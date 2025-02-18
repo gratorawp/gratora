@@ -1,0 +1,1522 @@
+// Form editor styles. Fullscreen chrome-hiding lives server-side in
+// FormsPage::maybePrintFullscreenStyles (inlined in <head>).
+
+@import '@dono/ui/scss/tokens';
+@import '../_shared/admin-base';
+
+@import '@dono/ui/scss/components/buttons';
+@import '@dono/ui/scss/components/form';
+@import '@dono/ui/scss/components/switch';
+@import '@dono/ui/scss/components/collapsible';
+@import '@dono/ui/scss/components/segmented';
+@import '@dono/ui/scss/components/slider';
+@import '@dono/ui/scss/components/number-with-unit';
+@import '@dono/ui/scss/components/color-input';
+@import '@dono/ui/scss/components/field';
+@import '@dono/ui/scss/components/box-control';
+@import '@dono/ui/scss/components/amount-input';
+@import '@dono/ui/scss/components/notice';
+@import '@dono/ui/scss/components/toast';
+@import '../_shared/components/form-template-picker';
+
+$header-height: 56px;
+$sidebar-width: 300px;
+
+.dono-form-editor {
+    margin: 0;
+    height: 100%;
+    min-height: 100vh;
+    background: #fff;
+    color: $text;
+
+    // Mirror runtime.scss: when the resolved tokens omit --dono-accent-soft
+    // (catalogue default, not explicitly paired) the preview derives it from
+    // --dono-accent like the published form does, instead of a static tint.
+    --dono-accent-soft: #{$accent-soft};
+    --dono-accent-soft: color-mix(in srgb, var(--dono-accent) 12%, #fff);
+
+    &__loading {
+        padding: 40px;
+        text-align: center;
+    }
+
+    &__notices {
+        flex-shrink: 0;
+        padding: 8px 16px 0;
+
+        .components-notice { margin: 0 0 8px; }
+    }
+
+    &__canvas {
+        height: 100%;
+        overflow: auto;
+        padding: 40px 24px 80px;
+        background: $bg-soft;
+    }
+
+    &__sheet {
+        max-width: var( --dono-editor-sheet-width, 540px );
+        margin: 0 auto;
+        background: #fff;
+        border-radius: 14px;
+        padding: 36px 40px 44px;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 12px 32px rgba(15, 23, 42, .06);
+
+        .block-editor-block-list__layout {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        // Strip Gutenberg's outer block padding that creates double-card feel.
+        .block-editor-block-list__block { margin: 0; }
+
+        .block-list-appender {
+            flex: 1 0 100%;
+            width: 100%;
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: center;
+            margin: 14px 0 4px !important;
+            padding: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .block-editor-button-block-appender,
+        .block-editor-inserter__toggle {
+            width: 28px;
+            height: 28px;
+            min-width: 28px;
+            padding: 0;
+            background: transparent;
+            border: 1px dashed #d1d5db;
+            border-radius: 999px;
+            color: $text-muted;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: border-color .12s, background .12s, color .12s, transform .12s;
+            box-shadow: none;
+
+            &:hover {
+                border-style: solid;
+                border-color: $accent;
+                background: $accent-soft;
+                color: $accent;
+                transform: scale(1.06);
+            }
+
+            &:focus-visible {
+                outline: 0;
+                border-color: $accent;
+                box-shadow: 0 0 0 3px $accent-soft;
+            }
+
+            svg {
+                width: 14px;
+                height: 14px;
+                fill: currentColor;
+            }
+        }
+    }
+
+    &__settings {
+        height: 100%;
+        overflow: auto;
+        background: #fff;
+    }
+
+    &__empty {
+        text-align: center;
+        padding: 32px 16px;
+        color: $text-muted;
+
+        h3 {
+            margin: 0 0 6px;
+            font-size: 16px;
+            font-weight: 600;
+            color: $text;
+        }
+        p { margin: 0 0 18px; font-size: 13px; }
+        button {
+            appearance: none;
+            background: $accent;
+            color: #fff;
+            border: 0;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font: inherit;
+            font-weight: 500;
+            cursor: pointer;
+
+            &:hover { background: $accent-dark; }
+        }
+    }
+
+    &__preview {
+        height: 100%;
+        background: #f0f0f1;
+        overflow: hidden;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+    }
+    &__preview-toolbar {
+        display: flex;
+        gap: 2px;
+        justify-content: center;
+        align-items: center;
+        padding: 8px;
+        background: #fff;
+        border-bottom: 1px solid $border-soft;
+
+        .components-button.dono-form-editor__device {
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            padding: 0;
+            color: $text-muted;
+            border-radius: 6px;
+
+            &:hover:not(:disabled) {
+                background: $bg-soft;
+                color: $text;
+            }
+            &.is-active {
+                background: $accent-soft;
+                color: $accent;
+            }
+        }
+    }
+    &__preview-stage {
+        flex: 1;
+        overflow: auto;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 28px 20px;
+    }
+    &__device-frame {
+        max-width: 100%;
+        display: flex;
+        flex-direction: column;
+        background: #fff;
+        border: 1px solid $border-soft;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, .06);
+        height: 100%;
+        min-height: 600px;
+
+        &.has-bezel {
+            border: 10px solid #1f2937;
+            border-radius: 36px;
+            box-shadow:
+                0 0 0 1px rgba(0, 0, 0, .08),
+                0 16px 40px rgba(0, 0, 0, .18);
+            padding: 0;
+            position: relative;
+            height: 780px;
+            min-height: 0;
+
+            &::before {
+                content: '';
+                position: absolute;
+                top: 6px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 90px;
+                height: 22px;
+                background: #1f2937;
+                border-radius: 0 0 14px 14px;
+                z-index: 1;
+            }
+        }
+    }
+    &__preview-frame {
+        flex: 1;
+        width: 100%;
+        height: 100%;
+        border: 0;
+        display: block;
+        background: #fff;
+    }
+    &__preview-spinner {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+    }
+}
+
+// InterfaceSkeleton fills the viewport. WP admin chrome (bar + sidebar) is hidden
+// in FormsPage::maybePrintFullscreenStyles, so we don't reserve space for it.
+.dono-form-editor .interface-interface-skeleton {
+    position: fixed;
+    inset: 0;
+    height: auto;
+}
+
+// Rebrand WP's admin-theme blue with Dono accent green for any block-editor primitive
+// rendered while this stylesheet is loaded. Root-level scope catches popovers that
+// portal out of .dono-form-editor (block-list insertion inserter, slot popovers, etc.).
+// Safe because this stylesheet is only enqueued on the form editor page.
+:root {
+    --wp-admin-theme-color:           #{$accent};
+    --wp-admin-theme-color-darker-10: #{$accent-dark};
+    --wp-admin-theme-color-darker-20: #{$accent-dark};
+    --wp-admin-border-width-focus:    2px;
+    // WP 7+ Button reads --wp-components-color-accent first and only falls
+    // back to --wp-admin-theme-color, so secondary/tertiary buttons stay
+    // WP-admin-blue unless we override this too. Mirrors campaigns.scss.
+    --wp-components-color-accent:           #{$accent};
+    --wp-components-color-accent-darker-10: #{$accent-dark};
+    --wp-components-color-accent-darker-20: #{$accent-dark};
+}
+
+.dono-form-editor {
+    .block-editor-block-list__block.is-selected,
+    .block-editor-block-list__block.is-hovered,
+    .block-editor-block-list__block.has-child-selected {
+        &::before,
+        &::after {
+            border-color: #{$accent} !important;
+        }
+    }
+
+    // Newer overlay-based selection (Gutenberg 14+).
+    .block-editor-block-popover__overlay,
+    .block-editor-block-list__layout .is-selected > .block-editor-block-list__block-popover {
+        outline-color: #{$accent} !important;
+    }
+}
+
+// Between-blocks inserter is portaled outside .dono-form-editor; use unscoped selectors.
+// editor.scss is only enqueued on the form editor page, so this can't bleed elsewhere.
+.block-editor-block-list__insertion-point-indicator {
+    background: #{$accent} !important;
+    height: 2px !important;
+}
+
+.block-editor-block-list__insertion-point-inserter,
+.block-editor-block-popover__inbetween-container .components-button,
+.block-editor-block-popover .components-button.is-primary,
+.block-editor-block-popover .block-editor-inserter__toggle,
+.block-editor-block-popover .block-editor-button-block-appender {
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+    padding: 0 !important;
+    background: #{$accent} !important;
+    color: #fff !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    box-shadow: 0 2px 6px rgba(30, 138, 78, .25) !important;
+    transition: background .12s, transform .12s, box-shadow .12s !important;
+
+    &:hover:not(:disabled) {
+        background: #{$accent-dark} !important;
+        color: #fff !important;
+        transform: scale(1.08);
+        box-shadow: 0 3px 10px rgba(30, 138, 78, .35) !important;
+    }
+
+    &:focus-visible {
+        outline: 0 !important;
+        box-shadow: 0 0 0 3px #{$accent-soft}, 0 2px 6px rgba(30, 138, 78, .25) !important;
+    }
+
+    svg {
+        width: 14px;
+        height: 14px;
+        fill: currentColor;
+    }
+}
+
+.dono-form-editor .interface-interface-skeleton__sidebar {
+    width: $sidebar-width;
+    border-left: 1px solid $border-soft;
+}
+
+.dono-form-editor .interface-interface-skeleton__secondary-sidebar {
+    width: 360px;
+    border-right: 1px solid $border-soft;
+    background: #fff;
+}
+
+.dono-form-editor__secondary {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #fff;
+
+    &--inserter {
+        // Strip the Blocks/Patterns/Media tab strip + internal close button;
+        // the header toggle (X) is the only close affordance. Do NOT hide
+        // `.block-editor-inserter__panel-header`: in newer WP it carries the
+        // per-category section header (the category titles we want to keep).
+        .block-editor-inserter__tabs,
+        .block-editor-tabbed-sidebar__tablist,
+        .block-editor-tabbed-sidebar__tabs,
+        .block-editor-inserter__close-button,
+        .block-editor-tabbed-sidebar__close-button,
+        .block-editor-tabbed-sidebar > .components-button.has-icon {
+            display: none !important;
+        }
+
+        .block-editor-inserter__menu,
+        .block-editor-inserter__main-area,
+        .block-editor-inserter__tabs > div,
+        .block-editor-tabbed-sidebar,
+        .block-editor-tabbed-sidebar__tabpanel,
+        .block-editor-inserter__block-list {
+            height: 100%;
+            background: #fff;
+        }
+
+        .block-editor-inserter__panel-title,
+        .block-editor-inserter__block-list .components-panel__body > h2 {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            color: $text-muted;
+            margin: 0;
+            padding: 16px 16px 8px;
+        }
+
+        .block-editor-block-types-list__item {
+            border-radius: 8px;
+            transition: background .12s, color .12s;
+
+            &:hover {
+                background: $accent-soft;
+                color: $accent-dark;
+            }
+        }
+
+        .block-editor-inserter__search,
+        .block-editor-inserter__search-input {
+            border-radius: 8px;
+        }
+    }
+
+    &--listview {
+        padding: 0;
+
+        .block-editor-list-view-leaf {
+            font-size: 13px;
+        }
+    }
+
+    &-title {
+        padding: 14px 16px 10px;
+        border-bottom: 1px solid $border-soft;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        color: $text-muted;
+    }
+}
+
+// Header layout: [back][+][undo][redo] | [title] | [pill tabs][save][gear]
+.dono-editor-header {
+    height: $header-height;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, auto) minmax(0, 1fr);
+    align-items: center;
+    gap: 16px;
+    padding: 0 12px;
+    background: #fff;
+    border-bottom: 1px solid $border-soft;
+
+    &__left {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        min-width: 0;
+    }
+
+    &__right {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        justify-content: flex-end;
+        min-width: 0;
+    }
+
+    &__center {
+        display: flex;
+        justify-content: center;
+        min-width: 0;
+    }
+
+    &__back {
+        display: inline-flex;
+        align-items: center;
+        gap: 2px;
+        padding: 6px 10px 6px 4px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 500;
+        color: $text-muted;
+        white-space: nowrap;
+        transition: background .12s, color .12s;
+        flex-shrink: 0;
+
+        &:hover { background: $bg-soft; color: $text; }
+    }
+
+    &__title {
+        flex: 1 1 auto;
+        max-width: 100%;
+        min-width: 240px;
+        appearance: none;
+        background: #fff;
+        color: $text;
+        border: 1px solid #e3e6ea;
+        border-radius: 8px;
+        padding: 7px 14px;
+        margin: 0;
+        font: inherit;
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 1.4;
+        text-align: center;
+        outline: 0;
+        transition: border-color .12s, box-shadow .12s;
+
+        &::placeholder { color: $text-muted; font-weight: 400; }
+
+        &:hover { border-color: #c7cdd4; }
+
+        &:focus {
+            border-color: $accent;
+            box-shadow: 0 0 0 3px $accent-soft;
+            text-align: left;
+        }
+    }
+
+    &__tabs {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        padding: 2px;
+        background: $bg-soft;
+        border-radius: 8px;
+        margin-right: 4px;
+    }
+
+    &__tab {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        appearance: none;
+        border: 0;
+        background: transparent;
+        padding: 6px 14px;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 500;
+        color: $text-muted;
+        border-radius: 6px;
+        cursor: pointer;
+        line-height: 1.5;
+        transition: background .12s, color .12s, box-shadow .12s;
+
+        svg { width: 15px; height: 15px; }
+
+        &:hover { background: rgba(255, 255, 255, .6); color: $text; }
+        &.is-active {
+            background: #fff;
+            color: $text;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, .08);
+        }
+    }
+
+    &__divider {
+        width: 1px;
+        height: 24px;
+        background: $border-soft;
+        margin: 0 4px;
+    }
+
+    .components-button.is-primary {
+        background: $accent;
+        color: #fff;
+        border: 1px solid $accent;
+        border-radius: 6px;
+        padding: 6px 14px;
+        height: auto;
+        min-height: 32px;
+        font-size: 13px;
+        font-weight: 500;
+        box-shadow: none;
+        transition: background .12s, border-color .12s, box-shadow .12s;
+
+        &:not(:disabled):hover {
+            background: $accent-dark;
+            border-color: $accent-dark;
+            color: #fff;
+        }
+
+        &:focus:not(:disabled),
+        &:focus-visible:not(:disabled) {
+            outline: 0;
+            box-shadow: 0 0 0 3px $accent-soft;
+            border-color: $accent;
+        }
+
+        &:disabled,
+        &[aria-disabled="true"] {
+            background: $accent;
+            border-color: $accent;
+            color: #fff;
+            opacity: .45;
+            cursor: not-allowed;
+        }
+    }
+
+    .components-button.has-icon:not(.is-primary) {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        padding: 0;
+        color: $text-muted;
+        border-radius: 6px;
+        box-shadow: none;
+        transition: background .12s, color .12s;
+
+        &:not(:disabled):hover {
+            background: $bg-soft;
+            color: $text;
+        }
+
+        &:not(:disabled):focus-visible {
+            outline: 0;
+            box-shadow: 0 0 0 2px $accent-soft;
+        }
+
+        &.is-pressed,
+        &[aria-pressed="true"] {
+            background: $accent-soft;
+            color: $accent;
+
+            &:not(:disabled):hover {
+                background: $accent-soft;
+                color: $accent-dark;
+            }
+        }
+
+        &:disabled,
+        &[aria-disabled="true"] {
+            opacity: .35;
+            color: $text-muted;
+        }
+    }
+}
+
+.dono-form-sidebar {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+
+    &__header {
+        flex-shrink: 0;
+        padding: 14px 16px;
+        border-bottom: 1px solid $border-soft;
+        background: #fff;
+    }
+
+    &__title {
+        margin: 0;
+        font-size: 13px;
+        font-weight: 600;
+        color: $text;
+    }
+
+    &__body {
+        flex: 1;
+        overflow: auto;
+        background: #fff;
+
+        .components-panel__body {
+            border-top: 1px solid $border-soft;
+            border-bottom: 0;
+
+            &:last-of-type {
+                border-bottom: 1px solid $border-soft;
+            }
+        }
+
+        // @wordpress/components v28+ defaults block-supports inputs to 40px,
+        // tuned for the post editor's wide sidebar; too dominant in our 300px
+        // sidebar, so trim while staying tall enough for touch targets.
+        .components-input-control__container .components-input-control__input,
+        .components-number-control input,
+        .components-unit-control input,
+        .components-text-control__input,
+        .components-textarea-control__input,
+        .components-select-control__input {
+            min-height: 32px;
+        }
+        // The header row geometry is owned solely by the toggle button so the
+        // collapsed and expanded headers are pixel-identical. WP's default
+        // ".is-opened > .components-panel__body-title { margin: -16px }" assumes
+        // a 16px body padding; we use a compact sidebar, so the body carries no
+        // vertical padding and the opened title margin is realigned to match.
+        .components-panel__body {
+            padding: 0 16px;
+        }
+        .components-panel__body.is-opened {
+            padding-bottom: 16px;
+        }
+        .components-panel__body > .components-panel__body-title {
+            margin: 0 -16px;
+        }
+        .components-panel__body.is-opened > .components-panel__body-title {
+            margin-bottom: 8px;
+        }
+        .components-panel__body-toggle.components-button {
+            padding: 12px 40px 12px 16px;
+        }
+        .components-panel__body-title {
+            font-size: 12px;
+        }
+        // WP recolours the panel-header focus ring to our accent at 2px. On a
+        // collapsed panel the toggle keeps focus after a click, so that heavy
+        // green inset box lingers on the header. Drop it for pointer focus;
+        // keyboard focus keeps a visible ring.
+        .components-panel__body-toggle:focus:not(:focus-visible) {
+            box-shadow: none;
+            outline: none;
+        }
+        .components-base-control__label {
+            margin-bottom: 4px;
+            font-size: 11px;
+        }
+    }
+}
+
+.dono-readiness {
+    &__summary {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin: 6px 0 0;
+        font-size: 12px;
+        font-weight: 500;
+        color: $text-muted;
+
+        &.is-pass  { color: #15803d; }
+        &.is-warn  { color: #b45309; }
+        &.is-fail  { color: #b91c1c; }
+    }
+
+    &__list {
+        margin: 0;
+        padding: 8px 0;
+        list-style: none;
+    }
+
+    &__empty {
+        margin: 0;
+        padding: 16px;
+        font-size: 13px;
+        line-height: 1.45;
+        color: $text-muted;
+    }
+
+    &__row {
+        display: flex;
+        gap: 10px;
+        padding: 12px 16px;
+        border-bottom: 1px solid $border-soft;
+
+        &:last-child { border-bottom: 0; }
+
+        &.is-pass  .dono-readiness__icon { color: #15803d; }
+        &.is-warn  .dono-readiness__icon { color: #b45309; }
+        &.is-fail  .dono-readiness__icon { color: #b91c1c; }
+    }
+
+    &__icon {
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+
+    &__body {
+        flex: 1;
+        min-width: 0;
+    }
+
+    &__label {
+        font-size: 13px;
+        font-weight: 500;
+        color: $text;
+        line-height: 1.35;
+    }
+
+    &__detail {
+        margin-top: 2px;
+        font-size: 12px;
+        color: $text-muted;
+        line-height: 1.4;
+    }
+
+    &__action {
+        display: inline-block;
+        margin-top: 6px;
+        font-size: 12px;
+        font-weight: 500;
+        color: $accent;
+        text-decoration: none;
+
+        &:hover { text-decoration: underline; }
+    }
+}
+
+.dono-amounts-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 12px 0 8px;
+
+    &__label {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        color: $text-muted;
+    }
+}
+
+.dono-amounts-add,
+.dono-preset-row__remove {
+    flex: 0 0 auto;
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    border: 1px solid $border-soft;
+    background: #fff;
+    color: $text-muted;
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dono-amounts-add {
+    color: $text;
+
+    &:hover:not( :disabled ) { background: $bg-soft; }
+    &:disabled { opacity: .4; cursor: default; }
+}
+
+.dono-preset-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+
+    &.is-dragging { opacity: .5; }
+
+    &__drag {
+        flex: 0 0 auto;
+        cursor: grab;
+        user-select: none;
+        color: $text-muted;
+        font-size: 14px;
+        line-height: 1;
+        padding: 4px 2px;
+
+        &:active { cursor: grabbing; }
+    }
+
+    &__radio {
+        flex: 0 0 auto;
+        margin: 0;
+    }
+
+    &__amt {
+        flex: 1;
+        min-width: 0;
+
+        .dono-amount { width: 100%; }
+    }
+
+    &__remove:hover:not( :disabled ) {
+        background: $red-soft;
+        color: #b32d2e;
+        border-color: #f0c4c4;
+    }
+
+    &__remove:disabled {
+        opacity: .4;
+        cursor: default;
+    }
+
+}
+
+input.dono-tribute-type-input,
+input[type="text"].dono-tribute-type-input {
+    appearance: none;
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    margin: 0;
+    padding: 9px 12px;
+    background: #fff;
+    border: 1px solid $border-mid;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    color: $text;
+    line-height: 1.3;
+    box-shadow: none;
+    transition: border-color .12s, box-shadow .12s;
+
+    &::placeholder { color: $text-soft; }
+
+    &:focus,
+    &:focus-visible {
+        outline: 0;
+        border-color: $accent;
+        box-shadow: 0 0 0 3px $accent-soft;
+    }
+}
+
+.dono-checkbox-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: $text-muted;
+    cursor: pointer;
+
+    input {
+        margin: 0;
+        accent-color: $accent;
+    }
+}
+
+.dono-shadow-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    padding: 12px;
+    background: $bg-page;
+    border: 1px solid $border-soft;
+    border-radius: 8px;
+
+    &__tile {
+        appearance: none;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 52px;
+        padding: 0;
+        background: #fff;
+        border: 1px solid $border-soft;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: border-color .12s, transform .12s;
+
+        &:hover { border-color: #c7cdd4; }
+
+        &.is-on {
+            border-color: $accent;
+            box-shadow: 0 0 0 2px $accent-soft;
+        }
+
+        &__sample {
+            display: block;
+            width: 24px;
+            height: 24px;
+            background: #fff;
+            border-radius: 4px;
+        }
+
+        &__none {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            color: $text-muted;
+        }
+    }
+}
+
+.dono-sidebar-intro {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+
+    &__icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        flex-shrink: 0;
+        border-radius: 8px;
+        background: $accent-soft;
+        color: $accent;
+    }
+
+    &__text {
+        flex: 1;
+        min-width: 0;
+    }
+
+    &__title {
+        margin: 0 0 2px;
+        font-size: 13px;
+        font-weight: 600;
+        color: $text;
+        line-height: 1.3;
+    }
+
+    &__desc {
+        margin: 0;
+        font-size: 12px;
+        color: $text-muted;
+        line-height: 1.45;
+    }
+}
+
+.dono-form-settings {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 0;
+    min-height: 100%;
+
+    &__notice {
+        margin: 0 0 12px;
+        padding: 10px 12px;
+        background: $bg-soft;
+        border: 1px solid $border-soft;
+        border-left: 3px solid $accent;
+        border-radius: 6px;
+        font-size: 12.5px;
+        color: $text-muted;
+    }
+
+    &__nav {
+        padding: 24px 16px;
+        border-right: 1px solid $border-soft;
+        background: $bg-page;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    &__nav-item {
+        appearance: none;
+        width: 100%;
+        text-align: left;
+        background: transparent;
+        border: 0;
+        padding: 10px 14px;
+        font-size: 14px;
+        font-weight: 500;
+        color: $text;
+        cursor: pointer;
+        border-radius: 8px;
+        font-family: inherit;
+        transition: background-color .12s, color .12s;
+
+        &:hover { background: rgba(0, 0, 0, .04); }
+        &:focus-visible {
+            outline: 0;
+            box-shadow: 0 0 0 2px $accent-soft;
+        }
+
+        &.is-active {
+            background: #fff;
+            font-weight: 600;
+            color: $text;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, .06);
+        }
+    }
+
+    &__main {
+        padding: 32px 48px 64px;
+        max-width: 960px;
+        width: 100%;
+    }
+
+    &__row {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 48px;
+        padding: 28px 0;
+        border-bottom: 1px solid $border-soft;
+
+        &:last-child { border-bottom: 0; }
+        &:first-child { padding-top: 8px; }
+    }
+
+    &__row-head { max-width: 260px; }
+
+    &__row-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: $text;
+        margin: 0 0 6px;
+        line-height: 1.4;
+    }
+
+    &__row-desc {
+        font-size: 13px;
+        color: $text-muted;
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    &__row-body {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        min-width: 0;
+    }
+}
+
+.dono-sidebar-heading {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: $text-muted;
+    margin-top: 8px;
+}
+
+.dono-sidebar-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.dono-sidebar-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px 12px;
+    background: #f8fafb;
+    border-radius: 8px;
+
+    &__label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        color: $text-muted;
+        margin-bottom: 2px;
+    }
+
+    &__help {
+        font-size: 12px;
+        color: $text-muted;
+    }
+}
+
+.dono-sidebar-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.dono-color-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 16px;
+
+    &__label {
+        font-size: 11px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        color: $text-muted;
+    }
+
+    &__swatch {
+        appearance: none;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 10px 6px 6px;
+        background: #fff;
+        border: 1px solid $border-soft;
+        border-radius: 8px;
+        cursor: pointer;
+        font: inherit;
+        color: $text;
+        font-size: 12.5px;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: .02em;
+        transition: border-color .12s, box-shadow .12s;
+
+        &:hover { border-color: #c7cdd4; }
+        &:focus-visible {
+            outline: 0;
+            border-color: $accent;
+            box-shadow: 0 0 0 3px $accent-soft;
+        }
+
+        .component-color-indicator {
+            width: 22px;
+            height: 22px;
+            margin: 0;
+            border-radius: 6px;
+            box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .08);
+        }
+    }
+
+    &__popover {
+        padding: 12px;
+    }
+}
+
+.dono-sidebar-shortcode {
+    margin-top: 8px;
+    padding: 10px 12px;
+    background: #f8fafb;
+    border-radius: 8px;
+    font-size: 12px;
+    color: $text-muted;
+
+    strong { display: block; margin-bottom: 4px; }
+    code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 12px;
+        color: $text;
+        display: block;
+        word-break: break-all;
+    }
+}
+
+.dono-shortcode {
+    display: flex;
+    align-items: stretch;
+    gap: 6px;
+    margin-top: 8px;
+
+    &__code {
+        flex: 1;
+        padding: 8px 10px;
+        background: #f8fafb;
+        border: 1px solid $border-soft;
+        border-radius: 6px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 11.5px;
+        color: $text;
+        word-break: break-all;
+        white-space: pre-wrap;
+        line-height: 1.4;
+    }
+
+    &__copy.components-button {
+        flex-shrink: 0;
+        align-self: flex-start;
+        height: auto;
+        padding: 8px 12px;
+    }
+}
+
+.dono-block-preview {
+    border-radius: 8px;
+    padding: 14px 16px;
+    background: #fff;
+    display: block;
+
+    &--check {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 14px;
+    }
+
+    &__steps-add {
+        margin-top: 12px;
+        display: flex;
+        justify-content: center;
+    }
+
+    // Dashed border kept on purpose: it's a container the user fills.
+    &--step {
+        padding: 16px 18px;
+        background: #fff;
+        border: 1px dashed #d1d5db;
+    }
+    &__step-meta {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        color: $text-muted;
+        margin-bottom: 4px;
+    }
+    &__step-title {
+        font-size: 18px;
+        font-weight: 600;
+        line-height: 1.3;
+        color: $text;
+        margin: 0 0 12px;
+    }
+
+    &--hidden {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        background: #f8fafb;
+        border: 1px solid $border-mid;
+        font-size: 12px;
+        color: $text-muted;
+    }
+    &__hidden-tag {
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        padding: 2px 6px;
+        background: $border-mid;
+        color: #374151;
+        border-radius: 3px;
+    }
+    &__hidden-meta { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+    &--html { padding: 0; overflow: hidden; }
+    &__html-frame { padding: 12px; }
+    &__html-empty {
+        padding: 14px 16px;
+        color: $text-soft;
+        font-size: 13px;
+        font-style: italic;
+    }
+
+    &__label {
+        display: inline-block;
+        font-size: 12px;
+        font-weight: 500;
+        color: $text-muted;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+    }
+    &__req {
+        color: $accent;
+        font-style: normal;
+        margin-left: 4px;
+    }
+    &__title {
+        font-size: 14px;
+        font-weight: 500;
+        color: $text;
+        margin: 0 0 10px;
+    }
+    &__field {
+        padding: 9px 12px;
+        background: #fafbfc;
+        border: 1px solid $border-soft;
+        border-radius: 8px;
+        font-size: 13.5px;
+        color: $text-soft;
+        min-height: 36px;
+        display: flex;
+        align-items: center;
+    }
+    &__textarea {
+        padding: 10px 12px;
+        background: #fafbfc;
+        border: 1px solid $border-soft;
+        border-radius: 8px;
+        font-size: 13.5px;
+        color: $text-soft;
+        min-height: 70px;
+    }
+    &__grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+    &__radios {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 18px;
+        margin-bottom: 10px;
+        font-size: 13px;
+        color: $text;
+
+        label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: default;
+            white-space: nowrap;
+            flex: 0 0 auto;
+            max-width: none;
+            min-width: 0;
+        }
+        label > span {
+            white-space: nowrap;
+            flex: 0 0 auto;
+        }
+        input[type="radio"] {
+            accent-color: $accent;
+            flex: 0 0 auto;
+            margin: 0;
+        }
+    }
+    &__input {
+        padding: 8px 10px;
+        background: #fafbfc;
+        border: 1px solid $border-soft;
+        border-radius: 6px;
+        font-size: 13px;
+        color: $text-soft;
+    }
+    &__hint {
+        margin-top: 8px;
+        font-size: 12px;
+        color: $text-muted;
+    }
+
+    &--goal {
+        padding: 16px 18px;
+    }
+
+    &__pills {
+        display: inline-flex;
+        gap: 2px;
+        padding: 3px;
+        background: $bg-soft;
+        border-radius: 8px;
+    }
+
+    &__pill {
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: .02em;
+        color: $text-muted;
+        border-radius: 6px;
+        font-variant-numeric: tabular-nums;
+
+        &.is-active {
+            background: #fff;
+            color: $text;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, .08);
+        }
+    }
+
+    &__goal-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        font-size: 14px;
+        margin-bottom: 8px;
+        color: $text;
+
+        strong {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+        span {
+            color: $text-muted;
+            font-size: 13px;
+        }
+    }
+
+    &__goal-bar {
+        height: 8px;
+        background: #eef0f1;
+        border-radius: 999px;
+        overflow: hidden;
+    }
+
+    &__goal-fill {
+        height: 100%;
+        background: var(--dono-accent, $accent);
+        border-radius: inherit;
+        transition: width .25s ease;
+        min-width: 2px;
+    }
+
+    &__goal-meta {
+        display: flex;
+        gap: 14px;
+        margin-top: 10px;
+        font-size: 12px;
+        color: $text-muted;
+
+        & > span:first-child {
+            font-weight: 600;
+            color: var(--dono-accent, $accent);
+        }
+    }
+}
+
+.dono-template-picker {
+    &__intro {
+        margin: 0 0 18px;
+        color: $text-muted;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    &__grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    &__card {
+        appearance: none;
+        background: #fff;
+        border: 1px solid $border-mid;
+        border-radius: 10px;
+        padding: 16px;
+        cursor: pointer;
+        text-align: left;
+        font-family: inherit;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        transition: border-color .12s, box-shadow .12s;
+
+        &:hover {
+            border-color: $accent;
+            box-shadow: 0 0 0 2px $accent-soft;
+        }
+    }
+
+    &__name {
+        font-size: 14px;
+        font-weight: 600;
+        color: $text;
+    }
+
+    &__desc {
+        font-size: 12.5px;
+        color: $text-muted;
+        line-height: 1.45;
+    }
+}

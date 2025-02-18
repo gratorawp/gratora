@@ -1,0 +1,146 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Dono\Foundation;
+
+use Dono\Campaigns\CampaignPermalinks;
+use Dono\Core\Activator;
+use Dono\Core\CoreModule;
+use Dono\Donors\Portal\PortalPage;
+use Dono\Foundation\Auth\Capabilities;
+use Dono\Foundation\Container\Container;
+use Dono\Foundation\Modules\ModuleManager;
+use Dono\Foundation\Time\SystemClock;
+use Dono\Funds\FundRepository;
+use Dono\Onboarding\Onboarding;
+
+/**
+ * Plugin singleton. Owns the Container and ModuleManager and runs the boot pipeline.
+ *
+ * @version 1.0.0
+ */
+final class Plugin
+{
+    private static ?self $instance = null;
+    private static bool $booted = false;
+
+    public readonly Container $container;
+    public readonly ModuleManager $modules;
+
+    private function __construct()
+    {
+        $this->container = new Container();
+        $this->modules   = new ModuleManager($this->container);
+
+        $this->container->instance(Container::class, $this->container);
+        $this->container->instance(ModuleManager::class, $this->modules);
+    }
+
+    /** Return the plugin singleton, creating it on first call. */
+    public static function instance(): self
+    {
+        return self::$instance ??= new self();
+    }
+
+    /** Load text domain, register and boot all modules. Idempotent. */
+    public static function boot(): void
+    {
+        // Guard against double-boot: CLI/test scripts may call boot().
+        if (self::$booted) return;
+        self::$booted = true;
+
+        $self = self::instance();
+
+        load_plugin_textdomain('dono', false, dirname(plugin_basename(DONO_FILE)) . '/languages');
+
+        // Guarded so boot() is safe even when modules were already registered
+        // earlier in the same request - e.g. the integration test bootstrap
+        // migrates the schema (which registers modules) before plugins_loaded.
+        if (! $self->modules->get('core')) {
+            $self->modules->register(new CoreModule());
+        }
+
+        // Allow external modules to register on this hook.
+        do_action('dono.modules.register', $self->modules);
+
+        $self->modules->bootAll();
+
+        // Virtual `dono_access` cap for admin-menu visibility (super-admins,
+        // the manage_dono umbrella, or any granular dono_* cap holder). REST
+        // endpoints still enforce per-area granular caps.
+        add_filter('user_has_cap', [Capabilities::class, 'grantMetaCaps']);
+
+        // Activation hooks don't fire on plugin updates. Re-ensure the donor
+        // portal page once per DONO_VERSION bump so existing installs that
+        // skip a reactivation still get the page (and recover from manual
+        // deletion). Cheap on steady state (one option read).
+        add_action('wp_loaded', static function (): void {
+            (new PortalPage())->maybeHeal();
+        }, 100);
+
+        do_action('dono.booted', $self);
+    }
+
+    /**
+     * Register modules and run all model migrations (schema only). Idempotent
+     * and safe to call before plugins_loaded - the integration test bootstrap
+     * calls this so the dono_* tables exist before boot() constructs services
+     * (e.g. IdentityHasher) that read them.
+     */
+    public static function migrateSchema(): void
+    {
+        require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+        $self = self::instance();
+
+        // CLI/early activation may run before plugins_loaded; registration is idempotent.
+        if (! $self->modules->get('core')) {
+            $self->modules->register(new CoreModule());
+        }
+
+        foreach ($self->modules->allMigrations() as $modelClass) {
+            if (method_exists($modelClass, 'migrate')) {
+                $modelClass::migrate(true);
+            }
+        }
+    }
+
+    /** Run migrations, set capabilities, seed onboarding, flush rewrite rules. */
+    public static function onActivation(): void
+    {
+        self::migrateSchema();
+
+        Capabilities::applyMapping(
+            Capabilities::currentMapping()
+        );
+
+        Onboarding::maybeSeedOnActivation();
+
+        // Activation-time only; separate from the runtime service graph.
+        (new Activator(
+            new FundRepository(),
+            new SystemClock()
+        ))->activate();
+
+        // The donor portal page hosts [dono_donor_portal] and is what every
+        // magic-link email points at - create or adopt it before any donor
+        // ever needs the URL.
+        (new PortalPage())->ensure();
+        update_option(PortalPage::OPTION_VERSION, DONO_VERSION, false);
+
+        // Register campaign rewrite and flush so permalinks resolve immediately.
+        (new CampaignPermalinks())->addRule();
+        flush_rewrite_rules();
+
+        do_action('dono.activated');
+    }
+
+    /** Flush rewrite rules on deactivation. */
+    public static function onDeactivation(): void
+    {
+        flush_rewrite_rules();
+
+        do_action('dono.deactivated');
+    }
+}

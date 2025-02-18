@@ -1,0 +1,70 @@
+{
+    "name": "getdono/dono",
+    "description": "Donation platform for WordPress",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Dono"
+        }
+    ],
+    "require": {
+        "php": ">=8.1",
+        "woocommerce/action-scheduler": "^3.7",
+        "ext-openssl": "*"
+    },
+    "require-dev": {
+        "dono/queryable": "dev-main",
+        "brianhenryie/strauss": "^0.27.2",
+        "mpdf/mpdf": "^8.2",
+        "php-stubs/wordpress-stubs": "^6.9",
+        "phpunit/phpunit": "^9.6",
+        "wp-phpunit/wp-phpunit": "^7.0",
+        "yoast/phpunit-polyfills": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Dono\\": "src/"
+        },
+        "classmap": [
+            "vendor-prefixed/"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Dono\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test":              "phpunit",
+        "test:unit":         "phpunit",
+        "test:integration":  "phpunit --configuration phpunit-integration.xml.dist",
+        "test:all":          ["@test:unit", "@test:integration"],
+        "strauss":           [
+            "@php -d memory_limit=1G vendor/bin/strauss",
+            "find vendor-prefixed -type d -name .git -exec rm -rf {} +",
+            "@php -r \"file_put_contents('vendor/composer/autoload_aliases.php', '<?php');\"",
+            "@composer dump-autoload"
+        ]
+    },
+    "extra": {
+        "strauss": {
+            "target_directory": "vendor-prefixed",
+            "namespace_prefix": "Dono\\Vendor\\",
+            "classmap_prefix": "Dono_Vendor_",
+            "constant_prefix": "DONO_VENDOR_",
+            "packages": [
+                "mpdf/mpdf",
+                "dono/queryable"
+            ],
+            "update_call_sites": false,
+            "delete_vendor_packages": true
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "config": {
+        "sort-packages": true,
+        "optimize-autoloader": true
+    }
+}

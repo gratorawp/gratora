@@ -1,0 +1,22 @@
+name = "dono-connect-broker"
+main = "src/index.ts"
+compatibility_date = "2026-03-01"
+
+# One-time, short-TTL store for the exchange_code -> token bundle handoff.
+# Create with: wrangler kv namespace create EXCHANGE
+[[kv_namespaces]]
+binding = "EXCHANGE"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+
+# Public base URL of THIS deployed worker (no trailing slash). The broker
+# builds its Stripe redirect_uri as ${BROKER_PUBLIC_URL}/stripe/oauth/return,
+# which must be registered in the Stripe Connect app settings.
+[vars]
+BROKER_PUBLIC_URL = "https://connect.getdono.com"
+
+# Secrets (set via `wrangler secret put <NAME>`, never in this file):
+#   STRIPE_CLIENT_ID_LIVE   ca_...        platform Connect client id (live)
+#   STRIPE_SECRET_LIVE      sk_live_...   platform secret key (live)
+#   STRIPE_CLIENT_ID_TEST   ca_...        platform Connect client id (test)
+#   STRIPE_SECRET_TEST      sk_test_...   platform secret key (test)
+#   STATE_SIGNING_SECRET    random 32+ byte string; signs the OAuth state

@@ -1,0 +1,19 @@
+/vendor/
+/node_modules/
+/build/
+/.idea/
+/.vscode/
+/.claude/
+/.phpunit.cache/
+/test-results/
+/playwright-report/
+/.playwright/
+/tests-e2e/.env
+*.log
+.DS_Store
+composer.lock
+package-lock.json
+
+# Local wp-env override (machine-specific plugin paths)
+.wp-env.override.json
+/.wp-env/

@@ -1,0 +1,85 @@
+// Cross-page admin defaults. Imported by every admin entry SCSS so the
+// rules below apply to every Dono admin screen (list, detail, settings,
+// donors, donations, forms, funds, onboarding) regardless of which
+// per-page wrapper class is present in the DOM.
+//
+// Targets the WP-generated body classes:
+//   - body.toplevel_page_dono            -> the Dono "Dashboard" entry
+//   - body[class*="dono_page_dono-"]     -> every Dono submenu page
+//
+// The consumer is expected to have @import'd @dono/ui/scss/tokens
+// already so $accent / $accent-dark are in scope.
+
+body.toplevel_page_dono,
+body[class*="dono_page_dono-"] {
+    // Re-skin WP components (ToggleControl, primary buttons, focus rings,
+    // etc.) from the default WP admin blue to the Dono accent. Many WP
+    // components read --wp-admin-theme-color directly.
+    --wp-admin-theme-color:           #{$accent};
+    --wp-admin-theme-color--rgb:      30, 138, 78;
+    --wp-admin-theme-color-darker-10: #{$accent-dark};
+    --wp-admin-theme-color-darker-20: #{$accent-dark};
+
+    // Suppress the browser-default focus outline on mouse clicks. It's
+    // rectangular and doesn't follow border-radius on anchors / many
+    // buttons, which is why a click on a rounded button looks like it
+    // grows a square border. Keyboard nav (:focus-visible) is preserved.
+    *:focus:not(:focus-visible) { outline: none; box-shadow: none; }
+
+    // wp-admin's common.css ships `a:focus { border-radius: 2px;
+    // box-shadow: 0 0 0 1.5px var(--wp-admin-theme-color); ... }` which
+    // wraps every Dono link styled as a tab/button in a square coloured
+    // ring on click. Kill the shadow globally. border-radius and color
+    // are restated per-class on the elements that need it (since
+    // border-radius isn't inherited and the per-class color is part of
+    // the component's design - e.g. an active tab needs the green
+    // colour preserved, not the page default).
+    a:focus { box-shadow: none; }
+
+    // Dono-styled keyboard focus ring on the shared .dono-btn primitive.
+    // Should live in @dono/ui long-term; kept here until the package
+    // ships a focus rule of its own.
+    //
+    // Note: when .dono-btn renders as an <a>, multiple wp-admin / block-
+    // theme rules at `a`, `a:hover`, `a:focus`, `a:active` win on
+    // specificity (0,1,1 over .dono-btn's 0,1,0) and dye the text bright
+    // blue, drop border-radius to 2px, and add a square box-shadow ring.
+    // Restate the dono values per anchor pseudo-state so the button
+    // stays itself.
+    .dono-btn {
+        &:hover, &:focus, &:active { color: $text; }
+        &:focus {
+            outline: none;
+            box-shadow: none;
+            border-radius: $radius-md;
+        }
+        &:focus-visible {
+            outline: 2px solid $accent;
+            outline-offset: 2px;
+        }
+
+        &--primary {
+            &:hover, &:focus, &:active { color: #fff; }
+        }
+        &--ghost {
+            &:focus, &:active { color: $text-muted; }
+            // @dono/ui sets ghost :hover to $text intentionally; keep it.
+        }
+        &--danger {
+            &:hover, &:focus, &:active { color: $red; }
+        }
+    }
+
+    // Hide the native number-stepper buttons on admin number inputs for a flat,
+    // consistent look (across .dono-input / .dono-inp / .dono-fld). The field
+    // still accepts numbers and keyboard up/down.
+    input[type="number"] {
+        -moz-appearance: textfield;
+        appearance: textfield;
+    }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+}

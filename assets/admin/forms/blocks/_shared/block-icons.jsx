@@ -1,0 +1,85 @@
+/**
+ * Lucide icon elements for every Dono block.
+ *
+ * WP's `registerBlockType` takes the icon as a React element. Pre-rendering
+ * here means each block file imports one constant instead of pulling in
+ * lucide-react itself. Block icons render at 24px in the inserter.
+ */
+
+import {
+    AlignLeft,
+    Calendar,
+    Code,
+    CheckSquare,
+    ChevronDown,
+    CircleDollarSign,
+    CircleDot,
+    Coins,
+    Columns2,
+    Columns3,
+    EyeOff,
+    FolderHeart,
+    Globe,
+    HandCoins,
+    Hash,
+    Heading,
+    Heart,
+    HeartHandshake,
+    Layers,
+    ListChecks,
+    Lock,
+    Mail,
+    MapPin,
+    MessageSquare,
+    Phone,
+    Repeat,
+    SeparatorHorizontal,
+    ShieldCheck,
+    Square,
+    SquareDashed,
+    Tag,
+    Target,
+    Type,
+    User,
+} from 'lucide-react';
+
+const BLOCK = { size: 24, strokeWidth: 1.75 };
+
+// Per-block icons, keyed by block file name (matches blocks/<name>/index.js).
+export const BlockIcons = {
+    address:           <MapPin           { ...BLOCK } />,
+    'anonymous-toggle':<EyeOff           { ...BLOCK } />,
+    checkbox:          <CheckSquare      { ...BLOCK } />,
+    comment:           <MessageSquare    { ...BLOCK } />,
+    consent:           <ShieldCheck      { ...BLOCK } />,
+    country:           <Globe            { ...BLOCK } />,
+    columns:           <Columns3         { ...BLOCK } />,
+    'cover-fees':      <HandCoins        { ...BLOCK } />,
+    'currency-switcher':<Coins           { ...BLOCK } />,
+    date:              <Calendar         { ...BLOCK } />,
+    'donation-amount': <CircleDollarSign { ...BLOCK } />,
+    'payment-gateways':<HandCoins        { ...BLOCK } />,
+    dropdown:          <ChevronDown      { ...BLOCK } />,
+    hidden:            <Tag              { ...BLOCK } />,
+    html:              <Code             { ...BLOCK } />,
+    email:             <Mail             { ...BLOCK } />,
+    'fund-picker':     <FolderHeart      { ...BLOCK } />,
+    goal:              <Target           { ...BLOCK } />,
+    heading:           <Heading          { ...BLOCK } />,
+    'multi-select':    <ListChecks       { ...BLOCK } />,
+    name:              <User             { ...BLOCK } />,
+    'number-input':    <Hash             { ...BLOCK } />,
+    paragraph:         <AlignLeft        { ...BLOCK } />,
+    divider:           <SeparatorHorizontal { ...BLOCK } />,
+    phone:             <Phone            { ...BLOCK } />,
+    'privacy-notice':  <Lock             { ...BLOCK } />,
+    radio:             <CircleDot        { ...BLOCK } />,
+    'recurring-toggle':<Repeat           { ...BLOCK } />,
+    row:               <Columns2         { ...BLOCK } />,
+    section:           <Square           { ...BLOCK } />,
+    step:              <SquareDashed     { ...BLOCK } />,
+    steps:             <Layers           { ...BLOCK } />,
+    'submit-button':   <HeartHandshake   { ...BLOCK } />,
+    'text-input':      <Type             { ...BLOCK } />,
+    tribute:           <Heart            { ...BLOCK } />,
+};

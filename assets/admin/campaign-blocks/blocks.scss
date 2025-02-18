@@ -1,0 +1,878 @@
+// Campaign block styles, loaded in the editor and on the public page.
+// Theme-sensitive surfaces read CSS custom properties so a wrapper carrying
+// `style="--dono-accent: ..."` recolours a block without recompiling.
+
+$accent-fallback:     #1e8a4e;
+$accent-soft-fallback: rgba(30, 138, 78, .12);
+$text-fallback:       #1e1e1e;
+$text-muted-fallback: #6b7280;
+$border-fallback:     #e5e7eb;
+$bg-fallback:         #fff;
+$bg-soft-fallback:    #f3f4f6;
+$radius-fallback:     12px;
+$radius-sm-fallback:  8px;
+$shadow-fallback:     0 20px 50px rgba(0, 0, 0, .25);
+
+.dono-block {
+    margin: 0 0 24px;
+    color: var(--dono-text, #{$text-fallback});
+}
+
+.dono-block-notice {
+    padding: 16px 20px;
+    border: 1px dashed #f0b400;
+    background: #fff8e1;
+    color: #6b4d00;
+    border-radius: var(--dono-radius-sm, #{$radius-sm-fallback});
+    font-size: 13px;
+}
+
+.dono-block-note {
+    font-size: 12px;
+    margin: 6px 0 12px;
+    color: var(--dono-text, #{$text-fallback});
+    line-height: 1.45;
+
+    strong { font-weight: 500; }
+
+    &--muted { color: var(--dono-text-muted, #{$text-muted-fallback}); font-style: italic; }
+
+    &__pill {
+        display: inline-block;
+        margin-left: 6px;
+        padding: 1px 7px;
+        font-size: 10px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        background: var(--dono-bg-soft, #{$bg-soft-fallback});
+        color: var(--dono-text-muted, #{$text-muted-fallback});
+        border-radius: 9px;
+        vertical-align: middle;
+    }
+}
+
+// Hero - title + description over the cover image with a gradient scrim.
+.dono-block--hero {
+    margin: 0 0 24px;
+
+    .dono-hero {
+        position: relative;
+        border-radius: var(--dono-radius-lg, 18px);
+        overflow: hidden;
+        border: 1px solid var(--dono-border, #{$border-fallback});
+        box-shadow: 0 6px 22px rgba(15, 23, 42, .10);
+    }
+
+    .dono-hero__cover {
+        position: relative;
+        aspect-ratio: 16 / 7;
+        display: flex;
+        align-items: flex-end;
+
+        img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        &.is-placeholder {
+            background:
+                radial-gradient(130% 120% at 12% 0%, rgba(255, 255, 255, .22), transparent 50%),
+                linear-gradient(135deg, var(--dono-accent, #{$accent-fallback}), color-mix(in srgb, var(--dono-accent, #{$accent-fallback}) 55%, #08160f));
+        }
+    }
+
+    .dono-hero__scrim {
+        position: relative;
+        width: 100%;
+        padding: 110px 36px 28px;
+        background: linear-gradient(180deg, transparent 0%, rgba(8, 22, 17, .28) 45%, rgba(8, 22, 17, .68) 100%);
+    }
+
+    .dono-hero__title {
+        margin: 0;
+        font-size: clamp(28px, 4.4vw, 42px);
+        font-weight: 800;
+        letter-spacing: -.025em;
+        line-height: 1.1;
+        color: #fff;
+        text-wrap: balance;
+    }
+
+    .dono-hero__description {
+        margin: 12px 0 0;
+        max-width: 640px;
+        font-size: clamp(15px, 1.6vw, 18px);
+        font-weight: 500;
+        line-height: 1.55;
+        color: rgba(255, 255, 255, .92);
+    }
+
+    .dono-hero__summary {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 14px 22px;
+        margin-top: 22px;
+    }
+
+    .dono-hero__raised {
+        font-size: clamp(22px, 3vw, 30px);
+        font-weight: 800;
+        letter-spacing: -.02em;
+        color: #fff;
+
+        small {
+            display: block;
+            margin-top: 2px;
+            font-size: 13px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, .78);
+            letter-spacing: 0;
+        }
+    }
+
+    &.is-align-center {
+        .dono-hero__scrim   { text-align: center; }
+        .dono-hero__description { margin-left: auto; margin-right: auto; }
+        .dono-hero__summary { justify-content: center; }
+    }
+
+    @media (max-width: 600px) {
+        .dono-hero__scrim { padding: 72px 20px 22px; }
+    }
+}
+
+// Stats (3-up)
+.dono-block--stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+
+    .dono-stat {
+        background: var(--dono-bg, #{$bg-fallback});
+        border: 1px solid var(--dono-border, #{$border-fallback});
+        border-radius: var(--dono-radius, #{$radius-fallback});
+        padding: 20px 22px;
+    }
+    .dono-stat__value {
+        font-size: 30px;
+        font-weight: 800;
+        letter-spacing: -.02em;
+        color: var(--dono-text, #{$text-fallback});
+        line-height: 1.1;
+        font-variant-numeric: tabular-nums;
+    }
+    .dono-stat__label {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        color: var(--dono-text-muted, #{$text-muted-fallback});
+        margin-top: 6px;
+    }
+}
+
+// Progress
+.dono-block--progress {
+    .dono-progress__labels {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+    .dono-progress__value {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--dono-accent, #{$accent-fallback});
+        font-variant-numeric: tabular-nums;
+    }
+    .dono-progress__caption {
+        margin-left: 6px;
+        font-size: 13px;
+        color: var(--dono-text-muted, #{$text-muted-fallback});
+        text-transform: lowercase;
+    }
+    .dono-progress__target {
+        font-size: 13px;
+        color: var(--dono-text-muted, #{$text-muted-fallback});
+        font-variant-numeric: tabular-nums;
+    }
+    .dono-progress__bar {
+        height: 14px;
+        background: var(--dono-bg-soft, #{$bg-soft-fallback});
+        border-radius: 999px;
+        overflow: hidden;
+    }
+    .dono-progress__bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--dono-accent, #{$accent-fallback}), color-mix(in srgb, var(--dono-accent, #{$accent-fallback}) 65%, #fff));
+        border-radius: 999px;
+        transition: width .35s ease;
+    }
+}
+
+// Donate button
+.dono-block--donate-button {
+    &.is-align-left   { text-align: left; }
+    &.is-align-center { text-align: center; }
+    &.is-align-right  { text-align: right; }
+
+    .dono-donate-button {
+        display: inline-block;
+        background: var(--dono-accent, #{$accent-fallback});
+        color: #fff;
+        font-size: 15px;
+        font-weight: 500;
+        padding: 12px 24px;
+        border: 0;
+        border-radius: 999px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: filter .15s;
+
+        &:hover { filter: brightness(.92); }
+        &.is-disabled {
+            background: var(--dono-text-muted, #{$text-muted-fallback});
+            cursor: not-allowed;
+            opacity: .8;
+        }
+    }
+}
+
+// Modal (opened from donate button)
+body.dono-modal-open { overflow: hidden; }
+
+.dono-donate-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+
+    &[hidden] { display: none; }
+
+    &.is-open {
+        animation: dono-modal-in .15s ease;
+    }
+
+    &__backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, .55);
+    }
+
+    &__panel {
+        position: relative;
+        max-width: 540px;
+        margin: 5vh auto;
+        max-height: 90vh;
+        background: var(--dono-bg, #{$bg-fallback});
+        border-radius: var(--dono-radius, #{$radius-fallback});
+        box-shadow: var(--dono-card-shadow, #{$shadow-fallback});
+        overflow: auto;
+        padding: 32px 28px 24px;
+    }
+
+    &__close {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: 0;
+        border-radius: 50%;
+        cursor: pointer;
+        color: var(--dono-text-muted, #{$text-muted-fallback});
+
+        &:hover {
+            background: var(--dono-bg-soft, #{$bg-soft-fallback});
+            color: var(--dono-text, #{$text-fallback});
+        }
+    }
+}
+
+@keyframes dono-modal-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+// Shared title affordance
+.dono-block__title {
+    margin: 0 0 16px;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--dono-text, #{$text-fallback});
+}
+
+.dono-block__empty {
+    margin: 0;
+    padding: 16px 20px;
+    border: 1px dashed var(--dono-border, #{$border-fallback});
+    background: var(--dono-bg-soft, #fafafa);
+    color: var(--dono-text-muted, #{$text-muted-fallback});
+    border-radius: var(--dono-radius-sm, #{$radius-sm-fallback});
+    font-size: 13px;
+}
+
+// ServerSideRender suppresses its own <h3> (REST_REQUEST) so the editor's
+// inline RichText title is the one shown; style it to match the frontend.
+.dono-campaign-block-edit {
+    &__title {
+        margin: 0 0 16px;
+        font-size: 20px;
+        font-weight: 600;
+        line-height: 1.25;
+        color: var(--dono-text, #{$text-fallback});
+
+        &[data-rich-text-placeholder]::before,
+        &:empty::before {
+            color: var(--dono-text-muted, #{$text-muted-fallback});
+            opacity: .65;
+        }
+    }
+}
+
+// Top donors
+.dono-block--top-donors {
+    .dono-top-donors__list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        counter-reset: dono-top-donor;
+    }
+
+    .dono-top-donors__row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px 12px;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--dono-border, #{$border-fallback});
+
+        &:last-child { border-bottom: 0; }
+    }
+
+    .dono-top-donors__rank {
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 28px;
+        height: 28px;
+        padding: 0 8px;
+        border-radius: 999px;
+        background: var(--dono-bg-soft, #{$bg-soft-fallback});
+        color: var(--dono-text-muted, #{$text-muted-fallback});
+        font-size: 12px;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .dono-top-donors__name {
+        flex: 1 1 auto;
+        min-width: 0;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--dono-text, #{$text-fallback});
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+
+        &.is-anonymous {
+            font-style: italic;
+            color: var(--dono-text-muted, #{$text-muted-fallback});
+            font-weight: 400;
+        }
+    }
+
+    .dono-top-donors__count {
+        flex: 0 0 auto;
+        font-size: 12px;
+        color: var(--dono-text-muted, #{$text-muted-fallback});
+        font-variant-numeric: tabular-nums;
+    }
+
+    .dono-top-donors__amount {
+        flex: 0 0 auto;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--dono-accent, #{$accent-fallback});
+        font-variant-numeric: tabular-nums;
+    }
+
+    // Share-of-top bar; sits on its own line below the row (flex-basis 100%).
+    .dono-top-donors__bar {
+        flex: 0 0 100%;
+        height: 6px;
+        background: var(--dono-bg-soft, #{$bg-soft-fallback});
+        border-radius: 999px;
+        overflow: hidden;
+
+        &::before {
+            content: '';
+            display: block;
+            height: 100%;
+            width: var(--dono-bar-w, 0%);
+            background: linear-gradient(90deg, var(--dono-accent, #{$accent-fallback}), color-mix(in srgb, var(--dono-accent, #{$accent-fallback}) 65%, #fff));
+            border-radius: 999px;
+        }
+    }
+
+    .dono-top-donors__podium .dono-avatar {
+        align-self: center;
+        width: 44px;
+        height: 44px;
+        font-size: 16px;
+        margin-bottom: 2px;
+    }
+
+    .dono-top-donors__podium {
+        list-style: none;
+        margin: 0 0 16px;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        align-items: end;
+        gap: 8px;
+    }
+
+    .dono-top-donors__podium-tier {
+        background: var(--dono-bg, #{$bg-fallback});
+        border: 1px solid var(--dono-border, #{$border-fallback});
+        border-radius: var(--dono-radius, #{$radius-fallback});
+        padding: 16px 12px 18px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        &--1 {
+            min-height: 160px;
+            border-color: var(--dono-accent, #{$accent-fallback});
+            box-shadow: 0 4px 14px var(--dono-accent-soft, #{$accent-soft-fallback});
+            .dono-top-donors__podium-rank {
+                background: var(--dono-accent, #{$accent-fallback});
+                color: #fff;
+            }
+        }
+        &--2 { min-height: 140px; }
+        &--3 { min-height: 120px; }
+    }
+
+    .dono-top-donors__podium-rank {
+        align-self: center;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--dono-bg-soft, #{$bg-soft-fallback});
+        color: var(--dono-text, #{$text-fallback});
+        font-size: 13px;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+        margin-bottom: 4px;
+    }
+
+    .dono-top-donors__podium-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--dono-text, #{$text-fallback});
+        word-break: break-word;
+
+        &.is-anonymous {
+            font-style: italic;
+            color: var(--dono-text-muted, #{$text-muted-fallback});
+            font-weight: 500;
+        }
+    }
+
+    .dono-top-donors__podium-amount {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--dono-accent, #{$accent-fallback});
+        font-variant-numeric: tabular-nums;
+    }
+
+    .dono-top-donors__podium-count {
+        font-size: 11px;
+        color: var(--dono-text-muted, #{$text-muted-fallback});
+        font-variant-numeric: tabular-nums;
+    }
+
+    @media (max-width: 480px) {
+        .dono-top-donors__podium {
+            grid-template-columns: 1fr;
+        }
+        .dono-top-donors__podium-tier {
+            min-height: auto !important;
+        }
+    }
+}
+
+// Recent donations
+.dono-block--recent-donations {
+    .dono-recent-donations__list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .dono-recent-donations__item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--dono-border, #{$border-fallback});
+
+        &:last-child { border-bottom: 0; }
+    }
+
+    .dono-recent-donations__content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .dono-recent-donations__header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .dono-recent-donations__name {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--dono-text, #{$text-fallback});
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+
+        &.is-anonymous {
+            font-style: italic;
+            color: var(--dono-text-muted, #{$text-muted-fallback});
+            font-weight: 400;
+        }
+    }
+
+    .dono-recent-donations__amount {
+        flex: 0 0 auto;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--dono-accent, #{$accent-fallback});
+        font-variant-numeric: tabular-nums;
+    }
+
+    .dono-recent-donations__meta {
+        margin-top: 4px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .dono-recent-donations__time {
+        font-size: 12px;
+        color: var(--dono-text-muted, #{$text-muted-fallback});
+    }
+
+    .dono-recent-donations__message {
+        margin: 0;
+        padding: 8px 12px;
+        border-left: 3px solid var(--dono-accent, #{$accent-fallback});
+        background: var(--dono-bg-soft, #f9fafb);
+        color: var(--dono-text, #{$text-fallback});
+        font-style: italic;
+        font-size: 13px;
+        line-height: 1.5;
+        border-radius: 0 6px 6px 0;
+    }
+}
+
+// Supporter wall
+.dono-block--supporter-wall {
+    .dono-supporter-wall {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 12px;
+    }
+
+    .dono-supporter-wall__card {
+        background: var(--dono-bg, #{$bg-fallback});
+        border: 1px solid var(--dono-border, #{$border-fallback});
+        border-radius: var(--dono-radius, 10px);
+        padding: 14px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+
+        &.has-message {
+            grid-column: span 2;
+        }
+    }
+
+    .dono-supporter-wall__top {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        .dono-avatar { width: 32px; height: 32px; font-size: 13px; }
+    }
+
+    .dono-supporter-wall__name {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--dono-text, #{$text-fallback});
+        word-break: break-word;
+    }
+
+    .dono-supporter-wall__amount {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--dono-accent, #{$accent-fallback});
+        font-variant-numeric: tabular-nums;
+    }
+
+    .dono-supporter-wall__message {
+        margin: 0;
+        padding: 0;
+        font-size: 13px;
+        line-height: 1.45;
+        color: var(--dono-text-muted, #{$text-muted-fallback});
+        font-style: italic;
+
+        &::before { content: '\201C'; }
+        &::after  { content: '\201D'; }
+    }
+
+    @media (max-width: 480px) {
+        .dono-supporter-wall {
+            grid-template-columns: 1fr;
+        }
+        .dono-supporter-wall__card.has-message {
+            grid-column: span 1;
+        }
+    }
+}
+
+// Block option modifiers (pass 2). Left alignment, "md" size, and "auto"
+// columns are the base styles above, so only the non-default cases need rules.
+
+.dono-block--hero.is-align-center {
+    text-align: center;
+
+    .dono-hero__description { margin-left: auto; margin-right: auto; }
+}
+
+.dono-block--stats.is-align-center .dono-stat { text-align: center; }
+.dono-block--stats.is-align-right  .dono-stat { text-align: right; }
+
+.dono-block--progress.is-align-center .dono-progress__labels {
+    justify-content: center;
+    text-align: center;
+}
+
+.dono-block--donate-button {
+    .dono-donate-button {
+        &.is-size-sm { padding: 8px 18px;  font-size: 13px; }
+        &.is-size-lg { padding: 16px 32px; font-size: 17px; }
+    }
+
+    &.is-full-width .dono-donate-button {
+        display: block;
+        width: 100%;
+        text-align: center;
+    }
+}
+
+.dono-block--supporter-wall {
+    .dono-supporter-wall {
+        &.is-cols-2 { grid-template-columns: repeat(2, 1fr); }
+        &.is-cols-3 { grid-template-columns: repeat(3, 1fr); }
+        &.is-cols-4 { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    @media (max-width: 480px) {
+        .dono-supporter-wall.is-cols-2,
+        .dono-supporter-wall.is-cols-3,
+        .dono-supporter-wall.is-cols-4 {
+            grid-template-columns: 1fr;
+        }
+    }
+}
+
+// Campaigns grid - "more ways to give" cards.
+.dono-block--grid {
+    margin: 28px 0 24px;
+}
+.dono-grid__head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+.dono-grid__title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    color: var(--dono-text, #{$text-fallback});
+}
+.dono-campaign-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+.dono-campaign-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--dono-bg, #{$bg-fallback});
+    border: 1px solid var(--dono-border, #{$border-fallback});
+    border-radius: var(--dono-radius, #{$radius-fallback});
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .06);
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+
+    &:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 28px rgba(15, 23, 42, .12);
+        border-color: color-mix(in srgb, var(--dono-accent, #{$accent-fallback}) 35%, var(--dono-border, #{$border-fallback}));
+    }
+    &.is-inert { pointer-events: none; cursor: default; }
+
+    &__cover {
+        position: relative;
+        aspect-ratio: 16 / 9;
+        display: block;
+
+        img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+        &.is-placeholder {
+            background:
+                radial-gradient(130% 120% at 12% 0%, rgba(255, 255, 255, .22), transparent 50%),
+                linear-gradient(135deg, var(--dono-accent, #{$accent-fallback}), color-mix(in srgb, var(--dono-accent, #{$accent-fallback}) 55%, #08160f));
+        }
+    }
+
+    &__body { display: flex; flex-direction: column; flex: 1; padding: 18px 18px 20px; }
+
+    &__title {
+        display: block;
+        margin: 0 0 6px;
+        font-size: 17px; font-weight: 700; letter-spacing: -.01em; line-height: 1.3;
+        color: var(--dono-text, #{$text-fallback});
+    }
+
+    &__blurb {
+        margin: 0 0 16px;
+        font-size: 13.5px; line-height: 1.55;
+        color: var(--dono-text-muted, #{$text-muted-fallback});
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    &__progress { display: block; margin-top: auto; }
+
+    &__bar {
+        display: block;
+        height: 8px;
+        background: var(--dono-bg-soft, #{$bg-soft-fallback});
+        border-radius: 999px;
+        overflow: hidden;
+        margin-bottom: 8px;
+
+        > span {
+            display: block;
+            height: 100%;
+            background: linear-gradient(90deg, var(--dono-accent, #{$accent-fallback}), color-mix(in srgb, var(--dono-accent, #{$accent-fallback}) 70%, #fff));
+            border-radius: 999px;
+        }
+    }
+
+    &__meta { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-size: 13px; }
+    &__raised { font-weight: 700; color: var(--dono-text, #{$text-fallback}); }
+    &__goal   { color: var(--dono-text-muted, #{$text-muted-fallback}); }
+
+    &__foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-top: 16px;
+        padding-top: 14px;
+        border-top: 1px solid var(--dono-border, #{$border-fallback});
+    }
+    &__pct {
+        font-size: 12.5px; font-weight: 700;
+        color: var(--dono-accent, #{$accent-fallback});
+        background: var(--dono-accent-soft, #{$accent-soft-fallback});
+        padding: 3px 10px; border-radius: 999px;
+    }
+    &__link {
+        display: inline-flex; align-items: center; gap: 6px;
+        font-size: 13.5px; font-weight: 700;
+        color: var(--dono-accent, #{$accent-fallback});
+
+        svg { display: block; transition: transform .12s; }
+    }
+    &:hover &__link svg { transform: translateX(2px); }
+}
+
+// Donation form block - inline form wrapper + editor placeholder.
+.dono-block--donation-form {
+    margin: 0 0 24px;
+
+    &.is-align-center { display: flex; justify-content: center; }
+}
+.dono-donation-form__placeholder {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 28px;
+    text-align: center;
+    border: 1px dashed var(--dono-border, #{$border-fallback});
+    border-radius: var(--dono-radius, #{$radius-fallback});
+    background: var(--dono-bg-soft, #{$bg-soft-fallback});
+    color: var(--dono-text-muted, #{$text-muted-fallback});
+
+    strong { color: var(--dono-text, #{$text-fallback}); font-size: 15px; }
+    span   { font-size: 13px; }
+}
+
+// Circular initial avatar for donor-activity blocks (top donors, recent).
+.dono-avatar {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1;
+
+    &--anon {
+        background: var(--dono-bg-soft, #{$bg-soft-fallback});
+        color: var(--dono-text-muted, #{$text-muted-fallback});
+    }
+}

@@ -1,0 +1,438 @@
+// Shared chrome for any admin list table that wraps <DataViews> in a
+// `.dono-dataviews` div. Imported by every list page SCSS (campaigns,
+// donations, donors, funds, ...) so there is one source of truth for the
+// card shell, toolbar/filter rows, table header/body padding, the primary-
+// column-absorbs-space pattern, footer band, and selected/hover row colours.
+//
+// The consumer is expected to have already `@import`ed
+// `@dono/ui/scss/tokens` so $accent / $text / $bg-soft / $border-soft etc.
+// are in scope.
+
+.dono-dataviews {
+    // DataViews reads its accent from --wp-admin-theme-color; override locally
+    // so the selected row, checkbox tick, sort caret, etc. all read accent green.
+    --wp-admin-theme-color:           #{$accent};
+    --wp-admin-theme-color--rgb:      30, 138, 78;
+    --wp-admin-theme-color-darker-10: #{$accent-dark};
+    --wp-admin-theme-color-darker-20: #{$accent-dark};
+    --wp-components-color-accent:           #{$accent};
+    --wp-components-color-accent-darker-10: #{$accent-dark};
+    --wp-components-color-accent-darker-20: #{$accent-dark};
+
+    position: relative;
+    background: #fff;
+    border: 1px solid $border-soft;
+    border-radius: $radius-lg;
+    box-shadow: $shadow-md;
+    overflow: hidden;
+
+    // Indeterminate progress bar across the top of the card whenever any inner
+    // element reports aria-busy="true" (set by DataViews while loading or
+    // refreshing data). Pure CSS; sits above the table without taking layout.
+    &:has([aria-busy="true"])::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        z-index: 5;
+        background:
+            linear-gradient(90deg, transparent 0%, #{$accent} 50%, transparent 100%)
+            no-repeat 0 0 / 35% 100%
+            $bg-soft;
+        animation: donoDataviewsProgress 1.1s linear infinite;
+        pointer-events: none;
+    }
+
+    .dataviews-wrapper {
+        font-size: 13.5px;
+        line-height: 1.45;
+        // Wide list tables overflow on narrower screens; the outer card uses
+        // `overflow: hidden` for its rounded corners, so the inner wrapper is
+        // the horizontal scroll context. Force it to span the full card width
+        // so the filter header + footer's `width: 100%` resolves to the
+        // visible card width, not the narrower flex-content shrink-fit.
+        overflow-x: auto;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .dataviews__view-actions,
+    .dataviews-filters__container {
+        padding: 12px 16px;
+        background: #fff;
+        border-bottom: 1px solid $border-soft;
+    }
+
+    // The view-actions toolbar is rendered as `<HStack expanded={true}>`,
+    // which emits `width: 100%` via emotion. With `justify: space-between`
+    // and `position: sticky; left: 0` (from WP), the row stretches to the
+    // wrapper's full inline size - and when that exceeds the viewport (e.g.
+    // wide tables), the right-side icons land past the visible card edge.
+    // Cap the row at the visible card width so the icons stay in view and
+    // the row itself doesn't drag the wrapper's scrollWidth wider than the
+    // table demands.
+    .dataviews__view-actions {
+        width: auto !important;
+        max-width: 100%;
+        position: sticky !important;
+        left: 0 !important;
+        right: 0 !important;
+    }
+
+    // Filters chips row gets the sticky left+right stretch so its bottom
+    // border always reaches both edges of the card.
+    .dataviews-filters__container {
+        position: sticky !important;
+        left: 0 !important;
+        right: 0 !important;
+    }
+
+    .dataviews-view-table {
+        color: $text;
+        font-size: 13.5px;
+        // WP sets `margin-bottom: auto` on the table to push the footer to the
+        // wrapper's bottom edge. In short-content tables the wrapper is taller
+        // than the content so the auto-margin leaves a visible white strip
+        // between the last row and the gray footer band.
+        margin-bottom: 0 !important;
+        // Collapse borders + zero spacing so adjacent header cells touch and
+        // their shared gray band reads as one continuous strip.
+        border-collapse: collapse !important;
+        border-spacing: 0 !important;
+
+        // Each cell shrinks to its content + padding; the "primary" column
+        // (first cell after the bulk-actions checkbox, or first cell if no
+        // checkbox is rendered) absorbs the remaining width so other columns
+        // don't carry visible gaps between their content and the next column.
+        tr > td,
+        tr > th {
+            width: 1%;
+        }
+        tr > .dataviews-view-table__checkbox-column + td,
+        tr > .dataviews-view-table__checkbox-column + th,
+        tr > td:first-child:not(.dataviews-view-table__checkbox-column),
+        tr > th:first-child:not(.dataviews-view-table__checkbox-column) {
+            width: auto;
+        }
+
+        thead th {
+            background: $bg-soft;
+            color: $text-soft;
+            font-size: 11.5px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            padding: 9px 10px;
+            border-bottom: 1px solid $border-soft;
+            border-left: 0;
+            border-right: 0;
+            white-space: nowrap;
+            text-align: left;
+        }
+
+        // Reset DataViews' giant 48px first/last-cell inset to 12px.
+        tr td:first-child,
+        tr th:first-child { padding-left: 12px; }
+
+        // Actions column is always last: hug the right edge so there is
+        // no empty gap before the table border. Safe for tables that don't
+        // declare an explicit actions column (the DataViews row-actions
+        // menu lives in the same last cell anyway).
+        tr td:last-child,
+        tr th:last-child {
+            padding-right: 12px;
+            white-space: nowrap;
+            text-align: right;
+        }
+
+        .dataviews-view-table-header-button {
+            color: $text-soft;
+            font-size: 11.5px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            // The header label is rendered inside a WP <Button>
+            // (`.components-button`, inline-flex). Without these overrides
+            // the inline-flex element gets dropped somewhere mid-cell on
+            // the wide title-absorbing column. Force the button to fill the
+            // cell, hug the left edge, and start-align its label.
+            display: flex !important;
+            width: 100% !important;
+            justify-content: flex-start !important;
+            align-items: center !important;
+            text-align: left !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            margin-left: 0 !important;
+
+            // WP's `.components-button.is-tertiary:hover` paints a faint
+            // theme-color tint; with our accent overridden to green that
+            // reads as a colored cell. Strip it.
+            &:hover,
+            &:hover:not(:disabled, [aria-disabled="true"]) {
+                background: transparent !important;
+                color: $text-muted;
+            }
+        }
+
+        tbody {
+            tr {
+                border-top: 1px solid $border-soft;
+                transition: background .12s;
+
+                &:hover,
+                &.is-hovered {
+                    background: $accent-tint;
+                    cursor: pointer;
+                }
+            }
+
+            td {
+                padding: 10px 10px;
+                vertical-align: middle;
+                color: $text;
+                font-size: 13.5px;
+                line-height: 1.45;
+                white-space: nowrap;
+            }
+
+            // Drop the 32px min-height DataViews forces on its cell-content
+            // wrapper so our rows breathe naturally.
+            .dataviews-view-table__cell-content-wrapper { min-height: 0; }
+        }
+
+        tr.is-selected {
+            background: $accent-soft;
+            color: $text;
+
+            &:hover { background: rgba(30, 138, 78, 0.18); }
+        }
+    }
+
+    .dataviews-pagination,
+    .dataviews-footer {
+        background: $bg-soft;
+        border-top: 1px solid $border-soft;
+        padding: 10px 14px;
+        font-size: 12.5px;
+        color: $text-muted;
+    }
+
+    // Footer is an HStack rendered with `expanded={false}` + `justify="end"`,
+    // which sizes it to content. Force it to span the wrapper, pin to the
+    // viewport on horizontal scroll, and push bulk-actions left so pagination
+    // can still ride the right edge via `margin-right: auto`.
+    .dataviews-footer {
+        position: sticky !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0;
+        width: 100% !important;
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        justify-content: flex-start;
+    }
+    .dataviews-bulk-actions-footer__container {
+        margin-right: auto;
+    }
+
+    .dataviews-filters__summary-chip {
+        background: #fff;
+        border: 1px solid $border-mid;
+        border-radius: 999px;
+        font-size: 12px;
+        color: $text;
+
+        &:hover { background: $bg-soft; }
+    }
+
+    .dataviews-search input {
+        border-color: $border-mid;
+        border-radius: $radius-md;
+        font-size: 13px;
+    }
+}
+
+// Goal-progress cell, shared by the campaigns + funds lists (see GoalBar.jsx).
+.dono-goalbar {
+    min-width: 120px;
+    line-height: 1.2;
+
+    &__labels {
+        display: flex;
+        justify-content: space-between;
+        gap: 6px;
+        margin-bottom: 4px;
+        font-size: 12px;
+        font-variant-numeric: tabular-nums;
+        color: $text;
+
+        &.is-muted { color: $text-soft; }
+    }
+
+    &__pct { color: $text-soft; }
+
+    &__track {
+        height: 4px;
+        background: $bg-soft;
+        border-radius: 2px;
+        overflow: hidden;
+    }
+
+    &__fill {
+        height: 100%;
+        background: $accent;
+        border-radius: 2px;
+        transition: width .3s;
+    }
+}
+
+// ---- Shared list-cell vocabulary ----
+// Used by every admin list table's column renderers (donations, campaigns,
+// funds, donors). Lives here so a list only needs to @import this partial to
+// get the full cell kit; no cross-importing another page's stylesheet.
+
+.dono-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    max-width: 100%;
+
+    &__avatar {
+        flex-shrink: 0;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: $accent-soft;
+        color: $accent-dark;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0;
+        text-transform: uppercase;
+    }
+
+    &__body {
+        min-width: 0;
+        line-height: 1.3;
+    }
+
+    &__name {
+        font-weight: 500;
+        color: $text;
+        font-size: 13.5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__sub {
+        font-size: 11.5px;
+        color: $text-muted;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
+        &--mono {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 11.5px;
+        }
+    }
+
+    &__link {
+        font-size: 13px;
+        color: $text;
+        text-decoration: none;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
+        // Primary entity link (campaign title, fund name, donor name) reads
+        // a touch heavier than secondary links (donations' campaign/form).
+        &--strong { font-weight: 500; }
+
+        &:hover  { color: $accent; text-decoration: underline; }
+        &:focus  { color: $accent; text-decoration: underline; outline: none; box-shadow: none; }
+        &:focus-visible { outline: 2px solid $accent; outline-offset: 2px; border-radius: 2px; }
+    }
+}
+
+.dono-mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12.5px;
+    color: $text;
+}
+
+.dono-mono-link {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12.5px;
+    color: $accent-dark;
+    text-decoration: none;
+    font-weight: 500;
+
+    &:hover { color: $accent; text-decoration: underline; }
+}
+
+.dono-time {
+    display: inline-flex;
+    flex-direction: column;
+    line-height: 1.3;
+
+    &__rel {
+        font-size: 13px;
+        color: $text;
+    }
+
+    &__abs {
+        font-size: 11.5px;
+        color: $text-soft;
+    }
+}
+
+// @dono/ui's AmountInput claims `.dono-amount` (a <div>) with a grid layout +
+// border for the form input. The list tables reuse the class on a plain <span>
+// for the read-only amount cell, which inherits that border. Restrict the cell
+// styles to spans so the form input keeps its box and the cells stay flat.
+span.dono-amount {
+    display: inline;
+    border: 0;
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+    color: $text;
+
+    &.dono-amount--strike { text-decoration: line-through; color: $text-muted; font-weight: 400; }
+    &.dono-amount--num   { font-variant-numeric: tabular-nums; }
+}
+
+.dono-country {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: $text-muted;
+
+    &__code {
+        font-size: 10.5px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        padding: 2px 6px;
+        background: $bg-soft;
+        border-radius: 4px;
+        color: $text;
+    }
+}
+
+@keyframes donoDataviewsProgress {
+    0%   { background-position: -35% 0; }
+    100% { background-position: 135% 0; }
+}

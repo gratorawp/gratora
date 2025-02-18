@@ -1,0 +1,612 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Dono\Donors;
+
+use DateTimeImmutable;
+use Dono\Analytics\Event;
+use Dono\Campaigns\Campaign;
+use Dono\Donations\ChannelClassifier;
+use Dono\Donations\Donation;
+use Dono\Donations\DonationQueries;
+use Dono\Donors\DonorNoteRepository;
+use Dono\Foundation\Helpers\Csv;
+use Dono\Foundation\Time\Clock;
+use Dono\Receipts\Receipt;
+use Dono\Recurring\RecurringPlan;
+use Dono\Recurring\RecurringPlanRepository;
+use Dono\Settings\SettingsService;
+use Dono\Vendor\Queryable\DB;
+use Throwable;
+
+/**
+ * Builds donor-insights and donor-profile payloads for the admin UI.
+ *
+ * @version 1.0.0“
+ */
+final class DonorMetricsService
+{
+    public function __construct(
+        private DonorRepository $donors,
+        private DonorService $donorService,
+        private RecurringPlanRepository $recurring,
+        private DonorNoteRepository $notes,
+        private MagicLinkService $magicLinks,
+        private Clock $clock,
+    ) {
+    }
+
+    /** @return array<string,mixed> */
+    public function insights(): array
+    {
+        $today = $this->clock->now()->format('Y-m-d');
+
+        $kpi       = $this->donors->lifecycleKpi($today);
+        $segments  = $this->donors->rfmSegments($today);
+        $ltv       = $this->donors->lifetimeValueHistogram([2500, 10000, 25000, 50000, 100000, 250000]);
+        $top       = $this->donors->topByLifetimeValue(20);
+        $retention = $this->donors->donorCohortRetention(12, 12);
+        $recurring = $this->recurring->recurringStats($today);
+
+        $total = max(1, $kpi['total']); // avoid division by zero
+        $kpi['active_pct']  = (int) round(($kpi['active']  / $total) * 100);
+        $kpi['at_risk_pct'] = (int) round(($kpi['at_risk'] / $total) * 100);
+        $kpi['lapsed_pct']  = (int) round(($kpi['lapsed']  / $total) * 100);
+        $kpi['lost_pct']    = (int) round(($kpi['lost']    / $total) * 100);
+
+        return [
+            'kpi'          => $kpi,
+            'segments'     => $segments,
+            'ltv_buckets'  => $ltv,
+            'top_donors'   => $this->shapeTopDonors($top),
+            'retention'    => $retention,
+            'recurring'    => $recurring,
+            'generated_at' => $this->clock->now()->format('c'),
+        ];
+    }
+
+    /**
+     * Paged at-risk donors with decrypted email.
+     *
+     * @return array{rows:array<array<string,mixed>>, total:int}
+     */
+    public function atRisk(int $page = 1, int $perPage = 25): array
+    {
+        $today = $this->clock->now()->format('Y-m-d');
+        $result = $this->donors->listAtRisk($today, $page, $perPage);
+
+        $result['rows'] = array_map(function (array $r): array {
+            $donor = Donor::make();
+            $donor->email_encrypted = (string) $r['email_encrypted'];
+            $email = $this->donorService->decryptEmail($donor);
+            unset($r['email_encrypted']);
+            $name = trim(($r['first_name'] ?? '') . ' ' . ($r['last_name'] ?? ''));
+            return [
+                'id'                  => $r['id'],
+                'name'                => $name !== '' ? $name : __('Donor', 'dono') . ' #' . $r['id'],
+                'email'               => $email,
+                'country'             => $r['country'],
+                'donations_count'     => $r['donations_count'],
+                'total_donated_cents' => $r['total_donated_cents'],
+                'last_donation_at'    => $r['last_donation_at'],
+                'first_donation_at'   => $r['first_donation_at'],
+            ];
+        }, $result['rows']);
+
+        return $result;
+    }
+
+    /** All at-risk donors as CSV. Capped at 10k rows to bound memory. */
+    public function atRiskCsv(): string
+    {
+        $result = $this->atRisk(1, 10000);
+
+        $out = fopen('php://temp', 'r+');
+        Csv::writeRow($out, ['id', 'name', 'email', 'country', 'donations', 'total_donated', 'first_donation_at', 'last_donation_at']);
+        foreach ($result['rows'] as $r) {
+            Csv::writeRow($out, [
+                $r['id'],
+                $r['name'],
+                $r['email'],
+                $r['country'] ?? '',
+                $r['donations_count'],
+                number_format($r['total_donated_cents'] / 100, 2, '.', ''),
+                $r['first_donation_at'] ?? '',
+                $r['last_donation_at'] ?? '',
+            ]);
+        }
+        rewind($out);
+        $csv = (string) stream_get_contents($out);
+        fclose($out);
+        return $csv;
+    }
+
+    /**
+     * Full profile payload for the donor detail screen.
+     *
+     * @return array<string,mixed>|null null when donor doesn't exist.
+     */
+    public function profile(int $donorId, bool $includeMagicLink = false): ?array
+    {
+        $donor = $this->donors->findById($donorId);
+        if (! $donor) return null;
+
+        $today   = $this->clock->now()->format('Y-m-d');
+        $segment = $this->classifySegment($donor, $today);
+
+        $donations = Donation::query()
+            ->where('donor_id', $donorId)
+            ->orderBy('created_at', 'DESC')
+            ->limit(25)
+            ->getAll();
+
+        $recurringPlans = RecurringPlan::query()
+            ->where('donor_id', $donorId)
+            ->orderBy('status', 'ASC')
+            ->orderBy('started_at', 'DESC')
+            ->getAll();
+
+        $receipts = Receipt::query()
+            ->where('donor_id', $donorId)
+            ->orderBy('issued_at', 'DESC')
+            ->limit(25)
+            ->getAll();
+
+        $events = Event::query()
+            ->where('donor_id', $donorId)
+            ->orderBy('occurred_at', 'DESC')
+            ->limit(100)
+            ->getAll();
+
+        $consents = Consent::query()
+            ->where('donor_id', $donorId)
+            ->orderBy('occurred_at', 'DESC')
+            ->getAll();
+
+        $notes      = $this->notes->listForDonor($donorId);
+        $timeline   = $this->donors->monthlyTimelineForDonor($donorId);
+        $attribution = $this->donors->attributionMixForDonor($donorId);
+
+        // One query for campaign titles to avoid N+1 in donations/events.
+        $campaignIds = array_unique(array_filter(array_merge(
+            array_map(static fn ($d) => $d->campaign_id, $donations),
+            array_map(static fn ($e) => $e->campaign_id, $events),
+        )));
+        $campaigns = [];
+        if ($campaignIds) {
+            foreach (Campaign::query()->whereIn('id', array_values($campaignIds))->getAll() as $c) {
+                $campaigns[(int) $c->id] = ['id' => (int) $c->id, 'title' => (string) $c->title, 'slug' => (string) $c->slug];
+            }
+        }
+
+        // Lifetime extras
+        $totalCents = (int) $donor->total_donated_cents;
+        $count      = (int) $donor->donations_count;
+        $avgCents   = $count > 0 ? (int) round($totalCents / $count) : 0;
+
+        $sparkline = $this->buildSparkline($timeline, 30);
+        $netExpr = DonationQueries::netBaseExpr();
+        $largestDonation = (int) (DonationQueries::live(DB::table('dono_donations')
+            ->whereIn('status', ['paid', 'partial_refund'])
+            ->where('donor_id', $donorId))
+            ->selectRaw("COALESCE(MAX({$netExpr}), 0) AS m")
+            ->get()['m'] ?? 0);
+
+        $oneTimeCount = 0;
+        $recurringCount = 0;
+        foreach ($donations as $d) {
+            if (($d->frequency ?? 'one_time') === 'one_time') $oneTimeCount++;
+            else $recurringCount++;
+        }
+
+        // MRR from active plans (cadence-normalised monthly equivalent).
+        $mrrCents = 0;
+        $activePlanCount = 0;
+        $nextPaymentAt = null;
+        foreach ($recurringPlans as $p) {
+            if ($p->status !== 'active') continue;
+            $activePlanCount++;
+            $mrrCents += $this->monthlyEquivalent($p);
+            if ($nextPaymentAt === null || ($p->next_payment_at && $p->next_payment_at < $nextPaymentAt)) {
+                $nextPaymentAt = $p->next_payment_at;
+            }
+        }
+
+        // Attribution rollup into canonical channel buckets.
+        $byChannel = [];
+        foreach ($attribution as $t) {
+            $attr = [];
+            if ($t['utm_source'] !== null) $attr['utm_source'] = $t['utm_source'];
+            if ($t['utm_medium'] !== null) $attr['utm_medium'] = $t['utm_medium'];
+            $key = ChannelClassifier::classify($attr);
+            $byChannel[$key] ??= ['amount' => 0, 'count' => 0];
+            $byChannel[$key]['amount'] += $t['amount_cents'];
+            $byChannel[$key]['count']  += $t['donations_count'];
+        }
+        uasort($byChannel, fn ($a, $b) => $b['amount'] <=> $a['amount']);
+        $channels = [];
+        foreach ($byChannel as $ch => $stats) {
+            $channels[] = ['channel' => $ch, 'amount_cents' => $stats['amount'], 'donations_count' => $stats['count']];
+        }
+
+        // Consents: show EVERY configured purpose with this donor's latest
+        // status, so purposes the donor never acted on still appear (not just
+        // the ones with a recorded row). Latest row per purpose wins (rows are
+        // sorted DESC by occurred_at). The full audit trail lives in `history`.
+        $latestConsent = [];
+        foreach ($consents as $c) {
+            if (! isset($latestConsent[$c->purpose])) {
+                $latestConsent[$c->purpose] = $c;
+            }
+        }
+        $labels = [];
+        $cfg    = (new SettingsService())->get('consents');
+        foreach ((is_array($cfg['purposes'] ?? null) ? $cfg['purposes'] : []) as $p) {
+            $k = (string) ($p['key'] ?? '');
+            if ($k !== '') $labels[$k] = (string) ($p['label'] ?? $k);
+        }
+        $consentCurrent = [];
+        foreach (array_unique(array_merge(array_keys($labels), array_keys($latestConsent))) as $key) {
+            $c = $latestConsent[$key] ?? null;
+            $consentCurrent[$key] = [
+                'purpose'            => $labels[$key] ?? (string) $key,
+                'granted'            => $c ? (bool) $c->granted : false,
+                'source'             => $c ? (string) $c->source : '',
+                'occurred_at'        => $c ? (string) $c->occurred_at : null,
+                'source_form_id'     => ($c && $c->source_form_id !== null) ? (int) $c->source_form_id : null,
+                'source_donation_id' => ($c && $c->source_donation_id !== null) ? (int) $c->source_donation_id : null,
+            ];
+        }
+
+        // Contextual banners.
+        $banners = [];
+        if ($donor->redacted_at !== null) {
+            $banners[] = ['kind' => 'redacted', 'message' => __('This donor has been redacted under GDPR. PII has been removed; lifetime totals are kept for accounting.', 'dono')];
+        }
+        $pastDuePlan = null;
+        foreach ($recurringPlans as $p) {
+            if ($p->status === 'past_due') { $pastDuePlan = $p; break; }
+        }
+        if ($pastDuePlan) {
+            $banners[] = ['kind' => 'past_due', 'message' => __('1 subscription is in dunning. Open the Recurring tab to retry.', 'dono')];
+        }
+
+        // Gated: this mints a 30-day portal login that impersonates the donor,
+        // so only edit-capable callers get it (never a view-only role).
+        $magicLinkUrl = null;
+        if ($includeMagicLink && $donor->redacted_at === null) {
+            $magicLinkUrl = $this->magicLinkUrl($donor);
+        }
+
+        return [
+            'donor' => [
+                'id'                  => (int) $donor->id,
+                'reference'           => sprintf('DONOR_%04d', $donor->id),
+                'name'                => $this->donorName($donor),
+                'email'               => $donor->redacted_at === null ? $this->donorService->decryptEmail($donor) : null,
+                'phone'               => $donor->redacted_at === null ? $this->donorService->decryptPhone($donor) : null,
+                'address'             => $donor->redacted_at === null ? $this->donorService->decryptAddress($donor) : null,
+                'address_parts'       => $donor->redacted_at === null ? $this->donorService->decryptAddressStruct($donor) : null,
+                'country'             => $donor->country,
+                'donor_type'          => $donor->donor_type,
+                'company'             => $donor->company,
+                'first_name'          => $donor->first_name,
+                'last_name'           => $donor->last_name,
+                'segment'             => $segment,
+                'first_donation_at'   => $donor->first_donation_at,
+                'last_donation_at'    => $donor->last_donation_at,
+                'created_at'          => $donor->created_at,
+                'redacted_at'         => $donor->redacted_at,
+                'is_anonymous'        => $this->isAnonymous($donor),
+            ],
+            'lifetime' => [
+                'total_cents'          => $totalCents,
+                'count'                => $count,
+                'avg_cents'            => $avgCents,
+                'largest_cents'        => $largestDonation,
+                'one_time_count'       => $oneTimeCount,
+                'recurring_count'      => $recurringCount,
+                'mrr_cents'            => $mrrCents,
+                'active_plan_count'    => $activePlanCount,
+                'next_payment_at'      => $nextPaymentAt,
+                'sparkline'            => $sparkline,
+            ],
+            'donations' => array_map(fn (Donation $d) => $this->mapDonationRow($d), $donations),
+            'recurring' => [
+                'plans' => array_map(fn (RecurringPlan $p) => $this->mapRecurringPlanRow($p), $recurringPlans),
+            ],
+            'receipts' => array_map(fn (Receipt $r) => $this->mapReceiptRow($r), $receipts),
+            'events' => array_map(fn (Event $e) => $this->mapEventRow($e), $events),
+            'consents' => [
+                'current' => array_values($consentCurrent),
+                'history' => array_map(fn (Consent $c) => $this->mapConsentRow($c), $consents),
+            ],
+            'notes'           => $notes,
+            'campaigns'       => $campaigns,
+            'by_channel'      => $channels,
+            'monthly_timeline'=> $timeline,
+            'banners'         => $banners,
+            'magic_link_url'  => $magicLinkUrl,
+        ];
+    }
+
+    private function isAnonymous(Donor $d): bool
+    {
+        if ($d->redacted_at !== null) return false; // redacted is a distinct state from anonymous
+        return ! $d->first_name && ! $d->last_name;
+    }
+
+    /**
+     * Pads monthly_timeline into a fixed-length array of the N most recent values.
+     *
+     * @param array<array{month:string,amount_cents:int,donations_count:int}> $timeline
+     * @return array<int>
+     */
+    private function buildSparkline(array $timeline, int $buckets): array
+    {
+        if (! $timeline) return array_fill(0, $buckets, 0);
+        $tail = array_slice($timeline, -$buckets);
+        $out = array_fill(0, $buckets, 0);
+        $offset = $buckets - count($tail);
+        foreach ($tail as $i => $row) {
+            $out[$offset + $i] = (int) $row['amount_cents'];
+        }
+        return $out;
+    }
+
+    /** Monthly-equivalent value of one recurring plan, in cents. */
+    private function monthlyEquivalent(RecurringPlan $p): int
+    {
+        $amount = (int) $p->amount_cents;
+        $n      = max(1, (int) $p->interval_count);
+        return match ($p->interval_unit) {
+            'month' => (int) round($amount / $n),
+            'week'  => (int) round(($amount * 4.345) / $n),
+            'year'  => (int) round($amount / (12 * $n)),
+            'day'   => (int) round(($amount * 30) / $n),
+            default => $amount,
+        };
+    }
+
+    /**
+     * Issues a self-service magic link. Raw token returned once; never stored cleartext.
+     * Profile responses are admin-only.
+     */
+    private function magicLinkUrl(Donor $donor): ?string
+    {
+        try {
+            $token = $this->magicLinks->issue((int) $donor->id, 'donor_portal', null, 2_592_000);
+        } catch ( Throwable $e) {
+            return null;
+        }
+        return add_query_arg('token', $token, (new \Dono\Donors\Portal\PortalPage())->url());
+    }
+
+    private function donorName(Donor $d): string
+    {
+        $name = trim(($d->first_name ?? '') . ' ' . ($d->last_name ?? ''));
+        return $name !== '' ? $name : __('Donor', 'dono') . ' #' . $d->id;
+    }
+
+    /**
+     * Classifies one donor into a segment. Must stay in sync with the SQL CASE
+     * in DonorRepository::rfmSegments().
+     */
+    private function classifySegment(Donor $d, string $today): string
+    {
+        if (! $d->last_donation_at) return 'other';
+
+        $now    = new DateTimeImmutable($today);
+        $last   = new DateTimeImmutable(substr((string) $d->last_donation_at, 0, 10));
+        $created = new DateTimeImmutable(substr((string) $d->created_at, 0, 10));
+        $days = (int) $now->diff($last)->format('%a');
+        $daysSinceCreated = (int) $now->diff($created)->format('%a');
+
+        if ($days > 365) return 'lost';
+        if ($days <= 90  && $d->donations_count >= 4 && $d->total_donated_cents >= 25000) return 'champions';
+        if ($days <= 90  && $d->donations_count >= 2) return 'loyal';
+        if ($days <= 90  && $daysSinceCreated <= 30) return 'new';
+        if ($days <= 180 && $days > 90)  return 'at_risk';
+        if ($days <= 365 && $days > 180) return 'hibernating';
+        return 'other';
+    }
+
+    /** @param array<array<string,mixed>> $rows */
+    private function shapeTopDonors(array $rows): array
+    {
+        return array_map(static function (array $r): array {
+            $name = trim(($r['first_name'] ?? '') . ' ' . ($r['last_name'] ?? ''));
+            return [
+                'id'                  => $r['id'],
+                'name'                => $name !== '' ? $name : __('Donor', 'dono') . ' #' . $r['id'],
+                'country'             => $r['country'],
+                'total_donated_cents' => $r['total_donated_cents'],
+                'donations_count'     => $r['donations_count'],
+                'last_donation_at'    => $r['last_donation_at'],
+            ];
+        }, $rows);
+    }
+
+    /** @return array<string,mixed> */
+    private function mapDonationRow(Donation $d): array
+    {
+        return [
+            'id'             => (int) $d->id,
+            'reference'      => (string) $d->reference,
+            'amount_cents'   => (int) $d->amount_cents,
+            'currency'       => (string) $d->currency,
+            'frequency'      => (string) $d->frequency,
+            'status'         => (string) $d->status,
+            'gateway'        => (string) $d->gateway,
+            'campaign_id'    => $d->campaign_id !== null ? (int) $d->campaign_id : null,
+            'paid_at'        => $d->paid_at,
+            'created_at'     => (string) $d->created_at,
+        ];
+    }
+
+    /**
+     * Uncapped donation list for a DSAR export. profile() caps at 25 for admin UI.
+     *
+     * @return list<array<string,mixed>>
+     */
+    public function donationsForExport(int $donorId): array
+    {
+        $rows = Donation::query()
+            ->where('donor_id', $donorId)
+            ->orderBy('created_at', 'DESC')
+            ->getAll();
+
+        return array_map(fn (Donation $d) => $this->mapDonationRow($d), $rows);
+    }
+
+    /** @return array<string,mixed> */
+    private function mapRecurringPlanRow(RecurringPlan $p): array
+    {
+        return [
+            'id'                    => (int) $p->id,
+            'gateway'               => (string) $p->gateway,
+            'gateway_subscription_id'=> (string) $p->gateway_subscription_id,
+            'amount_cents'          => (int) $p->amount_cents,
+            'currency'              => (string) $p->currency,
+            'interval_unit'         => (string) $p->interval_unit,
+            'interval_count'        => (int) $p->interval_count,
+            'status'                => (string) $p->status,
+            'started_at'            => (string) $p->started_at,
+            'next_payment_at'       => $p->next_payment_at,
+            'last_payment_at'       => $p->last_payment_at,
+            'cancelled_at'          => $p->cancelled_at,
+            'payments_count'        => (int) $p->payments_count,
+            'total_paid_cents'      => (int) $p->total_paid_cents,
+            'failed_renewals_count' => (int) $p->failed_renewals_count,
+            'campaign_id'           => $p->campaign_id !== null ? (int) $p->campaign_id : null,
+        ];
+    }
+
+    /** @return array<string,mixed> */
+    private function mapReceiptRow(Receipt $r): array
+    {
+        return [
+            'id'               => (int) $r->id,
+            'receipt_number'   => (string) $r->receipt_number,
+            'renderer_id'      => (string) $r->renderer_id,
+            'donation_id'      => (int) $r->donation_id,
+            'sent_to_email_at' => $r->sent_to_email_at,
+            'voided'           => (bool) $r->voided,
+            'issued_at'        => (string) $r->issued_at,
+        ];
+    }
+
+    /** @return array<string,mixed> */
+    private function mapEventRow(Event $e): array
+    {
+        return [
+            'id'                => (int) $e->id,
+            'type'              => (string) $e->type,
+            'donation_id'       => $e->donation_id !== null ? (int) $e->donation_id : null,
+            'recurring_plan_id' => $e->recurring_plan_id !== null ? (int) $e->recurring_plan_id : null,
+            'receipt_id'        => $e->receipt_id !== null ? (int) $e->receipt_id : null,
+            'campaign_id'       => $e->campaign_id !== null ? (int) $e->campaign_id : null,
+            'amount_cents'      => $e->amount_cents !== null ? (int) $e->amount_cents : null,
+            'currency'          => $e->currency,
+            'payload'           => $e->payload,
+            'occurred_at'       => (string) $e->occurred_at,
+        ];
+    }
+
+    /** @return array<string,mixed> */
+    private function mapConsentRow(Consent $c): array
+    {
+        return [
+            'id'          => (int) $c->id,
+            'purpose'     => (string) $c->purpose,
+            'granted'     => (bool) $c->granted,
+            'source'      => (string) $c->source,
+            'occurred_at' => (string) $c->occurred_at,
+        ];
+    }
+
+    /**
+     * Uncapped personal data bundle for a DSAR export. Returns only the
+     * donor's own data, not the admin-insights aggregate.
+     *
+     * @return array<string,mixed>|null
+     */
+    public function exportData(int $donorId): ?array
+    {
+        $donor = $this->donors->findById($donorId);
+        if (! $donor) {
+            return null;
+        }
+
+        $live = $donor->redacted_at === null;
+
+        $recurringPlans = RecurringPlan::query()
+            ->where('donor_id', $donorId)
+            ->orderBy('status', 'ASC')
+            ->orderBy('started_at', 'DESC')
+            ->getAll();
+
+        $receipts = Receipt::query()
+            ->where('donor_id', $donorId)
+            ->orderBy('issued_at', 'DESC')
+            ->getAll();
+
+        $events = Event::query()
+            ->where('donor_id', $donorId)
+            ->orderBy('occurred_at', 'DESC')
+            ->getAll();
+
+        $consents = Consent::query()
+            ->where('donor_id', $donorId)
+            ->orderBy('occurred_at', 'DESC')
+            ->getAll();
+
+        $consentCurrent = [];
+        foreach ($consents as $c) {
+            if (! isset($consentCurrent[$c->purpose])) {
+                $consentCurrent[$c->purpose] = [
+                    'purpose'            => (string) $c->purpose,
+                    'granted'            => (bool) $c->granted,
+                    'source'             => (string) $c->source,
+                    'occurred_at'        => (string) $c->occurred_at,
+                    'source_form_id'     => $c->source_form_id !== null ? (int) $c->source_form_id : null,
+                    'source_donation_id' => $c->source_donation_id !== null ? (int) $c->source_donation_id : null,
+                ];
+            }
+        }
+
+        return [
+            'donor' => [
+                'id'                => (int) $donor->id,
+                'reference'         => sprintf('DONOR_%04d', $donor->id),
+                'name'              => $this->donorName($donor),
+                'email'             => $live ? $this->donorService->decryptEmail($donor) : null,
+                'phone'             => $live ? $this->donorService->decryptPhone($donor) : null,
+                'address'           => $live ? $this->donorService->decryptAddress($donor) : null,
+                'country'           => $donor->country,
+                'donor_type'        => $donor->donor_type,
+                'company'           => $donor->company,
+                'first_name'        => $donor->first_name,
+                'last_name'         => $donor->last_name,
+                'first_donation_at' => $donor->first_donation_at,
+                'last_donation_at'  => $donor->last_donation_at,
+                'created_at'        => $donor->created_at,
+                'redacted_at'       => $donor->redacted_at,
+                'is_anonymous'      => $this->isAnonymous($donor),
+            ],
+            'donations' => $this->donationsForExport($donorId),
+            'recurring' => [
+                'plans' => array_map(fn (RecurringPlan $p) => $this->mapRecurringPlanRow($p), $recurringPlans),
+            ],
+            'receipts'  => array_map(fn (Receipt $r) => $this->mapReceiptRow($r), $receipts),
+            'events'    => array_map(fn (Event $e) => $this->mapEventRow($e), $events),
+            'consents'  => [
+                'current' => array_values($consentCurrent),
+                'history' => array_map(fn (Consent $c) => $this->mapConsentRow($c), $consents),
+            ],
+            // Staff notes are in DSAR scope; uncap (admin UI uses default-capped listForDonor()).
+            'notes' => $this->notes->listForDonor($donorId, 100000),
+        ];
+    }
+}

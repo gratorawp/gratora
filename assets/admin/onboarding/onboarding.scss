@@ -1,0 +1,845 @@
+// Dono first-run onboarding. Full-page chrome stripped via the
+// `dono-onboarding-fullscreen` body class (added by OnboardingPage).
+
+@import '@dono/ui/scss/tokens';
+@import '../_shared/admin-base';
+@import '@dono/ui/scss/components/amount-input';
+@import '@dono/ui/scss/components/searchable-select';
+@import '@dono/ui/scss/components/skeleton';
+
+// Aliases for legacy local names still used inside this file.
+$shadow-card:   $shadow-md;
+$shadow-lifted: $shadow-lg;
+
+body.dono-onboarding-fullscreen {
+    background: $bg-page;
+    margin-top: 0 !important;
+
+    #wpadminbar,
+    #adminmenumain,
+    #adminmenuback,
+    #wpfooter { display: none !important; }
+
+    #wpcontent {
+        margin-left: 0 !important;
+        padding-left: 0 !important;
+    }
+    #wpbody-content {
+        padding-bottom: 0 !important;
+    }
+    html.wp-toolbar { padding-top: 0 !important; }
+
+    // Strip update notices, error banners, etc. that try to inject into the
+    // top of the admin area.
+    .update-nag,
+    .notice,
+    .updated,
+    .error { display: none !important; }
+
+    // WP admin's forms.css applies a global box-shadow + grey border to every
+    // <input>/<select>/<textarea>. Override at body-class specificity so our
+    // onboarding inputs render with our own chrome.
+    .dono-onboarding__input,
+    .dono-searchable__input {
+        border: 1px solid $border-mid;
+        background: #fff;
+        box-shadow: none;
+        color: $text;
+        border-radius: 8px;
+        min-height: 0;
+        line-height: 1.3;
+        font-size: 14px;
+        padding: 10px 12px;
+
+        &:focus,
+        &:focus-visible {
+            border-color: $accent;
+            box-shadow: 0 0 0 3px $accent-soft;
+            outline: 0;
+        }
+    }
+    select.dono-onboarding__input { padding-right: 32px; }
+}
+
+.dono-onboarding {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
+    color: $text;
+    min-height: 100vh;
+    padding: 24px 24px 48px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    // Center the whole stack (top bar + frame) vertically as a unit so the
+    // brand mark + Skip link sit right above the card instead of flying off
+    // to the top of the viewport on tall screens.
+    justify-content: center;
+    gap: 16px;
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    &__top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        max-width: 560px;
+        width: 100%;
+        padding: 0 10px;
+        flex-shrink: 0;
+        transition: max-width .2s ease;
+
+        // Track the frame's width on wide steps (Brand + Gateway) so the
+        // brand mark + Skip link sit flush with the card edges.
+        &.is-wide { max-width: 720px; }
+    }
+
+    &__brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        color: $text;
+    }
+    // .dono-onboarding__brand-mark is rendered by the shared <DonoMark/>
+    // component with inline styles, so no chip rules live here. We only
+    // own the wordmark next to it.
+    &__brand-name { font-size: 15px; }
+
+    &__skip {
+        appearance: none;
+        background: transparent;
+        border: 0;
+        padding: 6px 4px;
+        color: $text-muted;
+        font-size: 13px;
+        cursor: pointer;
+
+        &:hover { color: $text; }
+    }
+
+    &__frame {
+        background: #fff;
+        border: 1px solid $border-soft;
+        border-radius: 16px;
+        box-shadow: $shadow-card;
+        max-width: 560px;
+        width: 100%;
+        margin: 0;
+        padding: 24px 32px 24px;
+        transition: max-width .2s ease;
+
+        &.is-wide { max-width: 720px; }
+    }
+
+    &__meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 24px;
+    }
+    &__caption {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        color: $text-muted;
+        font-weight: 500;
+    }
+    &__dots {
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+    }
+    &__dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: $border-mid;
+        transition: background .15s, width .15s, border-radius .15s;
+
+        &.is-done    { background: $accent; }
+        &.is-current {
+            background: $accent;
+            width: 18px;
+            border-radius: 999px;
+        }
+    }
+
+    &__headline {
+        font-size: 28px;
+        line-height: 1.2;
+        letter-spacing: -0.02em;
+        font-weight: 600;
+        color: $text;
+        margin: 0 0 8px;
+    }
+
+    &__subtitle {
+        font-size: 15px;
+        line-height: 1.55;
+        color: $text-muted;
+        margin: 0 0 28px;
+    }
+
+    // Form inputs. The selectors are scoped tightly so WP admin's global
+    // `input[type="text"]` reset (margin, box-shadow, border-color) doesn't
+    // override the onboarding styling; `body.dono-onboarding-fullscreen`
+    // wins on specificity.
+    &__input {
+        width: 100%;
+        padding: 10px 12px;
+        font-size: 14px;
+        font-family: inherit;
+        line-height: 1.3;
+        color: $text;
+        background: #fff;
+        border: 1px solid $border-mid;
+        border-radius: 8px;
+        outline: 0;
+        box-shadow: none;
+        margin: 0;
+        min-height: 0;
+        transition: border-color .12s ease, box-shadow .12s ease;
+
+        &::placeholder { color: $text-soft; }
+
+        &:focus,
+        &:focus-visible {
+            outline: 0;
+            border-color: $accent;
+            box-shadow: 0 0 0 3px $accent-soft;
+        }
+    }
+    select.dono-onboarding__input {
+        appearance: none;
+        cursor: pointer;
+        background-image:
+            linear-gradient(45deg, transparent 50%, $text-muted 50%),
+            linear-gradient(135deg, $text-muted 50%, transparent 50%);
+        background-position: calc(100% - 16px) 16px, calc(100% - 11px) 16px;
+        background-size: 5px 5px;
+        background-repeat: no-repeat;
+        padding-right: 32px;
+    }
+
+
+    &__radios {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    &__radio {
+        appearance: none;
+        background: #fff;
+        border: 1px solid $border-mid;
+        border-radius: 8px;
+        padding: 12px 14px;
+        cursor: pointer;
+        text-align: left;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        font-family: inherit;
+        transition: border-color .12s, background .12s;
+
+        strong { font-size: 15px; color: $text; font-weight: 600; }
+        span   { font-size: 12px; color: $text-muted; }
+
+        &:hover { border-color: #d1d5db; }
+        &.is-selected {
+            border-color: $accent;
+            background: $accent-tint;
+            box-shadow: 0 0 0 2px $accent-soft;
+        }
+    }
+
+    &__presets {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        text-align: left;
+        margin: 4px 0 8px;
+    }
+
+    &__preset {
+        position: relative;
+        appearance: none;
+        background: #fff;
+        border: 1px solid $border-mid;
+        border-radius: 8px;
+        padding: 10px;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        font-family: inherit;
+        text-align: left;
+        transition: border-color .12s;
+
+        &:hover { border-color: #d1d5db; }
+        &.is-selected {
+            border-color: $accent;
+            border-width: 2px;
+            // 2px border + 9px pad == 1px + 10px: content box fixed, no reflow.
+            padding: 9px;
+        }
+        &.is-disabled {
+            opacity: .55;
+            cursor: not-allowed;
+        }
+    }
+
+    &__preset-check {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 22px;
+        height: 22px;
+        border-radius: 999px;
+        background: $accent;
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 1px 3px rgba(20, 105, 58, .35);
+    }
+
+    &__preset-thumb {
+        height: 64px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    &__preset-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 14px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    &__preset-thumb--classic {
+        background: linear-gradient(180deg, #f3faf5, $accent-soft);
+
+        .dono-onboarding__preset-btn {
+            background: $accent;
+            color: #fff;
+            border-radius: 999px;
+        }
+    }
+    &__preset-thumb--bold {
+        background: linear-gradient(180deg, #f5f5f7, #e9e9ee);
+
+        .dono-onboarding__preset-btn {
+            background: #0F3D5C;
+            color: #fff;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            font-size: 11px;
+            font-weight: 700;
+        }
+    }
+    &__preset-thumb--quiet {
+        background: #fafaf9;
+        border: 1px dashed $border-mid;
+
+        .dono-onboarding__preset-btn {
+            background: transparent;
+            color: $text;
+            border: 1px solid $text;
+            border-radius: 2px;
+            font-weight: 500;
+        }
+    }
+    &__preset-thumb--theme {
+        background: repeating-linear-gradient(
+            45deg,
+            $bg-soft 0 6px,
+            #ebedf0 6px 12px
+        );
+
+        .dono-onboarding__preset-btn {
+            background: $text-soft;
+            color: #fff;
+            border-radius: 8px;
+        }
+    }
+
+    &__preset-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: $text;
+    }
+
+    &__preset-desc {
+        font-size: 12px;
+        color: $text-muted;
+        line-height: 1.45;
+    }
+
+    // Preview section under the preset grid (renders a sample donation card
+    // styled with the chosen preset's tokens applied as CSS variables).
+    &__preview {
+        margin-top: 24px;
+        padding-top: 20px;
+        border-top: 1px solid $border-soft;
+    }
+    &__preview-label {
+        font-size: 11px;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: $text-muted;
+        font-weight: 600;
+        margin-bottom: 12px;
+    }
+
+    // The real donation-form runtime, iframed for true WYSIWYG. The form
+    // themes itself; this is just the framed viewport.
+    &__preview-frame {
+        display: block;
+        width: 100%;
+        margin: 0;
+        height: 480px;
+        border: 1px solid $border-mid;
+        border-radius: $radius-lg;
+        background: #fff;
+    }
+
+    &__preview-stage { position: relative; }
+
+    // Covers the blank iframe until the preview HTML has loaded.
+    &__preview-skeleton {
+        position: absolute;
+        inset: 0;
+        height: 480px;
+        border: 1px solid $border-mid;
+        border-radius: $radius-lg;
+        background: linear-gradient(90deg, $bg-soft 0%, #f3f4f6 40%, $bg-soft 80%);
+        background-size: 200% 100%;
+        animation: dono-skeleton-pulse 1.4s ease-in-out infinite;
+    }
+
+    // Shown when the preview request fails; the brand choice is still saved.
+    &__preview-fallback {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        height: 480px;
+        border: 1px solid $border-mid;
+        border-radius: $radius-lg;
+        background: #fff;
+        text-align: center;
+        color: $text-muted;
+        font-size: 14px;
+    }
+
+    // Full-width so CauseStep's user-type tiles and cause select span the
+    // frame instead of being squeezed into the FormRow 35%/1fr layout.
+    &__section {
+        padding: 14px 0;
+
+        &:first-of-type { padding-top: 4px; }
+    }
+
+    &__section-label {
+        font-size: 13px;
+        font-weight: 500;
+        color: $text;
+        line-height: 1.4;
+        margin-bottom: 12px;
+    }
+
+    &__section-help {
+        font-size: 12px;
+        color: $text-muted;
+        margin: 4px 0 12px;
+        line-height: 1.45;
+    }
+
+    &__usertype {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    &__usertype-tile {
+        position: relative;
+        appearance: none;
+        background: #fff;
+        border: 1px solid $border-mid;
+        border-radius: 8px;
+        padding: 14px;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-family: inherit;
+        text-align: left;
+        transition: border-color .12s, background .12s, box-shadow .12s;
+
+        &:hover { border-color: #d1d5db; }
+        &.is-selected {
+            border-color: $accent;
+            background: $accent-tint;
+            box-shadow: 0 0 0 2px $accent-soft;
+        }
+    }
+
+    &__usertype-check {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 20px;
+        height: 20px;
+        border-radius: 999px;
+        background: $accent;
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transform: scale(.6);
+        transition: opacity .12s, transform .12s;
+    }
+
+    &__usertype-tile.is-selected &__usertype-check {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    &__usertype-glyph {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        background: $bg-soft;
+        color: $accent;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    &__usertype-tile.is-selected &__usertype-glyph { background: #fff; }
+
+    &__usertype-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: $text;
+    }
+
+    &__usertype-desc {
+        font-size: 12px;
+        color: $text-muted;
+        line-height: 1.45;
+    }
+
+    &__telemetry {
+        margin-top: 8px;
+        padding-top: 18px;
+        border-top: 1px solid $border-soft;
+    }
+
+    &__telemetry-row {
+        display: grid;
+        grid-template-columns: 18px 1fr;
+        gap: 12px;
+        align-items: start;
+        cursor: pointer;
+    }
+
+    // Element-prefixed selector with `!important` reset: WP admin's
+    // `input[type=checkbox]` rules (appearance: none + custom blue check)
+    // otherwise win on specificity and turn the checkbox into a 20px blue
+    // square that overflows the 18px grid column.
+    input[type="checkbox"].dono-onboarding__telemetry-input {
+        appearance: auto;
+        -webkit-appearance: auto;
+        accent-color: $accent;
+        width: 16px;
+        height: 16px;
+        min-width: 16px;
+        min-height: 16px;
+        max-width: 16px;
+        max-height: 16px;
+        margin: 2px 0 0 !important;
+        padding: 0;
+        border: 0;
+        background: none;
+        box-shadow: none;
+
+        &::before { content: none; }
+    }
+
+    &__telemetry-body {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        strong { font-size: 13px; font-weight: 600; color: $text; }
+        span   { font-size: 12.5px; color: $text-muted; line-height: 1.5; }
+    }
+
+    &__country-row {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    &__field-label {
+        display: block;
+        margin: 0 0 4px;
+        font-size: 12px;
+        color: $text-muted;
+        line-height: 1.4;
+    }
+
+    &__field-optional {
+        color: $text-soft;
+        font-weight: 400;
+    }
+
+    &__address {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+
+        .span-2 { grid-column: 1 / -1; }
+    }
+
+    &__segmented {
+        display: inline-flex;
+        background: $bg-soft;
+        border: 1px solid $border-mid;
+        border-radius: 10px;
+        padding: 4px;
+        gap: 4px;
+
+        button {
+            appearance: none;
+            border: 0;
+            background: transparent;
+            padding: 8px 16px;
+            font: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            color: $text-muted;
+            cursor: pointer;
+            border-radius: 7px;
+            transition: background .12s, color .12s;
+
+            &.is-on {
+                background: #fff;
+                color: $text;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, .08);
+            }
+        }
+    }
+
+    &__amounts {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+    }
+
+    &__amount {
+        appearance: none;
+        background: #fff;
+        border: 1px solid $border-mid;
+        border-radius: 8px;
+        padding: 14px 8px;
+        font: inherit;
+        font-size: 15px;
+        font-weight: 600;
+        color: $text;
+        cursor: pointer;
+        transition: border-color .12s, background .12s, box-shadow .12s, color .12s;
+
+        &:hover { border-color: #d1d5db; }
+
+        &.is-selected {
+            border-color: $accent;
+            background: $accent-tint;
+            box-shadow: 0 0 0 2px $accent-soft;
+            color: $accent;
+        }
+    }
+
+    &__custom-amount { margin-top: 12px; }
+
+    &__checklist {
+        list-style: none;
+        margin: 12px 0 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        text-align: left;
+    }
+
+    &__checklist-item {
+        display: grid;
+        grid-template-columns: 28px 1fr auto;
+        align-items: center;
+        gap: 14px;
+        padding: 16px 18px;
+        background: #fff;
+        border: 1px solid $border-mid;
+        border-radius: 10px;
+        transition: border-color .15s, box-shadow .15s;
+
+        &:hover {
+            border-color: #d1d5db;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, .06);
+        }
+    }
+
+    &__checklist-bullet {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        border: 2px solid $border-mid;
+        background: #fff;
+    }
+
+    &__checklist-body {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
+    }
+
+    &__checklist-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: $text;
+        line-height: 1.3;
+    }
+
+    &__checklist-desc {
+        font-size: 12.5px;
+        color: $text-muted;
+        line-height: 1.45;
+    }
+
+    &__checklist-foot {
+        margin: 18px 0 0;
+        text-align: center;
+    }
+
+    &__checklist-skip {
+        appearance: none;
+        background: transparent;
+        border: 0;
+        padding: 6px 10px;
+        font-family: inherit;
+        font-size: 12px;
+        color: $text-muted;
+        cursor: pointer;
+        border-radius: 6px;
+        text-decoration: none;
+
+        &:hover,
+        &:focus,
+        &:active {
+            color: $text;
+            background: $bg-soft;
+            text-decoration: none;
+        }
+    }
+
+    &__nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 32px;
+        padding-top: 20px;
+        border-top: 1px solid $border-soft;
+
+        // Welcome + Finish have no Back button, so center the single CTA
+        // and drop the divider rule entirely.
+        &--centered {
+            justify-content: center;
+            margin-top: 24px;
+            padding-top: 0;
+            border-top: 0;
+        }
+    }
+
+    &__error {
+        margin-top: 16px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        background: #fee2e2;
+        color: #991b1b;
+        font-size: 13px;
+    }
+
+}
+
+.dono-onboarding .dono-btn {
+    appearance: none;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    text-decoration: none;
+    transition: background .12s, border-color .12s, color .12s, opacity .12s;
+
+    &:hover,
+    &:focus,
+    &:active { text-decoration: none; }
+
+    &:disabled { opacity: .55; cursor: default; }
+
+    &--primary {
+        background: $accent;
+        color: #fff;
+
+        &:hover:not(:disabled) { background: $accent-dark; }
+    }
+
+    &--ghost {
+        background: transparent;
+        color: $text-muted;
+
+        &:hover:not(:disabled) { color: $text; }
+    }
+
+    &--lg {
+        padding: 12px 22px;
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 640px) {
+    .dono-onboarding {
+        padding: 16px 12px 32px;
+
+        &__top { margin-bottom: 20px; }
+        &__frame { padding: 24px 20px 20px; border-radius: 12px; }
+        &__frame.is-wide { max-width: 100%; }
+        &__headline { font-size: 24px; }
+        &__radios,
+        &__presets,
+        &__usertype,
+        &__address { grid-template-columns: 1fr; }
+        &__amounts { grid-template-columns: repeat(2, 1fr); }
+        &__checklist-item {
+            grid-template-columns: 28px 1fr;
+            .dono-btn { grid-column: 1 / -1; width: 100%; justify-content: center; }
+        }
+        &__nav { flex-direction: column-reverse; gap: 8px;
+            .dono-btn { width: 100%; }
+            > span { display: none; }
+        }
+    }
+}

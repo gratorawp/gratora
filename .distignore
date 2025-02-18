@@ -1,0 +1,46 @@
+# Files and directories excluded from the published WordPress.org package.
+# Human-readable source (assets/) and the build config (webpack.config.js,
+# package.json) are intentionally kept so the minified build/ output is
+# reproducible and reviewable (Plugin Guideline 4).
+#
+# Note: run `composer install --no-dev` before packaging so vendor/ ships
+# without development dependencies. .distignore cannot strip those itself.
+
+/.git
+/.github
+/.claude
+/.gitignore
+/.distignore
+/.editorconfig
+/.eslintignore
+/.eslintrc
+/.eslintrc.js
+/.eslintrc.json
+/.prettierrc
+/.prettierrc.js
+/.stylelintrc
+/.stylelintrc.json
+
+/node_modules
+/broker
+/tests
+/docs
+/coverage
+
+/phpunit.xml
+/phpunit.xml.dist
+/.phpunit.result.cache
+/composer.lock
+/package-lock.json
+
+/README.md
+/ROADMAP.md
+
+/vendor/phpunit
+/vendor/bin
+
+.DS_Store
+Thumbs.db
+*.zip
+*.log
+*.map

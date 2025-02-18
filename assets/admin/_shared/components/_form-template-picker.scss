@@ -1,0 +1,196 @@
+// Shared FormTemplatePicker modal styles. Imported by both campaigns.scss
+// (Add new form picker) and forms/editor.scss (auto-prompt on empty form),
+// since the two pages load separate CSS bundles and the picker lives in
+// _shared/components/FormTemplatePicker.jsx.
+
+.dono-form-template-picker {
+    .components-modal__content { padding-top: 12px; }
+
+    &__filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        padding: 0 0 14px;
+        border-bottom: 1px solid #e5e7eb;
+        margin-bottom: 14px;
+    }
+    &__filter {
+        appearance: none;
+        border: 0;
+        background: transparent;
+        padding: 6px 12px;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 500;
+        color: $text-muted;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: background .12s, color .12s;
+
+        &:hover { color: $text; background: $bg-soft; }
+        &.is-active {
+            background: $accent-soft;
+            color: $accent;
+        }
+    }
+
+    &__grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 14px;
+        padding: 4px 0 8px;
+    }
+    &__card {
+        text-align: left;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding: 0;
+        border: 1px solid $border-mid;
+        border-radius: 12px;
+        background: #fff;
+        cursor: pointer;
+        overflow: hidden;
+        transition: border-color .15s, box-shadow .15s, transform .15s;
+
+        &:hover {
+            border-color: $accent;
+            box-shadow: 0 6px 20px rgba(30, 138, 78, 0.08);
+            transform: translateY(-1px);
+        }
+        &[disabled] {
+            opacity: .5;
+            cursor: progress;
+        }
+    }
+    &__meta {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 0 14px 14px;
+
+        strong { font-size: 13px; color: $text; }
+    }
+    &__desc {
+        font-size: 12px;
+        color: $text-muted;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+}
+
+.dono-template-thumb {
+    --thumb-accent: #{$accent};
+    position: relative;
+    aspect-ratio: 4 / 3;
+    background: #f3f4f6;
+    border-bottom: 1px solid $border-soft;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px;
+    overflow: hidden;
+
+    &__sheet {
+        background: #fff;
+        width: 100%;
+        max-width: 140px;
+        padding: 10px;
+        border: 1px solid $border-soft;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, .04);
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    &__steps {
+        display: flex;
+        justify-content: center;
+        gap: 4px;
+        margin-bottom: 2px;
+
+        span {
+            width: 6px;
+            height: 6px;
+            border-radius: 999px;
+            background: #d1d5db;
+
+            &.is-active { background: var(--thumb-accent); }
+        }
+    }
+
+    &__title {
+        display: block;
+        height: 7px;
+        width: 65%;
+        background: #1f2937;
+        border-radius: 2px;
+    }
+    &__sub {
+        display: block;
+        height: 4px;
+        width: 85%;
+        background: #d1d5db;
+        border-radius: 2px;
+    }
+    &__tiles {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 3px;
+        margin-top: 2px;
+
+        span {
+            display: block;
+            height: 14px;
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+
+            &.is-active {
+                background: var(--thumb-accent);
+                opacity: .12;
+                border-color: var(--thumb-accent);
+            }
+        }
+    }
+    &__field {
+        display: block;
+        height: 8px;
+        background: #f3f4f6;
+        border: 1px solid #e5e7eb;
+        margin-top: 2px;
+    }
+    &__button {
+        display: block;
+        height: 10px;
+        background: var(--thumb-accent);
+        margin-top: 2px;
+    }
+
+    &--modal {
+        background: rgba(15, 23, 42, .35);
+    }
+    &__modal-backdrop {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    &--inline {
+        background: #f7f8fa;
+    }
+
+    &--blank {
+        background: #f8fafb;
+        border-bottom: 1px dashed $border-mid;
+
+        .dashicons {
+            font-size: 36px;
+            width: 36px;
+            height: 36px;
+            color: $text-muted;
+        }
+    }
+}

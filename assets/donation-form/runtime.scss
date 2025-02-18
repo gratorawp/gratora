@@ -1,0 +1,1421 @@
+// Donation-form runtime styles. Scoped to `.dono-form` to avoid fighting
+// theme CSS; CSS variables let themes/campaigns override.
+
+.dono-donation-form .dono-modal-host {
+    display: inline-block;
+}
+.dono-donation-form .dono-modal-trigger {
+    cursor: pointer;
+}
+.dono-donation-form .dono-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &__backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+    }
+    &__panel {
+        position: relative;
+        background: var(--dono-bg, #fff);
+        // The modal is always a card; keep it legible even when the form's
+        // container style is "plain" (which makes the in-page form inherit
+        // the theme's text colour).
+        color: var(--dono-text, #111827);
+        border-radius: var(--dono-radius, 12px);
+        max-width: 560px;
+        width: calc(100% - 32px);
+        max-height: calc(100vh - 64px);
+        overflow: auto;
+        padding: 28px 24px 24px;
+        box-shadow: var(--dono-card-shadow, 0 30px 60px rgba(0, 0, 0, 0.25));
+    }
+    &__close {
+        position: absolute;
+        top: 8px;
+        right: 10px;
+        background: transparent;
+        border: 0;
+        font-size: 24px;
+        line-height: 1;
+        cursor: pointer;
+        color: var(--dono-text-muted, #6b7280);
+
+        &:hover { color: var(--dono-text, #111827); }
+    }
+}
+
+// Token defaults live on the outermost wrapper (`.dono-donation-form`) so
+// inline `style="--dono-accent: …"` written by applyThemeTokens() wins on the
+// same element and cascades down. Declaring them on a descendant (`.dono-form`)
+// would shadow the inherited inline values, since direct declarations override
+// inherited custom-property values regardless of specificity.
+.dono-donation-form {
+    // Reset host-theme defaults that some block themes apply to <form>.
+    border: 0;
+    padding: 0;
+    margin: 0 auto;
+
+    // Bounded by the admin-set max width with a hard-coded fallback. Theme
+    // CSS can override this at any level via `--dono-form-max-width`.
+    max-width: var(--dono-form-max-width, 720px);
+    width: 100%;
+    box-sizing: border-box;
+
+    --dono-accent:         #1e8a4e;
+    // Selected/soft tint tracks the brand accent. Legacy literal first, then
+    // an accent-derived mix for modern browsers (last valid declaration wins;
+    // unsupported color-mix is ignored). A brand preset can still set
+    // --dono-accent-soft explicitly to override both.
+    --dono-accent-soft:    #e7f5ec;
+    --dono-accent-soft:    color-mix(in srgb, var(--dono-accent) 12%, #fff);
+    --dono-text:           #111827;
+    --dono-text-muted:     #6b7280;
+    --dono-border:         #e5e7eb;
+    --dono-bg:             #ffffff;
+    --dono-bg-soft:        #f8fafb;
+    --dono-error-bg:       #fde8e8;
+    --dono-error-fg:       #9b1c1c;
+    --dono-warning-bg:     #fef3c7;
+    --dono-warning-fg:     #92400e;
+    --dono-on-accent:      #ffffff;
+    --dono-required:       #d63384;
+    --dono-font-family:    system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --dono-font-size:      15px;
+    --dono-heading-weight: 600;
+    --dono-body-weight:    400;
+    --dono-radius:         10px;
+    --dono-radius-sm:      8px;
+    // --dono-button-radius / --dono-switcher-radius are intentionally NOT
+    // defaulted: left unset they fall back to --dono-radius-sm (shared with
+    // the amount tiles). Set either in a brand preset / theme CSS to override
+    // just the donate button or just the currency switcher.
+    --dono-pill-radius:    999px;
+    --dono-preset-hover:   rgba(0, 0, 0, .04);
+    --dono-border-width:   1px;
+    --dono-gap:            20px;
+    --dono-field-gap:      6px;
+    --dono-button-height:  48px;
+    --dono-button-weight:  600;
+    --dono-button-shadow:  0 1px 2px rgba(0, 0, 0, .08);
+    --dono-focus-ring:     #1e8a4e;
+    --dono-card-shadow:    0 12px 32px rgba(15, 23, 42, .06);
+
+    // Opt-in via the admin "Container" setting. Each piece is a CSS variable
+    // so themes can override, e.g. `.dono-donation-form { --dono-form-padding: 20px 24px; }`.
+    &--framed {
+        background: var(--dono-form-bg, #fff);
+        border-radius: var(--dono-form-radius, 14px);
+        box-shadow: var(--dono-form-shadow, 0 1px 2px rgba(15, 23, 42, .04), 0 12px 32px rgba(15, 23, 42, .06));
+        padding: var(--dono-form-padding, 36px 40px 44px);
+    }
+}
+
+// Defensive boundary against host-theme element styles spilling in. Kept at
+// specificity 0 via :where() so every dono component class still wins and
+// --dono-* variable theming is untouched. Deliberately leaves <a>, list-style
+// and colour alone so admin-authored rich text (privacy notice, HTML/paragraph
+// blocks) keeps its link/list affordances; only the high-spill, low-risk
+// surface is neutralised. Light-DOM caveat remains: a theme rule with higher
+// specificity than a single class can still override component styles.
+:where(.dono-form) {
+    :where(button, input, select, textarea) {
+        margin: 0;
+        font: inherit;
+        color: inherit;
+        letter-spacing: normal;
+        text-transform: none;
+        box-shadow: none;
+    }
+    :where(p, h1, h2, h3, h4, h5, h6, ul, ol, li, figure, blockquote, hr, table) {
+        margin: 0;
+    }
+    :where(fieldset) { margin: 0; padding: 0; border: 0; min-width: 0; }
+    :where(legend)   { padding: 0; }
+}
+
+// "Plain" container: no card, blends into the host page. Background and text
+// colour follow the page/theme instead of the branded card tokens, so a plain
+// embed reads correctly on light or dark sections. A dev can still re-introduce
+// a surface via --dono-form-bg. Doubled wrapper class keeps this above the
+// base `.dono-donation-form .dono-form` rule regardless of source order.
+.dono-donation-form.dono-donation-form--plain .dono-form {
+    background: var(--dono-form-bg, transparent);
+    color: inherit;
+}
+
+.dono-donation-form .dono-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dono-gap);
+    background: var(--dono-bg);
+    color: var(--dono-text);
+    font-family: var(--dono-font-family);
+    font-size: var(--dono-font-size);
+    font-weight: var(--dono-body-weight);
+    line-height: 1.5;
+    // Cut the inheritance chain for typography a host theme can push in via
+    // body/.entry-content that font/color/line-height don't already cover.
+    text-align: start;
+    text-transform: none;
+    letter-spacing: normal;
+    font-style: normal;
+
+    * { box-sizing: border-box; }
+
+    &--inline {
+        gap: 24px;
+
+        .dono-form__step { min-height: 0; }
+        .dono-form__nav {
+            display: flex;
+            padding-top: 8px;
+        }
+    }
+
+    &__step {
+        min-height: 200px;
+    }
+
+    &__step-title {
+        margin: 0 0 16px;
+        font-size: 18px;
+        font-weight: var(--dono-heading-weight, 600);
+        color: var(--dono-text);
+    }
+
+    &__nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding-top: 4px;
+
+        // Donate-button alignment (single-page form). Same specificity as the
+        // rule above and declared after it, so the modifier wins the tie.
+        &--align-left   { justify-content: flex-start; }
+        &--align-center { justify-content: center; }
+        &--align-right  { justify-content: flex-end; }
+        &--align-full {
+            justify-content: stretch;
+            .dono-form__button { width: 100%; }
+        }
+    }
+
+    &__step-count {
+        font-size: 12px;
+        color: var(--dono-text-muted);
+        font-variant-numeric: tabular-nums;
+    }
+
+    // dono/divider: structure + default line colour. Spacing, thickness and
+    // an explicit colour are set inline by the block.
+    &__divider {
+        margin: 0;
+        border: 0;
+        border-top: 1px solid var(--dono-border);
+        width: 100%;
+    }
+
+    &__button {
+        appearance: none;
+        border: var(--dono-button-border, 0);
+        min-height: var(--dono-button-height, 48px);
+        padding: 0 22px;
+        font-size: 14px;
+        font-weight: var(--dono-button-weight, 600);
+        // Defaults to the shared --dono-radius-sm (so the button matches the
+        // amount tiles / brand radius); --dono-button-radius overrides just
+        // the button when set.
+        border-radius: var(--dono-button-radius, var(--dono-radius-sm, 8px));
+        cursor: pointer;
+        transition: filter .15s, background .15s, box-shadow .15s;
+        font-family: inherit;
+        box-shadow: var(--dono-button-shadow, 0 1px 2px rgba(0, 0, 0, .08));
+
+        &:disabled { opacity: .5; cursor: not-allowed; }
+
+        &--primary {
+            background: var(--dono-button-bg, var(--dono-accent));
+            color: var(--dono-button-fg, var(--dono-on-accent, #fff));
+
+            &:hover:not(:disabled) {
+                filter: brightness(.92);
+                background: var(--dono-button-hover-bg, var(--dono-button-bg, var(--dono-accent)));
+            }
+        }
+
+        &--secondary {
+            background: var(--dono-bg-soft);
+            color: var(--dono-text);
+
+            &:hover:not(:disabled) { background: var(--dono-border); }
+        }
+    }
+
+    &__presets {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+        gap: 8px;
+        margin-bottom: 14px;
+    }
+    // Filled gray tile with accent outline for the selected / preselected
+    // amount. Mirrors the editor preview in
+    // admin/forms/blocks/donation-amount/index.js.
+    &__preset {
+        position: relative;
+        appearance: none;
+        border: 0;
+        background: var(--dono-bg-soft, #f8fafb);
+        color: var(--dono-text);
+        padding: 12px 12px;
+        border-radius: var(--dono-radius-sm);
+        cursor: pointer;
+        transition: background .15s, outline-color .15s;
+        font-family: inherit;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        outline: 2px solid transparent;
+        outline-offset: -2px;
+
+        &:hover { background: var(--dono-preset-hover, rgba(0, 0, 0, .04)); }
+
+        &:focus-visible {
+            outline-color: var(--dono-focus-ring, var(--dono-accent));
+            outline-offset: 2px;
+        }
+
+        &.is-selected {
+            outline-color: var(--dono-accent);
+            background: var(--dono-accent-soft);
+            color: var(--dono-accent);
+        }
+    }
+    &__preset-amount {
+        font-size: 16px;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+    }
+    &__preset-impact {
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--dono-text-muted);
+        line-height: 1.3;
+    }
+
+    // Two render styles (set on the block): "pills" = rounded segmented
+    // buttons, "tabs" = underline-style nav. Both use brand tokens.
+    &__frequency {
+        margin: 0 0 14px;
+        padding: 0;
+        border: 0;
+
+        legend {
+            padding: 0 0 6px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--dono-text);
+        }
+    }
+    &__frequency-options {
+        display: inline-flex;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+    &__frequency-option {
+        appearance: none;
+        background: transparent;
+        border: 0;
+        padding: 8px 14px;
+        font-size: 13px;
+        font-weight: 500;
+        font-family: inherit;
+        cursor: pointer;
+        color: var(--dono-text-muted);
+        transition: background .15s, color .15s, border-color .15s;
+    }
+
+    &__frequency--pills {
+        .dono-form__frequency-options {
+            padding: 4px;
+            background: var(--dono-bg-soft, #f8fafb);
+            border-radius: var(--dono-radius-sm, 8px);
+        }
+        .dono-form__frequency-option {
+            border-radius: var(--dono-radius-sm, 8px);
+
+            &:hover { color: var(--dono-text); }
+            &.is-selected {
+                background: var(--dono-accent);
+                color: var(--dono-on-accent, #fff);
+            }
+        }
+    }
+
+    &__frequency--tabs {
+        border-bottom: 1px solid var(--dono-border);
+
+        .dono-form__frequency-options { gap: 0; }
+        .dono-form__frequency-option {
+            margin-bottom: -1px;
+            border-bottom: 2px solid transparent;
+            border-radius: 0;
+
+            &:hover { color: var(--dono-text); }
+            &.is-selected {
+                color: var(--dono-accent);
+                border-bottom-color: var(--dono-accent);
+                font-weight: 600;
+            }
+        }
+    }
+    &__frequency-help {
+        margin: 6px 0 0;
+        font-size: 12px;
+        color: var(--dono-text-muted);
+        line-height: 1.4;
+    }
+
+    &__custom {
+        display: block;
+    }
+    &__custom-label {
+        display: block;
+        font-size: 13px;
+        color: var(--dono-text-muted);
+        margin-bottom: 6px;
+    }
+    &__custom-input-wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: var(--dono-border-width, 1px) solid var(--dono-border);
+        border-radius: var(--dono-radius-sm);
+        padding: 0 12px;
+        background: var(--dono-bg);
+
+        &:focus-within {
+            border-color: var(--dono-focus-ring, var(--dono-accent));
+            box-shadow: 0 0 0 3px var(--dono-accent-soft);
+        }
+    }
+    &__currency {
+        font-size: 13px;
+        color: var(--dono-text-muted);
+        font-weight: 500;
+    }
+    &__custom-input {
+        flex: 1;
+        appearance: none;
+        border: 0;
+        outline: 0;
+        padding: 10px 0;
+        font-size: 16px;
+        background: transparent;
+        color: var(--dono-text);
+        font-variant-numeric: tabular-nums;
+        font-family: inherit;
+    }
+}
+
+// Honeypot field. Hidden off-screen, never seen by humans. Scripted bots that
+// crawl the DOM and fill all inputs populate it; the server then silently
+// rejects the submission. Using `position: absolute` instead of `display:
+// none` because some bots intentionally skip display:none fields.
+.dono-donation-form .dono-form__hp {
+    position: absolute;
+    left: -10000px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+.dono-donation-form .dono-privacy {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--dono-text-muted);
+
+    &--center { text-align: center; }
+    &--right  { text-align: right;  }
+
+    &__link {
+        color: var(--dono-accent);
+        text-decoration: underline;
+
+        &:hover, &:focus-visible {
+            text-decoration: none;
+        }
+    }
+}
+
+.dono-donation-form .dono-amount {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: var(--dono-border-width, 1px) solid var(--dono-border);
+    border-radius: var(--dono-radius-sm);
+    padding: 0 12px;
+    background: var(--dono-bg);
+
+    &:focus-within {
+        border-color: var(--dono-focus-ring, var(--dono-accent));
+        box-shadow: 0 0 0 3px var(--dono-accent-soft);
+    }
+
+    &__prefix {
+        display: inline-flex;
+        align-items: center;
+    }
+
+    &__code {
+        font-size: 13px;
+        color: var(--dono-text-muted);
+        font-weight: 500;
+    }
+
+    &__input {
+        flex: 1;
+        appearance: none;
+        border: 0;
+        outline: 0;
+        padding: 10px 0;
+        font-size: 16px;
+        background: transparent;
+        color: var(--dono-text);
+        font-variant-numeric: tabular-nums;
+        font-family: inherit;
+        min-width: 0;
+    }
+}
+
+.dono-donation-form .dono-form {
+
+    &__donor {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    &__row {
+        display: flex;
+        gap: 12px;
+
+        &--two-up {
+            > * { flex: 1; min-width: 0; }
+
+            @media (max-width: 480px) { flex-direction: column; }
+        }
+    }
+
+    &__field {
+        display: flex;
+        flex-direction: column;
+        gap: var(--dono-field-gap, 4px);
+    }
+
+    &__label {
+        font-size: 13px;
+        color: var(--dono-text-muted);
+        font-weight: 500;
+    }
+
+    &__required {
+        color: var(--dono-required, #d63384);
+        margin-left: 2px;
+    }
+
+    &__field input {
+        appearance: none;
+        border: var(--dono-border-width, 1px) solid var(--dono-border);
+        border-radius: var(--dono-radius-sm);
+        padding: 10px 12px;
+        font-size: var(--dono-font-size, 15px);
+        background: var(--dono-bg);
+        color: var(--dono-text);
+        font-family: inherit;
+        line-height: 1.4;
+
+        &:focus {
+            outline: 0;
+            border-color: var(--dono-focus-ring, var(--dono-accent));
+            box-shadow: 0 0 0 3px var(--dono-accent-soft);
+        }
+
+        &[aria-invalid="true"] {
+            border-color: var(--dono-error-fg);
+        }
+    }
+
+    &__field-error {
+        margin: 4px 0 0;
+        font-size: 12px;
+        color: var(--dono-error-fg);
+    }
+
+    &__summary {
+        margin: 0;
+        padding: 16px;
+        background: var(--dono-bg-soft);
+        border-radius: var(--dono-radius);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    &__summary-row {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+
+        dt { color: var(--dono-text-muted); font-size: 13px; margin: 0; }
+        dd { margin: 0; font-weight: 500; }
+    }
+    &__summary-row--total {
+        margin-top: 4px;
+        padding-top: 12px;
+        border-top: var(--dono-border-width, 1px) solid var(--dono-border);
+
+        dt { color: var(--dono-text); font-size: 15px; font-weight: 600; }
+    }
+    &__summary-amount {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--dono-accent);
+        font-variant-numeric: tabular-nums;
+    }
+
+    &__payment {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    &__test-banner {
+        padding: 10px 14px;
+        border-radius: var(--dono-radius-sm);
+        border: var(--dono-border-width, 1px) solid var(--dono-warning-fg, #92400e);
+        background: var(--dono-warning-bg, #fef3c7);
+        color: var(--dono-warning-fg, #92400e);
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    &__gateways {
+        margin: 0;
+        padding: 0;
+        border: 0;
+    }
+    &__gateways-legend {
+        padding: 0;
+        margin: 0 0 8px;
+        color: var(--dono-text-muted);
+        font-size: 13px;
+    }
+    &__gateways-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    &__gateway {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 12px 14px;
+        border: var(--dono-border-width, 1px) solid var(--dono-border);
+        border-radius: var(--dono-radius);
+        cursor: pointer;
+
+        input[type="radio"] {
+            margin: 2px 0 0;
+            accent-color: var(--dono-accent);
+            flex-shrink: 0;
+        }
+        &.is-selected {
+            border-color: var(--dono-accent);
+            box-shadow: inset 0 0 0 1px var(--dono-accent);
+        }
+    }
+    &__gateway-body {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    &__gateway-label { font-weight: 600; }
+    &__gateway-desc {
+        color: var(--dono-text-muted);
+        font-size: 13px;
+    }
+
+    // Compact list variant: no card chrome, just radios + label/desc inline.
+    &__gateways--list &__gateways-list { gap: 4px; }
+    &__gateways--list &__gateway {
+        padding: 6px 0;
+        border: 0;
+        border-radius: 0;
+
+        &.is-selected { box-shadow: none; }
+    }
+
+    &__grid {
+        display: grid;
+        gap: 12px;
+
+        @media (max-width: 480px) {
+            grid-template-columns: 1fr !important;
+        }
+    }
+
+    &__check {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 14px;
+        color: var(--dono-text);
+        cursor: pointer;
+        margin-top: 4px;
+
+        input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--dono-accent);
+            margin: 0;
+        }
+
+        &--single {
+            align-items: flex-start;
+        }
+    }
+
+    &__check-body {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    &__check-label {
+        font-size: 14px;
+        color: var(--dono-text);
+    }
+
+    &__check-help {
+        font-size: 12px;
+        color: var(--dono-text-muted);
+    }
+
+    &__field-help {
+        font-size: 12px;
+        color: var(--dono-text-muted);
+        margin-bottom: 4px;
+    }
+
+    &__radio {
+        border: none;
+        padding: 0;
+        margin: 0;
+
+        legend {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--dono-text);
+            margin-bottom: 6px;
+        }
+    }
+
+    &__radio-options {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    &__radio--horizontal &__radio-options {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    &__radio-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        color: var(--dono-text);
+        cursor: pointer;
+
+        input[type="radio"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--dono-accent);
+            margin: 0;
+        }
+    }
+
+    &__radio-option-label {
+        font-size: 14px;
+    }
+
+    &__multi-select {
+        border: none;
+        padding: 0;
+        margin: 0;
+
+        legend {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--dono-text);
+            margin-bottom: 6px;
+        }
+    }
+
+    &__multi-select-options {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    &__multi-select-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        color: var(--dono-text);
+        cursor: pointer;
+
+        input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--dono-accent);
+            margin: 0;
+        }
+    }
+
+    &__multi-select-option-label {
+        font-size: 14px;
+    }
+
+    &__cover-fees-math {
+        font-style: normal;
+        margin-left: 6px;
+        color: var(--dono-accent);
+        font-weight: 500;
+        font-variant-numeric: tabular-nums;
+    }
+
+    &__tribute {
+        border: var(--dono-border-width, 1px) solid var(--dono-border);
+        border-radius: var(--dono-radius-sm);
+        padding: 12px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        legend {
+            padding: 0 6px;
+            font-weight: 500;
+            font-size: 13px;
+        }
+        input[type="text"], input[type="email"], textarea {
+            width: 100%;
+            padding: 8px 10px;
+            border: var(--dono-border-width, 1px) solid var(--dono-border);
+            border-radius: var(--dono-radius-sm);
+            font: inherit;
+        }
+        textarea { resize: vertical; }
+    }
+    &__tribute-types {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 16px;
+        font-size: 13px;
+
+        label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            white-space: nowrap;
+            flex: 0 0 auto;
+        }
+        input[type="radio"] { flex: 0 0 auto; margin: 0; }
+    }
+
+    &__fund {
+        border: 0;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        legend {
+            padding: 0;
+            font-weight: 500;
+            font-size: 13px;
+            color: var(--dono-text-muted);
+        }
+    }
+    &__fund-options {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 8px;
+    }
+    &__fund-group {
+        grid-column: 1 / -1;
+        margin: 6px 0 -2px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        color: var(--dono-text-muted);
+    }
+    &__fund-option {
+        position: relative;
+        &.is-child {
+            grid-column: 1 / -1;
+            margin-left: 14px;
+        }
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        padding: 12px;
+        border: calc(var(--dono-border-width, 1px) * 2) solid var(--dono-border);
+        border-radius: var(--dono-radius-sm);
+        background: var(--dono-bg);
+        cursor: pointer;
+        transition: border-color .15s, background .15s;
+
+        &:hover { border-color: var(--dono-text-muted); }
+        // The radio is visually hidden, so surface keyboard focus on the label.
+        &:focus-within {
+            border-color: var(--dono-focus-ring, var(--dono-accent));
+            box-shadow: 0 0 0 3px var(--dono-accent-soft);
+        }
+        &.is-selected {
+            border-color: var(--dono-accent);
+            background: var(--dono-accent-soft);
+        }
+
+        input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+    }
+    &__fund-option-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--dono-text);
+    }
+    &__fund-option-desc {
+        font-size: 11px;
+        color: var(--dono-text-muted);
+        line-height: 1.3;
+    }
+
+    &__address {
+        border: 0;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+
+        legend {
+            padding: 0;
+            font-weight: var(--dono-heading-weight, 600);
+            font-size: 14px;
+            color: var(--dono-text);
+        }
+    }
+
+    &__consent {
+        border: 0;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        legend {
+            padding: 0;
+            font-weight: var(--dono-heading-weight, 600);
+            font-size: 14px;
+            color: var(--dono-text);
+        }
+    }
+    &__consent-help {
+        margin: 0;
+        font-size: 13px;
+        color: var(--dono-text-muted);
+        line-height: 1.4;
+    }
+    &__consent-purposes {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    &__consent-purpose {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        padding: 10px 12px;
+        border: var(--dono-border-width, 1px) solid var(--dono-border);
+        border-radius: var(--dono-radius-sm);
+        background: var(--dono-bg);
+        cursor: pointer;
+
+        input[type="checkbox"] {
+            margin-top: 2px;
+            accent-color: var(--dono-accent);
+            flex-shrink: 0;
+        }
+        input[type="checkbox"]:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+        }
+    }
+    &__consent-body {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        flex: 1;
+        min-width: 0;
+    }
+    &__consent-label {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--dono-text);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+    &__consent-desc {
+        font-size: 12px;
+        color: var(--dono-text-muted);
+        line-height: 1.4;
+    }
+    &__consent-required-pill {
+        font-size: 9px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        padding: 1px 6px;
+        border-radius: 999px;
+        background: var(--dono-warning-bg, #fef3c7);
+        color: var(--dono-warning-fg, #92400e);
+    }
+
+    &__currency-switcher {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        font-size: 13px;
+        color: var(--dono-text-muted);
+        margin-bottom: 12px;
+
+        select {
+            padding: 6px 10px;
+            border: var(--dono-border-width, 1px) solid var(--dono-border);
+            border-radius: var(--dono-switcher-radius, var(--dono-radius-sm, 8px));
+            font: inherit;
+            background: var(--dono-bg);
+            cursor: pointer;
+        }
+
+        &--left  { justify-content: flex-start; }
+        &--right { justify-content: flex-end; }
+    }
+    &__currency-switcher-label { flex-shrink: 0; }
+
+    &__currency-pills {
+        display: inline-flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        padding: 4px;
+        background: var(--dono-bg-soft, #f8fafb);
+        border-radius: var(--dono-switcher-radius, var(--dono-radius-sm, 8px));
+    }
+    &__currency-pill {
+        appearance: none;
+        border: 0;
+        background: transparent;
+        padding: 6px 14px;
+        border-radius: var(--dono-switcher-radius, var(--dono-radius-sm, 8px));
+        font: inherit;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--dono-text-muted);
+        cursor: pointer;
+        transition: background .15s, color .15s;
+
+        &:hover { color: var(--dono-text); }
+        &.is-selected {
+            background: var(--dono-accent);
+            color: var(--dono-on-accent, #fff);
+        }
+    }
+
+    textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: var(--dono-border-width, 1px) solid var(--dono-border);
+        border-radius: var(--dono-radius-sm);
+        font: inherit;
+        line-height: 1.5;
+        resize: vertical;
+        min-height: 64px;
+
+        &:focus {
+            outline: none;
+            border-color: var(--dono-focus-ring, var(--dono-accent));
+            box-shadow: 0 0 0 3px var(--dono-accent-soft);
+        }
+    }
+
+    &__decorations {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 14px;
+    }
+    &__html { display: contents; }
+
+    .dono-goal {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .dono-goal__amount {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        color: var(--dono-text);
+
+        strong { font-weight: 600; }
+        span   { color: var(--dono-text-muted); }
+    }
+    .dono-goal__bar {
+        height: 8px;
+        background: var(--dono-border);
+        border-radius: var(--dono-radius-sm, 4px);
+        overflow: hidden;
+    }
+    .dono-goal__fill {
+        height: 100%;
+        background: var(--dono-accent);
+        transition: width .3s ease;
+    }
+    .dono-goal__meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: var(--dono-text-muted);
+    }
+    .dono-goal--missing {
+        font-size: 12px;
+        color: var(--dono-text-muted);
+        padding: 8px 10px;
+        background: var(--dono-bg-soft);
+        border-radius: var(--dono-radius-sm);
+    }
+    &__heading {
+        margin: 0;
+        font-weight: var(--dono-heading-weight, 600);
+        line-height: 1.25;
+        color: var(--dono-text);
+
+        &--left   { text-align: left; }
+        &--center { text-align: center; }
+        &--right  { text-align: right; }
+    }
+    &__paragraph {
+        margin: 0;
+        line-height: 1.5;
+        color: var(--dono-text-muted);
+        font-size: 14px;
+
+        &--left   { text-align: left; }
+        &--center { text-align: center; }
+        &--right  { text-align: right; }
+
+        a { color: var(--dono-accent); }
+    }
+
+    &__progress {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        margin: 16px 0 0;
+    }
+
+    &__page-title {
+        margin: 0 0 8px;
+        font-size: 18px;
+        font-weight: var(--dono-heading-weight, 600);
+        color: var(--dono-text);
+        line-height: 1.3;
+    }
+
+    &--paged-bar {
+        gap: 0;
+    }
+    &__bar-header {
+        display: grid;
+        grid-template-columns: 40px 1fr 40px;
+        align-items: center;
+        padding: 12px 16px 16px;
+    }
+    &__bar-back {
+        appearance: none;
+        background: transparent;
+        border: 0;
+        padding: 0;
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        cursor: pointer;
+        color: var(--dono-text-muted);
+        font-size: 18px;
+        line-height: 1;
+        transition: background .12s, color .12s;
+
+        &:hover {
+            background: var(--dono-bg-soft);
+            color: var(--dono-text);
+        }
+        &[aria-hidden="true"] { pointer-events: none; }
+    }
+    &__bar-title {
+        margin: 0;
+        font-size: 15px;
+        font-weight: var(--dono-heading-weight, 600);
+        text-align: center;
+        color: var(--dono-text);
+        line-height: 1.3;
+    }
+    &__bar-spacer { width: 32px; }
+
+    &__bar-track {
+        height: 4px;
+        background: var(--dono-border, #e5e7eb);
+        border-radius: 0;
+        overflow: hidden;
+        margin: 0 0 20px;
+    }
+    &__bar-fill {
+        height: 100%;
+        background: var(--dono-accent);
+        transition: width .25s ease;
+    }
+    &__body {
+        display: flex;
+        flex-direction: column;
+        gap: var(--dono-gap, 20px);
+    }
+    &__nav--end,
+    &__nav--align-end,
+    &__nav--align-right    { justify-content: flex-end; }
+    &__nav--align-start,
+    &__nav--align-left     { justify-content: flex-start; }
+    &__nav--align-center   { justify-content: center; }
+    &__nav--align-stretch  { > .dono-form__button { flex: 1; } }
+    &__progress-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--dono-border, #e5e7eb);
+        transition: background .15s ease, transform .15s ease;
+
+        &.is-done    { background: var(--dono-accent, #1e8a4e); }
+        &.is-current {
+            background: var(--dono-accent, #1e8a4e);
+            transform: scale(1.25);
+        }
+    }
+    &__page-title {
+        margin: 0 0 12px;
+        font-size: 16px;
+        font-weight: var(--dono-heading-weight, 600);
+        color: var(--dono-text);
+    }
+
+    // Author styling is owned by WP's block-supports (colour / border /
+    // spacing / shadow panels); the wrapper just renders the inline style
+    // the Style Engine produced. Only structural CSS lives here.
+    .dono-block--section {
+        // Nested decorations should stack vertically without doubled bottom margin.
+        > .dono-form__decorations { margin-bottom: 0; }
+    }
+
+    &__error {
+        padding: 10px 14px;
+        background: var(--dono-error-bg);
+        color: var(--dono-error-fg);
+        border-radius: var(--dono-radius-sm);
+        font-size: 13px;
+    }
+
+    &__success {
+        text-align: center;
+        padding: 20px 0;
+
+        h3 {
+            margin: 12px 0 6px;
+            font-size: 20px;
+            font-weight: var(--dono-heading-weight, 600);
+        }
+    }
+    &__success-icon {
+        width: 56px;
+        height: 56px;
+        margin: 0 auto;
+        border-radius: 50%;
+        background: var(--dono-accent);
+        color: var(--dono-on-accent, #fff);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 30px;
+        font-weight: 700;
+    }
+    &__reference {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 13px;
+        color: var(--dono-text-muted);
+        margin: 0 0 18px;
+    }
+
+    &__payment-title {
+        margin: 0 0 4px;
+        font-size: 18px;
+        font-weight: var(--dono-heading-weight, 600);
+    }
+    &__payment-amount {
+        margin: 0 0 16px;
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--dono-accent);
+    }
+    &__payment-element {
+        min-height: 44px;
+        margin-bottom: 16px;
+    }
+    &__payment-loading {
+        font-size: 13px;
+        color: var(--dono-text-muted);
+        margin: 0 0 12px;
+    }
+
+    &__confirming {
+        text-align: center;
+        padding: 32px 0;
+        color: var(--dono-text-muted);
+        font-size: 14px;
+    }
+    &__spinner {
+        display: inline-block;
+        width: 28px;
+        height: 28px;
+        margin-bottom: 12px;
+        border: 3px solid var(--dono-border);
+        border-top-color: var(--dono-accent);
+        border-radius: 50%;
+        animation: dono-form-spin 0.7s linear infinite;
+    }
+}
+
+@keyframes dono-form-spin {
+    to { transform: rotate(360deg); }
+}
+
+.dono-form__country-select {
+    position: relative;
+
+    &-input {
+        width: 100%;
+        padding: 9px 32px 9px 12px;
+        border: var(--dono-border-width, 1px) solid var(--dono-border);
+        border-radius: var(--dono-radius-sm, 8px);
+        background: var(--dono-bg, #fff);
+        color: var(--dono-text);
+        font: inherit;
+        line-height: 1.4;
+        cursor: pointer;
+
+        &:focus {
+            outline: 2px solid var(--dono-accent);
+            outline-offset: -1px;
+        }
+
+        &[aria-invalid="true"] { border-color: var(--dono-error-fg); }
+    }
+
+    &-chevron {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--dono-text-muted);
+        pointer-events: none;
+        transition: transform .15s ease;
+    }
+
+    &.is-open &-chevron { transform: translateY(-50%) rotate(180deg); }
+
+    &-list {
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        right: 0;
+        z-index: 20;
+        max-height: 240px;
+        overflow-y: auto;
+        margin: 0;
+        padding: 4px;
+        list-style: none;
+        background: var(--dono-bg, #fff);
+        border: var(--dono-border-width, 1px) solid var(--dono-border);
+        border-radius: var(--dono-radius-sm, 8px);
+        box-shadow: 0 8px 24px rgba(15, 23, 42, .08);
+    }
+
+    &-option {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 7px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        color: var(--dono-text);
+        font-size: 14px;
+        line-height: 1.3;
+
+        &.is-active,
+        &:hover { background: var(--dono-accent-soft, #e7f5ec); }
+
+        &.is-current { font-weight: 600; }
+    }
+
+    &-hint {
+        color: var(--dono-text-muted);
+        font-size: 12px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+}

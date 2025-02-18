@@ -1,0 +1,61 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Dono\Forms\Blocks;
+
+use Dono\Foundation\Helpers\View;
+
+/**
+ * Inline privacy notice. Link omitted when no privacy policy URL is set.
+ *
+ * @version 1.0.0
+ */
+final class PrivacyNoticeBlock implements Block
+{
+    /**
+     * Block type name.
+     */
+    public function name(): string
+    {
+        return 'dono/privacy-notice';
+    }
+
+    /**
+     * Block attribute schema.
+     */
+    public function attributes(): array
+    {
+        return [
+            // Empty defaults so an unedited block falls back to the translated
+            // strings in render() rather than shipping fixed English.
+            'text'     => ['type' => 'string', 'default' => ''],
+            'linkText' => ['type' => 'string', 'default' => ''],
+            'align'    => ['type' => 'string', 'default' => 'left'],
+        ];
+    }
+
+    /**
+     * Renders the privacy notice text with an optional policy link.
+     */
+    public function render(array $attrs, string $content): string
+    {
+        $align = (string) ($attrs['align'] ?? 'left');
+        if (! in_array($align, ['left', 'center', 'right'], true)) {
+            $align = 'left';
+        }
+
+        $privacy = get_option('dono_privacy', []);
+        $url = is_array($privacy) ? trim((string) ($privacy['privacy_policy_url'] ?? '')) : '';
+
+        $text     = trim((string) ($attrs['text']     ?? ''));
+        $linkText = trim((string) ($attrs['linkText'] ?? ''));
+
+        return View::loadRelative(__DIR__, 'views/privacy-notice', [
+            'text'     => $text     !== '' ? $text     : __('By donating you agree to our', 'dono'),
+            'linkText' => $linkText !== '' ? $linkText : __('Privacy Policy', 'dono'),
+            'align'    => $align,
+            'url'      => $url,
+        ]);
+    }
+}

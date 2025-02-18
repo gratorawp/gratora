@@ -1,0 +1,1454 @@
+// Settings page styles.
+
+@import '../campaigns/campaigns.scss';
+// ConfirmDialog (Numbering counters, Receipts preview, Stripe disconnect) needs
+// the @dono/ui dialog chrome; the JS import alone ships no CSS.
+@import '@dono/ui/scss/components/dialog';
+
+// Aliases for legacy local names still referenced inside this file.
+$border: $border-mid;
+
+.dono-settings-page {
+    max-width: 1480px;
+    color: $text;
+    font-variant-numeric: tabular-nums;
+
+    .num {
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.005em;
+    }
+}
+
+.dono-crumbs {
+    font-size: 13px;
+    color: $text-muted;
+    margin-bottom: 6px;
+
+    a { color: $text-muted; text-decoration: none; }
+    a:hover { color: $text; }
+
+    .sep { margin: 0 6px; color: #cbd0d5; }
+}
+
+.dono-page-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+
+    h1 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+    }
+
+    &__title-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    &__right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    &__meta {
+        font-size: 12.5px;
+        color: $text-muted;
+    }
+}
+
+.dono-status-badge {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: $accent-soft;
+    color: $accent-dark;
+}
+
+.dono-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: $card-radius;
+    margin-bottom: 18px;
+    font-size: 13px;
+
+    strong { font-weight: 600; }
+
+    &--warn {
+        background: $amber-tint;
+        border: 1px solid #f6e3a8;
+        border-left: 3px solid $amber;
+        color: #5c3d00;
+
+        strong { color: #4a3200; }
+    }
+
+    &__icon {
+        width: 22px; height: 22px;
+        flex-shrink: 0;
+        color: $amber;
+    }
+
+    &__body {
+        flex: 1;
+        line-height: 1.4;
+
+        a {
+            margin-left: 6px;
+            color: #4a3200;
+            text-decoration: underline;
+            font-weight: 500;
+        }
+    }
+
+    &__close {
+        background: transparent;
+        border: 0;
+        color: $amber;
+        cursor: pointer;
+        font-size: 18px;
+        line-height: 1;
+        padding: 4px 6px;
+    }
+}
+
+
+.dono-tabs {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    border-bottom: 1px solid $border-soft;
+    margin: 0 0 24px;
+    gap: 0;
+    overflow: visible;
+
+    &__scroll {
+        display: flex;
+        flex: 1;
+        min-width: 0;
+        overflow-x: auto;
+        scrollbar-width: none;
+
+        &::-webkit-scrollbar { display: none; }
+    }
+
+    a, button.dono-tab {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        text-decoration: none;
+        color: $text-muted;
+        font-size: 14px;
+        font-weight: 400;
+        background: transparent;
+        border: 0;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: color .12s, border-color .12s;
+        font-family: inherit;
+
+        &:hover { color: $text; }
+
+        // Override WP admin's global a:focus box-shadow/outline.
+        &:focus { outline: none; box-shadow: none; }
+        &:focus-visible {
+            outline: 2px solid $accent;
+            outline-offset: -4px;
+            border-radius: 4px;
+        }
+
+        &.is-active {
+            color: $accent;
+            border-bottom-color: $accent;
+            font-weight: 500;
+        }
+    }
+
+    &__overflow {
+        display: inline-flex;
+        align-items: center;
+        padding: 10px 12px;
+        color: $text-muted;
+        font-size: 13px;
+        background: transparent;
+        border: 0;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+        cursor: pointer;
+        font-family: inherit;
+
+        &:hover { color: $text; }
+    }
+}
+
+.dono-tab__icon {
+    width: 15px; height: 15px;
+    color: currentColor;
+    opacity: 0.9;
+    flex-shrink: 0;
+}
+
+.dono-tab__dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: $accent;
+    margin-left: 2px;
+    flex-shrink: 0;
+
+    &.is-amber { background: $amber; }
+    &.is-red   { background: $red; }
+}
+
+.dono-settings-page__body {
+    min-width: 0;
+}
+
+.dono-panel { animation: donoPanelIn .12s ease-out; }
+.dono-panel[hidden] { display: none; }
+@keyframes donoPanelIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.dono-section-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 14px;
+
+    h2 {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 600;
+        color: $accent;
+        letter-spacing: 0.01em;
+    }
+
+    &__sub {
+        font-size: 12.5px;
+        color: $text-muted;
+    }
+}
+
+.dono-section-block { margin-bottom: 28px; }
+
+
+.dono-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 500;
+
+    &--green { background: $accent-soft; color: $accent-dark; }
+    &--amber { background: $amber-soft;  color: $amber; }
+    &--red   { background: $red-soft;    color: $red; }
+    &--gray  { background: $bg-soft;     color: $text-muted; }
+    &--blue  { background: $blue-soft;   color: $blue; }
+
+    &__dot {
+        width: 6px; height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+
+        &--soft { opacity: 0.65; }
+    }
+}
+
+.dono-edited-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 500;
+    background: $accent-soft;
+    color: $accent-dark;
+
+    &::before {
+        content: "";
+        width: 5px; height: 5px;
+        border-radius: 50%;
+        background: $accent;
+    }
+}
+
+
+
+.dono-stack-12 { display: flex; flex-direction: column; gap: 12px; }
+.dono-grid-2-eq { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.dono-toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid $border-soft;
+
+    &:last-child { border-bottom: 0; }
+
+    &__body { flex: 1; }
+
+    &__title {
+        font-size: 13px;
+        font-weight: 500;
+        color: $text;
+    }
+
+    &__sub {
+        font-size: 11.5px;
+        color: $text-muted;
+        margin-top: 2px;
+        line-height: 1.4;
+    }
+}
+
+
+.dono-brand-mark {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    color: #fff;
+    flex-shrink: 0;
+
+    &--stripe { background: linear-gradient(135deg, #635bff 0%, #4f47e6 100%); }
+    &--offline { background: linear-gradient(135deg, #475569 0%, #334155 100%); }
+}
+
+.dono-gateway-foot {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 16px;
+    align-items: center;
+    width: 100%;
+
+    &__cell {
+        .lbl {
+            font-size: 10.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: $text-soft;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .val {
+            font-size: 12.5px;
+            color: $text;
+            font-weight: 500;
+
+            &.is-muted { color: $text-muted; font-weight: 400; }
+            &.is-mono  { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+        }
+    }
+}
+
+.dono-connect-p {
+    font-size: 13px;
+    line-height: 1.6;
+    color: $text-muted;
+    margin: 0 0 16px;
+
+    strong { color: $text; }
+}
+
+.dono-connect-checks {
+    margin: 0 0 18px;
+    padding: 0;
+    list-style: none;
+    font-size: 13px;
+    color: $text-muted;
+
+    li {
+        position: relative;
+        padding: 5px 0 5px 24px;
+
+        &::before {
+            content: "\2713";
+            position: absolute;
+            left: 0;
+            color: $accent;
+            font-weight: 700;
+        }
+    }
+}
+
+.dono-connect-notice {
+    display: flex;
+    gap: 10px;
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 13px;
+    line-height: 1.55;
+    margin-bottom: 4px;
+
+    strong { font-weight: 600; }
+
+    &__icon { flex: none; font-size: 15px; line-height: 1.4; }
+
+    &--info   { background: $blue-soft;   color: #1e3a8a; }
+    &--amber  { background: $amber-soft;  color: #7c4a02; }
+    &--accent { background: $accent-soft; color: $accent-dark; }
+}
+
+.dono-connect-fee {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 16px;
+    padding: 12px 14px;
+    background: $bg-soft;
+    border-radius: 9px;
+    font-size: 13px;
+
+    &__amt {
+        font-weight: 600;
+
+        &--waived { color: $accent; }
+    }
+}
+
+.dono-connect-pro {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 7px;
+    background: $accent;
+    color: #fff;
+    border-radius: 5px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.dono-connect-options {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid $border-soft;
+}
+
+.dono-connect-devlink {
+    appearance: none;
+    background: none;
+    border: 0;
+    padding: 0;
+    margin-top: 16px;
+    font-size: 12px;
+    color: $text-soft;
+    text-decoration: underline;
+    cursor: pointer;
+
+    &:hover { color: $text-muted; }
+}
+
+.dono-connect-dev {
+    margin-top: 16px;
+    padding: 16px;
+    background: $bg-soft;
+    border-radius: 9px;
+}
+
+.dono-setup {
+    background: #fff;
+    border: 1px solid $border-soft;
+    border-radius: $card-radius;
+    box-shadow: $card-shadow;
+    padding: 20px;
+    margin-bottom: 16px;
+
+    &__head {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 16px;
+    }
+
+    &__title {
+        font-size: 14px;
+        font-weight: 600;
+
+        small {
+            font-weight: 400;
+            color: $text-muted;
+            font-size: 12.5px;
+            margin-left: 8px;
+        }
+    }
+
+    &__progress {
+        font-size: 12px;
+        color: $text-muted;
+
+        strong {
+            color: $accent-dark;
+            font-weight: 600;
+        }
+    }
+
+    &__bar {
+        position: relative;
+        display: flex;
+        height: 6px;
+        gap: 4px;
+        margin-bottom: 18px;
+    }
+
+    &__bar-seg {
+        flex: 1;
+        background: $bg-soft;
+        border-radius: 3px;
+        transition: background .2s;
+
+        &.is-done { background: $accent; }
+        &.is-doing {
+            background: linear-gradient(90deg, #{$accent} 0%, #{$accent} 60%, #c8e6d3 60%, #{$bg-soft} 100%);
+        }
+    }
+
+    &__steps {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 12px;
+    }
+}
+
+.dono-setup-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px;
+    border-radius: $radius-md;
+    background: $bg-soft;
+    text-decoration: none;
+    color: $text;
+    transition: background .12s, transform .12s;
+    cursor: pointer;
+
+    &:hover { background: #eef1f4; }
+
+    &__check {
+        width: 18px; height: 18px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 1px;
+        background: #fff;
+        border: 1.5px solid $border;
+        color: $text-soft;
+    }
+
+    &.is-done .dono-setup-step__check {
+        background: $accent;
+        border-color: $accent;
+        color: #fff;
+    }
+
+    &.is-doing .dono-setup-step__check {
+        background: #fff;
+        border-color: $accent;
+        color: $accent;
+    }
+
+    &__body { min-width: 0; flex: 1; }
+
+    &__title {
+        font-size: 12.5px;
+        font-weight: 600;
+        line-height: 1.3;
+        margin-bottom: 2px;
+    }
+
+    &__sub {
+        font-size: 11.5px;
+        color: $text-muted;
+        line-height: 1.35;
+    }
+
+    &.is-done &__sub { color: $accent-dark; }
+}
+
+.dono-health-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.dono-health {
+    background: #fff;
+    border: 1px solid $border-soft;
+    border-radius: $card-radius;
+    box-shadow: $card-shadow;
+    padding: 14px 16px;
+
+    &__head {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+
+    &__dot {
+        width: 8px; height: 8px;
+        border-radius: 50%;
+        background: $accent;
+        box-shadow: 0 0 0 3px rgba(30, 138, 78, 0.15);
+        flex-shrink: 0;
+
+        &.is-amber {
+            background: $amber;
+            box-shadow: 0 0 0 3px rgba(185, 122, 5, 0.15);
+        }
+
+        &.is-red {
+            background: $red;
+            box-shadow: 0 0 0 3px rgba(180, 35, 24, 0.15);
+        }
+    }
+
+    &__label {
+        font-size: 12px;
+        color: $text-muted;
+        font-weight: 500;
+    }
+
+    &__value {
+        font-size: 15px;
+        font-weight: 600;
+        line-height: 1.3;
+        margin-bottom: 2px;
+    }
+
+    &__meta {
+        font-size: 11.5px;
+        color: $text-muted;
+    }
+
+    &__action {
+        margin-top: 8px;
+        font-size: 11.5px;
+        color: $accent-dark;
+        text-decoration: none;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: transparent;
+        border: 0;
+        padding: 0;
+        cursor: pointer;
+        font-family: inherit;
+
+        &:hover { color: $accent; }
+    }
+}
+
+.dono-merge-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+.dono-merge-tag {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 11px;
+    padding: 3px 7px;
+    background: $accent-tint;
+    color: $accent-dark;
+    border: 1px solid #cde6d6;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background .12s, border-color .12s;
+
+    &:hover { background: $accent-soft; border-color: $accent; }
+}
+
+.dono-currency-preview {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 10px 14px;
+    background: $accent-tint;
+    border: 1px solid #cde6d6;
+    border-radius: $radius-md;
+    margin-bottom: 12px;
+
+    &__label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: $accent-dark;
+        font-weight: 600;
+    }
+
+    &__value {
+        font-size: 18px;
+        font-weight: 700;
+        color: $text;
+    }
+}
+
+.dono-cur-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.dono-cur-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 11px;
+    border: 1px solid $border;
+    border-radius: 999px;
+    background: $bg-card;
+    font-size: 12.5px;
+    color: $text;
+    cursor: pointer;
+
+    &__box {
+        width: 14px; height: 14px;
+        border: 1.5px solid #c4c9d0;
+        border-radius: 4px;
+        display: grid;
+        place-items: center;
+        color: #fff;
+    }
+    &__tag {
+        font-size: 10px;
+        color: $text-soft;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+    }
+    &.is-on {
+        border-color: $accent;
+        background: $accent-tint;
+        color: $accent-dark;
+        font-weight: 500;
+
+        .dono-cur-chip__box { background: $accent; border-color: $accent; }
+    }
+    &.is-locked { cursor: default; background: $bg-soft; color: $text-muted; }
+}
+
+.dono-fx-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dono-fx {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+
+    th {
+        text-align: left;
+        font-size: 11px;
+        font-weight: 600;
+        color: $text-soft;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        padding: 8px 12px;
+        border-bottom: 1px solid $border-soft;
+    }
+    td {
+        padding: 11px 12px;
+        border-bottom: 1px solid $border-soft;
+        font-size: 13px;
+        vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: 0; }
+
+    &__num { text-align: right; }
+    &__ccy { display: flex; align-items: center; gap: 9px; }
+    &__flag {
+        width: 24px; height: 17px;
+        border-radius: 3px;
+        background: $bg-soft;
+        display: grid;
+        place-items: center;
+        font-size: 10px;
+        color: $text-soft;
+        font-weight: 600;
+    }
+    &__name { color: $text-muted; font-size: 12px; }
+    &__src  { color: $text-muted; font-size: 12px; }
+    &__hint {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        justify-content: flex-end;
+        margin-top: 4px;
+        font-size: 11px;
+        color: $text-soft;
+    }
+    &__reset { color: $accent-dark; font-weight: 500; text-decoration: none; }
+    &__reset:hover { text-decoration: underline; }
+}
+
+.dono-rate-input {
+    width: 130px;
+    padding: 6px 9px;
+    text-align: right;
+    border: 1px solid $border;
+    border-radius: $radius-sm;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    background: $bg-card;
+    color: $text;
+
+    &:focus {
+        outline: none;
+        border-color: $accent;
+        box-shadow: 0 0 0 3px rgba(30, 138, 78, .12);
+    }
+    &.is-manual { border-color: $accent; box-shadow: inset 2px 0 0 $accent; }
+    &:disabled { background: $bg-soft; color: $text-muted; }
+}
+
+.dono-muted { color: $text-muted; font-size: 13px; }
+
+.dono-roles-table {
+    display: grid;
+    overflow-x: auto;
+
+    &__head {
+        display: grid;
+        grid-template-columns: minmax(220px, 1fr) repeat(var(--dono-role-count, 4), minmax(120px, 1fr));
+        gap: 0;
+        align-items: end;
+        padding-bottom: 12px;
+        border-bottom: 1px solid $border-soft;
+    }
+    &__role-cell {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        color: $text-muted;
+        font-weight: 600;
+    }
+    &__role {
+        text-align: center;
+        font-size: 13px;
+
+        strong { display: block; color: $text; }
+    }
+    &__role-actions {
+        display: inline-flex;
+        gap: 6px;
+        margin-top: 4px;
+        justify-content: center;
+    }
+    &__group {
+        margin-top: 14px;
+    }
+    &__group-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        color: $text-soft;
+        font-weight: 600;
+        padding: 8px 0 4px;
+    }
+    &__row {
+        display: grid;
+        grid-template-columns: minmax(220px, 1fr) repeat(var(--dono-role-count, 4), minmax(120px, 1fr));
+        align-items: center;
+        padding: 6px 0;
+        border-bottom: 1px solid $bg-soft;
+
+        &:hover { background: #fafbfc; }
+    }
+    &__cap {
+        font-size: 13px;
+        color: $text;
+        padding: 4px 8px 4px 0;
+    }
+    &__cell {
+        text-align: center;
+
+        input[type="checkbox"] {
+            margin: 0;
+            accent-color: $accent;
+            cursor: pointer;
+        }
+    }
+}
+
+.dono-advanced-info {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 0;
+    font-size: 13px;
+
+    > div {
+        display: contents;
+    }
+    dt {
+        padding: 6px 0;
+        color: $text-muted;
+        font-weight: 500;
+    }
+    dd {
+        margin: 0;
+        padding: 6px 0;
+        color: $text;
+        word-break: break-all;
+
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 12px;
+            background: $bg-soft;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+    }
+}
+.dono-advanced-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+
+    th, td {
+        text-align: left;
+        padding: 8px 6px;
+        border-bottom: 1px solid $bg-soft;
+    }
+    th {
+        color: $text-muted;
+        font-weight: 500;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+    }
+    code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 12px;
+    }
+    td:last-child { font-variant-numeric: tabular-nums; }
+}
+.dono-advanced-cron {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 13px;
+
+    li {
+        padding: 6px 0;
+        border-bottom: 1px solid $bg-soft;
+    }
+    em { color: $text-muted; font-style: normal; font-size: 12px; }
+}
+.dono-advanced-notice {
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-size: 13px;
+
+    &--success { background: $accent-soft; color: $accent-dark; }
+    &--error   { background: $red-soft; color: $red; }
+}
+
+.dono-consents {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    &__add {
+        align-self: flex-start;
+        margin-top: 4px;
+    }
+}
+
+.dono-consent-card {
+    background: #fff;
+    border: 1px solid $border-soft;
+    border-radius: 10px;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: border-color .15s, box-shadow .15s;
+
+    &:hover {
+        border-color: #d1d5db;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, .03);
+    }
+
+    &__head {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    &__head &__label {
+        flex: 1;
+    }
+    &__delete {
+        appearance: none;
+        background: transparent;
+        border: 0;
+        padding: 4px 8px;
+        font: inherit;
+        font-size: 12px;
+        color: $text-muted;
+        cursor: pointer;
+        border-radius: 4px;
+
+        &:hover { background: #fee2e2; color: #b91c1c; }
+    }
+    &__foot {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: 16px;
+        padding-top: 12px;
+        border-top: 1px solid $bg-soft;
+    }
+    &__meta-field {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        color: $text-muted;
+        font-weight: 500;
+
+        input {
+            min-width: 180px;
+            text-transform: none;
+            letter-spacing: normal;
+        }
+
+        &--narrow input {
+            min-width: 64px;
+            width: 80px;
+        }
+    }
+    &__toggles {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-left: auto;
+    }
+    &__chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: $text;
+        cursor: pointer;
+    }
+    &__chip-label { user-select: none; }
+}
+
+.dono-email-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.dono-email-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid $border-soft;
+
+    &:last-child { border-bottom: 0; }
+
+    &__dot {
+        width: 10px; height: 10px;
+        border-radius: 50%;
+        background: $border;
+        flex-shrink: 0;
+
+        &.is-on {
+            background: $accent;
+            box-shadow: 0 0 0 3px rgba(30, 138, 78, 0.12);
+        }
+    }
+
+    &__body {
+        flex: 1;
+        min-width: 0;
+    }
+
+    &__title {
+        font-size: 13.5px;
+        font-weight: 600;
+        color: $text;
+        line-height: 1.3;
+    }
+
+    &__desc {
+        font-size: 12px;
+        color: $text-muted;
+        line-height: 1.45;
+        margin-top: 2px;
+    }
+
+    &__recipient {
+        font-size: 11.5px;
+        color: $text-muted;
+        background: $bg-soft;
+        border-radius: 999px;
+        padding: 3px 9px;
+        white-space: nowrap;
+    }
+}
+
+.dono-editor-head {
+    margin-bottom: 8px;
+}
+
+.dono-editor-back {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    padding: 4px 0;
+    color: $text-muted;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+
+    &:hover { color: $text; }
+    &:focus { outline: none; box-shadow: none; }
+}
+
+.dono-settings-empty {
+    background: #fff;
+    border: 1px solid $border-soft;
+    border-radius: $card-radius;
+    box-shadow: $card-shadow;
+    padding: 36px 24px;
+    text-align: center;
+
+    &__title {
+        font-size: 16px;
+        font-weight: 600;
+        color: $text;
+        margin-bottom: 6px;
+    }
+
+    &__desc {
+        font-size: 13px;
+        color: $text-muted;
+        max-width: 520px;
+        margin: 0 auto 12px;
+        line-height: 1.5;
+    }
+
+    &__hint {
+        font-size: 12px;
+        color: $text-soft;
+    }
+}
+
+.dono-save-bar {
+    position: fixed;
+    left: 50%;
+    bottom: 22px;
+    transform: translateX(-50%);
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 14px 10px 18px;
+    background: $text;
+    color: #fff;
+    border-radius: 999px;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, .25), 0 2px 8px rgba(15, 23, 42, .18);
+    font-size: 13px;
+    animation: donoSaveBarIn .25s cubic-bezier(.2, .7, 0, 1);
+
+    &__dot {
+        width: 8px; height: 8px;
+        border-radius: 50%;
+        background: $accent;
+        box-shadow: 0 0 0 3px rgba(30, 138, 78, .35);
+        flex-shrink: 0;
+    }
+
+    &__count {
+        font-weight: 500;
+        color: #fff;
+
+        strong { font-weight: 600; }
+        em     { font-style: normal; color: rgba(255, 255, 255, .7); }
+    }
+
+    &__btn {
+        appearance: none;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 500;
+        padding: 6px 14px;
+        border-radius: 999px;
+        cursor: pointer;
+        border: 0;
+        transition: background .12s, color .12s;
+
+        &:disabled { opacity: .55; cursor: not-allowed; }
+
+        &--ghost {
+            background: transparent;
+            color: rgba(255, 255, 255, .7);
+
+            &:hover:not(:disabled) { color: #fff; }
+        }
+
+        &--primary {
+            background: $accent;
+            color: #fff;
+
+            &:hover:not(:disabled) { background: $accent-dark; }
+        }
+    }
+}
+
+@keyframes donoSaveBarIn {
+    from { transform: translate(-50%, 8px); opacity: 0; }
+    to   { transform: translate(-50%, 0);   opacity: 1; }
+}
+
+.dono-email-editor-tabs {
+    display: flex;
+    gap: 6px;
+    margin: 8px 0 16px;
+    border-bottom: 1px solid $border-mid;
+}
+.dono-email-editor-tab {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: $text-muted;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+
+    &:hover     { color: $text; }
+    &.is-active { color: $accent; border-bottom-color: $accent; }
+}
+
+.dono-email-preview {
+    background: #f9fafb;
+    border-radius: 8px;
+    padding: 18px 20px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+
+    &__head {
+        font-size: 13px;
+        line-height: 1.6;
+        color: #374151;
+        padding-bottom: 12px;
+        margin-bottom: 14px;
+        border-bottom: 1px solid $border-mid;
+    }
+    &__body {
+        white-space: pre-wrap;
+        font-family: inherit;
+        font-size: 14px;
+        line-height: 1.55;
+        color: $text;
+        margin: 0;
+    }
+}
+
+// Settings pages contain their own Cards inside `.dono-panel`, so the
+// outer panel chrome inherited from campaigns.scss (white bg, border,
+// shadow, padding) would make those Cards look nested. Strip it for any
+// `.dono-panel` that sits inside the settings page; dashboard/campaign
+// widget panels still get the card treatment unchanged.
+.dono-settings-page {
+    .dono-panel {
+        background: transparent;
+        border: 0;
+        box-shadow: none;
+        padding: 0;
+    }
+
+    // Re-skin WP components (ToggleControl, primary buttons, focus rings,
+    // etc.) from the default WP admin blue to the Dono accent. WP reads
+    // `--wp-admin-theme-color` for all of these.
+    --wp-admin-theme-color:           #{$accent};
+    --wp-admin-theme-color--rgb:      30, 138, 78;
+    --wp-admin-theme-color-darker-10: #{$accent-dark};
+    --wp-admin-theme-color-darker-20: #{$accent-dark};
+
+    // Suppress the browser-default focus outline on mouse clicks. It's
+    // rectangular and doesn't follow border-radius on anchors / many buttons,
+    // which is why a click on a rounded tab or pill looks like it grows a
+    // square border. Keyboard nav (:focus-visible) is left untouched.
+    *:focus:not(:focus-visible) { outline: none; box-shadow: none; }
+}
+
+.dono-brand-layout {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 16px;
+    align-items: start;
+
+    @media (max-width: 1200px) {
+        grid-template-columns: 1fr;
+    }
+
+    &__main { min-width: 0; }
+    &__rail {
+        position: sticky;
+        top: 16px;
+
+        @media (max-width: 1200px) {
+            position: static;
+            max-width: 520px;
+        }
+    }
+}
+
+.dono-preset-mgr {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 16px;
+    align-items: start;
+
+    @media (max-width: 800px) {
+        grid-template-columns: 1fr;
+    }
+
+    &__list {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    &__row {
+        all: unset;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 10px;
+        border-radius: 6px;
+        border: 1px solid transparent;
+        transition: background .1s ease, border-color .1s ease;
+
+        &:hover { background: $bg-soft; }
+        &.is-active {
+            background: $accent-tint;
+            border-color: $accent;
+        }
+    }
+
+    &__swatch {
+        width: 18px;
+        height: 18px;
+        border-radius: 4px;
+        flex-shrink: 0;
+        border: 1px solid rgba(0, 0, 0, .08);
+    }
+
+    &__meta {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+        flex: 1;
+    }
+
+    &__name {
+        font-size: 13px;
+        font-weight: 500;
+        color: $text;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__default {
+        display: inline-flex;
+        align-items: center;
+        gap: 2px;
+        font-size: 11px;
+        color: $accent-dark;
+    }
+
+    &__add {
+        margin-top: 4px;
+        justify-content: center;
+    }
+
+    &__empty {
+        padding: 24px;
+        text-align: center;
+        color: $text-muted;
+        font-size: 13px;
+        border: 1px dashed $border;
+        border-radius: 6px;
+    }
+}
+
+.dono-preset-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    &__head {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    &__name {
+        flex: 1;
+        padding: 6px 10px;
+        font-size: 15px;
+        font-weight: 500;
+        border: 1px solid $border;
+        border-radius: 4px;
+        background: #fff;
+        color: $text;
+
+        &:focus {
+            outline: 0;
+            border-color: $accent;
+            box-shadow: 0 0 0 1px $accent;
+        }
+    }
+
+    &__actions {
+        display: flex;
+        gap: 6px;
+        flex-shrink: 0;
+    }
+
+    &__desc {
+        margin: 0;
+        font-size: 12px;
+        color: $text-muted;
+        line-height: 1.5;
+    }
+}

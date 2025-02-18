@@ -1,0 +1,387 @@
+// Inherit shared widget chrome (grid, cards, metric, section bar, etc.).
+@import '../campaigns/campaigns.scss';
+
+.dono-dashboard {
+    &__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+    }
+
+    &__title {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 700;
+        color: $text;
+        letter-spacing: -0.01em;
+    }
+
+    &[data-loading="true"] { opacity: .6; transition: opacity .15s; }
+}
+
+.dono-active-campaigns {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+
+    &__row {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        padding: 8px 0;
+        border-radius: 8px;
+
+        &:hover .dono-active-campaigns__title { color: $accent; }
+    }
+
+    &__head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 6px;
+    }
+
+    &__title {
+        flex: 1;
+        font-size: 14px;
+        font-weight: 500;
+        color: $text;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        transition: color .15s;
+    }
+
+    &__bar {
+        height: 6px;
+        background: $bg-soft;
+        border-radius: 3px;
+        overflow: hidden;
+    }
+
+    &__bar-fill {
+        height: 100%;
+        background: $accent;
+        transition: width .3s;
+    }
+
+    &__meta {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        margin-top: 6px;
+        font-size: 12px;
+        color: $text-muted;
+        font-variant-numeric: tabular-nums;
+    }
+
+    &__when { color: $text-soft; }
+}
+
+.dono-quick-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    &__primary {
+        justify-content: center;
+        padding: 10px 14px !important;
+        gap: 8px;
+    }
+
+    &__item {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        color: $text;
+        text-decoration: none;
+        background: #f8fafb;
+
+        &:hover { background: $border-soft; color: $accent; }
+
+        svg { color: $text-muted; }
+        &:hover svg { color: $accent; }
+    }
+}
+
+.dono-today {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 2px 0;
+
+    &__pulse {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: $accent;
+        box-shadow: 0 0 0 4px rgba(30, 138, 78, .15);
+        animation: dono-today-pulse 2.4s ease-in-out infinite;
+    }
+
+    &__label {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        color: $text-muted;
+        font-weight: 500;
+    }
+
+    &__chips {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        flex-wrap: wrap;
+    }
+
+    &__chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        background: #f8fafb;
+        border-radius: 999px;
+        font-size: 13px;
+        color: $text;
+        font-variant-numeric: tabular-nums;
+
+        &.is-strong { background: $accent-soft; color: $accent-dark; font-weight: 600; }
+        &.is-warn   { background: #fef3c7; color: #92400e; }
+    }
+
+    &__empty {
+        margin: 0;
+        color: $text-muted;
+        font-size: 13px;
+    }
+}
+
+@keyframes dono-today-pulse {
+    0%, 100% { box-shadow: 0 0 0 4px rgba(30, 138, 78, .15); }
+    50%      { box-shadow: 0 0 0 7px rgba(30, 138, 78, .08); }
+}
+.dono-activity {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+
+    &__row {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 10px 0;
+
+        & + & {
+            border-top: 1px solid $border-soft;
+        }
+    }
+
+    &__dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-top: 7px;
+        flex-shrink: 0;
+
+        &.is-onetime   { background: $text-soft; }
+        &.is-recurring { background: $accent; }
+    }
+
+    &__body { flex: 1; min-width: 0; }
+
+    &__top {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: baseline;
+        font-size: 13px;
+    }
+
+    &__donor {
+        color: $text;
+        font-weight: 500;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__amount {
+        color: $text;
+        font-variant-numeric: tabular-nums;
+        font-weight: 500;
+    }
+
+    &__sub {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        margin-top: 2px;
+        font-size: 12px;
+        color: $text-muted;
+    }
+
+    &__campaign {
+        color: $text-muted;
+        text-decoration: none;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+
+        &:hover { color: $accent; }
+    }
+
+    &__when {
+        color: $text-soft;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+    }
+}
+.dono-top-campaigns {
+    &__spark {
+        width: 88px;
+        padding: 0 8px;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .dono-spark { display: block; }
+}
+.dono-recurring {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+
+    &__main { flex: 1; min-width: 0; }
+
+    &__mrr {
+        font-size: 28px;
+        font-weight: 700;
+        color: $text;
+        line-height: 1.1;
+        font-variant-numeric: tabular-nums;
+    }
+
+    &__suffix {
+        font-size: 13px;
+        color: $text-muted;
+        font-weight: 500;
+        margin-left: 4px;
+    }
+
+    &__sub {
+        margin-top: 6px;
+        font-size: 12px;
+        color: $text-muted;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    &__dot { color: $text-soft; }
+    &__new { color: $accent-dark; font-weight: 500; }
+
+    &__forecast {
+        background: $accent-soft;
+        padding: 10px 14px;
+        border-radius: 10px;
+        flex-shrink: 0;
+        text-align: right;
+    }
+
+    &__forecast-label {
+        font-size: 11px;
+        color: $accent-dark;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        font-weight: 500;
+    }
+
+    &__forecast-value {
+        font-size: 18px;
+        font-weight: 700;
+        color: $accent-dark;
+        margin-top: 2px;
+        font-variant-numeric: tabular-nums;
+    }
+}
+.dono-attention {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+
+    &__empty {
+        margin: 0;
+        padding: 16px 0;
+        color: $text-muted;
+        font-size: 13px;
+        text-align: center;
+    }
+
+    &__item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        margin-bottom: 4px;
+        font-size: 13px;
+        background: #f8fafb;
+
+        &.is-error { background: #fde8e8; }
+        &.is-warn  { background: #fef3c7; }
+        &.is-info  { background: $accent-soft; }
+    }
+
+    &__dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+
+        .is-error & { background: #b91c1c; }
+        .is-warn  & { background: #b45309; }
+        .is-info  & { background: $accent; }
+    }
+
+    &__title {
+        flex: 1;
+        color: $text;
+        line-height: 1.45;
+        min-width: 0;
+    }
+
+    &__action {
+        flex-shrink: 0;
+        font-size: 12px;
+        font-weight: 500;
+        text-decoration: none;
+        color: $text;
+        white-space: nowrap;
+        padding: 4px 8px;
+        border-radius: 6px;
+
+        &:hover { background: rgba(255, 255, 255, .6); color: $accent-dark; }
+
+        .is-error & { color: #7c2222; }
+        .is-warn  & { color: #6b4d00; }
+        .is-info  & { color: $accent-dark; }
+    }
+}

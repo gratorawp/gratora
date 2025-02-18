@@ -1,0 +1,675 @@
+@import '@dono/ui/scss/tokens';
+@import '../_shared/admin-base';
+@import '@dono/ui/scss/components/empty-state';
+@import '@dono/ui/scss/components/form';
+@import '@dono/ui/scss/components/date-field';
+
+@import '../_shared/kpi-strip';
+
+.dd-shell {
+    // Token-sourced custom props consumed by inline styles in the detail
+    // cards (OverviewCard/ReceiptCard/RefundDialog). Previously these read
+    // undefined vars and silently fell back to hardcoded hex; defining them
+    // here keeps the cards token-driven and themeable.
+    --dd-text-muted:  #{$text-muted};
+    --dd-accent-dark: #{$accent-dark};
+    --dd-red:         #{$red};
+
+    max-width: 1480px;
+    margin: 0 auto;
+    color: $text;
+    font-variant-numeric: tabular-nums;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.dd-shell .num  { font-variant-numeric: tabular-nums; letter-spacing: -0.005em; }
+.dd-shell .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.dd-shell .muted { color: $text-muted; }
+
+.dd-head { margin-bottom: 6px; }
+
+.dd-crumbs {
+    font-size: 13px;
+    color: $text-muted;
+    margin-bottom: 6px;
+    a       { color: $text-muted; text-decoration: none; }
+    a:hover { color: $text; }
+    .sep    { margin: 0 6px; color: #cbd0d5; }
+}
+
+.dd-page-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
+
+    h1 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        line-height: 1.2;
+
+        &.is-anon { font-style: italic; color: $text-muted; font-weight: 500; }
+    }
+
+    &__left {
+        display: flex; flex-direction: column; gap: 6px;
+        min-width: 0;
+    }
+    &__meta {
+        color: $text-muted;
+        font-size: 13px;
+        display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px;
+        a { color: $accent-dark; text-decoration: none; font-weight: 500; }
+        .dot-sep { color: #cbd0d5; margin: 0 4px; }
+    }
+    &__right {
+        display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+        min-width: 0;
+    }
+    &__amount {
+        font-size: 28px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        line-height: 1.1;
+        color: $text;
+
+        &.is-strike { text-decoration: line-through; color: $text-muted; }
+        small { font-size: 16px; font-weight: 600; color: $text-muted; }
+    }
+    &__amount-sub {
+        font-size: 12.5px;
+        color: $blue;
+        strong { font-weight: 600; }
+    }
+    &__actions {
+        display: flex; align-items: center; gap: 8px;
+        margin-top: 4px;
+    }
+}
+
+// Scoped to both .dd-shell (page) and .dd-modal (portal'd modal content)
+// because @wordpress/components Modal renders into document.body.
+.dd-shell, .dd-modal {
+    .btn {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 7px 14px;
+        background: #fff;
+        color: $text;
+        border: 1px solid $border-mid;
+        border-radius: $radius-md;
+        font-size: 13px;
+        font-weight: 500;
+        text-decoration: none;
+        cursor: pointer;
+        transition: border-color .12s, background .12s, color .12s;
+        font-family: inherit;
+        // Normalise <a> vs <button> width math under .btn--block.
+        box-sizing: border-box;
+
+        &:hover { border-color: #cbd0d5; background: $bg-page; }
+        &:disabled, &[disabled] { opacity: .55; cursor: not-allowed; }
+
+        .ic { width: 14px; height: 14px; flex-shrink: 0; }
+    }
+    .btn--primary {
+        background: $accent;
+        color: #fff;
+        border-color: $accent;
+        &:hover { background: $accent-dark; border-color: $accent-dark; }
+    }
+    .btn--danger {
+        background: #fff;
+        color: $red;
+        border-color: #f0c8c4;
+        &:hover { background: $red-soft; border-color: #e6a39e; }
+    }
+    .btn--sm    { padding: 5px 10px; font-size: 12px; }
+    .btn--block { width: 100%; justify-content: center; }
+    .btn--icon  {
+        width: 32px; height: 32px; padding: 0; justify-content: center;
+    }
+    .btn--link {
+        background: transparent;
+        border: 0;
+        padding: 0;
+        color: $accent-dark;
+        cursor: pointer;
+        font-size: 12.5px;
+        font-weight: 500;
+        &:hover { color: $accent; }
+    }
+}
+
+.dd-banner {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 16px;
+    border-radius: $radius-lg;
+    font-size: 13px;
+    line-height: 1.45;
+
+    &__icon { width: 20px; height: 20px; flex-shrink: 0; margin-top: 1px; }
+    &__body { flex: 1; strong { font-weight: 600; } }
+
+    &--warn {
+        background: $amber-tint;
+        border: 1px solid #f6e3a8;
+        border-left: 3px solid $amber;
+        color: #5c3d00;
+        .dd-banner__icon { color: $amber; }
+    }
+    &--danger {
+        background: $red-tint;
+        border: 1px solid #f3c6c2;
+        border-left: 3px solid $red;
+        color: #5a1816;
+        .dd-banner__icon { color: $red; }
+    }
+}
+
+.dd-notice { margin: 0; }
+
+.dd-layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 24px;
+    align-items: start;
+
+    @media (max-width: 1080px) {
+        grid-template-columns: 1fr;
+    }
+}
+.dd-main { min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+.dd-rail { display: flex; flex-direction: column; gap: 14px; position: sticky; top: 24px; }
+@media (max-width: 1080px) { .dd-rail { position: static; } }
+
+.dd-card {
+    background: #fff;
+    border: 1px solid $border-soft;
+    border-radius: $radius-lg;
+    box-shadow: $shadow-md;
+    transition: border-color .12s;
+
+    &:hover { border-color: #dbe0e6; }
+
+    &__body { padding: 18px 22px; }
+}
+
+.dd-pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 500;
+    white-space: nowrap;
+
+    &::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+    &--lg { padding: 4px 12px; font-size: 12.5px; }
+
+    &.is-ok    { background: $accent-soft; color: $accent-dark; }
+    &.is-warn  { background: $amber-soft;  color: $amber; }
+    &.is-error { background: $red-soft;    color: $red; }
+    &.is-info  { background: $blue-soft;   color: $blue; }
+    &.is-muted { background: $bg-page;     color: $text-muted; }
+}
+
+.dd-kv {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    row-gap: 12px;
+    column-gap: 16px;
+
+    @media (max-width: 720px) {
+        grid-template-columns: 1fr;
+    }
+
+    &__row { display: contents; }
+    &__row.is-strike .dd-kv__val--big { text-decoration: line-through; color: $text-muted; }
+    &__lbl {
+        font-size: 12px;
+        color: $text-muted;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        font-weight: 500;
+        padding-top: 2px;
+    }
+    &__val {
+        font-size: 13.5px;
+        color: $text;
+        line-height: 1.45;
+        min-width: 0;
+        a { color: $accent-dark; text-decoration: none; font-weight: 500; }
+        a:hover { color: $accent; }
+    }
+    &__val--big {
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        color: $text;
+    }
+    &__sub {
+        display: block;
+        font-size: 11.5px;
+        color: $text-soft;
+        margin-top: 3px;
+    }
+}
+
+.dd-section-lbl {
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: $text-soft;
+    margin-bottom: 8px;
+}
+
+.dd-channel-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 500;
+    background: $accent-tint;
+    color: $accent-dark;
+    border: 1px solid #cde6d6;
+}
+
+.dd-mono-copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 8px;
+    background: $bg-page;
+    border: 1px solid $border-soft;
+    border-radius: 5px;
+    font-size: 12.5px;
+}
+.dd-mono-copy__btn {
+    background: transparent;
+    border: 0;
+    color: $text-soft;
+    padding: 0;
+    cursor: pointer;
+    display: inline-flex;
+    &:hover { color: $accent-dark; }
+}
+
+.dd-donor-row {
+    display: grid;
+    grid-template-columns: 48px 1fr auto;
+    gap: 16px;
+    align-items: flex-start;
+
+    &__main { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+    &__name {
+        font-size: 16px;
+        font-weight: 600;
+        color: $text;
+    }
+    &__email {
+        font-size: 13px;
+        color: $accent-dark;
+        text-decoration: none;
+        &:hover { text-decoration: underline; }
+    }
+    &__phone, &__addr {
+        font-size: 12.5px;
+        color: $text-muted;
+        white-space: pre-wrap;
+    }
+    &__lifetime {
+        margin-top: 6px;
+        font-size: 12px;
+        color: $text-muted;
+        strong { color: $text; font-weight: 600; }
+    }
+    &__link {
+        font-size: 12.5px;
+        font-weight: 500;
+        color: $accent-dark;
+        text-decoration: none;
+        white-space: nowrap;
+        &:hover { color: $accent; }
+    }
+}
+
+.dd-avatar {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: $accent-soft;
+    color: $accent-dark;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 600;
+    flex-shrink: 0;
+
+    &--md { width: 32px; height: 32px; font-size: 12px; }
+}
+
+.dd-receipt-row {
+    display: grid;
+    grid-template-columns: 32px 1fr auto;
+    gap: 14px;
+    align-items: center;
+
+    & + & {
+        margin-top: 14px;
+        padding-top: 14px;
+        border-top: 1px solid $border-soft;
+    }
+
+    &__icon {
+        width: 32px; height: 32px;
+        background: $accent-soft;
+        color: $accent-dark;
+        border-radius: 8px;
+        display: inline-flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+    }
+    &__main { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+    &__line {
+        display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    &__num {
+        font-size: 14px;
+        font-weight: 600;
+        color: $text;
+        &.is-strike { text-decoration: line-through; color: $text-muted; }
+    }
+    &__renderer {
+        display: inline-block;
+        padding: 1px 8px;
+        background: $bg-page;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 500;
+        color: $text-muted;
+        letter-spacing: 0.02em;
+    }
+    &__meta {
+        font-size: 12px;
+        color: $text-muted;
+        strong { color: $text; font-weight: 600; }
+    }
+    &__actions {
+        display: flex; gap: 8px;
+        flex-shrink: 0;
+    }
+}
+
+.dd-fees {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+
+    &__cell {
+        padding: 12px 14px;
+        background: $bg-page;
+        border: 1px solid $border-soft;
+        border-radius: $radius-md;
+        display: flex; flex-direction: column; gap: 2px;
+    }
+    &__cell--neg { color: $text-muted; }
+    &__cell--net {
+        background: $accent-soft;
+        border-color: #cde6d6;
+        color: $accent-dark;
+    }
+    &__lbl {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 500;
+    }
+    &__val { font-size: 16px; font-weight: 600; }
+}
+
+.dd-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+
+    thead th {
+        text-align: left;
+        font-size: 11px;
+        font-weight: 600;
+        color: $text-soft;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 8px 12px;
+        border-bottom: 1px solid $border-soft;
+        background: $bg-page;
+
+        &:first-child { padding-left: 22px; }
+        &:last-child  { padding-right: 22px; }
+    }
+    tbody td {
+        padding: 11px 12px;
+        border-bottom: 1px solid $border-soft;
+        vertical-align: middle;
+        &:first-child { padding-left: 22px; }
+        &:last-child  { padding-right: 22px; }
+        &.num-cell    { font-variant-numeric: tabular-nums; font-weight: 500; text-align: right; white-space: nowrap; }
+    }
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: $accent-tint; }
+
+    .ref-cell { font-family: ui-monospace, monospace; font-size: 12.5px; }
+    .ref-cell a { color: $accent-dark; text-decoration: none; &:hover { color: $accent; } }
+    &__sub { display: block; font-size: 11px; color: $text-soft; }
+}
+
+.dd-timeline {
+    display: flex; flex-direction: column;
+}
+.dd-tl-row {
+    display: grid;
+    grid-template-columns: 110px 24px 1fr;
+    gap: 12px;
+    align-items: stretch; // dot column fills the row height so the connector spans it
+    padding: 10px 0;
+
+    &__time {
+        font-size: 11.5px;
+        color: $text-muted;
+        white-space: nowrap;
+        padding-top: 3px;
+        display: flex; flex-direction: column;
+        small { font-size: 10.5px; color: $text-soft; }
+    }
+    &__dot {
+        position: relative;
+        display: flex; justify-content: center; align-items: flex-start;
+        padding-top: 5px;
+    }
+    // Connector extends into adjacent rows' padding so the line doesn't break
+    // between dots; the white halo on .dd-tl-row__dot-inner sits above via
+    // z-index and masks the line where each dot is.
+    &__dot::before {
+        content: "";
+        position: absolute;
+        top: -10px;
+        bottom: -10px;
+        left: 50%;
+        width: 1.5px;
+        background: $border-mid;
+        transform: translateX(-50%);
+        z-index: 0;
+    }
+    &:first-child &__dot::before { top: 9px; }            // start at dot center
+    &:last-child  &__dot::before { bottom: auto; height: 19px; } // end at dot center
+
+    &__dot-inner {
+        width: 9px; height: 9px;
+        border-radius: 50%;
+        background: $text-soft;
+        box-shadow: 0 0 0 3px #fff, 0 0 0 4px $border-soft;
+        position: relative;
+        z-index: 1;
+
+        &.is-ok    { background: $accent;  box-shadow: 0 0 0 3px #fff, 0 0 0 4px #cde6d6; }
+        &.is-warn  { background: $amber;   box-shadow: 0 0 0 3px #fff, 0 0 0 4px #f6e3a8; }
+        &.is-error { background: $red;     box-shadow: 0 0 0 3px #fff, 0 0 0 4px #f3c6c2; }
+        &.is-info  { background: $blue;    box-shadow: 0 0 0 3px #fff, 0 0 0 4px #c7d6f7; }
+        &.is-muted { background: $text-soft; }
+    }
+
+    &__body { min-width: 0; padding-top: 2px; }
+    &__title {
+        font-size: 13.5px;
+        color: $text;
+        font-weight: 500;
+        strong { font-weight: 600; }
+        a { color: $accent-dark; text-decoration: none; }
+    }
+    &__sub {
+        font-size: 12px;
+        color: $text-muted;
+        margin-top: 3px;
+    }
+}
+
+.dd-notes-list { display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
+.dd-note {
+    display: grid;
+    grid-template-columns: 32px 1fr auto;
+    gap: 12px;
+    align-items: flex-start;
+
+    &__body { min-width: 0; }
+    &__head {
+        display: flex; gap: 8px; align-items: baseline;
+        font-size: 12px; color: $text-muted;
+        margin-bottom: 4px;
+        flex-wrap: wrap;
+        strong { color: $text; font-weight: 600; }
+    }
+    &__role {
+        display: inline-block;
+        padding: 1px 7px;
+        background: $bg-page;
+        border-radius: 999px;
+        font-size: 10.5px;
+        font-weight: 500;
+        color: $text-muted;
+        text-transform: capitalize;
+        letter-spacing: 0.02em;
+    }
+    &__text { font-size: 13.5px; color: $text; white-space: pre-wrap; }
+    &__delete {
+        appearance: none; background: none; border: 0;
+        color: $text-soft; cursor: pointer; padding: 4px;
+        &:hover { color: $red; }
+    }
+}
+.dd-note-form {
+    border-top: 1px solid $border-soft;
+    padding-top: 14px;
+
+    textarea {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid $border-mid;
+        border-radius: $radius-md;
+        font-size: 13.5px;
+        font-family: inherit;
+        color: $text;
+        resize: vertical;
+        &:focus { outline: 0; border-color: $accent; box-shadow: 0 0 0 3px rgba($accent, .12); }
+    }
+    &__error  { color: $red; font-size: 12.5px; margin-top: 6px; }
+    &__actions{ display: flex; justify-content: flex-end; margin-top: 10px; }
+}
+
+.dd-rail-card {
+    background: #fff;
+    border: 1px solid $border-soft;
+    border-radius: $radius-lg;
+    box-shadow: $shadow-md;
+
+    &__head {
+        padding: 12px 16px 8px;
+        border-bottom: 1px solid $border-soft;
+    }
+    &__title {
+        font-size: 11.5px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: $text-soft;
+    }
+    &__body { padding: 14px 16px; }
+}
+
+.dd-rail-stat {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 8px;
+    padding: 6px 0;
+
+    &__lbl { font-size: 12px; color: $text-muted; }
+    &__val { font-size: 13px; font-weight: 500; color: $text; text-align: right; }
+}
+
+.dd-rail-actions {
+    display: flex; flex-direction: column; gap: 8px;
+}
+.dd-rail-actions__hint {
+    margin-top: 10px;
+    font-size: 11.5px;
+    color: $text-muted;
+    line-height: 1.45;
+    strong { color: $text; font-weight: 600; }
+}
+
+// Edit form (reused by RefundDialog Modal)
+.dd-edit-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+
+    @media (max-width: 600px) { grid-template-columns: 1fr; }
+
+    label {
+        display: flex; flex-direction: column; gap: 4px;
+        font-size: 13px; color: $text-muted;
+    }
+    input, textarea, select {
+        padding: 7px 10px;
+        border: 1px solid $border-mid;
+        border-radius: $radius-md;
+        font-size: 13.5px;
+        font-family: inherit;
+        color: $text;
+        background: #fff;
+        &:focus { outline: 0; border-color: $accent; box-shadow: 0 0 0 3px rgba($accent, .12); }
+    }
+    &__actions {
+        grid-column: 1 / -1;
+        display: flex; justify-content: flex-end; gap: 8px;
+    }
+    &__error {
+        grid-column: 1 / -1;
+        color: $red; font-size: 13px;
+    }
+}
+
+.dd-loading, .dd-empty {
+    padding: 24px;
+    color: $text-muted;
+    text-align: center;
+    font-size: 13px;
+}
+
+.dono-amount__base {
+    display: block;
+    margin-top: 2px;
+    color: $text-muted;
+    font-size: 11.5px;
+    font-weight: 400;
+}

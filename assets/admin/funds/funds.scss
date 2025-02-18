@@ -1,0 +1,299 @@
+@import '@dono/ui/scss/tokens';
+@import '../_shared/admin-base';
+@import '../_shared/kpi-strip';
+@import '@dono/ui/scss/components/notice';
+@import '@dono/ui/scss/components/toast';
+@import '@dono/ui/scss/components/empty-state';
+@import '@dono/ui/scss/components/buttons';
+@import '@dono/ui/scss/components/switch';
+@import '@dono/ui/scss/components/drawer';
+@import '@dono/ui/scss/components/dialog';
+@import '@dono/ui/scss/components/searchable-select';
+@import '@dono/ui/scss/components/form';
+
+.dono-crumbs {
+    font-size: 13px;
+    color: $text-muted;
+    margin-bottom: 6px;
+
+    a { color: $text-muted; text-decoration: none; }
+    a:hover { color: $text; }
+
+    .sep { margin: 0 6px; color: #cbd0d5; }
+}
+
+.dono-page-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+
+    h1 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        line-height: 1.2;
+    }
+
+    &__title-row { display: flex; align-items: center; gap: 10px; }
+    &__right     { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+    &__meta      { font-size: 12.5px; color: $text-muted; }
+}
+
+.dono-funds-intro {
+    margin: 0 0 16px;
+    font-size: 13px;
+    color: $text-muted;
+    line-height: 1.55;
+    max-width: 720px;
+}
+
+// ---- Row actions ----
+.dono-row-actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    justify-content: flex-end;
+}
+
+.dono-icon-btn {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: $text-soft;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+
+    &:hover { background: $bg-page; color: $text; }
+}
+
+// DropdownMenu toggle (the kebab) inherits the same quiet icon-button look.
+.dono-row-actions .components-dropdown-menu__toggle {
+    min-width: 28px;
+    height: 28px;
+    padding: 0;
+    color: $text-soft;
+
+    &:hover:not(:disabled) { background: $bg-page; color: $text; }
+}
+
+// ---- Table cell chrome ----
+.dono-fund-name {
+    position: relative;
+
+    &--child::before {
+        content: "";
+        position: absolute;
+        left: 11px;
+        top: -14px;
+        bottom: 50%;
+        width: 10px;
+        border-left: 1.5px solid $border-mid;
+        border-bottom: 1.5px solid $border-mid;
+        border-bottom-left-radius: 5px;
+        pointer-events: none;
+    }
+}
+
+.dono-fund-code {
+    font-family: $font-mono;
+    font-size: 11px;
+    color: $text-muted;
+    background: $bg-soft;
+    padding: 1px 6px;
+    border-radius: 4px;
+    margin-top: 3px;
+    display: inline-block;
+}
+
+.dono-fund-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: $radius-pill;
+    line-height: 1.5;
+
+    &--default      { background: $accent-soft; color: $accent-dark; margin-left: 8px; }
+    &--restricted   { background: $amber-soft; color: $amber; }
+    &--unrestricted { background: $bg-soft; color: $text-muted; }
+    &--pending      { background: $blue-soft; color: $blue; }
+}
+
+.dono-fund-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    color: $text;
+}
+.dono-fund-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+
+    &.is-on  { background: $accent; }
+    &.is-off { background: $text-soft; }
+}
+
+@import '../_shared/dataviews';
+
+.dono-fset {
+    border: 0;
+    padding: 0;
+    margin: 0 0 20px;
+
+    legend {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: .055em;
+        color: $text-muted;
+        font-weight: 600;
+        margin-bottom: 12px;
+        padding: 0;
+    }
+}
+
+.dono-fld {
+    margin-bottom: 14px;
+
+    label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 6px;
+    }
+
+    &__help { font-size: 12px; color: $text-muted; margin: 5px 0 0; line-height: 1.5; }
+    &__opt  { color: $text-soft; font-weight: 500; }
+}
+
+// Fund drawer fields use the shared .dono-input / .dono-textarea / .dono-input--mono
+// classes (form partial imported above); no local input chrome.
+
+// Row layout for the @dono/ui ToggleRow (body left, switch right). Currently
+// duplicated in settings.scss + campaigns.scss too; belongs in @dono/ui
+// _switch.scss next to .dono-switch (follow-up consolidation).
+.dono-toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid $border-soft;
+
+    &:last-child { border-bottom: 0; }
+
+    &__body { flex: 1; }
+
+    &__title {
+        font-size: 13px;
+        font-weight: 500;
+        color: $text;
+    }
+
+    &__sub {
+        font-size: 11.5px;
+        color: $text-muted;
+        margin-top: 2px;
+        line-height: 1.4;
+    }
+}
+
+.dono-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.dono-seg2 {
+    display: flex;
+    background: $bg-soft;
+    border-radius: $radius-md;
+    padding: 3px;
+    gap: 3px;
+
+    button {
+        flex: 1;
+        appearance: none;
+        border: 0;
+        background: transparent;
+        padding: 8px;
+        font: inherit;
+        font-size: 12.5px;
+        font-weight: 500;
+        color: $text-muted;
+        border-radius: 6px;
+        cursor: pointer;
+
+        &.is-active {
+            background: #fff;
+            color: $text;
+            box-shadow: $shadow-sm;
+            font-weight: 600;
+        }
+    }
+}
+
+.dono-toggle {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 13px 14px;
+    border: 1px solid $border-mid;
+    border-radius: $radius-md;
+    margin-bottom: 10px;
+    cursor: pointer;
+
+    > span {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+
+        strong { font-size: 13px; font-weight: 600; }
+        span   { font-size: 12px; color: $text-muted; line-height: 1.5; }
+    }
+
+    input { margin-top: 3px; accent-color: $accent; width: 16px; height: 16px; }
+}
+
+// ---- Delete-dialog choice rows ----
+.dono-choice {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    border: 1px solid $border-mid;
+    border-radius: $radius-md;
+    margin-bottom: 8px;
+    cursor: pointer;
+
+    &:hover { border-color: #cbd0d5; }
+
+    input {
+        margin-top: 2px;
+        accent-color: $accent;
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+    }
+
+    > span {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+
+        strong { font-size: 13px; font-weight: 600; color: $text; }
+        span   { font-size: 12px; color: $text-muted; line-height: 1.5; }
+    }
+
+    &:has(input:checked) {
+        border-color: $accent;
+        background: $accent-tint;
+    }
+}

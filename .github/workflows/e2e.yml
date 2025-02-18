@@ -1,0 +1,97 @@
+name: e2e
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+# wp-env runs WordPress in Docker, so the macOS named-volume mount bug that
+# blocks local hermetic runs does not apply on the Linux runners.
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    env:
+      DONO_E2E_URL: http://localhost:8888
+    steps:
+      - name: Checkout core
+        uses: actions/checkout@v4
+
+      # The peer-to-peer add-on lives in a separate (private) repo. When it is
+      # configured (repo var DONO_P2P_REPO + token secret DONO_P2P_TOKEN), pull
+      # it in as a sibling so the P2P suite runs too; otherwise the run covers
+      # core only.
+      - name: Checkout dono-p2p (optional)
+        id: p2p
+        if: vars.DONO_P2P_REPO != ''
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ vars.DONO_P2P_REPO }}
+          token: ${{ secrets.DONO_P2P_TOKEN }}
+          ref: ${{ vars.DONO_P2P_REF || 'main' }}
+          path: dono-p2p
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build core
+        run: |
+          composer install --no-interaction --prefer-dist --no-progress
+          npm ci
+          npm run build
+
+      - name: Build dono-p2p
+        if: vars.DONO_P2P_REPO != ''
+        working-directory: dono-p2p
+        run: |
+          composer install --no-interaction --prefer-dist --no-progress
+          npm ci
+          npm run build
+
+      # wp-env reads .wp-env.override.json on top of the committed core-only
+      # .wp-env.json, so adding the add-on here keeps the default config clean.
+      - name: Compose wp-env plugins
+        if: vars.DONO_P2P_REPO != ''
+        run: |
+          printf '{ "plugins": [ ".", "%s/dono-p2p" ] }\n' "$GITHUB_WORKSPACE" > .wp-env.override.json
+          cat .wp-env.override.json
+
+      - name: Start wp-env
+        run: npx wp-env start
+
+      - name: Seed core fixtures
+        run: |
+          OUT="$(npx wp-env run cli wp dono e2e-seed 2>&1)"
+          echo "$OUT"
+          echo "$OUT" | grep -oE 'DONO_E2E_[A-Z_]+="[^"]*"' | sed -E 's/"//g' >> "$GITHUB_ENV"
+
+      - name: Seed P2P fixtures
+        if: vars.DONO_P2P_REPO != ''
+        run: |
+          OUT="$(npx wp-env run cli wp dono-p2p e2e-seed 2>&1)"
+          echo "$OUT"
+          echo "$OUT" | grep -oE 'DONO_E2E_[A-Z_]+="[^"]*"' | sed -E 's/"//g' >> "$GITHUB_ENV"
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Run e2e
+        run: npm run test:e2e
+
+      - name: Upload report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7

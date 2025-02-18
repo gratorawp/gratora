@@ -1,0 +1,134 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Dono\Donors\Portal;
+
+use WP_Post;
+
+/**
+ * The donor portal lives at a real WP Page that hosts the
+ * [dono_donor_portal] shortcode. Magic-link emails point donors at its URL,
+ * so a missing page silently breaks every donor self-service flow (receipts,
+ * recurring, refunds, my-fundraising). This service guarantees the page
+ * exists, is published, and is reachable.
+ *
+ *  - `ensure()` creates the page on activation, OR adopts an existing
+ *    page that already uses the canonical slug.
+ *  - `resolve()` returns the page id only if the page is still published.
+ *  - `url()` is the single source of truth for portal links across emails,
+ *    REST, and metrics.
+ *
+ * Site owners can still override with the `dono.portal.url` filter; this
+ * service is consulted only when the filter returns empty.
+ *
+ * @version 1.0.0
+ */
+final class PortalPage
+{
+    public const OPTION_PAGE_ID = 'dono_portal_page_id';
+    public const OPTION_VERSION = 'dono_portal_page_version';
+    public const SLUG           = 'donor-portal';
+    public const META_MANAGED   = '_dono_managed_portal';
+    public const SHORTCODE      = '[dono_donor_portal]';
+
+    /**
+     * Ensures a published donor-portal page exists. Idempotent.
+     *
+     * Resolution order:
+     *  1. Stored page id resolves to a published Page → keep it, return id.
+     *  2. A Page with our slug already exists (older installs that added
+     *     the shortcode manually) → adopt it, store the id, return.
+     *  3. Insert a fresh Page with the shortcode → return its new id.
+     */
+    public function ensure(): int
+    {
+        $existing = $this->resolve();
+        if ($existing > 0) {
+            return $existing;
+        }
+
+        $bySlug = get_page_by_path(self::SLUG, OBJECT, 'page');
+        if ($bySlug instanceof WP_Post && $bySlug->post_status === 'publish') {
+            update_option(self::OPTION_PAGE_ID, (int) $bySlug->ID, false);
+            return (int) $bySlug->ID;
+        }
+
+        $id = wp_insert_post([
+            'post_type'    => 'page',
+            'post_title'   => __('Donor portal', 'dono'),
+            'post_name'    => self::SLUG,
+            'post_status'  => 'publish',
+            'post_content' => self::SHORTCODE,
+            'comment_status' => 'closed',
+            'ping_status'    => 'closed',
+        ], true);
+
+        if (is_wp_error($id) || (int) $id <= 0) {
+            return 0;
+        }
+
+        update_post_meta((int) $id, self::META_MANAGED, '1');
+        update_option(self::OPTION_PAGE_ID, (int) $id, false);
+        return (int) $id;
+    }
+
+    /**
+     * Returns the published portal-page id, or 0 if the stored id is missing,
+     * trashed, draft, or a non-page post type. Cheap (one option + one
+     * get_post cache hit).
+     */
+    public function resolve(): int
+    {
+        $id = (int) get_option(self::OPTION_PAGE_ID, 0);
+        if ($id <= 0) {
+            return 0;
+        }
+        $post = get_post($id);
+        if (! $post instanceof WP_Post) {
+            return 0;
+        }
+        if ($post->post_type !== 'page' || $post->post_status !== 'publish') {
+            return 0;
+        }
+        return $id;
+    }
+
+    /**
+     * Canonical portal URL. The `dono.portal.url` filter still overrides
+     * (existing contract); otherwise the URL is the permalink of the stored
+     * page, or the slug-based home_url() fallback while the page is being
+     * provisioned.
+     */
+    public function url(): string
+    {
+        $filtered = (string) apply_filters('dono.portal.url', '');
+        if ($filtered !== '') {
+            return $filtered;
+        }
+
+        $id = $this->resolve();
+        if ($id > 0) {
+            $url = (string) get_permalink($id);
+            if ($url !== '') {
+                return $url;
+            }
+        }
+
+        return home_url('/' . self::SLUG . '/');
+    }
+
+    /**
+     * Heal pass for plugin updates: register_activation_hook does not fire
+     * on updates, so we re-run ensure() once per DONO_VERSION bump. Steady
+     * state is a single option read.
+     */
+    public function maybeHeal(): void
+    {
+        if (get_option(self::OPTION_VERSION) === DONO_VERSION) {
+            return;
+        }
+        $this->ensure();
+        update_option(self::OPTION_VERSION, DONO_VERSION, false);
+    }
+}

@@ -1,0 +1,514 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Dono\Donors;
+
+use DateTimeImmutable;
+use Dono\Donations\DonationQueries;
+use Dono\Vendor\Queryable\DB;
+
+/**
+ * Repository over the Donor model.
+ *
+ * @version 1.0.0
+ */
+final class DonorRepository
+{
+    // Donor lifecycle windows, in days since last donation. Shared by the KPI
+    // buckets and the at-risk list/export so the headline count and the listed
+    // rows always describe the same donors. active: <ACTIVE; at_risk:
+    // ACTIVE..AT_RISK; lapsed: AT_RISK..LAPSED; lost: >LAPSED.
+    private const NEW_DAYS     = 30;
+    private const ACTIVE_DAYS  = 90;
+    private const AT_RISK_DAYS = 180;
+    private const LAPSED_DAYS  = 365;
+
+    public function findById(int $id): ?Donor
+    {
+        return Donor::query()->find('id', $id);
+    }
+
+    /**
+     * Batch lookup keyed by id to avoid N+1 queries.
+     *
+     * @param array<int> $ids
+     * @return array<int, Donor>
+     */
+    public function findManyByIds(array $ids): array
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
+        if (! $ids) return [];
+        $rows = Donor::query()->whereIn('id', $ids)->getAll();
+        $byId = [];
+        foreach ($rows as $d) $byId[(int) $d->id] = $d;
+        return $byId;
+    }
+
+    public function findByEmailHash(string $hash): ?Donor
+    {
+        return Donor::query()->find('email_hash', $hash);
+    }
+
+    public function existsByEmailHash(string $hash): bool
+    {
+        return $this->findByEmailHash($hash) !== null;
+    }
+
+    /**
+     * @param array{page?:int,per_page?:int,orderby?:string,order?:string,country?:string,matching_ids?:array<int>,has_search?:bool} $args
+     * @return array{items: array<Donor>, total: int}
+     */
+    public function listAdmin(array $args = []): array
+    {
+        $page    = max(1, (int) ($args['page']     ?? 1));
+        $perPage = max(1, min(100, (int) ($args['per_page'] ?? 25)));
+        $offset  = ($page - 1) * $perPage;
+
+        $allowedSort = ['last_donation_at', 'total_donated_cents', 'donations_count', 'created_at', 'last_name'];
+        $orderBy = in_array($args['orderby'] ?? '', $allowedSort, true)
+            ? $args['orderby']
+            : 'last_donation_at';
+        $order   = strtoupper((string) ($args['order'] ?? 'desc')) === 'ASC' ? 'ASC' : 'DESC';
+
+        $ids = array_values(array_unique(array_map('intval', (array) ($args['matching_ids'] ?? []))));
+        $hasSearch = ! empty($args['has_search']);
+
+        $applyFilters = function ($q) use ($args, $ids, $hasSearch) {
+            if (! empty($args['country'])) {
+                $q = $q->where('country', strtoupper((string) $args['country']));
+            }
+            if (! empty($args['donor_type'])) {
+                $q = $q->where('donor_type', (string) $args['donor_type']);
+            }
+            if ($hasSearch) {
+                // Empty $ids → never-matches sentinel, otherwise narrow to ids.
+                $q = $q->whereIn('id', $ids ?: [0]);
+            }
+            return $q;
+        };
+
+        $total = (int) $applyFilters(Donor::query())->count();
+        $items = $applyFilters(Donor::query())
+            ->orderBy($orderBy, $order)
+            ->limit($perPage)
+            ->offset($offset)
+            ->getAll();
+
+        return ['items' => $items, 'total' => $total];
+    }
+
+    /**
+     * Filter-aware aggregates for the donors admin list (KPI strip). Honors
+     * the same country / donor_type / search filters as listAdmin().
+     *
+     * `total_donated_cents` and `donations_count` come from the denormalized
+     * counters on each donor row. `avg_ltv_cents` is the mean lifetime value
+     * across donors who have given at least once (avoids dragging the average
+     * down with never-given records).
+     *
+     * @param array{country?:?string,donor_type?:?string,has_search?:bool,matching_ids?:array<int>} $args
+     * @return array{total_count:int,with_donations:int,total_donated_cents:int,avg_ltv_cents:int}
+     */
+    public function aggregateAdmin(array $args = []): array
+    {
+        $ids       = array_values(array_unique(array_map('intval', (array) ($args['matching_ids'] ?? []))));
+        $hasSearch = ! empty($args['has_search']);
+
+        $applyFilters = function ($q) use ($args, $ids, $hasSearch) {
+            if (! empty($args['country'])) {
+                $q = $q->where('country', strtoupper((string) $args['country']));
+            }
+            if (! empty($args['donor_type'])) {
+                $q = $q->where('donor_type', (string) $args['donor_type']);
+            }
+            if ($hasSearch) {
+                $q = $q->whereIn('id', $ids ?: [0]);
+            }
+            return $q;
+        };
+
+        $base = fn () => DB::table('dono_donors');
+
+        $totalCount    = (int) $applyFilters($base())->count();
+        $withDonations = (int) $applyFilters($base())->where('donations_count', 0, '>')->count();
+
+        $sumRow = $applyFilters($base())
+            ->selectRaw('COALESCE(SUM(total_donated_cents),0) AS raised')
+            ->get();
+        $raised = (int) ($sumRow['raised'] ?? 0);
+
+        return [
+            'total_count'         => $totalCount,
+            'with_donations'      => $withDonations,
+            'total_donated_cents' => $raised,
+            'avg_ltv_cents'       => $withDonations > 0 ? (int) round($raised / $withDonations) : 0,
+        ];
+    }
+
+    /**
+     * Lifecycle KPI roll-up in one round-trip. Thresholds are configurable;
+     * excludes redacted donors.
+     *
+     * @return array{
+     *   total:int,
+     *   new:int,
+     *   active:int,
+     *   at_risk:int,
+     *   lapsed:int,
+     *   lost:int,
+     *   avg_ltv_cents:int,
+     *   median_ltv_cents:int,
+     *   total_ltv_cents:int
+     * }
+     */
+    public function lifecycleKpi(string $today, int $newDays = self::NEW_DAYS, int $activeDays = self::ACTIVE_DAYS, int $atRiskDays = self::AT_RISK_DAYS, int $lapsedDays = self::LAPSED_DAYS): array
+    {
+        $newCut    = esc_sql($this->daysAgo($today, $newDays));
+        $activeCut = esc_sql($this->daysAgo($today, $activeDays));
+        $atRiskCut = esc_sql($this->daysAgo($today, $atRiskDays));
+        $lapsedCut = esc_sql($this->daysAgo($today, $lapsedDays));
+
+        $row = DB::table('dono_donors')
+            ->whereRaw('redacted_at IS NULL')
+            ->selectRaw("
+                COUNT(*) AS total,
+                SUM(CASE WHEN created_at >= '{$newCut}' THEN 1 ELSE 0 END) AS new_donors,
+                SUM(CASE WHEN last_donation_at >= '{$activeCut}' THEN 1 ELSE 0 END) AS active,
+                SUM(CASE WHEN last_donation_at <  '{$activeCut}' AND last_donation_at >= '{$atRiskCut}' THEN 1 ELSE 0 END) AS at_risk,
+                SUM(CASE WHEN last_donation_at <  '{$atRiskCut}' AND last_donation_at >= '{$lapsedCut}' THEN 1 ELSE 0 END) AS lapsed,
+                SUM(CASE WHEN last_donation_at <  '{$lapsedCut}' THEN 1 ELSE 0 END) AS lost,
+                COALESCE(SUM(total_donated_cents), 0) AS ltv_total,
+                COALESCE(AVG(total_donated_cents), 0) AS ltv_avg
+            ")
+            ->get();
+
+        $total = (int) ($row['total'] ?? 0);
+        $median = $total > 0 ? $this->medianLtv($total) : 0;
+
+        return [
+            'total'            => $total,
+            'new'              => (int) ($row['new_donors'] ?? 0),
+            'active'           => (int) ($row['active']     ?? 0),
+            'at_risk'          => (int) ($row['at_risk']    ?? 0),
+            'lapsed'           => (int) ($row['lapsed']     ?? 0),
+            'lost'             => (int) ($row['lost']       ?? 0),
+            'avg_ltv_cents'    => (int) round((float) ($row['ltv_avg']   ?? 0)),
+            'median_ltv_cents' => $median,
+            'total_ltv_cents'  => (int) ($row['ltv_total'] ?? 0),
+        ];
+    }
+
+    /**
+     * Paged donors in the at-risk window: last_donation_at between activeDays
+     * and atRiskDays ago - the exact bucket lifecycleKpi() counts as `at_risk`,
+     * so the headline count and these rows always agree. Ordered by LTV desc.
+     *
+     * @return array{rows:array<array<string,mixed>>, total:int}
+     */
+    public function listAtRisk(string $today, int $page = 1, int $perPage = 25, int $activeDays = self::ACTIVE_DAYS, int $atRiskDays = self::AT_RISK_DAYS): array
+    {
+        $activeCut = esc_sql($this->daysAgo($today, $activeDays));
+        $atRiskCut = esc_sql($this->daysAgo($today, $atRiskDays));
+        $offset    = max(0, ($page - 1) * $perPage);
+
+        $where = "redacted_at IS NULL AND last_donation_at < '{$activeCut}' AND last_donation_at >= '{$atRiskCut}'";
+
+        $total = (int) DB::table('dono_donors')->whereRaw($where)->count();
+
+        $rows = DB::table('dono_donors')
+            ->whereRaw($where)
+            ->selectRaw('id, first_name, last_name, email_encrypted, country, donations_count, total_donated_cents, last_donation_at, first_donation_at')
+            ->orderBy('total_donated_cents', 'DESC')
+            ->limit($perPage)
+            ->offset($offset)
+            ->getAll();
+
+        $shaped = array_map(static fn ($r) => [
+            'id'                  => (int) $r['id'],
+            'first_name'          => $r['first_name'],
+            'last_name'           => $r['last_name'],
+            'email_encrypted'     => $r['email_encrypted'],
+            'country'             => $r['country'],
+            'donations_count'     => (int) $r['donations_count'],
+            'total_donated_cents' => (int) $r['total_donated_cents'],
+            'last_donation_at'    => $r['last_donation_at'],
+            'first_donation_at'   => $r['first_donation_at'],
+        ], $rows);
+
+        return ['rows' => $shaped, 'total' => $total];
+    }
+
+    /**
+     * Top donors by lifetime value. Returns plain rows; caller decrypts/shapes.
+     *
+     * @return array<array{
+     *   id:int, first_name:?string, last_name:?string, country:?string,
+     *   total_donated_cents:int, donations_count:int, last_donation_at:?string
+     * }>
+     */
+    public function topByLifetimeValue(int $limit = 20): array
+    {
+        $rows = DB::table('dono_donors')
+            ->whereRaw('redacted_at IS NULL')
+            ->selectRaw('id, first_name, last_name, country, total_donated_cents, donations_count, last_donation_at')
+            ->orderBy('total_donated_cents', 'DESC')
+            ->limit($limit)
+            ->getAll();
+
+        return array_map(static fn ($r) => [
+            'id'                  => (int) $r['id'],
+            'first_name'          => $r['first_name'],
+            'last_name'           => $r['last_name'],
+            'country'             => $r['country'],
+            'total_donated_cents' => (int) $r['total_donated_cents'],
+            'donations_count'     => (int) $r['donations_count'],
+            'last_donation_at'    => $r['last_donation_at'],
+        ], $rows);
+    }
+
+    /**
+     * Buckets donor lifetime value across fixed cent thresholds with an
+     * overflow bucket above the highest threshold.
+     *
+     * @param array<int> $thresholdsCents
+     * @return array<array{min_cents:int, max_cents:?int, donor_count:int, total_ltv_cents:int}>
+     */
+    public function lifetimeValueHistogram(array $thresholdsCents): array
+    {
+        if (! $thresholdsCents) return [];
+        sort($thresholdsCents);
+
+        $cases = [];
+        foreach ($thresholdsCents as $t) {
+            $cases[] = "WHEN total_donated_cents <= {$t} THEN {$t}";
+        }
+        $bucketExpr = 'CASE ' . implode(' ', $cases) . ' ELSE NULL END';
+
+        $rows = DB::table('dono_donors')
+            ->whereRaw('redacted_at IS NULL AND total_donated_cents > 0')
+            ->selectRaw("{$bucketExpr} AS bucket, COUNT(*) AS donor_count, COALESCE(SUM(total_donated_cents), 0) AS ltv")
+            ->groupByRaw($bucketExpr)
+            ->getAll();
+
+        $byBucket = [];
+        foreach ($rows as $r) {
+            $key = $r['bucket'] === null ? 'overflow' : (int) $r['bucket'];
+            $byBucket[$key] = [
+                'donor_count' => (int) $r['donor_count'],
+                'ltv'         => (int) $r['ltv'],
+            ];
+        }
+
+        $out  = [];
+        $prev = 0;
+        foreach ($thresholdsCents as $t) {
+            $out[] = [
+                'min_cents'       => $prev + 1,
+                'max_cents'       => $t,
+                'donor_count'     => $byBucket[$t]['donor_count'] ?? 0,
+                'total_ltv_cents' => $byBucket[$t]['ltv']         ?? 0,
+            ];
+            $prev = $t;
+        }
+        $out[] = [
+            'min_cents'       => $prev + 1,
+            'max_cents'       => null,
+            'donor_count'     => $byBucket['overflow']['donor_count'] ?? 0,
+            'total_ltv_cents' => $byBucket['overflow']['ltv']         ?? 0,
+        ];
+        return $out;
+    }
+
+    /**
+     * RFM-style segmentation in one round trip over the full donor base
+     * (excluding redacted).
+     *
+     * Segments: champions, loyal, new, at_risk, hibernating, lost, other.
+     *
+     * @return array<array{segment:string, donor_count:int, total_ltv_cents:int, avg_ltv_cents:int}>
+     */
+    public function rfmSegments(string $today, int $activeDays = 90, int $atRiskDays = 180, int $lostDays = 365, int $newDays = 30): array
+    {
+        $activeCut = esc_sql($this->daysAgo($today, $activeDays));
+        $atRiskCut = esc_sql($this->daysAgo($today, $atRiskDays));
+        $lostCut   = esc_sql($this->daysAgo($today, $lostDays));
+        $newCut    = esc_sql($this->daysAgo($today, $newDays));
+
+        // Tier thresholds: high LTV >= 25 000 cents, frequent >= 4 donations.
+        $segmentCase = "
+            CASE
+                WHEN last_donation_at IS NULL THEN 'other'
+                WHEN last_donation_at < '{$lostCut}' THEN 'lost'
+                WHEN last_donation_at >= '{$activeCut}' AND donations_count >= 4 AND total_donated_cents >= 25000 THEN 'champions'
+                WHEN last_donation_at >= '{$activeCut}' AND donations_count >= 2 THEN 'loyal'
+                WHEN last_donation_at >= '{$activeCut}' AND created_at >= '{$newCut}' THEN 'new'
+                WHEN last_donation_at < '{$activeCut}' AND last_donation_at >= '{$atRiskCut}' THEN 'at_risk'
+                WHEN last_donation_at < '{$atRiskCut}' AND last_donation_at >= '{$lostCut}' THEN 'hibernating'
+                ELSE 'other'
+            END
+        ";
+
+        $rows = DB::table('dono_donors')
+            ->whereRaw('redacted_at IS NULL')
+            ->selectRaw("
+                {$segmentCase} AS segment,
+                COUNT(*) AS donor_count,
+                COALESCE(SUM(total_donated_cents), 0) AS ltv,
+                COALESCE(AVG(total_donated_cents), 0) AS ltv_avg
+            ")
+            ->groupByRaw($segmentCase)
+            ->getAll();
+
+        $out = [];
+        foreach ($rows as $r) {
+            $out[] = [
+                'segment'         => (string) $r['segment'],
+                'donor_count'     => (int) $r['donor_count'],
+                'total_ltv_cents' => (int) $r['ltv'],
+                'avg_ltv_cents'   => (int) round((float) $r['ltv_avg']),
+            ];
+        }
+        // Stable UI ordering.
+        $order = ['champions', 'loyal', 'new', 'at_risk', 'hibernating', 'lost', 'other'];
+        usort($out, static fn ($a, $b) => array_search($a['segment'], $order, true) <=> array_search($b['segment'], $order, true));
+        return $out;
+    }
+
+    /**
+     * Cohort retention matrix. Rows are cohorts (month of first donation);
+     * columns are elapsed months; values are distinct donor counts. One SQL pass.
+     *
+     * @return array{
+     *   cohorts: array<array{
+     *     month:string, size:int,
+     *     retention: array<int, array{count:int, pct:float}>
+     *   }>,
+     *   max_offset: int
+     * }
+     */
+    public function donorCohortRetention(int $cohortMonths = 12, int $maxOffset = 12): array
+    {
+        $donorsT    = DB::getPrefix() . 'dono_donors';
+        $donationsT = DB::getPrefix() . 'dono_donations';
+        $cutoff     = esc_sql((new DateTimeImmutable("first day of -{$cohortMonths} months"))->format('Y-m-d'));
+
+        $sql = "
+            SELECT
+                DATE_FORMAT(dn.first_donation_at, '%Y-%m') AS cohort,
+                PERIOD_DIFF(DATE_FORMAT(d.paid_at, '%Y%m'), DATE_FORMAT(dn.first_donation_at, '%Y%m')) AS offset_m,
+                COUNT(DISTINCT d.donor_id) AS donors
+            FROM {$donorsT} dn
+            JOIN {$donationsT} d ON d.donor_id = dn.id
+            WHERE dn.redacted_at IS NULL
+              AND dn.first_donation_at IS NOT NULL
+              AND dn.first_donation_at >= '{$cutoff} 00:00:00'
+              AND d.status = 'paid'
+              AND d.is_test = 0
+            GROUP BY cohort, offset_m
+            ORDER BY cohort ASC, offset_m ASC
+        ";
+        $result = DB::raw($sql);
+        $rows = is_array($result) ? ($result['rows'] ?? []) : [];
+
+        $grid = [];
+        foreach ($rows as $r) {
+            $cohort = (string) $r->cohort;
+            $offset = (int) $r->offset_m;
+            $count  = (int) $r->donors;
+            if ($offset < 0 || $offset > $maxOffset) continue;
+            $grid[$cohort][$offset] = $count;
+        }
+
+        // Cohort size = donors at offset 0.
+        $cohorts = [];
+        foreach ($grid as $cohort => $offsets) {
+            $size = (int) ($offsets[0] ?? 0);
+            $retention = [];
+            for ($i = 0; $i <= $maxOffset; $i++) {
+                $cnt = (int) ($offsets[$i] ?? 0);
+                $retention[$i] = [
+                    'count' => $cnt,
+                    'pct'   => $size > 0 ? round(($cnt / $size) * 100, 1) : 0.0,
+                ];
+            }
+            $cohorts[] = ['month' => $cohort, 'size' => $size, 'retention' => $retention];
+        }
+
+        return ['cohorts' => $cohorts, 'max_offset' => $maxOffset];
+    }
+
+    /**
+     * Monthly donation series for one donor.
+     *
+     * @return array<array{month:string, amount_cents:int, donations_count:int}>
+     */
+    public function monthlyTimelineForDonor(int $donorId): array
+    {
+        $netExpr = DonationQueries::netBaseExpr();
+        $rows = DonationQueries::live(DB::table('dono_donations')
+            ->whereIn('status', ['paid', 'partial_refund'])
+            ->where('donor_id', $donorId))
+            ->selectRaw("DATE_FORMAT(paid_at, '%Y-%m') AS month, COALESCE(SUM({$netExpr}), 0) AS amount, COUNT(*) AS cnt")
+            ->groupByRaw("DATE_FORMAT(paid_at, '%Y-%m')")
+            ->orderByRaw('month ASC')
+            ->getAll();
+
+        return array_map(static fn ($r) => [
+            'month'           => (string) $r['month'],
+            'amount_cents'    => (int) $r['amount'],
+            'donations_count' => (int) $r['cnt'],
+        ], $rows);
+    }
+
+    /**
+     * Attribution mix for one donor across all paid donations.
+     *
+     * @return array<array{utm_source:?string, utm_medium:?string, amount_cents:int, donations_count:int}>
+     */
+    public function attributionMixForDonor(int $donorId): array
+    {
+        $netExpr = DonationQueries::netBaseExpr();
+        $rows = DonationQueries::live(DB::table('dono_donations')
+            ->whereIn('status', ['paid', 'partial_refund'])
+            ->where('donor_id', $donorId))
+            ->selectRaw("
+                JSON_UNQUOTE(JSON_EXTRACT(source_attribution, '$.utm_source')) AS utm_source,
+                JSON_UNQUOTE(JSON_EXTRACT(source_attribution, '$.utm_medium')) AS utm_medium,
+                COALESCE(SUM({$netExpr}), 0) AS amount,
+                COUNT(*) AS cnt
+            ")
+            ->groupByRaw("
+                JSON_UNQUOTE(JSON_EXTRACT(source_attribution, '$.utm_source')),
+                JSON_UNQUOTE(JSON_EXTRACT(source_attribution, '$.utm_medium'))
+            ")
+            ->getAll();
+
+        return array_map(static fn ($r) => [
+            'utm_source'      => $r['utm_source'] !== null && $r['utm_source'] !== 'null' ? (string) $r['utm_source'] : null,
+            'utm_medium'      => $r['utm_medium'] !== null && $r['utm_medium'] !== 'null' ? (string) $r['utm_medium'] : null,
+            'amount_cents'    => (int) $r['amount'],
+            'donations_count' => (int) $r['cnt'],
+        ], $rows);
+    }
+
+    /** Median LTV via OFFSET at the count midpoint. */
+    private function medianLtv(int $totalCount): int
+    {
+        if ($totalCount === 0) return 0;
+        $offset = (int) floor($totalCount / 2);
+        $row = DB::table('dono_donors')
+            ->whereRaw('redacted_at IS NULL')
+            ->selectRaw('total_donated_cents')
+            ->orderBy('total_donated_cents', 'ASC')
+            ->limit(1)
+            ->offset($offset)
+            ->get();
+        return (int) ($row['total_donated_cents'] ?? 0);
+    }
+
+    private function daysAgo(string $today, int $days): string
+    {
+        return (new DateTimeImmutable($today))->modify("-{$days} days")->format('Y-m-d 00:00:00');
+    }
+}

@@ -1,0 +1,38 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Dono\Gateways;
+
+/**
+ * Result of `PaymentGateway::confirm()`.
+ *
+ * @version 1.0.0
+ */
+final class GatewayConfirmResult
+{
+    public function __construct(
+        public readonly bool $success,
+        public readonly ?string $gateway_txn_id = null,
+        public readonly ?string $payment_method = null,
+        public readonly ?string $payment_method_brand = null,
+        public readonly ?string $payment_method_last4 = null,
+        public readonly ?int $fee_cents = null,
+        public readonly ?string $error = null,
+        public readonly ?array $metadata = null,
+    ) {
+    }
+
+    /** Serialise to an array for persistence. */
+    public function toArray(): array
+    {
+        return [
+            'gateway_txn_id'       => $this->gateway_txn_id,
+            'payment_method'       => $this->payment_method,
+            'payment_method_brand' => $this->payment_method_brand,
+            'payment_method_last4' => $this->payment_method_last4,
+            'fee_cents'            => $this->fee_cents,
+            'metadata'             => $this->metadata,
+        ];
+    }
+}
