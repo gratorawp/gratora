@@ -20,13 +20,26 @@
 declare(strict_types=1);
 
 $tests_dir = getenv('WP_TESTS_DIR') ?: (static function (): string {
-    // bin/install-wp-tests.sh defaults to /tmp, but PHP's sys_get_temp_dir() is
-    // /var/folders/... on macOS. Prefer whichever location actually holds the
-    // config so the suite runs without a manually exported WP_TESTS_DIR.
-    foreach ([sys_get_temp_dir() . '/wordpress-tests-lib', '/tmp/wordpress-tests-lib'] as $dir) {
-        if (file_exists($dir . '/wp-tests-config.php')) {
-            return $dir;
+    // Candidates in preference order: the persistent home install (immune to
+    // macOS temp purges), then the historical temp locations. A candidate only
+    // counts if its config exists AND the WP core its ABSPATH points at is
+    // still on disk - temp cleanup can take one without the other.
+    $home       = getenv('HOME') ?: '';
+    $candidates = array_filter([
+        $home !== '' ? $home . '/.dono-wp-tests/wordpress-tests-lib' : null,
+        sys_get_temp_dir() . '/wordpress-tests-lib',
+        '/tmp/wordpress-tests-lib',
+    ]);
+    foreach ($candidates as $dir) {
+        $config = $dir . '/wp-tests-config.php';
+        if (! file_exists($config)) {
+            continue;
         }
+        if (preg_match("/define\(\s*'ABSPATH',\s*'([^']+)'/", (string) file_get_contents($config), $m)
+            && ! file_exists($m[1] . 'wp-settings.php')) {
+            continue;
+        }
+        return $dir;
     }
     return sys_get_temp_dir() . '/wordpress-tests-lib';
 })();

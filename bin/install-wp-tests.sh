@@ -20,8 +20,8 @@ DB_PASS=${3:-}
 DB_HOST=${4:-127.0.0.1}
 WP_VERSION=${5:-latest}
 
-WP_CORE_DIR=${WP_CORE_DIR:-/tmp/wordpress}
-WP_TESTS_DIR=${WP_TESTS_DIR:-/tmp/wordpress-tests-lib}
+WP_CORE_DIR=${WP_CORE_DIR:-$HOME/.dono-wp-tests/wordpress}
+WP_TESTS_DIR=${WP_TESTS_DIR:-$HOME/.dono-wp-tests/wordpress-tests-lib}
 
 # 1. WordPress core
 if [ ! -f "${WP_CORE_DIR}/wp-load.php" ]; then
