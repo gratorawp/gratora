@@ -548,12 +548,17 @@ final class DonationRepository
         if ($campaignId !== null) $q = $q->where('campaign_id', $campaignId);
 
         $prefix = DB::getPrefix();
+        // Scale each refund by its donation's fx_rate so refunded cents land in
+        // the base currency, matching the donations' base_amount_cents they get
+        // netted against (and DonationQueries::refundedBaseExpr on the public
+        // path). Summing raw amount_cents mixed foreign cents into base totals.
         return $q->joinRaw(
             "LEFT JOIN (
-                SELECT donation_id, SUM(amount_cents) AS refunded
-                FROM {$prefix}dono_refunds
-                WHERE status = 'succeeded'
-                GROUP BY donation_id
+                SELECT rf.donation_id, SUM(ROUND(rf.amount_cents * COALESCE(d.fx_rate, 0))) AS refunded
+                FROM {$prefix}dono_refunds rf
+                JOIN {$prefix}dono_donations d ON d.id = rf.donation_id
+                WHERE rf.status = 'succeeded'
+                GROUP BY rf.donation_id
             ) r ON r.donation_id = {$prefix}dono_donations.id"
         );
     }

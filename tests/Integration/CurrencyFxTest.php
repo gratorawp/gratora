@@ -7,6 +7,8 @@ namespace Dono\Tests\Integration;
 use Dono\Async\AsyncDispatcher;
 use Dono\Currency\FxRates;
 use Dono\Currency\FxRatesUpdater;
+use Dono\Donations\DonationRepository;
+use Dono\Donations\Refund;
 use Dono\Foundation\Helpers\Money;
 use Dono\Settings\SettingsService;
 use WP_Error;
@@ -158,6 +160,37 @@ final class CurrencyFxTest extends IntegrationTestCase
         ));
         // 5000 base + 4000 other*0.5 (2000 base) = 7000, not the raw 9000.
         $this->assertSame(7000, $raised);
+    }
+
+    public function test_foreign_donation_refund_nets_in_base_currency(): void
+    {
+        $base  = Money::defaultCurrency();
+        $other = $base === 'USD' ? 'GBP' : 'USD';
+        $this->seedRates($base, [$other => 2.0]); // other -> base = 0.5
+
+        $ref = $this->postDonation([
+            'email' => 'refund-fx@x.com', 'amount_cents' => 10000, 'currency' => $other, 'gateway' => 'offline',
+        ])->get_data()['reference'];
+        $this->confirm($ref);
+
+        $repo     = new DonationRepository();
+        $donation = $repo->findByReference($ref);
+        $this->assertSame(5000, (int) $donation->base_amount_cents, '10000 other at 0.5 -> 5000 base');
+
+        // Refund 4000 in the donation currency; base-scaled that is 2000.
+        $refund = Refund::make();
+        $refund->donation_id  = $donation->id;
+        $refund->amount_cents = 4000;
+        $refund->currency     = $other;
+        $refund->initiated_by = 'gateway';
+        $refund->status       = 'succeeded';
+        $refund->occurred_at  = gmdate('Y-m-d H:i:s');
+        $refund->save();
+        $donation->status = 'partial_refund';
+        $donation->save();
+
+        // 5000 base - (4000 * 0.5 = 2000) base = 3000, not the raw 5000 - 4000 = 1000.
+        $this->assertSame(3000, $repo->aggregatePaidBetween()['amount_cents']);
     }
 
     public function test_updater_is_idempotent_and_keeps_last_good_on_failure(): void
