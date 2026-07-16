@@ -76,6 +76,15 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
         return max(0, min($fee, $amountCents));
     }
 
+    /** Same cut as a percentage, for subscription renewals (application_fee_percent). */
+    private function applicationFeePercent(): float
+    {
+        if ($this->license->isPro()) return 0.0;
+        $bps = (int) apply_filters('dono.stripe.application_fee_bps', self::FEE_BPS);
+        $bps = max(0, min(10000, $bps));
+        return $bps / 100;
+    }
+
     public function id(): string
     {
         return 'stripe';
@@ -364,6 +373,18 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
         }
 
         $refunds = (array) ($charge['refunds']['data'] ?? []);
+        // Recent Stripe API versions drop the embedded refund list from the
+        // event payload; fetch it when the charge shows a refund but none came
+        // through, otherwise external refunds would be silently ignored.
+        $chargeId = (string) ($charge['id'] ?? '');
+        if ($refunds === [] && (int) ($charge['amount_refunded'] ?? 0) > 0 && $chargeId !== '') {
+            try {
+                $fetched = $this->api->get('/charges/' . rawurlencode($chargeId) . '/refunds', $this->connectHeaders());
+                $refunds = (array) ($fetched['data'] ?? []);
+            } catch (RuntimeException $e) {
+                // Leave empty; the outcome reports handled with no rows recorded.
+            }
+        }
         foreach ($refunds as $r) {
             $refundId = (string) ($r['id'] ?? '');
             $amount   = Currency::fromMinorUnits((int) ($r['amount'] ?? 0), $donation->currency);
@@ -612,7 +633,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
         $nowEpoch       = $this->clock->now()->getTimestamp();
         $firstRenewalAt = FrequencyMap::nextRenewalAfter($nowEpoch, $interval, $intervalCount);
 
-        $sub = $this->api->post('/subscriptions', [
+        $subParams = [
             'customer'             => $customerId,
             'items'                => [['price' => (string) ($price['id'] ?? '')]],
             'billing_cycle_anchor' => $firstRenewalAt,
@@ -624,7 +645,17 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
                 'dono_campaign_id'         => (string) ($donation->campaign_id ?? ''),
                 'dono_initial_donation_id' => (string) $donation->id,
             ],
-        ], array_merge(
+        ];
+
+        // Without this every renewal invoice would settle at 0 platform fee even
+        // though the first charge took one. application_fee_percent applies the
+        // same cut to each recurring invoice on the connected account.
+        $feePercent = $this->applicationFeePercent();
+        if ($feePercent > 0) {
+            $subParams['application_fee_percent'] = $feePercent;
+        }
+
+        $sub = $this->api->post('/subscriptions', $subParams, array_merge(
             $this->connectHeaders(),
             // Deterministic key: a redelivered webhook re-POSTs the same key, so
             // Stripe returns the original subscription instead of creating a
@@ -842,9 +873,15 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
 
         $reason = (string) ($sub['cancellation_details']['reason'] ?? '');
         $now    = $this->clock->now()->format('Y-m-d H:i:s');
+        // A portal/admin cancel already recorded the event before deleting the
+        // Stripe sub; only emit here for gateway-initiated cancels (dunning,
+        // Stripe dashboard) so the donor gets exactly one cancellation email.
+        $alreadyCancelled = $plan->status === 'cancelled';
         $this->plans->markCancelled($plan, $now, $reason !== '' ? $reason : null);
 
-        $this->donationService->recordRecurringCancellation($plan, $reason !== '' ? $reason : null);
+        if (! $alreadyCancelled) {
+            $this->donationService->recordRecurringCancellation($plan, $reason !== '' ? $reason : null);
+        }
 
         return new WebhookOutcome(
             signature_ok: true,

@@ -126,6 +126,7 @@ final class StripeFirstChargeSubscriptionTest extends IntegrationTestCase
         $this->assertSame('pm_test_card', $subBody['default_payment_method']);
         $this->assertSame('none', $subBody['proration_behavior']);
         $this->assertArrayHasKey('billing_cycle_anchor', $subBody, 'Future anchor prevents same-day double-charge');
+        $this->assertEquals(2, $subBody['application_fee_percent'] ?? 0, 'Renewals must carry the same 2% platform fee as the first charge');
 
         // 4. Local mirror exists.
         $fresh = $repo->findByReference($reference);
