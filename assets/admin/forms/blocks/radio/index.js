@@ -3,7 +3,7 @@ import { PanelBody, TextControl, ToggleControl } from '@wordpress/components';
 import Segmented from '../../../_shared/components/Segmented';
 import { __ } from '@wordpress/i18n';
 import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
-import { OptionsEditor, normalizeOptions, slugify } from '../_shared/OptionsEditor';
+import { OptionsEditor, normalizeOptions, slugify, slugifyField } from '../_shared/OptionsEditor';
 import { BlockIcons } from '../_shared/block-icons';
 
 const NAME = 'dono/radio';
@@ -54,7 +54,7 @@ function Edit( { attributes, setAttributes } ) {
                     <TextControl
                         label={ __( 'Field name', 'dono' ) }
                         value={ field }
-                        onChange={ ( v ) => setAttributes( { field: slugify( v ) } ) }
+                        onChange={ ( v ) => setAttributes( { field: slugifyField( v ) } ) }
                         help={ __( 'Key the value is stored under. Auto-derived from label if empty.', 'dono' ) }
                         __nextHasNoMarginBottom
                     />

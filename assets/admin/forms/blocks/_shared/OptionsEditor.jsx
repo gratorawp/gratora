@@ -8,6 +8,15 @@ export function slugify( s ) {
         .replace( /^-+|-+$/g, '' );
 }
 
+// Field keys are snake_case to match the server (DropdownBlock::slugifySnake)
+// and the runtime custom-value keys, so conditions targeting a field resolve.
+export function slugifyField( s ) {
+    return String( s || '' )
+        .toLowerCase()
+        .replace( /[^a-z0-9]+/g, '_' )
+        .replace( /^_+|_+$/g, '' );
+}
+
 export function normalizeOptions( raw, fallback ) {
     const fb = Array.isArray( fallback ) && fallback.length > 0
         ? fallback
