@@ -47,7 +47,11 @@ final class TopDonorsBlock extends CampaignBlock
         if (! $campaign) return $this->notBoundNotice();
 
         $limit = max(3, min(50, (int) ($attrs['limit'] ?? 10)));
-        $rows  = $this->donations->topPaidDonors(null, null, (int) $campaign->id, $limit, false);
+        // Exclude anonymous in SQL only when the toggle asks, so the limit
+        // applies to the visible rows (not trimmed afterwards) and the toggle
+        // actually does something.
+        $hideAnonymous = (bool) ($attrs['hideAnonymous'] ?? false);
+        $rows  = $this->donations->topPaidDonors(null, null, (int) $campaign->id, $limit, ! $hideAnonymous);
 
         $donorIds = array_values(array_filter(array_map(static fn ($r) => (int) $r['donor_id'], $rows)));
         $donorsById = [];
@@ -56,8 +60,6 @@ final class TopDonorsBlock extends CampaignBlock
                 $donorsById[(int) $d->id] = $d;
             }
         }
-
-        $hideAnonymous = (bool) ($attrs['hideAnonymous'] ?? false);
 
         $entries = [];
         foreach ($rows as $row) {

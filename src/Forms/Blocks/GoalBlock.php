@@ -6,6 +6,7 @@ namespace Dono\Forms\Blocks;
 
 use Dono\Campaigns\CampaignRepository;
 use Dono\Forms\FormRepository;
+use Dono\Foundation\Helpers\Money;
 use Dono\Foundation\Helpers\View;
 use Dono\Vendor\Queryable\DB;
 
@@ -125,7 +126,7 @@ final class GoalBlock implements Block
         $campaign = $form->campaign_id ? $this->campaigns->findById((int) $form->campaign_id) : null;
         $currency = $campaign
             ? (string) $campaign->currency
-            : (string) (get_option('dono_default_currency') ?: 'USD');
+            : Money::defaultCurrency();
 
         return $this->view(
             goalType:    $type,
