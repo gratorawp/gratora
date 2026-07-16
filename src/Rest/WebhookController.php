@@ -6,6 +6,7 @@ namespace Dono\Rest;
 
 use Dono\Foundation\Time\Clock;
 use Dono\Gateways\GatewayManager;
+use Dono\Gateways\WebhookOutcome;
 use Dono\Vendor\Queryable\QueryException;
 use Dono\Webhooks\WebhookLog;
 use WP_Error;
@@ -52,7 +53,19 @@ final class WebhookController
 
         $this->debugLog("webhook received: gateway={$gatewayId}");
 
-        $outcome = $gateway->handleWebhook($request);
+        try {
+            $outcome = $gateway->handleWebhook($request);
+        } catch (\Throwable $e) {
+            // An out-of-order or malformed event must not fatal the endpoint;
+            // record a delivery row and 500 so the gateway retries.
+            $this->debugLog("webhook handler threw: gateway={$gatewayId}: " . $e->getMessage());
+            $outcome = new WebhookOutcome(
+                signature_ok: true,
+                event_type:   'exception',
+                error:        'Handler exception: ' . $e->getMessage(),
+                http_status:  500,
+            );
+        }
 
         $this->debugLog("webhook processed: gateway={$gatewayId} event={$outcome->event_type} handled=" . ($outcome->handled ? 'yes' : 'no') . " sig_ok=" . ($outcome->signature_ok ? 'yes' : 'no'));
 

@@ -246,7 +246,7 @@ final class DonationsController
         } catch ( Throwable $e) {
             $this->debugLog("gateway createIntent failed: {$e->getMessage()}");
             $this->donations->markFailed($donation, 'Gateway createIntent threw: ' . $e->getMessage());
-            return new WP_Error('dono_gateway_intent_failed', $e->getMessage(), ['status' => 502]);
+            return new WP_Error('dono_gateway_intent_failed', __('We could not start your payment. Please try again in a moment.', 'dono'), ['status' => 502]);
         }
 
         try {
@@ -257,7 +257,7 @@ final class DonationsController
             );
         } catch (Throwable $e) {
             $this->donations->markFailed($donation, 'setGatewayIntent failed: ' . $e->getMessage());
-            return new WP_Error('dono_intent_persist_failed', $e->getMessage(), ['status' => 500]);
+            return new WP_Error('dono_intent_persist_failed', __('Something went wrong saving your donation. Please try again.', 'dono'), ['status' => 500]);
         }
 
         if ($gatewayResult->requires_action) {
@@ -367,7 +367,7 @@ final class DonationsController
         try {
             $result = $gateway->confirm($donation, $payload);
         } catch ( Throwable $e) {
-            return new WP_Error('dono_gateway_confirm_failed', $e->getMessage(), ['status' => 502]);
+            return new WP_Error('dono_gateway_confirm_failed', __('We could not confirm your payment. Please try again in a moment.', 'dono'), ['status' => 502]);
         }
 
         if (! $result->success) {
