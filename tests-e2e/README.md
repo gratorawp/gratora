@@ -105,6 +105,39 @@ Reports / traces / screenshots on failure land in `test-results/` (gitignored).
 If you hit `dono_rate_limited` (429), re-run `wp dono e2e-seed` to clear the
 AntiSpamGuard IP transients and start fresh.
 
+## Visual regression
+
+Screenshot goldens for the donor-facing surfaces, in a dedicated `visual`
+project (`specs/visual/`). Element-scoped to the form so theme chrome never
+bleeds into a golden. Covered: the kitchen-sink form (initial desktop +
+mobile, tribute expanded, currency switched, field-error styling), each page
+of the multi-step wizard, and the layout/content form (goal block masked, its
+totals drift as the functional suite donates).
+
+```sh
+npm run test:visual            # compare against committed goldens
+npm run test:visual:update     # re-bless after an intentional styling change
+```
+
+Needs the same env as the functional suite (`DONO_E2E_URL` +
+`DONO_E2E_FORM_PATH`, plus the wizard/layout paths for those specs). The
+project is opt-in (the scripts set `DONO_E2E_VISUAL=1`) so a plain
+`npm run test:e2e` never fails on missing snapshots.
+
+Goldens are committed under `specs/visual/__screenshots__/<platform>/`, keyed
+by OS because font rasterisation differs per platform - the darwin set is
+canonical for local work; a Linux CI runner would grow its own set on first
+`--update-snapshots` run. On a diff, the report in `test-results/` contains
+expected / actual / diff images side by side (`npx playwright show-report`).
+
+Comparison settings live in `playwright.config.ts` (`expect.toHaveScreenshot`):
+animations disabled, caret hidden, `maxDiffPixels: 120`, and
+`specs/visual/vrt.css` injected at capture time to neutralise motion.
+
+The goldens assume the seeded e2e site state, including test mode being ON
+(the form renders the test-mode banner). If a golden fails after reseeding,
+check the site state before re-blessing.
+
 ## Hermetic (wp-env) and CI
 
 The committed `.wp-env.json` loads core only, so a standalone checkout boots.

@@ -8,11 +8,17 @@ const baseURL = process.env.DONO_E2E_URL ?? 'http://localhost:10075';
 // them unseeded. The core project always runs and ignores specs/p2p.
 const runP2p = !! process.env.DONO_E2E_P2P_START_PATH;
 
+// Visual regression project. Opt-in (DONO_E2E_VISUAL=1) because screenshot
+// goldens are rendered on macOS; a default run on another platform would fail
+// on missing snapshots rather than catch regressions. Run via npm run
+// test:visual / test:visual:update.
+const runVisual = !! process.env.DONO_E2E_VISUAL;
+
 const projects: Project[] = [
     {
         name: 'core',
         use: { ...devices['Desktop Chrome'] },
-        testIgnore: '**/specs/p2p/**',
+        testIgnore: ['**/specs/p2p/**', '**/specs/visual/**'],
     },
 ];
 
@@ -21,6 +27,15 @@ if (runP2p) {
         name: 'p2p',
         use: { ...devices['Desktop Chrome'] },
         testMatch: '**/specs/p2p/**',
+        testIgnore: '**/specs/visual/**',
+    });
+}
+
+if (runVisual) {
+    projects.push({
+        name: 'visual',
+        use: { ...devices['Desktop Chrome'] },
+        testMatch: '**/specs/visual/**',
     });
 }
 
@@ -32,6 +47,18 @@ export default defineConfig({
     retries: process.env.CI ? 1 : 0,
     reporter: process.env.CI ? 'line' : 'list',
     globalSetup: './tests-e2e/setup/global-setup.ts',
+    // Goldens are committed; {platform} keeps per-OS renders side by side so a
+    // Linux CI runner can grow its own set without clobbering the macOS ones.
+    snapshotPathTemplate: '{testDir}/visual/__screenshots__/{platform}/{arg}{ext}',
+    expect: {
+        toHaveScreenshot: {
+            animations: 'disabled',
+            caret: 'hide',
+            scale: 'css',
+            maxDiffPixels: 120,
+            stylePath: './tests-e2e/specs/visual/vrt.css',
+        },
+    },
     use: {
         baseURL,
         trace: 'retain-on-failure',

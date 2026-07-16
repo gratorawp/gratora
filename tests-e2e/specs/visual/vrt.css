@@ -1,0 +1,15 @@
+/*
+ * Injected into every toHaveScreenshot capture (expect.toHaveScreenshot.stylePath).
+ * Neutralizes motion and chrome that would make pixel comparison flaky.
+ */
+*,
+*::before,
+*::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+}
+
+#wpadminbar {
+    display: none !important;
+}
