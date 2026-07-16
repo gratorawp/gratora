@@ -70,8 +70,19 @@ final class ReferenceGeneratorFormatTest extends TestCase
 
     public function test_custom_separator(): void
     {
-        update_option(ReferenceGenerator::OPTION_SETTINGS, ['separator' => '/']);
-        $this->assertSame('DONO/2026/00001', $this->gen->format('donation', 2026, 1));
+        update_option(ReferenceGenerator::OPTION_SETTINGS, ['separator' => '_']);
+        $this->assertSame('DONO_2026_00001', $this->gen->format('donation', 2026, 1));
+    }
+
+    public function test_route_unsafe_separator_and_prefix_are_coerced(): void
+    {
+        // '.', '/', '#' would mint references no REST route can match; coerce
+        // the separator to '-' and strip the prefix down to the safe alphabet.
+        update_option(ReferenceGenerator::OPTION_SETTINGS, [
+            'separator' => '/',
+            'prefixes'  => ['donation' => 'DO.NO'],
+        ]);
+        $this->assertSame('DONO-2026-00001', $this->gen->format('donation', 2026, 1));
     }
 
     public function test_combined_overrides(): void
