@@ -176,6 +176,35 @@ final class DonationFlowTest extends IntegrationTestCase
         $this->assertSame('dono_unsupported_currency', $res->get_data()['code'] ?? null);
     }
 
+    public function test_zero_decimal_currency_rejects_fractional_amounts(): void
+    {
+        // JPY has no sub-unit; internal storage is always major x 100, so an
+        // amount that is not a whole yen (5050 -> Y50.50) cannot be represented
+        // and would mischarge at the gateway. Make JPY the base, then the create
+        // endpoint must reject the fractional amount but allow the whole-yen one.
+        update_option('dono_currency_locale', [
+            'default_currency'     => 'JPY',
+            'supported_currencies' => ['JPY'],
+        ]);
+
+        $bad = $this->postDonation([
+            'email'        => 'yen@example.com',
+            'amount_cents' => 5050,
+            'currency'     => 'JPY',
+            'gateway'      => 'offline',
+        ]);
+        $this->assertSame(400, $bad->get_status());
+        $this->assertSame('dono_invalid_amount', $bad->get_data()['code'] ?? null);
+
+        $ok = $this->postDonation([
+            'email'        => 'yen2@example.com',
+            'amount_cents' => 5000,
+            'currency'     => 'JPY',
+            'gateway'      => 'offline',
+        ]);
+        $this->assertSame(201, $ok->get_status(), 'a whole-yen amount passes the precision guard');
+    }
+
     public function test_post_donations_accepts_the_base_currency_even_when_not_in_supported_list(): void
     {
         // An org can switch its base currency without re-adding it to the

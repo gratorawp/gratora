@@ -228,8 +228,13 @@ export default function Editor( { formId } ) {
         // CHANGE keeps it in history (undoable) when replacing existing content;
         // RESET sets a fresh baseline for the first-open empty-form seeding.
         dispatchHistory( { type: hasContent ? 'CHANGE' : 'RESET', blocks: parsed } );
+        // Templates ship their own form settings (goal, recurring defaults); apply
+        // them alongside the blocks so the picked shape is complete, not blocks-only.
+        if ( template?.settings && typeof template.settings === 'object' ) {
+            c.edit( { settings: mergeFormSettings( template.settings ) } );
+        }
         setTemplatePickerOpen( false );
-    }, [ history.present.length ] );
+    }, [ history.present.length, c ] );
 
     const onBlocksInput  = useCallback( ( next ) => dispatchHistory( { type: 'INPUT',  blocks: next } ), [] );
     const onBlocksChange = useCallback( ( next ) => dispatchHistory( { type: 'CHANGE', blocks: next } ), [] );

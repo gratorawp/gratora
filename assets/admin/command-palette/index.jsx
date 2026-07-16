@@ -10,7 +10,6 @@ import {
     currencyDollar,
     people,
     megaphone,
-    formatListBullets,
     archive,
     cog,
     plus,
@@ -50,12 +49,6 @@ const commands = [
         callback: goTo( 'dono-campaigns' ),
     },
     {
-        name:     'dono/forms',
-        label:    __( 'Dono: View donation forms', 'dono' ),
-        icon:     formatListBullets,
-        callback: goTo( 'dono-forms' ),
-    },
-    {
         name:     'dono/funds',
         label:    __( 'Dono: View funds', 'dono' ),
         icon:     archive,
@@ -79,15 +72,6 @@ const commands = [
         icon:     plus,
         callback: ( { close } ) => {
             window.location.href = adminUrl( 'dono-campaigns' ) + '&action=new';
-            close();
-        },
-    },
-    {
-        name:     'dono/new-form',
-        label:    __( 'Dono: New donation form', 'dono' ),
-        icon:     plus,
-        callback: ( { close } ) => {
-            window.location.href = adminUrl( 'dono-forms' ) + '&action=new';
             close();
         },
     },

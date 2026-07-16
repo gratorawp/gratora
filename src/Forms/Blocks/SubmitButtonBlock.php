@@ -27,7 +27,7 @@ final class SubmitButtonBlock implements Block
     public function attributes(): array
     {
         return [
-            'label'       => ['type' => 'string',  'default' => 'Donate'],
+            'label'       => ['type' => 'string',  'default' => 'Donate now'],
             'align'       => ['type' => 'string',  'default' => 'left'],
             'showSummary' => ['type' => 'boolean', 'default' => true],
         ];
@@ -44,7 +44,7 @@ final class SubmitButtonBlock implements Block
         }
 
         return View::loadRelative(__DIR__, 'views/submit-button', [
-            'label' => (string) ($attrs['label'] ?? __('Donate', 'dono')),
+            'label' => (string) ($attrs['label'] ?? __('Donate now', 'dono')),
             'align' => $align,
         ]);
     }

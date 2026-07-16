@@ -55,7 +55,11 @@ final class CampaignRepository
                 $q = $q->orderBy('raised_cents', 'DESC');
                 break;
             case 'ending-soon':
-                $q = $q->whereIsNotNull('ends_at')->orderBy('ends_at', 'ASC');
+                // Only campaigns that have not already ended; an ends_at in the
+                // past would otherwise sort first and surface dead campaigns.
+                $q = $q->whereIsNotNull('ends_at')
+                    ->where('ends_at', gmdate('Y-m-d H:i:s'), '>=')
+                    ->orderBy('ends_at', 'ASC');
                 break;
             default:
                 $q = $q->orderBy('created_at', 'DESC');

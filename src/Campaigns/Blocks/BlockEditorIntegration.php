@@ -34,6 +34,7 @@ final class BlockEditorIntegration
         add_action('enqueue_block_editor_assets', [$this, 'enqueueEditorAssets']);
         add_action('enqueue_block_assets',        [$this, 'enqueueEditorCanvasStyle']);
         add_action('wp_enqueue_scripts',          [$this, 'enqueueFrontendAssets']);
+        add_filter('render_block',                [$this, 'enqueueOnRender'], 10, 2);
         add_action('init',                        [$this, 'registerPageMeta']);
     }
 
@@ -139,6 +140,40 @@ final class BlockEditorIntegration
             return;
         }
 
+        $this->enqueueBlockStyle();
+
+        // Modal JS only needed when the donate-button block is present.
+        if ($hasDonateButton) {
+            $this->enqueueDonateButtonModal();
+        }
+    }
+
+    /**
+     * has_block() only sees the post's own content, so a Dono block nested in a
+     * synced pattern or template part renders unstyled. render_block fires for
+     * every block wherever it lives; enqueue lazily then. Late enqueues still
+     * print, so the block is never left without its CSS or modal script.
+     *
+     * @param array<string,mixed> $block
+     */
+    public function enqueueOnRender(string $content, array $block): string
+    {
+        $name = (string) ($block['blockName'] ?? '');
+        if (! in_array($name, self::BLOCK_NAMES, true)) {
+            return $content;
+        }
+        $this->enqueueBlockStyle();
+        if ($name === 'dono/donate-button') {
+            $this->enqueueDonateButtonModal();
+        }
+        return $content;
+    }
+
+    private function enqueueBlockStyle(): void
+    {
+        if (wp_style_is(self::HANDLE_FRONTEND, 'enqueued')) {
+            return;
+        }
         $cssPath = DONO_DIR . 'build/admin/campaign-blocks.css';
         if (file_exists($cssPath)) {
             wp_enqueue_style(
@@ -148,16 +183,19 @@ final class BlockEditorIntegration
                 DONO_VERSION
             );
         }
+    }
 
-        // Modal JS only needed when the donate-button block is present.
-        if ($hasDonateButton) {
-            wp_enqueue_script(
-                'dono-donate-button-modal',
-                DONO_URL . 'assets/donate-button/modal.js',
-                [],
-                DONO_VERSION,
-                true
-            );
+    private function enqueueDonateButtonModal(): void
+    {
+        if (wp_script_is('dono-donate-button-modal', 'enqueued')) {
+            return;
         }
+        wp_enqueue_script(
+            'dono-donate-button-modal',
+            DONO_URL . 'assets/donate-button/modal.js',
+            [],
+            DONO_VERSION,
+            true
+        );
     }
 }

@@ -33,7 +33,11 @@ export default function List() {
     const [ error, setError ]     = useState( null );
     const [ stats, setStats ]     = useState( null );
     const [ confirm, setConfirm ] = useState( null );
-    const [ drawerOpen, setDrawerOpen ] = useState( false );
+    // Opens straight into the create drawer when reached via the command
+    // palette's "New campaign" (admin.php?page=dono-campaigns&action=new).
+    const [ drawerOpen, setDrawerOpen ] = useState(
+        () => new URLSearchParams( window.location.search ).get( 'action' ) === 'new'
+    );
 
     const statusFilter = view.filters?.find( ( f ) => f.field === 'status' );
 

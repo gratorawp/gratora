@@ -14,7 +14,16 @@ export function initialState( config ) {
         ? Number( first )
         : Number( first?.cents || 0 );
     const firstCents = Number( config.__prefillAmount ) || fallback;
-    const donorSteps = ( config.steps || [] ).filter( ( s ) => s.type === 'donor' );
+    // Fields authored above a multi-step wizard live in config.preamble (rendered
+    // once above the wizard, not inside a step). Fold them into field collection
+    // as a synthetic step so their values are seeded, captured and submitted like
+    // any step field instead of rendering as orphaned, never-captured inputs.
+    const preambleStep = ( Array.isArray( config.preamble ) && config.preamble.length )
+        ? [ { type: 'donor', items: config.preamble } ]
+        : [];
+    const donorSteps = preambleStep.concat(
+        ( config.steps || [] ).filter( ( s ) => s.type === 'donor' )
+    );
     const allDonorFields = donorSteps.flatMap( fieldsOf );
     const anonField = allDonorFields.find( ( f ) => f.kind === 'anonymous' );
     const fundField = allDonorFields.find( ( f ) => f.kind === 'fund' );

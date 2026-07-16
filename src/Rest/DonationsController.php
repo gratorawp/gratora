@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dono\Rest;
 
 use Dono\Campaigns\Campaign;
+use Dono\Currency\Currency;
 use Dono\Donations\AntiSpamGuard;
 use Dono\Donations\Donation;
 use Dono\Donations\DonationIntent;
@@ -97,6 +98,12 @@ final class DonationsController
         // conversion, so reject them rather than record an unreportable row.
         if (! $this->isSupportedCurrency($currency)) {
             return new WP_Error('dono_unsupported_currency', __('This currency is not accepted.', 'dono'), ['status' => 400]);
+        }
+        // Zero-decimal currencies (JPY, KRW, ...) have no sub-unit. Storage is
+        // always major x 100, so the amount must land on a whole major unit or
+        // the gateway conversion rounds and mischarges.
+        if (Currency::minorUnits($currency) === 0 && $amount % 100 !== 0) {
+            return new WP_Error('dono_invalid_amount', __('This currency does not support fractional amounts.', 'dono'), ['status' => 400]);
         }
         if ($gatewayId === '' || ! $this->gateways->get($gatewayId)) {
             /* translators: %s: gateway identifier */

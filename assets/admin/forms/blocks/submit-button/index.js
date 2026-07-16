@@ -21,7 +21,7 @@ const ALIGN_OPTIONS = [
 ];
 
 function Edit( { attributes, setAttributes } ) {
-    const { label = 'Donate', align = 'left', showSummary = true } = attributes;
+    const { label = 'Donate now', align = 'left', showSummary = true } = attributes;
 
     const justify = {
         left:   'flex-start',
@@ -70,7 +70,7 @@ function Edit( { attributes, setAttributes } ) {
                     tagName="span"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Donate', 'dono' ) }
+                    placeholder={ __( 'Donate now', 'dono' ) }
                     allowedFormats={ [] }
                     style={ {
                         display:       'inline-block',
@@ -101,7 +101,7 @@ export default function register( api ) {
         icon:       BlockIcons[ 'submit-button' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },
         attributes: {
-            label:       { type: 'string',  default: 'Donate' },
+            label:       { type: 'string',  default: 'Donate now' },
             align:       { type: 'string',  default: 'left' },
             showSummary: { type: 'boolean', default: true },
         },
