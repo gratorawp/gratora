@@ -72,6 +72,13 @@ final class FormSubmissionValidator
 
     private function validateBlock(string $name, array $attrs, array $body, array &$offered): ?WP_Error
     {
+        // A block hidden by its display condition submits no value by design, so
+        // its required/format rules must not be enforced (mirrors the client).
+        if (isset($attrs['condition']) && is_array($attrs['condition'])
+            && ! ConditionEvaluator::passes($attrs['condition'], $body)) {
+            return null;
+        }
+
         $profile = is_array($body['profile'] ?? null) ? $body['profile'] : [];
         $custom  = is_array($body['custom'] ?? null) ? $body['custom'] : [];
 

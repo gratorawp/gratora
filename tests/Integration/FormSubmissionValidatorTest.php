@@ -93,6 +93,27 @@ BLOCKS;
         $this->assertNotNull($this->validator()->validate($this->form($blocks), $base + ['frequency' => 'yearly']));
     }
 
+    public function test_required_field_hidden_by_its_condition_is_not_enforced(): void
+    {
+        $blocks = <<<BLOCKS
+<!-- wp:dono/donation-amount {"presets":[{"cents":2500}]} /-->
+<!-- wp:dono/text-input {"label":"Company","field":"company","required":true,"condition":{"field":"custom.donor_type","op":"=","value":"business"}} /-->
+<!-- wp:dono/submit-button /-->
+BLOCKS;
+        $form = $this->form($blocks);
+        $base = ['amount_cents' => 2500, 'frequency' => 'one_time'];
+
+        // Condition false: the field is hidden client-side and submits nothing,
+        // so the server must not enforce its required rule.
+        $this->assertNull($this->validator()->validate($form, $base + ['custom' => ['donor_type' => 'individual']]));
+
+        // Condition true but the required field is empty: reject.
+        $this->assertNotNull($this->validator()->validate($form, $base + ['custom' => ['donor_type' => 'business']]));
+
+        // Condition true and filled: pass.
+        $this->assertNull($this->validator()->validate($form, $base + ['custom' => ['donor_type' => 'business', 'company' => 'Acme']]));
+    }
+
     public function test_number_and_pattern_constraints_are_enforced(): void
     {
         $blocks = <<<BLOCKS
