@@ -25,7 +25,7 @@ export function initialState( config ) {
         : Number( first?.cents || 0 );
     const firstCents = Number( config.__prefillAmount ) || fallback;
     const donorSteps = ( config.steps || [] ).filter( ( s ) => s.type === 'donor' );
-    const allDonorFields = donorSteps.flatMap( ( s ) => s.fields || [] );
+    const allDonorFields = donorSteps.flatMap( fieldsOf );
     const anonField = allDonorFields.find( ( f ) => f.kind === 'anonymous' );
     const fundField = allDonorFields.find( ( f ) => f.kind === 'fund' );
     const freqField = allDonorFields.find( ( f ) => f.kind === 'frequency' );
@@ -81,7 +81,7 @@ function initialConsents( donorSteps ) {
     const out = {};
     const list = Array.isArray( donorSteps ) ? donorSteps : [ donorSteps ];
     for ( const s of list ) {
-        for ( const f of ( s?.fields || [] ) ) {
+        for ( const f of fieldsOf( s ) ) {
             if ( f.kind !== 'consent' ) continue;
             const defaultOn = f.defaultState === 'opt-out';
             for ( const p of ( f.purposes || [] ) ) {
@@ -97,7 +97,7 @@ function initialCustom( donorSteps ) {
     // so the initial custom values cover the whole form.
     const all = [];
     for ( const s of ( Array.isArray( donorSteps ) ? donorSteps : [ donorSteps ] ) ) {
-        for ( const f of ( s?.fields || [] ) ) all.push( f );
+        for ( const f of fieldsOf( s ) ) all.push( f );
     }
     const out = {};
     for ( const f of all ) {
@@ -291,6 +291,8 @@ export function reducer( state, action ) {
                 form_id:     state.formId,
                 campaign_id: state.campaignId,
                 fx:          state.fx,
+                i18n:        state.i18n,
+                spam:        { minAmountCents: state.minAmountCents },
             } );
 
         default:
@@ -302,8 +304,17 @@ function findStep( steps, type ) {
     return ( steps || [] ).find( ( s ) => s.type === type );
 }
 
+// Donor steps carry fields as items tagged t:'field' (interleaved with t:'deco'
+// content); fall back to a flat fields array for any step not shaped that way.
+function fieldsOf( step ) {
+    if ( Array.isArray( step?.items ) ) {
+        return step.items.filter( ( it ) => it && it.t === 'field' );
+    }
+    return Array.isArray( step?.fields ) ? step.fields : [];
+}
+
 function findField( step, kind ) {
-    return ( step?.fields || [] ).find( ( f ) => f.kind === kind );
+    return fieldsOf( step ).find( ( f ) => f.kind === kind );
 }
 
 /** Raw preset amounts (in presetCurrency cents) from the amount step. */
@@ -356,7 +367,7 @@ export function validateStep( step, state ) {
 
         case 'donor': {
             const v = state.values;
-            const fields = ( step.fields || [] ).filter( ( f ) => evaluateCondition( f.condition, v ) );
+            const fields = fieldsOf( step ).filter( ( f ) => evaluateCondition( f.condition, v ) );
             for ( const f of fields ) {
                 if ( f.kind === 'email' ) {
                     // Always required: the server hard-requires a valid email,
@@ -489,7 +500,7 @@ function suppressedFields( state ) {
     const CUSTOM = [ 'text', 'number', 'date', 'dropdown', 'radio', 'checkbox', 'multi-select', 'hidden' ];
     const out = { custom: new Set(), frequency: false, fund: false, anon: false, fees: false };
     for ( const step of ( state.steps || [] ) ) {
-        for ( const f of ( step.fields || [] ) ) {
+        for ( const f of fieldsOf( step ) ) {
             if ( evaluateCondition( f.condition, v ) ) continue;
             if ( f.kind === 'frequency' ) out.frequency = true;
             else if ( f.kind === 'fund' ) out.fund = true;
