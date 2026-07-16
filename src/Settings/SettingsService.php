@@ -101,7 +101,7 @@ final class SettingsService
                 'mapping' => [
                     'administrator' => [
                         'dono_view_donors', 'dono_edit_donors', 'dono_export_donors', 'dono_redact_donors',
-                        'dono_view_donations', 'dono_refund_donations', 'dono_resend_receipt',
+                        'dono_view_donations', 'dono_edit_donations', 'dono_refund_donations', 'dono_resend_receipt',
                         'dono_view_reports', 'dono_manage_campaigns', 'dono_manage_forms', 'dono_manage_settings',
                     ],
                     'editor' => [

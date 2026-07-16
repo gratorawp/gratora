@@ -45,7 +45,7 @@ export default function List() {
             path:  addQueryArgs( '/dono/v1/admin/campaigns', {
                 page:     view.page,
                 per_page: view.perPage,
-                orderby:  view.sort?.field || 'updated_at',
+                orderby:  view.sort?.field === 'raised' ? 'raised_cents' : ( view.sort?.field || 'updated_at' ),
                 order:    view.sort?.direction || 'desc',
                 search:   view.search || undefined,
                 status:   statusFilter?.value || undefined,

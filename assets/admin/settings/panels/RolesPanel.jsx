@@ -19,6 +19,7 @@ const CAP_GROUPS = [
         label: __( 'Donations', 'dono' ),
         caps: [
             [ 'dono_view_donations',   __( 'View donations', 'dono' ) ],
+            [ 'dono_edit_donations',   __( 'Edit donations (notes)', 'dono' ) ],
             [ 'dono_refund_donations', __( 'Refund donations', 'dono' ) ],
             [ 'dono_resend_receipt',   __( 'Resend receipts', 'dono' ) ],
         ],

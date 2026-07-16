@@ -48,7 +48,7 @@ export default function DonationsTab( { donorId } ) {
         donor_id: donorId,
         page:     view.page,
         per_page: view.perPage,
-        orderby:  view.sort?.field || 'created_at',
+        orderby:  view.sort?.field === 'amount' ? 'amount_cents' : ( view.sort?.field || 'created_at' ),
         order:    view.sort?.direction || 'desc',
         status:   statusFilter?.value || undefined,
         search:   view.search || undefined,

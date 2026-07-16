@@ -75,7 +75,7 @@ export default function List() {
     const apiParams = useMemo( () => ( {
         page:         view.page,
         per_page:     view.perPage,
-        orderby:      view.sort?.field || 'created_at',
+        orderby:      view.sort?.field === 'amount' ? 'amount_cents' : ( view.sort?.field || 'created_at' ),
         order:        view.sort?.direction || 'desc',
         search:       view.search || undefined,
         status:       statusFilter || undefined,
