@@ -499,22 +499,37 @@ final class DonationService
             return $donation;
         }
 
+        $now = $this->clock->now()->format('Y-m-d H:i:s');
+
+        // Conditional transition: a webhook may have moved the row to a terminal
+        // (paid/refunded) state since this object loaded. Only fail it while it
+        // is still non-terminal so we never clobber real money back to failed.
+        $applied = DB::table('dono_donations')
+            ->where('id', $donation->id)
+            ->whereNotIn('status', ['paid', 'refunded', 'partial_refund'])
+            ->update([
+                'status'         => 'failed',
+                'failure_reason' => $reason,
+                'updated_at'     => $now,
+            ])->affectedRows;
+
+        if ($applied === 0) {
+            // Lost the race to a terminal transition; reflect the winning row.
+            return $this->donations->findById($donation->id) ?? $donation;
+        }
+
         $donation->status         = 'failed';
         $donation->failure_reason = $reason;
-        $donation->updated_at     = $this->clock->now()->format('Y-m-d H:i:s');
+        $donation->updated_at     = $now;
 
-        DB::transaction(function () use ($donation, $reason) {
-            $donation->save();
-
-            $this->events->record('donation.failed', [
-                'donor_id'    => $donation->donor_id,
-                'donation_id' => $donation->id,
-                'form_id'     => $donation->form_id,
-                'campaign_id' => $donation->campaign_id,
-                'country'     => $donation->country,
-                'payload'     => ['gateway' => $donation->gateway, 'reason' => $reason],
-            ]);
-        });
+        $this->events->record('donation.failed', [
+            'donor_id'    => $donation->donor_id,
+            'donation_id' => $donation->id,
+            'form_id'     => $donation->form_id,
+            'campaign_id' => $donation->campaign_id,
+            'country'     => $donation->country,
+            'payload'     => ['gateway' => $donation->gateway, 'reason' => $reason],
+        ]);
 
         do_action('dono.donation.failed', $donation);
 

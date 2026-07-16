@@ -42,6 +42,24 @@ final class DonationConfirmRaceTest extends IntegrationTestCase
         $this->assertSame('txn_a', $fresh->gateway_txn_id, 'the winner wrote its fields; the loser did not overwrite');
     }
 
+    public function test_markFailed_does_not_clobber_a_concurrently_paid_donation(): void
+    {
+        $svc = Plugin::instance()->container->get(DonationService::class);
+        $ref = $this->seedPendingDonation();
+
+        // Two in-memory copies, both believing the row is still pending.
+        $paidCopy   = Donation::query()->where('reference', $ref)->get();
+        $failedCopy = Donation::query()->where('reference', $ref)->get();
+
+        // One process confirms it to paid; a concurrent stale copy then tries to
+        // fail it. The conditional transition must let paid win.
+        $svc->confirm($paidCopy, ['gateway_txn_id' => 'txn_ok']);
+        $svc->markFailed($failedCopy, 'gateway timeout');
+
+        $fresh = Donation::query()->where('reference', $ref)->get();
+        $this->assertSame('paid', $fresh->status, 'a stale markFailed must not clobber a paid donation');
+    }
+
     private function seedPendingDonation(): string
     {
         $donor = Plugin::instance()->container->get(DonorService::class)
