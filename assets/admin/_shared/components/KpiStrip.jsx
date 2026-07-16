@@ -1,11 +1,6 @@
 /**
- * Presentational KPI card strip shown above admin list tables. Each list
- * builds its own `items` (domain labels/values) and passes them here so the
- * card markup + loading treatment stay identical across donations, campaigns,
- * funds and donors.
- *
- *   items: Array<{ label: string, value: node, sub?: node }>
- *   loading: boolean   // dims the strip while the first stats fetch is in flight
+ * Presentational KPI card strip above admin list tables; each list passes its own
+ * items ({ label, value, sub? }) so card markup + loading treatment stay identical.
  */
 export default function KpiStrip( { items, loading } ) {
     return (

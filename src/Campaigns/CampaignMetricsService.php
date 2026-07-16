@@ -38,16 +38,9 @@ final class CampaignMetricsService
     }
 
     /**
-     * Same as summary() but with an optional `comparison` block.
-     *
-     * $mode picks which baseline to compare against:
-     *   'period' (default): the equivalent window immediately before this one
-     *                       (e.g. "last 7" is the 7 days before)
-     *   'year':             same window shifted back one year (for seasonal
-     *                       / annual-giving comparisons)
-     *   'none':             no comparison; the block is null
-     *
-     * For `all-time` no comparison makes sense, so the block is always null.
+     * summary() plus an optional comparison block. $mode: 'period' compares to the
+     * equivalent window immediately before, 'year' to the same window one year back,
+     * 'none' skips it. all-time always gets null.
      *
      * @return array<string,mixed>
      */
@@ -371,17 +364,10 @@ final class CampaignMetricsService
     }
 
     /**
-     * Donation-size distribution across fixed cent-value buckets.
-     * Curve shape shows whether a campaign is many-small-donations or
-     * few-large-donations.
+     * Donation-size distribution across fixed, currency-agnostic cent buckets;
+     * the front-end formats labels.
      *
-     * Buckets are currency-agnostic (cent ranges); the front-end formats labels.
-     *
-     * @return array{
-     *   buckets: array<array{min_cents:int,max_cents:?int,count:int,amount_cents:int}>,
-     *   median_cents: int,
-     *   total_count: int
-     * }
+     * @return array{buckets:array<array{min_cents:int,max_cents:?int,count:int,amount_cents:int}>,median_cents:int,total_count:int}
      */
     public function distributionBuckets(int $campaignId, string $range = 'all-time'): array
     {
@@ -471,12 +457,8 @@ final class CampaignMetricsService
     }
 
     /**
-     * Donation channel attribution.
-     *
-     * Maps `source_attribution.utm_*` into a canonical channel bucket the
-     * frontend knows how to label (direct / email / social / paid-social /
-     * organic / cpc / referral / qr / peer / other). The raw values stay on
-     * the donation row; only the aggregate is normalised.
+     * Channel attribution: maps source_attribution.utm_* into canonical channel
+     * buckets; raw values stay on the donation row.
      *
      * @return array<array{channel:string,amount_cents:int,donations_count:int}>
      */

@@ -12,19 +12,11 @@ namespace Dono\Forms;
 final class FormTemplates
 {
     /**
-     * Every built-in template.
+     * Every built-in template, ordered by category (Blank, Starter, Standard, Recurring,
+     * Tribute, Wizard, Premium). Templates defined below but not listed here stay
+     * unregistered; re-enable by appending, or via the dono.form.templates filter.
      *
      * @return list<array{id:string,name:string,description:string,icon:string,category:string,thumbnail_hint:string,settings:array<string,mixed>,blocks:string}>
-     */
-    /**
-     * Curated set of 10 templates spanning minimal → complex, with all common
-     * donor fields represented across the lot. The picker orders them by
-     * category in the rough order admins go through (Blank, Starter, Standard,
-     * Recurring, Tribute, Wizard, Premium).
-     *
-     * Older templates are still defined below but no longer registered; they
-     * can be re-enabled by appending them here, or by hooking into the
-     * `dono.form.templates` filter from an add-on.
      */
     public static function all(): array
     {

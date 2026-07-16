@@ -1,12 +1,6 @@
-// Intentional fork of @dono/ui's formatAmount/groupDigits: the shared helper
-// reads the org format from window.dono.number_format (an admin global), but the
-// public donation form has no window.dono - its number format is pushed from the
-// server form config. So this variant keeps a module-local `activeFormat` set
-// once at bootstrap via setActiveNumberFormat(config.numberFormat). Deduping
-// would require @dono/ui to expose a runtime-settable format source.
-//
-// Bootstrap must call setActiveNumberFormat(config.numberFormat) once before
-// render; call sites then stay zero-arg for format options.
+// Intentional fork of @dono/ui's formatAmount/groupDigits: the public form has no
+// window.dono, so the number format comes from the server form config. Bootstrap must
+// call setActiveNumberFormat(config.numberFormat) once before render; call sites stay zero-arg.
 
 let activeFormat = {
     decimalPlaces:  2,

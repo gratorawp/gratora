@@ -129,25 +129,12 @@ final class CampaignRepository
     }
 
     /**
-     * Filter-aware aggregates for the campaigns admin list (KPI strip).
-     * Honors the same status + search filters as listAdmin().
-     *
-     * `raised_cents` and `donations_count` sum the denormalized counters on
-     * each Campaign row, so they reflect lifetime totals already maintained
-     * by the donation lifecycle, not a live aggregate over the donations
-     * table.
-     *
-     * `currency` returns the most common currency among rows that have
-     * actually raised something; null when nothing has been raised yet.
+     * KPI-strip aggregates for the campaigns admin list; honors the same status + search
+     * filters as listAdmin(). Sums the denormalized per-campaign counters (lifetime totals,
+     * not a live donations aggregate); currency is the most common among raising rows, else null.
      *
      * @param array{status?:?string,search?:?string} $args
-     * @return array{
-     *   total_count: int,
-     *   active_count: int,
-     *   raised_cents: int,
-     *   currency: ?string,
-     *   donations_count: int,
-     * }
+     * @return array{total_count:int,active_count:int,raised_cents:int,currency:?string,donations_count:int}
      */
     public function aggregateAdmin(array $args = []): array
     {

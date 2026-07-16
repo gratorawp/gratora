@@ -1,13 +1,7 @@
 /**
  * Exchange-rate state for the Currency panel, shaped like useDonoSettings so
- * Settings.jsx can fold it into the single Save bar:
- *
- *   { rows, auto, base, source, stale, fetchedAt,
- *     isDirty, isSaving, save, discard,
- *     setAuto, setManual(code,n), resetManual(code), fetchNow() }
- *
- * Backed by /dono/v1/admin/currency/fx (GET state, PUT auto+manual,
- * POST /fetch for an immediate refresh that ignores the auto toggle).
+ * Settings.jsx folds it into the single Save bar. Backed by
+ * /dono/v1/admin/currency/fx (GET state, PUT auto+manual, POST /fetch).
  */
 
 import { useState, useEffect, useCallback, useMemo } from '@wordpress/element';

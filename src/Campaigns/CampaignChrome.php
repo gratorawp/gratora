@@ -7,13 +7,9 @@ namespace Dono\Campaigns;
 use Dono\Foundation\Hooks\HookProvider;
 
 /**
- * Hides the active theme's header/footer on a campaign's public pages when the
- * campaign opts in (Appearance settings). Works for any block theme: the header
- * and footer are core/template-part blocks, so suppressing them at render covers
- * the campaign landing page and every add-on route that resolves to the same
- * campaign (e.g. the P2P fundraiser/team/start pages), with no theme-specific CSS.
- *
- * @version 1.0.0
+ * Hides the theme header/footer on a campaign's public pages when the campaign
+ * opts in. Header and footer are core/template-part blocks, so suppressing them at
+ * render covers any block theme and every add-on route resolving to the campaign.
  */
 final class CampaignChrome extends HookProvider
 {

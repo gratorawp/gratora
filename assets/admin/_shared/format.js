@@ -1,9 +1,6 @@
 /**
- * Generic formatters live in @dono/ui; re-export them here so the many call
- * sites importing from '_shared/format' stay stable. StatusBadge is the local
- * token-driven `.dono-pill` component (one badge system for the whole admin).
- * The Dono-specific admin routing helpers (they hardcode dono-* admin pages)
- * stay local - they are not design-system concerns.
+ * Re-exports @dono/ui's generic formatters so call sites importing '_shared/format'
+ * stay stable; the Dono-specific admin routing helpers stay local.
  */
 import { __ } from '@wordpress/i18n';
 

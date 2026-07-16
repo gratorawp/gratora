@@ -45,12 +45,8 @@ final class Campaign extends Model
     public ?array $default_amount_presets = null;
 
     /**
-     * Campaign-level styling choice. Shape:
-     *   - null / [] : use the org default preset
-     *   - ['preset_id' => '<id>']                       : pick a named brand preset
-     *   - ['preset_id' => '<id>', 'tokens' => [...]]    : preset + inline overrides
-     *
-     * Effective tokens for a render are resolved by CampaignStyleResolver.
+     * Styling choice, resolved by CampaignStyleResolver: null/[] = org default preset;
+     * ['preset_id' => id] picks a brand preset, optionally with 'tokens' inline overrides.
      */
     public ?array $style = null;
 

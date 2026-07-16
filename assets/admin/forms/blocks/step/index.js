@@ -1,11 +1,6 @@
 /**
- * dono/step: one page inside a dono/steps wizard.
- *
- * Title is editable from both the canvas (inline, click on the header) and
- * the sidebar (TextControl + showTitle toggle). The editor renders the title
- * as the same heading element the runtime emits so build mode matches the
- * donor-facing form. Hidden from the inserter; authors add steps via the
- * parent's toolbar.
+ * dono/step: one page inside a dono/steps wizard. Hidden from the inserter;
+ * authors add steps via the parent's toolbar.
  */
 
 import { useBlockProps, InspectorControls, InnerBlocks, RichText } from '@wordpress/block-editor';

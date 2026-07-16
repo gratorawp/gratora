@@ -99,13 +99,9 @@ final class DonorRepository
     }
 
     /**
-     * Filter-aware aggregates for the donors admin list (KPI strip). Honors
-     * the same country / donor_type / search filters as listAdmin().
-     *
-     * `total_donated_cents` and `donations_count` come from the denormalized
-     * counters on each donor row. `avg_ltv_cents` is the mean lifetime value
-     * across donors who have given at least once (avoids dragging the average
-     * down with never-given records).
+     * KPI-strip aggregates for the donors admin list, honoring the listAdmin() filters.
+     * Totals come from the denormalized donor counters; avg_ltv_cents averages only
+     * donors who have given at least once.
      *
      * @param array{country?:?string,donor_type?:?string,has_search?:bool,matching_ids?:array<int>} $args
      * @return array{total_count:int,with_donations:int,total_donated_cents:int,avg_ltv_cents:int}

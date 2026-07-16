@@ -14,15 +14,9 @@ use WP_REST_Response;
 use WP_REST_Server;
 
 /**
- * Generic incoming-webhook dispatcher.
- *
- *   POST /wp-json/dono/v1/webhooks/{gateway}
- *
- * The resolved gateway's handleWebhook() verifies the signature and dispatches
- * the event. Dedup relies on the (gateway, external_id) UNIQUE index rather
- * than a SELECT pre-check, which would race under concurrent redeliveries.
- *
- * @version 1.0.0
+ * Incoming-webhook dispatcher: POST /dono/v1/webhooks/{gateway}; handleWebhook()
+ * verifies the signature. Dedup relies on the (gateway, external_id) UNIQUE index,
+ * not a SELECT pre-check, which would race under concurrent redeliveries.
  */
 final class WebhookController
 {

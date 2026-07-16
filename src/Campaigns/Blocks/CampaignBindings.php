@@ -10,15 +10,9 @@ use Dono\Foundation\Helpers\Money;
 use Dono\Foundation\Hooks\HookProvider;
 
 /**
- * Block Bindings (WP 6.5+) source that resolves campaign stats for core
- * blocks. A theme/author can drop a core Heading or Paragraph and bind its
- * content to e.g. `dono/campaign:title` or `dono/campaign:raised` instead of
- * shipping bespoke `dono/campaign-*` blocks.
- *
- * The `args.campaign_id` argument is optional: when absent, falls back to the
- * page's `_dono_campaign_id` post meta, the same fallback CampaignBlock uses.
- *
- * @version 1.0.0
+ * Block Bindings source resolving campaign stats for core blocks (e.g. bind a
+ * Heading to dono/campaign:raised). args.campaign_id is optional; it falls back
+ * to the page's _dono_campaign_id meta, same as CampaignBlock.
  */
 final class CampaignBindings extends HookProvider
 {

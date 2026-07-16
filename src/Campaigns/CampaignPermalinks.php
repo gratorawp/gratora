@@ -8,12 +8,9 @@ use Dono\Foundation\Hooks\HookProvider;
 use WP_Post;
 
 /**
- * Serves campaign pages under /campaigns/<slug>/. Campaign pages are ordinary
- * top-level WP pages (no CPT); a rewrite rule maps the prefixed URL onto the
- * page and a page_link filter ensures every generated permalink carries the
- * prefix so the public URL, admin list, and create-drawer preview agree.
- *
- * @version 1.0.0
+ * Serves campaign pages under /campaigns/<slug>/. Campaigns are ordinary top-level
+ * pages; a rewrite maps the prefixed URL and a page_link filter keeps every
+ * generated permalink carrying the prefix.
  */
 final class CampaignPermalinks extends HookProvider
 {

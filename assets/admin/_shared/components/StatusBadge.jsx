@@ -1,12 +1,9 @@
 import { __ } from '@wordpress/i18n';
 
 /**
- * Single status-pill renderer for the whole admin. Each status maps to a
- * `.dono-pill--{variant}` colour (token-driven, defined in campaigns.scss and
- * loaded by every admin bundle) plus a default label. Covers campaign/form
- * lifecycle and donation lifecycle; the status strings don't collide across
- * domains. Pass `label` to override the default (e.g. a domain that prefers
- * "Published" over "Active" for the `published` state).
+ * Single status-pill renderer for the whole admin: status -> .dono-pill--{variant}
+ * + default label. Status strings don't collide across domains; pass `label` to
+ * override (e.g. "Published" instead of "Active").
  */
 const STATUS = {
     // Campaign / form lifecycle

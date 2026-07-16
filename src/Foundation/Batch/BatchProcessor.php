@@ -8,15 +8,9 @@ use Closure;
 use Dono\Vendor\Queryable\DB;
 
 /**
- * One bounded, resumable tick of a batched data operation.
- *
- * Invariants: the caller must operate on a shrinking match set (every item
- * handled by $apply must no longer match $next). This keeps re-querying the
- * first N correct without OFFSET. Each batch is optionally transactional so a
- * crash leaves whole batches applied or not - the job is resumable and
- * idempotent. One batch per call; the caller re-enqueues itself while true.
- *
- * @version 1.0.0
+ * One bounded, resumable tick of a batched data operation. The caller must operate
+ * on a shrinking match set (items handled by $apply stop matching $next) so
+ * re-querying the first N stays correct without OFFSET; batches may be transactional.
  */
 final class BatchProcessor
 {

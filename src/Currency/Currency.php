@@ -5,20 +5,10 @@ declare(strict_types=1);
 namespace Dono\Currency;
 
 /**
- * Single source of truth for a currency's minor-unit exponent and for the
- * conversion between Dono's internal storage and a processor's charge amount.
- *
- * Internal convention: every monetary value is stored as major units x 100
- * (the amount_cents columns), whatever the currency's real precision. Money,
- * FxRates and receipts all rely on that uniform /100 scale, so storage stays
- * as-is and the rescale happens only at the gateway boundary.
- *
- * Processors want the amount in the currency's smallest unit, major x 10^exp
- * (Stripe's `amount`). For 2-decimal currencies the two are identical; for
- * 0-decimal (JPY) and 3-decimal (BHD) they differ, which is the source of the
- * 100x / 10x mischarge these helpers exist to prevent.
- *
- * @version 1.0.0
+ * Currency minor-unit exponents and the storage <-> processor charge-amount conversion.
+ * Storage is always major units x 100 regardless of the currency's real precision; the
+ * rescale to the processor's smallest unit happens only here, at the gateway boundary
+ * (prevents the 100x JPY / 10x BHD mischarge).
  */
 final class Currency
 {

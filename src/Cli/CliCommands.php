@@ -443,21 +443,6 @@ BLOCKS;
     }
 
     /**
-     * Conditional-logic variant: a single-step form with a trigger dropdown
-     * and a set of blocks whose `condition` attribute hides them by default
-     * and reveals them when the dropdown changes. Covers:
-     *   - `=` operator: heading visible only on a specific dropdown value
-     *   - `!=` operator: comment visible only when *any* value is picked
-     *   - required field hidden by condition does NOT block submit (regression
-     *     check: hidden-required is the most common conditional footgun)
-     */
-    /**
-     * Custom-field block coverage: text/number/radio/checkbox/multi-select/
-     * hidden. Each block has a unique marker label/field so the spec can
-     * exercise the interactive control AND verify the payload survives by
-     * checking the success state after submit.
-     */
-    /**
      * Layout + content blocks: heading, paragraph, html, divider, columns,
      * row, section, recurring-toggle, fund-picker, privacy-notice, goal.
      * Each gets a unique marker so the spec can assert the block survived to

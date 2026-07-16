@@ -7,22 +7,9 @@ namespace Dono\Donors\Portal;
 use WP_Post;
 
 /**
- * The donor portal lives at a real WP Page that hosts the
- * [dono_donor_portal] shortcode. Magic-link emails point donors at its URL,
- * so a missing page silently breaks every donor self-service flow (receipts,
- * recurring, refunds, my-fundraising). This service guarantees the page
- * exists, is published, and is reachable.
- *
- *  - `ensure()` creates the page on activation, OR adopts an existing
- *    page that already uses the canonical slug.
- *  - `resolve()` returns the page id only if the page is still published.
- *  - `url()` is the single source of truth for portal links across emails,
- *    REST, and metrics.
- *
- * Site owners can still override with the `dono.portal.url` filter; this
- * service is consulted only when the filter returns empty.
- *
- * @version 1.0.0
+ * Guarantees the donor-portal WP page (hosts [dono_donor_portal]) exists and is
+ * published: magic-link emails point at its URL, so a missing page silently breaks
+ * donor self-service. url() is the single source of truth unless dono.portal.url is set.
  */
 final class PortalPage
 {
@@ -33,13 +20,8 @@ final class PortalPage
     public const SHORTCODE      = '[dono_donor_portal]';
 
     /**
-     * Ensures a published donor-portal page exists. Idempotent.
-     *
-     * Resolution order:
-     *  1. Stored page id resolves to a published Page → keep it, return id.
-     *  2. A Page with our slug already exists (older installs that added
-     *     the shortcode manually) → adopt it, store the id, return.
-     *  3. Insert a fresh Page with the shortcode → return its new id.
+     * Idempotent: keeps a stored id that still resolves to a published page, else
+     * adopts an existing page at the canonical slug, else inserts a fresh one.
      */
     public function ensure(): int
     {

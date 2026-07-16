@@ -5,15 +5,9 @@ declare(strict_types=1);
 namespace Dono\Campaigns\Styling;
 
 /**
- * Brand-level style presets (Classic, Bold, Quiet, and user-created customs).
- *
- * Stored in the `dono_org_brand` option as:
- *   ['presets' => [...], 'default_id' => '<id>']
- *
- * Built-ins are always present in `all()` regardless of the saved option.
- * Users may edit a built-in's tokens but cannot delete one.
- *
- * @version 1.0.0
+ * Brand style presets (built-ins + user customs), stored in dono_org_brand as
+ * ['presets' => [...], 'default_id' => id]. Built-ins are always present in all();
+ * users may edit a built-in's tokens but cannot delete one.
  */
 final class StylePresets
 {
@@ -141,15 +135,8 @@ final class StylePresets
     }
 
     /**
-     * Derive a preset from the active WP theme's global settings & styles
-     * (theme.json). Returns null if the theme exposes nothing useful.
-     *
-     * Mapping:
-     *   theme palette 'primary' / 'accent' / first slug -> dono-accent
-     *   theme palette 'background'                       -> dono-bg
-     *   theme palette 'foreground'                       -> dono-text
-     *   styles.elements.button.border.radius             -> dono-radius-sm
-     *   styles.elements.button.typography.fontWeight     -> dono-button-weight
+     * Derive a preset from the active theme's theme.json palette + button styles.
+     * Returns null when the theme exposes nothing useful.
      */
     public static function themePreset(): ?array
     {

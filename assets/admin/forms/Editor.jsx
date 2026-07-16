@@ -1,10 +1,6 @@
 /**
- * Form editor: direct @wordpress/block-editor shell.
- *
- * No isolated-block-editor: we own the chrome (header layout, sidebar tabs),
- * which gives us the [back][brand][+][undo][redo][title][Build|Preview][Save][gear]
- * layout we want without fighting IBE's slot/fill portals. Block data lives
- * in a useReducer history (past/present/future) so undo/redo are local.
+ * Form editor on @wordpress/block-editor directly (no isolated-block-editor): we own
+ * the chrome, and block data lives in a useReducer history so undo/redo stay local.
  */
 
 import { useEffect, useCallback, useMemo, useReducer, useRef, useState } from '@wordpress/element';
@@ -657,12 +653,9 @@ function BlockSelectionSync( { onChange } ) {
 }
 
 /**
- * Clear the block selection on any mousedown outside an actual block, its
- * floating toolbar/popover, or the inspector / inserter sidebars. The dispatch
- * goes through `useRegistry()` because BlockEditorProvider scopes the
- * block-editor store to its own sub-registry; the global `wp.data.dispatch`
- * dispatches into the OUTER registry and never reaches the editor's store,
- * which is why three earlier attempts at this handler did nothing.
+ * Clear the block selection on mousedown outside a block, its popovers, or the
+ * sidebars. Must dispatch via useRegistry(): BlockEditorProvider scopes the
+ * block-editor store to a sub-registry the global wp.data.dispatch never reaches.
  */
 function DeselectOnOutsideClick() {
     const registry = useRegistry();

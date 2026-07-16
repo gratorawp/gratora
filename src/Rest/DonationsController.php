@@ -22,15 +22,6 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 
-/**
- * Public REST surface for donations.
- *
- *   POST /wp-json/dono/v1/donations
- *   POST /wp-json/dono/v1/donations/{reference}/confirm
- *   GET  /wp-json/dono/v1/donations/{reference}
- *
- * @version 1.0.0
- */
 final class DonationsController
 {
     private const NAMESPACE = 'dono/v1';

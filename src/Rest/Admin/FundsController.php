@@ -17,17 +17,7 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 
-/**
- * Admin REST surface for funds (organisation-wide donation designations).
- *
- *   GET    /dono/v1/admin/funds
- *   POST   /dono/v1/admin/funds
- *   GET    /dono/v1/admin/funds/{id}
- *   PUT    /dono/v1/admin/funds/{id}
- *   DELETE /dono/v1/admin/funds/{id}
- *
- * @version 1.0.0
- */
+/** Admin CRUD surface for funds (organisation-wide donation designations). */
 final class FundsController
 {
     private const NAMESPACE = 'dono/v1';

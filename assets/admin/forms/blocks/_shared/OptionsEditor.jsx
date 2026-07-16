@@ -38,14 +38,8 @@ export function normalizeOptions( raw, fallback ) {
 }
 
 /**
- * Inspector-side editor for option lists shared by dropdown/radio/checkbox/multi-select.
- *
- * Props:
- *   options    : current array of { label, value, isDefault }
- *   onChange   : ( nextArr ) => void
- *   allowDefault   : show the "default" toggle per row (default true)
- *   singleDefault  : enforce a single default at a time (radio/dropdown)
- *   addLabel       : optional override for the add button label
+ * Inspector-side option-list editor shared by dropdown/radio/checkbox/multi-select.
+ * singleDefault enforces one default at a time (radio/dropdown).
  */
 export function OptionsEditor( {
     options,

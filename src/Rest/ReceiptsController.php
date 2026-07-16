@@ -19,13 +19,8 @@ use WP_REST_Request;
 use WP_REST_Server;
 
 /**
- * Magic-link receipt re-download.
- *
- *   GET /wp-json/dono/v1/receipts/{receipt_id}/download?token={raw_token}
- *
- * Token is multi-use within its TTL so donors can re-download from any device.
- *
- * @version 1.0.0
+ * Magic-link receipt re-download. The token is multi-use within its TTL so donors
+ * can re-download from any device.
  */
 final class ReceiptsController
 {

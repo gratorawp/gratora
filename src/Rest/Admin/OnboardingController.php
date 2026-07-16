@@ -15,13 +15,8 @@ use WP_REST_Server;
 use WP_Error;
 
 /**
- * First-run onboarding lifecycle transitions. Per-step settings are persisted
- * by /admin/settings/{group}, not here.
- *
- *   POST /admin/onboarding/finalize   { campaign_title?, currency? }
- *   POST /admin/onboarding/dismiss
- *
- * @version 1.0.0
+ * First-run onboarding lifecycle transitions (finalize, dismiss). Per-step settings
+ * are persisted by /admin/settings/{group}, not here.
  */
 final class OnboardingController
 {

@@ -19,11 +19,9 @@ final class GatewayIntentResult
         public readonly bool $requires_action = false,
         public readonly ?array $metadata = null,
         /**
-         * True when the gateway has nothing more to do: no redirect, no
-         * client-side card auth, no off-site capture step. The donations
-         * REST controller can immediately call gateway->confirm() and
-         * mark the donation paid in the same request. Used by the sandbox
-         * gateway so test donations settle without an admin/webhook step.
+         * True when the gateway has nothing more to do (no redirect, client auth,
+         * or off-site capture): the REST controller may confirm() and mark paid in
+         * the same request. Used by the sandbox gateway.
          */
         public readonly bool $auto_confirm = false,
     ) {

@@ -1,10 +1,6 @@
 /**
- * Wires Dono actions into the WordPress 7.0 global command palette
- * (Cmd/Ctrl+K in wp-admin).
- *
- * Static commands are registered once at script load. The bundle attaches via
- * `admin_enqueue_scripts` so it runs on every admin screen and stays alive for
- * the palette's lifetime.
+ * Registers Dono commands in the WP global command palette (Cmd/Ctrl+K); enqueued
+ * on every admin screen so the palette can always reach them.
  */
 import { dispatch } from '@wordpress/data';
 import { store as commandsStore } from '@wordpress/commands';

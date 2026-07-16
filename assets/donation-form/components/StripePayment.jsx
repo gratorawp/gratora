@@ -5,12 +5,9 @@ import { loadStripeJs } from '../util/stripe';
 import { formatAmount } from '../util/format';
 
 /**
- * Second step for the Stripe gateway: mounts the Payment Element against the
- * PaymentIntent client_secret returned by donation create, then confirms on the
- * client. Cards complete inline (redirect: 'if_required'); redirect-based
- * methods (iDEAL, Bancontact) bounce to return_url and resolve on boot via
- * resolveStripeReturn(). The webhook remains the server-side source of truth -
- * this only drives Stripe to capture and shows the donor an inline outcome.
+ * Mounts the Payment Element against the PaymentIntent client_secret and confirms
+ * client-side; cards complete inline, redirect methods resolve on boot via
+ * resolveStripeReturn(). The webhook stays the server-side source of truth.
  */
 export default function StripePayment( { config, payment, dispatch } ) {
     const mountRef = useRef( null );

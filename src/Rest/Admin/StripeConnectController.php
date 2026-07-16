@@ -14,17 +14,9 @@ use WP_REST_Response;
 use WP_REST_Server;
 
 /**
- * Stripe Connect onboarding via the Dono broker. The plugin never holds the
- * platform secret; the broker runs the OAuth exchange and redirects back with
+ * Stripe Connect onboarding via the Dono broker: the plugin never holds the
+ * platform secret. The broker runs the OAuth exchange and redirects back with
  * the connected account's tokens, stored encrypted.
- *
- *   GET  /connect/stripe/status      admin: connection state
- *   POST /connect/stripe/authorize   admin: broker authorize URL
- *   GET  /connect/stripe/callback    public: broker redirect with tokens
- *   POST /connect/stripe/disconnect  admin: deauthorize and forget
- *   POST /connect/stripe/dev-connect admin + WP_DEBUG: paste a test token
- *
- * @version 1.0.0
  */
 final class StripeConnectController
 {

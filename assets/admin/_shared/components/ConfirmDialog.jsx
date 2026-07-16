@@ -3,24 +3,9 @@ import Dialog from './Dialog';
 import Btn from './Btn';
 
 /**
- * Shared confirm dialog for list-table bulk/row actions. Replaces native
- * window.confirm() so every admin surface uses the same Dono-styled modal.
- *
- * Driven by a `confirm` state object (or null when closed):
- *   {
- *     title:        string,            // dialog heading
- *     message:      string|node,       // body copy
- *     confirmLabel: string,            // primary button label (default "Confirm")
- *     destructive:  boolean,           // render the primary button as danger
- *     onConfirm:    () => void|Promise // run after the dialog closes
- *   }
- *
- * Usage:
- *   const [ confirm, setConfirm ] = useState( null );
- *   ...
- *   setConfirm( { title, message, confirmLabel, destructive, onConfirm } );
- *   ...
- *   <ConfirmDialog confirm={ confirm } onClose={ () => setConfirm( null ) } />
+ * Shared confirm dialog for list-table bulk/row actions; replaces window.confirm
+ * with the Dono-styled modal. Driven by a `confirm` state object, null when closed:
+ * { title, message, confirmLabel, destructive, onConfirm } (onConfirm runs after close).
  */
 export default function ConfirmDialog( { confirm, onClose } ) {
     if ( ! confirm ) return null;

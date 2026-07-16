@@ -1,14 +1,7 @@
 /**
- * dono/steps: multi-page wizard container.
- *
- * Children are `dono/step` blocks. Each Step becomes one wizard page in the
- * donor-facing runtime; without this block the form is single-page.
- *
- * `progressStyle` picks the visual treatment for navigation:
- *   - "dots"  → centered dots beneath the form, Back / Continue in a footer row.
- *   - "bar"   → top header with back arrow + centered step title + linear
- *                progress fill underneath. No bottom Back button.
- *   - "none"  → no progress indicator at all.
+ * dono/steps: multi-page wizard container. Children are dono/step blocks, one
+ * wizard page each; without this block the form is single-page. progressStyle
+ * picks the navigation treatment: dots, bar, or none.
  */
 
 import { useBlockProps, InspectorControls, InnerBlocks } from '@wordpress/block-editor';

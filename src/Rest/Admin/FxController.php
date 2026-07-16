@@ -14,13 +14,8 @@ use WP_REST_Response;
 use WP_REST_Server;
 
 /**
- * Exchange-rate settings surface for the Currency panel.
- *
- *   GET   /dono/v1/admin/currency/fx        current rates + auto flag
- *   PUT   /dono/v1/admin/currency/fx        save auto toggle + manual overrides
- *   POST  /dono/v1/admin/currency/fx/fetch  fetch now (ignores the auto toggle)
- *
- * @version 1.0.0
+ * Exchange-rate settings surface for the Currency panel; POST /fetch refreshes
+ * immediately regardless of the auto toggle.
  */
 final class FxController
 {

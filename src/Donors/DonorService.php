@@ -90,13 +90,9 @@ final class DonorService
     }
 
     /**
-     * Donor-initiated profile edit (from the portal): explicitly overwrites
-     * fields present in the patch, including ones that already have a value.
-     * Unlike refreshProfile (which is the lock-on-first-write back-fill used
-     * by the donation flow), this is the donor's own edit and the donor owns
-     * their identity.
-     *
-     * Empty-string clears the field to null; absent keys are untouched.
+     * Donor-initiated portal edit: overwrites any field present in the patch (unlike
+     * refreshProfile's lock-on-first-write back-fill). Empty string clears to null;
+     * absent keys are untouched.
      *
      * @param array{first_name?:?string,last_name?:?string,country?:?string,company?:?string,locale?:?string,phone?:?string,address?:array<string,mixed>|null} $patch
      */

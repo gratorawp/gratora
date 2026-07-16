@@ -1,18 +1,7 @@
 /**
- * Shared form-template picker. Used by both:
- *   - campaign Detail.jsx (Forms tab → "Add new form")
- *   - form Editor.jsx (auto-prompt when an empty form is opened)
- *
- * The picker fetches the canonical list from /admin/forms/templates, groups
- * by category, and renders a thumbnail + name + description per template.
- *
- * Props:
- *   onPick    (template) => void  fires when admin picks a card
- *   onClose   () => void          fires on dismiss
- *   creating  bool                disables cards while a parent flow is in
- *                                 the middle of creating the chosen form
- *   intro     string              optional copy shown above the filters;
- *                                 defaults to the picker's standard intro
+ * Shared form-template picker (campaign Detail "Add new form" + form Editor auto-prompt).
+ * Fetches /admin/forms/templates, groups by category; `creating` disables the cards
+ * while the parent flow creates the chosen form.
  */
 
 import { useEffect, useMemo, useState } from '@wordpress/element';

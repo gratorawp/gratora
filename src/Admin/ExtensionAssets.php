@@ -5,12 +5,9 @@ declare(strict_types=1);
 namespace Dono\Admin;
 
 /**
- * Extension-tab seam for add-ons. Defines the `window.dono.tabs` JS registry
- * (an inline, src-less script) and fires an action so add-ons can enqueue their
- * own tab bundles for a given surface (e.g. 'campaign', 'portal'). Core React
- * apps read the registry via the shared `useExtensionTabs` hook.
- *
- * @version 1.0.0
+ * Extension-tab seam: defines the window.dono.tabs registry inline and fires an
+ * action so add-ons can enqueue tab bundles per surface. Core React apps read the
+ * registry via the shared useExtensionTabs hook.
  */
 final class ExtensionAssets
 {

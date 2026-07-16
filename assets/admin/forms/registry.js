@@ -1,17 +1,7 @@
 /**
- * Dono Forms editor block registry.
- *
- * Two extension surfaces:
- *
- *   1. `window.dono.blocks.register(name, definition)`: imperative; call
- *      after the dono-admin-forms bundle has loaded. Wraps registerBlockType
- *      and whitelists the name for the editor inserter.
- *
- *   2. `wp.hooks.addAction('dono.editor.registerBlocks', 'my-mod', (api) => …)`:
- *      declarative; we fire the action once before the editor mounts.
- *
- * Both converge on the same registry; the editor reads `api.allowed` for the
- * inserter whitelist.
+ * Forms-editor block registry. Two extension surfaces converge here:
+ * window.dono.blocks.register(name, def) after the bundle loads, and the
+ * 'dono.editor.registerBlocks' action fired before mount; both whitelist for the inserter.
  */
 
 import { registerBlockType, getBlockType } from '@wordpress/blocks';

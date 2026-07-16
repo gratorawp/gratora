@@ -5,14 +5,9 @@ declare(strict_types=1);
 namespace Dono\Donations;
 
 /**
- * Immutable input to `DonationService::createPending()`.
- *
- * Carries everything captured from a donation form or API submission, but
- * nothing derived (reference, donor_id, status, paid_at are the service's
- * job). Donor profile is part of the intent; the service does the
- * find-or-create via DonorService.
- *
- * @version 1.0.0
+ * Immutable input to DonationService::createPending(): everything captured from a form
+ * or API submission, nothing derived (reference, donor_id, status, paid_at are the
+ * service's job; donor find-or-create happens there too).
  *
  * @phpstan-type Profile array{
  *     first_name?: ?string,

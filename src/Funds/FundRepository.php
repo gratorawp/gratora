@@ -66,15 +66,11 @@ final class FundRepository
     }
 
     /**
-     * Active funds shaped for donor-facing pickers: numeric-string ids and a
-     * one-level hierarchy. A parent that still has active children is a
-     * non-selectable header; donors pick a leaf.
+     * Active funds shaped for donor-facing pickers: one-level hierarchy where a parent
+     * with active children is a non-selectable header. $allowedIds, when non-null,
+     * filters to those ids but keeps parent headers whose children survive.
      *
-     * @param list<int>|null $allowedIds When non-null, only funds with ids in
-     *                                   this list are returned. Parent funds
-     *                                   are kept as non-selectable headers if
-     *                                   at least one of their children survives.
-     *
+     * @param list<int>|null $allowedIds
      * @return list<array{id:string,label:string,description:string,depth:int,selectable:bool}>
      */
     public function pickerOptions(?array $allowedIds = null): array

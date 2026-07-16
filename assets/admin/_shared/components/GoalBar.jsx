@@ -1,12 +1,7 @@
 /**
- * Goal-progress cell for list tables. Presentational only: the caller supplies
- * the left/right labels (campaigns show "target / pct", funds show "raised /
- * of goal") so the bar chrome + label typography stay identical across tables.
- *
- *   left:  node    // left-aligned label
- *   right: node    // right-aligned label (muted), optional
- *   pct:   number  // 0-100 fill width
- *   muted: boolean // dim the labels (e.g. when no goal is set)
+ * Goal-progress cell for list tables. Presentational only: callers supply the
+ * left/right labels so bar chrome + typography stay identical across tables;
+ * pct is the 0-100 fill width, muted dims the labels.
  */
 export default function GoalBar( { left, right, pct = 0, muted = false } ) {
     const width = Math.min( 100, Math.max( 0, pct ) );

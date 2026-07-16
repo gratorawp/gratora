@@ -1,10 +1,6 @@
 /**
- * dono/html: inline HTML decoration.
- *
- * Carries arbitrary sanitised HTML through to the donor form for embeds,
- * sponsor logo strips, reassurance copy, custom legal disclaimers, etc. The
- * editor previews the HTML rendered in a thin frame so authors can sanity-
- * check it without leaving the canvas.
+ * dono/html: carries sanitised HTML through to the donor form (embeds, sponsor
+ * strips, legal copy). The editor previews it rendered in a thin frame.
  */
 
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';

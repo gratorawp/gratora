@@ -8,11 +8,8 @@ use Dono\Foundation\Helpers\Money;
 use Dono\Foundation\Helpers\View;
 
 /**
- * Renders a responsive grid of other published campaigns as cards (image,
- * title, blurb, mini progress, raised/goal, donate link). Used for a "more
- * ways to give" section on a campaign page or a standalone browse page.
- *
- * @version 1.0.0
+ * Responsive card grid of other published campaigns ("more ways to give" section
+ * or a standalone browse page).
  */
 final class CampaignGridBlock extends CampaignBlock
 {

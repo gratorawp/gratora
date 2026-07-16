@@ -3,18 +3,8 @@ import { evaluateCondition } from './conditions';
 import { convertCents, displayPreset } from '../util/fx';
 import { formatAmount } from '../util/format';
 /**
- * Donation-form state: single useReducer source of truth.
- *
- * Shape:
- *   {
- *     step:        0..N-1                       index into the steps array
- *     steps:       [ { type, ... } ]            from the server-emitted config
- *     values:      { amount_cents, email, profile: { ... }, ... }
- *     errors:      { fieldName: 'message' }     per-field validation
- *     status:      'idle' | 'submitting' | 'success' | 'error'
- *     submission:  { reference, redirect_url } | null
- *     message:     string                       last status/error message
- *   }
+ * Donation-form state: single useReducer source of truth
+ * (step, steps, values, errors, status, submission, message).
  */
 
 export function initialState( config ) {

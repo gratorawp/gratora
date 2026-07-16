@@ -38,14 +38,9 @@ final class BlockEditorIntegration
     }
 
     /**
-     * Expose the page → campaign back-link to the block editor / REST.
-     *
-     * Campaign landing pages and the per-campaign layout subpages all carry
-     * `_dono_campaign_id` postmeta (written by CampaignService and the p2p
-     * LayoutPages helper). Surfacing it through REST lets editor-side block
-     * UIs hide their "Campaign" picker when the post they sit on is already
-     * tied to a campaign and instead ask for a more specific choice (e.g.
-     * which form to render).
+     * Expose the page -> campaign back-link (_dono_campaign_id meta) through REST so
+     * editor-side block UIs can hide their campaign picker on posts already tied to
+     * a campaign.
      */
     public function registerPageMeta(): void
     {

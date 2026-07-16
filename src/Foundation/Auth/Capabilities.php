@@ -77,13 +77,9 @@ final class Capabilities
     }
 
     /**
-     * Per-area admin-menu meta-caps. Each `dono_access_*` is granted to WP
-     * super-admins (manage_options) or holders of the area's granular cap, so a
-     * submenu item only shows to a role that can actually use it. The umbrella
-     * `dono_access` (top menu visibility) is true for any of those, the
-     * manage_dono umbrella, or any granular dono_* cap. WP menus take a single
-     * capability string, hence these virtual caps; the REST layer still enforces
-     * the real granular caps, so menu visibility never widens actual access.
+     * Virtual menu meta-caps: WP menus take one capability string, so each
+     * dono_access_* grants on manage_options or the area's granular cap. REST still
+     * enforces the granular caps, so menu visibility never widens actual access.
      *
      * @var array<string,string> menu meta-cap => the granular cap it maps to
      */

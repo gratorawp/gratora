@@ -29,10 +29,9 @@ abstract class CampaignBlock implements Block
     }
 
     /**
-     * Opt into the WP 7.0 responsive visibility control. Campaign blocks
-     * render on regular pages (not inside the donation form's walker), so the
-     * core `render_block` filter wraps them with the right `wp-block-hidden-*`
-     * classes and the per-viewport media queries take effect.
+     * Opt into the WP 7.0 responsive visibility control: these blocks render on
+     * regular pages (not the form walker), so core's render_block filter can wrap
+     * them with the wp-block-hidden-* classes.
      *
      * @return array<string,mixed>
      */

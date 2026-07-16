@@ -286,14 +286,9 @@ final class DonationService
     }
 
     /**
-     * Create + confirm a renewal donation under an existing recurring plan.
-     * Fires `dono.donation.completed` (as any paid donation does) AND
-     * `dono.recurring.renewed` so emails / analytics can differentiate the
-     * second-and-later charge from the first.
-     *
-     * Idempotent: if a donation with this (gateway, intent) already exists,
-     * returns it without firing a second renewal event. The caller should
-     * still pass a unique `gatewayIntentId` per Stripe invoice/payment-intent.
+     * Create + confirm a renewal donation under an existing recurring plan; fires
+     * dono.donation.completed plus dono.recurring.renewed. Idempotent per (gateway,
+     * intent): an existing donation is returned without a second renewal event.
      *
      * @param array<string,mixed> $confirmResult Same shape DonationService::confirm() consumes.
      */
@@ -414,21 +409,9 @@ final class DonationService
     }
 
     /**
-     * Mirror a gateway-side subscription cancellation into the analytics event
-     * stream and fire the WP action that the email subscriber listens on. The
-     * plan row's status flip is the caller's responsibility (the gateway
-     * webhook handler does it before calling here).
-     */
-    /**
-     * Persist that converting a freshly-paid recurring donation into a real
-     * Stripe Subscription failed. The first charge is already collected, so
-     * we don't refund; we mark the donation so the admin sees a clear retry
-     * affordance instead of silently losing all future renewals.
-     *
-     * Flags written:
-     *   - subscription_creation_failed: true
-     *   - subscription_creation_failed_reason: short message
-     *   - subscription_creation_failed_at: ISO timestamp
+     * Record a failed PaymentIntent -> Subscription conversion. The first charge is
+     * already collected, so no refund; subscription_creation_failed* flags give the
+     * admin a retry affordance instead of silently losing all future renewals.
      */
     public function recordSubscriptionCreationFailure(Donation $donation, \Throwable $e): void
     {

@@ -106,12 +106,9 @@ final class ReferenceGenerator
     }
 
     /**
-     * Atomic counter increment via MySQL LAST_INSERT_ID(expr): a single UPDATE
-     * sets the counter and stashes the new value in the connection's
-     * LAST_INSERT_ID, which the follow-up SELECT reads. Both run through
-     * DB::raw, which shares the same $wpdb connection, so LAST_INSERT_ID stays
-     * valid across the two calls. Gap-free and race-safe (not a read-modify-
-     * write, so no lost updates under concurrency).
+     * Atomic increment: one UPDATE stashes the new value in LAST_INSERT_ID(expr),
+     * the follow-up SELECT reads it. Both run through DB::raw on the same $wpdb
+     * connection, so the value survives; no read-modify-write, no lost updates.
      */
     private function nextCounter(string $scope, int $year): int
     {

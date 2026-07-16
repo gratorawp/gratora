@@ -1,10 +1,7 @@
 /**
- * Per-user layout (order + hidden) for any widget grid in the admin.
- *
- * `scope` is an opaque key used to namespace the saved layout
- * (e.g. 'dashboard', 'campaign_5'). Anything in `allKeys` that the server
- * doesn't yet know about is appended to the end visible by default, so
- * adding new widgets later doesn't need a migration.
+ * Per-user layout (order + hidden) for admin widget grids; `scope` namespaces the
+ * saved layout. Keys the server doesn't know yet append to the end visible by
+ * default, so new widgets need no migration.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from '@wordpress/element';

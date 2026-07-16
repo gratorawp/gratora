@@ -574,21 +574,10 @@ final class DonationRepository
     }
 
     /**
-     * Aggregate KPIs for the admin donations list, scoped by the same filter
-     * shape as listAdmin(). All counts respect filters; raised totals are
-     * paid-only (we don't count pending money as "raised").
+     * Aggregate KPIs for the admin donations list, scoped by the listAdmin() filter shape.
+     * Raised totals are paid-only; currency is the most common in the filtered set.
      *
-     * Currency: when the filtered set spans multiple currencies, returns the
-     * most-common one (Donation::currency). Single-currency orgs (the common
-     * case) get the right answer trivially.
-     *
-     * @return array{
-     *   total_count: int,
-     *   paid_count: int,
-     *   raised_cents: int,
-     *   currency: ?string,
-     *   donors_count: int,
-     * }
+     * @return array{total_count:int,paid_count:int,raised_cents:int,currency:?string,donors_count:int}
      */
     public function aggregateAdmin(array $args = []): array
     {

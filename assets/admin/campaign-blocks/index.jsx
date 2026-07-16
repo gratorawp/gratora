@@ -108,11 +108,9 @@ function CampaignField( { attributes, setAttributes, campaign, onCampaignPage, i
 }
 
 /**
- * Canvas body for a campaign block. When the block is unbound on a non-campaign
- * page, surface the picker inline (a Placeholder) so it can be configured
- * without opening the sidebar. Otherwise preview via ServerSideRender against
- * the resolved campaign id so a block on its own campaign page renders real
- * content instead of an unbound notice (block-renderer has no post context).
+ * Canvas body for a campaign block: unbound on a non-campaign page shows an inline
+ * picker Placeholder; otherwise previews via ServerSideRender with the resolved
+ * campaign id (block-renderer has no post context).
  */
 function CampaignCanvas( { block, attributes, setAttributes, onCampaignPage, resolvedId, icon = 'megaphone', className, children } ) {
     const blockProps = useBlockProps( className ? { className } : {} );
