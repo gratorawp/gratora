@@ -10,6 +10,7 @@ use Dono\Donations\DonationService;
 use Dono\Donations\Refund;
 use Dono\Donors\DonorService;
 use Dono\Foundation\Plugin;
+use Dono\Vendor\Queryable\DB;
 use Dono\Vendor\Queryable\QueryException;
 
 /**
@@ -76,6 +77,39 @@ final class RefundIdempotencyTest extends IntegrationTestCase
         }
         $after = (int) Refund::query()->where('donation_id', (int) $donation->id)->count();
         $this->assertSame($before, $after, 'no refund row recorded once fully refunded');
+    }
+
+    public function test_refunded_cents_counter_guards_over_refund_against_a_stale_view(): void
+    {
+        $svc  = Plugin::instance()->container->get(DonationService::class);
+        $repo = Plugin::instance()->container->get(DonationRepository::class);
+        $donation = $this->seedPaidDonation(5000);
+
+        // The counter advances in lockstep with SUM(succeeded refunds).
+        $svc->recordExternalRefund($donation, 2000, 'rf_track_a', 'requested_by_customer');
+        $fresh = $repo->findByReference($donation->reference);
+        $this->assertSame(2000, (int) $fresh->refunded_cents, 'counter mirrors the refunded total');
+
+        // Simulate a concurrent refund committing the rest of the balance while
+        // this caller still holds a copy that believes 3000 is refundable. The
+        // SUM-of-refund-rows pre-clamp cannot see it, but the counter can.
+        $stale = $repo->findByReference($donation->reference);
+        DB::table('dono_donations')
+            ->whereRaw('id = ' . (int) $donation->id)
+            ->update(['refunded_cents' => 5000, 'status' => 'refunded']);
+
+        $before = (int) Refund::query()->where('donation_id', (int) $donation->id)->count();
+        try {
+            $svc->recordExternalRefund($stale, 3000, 'rf_track_b', 'requested_by_customer');
+            $this->fail('the atomic counter guard must reject an over-refund on a stale view');
+        } catch (\RuntimeException $e) {
+            // expected: refunded_cents + 3000 no longer fits the principal
+        }
+
+        $after = (int) Refund::query()->where('donation_id', (int) $donation->id)->count();
+        $this->assertSame($before, $after, 'no refund row recorded past the principal');
+        $final = $repo->findByReference($donation->reference);
+        $this->assertSame(5000, (int) $final->refunded_cents, 'counter never exceeds the principal');
     }
 
     public function test_unique_index_blocks_a_second_row_with_the_same_gateway_id(): void

@@ -594,17 +594,34 @@ final class DonationService
             );
         }
 
-        $newRefundedTotal = $alreadyRefunded + $amountCents;
-        $isFullRefund     = $newRefundedTotal >= $donation->amount_cents;
-
         $now    = $this->clock->now()->format('Y-m-d H:i:s');
         $refund = Refund::make();
 
         try {
         DB::transaction(function () use (
             $donation, $amountCents, $reason, $initiatedBy, $metadata,
-            $gatewayRefundId, $now, $refund, $isFullRefund
+            $gatewayRefundId, $now, $refund
         ) {
+            // Atomic over-refund guard: bump the cumulative counter only while
+            // the new total still fits the principal. A concurrent refund that
+            // consumed the balance since the SUM was read makes this match zero
+            // rows; the increment's row lock then serialises the rest of this
+            // transaction so the check-then-act clamp above cannot be outrun.
+            $reserved = DB::table('dono_donations')
+                ->whereRaw('id = ' . (int) $donation->id . ' AND refunded_cents + ' . (int) $amountCents . ' <= amount_cents')
+                ->increment('refunded_cents', (int) $amountCents);
+            if ($reserved->affectedRows < 1) {
+                throw new RuntimeException(
+                    "External refund for {$donation->reference} exceeds the refundable balance."
+                );
+            }
+            $newTotal = (int) (DB::table('dono_donations')
+                ->where('id', $donation->id)
+                ->selectRaw('refunded_cents AS total')
+                ->get()['total'] ?? 0);
+            $isFullRefund = $newTotal >= $donation->amount_cents;
+            $donation->refunded_cents = $newTotal;
+
             $refund->donation_id       = $donation->id;
             $refund->amount_cents      = $amountCents;
             $refund->currency          = $donation->currency;
@@ -709,13 +726,30 @@ final class DonationService
 
         $now = $this->clock->now()->format('Y-m-d H:i:s');
         $refund = Refund::make();
-        $newRefundedTotal = $alreadyRefunded + ($result->amount_cents ?? $amountCents);
-        $isFullRefund     = $newRefundedTotal >= $donation->amount_cents;
+        $recordedCents = (int) ($result->amount_cents ?? $amountCents);
 
         DB::transaction(function () use (
             $donation, $result, $reason, $initiatedBy, $initiatedUserId,
-            $amountCents, $now, $refund, $isFullRefund
+            $amountCents, $recordedCents, $now, $refund
         ) {
+            // Atomic over-refund guard (see recordExternalRefund): the counter
+            // bump applies only while the new total fits the principal, and its
+            // row lock serialises concurrent refunds on this donation.
+            $reserved = DB::table('dono_donations')
+                ->whereRaw('id = ' . (int) $donation->id . ' AND refunded_cents + ' . $recordedCents . ' <= amount_cents')
+                ->increment('refunded_cents', $recordedCents);
+            if ($reserved->affectedRows < 1) {
+                throw new RuntimeException(
+                    "Refund for {$donation->reference} exceeds the refundable balance."
+                );
+            }
+            $newTotal = (int) (DB::table('dono_donations')
+                ->where('id', $donation->id)
+                ->selectRaw('refunded_cents AS total')
+                ->get()['total'] ?? 0);
+            $isFullRefund = $newTotal >= $donation->amount_cents;
+            $donation->refunded_cents = $newTotal;
+
             $refund->donation_id       = $donation->id;
             $refund->amount_cents      = $result->amount_cents ?? $amountCents;
             $refund->currency          = $donation->currency;

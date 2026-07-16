@@ -68,6 +68,8 @@ final class Donation extends Model
     public ?array $flags = null;
     public ?string $paid_at = null;
     public ?string $refunded_at = null;
+    /** Cumulative refunded minor units; mirrors SUM(succeeded refunds), the concurrency guard for over-refund. */
+    public int $refunded_cents = 0;
     public string $created_at;
     public string $updated_at;
 }
@@ -114,6 +116,7 @@ Donation::schema(function (Table $t): void {
     $t->json('flags')->nullable();
     $t->datetime('paid_at')->nullable();
     $t->datetime('refunded_at')->nullable();
+    $t->bigInteger('refunded_cents')->unsigned()->default(0);
     $t->datetime('created_at');
     $t->datetime('updated_at');
 
