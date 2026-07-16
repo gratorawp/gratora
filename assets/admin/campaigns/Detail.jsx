@@ -454,7 +454,7 @@ const WIDGET_KEYS = [
     'gateway',
 ];
 
-function OverviewTab( { campaign, nav } ) {
+function OverviewTab( { campaign, nav, onError } ) {
     const [ range, setRange ] = useState( 'all-time' );
     const [ compareMode, setCompareMode ] = useState( 'none' );
     const [ metrics, setMetrics ] = useState( campaign.metrics );
@@ -473,7 +473,9 @@ function OverviewTab( { campaign, nav } ) {
             + `?range=${ range }&compare=${ compareMode }&include=${ encodeURIComponent( includeKey ) }`;
         apiFetch( { path: url } )
             .then( ( m ) => { if ( ! aborted ) setMetrics( ( prev ) => ( { ...( prev || {} ), ...m } ) ); } )
-            .catch( () => {} )
+            // Surface the failure instead of leaving the zero-fallback metrics
+            // on screen as if they were real data.
+            .catch( ( e ) => { if ( ! aborted ) onError?.( e?.message || __( 'Could not load campaign metrics.', 'dono' ) ); } )
             .finally( () => { if ( ! aborted ) setLoading( false ); } );
         return () => { aborted = true; };
     }, [ range, compareMode, campaign.id, includeKey ] );
