@@ -285,6 +285,7 @@ function AtRiskTable() {
     const [ total, setTotal ]     = useState( 0 );
     const [ page, setPage ]       = useState( 1 );
     const [ loading, setLoading ] = useState( true );
+    const [ error, setError ]     = useState( null );
     const perPage = 10;
 
     useEffect( () => {
@@ -300,8 +301,11 @@ function AtRiskTable() {
                 setTotal( Number( totalHeader || 0 ) );
                 const rows = await res.json();
                 setData( rows );
+                setError( null );
             } )
-            .catch( () => { if ( ! aborted ) setData( [] ); } )
+            // On failure keep data null and record the error so we show a
+            // problem, not the celebratory "no donors slipping" empty state.
+            .catch( ( e ) => { if ( ! aborted ) setError( e?.message || __( 'Could not load at-risk donors.', 'dono' ) ); } )
             .finally( () => { if ( ! aborted ) setLoading( false ); } );
         return () => { aborted = true; };
     }, [ page ] );
@@ -325,7 +329,8 @@ function AtRiskTable() {
                 </button>
             </div>
             { loading && ! data && <p className="dono-loading">{ __( 'Loading…', 'dono' ) }</p> }
-            { data && data.length === 0 && <p className="dono-empty">{ __( 'No donors are slipping. Nice work.', 'dono' ) }</p> }
+            { error && ! loading && <p className="dono-error">{ error }</p> }
+            { ! error && data && data.length === 0 && <p className="dono-empty">{ __( 'No donors are slipping. Nice work.', 'dono' ) }</p> }
             { data && data.length > 0 && (
                 <>
                     <table className="dono-table">

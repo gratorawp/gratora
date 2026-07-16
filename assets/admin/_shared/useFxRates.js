@@ -83,7 +83,13 @@ export function useFxRates() {
             // Refresh the underlying auto-rates but keep any unsaved manual
             // edits and auto-toggle change; a fetch must not discard them.
             setServer( updated );
-            notify.success( __( 'Exchange rates updated.', 'dono' ) );
+            // A 200 can still report a failed provider fetch in the body; don't
+            // claim success when the rates did not actually refresh.
+            if ( updated?.fetch_ok === false ) {
+                notify.error( __( 'Could not fetch exchange rates. Please try again.', 'dono' ) );
+            } else {
+                notify.success( __( 'Exchange rates updated.', 'dono' ) );
+            }
             return updated;
         } catch ( err ) {
             notify.error( err?.message || __( 'Could not fetch exchange rates. Please try again.', 'dono' ) );
