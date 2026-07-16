@@ -92,8 +92,11 @@ final class ReferenceGenerator
     public function format(string $scope, int $year, int $counter): string
     {
         $s = $this->settings();
-        $sep = (string) ($s['separator'] ?? '-');
-        $prefix = (string) ($s['prefixes'][$scope] ?? strtoupper($scope));
+        // Coerce to the alphabet the REST routes accept ([A-Za-z0-9_-]); a stray
+        // '.', '/' or '#' in the setting would mint references no admin or donor
+        // route can match, permanently breaking detail/refund/confirm on them.
+        $sep = $this->sanitizeToken((string) ($s['separator'] ?? '-'), '-');
+        $prefix = $this->sanitizeToken((string) ($s['prefixes'][$scope] ?? strtoupper($scope)), strtoupper($scope));
         $padding = max(1, (int) ($s['padding'] ?? 5));
 
         $parts = [$prefix];
@@ -103,6 +106,12 @@ final class ReferenceGenerator
         $parts[] = str_pad((string) $counter, $padding, '0', STR_PAD_LEFT);
 
         return implode($sep, $parts);
+    }
+
+    private function sanitizeToken(string $raw, string $fallback): string
+    {
+        $clean = preg_replace('/[^A-Za-z0-9_-]/', '', $raw);
+        return $clean !== null && $clean !== '' ? $clean : $fallback;
     }
 
     /**

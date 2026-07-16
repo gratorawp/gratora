@@ -46,7 +46,7 @@ final class DonationsController
             'args'                => $this->createArgs(),
         ]);
 
-        register_rest_route(self::NAMESPACE, '/donations/(?P<reference>[A-Z0-9\-_]+)', [
+        register_rest_route(self::NAMESPACE, '/donations/(?P<reference>[A-Za-z0-9_\-]+)', [
             'methods'             => WP_REST_Server::READABLE,
             'callback'            => [$this, 'getStatus'],
             'permission_callback' => '__return_true',
@@ -56,7 +56,7 @@ final class DonationsController
             ],
         ]);
 
-        register_rest_route(self::NAMESPACE, '/donations/(?P<reference>[A-Z0-9\-_]+)/confirm', [
+        register_rest_route(self::NAMESPACE, '/donations/(?P<reference>[A-Za-z0-9_\-]+)/confirm', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'confirm'],
             'permission_callback' => [$this, 'confirmPermission'],
