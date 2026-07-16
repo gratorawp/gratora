@@ -187,6 +187,14 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                         aria-invalid={ !! err[ 'note_to_org' ] }
                         required={ !! f.required }
                     />
+                    <label class="dono-form__check">
+                        <input
+                            type="checkbox"
+                            checked={ !! v.note_public }
+                            onChange={ onCheck( 'note_public' ) }
+                        />
+                        <span>{ config.i18n.notePublic }</span>
+                    </label>
                 </Field>
             );
 

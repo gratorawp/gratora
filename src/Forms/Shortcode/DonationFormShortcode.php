@@ -541,6 +541,7 @@ final class DonationFormShortcode extends HookProvider
                 'confirming'     => __('Confirming your payment…', 'dono'),
                 'cancel'         => __('Cancel', 'dono'),
                 'comment'        => __('Add a message', 'dono'),
+                'notePublic'     => __('Show my message publicly on the supporter wall', 'dono'),
                 'anonymous'      => __('Make this donation anonymous', 'dono'),
                 'phone'          => __('Phone', 'dono'),
                 'addressLine1'   => __('Address line 1', 'dono'),

@@ -56,6 +56,8 @@ final class Donation extends Model
     public ?array $source_attribution = null;
     public ?string $locale = null;
     public ?string $note_to_org = null;
+    /** Donor opted in to showing note_to_org publicly (supporter wall / recent donations). */
+    public bool $note_public = false;
     /** AES-GCM ciphertext of json_encode(donor custom field values). */
     public ?string $custom_data_encrypted = null;
     /** Name as given for this donation; the donor record stays canonical. */
@@ -107,6 +109,7 @@ Donation::schema(function (Table $t): void {
     $t->json('source_attribution')->nullable();
     $t->string('locale', 10)->nullable();
     $t->text('note_to_org')->nullable();
+    $t->boolean('note_public')->default(0);
     $t->longText('custom_data_encrypted')->nullable();
     $t->string('donor_first_name', 100)->nullable();
     $t->string('donor_last_name', 100)->nullable();

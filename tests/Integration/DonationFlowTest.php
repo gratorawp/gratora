@@ -162,6 +162,31 @@ final class DonationFlowTest extends IntegrationTestCase
         $this->assertSame(0, $this->columnOf($ref, 'fundraiser_team_id'), 'raw fundraiser_team_id must not be persisted');
     }
 
+    public function test_note_to_org_is_private_unless_the_donor_opts_in(): void
+    {
+        // note_to_org is a note to the organisation; it only appears on the
+        // public supporter wall / recent donations when the donor ticks the
+        // opt-in, so the stored note_public flag must reflect that choice.
+        $public = $this->postDonation([
+            'email'        => 'wall@example.com',
+            'amount_cents' => 5000,
+            'currency'     => 'EUR',
+            'gateway'      => 'offline',
+            'note_to_org'  => 'Proud to support this!',
+            'note_public'  => true,
+        ])->get_data()['reference'];
+        $this->assertSame(1, $this->columnOf($public, 'note_public'), 'opted-in message is marked public');
+
+        $private = $this->postDonation([
+            'email'        => 'private@example.com',
+            'amount_cents' => 5000,
+            'currency'     => 'EUR',
+            'gateway'      => 'offline',
+            'note_to_org'  => 'In memory of my father - please keep private',
+        ])->get_data()['reference'];
+        $this->assertSame(0, $this->columnOf($private, 'note_public'), 'note stays private by default');
+    }
+
     public function test_post_donations_rejects_currency_off_the_org_allow_list(): void
     {
         // The base fixture accepts USD/EUR/GBP; JPY is a valid ISO code but not

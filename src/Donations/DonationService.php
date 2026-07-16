@@ -113,6 +113,7 @@ final class DonationService
             $donation->source_attribution = $intent->source_attribution;
             $donation->locale             = $intent->locale;
             $donation->note_to_org        = $intent->note_to_org;
+            $donation->note_public        = $intent->note_public;
             // Honor the donor's persistent privacy preference: when the
             // existing donor has set `always_anonymous` (via donor portal),
             // force every new donation to anonymous regardless of intent.

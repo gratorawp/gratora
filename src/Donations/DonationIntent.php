@@ -36,6 +36,7 @@ final class DonationIntent
         public readonly ?array $source_attribution = null,
         public readonly ?string $locale = null,
         public readonly ?string $note_to_org = null,
+        public readonly bool $note_public = false,
         public readonly bool $is_anonymous = false,
         public readonly ?string $country = null,
         /** @var array{type:string,name:string,notify_email?:?string,message?:?string}|null */

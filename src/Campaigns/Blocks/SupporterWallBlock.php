@@ -78,7 +78,9 @@ final class SupporterWallBlock extends CampaignBlock
             // Base/org currency so totals stay coherent across mixed-currency donations.
             $amount = (int) ($donation->base_amount_cents ?? $donation->amount_cents);
             $paidAt = (string) ($donation->paid_at ?: $donation->created_at);
-            $note   = trim((string) ($donation->note_to_org ?? ''));
+            // Only donors who opted in to a public message are shown; note_to_org
+            // is otherwise a private note to the organisation.
+            $note   = $donation->note_public ? trim((string) ($donation->note_to_org ?? '')) : '';
 
             if (! isset($byDonor[$id])) {
                 $byDonor[$id] = [

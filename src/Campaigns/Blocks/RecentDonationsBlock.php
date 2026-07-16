@@ -92,7 +92,8 @@ final class RecentDonationsBlock extends CampaignBlock
                 'currency'     => (string) $donation->currency,
                 'time_ago'     => $timeAgo,
                 'paid_at_iso'  => (string) $paidAt,
-                'message'      => (string) ($donation->note_to_org ?? ''),
+                // Private unless the donor opted in to a public message.
+                'message'      => $donation->note_public ? (string) ($donation->note_to_org ?? '') : '',
             ];
         }
 

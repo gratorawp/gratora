@@ -194,6 +194,7 @@ final class DonationsController
             source_attribution: $sourceAttribution,
             locale:             isset($body['locale']) ? (string) $body['locale'] : null,
             note_to_org:        isset($body['note_to_org']) ? (string) $body['note_to_org'] : null,
+            note_public:        ! empty($body['note_public']),
             is_anonymous:       (bool) ($body['is_anonymous'] ?? false),
             country:            $country !== null ? (string) $country : null,
             tribute:            $this->normalizeTribute($body['tribute'] ?? null),
