@@ -625,6 +625,10 @@ final class PortalController
                     if ($newCents < 50) return new WP_Error('dono_invalid_input', __('Amount is too low.', 'dono'), ['status' => 422]);
                     if ($sub) $sub->updateSubscriptionAmount($plan, $newCents);
                     $plan->amount_cents = $newCents;
+                    // Keep the base-currency snapshot in step with the new amount.
+                    $plan->base_amount_cents = $plan->fx_rate !== null
+                        ? (int) round($newCents * (float) $plan->fx_rate)
+                        : null;
                     $plan->save();
                     do_action('dono.recurring.plan_amount_changed', $plan);
                     break;

@@ -99,26 +99,28 @@ final class RecurringPlanRepository
     {
         $monthStart = esc_sql((new \DateTimeImmutable($today))->modify('first day of this month')->format('Y-m-d 00:00:00'));
 
-        // interval_count=0 would div-by-zero; NULLIF guards against it.
+        // Normalize each plan to the org base currency (fx snapshot from the
+        // first donation) so a foreign-currency plan does not inflate MRR; fall
+        // back to the plan amount when there is no snapshot. interval_count=0
+        // would div-by-zero; NULLIF guards against it.
+        $amt = 'COALESCE(base_amount_cents, amount_cents)';
         $mrrExpr = "
             SUM(
                 CASE interval_unit
-                    WHEN 'month' THEN amount_cents / NULLIF(interval_count, 0)
-                    WHEN 'week'  THEN amount_cents * 4.345 / NULLIF(interval_count, 0)
-                    WHEN 'year'  THEN amount_cents / NULLIF(12 * interval_count, 0)
-                    WHEN 'day'   THEN amount_cents * 30 / NULLIF(interval_count, 0)
-                    ELSE amount_cents
+                    WHEN 'month' THEN {$amt} / NULLIF(interval_count, 0)
+                    WHEN 'week'  THEN {$amt} * 4.345 / NULLIF(interval_count, 0)
+                    WHEN 'year'  THEN {$amt} / NULLIF(12 * interval_count, 0)
+                    WHEN 'day'   THEN {$amt} * 30 / NULLIF(interval_count, 0)
+                    ELSE {$amt}
                 END
             )
         ";
 
-        // Exclude test-mode plans from the live MRR widget. (Plans store
-        // amount_cents in the plan currency; under the single org-currency model
-        // these are the org currency, so the MRR sum stays coherent.)
+        // Exclude test-mode plans from the live MRR widget.
         $active = DB::table('dono_recurring_plans')
             ->where('status', 'active')
             ->where('is_test', 0)
-            ->selectRaw("COUNT(*) AS cnt, COALESCE({$mrrExpr}, 0) AS mrr, COALESCE(AVG(amount_cents), 0) AS avg_amount")
+            ->selectRaw("COUNT(*) AS cnt, COALESCE({$mrrExpr}, 0) AS mrr, COALESCE(AVG({$amt}), 0) AS avg_amount")
             ->get();
 
         $newCount = (int) DB::table('dono_recurring_plans')

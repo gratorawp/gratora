@@ -689,6 +689,8 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
         $plan->gateway_customer_id     = $customerId;
         $plan->amount_cents       = (int) $donation->amount_cents;
         $plan->currency           = (string) $donation->currency;
+        $plan->base_amount_cents  = $donation->base_amount_cents;
+        $plan->fx_rate            = $donation->fx_rate;
         $plan->interval_unit      = $interval;
         $plan->interval_count     = $intervalCount;
         $plan->status             = 'active';

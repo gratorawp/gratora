@@ -29,6 +29,10 @@ final class RecurringPlan extends Model
     public ?string $gateway_customer_id = null;
     public int $amount_cents;
     public string $currency;
+    // FX snapshot copied from the first donation so MRR can normalize foreign
+    // plans to the org base currency; null when that donation had no rate.
+    public ?int $base_amount_cents = null;
+    public ?string $fx_rate = null;
     public string $interval_unit = 'month';
     public int $interval_count = 1;
     public string $status = 'active';
@@ -60,6 +64,8 @@ RecurringPlan::schema(function (Table $t): void {
     $t->string('gateway_customer_id', 128)->nullable();
     $t->bigInteger('amount_cents')->unsigned();
     $t->string('currency', 3);
+    $t->bigInteger('base_amount_cents')->unsigned()->nullable();
+    $t->decimal('fx_rate', 18, 8)->nullable();
     $t->string('interval_unit', 10)->default('month');
     $t->tinyInteger('interval_count')->unsigned()->default(1);
     $t->string('status', 20)->default('active');
