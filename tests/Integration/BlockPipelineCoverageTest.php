@@ -228,6 +228,37 @@ BLOCKS;
         );
     }
 
+    public function test_untouched_recurring_toggle_still_offers_frequencies(): void
+    {
+        // Gutenberg strips the frequencies attr when it equals the registered
+        // default, so an untouched toggle serializes with no attrs. The walker
+        // must still emit a frequency picker (otherwise recurring is silently off).
+        $cfg = json_decode($this->configFor(
+            '<!-- wp:dono/donation-amount /--><!-- wp:dono/recurring-toggle /-->'
+            . '<!-- wp:dono/name /--><!-- wp:dono/email /--><!-- wp:dono/submit-button /-->'
+        ), true);
+        $this->assertIsArray($cfg);
+
+        $kinds = array_map(static fn ($it) => $it['kind'] ?? '', $this->donorItems($cfg));
+        $this->assertContains('frequency', $kinds, 'an untouched recurring toggle must still offer a frequency choice');
+    }
+
+    public function test_untouched_privacy_notice_parses_into_the_config(): void
+    {
+        // Empty attrs must encode as {} not []; [] leaves the block comment
+        // unparsed and the notice silently disappears from the mounted form.
+        $config = $this->configFor(
+            '<!-- wp:dono/donation-amount /--><!-- wp:dono/name /--><!-- wp:dono/email /-->'
+            . '<!-- wp:dono/privacy-notice /--><!-- wp:dono/submit-button /-->'
+        );
+        $this->assertNotSame('', $config);
+        $this->assertStringNotContainsString(
+            'wp:dono/privacy-notice',
+            $config,
+            'a bare privacy notice must render, not leak an unparsed block comment'
+        );
+    }
+
     public function test_a_field_row_stays_grouped_between_content(): void
     {
         $cfg = json_decode($this->configFor(

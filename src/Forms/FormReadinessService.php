@@ -68,7 +68,7 @@ final class FormReadinessService
                 'label'  => __('No recurring toggle on this form', 'dono'),
             ];
         }
-        $freqs = Blocks\RecurringToggleBlock::normalizeFrequencies($stub['frequencies'] ?? []);
+        $freqs = Blocks\RecurringToggleBlock::normalizeFrequencies($stub['frequencies'] ?? Blocks\RecurringToggleBlock::DEFAULT_FREQUENCIES);
         if (! in_array('one-time', $freqs, true) && ! empty($freqs)) {
             array_unshift($freqs, 'one-time');
         }

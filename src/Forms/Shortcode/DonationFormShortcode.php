@@ -728,8 +728,10 @@ final class DonationFormShortcode extends HookProvider
                     break;
 
                 case 'dono/privacy-notice':
+                    // Cast to object so empty attrs encode as {} not []; [] makes
+                    // the block comment unparseable and the notice silently vanishes.
                     $privacyHtml = (string) do_blocks(
-                        '<!-- wp:dono/privacy-notice ' . wp_json_encode($attrs) . ' /-->'
+                        '<!-- wp:dono/privacy-notice ' . wp_json_encode((object) $attrs) . ' /-->'
                     );
                     $items[] = $withCond(['kind' => 'html', 'html' => $privacyHtml], $attrs);
                     break;
@@ -828,6 +830,19 @@ final class DonationFormShortcode extends HookProvider
                     // Emit this page's items (fields + content interleaved, or a
                     // content-only page); flushItems no-ops when the step is empty.
                     $flushItems();
+                    // A step left empty in the builder would otherwise publish a
+                    // blank wizard page; drop it so donors never click through one.
+                    $pageHasContent = false;
+                    foreach ($steps as $emitted) {
+                        if (($emitted['page'] ?? null) === $currentPage) {
+                            $pageHasContent = true;
+                            break;
+                        }
+                    }
+                    if (! $pageHasContent) {
+                        unset($stepDefs[$currentPage]);
+                        $currentPage--;
+                    }
                     break;
 
                 case 'dono/section':
@@ -1125,7 +1140,7 @@ final class DonationFormShortcode extends HookProvider
                     break;
 
                 case 'dono/recurring-toggle':
-                    $rFreqs = RecurringToggleBlock::normalizeFrequencies($attrs['frequencies'] ?? []);
+                    $rFreqs = RecurringToggleBlock::normalizeFrequencies($attrs['frequencies'] ?? RecurringToggleBlock::DEFAULT_FREQUENCIES);
                     if (! in_array('one-time', $rFreqs, true) && ! empty($rFreqs)) {
                         array_unshift($rFreqs, 'one-time');
                     }

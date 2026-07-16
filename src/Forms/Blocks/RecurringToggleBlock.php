@@ -15,6 +15,10 @@ final class RecurringToggleBlock implements Block
 {
     public const ALLOWED_FREQUENCIES = ['one-time', 'weekly', 'biweekly', 'monthly', 'quarterly', 'yearly'];
 
+    // Gutenberg omits an attribute whose value equals its registered default, so
+    // consumers must fall back to this when the frequencies attr is absent.
+    public const DEFAULT_FREQUENCIES = ['one-time', 'monthly'];
+
     /**
      * Block type name.
      */
@@ -33,7 +37,7 @@ final class RecurringToggleBlock implements Block
             'helpText'         => ['type' => 'string', 'default' => ''],
             'style'            => ['type' => 'string', 'default' => 'pills'],
             'defaultFrequency' => ['type' => 'string', 'default' => 'one-time'],
-            'frequencies'      => ['type' => 'array',  'default' => ['one-time', 'monthly']],
+            'frequencies'      => ['type' => 'array',  'default' => self::DEFAULT_FREQUENCIES],
         ];
     }
 
