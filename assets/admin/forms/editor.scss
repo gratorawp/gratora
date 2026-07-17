@@ -582,6 +582,43 @@ $sidebar-width: 300px;
         }
     }
 
+    // Secondary text actions (Save / Saved / Unpublish). Without this they fall
+    // back to WP's default ~2px radius and read square next to the pill tabs and
+    // the 6px primary button.
+    .components-button.is-secondary {
+        background: #fff;
+        color: $text;
+        border: 1px solid $border-mid;
+        border-radius: 6px;
+        padding: 6px 14px;
+        height: auto;
+        min-height: 32px;
+        font-size: 13px;
+        font-weight: 500;
+        box-shadow: none;
+        transition: background .12s, border-color .12s, color .12s;
+
+        &:not(:disabled):hover {
+            background: $bg-page;
+            border-color: #cbd0d5;
+            color: $text;
+        }
+
+        &:focus:not(:disabled),
+        &:focus-visible:not(:disabled) {
+            outline: 0;
+            box-shadow: 0 0 0 3px $accent-soft;
+            border-color: $border-mid;
+        }
+
+        &:disabled,
+        &[aria-disabled="true"] {
+            opacity: .6;
+            cursor: default;
+            color: $text-muted;
+        }
+    }
+
     .components-button.has-icon:not(.is-primary) {
         width: 32px;
         height: 32px;
