@@ -613,6 +613,10 @@ $sidebar-width: 300px;
 
         &:disabled,
         &[aria-disabled="true"] {
+            // WP's disabled rule re-adds an inset box-shadow "border" that
+            // doubles up with the real border and reads heavier than the
+            // enabled Unpublish button; keep the single flat border.
+            box-shadow: none;
             opacity: .6;
             cursor: default;
             color: $text-muted;
