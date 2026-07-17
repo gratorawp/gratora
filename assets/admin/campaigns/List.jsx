@@ -93,7 +93,12 @@ export default function List() {
             render: ( { item } ) => (
                 <div className="dono-row__body">
                     <span style={ { display: 'inline-flex', alignItems: 'center', gap: 8 } }>
-                        <a className="dono-row__link dono-row__link--strong" href={ detailHref( item.id ) }>
+                        <a
+                            className="dono-row__link dono-row__link--strong"
+                            href={ detailHref( item.id ) }
+                            onMouseDown={ ( e ) => e.stopPropagation() }
+                            onClick={ ( e ) => e.stopPropagation() }
+                        >
                             { item.title }
                         </a>
                         { item.campaign_type && item.campaign_type !== 'standard' && item.campaign_type_label && (
