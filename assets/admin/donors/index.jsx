@@ -13,6 +13,7 @@ import Toaster from '../_shared/components/Toaster';
 
 import EmptyState from '../_shared/components/EmptyState';
 import ConfirmDialog from '../_shared/components/ConfirmDialog';
+import { rowLinkProps } from '../_shared/rowLink';
 import KpiStrip from '../_shared/components/KpiStrip';
 import { formatAmount, formatDate, timeAgo } from '../_shared/format';
 import { COUNTRIES } from '../../_shared/countries';
@@ -133,7 +134,7 @@ function DonorsApp( { toggleSlot } ) {
                     <div className="dono-row">
                         <span className="dono-row__avatar" aria-hidden="true">{ initials( name ) }</span>
                         <div className="dono-row__body">
-                            <a className="dono-row__link dono-row__link--strong" href={ `#donor/${ item.id }` }>
+                            <a className="dono-row__link dono-row__link--strong" href={ `#donor/${ item.id }` } { ...rowLinkProps }>
                                 { name }
                             </a>
                             { item.donor_type && item.donor_type !== 'individual' && (

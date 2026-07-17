@@ -11,6 +11,7 @@ import Btn from '../_shared/components/Btn';
 import DateField from '../_shared/components/DateField';
 import EmptyState from '../_shared/components/EmptyState';
 import ConfirmDialog from '../_shared/components/ConfirmDialog';
+import { rowLinkProps } from '../_shared/rowLink';
 import KpiStrip from '../_shared/components/KpiStrip';
 import StatusBadge from '../_shared/components/StatusBadge';
 import { formatAmount, formatDate, STATUS_LABEL } from './format';
@@ -130,7 +131,7 @@ export default function List() {
             label:         __( 'Reference', 'dono' ),
             enableSorting: true,
             render: ( { item } ) => (
-                <a className="dono-mono-link" href={ detailHref( item.reference ) }>
+                <a className="dono-mono-link" href={ detailHref( item.reference ) } { ...rowLinkProps }>
                     { item.reference }
                 </a>
             ),
@@ -200,7 +201,7 @@ export default function List() {
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => (
                 item.campaign?.title
-                    ? <a className="dono-row__link" href={ campaignDetailHref( item.campaign.id ) }>{ item.campaign.title }</a>
+                    ? <a className="dono-row__link" href={ campaignDetailHref( item.campaign.id ) } { ...rowLinkProps }>{ item.campaign.title }</a>
                     : <span className="dono-row__sub">-</span>
             ),
         },
@@ -222,7 +223,7 @@ export default function List() {
             label:  __( 'Form', 'dono' ),
             render: ( { item } ) => (
                 item.form?.title
-                    ? <a className="dono-row__link" href={ formEditorHref( item.form.id ) }>{ item.form.title }</a>
+                    ? <a className="dono-row__link" href={ formEditorHref( item.form.id ) } { ...rowLinkProps }>{ item.form.title }</a>
                     : <span className="dono-row__sub">-</span>
             ),
         },

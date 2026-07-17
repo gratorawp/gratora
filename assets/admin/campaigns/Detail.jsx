@@ -9,6 +9,7 @@ import { notify } from '../_shared/notify';
 import { __, _n, sprintf } from '@wordpress/i18n';
 
 import { useDonoRecord } from '../_shared/useDonoRecord';
+import { rowLinkProps } from '../_shared/rowLink';
 import { StatusBadge, STATUS_LABEL, formatAmount, formatDate, timeAgo, listHref, detailHref, formEditorHref } from '../_shared/format';
 import Card from '../_shared/components/Card';
 import FormRow from '../_shared/components/FormRow';
@@ -985,7 +986,7 @@ function FormsTab( { campaign } ) {
             enableSorting: true,
             render: ( { item } ) => (
                 <div style={ { lineHeight: 1.3 } }>
-                    <a className="dono-row__link dono-row__link--strong" href={ formEditorHref( item.id ) }>
+                    <a className="dono-row__link dono-row__link--strong" href={ formEditorHref( item.id ) } { ...rowLinkProps }>
                         { item.title }
                     </a>
                     { item.id === defaultFormId && (

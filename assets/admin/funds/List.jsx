@@ -9,6 +9,7 @@ import { Pencil, Trash2 as TrashIcon, Star, Power, PowerOff, Wallet } from 'luci
 
 import { formatAmount, formatDate } from '../_shared/format';
 import Btn from '../_shared/components/Btn';
+import { stopRowSelect } from '../_shared/rowLink';
 import EmptyState from '../_shared/components/EmptyState';
 import Drawer from '../_shared/components/Drawer';
 import Dialog from '../_shared/components/Dialog';
@@ -181,7 +182,8 @@ export default function List() {
                         <a
                             className="dono-row__link dono-row__link--strong"
                             href="#"
-                            onClick={ ( e ) => { e.preventDefault(); setEditing( item ); } }
+                            onMouseDown={ stopRowSelect }
+                            onClick={ ( e ) => { stopRowSelect( e ); e.preventDefault(); setEditing( item ); } }
                         >
                             { item.name }
                         </a>

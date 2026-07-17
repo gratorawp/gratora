@@ -9,6 +9,7 @@ import { Copy as CopyIcon, Trash2 as TrashIcon, Target } from 'lucide-react';
 import { StatusBadge, STATUS_LABEL, formatAmount, formatDate, timeAgo, detailHref } from '../_shared/format';
 import Btn from '../_shared/components/Btn';
 import EmptyState from '../_shared/components/EmptyState';
+import { rowLinkProps } from '../_shared/rowLink';
 import ConfirmDialog from '../_shared/components/ConfirmDialog';
 import KpiStrip from '../_shared/components/KpiStrip';
 import GoalBar from '../_shared/components/GoalBar';
@@ -96,8 +97,7 @@ export default function List() {
                         <a
                             className="dono-row__link dono-row__link--strong"
                             href={ detailHref( item.id ) }
-                            onMouseDown={ ( e ) => e.stopPropagation() }
-                            onClick={ ( e ) => e.stopPropagation() }
+                            { ...rowLinkProps }
                         >
                             { item.title }
                         </a>
