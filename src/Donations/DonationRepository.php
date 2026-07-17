@@ -136,6 +136,19 @@ final class DonationRepository
         ], $rows);
     }
 
+    /** Earliest paid_at (Y-m-d) among a campaign's live donations, or null if none. */
+    public function firstPaidDate(int $campaignId): ?string
+    {
+        $row = DonationQueries::live(DB::table('dono_donations')
+            ->selectRaw('MIN(paid_at) AS first_paid')
+            ->whereIn('status', ['paid', 'partial_refund']))
+            ->where('campaign_id', $campaignId)
+            ->get();
+
+        $val = $row['first_paid'] ?? null;
+        return $val ? substr((string) $val, 0, 10) : null;
+    }
+
     /**
      * Most-common currency among paid donations in scope. Used when callers
      * need a single currency to format aggregated totals against a

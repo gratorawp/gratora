@@ -573,8 +573,13 @@ final class CampaignMetricsService
     private function campaignStartDate(int $campaignId): string
     {
         $c = Campaign::query()->find('id', $campaignId);
-        if (! $c) return $this->daysAgo(30);
-        $iso = $c->starts_at ?? $c->created_at;
-        return substr((string) $iso, 0, 10);
+        $start = $c ? substr((string) ($c->starts_at ?? $c->created_at), 0, 10) : $this->daysAgo(30);
+
+        // Donations can predate the campaign's start date (a start set after
+        // early gifts, imports, backfills), so anchor the all-time series at the
+        // earliest paid donation when it is older; otherwise the chart cuts off
+        // that revenue and reads as a flat zero line.
+        $firstPaid = $this->donations->firstPaidDate($campaignId);
+        return ($firstPaid !== null && $firstPaid < $start) ? $firstPaid : $start;
     }
 }
