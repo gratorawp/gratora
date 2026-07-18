@@ -175,12 +175,17 @@ final class DonorRepository
                 SUM(CASE WHEN last_donation_at <  '{$atRiskCut}' AND last_donation_at >= '{$lapsedCut}' THEN 1 ELSE 0 END) AS lapsed,
                 SUM(CASE WHEN last_donation_at <  '{$lapsedCut}' THEN 1 ELSE 0 END) AS lost,
                 COALESCE(SUM(total_donated_cents), 0) AS ltv_total,
-                COALESCE(AVG(total_donated_cents), 0) AS ltv_avg
+                SUM(CASE WHEN total_donated_cents > 0 THEN 1 ELSE 0 END) AS givers
             ")
             ->get();
 
         $total = (int) ($row['total'] ?? 0);
-        $median = $total > 0 ? $this->medianLtv($total) : 0;
+        // Avg / median lifetime value describe donors who actually gave, not the
+        // whole base: test-created and never-gave donor rows would drag both
+        // toward 0 and disagree with the donors-list "Avg lifetime value".
+        $givers = (int) ($row['givers'] ?? 0);
+        $avgLtv = $givers > 0 ? (int) round(((int) ($row['ltv_total'] ?? 0)) / $givers) : 0;
+        $median = $givers > 0 ? $this->medianLtv($givers) : 0;
 
         return [
             'total'            => $total,
@@ -189,7 +194,7 @@ final class DonorRepository
             'at_risk'          => (int) ($row['at_risk']    ?? 0),
             'lapsed'           => (int) ($row['lapsed']     ?? 0),
             'lost'             => (int) ($row['lost']       ?? 0),
-            'avg_ltv_cents'    => (int) round((float) ($row['ltv_avg']   ?? 0)),
+            'avg_ltv_cents'    => $avgLtv,
             'median_ltv_cents' => $median,
             'total_ltv_cents'  => (int) ($row['ltv_total'] ?? 0),
         ];
@@ -488,13 +493,14 @@ final class DonorRepository
         ], $rows);
     }
 
-    /** Median LTV via OFFSET at the count midpoint. */
-    private function medianLtv(int $totalCount): int
+    /** Median LTV among donors who gave, via OFFSET at their midpoint. */
+    private function medianLtv(int $giverCount): int
     {
-        if ($totalCount === 0) return 0;
-        $offset = (int) floor($totalCount / 2);
+        if ($giverCount === 0) return 0;
+        $offset = (int) floor($giverCount / 2);
         $row = DB::table('dono_donors')
             ->whereRaw('redacted_at IS NULL')
+            ->where('total_donated_cents', 0, '>')
             ->selectRaw('total_donated_cents')
             ->orderBy('total_donated_cents', 'ASC')
             ->limit(1)
