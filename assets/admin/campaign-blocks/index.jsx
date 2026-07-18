@@ -112,7 +112,7 @@ function CampaignField( { attributes, setAttributes, campaign, onCampaignPage, i
  * picker Placeholder; otherwise previews via ServerSideRender with the resolved
  * campaign id (block-renderer has no post context).
  */
-function CampaignCanvas( { block, attributes, setAttributes, onCampaignPage, resolvedId, icon = 'megaphone', className, children } ) {
+function CampaignCanvas( { block, attributes, setAttributes, onCampaignPage, resolvedId, icon = 'megaphone', className, children, isSelected = false, interactive = false } ) {
     const blockProps = useBlockProps( className ? { className } : {} );
 
     if ( ! onCampaignPage && ! attributes.campaignId ) {
@@ -132,10 +132,14 @@ function CampaignCanvas( { block, attributes, setAttributes, onCampaignPage, res
         );
     }
 
+    // Interactive previews (the live donation form) stay disabled until the
+    // block is selected, so the first click selects the block and later clicks
+    // drive the form. Toggling isDisabled (vs swapping elements) keeps the
+    // iframe from remounting on every selection change.
     return (
         <div { ...blockProps }>
             { children }
-            <Disabled>
+            <Disabled isDisabled={ interactive ? ! isSelected : true }>
                 <ServerSideRender block={ block } attributes={ { ...attributes, campaignId: resolvedId } } />
             </Disabled>
         </div>
@@ -859,7 +863,7 @@ registerBlockType( 'dono/donation-form', {
         campaignId: { type: 'integer', default: 0 },
         align:      { type: 'string',  default: 'left' },
     },
-    edit: function DonationFormEdit( { attributes, setAttributes } ) {
+    edit: function DonationFormEdit( { attributes, setAttributes, isSelected } ) {
         const { campaign, onCampaignPage, resolvedId } = useBoundCampaign( attributes.campaignId );
         return <>
             <InspectorControls>
@@ -889,6 +893,8 @@ registerBlockType( 'dono/donation-form', {
                 onCampaignPage={ onCampaignPage }
                 resolvedId={ resolvedId }
                 icon="money-alt"
+                isSelected={ isSelected }
+                interactive
             />
         </>;
     },
