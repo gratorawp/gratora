@@ -8,6 +8,7 @@ import { registerBlockType } from '@wordpress/blocks';
 import { InspectorControls, RichText, useBlockProps } from '@wordpress/block-editor';
 import {
     Disabled,
+    ExternalLink,
     PanelBody,
     Placeholder,
     RangeControl,
@@ -861,10 +862,14 @@ registerBlockType( 'dono/donation-form', {
     icon:       'money-alt',
     attributes: {
         campaignId: { type: 'integer', default: 0 },
-        align:      { type: 'string',  default: 'left' },
     },
     edit: function DonationFormEdit( { attributes, setAttributes, isSelected } ) {
         const { campaign, onCampaignPage, resolvedId } = useBoundCampaign( attributes.campaignId );
+        const formId = Number( campaign?.default_form_id || 0 );
+        const formEditUrl = new URL(
+            formId ? `admin.php?page=dono-forms&view=edit&form=${ formId }` : 'admin.php?page=dono-forms',
+            window.location.href
+        ).href;
         return <>
             <InspectorControls>
                 <PanelBody title={ __( 'Donation form', 'dono' ) }>
@@ -874,16 +879,15 @@ registerBlockType( 'dono/donation-form', {
                         campaign={ campaign }
                         onCampaignPage={ onCampaignPage }
                     />
-                    <SelectControl
-                        label={ __( 'Alignment', 'dono' ) }
-                        value={ attributes.align }
-                        options={ [
-                            { value: 'left',   label: __( 'Left',   'dono' ) },
-                            { value: 'center', label: __( 'Center', 'dono' ) },
-                        ] }
-                        onChange={ ( v ) => setAttributes( { align: v } ) }
-                        __nextHasNoMarginBottom
-                    />
+                    { campaign && (
+                        <p className="dono-block-note">
+                            <ExternalLink href={ formEditUrl }>
+                                { formId
+                                    ? __( 'Edit this donation form', 'dono' )
+                                    : __( 'Manage donation forms', 'dono' ) }
+                            </ExternalLink>
+                        </p>
+                    ) }
                 </PanelBody>
             </InspectorControls>
             <CampaignCanvas

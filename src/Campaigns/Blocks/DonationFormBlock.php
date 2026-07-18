@@ -31,9 +31,7 @@ final class DonationFormBlock extends CampaignBlock
 
     public function attributes(): array
     {
-        return $this->campaignIdAttr() + [
-            'align' => ['type' => 'string', 'default' => 'left'],
-        ];
+        return $this->campaignIdAttr();
     }
 
     public function render(array $attrs, string $content): string
@@ -53,9 +51,6 @@ final class DonationFormBlock extends CampaignBlock
                     . '</div>'
                 : '';
         }
-
-        $align = in_array($attrs['align'] ?? 'left', ['left', 'center'], true)
-            ? (string) $attrs['align'] : 'left';
 
         // Editor preview: the block renderer runs as a REST request (is_admin()
         // is false there), so detect it via REST_REQUEST. ServerSideRender injects
@@ -79,7 +74,6 @@ final class DonationFormBlock extends CampaignBlock
                 'mode'         => 'editor',
                 'previewDoc'   => $previewDoc,
                 'formTitle'    => (string) $form->title,
-                'align'        => $align,
                 'themePrimary' => $campaign->accentColor(),
             ]);
         }
@@ -87,7 +81,6 @@ final class DonationFormBlock extends CampaignBlock
         return View::loadRelative(__DIR__, 'views/donation-form', [
             'mode'         => 'front',
             'formHtml'     => do_shortcode('[dono_donation_form slug="' . esc_attr($form->slug) . '"]'),
-            'align'        => $align,
             'themePrimary' => $campaign->accentColor(),
         ]);
     }

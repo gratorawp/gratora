@@ -836,11 +836,11 @@ body.dono-modal-open { overflow: hidden; }
     &:hover &__link svg { transform: translateX(2px); }
 }
 
-// Donation form block - inline form wrapper + editor placeholder.
+// Donation form block - inline form wrapper + editor placeholder. The form
+// itself is centred by its own `margin: 0 auto` + max-width, so no alignment
+// handling is needed here.
 .dono-block--donation-form {
     margin: 0 0 24px;
-
-    &.is-align-center { display: flex; justify-content: center; }
 }
 .dono-donation-form__placeholder {
     display: flex;

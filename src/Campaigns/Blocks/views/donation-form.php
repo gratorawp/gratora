@@ -5,11 +5,10 @@ defined('ABSPATH') || exit;
  * @var ?string $formHtml
  * @var ?string $previewDoc    Self-contained iframe document (editor mode)
  * @var ?string $formTitle
- * @var string  $align
  * @var string  $themePrimary
  */
 ?>
-<section class="dono-block dono-block--donation-form is-align-<?php echo esc_attr($align); ?>" data-block="dono/donation-form" style="--dono-accent: <?php echo esc_attr($themePrimary); ?>;">
+<section class="dono-block dono-block--donation-form" data-block="dono/donation-form" style="--dono-accent: <?php echo esc_attr($themePrimary); ?>;">
     <?php if (($mode ?? 'front') === 'editor'): ?>
         <?php if (($previewDoc ?? '') !== ''): ?>
             <iframe
