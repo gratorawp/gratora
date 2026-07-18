@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Tests\Integration;
 
+use Dono\Donations\Donation;
 use Dono\Donors\Donor;
 use Dono\Donors\DonorRepository;
 
@@ -85,6 +86,28 @@ final class DonorLifecycleWindowTest extends IntegrationTestCase
         $d->updated_at          = $now;
         $d->save();
 
-        return (int) $d->id;
+        $donorId = (int) $d->id;
+
+        // A real donor always has at least one live donation backing these
+        // counters; lifecycleKpi()/list counts now filter on that, so seed the
+        // paid row the denormalized fields imply.
+        $don = Donation::make();
+        $don->reference         = 'DONO-LW-' . substr(md5($email), 0, 8);
+        $don->donor_id          = $donorId;
+        $don->amount_cents      = 5000;
+        $don->net_cents         = 5000;
+        $don->currency          = 'USD';
+        $don->base_amount_cents = 5000;
+        $don->base_currency     = 'USD';
+        $don->fx_rate           = '1.00000000';
+        $don->gateway           = 'stripe';
+        $don->status            = 'paid';
+        $don->is_test           = false;
+        $don->paid_at           = $last;
+        $don->created_at        = $now;
+        $don->updated_at        = $now;
+        $don->save();
+
+        return $donorId;
     }
 }

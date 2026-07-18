@@ -56,6 +56,20 @@ final class DonorRepository
     }
 
     /**
+     * SQL predicate for "real donor": has at least one live (non-test) donation.
+     * Donor rows are created for every donation, so test-mode donations spawn
+     * donor records that would otherwise inflate the admin counts and list. Must
+     * be the FIRST where-condition on a query - whereRaw adds no AND connector,
+     * but a where() chained after it does.
+     */
+    private function liveDonorPredicate(): string
+    {
+        $prefix = DB::getPrefix();
+        return "EXISTS (SELECT 1 FROM {$prefix}dono_donations d "
+            . "WHERE d.donor_id = {$prefix}dono_donors.id AND d.is_test = 0)";
+    }
+
+    /**
      * @param array{page?:int,per_page?:int,orderby?:string,order?:string,country?:string,matching_ids?:array<int>,has_search?:bool} $args
      * @return array{items: array<Donor>, total: int}
      */
@@ -88,8 +102,8 @@ final class DonorRepository
             return $q;
         };
 
-        $total = (int) $applyFilters(Donor::query())->count();
-        $items = $applyFilters(Donor::query())
+        $total = (int) $applyFilters(Donor::query()->whereRaw($this->liveDonorPredicate()))->count();
+        $items = $applyFilters(Donor::query()->whereRaw($this->liveDonorPredicate()))
             ->orderBy($orderBy, $order)
             ->limit($perPage)
             ->offset($offset)
@@ -124,7 +138,7 @@ final class DonorRepository
             return $q;
         };
 
-        $base = fn () => DB::table('dono_donors');
+        $base = fn () => DB::table('dono_donors')->whereRaw($this->liveDonorPredicate());
 
         $totalCount    = (int) $applyFilters($base())->count();
         $withDonations = (int) $applyFilters($base())->where('donations_count', 0, '>')->count();
@@ -166,7 +180,7 @@ final class DonorRepository
         $lapsedCut = esc_sql($this->daysAgo($today, $lapsedDays));
 
         $row = DB::table('dono_donors')
-            ->whereRaw('redacted_at IS NULL')
+            ->whereRaw('redacted_at IS NULL AND ' . $this->liveDonorPredicate())
             ->selectRaw("
                 COUNT(*) AS total,
                 SUM(CASE WHEN created_at >= '{$newCut}' THEN 1 ELSE 0 END) AS new_donors,
