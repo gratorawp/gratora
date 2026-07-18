@@ -10,7 +10,7 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 
 import { useDonoRecord } from '../_shared/useDonoRecord';
 import { rowLinkProps } from '../_shared/rowLink';
-import { StatusBadge, STATUS_LABEL, formatAmount, formatDate, timeAgo, listHref, detailHref, formEditorHref } from '../_shared/format';
+import { StatusBadge, STATUS_LABEL, formatAmount, defaultCurrency, formatDate, timeAgo, listHref, detailHref, formEditorHref } from '../_shared/format';
 import Card from '../_shared/components/Card';
 import FormRow from '../_shared/components/FormRow';
 import { ToggleRow } from '../_shared/components/Switch';
@@ -207,6 +207,7 @@ export default function Detail( { id, tab } ) {
                     <OverviewTab
                         campaign={ campaign }
                         nav={ <DetailNav campaign={ campaign } activeTab={ activeTab } extraTabs={ extTabs } onAction={ onHeaderAction } /> }
+                        onError={ setError }
                     />
                 ) }
                 { activeTab === 'forms' && (
@@ -513,7 +514,7 @@ function OverviewTab( { campaign, nav, onError } ) {
                 <div className="dono-overview__metrics">
                     <GoalProgressCard campaign={ campaign } metrics={ m } />
                     <MetricCard label={ __( 'Amount raised', 'dono' ) }
-                                value={ formatAmount( m.amount_raised_cents, campaign.currency ) }
+                                value={ formatAmount( m.amount_raised_cents ) }
                                 changePct={ cmp?.amount_raised_cents }
                                 icon={ <IconCoins /> } />
                     <MetricCard label={ __( 'Donations', 'dono' ) }
@@ -525,7 +526,7 @@ function OverviewTab( { campaign, nav, onError } ) {
                                 changePct={ cmp?.donors_count }
                                 icon={ <IconUsers /> } />
                     <MetricCard label={ __( 'Average donation', 'dono' ) }
-                                value={ formatAmount( m.avg_donation_cents, campaign.currency ) }
+                                value={ formatAmount( m.avg_donation_cents ) }
                                 changePct={ cmp?.avg_donation_cents }
                                 icon={ <IconActivity /> } />
                 </div>
@@ -570,19 +571,19 @@ function OverviewTab( { campaign, nav, onError } ) {
         },
         'top-donors': {
             title: __( 'Top donors', 'dono' ),
-            render: () => <TopDonors rows={ m.top_donors } currency={ campaign.currency } />,
+            render: () => <TopDonors rows={ m.top_donors } currency={ defaultCurrency() } />,
         },
         'top-forms': {
             title: __( 'Top forms', 'dono' ),
-            render: () => <TopForms rows={ m.top_forms } currency={ campaign.currency } />,
+            render: () => <TopForms rows={ m.top_forms } currency={ defaultCurrency() } />,
         },
         channel: {
             title: __( 'By channel', 'dono' ),
-            render: () => <ChannelBreakdown rows={ m.by_channel } currency={ campaign.currency } />,
+            render: () => <ChannelBreakdown rows={ m.by_channel } currency={ defaultCurrency() } />,
         },
         gateway: {
             title: __( 'By payment method', 'dono' ),
-            render: () => <GatewayBreakdown rows={ m.by_gateway } currency={ campaign.currency } />,
+            render: () => <GatewayBreakdown rows={ m.by_gateway } currency={ defaultCurrency() } />,
         },
     };
 
@@ -814,20 +815,25 @@ function TopDonors( { rows, currency } ) {
     );
 }
 
-function GoalProgressCard( { campaign, metrics } ) {
+function GoalProgressCard( { campaign } ) {
     const goalType = campaign.goal_type ?? 'amount';
     const target = goalType === 'amount'
         ? ( campaign.goal_cents ?? 0 )
         : ( campaign.goal_count ?? 0 );
+    // Goal progress is cumulative — always the campaign-lifetime totals, never
+    // the range-scoped metrics, or picking a range with no gifts reads 0% on an
+    // already-funded campaign.
     const current = goalType === 'amount'
-        ? ( metrics.amount_raised_cents ?? 0 )
+        ? ( campaign.raised_cents ?? 0 )
         : goalType === 'donations'
-            ? ( metrics.donations_count ?? 0 )
-            : ( metrics.donors_count ?? 0 );
+            ? ( campaign.donations_count ?? 0 )
+            : ( campaign.donors_count ?? 0 );
     const pct = target > 0 ? Math.min( 100, Math.round( ( current / target ) * 100 ) ) : null;
 
+    // Raised totals are summed in the org base currency; format with the org
+    // default (no per-campaign currency arg), like every other money widget.
     const fmt = ( v ) => goalType === 'amount'
-        ? formatAmount( v, campaign.currency )
+        ? formatAmount( v )
         : Number( v ).toLocaleString();
 
     return (
