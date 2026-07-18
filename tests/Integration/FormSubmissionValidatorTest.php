@@ -112,6 +112,61 @@ BLOCKS;
         );
     }
 
+    public function test_presets_only_form_enforces_its_presets(): void
+    {
+        $blocks = <<<BLOCKS
+<!-- wp:dono/donation-amount {"presets":[{"cents":2500},{"cents":5000}],"allowCustom":false} /-->
+<!-- wp:dono/submit-button /-->
+BLOCKS;
+        $base = ['frequency' => 'one_time', 'custom' => [], 'consents' => []];
+
+        $this->assertNull(
+            $this->validator()->validate($this->form($blocks), $base + ['amount_cents' => 2500]),
+            'a listed preset is accepted'
+        );
+        $this->assertNotNull(
+            $this->validator()->validate($this->form($blocks), $base + ['amount_cents' => 700]),
+            'an off-preset amount is rejected on a presets-only form'
+        );
+    }
+
+    public function test_custom_amount_form_still_accepts_any_amount(): void
+    {
+        $blocks = <<<BLOCKS
+<!-- wp:dono/donation-amount {"presets":[{"cents":2500}],"allowCustom":true} /-->
+<!-- wp:dono/submit-button /-->
+BLOCKS;
+        $base = ['frequency' => 'one_time', 'custom' => [], 'consents' => []];
+
+        $this->assertNull(
+            $this->validator()->validate($this->form($blocks), $base + ['amount_cents' => 743]),
+            'a custom amount is accepted when the form allows custom'
+        );
+    }
+
+    public function test_fund_picker_rejects_a_fund_outside_its_allowlist(): void
+    {
+        $blocks = <<<BLOCKS
+<!-- wp:dono/donation-amount {"presets":[{"cents":2500}]} /-->
+<!-- wp:dono/fund-picker {"fundIds":[7,8]} /-->
+<!-- wp:dono/submit-button /-->
+BLOCKS;
+        $base = ['amount_cents' => 2500, 'frequency' => 'one_time', 'custom' => [], 'consents' => []];
+
+        $this->assertNull(
+            $this->validator()->validate($this->form($blocks), $base + ['fund_id' => 7]),
+            'a fund in the allowlist is accepted'
+        );
+        $this->assertNotNull(
+            $this->validator()->validate($this->form($blocks), $base + ['fund_id' => 99]),
+            'a fund outside the allowlist is rejected'
+        );
+        $this->assertNull(
+            $this->validator()->validate($this->form($blocks), $base + ['fund_id' => 0]),
+            'a cleared fund choice falls through to the default'
+        );
+    }
+
     public function test_default_recurring_toggle_accepts_the_frequencies_it_offers(): void
     {
         // Gutenberg omits `frequencies` when it equals the block default, so a

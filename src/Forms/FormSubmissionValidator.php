@@ -6,6 +6,7 @@ namespace Dono\Forms;
 
 use Dono\Forms\Blocks\ConsentBlock;
 use Dono\Forms\Blocks\DateBlock;
+use Dono\Forms\Blocks\DonationAmountBlock;
 use Dono\Forms\Blocks\DropdownBlock;
 use Dono\Forms\Blocks\RecurringToggleBlock;
 use WP_Error;
@@ -114,6 +115,35 @@ final class FormSubmissionValidator
                 $noteMax = (int) ($attrs['maxLength'] ?? 5000);
                 if ($noteMax > 0 && mb_strlen($note) > $noteMax) {
                     return $this->reject(__('Your message is too long.', 'dono'));
+                }
+                break;
+
+            case 'dono/donation-amount':
+                // A presets-only form (custom amounts disabled) must only accept
+                // a listed preset; a crafted POST can otherwise send any amount.
+                // 'fixed' donation type is a single custom input, so it's exempt.
+                $amountType = (string) ($attrs['donationType'] ?? 'multi');
+                $allowCustom = $amountType === 'fixed' ? true : (bool) ($attrs['allowCustom'] ?? true);
+                if (! $allowCustom) {
+                    $allowedCents = array_map(
+                        static fn ($p) => (int) $p['cents'],
+                        DonationAmountBlock::normalizePresets($attrs['presets'] ?? null)
+                    );
+                    if (! in_array((int) ($body['amount_cents'] ?? 0), $allowedCents, true)) {
+                        return $this->reject(__('Choose one of the listed donation amounts.', 'dono'));
+                    }
+                }
+                break;
+
+            case 'dono/fund-picker':
+                // When the picker restricts to a set of funds, a chosen fund
+                // must be one of them; a crafted POST can otherwise route to any
+                // fund in the org. A cleared choice (0) falls back to the form's
+                // default and is left to the create path.
+                $allowedFunds = array_values(array_filter(array_map('intval', (array) ($attrs['fundIds'] ?? []))));
+                $chosenFund   = (int) ($body['fund_id'] ?? 0);
+                if ($allowedFunds !== [] && $chosenFund !== 0 && ! in_array($chosenFund, $allowedFunds, true)) {
+                    return $this->reject(__('That fund is not available for this form.', 'dono'));
                 }
                 break;
 
