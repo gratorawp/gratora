@@ -9,6 +9,18 @@ import { formatAmount, formatAmountCompact } from '../../_shared/format';
 
 // Donation-size distribution histogram with a median reference line.
 export default function DistributionHistogram( { distribution, currency } ) {
+    // Hooks must run on every render: this widget mounts with distribution=null
+    // (loading) then re-renders with data, so the useMemo has to sit above the
+    // empty-guard or the hook count changes and React throws.
+    const buckets = distribution?.buckets ?? [];
+    const data = useMemo( () => buckets.map( ( b ) => ( {
+        label: labelFor( b, currency ),
+        count: b.count,
+        amount_cents: b.amount_cents,
+        min: b.min_cents,
+        max: b.max_cents,
+    } ) ), [ buckets, currency ] );
+
     if ( ! distribution || distribution.total_count === 0 ) {
         return (
             <p className="dono-panel__empty">
@@ -17,15 +29,7 @@ export default function DistributionHistogram( { distribution, currency } ) {
         );
     }
 
-    const { buckets, median_cents, total_count } = distribution;
-
-    const data = useMemo( () => buckets.map( ( b ) => ( {
-        label: labelFor( b, currency ),
-        count: b.count,
-        amount_cents: b.amount_cents,
-        min: b.min_cents,
-        max: b.max_cents,
-    } ) ), [ buckets, currency ] );
+    const { median_cents, total_count } = distribution;
 
     // Find the bucket the median falls into so we can draw a reference line.
     const medianBucketIndex = buckets.findIndex( ( b ) => {

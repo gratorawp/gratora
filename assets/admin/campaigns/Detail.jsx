@@ -482,7 +482,11 @@ function OverviewTab( { campaign, nav, onError } ) {
         return () => { aborted = true; };
     }, [ range, compareMode, campaign.id, includeKey ] );
 
-    const m = metrics || {
+    // Merge the fallback ALWAYS, not just while metrics is null: an include=-
+    // limited response (e.g. after hiding then unhiding a widget) returns an
+    // object missing the excluded keys, and the wrappers below deref rows
+    // directly, so an absent key must still resolve to its empty default.
+    const m = {
         amount_raised_cents: 0,
         donations_count: 0,
         donors_count: 0,
@@ -499,6 +503,7 @@ function OverviewTab( { campaign, nav, onError } ) {
         notes: [],
         distribution: null,
         dow_hour: null,
+        ...( metrics || {} ),
     };
 
     const compareOn = compareMode !== 'none';
