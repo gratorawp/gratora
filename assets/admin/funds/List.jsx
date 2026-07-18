@@ -92,6 +92,7 @@ export default function List() {
     const [ editing, setEditing ]   = useState( null );
     const [ deleteTarget, setDeleteTarget ] = useState( null );
     const [ stats, setStats ]       = useState( null );
+    const [ statsLoading, setStatsLoading ] = useState( true );
     const [ reload, setReload ]     = useState( 0 );
 
     const statusFilter = view.filters?.find( ( f ) => f.field === 'status' );
@@ -104,7 +105,7 @@ export default function List() {
             path: addQueryArgs( '/dono/v1/admin/funds', {
                 page:     view.page,
                 per_page: view.perPage,
-                orderby:  view.sort?.field === 'goal' ? 'raised_cents' : ( view.sort?.field || 'sort_order' ),
+                orderby:  view.sort?.field || 'sort_order',
                 order:    view.sort?.direction || 'asc',
                 search:   view.search || undefined,
                 status:   statusFilter?.value || undefined,
@@ -127,9 +128,15 @@ export default function List() {
     }, [ view, statusFilter ] );
 
     const loadStats = useCallback( () => {
+        setStatsLoading( true );
         apiFetch( { path: '/dono/v1/admin/funds/stats' } )
             .then( setStats )
-            .catch( () => {} );
+            .catch( ( err ) => {
+                // Don't strand the KPI strip in a perpetual spinner; settling
+                // loading resolves it to em-dashes instead.
+                window.console?.error( '[dono] fund stats failed to load', err );
+            } )
+            .finally( () => setStatsLoading( false ) );
     }, [] );
 
     useEffect( () => load(), [ load, reload ] );
@@ -211,7 +218,10 @@ export default function List() {
         {
             id:            'goal',
             label:         __( 'Goal progress', 'dono' ),
-            enableSorting: true,
+            // Not sortable: the column shows raised-vs-goal percentage, but a
+            // parent's raised is rolled up in PHP after the query, so no DB
+            // sort key reflects what's displayed.
+            enableSorting: false,
             render: ( { item } ) => {
                 if ( ! item.goal_cents ) {
                     return (
@@ -322,7 +332,7 @@ export default function List() {
                 { __( 'Organization-wide designations donations are allocated to. Funds persist across campaigns and years so restricted giving and accounting roll up correctly.', 'dono' ) }
             </p>
 
-            <KpiStrip items={ fundKpis( stats ) } loading={ ! stats } />
+            <KpiStrip items={ fundKpis( stats ) } loading={ statsLoading } />
 
             { error && (
                 <Notice status="error" onRemove={ () => setError( null ) }>{ error }</Notice>

@@ -459,8 +459,17 @@ final class DonationRepository
         if ($totalCount === 0) return 0;
         $offset = (int) floor($totalCount / 2);
 
-        $row = $this->paidQuery($from, $to, $campaignId)
-            ->selectRaw('amount_cents')
+        // Order over the same set the histogram counts (paid + partial_refund).
+        // paidQuery() is paid-only, so an offset derived from the histogram's
+        // paid+partial total would overshoot into the tail (or past the end).
+        $q = DonationQueries::live(
+            DB::table('dono_donations')->whereIn('status', ['paid', 'partial_refund'])
+        );
+        if ($from !== null)       $q = $q->where('paid_at', $from . ' 00:00:00', '>=');
+        if ($to   !== null)       $q = $q->where('paid_at', $to   . ' 23:59:59', '<=');
+        if ($campaignId !== null) $q = $q->where('campaign_id', $campaignId);
+
+        $row = $q->selectRaw('amount_cents')
             ->orderBy('amount_cents', 'ASC')
             ->limit(1)
             ->offset($offset)
@@ -523,14 +532,21 @@ final class DonationRepository
         return $out;
     }
 
-    /** Count of paid non-one-time donations for a campaign (the "active recurring" KPI). */
+    /**
+     * Distinct donors with a paid recurring donation for a campaign (the
+     * "Recurring donors" KPI). Counts donors, not rows: a donor with six
+     * monthly renewals is one recurring donor, not six.
+     */
     public function countActiveRecurringForCampaign(int $campaignId): int
     {
-        return (int) DonationQueries::live(DB::table('dono_donations')
+        $row = DonationQueries::live(DB::table('dono_donations')
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('campaign_id', $campaignId))
             ->where('frequency', 'one_time', '<>')
-            ->count();
+            ->selectRaw('COUNT(DISTINCT donor_id) AS c')
+            ->get();
+
+        return (int) ($row['c'] ?? 0);
     }
 
     // ── Shared query builder ──────────────────────────────────────────────
