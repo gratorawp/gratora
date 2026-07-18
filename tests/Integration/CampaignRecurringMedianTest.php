@@ -46,12 +46,25 @@ final class CampaignRecurringMedianTest extends IntegrationTestCase
         $this->assertSame(3000, $this->repo()->medianPaidAmount(null, null, self::CAMPAIGN, 5));
     }
 
+    public function test_median_uses_base_currency_not_donor_currency(): void
+    {
+        // Donor-currency amounts and org-base amounts diverge sharply. The
+        // median must describe the base values so foreign gifts rank against
+        // org-currency ones consistently.
+        $this->seed(101, 'one_time', 30000, 'fx1', 'paid', 3000);
+        $this->seed(102, 'one_time', 20000, 'fx2', 'paid', 2000);
+        $this->seed(103, 'one_time', 10000, 'fx3', 'paid', 1000);
+
+        // offset floor(3/2)=1 over base-sorted [1000,2000,3000] -> 2000, not 20000.
+        $this->assertSame(2000, $this->repo()->medianPaidAmount(null, null, self::CAMPAIGN, 3));
+    }
+
     private function repo(): DonationRepository
     {
         return Plugin::instance()->container->get(DonationRepository::class);
     }
 
-    private function seed(int $donorId, string $freq, int $cents, string $ref, string $status = 'paid'): void
+    private function seed(int $donorId, string $freq, int $cents, string $ref, string $status = 'paid', ?int $base = null): void
     {
         $now = gmdate('Y-m-d H:i:s');
         $d = Donation::make();
@@ -61,8 +74,8 @@ final class CampaignRecurringMedianTest extends IntegrationTestCase
         $d->amount_cents      = $cents;
         $d->net_cents         = $cents;
         $d->currency          = 'USD';
-        $d->base_amount_cents = $cents;
-        $d->base_currency     = 'USD';
+        $d->base_amount_cents = $base ?? $cents;
+        $d->base_currency     = 'EUR';
         $d->fx_rate           = '1.00000000';
         $d->gateway           = 'offline';
         $d->status            = $status;

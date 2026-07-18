@@ -538,7 +538,7 @@ function OverviewTab( { campaign, nav, onError } ) {
             render: () => (
                 <RevenueChart
                     series={ m.revenue_series }
-                    currency={ campaign.currency }
+                    currency={ defaultCurrency() }
                     compareOn={ compareOn && rangeIsComparable }
                     comparison={ m.comparison }
                 />
@@ -550,7 +550,7 @@ function OverviewTab( { campaign, nav, onError } ) {
         },
         distribution: {
             title: __( 'Donation shape', 'dono' ),
-            render: () => <DistributionHistogram distribution={ m.distribution } currency={ campaign.currency } />,
+            render: () => <DistributionHistogram distribution={ m.distribution } currency={ defaultCurrency() } />,
         },
         heatmap: {
             title: __( 'When donors give', 'dono' ),

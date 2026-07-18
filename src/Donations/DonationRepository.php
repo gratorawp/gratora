@@ -388,9 +388,13 @@ final class DonationRepository
 
         sort($thresholdsCents);
         $prefix = DB::getPrefix();
+        // Bucket on base_amount_cents (org currency), not the donor-currency
+        // amount_cents. Donations can be taken in different currencies, so
+        // bucketing by face value would compare foreign amounts against
+        // one-currency thresholds and land near-boundary gifts in the wrong bar.
         $cases = [];
         foreach ($thresholdsCents as $t) {
-            $cases[] = "WHEN {$prefix}dono_donations.amount_cents <= {$t} THEN {$t}";
+            $cases[] = "WHEN COALESCE({$prefix}dono_donations.base_amount_cents, 0) <= {$t} THEN {$t}";
         }
         $bucketExpr = 'CASE ' . implode(' ', $cases) . ' ELSE NULL END';
 
@@ -459,9 +463,11 @@ final class DonationRepository
         if ($totalCount === 0) return 0;
         $offset = (int) floor($totalCount / 2);
 
-        // Order over the same set the histogram counts (paid + partial_refund).
-        // paidQuery() is paid-only, so an offset derived from the histogram's
-        // paid+partial total would overshoot into the tail (or past the end).
+        // Order over the same set the histogram counts (paid + partial_refund)
+        // and in the same currency it buckets by (base_amount_cents). paidQuery()
+        // is paid-only, so an offset from the paid+partial total would overshoot;
+        // ordering by donor-currency amount_cents would rank foreign gifts
+        // against org-currency ones.
         $q = DonationQueries::live(
             DB::table('dono_donations')->whereIn('status', ['paid', 'partial_refund'])
         );
@@ -469,8 +475,8 @@ final class DonationRepository
         if ($to   !== null)       $q = $q->where('paid_at', $to   . ' 23:59:59', '<=');
         if ($campaignId !== null) $q = $q->where('campaign_id', $campaignId);
 
-        $row = $q->selectRaw('amount_cents')
-            ->orderBy('amount_cents', 'ASC')
+        $row = $q->selectRaw('COALESCE(base_amount_cents, 0) AS amount_cents')
+            ->orderBy('base_amount_cents', 'ASC')
             ->limit(1)
             ->offset($offset)
             ->get();
