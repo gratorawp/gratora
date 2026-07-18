@@ -339,8 +339,11 @@ final class DonationFormShortcode extends HookProvider
      * @param bool $autoResize Size the iframe to its content from inside the
      *                         srcdoc (same-origin, so window.frameElement works);
      *                         the forms pane sizes with CSS and opts out.
+     * @param bool $transparent Drop the pane background so the form blends into
+     *                          the host editor canvas (the block editor); the
+     *                          forms pane keeps its grey for card contrast.
      */
-    public function buildPreviewDocument(array $preview, bool $autoResize = false): string
+    public function buildPreviewDocument(array $preview, bool $autoResize = false, bool $transparent = false): string
     {
         $cssUrl   = esc_url($preview['cssUrl']);
         $jsUrl    = esc_url($preview['jsUrl']);
@@ -363,6 +366,7 @@ final class DonationFormShortcode extends HookProvider
         // back into the frame height each observer tick, run away). The delta
         // guard and cap are belt-and-suspenders against any residual loop.
         $bodyMinHeight = $autoResize ? '0' : '100vh';
+        $background    = $transparent ? 'transparent' : '#f0f0f1';
         $resize = $autoResize
             ? '<script>(function(){var l=0;function s(){try{if(!window.frameElement)return;var h=Math.min(document.documentElement.scrollHeight,4000);if(Math.abs(h-l)>2){l=h;window.frameElement.style.height=h+"px"}}catch(e){}}addEventListener("load",s);if(window.ResizeObserver){new ResizeObserver(s).observe(document.documentElement)}setTimeout(s,300);setTimeout(s,1200)})();</script>'
             : '';
@@ -375,7 +379,7 @@ final class DonationFormShortcode extends HookProvider
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="{$cssUrl}">
     <style>
-        html, body { margin: 0; padding: 0; background: #f0f0f1; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif; }
+        html, body { margin: 0; padding: 0; background: {$background}; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif; }
         body { padding: 32px 16px; min-height: {$bodyMinHeight}; }
     </style>
 </head>

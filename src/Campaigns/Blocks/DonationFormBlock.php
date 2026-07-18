@@ -72,7 +72,7 @@ final class DonationFormBlock extends CampaignBlock
                     is_array($form->settings) ? $form->settings : null,
                     (int) $form->campaign_id,
                 );
-                $previewDoc = $this->shortcode->buildPreviewDocument($preview, true);
+                $previewDoc = $this->shortcode->buildPreviewDocument($preview, autoResize: true, transparent: true);
             }
 
             return View::loadRelative(__DIR__, 'views/donation-form', [
