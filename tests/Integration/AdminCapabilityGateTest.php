@@ -93,4 +93,42 @@ final class AdminCapabilityGateTest extends IntegrationTestCase
             'redact cap passes the gate'
         );
     }
+
+    public function test_managing_roles_requires_full_admin_not_just_settings_cap(): void
+    {
+        $this->actAs(['dono_manage_settings']);
+
+        // A settings-scoped role edits ordinary settings...
+        $this->assertAllowed(
+            $this->status('PUT', '/dono/v1/admin/settings/general', ['organization_name' => 'X']),
+            'settings manager edits general settings'
+        );
+        // ...but must not rewrite the role->capability mapping (privilege escalation),
+        $this->assertForbidden(
+            $this->status('PUT', '/dono/v1/admin/settings/roles', ['mapping' => ['subscriber' => ['dono_refund_donations']]]),
+            'settings manager cannot grant capabilities via the roles mapping'
+        );
+        // ...nor restore/export a settings bundle (applies the mapping + leaks secrets).
+        $this->assertForbidden(
+            $this->status('POST', '/dono/v1/admin/advanced/import', ['settings' => []]),
+            'settings manager cannot import a settings bundle'
+        );
+        $this->assertForbidden(
+            $this->status('GET', '/dono/v1/admin/advanced/export'),
+            'settings manager cannot export secrets'
+        );
+    }
+
+    public function test_full_admin_can_manage_roles(): void
+    {
+        // The IntegrationTestCase default user is an administrator (manage_options).
+        $this->assertAllowed(
+            $this->status('PUT', '/dono/v1/admin/settings/roles', ['mapping' => []]),
+            'an admin can manage the roles mapping'
+        );
+        $this->assertAllowed(
+            $this->status('GET', '/dono/v1/admin/advanced/export'),
+            'an admin can export'
+        );
+    }
 }

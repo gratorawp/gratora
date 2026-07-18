@@ -38,16 +38,20 @@ final class AdvancedController
             'permission_callback' => [$this, 'canAccess'],
         ]);
 
+        // Export leaks gateway secrets and import restores the role-capability
+        // mapping + secrets, so both need full admin, not the delegatable
+        // dono_manage_settings (which a scoped role could otherwise use to
+        // read the webhook secret or grant itself capabilities via import).
         register_rest_route(self::NAMESPACE, '/admin/advanced/export', [
             'methods'             => WP_REST_Server::READABLE,
             'callback'            => [$this, 'export'],
-            'permission_callback' => [$this, 'canAccess'],
+            'permission_callback' => [$this, 'canManage'],
         ]);
 
         register_rest_route(self::NAMESPACE, '/admin/advanced/import', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'import'],
-            'permission_callback' => [$this, 'canAccess'],
+            'permission_callback' => [$this, 'canManage'],
         ]);
 
         register_rest_route(self::NAMESPACE, '/admin/advanced/recalculate', [
@@ -225,6 +229,11 @@ final class AdvancedController
     public function canAccess(): bool
     {
         return Capabilities::userCan('dono_manage_settings');
+    }
+
+    public function canManage(): bool
+    {
+        return current_user_can('manage_options');
     }
 
     public function info(): WP_REST_Response

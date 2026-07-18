@@ -60,6 +60,12 @@ final class SettingsController
         if (! $this->settings->knows($group)) {
             return new WP_Error('dono_unknown_group', __('Unknown settings group.', 'dono'), ['status' => 404]);
         }
+        // Assigning Dono capabilities to roles grants privileges, so it needs
+        // full admin - not the delegatable dono_manage_settings, which a scoped
+        // role could otherwise use to grant itself refund/redact/export caps.
+        if ($group === 'roles' && ! current_user_can('manage_options')) {
+            return new WP_Error('dono_forbidden', __('Managing roles requires full administrator access.', 'dono'), ['status' => 403]);
+        }
         $body = (array) $request->get_json_params();
         // Whitelist to known top-level keys for this group so arbitrary keys
         // can't be planted in the option by a curious caller. SettingsService
