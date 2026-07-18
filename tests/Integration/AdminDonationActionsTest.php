@@ -211,10 +211,10 @@ final class AdminDonationActionsTest extends IntegrationTestCase
         $this->assertStringContainsString('live@example.com', $csv);
         $this->assertStringNotContainsString('test@example.com', $csv, 'is_test filter must scope the export');
 
-        // No filter mirrors the list: both rows present.
+        // No filter is live-only: the test row is hidden unless explicitly asked for.
         $csv = $this->captureCsv('/dono/v1/admin/donations/export.csv');
         $this->assertStringContainsString('live@example.com', $csv);
-        $this->assertStringContainsString('test@example.com', $csv);
+        $this->assertStringNotContainsString('test@example.com', $csv);
     }
 
     public function test_stats_excludes_test_money_from_raised_by_default(): void
@@ -222,10 +222,10 @@ final class AdminDonationActionsTest extends IntegrationTestCase
         $this->seedPaidDonation(['email' => 'live@example.com', 'gateway' => 'offline', 'is_test' => false, 'amount_cents' => 5000]);
         $this->seedPaidDonation(['email' => 'test@example.com', 'gateway' => 'stripe',  'is_test' => true,  'amount_cents' => 9999]);
 
-        // Default (no is_test filter): "Raised" is real money only, but the row
-        // count still mirrors the list (which shows test rows, badged).
+        // Default (no is_test filter): live-only across the board, so total,
+        // paid and raised all describe real donations.
         $stats = $this->get('/dono/v1/admin/donations/stats')->get_data();
-        $this->assertSame(2, (int) $stats['total_count'], 'total mirrors the list (incl. test)');
+        $this->assertSame(1, (int) $stats['total_count'], 'total is live-only by default');
         $this->assertSame(1, (int) $stats['paid_count'], 'paid count excludes test money');
         $this->assertSame(5000, (int) $stats['raised_cents'], 'test money never inflates Raised');
 

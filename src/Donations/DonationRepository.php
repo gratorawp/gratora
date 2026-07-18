@@ -665,6 +665,11 @@ final class DonationRepository
         }
         if (array_key_exists('is_test', $args) && $args['is_test'] !== '' && $args['is_test'] !== null) {
             $q = $q->where('is_test', (bool) $args['is_test'] ? 1 : 0);
+        } else {
+            // Live-only by default; test donations are a dev/staging concern and
+            // surface (in the list, CSV export and the strip total alike) only
+            // when the admin explicitly filters to them.
+            $q = $q->where('is_test', 0);
         }
         if ($createdFrom !== null) {
             $q = $q->where('created_at', $createdFrom, '>=');
