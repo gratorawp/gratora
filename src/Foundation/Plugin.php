@@ -71,10 +71,22 @@ final class Plugin
         // endpoints still enforce per-area granular caps.
         add_filter('user_has_cap', [Capabilities::class, 'grantMetaCaps']);
 
-        // Activation hooks don't fire on plugin updates. Re-ensure the donor
-        // portal page once per DONO_VERSION bump so existing installs that
-        // skip a reactivation still get the page (and recover from manual
-        // deletion). Cheap on steady state (one option read).
+        // Activation hooks don't fire on plugin updates, so a release that adds
+        // a table or column would never migrate on a normal update, causing
+        // "unknown column" errors until a reactivation. Run the schema
+        // migration once per DONO_VERSION bump (cheap on steady state: one
+        // option read). Priority 99 so tables exist before the portal heal.
+        add_action('wp_loaded', static function (): void {
+            if (get_option('dono_db_version') === DONO_VERSION) {
+                return;
+            }
+            self::migrateSchema();
+            update_option('dono_db_version', DONO_VERSION, false);
+        }, 99);
+
+        // Re-ensure the donor portal page once per DONO_VERSION bump so existing
+        // installs that skip a reactivation still get the page (and recover from
+        // manual deletion). Cheap on steady state (one option read).
         add_action('wp_loaded', static function (): void {
             (new PortalPage())->maybeHeal();
         }, 100);
@@ -110,6 +122,9 @@ final class Plugin
     public static function onActivation(): void
     {
         self::migrateSchema();
+        // Stamp the schema version so the boot-time gate doesn't re-migrate on
+        // the first request after activation.
+        update_option('dono_db_version', DONO_VERSION, false);
 
         Capabilities::applyMapping(
             Capabilities::currentMapping()

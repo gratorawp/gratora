@@ -36,6 +36,17 @@ final class ActivationTest extends IntegrationTestCase
         $this->assertTrue((bool) $fund->is_active);
     }
 
+    public function test_activation_stamps_the_schema_version(): void
+    {
+        delete_option('dono_db_version');
+        Plugin::onActivation();
+        $this->assertSame(
+            DONO_VERSION,
+            get_option('dono_db_version'),
+            'activation records the schema version so the boot gate skips a redundant migration'
+        );
+    }
+
     public function test_re_activation_does_not_duplicate_the_default_fund(): void
     {
         Plugin::onActivation();
