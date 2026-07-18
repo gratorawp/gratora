@@ -140,6 +140,7 @@ final class CampaignService
                 : (int) $input['goal_count'];
         }
 
+        $prevType = $campaign->campaign_type;
         if (array_key_exists('campaign_type', $input)) {
             // One-way conversion: only a 'standard' campaign may be converted, and
             // only to a registered non-standard type. Existing non-standard
@@ -201,6 +202,13 @@ final class CampaignService
         ]);
 
         do_action('dono.campaign.updated', $campaign);
+        if ($campaign->campaign_type !== $prevType) {
+            // A one-way type conversion just happened. `updated` alone can't
+            // distinguish it from an ordinary edit, so fire a dedicated event
+            // add-ons can hook to seed the new type's sidecar and re-lay-out the
+            // page (which still carries the standard starter blocks).
+            do_action('dono.campaign.converted', $campaign, $prevType);
+        }
         return $campaign;
     }
 
@@ -235,6 +243,12 @@ final class CampaignService
         // Form delete and campaign delete must commit together. Forms live
         // under a campaign; there is no orphan state.
         DB::transaction(function () use ($campaign) {
+            // Fire dono.form.deleted per form: the bulk delete below bypasses
+            // FormService::delete's hook, so add-on cleanup (sidecars, stats,
+            // event log) would otherwise never run and leave latent orphans.
+            foreach (Form::query()->where('campaign_id', $campaign->id)->getAll() as $form) {
+                do_action('dono.form.deleted', $form);
+            }
             Form::query()->where('campaign_id', $campaign->id)->delete();
             Campaign::query()->where('id', $campaign->id)->delete();
         });

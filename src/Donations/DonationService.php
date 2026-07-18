@@ -524,7 +524,10 @@ final class DonationService
         // is still non-terminal so we never clobber real money back to failed.
         $applied = DB::table('dono_donations')
             ->where('id', $donation->id)
-            ->whereNotIn('status', ['paid', 'refunded', 'partial_refund'])
+            // Exclude 'failed' too: a redelivered payment_intent.payment_failed
+            // must not re-run the transition (fresh updated_at would count as a
+            // changed row) and re-fire the donation.failed event.
+            ->whereNotIn('status', ['paid', 'refunded', 'partial_refund', 'failed'])
             ->update([
                 'status'         => 'failed',
                 'failure_reason' => $reason,
@@ -740,6 +743,21 @@ final class DonationService
         $result = $gateway->refund($donation, $amountCents, $reason);
         if (! $result->success) {
             throw new RuntimeException($result->error ?? 'Gateway refund failed.');
+        }
+
+        // The charge.refunded webhook records the same gateway refund and can win
+        // the race between this call returning and the transaction below. If it
+        // already recorded this exact refund, return that row idempotently rather
+        // than letting the over-refund guard throw a spurious "exceeds refundable"
+        // error for a refund that in fact succeeded.
+        if ($result->gateway_refund_id) {
+            $existing = Refund::query()
+                ->where('gateway_refund_id', $result->gateway_refund_id)
+                ->where('status', 'succeeded')
+                ->get();
+            if ($existing) {
+                return $existing;
+            }
         }
 
         $now = $this->clock->now()->format('Y-m-d H:i:s');

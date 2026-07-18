@@ -164,43 +164,11 @@ final class SettingsService
                 'from_email' => '',
                 'reply_to'   => '',
                 'bcc_admin'  => false,
-                'templates'  => [
-                    'donation_receipt' => [
-                        'enabled' => true,
-                        'subject' => 'Thank you for your donation to {organisation_name}',
-                        'body'    => "Hi {donor_first_name},\n\nThank you for your donation of {amount} to {organisation_name}.\n\nReference: {reference}\nReceipt number: {receipt_number}\n\nYour receipt is attached as a PDF. Keep it for your records.\n\nWith gratitude,\n{organisation_name}",
-                    ],
-                    'offline_instructions' => [
-                        'enabled' => true,
-                        'subject' => 'Payment instructions for your donation to {organisation_name}',
-                        'body'    => "Hi {donor_name},\n\nThank you for choosing to support {campaign_title} with a donation of {amount}.\n\n{instructions}\n\nPlease transfer the amount using the reference {reference}. We will email your receipt as soon as the payment arrives.\n\n{bank_details}\n\nThanks,\n{organisation_name}",
-                    ],
-                    'donation_pending' => [
-                        'enabled' => true,
-                        'subject' => 'Your donation is processing',
-                        'body'    => "Hi {donor_first_name},\n\nWe have received your donation of {amount}.\n\nReference: {reference}\n\nYour payment is being processed. Bank settlement can take a few business days; we will email your receipt the moment it clears.\n\nThanks,\n{organisation_name}",
-                    ],
-                    'donation_refunded' => [
-                        'enabled' => true,
-                        'subject' => 'Your donation has been refunded',
-                        'body'    => "Hi {donor_name},\n\nWe have refunded your donation of {amount} to {campaign_title}. Funds should return to your card within 5 to 10 business days.\n\nIf this was a mistake or you have any questions, just reply to this email.\n\nThanks,\n{organisation_name}",
-                    ],
-                    'recurring_renewal' => [
-                        'enabled' => true,
-                        'subject' => 'Your recurring donation renewed',
-                        'body'    => "Hi {donor_name},\n\nYour recurring donation of {amount} to {campaign_title} was renewed today. Receipt number: {receipt_number}.\n\nThank you for your continued support.\n\nThanks,\n{organisation_name}",
-                    ],
-                    'subscription_cancelled' => [
-                        'enabled' => true,
-                        'subject' => 'Your recurring donation has been cancelled',
-                        'body'    => "Hi {donor_name},\n\nYour recurring donation of {amount} to {campaign_title} has been cancelled. No further charges will be made.\n\nThank you for the donations you made along the way.\n\nThanks,\n{organisation_name}",
-                    ],
-                    'magic_link' => [
-                        'enabled' => true,
-                        'subject' => 'Your sign-in link for {organisation_name}',
-                        'body'    => "Hi {donor_name},\n\nOpen your donor portal:\n{portal_url}\n\nThis link works for 30 days. If you didn't request it, you can ignore this email.\n\nThanks,\n{organisation_name}",
-                    ],
-                ],
+                // Subjects/bodies are filled at runtime by emailTemplateDefaults()
+                // via resolveDynamicDefaults: const expressions can't call __(),
+                // so keeping them here would make every transactional email
+                // untranslatable regardless of the installed locale.
+                'templates'  => [],
             ],
         ],
         // telemetry opt-in is captured during onboarding; no Settings panel
@@ -248,6 +216,54 @@ final class SettingsService
     }
 
     /**
+     * Transactional email template defaults. Built here (not in the const) so
+     * subjects and bodies pass through __() and are translatable; the stored
+     * option overlays these in get() when an admin customises a template.
+     *
+     * @return array<string,array{enabled:bool,subject:string,body:string}>
+     */
+    private function emailTemplateDefaults(): array
+    {
+        return [
+            'donation_receipt' => [
+                'enabled' => true,
+                'subject' => __('Thank you for your donation to {organisation_name}', 'dono'),
+                'body'    => __("Hi {donor_first_name},\n\nThank you for your donation of {amount} to {organisation_name}.\n\nReference: {reference}\nReceipt number: {receipt_number}\n\nYour receipt is attached as a PDF. Keep it for your records.\n\nWith gratitude,\n{organisation_name}", 'dono'),
+            ],
+            'offline_instructions' => [
+                'enabled' => true,
+                'subject' => __('Payment instructions for your donation to {organisation_name}', 'dono'),
+                'body'    => __("Hi {donor_name},\n\nThank you for choosing to support {campaign_title} with a donation of {amount}.\n\n{instructions}\n\nPlease transfer the amount using the reference {reference}. We will email your receipt as soon as the payment arrives.\n\n{bank_details}\n\nThanks,\n{organisation_name}", 'dono'),
+            ],
+            'donation_pending' => [
+                'enabled' => true,
+                'subject' => __('Your donation is processing', 'dono'),
+                'body'    => __("Hi {donor_first_name},\n\nWe have received your donation of {amount}.\n\nReference: {reference}\n\nYour payment is being processed. Bank settlement can take a few business days; we will email your receipt the moment it clears.\n\nThanks,\n{organisation_name}", 'dono'),
+            ],
+            'donation_refunded' => [
+                'enabled' => true,
+                'subject' => __('Your donation has been refunded', 'dono'),
+                'body'    => __("Hi {donor_name},\n\nWe have refunded your donation of {amount} to {campaign_title}. Funds should return to your card within 5 to 10 business days.\n\nIf this was a mistake or you have any questions, just reply to this email.\n\nThanks,\n{organisation_name}", 'dono'),
+            ],
+            'recurring_renewal' => [
+                'enabled' => true,
+                'subject' => __('Your recurring donation renewed', 'dono'),
+                'body'    => __("Hi {donor_name},\n\nYour recurring donation of {amount} to {campaign_title} was renewed today. Receipt number: {receipt_number}.\n\nThank you for your continued support.\n\nThanks,\n{organisation_name}", 'dono'),
+            ],
+            'subscription_cancelled' => [
+                'enabled' => true,
+                'subject' => __('Your recurring donation has been cancelled', 'dono'),
+                'body'    => __("Hi {donor_name},\n\nYour recurring donation of {amount} to {campaign_title} has been cancelled. No further charges will be made.\n\nThank you for the donations you made along the way.\n\nThanks,\n{organisation_name}", 'dono'),
+            ],
+            'magic_link' => [
+                'enabled' => true,
+                'subject' => __('Your sign-in link for {organisation_name}', 'dono'),
+                'body'    => __("Hi {donor_name},\n\nOpen your donor portal:\n{portal_url}\n\nThis link works for 30 days. If you didn't request it, you can ignore this email.\n\nThanks,\n{organisation_name}", 'dono'),
+            ],
+        ];
+    }
+
+    /**
      * Fills in defaults that depend on runtime install state (blog name, admin email).
      *
      * @param array<string,mixed> $static
@@ -256,6 +272,12 @@ final class SettingsService
     private function resolveDynamicDefaults(string $group, array $static): array
     {
         if ($group !== 'email') return $static;
+
+        // Translatable template defaults (see the const note). The stored option
+        // overlays these in get(), so a customised template still wins.
+        if (empty($static['templates'])) {
+            $static['templates'] = $this->emailTemplateDefaults();
+        }
 
         // Use the blog name as sender name so donors see "{site name} <addr>" rather than bare "wordpress@host".
         if (($static['from_name'] ?? '') === '') {
