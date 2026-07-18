@@ -92,6 +92,29 @@ final class Batch2SecurityTest extends IntegrationTestCase
         );
     }
 
+    public function test_redaction_erases_staff_notes(): void
+    {
+        $c     = \Dono\Foundation\Plugin::instance()->container;
+        $svc   = $c->get(DonorService::class);
+        $notes = $c->get(\Dono\Donors\DonorNoteRepository::class);
+
+        $donor = $svc->findOrCreate('noted@example.com', ['first_name' => 'Nora']);
+        $notes->create((int) $donor->id, 'Prefers phone contact; lives at 12 Elm St.', 1);
+        $this->assertGreaterThan(
+            0,
+            (int) \Dono\Donors\DonorNote::query()->where('donor_id', (int) $donor->id)->count(),
+            'a staff note exists before redaction'
+        );
+
+        $svc->redact($donor);
+
+        $this->assertSame(
+            0,
+            (int) \Dono\Donors\DonorNote::query()->where('donor_id', (int) $donor->id)->count(),
+            'redaction removes free-text staff notes (DSAR-scope PII)'
+        );
+    }
+
     public function test_redaction_erases_tribute_pii(): void
     {
         $svc   = \Dono\Foundation\Plugin::instance()->container->get(DonorService::class);

@@ -285,6 +285,10 @@ final class DonorService
             // Revoke outstanding magic-link tokens so a previously-emailed
             // portal link can no longer open a session for the redacted donor.
             MagicLinkToken::query()->where('donor_id', $donor->id)->delete();
+
+            // Staff notes about the donor are free-text PII and in DSAR export
+            // scope (DonorMetricsService::exportData), so erasure removes them.
+            DonorNote::query()->where('donor_id', $donor->id)->delete();
         });
 
         do_action('dono.donor.redacted', $donor);
