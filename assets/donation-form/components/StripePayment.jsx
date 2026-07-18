@@ -13,6 +13,7 @@ export default function StripePayment( { config, payment, dispatch } ) {
     const mountRef = useRef( null );
     const stripeRef = useRef( null );
     const elementsRef = useRef( null );
+    const elRef = useRef( null );
     const [ ready, setReady ] = useState( false );
     const [ paying, setPaying ] = useState( false );
     const [ error, setError ] = useState( '' );
@@ -35,16 +36,22 @@ export default function StripePayment( { config, payment, dispatch } ) {
                 stripeRef.current = stripe;
                 const elements = stripe.elements( {
                     clientSecret: payment.clientSecret,
-                    appearance: { theme: 'stripe', variables: stripeVars() },
+                    appearance: { theme: 'stripe', variables: stripeVars( mountRef.current ) },
                 } );
                 elementsRef.current = elements;
                 const el = elements.create( 'payment', { layout: 'tabs' } );
+                elRef.current = el;
                 el.on( 'ready', () => { if ( ! cancelled ) setReady( true ); } );
                 el.mount( mountRef.current );
             } )
             .catch( () => { if ( ! cancelled ) setError( i18n.error ); } );
 
-        return () => { cancelled = true; };
+        return () => {
+            cancelled = true;
+            // Tear down the Stripe iframe so a cancel/retry doesn't orphan it.
+            try { elRef.current?.destroy(); } catch { /* already gone */ }
+            elRef.current = null;
+        };
     }, [ pk, payment?.clientSecret ] );
 
     const onPay = async () => {
@@ -122,9 +129,11 @@ export default function StripePayment( { config, payment, dispatch } ) {
 }
 
 /** Map the form's themed CSS vars onto the Payment Element where they exist. */
-function stripeVars() {
+function stripeVars( el ) {
     try {
-        const cs = getComputedStyle( document.documentElement );
+        // --dono-accent is set on the .dono-donation-form element and inherits
+        // down to the mount node; documentElement wouldn't see the override.
+        const cs = getComputedStyle( el || document.documentElement );
         const accent = cs.getPropertyValue( '--dono-accent' ).trim();
         return accent ? { colorPrimary: accent } : {};
     } catch {
