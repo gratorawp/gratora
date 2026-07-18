@@ -743,6 +743,14 @@ final class CoreModule implements DonoModule
             if ($group === 'roles') {
                 Capabilities::applyMapping(is_array($next['mapping'] ?? null) ? $next['mapping'] : []);
             }
+            if ($group === 'currency-locale') {
+                // Campaigns report in the single org currency; keep their stored
+                // currency in lockstep when the org default currency changes.
+                $cur = strtoupper((string) ($next['default_currency'] ?? ''));
+                if ($cur !== '') {
+                    Campaign::query()->where('currency', $cur, '!=')->update(['currency' => $cur]);
+                }
+            }
         }, 10, 2);
 
 

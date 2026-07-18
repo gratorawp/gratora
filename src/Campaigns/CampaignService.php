@@ -282,7 +282,9 @@ final class CampaignService
         $copy->status      = 'draft';
         $copy->campaign_type = $source->campaign_type;
         $copy->description = $source->description;
-        $copy->currency    = $source->currency;
+        // Campaigns always report in the org currency; never copy a source's
+        // (possibly stale) currency forward.
+        $copy->currency    = Money::defaultCurrency();
         $copy->goal_type   = $source->goal_type;
         $copy->goal_cents  = $source->goal_cents;
         $copy->goal_count  = $source->goal_count;
