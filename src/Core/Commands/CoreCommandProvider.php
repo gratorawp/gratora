@@ -28,8 +28,8 @@ use Dono\Funds\FundService;
 use Dono\Gateways\GatewayManager;
 use Dono\Gateways\SubscriptionAware;
 use Dono\Receipts\ReceiptIssuer;
+use Dono\Recurring\RecurringCanceller;
 use Dono\Recurring\RecurringPlan;
-use Dono\Recurring\RecurringPlanRepository;
 
 /**
  * Registers core domain operations as Command objects.
@@ -725,18 +725,11 @@ final class CoreCommandProvider
             false,
             true,
             function (array $in) use ($c): array {
-                [$plan, $sub] = $this->resolvePlan($c, (int) $in['plan_id']);
+                [$plan] = $this->resolvePlan($c, (int) $in['plan_id']);
                 $reason = isset($in['reason']) ? (string) $in['reason'] : null;
-                if ($sub) {
-                    $sub->cancelSubscription($plan, $reason);
-                }
-                // Gate on winning the transition so a racing Stripe
-                // customer.subscription.deleted webhook doesn't also send the
-                // cancellation email or clobber a renewal's counters (see the
-                // portal cancel path).
-                if ($c->get(RecurringPlanRepository::class)->markCancelled($plan, gmdate('Y-m-d H:i:s'), $reason)) {
-                    $c->get(DonationService::class)->recordRecurringCancellation($plan, $reason);
-                }
+                // Gateway cancel + winner-gated local side effects (one email
+                // even if the gateway's subscription.deleted webhook races).
+                $c->get(RecurringCanceller::class)->cancel($plan, $reason);
                 return ['plan_id' => (int) $plan->id, 'status' => (string) $plan->status];
             },
             self::META,

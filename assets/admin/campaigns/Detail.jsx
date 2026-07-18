@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef, useMemo, Fragment } from '@wo
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { DataViews } from '@wordpress/dataviews';
-import { Modal, Spinner } from '@wordpress/components';
+import { Modal, Spinner, Button, CheckboxControl } from '@wordpress/components';
 import Notice from '../_shared/components/Notice';
 import ConfirmDialog from '../_shared/components/ConfirmDialog';
 import { notify } from '../_shared/notify';
@@ -83,6 +83,9 @@ export default function Detail( { id, tab } ) {
     const c = useDonoRecord( 'campaign', id );
     const [ error, setError ]   = useState( null );
     const [ confirm, setConfirm ] = useState( null );
+    // Archive confirmation for campaigns with active subscriptions.
+    const [ archivePrompt, setArchivePrompt ] = useState( null );
+    const [ cancelSubs, setCancelSubs ]       = useState( false );
     const extTabsAll = useExtensionTabs( 'campaign' );
 
     // One-shot "Duplicated from X" toast surfaced after a redirect from the
@@ -120,6 +123,22 @@ export default function Detail( { id, tab } ) {
     );
     const activeTab = [ ...TABS, ...extTabs.map( ( t ) => t.id ) ].includes( tab ) ? tab : 'overview';
 
+    const runArchive = async ( nextStatus, cancelRecurring ) => {
+        try {
+            await apiFetch( {
+                path: `/dono/v1/admin/campaigns/${ campaign.id }`,
+                method: 'PUT',
+                data: { status: nextStatus, ...( cancelRecurring ? { cancel_recurring: true } : {} ) },
+            } );
+            notify.success( nextStatus === 'archived'
+                ? __( 'Campaign archived.', 'dono' )
+                : __( 'Campaign restored to draft.', 'dono' ) );
+            window.location.reload();
+        } catch ( err ) {
+            setError( err?.message || __( 'Update failed.', 'dono' ) );
+        }
+    };
+
     const onHeaderAction = async ( name ) => {
         if ( name === 'duplicate' ) {
             try {
@@ -138,21 +157,26 @@ export default function Detail( { id, tab } ) {
             }
             return;
         }
-        if ( name === 'archive' || name === 'unarchive' ) {
-            const nextStatus = name === 'archive' ? 'archived' : 'draft';
+        if ( name === 'unarchive' ) {
+            await runArchive( 'draft', false );
+            return;
+        }
+        if ( name === 'archive' ) {
+            // If the campaign has active subscriptions, ask what to do with them
+            // before archiving; otherwise archive straight away.
             try {
-                await apiFetch( {
-                    path: `/dono/v1/admin/campaigns/${ campaign.id }`,
-                    method: 'PUT',
-                    data: { status: nextStatus },
+                const summary = await apiFetch( {
+                    path: `/dono/v1/admin/campaigns/${ campaign.id }/recurring-summary`,
                 } );
-                notify.success( name === 'archive'
-                    ? __( 'Campaign archived.', 'dono' )
-                    : __( 'Campaign restored to draft.', 'dono' ) );
-                window.location.reload();
-            } catch ( err ) {
-                setError( err?.message || __( 'Update failed.', 'dono' ) );
+                if ( summary?.count > 0 ) {
+                    setCancelSubs( false );
+                    setArchivePrompt( summary );
+                    return;
+                }
+            } catch ( e ) {
+                // Best-effort: fall through to a plain archive if the check fails.
             }
+            await runArchive( 'archived', false );
             return;
         }
         if ( name === 'publish' || name === 'unpublish' ) {
@@ -236,6 +260,55 @@ export default function Detail( { id, tab } ) {
             </div>
 
             <ConfirmDialog confirm={ confirm } onClose={ () => setConfirm( null ) } />
+
+            { archivePrompt && (
+                <Modal
+                    title={ __( 'Archive campaign', 'dono' ) }
+                    onRequestClose={ () => setArchivePrompt( null ) }
+                >
+                    <p style={ { marginTop: 0 } }>
+                        { sprintf(
+                            /* translators: %d: number of active recurring donations */
+                            _n(
+                                'This campaign has %d active recurring donation.',
+                                'This campaign has %d active recurring donations.',
+                                archivePrompt.count,
+                                'dono'
+                            ),
+                            archivePrompt.count
+                        ) }
+                        { archivePrompt.mrr_cents > 0 && ' ' + sprintf(
+                            /* translators: %s: formatted monthly amount */
+                            __( 'They renew for about %s per month.', 'dono' ),
+                            formatAmount( archivePrompt.mrr_cents, archivePrompt.currency )
+                        ) }
+                    </p>
+                    <p>
+                        { __( 'Archiving stops new donations. These subscriptions keep renewing and stay credited to this campaign unless you cancel them.', 'dono' ) }
+                    </p>
+                    <CheckboxControl
+                        label={ __( 'Also cancel these subscriptions (donors will be emailed)', 'dono' ) }
+                        checked={ cancelSubs }
+                        onChange={ setCancelSubs }
+                        __nextHasNoMarginBottom
+                    />
+                    <div style={ { display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 20 } }>
+                        <Button variant="tertiary" onClick={ () => setArchivePrompt( null ) }>
+                            { __( 'Cancel', 'dono' ) }
+                        </Button>
+                        <Button
+                            variant="primary"
+                            isDestructive={ cancelSubs }
+                            onClick={ () => {
+                                setArchivePrompt( null );
+                                runArchive( 'archived', cancelSubs );
+                            } }
+                        >
+                            { __( 'Archive campaign', 'dono' ) }
+                        </Button>
+                    </div>
+                </Modal>
+            ) }
         </div>
     );
 }

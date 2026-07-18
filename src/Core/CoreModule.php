@@ -139,6 +139,7 @@ use Dono\Receipts\ReceiptIssuer;
 use Dono\Receipts\ReceiptRepository;
 use Dono\Receipts\Renderers\GenericReceiptRenderer;
 use Dono\Recurring\RecurringPlan;
+use Dono\Recurring\RecurringCanceller;
 use Dono\Recurring\RecurringPlanRepository;
 use Dono\Rest\Admin\AdvancedController;
 use Dono\Rest\Admin\NumberingController;
@@ -425,7 +426,7 @@ final class CoreModule implements DonoModule
             $c->get(Mailer::class),
             $c->get(AsyncDispatcher::class),
             $c->get(DonationService::class),
-            $c->get(RecurringPlanRepository::class),
+            $c->get(RecurringCanceller::class),
         ));
 
         $c->bind(AggregateSyncer::class, fn () => new AggregateSyncer());
@@ -597,11 +598,19 @@ final class CoreModule implements DonoModule
             $c->get(FundRepository::class)
         ));
 
+        $c->bind(RecurringCanceller::class, fn (Container $c) => new RecurringCanceller(
+            $c->get(RecurringPlanRepository::class),
+            $c->get(DonationService::class),
+            $c->get(GatewayManager::class)
+        ));
+
         $c->bind(AdminCampaignsController::class, fn (Container $c) => new AdminCampaignsController(
             $c->get(CampaignRepository::class),
             $c->get(CampaignService::class),
             $c->get(CampaignMetricsService::class),
-            $c->get(FundRepository::class)
+            $c->get(FundRepository::class),
+            $c->get(RecurringPlanRepository::class),
+            $c->get(RecurringCanceller::class)
         ));
 
         $c->bind(AdminFundsController::class, fn (Container $c) => new AdminFundsController(

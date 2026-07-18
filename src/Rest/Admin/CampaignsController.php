@@ -12,6 +12,8 @@ use Dono\Campaigns\CampaignService;
 use Dono\Forms\Form;
 use Dono\Funds\Fund;
 use Dono\Funds\FundRepository;
+use Dono\Recurring\RecurringCanceller;
+use Dono\Recurring\RecurringPlanRepository;
 use Dono\Rest\Schemas\CampaignSchemas;
 use InvalidArgumentException;
 use RuntimeException;
@@ -35,6 +37,8 @@ final class CampaignsController
         private CampaignService $campaignService,
         private CampaignMetricsService $metrics,
         private FundRepository $funds,
+        private RecurringPlanRepository $plans,
+        private RecurringCanceller $canceller,
     ) {
     }
 
@@ -125,6 +129,30 @@ final class CampaignsController
             'callback'            => [$this, 'goalContext'],
             'permission_callback' => [$this, 'canAccess'],
         ]);
+
+        register_rest_route(self::NAMESPACE, '/admin/campaigns/(?P<id>\d+)/recurring-summary', [
+            'methods'             => WP_REST_Server::READABLE,
+            'callback'            => [$this, 'recurringSummary'],
+            'permission_callback' => [$this, 'canAccess'],
+        ]);
+    }
+
+    /**
+     * Active recurring plans + monthly-equivalent for a campaign. Drives the
+     * archive confirmation ("N active recurring donations that keep renewing").
+     */
+    public function recurringSummary(WP_REST_Request $request): WP_REST_Response|WP_Error
+    {
+        $campaign = $this->campaigns->findById((int) $request['id']);
+        if (! $campaign) {
+            return new WP_Error('dono_not_found', __('Campaign not found.', 'dono'), ['status' => 404]);
+        }
+        $summary = $this->plans->activeForCampaign((int) $campaign->id);
+        return new WP_REST_Response([
+            'count'     => $summary['count'],
+            'mrr_cents' => $summary['mrr_cents'],
+            'currency'  => $campaign->currency,
+        ], 200);
     }
 
     public function canAccess(): bool
@@ -181,12 +209,24 @@ final class CampaignsController
         if (! $campaign) {
             return new WP_Error('dono_not_found', __('Campaign not found.', 'dono'), ['status' => 404]);
         }
-        $body = (array) ($request->get_json_params() ?? []);
+        $body      = (array) ($request->get_json_params() ?? []);
+        $wasActive = $campaign->status !== 'archived';
         try {
             $campaign = $this->campaignService->update($campaign, $body);
         } catch (InvalidArgumentException $e) {
             return new WP_Error('dono_invalid_input', $e->getMessage(), ['status' => 422]);
         }
+
+        // Archiving is non-destructive to subscriptions by default: existing
+        // recurring donations keep renewing (and are still credited here). The
+        // admin can opt to stop them too via the archive dialog's checkbox.
+        if ($wasActive && $campaign->status === 'archived' && ! empty($body['cancel_recurring'])) {
+            $this->canceller->cancelActiveForCampaign(
+                (int) $campaign->id,
+                __('Campaign archived', 'dono')
+            );
+        }
+
         return new WP_REST_Response($this->shapeFull($campaign, 'all-time'), 200);
     }
 

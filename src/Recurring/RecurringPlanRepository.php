@@ -93,6 +93,40 @@ final class RecurringPlanRepository
     }
 
     /**
+     * Active recurring plans attributed to a campaign, plus their base-currency
+     * monthly-equivalent total. Drives the archive dialog's "N active recurring
+     * donations (~$X/mo)" and matches what cancelActiveForCampaign would cancel.
+     *
+     * @return array{count:int, mrr_cents:int}
+     */
+    public function activeForCampaign(int $campaignId): array
+    {
+        $amt = 'COALESCE(base_amount_cents, amount_cents)';
+        $mrrExpr = "
+            SUM(
+                CASE interval_unit
+                    WHEN 'month' THEN {$amt} / NULLIF(interval_count, 0)
+                    WHEN 'week'  THEN {$amt} * 4.345 / NULLIF(interval_count, 0)
+                    WHEN 'year'  THEN {$amt} / NULLIF(12 * interval_count, 0)
+                    WHEN 'day'   THEN {$amt} * 30 / NULLIF(interval_count, 0)
+                    ELSE {$amt}
+                END
+            )
+        ";
+
+        $row = DB::table('dono_recurring_plans')
+            ->where('campaign_id', $campaignId)
+            ->where('status', 'active')
+            ->selectRaw("COUNT(*) AS cnt, COALESCE({$mrrExpr}, 0) AS mrr")
+            ->get();
+
+        return [
+            'count'     => (int) ($row['cnt'] ?? 0),
+            'mrr_cents' => (int) round((float) ($row['mrr'] ?? 0)),
+        ];
+    }
+
+    /**
      * Recurring revenue health roll-up. Normalises each active plan to its monthly
      * equivalent so MRR is comparable across cadences.
      *
