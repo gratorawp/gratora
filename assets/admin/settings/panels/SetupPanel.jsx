@@ -229,21 +229,9 @@ function buildHealth( gateways, stripeConnect ) {
             actionLabel: __( 'Configure', 'dono' ),
             tab:   'gateways',
         },
-        {
-            id:    'donation',
-            label: __( 'Last donation', 'dono' ),
-            value: '-',
-            tone:  'green',
-            meta:  __( 'No donations yet', 'dono' ),
-            actionLabel: null,
-        },
-        {
-            id:    'cron',
-            label: __( 'Cron', 'dono' ),
-            value: __( 'Running', 'dono' ),
-            tone:  'green',
-            meta:  __( 'Last beat recently', 'dono' ),
-            actionLabel: null,
-        },
+        // "Last donation" and "Cron" cards were hardcoded to a reassuring green
+        // with no data behind them - a fake "Cron: Running" masks a wedged cron
+        // (receipts silently not sending). Dropped rather than fabricate health;
+        // reinstate only when driven by a real endpoint.
     ];
 }

@@ -1,7 +1,13 @@
 import { __, sprintf } from '@wordpress/i18n';
+import { addQueryArgs } from '@wordpress/url';
 import { Coins, History } from 'lucide-react';
 
 import EmptyState from '../../../_shared/components/EmptyState';
+
+// Deep-link to a donation's detail view (same target the Donations tab uses).
+function donationHref( reference ) {
+    return addQueryArgs( window.location.pathname, { page: 'dono-donations', view: 'detail', reference } );
+}
 import { formatAmount, formatDateTime, formatDate, timeAgo, donationStatusPill, eventMeta } from '../helpers';
 import {
     IconCheck, IconAlert, IconRotate, IconNote, IconClock, IconRefund, IconFile,
@@ -37,14 +43,14 @@ function TimelineRow( { event, campaigns } ) {
         title = (
             <>
                 { __( 'Donated', 'dono' ) } <strong>{ amount }</strong>
-                { camp && <> { __( 'to', 'dono' ) } <a href="#">{ camp.title }</a></> }
+                { camp && <> { __( 'to', 'dono' ) } <span className="dp-tl-camp">{ camp.title }</span></> }
             </>
         );
     } else if ( event.type === 'recurring_plan.renewed' && amount ) {
         title = (
             <>
                 { __( 'Recurring renewal paid', 'dono' ) } <strong>{ amount }</strong>
-                { camp && <> { __( 'to', 'dono' ) } <a href="#">{ camp.title }</a></> }
+                { camp && <> { __( 'to', 'dono' ) } <span className="dp-tl-camp">{ camp.title }</span></> }
             </>
         );
     } else if ( event.type === 'donation.refunded' && amount ) {
@@ -103,7 +109,7 @@ function RecentDonationsCard( { donations, campaigns, lifetime, onAllDonations }
                                                 <span className="dp-recent-row__camp">{ camp ? camp.title : '-' }</span>
                                             </span>
                                             <span className="dp-recent-row__sub">
-                                                <a href="#">{ d.reference }</a>
+                                                <a href={ donationHref( d.reference ) }>{ d.reference }</a>
                                                 <span>{ timeAgo( d.paid_at || d.created_at ) }</span>
                                             </span>
                                         </div>

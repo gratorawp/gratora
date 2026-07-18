@@ -7,6 +7,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 
 export function useDonoSettings( group ) {
@@ -14,14 +15,23 @@ export function useDonoSettings( group ) {
     const [ edits, setEdits ]               = useState( {} );
     const [ replacements, setReplacements ] = useState( {} );
     const [ saving, setSaving ]             = useState( false );
+    const [ error, setError ]               = useState( null );
+    const [ reloadKey, setReloadKey ]       = useState( 0 );
+
+    const reload = useCallback( () => setReloadKey( ( k ) => k + 1 ), [] );
 
     useEffect( () => {
         let aborted = false;
+        setSaved( null );
+        setError( null );
         apiFetch( { path: `/dono/v1/admin/settings/${ group }` } )
             .then( ( data ) => { if ( ! aborted ) setSaved( data || {} ); } )
-            .catch( () => {} );
+            // Surface the failure instead of swallowing it: a swallowed load left
+            // isLoading stuck forever, and (worse) saving from the unloaded state
+            // PUT a partial record that wiped keys like the whole roles mapping.
+            .catch( () => { if ( ! aborted ) setError( __( 'Could not load these settings. Refresh to try again.', 'dono' ) ); } );
         return () => { aborted = true; };
-    }, [ group ] );
+    }, [ group, reloadKey ] );
 
     const record = useMemo(
         () => ( { ...deepMerge( saved || {}, edits ), ...replacements } ),
@@ -51,6 +61,11 @@ export function useDonoSettings( group ) {
     }, [] );
 
     const save = useCallback( async () => {
+        // Never PUT from an unloaded record: it would replace the group with a
+        // partial object and drop keys that weren't loaded (e.g. roles mapping).
+        if ( saved === null ) {
+            throw new Error( __( 'Settings have not loaded yet. Refresh and try again.', 'dono' ) );
+        }
         setSaving( true );
         try {
             const updated = await apiFetch( {
@@ -65,7 +80,7 @@ export function useDonoSettings( group ) {
         } finally {
             setSaving( false );
         }
-    }, [ group, record ] );
+    }, [ group, record, saved ] );
 
     const value = useCallback(
         ( key, fallback = '' ) => {
@@ -91,7 +106,11 @@ export function useDonoSettings( group ) {
         setValue,
         isDirty,
         isSaving:  saving,
-        isLoading: saved === null,
+        // A failed load is not "loading": surface the error + retry instead of
+        // spinning forever.
+        isLoading: saved === null && error === null,
+        loadError: error,
+        reload,
         bind: ( key, fallback = '' ) => ( {
             value:    value( key, fallback ),
             onChange: ( e ) => edit( pathSet( {}, key, e.target.value ) ),

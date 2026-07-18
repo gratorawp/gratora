@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
 import { DataViews } from '@wordpress/dataviews';
+import { Notice } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { __, _n, sprintf } from '@wordpress/i18n';
@@ -40,6 +41,7 @@ export default function DonationsTab( { donorId } ) {
     const [ data, setData ]       = useState( [] );
     const [ total, setTotal ]     = useState( 0 );
     const [ loading, setLoading ] = useState( false );
+    const [ error, setError ]     = useState( '' );
     const [ confirm, setConfirm ] = useState( null );
 
     const statusFilter = view.filters?.find( ( f ) => f.field === 'status' );
@@ -63,8 +65,9 @@ export default function DonationsTab( { donorId } ) {
                 const items = await res.json();
                 setData( Array.isArray( items ) ? items : [] );
                 setTotal( parseInt( res.headers.get( 'X-WP-Total' ) || '0', 10 ) );
+                setError( '' );
             } )
-            .catch( () => { if ( ! aborted ) { setData( [] ); setTotal( 0 ); } } )
+            .catch( () => { if ( ! aborted ) { setData( [] ); setTotal( 0 ); setError( __( 'Could not load donations. Refresh to try again.', 'dono' ) ); } } )
             .finally( () => { if ( ! aborted ) setLoading( false ); } );
         return () => { aborted = true; };
     }, [ apiParams ] );
@@ -219,6 +222,9 @@ export default function DonationsTab( { donorId } ) {
 
     return (
         <div className="dono-dataviews dp-donations-dv">
+            { error && (
+                <Notice status="error" isDismissible={ false }>{ error }</Notice>
+            ) }
             <DataViews
                 data={ data }
                 isLoading={ loading }
