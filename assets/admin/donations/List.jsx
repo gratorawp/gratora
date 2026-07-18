@@ -461,7 +461,7 @@ function donationKpis( stats ) {
         },
         {
             label: __( 'Raised', 'dono' ),
-            value: stats && stats.raised_cents > 0
+            value: stats
                 ? formatAmount( stats.raised_cents, stats.currency || undefined )
                 : '-',
             sub: stats?.currency

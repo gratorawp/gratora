@@ -606,7 +606,14 @@ final class DonationRepository
         // for list pages where we want model rows.
         $base = fn () => DB::table('dono_donations');
 
-        $totalCount = (int) $applyFilters($base())->count();
+        // Keep the strip internally consistent: total, like the money KPIs
+        // below, is live-only unless the admin explicitly filters to test data
+        // (else "Total 46 / Paid 16" looks broken).
+        $totalQuery = $applyFilters($base());
+        if (! self::hasExplicitTestFilter($args)) {
+            $totalQuery = $totalQuery->where('is_test', 0);
+        }
+        $totalCount = (int) $totalQuery->count();
 
         // Net refunds in base currency to match the base-currency raised sum.
         $refundedExpr = DonationQueries::refundedBaseExpr();
