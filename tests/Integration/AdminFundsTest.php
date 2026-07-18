@@ -350,6 +350,36 @@ final class AdminFundsTest extends IntegrationTestCase
         $this->assertSame('General', $stats['default']['name']);
     }
 
+    public function test_parent_fund_rolls_up_child_totals(): void
+    {
+        $parent = $this->post('/dono/v1/admin/funds', [
+            'code' => 'parent', 'name' => 'Parent', 'goal_cents' => 100000,
+        ])->get_data();
+        $child = $this->post('/dono/v1/admin/funds', [
+            'code' => 'child', 'name' => 'Child', 'parent_fund_id' => $parent['id'],
+        ])->get_data();
+
+        // A synced child that has collected donations; the parent's own row
+        // stays 0 because donations name the exact fund.
+        \Dono\Funds\Fund::query()->where('id', (int) $child['id'])
+            ->update(['raised_cents' => 7000, 'donations_count' => 2]);
+
+        $byId = [];
+        foreach ($this->get('/dono/v1/admin/funds')->get_data() as $row) {
+            $byId[(int) $row['id']] = $row;
+        }
+
+        $this->assertSame(7000, $byId[(int) $parent['id']]['raised_cents'],
+            'Parent shows its children raised total, not its own empty row');
+        $this->assertSame(2, $byId[(int) $parent['id']]['donations_count'],
+            'Parent donation count rolls up its children');
+        $this->assertSame(7000, $byId[(int) $child['id']]['raised_cents'],
+            'Child keeps its own total');
+
+        $this->assertSame(7000, $this->get('/dono/v1/admin/funds/stats')->get_data()['raised_cents'],
+            'Org-wide raised counts the money once, not once per level');
+    }
+
     private function get(string $path, array $params = []): \WP_REST_Response
     {
         $req = new WP_REST_Request('GET', $path);

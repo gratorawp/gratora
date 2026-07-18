@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Dono\Funds;
 
+use Dono\Vendor\Queryable\DB;
+
 /**
  * Fund query helpers.
  *
@@ -180,6 +182,49 @@ final class FundRepository
             ->offset($offset)
             ->getAll();
 
+        $this->rollUpParents($items);
+
         return ['items' => $items, 'total' => $total];
+    }
+
+    /**
+     * Donations land against the exact fund they name, so a parent fund with
+     * children collects nothing on its own row and would read 0 raised / 0%.
+     * Fold each parent's descendant totals into the parent rows we return.
+     * Display-only: the stored counters and stats() SUM stay exact, so the
+     * total-raised KPI is never double-counted.
+     *
+     * @param array<Fund> $items
+     */
+    private function rollUpParents(array $items): void
+    {
+        $parentIds = [];
+        foreach ($items as $f) {
+            if ($f->parent_fund_id === null) {
+                $parentIds[(int) $f->id] = true;
+            }
+        }
+        if ($parentIds === []) {
+            return;
+        }
+
+        $rows = DB::table('dono_funds')
+            ->whereIn('parent_fund_id', array_keys($parentIds))
+            ->selectRaw('parent_fund_id, SUM(raised_cents) AS r, SUM(donations_count) AS dc')
+            ->groupBy('parent_fund_id')
+            ->getAll();
+
+        $byParent = [];
+        foreach ($rows as $row) {
+            $byParent[(int) $row['parent_fund_id']] = $row;
+        }
+
+        foreach ($items as $f) {
+            $agg = $byParent[(int) $f->id] ?? null;
+            if ($agg !== null) {
+                $f->raised_cents    += (int) $agg['r'];
+                $f->donations_count += (int) $agg['dc'];
+            }
+        }
     }
 }
