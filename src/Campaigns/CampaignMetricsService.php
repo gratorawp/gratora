@@ -83,10 +83,12 @@ final class CampaignMetricsService
             $limit,
         );
 
+        $forms = $this->formsByIds(array_map(static fn ($r) => (int) $r['form_id'], $tops));
+
         $out = [];
         foreach ($tops as $row) {
             if ($row['form_id'] === 0) continue;
-            $form = Form::query()->find('id', $row['form_id']);
+            $form = $forms[(int) $row['form_id']] ?? null;
             $out[] = [
                 'form_id'         => $row['form_id'],
                 'form_title'      => $form ? $form->title : __('Removed form', 'dono'),
@@ -189,6 +191,21 @@ final class CampaignMetricsService
         return $series;
     }
 
+    /**
+     * @param array<int> $ids
+     * @return array<int,Form>
+     */
+    private function formsByIds(array $ids): array
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
+        if (! $ids) return [];
+        $byId = [];
+        foreach (Form::query()->whereIn('id', $ids)->getAll() as $f) {
+            $byId[(int) $f->id] = $f;
+        }
+        return $byId;
+    }
+
     /** @return array<array{id:int,donor_name:string,amount_cents:int,currency:string,paid_at:?string,form_title:?string,is_anonymous:bool}> */
     public function recentDonations(int $campaignId, int $limit = 10): array
     {
@@ -199,13 +216,14 @@ final class CampaignMetricsService
             ->limit($limit)
             ->getAll();
 
-        $donorCache = [];
-        $formCache  = [];
+        $donors = $this->donors->findManyByIds(array_map(static fn ($d) => (int) $d->donor_id, $rows));
+        $forms  = $this->formsByIds(array_map(static fn ($d) => (int) ($d->form_id ?? 0), $rows));
+
         $out = [];
         foreach ($rows as $d) {
             /** @var Donation $d */
-            $donor = $donorCache[$d->donor_id] ??= Donor::query()->find('id', $d->donor_id);
-            $form  = $d->form_id ? ($formCache[$d->form_id] ??= Form::query()->find('id', $d->form_id)) : null;
+            $donor = $donors[(int) $d->donor_id] ?? null;
+            $form  = $d->form_id ? ($forms[(int) $d->form_id] ?? null) : null;
 
             $name = $donor && ! $d->is_anonymous
                 ? trim(($donor->first_name ?? '') . ' ' . ($donor->last_name ?? ''))
@@ -343,10 +361,11 @@ final class CampaignMetricsService
             if (count($rows) >= $limit) break;
         }
 
+        $donors = $this->donors->findManyByIds(array_map(static fn ($d) => (int) $d->donor_id, $rows));
+
         $out = [];
-        $donorCache = [];
         foreach ($rows as $d) {
-            $donor = $donorCache[$d->donor_id] ??= Donor::query()->find('id', $d->donor_id);
+            $donor = $donors[(int) $d->donor_id] ?? null;
             $name = $donor && ! $d->is_anonymous
                 ? trim(($donor->first_name ?? '') . ' ' . ($donor->last_name ?? ''))
                 : '';
