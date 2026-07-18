@@ -382,7 +382,19 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
                 $fetched = $this->api->get('/charges/' . rawurlencode($chargeId) . '/refunds', $this->connectHeaders());
                 $refunds = (array) ($fetched['data'] ?? []);
             } catch (RuntimeException $e) {
-                // Leave empty; the outcome reports handled with no rows recorded.
+                // This fetch is the only source of the refund rows on recent
+                // API versions. Swallowing it would leave a real refund
+                // unrecorded and the donation "paid" forever with no retry, so
+                // report a 500 and let Stripe redeliver (recordExternalRefund
+                // is idempotent, so a later success won't double-count).
+                return new WebhookOutcome(
+                    signature_ok: true,
+                    external_id:  $eventId,
+                    event_type:   $type,
+                    handled:      false,
+                    error:        "Failed to fetch refunds for charge {$chargeId}: " . $e->getMessage(),
+                    http_status:  500,
+                );
             }
         }
         foreach ($refunds as $r) {
