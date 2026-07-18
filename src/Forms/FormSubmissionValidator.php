@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Forms;
 
+use Dono\Campaigns\Campaign;
 use Dono\Forms\Blocks\ConsentBlock;
 use Dono\Forms\Blocks\DateBlock;
 use Dono\Forms\Blocks\DonationAmountBlock;
@@ -23,8 +24,21 @@ final class FormSubmissionValidator
     {
         $blocks = parse_blocks((string) ($form->blocks ?? ''));
 
+        // The rendered amount step falls back to the campaign's presets when the
+        // block omits its own (see DonationFormShortcode::buildSteps). The
+        // presets-only check must use the same set, or a form on campaign presets
+        // rejects every amount the donor is actually shown.
+        $campaignPresets = null;
+        $campaignId = isset($form->campaign_id) ? (int) $form->campaign_id : 0;
+        if ($campaignId > 0) {
+            $campaign = Campaign::query()->find('id', $campaignId);
+            if ($campaign && is_array($campaign->default_amount_presets) && ! empty($campaign->default_amount_presets)) {
+                $campaignPresets = $campaign->default_amount_presets;
+            }
+        }
+
         $offered = ['one_time'];
-        $err = $this->walk($blocks, $body, $offered);
+        $err = $this->walk($blocks, $body, $offered, $campaignPresets);
         if ($err !== null) {
             return $err;
         }
@@ -50,19 +64,19 @@ final class FormSubmissionValidator
      * @param array<int,array<string,mixed>> $blocks
      * @param array<string,bool>             $offered passed by ref; accumulates offered frequencies
      */
-    private function walk(array $blocks, array $body, array &$offered): ?WP_Error
+    private function walk(array $blocks, array $body, array &$offered, ?array $campaignPresets): ?WP_Error
     {
         foreach ($blocks as $block) {
             $name  = (string) ($block['blockName'] ?? '');
             $attrs = is_array($block['attrs'] ?? null) ? $block['attrs'] : [];
 
-            $err = $this->validateBlock($name, $attrs, $body, $offered);
+            $err = $this->validateBlock($name, $attrs, $body, $offered, $campaignPresets);
             if ($err !== null) {
                 return $err;
             }
 
             if (! empty($block['innerBlocks']) && is_array($block['innerBlocks'])) {
-                $err = $this->walk($block['innerBlocks'], $body, $offered);
+                $err = $this->walk($block['innerBlocks'], $body, $offered, $campaignPresets);
                 if ($err !== null) {
                     return $err;
                 }
@@ -71,7 +85,7 @@ final class FormSubmissionValidator
         return null;
     }
 
-    private function validateBlock(string $name, array $attrs, array $body, array &$offered): ?WP_Error
+    private function validateBlock(string $name, array $attrs, array $body, array &$offered, ?array $campaignPresets): ?WP_Error
     {
         // A block hidden by its display condition submits no value by design, so
         // its required/format rules must not be enforced (mirrors the client).
@@ -85,10 +99,12 @@ final class FormSubmissionValidator
 
         switch ($name) {
             case 'dono/name':
-                if (! empty($attrs['requireFirst']) && ! $this->filled($profile['first_name'] ?? null)) {
+                // requireFirst/requireLast default true (NameBlock); the editor
+                // omits an attr equal to its default, so absent means required.
+                if ((bool) ($attrs['requireFirst'] ?? true) && ! $this->filled($profile['first_name'] ?? null)) {
                     return $this->requiredError(__('First name', 'dono'));
                 }
-                if (! empty($attrs['requireLast']) && ! $this->filled($profile['last_name'] ?? null)) {
+                if ((bool) ($attrs['requireLast'] ?? true) && ! $this->filled($profile['last_name'] ?? null)) {
                     return $this->requiredError(__('Last name', 'dono'));
                 }
                 break;
@@ -125,9 +141,13 @@ final class FormSubmissionValidator
                 $amountType = (string) ($attrs['donationType'] ?? 'multi');
                 $allowCustom = $amountType === 'fixed' ? true : (bool) ($attrs['allowCustom'] ?? true);
                 if (! $allowCustom) {
+                    $raw = $attrs['presets'] ?? null;
+                    if (! is_array($raw) || empty($raw)) {
+                        $raw = $campaignPresets;
+                    }
                     $allowedCents = array_map(
                         static fn ($p) => (int) $p['cents'],
-                        DonationAmountBlock::normalizePresets($attrs['presets'] ?? null)
+                        DonationAmountBlock::normalizePresets($raw)
                     );
                     if (! in_array((int) ($body['amount_cents'] ?? 0), $allowedCents, true)) {
                         return $this->reject(__('Choose one of the listed donation amounts.', 'dono'));

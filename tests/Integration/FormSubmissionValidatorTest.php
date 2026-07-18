@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Tests\Integration;
 
+use Dono\Campaigns\Campaign;
 use Dono\Forms\Form;
 use Dono\Forms\FormSubmissionValidator;
 
@@ -29,7 +30,7 @@ final class FormSubmissionValidatorTest extends IntegrationTestCase
     private const BLOCKS = <<<BLOCKS
 <!-- wp:dono/donation-amount {"presets":[{"cents":2500}]} /-->
 <!-- wp:dono/email {"required":true} /-->
-<!-- wp:dono/name {"requireFirst":true} /-->
+<!-- wp:dono/name {"requireFirst":true,"requireLast":false} /-->
 <!-- wp:dono/text-input {"label":"Nickname","required":true} /-->
 <!-- wp:dono/consent {"purposes":[{"id":"gdpr","label":"I agree to the terms","requiredByLaw":true}]} /-->
 <!-- wp:dono/submit-button /-->
@@ -127,6 +128,61 @@ BLOCKS;
         $this->assertNotNull(
             $this->validator()->validate($this->form($blocks), $base + ['amount_cents' => 700]),
             'an off-preset amount is rejected on a presets-only form'
+        );
+    }
+
+    public function test_presets_only_falls_back_to_campaign_presets(): void
+    {
+        // Presets-only block that OMITS its own presets (the editor drops the
+        // attr when it equals the default). The rendered amounts come from the
+        // campaign, so the validator must use the same set or it rejects every
+        // amount the donor is shown.
+        $now = gmdate('Y-m-d H:i:s');
+        $c = Campaign::make();
+        $c->title      = 'Preset Camp';
+        $c->slug       = 'preset-camp-' . uniqid();
+        $c->status     = 'published';
+        $c->default_amount_presets = [2000, 7500];
+        $c->created_at = $now;
+        $c->updated_at = $now;
+        $c->save();
+
+        $blocks = <<<BLOCKS
+<!-- wp:dono/donation-amount {"allowCustom":false} /-->
+<!-- wp:dono/submit-button /-->
+BLOCKS;
+        $form = $this->form($blocks);
+        $form->campaign_id = (int) $c->id;
+        $base = ['frequency' => 'one_time', 'custom' => [], 'consents' => []];
+
+        $this->assertNull(
+            $this->validator()->validate($form, $base + ['amount_cents' => 7500]),
+            'a campaign preset the donor is shown is accepted'
+        );
+        $this->assertNotNull(
+            $this->validator()->validate($form, $base + ['amount_cents' => 2500]),
+            'the hardcoded default 2500 is not a campaign preset and is rejected'
+        );
+    }
+
+    public function test_name_required_by_default_is_enforced(): void
+    {
+        // NameBlock defaults requireFirst/requireLast to true; the editor omits
+        // the attrs at their default, so an absent attr still means required.
+        $blocks = <<<BLOCKS
+<!-- wp:dono/donation-amount {"presets":[{"cents":2500}]} /-->
+<!-- wp:dono/name /-->
+<!-- wp:dono/submit-button /-->
+BLOCKS;
+        $base = ['amount_cents' => 2500, 'frequency' => 'one_time', 'custom' => [], 'consents' => []];
+
+        $this->assertNotNull(
+            $this->validator()->validate($this->form($blocks), $base + ['profile' => ['last_name' => 'Lovelace']]),
+            'a default name block still requires first name'
+        );
+        $this->assertNull(
+            $this->validator()->validate($this->form($blocks), $base + ['profile' => ['first_name' => 'Ada', 'last_name' => 'Lovelace']]),
+            'both names present passes'
         );
     }
 
