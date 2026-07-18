@@ -1,0 +1,46 @@
+/**
+ * ESLint config. Mirrors wp-scripts' default (@wordpress/eslint-plugin) but
+ * turns off Prettier + brace-style enforcement: the codebase uses a deliberate
+ * manual format (aligned columns, 4-space indent, single-line guards) that
+ * Prettier cannot preserve, so enforcing it would mean reformatting every file.
+ * lint:js still runs the substantive rules (unused vars, hooks, a11y, etc.).
+ */
+module.exports = {
+    root: true,
+    extends: [ 'plugin:@wordpress/eslint-plugin/recommended' ],
+    // No babel config in the repo, so mirror wp-scripts' parser fallback.
+    parserOptions: {
+        requireConfigFile: false,
+        babelOptions: {
+            presets: [ require.resolve( '@wordpress/babel-preset-default' ) ],
+        },
+    },
+    rules: {
+        'prettier/prettier': 'off',
+        curly: 'off',
+        // House style diverges from the WP defaults by design; keep lint focused
+        // on substance (unused vars, hooks, a11y) rather than these conventions:
+        camelcase: 'off', //           REST/DB fields are snake_case (amount_cents)
+        'dot-notation': 'off',
+        'no-nested-ternary': 'off',
+        'jsdoc/require-param': 'off', // comments are intentionally minimal
+        'jsdoc/require-param-type': 'off',
+        'jsdoc/check-tag-names': 'off', // e.g. @jsxImportSource in the Preact runtime
+    },
+    overrides: [
+        {
+            // Unit-test files (mirrors wp-scripts' default override).
+            files: [ '**/@(test|__tests__)/**/*.js', '**/?(*.)test.js' ],
+            extends: [ 'plugin:@wordpress/eslint-plugin/test-unit' ],
+        },
+        {
+            // Preact runtimes: `class`/`for` JSX attributes are correct here and
+            // React-specific rules don't apply.
+            files: [ 'assets/donation-form/**', 'assets/donor-portal/**' ],
+            rules: {
+                'react/no-unknown-property': 'off',
+                'react/no-unescaped-entities': 'off',
+            },
+        },
+    ],
+};
