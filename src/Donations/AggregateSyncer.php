@@ -132,8 +132,9 @@ final class AggregateSyncer
     }
 
     // Nets refunded cents out of SUM(amount) so partial refunds reduce the
-    // total instead of dropping the whole donation; refunds table is the
-    // source of truth (donations row has no refunded_cents column).
+    // total instead of dropping the whole donation; the refunds table is the
+    // source of truth for the netted figure, independent of the donation's
+    // refunded_cents over-refund counter.
     // Fully-qualified table name on both sides: unqualified `id` would bind
     // to wp_dono_refunds.id since refunds also has an id column.
     private function refundedSubquery(): string

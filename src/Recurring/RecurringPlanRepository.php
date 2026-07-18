@@ -36,10 +36,13 @@ final class RecurringPlanRepository
             $update['next_payment_at'] = $nextPaymentAt;
         }
 
-        // Atomic increment avoids lost updates from concurrent webhooks.
-        DB::table('dono_recurring_plans')->where('id', $plan->id)->update($update);
-        DB::table('dono_recurring_plans')->where('id', $plan->id)->increment('payments_count');
-        DB::table('dono_recurring_plans')->where('id', $plan->id)->increment('total_paid_cents', $amountCents);
+        // Atomic increments avoid lost updates from concurrent webhooks; the
+        // transaction keeps the three writes consistent if one fails mid-way.
+        DB::transaction(function () use ($plan, $amountCents, $update): void {
+            DB::table('dono_recurring_plans')->where('id', $plan->id)->update($update);
+            DB::table('dono_recurring_plans')->where('id', $plan->id)->increment('payments_count');
+            DB::table('dono_recurring_plans')->where('id', $plan->id)->increment('total_paid_cents', $amountCents);
+        });
 
         $plan->payments_count   = (int) $plan->payments_count + 1;
         $plan->total_paid_cents = (int) $plan->total_paid_cents + $amountCents;
