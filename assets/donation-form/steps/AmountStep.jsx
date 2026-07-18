@@ -70,7 +70,7 @@ export default function AmountStep( { step, state, dispatch, config } ) {
                 </label>
             ) }
 
-            { error && <p class="dono-form__field-error">{ error }</p> }
+            { error && <p class="dono-form__field-error" role="alert">{ error }</p> }
         </div>
     );
 }

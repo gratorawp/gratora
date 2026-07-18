@@ -744,6 +744,11 @@ function mount( form ) {
     form.innerHTML = '';
     form.dataset.donoMounted = 'true';
 
+    // The host element is a real <form> and the Preact UI uses type="button",
+    // so a native submit (Enter on a single-field step) would reload the page
+    // and wipe all in-progress state. Block it; navigation is button-driven.
+    form.addEventListener( 'submit', ( e ) => e.preventDefault() );
+
     applyThemeTokens( form, config.theme );
 
     try {

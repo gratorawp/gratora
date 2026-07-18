@@ -4,6 +4,7 @@ import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 import { detailHref } from '../../_shared/format';
+import { notify } from '../../_shared/notify';
 
 const ICON = {
     plus: (
@@ -46,8 +47,9 @@ export default function QuickActions() {
                 data:   { title: __( 'Untitled campaign', 'dono' ) },
             } );
             window.location.href = detailHref( c.id, 'overview' );
-        } catch {
+        } catch ( err ) {
             setCreating( false );
+            notify.error( err?.message || __( 'Could not create the campaign. Please try again.', 'dono' ) );
         }
     };
 
