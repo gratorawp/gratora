@@ -57,15 +57,20 @@ final class RecurringPlanRepository
         $plan->updated_at = $occurredAt;
     }
 
-    public function markCancelled(RecurringPlan $plan, string $occurredAt, ?string $reason = null): void
+    /**
+     * @return bool True if this call won the active->cancelled transition, so
+     *   the caller can fire cancellation side effects exactly once even when
+     *   two webhook deliveries race (both may pre-read status='active').
+     */
+    public function markCancelled(RecurringPlan $plan, string $occurredAt, ?string $reason = null): bool
     {
-        if ($plan->status === 'cancelled') return;
+        if ($plan->status === 'cancelled') return false;
 
         // Targeted column update, not a whole-row save(): Queryable's save()
         // rewrites payments_count / total_paid_cents from the loaded values,
         // so a cancellation that loaded its plan before a concurrent renewal's
         // atomic increment committed would silently lose that counter bump.
-        RecurringPlan::query()
+        $result = RecurringPlan::query()
             ->where('id', $plan->id)
             ->where('status', 'cancelled', '!=')
             ->update([
@@ -80,6 +85,8 @@ final class RecurringPlanRepository
         $plan->cancelled_at        = $occurredAt;
         $plan->cancellation_reason = $reason;
         $plan->updated_at          = $occurredAt;
+
+        return ($result->affectedRows ?? 0) > 0;
     }
 
     /**

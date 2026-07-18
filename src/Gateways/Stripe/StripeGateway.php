@@ -890,10 +890,11 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
         // A portal/admin cancel already recorded the event before deleting the
         // Stripe sub; only emit here for gateway-initiated cancels (dunning,
         // Stripe dashboard) so the donor gets exactly one cancellation email.
-        $alreadyCancelled = $plan->status === 'cancelled';
-        $this->plans->markCancelled($plan, $now, $reason !== '' ? $reason : null);
+        // Gate on which call actually won the DB transition, not a pre-read, so
+        // two racing deliveries can't both send.
+        $won = $this->plans->markCancelled($plan, $now, $reason !== '' ? $reason : null);
 
-        if (! $alreadyCancelled) {
+        if ($won) {
             $this->donationService->recordRecurringCancellation($plan, $reason !== '' ? $reason : null);
         }
 
@@ -937,7 +938,14 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
             if ($this->connect->isConnected()) {
                 $params['refund_application_fee'] = 'true';
             }
-            $stripeRefund = $this->api->post('/refunds', $params, $this->connectHeaders());
+            // Idempotency-Key so a timed-out refund that already processed on
+            // Stripe returns the original on retry instead of issuing a second
+            // one. Stable per attempt (refunded_cents only advances once the
+            // local write commits) yet distinct across separate partial refunds.
+            $headers = array_merge($this->connectHeaders(), [
+                'Idempotency-Key' => 'dono_refund_' . $donation->id . '_' . (int) $donation->refunded_cents . '_' . $amountCents,
+            ]);
+            $stripeRefund = $this->api->post('/refunds', $params, $headers);
         } catch (\Throwable $e) {
             return RefundResult::failure($e->getMessage());
         }

@@ -385,7 +385,22 @@ final class DonationService
         $donation->is_test        = (bool) $plan->is_test;
         $donation->created_at     = $now;
         $donation->updated_at     = $now;
-        $donation->save();
+        try {
+            $donation->save();
+        } catch (\Dono\Vendor\Queryable\QueryException $e) {
+            // Lost the race to a concurrent redelivery of the same invoice: the
+            // other call already inserted the row (UNIQUE gateway_intent_id).
+            // Return the winner idempotently instead of throwing a 500.
+            $winner = Donation::query()
+                ->where('gateway', $gateway)
+                ->where('gateway_intent_id', $gatewayIntentId)
+                ->get();
+            if (! $winner) throw $e;
+            if ($winner->status === 'pending') {
+                $this->confirm($winner, $confirmResult);
+            }
+            return ['donation' => $winner, 'created' => false];
+        }
 
         // Confirm immediately (caller has already established that the gateway
         // charge succeeded; we just mirror that locally).
