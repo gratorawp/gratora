@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Dono\Foundation\Helpers;
 
+use Dono\Currency\Currency;
+
 /**
  * Canonical money formatter for human-facing cents values.
  * DB/API/repository layers keep working in integer cents; only display calls this.
@@ -48,7 +50,7 @@ final class Money
         $major    = $cents / 100;
         $isWhole  = ($cents % 100) === 0;
         $fmt      = self::numberFormat();
-        $decimals = ($compact && $isWhole) ? 0 : (int) $fmt['decimal_places'];
+        $decimals = ($compact && $isWhole) ? 0 : self::decimalsFor($code);
 
         $number = number_format(
             abs($major),
@@ -62,6 +64,20 @@ final class Money
         return $fmt['symbol_position'] === 'after'
             ? $number . ' ' . $symbol
             : $symbol . $number;
+    }
+
+    /**
+     * Display decimal places for a currency: the org's configured places for
+     * its own default currency (an org may tune its display), otherwise the
+     * currency's ISO minor-unit count so JPY shows none and BHD shows three.
+     * Amounts are stored as major x 100 regardless, so only rendering changes.
+     */
+    private static function decimalsFor(string $code): int
+    {
+        if ($code === self::defaultCurrency()) {
+            return (int) self::numberFormat()['decimal_places'];
+        }
+        return Currency::minorUnits($code);
     }
 
     /**
