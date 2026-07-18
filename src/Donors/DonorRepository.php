@@ -408,18 +408,33 @@ final class DonorRepository
         $donationsT = DB::getPrefix() . 'dono_donations';
         $cutoff     = esc_sql((new DateTimeImmutable("first day of -{$cohortMonths} months"))->format('Y-m-d'));
 
+        // Anchor each donor's cohort on their own earliest live donation
+        // (MIN over the SAME status set the offsets count), not the
+        // denormalized first_donation_at. Otherwise a donor whose first gift
+        // isn't a plain 'paid' row misses offset 0, so the cohort size
+        // undercounts while later offsets still populate (>100% retention).
+        // The MIN spans all of the donor's donations, then cohorts are trimmed
+        // to the window, so a pre-window first gift can't mis-anchor a donor.
         $sql = "
             SELECT
-                DATE_FORMAT(dn.first_donation_at, '%Y-%m') AS cohort,
-                PERIOD_DIFF(DATE_FORMAT(d.paid_at, '%Y%m'), DATE_FORMAT(dn.first_donation_at, '%Y%m')) AS offset_m,
+                DATE_FORMAT(fd.first_paid, '%Y-%m') AS cohort,
+                PERIOD_DIFF(DATE_FORMAT(d.paid_at, '%Y%m'), DATE_FORMAT(fd.first_paid, '%Y%m')) AS offset_m,
                 COUNT(DISTINCT d.donor_id) AS donors
-            FROM {$donorsT} dn
-            JOIN {$donationsT} d ON d.donor_id = dn.id
-            WHERE dn.redacted_at IS NULL
-              AND dn.first_donation_at IS NOT NULL
-              AND dn.first_donation_at >= '{$cutoff} 00:00:00'
-              AND d.status = 'paid'
-              AND d.is_test = 0
+            FROM (
+                SELECT d2.donor_id, MIN(d2.paid_at) AS first_paid
+                FROM {$donationsT} d2
+                JOIN {$donorsT} dn2 ON dn2.id = d2.donor_id
+                WHERE dn2.redacted_at IS NULL
+                  AND d2.status IN ('paid', 'partial_refund')
+                  AND d2.is_test = 0
+                  AND d2.paid_at IS NOT NULL
+                GROUP BY d2.donor_id
+            ) fd
+            JOIN {$donationsT} d
+                ON d.donor_id = fd.donor_id
+               AND d.status IN ('paid', 'partial_refund')
+               AND d.is_test = 0
+            WHERE fd.first_paid >= '{$cutoff} 00:00:00'
             GROUP BY cohort, offset_m
             ORDER BY cohort ASC, offset_m ASC
         ";
