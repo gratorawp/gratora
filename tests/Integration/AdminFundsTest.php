@@ -380,6 +380,46 @@ final class AdminFundsTest extends IntegrationTestCase
             'Org-wide raised counts the money once, not once per level');
     }
 
+    public function test_deletable_flag_mirrors_the_delete_guard(): void
+    {
+        // An untouched fund is hard-deletable.
+        $free = $this->post('/dono/v1/admin/funds', ['code' => 'free', 'name' => 'Free'])->get_data();
+        $this->assertTrue($free['deletable']);
+
+        // A fund a campaign points to is NOT deletable even with zero donations
+        // - the case the old live-only donation count got wrong.
+        $used     = $this->post('/dono/v1/admin/funds', ['code' => 'used', 'name' => 'Used'])->get_data();
+        $campaign = $this->post('/dono/v1/admin/campaigns', ['title' => 'Appeal'])->get_data();
+        $this->put("/dono/v1/admin/campaigns/{$campaign['id']}", ['default_fund_id' => $used['id']]);
+
+        // A fund reached only by a test donation is likewise blocked.
+        $tested = $this->post('/dono/v1/admin/funds', ['code' => 'tested', 'name' => 'Tested'])->get_data();
+        $now = gmdate('Y-m-d H:i:s');
+        $d = \Dono\Donations\Donation::make();
+        $d->reference = 'DONO-DEL-TEST'; $d->donor_id = 1;
+        $d->amount_cents = 1000; $d->net_cents = 1000; $d->currency = 'USD';
+        $d->base_amount_cents = 1000; $d->base_currency = 'USD'; $d->fx_rate = '1.00000000';
+        $d->gateway = 'offline'; $d->status = 'paid'; $d->is_test = true;
+        $d->fund_id = (int) $tested['id'];
+        $d->paid_at = $now; $d->created_at = $now; $d->updated_at = $now;
+        $d->save();
+
+        $byId = [];
+        foreach ($this->get('/dono/v1/admin/funds')->get_data() as $row) {
+            $byId[(int) $row['id']] = $row;
+        }
+
+        $this->assertTrue($byId[(int) $free['id']]['deletable'], 'unreferenced fund stays deletable');
+        $this->assertFalse($byId[(int) $used['id']]['deletable'], 'a campaign reference blocks hard-delete');
+        $this->assertFalse($byId[(int) $tested['id']]['deletable'], 'even a test donation blocks hard-delete');
+
+        // The default fund is never deletable.
+        $default = $this->post('/dono/v1/admin/funds', [
+            'code' => 'main', 'name' => 'Main', 'is_default' => true,
+        ])->get_data();
+        $this->assertFalse($this->get("/dono/v1/admin/funds/{$default['id']}")->get_data()['deletable']);
+    }
+
     private function get(string $path, array $params = []): \WP_REST_Response
     {
         $req = new WP_REST_Request('GET', $path);

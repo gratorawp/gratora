@@ -105,7 +105,13 @@ final class FundsController
 
         // donations_count is denormalised on the fund row (written by
         // AggregateSyncer::syncFund). Pass null so shape() reads the column.
-        $shaped = array_map(fn (Fund $f) => $this->shape($f), $result['items']);
+        $deletable = $this->fundService->deletableMap(
+            array_map(static fn (Fund $f) => (int) $f->id, $result['items'])
+        );
+        $shaped = array_map(
+            fn (Fund $f) => $this->shape($f, null, $deletable[(int) $f->id] ?? false),
+            $result['items']
+        );
 
         $response = new WP_REST_Response($shaped, 200);
         $response->header('X-WP-Total', (string) $result['total']);
@@ -124,7 +130,7 @@ final class FundsController
         if (! $fund) {
             return new WP_Error('dono_not_found', __('Fund not found.', 'dono'), ['status' => 404]);
         }
-        return new WP_REST_Response($this->shape($fund), 200);
+        return new WP_REST_Response($this->shapeOne($fund), 200);
     }
 
     public function create(WP_REST_Request $request): WP_REST_Response|WP_Error
@@ -137,7 +143,7 @@ final class FundsController
         } catch (RuntimeException $e) {
             return new WP_Error('dono_fund_create_failed', $e->getMessage(), ['status' => 500]);
         }
-        return new WP_REST_Response($this->shape($fund), 201);
+        return new WP_REST_Response($this->shapeOne($fund), 201);
     }
 
     public function update(WP_REST_Request $request): WP_REST_Response|WP_Error
@@ -152,7 +158,7 @@ final class FundsController
         } catch (InvalidArgumentException $e) {
             return new WP_Error('dono_invalid_input', $e->getMessage(), ['status' => 422]);
         }
-        return new WP_REST_Response($this->shape($fund), 200);
+        return new WP_REST_Response($this->shapeOne($fund), 200);
     }
 
     public function delete(WP_REST_Request $request): WP_REST_Response|WP_Error
@@ -176,7 +182,13 @@ final class FundsController
     }
 
     /** @return array<string,mixed> */
-    private function shape(Fund $f, ?int $donationsCount = null): array
+    private function shapeOne(Fund $f): array
+    {
+        $deletable = $this->fundService->deletableMap([(int) $f->id]);
+        return $this->shape($f, null, $deletable[(int) $f->id] ?? false);
+    }
+
+    private function shape(Fund $f, ?int $donationsCount = null, bool $deletable = false): array
     {
         return [
             'id'              => (int) $f->id,
@@ -202,6 +214,10 @@ final class FundsController
             // COUNT(*) until the next migration backfills the column.
             'donations_count' => $donationsCount ?? (int) $f->donations_count,
             'reassign_pending' => array_key_exists((int) $f->id, FundReassignmentJob::pending()),
+            // Whether delete() would hard-delete (no references) vs deactivate,
+            // so the delete dialog offers the action the server will actually
+            // take instead of guessing from the live-only donation count.
+            'deletable'        => $deletable,
         ];
     }
 }

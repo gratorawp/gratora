@@ -573,10 +573,9 @@ function FundDeleteModal( { fund, funds, onClose, onError, onDone } ) {
                 msg = sprintf( /* translators: %s: fund name */ __( 'Reassigning donations from “%s”. It will be removed once complete.', 'dono' ), fund.name );
             } else {
                 msg = sprintf(
-                    /* translators: 1: fund name, 2: donation count */
-                    __( 'Fund “%1$s” was deactivated; its %2$d donation(s) were kept for reporting.', 'dono' ),
-                    fund.name,
-                    res.donations || 0
+                    /* translators: %s: fund name */
+                    __( 'Fund “%s” was deactivated and kept for reporting.', 'dono' ),
+                    fund.name
                 );
             }
             onDone( msg );
@@ -586,11 +585,13 @@ function FundDeleteModal( { fund, funds, onClose, onError, onDone } ) {
         }
     };
 
-    // Nothing to reassign when the fund has no donations - only offer the
-    // straight delete/deactivate path.
-    const hasDonations = ( fund.donations_count || 0 ) > 0;
+    // The server hard-deletes only a fund with zero references (donations of
+    // any status, plus campaigns/forms/plans that point to it); otherwise it
+    // deactivates. `deletable` is that authoritative verdict, so the dialog
+    // offers the action the server will actually take.
+    const deletable = fund.deletable === true;
     const reassignBlocked = choice === 'reassign' && ! targetId;
-    const primaryLabel = ! hasDonations
+    const primaryLabel = deletable
         ? __( 'Delete fund', 'dono' )
         : ( choice === 'reassign' ? __( 'Reassign and delete', 'dono' ) : __( 'Deactivate fund', 'dono' ) );
 
@@ -612,14 +613,14 @@ function FundDeleteModal( { fund, funds, onClose, onError, onDone } ) {
                 </>
             ) }
         >
-            { ! hasDonations ? (
+            { deletable ? (
                 <p className="dono-dialog__help">
-                    { __( 'This fund has no donations. Deleting it removes it entirely. If a campaign still points to it, it is deactivated instead and kept for reporting.', 'dono' ) }
+                    { __( 'Nothing points to this fund, so deleting it removes it entirely.', 'dono' ) }
                 </p>
             ) : (
                 <>
                     <p className="dono-dialog__help">
-                        { __( 'A fund with donation history is never hard-deleted. Choose what to do:', 'dono' ) }
+                        { __( 'This fund is still referenced, so it is never hard-deleted. Choose what to do:', 'dono' ) }
                     </p>
 
                     <label className="dono-choice">
@@ -643,8 +644,8 @@ function FundDeleteModal( { fund, funds, onClose, onError, onDone } ) {
                             onChange={ () => setChoice( 'reassign' ) }
                         />
                         <span>
-                            <strong>{ __( 'Reassign donations to another fund, then delete', 'dono' ) }</strong>
-                            <span>{ __( 'Moves every donation onto the chosen fund, then removes this one.', 'dono' ) }</span>
+                            <strong>{ __( 'Reassign to another fund, then delete', 'dono' ) }</strong>
+                            <span>{ __( 'Moves every donation, campaign and form that points here onto the chosen fund, then removes this one.', 'dono' ) }</span>
                         </span>
                     </label>
 

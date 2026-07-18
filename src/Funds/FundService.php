@@ -243,6 +243,51 @@ final class FundService
         return ['action' => 'deleted'];
     }
 
+    /**
+     * Which of these funds delete() would hard-delete rather than deactivate:
+     * not the default, no sub-funds, and zero donation / campaign / form / plan
+     * references. Donations of ANY status count, so a fund reached only by test
+     * or pending rows still reads as non-deletable, exactly as the delete guard
+     * treats it. Batched into a handful of grouped queries so the admin list
+     * can flag every row without a per-row fan-out.
+     *
+     * @param list<int> $fundIds
+     * @return array<int,bool>
+     */
+    public function deletableMap(array $fundIds): array
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $fundIds))));
+        if ($ids === []) {
+            return [];
+        }
+
+        $blocked = [];
+        foreach (Fund::query()->whereIn('id', $ids)->where('is_default', 1)->getAll() as $f) {
+            $blocked[(int) $f->id] = true;
+        }
+
+        $mark = function (string $table, string $column) use ($ids, &$blocked): void {
+            $rows = DB::table($table)
+                ->whereIn($column, $ids)
+                ->selectRaw("DISTINCT {$column} AS ref")
+                ->getAll();
+            foreach ($rows as $r) {
+                $blocked[(int) $r['ref']] = true;
+            }
+        };
+        $mark('dono_donations', 'fund_id');
+        $mark('dono_campaigns', 'default_fund_id');
+        $mark('dono_forms', 'default_fund_id');
+        $mark('dono_recurring_plans', 'fund_id');
+        $mark('dono_funds', 'parent_fund_id');
+
+        $out = [];
+        foreach ($ids as $id) {
+            $out[$id] = ! isset($blocked[$id]);
+        }
+        return $out;
+    }
+
     /** Re-queue any reassignment whose background job was lost. Idempotent. */
     public function reconcilePendingReassignments(): void
     {
