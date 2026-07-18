@@ -24,6 +24,7 @@ use Dono\Mail\Mailer;
 use Dono\Receipts\Receipt;
 use Dono\Receipts\ReceiptRepository;
 use Dono\Recurring\RecurringPlan;
+use Dono\Recurring\RecurringPlanRepository;
 use RuntimeException;
 use WP_Error;
 use WP_REST_Request;
@@ -60,6 +61,7 @@ final class PortalController
         private Mailer $mailer,
         private AsyncDispatcher $async,
         private \Dono\Donations\DonationService $donationService,
+        private RecurringPlanRepository $plans,
     ) {
     }
 
@@ -636,15 +638,16 @@ final class PortalController
                 case 'cancel':
                     $reason = isset($body['reason']) ? (string) $body['reason'] : null;
                     if ($sub) $sub->cancelSubscription($plan, $reason);
-                    $plan->status              = 'cancelled';
-                    $plan->cancelled_at        = $now;
-                    $plan->cancellation_reason = $reason;
-                    $plan->save();
-                    // Canonical event + analytics record. Same hook the Stripe
-                    // webhook fires when the gateway initiates the cancel, so
-                    // DonationEmails sends one `subscription_cancelled` mail
-                    // regardless of who triggered it.
-                    $this->donationService->recordRecurringCancellation($plan, $reason);
+                    // Gate the side effects on winning the active->cancelled
+                    // transition: cancelSubscription can make Stripe fire
+                    // customer.subscription.deleted before we get here, and that
+                    // webhook also records the cancellation. markCancelled's
+                    // conditional update lets exactly one path send the email and
+                    // avoids a full-row save() clobbering a racing renewal's
+                    // counter increments.
+                    if ($this->plans->markCancelled($plan, $now, $reason)) {
+                        $this->donationService->recordRecurringCancellation($plan, $reason);
+                    }
                     break;
 
                 default:

@@ -128,6 +128,21 @@ final class DonationsController
                         ['status' => 403]
                     );
                 }
+                // The render gate also requires a published campaign; enforce it
+                // here too so an archived/unpublished campaign stops taking
+                // donations. Otherwise a stale (day-bucketed) form token or a
+                // direct POST lands on the archived campaign, inflating its
+                // totals and re-arming the delete guard so it can't be removed.
+                if ($form->campaign_id) {
+                    $campaign = Campaign::query()->find('id', (int) $form->campaign_id);
+                    if (! $campaign || $campaign->status !== 'published') {
+                        return new WP_Error(
+                            'dono_campaign_not_available',
+                            __('This campaign is not accepting donations.', 'dono'),
+                            ['status' => 403]
+                        );
+                    }
+                }
                 $formType = $form->form_type;
 
                 $invalid = (new FormSubmissionValidator())->validate($form, $body);

@@ -94,6 +94,29 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $this->assertSame('', $html);
     }
 
+    public function test_donation_post_is_rejected_when_the_campaign_is_archived(): void
+    {
+        // The render gate hides the form, but a stale day-bucket token or a
+        // direct POST must also be refused at the write path.
+        $campaign = Campaign::query()->find('id', $this->campaignId);
+        $campaign->status = 'archived';
+        $campaign->save();
+
+        $req = new WP_REST_Request('POST', '/dono/v1/donations');
+        $req->set_header('content-type', 'application/json');
+        $req->set_body(json_encode([
+            'form_id'      => $this->formId,
+            'email'        => 'donor@example.com',
+            'amount_cents' => 2500,
+            'currency'     => 'USD',
+            'gateway'      => 'offline',
+        ]));
+        $res = rest_do_request($req);
+
+        $this->assertSame(403, $res->get_status());
+        $this->assertSame('dono_campaign_not_available', $res->get_data()['code'] ?? null);
+    }
+
     public function test_publishing_the_page_publishes_the_campaign(): void
     {
         $service = \Dono\Foundation\Plugin::instance()

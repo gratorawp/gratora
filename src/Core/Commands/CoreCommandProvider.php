@@ -29,6 +29,7 @@ use Dono\Gateways\GatewayManager;
 use Dono\Gateways\SubscriptionAware;
 use Dono\Receipts\ReceiptIssuer;
 use Dono\Recurring\RecurringPlan;
+use Dono\Recurring\RecurringPlanRepository;
 
 /**
  * Registers core domain operations as Command objects.
@@ -729,13 +730,13 @@ final class CoreCommandProvider
                 if ($sub) {
                     $sub->cancelSubscription($plan, $reason);
                 }
-                $plan->status              = 'cancelled';
-                $plan->cancelled_at        = gmdate('Y-m-d H:i:s');
-                $plan->cancellation_reason = $reason;
-                $plan->save();
-                // Same canonical event the portal + Stripe webhook fire, so the
-                // `subscription_cancelled` email goes out regardless of source.
-                $c->get(DonationService::class)->recordRecurringCancellation($plan, $reason);
+                // Gate on winning the transition so a racing Stripe
+                // customer.subscription.deleted webhook doesn't also send the
+                // cancellation email or clobber a renewal's counters (see the
+                // portal cancel path).
+                if ($c->get(RecurringPlanRepository::class)->markCancelled($plan, gmdate('Y-m-d H:i:s'), $reason)) {
+                    $c->get(DonationService::class)->recordRecurringCancellation($plan, $reason);
+                }
                 return ['plan_id' => (int) $plan->id, 'status' => (string) $plan->status];
             },
             self::META,
