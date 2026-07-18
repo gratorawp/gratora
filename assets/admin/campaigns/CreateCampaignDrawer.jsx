@@ -1,9 +1,10 @@
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useRef } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
 
 import { detailHref } from '../_shared/format';
 import Drawer from '../_shared/components/Drawer';
+import Notice from '../_shared/components/Notice';
 import Field from '../_shared/components/Field';
 import Segmented from '../_shared/components/Segmented';
 import AmountInput from '../_shared/components/AmountInput';
@@ -76,6 +77,13 @@ export default function CreateCampaignDrawer( { onClose } ) {
 
     const [ submitting, setSubmitting ] = useState( false );
     const [ error, setError ]           = useState( null );
+    const errorRef                      = useRef( null );
+
+    // The submit button sits in the footer but the error renders at the top of a
+    // long scrollable body; pull it into view (Notice already announces via role=alert).
+    useEffect( () => {
+        if ( error ) errorRef.current?.scrollIntoView( { behavior: 'smooth', block: 'nearest' } );
+    }, [ error ] );
 
     useEffect( () => {
         let aborted = false;
@@ -183,7 +191,11 @@ export default function CreateCampaignDrawer( { onClose } ) {
             foot={ foot }
         >
             <div className="dono-cc">
-            { error && <div className="dono-cc__error">{ error }</div> }
+            { error && (
+                <div ref={ errorRef } className="dono-cc__error">
+                    <Notice status="error" isDismissible={ false }>{ error }</Notice>
+                </div>
+            ) }
 
             <Field label={ __( 'Campaign title', 'dono' ) }>
                 <input
@@ -236,9 +248,7 @@ export default function CreateCampaignDrawer( { onClose } ) {
                             type="number"
                             min="0"
                             value={ count }
-                            placeholder={ goalType === 'donations'
-                                ? __( 'Enter a number', 'dono' )
-                                : __( 'Enter a number', 'dono' ) }
+                            placeholder={ __( 'Enter a number', 'dono' ) }
                             onChange={ ( e ) => setCount( e.target.value ) }
                         />
                     </div>

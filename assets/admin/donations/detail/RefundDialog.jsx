@@ -3,11 +3,15 @@ import { useState } from '@wordpress/element';
 import { Modal } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
 
-import { formatAmount } from './helpers';
+import { formatAmount, currencyDecimals } from './helpers';
 
 export default function RefundDialog( { donation, onClose, onSuccess } ) {
     const maxCents = donation.refundable_cents;
-    const [ amount, setAmount ] = useState( ( maxCents / 100 ).toFixed( 2 ) );
+    // Entry decimals follow the currency (JPY none, BHD three); the stored value
+    // stays minor units (major x 100), so /100 and *100 are unchanged.
+    const dp   = currencyDecimals( donation.currency );
+    const step = dp > 0 ? '0.' + '0'.repeat( dp - 1 ) + '1' : '1';
+    const [ amount, setAmount ] = useState( ( maxCents / 100 ).toFixed( dp ) );
     const [ reason, setReason ] = useState( '' );
     const [ saving, setSaving ] = useState( false );
     const [ error, setError ]   = useState( null );
@@ -53,9 +57,9 @@ export default function RefundDialog( { donation, onClose, onSuccess } ) {
                     <input
                         className="dono-input"
                         type="number"
-                        step="0.01"
-                        min="0.01"
-                        max={ ( maxCents / 100 ).toFixed( 2 ) }
+                        step={ step }
+                        min={ step }
+                        max={ ( maxCents / 100 ).toFixed( dp ) }
                         value={ amount }
                         onChange={ ( e ) => setAmount( e.target.value ) }
                     />

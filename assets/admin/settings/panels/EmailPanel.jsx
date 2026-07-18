@@ -8,6 +8,8 @@ import FormRow from '../../_shared/components/FormRow';
 import Btn from '../../_shared/components/Btn';
 import { ToggleRow } from '../../_shared/components/Switch';
 import { getDonorTemplates, getTemplateById } from '../../_shared/emailTemplates';
+import { formatAmount } from '../../_shared/format';
+import { tablistKeyDown } from '../../_shared/tablistKeys';
 
 export default function EmailPanel( { s } ) {
     const [ editingId, setEditingId ] = useState( null );
@@ -151,7 +153,7 @@ const SAMPLE_VALUES = {
     '{donor_name}':        'Jane Doe',
     '{donor_email}':       'jane@example.com',
     '{organisation_name}': 'Your Organization',
-    '{amount}':            '€25.00',
+    '{amount}':            formatAmount( 2500 ),
     '{campaign_title}':    'Spring fundraiser',
     '{receipt_number}':    'R-2026-00042',
     '{reference}':         'DN-XYZ123',
@@ -201,11 +203,16 @@ function TemplateEditor( { id, s, onBack } ) {
                 sub={ meta.desc }
             />
 
-            <div className="dono-email-editor-tabs" role="tablist">
+            <div
+                className="dono-email-editor-tabs"
+                role="tablist"
+                onKeyDown={ ( e ) => tablistKeyDown( e, [ 'edit', 'preview' ], view, setView ) }
+            >
                 <button
                     type="button"
                     role="tab"
                     aria-selected={ view === 'edit' }
+                    tabIndex={ view === 'edit' ? 0 : -1 }
                     className={ `dono-email-editor-tab${ view === 'edit' ? ' is-active' : '' }` }
                     onClick={ () => setView( 'edit' ) }
                 >
@@ -215,6 +222,7 @@ function TemplateEditor( { id, s, onBack } ) {
                     type="button"
                     role="tab"
                     aria-selected={ view === 'preview' }
+                    tabIndex={ view === 'preview' ? 0 : -1 }
                     className={ `dono-email-editor-tab${ view === 'preview' ? ' is-active' : '' }` }
                     onClick={ () => setView( 'preview' ) }
                 >

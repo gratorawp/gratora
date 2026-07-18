@@ -125,6 +125,17 @@ export default function Onboarding() {
     const [ busy, setBusy ]     = useState( false );
     const [ error, setError ]   = useState( null );
 
+    // Move focus to the new step's heading on step change (not initial mount) so
+    // keyboard and screen-reader users land on the fresh content instead of the
+    // nav button whose label just changed under them.
+    const frameRef    = useRef( null );
+    const stepMounted = useRef( false );
+    useEffect( () => {
+        if ( ! stepMounted.current ) { stepMounted.current = true; return; }
+        const h = frameRef.current?.querySelector( '.dono-onboarding__headline' );
+        if ( h ) { h.setAttribute( 'tabindex', '-1' ); h.focus(); }
+    }, [ step ] );
+
     const [ org, setOrg ] = useState( {
         name:           wp.site_name || '',
         email:          wp.admin_email || '',
@@ -367,7 +378,7 @@ export default function Onboarding() {
                 ) }
             </div>
 
-            <section className={ `dono-onboarding__frame${ step === 3 ? ' is-wide' : '' }` }>
+            <section ref={ frameRef } className={ `dono-onboarding__frame${ step === 3 ? ' is-wide' : '' }` }>
                 <div className="dono-onboarding__meta">
                     <span className="dono-onboarding__caption">
                         { sprintf( __( 'Step %1$d of %2$d', 'dono' ), step + 1, TOTAL ) }
@@ -699,7 +710,9 @@ function GoalStep( { value, onChange, cause, currency, format = 'us' } ) {
                                         className={ `dono-onboarding__amount${ isSel ? ' is-selected' : '' }` }
                                         onClick={ () => set( { amount } ) }
                                     >
-                                        { symbol }{ groupDigits( amount, format, 0 ) }
+                                        { format === 'eu'
+                                            ? <>{ groupDigits( amount, format, 0 ) } { symbol }</>
+                                            : <>{ symbol }{ groupDigits( amount, format, 0 ) }</> }
                                     </button>
                                 );
                             } ) }
@@ -945,20 +958,6 @@ function ChecklistItem( { title, description, href, cta } ) {
             </div>
             <a className="dono-btn dono-btn--primary" href={ href }>{ cta }</a>
         </li>
-    );
-}
-
-function RadioCard( { label, sub, checked, onChange } ) {
-    return (
-        <button
-            type="button"
-            className={ `dono-onboarding__radio${ checked ? ' is-selected' : '' }` }
-            onClick={ onChange }
-            aria-pressed={ checked }
-        >
-            <strong>{ label }</strong>
-            { sub && <span>{ sub }</span> }
-        </button>
     );
 }
 

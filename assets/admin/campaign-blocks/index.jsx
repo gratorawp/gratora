@@ -21,6 +21,7 @@ import ServerSideRender from '@wordpress/server-side-render';
 import { __ } from '@wordpress/i18n';
 
 import { registerDonoEntities } from '../_shared/entities';
+import { defaultCurrency, currencyDecimals } from '../_shared/format';
 import './blocks.scss';
 
 registerDonoEntities();
@@ -679,8 +680,11 @@ registerBlockType( 'dono/supporter-wall', {
         if ( campaign && Number( campaign.donations_count ) === 0 ) {
             issues.push( __( 'No donations yet, so the wall will be empty on the page.', 'dono' ) );
         }
-        // Display in major units; store as cents.
+        // Display in major units; store as cents. Entry decimals follow the org
+        // currency (JPY none, BHD three) so the step matches what renders.
         const minAmountMajor = ( Number( attributes.minAmountCents ) || 0 ) / 100;
+        const minAmountDp    = currencyDecimals( defaultCurrency() );
+        const minAmountStep  = minAmountDp > 0 ? '0.' + '0'.repeat( minAmountDp - 1 ) + '1' : '1';
         return <>
             <InspectorControls>
                 <PanelBody title={ __( 'Supporter wall', 'dono' ) }>
@@ -721,7 +725,7 @@ registerBlockType( 'dono/supporter-wall', {
                         label={ __( 'Minimum donation amount', 'dono' ) }
                         type="number"
                         min={ 0 }
-                        step="0.01"
+                        step={ minAmountStep }
                         value={ String( minAmountMajor || '' ) }
                         onChange={ ( v ) => {
                             const major = Number( v );

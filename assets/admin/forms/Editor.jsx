@@ -5,6 +5,7 @@
 
 import { useEffect, useCallback, useMemo, useReducer, useRef, useState } from '@wordpress/element';
 import {
+    BaseControl,
     Button,
     Modal,
     PanelBody,
@@ -39,8 +40,10 @@ import { useDonoRecord } from '../_shared/useDonoRecord';
 import LocalIcon from '../_shared/components/Icon';
 import Slider    from '../_shared/components/Slider';
 import Segmented from '../_shared/components/Segmented';
+import AmountInput from '../_shared/components/AmountInput';
 import FormTemplatePicker from '../_shared/components/FormTemplatePicker';
 import { STATUS_LABEL, campaignHref } from './format';
+import { defaultCurrency } from '../_shared/format';
 import blockRegistry, { runBlockRegistration } from './registry';
 import './blocks';
 import './editor.scss';
@@ -88,6 +91,15 @@ function mergeFormSettings( stored ) {
         gateways:  { ...def.gateways,  ...( stored.gateways  || {} ) },
         goal:      { ...def.goal,      ...( stored.goal      || {} ) },
     };
+}
+
+// Walk the live block tree for a block by name (handles nested inner blocks).
+function blocksInclude( list, name ) {
+    for ( const b of Array.isArray( list ) ? list : [] ) {
+        if ( b?.name === name ) return true;
+        if ( Array.isArray( b?.innerBlocks ) && b.innerBlocks.length && blocksInclude( b.innerBlocks, name ) ) return true;
+    }
+    return false;
 }
 
 let blocksReady = false;
@@ -181,10 +193,17 @@ export default function Editor( { formId } ) {
     ensureBlocksRegistered();
 
     // Campaigns + gateways are dropdown sources, not entities; fetch once.
+    // Surface a per-source failure instead of leaving the select silently empty.
     useEffect( () => {
-        apiFetch( { path: '/dono/v1/admin/forms/campaigns' } ).then( setCampaigns ).catch( () => {} );
-        apiFetch( { path: '/dono/v1/admin/forms/gateways' } ).then( setGateways ).catch( () => {} );
-        apiFetch( { path: '/dono/v1/admin/forms/funds' } ).then( setFunds ).catch( () => {} );
+        apiFetch( { path: '/dono/v1/admin/forms/campaigns' } )
+            .then( setCampaigns )
+            .catch( ( err ) => setError( err?.message || __( 'Could not load campaigns.', 'dono' ) ) );
+        apiFetch( { path: '/dono/v1/admin/forms/gateways' } )
+            .then( setGateways )
+            .catch( ( err ) => setError( err?.message || __( 'Could not load payment gateways.', 'dono' ) ) );
+        apiFetch( { path: '/dono/v1/admin/forms/funds' } )
+            .then( setFunds )
+            .catch( ( err ) => setError( err?.message || __( 'Could not load funds.', 'dono' ) ) );
     }, [] );
 
     // Expose form context to block edit components (Goal needs campaign progress).
@@ -589,6 +608,7 @@ export default function Editor( { formId } ) {
                                         campaigns={ campaigns }
                                         gateways={ gateways }
                                         funds={ funds }
+                                        blocks={ blocks }
                                     />
                                 ) : (
                                     <div className="dono-form-editor__canvas">
@@ -897,7 +917,7 @@ function PreviewPane( { loading, html, device, onDeviceChange } ) {
     );
 }
 
-function SettingsView( { c, campaigns, gateways, funds } ) {
+function SettingsView( { c, campaigns, gateways, funds, blocks } ) {
     return (
         <div className="dono-form-editor__settings">
             <FormSettingsPanel
@@ -905,6 +925,7 @@ function SettingsView( { c, campaigns, gateways, funds } ) {
                 campaigns={ campaigns }
                 gateways={ gateways }
                 funds={ funds }
+                blocks={ blocks }
             />
         </div>
     );
@@ -1115,7 +1136,7 @@ const SETTINGS_TABS = [
     { id: 'embed',     label: __( 'Embed', 'dono' ) },
 ];
 
-function FormSettingsPanel( { c, campaigns, gateways, funds } ) {
+function FormSettingsPanel( { c, campaigns, gateways, funds, blocks } ) {
     const settings = useMemo(
         () => mergeFormSettings( c.record.settings ),
         [ c.record.settings ]
@@ -1146,7 +1167,7 @@ function FormSettingsPanel( { c, campaigns, gateways, funds } ) {
                 { activeTab === 'general'   && <GeneralSection   c={ c } campaigns={ campaigns } funds={ funds } settings={ settings } setSettings={ setSettings } /> }
                 { activeTab === 'goal'      && <GoalSection      settings={ settings } setSettings={ setSettings } /> }
                 { activeTab === 'container' && <ContainerSection settings={ settings } setSettings={ setSettings } /> }
-                { activeTab === 'gateways'  && <GatewaysSection  gateways={ gateways } settings={ settings } setSettings={ setSettings } blocks={ c.value( 'blocks', '' ) } /> }
+                { activeTab === 'gateways'  && <GatewaysSection  gateways={ gateways } settings={ settings } setSettings={ setSettings } blocks={ blocks } /> }
                 { activeTab === 'after'     && <AfterSection     settings={ settings } setSettings={ setSettings } /> }
                 { activeTab === 'embed'     && <EmbedSection     slug={ c.value( 'slug' ) } /> }
             </main>
@@ -1311,24 +1332,26 @@ function GoalSection( { settings, setSettings } ) {
                 __nextHasNoMarginBottom
             />
             { goal.type === 'amount' && (
-                <TextControl
+                <BaseControl
+                    id="dono-form-goal-amount"
                     label={ __( 'Target amount', 'dono' ) }
-                    type="number"
-                    min={ 0 }
-                    step="1"
-                    value={ String( ( Number( goal.amount_cents ) || 0 ) / 100 || '' ) }
-                    onChange={ ( v ) => {
-                        const major = Number( v );
-                        setSettings( { goal: {
+                    help={ __( 'In the currency this form uses.', 'dono' ) }
+                    __nextHasNoMarginBottom
+                >
+                    <AmountInput
+                        value={ ( Number( goal.amount_cents ) || 0 ) / 100 }
+                        onChange={ ( major ) => setSettings( { goal: {
                             ...goal,
                             type:         'amount',
                             amount_cents: Number.isFinite( major ) && major > 0 ? Math.round( major * 100 ) : 0,
                             count:        0,
-                        } } );
-                    } }
-                    help={ __( 'In the currency this form uses.', 'dono' ) }
-                    __nextHasNoMarginBottom
-                />
+                        } } ) }
+                        currency={ defaultCurrency() }
+                        min={ 0 }
+                        placeholder="0"
+                        inputProps={ { id: 'dono-form-goal-amount' } }
+                    />
+                </BaseControl>
             ) }
             { ( goal.type === 'donations' || goal.type === 'donors' ) && (
                 <TextControl
@@ -1377,12 +1400,14 @@ function ContainerSection( { settings, setSettings } ) {
     );
 }
 
-function GatewaysSection( { gateways, settings, setSettings, blocks = '' } ) {
+function GatewaysSection( { gateways, settings, setSettings, blocks = [] } ) {
     // The payment-gateways block is the single writer of the allowed list on
     // save (FormService::syncGatewayAllowed). When the block is on the form,
     // editing the checkboxes here would be silently overwritten on save, so
     // we surface that and disable the controls instead of pretending otherwise.
-    const blockManaged = /<!--\s*wp:dono\/payment-gateways\b/.test( blocks );
+    // Read the live editor blocks so adding/removing the block reflects here
+    // immediately; the saved markup lags behind until the next save.
+    const blockManaged = blocksInclude( blocks, 'dono/payment-gateways' );
 
     const toggleGateway = ( id ) => {
         const current = settings.gateways.allowed || [];

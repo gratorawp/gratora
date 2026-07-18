@@ -1,5 +1,6 @@
 import { __ } from '@wordpress/i18n';
 
+import { tablistKeyDown } from '../../_shared/tablistKeys';
 import { IconBars, IconHeart, IconRotate, IconFile, IconNote, IconShield } from './icons';
 
 const TAB_DEFS = [
@@ -13,13 +14,19 @@ const TAB_DEFS = [
 
 export default function Tabs( { active, onChange, counts = {}, dots = {} } ) {
     return (
-        <nav className="dp-tabs" role="tablist" aria-label={ __( 'Donor sections', 'dono' ) }>
+        <nav
+            className="dp-tabs"
+            role="tablist"
+            aria-label={ __( 'Donor sections', 'dono' ) }
+            onKeyDown={ ( e ) => tablistKeyDown( e, TAB_DEFS.map( ( d ) => d.id ), active, onChange ) }
+        >
             { TAB_DEFS.map( ( t ) => (
                 <a
                     key={ t.id }
                     href={ `#${ t.id }` }
                     role="tab"
                     aria-selected={ active === t.id }
+                    tabIndex={ active === t.id ? 0 : -1 }
                     className={ active === t.id ? 'is-active' : '' }
                     onClick={ ( e ) => { e.preventDefault(); onChange( t.id ); } }
                 >

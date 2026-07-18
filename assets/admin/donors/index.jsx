@@ -14,6 +14,7 @@ import Toaster from '../_shared/components/Toaster';
 import EmptyState from '../_shared/components/EmptyState';
 import ConfirmDialog from '../_shared/components/ConfirmDialog';
 import { rowLinkProps } from '../_shared/rowLink';
+import { tablistKeyDown } from '../_shared/tablistKeys';
 import KpiStrip from '../_shared/components/KpiStrip';
 import { formatAmount, formatDate, timeAgo } from '../_shared/format';
 import { COUNTRIES } from '../../_shared/countries';
@@ -354,11 +355,17 @@ function IconInsights() {
 
 function ViewToggle( { active, onChange } ) {
     return (
-        <div className="dono-view-toggle" role="tablist" aria-label={ __( 'Donor sections', 'dono' ) }>
+        <div
+            className="dono-view-toggle"
+            role="tablist"
+            aria-label={ __( 'Donor sections', 'dono' ) }
+            onKeyDown={ ( e ) => tablistKeyDown( e, [ 'list', 'insights' ], active, onChange ) }
+        >
             <button
                 type="button"
                 role="tab"
                 aria-selected={ active === 'list' }
+                tabIndex={ active === 'list' ? 0 : -1 }
                 className={ `dono-cmp-toggle${ active === 'list' ? ' is-active' : '' }` }
                 onClick={ () => onChange( 'list' ) }
             >
@@ -369,6 +376,7 @@ function ViewToggle( { active, onChange } ) {
                 type="button"
                 role="tab"
                 aria-selected={ active === 'insights' }
+                tabIndex={ active === 'insights' ? 0 : -1 }
                 className={ `dono-cmp-toggle${ active === 'insights' ? ' is-active' : '' }` }
                 onClick={ () => onChange( 'insights' ) }
             >

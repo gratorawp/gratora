@@ -130,7 +130,7 @@ function LtvHistogram( { buckets } ) {
             { buckets.map( ( b, i ) => {
                 const h = ( b.donor_count / max ) * 100;
                 return (
-                    <div key={ i } className="dono-ltv-hist__col" title={ `${ b.donor_count } ${ __( 'donors', 'dono' ) }` }>
+                    <div key={ b.min_cents } className="dono-ltv-hist__col" title={ `${ b.donor_count } ${ __( 'donors', 'dono' ) }` }>
                         <div className="dono-ltv-hist__bar-wrap">
                             <div className="dono-ltv-hist__bar" style={ { height: `${ Math.max( h, 2 ) }%` } } />
                         </div>

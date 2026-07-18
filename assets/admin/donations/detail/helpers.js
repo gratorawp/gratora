@@ -1,7 +1,7 @@
 // Money in minor units; REST dates are MySQL strings needing the T separator.
 import { __, sprintf } from '@wordpress/i18n';
 
-export { formatAmount, formatAmountCompact } from '../../_shared/format';
+export { formatAmount, formatAmountCompact, currencyDecimals } from '../../_shared/format';
 
 export function formatDateTime( iso ) {
     if ( ! iso ) return '-';

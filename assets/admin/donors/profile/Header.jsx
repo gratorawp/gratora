@@ -98,7 +98,7 @@ export default function Header( { donor, lifetime, banners, recurring, magicLink
 
             { banners?.map( ( b, i ) => (
                 <Banner
-                    key={ i }
+                    key={ b.kind }
                     kind={ b.kind }
                     message={ b.message }
                     onAction={ b.kind === 'past_due' && onTabSwitch ? () => onTabSwitch( 'recurring' ) : null }

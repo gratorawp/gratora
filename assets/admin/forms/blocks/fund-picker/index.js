@@ -154,8 +154,12 @@ function Edit( { attributes, setAttributes } ) {
     const list        = funds || [];
     const visible     = fundIds.length ? filteredList : list;
     const selectable  = visible.filter( ( f ) => f.selectable );
+    const selectableIds = selectable.map( ( f ) => String( f.id ) );
     const emptyChosen = allowEmpty && defaultId === '__none__';
-    const selectedId  = emptyChosen ? '__none__' : ( defaultId || selectable[ 0 ]?.id || '' );
+    // A preselect pointing at a fund outside the offered set falls back to the
+    // first offered fund, matching how the runtime resolves the default.
+    const validDefault = defaultId && selectableIds.includes( String( defaultId ) ) ? defaultId : '';
+    const selectedId  = emptyChosen ? '__none__' : ( validDefault || selectable[ 0 ]?.id || '' );
 
     const toggleFundId = ( id ) => {
         const sid = String( id );
@@ -163,13 +167,23 @@ function Edit( { attributes, setAttributes } ) {
         const next = current.includes( sid )
             ? current.filter( ( x ) => x !== sid )
             : [ ...current, sid ];
-        setAttributes( { fundIds: next.map( ( x ) => parseInt( x, 10 ) ).filter( Boolean ) } );
+        const nextIds = next.map( ( x ) => parseInt( x, 10 ) ).filter( Boolean );
+        const patch = { fundIds: nextIds };
+        // Restricting to a set that no longer offers the preselected fund resets
+        // it to Auto so we never persist a default outside the allowlist.
+        if ( nextIds.length && defaultId && defaultId !== '__none__'
+            && ! nextIds.map( String ).includes( String( defaultId ) ) ) {
+            patch.defaultId = '';
+        }
+        setAttributes( patch );
     };
 
+    // Offer only funds this block actually shows; a restricted set must not let
+    // the admin preselect a fund the donor can't pick.
     const preselectChoices = [
         { value: '', label: __( 'Auto (form, campaign, then org default)', 'dono' ) },
         ...( allowEmpty ? [ { value: '__none__', label: __( 'No specific fund', 'dono' ) } ] : [] ),
-        ...list.map( ( f ) => ( {
+        ...visible.map( ( f ) => ( {
             value:    f.selectable ? String( f.id ) : `g:${ f.id }`,
             label:    f.depth ? `- ${ f.label }` : f.label,
             disabled: ! f.selectable,

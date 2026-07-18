@@ -27,6 +27,7 @@ function buildEvents( { donation, receipts, refunds, notes } ) {
 
     if ( donation.created_at ) {
         events.push( {
+            id:    'created',
             time:  donation.created_at,
             dot:   'is-info',
             title: __( 'Donation created', 'dono' ),
@@ -37,6 +38,7 @@ function buildEvents( { donation, receipts, refunds, notes } ) {
     }
     if ( donation.paid_at ) {
         events.push( {
+            id:    'paid',
             time:  donation.paid_at,
             dot:   'is-ok',
             title: __( 'Payment captured', 'dono' ),
@@ -45,8 +47,9 @@ function buildEvents( { donation, receipts, refunds, notes } ) {
                 : <span style={ { textTransform: 'capitalize' } }>{ donation.gateway }</span>,
         } );
     }
-    ( receipts || [] ).forEach( ( r ) => {
+    ( receipts || [] ).forEach( ( r, ri ) => {
         events.push( {
+            id:    `receipt-${ ri }`,
             time:  r.issued_at,
             dot:   'is-info',
             title: __( 'Receipt issued', 'dono' ),
@@ -54,6 +57,7 @@ function buildEvents( { donation, receipts, refunds, notes } ) {
         } );
         if ( r.voided && r.voided_at ) {
             events.push( {
+                id:    `receipt-void-${ ri }`,
                 time:  r.voided_at,
                 dot:   'is-muted',
                 title: __( 'Receipt voided', 'dono' ),
@@ -61,16 +65,18 @@ function buildEvents( { donation, receipts, refunds, notes } ) {
             } );
         }
     } );
-    ( refunds || [] ).forEach( ( r ) => {
+    ( refunds || [] ).forEach( ( r, ri ) => {
         events.push( {
+            id:    `refund-${ ri }`,
             time:  r.occurred_at,
             dot:   r.status === 'succeeded' ? 'is-warn' : 'is-error',
             title: <>{ __( 'Refund', 'dono' ) } <strong>{ formatAmount( r.amount_cents, r.currency ) }</strong></>,
             sub:   r.reason ? <em>"{ r.reason }"</em> : null,
         } );
     } );
-    ( notes || [] ).forEach( ( n ) => {
+    ( notes || [] ).forEach( ( n, ni ) => {
         events.push( {
+            id:    `note-${ ni }`,
             time:  n.created_at,
             dot:   'is-muted',
             title: __( 'Note added', 'dono' ),
@@ -88,8 +94,8 @@ export default function TimelineCard( props ) {
         <div className="dd-card">
             <div className="dd-card__body">
                 <div className="dd-timeline">
-                    { events.map( ( e, i ) => (
-                        <Row key={ i } time={ e.time } dotCls={ e.dot } title={ e.title } sub={ e.sub } />
+                    { events.map( ( e ) => (
+                        <Row key={ e.id } time={ e.time } dotCls={ e.dot } title={ e.title } sub={ e.sub } />
                     ) ) }
                 </div>
             </div>

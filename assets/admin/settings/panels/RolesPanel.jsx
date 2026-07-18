@@ -38,19 +38,35 @@ const CAP_GROUPS = [
 const ALL_CAPS = CAP_GROUPS.flatMap( ( g ) => g.caps.map( ( c ) => c[ 0 ] ) );
 
 export default function RolesPanel( { s } ) {
-    const [ roles, setRoles ] = useState( null );
+    const [ roles, setRoles ]         = useState( null );
+    const [ loadError, setLoadError ] = useState( false );
 
-    useEffect( () => {
+    const load = () => {
+        setLoadError( false );
         apiFetch( { path: '/dono/v1/admin/roles' } )
             .then( setRoles )
-            .catch( () => setRoles( [] ) );
-    }, [] );
+            .catch( () => setLoadError( true ) );
+    };
+
+    useEffect( () => { load(); }, [] );
 
     const mapping = useMemo( () => {
         const stored = s.value( 'mapping', {} );
         return ( stored && typeof stored === 'object' ) ? stored : {};
     }, [ s.value( 'mapping', {} ) ] );
 
+    if ( loadError ) {
+        return (
+            <div className="dono-panel">
+                <Card>
+                    <p style={ { color: '#b42318', margin: '0 0 12px' } }>
+                        { __( 'Could not load roles.', 'dono' ) }
+                    </p>
+                    <Btn variant="secondary" onClick={ load }>{ __( 'Retry', 'dono' ) }</Btn>
+                </Card>
+            </div>
+        );
+    }
     if ( ! roles ) return <p>{ __( 'Loading…', 'dono' ) }</p>;
 
     // s.replace, not s.edit: deep merge would re-add cleared caps.

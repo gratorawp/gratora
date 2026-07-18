@@ -45,6 +45,7 @@ export default function List() {
     const load = useCallback( () => {
         let aborted = false;
         setLoading( true );
+        setError( null );
 
         apiFetch( {
             path:  addQueryArgs( '/dono/v1/admin/campaigns', {

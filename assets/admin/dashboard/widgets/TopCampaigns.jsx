@@ -5,7 +5,7 @@ import EmptyState from '../../_shared/components/EmptyState';
 import { formatAmount, detailHref } from '../../_shared/format';
 
 function Sparkline( { points = [], color = '#1e8a4e' } ) {
-    if ( points.length === 0 ) return null;
+    if ( ! points || points.length === 0 ) return null;
     const w = 80, h = 22;
     const max = Math.max( 1, ...points.map( ( p ) => p.amount_cents ) );
     const stepX = points.length > 1 ? w / ( points.length - 1 ) : w;

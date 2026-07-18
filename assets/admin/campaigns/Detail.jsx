@@ -352,6 +352,7 @@ function statusPillClass( status ) {
 function HeaderMenu( { campaign, onAction } ) {
     const [ open, setOpen ] = useState( false );
     const ref = useRef( null );
+    const triggerRef = useRef( null );
 
     useEffect( () => {
         if ( ! open ) return undefined;
@@ -360,16 +361,36 @@ function HeaderMenu( { campaign, onAction } ) {
         return () => document.removeEventListener( 'mousedown', close );
     }, [ open ] );
 
-    const fire = ( name ) => { setOpen( false ); onAction?.( name ); };
+    const fire = ( name ) => { setOpen( false ); triggerRef.current?.focus(); onAction?.( name ); };
     const isArchived  = campaign.status === 'archived';
     const isDraft     = campaign.status === 'draft';
     const isPublished = campaign.status === 'published';
 
+    const onKeyDown = ( e ) => {
+        if ( ! open ) return;
+        if ( e.key === 'Escape' ) {
+            setOpen( false );
+            triggerRef.current?.focus();
+            return;
+        }
+        if ( e.key !== 'ArrowDown' && e.key !== 'ArrowUp' ) return;
+        e.preventDefault();
+        const items = Array.from( ref.current?.querySelectorAll( '.dono-menu__item' ) || [] );
+        if ( ! items.length ) return;
+        const idx  = items.indexOf( document.activeElement );
+        const next = e.key === 'ArrowDown'
+            ? ( idx + 1 ) % items.length
+            : ( idx <= 0 ? items.length - 1 : idx - 1 );
+        items[ next ].focus();
+    };
+
     return (
-        <div className="dono-menu" ref={ ref }>
+        <div className="dono-menu" ref={ ref } onKeyDown={ onKeyDown }>
             <button
                 type="button"
+                ref={ triggerRef }
                 className="dono-menu__trigger"
+                aria-label={ __( 'Campaign actions', 'dono' ) }
                 aria-haspopup="menu"
                 aria-expanded={ open }
                 onClick={ () => setOpen( ( v ) => ! v ) }
@@ -379,22 +400,22 @@ function HeaderMenu( { campaign, onAction } ) {
             { open && (
                 <div className="dono-menu__list" role="menu">
                     { isDraft && (
-                        <button type="button" className="dono-menu__item is-primary" onClick={ () => fire( 'publish' ) }>
+                        <button type="button" role="menuitem" className="dono-menu__item is-primary" onClick={ () => fire( 'publish' ) }>
                             { __( 'Publish campaign', 'dono' ) }
                         </button>
                     ) }
                     { isPublished && (
-                        <button type="button" className="dono-menu__item" onClick={ () => fire( 'unpublish' ) }>
+                        <button type="button" role="menuitem" className="dono-menu__item" onClick={ () => fire( 'unpublish' ) }>
                             { __( 'Move to draft', 'dono' ) }
                         </button>
                     ) }
-                    <button type="button" className="dono-menu__item" onClick={ () => fire( 'duplicate' ) }>
+                    <button type="button" role="menuitem" className="dono-menu__item" onClick={ () => fire( 'duplicate' ) }>
                         { __( 'Duplicate campaign', 'dono' ) }
                     </button>
-                    <button type="button" className="dono-menu__item" onClick={ () => fire( isArchived ? 'unarchive' : 'archive' ) }>
+                    <button type="button" role="menuitem" className="dono-menu__item" onClick={ () => fire( isArchived ? 'unarchive' : 'archive' ) }>
                         { isArchived ? __( 'Restore to draft', 'dono' ) : __( 'Archive campaign', 'dono' ) }
                     </button>
-                    <button type="button" className="dono-menu__item is-danger" onClick={ () => fire( 'delete' ) }>
+                    <button type="button" role="menuitem" className="dono-menu__item is-danger" onClick={ () => fire( 'delete' ) }>
                         { __( 'Delete…', 'dono' ) }
                     </button>
                 </div>
@@ -1262,10 +1283,12 @@ function SettingsTab( { campaign, onError } ) {
     const [ forms, setForms ]   = useState( [] );
 
     useEffect( () => {
-        apiFetch( { path: '/dono/v1/admin/campaigns/funds' } ).then( setFunds ).catch( () => {} );
+        apiFetch( { path: '/dono/v1/admin/campaigns/funds' } )
+            .then( setFunds )
+            .catch( () => onError?.( __( 'Could not load funds.', 'dono' ) ) );
         apiFetch( { path: `/dono/v1/admin/forms?campaign_id=${ campaign.id }&per_page=100` } )
             .then( ( res ) => setForms( Array.isArray( res ) ? res : ( res?.items || [] ) ) )
-            .catch( () => {} );
+            .catch( () => onError?.( __( 'Could not load forms.', 'dono' ) ) );
     }, [ campaign.id ] );
 
     // Warn before leaving the page if there are unsaved edits.
@@ -1921,13 +1944,5 @@ function StatusPillGroup( { value, onChange } ) {
                 </button>
             ) ) }
         </div>
-    );
-}
-
-function ThemeButtonPreview( { color, label } ) {
-    return (
-        <span className="dono-theme-preview" style={ { background: color } }>
-            { label || __( 'Donate', 'dono' ) }
-        </span>
     );
 }

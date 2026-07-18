@@ -3,6 +3,7 @@ import { __, sprintf, _n } from '@wordpress/i18n';
 
 import Toaster from '../_shared/components/Toaster';
 import { notify } from '../_shared/notify';
+import { tablistKeyDown } from '../_shared/tablistKeys';
 
 import { useDonoSettings } from '../_shared/useDonoSettings';
 import { useFxRates } from '../_shared/useFxRates';
@@ -198,7 +199,12 @@ export default function Settings() {
                 </div>
             </div>
 
-            <nav className="dono-tabs" role="tablist" aria-label={ __( 'Settings sections', 'dono' ) }>
+            <nav
+                className="dono-tabs"
+                role="tablist"
+                aria-label={ __( 'Settings sections', 'dono' ) }
+                onKeyDown={ ( e ) => tablistKeyDown( e, TABS.map( ( t ) => t.key ), tab, jumpTo ) }
+            >
                 <div className="dono-tabs__scroll">
                     { TABS.map( ( t ) => {
                         const active   = tab === t.key;
@@ -210,6 +216,7 @@ export default function Settings() {
                                 href={ `#${ t.key }` }
                                 role="tab"
                                 aria-selected={ active }
+                                tabIndex={ active ? 0 : -1 }
                                 className={ active ? 'is-active' : '' }
                                 onClick={ ( e ) => { e.preventDefault(); jumpTo( t.key ); } }
                             >

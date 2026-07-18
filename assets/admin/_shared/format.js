@@ -9,6 +9,7 @@ export {
     numberFormat,
     formatAmount,
     formatAmountCompact,
+    currencyDecimals,
     groupDigits,
     formatDate,
     timeAgo,

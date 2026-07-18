@@ -16,6 +16,7 @@ const RECALC_SCOPES = [
 
 export default function AdvancedPanel( { s } ) {
     const [ info, setInfo ]           = useState( null );
+    const [ infoError, setInfoError ] = useState( false );
     const [ notice,    setNotice ]    = useState( null );
     const [ exporting, setExporting ] = useState( false );
     const [ importing, setImporting ] = useState( false );
@@ -23,11 +24,14 @@ export default function AdvancedPanel( { s } ) {
     const [ recalcRunning, setRecalcRunning ] = useState( false );
     const [ recalcResult, setRecalcResult ]   = useState( null );
 
-    useEffect( () => {
+    const loadInfo = () => {
+        setInfoError( false );
         apiFetch( { path: '/dono/v1/admin/advanced/info' } )
             .then( setInfo )
-            .catch( () => setInfo( null ) );
-    }, [] );
+            .catch( () => setInfoError( true ) );
+    };
+
+    useEffect( () => { loadInfo(); }, [] );
 
     const doExport = async () => {
         setExporting( true );
@@ -102,7 +106,12 @@ export default function AdvancedPanel( { s } ) {
                 title={ __( 'System info', 'dono' ) }
                 sub={ __( 'Useful when reporting an issue.', 'dono' ) }
             >
-                { ! info ? <p>{ __( 'Loading...', 'dono' ) }</p> : (
+                { infoError ? (
+                    <div style={ { display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' } }>
+                        <p style={ { color: '#b42318', margin: 0 } }>{ __( 'Could not load system info.', 'dono' ) }</p>
+                        <Btn variant="secondary" onClick={ loadInfo }>{ __( 'Retry', 'dono' ) }</Btn>
+                    </div>
+                ) : ! info ? <p>{ __( 'Loading...', 'dono' ) }</p> : (
                     <div className="dono-advanced-info">
                         <div><dt>{ __( 'Dono version', 'dono' ) }</dt><dd>{ info.version }</dd></div>
                         <div><dt>{ __( 'PHP version', 'dono' ) }</dt><dd>{ info.php }</dd></div>

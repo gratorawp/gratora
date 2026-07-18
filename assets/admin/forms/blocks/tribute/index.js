@@ -91,14 +91,19 @@ function Edit( { attributes, setAttributes } ) {
                             <span
                                 className="dono-preset-row__drag"
                                 draggable
+                                tabIndex={ 0 }
                                 onDragStart={ ( e ) => {
                                     e.dataTransfer.effectAllowed = 'move';
                                     try { e.dataTransfer.setData( 'text/plain', String( i ) ); } catch ( _e ) {}
                                     setDragIndex( i );
                                 } }
                                 onDragEnd={ () => setDragIndex( null ) }
+                                onKeyDown={ ( e ) => {
+                                    if ( e.key === 'ArrowUp' )   { e.preventDefault(); reorder( i, i - 1 ); }
+                                    if ( e.key === 'ArrowDown' ) { e.preventDefault(); reorder( i, i + 1 ); }
+                                } }
                                 role="button"
-                                aria-label={ __( 'Drag to reorder', 'dono' ) }
+                                aria-label={ __( 'Drag to reorder, or use the arrow keys', 'dono' ) }
                                 title={ __( 'Drag to reorder', 'dono' ) }
                             >
                                 ⠿

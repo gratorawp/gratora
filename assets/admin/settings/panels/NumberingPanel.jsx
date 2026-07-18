@@ -59,19 +59,23 @@ export default function NumberingPanel( { s } ) {
 
     // Live counters (next value per scope) live outside the settings option, so
     // they are fetched and written through their own endpoint.
-    const [ counters, setCounters ] = useState( null );
-    const [ drafts, setDrafts ]     = useState( {} );
-    const [ busy, setBusy ]         = useState( '' );
-    const [ confirm, setConfirm ]   = useState( null );
+    const [ counters, setCounters ]   = useState( null );
+    const [ drafts, setDrafts ]       = useState( {} );
+    const [ busy, setBusy ]           = useState( '' );
+    const [ confirm, setConfirm ]     = useState( null );
+    const [ loadError, setLoadError ] = useState( false );
 
-    useEffect( () => {
+    const loadCounters = () => {
+        setLoadError( false );
         apiFetch( { path: '/dono/v1/admin/numbering/counters' } )
             .then( ( data ) => {
                 setCounters( data || {} );
                 setDrafts( data || {} );
             } )
-            .catch( () => setCounters( {} ) );
-    }, [] );
+            .catch( () => { setCounters( null ); setLoadError( true ); } );
+    };
+
+    useEffect( () => { loadCounters(); }, [] );
 
     const setDraft = ( key, v ) => setDrafts( ( prev ) => ( { ...prev, [ key ]: v } ) );
 
@@ -238,7 +242,14 @@ export default function NumberingPanel( { s } ) {
                         { __( 'You have unsaved format changes above. Previews here use the saved format, so save first if you want new references to use the updated format.', 'dono' ) }
                     </p>
                 ) }
-                { counters === null ? (
+                { loadError ? (
+                    <div style={ { display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' } }>
+                        <p style={ { color: '#b42318', margin: 0 } }>
+                            { __( 'Could not load the current counters.', 'dono' ) }
+                        </p>
+                        <Btn variant="secondary" onClick={ loadCounters }>{ __( 'Retry', 'dono' ) }</Btn>
+                    </div>
+                ) : counters === null ? (
                     <p style={ { color: '#6b7280' } }>{ __( 'Loading…', 'dono' ) }</p>
                 ) : (
                     SCOPES.map( ( p ) => {

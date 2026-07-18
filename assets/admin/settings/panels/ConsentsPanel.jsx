@@ -88,7 +88,7 @@ export default function ConsentsPanel( { s } ) {
                 ) }
 
                 { list.map( ( p, i ) => (
-                    <div key={ i } className="dono-consent-card">
+                    <div key={ p.key } className="dono-consent-card">
                         <header className="dono-consent-card__head">
                             <input
                                 className="dono-input dono-consent-card__label"

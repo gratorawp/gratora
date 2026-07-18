@@ -9,7 +9,7 @@ import { formatDateTime, timeAgo, initials } from '../helpers';
 import { IconTrash } from '../icons';
 
 export default function NotesTab( { donorId, notes: initialNotes, onChanged } ) {
-    const [ notes, setNotes ] = useState( initialNotes );
+    const [ notes, setNotes ] = useState( initialNotes || [] );
     const [ body, setBody ]   = useState( '' );
     const [ saving, setSaving ] = useState( false );
     const [ error, setError ]   = useState( null );

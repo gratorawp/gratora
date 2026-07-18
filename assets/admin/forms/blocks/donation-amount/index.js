@@ -9,11 +9,15 @@ import AmountInput from '../../../_shared/components/AmountInput';
 
 const NAME = 'dono/donation-amount';
 
+// Stable per-row id so React keys survive reorder/delete instead of tracking
+// array position. Persisted in attributes; the server normaliser ignores it.
+const uid = () => Math.random().toString( 36 ).slice( 2, 9 );
+
 const DEFAULT_PRESETS = [
-    { cents: 1000,  impact: '', preselected: false },
-    { cents: 2500,  impact: '', preselected: false },
-    { cents: 5000,  impact: '', preselected: false },
-    { cents: 10000, impact: '', preselected: false },
+    { id: 'preset-1', cents: 1000,  impact: '', preselected: false },
+    { id: 'preset-2', cents: 2500,  impact: '', preselected: false },
+    { id: 'preset-3', cents: 5000,  impact: '', preselected: false },
+    { id: 'preset-4', cents: 10000, impact: '', preselected: false },
 ];
 
 function normalizePresets( presets ) {
@@ -21,6 +25,7 @@ function normalizePresets( presets ) {
     return presets.map( ( p ) => {
         if ( typeof p === 'number' ) return { cents: Math.max( 0, p ), impact: '', preselected: false };
         return {
+            id:      p?.id,
             cents:   Math.max( 0, Number( p?.cents ) || 0 ),
             impact:  String( p?.impact || '' ),
             preselected: !! p?.preselected,
@@ -48,7 +53,7 @@ function Edit( { attributes, setAttributes, clientId } ) {
     const addPreset = () => {
         const lastCents = presets.length ? presets[ presets.length - 1 ].cents : 0;
         const nextCents = lastCents > 0 ? lastCents * 2 : 1000;
-        setAttributes( { presets: [ ...presets, { cents: nextCents, impact: '', preselected: false } ] } );
+        setAttributes( { presets: [ ...presets, { id: uid(), cents: nextCents, impact: '', preselected: false } ] } );
     };
 
     const removePreset = ( i ) => {
@@ -114,7 +119,7 @@ function Edit( { attributes, setAttributes, clientId } ) {
 
                     { presets.map( ( p, i ) => (
                         <div
-                            key={ i }
+                            key={ p.id || i }
                             className={ `dono-preset-row${ dragIndex === i ? ' is-dragging' : '' }` }
                             onDragOver={ ( e ) => e.preventDefault() }
                             onDrop={ () => { reorder( dragIndex, i ); setDragIndex( null ); } }
@@ -122,14 +127,19 @@ function Edit( { attributes, setAttributes, clientId } ) {
                             <span
                                 className="dono-preset-row__drag"
                                 draggable
+                                tabIndex={ 0 }
                                 onDragStart={ ( e ) => {
                                     e.dataTransfer.effectAllowed = 'move';
                                     try { e.dataTransfer.setData( 'text/plain', String( i ) ); } catch ( _e ) {}
                                     setDragIndex( i );
                                 } }
                                 onDragEnd={ () => setDragIndex( null ) }
+                                onKeyDown={ ( e ) => {
+                                    if ( e.key === 'ArrowUp' )   { e.preventDefault(); reorder( i, i - 1 ); }
+                                    if ( e.key === 'ArrowDown' ) { e.preventDefault(); reorder( i, i + 1 ); }
+                                } }
                                 role="button"
-                                aria-label={ __( 'Drag to reorder', 'dono' ) }
+                                aria-label={ __( 'Drag to reorder, or use the arrow keys', 'dono' ) }
                                 title={ __( 'Drag to reorder', 'dono' ) }
                             >
                                 ⠿
@@ -139,8 +149,8 @@ function Edit( { attributes, setAttributes, clientId } ) {
                                 className="dono-preset-row__radio"
                                 name={ `dono-amount-highlight-${ clientId }` }
                                 checked={ !! p.preselected }
-                                onClick={ () => setPreselected( i ) }
-                                onChange={ () => {} }
+                                onChange={ () => setPreselected( i ) }
+                                onClick={ () => { if ( p.preselected ) setPreselected( i ); } }
                                 aria-label={ __( 'Preselect this amount', 'dono' ) }
                                 title={ __( 'Preselect this amount', 'dono' ) }
                             />
@@ -185,7 +195,7 @@ function Edit( { attributes, setAttributes, clientId } ) {
                             || ( i === 0 && ! presets.some( ( x ) => x && x.preselected ) );
                         return (
                         <div
-                            key={ i }
+                            key={ p.id || i }
                             style={ {
                                 padding:      '10px 12px',
                                 background:   '#f0f0f1',
@@ -249,12 +259,7 @@ export default function register( api ) {
         icon:       BlockIcons[ 'donation-amount' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },
         attributes: {
-            presets:     { type: 'array', default: [
-                { cents: 1000,  impact: '' },
-                { cents: 2500,  impact: '' },
-                { cents: 5000,  impact: '' },
-                { cents: 10000, impact: '' },
-            ] },
+            presets:     { type: 'array', default: DEFAULT_PRESETS },
             allowCustom:      { type: 'boolean', default: true },
             currency:         { type: 'string',  default: '' },
             donationType:     { type: 'string',  default: 'multi' },
