@@ -117,9 +117,13 @@ final class RecurringPlanRepository
         ";
 
         // Exclude test-mode plans from the live MRR widget.
+        // interval_count = 0 would be excluded from mrrExpr (NULLIF guard) but
+        // still counted, so active_count and MRR would disagree; drop such
+        // malformed plans from both.
         $active = DB::table('dono_recurring_plans')
             ->where('status', 'active')
             ->where('is_test', 0)
+            ->where('interval_count', 0, '>')
             ->selectRaw("COUNT(*) AS cnt, COALESCE({$mrrExpr}, 0) AS mrr, COALESCE(AVG({$amt}), 0) AS avg_amount")
             ->get();
 

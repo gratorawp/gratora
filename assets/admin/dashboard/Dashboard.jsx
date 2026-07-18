@@ -12,6 +12,7 @@ import SectionBar from '../_shared/widgets/SectionBar';
 import RevenueChart from '../_shared/widgets/RevenueChart';
 import ChannelBreakdown from '../_shared/widgets/ChannelBreakdown';
 import { useDonoLayout } from '../_shared/widgets/useDonoLayout';
+import { defaultCurrency } from '../_shared/format';
 
 import KpiRow from './widgets/KpiRow';
 import ActiveCampaigns from './widgets/ActiveCampaigns';
@@ -86,7 +87,7 @@ export default function Dashboard() {
     const rangeIsComparable = range !== 'all-time' && range !== 'today';
 
     const compareOn = compareMode !== 'none' && rangeIsComparable;
-    const currency = m.kpi?.currency || 'USD';
+    const currency = m.kpi?.currency || defaultCurrency();
 
     const registry = {
         today: {

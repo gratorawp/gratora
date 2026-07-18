@@ -124,8 +124,10 @@ final class DashboardMetricsService
             }
         }
 
+        // Both full and partial refunds stamp refunded_at; counting only
+        // 'refunded' misses partial refunds issued in the window.
         $refunds = DonationQueries::live(Donation::query())
-            ->where('status', 'refunded')
+            ->whereIn('status', ['refunded', 'partial_refund'])
             ->where('refunded_at', $since, '>=')
             ->count();
 
@@ -313,12 +315,15 @@ final class DashboardMetricsService
             ];
         }
 
-        // 2. Campaigns ending within 7 days.
-        $soonEnd = $this->clock->now()->modify('+7 days')->format('Y-m-d');
-        $today   = $this->clock->now()->format('Y-m-d');
+        // 2. Campaigns ending within 7 days. ends_at is a datetime, so bound on
+        // the full second range: from now (not midnight, else campaigns that
+        // already ended earlier today still match) to end-of-day 7 days out (not
+        // 00:00:00, else campaigns ending later on the 7th day are missed).
+        $now     = $this->clock->now()->format('Y-m-d H:i:s');
+        $soonEnd = $this->clock->now()->modify('+7 days')->format('Y-m-d 23:59:59');
         $ending  = Campaign::query()
             ->where('status', 'published')
-            ->where('ends_at', $today, '>=')
+            ->where('ends_at', $now, '>=')
             ->where('ends_at', $soonEnd, '<=')
             ->getAll();
         foreach ($ending as $c) {
@@ -500,7 +505,9 @@ final class DashboardMetricsService
             $out[] = [
                 'id'              => (int) $campaign->id,
                 'title'           => (string) $campaign->title,
-                'currency'        => (string) $campaign->currency,
+                // Raised is summed in the org base currency, so label it that way
+                // (a per-campaign currency would mis-symbol a base-currency value).
+                'currency'        => Money::defaultCurrency(),
                 'amount_cents'    => $row['amount_cents'],
                 'donations_count' => $row['donations_count'],
                 'sparkline'       => $sparkline,
@@ -570,7 +577,7 @@ final class DashboardMetricsService
                 'title'              => (string) $c->title,
                 'slug'               => (string) $c->slug,
                 'status'             => (string) $c->status,
-                'currency'           => (string) $c->currency,
+                'currency'           => Money::defaultCurrency(),
                 'goal_type'          => $c->goal_type ?: 'amount',
                 'goal_cents'         => $c->goal_cents,
                 'goal_count'         => $c->goal_count,
