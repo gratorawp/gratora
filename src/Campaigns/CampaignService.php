@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Dono\Campaigns;
 
+use Dono\Donations\Donation;
 use Dono\Forms\Form;
 use Dono\Forms\FormService;
 use Dono\Foundation\Helpers\Money;
 use Dono\Foundation\Time\Clock;
+use Dono\Recurring\RecurringPlan;
 use InvalidArgumentException;
 use Dono\Vendor\Queryable\DB;
 use RuntimeException;
@@ -204,6 +206,18 @@ final class CampaignService
 
     public function delete(Campaign $campaign): void
     {
+        // A campaign with donations (or recurring plans) is never hard-deleted:
+        // its donation rows would be orphaned against a missing campaign_id,
+        // losing that campaign's reporting. Archive keeps the records instead.
+        // Mirrors FundService::delete's reference guard.
+        $donations = (int) Donation::query()->where('campaign_id', $campaign->id)->count();
+        $plans     = (int) RecurringPlan::query()->where('campaign_id', $campaign->id)->count();
+        if ($donations > 0 || $plans > 0) {
+            throw new RuntimeException(
+                __('This campaign has donations and cannot be deleted. Archive it instead to keep its records.', 'dono')
+            );
+        }
+
         // WP post deletion is not transactional; done first so the
         // `before_delete_post` hook can re-sync if the campaign-row delete fails.
         if ($campaign->page_id) {
