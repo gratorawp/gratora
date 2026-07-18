@@ -347,7 +347,7 @@ final class FormReadinessService
         foreach ($blocks as $b) {
             if (! is_array($b)) continue;
             if (($b['blockName'] ?? null) === 'dono/recurring-toggle') {
-                $freqs = Blocks\RecurringToggleBlock::normalizeFrequencies($b['attrs']['frequencies'] ?? []);
+                $freqs = Blocks\RecurringToggleBlock::normalizeFrequencies($b['attrs']['frequencies'] ?? Blocks\RecurringToggleBlock::DEFAULT_FREQUENCIES);
                 if (! in_array('one-time', $freqs, true) && ! empty($freqs)) {
                     array_unshift($freqs, 'one-time');
                 }

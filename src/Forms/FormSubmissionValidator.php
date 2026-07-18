@@ -228,7 +228,11 @@ final class FormSubmissionValidator
                 break;
 
             case 'dono/recurring-toggle':
-                $freqs = RecurringToggleBlock::normalizeFrequencies($attrs['frequencies'] ?? []);
+                // Gutenberg omits an attribute equal to its registered default,
+                // so an absent frequencies key means the default set, not none -
+                // must match the renderer's fallback or offered frequencies are
+                // rejected on submit.
+                $freqs = RecurringToggleBlock::normalizeFrequencies($attrs['frequencies'] ?? RecurringToggleBlock::DEFAULT_FREQUENCIES);
                 if (! in_array('one-time', $freqs, true) && ! empty($freqs)) {
                     array_unshift($freqs, 'one-time');
                 }

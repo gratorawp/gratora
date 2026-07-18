@@ -93,6 +93,29 @@ BLOCKS;
         $this->assertNotNull($this->validator()->validate($this->form($blocks), $base + ['frequency' => 'yearly']));
     }
 
+    public function test_default_recurring_toggle_accepts_the_frequencies_it_offers(): void
+    {
+        // Gutenberg omits `frequencies` when it equals the block default, so a
+        // default-configured toggle serialises with no attrs. The validator
+        // must still offer one-time + monthly, matching what the form renders.
+        $blocks = <<<BLOCKS
+<!-- wp:dono/donation-amount {"presets":[{"cents":2500}]} /-->
+<!-- wp:dono/email {"required":true} /-->
+<!-- wp:dono/recurring-toggle /-->
+<!-- wp:dono/submit-button /-->
+BLOCKS;
+        $base = ['amount_cents' => 2500, 'custom' => [], 'consents' => []];
+
+        $this->assertNull(
+            $this->validator()->validate($this->form($blocks), $base + ['frequency' => 'monthly']),
+            'a default recurring-toggle must accept the monthly donation it offers'
+        );
+        $this->assertNotNull(
+            $this->validator()->validate($this->form($blocks), $base + ['frequency' => 'yearly']),
+            'a frequency outside the default set is still rejected'
+        );
+    }
+
     public function test_required_field_hidden_by_its_condition_is_not_enforced(): void
     {
         $blocks = <<<BLOCKS
