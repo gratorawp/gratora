@@ -186,6 +186,13 @@ final class DonorsController
         if (! $donor) {
             return new WP_Error('dono_not_found', __('Donor not found.', 'dono'), ['status' => 404]);
         }
+        // A redacted donor is erased: this handler writes name/company/country
+        // via a direct UPDATE and phone/address via setEncryptedField, none of
+        // which pass through DonorService::editProfile's guard, so block the
+        // whole edit here or those writes would re-populate the erased row.
+        if ($donor->redacted_at !== null) {
+            return new WP_Error('dono_donor_redacted', __('This donor has been erased and can no longer be edited.', 'dono'), ['status' => 422]);
+        }
 
         // Explicit edit: present keys set the value, empty string clears to NULL.
         // Direct UPDATE because model save() drops NULLs via array_filter.

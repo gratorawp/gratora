@@ -396,6 +396,9 @@ final class DonorService
     /** Encrypts and persists a value into an encrypted donor column. Null/empty clears it. */
     public function setEncryptedField(Donor $donor, string $field, ?string $value): void
     {
+        if ($donor->redacted_at !== null) {
+            throw new InvalidArgumentException(__('This donor has been erased and can no longer be edited.', 'dono'));
+        }
         if (! in_array($field, ['phone_encrypted', 'address_encrypted', 'notes_encrypted', 'tax_id_encrypted'], true)) {
             throw new InvalidArgumentException("Unsupported encrypted field: {$field}");
         }

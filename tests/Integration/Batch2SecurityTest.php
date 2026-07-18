@@ -98,6 +98,29 @@ final class Batch2SecurityTest extends IntegrationTestCase
         $svc->editProfile($donor, ['first_name' => 'Hacker']);
     }
 
+    public function test_admin_edit_endpoint_cannot_repopulate_a_redacted_donor(): void
+    {
+        // The admin PATCH handler writes name/company via a direct UPDATE and
+        // phone/address via setEncryptedField, bypassing editProfile - so the
+        // redacted guard has to live on that path too.
+        $svc   = \Dono\Foundation\Plugin::instance()->container->get(DonorService::class);
+        $donor = $svc->findOrCreate('adminedit@example.com', ['first_name' => 'Ada']);
+        $id    = (int) $donor->id;
+        $svc->redact($donor);
+
+        $req = new \WP_REST_Request('PATCH', "/dono/v1/admin/donors/{$id}");
+        $req->set_header('content-type', 'application/json');
+        $req->set_body((string) wp_json_encode(['first_name' => 'Hacker', 'phone' => '+15550001234']));
+        $res = rest_do_request($req);
+
+        $this->assertSame(422, $res->get_status());
+        $this->assertSame('dono_donor_redacted', $res->get_data()['code'] ?? null);
+
+        $fresh = Donor::query()->where('id', $id)->get();
+        $this->assertNull($fresh->first_name, 'the erased row was not re-populated');
+        $this->assertNull($fresh->phone_encrypted, 'no phone written to the erased row');
+    }
+
     public function test_redaction_revokes_outstanding_magic_link_tokens(): void
     {
         $c     = \Dono\Foundation\Plugin::instance()->container;
