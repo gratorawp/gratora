@@ -66,7 +66,9 @@ final class DonationService
         $statusTokenHash = hash('sha256', $rawStatusToken);
 
         DB::transaction(function () use ($intent, $now, $statusTokenHash, &$donation) {
-            $donor = $this->donors->findOrCreate($intent->email, $intent->profile);
+            // A genuine paid donation re-engages a previously-erased donor, so
+            // this is the one path allowed to reactivate a redacted row.
+            $donor = $this->donors->findOrCreate($intent->email, $intent->profile, true);
 
             $donation = Donation::make();
             $donation->reference          = $this->references->next('donation');

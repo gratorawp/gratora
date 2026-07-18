@@ -775,7 +775,7 @@ final class PortalController
     {
         $donorId = $this->session->currentDonorId();
         $donor   = $donorId ? $this->donors->findById($donorId) : null;
-        if (! $donor) return new WP_Error('dono_unauthorized', '', ['status' => 401]);
+        if (! $donor || $donor->redacted_at !== null) return new WP_Error('dono_unauthorized', '', ['status' => 401]);
 
         return new WP_REST_Response([
             'email'      => (string) ($this->donorService->decryptEmail($donor) ?? ''),
@@ -791,7 +791,7 @@ final class PortalController
     {
         $donorId = $this->session->currentDonorId();
         $donor   = $donorId ? $this->donors->findById($donorId) : null;
-        if (! $donor) return new WP_Error('dono_unauthorized', '', ['status' => 401]);
+        if (! $donor || $donor->redacted_at !== null) return new WP_Error('dono_unauthorized', '', ['status' => 401]);
 
         $body  = (array) ($request->get_json_params() ?? []);
         $patch = [];

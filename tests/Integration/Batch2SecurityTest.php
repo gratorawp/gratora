@@ -62,11 +62,40 @@ final class Batch2SecurityTest extends IntegrationTestCase
         $this->assertNotNull($redacted->redacted_at);
         $this->assertNull($svc->decryptEmail($redacted));
 
-        // Same email donates again -> same row, re-activated (one donor per email).
-        $again = $svc->findOrCreate('repeat@example.com', ['first_name' => 'Reed']);
+        // Same email donates again (the donation path passes reactivate=true)
+        // -> same row, re-activated (one donor per email).
+        $again = $svc->findOrCreate('repeat@example.com', ['first_name' => 'Reed'], true);
         $this->assertSame($id, (int) $again->id, 'one donor per email - no second row');
         $this->assertNull($again->redacted_at, 'row is re-activated, not redacted-with-PII');
         $this->assertSame('repeat@example.com', $svc->decryptEmail($again));
+    }
+
+    public function test_bare_lookup_does_not_reactivate_or_repopulate_a_redacted_donor(): void
+    {
+        $svc = \Dono\Foundation\Plugin::instance()->container->get(DonorService::class);
+
+        $donor = $svc->findOrCreate('erased@example.com', ['first_name' => 'Ann']);
+        $id    = (int) $donor->id;
+        $svc->redact($donor);
+
+        // A bare lookup - e.g. the unauthenticated portal register/link request
+        // - must never un-redact the donor or plant PII on the erased row.
+        $again = $svc->findOrCreate('erased@example.com', ['first_name' => 'Mallory']);
+        $this->assertSame($id, (int) $again->id, 'still one donor per email');
+
+        $fresh = Donor::query()->where('id', $id)->get();
+        $this->assertNotNull($fresh->redacted_at, 'the erasure stays intact');
+        $this->assertNull($fresh->first_name, 'no name is planted onto the erased row');
+    }
+
+    public function test_editing_a_redacted_donor_is_rejected(): void
+    {
+        $svc   = \Dono\Foundation\Plugin::instance()->container->get(DonorService::class);
+        $donor = $svc->findOrCreate('noedit@example.com', ['first_name' => 'Nia']);
+        $svc->redact($donor);
+
+        $this->expectException(\InvalidArgumentException::class);
+        $svc->editProfile($donor, ['first_name' => 'Hacker']);
     }
 
     public function test_redaction_revokes_outstanding_magic_link_tokens(): void

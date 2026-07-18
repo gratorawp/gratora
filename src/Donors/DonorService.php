@@ -39,18 +39,22 @@ final class DonorService
      *     donor_type?: 'individual'|'organization'|'household',
      * } $profile
      */
-    public function findOrCreate(string $email, array $profile = []): Donor
+    public function findOrCreate(string $email, array $profile = [], bool $reactivateIfRedacted = false): Donor
     {
         $email = $this->hasher->normalizeEmail($email);
         $hash  = $this->hasher->emailHash($email);
 
         $existing = $this->donors->findByEmailHash($hash);
         if ($existing !== null) {
-            // One donor per email. If the matched donor was redacted, a new
-            // donation means they re-engaged and re-provided their data, so
-            // re-activate the row (restore the encrypted email, clear the
-            // redaction flag) instead of leaving it redacted-with-PII.
+            // One donor per email. Only a genuine new donation re-activates a
+            // redacted donor (restoring the encrypted email + clearing the
+            // flag). A bare lookup - e.g. an unauthenticated portal link
+            // request - must leave the erased row untouched: never un-redact it
+            // and never re-populate PII through refreshProfile below.
             if ($existing->redacted_at !== null) {
+                if (! $reactivateIfRedacted) {
+                    return $existing;
+                }
                 $existing->email_encrypted = $this->crypto->encrypt($email);
                 $existing->redacted_at     = null;
                 $existing->updated_at      = $this->clock->now()->format('Y-m-d H:i:s');
@@ -98,6 +102,9 @@ final class DonorService
      */
     public function editProfile(Donor $donor, array $patch): Donor
     {
+        if ($donor->redacted_at !== null) {
+            throw new InvalidArgumentException(__('This donor has been erased and can no longer be edited.', 'dono'));
+        }
         $changed = false;
         $textFields = ['first_name' => 100, 'last_name' => 100, 'company' => 150, 'locale' => 10];
 
@@ -200,6 +207,9 @@ final class DonorService
     /** Admin-only email change. Recomputes email_hash and email_encrypted. */
     public function changeEmail(Donor $donor, string $newEmail): Donor
     {
+        if ($donor->redacted_at !== null) {
+            throw new InvalidArgumentException(__('This donor has been erased and can no longer be edited.', 'dono'));
+        }
         $normalized = $this->hasher->normalizeEmail($newEmail);
         if ($normalized === '') {
             throw new InvalidArgumentException(__('Email is required.', 'dono'));
