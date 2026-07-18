@@ -276,47 +276,12 @@ final class FormsController
         $settings   = is_array($body['settings'] ?? null) ? $body['settings'] : null;
         $campaignId = isset($body['campaign_id']) ? (int) $body['campaign_id'] : null;
 
+        // $blocks was block-aware sanitized above (kses'd for authors lacking
+        // unfiltered_html), so renderPreview's do_blocks() output is safe to
+        // inline in the standalone preview document.
         $shortcode = new DonationFormShortcode($this->forms, $this->styles, $this->campaigns, null, $this->gateways);
         $preview   = $shortcode->renderPreview($blocks, $settings, $campaignId);
-
-        $cssUrl  = esc_url($preview['cssUrl']);
-        $jsUrl   = esc_url($preview['jsUrl']);
-        // $blocks was block-aware sanitized above (kses'd for authors lacking
-        // unfiltered_html), so this do_blocks() output is safe to inline; the
-        // interpolated URLs are esc_url'd.
-        $formHtml = $preview['html'];
-
-        // Inline script-handle deps; the preview iframe is a standalone document.
-        $depScripts = '';
-        $scripts    = wp_scripts();
-        foreach ($preview['jsDeps'] as $handle) {
-            $reg = $scripts->registered[$handle] ?? null;
-            $src = $reg ? (string) $reg->src : '';
-            if ($src !== '') {
-                $url = strpos($src, 'http') === 0 ? $src : site_url($src);
-                $depScripts .= '<script src="' . esc_url($url) . '"></script>' . "\n";
-            }
-        }
-
-        $doc = <<<HTML
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="{$cssUrl}">
-    <style>
-        html, body { margin: 0; padding: 0; background: #f0f0f1; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif; }
-        body { padding: 32px 16px; min-height: 100vh; }
-    </style>
-</head>
-<body>
-    {$formHtml}
-    {$depScripts}
-    <script src="{$jsUrl}"></script>
-</body>
-</html>
-HTML;
+        $doc       = $shortcode->buildPreviewDocument($preview);
 
         return new WP_REST_Response([
             'html' => $doc,

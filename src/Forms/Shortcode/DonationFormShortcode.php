@@ -329,6 +329,67 @@ final class DonationFormShortcode extends HookProvider
     }
 
     /**
+     * Wrap a renderPreview() result into a self-contained HTML document: its own
+     * stylesheet plus the runtime and its script-handle deps inlined, so the form
+     * boots in isolation inside an iframe srcdoc (the host editor never runs the
+     * runtime, and the iframe can't reach the editor's scripts). Shared by the
+     * forms editor preview pane and the campaign donation-form block editor.
+     *
+     * @param array{html:string, cssUrl:string, jsUrl:string, jsDeps:list<string>} $preview
+     * @param bool $autoResize Size the iframe to its content from inside the
+     *                         srcdoc (same-origin, so window.frameElement works);
+     *                         the forms pane sizes with CSS and opts out.
+     */
+    public function buildPreviewDocument(array $preview, bool $autoResize = false): string
+    {
+        $cssUrl   = esc_url($preview['cssUrl']);
+        $jsUrl    = esc_url($preview['jsUrl']);
+        $formHtml = $preview['html'];
+
+        // Inline script-handle deps; the preview iframe is a standalone document.
+        $depScripts = '';
+        $scripts    = wp_scripts();
+        foreach ($preview['jsDeps'] as $handle) {
+            $reg = $scripts->registered[$handle] ?? null;
+            $src = $reg ? (string) $reg->src : '';
+            if ($src !== '') {
+                $url = strpos($src, 'http') === 0 ? $src : site_url($src);
+                $depScripts .= '<script src="' . esc_url($url) . '"></script>' . "\n";
+            }
+        }
+
+        // Auto-resize hugs content, so the body must NOT stretch to the viewport
+        // (min-height:100vh + padding would inflate the measured height and, fed
+        // back into the frame height each observer tick, run away). The delta
+        // guard and cap are belt-and-suspenders against any residual loop.
+        $bodyMinHeight = $autoResize ? '0' : '100vh';
+        $resize = $autoResize
+            ? '<script>(function(){var l=0;function s(){try{if(!window.frameElement)return;var h=Math.min(document.documentElement.scrollHeight,4000);if(Math.abs(h-l)>2){l=h;window.frameElement.style.height=h+"px"}}catch(e){}}addEventListener("load",s);if(window.ResizeObserver){new ResizeObserver(s).observe(document.documentElement)}setTimeout(s,300);setTimeout(s,1200)})();</script>'
+            : '';
+
+        return <<<HTML
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{$cssUrl}">
+    <style>
+        html, body { margin: 0; padding: 0; background: #f0f0f1; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif; }
+        body { padding: 32px 16px; min-height: {$bodyMinHeight}; }
+    </style>
+</head>
+<body>
+    {$formHtml}
+    {$depScripts}
+    <script src="{$jsUrl}"></script>
+    {$resize}
+</body>
+</html>
+HTML;
+    }
+
+    /**
      * Visitor context passed to filters and gateway resolution.
      *
      * @return array<string,mixed>

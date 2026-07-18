@@ -705,9 +705,18 @@ final class CoreModule implements DonoModule
             $c->get(CampaignRepository::class),
             $c->get(FormRepository::class),
         ));
+        $formShortcode = new DonationFormShortcode(
+            $c->get(FormRepository::class),
+            $c->get(CampaignStyleResolver::class),
+            $c->get(CampaignRepository::class),
+            $c->get(AntiSpamGuard::class),
+            $c->get(GatewayManager::class),
+            $c->get(TestMode::class),
+        );
         $blocks->add(new DonationFormBlock(
             $c->get(CampaignRepository::class),
             $c->get(FormRepository::class),
+            $formShortcode,
         ));
         $blocks->add(new TopDonorsBlock(
             $c->get(CampaignRepository::class),
@@ -728,14 +737,7 @@ final class CoreModule implements DonoModule
         (new CampaignBlockEditorIntegration())->register();
         (new \Dono\Campaigns\Blocks\CampaignBindings($c->get(CampaignRepository::class)))->register();
 
-        (new DonationFormShortcode(
-            $c->get(FormRepository::class),
-            $c->get(CampaignStyleResolver::class),
-            $c->get(CampaignRepository::class),
-            $c->get( AntiSpamGuard::class),
-            $c->get(GatewayManager::class),
-            $c->get( TestMode::class),
-        ))->register();
+        $formShortcode->register();
 
         (new PortalShortcode())->register();
 
