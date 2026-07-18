@@ -72,7 +72,9 @@ final class AdminGlobals extends HookProvider
 
         printf(
             '<script id="dono-admin-globals">window.dono = window.dono || {}; Object.assign(window.dono, %s);</script>',
-            wp_json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+            // JSON_HEX_TAG|JSON_HEX_AMP escape < > &, so a value containing
+            // </script> (e.g. the site name) can't break out of the inline tag.
+            wp_json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP)
         );
     }
 

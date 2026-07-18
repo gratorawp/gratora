@@ -296,6 +296,7 @@ final class DonorRepository
 
         $cases = [];
         foreach ($thresholdsCents as $t) {
+            $t = (int) $t;
             $cases[] = "WHEN total_donated_cents <= {$t} THEN {$t}";
         }
         $bucketExpr = 'CASE ' . implode(' ', $cases) . ' ELSE NULL END';

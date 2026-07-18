@@ -66,7 +66,9 @@ final class SupporterWallBlock extends CampaignBlock
             ->where('is_anonymous', false);
 
         if ($minAmountCents > 0) {
-            $query = $query->where('amount_cents', $minAmountCents, '>=');
+            // Threshold is an org-currency figure, so compare against the base
+            // amount, not the donor's (possibly foreign) amount_cents.
+            $query = $query->where('base_amount_cents', $minAmountCents, '>=');
         }
 
         $donations = $query->orderBy('paid_at', 'DESC')->limit($poolSize)->getAll();
@@ -114,7 +116,7 @@ final class SupporterWallBlock extends CampaignBlock
                 ->where('is_anonymous', false)
                 ->whereIn('donor_id', $donorIds);
             if ($minAmountCents > 0) {
-                $netQuery = $netQuery->where('amount_cents', $minAmountCents, '>=');
+                $netQuery = $netQuery->where('base_amount_cents', $minAmountCents, '>=');
             }
             $netRows = $netQuery
                 ->selectRaw('donor_id, COALESCE(SUM(' . DonationQueries::netBaseExpr() . '), 0) AS net_cents')

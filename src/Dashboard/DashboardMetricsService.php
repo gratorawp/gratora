@@ -342,10 +342,14 @@ final class DashboardMetricsService
             ];
         }
 
-        // 3. Published campaigns missing a default form.
+        // 3. Published campaigns missing a default form. default_form_id is
+        // nullable and update() clears it to NULL (not 0), and NULL <= 0 is NULL
+        // in SQL, so the cleared-form case needs an explicit IS NULL.
         $missingForm = Campaign::query()
             ->where('status', 'published')
-            ->where('default_form_id', 0, '<=')
+            ->where(function ($q) {
+                $q->whereIsNull('default_form_id')->orWhere('default_form_id', 0, '<=');
+            })
             ->getAll();
         foreach ($missingForm as $c) {
             $items[] = [

@@ -105,8 +105,15 @@ final class FormSubmissionValidator
                 break;
 
             case 'dono/comment':
-                if (! empty($attrs['required']) && ! $this->filled($body['note_to_org'] ?? null)) {
+                $note = (string) ($body['note_to_org'] ?? '');
+                if (! empty($attrs['required']) && ! $this->filled($note)) {
                     return $this->requiredError($this->label($attrs, __('Comment', 'dono')));
+                }
+                // Cap length server-side: the note can surface publicly, and the
+                // client's maxlength is bypassable by a crafted POST.
+                $noteMax = (int) ($attrs['maxLength'] ?? 5000);
+                if ($noteMax > 0 && mb_strlen($note) > $noteMax) {
+                    return $this->reject(__('Your message is too long.', 'dono'));
                 }
                 break;
 

@@ -93,6 +93,25 @@ BLOCKS;
         $this->assertNotNull($this->validator()->validate($this->form($blocks), $base + ['frequency' => 'yearly']));
     }
 
+    public function test_overlong_comment_is_rejected_server_side(): void
+    {
+        $blocks = <<<BLOCKS
+<!-- wp:dono/donation-amount {"presets":[{"cents":2500}]} /-->
+<!-- wp:dono/comment {"maxLength":50} /-->
+<!-- wp:dono/submit-button /-->
+BLOCKS;
+        $base = ['amount_cents' => 2500, 'frequency' => 'one_time', 'custom' => [], 'consents' => []];
+
+        $this->assertNull(
+            $this->validator()->validate($this->form($blocks), $base + ['note_to_org' => 'short note']),
+            'a note within the limit passes'
+        );
+        $this->assertNotNull(
+            $this->validator()->validate($this->form($blocks), $base + ['note_to_org' => str_repeat('x', 51)]),
+            'a note over the block maxLength is rejected'
+        );
+    }
+
     public function test_default_recurring_toggle_accepts_the_frequencies_it_offers(): void
     {
         // Gutenberg omits `frequencies` when it equals the block default, so a
