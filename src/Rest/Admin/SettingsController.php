@@ -51,7 +51,11 @@ final class SettingsController
         if (! $this->settings->knows($group)) {
             return new WP_Error('dono_unknown_group', __('Unknown settings group.', 'dono'), ['status' => 404]);
         }
-        return new WP_REST_Response($this->settings->get($group), 200);
+        $data = $this->settings->get($group);
+        if ($group === 'gateways') {
+            $data = $this->maskGatewaySecrets($data);
+        }
+        return new WP_REST_Response($data, 200);
     }
 
     public function update(WP_REST_Request $request): WP_REST_Response|WP_Error
@@ -74,8 +78,43 @@ final class SettingsController
         if ($allowed !== []) {
             $body = array_intersect_key($body, array_flip($allowed));
         }
-        $body = $this->sanitize($body);
-        return new WP_REST_Response($this->settings->update($group, $body), 200);
+        if ($group === 'gateways') {
+            // A webhook secret that comes back as the mask means "unchanged":
+            // keep the stored value rather than overwriting it with the mask.
+            $stored = $this->settings->get($group);
+            foreach (self::GATEWAY_SECRET_KEYS as $k) {
+                if (($body['stripe'][$k] ?? null) === self::SECRET_MASK) {
+                    $body['stripe'][$k] = (string) ($stored['stripe'][$k] ?? '');
+                }
+            }
+        }
+        $body  = $this->sanitize($body);
+        $saved = $this->settings->update($group, $body);
+        if ($group === 'gateways') {
+            $saved = $this->maskGatewaySecrets($saved);
+        }
+        return new WP_REST_Response($saved, 200);
+    }
+
+    private const SECRET_MASK = '••••••••';
+    private const GATEWAY_SECRET_KEYS = ['webhook_secret_test', 'webhook_secret_live'];
+
+    /**
+     * Replace stored webhook secrets with a mask for the REST read: the UI
+     * treats them as write-only. The mask is truthy so the "configured" status
+     * still reads, and a resubmitted mask is preserved on update().
+     *
+     * @param array<string,mixed> $data
+     * @return array<string,mixed>
+     */
+    private function maskGatewaySecrets(array $data): array
+    {
+        foreach (self::GATEWAY_SECRET_KEYS as $k) {
+            if (! empty($data['stripe'][$k])) {
+                $data['stripe'][$k] = self::SECRET_MASK;
+            }
+        }
+        return $data;
     }
 
     /**
