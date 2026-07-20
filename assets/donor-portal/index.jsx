@@ -1,6 +1,6 @@
 /** @jsxImportSource preact */
 
-import { h, render } from 'preact';
+import { render } from 'preact';
 import { useEffect, useState, useCallback, useRef } from 'preact/hooks';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { formatAmount } from '@dono/ui/utils/format';
@@ -753,7 +753,7 @@ function ChangeAmountForm( { plan, onSubmit } ) {
     );
 }
 
-function CancelDeflection( { plan, onPause, onSkip, onReduce, onCancel } ) {
+function CancelDeflection( { onPause, onSkip, onReduce, onCancel } ) {
     const [ confirmed, setConfirmed ] = useState( false );
     const [ reason, setReason ] = useState( '' );
 

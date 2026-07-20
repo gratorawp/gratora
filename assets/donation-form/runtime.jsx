@@ -1,6 +1,6 @@
 /** @jsxImportSource preact */
 
-import { h, render } from 'preact';
+import { render } from 'preact';
 import { useCallback, useReducer, useRef, useState, useEffect } from 'preact/hooks';
 
 import { reducer, initialState, validateStep, buildPayload } from './state/store';

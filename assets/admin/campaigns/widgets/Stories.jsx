@@ -1,4 +1,4 @@
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { formatAmount, timeAgo } from '../../_shared/format';
 
 export default function Stories( { rows = [] } ) {

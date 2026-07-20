@@ -1,6 +1,6 @@
 // Donations list: paginated DataViews against /dono/v1/admin/donations.
 
-import { useState, useEffect, useMemo, useCallback } from '@wordpress/element';
+import { useState, useEffect, useMemo } from '@wordpress/element';
 import { DataViews } from '@wordpress/dataviews';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';

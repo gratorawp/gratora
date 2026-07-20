@@ -7,7 +7,7 @@ import { addQueryArgs } from '@wordpress/url';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { Pencil, Trash2 as TrashIcon, Star, Power, PowerOff, Wallet } from 'lucide-react';
 
-import { formatAmount, formatDate } from '../_shared/format';
+import { formatAmount } from '../_shared/format';
 import Btn from '../_shared/components/Btn';
 import { stopRowSelect } from '../_shared/rowLink';
 import EmptyState from '../_shared/components/EmptyState';

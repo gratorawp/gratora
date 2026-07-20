@@ -2,7 +2,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 
 import { formatMonth } from './helpers';
-import { IconReply, IconLink, IconRotate, IconAlert } from './icons';
+import { IconLink, IconRotate, IconAlert } from './icons';
 
 function HeadChip( { children, tone = 'ok', mono = false } ) {
     const classes = [ 'head-chip' ];
@@ -34,7 +34,7 @@ function Banner( { kind, message, onAction } ) {
     );
 }
 
-export default function Header( { donor, lifetime, banners, recurring, magicLinkUrl, onBack, onEdit, onTabSwitch } ) {
+export default function Header( { donor, banners, recurring, magicLinkUrl, onBack, onEdit, onTabSwitch } ) {
     const [ copied, setCopied ] = useState( false );
 
     const copyMagic = async () => {
@@ -96,7 +96,7 @@ export default function Header( { donor, lifetime, banners, recurring, magicLink
                 </div>
             </div>
 
-            { banners?.map( ( b, i ) => (
+            { banners?.map( ( b ) => (
                 <Banner
                     key={ b.kind }
                     kind={ b.kind }

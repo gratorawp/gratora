@@ -8,6 +8,12 @@
 module.exports = {
     root: true,
     extends: [ 'plugin:@wordpress/eslint-plugin/recommended' ],
+    env: { browser: true },
+    // The JS lint uses the babel parser, which can't parse TypeScript: the
+    // Cloudflare Worker (broker/) and Playwright specs (tests-e2e/) are .ts and
+    // report every type reference as undefined. They need their own TS lint;
+    // don't let them drown lint:js. build/ and vendor* are generated.
+    ignorePatterns: [ 'build/', 'vendor/', 'vendor-prefixed/', 'broker/', 'tests-e2e/', '**/*.ts', '**/*.tsx' ],
     // No babel config in the repo, so mirror wp-scripts' parser fallback.
     parserOptions: {
         requireConfigFile: false,

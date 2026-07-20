@@ -122,7 +122,6 @@ export default function SetupPanel( { org, brand, gateways, email, onJumpTo } ) 
 }
 
 function buildSteps( { org, brand, gateways, email, stripeConnect } ) {
-    const stripe = gateways.stripe || {};
     const offline = gateways.offline || {};
     const connect = stripeConnect || {};
 

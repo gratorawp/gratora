@@ -139,9 +139,10 @@ function initialCustom( donorSteps ) {
 }
 
 function resolveHiddenValue( f ) {
-    const src      = String( f.source || 'fixed' );
     const fallback = String( f.defaultValue || '' );
     if ( typeof window === 'undefined' ) return fallback;
+
+    const src    = String( f.source || 'fixed' );
     const params = new URLSearchParams( window.location.search );
 
     let value = '';

@@ -1,4 +1,4 @@
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { Coins } from 'lucide-react';
 
 import EmptyState from '../../_shared/components/EmptyState';

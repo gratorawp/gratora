@@ -37,7 +37,7 @@ function IdentityRow( { icon, value, copyable, sub, valClass = '' } ) {
     );
 }
 
-export default function IdentityCard( { donor, magicLinkUrl, onMagicLinkRefresh } ) {
+export default function IdentityCard( { donor, magicLinkUrl } ) {
     const [ copiedMagic, setCopiedMagic ] = useState( false );
     const isAnon     = donor.is_anonymous;
     const isRedacted = !! donor.redacted_at;

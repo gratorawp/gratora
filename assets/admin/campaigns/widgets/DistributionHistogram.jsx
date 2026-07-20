@@ -12,14 +12,13 @@ export default function DistributionHistogram( { distribution, currency } ) {
     // Hooks must run on every render: this widget mounts with distribution=null
     // (loading) then re-renders with data, so the useMemo has to sit above the
     // empty-guard or the hook count changes and React throws.
-    const buckets = distribution?.buckets ?? [];
-    const data = useMemo( () => buckets.map( ( b ) => ( {
+    const data = useMemo( () => ( distribution?.buckets ?? [] ).map( ( b ) => ( {
         label: labelFor( b, currency ),
         count: b.count,
         amount_cents: b.amount_cents,
         min: b.min_cents,
         max: b.max_cents,
-    } ) ), [ buckets, currency ] );
+    } ) ), [ distribution, currency ] );
 
     if ( ! distribution || distribution.total_count === 0 ) {
         return (
@@ -30,6 +29,7 @@ export default function DistributionHistogram( { distribution, currency } ) {
     }
 
     const { median_cents, total_count } = distribution;
+    const buckets = distribution.buckets;
 
     // Find the bucket the median falls into so we can draw a reference line.
     const medianBucketIndex = buckets.findIndex( ( b ) => {

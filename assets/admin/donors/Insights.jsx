@@ -127,7 +127,7 @@ function LtvHistogram( { buckets } ) {
     const max = buckets.reduce( ( m, b ) => Math.max( m, b.donor_count ), 0 ) || 1;
     return (
         <div className="dono-ltv-hist">
-            { buckets.map( ( b, i ) => {
+            { buckets.map( ( b ) => {
                 const h = ( b.donor_count / max ) * 100;
                 return (
                     <div key={ b.min_cents } className="dono-ltv-hist__col" title={ `${ b.donor_count } ${ __( 'donors', 'dono' ) }` }>

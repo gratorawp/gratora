@@ -11,7 +11,7 @@ const DEFAULT_OPTIONS = [
     { label: 'Option one', value: 'option-one', isDefault: false },
 ];
 
-function Edit( { attributes, setAttributes, clientId } ) {
+function Edit( { attributes, setAttributes } ) {
     const {
         label       = '',
         placeholder = '',

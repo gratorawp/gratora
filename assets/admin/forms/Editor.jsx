@@ -7,8 +7,6 @@ import { useEffect, useCallback, useMemo, useReducer, useRef, useState } from '@
 import {
     BaseControl,
     Button,
-    Modal,
-    PanelBody,
     Popover,
     SelectControl,
     SlotFillProvider,
@@ -55,7 +53,6 @@ const UndoIcon       = () => <LocalIcon name="undo"          size={ 18 } />;
 const RedoIcon       = () => <LocalIcon name="redo"          size={ 18 } />;
 const CogIcon        = () => <LocalIcon name="settings"      size={ 18 } />;
 const PanelRightIcon = () => <LocalIcon name="panel-right"   size={ 18 } />;
-const EditIcon       = () => <LocalIcon name="edit"          size={ 18 } />;
 const DesktopIcon    = () => <LocalIcon name="desktop"       size={ 18 } />;
 const TabletIcon     = () => <LocalIcon name="tablet"        size={ 18 } />;
 const MobileIcon     = () => <LocalIcon name="mobile"        size={ 18 } />;
