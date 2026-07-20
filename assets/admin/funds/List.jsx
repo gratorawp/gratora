@@ -187,14 +187,14 @@ export default function List() {
                     style={ item.__depth ? { paddingLeft: `${ item.__depth * 26 }px` } : undefined }
                 >
                     <div style={ { lineHeight: 1.35 } }>
-                        <a
+                        <button
+                            type="button"
                             className="dono-row__link dono-row__link--strong"
-                            href="#"
                             onMouseDown={ stopRowSelect }
-                            onClick={ ( e ) => { stopRowSelect( e ); e.preventDefault(); setEditing( item ); } }
+                            onClick={ ( e ) => { stopRowSelect( e ); setEditing( item ); } }
                         >
                             { item.name }
-                        </a>
+                        </button>
                         { item.is_default && (
                             <span className="dono-fund-badge dono-fund-badge--default">
                                 { __( 'Default', 'dono' ) }

@@ -44,6 +44,13 @@ module.exports = {
         // `x == null` is the codebase's deliberate null-or-undefined guard;
         // require === everywhere else.
         eqeqeq: [ 'error', 'always', { null: 'ignore' } ],
+        // autofocus is used only inside modals/drawers the user just opened
+        // (focus belongs in the dialog) and as an opt-in prop, never on load.
+        'jsx-a11y/no-autofocus': 'off',
+        // the form editor embeds WP block-editor components (BlockLibrary,
+        // ListView, NumberControl) that ship only as __experimental with no
+        // stable equivalent.
+        '@wordpress/no-unsafe-wp-apis': 'off',
         'jsdoc/require-param': 'off', // comments are intentionally minimal
         'jsdoc/require-param-type': 'off',
         'jsdoc/check-tag-names': 'off', // e.g. @jsxImportSource in the Preact runtime

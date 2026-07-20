@@ -1146,7 +1146,7 @@ function FormSettingsPanel( { c, campaigns, gateways, funds, blocks } ) {
 
     return (
         <div className="dono-form-settings">
-            <aside className="dono-form-settings__nav" role="tablist" aria-label={ __( 'Settings sections', 'dono' ) }>
+            <div className="dono-form-settings__nav" role="tablist" aria-label={ __( 'Settings sections', 'dono' ) }>
                 { SETTINGS_TABS.map( ( t ) => (
                     <button
                         key={ t.id }
@@ -1159,7 +1159,7 @@ function FormSettingsPanel( { c, campaigns, gateways, funds, blocks } ) {
                         { t.label }
                     </button>
                 ) ) }
-            </aside>
+            </div>
             <main className="dono-form-settings__main">
                 { activeTab === 'general'   && <GeneralSection   c={ c } campaigns={ campaigns } funds={ funds } settings={ settings } setSettings={ setSettings } /> }
                 { activeTab === 'goal'      && <GoalSection      settings={ settings } setSettings={ setSettings } /> }

@@ -448,7 +448,7 @@ function HeaderMenu( { campaign, onAction } ) {
         e.preventDefault();
         const items = Array.from( ref.current?.querySelectorAll( '.dono-menu__item' ) || [] );
         if ( ! items.length ) return;
-        const idx  = items.indexOf( document.activeElement );
+        const idx  = items.indexOf( ref.current.ownerDocument.activeElement );
         const next = e.key === 'ArrowDown'
             ? ( idx + 1 ) % items.length
             : ( idx <= 0 ? items.length - 1 : idx - 1 );
@@ -456,6 +456,7 @@ function HeaderMenu( { campaign, onAction } ) {
     };
 
     return (
+        // eslint-disable-next-line jsx-a11y/no-static-element-interactions -- menu-widget wrapper; onKeyDown coordinates roving focus among the role=menuitem buttons in the popup below
         <div className="dono-menu" ref={ ref } onKeyDown={ onKeyDown }>
             <button
                 type="button"
@@ -1408,7 +1409,7 @@ function SettingsTab( { campaign, onError } ) {
 
     return (
         <div>
-            <nav className="dono-subtabs" role="tablist">
+            <div className="dono-subtabs" role="tablist">
                 { SUB_TABS.map( ( t ) => {
                     const active   = subTab === t.key;
                     const isDirty  = !! dirtyByTab[ t.key ];
@@ -1441,7 +1442,7 @@ function SettingsTab( { campaign, onError } ) {
                         { t.label }
                     </a>
                 ) ) }
-            </nav>
+            </div>
 
             { ( () => {
                 const showRail = subTab === 'general' || subTab === 'appearance';

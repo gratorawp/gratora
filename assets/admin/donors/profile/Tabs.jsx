@@ -14,9 +14,10 @@ const TAB_DEFS = [
 
 export default function Tabs( { active, onChange, counts = {}, dots = {} } ) {
     return (
-        <nav
+        <div
             className="dp-tabs"
             role="tablist"
+            tabIndex={ -1 }
             aria-label={ __( 'Donor sections', 'dono' ) }
             onKeyDown={ ( e ) => tablistKeyDown( e, TAB_DEFS.map( ( d ) => d.id ), active, onChange ) }
         >
@@ -40,6 +41,6 @@ export default function Tabs( { active, onChange, counts = {}, dots = {} } ) {
                     ) }
                 </a>
             ) ) }
-        </nav>
+        </div>
     );
 }

@@ -53,9 +53,9 @@ export default function Header( { donor, banners, recurring, magicLinkUrl, onBac
     return (
         <header className="dp-head">
             <div className="dp-crumbs">
-                <a href="#" onClick={ ( e ) => { e.preventDefault(); onBack(); } }>{ __( 'Dono', 'dono' ) }</a>
+                <button type="button" onClick={ onBack }>{ __( 'Dono', 'dono' ) }</button>
                 <span className="sep">›</span>
-                <a href="#" onClick={ ( e ) => { e.preventDefault(); onBack(); } }>{ __( 'Donors', 'dono' ) }</a>
+                <button type="button" onClick={ onBack }>{ __( 'Donors', 'dono' ) }</button>
                 <span className="sep">›</span>
                 <span>{ donor.name }</span>
             </div>

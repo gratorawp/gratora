@@ -18,9 +18,9 @@ export default function Header( { donation, donor, onResendReceipt, onRefund, on
     return (
         <header className="dd-head">
             <div className="dd-crumbs">
-                <a href="#" onClick={ ( e ) => { e.preventDefault(); onBack(); } }>{ __( 'Dono', 'dono' ) }</a>
+                <button type="button" onClick={ onBack }>{ __( 'Dono', 'dono' ) }</button>
                 <span className="sep">›</span>
-                <a href="#" onClick={ ( e ) => { e.preventDefault(); onBack(); } }>{ __( 'Donations', 'dono' ) }</a>
+                <button type="button" onClick={ onBack }>{ __( 'Donations', 'dono' ) }</button>
                 <span className="sep">›</span>
                 <span className="mono">{ donation.reference }</span>
             </div>

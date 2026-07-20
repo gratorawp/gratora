@@ -256,8 +256,8 @@ $bar-radius:    6px;
     font-size: 13px;
     color: $text-muted;
     margin-bottom: 6px;
-    a       { color: $text-muted; text-decoration: none; }
-    a:hover { color: $text; }
+    a, button       { color: $text-muted; text-decoration: none; background: none; border: 0; padding: 0; font: inherit; cursor: pointer; }
+    a:hover, button:hover { color: $text; }
     .sep    { margin: 0 6px; color: #cbd0d5; }
 }
 

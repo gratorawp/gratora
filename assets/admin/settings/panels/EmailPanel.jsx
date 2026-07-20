@@ -206,6 +206,7 @@ function TemplateEditor( { id, s, onBack } ) {
             <div
                 className="dono-email-editor-tabs"
                 role="tablist"
+                tabIndex={ -1 }
                 onKeyDown={ ( e ) => tablistKeyDown( e, [ 'edit', 'preview' ], view, setView ) }
             >
                 <button

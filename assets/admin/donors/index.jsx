@@ -358,6 +358,7 @@ function ViewToggle( { active, onChange } ) {
         <div
             className="dono-view-toggle"
             role="tablist"
+            tabIndex={ -1 }
             aria-label={ __( 'Donor sections', 'dono' ) }
             onKeyDown={ ( e ) => tablistKeyDown( e, [ 'list', 'insights' ], active, onChange ) }
         >

@@ -199,9 +199,10 @@ export default function Settings() {
                 </div>
             </div>
 
-            <nav
+            <div
                 className="dono-tabs"
                 role="tablist"
+                tabIndex={ -1 }
                 aria-label={ __( 'Settings sections', 'dono' ) }
                 onKeyDown={ ( e ) => tablistKeyDown( e, TABS.map( ( t ) => t.key ), tab, jumpTo ) }
             >
@@ -227,7 +228,7 @@ export default function Settings() {
                         );
                     } ) }
                 </div>
-            </nav>
+            </div>
 
             <Toaster />
 

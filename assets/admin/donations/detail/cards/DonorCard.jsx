@@ -48,13 +48,13 @@ export default function DonorCard( { donor, donationName, isAnonymous, onOpenDon
                                 : __( 'First donation from this donor', 'dono' ) }
                         </div>
                     </div>
-                    <a
+                    <button
+                        type="button"
                         className="dd-donor-row__link"
-                        href="#"
-                        onClick={ ( e ) => { e.preventDefault(); onOpenDonor?.( donor.id ); } }
+                        onClick={ () => onOpenDonor?.( donor.id ) }
                     >
                         { __( 'Open donor →', 'dono' ) }
-                    </a>
+                    </button>
                 </div>
             </div>
         </div>
