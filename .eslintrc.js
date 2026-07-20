@@ -29,6 +29,10 @@ module.exports = {
         camelcase: 'off', //           REST/DB fields are snake_case (amount_cents)
         'dot-notation': 'off',
         'no-nested-ternary': 'off',
+        // `onChange && onChange( v )` is the runtime's optional-callback idiom.
+        'no-unused-expressions': [ 'error', { allowShortCircuit: true, allowTernary: true } ],
+        // House rule bans en/em dashes; keep hyphens in numeric ranges.
+        '@wordpress/i18n-hyphenated-range': 'off',
         'jsdoc/require-param': 'off', // comments are intentionally minimal
         'jsdoc/require-param-type': 'off',
         'jsdoc/check-tag-names': 'off', // e.g. @jsxImportSource in the Preact runtime

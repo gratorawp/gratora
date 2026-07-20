@@ -71,7 +71,7 @@ function buildEvents( { donation, receipts, refunds, notes } ) {
             time:  r.occurred_at,
             dot:   r.status === 'succeeded' ? 'is-warn' : 'is-error',
             title: <>{ __( 'Refund', 'dono' ) } <strong>{ formatAmount( r.amount_cents, r.currency ) }</strong></>,
-            sub:   r.reason ? <em>"{ r.reason }"</em> : null,
+            sub:   r.reason ? <em>&quot;{ r.reason }&quot;</em> : null,
         } );
     } );
     ( notes || [] ).forEach( ( n, ni ) => {
@@ -80,7 +80,7 @@ function buildEvents( { donation, receipts, refunds, notes } ) {
             time:  n.created_at,
             dot:   'is-muted',
             title: __( 'Note added', 'dono' ),
-            sub:   <em>"{ n.body.length > 120 ? n.body.slice( 0, 117 ) + '…' : n.body }"</em>,
+            sub:   <em>&quot;{ n.body.length > 120 ? n.body.slice( 0, 117 ) + '…' : n.body }&quot;</em>,
         } );
     } );
 

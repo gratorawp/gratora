@@ -381,7 +381,7 @@ export default function Onboarding() {
             <section ref={ frameRef } className={ `dono-onboarding__frame${ step === 3 ? ' is-wide' : '' }` }>
                 <div className="dono-onboarding__meta">
                     <span className="dono-onboarding__caption">
-                        { sprintf( __( 'Step %1$d of %2$d', 'dono' ), step + 1, TOTAL ) }
+                        { sprintf( /* translators: %1$d: current step number. %2$d: total number of steps. */ __( 'Step %1$d of %2$d', 'dono' ), step + 1, TOTAL ) }
                     </span>
                     <span className="dono-onboarding__dots" aria-hidden="true">
                         { Array.from( { length: TOTAL } ).map( ( _, i ) => (

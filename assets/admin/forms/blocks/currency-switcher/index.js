@@ -107,7 +107,7 @@ function Edit( { attributes, setAttributes } ) {
                                 >
                                     { on && (
                                         <svg viewBox="0 0 12 12" width="8" height="8" aria-hidden="true">
-                                            <path d="M2 6l3 3 5-6" fill="none" stroke="currentColor" stroke-width="2" />
+                                            <path d="M2 6l3 3 5-6" fill="none" stroke="currentColor" strokeWidth="2" />
                                         </svg>
                                     ) }
                                 </span>

@@ -76,7 +76,7 @@ export default function OverviewCard( { donation } ) {
 
                     { donation.note_to_org && (
                         <KvRow label={ __( 'Donor note', 'dono' ) }>
-                            <em>"{ donation.note_to_org }"</em>
+                            <em>&quot;{ donation.note_to_org }&quot;</em>
                         </KvRow>
                     ) }
 

@@ -147,9 +147,9 @@ export default function List() {
         setReload( ( n ) => n + 1 );
     }, [] );
 
-    const mutate = useCallback( async ( id, data ) => {
+    const mutate = useCallback( async ( id, payload ) => {
         try {
-            await apiFetch( { path: `/dono/v1/admin/funds/${ id }`, method: 'POST', data } );
+            await apiFetch( { path: `/dono/v1/admin/funds/${ id }`, method: 'POST', data: payload } );
             afterChange();
         } catch ( err ) {
             setError( err?.message || __( 'Action failed.', 'dono' ) );

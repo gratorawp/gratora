@@ -57,7 +57,7 @@ function ExchangeRatesCard( { fx, base } ) {
             { freshnessPill( fx ) }
             <Btn size="sm" onClick={ fx.fetchNow } disabled={ fx.fetching }>
                 <svg viewBox="0 0 16 16" fill="none" width="13" height="13" aria-hidden="true">
-                    <path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9M13.5 2v3h-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9M13.5 2v3h-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
                 { fx.fetching ? __( 'Fetching…', 'dono' ) : __( 'Fetch rates now', 'dono' ) }
             </Btn>
@@ -223,7 +223,7 @@ export default function CurrencyPanel( { s, fx } ) {
                                     <span className="dono-cur-chip__box">
                                         { on && (
                                             <svg viewBox="0 0 12 12" width="9" height="9" aria-hidden="true">
-                                                <path d="M2 6l3 3 5-6" fill="none" stroke="currentColor" stroke-width="2" />
+                                                <path d="M2 6l3 3 5-6" fill="none" stroke="currentColor" strokeWidth="2" />
                                             </svg>
                                         ) }
                                     </span>
@@ -267,7 +267,7 @@ export default function CurrencyPanel( { s, fx } ) {
                         value={ decimalSep }
                         onChange={ ( e ) => s.edit( { format: { decimal_sep: e.target.value } } ) }
                     >
-                        <option value=",">{ __( 'Comma  (1.234,56)', 'dono' ) }</option>
+                        <option value=",">{ __( 'Comma (1.234,56)', 'dono' ) }</option>
                         <option value=".">{ __( 'Period (1,234.56)', 'dono' ) }</option>
                     </select>
                 </FormRow>
@@ -279,10 +279,10 @@ export default function CurrencyPanel( { s, fx } ) {
                         onChange={ ( e ) => s.edit( { format: { thousand_sep: e.target.value } } ) }
                     >
                         <option value=".">{ __( 'Period (1.234,56)', 'dono' ) }</option>
-                        <option value=",">{ __( 'Comma  (1,234.56)', 'dono' ) }</option>
-                        <option value=" ">{ __( 'Space  (1 234,56)', 'dono' ) }</option>
+                        <option value=",">{ __( 'Comma (1,234.56)', 'dono' ) }</option>
+                        <option value=" ">{ __( 'Space (1 234,56)', 'dono' ) }</option>
                         <option value="'">{ __( "Apostrophe (1'234.56)", 'dono' ) }</option>
-                        <option value="">{ __( 'None   (1234,56)', 'dono' ) }</option>
+                        <option value="">{ __( 'None (1234,56)', 'dono' ) }</option>
                     </select>
                 </FormRow>
 
@@ -292,8 +292,8 @@ export default function CurrencyPanel( { s, fx } ) {
                         value={ symbolPosition }
                         onChange={ ( e ) => s.edit( { format: { symbol_position: e.target.value } } ) }
                     >
-                        <option value="before">{ __( 'Before amount  (€10,00)', 'dono' ) }</option>
-                        <option value="after">{ __( 'After amount   (10,00 €)', 'dono' ) }</option>
+                        <option value="before">{ __( 'Before amount (€10,00)', 'dono' ) }</option>
+                        <option value="after">{ __( 'After amount (10,00 €)', 'dono' ) }</option>
                     </select>
                 </FormRow>
             </Card>

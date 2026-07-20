@@ -111,7 +111,7 @@ export default function AdvancedPanel( { s } ) {
                         <p style={ { color: '#b42318', margin: 0 } }>{ __( 'Could not load system info.', 'dono' ) }</p>
                         <Btn variant="secondary" onClick={ loadInfo }>{ __( 'Retry', 'dono' ) }</Btn>
                     </div>
-                ) : ! info ? <p>{ __( 'Loading...', 'dono' ) }</p> : (
+                ) : ! info ? <p>{ __( 'Loading…', 'dono' ) }</p> : (
                     <div className="dono-advanced-info">
                         <div><dt>{ __( 'Dono version', 'dono' ) }</dt><dd>{ info.version }</dd></div>
                         <div><dt>{ __( 'PHP version', 'dono' ) }</dt><dd>{ info.php }</dd></div>

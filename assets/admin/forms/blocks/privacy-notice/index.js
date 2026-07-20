@@ -73,7 +73,7 @@ function Edit( { attributes, setAttributes } ) {
                         </p>
                     ) : (
                         <Notice status="warning" isDismissible={ false } style={ { marginTop: 12 } }>
-                            { __( 'No privacy policy URL is set. Donors will see the text but no link until you add one in ', 'dono' ) }
+                            { __( 'No privacy policy URL is set. Donors will see the text but no link until you add one in', 'dono' ) }{ ' ' }
                             <ExternalLink href={ settingsHref }>{ __( 'Settings → Privacy', 'dono' ) }</ExternalLink>.
                         </Notice>
                     ) }

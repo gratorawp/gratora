@@ -397,7 +397,7 @@ function SignInPrompt( { initialError } ) {
             </form>
             { error && <p class="dp-signin__error">{ error }</p> }
             <p class="dp-signin__alt">
-                { isRegister ? __( 'Already have an account or donated before? ', 'dono' ) : __( 'New here and want to fundraise? ', 'dono' ) }
+                { isRegister ? __( 'Already have an account or donated before?', 'dono' ) : __( 'New here and want to fundraise?', 'dono' ) }{ ' ' }
                 <button type="button" class="dp-link" onClick={ () => { setError( null ); setMode( isRegister ? 'signin' : 'register' ); } }>
                     { isRegister ? __( 'Sign in', 'dono' ) : __( 'Create an account', 'dono' ) }
                 </button>
@@ -1022,7 +1022,7 @@ function CountryPicker( { value, onChange } ) {
     const [ open, setOpen ]   = useState( false );
 
     useEffect( () => {
-        const c = COUNTRIES.find( ( c ) => c.code === ( value || '' ).toUpperCase() );
+        const c = COUNTRIES.find( ( cur ) => cur.code === ( value || '' ).toUpperCase() );
         setQuery( c ? c.name : ( value || '' ) );
     }, [ value ] );
 

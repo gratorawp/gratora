@@ -58,8 +58,8 @@ export default function AmountStep( { step, state, dispatch, config } ) {
                     <AmountInput
                         value={ isCustom && cents > 0 ? cents / 100 : 0 }
                         onChange={ ( n ) => {
-                            const cents = Math.max( 0, Math.round( Number( n || 0 ) * 100 ) );
-                            setCents( cents );
+                            const nextCents = Math.max( 0, Math.round( Number( n || 0 ) * 100 ) );
+                            setCents( nextCents );
                         } }
                         currency={ state.currency }
                         min={ 0 }

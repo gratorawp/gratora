@@ -287,7 +287,7 @@ export default function StripeConnectCard( { s } ) {
                 </ul>
                 { ! pro && (
                     <Notice tone="accent" icon="ⓘ">
-                        { __( 'On the free plan Dono keeps a', 'dono' ) } <strong>{ __( '2% platform fee', 'dono' ) }</strong>{ ' ' }
+                        { __( 'On the free plan Dono keeps a', 'dono' ) } <strong>2%{ ' ' }{ __( 'platform fee', 'dono' ) }</strong>{ ' ' }
                         { __( 'per donation.', 'dono' ) }
                     </Notice>
                 ) }
@@ -348,7 +348,7 @@ export default function StripeConnectCard( { s } ) {
                 </span>
                 { pro
                     ? <span className="dono-connect-fee__amt dono-connect-fee__amt--waived">{ __( 'Waived, 0%', 'dono' ) }</span>
-                    : <span className="dono-connect-fee__amt">{ __( '2% per donation', 'dono' ) }</span>
+                    : <span className="dono-connect-fee__amt">2%{ ' ' }{ __( 'per donation', 'dono' ) }</span>
                 }
             </div>
             { optionsBlock }

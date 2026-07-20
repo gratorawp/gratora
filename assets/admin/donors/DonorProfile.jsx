@@ -48,7 +48,7 @@ function EditPanel( { donor, onCancel, onSaved } ) {
         address: { ...s.address, [ k ]: e.target.value },
     } ) );
     const [ countryQuery, setCountryQuery ] = useState( () => {
-        const c = COUNTRIES.find( ( c ) => c.code === ( donor.country || '' ).toUpperCase() );
+        const c = COUNTRIES.find( ( cur ) => cur.code === ( donor.country || '' ).toUpperCase() );
         return c ? c.name : '';
     } );
     const [ countryOpen, setCountryOpen ] = useState( false );

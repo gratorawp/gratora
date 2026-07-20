@@ -491,14 +491,14 @@ function useFocusTrap( ref, active ) {
             if ( e.key !== 'Tab' ) return;
             const nodes = [ ...el.querySelectorAll( FOCUSABLE ) ];
             if ( ! nodes.length ) return;
-            const first = nodes[ 0 ];
+            const firstNode = nodes[ 0 ];
             const last  = nodes[ nodes.length - 1 ];
-            if ( e.shiftKey && document.activeElement === first ) {
+            if ( e.shiftKey && document.activeElement === firstNode ) {
                 e.preventDefault();
                 last.focus();
             } else if ( ! e.shiftKey && document.activeElement === last ) {
                 e.preventDefault();
-                first.focus();
+                firstNode.focus();
             }
         };
         el.addEventListener( 'keydown', onTab );
