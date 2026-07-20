@@ -21,6 +21,9 @@ export default function CountrySelect( {
     const code = String( value || '' ).toUpperCase();
     const selectedName = countryName( code );
 
+    const listId = id ? `${ id }-listbox` : undefined;
+    const optId  = ( c ) => ( id ? `${ id }-opt-${ c.code }` : undefined );
+
     const [ query, setQuery ]   = useState( '' );
     const [ open,  setOpen ]    = useState( false );
     const [ active, setActive ] = useState( 0 );
@@ -73,6 +76,7 @@ export default function CountrySelect( {
     };
 
     return (
+        // eslint-disable-next-line jsx-a11y/no-static-element-interactions -- presentational wrapper; the combobox is the input inside. onMouseDown only prevents focus theft.
         <div
             ref={ wrapRef }
             class={ `dono-form__country-select${ open ? ' is-open' : '' }` }
@@ -93,6 +97,8 @@ export default function CountrySelect( {
                 aria-invalid={ ariaInvalid || undefined }
                 aria-autocomplete="list"
                 aria-expanded={ open }
+                aria-controls={ open ? listId : undefined }
+                aria-activedescendant={ open && matches[ active ] ? optId( matches[ active ] ) : undefined }
                 role="combobox"
                 onFocus={ () => { setOpen( true ); setQuery( '' ); } }
                 onInput={ ( e ) => { setQuery( e.target.value ); if ( ! open ) setOpen( true ); } }
@@ -105,10 +111,12 @@ export default function CountrySelect( {
             </span>
 
             { open && matches.length > 0 && (
-                <ul class="dono-form__country-select-list" role="listbox">
+                <ul id={ listId } class="dono-form__country-select-list" role="listbox">
                     { matches.map( ( c, i ) => (
+                        // eslint-disable-next-line jsx-a11y/click-events-have-key-events -- option selection is keyboard-driven through the combobox input's onKeyDown; the option is mouse-activated only.
                         <li
                             key={ c.code }
+                            id={ optId( c ) }
                             role="option"
                             aria-selected={ i === active }
                             class={ `dono-form__country-select-option${ i === active ? ' is-active' : '' }${ c.code === code ? ' is-current' : '' }` }

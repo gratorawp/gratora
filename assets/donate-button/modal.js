@@ -7,7 +7,7 @@
 
     function open( modal ) {
         if ( ! modal ) return;
-        lastFocused = document.activeElement;
+        lastFocused = modal.ownerDocument.activeElement;
         modal.hidden = false;
         // Forced reflow so the CSS transition picks up the class toggle.
         // eslint-disable-next-line no-unused-expressions
@@ -75,7 +75,7 @@
             if ( ! nodes.length ) return;
             const first  = nodes[ 0 ];
             const last   = nodes[ nodes.length - 1 ];
-            const active = document.activeElement;
+            const active = panel.ownerDocument.activeElement;
             if ( e.shiftKey && ( active === first || ! panel.contains( active ) ) ) {
                 e.preventDefault();
                 last.focus();

@@ -483,7 +483,8 @@ function useFocusTrap( ref, active ) {
     useEffect( () => {
         if ( ! active || ! ref.current ) return;
         const el = ref.current;
-        const prev = document.activeElement;
+        const doc = el.ownerDocument;
+        const prev = doc.activeElement;
         const first = el.querySelector( FOCUSABLE );
         if ( first ) first.focus();
 
@@ -493,10 +494,10 @@ function useFocusTrap( ref, active ) {
             if ( ! nodes.length ) return;
             const firstNode = nodes[ 0 ];
             const last  = nodes[ nodes.length - 1 ];
-            if ( e.shiftKey && document.activeElement === firstNode ) {
+            if ( e.shiftKey && doc.activeElement === firstNode ) {
                 e.preventDefault();
                 last.focus();
-            } else if ( ! e.shiftKey && document.activeElement === last ) {
+            } else if ( ! e.shiftKey && doc.activeElement === last ) {
                 e.preventDefault();
                 firstNode.focus();
             }
@@ -532,7 +533,8 @@ function ModalShell( { children, openLabel, config } ) {
             </button>
             { open && (
                 <div class="dono-modal" role="dialog" aria-modal="true" aria-label={ config.i18n.formTitle || '' }>
-                    <div class="dono-modal__backdrop" onClick={ () => setOpen( false ) } />
+                    { /* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events -- decorative overlay; Escape and the close button provide keyboard dismissal */ }
+                    <div class="dono-modal__backdrop" aria-hidden="true" onClick={ () => setOpen( false ) } />
                     <div class="dono-modal__panel" ref={ panelRef }>
                         <button
                             type="button"

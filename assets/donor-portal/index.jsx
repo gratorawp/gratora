@@ -14,7 +14,8 @@ function useFocusTrap( ref, active, onClose ) {
     useEffect( () => {
         if ( ! active || ! ref.current ) return;
         const el = ref.current;
-        const prev = document.activeElement;
+        const doc = el.ownerDocument;
+        const prev = doc.activeElement;
         const first = el.querySelector( FOCUSABLE );
         if ( first ) first.focus();
         const onKey = ( e ) => {
@@ -26,10 +27,10 @@ function useFocusTrap( ref, active, onClose ) {
             if ( e.key !== 'Tab' ) return;
             const nodes = [ ...el.querySelectorAll( FOCUSABLE ) ];
             if ( ! nodes.length ) return;
-            if ( e.shiftKey && document.activeElement === nodes[ 0 ] ) {
+            if ( e.shiftKey && doc.activeElement === nodes[ 0 ] ) {
                 e.preventDefault();
                 nodes[ nodes.length - 1 ].focus();
-            } else if ( ! e.shiftKey && document.activeElement === nodes[ nodes.length - 1 ] ) {
+            } else if ( ! e.shiftKey && doc.activeElement === nodes[ nodes.length - 1 ] ) {
                 e.preventDefault();
                 nodes[ 0 ].focus();
             }
@@ -276,7 +277,7 @@ function App() {
                 </div>
             ) }
 
-            <nav class="dp__nav" role="tablist">
+            <div class="dp__nav" role="tablist">
                 { [ ...TABS, ...visibleExtTabs ].map( ( t ) => {
                     const showDot = t.id === 'consents' && consentsPending > 0;
                     return (
@@ -292,7 +293,7 @@ function App() {
                         </button>
                     );
                 } ) }
-            </nav>
+            </div>
 
             <main class="dp__main">
                 { tab === 'overview'    && <Overview  me={ me } /> }
@@ -441,9 +442,9 @@ function Donations( { onOpen } ) {
     if ( ! list.length ) return <p>{ __( 'No donations yet.', 'dono' ) }</p>;
 
     return (
-        <ul class="dp-list">
+        <div class="dp-list">
             { list.map( ( d ) => (
-                <li
+                <div
                     key={ d.id }
                     class="dp-list__row"
                     role="button"
@@ -461,9 +462,9 @@ function Donations( { onOpen } ) {
                         <div class="dp-list__sub">{ formatDate( d.paid_at ) } · { d.reference }</div>
                     </div>
                     <span class={ `dp-pill dp-pill--${ d.frequency }` }>{ freqLabel( d.frequency ) }</span>
-                </li>
+                </div>
             ) ) }
-        </ul>
+        </div>
     );
 }
 
@@ -487,6 +488,7 @@ function DonationDetail( { reference, onClose } ) {
     };
 
     return (
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events -- click-outside-to-close is a mouse convenience; Escape (focus trap) and the close button provide keyboard dismissal
         <div class="dp-modal" role="dialog" aria-modal="true" aria-label={ __( 'Donation details', 'dono' ) } onClick={ ( e ) => { if ( e.target === e.currentTarget ) onClose(); } } ref={ panelRef }>
             <div class="dp-modal__panel">
                 <button class="dp-modal__close" onClick={ onClose } aria-label={ __( 'Close', 'dono' ) }>×</button>
@@ -688,6 +690,7 @@ function RecurringActionSheet( { plan, onClose, onDone } ) {
         .catch( ( e ) => setErr( e.message || __( 'Something went wrong.', 'dono' ) ) );
 
     return (
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events -- click-outside-to-close is a mouse convenience; Escape (focus trap) and the close button provide keyboard dismissal
         <div class="dp-modal" role="dialog" aria-modal="true" aria-label={ __( 'Manage donation', 'dono' ) } onClick={ ( e ) => { if ( e.target === e.currentTarget ) onClose(); } } ref={ panelRef }>
             <div class="dp-modal__panel">
                 <button class="dp-modal__close" onClick={ onClose } aria-label={ __( 'Close', 'dono' ) }>×</button>
