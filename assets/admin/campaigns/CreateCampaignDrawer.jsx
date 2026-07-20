@@ -161,6 +161,7 @@ export default function CreateCampaignDrawer( { onClose } ) {
                 <span>{ __( 'Creating builds a landing page for you. You can change everything later.', 'dono' ) }</span>
             </div>
             <div className="dono-cc__foot">
+                { /* eslint-disable-next-line jsx-a11y/label-has-associated-control -- Switch is self-labeled via its label prop; the wrapping label makes the whole row a click target */ }
                 <label className="dono-cc__publish">
                     <Switch checked={ publishNow } onChange={ setPublishNow } label={ __( 'Publish now', 'dono' ) } />
                     <span className="dono-cc__publish-txt">

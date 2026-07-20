@@ -500,8 +500,9 @@ function CauseStep( { value, onChange } ) {
             </div>
 
             <div className="dono-onboarding__telemetry">
-                <label className="dono-onboarding__telemetry-row">
+                <label className="dono-onboarding__telemetry-row" htmlFor="dono-onboarding-telemetry">
                     <input
+                        id="dono-onboarding-telemetry"
                         type="checkbox"
                         className="dono-onboarding__telemetry-input"
                         checked={ !! value.telemetry_enabled }

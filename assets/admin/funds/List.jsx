@@ -624,8 +624,9 @@ function FundDeleteModal( { fund, funds, onClose, onError, onDone } ) {
                         { __( 'This fund is still referenced, so it is never hard-deleted. Choose what to do:', 'dono' ) }
                     </p>
 
-                    <label className="dono-choice">
+                    <label className="dono-choice" htmlFor="dono-fund-delete-deactivate">
                         <input
+                            id="dono-fund-delete-deactivate"
                             type="radio"
                             name="dono-fund-delete"
                             checked={ choice === 'deactivate' }
@@ -637,8 +638,9 @@ function FundDeleteModal( { fund, funds, onClose, onError, onDone } ) {
                         </span>
                     </label>
 
-                    <label className="dono-choice">
+                    <label className="dono-choice" htmlFor="dono-fund-delete-reassign">
                         <input
+                            id="dono-fund-delete-reassign"
                             type="radio"
                             name="dono-fund-delete"
                             checked={ choice === 'reassign' }

@@ -54,7 +54,7 @@ export default function AmountStep( { step, state, dispatch, config } ) {
             ) }
 
             { allowCustom && (
-                <label class="dono-form__custom">
+                <div class="dono-form__custom">
                     <AmountInput
                         value={ isCustom && cents > 0 ? cents / 100 : 0 }
                         onChange={ ( n ) => {
@@ -67,7 +67,7 @@ export default function AmountStep( { step, state, dispatch, config } ) {
                         placeholder={ config.i18n.customAmount }
                         inputProps={ { 'aria-label': config.i18n.customAmount } }
                     />
-                </label>
+                </div>
             ) }
 
             { error && <p class="dono-form__field-error" role="alert">{ error }</p> }

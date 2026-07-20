@@ -33,6 +33,14 @@ module.exports = {
         'no-unused-expressions': [ 'error', { allowShortCircuit: true, allowTernary: true } ],
         // House rule bans en/em dashes; keep hyphens in numeric ranges.
         '@wordpress/i18n-hyphenated-range': 'off',
+        // The forms wrap controls inside their <label> (valid implicit
+        // association per the html spec); accept that, not only htmlFor.
+        // The custom components below render the actual control element.
+        'jsx-a11y/label-has-associated-control': [ 'error', {
+            assert: 'either',
+            depth: 3, // label text is often wrapped in a styled span/strong
+            controlComponents: [ 'AmountInput', 'CountrySelect', 'Switch' ],
+        } ],
         // `x == null` is the codebase's deliberate null-or-undefined guard;
         // require === everywhere else.
         eqeqeq: [ 'error', 'always', { null: 'ignore' } ],
