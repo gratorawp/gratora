@@ -37,7 +37,7 @@ function TimelineRow( { event, campaigns } ) {
         : null;
 
     let title = <>{ meta.label }</>;
-    let sub   = null;
+    const sub = null;
 
     if ( event.type === 'donation.paid' && amount ) {
         title = (

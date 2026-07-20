@@ -1805,10 +1805,11 @@ function AppearancePanel( { c } ) {
     const toggleCustomizing = ( on ) => {
         if ( on ) {
             writeStyle( { ...style, tokens: { ...inline } } );
-        } else {
+        } else if ( presetId === '' ) {
             // No preset either - drop the field so brand default takes over.
-            if ( presetId === '' ) writeStyle( null );
-            else writeStyle( { preset_id: presetId } );
+            writeStyle( null );
+        } else {
+            writeStyle( { preset_id: presetId } );
         }
     };
 

@@ -33,6 +33,9 @@ module.exports = {
         'no-unused-expressions': [ 'error', { allowShortCircuit: true, allowTernary: true } ],
         // House rule bans en/em dashes; keep hyphens in numeric ranges.
         '@wordpress/i18n-hyphenated-range': 'off',
+        // `x == null` is the codebase's deliberate null-or-undefined guard;
+        // require === everywhere else.
+        eqeqeq: [ 'error', 'always', { null: 'ignore' } ],
         'jsdoc/require-param': 'off', // comments are intentionally minimal
         'jsdoc/require-param-type': 'off',
         'jsdoc/check-tag-names': 'off', // e.g. @jsxImportSource in the Preact runtime
