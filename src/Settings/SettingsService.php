@@ -273,11 +273,16 @@ final class SettingsService
     {
         if ($group !== 'email') return $static;
 
-        // Translatable template defaults (see the const note). The stored option
-        // overlays these in get(), so a customised template still wins.
-        if (empty($static['templates'])) {
-            $static['templates'] = $this->emailTemplateDefaults();
-        }
+        // Translatable template defaults (see the const note). Merge core
+        // defaults UNDER any templates a filter already contributed, so an
+        // add-on registering its own templates (dono.settings.groups) cannot
+        // displace the core set - otherwise activating an add-on silently
+        // drops core transactional emails (receipts, magic link). The stored
+        // option overlays both in get(), so a customised template still wins.
+        $static['templates'] = array_merge(
+            $this->emailTemplateDefaults(),
+            is_array($static['templates'] ?? null) ? $static['templates'] : []
+        );
 
         // Use the blog name as sender name so donors see "{site name} <addr>" rather than bare "wordpress@host".
         if (($static['from_name'] ?? '') === '') {

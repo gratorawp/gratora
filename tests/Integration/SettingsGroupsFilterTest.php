@@ -44,4 +44,32 @@ final class SettingsGroupsFilterTest extends IntegrationTestCase
         remove_all_filters('dono.settings.groups');
         remove_all_actions('dono.settings.updated');
     }
+
+    /**
+     * An add-on registering its own email template via the filter must not
+     * displace the core template set. resolveDynamicDefaults used to inject
+     * core templates only when the group's templates were empty, so any add-on
+     * that pre-populated them silently dropped every core transactional email
+     * (receipts, magic link). Merge, do not skip.
+     */
+    public function test_addon_email_template_does_not_displace_core_templates(): void
+    {
+        add_filter('dono.settings.groups', static function (array $g): array {
+            $g['email']['defaults']['templates']['dono_addon_welcome'] = [
+                'enabled' => true,
+                'subject' => 'Add-on welcome',
+                'body'    => 'Hello from the add-on.',
+            ];
+            return $g;
+        });
+
+        $templates = (new SettingsService())->get('email')['templates'] ?? [];
+
+        $this->assertArrayHasKey('dono_addon_welcome', $templates, 'the add-on template is present');
+        $this->assertArrayHasKey('magic_link', $templates, 'core magic-link survives an add-on template');
+        $this->assertArrayHasKey('donation_receipt', $templates, 'core receipt survives an add-on template');
+        $this->assertTrue((bool) ($templates['magic_link']['enabled'] ?? false), 'core magic-link stays enabled');
+
+        remove_all_filters('dono.settings.groups');
+    }
 }
