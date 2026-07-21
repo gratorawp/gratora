@@ -1,7 +1,7 @@
 /** @jsxImportSource preact */
 
 import { formatAmount } from '../util/format';
-import { computeFees } from '../state/store';
+import { coveredFeeCents } from '../state/store';
 
 const FREQUENCY_DEFAULTS = {
     'weekly':    'Weekly',
@@ -26,7 +26,9 @@ export default function ConfirmStep( { step, state, config } ) {
         ? ( config.i18n[ freqKey[ freq ] ] || FREQUENCY_DEFAULTS[ freq ] || freq )
         : '';
 
-    const fee   = v.cover_fees ? computeFees( state, cents ) : 0;
+    // Zero when unchecked or when a condition hides the cover-fees field, so
+    // the shown total always equals what buildPayload charges.
+    const fee   = coveredFeeCents( state );
     const total = formatAmount( cents + fee, state.currency );
 
     return (

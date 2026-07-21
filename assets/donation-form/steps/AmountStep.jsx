@@ -2,6 +2,7 @@
 
 import { formatAmount } from '../util/format';
 import { displayPreset } from '../util/fx';
+import { decodeEntities } from '../util/entities';
 import AmountInput from '../components/AmountInput';
 import CurrencySwitcher from '../components/CurrencySwitcher';
 
@@ -47,7 +48,7 @@ export default function AmountStep( { step, state, dispatch, config } ) {
                         onClick={ () => setCents( p.cents ) }
                     >
                         <span class="dono-form__preset-amount">{ formatAmount( p.cents, state.currency ) }</span>
-                        { p.impact && <span class="dono-form__preset-impact">{ p.impact }</span> }
+                        { p.impact && <span class="dono-form__preset-impact">{ decodeEntities( p.impact ) }</span> }
                     </button>
                 ) ) }
             </div>

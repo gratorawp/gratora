@@ -3,7 +3,7 @@
 import { render } from 'preact';
 import { useCallback, useReducer, useRef, useState, useEffect } from 'preact/hooks';
 
-import { reducer, initialState, validateStep, buildPayload } from './state/store';
+import { reducer, initialState, validateStep, buildPayload, fieldSteps } from './state/store';
 import AmountStep   from './steps/AmountStep';
 import DonorStep    from './steps/DonorStep';
 import ConfirmStep  from './steps/ConfirmStep';
@@ -14,6 +14,7 @@ import CurrencySwitcher from './components/CurrencySwitcher';
 import StripePayment from './components/StripePayment';
 import { detectStripeReturn, resolveStripeReturn, clearStripeReturnParams } from './util/stripe';
 import { interpolateLabel } from './util/interpolate';
+import { decodeEntities } from './util/entities';
 import { setActiveNumberFormat } from './util/format';
 import { evaluateCondition } from './state/conditions';
 import './runtime.scss';
@@ -110,20 +111,28 @@ function FormBody( { state, dispatch, config } ) {
     const formToken    = config.spam?.formToken || '';
     const [ honeypot, setHoneypot ] = useState( '' );
 
+    // Re-entrancy guard: a double-click fires onSubmit twice in the same tick
+    // (the disabled re-render lands later), creating two pending donations.
+    // The ref flips synchronously; the finally re-arms on every exit, and the
+    // 'submitting' status keeps the button disabled while the fetch is out.
+    const inFlight = useRef( false );
+
     const onSubmit = useCallback( async () => {
-        for ( const s of state.steps ) {
-            const errors = validateStep( s, state );
-            if ( Object.keys( errors ).length > 0 ) {
-                // Jump to the page that owns the errored field so the message is
-                // visible; otherwise a paged form dead-ends with no feedback when
-                // the error is on an earlier page than the submit button.
-                dispatch( { type: 'SET_ERRORS', errors, step: s.page || 0 } );
-                focusFirstInvalid();
-                return;
-            }
-        }
-        dispatch( { type: 'SUBMIT_START' } );
+        if ( inFlight.current ) return;
+        inFlight.current = true;
         try {
+            for ( const s of fieldSteps( state ) ) {
+                const errors = validateStep( s, state );
+                if ( Object.keys( errors ).length > 0 ) {
+                    // Jump to the page that owns the errored field so the message is
+                    // visible; otherwise a paged form dead-ends with no feedback when
+                    // the error is on an earlier page than the submit button.
+                    dispatch( { type: 'SET_ERRORS', errors, step: s.page || 0 } );
+                    focusFirstInvalid();
+                    return;
+                }
+            }
+            dispatch( { type: 'SUBMIT_START' } );
             // Send X-WP-Nonce only when present (logged-in users). Anonymous
             // donors omit it so a page-cached form never sends a stale nonce
             // the REST layer would reject with a 403.
@@ -178,6 +187,8 @@ function FormBody( { state, dispatch, config } ) {
             } );
         } catch ( err ) {
             dispatch( { type: 'SUBMIT_ERROR', message: err?.message || config.i18n.error } );
+        } finally {
+            inFlight.current = false;
         }
     }, [ state, config, dispatch, formToken, honeypot ] );
 
@@ -331,25 +342,29 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
     const current = Math.max( 0, Math.min( state.step, pages.length - 1 ) );
     const isLast  = current === pages.length - 1;
     const pageSteps = state.steps.filter( ( s ) => ( s.page || 0 ) === current );
+    // Validation walks fieldSteps so fields authored above the wizard (the
+    // preamble, rendered once by FormBody, never as a page step) check with
+    // the first page instead of bypassing validation entirely.
+    const checkSteps = fieldSteps( state ).filter( ( s ) => ( s.page || 0 ) === current );
 
     const page = pages[ current ] || {};
-    const pageTitle = page.title || '';
+    const pageTitle = decodeEntities( page.title || '' );
     const showPageTitle = page.showTitle !== false && pageTitle !== '';
 
     const onPrev = useCallback( () => dispatch( { type: 'PREV' } ), [ dispatch ] );
 
     const onNext = useCallback( () => {
         const errors = {};
-        for ( const s of pageSteps ) {
+        for ( const s of checkSteps ) {
             Object.assign( errors, validateStep( s, state ) );
         }
         dispatch( { type: 'NEXT', errors } );
         if ( Object.keys( errors ).length > 0 ) focusFirstInvalid();
-    }, [ pageSteps, state, dispatch ] );
+    }, [ checkSteps, state, dispatch ] );
 
     const submit = useCallback( () => {
         const errors = {};
-        for ( const s of pageSteps ) {
+        for ( const s of checkSteps ) {
             Object.assign( errors, validateStep( s, state ) );
         }
         if ( Object.keys( errors ).length > 0 ) {
@@ -358,7 +373,7 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
             return;
         }
         onSubmit();
-    }, [ pageSteps, state, dispatch, onSubmit ] );
+    }, [ checkSteps, state, dispatch, onSubmit ] );
 
     const submitStep = state.steps.find( ( s ) => s.type === 'submit' );
     const submitLabel = interpolateLabel(
@@ -470,7 +485,7 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
                 <ProgressBar
                     current={ current }
                     total={ pages.length }
-                    labels={ pages.map( ( p ) => p.title || '' ) }
+                    labels={ pages.map( ( p ) => decodeEntities( p.title || '' ) ) }
                 />
             ) }
         </div>
@@ -592,7 +607,7 @@ function renderDecorationItem( d, i, values, ctx ) {
                 key={ i }
                 class={ `dono-form__heading dono-form__heading--${ d.align || 'left' }` }
             >
-                { d.text }
+                { decodeEntities( d.text ) }
             </Tag>
         );
     }
@@ -698,10 +713,17 @@ function applyUrlPrefills( config ) {
         const amount = config.steps.find( ( s ) => s.type === 'amount' );
         if ( amount ) {
             const list = amount.presets || [];
-            if ( ! list.find( ( p ) => ( typeof p === 'number' ? p : p?.cents ) === cents ) ) {
-                amount.presets = [ ...list, { cents, impact: '' } ];
+            const isPreset = !! list.find( ( p ) => ( typeof p === 'number' ? p : p?.cents ) === cents );
+            // Presets-only forms reject non-preset amounts server-side, so a
+            // non-preset prefill would preselect a tile that can never submit.
+            // Only honor it when custom amounts are allowed or it already
+            // matches an authored preset.
+            if ( isPreset || amount.allowCustom !== false ) {
+                if ( ! isPreset ) {
+                    amount.presets = [ ...list, { cents, impact: '' } ];
+                }
+                config.__prefillAmount = cents;
             }
-            config.__prefillAmount = cents;
         }
     }
     if ( freq ) config.__prefillFrequency = freq;

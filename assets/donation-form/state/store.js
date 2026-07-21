@@ -1,11 +1,24 @@
 /** @jsxImportSource preact */
 import { evaluateCondition } from './conditions';
-import { convertCents, displayPreset } from '../util/fx';
+import { convertCents, displayPreset, isZeroDecimal } from '../util/fx';
 import { formatAmount } from '../util/format';
 /**
  * Donation-form state: single useReducer source of truth
  * (step, steps, values, errors, status, submission, message).
  */
+
+// Every field-bearing collection: fields authored above a wizard live in
+// `preamble` (rendered once above the form, not inside a step), so fold them
+// in as a synthetic first-page donor step. Validation, fees, suppression and
+// payload building must all walk this, never `steps` alone, or preamble
+// fields become orphaned, never-validated, never-suppressed inputs. Works on
+// both the boot config and the reducer state (same preamble/steps keys).
+export function fieldSteps( src ) {
+    const pre = ( Array.isArray( src.preamble ) && src.preamble.length )
+        ? [ { type: 'donor', page: 0, items: src.preamble } ]
+        : [];
+    return pre.concat( src.steps || [] );
+}
 
 export function initialState( config ) {
     const presets   = findStep( config.steps, 'amount' )?.presets || [];
@@ -14,16 +27,7 @@ export function initialState( config ) {
         ? Number( first )
         : Number( first?.cents || 0 );
     const firstCents = Number( config.__prefillAmount ) || fallback;
-    // Fields authored above a multi-step wizard live in config.preamble (rendered
-    // once above the wizard, not inside a step). Fold them into field collection
-    // as a synthetic step so their values are seeded, captured and submitted like
-    // any step field instead of rendering as orphaned, never-captured inputs.
-    const preambleStep = ( Array.isArray( config.preamble ) && config.preamble.length )
-        ? [ { type: 'donor', items: config.preamble } ]
-        : [];
-    const donorSteps = preambleStep.concat(
-        ( config.steps || [] ).filter( ( s ) => s.type === 'donor' )
-    );
+    const donorSteps = fieldSteps( config ).filter( ( s ) => s.type === 'donor' );
     const allDonorFields = donorSteps.flatMap( fieldsOf );
     const anonField = allDonorFields.find( ( f ) => f.kind === 'anonymous' );
     const fundField = allDonorFields.find( ( f ) => f.kind === 'fund' );
@@ -34,6 +38,7 @@ export function initialState( config ) {
     return {
         step:        0,
         steps:       config.steps,
+        preamble:    Array.isArray( config.preamble ) ? config.preamble : [],
         pages:       Array.isArray( config.pages )   ? config.pages   : [],
         pageNav:     ( config.pageNav && typeof config.pageNav === 'object' ) ? config.pageNav : {},
         currency:    config.currency,
@@ -66,7 +71,7 @@ export function initialState( config ) {
             tribute:      { type: '', name: '', notify_email: '', message: '', convert_to_annual: false },
             fund_id:      fundField ? String( fundField.default_id || '' ) : '',
             consents,
-            frequency:    freqField ? String( freqField.default || 'one-time' ) : 'one-time',
+            frequency:    initialFrequency( config, freqField ),
             custom,
         },
         errors:     {},
@@ -75,6 +80,19 @@ export function initialState( config ) {
         payment:    null,
         message:    '',
     };
+}
+
+// Portal give-again links prefill ?dono_frequency= in the stored underscore
+// vocabulary ('one_time'); form state uses hyphens. Apply the prefill only
+// when the form's frequency field actually offers it; otherwise fall back to
+// the authored default.
+function initialFrequency( config, freqField ) {
+    const fallback = freqField ? String( freqField.default || 'one-time' ) : 'one-time';
+    const raw = String( config.__prefillFrequency || '' ).trim();
+    if ( ! raw || ! freqField ) return fallback;
+    const norm    = raw.replace( /_/g, '-' );
+    const offered = Array.isArray( freqField.frequencies ) ? freqField.frequencies : [];
+    return offered.includes( norm ) ? norm : fallback;
 }
 
 function initialConsents( donorSteps ) {
@@ -284,6 +302,7 @@ export function reducer( state, action ) {
         case 'RESET':
             return initialState( {
                 steps:       state.steps,
+                preamble:    state.preamble,
                 pages:       state.pages,
                 pageNav:     state.pageNav,
                 currency:    state.presetCurrency,
@@ -500,7 +519,7 @@ function suppressedFields( state ) {
     const v = state.values;
     const CUSTOM = [ 'text', 'number', 'date', 'dropdown', 'radio', 'checkbox', 'multi-select', 'hidden' ];
     const out = { custom: new Set(), frequency: false, fund: false, anon: false, fees: false };
-    for ( const step of ( state.steps || [] ) ) {
+    for ( const step of fieldSteps( state ) ) {
         for ( const f of fieldsOf( step ) ) {
             if ( evaluateCondition( f.condition, v ) ) continue;
             if ( f.kind === 'frequency' ) out.frequency = true;
@@ -517,7 +536,7 @@ export function buildPayload( state ) {
     const v = state.values;
     const sup = suppressedFields( state );
     const base = Number( v.amount_cents ) || 0;
-    const fee  = ( v.cover_fees && ! sup.fees ) ? computeFees( state, base ) : 0;
+    const fee  = coveredFeeCents( state );
     return {
         email:             ( v.email || '' ).trim(),
         amount_cents:      base + fee,
@@ -608,8 +627,27 @@ function buildTribute( t ) {
 
 export function computeFees( state, base ) {
     // Multi-page wizards emit one donor step per page; scan all for cover-fees.
-    const donorSteps = ( state.steps || [] ).filter( ( s ) => s.type === 'donor' );
+    const donorSteps = fieldSteps( state ).filter( ( s ) => s.type === 'donor' );
     const f = donorSteps.map( ( s ) => findField( s, 'cover_fees' ) ).find( Boolean );
     if ( ! f ) return 0;
-    return Math.round( base * ( ( f.percent || 0 ) / 100 ) ) + Number( f.fixed || 0 );
+    // The fixed component is authored in the org base currency; convert it
+    // when the donor switched, so a 30-cent fixed never rides as 0.30 EUR.
+    const fixed = convertCents( state.fx, Number( f.fixed || 0 ), state.presetCurrency, state.currency );
+    let fee = Math.round( base * ( ( f.percent || 0 ) / 100 ) ) + fixed;
+    if ( isZeroDecimal( state.currency ) ) {
+        // Storage is major x 100: round to a whole major unit (nearest, ties
+        // away from zero) so base + fee passes the server's no-fractional-
+        // amounts check for this currency.
+        fee = Math.round( fee / 100 ) * 100;
+    }
+    return Math.max( 0, fee );
+}
+
+// The fee actually charged: zero when the donor left cover-fees unchecked or
+// a condition hides the field. Display sites (summary, submit label) must use
+// this, not computeFees directly, so shown totals always match the payload.
+export function coveredFeeCents( state ) {
+    if ( ! state.values.cover_fees ) return 0;
+    if ( suppressedFields( state ).fees ) return 0;
+    return computeFees( state, Number( state.values.amount_cents ) || 0 );
 }

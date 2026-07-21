@@ -2,6 +2,7 @@
 
 import { evaluateCondition } from '../state/conditions';
 import { formatAmount } from '../util/format';
+import { decodeEntities } from '../util/entities';
 import { computeFees } from '../state/store';
 import ErrorBoundary from '../components/ErrorBoundary';
 import CountrySelect from '../components/CountrySelect';
@@ -87,7 +88,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                         <input
                             type="text"
                             autoComplete="given-name"
-                            placeholder={ f.firstPlaceholder || '' }
+                            placeholder={ decodeEntities( f.firstPlaceholder || '' ) }
                             value={ v.profile.first_name }
                             onInput={ onText( 'profile.first_name' ) }
                             aria-invalid={ !! err[ 'profile.first_name' ] }
@@ -102,7 +103,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                         <input
                             type="text"
                             autoComplete="family-name"
-                            placeholder={ f.lastPlaceholder || '' }
+                            placeholder={ decodeEntities( f.lastPlaceholder || '' ) }
                             value={ v.profile.last_name }
                             onInput={ onText( 'profile.last_name' ) }
                             aria-invalid={ !! err[ 'profile.last_name' ] }
@@ -123,7 +124,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                     <input
                         type="email"
                         autoComplete="email"
-                        placeholder={ f.placeholder || '' }
+                        placeholder={ decodeEntities( f.placeholder || '' ) }
                         value={ v.email }
                         onInput={ onText( 'email' ) }
                         aria-invalid={ !! err[ 'email' ] }
@@ -141,9 +142,10 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                     error={ err[ 'profile.country' ] }
                 >
                     <CountrySelect
+                        id={ `dono-country-${ key }` }
                         value={ v.profile.country }
                         onChange={ setField( 'profile.country' ) }
-                        placeholder={ f.placeholder || config.i18n.searchCountry || 'Search country…' }
+                        placeholder={ decodeEntities( f.placeholder || '' ) || config.i18n.searchCountry || 'Search country…' }
                         required={ !! f.required }
                         ariaInvalid={ !! err[ 'profile.country' ] }
                     />
@@ -161,7 +163,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                     <input
                         type="tel"
                         autoComplete="tel"
-                        placeholder={ f.placeholder || '' }
+                        placeholder={ decodeEntities( f.placeholder || '' ) }
                         value={ v.profile.phone }
                         onInput={ onText( 'profile.phone' ) }
                         aria-invalid={ !! err[ 'profile.phone' ] }
@@ -181,7 +183,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                     <textarea
                         rows={ 3 }
                         maxLength={ 5000 }
-                        placeholder={ f.placeholder || '' }
+                        placeholder={ decodeEntities( f.placeholder || '' ) }
                         value={ v.note_to_org }
                         onInput={ onText( 'note_to_org' ) }
                         aria-invalid={ !! err[ 'note_to_org' ] }
@@ -206,7 +208,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                         checked={ !! v.is_anonymous }
                         onChange={ onCheck( 'is_anonymous' ) }
                     />
-                    <span>{ f.label || config.i18n.anonymous }</span>
+                    <span>{ decodeEntities( f.label || '' ) || config.i18n.anonymous }</span>
                 </label>
             );
 
@@ -219,7 +221,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                 ];
             return (
                 <fieldset key={ key } class="dono-form__tribute">
-                    <legend>{ f.label }</legend>
+                    <legend>{ decodeEntities( f.label ) }</legend>
                     <div class="dono-form__tribute-types">
                         { tributeTypes.map( ( t ) => (
                             <label key={ t.id }>
@@ -229,7 +231,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                                     checked={ v.tribute.type === t.id }
                                     onChange={ () => onText( 'tribute.type' )( { target: { value: t.id } } ) }
                                 />
-                                { t.label }
+                                { decodeEntities( t.label ) }
                             </label>
                         ) ) }
                     </div>
@@ -292,7 +294,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                         onChange={ onCheck( 'cover_fees' ) }
                     />
                     <span>
-                        { f.label || config.i18n.coverFees }
+                        { decodeEntities( f.label || '' ) || config.i18n.coverFees }
                         { fee > 0 && (
                             <em class="dono-form__cover-fees-math">
                                 { ` (${ formatAmount( fee, state.currency ) })` }
@@ -310,8 +312,8 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
             const setId      = ( id ) => onText( 'fund_id' )( { target: { value: id } } );
             return (
                 <fieldset key={ key } class="dono-form__fund">
-                    <legend>{ f.label || '' }</legend>
-                    <div class="dono-form__fund-options" role="radiogroup" aria-label={ f.label || '' }>
+                    <legend>{ decodeEntities( f.label || '' ) }</legend>
+                    <div class="dono-form__fund-options" role="radiogroup" aria-label={ decodeEntities( f.label || '' ) }>
                         { allowEmpty && (
                             <label class={ `dono-form__fund-option${ current === '' ? ' is-selected' : '' }` }>
                                 <input
@@ -320,7 +322,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                                     checked={ current === '' }
                                     onChange={ () => setId( '' ) }
                                 />
-                                <span class="dono-form__fund-option-label">{ f.empty_label || config.i18n.noSpecificFund || 'No specific fund' }</span>
+                                <span class="dono-form__fund-option-label">{ decodeEntities( f.empty_label || '' ) || config.i18n.noSpecificFund || 'No specific fund' }</span>
                                 { f.empty_description && (
                                     <span class="dono-form__fund-option-desc">{ f.empty_description }</span>
                                 ) }
@@ -333,7 +335,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                             if ( o.selectable === false ) {
                                 return (
                                     <div key={ `g-${ id }` } class="dono-form__fund-group">
-                                        { o.label || id }
+                                        { decodeEntities( o.label || '' ) || id }
                                     </div>
                                 );
                             }
@@ -349,7 +351,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                                         checked={ checked }
                                         onChange={ () => setId( id ) }
                                     />
-                                    <span class="dono-form__fund-option-label">{ o.label || id }</span>
+                                    <span class="dono-form__fund-option-label">{ decodeEntities( o.label || '' ) || id }</span>
                                     { o.description && (
                                         <span class="dono-form__fund-option-desc">{ o.description }</span>
                                     ) }
@@ -373,7 +375,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
             };
             return (
                 <fieldset key={ key } class="dono-form__address">
-                    { f.label && <legend>{ f.label }</legend> }
+                    { f.label && <legend>{ decodeEntities( f.label ) }</legend> }
                     { f.showLine1 && (
                         <Field
                             label={ i18.line1 }
@@ -461,6 +463,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                                     error={ err[ 'profile.address.country' ] }
                                 >
                                     <CountrySelect
+                                        id={ `dono-address-country-${ key }` }
                                         value={ a.country || '' }
                                         onChange={ setField( 'profile.address.country' ) }
                                         required={ !! f.requireCountry }
@@ -479,7 +482,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
             const consents = v.consents || {};
             return (
                 <fieldset key={ key } class="dono-form__consent">
-                    { f.label && <legend>{ f.label }</legend> }
+                    { f.label && <legend>{ decodeEntities( f.label ) }</legend> }
                     { f.helpText && <p class="dono-form__consent-help">{ f.helpText }</p> }
                     <div class="dono-form__consent-purposes">
                         { purposes.map( ( p ) => {
@@ -498,7 +501,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                                     />
                                     <span class="dono-form__consent-body">
                                         <span class="dono-form__consent-label">
-                                            { p.label || id }
+                                            { decodeEntities( p.label || '' ) || id }
                                             { required && (
                                                 <span class="dono-form__consent-required-pill">{ config.i18n.required || 'Required' }</span>
                                             ) }
@@ -557,7 +560,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                     { f.helpText && <span class="dono-form__field-help">{ f.helpText }</span> }
                     <input
                         type="text"
-                        placeholder={ f.placeholder || '' }
+                        placeholder={ decodeEntities( f.placeholder || '' ) }
                         value={ cur }
                         maxLength={ f.maxLength > 0 ? f.maxLength : undefined }
                         pattern={ f.pattern || undefined }
@@ -583,7 +586,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                     { f.helpText && <span class="dono-form__field-help">{ f.helpText }</span> }
                     <input
                         type="number"
-                        placeholder={ f.placeholder || '' }
+                        placeholder={ decodeEntities( f.placeholder || '' ) }
                         value={ cur }
                         min={ f.min === null || f.min === undefined ? undefined : f.min }
                         max={ f.max === null || f.max === undefined ? undefined : f.max }
@@ -611,8 +614,8 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
             const style = f.style === 'tabs' ? 'tabs' : 'pills';
             return (
                 <fieldset key={ key } class={ `dono-form__frequency dono-form__frequency--${ style }` }>
-                    { f.label && <legend>{ f.label }</legend> }
-                    <div class="dono-form__frequency-options" role="radiogroup" aria-label={ f.label || config.i18n.frequency || 'Frequency' }>
+                    { f.label && <legend>{ decodeEntities( f.label ) }</legend> }
+                    <div class="dono-form__frequency-options" role="radiogroup" aria-label={ decodeEntities( f.label || '' ) || config.i18n.frequency || 'Frequency' }>
                         { freqs.map( ( freq ) => {
                             const selected = current === freq;
                             return (
@@ -652,12 +655,17 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                         aria-invalid={ !! err[ errKey ] }
                         required={ !! f.required }
                     >
-                        { f.placeholder && (
-                            <option value="">{ f.placeholder }</option>
+                        { f.placeholder ? (
+                            <option value="">{ decodeEntities( f.placeholder ) }</option>
+                        ) : (
+                            // No placeholder and nothing chosen: without this the
+                            // control displays the first option while state holds
+                            // '', so the choice never submits despite looking set.
+                            cur === '' && <option value="" disabled></option>
                         ) }
                         { options.map( ( o ) => (
                             <option key={ o.value } value={ o.value }>
-                                { o.label || o.value }
+                                { decodeEntities( o.label || '' ) || o.value }
                             </option>
                         ) ) }
                     </select>
@@ -675,11 +683,11 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                 <fieldset key={ key } class={ `dono-form__radio dono-form__radio--${ layout }` }>
                     { f.label && (
                         <legend>
-                            { f.label }
+                            { decodeEntities( f.label ) }
                             { f.required && <span class="dono-form__required" aria-hidden="true">*</span> }
                         </legend>
                     ) }
-                    <div class="dono-form__radio-options" role="radiogroup" aria-label={ f.label || '' }>
+                    <div class="dono-form__radio-options" role="radiogroup" aria-label={ decodeEntities( f.label || '' ) }>
                         { options.map( ( o ) => {
                             const checked = cur === String( o.value );
                             return (
@@ -696,7 +704,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                                         required={ !! f.required }
                                     />
                                     <span class="dono-form__radio-option-label">
-                                        { o.label || o.value }
+                                        { decodeEntities( o.label || '' ) || o.value }
                                     </span>
                                 </label>
                             );
@@ -724,7 +732,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                     />
                     <span class="dono-form__check-body">
                         <span class="dono-form__check-label">
-                            { f.label || '' }
+                            { decodeEntities( f.label || '' ) }
                             { f.required && <span class="dono-form__required" aria-hidden="true">*</span> }
                         </span>
                         { f.helpText && (
@@ -758,7 +766,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                 <fieldset key={ key } class="dono-form__multi-select">
                     { f.label && (
                         <legend>
-                            { f.label }
+                            { decodeEntities( f.label ) }
                             { ( f.required || f.minSelections > 0 ) && <span class="dono-form__required" aria-hidden="true">*</span> }
                         </legend>
                     ) }
@@ -777,7 +785,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                                         onChange={ () => toggle( val ) }
                                     />
                                     <span class="dono-form__multi-select-option-label">
-                                        { o.label || o.value }
+                                        { decodeEntities( o.label || '' ) || o.value }
                                     </span>
                                 </label>
                             );
@@ -804,7 +812,7 @@ function Field( { label, required, error, children } ) {
     return (
         <label class="dono-form__field">
             <span class="dono-form__label">
-                { label }
+                { decodeEntities( label ) }
                 { required && <span class="dono-form__required" aria-hidden="true">*</span> }
             </span>
             { children }
