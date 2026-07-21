@@ -660,6 +660,7 @@ final class CoreModule implements DonoModule
             new StripeConnectController(
                 $c->get(StripeApi::class),
                 $c->get( StripeConnectAccount::class),
+                $c->get(TestMode::class),
             ),
             new FxController(
                 $c->get(FxRates::class),

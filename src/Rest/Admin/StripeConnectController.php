@@ -8,6 +8,7 @@ use Dono\Foundation\Auth\Capabilities;
 use Dono\Gateways\Stripe\StripeApi;
 use Dono\Gateways\Stripe\StripeConnect;
 use Dono\Gateways\Stripe\StripeConnectAccount;
+use Dono\Gateways\TestMode;
 use RuntimeException;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -26,6 +27,7 @@ final class StripeConnectController
     public function __construct(
         private StripeApi $api,
         private StripeConnectAccount $account,
+        private TestMode $testMode,
     ) {
     }
 
@@ -94,9 +96,15 @@ final class StripeConnectController
         $state = bin2hex(random_bytes(16));
         set_transient($this->stateKey(), $state, self::STATE_TTL);
 
+        // Connect in whichever mode the org runs in: a site in test mode links
+        // a Stripe test account, live links live. forForm(null) reads the
+        // org-wide dono_gateway_config.test_mode flag.
+        $mode = $this->testMode->forForm(null) ? 'test' : 'live';
+
         $url = add_query_arg([
             'state'      => $state,
             'return_url' => rawurlencode($this->callbackUrl()),
+            'mode'       => $mode,
         ], StripeConnect::brokerUrl() . '/stripe/authorize');
 
         return new WP_REST_Response(['url' => $url], 200);
@@ -146,6 +154,13 @@ final class StripeConnectController
             'stripe_publishable_key'      => (string) ($payload['stripe_publishable_key']      ?? ''),
             'stripe_publishable_key_test' => (string) ($payload['stripe_publishable_key_test'] ?? ''),
         ]);
+
+        // The broker populates only the linked mode's token pair. Tell the
+        // account which mode we just connected so the immediate flag retrieve
+        // authenticates with that token, instead of failing safe to test (a
+        // live connect would otherwise 401 and wait for an account webhook).
+        $isTest = (string) ($payload['stripe_access_token_test'] ?? '') !== '';
+        $this->account->useTestMode($isTest);
         $this->refreshAccountFlags();
 
         return $this->redirect($settingsUrl, 'connected');
