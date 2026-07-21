@@ -42,7 +42,7 @@ final class PortalController
 {
     private const NAMESPACE = 'dono/v1';
 
-    private const SEND_LINK_HOOK         = 'dono.async.send_portal_link';
+    public const SEND_LINK_HOOK          = 'dono.async.send_portal_link';
     private const SEND_LINK_IP_MAX       = 10;
     private const SEND_LINK_IP_WINDOW    = 15 * MINUTE_IN_SECONDS;
     private const SEND_LINK_EMAIL_WINDOW = 5 * MINUTE_IN_SECONDS;
