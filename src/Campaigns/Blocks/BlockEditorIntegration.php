@@ -112,6 +112,7 @@ final class BlockEditorIntegration
                 [],
                 DONO_VERSION
             );
+            wp_style_add_data(self::HANDLE_FRONTEND, 'rtl', 'replace');
         }
     }
 
@@ -182,6 +183,7 @@ final class BlockEditorIntegration
                 [],
                 DONO_VERSION
             );
+            wp_style_add_data(self::HANDLE_FRONTEND, 'rtl', 'replace');
         }
     }
 

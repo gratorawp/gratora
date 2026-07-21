@@ -64,15 +64,19 @@ final class DonationFormShortcode extends HookProvider
     protected function actions(): array
     {
         return [
-            'init'               => 'register',
             'wp_enqueue_scripts' => 'maybeEnqueue',
         ];
     }
 
-    /** Register the shortcode. */
+    /**
+     * Register the shortcode and wire the hook map. Overriding without the
+     * parent call left maybeEnqueue unhooked, so the head-time enqueue for
+     * shortcode pages never ran and every render used the late fallback.
+     */
     public function register(): void
     {
         add_shortcode(self::TAG, [$this, 'render']);
+        parent::register();
     }
 
     /** Enqueue assets only when a page actually uses the shortcode. */
@@ -108,8 +112,15 @@ final class DonationFormShortcode extends HookProvider
                 [],
                 $this->cssVersion()
             );
+            wp_style_add_data(self::HANDLE, 'rtl', 'replace');
             wp_enqueue_style(self::HANDLE);
         }
+    }
+
+    /** Stylesheet file for the current text direction (a -rtl build exists). */
+    private function cssFileName(): string
+    {
+        return is_rtl() ? 'runtime-rtl.css' : 'runtime.css';
     }
 
     /**
@@ -168,7 +179,7 @@ final class DonationFormShortcode extends HookProvider
         ) {
             $this->cssLinkInlined = true;
             wp_dequeue_style(self::HANDLE);
-            $href = DONO_URL . 'build/donation-form/runtime.css?ver=' . rawurlencode($this->cssVersion());
+            $href = DONO_URL . 'build/donation-form/' . $this->cssFileName() . '?ver=' . rawurlencode($this->cssVersion());
             $html = '<link rel="stylesheet" id="dono-runtime-css" href="' . esc_url($href) . '">' . $html;
         }
 
@@ -322,7 +333,7 @@ final class DonationFormShortcode extends HookProvider
         // Version CSS by mtime so SCSS-only rebuilds bust the iframe cache
         return [
             'html'   => $html,
-            'cssUrl' => DONO_URL . 'build/donation-form/runtime.css?v=' . $this->cssVersion(),
+            'cssUrl' => DONO_URL . 'build/donation-form/' . $this->cssFileName() . '?v=' . $this->cssVersion(),
             'jsUrl'  => DONO_URL . 'build/donation-form/runtime/index.js?v=' . ($asset['version'] ?? DONO_VERSION),
             'jsDeps' => (array) ($asset['dependencies'] ?? []),
         ];

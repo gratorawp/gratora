@@ -85,6 +85,7 @@ final class PortalShortcode extends HookProvider
             // Version by file mtime, not DONO_VERSION, so a rebuilt stylesheet
             // busts the browser cache without a plugin version bump.
             wp_enqueue_style(self::HANDLE, DONO_URL . 'build/donor-portal/index.css', [], (string) filemtime($cssPath));
+            wp_style_add_data(self::HANDLE, 'rtl', 'replace');
             wp_add_inline_style(self::HANDLE, $this->brandCss());
         }
     }
