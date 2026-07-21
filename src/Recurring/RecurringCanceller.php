@@ -45,23 +45,33 @@ final class RecurringCanceller
     }
 
     /**
-     * Cancel every active plan attributed to a campaign (used when an admin
-     * archives a campaign and opts to stop its subscriptions). Returns the
-     * number actually cancelled.
+     * Cancel every live active plan attributed to a campaign (used when an
+     * admin archives a campaign and opts to stop its subscriptions). One
+     * plan's gateway failure must not abort the rest or the archive: failures
+     * are collected so the caller can surface them, and the loop continues.
+     *
+     * @return array{cancelled:int, failed:int}
      */
-    public function cancelActiveForCampaign(int $campaignId, ?string $reason = null): int
+    public function cancelActiveForCampaign(int $campaignId, ?string $reason = null): array
     {
         $cancelled = 0;
+        $failed    = 0;
         foreach (
             RecurringPlan::query()
                 ->where('campaign_id', $campaignId)
                 ->where('status', 'active')
+                ->where('is_test', false)
                 ->getAll() as $plan
         ) {
-            if ($this->cancel($plan, $reason)) {
-                $cancelled++;
+            try {
+                if ($this->cancel($plan, $reason)) {
+                    $cancelled++;
+                }
+            } catch (\Throwable $e) {
+                $failed++;
+                error_log(sprintf('dono: archive-cancel failed for plan %d: %s', (int) $plan->id, $e->getMessage()));
             }
         }
-        return $cancelled;
+        return ['cancelled' => $cancelled, 'failed' => $failed];
     }
 }

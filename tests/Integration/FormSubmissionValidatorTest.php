@@ -131,6 +131,55 @@ BLOCKS;
         );
     }
 
+    public function test_presets_only_accepts_a_preset_with_the_fee_folded_in(): void
+    {
+        $blocks = <<<BLOCKS
+<!-- wp:dono/donation-amount {"presets":[{"cents":2500},{"cents":5000}],"allowCustom":false} /-->
+<!-- wp:dono/cover-fees /-->
+<!-- wp:dono/submit-button /-->
+BLOCKS;
+        $base = ['frequency' => 'one_time', 'custom' => [], 'consents' => []];
+
+        $this->assertNull(
+            $this->validator()->validate($this->form($blocks), $base + [
+                'amount_cents'      => 5175,
+                'fee_covered_cents' => 175,
+            ]),
+            'preset + covered fee is the charged gross; membership applies to the net'
+        );
+        $this->assertNotNull(
+            $this->validator()->validate($this->form($blocks), $base + [
+                'amount_cents'      => 5175,
+                'fee_covered_cents' => 100,
+            ]),
+            'a fee that does not explain the off-preset gross is still rejected'
+        );
+    }
+
+    public function test_presets_only_skips_membership_for_a_switched_currency(): void
+    {
+        $blocks = <<<BLOCKS
+<!-- wp:dono/donation-amount {"presets":[{"cents":5000}],"allowCustom":false} /-->
+<!-- wp:dono/submit-button /-->
+BLOCKS;
+        $base = ['frequency' => 'one_time', 'custom' => [], 'consents' => []];
+
+        $this->assertNull(
+            $this->validator()->validate($this->form($blocks), $base + [
+                'amount_cents' => 4600,
+                'currency'     => 'EUR',
+            ]),
+            'a converted nice-rounded preset in another currency cannot be reproduced here'
+        );
+        $this->assertNotNull(
+            $this->validator()->validate($this->form($blocks), $base + [
+                'amount_cents' => 4600,
+                'currency'     => 'USD',
+            ]),
+            'the authored currency still enforces membership'
+        );
+    }
+
     public function test_presets_only_falls_back_to_campaign_presets(): void
     {
         // Presets-only block that OMITS its own presets (the editor drops the

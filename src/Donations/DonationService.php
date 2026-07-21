@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace Dono\Donations;
 
 use Dono\Analytics\EventRecorder;
+use Dono\Currency\FxRates;
 use Dono\Donors\DonorService;
+use Dono\Forms\FormTypeRegistry;
 use Dono\Foundation\Crypto\Crypto;
 use Dono\Foundation\Helpers\Money;
 use Dono\Foundation\References\ReferenceGenerator;
 use Dono\Foundation\Time\Clock;
+use Dono\Funds\FundResolver;
 use Dono\Gateways\GatewayManager;
 use Dono\Gateways\RefundResult;
 use Dono\Gateways\TestMode;
@@ -35,9 +38,9 @@ final class DonationService
         private GatewayManager $gateways,
         private Clock $clock,
         private AggregateSyncer $aggregates,
-        private \Dono\Funds\FundResolver $funds,
-        private \Dono\Currency\FxRates $fx,
-        private \Dono\Forms\FormTypeRegistry $formTypes,
+        private FundResolver $funds,
+        private FxRates $fx,
+        private FormTypeRegistry $formTypes,
         private Crypto $crypto,
         private TestMode $testMode,
         private ?DonationTributeRepository $tributes = null,

@@ -10,6 +10,7 @@ use Dono\Forms\Blocks\DateBlock;
 use Dono\Forms\Blocks\DonationAmountBlock;
 use Dono\Forms\Blocks\DropdownBlock;
 use Dono\Forms\Blocks\RecurringToggleBlock;
+use Dono\Foundation\Helpers\Money;
 use WP_Error;
 
 /**
@@ -20,8 +21,11 @@ use WP_Error;
  */
 final class FormSubmissionValidator
 {
+    private ?Form $form = null;
+
     public function validate(Form $form, array $body): ?WP_Error
     {
+        $this->form = $form;
         $blocks = parse_blocks((string) ($form->blocks ?? ''));
 
         // The rendered amount step falls back to the campaign's presets when the
@@ -58,6 +62,26 @@ final class FormSubmissionValidator
         $ids = [];
         self::collectConsentIds(parse_blocks((string) $blocks), $ids);
         return $ids;
+    }
+
+    /** Whether the authored form contains a block, at any nesting depth. */
+    public static function hasBlock(string $blocks, string $blockName): bool
+    {
+        return self::treeHasBlock(parse_blocks($blocks), $blockName);
+    }
+
+    /** @param array<int,array<string,mixed>> $blocks */
+    private static function treeHasBlock(array $blocks, string $blockName): bool
+    {
+        foreach ($blocks as $block) {
+            if (($block['blockName'] ?? '') === $blockName) {
+                return true;
+            }
+            if (! empty($block['innerBlocks']) && self::treeHasBlock($block['innerBlocks'], $blockName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -145,11 +169,35 @@ final class FormSubmissionValidator
                     if (! is_array($raw) || empty($raw)) {
                         $raw = $campaignPresets;
                     }
-                    $allowedCents = array_map(
-                        static fn ($p) => (int) $p['cents'],
-                        DonationAmountBlock::normalizePresets($raw)
+                    // Renderer parity: the amounts the donor was shown pass
+                    // through the same filter (render-only variant/visitor
+                    // context is unavailable at submit time).
+                    $presets = (array) apply_filters(
+                        'dono.form.amounts',
+                        DonationAmountBlock::normalizePresets($raw),
+                        $this->form,
+                        null,
+                        null
                     );
-                    if (! in_array((int) ($body['amount_cents'] ?? 0), $allowedCents, true)) {
+                    $allowedCents = array_map(
+                        static fn ($p) => (int) ($p['cents'] ?? 0),
+                        $presets
+                    );
+                    // The charged amount folds the optional covered fee on top
+                    // of the chosen preset; membership applies to the net.
+                    $gross = (int) ($body['amount_cents'] ?? 0);
+                    $fee   = min($gross, max(0, (int) ($body['fee_covered_cents'] ?? 0)));
+                    $net   = $gross - $fee;
+                    // Presets are authored in the org base currency. A donor
+                    // who switched currency pays a converted, nice-rounded
+                    // value this side cannot reproduce (rates drift between
+                    // render and submit), so membership is only enforceable in
+                    // the authored currency; the amount floor/cap still apply.
+                    $submittedCurrency = strtoupper((string) ($body['currency'] ?? ''));
+                    $presetCurrency    = strtoupper(Money::defaultCurrency());
+                    if (($submittedCurrency === '' || $submittedCurrency === $presetCurrency)
+                        && ! in_array($net, $allowedCents, true)
+                    ) {
                         return $this->reject(__('Choose one of the listed donation amounts.', 'dono'));
                     }
                 }

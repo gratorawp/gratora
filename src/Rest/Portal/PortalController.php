@@ -6,6 +6,7 @@ namespace Dono\Rest\Portal;
 
 use Dono\Async\AsyncDispatcher;
 use Dono\Campaigns\Campaign;
+use Dono\Currency\Currency;
 use Dono\Donations\Donation;
 use Dono\Donations\DonationQueries;
 use Dono\Donations\DonationRepository;
@@ -470,8 +471,12 @@ final class PortalController
             if ($campaign && $campaign->page_id) {
                 $perma = get_permalink((int) $campaign->page_id);
                 if ($perma) {
+                    // Prefill the net amount: amount_cents folds the covered
+                    // fee in, and the form re-adds the fee on top of the
+                    // prefill, so gross would double-count last time's fee.
+                    $net = (int) $d->amount_cents - min((int) $d->amount_cents, max(0, (int) ($d->fee_covered_cents ?? 0)));
                     $giveAgainUrl = add_query_arg([
-                        'dono_amount'    => (int) $d->amount_cents,
+                        'dono_amount'    => $net,
                         'dono_frequency' => $d->frequency,
                     ], $perma);
                 }
@@ -625,6 +630,13 @@ final class PortalController
                 case 'change_amount':
                     $newCents = (int) ($body['amount_cents'] ?? 0);
                     if ($newCents < 50) return new WP_Error('dono_invalid_input', __('Amount is too low.', 'dono'), ['status' => 422]);
+                    if ($newCents > 99999999) return new WP_Error('dono_invalid_input', __('Amount is too high.', 'dono'), ['status' => 422]);
+                    // Same zero-decimal guard as the create path: storage is
+                    // major x 100, so a fractional JPY amount would round at
+                    // the gateway and permanently disagree with the plan.
+                    if (Currency::minorUnits((string) $plan->currency) === 0 && $newCents % 100 !== 0) {
+                        return new WP_Error('dono_invalid_input', __('This currency does not support fractional amounts.', 'dono'), ['status' => 422]);
+                    }
                     if ($sub) $sub->updateSubscriptionAmount($plan, $newCents);
                     $plan->amount_cents = $newCents;
                     // Keep the base-currency snapshot in step with the new amount.

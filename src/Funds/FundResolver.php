@@ -23,7 +23,7 @@ final class FundResolver
 
     public function resolve(?int $submittedFundId, ?int $formId, ?int $campaignId): ?int
     {
-        if ($id = $this->activeId($submittedFundId)) {
+        if ($id = $this->selectableId($submittedFundId)) {
             return $id;
         }
 
@@ -58,5 +58,23 @@ final class FundResolver
         }
         $fund = Fund::query()->where('id', $fundId)->get();
         return $fund && $fund->is_active ? (int) $fund->id : null;
+    }
+
+    /**
+     * Donor-submitted choices only: a parent fund with active children is a
+     * picker group header, not a choice, and the renderer never offers it.
+     * Admin-configured defaults keep plain activeId semantics.
+     */
+    private function selectableId(mixed $fundId): ?int
+    {
+        $id = $this->activeId($fundId);
+        if ($id === null) {
+            return null;
+        }
+        $hasActiveChild = Fund::query()
+            ->where('parent_fund_id', $id)
+            ->where('is_active', 1)
+            ->get();
+        return $hasActiveChild ? null : $id;
     }
 }

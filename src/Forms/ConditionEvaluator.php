@@ -38,12 +38,28 @@ final class ConditionEvaluator
         if ($field === 'frequency') {
             return str_replace('_', '-', (string) ($body['frequency'] ?? ''));
         }
+        // The client evaluates amount conditions against the chosen amount;
+        // the payload's amount_cents additionally folds the covered fee in.
+        // Compare on the net so both sides show/require the same fields.
+        if ($field === 'amount_cents') {
+            $gross = (int) ($body['amount_cents'] ?? 0);
+            $fee   = min($gross, max(0, (int) ($body['fee_covered_cents'] ?? 0)));
+            return $gross - $fee;
+        }
         $value = $body;
         foreach (explode('.', $field) as $part) {
             if (! is_array($value) || ! array_key_exists($part, $value)) {
                 return null;
             }
             $value = $value[$part];
+        }
+        // Mirror JS String(): the client compares String(true) = 'true' and
+        // String(['a','b']) = 'a,b'; PHP would cast to '1'/'' and 'Array'.
+        if (is_bool($value)) {
+            return $value ? 'true' : 'false';
+        }
+        if (is_array($value)) {
+            return implode(',', array_map('strval', $value));
         }
         return $value;
     }

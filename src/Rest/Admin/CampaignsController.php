@@ -220,14 +220,20 @@ final class CampaignsController
         // Archiving is non-destructive to subscriptions by default: existing
         // recurring donations keep renewing (and are still credited here). The
         // admin can opt to stop them too via the archive dialog's checkbox.
+        $recurringCancel = null;
         if ($wasActive && $campaign->status === 'archived' && ! empty($body['cancel_recurring'])) {
-            $this->canceller->cancelActiveForCampaign(
+            $recurringCancel = $this->canceller->cancelActiveForCampaign(
                 (int) $campaign->id,
                 __('Campaign archived', 'dono')
             );
         }
 
-        return new WP_REST_Response($this->shapeFull($campaign, 'all-time'), 200);
+        $payload = $this->shapeFull($campaign, 'all-time');
+        if ($recurringCancel !== null) {
+            $payload['recurring_cancel'] = $recurringCancel;
+        }
+
+        return new WP_REST_Response($payload, 200);
     }
 
     /**

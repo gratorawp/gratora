@@ -62,7 +62,10 @@ let onSessionExpired = null;
 function api( path, init = {} ) {
     const headers = {
         'Content-Type': 'application/json',
-        'X-WP-Nonce':   cfg.nonce,
+        // Nonce only when the page minted one (logged-in WP user). Anonymous
+        // visitors send none: a cached page's stale nonce would make core's
+        // cookie check 403 every request, including magic-link sign-in.
+        ...( cfg.nonce ? { 'X-WP-Nonce': cfg.nonce } : {} ),
         ...( init.headers || {} ),
     };
     if ( csrfToken ) headers[ 'X-Dono-Csrf' ] = csrfToken;
@@ -945,7 +948,7 @@ function PrivacyActions() {
             // a binary download instead of being JSON.parsed in the helper.
             const headers = {
                 'Content-Type': 'application/json',
-                'X-WP-Nonce':   cfg.nonce,
+                ...( cfg.nonce ? { 'X-WP-Nonce': cfg.nonce } : {} ),
             };
             if ( csrfToken ) headers[ 'X-Dono-Csrf' ] = csrfToken;
             const r = await fetch( `${ cfg.rest }data-export`, {

@@ -117,6 +117,28 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $this->assertSame('dono_campaign_not_available', $res->get_data()['code'] ?? null);
     }
 
+    public function test_donation_post_is_rejected_when_the_form_was_deleted(): void
+    {
+        // Form tokens stay valid for days; a deleted form's token must not
+        // bypass the status gates and the block validator by resolving to a
+        // null form.
+        Form::query()->where('id', $this->formId)->delete();
+
+        $req = new WP_REST_Request('POST', '/dono/v1/donations');
+        $req->set_header('content-type', 'application/json');
+        $req->set_body(json_encode([
+            'form_id'      => $this->formId,
+            'email'        => 'donor@example.com',
+            'amount_cents' => 2500,
+            'currency'     => 'USD',
+            'gateway'      => 'offline',
+        ]));
+        $res = rest_do_request($req);
+
+        $this->assertSame(403, $res->get_status());
+        $this->assertSame('dono_form_not_available', $res->get_data()['code'] ?? null);
+    }
+
     public function test_publishing_the_page_publishes_the_campaign(): void
     {
         $service = \Dono\Foundation\Plugin::instance()

@@ -114,9 +114,14 @@ final class RecurringPlanRepository
             )
         ";
 
+        // Live plans only, matching recurringStats and the archive-cancel
+        // loop: test-mode plans are not real money and a malformed
+        // interval_count of 0 would count without contributing MRR.
         $row = DB::table('dono_recurring_plans')
             ->where('campaign_id', $campaignId)
             ->where('status', 'active')
+            ->where('is_test', 0)
+            ->where('interval_count', 0, '>')
             ->selectRaw("COUNT(*) AS cnt, COALESCE({$mrrExpr}, 0) AS mrr")
             ->get();
 

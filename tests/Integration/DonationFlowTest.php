@@ -376,6 +376,7 @@ final class DonationFlowTest extends IntegrationTestCase
         $campaign = Campaign::make();
         $campaign->title           = 'C';
         $campaign->slug            = 'c-' . uniqid();
+        $campaign->status          = 'published';
         $campaign->default_fund_id = (int) $campFund->id;
         $campaign->created_at      = gmdate('Y-m-d H:i:s');
         $campaign->updated_at      = $campaign->created_at;

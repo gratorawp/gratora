@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Campaigns\Blocks;
 
+use Dono\Campaigns\CampaignRepository;
 use Dono\Forms\FormRepository;
 use Dono\Forms\Shortcode\DonationFormShortcode;
 use Dono\Foundation\Helpers\View;
@@ -17,7 +18,7 @@ use Dono\Foundation\Helpers\View;
 final class DonationFormBlock extends CampaignBlock
 {
     public function __construct(
-        \Dono\Campaigns\CampaignRepository $campaigns,
+        CampaignRepository $campaigns,
         private readonly FormRepository $forms,
         private readonly ?DonationFormShortcode $shortcode = null,
     ) {

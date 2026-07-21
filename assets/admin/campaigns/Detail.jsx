@@ -123,11 +123,22 @@ export default function Detail( { id, tab } ) {
 
     const runArchive = async ( nextStatus, cancelRecurring ) => {
         try {
-            await apiFetch( {
+            const res = await apiFetch( {
                 path: `/dono/v1/admin/campaigns/${ campaign.id }`,
                 method: 'PUT',
                 data: { status: nextStatus, ...( cancelRecurring ? { cancel_recurring: true } : {} ) },
             } );
+            const failed = res?.recurring_cancel?.failed || 0;
+            if ( failed > 0 ) {
+                // Stay on the page: the campaign is archived but some gateway
+                // cancellations failed and need attention, not a blind reload.
+                setError( sprintf(
+                    /* translators: %d: number of subscriptions */
+                    __( 'Campaign archived, but %d subscription cancellation(s) failed at the gateway. Those plans are still active.', 'dono' ),
+                    failed
+                ) );
+                return;
+            }
             notify.success( nextStatus === 'archived'
                 ? __( 'Campaign archived.', 'dono' )
                 : __( 'Campaign restored to draft.', 'dono' ) );

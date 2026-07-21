@@ -71,7 +71,12 @@ final class PortalShortcode extends HookProvider
             );
             wp_localize_script(self::HANDLE, 'donoPortal', [
                 'rest'  => esc_url_raw(rest_url('dono/v1/portal/')),
-                'nonce' => wp_create_nonce('wp_rest'),
+                // Same rule as the donation form: only logged-in users get a
+                // REST nonce. Anonymous visitors send none, so a page-cached
+                // portal never carries a stale nonce that WP's cookie check
+                // would 403 (which would break magic-link sign-in itself).
+                // Portal auth is the session cookie + X-Dono-Csrf, not this.
+                'nonce' => is_user_logged_in() ? wp_create_nonce('wp_rest') : '',
             ]);
             wp_set_script_translations(self::HANDLE, 'dono', DONO_DIR . 'languages');
         }

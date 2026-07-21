@@ -119,6 +119,17 @@ final class DonationsController
         $form     = null;
         if ($formId !== null) {
             $form = Form::query()->where('id', $formId)->get();
+            // A form_id that no longer resolves must not skip the gates below:
+            // form tokens stay valid for days, so a deleted form's token (or a
+            // stubbed preview id) would otherwise bypass the status gates and
+            // the whole block-level validator.
+            if (! $form) {
+                return new WP_Error(
+                    'dono_form_not_available',
+                    __('This form is not accepting donations.', 'dono'),
+                    ['status' => 403]
+                );
+            }
             if ($form) {
                 // Mirror the public render gate: only published forms take donations.
                 if ($form->status !== 'published') {
@@ -148,6 +159,14 @@ final class DonationsController
                 $invalid = (new FormSubmissionValidator())->validate($form, $body);
                 if ($invalid !== null) {
                     return $invalid;
+                }
+
+                // A fund choice is only meaningful when the form offered one;
+                // otherwise a crafted POST routes money to any active fund the
+                // form never listed. Cleared, the resolver falls back to the
+                // form/campaign/org default chain.
+                if (! FormSubmissionValidator::hasBlock((string) ($form->blocks ?? ''), 'dono/fund-picker')) {
+                    unset($body['fund_id']);
                 }
             }
         }
@@ -444,7 +463,12 @@ final class DonationsController
         if ($id <= 0) {
             return null;
         }
-        return Campaign::query()->where('id', $id)->get() ? $id : null;
+        // Only published campaigns take credit for client-submitted ids; the
+        // form-bound path enforces the same gate above, and crediting an
+        // archived campaign would inflate its totals and re-arm its delete
+        // guard.
+        $campaign = Campaign::query()->where('id', $id)->get();
+        return ($campaign && $campaign->status === 'published') ? $id : null;
     }
 
     /**
