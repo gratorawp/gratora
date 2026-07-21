@@ -24,6 +24,7 @@ use Dono\Campaigns\CampaignChrome;
 use Dono\Campaigns\CampaignMetricsService;
 use Dono\Campaigns\CampaignRepository;
 use Dono\Campaigns\CampaignService;
+use Dono\Campaigns\SocialMeta;
 use Dono\Dashboard\DashboardMetricsService;
 use Dono\Donations\AggregateSyncer;
 use Dono\Donations\AntiSpamGuard;
@@ -322,6 +323,8 @@ final class CoreModule implements DonoModule
         (new CampaignPermalinks())->register();
 
         (new CampaignChrome($c->get(CampaignRepository::class)))->register();
+
+        (new SocialMeta($c->get(CampaignRepository::class)))->register();
 
         // Keep campaign page visibility in sync with form status.
         add_action('dono.form.updated', static function ($form) use ($c) {
