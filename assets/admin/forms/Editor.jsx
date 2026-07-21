@@ -7,6 +7,7 @@ import { useEffect, useCallback, useMemo, useReducer, useRef, useState } from '@
 import {
     BaseControl,
     Button,
+    Modal,
     Popover,
     SelectControl,
     SlotFillProvider,
@@ -35,6 +36,7 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 
 import { useDonoRecord } from '../_shared/useDonoRecord';
+import Btn from '../_shared/components/Btn';
 import LocalIcon from '../_shared/components/Icon';
 import Slider    from '../_shared/components/Slider';
 import Segmented from '../_shared/components/Segmented';
@@ -158,6 +160,8 @@ export default function Editor( { formId } ) {
     const [ lastSavedSerialized, setLastSavedSerialized ] = useState( '' );
     const seededRef = useRef( false );
     const [ templatePickerOpen, setTemplatePickerOpen ] = useState( false );
+    // Template awaiting replace confirmation (picker chose it over existing content).
+    const [ pendingTemplate, setPendingTemplate ] = useState( null );
     // Which header action is in flight, so only its button shows the spinner.
     const [ savingAction, setSavingAction ] = useState( null );
 
@@ -232,13 +236,7 @@ export default function Editor( { formId } ) {
         }
     }, [ c.savedRecord ] );
 
-    const applyTemplate = useCallback( ( template ) => {
-        const hasContent = history.present.length > 0;
-        if ( hasContent && ! window.confirm(
-            __( 'Replace the current form with this template? You can undo this afterwards.', 'dono' )
-        ) ) {
-            return;
-        }
+    const performApplyTemplate = useCallback( ( template, hasContent ) => {
         const blocksMarkup = ( template?.blocks ?? '' ).trim();
         const parsed = blocksMarkup ? parse( blocksMarkup ) : [];
         // CHANGE keeps it in history (undoable) when replacing existing content;
@@ -249,8 +247,19 @@ export default function Editor( { formId } ) {
         if ( template?.settings && typeof template.settings === 'object' ) {
             c.edit( { settings: mergeFormSettings( template.settings ) } );
         }
+        setPendingTemplate( null );
         setTemplatePickerOpen( false );
-    }, [ history.present.length, c ] );
+    }, [ c ] );
+
+    const applyTemplate = useCallback( ( template ) => {
+        if ( history.present.length > 0 ) {
+            // Replacing real content needs an explicit confirm; the dialog's
+            // primary action runs performApplyTemplate with hasContent true.
+            setPendingTemplate( template );
+            return;
+        }
+        performApplyTemplate( template, false );
+    }, [ history.present.length, performApplyTemplate ] );
 
     const onBlocksInput  = useCallback( ( next ) => dispatchHistory( { type: 'INPUT',  blocks: next } ), [] );
     const onBlocksChange = useCallback( ( next ) => dispatchHistory( { type: 'CHANGE', blocks: next } ), [] );
@@ -655,6 +664,24 @@ export default function Editor( { formId } ) {
                     onPick={ applyTemplate }
                     onClose={ () => setTemplatePickerOpen( false ) }
                 />
+            ) }
+
+            { pendingTemplate && (
+                <Modal
+                    title={ __( 'Apply template', 'dono' ) }
+                    onRequestClose={ () => setPendingTemplate( null ) }
+                    size="small"
+                >
+                    <p style={ { marginTop: 0 } }>
+                        { __( 'Replace the current form with this template? You can undo this afterwards.', 'dono' ) }
+                    </p>
+                    <div style={ { display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 } }>
+                        <Btn onClick={ () => setPendingTemplate( null ) }>{ __( 'Cancel', 'dono' ) }</Btn>
+                        <Btn variant="primary" onClick={ () => performApplyTemplate( pendingTemplate, true ) }>
+                            { __( 'Replace form', 'dono' ) }
+                        </Btn>
+                    </div>
+                </Modal>
             ) }
         </div>
     );

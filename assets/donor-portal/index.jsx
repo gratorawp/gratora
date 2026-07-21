@@ -938,6 +938,7 @@ function Profile( { onSaved } ) {
 function PrivacyActions() {
     const [ exporting, setExporting ] = useState( false );
     const [ deleting, setDeleting ]   = useState( false );
+    const [ confirmOpen, setConfirmOpen ] = useState( false );
     const [ error, setError ]         = useState( null );
 
     const downloadData = async () => {
@@ -977,9 +978,6 @@ function PrivacyActions() {
     };
 
     const forget = async () => {
-        if ( ! window.confirm( __( 'Permanently anonymize your account? Past donations stay attached for tax/audit but every other detail is wiped. This cannot be undone.', 'dono' ) ) ) return;
-        const confirm = window.prompt( sprintf( /* translators: %s: the literal confirmation keyword to type (DELETE) */ __( 'Type %s to confirm.', 'dono' ), 'DELETE' ) );
-        if ( confirm !== 'DELETE' ) return;
         setDeleting( true );
         setError( null );
         try {
@@ -999,13 +997,63 @@ function PrivacyActions() {
                 <button class="dp-action" disabled={ exporting } onClick={ downloadData }>
                     { exporting ? __( 'Preparing…', 'dono' ) : __( 'Download my data', 'dono' ) }
                 </button>
-                <button class="dp-action is-destructive" disabled={ deleting } onClick={ forget }>
+                <button class="dp-action is-destructive" disabled={ deleting } onClick={ () => { setError( null ); setConfirmOpen( true ); } }>
                     { deleting ? __( 'Deleting…', 'dono' ) : __( 'Delete my account', 'dono' ) }
                 </button>
             </div>
             <p class="dp-privacy__note">
                 { __( "Download returns a JSON copy of everything we hold on you. Deletion anonymizes your record; donation totals stay for the organisation's tax records.", 'dono' ) }
             </p>
+            { confirmOpen && (
+                <DeleteAccountModal
+                    deleting={ deleting }
+                    error={ error }
+                    onConfirm={ forget }
+                    onClose={ () => setConfirmOpen( false ) }
+                />
+            ) }
+        </div>
+    );
+}
+
+function DeleteAccountModal( { deleting, error, onConfirm, onClose } ) {
+    const [ typed, setTyped ] = useState( '' );
+    const panelRef = useRef( null );
+    const inputRef = useRef( null );
+    useFocusTrap( panelRef, true, onClose );
+    // The trap's initial focus lands on the close button; move it to the
+    // confirmation input so the donor can type straight away.
+    useEffect( () => { if ( inputRef.current ) inputRef.current.focus(); }, [] );
+
+    const matches = typed === 'DELETE';
+
+    return (
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events -- click-outside-to-close is a mouse convenience; Escape (focus trap) and the close button provide keyboard dismissal
+        <div class="dp-modal" role="dialog" aria-modal="true" aria-label={ __( 'Delete my account', 'dono' ) } onClick={ ( e ) => { if ( e.target === e.currentTarget ) onClose(); } } ref={ panelRef }>
+            <div class="dp-modal__panel">
+                <button class="dp-modal__close" onClick={ onClose } aria-label={ __( 'Close', 'dono' ) }>×</button>
+                <h3>{ __( 'Delete my account', 'dono' ) }</h3>
+                { error && <p class="dp-error">{ error }</p> }
+                <p>{ __( 'Permanently anonymize your account? Past donations stay attached for tax/audit but every other detail is wiped. This cannot be undone.', 'dono' ) }</p>
+                <div class="dp-form">
+                    <label>
+                        { sprintf( /* translators: %s: the literal confirmation keyword to type (DELETE) */ __( 'Type %s to confirm.', 'dono' ), 'DELETE' ) }
+                        <input
+                            ref={ inputRef }
+                            type="text"
+                            value={ typed }
+                            autofocus
+                            autocomplete="off"
+                            spellcheck="false"
+                            onInput={ ( e ) => setTyped( e.target.value ) }
+                        />
+                    </label>
+                </div>
+                <button class="dp-action dp-action--danger" disabled={ deleting || ! matches } onClick={ onConfirm }>
+                    { deleting ? __( 'Deleting…', 'dono' ) : __( 'Delete my account', 'dono' ) }
+                </button>
+                <button class="dp-action" disabled={ deleting } onClick={ onClose }>{ __( 'Cancel', 'dono' ) }</button>
+            </div>
         </div>
     );
 }

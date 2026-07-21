@@ -285,6 +285,7 @@
     margin-bottom: 6px;
 
     &:hover { border-color: var(--dp-muted); }
+    &:disabled { opacity: .5; cursor: not-allowed; }
     &.is-primary { background: var(--dp-accent); color: #fff; border-color: var(--dp-accent); text-align: center; }
     &--danger { color: #b91c1c; border-color: #fecaca; }
 }
