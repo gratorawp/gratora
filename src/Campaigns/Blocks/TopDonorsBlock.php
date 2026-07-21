@@ -47,11 +47,11 @@ final class TopDonorsBlock extends CampaignBlock
         if (! $campaign) return $this->notBoundNotice();
 
         $limit = max(3, min(50, (int) ($attrs['limit'] ?? 10)));
-        // Exclude anonymous in SQL only when the toggle asks, so the limit
-        // applies to the visible rows (not trimmed afterwards) and the toggle
-        // actually does something.
         $hideAnonymous = (bool) ($attrs['hideAnonymous'] ?? false);
-        $rows  = $this->donations->topPaidDonors(null, null, (int) $campaign->id, $limit, ! $hideAnonymous);
+        // Named rankings never include anonymous donations: a donation the
+        // donor chose to hide must not surface their name or pad their public
+        // total. Anonymous giving appears only as the masked aggregate below.
+        $rows  = $this->donations->topPaidDonors(null, null, (int) $campaign->id, $limit, false);
 
         $donorIds = array_values(array_filter(array_map(static fn ($r) => (int) $r['donor_id'], $rows)));
         $donorsById = [];
@@ -78,6 +78,20 @@ final class TopDonorsBlock extends CampaignBlock
                 'donations_count' => (int) $row['donations_count'],
                 'is_anonymous'    => $isAnonymousAggregate,
             ];
+        }
+
+        if (! $hideAnonymous) {
+            $anon = $this->donations->anonymousPaidTotal(null, null, (int) $campaign->id);
+            if ($anon['donations_count'] > 0) {
+                $entries[] = [
+                    'name'            => __('Anonymous', 'dono'),
+                    'amount_cents'    => $anon['amount_cents'],
+                    'donations_count' => $anon['donations_count'],
+                    'is_anonymous'    => true,
+                ];
+                usort($entries, static fn ($a, $b) => $b['amount_cents'] <=> $a['amount_cents']);
+                $entries = array_slice($entries, 0, $limit);
+            }
         }
 
         return View::loadRelative(__DIR__, 'views/top-donors', [

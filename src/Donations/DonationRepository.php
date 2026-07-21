@@ -377,6 +377,26 @@ final class DonationRepository
     }
 
     /**
+     * Net paid total + count of anonymous donations in scope, for surfacing
+     * anonymous giving as one masked aggregate without naming anyone.
+     *
+     * @return array{amount_cents:int, donations_count:int}
+     */
+    public function anonymousPaidTotal(?string $from = null, ?string $to = null, ?int $campaignId = null): array
+    {
+        $prefix = DB::getPrefix();
+        $row = $this->netPaidQuery($from, $to, $campaignId)
+            ->where("{$prefix}dono_donations.is_anonymous", true)
+            ->selectRaw("COALESCE(SUM(COALESCE({$prefix}dono_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount, COUNT(*) AS cnt")
+            ->get();
+
+        return [
+            'amount_cents'    => (int) ($row['amount'] ?? 0),
+            'donations_count' => (int) ($row['cnt'] ?? 0),
+        ];
+    }
+
+    /**
      * Donation-amount histogram
      *
      * @param array<int> $thresholdsCents  e.g. [1000, 2500, 5000, 10000, 50000]
