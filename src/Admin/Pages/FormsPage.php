@@ -29,12 +29,17 @@ final class FormsPage extends HookProvider
         return ['admin_head' => 'maybePrintFullscreenStyles'];
     }
 
-    /** True only when ?page=dono-forms&view=edit. */
+    /**
+     * True when the forms screen is showing an editor. The page is hidden and
+     * has no other view, so the form id is the only signal that matters - the
+     * React root gates on the same thing, which keeps the fullscreen chrome and
+     * the editor from disagreeing about what is on screen.
+     */
     public static function isFormEditView(): bool
     {
         return is_admin()
             && ($_GET['page'] ?? '') === self::PAGE_ID
-            && ($_GET['view'] ?? '') === 'edit';
+            && (int) ($_GET['form'] ?? 0) > 0;
     }
 
     public function maybePrintFullscreenStyles(): void

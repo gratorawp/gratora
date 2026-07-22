@@ -41,7 +41,6 @@ export function detailHref( id, tab = 'overview' ) {
 export function formEditorHref( formId ) {
     const p = new URLSearchParams();
     p.set( 'page', 'dono-forms' );
-    p.set( 'view', 'edit' );
     p.set( 'form', String( formId ) );
     return `${ window.location.pathname }?${ p.toString() }`;
 }

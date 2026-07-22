@@ -181,7 +181,7 @@ final class OnboardingController
             'campaign_page'   => $campaign->page_id ? (string) get_permalink((int) $campaign->page_id) : '',
             'default_form_id' => $formId,
             'form_edit_url'   => $formId > 0
-                ? esc_url_raw(admin_url('admin.php?page=dono-forms&view=edit&form=' . $formId))
+                ? esc_url_raw(admin_url('admin.php?page=dono-forms&form=' . $formId))
                 : '',
         ], 200);
     }

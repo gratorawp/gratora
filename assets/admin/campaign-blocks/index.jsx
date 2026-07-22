@@ -870,8 +870,13 @@ registerBlockType( 'dono/donation-form', {
     edit: function DonationFormEdit( { attributes, setAttributes, isSelected } ) {
         const { campaign, onCampaignPage, resolvedId } = useBoundCampaign( attributes.campaignId );
         const formId = Number( campaign?.default_form_id || 0 );
+        // Without a form there is nothing for the forms screen to open - it is a
+        // hidden page that renders only an editor - so send them to the campaign's
+        // Forms tab, where a form can actually be created.
         const formEditUrl = new URL(
-            formId ? `admin.php?page=dono-forms&view=edit&form=${ formId }` : 'admin.php?page=dono-forms',
+            formId
+                ? `admin.php?page=dono-forms&form=${ formId }`
+                : `admin.php?page=dono-campaigns&view=detail&id=${ resolvedId }&tab=forms`,
             window.location.href
         ).href;
         return <>

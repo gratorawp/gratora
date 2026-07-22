@@ -23,7 +23,6 @@ export function formatDate( iso, opts = {} ) {
 export function editorHref( id ) {
     const params = new URLSearchParams();
     params.set( 'page', 'dono-forms' );
-    params.set( 'view', 'edit' );
     params.set( 'form', String( id ) );
     return `${ window.location.pathname }?${ params.toString() }`;
 }
