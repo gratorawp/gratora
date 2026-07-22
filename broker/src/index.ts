@@ -86,12 +86,12 @@ async function oauthReturn(url: URL, env: Env): Promise<Response> {
 
     const err = url.searchParams.get('error');
     if (err) {
-        return redirect(appendParams(st.r, { error: err, state: st.s }));
+        return redirect(appendParams(st.r, { connect_error: err, state: st.s }));
     }
 
     const code = url.searchParams.get('code') ?? '';
     if (code === '') {
-        return redirect(appendParams(st.r, { error: 'missing_code', state: st.s }));
+        return redirect(appendParams(st.r, { connect_error: 'missing_code', state: st.s }));
     }
 
     const secret = st.m === 'test' ? env.STRIPE_SECRET_TEST : env.STRIPE_SECRET_LIVE;
@@ -107,7 +107,7 @@ async function oauthReturn(url: URL, env: Env): Promise<Response> {
     const tok = (await tokenRes.json()) as Record<string, unknown>;
     if (!tokenRes.ok || typeof tok.stripe_user_id !== 'string') {
         const reason = typeof tok.error === 'string' ? tok.error : 'exchange_failed';
-        return redirect(appendParams(st.r, { error: reason, state: st.s }));
+        return redirect(appendParams(st.r, { connect_error: reason, state: st.s }));
     }
 
     const exchangeCode = hex(crypto.getRandomValues(new Uint8Array(32)));

@@ -13,9 +13,17 @@ final class StripeConnect
 {
     public const BROKER_URL = 'https://connect.getdono.com';
 
-    /** Returns the hosted Connect broker URL. */
+    /**
+     * Hosted Connect broker base URL (no trailing slash). Production uses the
+     * default; a staging/dev site can point at a test broker via the
+     * DONO_CONNECT_BROKER_URL constant or the dono.stripe.broker_url filter,
+     * without editing the shipped default.
+     */
     public static function brokerUrl(): string
     {
-        return self::BROKER_URL;
+        if (defined('DONO_CONNECT_BROKER_URL') && is_string(DONO_CONNECT_BROKER_URL) && DONO_CONNECT_BROKER_URL !== '') {
+            return rtrim((string) DONO_CONNECT_BROKER_URL, '/');
+        }
+        return rtrim((string) apply_filters('dono.stripe.broker_url', self::BROKER_URL), '/');
     }
 }

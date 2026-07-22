@@ -49,4 +49,22 @@ final class StripeConnectAuthorizeModeTest extends IntegrationTestCase
         $this->assertStringContainsString('mode=live', $url);
         $this->assertStringNotContainsString('mode=test', $url);
     }
+
+    public function test_state_survives_the_unauthenticated_callback(): void
+    {
+        wp_set_current_user(1); // an admin initiates the connect
+        $url = $this->authorizeUrl();
+        parse_str((string) parse_url($url, PHP_URL_QUERY), $q);
+        $state = (string) ($q['state'] ?? '');
+        $this->assertNotSame('', $state);
+
+        // The broker redirects the browser to a PUBLIC callback where no user is
+        // authenticated (id 0). The state transient must still be findable, so
+        // it can't be keyed by the current user.
+        wp_set_current_user(0);
+        $this->assertNotFalse(
+            get_transient('dono_stripe_oauth_state_' . hash('sha256', $state)),
+            'state transient is keyed by the state, not the current user'
+        );
+    }
 }

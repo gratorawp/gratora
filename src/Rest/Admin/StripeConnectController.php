@@ -94,7 +94,11 @@ final class StripeConnectController
     public function authorize(): WP_REST_Response
     {
         $state = bin2hex(random_bytes(16));
-        set_transient($this->stateKey(), $state, self::STATE_TTL);
+        // Key the transient by the state, not the current user: the broker
+        // redirects the browser to a public callback where no user is
+        // authenticated (current id 0), so a user-scoped key would never be
+        // found there. The random state is itself the single-use CSRF token.
+        set_transient($this->stateKey($state), '1', self::STATE_TTL);
 
         // Connect in whichever mode the org runs in: a site in test mode links
         // a Stripe test account, live links live. forForm(null) reads the
@@ -114,15 +118,23 @@ final class StripeConnectController
     {
         $settingsUrl = admin_url('admin.php?page=dono-settings#gateways');
 
-        if ((string) $request->get_param('error') !== '') {
-            return $this->redirect($settingsUrl, 'denied');
+        // Named connect_error, not error: WordPress strips the reserved `error`
+        // query var before the callback runs, so the broker reports its failure
+        // reason under a non-reserved key.
+        $connectError = (string) $request->get_param('connect_error');
+        if ($connectError !== '') {
+            // access_denied = the owner declined consent; anything else (a
+            // restricted/rejected account, an expired or reused code) is a
+            // failure to authorize, which the UI phrases differently.
+            return $this->redirect($settingsUrl, $connectError === 'access_denied' ? 'denied' : 'oauth_failed');
         }
 
-        $state  = (string) $request->get_param('state');
-        $stored = get_transient($this->stateKey());
-        delete_transient($this->stateKey());
+        $state = (string) $request->get_param('state');
+        $key   = $this->stateKey($state);
+        $known = $state !== '' && get_transient($key) !== false;
+        delete_transient($key);
 
-        if ($state === '' || ! is_string($stored) || ! hash_equals($stored, $state)) {
+        if (! $known) {
             return $this->redirect($settingsUrl, 'invalid_state');
         }
 
@@ -223,9 +235,9 @@ final class StripeConnectController
         return rest_url(self::NAMESPACE . '/connect/stripe/callback');
     }
 
-    private function stateKey(): string
+    private function stateKey(string $state): string
     {
-        return 'dono_stripe_oauth_state_' . get_current_user_id();
+        return 'dono_stripe_oauth_state_' . hash('sha256', $state);
     }
 
     private function redirect(string $base, string $status): WP_REST_Response

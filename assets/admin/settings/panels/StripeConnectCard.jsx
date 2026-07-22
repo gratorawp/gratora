@@ -25,6 +25,7 @@ function readReturnFlash() {
 const FLASH = {
     connected:     { tone: 'accent', text: __( 'Stripe account connected.', 'dono' ) },
     denied:        { tone: 'amber',  text: __( 'Stripe connection was cancelled.', 'dono' ) },
+    oauth_failed:  { tone: 'amber',  text: __( 'Stripe could not authorize that account. It may be restricted or rejected. Try connecting a different account.', 'dono' ) },
     invalid_state: { tone: 'amber',  text: __( 'The connection link expired. Please try again.', 'dono' ) },
     claim_failed:  { tone: 'amber',  text: __( 'Stripe could not complete the connection. Please try again.', 'dono' ) },
 };
