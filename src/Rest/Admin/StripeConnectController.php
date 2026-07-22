@@ -8,6 +8,7 @@ use Dono\Foundation\Auth\Capabilities;
 use Dono\Gateways\Stripe\StripeApi;
 use Dono\Gateways\Stripe\StripeConnect;
 use Dono\Gateways\Stripe\StripeConnectAccount;
+use Dono\Gateways\Stripe\StripeWebhookProvisioner;
 use Dono\Gateways\TestMode;
 use RuntimeException;
 use WP_REST_Request;
@@ -174,6 +175,7 @@ final class StripeConnectController
         $isTest = (string) ($payload['stripe_access_token_test'] ?? '') !== '';
         $this->account->useTestMode($isTest);
         $this->refreshAccountFlags();
+        $this->provisionWebhook($isTest);
 
         return $this->redirect($settingsUrl, 'connected');
     }
@@ -227,6 +229,21 @@ final class StripeConnectController
             if (is_array($obj)) $this->account->refresh($obj);
         } catch (RuntimeException $e) {
             // Non-fatal; account.updated webhook will fill it in.
+        }
+    }
+
+    /**
+     * Register Dono's webhook on the connected account so paid/refund/renewal
+     * events flow without manual setup ("Dono handles the setup"). Best-effort:
+     * a failure (unreachable/local site, API error) leaves the manual signing-
+     * secret field in place and must never break the connect.
+     */
+    private function provisionWebhook(bool $isTest): void
+    {
+        try {
+            (new StripeWebhookProvisioner($this->api, $this->account))->provision($isTest);
+        } catch (\Throwable $e) {
+            error_log('[dono] Stripe webhook auto-provision failed: ' . $e->getMessage());
         }
     }
 
