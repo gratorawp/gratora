@@ -44,6 +44,10 @@ final class SettingsPage extends HookProvider
         $this->enqueueAssets();
         ?>
         <div class="wrap">
+            <?php // Anchor for WP's admin-notice mover: without a server-rendered
+                  // heading (the "Settings" h1 is React-rendered), notices land
+                  // inside the React header row. This pins them above it. ?>
+            <hr class="wp-header-end" />
             <div id="dono-admin-settings"></div>
         </div>
         <?php
