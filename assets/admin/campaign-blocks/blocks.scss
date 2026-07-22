@@ -876,3 +876,22 @@ body.dono-modal-open { overflow: hidden; }
         color: var(--dono-text-muted, #{$text-muted-fallback});
     }
 }
+
+// One shared rail: campaign blocks align to the same 1080px container as the
+// P2P sections and the start page instead of stretching to the template width.
+// Last in the file so the margin-inline centering wins over the per-block
+// margin shorthands above.
+.dono-block--hero,
+.dono-block--stats,
+.dono-block--progress,
+.dono-block--donate-button,
+.dono-block--top-donors,
+.dono-block--recent-donations,
+.dono-block--supporter-wall,
+.dono-block--grid,
+.dono-block--donation-form {
+    box-sizing: border-box;
+    max-width: 1080px;
+    margin-left: auto;
+    margin-right: auto;
+}
