@@ -35,7 +35,7 @@ function detailHref( reference ) {
 // filtered on, which would show an unexplained empty table.
 function initialFilters() {
     const status = new URLSearchParams( window.location.search ).get( 'status' );
-    return STATUS_LABEL[ status ]
+    return status && Object.hasOwn( STATUS_LABEL, status )
         ? [ { field: 'status', operator: 'is', value: status } ]
         : [];
 }

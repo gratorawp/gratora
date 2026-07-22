@@ -46,11 +46,11 @@ final class StripeWebhookProvisioner
         // Route token-bearing calls to the mode that was just connected.
         $this->account->useTestMode($isTest);
 
-        $url  = rest_url('dono/v1/webhooks/stripe');
-        $host = (string) wp_parse_url($url, PHP_URL_HOST);
-        if ($host === '' || $host === 'localhost' || $host === '127.0.0.1') {
-            // Stripe can't deliver to a local / unresolvable host; leave the
-            // manual signing-secret (Stripe CLI) path in place.
+        $url = rest_url('dono/v1/webhooks/stripe');
+        if (! self::stripeCanReach($url)) {
+            // Stripe can't deliver to a local / unresolvable host; provisioning
+            // would store a dead endpoint's secret over the manual (Stripe CLI)
+            // one and silently break signature checks.
             return;
         }
 
@@ -78,6 +78,36 @@ final class StripeWebhookProvisioner
         if ($secret !== '') {
             $this->storeSecret($isTest, $secret);
         }
+    }
+
+    /**
+     * Whether Stripe's servers could plausibly deliver to this URL. Local
+     * environments, dev TLDs, and private/loopback addresses cannot receive
+     * webhooks, and provisioning against them would overwrite a working
+     * manually-entered (Stripe CLI) signing secret with a dead endpoint's.
+     */
+    private static function stripeCanReach(string $url): bool
+    {
+        if (wp_get_environment_type() === 'local') {
+            return false;
+        }
+        $host = strtolower((string) wp_parse_url($url, PHP_URL_HOST));
+        if ($host === '' || $host === 'localhost') {
+            return false;
+        }
+        foreach (['.local', '.localhost', '.test', '.internal', '.example', '.invalid'] as $tld) {
+            if (str_ends_with($host, $tld)) {
+                return false;
+            }
+        }
+        if (filter_var($host, FILTER_VALIDATE_IP) !== false) {
+            return filter_var(
+                $host,
+                FILTER_VALIDATE_IP,
+                FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
+            ) !== false;
+        }
+        return true;
     }
 
     private function storeSecret(bool $isTest, string $secret): void

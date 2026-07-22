@@ -110,7 +110,9 @@ final class BlockEditorIntegration
                 self::HANDLE_FRONTEND,
                 DONO_URL . 'build/admin/campaign-blocks.css',
                 [],
-                DONO_VERSION
+                // mtime, not DONO_VERSION: the built css changes without a
+                // plugin release and a stale cache means invisible restyles.
+                (string) (@filemtime($cssPath) ?: DONO_VERSION)
             );
             wp_style_add_data(self::HANDLE_FRONTEND, 'rtl', 'replace');
         }
@@ -181,7 +183,7 @@ final class BlockEditorIntegration
                 self::HANDLE_FRONTEND,
                 DONO_URL . 'build/admin/campaign-blocks.css',
                 [],
-                DONO_VERSION
+                (string) (@filemtime($cssPath) ?: DONO_VERSION)
             );
             wp_style_add_data(self::HANDLE_FRONTEND, 'rtl', 'replace');
         }
