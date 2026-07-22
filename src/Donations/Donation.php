@@ -66,6 +66,13 @@ final class Donation extends Model
     public bool $is_anonymous = false;
     /** Test-mode donation: excluded from all money reporting, never charged live. */
     public bool $is_test = false;
+    /**
+     * What the money is: 'donation', or a non-donation kind an add-on moves
+     * through the rails (e.g. 'order' for event ticket orders). Non-donation
+     * kinds stay out of donor lifetime rollups and never carry a platform fee;
+     * campaign and org revenue include every kind.
+     */
+    public string $kind = 'donation';
     public ?string $failure_reason = null;
     public ?array $flags = null;
     public ?string $paid_at = null;
@@ -98,6 +105,7 @@ Donation::schema(function (Table $t): void {
     $t->string('country', 2)->nullable();
     $t->string('frequency', 20)->default('one_time');
     $t->string('status', 20)->default('pending');
+    $t->string('kind', 20)->default('donation');
     $t->string('gateway', 32);
     $t->string('gateway_account_id', 64)->nullable();
     $t->string('gateway_intent_id', 128)->nullable();

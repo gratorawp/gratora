@@ -52,6 +52,49 @@ final class Capabilities
     ];
 
     /**
+     * The capability maps with add-on registrations applied. Add-ons extend
+     * via the dono.capabilities filter, receiving and returning
+     * ['all' => string[], 'groups' => array<string,string[]>,
+     * 'labels' => array<string,string>].
+     *
+     * @return array{all:array<int,string>,groups:array<string,array<int,string>>,labels:array<string,string>}
+     */
+    private static function maps(): array
+    {
+        $maps = apply_filters('dono.capabilities', [
+            'all'    => self::ALL,
+            'groups' => self::GROUPS,
+            'labels' => self::LABELS,
+        ]);
+        if (! is_array($maps)) {
+            $maps = [];
+        }
+        return [
+            'all'    => array_values(array_unique((array) ($maps['all'] ?? self::ALL))),
+            'groups' => (array) ($maps['groups'] ?? self::GROUPS),
+            'labels' => (array) ($maps['labels'] ?? self::LABELS),
+        ];
+    }
+
+    /** @return array<int,string> */
+    public static function all(): array
+    {
+        return self::maps()['all'];
+    }
+
+    /** @return array<string,array<int,string>> */
+    public static function groups(): array
+    {
+        return self::maps()['groups'];
+    }
+
+    /** @return array<string,string> */
+    public static function labels(): array
+    {
+        return self::maps()['labels'];
+    }
+
+    /**
      * Per-endpoint gate for the admin REST controllers. WP super-admins
      * (manage_options) always pass so a default administrator never loses
      * access to the admin UI; otherwise the specific granular cap is required,
@@ -68,7 +111,7 @@ final class Capabilities
         if (current_user_can('manage_options') || current_user_can(self::MANAGE)) {
             return true;
         }
-        foreach (self::ALL as $cap) {
+        foreach (self::all() as $cap) {
             if (current_user_can($cap)) {
                 return true;
             }
@@ -120,7 +163,7 @@ final class Capabilities
      */
     public static function applyMapping(array $mapping): void
     {
-        $allCaps = self::ALL;
+        $allCaps = self::all();
         foreach (wp_roles()->role_objects as $slug => $role) {
             $granted = is_array($mapping[$slug] ?? null) ? $mapping[$slug] : [];
             $hasAny  = false;

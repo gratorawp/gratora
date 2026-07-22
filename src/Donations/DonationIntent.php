@@ -46,6 +46,8 @@ final class DonationIntent
         public readonly array $extra = [],
         /** @var array<string,mixed> donor-submitted custom form-field values */
         public readonly array $custom = [],
+        /** 'donation', or a non-donation kind (e.g. 'order') a handler stamps. */
+        public readonly string $kind = 'donation',
     ) {
     }
 }

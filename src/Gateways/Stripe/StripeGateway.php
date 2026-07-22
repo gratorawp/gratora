@@ -34,9 +34,6 @@ use WP_REST_Request;
  */
 final class StripeGateway implements PaymentGateway, SubscriptionAware
 {
-    /** Platform fee in basis points (200 = 2%). Filterable via dono.stripe.application_fee_bps. */
-    private const FEE_BPS = 200;
-
     public function __construct(
         private StripeApi $api,
         private DonationRepository $donations,
@@ -63,26 +60,20 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
         return [];
     }
 
-    /**
-     * Platform cut in cents, clamped to [0, amountCents]. Filterable via
-     * dono.stripe.application_fee_bps; 0 when isPro().
-     */
-    private function applicationFee(int $amountCents): int
+    /** Platform cut in cents; see PlatformFee for the rules (kind + license). */
+    private function applicationFee(Donation $donation): int
     {
-        if ($this->license->isPro()) return 0;
-        $bps = (int) apply_filters('dono.stripe.application_fee_bps', self::FEE_BPS);
-        $bps = max(0, min(10000, $bps));
-        $fee = (int) floor($amountCents * $bps / 10000);
-        return max(0, min($fee, $amountCents));
+        return PlatformFee::cents($donation->amount_cents, $donation->kind, $this->license->isPro());
     }
 
-    /** Same cut as a percentage, for subscription renewals (application_fee_percent). */
+    /**
+     * Same cut as a percentage, for subscription renewals
+     * (application_fee_percent). Subscriptions are always plain donations -
+     * no recurring non-donation kinds exist.
+     */
     private function applicationFeePercent(): float
     {
-        if ($this->license->isPro()) return 0.0;
-        $bps = (int) apply_filters('dono.stripe.application_fee_bps', self::FEE_BPS);
-        $bps = max(0, min(10000, $bps));
-        return $bps / 100;
+        return PlatformFee::percent('donation', $this->license->isPro());
     }
 
     public function id(): string
@@ -167,7 +158,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
         );
 
         // Direct charge on the connected account; platform takes its cut via application_fee_amount.
-        $fee = $this->applicationFee($donation->amount_cents);
+        $fee = $this->applicationFee($donation);
         if ($fee > 0 && $this->connect->isConnected()) {
             $params['application_fee_amount'] = Currency::toMinorUnits($fee, $donation->currency);
         }

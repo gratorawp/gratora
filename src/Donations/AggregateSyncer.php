@@ -17,8 +17,11 @@ final class AggregateSyncer
     {
         if ($donorId <= 0) return;
 
+        // Lifetime rollups are pure donation history: non-donation kinds
+        // (event ticket orders) ride the rails but do not count here.
         $row = DonationQueries::live(DB::table('dono_donations')
             ->whereIn('status', ['paid', 'partial_refund'])
+            ->where('kind', 'donation')
             ->where('donor_id', $donorId))
             ->selectRaw("
                 COALESCE(SUM(

@@ -113,6 +113,7 @@ final class DonationService
                 : null;
             $donation->frequency          = $intent->frequency;
             $donation->status             = 'pending';
+            $donation->kind               = $intent->kind;
             $donation->gateway            = $intent->gateway;
             $donation->payment_method     = $intent->payment_method;
             $donation->source_attribution = $intent->source_attribution;
