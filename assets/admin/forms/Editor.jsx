@@ -186,9 +186,18 @@ export default function Editor( { formId } ) {
     }, [ selectedBlockId ] );
 
     // Authoring secondary views (inserter / list view) only make sense in
-    // Develop. Close them automatically when the user switches mode.
+    // Develop. Close them when leaving and restore the same state - open
+    // panel or deliberately closed - on the way back.
+    const lastSecondaryView = useRef( secondaryView );
     useEffect( () => {
-        if ( view !== 'develop' ) setSecondaryView( null );
+        if ( view !== 'develop' ) {
+            setSecondaryView( ( cur ) => {
+                lastSecondaryView.current = cur;
+                return null;
+            } );
+        } else {
+            setSecondaryView( lastSecondaryView.current );
+        }
     }, [ view ] );
 
     ensureBlocksRegistered();
