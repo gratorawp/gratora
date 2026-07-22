@@ -7,8 +7,8 @@ import { useEntityRecord, useEntityRecords } from '@wordpress/core-data';
 import { registerBlockType } from '@wordpress/blocks';
 import { InspectorControls, RichText, useBlockProps } from '@wordpress/block-editor';
 import {
+    Button,
     Disabled,
-    ExternalLink,
     PanelBody,
     Placeholder,
     RangeControl,
@@ -890,11 +890,16 @@ registerBlockType( 'dono/donation-form', {
                     />
                     { campaign && (
                         <p className="dono-block-note">
-                            <ExternalLink href={ formEditUrl }>
+                            <Button
+                                variant="secondary"
+                                href={ formEditUrl }
+                                target="_blank"
+                                __next40pxDefaultSize
+                            >
                                 { formId
-                                    ? __( 'Edit this donation form', 'dono' )
+                                    ? __( 'Edit donation form', 'dono' )
                                     : __( 'Manage donation forms', 'dono' ) }
-                            </ExternalLink>
+                            </Button>
                         </p>
                     ) }
                 </PanelBody>
