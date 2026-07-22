@@ -195,7 +195,11 @@ $sidebar-width: 300px;
         overflow: auto;
         display: flex;
         justify-content: center;
-        align-items: flex-start;
+        // Stretch sizes the device frame to the stage's content box, so the
+        // stage itself never scrolls: the iframe is the only scroller, like a
+        // real browser window. flex-start + height:100% made the frame overlap
+        // the stage padding and nest a second scrollbar around the iframe's.
+        align-items: stretch;
         padding: 28px 20px;
     }
     &__device-frame {
@@ -207,8 +211,6 @@ $sidebar-width: 300px;
         border-radius: 12px;
         overflow: hidden;
         box-shadow: 0 4px 20px rgba(0, 0, 0, .06);
-        height: 100%;
-        min-height: 600px;
 
         &.has-bezel {
             border: 10px solid #1f2937;
@@ -218,7 +220,13 @@ $sidebar-width: 300px;
                 0 16px 40px rgba(0, 0, 0, .18);
             padding: 0;
             position: relative;
-            height: 780px;
+            // The phone keeps its screen shape; an explicit height opts out of
+            // the stage's align-items: stretch. Capped to the stage so a short
+            // window shrinks the phone instead of adding an outer scrollbar
+            // (border-box so the 10px bezel counts against the cap).
+            box-sizing: border-box;
+            height: min(780px, 100%);
+            align-self: center;
             min-height: 0;
 
             &::before {
@@ -341,12 +349,21 @@ $sidebar-width: 300px;
 }
 
 .dono-form-editor .interface-interface-skeleton__secondary-sidebar {
-    width: 360px;
+    // The skeleton animates an inline width while a panel opens, then drops
+    // it; this rule is what holds the rail open afterwards (core's base is
+    // width:auto, which collapses around the absolutely-positioned content
+    // wrapper). Keep in step with .dono-form-editor__secondary below.
+    width: 350px;
     border-right: 1px solid $border-soft;
     background: #fff;
 }
 
 .dono-form-editor__secondary {
+    // The skeleton's animation wrapper is width:fit-content, so the panel
+    // needs an explicit width or it shrink-wraps (the list view collapsed to
+    // its widest label). 350px matches the inserter's intrinsic width so the
+    // rail doesn't jump when toggling between the two.
+    width: 350px;
     height: 100%;
     display: flex;
     flex-direction: column;
