@@ -8,7 +8,7 @@ import Segmented from '../../../_shared/components/Segmented';
 
 const NAME = 'dono/currency-switcher';
 
-const SETTINGS_URL = 'admin.php?page=dono-settings';
+const SETTINGS_URL = 'admin.php?page=dono-settings#currency';
 
 function Edit( { attributes, setAttributes } ) {
     const { currencies = [], label = '', style = 'dropdown', align = 'left' } = attributes;
