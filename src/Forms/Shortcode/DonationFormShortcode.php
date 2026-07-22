@@ -377,7 +377,10 @@ final class DonationFormShortcode extends HookProvider
         // back into the frame height each observer tick, run away). The delta
         // guard and cap are belt-and-suspenders against any residual loop.
         $bodyMinHeight = $autoResize ? '0' : '100vh';
-        $background    = $transparent ? 'transparent' : '#f0f0f1';
+        // White like a real page: the builder's preview frame plays a browser
+        // window, and a grey page inside it read as a second window floating
+        // over the editor stage (which is the same grey).
+        $background    = $transparent ? 'transparent' : '#fff';
         $resize = $autoResize
             ? '<script>(function(){var l=0;function s(){try{if(!window.frameElement)return;var h=Math.min(document.documentElement.scrollHeight,4000);if(Math.abs(h-l)>2){l=h;window.frameElement.style.height=h+"px"}}catch(e){}}addEventListener("load",s);if(window.ResizeObserver){new ResizeObserver(s).observe(document.documentElement)}setTimeout(s,300);setTimeout(s,1200)})();</script>'
             : '';
