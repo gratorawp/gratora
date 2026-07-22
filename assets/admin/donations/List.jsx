@@ -30,13 +30,23 @@ function detailHref( reference ) {
     } );
 }
 
+// The dashboard deep-links here with ?status=failed, so seed the view from the
+// URL instead of dropping the param. Unknown values are ignored rather than
+// filtered on, which would show an unexplained empty table.
+function initialFilters() {
+    const status = new URLSearchParams( window.location.search ).get( 'status' );
+    return STATUS_LABEL[ status ]
+        ? [ { field: 'status', operator: 'is', value: status } ]
+        : [];
+}
+
 export default function List() {
     const [ view, setView ] = useState( {
         type:    'table',
         perPage: 25,
         page:    1,
         sort:    { field: 'created_at', direction: 'desc' },
-        filters: [],
+        filters: initialFilters(),
         search:  '',
         fields:  [ 'reference', 'status', 'donor', 'amount', 'gateway', 'campaign', 'form', 'created_at' ],
         // is_test column is opt-in via column picker; the badge appears on the
