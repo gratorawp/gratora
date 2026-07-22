@@ -22,7 +22,6 @@
 /.stylelintrc.json
 
 /node_modules
-/broker
 /tests
 /docs
 /coverage
