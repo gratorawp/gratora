@@ -21,6 +21,7 @@ use Dono\Currency\FxRates;
 use Dono\Currency\FxRatesUpdater;
 use Dono\Campaigns\Campaign;
 use Dono\Campaigns\CampaignChrome;
+use Dono\Campaigns\CampaignPageTemplate;
 use Dono\Campaigns\CampaignMetricsService;
 use Dono\Campaigns\CampaignRepository;
 use Dono\Campaigns\CampaignService;
@@ -323,6 +324,8 @@ final class CoreModule implements DonoModule
         (new CampaignPermalinks())->register();
 
         (new CampaignChrome($c->get(CampaignRepository::class)))->register();
+
+        (new CampaignPageTemplate())->register();
 
         (new SocialMeta($c->get(CampaignRepository::class)))->register();
 
