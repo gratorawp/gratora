@@ -129,6 +129,28 @@ final class CoreCommandProviderTest extends IntegrationTestCase
         $this->assertSame('published', $statusRow['to']);
     }
 
+    public function test_reverse_for_campaign_update_returns_the_inverse_status(): void
+    {
+        $admin = self::factory()->user->create(['role' => 'administrator']);
+        get_role('administrator')->add_cap('dono_manage_campaigns');
+        wp_set_current_user($admin);
+
+        $r          = $this->registry();
+        $ctx        = new CommandContext($admin, 'rest', 'req-' . uniqid());
+        $campaignId = (int) $r->dispatch('campaign.create', ['title' => 'Reverse Me', 'status' => 'draft'], $ctx)->data['campaign_id'];
+
+        // Publishing is reversible: the inverse restores the current (draft) status.
+        $inverse = $r->reverseFor('campaign.update', ['campaign_id' => $campaignId, 'status' => 'published'], $ctx);
+        $this->assertSame(['campaign_id' => $campaignId, 'status' => 'draft'], $inverse);
+
+        // Not reversible: no status key, a no-op status, an unknown command, and a
+        // command that declares no reverse closure all yield null.
+        $this->assertNull($r->reverseFor('campaign.update', ['campaign_id' => $campaignId, 'title' => 'Renamed'], $ctx));
+        $this->assertNull($r->reverseFor('campaign.update', ['campaign_id' => $campaignId, 'status' => 'draft'], $ctx));
+        $this->assertNull($r->reverseFor('campaign.teleport', ['campaign_id' => 1], $ctx));
+        $this->assertNull($r->reverseFor('campaign.duplicate', ['campaign_id' => $campaignId], $ctx));
+    }
+
     public function test_preview_for_unknown_invalid_or_previewless_command_returns_empty(): void
     {
         $admin = self::factory()->user->create(['role' => 'administrator']);

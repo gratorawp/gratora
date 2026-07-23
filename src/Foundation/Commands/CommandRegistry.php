@@ -187,6 +187,37 @@ final class CommandRegistry
     }
 
     /**
+     * The inverse of a reversible command: if the gate would pass and the command
+     * carries a reverse closure, returns the input that undoes it (computed from
+     * the current, pre-mutation state), or null. The handler is never called; a
+     * failed gate, a missing closure, or a throwing closure all yield null. Call
+     * this BEFORE dispatching the forward command, while the "before" state holds.
+     *
+     * @param array<string,mixed> $input
+     * @return array<string,mixed>|null
+     */
+    public function reverseFor(string $id, array $input, CommandContext $ctx): ?array
+    {
+        $command = $this->authorize($id, $ctx);
+        if ($command instanceof CommandResult) {
+            return null;
+        }
+        $canonical = $this->canonicalize($command, $input);
+        if ($canonical instanceof CommandResult) {
+            return null;
+        }
+        if ($command->reverse === null) {
+            return null;
+        }
+        try {
+            $inverse = ($command->reverse)($canonical);
+        } catch (\Throwable $e) {
+            return null;
+        }
+        return is_array($inverse) && $inverse !== [] ? $inverse : null;
+    }
+
+    /**
      * Existence + permission gate shared by dispatch() and previewFor(). Returns
      * the Command when the caller may run it, or a CommandResult error
      * (not_found or denied). No audit here: the caller decides whether a denial

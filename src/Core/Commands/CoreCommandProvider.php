@@ -593,6 +593,18 @@ final class CoreCommandProvider
                 }
                 return $rows;
             },
+            function (array $in) use ($c): ?array {
+                // Reversible when the update flips status: undo restores the
+                // campaign's current (pre-update) status.
+                if (! array_key_exists('status', $in)) {
+                    return null;
+                }
+                $campaign = $c->get(CampaignRepository::class)->findById((int) ($in['campaign_id'] ?? 0));
+                if (! $campaign || (string) $in['status'] === (string) $campaign->status) {
+                    return null;
+                }
+                return ['campaign_id' => (int) $campaign->id, 'status' => (string) $campaign->status];
+            },
         ));
 
         $r->register(new Command(
@@ -749,6 +761,18 @@ final class CoreCommandProvider
                     }
                 }
                 return $rows;
+            },
+            function (array $in) use ($c): ?array {
+                // Reversible when the update flips status: undo restores the
+                // form's current (pre-update) status.
+                if (! array_key_exists('status', $in)) {
+                    return null;
+                }
+                $form = $c->get(FormRepository::class)->findById((int) ($in['form_id'] ?? 0));
+                if (! $form || (string) $in['status'] === (string) $form->status) {
+                    return null;
+                }
+                return ['form_id' => (int) $form->id, 'status' => (string) $form->status];
             },
         ));
 
