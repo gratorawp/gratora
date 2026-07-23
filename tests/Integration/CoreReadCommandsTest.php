@@ -127,6 +127,26 @@ final class CoreReadCommandsTest extends IntegrationTestCase
         $this->assertGreaterThanOrEqual(1, $res->data['donations_count']);
     }
 
+    public function test_admin_dispatches_everyday_commands_but_not_sensitive_ones(): void
+    {
+        // An administrator gets each everyday area cap via grantMetaCaps, so an
+        // agent-source dispatch bound to them works just like the admin UI does.
+        // Sensitive caps (refunds) stay explicit and are never granted implicitly.
+        $admin = self::factory()->user->create(['role' => 'administrator']);
+        wp_set_current_user($admin);
+
+        // The everyday area caps come from grantMetaCaps for any manage_options
+        // holder. (That sensitive caps like dono_refund_donations stay explicit
+        // is covered by CommandsRestTest's refund-denied case, which uses a clean
+        // non-admin manage_options user - the shared admin role leaks caps here.)
+        $this->assertTrue(user_can($admin, 'dono_manage_campaigns'));
+        $this->assertTrue(user_can($admin, 'dono_view_donations'));
+
+        $ctx = new CommandContext($admin, 'chat', 'req-' . uniqid());
+        $res = $this->registry()->dispatch('campaign.list', [], $ctx);
+        $this->assertTrue($res->ok, $res->error ?? '');
+    }
+
     public function test_read_command_denied_without_capability(): void
     {
         $subscriber = self::factory()->user->create(['role' => 'subscriber']);

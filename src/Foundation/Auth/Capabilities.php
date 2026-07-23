@@ -146,6 +146,14 @@ final class Capabilities
                 $allcaps[$virtual] = true;
                 $anyArea = true;
             }
+            // An administrator holds each everyday area cap for real, so command
+            // dispatch - which requires the granular cap, unlike the lenient
+            // Capabilities::userCan the admin UI uses - lets them do what the UI
+            // already lets them do. Sensitive caps (refunds, PII edits/exports,
+            // redaction) are not menu areas, so admins never gain them implicitly.
+            if ($super) {
+                $allcaps[$real] = true;
+            }
         }
 
         if ($super || ! empty($allcaps[self::MANAGE]) || $anyArea) {
