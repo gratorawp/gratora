@@ -76,6 +76,79 @@ final class CoreCommandProviderTest extends IntegrationTestCase
         $this->assertSame('core', $byId['donation.refund']['meta']['add_on']);
     }
 
+    public function test_manifest_flags_destructive_commands_and_previewable_ones(): void
+    {
+        $byId = [];
+        foreach ($this->registry()->manifest() as $entry) {
+            $byId[$entry['id']] = $entry;
+        }
+
+        $destructive = [
+            'donation.refund', 'donation.record_external_refund', 'donor.redact',
+            'campaign.delete', 'form.delete', 'fund.delete',
+            'recurring.cancel', 'recurring.cancel_for_campaign',
+        ];
+        foreach ($destructive as $id) {
+            $this->assertNotEmpty($byId[$id]['meta']['destructive'] ?? null, "{$id} must be flagged destructive in meta");
+        }
+
+        $previewable = [
+            'campaign.update', 'form.update', 'donation.refund',
+            'recurring.cancel_for_campaign', 'campaign.delete', 'form.delete', 'fund.delete',
+        ];
+        foreach ($previewable as $id) {
+            $this->assertTrue($byId[$id]['has_preview'], "{$id} must expose has_preview");
+        }
+
+        // A command that got neither stays unflagged.
+        $this->assertArrayNotHasKey('destructive', $byId['campaign.update']['meta']);
+        $this->assertFalse($byId['campaign.create']['has_preview']);
+    }
+
+    public function test_preview_for_campaign_update_shows_the_status_change(): void
+    {
+        $admin = self::factory()->user->create(['role' => 'administrator']);
+        get_role('administrator')->add_cap('dono_manage_campaigns');
+        wp_set_current_user($admin);
+
+        $r          = $this->registry();
+        $ctx        = new CommandContext($admin, 'rest', 'req-' . uniqid());
+        $campaignId = (int) $r->dispatch('campaign.create', ['title' => 'Preview Me', 'status' => 'draft'], $ctx)->data['campaign_id'];
+
+        $rows = $r->previewFor('campaign.update', ['campaign_id' => $campaignId, 'status' => 'published'], $ctx);
+
+        $this->assertNotEmpty($rows, 'a real status change should yield a preview row');
+        $statusRow = null;
+        foreach ($rows as $row) {
+            if (($row['label'] ?? '') === 'Status') {
+                $statusRow = $row;
+            }
+        }
+        $this->assertNotNull($statusRow, 'a Status row must be present');
+        $this->assertSame('draft', $statusRow['from']);
+        $this->assertSame('published', $statusRow['to']);
+    }
+
+    public function test_preview_for_unknown_invalid_or_previewless_command_returns_empty(): void
+    {
+        $admin = self::factory()->user->create(['role' => 'administrator']);
+        get_role('administrator')->add_cap('dono_manage_campaigns');
+        wp_set_current_user($admin);
+
+        $r   = $this->registry();
+        $ctx = new CommandContext($admin, 'rest', 'req-' . uniqid());
+
+        // Unknown command id.
+        $this->assertSame([], $r->previewFor('campaign.teleport', ['campaign_id' => 1], $ctx));
+
+        // Invalid input: campaign.update requires campaign_id, so this fails validation.
+        $this->assertSame([], $r->previewFor('campaign.update', ['status' => 'published'], $ctx));
+
+        // Valid input but the command declares no preview closure.
+        $campaignId = (int) $r->dispatch('campaign.create', ['title' => 'No Preview'], $ctx)->data['campaign_id'];
+        $this->assertSame([], $r->previewFor('campaign.duplicate', ['campaign_id' => $campaignId], $ctx));
+    }
+
     public function test_donation_refund_dispatches_through_the_real_service(): void
     {
         $admin = self::factory()->user->create(['role' => 'administrator']);

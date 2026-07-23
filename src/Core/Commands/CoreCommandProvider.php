@@ -22,6 +22,7 @@ use Dono\Foundation\Commands\CommandContext;
 use Dono\Foundation\Commands\CommandError;
 use Dono\Foundation\Commands\CommandRegistry;
 use Dono\Foundation\Container\Container;
+use Dono\Foundation\Helpers\Money;
 use Dono\Foundation\Time\Clock;
 use Dono\Forms\FormRepository;
 use Dono\Forms\FormService;
@@ -204,7 +205,19 @@ final class CoreCommandProvider
                     'is_full_refund' => $donation->status === 'refunded',
                 ];
             },
-            self::META,
+            $this->meta(['destructive' => true]),
+            function (array $in) use ($c): array {
+                $donation = $c->get(DonationRepository::class)->findByReference((string) ($in['donation_reference'] ?? ''));
+                if (! $donation) {
+                    return [];
+                }
+                $amount = (int) ($in['amount_cents'] ?? 0);
+                $isFull = $amount >= (int) $donation->amount_cents;
+                return [[
+                    'label' => sprintf('Refund donation %s', (string) $donation->reference),
+                    'to'    => Money::format($amount, (string) $donation->currency) . ($isFull ? ' (full refund)' : ' (partial refund)'),
+                ]];
+            },
         ));
 
         $r->register(new Command(
@@ -238,7 +251,7 @@ final class CoreCommandProvider
                     'status'    => (string) $refund->status,
                 ];
             },
-            self::META,
+            $this->meta(['destructive' => true]),
         ));
 
         $r->register(new Command(
@@ -394,7 +407,7 @@ final class CoreCommandProvider
                     'redacted_at' => $redacted->redacted_at,
                 ];
             },
-            self::META,
+            $this->meta(['destructive' => true]),
         ));
 
         $r->register(new Command(
@@ -553,6 +566,33 @@ final class CoreCommandProvider
                 return ['campaign_id' => (int) $updated->id];
             },
             self::META,
+            function (array $in) use ($c): array {
+                $campaign = $c->get(CampaignRepository::class)->findById((int) ($in['campaign_id'] ?? 0));
+                if (! $campaign) {
+                    return [];
+                }
+                $rows = [];
+                if (array_key_exists('title', $in) && (string) $in['title'] !== (string) $campaign->title) {
+                    $rows[] = ['label' => 'Title', 'from' => (string) $campaign->title, 'to' => (string) $in['title']];
+                }
+                if (array_key_exists('status', $in) && (string) $in['status'] !== (string) $campaign->status) {
+                    $rows[] = ['label' => 'Status', 'from' => (string) $campaign->status, 'to' => (string) $in['status']];
+                }
+                if (array_key_exists('goal_cents', $in) && (int) $in['goal_cents'] !== (int) $campaign->goal_cents) {
+                    $rows[] = [
+                        'label' => 'Goal amount',
+                        'from'  => Money::format((int) $campaign->goal_cents, (string) $campaign->currency),
+                        'to'    => Money::format((int) $in['goal_cents'], (string) $campaign->currency),
+                    ];
+                }
+                if (array_key_exists('goal_count', $in) && (int) $in['goal_count'] !== (int) $campaign->goal_count) {
+                    $rows[] = ['label' => 'Goal count', 'from' => (string) (int) $campaign->goal_count, 'to' => (string) (int) $in['goal_count']];
+                }
+                if (array_key_exists('campaign_type', $in) && (string) $in['campaign_type'] !== (string) $campaign->campaign_type) {
+                    $rows[] = ['label' => 'Campaign type', 'from' => (string) $campaign->campaign_type, 'to' => (string) $in['campaign_type']];
+                }
+                return $rows;
+            },
         ));
 
         $r->register(new Command(
@@ -573,7 +613,17 @@ final class CoreCommandProvider
                 $c->get(CampaignService::class)->delete($campaign);
                 return ['campaign_id' => (int) $in['campaign_id'], 'deleted' => true];
             },
-            self::META,
+            $this->meta(['destructive' => true]),
+            function (array $in) use ($c): array {
+                $campaign = $c->get(CampaignRepository::class)->findById((int) ($in['campaign_id'] ?? 0));
+                if (! $campaign) {
+                    return [];
+                }
+                return [[
+                    'label' => 'Delete campaign',
+                    'to'    => sprintf('%s (#%d)', (string) $campaign->title, (int) $campaign->id),
+                ]];
+            },
         ));
 
         $r->register(new Command(
@@ -676,6 +726,30 @@ final class CoreCommandProvider
                 ];
             },
             $this->meta(['agent_hint' => 'The field layout (blocks) is designed in the form builder, not here. Read the form with form.get first so you act on its real structure. Settings are replaced wholesale, so send the full settings object.']),
+            function (array $in) use ($c): array {
+                $form = $c->get(FormRepository::class)->findById((int) ($in['form_id'] ?? 0));
+                if (! $form) {
+                    return [];
+                }
+                $rows = [];
+                if (array_key_exists('status', $in) && (string) $in['status'] !== (string) $form->status) {
+                    $rows[] = ['label' => 'Status', 'from' => (string) $form->status, 'to' => (string) $in['status']];
+                }
+                if (array_key_exists('settings', $in) && is_array($in['settings'])) {
+                    $existing = is_array($form->settings) ? $form->settings : [];
+                    foreach ($in['settings'] as $key => $value) {
+                        $before = $existing[$key] ?? null;
+                        if ($before !== $value) {
+                            $rows[] = [
+                                'label' => sprintf('Setting: %s', (string) $key),
+                                'from'  => $this->previewValue($before),
+                                'to'    => $this->previewValue($value),
+                            ];
+                        }
+                    }
+                }
+                return $rows;
+            },
         ));
 
         $r->register(new Command(
@@ -727,7 +801,17 @@ final class CoreCommandProvider
                 $c->get(FormService::class)->delete($form);
                 return ['form_id' => (int) $in['form_id'], 'deleted' => true];
             },
-            self::META,
+            $this->meta(['destructive' => true]),
+            function (array $in) use ($c): array {
+                $form = $c->get(FormRepository::class)->findById((int) ($in['form_id'] ?? 0));
+                if (! $form) {
+                    return [];
+                }
+                return [[
+                    'label' => 'Delete form',
+                    'to'    => sprintf('%s (#%d)', (string) $form->title, (int) $form->id),
+                ]];
+            },
         ));
 
         $r->register(new Command(
@@ -827,7 +911,25 @@ final class CoreCommandProvider
                 );
                 return ['fund_id' => (int) $in['fund_id'], 'deleted' => true, 'detail' => $result];
             },
-            self::META,
+            $this->meta(['destructive' => true]),
+            function (array $in) use ($c): array {
+                $repo = $c->get(FundRepository::class);
+                $fund = $repo->findById((int) ($in['fund_id'] ?? 0));
+                if (! $fund) {
+                    return [];
+                }
+                $rows = [[
+                    'label' => 'Delete fund',
+                    'to'    => sprintf('%s (%s)', (string) $fund->name, (string) $fund->code),
+                ]];
+                if (! empty($in['reassign_to'])) {
+                    $target = $repo->findById((int) $in['reassign_to']);
+                    if ($target) {
+                        $rows[] = ['label' => 'Reassign donations to', 'to' => sprintf('%s (%s)', (string) $target->name, (string) $target->code)];
+                    }
+                }
+                return $rows;
+            },
         ));
     }
 
@@ -892,7 +994,7 @@ final class CoreCommandProvider
                 $c->get(RecurringCanceller::class)->cancel($plan, $reason);
                 return ['plan_id' => (int) $plan->id, 'status' => (string) $plan->status];
             },
-            self::META,
+            $this->meta(['destructive' => true]),
         ));
 
         $r->register(new Command(
@@ -997,7 +1099,18 @@ final class CoreCommandProvider
                     'failed'      => (int) $result['failed'],
                 ];
             },
-            $this->meta(['agent_hint' => 'Cancels ALL active recurring donations on the campaign at once and cannot be undone. To cancel a single plan use recurring.cancel instead.']),
+            $this->meta(['destructive' => true, 'agent_hint' => 'Cancels ALL active recurring donations on the campaign at once and cannot be undone. To cancel a single plan use recurring.cancel instead.']),
+            function (array $in) use ($c): array {
+                $campaign = $c->get(CampaignRepository::class)->findById((int) ($in['campaign_id'] ?? 0));
+                if (! $campaign) {
+                    return [];
+                }
+                $active = (int) ($c->get(RecurringPlanRepository::class)->activeForCampaign((int) $campaign->id)['count'] ?? 0);
+                return [[
+                    'label' => sprintf('Cancel all active recurring plans on %s', (string) $campaign->title),
+                    'to'    => $active === 1 ? '1 active plan' : sprintf('%d active plans', $active),
+                ]];
+            },
         ));
     }
 
@@ -1704,6 +1817,24 @@ final class CoreCommandProvider
     {
         $full = trim(((string) ($donor->first_name ?? '')) . ' ' . ((string) ($donor->last_name ?? '')));
         return $full !== '' ? $full : '-';
+    }
+
+    /**
+     * Stringify a settings value for a preview row: scalars as-is, booleans as
+     * yes/no, structured values as compact JSON, a missing value as "not set".
+     */
+    private function previewValue(mixed $value): string
+    {
+        if ($value === null) {
+            return 'not set';
+        }
+        if (is_bool($value)) {
+            return $value ? 'yes' : 'no';
+        }
+        if (is_scalar($value)) {
+            return (string) $value;
+        }
+        return (string) wp_json_encode($value);
     }
 
     /**

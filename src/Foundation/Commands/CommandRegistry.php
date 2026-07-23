@@ -68,6 +68,7 @@ final class CommandRegistry
                 'capability'   => $c->capability,
                 'idempotent'   => $c->idempotent,
                 'mutating'     => $c->mutating,
+                'has_preview'  => $c->preview !== null,
                 'meta'         => $c->meta,
             ];
         }
@@ -82,17 +83,13 @@ final class CommandRegistry
      */
     public function dispatch(string $id, array $input, CommandContext $ctx): CommandResult
     {
-        $command = $this->commands[$id] ?? null;
-        if (! $command) {
-            return CommandResult::error('command.not_found', "Unknown command '{$id}'.");
-        }
-
-        $allowed = in_array($ctx->source, ['rest', 'cli'], true)
-            ? current_user_can($command->capability)
-            : ($ctx->user_id !== null && user_can($ctx->user_id, $command->capability));
-        if (! $allowed) {
-            $this->audit('command.denied', $command, $ctx, $input);
-            return CommandResult::error('command.denied', "Not permitted: {$command->capability}.");
+        $command = $this->authorize($id, $ctx);
+        if ($command instanceof CommandResult) {
+            // Only a permission denial is audited; not-found and invalid-input are not.
+            if ($command->error_code === 'command.denied') {
+                $this->audit('command.denied', $this->commands[$id], $ctx, $input);
+            }
+            return $command;
         }
 
         // Unattended sources are rate-limited; rest/cli are not.
@@ -101,17 +98,9 @@ final class CommandRegistry
             return CommandResult::error('command.rate_limited', "Rate limit exceeded for '{$id}'.");
         }
 
-        $canonical = $input;
-        if ($command->inputSchema !== []) {
-            $valid = rest_validate_value_from_schema($input, $command->inputSchema, $id);
-            if (is_wp_error($valid)) {
-                return CommandResult::error('command.invalid_input', $valid->get_error_message());
-            }
-            $sanitized = rest_sanitize_value_from_schema($input, $command->inputSchema, $id);
-            if (is_wp_error($sanitized)) {
-                return CommandResult::error('command.invalid_input', $sanitized->get_error_message());
-            }
-            $canonical = is_array($sanitized) ? $sanitized : (array) $sanitized;
+        $canonical = $this->canonicalize($command, $input);
+        if ($canonical instanceof CommandResult) {
+            return $canonical;
         }
 
         if ($command->mutating) {
@@ -163,6 +152,85 @@ final class CommandRegistry
         }
 
         return CommandResult::ok(is_array($data) ? $data : ['result' => $data]);
+    }
+
+    /**
+     * Read-only "what will this change" for a command. Runs the same front-half
+     * gates as dispatch (existence, permission, input validation), and when they
+     * pass and the command carries a preview closure, returns its change rows.
+     * The handler is never called. Any failed gate, a missing closure, or a
+     * throwing closure yields [] - a preview must never break the flow, so a
+     * caller can safely show the operator the diff before they approve.
+     *
+     * @param array<string,mixed> $input
+     * @return list<array{label:string, from?:string, to:string}>
+     */
+    public function previewFor(string $id, array $input, CommandContext $ctx): array
+    {
+        $command = $this->authorize($id, $ctx);
+        if ($command instanceof CommandResult) {
+            return [];
+        }
+        $canonical = $this->canonicalize($command, $input);
+        if ($canonical instanceof CommandResult) {
+            return [];
+        }
+        if ($command->preview === null) {
+            return [];
+        }
+        try {
+            $rows = ($command->preview)($canonical);
+        } catch (\Throwable $e) {
+            return [];
+        }
+        return is_array($rows) ? array_values($rows) : [];
+    }
+
+    /**
+     * Existence + permission gate shared by dispatch() and previewFor(). Returns
+     * the Command when the caller may run it, or a CommandResult error
+     * (not_found or denied). No audit here: the caller decides whether a denial
+     * is recorded (dispatch does; a read-only preview does not).
+     *
+     * @return Command|CommandResult
+     */
+    private function authorize(string $id, CommandContext $ctx): Command|CommandResult
+    {
+        $command = $this->commands[$id] ?? null;
+        if (! $command) {
+            return CommandResult::error('command.not_found', "Unknown command '{$id}'.");
+        }
+        $allowed = in_array($ctx->source, ['rest', 'cli'], true)
+            ? current_user_can($command->capability)
+            : ($ctx->user_id !== null && user_can($ctx->user_id, $command->capability));
+        if (! $allowed) {
+            return CommandResult::error('command.denied', "Not permitted: {$command->capability}.");
+        }
+        return $command;
+    }
+
+    /**
+     * Validate + sanitize input against a command's schema. Returns the
+     * canonical (sanitized) input, or a CommandResult invalid_input error. A
+     * command with no schema passes its input through unchanged.
+     *
+     * @param array<string,mixed> $input
+     * @return array<string,mixed>|CommandResult
+     */
+    private function canonicalize(Command $command, array $input): array|CommandResult
+    {
+        if ($command->inputSchema === []) {
+            return $input;
+        }
+        $valid = rest_validate_value_from_schema($input, $command->inputSchema, $command->id);
+        if (is_wp_error($valid)) {
+            return CommandResult::error('command.invalid_input', $valid->get_error_message());
+        }
+        $sanitized = rest_sanitize_value_from_schema($input, $command->inputSchema, $command->id);
+        if (is_wp_error($sanitized)) {
+            return CommandResult::error('command.invalid_input', $sanitized->get_error_message());
+        }
+        return is_array($sanitized) ? $sanitized : (array) $sanitized;
     }
 
     /**
