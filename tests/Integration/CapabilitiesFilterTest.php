@@ -53,4 +53,24 @@ final class CapabilitiesFilterTest extends IntegrationTestCase
         $role = get_role('subscriber');
         $this->assertFalse($role->has_cap('dono_qa_cap'), 'filtered cap revoked');
     }
+
+    /**
+     * Add-ons declare the everyday caps their command packs need through
+     * dono.capabilities.admin_caps; a default administrator then holds them so
+     * the assistant (strict granular dispatch) can drive add-on commands.
+     */
+    public function test_admin_caps_filter_grants_super_admins_the_declared_cap(): void
+    {
+        $cb = static fn (array $caps): array => array_merge($caps, ['dono_qa_admin_cap']);
+        add_filter('dono.capabilities.admin_caps', $cb);
+
+        $super = Capabilities::grantMetaCaps(['manage_options' => true]);
+        $this->assertTrue($super['dono_qa_admin_cap'] ?? false, 'super-admin implicitly holds the declared add-on cap');
+
+        // A scoped role that is not a super-admin does not gain it implicitly.
+        $plain = Capabilities::grantMetaCaps(['dono_view_donations' => true]);
+        $this->assertArrayNotHasKey('dono_qa_admin_cap', $plain);
+
+        remove_filter('dono.capabilities.admin_caps', $cb);
+    }
 }

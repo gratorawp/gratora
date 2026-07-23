@@ -156,6 +156,18 @@ final class Capabilities
             }
         }
 
+        // Add-ons declare the everyday caps their command packs need so a
+        // default administrator can drive them out of the box (the assistant
+        // dispatches with the strict granular check, not the lenient userCan).
+        // Add-ons keep sensitive caps off this list, so those stay explicit.
+        if ($super) {
+            foreach ((array) apply_filters('dono.capabilities.admin_caps', []) as $cap) {
+                if (is_string($cap) && $cap !== '') {
+                    $allcaps[$cap] = true;
+                }
+            }
+        }
+
         if ($super || ! empty($allcaps[self::MANAGE]) || $anyArea) {
             $allcaps['dono_access'] = true;
         }

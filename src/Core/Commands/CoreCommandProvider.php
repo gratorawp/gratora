@@ -40,7 +40,7 @@ use Dono\Recurring\RecurringPlan;
  */
 final class CoreCommandProvider
 {
-    private const META = ['add_on' => 'core'];
+    private const META = ['add_on' => 'core', 'add_on_label' => 'Dono'];
 
     public function register(CommandRegistry $r, Container $c): void
     {
@@ -523,7 +523,7 @@ final class CoreCommandProvider
 
         $r->register(new Command(
             'form.create',
-            'Create a donation form from a built-in template. The field layout comes from the template, not from raw markup; pick the closest template and refine it in the form builder afterwards.',
+            'Create a donation form from a built-in template.',
             $this->schema([
                 'title'       => ['type' => 'string'],
                 'slug'        => ['type' => 'string'],
@@ -553,12 +553,12 @@ final class CoreCommandProvider
                 $form = $c->get(FormService::class)->create($in);
                 return ['form_id' => (int) $form->id, 'slug' => (string) $form->slug, 'template' => $templateId];
             },
-            self::META,
+            $this->meta(['agent_hint' => 'The field layout comes from the template, not raw block markup you author. Pick the closest template; it can be refined in the form builder afterwards.']),
         ));
 
         $r->register(new Command(
             'form.update',
-            'Update a donation form\'s title, slug, status, or settings. The field layout (blocks) is designed in the form builder, not here; read the form with form.get first.',
+            'Update a donation form\'s title, slug, status, or settings.',
             $this->schema([
                 'form_id'  => ['type' => 'integer', 'minimum' => 1],
                 'title'    => ['type' => 'string'],
@@ -589,12 +589,12 @@ final class CoreCommandProvider
                     'settings' => $updated->settings ?: (object) [],
                 ];
             },
-            self::META,
+            $this->meta(['agent_hint' => 'The field layout (blocks) is designed in the form builder, not here. Read the form with form.get first so you act on its real structure. Settings are replaced wholesale, so send the full settings object.']),
         ));
 
         $r->register(new Command(
             'form.get',
-            'Read a donation form: its status, settings, and field-block structure. Use before editing so you work from the real form, not assumptions.',
+            'Read a donation form: its status, settings, and field-block structure.',
             $this->schema(['form_id' => ['type' => 'integer', 'minimum' => 1]], ['form_id']),
             [],
             'dono_manage_forms',
@@ -620,7 +620,7 @@ final class CoreCommandProvider
                     'blocks'      => $blocks,
                 ];
             },
-            self::META,
+            $this->meta(['agent_hint' => 'Use before editing a form so you work from its real structure, not assumptions.']),
         ));
 
         $r->register(new Command(
@@ -1190,6 +1190,20 @@ final class CoreCommandProvider
             $schema['required'] = $required;
         }
         return $schema;
+    }
+
+    /**
+     * Command meta. `agent_hint` is guidance sent only to the model (appended to
+     * the tool description); it never appears in the human-facing Tools tab,
+     * which shows the plain `summary`. Keeps operator-facing copy clean while
+     * still steering the assistant.
+     *
+     * @param array<string,mixed> $extra
+     * @return array<string,mixed>
+     */
+    private function meta(array $extra = []): array
+    {
+        return array_merge(self::META, $extra);
     }
 
     /**
