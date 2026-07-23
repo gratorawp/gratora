@@ -31,6 +31,7 @@ use Dono\Funds\FundRepository;
 use Dono\Funds\FundService;
 use Dono\Gateways\GatewayManager;
 use Dono\Gateways\SubscriptionAware;
+use Dono\Mail\Mailer;
 use Dono\Receipts\ReceiptIssuer;
 use Dono\Reports\CampaignReportBuilder;
 use Dono\Reports\TaxStatementBuilder;
@@ -276,6 +277,30 @@ final class CoreCommandProvider
             },
             self::META,
         ));
+
+        $r->register(new Command(
+            'donation.missing_receipts',
+            'List paid donations that have no issued, non-voided receipt - the donors who never got their receipt. Paged, newest first; optional campaign filter. No donor PII.',
+            $this->listSchema([
+                'campaign_id' => ['type' => 'integer', 'minimum' => 1],
+            ]),
+            [],
+            'dono_view_donations',
+            true,
+            false,
+            function (array $in) use ($c): array {
+                $res = $c->get(DonationRepository::class)->paidWithoutReceipt($in);
+                return $this->page($in, array_map(static fn ($m): array => [
+                    'reference'    => (string) $m->reference,
+                    'amount_cents' => (int) $m->amount_cents,
+                    'currency'     => (string) $m->currency,
+                    'campaign_id'  => $m->campaign_id !== null ? (int) $m->campaign_id : null,
+                    'paid_at'      => $m->paid_at,
+                    'created_at'   => (string) $m->created_at,
+                ], $res['items']), $res['total']);
+            },
+            $this->meta(['agent_hint' => 'Finds paid donations still missing a receipt so you can requeue each with receipt.requeue. Read-only; carries no donor email or name.']),
+        ));
     }
 
     private function donors(CommandRegistry $r, Container $c): void
@@ -431,6 +456,38 @@ final class CoreCommandProvider
                 return ['token' => $token];
             },
             self::META,
+        ));
+
+        $r->register(new Command(
+            'donor.send_email',
+            'Send a single one-off email to one donor. The operator approves the exact recipient, subject, and body before it sends.',
+            $this->schema([
+                'donor_id' => ['type' => 'integer', 'minimum' => 1],
+                'subject'  => ['type' => 'string', 'minLength' => 1],
+                'body'     => ['type' => 'string', 'minLength' => 1],
+            ], ['donor_id', 'subject', 'body']),
+            [],
+            'dono_edit_donors',
+            false,
+            true,
+            function (array $in) use ($c): array {
+                $donor = $c->get(DonorRepository::class)->findById((int) $in['donor_id']);
+                // A redacted donor has no address on file and must never be emailed.
+                if (! $donor || $donor->redacted_at !== null) {
+                    throw new CommandError('Donor not found.');
+                }
+                $email = $c->get(DonorService::class)->decryptEmail($donor);
+                if ($email === null || $email === '') {
+                    throw new CommandError('Donor has no email address on file.');
+                }
+                $sent = $c->get(Mailer::class)->sendRaw(
+                    $email,
+                    (string) $in['subject'],
+                    (string) $in['body'],
+                );
+                return ['sent' => (bool) $sent, 'donor_id' => (int) $donor->id];
+            },
+            $this->meta(['agent_hint' => 'A one-off email the operator approves before it sends; to resend a receipt use receipt.requeue and for a login link use donor.magic_link.issue instead.']),
         ));
     }
 
@@ -912,6 +969,35 @@ final class CoreCommandProvider
                 return ['plan_id' => (int) $plan->id, 'amount_cents' => (int) $plan->amount_cents];
             },
             self::META,
+        ));
+
+        $r->register(new Command(
+            'recurring.cancel_for_campaign',
+            'Cancel every active recurring plan attributed to a campaign.',
+            $this->schema([
+                'campaign_id' => ['type' => 'integer', 'minimum' => 1],
+                'reason'      => ['type' => ['string', 'null']],
+            ], ['campaign_id']),
+            [],
+            'dono_view_donations',
+            false,
+            true,
+            function (array $in) use ($c): array {
+                $campaignId = (int) $in['campaign_id'];
+                if (! $c->get(CampaignRepository::class)->findById($campaignId)) {
+                    throw new CommandError('Campaign not found.');
+                }
+                $result = $c->get(RecurringCanceller::class)->cancelActiveForCampaign(
+                    $campaignId,
+                    isset($in['reason']) ? (string) $in['reason'] : null,
+                );
+                return [
+                    'campaign_id' => $campaignId,
+                    'cancelled'   => (int) $result['cancelled'],
+                    'failed'      => (int) $result['failed'],
+                ];
+            },
+            $this->meta(['agent_hint' => 'Cancels ALL active recurring donations on the campaign at once and cannot be undone. To cancel a single plan use recurring.cancel instead.']),
         ));
     }
 

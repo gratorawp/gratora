@@ -133,6 +133,50 @@ final class DonationRepository
     }
 
     /**
+     * Paid (paid or partial_refund), non-test donations that have no issued,
+     * non-voided receipt - the "these donors never got their receipt" sweep.
+     * Paged (1..100), newest paid first, optionally scoped to one campaign.
+     *
+     * @param array{page?:int,per_page?:int,campaign_id?:int} $args
+     * @return array{items: array<Donation>, total: int}
+     */
+    public function paidWithoutReceipt(array $args = []): array
+    {
+        $page       = max(1, (int) ($args['page'] ?? 1));
+        $perPage    = max(1, min(100, (int) ($args['per_page'] ?? 25)));
+        $offset     = ($page - 1) * $perPage;
+        $campaignId = isset($args['campaign_id']) ? (int) $args['campaign_id'] : null;
+
+        $prefix = DB::getPrefix();
+        // Correlated NOT EXISTS against a non-voided receipt for the donation.
+        // Kept the FIRST where-condition: whereRaw adds no AND connector, but the
+        // where()s chained after it (status, is_test, campaign) do.
+        $noReceipt = "NOT EXISTS (SELECT 1 FROM {$prefix}dono_receipts rc "
+            . "WHERE rc.donation_id = {$prefix}dono_donations.id AND rc.voided = 0)";
+
+        $build = function () use ($noReceipt, $campaignId) {
+            $q = DonationQueries::live(
+                Donation::query()
+                    ->whereRaw($noReceipt)
+                    ->whereIn('status', ['paid', 'partial_refund'])
+            );
+            if ($campaignId !== null) {
+                $q = $q->where('campaign_id', $campaignId);
+            }
+            return $q;
+        };
+
+        $total = (int) $build()->count();
+        $items = $build()
+            ->orderBy('paid_at', 'DESC')
+            ->limit($perPage)
+            ->offset($offset)
+            ->getAll();
+
+        return ['items' => $items, 'total' => $total];
+    }
+
+    /**
      * All matching rows for export. Same filter shape as listAdmin(). Capped at 50k rows.
      *
      * @param array<string,mixed> $args
