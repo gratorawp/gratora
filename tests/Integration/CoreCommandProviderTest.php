@@ -48,6 +48,8 @@ final class CoreCommandProviderTest extends IntegrationTestCase
             'receipt.requeue', 'receipt.render_pdf', 'recurring.cancel',
             'recurring.pause', 'recurring.resume', 'recurring.update_amount',
             'donation.get', 'donor.get', 'campaign.metrics', 'donor.insights',
+            'campaign.list', 'fund.list', 'form.list', 'donation.list',
+            'donor.list', 'donor.find_by_email', 'report.revenue',
         ];
         foreach ($expected as $id) {
             $this->assertContains($id, $ids, "manifest missing {$id}");

@@ -23,6 +23,7 @@ use Dono\Foundation\Commands\CommandRegistry;
 use Dono\Foundation\Container\Container;
 use Dono\Forms\FormRepository;
 use Dono\Forms\FormService;
+use Dono\Foundation\Identity\IdentityHasher;
 use Dono\Funds\FundRepository;
 use Dono\Funds\FundService;
 use Dono\Gateways\GatewayManager;
@@ -905,6 +906,201 @@ final class CoreCommandProvider
             fn (): array => ['insights' => $c->get(DonorMetricsService::class)->insights()],
             self::META,
         ));
+
+        // Read/list commands: the assistant's eyes. Paged, cap-gated, and never
+        // surfacing raw donor PII in a bulk listing (donor identity is its own
+        // dono_view_donors command). All are non-mutating + idempotent, so they
+        // skip the confirmation gate entirely.
+        $r->register(new Command(
+            'campaign.list',
+            'List campaigns (paged, newest first); filter by status or search text.',
+            $this->listSchema(['status' => ['type' => 'string', 'enum' => ['draft', 'published', 'archived']]]),
+            [],
+            'dono_manage_campaigns',
+            true,
+            false,
+            function (array $in) use ($c): array {
+                $res = $c->get(CampaignRepository::class)->listAdmin($in);
+                return $this->page($in, array_map(static fn ($m): array => [
+                    'id'              => (int) $m->id,
+                    'title'           => (string) $m->title,
+                    'slug'            => (string) $m->slug,
+                    'status'          => (string) $m->status,
+                    'campaign_type'   => (string) $m->campaign_type,
+                    'goal_type'       => (string) $m->goal_type,
+                    'goal_cents'      => $m->goal_cents,
+                    'goal_count'      => $m->goal_count,
+                    'currency'        => (string) $m->currency,
+                    'raised_cents'    => (int) $m->raised_cents,
+                    'donations_count' => (int) $m->donations_count,
+                    'donors_count'    => (int) $m->donors_count,
+                ], $res['items']), $res['total']);
+            },
+            self::META,
+        ));
+
+        $r->register(new Command(
+            'fund.list',
+            'List funds (paged); filter by search text.',
+            $this->listSchema(),
+            [],
+            'dono_manage_campaigns',
+            true,
+            false,
+            function (array $in) use ($c): array {
+                $res = $c->get(FundRepository::class)->listAdmin($in);
+                return $this->page($in, array_map(static fn ($m): array => [
+                    'id'        => (int) $m->id,
+                    'code'      => (string) $m->code,
+                    'name'      => (string) $m->name,
+                    'is_active' => (bool) $m->is_active,
+                ], $res['items']), $res['total']);
+            },
+            self::META,
+        ));
+
+        $r->register(new Command(
+            'form.list',
+            'List donation forms (paged); filter by status, campaign, or search text.',
+            $this->listSchema([
+                'status'      => ['type' => 'string'],
+                'campaign_id' => ['type' => 'integer', 'minimum' => 1],
+            ]),
+            [],
+            'dono_manage_forms',
+            true,
+            false,
+            function (array $in) use ($c): array {
+                $res = $c->get(FormRepository::class)->listAdmin($in);
+                return $this->page($in, array_map(static fn ($m): array => [
+                    'id'          => (int) $m->id,
+                    'title'       => (string) $m->title,
+                    'slug'        => (string) $m->slug,
+                    'status'      => (string) $m->status,
+                    'form_type'   => (string) $m->form_type,
+                    'campaign_id' => (int) $m->campaign_id,
+                ], $res['items']), $res['total']);
+            },
+            self::META,
+        ));
+
+        $r->register(new Command(
+            'donation.list',
+            'List donations (paged, newest first); filter by status, campaign, or search. Carries donor_id but never donor name or email.',
+            $this->listSchema([
+                'status'      => ['type' => 'string'],
+                'campaign_id' => ['type' => 'integer', 'minimum' => 1],
+            ]),
+            [],
+            'dono_view_donations',
+            true,
+            false,
+            function (array $in) use ($c): array {
+                $res = $c->get(DonationRepository::class)->listAdmin($in);
+                return $this->page($in, array_map(static fn ($m): array => [
+                    'id'           => (int) $m->id,
+                    'reference'    => (string) $m->reference,
+                    'amount_cents' => (int) $m->amount_cents,
+                    'currency'     => (string) $m->currency,
+                    'status'       => (string) $m->status,
+                    'gateway'      => (string) $m->gateway,
+                    'frequency'    => (string) $m->frequency,
+                    'campaign_id'  => $m->campaign_id,
+                    'fund_id'      => $m->fund_id,
+                    'donor_id'     => (int) $m->donor_id,
+                    'is_anonymous' => (bool) $m->is_anonymous,
+                    'is_test'      => (bool) $m->is_test,
+                    'created_at'   => (string) $m->created_at,
+                ], $res['items']), $res['total']);
+            },
+            self::META,
+        ));
+
+        $r->register(new Command(
+            'donor.list',
+            'List donors (paged) with name, email, and lifetime totals. Returns PII; gated on dono_view_donors.',
+            $this->listSchema(),
+            [],
+            'dono_view_donors',
+            true,
+            false,
+            function (array $in) use ($c): array {
+                $res     = $c->get(DonorRepository::class)->listAdmin($in);
+                $service = $c->get(DonorService::class);
+                return $this->page($in, array_map(static fn ($m): array => [
+                    'id'                  => (int) $m->id,
+                    'name'                => self::donorName($m),
+                    'email'               => $service->decryptEmail($m) ?: null,
+                    'donations_count'     => (int) $m->donations_count,
+                    'total_donated_cents' => (int) $m->total_donated_cents,
+                    'last_donation_at'    => $m->last_donation_at,
+                ], $res['items']), $res['total']);
+            },
+            self::META,
+        ));
+
+        $r->register(new Command(
+            'donor.find_by_email',
+            'Look up a single donor by email address. Returns PII; gated on dono_view_donors.',
+            $this->schema([
+                'email' => ['type' => 'string', 'format' => 'email', 'minLength' => 3],
+            ], ['email']),
+            [],
+            'dono_view_donors',
+            true,
+            false,
+            function (array $in) use ($c): array {
+                $hash  = $c->get(IdentityHasher::class)->emailHash((string) $in['email']);
+                $donor = $c->get(DonorRepository::class)->findByEmailHash($hash);
+                if (! $donor) {
+                    return ['found' => false, 'donor' => null];
+                }
+                $service = $c->get(DonorService::class);
+                return [
+                    'found' => true,
+                    'donor' => [
+                        'id'                  => (int) $donor->id,
+                        'name'                => self::donorName($donor),
+                        'email'               => $service->decryptEmail($donor) ?: null,
+                        'donations_count'     => (int) $donor->donations_count,
+                        'total_donated_cents' => (int) $donor->total_donated_cents,
+                        'last_donation_at'    => $donor->last_donation_at,
+                    ],
+                ];
+            },
+            self::META,
+        ));
+
+        $r->register(new Command(
+            'report.revenue',
+            'Paid-donation revenue totals for an optional date range and campaign.',
+            $this->schema([
+                'from'        => ['type' => ['string', 'null'], 'format' => 'date'],
+                'to'          => ['type' => ['string', 'null'], 'format' => 'date'],
+                'campaign_id' => ['type' => ['integer', 'null'], 'minimum' => 1],
+            ]),
+            [],
+            'dono_view_reports',
+            true,
+            false,
+            function (array $in) use ($c): array {
+                $repo       = $c->get(DonationRepository::class);
+                $from       = $in['from'] ?? null;
+                $to         = $in['to'] ?? null;
+                $campaignId = isset($in['campaign_id']) ? (int) $in['campaign_id'] : null;
+                $agg        = $repo->aggregatePaidBetween($from, $to, $campaignId);
+                return [
+                    'amount_cents'    => (int) ($agg['amount_cents'] ?? 0),
+                    'donations_count' => (int) ($agg['donations_count'] ?? 0),
+                    'donors_count'    => (int) ($agg['donors_count'] ?? 0),
+                    'currency'        => $repo->topCurrencyForPaid($from, $to),
+                    'from'            => $from,
+                    'to'              => $to,
+                    'campaign_id'     => $campaignId,
+                ];
+            },
+            self::META,
+        ));
     }
 
     /**
@@ -923,6 +1119,46 @@ final class CoreCommandProvider
             $schema['required'] = $required;
         }
         return $schema;
+    }
+
+    /**
+     * Common paged-list input: page + per_page + search, plus any $extra filters.
+     *
+     * @param array<string,array<string,mixed>> $extra
+     * @return array<string,mixed>
+     */
+    private function listSchema(array $extra = []): array
+    {
+        return $this->schema(array_merge([
+            'page'     => ['type' => 'integer', 'minimum' => 1],
+            'per_page' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 100],
+            'search'   => ['type' => 'string'],
+        ], $extra));
+    }
+
+    /**
+     * Wrap projected list rows with echoed pagination, mirroring the per_page
+     * clamp the repositories apply (1..100, default 25).
+     *
+     * @param array<string,mixed> $in
+     * @param list<array<string,mixed>> $items
+     * @return array{items: list<array<string,mixed>>, total: int, page: int, per_page: int}
+     */
+    private function page(array $in, array $items, int $total): array
+    {
+        return [
+            'items'    => $items,
+            'total'    => $total,
+            'page'     => max(1, (int) ($in['page'] ?? 1)),
+            'per_page' => max(1, min(100, (int) ($in['per_page'] ?? 25))),
+        ];
+    }
+
+    /** Display name from the plaintext first/last columns; email stays encrypted. */
+    private static function donorName(object $donor): string
+    {
+        $full = trim(((string) ($donor->first_name ?? '')) . ' ' . ((string) ($donor->last_name ?? '')));
+        return $full !== '' ? $full : '-';
     }
 
     /**
