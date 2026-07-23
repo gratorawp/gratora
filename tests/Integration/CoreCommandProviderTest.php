@@ -143,6 +143,27 @@ final class CoreCommandProviderTest extends IntegrationTestCase
         remove_all_filters('dono.campaign.types');
     }
 
+    public function test_campaign_create_rejects_a_type_whose_add_on_is_inactive(): void
+    {
+        $admin = self::factory()->user->create(['role' => 'administrator']);
+        get_role('administrator')->add_cap('dono_manage_campaigns');
+        wp_set_current_user($admin);
+
+        // No add-on registered peer_to_peer, so it is not an available type and
+        // must be refused - not silently downgraded to standard with a success.
+        $ctx = new CommandContext($admin, 'rest', 'req-' . uniqid());
+        $res = $this->registry()->dispatch('campaign.create', [
+            'title'         => 'Ghost P2P',
+            'campaign_type' => 'peer_to_peer',
+        ], $ctx);
+        $this->assertFalse($res->ok, 'an unavailable campaign type must be rejected');
+        $this->assertSame('command.invalid_input', $res->error_code);
+
+        // A standard campaign still works.
+        $ok = $this->registry()->dispatch('campaign.create', ['title' => 'Plain', 'campaign_type' => 'standard'], $ctx);
+        $this->assertTrue($ok->ok, $ok->error ?? '');
+    }
+
     public function test_campaign_update_sets_the_image_attachment(): void
     {
         $admin = self::factory()->user->create(['role' => 'administrator']);

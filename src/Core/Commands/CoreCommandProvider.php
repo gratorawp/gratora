@@ -413,6 +413,12 @@ final class CoreCommandProvider
 
     private function campaigns(CommandRegistry $r, Container $c): void
     {
+        // Built from the LIVE registry so a type a Pro add-on contributes (e.g.
+        // peer_to_peer from dono-p2p) is offered only when that add-on is active.
+        // An unavailable type is then rejected at the boundary, not silently
+        // downgraded to standard with a misleading success.
+        $campaignTypes = array_keys((array) apply_filters('dono.campaign.types', ['standard' => '']));
+
         $r->register(new Command(
             'campaign.create',
             'Create a campaign with its default form and page.',
@@ -425,7 +431,7 @@ final class CoreCommandProvider
                 'goal_type'   => ['type' => 'string', 'enum' => ['amount', 'donations', 'donors']],
                 'goal_cents'  => ['type' => ['integer', 'null'], 'minimum' => 0],
                 'goal_count'  => ['type' => ['integer', 'null'], 'minimum' => 0],
-                'campaign_type' => ['type' => 'string', 'description' => 'Campaign type slug from the campaign-type registry (e.g. standard, peer_to_peer). Unknown values fall back to standard.'],
+                'campaign_type' => ['type' => 'string', 'enum' => $campaignTypes, 'description' => 'Campaign type. Only these registered types exist; a type contributed by a Pro add-on (e.g. peer_to_peer) is listed only when that add-on is active.'],
                 'image_attachment_id' => ['type' => ['integer', 'null'], 'minimum' => 1, 'description' => 'Media-library attachment ID to use as the campaign photo.'],
             ]),
             [],
@@ -450,7 +456,7 @@ final class CoreCommandProvider
                 'description' => ['type' => ['string', 'null']],
                 'goal_cents'  => ['type' => ['integer', 'null'], 'minimum' => 0],
                 'goal_count'  => ['type' => ['integer', 'null'], 'minimum' => 0],
-                'campaign_type' => ['type' => 'string', 'description' => 'Campaign type slug from the campaign-type registry. Only a standard campaign can be promoted to another type; ignored otherwise.'],
+                'campaign_type' => ['type' => 'string', 'enum' => $campaignTypes, 'description' => 'Campaign type. Only these registered types exist; only a standard campaign can be promoted to another type.'],
                 'image_attachment_id' => ['type' => ['integer', 'null'], 'minimum' => 1, 'description' => 'Media-library attachment ID to use as the campaign photo.'],
             ], ['campaign_id']),
             [],
