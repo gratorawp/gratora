@@ -14,6 +14,9 @@ use RuntimeException;
  */
 final class CommandRegistry
 {
+    /** Sources whose mutating dispatches must clear the confirmation gate. */
+    private const CONFIRMATION_SOURCES = ['mcp', 'chat'];
+
     /** @var array<string,Command> */
     private array $commands = [];
 
@@ -116,7 +119,11 @@ final class CommandRegistry
             if ($ctx->dry_run) {
                 return CommandResult::dryRun($canonical, $confirmDigest);
             }
-            if ($ctx->source === 'mcp') {
+            // Agent-initiated mutations pause for a human. 'mcp' is an external
+            // client; 'chat' is the in-admin assistant. Both must clear the
+            // confirmation verifier; 'automation'/'rest'/'cli' are trusted
+            // callers and run straight through.
+            if (in_array($ctx->source, self::CONFIRMATION_SOURCES, true)) {
                 $confirmed = ConfirmationGate::verify(
                     $ctx->confirmation,
                     (string) ($ctx->user_id ?? '0'),

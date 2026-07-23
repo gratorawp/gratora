@@ -630,7 +630,10 @@ final class CoreModule implements DonoModule
             $c->get(EventRecorder::class)
         ));
         (new CoreCommandProvider())->register($c->get(CommandRegistry::class), $c);
-        do_action('dono.commands.register', $c->get(CommandRegistry::class), $c);
+        // The dono.commands.register broadcast fires from Plugin::boot AFTER
+        // every module has booted, so an add-on's boot-time add_action handler
+        // is honored. Firing it here (during core's own boot) would run before
+        // add-on modules exist, silently dropping their command packs.
 
         (new RestProvider(
             $c->get(DonationsController::class),

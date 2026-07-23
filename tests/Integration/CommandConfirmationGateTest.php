@@ -90,6 +90,53 @@ final class CommandConfirmationGateTest extends IntegrationTestCase
         remove_all_filters('dono.commands.confirmation_verifier');
     }
 
+    public function test_chat_mutating_without_confirmation_is_confirmation_required(): void
+    {
+        // The in-admin assistant dispatches as source 'chat'; an AI-initiated
+        // mutation must pause for the operator exactly like an mcp one, not
+        // run straight through.
+        $r = $this->registry();
+        $r->register($this->mutating('gate.chat', $n));
+
+        $res = $r->dispatch('gate.chat', ['x' => 7], new CommandContext(1, 'chat', 'req-chat-1'));
+
+        $this->assertFalse($res->ok);
+        $this->assertSame('command.confirmation_required', $res->error_code);
+        $this->assertSame(['command' => 'gate.chat', 'input' => ['x' => 7]], $res->data['preview']);
+        $this->assertNotEmpty($res->data['confirm_digest']);
+        $this->assertCount(0, $this->invokedFor('gate.chat'));
+    }
+
+    public function test_chat_mutating_with_verified_confirmation_runs(): void
+    {
+        add_filter('dono.commands.confirmation_verifier', fn () => new class {
+            public function verify(string $token, string $session, string $commandId, string $inputDigest): bool
+            {
+                return $token === 'approved';
+            }
+        });
+
+        $r = $this->registry();
+        $r->register($this->mutating('gate.chat_ok', $n));
+
+        $ok = $r->dispatch('gate.chat_ok', ['v' => 3], new CommandContext(1, 'chat', 'req-chat-2', false, 'approved'));
+        $this->assertTrue($ok->ok);
+        $this->assertSame(['ran' => true], $ok->data);
+
+        remove_all_filters('dono.commands.confirmation_verifier');
+    }
+
+    public function test_chat_read_command_proceeds_without_confirmation(): void
+    {
+        $r = $this->registry();
+        $r->register(new Command('gate.chat_read', 'r', [], [], 'manage_options', true, false, fn () => ['ok' => 2]));
+
+        $res = $r->dispatch('gate.chat_read', [], new CommandContext(1, 'chat', 'req-chat-3'));
+
+        $this->assertTrue($res->ok);
+        $this->assertSame(['ok' => 2], $res->data);
+    }
+
     public function test_mcp_read_command_proceeds_without_token(): void
     {
         $r = $this->registry();

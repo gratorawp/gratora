@@ -7,6 +7,7 @@ namespace Dono\Foundation;
 use Dono\Campaigns\CampaignPermalinks;
 use Dono\Core\Activator;
 use Dono\Core\CoreModule;
+use Dono\Foundation\Commands\CommandRegistry;
 use Dono\Donors\Portal\PortalPage;
 use Dono\Foundation\Auth\Capabilities;
 use Dono\Foundation\Container\Container;
@@ -65,6 +66,18 @@ final class Plugin
         do_action('dono.modules.register', $self->modules);
 
         $self->modules->bootAll();
+
+        // Broadcast the command registry now that every module has booted, so
+        // add-on command packs registered via add_action('dono.commands.register')
+        // in their boot() are honored (core's own commands are registered
+        // directly in CoreModule::boot, independent of this hook).
+        if ($self->container->has(CommandRegistry::class)) {
+            do_action(
+                'dono.commands.register',
+                $self->container->get(CommandRegistry::class),
+                $self->container
+            );
+        }
 
         // Virtual `dono_access` cap for admin-menu visibility (super-admins,
         // the manage_dono umbrella, or any granular dono_* cap holder). REST
