@@ -143,6 +143,37 @@ final class CoreCommandProviderTest extends IntegrationTestCase
         remove_all_filters('dono.campaign.types');
     }
 
+    public function test_campaign_update_sets_the_image_attachment(): void
+    {
+        $admin = self::factory()->user->create(['role' => 'administrator']);
+        get_role('administrator')->add_cap('dono_manage_campaigns');
+        wp_set_current_user($admin);
+
+        $ctx        = new CommandContext($admin, 'rest', 'req-' . uniqid());
+        $campaignId = (int) $this->registry()->dispatch('campaign.create', ['title' => 'Photo Campaign'], $ctx)->data['campaign_id'];
+        $attachment = $this->makeImageAttachment();
+
+        $res = $this->registry()->dispatch('campaign.update', [
+            'campaign_id'         => $campaignId,
+            'image_attachment_id' => $attachment,
+        ], $ctx);
+
+        $this->assertTrue($res->ok, $res->error ?? '');
+        $campaign = Plugin::instance()->container->get(CampaignRepository::class)->findById($campaignId);
+        $this->assertSame($attachment, (int) $campaign->image_attachment_id);
+    }
+
+    private function makeImageAttachment(): int
+    {
+        $png    = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
+        $upload = wp_upload_bits('dono-cmd-test.png', null, $png);
+        return (int) wp_insert_attachment([
+            'post_mime_type' => 'image/png',
+            'post_title'     => 'test',
+            'post_status'    => 'inherit',
+        ], $upload['file']);
+    }
+
     private function driveDonationToPaid(): string
     {
         $createReq = new WP_REST_Request('POST', '/dono/v1/donations');

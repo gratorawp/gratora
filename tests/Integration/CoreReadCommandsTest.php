@@ -7,6 +7,7 @@ namespace Dono\Tests\Integration;
 use Dono\Analytics\EventRecorder;
 use Dono\Campaigns\CampaignService;
 use Dono\Donors\DonorService;
+use Dono\Foundation\Commands\Command;
 use Dono\Foundation\Commands\CommandContext;
 use Dono\Foundation\Commands\CommandRegistry;
 use Dono\Core\Commands\CoreCommandProvider;
@@ -145,6 +146,32 @@ final class CoreReadCommandsTest extends IntegrationTestCase
         $ctx = new CommandContext($admin, 'chat', 'req-' . uniqid());
         $res = $this->registry()->dispatch('campaign.list', [], $ctx);
         $this->assertTrue($res->ok, $res->error ?? '');
+    }
+
+    public function test_handler_exception_becomes_a_failed_result_not_a_fatal(): void
+    {
+        $admin = self::factory()->user->create(['role' => 'administrator']);
+        wp_set_current_user($admin);
+
+        $registry = $this->registry();
+        $registry->register(new Command(
+            'test.boom',
+            'Throws a non-CommandError.',
+            [],
+            [],
+            'manage_options',
+            false,
+            false,
+            static function (): array {
+                throw new \InvalidArgumentException('kaboom');
+            }
+        ));
+
+        $res = $registry->dispatch('test.boom', [], new CommandContext($admin, 'chat', 'req-' . uniqid()));
+
+        $this->assertFalse($res->ok);
+        $this->assertSame('command.failed', $res->error_code);
+        $this->assertStringContainsString('kaboom', (string) $res->error);
     }
 
     public function test_read_command_denied_without_capability(): void

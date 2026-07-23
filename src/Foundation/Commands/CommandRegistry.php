@@ -146,6 +146,13 @@ final class CommandRegistry
         } catch (CommandError $e) {
             $this->audit('command.failed', $command, $ctx, $canonical, $e->getMessage());
             return CommandResult::error('command.failed', $e->getMessage());
+        } catch (\Throwable $e) {
+            // An agent-initiated command must never fatal the request: a bad
+            // input that trips a service exception (invalid slug, unpublishable
+            // form, ...) comes back as a failed result the model can react to.
+            $this->audit('command.failed', $command, $ctx, $canonical, $e->getMessage());
+            error_log(sprintf('[dono] command %s threw %s: %s', $id, get_class($e), $e->getMessage()));
+            return CommandResult::error('command.failed', $e->getMessage());
         }
 
         if (defined('WP_DEBUG') && WP_DEBUG && $command->outputSchema !== []) {
