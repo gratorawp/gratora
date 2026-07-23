@@ -7,6 +7,7 @@ namespace Dono\Core\Commands;
 use Dono\Campaigns\CampaignMetricsService;
 use Dono\Campaigns\CampaignRepository;
 use Dono\Campaigns\CampaignService;
+use Dono\Dashboard\DashboardMetricsService;
 use Dono\Donations\AggregateSyncer;
 use Dono\Donations\DonationIntent;
 use Dono\Donations\DonationRepository;
@@ -21,6 +22,7 @@ use Dono\Foundation\Commands\CommandContext;
 use Dono\Foundation\Commands\CommandError;
 use Dono\Foundation\Commands\CommandRegistry;
 use Dono\Foundation\Container\Container;
+use Dono\Foundation\Time\Clock;
 use Dono\Forms\FormRepository;
 use Dono\Forms\FormService;
 use Dono\Forms\FormTemplates;
@@ -32,6 +34,7 @@ use Dono\Gateways\SubscriptionAware;
 use Dono\Receipts\ReceiptIssuer;
 use Dono\Recurring\RecurringCanceller;
 use Dono\Recurring\RecurringPlan;
+use Dono\Recurring\RecurringPlanRepository;
 
 /**
  * Registers core domain operations as Command objects.
@@ -41,6 +44,9 @@ use Dono\Recurring\RecurringPlan;
 final class CoreCommandProvider
 {
     private const META = ['add_on' => 'core', 'add_on_label' => 'Dono'];
+
+    /** Date-range windows the dashboard metrics service accepts. */
+    private const REPORT_RANGES = ['today', 'last-7', 'last-30', 'last-90', 'all-time'];
 
     public function register(CommandRegistry $r, Container $c): void
     {
@@ -52,6 +58,7 @@ final class CoreCommandProvider
         $this->receipts($r, $c);
         $this->recurring($r, $c);
         $this->reads($r, $c);
+        $this->reports($r, $c);
     }
 
     private function donations(CommandRegistry $r, Container $c): void
@@ -1181,6 +1188,127 @@ final class CoreCommandProvider
     }
 
     /**
+     * "Ask your data" analytics reads: thin projections over the dashboard and
+     * donor metrics services so the assistant can answer "how are we doing",
+     * "what's our recurring revenue", and "who's at risk of lapsing". All
+     * non-mutating + idempotent, so they skip the confirmation gate.
+     */
+    private function reports(CommandRegistry $r, Container $c): void
+    {
+        $rangeArg = [
+            'type'        => 'string',
+            'enum'        => self::REPORT_RANGES,
+            'description' => 'Reporting window. One of today, last-7, last-30, last-90, all-time. Defaults to last-30.',
+        ];
+
+        $r->register(new Command(
+            'report.dashboard',
+            'Org-wide KPI snapshot for a date range: revenue raised, donation count, unique donors, and average donation.',
+            $this->schema([
+                'range'   => $rangeArg,
+                'compare' => ['type' => 'boolean', 'description' => 'When true, also compare against the immediately preceding period of the same length. Ignored for the all-time range.'],
+            ]),
+            [],
+            'dono_view_reports',
+            true,
+            false,
+            function (array $in) use ($c): array {
+                $range   = (string) ($in['range'] ?? 'last-30');
+                // The service takes a string mode (none|period|year); expose a
+                // simple on/off and map true to a same-length previous period.
+                $compare = ! empty($in['compare']) ? 'period' : 'none';
+                return $this->dashboardMetrics($c)->kpi($range, $compare);
+            },
+            self::META,
+        ));
+
+        $r->register(new Command(
+            'report.recurring',
+            'Recurring-revenue snapshot: active plans, monthly recurring revenue (MRR), 30-day projection, and new plans this month.',
+            [],
+            [],
+            'dono_view_reports',
+            true,
+            false,
+            fn (): array => $this->dashboardMetrics($c)->recurring(),
+            self::META,
+        ));
+
+        $r->register(new Command(
+            'report.top_campaigns',
+            'Top campaigns ranked by revenue raised in a date range.',
+            $this->schema([
+                'range' => $rangeArg,
+                'limit' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 50, 'description' => 'How many campaigns to return (1 to 50). Defaults to 5.'],
+            ]),
+            [],
+            'dono_view_reports',
+            true,
+            false,
+            function (array $in) use ($c): array {
+                $range = (string) ($in['range'] ?? 'last-30');
+                $limit = isset($in['limit']) ? (int) $in['limit'] : 5;
+                $rows  = $this->dashboardMetrics($c)->topCampaigns($range, $limit);
+                // Drop the per-row sparkline: this command answers "which
+                // campaigns raised the most", not the daily shape of each.
+                return [
+                    'range'     => $range,
+                    'campaigns' => array_map(static fn (array $row): array => [
+                        'id'              => (int) $row['id'],
+                        'title'           => (string) $row['title'],
+                        'currency'        => (string) $row['currency'],
+                        'amount_cents'    => (int) $row['amount_cents'],
+                        'donations_count' => (int) $row['donations_count'],
+                    ], $rows),
+                ];
+            },
+            self::META,
+        ));
+
+        $r->register(new Command(
+            'report.attention',
+            'Operations queue needing a decision: failed donations, campaigns ending soon, published campaigns with no form, and recent donor notes. Each item carries a tone and an admin link.',
+            [],
+            [],
+            'dono_view_reports',
+            true,
+            false,
+            function () use ($c): array {
+                $items = array_map(static fn (array $i): array => [
+                    'key'          => (string) $i['key'],
+                    'tone'         => (string) $i['tone'],
+                    'title'        => (string) $i['title'],
+                    'count'        => isset($i['count']) ? (int) $i['count'] : null,
+                    'action_label' => $i['action_label'] ?? null,
+                    'action_href'  => $i['action_href'] ?? null,
+                ], $this->dashboardMetrics($c)->attention());
+                return ['items' => $items];
+            },
+            self::META,
+        ));
+
+        $r->register(new Command(
+            'donor.at_risk',
+            'List at-risk donors (paged): donors who gave before but are now lapsing, highest lifetime value first. Returns PII (name, email); gated on dono_view_donors.',
+            $this->schema([
+                'page'     => ['type' => 'integer', 'minimum' => 1],
+                'per_page' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 100],
+            ]),
+            [],
+            'dono_view_donors',
+            true,
+            false,
+            function (array $in) use ($c): array {
+                $page    = max(1, (int) ($in['page'] ?? 1));
+                $perPage = max(1, min(100, (int) ($in['per_page'] ?? 25)));
+                $result  = $c->get(DonorMetricsService::class)->atRisk($page, $perPage);
+                return $this->page($in, $result['rows'], $result['total']);
+            },
+            self::META,
+        ));
+    }
+
+    /**
      * @param array<string,array<string,mixed>> $properties
      * @param list<string>                       $required
      * @return array<string,mixed>
@@ -1335,6 +1463,19 @@ final class CoreCommandProvider
                 ],
             ],
         ];
+    }
+
+    /**
+     * DashboardMetricsService is not container-bound; build it exactly as the
+     * dashboard REST controller does (Clock plus the donation + recurring repos).
+     */
+    private function dashboardMetrics(Container $c): DashboardMetricsService
+    {
+        return new DashboardMetricsService(
+            $c->get(Clock::class),
+            $c->get(DonationRepository::class),
+            $c->get(RecurringPlanRepository::class),
+        );
     }
 
     /**
