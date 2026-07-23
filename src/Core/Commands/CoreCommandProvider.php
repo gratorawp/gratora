@@ -35,6 +35,7 @@ use Dono\Receipts\ReceiptIssuer;
 use Dono\Recurring\RecurringCanceller;
 use Dono\Recurring\RecurringPlan;
 use Dono\Recurring\RecurringPlanRepository;
+use Dono\Settings\SettingsService;
 
 /**
  * Registers core domain operations as Command objects.
@@ -48,6 +49,17 @@ final class CoreCommandProvider
     /** Date-range windows the dashboard metrics service accepts. */
     private const REPORT_RANGES = ['today', 'last-7', 'last-30', 'last-90', 'all-time'];
 
+    /**
+     * Benign settings groups the assistant may read and write. Deliberately
+     * omits roles (privilege-escalation surface), gateways (Stripe secrets and
+     * bank details), advanced, privacy, and telemetry - those stay human-only.
+     * An out-of-list group is rejected by the schema enum as command.invalid_input.
+     */
+    private const SETTINGS_GROUPS = ['org-profile', 'currency-locale', 'org-brand', 'receipts', 'email', 'numbering', 'consents'];
+
+    /** Key names that name a secret; their values are redacted on read and refused on write, at any depth. */
+    private const SECRET_KEY_PATTERN = '/secret|password|token|api[_-]?key|private[_-]?key|webhook/i';
+
     public function register(CommandRegistry $r, Container $c): void
     {
         $this->donations($r, $c);
@@ -59,6 +71,7 @@ final class CoreCommandProvider
         $this->recurring($r, $c);
         $this->reads($r, $c);
         $this->reports($r, $c);
+        $this->settings($r, $c);
     }
 
     private function donations(CommandRegistry $r, Container $c): void
@@ -1306,6 +1319,109 @@ final class CoreCommandProvider
             },
             self::META,
         ));
+    }
+
+    /**
+     * Read and write benign org settings. Security-critical: only SETTINGS_GROUPS
+     * is reachable (the enum rejects anything else as command.invalid_input), so
+     * roles, gateways, advanced, privacy, and telemetry can never be touched
+     * here. Secret-shaped values are redacted on read and refused on write as
+     * defence in depth, even though no allowlisted group holds one today.
+     */
+    private function settings(CommandRegistry $r, Container $c): void
+    {
+        $groupArg = [
+            'type'        => 'string',
+            'enum'        => self::SETTINGS_GROUPS,
+            'description' => 'Which settings group to act on. Only these benign groups are reachable; roles and gateways (and other sensitive groups) are intentionally excluded and stay human-only.',
+        ];
+
+        $r->register(new Command(
+            'settings.get',
+            'Read one benign org settings group (org profile, currency and locale, brand, receipts, email, numbering, or consents). Any secret-shaped value is redacted.',
+            $this->schema(['group' => $groupArg], ['group']),
+            [],
+            'dono_manage_settings',
+            true,
+            false,
+            function (array $in) use ($c): array {
+                $group  = (string) $in['group'];
+                $values = $c->get(SettingsService::class)->get($group);
+                return ['group' => $group, 'values' => $this->redactSecrets($values)];
+            },
+            self::META,
+        ));
+
+        $r->register(new Command(
+            'settings.update',
+            'Update one benign org settings group. Partial update; only existing, non-secret keys can be set.',
+            $this->schema([
+                'group'  => $groupArg,
+                'values' => [
+                    'type'        => 'object',
+                    'description' => 'The settings keys to change for this group. Call settings.get first to see the exact keys; only existing, non-secret keys can be set. Unknown or secret-shaped keys are rejected.',
+                ],
+            ], ['group', 'values']),
+            [],
+            'dono_manage_settings',
+            false,
+            true,
+            function (array $in) use ($c): array {
+                $group    = (string) $in['group'];
+                $values   = is_array($in['values'] ?? null) ? $in['values'] : [];
+                $settings = $c->get(SettingsService::class);
+
+                // Settable keys = the group's current top-level keys, minus any
+                // secret-shaped key. Derived from the live settings so no
+                // per-group schema is hardcoded and the agent cannot invent keys.
+                $current  = $settings->get($group);
+                $settable = [];
+                foreach ($current as $key => $_v) {
+                    if (is_string($key) && ! preg_match(self::SECRET_KEY_PATTERN, $key)) {
+                        $settable[$key] = true;
+                    }
+                }
+
+                $validated = [];
+                foreach ($values as $key => $value) {
+                    if (is_string($key) && preg_match(self::SECRET_KEY_PATTERN, $key)) {
+                        throw new CommandError(sprintf('The "%s" setting holds a secret and cannot be set here.', $key));
+                    }
+                    if (! isset($settable[$key])) {
+                        throw new CommandError(sprintf('Unknown setting "%s" for group "%s". Call settings.get first to see the settable keys.', (string) $key, $group));
+                    }
+                    $validated[$key] = $value;
+                }
+
+                $updated = $settings->update($group, $validated);
+                return ['group' => $group, 'values' => $this->redactSecrets($updated)];
+            },
+            $this->meta(['agent_hint' => 'Call settings.get first to learn the exact key names for the group; only existing, non-secret keys can be set. This command never reaches roles or gateways.']),
+        ));
+    }
+
+    /**
+     * Replace every secret-shaped value with "***", walking nested arrays to any
+     * depth. A matching key redacts its whole value (scalar or subtree); other
+     * keys with array values are recursed into. Defence in depth: the
+     * allowlisted groups hold no secrets, but a future key (or an add-on group
+     * behind the same enum) might.
+     *
+     * @param array<string,mixed> $values
+     * @return array<string,mixed>
+     */
+    private function redactSecrets(array $values): array
+    {
+        foreach ($values as $key => $value) {
+            if (is_string($key) && preg_match(self::SECRET_KEY_PATTERN, $key)) {
+                $values[$key] = '***';
+                continue;
+            }
+            if (is_array($value)) {
+                $values[$key] = $this->redactSecrets($value);
+            }
+        }
+        return $values;
     }
 
     /**
