@@ -17,6 +17,7 @@ use Dono\Rest\Admin\FxController;
 use Dono\Rest\Admin\LicenseController as AdminLicenseController;
 use Dono\Rest\Admin\NumberingController as AdminNumberingController;
 use Dono\Rest\Admin\OnboardingController as AdminOnboardingController;
+use Dono\Rest\Admin\ReportsController as AdminReportsController;
 use Dono\Rest\Admin\RolesController as AdminRolesController;
 use Dono\Rest\Admin\SettingsController as AdminSettingsController;
 use Dono\Rest\Admin\StripeConnectController;
@@ -51,6 +52,7 @@ final class RestProvider extends HookProvider
         private FxController $fx,
         private AdminCommandsController $commands,
         private AdminNumberingController $numbering,
+        private AdminReportsController $reports,
     ) {
     }
 
@@ -81,6 +83,7 @@ final class RestProvider extends HookProvider
         $this->fx->registerRoutes();
         $this->commands->registerRoutes();
         $this->numbering->registerRoutes();
+        $this->reports->registerRoutes();
 
         $registry = new ControllerRegistry();
         do_action('dono.rest.register', $registry);

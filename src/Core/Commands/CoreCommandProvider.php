@@ -32,6 +32,8 @@ use Dono\Funds\FundService;
 use Dono\Gateways\GatewayManager;
 use Dono\Gateways\SubscriptionAware;
 use Dono\Receipts\ReceiptIssuer;
+use Dono\Reports\CampaignReportBuilder;
+use Dono\Reports\TaxStatementBuilder;
 use Dono\Recurring\RecurringCanceller;
 use Dono\Recurring\RecurringPlan;
 use Dono\Recurring\RecurringPlanRepository;
@@ -71,6 +73,7 @@ final class CoreCommandProvider
         $this->recurring($r, $c);
         $this->reads($r, $c);
         $this->reports($r, $c);
+        $this->reportDocuments($r, $c);
         $this->settings($r, $c);
     }
 
@@ -1319,6 +1322,127 @@ final class CoreCommandProvider
             },
             self::META,
         ));
+    }
+
+    /**
+     * Report-document commands. Each only generates a capability-gated, time-
+     * limited download link (it does not stream or store a PDF), so both are
+     * non-mutating + idempotent and skip the confirmation gate. The link points
+     * at a core REST route that regenerates and streams the PDF on demand; the
+     * donor tax statement carries PII and is gated on dono_view_donors.
+     */
+    private function reportDocuments(CommandRegistry $r, Container $c): void
+    {
+        $currentYear = (int) wp_date('Y');
+
+        $r->register(new Command(
+            'report.campaign_pdf',
+            'Generate a secure download link for a campaign performance one-pager PDF (raised vs goal, donations, donors, average). Aggregate figures only, no donor PII.',
+            $this->schema([
+                'campaign_id' => ['type' => 'integer', 'minimum' => 1],
+                'range'       => [
+                    'type'        => 'string',
+                    'enum'        => self::REPORT_RANGES,
+                    'description' => 'Reporting window. One of today, last-7, last-30, last-90, all-time. Defaults to last-30.',
+                ],
+            ], ['campaign_id']),
+            [],
+            'dono_view_reports',
+            true,
+            false,
+            function (array $in) use ($c): array {
+                $campaignId = (int) $in['campaign_id'];
+                $campaign   = $c->get(CampaignRepository::class)->findById($campaignId);
+                if (! $campaign) {
+                    throw new CommandError('Campaign not found.');
+                }
+                $range = in_array($in['range'] ?? null, self::REPORT_RANGES, true)
+                    ? (string) $in['range']
+                    : 'last-30';
+
+                return [
+                    'campaign_id'  => $campaignId,
+                    'download_url' => $this->reportUrl(
+                        'dono/v1/reports/campaign/' . $campaignId . '/pdf',
+                        ['range' => $range],
+                    ),
+                    'filename'     => CampaignReportBuilder::filename($campaignId, $range),
+                    'expires_hint' => $this->linkExpiryHint(),
+                ];
+            },
+            self::META,
+        ));
+
+        $r->register(new Command(
+            'donor.tax_statement_pdf',
+            'Generate a secure download link for a donor year-end tax statement PDF (US 501(c)(3) style, net of refunds), and report the donation count and net total for the year. Returns a PII document link; gated on dono_view_donors.',
+            $this->schema([
+                'donor_id' => ['type' => 'integer', 'minimum' => 1],
+                'year'     => [
+                    'type'        => 'integer',
+                    'minimum'     => 2000,
+                    'maximum'     => $currentYear,
+                    'description' => 'Calendar year of the statement, e.g. 2025. Between 2000 and the current year.',
+                ],
+            ], ['donor_id', 'year']),
+            [],
+            'dono_view_donors',
+            true,
+            false,
+            function (array $in) use ($c, $currentYear): array {
+                $donorId = (int) $in['donor_id'];
+                $year    = (int) $in['year'];
+                if ($year < 2000 || $year > $currentYear) {
+                    throw new CommandError('Statement year must be between 2000 and the current year.');
+                }
+                $donor = $c->get(DonorRepository::class)->findById($donorId);
+                if (! $donor || $donor->redacted_at !== null) {
+                    throw new CommandError('Donor not found.');
+                }
+
+                // Count + net total from the year's paid donations so the
+                // assistant can state the figures without opening the PDF.
+                $summary = $c->get(TaxStatementBuilder::class)->summary($donorId, $year);
+
+                return [
+                    'donor_id'       => $donorId,
+                    'year'           => $year,
+                    'download_url'   => $this->reportUrl(
+                        'dono/v1/reports/donor/' . $donorId . '/tax-statement/' . $year,
+                        [],
+                    ),
+                    'filename'       => TaxStatementBuilder::filename($donorId, $year),
+                    'donation_count' => (int) $summary['donation_count'],
+                    'total_cents'    => (int) $summary['total_cents'],
+                ];
+            },
+            self::META,
+        ));
+    }
+
+    /**
+     * Build a report download URL. A clicked link carries the operator's auth
+     * cookie but not a REST nonce, so a fresh wp_rest nonce is appended for
+     * cookie auth to validate; the link is therefore time-limited to the nonce
+     * lifetime (see linkExpiryHint).
+     *
+     * @param array<string,scalar> $args
+     */
+    private function reportUrl(string $path, array $args): string
+    {
+        $args['_wpnonce'] = wp_create_nonce('wp_rest');
+        return esc_url_raw(add_query_arg($args, rest_url($path)));
+    }
+
+    /** Human hint for how long a nonce-signed download link stays valid. */
+    private function linkExpiryHint(): string
+    {
+        $life = (int) apply_filters('nonce_life', DAY_IN_SECONDS);
+        return sprintf(
+            /* translators: %s: human-readable duration, e.g. "1 day". */
+            __('Link is time-limited to your login session (about %s); regenerate it if it stops working.', 'dono'),
+            human_time_diff(0, $life),
+        );
     }
 
     /**

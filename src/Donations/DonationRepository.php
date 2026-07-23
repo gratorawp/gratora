@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Donations;
 
+use Dono\Receipts\Receipt;
 use Dono\Vendor\Queryable\DB;
 use Dono\Vendor\Queryable\QueryBuilder;
 
@@ -22,6 +23,64 @@ final class DonationRepository
     public function findByReference(string $reference): ?Donation
     {
         return Donation::query()->find('reference', $reference);
+    }
+
+    /**
+     * Every paid (paid or partial_refund), non-test donation by one donor within
+     * a calendar year, oldest first, for a year-end tax statement. The year
+     * boundary uses paid_at (when the money actually arrived), not created_at.
+     *
+     * Each row carries the gross amount plus the succeeded-refund total for that
+     * donation (source of truth is the Refund table, matching the receipt/annual
+     * statement renderers) so the caller can net it to a deductible figure.
+     * receipt_number is the issued, non-voided receipt's number when one exists.
+     *
+     * @return list<array{date:string,amount_cents:int,refunded_cents:int,currency:string,reference:string,receipt_number:?string}>
+     */
+    public function paidForDonorInYear(int $donorId, int $year): array
+    {
+        $start = sprintf('%04d-01-01 00:00:00', $year);
+        $end   = sprintf('%04d-12-31 23:59:59', $year);
+
+        $rows = DonationQueries::live(Donation::query())
+            ->whereIn('status', ['paid', 'partial_refund'])
+            ->where('donor_id', $donorId)
+            ->whereBetween('paid_at', $start, $end)
+            ->orderBy('paid_at', 'ASC')
+            ->getAll();
+        if (! $rows) {
+            return [];
+        }
+
+        $ids = array_map(static fn ($d): int => (int) $d->id, $rows);
+
+        $refundedById = [];
+        foreach (Refund::query()->whereIn('donation_id', $ids)->where('status', 'succeeded')->getAll() as $r) {
+            $did                = (int) $r->donation_id;
+            $refundedById[$did] = ($refundedById[$did] ?? 0) + (int) $r->amount_cents;
+        }
+
+        $receiptById = [];
+        foreach (Receipt::query()->whereIn('donation_id', $ids)->where('voided', 0)->getAll() as $rc) {
+            $did = (int) $rc->donation_id;
+            if (! isset($receiptById[$did])) {
+                $receiptById[$did] = (string) $rc->receipt_number;
+            }
+        }
+
+        $out = [];
+        foreach ($rows as $d) {
+            $id    = (int) $d->id;
+            $out[] = [
+                'date'           => (string) ($d->paid_at ?? $d->created_at),
+                'amount_cents'   => (int) $d->amount_cents,
+                'refunded_cents' => (int) ($refundedById[$id] ?? 0),
+                'currency'       => (string) $d->currency,
+                'reference'      => (string) $d->reference,
+                'receipt_number' => $receiptById[$id] ?? null,
+            ];
+        }
+        return $out;
     }
 
     public function findByGatewayIntent(string $gateway, string $intentId): ?Donation

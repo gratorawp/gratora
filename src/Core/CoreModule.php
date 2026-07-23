@@ -137,6 +137,8 @@ use Dono\Mail\Mailer;
 use Dono\Onboarding\Onboarding;
 use Dono\Onboarding\OnboardingPage;
 use Dono\Receipts\PdfBuilder;
+use Dono\Reports\CampaignReportBuilder;
+use Dono\Reports\TaxStatementBuilder;
 use Dono\Receipts\Receipt;
 use Dono\Receipts\ReceiptIssuer;
 use Dono\Receipts\ReceiptRepository;
@@ -156,6 +158,7 @@ use Dono\Rest\Admin\FormsController as AdminFormsController;
 use Dono\Rest\Admin\FxController;
 use Dono\Rest\Admin\LicenseController as AdminLicenseController;
 use Dono\Rest\Admin\OnboardingController;
+use Dono\Rest\Admin\ReportsController;
 use Dono\Rest\Admin\RolesController;
 use Dono\Rest\Admin\SettingsController;
 use Dono\Rest\Admin\StripeConnectController;
@@ -400,6 +403,17 @@ final class CoreModule implements DonoModule
 
         $c->bind(AnnualStatementBuilder::class, fn (Container $c) => new AnnualStatementBuilder(
             $c->get(PdfBuilder::class)
+        ));
+
+        $c->bind(CampaignReportBuilder::class, fn (Container $c) => new CampaignReportBuilder(
+            $c->get(PdfBuilder::class),
+            $c->get(CampaignMetricsService::class),
+        ));
+
+        $c->bind(TaxStatementBuilder::class, fn (Container $c) => new TaxStatementBuilder(
+            $c->get(PdfBuilder::class),
+            $c->get(DonationRepository::class),
+            $c->get(DonorService::class),
         ));
 
         $c->bind( SettingsService::class, fn (Container $c) => new SettingsService());
@@ -675,7 +689,13 @@ final class CoreModule implements DonoModule
                 new SettingsService()
             ),
             new CommandsController($c->get(CommandRegistry::class)),
-            new NumberingController($c->get(ReferenceGenerator::class))
+            new NumberingController($c->get(ReferenceGenerator::class)),
+            new ReportsController(
+                $c->get(CampaignRepository::class),
+                $c->get(CampaignReportBuilder::class),
+                $c->get(DonorRepository::class),
+                $c->get(TaxStatementBuilder::class),
+            )
         ))->register();
 
         $c->get(PortalController::class)->registerHooks();
