@@ -43,7 +43,7 @@ final class CoreCommandProviderTest extends IntegrationTestCase
             'donor.refresh_profile', 'donor.change_email', 'donor.redact',
             'donor.consent.record', 'donor.magic_link.issue',
             'campaign.create', 'campaign.update', 'campaign.delete',
-            'campaign.duplicate', 'form.create', 'form.update', 'form.delete',
+            'campaign.duplicate', 'form.create', 'form.update', 'form.get', 'form.delete',
             'form.duplicate', 'fund.create', 'fund.update', 'fund.delete',
             'receipt.requeue', 'receipt.render_pdf', 'recurring.cancel',
             'recurring.pause', 'recurring.resume', 'recurring.update_amount',
@@ -161,6 +161,120 @@ final class CoreCommandProviderTest extends IntegrationTestCase
         $this->assertTrue($res->ok, $res->error ?? '');
         $campaign = Plugin::instance()->container->get(CampaignRepository::class)->findById($campaignId);
         $this->assertSame($attachment, (int) $campaign->image_attachment_id);
+    }
+
+    public function test_form_get_reads_structure_and_form_update_rejects_fantasy_settings(): void
+    {
+        $admin = self::factory()->user->create(['role' => 'administrator']);
+        get_role('administrator')->add_cap('dono_manage_campaigns');
+        get_role('administrator')->add_cap('dono_manage_forms');
+        wp_set_current_user($admin);
+
+        $ctx        = new CommandContext($admin, 'rest', 'req-' . uniqid());
+        $campaignId = (int) $this->registry()->dispatch('campaign.create', ['title' => 'Form Host'], $ctx)->data['campaign_id'];
+        $formId     = (int) Plugin::instance()->container->get(CampaignRepository::class)->findById($campaignId)->default_form_id;
+        $this->assertGreaterThan(0, $formId, 'campaign.create should seed a default form');
+
+        // form.get reports the real structure.
+        $get = $this->registry()->dispatch('form.get', ['form_id' => $formId], $ctx);
+        $this->assertTrue($get->ok, $get->error ?? '');
+        $this->assertSame($formId, $get->data['form_id']);
+        $this->assertIsArray($get->data['blocks']);
+
+        // Fantasy settings (currency/recurring) are rejected, not silently stored.
+        $bad = $this->registry()->dispatch('form.update', [
+            'form_id'  => $formId,
+            'settings' => ['supported_currencies' => ['USD', 'EUR'], 'recurring_enabled' => true],
+        ], $ctx);
+        $this->assertFalse($bad->ok);
+        $this->assertSame('command.invalid_input', $bad->error_code);
+
+        // A real setting (goal) applies and the result reflects it.
+        $ok = $this->registry()->dispatch('form.update', [
+            'form_id'  => $formId,
+            'settings' => ['goal' => ['type' => 'amount', 'amount_cents' => 500000]],
+        ], $ctx);
+        $this->assertTrue($ok->ok, $ok->error ?? '');
+        $this->assertSame('amount', $ok->data['settings']['goal']['type']);
+    }
+
+    public function test_form_update_merges_settings_without_dropping_keys(): void
+    {
+        $admin = self::factory()->user->create(['role' => 'administrator']);
+        get_role('administrator')->add_cap('dono_manage_campaigns');
+        get_role('administrator')->add_cap('dono_manage_forms');
+        wp_set_current_user($admin);
+
+        $ctx        = new CommandContext($admin, 'rest', 'req-' . uniqid());
+        $campaignId = (int) $this->registry()->dispatch('campaign.create', ['title' => 'Merge Host'], $ctx)->data['campaign_id'];
+        $formId     = (int) Plugin::instance()->container->get(CampaignRepository::class)->findById($campaignId)->default_form_id;
+
+        // Set a thank-you message, then patch only the goal.
+        $this->registry()->dispatch('form.update', ['form_id' => $formId, 'settings' => ['thank_you_message' => 'Cheers']], $ctx);
+        $this->registry()->dispatch('form.update', ['form_id' => $formId, 'settings' => ['goal' => ['type' => 'amount', 'amount_cents' => 1000]]], $ctx);
+
+        $get = $this->registry()->dispatch('form.get', ['form_id' => $formId], $ctx);
+        $this->assertSame('Cheers', $get->data['settings']['thank_you_message'], 'a partial settings patch must not drop other keys');
+        $this->assertSame('amount', $get->data['settings']['goal']['type']);
+    }
+
+    public function test_form_create_seeds_a_template_and_rejects_fantasy_input(): void
+    {
+        $admin = self::factory()->user->create(['role' => 'administrator']);
+        get_role('administrator')->add_cap('dono_manage_campaigns');
+        get_role('administrator')->add_cap('dono_manage_forms');
+        wp_set_current_user($admin);
+
+        $ctx        = new CommandContext($admin, 'rest', 'req-' . uniqid());
+        $campaignId = (int) $this->registry()->dispatch('campaign.create', ['title' => 'Tmpl Host'], $ctx)->data['campaign_id'];
+
+        // Creating from a named template seeds that template's field blocks.
+        $created = $this->registry()->dispatch('form.create', [
+            'title'       => 'Quick Give copy',
+            'template'    => 'quick-give',
+            'campaign_id' => $campaignId,
+        ], $ctx);
+        $this->assertTrue($created->ok, $created->error ?? '');
+        $get = $this->registry()->dispatch('form.get', ['form_id' => (int) $created->data['form_id']], $ctx);
+        $this->assertContains('dono/donation-amount', $get->data['blocks'], 'template field blocks should be seeded');
+
+        // An unknown template id is rejected by the enum.
+        $badTpl = $this->registry()->dispatch('form.create', ['template' => 'no-such-template', 'campaign_id' => $campaignId], $ctx);
+        $this->assertFalse($badTpl->ok);
+        $this->assertSame('command.invalid_input', $badTpl->error_code);
+
+        // A fantasy settings key is rejected, not silently stored.
+        $badSettings = $this->registry()->dispatch('form.create', [
+            'template'    => 'blank',
+            'campaign_id' => $campaignId,
+            'settings'    => ['currency' => 'EUR'],
+        ], $ctx);
+        $this->assertFalse($badSettings->ok);
+        $this->assertSame('command.invalid_input', $badSettings->error_code);
+    }
+
+    public function test_donor_profile_is_typed_and_rejects_fantasy_keys(): void
+    {
+        $admin = self::factory()->user->create(['role' => 'administrator']);
+        get_role('administrator')->add_cap('dono_edit_donors');
+        wp_set_current_user($admin);
+
+        $ctx = new CommandContext($admin, 'rest', 'req-' . uniqid());
+
+        // The real, documented profile keys are accepted (including nested address).
+        $ok = $this->registry()->dispatch('donor.find_or_create', [
+            'email'   => 'typed-profile@example.com',
+            'profile' => ['first_name' => 'Ada', 'country' => 'US', 'address' => ['city' => 'NYC', 'postal' => '10001']],
+        ], $ctx);
+        $this->assertTrue($ok->ok, $ok->error ?? '');
+
+        // A made-up profile key is rejected, not silently ignored.
+        $bad = $this->registry()->dispatch('donor.find_or_create', [
+            'email'   => 'typed-profile2@example.com',
+            'profile' => ['loyalty_points' => 999],
+        ], $ctx);
+        $this->assertFalse($bad->ok);
+        $this->assertSame('command.invalid_input', $bad->error_code);
     }
 
     private function makeImageAttachment(): int

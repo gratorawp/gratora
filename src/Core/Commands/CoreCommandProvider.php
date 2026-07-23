@@ -23,6 +23,7 @@ use Dono\Foundation\Commands\CommandRegistry;
 use Dono\Foundation\Container\Container;
 use Dono\Forms\FormRepository;
 use Dono\Forms\FormService;
+use Dono\Forms\FormTemplates;
 use Dono\Foundation\Identity\IdentityHasher;
 use Dono\Funds\FundRepository;
 use Dono\Funds\FundService;
@@ -67,7 +68,7 @@ final class CoreCommandProvider
                 'form_id'      => ['type' => ['integer', 'null'], 'minimum' => 1],
                 'campaign_id'  => ['type' => ['integer', 'null'], 'minimum' => 1],
                 'fund_id'      => ['type' => ['integer', 'null'], 'minimum' => 1],
-                'profile'      => ['type' => 'object'],
+                'profile'      => $this->profileSchema(),
                 'country'      => ['type' => ['string', 'null']],
                 'note_to_org'  => ['type' => ['string', 'null']],
                 'is_anonymous' => ['type' => 'boolean'],
@@ -106,7 +107,7 @@ final class CoreCommandProvider
             'Mark a pending donation paid; idempotent, syncs aggregates.',
             $this->schema([
                 'donation_reference' => ['type' => 'string', 'minLength' => 1],
-                'result'             => ['type' => 'object'],
+                'result'             => ['type' => 'object', 'description' => 'Raw gateway confirmation payload (transaction id, etc.). Supplied by the payment gateway, not composed by hand; omit it when confirming manually.'],
             ], ['donation_reference']),
             [],
             'dono_view_donations',
@@ -261,7 +262,7 @@ final class CoreCommandProvider
             'Find a donor by email or create one; back-fills empty profile fields.',
             $this->schema([
                 'email'   => ['type' => 'string', 'format' => 'email'],
-                'profile' => ['type' => 'object'],
+                'profile' => $this->profileSchema(),
             ], ['email']),
             [],
             'dono_edit_donors',
@@ -282,7 +283,7 @@ final class CoreCommandProvider
             'Back-fill only empty donor profile fields from a payload.',
             $this->schema([
                 'donor_id' => ['type' => 'integer', 'minimum' => 1],
-                'profile'  => ['type' => 'object'],
+                'profile'  => $this->profileSchema(),
             ], ['donor_id', 'profile']),
             [],
             'dono_edit_donors',
@@ -355,7 +356,15 @@ final class CoreCommandProvider
                 'donor_id'    => ['type' => 'integer', 'minimum' => 1],
                 'purpose_key' => ['type' => 'string', 'minLength' => 1],
                 'granted'     => ['type' => 'boolean'],
-                'context'     => ['type' => 'object'],
+                'context'     => [
+                    'type'                 => ['object', 'null'],
+                    'additionalProperties' => false,
+                    'description'          => 'Optional audit metadata for where the consent came from. Only these keys are recorded.',
+                    'properties'           => [
+                        'source' => ['type' => 'string', 'description' => 'Origin of the consent record, e.g. "admin" or "form". Defaults to "admin".'],
+                        'ip'     => ['type' => 'string', 'description' => 'Donor IP address; stored only as a salted hash.'],
+                    ],
+                ],
             ], ['donor_id', 'purpose_key', 'granted']),
             [],
             'dono_edit_donors',
@@ -505,15 +514,26 @@ final class CoreCommandProvider
 
     private function forms(CommandRegistry $r, Container $c): void
     {
+        $templates    = FormTemplates::all();
+        $templateIds  = array_values(array_filter(array_map(static fn (array $t): string => (string) ($t['id'] ?? ''), $templates)));
+        $templateList = implode('; ', array_map(
+            static fn (array $t): string => sprintf('%s (%s)', (string) ($t['id'] ?? ''), wp_strip_all_tags((string) ($t['name'] ?? ''))),
+            $templates
+        ));
+
         $r->register(new Command(
             'form.create',
-            'Create a donation form.',
+            'Create a donation form from a built-in template. The field layout comes from the template, not from raw markup; pick the closest template and refine it in the form builder afterwards.',
             $this->schema([
                 'title'       => ['type' => 'string'],
                 'slug'        => ['type' => 'string'],
                 'status'      => ['type' => 'string', 'enum' => ['draft', 'published', 'archived']],
-                'blocks'      => ['type' => 'string'],
-                'settings'    => ['type' => ['object', 'null']],
+                'template'    => [
+                    'type'        => 'string',
+                    'enum'        => $templateIds ?: ['blank'],
+                    'description' => 'Which built-in template to start from (its field layout and default settings). Options: ' . $templateList . '. Defaults to "blank".',
+                ],
+                'settings'    => $this->formSettingsSchema(),
                 'campaign_id' => ['type' => ['integer', 'null'], 'minimum' => 1],
             ]),
             [],
@@ -521,22 +541,30 @@ final class CoreCommandProvider
             false,
             true,
             function (array $in) use ($c): array {
+                $templateId = (string) ($in['template'] ?? 'blank');
+                $template   = FormTemplates::find($templateId) ?? FormTemplates::find('blank');
+                unset($in['template']);
+                // Layout comes from the trusted template; the agent may only
+                // override typed settings on top of the template defaults.
+                $in['blocks']   = (string) ($template['blocks'] ?? '');
+                $base           = is_array($template['settings'] ?? null) ? $template['settings'] : [];
+                $override       = is_array($in['settings'] ?? null) ? $in['settings'] : [];
+                $in['settings'] = array_replace($base, $override);
                 $form = $c->get(FormService::class)->create($in);
-                return ['form_id' => (int) $form->id, 'slug' => (string) $form->slug];
+                return ['form_id' => (int) $form->id, 'slug' => (string) $form->slug, 'template' => $templateId];
             },
             self::META,
         ));
 
         $r->register(new Command(
             'form.update',
-            'Update a donation form; partial update of supplied fields.',
+            'Update a donation form\'s title, slug, status, or settings. The field layout (blocks) is designed in the form builder, not here; read the form with form.get first.',
             $this->schema([
                 'form_id'  => ['type' => 'integer', 'minimum' => 1],
                 'title'    => ['type' => 'string'],
                 'slug'     => ['type' => 'string'],
                 'status'   => ['type' => 'string', 'enum' => ['draft', 'published', 'archived']],
-                'blocks'   => ['type' => 'string'],
-                'settings' => ['type' => ['object', 'null']],
+                'settings' => $this->formSettingsSchema(),
             ], ['form_id']),
             [],
             'dono_manage_forms',
@@ -548,8 +576,49 @@ final class CoreCommandProvider
                     throw new CommandError('Form not found.');
                 }
                 unset($in['form_id']);
+                // Saving replaces settings wholesale; merge the patch over what is
+                // already stored so a partial update never drops other keys.
+                if (array_key_exists('settings', $in) && is_array($in['settings'])) {
+                    $existing = is_array($form->settings) ? $form->settings : [];
+                    $in['settings'] = array_replace($existing, $in['settings']);
+                }
                 $updated = $c->get(FormService::class)->update($form, $in);
-                return ['form_id' => (int) $updated->id];
+                return [
+                    'form_id'  => (int) $updated->id,
+                    'status'   => (string) $updated->status,
+                    'settings' => $updated->settings ?: (object) [],
+                ];
+            },
+            self::META,
+        ));
+
+        $r->register(new Command(
+            'form.get',
+            'Read a donation form: its status, settings, and field-block structure. Use before editing so you work from the real form, not assumptions.',
+            $this->schema(['form_id' => ['type' => 'integer', 'minimum' => 1]], ['form_id']),
+            [],
+            'dono_manage_forms',
+            true,
+            false,
+            function (array $in) use ($c): array {
+                $form = $c->get(FormRepository::class)->findById((int) $in['form_id']);
+                if (! $form) {
+                    throw new CommandError('Form not found.');
+                }
+                $blocks = [];
+                foreach (parse_blocks((string) $form->blocks) as $block) {
+                    if (! empty($block['blockName'])) {
+                        $blocks[] = (string) $block['blockName'];
+                    }
+                }
+                return [
+                    'form_id'     => (int) $form->id,
+                    'title'       => (string) $form->title,
+                    'status'      => (string) $form->status,
+                    'campaign_id' => (int) $form->campaign_id,
+                    'settings'    => $form->settings ?: (object) [],
+                    'blocks'      => $blocks,
+                ];
             },
             self::META,
         ));
@@ -1161,6 +1230,91 @@ final class CoreCommandProvider
     {
         $full = trim(((string) ($donor->first_name ?? '')) . ' ' . ((string) ($donor->last_name ?? '')));
         return $full !== '' ? $full : '-';
+    }
+
+    /**
+     * The only donor-profile keys the platform accepts. Typed strictly so the
+     * agent sees exactly what is settable and cannot pass fields that would be
+     * silently ignored.
+     *
+     * @return array<string,mixed>
+     */
+    private function profileSchema(): array
+    {
+        return [
+            'type'                 => ['object', 'null'],
+            'additionalProperties' => false,
+            'description'          => 'Donor profile. Only these keys are accepted.',
+            'properties'           => [
+                'first_name' => ['type' => ['string', 'null']],
+                'last_name'  => ['type' => ['string', 'null']],
+                'company'    => ['type' => ['string', 'null']],
+                'locale'     => ['type' => ['string', 'null']],
+                'country'    => ['type' => ['string', 'null'], 'description' => 'ISO 3166-1 alpha-2 country code.'],
+                'donor_type' => ['type' => 'string', 'enum' => ['individual', 'organization']],
+                'phone'      => ['type' => ['string', 'null']],
+                'address'    => [
+                    'type'                 => ['object', 'null'],
+                    'additionalProperties' => false,
+                    'properties'           => [
+                        'line1'   => ['type' => ['string', 'null']],
+                        'line2'   => ['type' => ['string', 'null']],
+                        'city'    => ['type' => ['string', 'null']],
+                        'region'  => ['type' => ['string', 'null']],
+                        'postal'  => ['type' => ['string', 'null']],
+                        'country' => ['type' => ['string', 'null']],
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * The complete set of form-settings keys the platform reads. Typed strictly
+     * so the agent cannot invent settings (there is no currency setting: Dono
+     * uses one org currency) and knows the real goal/recurring shapes. The
+     * gateways list is written by the payment-gateways block, so it is not
+     * settable here.
+     *
+     * @return array<string,mixed>
+     */
+    private function formSettingsSchema(): array
+    {
+        return [
+            'type'                 => ['object', 'null'],
+            'additionalProperties' => false,
+            'description'          => 'Form settings. Only these keys exist. There is no currency setting; Dono uses a single org currency. Send the full object (read it first with form.get): saving replaces settings wholesale.',
+            'properties'           => [
+                'layout'            => ['type' => 'string', 'description' => 'How the form renders, e.g. "inline" or "modal".'],
+                'style'            => [
+                    'type'                 => 'object',
+                    'additionalProperties' => false,
+                    'properties'           => ['preset_id' => ['type' => 'string', 'description' => 'Style-preset id, or empty for the campaign default.']],
+                ],
+                'recurring'         => [
+                    'type'                 => 'object',
+                    'additionalProperties' => false,
+                    'description'          => 'Recurring-giving options offered on the form.',
+                    'properties'           => [
+                        'enabled'     => ['type' => 'boolean'],
+                        'frequencies' => ['type' => 'array', 'items' => ['type' => 'string']],
+                    ],
+                ],
+                'anonymous_allowed' => ['type' => 'boolean'],
+                'thank_you_message' => ['type' => 'string'],
+                'redirect_url'      => ['type' => 'string'],
+                'goal'              => [
+                    'type'                 => 'object',
+                    'additionalProperties' => false,
+                    'description'          => 'Fundraising goal shown on the form.',
+                    'properties'           => [
+                        'type'         => ['type' => 'string', 'enum' => ['amount', 'donations', 'donors', 'none']],
+                        'amount_cents' => ['type' => 'integer', 'minimum' => 0, 'description' => 'Target in minor units, when type is "amount".'],
+                        'count'        => ['type' => 'integer', 'minimum' => 0, 'description' => 'Target donation/donor count, when type is "donations" or "donors".'],
+                    ],
+                ],
+            ],
+        ];
     }
 
     /**
