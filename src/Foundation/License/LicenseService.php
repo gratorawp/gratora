@@ -42,10 +42,43 @@ final class LicenseService
         return in_array($feature, $this->proFeatures(), true);
     }
 
-    /** License status string for display. */
+    /**
+     * License status string for display: active | grace | expired | revoked |
+     * inactive. The dono-licensing client (vendored in each Pro add-on) sets
+     * dono.pro.license_status from the server's signed response. When no client
+     * is loaded, the filter passes through the possession-based default so the
+     * admin still reads sensibly.
+     */
     public function status(): string
     {
-        return $this->isPro() ? 'active' : 'inactive';
+        $default = $this->isPro() ? 'active' : 'inactive';
+        $status  = apply_filters('dono.pro.license_status', $default);
+
+        return is_string($status) && $status !== '' ? $status : $default;
+    }
+
+    /**
+     * Booted Pro add-ons as id + human-name pairs, for admin display. Falls
+     * back to the id when a module has no resolvable name.
+     *
+     * @return array<int,array{id:string,name:string}>
+     */
+    public function addons(): array
+    {
+        if ($this->modules === null) {
+            return [];
+        }
+
+        $addons = [];
+        foreach ($this->proFeatures() as $id) {
+            $module   = $this->modules->get($id);
+            $addons[] = [
+                'id'   => $id,
+                'name' => $module !== null ? $module->name() : $id,
+            ];
+        }
+
+        return $addons;
     }
 
     /**
@@ -58,7 +91,7 @@ final class LicenseService
         return [
             'active'   => $features !== [],
             'features' => $features,
-            'status'   => $features !== [] ? 'active' : 'inactive',
+            'status'   => $this->status(),
         ];
     }
 
