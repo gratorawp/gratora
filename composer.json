@@ -20,7 +20,8 @@
         "php-stubs/wordpress-stubs": "^6.9",
         "phpunit/phpunit": "^9.6",
         "wp-phpunit/wp-phpunit": "^7.0",
-        "yoast/phpunit-polyfills": "^2.0"
+        "yoast/phpunit-polyfills": "^2.0",
+        "dono/since": "dev-main"
     },
     "autoload": {
         "psr-4": {
@@ -36,11 +37,14 @@
         }
     },
     "scripts": {
-        "test":              "phpunit",
-        "test:unit":         "phpunit",
-        "test:integration":  "phpunit --configuration phpunit-integration.xml.dist",
-        "test:all":          ["@test:unit", "@test:integration"],
-        "strauss":           [
+        "test": "phpunit",
+        "test:unit": "phpunit",
+        "test:integration": "phpunit --configuration phpunit-integration.xml.dist",
+        "test:all": [
+            "@test:unit",
+            "@test:integration"
+        ],
+        "strauss": [
             "@php -d memory_limit=1G vendor/bin/strauss",
             "find vendor-prefixed -type d -name .git -exec rm -rf {} +",
             "@php -r \"file_put_contents('vendor/composer/autoload_aliases.php', '<?php');\"",
@@ -66,5 +70,14 @@
     "config": {
         "sort-packages": true,
         "optimize-autoloader": true
-    }
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "/Users/ante/Local Sites/since",
+            "options": {
+                "symlink": true
+            }
+        }
+    ]
 }
