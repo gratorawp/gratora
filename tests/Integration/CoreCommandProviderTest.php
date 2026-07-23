@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dono\Tests\Integration;
 
 use Dono\Analytics\EventRecorder;
+use Dono\Campaigns\CampaignRepository;
 use Dono\Core\Commands\CoreCommandProvider;
 use Dono\Donations\Donation;
 use Dono\Donations\DonationRepository;
@@ -107,6 +108,37 @@ final class CoreCommandProviderTest extends IntegrationTestCase
         );
         $this->assertContains('donation.refunded', $eventTypes);
         $this->assertContains('command.invoked', $eventTypes);
+    }
+
+    public function test_campaign_create_honors_campaign_type_from_the_registry(): void
+    {
+        $admin = self::factory()->user->create(['role' => 'administrator']);
+        get_role('administrator')->add_cap('dono_manage_campaigns');
+        wp_set_current_user($admin);
+
+        // An add-on contributes its type to the live filter, as dono-p2p does.
+        add_filter('dono.campaign.types', static function (array $types): array {
+            $types['peer_to_peer'] = 'Peer-to-peer';
+            return $types;
+        });
+
+        $ctx = new CommandContext($admin, 'rest', 'req-' . uniqid());
+        $res = $this->registry()->dispatch('campaign.create', [
+            'title'         => 'Dog Shelter Drive',
+            'campaign_type' => 'peer_to_peer',
+        ], $ctx);
+
+        $this->assertTrue($res->ok, $res->error ?? '');
+
+        $campaign = Plugin::instance()->container->get(CampaignRepository::class)
+            ->findById((int) $res->data['campaign_id']);
+        $this->assertSame(
+            'peer_to_peer',
+            $campaign->campaign_type,
+            'campaign_type must survive dispatch; additionalProperties:false was stripping it'
+        );
+
+        remove_all_filters('dono.campaign.types');
     }
 
     private function driveDonationToPaid(): string
