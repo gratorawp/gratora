@@ -1433,43 +1433,6 @@ final class CoreCommandProvider
      * "what's our recurring revenue", and "who's at risk of lapsing". All
      * non-mutating + idempotent, so they skip the confirmation gate.
      */
-    /**
-     * Recent domain events of the given types since a timestamp, newest first,
-     * as a compact alert list. Amounts, ids, and a link only, no donor names, so
-     * it stays at the dono_view_reports tier. `since` is a UTC Y-m-d H:i:s
-     * matching the event log; it defaults to the last 24 hours.
-     *
-     * @param list<string> $types
-     * @return array{since:string, count:int, items:list<array<string,mixed>>}
-     */
-    private function recentEvents(array $types, ?string $since, int $minCents = 0): array
-    {
-        $since = ($since !== null && $since !== '') ? $since : gmdate('Y-m-d H:i:s', time() - DAY_IN_SECONDS);
-
-        $query = Event::query()
-            ->whereIn('type', $types)
-            ->where('occurred_at', $since, '>=');
-        if ($minCents > 0) {
-            $query->where('amount_cents', $minCents, '>=');
-        }
-
-        $rows  = $query->orderBy('occurred_at', 'DESC')->limit(100)->getAll();
-        $items = array_map(static function ($event): array {
-            $payload = is_array($event->payload) ? $event->payload : [];
-            return [
-                'type'         => (string) $event->type,
-                'occurred_at'  => (string) $event->occurred_at,
-                'amount_cents' => $event->amount_cents !== null ? (int) $event->amount_cents : null,
-                'currency'     => $event->currency,
-                'donation_id'  => $event->donation_id !== null ? (int) $event->donation_id : null,
-                'reason'       => isset($payload['reason']) ? (string) $payload['reason'] : null,
-                'action_href'  => $event->donation_id !== null ? admin_url('admin.php?page=dono-donations') : null,
-            ];
-        }, $rows);
-
-        return ['since' => $since, 'count' => count($items), 'items' => $items];
-    }
-
     private function reports(CommandRegistry $r, Container $c): void
     {
         $rangeArg = [
@@ -1477,73 +1440,6 @@ final class CoreCommandProvider
             'enum'        => self::REPORT_RANGES,
             'description' => 'Reporting window. One of today, last-7, last-30, last-90, all-time. Defaults to last-30.',
         ];
-
-        $r->register(new Command(
-            'report.briefing',
-            'A single briefing bundle for a period: headline KPIs versus the prior period, the attention queue, the recurring-revenue snapshot, and the count of donors now at risk of lapsing. Aggregate figures only, no donor PII. Built for a scheduled "what happened and what needs me" summary.',
-            $this->schema([
-                'range' => $rangeArg,
-            ]),
-            [],
-            'dono_view_reports',
-            true,
-            false,
-            function (array $in) use ($c): array {
-                $range = (string) ($in['range'] ?? 'last-7');
-                $dash  = $this->dashboardMetrics($c);
-                $risk  = $c->get(DonorMetricsService::class)->atRisk(1, 1);
-                return [
-                    'range'         => $range,
-                    'currency'      => strtoupper(Money::defaultCurrency()),
-                    'kpi'           => $dash->kpi($range, 'period'),
-                    'recurring'     => $dash->recurring(),
-                    'attention'     => $dash->attention(),
-                    'at_risk_count' => (int) ($risk['total'] ?? 0),
-                ];
-            },
-            self::META,
-        ));
-
-        $sinceArg = ['type' => ['string', 'null'], 'description' => 'Lower bound as a UTC Y-m-d H:i:s timestamp. Defaults to the last 24 hours. Scheduled alerts fill this with their own window.'];
-
-        $r->register(new Command(
-            'report.large_donations',
-            'Completed donations at or above an amount threshold since a given time, newest first. For a "tell me when a big gift comes in" alert. Amounts and links only, no donor names.',
-            $this->schema([
-                'since'     => $sinceArg,
-                'min_cents' => ['type' => 'integer', 'minimum' => 1, 'description' => 'Minimum gift size in minor units (cents). Defaults to 25000.'],
-            ]),
-            [],
-            'dono_view_reports',
-            true,
-            false,
-            fn (array $in): array => $this->recentEvents(['donation.completed'], $in['since'] ?? null, (int) ($in['min_cents'] ?? 25000)),
-            self::META
-        ));
-
-        $r->register(new Command(
-            'report.failed_payments',
-            'Failed donations and failed subscription-creation attempts since a given time, newest first. For a "catch dunning problems early" alert.',
-            $this->schema(['since' => $sinceArg]),
-            [],
-            'dono_view_reports',
-            true,
-            false,
-            fn (array $in): array => $this->recentEvents(['donation.failed', 'recurring.subscription_creation_failed'], $in['since'] ?? null),
-            self::META
-        ));
-
-        $r->register(new Command(
-            'report.recurring_cancellations',
-            'Recurring plans cancelled since a given time, newest first. For a "win those donors back" alert.',
-            $this->schema(['since' => $sinceArg]),
-            [],
-            'dono_view_reports',
-            true,
-            false,
-            fn (array $in): array => $this->recentEvents(['recurring.cancelled'], $in['since'] ?? null),
-            self::META
-        ));
 
         $r->register(new Command(
             'report.dashboard',
