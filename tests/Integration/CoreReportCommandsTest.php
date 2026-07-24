@@ -47,6 +47,41 @@ final class CoreReportCommandsTest extends IntegrationTestCase
         return new CommandContext($admin, 'rest', 'req-' . uniqid());
     }
 
+    public function test_diagnostics_recent_groups_recent_failures(): void
+    {
+        $events = Plugin::instance()->container->get(EventRecorder::class);
+        $events->record('command.failed', ['user_id' => 1, 'payload' => ['command_id' => 'refund.create', 'error' => 'Stripe: No such charge']]);
+        $events->record('command.failed', ['user_id' => 1, 'payload' => ['command_id' => 'refund.create', 'error' => 'Stripe: No such charge']]);
+        $events->record('donation.failed', ['payload' => ['gateway' => 'stripe', 'reason' => 'card_declined']]);
+        $events->record('donation.completed', ['payload' => []]);
+
+        $res = $this->registry()->dispatch('diagnostics.recent', ['hours' => 24], $this->adminCtx());
+
+        $this->assertTrue($res->ok);
+        $this->assertSame(3, $res->data['total_issues'], '2 command failures + 1 failed donation');
+
+        $byType = [];
+        foreach ($res->data['issues'] as $issue) {
+            $byType[$issue['type']] = $issue;
+        }
+        $this->assertSame(2, $byType['command.failed']['count']);
+        $this->assertSame('Stripe: No such charge', $byType['command.failed']['sample_error']);
+        $this->assertSame([['command_id' => 'refund.create', 'count' => 2]], $byType['command.failed']['commands']);
+        $this->assertSame('card_declined', $byType['donation.failed']['sample_error']);
+        $this->assertSame(1, $res->data['healthy']['donation.completed'] ?? 0, 'healthy activity is counted for context');
+    }
+
+    public function test_diagnostics_recent_needs_the_reports_capability(): void
+    {
+        $user = self::factory()->user->create(['role' => 'subscriber']);
+        wp_set_current_user($user);
+        $ctx = new CommandContext($user, 'rest', 'req-' . uniqid());
+
+        $res = $this->registry()->dispatch('diagnostics.recent', [], $ctx);
+
+        $this->assertFalse($res->ok, 'error diagnostics are gated behind dono_view_reports');
+    }
+
     public function test_manifest_lists_the_report_commands_as_non_mutating(): void
     {
         $byId = [];

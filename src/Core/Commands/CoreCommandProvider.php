@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Core\Commands;
 
+use Dono\Analytics\Event;
 use Dono\Campaigns\CampaignMetricsService;
 use Dono\Campaigns\CampaignRepository;
 use Dono\Campaigns\CampaignService;
@@ -1502,6 +1503,87 @@ final class CoreCommandProvider
                 ];
             },
             self::META,
+        ));
+
+        $r->register(new Command(
+            'diagnostics.recent',
+            'Recent operational problems from the event log: failed donations and subscriptions, plus commands that errored, were denied, or were rate-limited. Grouped by type with a count, the most recent occurrence, and a sample error, alongside a healthy-activity tally for context. Read-only; carries no donor names or emails.',
+            $this->schema([
+                'hours' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 168, 'description' => 'How far back to look, in hours (1 to 168). Defaults to 24.'],
+            ]),
+            [],
+            'dono_view_reports',
+            true,
+            false,
+            function (array $in): array {
+                $hours = max(1, min(168, (int) ($in['hours'] ?? 24)));
+                $since = gmdate('Y-m-d H:i:s', time() - $hours * 3600);
+
+                $issueTypes = [
+                    'command.failed',
+                    'command.denied',
+                    'command.rate_limited',
+                    'donation.failed',
+                    'recurring.subscription_creation_failed',
+                ];
+                $healthyTypes = ['donation.completed', 'recurring.renewed', 'receipt.issued'];
+
+                $rows = Event::query()
+                    ->whereIn('type', array_merge($issueTypes, $healthyTypes))
+                    ->where('occurred_at', $since, '>=')
+                    ->orderBy('id', 'DESC')
+                    ->limit(2000)
+                    ->getAll();
+
+                $issues  = [];
+                $healthy = [];
+                foreach ($rows as $ev) {
+                    $type = (string) $ev->type;
+                    if (in_array($type, $healthyTypes, true)) {
+                        $healthy[$type] = ($healthy[$type] ?? 0) + 1;
+                        continue;
+                    }
+                    $payload = is_array($ev->payload) ? $ev->payload : [];
+                    if (! isset($issues[$type])) {
+                        $issues[$type] = ['type' => $type, 'count' => 0, 'last_at' => (string) $ev->occurred_at, 'sample_error' => null, 'commands' => []];
+                    }
+                    $issues[$type]['count']++;
+                    // Rows are newest-first, so the first error text we meet is the most recent.
+                    if ($issues[$type]['sample_error'] === null) {
+                        $err = $payload['error'] ?? $payload['reason'] ?? $payload['message'] ?? null;
+                        if (is_string($err) && $err !== '') {
+                            $issues[$type]['sample_error'] = $err;
+                        }
+                    }
+                    if (isset($payload['command_id']) && $payload['command_id'] !== '') {
+                        $cid = (string) $payload['command_id'];
+                        $issues[$type]['commands'][$cid] = ($issues[$type]['commands'][$cid] ?? 0) + 1;
+                    }
+                }
+
+                $issueList = array_values(array_map(static function (array $i): array {
+                    $commands = [];
+                    foreach ($i['commands'] as $cid => $n) {
+                        $commands[] = ['command_id' => $cid, 'count' => $n];
+                    }
+                    return [
+                        'type'         => $i['type'],
+                        'count'        => $i['count'],
+                        'last_at'      => $i['last_at'],
+                        'sample_error' => $i['sample_error'],
+                        'commands'     => $commands,
+                    ];
+                }, $issues));
+
+                return [
+                    'window_hours' => $hours,
+                    'since'        => $since,
+                    'total_issues' => array_sum(array_column($issueList, 'count')),
+                    'issues'       => $issueList,
+                    'healthy'      => $healthy,
+                ];
+            },
+            $this->meta(['agent_hint' => 'Use when the operator asks what is failing, why donations or subscriptions are not going through, why a command was denied, or to troubleshoot recent errors. Read sample_error to explain the likely cause and suggest a fix; it reflects only what the plugin recorded, not PHP fatals or the server error log.']),
         ));
 
         $r->register(new Command(
