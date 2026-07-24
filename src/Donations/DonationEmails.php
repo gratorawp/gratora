@@ -43,6 +43,8 @@ final class DonationEmails extends HookProvider
             'dono.recurring.renewed'       => ['onRecurringRenewed', 10, 2],
             // 2-arg: $plan, $reason
             'dono.recurring.cancelled'     => ['onRecurringCancelled', 10, 2],
+            // 1-arg: $donorId (fired once, when a donor's aggregate crosses 0 -> 1)
+            'dono.donor.first_donation_completed' => 'onFirstDonation',
         ];
     }
 
@@ -147,6 +149,25 @@ final class DonationEmails extends HookProvider
             'amount'            => Money::format((int) $refund->amount_cents, (string) $donation->currency),
             'campaign_title'    => $this->campaignTitle($donation),
             'reference'         => (string) $donation->reference,
+        ]);
+    }
+
+    /**
+     * A donor's first completed donation: a one-off welcome, separate from the
+     * transactional receipt. Fires exactly once (the syncer only raises this on
+     * the 0 -> 1 crossing), so a second donation never re-sends it.
+     */
+    public function onFirstDonation(int $donorId): void
+    {
+        $donor = $this->donors->findById($donorId);
+        if (! $donor) return;
+        $email = $this->donorService->decryptEmail($donor);
+        if ($email === null || $email === '') return;
+
+        $this->mailer->sendTemplate('donation_first', $email, [
+            'donor_first_name'  => trim((string) ($donor->first_name ?? '')),
+            'donor_name'        => trim(($donor->first_name ?? '') . ' ' . ($donor->last_name ?? '')),
+            'organisation_name' => (string) get_bloginfo('name'),
         ]);
     }
 

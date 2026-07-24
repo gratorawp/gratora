@@ -230,6 +230,11 @@ final class SettingsService
                 'subject' => __('Thank you for your donation to {organisation_name}', 'dono'),
                 'body'    => __("Hi {donor_first_name},\n\nThank you for your donation of {amount} to {organisation_name}.\n\nReference: {reference}\nReceipt number: {receipt_number}\n\nYour receipt is attached as a PDF. Keep it for your records.\n\nWith gratitude,\n{organisation_name}", 'dono'),
             ],
+            'donation_first' => [
+                'enabled' => true,
+                'subject' => __('Thank you for your first donation to {organisation_name}', 'dono'),
+                'body'    => __("Hi {donor_first_name},\n\nThank you for making your first donation to {organisation_name}. Your support means a great deal, and we are grateful to have you with us.\n\nWe will keep you posted on the difference it makes.\n\nWith gratitude,\n{organisation_name}", 'dono'),
+            ],
             'offline_instructions' => [
                 'enabled' => true,
                 'subject' => __('Payment instructions for your donation to {organisation_name}', 'dono'),

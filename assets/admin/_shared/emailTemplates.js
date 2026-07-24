@@ -19,6 +19,13 @@ export function getDonorTemplates() {
             tags:      DONATION_TAGS,
         },
         {
+            id:        'donation_first',
+            label:     __( 'First donation welcome', 'dono' ),
+            desc:      __( 'A one-off welcome sent when a donor gives for the first time, separate from the receipt. Warm and relational, not transactional.', 'dono' ),
+            recipient: __( 'Donor', 'dono' ),
+            tags:      [ '{donor_first_name}', '{donor_name}', '{organisation_name}' ],
+        },
+        {
             id:        'offline_instructions',
             label:     __( 'Offline donation instructions', 'dono' ),
             desc:      __( 'Sent when a donor picks bank transfer. Shows IBAN, reference, and amount so they can complete the transfer.', 'dono' ),
