@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Tests\Integration;
 
+use Dono\Analytics\Event;
 use Dono\Analytics\EventRecorder;
 use Dono\Campaigns\CampaignService;
 use Dono\Core\Commands\CoreCommandProvider;
@@ -26,7 +27,43 @@ final class CoreReportCommandsTest extends IntegrationTestCase
     private const REPORT_IDS = [
         'report.briefing', 'report.dashboard', 'report.recurring', 'report.top_campaigns',
         'report.attention', 'donor.at_risk',
+        'report.large_donations', 'report.failed_payments', 'report.recurring_cancellations',
     ];
+
+    public function test_large_donations_alert_filters_by_amount_and_window(): void
+    {
+        $events = Plugin::instance()->container->get(EventRecorder::class);
+        $events->record('donation.completed', ['amount_cents' => 60000, 'currency' => 'USD', 'donation_id' => 1]);
+        $events->record('donation.completed', ['amount_cents' => 500, 'currency' => 'USD', 'donation_id' => 2]);
+
+        // A big gift from two days ago must fall outside the default 24h window.
+        $old = Event::make();
+        $old->type         = 'donation.completed';
+        $old->amount_cents = 70000;
+        $old->currency     = 'USD';
+        $old->donation_id  = 3;
+        $old->occurred_at  = gmdate('Y-m-d H:i:s', time() - 2 * DAY_IN_SECONDS);
+        $old->save();
+
+        $res = $this->registry()->dispatch('report.large_donations', ['min_cents' => 10000], $this->adminCtx());
+
+        $this->assertTrue($res->ok, $res->error ?? '');
+        $this->assertSame(1, $res->data['count'], 'only the recent gift at or above the threshold is returned');
+        $this->assertSame(60000, $res->data['items'][0]['amount_cents']);
+    }
+
+    public function test_failed_payments_alert_lists_only_failures(): void
+    {
+        $events = Plugin::instance()->container->get(EventRecorder::class);
+        $events->record('donation.failed', ['payload' => ['reason' => 'card_declined']]);
+        $events->record('recurring.subscription_creation_failed', ['payload' => ['reason' => 'authentication_required']]);
+        $events->record('donation.completed', ['amount_cents' => 1000, 'currency' => 'USD']);
+
+        $res = $this->registry()->dispatch('report.failed_payments', [], $this->adminCtx());
+
+        $this->assertTrue($res->ok, $res->error ?? '');
+        $this->assertSame(2, $res->data['count'], 'only failure events are listed, not the completed donation');
+    }
 
     public function test_briefing_bundles_the_period_snapshot(): void
     {
