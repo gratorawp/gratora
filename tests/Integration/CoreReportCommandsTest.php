@@ -66,7 +66,12 @@ final class CoreReportCommandsTest extends IntegrationTestCase
         }
         $this->assertSame(2, $byType['command.failed']['count']);
         $this->assertSame('Stripe: No such charge', $byType['command.failed']['sample_error']);
-        $this->assertSame([['command_id' => 'refund.create', 'count' => 2]], $byType['command.failed']['commands']);
+
+        $cmd = $byType['command.failed']['commands'][0];
+        $this->assertSame('refund.create', $cmd['command_id']);
+        $this->assertSame(2, $cmd['count']);
+        $this->assertSame(1, $cmd['by_user'][0]['user_id'], 'the operator who hit the failure is named');
+        $this->assertSame(2, $cmd['by_user'][0]['count']);
         $this->assertSame('card_declined', $byType['donation.failed']['sample_error']);
         $this->assertSame(1, $res->data['healthy']['donation.completed'] ?? 0, 'healthy activity is counted for context');
     }

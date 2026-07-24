@@ -1507,7 +1507,7 @@ final class CoreCommandProvider
 
         $r->register(new Command(
             'diagnostics.recent',
-            'Recent operational problems from the event log: failed donations and subscriptions, plus commands that errored, were denied, or were rate-limited. Grouped by type with a count, the most recent occurrence, and a sample error, alongside a healthy-activity tally for context. Read-only; carries no donor names or emails.',
+            'Recent operational problems from the event log: failed donations and subscriptions, plus commands that errored, were denied, or were rate-limited. Grouped by type with a count, the most recent occurrence, a sample error, and which operator ran each failed or denied command, alongside a healthy-activity tally for context. Read-only; carries no donor names or emails.',
             $this->schema([
                 'hours' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 168, 'description' => 'How far back to look, in hours (1 to 168). Defaults to 24.'],
             ]),
@@ -1557,23 +1557,42 @@ final class CoreCommandProvider
                     }
                     if (isset($payload['command_id']) && $payload['command_id'] !== '') {
                         $cid = (string) $payload['command_id'];
-                        $issues[$type]['commands'][$cid] = ($issues[$type]['commands'][$cid] ?? 0) + 1;
+                        if (! isset($issues[$type]['commands'][$cid])) {
+                            $issues[$type]['commands'][$cid] = ['count' => 0, 'users' => []];
+                        }
+                        $issues[$type]['commands'][$cid]['count']++;
+                        // The operator who ran it: a WP user (staff), never a donor.
+                        $uid = $ev->user_id !== null ? (int) $ev->user_id : (int) ($payload['user_id'] ?? 0);
+                        if ($uid > 0) {
+                            $issues[$type]['commands'][$cid]['users'][$uid] = ($issues[$type]['commands'][$cid]['users'][$uid] ?? 0) + 1;
+                        }
                     }
                 }
 
-                $issueList = array_values(array_map(static function (array $i): array {
+                $names     = [];
+                $issueList = [];
+                foreach ($issues as $issue) {
                     $commands = [];
-                    foreach ($i['commands'] as $cid => $n) {
-                        $commands[] = ['command_id' => $cid, 'count' => $n];
+                    foreach ($issue['commands'] as $cid => $data) {
+                        arsort($data['users']);
+                        $byUser = [];
+                        foreach ($data['users'] as $uid => $hits) {
+                            if (! isset($names[$uid])) {
+                                $user        = get_userdata((int) $uid);
+                                $names[$uid] = $user ? $user->display_name : 'user #' . $uid;
+                            }
+                            $byUser[] = ['user_id' => (int) $uid, 'name' => $names[$uid], 'count' => $hits];
+                        }
+                        $commands[] = ['command_id' => $cid, 'count' => $data['count'], 'by_user' => $byUser];
                     }
-                    return [
-                        'type'         => $i['type'],
-                        'count'        => $i['count'],
-                        'last_at'      => $i['last_at'],
-                        'sample_error' => $i['sample_error'],
+                    $issueList[] = [
+                        'type'         => $issue['type'],
+                        'count'        => $issue['count'],
+                        'last_at'      => $issue['last_at'],
+                        'sample_error' => $issue['sample_error'],
                         'commands'     => $commands,
                     ];
-                }, $issues));
+                }
 
                 return [
                     'window_hours' => $hours,
@@ -1583,7 +1602,7 @@ final class CoreCommandProvider
                     'healthy'      => $healthy,
                 ];
             },
-            $this->meta(['agent_hint' => 'Use when the operator asks what is failing, why donations or subscriptions are not going through, why a command was denied, or to troubleshoot recent errors. Read sample_error to explain the likely cause and suggest a fix; it reflects only what the plugin recorded, not PHP fatals or the server error log.']),
+            $this->meta(['agent_hint' => 'Use when the operator asks what is failing, why donations or subscriptions are not going through, why a command was denied, who hit a denial or error, or to troubleshoot recent problems. Read sample_error to explain the likely cause and suggest a fix, and read each command breakdown\'s by_user to name which operator was affected. It reflects only what the plugin recorded, not PHP fatals or the server error log.']),
         ));
 
         $r->register(new Command(
