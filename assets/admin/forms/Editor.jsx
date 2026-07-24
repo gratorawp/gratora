@@ -30,7 +30,7 @@ import {
 } from '@wordpress/block-editor';
 import { InterfaceSkeleton } from '@wordpress/interface';
 import { ShortcutProvider } from '@wordpress/keyboard-shortcuts';
-import { parse, serialize } from '@wordpress/blocks';
+import { createBlock, parse, serialize } from '@wordpress/blocks';
 import { useRegistry, useSelect } from '@wordpress/data';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
@@ -606,6 +606,7 @@ export default function Editor( { formId } ) {
                     >
                         <BlockSelectionSync onChange={ setSelectedBlockId } />
                         <DeselectOnOutsideClick />
+                        <AssistantBridge />
                         <InterfaceSkeleton
                             header={ header }
                             notices={ notices }
@@ -733,6 +734,44 @@ function DeselectOnOutsideClick() {
         };
         document.addEventListener( 'mousedown', onDocMouseDown, true );
         return () => document.removeEventListener( 'mousedown', onDocMouseDown, true );
+    }, [ registry ] );
+    return null;
+}
+
+/**
+ * A generic block-manipulation bridge for extensions (the AI form assistant uses
+ * it): reads the current fields and inserts/updates/removes/moves them. Lives
+ * inside BlockEditorProvider and dispatches via useRegistry() so it reaches the
+ * scoped store, and every change flows through onChange, so undo and the dirty
+ * check treat an extension edit exactly like a hand edit. Nothing is persisted
+ * until the operator saves the form.
+ */
+function AssistantBridge() {
+    const registry = useRegistry();
+    useEffect( () => {
+        const store = () => registry.select( 'core/block-editor' );
+        const act   = () => registry.dispatch( 'core/block-editor' );
+        window.donoFormBlocks = {
+            getBlocks: () =>
+                store().getBlocks().map( ( b ) => ( {
+                    clientId: b.clientId,
+                    name: b.name,
+                    attributes: b.attributes,
+                } ) ),
+            insertBlock: ( name, attributes, afterClientId ) => {
+                const block = createBlock( name, attributes || {} );
+                const order = store().getBlockOrder( '' );
+                const found = afterClientId ? order.indexOf( afterClientId ) : -1;
+                act().insertBlock( block, found !== -1 ? found + 1 : order.length, '' );
+                return block.clientId;
+            },
+            updateBlock: ( clientId, attributes ) =>
+                act().updateBlockAttributes( clientId, attributes || {} ),
+            removeBlock: ( clientId ) => act().removeBlock( clientId, false ),
+            moveBlock: ( clientId, toIndex ) =>
+                act().moveBlocksToPosition( [ clientId ], '', '', toIndex ),
+        };
+        return () => { delete window.donoFormBlocks; };
     }, [ registry ] );
     return null;
 }
