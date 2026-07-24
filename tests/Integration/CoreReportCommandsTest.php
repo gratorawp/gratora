@@ -24,9 +24,30 @@ use WP_REST_Request;
 final class CoreReportCommandsTest extends IntegrationTestCase
 {
     private const REPORT_IDS = [
-        'report.dashboard', 'report.recurring', 'report.top_campaigns',
+        'report.briefing', 'report.dashboard', 'report.recurring', 'report.top_campaigns',
         'report.attention', 'donor.at_risk',
     ];
+
+    public function test_briefing_bundles_the_period_snapshot(): void
+    {
+        $res = $this->registry()->dispatch('report.briefing', ['range' => 'last-7'], $this->adminCtx());
+
+        $this->assertTrue($res->ok, $res->error ?? '');
+        foreach (['range', 'kpi', 'recurring', 'attention', 'at_risk_count'] as $key) {
+            $this->assertArrayHasKey($key, $res->data, "the briefing bundle carries $key");
+        }
+        $this->assertArrayHasKey('amount_raised_cents', $res->data['kpi'], 'the briefing carries the headline KPIs');
+        $this->assertIsInt($res->data['at_risk_count'], 'at-risk is an aggregate count, not PII rows');
+    }
+
+    public function test_briefing_is_gated_on_reports(): void
+    {
+        $user = self::factory()->user->create(['role' => 'subscriber']);
+        wp_set_current_user($user);
+        $res = $this->registry()->dispatch('report.briefing', [], new CommandContext($user, 'rest', 'req-' . uniqid()));
+
+        $this->assertFalse($res->ok, 'the briefing is gated behind dono_view_reports');
+    }
 
     private function registry(): CommandRegistry
     {

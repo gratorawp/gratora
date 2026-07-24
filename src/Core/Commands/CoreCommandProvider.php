@@ -1442,6 +1442,32 @@ final class CoreCommandProvider
         ];
 
         $r->register(new Command(
+            'report.briefing',
+            'A single briefing bundle for a period: headline KPIs versus the prior period, the attention queue, the recurring-revenue snapshot, and the count of donors now at risk of lapsing. Aggregate figures only, no donor PII. Built for a scheduled "what happened and what needs me" summary.',
+            $this->schema([
+                'range' => $rangeArg,
+            ]),
+            [],
+            'dono_view_reports',
+            true,
+            false,
+            function (array $in) use ($c): array {
+                $range = (string) ($in['range'] ?? 'last-7');
+                $dash  = $this->dashboardMetrics($c);
+                $risk  = $c->get(DonorMetricsService::class)->atRisk(1, 1);
+                return [
+                    'range'         => $range,
+                    'currency'      => strtoupper(Money::defaultCurrency()),
+                    'kpi'           => $dash->kpi($range, 'period'),
+                    'recurring'     => $dash->recurring(),
+                    'attention'     => $dash->attention(),
+                    'at_risk_count' => (int) ($risk['total'] ?? 0),
+                ];
+            },
+            self::META,
+        ));
+
+        $r->register(new Command(
             'report.dashboard',
             'Org-wide KPI snapshot for a date range: revenue raised, donation count, unique donors, and average donation.',
             $this->schema([
