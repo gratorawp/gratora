@@ -69,8 +69,8 @@ final class Donation extends Model
     /**
      * What the money is: 'donation', or a non-donation kind an add-on moves
      * through the rails (e.g. 'order' for event ticket orders). Non-donation
-     * kinds stay out of donor lifetime rollups and never carry a platform fee;
-     * campaign and org revenue include every kind.
+     * kinds stay out of donor lifetime rollups; campaign and org revenue
+     * include every kind.
      */
     public string $kind = 'donation';
     public ?string $failure_reason = null;

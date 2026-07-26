@@ -72,7 +72,6 @@ final class StripeCurrencyAmountTest extends IntegrationTestCase
                 $c->get(DonationRepository::class),
                 $c->get(\Dono\Donations\DonationService::class),
                 $c->get(StripeConnectAccount::class),
-                $c->get(\Dono\Foundation\License\LicenseService::class),
                 $c->get(\Dono\Donors\DonorRepository::class),
                 $c->get(\Dono\Donors\DonorService::class),
                 $c->get(\Dono\Foundation\Time\Clock::class),
@@ -86,7 +85,7 @@ final class StripeCurrencyAmountTest extends IntegrationTestCase
     /**
      * @dataProvider currencyAmounts
      */
-    public function test_charge_amount_is_scaled_per_currency(string $code, int $storedCents, int $expectedStripe, int $expectedFee): void
+    public function test_charge_amount_is_scaled_per_currency(string $code, int $storedCents, int $expectedStripe): void
     {
         $this->createDonation($code, $storedCents, strtolower($code) . '@example.com');
 
@@ -99,25 +98,19 @@ final class StripeCurrencyAmountTest extends IntegrationTestCase
             "{$code}: {$storedCents} stored cents must reach Stripe as {$expectedStripe}"
         );
 
-        // Platform fee, when present, scales the same way as the amount.
-        if (isset($pi['application_fee_amount'])) {
-            $this->assertSame(
-                (string) $expectedFee,
-                $pi['application_fee_amount'],
-                "{$code}: application_fee_amount must be scaled to the currency unit"
-            );
-        }
+        // The full amount settles to the organization: Dono attaches no
+        // application fee of its own.
+        $this->assertArrayNotHasKey('application_fee_amount', $pi, "{$code}: no platform fee is ever attached");
     }
 
-    /** @return array<string,array{0:string,1:int,2:int,3:int}> */
+    /** @return array<string,array{0:string,1:int,2:int}> */
     public static function currencyAmounts(): array
     {
         return [
-            // code, stored (major*100), expected Stripe amount, expected 2% fee
-            'JPY zero-decimal'  => ['JPY', 100000, 1000, 20],
-            'USD two-decimal'   => ['USD', 2500, 2500, 50],
-            // 2% of 500 stored = 10 stored cents, scaled to BHD thousandths (x10) = 100.
-            'BHD three-decimal' => ['BHD', 500, 5000, 100],
+            // code, stored (major*100), expected Stripe amount
+            'JPY zero-decimal'  => ['JPY', 100000, 1000],
+            'USD two-decimal'   => ['USD', 2500, 2500],
+            'BHD three-decimal' => ['BHD', 500, 5000],
         ];
     }
 

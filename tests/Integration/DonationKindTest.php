@@ -12,12 +12,11 @@ use Dono\Donations\DonationService;
 use Dono\Donors\Donor;
 use Dono\Donors\DonorService;
 use Dono\Foundation\Plugin;
-use Dono\Gateways\Stripe\PlatformFee;
 
 /**
  * The donation `kind` discriminator: non-donation money (event ticket orders)
- * rides the payment rails but stays out of donor lifetime rollups and never
- * carries the platform fee. Campaign and org revenue keep including it.
+ * rides the payment rails but stays out of donor lifetime rollups. Campaign and
+ * org revenue keep including it.
  */
 final class DonationKindTest extends IntegrationTestCase
 {
@@ -101,13 +100,5 @@ final class DonationKindTest extends IntegrationTestCase
 
         $fresh = Campaign::query()->where('id', $c->id)->get();
         $this->assertSame(7000, (int) $fresh->raised_cents, 'campaign revenue includes ticket orders');
-    }
-
-    public function test_platform_fee_never_applies_to_order_kind(): void
-    {
-        $this->assertSame(200, PlatformFee::cents(10000, 'donation', false), '2% on a plain donation');
-        $this->assertSame(0, PlatformFee::cents(10000, 'order', false), 'never on an order, even unlicensed');
-        $this->assertSame(0, PlatformFee::cents(10000, 'donation', true), 'waived when pro');
-        $this->assertSame(0, PlatformFee::cents(0, 'donation', false));
     }
 }

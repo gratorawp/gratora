@@ -18,7 +18,6 @@ use Dono\Gateways\RefundResult;
 use Dono\Gateways\SubscriptionAware;
 use Dono\Gateways\TestMode;
 use Dono\Gateways\WebhookOutcome;
-use Dono\Foundation\License\LicenseService;
 use Dono\Recurring\FrequencyMap;
 use Dono\Recurring\RecurringPlan;
 use Dono\Recurring\RecurringPlanRepository;
@@ -39,7 +38,6 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
         private DonationRepository $donations,
         private DonationService $donationService,
         private StripeConnectAccount $connect,
-        private LicenseService $license,
         private DonorRepository $donors,
         private DonorService $donorService,
         private Clock $clock,
@@ -58,22 +56,6 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
     private function connectHeaders(): array
     {
         return [];
-    }
-
-    /** Platform cut in cents; see PlatformFee for the rules (kind + license). */
-    private function applicationFee(Donation $donation): int
-    {
-        return PlatformFee::cents($donation->amount_cents, $donation->kind, $this->license->isPro());
-    }
-
-    /**
-     * Same cut as a percentage, for subscription renewals
-     * (application_fee_percent). Subscriptions are always plain donations -
-     * no recurring non-donation kinds exist.
-     */
-    private function applicationFeePercent(): float
-    {
-        return PlatformFee::percent('donation', $this->license->isPro());
     }
 
     public function id(): string
@@ -157,12 +139,8 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
             $donation->form_id
         );
 
-        // Direct charge on the connected account; platform takes its cut via application_fee_amount.
-        $fee = $this->applicationFee($donation);
-        if ($fee > 0 && $this->connect->isConnected()) {
-            $params['application_fee_amount'] = Currency::toMinorUnits($fee, $donation->currency);
-        }
-
+        // Direct charge on the connected account: the full amount settles to the
+        // organization, Dono takes nothing.
         $intent = $this->api->post('/payment_intents', $params, $this->connectHeaders());
 
         return new GatewayIntentResult(
@@ -650,14 +628,6 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
             ],
         ];
 
-        // Without this every renewal invoice would settle at 0 platform fee even
-        // though the first charge took one. application_fee_percent applies the
-        // same cut to each recurring invoice on the connected account.
-        $feePercent = $this->applicationFeePercent();
-        if ($feePercent > 0) {
-            $subParams['application_fee_percent'] = $feePercent;
-        }
-
         $sub = $this->api->post('/subscriptions', $subParams, array_merge(
             $this->connectHeaders(),
             // Deterministic key: a redelivered webhook re-POSTs the same key, so
@@ -924,11 +894,6 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
         }
 
         try {
-            // refund_application_fee pulls the platform's cut back too, so a
-            // refunded donation nets to zero for everyone.
-            if ($this->connect->isConnected()) {
-                $params['refund_application_fee'] = 'true';
-            }
             // Idempotency-Key so a timed-out refund that already processed on
             // Stripe returns the original on retry instead of issuing a second
             // one. Stable per attempt (refunded_cents only advances once the

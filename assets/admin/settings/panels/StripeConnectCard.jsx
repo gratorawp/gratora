@@ -11,10 +11,6 @@ import ConfirmDialog from '../../_shared/components/ConfirmDialog';
 import { notify } from '../../_shared/notify';
 
 
-function isPro() {
-    return !! ( typeof window !== 'undefined' && window.dono?.pro?.active );
-}
-
 function readReturnFlash() {
     if ( typeof window === 'undefined' ) return '';
     const params = new URLSearchParams( window.location.search );
@@ -257,7 +253,6 @@ export default function StripeConnectCard( { s } ) {
     const connected     = !! status?.connected;
     const canCharge     = !! status?.can_charge;
     const account       = status?.account || null;
-    const pro           = isPro();
 
     // State 1: platform not configured.
     if ( ! platformReady ) {
@@ -284,14 +279,9 @@ export default function StripeConnectCard( { s } ) {
                 </p>
                 <ul className="dono-connect-checks">
                     <li>{ __( 'Payouts go straight to your bank, on your schedule', 'dono' ) }</li>
+                    <li>{ __( 'You keep 100% of every donation, Dono takes no cut', 'dono' ) }</li>
                     <li>{ __( 'You stay in full control, disconnect anytime', 'dono' ) }</li>
                 </ul>
-                { ! pro && (
-                    <Notice tone="accent" icon="ⓘ">
-                        { __( 'On the free plan Dono keeps a', 'dono' ) } <strong>2%{ ' ' }{ __( 'platform fee', 'dono' ) }</strong>{ ' ' }
-                        { __( 'per donation.', 'dono' ) }
-                    </Notice>
-                ) }
                 <div style={ { marginTop: 18 } }>
                     <Btn variant="primary" onClick={ connect } isBusy={ connecting } disabled={ connecting }>
                         { __( 'Connect with Stripe', 'dono' ) }
@@ -342,16 +332,6 @@ export default function StripeConnectCard( { s } ) {
                 <strong>{ __( 'You are all set.', 'dono' ) }</strong>{ ' ' }
                 { __( 'Donations are flowing to your Stripe account and paying out to your bank.', 'dono' ) }
             </Notice>
-            <div className="dono-connect-fee">
-                <span>
-                    { __( 'Dono platform fee', 'dono' ) }
-                    { pro && <span className="dono-connect-pro">{ __( 'Pro', 'dono' ) }</span> }
-                </span>
-                { pro
-                    ? <span className="dono-connect-fee__amt dono-connect-fee__amt--waived">{ __( 'Waived, 0%', 'dono' ) }</span>
-                    : <span className="dono-connect-fee__amt">2%{ ' ' }{ __( 'per donation', 'dono' ) }</span>
-                }
-            </div>
             { optionsBlock }
         </Card>
         <ConfirmDialog confirm={ confirm } onClose={ () => setConfirm( null ) } />

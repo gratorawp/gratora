@@ -510,7 +510,6 @@ final class CoreModule implements DonoModule
                 $c->get(DonationRepository::class),
                 $c->get(DonationService::class),
                 $c->get( StripeConnectAccount::class),
-                $c->get(LicenseService::class),
                 $c->get(DonorRepository::class),
                 $c->get(DonorService::class),
                 $c->get(Clock::class),

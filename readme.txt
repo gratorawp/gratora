@@ -27,7 +27,7 @@ Card payments are processed securely through Stripe using your own connected Str
 
 = Is Dono free? =
 
-Yes, the plugin is free. Card payments run through your own Stripe account, so standard Stripe processing fees apply along with a small Dono platform fee on card donations. Offline donations have no fee.
+Yes, the plugin is free. Card payments run through your own Stripe account, so your usual Stripe processing fees apply. Dono adds no platform fee of its own, you keep 100% of every donation.
 
 = Which payment methods are supported? =
 

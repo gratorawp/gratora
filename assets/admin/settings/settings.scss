@@ -410,36 +410,6 @@ $border: $border-mid;
     &--accent { background: $accent-soft; color: $accent-dark; }
 }
 
-.dono-connect-fee {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 16px;
-    padding: 12px 14px;
-    background: $bg-soft;
-    border-radius: 9px;
-    font-size: 13px;
-
-    &__amt {
-        font-weight: 600;
-
-        &--waived { color: $accent; }
-    }
-}
-
-.dono-connect-pro {
-    display: inline-block;
-    margin-left: 8px;
-    padding: 2px 7px;
-    background: $accent;
-    color: #fff;
-    border-radius: 5px;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-}
-
 .dono-connect-options {
     margin-top: 18px;
     padding-top: 16px;

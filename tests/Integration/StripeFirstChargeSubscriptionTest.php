@@ -56,7 +56,6 @@ final class StripeFirstChargeSubscriptionTest extends IntegrationTestCase
                 $c->get(\Dono\Donations\DonationRepository::class),
                 $c->get(\Dono\Donations\DonationService::class),
                 $c->get(\Dono\Gateways\Stripe\StripeConnectAccount::class),
-                $c->get(\Dono\Foundation\License\LicenseService::class),
                 $c->get(\Dono\Donors\DonorRepository::class),
                 $c->get(\Dono\Donors\DonorService::class),
                 $c->get(\Dono\Foundation\Time\Clock::class),
@@ -126,7 +125,7 @@ final class StripeFirstChargeSubscriptionTest extends IntegrationTestCase
         $this->assertSame('pm_test_card', $subBody['default_payment_method']);
         $this->assertSame('none', $subBody['proration_behavior']);
         $this->assertArrayHasKey('billing_cycle_anchor', $subBody, 'Future anchor prevents same-day double-charge');
-        $this->assertEquals(2, $subBody['application_fee_percent'] ?? 0, 'Renewals must carry the same 2% platform fee as the first charge');
+        $this->assertArrayNotHasKey('application_fee_percent', $subBody, 'Renewals settle in full to the organization, no platform fee');
 
         // 4. Local mirror exists.
         $fresh = $repo->findByReference($reference);

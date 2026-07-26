@@ -47,7 +47,6 @@ final class StripeChargeRefundedTest extends IntegrationTestCase
                 $c->get(\Dono\Donations\DonationRepository::class),
                 $c->get(\Dono\Donations\DonationService::class),
                 $c->get(\Dono\Gateways\Stripe\StripeConnectAccount::class),
-                $c->get(\Dono\Foundation\License\LicenseService::class),
                 $c->get(\Dono\Donors\DonorRepository::class),
                 $c->get(\Dono\Donors\DonorService::class),
                 $c->get(\Dono\Foundation\Time\Clock::class),
