@@ -47,7 +47,7 @@ final class CommandRegistryTest extends TestCase
 
         $entry = $manifest[0];
         $this->assertSame(
-            ['id', 'summary', 'inputSchema', 'outputSchema', 'capability', 'idempotent', 'mutating', 'meta'],
+            ['id', 'summary', 'inputSchema', 'outputSchema', 'capability', 'idempotent', 'mutating', 'has_preview', 'meta'],
             array_keys($entry)
         );
         $this->assertArrayNotHasKey('handler', $entry);
