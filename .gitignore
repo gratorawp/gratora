@@ -17,3 +17,10 @@ package-lock.json
 # Local wp-env override (machine-specific plugin paths)
 .wp-env.override.json
 /.wp-env/
+
+# Internal working material. This plugin is going to be open sourced, so
+# anything that is not shipped code stays out of the repo: planning docs,
+# competitor research, and above all the QA findings, which describe how to
+# attack the product. Their home is ~/Local Sites/dono/dono-pro-addon-specs/.
+/docs/
+/qa/
