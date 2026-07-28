@@ -14,6 +14,7 @@ use Dono\Gateways\PaymentGateway;
 use Dono\Gateways\RefundResult;
 use Dono\Gateways\SubscriptionAware;
 use Dono\Gateways\WebhookOutcome;
+use Dono\Gateways\WebhookPaymentGuard;
 use Dono\Recurring\FrequencyMap;
 use Dono\Recurring\RecurringPlan;
 use Dono\Recurring\RecurringPlanRepository;
@@ -35,6 +36,13 @@ use WP_REST_Request;
  */
 final class RazorpayGateway implements PaymentGateway, SubscriptionAware
 {
+    /**
+     * Mode of the webhook secret that verified the current delivery. Razorpay
+     * events carry no mode of their own, so the verifying secret is the only
+     * evidence of which environment an event came from.
+     */
+    private ?bool $verifiedIsTest = null;
+
     public function __construct(
         private RazorpayApi $api,
         private RazorpayAccount $account,
@@ -344,6 +352,7 @@ final class RazorpayGateway implements PaymentGateway, SubscriptionAware
             if ($secret === '') continue;
             if (RazorpaySignature::matches(RazorpaySignature::forWebhook($raw, $secret), $signature)) {
                 $this->account->useTestMode($test);
+                $this->verifiedIsTest = $test;
                 $verified = true;
                 break;
             }
@@ -415,6 +424,22 @@ final class RazorpayGateway implements PaymentGateway, SubscriptionAware
         $donation = $this->donationForPayment($payment);
         if (! $donation) {
             return $this->unmatched($eventId, $type, 'payment');
+        }
+
+        // A verified signature proves Razorpay sent this, not that it is about
+        // this donation for this amount in this mode.
+        $currency = strtoupper((string) ($payment['currency'] ?? ''));
+        $refusal  = WebhookPaymentGuard::refuse(
+            $donation,
+            $this->id(),
+            $this->verifiedIsTest,
+            isset($payment['amount'])
+                ? RazorpayMoney::toStoredCents((int) $payment['amount'], $currency ?: (string) $donation->currency)
+                : null,
+            $currency !== '' ? $currency : null,
+        );
+        if ($refusal !== null) {
+            return $this->refused($eventId, $type, $refusal);
         }
 
         // Idempotent: DonationService::confirm() no-ops on an already-paid row.
@@ -573,6 +598,17 @@ final class RazorpayGateway implements PaymentGateway, SubscriptionAware
             ->get();
 
         if ($signup instanceof Donation) {
+            $refusal = WebhookPaymentGuard::refuse(
+                $signup,
+                $this->id(),
+                $this->verifiedIsTest,
+                $amount,
+                $currency,
+            );
+            if ($refusal !== null) {
+                return $this->refused($eventId, $type, $refusal);
+            }
+
             $this->donationService->confirm($signup, $confirmResult);
 
             $fresh = $this->planRepo->findBySubscriptionId($this->id(), $subId);
@@ -784,6 +820,22 @@ final class RazorpayGateway implements PaymentGateway, SubscriptionAware
         return $orderId !== ''
             ? $this->donations->findByGatewayIntent($this->id(), $orderId)
             : null;
+    }
+
+    /**
+     * A genuinely Razorpay-signed event that must not touch this donation. 200,
+     * not 5xx: retrying will not make it acceptable.
+     */
+    private function refused(string $eventId, string $type, string $reason): WebhookOutcome
+    {
+        return new WebhookOutcome(
+            signature_ok: true,
+            external_id:  $eventId,
+            event_type:   $type,
+            handled:      false,
+            error:        'Refused: ' . $reason,
+            http_status:  200,
+        );
     }
 
     private function unmatched(string $eventId, string $type, string $what): WebhookOutcome

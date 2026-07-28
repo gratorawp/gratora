@@ -37,7 +37,7 @@ final class StripeCurrencyAmountTest extends IntegrationTestCase
         $this->secret = 'whsec_test_' . bin2hex(random_bytes(8));
         update_option('dono_gateway_config', [
             'test_mode' => true,
-            'stripe'    => ['webhook_secret' => $this->secret],
+            'stripe'    => ['webhook_secret_test' => $this->secret],
         ]);
 
         // This suite exercises zero-/three-decimal currencies, so the org must
@@ -148,6 +148,9 @@ final class StripeCurrencyAmountTest extends IntegrationTestCase
             'status'               => 'succeeded',
             'payment_method_types' => ['card'],
             'latest_charge'        => 'ch_test_jpy',
+            // 100000 internal cents of JPY is 1000 yen to Stripe.
+            'amount_received'      => 1000,
+            'currency'             => 'jpy',
         ]);
         $this->assertSame(200, $paid->get_status(), 'paid webhook accepted: ' . wp_json_encode($paid->get_data()));
         $this->assertSame('paid', $this->donations()->findByReference($reference)->status);

@@ -27,7 +27,7 @@ final class StripeChargeRefundedTest extends IntegrationTestCase
         parent::setUp();
         $this->secret = 'whsec_test_' . bin2hex(random_bytes(8));
         update_option('dono_gateway_config', [
-            'stripe' => ['webhook_secret' => $this->secret, 'test_mode' => true],
+            'stripe' => ['webhook_secret_live' => $this->secret, 'test_mode' => true],
         ]);
 
         $stripeAcct = (new StripeAccount(new Crypto()));

@@ -14,6 +14,7 @@ use Dono\Gateways\PaymentGateway;
 use Dono\Gateways\RefundResult;
 use Dono\Gateways\SubscriptionAware;
 use Dono\Gateways\WebhookOutcome;
+use Dono\Gateways\WebhookPaymentGuard;
 use Dono\Recurring\FrequencyMap;
 use Dono\Recurring\RecurringPlan;
 use Dono\Recurring\RecurringPlanRepository;
@@ -36,6 +37,12 @@ use WP_REST_Request;
  */
 final class PayPalGateway implements PaymentGateway, SubscriptionAware
 {
+    /**
+     * Mode of the credentials that verified the current webhook. Set once per
+     * delivery in handleWebhook; null outside a webhook request.
+     */
+    private ?bool $verifiedIsTest = null;
+
     public function __construct(
         private PayPalApi $api,
         private PayPalAccount $account,
@@ -285,6 +292,9 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware
             if ($this->account->webhookId($test) === '') continue;
             $this->account->useTestMode($test);
             if ($this->api->verifyWebhookSignature($headers, $raw)) {
+                // Which mode verified is what later stops a sandbox event
+                // confirming a live donation.
+                $this->verifiedIsTest = $test;
                 $verified = true;
                 break;
             }
@@ -322,6 +332,24 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware
         $donation = $this->donationForCapture($capture);
         if (! $donation) {
             return $this->unmatched($eventId, $type, 'capture');
+        }
+
+        // A PayPal-signed event proves PayPal sent it, not that it is about this
+        // donation for this amount. The browser picks custom_id and the amount
+        // when it creates the order, so without this a $0.01 capture confirmed a
+        // $10,000 donation.
+        $currency = strtoupper((string) ($capture['amount']['currency_code'] ?? ''));
+        $refusal  = WebhookPaymentGuard::refuse(
+            $donation,
+            $this->id(),
+            $this->verifiedIsTest,
+            isset($capture['amount']['value'])
+                ? PayPalMoney::toStoredCents((string) $capture['amount']['value'], $currency ?: (string) $donation->currency)
+                : null,
+            $currency !== '' ? $currency : null,
+        );
+        if ($refusal !== null) {
+            return $this->refused($eventId, $type, $refusal);
         }
 
         // Idempotent: DonationService::confirm() no-ops on an already-paid row.
@@ -551,6 +579,22 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware
         return $orderId !== ''
             ? $this->donations->findByGatewayIntent($this->id(), $orderId)
             : null;
+    }
+
+    /**
+     * A genuinely PayPal-signed event that must not touch this donation. 200,
+     * not 5xx: retrying will not make it acceptable.
+     */
+    private function refused(string $eventId, string $type, string $reason): WebhookOutcome
+    {
+        return new WebhookOutcome(
+            signature_ok: true,
+            external_id:  $eventId,
+            event_type:   $type,
+            handled:      false,
+            error:        'Refused: ' . $reason,
+            http_status:  200,
+        );
     }
 
     private function unmatched(string $eventId, string $type, string $what): WebhookOutcome

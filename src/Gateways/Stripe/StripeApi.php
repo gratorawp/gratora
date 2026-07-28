@@ -41,13 +41,19 @@ final class StripeApi
      *
      * @return list<string> non-empty secrets
      */
+    /**
+     * Signing secrets by mode. Deliberately keyed rather than flattened: which
+     * mode a secret belongs to is what stops a test secret confirming live
+     * money, so a secret whose mode is unknown is no longer usable at all.
+     *
+     * @return array<string,string> 'test' and/or 'live'
+     */
     public function webhookSecrets(): array
     {
-        return array_values(array_filter([
-            $this->gatewayConfig('webhook_secret'),
-            $this->gatewayConfig('webhook_secret_test'),
-            $this->gatewayConfig('webhook_secret_live'),
-        ], static fn (string $s): bool => $s !== ''));
+        return array_filter([
+            'test' => $this->gatewayConfig('webhook_secret_test'),
+            'live' => $this->gatewayConfig('webhook_secret_live'),
+        ], static fn (string $s): bool => $s !== '');
     }
 
     /** True when at least one webhook signing secret is configured. */
@@ -162,11 +168,21 @@ final class StripeApi
      * Verify a `Stripe-Signature` header against the body. Returns false on a
      * malformed header or hash mismatch. Tolerance is the standard 5 minutes.
      */
-    public function verifyWebhookSignature(string $payload, string $sigHeader, int $tolerance = 300): bool
+    /**
+     * Verify a Stripe signature and report which mode's secret matched.
+     *
+     * Returning the mode rather than a bool is the point: the caller must be
+     * able to refuse a test-signed event that claims to be live. A bool made
+     * that impossible, and a test secret could refund live donations.
+     *
+     * @return bool|null null when nothing verified, true when the TEST secret
+     *                   matched, false when the LIVE secret matched.
+     */
+    public function verifiedWebhookMode(string $payload, string $sigHeader, int $tolerance = 300): ?bool
     {
         $secrets = $this->webhookSecrets();
         if ($secrets === [] || $sigHeader === '') {
-            return false;
+            return null;
         }
 
         $timestamp  = null;
@@ -184,25 +200,25 @@ final class StripeApi
         }
 
         if ($timestamp === null || $signatures === []) {
-            return false;
+            return null;
         }
 
         // Replay-attack window.
         if (abs(time() - (int) $timestamp) > $tolerance) {
-            return false;
+            return null;
         }
 
         $signedPayload = "{$timestamp}.{$payload}";
 
-        foreach ($secrets as $secret) {
+        foreach ($secrets as $mode => $secret) {
             $expected = hash_hmac('sha256', $signedPayload, $secret);
             foreach ($signatures as $sig) {
                 if (hash_equals($expected, $sig)) {
-                    return true;
+                    return $mode === 'test';
                 }
             }
         }
 
-        return false;
+        return null;
     }
 }

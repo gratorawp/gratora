@@ -30,7 +30,7 @@ final class SubscriptionRetryTest extends IntegrationTestCase
 
         update_option('dono_gateway_config', [
             'test_mode' => true,
-            'stripe'    => ['webhook_secret' => 'whsec_retry'],
+            'stripe'    => ['webhook_secret_test' => 'whsec_retry'],
         ]);
 
         $c = Plugin::instance()->container;
@@ -69,6 +69,8 @@ final class SubscriptionRetryTest extends IntegrationTestCase
             'id'                  => $donation->gateway_intent_id,
             'status'              => 'succeeded',
             'customer'            => 'cus_retry',
+            'amount_received'     => 2500,
+            'currency'            => 'usd',
             'payment_method'      => 'pm_retry',
             'payment_method_types'=> ['card'],
             'latest_charge'       => 'ch_retry',

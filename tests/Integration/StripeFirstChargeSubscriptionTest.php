@@ -33,7 +33,7 @@ final class StripeFirstChargeSubscriptionTest extends IntegrationTestCase
         $this->secret = 'whsec_test_' . bin2hex(random_bytes(8));
         update_option('dono_gateway_config', [
             'test_mode' => true, // org-wide kill switch so the donation is stamped is_test
-            'stripe'    => ['webhook_secret' => $this->secret],
+            'stripe'    => ['webhook_secret_test' => $this->secret],
         ]);
 
         $c = Plugin::instance()->container;
@@ -100,6 +100,8 @@ final class StripeFirstChargeSubscriptionTest extends IntegrationTestCase
             'payment_method'      => 'pm_test_card',
             'payment_method_types'=> ['card'],
             'latest_charge'       => 'ch_test_first',
+            'amount_received'     => 2500,
+            'currency'            => 'usd',
         ]);
         $this->assertSame(200, $res->get_status(), 'Webhook accepted: ' . wp_json_encode($res->get_data()));
 

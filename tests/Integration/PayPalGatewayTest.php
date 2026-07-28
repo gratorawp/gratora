@@ -298,6 +298,7 @@ final class PayPalGatewayTest extends IntegrationTestCase
         $res = $this->postWebhook('PAYMENT.CAPTURE.COMPLETED', [
             'id'        => 'CAPTURE-1',
             'custom_id' => $reference,
+            'amount' => ['value' => '25.00', 'currency_code' => 'USD'],
         ]);
 
         $this->assertSame(200, $res->get_status(), wp_json_encode($res->get_data()));
@@ -309,8 +310,8 @@ final class PayPalGatewayTest extends IntegrationTestCase
     {
         $reference = $this->createDonation();
 
-        $this->postWebhook('PAYMENT.CAPTURE.COMPLETED', ['id' => 'CAPTURE-1', 'custom_id' => $reference]);
-        $this->postWebhook('PAYMENT.CAPTURE.COMPLETED', ['id' => 'CAPTURE-1', 'custom_id' => $reference]);
+        $this->postWebhook('PAYMENT.CAPTURE.COMPLETED', ['id' => 'CAPTURE-1', 'custom_id' => $reference, 'amount' => ['value' => '25.00', 'currency_code' => 'USD'],]);
+        $this->postWebhook('PAYMENT.CAPTURE.COMPLETED', ['id' => 'CAPTURE-1', 'custom_id' => $reference, 'amount' => ['value' => '25.00', 'currency_code' => 'USD'],]);
 
         $fresh = $this->donations()->findByReference($reference);
         $this->assertSame('paid', $fresh->status);
@@ -320,7 +321,7 @@ final class PayPalGatewayTest extends IntegrationTestCase
     public function test_dashboard_refund_webhook_is_recorded(): void
     {
         $reference = $this->createDonation();
-        $this->postWebhook('PAYMENT.CAPTURE.COMPLETED', ['id' => 'CAPTURE-1', 'custom_id' => $reference]);
+        $this->postWebhook('PAYMENT.CAPTURE.COMPLETED', ['id' => 'CAPTURE-1', 'custom_id' => $reference, 'amount' => ['value' => '25.00', 'currency_code' => 'USD'],]);
 
         $res = $this->postWebhook('PAYMENT.CAPTURE.REFUNDED', [
             'id'        => 'REFUND-WH-1',

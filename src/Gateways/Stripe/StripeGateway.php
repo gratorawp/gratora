@@ -18,6 +18,7 @@ use Dono\Gateways\RefundResult;
 use Dono\Gateways\SubscriptionAware;
 use Dono\Gateways\TestMode;
 use Dono\Gateways\WebhookOutcome;
+use Dono\Gateways\WebhookPaymentGuard;
 use Dono\Recurring\FrequencyMap;
 use Dono\Recurring\RecurringPlan;
 use Dono\Recurring\RecurringPlanRepository;
@@ -33,6 +34,12 @@ use WP_REST_Request;
  */
 final class StripeGateway implements PaymentGateway, SubscriptionAware
 {
+    /**
+     * Mode of the signing secret that verified the current webhook. Set once
+     * per delivery in handleWebhook; null outside a webhook request.
+     */
+    private ?bool $verifiedIsTest = null;
+
     public function __construct(
         private StripeApi $api,
         private DonationRepository $donations,
@@ -158,7 +165,8 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
         $payload = (string) $request->get_body();
         $sig     = (string) $request->get_header('stripe_signature');
 
-        if (! $this->api->verifyWebhookSignature($payload, $sig)) {
+        $verifiedIsTest = $this->api->verifiedWebhookMode($payload, $sig);
+        if ($verifiedIsTest === null) {
             return WebhookOutcome::badSignature();
         }
 
@@ -171,11 +179,25 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
             );
         }
 
-        // Any token-bearing follow-up (subscription creation, refunds) must
-        // run in the mode the event was generated in, not whatever the last
-        // request left set. livemode is part of the now-verified payload.
-        // Absent (shouldn't happen for real events) falls back to test.
-        $this->account->useTestMode(! (bool) ($event['livemode'] ?? false));
+        // The body says what mode it is; the signature proves it. When they
+        // disagree the body is lying, which is exactly how a leaked test secret
+        // was able to refund a live donation. Only checked when livemode is
+        // actually present: its absence is not evidence of anything, and the
+        // per-donation mode check below is what enforces the rule regardless.
+        if (array_key_exists('livemode', $event)) {
+            $claimsTest = ! (bool) $event['livemode'];
+            if ($claimsTest !== $verifiedIsTest) {
+                return WebhookOutcome::badSignature(
+                    'Event claims ' . ($claimsTest ? 'test' : 'live')
+                    . ' mode but was signed with the ' . ($verifiedIsTest ? 'test' : 'live') . ' secret.'
+                );
+            }
+        }
+
+        // Any token-bearing follow-up (subscription creation, refunds) runs in
+        // the mode that actually verified, never one taken from the payload.
+        $this->verifiedIsTest = $verifiedIsTest;
+        $this->account->useTestMode($verifiedIsTest);
 
         $eventId = (string) $event['id'];
         $type    = (string) $event['type'];
@@ -236,6 +258,21 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
             );
         }
 
+        // A verified signature proves Stripe sent this, not that it is about
+        // this donation for this amount in this mode.
+        $refusal = WebhookPaymentGuard::refuse(
+            $donation,
+            $this->id(),
+            $this->verifiedIsTest,
+            isset($intent['amount_received'])
+                ? Currency::fromMinorUnits((int) $intent['amount_received'], (string) ($intent['currency'] ?? $donation->currency))
+                : null,
+            isset($intent['currency']) ? (string) $intent['currency'] : null,
+        );
+        if ($refusal !== null) {
+            return $this->refused($eventId, $type, $refusal);
+        }
+
         $confirm = $this->buildConfirmResultFromIntent($intent);
 
         if (! $confirm->success) {
@@ -286,6 +323,10 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
             );
         }
 
+        if ($reason = $this->wrongMode((bool) $donation->is_test)) {
+            return $this->refused($eventId, $type, $reason);
+        }
+
         $reason = $intent['last_payment_error']['message'] ?? __('Payment declined.', 'dono');
         $this->donationService->markFailed($donation, $reason);
 
@@ -324,6 +365,10 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
                 handled:      false,
                 error:        "No donation found for PaymentIntent {$intentId}",
             );
+        }
+
+        if ($reason = $this->wrongMode((bool) $donation->is_test)) {
+            return $this->refused($eventId, $type, $reason);
         }
 
         $refunds = (array) ($charge['refunds']['data'] ?? []);
@@ -406,6 +451,10 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
                 handled:      false,
                 error:        "No donation found for PaymentIntent {$intentId}",
             );
+        }
+
+        if ($reason = $this->wrongMode((bool) $donation->is_test)) {
+            return $this->refused($eventId, $type, $reason);
         }
 
         $disputeId = (string) ($dispute['id'] ?? '');
@@ -1039,5 +1088,43 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
         return str_contains($msg, 'no such subscription')
             || str_contains($msg, 'already canceled')
             || str_contains($msg, 'already cancelled');
+    }
+
+    /**
+     * Every webhook that touches a donation or a plan must be in that record's
+     * mode. Checked against the secret that verified, never against the event
+     * body, so a leaked test secret cannot reach live records even when the
+     * body omits livemode.
+     */
+    private function wrongMode(bool $recordIsTest): ?string
+    {
+        if ($this->verifiedIsTest === null) {
+            return 'the mode of the verifying secret is unknown';
+        }
+        if ($this->verifiedIsTest !== $recordIsTest) {
+            return sprintf(
+                'a %s-mode secret verified this event but the record is %s',
+                $this->verifiedIsTest ? 'test' : 'live',
+                $recordIsTest ? 'test' : 'live'
+            );
+        }
+        return null;
+    }
+
+    /**
+     * A signed event that must not touch this donation. 200, not 5xx: the event
+     * is genuine, it just may not do what it asked, and a 5xx would make Stripe
+     * retry it for days.
+     */
+    private function refused(string $eventId, string $type, string $reason): WebhookOutcome
+    {
+        return new WebhookOutcome(
+            signature_ok: true,
+            external_id:  $eventId,
+            event_type:   $type,
+            handled:      false,
+            error:        'Refused: ' . $reason,
+            http_status:  200,
+        );
     }
 }
