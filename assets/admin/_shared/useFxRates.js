@@ -105,6 +105,10 @@ export function useFxRates() {
         stale:     !! server?.stale,
         fetchedAt: server?.fetched_at || null,
         date:      server?.date || null,
+        // Supported currencies with no rate to the base. Donations in them are
+        // accepted in full but count as zero in every base-currency total, so
+        // the panel warns before the currency is offered.
+        unconvertible: server?.unconvertible || [],
         rows,
         auto,
         loading,

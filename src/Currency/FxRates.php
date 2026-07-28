@@ -75,6 +75,32 @@ final class FxRates
     }
 
     /** Units of $code per 1 base, manual override winning. Null if unknown. */
+    /**
+     * Of the currencies given, the ones with no usable rate to the base.
+     *
+     * A donation in such a currency is still accepted (money is never gated on
+     * reporting being configured), but it stores no base_amount_cents and so
+     * contributes nothing to any base-currency total. That is invisible unless
+     * something says so, which is what this is for: the settings screen warns
+     * before an admin offers the currency, and the reports say how many rows
+     * are missing.
+     *
+     * @param list<string> $codes
+     * @return list<string> upper-cased, in the order given
+     */
+    public function unconvertible(array $codes): array
+    {
+        $out = [];
+        foreach ($codes as $code) {
+            $code = strtoupper(trim((string) $code));
+            if ($code === '') continue;
+            if ($this->effectiveRate($code) === null) {
+                $out[] = $code;
+            }
+        }
+        return array_values(array_unique($out));
+    }
+
     public function effectiveRate(string $code): ?float
     {
         $code = strtoupper(trim($code));

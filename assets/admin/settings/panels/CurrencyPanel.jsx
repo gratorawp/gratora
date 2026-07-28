@@ -76,6 +76,22 @@ function ExchangeRatesCard( { fx, base } ) {
             foot={ foot }
             edited={ fx.isDirty }
         >
+            { ( fx.unconvertible || [] ).length > 0 && (
+                <div className="dono-connect-notice dono-connect-notice--amber">
+                    <span className="dono-connect-notice__icon" aria-hidden="true">!</span>
+                    <div>
+                        <strong>
+                            { sprintf(
+                                /* translators: %s: comma-separated currency codes */
+                                __( 'No exchange rate for %s.', 'dono' ),
+                                ( fx.unconvertible || [] ).join( ', ' )
+                            ) }
+                        </strong>{ ' ' }
+                        { __( 'Donations in these currencies are still accepted in full, but they cannot be valued in your base currency, so they count as zero in campaign, fund and donor totals. Add a rate below, or stop offering the currency.', 'dono' ) }
+                    </div>
+                </div>
+            ) }
+
             <ToggleRow
                 title={ __( 'Update rates automatically every day', 'dono' ) }
                 sub={ sprintf(

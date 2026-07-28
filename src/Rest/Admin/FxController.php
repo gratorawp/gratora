@@ -122,6 +122,11 @@ final class FxController
             'fetched_at' => $this->fx->fetchedAt(),
             'source'     => 'European Central Bank (Frankfurter)',
             'rows'       => $rows,
+            // Currencies the org offers that have no rate to the base. A
+            // donation in one is still accepted, but it counts as zero in every
+            // base-currency total, so the admin has to be told before they
+            // offer it rather than discovering it in a report.
+            'unconvertible' => $this->fx->unconvertible($supported),
         ];
     }
 }

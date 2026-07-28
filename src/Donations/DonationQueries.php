@@ -54,6 +54,22 @@ final class DonationQueries
      * fx_rate (base per donation unit; NULL when the donation already is base).
      * Use only where dono_donations is the main/correlated table.
      */
+    /**
+     * Rows whose base-currency value is unknown, so a total built on
+     * netBaseExpr() is missing them.
+     *
+     * base_amount_cents is NULL when the donation's currency had no FX rate at
+     * the time it was taken. Money is never gated on reporting being
+     * configured, so the donation is accepted and simply contributes 0. That is
+     * invisible unless a caller says so, which is what this counts: a campaign
+     * showing 22 donations raising what 21 raised is a bug report waiting to
+     * happen, and this is how the screen can explain it instead.
+     */
+    public static function unconvertedExpr(): string
+    {
+        return 'SUM(CASE WHEN base_amount_cents IS NULL THEN 1 ELSE 0 END)';
+    }
+
     public static function refundedBaseExpr(): string
     {
         $prefix    = DB::getPrefix();
