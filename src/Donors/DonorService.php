@@ -6,6 +6,9 @@ namespace Dono\Donors;
 
 use Dono\Donations\Donation;
 use Dono\Donations\DonationTribute;
+use Dono\Recurring\RecurringPlan;
+use Dono\Donations\Refund;
+use Dono\Donations\DonationNote;
 use Dono\Foundation\Crypto\Crypto;
 use Dono\Foundation\Identity\IdentityHasher;
 use Dono\Foundation\Time\Clock;
@@ -266,10 +269,15 @@ final class DonorService
             $donor->save();
 
             foreach (Donation::query()->where('donor_id', $donor->id)->getAll() as $donation) {
+                // Every field cleared below must be listed here, or the skip
+                // silently protects it. Adding gateway_metadata without adding
+                // it to this condition left it untouched on exactly the rows
+                // that had nothing else to clear.
                 if ($donation->custom_data_encrypted === null
                     && $donation->donor_first_name === null
                     && $donation->donor_last_name === null
                     && ($donation->note_to_org ?? '') === ''
+                    && $donation->gateway_metadata === null
                 ) {
                     continue;
                 }
@@ -278,9 +286,36 @@ final class DonorService
                 $donation->donor_last_name       = null;
                 // Donor-authored message can carry PII; clear it on erasure.
                 $donation->note_to_org           = null;
+                // The gateway's own record of the payer: PayPal payer_email,
+                // Stripe billing_details, card last-4. Cleartext, and the QA
+                // sweep found it surviving erasure.
+                $donation->gateway_metadata      = null;
                 $donation->updated_at            = $donor->redacted_at;
                 $donation->save();
             }
+
+            $donationIds = array_map(
+                static fn (Donation $d): int => (int) $d->id,
+                Donation::query()->where('donor_id', $donor->id)->getAll()
+            );
+
+            if ($donationIds !== []) {
+                // Staff notes written against a donation, as opposed to against
+                // the donor, are the same free-text PII and were being missed.
+                DonationNote::query()->whereIn('donation_id', $donationIds)->delete();
+
+                // A refund reason is admin free text and its metadata carries
+                // the gateway's payer details.
+                Refund::query()
+                    ->whereIn('donation_id', $donationIds)
+                    ->update(['reason' => null, 'metadata' => null]);
+            }
+
+            // The gateway's customer id is a stable handle back to the donor on
+            // the processor's side, so it is re-identifying data.
+            RecurringPlan::query()
+                ->where('donor_id', $donor->id)
+                ->update(['gateway_customer_id' => null]);
 
             // Tributes carry donor-authored PII the erasure must also remove:
             // the message, a third party's notify email, and the honoree name.
