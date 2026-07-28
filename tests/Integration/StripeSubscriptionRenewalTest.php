@@ -6,7 +6,7 @@ namespace Dono\Tests\Integration;
 
 use Dono\Donations\Donation;
 use Dono\Foundation\Crypto\Crypto;
-use Dono\Gateways\Stripe\StripeConnectAccount;
+use Dono\Gateways\Stripe\StripeAccount;
 use Dono\Recurring\RecurringPlan;
 use WP_REST_Request;
 
@@ -28,14 +28,10 @@ final class StripeSubscriptionRenewalTest extends IntegrationTestCase
         ]);
 
         // Stripe gateway only registers when a connected account is present.
-        (new StripeConnectAccount(new Crypto()))->store(
-            [
-                'stripe_user_id'           => 'acct_test_123',
-                'stripe_access_token_test' => 'sk_test_connected',
-                'stripe_access_token'      => 'sk_live_connected',
-            ],
-            ['charges_enabled' => true],
-        );
+        $stripeAcct = (new StripeAccount(new Crypto()));
+        $stripeAcct->saveKeys(true, 'sk_test_connected', 'pk_test_seed');
+        $stripeAcct->saveKeys(false, 'sk_live_connected', 'pk_live_seed');
+        $stripeAcct->refresh(['id' => 'acct_test_123', 'charges_enabled' => true]);
 
         // CoreModule registers the Stripe gateway only when the connected
         // account is present at boot. Tests connect the account in setUp(), so
@@ -47,7 +43,7 @@ final class StripeSubscriptionRenewalTest extends IntegrationTestCase
                 $c->get(\Dono\Gateways\Stripe\StripeApi::class),
                 $c->get(\Dono\Donations\DonationRepository::class),
                 $c->get(\Dono\Donations\DonationService::class),
-                $c->get(\Dono\Gateways\Stripe\StripeConnectAccount::class),
+                $c->get(\Dono\Gateways\Stripe\StripeAccount::class),
                 $c->get(\Dono\Donors\DonorRepository::class),
                 $c->get(\Dono\Donors\DonorService::class),
                 $c->get(\Dono\Foundation\Time\Clock::class),

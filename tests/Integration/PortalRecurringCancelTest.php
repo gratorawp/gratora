@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Dono\Tests\Integration;
 
 use Dono\Foundation\Plugin;
-use Dono\Gateways\Stripe\StripeConnectAccount;
+use Dono\Gateways\Stripe\StripeAccount;
 use Dono\Recurring\RecurringPlan;
 use WP_REST_Request;
 
@@ -23,14 +23,10 @@ final class PortalRecurringCancelTest extends IntegrationTestCase
 
         // Stripe gateway must exist so the portal's gateway lookup doesn't no-op.
         update_option('dono_gateway_config', ['test_mode' => true]);
-        Plugin::instance()->container->get(StripeConnectAccount::class)->store(
-            [
-                'stripe_user_id'           => 'acct_test_portal',
-                'stripe_access_token_test' => 'sk_test_portal',
-                'stripe_access_token'      => 'sk_live_portal',
-            ],
-            ['charges_enabled' => true],
-        );
+        $stripeAcct = Plugin::instance()->container->get(StripeAccount::class);
+        $stripeAcct->saveKeys(true, 'sk_test_portal', 'pk_test_seed');
+        $stripeAcct->saveKeys(false, 'sk_live_portal', 'pk_live_seed');
+        $stripeAcct->refresh(['id' => 'acct_test_portal', 'charges_enabled' => true]);
 
         // Intercept Stripe DELETE /v1/subscriptions/{id} so we don't hit the real API.
         add_filter('pre_http_request', static function ($pre, $args, $url) {
@@ -51,7 +47,7 @@ final class PortalRecurringCancelTest extends IntegrationTestCase
                 $c->get(\Dono\Gateways\Stripe\StripeApi::class),
                 $c->get(\Dono\Donations\DonationRepository::class),
                 $c->get(\Dono\Donations\DonationService::class),
-                $c->get(\Dono\Gateways\Stripe\StripeConnectAccount::class),
+                $c->get(\Dono\Gateways\Stripe\StripeAccount::class),
                 $c->get(\Dono\Donors\DonorRepository::class),
                 $c->get(\Dono\Donors\DonorService::class),
                 $c->get(\Dono\Foundation\Time\Clock::class),

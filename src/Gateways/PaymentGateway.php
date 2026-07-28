@@ -48,7 +48,7 @@ interface PaymentGateway
 
     /**
      * Whether the gateway can currently accept a charge. Most gateways are
-     * always ready; Stripe is false until its connected account has charges
+     * always ready; Stripe is false until the org's Stripe account has charges
      * enabled, so the donor form must not offer it before then (otherwise the
      * donor only fails at createIntent with a hard error).
      */

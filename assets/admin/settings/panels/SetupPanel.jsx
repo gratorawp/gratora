@@ -4,11 +4,11 @@ import apiFetch from '@wordpress/api-fetch';
 
 // Reads savedRecord (not pending edits) so the checklist reflects persisted state.
 export default function SetupPanel( { org, brand, gateways, email, onJumpTo } ) {
-    // Stripe Connect status lives in its own option (dono_connect_stripe), not
-    // in dono_gateway_config, so the Gateway step has to fetch it separately.
+    // Stripe key status lives in its own system setting, not in
+    // dono_gateway_config, so the Gateway step has to fetch it separately.
     const [ stripeConnect, setStripeConnect ] = useState( null );
     useEffect( () => {
-        apiFetch( { path: '/dono/v1/connect/stripe/status' } )
+        apiFetch( { path: '/dono/v1/gateways/stripe/status' } )
             .then( setStripeConnect )
             .catch( () => setStripeConnect( null ) );
     }, [] );
@@ -138,9 +138,9 @@ function buildSteps( { org, brand, gateways, email, stripeConnect } ) {
         ? sprintf( /* translators: %s: brand preset id */ __( 'Default: %s', 'dono' ), defaultId )
         : __( 'Using Classic. Pick or customise to make it yours.', 'dono' );
 
-    // Stripe is "ready" when a Connect account is on file via the broker flow,
-    // not when API keys are filled in the gateways option (Connect doesn't use
-    // keys here). Connect status endpoint returns at least { connected, account_id }.
+    // Stripe is "ready" when verified API keys are on file, which lives in its
+    // own system setting rather than the gateways option. The status endpoint
+    // returns at least { connected, can_charge, account }.
     const stripeConfigured  = !! connect.connected;
     const offlineConfigured = offline.enabled && String( offline.instructions || '' ).trim() !== '';
     let gatewayState = 'todo';

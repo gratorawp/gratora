@@ -130,7 +130,7 @@ use Dono\Gateways\GatewayManager;
 use Dono\Gateways\Offline\OfflineGateway;
 use Dono\Gateways\Sandbox\SandboxGateway;
 use Dono\Gateways\Stripe\StripeApi;
-use Dono\Gateways\Stripe\StripeConnectAccount;
+use Dono\Gateways\Stripe\StripeAccount;
 use Dono\Gateways\Stripe\StripeGateway;
 use Dono\Gateways\TestMode;
 use Dono\Mail\Mailer;
@@ -161,7 +161,7 @@ use Dono\Rest\Admin\OnboardingController;
 use Dono\Rest\Admin\ReportsController;
 use Dono\Rest\Admin\RolesController;
 use Dono\Rest\Admin\SettingsController;
-use Dono\Rest\Admin\StripeConnectController;
+use Dono\Rest\Admin\StripeKeysController;
 use Dono\Rest\Admin\UserPrefsController;
 use Dono\Rest\Portal\PortalController as PortalController;
 use Dono\Rest\DonationsController;
@@ -487,18 +487,18 @@ final class CoreModule implements DonoModule
         ));
 
         $c->bind(GatewayManager::class, fn () => new GatewayManager());
-        $c->bind( StripeConnectAccount::class, fn (Container $c) => new StripeConnectAccount(
+        $c->bind(StripeAccount::class, fn (Container $c) => new StripeAccount(
             $c->get(Crypto::class)
         ));
         $c->bind(StripeApi::class, fn (Container $c) => new StripeApi(
-            $c->get( StripeConnectAccount::class)
+            $c->get(StripeAccount::class)
         ));
 
         $gateways = $c->get(GatewayManager::class);
         $gateways->register(new OfflineGateway($c->get(Clock::class)));
 
         $stripeApi     = $c->get(StripeApi::class);
-        $stripeAccount = $c->get(StripeConnectAccount::class);
+        $stripeAccount = $c->get(StripeAccount::class);
         // Register Stripe whenever an account is connected (mode-independent,
         // same check the readiness UI uses). The boot context has no mode set,
         // so the old isConfigured() gate only ever saw the test token and would
@@ -509,7 +509,7 @@ final class CoreModule implements DonoModule
                 $stripeApi,
                 $c->get(DonationRepository::class),
                 $c->get(DonationService::class),
-                $c->get( StripeConnectAccount::class),
+                $c->get(StripeAccount::class),
                 $c->get(DonorRepository::class),
                 $c->get(DonorService::class),
                 $c->get(Clock::class),
@@ -604,7 +604,7 @@ final class CoreModule implements DonoModule
         $c->bind( FormReadinessService::class, fn (Container $c) => new FormReadinessService(
             $c->get( SettingsService::class),
             $c->get( GatewayManager::class),
-            $c->get( StripeConnectAccount::class),
+            $c->get(StripeAccount::class),
             $c->get( TestMode::class),
         ));
 
@@ -677,10 +677,9 @@ final class CoreModule implements DonoModule
                 $c->get( CampaignService::class),
                 $c->get( SettingsService::class),
             ),
-            new StripeConnectController(
+            new StripeKeysController(
                 $c->get(StripeApi::class),
-                $c->get( StripeConnectAccount::class),
-                $c->get(TestMode::class),
+                $c->get(StripeAccount::class),
             ),
             new FxController(
                 $c->get(FxRates::class),
@@ -833,7 +832,7 @@ final class CoreModule implements DonoModule
             // renewals and async confirmations never process.
             add_action('admin_notices', static function () use ($c): void {
                 if (! current_user_can('manage_options')) return;
-                if (! $c->get(StripeConnectAccount::class)->isConnected()) return;
+                if (! $c->get(StripeAccount::class)->isConnected()) return;
                 if ($c->get(StripeApi::class)->hasWebhookSecret()) return;
                 echo '<div class="notice dono-admin-notice" role="alert" style="'
                     . 'border:1px solid #e5e7eb;border-left:3px solid #b54708;border-radius:8px;'

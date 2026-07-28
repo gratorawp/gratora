@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Dono\Forms;
 
 use Dono\Gateways\GatewayManager;
-use Dono\Gateways\Stripe\StripeConnectAccount;
+use Dono\Gateways\Stripe\StripeAccount;
 use Dono\Gateways\TestMode;
 use Dono\Settings\SettingsService;
 
@@ -20,7 +20,7 @@ final class FormReadinessService
     public function __construct(
         private SettingsService $settings,
         private GatewayManager $gateways,
-        private StripeConnectAccount $stripeAccount,
+        private StripeAccount $stripeAccount,
         private TestMode $testMode,
     ) {
     }

@@ -20,7 +20,7 @@ use Dono\Rest\Admin\OnboardingController as AdminOnboardingController;
 use Dono\Rest\Admin\ReportsController as AdminReportsController;
 use Dono\Rest\Admin\RolesController as AdminRolesController;
 use Dono\Rest\Admin\SettingsController as AdminSettingsController;
-use Dono\Rest\Admin\StripeConnectController;
+use Dono\Rest\Admin\StripeKeysController;
 use Dono\Rest\Admin\UserPrefsController as AdminUserPrefsController;
 use Dono\Rest\Portal\PortalController;
 
@@ -48,7 +48,7 @@ final class RestProvider extends HookProvider
         private AdminRolesController $adminRoles,
         private AdminAdvancedController $adminAdvanced,
         private AdminOnboardingController $adminOnboarding,
-        private StripeConnectController $stripeConnect,
+        private StripeKeysController $stripeKeys,
         private FxController $fx,
         private AdminCommandsController $commands,
         private AdminNumberingController $numbering,
@@ -79,7 +79,7 @@ final class RestProvider extends HookProvider
         $this->adminRoles->registerRoutes();
         $this->adminAdvanced->registerRoutes();
         $this->adminOnboarding->registerRoutes();
-        $this->stripeConnect->registerRoutes();
+        $this->stripeKeys->registerRoutes();
         $this->fx->registerRoutes();
         $this->commands->registerRoutes();
         $this->numbering->registerRoutes();

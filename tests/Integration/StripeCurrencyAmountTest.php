@@ -9,7 +9,7 @@ use Dono\Donations\DonationRepository;
 use Dono\Donations\Refund;
 use Dono\Foundation\Plugin;
 use Dono\Gateways\GatewayManager;
-use Dono\Gateways\Stripe\StripeConnectAccount;
+use Dono\Gateways\Stripe\StripeAccount;
 use Dono\Gateways\Stripe\StripeGateway;
 use WP_REST_Request;
 
@@ -56,14 +56,10 @@ final class StripeCurrencyAmountTest extends IntegrationTestCase
         ], false);
 
         $c = Plugin::instance()->container;
-        $c->get(StripeConnectAccount::class)->store(
-            [
-                'stripe_user_id'           => 'acct_test_123',
-                'stripe_access_token_test' => 'sk_test_connected',
-                'stripe_access_token'      => 'sk_live_connected',
-            ],
-            ['charges_enabled' => true],
-        );
+        $stripeAcct = $c->get(StripeAccount::class);
+        $stripeAcct->saveKeys(true, 'sk_test_connected', 'pk_test_seed');
+        $stripeAcct->saveKeys(false, 'sk_live_connected', 'pk_live_seed');
+        $stripeAcct->refresh(['id' => 'acct_test_123', 'charges_enabled' => true]);
 
         $manager = $c->get(GatewayManager::class);
         if (! $manager->get('stripe')) {
@@ -71,7 +67,7 @@ final class StripeCurrencyAmountTest extends IntegrationTestCase
                 $c->get(\Dono\Gateways\Stripe\StripeApi::class),
                 $c->get(DonationRepository::class),
                 $c->get(\Dono\Donations\DonationService::class),
-                $c->get(StripeConnectAccount::class),
+                $c->get(StripeAccount::class),
                 $c->get(\Dono\Donors\DonorRepository::class),
                 $c->get(\Dono\Donors\DonorService::class),
                 $c->get(\Dono\Foundation\Time\Clock::class),

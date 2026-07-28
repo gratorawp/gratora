@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace Dono\Tests\Unit\Gateways;
 
-use Dono\Gateways\Stripe\StripeConnectAccount;
+use Dono\Gateways\Stripe\StripeAccount;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 
-final class StripeConnectAccountTest extends TestCase
+final class StripeAccountTest extends TestCase
 {
-    private StripeConnectAccount $acct;
+    private StripeAccount $acct;
 
     protected function setUp(): void
     {
         // Mode resolution never touches Crypto (which loads a key from the DB),
         // so skip the constructor for a pure unit.
-        $this->acct = (new ReflectionClass(StripeConnectAccount::class))
+        $this->acct = (new ReflectionClass(StripeAccount::class))
             ->newInstanceWithoutConstructor();
     }
 

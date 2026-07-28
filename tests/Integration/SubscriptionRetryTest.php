@@ -7,7 +7,7 @@ namespace Dono\Tests\Integration;
 use Dono\Donations\Donation;
 use Dono\Donations\DonationRepository;
 use Dono\Foundation\Plugin;
-use Dono\Gateways\Stripe\StripeConnectAccount;
+use Dono\Gateways\Stripe\StripeAccount;
 use Dono\Recurring\RecurringPlan;
 use WP_REST_Request;
 
@@ -34,14 +34,10 @@ final class SubscriptionRetryTest extends IntegrationTestCase
         ]);
 
         $c = Plugin::instance()->container;
-        $c->get(StripeConnectAccount::class)->store(
-            [
-                'stripe_user_id'           => 'acct_retry',
-                'stripe_access_token_test' => 'sk_test_retry',
-                'stripe_access_token'      => 'sk_live_retry',
-            ],
-            ['charges_enabled' => true],
-        );
+        $stripeAcct = $c->get(StripeAccount::class);
+        $stripeAcct->saveKeys(true, 'sk_test_retry', 'pk_test_seed');
+        $stripeAcct->saveKeys(false, 'sk_live_retry', 'pk_live_seed');
+        $stripeAcct->refresh(['id' => 'acct_retry', 'charges_enabled' => true]);
 
         $manager = $c->get(\Dono\Gateways\GatewayManager::class);
         if (! $manager->get('stripe')) {
@@ -49,7 +45,7 @@ final class SubscriptionRetryTest extends IntegrationTestCase
                 $c->get(\Dono\Gateways\Stripe\StripeApi::class),
                 $c->get(\Dono\Donations\DonationRepository::class),
                 $c->get(\Dono\Donations\DonationService::class),
-                $c->get(\Dono\Gateways\Stripe\StripeConnectAccount::class),
+                $c->get(\Dono\Gateways\Stripe\StripeAccount::class),
                 $c->get(\Dono\Donors\DonorRepository::class),
                 $c->get(\Dono\Donors\DonorService::class),
                 $c->get(\Dono\Foundation\Time\Clock::class),

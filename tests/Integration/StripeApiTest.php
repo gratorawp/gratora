@@ -6,12 +6,12 @@ namespace Dono\Tests\Integration;
 
 use Dono\Foundation\Crypto\Crypto;
 use Dono\Gateways\Stripe\StripeApi;
-use Dono\Gateways\Stripe\StripeConnectAccount;
+use Dono\Gateways\Stripe\StripeAccount;
 
 /**
- * Connect-only StripeApi: "configured" means a connected account with an
- * access token, and the webhook secret comes from dono_gateway_config. Both
- * are DB-backed, so this is an integration test.
+ * StripeApi is "configured" when the org has stored a secret key for the
+ * active mode; the webhook secret comes from dono_gateway_config. Both are
+ * DB-backed, so this is an integration test.
  */
 final class StripeApiTest extends IntegrationTestCase
 {
@@ -28,27 +28,23 @@ final class StripeApiTest extends IntegrationTestCase
 
     private function api(): StripeApi
     {
-        return new StripeApi(new StripeConnectAccount(new Crypto()));
+        return new StripeApi(new StripeAccount(new Crypto()));
     }
 
     private function connectAccount(): void
     {
-        (new StripeConnectAccount(new Crypto()))->store(
-            [
-                'stripe_user_id'           => 'acct_test_123',
-                'stripe_access_token_test' => 'sk_test_connected',
-                'stripe_access_token'      => 'sk_live_connected',
-            ],
-            ['charges_enabled' => true],
-        );
+        $stripeAcct = (new StripeAccount(new Crypto()));
+        $stripeAcct->saveKeys(true, 'sk_test_connected', 'pk_test_seed');
+        $stripeAcct->saveKeys(false, 'sk_live_connected', 'pk_live_seed');
+        $stripeAcct->refresh(['id' => 'acct_test_123', 'charges_enabled' => true]);
     }
 
-    public function test_is_configured_false_without_a_connected_account(): void
+    public function test_is_configured_false_without_keys(): void
     {
         $this->assertFalse($this->api()->isConfigured());
     }
 
-    public function test_is_configured_true_when_account_connected(): void
+    public function test_is_configured_true_once_keys_are_saved(): void
     {
         $this->connectAccount();
         $this->assertTrue($this->api()->isConfigured());

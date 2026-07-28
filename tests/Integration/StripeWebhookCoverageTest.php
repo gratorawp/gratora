@@ -8,7 +8,7 @@ use Dono\Donations\Donation;
 use Dono\Donors\DonorService;
 use Dono\Foundation\Crypto\Crypto;
 use Dono\Foundation\Plugin;
-use Dono\Gateways\Stripe\StripeConnectAccount;
+use Dono\Gateways\Stripe\StripeAccount;
 use WP_REST_Request;
 
 /**
@@ -28,14 +28,10 @@ final class StripeWebhookCoverageTest extends IntegrationTestCase
             'stripe' => ['webhook_secret' => $this->secret, 'test_mode' => true],
         ]);
 
-        (new StripeConnectAccount(new Crypto()))->store(
-            [
-                'stripe_user_id'           => 'acct_test_123',
-                'stripe_access_token_test' => 'sk_test_connected',
-                'stripe_access_token'      => 'sk_live_connected',
-            ],
-            ['charges_enabled' => true],
-        );
+        $stripeAcct = (new StripeAccount(new Crypto()));
+        $stripeAcct->saveKeys(true, 'sk_test_connected', 'pk_test_seed');
+        $stripeAcct->saveKeys(false, 'sk_live_connected', 'pk_live_seed');
+        $stripeAcct->refresh(['id' => 'acct_test_123', 'charges_enabled' => true]);
 
         $c       = Plugin::instance()->container;
         $manager = $c->get(\Dono\Gateways\GatewayManager::class);
@@ -44,7 +40,7 @@ final class StripeWebhookCoverageTest extends IntegrationTestCase
                 $c->get(\Dono\Gateways\Stripe\StripeApi::class),
                 $c->get(\Dono\Donations\DonationRepository::class),
                 $c->get(\Dono\Donations\DonationService::class),
-                $c->get(\Dono\Gateways\Stripe\StripeConnectAccount::class),
+                $c->get(\Dono\Gateways\Stripe\StripeAccount::class),
                 $c->get(\Dono\Donors\DonorRepository::class),
                 $c->get(\Dono\Donors\DonorService::class),
                 $c->get(\Dono\Foundation\Time\Clock::class),
@@ -68,7 +64,7 @@ final class StripeWebhookCoverageTest extends IntegrationTestCase
 
     public function test_account_updated_refreshes_connected_account_status(): void
     {
-        $connect = new StripeConnectAccount(new Crypto());
+        $connect = new StripeAccount(new Crypto());
         $this->assertTrue($connect->canCharge(), 'account starts able to charge');
 
         $this->postWebhook('account.updated', [
@@ -77,7 +73,7 @@ final class StripeWebhookCoverageTest extends IntegrationTestCase
         ]);
 
         $this->assertFalse(
-            (new StripeConnectAccount(new Crypto()))->canCharge(),
+            (new StripeAccount(new Crypto()))->canCharge(),
             'account.updated refreshes the stored charges_enabled flag',
         );
     }
@@ -90,19 +86,19 @@ final class StripeWebhookCoverageTest extends IntegrationTestCase
         ]);
 
         $this->assertTrue(
-            (new StripeConnectAccount(new Crypto()))->canCharge(),
+            (new StripeAccount(new Crypto()))->canCharge(),
             'an update for an unrelated account does not touch ours',
         );
     }
 
     public function test_account_deauthorized_forgets_the_account(): void
     {
-        $this->assertNotNull((new StripeConnectAccount(new Crypto()))->accountId(), 'account is connected');
+        $this->assertNotNull((new StripeAccount(new Crypto()))->accountId(), 'account is connected');
 
         $this->postWebhook('account.application.deauthorized', [], ['account' => 'acct_test_123']);
 
         $this->assertNull(
-            (new StripeConnectAccount(new Crypto()))->accountId(),
+            (new StripeAccount(new Crypto()))->accountId(),
             'deauthorization drops the local Connect account',
         );
     }

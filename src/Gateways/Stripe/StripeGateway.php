@@ -37,7 +37,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
         private StripeApi $api,
         private DonationRepository $donations,
         private DonationService $donationService,
-        private StripeConnectAccount $connect,
+        private StripeAccount $account,
         private DonorRepository $donors,
         private DonorService $donorService,
         private Clock $clock,
@@ -45,18 +45,6 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
     ) {
     }
 
-    /**
-     * Returns extra Stripe request headers. Empty because we authenticate as
-     * the connected account via its own access token; the platform
-     * Stripe-Account header would be incorrect. Seam kept so call sites stay
-     * uniform.
-     *
-     * @return array<string,string>
-     */
-    private function connectHeaders(): array
-    {
-        return [];
-    }
 
     public function id(): string
     {
@@ -99,12 +87,12 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
     {
         // Connected but mid-onboarding accounts can't charge yet; gating here
         // keeps the donor options and the admin readiness check on one signal.
-        return $this->connect->canCharge();
+        return $this->account->canCharge();
     }
 
     public function createIntent(Donation $donation): GatewayIntentResult
     {
-        $this->connect->useTestMode((bool) $donation->is_test);
+        $this->account->useTestMode((bool) $donation->is_test);
 
         $params = [
             'amount'      => Currency::toMinorUnits($donation->amount_cents, $donation->currency),
@@ -133,15 +121,12 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
             $params['setup_future_usage']  = 'off_session';
         }
 
-        // Stamp which connected account this donation settles to.
-        $donation->gateway_account_id = $this->connect->accountIdFor(
-            $donation->campaign_id,
-            $donation->form_id
-        );
+        // Stamp which Stripe account this donation settles to.
+        $donation->gateway_account_id = $this->account->accountId();
 
-        // Direct charge on the connected account: the full amount settles to the
-        // organization, Dono takes nothing.
-        $intent = $this->api->post('/payment_intents', $params, $this->connectHeaders());
+        // Charged directly on the organisation's own Stripe account: the full
+        // amount settles to them, Dono takes nothing.
+        $intent = $this->api->post('/payment_intents', $params);
 
         return new GatewayIntentResult(
             intent_id:      $intent['id'],
@@ -162,9 +147,9 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
             return new GatewayConfirmResult(success: false, error: 'No gateway_intent_id on donation.');
         }
 
-        $this->connect->useTestMode((bool) $donation->is_test);
+        $this->account->useTestMode((bool) $donation->is_test);
 
-        $intent = $this->api->get('/payment_intents/' . $donation->gateway_intent_id, $this->connectHeaders());
+        $intent = $this->api->get('/payment_intents/' . $donation->gateway_intent_id);
         return $this->buildConfirmResultFromIntent($intent);
     }
 
@@ -190,7 +175,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
         // run in the mode the event was generated in, not whatever the last
         // request left set. livemode is part of the now-verified payload.
         // Absent (shouldn't happen for real events) falls back to test.
-        $this->connect->useTestMode(! (bool) ($event['livemode'] ?? false));
+        $this->account->useTestMode(! (bool) ($event['livemode'] ?? false));
 
         $eventId = (string) $event['id'];
         $type    = (string) $event['type'];
@@ -348,7 +333,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
         $chargeId = (string) ($charge['id'] ?? '');
         if ($refunds === [] && (int) ($charge['amount_refunded'] ?? 0) > 0 && $chargeId !== '') {
             try {
-                $fetched = $this->api->get('/charges/' . rawurlencode($chargeId) . '/refunds', $this->connectHeaders());
+                $fetched = $this->api->get('/charges/' . rawurlencode($chargeId) . '/refunds');
                 $refunds = (array) ($fetched['data'] ?? []);
             } catch (RuntimeException $e) {
                 // This fetch is the only source of the refund rows on recent
@@ -457,16 +442,16 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
     }
 
     /**
-     * `account.updated`: connected account capabilities changed. Mirror the
+     * `account.updated`: the Stripe account's capabilities changed. Mirror the
      * flags locally. Only acts on the account we have stored.
      */
     private function handleAccountUpdated(string $eventId, string $type, array $account): WebhookOutcome
     {
         $acctId  = (string) ($account['id'] ?? '');
-        $current = $this->connect->accountId();
+        $current = $this->account->accountId();
 
         if ($acctId !== '' && $current !== null && hash_equals($current, $acctId)) {
-            $this->connect->refresh($account);
+            $this->account->refresh($account);
         }
 
         return new WebhookOutcome(
@@ -485,10 +470,10 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
     private function handleAccountDeauthorized(string $eventId, string $type, array $event): WebhookOutcome
     {
         $acctId  = (string) ($event['account'] ?? '');
-        $current = $this->connect->accountId();
+        $current = $this->account->accountId();
 
         if ($acctId !== '' && $current !== null && hash_equals($current, $acctId)) {
-            $this->connect->forget();
+            $this->account->forget();
         }
 
         return new WebhookOutcome(
@@ -520,10 +505,9 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
             throw new RuntimeException("Donation {$donation->reference} has no gateway intent to re-read.");
         }
 
-        $this->connect->useTestMode((bool) $donation->is_test);
+        $this->account->useTestMode((bool) $donation->is_test);
         $intent = $this->api->get(
-            '/payment_intents/' . rawurlencode((string) $donation->gateway_intent_id),
-            $this->connectHeaders()
+            '/payment_intents/' . rawurlencode((string) $donation->gateway_intent_id)
         );
 
         $this->createSubscriptionFromFirstCharge($donation, $intent);
@@ -561,7 +545,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
         if ($email !== null && $email !== '') $params['email'] = $email;
         if ($name !== '')                     $params['name']  = $name;
 
-        $customer = $this->api->post('/customers', $params, $this->connectHeaders());
+        $customer = $this->api->post('/customers', $params);
         $id       = (string) ($customer['id'] ?? '');
         if ($id === '') {
             throw new RuntimeException('Stripe customer creation returned no id.');
@@ -596,7 +580,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
         // bills against the same card the donor authorised.
         $this->api->post('/customers/' . rawurlencode($customerId), [
             'invoice_settings' => ['default_payment_method' => $paymentMethodId],
-        ], $this->connectHeaders());
+        ]);
 
         [$interval, $intervalCount] = FrequencyMap::toStripe($donation->frequency);
         $productId = $this->resolveDonationProduct((bool) $donation->is_test);
@@ -609,7 +593,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
                 'interval'       => $interval,
                 'interval_count' => $intervalCount,
             ],
-        ], $this->connectHeaders());
+        ]);
 
         $nowEpoch       = $this->clock->now()->getTimestamp();
         $firstRenewalAt = FrequencyMap::nextRenewalAfter($nowEpoch, $interval, $intervalCount);
@@ -628,13 +612,12 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
             ],
         ];
 
-        $sub = $this->api->post('/subscriptions', $subParams, array_merge(
-            $this->connectHeaders(),
+        $sub = $this->api->post('/subscriptions', $subParams, [
             // Deterministic key: a redelivered webhook re-POSTs the same key, so
             // Stripe returns the original subscription instead of creating a
             // second one (which would double-charge the donor every renewal).
-            ['Idempotency-Key' => 'dono_sub_' . $donation->id]
-        ));
+            'Idempotency-Key' => 'dono_sub_' . $donation->id,
+        ]);
 
         $subId = (string) ($sub['id'] ?? '');
 
@@ -698,7 +681,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
         $product = $this->api->post('/products', [
             'name'        => 'Donation',
             'description' => sprintf('Recurring donations to %s', (string) get_bloginfo('name')),
-        ], $this->connectHeaders());
+        ]);
 
         $productId = (string) ($product['id'] ?? '');
         if ($productId === '') {
@@ -873,7 +856,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
             return RefundResult::failure(__('No gateway intent on donation; cannot refund via Stripe.', 'dono'));
         }
 
-        $this->connect->useTestMode((bool) $donation->is_test);
+        $this->account->useTestMode((bool) $donation->is_test);
 
         if (! $this->api->isConfigured()) {
             return RefundResult::failure(__('Stripe is not configured.', 'dono'));
@@ -898,9 +881,9 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
             // Stripe returns the original on retry instead of issuing a second
             // one. Stable per attempt (refunded_cents only advances once the
             // local write commits) yet distinct across separate partial refunds.
-            $headers = array_merge($this->connectHeaders(), [
+            $headers = [
                 'Idempotency-Key' => 'dono_refund_' . $donation->id . '_' . (int) $donation->refunded_cents . '_' . $amountCents,
-            ]);
+            ];
             $stripeRefund = $this->api->post('/refunds', $params, $headers);
         } catch (\Throwable $e) {
             return RefundResult::failure($e->getMessage());
@@ -949,14 +932,14 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
     /** @throws RuntimeException on a non-recoverable gateway error. */
     public function cancelSubscription(RecurringPlan $plan, ?string $reason = null): void
     {
-        $this->connect->useTestMode((bool) $plan->is_test);
+        $this->account->useTestMode((bool) $plan->is_test);
         $subId = (string) $plan->gateway_subscription_id;
         if ($subId === '') {
             // Local-only plan, never reached Stripe.
             return;
         }
         try {
-            $this->api->delete('/subscriptions/' . rawurlencode($subId), $this->connectHeaders());
+            $this->api->delete('/subscriptions/' . rawurlencode($subId));
         } catch (RuntimeException $e) {
             // Already-cancelled/not-found 4xx: swallow so the local cancel
             // doesn't bounce when the gateway is already in the desired state.
@@ -969,7 +952,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
     /** @throws RuntimeException on a non-recoverable gateway error. */
     public function pauseSubscription(RecurringPlan $plan, ?string $resumesAt = null): void
     {
-        $this->connect->useTestMode((bool) $plan->is_test);
+        $this->account->useTestMode((bool) $plan->is_test);
         $subId = (string) $plan->gateway_subscription_id;
         if ($subId === '') return;
 
@@ -981,33 +964,33 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
 
         $this->api->post('/subscriptions/' . rawurlencode($subId), [
             'pause_collection' => $pauseCollection,
-        ], $this->connectHeaders());
+        ]);
     }
 
     /** @throws RuntimeException on a non-recoverable gateway error. */
     public function resumeSubscription(RecurringPlan $plan): void
     {
-        $this->connect->useTestMode((bool) $plan->is_test);
+        $this->account->useTestMode((bool) $plan->is_test);
         $subId = (string) $plan->gateway_subscription_id;
         if ($subId === '') return;
 
         // Stripe convention: passing an empty string clears pause_collection.
         $this->api->post('/subscriptions/' . rawurlencode($subId), [
             'pause_collection' => '',
-        ], $this->connectHeaders());
+        ]);
     }
 
     /** @throws RuntimeException on a non-recoverable gateway error. */
     public function updateSubscriptionAmount(RecurringPlan $plan, int $amountCents): void
     {
-        $this->connect->useTestMode((bool) $plan->is_test);
+        $this->account->useTestMode((bool) $plan->is_test);
         $subId = (string) $plan->gateway_subscription_id;
         if ($subId === '') return;
         if ($amountCents <= 0) throw new RuntimeException('Amount must be positive.');
 
         // Stripe Prices are immutable, so mint a new Price and swap it onto
         // the subscription's first item.
-        $sub = $this->api->get('/subscriptions/' . rawurlencode($subId), $this->connectHeaders());
+        $sub = $this->api->get('/subscriptions/' . rawurlencode($subId));
         $items = is_array($sub['items']['data'] ?? null) ? $sub['items']['data'] : [];
         if (empty($items)) {
             throw new RuntimeException('Stripe subscription has no items to update.');
@@ -1032,7 +1015,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
                 'interval'       => $interval,
                 'interval_count' => $intervalCount,
             ],
-        ], $this->connectHeaders());
+        ]);
         $newPriceId = (string) ($newPrice['id'] ?? '');
         if ($newPriceId === '') {
             throw new RuntimeException('Stripe price creation returned no id.');
@@ -1046,7 +1029,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
                 'price' => $newPriceId,
             ]],
             'proration_behavior' => 'none',
-        ], $this->connectHeaders());
+        ]);
     }
 
     /** True when Stripe's error means the subscription is already gone. */

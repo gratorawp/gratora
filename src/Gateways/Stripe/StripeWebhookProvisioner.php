@@ -7,10 +7,10 @@ namespace Dono\Gateways\Stripe;
 use RuntimeException;
 
 /**
- * Registers Dono's webhook endpoint on the connected account right after a
+ * Registers Dono's webhook endpoint on the organisation's own Stripe account
  * successful connect, so paid / refund / renewal / dispute events flow without
  * the org hand-building a webhook in Stripe. Direct charges fire on the
- * connected account, so the endpoint is created there (via the account's own
+ * account, so the endpoint is created with the account's own secret key.
  * access token). Best-effort: the caller catches failures, and a
  * local/unreachable site keeps the manual signing-secret path.
  *
@@ -32,12 +32,12 @@ final class StripeWebhookProvisioner
 
     public function __construct(
         private StripeApi $api,
-        private StripeConnectAccount $account,
+        private StripeAccount $account,
     ) {
     }
 
     /**
-     * Create (or refresh) the webhook endpoint on the just-connected account and
+     * Create (or refresh) the webhook endpoint on the account and
      * store its signing secret for the given mode. Throws on API failure so the
      * caller can log; a thrown error must never block the connect itself.
      */

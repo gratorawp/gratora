@@ -17,7 +17,7 @@ final class StripeApi
     private const API_VERSION = '2024-12-18.acacia';
     private const TIMEOUT = 10;
 
-    public function __construct(private StripeConnectAccount $account)
+    public function __construct(private StripeAccount $account)
     {
     }
 
@@ -30,7 +30,7 @@ final class StripeApi
     /** Per-account access token for the active mode (Bearer auth). */
     public function secretKey(): string
     {
-        return $this->account->activeAccessToken();
+        return $this->account->activeSecretKey();
     }
 
     /**
@@ -102,7 +102,7 @@ final class StripeApi
     {
         if (! $this->isConfigured()) {
             // Fail closed: a test-mode donation never silently falls back to
-            // the live token (activeAccessToken only reads the active mode's
+            // the live token (activeSecretKey only reads the active mode's
             // field), so be explicit about which connection is missing.
             $mode = $this->account->isTestMode() ? 'test' : 'live';
             throw new RuntimeException(sprintf(
