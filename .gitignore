@@ -24,3 +24,7 @@ package-lock.json
 # attack the product. Their home is ~/Local Sites/dono/dono-pro-addon-specs/.
 /docs/
 /qa/
+# Working notes for whoever is building this, not for whoever is reading it:
+# it describes the Pro add-on line and the licensing model, which have no place
+# in the free core's public repo. Kept on disk, just not published.
+CLAUDE.md
