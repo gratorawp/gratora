@@ -17,6 +17,7 @@ import ReceiptsPanel from './panels/ReceiptsPanel';
 import NumberingPanel from './panels/NumberingPanel';
 import ConsentsPanel from './panels/ConsentsPanel';
 import PrivacyPanel from './panels/PrivacyPanel';
+import GiftAidPanel from './panels/GiftAidPanel';
 import RolesPanel from './panels/RolesPanel';
 import AdvancedPanel from './panels/AdvancedPanel';
 import {
@@ -33,6 +34,7 @@ const TABS = [
     { key: 'email',        label: __( 'Emails', 'dono' ),               Icon: IconEmail },
     { key: 'receipts',     label: __( 'Receipts', 'dono' ),             Icon: IconReceipt },
     { key: 'numbering',    label: __( 'Numbering', 'dono' ),            Icon: IconNumbering },
+    { key: 'gift-aid',     label: __( 'Gift Aid', 'dono' ),             Icon: IconReceipt },
     { key: 'privacy',      label: __( 'Data & privacy', 'dono' ),       Icon: IconPrivacy },
     { key: 'roles',        label: __( 'Roles & permissions', 'dono' ),  Icon: IconRoles },
     { key: 'advanced',     label: __( 'Advanced', 'dono' ),             Icon: IconAdvanced },
@@ -49,6 +51,7 @@ const SECTION_LABELS = {
     'receipts':        __( 'Receipts', 'dono' ),
     'numbering':       __( 'Numbering', 'dono' ),
     'consents':        __( 'Consents', 'dono' ),
+    'gift_aid':        __( 'Gift Aid', 'dono' ),
     'privacy':         __( 'Data & privacy', 'dono' ),
     'roles':           __( 'Roles & permissions', 'dono' ),
     'advanced':        __( 'Advanced', 'dono' ),
@@ -74,6 +77,7 @@ export default function Settings() {
     const receipts = useDonoSettings( 'receipts' );
     const numbering = useDonoSettings( 'numbering' );
     const consents = useDonoSettings( 'consents' );
+    const giftAid  = useDonoSettings( 'gift_aid' );
     const privacy  = useDonoSettings( 'privacy' );
     const roles    = useDonoSettings( 'roles' );
     const advanced = useDonoSettings( 'advanced' );
@@ -87,7 +91,7 @@ export default function Settings() {
         return () => window.removeEventListener( 'hashchange', onHash );
     }, [] );
 
-    const anyDirty = org.isDirty || brand.isDirty || currency.isDirty || fx.isDirty || gateways.isDirty || email.isDirty || receipts.isDirty || numbering.isDirty || consents.isDirty || privacy.isDirty || roles.isDirty || advanced.isDirty;
+    const anyDirty = org.isDirty || brand.isDirty || currency.isDirty || fx.isDirty || gateways.isDirty || email.isDirty || receipts.isDirty || numbering.isDirty || consents.isDirty || giftAid.isDirty || privacy.isDirty || roles.isDirty || advanced.isDirty;
     useEffect( () => {
         if ( ! anyDirty ) return undefined;
         const handler = ( e ) => { e.preventDefault(); e.returnValue = ''; return ''; };
@@ -115,10 +119,11 @@ export default function Settings() {
         email:        email.isDirty,
         receipts:     receipts.isDirty,
         numbering:    numbering.isDirty,
+        'gift-aid':   giftAid.isDirty,
         privacy:      privacy.isDirty || consents.isDirty,
         roles:        roles.isDirty,
         advanced:     advanced.isDirty,
-    } ), [ org.isDirty, brand.isDirty, currency.isDirty, fx.isDirty, gateways.isDirty, email.isDirty, receipts.isDirty, numbering.isDirty, consents.isDirty, privacy.isDirty, roles.isDirty, advanced.isDirty ] );
+    } ), [ org.isDirty, brand.isDirty, currency.isDirty, fx.isDirty, gateways.isDirty, email.isDirty, receipts.isDirty, numbering.isDirty, consents.isDirty, giftAid.isDirty, privacy.isDirty, roles.isDirty, advanced.isDirty ] );
 
     const dirtySections = Object.values( dirtyByTab ).filter( Boolean ).length;
 
@@ -133,6 +138,7 @@ export default function Settings() {
         if ( receipts.isDirty ) jobs.push( { name: 'receipts',        run: receipts.save } );
         if ( numbering.isDirty ) jobs.push( { name: 'numbering',       run: numbering.save } );
         if ( consents.isDirty ) jobs.push( { name: 'consents',        run: consents.save } );
+        if ( giftAid.isDirty )  jobs.push( { name: 'gift_aid',        run: giftAid.save } );
         if ( privacy.isDirty )  jobs.push( { name: 'privacy',         run: privacy.save } );
         if ( roles.isDirty )    jobs.push( { name: 'roles',           run: roles.save } );
         if ( advanced.isDirty ) jobs.push( { name: 'advanced',        run: advanced.save } );
@@ -171,12 +177,13 @@ export default function Settings() {
         receipts.discard();
         numbering.discard();
         consents.discard();
+        giftAid.discard();
         privacy.discard();
         roles.discard();
         advanced.discard();
     };
 
-    const anySaving = org.isSaving || brand.isSaving || currency.isSaving || fx.isSaving || gateways.isSaving || email.isSaving || receipts.isSaving || numbering.isSaving || consents.isSaving || privacy.isSaving || roles.isSaving || advanced.isSaving;
+    const anySaving = org.isSaving || brand.isSaving || currency.isSaving || fx.isSaving || gateways.isSaving || email.isSaving || receipts.isSaving || numbering.isSaving || consents.isSaving || giftAid.isSaving || privacy.isSaving || roles.isSaving || advanced.isSaving;
 
     return (
         <div className="dono-settings-page">
@@ -256,6 +263,9 @@ export default function Settings() {
                 </div>
                 <div hidden={ tab !== 'numbering' }>
                     <NumberingPanel s={ numbering } />
+                </div>
+                <div hidden={ tab !== 'gift-aid' }>
+                    <GiftAidPanel s={ giftAid } />
                 </div>
                 <div hidden={ tab !== 'privacy' }>
                     <PrivacyPanel s={ privacy } />

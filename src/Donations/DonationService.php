@@ -9,6 +9,7 @@ use Dono\Currency\FxRates;
 use Dono\Donors\DonorService;
 use Dono\Forms\FormTypeRegistry;
 use Dono\Forms\Blocks\GiftAidBlock;
+use Dono\GiftAid\GiftAidClaims;
 use Dono\GiftAid\GiftAidDeclarations;
 use Dono\GiftAid\GiftAidEligibility;
 use Dono\Foundation\Crypto\Crypto;
@@ -49,6 +50,7 @@ final class DonationService
         private ?DonationTributeRepository $tributes = null,
         private ?GiftAidEligibility $giftAid = null,
         private ?GiftAidDeclarations $giftAidDeclarations = null,
+        private ?GiftAidClaims $giftAidClaims = null,
     ) {
     }
 
@@ -138,6 +140,12 @@ final class DonationService
             // true when the gift was made.
             $donation->gift_aid           = $this->giftAid !== null
                 && $this->giftAid->qualifies($donation, $donor, $intent->gift_aid);
+            if ($donation->gift_aid && $this->giftAidClaims !== null) {
+                // Frozen now, from the profile submitted with this gift: HMRC
+                // wants the address as it was, and the record must outlive the
+                // donor row.
+                $this->giftAidClaims->snapshot($donation, $donor, $intent->profile);
+            }
             $donation->created_at         = $now;
             $donation->updated_at         = $now;
 

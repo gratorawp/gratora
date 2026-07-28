@@ -87,14 +87,14 @@ final class Plugin
         // Activation hooks don't fire on plugin updates, so a release that adds
         // a table or column would never migrate on a normal update, causing
         // "unknown column" errors until a reactivation. Run the schema
-        // migration once per DONO_VERSION bump (cheap on steady state: one
+        // migration once per DONO_DB_VERSION bump (cheap on steady state: one
         // option read). Priority 99 so tables exist before the portal heal.
         add_action('wp_loaded', static function (): void {
-            if (get_option('dono_db_version') === DONO_VERSION) {
+            if (get_option('dono_db_version') === DONO_DB_VERSION) {
                 return;
             }
             self::migrateSchema();
-            update_option('dono_db_version', DONO_VERSION, false);
+            update_option('dono_db_version', DONO_DB_VERSION, false);
         }, 99);
 
         // Re-ensure the donor portal page once per DONO_VERSION bump so existing
@@ -137,7 +137,7 @@ final class Plugin
         self::migrateSchema();
         // Stamp the schema version so the boot-time gate doesn't re-migrate on
         // the first request after activation.
-        update_option('dono_db_version', DONO_VERSION, false);
+        update_option('dono_db_version', DONO_DB_VERSION, false);
 
         Capabilities::applyMapping(
             Capabilities::currentMapping()

@@ -130,6 +130,9 @@ use Dono\Foundation\References\ReferenceGenerator;
 use Dono\Foundation\Time\Clock;
 use Dono\Foundation\Time\SystemClock;
 use Dono\Forms\Blocks\GiftAidBlock;
+use Dono\GiftAid\GiftAidClaimExport;
+use Dono\GiftAid\GiftAidClaims;
+use Dono\GiftAid\GiftAidErasureHandler;
 use Dono\GiftAid\GiftAidDeclaration;
 use Dono\GiftAid\GiftAidDeclarations;
 use Dono\GiftAid\GiftAidEligibility;
@@ -174,6 +177,7 @@ use Dono\Rest\Admin\CampaignsController as AdminCampaignsController;
 use Dono\Rest\Admin\CommandsController;
 use Dono\Rest\Admin\DashboardController;
 use Dono\Rest\Admin\FundsController as AdminFundsController;
+use Dono\Rest\Admin\GiftAidController;
 use Dono\Rest\Admin\DonationsController as AdminDonationsController;
 use Dono\Rest\Admin\DonorsController as AdminDonorsController;
 use Dono\Rest\Admin\FormsController as AdminFormsController;
@@ -400,10 +404,11 @@ final class CoreModule implements DonoModule
         // Core erases through the same registry add-ons use, so there is one
         // mechanism and one order rather than core's inline copy plus a hook
         // everyone else is expected to remember.
-        add_filter('dono.donor.erasure_handlers', static function (array $handlers): array {
+        add_filter('dono.donor.erasure_handlers', static function (array $handlers) use ($c): array {
             $handlers[] = new CoreDonorDataHandler();
             $handlers[] = new AnalyticsEventHandler();
             $handlers[] = new WebhookLogHandler();
+            $handlers[] = new GiftAidErasureHandler($c->get(GiftAidClaims::class));
             return $handlers;
         });
 
@@ -532,9 +537,12 @@ final class CoreModule implements DonoModule
             $c->get( TestMode::class),
             $c->get(DonationTributeRepository::class),
             $c->get(GiftAidEligibility::class),
-            $c->get(GiftAidDeclarations::class)
+            $c->get(GiftAidDeclarations::class),
+            $c->get(GiftAidClaims::class)
         ));
 
+        $c->bind(GiftAidClaims::class, fn (Container $c) => new GiftAidClaims($c->get(Crypto::class)));
+        $c->bind(GiftAidClaimExport::class, fn (Container $c) => new GiftAidClaimExport($c->get(GiftAidClaims::class)));
         $c->bind(GiftAidDeclarations::class, fn (Container $c) => new GiftAidDeclarations(
             $c->get(Clock::class),
             $c->get(IdentityHasher::class)
@@ -837,7 +845,8 @@ final class CoreModule implements DonoModule
                 $c->get(CampaignReportBuilder::class),
                 $c->get(DonorRepository::class),
                 $c->get(TaxStatementBuilder::class),
-            )
+            ),
+            new GiftAidController($c->get(GiftAidClaimExport::class))
         ))->register();
 
         $c->get(PortalController::class)->registerHooks();
