@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Gateways\PayPal;
 
+use Dono\Gateways\AccountFingerprint;
 use RuntimeException;
 
 /**
@@ -95,7 +96,8 @@ final class PayPalPlans
     {
         $stored = get_option(self::PRODUCT_OPTION, []);
         $stored = is_array($stored) ? $stored : [];
-        $key    = $test ? 'test' : 'live';
+        // Same rule as the plans: scope to the account that owns the product.
+        $key    = ($test ? 'test' : 'live') . '_' . AccountFingerprint::of($this->account->clientIdFor($test));
 
         if (! empty($stored[$key]) && is_string($stored[$key])) {
             return $stored[$key];
@@ -130,6 +132,10 @@ final class PayPalPlans
     {
         return implode('_', [
             $test ? 'test' : 'live',
+            // A plan hangs off a product inside one merchant account and means
+            // nothing in another. Without this, connecting a different account
+            // kept handing the old one's plan ids to the new one.
+            AccountFingerprint::of($this->account->clientIdFor($test)),
             strtolower($currency),
             $amountCents,
             strtolower($unit),

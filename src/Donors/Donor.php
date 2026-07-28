@@ -36,6 +36,8 @@ final class Donor extends Model
     public ?string $first_donation_at = null;
     public ?string $last_donation_at = null;
     public ?string $redacted_at = null;
+    /** When the last re-identification handle was severed. See DonorPurge. */
+    public ?string $purged_at = null;
     public ?string $notes_encrypted = null;
     public ?array $flags = null;
     public string $created_at;
@@ -61,10 +63,13 @@ Donor::schema(function (Table $t): void {
     $t->datetime('first_donation_at')->nullable();
     $t->datetime('last_donation_at')->nullable()->index();
     $t->datetime('redacted_at')->nullable()->index();
+    $t->datetime('purged_at')->nullable();
     $t->text('notes_encrypted')->nullable();
     $t->json('flags')->nullable();
     $t->datetime('created_at');
     $t->datetime('updated_at');
 
     $t->unique(['email_hash']);
+    // DonorPurge's daily sweep for redacted donors past their reunite window.
+    $t->index(['purged_at', 'redacted_at']);
 });

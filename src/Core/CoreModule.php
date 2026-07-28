@@ -163,6 +163,7 @@ use Dono\Receipts\Renderers\GenericReceiptRenderer;
 use Dono\Recurring\RecurringPlan;
 use Dono\Recurring\RecurringCanceller;
 use Dono\Recurring\RecurringPlanRepository;
+use Dono\Recurring\RecurringResumer;
 use Dono\Rest\Admin\AdvancedController;
 use Dono\Rest\Admin\NumberingController;
 use Dono\Rest\Admin\CampaignsController as AdminCampaignsController;
@@ -717,6 +718,16 @@ final class CoreModule implements DonoModule
             $c->get(DonationService::class),
             $c->get(GatewayManager::class)
         ));
+
+        // Lifts a pause when its window closes. PayPal and Razorpay cannot
+        // schedule their own resume, so without this a donor's "skip next
+        // payment" stopped the subscription for good.
+        $c->bind(RecurringResumer::class, fn (Container $c) => new RecurringResumer(
+            $c->get(GatewayManager::class),
+            $c->get(Clock::class),
+            $c->get(AsyncDispatcher::class)
+        ));
+        $c->get(RecurringResumer::class)->register();
 
         $c->bind(AdminCampaignsController::class, fn (Container $c) => new AdminCampaignsController(
             $c->get(CampaignRepository::class),

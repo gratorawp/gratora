@@ -158,7 +158,10 @@ final class PayPalApi
         }
 
         if ($code >= 400) {
-            throw new RuntimeException('PayPal API: ' . $this->errorMessage($decoded, $code));
+            throw new PayPalApiException(
+                'PayPal API: ' . $this->errorMessage($decoded, $code),
+                PayPalApiException::issuesFrom($decoded)
+            );
         }
 
         return $decoded;

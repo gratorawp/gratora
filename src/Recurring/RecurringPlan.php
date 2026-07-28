@@ -40,6 +40,11 @@ final class RecurringPlan extends Model
     public ?string $current_period_start = null;
     public ?string $current_period_end = null;
     public ?string $next_payment_at = null;
+    /**
+     * When a paused plan is due to restart. Set by the portal's "pause for N
+     * months" and "skip next payment"; swept by RecurringResumer.
+     */
+    public ?string $resume_at = null;
     public ?string $last_payment_at = null;
     public ?string $cancelled_at = null;
     public ?string $cancellation_reason = null;
@@ -73,6 +78,7 @@ RecurringPlan::schema(function (Table $t): void {
     $t->datetime('current_period_start')->nullable();
     $t->datetime('current_period_end')->nullable();
     $t->datetime('next_payment_at')->nullable();
+    $t->datetime('resume_at')->nullable();
     $t->datetime('last_payment_at')->nullable();
     $t->datetime('cancelled_at')->nullable();
     $t->string('cancellation_reason', 255)->nullable();
@@ -91,4 +97,6 @@ RecurringPlan::schema(function (Table $t): void {
     // Donor's active plans list + dunning scheduler.
     $t->index(['donor_id', 'status']);
     $t->index(['status', 'next_payment_at']);
+    // RecurringResumer's daily sweep for paused plans that are due back.
+    $t->index(['status', 'resume_at']);
 });

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dono\Donations;
 
 use Dono\Foundation\Config\SystemSetting;
+use Dono\Foundation\Helpers\Money;
 use Dono\Foundation\Identity\IdentityHasher;
 use Dono\Gateways\TestMode;
 use WP_Error;
@@ -145,7 +146,7 @@ final class AntiSpamGuard
             return new WP_Error(
                 'dono_amount_too_low',
                 /* translators: %s: minimum donation amount formatted */
-                sprintf(__('Minimum donation is %s.', 'dono'), \Dono\Foundation\Helpers\Money::format($min)),
+                sprintf(__('Minimum donation is %s.', 'dono'), Money::format($min)),
                 ['status' => 400]
             );
         }

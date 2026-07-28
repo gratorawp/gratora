@@ -603,13 +603,18 @@ final class PortalController
                     if ($sub) $sub->pauseSubscription($plan, $resumesAt);
                     $plan->status          = 'paused';
                     $plan->next_payment_at = $resumesAt;
+                    // Only Stripe schedules its own resume; RecurringResumer
+                    // reads this so PayPal and Razorpay restart too, instead of
+                    // pausing forever behind a date the donor can see.
+                    $plan->resume_at       = $resumesAt;
                     $plan->save();
                     do_action('dono.recurring.plan_paused', $plan, $months);
                     break;
 
                 case 'resume':
                     if ($sub) $sub->resumeSubscription($plan);
-                    $plan->status = 'active';
+                    $plan->status    = 'active';
+                    $plan->resume_at = null;
                     $plan->save();
                     do_action('dono.recurring.plan_resumed', $plan);
                     break;
@@ -619,9 +624,14 @@ final class PortalController
                         $unit  = ($plan->interval_unit === 'year') ? 'year' : ($plan->interval_unit === 'week' ? 'week' : 'month');
                         $count = max(1, (int) $plan->interval_count);
                         $nextAt = gmdate('Y-m-d H:i:s', strtotime("+{$count} {$unit}", strtotime($plan->next_payment_at)));
-                        // Pause with auto-resume so the original charge is skipped.
+                        // Pause at the gateway so the original charge is
+                        // skipped, and record when to lift it. The plan is not
+                        // "paused" to the donor, it is an active monthly gift
+                        // missing one cycle, so status is left alone; the resume
+                        // is driven by resume_at, not by status.
                         if ($sub) $sub->pauseSubscription($plan, $nextAt);
                         $plan->next_payment_at = $nextAt;
+                        $plan->resume_at       = $nextAt;
                         $plan->save();
                         do_action('dono.recurring.plan_skipped', $plan);
                     }

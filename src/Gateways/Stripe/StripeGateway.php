@@ -12,6 +12,7 @@ use Dono\Donors\DonorRepository;
 use Dono\Donors\DonorService;
 use Dono\Foundation\Time\Clock;
 use Dono\Gateways\GatewayConfirmResult;
+use Dono\Gateways\AccountFingerprint;
 use Dono\Gateways\GatewayIntentResult;
 use Dono\Gateways\PaymentGateway;
 use Dono\Gateways\RefundResult;
@@ -714,15 +715,21 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
     }
 
     /**
-     * One Stripe Product per mode (test/live), cached in gateway settings.
-     * Stripe Prices need a product to hang off; we never present the product
-     * to the donor, it's purely a billing-side grouping.
+     * One Stripe Product per mode (test/live) and account, cached in gateway
+     * settings. Stripe Prices need a product to hang off; we never present the
+     * product to the donor, it's purely a billing-side grouping.
+     *
+     * The account fingerprint is part of the key because a Product lives inside
+     * one Stripe account: without it, connecting a different account kept
+     * handing the old account's product id to the new one and every recurring
+     * donation failed against it.
      */
     private function resolveDonationProduct(bool $isTest): string
     {
         $opt    = get_option('dono_gateway_config', []);
         $stripe = is_array($opt) && is_array($opt['stripe'] ?? null) ? $opt['stripe'] : [];
-        $key    = $isTest ? 'stripe_product_id_test' : 'stripe_product_id_live';
+        $key    = ($isTest ? 'stripe_product_id_test' : 'stripe_product_id_live')
+                . '_' . AccountFingerprint::of($this->account->secretKeyFor($isTest));
 
         $existing = (string) ($stripe[$key] ?? '');
         if ($existing !== '') return $existing;

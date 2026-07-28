@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Gateways\Razorpay;
 
+use Dono\Gateways\AccountFingerprint;
 use RuntimeException;
 
 /**
@@ -74,6 +75,10 @@ final class RazorpayPlans
     {
         return implode('_', [
             $test ? 'test' : 'live',
+            // A plan belongs to the account that created it. Without this,
+            // connecting a different merchant kept handing the old account's
+            // plan ids to the new one and every recurring donation 502'd.
+            AccountFingerprint::of($this->account->keyIdFor($test)),
             strtolower($currency),
             $amountCents,
             strtolower($period),

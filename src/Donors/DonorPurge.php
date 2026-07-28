@@ -7,7 +7,6 @@ namespace Dono\Donors;
 use Dono\Async\AsyncDispatcher;
 use Dono\Foundation\Batch\BatchProcessor;
 use Dono\Foundation\Time\Clock;
-use Dono\Vendor\Queryable\DB;
 
 /**
  * Severs the last handle on an already-redacted donor, `retention_days_after_
@@ -64,26 +63,21 @@ final class DonorPurge
 
     public function run(): void
     {
-        $prefix = DB::getPrefix();
         $cutoff = $this->cutoff();
 
+        // purge() stamps purged_at, so handled rows drop out of this set and
+        // BatchProcessor's re-query of the first N stays correct.
         $more = BatchProcessor::step(
-            fn (int $n) => array_map(
-                static fn ($r) => (int) ($r->id ?? 0),
-                DB::raw(
-                    "SELECT id FROM {$prefix}dono_donors
-                     WHERE redacted_at IS NOT NULL
-                       AND redacted_at <= %s
-                       AND email_hash <> SHA2(CONCAT('dono-purged:', id), 256)
-                     ORDER BY id ASC
-                     LIMIT %d",
-                    [$cutoff, $n]
-                )['rows'] ?? []
-            ),
-            function (array $ids): void {
-                foreach ($ids as $id) {
-                    $donor = Donor::query()->where('id', $id)->get();
-                    if ($donor) $this->purge($donor);
+            fn (int $n) => Donor::query()
+                ->whereIsNotNull('redacted_at')
+                ->where('redacted_at', $cutoff, '<=')
+                ->whereIsNull('purged_at')
+                ->orderBy('id')
+                ->limit($n)
+                ->getAll(),
+            function (array $donors): void {
+                foreach ($donors as $donor) {
+                    $this->purge($donor);
                 }
             },
             self::BATCH,
@@ -95,19 +89,21 @@ final class DonorPurge
         }
     }
 
-    /** Idempotent: a second call finds the hash already severed and changes nothing. */
+    /** Idempotent: a second call finds the row already stamped and changes nothing. */
     public function purge(Donor $donor): void
     {
-        $severed = self::severedHash((int) $donor->id);
-        if ($donor->email_hash === $severed) return;
+        if ($donor->purged_at !== null) return;
 
-        $donor->email_hash = $severed;
+        $now = $this->clock->now()->format('Y-m-d H:i:s');
+
+        $donor->email_hash = self::severedHash((int) $donor->id);
+        $donor->purged_at  = $now;
         // Donor-scoped preferences (always_anonymous) and the link to other
         // members of a household are both particular to a person; on a shell
         // that is no longer anyone they only serve to group rows back together.
         $donor->flags        = null;
         $donor->household_id = null;
-        $donor->updated_at   = $this->clock->now()->format('Y-m-d H:i:s');
+        $donor->updated_at   = $now;
         $donor->save();
     }
 

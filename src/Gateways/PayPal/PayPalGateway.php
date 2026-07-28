@@ -738,18 +738,32 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware
         return FrequencyMap::toStripe($frequency);
     }
 
+    /**
+     * A second capture on an order PayPal already took. Safe to re-enter: the
+     * caller re-reads the order and confirms the donation from it.
+     *
+     * PayPal always sends a `description` next to the issue code, and the
+     * message builder prefers the description, so grepping the message for the
+     * code only ever worked against a response shape PayPal does not send. A
+     * double-click or a retried tab therefore told the donor the payment had
+     * failed on money already taken.
+     */
     private function isAlreadyCaptured(RuntimeException $e): bool
     {
-        return str_contains($e->getMessage(), 'ORDER_ALREADY_CAPTURED');
+        return $e instanceof PayPalApiException && $e->hasIssue('ORDER_ALREADY_CAPTURED');
     }
 
-    /** PayPal's "you cannot do that from the current state" family. */
+    /**
+     * Pause/resume/cancel are safe to re-enter, so PayPal telling us the
+     * subscription is already in the state we asked for is success, not failure.
+     *
+     * Matched on the issue codes rather than on the message: the previous
+     * `already` needle also matched the *description* of unrelated errors, and
+     * the codes it looked for never survived message formatting anyway.
+     */
     private function isAlreadyInThatState(RuntimeException $e): bool
     {
-        $msg = $e->getMessage();
-        foreach (['SUBSCRIPTION_STATUS_INVALID', 'INVALID_STATE', 'already'] as $needle) {
-            if (str_contains($msg, $needle)) return true;
-        }
-        return false;
+        return $e instanceof PayPalApiException
+            && $e->hasIssue('SUBSCRIPTION_STATUS_INVALID', 'INVALID_STATE', 'INVALID_RESOURCE_STATE');
     }
 }
