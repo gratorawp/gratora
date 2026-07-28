@@ -37,19 +37,19 @@
         }
     },
     "scripts": {
-        "test": "phpunit",
-        "test:unit": "phpunit",
-        "test:integration": "phpunit --configuration phpunit-integration.xml.dist",
-        "test:all": [
+        "test": [
             "@test:unit",
             "@test:integration"
         ],
+        "test:unit": "phpunit",
+        "test:integration": "phpunit --configuration phpunit-integration.xml.dist",
         "strauss": [
             "@php -d memory_limit=1G vendor/bin/strauss",
             "find vendor-prefixed -type d -name .git -exec rm -rf {} +",
             "@php -r \"file_put_contents('vendor/composer/autoload_aliases.php', '<?php');\"",
             "@composer dump-autoload"
-        ]
+        ],
+        "test:setup": "bash bin/install-wp-tests.sh"
     },
     "extra": {
         "strauss": {

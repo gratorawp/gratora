@@ -46,15 +46,12 @@ $tests_dir = getenv('WP_TESTS_DIR') ?: (static function (): string {
 $phpunit_dir = getenv('WP_PHPUNIT__DIR') ?: __DIR__ . '/../vendor/wp-phpunit/wp-phpunit';
 
 if (! file_exists($tests_dir . '/wp-tests-config.php')) {
-    fwrite(STDERR, "\n");
-    fwrite(STDERR, "Test config not found at {$tests_dir}/wp-tests-config.php.\n");
-    fwrite(STDERR, "\n");
-    fwrite(STDERR, "First-time setup:\n");
-    fwrite(STDERR, "  bin/install-wp-tests.sh <db-name> <db-user> <db-pass> [db-host]\n");
-    fwrite(STDERR, "\n");
-    fwrite(STDERR, "Example:\n");
-    fwrite(STDERR, "  bin/install-wp-tests.sh dono_test root '' localhost\n");
-    fwrite(STDERR, "\n");
+    fwrite(STDERR, "\nThe WordPress test suite is not installed at {$tests_dir}.\n\n");
+    fwrite(STDERR, "Install it once, then every Dono repo on this machine finds it:\n");
+    fwrite(STDERR, "  composer test:setup <db-name> <db-user> <db-pass> [db-host] [wp-version]\n\n");
+    fwrite(STDERR, "e.g.  composer test:setup dono_tests root '' 127.0.0.1 latest\n");
+    fwrite(STDERR, "It needs a MySQL you can create databases on, and it WIPES <db-name>.\n");
+    fwrite(STDERR, "Set WP_TESTS_DIR to point somewhere else.\n\n");
     exit(1);
 }
 
