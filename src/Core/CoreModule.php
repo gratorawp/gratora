@@ -134,6 +134,10 @@ use Dono\Gateways\PayPal\PayPalAccount;
 use Dono\Gateways\PayPal\PayPalApi;
 use Dono\Gateways\PayPal\PayPalGateway;
 use Dono\Gateways\PayPal\PayPalPlans;
+use Dono\Gateways\Razorpay\RazorpayAccount;
+use Dono\Gateways\Razorpay\RazorpayApi;
+use Dono\Gateways\Razorpay\RazorpayGateway;
+use Dono\Gateways\Razorpay\RazorpayPlans;
 use Dono\Gateways\Stripe\ApplePayDomain;
 use Dono\Gateways\Stripe\StripeAccount;
 use Dono\Gateways\Stripe\StripeGateway;
@@ -167,6 +171,7 @@ use Dono\Rest\Admin\ReportsController;
 use Dono\Rest\Admin\RolesController;
 use Dono\Rest\Admin\SettingsController;
 use Dono\Rest\Admin\PayPalKeysController;
+use Dono\Rest\Admin\RazorpayKeysController;
 use Dono\Rest\Admin\StripeKeysController;
 use Dono\Rest\Admin\UserPrefsController;
 use Dono\Rest\Portal\PortalController as PortalController;
@@ -513,6 +518,16 @@ final class CoreModule implements DonoModule
             $c->get(PayPalApi::class),
             $c->get(PayPalAccount::class)
         ));
+        $c->bind(RazorpayAccount::class, fn (Container $c) => new RazorpayAccount(
+            $c->get(Crypto::class)
+        ));
+        $c->bind(RazorpayApi::class, fn (Container $c) => new RazorpayApi(
+            $c->get(RazorpayAccount::class)
+        ));
+        $c->bind(RazorpayPlans::class, fn (Container $c) => new RazorpayPlans(
+            $c->get(RazorpayApi::class),
+            $c->get(RazorpayAccount::class)
+        ));
 
         $gateways = $c->get(GatewayManager::class);
         $gateways->register(new OfflineGateway($c->get(Clock::class)));
@@ -547,6 +562,19 @@ final class CoreModule implements DonoModule
                 $c->get(DonationRepository::class),
                 $c->get(DonationService::class),
                 $c->get(PayPalPlans::class),
+                $c->get(RecurringPlanRepository::class),
+                $c->get(Clock::class),
+            ));
+        }
+
+        $razorpayAccount = $c->get(RazorpayAccount::class);
+        if ($razorpayAccount->isConnected()) {
+            $gateways->register(new RazorpayGateway(
+                $c->get(RazorpayApi::class),
+                $razorpayAccount,
+                $c->get(DonationRepository::class),
+                $c->get(DonationService::class),
+                $c->get(RazorpayPlans::class),
                 $c->get(RecurringPlanRepository::class),
                 $c->get(Clock::class),
             ));
@@ -727,6 +755,17 @@ final class CoreModule implements DonoModule
                 $c->get(GatewayManager::class),
                 $c->get(PayPalApi::class),
                 $c->get(PayPalAccount::class),
+                $c->get(RecurringPlanRepository::class),
+                $c->get(Clock::class),
+            ),
+            new RazorpayKeysController(
+                $c->get(RazorpayApi::class),
+                $c->get(RazorpayAccount::class),
+            ),
+            new \Dono\Rest\RazorpayController(
+                $c->get(DonationRepository::class),
+                $c->get(DonationService::class),
+                $c->get(GatewayManager::class),
                 $c->get(RecurringPlanRepository::class),
                 $c->get(Clock::class),
             ),

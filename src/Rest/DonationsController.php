@@ -336,7 +336,30 @@ final class DonationsController
             'client_secret'   => $gatewayResult->client_secret,
             'requires_action' => $gatewayResult->requires_action,
             'paypal'          => $this->payPalPayload($gatewayResult),
+            'razorpay'        => $this->razorpayPayload($gatewayResult),
         ], 201);
+    }
+
+    /**
+     * The handful of Razorpay fields Checkout needs. Explicit whitelist, same
+     * rule as PayPal: gateway metadata never gets echoed to the browser
+     * wholesale.
+     *
+     * @return array{kind:string,order_id:string,subscription_id:string}|null
+     */
+    private function razorpayPayload(GatewayIntentResult $result): ?array
+    {
+        $meta = $result->metadata ?? [];
+        $kind = (string) ($meta['razorpay_kind'] ?? '');
+        if ($kind === '') {
+            return null;
+        }
+
+        return [
+            'kind'            => $kind,
+            'order_id'        => (string) ($meta['razorpay_order_id'] ?? ''),
+            'subscription_id' => (string) ($meta['razorpay_subscription_id'] ?? ''),
+        ];
     }
 
     /**

@@ -13,6 +13,7 @@ import GatewaySelect from './components/GatewaySelect';
 import CurrencySwitcher from './components/CurrencySwitcher';
 import StripePayment from './components/StripePayment';
 import PayPalPayment from './components/PayPalPayment';
+import RazorpayPayment from './components/RazorpayPayment';
 import { detectStripeReturn, resolveStripeReturn, clearStripeReturnParams } from './util/stripe';
 import { interpolateLabel } from './util/interpolate';
 import { decodeEntities } from './util/entities';
@@ -178,6 +179,32 @@ function FormBody( { state, dispatch, config } ) {
                 }
                 return;
             }
+            // Razorpay opens its own Checkout modal against the order or
+            // subscription the server already created. Same rule as the others:
+            // no key id means no way to collect, so fail rather than thank.
+            if ( data.razorpay ) {
+                if ( config.razorpay?.keyId ) {
+                    dispatch( {
+                        type: 'AWAIT_PAYMENT',
+                        payment: {
+                            razorpay:    data.razorpay,
+                            reference:   data.reference,
+                            intentId:    data.intent_id,
+                            amountCents: data.amount_cents,
+                            currency:    data.currency,
+                            // Checkout asks for these regardless, so hand over
+                            // what the donor already typed.
+                            donorName:   [ state.values.profile?.first_name, state.values.profile?.last_name ]
+                                .filter( Boolean ).join( ' ' ),
+                            donorEmail:  state.values.email || '',
+                            donorPhone:  state.values.profile?.phone || '',
+                        },
+                    } );
+                } else {
+                    dispatch( { type: 'SUBMIT_ERROR', message: config.i18n.error } );
+                }
+                return;
+            }
             // A client_secret means the gateway needs a client-side payment
             // step. Without a publishable key we cannot collect it, so this is
             // an error - never fall through to a "thank you" with no payment.
@@ -214,7 +241,9 @@ function FormBody( { state, dispatch, config } ) {
     }, [ state, config, dispatch, formToken, honeypot ] );
 
     if ( state.status === 'payment' ) {
-        const PaymentStep = state.payment?.paypal ? PayPalPayment : StripePayment;
+        let PaymentStep = StripePayment;
+        if ( state.payment?.paypal ) PaymentStep = PayPalPayment;
+        else if ( state.payment?.razorpay ) PaymentStep = RazorpayPayment;
         return (
             <ErrorBoundary>
                 <PaymentStep config={ config } payment={ state.payment } dispatch={ dispatch } />
