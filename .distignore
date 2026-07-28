@@ -34,6 +34,12 @@
 
 /README.md
 /ROADMAP.md
+# .gitignore keeps these out of the repo; this keeps them out of the zip.
+# They live on disk, so being untracked hides them from git and from nothing
+# else: without these lines the build would ship the QA findings and the
+# internal working notes to every customer.
+/CLAUDE.md
+/qa
 
 /vendor/phpunit
 /vendor/bin
