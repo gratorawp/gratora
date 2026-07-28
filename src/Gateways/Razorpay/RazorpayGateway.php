@@ -569,6 +569,29 @@ final class RazorpayGateway implements PaymentGateway, SubscriptionAware
 
         $plan = $this->planRepo->findBySubscriptionId($this->id(), $subId);
         if (! $plan) {
+            // No plan yet. Either this subscription is not ours at all, or
+            // Razorpay charged and fired this event before the donor's browser
+            // finished calling /gateways/razorpay/subscription to record it.
+            //
+            // Those need opposite answers. Acknowledging both meant the race
+            // ended with the donor charged, Razorpay never retrying, and the
+            // donation pending forever with nothing to reconcile it. So if a
+            // donation is waiting on exactly this subscription, ask Razorpay to
+            // deliver again and let the browser callback win the race.
+            $waiting = $this->donations->findByGatewayIntent($this->id(), $subId);
+            if ($waiting instanceof Donation) {
+                return new WebhookOutcome(
+                    signature_ok: true,
+                    external_id:  $eventId,
+                    event_type:   $type,
+                    handled:      false,
+                    error:        'Subscription not recorded yet; retry.',
+                    // 5xx is this codebase's existing signal for "retry me",
+                    // the same as the out-of-order refund path.
+                    http_status:  503,
+                );
+            }
+
             return $this->unmatched($eventId, $type, 'subscription');
         }
 

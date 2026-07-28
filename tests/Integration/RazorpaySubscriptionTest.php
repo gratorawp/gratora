@@ -428,6 +428,45 @@ final class RazorpaySubscriptionTest extends IntegrationTestCase
         $this->assertSame(100000, (int) $plan->total_paid_cents);
     }
 
+    /**
+     * Razorpay charges the moment the donor authorises, so the charge webhook
+     * can beat the browser callback that records the subscription. Answering
+     * 200 to that ended the race with the donor charged, Razorpay never
+     * retrying, and the donation pending forever.
+     */
+    public function test_a_charge_arriving_before_the_callback_asks_for_a_retry(): void
+    {
+        $reference = $this->createDonation();
+        // Deliberately do NOT call recordSubscription: the browser has not
+        // reported back yet, so no plan exists.
+
+        $res = $this->webhook($this->chargedEvent([
+            'id' => 'pay_early', 'amount' => 100000, 'currency' => 'INR',
+            'status' => 'captured', 'method' => 'upi',
+        ]));
+
+        $this->assertGreaterThanOrEqual(500, $res->get_status(), 'a retryable status, not an acknowledgement');
+        $this->assertSame('pending', $this->donations()->findByReference($reference)->status);
+    }
+
+    /** Once the callback lands, the retried delivery settles the donation. */
+    public function test_the_retried_charge_settles_once_the_callback_lands(): void
+    {
+        $reference = $this->createDonation();
+        $charge = $this->chargedEvent([
+            'id' => 'pay_early', 'amount' => 100000, 'currency' => 'INR',
+            'status' => 'captured', 'method' => 'upi',
+        ]);
+
+        $this->webhook($charge);              // too early, asks for a retry
+        $this->recordSubscription($reference); // browser catches up
+        $res = $this->webhook($charge);        // Razorpay redelivers
+
+        $this->assertSame(200, $res->get_status());
+        $this->assertSame('paid', $this->donations()->findByReference($reference)->status);
+        $this->assertSame(1, (int) $this->plans()->findBySubscriptionId('razorpay', 'sub_1')->payments_count);
+    }
+
     public function test_a_cancellation_webhook_ends_the_plan(): void
     {
         $reference = $this->createDonation();
