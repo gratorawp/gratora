@@ -23,8 +23,9 @@ import GiftAidPanel from './panels/GiftAidPanel';
 import RolesPanel from './panels/RolesPanel';
 import AdvancedPanel from './panels/AdvancedPanel';
 import {
-    IconSetup, IconOrganization, IconCurrency, IconGateways,
-    IconEmail, IconReceipt, IconNumbering, IconPrivacy, IconRoles, IconAdvanced,
+    IconSetup, IconOrganization, IconCurrency, IconGateways, IconBrand,
+    IconEmail, IconReceipt, IconNumbering, IconGiftAid, IconPrivacy, IconRoles,
+    IconLicense, IconExtension, IconAdvanced,
 } from './icons';
 
 // Ordered by how often an operator opens it, money first. Add-on tabs land
@@ -33,19 +34,19 @@ const TABS = [
     { key: 'setup',        label: __( 'Setup', 'dono' ),                Icon: IconSetup },
     { key: 'gateways',     label: __( 'Payments', 'dono' ),             Icon: IconGateways },
     { key: 'organization', label: __( 'Organization', 'dono' ),         Icon: IconOrganization },
-    { key: 'brand',        label: __( 'Brand', 'dono' ),                Icon: IconOrganization },
+    { key: 'brand',        label: __( 'Brand', 'dono' ),                Icon: IconBrand },
     { key: 'email',        label: __( 'Emails', 'dono' ),               Icon: IconEmail },
     { key: 'receipts',     label: __( 'Receipts', 'dono' ),             Icon: IconReceipt },
     { key: 'currency',     label: __( 'Currency', 'dono' ),             Icon: IconCurrency },
     { key: 'numbering',    label: __( 'Numbering', 'dono' ),            Icon: IconNumbering },
-    { key: 'gift-aid',     label: __( 'Gift Aid', 'dono' ),             Icon: IconReceipt },
+    { key: 'gift-aid',     label: __( 'Gift Aid', 'dono' ),             Icon: IconGiftAid },
     { key: 'privacy',      label: __( 'Privacy', 'dono' ),              Icon: IconPrivacy },
     { key: 'roles',        label: __( 'Roles', 'dono' ),                Icon: IconRoles },
 ];
 
 // Always last, whatever add-ons register in between.
 const TAIL_TABS = [
-    { key: 'licenses',     label: __( 'Licenses', 'dono' ),             Icon: IconSetup },
+    { key: 'licenses',     label: __( 'Licenses', 'dono' ),             Icon: IconLicense },
     { key: 'advanced',     label: __( 'Advanced', 'dono' ),             Icon: IconAdvanced },
 ];
 
@@ -79,7 +80,12 @@ export default function Settings() {
     const extTabs                         = useExtensionTabs( 'settings' );
     const allTabs                         = [
         ...TABS,
-        ...extTabs.map( ( t ) => ( { key: t.id, label: t.label, Icon: IconAdvanced } ) ),
+        // An add-on may ship its own icon component; otherwise it reads as a plug-in.
+        ...extTabs.map( ( t ) => ( {
+            key: t.id,
+            label: t.label,
+            Icon: typeof t.icon === 'function' ? t.icon : IconExtension,
+        } ) ),
         ...TAIL_TABS,
     ];
 
@@ -217,7 +223,7 @@ export default function Settings() {
                 <span className="sep">›</span>
                 <span>{ __( 'Settings', 'dono' ) }</span>
                 <span className="sep">›</span>
-                <span>{ TABS.find( ( t ) => t.key === tab )?.label || '' }</span>
+                <span>{ allTabs.find( ( t ) => t.key === tab )?.label || '' }</span>
             </div>
 
             <div className="dono-page-head">

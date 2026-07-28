@@ -5,8 +5,12 @@ import {
     CircleDollarSign,
     CreditCard,
     Hash,
+    KeyRound,
+    Landmark,
     Mail,
     MoreHorizontal,
+    Palette,
+    Puzzle,
     Receipt,
     Settings,
     Shield,
@@ -49,6 +53,23 @@ export function IconPrivacy( props ) {
 
 export function IconRoles( props ) {
     return <Users strokeWidth={ STROKE } { ...props } />;
+}
+
+export function IconBrand( props ) {
+    return <Palette strokeWidth={ STROKE } { ...props } />;
+}
+
+export function IconGiftAid( props ) {
+    return <Landmark strokeWidth={ STROKE } { ...props } />;
+}
+
+export function IconLicense( props ) {
+    return <KeyRound strokeWidth={ STROKE } { ...props } />;
+}
+
+// Fallback for an add-on tab that registers no icon of its own.
+export function IconExtension( props ) {
+    return <Puzzle strokeWidth={ STROKE } { ...props } />;
 }
 
 export function IconAdvanced( props ) {
