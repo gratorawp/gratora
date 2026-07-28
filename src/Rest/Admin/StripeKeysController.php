@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dono\Rest\Admin;
 
 use Dono\Foundation\Auth\Capabilities;
+use Dono\Gateways\Stripe\ApplePayDomain;
 use Dono\Gateways\Stripe\StripeAccount;
 use Dono\Gateways\Stripe\StripeApi;
 use Dono\Gateways\Stripe\StripeWebhookProvisioner;
@@ -27,6 +28,7 @@ final class StripeKeysController
     public function __construct(
         private StripeApi $api,
         private StripeAccount $account,
+        private ApplePayDomain $applePay,
     ) {
     }
 
@@ -61,6 +63,55 @@ final class StripeKeysController
                 'mode' => ['type' => 'string', 'enum' => ['test', 'live', 'all'], 'default' => 'all'],
             ],
         ]);
+
+        register_rest_route(self::NAMESPACE, '/gateways/stripe/apple-pay', [
+            'methods'             => WP_REST_Server::CREATABLE,
+            'callback'            => [$this, 'enableApplePay'],
+            'permission_callback' => [$this, 'canManage'],
+            'args'                => [
+                'mode' => ['type' => 'string', 'enum' => ['test', 'live'], 'default' => 'live'],
+                'association_file' => ['type' => 'string'],
+            ],
+        ]);
+    }
+
+    /**
+     * Store Apple's association file, then ask Stripe to register and verify
+     * the domain. Both halves have to be true before Apple Pay renders, so this
+     * does them together and reports whichever one is missing.
+     */
+    public function enableApplePay(WP_REST_Request $request): WP_REST_Response|WP_Error
+    {
+        $test = $request->get_param('mode') === 'test';
+        $file = trim((string) ($request->get_param('association_file') ?? ''));
+
+        if ($file !== '') {
+            $this->applePay->storeAssociationFile($file);
+        }
+
+        if (! $this->applePay->isFileReady()) {
+            return new WP_Error(
+                'dono_apple_pay_no_file',
+                __('Paste the domain association file from Stripe first. Apple checks for it before the button can appear.', 'dono'),
+                ['status' => 400]
+            );
+        }
+
+        try {
+            $result = $this->applePay->registerDomain($test);
+        } catch (RuntimeException $e) {
+            // Already registered is not a failure: re-check instead.
+            try {
+                $result = $this->applePay->refresh($test);
+            } catch (RuntimeException $inner) {
+                return new WP_Error('dono_apple_pay_failed', $inner->getMessage(), ['status' => 400]);
+            }
+        }
+
+        return new WP_REST_Response([
+            'apple_pay' => $result,
+            'domain'    => $this->applePay->domain(),
+        ], 200);
     }
 
     public function canManage(): bool
@@ -76,6 +127,12 @@ final class StripeKeysController
             'account'     => $this->account->get(),
             'webhook_url' => rest_url('dono/v1/webhooks/stripe'),
             'has_webhook_secret' => $this->api->hasWebhookSecret(),
+            'apple_pay' => [
+                'domain'    => $this->applePay->domain(),
+                'has_file'  => $this->applePay->isFileReady(),
+                'test'      => $this->applePay->status(true),
+                'live'      => $this->applePay->status(false),
+            ],
         ], 200);
     }
 

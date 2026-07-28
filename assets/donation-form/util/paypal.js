@@ -18,6 +18,9 @@ function sdkUrl( { clientId, currency, vault } ) {
             ? { vault: 'true', intent: 'subscription' }
             : { intent: 'capture' } ),
         components: 'buttons',
+        // Venmo is off unless asked for. PayPal still only shows it to eligible
+        // buyers (US, USD), so requesting it is safe everywhere else.
+        'enable-funding': 'venmo',
     } );
     return `https://www.paypal.com/sdk/js?${ params.toString() }`;
 }

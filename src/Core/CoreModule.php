@@ -134,6 +134,7 @@ use Dono\Gateways\PayPal\PayPalAccount;
 use Dono\Gateways\PayPal\PayPalApi;
 use Dono\Gateways\PayPal\PayPalGateway;
 use Dono\Gateways\PayPal\PayPalPlans;
+use Dono\Gateways\Stripe\ApplePayDomain;
 use Dono\Gateways\Stripe\StripeAccount;
 use Dono\Gateways\Stripe\StripeGateway;
 use Dono\Gateways\TestMode;
@@ -498,6 +499,10 @@ final class CoreModule implements DonoModule
         $c->bind(StripeApi::class, fn (Container $c) => new StripeApi(
             $c->get(StripeAccount::class)
         ));
+        $c->bind(ApplePayDomain::class, fn (Container $c) => new ApplePayDomain(
+            $c->get(StripeApi::class),
+            $c->get(StripeAccount::class)
+        ));
         $c->bind(PayPalAccount::class, fn (Container $c) => new PayPalAccount(
             $c->get(Crypto::class)
         ));
@@ -710,6 +715,7 @@ final class CoreModule implements DonoModule
             new StripeKeysController(
                 $c->get(StripeApi::class),
                 $c->get(StripeAccount::class),
+                $c->get(ApplePayDomain::class),
             ),
             new PayPalKeysController(
                 $c->get(PayPalApi::class),
@@ -822,6 +828,9 @@ final class CoreModule implements DonoModule
         $formShortcode->register();
 
         (new PortalShortcode())->register();
+        // Serves Apple's domain association file on the front end, so it must
+        // register outside any is_admin() gate.
+        $c->get(ApplePayDomain::class)->register();
 
         add_action('dono.settings.updated', static function (string $group, array $next): void {
             if ($group === 'roles') {
