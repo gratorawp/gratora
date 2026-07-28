@@ -145,7 +145,9 @@ final class DonationFormShortcode extends HookProvider
             ));
         }
 
-        // Public front end: the form and its campaign must both be published.
+        // Public front end: the form must be published and its campaign must be
+        // open (published, and inside its schedule if it has one). Rendering a
+        // form the submit gate will refuse is worse than rendering nothing.
         // A block add-on can preview an unpublished form in the editor by opting
         // in through this filter; it only takes effect for a user who can edit,
         // so the gate is never bypassed for a public visitor.
@@ -156,7 +158,7 @@ final class DonationFormShortcode extends HookProvider
                 return '';
             }
             $campaign = $this->campaigns ? $this->campaigns->findById($form->campaign_id) : null;
-            if (! $campaign || $campaign->status !== 'published') {
+            if (! $campaign || ! $campaign->acceptsDonations()) {
                 return '';
             }
         }

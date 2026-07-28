@@ -140,14 +140,14 @@ final class DonationsController
                         ['status' => 403]
                     );
                 }
-                // The render gate also requires a published campaign; enforce it
-                // here too so an archived/unpublished campaign stops taking
-                // donations. Otherwise a stale (day-bucketed) form token or a
-                // direct POST lands on the archived campaign, inflating its
+                // The render gate applies the same rule; enforce it here too so
+                // an archived, unpublished or out-of-schedule campaign stops
+                // taking donations. Otherwise a stale (day-bucketed) form token
+                // or a direct POST lands on the closed campaign, inflating its
                 // totals and re-arming the delete guard so it can't be removed.
                 if ($form->campaign_id) {
                     $campaign = Campaign::query()->find('id', (int) $form->campaign_id);
-                    if (! $campaign || $campaign->status !== 'published') {
+                    if (! $campaign || ! $campaign->acceptsDonations()) {
                         return new WP_Error(
                             'dono_campaign_not_available',
                             __('This campaign is not accepting donations.', 'dono'),
@@ -510,12 +510,11 @@ final class DonationsController
         if ($id <= 0) {
             return null;
         }
-        // Only published campaigns take credit for client-submitted ids; the
-        // form-bound path enforces the same gate above, and crediting an
-        // archived campaign would inflate its totals and re-arm its delete
-        // guard.
+        // Only campaigns currently open take credit for client-submitted ids;
+        // the form-bound path enforces the same gate above, and crediting a
+        // closed campaign would inflate its totals and re-arm its delete guard.
         $campaign = Campaign::query()->where('id', $id)->get();
-        return ($campaign && $campaign->status === 'published') ? $id : null;
+        return ($campaign && $campaign->acceptsDonations()) ? $id : null;
     }
 
     /**

@@ -66,6 +66,65 @@ final class Campaign extends Model
     {
         return (new CampaignStyleResolver())->accentFor($this);
     }
+
+    /**
+     * The single answer to "can this campaign take money right now".
+     *
+     * The rule was previously spelled out at each gate as a bare status check,
+     * in three places, and not one of them read the schedule the admin set: a
+     * campaign that closed on Friday still took donations on Saturday. Adding a
+     * condition here now reaches every gate at once.
+     *
+     * $now is UTC, matching how starts_at / ends_at are stored and how
+     * CampaignRepository already compares them.
+     */
+    public function acceptsDonations(?string $now = null): bool
+    {
+        if ($this->status !== 'published') return false;
+
+        $now ??= gmdate('Y-m-d H:i:s');
+
+        $starts = self::startBoundary($this->starts_at);
+        if ($starts !== null && $starts > $now) return false;
+
+        $ends = self::endBoundary($this->ends_at);
+        if ($ends !== null && $ends < $now) return false;
+
+        return true;
+    }
+
+    private static function startBoundary(?string $stamp): ?string
+    {
+        $stamp = self::clean($stamp);
+        if ($stamp === null) return null;
+        return strlen($stamp) <= 10 ? $stamp . ' 00:00:00' : $stamp;
+    }
+
+    /**
+     * An end date is inclusive of the whole of that day: "ends 28 July" still
+     * takes a donation at 10am on the 28th.
+     *
+     * The column is a datetime, so a date the admin picked has already been
+     * normalised to midnight by the time we read it back, and midnight is not
+     * distinguishable from a deliberate 00:00:00 end. The schedule UI only ever
+     * emits dates, so reading midnight as end-of-day matches what was actually
+     * chosen; the alternative silently costs every campaign its final day.
+     */
+    private static function endBoundary(?string $stamp): ?string
+    {
+        $stamp = self::clean($stamp);
+        if ($stamp === null) return null;
+        if (strlen($stamp) <= 10) return $stamp . ' 23:59:59';
+        return substr($stamp, 11) === '00:00:00'
+            ? substr($stamp, 0, 10) . ' 23:59:59'
+            : $stamp;
+    }
+
+    private static function clean(?string $stamp): ?string
+    {
+        $stamp = trim(str_replace('T', ' ', (string) $stamp));
+        return $stamp === '' ? null : $stamp;
+    }
 }
 
 Campaign::schema(function (Table $t): void {

@@ -9,9 +9,10 @@ use Dono\Forms\Form;
 use WP_REST_Request;
 
 /**
- * Render gate: `[dono_donation_form slug="..."]` returns '' unless BOTH the
- * form and its campaign are status=published. Regression coverage for the
- * "form must live under an active campaign" rule.
+ * Render gate: `[dono_donation_form slug="..."]` returns '' unless the form is
+ * published and its campaign is open. Regression coverage for the "form must
+ * live under an active campaign" rule, which covers both the campaign's status
+ * and the schedule the admin set on it.
  */
 final class CampaignFormGateTest extends IntegrationTestCase
 {
@@ -115,6 +116,86 @@ final class CampaignFormGateTest extends IntegrationTestCase
 
         $this->assertSame(403, $res->get_status());
         $this->assertSame('dono_campaign_not_available', $res->get_data()['code'] ?? null);
+    }
+
+    public function test_a_campaign_past_its_end_date_stops_rendering_the_form(): void
+    {
+        $this->schedule(null, gmdate('Y-m-d', strtotime('-1 day')));
+
+        $this->assertSame('', do_shortcode('[dono_donation_form slug="' . $this->formSlug . '"]'));
+    }
+
+    /**
+     * The whole point: a campaign that closed on Friday must not still be taking
+     * money on Saturday.
+     */
+    public function test_a_campaign_past_its_end_date_rejects_a_direct_post(): void
+    {
+        $this->schedule(null, gmdate('Y-m-d', strtotime('-1 day')));
+
+        $res = $this->postDonation();
+
+        $this->assertSame(403, $res->get_status());
+        $this->assertSame('dono_campaign_not_available', $res->get_data()['code'] ?? null);
+    }
+
+    /**
+     * A date-only end is the whole of that day. Comparing the stored
+     * '2026-07-28' against '2026-07-28 10:00:00' as raw strings would close the
+     * campaign at midnight and lose it a full day of donations.
+     */
+    public function test_a_campaign_ending_today_still_takes_donations_all_day(): void
+    {
+        $this->schedule(null, gmdate('Y-m-d'));
+
+        $this->assertStringContainsString(
+            'dono-donation-form--blocks',
+            do_shortcode('[dono_donation_form slug="' . $this->formSlug . '"]')
+        );
+        $this->assertSame(201, $this->postDonation()->get_status());
+    }
+
+    public function test_a_campaign_that_has_not_started_yet_takes_nothing(): void
+    {
+        $this->schedule(gmdate('Y-m-d', strtotime('+2 days')), null);
+
+        $this->assertSame('', do_shortcode('[dono_donation_form slug="' . $this->formSlug . '"]'));
+        $this->assertSame(403, $this->postDonation()->get_status());
+    }
+
+    public function test_a_campaign_starting_today_is_already_open(): void
+    {
+        $this->schedule(gmdate('Y-m-d'), gmdate('Y-m-d', strtotime('+7 days')));
+
+        $this->assertSame(201, $this->postDonation()->get_status());
+    }
+
+    /** No schedule set is the common case and must be untouched by any of this. */
+    public function test_a_campaign_with_no_schedule_is_unaffected(): void
+    {
+        $this->assertSame(201, $this->postDonation()->get_status());
+    }
+
+    private function schedule(?string $startsAt, ?string $endsAt): void
+    {
+        $campaign = Campaign::query()->find('id', $this->campaignId);
+        $campaign->starts_at = $startsAt;
+        $campaign->ends_at   = $endsAt;
+        $campaign->save();
+    }
+
+    private function postDonation(): \WP_REST_Response
+    {
+        $req = new WP_REST_Request('POST', '/dono/v1/donations');
+        $req->set_header('content-type', 'application/json');
+        $req->set_body(json_encode([
+            'form_id'      => $this->formId,
+            'email'        => 'donor@example.com',
+            'amount_cents' => 2500,
+            'currency'     => 'USD',
+            'gateway'      => 'offline',
+        ]));
+        return rest_do_request($req);
     }
 
     public function test_donation_post_is_rejected_when_the_form_was_deleted(): void
