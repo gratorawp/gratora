@@ -7,6 +7,7 @@ namespace Dono\Tests\Integration;
 use Dono\Campaigns\Campaign;
 use Dono\Forms\Form;
 use WP_REST_Request;
+use WP_REST_Response;
 
 /**
  * Render gate: `[dono_donation_form slug="..."]` returns '' unless the form is
@@ -184,7 +185,7 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $campaign->save();
     }
 
-    private function postDonation(): \WP_REST_Response
+    private function postDonation(): WP_REST_Response
     {
         $req = new WP_REST_Request('POST', '/dono/v1/donations');
         $req->set_header('content-type', 'application/json');

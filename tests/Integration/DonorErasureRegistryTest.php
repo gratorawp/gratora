@@ -11,6 +11,7 @@ use Dono\Donors\DonorService;
 use Dono\Donors\Erasure\ErasureHandler;
 use Dono\Donors\Erasure\ErasureRequest;
 use Dono\Foundation\Plugin;
+use RuntimeException;
 use Dono\Webhooks\WebhookLog;
 
 /**
@@ -215,7 +216,7 @@ final class DonorErasureRegistryTest extends IntegrationTestCase
 
             public function erase(ErasureRequest $request): void
             {
-                throw new \RuntimeException('this add-on cannot complete its part');
+                throw new RuntimeException('this add-on cannot complete its part');
             }
         };
         $add = static function (array $h) use ($exploder): array {
@@ -227,7 +228,7 @@ final class DonorErasureRegistryTest extends IntegrationTestCase
         try {
             $this->erase();
             $this->fail('the failure should surface, not be swallowed');
-        } catch (\RuntimeException $e) {
+        } catch (RuntimeException $e) {
             $this->assertStringContainsString('cannot complete', $e->getMessage());
         } finally {
             remove_filter('dono.donor.erasure_handlers', $add);

@@ -18,6 +18,7 @@ use Dono\Analytics\EventRecorder;
 use Dono\Async\AsyncDispatcher;
 use Dono\Campaigns\CampaignPermalinks;
 use Dono\Campaigns\CampaignTypeRegistry;
+use Dono\Campaigns\DefaultCampaignTypeHandler;
 use Dono\Currency\FxRates;
 use Dono\Currency\FxRatesUpdater;
 use Dono\Campaigns\Campaign;
@@ -31,6 +32,7 @@ use Dono\Dashboard\DashboardMetricsService;
 use Dono\Donations\AggregateSyncer;
 use Dono\Donations\AntiSpamGuard;
 use Dono\Donations\Donation;
+use Dono\Donations\DonationEmails;
 use Dono\Donations\DonationNote;
 use Dono\Donations\DonationNoteRepository;
 use Dono\Donations\DonationRepository;
@@ -46,14 +48,20 @@ use Dono\Donors\DonorEmailRehasher;
 use Dono\Donors\DonorMetricsService;
 use Dono\Donors\DonorNote;
 use Dono\Donors\DonorNoteRepository;
+use Dono\Donors\DonorPurge;
 use Dono\Donors\DonorRepository;
 use Dono\Donors\DonorService;
+use Dono\Donors\Erasure\AnalyticsEventHandler;
+use Dono\Donors\Erasure\CoreDonorDataHandler;
+use Dono\Donors\Erasure\ErasureRegistry;
+use Dono\Donors\Erasure\WebhookLogHandler;
 use Dono\Donors\MagicLinkService;
 use Dono\Donors\MagicLinkToken;
 use Dono\Donors\Portal\AnnualStatementBuilder;
 use Dono\Donors\Portal\PortalSession;
 use Dono\Donors\Portal\PortalShortcode;
 use Dono\Campaigns\Blocks\BlockEditorIntegration as CampaignBlockEditorIntegration;
+use Dono\Campaigns\Blocks\CampaignBindings;
 use Dono\Campaigns\Blocks\CampaignGridBlock;
 use Dono\Campaigns\Blocks\CampaignHeroBlock;
 use Dono\Campaigns\Blocks\CampaignProgressBlock;
@@ -176,6 +184,8 @@ use Dono\Rest\Admin\StripeKeysController;
 use Dono\Rest\Admin\UserPrefsController;
 use Dono\Rest\Portal\PortalController as PortalController;
 use Dono\Rest\DonationsController;
+use Dono\Rest\PayPalController;
+use Dono\Rest\RazorpayController;
 use Dono\Rest\ReceiptsController;
 use Dono\Rest\RestProvider;
 use Dono\Rest\WebhookController;
@@ -380,31 +390,31 @@ final class CoreModule implements DonoModule
             $c->get(Clock::class)
         ));
 
-        $c->bind(\Dono\Donors\Erasure\ErasureRegistry::class, fn (Container $c) => new \Dono\Donors\Erasure\ErasureRegistry());
+        $c->bind(ErasureRegistry::class, fn (Container $c) => new ErasureRegistry());
 
         // Core erases through the same registry add-ons use, so there is one
         // mechanism and one order rather than core's inline copy plus a hook
         // everyone else is expected to remember.
         add_filter('dono.donor.erasure_handlers', static function (array $handlers): array {
-            $handlers[] = new \Dono\Donors\Erasure\CoreDonorDataHandler();
-            $handlers[] = new \Dono\Donors\Erasure\AnalyticsEventHandler();
-            $handlers[] = new \Dono\Donors\Erasure\WebhookLogHandler();
+            $handlers[] = new CoreDonorDataHandler();
+            $handlers[] = new AnalyticsEventHandler();
+            $handlers[] = new WebhookLogHandler();
             return $handlers;
         });
 
-        $c->bind(\Dono\Donors\DonorPurge::class, fn (Container $c) => new \Dono\Donors\DonorPurge(
+        $c->bind(DonorPurge::class, fn (Container $c) => new DonorPurge(
             $c->get(AsyncDispatcher::class),
             $c->get(Clock::class)
         ));
-        $c->get(\Dono\Donors\DonorPurge::class)->register();
+        $c->get(DonorPurge::class)->register();
 
         $c->bind(DonorService::class, fn (Container $c) => new DonorService(
             $c->get(DonorRepository::class),
             $c->get(IdentityHasher::class),
             $c->get(Crypto::class),
             $c->get(Clock::class),
-            $c->get(\Dono\Donors\Erasure\ErasureRegistry::class),
-            $c->get(\Dono\Donors\DonorPurge::class)
+            $c->get(ErasureRegistry::class),
+            $c->get(DonorPurge::class)
         ));
 
         $c->get(DonorRetention::class)->register();
@@ -454,7 +464,7 @@ final class CoreModule implements DonoModule
 
         // Sends non-receipt donation emails (offline instructions, refund
         // notice, tribute notification). Receipt emails are handled by ReceiptIssuer.
-        $c->bind(\Dono\Donations\DonationEmails::class, fn (Container $c) => new \Dono\Donations\DonationEmails(
+        $c->bind(DonationEmails::class, fn (Container $c) => new DonationEmails(
             $c->get(Mailer::class),
             $c->get(DonorRepository::class),
             $c->get(DonorService::class),
@@ -462,7 +472,7 @@ final class CoreModule implements DonoModule
             $c->get(CampaignRepository::class),
             $c->get(DonationTributeRepository::class),
         ));
-        $c->get(\Dono\Donations\DonationEmails::class)->register();
+        $c->get(DonationEmails::class)->register();
 
         $c->bind(PortalController::class, fn (Container $c) => new PortalController(
             $c->get(PortalSession::class),
@@ -493,7 +503,7 @@ final class CoreModule implements DonoModule
 
         $c->bind( CampaignTypeRegistry::class, function (): CampaignTypeRegistry {
             $r = new CampaignTypeRegistry();
-            $r->register(new \Dono\Campaigns\DefaultCampaignTypeHandler());
+            $r->register(new DefaultCampaignTypeHandler());
             do_action('dono.campaign_types.register', $r);
             return $r;
         });
@@ -770,7 +780,7 @@ final class CoreModule implements DonoModule
                 $c->get(PayPalApi::class),
                 $c->get(PayPalAccount::class),
             ),
-            new \Dono\Rest\PayPalController(
+            new PayPalController(
                 $c->get(DonationRepository::class),
                 $c->get(DonationService::class),
                 $c->get(GatewayManager::class),
@@ -783,7 +793,7 @@ final class CoreModule implements DonoModule
                 $c->get(RazorpayApi::class),
                 $c->get(RazorpayAccount::class),
             ),
-            new \Dono\Rest\RazorpayController(
+            new RazorpayController(
                 $c->get(DonationRepository::class),
                 $c->get(DonationService::class),
                 $c->get(GatewayManager::class),
@@ -883,7 +893,7 @@ final class CoreModule implements DonoModule
         add_action('init', [$blocks, 'register']);
 
         (new CampaignBlockEditorIntegration())->register();
-        (new \Dono\Campaigns\Blocks\CampaignBindings($c->get(CampaignRepository::class)))->register();
+        (new CampaignBindings($c->get(CampaignRepository::class)))->register();
 
         $formShortcode->register();
 

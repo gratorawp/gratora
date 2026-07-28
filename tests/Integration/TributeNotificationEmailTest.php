@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Tests\Integration;
 
+use ArrayObject;
 use WP_REST_Request;
 
 /**
@@ -127,7 +128,7 @@ final class TributeNotificationEmailTest extends IntegrationTestCase
     /**
      * @return list<array{to:?string,subject:?string,message:?string}>
      */
-    private function mailsTo(\ArrayObject $mails, string $address): array
+    private function mailsTo(ArrayObject $mails, string $address): array
     {
         $hits = [];
         foreach ($mails as $m) {

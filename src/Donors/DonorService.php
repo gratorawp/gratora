@@ -12,6 +12,7 @@ use Dono\Foundation\Crypto\Crypto;
 use Dono\Foundation\Identity\IdentityHasher;
 use Dono\Foundation\Time\Clock;
 use InvalidArgumentException;
+use Throwable;
 use Dono\Vendor\Queryable\DB;
 
 /**
@@ -338,7 +339,7 @@ final class DonorService
         if ($value === null || $value === '') return null;
         try {
             return $this->crypto->decrypt($value);
-        } catch (\Throwable) {
+        } catch (Throwable) {
             return null;
         }
     }
