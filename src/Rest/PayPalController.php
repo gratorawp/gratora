@@ -173,7 +173,7 @@ final class PayPalController
     private function createPlan(Donation $donation, string $subId, array $sub, string $status): RecurringPlan
     {
         $now = $this->clock->now()->format('Y-m-d H:i:s');
-        [$unit, $count] = $this->intervalFor((string) $donation->frequency);
+        [$unit, $count] = FrequencyMap::toStripe((string) $donation->frequency);
 
         $plan = RecurringPlan::make();
         $plan->donor_id           = (int) $donation->donor_id;
@@ -206,17 +206,6 @@ final class PayPalController
         $donation->save();
 
         return $plan;
-    }
-
-    /** @return array{0:string,1:int} */
-    private function intervalFor(string $frequency): array
-    {
-        return match ($frequency) {
-            'weekly'    => ['week', 1],
-            'quarterly' => ['month', 3],
-            'yearly'    => ['year', 1],
-            default     => ['month', 1],
-        };
     }
 
     private function pendingDonation(string $reference): Donation|WP_Error

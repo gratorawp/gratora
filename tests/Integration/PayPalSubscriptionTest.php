@@ -107,7 +107,7 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
 
     private string $currentReference = '';
 
-    private function createRecurringDonation(int $amount = 2500): string
+    private function createRecurringDonation(int $amount = 2500, string $frequency = 'monthly'): string
     {
         $req = new WP_REST_Request('POST', '/dono/v1/donations');
         $req->set_header('content-type', 'application/json');
@@ -116,7 +116,7 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
             'amount_cents' => $amount,
             'currency'     => 'USD',
             'gateway'      => 'paypal',
-            'frequency'    => 'monthly',
+            'frequency'    => $frequency,
             'profile'      => ['first_name' => 'Sub', 'last_name' => 'Scriber'],
         ]));
         $res  = rest_do_request($req);
@@ -194,6 +194,25 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
 
         // No order is opened for a subscription: PayPal bills from the plan.
         $this->assertNull($this->findCall('/v2/checkout/orders'));
+    }
+
+    /**
+     * "Every 2 weeks" is a frequency donors can pick on the form. A local
+     * interval table with a monthly default silently billed them once a month
+     * instead, and stamped the wrong interval on the plan row as well.
+     */
+    public function test_biweekly_bills_every_two_weeks_not_monthly(): void
+    {
+        $reference = $this->createRecurringDonation(2500, 'biweekly');
+
+        $plan = $this->findCall('/v1/billing/plans');
+        $this->assertSame('WEEK', $plan['body']['billing_cycles'][0]['frequency']['interval_unit'] ?? null);
+        $this->assertSame(2, $plan['body']['billing_cycles'][0]['frequency']['interval_count'] ?? null);
+
+        $this->recordSubscription($reference);
+        $local = $this->plans()->findBySubscriptionId('paypal', 'I-SUB-1');
+        $this->assertSame('week', $local->interval_unit);
+        $this->assertSame(2, (int) $local->interval_count);
     }
 
     /** A repeat of the same amount and interval must reuse the plan. */

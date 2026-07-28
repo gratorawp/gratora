@@ -683,15 +683,15 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware
         );
     }
 
-    /** @return array{0:string,1:int} interval unit + count for a Dono frequency. */
+    /**
+     * @return array{0:string,1:int} interval unit + count for a Dono frequency.
+     *
+     * Delegates to FrequencyMap rather than repeating the table: a local match
+     * with a monthly default silently billed biweekly donors once a month.
+     */
     private function intervalFor(string $frequency): array
     {
-        return match ($frequency) {
-            'weekly'    => ['week', 1],
-            'quarterly' => ['month', 3],
-            'yearly'    => ['year', 1],
-            default     => ['month', 1],
-        };
+        return FrequencyMap::toStripe($frequency);
     }
 
     private function isAlreadyCaptured(RuntimeException $e): bool
