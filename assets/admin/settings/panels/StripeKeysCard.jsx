@@ -434,7 +434,7 @@ export default function StripeKeysCard( { s } ) {
                     <>
                         <FormRow
                             label={ __( 'Webhook signing secret (test)', 'dono' ) }
-                            help={ __( 'From the test-mode Stripe webhook endpoint. Needed for paid / refund / dispute updates on test donations.', 'dono' ) }
+                            help={ __( 'From the test-mode Stripe webhook endpoint. Needed for paid, refund and dispute updates on test donations. Once saved it is hidden, so the dots mean it is set: type a new one to replace it, or clear the field to remove it.', 'dono' ) }
                         >
                             <KeyField
                                 value={ s.value( 'stripe.webhook_secret_test', '' ) }
@@ -445,7 +445,7 @@ export default function StripeKeysCard( { s } ) {
                         </FormRow>
                         <FormRow
                             label={ __( 'Webhook signing secret (live)', 'dono' ) }
-                            help={ __( 'From the live-mode Stripe webhook endpoint. Stripe issues a separate secret for live; without it, live webhooks are rejected.', 'dono' ) }
+                            help={ __( 'From the live-mode Stripe webhook endpoint. Stripe issues a separate secret for live; without it, live webhooks are rejected. Once saved it is hidden, same as the test one.', 'dono' ) }
                         >
                             <KeyField
                                 value={ s.value( 'stripe.webhook_secret_live', '' ) }

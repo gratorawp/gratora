@@ -41,6 +41,7 @@ use Dono\Recurring\RecurringCanceller;
 use Dono\Recurring\RecurringPlan;
 use Dono\Recurring\RecurringPlanRepository;
 use Dono\Settings\SettingsService;
+use Dono\Settings\SecretRedactor;
 
 /**
  * Registers core domain operations as Command objects.
@@ -63,8 +64,6 @@ final class CoreCommandProvider
     private const SETTINGS_GROUPS = ['org-profile', 'currency-locale', 'org-brand', 'receipts', 'email', 'numbering', 'consents'];
 
     /** Key names that name a secret; their values are redacted on read and refused on write, at any depth. */
-    private const SECRET_KEY_PATTERN = '/secret|password|token|api[_-]?key|private[_-]?key|webhook/i';
-
     public function register(CommandRegistry $r, Container $c): void
     {
         $this->donations($r, $c);
@@ -1825,14 +1824,14 @@ final class CoreCommandProvider
                 $current  = $settings->get($group);
                 $settable = [];
                 foreach ($current as $key => $_v) {
-                    if (is_string($key) && ! preg_match(self::SECRET_KEY_PATTERN, $key)) {
+                    if (is_string($key) && ! SecretRedactor::isSecretKey($key)) {
                         $settable[$key] = true;
                     }
                 }
 
                 $validated = [];
                 foreach ($values as $key => $value) {
-                    if (is_string($key) && preg_match(self::SECRET_KEY_PATTERN, $key)) {
+                    if (is_string($key) && SecretRedactor::isSecretKey($key)) {
                         throw new CommandError(sprintf('The "%s" setting holds a secret and cannot be set here.', $key));
                     }
                     if (! isset($settable[$key])) {
@@ -1849,27 +1848,17 @@ final class CoreCommandProvider
     }
 
     /**
-     * Replace every secret-shaped value with "***", walking nested arrays to any
-     * depth. A matching key redacts its whole value (scalar or subtree); other
-     * keys with array values are recursed into. Defence in depth: the
-     * allowlisted groups hold no secrets, but a future key (or an add-on group
-     * behind the same enum) might.
+     * Secrets are masked by SecretRedactor, the single owner of this rule. The
+     * REST settings read used to skip it and returned the Stripe webhook
+     * signing secret in plaintext, so it now lives in one place both callers
+     * use.
      *
      * @param array<string,mixed> $values
      * @return array<string,mixed>
      */
     private function redactSecrets(array $values): array
     {
-        foreach ($values as $key => $value) {
-            if (is_string($key) && preg_match(self::SECRET_KEY_PATTERN, $key)) {
-                $values[$key] = '***';
-                continue;
-            }
-            if (is_array($value)) {
-                $values[$key] = $this->redactSecrets($value);
-            }
-        }
-        return $values;
+        return SecretRedactor::redact($values);
     }
 
     /**

@@ -33,16 +33,20 @@ final class GatewaySecretTest extends IntegrationTestCase
         return (string) ($stored['stripe']['webhook_secret_test'] ?? '');
     }
 
-    public function test_a_settings_manager_reads_back_the_real_secret(): void
+    /**
+     * This used to assert the opposite, so the field could reveal the secret.
+     * That traded the confidentiality of the ONLY authentication on
+     * /dono/v1/webhooks/stripe for a UI convenience: reading it was enough to
+     * forge a paid donation with no donations capability at all.
+     */
+    public function test_a_settings_manager_never_reads_back_the_real_secret(): void
     {
         $this->put('gateways', ['stripe' => ['webhook_secret_test' => 'whsec_realsecret']]);
 
         $shown = $this->show('gateways');
-        $this->assertSame(
-            'whsec_realsecret',
-            $shown['stripe']['webhook_secret_test'] ?? '',
-            'the stored secret comes back so the field can reveal it'
-        );
+
+        $this->assertSame('***', $shown['stripe']['webhook_secret_test'] ?? '');
+        $this->assertStringNotContainsString('whsec_realsecret', (string) wp_json_encode($shown));
     }
 
     public function test_a_save_that_omits_the_secret_leaves_it_intact(): void

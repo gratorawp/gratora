@@ -10,6 +10,7 @@ use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
+use Dono\Settings\SecretRedactor;
 
 /**
  * Admin settings read/write by group key.
@@ -51,8 +52,10 @@ final class SettingsController
         if (! $this->settings->knows($group)) {
             return new WP_Error('dono_unknown_group', __('Unknown settings group.', 'dono'), ['status' => 404]);
         }
-        $data = $this->settings->get($group);
-        return new WP_REST_Response($data, 200);
+        // Never hand a stored secret back out. The gateways group holds the
+        // Stripe webhook signing secret, which is the only authentication on
+        // the webhook route: reading it was enough to forge a paid donation.
+        return new WP_REST_Response(SecretRedactor::redact($this->settings->get($group)), 200);
     }
 
     public function update(WP_REST_Request $request): WP_REST_Response|WP_Error
@@ -75,9 +78,13 @@ final class SettingsController
         if ($allowed !== []) {
             $body = array_intersect_key($body, array_flip($allowed));
         }
-        $body  = $this->sanitize($body);
+        $body = $this->sanitize($body);
+        // The read path masks secrets, so a client that round-trips the group
+        // sends the mask back. Put the stored value behind it, otherwise saving
+        // any unrelated field would wipe the signing secret.
+        $body  = SecretRedactor::restore($body, $this->settings->get($group));
         $saved = $this->settings->update($group, $body);
-        return new WP_REST_Response($saved, 200);
+        return new WP_REST_Response(SecretRedactor::redact($saved), 200);
     }
 
     /**
