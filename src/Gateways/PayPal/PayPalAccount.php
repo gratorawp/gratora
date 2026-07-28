@@ -110,12 +110,18 @@ final class PayPalAccount
 
     /**
      * PayPal has no "charges enabled" flag equivalent to Stripe's: a REST app
-     * with working credentials can take payments. Credentials are verified at
-     * save time, so having them is the readiness signal.
+     * with working credentials can take payments, and credentials are verified
+     * at save time, so having them is the readiness signal.
+     *
+     * Deliberately mode-independent. This answers "may the form offer PayPal",
+     * which is asked before any donation has fixed a mode, and the mode
+     * override is per-operation state on a shared instance: keying off it made
+     * a live-mode call earlier in the request hide PayPal from a sandbox form.
+     * A charge in a mode with no credentials still fails closed in PayPalApi.
      */
     public function canCharge(): bool
     {
-        return $this->hasKeysFor($this->isTestMode());
+        return $this->isConnected();
     }
 
     public function useTestMode(bool $test): void
