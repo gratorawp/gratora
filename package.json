@@ -13,7 +13,8 @@
         "test:visual:update": "DONO_E2E_VISUAL=1 playwright test --project=visual --update-snapshots",
         "db:reset": "php bin/reseed.php",
         "db:seed-demo": "php -d memory_limit=512M bin/seed-demo.php",
-        "copy:vendor-css": "mkdir -p build/admin/campaigns build/admin/donations build/admin/donors build/admin/forms build/admin/funds && cp node_modules/@wordpress/dataviews/build-style/style.css build/admin/campaigns/dataviews.css && cp node_modules/@wordpress/dataviews/build-style/style.css build/admin/donations/dataviews.css && cp node_modules/@wordpress/dataviews/build-style/style.css build/admin/donors/dataviews.css && cp node_modules/@wordpress/dataviews/build-style/style.css build/admin/forms/dataviews.css && cp node_modules/@wordpress/dataviews/build-style/style.css build/admin/funds/dataviews.css"
+        "copy:vendor-css": "mkdir -p build/admin/campaigns build/admin/donations build/admin/donors build/admin/forms build/admin/funds && cp node_modules/@wordpress/dataviews/build-style/style.css build/admin/campaigns/dataviews.css && cp node_modules/@wordpress/dataviews/build-style/style.css build/admin/donations/dataviews.css && cp node_modules/@wordpress/dataviews/build-style/style.css build/admin/donors/dataviews.css && cp node_modules/@wordpress/dataviews/build-style/style.css build/admin/forms/dataviews.css && cp node_modules/@wordpress/dataviews/build-style/style.css build/admin/funds/dataviews.css",
+        "package": "node bin/package.mjs"
     },
     "devDependencies": {
         "@playwright/test": "^1.60.0",

@@ -31,3 +31,6 @@ CLAUDE.md
 # Internal engineering direction: what we deferred, declined and are watching.
 # Useful to us, useful to a competitor, and not shipped code.
 ROADMAP.md
+
+# Packaged zips from `npm run package`.
+/dist/
