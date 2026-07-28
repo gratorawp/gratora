@@ -28,3 +28,6 @@ package-lock.json
 # it describes the Pro add-on line and the licensing model, which have no place
 # in the free core's public repo. Kept on disk, just not published.
 CLAUDE.md
+# Internal engineering direction: what we deferred, declined and are watching.
+# Useful to us, useful to a competitor, and not shipped code.
+ROADMAP.md
