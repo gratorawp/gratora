@@ -568,42 +568,17 @@ final class CoreCommandProvider
             self::META,
             function (array $in) use ($c): array {
                 $campaign = $c->get(CampaignRepository::class)->findById((int) ($in['campaign_id'] ?? 0));
-                if (! $campaign) {
-                    return [];
-                }
-                $rows = [];
-                if (array_key_exists('title', $in) && (string) $in['title'] !== (string) $campaign->title) {
-                    $rows[] = ['label' => 'Title', 'from' => (string) $campaign->title, 'to' => (string) $in['title']];
-                }
-                if (array_key_exists('status', $in) && (string) $in['status'] !== (string) $campaign->status) {
-                    $rows[] = ['label' => 'Status', 'from' => (string) $campaign->status, 'to' => (string) $in['status']];
-                }
-                if (array_key_exists('goal_cents', $in) && (int) $in['goal_cents'] !== (int) $campaign->goal_cents) {
-                    $rows[] = [
-                        'label' => 'Goal amount',
-                        'from'  => Money::format((int) $campaign->goal_cents, (string) $campaign->currency),
-                        'to'    => Money::format((int) $in['goal_cents'], (string) $campaign->currency),
-                    ];
-                }
-                if (array_key_exists('goal_count', $in) && (int) $in['goal_count'] !== (int) $campaign->goal_count) {
-                    $rows[] = ['label' => 'Goal count', 'from' => (string) (int) $campaign->goal_count, 'to' => (string) (int) $in['goal_count']];
-                }
-                if (array_key_exists('campaign_type', $in) && (string) $in['campaign_type'] !== (string) $campaign->campaign_type) {
-                    $rows[] = ['label' => 'Campaign type', 'from' => (string) $campaign->campaign_type, 'to' => (string) $in['campaign_type']];
-                }
-                return $rows;
+
+                return $campaign ? $this->campaignChangeSet($in, $campaign)['rows'] : [];
             },
             function (array $in) use ($c): ?array {
-                // Reversible when the update flips status: undo restores the
-                // campaign's current (pre-update) status.
-                if (! array_key_exists('status', $in)) {
-                    return null;
-                }
                 $campaign = $c->get(CampaignRepository::class)->findById((int) ($in['campaign_id'] ?? 0));
-                if (! $campaign || (string) $in['status'] === (string) $campaign->status) {
+                if (! $campaign) {
                     return null;
                 }
-                return ['campaign_id' => (int) $campaign->id, 'status' => (string) $campaign->status];
+                $inverse = $this->campaignChangeSet($in, $campaign)['inverse'];
+
+                return $inverse === null ? null : ['campaign_id' => (int) $campaign->id] + $inverse;
             },
         ));
 
@@ -740,39 +715,17 @@ final class CoreCommandProvider
             $this->meta(['agent_hint' => 'The field layout (blocks) is designed in the form builder, not here. Read the form with form.get first so you act on its real structure. Settings are replaced wholesale, so send the full settings object.']),
             function (array $in) use ($c): array {
                 $form = $c->get(FormRepository::class)->findById((int) ($in['form_id'] ?? 0));
-                if (! $form) {
-                    return [];
-                }
-                $rows = [];
-                if (array_key_exists('status', $in) && (string) $in['status'] !== (string) $form->status) {
-                    $rows[] = ['label' => 'Status', 'from' => (string) $form->status, 'to' => (string) $in['status']];
-                }
-                if (array_key_exists('settings', $in) && is_array($in['settings'])) {
-                    $existing = is_array($form->settings) ? $form->settings : [];
-                    foreach ($in['settings'] as $key => $value) {
-                        $before = $existing[$key] ?? null;
-                        if ($before !== $value) {
-                            $rows[] = [
-                                'label' => sprintf('Setting: %s', (string) $key),
-                                'from'  => $this->previewValue($before),
-                                'to'    => $this->previewValue($value),
-                            ];
-                        }
-                    }
-                }
-                return $rows;
+
+                return $form ? $this->formChangeSet($in, $form)['rows'] : [];
             },
             function (array $in) use ($c): ?array {
-                // Reversible when the update flips status: undo restores the
-                // form's current (pre-update) status.
-                if (! array_key_exists('status', $in)) {
-                    return null;
-                }
                 $form = $c->get(FormRepository::class)->findById((int) ($in['form_id'] ?? 0));
-                if (! $form || (string) $in['status'] === (string) $form->status) {
+                if (! $form) {
                     return null;
                 }
-                return ['form_id' => (int) $form->id, 'status' => (string) $form->status];
+                $inverse = $this->formChangeSet($in, $form)['inverse'];
+
+                return $inverse === null ? null : ['form_id' => (int) $form->id] + $inverse;
             },
         ));
 
@@ -1937,6 +1890,124 @@ final class CoreCommandProvider
      * Stringify a settings value for a preview row: scalars as-is, booleans as
      * yes/no, structured values as compact JSON, a missing value as "not set".
      */
+    /**
+     * @param array<string,mixed> $in
+     * @return array{rows:list<array<string,string>>, inverse:array<string,mixed>|null}
+     */
+    private function campaignChangeSet(array $in, object $campaign): array
+    {
+        return $this->changeSet($in, [
+            'title'      => ['label' => 'Title',       'current' => fn (): string => (string) $campaign->title],
+            'status'     => ['label' => 'Status',      'current' => fn (): string => (string) $campaign->status],
+            'goal_cents' => [
+                'label'   => 'Goal amount',
+                'current' => fn (): int => (int) $campaign->goal_cents,
+                'format'  => fn (mixed $v): string => Money::format((int) $v, (string) $campaign->currency),
+            ],
+            'goal_count' => ['label' => 'Goal count',  'current' => fn (): int => (int) $campaign->goal_count],
+            // Promotion off 'standard' is one way (CampaignService refuses the
+            // way back), so a change that includes it cannot be undone at all.
+            'campaign_type' => [
+                'label'      => 'Campaign type',
+                'current'    => fn (): string => (string) $campaign->campaign_type,
+                'reversible' => false,
+            ],
+        ]);
+    }
+
+    /**
+     * @param array<string,mixed> $in
+     * @return array{rows:list<array<string,string>>, inverse:array<string,mixed>|null}
+     */
+    private function formChangeSet(array $in, object $form): array
+    {
+        $fields   = ['status' => ['label' => 'Status', 'current' => fn (): string => (string) $form->status]];
+        $existing = is_array($form->settings) ? $form->settings : [];
+
+        // Settings keys are open-ended, so the map is built from whatever the
+        // patch touches. update() merges the patch over what is stored, so
+        // restoring the previous values of exactly those keys is a real undo.
+        $flat = [];
+        if (is_array($in['settings'] ?? null)) {
+            foreach ($in['settings'] as $key => $value) {
+                $flat['setting:' . $key] = $value;
+                $fields['setting:' . $key] = [
+                    'label'   => sprintf('Setting: %s', (string) $key),
+                    'current' => fn (): mixed => $existing[$key] ?? null,
+                ];
+            }
+        }
+
+        $result = $this->changeSet($flat + $in, $fields);
+
+        if (is_array($result['inverse'])) {
+            $settings = [];
+            foreach ($result['inverse'] as $key => $value) {
+                if (str_starts_with((string) $key, 'setting:')) {
+                    $settings[substr((string) $key, 8)] = $value;
+                    unset($result['inverse'][$key]);
+                }
+            }
+            if ($settings !== []) {
+                $result['inverse']['settings'] = $settings;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * The preview an operator approves and the inverse that undoes it, derived
+     * from one field map so they cannot disagree.
+     *
+     * They used to be written out separately: the preview enumerated every
+     * changed field and the inverse handled only `status`. Approving a rename
+     * plus a publish and then clicking Undo restored the status, left the
+     * rename applied, and reported "Reverted."
+     *
+     * A field that cannot be put back (campaign_type promotion is one-way)
+     * makes the whole change irreversible rather than partly so. Offering Undo
+     * for a change it can only half-undo is the bug, not the absence of Undo.
+     *
+     * @param array<string,mixed> $in
+     * @param array<string,array{label:string,current:callable,format?:callable,reversible?:bool}> $fields
+     * @return array{rows:list<array<string,string>>, inverse:array<string,mixed>|null}
+     */
+    private function changeSet(array $in, array $fields): array
+    {
+        $rows       = [];
+        $inverse    = [];
+        $reversible = true;
+
+        foreach ($fields as $key => $spec) {
+            if (! array_key_exists($key, $in)) continue;
+
+            $before = ($spec['current'])();
+            $after  = $in[$key];
+
+            // Loose compare so an int goal arriving as a string is not a change.
+            if ((string) $this->previewValue($before) === (string) $this->previewValue($after)) continue;
+
+            $format = $spec['format'] ?? fn (mixed $v): string => $this->previewValue($v);
+            $rows[] = [
+                'label' => $spec['label'],
+                'from'  => (string) $format($before),
+                'to'    => (string) $format($after),
+            ];
+
+            if ($spec['reversible'] ?? true) {
+                $inverse[$key] = $before;
+            } else {
+                $reversible = false;
+            }
+        }
+
+        return [
+            'rows'    => $rows,
+            'inverse' => ($reversible && $inverse !== []) ? $inverse : null,
+        ];
+    }
+
     private function previewValue(mixed $value): string
     {
         if ($value === null) {

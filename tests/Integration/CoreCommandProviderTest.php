@@ -129,7 +129,13 @@ final class CoreCommandProviderTest extends IntegrationTestCase
         $this->assertSame('published', $statusRow['to']);
     }
 
-    public function test_reverse_for_campaign_update_returns_the_inverse_status(): void
+    /**
+     * The inverse has to put back everything the approval card previewed. It
+     * used to carry only `status`, so approving a rename plus a publish and
+     * clicking Undo restored the status, left the rename applied, and reported
+     * "Reverted."
+     */
+    public function test_reverse_for_campaign_update_covers_every_changed_field(): void
     {
         $admin = self::factory()->user->create(['role' => 'administrator']);
         get_role('administrator')->add_cap('dono_manage_campaigns');
@@ -139,14 +145,73 @@ final class CoreCommandProviderTest extends IntegrationTestCase
         $ctx        = new CommandContext($admin, 'rest', 'req-' . uniqid());
         $campaignId = (int) $r->dispatch('campaign.create', ['title' => 'Reverse Me', 'status' => 'draft'], $ctx)->data['campaign_id'];
 
-        // Publishing is reversible: the inverse restores the current (draft) status.
-        $inverse = $r->reverseFor('campaign.update', ['campaign_id' => $campaignId, 'status' => 'published'], $ctx);
-        $this->assertSame(['campaign_id' => $campaignId, 'status' => 'draft'], $inverse);
+        $inverse = $r->reverseFor('campaign.update', [
+            'campaign_id' => $campaignId,
+            'status'      => 'published',
+            'title'       => 'Renamed',
+        ], $ctx);
 
-        // Not reversible: no status key, a no-op status, an unknown command, and a
-        // command that declares no reverse closure all yield null.
-        $this->assertNull($r->reverseFor('campaign.update', ['campaign_id' => $campaignId, 'title' => 'Renamed'], $ctx));
-        $this->assertNull($r->reverseFor('campaign.update', ['campaign_id' => $campaignId, 'status' => 'draft'], $ctx));
+        $this->assertSame(
+            ['campaign_id' => $campaignId, 'title' => 'Reverse Me', 'status' => 'draft'],
+            $inverse,
+            'both changed fields come back, not just the status'
+        );
+    }
+
+    public function test_a_single_field_change_is_still_reversible(): void
+    {
+        $admin = self::factory()->user->create(['role' => 'administrator']);
+        get_role('administrator')->add_cap('dono_manage_campaigns');
+        wp_set_current_user($admin);
+
+        $r          = $this->registry();
+        $ctx        = new CommandContext($admin, 'rest', 'req-' . uniqid());
+        $campaignId = (int) $r->dispatch('campaign.create', ['title' => 'Reverse Me', 'status' => 'draft'], $ctx)->data['campaign_id'];
+
+        $this->assertSame(
+            ['campaign_id' => $campaignId, 'status' => 'draft'],
+            $r->reverseFor('campaign.update', ['campaign_id' => $campaignId, 'status' => 'published'], $ctx)
+        );
+        $this->assertSame(
+            ['campaign_id' => $campaignId, 'title' => 'Reverse Me'],
+            $r->reverseFor('campaign.update', ['campaign_id' => $campaignId, 'title' => 'Renamed'], $ctx),
+            'a rename is restorable, so it is reversible'
+        );
+    }
+
+    /**
+     * Promotion off 'standard' is one way, so a change carrying it is offered
+     * no Undo at all. Half an undo reported as "Reverted" is the bug.
+     */
+    public function test_a_change_with_an_irreversible_field_offers_no_undo(): void
+    {
+        $admin = self::factory()->user->create(['role' => 'administrator']);
+        get_role('administrator')->add_cap('dono_manage_campaigns');
+        wp_set_current_user($admin);
+        add_filter('dono.campaign.types', static fn (array $t): array => $t + ['squad' => 'Squad']);
+
+        $r          = $this->registry();
+        $ctx        = new CommandContext($admin, 'rest', 'req-' . uniqid());
+        $campaignId = (int) $r->dispatch('campaign.create', ['title' => 'One Way', 'status' => 'draft'], $ctx)->data['campaign_id'];
+
+        $this->assertNull($r->reverseFor('campaign.update', [
+            'campaign_id'   => $campaignId,
+            'status'        => 'published',
+            'campaign_type' => 'squad',
+        ], $ctx));
+    }
+
+    public function test_a_no_op_or_unknown_command_yields_no_inverse(): void
+    {
+        $admin = self::factory()->user->create(['role' => 'administrator']);
+        get_role('administrator')->add_cap('dono_manage_campaigns');
+        wp_set_current_user($admin);
+
+        $r          = $this->registry();
+        $ctx        = new CommandContext($admin, 'rest', 'req-' . uniqid());
+        $campaignId = (int) $r->dispatch('campaign.create', ['title' => 'Reverse Me', 'status' => 'draft'], $ctx)->data['campaign_id'];
+
+        $this->assertNull($r->reverseFor('campaign.update', ['campaign_id' => $campaignId, 'status' => 'draft'], $ctx), 'nothing changed');
         $this->assertNull($r->reverseFor('campaign.teleport', ['campaign_id' => 1], $ctx));
         $this->assertNull($r->reverseFor('campaign.duplicate', ['campaign_id' => $campaignId], $ctx));
     }
