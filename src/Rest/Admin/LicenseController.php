@@ -78,12 +78,37 @@ final class LicenseController
         return new WP_REST_Response($this->payload(), 200);
     }
 
+    /**
+     * Storing the key is what activates it: the licensing client listens on
+     * this option and calls the server synchronously, so the payload built
+     * afterwards already carries the verdict. The client is only present
+     * alongside a paid add-on, so with none installed this is just a stored
+     * key and every product reports unknown.
+     */
     public function activate(WP_REST_Request $request): WP_REST_Response
     {
         $key = sanitize_text_field((string) $request->get_param('key'));
+        if ($key === '') {
+            return new WP_REST_Response([
+                'code'    => 'dono_license_empty',
+                'message' => __('Enter your license key.', 'dono'),
+            ], 400);
+        }
+
         update_option(self::OPTION_KEY, $key, false);
 
-        return new WP_REST_Response($this->payload(), 200);
+        $payload = $this->payload();
+
+        // A key the server rejected is worse than no key, because the screen
+        // would otherwise show it as stored and look activated.
+        if ($payload['checked'] && ! $payload['any_entitled']) {
+            return new WP_REST_Response($payload + [
+                'code'    => 'dono_license_rejected',
+                'message' => __('That key was not accepted for any installed add-on.', 'dono'),
+            ], 200);
+        }
+
+        return new WP_REST_Response($payload, 200);
     }
 
     public function deactivate(): WP_REST_Response
@@ -114,10 +139,29 @@ final class LicenseController
         $key    = (string) get_option(self::OPTION_KEY, '');
         $hasKey = $key !== '';
 
+        // Per add-on entitlement comes from the licensing client through the
+        // seam it already publishes. With no client the filter passes the
+        // default straight back, which is how we tell "nobody checked" from
+        // "checked and refused".
+        $checked = false;
+        $addons  = [];
+        foreach ($this->license->addons() as $addon) {
+            $status = (string) apply_filters('dono.pro.product_status', 'unknown', $addon['id']);
+            if ($status !== 'unknown') {
+                $checked = true;
+            }
+            $addons[] = $addon + [
+                'status'   => $status,
+                'entitled' => in_array($status, ['active', 'expired', 'grace'], true),
+            ];
+        }
+
         return array_merge($this->license->snapshot(), [
-            'has_key'    => $hasKey,
-            'key_masked' => $hasKey ? $this->mask($key) : '',
-            'addons'     => $this->license->addons(),
+            'has_key'      => $hasKey,
+            'key_masked'   => $hasKey ? $this->mask($key) : '',
+            'addons'       => $addons,
+            'checked'      => $checked,
+            'any_entitled' => array_reduce($addons, static fn (bool $c, array $a): bool => $c || $a['entitled'], false),
         ]);
     }
 

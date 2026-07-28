@@ -145,6 +145,8 @@
     white-space: nowrap;
 
     &--green { background: $accent-soft; color: $accent-dark; }
+    &--amber { background: $amber-soft;  color: $amber; }
+    &--red   { background: $red-soft;    color: $red; }
     &--gray  { background: $bg-soft; color: $text-muted; border: 1px solid $border-mid; }
 }
 

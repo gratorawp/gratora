@@ -1,5 +1,5 @@
 import { useState, useEffect } from '@wordpress/element';
-import { __, sprintf, _n } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 
 import Card from '../_shared/components/Card';
@@ -17,6 +17,30 @@ const STATUS_META = {
     expired:  { tone: 'amber', label: __( 'Expired', 'dono' ) },
     revoked:  { tone: 'red',   label: __( 'Revoked', 'dono' ) },
     inactive: { tone: 'gray',  label: __( 'Inactive', 'dono' ) },
+};
+
+// Per add-on, from the licensing client. 'unknown' means nothing checked it,
+// which is the honest state when no client is installed.
+const ADDON_PILL = {
+    active: 'green',
+    grace: 'amber',
+    expired: 'amber',
+    over_limit: 'amber',
+    revoked: 'red',
+    invalid: 'red',
+    not_entitled: 'red',
+    inactive: 'gray',
+};
+
+const ADDON_LABEL = {
+    active: __( 'Licensed', 'dono' ),
+    grace: __( 'In grace period', 'dono' ),
+    expired: __( 'Expired', 'dono' ),
+    over_limit: __( 'Site limit reached', 'dono' ),
+    revoked: __( 'Revoked', 'dono' ),
+    invalid: __( 'Key not accepted', 'dono' ),
+    not_entitled: __( 'Not on this key', 'dono' ),
+    inactive: __( 'Not activated', 'dono' ),
 };
 
 function StatusBadge( { status } ) {
@@ -133,7 +157,7 @@ export default function Licenses() {
     } else if ( snap === null ) {
         body = (
             <Card>
-                <p className="dono-lic-muted">{ __( 'Loading license status...', 'dono' ) }</p>
+                <p className="dono-lic-muted">{ __( 'Loading license status…', 'dono' ) }</p>
             </Card>
         );
     } else if ( ! snap.has_key || changing ) {
@@ -232,8 +256,9 @@ export default function Licenses() {
                     sub={ __( 'Installed Pro add-ons unlocked by your key.', 'dono' ) }
                     meta={ addons.length > 0
                         ? sprintf(
-                            /* translators: %d: number of licensed Pro add-ons */
-                            _n( '%d add-on licensed', '%d add-ons licensed', addons.length, 'dono' ),
+                            /* translators: 1: entitled add-ons, 2: installed add-ons */
+                            __( '%1$d of %2$d licensed', 'dono' ),
+                            addons.filter( ( a ) => a.entitled ).length,
                             addons.length,
                         )
                         : null }
@@ -248,8 +273,8 @@ export default function Licenses() {
                                         <div className="dono-lic-addon__name">{ a.name }</div>
                                         <div className="dono-lic-addon__id">{ a.id }</div>
                                     </div>
-                                    <span className="dono-lic-pill dono-lic-pill--green">
-                                        { __( 'Licensed', 'dono' ) }
+                                    <span className={ `dono-lic-pill dono-lic-pill--${ ADDON_PILL[ a.status ] || 'gray' }` }>
+                                        { ADDON_LABEL[ a.status ] || __( 'Not checked', 'dono' ) }
                                     </span>
                                 </div>
                             ) ) }
