@@ -5,46 +5,14 @@ import { __ } from '@wordpress/i18n';
 import Card from '../../_shared/components/Card';
 import Btn from '../../_shared/components/Btn';
 
-const CAP_GROUPS = [
-    {
-        label: __( 'Donors', 'dono' ),
-        caps: [
-            [ 'dono_view_donors',   __( 'View donors', 'dono' ) ],
-            [ 'dono_edit_donors',   __( 'Edit donor records', 'dono' ) ],
-            [ 'dono_export_donors', __( 'Export donor list (CSV)', 'dono' ) ],
-            [ 'dono_redact_donors', __( 'Redact donors (GDPR)', 'dono' ) ],
-        ],
-    },
-    {
-        label: __( 'Donations', 'dono' ),
-        caps: [
-            [ 'dono_view_donations',   __( 'View donations', 'dono' ) ],
-            [ 'dono_edit_donations',   __( 'Edit donations (notes)', 'dono' ) ],
-            [ 'dono_refund_donations', __( 'Refund donations', 'dono' ) ],
-            [ 'dono_resend_receipt',   __( 'Resend receipts', 'dono' ) ],
-        ],
-    },
-    {
-        label: __( 'Reports & setup', 'dono' ),
-        caps: [
-            [ 'dono_view_reports',     __( 'View dashboards & reports', 'dono' ) ],
-            [ 'dono_manage_campaigns', __( 'Manage campaigns', 'dono' ) ],
-            [ 'dono_manage_forms',     __( 'Manage donation forms', 'dono' ) ],
-            [ 'dono_manage_settings',  __( 'Manage settings', 'dono' ) ],
-        ],
-    },
-];
-
-const ALL_CAPS = CAP_GROUPS.flatMap( ( g ) => g.caps.map( ( c ) => c[ 0 ] ) );
-
 export default function RolesPanel( { s } ) {
-    const [ roles, setRoles ]         = useState( null );
+    const [ data, setData ]           = useState( null );
     const [ loadError, setLoadError ] = useState( false );
 
     const load = () => {
         setLoadError( false );
         apiFetch( { path: '/dono/v1/admin/roles' } )
-            .then( setRoles )
+            .then( setData )
             .catch( () => setLoadError( true ) );
     };
 
@@ -67,7 +35,13 @@ export default function RolesPanel( { s } ) {
             </div>
         );
     }
-    if ( ! roles ) return <p>{ __( 'Loading…', 'dono' ) }</p>;
+    if ( ! data ) return <p>{ __( 'Loading…', 'dono' ) }</p>;
+
+    // Both come from the server: an add-on registers capabilities through the
+    // dono.capabilities filter, so a list kept here could never include them.
+    const roles    = data.roles || [];
+    const capGroups = data.capabilities || [];
+    const allCaps  = capGroups.flatMap( ( g ) => g.caps.map( ( c ) => c.cap ) );
 
     // s.replace, not s.edit: deep merge would re-add cleared caps.
     const writeMapping = ( next ) => s.replace( { mapping: next } );
@@ -85,7 +59,7 @@ export default function RolesPanel( { s } ) {
         setRoleCaps( slug, next );
     };
 
-    const setAll = ( slug, on ) => setRoleCaps( slug, on ? ALL_CAPS : [] );
+    const setAll = ( slug, on ) => setRoleCaps( slug, on ? allCaps : [] );
 
     return (
         <div className="dono-panel">
@@ -118,10 +92,10 @@ export default function RolesPanel( { s } ) {
                         ) ) }
                     </div>
 
-                    { CAP_GROUPS.map( ( group ) => (
+                    { capGroups.map( ( group ) => (
                         <div key={ group.label } className="dono-roles-table__group">
                             <div className="dono-roles-table__group-label">{ group.label }</div>
-                            { group.caps.map( ( [ cap, label ] ) => (
+                            { group.caps.map( ( { cap, label } ) => (
                                 <div key={ cap } className="dono-roles-table__row">
                                     <div className="dono-roles-table__cap">{ label }</div>
                                     { roles.map( ( r ) => {
