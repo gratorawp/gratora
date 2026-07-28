@@ -27,20 +27,26 @@ import {
     IconEmail, IconReceipt, IconNumbering, IconPrivacy, IconRoles, IconAdvanced,
 } from './icons';
 
+// Ordered by how often an operator opens it, money first. Add-on tabs land
+// after these, ahead of Licenses and Advanced.
 const TABS = [
     { key: 'setup',        label: __( 'Setup', 'dono' ),                Icon: IconSetup },
+    { key: 'gateways',     label: __( 'Payments', 'dono' ),             Icon: IconGateways },
     { key: 'organization', label: __( 'Organization', 'dono' ),         Icon: IconOrganization },
     { key: 'brand',        label: __( 'Brand', 'dono' ),                Icon: IconOrganization },
-    { key: 'currency',     label: __( 'Currency & locale', 'dono' ),    Icon: IconCurrency },
-    { key: 'gateways',     label: __( 'Payment gateways', 'dono' ),     Icon: IconGateways },
     { key: 'email',        label: __( 'Emails', 'dono' ),               Icon: IconEmail },
     { key: 'receipts',     label: __( 'Receipts', 'dono' ),             Icon: IconReceipt },
+    { key: 'currency',     label: __( 'Currency', 'dono' ),             Icon: IconCurrency },
     { key: 'numbering',    label: __( 'Numbering', 'dono' ),            Icon: IconNumbering },
     { key: 'gift-aid',     label: __( 'Gift Aid', 'dono' ),             Icon: IconReceipt },
-    { key: 'privacy',      label: __( 'Data & privacy', 'dono' ),       Icon: IconPrivacy },
-    { key: 'roles',        label: __( 'Roles & permissions', 'dono' ),  Icon: IconRoles },
-    { key: 'advanced',     label: __( 'Advanced', 'dono' ),             Icon: IconAdvanced },
+    { key: 'privacy',      label: __( 'Privacy', 'dono' ),              Icon: IconPrivacy },
+    { key: 'roles',        label: __( 'Roles', 'dono' ),                Icon: IconRoles },
+];
+
+// Always last, whatever add-ons register in between.
+const TAIL_TABS = [
     { key: 'licenses',     label: __( 'Licenses', 'dono' ),             Icon: IconSetup },
+    { key: 'advanced',     label: __( 'Advanced', 'dono' ),             Icon: IconAdvanced },
 ];
 
 // Save-job slug -> human label, for failure messages (job slugs are not tab keys).
@@ -62,15 +68,20 @@ const SECTION_LABELS = {
 
 function initialTab() {
     const hash = ( window.location.hash || '' ).replace( /^#/, '' ).split( '/' )[ 0 ];
-    if ( TABS.some( ( t ) => t.key === hash ) ) return hash;
+    if ( [ ...TABS, ...TAIL_TABS ].some( ( t ) => t.key === hash ) ) return hash;
     const params = new URLSearchParams( window.location.search );
     const q = params.get( 'tab' );
-    return TABS.some( ( t ) => t.key === q ) ? q : 'setup';
+    return [ ...TABS, ...TAIL_TABS ].some( ( t ) => t.key === q ) ? q : 'setup';
 }
 
 export default function Settings() {
     const [ tab, setTab ]                 = useState( initialTab );
     const extTabs                         = useExtensionTabs( 'settings' );
+    const allTabs                         = [
+        ...TABS,
+        ...extTabs.map( ( t ) => ( { key: t.id, label: t.label, Icon: IconAdvanced } ) ),
+        ...TAIL_TABS,
+    ];
 
     const org      = useDonoSettings( 'org-profile' );
     const brand    = useDonoSettings( 'org-brand' );
@@ -90,7 +101,8 @@ export default function Settings() {
     // add-on tab registers after mount, and a hash-only navigation to it never
     // reloads the page.
     useEffect( () => {
-        const known = ( h ) => TABS.some( ( t ) => t.key === h ) || extTabs.some( ( t ) => t.id === h );
+        const known = ( h ) =>
+            [ ...TABS, ...TAIL_TABS ].some( ( t ) => t.key === h ) || extTabs.some( ( t ) => t.id === h );
         const read  = () => ( window.location.hash || '' ).replace( /^#/, '' ).split( '/' )[ 0 ];
 
         const onHash = () => {
@@ -224,10 +236,10 @@ export default function Settings() {
                 role="tablist"
                 tabIndex={ -1 }
                 aria-label={ __( 'Settings sections', 'dono' ) }
-                onKeyDown={ ( e ) => tablistKeyDown( e, [ ...TABS.map( ( t ) => t.key ), ...extTabs.map( ( t ) => t.id ) ], tab, jumpTo ) }
+                onKeyDown={ ( e ) => tablistKeyDown( e, allTabs.map( ( t ) => t.key ), tab, jumpTo ) }
             >
                 <div className="dono-tabs__scroll">
-                    { [ ...TABS, ...extTabs.map( ( t ) => ( { key: t.id, label: t.label, Icon: IconAdvanced } ) ) ].map( ( t ) => {
+                    { allTabs.map( ( t ) => {
                         const active   = tab === t.key;
                         const isDirty  = !! dirtyByTab[ t.key ];
                         const Icon     = t.Icon;

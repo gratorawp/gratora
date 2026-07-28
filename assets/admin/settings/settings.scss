@@ -130,24 +130,24 @@ $border: $border-mid;
     gap: 0;
     overflow: visible;
 
+    // Wraps rather than scrolls: a hidden horizontal scroller meant the last
+    // tabs simply were not there once add-ons started registering their own.
     &__scroll {
         display: flex;
         flex: 1;
         min-width: 0;
-        overflow-x: auto;
-        scrollbar-width: none;
-
-        &::-webkit-scrollbar { display: none; }
+        flex-wrap: wrap;
+        row-gap: 2px;
     }
 
     a, button.dono-tab {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
-        padding: 10px 16px;
+        gap: 6px;
+        padding: 9px 11px;
         text-decoration: none;
         color: $text-muted;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 400;
         background: transparent;
         border: 0;
