@@ -26,6 +26,13 @@ export function getDonorTemplates() {
             tags:      [ '{donor_first_name}', '{donor_name}', '{organisation_name}' ],
         },
         {
+            id:        'tribute_notification',
+            label:     __( 'Tribute notification', 'dono' ),
+            desc:      __( 'Sent to the person a tribute donor asked us to notify, telling them a donation was made in honor or in memory of someone. Never sent for test donations, and never names an anonymous donor.', 'dono' ),
+            recipient: __( 'Honoree contact', 'dono' ),
+            tags:      [ '{honoree_name}', '{tribute_type}', '{donor_name}', '{organisation_name}', '{campaign_title}', '{amount}', '{message}' ],
+        },
+        {
             id:        'offline_instructions',
             label:     __( 'Offline donation instructions', 'dono' ),
             desc:      __( 'Sent when a donor picks bank transfer. Shows IBAN, reference, and amount so they can complete the transfer.', 'dono' ),

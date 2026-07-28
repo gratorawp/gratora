@@ -15,8 +15,8 @@ use Dono\Settings\SettingsService;
 
 /**
  * Wires the non-receipt donation email templates (offline instructions, refund
- * notice). Each fires via Mailer::sendTemplate, so the `enabled` toggle and
- * the user-edited subject/body are both honored.
+ * notice, tribute notification). Each fires via Mailer::sendTemplate, so the
+ * `enabled` toggle and the user-edited subject/body are both honored.
  *
  * @version 1.0.0
  */
@@ -28,6 +28,7 @@ final class DonationEmails extends HookProvider
         private DonorService $donorService,
         private SettingsService $settings,
         private CampaignRepository $campaigns,
+        private DonationTributeRepository $tributes,
     ) {
     }
 
@@ -35,6 +36,7 @@ final class DonationEmails extends HookProvider
     {
         return [
             'dono.donation.intent_created' => 'onIntentCreated',
+            'dono.donation.completed'      => 'onCompletedTribute',
             // 3-arg: $donation, $reason, $metadata
             'dono.donation.pending'        => ['onPending', 10, 3],
             // 2-arg: $donation, $refund
@@ -169,6 +171,59 @@ final class DonationEmails extends HookProvider
             'donor_name'        => trim(($donor->first_name ?? '') . ' ' . ($donor->last_name ?? '')),
             'organisation_name' => (string) get_bloginfo('name'),
         ]);
+    }
+
+    /**
+     * The honoree notification a tribute donor asked us to send. The address is
+     * collected by dono/tribute, encrypted at rest, and until now was never read
+     * by anything: the donor typed a bereaved family's address and nothing
+     * happened.
+     *
+     * Deliberately skipped for test-mode donations. The receipt can carry a
+     * "this was a test" banner because it goes back to the person who made the
+     * test; this one goes to an uninvolved third party who never asked to hear
+     * from us, and "someone donated in memory of your relative (test)" is not a
+     * message worth risking on a staging run.
+     */
+    public function onCompletedTribute(Donation $donation): void
+    {
+        if ($donation->is_test) return;
+
+        $tribute = $this->tributes->forDonation((int) $donation->id);
+        if (! $tribute instanceof DonationTribute) return;
+
+        $to = $this->tributes->decryptedNotifyEmail($tribute);
+        if ($to === null || $to === '' || ! is_email($to)) return;
+
+        // An anonymous donor stays anonymous to the honoree's family too.
+        $donorName = $donation->is_anonymous
+            ? __('A donor', 'dono')
+            : $this->donorName($donation);
+        if (trim($donorName) === '') $donorName = __('A donor', 'dono');
+
+        $this->mailer->sendTemplate('tribute_notification', $to, [
+            'honoree_name'      => (string) $tribute->name,
+            'tribute_type'      => $this->tributeTypeLabel((string) $tribute->type),
+            'donor_name'        => $donorName,
+            'organisation_name' => (string) get_bloginfo('name'),
+            'campaign_title'    => $this->campaignTitle($donation),
+            'amount'            => Money::format((int) $donation->amount_cents, (string) $donation->currency),
+            'message'           => (string) ($this->tributes->decryptedMessage($tribute) ?? ''),
+        ]);
+    }
+
+    /**
+     * Tribute type ids are admin-editable on the block, so only the two shipped
+     * defaults can be turned into a phrase; anything else is echoed back rather
+     * than guessed at.
+     */
+    private function tributeTypeLabel(string $type): string
+    {
+        switch ($type) {
+            case 'honor':    return __('in honor of', 'dono');
+            case 'memorial': return __('in memory of', 'dono');
+            default:         return $type;
+        }
     }
 
     private function resolveDonorEmail(Donation $donation): ?string

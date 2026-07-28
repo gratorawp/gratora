@@ -235,6 +235,11 @@ final class SettingsService
                 'subject' => __('Thank you for your first donation to {organisation_name}', 'dono'),
                 'body'    => __("Hi {donor_first_name},\n\nThank you for making your first donation to {organisation_name}. Your support means a great deal, and we are grateful to have you with us.\n\nWe will keep you posted on the difference it makes.\n\nWith gratitude,\n{organisation_name}", 'dono'),
             ],
+            'tribute_notification' => [
+                'enabled' => true,
+                'subject' => __('A donation was made {tribute_type} {honoree_name}', 'dono'),
+                'body'    => __("Hello,\n\n{donor_name} has made a donation to {organisation_name} {tribute_type} {honoree_name}.\n\n{message}\n\nWe thought you would want to know.\n\nWith warm regards,\n{organisation_name}", 'dono'),
+            ],
             'offline_instructions' => [
                 'enabled' => true,
                 'subject' => __('Payment instructions for your donation to {organisation_name}', 'dono'),

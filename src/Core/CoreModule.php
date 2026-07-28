@@ -433,13 +433,14 @@ final class CoreModule implements DonoModule
         ));
 
         // Sends non-receipt donation emails (offline instructions, refund
-        // notice). Receipt emails are handled by ReceiptIssuer.
+        // notice, tribute notification). Receipt emails are handled by ReceiptIssuer.
         $c->bind(\Dono\Donations\DonationEmails::class, fn (Container $c) => new \Dono\Donations\DonationEmails(
             $c->get(Mailer::class),
             $c->get(DonorRepository::class),
             $c->get(DonorService::class),
             $c->get(SettingsService::class),
             $c->get(CampaignRepository::class),
+            $c->get(DonationTributeRepository::class),
         ));
         $c->get(\Dono\Donations\DonationEmails::class)->register();
 
