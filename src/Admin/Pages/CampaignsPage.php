@@ -40,6 +40,9 @@ final class CampaignsPage extends HookProvider
         $this->enqueueAssets();
         ?>
         <div class="wrap">
+            <?php // WP moves admin notices to just after this marker. Without it they
+                  // land beside the React header instead of above it. ?>
+            <hr class="wp-header-end" />
             <div id="dono-admin-campaigns"></div>
         </div>
         <?php

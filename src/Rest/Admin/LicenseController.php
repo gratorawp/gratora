@@ -143,18 +143,8 @@ final class LicenseController
         // seam it already publishes. With no client the filter passes the
         // default straight back, which is how we tell "nobody checked" from
         // "checked and refused".
-        $checked = false;
-        $addons  = [];
-        foreach ($this->license->addons() as $addon) {
-            $status = (string) apply_filters('dono.pro.product_status', 'unknown', $addon['id']);
-            if ($status !== 'unknown') {
-                $checked = true;
-            }
-            $addons[] = $addon + [
-                'status'   => $status,
-                'entitled' => in_array($status, ['active', 'expired', 'grace'], true),
-            ];
-        }
+        $addons  = $this->license->entitlements();
+        $checked = array_reduce($addons, static fn (bool $c, array $a): bool => $c || $a['status'] !== 'unknown', false);
 
         return array_merge($this->license->snapshot(), [
             'has_key'      => $hasKey,

@@ -123,6 +123,7 @@ use Dono\Foundation\Container\Container;
 use Dono\Foundation\Crypto\Crypto;
 use Dono\Foundation\Auth\Capabilities;
 use Dono\Foundation\Identity\IdentityHasher;
+use Dono\Foundation\License\LicenseNotice;
 use Dono\Foundation\License\LicenseService;
 use Dono\Foundation\Modules\DonoModule;
 use Dono\Foundation\Modules\ModuleManager;
@@ -964,6 +965,7 @@ final class CoreModule implements DonoModule
             (new OnboardingPage())->register();
             (new Onboarding())->register();
             (new AdminGlobals($c->get(LicenseService::class)))->register();
+            (new LicenseNotice($c->get(LicenseService::class)))->register();
 
             // Persist admin notice until the lost-key flag is cleared.
             add_action('admin_notices', static function (): void {

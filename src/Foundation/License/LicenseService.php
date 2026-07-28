@@ -57,6 +57,50 @@ final class LicenseService
         return is_string($status) && $status !== '' ? $status : $default;
     }
 
+    /** Statuses whose product keeps running. Only the rest are a problem. */
+    public const ENTITLED = ['active', 'expired', 'grace'];
+
+    /**
+     * Every booted Pro add-on with the licensing client's verdict on it.
+     *
+     * `unknown` means nothing formed an opinion, which is what happens with no
+     * client installed. That is deliberately distinct from a refusal: the
+     * screen must not imply entitlement it never checked.
+     *
+     * @return array<int,array{id:string,name:string,status:string,entitled:bool}>
+     */
+    public function entitlements(): array
+    {
+        $out = [];
+        foreach ($this->addons() as $addon) {
+            $status = (string) apply_filters('dono.pro.product_status', 'unknown', $addon['id']);
+            $out[]  = $addon + [
+                'status'   => $status,
+                'entitled' => in_array($status, self::ENTITLED, true),
+            ];
+        }
+
+        return $out;
+    }
+
+    /** Add-ons a licensing client actively refused, ignoring unchecked ones. */
+    public function unlicensed(): array
+    {
+        return array_values(array_filter(
+            $this->entitlements(),
+            static fn (array $a): bool => ! $a['entitled'] && $a['status'] !== 'unknown'
+        ));
+    }
+
+    /** Entitled, but on borrowed time: updates stop when it lapses. */
+    public function lapsing(): array
+    {
+        return array_values(array_filter(
+            $this->entitlements(),
+            static fn (array $a): bool => in_array($a['status'], ['expired', 'grace'], true)
+        ));
+    }
+
     /**
      * Booted Pro add-ons as id + human-name pairs, for admin display. Falls
      * back to the id when a module has no resolvable name.

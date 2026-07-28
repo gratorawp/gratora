@@ -72,6 +72,22 @@ function StateNotice( { status } ) {
             </Notice>
         );
     }
+    if ( status === 'invalid' || status === 'not_entitled' ) {
+        return (
+            <Notice status="error" isDismissible={ false }>
+                <strong>{ __( 'This key was not accepted.', 'dono' ) }</strong>{ ' ' }
+                { __( 'Check it against your purchase email. Until it is fixed your add-ons will not receive updates or security fixes.', 'dono' ) }
+            </Notice>
+        );
+    }
+    if ( status === 'over_limit' ) {
+        return (
+            <Notice status="warning" isDismissible={ false }>
+                <strong>{ __( 'This key has no seats left.', 'dono' ) }</strong>{ ' ' }
+                { __( 'Deactivate it on a site you no longer use, or upgrade, to receive updates here.', 'dono' ) }
+            </Notice>
+        );
+    }
     if ( status === 'revoked' ) {
         return (
             <Notice status="error" isDismissible={ false }>
@@ -81,6 +97,42 @@ function StateNotice( { status } ) {
         );
     }
     return null;
+}
+
+// Shown whether or not a key is stored: an operator with unlicensed add-ons
+// installed needs to see them, which was the whole reason the screen looked
+// empty before a key was entered.
+function AddonsCard( { addons } ) {
+    if ( addons.length === 0 ) {
+        return null;
+    }
+
+    return (
+        <Card
+            title={ __( 'Your add-ons', 'dono' ) }
+            sub={ __( 'Installed Pro add-ons unlocked by your key.', 'dono' ) }
+            meta={ sprintf(
+                /* translators: 1: entitled add-ons, 2: installed add-ons */
+                __( '%1$d of %2$d licensed', 'dono' ),
+                addons.filter( ( a ) => a.entitled ).length,
+                addons.length,
+            ) }
+        >
+            <div className="dono-lic-addons">
+                { addons.map( ( a ) => (
+                    <div className="dono-lic-addon" key={ a.id }>
+                        <div className="dono-lic-addon__main">
+                            <div className="dono-lic-addon__name">{ a.name }</div>
+                            <div className="dono-lic-addon__id">{ a.id }</div>
+                        </div>
+                        <span className={ `dono-lic-pill dono-lic-pill--${ ADDON_PILL[ a.status ] || 'gray' }` }>
+                            { ADDON_LABEL[ a.status ] || __( 'Not checked', 'dono' ) }
+                        </span>
+                    </div>
+                ) ) }
+            </div>
+        </Card>
+    );
 }
 
 export default function Licenses() {
@@ -161,7 +213,9 @@ export default function Licenses() {
             </Card>
         );
     } else if ( ! snap.has_key || changing ) {
+        const pending = Array.isArray( snap.addons ) ? snap.addons : [];
         body = (
+            <>
             <Card
                 title={ changing ? __( 'Change license key', 'dono' ) : __( 'Activate your license', 'dono' ) }
                 meta={ changing ? null : (
@@ -203,6 +257,13 @@ export default function Licenses() {
                     </div>
                 </Field>
             </Card>
+            { ! changing && pending.length > 0 && (
+                <Notice status="warning" isDismissible={ false }>
+                    { __( 'These add-ons are installed but not licensed, so they will not receive updates or security fixes.', 'dono' ) }
+                </Notice>
+            ) }
+            <AddonsCard addons={ pending } />
+            </>
         );
     } else {
         const addons = Array.isArray( snap.addons ) ? snap.addons : [];
@@ -251,36 +312,7 @@ export default function Licenses() {
                     </div>
                 </Card>
 
-                <Card
-                    title={ __( 'Your add-ons', 'dono' ) }
-                    sub={ __( 'Installed Pro add-ons unlocked by your key.', 'dono' ) }
-                    meta={ addons.length > 0
-                        ? sprintf(
-                            /* translators: 1: entitled add-ons, 2: installed add-ons */
-                            __( '%1$d of %2$d licensed', 'dono' ),
-                            addons.filter( ( a ) => a.entitled ).length,
-                            addons.length,
-                        )
-                        : null }
-                >
-                    { addons.length === 0 ? (
-                        <p className="dono-lic-muted">{ __( 'No Pro add-ons installed yet.', 'dono' ) }</p>
-                    ) : (
-                        <div className="dono-lic-addons">
-                            { addons.map( ( a ) => (
-                                <div className="dono-lic-addon" key={ a.id }>
-                                    <div className="dono-lic-addon__main">
-                                        <div className="dono-lic-addon__name">{ a.name }</div>
-                                        <div className="dono-lic-addon__id">{ a.id }</div>
-                                    </div>
-                                    <span className={ `dono-lic-pill dono-lic-pill--${ ADDON_PILL[ a.status ] || 'gray' }` }>
-                                        { ADDON_LABEL[ a.status ] || __( 'Not checked', 'dono' ) }
-                                    </span>
-                                </div>
-                            ) ) }
-                        </div>
-                    ) }
-                </Card>
+                <AddonsCard addons={ addons } />
             </>
         );
     }
