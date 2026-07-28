@@ -3,6 +3,7 @@ import { __ } from '@wordpress/i18n';
 import Card from '../../_shared/components/Card';
 import FormRow from '../../_shared/components/FormRow';
 import BrandMark from '../../_shared/components/BrandMark';
+import useCardOpen from '../../_shared/useCardOpen';
 import { ToggleRow } from '../../_shared/components/Switch';
 import StripeKeysCard from './StripeKeysCard';
 import PayPalKeysCard from './PayPalKeysCard';
@@ -11,6 +12,8 @@ import RazorpayKeysCard from './RazorpayKeysCard';
 export default function GatewaysPanel( { s } ) {
     const offlineEnabled    = !! s.value( 'offline.enabled', true );
     const offlineConfigured = !! s.value( 'offline.instructions', '' );
+
+    const [ offlineOpen, setOfflineOpen ] = useCardOpen( offlineEnabled && ! offlineConfigured );
 
     const offlinePill = ! offlineEnabled
         ? <span className="dono-pill dono-pill--gray"><span className="dono-pill__dot dono-pill__dot--soft" />{ __( 'Disabled', 'dono' ) }</span>
@@ -43,6 +46,9 @@ export default function GatewaysPanel( { s } ) {
                 sub={ __( 'Donor sees your bank details and pays offline', 'dono' ) }
                 meta={ offlinePill }
                 edited={ s.isDirty }
+                collapsible
+                open={ offlineOpen }
+                onToggle={ setOfflineOpen }
             >
                 <ToggleRow
                     title={ __( 'Enable offline donations', 'dono' ) }

@@ -9,6 +9,7 @@ import FormRow from '../../_shared/components/FormRow';
 import KeyField from '../../_shared/components/KeyField';
 import ConfirmDialog from '../../_shared/components/ConfirmDialog';
 import { notify } from '../../_shared/notify';
+import useCardOpen from '../../_shared/useCardOpen';
 
 function Pill( { tone, children } ) {
     return (
@@ -179,9 +180,14 @@ export default function RazorpayKeysCard() {
         } );
     }, [] );
 
+    const [ open, setOpen ] = useCardOpen( loadError );
+
     const head = {
-        leading: <BrandMark letter="R" variant="razorpay" />,
-        title:   __( 'Razorpay', 'dono' ),
+        leading:     <BrandMark letter="R" variant="razorpay" />,
+        title:       __( 'Razorpay', 'dono' ),
+        collapsible: true,
+        open,
+        onToggle:    setOpen,
     };
     const sub = __( 'UPI, cards, netbanking and wallets, in India', 'dono' );
 

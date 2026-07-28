@@ -9,6 +9,7 @@ import FormRow from '../../_shared/components/FormRow';
 import KeyField from '../../_shared/components/KeyField';
 import ConfirmDialog from '../../_shared/components/ConfirmDialog';
 import { notify } from '../../_shared/notify';
+import useCardOpen from '../../_shared/useCardOpen';
 
 function Pill( { tone, children } ) {
     return (
@@ -178,9 +179,14 @@ export default function PayPalKeysCard() {
         } );
     }, [] );
 
+    const [ open, setOpen ] = useCardOpen( loadError );
+
     const head = {
-        leading: <BrandMark letter="P" variant="paypal" />,
-        title:   __( 'PayPal', 'dono' ),
+        leading:     <BrandMark letter="P" variant="paypal" />,
+        title:       __( 'PayPal', 'dono' ),
+        collapsible: true,
+        open,
+        onToggle:    setOpen,
     };
     const sub = __( 'PayPal, Venmo, Pay Later and cards', 'dono' );
 

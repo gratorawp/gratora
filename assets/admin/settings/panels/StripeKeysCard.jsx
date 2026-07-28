@@ -9,6 +9,7 @@ import FormRow from '../../_shared/components/FormRow';
 import KeyField from '../../_shared/components/KeyField';
 import ConfirmDialog from '../../_shared/components/ConfirmDialog';
 import { notify } from '../../_shared/notify';
+import useCardOpen from '../../_shared/useCardOpen';
 
 function Pill( { tone, children } ) {
     return (
@@ -326,9 +327,18 @@ export default function StripeKeysCard( { s } ) {
         } );
     }, [] );
 
+    const account   = status?.account || null;
+    const connected = !! status?.connected;
+    const canCharge = !! status?.can_charge;
+
+    const [ open, setOpen ] = useCardOpen( loadError || ( connected && ! canCharge ) );
+
     const head = {
-        leading: <BrandMark letter="S" variant="stripe" />,
-        title:   __( 'Stripe', 'dono' ),
+        leading:     <BrandMark letter="S" variant="stripe" />,
+        title:       __( 'Stripe', 'dono' ),
+        collapsible: true,
+        open,
+        onToggle:    setOpen,
     };
     const sub = __( 'Cards, SEPA, Apple Pay, Google Pay', 'dono' );
 
@@ -355,10 +365,6 @@ export default function StripeKeysCard( { s } ) {
             </Card>
         );
     }
-
-    const account   = status?.account || null;
-    const connected = !! status?.connected;
-    const canCharge = !! status?.can_charge;
 
     let meta = <Pill tone="gray">{ __( 'Not set up', 'dono' ) }</Pill>;
     if ( connected && canCharge ) meta = <Pill tone="green">{ __( 'Ready', 'dono' ) }</Pill>;
