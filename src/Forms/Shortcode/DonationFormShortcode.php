@@ -553,6 +553,7 @@ HTML;
             'gateway'     => $gateway,
             'gateways'    => $gatewaysCfg,
             'stripe'      => $this->stripePublicConfig($gatewaysCfg['options'] ?? [], $gateway, $testModeOn),
+            'paypal'      => $this->payPalPublicConfig($gatewaysCfg['options'] ?? [], $gateway, $testModeOn, (string) $currency),
             'testMode'    => $testModeOn,
             'currency'    => $currency,
             'currencies'  => $currencies,
@@ -1524,5 +1525,34 @@ HTML;
         }
 
         return $key !== '' ? ['publishableKey' => $key] : null;
+    }
+
+    /**
+     * Client-side PayPal config for the SDK buttons: the client id for the mode
+     * the order will be created in. The client id is public by design, like a
+     * Stripe publishable key. Emitted only when PayPal is offered on this form.
+     *
+     * @param array<int,array<string,mixed>> $options
+     * @return array{clientId:string,currency:string,intent:string}|null
+     */
+    private function payPalPublicConfig(array $options, string $defaultGateway, bool $testMode, string $currency): ?array
+    {
+        $ids   = array_column($options, 'id');
+        $ids[] = $defaultGateway;
+        if (! in_array('paypal', $ids, true)) {
+            return null;
+        }
+
+        try {
+            $clientId = Plugin::instance()->container
+                ->get(\Dono\Gateways\PayPal\PayPalAccount::class)
+                ->clientIdFor($testMode);
+        } catch (Throwable) {
+            return null;
+        }
+
+        return $clientId !== ''
+            ? ['clientId' => $clientId, 'currency' => strtoupper($currency), 'intent' => 'capture']
+            : null;
     }
 }

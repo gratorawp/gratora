@@ -14,6 +14,7 @@ use Dono\Donations\DonationService;
 use Dono\Donors\ConsentService;
 use Dono\Forms\Form;
 use Dono\Forms\FormSubmissionValidator;
+use Dono\Gateways\GatewayIntentResult;
 use Dono\Gateways\GatewayManager;
 use Dono\Rest\Schemas\DonationSchemas;
 use Dono\Settings\SettingsService;
@@ -334,7 +335,30 @@ final class DonationsController
             'redirect_url'    => $gatewayResult->redirect_url,
             'client_secret'   => $gatewayResult->client_secret,
             'requires_action' => $gatewayResult->requires_action,
+            'paypal'          => $this->payPalPayload($gatewayResult),
         ], 201);
+    }
+
+    /**
+     * The handful of PayPal fields the SDK buttons need. Kept to an explicit
+     * whitelist rather than echoing the gateway metadata, so a future gateway
+     * field cannot leak to the browser by accident.
+     *
+     * @return array{kind:string,order_id:string,plan_id:string}|null
+     */
+    private function payPalPayload(GatewayIntentResult $result): ?array
+    {
+        $meta = $result->metadata ?? [];
+        $kind = (string) ($meta['paypal_kind'] ?? '');
+        if ($kind === '') {
+            return null;
+        }
+
+        return [
+            'kind'     => $kind,
+            'order_id' => (string) ($meta['paypal_order_id'] ?? ''),
+            'plan_id'  => (string) ($meta['paypal_plan_id'] ?? ''),
+        ];
     }
 
     /**

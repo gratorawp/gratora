@@ -5,6 +5,7 @@ import FormRow from '../../_shared/components/FormRow';
 import BrandMark from '../../_shared/components/BrandMark';
 import { ToggleRow } from '../../_shared/components/Switch';
 import StripeKeysCard from './StripeKeysCard';
+import PayPalKeysCard from './PayPalKeysCard';
 
 export default function GatewaysPanel( { s } ) {
     const offlineEnabled    = !! s.value( 'offline.enabled', true );
@@ -32,6 +33,7 @@ export default function GatewaysPanel( { s } ) {
             </Card>
 
             <StripeKeysCard s={ s } />
+            <PayPalKeysCard />
 
             <Card
                 leading={ <BrandMark letter="O" variant="offline" /> }

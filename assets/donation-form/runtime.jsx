@@ -12,6 +12,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import GatewaySelect from './components/GatewaySelect';
 import CurrencySwitcher from './components/CurrencySwitcher';
 import StripePayment from './components/StripePayment';
+import PayPalPayment from './components/PayPalPayment';
 import { detectStripeReturn, resolveStripeReturn, clearStripeReturnParams } from './util/stripe';
 import { interpolateLabel } from './util/interpolate';
 import { decodeEntities } from './util/entities';
@@ -157,6 +158,26 @@ function FormBody( { state, dispatch, config } ) {
                 window.location.assign( data.redirect_url );
                 return;
             }
+            // PayPal hands back its own buttons step instead of a secret. Same
+            // rule as Stripe: without a client id we cannot collect payment, so
+            // fail rather than fall through to a thank-you with no money taken.
+            if ( data.paypal ) {
+                if ( config.paypal?.clientId ) {
+                    dispatch( {
+                        type: 'AWAIT_PAYMENT',
+                        payment: {
+                            paypal:      data.paypal,
+                            reference:   data.reference,
+                            intentId:    data.intent_id,
+                            amountCents: data.amount_cents,
+                            currency:    data.currency,
+                        },
+                    } );
+                } else {
+                    dispatch( { type: 'SUBMIT_ERROR', message: config.i18n.error } );
+                }
+                return;
+            }
             // A client_secret means the gateway needs a client-side payment
             // step. Without a publishable key we cannot collect it, so this is
             // an error - never fall through to a "thank you" with no payment.
@@ -193,9 +214,10 @@ function FormBody( { state, dispatch, config } ) {
     }, [ state, config, dispatch, formToken, honeypot ] );
 
     if ( state.status === 'payment' ) {
+        const PaymentStep = state.payment?.paypal ? PayPalPayment : StripePayment;
         return (
             <ErrorBoundary>
-                <StripePayment config={ config } payment={ state.payment } dispatch={ dispatch } />
+                <PaymentStep config={ config } payment={ state.payment } dispatch={ dispatch } />
             </ErrorBoundary>
         );
     }
