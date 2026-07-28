@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 namespace Dono\Rest\Admin;
+use Dono\Rest\Paging;
 use Dono\Foundation\Auth\Capabilities;
 
 use Dono\Campaigns\Campaign;
@@ -197,7 +198,7 @@ final class DonationsController
             : ($search !== '' ? $this->donorService->findIdsBySearch($search) : []);
 
         $result = $this->donations->listAdmin([
-            'page'               => (int) ($request['page']     ?? 1),
+            'page'               => Paging::page($request['page'] ?? null),
             'per_page'           => (int) ($request['per_page'] ?? 25),
             'orderby'            => (string) ($request['orderby'] ?? 'created_at'),
             'order'              => (string) ($request['order']   ?? 'desc'),

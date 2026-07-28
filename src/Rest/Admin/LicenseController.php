@@ -60,9 +60,17 @@ final class LicenseController
         ]);
     }
 
+    /**
+     * The licence enables or disables every paid add-on site-wide, so it is a
+     * settings-level write, not a "can this person see the Dono admin" one.
+     *
+     * canAccessAdmin() is true for anyone holding any single dono_* cap, which
+     * meant a read-only donor viewer could plant an arbitrary key or delete the
+     * real one and knock out every Pro add-on.
+     */
     public function canAccess(): bool
     {
-        return Capabilities::canAccessAdmin();
+        return Capabilities::userCan('dono_manage_settings') || current_user_can('manage_options');
     }
 
     public function show(): WP_REST_Response

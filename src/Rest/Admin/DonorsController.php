@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 namespace Dono\Rest\Admin;
+use Dono\Rest\Paging;
 use Dono\Foundation\Auth\Capabilities;
 
 use Dono\Donations\Donation;
@@ -279,7 +280,7 @@ final class DonorsController
     {
         $perPage = (int) ($request['per_page'] ?? 25);
         $result = $this->metrics->atRisk(
-            (int) ($request['page'] ?? 1),
+            Paging::page($request['page'] ?? null),
             $perPage,
         );
         $response = new WP_REST_Response($result['rows'], 200);
@@ -491,7 +492,7 @@ final class DonorsController
             : [];
 
         $result = $this->donors->listAdmin([
-            'page'         => (int) ($request['page']     ?? 1),
+            'page'         => Paging::page($request['page'] ?? null),
             'per_page'     => (int) ($request['per_page'] ?? 25),
             'orderby'      => (string) ($request['orderby'] ?? 'last_donation_at'),
             'order'        => (string) ($request['order']   ?? 'desc'),
