@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Admin\Pages;
 
+use Dono\Admin\ExtensionAssets;
 use Dono\Foundation\Hooks\HookProvider;
 
 /**
@@ -48,10 +49,15 @@ final class DonationsPage extends HookProvider
     {
         $asset = require DONO_DIR . self::BUILD_DIR . '/index.asset.php';
 
+        // Register the extension-panel registry and let add-ons enqueue their
+        // donation bundles, then depend on it so the registry is defined
+        // before the app reads it.
+        ExtensionAssets::enqueue('donation');
+
         wp_enqueue_script(
             self::HANDLE,
             DONO_URL . self::BUILD_DIR . '/index.js',
-            $asset['dependencies'] ?? [],
+            array_merge($asset['dependencies'] ?? [], [ExtensionAssets::HANDLE]),
             $asset['version']      ?? DONO_VERSION,
             true
         );

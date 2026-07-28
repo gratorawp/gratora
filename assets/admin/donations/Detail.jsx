@@ -13,6 +13,7 @@ import ConfirmDialog from '../_shared/components/ConfirmDialog';
 import Dialog from '../_shared/components/Dialog';
 import Btn from '../_shared/components/Btn';
 import notify from '../_shared/notify';
+import { useExtensionTabs, ExtensionTabPanel } from '../_shared/extensionTabs';
 import { __ } from '@wordpress/i18n';
 
 import Header   from './detail/Header';
@@ -45,6 +46,12 @@ export default function Detail( { reference } ) {
     const [ loading, setLoading ] = useState( true );
     const [ error, setError ]     = useState( null );
     const [ showRefund, setShowRefund ] = useState( false );
+
+    // This surface is a card stack rather than a tab bar, so a registered
+    // panel renders as another card in the main column. The registry contract
+    // is "mount a node with context", which is presentation-agnostic; only
+    // the name says tab.
+    const extPanels = useExtensionTabs( 'donation' );
     const [ confirm, setConfirm ] = useState( null );
     const [ failOpen, setFailOpen ]     = useState( false );
     const [ failReason, setFailReason ] = useState( '' );
@@ -166,6 +173,14 @@ export default function Detail( { reference } ) {
                         <NotesCard donationRef={ donation.reference } notes={ notes } onChanged={ load } />
                     </div>
                     <RelatedDonationsCard donor={ donor } related={ related } />
+
+                    { extPanels.map( ( panel ) => (
+                        <ExtensionTabPanel
+                            key={ panel.id }
+                            tab={ panel }
+                            context={ { donation, donor, receipts, refunds } }
+                        />
+                    ) ) }
                 </div>
 
                 <aside className="dd-rail">
