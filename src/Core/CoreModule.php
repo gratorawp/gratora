@@ -130,6 +130,10 @@ use Dono\Gateways\GatewayManager;
 use Dono\Gateways\Offline\OfflineGateway;
 use Dono\Gateways\Sandbox\SandboxGateway;
 use Dono\Gateways\Stripe\StripeApi;
+use Dono\Gateways\PayPal\PayPalAccount;
+use Dono\Gateways\PayPal\PayPalApi;
+use Dono\Gateways\PayPal\PayPalGateway;
+use Dono\Gateways\PayPal\PayPalPlans;
 use Dono\Gateways\Stripe\StripeAccount;
 use Dono\Gateways\Stripe\StripeGateway;
 use Dono\Gateways\TestMode;
@@ -161,6 +165,7 @@ use Dono\Rest\Admin\OnboardingController;
 use Dono\Rest\Admin\ReportsController;
 use Dono\Rest\Admin\RolesController;
 use Dono\Rest\Admin\SettingsController;
+use Dono\Rest\Admin\PayPalKeysController;
 use Dono\Rest\Admin\StripeKeysController;
 use Dono\Rest\Admin\UserPrefsController;
 use Dono\Rest\Portal\PortalController as PortalController;
@@ -493,6 +498,16 @@ final class CoreModule implements DonoModule
         $c->bind(StripeApi::class, fn (Container $c) => new StripeApi(
             $c->get(StripeAccount::class)
         ));
+        $c->bind(PayPalAccount::class, fn (Container $c) => new PayPalAccount(
+            $c->get(Crypto::class)
+        ));
+        $c->bind(PayPalApi::class, fn (Container $c) => new PayPalApi(
+            $c->get(PayPalAccount::class)
+        ));
+        $c->bind(PayPalPlans::class, fn (Container $c) => new PayPalPlans(
+            $c->get(PayPalApi::class),
+            $c->get(PayPalAccount::class)
+        ));
 
         $gateways = $c->get(GatewayManager::class);
         $gateways->register(new OfflineGateway($c->get(Clock::class)));
@@ -514,6 +529,21 @@ final class CoreModule implements DonoModule
                 $c->get(DonorService::class),
                 $c->get(Clock::class),
                 $c->get(RecurringPlanRepository::class),
+            ));
+        }
+
+        // Same rule as Stripe: register whenever either mode has credentials,
+        // and let the per-charge calls fail closed for a mode that has none.
+        $paypalAccount = $c->get(PayPalAccount::class);
+        if ($paypalAccount->isConnected()) {
+            $gateways->register(new PayPalGateway(
+                $c->get(PayPalApi::class),
+                $paypalAccount,
+                $c->get(DonationRepository::class),
+                $c->get(DonationService::class),
+                $c->get(PayPalPlans::class),
+                $c->get(RecurringPlanRepository::class),
+                $c->get(Clock::class),
             ));
         }
 
@@ -680,6 +710,19 @@ final class CoreModule implements DonoModule
             new StripeKeysController(
                 $c->get(StripeApi::class),
                 $c->get(StripeAccount::class),
+            ),
+            new PayPalKeysController(
+                $c->get(PayPalApi::class),
+                $c->get(PayPalAccount::class),
+            ),
+            new \Dono\Rest\PayPalController(
+                $c->get(DonationRepository::class),
+                $c->get(DonationService::class),
+                $c->get(GatewayManager::class),
+                $c->get(PayPalApi::class),
+                $c->get(PayPalAccount::class),
+                $c->get(RecurringPlanRepository::class),
+                $c->get(Clock::class),
             ),
             new FxController(
                 $c->get(FxRates::class),

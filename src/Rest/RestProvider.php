@@ -20,6 +20,7 @@ use Dono\Rest\Admin\OnboardingController as AdminOnboardingController;
 use Dono\Rest\Admin\ReportsController as AdminReportsController;
 use Dono\Rest\Admin\RolesController as AdminRolesController;
 use Dono\Rest\Admin\SettingsController as AdminSettingsController;
+use Dono\Rest\Admin\PayPalKeysController;
 use Dono\Rest\Admin\StripeKeysController;
 use Dono\Rest\Admin\UserPrefsController as AdminUserPrefsController;
 use Dono\Rest\Portal\PortalController;
@@ -49,6 +50,8 @@ final class RestProvider extends HookProvider
         private AdminAdvancedController $adminAdvanced,
         private AdminOnboardingController $adminOnboarding,
         private StripeKeysController $stripeKeys,
+        private PayPalKeysController $payPalKeys,
+        private PayPalController $payPal,
         private FxController $fx,
         private AdminCommandsController $commands,
         private AdminNumberingController $numbering,
@@ -80,6 +83,8 @@ final class RestProvider extends HookProvider
         $this->adminAdvanced->registerRoutes();
         $this->adminOnboarding->registerRoutes();
         $this->stripeKeys->registerRoutes();
+        $this->payPalKeys->registerRoutes();
+        $this->payPal->registerRoutes();
         $this->fx->registerRoutes();
         $this->commands->registerRoutes();
         $this->numbering->registerRoutes();
