@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dono\Donations;
 
 use Dono\Vendor\Queryable\DB;
+use Dono\Donors\DonorAggregateSyncer;
 
 /**
  * Recomputes denormalised donation aggregates for a donor, campaign, or form.
@@ -13,35 +14,15 @@ use Dono\Vendor\Queryable\DB;
  */
 final class AggregateSyncer
 {
+    /**
+     * Delegates to DonorAggregateSyncer, which is what the live
+     * dono.donation.completed hook runs. This used to be a second, independent
+     * implementation of the same rollup: it had the kind filter and the live
+     * one did not, so a resync silently disagreed with the live path.
+     */
     public function syncDonor(int $donorId): void
     {
-        if ($donorId <= 0) return;
-
-        // Lifetime rollups are pure donation history: non-donation kinds
-        // (event ticket orders) ride the rails but do not count here.
-        $row = DonationQueries::live(DB::table('dono_donations')
-            ->whereIn('status', ['paid', 'partial_refund'])
-            ->where('kind', 'donation')
-            ->where('donor_id', $donorId))
-            ->selectRaw("
-                COALESCE(SUM(
-                    COALESCE(base_amount_cents, 0) - {$this->refundedSubquery()}
-                ), 0) AS total_cents,
-                COUNT(*)                       AS cnt,
-                MIN(paid_at)                   AS first_paid,
-                MAX(paid_at)                   AS last_paid
-            ")
-            ->get();
-
-        DB::table('dono_donors')
-            ->where('id', $donorId)
-            ->update([
-                'total_donated_cents' => (int) ($row['total_cents'] ?? 0),
-                'donations_count'     => (int) ($row['cnt']         ?? 0),
-                'first_donation_at'   => $row['first_paid'] ?? null,
-                'last_donation_at'    => $row['last_paid']  ?? null,
-                'updated_at'          => gmdate('Y-m-d H:i:s'),
-            ]);
+        (new DonorAggregateSyncer())->syncForDonor($donorId);
     }
 
     public function syncCampaign(int $campaignId): void

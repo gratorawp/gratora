@@ -64,6 +64,14 @@ final class ReceiptIssuer
 
     public function onDonationCompleted(Donation $donation): void
     {
+        // Ticket orders ride the donations table but are a purchase, not a
+        // gift. Issuing a donation receipt for one misstates what the payer
+        // received, and the receipt then fed the tax-deductible statement.
+        // Add-ons that sell things issue their own confirmation.
+        if ((string) ($donation->kind ?? 'donation') !== 'donation') {
+            return;
+        }
+
         $this->async->enqueue(self::HOOK, ['donation_id' => $donation->id]);
     }
 

@@ -30,6 +30,24 @@ final class DonationQueries
     }
 
     /**
+     * Rows that are donation history: real money, given as a gift.
+     *
+     * Event ticket orders ride the same table with kind='order'. They are a
+     * purchase, not a donation, so they must stay out of donor lifetime totals,
+     * campaign and fund rollups, donation reporting, receipts and the year-end
+     * tax statement. The QA sweep found kind filtered in exactly one place in
+     * core, which is why a ticket buyer's lifetime total inflated and a ticket
+     * appeared on a tax-deductible statement.
+     *
+     * This is the single owner of that rule. Reach for it wherever "donations"
+     * is meant, rather than repeating the where().
+     */
+    public static function donationsOnly($q)
+    {
+        return self::live($q)->where('kind', 'donation');
+    }
+
+    /**
      * Correlated subquery: total succeeded refunds for the current
      * dono_donations row, expressed in the org/base currency. Refunds are
      * stored in the donation currency, so each is scaled by the donation's
