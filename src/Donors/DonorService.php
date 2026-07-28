@@ -27,6 +27,7 @@ final class DonorService
         private Crypto $crypto,
         private Clock $clock,
         private ErasureRegistry $erasure,
+        private DonorPurge $purge,
     ) {
     }
 
@@ -279,6 +280,13 @@ final class DonorService
             // whole thing back rather than leaving the donor marked erased when
             // only some of their data went.
             $this->erasure->run($request);
+
+            // A zero retention window means there is no grace period in which a
+            // returning donor is reunited with this record, so the handle goes
+            // now rather than on tomorrow's sweep.
+            if ($this->purge->purgesOnRedaction()) {
+                $this->purge->purge($donor);
+            }
         });
 
         return $donor;

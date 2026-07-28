@@ -26,8 +26,8 @@ export default function PrivacyPanel( { s } ) {
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Retention after redaction', 'dono' ) }
-                    help={ __( 'Days a redacted donor record is kept before being purged entirely. Donations stay linked to the anonymous record. 0 = purge immediately.', 'dono' ) }
+                    label={ __( 'Reunite window after redaction', 'dono' ) }
+                    help={ __( 'A redacted donor who gives again within this many days is recognised and reunited with their giving history. After it, the last link to their email is severed and they are treated as a new donor. Their past donations stay counted either way. 0 severs it at redaction; unlike the retention settings below, 0 does not mean "off".', 'dono' ) }
                 >
                     <input
                         type="number"

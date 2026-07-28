@@ -392,12 +392,19 @@ final class CoreModule implements DonoModule
             return $handlers;
         });
 
+        $c->bind(\Dono\Donors\DonorPurge::class, fn (Container $c) => new \Dono\Donors\DonorPurge(
+            $c->get(AsyncDispatcher::class),
+            $c->get(Clock::class)
+        ));
+        $c->get(\Dono\Donors\DonorPurge::class)->register();
+
         $c->bind(DonorService::class, fn (Container $c) => new DonorService(
             $c->get(DonorRepository::class),
             $c->get(IdentityHasher::class),
             $c->get(Crypto::class),
             $c->get(Clock::class),
-            $c->get(\Dono\Donors\Erasure\ErasureRegistry::class)
+            $c->get(\Dono\Donors\Erasure\ErasureRegistry::class),
+            $c->get(\Dono\Donors\DonorPurge::class)
         ));
 
         $c->get(DonorRetention::class)->register();
