@@ -398,6 +398,36 @@ final class RazorpaySubscriptionTest extends IntegrationTestCase
         $this->assertSame(200000, (int) $plan->total_paid_cents);
     }
 
+    /**
+     * Razorpay redelivers. The renewal branch was replay-protected and the
+     * signup branch was not: a second delivery of the FIRST charge fell into
+     * createRenewal, which cannot match the payment because the signup donation
+     * stores the subscription id in gateway_intent_id. It inserted a duplicate,
+     * hit the unique index, and threw, leaving the endpoint answering 500 to
+     * every later delivery. Only the DB constraint prevented a double-bank.
+     */
+    public function test_a_redelivered_first_charge_does_not_500_or_duplicate(): void
+    {
+        $reference = $this->createDonation();
+        $this->recordSubscription($reference);
+
+        $first = $this->chargedEvent([
+            'id' => 'pay_first', 'amount' => 100000, 'currency' => 'INR',
+            'status' => 'captured', 'method' => 'upi',
+        ]);
+
+        $this->assertSame(200, $this->webhook($first)->get_status());
+        $this->assertSame(200, $this->webhook($first)->get_status(), 'the redelivery is accepted, not a 500');
+
+        $all = Donation::query()->where('gateway', 'razorpay')->getAll();
+        $this->assertCount(1, $all, 'no duplicate donation from the replay');
+        $this->assertSame('paid', $all[0]->status);
+
+        $plan = $this->plans()->findBySubscriptionId('razorpay', 'sub_1');
+        $this->assertSame(1, (int) $plan->payments_count, 'the counter did not move twice');
+        $this->assertSame(100000, (int) $plan->total_paid_cents);
+    }
+
     public function test_a_cancellation_webhook_ends_the_plan(): void
     {
         $reference = $this->createDonation();

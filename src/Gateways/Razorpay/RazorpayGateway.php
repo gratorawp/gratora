@@ -592,6 +592,26 @@ final class RazorpayGateway implements PaymentGateway, SubscriptionAware
             'metadata'       => ['razorpay_subscription_id' => $subId],
         ];
 
+        // A redelivery of a charge already banked.
+        //
+        // The renewal branch is replay-protected by createRenewal, but the
+        // signup branch was not: on a second delivery the signup row is no
+        // longer pending, so the lookup below missed it and execution fell into
+        // createRenewal, which cannot recognise the payment because the signup
+        // donation stores the SUBSCRIPTION id in gateway_intent_id, not the
+        // payment id. It inserted a duplicate, collided with
+        // uk_gateway_gateway_txn_id, and threw out of the handler, leaving the
+        // endpoint answering 500 to every subsequent delivery. Only the unique
+        // index stood between that and banking the money twice.
+        if ($this->donations->findByGatewayTxn($this->id(), $paymentId) instanceof Donation) {
+            return new WebhookOutcome(
+                signature_ok: true,
+                external_id:  $eventId,
+                event_type:   $type,
+                handled:      true,
+            );
+        }
+
         $signup = Donation::query()
             ->where('recurring_plan_id', (int) $plan->id)
             ->where('status', 'pending')
