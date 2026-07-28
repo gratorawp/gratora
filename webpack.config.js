@@ -24,7 +24,6 @@ module.exports = {
     entry: {
         'admin/dashboard':         path.resolve( __dirname, 'assets/admin/dashboard/index.jsx' ),
         'admin/settings':          path.resolve( __dirname, 'assets/admin/settings/index.jsx' ),
-        'admin/licenses':          path.resolve( __dirname, 'assets/admin/licenses/index.jsx' ),
         'admin/campaigns':         path.resolve( __dirname, 'assets/admin/campaigns/index.jsx' ),
         'admin/donations':         path.resolve( __dirname, 'assets/admin/donations/index.jsx' ),
         'admin/donors':            path.resolve( __dirname, 'assets/admin/donors/index.jsx' ),

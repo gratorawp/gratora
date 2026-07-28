@@ -31,7 +31,7 @@ final class LicenseNotice
             return;
         }
         // Already on the screen that says all of this.
-        if (($_GET['page'] ?? '') === 'dono-licenses') {
+        if (($_GET['page'] ?? '') === 'dono-settings') {
             return;
         }
 
@@ -95,7 +95,7 @@ final class LicenseNotice
             ),
             esc_html__('Dono:', 'dono'),
             esc_html($message),
-            esc_url(admin_url('admin.php?page=dono-licenses')),
+            esc_url(admin_url('admin.php?page=dono-settings#licenses')),
             esc_html__('Manage licenses', 'dono')
         );
     }

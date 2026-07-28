@@ -4,6 +4,8 @@ import { __, sprintf, _n } from '@wordpress/i18n';
 import Toaster from '../_shared/components/Toaster';
 import { notify } from '../_shared/notify';
 import { tablistKeyDown } from '../_shared/tablistKeys';
+import { useExtensionTabs, ExtensionTabPanel } from '../_shared/extensionTabs';
+import Licenses from '../licenses/Licenses';
 
 import { useDonoSettings } from '../_shared/useDonoSettings';
 import { useFxRates } from '../_shared/useFxRates';
@@ -38,6 +40,7 @@ const TABS = [
     { key: 'privacy',      label: __( 'Data & privacy', 'dono' ),       Icon: IconPrivacy },
     { key: 'roles',        label: __( 'Roles & permissions', 'dono' ),  Icon: IconRoles },
     { key: 'advanced',     label: __( 'Advanced', 'dono' ),             Icon: IconAdvanced },
+    { key: 'licenses',     label: __( 'Licenses', 'dono' ),             Icon: IconSetup },
 ];
 
 // Save-job slug -> human label, for failure messages (job slugs are not tab keys).
@@ -67,6 +70,7 @@ function initialTab() {
 
 export default function Settings() {
     const [ tab, setTab ]                 = useState( initialTab );
+    const extTabs                         = useExtensionTabs( 'settings' );
 
     const org      = useDonoSettings( 'org-profile' );
     const brand    = useDonoSettings( 'org-brand' );
@@ -82,14 +86,23 @@ export default function Settings() {
     const roles    = useDonoSettings( 'roles' );
     const advanced = useDonoSettings( 'advanced' );
 
+    // Re-run when extTabs changes so this closure never holds a stale list: an
+    // add-on tab registers after mount, and a hash-only navigation to it never
+    // reloads the page.
     useEffect( () => {
+        const known = ( h ) => TABS.some( ( t ) => t.key === h ) || extTabs.some( ( t ) => t.id === h );
+        const read  = () => ( window.location.hash || '' ).replace( /^#/, '' ).split( '/' )[ 0 ];
+
         const onHash = () => {
-            const h = ( window.location.hash || '' ).replace( /^#/, '' ).split( '/' )[ 0 ];
-            if ( TABS.some( ( t ) => t.key === h ) ) setTab( h );
+            const h = read();
+            if ( known( h ) ) setTab( h );
         };
+        // Also correct the tab chosen at mount, before add-on tabs existed.
+        onHash();
+
         window.addEventListener( 'hashchange', onHash );
         return () => window.removeEventListener( 'hashchange', onHash );
-    }, [] );
+    }, [ extTabs ] );
 
     const anyDirty = org.isDirty || brand.isDirty || currency.isDirty || fx.isDirty || gateways.isDirty || email.isDirty || receipts.isDirty || numbering.isDirty || consents.isDirty || giftAid.isDirty || privacy.isDirty || roles.isDirty || advanced.isDirty;
     useEffect( () => {
@@ -211,10 +224,10 @@ export default function Settings() {
                 role="tablist"
                 tabIndex={ -1 }
                 aria-label={ __( 'Settings sections', 'dono' ) }
-                onKeyDown={ ( e ) => tablistKeyDown( e, TABS.map( ( t ) => t.key ), tab, jumpTo ) }
+                onKeyDown={ ( e ) => tablistKeyDown( e, [ ...TABS.map( ( t ) => t.key ), ...extTabs.map( ( t ) => t.id ) ], tab, jumpTo ) }
             >
                 <div className="dono-tabs__scroll">
-                    { TABS.map( ( t ) => {
+                    { [ ...TABS, ...extTabs.map( ( t ) => ( { key: t.id, label: t.label, Icon: IconAdvanced } ) ) ].map( ( t ) => {
                         const active   = tab === t.key;
                         const isDirty  = !! dirtyByTab[ t.key ];
                         const Icon     = t.Icon;
@@ -277,6 +290,14 @@ export default function Settings() {
                 <div hidden={ tab !== 'advanced' }>
                     <AdvancedPanel s={ advanced } />
                 </div>
+                <div hidden={ tab !== 'licenses' }>
+                    <Licenses />
+                </div>
+                { extTabs.map( ( t ) => (
+                    <div key={ t.id } hidden={ tab !== t.id }>
+                        <ExtensionTabPanel tab={ t } context={ {} } />
+                    </div>
+                ) ) }
             </div>
 
             { dirtySections > 0 && (

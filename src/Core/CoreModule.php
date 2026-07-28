@@ -11,7 +11,6 @@ use Dono\Admin\Pages\DonationsPage;
 use Dono\Admin\Pages\DonorsPage;
 use Dono\Admin\Pages\FormsPage;
 use Dono\Admin\Pages\FundsPage;
-use Dono\Admin\Pages\LicensesPage;
 use Dono\Admin\Pages\SettingsPage;
 use Dono\Analytics\Event;
 use Dono\Analytics\EventRecorder;
@@ -960,7 +959,6 @@ final class CoreModule implements DonoModule
             (new DonorsPage())->register();
             (new FormsPage())->register();
             (new FundsPage())->register();
-            (new LicensesPage($c))->register();
             (new SettingsPage($c))->register();
             (new OnboardingPage())->register();
             (new Onboarding())->register();

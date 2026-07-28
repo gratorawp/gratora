@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dono\Admin\Pages;
 
 use Dono\Foundation\Container\Container;
+use Dono\Admin\ExtensionAssets;
 use Dono\Foundation\Hooks\HookProvider;
 
 /**
@@ -61,10 +62,14 @@ final class SettingsPage extends HookProvider
 
         wp_enqueue_media();
 
+        // Add-ons register their settings tab into this registry, so it has to
+        // be defined before the settings app reads it.
+        ExtensionAssets::enqueue('settings');
+
         wp_enqueue_script(
             self::HANDLE,
             DONO_URL . self::BUILD_DIR . '/index.js',
-            $asset['dependencies'] ?? [],
+            array_merge($asset['dependencies'] ?? [], [ExtensionAssets::HANDLE]),
             $asset['version']      ?? DONO_VERSION,
             true
         );

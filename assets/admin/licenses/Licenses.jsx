@@ -6,7 +6,6 @@ import Card from '../_shared/components/Card';
 import Btn from '../_shared/components/Btn';
 import Notice from '../_shared/components/Notice';
 import Field from '../_shared/components/Field';
-import Toaster from '../_shared/components/Toaster';
 import { notify } from '../_shared/notify';
 
 const BASE = '/dono/v1/admin/license';
@@ -317,21 +316,12 @@ export default function Licenses() {
         );
     }
 
+    // A Settings tab now, so the page header and Toaster belong to Settings.
     return (
         <div className="dono-licenses-page">
-            <div className="dono-lic-crumbs">
-                <a href="admin.php?page=dono">{ __( 'Dono', 'dono' ) }</a>
-                <span className="sep" aria-hidden="true" />
-                <span className="here">{ __( 'Licenses', 'dono' ) }</span>
-            </div>
-
-            <div className="dono-lic-head">
-                <h1>{ __( 'Licenses', 'dono' ) }</h1>
-                <p>{ __( 'One key activates every Dono Pro add-on on this site.', 'dono' ) }</p>
-            </div>
-
-            <Toaster />
-
+            <p className="dono-lic-intro">
+                { __( 'One key activates every Dono Pro add-on on this site.', 'dono' ) }
+            </p>
             { body }
         </div>
     );
