@@ -43,7 +43,6 @@ final class LicenseNotice
         $refused = $this->license->unlicensed();
         if ($refused !== []) {
             $this->notice(
-                'error',
                 sprintf(
                     /* translators: %s: comma-separated add-on names */
                     __('Your license does not cover %s. They keep running for now, but they will not receive updates or security fixes.', 'dono'),
@@ -57,7 +56,6 @@ final class LicenseNotice
         $lapsing = $this->license->lapsing();
         if ($lapsing !== []) {
             $this->notice(
-                'warning',
                 sprintf(
                     /* translators: %s: comma-separated add-on names */
                     __('The license for %s has lapsed. Renew to keep receiving updates and security fixes.', 'dono'),
@@ -70,7 +68,6 @@ final class LicenseNotice
 
         if ((string) get_option(self::OPTION_KEY, '') === '') {
             $this->notice(
-                'warning',
                 __('Your Dono add-ons are not linked to a license key, so they will not receive updates or security fixes.', 'dono')
             );
         }
@@ -82,17 +79,17 @@ final class LicenseNotice
         return implode(', ', array_map(static fn (array $a): string => (string) $a['name'], $addons));
     }
 
-    private function notice(string $level, string $message): void
+    /**
+     * Always a warning, never an error: an unlicensed add-on keeps running, it
+     * just stops receiving updates. Red would overstate it.
+     */
+    private function notice(string $message): void
     {
-        $colour = $level === 'error'
-            ? ['#b42318', '#fff7f7']
-            : ['#b54708', '#fffaf5'];
-
         printf(
             '<div class="notice dono-admin-notice" role="alert" style="%s"><strong>%s</strong> %s <a href="%s">%s</a></div>',
             esc_attr(
-                'border:1px solid #e5e7eb;border-left:3px solid ' . $colour[0] . ';border-radius:8px;'
-                . 'background:' . $colour[1] . ';color:' . $colour[0] . ';padding:11px 14px;'
+                'border:1px solid #e5e7eb;border-left:3px solid #b54708;border-radius:8px;'
+                . 'background:#fffaf5;color:#b54708;padding:11px 14px;'
                 . "font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;"
                 . 'font-size:13px;line-height:1.45;'
             ),

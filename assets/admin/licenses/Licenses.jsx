@@ -74,7 +74,7 @@ function StateNotice( { status } ) {
     }
     if ( status === 'invalid' || status === 'not_entitled' ) {
         return (
-            <Notice status="error" isDismissible={ false }>
+            <Notice status="warning" isDismissible={ false }>
                 <strong>{ __( 'This key was not accepted.', 'dono' ) }</strong>{ ' ' }
                 { __( 'Check it against your purchase email. Until it is fixed your add-ons will not receive updates or security fixes.', 'dono' ) }
             </Notice>
