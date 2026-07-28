@@ -14,8 +14,10 @@ use Dono\Donations\DonationService;
 use Dono\Donors\ConsentService;
 use Dono\Forms\Form;
 use Dono\Forms\FormSubmissionValidator;
+use Dono\Gateways\BrowserAware;
 use Dono\Gateways\GatewayIntentResult;
 use Dono\Gateways\GatewayManager;
+use Dono\Gateways\PaymentGateway;
 use Dono\Rest\Schemas\DonationSchemas;
 use Dono\Settings\SettingsService;
 use Throwable;
@@ -338,7 +340,30 @@ final class DonationsController
             'requires_action' => $gatewayResult->requires_action,
             'paypal'          => $this->payPalPayload($gatewayResult),
             'razorpay'        => $this->razorpayPayload($gatewayResult),
+            ...$this->browserAwarePayload($gateway, $gatewayResult),
         ], 201);
+    }
+
+    /**
+     * The browser-facing slice a gateway that ships outside core declares for
+     * itself, keyed by its own id. Same whitelist rule as the two built-ins
+     * above: the gateway states what may leave, never the raw metadata.
+     *
+     * @return array<string,array<string,mixed>>
+     */
+    private function browserAwarePayload(PaymentGateway $gateway, GatewayIntentResult $result): array
+    {
+        if (! $gateway instanceof BrowserAware) {
+            return [];
+        }
+
+        try {
+            $payload = $gateway->browserPayload($result);
+        } catch (Throwable) {
+            return [];
+        }
+
+        return $payload === null ? [] : [$gateway->id() => $payload];
     }
 
     /**

@@ -24,6 +24,7 @@ use Dono\Forms\FormRepository;
 use Dono\Foundation\Helpers\Money;
 use Dono\Foundation\Hooks\HookProvider;
 use Dono\Foundation\Plugin;
+use Dono\Gateways\BrowserAware;
 use Dono\Gateways\GatewayManager;
 use Dono\Gateways\Stripe\StripeApi;
 use Dono\Gateways\TestMode;
@@ -91,13 +92,15 @@ final class DonationFormShortcode extends HookProvider
     /** Register and enqueue the runtime script and style. */
     private function enqueue(): void
     {
+        FormGatewayAssets::enqueue();
+
         $assetPath = DONO_DIR . 'build/donation-form/runtime/index.asset.php';
         if (file_exists($assetPath)) {
             $asset = require $assetPath;
             wp_register_script(
                 self::HANDLE,
                 DONO_URL . 'build/donation-form/runtime/index.js',
-                $asset['dependencies'] ?? [],
+                array_merge($asset['dependencies'] ?? [], [FormGatewayAssets::HANDLE]),
                 $asset['version']      ?? DONO_VERSION,
                 true
             );
@@ -557,6 +560,7 @@ HTML;
             'stripe'      => $this->stripePublicConfig($gatewaysCfg['options'] ?? [], $gateway, $testModeOn),
             'paypal'      => $this->payPalPublicConfig($gatewaysCfg['options'] ?? [], $gateway, $testModeOn, (string) $currency),
             'razorpay'    => $this->razorpayPublicConfig($gatewaysCfg['options'] ?? [], $gateway, $testModeOn, (string) $currency),
+            ...$this->browserAwareConfig($testModeOn, (string) $currency),
             'testMode'    => $testModeOn,
             'currency'    => $currency,
             'currencies'  => $currencies,
@@ -1586,5 +1590,40 @@ HTML;
         return $keyId !== ''
             ? ['keyId' => $keyId, 'currency' => strtoupper($currency)]
             : null;
+    }
+
+    /**
+     * Public config from every registered gateway that owns a browser step,
+     * keyed by gateway id. The three built-ins keep their own methods above;
+     * this is how a gateway that ships in an add-on reaches the page.
+     *
+     * A throwing gateway is skipped rather than taking the whole form down
+     * with it: a misconfigured payment method must not stop donations through
+     * the others.
+     *
+     * @return array<string,array<string,mixed>>
+     */
+    private function browserAwareConfig(bool $testMode, string $currency): array
+    {
+        if ($this->gateways === null) {
+            return [];
+        }
+
+        $out = [];
+        foreach ($this->gateways->all() as $id => $gateway) {
+            if (! $gateway instanceof BrowserAware) {
+                continue;
+            }
+            try {
+                $config = $gateway->publicConfig($testMode, $currency);
+            } catch (Throwable) {
+                continue;
+            }
+            if ($config !== []) {
+                $out[$id] = $config;
+            }
+        }
+
+        return $out;
     }
 }

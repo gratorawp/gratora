@@ -27,6 +27,20 @@ const STEP_RENDERERS = {
     submit: ConfirmStep,
 };
 
+/**
+ * Payment steps for gateways that ship outside core. An add-on registers with
+ * window.dono.formGateways.register( id, { component, ready } ) before the
+ * runtime mounts; `ready` gets the gateway's own slice of the form config and
+ * answers whether it can actually collect a payment.
+ */
+function registeredGateway( id ) {
+    if ( ! id ) return null;
+    const reg = typeof window !== 'undefined' ? window.dono?.formGateways : null;
+    const entry = reg && typeof reg.get === 'function' ? reg.get( id ) : null;
+
+    return entry && typeof entry.component === 'function' ? entry : null;
+}
+
 // After a failed validation the invalid field may be off-screen (long or paged
 // form), so clicking the button looks like a dead click. Move focus and scroll
 // to the first invalid field once the error re-render has committed.
@@ -205,6 +219,31 @@ function FormBody( { state, dispatch, config } ) {
                 }
                 return;
             }
+            // A gateway that ships outside core: it declared a browser payload
+            // server-side and registered a component here. Same rule as the
+            // three above, with the gateway itself deciding what "ready" means.
+            const extra = registeredGateway( data.gateway );
+            if ( extra && data[ data.gateway ] ) {
+                if ( ! extra.ready || extra.ready( config[ data.gateway ] || {} ) ) {
+                    dispatch( {
+                        type: 'AWAIT_PAYMENT',
+                        payment: {
+                            gateway:     data.gateway,
+                            data:        data[ data.gateway ],
+                            reference:   data.reference,
+                            intentId:    data.intent_id,
+                            amountCents: data.amount_cents,
+                            currency:    data.currency,
+                            donorName:   [ state.values.profile?.first_name, state.values.profile?.last_name ]
+                                .filter( Boolean ).join( ' ' ),
+                            donorEmail:  state.values.email || '',
+                        },
+                    } );
+                } else {
+                    dispatch( { type: 'SUBMIT_ERROR', message: config.i18n.error } );
+                }
+                return;
+            }
             // A client_secret means the gateway needs a client-side payment
             // step. Without a publishable key we cannot collect it, so this is
             // an error - never fall through to a "thank you" with no payment.
@@ -244,6 +283,9 @@ function FormBody( { state, dispatch, config } ) {
         let PaymentStep = StripePayment;
         if ( state.payment?.paypal ) PaymentStep = PayPalPayment;
         else if ( state.payment?.razorpay ) PaymentStep = RazorpayPayment;
+        else if ( state.payment?.gateway ) {
+            PaymentStep = registeredGateway( state.payment.gateway )?.component || PaymentStep;
+        }
         return (
             <ErrorBoundary>
                 <PaymentStep config={ config } payment={ state.payment } dispatch={ dispatch } />
