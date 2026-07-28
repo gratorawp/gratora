@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace Dono\Donors;
 
 use Dono\Donations\Donation;
-use Dono\Donations\DonationTribute;
+use Dono\Donors\Erasure\ErasureRegistry;
+use Dono\Donors\Erasure\ErasureRequest;
 use Dono\Recurring\RecurringPlan;
-use Dono\Donations\Refund;
-use Dono\Donations\DonationNote;
 use Dono\Foundation\Crypto\Crypto;
 use Dono\Foundation\Identity\IdentityHasher;
 use Dono\Foundation\Time\Clock;
@@ -27,6 +26,7 @@ final class DonorService
         private IdentityHasher $hasher,
         private Crypto $crypto,
         private Clock $clock,
+        private ErasureRegistry $erasure,
     ) {
     }
 
@@ -247,12 +247,18 @@ final class DonorService
      * GDPR soft-redact: zeroes PII, preserves the row and donation totals.
      * Financial records (amount, reference, dates) are retained for legal/tax
      * purposes; custom form-field answers and per-donation names are cleared.
+     *
+     * The identifiers are read before anything is wiped, because handlers for
+     * tables with no donor_id (webhook bodies, AI transcripts, importer maps)
+     * can only find the donor by searching for the values themselves.
      */
     public function redact(Donor $donor): Donor
     {
         if ($donor->redacted_at !== null) {
             return $donor;
         }
+
+        $request = $this->erasureRequest($donor);
 
         $donor->email_encrypted    = '';
         $donor->first_name         = null;
@@ -265,80 +271,68 @@ final class DonorService
         $donor->redacted_at        = $this->clock->now()->format('Y-m-d H:i:s');
         $donor->updated_at         = $donor->redacted_at;
 
-        DB::transaction(function () use ($donor) {
+        DB::transaction(function () use ($donor, $request) {
             $donor->save();
 
-            foreach (Donation::query()->where('donor_id', $donor->id)->getAll() as $donation) {
-                // Every field cleared below must be listed here, or the skip
-                // silently protects it. Adding gateway_metadata without adding
-                // it to this condition left it untouched on exactly the rows
-                // that had nothing else to clear.
-                if ($donation->custom_data_encrypted === null
-                    && $donation->donor_first_name === null
-                    && $donation->donor_last_name === null
-                    && ($donation->note_to_org ?? '') === ''
-                    && $donation->gateway_metadata === null
-                ) {
-                    continue;
-                }
-                $donation->custom_data_encrypted = null;
-                $donation->donor_first_name      = null;
-                $donation->donor_last_name       = null;
-                // Donor-authored message can carry PII; clear it on erasure.
-                $donation->note_to_org           = null;
-                // The gateway's own record of the payer: PayPal payer_email,
-                // Stripe billing_details, card last-4. Cleartext, and the QA
-                // sweep found it surviving erasure.
-                $donation->gateway_metadata      = null;
-                $donation->updated_at            = $donor->redacted_at;
-                $donation->save();
-            }
-
-            $donationIds = array_map(
-                static fn (Donation $d): int => (int) $d->id,
-                Donation::query()->where('donor_id', $donor->id)->getAll()
-            );
-
-            if ($donationIds !== []) {
-                // Staff notes written against a donation, as opposed to against
-                // the donor, are the same free-text PII and were being missed.
-                DonationNote::query()->whereIn('donation_id', $donationIds)->delete();
-
-                // A refund reason is admin free text and its metadata carries
-                // the gateway's payer details.
-                Refund::query()
-                    ->whereIn('donation_id', $donationIds)
-                    ->update(['reason' => null, 'metadata' => null]);
-            }
-
-            // The gateway's customer id is a stable handle back to the donor on
-            // the processor's side, so it is re-identifying data.
-            RecurringPlan::query()
-                ->where('donor_id', $donor->id)
-                ->update(['gateway_customer_id' => null]);
-
-            // Tributes carry donor-authored PII the erasure must also remove:
-            // the message, a third party's notify email, and the honoree name.
-            DonationTribute::query()
-                ->where('donor_id', $donor->id)
-                ->update([
-                    'name'                   => '',
-                    'notify_email_encrypted' => null,
-                    'message_encrypted'      => null,
-                ]);
-
-            // Revoke outstanding magic-link tokens so a previously-emailed
-            // portal link can no longer open a session for the redacted donor.
-            MagicLinkToken::query()->where('donor_id', $donor->id)->delete();
-
-            // Staff notes about the donor are free-text PII and in DSAR export
-            // scope (DonorMetricsService::exportData), so erasure removes them.
-            DonorNote::query()->where('donor_id', $donor->id)->delete();
+            // Core and every add-on erase through the same registry, inside
+            // this transaction: a handler that cannot finish its part rolls the
+            // whole thing back rather than leaving the donor marked erased when
+            // only some of their data went.
+            $this->erasure->run($request);
         });
 
-        do_action('dono.donor.redacted', $donor);
-
         return $donor;
+    }
+
+    /**
+     * Snapshot of everything that identifies this donor, taken while it is
+     * still readable. Gateway ids are in here because a webhook body has no
+     * donor_id: `pi_...` or `cus_...` is the only thread back from the raw
+     * payload to the person it describes.
+     */
+    private function erasureRequest(Donor $donor): ErasureRequest
+    {
+        $donations = Donation::query()->where('donor_id', $donor->id)->getAll();
+        $plans     = RecurringPlan::query()->where('donor_id', $donor->id)->getAll();
+
+        $candidates = [
+            $this->decryptEmail($donor),
+            $this->decrypt($donor->phone_encrypted),
+            $this->decrypt($donor->tax_id_encrypted),
+            $donor->first_name,
+            $donor->last_name,
+            trim((string) $donor->first_name . ' ' . (string) $donor->last_name),
+            $donor->company,
+        ];
+
+        $donationIds = [];
+        foreach ($donations as $d) {
+            $donationIds[]  = (int) $d->id;
+            $candidates[]   = $d->reference;
+            $candidates[]   = $d->gateway_intent_id;
+            $candidates[]   = $d->gateway_txn_id;
+        }
+        foreach ($plans as $p) {
+            $candidates[] = $p->gateway_subscription_id;
+            $candidates[] = $p->gateway_customer_id;
+        }
+
+        return ErasureRequest::make(
+            (int) $donor->id,
+            $donationIds,
+            $candidates,
+            $this->clock->now()->format('Y-m-d H:i:s'),
+        );
+    }
+
+    private function decrypt(?string $value): ?string
+    {
+        if ($value === null || $value === '') return null;
+        try {
+            return $this->crypto->decrypt($value);
+        } catch (\Throwable) {
+            return null;
+        }
     }
 
     /**

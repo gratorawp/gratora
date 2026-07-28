@@ -380,11 +380,24 @@ final class CoreModule implements DonoModule
             $c->get(Clock::class)
         ));
 
+        $c->bind(\Dono\Donors\Erasure\ErasureRegistry::class, fn (Container $c) => new \Dono\Donors\Erasure\ErasureRegistry());
+
+        // Core erases through the same registry add-ons use, so there is one
+        // mechanism and one order rather than core's inline copy plus a hook
+        // everyone else is expected to remember.
+        add_filter('dono.donor.erasure_handlers', static function (array $handlers): array {
+            $handlers[] = new \Dono\Donors\Erasure\CoreDonorDataHandler();
+            $handlers[] = new \Dono\Donors\Erasure\AnalyticsEventHandler();
+            $handlers[] = new \Dono\Donors\Erasure\WebhookLogHandler();
+            return $handlers;
+        });
+
         $c->bind(DonorService::class, fn (Container $c) => new DonorService(
             $c->get(DonorRepository::class),
             $c->get(IdentityHasher::class),
             $c->get(Crypto::class),
-            $c->get(Clock::class)
+            $c->get(Clock::class),
+            $c->get(\Dono\Donors\Erasure\ErasureRegistry::class)
         ));
 
         $c->get(DonorRetention::class)->register();
