@@ -41,7 +41,7 @@ final class ActivationTest extends IntegrationTestCase
         delete_option('dono_db_version');
         Plugin::onActivation();
         $this->assertSame(
-            DONO_VERSION,
+            DONO_DB_VERSION,
             get_option('dono_db_version'),
             'activation records the schema version so the boot gate skips a redundant migration'
         );
