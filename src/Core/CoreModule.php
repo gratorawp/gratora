@@ -129,6 +129,10 @@ use Dono\Foundation\Modules\ModuleManager;
 use Dono\Foundation\References\ReferenceGenerator;
 use Dono\Foundation\Time\Clock;
 use Dono\Foundation\Time\SystemClock;
+use Dono\Forms\Blocks\GiftAidBlock;
+use Dono\GiftAid\GiftAidDeclaration;
+use Dono\GiftAid\GiftAidDeclarations;
+use Dono\GiftAid\GiftAidEligibility;
 use Dono\Funds\Fund;
 use Dono\Funds\FundReassignmentJob;
 use Dono\Funds\FundRepository;
@@ -526,7 +530,17 @@ final class CoreModule implements DonoModule
             $c->get( FormTypeRegistry::class),
             $c->get(Crypto::class),
             $c->get( TestMode::class),
-            $c->get(DonationTributeRepository::class)
+            $c->get(DonationTributeRepository::class),
+            $c->get(GiftAidEligibility::class),
+            $c->get(GiftAidDeclarations::class)
+        ));
+
+        $c->bind(GiftAidDeclarations::class, fn (Container $c) => new GiftAidDeclarations(
+            $c->get(Clock::class),
+            $c->get(IdentityHasher::class)
+        ));
+        $c->bind(GiftAidEligibility::class, fn (Container $c) => new GiftAidEligibility(
+            $c->get(GiftAidDeclarations::class)
         ));
 
         $c->bind(GatewayManager::class, fn () => new GatewayManager());
@@ -853,6 +867,7 @@ final class CoreModule implements DonoModule
         $blocks->add(new FundPickerBlock());
         $blocks->add(new AddressBlock());
         $blocks->add(new ConsentBlock());
+        $blocks->add(new GiftAidBlock());
         $blocks->add(new PrivacyNoticeBlock());
         $blocks->add(new SubmitButtonBlock());
         $blocks->add(new DateBlock());
@@ -992,6 +1007,7 @@ final class CoreModule implements DonoModule
             Donation::class,
             DonationNote::class,
             DonationTribute::class,
+            GiftAidDeclaration::class,
             Refund::class,
             RecurringPlan::class,
             Receipt::class,

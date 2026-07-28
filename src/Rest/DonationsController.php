@@ -231,6 +231,7 @@ final class DonationsController
             note_to_org:        isset($body['note_to_org']) ? (string) $body['note_to_org'] : null,
             note_public:        ! empty($body['note_public']),
             is_anonymous:       (bool) ($body['is_anonymous'] ?? false),
+            gift_aid:           (bool) ($body['gift_aid'] ?? false),
             country:            $country !== null ? (string) $country : null,
             tribute:            $this->normalizeTribute($body['tribute'] ?? null),
             fee_covered_cents:  min($amount, max(0, (int) ($body['fee_covered_cents'] ?? 0))),

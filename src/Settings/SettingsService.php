@@ -80,6 +80,20 @@ final class SettingsService
                 ],
             ],
         ],
+        // UK Gift Aid. In core rather than a country pack: a UK charity cannot
+        // use the product without it, and it is worth 25% on top of every
+        // eligible gift.
+        'gift_aid' => [
+            'option'   => 'dono_gift_aid',
+            'defaults' => [
+                'enabled'   => false,
+                // HMRC's reference for the charity, printed on the claim.
+                'charity_reference' => '',
+                // Blank uses the statutory wording below, which is what HMRC
+                // expects a declaration to say. An org may only add to it.
+                'statement' => '',
+            ],
+        ],
         'privacy' => [
             'option'   => 'dono_privacy',
             'defaults' => [
