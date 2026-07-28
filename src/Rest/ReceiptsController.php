@@ -91,8 +91,19 @@ final class ReceiptsController
 
         $renderer = $this->findRendererById($receipt->renderer_id);
         if (! $renderer) {
-            /* translators: %s: renderer identifier (internal). */
-            return new WP_Error('dono_renderer_missing', sprintf(__('Renderer "%s" is no longer available.', 'dono'), $receipt->renderer_id), ['status' => 500]);
+            // 410, not 500: nothing is broken, the extension that produced
+            // this document is no longer active. A donor following an emailed
+            // link gets an explanation rather than an error, and the operator
+            // gets a reason instead of a stack trace.
+            //
+            // Falling back to the generic renderer would be worse than either:
+            // it would hand the donor a different, non-compliant document
+            // under the same receipt number.
+            return new WP_Error(
+                'dono_renderer_missing',
+                __('This receipt was produced by an extension that is no longer active. Please contact the organisation.', 'dono'),
+                ['status' => 410, 'renderer_id' => (string) $receipt->renderer_id]
+            );
         }
 
         // Render in the donor's locale so re-downloads stay in the issued language.

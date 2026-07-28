@@ -19,12 +19,24 @@ use Dono\Receipts\PdfBuilder;
  */
 final class AnnualStatementBuilder
 {
+    /** Names this builder to the dono.statement.pdf filter. */
+    public const KIND = 'portal';
+
     public function __construct(private PdfBuilder $pdf)
     {
     }
 
     public function build(Donor $donor, int $year): string
     {
+        // An add-on that issues jurisdiction-correct annual documents replaces
+        // this one outright. Without the seam a donor can reach two different
+        // annual statements for the same year from the same portal, only one
+        // of which satisfies their tax authority.
+        $override = apply_filters('dono.statement.pdf', null, $donor, $year, self::KIND);
+        if (is_string($override) && $override !== '') {
+            return $override;
+        }
+
         $start = sprintf('%04d-01-01 00:00:00', $year);
         $end   = sprintf('%04d-12-31 23:59:59', $year);
 

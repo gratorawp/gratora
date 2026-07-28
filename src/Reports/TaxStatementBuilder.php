@@ -24,6 +24,9 @@ use Dono\Receipts\PdfBuilder;
  */
 final class TaxStatementBuilder
 {
+    /** Names this builder to the dono.statement.pdf filter. */
+    public const KIND = 'tax';
+
     public function __construct(
         private PdfBuilder $pdf,
         private DonationRepository $donations,
@@ -33,6 +36,14 @@ final class TaxStatementBuilder
 
     public function build(Donor $donor, int $year): string
     {
+        // See AnnualStatementBuilder: an add-on replacing annual documents
+        // has to replace both, or the admin route and the portal route
+        // hand out different statements for the same year.
+        $override = apply_filters('dono.statement.pdf', null, $donor, $year, self::KIND);
+        if (is_string($override) && $override !== '') {
+            return $override;
+        }
+
         $itemized = $this->itemize($this->donations->paidForDonorInYear((int) $donor->id, $year));
         if ($itemized['donation_count'] === 0) {
             return '';

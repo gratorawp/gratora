@@ -68,7 +68,13 @@ final class ReceiptIssuer
         // gift. Issuing a donation receipt for one misstates what the payer
         // received, and the receipt then fed the tax-deductible statement.
         // Add-ons that sell things issue their own confirmation.
-        if ((string) ($donation->kind ?? 'donation') !== 'donation') {
+        //
+        // The filter exists because "no receipt" is the safe answer, not the
+        // right one: a gala ticket is a deductible contribution minus the
+        // value of the meal, and an add-on that can state that value should be
+        // able to turn issuance back on. The default is unchanged.
+        $shouldIssue = (string) ($donation->kind ?? 'donation') === 'donation';
+        if (! apply_filters('dono.receipt.should_issue', $shouldIssue, $donation)) {
             return;
         }
 
