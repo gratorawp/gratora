@@ -7,6 +7,7 @@ namespace Dono\Donations;
 use Dono\Campaigns\CampaignRepository;
 use Dono\Donors\DonorRepository;
 use Dono\Donors\DonorService;
+use Dono\Donors\Portal\PortalPage;
 use Dono\Foundation\Helpers\Money;
 use Dono\Foundation\Hooks\HookProvider;
 use Dono\Mail\Mailer;
@@ -45,6 +46,8 @@ final class DonationEmails extends HookProvider
             'dono.recurring.renewed'       => ['onRecurringRenewed', 10, 2],
             // 2-arg: $plan, $reason
             'dono.recurring.cancelled'     => ['onRecurringCancelled', 10, 2],
+            // 2-arg: $plan, $context
+            'dono.recurring.renewal_failed' => ['onRecurringFailed', 10, 2],
             // 1-arg: $donorId (fired once, when a donor's aggregate crosses 0 -> 1)
             'dono.donor.first_donation_completed' => 'onFirstDonation',
         ];
@@ -136,6 +139,41 @@ final class DonationEmails extends HookProvider
             'campaign_title'    => $plan->campaign_id
                 ? (($c = $this->campaigns->findById((int) $plan->campaign_id)) ? (string) $c->title : '')
                 : '',
+        ]);
+    }
+
+    /**
+     * A renewal the gateway declined. The donor is the only person who can fix
+     * it, so they are told while the plan is still alive rather than finding
+     * out when it is cancelled.
+     *
+     * @param array<string,mixed> $context
+     */
+    public function onRecurringFailed(RecurringPlan $plan, array $context = []): void
+    {
+        // Stripe and friends retry a failed invoice on their own schedule. One
+        // notice per failing card helps; four is nagging a donor who already
+        // knows, so only the first failure mails. The action still fires every
+        // time for anything that wants the full picture.
+        if ((int) ($context['attempt'] ?? 1) !== 1) return;
+
+        $donor = $this->donors->findById((int) $plan->donor_id);
+        if (! $donor) return;
+        $email = $this->donorService->decryptEmail($donor);
+        if ($email === null || $email === '') return;
+
+        $this->mailer->sendTemplate('subscription_payment_failed', $email, [
+            'donor_first_name'  => trim((string) ($donor->first_name ?? '')),
+            'donor_name'        => trim(($donor->first_name ?? '') . ' ' . ($donor->last_name ?? '')),
+            'organisation_name' => (string) get_bloginfo('name'),
+            'amount'            => Money::format((int) $plan->amount_cents, (string) $plan->currency),
+            'campaign_title'    => $plan->campaign_id
+                ? (($c = $this->campaigns->findById((int) $plan->campaign_id)) ? (string) $c->title : '')
+                : '',
+            // The portal page, not a signed link: a declined payment is not a
+            // request to sign in, and mailing a working session key on an event
+            // the donor did not trigger is a worse trade than one extra click.
+            'portal_url'        => (new PortalPage())->url(),
         ]);
     }
 

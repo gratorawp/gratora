@@ -149,6 +149,81 @@ final class StripeSubscriptionRenewalTest extends IntegrationTestCase
         $this->assertSame('active', $fresh->status, 'Single failure does not cancel');
     }
 
+    /**
+     * A failed renewal is the start of losing the gift, so it has to be
+     * announceable. Without this signal nothing downstream can tell anyone.
+     */
+    public function test_invoice_payment_failed_fires_the_renewal_failed_action(): void
+    {
+        $plan = $this->seedPlan();
+
+        $seen = [];
+        add_action('dono.recurring.renewal_failed', function ($p, $ctx) use (&$seen): void {
+            $seen[] = ['plan_id' => (int) $p->id, 'ctx' => $ctx];
+        }, 10, 2);
+
+        $this->postWebhook('invoice.payment_failed', $this->buildInvoice($plan, 2500, 'subscription_cycle'));
+
+        $this->assertCount(1, $seen);
+        $this->assertSame((int) $plan->id, $seen[0]['plan_id']);
+        $this->assertSame('stripe', $seen[0]['ctx']['gateway']);
+        $this->assertSame(1, $seen[0]['ctx']['attempt'], 'so a listener can tell a first failure from a fourth');
+    }
+
+    public function test_a_failed_renewal_tells_the_donor(): void
+    {
+        $plan  = $this->seedPlan();
+        $mails = $this->captureMails();
+
+        $this->postWebhook('invoice.payment_failed', $this->buildInvoice($plan, 2500, 'subscription_cycle'));
+
+        $mail = $this->findMailBySubject($mails, "couldn't be taken");
+        $this->assertNotNull(
+            $mail,
+            'the donor is told their payment failed, not left to find out when the plan is cancelled'
+        );
+        $this->assertStringNotContainsString(
+            '{portal_url}',
+            (string) $mail['message'],
+            'every tag the template uses must be supplied, or the donor reads the placeholder'
+        );
+        $this->assertStringContainsString('donor-portal', (string) $mail['message'], 'and it points somewhere real');
+    }
+
+    /**
+     * Stripe retries a failed invoice on its own schedule. One notice per
+     * failing card is help; four is the charity nagging a donor who already
+     * knows, so only the first attempt mails.
+     */
+    public function test_a_retry_does_not_mail_the_donor_again(): void
+    {
+        $plan = $this->seedPlan();
+        $this->postWebhook('invoice.payment_failed', $this->buildInvoice($plan, 2500, 'subscription_cycle'));
+
+        $mails = $this->captureMails();
+        $this->postWebhook('invoice.payment_failed', $this->buildInvoice($plan, 2500, 'subscription_cycle'));
+
+        $this->assertNull($this->findMailBySubject($mails, "couldn't be taken"));
+        $this->assertSame(
+            2,
+            (int) \Dono\Recurring\RecurringPlan::query()->find('id', (int) $plan->id)->failed_renewals_count,
+            'the second failure is still counted, it just does not re-mail'
+        );
+    }
+
+    public function test_a_failed_renewal_is_recorded_for_reporting(): void
+    {
+        $plan = $this->seedPlan();
+
+        $this->postWebhook('invoice.payment_failed', $this->buildInvoice($plan, 2500, 'subscription_cycle'));
+
+        $this->assertSame(
+            1,
+            (int) \Dono\Analytics\Event::query()->where('type', 'recurring.failed')->count(),
+            'the cancellation path records one, so the failure that precedes it must too'
+        );
+    }
+
     public function test_subscription_deleted_marks_plan_cancelled_and_fires_event(): void
     {
         $plan = $this->seedPlan();

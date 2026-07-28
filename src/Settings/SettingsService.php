@@ -274,6 +274,11 @@ final class SettingsService
                 'subject' => __('Your recurring donation renewed', 'dono'),
                 'body'    => __("Hi {donor_name},\n\nYour recurring donation of {amount} to {campaign_title} was renewed today. Receipt number: {receipt_number}.\n\nThank you for your continued support.\n\nThanks,\n{organisation_name}", 'dono'),
             ],
+            'subscription_payment_failed' => [
+                'enabled' => true,
+                'subject' => __("Your donation couldn't be taken this month", 'dono'),
+                'body'    => __("Hi {donor_first_name},\n\nWe tried to collect your recurring donation of {amount} to {campaign_title} today and your bank declined it. This usually means a card has expired or been replaced.\n\nNothing has been charged and your donation is still set up. You can update your card here:\n{portal_url}\n\nIf you would rather stop the donation, that is completely fine, and you can do that from the same page.\n\nThanks,\n{organisation_name}", 'dono'),
+            ],
             'subscription_cancelled' => [
                 'enabled' => true,
                 'subject' => __('Your recurring donation has been cancelled', 'dono'),

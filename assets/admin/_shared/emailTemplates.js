@@ -61,6 +61,16 @@ export function getDonorTemplates() {
             tags:      DONATION_TAGS,
         },
         {
+            id:        'subscription_payment_failed',
+            label:     __( 'Recurring payment failed', 'dono' ),
+            desc:      __( 'Sent the first time a renewal is declined, so the donor can update their card before the donation lapses. Retries do not re-send it.', 'dono' ),
+            recipient: __( 'Donor', 'dono' ),
+            // Only what onRecurringFailed actually passes. The wider donation
+            // list advertises tags this email has no value for (receipt
+            // number, download url), and an unsupplied tag renders literally.
+            tags:      [ '{donor_first_name}', '{donor_name}', '{organisation_name}', '{amount}', '{campaign_title}', '{portal_url}' ],
+        },
+        {
             id:        'subscription_cancelled',
             label:     __( 'Subscription cancelled', 'dono' ),
             desc:      __( 'Sent when a recurring donation is cancelled, either by the donor or by an admin.', 'dono' ),

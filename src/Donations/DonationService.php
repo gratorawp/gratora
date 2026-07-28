@@ -514,6 +514,43 @@ final class DonationService
         $donation->save();
     }
 
+    /**
+     * A renewal the gateway could not collect.
+     *
+     * Counted by the repository, announced here, so every surface that cares
+     * hears the same thing: the donor's dunning email, reporting, and anything
+     * an add-on wires up. Before this the failure only moved a counter, which
+     * meant a monthly gift could lapse without one person being told.
+     *
+     * `attempt` is the running failure count for this plan, so a listener can
+     * distinguish a first decline from a card that has been dead for a month.
+     */
+    public function recordRecurringFailure(\Dono\Recurring\RecurringPlan $plan, ?string $reason = null): void
+    {
+        $attempt = (int) $plan->failed_renewals_count;
+
+        $this->events->record('recurring.failed', [
+            'donor_id'     => $plan->donor_id,
+            'donation_id'  => null,
+            'form_id'      => $plan->form_id,
+            'campaign_id'  => $plan->campaign_id,
+            'amount_cents' => $plan->amount_cents,
+            'currency'     => $plan->currency,
+            'payload'      => [
+                'gateway'           => $plan->gateway,
+                'recurring_plan_id' => $plan->id,
+                'reason'            => $reason,
+                'attempt'           => $attempt,
+            ],
+        ]);
+
+        do_action('dono.recurring.renewal_failed', $plan, [
+            'gateway' => (string) $plan->gateway,
+            'reason'  => $reason,
+            'attempt' => $attempt,
+        ]);
+    }
+
     public function recordRecurringCancellation(\Dono\Recurring\RecurringPlan $plan, ?string $reason = null): void
     {
         $this->events->record('recurring.cancelled', [

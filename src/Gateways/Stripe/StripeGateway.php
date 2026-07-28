@@ -858,6 +858,12 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
         $now = $this->clock->now()->format('Y-m-d H:i:s');
         $this->plans->recordFailedRenewal($plan, $now);
 
+        // Stripe puts the decline text on the finalization error when it has
+        // one; a plain card decline arrives with nothing useful at invoice
+        // level, and inventing a reason would be worse than saying none.
+        $reason = $invoice['last_finalization_error']['message'] ?? null;
+        $this->donationService->recordRecurringFailure($plan, $reason !== null ? (string) $reason : null);
+
         return new WebhookOutcome(
             signature_ok: true,
             external_id:  $eventId,
