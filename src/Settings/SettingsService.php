@@ -298,6 +298,36 @@ final class SettingsService
      * @param array<string,mixed> $static
      * @return array<string,mixed>
      */
+    /**
+     * The merge tags each template's sender actually passes.
+     *
+     * Lives here, next to the templates, because the admin editor offers these
+     * to an author as safe to insert. Mailer::interpolate only replaces tags it
+     * is given, so an advertised tag the sender never fills does not vanish, it
+     * reaches the donor as literal braces. Offering one is therefore a promise,
+     * and the promise is kept by whoever calls sendTemplate.
+     *
+     * @return array<string, list<string>>
+     */
+    public static function templateTags(): array
+    {
+        $donor    = ['donor_first_name', 'donor_name', 'organisation_name'];
+        $donation = array_merge($donor, ['amount', 'campaign_title']);
+
+        return (array) apply_filters('dono.email.template_tags', [
+            'donation_receipt'            => array_merge($donation, ['receipt_number', 'reference', 'download_url']),
+            'donation_first'              => $donor,
+            'donation_pending'            => array_merge($donation, ['reference']),
+            'donation_refunded'           => array_merge($donation, ['reference']),
+            'offline_instructions'        => array_merge($donation, ['reference', 'bank_details', 'instructions']),
+            'recurring_renewal'           => array_merge($donation, ['receipt_number', 'reference']),
+            'subscription_payment_failed' => array_merge($donation, ['portal_url']),
+            'subscription_cancelled'      => $donation,
+            'tribute_notification'        => array_merge($donation, ['honoree_name', 'message', 'tribute_type']),
+            'magic_link'                  => ['donor_name', 'organisation_name', 'portal_url'],
+        ]);
+    }
+
     private function resolveDynamicDefaults(string $group, array $static): array
     {
         if ($group !== 'email') return $static;

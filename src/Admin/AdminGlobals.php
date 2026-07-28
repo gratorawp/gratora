@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Admin;
 
+use Dono\Settings\SettingsService;
 use Dono\Campaigns\Styling\StylePresets;
 use Dono\Campaigns\Styling\Tokens;
 use Dono\Forms\FormService;
@@ -68,6 +69,10 @@ final class AdminGlobals extends HookProvider
             'forms' => [
                 'required_blocks' => FormService::requiredBlocks(),
             ],
+            // Which merge tags each email template may safely offer. Sent from
+            // PHP because the sender decides them, so the editor cannot drift
+            // into advertising a tag nobody fills.
+            'email_template_tags' => SettingsService::templateTags(),
         ];
 
         printf(
