@@ -132,6 +132,8 @@ export default function Settings() {
 
     const jumpTo = ( next ) => {
         setTab( next );
+        // A jump from a row halfway down Setup would otherwise land mid-panel.
+        window.scrollTo( { top: 0 } );
         if ( window.history && window.history.replaceState ) {
             const url = new URL( window.location.href );
             url.hash = next;
@@ -272,7 +274,7 @@ export default function Settings() {
 
             <div className="dono-settings-page__body">
                 <div hidden={ tab !== 'setup' }>
-                    <SetupPanel org={ org } brand={ brand } gateways={ gateways } email={ email } onJumpTo={ jumpTo } />
+                    <SetupPanel onJumpTo={ jumpTo } />
                 </div>
                 <div hidden={ tab !== 'organization' }>
                     <OrganizationPanel s={ org } />

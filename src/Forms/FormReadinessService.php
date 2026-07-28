@@ -178,8 +178,13 @@ final class FormReadinessService
         ];
     }
 
-    /** @return array<string,mixed> */
-    private function receiptSenderCheck(): array
+    /**
+     * Public because the org-wide readiness check asks the same question and
+     * neither of these depends on a form.
+     *
+     * @return array<string,mixed>
+     */
+    public function receiptSenderCheck(): array
     {
         $email = $this->settings->get('email');
         $from  = trim((string) ($email['from_email'] ?? ''));
@@ -203,7 +208,7 @@ final class FormReadinessService
     }
 
     /** @return array<string,mixed> */
-    private function receiptTemplateCheck(): array
+    public function receiptTemplateCheck(): array
     {
         $email = $this->settings->get('email');
         $tpl   = is_array($email['templates']['donation_receipt'] ?? null)

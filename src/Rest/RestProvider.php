@@ -22,6 +22,7 @@ use Dono\Rest\Admin\ReportsController as AdminReportsController;
 use Dono\Rest\Admin\RolesController as AdminRolesController;
 use Dono\Rest\Admin\SettingsController as AdminSettingsController;
 use Dono\Rest\Admin\PayPalKeysController;
+use Dono\Rest\Admin\ReadinessController as AdminReadinessController;
 use Dono\Rest\Admin\RazorpayKeysController;
 use Dono\Rest\Admin\StripeKeysController;
 use Dono\Rest\Admin\UserPrefsController as AdminUserPrefsController;
@@ -61,6 +62,7 @@ final class RestProvider extends HookProvider
         private AdminNumberingController $numbering,
         private AdminReportsController $reports,
         private GiftAidController $giftAid,
+        private AdminReadinessController $readiness,
     ) {
     }
 
@@ -97,6 +99,7 @@ final class RestProvider extends HookProvider
         $this->numbering->registerRoutes();
         $this->reports->registerRoutes();
         $this->giftAid->registerRoutes();
+        $this->readiness->registerRoutes();
 
         $registry = new ControllerRegistry();
         do_action('dono.rest.register', $registry);

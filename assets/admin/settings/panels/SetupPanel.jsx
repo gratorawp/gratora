@@ -1,236 +1,171 @@
-import { __, sprintf } from '@wordpress/i18n';
-import { useEffect, useState } from '@wordpress/element';
+import { __, _n, sprintf } from '@wordpress/i18n';
+import { useCallback, useEffect, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
-// Reads savedRecord (not pending edits) so the checklist reflects persisted state.
-export default function SetupPanel( { org, brand, gateways, email, onJumpTo } ) {
-    // Stripe key status lives in its own system setting, not in
-    // dono_gateway_config, so the Gateway step has to fetch it separately.
-    const [ stripeConnect, setStripeConnect ] = useState( null );
-    useEffect( () => {
-        apiFetch( { path: '/dono/v1/gateways/stripe/status' } )
-            .then( setStripeConnect )
-            .catch( () => setStripeConnect( null ) );
+import Card from '../../_shared/components/Card';
+import Btn from '../../_shared/components/Btn';
+import useCardOpen from '../../_shared/useCardOpen';
+
+// Order: money first, then whether a donor can reach you, then whether they
+// hear back, then the machinery underneath.
+const GROUPS = [
+    { id: 'money',    title: __( 'Taking money', 'dono' ),          sub: __( 'What has to be true before a card is charged', 'dono' ) },
+    { id: 'page',     title: __( 'A live donation page', 'dono' ),  sub: __( 'Somewhere for a donor to land', 'dono' ) },
+    { id: 'receipts', title: __( 'Receipts and email', 'dono' ),    sub: __( 'What the donor gets back', 'dono' ) },
+    { id: 'jobs',     title: __( 'Background jobs', 'dono' ),       sub: __( 'Receipts and emails are queued, not sent inline', 'dono' ) },
+    { id: 'portal',   title: __( 'Donor portal', 'dono' ),          sub: __( 'Where sign-in and receipt links point', 'dono' ) },
+    { id: 'licenses', title: __( 'Add-ons and licenses', 'dono' ),  sub: __( 'Updates and security fixes for what you installed', 'dono' ) },
+];
+
+export default function SetupPanel( { onJumpTo } ) {
+    const [ report, setReport ] = useState( null );
+    const [ error, setError ]   = useState( false );
+
+    const load = useCallback( () => {
+        setError( false );
+        apiFetch( { path: '/dono/v1/admin/readiness' } )
+            .then( setReport )
+            .catch( () => setError( true ) );
     }, [] );
 
-    const steps = buildSteps( {
-        org:           org.savedRecord || {},
-        brand:         brand.savedRecord || {},
-        gateways:      gateways.savedRecord || {},
-        email:         email.savedRecord || {},
-        stripeConnect: stripeConnect || {},
-    } );
+    useEffect( () => { load(); }, [ load ] );
 
-    const loading = org.isLoading || brand.isLoading || gateways.isLoading || email.isLoading;
-    const done = steps.filter( ( s ) => s.state === 'done' ).length;
-    const total = steps.length;
+    if ( error ) {
+        return (
+            <div className="dono-panel">
+                <Card title={ __( 'Could not check your setup', 'dono' ) }>
+                    <p className="dono-connect-p">
+                        { __( 'Something went wrong reading the readiness report. Nothing is broken by this on its own.', 'dono' ) }
+                    </p>
+                    <Btn variant="primary" onClick={ load }>{ __( 'Try again', 'dono' ) }</Btn>
+                </Card>
+            </div>
+        );
+    }
 
-    const health = buildHealth( gateways.savedRecord || {}, stripeConnect || {} );
+    if ( ! report ) {
+        return (
+            <div className="dono-panel">
+                <div className="dono-readiness__head">
+                    <div className="dono-readiness__title">{ __( 'Checking your setup…', 'dono' ) }</div>
+                </div>
+            </div>
+        );
+    }
+
+    const checks = report.checks || [];
 
     return (
         <div className="dono-panel">
-            <div className="dono-setup">
-                <div className="dono-setup__head">
-                    <div className="dono-setup__title">
-                        { done === total
-                            ? __( 'Ready to accept donations', 'dono' )
-                            : __( 'Setup checklist', 'dono' ) }
-                        <small>
-                            { done === total
-                                ? __( 'Everything below is configured.', 'dono' )
-                                : __( 'Finish these to start receiving live donations.', 'dono' ) }
-                        </small>
-                    </div>
-                    <div className="dono-setup__progress">
-                        { loading
-                            ? __( 'Checking…', 'dono' )
-                            : sprintf(
-                                /* translators: 1: number of completed setup steps. 2: total number of steps. */
-                                __( '%1$d of %2$d complete', 'dono' ),
-                                done,
-                                total,
-                            ) }
-                    </div>
-                </div>
+            <Summary report={ report } />
 
-                <div className="dono-setup__bar" aria-hidden="true">
-                    { steps.map( ( s ) => (
-                        <div
-                            key={ s.id }
-                            className={ `dono-setup__bar-seg${ s.state === 'done' ? ' is-done' : '' }${ s.state === 'doing' ? ' is-doing' : '' }` }
-                        />
-                    ) ) }
-                </div>
+            { GROUPS.map( ( group ) => {
+                const rows = checks.filter( ( c ) => c.group === group.id );
+                if ( rows.length === 0 ) {
+                    return null;
+                }
 
-                <div className="dono-setup__steps">
-                    { steps.map( ( s ) => (
-                        <button
-                            key={ s.id }
-                            type="button"
-                            className={ `dono-setup-step${ s.state === 'done' ? ' is-done' : '' }${ s.state === 'doing' ? ' is-doing' : '' }` }
-                            onClick={ () => onJumpTo( s.tab ) }
-                        >
-                            <span className="dono-setup-step__check">
-                                { s.state === 'done' && (
-                                    <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <polyline points="2 6 5 9 10 3" />
-                                    </svg>
-                                ) }
-                                { s.state === 'doing' && (
-                                    <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
-                                        <circle cx="6" cy="6" r="2.5" fill="currentColor" />
-                                    </svg>
-                                ) }
-                                { s.state === 'todo' && (
-                                    <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor">
-                                        <circle cx="4" cy="4" r="2" />
-                                    </svg>
-                                ) }
-                            </span>
-                            <div className="dono-setup-step__body">
-                                <div className="dono-setup-step__title">{ s.title }</div>
-                                <div className="dono-setup-step__sub">{ s.sub }</div>
-                            </div>
-                        </button>
-                    ) ) }
-                </div>
-            </div>
+                return <Group key={ group.id } group={ group } rows={ rows } onJumpTo={ onJumpTo } />;
+            } ) }
+        </div>
+    );
+}
 
-            <div className="dono-health-grid">
-                { health.map( ( h ) => (
-                    <div key={ h.id } className="dono-health">
-                        <div className="dono-health__head">
-                            <span className={ `dono-health__dot${ h.tone === 'amber' ? ' is-amber' : '' }${ h.tone === 'red' ? ' is-red' : '' }` } />
-                            <span className="dono-health__label">{ h.label }</span>
-                        </div>
-                        <div className="dono-health__value num">{ h.value }</div>
-                        <div className="dono-health__meta">{ h.meta }</div>
-                        { h.actionLabel && (
-                            <button
-                                type="button"
-                                className="dono-health__action"
-                                onClick={ h.action ? h.action : ( () => onJumpTo( h.tab ) ) }
-                            >
-                                { h.actionLabel } →
-                            </button>
-                        ) }
-                    </div>
-                ) ) }
+function Summary( { report } ) {
+    const blockers = report.blockers || 0;
+    const warnings = report.warnings || 0;
+
+    let title = __( 'Ready to accept donations', 'dono' );
+    let sub   = __( 'Nothing on this page is standing in a donor’s way.', 'dono' );
+    let tone  = 'green';
+
+    if ( blockers > 0 ) {
+        tone  = 'red';
+        title = sprintf(
+            /* translators: %d: number of things preventing donations. */
+            _n( '%d thing is stopping donations', '%d things are stopping donations', blockers, 'dono' ),
+            blockers
+        );
+        sub = __( 'Until these are fixed, a donor cannot complete a donation.', 'dono' );
+    } else if ( warnings > 0 ) {
+        tone = 'amber';
+        sub  = sprintf(
+            /* translators: %d: number of non-blocking issues. */
+            _n( '%d thing is worth a look, but donations work.', '%d things are worth a look, but donations work.', warnings, 'dono' ),
+            warnings
+        );
+    }
+
+    return (
+        <div className={ `dono-readiness__head is-${ tone }` }>
+            <span className={ `dono-readiness__dot is-${ tone }` } />
+            <div>
+                <div className="dono-readiness__title">{ title }</div>
+                <div className="dono-readiness__sub">{ sub }</div>
             </div>
         </div>
     );
 }
 
-function buildSteps( { org, brand, gateways, email, stripeConnect } ) {
-    const offline = gateways.offline || {};
-    const connect = stripeConnect || {};
+// A group with nothing wrong is closed: the pill says so, and the rows behind
+// it are things the operator already did.
+function Group( { group, rows, onJumpTo } ) {
+    const trouble = rows.filter( ( r ) => r.status !== 'pass' ).length;
+    const [ open, setOpen ] = useCardOpen( trouble > 0 );
 
-    const orgName    = String( org.name || '' ).trim();
-    const orgEmail   = String( org.email || '' ).trim();
-    const orgFilled  = orgName !== '' && orgEmail !== '';
+    const pill = trouble === 0
+        ? <span className="dono-pill dono-pill--green"><span className="dono-pill__dot" />{ __( 'All good', 'dono' ) }</span>
+        : (
+            <span className="dono-pill dono-pill--amber">
+                <span className="dono-pill__dot" />
+                { sprintf(
+                    /* translators: %d: number of checks in this group needing attention. */
+                    _n( '%d needs attention', '%d need attention', trouble, 'dono' ),
+                    trouble
+                ) }
+            </span>
+        );
 
-    // Untouched defaults are functional; mark "doing" not "todo".
-    const defaultId      = String( brand.default_id || 'classic' );
-    const savedPresets   = Array.isArray( brand.presets ) ? brand.presets : [];
-    const brandCustom    = defaultId !== 'classic' || savedPresets.length > 0;
-    const brandState     = brandCustom ? 'done' : 'doing';
-    const brandSub       = brandCustom
-        ? sprintf( /* translators: %s: brand preset id */ __( 'Default: %s', 'dono' ), defaultId )
-        : __( 'Using Classic. Pick or customise to make it yours.', 'dono' );
-
-    // Stripe is "ready" when verified API keys are on file, which lives in its
-    // own system setting rather than the gateways option. The status endpoint
-    // returns at least { connected, can_charge, account }.
-    const stripeConfigured  = !! connect.connected;
-    const offlineConfigured = offline.enabled && String( offline.instructions || '' ).trim() !== '';
-    let gatewayState = 'todo';
-    let gatewaySub   = __( 'Connect Stripe or enable offline donations.', 'dono' );
-    if ( stripeConfigured ) {
-        gatewayState = 'done';
-        gatewaySub   = __( 'Stripe connected', 'dono' );
-    } else if ( offlineConfigured ) {
-        gatewayState = 'done';
-        gatewaySub   = __( 'Offline donations enabled', 'dono' );
-    }
-
-    const fromName  = String( email.from_name || '' ).trim();
-    const fromEmail = String( email.from_email || '' ).trim();
-    const senderSet = fromName !== '' && fromEmail !== '';
-
-    return [
-        {
-            id:    'org',
-            title: __( 'Organisation', 'dono' ),
-            sub:   orgFilled ? ( orgName || __( 'Saved', 'dono' ) ) : __( 'Name and contact email', 'dono' ),
-            state: orgFilled ? 'done' : 'todo',
-            tab:   'organization',
-        },
-        {
-            id:    'brand',
-            title: __( 'Brand preset', 'dono' ),
-            sub:   brandSub,
-            state: brandState,
-            tab:   'brand',
-        },
-        {
-            id:    'gateway',
-            title: __( 'Payment gateway', 'dono' ),
-            sub:   gatewaySub,
-            state: gatewayState,
-            tab:   'gateways',
-        },
-        {
-            id:    'sender',
-            title: __( 'Sender email', 'dono' ),
-            sub:   senderSet ? ( fromEmail || __( 'Configured', 'dono' ) ) : __( 'From name and a verified address', 'dono' ),
-            state: senderSet ? 'done' : 'todo',
-            tab:   'email',
-        },
-    ];
+    return (
+        <Card
+            title={ group.title }
+            sub={ group.sub }
+            meta={ pill }
+            collapsible
+            open={ open }
+            onToggle={ setOpen }
+        >
+            <ul className="dono-readiness__rows">
+                { rows.map( ( row ) => <Row key={ row.id } row={ row } onJumpTo={ onJumpTo } /> ) }
+            </ul>
+        </Card>
+    );
 }
 
-function buildHealth( gateways, stripeConnect ) {
-    const stripe  = gateways.stripe || {};
-    const connect = stripeConnect || {};
+function Row( { row, onJumpTo } ) {
+    // An action pointing at another settings tab is a tab switch, not a page
+    // load, but it stays a real link so it can still be opened in a new tab.
+    const jump = ( e ) => {
+        const url = row.action_url || '';
+        if ( ! url.includes( 'page=dono-settings' ) || ! url.includes( '#' ) ) {
+            return;
+        }
+        e.preventDefault();
+        onJumpTo( url.split( '#' )[ 1 ] );
+    };
 
-    let gw = { value: __( 'Not connected', 'dono' ), tone: 'red',   meta: __( 'Set up a gateway to accept donations.', 'dono' ) };
-    if ( connect.connected ) {
-        gw = { value: __( 'Stripe connected', 'dono' ), tone: 'green', meta: __( 'Donations are flowing to your Stripe account.', 'dono' ) };
-    }
-
-    // The webhook secret field lives on the Stripe card and only appears once an
-    // account is connected, so don't present it as an independent step before then.
-    let webhook;
-    if ( ! connect.connected ) {
-        webhook = { value: __( 'After connecting', 'dono' ), tone: 'amber', meta: __( 'Connect Stripe first, then add its webhook secret on the Stripe card.', 'dono' ) };
-    } else if ( stripe.webhook_secret_test || stripe.webhook_secret_live ) {
-        webhook = { value: __( 'Configured', 'dono' ), tone: 'green', meta: __( 'Refunds and disputes will sync.', 'dono' ) };
-    } else {
-        webhook = { value: __( 'Not configured', 'dono' ), tone: 'amber', meta: __( 'Add the webhook signing secret on the Stripe card.', 'dono' ) };
-    }
-
-    return [
-        {
-            id:    'gateway',
-            label: __( 'Gateway', 'dono' ),
-            value: gw.value,
-            tone:  gw.tone,
-            meta:  gw.meta,
-            actionLabel: __( 'Configure', 'dono' ),
-            tab:   'gateways',
-        },
-        {
-            id:    'webhook',
-            label: __( 'Webhook', 'dono' ),
-            value: webhook.value,
-            tone:  webhook.tone,
-            meta:  webhook.meta,
-            actionLabel: __( 'Configure', 'dono' ),
-            tab:   'gateways',
-        },
-        // "Last donation" and "Cron" cards were hardcoded to a reassuring green
-        // with no data behind them - a fake "Cron: Running" masks a wedged cron
-        // (receipts silently not sending). Dropped rather than fabricate health;
-        // reinstate only when driven by a real endpoint.
-    ];
+    return (
+        <li className="dono-readiness-row" data-status={ row.status }>
+            <span className="dono-readiness-row__dot" />
+            <div className="dono-readiness-row__body">
+                <div className="dono-readiness-row__label">{ row.label }</div>
+                { row.detail && <div className="dono-readiness-row__detail">{ row.detail }</div> }
+            </div>
+            { row.action_url && (
+                <a className="dono-readiness-row__action" href={ row.action_url } onClick={ jump }>
+                    { row.action_label || __( 'Fix', 'dono' ) } →
+                </a>
+            ) }
+        </li>
+    );
 }

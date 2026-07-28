@@ -928,7 +928,7 @@ function ChecklistStep( { finalized, settingsUrl, dashboardUrl } ) {
             <ul className="dono-onboarding__checklist">
                 <ChecklistItem
                     title={ __( 'Connect a payment gateway', 'dono' ) }
-                    description={ __( 'Stripe Connect, or a manual bank-transfer flow. You can change this any time.', 'dono' ) }
+                    description={ __( 'Stripe, PayPal, Razorpay, or a manual bank-transfer flow. You can change this any time.', 'dono' ) }
                     href={ gatewayUrl }
                     cta={ __( 'Connect', 'dono' ) }
                 />

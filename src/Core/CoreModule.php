@@ -57,6 +57,7 @@ use Dono\Donors\Erasure\WebhookLogHandler;
 use Dono\Donors\MagicLinkService;
 use Dono\Donors\MagicLinkToken;
 use Dono\Donors\Portal\AnnualStatementBuilder;
+use Dono\Donors\Portal\PortalPage;
 use Dono\Donors\Portal\PortalSession;
 use Dono\Donors\Portal\PortalShortcode;
 use Dono\Campaigns\Blocks\BlockEditorIntegration as CampaignBlockEditorIntegration;
@@ -184,6 +185,7 @@ use Dono\Rest\Admin\FormsController as AdminFormsController;
 use Dono\Rest\Admin\FxController;
 use Dono\Rest\Admin\LicenseController as AdminLicenseController;
 use Dono\Rest\Admin\OnboardingController;
+use Dono\Rest\Admin\ReadinessController;
 use Dono\Rest\Admin\ReportsController;
 use Dono\Rest\Admin\RolesController;
 use Dono\Rest\Admin\SettingsController;
@@ -198,6 +200,7 @@ use Dono\Rest\RazorpayController;
 use Dono\Rest\ReceiptsController;
 use Dono\Rest\RestProvider;
 use Dono\Rest\WebhookController;
+use Dono\Settings\ReadinessService;
 use Dono\Settings\SettingsService;
 use Dono\Webhooks\WebhookLog;
 use Dono\Webhooks\WebhookLogRetention;
@@ -846,7 +849,18 @@ final class CoreModule implements DonoModule
                 $c->get(DonorRepository::class),
                 $c->get(TaxStatementBuilder::class),
             ),
-            new GiftAidController($c->get(GiftAidClaimExport::class))
+            new GiftAidController($c->get(GiftAidClaimExport::class)),
+            new ReadinessController(new ReadinessService(
+                $c->get(SettingsService::class),
+                $c->get(FormReadinessService::class),
+                $c->get(StripeAccount::class),
+                $c->get(StripeApi::class),
+                $c->get(ApplePayDomain::class),
+                $c->get(PayPalAccount::class),
+                $c->get(RazorpayAccount::class),
+                new PortalPage(),
+                $c->get(LicenseService::class),
+            ))
         ))->register();
 
         $c->get(PortalController::class)->registerHooks();
