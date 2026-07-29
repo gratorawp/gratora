@@ -305,6 +305,29 @@ function FormBody( { state, dispatch, config } ) {
         );
     }
 
+    // Bank debit, authorised and on its way. Distinct from pending: the donor
+    // has done everything and no instructions are coming, so the message must
+    // not ask them for anything.
+    if ( state.status === 'processing' ) {
+        return (
+            <div class="dono-form__success dono-form__success--pending" role="status">
+                <div class="dono-form__success-icon dono-form__success-icon--pending" aria-hidden="true">⏳</div>
+                <h3>{ config.i18n.processingTitle || config.i18n.pendingTitle }</h3>
+                <p class="dono-form__thank-you">{ config.i18n.processingMessage || config.i18n.pendingMessage }</p>
+                { state.submission?.reference && (
+                    <p class="dono-form__reference">{ state.submission.reference }</p>
+                ) }
+                <button
+                    type="button"
+                    class="dono-form__button dono-form__button--secondary"
+                    onClick={ () => dispatch( { type: 'RESET' } ) }
+                >
+                    { config.i18n.donateAgain }
+                </button>
+            </div>
+        );
+    }
+
     if ( state.status === 'pending' ) {
         // Donation recorded but not yet paid (e.g. offline / bank transfer):
         // no money has moved, so do not honor the completed-donation redirect

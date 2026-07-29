@@ -12,8 +12,10 @@ export default function ActionsCard( {
 } ) {
     const canRefund     = donation.refundable_cents > 0 && donation.status === 'paid';
     const canResend     = donation.status === 'paid';
-    const canMarkPaid   = donation.status === 'pending' || donation.status === 'failed';
-    const canMarkFailed = donation.status === 'pending';
+    // `processing` is a bank debit on its way: it can still land, and it can
+    // still bounce, so both actions stay open until it resolves.
+    const canMarkPaid   = [ 'pending', 'processing', 'failed' ].includes( donation.status );
+    const canMarkFailed = [ 'pending', 'processing' ].includes( donation.status );
     const primaryReceipt = ( receipts || [] ).find( ( r ) => ! r.voided );
 
     return (

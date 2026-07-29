@@ -266,11 +266,13 @@ export default function List() {
             label:        __( 'Mark as paid', 'dono' ),
             icon:         () => <CheckIcon size={ 16 } strokeWidth={ 1.75 } />,
             supportsBulk: true,
-            // Only pending donations can be flipped to paid; failed ones use
-            // the per-row detail action (which captures a reason).
-            isEligible:   ( item ) => item.status === 'pending',
+            // Pending and still-settling donations can be flipped to paid;
+            // failed ones use the per-row detail action (which captures a
+            // reason). A bank debit sits in processing until it lands, and an
+            // admin reconciling a statement is often the first to know.
+            isEligible:   ( item ) => item.status === 'pending' || item.status === 'processing',
             callback: ( items ) => {
-                const targets = items.filter( ( i ) => i.status === 'pending' );
+                const targets = items.filter( ( i ) => i.status === 'pending' || i.status === 'processing' );
                 if ( ! targets.length ) return;
                 const n = targets.length;
                 const message = n === 1

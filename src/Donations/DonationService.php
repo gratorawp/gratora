@@ -248,14 +248,82 @@ final class DonationService
     }
 
     /**
+     * The donor is done and the money is on its way, but it has not arrived.
+     *
+     * Card money moves in seconds, so a card donation is either paid or it is
+     * not. Bank debit does not work that way: SEPA through Stripe and Direct
+     * Debit through GoCardless both authorise now and settle days later, and
+     * can still bounce in between. Leaving those in `pending` puts them in the
+     * same bucket as a donor who closed the tab, so an admin cannot tell
+     * expected income from abandoned checkouts and the donor is told their
+     * donation is "still processing" for a week when nothing is wrong.
+     *
+     * Distinct from markPending, which is an observability hook that leaves the
+     * status alone. This is a real transition, and only out of `pending`: money
+     * that has already settled or failed is not walked backwards by a late
+     * webhook.
+     *
+     * @param array<string,mixed> $metadata
+     */
+    public function markProcessing(Donation $donation, string $reason, array $metadata = []): Donation
+    {
+        if ($donation->status !== 'pending') {
+            return $donation;
+        }
+
+        $now = $this->clock->now()->format('Y-m-d H:i:s');
+
+        // Conditional transition, for the same reason confirm() uses one: a
+        // redelivered webhook and a redirect return can both hold this row as
+        // pending, and only one of them may fire the side effects.
+        $applied = Donation::query()
+            ->where('id', $donation->id)
+            ->where('status', 'pending')
+            ->update(['status' => 'processing', 'updated_at' => $now])
+            ->affectedRows;
+
+        if ($applied < 1) {
+            return $this->donations->findById($donation->id) ?? $donation;
+        }
+
+        $donation->status           = 'processing';
+        $donation->gateway_metadata = ['processing_reason' => $reason]
+            + $metadata
+            + (array) ($donation->gateway_metadata ?? []);
+        $donation->updated_at       = $now;
+        $donation->save();
+
+        $this->events->record('donation.processing', [
+            'donor_id'     => $donation->donor_id,
+            'donation_id'  => $donation->id,
+            'form_id'      => $donation->form_id,
+            'campaign_id'  => $donation->campaign_id,
+            'country'      => $donation->country,
+            'amount_cents' => $donation->amount_cents,
+            'currency'     => $donation->currency,
+            'payload'      => [
+                'gateway'   => $donation->gateway,
+                'frequency' => $donation->frequency,
+                'reason'    => $reason,
+            ] + $metadata,
+        ]);
+
+        do_action('dono.donation.processing', $donation, $reason, $metadata);
+
+        return $donation;
+    }
+
+    /**
      * Transition donation to paid
      */
     public function confirm(Donation $donation, array $result): Donation
     {
-        // Only pending/failed may move to paid. Guards every caller at once:
-        // a replayed gateway webhook or a re-confirm against a refunded
-        // donation must not resurrect it (paid stays idempotent).
-        if (! in_array($donation->status, ['pending', 'failed'], true)) {
+        // Only pending/processing/failed may move to paid. Guards every caller
+        // at once: a replayed gateway webhook or a re-confirm against a
+        // refunded donation must not resurrect it (paid stays idempotent).
+        // `processing` is here because bank debit settles days after it is
+        // authorised, and that settlement is what makes it paid.
+        if (! in_array($donation->status, ['pending', 'processing', 'failed'], true)) {
             return $donation;
         }
 
@@ -270,7 +338,7 @@ final class DonationService
             // once. An in-memory status check alone races between processes.
             $affected = Donation::query()
                 ->where('id', $donation->id)
-                ->whereIn('status', ['pending', 'failed'])
+                ->whereIn('status', ['pending', 'processing', 'failed'])
                 ->update(['status' => 'paid', 'updated_at' => $now])
                 ->affectedRows;
 

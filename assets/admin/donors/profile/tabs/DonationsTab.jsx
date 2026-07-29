@@ -13,6 +13,7 @@ import { formatAmount, formatDateTime, timeAgo, donationStatusPill } from '../he
 const STATUS_OPTIONS = [
     { value: 'paid',           label: __( 'Paid', 'dono' ) },
     { value: 'pending',        label: __( 'Pending', 'dono' ) },
+    { value: 'processing',     label: __( 'Processing', 'dono' ) },
     { value: 'failed',         label: __( 'Failed', 'dono' ) },
     { value: 'refunded',       label: __( 'Refunded', 'dono' ) },
     { value: 'partial_refund', label: __( 'Partial refund', 'dono' ) },
@@ -149,9 +150,9 @@ export default function DonationsTab( { donorId } ) {
             label:        __( 'Mark as paid', 'dono' ),
             icon:         () => <CheckIcon size={ 16 } strokeWidth={ 1.75 } />,
             supportsBulk: true,
-            isEligible:   ( item ) => item.status === 'pending',
+            isEligible:   ( item ) => item.status === 'pending' || item.status === 'processing',
             callback: ( items ) => {
-                const targets = items.filter( ( i ) => i.status === 'pending' );
+                const targets = items.filter( ( i ) => i.status === 'pending' || i.status === 'processing' );
                 if ( ! targets.length ) return;
                 const n = targets.length;
                 const message = n === 1

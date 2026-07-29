@@ -277,7 +277,11 @@ export function reducer( state, action ) {
         case 'SUBMIT_PENDING':
             return {
                 ...state,
-                status:     'pending',
+                // Two different things are not paid yet. `pending` means the
+                // donor still has something to do; `processing` means a bank
+                // debit is on its way and they are finished. Showing the wrong
+                // one asks someone who has already paid to pay again.
+                status:     action.data?.status === 'processing' ? 'processing' : 'pending',
                 submission: action.data,
                 message:    '',
             };

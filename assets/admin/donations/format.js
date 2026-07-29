@@ -20,6 +20,7 @@ export function formatDate( iso, opts = {} ) {
 
 export const STATUS_LABEL = {
     pending:        __( 'Pending', 'dono' ),
+    processing:     __( 'Processing', 'dono' ),
     paid:           __( 'Paid', 'dono' ),
     failed:         __( 'Failed', 'dono' ),
     refunded:       __( 'Refunded', 'dono' ),

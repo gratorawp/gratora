@@ -620,6 +620,11 @@ HTML;
                 'thanks'         => __('Thank you for your donation!', 'dono'),
                 'pendingTitle'   => __('Your donation is pending', 'dono'),
                 'pendingMessage' => __('Thank you. We have emailed you instructions to complete your payment.', 'dono'),
+                // Bank debit: the donor has finished and nothing is expected of
+                // them. Reusing the pending copy would tell someone who has
+                // already paid that we are still waiting on them.
+                'processingTitle'   => __('Thank you, your donation is on its way', 'dono'),
+                'processingMessage' => __('Your bank is transferring your donation. It usually takes a few working days to arrive, and we will email you once it does.', 'dono'),
                 'donateAgain'    => __('Donate again', 'dono'),
                 'error'          => __('Sorry, something went wrong. Please try again.', 'dono'),
                 'paymentTitle'   => __('Complete your donation', 'dono'),

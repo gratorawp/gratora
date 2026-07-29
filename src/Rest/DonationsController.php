@@ -458,7 +458,7 @@ final class DonationsController
                 'gateway_txn_id' => $donation->gateway_txn_id,
             ], 200);
         }
-        if (! in_array($donation->status, ['pending', 'failed'], true)) {
+        if (! in_array($donation->status, ['pending', 'processing', 'failed'], true)) {
             return new WP_Error(
                 'dono_invalid_transition',
                 sprintf(

@@ -432,7 +432,10 @@ final class DonationsController
         if ($donation->status === 'paid') {
             return new WP_REST_Response($this->show($request)->get_data(), 200);
         }
-        if (! in_array($donation->status, ['pending', 'failed'], true)) {
+        // `processing` is here because a bank debit settles days after it was
+        // authorised, and an admin reconciling a bank statement is often the
+        // first to know it landed.
+        if (! in_array($donation->status, ['pending', 'processing', 'failed'], true)) {
             return new WP_Error(
                 'dono_invalid_transition',
                 sprintf(
@@ -471,7 +474,9 @@ final class DonationsController
                 ['status' => 422]
             );
         }
-        if ($donation->status !== 'pending') {
+        // A submitted bank debit can bounce, and the admin may hear about it
+        // from the bank before any webhook arrives.
+        if (! in_array($donation->status, ['pending', 'processing'], true)) {
             return new WP_Error(
                 'dono_invalid_transition',
                 sprintf(
