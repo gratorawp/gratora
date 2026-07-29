@@ -198,6 +198,30 @@ final class AdminManualDonationTest extends IntegrationTestCase
         $this->assertSame(400, $this->record(['received_at' => '2099-01-01'])->get_status());
     }
 
+    /**
+     * WordPress pins PHP to UTC, so an admin east of the site sees a local date
+     * the server would call the future. Without a day of slack an admin in
+     * Auckland cannot record today's cash at all, on the untouched default.
+     */
+    public function test_tomorrow_is_accepted_because_somewhere_it_is_already_tomorrow(): void
+    {
+        $tomorrow = (new \DateTimeImmutable(current_time('Y-m-d')))->modify('+1 day')->format('Y-m-d');
+
+        $this->assertSame(201, $this->record(['received_at' => $tomorrow])->get_status());
+    }
+
+    /** createFromFormat rolls a nonexistent date forward rather than refusing it. */
+    public function test_it_rejects_a_day_that_does_not_exist(): void
+    {
+        $this->assertSame(400, $this->record(['received_at' => '2026-02-30'])->get_status());
+    }
+
+    /** A mistyped year lands in the earliest bucket of every time series, unseen. */
+    public function test_it_rejects_a_year_from_before_the_product_existed(): void
+    {
+        $this->assertSame(400, $this->record(['received_at' => '1900-01-01'])->get_status());
+    }
+
     public function test_it_is_closed_to_users_who_cannot_manage_donations(): void
     {
         wp_set_current_user(self::factory()->user->create(['role' => 'subscriber']));

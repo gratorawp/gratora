@@ -335,11 +335,27 @@ final class DonationsController
      */
     private function receivedAt(string $raw): ?string
     {
-        $date = \DateTimeImmutable::createFromFormat('!Y-m-d', trim($raw));
-        if (! $date) {
+        $raw  = trim($raw);
+        $date = \DateTimeImmutable::createFromFormat('!Y-m-d', $raw);
+        // createFromFormat is lenient: it rolls 2026-02-30 forward to March
+        // rather than rejecting it, so compare the parse back against what was
+        // typed. A date that does not exist is a typo, not a date.
+        if (! $date || $date->format('Y-m-d') !== $raw) {
             return null;
         }
-        if ($date->format('Y-m-d') > (new \DateTimeImmutable('today'))->format('Y-m-d')) {
+
+        // A calendar day ahead of the site, not of UTC. WordPress pins PHP to
+        // UTC, so an admin anywhere east of the site sees a local date the
+        // server would otherwise call the future, and could not record today's
+        // cash at all. One day of slack covers every offset in use.
+        $latest = (new \DateTimeImmutable(current_time('Y-m-d')))->modify('+1 day');
+        if ($date > $latest) {
+            return null;
+        }
+
+        // Nothing before Dono existed. Catches a mistyped year landing in the
+        // earliest bucket of every time series, where it is invisible.
+        if ($date->format('Y') < '2000') {
             return null;
         }
 
