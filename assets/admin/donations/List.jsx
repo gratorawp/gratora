@@ -5,9 +5,10 @@ import { DataViews } from '@wordpress/dataviews';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { Mail as MailIcon, Check as CheckIcon, Coins } from 'lucide-react';
+import { Mail as MailIcon, Check as CheckIcon, Coins, Plus } from 'lucide-react';
 
 import Btn from '../_shared/components/Btn';
+import RecordDonationDrawer from './RecordDonationDrawer';
 import DateField from '../_shared/components/DateField';
 import EmptyState from '../_shared/components/EmptyState';
 import ConfirmDialog from '../_shared/components/ConfirmDialog';
@@ -58,6 +59,7 @@ export default function List() {
     const [ loading, setLoading ] = useState( false );
     const [ exporting, setExporting ] = useState( false );
     const [ actionError, setActionError ] = useState( null );
+    const [ recording, setRecording ] = useState( false );
     const [ fetchError, setFetchError ]   = useState( null );
     const [ createdFrom, setCreatedFrom ] = useState( '' );
     const [ createdTo,   setCreatedTo ]   = useState( '' );
@@ -424,8 +426,19 @@ export default function List() {
                     >
                         { exporting ? __( 'Exporting…', 'dono' ) : __( 'Export CSV', 'dono' ) }
                     </Btn>
+                    <Btn variant="primary" onClick={ () => setRecording( true ) }>
+                        <Plus size={ 16 } strokeWidth={ 1.75 } />
+                        { __( 'Record a donation', 'dono' ) }
+                    </Btn>
                 </div>
             </div>
+
+            { recording && (
+                <RecordDonationDrawer
+                    onClose={ () => setRecording( false ) }
+                    onRecorded={ () => { setRecording( false ); refetch(); } }
+                />
+            ) }
             { ( actionError || fetchError ) && (
                 <div className="dono-advanced-notice dono-advanced-notice--error" style={ { marginBottom: 12 } }>
                     { actionError || fetchError }

@@ -679,3 +679,39 @@
     font-size: 11.5px;
     font-weight: 400;
 }
+
+// Record a donation drawer.
+.dono-rd {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+
+	&__row {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 12px;
+	}
+
+	&__foot {
+		display: flex;
+		gap: 8px;
+	}
+
+	&__receipt {
+		display: flex;
+		align-items: flex-start;
+		gap: 10px;
+		cursor: pointer;
+	}
+
+	&__receipt-txt {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		font-size: 13px;
+
+		span {
+			color: var(--dono-color-text-muted, #6b7280);
+		}
+	}
+}
