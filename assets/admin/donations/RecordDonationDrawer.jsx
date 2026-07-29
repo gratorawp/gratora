@@ -1,6 +1,6 @@
 import { useEffect, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 
 import Drawer from '../_shared/components/Drawer';
 import Notice from '../_shared/components/Notice';
@@ -42,6 +42,9 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
     const [ campaigns, setCampaigns ] = useState( [] );
     const [ saving, setSaving ]       = useState( false );
     const [ error, setError ]         = useState( '' );
+    // Set when the server found a donation this would duplicate. Holds its
+    // reference so the admin can go and look before deciding.
+    const [ duplicate, setDuplicate ] = useState( '' );
 
     useEffect( () => {
         let aborted = false;
@@ -61,7 +64,15 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
     const cents = amount === '' ? 0 : Math.round( Number( amount ) * 100 );
     const ready = email.trim() !== '' && cents > 0 && receivedAt !== '';
 
-    const submit = async () => {
+    // Any edit after a duplicate warning describes a different donation, so the
+    // warning stops applying and the button goes back to being a plain one.
+    const edited = ( setter ) => ( next ) => {
+        setDuplicate( '' );
+        setError( '' );
+        setter( next );
+    };
+
+    const submit = async ( anyway = false ) => {
         setSaving( true );
         setError( '' );
         try {
@@ -79,19 +90,33 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                     campaign_id: campaignId === '' ? null : Number( campaignId ),
                     note_to_org: note.trim(),
                     send_receipt: sendReceipt,
+                    confirm_duplicate: anyway,
                 },
             } );
             onRecorded( created );
         } catch ( e ) {
-            setError( e?.message || __( 'Could not record this donation.', 'dono' ) );
+            if ( e?.code === 'dono_duplicate_donation' ) {
+                setDuplicate( e?.data?.reference || '?' );
+            } else {
+                setError( e?.message || __( 'Could not record this donation.', 'dono' ) );
+            }
             setSaving( false );
         }
     };
 
     const foot = (
         <div className="dono-rd__foot">
-            <Btn variant="primary" onClick={ submit } disabled={ ! ready || saving } isBusy={ saving }>
-                { saving ? __( 'Recording…', 'dono' ) : __( 'Record donation', 'dono' ) }
+            <Btn
+                variant="primary"
+                onClick={ () => submit( duplicate !== '' ) }
+                disabled={ ! ready || saving }
+                isBusy={ saving }
+            >
+                { saving
+                    ? __( 'Recording…', 'dono' )
+                    : duplicate !== ''
+                        ? __( 'Record it anyway', 'dono' )
+                        : __( 'Record donation', 'dono' ) }
             </Btn>
             <Btn variant="ghost" onClick={ onClose } disabled={ saving }>
                 { __( 'Cancel', 'dono' ) }
@@ -111,13 +136,23 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                     <Notice status="error" isDismissible={ false }>{ error }</Notice>
                 ) }
 
+                { duplicate !== '' && (
+                    <Notice status="warning" isDismissible={ false }>
+                        { sprintf(
+                            /* translators: %s: the reference of the donation already on the books. */
+                            __( '%s is already down for this donor, this amount and this date. If they really gave twice, record it anyway. Otherwise change something above.', 'dono' ),
+                            duplicate
+                        ) }
+                    </Notice>
+                ) }
+
                 <Field label={ __( 'Donor email', 'dono' ) } help={ __( 'Matches an existing donor, or creates one.', 'dono' ) }>
                     <input
                         className="dono-input"
                         type="email"
                         value={ email }
                         autoFocus
-                        onChange={ ( e ) => setEmail( e.target.value ) }
+                        onChange={ ( e ) => edited( setEmail )( e.target.value ) }
                     />
                 </Field>
 
@@ -131,7 +166,7 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                 </div>
 
                 <Field label={ __( 'Amount', 'dono' ) }>
-                    <AmountInput value={ amount } onChange={ setAmount } currency={ currency } placeholder="0" />
+                    <AmountInput value={ amount } onChange={ edited( setAmount ) } currency={ currency } placeholder="0" />
                 </Field>
 
                 <Field
@@ -140,7 +175,7 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                 >
                     <DateField
                         value={ receivedAt }
-                        onChange={ ( next ) => setReceived( next || '' ) }
+                        onChange={ ( next ) => edited( setReceived )( next || '' ) }
                         ariaLabel={ __( 'Date received', 'dono' ) }
                     />
                 </Field>

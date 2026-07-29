@@ -69,8 +69,13 @@ final class DonationService
 
         DB::transaction(function () use ($intent, $now, $statusTokenHash, &$donation) {
             // A genuine paid donation re-engages a previously-erased donor, so
-            // this is the one path allowed to reactivate a redacted row.
-            $donor = $this->donors->findOrCreate($intent->email, $intent->profile, true);
+            // this is the one path allowed to reactivate a redacted row. The
+            // intent can decline it: see DonationIntent::$reactivate_redacted_donor.
+            $donor = $this->donors->findOrCreate(
+                $intent->email,
+                $intent->profile,
+                $intent->reactivate_redacted_donor
+            );
 
             $donation = Donation::make();
             $donation->reference          = $this->references->next('donation');
@@ -143,6 +148,15 @@ final class DonationService
             $givenLast  = trim((string) ($intent->profile['last_name']  ?? ''));
             $donation->donor_first_name = $givenFirst !== '' ? $givenFirst : null;
             $donation->donor_last_name  = $givenLast  !== '' ? $givenLast  : null;
+
+            // A donor who stayed erased through the lookup above keeps no name
+            // on a fresh row either. Erasure cleared this exact field on every
+            // donation they had; writing it back here would restore, one row at
+            // a time, what the erasure took.
+            if ($donor->redacted_at !== null) {
+                $donation->donor_first_name = null;
+                $donation->donor_last_name  = null;
+            }
 
             $donation->save();
 

@@ -217,6 +217,8 @@ final class DonationsController
             'fund_id'        => ['type' => ['integer', 'null']],
             'note_to_org'    => ['type' => 'string'],
             'send_receipt'   => ['type' => 'boolean', 'default' => false],
+            // The admin's answer to a 409: yes, I know, record it anyway.
+            'confirm_duplicate' => ['type' => 'boolean', 'default' => false],
         ];
     }
 
@@ -258,6 +260,22 @@ final class DonationsController
 
         $currency = strtoupper((string) ($request['currency'] ?: Money::defaultCurrency()));
 
+        if (! (bool) $request['confirm_duplicate']) {
+            $existing = $this->donationLike(
+                (string) $request['email'],
+                (int) $request['amount_cents'],
+                $currency,
+                $receivedAt
+            );
+            if ($existing !== null) {
+                return new WP_Error(
+                    'dono_duplicate_donation',
+                    __('This donor is already down for the same amount on that date.', 'dono'),
+                    ['status' => 409, 'reference' => (string) $existing->reference]
+                );
+            }
+        }
+
         $intent = new DonationIntent(
             email: (string) $request['email'],
             amount_cents: (int) $request['amount_cents'],
@@ -280,6 +298,10 @@ final class DonationsController
             // whether to write a claim snapshot, and it never asks again, so a
             // donation corrected a moment later still loses the 25%.
             is_test: false,
+            // Someone exercised their right to erasure. An admin typing their
+            // email is not them coming back, so the money is recorded against
+            // the erased shell and the erasure holds.
+            reactivate_redacted_donor: false,
         );
 
         try {
@@ -327,6 +349,40 @@ final class DonationsController
             'status'    => $donation->status,
             'paid_at'   => $donation->paid_at,
         ], 201);
+    }
+
+    /**
+     * A donation already on the books that this one would be a second copy of.
+     *
+     * Two cheques for the same amount from the same donor on the same day are
+     * genuinely possible, so this cannot silently dedupe: swallowing a real
+     * second gift is worse than the double-entry it would prevent. It warns,
+     * and the admin decides. What it catches is the timed-out request retried,
+     * the second admin working the same envelope, and the cheque recorded by
+     * hand that the donor had in fact already paid online.
+     */
+    private function donationLike(string $email, int $amountCents, string $currency, string $receivedAt): ?Donation
+    {
+        $donor = $this->donorService->findByEmail($email);
+        if (! $donor) {
+            return null;
+        }
+
+        $day = substr($receivedAt, 0, 10);
+
+        $matches = Donation::query()
+            ->where('donor_id', (int) $donor->id)
+            ->whereIn('status', ['paid', 'partial_refund'])
+            ->where('kind', 'donation')
+            ->where('amount_cents', $amountCents)
+            ->where('currency', $currency)
+            ->where('paid_at', $day . ' 00:00:00', '>=')
+            ->where('paid_at', $day . ' 23:59:59', '<=')
+            ->orderBy('id', 'DESC')
+            ->limit(1)
+            ->getAll();
+
+        return $matches[0] ?? null;
     }
 
     /**

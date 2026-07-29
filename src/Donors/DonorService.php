@@ -98,6 +98,14 @@ final class DonorService
         return $donor;
     }
 
+    /** Look a donor up without creating one and without touching an erased row. */
+    public function findByEmail(string $email): ?Donor
+    {
+        return $this->donors->findByEmailHash(
+            $this->hasher->emailHash($this->hasher->normalizeEmail($email))
+        );
+    }
+
     /**
      * Donor-initiated portal edit: overwrites any field present in the patch (unlike
      * refreshProfile's lock-on-first-write back-fill). Empty string clears to null;

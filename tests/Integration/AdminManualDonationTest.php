@@ -222,6 +222,71 @@ final class AdminManualDonationTest extends IntegrationTestCase
         $this->assertSame(400, $this->record(['received_at' => '1900-01-01'])->get_status());
     }
 
+    /**
+     * M4. Two cheques for the same amount from the same donor on the same day
+     * are genuinely possible, so this cannot dedupe silently: swallowing a real
+     * second gift is worse than the double entry it would prevent. It warns,
+     * and names the donation it thinks this is a copy of.
+     */
+    public function test_it_warns_before_recording_the_same_donation_twice(): void
+    {
+        $first = (string) $this->record()->get_data()['reference'];
+
+        $res = $this->record();
+
+        $this->assertSame(409, $res->get_status());
+        $this->assertSame('dono_duplicate_donation', $res->get_data()['code']);
+        $this->assertSame($first, $res->get_data()['data']['reference'], 'the warning must name what it matched');
+    }
+
+    /** The admin looked, and they really did give twice. */
+    public function test_the_admin_can_record_it_anyway(): void
+    {
+        $this->record();
+
+        $this->assertSame(201, $this->record(['confirm_duplicate' => true])->get_status());
+        $this->assertCount(2, Donation::query()->where('amount_cents', 25000)->getAll());
+    }
+
+    public function test_a_different_amount_is_not_a_duplicate(): void
+    {
+        $this->record();
+
+        $this->assertSame(201, $this->record(['amount_cents' => 25001])->get_status());
+    }
+
+    public function test_the_same_amount_on_another_day_is_not_a_duplicate(): void
+    {
+        $this->record();
+
+        $this->assertSame(201, $this->record(['received_at' => '2026-06-15'])->get_status());
+    }
+
+    /**
+     * M10. Someone exercised their right to erasure. An admin typing their
+     * email is not that person coming back, so the money goes on the books and
+     * the erasure holds: no un-redaction, and no name written onto the fresh
+     * row that redaction cleared from every other one.
+     */
+    public function test_recording_a_cheque_does_not_un_erase_a_donor(): void
+    {
+        $donorId = (int) $this->donation((string) $this->record()->get_data()['reference'])->donor_id;
+
+        $donors = \Dono\Foundation\Plugin::instance()->container->get(\Dono\Donors\DonorService::class);
+        $donors->redact(\Dono\Donors\Donor::query()->find('id', $donorId));
+
+        $reference = (string) $this->record(['amount_cents' => 4200])->get_data()['reference'];
+
+        $donor = \Dono\Donors\Donor::query()->find('id', $donorId);
+        $this->assertNotNull($donor->redacted_at, 'a hand-recorded cheque un-erased a donor who asked to be forgotten');
+
+        $donation = $this->donation($reference);
+        $this->assertSame($donorId, (int) $donation->donor_id, 'the money still has to be on the books');
+        $this->assertSame(4200, (int) $donation->amount_cents);
+        $this->assertNull($donation->donor_first_name, 'the erased name came back on the new row');
+        $this->assertNull($donation->donor_last_name);
+    }
+
     public function test_it_is_closed_to_users_who_cannot_manage_donations(): void
     {
         wp_set_current_user(self::factory()->user->create(['role' => 'subscriber']));

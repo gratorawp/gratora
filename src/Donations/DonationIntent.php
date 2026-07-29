@@ -55,6 +55,15 @@ final class DonationIntent
          * dono.donation.creating decide things from it that are never revisited.
          */
         public readonly ?bool $is_test = null,
+        /**
+         * Whether money from an erased donor un-erases them, reuniting it with
+         * their giving history. A donation someone made themselves is exactly
+         * the re-engagement the retention window exists for, and does. A cheque
+         * an admin types in is not: someone exercised their right to erasure,
+         * and a third party entering their email address is not them asking to
+         * come back.
+         */
+        public readonly bool $reactivate_redacted_donor = true,
     ) {
     }
 }
