@@ -231,6 +231,9 @@ function FormBody( { state, dispatch, config } ) {
                             gateway:     data.gateway,
                             data:        data[ data.gateway ],
                             reference:   data.reference,
+                            // The per-donation secret a confirm route needs to
+                            // prove this browser is the one that submitted.
+                            statusToken: data.status_token,
                             intentId:    data.intent_id,
                             amountCents: data.amount_cents,
                             currency:    data.currency,
