@@ -33,6 +33,10 @@ final class ChannelClassifier
         'peer'           => 'peer',
         'p2p'            => 'peer',
         'fundraiser'     => 'peer',
+        // Recorded by an admin, not given through the site. Without its own
+        // bucket it falls through to `direct`, which overstates what the
+        // website itself brought in.
+        'manual'         => 'manual',
     ];
 
     private const SOCIAL_SOURCES = [

@@ -296,9 +296,15 @@ final class DonationService
         }
 
         $now = $this->clock->now()->format('Y-m-d H:i:s');
+        // An admin recording a cheque banked last month is stating when the
+        // money arrived, which is not when they got round to typing it in.
+        // Everything else leaves this unset and gets the clock.
+        $paidAt = isset($result['paid_at']) && $result['paid_at'] !== ''
+            ? (string) $result['paid_at']
+            : $now;
 
         $affected = 0;
-        DB::transaction(function () use ($donation, $result, $now, &$affected) {
+        DB::transaction(function () use ($donation, $result, $now, $paidAt, &$affected) {
             // Single-winner transition. The sync redirect-return auto_confirm
             // and the payment_intent.succeeded webhook can both load the same
             // pending row; the conditional UPDATE lets exactly one flip it to
@@ -322,7 +328,7 @@ final class DonationService
             $donation->fee_cents            = isset($result['fee_cents']) ? (int) $result['fee_cents'] : 0;
             $donation->net_cents            = max(0, $donation->amount_cents - $donation->fee_cents);
             $donation->gateway_metadata     = $result['metadata'] ?? $donation->gateway_metadata;
-            $donation->paid_at              = $now;
+            $donation->paid_at              = $paidAt;
             $donation->updated_at           = $now;
             $donation->save();
 

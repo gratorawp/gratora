@@ -9,6 +9,7 @@ use Dono\Foundation\Auth\Capabilities;
 use Dono\Campaigns\Campaign;
 use Dono\Donations\ChannelClassifier;
 use Dono\Donations\Donation;
+use Dono\Donations\DonationIntent;
 use Dono\Donations\DonationNoteRepository;
 use Dono\Donations\DonationRepository;
 use Dono\Donations\DonationService;
@@ -55,10 +56,18 @@ final class DonationsController
     public function registerRoutes(): void
     {
         register_rest_route(self::NAMESPACE, '/admin/donations', [
-            'methods'             => WP_REST_Server::READABLE,
-            'callback'            => [$this, 'index'],
-            'permission_callback' => [$this, 'canAccess'],
-            'args'                => $this->indexArgs(),
+            [
+                'methods'             => WP_REST_Server::READABLE,
+                'callback'            => [$this, 'index'],
+                'permission_callback' => [$this, 'canAccess'],
+                'args'                => $this->indexArgs(),
+            ],
+            [
+                'methods'             => WP_REST_Server::CREATABLE,
+                'callback'            => [$this, 'record'],
+                'permission_callback' => static fn () => Capabilities::userCan('dono_edit_donations'),
+                'args'                => $this->recordArgs(),
+            ],
         ]);
 
         register_rest_route(self::NAMESPACE, '/admin/donations/export\.csv', [
@@ -185,6 +194,148 @@ final class DonationsController
     public function canAccess(): bool
     {
         return Capabilities::userCan('dono_view_donations');
+    }
+
+    /** @return array<string,mixed> */
+    private function recordArgs(): array
+    {
+        return [
+            'email'          => ['type' => 'string', 'required' => true, 'format' => 'email'],
+            'first_name'     => ['type' => 'string'],
+            'last_name'      => ['type' => 'string'],
+            'amount_cents'   => ['type' => 'integer', 'required' => true, 'minimum' => 1],
+            'currency'       => ['type' => 'string', 'pattern' => '^[A-Za-z]{3}$'],
+            'payment_method' => ['type' => 'string', 'required' => true],
+            'received_at'    => ['type' => 'string', 'required' => true],
+            'campaign_id'    => ['type' => ['integer', 'null']],
+            'fund_id'        => ['type' => ['integer', 'null']],
+            'note_to_org'    => ['type' => 'string'],
+            'send_receipt'   => ['type' => 'boolean', 'default' => false],
+        ];
+    }
+
+    /**
+     * Record money that arrived off the site: a cheque, cash in a bucket, a
+     * bank transfer nobody told the site about.
+     *
+     * It runs the same createPending + confirm path a donated donation runs,
+     * so aggregates, donor counters and every downstream listener behave
+     * identically. Three things differ, and each of them is a bug if left out:
+     * the money is dated when it arrived rather than when it was typed in, the
+     * donor is not emailed instructions to pay something already paid, and the
+     * row is never flagged as a test even on a site left in test mode.
+     */
+    public function record(WP_REST_Request $request): WP_REST_Response|WP_Error
+    {
+        $offline = $this->gateways->get('offline');
+        if (! $offline) {
+            return new WP_Error('dono_offline_unavailable', __('The offline gateway is not available.', 'dono'), ['status' => 500]);
+        }
+
+        $method = (string) $request['payment_method'];
+        if (! in_array($method, $offline->paymentMethods(), true)) {
+            return new WP_Error(
+                'dono_invalid_payment_method',
+                __('That is not a way money can arrive offline.', 'dono'),
+                ['status' => 400]
+            );
+        }
+
+        $receivedAt = $this->receivedAt((string) $request['received_at']);
+        if ($receivedAt === null) {
+            return new WP_Error(
+                'dono_invalid_received_at',
+                __('Give the date the money arrived, and it cannot be in the future.', 'dono'),
+                ['status' => 400]
+            );
+        }
+
+        $currency = strtoupper((string) ($request['currency'] ?: get_option('dono_base_currency', 'USD')));
+
+        $intent = new DonationIntent(
+            email: (string) $request['email'],
+            amount_cents: (int) $request['amount_cents'],
+            currency: $currency,
+            gateway: 'offline',
+            campaign_id: $request['campaign_id'] !== null ? (int) $request['campaign_id'] : null,
+            fund_id: $request['fund_id'] !== null ? (int) $request['fund_id'] : null,
+            profile: array_filter([
+                'first_name' => (string) $request['first_name'],
+                'last_name'  => (string) $request['last_name'],
+            ]),
+            payment_method: $method,
+            // The marker that keeps this out of the `direct` bucket and out of
+            // the offline instructions email. ChannelClassifier maps it.
+            source_attribution: ['utm_source' => 'admin', 'utm_medium' => 'manual'],
+            note_to_org: (string) $request['note_to_org'] ?: null,
+        );
+
+        try {
+            $created  = $this->donationService->createPending($intent);
+            $donation = $created['donation'];
+
+            // Test mode excludes a donation from every report. A real cheque
+            // entered while the site is rehearsing is still real money, so the
+            // flag is cleared before anything counts it. Also backdates the
+            // row so it lists and filters in the period it belongs to.
+            Donation::query()->where('id', (int) $donation->id)->update([
+                'is_test'    => 0,
+                'created_at' => $receivedAt,
+            ]);
+            $donation->is_test    = false;
+            $donation->created_at = $receivedAt;
+
+            $suppress = ! (bool) $request['send_receipt'];
+            $filter   = static function (bool $should, Donation $candidate) use ($donation, $suppress): bool {
+                return (int) $candidate->id === (int) $donation->id ? ! $suppress && $should : $should;
+            };
+            add_filter('dono.receipt.should_issue', $filter, 10, 2);
+
+            try {
+                $donation = $this->donationService->confirm($donation, [
+                    'gateway_txn_id' => 'manual-' . wp_generate_password(12, false),
+                    'payment_method' => $method,
+                    'paid_at'        => $receivedAt,
+                ]);
+            } finally {
+                remove_filter('dono.receipt.should_issue', $filter, 10);
+            }
+        } catch (RuntimeException $e) {
+            return new WP_Error('dono_record_failed', $e->getMessage(), ['status' => 500]);
+        }
+
+        $this->notes->create(
+            (int) $donation->id,
+            sprintf(
+                /* translators: %s: how the money arrived, e.g. cheque. */
+                __('Recorded by hand. Received as %s.', 'dono'),
+                $method
+            ),
+            get_current_user_id() ?: null
+        );
+
+        return new WP_REST_Response([
+            'reference' => $donation->reference,
+            'status'    => $donation->status,
+            'paid_at'   => $donation->paid_at,
+        ], 201);
+    }
+
+    /**
+     * Noon rather than midnight: a date-only value rendered in a timezone
+     * behind the site would otherwise slide to the previous day.
+     */
+    private function receivedAt(string $raw): ?string
+    {
+        $date = \DateTimeImmutable::createFromFormat('!Y-m-d', trim($raw));
+        if (! $date) {
+            return null;
+        }
+        if ($date->format('Y-m-d') > (new \DateTimeImmutable('today'))->format('Y-m-d')) {
+            return null;
+        }
+
+        return $date->setTime(12, 0)->format('Y-m-d H:i:s');
     }
 
     public function index(WP_REST_Request $request): WP_REST_Response

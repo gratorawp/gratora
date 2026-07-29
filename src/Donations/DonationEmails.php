@@ -55,6 +55,11 @@ final class DonationEmails extends HookProvider
     {
         if ($donation->gateway !== 'offline') return;
 
+        // A hand-recorded donation is money already banked. It rides the
+        // offline gateway because that is what it is, but sending the bank
+        // details asks the donor to pay a cheque they posted six weeks ago.
+        if (ChannelClassifier::classify((array) ($donation->source_attribution ?? [])) === 'manual') return;
+
         $email = $this->resolveDonorEmail($donation);
         if ($email === null) return;
 
@@ -199,6 +204,12 @@ final class DonationEmails extends HookProvider
     {
         $donor = $this->donors->findById($donorId);
         if (! $donor) return;
+
+        // Nobody typed their address into this site: an admin entered a cheque
+        // that arrived weeks ago, so there is no consent record and no reason
+        // to expect mail. A hand-recorded donation sends what the admin asked
+        // for and nothing else.
+        if ($this->wasRecordedByHand($donorId)) return;
         $email = $this->donorService->decryptEmail($donor);
         if ($email === null || $email === '') return;
 
@@ -207,6 +218,22 @@ final class DonationEmails extends HookProvider
             'donor_name'        => trim(($donor->first_name ?? '') . ' ' . ($donor->last_name ?? '')),
             'organisation_name' => (string) get_bloginfo('name'),
         ]);
+    }
+
+    /** Whether the donation that just made this donor a donor was entered by an admin. */
+    private function wasRecordedByHand(int $donorId): bool
+    {
+        $latest = Donation::query()
+            ->where('donor_id', $donorId)
+            ->where('status', 'paid')
+            ->orderBy('id', 'DESC')
+            ->limit(1)
+            ->getAll();
+
+        $donation = $latest[0] ?? null;
+
+        return $donation !== null
+            && ChannelClassifier::classify((array) ($donation->source_attribution ?? [])) === 'manual';
     }
 
     private function resolveDonorEmail(Donation $donation): ?string
