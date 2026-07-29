@@ -10,7 +10,9 @@ use Dono\Vendor\Queryable\Schema\Table;
 /**
  * Donation intent or completed donation.
  *
- * Status walks: pending to paid, failed, disputed, or refunded.
+ * Status walks: pending to processing, paid, failed, disputed, or refunded.
+ * `disputed` is a reversal: money that landed and was taken back by the bank,
+ * which only bank debit can do.
  *
  * @version 1.0.0
  */
@@ -74,6 +76,11 @@ final class Donation extends Model
      */
     public string $kind = 'donation';
     public ?string $failure_reason = null;
+    /**
+     * Why a paid donation went back: chargeback or late_failure. Bank debit
+     * only; null on every card donation and on a reversal that was reinstated.
+     */
+    public ?string $reversal_kind = null;
     public ?array $flags = null;
     public ?string $paid_at = null;
     public ?string $refunded_at = null;
@@ -124,6 +131,7 @@ Donation::schema(function (Table $t): void {
     $t->boolean('is_anonymous')->default(0);
     $t->boolean('is_test')->default(0)->index();
     $t->string('failure_reason', 255)->nullable();
+    $t->string('reversal_kind', 32)->nullable();
     $t->json('flags')->nullable();
     $t->datetime('paid_at')->nullable();
     $t->datetime('refunded_at')->nullable();

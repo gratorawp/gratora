@@ -619,6 +619,129 @@ final class DonationService
         };
     }
 
+    /**
+     * Money that landed and was taken back by the bank.
+     *
+     * Only bank debit can do this. A Direct Debit confirms, gets counted, and
+     * can still fail days later when the bank bounces it, or be charged back
+     * months later under the Direct Debit Guarantee. Neither is a refund: the
+     * charity did not choose it and gave nothing back, so no Refund row is
+     * written and the donation walks to `disputed` instead.
+     *
+     * What it shares with a refund is that the money must leave every total,
+     * which the aggregate syncers do for free once the status is off `paid`.
+     *
+     * @param string $kind chargeback or late_failure
+     */
+    public function markReversed(Donation $donation, string $kind, ?string $reason = null): Donation
+    {
+        $now = $this->clock->now()->format('Y-m-d H:i:s');
+
+        // Conditional, because GoCardless redelivers webhooks and one delivery
+        // carries many events, so the same reversal arrives more than once as a
+        // matter of course. Only money still counted can be taken back:
+        // `refunded` is settled and `disputed` is already done.
+        $applied = DB::table('dono_donations')
+            ->where('id', $donation->id)
+            ->whereIn('status', ['paid', 'partial_refund'])
+            ->update([
+                'status'         => 'disputed',
+                'reversal_kind'  => $kind,
+                'failure_reason' => $reason,
+                'updated_at'     => $now,
+            ])->affectedRows;
+
+        if ($applied === 0) {
+            return $this->donations->findById($donation->id) ?? $donation;
+        }
+
+        $donation->status         = 'disputed';
+        $donation->reversal_kind  = $kind;
+        $donation->failure_reason = $reason;
+        $donation->updated_at     = $now;
+
+        $this->events->record('donation.disputed', [
+            'donor_id'     => $donation->donor_id,
+            'donation_id'  => $donation->id,
+            'form_id'      => $donation->form_id,
+            'campaign_id'  => $donation->campaign_id,
+            'amount_cents' => $donation->amount_cents,
+            'currency'     => $donation->currency,
+            'payload'      => [
+                'gateway' => $donation->gateway,
+                'kind'    => $kind,
+                'reason'  => $reason,
+            ],
+        ]);
+
+        $this->resyncAggregatesFor($donation);
+
+        do_action('dono.donation.disputed', $donation, $kind);
+
+        return $donation;
+    }
+
+    /**
+     * The charity contested the reversal and won, so the money is theirs again.
+     * Clears the kind: the row should not keep claiming it was charged back
+     * once the claim has been thrown out.
+     */
+    public function reinstateReversed(Donation $donation): Donation
+    {
+        $now = $this->clock->now()->format('Y-m-d H:i:s');
+
+        $applied = DB::table('dono_donations')
+            ->where('id', $donation->id)
+            ->where('status', 'disputed')
+            ->update([
+                // A donation that was partly refunded before the reversal comes
+                // back as partial_refund, not paid, or the refund would vanish
+                // from the books along with the dispute.
+                'status'         => (int) $donation->refunded_cents > 0 ? 'partial_refund' : 'paid',
+                'reversal_kind'  => null,
+                'failure_reason' => null,
+                'updated_at'     => $now,
+            ])->affectedRows;
+
+        if ($applied === 0) {
+            return $this->donations->findById($donation->id) ?? $donation;
+        }
+
+        $donation->status         = (int) $donation->refunded_cents > 0 ? 'partial_refund' : 'paid';
+        $donation->reversal_kind  = null;
+        $donation->failure_reason = null;
+        $donation->updated_at     = $now;
+
+        $this->events->record('donation.reversal_reinstated', [
+            'donor_id'     => $donation->donor_id,
+            'donation_id'  => $donation->id,
+            'form_id'      => $donation->form_id,
+            'campaign_id'  => $donation->campaign_id,
+            'amount_cents' => $donation->amount_cents,
+            'currency'     => $donation->currency,
+            'payload'      => ['gateway' => $donation->gateway],
+        ]);
+
+        $this->resyncAggregatesFor($donation);
+
+        do_action('dono.donation.reversal_reinstated', $donation);
+
+        return $donation;
+    }
+
+    private function resyncAggregatesFor(Donation $donation): void
+    {
+        if ($donation->campaign_id) {
+            $this->aggregates->syncCampaign((int) $donation->campaign_id);
+        }
+        if ($donation->form_id) {
+            $this->aggregates->syncForm((int) $donation->form_id);
+        }
+        if ($donation->fund_id) {
+            $this->aggregates->syncFund((int) $donation->fund_id);
+        }
+    }
+
     public function markFailed(Donation $donation, ?string $reason = null): Donation
     {
         // Paid money is refunded, not failed; refund states are terminal.
