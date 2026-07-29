@@ -233,9 +233,7 @@ final class DonationsController
             note_to_org:        isset($body['note_to_org']) ? (string) $body['note_to_org'] : null,
             note_public:        ! empty($body['note_public']),
             is_anonymous:       (bool) ($body['is_anonymous'] ?? false),
-            gift_aid:           (bool) ($body['gift_aid'] ?? false),
             country:            $country !== null ? (string) $country : null,
-            tribute:            $this->normalizeTribute($body['tribute'] ?? null),
             fee_covered_cents:  min($amount, max(0, (int) ($body['fee_covered_cents'] ?? 0))),
             extra:              $extra,
             custom:             $custom,
@@ -541,25 +539,6 @@ final class DonationsController
         // closed campaign would inflate its totals and re-arm its delete guard.
         $campaign = Campaign::query()->where('id', $id)->get();
         return ($campaign && $campaign->acceptsDonations()) ? $id : null;
-    }
-
-    /**
-     * @param mixed $raw
-     * @return array{type:string,name:string,notify_email?:?string,message?:?string,convert_to_annual?:bool}|null
-     */
-    private function normalizeTribute($raw): ?array
-    {
-        if (! is_array($raw)) return null;
-        $type = trim((string) ($raw['type'] ?? ''));
-        $name = trim((string) ($raw['name'] ?? ''));
-        if ($type === '' || $name === '') return null;
-        $out = ['type' => $type, 'name' => $name];
-        $notify = trim((string) ($raw['notify_email'] ?? ''));
-        if ($notify !== '' && is_email($notify)) $out['notify_email'] = $notify;
-        $msg = trim((string) ($raw['message'] ?? ''));
-        if ($msg !== '') $out['message'] = $msg;
-        if (! empty($raw['convert_to_annual'])) $out['convert_to_annual'] = true;
-        return $out;
     }
 
     public function confirmPermission(): bool

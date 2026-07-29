@@ -83,21 +83,8 @@ final class DonationSchemas
             'locale'             => ['type' => 'string', 'maxLength' => 10],
             'note_to_org'        => ['type' => 'string', 'maxLength' => 5000],
             'is_anonymous'       => ['type' => 'boolean', 'default' => false],
-            'gift_aid'           => ['type' => 'boolean', 'default' => false],
             'country'            => ['type' => 'string', 'pattern' => '^[A-Za-z]{2}$'],
             'fee_covered_cents'  => ['type' => 'integer', 'minimum' => 0, 'default' => 0],
-
-            'tribute' => [
-                'type'                 => 'object',
-                'additionalProperties' => false,
-                'properties'           => [
-                    'type'              => ['type' => 'string', 'minLength' => 1, 'maxLength' => 64],
-                    'name'              => ['type' => 'string', 'maxLength' => 200],
-                    'notify_email'      => ['type' => 'string', 'maxLength' => 200],
-                    'message'           => ['type' => 'string', 'maxLength' => 500],
-                    'convert_to_annual' => ['type' => 'boolean'],
-                ],
-            ],
         ];
     }
 }

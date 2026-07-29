@@ -18,7 +18,6 @@ const CATEGORY_LABELS = {
     Starter:   __( 'Starter', 'dono' ),
     Standard:  __( 'Standard', 'dono' ),
     Recurring: __( 'Recurring', 'dono' ),
-    Tribute:   __( 'Tribute', 'dono' ),
     Wizard:    __( 'Wizard', 'dono' ),
     Formal:    __( 'Formal', 'dono' ),
     Other:     __( 'Other', 'dono' ),
@@ -38,7 +37,7 @@ export default function FormTemplatePicker( { onPick, onClose, creating = false,
 
     const categories = useMemo( () => {
         const seen  = new Set();
-        const order = [ 'Blank', 'Starter', 'Standard', 'Recurring', 'Tribute', 'Wizard', 'Formal' ];
+        const order = [ 'Blank', 'Starter', 'Standard', 'Recurring', 'Wizard', 'Formal' ];
         for ( const t of templates ) seen.add( t.category || 'Other' );
         const found = order.filter( ( c ) => seen.has( c ) );
         const extra = [ ...seen ].filter( ( c ) => ! order.includes( c ) );

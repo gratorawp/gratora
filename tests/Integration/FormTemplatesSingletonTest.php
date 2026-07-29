@@ -8,7 +8,7 @@ use Dono\Forms\FormTemplates;
 
 /**
  * Several Dono blocks register `supports.multiple = false` in their editor
- * registration (one tribute per form, one amount picker, one submit, etc.).
+ * registration (one amount picker, one submit, one consent block, etc.).
  * The Gutenberg editor silently drops the second instance, which produced a
  * confusing "missing block" symptom in earlier templates. This regression
  * guard scans every shipped template's block markup against the canonical
@@ -27,7 +27,6 @@ final class FormTemplatesSingletonTest extends IntegrationTestCase
         'dono/donation-amount',
         'dono/payment-gateways',
         'dono/consent',
-        'dono/tribute',
         'dono/currency-switcher',
         'dono/steps',
         'dono/phone',

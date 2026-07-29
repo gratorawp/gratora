@@ -7,6 +7,9 @@
 import { registerBlockType, getBlockType } from '@wordpress/blocks';
 import { doAction, addAction } from '@wordpress/hooks';
 
+import { ConditionPanel, DEFAULT_CONDITION } from './blocks/_shared/condition';
+import { BlockIcons } from './blocks/_shared/block-icons';
+
 const allowed = new Set();
 
 /**
@@ -40,6 +43,11 @@ const api = {
     has( name ) {
         return allowed.has( name );
     },
+
+    // Handed to add-on blocks so a field outside core gets the same
+    // conditional-logic panel and icon set as the built-ins, instead of
+    // reimplementing them and drifting.
+    shared: { ConditionPanel, DEFAULT_CONDITION, BlockIcons },
 };
 
 /** Fire the registration action; called once by Editor.jsx on mount. */

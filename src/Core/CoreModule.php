@@ -36,8 +36,6 @@ use Dono\Donations\DonationNote;
 use Dono\Donations\DonationNoteRepository;
 use Dono\Donations\DonationRepository;
 use Dono\Donations\DonationService;
-use Dono\Donations\DonationTribute;
-use Dono\Donations\DonationTributeRepository;
 use Dono\Donations\Refund;
 use Dono\Donors\Consent;
 use Dono\Donors\ConsentService;
@@ -98,7 +96,6 @@ use Dono\Forms\Blocks\SectionBlock;
 use Dono\Forms\Blocks\StepBlock;
 use Dono\Forms\Blocks\StepsBlock;
 use Dono\Forms\Blocks\SubmitButtonBlock;
-use Dono\Forms\Blocks\TributeBlock;
 use Dono\Forms\Blocks\DateBlock;
 use Dono\Forms\Blocks\TextInputBlock;
 use Dono\Forms\Blocks\NumberInputBlock;
@@ -130,13 +127,6 @@ use Dono\Foundation\Modules\ModuleManager;
 use Dono\Foundation\References\ReferenceGenerator;
 use Dono\Foundation\Time\Clock;
 use Dono\Foundation\Time\SystemClock;
-use Dono\Forms\Blocks\GiftAidBlock;
-use Dono\GiftAid\GiftAidClaimExport;
-use Dono\GiftAid\GiftAidClaims;
-use Dono\GiftAid\GiftAidErasureHandler;
-use Dono\GiftAid\GiftAidDeclaration;
-use Dono\GiftAid\GiftAidDeclarations;
-use Dono\GiftAid\GiftAidEligibility;
 use Dono\Funds\Fund;
 use Dono\Funds\FundReassignmentJob;
 use Dono\Funds\FundRepository;
@@ -178,7 +168,6 @@ use Dono\Rest\Admin\CampaignsController as AdminCampaignsController;
 use Dono\Rest\Admin\CommandsController;
 use Dono\Rest\Admin\DashboardController;
 use Dono\Rest\Admin\FundsController as AdminFundsController;
-use Dono\Rest\Admin\GiftAidController;
 use Dono\Rest\Admin\DonationsController as AdminDonationsController;
 use Dono\Rest\Admin\DonorsController as AdminDonorsController;
 use Dono\Rest\Admin\FormsController as AdminFormsController;
@@ -296,11 +285,6 @@ final class CoreModule implements DonoModule
             $c->get(Clock::class)
         ));
 
-        $c->bind(DonationTributeRepository::class, fn (Container $c) => new DonationTributeRepository(
-            $c->get(Crypto::class),
-            $c->get(Clock::class)
-        ));
-
         (new DonorAggregateSyncer())->register();
         (new WebhookLogRetention($c->get(AsyncDispatcher::class)))->register();
         // Prunes our own expired rate-limit transients independently of WP core's wp_scheduled_delete.
@@ -411,7 +395,6 @@ final class CoreModule implements DonoModule
             $handlers[] = new CoreDonorDataHandler();
             $handlers[] = new AnalyticsEventHandler();
             $handlers[] = new WebhookLogHandler();
-            $handlers[] = new GiftAidErasureHandler($c->get(GiftAidClaims::class));
             return $handlers;
         });
 
@@ -476,14 +459,13 @@ final class CoreModule implements DonoModule
         ));
 
         // Sends non-receipt donation emails (offline instructions, refund
-        // notice, tribute notification). Receipt emails are handled by ReceiptIssuer.
+        // notice, pending notice). Receipt emails are handled by ReceiptIssuer.
         $c->bind(DonationEmails::class, fn (Container $c) => new DonationEmails(
             $c->get(Mailer::class),
             $c->get(DonorRepository::class),
             $c->get(DonorService::class),
             $c->get(SettingsService::class),
             $c->get(CampaignRepository::class),
-            $c->get(DonationTributeRepository::class),
         ));
         $c->get(DonationEmails::class)->register();
 
@@ -493,7 +475,6 @@ final class CoreModule implements DonoModule
             $c->get(DonorService::class),
             $c->get(DonationRepository::class),
             $c->get(ReceiptRepository::class),
-            $c->get(DonationTributeRepository::class),
             $c->get(MagicLinkService::class),
             $c->get(IdentityHasher::class),
             $c->get(AnnualStatementBuilder::class),
@@ -537,21 +518,7 @@ final class CoreModule implements DonoModule
             $c->get(FxRates::class),
             $c->get( FormTypeRegistry::class),
             $c->get(Crypto::class),
-            $c->get( TestMode::class),
-            $c->get(DonationTributeRepository::class),
-            $c->get(GiftAidEligibility::class),
-            $c->get(GiftAidDeclarations::class),
-            $c->get(GiftAidClaims::class)
-        ));
-
-        $c->bind(GiftAidClaims::class, fn (Container $c) => new GiftAidClaims($c->get(Crypto::class)));
-        $c->bind(GiftAidClaimExport::class, fn (Container $c) => new GiftAidClaimExport($c->get(GiftAidClaims::class)));
-        $c->bind(GiftAidDeclarations::class, fn (Container $c) => new GiftAidDeclarations(
-            $c->get(Clock::class),
-            $c->get(IdentityHasher::class)
-        ));
-        $c->bind(GiftAidEligibility::class, fn (Container $c) => new GiftAidEligibility(
-            $c->get(GiftAidDeclarations::class)
+            $c->get( TestMode::class)
         ));
 
         $c->bind(GatewayManager::class, fn () => new GatewayManager());
@@ -849,7 +816,6 @@ final class CoreModule implements DonoModule
                 $c->get(DonorRepository::class),
                 $c->get(TaxStatementBuilder::class),
             ),
-            new GiftAidController($c->get(GiftAidClaimExport::class)),
             new ReadinessController(new ReadinessService(
                 $c->get(SettingsService::class),
                 $c->get(FormReadinessService::class),
@@ -886,11 +852,9 @@ final class CoreModule implements DonoModule
         $blocks->add(new AnonymousToggleBlock());
         $blocks->add(new CoverFeesBlock());
         $blocks->add(new CurrencySwitcherBlock());
-        $blocks->add(new TributeBlock());
         $blocks->add(new FundPickerBlock());
         $blocks->add(new AddressBlock());
         $blocks->add(new ConsentBlock());
-        $blocks->add(new GiftAidBlock());
         $blocks->add(new PrivacyNoticeBlock());
         $blocks->add(new SubmitButtonBlock());
         $blocks->add(new DateBlock());
@@ -938,8 +902,13 @@ final class CoreModule implements DonoModule
             $c->get(DonationRepository::class),
         ));
 
-        do_action('dono.blocks.register_server', $blocks);
-        add_action('init', [$blocks, 'register']);
+        // Broadcast on init, not here: add-on modules boot after core, so a
+        // handler they attach during their own boot would miss a broadcast
+        // fired inside this method and their block would never register.
+        add_action('init', static function () use ($blocks): void {
+            do_action('dono.blocks.register_server', $blocks);
+            $blocks->register();
+        });
 
         (new CampaignBlockEditorIntegration())->register();
         (new CampaignBindings($c->get(CampaignRepository::class)))->register();
@@ -1029,8 +998,6 @@ final class CoreModule implements DonoModule
             Fund::class,
             Donation::class,
             DonationNote::class,
-            DonationTribute::class,
-            GiftAidDeclaration::class,
             Refund::class,
             RecurringPlan::class,
             Receipt::class,

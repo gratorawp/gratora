@@ -240,38 +240,6 @@
     &__msg { color: var(--dp-muted); font-size: 13px; margin: 4px 0; }
 }
 
-.dp-tribute-form {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 10px;
-
-    input, textarea {
-        padding: 8px 10px;
-        border: 1px solid var(--dp-border);
-        border-radius: 8px;
-        font: inherit;
-    }
-    &__types { display: flex; gap: 14px; font-size: 13px; }
-    &__check { display: flex; gap: 8px; font-size: 13px; align-items: center; }
-    &__actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 8px;
-        margin-top: 6px;
-
-        button {
-            padding: 8px 14px;
-            border-radius: 8px;
-            border: 1px solid var(--dp-border);
-            background: var(--dp-bg);
-            cursor: pointer;
-
-            &.is-primary { background: var(--dp-accent); color: #fff; border-color: var(--dp-accent); }
-        }
-    }
-}
-
 .dp-action {
     display: block;
     width: 100%;

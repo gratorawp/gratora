@@ -5,11 +5,13 @@
  * Skips itself when the test form lacks the block.
  */
 
-import { test, expect } from '../fixtures/donor-form';
+import { test, expect } from '../../fixtures/donor-form';
+import { TributeField } from '../../helpers/TributeField';
 
 test.describe('tribute block', () => {
     test('renders the honor + memorial radios with no sub-fields until one is picked', async ({ donor }) => {
-        const fs = donor.tributeFieldset();
+        const tribute = new TributeField(donor.page, donor.form);
+        const fs = tribute.fieldset();
         test.skip(await fs.count() === 0, 'no tribute block on the test form');
 
         await expect(fs).toBeVisible();
@@ -21,7 +23,8 @@ test.describe('tribute block', () => {
     });
 
     test('picking a tribute kind reveals the name input', async ({ donor }) => {
-        const fs = donor.tributeFieldset();
+        const tribute = new TributeField(donor.page, donor.form);
+        const fs = tribute.fieldset();
         test.skip(await fs.count() === 0, 'no tribute block on the test form');
 
         // Prefer "honor" but fall back to whichever radio is present.
@@ -34,13 +37,14 @@ test.describe('tribute block', () => {
     });
 
     test('submitting with a tribute kind but no name surfaces a field error', async ({ donor }) => {
-        const fs = donor.tributeFieldset();
+        const tribute = new TributeField(donor.page, donor.form);
+        const fs = tribute.fieldset();
         test.skip(await fs.count() === 0, 'no tribute block on the test form');
 
         await donor.selectPresetAt(0);
         await donor.fillName('E2E', 'Tribute');
         await donor.fillEmail(`e2e+tribute+${Date.now()}@example.com`);
-        await donor.pickTribute('honor');
+        await tribute.pick('honor');
         // Intentionally leave the tribute name blank.
         await donor.selectGateway('offline');
         await donor.submit();
@@ -49,21 +53,23 @@ test.describe('tribute block', () => {
     });
 
     test('a complete tribute submission reaches thank-you', async ({ donor }) => {
-        const fs = donor.tributeFieldset();
+        const tribute = new TributeField(donor.page, donor.form);
+        const fs = tribute.fieldset();
         test.skip(await fs.count() === 0, 'no tribute block on the test form');
 
         await donor.selectPresetAt(0);
         await donor.fillName('E2E', 'Tribute');
         await donor.fillEmail(`e2e+tribute+${Date.now()}@example.com`);
-        await donor.pickTribute('honor');
-        await donor.fillTributeName('Jane Honoree');
+        await tribute.pick('honor');
+        await tribute.fillName('Jane Honoree');
         await donor.selectGateway('offline');
         await donor.submit();
         await donor.expectThankYou();
     });
 
     test('a custom tribute type id submits end-to-end', async ({ donor }) => {
-        const fs = donor.tributeFieldset();
+        const tribute = new TributeField(donor.page, donor.form);
+        const fs = tribute.fieldset();
         test.skip(await fs.count() === 0, 'no tribute block on the test form');
 
         // The canonical e2e form registers a third type id "celebrate" with
@@ -76,8 +82,8 @@ test.describe('tribute block', () => {
         await donor.selectPresetAt(0);
         await donor.fillName('E2E', 'Custom');
         await donor.fillEmail(`e2e+tribute-custom+${Date.now()}@example.com`);
-        await donor.pickTribute('celebration');
-        await donor.fillTributeName('Anna Milestone');
+        await tribute.pick('celebration');
+        await tribute.fillName('Anna Milestone');
         await donor.selectGateway('offline');
         await donor.submit();
         await donor.expectThankYou();

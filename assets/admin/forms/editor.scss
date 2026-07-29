@@ -925,35 +925,6 @@ $sidebar-width: 300px;
 
 }
 
-input.dono-tribute-type-input,
-input[type="text"].dono-tribute-type-input {
-    appearance: none;
-    width: 100%;
-    min-width: 0;
-    height: auto;
-    margin: 0;
-    padding: 9px 12px;
-    background: #fff;
-    border: 1px solid $border-mid;
-    border-radius: 8px;
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 500;
-    color: $text;
-    line-height: 1.3;
-    box-shadow: none;
-    transition: border-color .12s, box-shadow .12s;
-
-    &::placeholder { color: $text-soft; }
-
-    &:focus,
-    &:focus-visible {
-        outline: 0;
-        border-color: $accent;
-        box-shadow: 0 0 0 3px $accent-soft;
-    }
-}
-
 .dono-checkbox-row {
     display: inline-flex;
     align-items: center;

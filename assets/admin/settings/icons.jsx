@@ -6,7 +6,6 @@ import {
     CreditCard,
     Hash,
     KeyRound,
-    Landmark,
     Mail,
     MoreHorizontal,
     Palette,
@@ -57,10 +56,6 @@ export function IconRoles( props ) {
 
 export function IconBrand( props ) {
     return <Palette strokeWidth={ STROKE } { ...props } />;
-}
-
-export function IconGiftAid( props ) {
-    return <Landmark strokeWidth={ STROKE } { ...props } />;
 }
 
 export function IconLicense( props ) {

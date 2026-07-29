@@ -64,22 +64,6 @@ final class Donation extends Model
     public ?string $donor_first_name = null;
     public ?string $donor_last_name = null;
     public bool $is_anonymous = false;
-    /**
-     * Stamped at creation by GiftAidEligibility, never derived on read: a claim
-     * has to reflect what was true when the gift was made, so a donor later
-     * withdrawing their declaration must not silently unclaim past donations.
-     */
-    public bool $gift_aid = false;
-    /**
-     * The name and address HMRC needs, encrypted and frozen when the gift was
-     * stamped claimable.
-     *
-     * A snapshot rather than a join for two reasons. HMRC wants the donor's
-     * address as it was at the time of the gift, so a donor who later moves
-     * must not silently rewrite a submitted claim. And a claim has to survive
-     * donor erasure for six years, which reading the live donor row would not.
-     */
-    public ?string $gift_aid_claim_encrypted = null;
     /** Test-mode donation: excluded from all money reporting, never charged live. */
     public bool $is_test = false;
     /**
@@ -138,8 +122,6 @@ Donation::schema(function (Table $t): void {
     $t->string('donor_first_name', 100)->nullable();
     $t->string('donor_last_name', 100)->nullable();
     $t->boolean('is_anonymous')->default(0);
-    $t->boolean('gift_aid')->default(0);
-    $t->text('gift_aid_claim_encrypted')->nullable();
     $t->boolean('is_test')->default(0)->index();
     $t->string('failure_reason', 255)->nullable();
     $t->json('flags')->nullable();
@@ -154,9 +136,6 @@ Donation::schema(function (Table $t): void {
     // Webhook: same (gateway, intent_id) is the same donation.
     $t->unique(['gateway', 'gateway_intent_id']);
     $t->unique(['gateway', 'gateway_txn_id']);
-
-    // The HMRC claim export: claimable donations within a date range.
-    $t->index(['gift_aid', 'paid_at']);
 
     $t->index(['donor_id', 'status', 'paid_at']);
     $t->index(['status', 'paid_at']);

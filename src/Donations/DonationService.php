@@ -8,10 +8,6 @@ use Dono\Analytics\EventRecorder;
 use Dono\Currency\FxRates;
 use Dono\Donors\DonorService;
 use Dono\Forms\FormTypeRegistry;
-use Dono\Forms\Blocks\GiftAidBlock;
-use Dono\GiftAid\GiftAidClaims;
-use Dono\GiftAid\GiftAidDeclarations;
-use Dono\GiftAid\GiftAidEligibility;
 use Dono\Foundation\Crypto\Crypto;
 use Dono\Foundation\Helpers\Money;
 use Dono\Foundation\References\ReferenceGenerator;
@@ -47,10 +43,6 @@ final class DonationService
         private FormTypeRegistry $formTypes,
         private Crypto $crypto,
         private TestMode $testMode,
-        private ?DonationTributeRepository $tributes = null,
-        private ?GiftAidEligibility $giftAid = null,
-        private ?GiftAidDeclarations $giftAidDeclarations = null,
-        private ?GiftAidClaims $giftAidClaims = null,
     ) {
     }
 
@@ -135,17 +127,6 @@ final class DonationService
                 && ! empty($donor->flags['prefs']['always_anonymous']);
             $donation->is_anonymous       = $intent->is_anonymous || $donorAlwaysAnon;
             $donation->is_test            = $this->testMode->forFormId($intent->form_id);
-            // Asked before save so is_test and currency are already set: the
-            // eligibility rule reads them, and a claim must reflect what was
-            // true when the gift was made.
-            $donation->gift_aid           = $this->giftAid !== null
-                && $this->giftAid->qualifies($donation, $donor, $intent->gift_aid);
-            if ($donation->gift_aid && $this->giftAidClaims !== null) {
-                // Frozen now, from the profile submitted with this gift: HMRC
-                // wants the address as it was, and the record must outlive the
-                // donor row.
-                $this->giftAidClaims->snapshot($donation, $donor, $intent->profile);
-            }
             $donation->created_at         = $now;
             $donation->updated_at         = $now;
 
@@ -165,23 +146,10 @@ final class DonationService
 
             $donation->save();
 
-            if ($intent->tribute && $this->tributes !== null) {
-                $this->tributes->persist($donation, $intent->tribute);
-            }
-
-            // The evidence HMRC can ask for, written whenever the donor ticks
-            // the box, even if this particular gift does not qualify: the
-            // declaration is enduring and covers gifts they make later.
-            if ($intent->gift_aid && $this->giftAidDeclarations !== null) {
-                $this->giftAidDeclarations->record((int) $donor->id, true, [
-                    'source'      => 'form',
-                    'form_id'     => $intent->form_id,
-                    'donation_id' => (int) $donation->id,
-                    'statement'   => GiftAidBlock::statement(),
-                    'ip'          => $_SERVER['REMOTE_ADDR']     ?? null,
-                    'ua'          => $_SERVER['HTTP_USER_AGENT'] ?? null,
-                ]);
-            }
+            // Add-on rows that belong to this donation are written here, not on
+            // dono.donation.intent_created: that one fires after the commit, so
+            // a row it wrote could outlive a donation that rolled back.
+            do_action('dono.donation.creating', $donation, $intent, $donor);
 
             $this->events->record('donation.intent_created', [
                 'donor_id'     => $donor->id,

@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace Dono\Admin;
 
 /**
- * Extension-tab seam: defines the window.dono.tabs registry inline and fires an
- * action so add-ons can enqueue tab bundles per surface. Core React apps read the
- * registry via the shared useExtensionTabs hook.
+ * Extension seam: defines the window.dono.tabs and window.dono.panels registries
+ * inline and fires an action so add-ons can enqueue bundles per surface. A tab is
+ * a whole screen; a panel is a section inside one (the portal's donation detail).
+ * Core React apps read the registries via the shared useExtensionTabs hook.
  */
 final class ExtensionAssets
 {
@@ -42,6 +43,17 @@ window.dono.tabs = window.dono.tabs || (function () {
             if (!surface || !tab || !tab.id || typeof tab.mount !== 'function') return;
             (items[surface] = items[surface] || []).push(tab);
             window.dispatchEvent(new CustomEvent('dono:tabs:changed', { detail: { surface: surface } }));
+        },
+        get: function (surface) { return (items[surface] || []).slice(); }
+    };
+})();
+window.dono.panels = window.dono.panels || (function () {
+    var items = {};
+    return {
+        register: function (surface, panel) {
+            if (!surface || !panel || !panel.id || typeof panel.mount !== 'function') return;
+            (items[surface] = items[surface] || []).push(panel);
+            window.dispatchEvent(new CustomEvent('dono:panels:changed', { detail: { surface: surface } }));
         },
         get: function (surface) { return (items[surface] || []).slice(); }
     };

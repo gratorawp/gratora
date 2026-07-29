@@ -93,6 +93,7 @@ final class DonationFormShortcode extends HookProvider
     private function enqueue(): void
     {
         FormGatewayAssets::enqueue();
+        FormFieldAssets::enqueue();
 
         $assetPath = DONO_DIR . 'build/donation-form/runtime/index.asset.php';
         if (file_exists($assetPath)) {
@@ -100,7 +101,7 @@ final class DonationFormShortcode extends HookProvider
             wp_register_script(
                 self::HANDLE,
                 DONO_URL . 'build/donation-form/runtime/index.js',
-                array_merge($asset['dependencies'] ?? [], [FormGatewayAssets::HANDLE]),
+                array_merge($asset['dependencies'] ?? [], [FormGatewayAssets::HANDLE, FormFieldAssets::HANDLE]),
                 $asset['version']      ?? DONO_VERSION,
                 true
             );
@@ -648,12 +649,6 @@ HTML;
                 'currency'       => __('Currency', 'dono'),
                 'coverFees'      => __('I\'d like to help cover the transaction fee', 'dono'),
                 'feesTotal'      => __('Total with fees:', 'dono'),
-                'tributeHonor'   => __('In honor of', 'dono'),
-                'tributeMemorial' => __('In memory of', 'dono'),
-                'tributeName'    => __('Name of the person', 'dono'),
-                'tributeNotify'  => __('Notify someone (optional email)', 'dono'),
-                'tributeMessage' => __('Personal message (optional)', 'dono'),
-                'tributeAnnual'  => __('Remember this person every year with a matching donation', 'dono'),
                 'formTitle'      => __('Donation form', 'dono'),
                 'close'          => __('Close', 'dono'),
                 'required'       => __('Required', 'dono'),
@@ -1028,29 +1023,6 @@ HTML;
                     ], $row, $attrs);
                     break;
 
-                case 'dono/tribute':
-                    $tributeTypes = [];
-                    foreach ((array) ($attrs['types'] ?? []) as $t) {
-                        $id    = isset($t['id'])    ? (string) $t['id']    : '';
-                        $label = isset($t['label']) ? (string) $t['label'] : '';
-                        if ($id === '' || $label === '') continue;
-                        $tributeTypes[] = ['id' => $id, 'label' => $label];
-                    }
-                    if (empty($tributeTypes)) {
-                        $tributeTypes = [
-                            ['id' => 'honor',    'label' => __('In honor of', 'dono')],
-                            ['id' => 'memorial', 'label' => __('In memory of', 'dono')],
-                        ];
-                    }
-                    $items[] = $tagRow([
-                        'kind'        => 'tribute',
-                        'label'       => (string) ($attrs['label'] ?? __('Make this donation in honor or memory of someone', 'dono')),
-                        'types'       => $tributeTypes,
-                        'allowNotify' => (bool) ($attrs['allowNotify'] ?? true),
-                        'allowAnnual' => (bool) ($attrs['allowAnnual'] ?? true),
-                    ], $row, $attrs);
-                    break;
-
                 case 'dono/fund-picker':
                     $fpAllow      = (bool) ($attrs['allowEmpty'] ?? false);
                     $fpRepo       = new \Dono\Funds\FundRepository();
@@ -1319,6 +1291,17 @@ HTML;
                         'maxSelections' => max(0, (int) ($attrs['maxSelections'] ?? 0)),
                         'defaults'      => $msDefaults,
                     ], $row, $attrs);
+                    break;
+
+                default:
+                    // A field block that ships outside core. The add-on answers
+                    // with the runtime item its component renders from; a block
+                    // nobody claims stays out of the config rather than
+                    // reaching the donor as a half-built field.
+                    $extra = apply_filters('dono.form.block_field', null, $name, $attrs, $form);
+                    if (is_array($extra) && isset($extra['kind'])) {
+                        $items[] = $tagRow($extra, $row, $attrs);
+                    }
                     break;
             }
         }

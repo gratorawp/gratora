@@ -73,6 +73,9 @@ final class AdminGlobals extends HookProvider
             // PHP because the sender decides them, so the editor cannot drift
             // into advertising a tag nobody fills.
             'email_template_tags' => SettingsService::templateTags(),
+            // Templates that ship outside core: the editor has no other way to
+            // learn they exist.
+            'email_template_meta' => SettingsService::templateMeta(),
         ];
 
         printf(

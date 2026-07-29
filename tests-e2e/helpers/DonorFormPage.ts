@@ -107,15 +107,10 @@ export class DonorFormPage {
     }
 
     async fillComment(value: string): Promise<void> {
-        // The runtime emits comment as a Field-wrapped <textarea> with no
-        // name attribute. Identifying it by placeholder default ("Anything
-        // you want to share?") covers the common case; the textarea inside
-        // a tribute fieldset is excluded by hasNot.
-        const tributeFs = this.tributeFieldset();
-        const ta = this.form.locator('textarea').filter({
-            hasNot: tributeFs,
-        });
-        await ta.first().fill(value);
+        // The runtime emits comment as a Field-wrapped <textarea> with no name
+        // attribute. The Field wrapper is what tells it apart from a textarea a
+        // field block renders inside its own fieldset.
+        await this.form.locator('.dono-form__field textarea').first().fill(value);
     }
 
     anonymousToggle(): Locator {
@@ -133,29 +128,6 @@ export class DonorFormPage {
 
     coverFeesToggle(): Locator {
         return this.form.locator('.dono-form__cover-fees input[type="checkbox"], input[name="cover_fees"]').first();
-    }
-
-    tributeFieldset(): Locator {
-        return this.form.locator('.dono-form__tribute').first();
-    }
-
-    /**
-     * Pick a tribute type by id-keyword or full label text. Built-ins
-     * ("honor", "memorial") match the canonical label substring; custom ids
-     * (e.g. "celebrate") match the label registered for that id on the form.
-     */
-    async pickTribute(kindOrLabel: string): Promise<void> {
-        const fs = this.tributeFieldset();
-        const builtin: Record<string, RegExp> = {
-            honor:    /honor/i,
-            memorial: /memor/i,
-        };
-        const matcher = builtin[kindOrLabel] ?? new RegExp(kindOrLabel, 'i');
-        await fs.locator('label').filter({ hasText: matcher }).locator('input[type="radio"]').first().check();
-    }
-
-    async fillTributeName(value: string): Promise<void> {
-        await this.tributeFieldset().locator('input[type="text"]').first().fill(value);
     }
 
     gatewayOptions(): Locator {

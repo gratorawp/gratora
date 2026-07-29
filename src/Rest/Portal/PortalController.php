@@ -10,7 +10,6 @@ use Dono\Currency\Currency;
 use Dono\Donations\Donation;
 use Dono\Donations\DonationQueries;
 use Dono\Donations\DonationRepository;
-use Dono\Donations\DonationTributeRepository;
 use Dono\Donors\ConsentService;
 use Dono\Donors\Donor;
 use Dono\Donors\DonorRepository;
@@ -53,7 +52,6 @@ final class PortalController
         private DonorService $donorService,
         private DonationRepository $donations,
         private ReceiptRepository $receipts,
-        private DonationTributeRepository $tributes,
         private MagicLinkService $magicLinks,
         private IdentityHasher $hasher,
         private AnnualStatementBuilder $annualStatements,
@@ -127,12 +125,6 @@ final class PortalController
         register_rest_route(self::NAMESPACE, '/portal/donations/(?P<reference>[A-Za-z0-9_\-]+)/anonymity', [
             'methods'             => WP_REST_Server::EDITABLE,
             'callback'            => [$this, 'donationAnonymity'],
-            'permission_callback' => [$this, 'sessionWithCsrf'],
-        ]);
-
-        register_rest_route(self::NAMESPACE, '/portal/donations/(?P<reference>[A-Za-z0-9_\-]+)/tribute', [
-            'methods'             => WP_REST_Server::EDITABLE,
-            'callback'            => [$this, 'donationTribute'],
             'permission_callback' => [$this, 'sessionWithCsrf'],
         ]);
 
@@ -454,17 +446,6 @@ final class PortalController
             return new WP_Error('dono_not_found', '', ['status' => 404]);
         }
 
-        $tribute = $this->tributes->forDonation((int) $d->id);
-        $tributePayload = null;
-        if ($tribute) {
-            $tributePayload = [
-                'type'                => (string) $tribute->type,
-                'name'                => (string) $tribute->name,
-                'message'             => (string) ($this->tributes->decryptedMessage($tribute) ?? ''),
-                'convert_to_annual'   => (bool) $tribute->convert_to_annual,
-            ];
-        }
-
         $giveAgainUrl = null;
         if ($d->campaign_id) {
             $campaign = Campaign::query()->find('id', (int) $d->campaign_id);
@@ -483,7 +464,10 @@ final class PortalController
             }
         }
 
-        return new WP_REST_Response([
+        // Add-ons own records that hang off a donation, and the donor is
+        // entitled to see them here. The filter is how those reach the portal
+        // without core knowing what they are.
+        $payload = (array) apply_filters('dono.portal.donation', [
             'id'                => (int) $d->id,
             'reference'         => (string) $d->reference,
             'amount_cents'      => (int) $d->amount_cents,
@@ -495,9 +479,10 @@ final class PortalController
             'form_id'           => $d->form_id ? (int) $d->form_id : null,
             'paid_at'           => $d->paid_at,
             'is_anonymous'      => (bool) $d->is_anonymous,
-            'tribute'           => $tributePayload,
             'give_again_url'    => $giveAgainUrl,
-        ], 200);
+        ], $d);
+
+        return new WP_REST_Response($payload, 200);
     }
 
     public function donationAnonymity(WP_REST_Request $request): WP_REST_Response|WP_Error
@@ -516,32 +501,6 @@ final class PortalController
 
         do_action('dono.donation.updated', $d);
         return new WP_REST_Response(['ok' => true, 'is_anonymous' => $d->is_anonymous], 200);
-    }
-
-    public function donationTribute(WP_REST_Request $request): WP_REST_Response|WP_Error
-    {
-        $donor = $this->requireDonor();
-        if ($donor instanceof WP_Error) return $donor;
-
-        $d = $this->donations->findByReference((string) $request['reference']);
-        if (! $d || $d->donor_id !== $donor->id) {
-            return new WP_Error('dono_not_found', '', ['status' => 404]);
-        }
-        $body = (array) ($request->get_json_params() ?? []);
-        $name = trim((string) ($body['name'] ?? ''));
-        $type = trim((string) ($body['type'] ?? ''));
-        if ($name === '' || $type === '') {
-            return new WP_Error('dono_invalid_input', __('Type and name are required.', 'dono'), ['status' => 422]);
-        }
-        $notify = isset($body['notify_email']) ? trim((string) $body['notify_email']) : '';
-        $this->tributes->persist($d, [
-            'type'              => $type,
-            'name'              => $name,
-            'message'           => isset($body['message']) ? (string) $body['message'] : null,
-            'notify_email'      => $notify !== '' && is_email($notify) ? $notify : null,
-            'convert_to_annual' => ! empty($body['convert_to_annual']),
-        ]);
-        return new WP_REST_Response(['ok' => true], 200);
     }
 
     public function recurring(): WP_REST_Response|WP_Error

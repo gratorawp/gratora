@@ -80,20 +80,6 @@ final class SettingsService
                 ],
             ],
         ],
-        // UK Gift Aid. In core rather than a country pack: a UK charity cannot
-        // use the product without it, and it is worth 25% on top of every
-        // eligible gift.
-        'gift_aid' => [
-            'option'   => 'dono_gift_aid',
-            'defaults' => [
-                'enabled'   => false,
-                // HMRC's reference for the charity, printed on the claim.
-                'charity_reference' => '',
-                // Blank uses the statutory wording below, which is what HMRC
-                // expects a declaration to say. An org may only add to it.
-                'statement' => '',
-            ],
-        ],
         'privacy' => [
             'option'   => 'dono_privacy',
             'defaults' => [
@@ -249,11 +235,6 @@ final class SettingsService
                 'subject' => __('Thank you for your first donation to {organisation_name}', 'dono'),
                 'body'    => __("Hi {donor_first_name},\n\nThank you for making your first donation to {organisation_name}. Your support means a great deal, and we are grateful to have you with us.\n\nWe will keep you posted on the difference it makes.\n\nWith gratitude,\n{organisation_name}", 'dono'),
             ],
-            'tribute_notification' => [
-                'enabled' => true,
-                'subject' => __('A donation was made {tribute_type} {honoree_name}', 'dono'),
-                'body'    => __("Hello,\n\n{donor_name} has made a donation to {organisation_name} {tribute_type} {honoree_name}.\n\n{message}\n\nWe thought you would want to know.\n\nWith warm regards,\n{organisation_name}", 'dono'),
-            ],
             'offline_instructions' => [
                 'enabled' => true,
                 'subject' => __('Payment instructions for your donation to {organisation_name}', 'dono'),
@@ -323,9 +304,23 @@ final class SettingsService
             'recurring_renewal'           => array_merge($donation, ['receipt_number', 'reference']),
             'subscription_payment_failed' => array_merge($donation, ['portal_url']),
             'subscription_cancelled'      => $donation,
-            'tribute_notification'        => array_merge($donation, ['honoree_name', 'message', 'tribute_type']),
             'magic_link'                  => ['donor_name', 'organisation_name', 'portal_url'],
         ]);
+    }
+
+    /**
+     * Label, description and recipient for templates that ship outside core.
+     *
+     * The settings editor lists the templates it has been told about, so a
+     * template an add-on registers and never describes is stored, sent, and
+     * invisible to the admin whose name is on it. Core describes its own in the
+     * editor bundle, so this starts empty.
+     *
+     * @return list<array{id:string,label:string,desc?:string,recipient?:string}>
+     */
+    public static function templateMeta(): array
+    {
+        return array_values((array) apply_filters('dono.email.template_meta', []));
     }
 
     private function resolveDynamicDefaults(string $group, array $static): array

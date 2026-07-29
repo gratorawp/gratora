@@ -1,5 +1,6 @@
 import { PanelBody, SelectControl, TextControl } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
+import { applyFilters } from '@wordpress/hooks';
 import { __, sprintf } from '@wordpress/i18n';
 
 export const OP_OPTIONS = [
@@ -19,7 +20,6 @@ export const DEFAULT_CONDITION = { field: '', op: '=', value: '' };
 const BUILTIN_SOURCES = {
     'dono/donation-amount':  { value: 'amount_cents', label: __( 'Amount (cents)', 'dono' ) },
     'dono/recurring-toggle': { value: 'frequency',    label: __( 'Frequency', 'dono' ) },
-    'dono/tribute':          { value: 'tribute.type', label: __( 'Tribute type', 'dono' ) },
     'dono/anonymous-toggle': { value: 'is_anonymous', label: __( 'Is anonymous', 'dono' ) },
     'dono/cover-fees':       { value: 'cover_fees',   label: __( 'Cover fees', 'dono' ) },
 };
@@ -59,13 +59,17 @@ export function ConditionPanel( { condition, onChange, title } ) {
         const selfId = be.getSelectedBlockClientId();
         const all    = flatten( be.getBlocks(), [] );
 
+        // A donor field an add-on contributes exposes its value at a fixed
+        // key too, so it can be a condition source like any built-in.
+        const sources = applyFilters( 'dono.editor.conditionSources', BUILTIN_SOURCES );
+
         const opts = [ { value: '', label: __( '(Always show)', 'dono' ) } ];
         const seen = new Set( [ '' ] );
 
         for ( const b of all ) {
             if ( b.clientId === selfId ) continue;
 
-            const builtin = BUILTIN_SOURCES[ b.name ];
+            const builtin = sources[ b.name ];
             if ( builtin ) {
                 if ( ! seen.has( builtin.value ) ) {
                     opts.push( builtin );

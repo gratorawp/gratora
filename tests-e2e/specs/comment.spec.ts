@@ -8,8 +8,8 @@ import { test, expect } from '../fixtures/donor-form';
 test.describe('comment block', () => {
     test('renders a textarea', async ({ donor }) => {
         // Runtime renders the comment as a Field-wrapped textarea with no
-        // `name` attr. Tribute also has a textarea but only after a kind is
-        // picked, so on initial render any textarea is the comment block.
+        // `name` attr. A field block may render its own textarea inside a
+        // fieldset, so on initial render any bare textarea is the comment.
         const ta = donor.form.locator('textarea').first();
         test.skip(await ta.count() === 0, 'no comment block on the test form');
         await expect(ta).toBeVisible();

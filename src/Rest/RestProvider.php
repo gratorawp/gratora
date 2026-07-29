@@ -14,7 +14,6 @@ use Dono\Rest\Admin\DonorsController as AdminDonorsController;
 use Dono\Rest\Admin\FormsController as AdminFormsController;
 use Dono\Rest\Admin\FundsController as AdminFundsController;
 use Dono\Rest\Admin\FxController;
-use Dono\Rest\Admin\GiftAidController;
 use Dono\Rest\Admin\LicenseController as AdminLicenseController;
 use Dono\Rest\Admin\NumberingController as AdminNumberingController;
 use Dono\Rest\Admin\OnboardingController as AdminOnboardingController;
@@ -61,7 +60,6 @@ final class RestProvider extends HookProvider
         private AdminCommandsController $commands,
         private AdminNumberingController $numbering,
         private AdminReportsController $reports,
-        private GiftAidController $giftAid,
         private AdminReadinessController $readiness,
     ) {
     }
@@ -98,7 +96,6 @@ final class RestProvider extends HookProvider
         $this->commands->registerRoutes();
         $this->numbering->registerRoutes();
         $this->reports->registerRoutes();
-        $this->giftAid->registerRoutes();
         $this->readiness->registerRoutes();
 
         $registry = new ControllerRegistry();

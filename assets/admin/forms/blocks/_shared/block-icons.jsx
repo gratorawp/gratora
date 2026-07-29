@@ -23,7 +23,6 @@ import {
     HandCoins,
     Hash,
     Heading,
-    Heart,
     HeartHandshake,
     Layers,
     ListChecks,
@@ -81,5 +80,4 @@ export const BlockIcons = {
     steps:             <Layers           { ...BLOCK } />,
     'submit-button':   <HeartHandshake   { ...BLOCK } />,
     'text-input':      <Type             { ...BLOCK } />,
-    tribute:           <Heart            { ...BLOCK } />,
 };

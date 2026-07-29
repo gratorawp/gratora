@@ -120,11 +120,31 @@ function popReturn() {
 // Extension-tab seam (preact side). Mirrors assets/admin/_shared/extensionTabs.jsx
 // but built on preact/hooks since the portal is a standalone preact app. Add-ons
 // register portal tabs into window.dono.tabs (defined by ExtensionAssets).
-const TAB_EVENT = 'dono:tabs:changed';
+const TAB_EVENT   = 'dono:tabs:changed';
+const PANEL_EVENT = 'dono:panels:changed';
 
 function readExtTabs( surface ) {
     const reg = ( window.dono && window.dono.tabs ) || null;
     return reg && typeof reg.get === 'function' ? reg.get( surface ) : [];
+}
+
+function readExtPanels( surface ) {
+    const reg = ( window.dono && window.dono.panels ) || null;
+    return reg && typeof reg.get === 'function' ? reg.get( surface ) : [];
+}
+
+// Sections an add-on adds inside an existing screen, as opposed to a whole tab.
+function useExtensionPanels( surface ) {
+    const [ panels, setPanels ] = useState( () => readExtPanels( surface ) );
+    useEffect( () => {
+        const onChange = ( e ) => {
+            if ( ! e.detail || e.detail.surface === surface ) setPanels( readExtPanels( surface ) );
+        };
+        window.addEventListener( PANEL_EVENT, onChange );
+        setPanels( readExtPanels( surface ) );
+        return () => window.removeEventListener( PANEL_EVENT, onChange );
+    }, [ surface ] );
+    return panels;
 }
 
 function useExtensionTabs( surface ) {
@@ -149,6 +169,17 @@ function ExtensionPanel( { tab, context } ) {
         return () => { if ( typeof cleanup === 'function' ) cleanup(); };
     }, [ tab && tab.id ] );
     return <div ref={ ref } class="dp-ext-panel" />;
+}
+
+// Same imperative contract, remounted when the record it describes changes.
+function ExtensionSection( { panel, context, token } ) {
+    const ref = useRef( null );
+    useEffect( () => {
+        if ( ! ref.current ) return undefined;
+        const cleanup = panel.mount( ref.current, context );
+        return () => { if ( typeof cleanup === 'function' ) cleanup(); };
+    }, [ panel.id, token ] );
+    return <div ref={ ref } class="dp-detail__section dp-ext-section" />;
 }
 
 function App() {
@@ -474,8 +505,8 @@ function Donations( { onOpen } ) {
 function DonationDetail( { reference, onClose } ) {
     const [ d, setD ]         = useState( null );
     const [ error, setError ] = useState( null );
-    const [ editing, setEditing ] = useState( null );
     const panelRef = useRef( null );
+    const extSections = useExtensionPanels( 'portal-donation' );
     useFocusTrap( panelRef, true, onClose );
 
     const load = useCallback( () => {
@@ -522,106 +553,16 @@ function DonationDetail( { reference, onClose } ) {
                             </label>
                         </div>
 
-                        <div class="dp-detail__section">
-                            <h4>{ __( 'Tribute', 'dono' ) }</h4>
-                            { d.tribute ? (
-                                <div>
-                                    <strong>{ tributeTypeLabel( d.tribute.type ) } { d.tribute.name }</strong>
-                                    { d.tribute.message && <p class="dp-detail__msg">{ d.tribute.message }</p> }
-                                    <button class="dp-link" onClick={ () => setEditing( d.tribute ) }>{ __( 'Edit', 'dono' ) }</button>
-                                </div>
-                            ) : (
-                                <button class="dp-link" onClick={ () => setEditing( { type: 'honor', name: '', message: '' } ) }>
-                                    { __( 'Add a tribute', 'dono' ) }
-                                </button>
-                            ) }
-                            { editing && (
-                                <TributeForm
-                                    initial={ editing }
-                                    onSave={ ( payload ) => {
-                                        api( `donations/${ reference }/tribute`, {
-                                            method: 'POST',
-                                            body:   JSON.stringify( payload ),
-                                        } ).then( () => { setEditing( null ); load(); } )
-                                            .catch( ( e ) => setError( e.message ) );
-                                    } }
-                                    onCancel={ () => setEditing( null ) }
-                                />
-                            ) }
-                        </div>
+                        { extSections.map( ( panel ) => (
+                            <ExtensionSection
+                                key={ panel.id }
+                                panel={ panel }
+                                token={ `${ reference }:${ d.id }` }
+                                context={ { donation: d, reload: load, api } }
+                            />
+                        ) ) }
                     </>
                 ) }
-            </div>
-        </div>
-    );
-}
-
-function tributeTypeLabel( type ) {
-    if ( type === 'honor' )    return __( 'In honor of', 'dono' );
-    if ( type === 'memorial' ) return __( 'In memory of', 'dono' );
-    const t = String( type || '' ).replace( /-/g, ' ' ).trim();
-    return t.charAt( 0 ).toUpperCase() + t.slice( 1 );
-}
-
-function TributeForm( { initial, onSave, onCancel } ) {
-    const KNOWN = [
-        { id: 'honor',    label: __( 'In honor of', 'dono' ) },
-        { id: 'memorial', label: __( 'In memory of', 'dono' ) },
-    ];
-    const initialType = initial.type || 'honor';
-    const initiallyCustom = ! KNOWN.some( ( k ) => k.id === initialType );
-
-    const [ type, setType ]       = useState( initialType );
-    const [ custom, setCustom ]   = useState( initiallyCustom );
-    const [ name, setName ]       = useState( initial.name || '' );
-    const [ msg, setMsg ]         = useState( initial.message || '' );
-    const [ ann, setAnn ]         = useState( !! initial.convert_to_annual );
-    const [ notify, setNotify ]   = useState( initial.notify_email || '' );
-
-    return (
-        <div class="dp-tribute-form">
-            <div class="dp-tribute-form__types">
-                { KNOWN.map( ( k ) => (
-                    <label key={ k.id }>
-                        <input
-                            type="radio"
-                            checked={ ! custom && type === k.id }
-                            onChange={ () => { setCustom( false ); setType( k.id ); } }
-                        /> { k.label }
-                    </label>
-                ) ) }
-                <label>
-                    <input
-                        type="radio"
-                        checked={ custom }
-                        onChange={ () => { setCustom( true ); setType( initiallyCustom ? initialType : '' ); } }
-                    /> { __( 'Other', 'dono' ) }
-                </label>
-            </div>
-            { custom && (
-                <input
-                    type="text"
-                    placeholder={ __( 'Enter tribute type', 'dono' ) }
-                    value={ type }
-                    onInput={ ( e ) => setType( e.target.value ) }
-                />
-            ) }
-            <input type="text" placeholder={ __( 'Name', 'dono' ) } value={ name } onInput={ ( e ) => setName( e.target.value ) } />
-            <input type="email" placeholder={ __( 'Notify someone (optional email)', 'dono' ) } value={ notify } onInput={ ( e ) => setNotify( e.target.value ) } />
-            <textarea rows={ 2 } placeholder={ __( 'Message (optional)', 'dono' ) } value={ msg } onInput={ ( e ) => setMsg( e.target.value ) } />
-            <label class="dp-tribute-form__check">
-                <input type="checkbox" checked={ ann } onChange={ ( e ) => setAnn( e.target.checked ) } />
-                { __( 'Remember this person every year on this date with a matching donation', 'dono' ) }
-            </label>
-            <div class="dp-tribute-form__actions">
-                <button onClick={ onCancel }>{ __( 'Cancel', 'dono' ) }</button>
-                <button class="is-primary" onClick={ () => onSave( {
-                    type,
-                    name,
-                    message: msg,
-                    notify_email: notify.trim() || undefined,
-                    convert_to_annual: ann,
-                } ) }>{ __( 'Save', 'dono' ) }</button>
             </div>
         </div>
     );

@@ -11,7 +11,6 @@ use Dono\Donations\Donation;
 use Dono\Donations\DonationIntent;
 use Dono\Donations\DonationRepository;
 use Dono\Donations\DonationService;
-use Dono\Donations\DonationTributeRepository;
 use Dono\Donors\DonorService;
 use Dono\Forms\DefaultFormTypeHandler;
 use Dono\Forms\FormTypeHandler;
@@ -46,7 +45,6 @@ final class TypeDispatchTest extends IntegrationTestCase
             $types,
             $c->get(\Dono\Foundation\Crypto\Crypto::class),
             $c->get(\Dono\Gateways\TestMode::class),
-            $c->get(DonationTributeRepository::class),
         );
     }
 
@@ -102,7 +100,6 @@ final class TypeDispatchTest extends IntegrationTestCase
                     note_to_org: $intent->note_to_org,
                     is_anonymous: $intent->is_anonymous,
                     country: $intent->country,
-                    tribute: $intent->tribute,
                     fee_covered_cents: $intent->fee_covered_cents,
                     extra: array_merge($intent->extra, ['fundraiser_id' => 42]),
                 );

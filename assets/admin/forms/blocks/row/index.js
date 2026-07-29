@@ -1,5 +1,6 @@
 import { useBlockProps, InspectorControls, InnerBlocks } from '@wordpress/block-editor';
 import { PanelBody } from '@wordpress/components';
+import { applyFilters } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
 import { BlockIcons } from '../_shared/block-icons';
 import Slider from '../../../_shared/components/Slider';
@@ -16,8 +17,13 @@ const ALLOWED = [
     'dono/comment',
     'dono/anonymous-toggle',
     'dono/cover-fees',
-    'dono/tribute',
 ];
+
+// Resolved at registration, not module scope, so a donor field an add-on
+// contributes can join the list before the editor mounts.
+function allowedBlocks() {
+    return applyFilters( 'dono.editor.rowAllowedBlocks', ALLOWED );
+}
 
 const GAP_UNITS = [ 'px', 'em', 'rem', '%' ];
 
@@ -59,7 +65,7 @@ function Edit( { attributes, setAttributes } ) {
             </InspectorControls>
             <div { ...blockProps }>
                 <InnerBlocks
-                    allowedBlocks={ ALLOWED }
+                    allowedBlocks={ allowedBlocks() }
                     renderAppender={ InnerBlocks.ButtonBlockAppender }
                 />
             </div>

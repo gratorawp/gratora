@@ -31,7 +31,7 @@ Two suites, split into Playwright projects:
    - Creates / updates the campaign `dono-e2e` (published).
    - Creates / updates the single-page form `dono-e2e-form` (published) with
      every block the specs assert against (amount, name, email, country,
-     address, phone, comment, anonymous, cover-fees, tribute, consent, custom
+     address, phone, comment, anonymous, cover-fees, consent, custom
      date/dropdown, currency-switcher, payment-gateways, submit).
    - Creates / updates the multi-step form `dono-e2e-wizard` (published) for
      the multi-step regression spec.
@@ -110,7 +110,7 @@ AntiSpamGuard IP transients and start fresh.
 Screenshot goldens for the donor-facing surfaces, in a dedicated `visual`
 project (`specs/visual/`). Element-scoped to the form so theme chrome never
 bleeds into a golden. Covered: the kitchen-sink form (initial desktop +
-mobile, tribute expanded, currency switched, field-error styling), each page
+mobile, currency switched, field-error styling), each page
 of the multi-step wizard, and the layout/content form (goal block masked, its
 totals drift as the functional suite donates).
 
@@ -192,7 +192,7 @@ Required for the core specs:
 - submit-button
 
 Add these to also run the donor-block specs (country, address, anonymous,
-comment, phone, consent, cover-fees, tribute, custom-fields):
+comment, phone, consent, cover-fees, custom-fields):
 - country
 - address (with country sub-field visible; sub-fields can be optional)
 - anonymous-toggle
@@ -200,6 +200,6 @@ comment, phone, consent, cover-fees, tribute, custom-fields):
 - phone
 - consent (one optional + one required-by-law purpose)
 - cover-fees
-- tribute (with at least "In honor of" enabled)
+- tribute, when the dono-tributes add-on is installed (with at least "In honor of" enabled)
 - custom date field
 - custom dropdown

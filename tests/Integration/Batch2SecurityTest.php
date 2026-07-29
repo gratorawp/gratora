@@ -167,49 +167,6 @@ final class Batch2SecurityTest extends IntegrationTestCase
         );
     }
 
-    public function test_redaction_erases_tribute_pii(): void
-    {
-        $svc   = \Dono\Foundation\Plugin::instance()->container->get(DonorService::class);
-        $donor = $svc->findOrCreate('tribute@example.com', ['first_name' => 'Tilly']);
-        $now   = gmdate('Y-m-d H:i:s');
-
-        $d = \Dono\Donations\Donation::make();
-        $d->reference = 'DONO-TRIB-1';
-        $d->donor_id = (int) $donor->id;
-        $d->amount_cents = 5000;
-        $d->net_cents = 5000;
-        $d->currency = 'USD';
-        $d->base_amount_cents = 5000;
-        $d->base_currency = 'USD';
-        $d->fx_rate = '1.00000000';
-        $d->gateway = 'offline';
-        $d->status = 'paid';
-        $d->is_test = false;
-        $d->paid_at = $now;
-        $d->created_at = $now;
-        $d->updated_at = $now;
-        $d->save();
-
-        // In-honor tribute: donor message + a third party's notify email + the
-        // honoree's name - all PII the erasure must remove.
-        $t = \Dono\Donations\DonationTribute::make();
-        $t->donation_id = (int) $d->id;
-        $t->donor_id = (int) $donor->id;
-        $t->type = 'in_honor';
-        $t->name = 'Jane Honoree';
-        $t->notify_email_encrypted = 'enc:third-party@example.com';
-        $t->message_encrypted = 'enc:please celebrate';
-        $t->created_at = $now;
-        $t->save();
-
-        $svc->redact($donor);
-
-        $fresh = \Dono\Donations\DonationTribute::query()->where('id', (int) $t->id)->get();
-        $this->assertSame('', $fresh->name, 'honoree name erased on redaction');
-        $this->assertNull($fresh->notify_email_encrypted, 'third-party notify email erased');
-        $this->assertNull($fresh->message_encrypted, 'tribute message erased');
-    }
-
     /** @param \ArrayObject<int,array<string,mixed>> $mails */
     private function findMail(\ArrayObject $mails, string $needle): ?array
     {

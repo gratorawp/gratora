@@ -6,7 +6,6 @@ namespace Dono\Donors\Erasure;
 
 use Dono\Donations\Donation;
 use Dono\Donations\DonationNote;
-use Dono\Donations\DonationTribute;
 use Dono\Donors\DonorNote;
 use Dono\Donors\MagicLinkToken;
 use Dono\Recurring\RecurringPlan;
@@ -74,16 +73,6 @@ final class CoreDonorDataHandler implements ErasureHandler
         RecurringPlan::query()
             ->where('donor_id', $request->donorId)
             ->update(['gateway_customer_id' => null]);
-
-        // Tributes carry donor-authored PII the erasure must also remove:
-        // the message, a third party's notify email, and the honoree name.
-        DonationTribute::query()
-            ->where('donor_id', $request->donorId)
-            ->update([
-                'name'                   => '',
-                'notify_email_encrypted' => null,
-                'message_encrypted'      => null,
-            ]);
 
         // Revoke outstanding magic-link tokens so a previously-emailed
         // portal link can no longer open a session for the redacted donor.

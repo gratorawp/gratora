@@ -18,9 +18,9 @@ use ReflectionProperty;
  * table is silently missing it: every query touching that column dies with
  * "unknown column", and it looks fine on any machine that reactivated.
  *
- * This is exactly what happened to the Gift Aid columns, so the rule is pinned
- * here rather than left to memory. When this fails, you changed a schema:
- * bump DONO_DB_VERSION in dono.php and put the new fingerprint below.
+ * That has happened, so the rule is pinned here rather than left to memory.
+ * When this fails, you changed a schema: bump DONO_DB_VERSION in dono.php and
+ * put the new fingerprint below.
  */
 final class SchemaVersionTest extends IntegrationTestCase
 {
@@ -28,7 +28,7 @@ final class SchemaVersionTest extends IntegrationTestCase
      * sha256 of every registered model's compiled CREATE TABLE, in class order.
      * Update it in the same commit as the DONO_DB_VERSION bump.
      */
-    private const FINGERPRINT = '757c416b90dd3855b4912f80f428bd3ee5abf9d64b3f687ebdf128caeba52270';
+    private const FINGERPRINT = '83bdb19a97be02fa146642acc2f1b16efdfde5127e408fd39e4ea67d23b615a8';
 
     public function test_the_schema_matches_the_declared_db_version(): void
     {

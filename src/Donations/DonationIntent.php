@@ -38,11 +38,7 @@ final class DonationIntent
         public readonly ?string $note_to_org = null,
         public readonly bool $note_public = false,
         public readonly bool $is_anonymous = false,
-        /** The Gift Aid box as ticked on this form. */
-        public readonly bool $gift_aid = false,
         public readonly ?string $country = null,
-        /** @var array{type:string,name:string,notify_email?:?string,message?:?string}|null */
-        public readonly ?array $tribute = null,
         public readonly int $fee_covered_cents = 0,
         /** @var array<string,mixed> generic handler bag, e.g. form_type, fundraiser_id */
         public readonly array $extra = [],

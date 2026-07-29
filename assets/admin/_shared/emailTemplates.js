@@ -28,7 +28,34 @@ function tagsFor( id, fallback ) {
         : fallback;
 }
 
+/**
+ * Templates registered by an add-on. PHP is the only place that knows they
+ * exist, so without these the admin cannot find or edit an email their site
+ * is already sending.
+ */
+function addonTemplates() {
+    const meta = typeof window !== 'undefined'
+        && window.dono
+        && window.dono.email_template_meta;
+
+    if ( ! Array.isArray( meta ) ) return [];
+
+    return meta
+        .filter( ( t ) => t && t.id )
+        .map( ( t ) => ( {
+            id:        String( t.id ),
+            label:     String( t.label || t.id ),
+            desc:      String( t.desc || '' ),
+            recipient: String( t.recipient || '' ),
+            tags:      tagsFor( t.id, [] ),
+        } ) );
+}
+
 export function getDonorTemplates() {
+    return [ ...coreTemplates(), ...addonTemplates() ];
+}
+
+function coreTemplates() {
     return [
         {
             id:        'donation_receipt',
@@ -43,13 +70,6 @@ export function getDonorTemplates() {
             desc:      __( 'A one-off welcome sent when a donor gives for the first time, separate from the receipt. Warm and relational, not transactional.', 'dono' ),
             recipient: __( 'Donor', 'dono' ),
             tags:      tagsFor( 'donation_first', [ '{donor_first_name}', '{donor_name}', '{organisation_name}' ] ),
-        },
-        {
-            id:        'tribute_notification',
-            label:     __( 'Tribute notification', 'dono' ),
-            desc:      __( 'Sent to the person a tribute donor asked us to notify, telling them a donation was made in honor or in memory of someone. Never sent for test donations, and never names an anonymous donor.', 'dono' ),
-            recipient: __( 'Honoree contact', 'dono' ),
-            tags:      tagsFor( 'tribute_notification', [ '{donor_name}', '{organisation_name}', '{amount}', '{campaign_title}', '{honoree_name}', '{message}', '{tribute_type}' ] ),
         },
         {
             id:        'offline_instructions',

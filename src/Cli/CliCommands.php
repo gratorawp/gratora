@@ -407,7 +407,6 @@ final class CliCommands
 <!-- wp:dono/comment {"label":"Add a message"} /-->
 <!-- wp:dono/anonymous-toggle /-->
 <!-- wp:dono/cover-fees /-->
-<!-- wp:dono/tribute {"types":[{"id":"honor","label":"In honor of"},{"id":"memorial","label":"In memory of"},{"id":"celebrate","label":"In celebration of"}]} /-->
 <!-- wp:dono/date {"label":"Preferred call date","field":"call_date"} /-->
 <!-- wp:dono/dropdown {$dropdown} /-->
 <!-- wp:dono/consent {$consent} /-->

@@ -62,7 +62,6 @@ final class BlockPipelineCoverageTest extends IntegrationTestCase
 <!-- wp:dono/phone {"label":"MK_PHONE"} /-->
 <!-- wp:dono/comment {"label":"MK_COMMENT"} /-->
 <!-- wp:dono/address {"label":"MK_ADDRESS"} /-->
-<!-- wp:dono/tribute {"label":"MK_TRIBUTE"} /-->
 <!-- wp:dono/anonymous-toggle {"label":"MK_ANON"} /-->
 <!-- wp:dono/cover-fees {"label":"MK_COVERFEES"} /-->
 <!-- wp:dono/recurring-toggle {"label":"MK_RECURRING","frequencies":["one-time","monthly"]} /-->
@@ -88,7 +87,7 @@ BLOCKS;
         $markers = [
             'MK_HEADING', 'MK_PARAGRAPH', 'MK_HTML', '91234',
             'MK_EMAIL', 'MK_COUNTRY', 'MK_PHONE', 'MK_COMMENT',
-            'MK_ADDRESS', 'MK_TRIBUTE', 'MK_ANON', 'MK_COVERFEES',
+            'MK_ADDRESS', 'MK_ANON', 'MK_COVERFEES',
             'MK_RECURRING', 'MK_FUND', 'MK_TEXT', 'MK_NUMBER', 'MK_DATE',
             'MK_DROPDOWN', 'MK_RADIO', 'MK_CHECKBOX', 'MK_MULTISELECT',
             'MK_HIDDEN', 'MK_SUBMIT',

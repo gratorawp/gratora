@@ -1,5 +1,6 @@
 /** @jsxImportSource preact */
 import { evaluateCondition } from './conditions';
+import { mergePayload, registeredErrors, registeredValues } from './fields';
 import { convertCents, displayPreset, isZeroDecimal } from '../util/fx';
 import { formatAmount } from '../util/format';
 /**
@@ -68,11 +69,11 @@ export function initialState( config ) {
             note_public:  false,
             is_anonymous: !! anonField?.defaultOn,
             cover_fees:   !! allDonorFields.find( ( f ) => f.kind === 'cover_fees' )?.defaultOn,
-            tribute:      { type: '', name: '', notify_email: '', message: '', convert_to_annual: false },
             fund_id:      fundField ? String( fundField.default_id || '' ) : '',
             consents,
             frequency:    initialFrequency( config, freqField ),
             custom,
+            ...registeredValues( allDonorFields ),
         },
         errors:     {},
         status:     'idle',
@@ -417,15 +418,6 @@ export function validateStep( step, state ) {
                 if ( f.kind === 'country' && f.required && ! v.profile.country?.trim() ) {
                     e[ 'profile.country' ] = msg( 'required', 'Required.' );
                 }
-                if ( f.kind === 'tribute' && v.tribute.type ) {
-                    if ( ! v.tribute.name?.trim() ) {
-                        e[ 'tribute.name' ] = msg( 'enterName', 'Enter a name.' );
-                    }
-                    const ne = ( v.tribute.notify_email || '' ).trim();
-                    if ( ne && ! /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test( ne ) ) {
-                        e[ 'tribute.notify_email' ] = msg( 'invalidEmail', 'Enter a valid email.' );
-                    }
-                }
                 if ( f.kind === 'address' ) {
                     const a = v.profile.address || {};
                     if ( f.showLine1   && f.requireLine1   && ! a.line1?.trim()   ) e[ 'profile.address.line1' ]   = msg( 'required', 'Required.' );
@@ -498,6 +490,7 @@ export function validateStep( step, state ) {
                         }
                     }
                 }
+                Object.assign( e, registeredErrors( f, v, msg ) || {} );
             }
             break;
         }
@@ -541,7 +534,7 @@ export function buildPayload( state ) {
     const sup = suppressedFields( state );
     const base = Number( v.amount_cents ) || 0;
     const fee  = coveredFeeCents( state );
-    return {
+    return mergePayload( {
         email:             ( v.email || '' ).trim(),
         amount_cents:      base + fee,
         fee_covered_cents: fee,
@@ -552,7 +545,6 @@ export function buildPayload( state ) {
         note_to_org:       ( v.note_to_org || '' ).trim() || undefined,
         note_public:       v.note_public ? true : undefined,
         is_anonymous:      sup.anon ? false : !! v.is_anonymous,
-        tribute:           buildTribute( v.tribute ),
         fund_id:           sup.fund ? undefined : ( ( v.fund_id || '' ).trim() || undefined ),
         consents:          buildConsents( v.consents ),
         frequency:         sup.frequency ? 'one_time' : normalizeFrequency( v.frequency ),
@@ -565,7 +557,7 @@ export function buildPayload( state ) {
             phone:      ( v.profile.phone      || '' ).trim() || undefined,
             address:    buildAddress( v.profile.address ),
         },
-    };
+    }, v, state );
 }
 
 function buildAddress( a ) {
@@ -615,18 +607,6 @@ function buildCustom( c, suppress ) {
         out[ k ] = raw;
     }
     return Object.keys( out ).length === 0 ? undefined : out;
-}
-
-function buildTribute( t ) {
-    if ( ! t || ! t.type || ! t.name?.trim() ) return undefined;
-    const out = {
-        type:         t.type,
-        name:         t.name.trim(),
-        notify_email: ( t.notify_email || '' ).trim() || undefined,
-        message:      ( t.message || '' ).trim() || undefined,
-    };
-    if ( t.convert_to_annual ) out.convert_to_annual = true;
-    return out;
 }
 
 export function computeFees( state, base ) {

@@ -1,6 +1,7 @@
 /** @jsxImportSource preact */
 
 import { evaluateCondition } from '../state/conditions';
+import { fieldEntry } from '../state/fields';
 import { formatAmount } from '../util/format';
 import { decodeEntities } from '../util/entities';
 import { computeFees } from '../state/store';
@@ -211,78 +212,6 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                     <span>{ decodeEntities( f.label || '' ) || config.i18n.anonymous }</span>
                 </label>
             );
-
-        case 'tribute': {
-            const tributeTypes = Array.isArray( f.types ) && f.types.length > 0
-                ? f.types
-                : [
-                    { id: 'honor',    label: config.i18n.tributeHonor },
-                    { id: 'memorial', label: config.i18n.tributeMemorial },
-                ];
-            return (
-                <fieldset key={ key } class="dono-form__tribute">
-                    <legend>{ decodeEntities( f.label ) }</legend>
-                    <div class="dono-form__tribute-types">
-                        { tributeTypes.map( ( t ) => (
-                            <label key={ t.id }>
-                                <input
-                                    type="radio"
-                                    name={ `tribute-type-${ key }` }
-                                    checked={ v.tribute.type === t.id }
-                                    onChange={ () => onText( 'tribute.type' )( { target: { value: t.id } } ) }
-                                />
-                                { decodeEntities( t.label ) }
-                            </label>
-                        ) ) }
-                    </div>
-                    { v.tribute.type && (
-                        <>
-                            <input
-                                type="text"
-                                placeholder={ config.i18n.tributeName }
-                                value={ v.tribute.name }
-                                onInput={ onText( 'tribute.name' ) }
-                                aria-invalid={ !! err[ 'tribute.name' ] }
-                            />
-                            { err[ 'tribute.name' ] && (
-                                <span class="dono-form__field-error" role="alert">{ err[ 'tribute.name' ] }</span>
-                            ) }
-                            { f.allowNotify && (
-                                <>
-                                    <input
-                                        type="email"
-                                        placeholder={ config.i18n.tributeNotify }
-                                        value={ v.tribute.notify_email }
-                                        onInput={ onText( 'tribute.notify_email' ) }
-                                        aria-invalid={ !! err[ 'tribute.notify_email' ] }
-                                    />
-                                    { err[ 'tribute.notify_email' ] && (
-                                        <span class="dono-form__field-error" role="alert">{ err[ 'tribute.notify_email' ] }</span>
-                                    ) }
-                                    <textarea
-                                        placeholder={ config.i18n.tributeMessage }
-                                        rows={ 2 }
-                                        maxLength={ 500 }
-                                        value={ v.tribute.message }
-                                        onInput={ onText( 'tribute.message' ) }
-                                    />
-                                </>
-                            ) }
-                            { f.allowAnnual && (
-                                <label class="dono-form__check">
-                                    <input
-                                        type="checkbox"
-                                        checked={ !! v.tribute.convert_to_annual }
-                                        onChange={ onCheck( 'tribute.convert_to_annual' ) }
-                                    />
-                                    <span>{ config.i18n.tributeAnnual }</span>
-                                </label>
-                            ) }
-                        </>
-                    ) }
-                </fieldset>
-            );
-        }
 
         case 'cover_fees': {
             const fee = computeFees( state, v.amount_cents || 0 );
@@ -803,8 +732,15 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
             // payload via buildPayload's custom serializer.
             return null;
 
-        default:
-            return null;
+        default: {
+            // A field kind an add-on contributes. It gets the same context the
+            // built-ins render from, so it can read values, report errors and
+            // dispatch like any of them.
+            const entry = fieldEntry( f.kind );
+            if ( ! entry || typeof entry.component !== 'function' ) return null;
+            const Component = entry.component;
+            return <Component key={ key } field={ f } ctx={ { v, err, onText, onCheck, setField, config, dispatch, state } } />;
+        }
     }
 }
 

@@ -19,7 +19,6 @@ import registerColumnsBlock         from './columns';
 import registerCoverFeesBlock       from './cover-fees';
 import registerCurrencySwitcherBlock from './currency-switcher';
 import registerGoalBlock            from './goal';
-import registerTributeBlock         from './tribute';
 import registerFundPickerBlock      from './fund-picker';
 import registerAddressBlock         from './address';
 import registerConsentBlock         from './consent';
@@ -74,7 +73,6 @@ addAction( 'dono.editor.registerBlocks', 'dono/core-blocks', ( api ) => {
     registerPhoneBlock( api );
     registerCommentBlock( api );
     registerCoverFeesBlock( api );
-    registerTributeBlock( api );
     registerFundPickerBlock( api );
     registerAddressBlock( api );
     registerConsentBlock( api );

@@ -12,8 +12,8 @@ namespace Dono\Forms;
 final class FormTemplates
 {
     /**
-     * Every built-in template, ordered by category (Blank, Starter, Standard, Recurring,
-     * Tribute, Wizard, Premium). Templates defined below but not listed here stay
+     * Every built-in template, ordered by category (Blank, Starter, Standard,
+     * Recurring, Wizard, Premium). Templates defined below but not listed here stay
      * unregistered; re-enable by appending, or via the dono.form.templates filter.
      *
      * @return list<array{id:string,name:string,description:string,icon:string,category:string,thumbnail_hint:string,settings:array<string,mixed>,blocks:string}>
@@ -27,7 +27,6 @@ final class FormTemplates
             self::posterHero(),       // Standard
             self::impactTiers(),      // Standard
             self::sundayTithe(),      // Recurring
-            self::inMemoriam(),       // Tribute
             self::essentialsWizard(), // Wizard
             self::workplaceMatch(),   // Wizard
             self::galaPledge(),       // Premium
@@ -312,15 +311,6 @@ final class FormTemplates
                 . self::block('dono/goal', ['showAmount' => true, 'showDonors' => true, 'showDeadline' => false])
                 . self::block('dono/name', ['requireFirst' => true, 'requireLast' => true])
                 . self::block('dono/email', ['required' => true])
-                . self::block('dono/tribute', [
-                    'types' => [
-                        ['id' => 'honor',    'label' => __('In honor of', 'dono')],
-                        ['id' => 'memorial', 'label' => __('In memory of', 'dono')],
-                    ],
-                    'allowNotify' => true,
-                    'allowAnnual' => true,
-                    'label' => __('Give in honor of someone', 'dono'),
-                ])
                 . self::block('dono/comment', [
                     'label' => __('Add a message of support', 'dono'),
                     'placeholder' => __('Why this cause matters to you...', 'dono'),
@@ -386,14 +376,6 @@ final class FormTemplates
                     'required' => false,
                 ])
                 . self::block('dono/country', ['required' => true])
-                . self::block('dono/tribute', [
-                    'types' => [
-                        ['id' => 'honor', 'label' => __('In honor of', 'dono')],
-                    ],
-                    'allowNotify' => true,
-                    'allowAnnual' => false,
-                    'label' => __('Give in honor of someone', 'dono'),
-                ])
                 . self::block('dono/cover-fees', [
                     'percent' => 2.9, 'fixed' => 30,
                     'label' => __('Cover the processing fee so the full kit value reaches the cause', 'dono'),
@@ -415,76 +397,6 @@ final class FormTemplates
                 'gateways'          => ['allowed' => []],
                 'anonymous_allowed' => true,
                 'thank_you_message' => __("Your kit is on its way. We'll email you when it ships, and you can download a printable donation card to share with someone special.", 'dono'),
-                'redirect_url'      => '',
-            ],
-            'blocks'         => $blocks,
-        ];
-    }
-
-    /** Reverent memorial tribute template. */
-    private static function inMemoriam(): array
-    {
-        // Note: dono/name and dono/email are single-instance blocks. The
-        // family-contact channel uses the tribute block's notify-email field
-        // (allowNotify) and the comment block's "note for the family" body.
-        $blocks = self::block('dono/heading', ['text' => __('Give in memory of someone you loved', 'dono'), 'level' => 1])
-                . self::block('dono/paragraph', ['text' => __('A donation in their name supports the work that meant something to them. The family will receive a card with your message. No amount is ever disclosed.', 'dono')])
-                . self::block('dono/tribute', [
-                    'types' => [
-                        ['id' => 'memorial', 'label' => __('In memory of', 'dono')],
-                    ],
-                    'allowNotify' => true,
-                    'allowAnnual' => false,
-                    'label' => __('In loving memory of', 'dono'),
-                ])
-                . self::block('dono/heading', ['text' => __('Choose your gesture', 'dono'), 'level' => 2])
-                . self::block('dono/paragraph', ['text' => __('Every donation, at any size, honors their memory.', 'dono')])
-                . self::block('dono/donation-amount', [
-                    'presets' => self::presets(
-                        [50, 100, 250, 500],
-                        [
-                            __('A bouquet - $50', 'dono'),
-                            __('A donation card - $100', 'dono'),
-                            __('A lasting memory - $250', 'dono'),
-                            __('An enduring tribute - $500', 'dono'),
-                        ]
-                    ),
-                    'allowCustom' => true,
-                ])
-                . self::block('dono/cover-fees', [
-                    'percent' => 2.9, 'fixed' => 30,
-                    'label' => __("I'd like to add a small amount to cover processing, so the full donation reaches the cause.", 'dono'),
-                    'defaultOn' => false,
-                ])
-                . self::block('dono/heading', ['text' => __('Your details', 'dono'), 'level' => 2])
-                . self::block('dono/paragraph', ['text' => __("We'll send the card on your behalf. Your donation amount is never shared with the family.", 'dono')])
-                . self::block('dono/name', ['requireFirst' => true, 'requireLast' => true])
-                . self::block('dono/email', ['required' => true])
-                . self::block('dono/comment', [
-                    'label' => __('A note for the family', 'dono'),
-                    'placeholder' => __("Anything you'd like written inside the card. We'll handle the rest.", 'dono'),
-                    'required' => false,
-                ])
-                . self::block('dono/anonymous-toggle', [
-                    'label' => __("Don't display my name on the memorial page", 'dono'),
-                    'defaultOn' => false,
-                ])
-                . self::block('dono/submit-button', ['label' => __('Send your donation', 'dono')]);
-
-        return [
-            'id'             => 'in-memoriam',
-            'name'           => __('In Memoriam', 'dono'),
-            'description'    => __('Reverent three-step memorial flow for tribute donations in lieu of flowers, with a discreet card sent to the family.', 'dono'),
-            'icon'           => 'star-filled',
-            'category'       => 'Tribute',
-            'thumbnail_hint' => 'Serif headline over slate-blue card, single white lily silhouette, "In memory of" tribute field visible.',
-            'settings'       => [
-                'layout'            => 'inline',
-                'style'            => ['preset_id' => ''],
-                'recurring'         => ['enabled' => false, 'frequencies' => []],
-                'gateways'          => ['allowed' => []],
-                'anonymous_allowed' => true,
-                'thank_you_message' => __('Your donation in their memory has been received. The family will be notified with care.', 'dono'),
                 'redirect_url'      => '',
             ],
             'blocks'         => $blocks,
@@ -655,15 +567,6 @@ final class FormTemplates
                     'label' => __('Mailing address (street, city, region, postal)', 'dono'),
                     'placeholder' => __('123 Main Street', 'dono'),
                     'required' => true,
-                ])
-                . self::block('dono/tribute', [
-                    'types' => [
-                        ['id' => 'honor',    'label' => __('In honor of', 'dono')],
-                        ['id' => 'memorial', 'label' => __('In memory of', 'dono')],
-                    ],
-                    'allowNotify' => true,
-                    'allowAnnual' => true,
-                    'label' => __('Make this a tribute donation', 'dono'),
                 ])
                 . self::block('dono/anonymous-toggle', [
                     'label' => __('Withhold my name from public recognition lists', 'dono'),
@@ -848,14 +751,6 @@ final class FormTemplates
                         2
                     ),
                     'allowCustom' => true,
-                ])
-                . self::block('dono/tribute', [
-                    'label' => __('Dedicate your pledge', 'dono'),
-                    'types' => [
-                        ['id' => 'honor',    'label' => __('In honor of', 'dono')],
-                        ['id' => 'memorial', 'label' => __('In memory of', 'dono')],
-                    ],
-                    'allowNotify' => true,
                 ])
                 . self::block('dono/row', ['columns' => 2, 'gap' => 12], $detailsRow)
                 . self::block('dono/phone', [

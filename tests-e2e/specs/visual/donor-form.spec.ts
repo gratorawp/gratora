@@ -4,8 +4,8 @@
  *
  * Element-scoped to form.dono-donation-form so theme chrome around the
  * shortcode never bleeds into the goldens. States covered: initial render
- * (desktop + mobile), tribute fieldset expanded, currency switched, and the
- * field-error styling after an invalid submit.
+ * (desktop + mobile), currency switched, and the field-error styling after an
+ * invalid submit.
  *
  * Regenerate goldens after intentional styling changes:
  *   npm run test:visual:update
@@ -18,13 +18,6 @@ test.describe('visual: donor form', () => {
     test('initial render', async ({ donor }) => {
         await settle(donor.page);
         await expect(donor.form).toHaveScreenshot('donor-form.png');
-    });
-
-    test('tribute expanded', async ({ donor }) => {
-        await donor.pickTribute('honor');
-        await donor.fillTributeName('Grace Hopper');
-        await settle(donor.page);
-        await expect(donor.tributeFieldset()).toHaveScreenshot('donor-form-tribute-expanded.png');
     });
 
     test('currency switched', async ({ donor }) => {
