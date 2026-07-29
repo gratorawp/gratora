@@ -20,7 +20,7 @@ use WP_REST_Request;
 
 /**
  * `pauseSubscription()` documents `$resumesAt` as honoured, and only Stripe
- * can. PayPal's suspend and Razorpay's pause are indefinite and were dropping
+ * can. PayPal's suspend is indefinite and was dropping
  * the date, so a donor's "skip next payment" stopped the subscription for good
  * behind a next-payment date the portal kept showing them.
  *

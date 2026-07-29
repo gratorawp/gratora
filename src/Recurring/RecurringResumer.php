@@ -15,7 +15,7 @@ use Throwable;
  * Restarts paused plans when their pause window closes.
  *
  * `SubscriptionAware::pauseSubscription()` documents `$resumesAt` as honoured.
- * Only Stripe actually can: PayPal's suspend and Razorpay's pause are both
+ * Only Stripe actually can: PayPal's suspend is
  * indefinite and were dropping the date on the floor while the portal wrote a
  * next payment date the donor could see. A donor clicking "skip this month"
  * had in fact cancelled, and neither they nor the org would find out until

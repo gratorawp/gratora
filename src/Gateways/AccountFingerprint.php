@@ -7,7 +7,7 @@ namespace Dono\Gateways;
 /**
  * Identifies the account a cached remote object was created under.
  *
- * Stripe Products, PayPal Products and Plans, and Razorpay Plans all live
+ * Stripe Products and PayPal Products and Plans all live
  * inside one merchant account and mean nothing in another. All three were
  * cached under a key naming only the mode, so connecting a different account
  * left the old ids in place, every recurring donation failed against them, and

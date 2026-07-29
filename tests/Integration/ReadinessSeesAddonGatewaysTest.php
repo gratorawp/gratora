@@ -17,7 +17,7 @@ use WP_REST_Request;
 /**
  * Readiness has to see every gateway, not the three core happens to ship.
  *
- * The check named Stripe, PayPal and Razorpay one by one, so an organisation
+ * The check named the core gateways one by one, so an organisation
  * whose only payment method arrives in an add-on was told it had none
  * configured and could not take donations. It could, and was: the screen was
  * wrong about the one thing it exists to report.

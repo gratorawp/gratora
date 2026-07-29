@@ -60,11 +60,11 @@ final class WebhookPaymentGuardTest extends TestCase
         $this->assertStringContainsString('MXN', $reason);
     }
 
-    /** A PayPal event confirmed a Razorpay donation. */
+    /** A PayPal event confirmed a Stripe donation. */
     public function test_an_event_from_another_gateway_is_refused(): void
     {
         $reason = WebhookPaymentGuard::refuse(
-            $this->donation(['gateway' => 'razorpay']),
+            $this->donation(['gateway' => 'stripe']),
             'paypal',
             false,
             1000000,
@@ -72,7 +72,7 @@ final class WebhookPaymentGuardTest extends TestCase
         );
 
         $this->assertNotNull($reason);
-        $this->assertStringContainsString('razorpay', $reason);
+        $this->assertStringContainsString('stripe', $reason);
     }
 
     /** A test-mode secret marked a live donation paid on two gateways. */

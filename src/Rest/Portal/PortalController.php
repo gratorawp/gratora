@@ -563,7 +563,7 @@ final class PortalController
                     $plan->status          = 'paused';
                     $plan->next_payment_at = $resumesAt;
                     // Only Stripe schedules its own resume; RecurringResumer
-                    // reads this so PayPal and Razorpay restart too, instead of
+                    // reads this so PayPal restarts too, instead of
                     // pausing forever behind a date the donor can see.
                     $plan->resume_at       = $resumesAt;
                     $plan->save();

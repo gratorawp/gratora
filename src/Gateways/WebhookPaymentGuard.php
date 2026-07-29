@@ -12,7 +12,7 @@ use Dono\Donations\Donation;
  * A verified signature only proves the event came from the processor. It does not
  * prove the event is about *this* donation, for *this* amount, in *this* mode. The
  * QA sweep of 2026-07-28 found all three gaps live: a $0.01 PayPal capture
- * confirmed a $10,000 donation, a PayPal event confirmed a Razorpay donation, and
+ * confirmed a $10,000 donation, one gateway's event confirmed another's donation, and
  * a test-mode signing secret confirmed live money on two gateways.
  *
  * The donor-facing amount is always exactly `donation.amount_cents` on every

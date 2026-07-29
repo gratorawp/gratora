@@ -7,7 +7,6 @@ import useCardOpen from '../../_shared/useCardOpen';
 import { ToggleRow } from '../../_shared/components/Switch';
 import StripeKeysCard from './StripeKeysCard';
 import PayPalKeysCard from './PayPalKeysCard';
-import RazorpayKeysCard from './RazorpayKeysCard';
 
 export default function GatewaysPanel( { s } ) {
     const offlineEnabled    = !! s.value( 'offline.enabled', true );
@@ -38,7 +37,6 @@ export default function GatewaysPanel( { s } ) {
 
             <StripeKeysCard s={ s } />
             <PayPalKeysCard />
-            <RazorpayKeysCard />
 
             <Card
                 leading={ <BrandMark letter="O" variant="offline" /> }
