@@ -7,6 +7,10 @@ import { test, expect } from '../fixtures/donor-form';
  * is a contract: a listener that has to ask the server for the amount cannot be
  * handed donor data it never asked for, and a donation that has not been paid
  * must not look like one that has.
+ *
+ * Prerequisite: the two paid cases select the sandbox gateway, which core only
+ * registers when org-wide test mode is on. Without it they fail at gateway
+ * selection rather than on the assertion.
  */
 const COLLECT = `
     window.__donoCompleted = [];
