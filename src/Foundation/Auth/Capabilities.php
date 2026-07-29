@@ -43,7 +43,7 @@ final class Capabilities
         'dono_redact_donors'    => 'Redact donors (GDPR)',
         'dono_view_donations'   => 'View donations',
         'dono_edit_donations'   => 'Edit donations (notes)',
-        'dono_refund_donations' => 'Refund donations',
+        'dono_refund_donations' => 'Change what a donation is worth (refund, mark paid, record by hand)',
         'dono_resend_receipt'   => 'Resend receipts',
         'dono_view_reports'     => 'View dashboards & reports',
         'dono_manage_campaigns' => 'Manage campaigns',

@@ -12,6 +12,13 @@ namespace Dono\Donations;
  */
 final class ChannelClassifier
 {
+    /**
+     * Reserved: set only by an admin recording money that arrived off the site.
+     * The public donation route strips it from donor-supplied attribution,
+     * because it also decides whether payment instructions are sent.
+     */
+    public const MANUAL = 'manual';
+
     private const MEDIUM_MAP = [
         'email'          => 'email',
         'newsletter'     => 'email',

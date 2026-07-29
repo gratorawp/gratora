@@ -8,6 +8,7 @@ use Dono\Campaigns\Campaign;
 use Dono\Currency\Currency;
 use Dono\Donations\AntiSpamGuard;
 use Dono\Donations\Donation;
+use Dono\Donations\ChannelClassifier;
 use Dono\Donations\DonationIntent;
 use Dono\Donations\DonationRepository;
 use Dono\Donations\DonationService;
@@ -212,6 +213,14 @@ final class DonationsController
         $sourceAttribution = isset($body['source_attribution']) ? (array) $body['source_attribution'] : null;
         if ($sourceAttribution !== null && strlen((string) wp_json_encode($sourceAttribution)) > 4096) {
             return new WP_Error('dono_attribution_too_large', __('Attribution data is too large.', 'dono'), ['status' => 400]);
+        }
+        // `manual` is reserved: it means an admin recorded money that arrived off
+        // the site, and it suppresses the offline payment instructions. This blob
+        // comes from the donor's own query string, so without this a visitor
+        // arriving on ?utm_medium=manual would silently be denied the bank
+        // details they need in order to pay.
+        if (is_array($sourceAttribution) && strtolower(trim((string) ($sourceAttribution['utm_medium'] ?? ''))) === ChannelClassifier::MANUAL) {
+            unset($sourceAttribution['utm_medium']);
         }
         if ($custom !== [] && strlen((string) wp_json_encode($custom)) > 16384) {
             return new WP_Error('dono_custom_too_large', __('Submitted form data is too large.', 'dono'), ['status' => 400]);

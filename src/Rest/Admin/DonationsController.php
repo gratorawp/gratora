@@ -18,6 +18,7 @@ use Dono\Donors\Donor;
 use Dono\Donors\DonorRepository;
 use Dono\Donors\DonorService;
 use Dono\Foundation\Helpers\Csv;
+use Dono\Foundation\Helpers\Money;
 use Dono\Forms\Blocks\CustomFieldLabels;
 use Dono\Forms\Form;
 use Dono\Receipts\Receipt;
@@ -65,7 +66,12 @@ final class DonationsController
             [
                 'methods'             => WP_REST_Server::CREATABLE,
                 'callback'            => [$this, 'record'],
-                'permission_callback' => static fn () => Capabilities::userCan('dono_edit_donations'),
+                // Not dono_edit_donations: that cap is for notes, and this
+                // creates confirmed money at a caller-chosen amount and date.
+                // Marking an existing pending donation paid already requires
+                // this one, and creating an already-paid donation cannot need
+                // less than that.
+                'permission_callback' => static fn () => Capabilities::userCan('dono_refund_donations'),
                 'args'                => $this->recordArgs(),
             ],
         ]);
@@ -250,7 +256,7 @@ final class DonationsController
             );
         }
 
-        $currency = strtoupper((string) ($request['currency'] ?: get_option('dono_base_currency', 'USD')));
+        $currency = strtoupper((string) ($request['currency'] ?: Money::defaultCurrency()));
 
         $intent = new DonationIntent(
             email: (string) $request['email'],
