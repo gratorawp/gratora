@@ -83,6 +83,20 @@ final class DonationsController
             'args'                => $this->indexArgs(),
         ]);
 
+        // Campaign names for the record-a-donation picker.
+        //
+        // /admin/campaigns needs dono_manage_campaigns, which is exactly what a
+        // bookkeeper role created to enter cheques will not have, and the picker
+        // rendered blank so every donation they recorded went uncategorised. The
+        // donations list already shows campaign titles to anyone who can read
+        // it, so serving the names under the same capability discloses nothing
+        // new, and it does not widen the campaign-management surface.
+        register_rest_route(self::NAMESPACE, '/admin/donations/campaign-options', [
+            'methods'             => WP_REST_Server::READABLE,
+            'callback'            => [$this, 'campaignOptions'],
+            'permission_callback' => [$this, 'canAccess'],
+        ]);
+
         register_rest_route(self::NAMESPACE, '/admin/donations/stats', [
             'methods'             => WP_REST_Server::READABLE,
             'callback'            => [$this, 'stats'],
@@ -202,6 +216,29 @@ final class DonationsController
         return Capabilities::userCan('dono_view_donations');
     }
 
+    /**
+     * Id and title only, for the picker. Archived campaigns are included: a
+     * cheque that arrived during last year's appeal belongs to last year's
+     * appeal, and by the time someone is entering it the appeal is usually over.
+     */
+    public function campaignOptions(): WP_REST_Response
+    {
+        $rows = Campaign::query()
+            ->whereIn('status', ['published', 'archived'])
+            ->orderBy('created_at', 'DESC')
+            ->limit(500)
+            ->getAll();
+
+        return new WP_REST_Response(array_map(
+            static fn (Campaign $c): array => [
+                'id'       => (int) $c->id,
+                'title'    => (string) $c->title,
+                'archived' => (string) $c->status === 'archived',
+            ],
+            $rows,
+        ), 200);
+    }
+
     /** @return array<string,mixed> */
     private function recordArgs(): array
     {
@@ -304,6 +341,8 @@ final class DonationsController
             reactivate_redacted_donor: false,
         );
 
+        $donation = null;
+
         try {
             $created  = $this->donationService->createPending($intent);
             $donation = $created['donation'];
@@ -330,7 +369,42 @@ final class DonationsController
             } finally {
                 remove_filter('dono.receipt.should_issue', $filter, 10);
             }
-        } catch (RuntimeException $e) {
+        } catch (\Throwable $e) {
+            // Throwable, not RuntimeException: anything else escaped as a PHP
+            // fatal, so the admin got a blank 500 with no JSON and no way to
+            // tell whether the money had been recorded.
+            //
+            // What state the row is actually in decides the answer, so read it
+            // rather than assume the throw means nothing happened.
+            $recorded = $donation === null
+                ? null
+                : Donation::query()->find('id', (int) $donation->id);
+
+            // The money is on the books and something after it failed: a
+            // listener on the completed event, or the note below. Reporting
+            // failure here is a lie that invites the admin to enter the same
+            // cheque a second time.
+            if ($recorded !== null && (string) $recorded->status === 'paid') {
+                return new WP_REST_Response([
+                    'reference' => $recorded->reference,
+                    'status'    => $recorded->status,
+                    'paid_at'   => $recorded->paid_at,
+                ], 201);
+            }
+
+            // createPending commits its own transaction, so a failure inside
+            // confirm() leaves a pending row dated to the cheque, which reads on
+            // the list as money the org is still waiting for and is never
+            // reconciled because nobody knows it is there. Marked failed it says
+            // what happened, and unlike deleting it does not orphan rows an
+            // add-on wrote against this donation on dono.donation.creating.
+            if ($recorded !== null && (string) $recorded->status === 'pending') {
+                $this->donationService->markFailed(
+                    $recorded,
+                    __('Recording this donation by hand did not finish.', 'dono')
+                );
+            }
+
             return new WP_Error('dono_record_failed', $e->getMessage(), ['status' => 500]);
         }
 

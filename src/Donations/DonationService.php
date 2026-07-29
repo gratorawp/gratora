@@ -296,6 +296,51 @@ final class DonationService
     }
 
     /**
+     * When a caller says the money arrived, or the clock when it cannot be
+     * believed.
+     *
+     * `$result` is whatever a gateway handed back, and one caller
+     * (`donation.confirm`, reachable from the AI assistant) forwards a
+     * free-form object straight through. An unreadable or absurd value written
+     * to this column moves real money into a month that has not happened or one
+     * that closed years ago, and nothing downstream ever questions it.
+     *
+     * Money is never rejected over it: a donation that really was paid must
+     * confirm even if the timestamp attached to it is nonsense. So a value that
+     * cannot be believed is replaced by the clock and said out loud, the same
+     * trade refund() makes when a gateway over-reports.
+     */
+    private function paidAtFrom(mixed $raw, string $now): string
+    {
+        if (! is_string($raw) || trim($raw) === '') {
+            return $now;
+        }
+
+        $raw = trim($raw);
+        $ts  = strtotime($raw);
+        if ($ts === false) {
+            error_log(sprintf('[dono] unreadable paid_at %s; using the clock instead.', $raw));
+            return $now;
+        }
+
+        $stamp = gmdate('Y-m-d H:i:s', $ts);
+
+        // Two days of slack, not one: the record-a-donation endpoint already
+        // allows a calendar day ahead of the site for an admin east of it, and
+        // this must not undo that. Wide enough for any offset in use, narrow
+        // enough to catch a mistyped year.
+        $latest   = gmdate('Y-m-d H:i:s', (int) strtotime($now) + (2 * 86400));
+        $earliest = '2000-01-01 00:00:00';
+
+        if ($stamp > $latest || $stamp < $earliest) {
+            error_log(sprintf('[dono] paid_at %s is outside the plausible range; using the clock instead.', $raw));
+            return $now;
+        }
+
+        return $stamp;
+    }
+
+    /**
      * Transition donation to paid
      */
     public function confirm(Donation $donation, array $result): Donation
@@ -313,9 +358,7 @@ final class DonationService
         // An admin recording a cheque banked last month is stating when the
         // money arrived, which is not when they got round to typing it in.
         // Everything else leaves this unset and gets the clock.
-        $paidAt = isset($result['paid_at']) && $result['paid_at'] !== ''
-            ? (string) $result['paid_at']
-            : $now;
+        $paidAt = $this->paidAtFrom($result['paid_at'] ?? null, $now);
 
         $affected = 0;
         DB::transaction(function () use ($donation, $result, $now, $paidAt, &$affected) {

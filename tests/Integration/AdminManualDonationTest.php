@@ -287,6 +287,160 @@ final class AdminManualDonationTest extends IntegrationTestCase
         $this->assertNull($donation->donor_last_name);
     }
 
+    /**
+     * M1. confirm() took paid_at on trust, and donation.confirm forwards a
+     * free-form object from the AI assistant straight into it. A garbage
+     * timestamp in that column moves real money into a period that never
+     * happened, and nothing downstream questions it.
+     */
+    public function test_an_unusable_paid_at_falls_back_to_the_clock_rather_than_being_stored(): void
+    {
+        $service = \Dono\Foundation\Plugin::instance()->container->get(\Dono\Donations\DonationService::class);
+
+        foreach (['not a date', '2099-01-01 00:00:00', '1804-05-01 00:00:00'] as $bad) {
+            $pending = $service->createPending(new \Dono\Donations\DonationIntent(
+                email: 'clock@example.com',
+                amount_cents: 1000,
+                currency: 'USD',
+                gateway: 'offline',
+            ))['donation'];
+
+            $paid = $service->confirm($pending, ['paid_at' => $bad]);
+
+            $this->assertNotSame($bad, (string) $paid->paid_at, sprintf('paid_at %s was stored as given', $bad));
+            $this->assertStringStartsWith(
+                gmdate('Y-m-d'),
+                (string) $paid->paid_at,
+                sprintf('paid_at %s should have fallen back to the clock', $bad)
+            );
+        }
+    }
+
+    /** A real backdated date still survives it: the guard is a range, not a veto. */
+    public function test_a_plausible_backdated_paid_at_is_kept(): void
+    {
+        $reference = (string) $this->record(['received_at' => '2026-06-14'])->get_data()['reference'];
+
+        $this->assertStringStartsWith('2026-06-14', (string) $this->donation($reference)->paid_at);
+    }
+
+    /**
+     * M6, the half that bites hardest. A listener throwing after the transition
+     * means the money IS on the books, and the old catch reported 500 anyway.
+     * The admin, told it failed, enters the same cheque again.
+     *
+     * The throw is on a listener rather than inside confirm() because by the
+     * time a test can reach a hook the row is already paid, which is precisely
+     * the case being pinned. The other half, a throw inside confirm's own
+     * transaction leaving the row pending, is handled in the same catch.
+     */
+    public function test_a_failure_after_the_money_is_recorded_does_not_report_failure(): void
+    {
+        $boom = static function (): void {
+            throw new \RuntimeException('a listener exploded');
+        };
+        add_action('dono.donation.completed', $boom, 1);
+
+        try {
+            $res = $this->record();
+        } finally {
+            remove_action('dono.donation.completed', $boom, 1);
+        }
+
+        $this->assertSame(
+            201,
+            $res->get_status(),
+            'the money was recorded, so reporting failure invites the admin to enter it twice'
+        );
+
+        $donation = $this->donation((string) $res->get_data()['reference']);
+        $this->assertSame('paid', $donation->status);
+        $this->assertSame(25000, (int) $donation->amount_cents);
+    }
+
+    /** And nothing is left looking like money the org is still waiting for. */
+    public function test_no_donation_is_left_pending_after_a_failure(): void
+    {
+        $boom = static function (): void {
+            throw new \RuntimeException('a listener exploded');
+        };
+        add_action('dono.donation.completed', $boom, 1);
+
+        try {
+            $this->record();
+        } finally {
+            remove_action('dono.donation.completed', $boom, 1);
+        }
+
+        $this->assertSame(
+            [],
+            Donation::query()->where('status', 'pending')->getAll(),
+            'a half-recorded donation was left looking like money owed'
+        );
+    }
+
+    /**
+     * M9. paidWithoutReceipt() feeds the AI assistant's "donors who never got
+     * their receipt" report. A cheque the admin deliberately sent no receipt for
+     * matched it forever.
+     */
+    public function test_a_recorded_donation_is_not_reported_as_a_missing_receipt(): void
+    {
+        $this->record();
+
+        $missing = \Dono\Foundation\Plugin::instance()->container
+            ->get(\Dono\Donations\DonationRepository::class)
+            ->paidWithoutReceipt();
+
+        $this->assertSame(0, (int) $missing['total'], 'a hand-recorded cheque is not a receipt that went missing');
+    }
+
+    /** An online donation with no receipt still is one. */
+    public function test_an_online_donation_with_no_receipt_is_still_reported(): void
+    {
+        $service = \Dono\Foundation\Plugin::instance()->container->get(\Dono\Donations\DonationService::class);
+        $pending = $service->createPending(new \Dono\Donations\DonationIntent(
+            email: 'online@example.com',
+            amount_cents: 1000,
+            currency: 'USD',
+            gateway: 'offline',
+        ))['donation'];
+        $service->confirm($pending, []);
+
+        $missing = \Dono\Foundation\Plugin::instance()->container
+            ->get(\Dono\Donations\DonationRepository::class)
+            ->paidWithoutReceipt();
+
+        $this->assertGreaterThan(0, (int) $missing['total']);
+    }
+
+    /**
+     * M8. The drawer's picker used /admin/campaigns, which needs
+     * dono_manage_campaigns: exactly what a role created to enter cheques does
+     * not have. The catch was empty, so it rendered blank and every donation
+     * that role recorded went uncategorised.
+     */
+    public function test_the_campaign_picker_is_readable_by_someone_who_can_only_record(): void
+    {
+        $campaignId = $this->aCampaign();
+
+        $user = self::factory()->user->create(['role' => 'subscriber']);
+        $wpUser = get_user_by('id', $user);
+        $wpUser->add_cap('dono_access');
+        $wpUser->add_cap('dono_view_donations');
+        $wpUser->add_cap('dono_refund_donations');
+        wp_set_current_user($user);
+
+        $res = rest_do_request(new WP_REST_Request('GET', '/dono/v1/admin/donations/campaign-options'));
+
+        $this->assertSame(200, $res->get_status());
+        $this->assertContains(
+            $campaignId,
+            array_map(static fn (array $c): int => (int) $c['id'], (array) $res->get_data()),
+            'the picker cannot see the campaign the donation belongs to'
+        );
+    }
+
     public function test_it_is_closed_to_users_who_cannot_manage_donations(): void
     {
         wp_set_current_user(self::factory()->user->create(['role' => 'subscriber']));

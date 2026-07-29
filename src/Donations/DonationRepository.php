@@ -156,10 +156,22 @@ final class DonationRepository
         $noReceipt = "NOT EXISTS (SELECT 1 FROM {$prefix}dono_receipts rc "
             . "WHERE rc.donation_id = {$prefix}dono_donations.id AND rc.voided = 0)";
 
-        $build = function () use ($noReceipt, $campaignId) {
+        // A hand-recorded donation with no receipt is not one that went missing:
+        // the admin was asked and said not to send one, because the donor never
+        // gave this site an address. Left in, every cheque ever entered sits in
+        // this report permanently, and the AI assistant reports them as donors
+        // who never got their receipt. The ones where a receipt WAS asked for
+        // have a row, so the check above already excludes them.
+        //
+        // Matches ChannelClassifier::MANUAL, which core reserves and the public
+        // route strips; there is no channel column to read instead.
+        $notByHand = "(source_attribution IS NULL OR JSON_UNQUOTE(JSON_EXTRACT("
+            . "source_attribution, '$.utm_medium')) <> 'manual')";
+
+        $build = function () use ($noReceipt, $notByHand, $campaignId) {
             $q = DonationQueries::live(
                 Donation::query()
-                    ->whereRaw($noReceipt)
+                    ->whereRaw($noReceipt . ' AND ' . $notByHand)
                     ->whereIn('status', ['paid', 'partial_refund'])
             );
             if ($campaignId !== null) {

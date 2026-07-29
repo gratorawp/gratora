@@ -39,7 +39,8 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
     const [ note, setNote ]           = useState( '' );
     const [ sendReceipt, setReceipt ] = useState( false );
 
-    const [ campaigns, setCampaigns ] = useState( [] );
+    const [ campaigns, setCampaigns ]           = useState( [] );
+    const [ campaignsFailed, setCampaignsFailed ] = useState( false );
     const [ saving, setSaving ]       = useState( false );
     const [ error, setError ]         = useState( '' );
     // Set when the server found a donation this would duplicate. Holds its
@@ -48,16 +49,28 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
 
     useEffect( () => {
         let aborted = false;
-        apiFetch( { path: '/dono/v1/admin/campaigns?per_page=100' } )
+        // Not /admin/campaigns: that needs dono_manage_campaigns, which a role
+        // created just to enter cheques will not have, and the picker rendered
+        // blank so every donation they recorded went uncategorised.
+        apiFetch( { path: '/dono/v1/admin/donations/campaign-options' } )
             .then( ( res ) => {
                 if ( aborted ) return;
-                const rows = res?.items || res?.data || res || [];
-                setCampaigns( ( Array.isArray( rows ) ? rows : [] ).map( ( c ) => ( {
+                setCampaigns( ( Array.isArray( res ) ? res : [] ).map( ( c ) => ( {
                     value: String( c.id ),
-                    label: c.title,
+                    label: c.archived
+                        ? sprintf(
+                            /* translators: %s: campaign title. */
+                            __( '%s (archived)', 'dono' ),
+                            c.title
+                        )
+                        : c.title,
                 } ) ) );
             } )
-            .catch( () => {} );
+            .catch( () => {
+                if ( aborted ) return;
+                // Say so. Silence here reads as "this org has no campaigns".
+                setCampaignsFailed( true );
+            } );
         return () => { aborted = true; };
     }, [] );
 
@@ -188,12 +201,19 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                     </select>
                 </Field>
 
-                <Field label={ __( 'Campaign', 'dono' ) } help={ __( 'Optional. Leave empty for a general donation.', 'dono' ) }>
+                <Field
+                    label={ __( 'Campaign', 'dono' ) }
+                    help={ campaignsFailed
+                        ? __( 'Campaigns could not be loaded, so this will be recorded without one. Someone with campaign access can set it afterwards.', 'dono' )
+                        : __( 'Optional. Leave empty for a general donation.', 'dono' ) }
+                >
                     <SearchableSelect
                         value={ campaignId }
                         onChange={ setCampaign }
                         options={ campaigns }
-                        placeholder={ __( 'No campaign', 'dono' ) }
+                        placeholder={ campaignsFailed
+                            ? __( 'Unavailable', 'dono' )
+                            : __( 'No campaign', 'dono' ) }
                     />
                 </Field>
 

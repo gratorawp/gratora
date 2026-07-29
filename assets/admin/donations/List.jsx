@@ -13,6 +13,7 @@ import DateField from '../_shared/components/DateField';
 import EmptyState from '../_shared/components/EmptyState';
 import ConfirmDialog from '../_shared/components/ConfirmDialog';
 import { rowLinkProps } from '../_shared/rowLink';
+import notify from '../_shared/notify';
 import KpiStrip from '../_shared/components/KpiStrip';
 import StatusBadge from '../_shared/components/StatusBadge';
 import { formatAmount, formatDate, STATUS_LABEL } from './format';
@@ -436,7 +437,20 @@ export default function List() {
             { recording && (
                 <RecordDonationDrawer
                     onClose={ () => setRecording( false ) }
-                    onRecorded={ () => { setRecording( false ); refetch(); } }
+                    onRecorded={ ( created ) => {
+                        setRecording( false );
+                        refetch();
+                        // A donation dated to when the money arrived sorts by
+                        // that date, so a January cheque entered in July lands
+                        // pages down a newest-first list and the admin sees
+                        // nothing happen. The toast is the only confirmation
+                        // they get, so it names the row.
+                        notify.success( sprintf(
+                            /* translators: %s: the new donation's reference. */
+                            __( 'Recorded as %s.', 'dono' ),
+                            created?.reference || ''
+                        ) );
+                    } }
                 />
             ) }
             { ( actionError || fetchError ) && (
