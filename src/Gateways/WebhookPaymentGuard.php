@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dono\Gateways;
 
 use Dono\Donations\Donation;
+use Dono\Recurring\RecurringPlan;
 
 /**
  * The check every webhook must pass before it is allowed to mark a donation paid.
@@ -44,26 +45,9 @@ final class WebhookPaymentGuard
         ?int $observedCents,
         ?string $observedCurrency = null,
     ): ?string {
-        if ((string) $donation->gateway !== $gateway) {
-            return sprintf(
-                'event is from %s but the donation is a %s donation',
-                $gateway,
-                (string) $donation->gateway
-            );
-        }
-
-        // A test secret must never confirm live money, nor the reverse. This is
-        // checked against the secret that verified, because the event body is
-        // attacker-controlled and its own mode flag proves nothing.
-        if ($verifiedIsTest === null) {
-            return 'the mode of the verifying secret is unknown';
-        }
-        if ($verifiedIsTest !== (bool) $donation->is_test) {
-            return sprintf(
-                'a %s-mode secret verified this event but the donation is %s',
-                $verifiedIsTest ? 'test' : 'live',
-                $donation->is_test ? 'test' : 'live'
-            );
+        $refusal = self::refuseToTouch($donation, $gateway, $verifiedIsTest);
+        if ($refusal !== null) {
+            return $refusal;
         }
 
         if ($observedCents === null) {
@@ -84,6 +68,74 @@ final class WebhookPaymentGuard
                 'paid %d but the donation is for %d',
                 $observedCents,
                 (int) $donation->amount_cents
+            );
+        }
+
+        return null;
+    }
+
+    /**
+     * May this event act on this donation at all?
+     *
+     * The sweep hardened the handlers that confirm money and left the ones that
+     * reverse it. A refund, a failure and a cancellation each need the same two
+     * answers a confirmation needs (right gateway, right mode) but cannot use
+     * refuse(): a refund states its own amount rather than the donation's, and
+     * a cancellation states none, so the amount check would refuse them all.
+     *
+     * @return string|null null when the event may act, otherwise why not.
+     */
+    public static function refuseToTouch(
+        Donation $donation,
+        string $gateway,
+        ?bool $verifiedIsTest,
+    ): ?string {
+        return self::sameGatewayAndMode(
+            (string) $donation->gateway,
+            (bool) $donation->is_test,
+            $gateway,
+            $verifiedIsTest,
+            'donation'
+        );
+    }
+
+    /** The same question for a recurring plan, which carries the same two facts. */
+    public static function refuseToTouchPlan(
+        RecurringPlan $plan,
+        string $gateway,
+        ?bool $verifiedIsTest,
+    ): ?string {
+        return self::sameGatewayAndMode(
+            (string) $plan->gateway,
+            (bool) $plan->is_test,
+            $gateway,
+            $verifiedIsTest,
+            'plan'
+        );
+    }
+
+    private static function sameGatewayAndMode(
+        string $rowGateway,
+        bool $rowIsTest,
+        string $gateway,
+        ?bool $verifiedIsTest,
+        string $noun,
+    ): ?string {
+        if ($rowGateway !== $gateway) {
+            return sprintf('event is from %s but the %s is a %s %s', $gateway, $noun, $rowGateway, $noun);
+        }
+
+        // Checked against the secret that verified, because the event body is
+        // attacker-controlled and its own mode flag proves nothing.
+        if ($verifiedIsTest === null) {
+            return 'the mode of the verifying secret is unknown';
+        }
+        if ($verifiedIsTest !== $rowIsTest) {
+            return sprintf(
+                'a %s-mode secret verified this event but the %s is %s',
+                $verifiedIsTest ? 'test' : 'live',
+                $noun,
+                $rowIsTest ? 'test' : 'live'
             );
         }
 

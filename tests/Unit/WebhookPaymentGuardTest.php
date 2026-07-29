@@ -6,6 +6,7 @@ namespace Dono\Tests\Unit;
 
 use Dono\Donations\Donation;
 use Dono\Gateways\WebhookPaymentGuard;
+use Dono\Recurring\RecurringPlan;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -142,5 +143,72 @@ final class WebhookPaymentGuardTest extends TestCase
             1000000,
             'usd'
         ));
+    }
+
+    // -- events that reverse rather than confirm ------------------------------
+
+    /**
+     * The sweep fixed the handlers that take money. The ones that give it back,
+     * fail it or cancel it were left checking nothing, and they need the same
+     * two answers: is this event from this gateway, and in this mode.
+     *
+     * They cannot use refuse(): a refund states its own amount, and a
+     * cancellation states none at all, so the amount check that is right for a
+     * confirmation would refuse every one of them.
+     */
+    public function test_a_test_secret_cannot_refund_a_live_donation(): void
+    {
+        $reason = WebhookPaymentGuard::refuseToTouch($this->donation(['is_test' => false]), 'paypal', true);
+
+        $this->assertNotNull($reason);
+        $this->assertStringContainsString('test-mode secret', $reason);
+    }
+
+    public function test_a_live_secret_cannot_fail_a_test_donation(): void
+    {
+        $this->assertNotNull(
+            WebhookPaymentGuard::refuseToTouch($this->donation(['is_test' => true]), 'paypal', false)
+        );
+    }
+
+    public function test_an_event_from_another_gateway_cannot_touch_the_donation(): void
+    {
+        $reason = WebhookPaymentGuard::refuseToTouch($this->donation(['gateway' => 'stripe']), 'paypal', false);
+
+        $this->assertNotNull($reason);
+        $this->assertStringContainsString('stripe', $reason);
+    }
+
+    public function test_an_unknown_verifying_mode_cannot_touch_the_donation(): void
+    {
+        $this->assertNotNull(WebhookPaymentGuard::refuseToTouch($this->donation(), 'paypal', null));
+    }
+
+    /** No amount is stated, and for these events that is not a problem. */
+    public function test_a_matching_gateway_and_mode_may_touch_the_donation(): void
+    {
+        $this->assertNull(WebhookPaymentGuard::refuseToTouch($this->donation(), 'paypal', false));
+    }
+
+    /**
+     * Plans carry the same two facts and reach the same handlers, so a
+     * cancellation event gets the same answer a refund does.
+     */
+    public function test_a_test_secret_cannot_cancel_a_live_plan(): void
+    {
+        $plan          = RecurringPlan::make();
+        $plan->gateway = 'paypal';
+        $plan->is_test = false;
+
+        $this->assertNotNull(WebhookPaymentGuard::refuseToTouchPlan($plan, 'paypal', true));
+    }
+
+    public function test_a_matching_mode_may_touch_the_plan(): void
+    {
+        $plan          = RecurringPlan::make();
+        $plan->gateway = 'paypal';
+        $plan->is_test = true;
+
+        $this->assertNull(WebhookPaymentGuard::refuseToTouchPlan($plan, 'paypal', true));
     }
 }
