@@ -9,7 +9,8 @@ use Dono\Donations\DonationQueries;
 use Dono\Vendor\Queryable\DB;
 
 /**
- * Keeps pre-aggregated donor columns in sync when donations are paid or refunded.
+ * Keeps pre-aggregated donor columns in sync when donations are paid, refunded
+ * or reversed by the bank.
  *
  * @version 1.0.0
  */
@@ -22,6 +23,17 @@ final class DonorAggregateSyncer
         });
 
         add_action('dono.donation.refunded', function (Donation $d): void {
+            $this->syncForDonor((int) $d->donor_id);
+        });
+
+        // A bank taking money back changes what this donor has given just as a
+        // refund does. Without these two a charged-back donor keeps the money
+        // in their lifetime total and stays in whatever segment it bought them.
+        add_action('dono.donation.disputed', function (Donation $d): void {
+            $this->syncForDonor((int) $d->donor_id);
+        });
+
+        add_action('dono.donation.reversal_reinstated', function (Donation $d): void {
             $this->syncForDonor((int) $d->donor_id);
         });
     }

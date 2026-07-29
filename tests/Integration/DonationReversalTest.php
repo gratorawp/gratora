@@ -8,6 +8,7 @@ use Dono\Campaigns\Campaign;
 use Dono\Donations\Donation;
 use Dono\Donations\DonationRepository;
 use Dono\Donations\DonationService;
+use Dono\Donors\Donor;
 use Dono\Analytics\Event;
 use Dono\Foundation\Plugin;
 use WP_REST_Request;
@@ -201,6 +202,40 @@ final class DonationReversalTest extends IntegrationTestCase
         $this->service()->markReversed($this->reload((string) $donation->reference), 'chargeback', 'too late');
 
         $this->assertSame('refunded', $this->reload((string) $donation->reference)->status);
+    }
+
+    /**
+     * The campaign total is not the only place the money sits. A reversal that
+     * leaves campaign, form and fund but not the donor keeps a supporter in
+     * whatever segment the charged-back money bought them, and a fundraiser on
+     * a leaderboard place they did not earn.
+     */
+    public function test_the_money_comes_back_out_of_the_donors_own_totals(): void
+    {
+        $donation = $this->paidDonation();
+        $donorId  = (int) $donation->donor_id;
+
+        $this->assertSame(
+            1,
+            (int) Donor::query()->find('id', $donorId)->donations_count,
+            'precondition: the donation counted'
+        );
+
+        $this->service()->markReversed($donation, 'chargeback', 'bank reversed it');
+
+        $this->assertSame(0, (int) Donor::query()->find('id', $donorId)->donations_count);
+    }
+
+    /** And back again when the charity contests it and wins. */
+    public function test_reinstating_puts_it_back_into_the_donors_totals(): void
+    {
+        $donation = $this->paidDonation();
+        $donorId  = (int) $donation->donor_id;
+        $this->service()->markReversed($donation, 'chargeback', 'bank reversed it');
+
+        $this->service()->reinstateReversed($this->reload((string) $donation->reference));
+
+        $this->assertSame(1, (int) Donor::query()->find('id', $donorId)->donations_count);
     }
 
     /** Sometimes the charity wins, and the money is theirs again. */
