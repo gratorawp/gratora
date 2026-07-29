@@ -823,7 +823,7 @@ final class CoreModule implements DonoModule
                 $c->get(StripeApi::class),
                 $c->get(ApplePayDomain::class),
                 $c->get(PayPalAccount::class),
-                $c->get(RazorpayAccount::class),
+                $c->get(GatewayManager::class),
                 new PortalPage(),
                 $c->get(LicenseService::class),
             ))

@@ -12,8 +12,8 @@ use Dono\Donors\Portal\PortalPage;
 use Dono\Forms\Form;
 use Dono\Forms\FormReadinessService;
 use Dono\Foundation\License\LicenseService;
+use Dono\Gateways\GatewayManager;
 use Dono\Gateways\PayPal\PayPalAccount;
-use Dono\Gateways\Razorpay\RazorpayAccount;
 use Dono\Gateways\Stripe\ApplePayDomain;
 use Dono\Gateways\Stripe\StripeAccount;
 use Dono\Gateways\Stripe\StripeApi;
@@ -50,7 +50,7 @@ final class ReadinessService
         private StripeApi $stripeApi,
         private ApplePayDomain $applePay,
         private PayPalAccount $payPal,
-        private RazorpayAccount $razorpay,
+        private GatewayManager $gateways,
         private PortalPage $portal,
         private LicenseService $license,
     ) {
@@ -113,11 +113,19 @@ final class ReadinessService
     /** @return array<string,mixed> */
     private function gatewayCheck(): array
     {
+        // Asked of the registry rather than named one by one. Naming them meant
+        // an organisation whose only payment method arrives in an add-on was
+        // told it had none configured, which was wrong about the single thing
+        // this check exists to report.
         $ready = [];
-        if ($this->stripe->canCharge())   $ready[] = __('Stripe', 'dono');
-        if ($this->payPal->canCharge())   $ready[] = __('PayPal', 'dono');
-        if ($this->razorpay->canCharge()) $ready[] = __('Razorpay', 'dono');
-        if ($this->offlineReady())        $ready[] = __('offline donations', 'dono');
+        foreach ($this->gateways->all() as $gateway) {
+            if ($gateway->canCharge()) {
+                $ready[] = $gateway->label();
+            }
+        }
+        if ($this->offlineReady()) $ready[] = __('offline donations', 'dono');
+
+        $ready = array_values(array_unique($ready));
 
         if ($ready === []) {
             return $this->fail(
@@ -174,7 +182,15 @@ final class ReadinessService
         $missing = [];
         if ($this->stripe->isConnected() && ! $this->stripe->hasKeysFor(false)) $missing[] = __('Stripe', 'dono');
         if ($this->payPal->isConnected() && ! $this->payPal->hasKeysFor(false)) $missing[] = __('PayPal', 'dono');
-        if ($this->razorpay->isConnected() && ! $this->razorpay->hasKeysFor(false)) $missing[] = __('Razorpay', 'dono');
+
+        /**
+         * A gateway that ships in an add-on owns its own credentials, so it
+         * reports its own gap. Without this the screen is silent about a
+         * processor set up for test and never for live.
+         *
+         * @param list<string> $missing gateway labels with no live credentials
+         */
+        $missing = (array) apply_filters('dono.readiness.live_mode_gaps', $missing);
 
         if ($missing !== []) {
             return $this->fail(

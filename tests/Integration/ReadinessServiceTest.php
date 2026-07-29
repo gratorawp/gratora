@@ -12,7 +12,6 @@ use Dono\Foundation\Crypto\Crypto;
 use Dono\Foundation\License\LicenseService;
 use Dono\Gateways\GatewayManager;
 use Dono\Gateways\PayPal\PayPalAccount;
-use Dono\Gateways\Razorpay\RazorpayAccount;
 use Dono\Gateways\Stripe\ApplePayDomain;
 use Dono\Gateways\Stripe\StripeAccount;
 use Dono\Gateways\Stripe\StripeApi;
@@ -49,7 +48,9 @@ final class ReadinessServiceTest extends IntegrationTestCase
             $api,
             new ApplePayDomain($api, $stripe),
             new PayPalAccount($crypto),
-            new RazorpayAccount($crypto),
+            // A fresh registry: these assert what an unconfigured site is told,
+            // and the shared one may hold whatever a sibling registered.
+            new GatewayManager(),
             new PortalPage(),
             new LicenseService(),
         );
