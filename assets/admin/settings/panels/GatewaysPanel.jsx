@@ -1,5 +1,6 @@
 import { __ } from '@wordpress/i18n';
 
+import { useExtensionPanels, ExtensionSection } from '../../_shared/extensionTabs';
 import Card from '../../_shared/components/Card';
 import FormRow from '../../_shared/components/FormRow';
 import BrandMark from '../../_shared/components/BrandMark';
@@ -9,6 +10,11 @@ import StripeKeysCard from './StripeKeysCard';
 import PayPalKeysCard from './PayPalKeysCard';
 
 export default function GatewaysPanel( { s } ) {
+    // Gateways that ship in an add-on belong beside the ones core ships, not
+    // in a tab of their own: an admin looking for how to take a payment should
+    // find every answer in one place.
+    const gatewayPanels = useExtensionPanels( 'settings-gateways' );
+
     const offlineEnabled    = !! s.value( 'offline.enabled', true );
     const offlineConfigured = !! s.value( 'offline.instructions', '' );
 
@@ -37,6 +43,10 @@ export default function GatewaysPanel( { s } ) {
 
             <StripeKeysCard s={ s } />
             <PayPalKeysCard />
+
+            { gatewayPanels.map( ( panel ) => (
+                <ExtensionSection key={ panel.id } panel={ panel } />
+            ) ) }
 
             <Card
                 leading={ <BrandMark letter="O" variant="offline" /> }

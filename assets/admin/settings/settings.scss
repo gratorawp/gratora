@@ -333,6 +333,15 @@ $border: $border-mid;
     &--stripe { background: linear-gradient(135deg, #635bff 0%, #4f47e6 100%); }
     &--paypal { background: linear-gradient(135deg, #009cde 0%, #003087 100%); }
     &--offline { background: linear-gradient(135deg, #475569 0%, #334155 100%); }
+
+    // Gateways that ship in the payments add-on. The gradients live here
+    // because the mark itself does: an add-on should not have to restate the
+    // shape of a badge to use one.
+    &--authorize-net { background: linear-gradient(135deg, #0f8ddb 0%, #0a5f96 100%); }
+    &--square        { background: linear-gradient(135deg, #3e4348 0%, #1a1d20 100%); }
+    &--gocardless    { background: linear-gradient(135deg, #f45d48 0%, #d13c27 100%); }
+    &--moneris       { background: linear-gradient(135deg, #0a9dd9 0%, #00587a 100%); }
+    &--razorpay      { background: linear-gradient(135deg, #3395ff 0%, #072654 100%); }
 }
 
 .dono-gateway-foot {
