@@ -8,6 +8,7 @@ use Dono\Donations\Donation;
 use Dono\Donations\DonationRepository;
 use Dono\Donations\DonationService;
 use Dono\Foundation\Time\Clock;
+use Dono\Gateways\BrowserAware;
 use Dono\Gateways\GatewayConfirmResult;
 use Dono\Gateways\GatewayIntentResult;
 use Dono\Gateways\PaymentGateway;
@@ -34,7 +35,7 @@ use WP_REST_Request;
  *
  * @version 1.0.0
  */
-final class RazorpayGateway implements PaymentGateway, SubscriptionAware
+final class RazorpayGateway implements PaymentGateway, SubscriptionAware, BrowserAware
 {
     /**
      * Mode of the webhook secret that verified the current delivery. Razorpay
@@ -110,6 +111,47 @@ final class RazorpayGateway implements PaymentGateway, SubscriptionAware
      * Subscription. Either way the id the donor will pay against exists before
      * the browser is involved.
      */
+    /**
+     * What Checkout needs to open, for the mode it will open in.
+     *
+     * The key id is public by design, the same way a Stripe publishable key is.
+     * The secret never appears here. An empty array means there is nothing to
+     * open Checkout with, and the form carries nothing rather than a blank key.
+     *
+     * @return array<string,mixed>
+     */
+    public function publicConfig(bool $test, string $currency): array
+    {
+        $keyId = $this->account->keyIdFor($test);
+
+        return $keyId === ''
+            ? []
+            : ['keyId' => $keyId, 'currency' => strtoupper($currency)];
+    }
+
+    /**
+     * The handful of fields Checkout needs from the intent. An explicit
+     * whitelist rather than the metadata wholesale, so a field added to this
+     * gateway later cannot reach the browser by accident.
+     *
+     * @return array{kind:string,order_id:string,subscription_id:string}|null
+     */
+    public function browserPayload(GatewayIntentResult $result): ?array
+    {
+        $meta = $result->metadata ?? [];
+        $kind = (string) ($meta['razorpay_kind'] ?? '');
+
+        if ($kind === '') {
+            return null;
+        }
+
+        return [
+            'kind'            => $kind,
+            'order_id'        => (string) ($meta['razorpay_order_id'] ?? ''),
+            'subscription_id' => (string) ($meta['razorpay_subscription_id'] ?? ''),
+        ];
+    }
+
     public function createIntent(Donation $donation): GatewayIntentResult
     {
         $this->account->useTestMode((bool) $donation->is_test);

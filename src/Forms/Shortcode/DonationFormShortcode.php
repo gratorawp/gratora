@@ -560,7 +560,6 @@ HTML;
             'gateways'    => $gatewaysCfg,
             'stripe'      => $this->stripePublicConfig($gatewaysCfg['options'] ?? [], $gateway, $testModeOn),
             'paypal'      => $this->payPalPublicConfig($gatewaysCfg['options'] ?? [], $gateway, $testModeOn, (string) $currency),
-            'razorpay'    => $this->razorpayPublicConfig($gatewaysCfg['options'] ?? [], $gateway, $testModeOn, (string) $currency),
             ...$this->browserAwareConfig($testModeOn, (string) $currency),
             'testMode'    => $testModeOn,
             'currency'    => $currency,
@@ -1548,35 +1547,6 @@ HTML;
 
         return $clientId !== ''
             ? ['clientId' => $clientId, 'currency' => strtoupper($currency), 'intent' => 'capture']
-            : null;
-    }
-
-    /**
-     * Client-side Razorpay config for Checkout: the key id for the mode the
-     * order will be created in. The key id is public by design, like a Stripe
-     * publishable key. Emitted only when Razorpay is offered on this form.
-     *
-     * @param array<int,array<string,mixed>> $options
-     * @return array{keyId:string,currency:string}|null
-     */
-    private function razorpayPublicConfig(array $options, string $defaultGateway, bool $testMode, string $currency): ?array
-    {
-        $ids   = array_column($options, 'id');
-        $ids[] = $defaultGateway;
-        if (! in_array('razorpay', $ids, true)) {
-            return null;
-        }
-
-        try {
-            $keyId = Plugin::instance()->container
-                ->get(\Dono\Gateways\Razorpay\RazorpayAccount::class)
-                ->keyIdFor($testMode);
-        } catch (Throwable) {
-            return null;
-        }
-
-        return $keyId !== ''
-            ? ['keyId' => $keyId, 'currency' => strtoupper($currency)]
             : null;
     }
 

@@ -18,10 +18,15 @@ use Dono\Gateways\WebhookOutcome;
 use WP_REST_Request;
 
 /**
- * An add-on gateway has to reach the browser through the same two places the
- * built-in three do: the form's config script, and the create-donation
- * response. Both were hardcoded to stripe/paypal/razorpay, so a registered
+ * An add-on gateway has to reach the browser through the same two places a
+ * built-in one does: the form's config script, and the create-donation
+ * response. Both were once hardcoded to stripe/paypal/razorpay, so a registered
  * gateway could be chosen and then had no way to render its payment step.
+ *
+ * Razorpay now goes through the seam like every add-on gateway, so its key
+ * appears only when it is registered and has something to say, rather than
+ * always being present and usually null. Stripe and PayPal still have their own
+ * branches; they ship in core, so nothing forces the issue.
  */
 final class BrowserAwareGatewayTest extends IntegrationTestCase
 {
@@ -70,7 +75,7 @@ final class BrowserAwareGatewayTest extends IntegrationTestCase
     {
         $config = $this->renderedConfig();
 
-        foreach (['stripe', 'paypal', 'razorpay', 'gateways', 'testMode'] as $key) {
+        foreach (['stripe', 'paypal', 'gateways', 'testMode'] as $key) {
             $this->assertArrayHasKey($key, $config);
         }
     }
@@ -88,7 +93,7 @@ final class BrowserAwareGatewayTest extends IntegrationTestCase
     {
         $data = $this->submit();
 
-        foreach (['reference', 'status', 'gateway', 'intent_id', 'paypal', 'razorpay'] as $key) {
+        foreach (['reference', 'status', 'gateway', 'intent_id', 'paypal'] as $key) {
             $this->assertArrayHasKey($key, $data);
         }
     }
