@@ -18,7 +18,7 @@ export default function GatewaysPanel( { s } ) {
     const offlineEnabled    = !! s.value( 'offline.enabled', true );
     const offlineConfigured = !! s.value( 'offline.instructions', '' );
 
-    const [ offlineOpen, setOfflineOpen ] = useCardOpen( offlineEnabled && ! offlineConfigured );
+    const [ offlineOpen, setOfflineOpen ] = useCardOpen( offlineEnabled && ! offlineConfigured, 'payments', 'offline' );
 
     const offlinePill = ! offlineEnabled
         ? <span className="dono-pill dono-pill--gray"><span className="dono-pill__dot dono-pill__dot--soft" />{ __( 'Disabled', 'dono' ) }</span>

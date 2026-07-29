@@ -179,7 +179,7 @@ export default function PayPalKeysCard() {
         } );
     }, [] );
 
-    const [ open, setOpen ] = useCardOpen( loadError );
+    const [ open, setOpen ] = useCardOpen( loadError, 'payments', 'paypal' );
 
     const head = {
         leading:     <BrandMark letter="P" variant="paypal" />,

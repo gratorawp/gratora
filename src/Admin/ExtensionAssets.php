@@ -58,6 +58,30 @@ window.dono.panels = window.dono.panels || (function () {
         get: function (surface) { return (items[surface] || []).slice(); }
     };
 })();
+
+// One card open at a time within a named group. Core's cards and an add-on's
+// render in separate React roots, so the open one cannot be tracked in either
+// tree: whichever root a click lands in has to be able to close a card owned
+// by the other.
+window.dono.accordion = window.dono.accordion || (function () {
+    var open = {};
+    return {
+        current: function (group) { return open[group] || null; },
+        set: function (group, id) {
+            open[group] = id || null;
+            window.dispatchEvent(new CustomEvent('dono:accordion:changed', { detail: { group: group } }));
+        },
+        // Opens only if nobody has claimed the group yet. Several cards can
+        // want attention on the same screen, and they must not fight over it
+        // on mount: the first to ask wins, and a click always overrides.
+        claim: function (group, id) {
+            if (open[group]) return false;
+            open[group] = id;
+            window.dispatchEvent(new CustomEvent('dono:accordion:changed', { detail: { group: group } }));
+            return true;
+        }
+    };
+})();
 JS;
     }
 }

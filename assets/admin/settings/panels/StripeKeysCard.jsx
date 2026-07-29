@@ -331,7 +331,7 @@ export default function StripeKeysCard( { s } ) {
     const connected = !! status?.connected;
     const canCharge = !! status?.can_charge;
 
-    const [ open, setOpen ] = useCardOpen( loadError || ( connected && ! canCharge ) );
+    const [ open, setOpen ] = useCardOpen( loadError || ( connected && ! canCharge ), 'payments', 'stripe' );
 
     const head = {
         leading:     <BrandMark letter="S" variant="stripe" />,
