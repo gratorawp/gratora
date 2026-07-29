@@ -46,8 +46,7 @@ final class DonationEmails extends HookProvider
             'dono.recurring.cancelled'     => ['onRecurringCancelled', 10, 2],
             // 2-arg: $plan, $context
             'dono.recurring.renewal_failed' => ['onRecurringFailed', 10, 2],
-            // 1-arg: $donorId (fired once, when a donor's aggregate crosses 0 -> 1)
-            'dono.donor.first_donation_completed' => 'onFirstDonation',
+            'dono.donation.completed'      => 'onDonationCompleted',
         ];
     }
 
@@ -196,20 +195,29 @@ final class DonationEmails extends HookProvider
     }
 
     /**
-     * A donor's first completed donation: a one-off welcome, separate from the
-     * transactional receipt. Fires exactly once (the syncer only raises this on
-     * the 0 -> 1 crossing), so a second donation never re-sends it.
+     * The donor's first donation they made themselves: a one-off welcome,
+     * separate from the transactional receipt.
+     *
+     * Not dono.donor.first_donation_completed, which is the aggregate's 0 -> 1
+     * crossing. Nobody typed their address into this site when an admin entered
+     * a cheque, so no welcome goes out for one - but that cheque still crosses
+     * 0 -> 1, and when the donor later gives online the count moves 1 -> 2, the
+     * crossing never happens again, and they are never welcomed at all.
+     * Counting what this donor has actually given themselves, rather than
+     * watching a counter move, welcomes them the day they donate and never
+     * twice: an existing repeat donor is already past one and stays silent.
      */
-    public function onFirstDonation(int $donorId): void
+    public function onDonationCompleted(Donation $donation): void
     {
-        $donor = $this->donors->findById($donorId);
-        if (! $donor) return;
+        // A ticket order, a rehearsal, or a cheque an admin typed in is not the
+        // donor's own first donation, and must not be counted as one either:
+        // otherwise it welcomes a donor whose real first donation is still to
+        // come, on the strength of a row that will never be part of the count.
+        if (! $this->countsAsTheirOwn($donation)) return;
+        if ($this->ownDonationCount((int) $donation->donor_id) !== 1) return;
 
-        // Nobody typed their address into this site: an admin entered a cheque
-        // that arrived weeks ago, so there is no consent record and no reason
-        // to expect mail. A hand-recorded donation sends what the admin asked
-        // for and nothing else.
-        if ($this->wasRecordedByHand($donorId)) return;
+        $donor = $this->donors->findById((int) $donation->donor_id);
+        if (! $donor) return;
         $email = $this->donorService->decryptEmail($donor);
         if ($email === null || $email === '') return;
 
@@ -220,20 +228,31 @@ final class DonationEmails extends HookProvider
         ]);
     }
 
-    /** Whether the donation that just made this donor a donor was entered by an admin. */
-    private function wasRecordedByHand(int $donorId): bool
+    /**
+     * How many donations this donor has made themselves, counting the one that
+     * just completed. Scoped exactly as DonorAggregateSyncer scopes the counter
+     * this replaces (real money, given as a gift), minus the hand-recorded ones.
+     */
+    private function ownDonationCount(int $donorId): int
     {
-        $latest = Donation::query()
+        $rows = Donation::query()
             ->where('donor_id', $donorId)
-            ->where('status', 'paid')
-            ->orderBy('id', 'DESC')
-            ->limit(1)
+            ->whereIn('status', ['paid', 'partial_refund'])
             ->getAll();
 
-        $donation = $latest[0] ?? null;
+        $count = 0;
+        foreach ($rows as $row) {
+            if ($this->countsAsTheirOwn($row)) $count++;
+        }
 
-        return $donation !== null
-            && ChannelClassifier::classify((array) ($donation->source_attribution ?? [])) === 'manual';
+        return $count;
+    }
+
+    private function countsAsTheirOwn(Donation $donation): bool
+    {
+        return (string) $donation->kind === 'donation'
+            && ! (bool) $donation->is_test
+            && ChannelClassifier::classify((array) ($donation->source_attribution ?? [])) !== 'manual';
     }
 
     private function resolveDonorEmail(Donation $donation): ?string

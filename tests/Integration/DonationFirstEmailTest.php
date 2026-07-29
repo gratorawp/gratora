@@ -33,6 +33,39 @@ final class DonationFirstEmailTest extends IntegrationTestCase
         $this->assertCount(1, $welcome, 'only the first donation triggers the welcome');
     }
 
+    /**
+     * A cheque an admin typed in is not the donor saying hello, so it sends
+     * nothing. What it must not do is use up the welcome: the aggregate crosses
+     * 0 -> 1 on the cheque, and if that crossing is what the email watches, the
+     * donor's own first donation moves it 1 -> 2 and they are never welcomed at
+     * all. M5 from the manual-donations review.
+     */
+    public function test_a_donor_first_recorded_by_hand_is_welcomed_when_they_donate_themselves(): void
+    {
+        $mails = $this->captureMails();
+
+        $this->recordDonationByHand('margit@example.com', 'Margit');
+        $this->assertCount(0, $this->mailsBySubject($mails, 'first'), 'a hand-recorded cheque welcomed nobody');
+
+        $this->completeOfflineDonation('margit@example.com', 'Margit');
+
+        $welcome = $this->mailsBySubject($mails, 'first');
+        $this->assertCount(1, $welcome, 'the donor was never welcomed for the donation they made themselves');
+        $this->assertStringContainsString('Margit', (string) $welcome[0]['message']);
+    }
+
+    /** And still only once: the cheque before it does not earn a second. */
+    public function test_the_welcome_is_not_repeated_after_a_hand_recorded_start(): void
+    {
+        $mails = $this->captureMails();
+
+        $this->recordDonationByHand('yusuf@example.com', 'Yusuf');
+        $this->completeOfflineDonation('yusuf@example.com', 'Yusuf');
+        $this->completeOfflineDonation('yusuf@example.com', 'Yusuf');
+
+        $this->assertCount(1, $this->mailsBySubject($mails, 'first'));
+    }
+
     public function test_disabled_template_skips_the_welcome(): void
     {
         update_option('dono_email_settings', ['templates' => ['donation_first' => ['enabled' => false]]]);
@@ -43,6 +76,23 @@ final class DonationFirstEmailTest extends IntegrationTestCase
         $this->assertCount(0, $this->mailsBySubject($mails, 'first'), 'a disabled welcome never sends');
 
         delete_option('dono_email_settings');
+    }
+
+    private function recordDonationByHand(string $email, string $firstName): void
+    {
+        $req = new WP_REST_Request('POST', '/dono/v1/admin/donations');
+        $req->set_header('content-type', 'application/json');
+        $req->set_body((string) wp_json_encode([
+            'email'          => $email,
+            'first_name'     => $firstName,
+            'last_name'      => 'Test',
+            'amount_cents'   => 12500,
+            'currency'       => 'USD',
+            'payment_method' => 'cheque',
+            'received_at'    => '2026-06-14',
+        ]));
+        rest_do_request($req);
+        $this->runPendingAsyncJobs();
     }
 
     private function completeOfflineDonation(string $email, string $firstName): void
