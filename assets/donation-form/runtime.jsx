@@ -38,6 +38,14 @@ const STEP_RENDERERS = {
  */
 export const PENDING_KEY = 'dono:pending-donation';
 
+/**
+ * Fired on window once per donation, the moment this browser learns the money
+ * moved. Carries the reference and its status token and nothing else: a
+ * listener that needs the amount reads it back from the status endpoint, which
+ * is server-authoritative and returns no donor data.
+ */
+export const COMPLETED_EVENT = 'dono:donation:completed';
+
 function rememberPending( data ) {
     try {
         window.sessionStorage.setItem( PENDING_KEY, JSON.stringify( {
@@ -49,6 +57,30 @@ function rememberPending( data ) {
         // Private browsing can refuse storage. The donation is still made and
         // the webhook still settles it; only the return screen is lost.
     }
+}
+
+function readPending() {
+    try {
+        const raw = window.sessionStorage.getItem( PENDING_KEY );
+        return raw ? JSON.parse( raw ) : {};
+    } catch ( e ) {
+        return {};
+    }
+}
+
+/**
+ * The token lands in a different place on each payment path: in the submit
+ * response for auto-confirmed gateways, on the payment step for the ones that
+ * mount a component, and only in session storage for a gateway that navigated
+ * away and came back.
+ */
+function statusTokenFor( reference, state ) {
+    const stored = readPending();
+
+    return state.submission?.status_token
+        || state.payment?.statusToken
+        || ( stored.reference === reference ? stored.statusToken : '' )
+        || '';
 }
 
 function registeredGateway( id ) {
@@ -187,12 +219,13 @@ function FormBody( { state, dispatch, config } ) {
                 dispatch( { type: 'SUBMIT_ERROR', message: data.message || config.i18n.error } );
                 return;
             }
+            // Stashed on every path, not just the redirecting one. The status
+            // token is not in the return URL, deliberately, so anything that
+            // outlives this closure (a gateway that navigates away, a listener
+            // reading the amount back after completion) has no other source.
+            rememberPending( data );
+
             if ( data.redirect_url ) {
-                // The page is about to be replaced, and the status token is the
-                // only thing that lets the donor finish when they come back. It
-                // is not in the return URL, deliberately, so it has to survive
-                // the navigation here.
-                rememberPending( data );
                 window.location.assign( data.redirect_url );
                 return;
             }
@@ -280,6 +313,36 @@ function FormBody( { state, dispatch, config } ) {
         }
     }, [ state, config, dispatch, formToken, honeypot ] );
 
+    // Announced once per reference. `pending` is excluded on purpose: an
+    // offline donation has been recorded, not paid, and may never be.
+    // `processing` is included because a bank debit donor has finished and
+    // their browser is gone by the time the webhook settles it.
+    const announced = useRef( '' );
+    useEffect( () => {
+        if ( state.status !== 'success' && state.status !== 'processing' ) return;
+
+        const reference = state.submission?.reference || state.payment?.reference || '';
+        if ( ! reference || announced.current === reference ) return;
+        announced.current = reference;
+
+        window.dispatchEvent( new CustomEvent( COMPLETED_EVENT, {
+            detail: {
+                reference,
+                statusToken: statusTokenFor( reference, state ),
+                status:      state.status,
+            },
+        } ) );
+
+        // After the announcement, never before: a thank-you URL replaces the
+        // page, and a listener that has not run by then never will. This also
+        // keeps the navigation out of render, where it used to fire on every
+        // pass rather than once.
+        if ( state.status === 'success' && config.thanks?.redirect ) {
+            window.location.assign( config.thanks.redirect );
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [ state.status, state.submission, state.payment, config.thanks?.redirect ] );
+
     if ( state.status === 'payment' ) {
         let PaymentStep = StripePayment;
         if ( state.payment?.paypal ) PaymentStep = PayPalPayment;
@@ -349,12 +412,9 @@ function FormBody( { state, dispatch, config } ) {
     }
 
     if ( state.status === 'success' ) {
-        // Form-level redirect takes precedence: an admin who configured a
-        // thank-you URL wants the donor on that page, not on the inline
-        // success card.
-        if ( config.thanks?.redirect ) {
-            window.location.assign( config.thanks.redirect );
-        }
+        // A configured thank-you URL takes precedence over this card, but the
+        // navigation happens in the completion effect above so anything
+        // listening for the donation gets to run first.
         const message = config.thanks?.message || '';
         return (
             <div class="dono-form__success" role="status">
