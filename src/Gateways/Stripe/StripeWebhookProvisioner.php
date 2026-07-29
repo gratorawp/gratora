@@ -21,6 +21,7 @@ final class StripeWebhookProvisioner
     /** Connected-account events Dono's webhook handler acts on. */
     private const EVENTS = [
         'payment_intent.succeeded',
+        'payment_intent.processing',
         'payment_intent.payment_failed',
         'charge.refunded',
         'charge.dispute.funds_withdrawn',

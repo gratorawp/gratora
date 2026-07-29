@@ -208,6 +208,9 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
             case 'payment_intent.succeeded':
                 return $this->handlePaymentIntentSucceeded($eventId, $type, $object);
 
+            case 'payment_intent.processing':
+                return $this->handlePaymentIntentProcessing($eventId, $type, $object);
+
             case 'payment_intent.payment_failed':
                 return $this->handlePaymentIntentFailed($eventId, $type, $object);
 
@@ -300,6 +303,63 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
                 $this->donationService->recordSubscriptionCreationFailure($donation, $e);
             }
         }
+
+        return new WebhookOutcome(
+            signature_ok: true,
+            external_id:  $eventId,
+            event_type:   $type,
+            handled:      true,
+        );
+    }
+
+    /**
+     * A bank debit has been submitted and will settle in a few days.
+     *
+     * Only SEPA, ACH and the other delayed-notification methods reach this:
+     * a card goes straight to succeeded. Recording it means an admin sees
+     * expected income rather than a growing pile of donations that look
+     * abandoned, and the donor is not told for a week that we are still
+     * waiting on them. It is emphatically not paid: the debit can still bounce,
+     * and `payment_intent.succeeded` is what settles it.
+     *
+     * @param array<string,mixed> $intent
+     */
+    private function handlePaymentIntentProcessing(string $eventId, string $type, array $intent): WebhookOutcome
+    {
+        $intentId = (string) ($intent['id'] ?? '');
+        $donation = $this->donations->findByGatewayIntent($this->id(), $intentId);
+
+        if (! $donation) {
+            return new WebhookOutcome(
+                signature_ok: true,
+                external_id:  $eventId,
+                event_type:   $type,
+                handled:      false,
+                error:        "No donation found for PaymentIntent {$intentId}",
+                http_status:  200,
+            );
+        }
+
+        // A verified signature proves Stripe sent this, not that it is about
+        // this donation for this amount in this mode.
+        $refusal = WebhookPaymentGuard::refuse(
+            $donation,
+            $this->id(),
+            $this->verifiedIsTest,
+            isset($intent['amount'])
+                ? Currency::fromMinorUnits((int) $intent['amount'], (string) ($intent['currency'] ?? $donation->currency))
+                : null,
+            isset($intent['currency']) ? (string) $intent['currency'] : null,
+        );
+        if ($refusal !== null) {
+            return $this->refused($eventId, $type, $refusal);
+        }
+
+        // No-ops on anything already settled: markProcessing only moves a row
+        // out of pending, so a late redelivery cannot unsettle real money.
+        $this->donationService->markProcessing($donation, 'bank_debit_submitted', [
+            'payment_method' => (string) ($donation->payment_method ?? ''),
+        ]);
 
         return new WebhookOutcome(
             signature_ok: true,
