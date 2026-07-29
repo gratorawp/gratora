@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dono\Admin\Pages;
 
 use Dono\Foundation\Hooks\HookProvider;
+use Dono\Admin\ExtensionAssets;
 
 /**
  * Registers and renders the Donors admin page.
@@ -51,10 +52,12 @@ final class DonorsPage extends HookProvider
     {
         $asset = require DONO_DIR . self::BUILD_DIR . '/index.asset.php';
 
+        ExtensionAssets::enqueue('donor');
+
         wp_enqueue_script(
             self::HANDLE,
             DONO_URL . self::BUILD_DIR . '/index.js',
-            $asset['dependencies'] ?? [],
+            array_merge($asset['dependencies'] ?? [], [ExtensionAssets::HANDLE]),
             $asset['version']      ?? DONO_VERSION,
             true
         );

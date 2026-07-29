@@ -8,6 +8,7 @@ import { COUNTRIES } from '../../_shared/countries';
 import LifetimeMetrics from './profile/LifetimeMetrics';
 import Tabs from './profile/Tabs';
 import IdentityCard from './profile/IdentityCard';
+import { ExtensionSection, useExtensionPanels } from '../_shared/extensionTabs';
 import ActivityTab from './profile/tabs/ActivityTab';
 import DonationsTab from './profile/tabs/DonationsTab';
 import RecurringTab from './profile/tabs/RecurringTab';
@@ -261,6 +262,7 @@ export default function DonorProfile( { id, onBack } ) {
     const [ loading, setLoading ] = useState( true );
     const [ error, setError ]     = useState( null );
     const [ tab, setTab ]         = useState( 'activity' );
+    const extensionPanels         = useExtensionPanels( 'donor' );
     const [ editing, setEditing ] = useState( false );
 
     const load = () => {
@@ -331,6 +333,14 @@ export default function DonorProfile( { id, onBack } ) {
             <div className="dp-layout">
                 <aside className="dp-sidebar">
                     <IdentityCard donor={ donor } magicLinkUrl={ magicLinkUrl } />
+                    { extensionPanels.map( ( panel ) => (
+                        <ExtensionSection
+                            key={ panel.id }
+                            panel={ panel }
+                            context={ { donorId: donor?.id } }
+                            token={ donor?.id }
+                        />
+                    ) ) }
                 </aside>
                 <main className="dp-main">
                     { tab === 'activity' && (

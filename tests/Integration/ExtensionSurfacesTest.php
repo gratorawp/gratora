@@ -38,6 +38,7 @@ final class ExtensionSurfacesTest extends IntegrationTestCase
             'campaign settings' => ['campaign-settings'],
             'portal'            => ['portal'],
             'donation'          => ['donation'],
+            'donor'             => ['donor'],
         ];
     }
 
@@ -92,5 +93,28 @@ final class ExtensionSurfacesTest extends IntegrationTestCase
         $registered = $wp_scripts->registered['dono-admin-donations'] ?? null;
         $this->assertNotNull($registered, 'The donations bundle should be registered.');
         $this->assertContains(ExtensionAssets::HANDLE, $registered->deps);
+    }
+
+    /**
+     * The donor surface, for add-ons that hold something about a person rather
+     * than about a payment: a Gift Aid declaration, a communication preference.
+     * Same dependency requirement as the donations app.
+     */
+    public function test_the_donors_app_depends_on_the_registry(): void
+    {
+        global $wp_scripts;
+
+        $page = new \Dono\Admin\Pages\DonorsPage();
+        set_current_screen('dono_page_dono-donors');
+        wp_set_current_user(1);
+
+        ob_start();
+        $page->render();
+        ob_end_clean();
+
+        $registered = $wp_scripts->registered['dono-admin-donors'] ?? null;
+        $this->assertNotNull($registered, 'The donors bundle should be registered.');
+        $this->assertContains(ExtensionAssets::HANDLE, $registered->deps);
+        $this->assertContains('donor', $this->fired);
     }
 }

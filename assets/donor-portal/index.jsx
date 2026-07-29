@@ -172,14 +172,14 @@ function ExtensionPanel( { tab, context } ) {
 }
 
 // Same imperative contract, remounted when the record it describes changes.
-function ExtensionSection( { panel, context, token } ) {
+function ExtensionSection( { panel, context, token, className = 'dp-detail__section dp-ext-section' } ) {
     const ref = useRef( null );
     useEffect( () => {
         if ( ! ref.current ) return undefined;
         const cleanup = panel.mount( ref.current, context );
         return () => { if ( typeof cleanup === 'function' ) cleanup(); };
     }, [ panel.id, token ] );
-    return <div ref={ ref } class="dp-detail__section dp-ext-section" />;
+    return <div ref={ ref } class={ className } />;
 }
 
 function App() {
@@ -1063,6 +1063,7 @@ function CountryPicker( { value, onChange } ) {
 
 function Consents() {
     const [ list, setList ] = useState( null );
+    const extSections = useExtensionPanels( 'portal-consents' );
     const [ saving, setSaving ] = useState( false );
     const [ savedAt, setSavedAt ] = useState( null );
     const [ err, setErr ] = useState( '' );
@@ -1075,11 +1076,20 @@ function Consents() {
         return () => clearTimeout( t );
     }, [ savedAt ] );
 
+    // Add-on sections are not about consent purposes, so an organisation that
+    // has defined none must still see them.
+    const sections = extSections.map( ( panel ) => (
+        <ExtensionSection key={ panel.id } panel={ panel } context={ { api } } className="dp-ext-section" />
+    ) );
+
     if ( ! list ) return <p>{ err || __( 'Loading…', 'dono' ) }</p>;
     if ( ! list.length ) return (
-        <div class="dp-empty">
-            <p>{ __( 'No consent purposes are defined yet.', 'dono' ) }</p>
-            <p class="dp-hint">{ __( 'The organisation has not configured any subscriptions or consents.', 'dono' ) }</p>
+        <div class="dp-consents">
+            <div class="dp-empty">
+                <p>{ __( 'No consent purposes are defined yet.', 'dono' ) }</p>
+                <p class="dp-hint">{ __( 'The organisation has not configured any subscriptions or consents.', 'dono' ) }</p>
+            </div>
+            { sections }
         </div>
     );
 
@@ -1156,6 +1166,7 @@ function Consents() {
             ) ) }
             { saving && <p class="dp-consent__saving">{ __( 'Saving…', 'dono' ) }</p> }
             { ! saving && savedAt && <p class="dp-consent__saving dp-form__saved" role="status">{ __( 'Saved.', 'dono' ) }</p> }
+            { sections }
         </div>
     );
 }
