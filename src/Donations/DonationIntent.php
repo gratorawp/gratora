@@ -46,6 +46,15 @@ final class DonationIntent
         public readonly array $custom = [],
         /** 'donation', or a non-donation kind (e.g. 'order') a handler stamps. */
         public readonly string $kind = 'donation',
+        /**
+         * Overrides the org's test-mode switch. Null means "ask TestMode",
+         * which is what every donor-facing path wants. An admin recording
+         * money that already arrived sets false: a real cheque is real money
+         * even on a site that happens to be rehearsing, and the answer has to
+         * be settled before the row is written, because listeners on
+         * dono.donation.creating decide things from it that are never revisited.
+         */
+        public readonly ?bool $is_test = null,
     ) {
     }
 }

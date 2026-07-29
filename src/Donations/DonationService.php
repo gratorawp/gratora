@@ -126,7 +126,7 @@ final class DonationService
                 && is_array($donor->flags['prefs'] ?? null)
                 && ! empty($donor->flags['prefs']['always_anonymous']);
             $donation->is_anonymous       = $intent->is_anonymous || $donorAlwaysAnon;
-            $donation->is_test            = $this->testMode->forFormId($intent->form_id);
+            $donation->is_test            = $intent->is_test ?? $this->testMode->forFormId($intent->form_id);
             $donation->created_at         = $now;
             $donation->updated_at         = $now;
 

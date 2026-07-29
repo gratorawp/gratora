@@ -8,11 +8,11 @@ use Dono\Donations\Donation;
 use WP_REST_Request;
 
 /**
- * H3 from the manual-donations review. Currently FAILING on purpose.
+ * H3 from the manual-donations review.
  *
- * record() clears is_test after createPending() returns, but createPending()
+ * record() used to clear is_test after createPending() returned, but createPending()
  * fires dono.donation.creating inside its own transaction, so every listener on
- * that hook sees the flag still set. Gift Aid listens there and skips a claim
+ * that hook saw the flag still set. Gift Aid listens there and skips a claim
  * snapshot for a test donation. The row then persists is_test = 0, so it counts
  * as real money in every total while sitting permanently outside the Gift Aid
  * claim: 25% of the donation, gone, discovered at claim time.
@@ -22,22 +22,14 @@ use WP_REST_Request;
  * flag has been corrected. The damage happened earlier, which is why this test
  * watches the hook rather than the row.
  *
- * The fix is to resolve is_test BEFORE the insert, not after it: a
- * DonationIntent field, or a dono.donation.intent_creating filter, so record()
- * can state "this is never a test" before any listener runs.
+ * FIXED: is_test is now resolved before the insert, via a
+ * DonationIntent field record() sets to false, so no listener ever sees a
+ * hand-recorded cheque as a test donation.
  */
 final class ManualDonationTestModeWindowTest extends IntegrationTestCase
 {
     public function test_no_listener_ever_sees_a_recorded_cheque_as_a_test_donation(): void
     {
-        // Skipped so the suite stays green while the bug is open, not because
-        // the test is unreliable. It has been run and fails on the assertion
-        // below with [true] instead of [false]. Deleting this line is the first
-        // step of the fix; if it then passes without the is_test resolution
-        // moving before the insert, something else changed and that is worth
-        // understanding before closing the task.
-        $this->markTestSkipped('H3 is open. See task #253.');
-
         update_option('dono_gateway_config', array_merge(
             (array) get_option('dono_gateway_config', []),
             ['test_mode' => true]

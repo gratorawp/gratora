@@ -272,23 +272,25 @@ final class DonationsController
             payment_method: $method,
             // The marker that keeps this out of the `direct` bucket and out of
             // the offline instructions email. ChannelClassifier maps it.
-            source_attribution: ['utm_source' => 'admin', 'utm_medium' => 'manual'],
+            source_attribution: ['utm_source' => 'admin', 'utm_medium' => ChannelClassifier::MANUAL],
             note_to_org: (string) $request['note_to_org'] ?: null,
+            // A real cheque is real money even on a site left rehearsing. This
+            // has to be settled before the insert rather than corrected after
+            // it: Gift Aid reads the flag on dono.donation.creating to decide
+            // whether to write a claim snapshot, and it never asks again, so a
+            // donation corrected a moment later still loses the 25%.
+            is_test: false,
         );
 
         try {
             $created  = $this->donationService->createPending($intent);
             $donation = $created['donation'];
 
-            // Test mode excludes a donation from every report. A real cheque
-            // entered while the site is rehearsing is still real money, so the
-            // flag is cleared before anything counts it. Also backdates the
-            // row so it lists and filters in the period it belongs to.
+            // Backdate the row so it lists and filters in the period the money
+            // actually arrived in.
             Donation::query()->where('id', (int) $donation->id)->update([
-                'is_test'    => 0,
                 'created_at' => $receivedAt,
             ]);
-            $donation->is_test    = false;
             $donation->created_at = $receivedAt;
 
             $suppress = ! (bool) $request['send_receipt'];
