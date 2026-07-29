@@ -33,6 +33,25 @@ const STEP_RENDERERS = {
  * runtime mounts; `ready` gets the gateway's own slice of the form config and
  * answers whether it can actually collect a payment.
  */
+/**
+ * Where a redirect gateway picks the donation back up. Session-scoped, so it
+ * dies with the tab rather than following the donor around.
+ */
+export const PENDING_KEY = 'dono:pending-donation';
+
+function rememberPending( data ) {
+    try {
+        window.sessionStorage.setItem( PENDING_KEY, JSON.stringify( {
+            reference:   data.reference,
+            statusToken: data.status_token,
+            gateway:     data.gateway || '',
+        } ) );
+    } catch ( e ) {
+        // Private browsing can refuse storage. The donation is still made and
+        // the webhook still settles it; only the return screen is lost.
+    }
+}
+
 function registeredGateway( id ) {
     if ( ! id ) return null;
     const reg = typeof window !== 'undefined' ? window.dono?.formGateways : null;
@@ -170,6 +189,11 @@ function FormBody( { state, dispatch, config } ) {
                 return;
             }
             if ( data.redirect_url ) {
+                // The page is about to be replaced, and the status token is the
+                // only thing that lets the donor finish when they come back. It
+                // is not in the return URL, deliberately, so it has to survive
+                // the navigation here.
+                rememberPending( data );
                 window.location.assign( data.redirect_url );
                 return;
             }
