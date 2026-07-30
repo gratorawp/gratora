@@ -68,6 +68,15 @@
     "prefer-stable": true,
     "config": {
         "sort-packages": true,
-        "optimize-autoloader": true
-    }
+        "optimize-autoloader": true,
+        "platform": {
+            "php": "8.1"
+        }
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/getdono/queryable.git"
+        }
+    ]
 }

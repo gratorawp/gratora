@@ -41,4 +41,4 @@ jobs:
         run: bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1 latest
 
       - name: Unit + integration suites
-        run: composer test:all
+        run: composer test
