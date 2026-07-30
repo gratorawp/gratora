@@ -899,6 +899,12 @@ $bar-radius:    6px;
     margin-top: 3px;
     display: inline-flex; gap: 10px; align-items: center; flex-wrap: wrap;
 }
+.dp-tl-note {
+    font-size: 12px;
+    font-style: italic;
+    color: $text;
+    line-height: 1.45;
+}
 .dp-tl-when {
     font-size: 11.5px;
     color: $text-soft;

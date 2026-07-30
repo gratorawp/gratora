@@ -37,7 +37,9 @@ function TimelineRow( { event, campaigns } ) {
         : null;
 
     let title = <>{ meta.label }</>;
-    const sub = null;
+    // A note the donor left with the gift. Shown in quotes so it reads as their
+    // words, not ours.
+    const sub = event.note ? <span className="dp-tl-note">“{ event.note }”</span> : null;
 
     if ( event.type === 'donation.paid' && amount ) {
         title = (

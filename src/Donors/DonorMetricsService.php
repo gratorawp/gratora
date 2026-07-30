@@ -180,6 +180,20 @@ final class DonorMetricsService
             }
         }
 
+        // The note a donor left with a gift lives on the donation, not the event.
+        // Pull the notes for the events' donations in one query so the timeline
+        // can show the message inline instead of leaving it a click away.
+        $eventNotes = [];
+        $eventDonationIds = array_values(array_unique(array_filter(
+            array_map(static fn ($e) => $e->donation_id !== null ? (int) $e->donation_id : 0, $events)
+        )));
+        if ($eventDonationIds) {
+            foreach (Donation::query()->whereIn('id', $eventDonationIds)->getAll() as $d) {
+                $note = trim((string) ($d->note_to_org ?? ''));
+                if ($note !== '') $eventNotes[(int) $d->id] = $note;
+            }
+        }
+
         // Lifetime extras
         $totalCents = (int) $donor->total_donated_cents;
         $count      = (int) $donor->donations_count;
@@ -317,7 +331,17 @@ final class DonorMetricsService
                 'plans' => array_map(fn (RecurringPlan $p) => $this->mapRecurringPlanRow($p), $recurringPlans),
             ],
             'receipts' => array_map(fn (Receipt $r) => $this->mapReceiptRow($r), $receipts),
-            'events' => array_map(fn (Event $e) => $this->mapEventRow($e), $events),
+            'events' => array_map(function (Event $e) use ($eventNotes) {
+                $row = $this->mapEventRow($e);
+                // One donation spawns several events (intent, completed, receipt);
+                // the note belongs to the gift, so show it only on the event that
+                // is the gift, not on every row that shares its id.
+                $isGift = in_array((string) $e->type, ['donation.completed', 'donation.paid'], true);
+                $row['note'] = $isGift && $e->donation_id !== null
+                    ? ($eventNotes[(int) $e->donation_id] ?? null)
+                    : null;
+                return $row;
+            }, $events),
             'consents' => [
                 'current' => array_values($consentCurrent),
                 'history' => array_map(fn (Consent $c) => $this->mapConsentRow($c), $consents),

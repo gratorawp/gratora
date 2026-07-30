@@ -172,6 +172,63 @@ final class CoreReportCommandsTest extends IntegrationTestCase
         }
     }
 
+    public function test_a_single_donor_note_links_to_that_donors_profile(): void
+    {
+        $ctx = $this->adminCtx();
+        $this->seedNotedDonation(1, 'Please keep this anonymous.');
+
+        $items = $this->registry()->dispatch('report.attention', [], $ctx)->data['items'];
+        $note  = $this->itemByKey($items, 'donor-notes');
+
+        $this->assertNotNull($note, 'expected a donor-notes attention item');
+        $this->assertStringContainsString('page=dono-donors', $note['action_href']);
+        $this->assertStringEndsWith('#donor/1', $note['action_href']);
+    }
+
+    public function test_notes_from_several_donors_fall_back_to_the_donor_list(): void
+    {
+        $ctx = $this->adminCtx();
+        $this->seedNotedDonation(1, 'First note.');
+        $this->seedNotedDonation(2, 'Second note.');
+
+        $items = $this->registry()->dispatch('report.attention', [], $ctx)->data['items'];
+        $note  = $this->itemByKey($items, 'donor-notes');
+
+        $this->assertNotNull($note);
+        $this->assertStringEndsWith('page=dono-donors', $note['action_href']);
+        $this->assertStringNotContainsString('#donor/', $note['action_href']);
+    }
+
+    private function itemByKey(array $items, string $key): ?array
+    {
+        foreach ($items as $item) {
+            if (($item['key'] ?? '') === $key) return $item;
+        }
+        return null;
+    }
+
+    private function seedNotedDonation(int $donorId, string $note): void
+    {
+        $now = gmdate('Y-m-d H:i:s');
+        $don = Donation::make();
+        $don->reference         = 'DONO-NOTE-' . $donorId;
+        $don->donor_id          = $donorId;
+        $don->amount_cents      = 5000;
+        $don->net_cents         = 5000;
+        $don->currency          = 'USD';
+        $don->base_amount_cents = 5000;
+        $don->base_currency     = 'USD';
+        $don->fx_rate           = '1.00000000';
+        $don->gateway           = 'stripe';
+        $don->status            = 'paid';
+        $don->is_test           = false;
+        $don->note_to_org       = $note;
+        $don->paid_at           = $now;
+        $don->created_at        = $now;
+        $don->updated_at        = $now;
+        $don->save();
+    }
+
     public function test_donor_at_risk_lists_a_lapsing_donor(): void
     {
         $ctx = $this->adminCtx();

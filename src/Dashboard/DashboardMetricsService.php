@@ -372,11 +372,22 @@ final class DashboardMetricsService
             ->orderBy('paid_at', 'DESC')
             ->limit(60)
             ->getAll();
-        $noteCount = 0;
+        $noteCount   = 0;
+        $noteDonors  = [];
         foreach ($candidates as $d) {
-            if (trim((string) ($d->note_to_org ?? '')) !== '') $noteCount++;
+            if (trim((string) ($d->note_to_org ?? '')) === '') continue;
+            $noteCount++;
+            $donorId = (int) ($d->donor_id ?? 0);
+            if ($donorId > 0) $noteDonors[$donorId] = true;
         }
         if ($noteCount > 0) {
+            // The note is the donor's, so open their profile when it points at one
+            // person: their timeline shows the note in context. Several donors
+            // have no single profile, so fall back to the donor list rather than
+            // the donations ledger, which is where you read amounts, not messages.
+            $href = count($noteDonors) === 1
+                ? admin_url('admin.php?page=dono-donors#donor/' . array_key_first($noteDonors))
+                : admin_url('admin.php?page=dono-donors');
             $items[] = [
                 'key'   => 'donor-notes',
                 'tone'  => 'info',
@@ -391,7 +402,7 @@ final class DashboardMetricsService
                     $noteCount
                 ),
                 'action_label' => __('Read', 'dono'),
-                'action_href'  => admin_url('admin.php?page=dono-donations'),
+                'action_href'  => $href,
                 'count'        => $noteCount,
             ];
         }

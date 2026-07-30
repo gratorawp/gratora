@@ -257,7 +257,9 @@
         vertical-align: middle;
     }
 
-    .dono-spark { display: block; }
+    // The cell centers its contents, but a block-level SVG ignores text-align,
+    // so it sat flush-left. margin-inline auto centers the fixed-width chart.
+    .dono-spark { display: block; margin: 0 auto; }
 }
 .dono-recurring {
     display: flex;
