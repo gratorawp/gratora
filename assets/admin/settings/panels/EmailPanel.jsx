@@ -225,6 +225,7 @@ function TemplateDialog( { t, s, onClose } ) {
     return (
         <Dialog
             title={ t.label }
+            size="wide"
             onClose={ onClose }
             foot={ (
                 <>

@@ -976,8 +976,11 @@ $border: $border-mid;
     display: flex;
     align-items: center;
     gap: 14px;
-    padding: 14px 4px;
-    width: 100%;
+    // Bleeds to the card's edges (its body padding is 16px 20px 20px) so the
+    // hover band reads as a row of the list rather than a slab floating in it.
+    padding: 14px 20px;
+    margin-inline: -20px;
+    width: auto;
     text-align: left;
     appearance: none;
     background: transparent;
@@ -986,10 +989,11 @@ $border: $border-mid;
     border-radius: 0;
     font-family: inherit;
     cursor: pointer;
+    transition: background .12s;
 
     &:last-child { border-bottom: 0; }
 
-    &:hover  { background: $bg-soft; }
+    &:hover  { background: $accent-tint; }
     &:focus  { outline: none; box-shadow: none; }
     &:focus-visible {
         outline: 2px solid $accent;
