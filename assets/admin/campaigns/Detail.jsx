@@ -1731,20 +1731,10 @@ function GoalPanel( { c } ) {
                 { r.goal_type === 'amount' && (
                     <FormRow
                         label={ __( 'Target amount', 'dono' ) }
-                        help={ sprintf(
-                            /* translators: %s: the organization's reporting currency code, e.g. "EUR" */
-                            __( 'Leave empty for no goal. Targets are in %s, the currency your campaigns report in. Donations in other currencies convert into it.', 'dono' ),
-                            defaultCurrency(),
-                        ) }
-                        fieldHelp={ (
-                            <a href="admin.php?page=dono-settings#currency">
-                                { __( 'Change the reporting currency', 'dono' ) }
-                            </a>
-                        ) }
+                        help={ __( 'Leave empty for no goal.', 'dono' ) }
                     >
                         <AmountInput
                             currency={ defaultCurrency() }
-                            className={ inputCls( c, 'goal_cents' ) }
                             min={ 0 }
                             value={ r.goal_cents == null || r.goal_cents === '' ? '' : Number( r.goal_cents ) / 100 }
                             onChange={ ( v ) => c.edit( { goal_cents: v ? Math.round( v * 100 ) : null } ) }
