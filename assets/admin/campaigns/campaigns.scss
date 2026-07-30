@@ -2212,13 +2212,6 @@ $card-radius:   $radius-lg;
     box-shadow: $card-shadow;
     padding: 16px 20px;
     margin-bottom: 16px;
-    border-left: 3px solid $border-mid;
-
-    &--info            { border-left-color: $border-mid; }
-    &--modest          { border-left-color: $amber; }
-    &--in-line         { border-left-color: $accent; }
-    &--ambitious       { border-left-color: $accent-dark; }
-    &--very-ambitious  { border-left-color: $red; }
 
     &__head {
         display: flex;
