@@ -31,6 +31,20 @@ export default function BrandPanel( { s } ) {
 
     const active = presets.find( ( p ) => p.id === activeId ) || presets[ 0 ] || null;
 
+    // What Reset restores a token to. For a built-in, that is the preset's own
+    // shipped value (Bold's navy, the Site theme's theme.json accent), which
+    // lives in styling.builtins before any user edit was merged in. Falling
+    // straight through to the catalogue default, as this used to, reset every
+    // preset's colours to the same green.
+    const catalogueDefaults = window.dono?.styling?.defaults || {};
+    const builtinTokens = ( id ) => {
+        const list = Array.isArray( window.dono?.styling?.builtins ) ? window.dono.styling.builtins : [];
+        return list.find( ( b ) => b.id === id )?.tokens || {};
+    };
+    const resetDefaults = active
+        ? { ...catalogueDefaults, ...builtinTokens( active.id ) }
+        : catalogueDefaults;
+
     const writePresets = ( next ) => s.replace( { presets: next } );
 
     const writePreset = ( id, patch ) => {
@@ -106,8 +120,9 @@ export default function BrandPanel( { s } ) {
                         <div className="dono-preset-mgr">
                             <div className="dono-preset-mgr__list">
                                 { presets.map( ( p ) => {
-                                    const accent = ( p.tokens && p.tokens[ 'dono-accent' ] )
-                                        || ( window.dono?.styling?.defaults || {} )[ 'dono-accent' ]
+                                    const accent = p.tokens?.[ 'dono-accent' ]
+                                        || builtinTokens( p.id )[ 'dono-accent' ]
+                                        || catalogueDefaults[ 'dono-accent' ]
                                         || '#1e8a4e';
                                     const isActive  = p.id === active?.id;
                                     const isDefault = p.id === defaultId;
@@ -150,6 +165,7 @@ export default function BrandPanel( { s } ) {
                                 { active ? (
                                     <PresetEditor
                                         preset={ active }
+                                        resetDefaults={ resetDefaults }
                                         isDefault={ active.id === defaultId }
                                         onRename={ ( v ) => setName( active.id, v ) }
                                         onTokens={ ( v ) => writeTokens( active.id, v ) }
@@ -179,7 +195,12 @@ export default function BrandPanel( { s } ) {
                     <Card title={ __( 'Live preview', 'dono' ) }>
                         { active && (
                             <StylePreview
-                                tokens={ active.tokens || {} }
+                                // Floor the preview with the built-in baseline so a
+                                // reset token falls back to the preset's own value,
+                                // not the catalogue default the resolver would use.
+                                // On save the same fallback returns through
+                                // StylePresets::all()'s built-in merge.
+                                tokens={ { ...builtinTokens( active.id ), ...( active.tokens || {} ) } }
                                 layer="brand"
                                 styling={ window.dono?.styling || {} }
                             />
@@ -192,7 +213,7 @@ export default function BrandPanel( { s } ) {
     );
 }
 
-function PresetEditor( { preset, isDefault, onRename, onTokens, onMakeDefault, onClone, onDelete } ) {
+function PresetEditor( { preset, resetDefaults, isDefault, onRename, onTokens, onMakeDefault, onClone, onDelete } ) {
     return (
         <div className="dono-preset-editor">
             <div className="dono-preset-editor__head">
@@ -235,7 +256,7 @@ function PresetEditor( { preset, isDefault, onRename, onTokens, onMakeDefault, o
                 onChange={ onTokens }
                 catalogue={ window.dono?.styling?.catalogue || {} }
                 groups={ window.dono?.styling?.groups || {} }
-                defaults={ window.dono?.styling?.defaults || {} }
+                defaults={ resetDefaults || window.dono?.styling?.defaults || {} }
             />
         </div>
     );

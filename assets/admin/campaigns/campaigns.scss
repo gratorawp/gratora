@@ -18,20 +18,18 @@
 @import '@dono/ui/scss/components/date-field';
 @import '@dono/ui/scss/components/style-preview';
 
-// The shared preview hardcodes the card shadow and the button height rather
-// than reading the tokens, so changing those two in the brand editor moved the
-// real form but not the preview. Bind them here until @dono/ui reads them
-// itself; the fallbacks are the values it hardcoded, so nothing shifts for a
-// preset that leaves them at default. (dono-gap, dono-field-gap,
-// dono-button-hover-bg and dono-focus-ring stay unshown: the static, fieldless,
-// non-interactive preview has nothing to hang them on.)
-.dono-style-preview {
-    &__frame {
-        box-shadow: var(--dono-card-shadow, 0 1px 2px rgba(15, 23, 42, .04), 0 1px 3px rgba(15, 23, 42, .06));
-    }
-    &__cta {
-        min-height: var(--dono-button-height, 44px);
-    }
+// The shared preview hardcodes the card shadow rather than reading the token,
+// so changing Card shadow in the brand editor moved the real form but not the
+// preview beside it. Bind it here until @dono/ui reads it itself; the fallback
+// is the value it hardcoded, so a preset that leaves it at default is unchanged.
+//
+// Only the shadow. The preview is a scaled-down mock (13px button text, 10px
+// padding), so an absolute pixel token like Button height cannot land on it
+// without distorting the proportion, the way a literal 48px button dwarfs the
+// mini amount tiles. Those tokens (and dono-gap, dono-field-gap, hover and
+// focus, which have no field, hover or focus in a static mock) stay unshown.
+.dono-style-preview__frame {
+    box-shadow: var(--dono-card-shadow, 0 1px 2px rgba(15, 23, 42, .04), 0 1px 3px rgba(15, 23, 42, .06));
 }
 
 // Local aliases for legacy names still used inside this file. Both the

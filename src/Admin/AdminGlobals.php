@@ -64,6 +64,14 @@ final class AdminGlobals extends HookProvider
                 'groups'     => Tokens::groups(),
                 'defaults'   => Tokens::defaults(),
                 'presets'    => StylePresets::all(),
+                // The built-ins as they ship, before any user edit is merged in.
+                // Resetting a token in the brand editor restores the preset's
+                // own value from here (Bold's navy, the Site theme's theme.json
+                // accent), not the catalogue default that all presets share.
+                'builtins'   => array_values(array_filter(array_merge(
+                    StylePresets::builtins(),
+                    [StylePresets::themePreset()]
+                ))),
                 'default_id' => StylePresets::defaultId(),
             ],
             'forms' => [
