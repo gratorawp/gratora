@@ -26,7 +26,7 @@ import StylePreview, { resolveEffectiveTokens } from '../_shared/styling/StylePr
 import ScheduleTimeline from './ScheduleTimeline';
 import CoverImageCard from './CoverImageCard';
 import AmbitionMeter from './AmbitionMeter';
-import { CURRENCIES } from '../_shared/currency';
+import AmountInput from '../_shared/components/AmountInput';
 
 import WidgetGrid from '../_shared/widgets/WidgetGrid';
 import LayoutControls from '../_shared/widgets/LayoutControls';
@@ -1331,7 +1331,7 @@ const FIELD_TO_SUBTAB = {
     title: 'general', description: 'general', slug: 'general', status: 'general',
     starts_at: 'general', ends_at: 'general',
     image_attachment_id: 'general', image_url: 'general',
-    goal_type: 'goal', goal_cents: 'goal', goal_count: 'goal', currency: 'goal',
+    goal_type: 'goal', goal_cents: 'goal', goal_count: 'goal',
     style: 'appearance', hide_header: 'appearance', hide_footer: 'appearance',
     default_form_id: 'defaults', default_fund_id: 'defaults',
 };
@@ -1349,7 +1349,6 @@ const fieldToCard = () => ( {
     goal_type:            __( 'Goal', 'dono' ),
     goal_cents:           __( 'Goal', 'dono' ),
     goal_count:           __( 'Goal', 'dono' ),
-    currency:             __( 'Goal', 'dono' ),
     style:                __( 'Appearance', 'dono' ),
     hide_header:          __( 'Page header & footer', 'dono' ),
     hide_footer:          __( 'Page header & footer', 'dono' ),
@@ -1456,7 +1455,7 @@ function SettingsTab( { campaign, onError } ) {
             </div>
 
             { ( () => {
-                const showRail = subTab === 'general' || subTab === 'appearance';
+                const showRail = subTab === 'general' || subTab === 'goal' || subTab === 'appearance';
                 return (
                     <div className={ `dono-settings-layout${ showRail ? '' : ' dono-settings-layout--no-rail' }` }>
                         <div className="dono-settings-layout__main">
@@ -1712,7 +1711,7 @@ function GeneralPanel( { c, campaign } ) {
 
 function GoalPanel( { c } ) {
     const r = c.record;
-    const editedCount = [ 'goal_type', 'goal_cents', 'goal_count', 'currency' ]
+    const editedCount = [ 'goal_type', 'goal_cents', 'goal_count' ]
         .reduce( ( n, k ) => n + ( c.edits?.[ k ] !== undefined ? 1 : 0 ), 0 );
     return (
         <div className="dono-section-block">
@@ -1732,32 +1731,24 @@ function GoalPanel( { c } ) {
                 { r.goal_type === 'amount' && (
                     <FormRow
                         label={ __( 'Target amount', 'dono' ) }
-                        help={ __( 'Leave empty for no goal. Enter the target value in your currency.', 'dono' ) }
+                        help={ sprintf(
+                            /* translators: %s: the organization's reporting currency code, e.g. "EUR" */
+                            __( 'Leave empty for no goal. Targets are in %s, the currency your campaigns report in. Donations in other currencies convert into it.', 'dono' ),
+                            defaultCurrency(),
+                        ) }
+                        fieldHelp={ (
+                            <a href="admin.php?page=dono-settings#currency">
+                                { __( 'Change the reporting currency', 'dono' ) }
+                            </a>
+                        ) }
                     >
-                        <div className="dono-grid-2-eq" style={ { gridTemplateColumns: '160px 1fr' } }>
-                            <select
-                                className={ selectCls( c, 'currency' ) }
-                                value={ c.value( 'currency', 'USD' ) }
-                                onChange={ ( e ) => c.edit( { currency: e.target.value } ) }
-                            >
-                                { CURRENCIES.map( ( cc ) => (
-                                    <option key={ cc.code } value={ cc.code }>{ cc.code } · { cc.symbol }</option>
-                                ) ) }
-                            </select>
-                            <input
-                                type="number"
-                                className={ inputCls( c, 'goal_cents' ) }
-                                min="0"
-                                step="0.01"
-                                value={ r.goal_cents == null || r.goal_cents === '' ? '' : ( Number( r.goal_cents ) / 100 ).toFixed( 2 ) }
-                                onChange={ ( e ) => {
-                                    const v = e.target.value;
-                                    c.edit( {
-                                        goal_cents: v === '' ? null : Math.round( Number( v ) * 100 ),
-                                    } );
-                                } }
-                            />
-                        </div>
+                        <AmountInput
+                            currency={ defaultCurrency() }
+                            className={ inputCls( c, 'goal_cents' ) }
+                            min={ 0 }
+                            value={ r.goal_cents == null || r.goal_cents === '' ? '' : Number( r.goal_cents ) / 100 }
+                            onChange={ ( v ) => c.edit( { goal_cents: v ? Math.round( v * 100 ) : null } ) }
+                        />
                     </FormRow>
                 ) }
 
