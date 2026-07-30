@@ -1327,14 +1327,6 @@ $card-radius:   $radius-lg;
 // Recharts overrides: keep the wrapper clean.
 .dono-recharts {
     .recharts-cartesian-axis-tick text { fill: $text-muted; }
-
-    // The tooltip ships its own padding + border via `contentStyle` props;
-    // strip the wrapper's white box that otherwise wraps the dark pill.
-    .recharts-default-tooltip {
-        background: transparent !important;
-        border: 0 !important;
-        padding: 0 !important;
-    }
 }
 
 .dono-histogram {
