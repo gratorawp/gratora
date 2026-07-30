@@ -15,12 +15,24 @@ const SCOPES = [
     { key: 'refund',   label: __( 'Refund', 'dono' ) },
 ];
 
-// Mirrors ReferenceGenerator::format() so previews match minted references.
+/**
+ * Mirrors ReferenceGenerator::format() so previews match minted references.
+ * Split so the preview can weight the counter, which is the only part that
+ * moves, apart from the prefix and year, which are the operator's own.
+ */
+function refParts( fmt, prefix, counter, year ) {
+    const lead = [ prefix || '' ];
+    if ( fmt.includeYear ) lead.push( String( year ) );
+
+    return {
+        head: lead.join( fmt.sep ) + fmt.sep,
+        seq:  String( Math.max( 1, counter || 1 ) ).padStart( fmt.padding, '0' ),
+    };
+}
+
 function buildRef( fmt, prefix, counter, year ) {
-    const parts = [ prefix || '' ];
-    if ( fmt.includeYear ) parts.push( String( year ) );
-    parts.push( String( Math.max( 1, counter || 1 ) ).padStart( fmt.padding, '0' ) );
-    return parts.join( fmt.sep );
+    const { head, seq } = refParts( fmt, prefix, counter, year );
+    return head + seq;
 }
 
 function clampPad( v ) {
@@ -122,33 +134,19 @@ export default function NumberingPanel( { s } ) {
                 sub={ __( 'How donations, receipts, and refunds are numbered. References are gap-free and increment automatically.', 'dono' ) }
                 edited={ s.isDirty }
             >
-                <div
-                    style={ {
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        gap: 12,
-                        marginBottom: 20,
-                    } }
-                >
-                    { SCOPES.map( ( p ) => (
-                        <div
-                            key={ p.key }
-                            style={ {
-                                flex: '1 1 160px',
-                                border: '1px solid #e5e7eb',
-                                borderRadius: 8,
-                                padding: '10px 12px',
-                                background: '#fafafa',
-                            } }
-                        >
-                            <div style={ { fontSize: 11, textTransform: 'uppercase', letterSpacing: '.04em', color: '#6b7280', marginBottom: 4 } }>
-                                { p.label }
+                <div className="dono-ref-previews">
+                    { SCOPES.map( ( p ) => {
+                        const { head, seq } = refParts( liveFmt, livePrefix[ p.key ], 1, year );
+                        return (
+                            <div key={ p.key } className="dono-ref-preview">
+                                <span className="dono-ref-preview__label">{ p.label }</span>
+                                <span className="dono-ref-preview__value">
+                                    { head }
+                                    <span className="dono-ref-preview__seq">{ seq }</span>
+                                </span>
                             </div>
-                            <code style={ { fontSize: 14, fontWeight: 600, color: '#111827' } }>
-                                { buildRef( liveFmt, livePrefix[ p.key ], 1, year ) }
-                            </code>
-                        </div>
-                    ) ) }
+                        );
+                    } ) }
                 </div>
 
                 <FormRow

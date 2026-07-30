@@ -1053,6 +1053,48 @@ $border: $border-mid;
     &:hover &__recipient { background: #fff; }
 }
 
+// What a reference will look like, on the Numbering tab. The prefix and year
+// are the operator's own and stay quiet; the counter is the only part that
+// moves, and the controls for it sit directly below, so it carries the weight.
+.dono-ref-previews {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.dono-ref-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding: 12px 14px;
+    background: $bg-page;
+    border: 1px solid $border-mid;
+    border-radius: $radius-md;
+
+    &__label {
+        font-size: 10.5px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        color: $text-soft;
+    }
+
+    &__value {
+        font-family: $font-mono;
+        font-size: 14px;
+        font-variant-numeric: tabular-nums;
+        color: $text-muted;
+        white-space: nowrap;
+        overflow-x: auto;
+    }
+
+    &__seq {
+        color: $text;
+        font-weight: 600;
+    }
+}
+
 .dono-save-bar {
     position: fixed;
     left: 50%;
@@ -1166,7 +1208,7 @@ $border: $border-mid;
     }
 
     &__tag {
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-family: $font-mono;
         font-size: 12px;
         background: $accent-tint;
         color: $accent-dark;

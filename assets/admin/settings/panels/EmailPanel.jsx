@@ -50,7 +50,6 @@ export default function EmailPanel( { s } ) {
         <div className="dono-panel">
             <Card
                 title={ __( 'Sender identity', 'dono' ) }
-                meta={ __( 'Verify SPF and DKIM on the from-domain', 'dono' ) }
                 edited={ s.isDirty }
             >
                 <FormRow
