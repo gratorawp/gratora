@@ -49,6 +49,14 @@
         display: flex;
         gap: 4px;
         border-bottom: 1px solid var(--dp-border);
+        // Add-ons register their own tabs (My tickets, My fundraising), so the
+        // row can outgrow the width. Keep it one line and scroll rather than
+        // letting labels wrap to two lines.
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+
+        &::-webkit-scrollbar { display: none; }
     }
     &__tab {
         appearance: none;
@@ -61,6 +69,8 @@
         cursor: pointer;
         border-bottom: 2px solid transparent;
         margin-bottom: -1px;
+        white-space: nowrap;
+        flex-shrink: 0;
 
         &:hover     { color: var(--dp-text); }
         &.is-active { color: var(--dp-accent); border-bottom-color: var(--dp-accent); }
@@ -571,15 +581,7 @@
         h1 { font-size: 20px; }
     }
 
-    .dp__nav {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-
-        &::-webkit-scrollbar { display: none; }
-    }
     .dp__tab {
-        white-space: nowrap;
         padding: 8px 12px;
         font-size: 13px;
     }
