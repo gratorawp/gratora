@@ -2,7 +2,7 @@ import { useEffect, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { __, sprintf } from '@wordpress/i18n';
 
-import Drawer from '../_shared/components/Drawer';
+import Dialog from '@dono/ui/components/Dialog';
 import Notice from '../_shared/components/Notice';
 import Field from '../_shared/components/Field';
 import AmountInput from '../_shared/components/AmountInput';
@@ -138,12 +138,14 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
     );
 
     return (
-        <Drawer
+        <Dialog
             title={ __( 'Record a donation', 'dono' ) }
-            sub={ __( 'Money that arrived off the site: a cheque, cash at an event, a bank transfer.', 'dono' ) }
             onClose={ saving ? undefined : onClose }
             foot={ foot }
         >
+            <p className="dono-dialog__help">
+                { __( 'Money that arrived off the site: a cheque, cash at an event, a bank transfer.', 'dono' ) }
+            </p>
             <div className="dono-rd">
                 { error !== '' && (
                     <Notice status="error" isDismissible={ false }>{ error }</Notice>
@@ -225,13 +227,15 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                 <label className="dono-rd__receipt">
                     <Switch checked={ sendReceipt } onChange={ setReceipt } label={ __( 'Email the donor a receipt', 'dono' ) } />
                     <span className="dono-rd__receipt-txt">
-                        <strong>{ sendReceipt ? __( 'Send a receipt', 'dono' ) : __( 'Send nothing', 'dono' ) }</strong>
+                        <strong>{ sendReceipt
+                            ? __( 'Email a receipt', 'dono' )
+                            : __( 'Do not email the donor', 'dono' ) }</strong>
                         <span>{ sendReceipt
-                            ? __( 'They get a receipt for this donation.', 'dono' )
-                            : __( 'No email at all, not even a thank-you. They never gave this site an address, so nothing is sent unless you ask.', 'dono' ) }</span>
+                            ? __( 'The donor gets a receipt for this donation.', 'dono' )
+                            : __( 'Nothing is sent, not even a receipt.', 'dono' ) }</span>
                     </span>
                 </label>
             </div>
-        </Drawer>
+        </Dialog>
     );
 }

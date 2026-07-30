@@ -3,7 +3,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
 
 import { detailHref } from '../_shared/format';
-import Drawer from '../_shared/components/Drawer';
+import Dialog from '@dono/ui/components/Dialog';
 import Notice from '../_shared/components/Notice';
 import Field from '../_shared/components/Field';
 import Segmented from '../_shared/components/Segmented';
@@ -13,7 +13,7 @@ import DateField from '../_shared/components/DateField';
 import { Switch } from '../_shared/components/Switch';
 import Btn from '../_shared/components/Btn';
 
-import { DollarSign, HandHeart, Users, Ban, ImagePlus, CircleCheck, Plus } from 'lucide-react';
+import { DollarSign, HandHeart, Users, Ban, ImagePlus, Plus } from 'lucide-react';
 
 const GOAL_OPTIONS = [
     { value: 'amount',    label: __( 'Amount', 'dono' ),    icon: <DollarSign strokeWidth={ 1.75 } /> },
@@ -155,42 +155,38 @@ export default function CreateCampaignDrawer( { onClose } ) {
     };
 
     const foot = (
-        <>
-            <div className="dono-cc__reassure">
-                <CircleCheck size={ 14 } strokeWidth={ 1.75 } />
-                <span>{ __( 'Creating builds a landing page for you. You can change everything later.', 'dono' ) }</span>
+        <div className="dono-cc__foot">
+            { /* eslint-disable-next-line jsx-a11y/label-has-associated-control -- Switch is self-labeled via its label prop; the wrapping label makes the whole row a click target */ }
+            <label className="dono-cc__publish">
+                <Switch checked={ publishNow } onChange={ setPublishNow } label={ __( 'Publish now', 'dono' ) } />
+                <span className="dono-cc__publish-txt">
+                    <strong>{ publishNow ? __( 'Publish now', 'dono' ) : __( 'Create as draft', 'dono' ) }</strong>
+                    <span>{ publishNow
+                        ? __( 'Page goes live on create', 'dono' )
+                        : __( 'Toggle to publish now', 'dono' ) }</span>
+                </span>
+            </label>
+            <div className="dono-cc__foot-actions">
+                <Btn variant="ghost" onClick={ onClose } disabled={ submitting }>
+                    { __( 'Cancel', 'dono' ) }
+                </Btn>
+                <Btn variant="primary" onClick={ submit } isBusy={ submitting } disabled={ ! canCreate }>
+                    <Plus size={ 14 } strokeWidth={ 1.75 } />
+                    { __( 'Create', 'dono' ) }
+                </Btn>
             </div>
-            <div className="dono-cc__foot">
-                { /* eslint-disable-next-line jsx-a11y/label-has-associated-control -- Switch is self-labeled via its label prop; the wrapping label makes the whole row a click target */ }
-                <label className="dono-cc__publish">
-                    <Switch checked={ publishNow } onChange={ setPublishNow } label={ __( 'Publish now', 'dono' ) } />
-                    <span className="dono-cc__publish-txt">
-                        <strong>{ publishNow ? __( 'Publish now', 'dono' ) : __( 'Create as draft', 'dono' ) }</strong>
-                        <span>{ publishNow
-                            ? __( 'Page goes live on create', 'dono' )
-                            : __( 'Toggle to publish now', 'dono' ) }</span>
-                    </span>
-                </label>
-                <div className="dono-cc__foot-actions">
-                    <Btn variant="ghost" onClick={ onClose } disabled={ submitting }>
-                        { __( 'Cancel', 'dono' ) }
-                    </Btn>
-                    <Btn variant="primary" onClick={ submit } isBusy={ submitting } disabled={ ! canCreate }>
-                        <Plus size={ 14 } strokeWidth={ 1.75 } />
-                        { __( 'Create', 'dono' ) }
-                    </Btn>
-                </div>
-            </div>
-        </>
+        </div>
     );
 
     return (
-        <Drawer
+        <Dialog
             title={ __( 'New campaign', 'dono' ) }
-            sub={ __( 'A few quick details, then you are live. You can change everything later.', 'dono' ) }
             onClose={ submitting ? undefined : onClose }
             foot={ foot }
         >
+            <p className="dono-dialog__help">
+                { __( 'A few quick details, then you are live. You can change everything later.', 'dono' ) }
+            </p>
             <div className="dono-cc">
             { error && (
                 <div ref={ errorRef } className="dono-cc__error">
@@ -386,6 +382,6 @@ export default function CreateCampaignDrawer( { onClose } ) {
                 ) }
             </Field>
             </div>
-        </Drawer>
+        </Dialog>
     );
 }

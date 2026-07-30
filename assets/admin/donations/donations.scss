@@ -3,6 +3,9 @@
 @import '@dono/ui/scss/components/empty-state';
 @import '@dono/ui/scss/components/form';
 @import '@dono/ui/scss/components/date-field';
+// The record-a-donation surface is a modal now; this screen did not pull in the
+// dialog chrome before, so without it the modal rendered unstyled.
+@import '@dono/ui/scss/components/dialog';
 
 @import '../_shared/kpi-strip';
 

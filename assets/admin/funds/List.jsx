@@ -11,7 +11,6 @@ import { formatAmount } from '../_shared/format';
 import Btn from '../_shared/components/Btn';
 import { stopRowSelect } from '../_shared/rowLink';
 import EmptyState from '../_shared/components/EmptyState';
-import Drawer from '../_shared/components/Drawer';
 import Dialog from '../_shared/components/Dialog';
 import { ToggleRow } from '../_shared/components/Switch';
 import KpiStrip from '../_shared/components/KpiStrip';
@@ -440,9 +439,8 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
     const parents = ( allFunds || [] ).filter( ( f ) => f.id !== fund.id );
 
     return (
-        <Drawer
+        <Dialog
             title={ __( 'Edit fund', 'dono' ) }
-            sub={ fund.code }
             onClose={ onClose }
             foot={ (
                 <>
@@ -454,10 +452,7 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
             ) }
         >
             { saveError && (
-                        <div className="dono-drawer__error" role="alert">
-                            <span>{ saveError }</span>
-                            <button type="button" onClick={ () => setSaveError( null ) } aria-label={ __( 'Dismiss', 'dono' ) }>✕</button>
-                        </div>
+                        <Notice status="error" onRemove={ () => setSaveError( null ) }>{ saveError }</Notice>
                     ) }
                     <fieldset className="dono-fset">
                         <legend>{ __( 'Identity', 'dono' ) }</legend>
@@ -546,7 +541,7 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
                             onChange={ ( v ) => set( 'is_active', v ) }
                         />
                     </fieldset>
-        </Drawer>
+        </Dialog>
     );
 }
 
