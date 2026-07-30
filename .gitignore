@@ -11,8 +11,17 @@
 /tests-e2e/.env
 *.log
 .DS_Store
-composer.lock
-package-lock.json
+
+# composer.lock and package-lock.json are deliberately TRACKED. vendor-prefixed/
+# is committed Strauss output built from resolved dependency versions, so
+# without the locks a fresh clone can prefix different versions than the ones in
+# git and nothing detects the drift. .distignore keeps both out of the zip.
+#
+# The lock files carried by the vendored libraries themselves are a different
+# thing and stay out: they record those libraries' own dev dependencies, which
+# mean nothing once Strauss has flattened the code into our namespace.
+vendor-prefixed/**/composer.lock
+vendor-prefixed/**/package-lock.json
 
 # Local wp-env override (machine-specific plugin paths)
 .wp-env.override.json
