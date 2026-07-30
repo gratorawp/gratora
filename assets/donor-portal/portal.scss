@@ -3,6 +3,10 @@
     --dp-text:     var(--dono-text, #111827);
     --dp-muted:    var(--dono-text-muted, #6b7280);
     --dp-border:   var(--dono-border, #e5e7eb);
+    // Hairline between rows, distinct from the boundary above. Matches
+    // @dono/ui's $border-soft; using --dp-border for both made cards and
+    // row dividers the same weight.
+    --dp-rule:     var(--dono-border-soft, #eef0f2);
     --dp-bg:       var(--dono-bg, #fff);
     --dp-bg-soft:  var(--dono-bg-soft, #f8fafb);
     --dp-radius:   var(--dono-radius, 10px);
