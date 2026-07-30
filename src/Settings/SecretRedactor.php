@@ -23,7 +23,13 @@ final class SecretRedactor
 {
     public const MASK = '***';
 
-    private const SECRET_KEY_PATTERN = '/secret|password|token|api[_-]?key|private[_-]?key|webhook/i';
+    // The trailing (?![a-z]) stops a secret word from matching as the prefix of
+    // a longer word. Without it "tokens" (a brand preset's design tokens) matched
+    // "token" and the whole tokens object was masked to "***", so every preset's
+    // colours vanished over REST while the localized copy kept them. Real secret
+    // keys (webhook_secret_test, access_token, secret_key, client_secret) end the
+    // secret word at a separator or the end of the key, so they still match.
+    private const SECRET_KEY_PATTERN = '/(?:secret|password|token|api[_-]?key|private[_-]?key|webhook)(?![a-z])/i';
 
     public static function isSecretKey(string $key): bool
     {
