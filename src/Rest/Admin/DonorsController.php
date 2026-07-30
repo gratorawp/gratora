@@ -83,6 +83,18 @@ final class DonorsController
             ],
         ]);
 
+        register_rest_route(self::NAMESPACE, '/admin/donors/(?P<id>\d+)/events', [
+            'methods'             => WP_REST_Server::READABLE,
+            'callback'            => [$this, 'events'],
+            'permission_callback' => [$this, 'canAccess'],
+            'args'                => [
+                'id'       => ['type' => 'integer', 'required' => true],
+                'page'     => ['type' => 'integer', 'default' => 1,  'minimum' => 1],
+                'per_page' => ['type' => 'integer', 'default' => 25, 'minimum' => 1, 'maximum' => 100],
+                'order'    => ['type' => 'string',  'default' => 'desc', 'enum' => ['asc', 'desc']],
+            ],
+        ]);
+
         register_rest_route(self::NAMESPACE, '/admin/donors/(?P<id>\d+)', [
             'methods'             => 'PATCH',
             'callback'            => [$this, 'update'],
@@ -179,6 +191,27 @@ final class DonorsController
             return new WP_Error('dono_not_found', __('Donor not found.', 'dono'), ['status' => 404]);
         }
         return new WP_REST_Response($payload, 200);
+    }
+
+    public function events(WP_REST_Request $request): WP_REST_Response|WP_Error
+    {
+        $donor = $this->donors->findById((int) $request['id']);
+        if (! $donor) {
+            return new WP_Error('dono_not_found', __('Donor not found.', 'dono'), ['status' => 404]);
+        }
+
+        $perPage = (int) $request['per_page'];
+        $result  = $this->metrics->eventsPage(
+            (int) $donor->id,
+            (int) $request['page'],
+            $perPage,
+            (string) $request['order'],
+        );
+
+        $response = new WP_REST_Response($result['items'], 200);
+        $response->header('X-WP-Total',      (string) $result['total']);
+        $response->header('X-WP-TotalPages', (string) max(1, (int) ceil($result['total'] / max(1, $perPage))));
+        return $response;
     }
 
     public function update(WP_REST_Request $request): WP_REST_Response|WP_Error

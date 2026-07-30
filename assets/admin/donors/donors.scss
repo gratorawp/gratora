@@ -905,6 +905,38 @@ $bar-radius:    6px;
     color: $text;
     line-height: 1.45;
 }
+
+// "See all activity" under the capped overview timeline.
+.dp-activity__see-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin: 4px 0 2px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--dono-color-accent, $accent);
+
+    &:hover { text-decoration: underline; }
+}
+
+// Event column in the full activity-log table: icon dot + label, note beneath.
+.dp-actlog__event {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+.dp-actlog__note {
+    display: block;
+    margin-top: 2px;
+    font-size: 12px;
+    font-style: italic;
+    color: $text-muted;
+    line-height: 1.4;
+}
 .dp-tl-when {
     font-size: 11.5px;
     color: $text-soft;

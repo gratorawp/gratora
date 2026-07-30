@@ -95,6 +95,33 @@ final class DsarExportCompletenessTest extends IntegrationTestCase
         $this->assertSame('In memory of my mother.', $paid['note']);
     }
 
+    public function test_events_page_paginates_the_full_activity_log(): void
+    {
+        $container = Plugin::instance()->container;
+        $donor = $container->get(DonorService::class)
+            ->findOrCreate('busy@example.com', ['first_name' => 'Busy', 'last_name' => 'Donor']);
+
+        // Three events at distinct, increasing times so newest-first is testable.
+        foreach ([1, 2, 3] as $i) {
+            $e = Event::make();
+            $e->type        = 'donation.completed';
+            $e->donor_id    = (int) $donor->id;
+            $e->occurred_at = sprintf('2026-07-2%d 10:00:00', $i);
+            $e->save();
+        }
+
+        $metrics = $container->get(DonorMetricsService::class);
+
+        $first = $metrics->eventsPage((int) $donor->id, 1, 2, 'desc');
+        $this->assertSame(3, $first['total'], 'total counts every event, not just the page');
+        $this->assertCount(2, $first['items'], 'per_page caps the page');
+        $this->assertSame('2026-07-23 10:00:00', $first['items'][0]['occurred_at'], 'newest first');
+
+        $second = $metrics->eventsPage((int) $donor->id, 2, 2, 'desc');
+        $this->assertCount(1, $second['items'], 'the remainder lands on page two');
+        $this->assertSame('2026-07-21 10:00:00', $second['items'][0]['occurred_at']);
+    }
+
     public function test_export_data_is_null_for_unknown_donor(): void
     {
         $metrics = Plugin::instance()->container->get(DonorMetricsService::class);

@@ -13,7 +13,7 @@ import {
     IconCheck, IconAlert, IconRotate, IconNote, IconClock, IconRefund, IconFile,
 } from '../icons';
 
-function TimelineDot( { variant } ) {
+export function TimelineDot( { variant } ) {
     const Icon =
         variant === 'is-ok'    ? IconCheck :
         variant === 'is-warn'  ? IconAlert :
@@ -177,7 +177,12 @@ function Row( { label, value, strong = false } ) {
     );
 }
 
-export default function ActivityTab( { donations, events, campaigns, recurring, lifetime, onAllDonations } ) {
+const OVERVIEW_EVENTS = 10;
+
+export default function ActivityTab( { donations, events, campaigns, recurring, lifetime, onAllDonations, onSeeAllActivity } ) {
+    // The overview is a preview; the Activity tab holds the full, paged log.
+    const recentEvents = events.slice( 0, OVERVIEW_EVENTS );
+    const hasMore = events.length > OVERVIEW_EVENTS;
     return (
         <div className="dp-activity">
             <div className="dp-activity-grid">
@@ -201,11 +206,18 @@ export default function ActivityTab( { donations, events, campaigns, recurring, 
                                     />
                                 )
                                 : (
-                                    <div className="dp-timeline">
-                                        { events.map( ( e ) => (
-                                            <TimelineRow key={ e.id } event={ e } campaigns={ campaigns } />
-                                        ) ) }
-                                    </div>
+                                    <>
+                                        <div className="dp-timeline">
+                                            { recentEvents.map( ( e ) => (
+                                                <TimelineRow key={ e.id } event={ e } campaigns={ campaigns } />
+                                            ) ) }
+                                        </div>
+                                        { hasMore && onSeeAllActivity && (
+                                            <button type="button" className="dp-activity__see-all" onClick={ onSeeAllActivity }>
+                                                { __( 'See all activity', 'dono' ) } →
+                                            </button>
+                                        ) }
+                                    </>
                                 ) }
                         </div>
                     </div>

@@ -10,6 +10,7 @@ import Tabs from './profile/Tabs';
 import IdentityCard from './profile/IdentityCard';
 import { ExtensionSection, useExtensionPanels } from '../_shared/extensionTabs';
 import ActivityTab from './profile/tabs/ActivityTab';
+import ActivityLogTab from './profile/tabs/ActivityLogTab';
 import DonationsTab from './profile/tabs/DonationsTab';
 import RecurringTab from './profile/tabs/RecurringTab';
 import ReceiptsTab from './profile/tabs/ReceiptsTab';
@@ -261,7 +262,7 @@ export default function DonorProfile( { id, onBack } ) {
     const [ data, setData ]       = useState( null );
     const [ loading, setLoading ] = useState( true );
     const [ error, setError ]     = useState( null );
-    const [ tab, setTab ]         = useState( 'activity' );
+    const [ tab, setTab ]         = useState( 'overview' );
     const extensionPanels         = useExtensionPanels( 'donor' );
     const [ editing, setEditing ] = useState( false );
 
@@ -343,7 +344,7 @@ export default function DonorProfile( { id, onBack } ) {
                     ) ) }
                 </aside>
                 <main className="dp-main">
-                    { tab === 'activity' && (
+                    { tab === 'overview' && (
                         <ActivityTab
                             donations={ donations }
                             events={ events }
@@ -351,8 +352,10 @@ export default function DonorProfile( { id, onBack } ) {
                             recurring={ recurring }
                             lifetime={ lifetime }
                             onAllDonations={ () => setTab( 'donations' ) }
+                            onSeeAllActivity={ () => setTab( 'activity' ) }
                         />
                     ) }
+                    { tab === 'activity'  && <ActivityLogTab donorId={ donor.id } /> }
                     { tab === 'donations' && <DonationsTab donorId={ donor.id } /> }
                     { tab === 'recurring' && <RecurringTab recurring={ recurring } /> }
                     { tab === 'receipts'  && <ReceiptsTab receipts={ receipts } /> }

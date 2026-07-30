@@ -183,16 +183,7 @@ final class DonorMetricsService
         // The note a donor left with a gift lives on the donation, not the event.
         // Pull the notes for the events' donations in one query so the timeline
         // can show the message inline instead of leaving it a click away.
-        $eventNotes = [];
-        $eventDonationIds = array_values(array_unique(array_filter(
-            array_map(static fn ($e) => $e->donation_id !== null ? (int) $e->donation_id : 0, $events)
-        )));
-        if ($eventDonationIds) {
-            foreach (Donation::query()->whereIn('id', $eventDonationIds)->getAll() as $d) {
-                $note = trim((string) ($d->note_to_org ?? ''));
-                if ($note !== '') $eventNotes[(int) $d->id] = $note;
-            }
-        }
+        $eventNotes = $this->noteMapForEvents($events);
 
         // Lifetime extras
         $totalCents = (int) $donor->total_donated_cents;
@@ -333,13 +324,7 @@ final class DonorMetricsService
             'receipts' => array_map(fn (Receipt $r) => $this->mapReceiptRow($r), $receipts),
             'events' => array_map(function (Event $e) use ($eventNotes) {
                 $row = $this->mapEventRow($e);
-                // One donation spawns several events (intent, completed, receipt);
-                // the note belongs to the gift, so show it only on the event that
-                // is the gift, not on every row that shares its id.
-                $isGift = in_array((string) $e->type, ['donation.completed', 'donation.paid'], true);
-                $row['note'] = $isGift && $e->donation_id !== null
-                    ? ($eventNotes[(int) $e->donation_id] ?? null)
-                    : null;
+                $row['note'] = $this->noteForEvent($e, $eventNotes);
                 return $row;
             }, $events),
             'consents' => [
@@ -536,6 +521,97 @@ final class DonorMetricsService
             'payload'           => $e->payload,
             'occurred_at'       => (string) $e->occurred_at,
         ];
+    }
+
+    /**
+     * One page of a donor's activity for the full log table. Same rows as the
+     * overview timeline, but paged, and with the note and campaign title inlined
+     * so the table needs no side lookups.
+     *
+     * @return array{items: array<int,array<string,mixed>>, total: int}
+     */
+    public function eventsPage(int $donorId, int $page, int $perPage, string $order = 'desc'): array
+    {
+        $order   = strtoupper($order) === 'ASC' ? 'ASC' : 'DESC';
+        $perPage = max(1, min(100, $perPage));
+        $page    = max(1, $page);
+
+        $total = Event::query()->where('donor_id', $donorId)->count();
+        if ($total === 0) {
+            return ['items' => [], 'total' => 0];
+        }
+
+        $events = Event::query()
+            ->where('donor_id', $donorId)
+            ->orderBy('occurred_at', $order)
+            ->limit($perPage)
+            ->offset(($page - 1) * $perPage)
+            ->getAll();
+
+        $notes     = $this->noteMapForEvents($events);
+        $campaigns = $this->campaignTitlesForEvents($events);
+
+        $items = array_map(function (Event $e) use ($notes, $campaigns) {
+            $row             = $this->mapEventRow($e);
+            $row['note']     = $this->noteForEvent($e, $notes);
+            $row['campaign'] = $e->campaign_id !== null ? ($campaigns[(int) $e->campaign_id] ?? null) : null;
+            return $row;
+        }, $events);
+
+        return ['items' => $items, 'total' => $total];
+    }
+
+    /**
+     * Notes the donors left with their gifts, keyed by donation id, for the
+     * donations behind these events. One query, only the non-empty ones.
+     *
+     * @param  array<int,Event> $events
+     * @return array<int,string>
+     */
+    private function noteMapForEvents(array $events): array
+    {
+        $ids = array_values(array_unique(array_filter(
+            array_map(static fn ($e) => $e->donation_id !== null ? (int) $e->donation_id : 0, $events)
+        )));
+        $map = [];
+        if ($ids) {
+            foreach (Donation::query()->whereIn('id', $ids)->getAll() as $d) {
+                $note = trim((string) ($d->note_to_org ?? ''));
+                if ($note !== '') $map[(int) $d->id] = $note;
+            }
+        }
+        return $map;
+    }
+
+    /**
+     * The note belongs to the gift, and one donation spawns several events
+     * (intent, completed, receipt), so surface it only on the gift event, not
+     * on every row that shares the donation id.
+     *
+     * @param array<int,string> $noteMap
+     */
+    private function noteForEvent(Event $e, array $noteMap): ?string
+    {
+        $isGift = in_array((string) $e->type, ['donation.completed', 'donation.paid'], true);
+        return $isGift && $e->donation_id !== null ? ($noteMap[(int) $e->donation_id] ?? null) : null;
+    }
+
+    /**
+     * @param  array<int,Event> $events
+     * @return array<int,array{id:int,title:string}>
+     */
+    private function campaignTitlesForEvents(array $events): array
+    {
+        $ids = array_values(array_unique(array_filter(
+            array_map(static fn ($e) => $e->campaign_id !== null ? (int) $e->campaign_id : 0, $events)
+        )));
+        $map = [];
+        if ($ids) {
+            foreach (Campaign::query()->whereIn('id', $ids)->getAll() as $c) {
+                $map[(int) $c->id] = ['id' => (int) $c->id, 'title' => (string) $c->title];
+            }
+        }
+        return $map;
     }
 
     /** @return array<string,mixed> */

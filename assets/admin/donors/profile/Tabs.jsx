@@ -1,15 +1,16 @@
 import { __ } from '@wordpress/i18n';
 
 import { tablistKeyDown } from '../../_shared/tablistKeys';
-import { IconBars, IconHeart, IconRotate, IconFile, IconNote, IconShield } from './icons';
+import { IconBars, IconActivity, IconHeart, IconRotate, IconFile, IconNote, IconShield } from './icons';
 
 const TAB_DEFS = [
-    { id: 'activity',  label: __( 'Activity',  'dono' ), Icon: IconBars   },
-    { id: 'donations', label: __( 'Donations', 'dono' ), Icon: IconHeart  },
-    { id: 'recurring', label: __( 'Recurring', 'dono' ), Icon: IconRotate },
-    { id: 'receipts',  label: __( 'Receipts',  'dono' ), Icon: IconFile   },
-    { id: 'notes',     label: __( 'Notes',     'dono' ), Icon: IconNote   },
-    { id: 'consent',   label: __( 'Consent',   'dono' ), Icon: IconShield },
+    { id: 'overview',  label: __( 'Overview',  'dono' ), Icon: IconBars     },
+    { id: 'activity',  label: __( 'Activity',  'dono' ), Icon: IconActivity },
+    { id: 'donations', label: __( 'Donations', 'dono' ), Icon: IconHeart    },
+    { id: 'recurring', label: __( 'Recurring', 'dono' ), Icon: IconRotate   },
+    { id: 'receipts',  label: __( 'Receipts',  'dono' ), Icon: IconFile     },
+    { id: 'notes',     label: __( 'Notes',     'dono' ), Icon: IconNote     },
+    { id: 'consent',   label: __( 'Consent',   'dono' ), Icon: IconShield   },
 ];
 
 export default function Tabs( { active, onChange, counts = {}, dots = {} } ) {
