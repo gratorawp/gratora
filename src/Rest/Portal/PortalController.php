@@ -843,7 +843,13 @@ final class PortalController
                 'version'        => $currentVersion,
                 'stored_version' => $storedVersion,
                 'stale'          => $stale,
-                'granted'        => $row ? (bool) $row->granted : (bool) $p['default'],
+                // The record is the truth. `default` is the donation form's
+                // pre-selection at the point of collection, not a subscription
+                // the donor already holds: with no record they have not
+                // consented, and this is exactly what the delivery gate and the
+                // admin consent view both read (row && granted), so a box ticked
+                // from `default` here would claim a subscription nothing honours.
+                'granted'        => $row !== null && (bool) $row->granted,
                 'occurred_at'    => $row->occurred_at ?? null,
                 'has_record'     => $row !== null,
             ];
