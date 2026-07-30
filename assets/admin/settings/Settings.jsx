@@ -114,6 +114,18 @@ export default function Settings() {
         // Also correct the tab chosen at mount, before add-on tabs existed.
         onHash();
 
+        // And the same correction for ?tab=, which initialTab() accepts but can
+        // only validate against the core tabs. Without this, ?tab=receipts
+        // works and ?tab=gift-aid silently lands on Setup: the query form is
+        // honoured for core tabs and ignored for every add-on one. Nothing in
+        // the UI writes these URLs (jumpTo writes the hash), so the ones that
+        // exist are hand-written, which is exactly where a silent
+        // near-miss costs the most. Hash still wins when both are present.
+        if ( ! read() ) {
+            const q = new URLSearchParams( window.location.search ).get( 'tab' );
+            if ( q && known( q ) ) setTab( q );
+        }
+
         window.addEventListener( 'hashchange', onHash );
         return () => window.removeEventListener( 'hashchange', onHash );
     }, [ extTabs ] );
