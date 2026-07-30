@@ -1,18 +1,18 @@
-import { useState } from '@wordpress/element';
+import { useRef, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { __, sprintf } from '@wordpress/i18n';
 
-import SectionBar from '../../_shared/components/SectionBar';
 import Card from '../../_shared/components/Card';
+import Dialog from '../../_shared/components/Dialog';
 import FormRow from '../../_shared/components/FormRow';
 import Btn from '../../_shared/components/Btn';
 import { ToggleRow } from '../../_shared/components/Switch';
-import { getDonorTemplates, getTemplateById } from '../../_shared/emailTemplates';
+import { getDonorTemplates } from '../../_shared/emailTemplates';
 import { formatAmount } from '../../_shared/format';
 import { tablistKeyDown } from '../../_shared/tablistKeys';
 
 export default function EmailPanel( { s } ) {
-    const [ editingId, setEditingId ] = useState( null );
+    const [ editing, setEditing ]     = useState( null );
     const [ testTo, setTestTo ]       = useState( '' );
     const [ testing, setTesting ]     = useState( false );
     const [ testNotice, setTestNotice ] = useState( null );
@@ -45,16 +45,6 @@ export default function EmailPanel( { s } ) {
             setTesting( false );
         }
     };
-
-    if ( editingId ) {
-        return (
-            <TemplateEditor
-                id={ editingId }
-                s={ s }
-                onBack={ () => setEditingId( null ) }
-            />
-        );
-    }
 
     return (
         <div className="dono-panel">
@@ -126,24 +116,36 @@ export default function EmailPanel( { s } ) {
                     { templates.map( ( t ) => {
                         const enabled = !! s.value( `templates.${ t.id }.enabled`, true );
                         return (
-                            <div key={ t.id } className="dono-email-row">
+                            <button
+                                key={ t.id }
+                                type="button"
+                                className="dono-email-row"
+                                onClick={ () => setEditing( t ) }
+                            >
                                 <span
                                     className={ `dono-email-row__dot${ enabled ? ' is-on' : '' }` }
-                                    aria-label={ enabled ? __( 'Enabled', 'dono' ) : __( 'Disabled', 'dono' ) }
+                                    aria-hidden="true"
                                 />
-                                <div className="dono-email-row__body">
-                                    <div className="dono-email-row__title">{ t.label }</div>
-                                    <div className="dono-email-row__desc">{ t.desc }</div>
-                                </div>
+                                <span className="dono-email-row__body">
+                                    <span className="dono-email-row__title">
+                                        { t.label }
+                                        <span className="screen-reader-text">
+                                            { enabled ? __( '(enabled)', 'dono' ) : __( '(disabled)', 'dono' ) }
+                                        </span>
+                                    </span>
+                                    <span className="dono-email-row__desc">{ t.desc }</span>
+                                </span>
                                 <span className="dono-email-row__recipient">{ t.recipient }</span>
-                                <Btn variant="ghost" size="sm" onClick={ () => setEditingId( t.id ) }>
-                                    { __( 'Edit', 'dono' ) }
-                                </Btn>
-                            </div>
+                                <span className="dono-email-row__edit">{ __( 'Edit', 'dono' ) }</span>
+                            </button>
                         );
                     } ) }
                 </div>
             </Card>
+
+            { editing && (
+                <TemplateDialog t={ editing } s={ s } onClose={ () => setEditing( null ) } />
+            ) }
         </div>
     );
 }
@@ -162,46 +164,76 @@ const SAMPLE_VALUES = {
     '{bank_details}':      'IBAN: DE89 3704 0044 0532 0130 00\nBIC: COBADEFFXXX',
 };
 
-function expandTags( s ) {
-    return ( s || '' ).replace( /\{[a-z_]+\}/g, ( m ) => SAMPLE_VALUES[ m ] ?? m );
+/**
+ * Core has no sample for a tag an add-on registered, and a body where half the
+ * tags read as prose and half as braces looks broken rather than unfinished.
+ * Anything without a sample is shown as a tag, so the preview stays coherent.
+ */
+function expandTags( text ) {
+    return ( text || '' ).split( /(\{[a-z_]+\})/ ).map( ( part, i ) =>
+        /^\{[a-z_]+\}$/.test( part ) && SAMPLE_VALUES[ part ] === undefined
+            ? <span key={ i } className="dono-email-preview__tag">{ part }</span>
+            : ( SAMPLE_VALUES[ part ] ?? part )
+    );
 }
 
-function TemplateEditor( { id, s, onBack } ) {
-    const meta = getTemplateById( id );
-    const [ view, setView ] = useState( 'edit' );
-    if ( ! meta ) {
-        return (
-            <div className="dono-panel">
-                <Btn variant="ghost" size="sm" onClick={ onBack }>← { __( 'Back to emails', 'dono' ) }</Btn>
-                <div className="dono-settings-empty">
-                    <div className="dono-settings-empty__title">{ __( 'Unknown template', 'dono' ) }</div>
-                </div>
-            </div>
-        );
-    }
+/**
+ * One template, edited in place over the settings draft. The page saves as a
+ * whole (see the save bar), so Done applies the change and Cancel drops it
+ * without ever touching the draft.
+ */
+function TemplateDialog( { t, s, onClose } ) {
+    const current = {
+        enabled: !! s.value( `templates.${ t.id }.enabled`, true ),
+        subject: s.value( `templates.${ t.id }.subject`, '' ),
+        body:    s.value( `templates.${ t.id }.body`, '' ),
+    };
 
-    const enabled = !! s.value( `templates.${ id }.enabled`, true );
-    const subject = s.value( `templates.${ id }.subject`, '' );
-    const body    = s.value( `templates.${ id }.body`, '' );
+    const [ draft, setDraft ] = useState( current );
+    const [ view, setView ]   = useState( 'edit' );
+    const bodyRef             = useRef( null );
 
-    const setSubject = ( v ) => s.edit( { templates: { [ id ]: { subject: v } } } );
-    const setBody    = ( v ) => s.edit( { templates: { [ id ]: { body:    v } } } );
-    const setEnabled = ( v ) => s.edit( { templates: { [ id ]: { enabled: v } } } );
+    const set = ( patch ) => setDraft( ( d ) => ( { ...d, ...patch } ) );
 
-    const insertTag = ( tag ) => setBody( `${ body }${ tag }` );
+    const done = () => {
+        const changed = {};
+        for ( const key of [ 'enabled', 'subject', 'body' ] ) {
+            if ( draft[ key ] !== current[ key ] ) changed[ key ] = draft[ key ];
+        }
+        if ( Object.keys( changed ).length ) {
+            s.edit( { templates: { [ t.id ]: changed } } );
+        }
+        onClose();
+    };
+
+    // At the caret, not appended: a tag belongs where the sentence needs it.
+    const insertTag = ( tag ) => {
+        const el = bodyRef.current;
+        if ( ! el ) {
+            set( { body: draft.body + tag } );
+            return;
+        }
+        const start = el.selectionStart;
+        const end   = el.selectionEnd;
+        set( { body: draft.body.slice( 0, start ) + tag + draft.body.slice( end ) } );
+        window.requestAnimationFrame( () => {
+            el.focus();
+            el.setSelectionRange( start + tag.length, start + tag.length );
+        } );
+    };
 
     return (
-        <div className="dono-panel">
-            <div className="dono-editor-head">
-                <button type="button" className="dono-editor-back" onClick={ onBack }>
-                    ← { __( 'Email templates', 'dono' ) }
-                </button>
-            </div>
-
-            <SectionBar
-                title={ meta.label }
-                sub={ meta.desc }
-            />
+        <Dialog
+            title={ t.label }
+            onClose={ onClose }
+            foot={ (
+                <>
+                    <Btn onClick={ onClose }>{ __( 'Cancel', 'dono' ) }</Btn>
+                    <Btn variant="primary" onClick={ done }>{ __( 'Done', 'dono' ) }</Btn>
+                </>
+            ) }
+        >
+            { t.desc && <p className="dono-dialog__help">{ t.desc }</p> }
 
             <div
                 className="dono-email-editor-tabs"
@@ -231,62 +263,66 @@ function TemplateEditor( { id, s, onBack } ) {
                 </button>
             </div>
 
-            { view === 'preview' && (
-                <Card>
-                    <div className="dono-email-preview">
-                        <div className="dono-email-preview__head">
-                            <div><strong>{ __( 'Subject:', 'dono' ) }</strong> { expandTags( subject ) || <em style={ { color: '#999' } }>{ __( '(no subject)', 'dono' ) }</em> }</div>
-                            <div><strong>{ __( 'To:', 'dono' ) }</strong> Jane Doe &lt;jane@example.com&gt;</div>
+            { view === 'preview' ? (
+                <div className="dono-email-preview">
+                    <div className="dono-email-preview__head">
+                        <div>
+                            <strong>{ __( 'Subject:', 'dono' ) }</strong>{ ' ' }
+                            { draft.subject.trim()
+                                ? expandTags( draft.subject )
+                                : <em>{ __( '(no subject)', 'dono' ) }</em> }
                         </div>
-                        <pre className="dono-email-preview__body">{ expandTags( body ) }</pre>
+                        <div><strong>{ __( 'To:', 'dono' ) }</strong> Jane Doe &lt;jane@example.com&gt;</div>
                     </div>
-                </Card>
-            ) }
-
-            { view === 'edit' && (
-            <Card edited={ s.isDirty }>
-                <ToggleRow
-                    title={ __( 'Send this email', 'dono' ) }
-                    sub={ __( 'Disable to skip this notification entirely.', 'dono' ) }
-                    checked={ enabled }
-                    onChange={ setEnabled }
-                />
-
-                <FormRow label={ __( 'Subject', 'dono' ) }>
-                    <input
-                        type="text"
-                        className="dono-input"
-                        value={ subject }
-                        onChange={ ( e ) => setSubject( e.target.value ) }
+                    <pre className="dono-email-preview__body">{ expandTags( draft.body ) }</pre>
+                </div>
+            ) : (
+                <>
+                    <ToggleRow
+                        title={ __( 'Send this email', 'dono' ) }
+                        sub={ __( 'Disable to skip this notification entirely.', 'dono' ) }
+                        checked={ draft.enabled }
+                        onChange={ ( v ) => set( { enabled: v } ) }
                     />
-                </FormRow>
 
-                <FormRow
-                    label={ __( 'Body', 'dono' ) }
-                    help={ __( 'Plain text. Merge tags expand at send time.', 'dono' ) }
-                    wide
-                >
-                    <div className="dono-merge-tags">
-                        { meta.tags.map( ( t ) => (
-                            <button
-                                key={ t }
-                                type="button"
-                                className="dono-merge-tag"
-                                onClick={ () => insertTag( t ) }
-                            >
-                                { t }
-                            </button>
-                        ) ) }
-                    </div>
-                    <textarea
-                        className="dono-textarea"
-                        rows={ 10 }
-                        value={ body }
-                        onChange={ ( e ) => setBody( e.target.value ) }
-                    />
-                </FormRow>
-            </Card>
+                    <FormRow label={ __( 'Subject', 'dono' ) } wide>
+                        <input
+                            type="text"
+                            className="dono-input"
+                            value={ draft.subject }
+                            onChange={ ( e ) => set( { subject: e.target.value } ) }
+                        />
+                    </FormRow>
+
+                    <FormRow
+                        label={ __( 'Body', 'dono' ) }
+                        help={ __( 'Plain text. Merge tags expand at send time.', 'dono' ) }
+                        wide
+                    >
+                        { !! t.tags.length && (
+                            <div className="dono-merge-tags">
+                                { t.tags.map( ( tag ) => (
+                                    <button
+                                        key={ tag }
+                                        type="button"
+                                        className="dono-merge-tag"
+                                        onClick={ () => insertTag( tag ) }
+                                    >
+                                        { tag }
+                                    </button>
+                                ) ) }
+                            </div>
+                        ) }
+                        <textarea
+                            ref={ bodyRef }
+                            className="dono-textarea"
+                            rows={ 10 }
+                            value={ draft.body }
+                            onChange={ ( e ) => set( { body: e.target.value } ) }
+                        />
+                    </FormRow>
+                </>
             ) }
-        </div>
+        </Dialog>
     );
 }

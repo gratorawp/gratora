@@ -976,10 +976,25 @@ $border: $border-mid;
     display: flex;
     align-items: center;
     gap: 14px;
-    padding: 14px 0;
+    padding: 14px 4px;
+    width: 100%;
+    text-align: left;
+    appearance: none;
+    background: transparent;
+    border: 0;
     border-bottom: 1px solid $border-soft;
+    border-radius: 0;
+    font-family: inherit;
+    cursor: pointer;
 
     &:last-child { border-bottom: 0; }
+
+    &:hover  { background: $bg-soft; }
+    &:focus  { outline: none; box-shadow: none; }
+    &:focus-visible {
+        outline: 2px solid $accent;
+        outline-offset: -2px;
+    }
 
     &__dot {
         width: 10px; height: 10px;
@@ -999,6 +1014,7 @@ $border: $border-mid;
     }
 
     &__title {
+        display: block;
         font-size: 13.5px;
         font-weight: 600;
         color: $text;
@@ -1006,6 +1022,7 @@ $border: $border-mid;
     }
 
     &__desc {
+        display: block;
         font-size: 12px;
         color: $text-muted;
         line-height: 1.45;
@@ -1020,53 +1037,16 @@ $border: $border-mid;
         padding: 3px 9px;
         white-space: nowrap;
     }
-}
 
-.dono-editor-head {
-    margin-bottom: 8px;
-}
-
-.dono-editor-back {
-    appearance: none;
-    background: transparent;
-    border: 0;
-    padding: 4px 0;
-    color: $text-muted;
-    font-size: 13px;
-    font-family: inherit;
-    cursor: pointer;
-
-    &:hover { color: $text; }
-    &:focus { outline: none; box-shadow: none; }
-}
-
-.dono-settings-empty {
-    background: #fff;
-    border: 1px solid $border-soft;
-    border-radius: $card-radius;
-    box-shadow: $card-shadow;
-    padding: 36px 24px;
-    text-align: center;
-
-    &__title {
-        font-size: 16px;
-        font-weight: 600;
-        color: $text;
-        margin-bottom: 6px;
-    }
-
-    &__desc {
-        font-size: 13px;
+    &__edit {
+        font-size: 12.5px;
+        font-weight: 500;
         color: $text-muted;
-        max-width: 520px;
-        margin: 0 auto 12px;
-        line-height: 1.5;
+        white-space: nowrap;
     }
 
-    &__hint {
-        font-size: 12px;
-        color: $text-soft;
-    }
+    &:hover &__edit      { color: $accent; }
+    &:hover &__recipient { background: #fff; }
 }
 
 .dono-save-bar {
@@ -1179,6 +1159,15 @@ $border: $border-mid;
         line-height: 1.55;
         color: $text;
         margin: 0;
+    }
+
+    &__tag {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 12px;
+        background: $accent-tint;
+        color: $accent-dark;
+        border-radius: 4px;
+        padding: 0 2px;
     }
 }
 

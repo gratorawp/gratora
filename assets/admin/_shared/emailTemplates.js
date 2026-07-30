@@ -118,7 +118,3 @@ function coreTemplates() {
         },
     ];
 }
-
-export function getTemplateById( id ) {
-    return getDonorTemplates().find( ( t ) => t.id === id ) || null;
-}
