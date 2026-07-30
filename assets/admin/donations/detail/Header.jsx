@@ -9,7 +9,9 @@ export default function Header( { donation, donor, onResendReceipt, onRefund, on
     const isFullRefund    = donation.status === 'refunded';
     const isPartialRefund = donation.refunded_cents > 0 && donation.status !== 'refunded';
     const isRefundable    = donation.refundable_cents > 0 && donation.status === 'paid';
-    const canResend       = donation.status === 'paid';
+    // An erased donor has no address left, so there is nowhere to send.
+    const isRedacted      = !! ( donor?.redacted ?? donation.donor?.redacted );
+    const canResend       = donation.status === 'paid' && ! isRedacted;
 
     const name = donation.is_anonymous
         ? __( 'Anonymous donor', 'dono' )

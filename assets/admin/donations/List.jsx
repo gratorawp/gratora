@@ -313,10 +313,11 @@ export default function List() {
             label:        __( 'Resend receipt', 'dono' ),
             icon:         () => <MailIcon size={ 16 } strokeWidth={ 1.75 } />,
             supportsBulk: true,
-            // Only paid donations have a receipt to resend.
-            isEligible:   ( item ) => item.status === 'paid',
+            // Only paid donations have a receipt to resend, and an erased donor
+            // has no address left to send it to.
+            isEligible:   ( item ) => item.status === 'paid' && ! item.donor?.redacted,
             callback: ( items ) => {
-                const targets = items.filter( ( i ) => i.status === 'paid' );
+                const targets = items.filter( ( i ) => i.status === 'paid' && ! i.donor?.redacted );
                 if ( ! targets.length ) return;
                 const n = targets.length;
                 const message = n === 1

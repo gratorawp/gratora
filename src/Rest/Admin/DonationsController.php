@@ -674,6 +674,9 @@ final class DonationsController
             $donorBlock = [
                 'id'                  => (int) $donor->id,
                 'name'                => $this->donorName($donor),
+                // Explicit, so the UI never has to infer erasure from a nulled
+                // email: nothing can be emailed to a donor who has been erased.
+                'redacted'            => $donor->redacted_at !== null,
                 'email'               => $donor->redacted_at === null ? $this->donorService->decryptEmail($donor) : null,
                 'phone'               => $donor->redacted_at === null ? $this->donorService->decryptPhone($donor) : null,
                 'address'             => $donor->redacted_at === null ? $this->donorService->decryptAddress($donor) : null,
@@ -845,6 +848,19 @@ final class DonationsController
         $donation = $this->donations->findByReference($reference);
         if (! $donation) {
             return new WP_Error('dono_not_found', __('Donation not found.', 'dono'), ['status' => 404]);
+        }
+
+        // Erasure wiped the address, so the issuer would find nothing to send to
+        // and return quietly. Refuse instead of reporting a receipt on its way,
+        // and leave the existing sent_to_email_at alone: it records a send that
+        // really happened, and re-queueing would clear it for a send that cannot.
+        $donor = $donation->donor_id ? $this->donors->findById((int) $donation->donor_id) : null;
+        if ($donor && $donor->redacted_at !== null) {
+            return new WP_Error(
+                'dono_donor_redacted',
+                __('This donor has been erased, so there is no address to send a receipt to.', 'dono'),
+                ['status' => 422],
+            );
         }
 
         $ok = $this->receiptIssuer->requeueForDonation($donation->id);
@@ -1159,10 +1175,13 @@ final class DonationsController
             'paid_at'      => $d->paid_at,
             'created_at'   => $d->created_at,
             'donor'        => $donor ? [
-                'id'      => $donor->id,
-                'name'    => $this->donorName($donor),
-                'email'   => $this->donorService->decryptEmail($donor),
-                'country' => $donor->country,
+                'id'       => $donor->id,
+                'name'     => $this->donorName($donor),
+                // Erasure means the address is gone: do not hand it back here,
+                // and let the row's actions see that there is nobody to email.
+                'redacted' => $donor->redacted_at !== null,
+                'email'    => $donor->redacted_at === null ? $this->donorService->decryptEmail($donor) : null,
+                'country'  => $donor->country,
             ] : null,
             'campaign'     => $campaign ? [
                 'id'    => (int) $campaign->id,

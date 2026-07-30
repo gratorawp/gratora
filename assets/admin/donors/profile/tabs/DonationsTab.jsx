@@ -28,7 +28,7 @@ function donationHref( reference ) {
     } );
 }
 
-export default function DonationsTab( { donorId } ) {
+export default function DonationsTab( { donorId, redacted } ) {
     const [ view, setView ] = useState( {
         type:    'table',
         perPage: 25,
@@ -190,7 +190,8 @@ export default function DonationsTab( { donorId } ) {
             label:        __( 'Resend receipt', 'dono' ),
             icon:         () => <MailIcon size={ 16 } strokeWidth={ 1.75 } />,
             supportsBulk: true,
-            isEligible:   ( item ) => item.status === 'paid',
+            // An erased donor has no address left to send a receipt to.
+            isEligible:   ( item ) => item.status === 'paid' && ! redacted,
             callback: ( items ) => {
                 const targets = items.filter( ( i ) => i.status === 'paid' );
                 if ( ! targets.length ) return;
@@ -219,7 +220,7 @@ export default function DonationsTab( { donorId } ) {
                 } );
             },
         },
-    ], [ refetch ] );
+    ], [ refetch, redacted ] );
 
     return (
         <div className="dono-dataviews dp-donations-dv">

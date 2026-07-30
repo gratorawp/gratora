@@ -187,6 +187,7 @@ export default function Detail( { reference } ) {
                     <QuickStatsCard donor={ donor } donation={ donation } related={ related } />
                     <ActionsCard
                         donation={ donation }
+                        donor={ donor }
                         receipts={ receipts }
                         onRefund={ openRefund }
                         onResend={ resendReceipt }

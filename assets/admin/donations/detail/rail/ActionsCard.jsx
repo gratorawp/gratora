@@ -6,12 +6,14 @@ import { downloadFile } from '../../../_shared/download';
 import notify from '../../../_shared/notify';
 
 export default function ActionsCard( {
-    donation, receipts,
+    donation, donor, receipts,
     onRefund, onResend, onAddNote,
     onMarkPaid, onMarkFailed,
 } ) {
     const canRefund     = donation.refundable_cents > 0 && donation.status === 'paid';
-    const canResend     = donation.status === 'paid';
+    // An erased donor has no address left, so there is nowhere to send.
+    const isRedacted    = !! ( donor?.redacted ?? donation.donor?.redacted );
+    const canResend     = donation.status === 'paid' && ! isRedacted;
     // `processing` is a bank debit on its way: it can still land, and it can
     // still bounce, so both actions stay open until it resolves.
     const canMarkPaid   = [ 'pending', 'processing', 'failed' ].includes( donation.status );
@@ -61,7 +63,9 @@ export default function ActionsCard( {
                         onClick={ onResend }
                     >
                         <IconMail className="ic" />
-                        { __( 'Resend receipt', 'dono' ) }
+                        { isRedacted
+                            ? __( 'Donor erased, cannot email', 'dono' )
+                            : __( 'Resend receipt', 'dono' ) }
                     </button>
                     { primaryReceipt
                         ? (
