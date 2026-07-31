@@ -111,7 +111,9 @@ final class CampaignBindings extends HookProvider
 
             'currency'          => $campaign->currency,
             'ends_at'           => $campaign->ends_at ?? '',
-            'days_left'         => (string) $this->daysLeft($campaign),
+            // '' rather than '0' when the campaign never ends: bound into
+            // "%s days left", a zero reads as "this closed today".
+            'days_left'         => (string) ($this->daysLeft($campaign) ?? ''),
 
             'image'             => $this->imageUrl($campaign),
             'image_alt'         => $this->imageAlt($campaign),
@@ -147,11 +149,11 @@ final class CampaignBindings extends HookProvider
         return $url ?: null;
     }
 
-    private function daysLeft(Campaign $campaign): int
+    private function daysLeft(Campaign $campaign): ?int
     {
-        if (! $campaign->ends_at) return 0;
+        if (! $campaign->ends_at) return null;
         $end = strtotime($campaign->ends_at);
-        if ($end === false) return 0;
+        if ($end === false) return null;
         $diff = (int) ceil(($end - time()) / 86400);
         return max(0, $diff);
     }
