@@ -44,6 +44,23 @@ window.dono.tabs = window.dono.tabs || (function () {
             (items[surface] = items[surface] || []).push(tab);
             window.dispatchEvent(new CustomEvent('dono:tabs:changed', { detail: { surface: surface } }));
         },
+        // A count an add-on learns after registering, e.g. how many pages are
+        // waiting for review. Replaces the entry rather than mutating it, so a
+        // consumer comparing identity re-renders; same id, so the panel does
+        // not remount.
+        badge: function (surface, id, value) {
+            var list = items[surface] || [];
+            for (var i = 0; i < list.length; i++) {
+                if (list[i].id !== id) continue;
+                if (list[i].badge === value) return;
+                var next = {};
+                for (var k in list[i]) { if (Object.prototype.hasOwnProperty.call(list[i], k)) next[k] = list[i][k]; }
+                next.badge = value;
+                list[i] = next;
+                window.dispatchEvent(new CustomEvent('dono:tabs:changed', { detail: { surface: surface } }));
+                return;
+            }
+        },
         get: function (surface) { return (items[surface] || []).slice(); }
     };
 })();

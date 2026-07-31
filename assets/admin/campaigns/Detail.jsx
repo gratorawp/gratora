@@ -396,6 +396,7 @@ function ViewToggle( { active, campaignId, extra = [] } ) {
                 >
                     { t.Icon ? <t.Icon /> : null }
                     { t.label }
+                    { !! t.badge && <span className="dono-cmp-toggle__badge">{ t.badge }</span> }
                 </a>
             ) ) }
         </div>

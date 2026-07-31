@@ -1556,6 +1556,24 @@ $card-radius:   $radius-lg;
 
         svg { color: $accent-dark; }
     }
+
+    // A count an add-on sets on its own tab, e.g. pages awaiting review. Warn
+    // rather than accent: it is work outstanding, not the selected section.
+    .dono-cmp-toggle__badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 18px;
+        margin-left: 2px;
+        padding: 0 5px;
+        border-radius: 999px;
+        background: $amber-soft;
+        color: $amber;
+        font-size: $text-xs;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+        line-height: 17px;
+    }
 }
 
 .dono-pill {
