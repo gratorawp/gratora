@@ -1202,7 +1202,6 @@ function SidebarIntro( { iconName, title, description } ) {
 const SETTINGS_TABS = [
     { id: 'general',   label: __( 'General', 'dono' ) },
     { id: 'goal',      label: __( 'Goal', 'dono' ) },
-    { id: 'container', label: __( 'Container', 'dono' ) },
     { id: 'gateways',  label: __( 'Gateways', 'dono' ) },
     { id: 'after',     label: __( 'After donation', 'dono' ) },
     { id: 'embed',     label: __( 'Embed', 'dono' ) },
@@ -1238,7 +1237,6 @@ function FormSettingsPanel( { c, campaigns, gateways, funds, blocks } ) {
             <main className="dono-form-settings__main">
                 { activeTab === 'general'   && <GeneralSection   c={ c } campaigns={ campaigns } funds={ funds } settings={ settings } setSettings={ setSettings } /> }
                 { activeTab === 'goal'      && <GoalSection      settings={ settings } setSettings={ setSettings } /> }
-                { activeTab === 'container' && <ContainerSection settings={ settings } setSettings={ setSettings } /> }
                 { activeTab === 'gateways'  && <GatewaysSection  gateways={ gateways } settings={ settings } setSettings={ setSettings } blocks={ blocks } /> }
                 { activeTab === 'after'     && <AfterSection     settings={ settings } setSettings={ setSettings } /> }
                 { activeTab === 'embed'     && <EmbedSection     slug={ c.value( 'slug' ) } /> }
@@ -1355,7 +1353,7 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
 
             <SettingsRow
                 title={ __( 'Layout & style', 'dono' ) }
-                description={ __( 'How the form is presented and which style preset it inherits.', 'dono' ) }
+                description={ __( 'How the form is presented: its layout, style preset, width, and whether it sits in a card.', 'dono' ) }
             >
                 <SelectControl
                     label={ __( 'Layout', 'dono' ) }
@@ -1367,6 +1365,24 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
                 <StylePresetField
                     value={ settings.style?.preset_id || '' }
                     onChange={ ( v ) => setSettings( { style: { ...settings.style, preset_id: v } } ) }
+                />
+                <Slider
+                    label={ __( 'Maximum width', 'dono' ) }
+                    value={ settings.container?.width ?? 540 }
+                    onChange={ ( v ) => setSettings( { container: { ...settings.container, width: v } } ) }
+                    min={ 320 }
+                    max={ 1200 }
+                    unit="px"
+                />
+                <Segmented
+                    label={ __( 'Container', 'dono' ) }
+                    value={ settings.container?.style ?? 'frame' }
+                    onChange={ ( v ) => setSettings( { container: { ...settings.container, style: v } } ) }
+                    options={ [
+                        { value: 'frame', label: __( 'Frame', 'dono' ) },
+                        { value: 'plain', label: __( 'Plain', 'dono' ) },
+                    ] }
+                    help={ __( '"Frame" wraps the form in a card with a shadow; "Plain" renders it flush with the page.', 'dono' ) }
                 />
             </SettingsRow>
         </>
@@ -1443,35 +1459,6 @@ function GoalSection( { settings, setSettings } ) {
         </SettingsRow>
     );
 }
-
-function ContainerSection( { settings, setSettings } ) {
-    return (
-        <SettingsRow
-            title={ __( 'Container', 'dono' ) }
-            description={ __( 'Sets the max width and whether the form is wrapped in a card. Themes can override these with --dono-form-* CSS variables.', 'dono' ) }
-        >
-            <Slider
-                label={ __( 'Maximum width', 'dono' ) }
-                value={ settings.container?.width ?? 540 }
-                onChange={ ( v ) => setSettings( { container: { ...settings.container, width: v } } ) }
-                min={ 320 }
-                max={ 1200 }
-                unit="px"
-            />
-            <Segmented
-                label={ __( 'Style', 'dono' ) }
-                value={ settings.container?.style ?? 'frame' }
-                onChange={ ( v ) => setSettings( { container: { ...settings.container, style: v } } ) }
-                options={ [
-                    { value: 'frame', label: __( 'Frame', 'dono' ) },
-                    { value: 'plain', label: __( 'Plain', 'dono' ) },
-                ] }
-                help={ __( '"Frame" wraps the form in a white card with shadow; "Plain" renders flush.', 'dono' ) }
-            />
-        </SettingsRow>
-    );
-}
-
 function GatewaysSection( { gateways, settings, setSettings, blocks = [] } ) {
     // The payment-gateways block is the single writer of the allowed list on
     // save (FormService::syncGatewayAllowed). When the block is on the form,

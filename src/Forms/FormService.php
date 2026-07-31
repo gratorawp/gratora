@@ -221,7 +221,10 @@ final class FormService
 
         if (array_key_exists('campaign_id', $input)) {
             $campaign = $this->resolveCampaign($input['campaign_id']);
-            $form->campaign_id = $campaign->id;
+            if ((int) $campaign->id !== (int) $form->campaign_id) {
+                $this->guardDefaultFormStays($form);
+                $form->campaign_id = $campaign->id;
+            }
         }
 
         if (array_key_exists('default_fund_id', $input)) {
@@ -399,5 +402,28 @@ final class FormService
         }
         unset($block);
         return $blocks;
+    }
+
+    /**
+     * A campaign points at its default form by id, and nothing reassigns that
+     * pointer when a form moves. Letting the default leave would leave the old
+     * campaign holding the id of a form another campaign now owns: its page
+     * would render that form, readiness would still call it ready, and the
+     * dashboard's missing-form check only looks for a null id, so nothing
+     * would report it. Refuse the move and let the organiser choose a
+     * different default first.
+     */
+    private function guardDefaultFormStays(Form $form): void
+    {
+        $campaign = Campaign::query()->find('id', (int) $form->campaign_id);
+        if ($campaign === null || (int) ($campaign->default_form_id ?? 0) !== (int) $form->id) {
+            return;
+        }
+
+        throw new InvalidArgumentException(sprintf(
+            /* translators: %s: campaign title. */
+            __('This is the default donation form for %s, so it cannot be moved. Make another form the default first.', 'dono'),
+            $campaign->title
+        ));
     }
 }
