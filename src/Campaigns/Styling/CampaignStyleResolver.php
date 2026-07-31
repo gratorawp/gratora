@@ -48,18 +48,9 @@ final class CampaignStyleResolver
 
         $tokens = (array) apply_filters('dono.form_style.tokens', $tokens, $form, $campaign);
 
-        // Accent-soft (selected/hover tint) must track the accent. When no
-        // preset/inline override deliberately pairs one with the accent and
-        // it is still the catalogue default, drop it so the runtime CSS
-        // derives it from the resolved --dono-accent via color-mix. Presets
-        // that pair their own soft (e.g. Bold/Quiet) keep theirs.
         $explicitSoft = isset($presetTokens['dono-accent-soft'])
             || ($formPresetId === '' && isset($campaignInline['dono-accent-soft']));
-        if (! $explicitSoft
-            && ($tokens['dono-accent-soft'] ?? null) === ($defaults['dono-accent-soft'] ?? null)
-        ) {
-            unset($tokens['dono-accent-soft']);
-        }
+        $tokens = $this->dropUnpairedSoft($tokens, $explicitSoft);
 
         return [
             'tokens'        => $tokens,
@@ -89,14 +80,42 @@ final class CampaignStyleResolver
         $campaignPreset = (string) ($style['preset_id'] ?? '');
         $campaignInline = $this->inlineTokens($style);
 
-        $presetId = $campaignPreset !== '' ? $campaignPreset : StylePresets::defaultId();
-        $tokens   = array_merge($tokens, StylePresets::tokensFor($presetId));
+        $presetId     = $campaignPreset !== '' ? $campaignPreset : StylePresets::defaultId();
+        $presetTokens = StylePresets::tokensFor($presetId);
+        $tokens       = array_merge($tokens, $presetTokens);
 
         if (! empty($campaignInline)) {
             $tokens = array_merge($tokens, $campaignInline);
         }
 
-        return (array) apply_filters('dono.campaign_style.tokens', $tokens, $campaign);
+        $tokens = (array) apply_filters('dono.campaign_style.tokens', $tokens, $campaign);
+
+        $explicitSoft = isset($presetTokens['dono-accent-soft'])
+            || isset($campaignInline['dono-accent-soft']);
+
+        return $this->dropUnpairedSoft($tokens, $explicitSoft);
+    }
+
+    /**
+     * Accent-soft (selected/hover tint) must track the accent. When nothing
+     * deliberately pairs one with the accent and it is still the catalogue
+     * default, drop it so the stylesheet derives it from the resolved
+     * --dono-accent via color-mix. Otherwise a campaign that picks a purple
+     * accent keeps the green default soft and washes its own page in green.
+     * Presets that pair their own soft (Bold, Quiet) keep theirs.
+     *
+     * @param array<string,string> $tokens
+     * @return array<string,string>
+     */
+    private function dropUnpairedSoft(array $tokens, bool $explicitSoft): array
+    {
+        $defaults = Tokens::defaults();
+        if (! $explicitSoft
+            && ($tokens['dono-accent-soft'] ?? null) === ($defaults['dono-accent-soft'] ?? null)
+        ) {
+            unset($tokens['dono-accent-soft']);
+        }
+        return $tokens;
     }
 
     /** Pull a preset id from form settings, normalised to '' when unset. */

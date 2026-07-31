@@ -4,6 +4,11 @@
 
 $accent-fallback:     #1e8a4e;
 $accent-soft-fallback: rgba(30, 138, 78, .12);
+// The soft tint must track the accent: the resolver emits --dono-accent-soft
+// only when a preset or the campaign deliberately pairs one, so derive it from
+// the accent otherwise. A literal fallback here would wash a purple campaign
+// in green.
+$accent-soft: var(--dono-accent-soft, color-mix(in srgb, var(--dono-accent, #{$accent-fallback}) 12%, #fff));
 $text-fallback:       #1e1e1e;
 $text-muted-fallback: #6b7280;
 $border-fallback:     #e5e7eb;
@@ -458,7 +463,7 @@ body.dono-modal-open { overflow: hidden; }
         &--1 {
             min-height: 160px;
             border-color: var(--dono-accent, #{$accent-fallback});
-            box-shadow: 0 4px 14px var(--dono-accent-soft, #{$accent-soft-fallback});
+            box-shadow: 0 4px 14px #{$accent-soft};
             .dono-top-donors__podium-rank {
                 background: var(--dono-accent, #{$accent-fallback});
                 color: #fff;
@@ -823,7 +828,7 @@ body.dono-modal-open { overflow: hidden; }
     &__pct {
         font-size: 12.5px; font-weight: 700;
         color: var(--dono-accent, #{$accent-fallback});
-        background: var(--dono-accent-soft, #{$accent-soft-fallback});
+        background: #{$accent-soft};
         padding: 3px 10px; border-radius: 999px;
     }
     &__link {
