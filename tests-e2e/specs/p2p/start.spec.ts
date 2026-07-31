@@ -13,9 +13,14 @@ test.describe('P2P start page', () => {
         await start.open();
 
         await expect(start.form).toBeVisible();
+        await expect(healthyPage.getByRole('heading', { name: 'Start fundraising' })).toBeVisible();
+        await expect(start.submit()).toHaveText(/create my page/i);
+
         await expect(start.segOption('solo')).toHaveClass(/is-active/);
+        await expect(start.segOption('solo')).toHaveAttribute('aria-checked', 'true');
         await expect(start.choiceValue()).toHaveValue('solo');
         // Neither team reveal is shown until a team choice is made.
+        await expect(start.reveal('join')).toBeHidden();
         await expect(start.reveal('create')).toBeHidden();
     });
 
@@ -30,9 +35,11 @@ test.describe('P2P start page', () => {
         await start.chooseSegment('join');
         await expect(start.segOption('join')).toHaveClass(/is-active/);
         await expect(start.segOption('join')).toHaveAttribute('aria-checked', 'true');
+        await expect(start.segOption('solo')).toHaveAttribute('aria-checked', 'false');
         await expect(start.choiceValue()).toHaveValue('join');
         await expect(start.reveal('join')).toBeVisible();
         await expect(start.reveal('create')).toBeHidden();
+        await expect(start.teamSearch()).toBeVisible();
 
         await start.chooseSegment('create');
         await expect(start.segOption('create')).toHaveClass(/is-active/);
@@ -57,42 +64,49 @@ test.describe('P2P start page', () => {
         await expect(start.reveal('create')).toBeVisible();
     });
 
-    test('team combo opens, filters and selects', async ({ healthyPage }) => {
+    test('team list filters and selects', async ({ healthyPage }) => {
         const start = new P2pStartPage(healthyPage);
         await start.open();
         await start.chooseSegment('join');
 
-        await start.comboInput().click();
-        await expect(start.comboMenu()).toBeVisible();
-
-        const seededTeam = start.comboOptions().filter({ hasText: P2P.teamName });
+        // The picker is a browsable list, not a dropdown: every team is on
+        // screen as soon as the join reveal opens.
+        await expect(start.teamSearch()).toBeVisible();
+        const seededTeam = start.teamOption(P2P.teamName);
         await expect(seededTeam).toHaveCount(1);
+        await expect(seededTeam).toBeVisible();
 
         // Filter to a non-matching term -> empty state, no visible options.
-        await start.comboInput().fill('zzzznomatch');
-        await expect(start.combo().locator('.dps-combo__empty')).toBeVisible();
+        await start.teamSearch().fill('zzzznomatch');
+        await expect(start.teamEmpty()).toBeVisible();
+        await expect(seededTeam).toBeHidden();
 
         // Filter back to the seeded team and pick it.
-        await start.comboInput().fill(P2P.teamName.slice(0, 4));
+        await start.teamSearch().fill(P2P.teamName.slice(0, 4));
+        await expect(start.teamEmpty()).toBeHidden();
         await expect(seededTeam).toBeVisible();
         await seededTeam.click();
-        await expect(start.comboInput()).toHaveValue(P2P.teamName);
+
+        // Selection is carried by the radio + the row's selected styling; the
+        // submitted value is the hidden team_id.
+        await expect(seededTeam).toHaveClass(/is-selected/);
+        await expect(start.teamRadio(P2P.teamName)).toBeChecked();
         await expect(start.teamIdValue()).not.toHaveValue('');
     });
 
-    test('goal chips drive the goal input and back', async ({ healthyPage }) => {
+    test('goal presets drive the goal input and back', async ({ healthyPage }) => {
         const start = new P2pStartPage(healthyPage);
         await start.open();
 
-        const chip2500 = healthyPage.locator('.dps-chip[data-goal="2500"]');
-        await chip2500.click();
-        await expect(start.goalInput()).toHaveValue('2500');
-        await expect(chip2500).toHaveClass(/is-active/);
+        const preset2000 = start.goalPreset(2000);
+        await preset2000.click();
+        await expect(start.goalInput()).toHaveValue('2000');
+        await expect(preset2000).toHaveClass(/is-active/);
 
-        // Typing a matching amount re-activates the corresponding chip.
+        // Typing a matching amount re-activates the corresponding preset.
         await start.goalInput().fill('1000');
-        await expect(healthyPage.locator('.dps-chip[data-goal="1000"]')).toHaveClass(/is-active/);
-        await expect(healthyPage.locator('.dps-chip[data-goal="2500"]')).not.toHaveClass(/is-active/);
+        await expect(start.goalPreset(1000)).toHaveClass(/is-active/);
+        await expect(preset2000).not.toHaveClass(/is-active/);
     });
 
     test('why counter tracks length', async ({ healthyPage }) => {
@@ -108,22 +122,24 @@ test.describe('P2P start page', () => {
         const start = new P2pStartPage(healthyPage);
         await start.open();
 
-        const accs = start.accordions();
-        const count = await accs.count();
+        const items = start.faqItems();
+        const count = await items.count();
         expect(count).toBeGreaterThan(1);
 
         // The first item starts open; the second starts closed.
-        const second = accs.nth(1);
+        const second = items.nth(1);
         await expect(second).not.toHaveClass(/is-open/);
-        await second.locator('.dps-acc__q').click();
+        await expect(start.faqAnswer(second)).toBeHidden();
+
+        await start.faqQuestion(second).click();
         await expect(second).toHaveClass(/is-open/);
-        await expect(second.locator('.dps-acc__a')).toBeVisible();
-        await expect(second.locator('.dps-acc__q')).toHaveAttribute('aria-expanded', 'true');
+        await expect(start.faqAnswer(second)).toBeVisible();
+        await expect(start.faqQuestion(second)).toHaveAttribute('aria-expanded', 'true');
     });
 
     test('honours ?choice= deep link', async ({ healthyPage }) => {
         const start = new P2pStartPage(healthyPage);
-        await start.open(P2P.startPath + (P2P.startPath.includes('?') ? '&' : '?') + 'choice=create');
+        await start.open(P2pStartPage.withQuery(P2P.startPath, 'choice=create'));
 
         await expect(start.choiceValue()).toHaveValue('create');
         await expect(start.reveal('create')).toBeVisible();
@@ -132,15 +148,26 @@ test.describe('P2P start page', () => {
     test('honours ?team= deep link', async ({ healthyPage }) => {
         const start = new P2pStartPage(healthyPage);
         await start.open();
-        await start.chooseSegment('join');
 
-        const seededTeam = start.comboOptions().filter({ hasText: P2P.teamName });
-        const teamId = await seededTeam.getAttribute('data-id');
+        const teamId = await start.teamRadio(P2P.teamName).getAttribute('value');
         expect(teamId).toBeTruthy();
 
-        await start.open(P2P.startPath + (P2P.startPath.includes('?') ? '&' : '?') + 'team=' + teamId);
+        // The bare param implies joining. It used to preselect the team while
+        // leaving the choice on solo, and the submit handler only sends team_id
+        // when the choice is join - so a shared link with only team= created a
+        // solo page and silently dropped the team.
+        await start.open(P2pStartPage.withQuery(P2P.startPath, 'team=' + teamId));
         await expect(start.teamIdValue()).toHaveValue(String(teamId));
-        await expect(start.comboInput()).toHaveValue(P2P.teamName);
+        await expect(start.teamRadio(P2P.teamName)).toBeChecked();
+        await expect(start.reveal('join')).toBeVisible();
+
+        // The link a team page actually renders carries the choice too, so the
+        // preselected row is on screen and marked.
+        await start.open(P2pStartPage.withQuery(P2P.startPath, 'choice=join&team=' + teamId));
+        await expect(start.reveal('join')).toBeVisible();
+        await expect(start.teamOption(P2P.teamName)).toBeVisible();
+        await expect(start.teamOption(P2P.teamName)).toHaveClass(/is-selected/);
+        await expect(start.teamIdValue()).toHaveValue(String(teamId));
     });
 
     test.describe('client validation', () => {
@@ -179,12 +206,12 @@ test.describe('P2P start page', () => {
         await start.open();
 
         const unique = `e2e-submit-${Date.now()}@dono.test`;
-        await start.page.locator('#dps-name').fill('E2E Submitter');
+        await start.nameInput().fill('E2E Submitter');
         await start.emailInput().fill(unique);
-        await start.page.locator('#dps-display').fill(`E2E ${Date.now()}`);
+        await start.displayInput().fill(`E2E ${Date.now()}`);
         await start.clickSubmit();
 
         await expect(start.done()).toBeVisible({ timeout: 15_000 });
-        await expect(start.done().locator('[data-dps-url]')).not.toHaveValue('');
+        await expect(start.doneUrl()).not.toHaveValue('');
     });
 });

@@ -4,7 +4,7 @@ import { P2P } from '../fixtures/p2p';
 /**
  * Page object for the public "start fundraising" page. Wraps the vanilla
  * interactivity from assets/p2p-start.js: the solo/join/create segmented
- * control + reveals, the searchable team combo, goal chips, the why-counter,
+ * control + reveals, the filterable team list, goal presets, the why-counter,
  * the FAQ accordion, and submit-time client validation.
  */
 export class P2pStartPage {
@@ -21,73 +21,107 @@ export class P2pStartPage {
         await this.form.waitFor({ state: 'visible' });
     }
 
+    /** Append a query string, respecting a startPath that already carries one. */
+    static withQuery(path: string, query: string): string {
+        return path + (path.includes('?') ? '&' : '?') + query;
+    }
+
     /* --- segmented control --- */
     segOption(choice: 'solo' | 'join' | 'create'): Locator {
-        return this.page.locator(`.dps-seg__opt[data-choice="${choice}"]`);
+        return this.page.locator(`.dono-p2p-seg__opt[data-choice="${choice}"]`);
     }
     reveal(choice: 'join' | 'create'): Locator {
-        return this.page.locator(`[data-dps-reveal="${choice}"]`);
+        return this.page.locator(`[data-dono-p2p-reveal="${choice}"]`);
     }
     choiceValue(): Locator {
-        return this.page.locator('[data-dps-choice-value]');
+        return this.page.locator('[data-dono-p2p-choice-value]');
     }
     async chooseSegment(choice: 'solo' | 'join' | 'create'): Promise<void> {
         await this.segOption(choice).click();
     }
 
-    /* --- team combo --- */
-    combo(): Locator {
-        return this.page.locator('[data-dps-combo]');
+    /* --- team picker ---
+     * A filtered-in-place list of radios, not a dropdown: every team is visible
+     * from the start and the search box only hides non-matching rows. The
+     * submitted value is the hidden team_id, which the radios drive. */
+    teamPicker(): Locator {
+        return this.page.locator('[data-dono-p2p-combo]');
     }
-    comboInput(): Locator {
-        return this.combo().locator('.dps-combo__input');
+    teamSearch(): Locator {
+        return this.page.locator('#dono-p2p-team-search');
     }
-    comboMenu(): Locator {
-        return this.combo().locator('.dps-combo__menu');
+    teamOptions(): Locator {
+        return this.teamPicker().locator('[data-dono-p2p-team-option]');
     }
-    comboOptions(): Locator {
-        return this.combo().locator('.dps-combo__opt');
+    teamOption(name: string): Locator {
+        return this.teamOptions().filter({ hasText: name });
+    }
+    teamRadio(name: string): Locator {
+        return this.teamOption(name).locator('.dp-team__radio');
+    }
+    teamEmpty(): Locator {
+        return this.teamPicker().locator('.dp-teamlist__empty');
     }
     teamIdValue(): Locator {
-        return this.combo().locator('[data-dps-team-id]');
+        return this.teamPicker().locator('[data-dono-p2p-team-id]');
     }
 
-    /* --- goal chips --- */
-    chips(): Locator {
-        return this.page.locator('.dps-chip');
+    /* --- goal presets --- */
+    goalPreset(amount: number | string): Locator {
+        return this.page.locator(`.dono-p2p-goal-preset[data-goal="${amount}"]`);
+    }
+    goalPresets(): Locator {
+        return this.page.locator('.dono-p2p-goal-preset');
     }
     goalInput(): Locator {
-        return this.page.locator('#dps-goal');
+        return this.page.locator('#dono-p2p-goal');
     }
 
     /* --- why counter --- */
     whyInput(): Locator {
-        return this.page.locator('#dps-why');
+        return this.page.locator('#dono-p2p-why');
     }
     whyCount(): Locator {
-        return this.page.locator('[data-dps-count]');
+        return this.page.locator('[data-dono-p2p-count]');
     }
 
     /* --- faq --- */
-    accordions(): Locator {
-        return this.page.locator('.dps-acc');
+    faqItems(): Locator {
+        return this.page.locator('.dp-faq');
+    }
+    faqQuestion(item: Locator): Locator {
+        return item.getByRole('button');
+    }
+    faqAnswer(item: Locator): Locator {
+        return item.locator('.dp-a');
+    }
+
+    /* --- fields --- */
+    nameInput(): Locator {
+        return this.page.locator('#dono-p2p-name');
+    }
+    emailInput(): Locator {
+        return this.page.locator('#dono-p2p-email');
+    }
+    displayInput(): Locator {
+        return this.page.locator('#dono-p2p-display');
+    }
+    teamNameInput(): Locator {
+        return this.page.locator('#dono-p2p-team-name');
     }
 
     /* --- submit + validation --- */
-    emailInput(): Locator {
-        return this.page.locator('#dps-email');
-    }
-    teamNameInput(): Locator {
-        return this.page.locator('#dps-team-name');
-    }
     submit(): Locator {
-        return this.form.locator('.dps-submit');
+        return this.form.locator('button[type="submit"]');
     }
     error(): Locator {
-        return this.page.locator('[data-dps-error]');
+        return this.page.locator('[data-dono-p2p-error]');
     }
     done(): Locator {
-        return this.page.locator('[data-dps-done]');
+        return this.page.locator('[data-dono-p2p-done]');
+    }
+    doneUrl(): Locator {
+        return this.done().locator('[data-dono-p2p-url]');
     }
     async clickSubmit(): Promise<void> {
         await this.submit().click();
