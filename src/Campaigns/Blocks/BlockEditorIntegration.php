@@ -82,6 +82,16 @@ final class BlockEditorIntegration
         );
         wp_set_script_translations(self::HANDLE_EDITOR, 'dono', DONO_DIR . 'languages');
 
+        // The field list the editor's binding picker offers, named here so the
+        // labels are translated once and the two halves cannot disagree about
+        // which values exist.
+        wp_add_inline_script(
+            self::HANDLE_EDITOR,
+            'window.donoCampaignBlocks = Object.assign( window.donoCampaignBlocks || {}, '
+            . wp_json_encode(['bindingFields' => CampaignBindings::fields()]) . ' );',
+            'before'
+        );
+
         // Re-skin WP ToggleControl in the editor chrome (inspector panels) to
         // the Dono switch look, so block settings toggles match the rest of the
         // admin. Static CSS (chrome has no compiled-token context).

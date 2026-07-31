@@ -59,6 +59,7 @@ use Dono\Donors\Portal\PortalPage;
 use Dono\Donors\Portal\PortalSession;
 use Dono\Donors\Portal\PortalShortcode;
 use Dono\Campaigns\Blocks\BlockEditorIntegration as CampaignBlockEditorIntegration;
+use Dono\Campaigns\Blocks\CampaignBindingPreviewController;
 use Dono\Campaigns\Blocks\CampaignBindings;
 use Dono\Campaigns\Blocks\CampaignGridBlock;
 use Dono\Campaigns\Blocks\CampaignHeroBlock;
@@ -872,7 +873,15 @@ final class CoreModule implements DonoModule
         });
 
         (new CampaignBlockEditorIntegration())->register();
-        (new CampaignBindings($c->get(CampaignRepository::class)))->register();
+        $campaignBindings = new CampaignBindings($c->get(CampaignRepository::class));
+        $campaignBindings->register();
+
+        // The editor resolves bindings on the client, so it needs the same
+        // values handed to it rather than computed a second time in JS.
+        (new CampaignBindingPreviewController(
+            $c->get(CampaignRepository::class),
+            $campaignBindings,
+        ))->register();
 
         $formShortcode->register();
 

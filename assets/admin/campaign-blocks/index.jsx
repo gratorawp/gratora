@@ -21,10 +21,15 @@ import ServerSideRender from '@wordpress/server-side-render';
 import { __ } from '@wordpress/i18n';
 
 import { registerDonoEntities } from '../_shared/entities';
+import { registerCampaignBindingSource } from './bindings.js';
 import { defaultCurrency, currencyDecimals } from '../_shared/format';
 import './blocks.scss';
 
 registerDonoEntities();
+
+// The client half of the binding source PHP registers. Without it a bound core
+// block shows the source's label instead of the campaign's own value.
+registerCampaignBindingSource( ( window.donoCampaignBlocks || {} ).bindingFields || {} );
 
 function useBoundCampaign( campaignId ) {
     const postMetaId = useSelect( ( select ) => {

@@ -27,6 +27,47 @@ final class CampaignBindings extends HookProvider
         ];
     }
 
+    /**
+     * The values a campaign can state, as the editor's field picker lists them.
+     * Machine forms (raised_cents, percent, currency) still resolve but are left
+     * off: they are for a layout that does arithmetic, not for somebody choosing
+     * what a heading should say.
+     *
+     * @return array<string,string>
+     */
+    public static function fields(): array
+    {
+        return [
+            'title'           => __('Title', 'dono'),
+            'description'     => __('Short description', 'dono'),
+            'image'           => __('Cover image', 'dono'),
+            'image_alt'       => __('Cover image description', 'dono'),
+            'url'             => __('Page link', 'dono'),
+            'raised'          => __('Raised', 'dono'),
+            'goal'            => __('Goal', 'dono'),
+            'percent_label'   => __('Percent of goal', 'dono'),
+            'donors_count'    => __('Donors', 'dono'),
+            'donations_count' => __('Donations', 'dono'),
+            'days_left'       => __('Days left', 'dono'),
+        ];
+    }
+
+    /**
+     * Every listed value for one campaign, for the editor to preview with. Same
+     * code path as the front end, so the editor cannot drift from it.
+     *
+     * @return array<string,?string>
+     */
+    public function valuesFor(Campaign $campaign): array
+    {
+        $out = [];
+        foreach (array_keys(self::fields()) as $key) {
+            $out[$key] = $this->valueFor($campaign, $key);
+        }
+
+        return $out;
+    }
+
     public function registerSource(): void
     {
         if (! function_exists('register_block_bindings_source')) return;
