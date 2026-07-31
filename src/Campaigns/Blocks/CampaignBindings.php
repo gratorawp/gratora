@@ -76,11 +76,13 @@ final class CampaignBindings extends HookProvider
 
     private function valueFor(Campaign $campaign, string $key): ?string
     {
+        // The model casts each column to its declared property type on hydration,
+        // so only the nullable ones need coercing here.
         $type    = $campaign->goal_type ?: 'amount';
         $current = match ($type) {
-            'donations' => (int) $campaign->donations_count,
-            'donors'    => (int) $campaign->donors_count,
-            default     => (int) $campaign->raised_cents,
+            'donations' => $campaign->donations_count,
+            'donors'    => $campaign->donors_count,
+            default     => $campaign->raised_cents,
         };
         $target = match ($type) {
             'amount' => (int) ($campaign->goal_cents ?? 0),
@@ -89,26 +91,26 @@ final class CampaignBindings extends HookProvider
         $percent = $target > 0 ? min(100, (int) round(($current / $target) * 100)) : 0;
 
         return match ($key) {
-            'title'             => (string) $campaign->title,
-            'description'       => (string) ($campaign->description ?? ''),
+            'title'             => $campaign->title,
+            'description'       => $campaign->description ?? '',
 
-            'raised'            => Money::format((int) $campaign->raised_cents, (string) $campaign->currency),
-            'raised_cents'      => (string) (int) $campaign->raised_cents,
+            'raised'            => Money::format($campaign->raised_cents, $campaign->currency),
+            'raised_cents'      => (string) $campaign->raised_cents,
 
             'goal'              => $target > 0 && $type === 'amount'
-                ? Money::format($target, (string) $campaign->currency)
+                ? Money::format($target, $campaign->currency)
                 : (string) $target,
             'goal_cents'        => (string) (int) ($campaign->goal_cents ?? 0),
             'goal_count'        => (string) (int) ($campaign->goal_count ?? 0),
 
-            'donors_count'      => (string) (int) $campaign->donors_count,
-            'donations_count'   => (string) (int) $campaign->donations_count,
+            'donors_count'      => (string) $campaign->donors_count,
+            'donations_count'   => (string) $campaign->donations_count,
 
             'percent'           => (string) $percent,
             'percent_label'     => $percent . '%',
 
-            'currency'          => (string) $campaign->currency,
-            'ends_at'           => (string) ($campaign->ends_at ?? ''),
+            'currency'          => $campaign->currency,
+            'ends_at'           => $campaign->ends_at ?? '',
             'days_left'         => (string) $this->daysLeft($campaign),
 
             'image'             => $this->imageUrl($campaign),
@@ -127,28 +129,28 @@ final class CampaignBindings extends HookProvider
     private function imageUrl(Campaign $campaign): ?string
     {
         if (! $campaign->image_attachment_id) return null;
-        $src = wp_get_attachment_image_url((int) $campaign->image_attachment_id, 'large');
+        $src = wp_get_attachment_image_url($campaign->image_attachment_id, 'large');
         return $src ?: null;
     }
 
     private function imageAlt(Campaign $campaign): ?string
     {
         if (! $campaign->image_attachment_id) return null;
-        $alt = get_post_meta((int) $campaign->image_attachment_id, '_wp_attachment_image_alt', true);
-        return is_string($alt) && $alt !== '' ? $alt : (string) $campaign->title;
+        $alt = get_post_meta($campaign->image_attachment_id, '_wp_attachment_image_alt', true);
+        return is_string($alt) && $alt !== '' ? $alt : $campaign->title;
     }
 
     private function pageUrl(Campaign $campaign): ?string
     {
         if (! $campaign->page_id) return null;
-        $url = get_permalink((int) $campaign->page_id);
+        $url = get_permalink($campaign->page_id);
         return $url ?: null;
     }
 
     private function daysLeft(Campaign $campaign): int
     {
         if (! $campaign->ends_at) return 0;
-        $end = strtotime((string) $campaign->ends_at);
+        $end = strtotime($campaign->ends_at);
         if ($end === false) return 0;
         $diff = (int) ceil(($end - time()) / 86400);
         return max(0, $diff);
