@@ -111,8 +111,38 @@ final class CampaignBindings extends HookProvider
             'ends_at'           => (string) ($campaign->ends_at ?? ''),
             'days_left'         => (string) $this->daysLeft($campaign),
 
+            'image'             => $this->imageUrl($campaign),
+            'image_alt'         => $this->imageAlt($campaign),
+            'url'               => $this->pageUrl($campaign),
+
             default             => null,
         };
+    }
+
+    /**
+     * Null rather than '' when the campaign has no cover: a binding that returns
+     * null leaves the block's own attribute alone, so a pattern's placeholder
+     * image survives instead of rendering a broken src.
+     */
+    private function imageUrl(Campaign $campaign): ?string
+    {
+        if (! $campaign->image_attachment_id) return null;
+        $src = wp_get_attachment_image_url((int) $campaign->image_attachment_id, 'large');
+        return $src ?: null;
+    }
+
+    private function imageAlt(Campaign $campaign): ?string
+    {
+        if (! $campaign->image_attachment_id) return null;
+        $alt = get_post_meta((int) $campaign->image_attachment_id, '_wp_attachment_image_alt', true);
+        return is_string($alt) && $alt !== '' ? $alt : (string) $campaign->title;
+    }
+
+    private function pageUrl(Campaign $campaign): ?string
+    {
+        if (! $campaign->page_id) return null;
+        $url = get_permalink((int) $campaign->page_id);
+        return $url ?: null;
     }
 
     private function daysLeft(Campaign $campaign): int
