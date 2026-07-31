@@ -633,7 +633,9 @@
         gap: 10px;
         padding: 12px 14px;
         border: var(--dono-border-width, 1px) solid var(--dono-border);
-        border-radius: var(--dono-radius);
+        // A control, not a tile: it sits in the same column as the amount
+        // buttons and the inputs, which all take the small radius.
+        border-radius: var(--dono-radius-sm);
         cursor: pointer;
 
         input[type="radio"] {

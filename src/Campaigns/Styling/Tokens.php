@@ -122,7 +122,7 @@ final class Tokens
                 'min'     => 0,
                 'max'     => 24,
                 'step'    => 1,
-                'help'    => __('Buttons, inputs, primary tiles.', 'dono'),
+                'help'    => __('Cards, panels and other surfaces.', 'dono'),
             ],
             'dono-radius-sm' => [
                 'group'   => 'radius',
@@ -132,7 +132,7 @@ final class Tokens
                 'min'     => 0,
                 'max'     => 16,
                 'step'    => 1,
-                'help'    => __('Pills, chips, badges.', 'dono'),
+                'help'    => __('Buttons, inputs, chips and other controls.', 'dono'),
             ],
             'dono-border-width' => [
                 'group'   => 'radius',
