@@ -74,6 +74,14 @@ final class Mailer
         $headers = is_array($opts['headers'] ?? null) ? $opts['headers'] : [];
         if (! empty($opts['html'])) {
             $headers[] = 'Content-Type: text/html; charset=UTF-8';
+        } else {
+            // Plain text is the default, and nothing decodes entities in it.
+            // Names arrive already HTML-encoded, both ours (sanitize_text_field
+            // turns < into &lt;) and WordPress's own: sanitize_option() stores
+            // blogname esc_html'd, so a site called "Cats & Dogs Trust" signed
+            // off every email as "Cats &amp; Dogs Trust". Decode for the plain
+            // text body only; in an HTML body the entities are already right.
+            $body = html_entity_decode($body, ENT_QUOTES | ENT_HTML5, 'UTF-8');
         }
         if ($replyTo !== '' && is_email($replyTo)) {
             $headers[] = 'Reply-To: ' . $replyTo;
@@ -115,6 +123,16 @@ final class Mailer
      */
     private function stripHeaderValue(string $value): string
     {
+        // A subject is not HTML, and names reach it already HTML-encoded, so a
+        // team called Team <3 & "Q" arrived as Team &lt;3 &amp; &quot;Q&quot;
+        // in the inbox. On a page the browser decodes it and nobody notices;
+        // in a header nothing does.
+        //
+        // Decode before stripping, never after: an encoded newline such as
+        // &#13;&#10; would otherwise survive the strip and then decode into a
+        // real CRLF, which is header injection.
+        $value = html_entity_decode($value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
         $stripped = preg_replace('/[\r\n\0\x0B]/', '', $value);
         return is_string($stripped) ? trim($stripped) : '';
     }

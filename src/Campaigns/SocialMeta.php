@@ -81,7 +81,10 @@ final class SocialMeta extends HookProvider
             'og:type'      => 'website',
             'og:url'       => (string) (get_permalink($pageId) ?: ''),
             'og:title'     => $campaign->title,
-            'og:site_name' => (string) get_bloginfo('name'),
+            // Decoded first: WordPress stores blogname esc_html'd, and every
+            // value here is escaped again on output, so an ampersand in the
+            // site name shipped as &amp;amp; in the tag.
+            'og:site_name' => wp_specialchars_decode((string) get_bloginfo('name'), ENT_QUOTES),
         ];
         if ($description !== '') {
             $tags['og:description'] = $description;
