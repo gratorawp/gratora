@@ -123,6 +123,15 @@ export class P2pStartPage {
     doneUrl(): Locator {
         return this.done().locator('[data-dono-p2p-url]');
     }
+    doneTitle(): Locator {
+        return this.done().locator('.dono-p2p-done__title');
+    }
+    doneSub(): Locator {
+        return this.done().locator('.dono-p2p-done__sub');
+    }
+    doneShare(): Locator {
+        return this.done().locator('[data-dono-p2p-share]');
+    }
     async clickSubmit(): Promise<void> {
         await this.submit().click();
     }

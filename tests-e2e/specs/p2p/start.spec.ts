@@ -214,4 +214,35 @@ test.describe('P2P start page', () => {
         await expect(start.done()).toBeVisible({ timeout: 15_000 });
         await expect(start.doneUrl()).not.toHaveValue('');
     });
+
+    test('a second signup with the same email says so instead of claiming success', async ({ healthyPage }) => {
+        test.skip(! process.env.DONO_E2E_P2P_SUBMIT, 'set DONO_E2E_P2P_SUBMIT=1 to run the side-effecting submit');
+
+        // The route will not touch a page that already exists - it is
+        // unauthenticated, so it must not reactivate or re-team one - and mails
+        // a manage link instead. The form used to show the full success card
+        // for that, telling the supporter their goal, story and team were saved
+        // when all three had been dropped.
+        const start = new P2pStartPage(healthyPage);
+        const email = `dupe-${Date.now()}@dono.test`;
+
+        await start.open();
+        await start.nameInput().fill('Dupe Dan');
+        await start.emailInput().fill(email);
+        await start.displayInput().fill(`Dupe ${Date.now()}`);
+        await start.clickSubmit();
+        await expect(start.done()).toBeVisible({ timeout: 15_000 });
+        await expect(start.doneTitle()).toHaveText('Your page is live!');
+
+        await start.open();
+        await start.nameInput().fill('Dupe Dan');
+        await start.emailInput().fill(email);
+        await start.displayInput().fill(`Dupe again ${Date.now()}`);
+        await start.clickSubmit();
+        await expect(start.done()).toBeVisible({ timeout: 15_000 });
+
+        await expect(start.doneTitle()).toHaveText('You already have a page here');
+        await expect(start.doneSub()).toContainText('not made a second page');
+        await expect(start.doneShare()).toBeHidden();
+    });
 });
