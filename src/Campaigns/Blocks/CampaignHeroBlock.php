@@ -26,6 +26,7 @@ final class CampaignHeroBlock extends CampaignBlock
             'showDescription' => ['type' => 'boolean', 'default' => true],
             'showCover'       => ['type' => 'boolean', 'default' => true],
             'showSummary'     => ['type' => 'boolean', 'default' => true],
+            'showTitle'       => ['type' => 'boolean', 'default' => true],
             'headingLevel'    => ['type' => 'integer', 'default' => 1],
             'align'           => ['type' => 'string',  'default' => 'left'],
         ];
@@ -48,7 +49,13 @@ final class CampaignHeroBlock extends CampaignBlock
             'imageUrl'        => $imageUrl,
             'showDescription' => (bool) ($attrs['showDescription'] ?? true),
             'showCover'       => (bool) ($attrs['showCover'] ?? true) && $imageUrl,
-            'showSummary'     => (bool) ($attrs['showSummary'] ?? true) && (int) $campaign->raised_cents > 0,
+            // Not gated on having raised something. A campaign on day one showed
+            // no money line and no goal, so the hero made no ask at the one
+            // moment it has nothing else to show.
+            'showSummary'     => (bool) ($attrs['showSummary'] ?? true),
+            // The seeded layout puts a bound Heading block above this block so
+            // the words are editable, and turns the built-in title off.
+            'showTitle'       => (bool) ($attrs['showTitle'] ?? true),
             'raised'          => Money::format((int) $campaign->raised_cents, $campaign->currency),
             'goalLabel'       => $goalCents > 0
                 /* translators: %s: formatted goal amount */

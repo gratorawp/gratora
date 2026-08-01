@@ -32,7 +32,9 @@ final class DonationFormBlock extends CampaignBlock
 
     public function attributes(): array
     {
-        return $this->campaignIdAttr();
+        return $this->campaignIdAttr() + [
+            'emptyText' => ['type' => 'string', 'default' => ''],
+        ];
     }
 
     public function render(array $attrs, string $content): string
@@ -45,12 +47,18 @@ final class DonationFormBlock extends CampaignBlock
             $campaign->default_form_id ? (int) $campaign->default_form_id : null
         );
 
+        // Renders something even with no form. A heading seeded above this
+        // block would otherwise caption whatever came next.
         if (! $form) {
-            return (is_user_logged_in() && current_user_can('edit_posts'))
-                ? '<div class="dono-block-notice">'
-                    . esc_html__('This campaign has no published donation form yet.', 'dono')
-                    . '</div>'
-                : '';
+            return View::loadRelative(__DIR__, 'views/donation-form', [
+                'mode'      => 'empty',
+                'emptyText' => (string) ($attrs['emptyText'] ?? '')
+                    ?: __('Donations are not open for this campaign yet.', 'dono'),
+                'notice'    => (is_user_logged_in() && current_user_can('edit_posts'))
+                    ? __('This campaign has no published donation form yet.', 'dono')
+                    : '',
+                'styleVars' => $this->styleVars($campaign),
+            ]);
         }
 
         // Editor preview: the block renderer runs as a REST request (is_admin()
@@ -79,9 +87,25 @@ final class DonationFormBlock extends CampaignBlock
             ]);
         }
 
+        // A published form still renders nothing when the campaign itself is
+        // not taking donations, a draft or one outside its schedule. Having a
+        // form row is not the same as having something to show.
+        $formHtml = do_shortcode('[dono_donation_form slug="' . esc_attr($form->slug) . '"]');
+        if (trim($formHtml) === '') {
+            return View::loadRelative(__DIR__, 'views/donation-form', [
+                'mode'      => 'empty',
+                'emptyText' => (string) ($attrs['emptyText'] ?? '')
+                    ?: __('Donations are not open for this campaign yet.', 'dono'),
+                'notice'    => (is_user_logged_in() && current_user_can('edit_posts'))
+                    ? __('This campaign is not accepting donations, so the form is hidden. Publish the campaign and check its schedule.', 'dono')
+                    : '',
+                'styleVars' => $this->styleVars($campaign),
+            ]);
+        }
+
         return View::loadRelative(__DIR__, 'views/donation-form', [
             'mode'         => 'front',
-            'formHtml'     => do_shortcode('[dono_donation_form slug="' . esc_attr($form->slug) . '"]'),
+            'formHtml'     => $formHtml,
             'styleVars' => $this->styleVars($campaign),
         ]);
     }

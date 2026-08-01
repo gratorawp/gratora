@@ -36,6 +36,7 @@ final class SupporterWallBlock extends CampaignBlock
     {
         return $this->campaignIdAttr() + [
             'title'          => ['type' => 'string',  'default' => ''],
+            'emptyText'      => ['type' => 'string',  'default' => ''],
             'limit'          => ['type' => 'integer', 'default' => 50],
             'sort'           => ['type' => 'string',  'default' => 'recent'],
             'showMessage'    => ['type' => 'boolean', 'default' => true],
@@ -133,6 +134,7 @@ final class SupporterWallBlock extends CampaignBlock
         if (! $byDonor) {
             return View::loadRelative(__DIR__, 'views/supporter-wall', [
                 'title'        => (string) ($attrs['title'] ?? ''),
+            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('No supporters to show yet.', 'dono'),
                 'entries'      => [],
                 'showMessage'  => $showMessage,
                 'showAmount'   => (bool) ($attrs['showAmount'] ?? false),
@@ -174,6 +176,7 @@ final class SupporterWallBlock extends CampaignBlock
 
         return View::loadRelative(__DIR__, 'views/supporter-wall', [
             'title'        => (string) ($attrs['title'] ?? ''),
+            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('No supporters to show yet.', 'dono'),
             'entries'      => $entries,
             'showMessage'  => $showMessage,
             'showAmount'   => (bool) ($attrs['showAmount'] ?? false),

@@ -2,6 +2,7 @@
 defined('ABSPATH') || exit;
 /**
  * @var string $title
+ * @var string $emptyText
  * @var array<array{name:string, message:string, amount_cents:int, currency:string, latest_paid_at:string}> $entries
  * @var bool   $showMessage
  * @var bool   $showAmount
@@ -12,12 +13,12 @@ defined('ABSPATH') || exit;
 <section class="dono-block dono-block--supporter-wall"
          data-block="dono/supporter-wall"
         <?php echo $styleVars !== '' ? ' style="' . esc_attr($styleVars) . '"' : ''; ?>>
-    <?php if ($title !== '' && ! (defined('REST_REQUEST') && REST_REQUEST)): ?>
+    <?php if ($title !== ''): ?>
         <h3 class="dono-block__title"><?php echo esc_html($title); ?></h3>
     <?php endif; ?>
 
     <?php if (! $entries): ?>
-        <p class="dono-block__empty"><?php esc_html_e('No supporters to show yet.', 'dono'); ?></p>
+        <p class="dono-block__empty"><?php echo esc_html($emptyText); ?></p>
     <?php else: ?>
         <ul class="dono-supporter-wall is-cols-<?php echo esc_attr($columns); ?>">
             <?php foreach ($entries as $entry): ?>

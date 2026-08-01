@@ -1,7 +1,7 @@
 <?php
 defined('ABSPATH') || exit;
 /**
- * @var string  $mode         'front' | 'editor'
+ * @var string  $mode         'front' | 'editor' | 'empty'
  * @var ?string $formHtml
  * @var ?string $previewDoc    Self-contained iframe document (editor mode)
  * @var ?string $formTitle
@@ -9,7 +9,12 @@ defined('ABSPATH') || exit;
  */
 ?>
 <section class="dono-block dono-block--donation-form" data-block="dono/donation-form"<?php echo $styleVars !== '' ? ' style="' . esc_attr($styleVars) . '"' : ''; ?>>
-    <?php if (($mode ?? 'front') === 'editor'): ?>
+    <?php if (($mode ?? 'front') === 'empty'): ?>
+        <p class="dono-block__empty"><?php echo esc_html($emptyText); ?></p>
+        <?php if (($notice ?? '') !== ''): ?>
+            <div class="dono-block-notice"><?php echo esc_html($notice); ?></div>
+        <?php endif; ?>
+    <?php elseif (($mode ?? 'front') === 'editor'): ?>
         <?php if (($previewDoc ?? '') !== ''): ?>
             <iframe
                 class="dono-donation-form__editor-preview"

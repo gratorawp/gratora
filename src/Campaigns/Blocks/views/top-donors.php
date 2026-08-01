@@ -2,6 +2,7 @@
 defined('ABSPATH') || exit;
 /**
  * @var string $title
+ * @var string $emptyText
  * @var array<array{name:string, amount_cents:int, donations_count:int, is_anonymous:bool}> $entries
  * @var string $currency
  * @var bool   $showAmount
@@ -19,12 +20,12 @@ $donoBar = static function (int $cents) use ($maxAmount): string {
 <section class="dono-block dono-block--top-donors dono-block--layout-<?php echo esc_attr($layout); ?>"
          data-block="dono/top-donors"
         <?php echo $styleVars !== '' ? ' style="' . esc_attr($styleVars) . '"' : ''; ?>>
-    <?php if ($title !== '' && ! (defined('REST_REQUEST') && REST_REQUEST)): ?>
+    <?php if ($title !== ''): ?>
         <h3 class="dono-block__title"><?php echo esc_html($title); ?></h3>
     <?php endif; ?>
 
     <?php if (! $entries): ?>
-        <p class="dono-block__empty"><?php esc_html_e('No donations yet.', 'dono'); ?></p>
+        <p class="dono-block__empty"><?php echo esc_html($emptyText); ?></p>
     <?php elseif ($layout === 'podium'): ?>
         <?php
         $podium = array_slice($entries, 0, 3);

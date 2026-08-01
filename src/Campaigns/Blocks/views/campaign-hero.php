@@ -7,6 +7,7 @@ defined('ABSPATH') || exit;
  * @var bool    $showDescription
  * @var bool    $showCover
  * @var bool    $showSummary
+ * @var bool    $showTitle
  * @var string  $raised
  * @var string  $goalLabel
  * @var int     $headingLevel
@@ -22,7 +23,9 @@ $hTag = 'h' . max(1, min(3, (int) $headingLevel));
                 <img src="<?php echo esc_url($imageUrl); ?>" alt="<?php echo esc_attr($title); ?>" />
             <?php endif; ?>
             <div class="dono-hero__scrim">
-                <<?php echo esc_attr($hTag); ?> class="dono-hero__title"><?php echo esc_html($title); ?></<?php echo esc_attr($hTag); ?>>
+                <?php if ($showTitle): ?>
+                    <<?php echo esc_attr($hTag); ?> class="dono-hero__title"><?php echo esc_html($title); ?></<?php echo esc_attr($hTag); ?>>
+                <?php endif; ?>
                 <?php if ($showDescription && ! empty($description)): ?>
                     <p class="dono-hero__description"><?php echo esc_html($description); ?></p>
                 <?php endif; ?>

@@ -30,13 +30,22 @@ final class CampaignPageBlocksTest extends IntegrationTestCase
         $campaign = $this->createCampaign(['title' => 'Starter block test']);
         $page = get_post((int) $campaign['page_id']);
 
-        $this->assertStringContainsString('wp:dono/campaign-hero',     $page->post_content);
-        $this->assertStringContainsString('wp:dono/campaign-stats',    $page->post_content);
-        $this->assertStringContainsString('wp:dono/campaign-progress', $page->post_content);
-        $this->assertStringContainsString('wp:dono/donation-form',     $page->post_content);
-        $this->assertStringContainsString('wp:dono/top-donors',        $page->post_content);
-        $this->assertStringContainsString('wp:dono/recent-donations',  $page->post_content);
-        $this->assertStringContainsString('wp:dono/campaign-grid',     $page->post_content);
+        $this->assertStringContainsString('wp:dono/campaign-hero',    $page->post_content);
+        $this->assertStringContainsString('wp:dono/donation-form',    $page->post_content);
+        $this->assertStringContainsString('wp:dono/top-donors',       $page->post_content);
+        $this->assertStringContainsString('wp:dono/recent-donations', $page->post_content);
+        $this->assertStringContainsString('wp:dono/campaign-grid',    $page->post_content);
+
+        // The hero states the money, so repeating it twice more above the fold
+        // said nothing new. Both blocks stay registered for custom layouts.
+        $this->assertStringNotContainsString('wp:dono/campaign-stats',    $page->post_content);
+        $this->assertStringNotContainsString('wp:dono/campaign-progress', $page->post_content);
+
+        // Headings are core Heading blocks, not markup inside a render
+        // callback, so an organiser owns the words.
+        $this->assertStringContainsString('wp:heading', $page->post_content);
+        $this->assertStringContainsString('Why this matters', $page->post_content);
+        $this->assertStringContainsString('wp:columns', $page->post_content);
     }
 
     public function test_hero_block_renders_campaign_title(): void
@@ -51,7 +60,7 @@ final class CampaignPageBlocksTest extends IntegrationTestCase
     public function test_stats_block_renders_zero_values_for_fresh_campaign(): void
     {
         $campaign = $this->createCampaign(['title' => 'Fresh stats']);
-        $html = $this->renderPage((int) $campaign['page_id']);
+        $html = $this->renderBlockPage('dono/campaign-stats', (int) $campaign['id']);
 
         $this->assertStringContainsString('dono-block--stats', $html);
         $this->assertStringContainsString('class="dono-stat__label">Raised', $html);
@@ -62,7 +71,7 @@ final class CampaignPageBlocksTest extends IntegrationTestCase
     public function test_progress_block_renders_bar_with_percent_role(): void
     {
         $campaign = $this->createCampaign(['title' => 'Progress test']);
-        $html = $this->renderPage((int) $campaign['page_id']);
+        $html = $this->renderBlockPage('dono/campaign-progress', (int) $campaign['id']);
 
         $this->assertStringContainsString('dono-block--progress', $html);
         $this->assertMatchesRegularExpression(
@@ -176,11 +185,24 @@ final class CampaignPageBlocksTest extends IntegrationTestCase
      */
     private function renderDonateButtonPage(int $campaignId): string
     {
+        return $this->renderBlockPage('dono/donate-button', $campaignId);
+    }
+
+    /**
+     * Render one block on a page of its own.
+     *
+     * Blocks that are registered but not seeded need this: reaching them
+     * through the starter layout tied their tests to what the layout happens
+     * to contain, so dropping a block from the seed failed tests that were
+     * never about the seed.
+     */
+    private function renderBlockPage(string $block, int $campaignId): string
+    {
         $pageId = wp_insert_post([
-            'post_title'   => 'Donate button page',
+            'post_title'   => $block . ' page',
             'post_status'  => 'publish',
             'post_type'    => 'page',
-            'post_content' => sprintf('<!-- wp:dono/donate-button {"campaignId":%d} /-->', $campaignId),
+            'post_content' => sprintf('<!-- wp:%s {"campaignId":%d} /-->', $block, $campaignId),
             'meta_input'   => ['_dono_campaign_id' => $campaignId],
         ]);
 

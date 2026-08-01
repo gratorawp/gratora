@@ -2,6 +2,7 @@
 defined('ABSPATH') || exit;
 /**
  * @var string $title
+ * @var string $emptyText
  * @var array<array{name:string, is_anonymous:bool, amount_cents:int, currency:string, time_ago:string, paid_at_iso:string, message:string}> $entries
  * @var bool   $showAmount
  * @var bool   $showTime
@@ -12,12 +13,12 @@ defined('ABSPATH') || exit;
 <section class="dono-block dono-block--recent-donations"
          data-block="dono/recent-donations"
         <?php echo $styleVars !== '' ? ' style="' . esc_attr($styleVars) . '"' : ''; ?>>
-    <?php if ($title !== '' && ! (defined('REST_REQUEST') && REST_REQUEST)): ?>
+    <?php if ($title !== ''): ?>
         <h3 class="dono-block__title"><?php echo esc_html($title); ?></h3>
     <?php endif; ?>
 
     <?php if (! $entries): ?>
-        <p class="dono-block__empty"><?php esc_html_e('No donations yet.', 'dono'); ?></p>
+        <p class="dono-block__empty"><?php echo esc_html($emptyText); ?></p>
     <?php else: ?>
         <ul class="dono-recent-donations__list">
             <?php foreach ($entries as $entry): ?>

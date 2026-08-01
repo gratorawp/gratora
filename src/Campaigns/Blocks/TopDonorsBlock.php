@@ -32,6 +32,7 @@ final class TopDonorsBlock extends CampaignBlock
     {
         return $this->campaignIdAttr() + [
             'title'          => ['type' => 'string',  'default' => ''],
+            'emptyText'      => ['type' => 'string',  'default' => ''],
             'limit'          => ['type' => 'integer', 'default' => 10],
             'showAmount'     => ['type' => 'boolean', 'default' => true],
             'showDonorCount' => ['type' => 'boolean', 'default' => false],
@@ -96,6 +97,7 @@ final class TopDonorsBlock extends CampaignBlock
 
         return View::loadRelative(__DIR__, 'views/top-donors', [
             'title'          => (string) ($attrs['title'] ?? ''),
+            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('No donations yet.', 'dono'),
             'entries'        => $entries,
             'currency'       => $campaign->currency,
             'showAmount'     => (bool) ($attrs['showAmount'] ?? true),

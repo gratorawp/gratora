@@ -494,23 +494,93 @@ final class CampaignService
         return (int) $pageId;
     }
 
+    /**
+     * The layout a new campaign page starts from.
+     *
+     * Seven bare dynamic blocks became a page an organiser can actually edit.
+     * Every heading here is a core Heading block rather than markup baked into
+     * a render callback, so the words belong to whoever owns the page. That is
+     * only safe because each block below a heading now always renders
+     * something: a block that returned an empty string would leave its heading
+     * captioning whatever came next.
+     *
+     * campaign-stats and campaign-progress leave the seed. Both stay
+     * registered for anyone who wants them, but the hero already states the
+     * money, and repeating it three times above the fold said nothing new.
+     *
+     * The class names come from the shared campaign page foundation
+     * (assets/campaign-page/page.css), which is why they read dp-.
+     */
     private function pageStarterBlocks(Campaign $campaign): string
     {
         $id = (int) $campaign->id;
+        // Known nit: both serializers escape the double hyphen in a class name
+        // inside an attribute value, so the editor rewrites dp-band--tight on
+        // its first save and the revision shows a change nobody made. Cosmetic,
+        // and LayoutBlocks in the P2P add-on writes it the same way, so this
+        // stays readable until the two are fixed together.
         $default = <<<BLOCKS
-<!-- wp:dono/campaign-hero {"campaignId":{$id}} /-->
+<!-- wp:heading {"level":1,"metadata":{"bindings":{"content":{"source":"dono/campaign","args":{"key":"title","campaign_id":{$id}}}}},"className":"dp-display dp-rail dp-top"} -->
+<h1 class="wp-block-heading dp-display dp-rail dp-top">Campaign name</h1>
+<!-- /wp:heading -->
 
-<!-- wp:dono/campaign-stats {"campaignId":{$id}} /-->
+<!-- wp:dono/campaign-hero {"campaignId":{$id},"showTitle":false} /-->
 
-<!-- wp:dono/campaign-progress {"campaignId":{$id}} /-->
+<!-- wp:group {"className":"dp-band dp-band--tight"} -->
+<div class="wp-block-group dp-band dp-band--tight">
+<!-- wp:heading {"level":2,"className":"dp-h2"} -->
+<h2 class="wp-block-heading dp-h2">About this campaign</h2>
+<!-- /wp:heading -->
 
-<!-- wp:dono/donation-form {"campaignId":{$id},"align":"center"} /-->
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"dono/campaign","args":{"key":"description","campaign_id":{$id}}}}},"className":"dp-body"} -->
+<p class="dp-body">What this campaign is raising for.</p>
+<!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->
 
-<!-- wp:dono/top-donors {"campaignId":{$id}} /-->
+<!-- wp:columns {"className":"dp-layout"} -->
+<div class="wp-block-columns dp-layout">
+<!-- wp:column {"width":"66%","className":"dp-layout__main"} -->
+<div class="wp-block-column dp-layout__main" style="flex-basis:66%">
+<!-- wp:heading {"level":2,"className":"dp-h2 dp-rail"} -->
+<h2 class="wp-block-heading dp-h2 dp-rail">Why this matters</h2>
+<!-- /wp:heading -->
 
-<!-- wp:dono/recent-donations {"campaignId":{$id}} /-->
+<!-- wp:paragraph {"className":"dp-body dp-rail"} -->
+<p class="dp-body dp-rail">Tell the story behind this campaign. Who it helps, what the money pays for, and what changes when the goal is met. Add photos, quotes and headings here like any other page.</p>
+<!-- /wp:paragraph -->
 
-<!-- wp:dono/campaign-grid {"campaignId":{$id}} /-->
+<!-- wp:heading {"level":2,"className":"dp-h2 dp-rail"} -->
+<h2 class="wp-block-heading dp-h2 dp-rail">Recent donations</h2>
+<!-- /wp:heading -->
+
+<!-- wp:dono/recent-donations {"campaignId":{$id},"title":"","limit":5} /-->
+
+<!-- wp:heading {"level":2,"className":"dp-h2 dp-rail"} -->
+<h2 class="wp-block-heading dp-h2 dp-rail">Top donors</h2>
+<!-- /wp:heading -->
+
+<!-- wp:dono/top-donors {"campaignId":{$id},"title":"","limit":5,"layout":"list"} /-->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column {"width":"34%","className":"dp-layout__side"} -->
+<div class="wp-block-column dp-layout__side" style="flex-basis:34%">
+<!-- wp:heading {"level":2,"className":"dp-h2"} -->
+<h2 class="wp-block-heading dp-h2">Donate</h2>
+<!-- /wp:heading -->
+
+<!-- wp:dono/donation-form {"campaignId":{$id}} /-->
+</div>
+<!-- /wp:column -->
+</div>
+<!-- /wp:columns -->
+
+<!-- wp:heading {"level":2,"className":"dp-h2 dp-rail"} -->
+<h2 class="wp-block-heading dp-h2 dp-rail">More ways to give</h2>
+<!-- /wp:heading -->
+
+<!-- wp:dono/campaign-grid {"campaignId":{$id},"heading":""} /-->
 BLOCKS;
 
         // Add-ons can seed a richer starter layout per campaign type (e.g. the

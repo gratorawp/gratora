@@ -4,12 +4,22 @@ defined('ABSPATH') || exit;
  * @var string $heading
  * @var array  $cards   list of ['title','blurb','imageUrl','url','raised','goalLabel','percent','accent']
  * @var string $styleVars
+ * @var ?string $emptyText  set only when there are no cards
+ * @var ?string $notice     editor-only explanation, empty for visitors
  */
 ?>
 <section class="dono-block dono-block--grid" data-block="dono/campaign-grid"<?php echo $styleVars !== '' ? ' style="' . esc_attr($styleVars) . '"' : ''; ?>>
-    <div class="dono-grid__head">
-        <h2 class="dono-grid__title"><?php echo esc_html($heading); ?></h2>
-    </div>
+    <?php if ($heading !== ''): ?>
+        <div class="dono-grid__head">
+            <h2 class="dono-grid__title"><?php echo esc_html($heading); ?></h2>
+        </div>
+    <?php endif; ?>
+    <?php if ($cards === []): ?>
+        <p class="dono-block__empty"><?php echo esc_html($emptyText ?? ''); ?></p>
+        <?php if (($notice ?? '') !== ''): ?>
+            <div class="dono-block-notice"><?php echo esc_html($notice); ?></div>
+        <?php endif; ?>
+    <?php else: ?>
     <div class="dono-campaign-grid">
         <?php foreach ($cards as $card): ?>
             <a class="dono-campaign-card<?php echo $card['url'] === '' ? ' is-inert' : ''; ?>"
@@ -51,4 +61,5 @@ defined('ABSPATH') || exit;
             </a>
         <?php endforeach; ?>
     </div>
+    <?php endif; ?>
 </section>

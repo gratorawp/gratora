@@ -165,6 +165,7 @@ registerBlockType( 'dono/campaign-hero', {
         showDescription: { type: 'boolean', default: true },
         showCover:       { type: 'boolean', default: true },
         showSummary:     { type: 'boolean', default: true },
+        showTitle:       { type: 'boolean', default: true },
         headingLevel:    { type: 'integer', default: 1 },
         align:           { type: 'string',  default: 'left' },
     },
@@ -468,6 +469,7 @@ registerBlockType( 'dono/top-donors', {
     attributes: {
         campaignId:     { type: 'integer', default: 0 },
         title:          { type: 'string',  default: '' },
+        emptyText:      { type: 'string',  default: '' },
         limit:          { type: 'integer', default: 10 },
         showAmount:     { type: 'boolean', default: true },
         showDonorCount: { type: 'boolean', default: false },
@@ -496,6 +498,14 @@ registerBlockType( 'dono/top-donors', {
                         value={ attributes.title }
                         onChange={ ( v ) => setAttributes( { title: v } ) }
                         placeholder={ __( 'Top supporters', 'dono' ) }
+                        __nextHasNoMarginBottom
+                    />
+                    <TextControl
+                        label={ __( 'Empty state text', 'dono' ) }
+                        value={ attributes.emptyText }
+                        onChange={ ( v ) => setAttributes( { emptyText: v } ) }
+                        placeholder={ __( 'No donations yet.', 'dono' ) }
+                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'dono' ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
@@ -577,6 +587,7 @@ registerBlockType( 'dono/recent-donations', {
     attributes: {
         campaignId:    { type: 'integer', default: 0 },
         title:         { type: 'string',  default: '' },
+        emptyText:     { type: 'string',  default: '' },
         limit:         { type: 'integer', default: 10 },
         showAmount:    { type: 'boolean', default: true },
         showTime:      { type: 'boolean', default: true },
@@ -604,6 +615,14 @@ registerBlockType( 'dono/recent-donations', {
                         value={ attributes.title }
                         onChange={ ( v ) => setAttributes( { title: v } ) }
                         placeholder={ __( 'Recent donations', 'dono' ) }
+                        __nextHasNoMarginBottom
+                    />
+                    <TextControl
+                        label={ __( 'Empty state text', 'dono' ) }
+                        value={ attributes.emptyText }
+                        onChange={ ( v ) => setAttributes( { emptyText: v } ) }
+                        placeholder={ __( 'No donations yet.', 'dono' ) }
+                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'dono' ) }
                         __nextHasNoMarginBottom
                     />
                     <RangeControl
@@ -673,6 +692,7 @@ registerBlockType( 'dono/supporter-wall', {
     attributes: {
         campaignId:     { type: 'integer', default: 0 },
         title:          { type: 'string',  default: '' },
+        emptyText:      { type: 'string',  default: '' },
         limit:          { type: 'integer', default: 50 },
         sort:           { type: 'string',  default: 'recent' },
         showMessage:    { type: 'boolean', default: true },
@@ -706,6 +726,14 @@ registerBlockType( 'dono/supporter-wall', {
                         value={ attributes.title }
                         onChange={ ( v ) => setAttributes( { title: v } ) }
                         placeholder={ __( 'Thank you to our supporters', 'dono' ) }
+                        __nextHasNoMarginBottom
+                    />
+                    <TextControl
+                        label={ __( 'Empty state text', 'dono' ) }
+                        value={ attributes.emptyText }
+                        onChange={ ( v ) => setAttributes( { emptyText: v } ) }
+                        placeholder={ __( 'No supporters to show yet.', 'dono' ) }
+                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'dono' ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
@@ -804,6 +832,7 @@ registerBlockType( 'dono/campaign-grid', {
         count:      { type: 'integer', default: 3 },
         orderBy:    { type: 'string',  default: 'recent' },
         heading:    { type: 'string',  default: '' },
+        emptyText:  { type: 'string',  default: '' },
     },
     edit: function GridEdit( { attributes, setAttributes } ) {
         const { onCampaignPage, resolvedId } = useBoundCampaign( attributes.campaignId );
@@ -872,6 +901,7 @@ registerBlockType( 'dono/donation-form', {
     icon:       'money-alt',
     attributes: {
         campaignId: { type: 'integer', default: 0 },
+        emptyText:  { type: 'string',  default: '' },
     },
     edit: function DonationFormEdit( { attributes, setAttributes, isSelected } ) {
         const { campaign, onCampaignPage, resolvedId } = useBoundCampaign( attributes.campaignId );

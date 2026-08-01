@@ -32,6 +32,7 @@ final class RecentDonationsBlock extends CampaignBlock
     {
         return $this->campaignIdAttr() + [
             'title'          => ['type' => 'string',  'default' => ''],
+            'emptyText'      => ['type' => 'string',  'default' => ''],
             'limit'          => ['type' => 'integer', 'default' => 10],
             'showAmount'     => ['type' => 'boolean', 'default' => true],
             'showTime'       => ['type' => 'boolean', 'default' => true],
@@ -99,6 +100,7 @@ final class RecentDonationsBlock extends CampaignBlock
 
         return View::loadRelative(__DIR__, 'views/recent-donations', [
             'title'        => (string) ($attrs['title'] ?? ''),
+            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('No donations yet.', 'dono'),
             'entries'      => $entries,
             'showAmount'   => (bool) ($attrs['showAmount'] ?? true),
             'showTime'     => (bool) ($attrs['showTime'] ?? true),

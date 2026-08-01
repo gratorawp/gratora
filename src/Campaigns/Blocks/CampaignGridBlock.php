@@ -25,6 +25,7 @@ final class CampaignGridBlock extends CampaignBlock
             'count'   => ['type' => 'integer', 'default' => 3],
             'orderBy' => ['type' => 'string',  'default' => 'recent'],
             'heading' => ['type' => 'string',  'default' => ''],
+            'emptyText' => ['type' => 'string', 'default' => ''],
         ];
     }
 
@@ -44,11 +45,16 @@ final class CampaignGridBlock extends CampaignBlock
 
         $campaigns = $this->campaigns->otherPublished($excludeId, $count, $orderBy);
         if (empty($campaigns)) {
-            return (is_user_logged_in() && current_user_can('edit_posts'))
-                ? '<div class="dono-block-notice">'
-                    . esc_html__('No other published campaigns to show yet. This block will list them once you have more.', 'dono')
-                    . '</div>'
-                : '';
+            return View::loadRelative(__DIR__, 'views/campaign-grid', [
+                'heading'   => '',
+                'cards'     => [],
+                'emptyText' => (string) ($attrs['emptyText'] ?? '')
+                    ?: __('More campaigns will appear here soon.', 'dono'),
+                'notice'    => (is_user_logged_in() && current_user_can('edit_posts'))
+                    ? __('No other published campaigns to show yet. This block will list them once you have more.', 'dono')
+                    : '',
+                'styleVars' => $this->styleVars($this->resolveCampaign($attrs)),
+            ]);
         }
 
         $cards = [];
@@ -74,10 +80,10 @@ final class CampaignGridBlock extends CampaignBlock
             ];
         }
 
+        // An empty heading means no heading, not "use ours". The seeded layout
+        // puts a core Heading block above this one so the words are editable,
+        // and a default here rendered it a second time.
         $heading = trim((string) ($attrs['heading'] ?? ''));
-        if ($heading === '') {
-            $heading = __('More ways to give', 'dono');
-        }
 
         return View::loadRelative(__DIR__, 'views/campaign-grid', [
             'heading' => $heading,
