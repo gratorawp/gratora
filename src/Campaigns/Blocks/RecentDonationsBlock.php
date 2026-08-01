@@ -103,7 +103,7 @@ final class RecentDonationsBlock extends CampaignBlock
             'showAmount'   => (bool) ($attrs['showAmount'] ?? true),
             'showTime'     => (bool) ($attrs['showTime'] ?? true),
             'showMessage'  => (bool) ($attrs['showMessage'] ?? true),
-            'themePrimary' => $campaign->accentColor(),
+            'styleVars' => $this->styleVars($campaign),
         ]);
     }
 }

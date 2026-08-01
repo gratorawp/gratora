@@ -6,6 +6,8 @@ namespace Dono\Campaigns\Blocks;
 
 use Dono\Campaigns\Campaign;
 use Dono\Campaigns\CampaignRepository;
+use Dono\Campaigns\Styling\CampaignStyleVars;
+use Dono\Campaigns\Styling\PageStyle;
 use Dono\Forms\Blocks\Block;
 
 /**
@@ -26,6 +28,34 @@ abstract class CampaignBlock implements Block
     protected function campaignIdAttr(): array
     {
         return ['campaignId' => ['type' => 'integer', 'default' => 0]];
+    }
+
+    /**
+     * The campaign's full token map, for the block wrapper's style attribute.
+     *
+     * Blocks used to pass the accent alone, which left every other token in the
+     * stylesheet resolving to its Sass fallback. See CampaignStyleVars.
+     *
+     * Empty when the page is already about this campaign, because PageStyle has
+     * put the same tokens on the body, where an organiser's own headings and
+     * paragraphs inherit them too. Repeating them per wrapper would add the
+     * whole map nine times over and style strictly less of the page. What is
+     * left is the case the body class cannot cover: a block naming a campaign
+     * the page is not about, say a donate button for one campaign dropped on
+     * another page, which needs its own tokens to override the page's.
+     */
+    protected function styleVars(?Campaign $campaign): string
+    {
+        if ($campaign === null) {
+            return '';
+        }
+
+        $pageCampaign = PageStyle::campaignForPost((int) get_queried_object_id());
+        if ($pageCampaign !== null && (int) $pageCampaign->id === (int) $campaign->id) {
+            return '';
+        }
+
+        return CampaignStyleVars::forCampaign($campaign);
     }
 
     /**

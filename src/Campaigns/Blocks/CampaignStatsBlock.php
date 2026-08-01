@@ -43,6 +43,7 @@ final class CampaignStatsBlock extends CampaignBlock
             'showDonors'     => (bool) ($attrs['showDonors']    ?? true),
             'align'          => in_array($attrs['align'] ?? 'left', ['left', 'center', 'right'], true)
                 ? (string) $attrs['align'] : 'left',
+            'styleVars'      => $this->styleVars($campaign),
         ]);
     }
 }

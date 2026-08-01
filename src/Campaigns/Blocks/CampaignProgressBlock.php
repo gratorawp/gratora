@@ -52,7 +52,7 @@ final class CampaignProgressBlock extends CampaignBlock
             'showLabels'  => (bool) ($attrs['showLabels'] ?? true),
             'align'       => in_array($attrs['align'] ?? 'left', ['left', 'center'], true)
                 ? (string) $attrs['align'] : 'left',
-            'themePrimary' => $campaign->accentColor(),
+            'styleVars' => $this->styleVars($campaign),
         ]);
     }
 }

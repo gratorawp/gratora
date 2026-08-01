@@ -11,11 +11,11 @@ defined('ABSPATH') || exit;
  * @var string  $goalLabel
  * @var int     $headingLevel
  * @var string  $align
- * @var string  $themePrimary
+ * @var string  $styleVars
  */
 $hTag = 'h' . max(1, min(3, (int) $headingLevel));
 ?>
-<section class="dono-block dono-block--hero is-align-<?php echo esc_attr($align); ?>" data-block="dono/campaign-hero" style="--dono-accent: <?php echo esc_attr($themePrimary); ?>;">
+<section class="dono-block dono-block--hero is-align-<?php echo esc_attr($align); ?>" data-block="dono/campaign-hero"<?php echo $styleVars !== '' ? ' style="' . esc_attr($styleVars) . '"' : ''; ?>>
     <div class="dono-hero">
         <div class="dono-hero__cover<?php echo ($showCover && $imageUrl) ? '' : ' is-placeholder'; ?>">
             <?php if ($showCover && $imageUrl): ?>

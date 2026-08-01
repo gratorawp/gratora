@@ -8,7 +8,7 @@ defined('ABSPATH') || exit;
  * @var string $currency
  * @var bool   $showLabels
  * @var string $align
- * @var string $themePrimary
+ * @var string $styleVars
  */
 $formatValue = static function (int $value, string $type, string $currency): string {
     if ($type === 'amount') {
@@ -17,7 +17,7 @@ $formatValue = static function (int $value, string $type, string $currency): str
     return (string) number_format_i18n($value);
 };
 ?>
-<section class="dono-block dono-block--progress is-align-<?php echo esc_attr($align); ?>" data-block="dono/campaign-progress" style="--dono-accent: <?php echo esc_attr($themePrimary); ?>;">
+<section class="dono-block dono-block--progress is-align-<?php echo esc_attr($align); ?>" data-block="dono/campaign-progress"<?php echo $styleVars !== '' ? ' style="' . esc_attr($styleVars) . '"' : ''; ?>>
     <?php if ($showLabels): ?>
         <div class="dono-progress__labels">
             <div class="dono-progress__current">

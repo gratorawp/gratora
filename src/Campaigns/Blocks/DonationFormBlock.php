@@ -75,14 +75,14 @@ final class DonationFormBlock extends CampaignBlock
                 'mode'         => 'editor',
                 'previewDoc'   => $previewDoc,
                 'formTitle'    => (string) $form->title,
-                'themePrimary' => $campaign->accentColor(),
+                'styleVars' => $this->styleVars($campaign),
             ]);
         }
 
         return View::loadRelative(__DIR__, 'views/donation-form', [
             'mode'         => 'front',
             'formHtml'     => do_shortcode('[dono_donation_form slug="' . esc_attr($form->slug) . '"]'),
-            'themePrimary' => $campaign->accentColor(),
+            'styleVars' => $this->styleVars($campaign),
         ]);
     }
 }

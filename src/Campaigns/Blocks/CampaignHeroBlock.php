@@ -57,7 +57,7 @@ final class CampaignHeroBlock extends CampaignBlock
             'headingLevel'    => max(1, min(3, (int) ($attrs['headingLevel'] ?? 1))),
             'align'           => in_array($attrs['align'] ?? 'left', ['left', 'center'], true)
                 ? (string) $attrs['align'] : 'left',
-            'themePrimary'    => $campaign->accentColor(),
+            'styleVars'       => $this->styleVars($campaign),
         ]);
     }
 }

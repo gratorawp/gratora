@@ -6,12 +6,12 @@ defined('ABSPATH') || exit;
  * @var bool   $showMessage
  * @var bool   $showAmount
  * @var string $columns
- * @var string $themePrimary
+ * @var string $styleVars
  */
 ?>
 <section class="dono-block dono-block--supporter-wall"
          data-block="dono/supporter-wall"
-         style="--dono-accent: <?php echo esc_attr($themePrimary); ?>;">
+        <?php echo $styleVars !== '' ? ' style="' . esc_attr($styleVars) . '"' : ''; ?>>
     <?php if ($title !== '' && ! (defined('REST_REQUEST') && REST_REQUEST)): ?>
         <h3 class="dono-block__title"><?php echo esc_html($title); ?></h3>
     <?php endif; ?>

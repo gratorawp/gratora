@@ -82,6 +82,9 @@ final class CampaignGridBlock extends CampaignBlock
         return View::loadRelative(__DIR__, 'views/campaign-grid', [
             'heading' => $heading,
             'cards'   => $cards,
+            // The grid's own chrome follows the campaign the page is about.
+            // Each card keeps its own accent, since a card is another campaign.
+            'styleVars' => $this->styleVars($this->resolveCampaign($attrs)),
         ]);
     }
 }

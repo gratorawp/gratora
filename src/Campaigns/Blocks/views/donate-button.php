@@ -7,14 +7,14 @@ defined('ABSPATH') || exit;
  * @var bool    $fullWidth
  * @var ?string $formSlug
  * @var string  $formHtml
- * @var string  $themePrimary
+ * @var string  $styleVars
  */
 $alignClass = in_array($align, ['left', 'center', 'right'], true) ? "is-align-{$align}" : 'is-align-left';
 $sizeClass  = 'is-size-' . (in_array($size, ['sm', 'md', 'lg'], true) ? $size : 'md');
 ?>
 <div class="dono-block dono-block--donate-button <?php echo esc_attr($alignClass); ?><?php echo $fullWidth ? ' is-full-width' : ''; ?>"
      data-block="dono/donate-button"
-     style="--dono-accent: <?php echo esc_attr($themePrimary); ?>;">
+    <?php echo $styleVars !== '' ? ' style="' . esc_attr($styleVars) . '"' : ''; ?>>
     <?php if ($formSlug): ?>
         <button type="button"
                 class="dono-donate-button <?php echo esc_attr($sizeClass); ?>"

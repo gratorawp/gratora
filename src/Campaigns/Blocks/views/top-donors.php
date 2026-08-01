@@ -8,7 +8,7 @@ defined('ABSPATH') || exit;
  * @var bool   $showDonorCount
  * @var bool   $showRank
  * @var string $layout         list|podium
- * @var string $themePrimary
+ * @var string $styleVars
  */
 $maxAmount = $entries ? (int) ($entries[0]['amount_cents'] ?? 0) : 0;
 $donoBar = static function (int $cents) use ($maxAmount): string {
@@ -18,7 +18,7 @@ $donoBar = static function (int $cents) use ($maxAmount): string {
 ?>
 <section class="dono-block dono-block--top-donors dono-block--layout-<?php echo esc_attr($layout); ?>"
          data-block="dono/top-donors"
-         style="--dono-accent: <?php echo esc_attr($themePrimary); ?>;">
+        <?php echo $styleVars !== '' ? ' style="' . esc_attr($styleVars) . '"' : ''; ?>>
     <?php if ($title !== '' && ! (defined('REST_REQUEST') && REST_REQUEST)): ?>
         <h3 class="dono-block__title"><?php echo esc_html($title); ?></h3>
     <?php endif; ?>

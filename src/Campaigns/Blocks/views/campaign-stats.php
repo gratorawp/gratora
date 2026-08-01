@@ -9,9 +9,10 @@ defined('ABSPATH') || exit;
  * @var bool   $showDonations
  * @var bool   $showDonors
  * @var string $align
+ * @var string $styleVars
  */
 ?>
-<section class="dono-block dono-block--stats is-align-<?php echo esc_attr($align); ?>" data-block="dono/campaign-stats">
+<section class="dono-block dono-block--stats is-align-<?php echo esc_attr($align); ?>" data-block="dono/campaign-stats"<?php echo $styleVars !== '' ? ' style="' . esc_attr($styleVars) . '"' : ''; ?>>
     <?php if ($showRaised): ?>
         <div class="dono-stat">
             <div class="dono-stat__value"><?php echo esc_html(\Dono\Foundation\Helpers\Money::compact($raisedCents, $currency)); ?></div>

@@ -137,7 +137,7 @@ final class SupporterWallBlock extends CampaignBlock
                 'showMessage'  => $showMessage,
                 'showAmount'   => (bool) ($attrs['showAmount'] ?? false),
                 'columns'      => $columns,
-                'themePrimary' => $campaign->accentColor(),
+                'styleVars' => $this->styleVars($campaign),
             ]);
         }
 
@@ -178,7 +178,7 @@ final class SupporterWallBlock extends CampaignBlock
             'showMessage'  => $showMessage,
             'showAmount'   => (bool) ($attrs['showAmount'] ?? false),
             'columns'      => $columns,
-            'themePrimary' => $campaign->accentColor(),
+            'styleVars' => $this->styleVars($campaign),
         ]);
     }
 }

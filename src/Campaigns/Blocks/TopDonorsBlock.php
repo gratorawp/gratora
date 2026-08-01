@@ -102,7 +102,7 @@ final class TopDonorsBlock extends CampaignBlock
             'showDonorCount' => (bool) ($attrs['showDonorCount'] ?? false),
             'layout'         => (string) ($attrs['layout'] ?? 'list') === 'podium' ? 'podium' : 'list',
             'showRank'       => (bool) ($attrs['showRank'] ?? true),
-            'themePrimary'   => $campaign->accentColor(),
+            'styleVars'      => $this->styleVars($campaign),
         ]);
     }
 }

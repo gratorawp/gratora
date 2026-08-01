@@ -134,6 +134,16 @@ final class Tokens
                 'step'    => 1,
                 'help'    => __('Buttons, inputs, chips and other controls.', 'dono'),
             ],
+            'dono-radius-lg' => [
+                'group'   => 'radius',
+                'label'   => __('Large corner radius', 'dono'),
+                'default' => '18px',
+                'control' => 'range',
+                'min'     => 0,
+                'max'     => 36,
+                'step'    => 1,
+                'help'    => __('The campaign hero and other large surfaces.', 'dono'),
+            ],
             'dono-border-width' => [
                 'group'   => 'radius',
                 'label'   => __('Border width', 'dono'),

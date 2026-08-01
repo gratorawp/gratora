@@ -3,9 +3,10 @@ defined('ABSPATH') || exit;
 /**
  * @var string $heading
  * @var array  $cards   list of ['title','blurb','imageUrl','url','raised','goalLabel','percent','accent']
+ * @var string $styleVars
  */
 ?>
-<section class="dono-block dono-block--grid" data-block="dono/campaign-grid">
+<section class="dono-block dono-block--grid" data-block="dono/campaign-grid"<?php echo $styleVars !== '' ? ' style="' . esc_attr($styleVars) . '"' : ''; ?>>
     <div class="dono-grid__head">
         <h2 class="dono-grid__title"><?php echo esc_html($heading); ?></h2>
     </div>

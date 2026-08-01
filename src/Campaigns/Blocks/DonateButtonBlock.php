@@ -73,7 +73,7 @@ final class DonateButtonBlock extends CampaignBlock
             'fullWidth'    => (bool) ($attrs['fullWidth'] ?? false),
             'formSlug'     => $form?->slug,
             'formHtml'     => $formHtml,
-            'themePrimary' => $campaign->accentColor(),
+            'styleVars' => $this->styleVars($campaign),
         ]);
     }
 }

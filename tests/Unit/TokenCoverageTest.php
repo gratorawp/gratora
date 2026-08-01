@@ -24,15 +24,20 @@ final class TokenCoverageTest extends TestCase
         $root  = dirname(__DIR__, 2);
         $globs = [
             '/assets/donation-form/runtime.scss',
-            '/assets/campaign-blocks/blocks.scss',
+            '/assets/admin/campaign-blocks/blocks.scss',
             '/assets/donor-portal/portal.scss',
         ];
         $css = '';
         foreach ($globs as $rel) {
             $path = $root . $rel;
-            if (is_file($path)) {
-                $css .= file_get_contents($path) . "\n";
+            // Skipping a missing file silently is how the campaign block
+            // stylesheet went unread here: the path was stale, so every token
+            // that only that sheet uses passed vacuously. A path in this list
+            // is a claim that the file exists.
+            if (! is_file($path)) {
+                throw new \RuntimeException("frontend stylesheet missing: {$rel}");
             }
+            $css .= file_get_contents($path) . "\n";
         }
         // The block server-renderers set --dono-accent inline on their wrappers.
         foreach (glob($root . '/src/Campaigns/Blocks/views/*.php') ?: [] as $view) {
