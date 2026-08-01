@@ -557,6 +557,23 @@ final class DonationsController
         $response = new WP_REST_Response($shaped, 200);
         $response->header('X-WP-Total',      (string) $result['total']);
         $response->header('X-WP-TotalPages', (string) max(1, (int) ceil($result['total'] / max(1, $perPage))));
+
+        // Only when the caller did not ask about test rows: otherwise they are
+        // already looking at exactly what they chose.
+        if ($request['is_test'] === null) {
+            $response->header('X-Dono-Test-Hidden', (string) $this->donations->countTestHidden([
+                'status'             => $request['status'] !== null ? (string) $request['status'] : null,
+                'search'             => $search !== '' ? $search : null,
+                'matching_donor_ids' => $matchingDonorIds,
+                'donor_id'           => $donorId,
+                'campaign_id'        => $request['campaign_id'] !== null ? (int) $request['campaign_id'] : null,
+                'form_id'            => $request['form_id']     !== null ? (int) $request['form_id']     : null,
+                'gateway'            => $request['gateway']     !== null ? (string) $request['gateway'] : null,
+                'created_from'       => $request['created_from'] !== null ? (string) $request['created_from'] : null,
+                'created_to'         => $request['created_to']   !== null ? (string) $request['created_to']   : null,
+            ]));
+        }
+
         return $response;
     }
 

@@ -62,6 +62,10 @@ export default function List() {
     const [ actionError, setActionError ] = useState( null );
     const [ recording, setRecording ] = useState( false );
     const [ fetchError, setFetchError ]   = useState( null );
+    // Test donations are excluded unless asked for. Saying how many were left
+    // out turns a silent exclusion into a visible one: an admin who donates
+    // while the org is in test mode otherwise watches it vanish.
+    const [ testHidden, setTestHidden ]   = useState( 0 );
     const [ createdFrom, setCreatedFrom ] = useState( '' );
     const [ createdTo,   setCreatedTo ]   = useState( '' );
     const [ stats, setStats ]     = useState( null );
@@ -114,12 +118,14 @@ export default function List() {
                 const items = await res.json();
                 setData( Array.isArray( items ) ? items : [] );
                 setTotal( parseInt( res.headers.get( 'X-WP-Total' ) || '0', 10 ) );
+                setTestHidden( parseInt( res.headers.get( 'X-Dono-Test-Hidden' ) || '0', 10 ) );
             } )
             .catch( ( err ) => {
                 if ( aborted ) return;
                 setFetchError( err?.message || __( 'Failed to load donations.', 'dono' ) );
                 setData( [] );
                 setTotal( 0 );
+                setTestHidden( 0 );
             } )
             .finally( () => ! aborted && setLoading( false ) );
 
@@ -457,6 +463,35 @@ export default function List() {
             { ( actionError || fetchError ) && (
                 <div className="dono-advanced-notice dono-advanced-notice--error" style={ { marginBottom: 12 } }>
                     { actionError || fetchError }
+                </div>
+            ) }
+
+            { testHidden > 0 && (
+                <div className="dono-advanced-notice" style={ { marginBottom: 12 } }>
+                    { sprintf(
+                        /* translators: %d: number of test donations hidden. */
+                        _n(
+                            '%d test donation is hidden.',
+                            '%d test donations are hidden.',
+                            testHidden,
+                            'dono'
+                        ),
+                        testHidden
+                    ) }
+                    { ' ' }
+                    <Btn
+                        variant="link"
+                        onClick={ () => setView( ( v ) => ( {
+                            ...v,
+                            page: 1,
+                            filters: [
+                                ...( v.filters || [] ).filter( ( f ) => f.field !== 'is_test' ),
+                                { field: 'is_test', operator: 'is', value: 'yes' },
+                            ],
+                        } ) ) }
+                    >
+                        { __( 'Show them', 'dono' ) }
+                    </Btn>
                 </div>
             ) }
 

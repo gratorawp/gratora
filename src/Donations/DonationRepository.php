@@ -109,6 +109,23 @@ final class DonationRepository
      * @param array{page?:int,per_page?:int,orderby?:string,order?:string,status?:string,search?:string,matching_donor_ids?:array<int>} $args
      * @return array{items: array<Donation>, total: int}
      */
+    /**
+     * How many test donations the same filters would have matched.
+     *
+     * The list is live-only unless asked otherwise, which is right - but it
+     * excluded them in total silence, so an admin donating while the org is in
+     * test mode watched their donation vanish. This is what the screen needs to
+     * say so.
+     *
+     * @param array<string,mixed> $args
+     */
+    public function countTestHidden(array $args = []): int
+    {
+        $args['is_test'] = true;
+
+        return (int) $this->applyAdminFilters(Donation::query(), $args)->count();
+    }
+
     public function listAdmin(array $args = []): array
     {
         $page    = max(1, (int) ($args['page']     ?? 1));
