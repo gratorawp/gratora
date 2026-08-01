@@ -29,7 +29,7 @@ final class DonateButtonBlock extends CampaignBlock
     public function attributes(): array
     {
         return $this->campaignIdAttr() + [
-            'label'     => ['type' => 'string',  'default' => 'Donate now'],
+            'label'     => ['type' => 'string',  'default' => ''],
             'align'     => ['type' => 'string',  'default' => 'left'],
             'size'      => ['type' => 'string',  'default' => 'md'],
             'fullWidth' => ['type' => 'boolean', 'default' => false],
@@ -66,7 +66,9 @@ final class DonateButtonBlock extends CampaignBlock
         }
 
         return View::loadRelative(__DIR__, 'views/donate-button', [
-            'label'        => (string) ($attrs['label'] ?? 'Donate now'),
+            // ?: not ??: the attribute exists and is an empty string when the
+            // organiser has not renamed it, so ?? would hand the view ''.
+            'label'        => (string) ($attrs['label'] ?? '') ?: __('Donate now', 'dono'),
             'align'        => (string) ($attrs['align'] ?? 'left'),
             'size'         => in_array($attrs['size'] ?? 'md', ['sm', 'md', 'lg'], true)
                 ? (string) $attrs['size'] : 'md',

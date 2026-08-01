@@ -21,7 +21,7 @@ const ALIGN_OPTIONS = [
 ];
 
 function Edit( { attributes, setAttributes } ) {
-    const { label = 'Donate now', align = 'left', showSummary = true } = attributes;
+    const { label = '', align = 'left', showSummary = true } = attributes;
 
     const justify = {
         left:   'flex-start',
@@ -101,7 +101,7 @@ export default function register( api ) {
         icon:       BlockIcons[ 'submit-button' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },
         attributes: {
-            label:       { type: 'string',  default: 'Donate now' },
+            label:       { type: 'string',  default: '' },
             align:       { type: 'string',  default: 'left' },
             showSummary: { type: 'boolean', default: true },
         },

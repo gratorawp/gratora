@@ -384,7 +384,7 @@ registerBlockType( 'dono/donate-button', {
     icon:       'heart',
     attributes: {
         campaignId: { type: 'integer', default: 0 },
-        label:      { type: 'string',  default: 'Donate now' },
+        label:      { type: 'string',  default: '' },
         align:      { type: 'string',  default: 'left' },
         size:       { type: 'string',  default: 'md' },
         fullWidth:  { type: 'boolean', default: false },
@@ -412,6 +412,7 @@ registerBlockType( 'dono/donate-button', {
                         label={ __( 'Label', 'dono' ) }
                         value={ attributes.label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
+                        placeholder={ __( 'Donate now', 'dono' ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
