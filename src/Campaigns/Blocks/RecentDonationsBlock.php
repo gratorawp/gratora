@@ -44,7 +44,7 @@ final class RecentDonationsBlock extends CampaignBlock
     public function render(array $attrs, string $content): string
     {
         $campaign = $this->resolveCampaign($attrs);
-        if (! $campaign) return $this->notBoundNotice();
+        if (! $campaign) return $this->notBoundNotice($attrs);
 
         $limit         = max(1, min(50, (int) ($attrs['limit'] ?? 10)));
         $showAnonymous = (bool) ($attrs['showAnonymous'] ?? true);

@@ -83,13 +83,38 @@ abstract class CampaignBlock implements Block
         return $id > 0 ? $this->campaigns->findRenderable($id) : null;
     }
 
-    protected function notBoundNotice(): string
+    /**
+     * Why this block rendered nothing, for someone who can do something about it.
+     *
+     * It always said "not bound to a campaign", which is one of two reasons and
+     * usually the wrong one. resolveCampaign() also returns null for a campaign
+     * that exists and is bound but is not renderable for this viewer, a draft or
+     * an archived one, and telling an editor to go and pick a campaign they had
+     * already picked sent them looking for a setting that was not wrong.
+     */
+    protected function notBoundNotice(array $attrs = []): string
     {
         if (! is_user_logged_in() || ! current_user_can('edit_posts')) {
             return '';
         }
-        return '<div class="dono-block-notice">'
-            . esc_html__('This block is not bound to a campaign. Pick one in the block sidebar.', 'dono')
-            . '</div>';
+
+        $id = (int) ($attrs['campaignId'] ?? 0);
+        if ($id === 0) {
+            global $post;
+            if ($post instanceof \WP_Post) {
+                $id = (int) get_post_meta($post->ID, '_dono_campaign_id', true);
+            }
+        }
+
+        $bound = $id > 0 ? $this->campaigns->findById($id) : null;
+        $message = $bound === null
+            ? __('This block is not bound to a campaign. Pick one in the block sidebar.', 'dono')
+            : sprintf(
+                /* translators: %s: the campaign's status, e.g. "draft". */
+                __('This campaign is %s, so this block is hidden from visitors. Publish the campaign to show it.', 'dono'),
+                (string) $bound->status
+            );
+
+        return '<div class="dono-block-notice">' . esc_html($message) . '</div>';
     }
 }

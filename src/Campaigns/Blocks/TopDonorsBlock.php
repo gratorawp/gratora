@@ -45,7 +45,7 @@ final class TopDonorsBlock extends CampaignBlock
     public function render(array $attrs, string $content): string
     {
         $campaign = $this->resolveCampaign($attrs);
-        if (! $campaign) return $this->notBoundNotice();
+        if (! $campaign) return $this->notBoundNotice($attrs);
 
         $limit = max(3, min(50, (int) ($attrs['limit'] ?? 10)));
         $hideAnonymous = (bool) ($attrs['hideAnonymous'] ?? false);

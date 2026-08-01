@@ -49,7 +49,7 @@ final class SupporterWallBlock extends CampaignBlock
     public function render(array $attrs, string $content): string
     {
         $campaign = $this->resolveCampaign($attrs);
-        if (! $campaign) return $this->notBoundNotice();
+        if (! $campaign) return $this->notBoundNotice($attrs);
 
         $limit          = max(5, min(500, (int) ($attrs['limit'] ?? 50)));
         $sort           = (string) ($attrs['sort'] ?? 'recent') === 'alphabetical' ? 'alphabetical' : 'recent';

@@ -31,7 +31,7 @@ final class CampaignStatsBlock extends CampaignBlock
     public function render(array $attrs, string $content): string
     {
         $campaign = $this->resolveCampaign($attrs);
-        if (! $campaign) return $this->notBoundNotice();
+        if (! $campaign) return $this->notBoundNotice($attrs);
 
         return View::loadRelative(__DIR__, 'views/campaign-stats', [
             'raisedCents'    => (int) $campaign->raised_cents,

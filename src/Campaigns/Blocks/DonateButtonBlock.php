@@ -39,7 +39,7 @@ final class DonateButtonBlock extends CampaignBlock
     public function render(array $attrs, string $content): string
     {
         $campaign = $this->resolveCampaign($attrs);
-        if (! $campaign) return $this->notBoundNotice();
+        if (! $campaign) return $this->notBoundNotice($attrs);
 
         $form = $this->forms->publishedForCampaign(
             (int) $campaign->id,

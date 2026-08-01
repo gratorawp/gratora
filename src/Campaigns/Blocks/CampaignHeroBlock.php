@@ -35,7 +35,7 @@ final class CampaignHeroBlock extends CampaignBlock
     public function render(array $attrs, string $content): string
     {
         $campaign = $this->resolveCampaign($attrs);
-        if (! $campaign) return $this->notBoundNotice();
+        if (! $campaign) return $this->notBoundNotice($attrs);
 
         $imageUrl = $campaign->image_attachment_id
             ? wp_get_attachment_image_url($campaign->image_attachment_id, 'large')
