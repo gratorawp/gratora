@@ -685,7 +685,7 @@ function OverviewTab( { campaign, nav, onError } ) {
         },
         'top-forms': {
             title: __( 'Top forms', 'dono' ),
-            render: () => <TopForms rows={ m.top_forms } currency={ defaultCurrency() } />,
+            render: () => <TopForms rows={ m.top_forms } currency={ defaultCurrency() } donationsCount={ m.donations_count } />,
         },
         channel: {
             title: __( 'By channel', 'dono' ),
@@ -790,15 +790,23 @@ function RecentDonations( { rows } ) {
     );
 }
 
-function TopForms( { rows, currency } ) {
+function TopForms( { rows, currency, donationsCount = 0 } ) {
     const total = rows.reduce( ( s, r ) => s + r.amount_cents, 0 );
     if ( rows.length === 0 ) {
+        // Two different nothings. A campaign with donations that came in
+        // without a form, recorded by hand or through the API, was told to wait
+        // for donations it had already received.
+        const gotDonations = donationsCount > 0;
         return (
             <EmptyState
                 compact
                 icon={ <ListChecks size={ 22 } strokeWidth={ 1.75 } /> }
-                title={ __( 'No form data yet', 'dono' ) }
-                body={ __( 'Once donations come in, this card ranks your forms by total raised.', 'dono' ) }
+                title={ gotDonations
+                    ? __( 'No donations through a form yet', 'dono' )
+                    : __( 'No form data yet', 'dono' ) }
+                body={ gotDonations
+                    ? __( 'This campaign\'s donations were recorded without a form, so there is nothing to rank. Donations made through a donation form appear here.', 'dono' )
+                    : __( 'Once donations come in, this card ranks your forms by total raised.', 'dono' ) }
             />
         );
     }
