@@ -60,8 +60,14 @@ final class AdvancedController
             'permission_callback' => [$this, 'canAccess'],
             'args'                => [
                 'scope' => [
-                    'type'    => 'string',
-                    'enum'    => ['all', 'donors', 'funds', 'campaigns', 'forms'],
+                    'type' => 'string',
+                    // Add-ons denormalise their own counters from the same
+                    // donation rows and drift the same way, so they can add a
+                    // scope rather than ship a second Recalculate button.
+                    'enum' => array_values(array_unique(array_merge(
+                        ['all', 'donors', 'funds', 'campaigns', 'forms'],
+                        array_map('strval', (array) apply_filters('dono.recalculate.scopes', []))
+                    ))),
                     'default' => 'all',
                 ],
             ],
@@ -155,6 +161,11 @@ final class AdvancedController
                 $counts['forms']++;
             }
         }
+
+        // Add-ons recompute theirs from the same source rows. Fired after the
+        // core passes so anything derived from a campaign total is rebuilt from
+        // a campaign total that is already correct.
+        $counts = (array) apply_filters('dono.recalculate.counts', $counts, $scope);
 
         return new WP_REST_Response([
             'ok'     => true,
