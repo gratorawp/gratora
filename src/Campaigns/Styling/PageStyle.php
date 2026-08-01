@@ -31,23 +31,46 @@ final class PageStyle
     private const BODY_CLASS = 'dono-campaign-styled';
 
     /**
-     * A handle with no stylesheet behind it. Registering our own decouples the
-     * tokens from whether a campaign block happens to be on the page, which is
-     * what gates the block stylesheet: a page holding only an organiser's own
-     * headings and paragraphs still gets its campaign's style.
+     * The campaign page foundation, and the campaign's own tokens inlined onto
+     * it. One handle for both so the tokens cannot arrive without the rules
+     * that read them, and so an add-on can depend on the foundation by name.
+     *
+     * Deliberately not the block stylesheet's handle: that one is enqueued only
+     * when a campaign block is on the page, and a page holding nothing but an
+     * organiser's own headings and paragraphs still belongs to its campaign.
      */
-    private const HANDLE = 'dono-campaign-style';
+    public const HANDLE = 'dono-campaign-page';
 
     private ?Campaign $campaign = null;
 
     public function register(): void
     {
         add_action('wp', [$this, 'resolve']);
+        // Registered early and unconditionally: an add-on naming it as a
+        // dependency must be able to resolve it even where we do not enqueue.
+        add_action('wp_enqueue_scripts', [$this, 'registerStyle'], 1);
         add_action('wp_enqueue_scripts', [$this, 'emit'], 20);
         add_filter('body_class', [$this, 'bodyClass']);
         // enqueue_block_assets is the hook that reaches the iframed editor
         // canvas; enqueue_block_editor_assets does not.
+        add_action('enqueue_block_assets', [$this, 'registerStyle'], 1);
         add_action('enqueue_block_assets', [$this, 'emitForEditor'], 20);
+    }
+
+    public function registerStyle(): void
+    {
+        if (wp_style_is(self::HANDLE, 'registered')) {
+            return;
+        }
+        $path = DONO_DIR . 'assets/campaign-page/page.css';
+        wp_register_style(
+            self::HANDLE,
+            DONO_URL . 'assets/campaign-page/page.css',
+            [],
+            // mtime, not DONO_VERSION: the file changes without a release and a
+            // stale cache means invisible restyles.
+            (string) (@filemtime($path) ?: DONO_VERSION)
+        );
     }
 
     /**
@@ -114,9 +137,7 @@ final class PageStyle
             return;
         }
 
-        if (! wp_style_is(self::HANDLE, 'registered')) {
-            wp_register_style(self::HANDLE, false, [], DONO_VERSION);
-        }
+        $this->registerStyle();
         wp_enqueue_style(self::HANDLE);
         wp_add_inline_style(self::HANDLE, '.' . self::BODY_CLASS . '{' . $vars . '}');
     }
@@ -148,9 +169,7 @@ final class PageStyle
             return;
         }
 
-        if (! wp_style_is(self::HANDLE, 'registered')) {
-            wp_register_style(self::HANDLE, false, [], DONO_VERSION);
-        }
+        $this->registerStyle();
         wp_enqueue_style(self::HANDLE);
         wp_add_inline_style(self::HANDLE, '.editor-styles-wrapper{' . $vars . '}');
     }
