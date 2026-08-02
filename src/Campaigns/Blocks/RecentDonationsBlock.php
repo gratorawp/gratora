@@ -105,7 +105,7 @@ final class RecentDonationsBlock extends CampaignBlock
             // draft or finished campaign has nothing to offer.
             'donateUrl'    => $campaign->acceptsDonations() ? '#dono-form' : '',
             'donateLabel'  => __('Donate', 'dono'),
-            'emptySubText' => __('The first one tends to be what convinces the next.', 'dono'),
+            'emptySubText' => __('Donations tend to follow the first one.', 'dono'),
             'emptyIcon'    => 'donation',
             'entries'      => $entries,
             'showAmount'   => (bool) ($attrs['showAmount'] ?? true),
