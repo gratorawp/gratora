@@ -28,9 +28,32 @@
 
 /phpunit.xml
 /phpunit.xml.dist
+# Excluding phpunit.xml.dist and not this one shipped the integration config to
+# every customer. Glob what belongs to the suite rather than listing variants.
+/phpunit-integration.xml.dist
+/phpunit*.xml
+/phpunit*.xml.dist
 /.phpunit.result.cache
+/.phpunit.cache
 /composer.lock
 /package-lock.json
+
+# End-to-end suite and everything that drives it.
+/tests-e2e
+/test-results
+/playwright.config.ts
+/playwright-report
+/TESTING.md
+/bin/install-wp-tests.sh
+
+# Local development environment, not the plugin.
+/.idea
+/.vscode
+/.wp-env.json
+/.wp-env.override.json
+# Tracked and currently clean, but a tracked .npmrc is usually a registry
+# credential and this is the wrong place to find out.
+/.npmrc
 
 /README.md
 /ROADMAP.md
@@ -49,3 +72,11 @@ Thumbs.db
 *.zip
 *.log
 *.map
+
+# Vendor test suites. Strauss copies dependencies whole, so their own tests and
+# fixtures come with them: fpdi ships 30 MB of sample PDFs and mpdf 5 MB more,
+# which is over half the plugin and none of it runs.
+/vendor-prefixed/setasign/fpdi/tests
+/vendor-prefixed/setasign/fpdi/local-tests
+/vendor-prefixed/mpdf/mpdf/tests
+/vendor-prefixed/mpdf/mpdf/phpstan-baseline.neon
