@@ -689,6 +689,18 @@
         display: grid;
         gap: 12px;
 
+        // A name field is already a two-up row of its own. Dropped into one
+        // column of a row alongside another field it became a row inside a
+        // row: three inputs across one line, and in a sidebar column that is
+        // about 77px each, too narrow to type a name into.
+        //
+        // So a row holding one stops being a row. Spanning only the name would
+        // leave whatever sits beside it stranded at half width with empty space
+        // alongside, which looks like a mistake rather than a layout.
+        &:has(> .dono-form__row--two-up) > * {
+            grid-column: 1 / -1;
+        }
+
         @media (max-width: 480px) {
             grid-template-columns: 1fr !important;
         }
