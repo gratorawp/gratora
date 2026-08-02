@@ -16,6 +16,7 @@ export default function AdvancedPanel( { s, active } ) {
     const [ recalcScope, setRecalcScope ]   = useState( 'all' );
     const [ recalcRunning, setRecalcRunning ] = useState( false );
     const [ recalcResult, setRecalcResult ]   = useState( null );
+    const [ upgrading, setUpgrading ]        = useState( false );
 
     const scopes = info?.recalc_scopes?.length
         ? info.recalc_scopes
@@ -75,6 +76,26 @@ export default function AdvancedPanel( { s, active } ) {
             setNotice( { type: 'error', text: err?.message || __( 'Import failed. Make sure the file is a Dono settings export.', 'dono' ) } );
         } finally {
             setImporting( false );
+        }
+    };
+
+    const doRunUpgrades = async () => {
+        setUpgrading( true );
+        setNotice( null );
+        try {
+            const res = await apiFetch( {
+                path:   '/dono/v1/admin/advanced/run-upgrades',
+                method: 'POST',
+            } );
+            const left = res?.remaining?.length || 0;
+            setNotice( left > 0
+                ? { type: 'success', text: __( 'Progress made. There is more to do - run it again.', 'dono' ) }
+                : { type: 'success', text: __( 'Data updates finished.', 'dono' ) } );
+            loadInfo();
+        } catch ( err ) {
+            setNotice( { type: 'error', text: err?.message || __( 'Could not finish the data updates.', 'dono' ) } );
+        } finally {
+            setUpgrading( false );
         }
     };
 
@@ -189,6 +210,29 @@ export default function AdvancedPanel( { s, active } ) {
                             </li>
                         ) ) }
                     </ul>
+                </Card>
+            ) }
+
+            { ( info?.pending_upgrades?.length > 0 ) && (
+                <Card
+                    title={ __( 'Data updates are outstanding', 'dono' ) }
+                    sub={ __( 'These run by themselves in the background. If they are still here after a few minutes, this site\'s scheduled tasks are not running and you can finish them here.', 'dono' ) }
+                >
+                    <ul className="dono-advanced-cron">
+                        { info.pending_upgrades.map( ( u ) => (
+                            <li key={ u.id }>{ u.description }</li>
+                        ) ) }
+                    </ul>
+                    <div className="dono-advanced-actions" style={ { marginTop: 12 } }>
+                        <Btn
+                            variant="primary"
+                            onClick={ doRunUpgrades }
+                            disabled={ upgrading }
+                            isBusy={ upgrading }
+                        >
+                            { upgrading ? __( 'Working…', 'dono' ) : __( 'Run them now', 'dono' ) }
+                        </Btn>
+                    </div>
                 </Card>
             ) }
 

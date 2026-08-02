@@ -6,6 +6,7 @@ namespace Dono\Rest\Admin;
 
 use Dono\Campaigns\Campaign;
 use Dono\Currency\FxBackfill;
+use Dono\Foundation\Upgrade\UpgradeRunner;
 use Dono\Donations\AggregateSyncer;
 use Dono\Donors\Donor;
 use Dono\Forms\Form;
@@ -29,6 +30,7 @@ final class AdvancedController
         private AggregateSyncer $aggregates,
         private \Dono\Mail\Mailer $mailer,
         private FxBackfill $fxBackfill,
+        private UpgradeRunner $upgrades,
     ) {
     }
 
@@ -53,6 +55,12 @@ final class AdvancedController
         register_rest_route(self::NAMESPACE, '/admin/advanced/import', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'import'],
+            'permission_callback' => [$this, 'canManage'],
+        ]);
+
+        register_rest_route(self::NAMESPACE, '/admin/advanced/run-upgrades', [
+            'methods'             => WP_REST_Server::CREATABLE,
+            'callback'            => [$this, 'runUpgrades'],
             'permission_callback' => [$this, 'canManage'],
         ]);
 
@@ -306,6 +314,29 @@ final class AdvancedController
         return $core;
     }
 
+    /**
+     * Drain the outstanding data migrations here and now.
+     *
+     * The queue is the normal path; this is the way back when cron is dead,
+     * which is not a rare state on shared hosting and is not something a site
+     * owner can fix from the plugin. Bounded so the request still returns:
+     * whatever is left stays pending and the button can be pressed again.
+     */
+    public function runUpgrades(): WP_REST_Response
+    {
+        $steps = 0;
+        while ($steps < 25 && $this->upgrades->step()) {
+            $steps++;
+        }
+
+        return new WP_REST_Response([
+            'remaining' => array_map(
+                static fn ($r): array => ['id' => $r->id(), 'description' => $r->description()],
+                $this->upgrades->pending()
+            ),
+        ], 200);
+    }
+
     public function info(): WP_REST_Response
     {
         global $wpdb;
@@ -338,6 +369,13 @@ final class AdvancedController
             // for their currency. Empty on a healthy site, which is why the
             // screen only says anything when it is not.
             'unconverted_donations' => FxBackfill::pending(),
+            // A data migration that never runs leaves the site quietly
+            // half-migrated, and Action Scheduler rides WP-cron, which plenty
+            // of hosts disable. The screen has to be able to say so.
+            'pending_upgrades'      => array_map(
+                static fn ($r): array => ['id' => $r->id(), 'description' => $r->description()],
+                $this->upgrades->pending()
+            ),
             'recalc_scopes'         => array_map(
                 static fn ($slug, $label): array => ['value' => $slug, 'label' => $label],
                 array_keys(self::scopes()),

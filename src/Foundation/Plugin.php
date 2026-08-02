@@ -12,6 +12,8 @@ use Dono\Donors\Portal\PortalPage;
 use Dono\Foundation\Auth\Capabilities;
 use Dono\Foundation\Container\Container;
 use Dono\Foundation\Modules\ModuleManager;
+use Dono\Foundation\Upgrade\UpgradeJob;
+use Dono\Foundation\Upgrade\UpgradeRunner;
 use Dono\Foundation\Time\SystemClock;
 use Dono\Funds\FundRepository;
 use Dono\Onboarding\Onboarding;
@@ -95,6 +97,13 @@ final class Plugin
             }
             self::migrateSchema();
             update_option('dono_db_version', DONO_DB_VERSION, false);
+
+            // Schema first, then data. A routine that backfills a column the
+            // same release added would otherwise run against a table without
+            // it. Queued rather than run here: a backfill over a few hundred
+            // thousand donations does not belong in the request that noticed
+            // the plugin had been updated.
+            self::instance()->container->get(UpgradeJob::class)->start();
         }, 99);
 
         // Re-ensure the donor portal page once per DONO_VERSION bump so existing
@@ -134,7 +143,17 @@ final class Plugin
     /** Run migrations, set capabilities, seed onboarding, flush rewrite rules. */
     public static function onActivation(): void
     {
+        $fresh = get_option('dono_db_version', null) === null;
+
         self::migrateSchema();
+
+        // A new site has nothing to migrate. Stamping the routines instead of
+        // running them keeps a backfill from walking an empty table, and stops
+        // one that assumes the shape an older release wrote from ever seeing a
+        // table that release never touched.
+        if ($fresh) {
+            UpgradeRunner::markAllDone(self::instance()->container->get(UpgradeRunner::class));
+        }
         // Stamp the schema version so the boot-time gate doesn't re-migrate on
         // the first request after activation.
         update_option('dono_db_version', DONO_DB_VERSION, false);

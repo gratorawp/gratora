@@ -51,6 +51,10 @@ use Dono\Donors\DonorPurge;
 use Dono\Donors\DonorRepository;
 use Dono\Donors\DonorService;
 use Dono\Donors\Erasure\AnalyticsEventHandler;
+use Dono\Donors\Erasure\ClearHashesOnAlreadyErasedConsents;
+use Dono\Foundation\Upgrade\UpgradeRunner;
+use Dono\Foundation\Upgrade\UpgradeJob;
+use Dono\Foundation\Upgrade\UpgradeNotice;
 use Dono\Donors\Erasure\CoreDonorDataHandler;
 use Dono\Donors\Erasure\ErasureRegistry;
 use Dono\Donors\Erasure\WebhookLogHandler;
@@ -698,6 +702,22 @@ final class CoreModule implements DonoModule
         ));
         $c->get(RecurringResumer::class)->register();
 
+        // Data migrations. dbDelta reconciles shape and nothing else, so
+        // anything that has to touch contents lives here.
+        $c->bind(UpgradeRunner::class, fn (Container $c) => new UpgradeRunner([
+            new ClearHashesOnAlreadyErasedConsents(),
+        ]));
+
+        $c->bind(UpgradeJob::class, fn (Container $c) => new UpgradeJob(
+            $c->get(AsyncDispatcher::class),
+            $c->get(UpgradeRunner::class),
+        ));
+        $c->get(UpgradeJob::class)->register();
+
+        if (is_admin()) {
+            (new UpgradeNotice($c->get(UpgradeRunner::class)))->register();
+        }
+
         $c->bind(CampaignCancelRecurringJob::class, fn (Container $c) => new CampaignCancelRecurringJob(
             $c->get(AsyncDispatcher::class),
             $c->get(RecurringCanceller::class),
@@ -754,6 +774,7 @@ final class CoreModule implements DonoModule
                 $c->get( AggregateSyncer::class),
                 $c->get( Mailer::class),
                 new FxBackfill($c->get( FxRates::class)),
+                $c->get(UpgradeRunner::class),
             ),
             new OnboardingController(
                 $c->get( CampaignService::class),
