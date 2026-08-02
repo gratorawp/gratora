@@ -28,7 +28,7 @@ final class SchemaVersionTest extends IntegrationTestCase
      * sha256 of every registered model's compiled CREATE TABLE, in class order.
      * Update it in the same commit as the DONO_DB_VERSION bump.
      */
-    private const FINGERPRINT = 'a0d280998bafe663150caf6370167853220b962983b099a0ed7889d2e4f9e4a5';
+    private const FINGERPRINT = '4a1cc6a4e7ebf309168062c309e83385e2f620de8da96de5645a562374dae745';
 
     public function test_the_schema_matches_the_declared_db_version(): void
     {

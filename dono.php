@@ -35,7 +35,7 @@ define('DONO_VERSION', '1.0.0');
 // stays put through a development cycle. Gating migration on the release
 // version meant a column added mid-cycle never migrated, and the first query
 // against it died with "unknown column" until someone reactivated the plugin.
-define('DONO_DB_VERSION', '4');
+define('DONO_DB_VERSION', '5');
 define('DONO_FILE', __FILE__);
 define('DONO_DIR', plugin_dir_path(__FILE__));
 define('DONO_URL', plugin_dir_url(__FILE__));
