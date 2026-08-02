@@ -248,6 +248,55 @@ final class StripeSubscriptionRenewalTest extends IntegrationTestCase
         $this->assertNotNull($cancellationMail, 'subscription_cancelled email goes out');
     }
 
+    public function test_a_test_signed_event_cannot_renew_a_live_plan(): void
+    {
+        $plan = $this->seedPlan();
+        $plan->is_test = false;
+        $plan->save();
+
+        $before = (int) $plan->payments_count;
+
+        // Signed with the test webhook secret, which is a far softer credential
+        // than the live one: staging env files, CI, contractors. Nothing in the
+        // event body decides the mode, so claiming livemode changes nothing.
+        $this->postWebhook('invoice.payment_succeeded', $this->buildInvoice($plan, 500000, 'subscription_cycle'));
+
+        $renewal = Donation::query()->where('recurring_plan_id', $plan->id)->orderBy('id', 'DESC')->get();
+        $this->assertNull($renewal, 'no live money is banked on a test-mode signature');
+
+        $fresh = \Dono\Recurring\RecurringPlan::query()->find('id', (int) $plan->id);
+        $this->assertSame($before, (int) $fresh->payments_count, 'and the live plan counters do not move');
+    }
+
+    public function test_a_test_signed_event_cannot_cancel_a_live_plan(): void
+    {
+        $plan = $this->seedPlan();
+        $plan->is_test = false;
+        $plan->save();
+
+        $this->postWebhook('customer.subscription.deleted', [
+            'id'     => (string) $plan->gateway_subscription_id,
+            'status' => 'canceled',
+        ]);
+
+        $fresh = \Dono\Recurring\RecurringPlan::query()->find('id', (int) $plan->id);
+        $this->assertSame('active', (string) $fresh->status, 'a test secret cannot stop a live donor\'s giving');
+    }
+
+    public function test_a_test_signed_failure_cannot_touch_a_live_plan(): void
+    {
+        $plan = $this->seedPlan();
+        $plan->is_test = false;
+        $plan->save();
+
+        $before = (int) $plan->failed_renewals_count;
+
+        $this->postWebhook('invoice.payment_failed', $this->buildInvoice($plan, 2500, 'subscription_cycle'));
+
+        $fresh = \Dono\Recurring\RecurringPlan::query()->find('id', (int) $plan->id);
+        $this->assertSame($before, (int) $fresh->failed_renewals_count);
+    }
+
     private function seedPlan(): RecurringPlan
     {
         // Use the service so the email is properly hashed + encrypted; the
@@ -262,6 +311,10 @@ final class StripeSubscriptionRenewalTest extends IntegrationTestCase
         $plan = RecurringPlan::make();
         $plan->donor_id           = (int) $donor->id;
         $plan->gateway            = 'stripe';
+        // The harness signs with the test webhook secret, so the plan it acts
+        // on is a test plan. Left live, the fixture was a test-mode secret
+        // renewing live money, which is the thing the mode guard refuses.
+        $plan->is_test            = true;
         $plan->gateway_subscription_id = 'sub_test_renew_' . bin2hex(random_bytes(4));
         $plan->gateway_customer_id     = 'cus_test_renew';
         $plan->amount_cents       = 2500;

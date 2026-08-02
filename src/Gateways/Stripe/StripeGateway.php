@@ -842,6 +842,16 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
             );
         }
 
+        // A signature only proves Stripe sent it, not which mode signed it. The
+        // donation handlers check; the three that act on a plan did not, and
+        // refuseToTouchPlan() was written for exactly this and called nowhere.
+        // A test-mode secret is a much softer credential - staging env files,
+        // CI, contractors - and it could renew a live plan, bank the money,
+        // email a receipt, or cancel every live subscription on the account.
+        if ($reason = WebhookPaymentGuard::refuseToTouchPlan($plan, $this->id(), $this->verifiedIsTest)) {
+            return $this->refused($eventId, $type, $reason);
+        }
+
         $piId        = (string) ($invoice['payment_intent'] ?? '');
         $currency    = strtoupper((string) ($invoice['currency'] ?? $plan->currency));
         $amountCents = Currency::fromMinorUnits((int) ($invoice['amount_paid'] ?? 0), $currency);
@@ -915,6 +925,16 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
             );
         }
 
+        // A signature only proves Stripe sent it, not which mode signed it. The
+        // donation handlers check; the three that act on a plan did not, and
+        // refuseToTouchPlan() was written for exactly this and called nowhere.
+        // A test-mode secret is a much softer credential - staging env files,
+        // CI, contractors - and it could renew a live plan, bank the money,
+        // email a receipt, or cancel every live subscription on the account.
+        if ($reason = WebhookPaymentGuard::refuseToTouchPlan($plan, $this->id(), $this->verifiedIsTest)) {
+            return $this->refused($eventId, $type, $reason);
+        }
+
         $now = $this->clock->now()->format('Y-m-d H:i:s');
         $this->plans->recordFailedRenewal($plan, $now);
 
@@ -949,6 +969,16 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
                 error:        "No local plan for subscription {$subscriptionId}",
                 http_status:  200,
             );
+        }
+
+        // A signature only proves Stripe sent it, not which mode signed it. The
+        // donation handlers check; the three that act on a plan did not, and
+        // refuseToTouchPlan() was written for exactly this and called nowhere.
+        // A test-mode secret is a much softer credential - staging env files,
+        // CI, contractors - and it could renew a live plan, bank the money,
+        // email a receipt, or cancel every live subscription on the account.
+        if ($reason = WebhookPaymentGuard::refuseToTouchPlan($plan, $this->id(), $this->verifiedIsTest)) {
+            return $this->refused($eventId, $type, $reason);
         }
 
         $reason = (string) ($sub['cancellation_details']['reason'] ?? '');
