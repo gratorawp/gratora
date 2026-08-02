@@ -98,6 +98,9 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
                 'id'         => 'I-SUB-1',
                 'status'     => 'ACTIVE',
                 'custom_id'  => $this->currentReference,
+                // A real subscription always names the plan it bills on, which
+                // is what fixes the amount.
+                'plan_id'    => $this->subscriptionPlanId,
                 'subscriber' => ['payer_id' => 'PAYER-1'],
                 'billing_info' => ['next_billing_time' => gmdate('Y-m-d H:i:s', time() + 2592000)],
             ];
@@ -106,6 +109,33 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
     }
 
     private string $currentReference = '';
+
+    /** What PayPal reports the subscription bills on; the browser picks this. */
+    private string $subscriptionPlanId = 'P-PLAN-1';
+
+    public function test_a_subscription_on_another_plan_is_refused(): void
+    {
+        $reference = $this->createRecurringDonation(100000);
+
+        // custom_id is the donor's own reference, so it passes the ownership
+        // check. The subscription bills on a plan we never quoted for it: the
+        // SDK runs in their browser, so choosing a cheaper plan costs nothing.
+        $this->subscriptionPlanId = 'P-PLAN-CHEAP';
+
+        $req = new WP_REST_Request('POST', '/dono/v1/gateways/paypal/subscription');
+        $req->set_header('content-type', 'application/json');
+        $req->set_body((string) wp_json_encode([
+            'reference'       => $reference,
+            'subscription_id' => 'I-SUB-1',
+        ]));
+
+        $res = rest_get_server()->dispatch($req);
+
+        $this->assertSame(403, $res->get_status(), 'the amount is not taken on trust');
+
+        $donation = (new DonationRepository())->findByReference($reference);
+        $this->assertNull($donation->recurring_plan_id, 'and no plan is recorded for money nobody is charging');
+    }
 
     private function createRecurringDonation(int $amount = 2500, string $frequency = 'monthly'): string
     {

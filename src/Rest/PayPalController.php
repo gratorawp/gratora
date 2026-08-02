@@ -147,6 +147,23 @@ final class PayPalController
             );
         }
 
+        // custom_id proves which donation the subscription is for. It says
+        // nothing about the money, and the browser chooses the plan: the SDK is
+        // handed a plan id for this donation's amount, and can just as easily
+        // create the subscription on a cheaper plan and hand that back here.
+        // Nothing compared the two, so a 1.00 subscription could stand behind a
+        // 1000.00 recurring donation, and the plan would be recorded, reported
+        // and renewed at the amount nobody was charging.
+        $meta         = (array) ($donation->gateway_metadata ?? []);
+        $expectedPlan = (string) ($meta['paypal_plan_id'] ?? '');
+        if ($expectedPlan === '' || (string) ($sub['plan_id'] ?? '') !== $expectedPlan) {
+            return $this->error(
+                'dono_paypal_subscription_plan_mismatch',
+                __('That subscription is not for this donation amount.', 'dono'),
+                403
+            );
+        }
+
         $status = (string) ($sub['status'] ?? '');
         if (! in_array($status, ['ACTIVE', 'APPROVED', 'APPROVAL_PENDING'], true)) {
             return $this->error(
