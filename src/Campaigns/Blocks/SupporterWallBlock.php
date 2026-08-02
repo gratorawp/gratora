@@ -134,12 +134,12 @@ final class SupporterWallBlock extends CampaignBlock
         if (! $byDonor) {
             return View::loadRelative(__DIR__, 'views/supporter-wall', [
                 'title'        => (string) ($attrs['title'] ?? ''),
-            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('No supporters on the wall yet.', 'dono'),
+            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('The supporter wall is empty.', 'dono'),
             // No button when the campaign cannot take the money: a
             // draft or finished campaign has nothing to offer.
             'donateUrl'    => $campaign->acceptsDonations() ? '#dono-form' : '',
-            'donateLabel'  => __('Be the first', 'dono'),
-            'emptySubText' => __('Add your name to this campaign.', 'dono'),
+            'donateLabel'  => __('Donate', 'dono'),
+            'emptySubText' => __('Add the first name to it.', 'dono'),
             'emptyIcon'    => 'supporters',
                 'entries'      => [],
                 'showMessage'  => $showMessage,
@@ -182,12 +182,12 @@ final class SupporterWallBlock extends CampaignBlock
 
         return View::loadRelative(__DIR__, 'views/supporter-wall', [
             'title'        => (string) ($attrs['title'] ?? ''),
-            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('No supporters on the wall yet.', 'dono'),
+            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('The supporter wall is empty.', 'dono'),
             // No button when the campaign cannot take the money: a
             // draft or finished campaign has nothing to offer.
             'donateUrl'    => $campaign->acceptsDonations() ? '#dono-form' : '',
-            'donateLabel'  => __('Be the first', 'dono'),
-            'emptySubText' => __('Add your name to this campaign.', 'dono'),
+            'donateLabel'  => __('Donate', 'dono'),
+            'emptySubText' => __('Add the first name to it.', 'dono'),
             'emptyIcon'    => 'supporters',
             'entries'      => $entries,
             'showMessage'  => $showMessage,
