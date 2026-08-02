@@ -4,6 +4,7 @@ import { render } from 'preact';
 import { useCallback, useReducer, useRef, useState, useEffect } from 'preact/hooks';
 
 import { reducer, initialState, validateStep, buildPayload, fieldSteps } from './state/store';
+import { visibleGateways } from './util/gateways';
 import AmountStep   from './steps/AmountStep';
 import DonorStep    from './steps/DonorStep';
 import ConfirmStep  from './steps/ConfirmStep';
@@ -538,7 +539,14 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
         if ( Object.keys( errors ).length > 0 ) focusFirstInvalid();
     }, [ checkSteps, state, dispatch ] );
 
+    // No enabled gateway takes the chosen currency. GatewaySelect says so
+    // where the choice is made; this stops the donor reaching a server refusal
+    // by pressing the button anyway.
+    const noGateway = visibleGateways( config, state ).length === 0;
+
     const submit = useCallback( () => {
+        if ( noGateway ) return;
+
         const errors = {};
         for ( const s of checkSteps ) {
             Object.assign( errors, validateStep( s, state ) );
@@ -549,7 +557,7 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
             return;
         }
         onSubmit();
-    }, [ checkSteps, state, dispatch, onSubmit ] );
+    }, [ checkSteps, state, dispatch, onSubmit, noGateway ] );
 
     const submitStep = state.steps.find( ( s ) => s.type === 'submit' );
     const submitLabel = interpolateLabel(
@@ -564,7 +572,7 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
         <button
             type="button"
             class="dono-form__button dono-form__button--primary"
-            disabled={ state.status === 'submitting' }
+            disabled={ state.status === 'submitting' || ( isLast && noGateway ) }
             onClick={ isLast ? submit : onNext }
         >
             { state.status === 'submitting'
