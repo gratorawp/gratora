@@ -6,6 +6,7 @@ namespace Dono\Rest\Admin;
 use Dono\Foundation\Auth\Capabilities;
 
 use Dono\Currency\FxRates;
+use Dono\Gateways\GatewayManager;
 use Dono\Currency\FxRatesUpdater;
 use Dono\Foundation\Helpers\Money;
 use Dono\Settings\SettingsService;
@@ -25,6 +26,7 @@ final class FxController
         private FxRates $fx,
         private FxRatesUpdater $updater,
         private SettingsService $settings,
+        private GatewayManager $gateways,
     ) {
     }
 
@@ -127,6 +129,31 @@ final class FxController
             // base-currency total, so the admin has to be told before they
             // offer it rather than discovering it in a report.
             'unconvertible' => $this->fx->unconvertible($supported),
+            // Currencies the org offers that no enabled gateway can charge.
+            // The donation form has to say so at the point of choice, which is
+            // late: the currency was offered on a page a donor had already
+            // reached. Say it here, where it was added.
+            'no_gateway' => $this->currenciesWithoutGateway($supported),
         ];
+    }
+
+    /**
+     * @param  array<int,string> $supported
+     * @return array<int,string>
+     */
+    private function currenciesWithoutGateway(array $supported): array
+    {
+        $out = [];
+        foreach ($supported as $code) {
+            $code = strtoupper(trim((string) $code));
+            if ($code === '') {
+                continue;
+            }
+            if ($this->gateways->availableFor(null, $code, 'one_time') === []) {
+                $out[] = $code;
+            }
+        }
+
+        return array_values(array_unique($out));
     }
 }

@@ -772,7 +772,8 @@ final class CoreModule implements DonoModule
             new FxController(
                 $c->get(FxRates::class),
                 new FxRatesUpdater($c->get(AsyncDispatcher::class)),
-                new SettingsService()
+                new SettingsService(),
+                $c->get(GatewayManager::class)
             ),
             new CommandsController($c->get(CommandRegistry::class)),
             new NumberingController($c->get(ReferenceGenerator::class)),

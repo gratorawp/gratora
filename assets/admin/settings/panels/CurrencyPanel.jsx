@@ -92,6 +92,22 @@ function ExchangeRatesCard( { fx, base } ) {
                 </div>
             ) }
 
+            { ( fx.no_gateway || [] ).length > 0 && (
+                <div className="dono-connect-notice dono-connect-notice--amber">
+                    <span className="dono-connect-notice__icon" aria-hidden="true">!</span>
+                    <div>
+                        <strong>
+                            { sprintf(
+                                /* translators: %s: comma-separated currency codes */
+                                __( 'No payment method accepts %s.', 'dono' ),
+                                ( fx.no_gateway || [] ).join( ', ' )
+                            ) }
+                        </strong>{ ' ' }
+                        { __( 'A donor who picks one of these gets as far as the payment step and can go no further. Enable a gateway that takes the currency, or stop offering it.', 'dono' ) }
+                    </div>
+                </div>
+            ) }
+
             <ToggleRow
                 title={ __( 'Update rates automatically every day', 'dono' ) }
                 sub={ sprintf(
