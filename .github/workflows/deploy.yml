@@ -1,0 +1,138 @@
+name: Deploy to WordPress.org
+
+# Fires on a version tag, and can be run by hand at any time to watch it build
+# the artefact without publishing anything.
+#
+# The artefact is NOT the git checkout. vendor/ and build/ are both gitignored,
+# and dono.php requires vendor/autoload.php and action-scheduler at boot, so a
+# deploy straight from a checkout ships a plugin that fatals the moment anyone
+# activates it, with the admin screens blank behind it. Everything below exists
+# to make sure that cannot happen quietly.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Build and inspect the artefact without publishing'
+        type: boolean
+        default: true
+
+jobs:
+  deploy:
+    name: Build, verify, publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: mysqli, gd, intl, zip, mbstring, dom, curl
+          coverage: none
+          tools: composer
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # The tag is the only thing that says which version this is. If it
+      # disagrees with the two places WordPress reads, the update either never
+      # offers itself or offers the wrong thing, so stop here rather than
+      # publish a mismatch.
+      - name: Version matches the tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          HEADER=$(grep -m1 -E '^\s*\*?\s*Version:' dono.php | sed -E 's/.*Version:\s*//' | tr -d ' \r')
+          STABLE=$(grep -m1 -E '^Stable tag:' readme.txt | sed -E 's/Stable tag:\s*//' | tr -d ' \r')
+          echo "tag=$TAG header=$HEADER stable=$STABLE"
+          test "$TAG" = "$HEADER" || { echo "::error::dono.php Version ($HEADER) does not match tag ($TAG)"; exit 1; }
+          test "$TAG" = "$STABLE" || { echo "::error::readme.txt Stable tag ($STABLE) does not match tag ($TAG)"; exit 1; }
+
+      # Production dependencies only. bin/package.mjs refuses to run while the
+      # dev ones are present, so a missing --no-dev fails loudly rather than
+      # shipping a 56 MB zip full of PHPUnit.
+      - name: Install production dependencies
+        run: composer install --no-dev --prefer-dist --no-progress --optimize-autoloader
+
+      # build/ is gitignored, and without it every admin screen renders nothing.
+      - name: Build assets
+        run: |
+          npm ci
+          npm run build
+
+      - name: Package
+        run: npm run package
+
+      # Reading the artefact rather than trusting that it built. Each of these
+      # has already been wrong once.
+      - name: Verify the artefact
+        run: |
+          set -e
+          ZIP=dist/dono.zip
+          test -f "$ZIP" || { echo "::error::no zip was produced"; exit 1; }
+
+          SIZE=$(du -m "$ZIP" | cut -f1)
+          echo "artefact: ${SIZE} MB"
+          # Was 56 MB before the vendor test suites and unused mpdf fonts came
+          # out. A jump back means something is shipping that should not.
+          test "$SIZE" -lt 20 || { echo "::error::zip is ${SIZE} MB; expected well under 20"; exit 1; }
+
+          # Extracted beside the zip, not into a temp dir: this tree is what
+          # the publish step uploads, so the thing verified and the thing
+          # shipped are the same bytes. package.mjs stages in a temp dir and
+          # deletes it, leaving only the zip.
+          rm -rf dist/dono
+          unzip -q "$ZIP" -d dist
+          P=dist/dono
+
+          for f in vendor/autoload.php vendor/woocommerce/action-scheduler/action-scheduler.php build; do
+            test -e "$P/$f" || { echo "::error::$f missing from the zip; the plugin would fatal on activation"; exit 1; }
+          done
+
+          for leak in tests tests-e2e node_modules .git CLAUDE.md phpunit.xml.dist phpunit-integration.xml.dist .npmrc; do
+            test ! -e "$P/$leak" || { echo "::error::$leak is in the zip"; exit 1; }
+          done
+
+          # The classes the plugin needs at runtime, resolved the way dono.php
+          # resolves them: vendor/autoload.php and nothing else. This is what
+          # catches a runtime dependency that has drifted into require-dev.
+          php -r '
+            require "dist/dono/vendor/autoload.php";
+            $need = [
+              "Dono\\Vendor\\Queryable\\Model",
+              "Dono\\Vendor\\Mpdf\\Mpdf",
+              "Dono\\Foundation\\Plugin",
+              "Dono\\Receipts\\PdfBuilder",
+            ];
+            foreach ($need as $c) {
+              if (! class_exists($c)) { fwrite(STDERR, "::error::$c does not resolve from the packaged tree\n"); exit(1); }
+            }
+            echo "runtime classes resolve\n";
+          '
+
+          # Receipts pick their faces out of the pruned font set.
+          test -f "$P/vendor-prefixed/mpdf/mpdf/ttfonts/DejaVuSansCondensed.ttf" \
+            || { echo "::error::the fallback font was pruned away"; exit 1; }
+
+      - name: Upload the artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dono-plugin
+          path: dist/dono.zip
+
+      # Only after everything above passed, and never on a dry run.
+      - name: Publish to WordPress.org
+        if: startsWith(github.ref, 'refs/tags/v') && inputs.dry_run != true
+        uses: 10up/action-wordpress-plugin-deploy@stable
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG: dono
+          BUILD_DIR: dist/dono
+          VERSION: ${{ github.ref_name }}
