@@ -63,9 +63,14 @@ final class SocialMeta extends HookProvider
     {
         $description = self::excerptText((string) ($campaign->description ?? ''));
         if ($description === '') {
+            // The page's own excerpt only. Falling back to post_content used to
+            // be harmless when a campaign page was a handful of dynamic blocks
+            // with no prose in the markup. The seeded layout carries starter
+            // copy, so scraping it shared "Campaign name About this campaign
+            // What this campaign is raising for" as the campaign's description.
             $page = get_post($pageId);
-            if ($page instanceof \WP_Post) {
-                $description = self::excerptText($page->post_excerpt !== '' ? $page->post_excerpt : $page->post_content);
+            if ($page instanceof \WP_Post && $page->post_excerpt !== '') {
+                $description = self::excerptText($page->post_excerpt);
             }
         }
 

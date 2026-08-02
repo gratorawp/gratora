@@ -47,11 +47,17 @@ final class CampaignHeroBlock extends CampaignBlock
             ? wp_get_attachment_image_url($campaign->image_attachment_id, 'large')
             : null;
 
-        $goalCents = $campaign->goal_type === 'amount' ? (int) $campaign->goal_cents : 0;
+        $goalType  = (string) ($campaign->goal_type ?? 'amount');
+        $goalCents = $goalType === 'amount' ? (int) $campaign->goal_cents : 0;
+        $goalCount = $goalType === 'amount' ? 0 : (int) ($campaign->goal_count ?? 0);
+        $progress  = match ($goalType) {
+            'donations' => (int) $campaign->donations_count,
+            'donors'    => (int) $campaign->donors_count,
+            default     => (int) $campaign->raised_cents,
+        };
+        $target    = $goalType === 'amount' ? $goalCents : $goalCount;
 
-        $goalPercent = $goalCents > 0
-            ? min(100, (int) round((int) $campaign->raised_cents / $goalCents * 100))
-            : 0;
+        $goalPercent = $target > 0 ? min(100, (int) round($progress / $target * 100)) : 0;
 
         return View::loadRelative(__DIR__, 'views/campaign-hero', [
             'title'           => $campaign->title,
@@ -64,12 +70,37 @@ final class CampaignHeroBlock extends CampaignBlock
             // The seeded layout puts a bound Heading block above this block so
             // the words are editable, and turns the built-in title off.
             'showTitle'       => (bool) ($attrs['showTitle'] ?? true),
-            'raised'          => Money::format((int) $campaign->raised_cents, $campaign->currency),
-            'goalLabel'       => $goalCents > 0
-                /* translators: %s: formatted goal amount */
-                ? sprintf(__('raised of %s goal', 'dono'), Money::format($goalCents, $campaign->currency))
-                : __('raised so far', 'dono'),
-            'hasGoal'         => $goalCents > 0,
+            // A campaign counting donations or donors leads with that count,
+            // not with money. Reading "raised so far" under a donor goal, with
+            // no goal in sight, was what dropping campaign-progress from the
+            // seed left behind: that block understood all three goal types and
+            // the hero only understood one.
+            'raised'          => match ($goalType) {
+                'donations' => number_format_i18n((int) $campaign->donations_count),
+                'donors'    => number_format_i18n((int) $campaign->donors_count),
+                default     => Money::format((int) $campaign->raised_cents, $campaign->currency),
+            },
+            'goalLabel'       => match (true) {
+                $goalType === 'donations' && $target > 0 => sprintf(
+                    /* translators: %s: the number of donations targeted. */
+                    __('of %s donations', 'dono'),
+                    number_format_i18n($target)
+                ),
+                $goalType === 'donors' && $target > 0 => sprintf(
+                    /* translators: %s: the number of donors targeted. */
+                    __('of %s donors', 'dono'),
+                    number_format_i18n($target)
+                ),
+                $goalType === 'donations' => __('donations so far', 'dono'),
+                $goalType === 'donors'    => __('donors so far', 'dono'),
+                $target > 0 => sprintf(
+                    /* translators: %s: formatted goal amount */
+                    __('raised of %s goal', 'dono'),
+                    Money::format($goalCents, $campaign->currency)
+                ),
+                default => __('raised so far', 'dono'),
+            },
+            'hasGoal'         => $target > 0,
             'percent'         => $goalPercent,
             'showProgress'    => (bool) ($attrs['showProgress'] ?? true),
             'showStats'       => (bool) ($attrs['showStats'] ?? true),
