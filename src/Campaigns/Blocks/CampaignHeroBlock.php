@@ -43,9 +43,14 @@ final class CampaignHeroBlock extends CampaignBlock
         $campaign = $this->resolveCampaign($attrs);
         if (! $campaign) return $this->notBoundNotice($attrs);
 
-        $imageUrl = $campaign->image_attachment_id
-            ? wp_get_attachment_image_url($campaign->image_attachment_id, 'large')
-            : null;
+        $imageId  = (int) ($campaign->image_attachment_id ?? 0);
+        $imageUrl = $imageId ? wp_get_attachment_image_url($imageId, 'large') : null;
+        // The attachment's own alt text, deliberately falling back to none.
+        // The hero title sits directly above the photo, so alt="<title>" had a
+        // screen reader announce the campaign name twice in a row.
+        $imageAlt = $imageId
+            ? trim((string) get_post_meta($imageId, '_wp_attachment_image_alt', true))
+            : '';
 
         $goalType  = (string) ($campaign->goal_type ?? 'amount');
         $goalCents = $goalType === 'amount' ? (int) $campaign->goal_cents : 0;
@@ -62,6 +67,8 @@ final class CampaignHeroBlock extends CampaignBlock
         return View::loadRelative(__DIR__, 'views/campaign-hero', [
             'title'           => $campaign->title,
             'imageUrl'        => $imageUrl,
+            'imageId'         => $imageId,
+            'imageAlt'        => $imageAlt,
             'showCover'       => (bool) ($attrs['showCover'] ?? true) && $imageUrl,
             // Not gated on having raised something. A campaign on day one showed
             // no money line and no goal, so the hero made no ask at the one

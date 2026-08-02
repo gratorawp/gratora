@@ -12,6 +12,8 @@ defined('ABSPATH') || exit;
  *
  * @var string  $title
  * @var ?string $imageUrl
+ * @var int     $imageId
+ * @var string  $imageAlt
  * @var bool    $showCover
  * @var bool    $showSummary
  * @var bool    $showTitle
@@ -41,8 +43,21 @@ $hTag     = 'h' . max(1, min(3, (int) $headingLevel));
         <div class="dp-hero<?php echo $hasPhoto ? '' : ' dp-hero--flat'; ?>">
             <div class="dp-hero-media">
                 <?php if ($hasPhoto): ?>
-                    <img class="dp-figure" src="<?php echo esc_url($imageUrl); ?>"
-                         alt="<?php echo esc_attr($title); ?>" loading="lazy" />
+                    <?php
+                    // Through the attachment rather than by URL, which is what
+                    // supplies srcset and sizes: every visitor was served the
+                    // full "large" file, phones included.
+                    echo wp_get_attachment_image($imageId, 'large', false, [
+                        'class' => 'dp-figure',
+                        // This is the largest thing above the fold and so the
+                        // element LCP is measured on. Lazy told the browser to
+                        // wait for layout before even asking for it.
+                        'loading'       => 'eager',
+                        'fetchpriority' => 'high',
+                        'decoding'      => 'async',
+                        'alt'           => $imageAlt,
+                    ]);
+                    ?>
                 <?php endif; ?>
             </div>
             <div class="dp-hero-card">
@@ -57,7 +72,20 @@ $hTag     = 'h' . max(1, min(3, (int) $headingLevel));
                 <?php endif; ?>
 
                 <?php if ($showProgress && $hasGoal): ?>
-                    <div class="dp-bar"><i style="width: <?php echo esc_attr((string) $percent); ?>%"></i></div>
+                    <?php
+                    // The amounts above are readable; how far along they are was
+                    // conveyed by the length of a coloured div and nothing else.
+                    ?>
+                    <div class="dp-bar" role="progressbar"
+                         aria-valuenow="<?php echo esc_attr((string) $percent); ?>"
+                         aria-valuemin="0" aria-valuemax="100"
+                         aria-label="<?php echo esc_attr(sprintf(
+                             /* translators: %d: percentage of the goal reached */
+                             __('%d%% of goal reached', 'dono'),
+                             $percent
+                         )); ?>">
+                        <i style="width: <?php echo esc_attr((string) $percent); ?>%"></i>
+                    </div>
                 <?php endif; ?>
 
                 <?php if ($showStats): ?>
