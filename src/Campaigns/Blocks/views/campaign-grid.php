@@ -4,8 +4,12 @@ defined('ABSPATH') || exit;
  * @var string $heading
  * @var array  $cards   list of ['title','blurb','imageUrl','url','raised','goalLabel','percent','accent']
  * @var string $styleVars
- * @var ?string $emptyText  set only when there are no cards
- * @var ?string $notice     editor-only explanation, empty for visitors
+ * @var ?string $emptyText     set only when there are no cards
+ * @var ?string $emptySubText
+ * @var ?string $emptyIcon
+ * @var ?string $donateLabel
+ * @var ?string $donateUrl     empty when this campaign is not taking donations
+ * @var ?string $notice        editor-only explanation, empty for visitors
  */
 ?>
 <section class="dono-block dono-block--grid" data-block="dono/campaign-grid"<?php echo $styleVars !== '' ? ' style="' . esc_attr($styleVars) . '"' : ''; ?>>
@@ -15,7 +19,7 @@ defined('ABSPATH') || exit;
         </div>
     <?php endif; ?>
     <?php if ($cards === []): ?>
-        <p class="dono-block__empty"><?php echo esc_html($emptyText ?? ''); ?></p>
+        <?php require __DIR__ . '/empty-cta.php'; ?>
         <?php if (($notice ?? '') !== ''): ?>
             <div class="dono-block-notice"><?php echo esc_html($notice); ?></div>
         <?php endif; ?>

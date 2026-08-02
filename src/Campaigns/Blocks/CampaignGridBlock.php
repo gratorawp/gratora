@@ -45,15 +45,25 @@ final class CampaignGridBlock extends CampaignBlock
 
         $campaigns = $this->campaigns->otherPublished($excludeId, $count, $orderBy);
         if (empty($campaigns)) {
+            $current = $this->resolveCampaign($attrs);
+
             return View::loadRelative(__DIR__, 'views/campaign-grid', [
                 'heading'   => '',
                 'cards'     => [],
                 'emptyText' => (string) ($attrs['emptyText'] ?? '')
-                    ?: __('More campaigns will appear here soon.', 'dono'),
+                    ?: __('This is the only campaign running right now.', 'dono'),
+                // Unlike the donation and donor blocks, nothing a visitor does
+                // makes another campaign appear. So the invitation points at
+                // the one they are already reading, which is the only way to
+                // give that exists today.
+                'emptySubText' => __('Which makes it an easy choice.', 'dono'),
+                'emptyIcon'    => 'campaigns',
+                'donateLabel'  => __('Donate', 'dono'),
+                'donateUrl'    => ($current && $current->acceptsDonations()) ? '#dono-form' : '',
                 'notice'    => (is_user_logged_in() && current_user_can('edit_posts'))
-                    ? __('No other published campaigns to show yet. This block will list them once you have more.', 'dono')
+                    ? __('Only this campaign is published, so there is nothing to list. Visitors see the message above; this line is editor-only.', 'dono')
                     : '',
-                'styleVars' => $this->styleVars($this->resolveCampaign($attrs)),
+                'styleVars' => $this->styleVars($current),
             ]);
         }
 
