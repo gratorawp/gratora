@@ -236,6 +236,22 @@ final class CoreModule implements DonoModule
         return self::TIER_CORE;
     }
 
+    /**
+     * Core's data migrations, in the order they must run.
+     *
+     * Static and container-free because activation needs them too, and
+     * register_activation_hook fires before plugins_loaded: resolving this from
+     * the container there asks for a binding that boot() has not made yet, and
+     * the plugin dies on activation with WordPress reporting only "triggered a
+     * fatal error".
+     */
+    public static function upgradeRoutines(): array
+    {
+        return [
+            new ClearHashesOnAlreadyErasedConsents(),
+        ];
+    }
+
     public function boot(Container $c): void
     {
         // Cache-bust every Dono build/ stylesheet by file mtime instead of
@@ -704,9 +720,7 @@ final class CoreModule implements DonoModule
 
         // Data migrations. dbDelta reconciles shape and nothing else, so
         // anything that has to touch contents lives here.
-        $c->bind(UpgradeRunner::class, fn (Container $c) => new UpgradeRunner([
-            new ClearHashesOnAlreadyErasedConsents(),
-        ]));
+        $c->bind(UpgradeRunner::class, fn (Container $c) => new UpgradeRunner(self::upgradeRoutines()));
 
         $c->bind(UpgradeJob::class, fn (Container $c) => new UpgradeJob(
             $c->get(AsyncDispatcher::class),

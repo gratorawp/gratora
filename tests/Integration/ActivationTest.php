@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace Dono\Tests\Integration;
 
 use Dono\Core\Activator;
+use Dono\Core\CoreModule;
 use Dono\Donors\Portal\PortalPage;
 use Dono\Foundation\Plugin;
+use Dono\Foundation\Upgrade\UpgradeRoutine;
+use Dono\Foundation\Upgrade\UpgradeRunner;
 
 final class ActivationTest extends IntegrationTestCase
 {
@@ -130,5 +133,40 @@ final class ActivationTest extends IntegrationTestCase
         $this->assertSame('publish', $post->post_status);
         $this->assertStringContainsString(PortalPage::SHORTCODE, $post->post_content);
         $this->assertSame(DONO_VERSION, get_option(PortalPage::OPTION_VERSION));
+    }
+
+    /**
+     * Activation runs on register_activation_hook, which fires before
+     * plugins_loaded and so before any module has booted. Anything it resolves
+     * from the container asks for a binding that does not exist yet, and
+     * WordPress reports the result as nothing but "Plugin could not be
+     * activated because it triggered a fatal error".
+     */
+    public function test_activation_does_not_need_a_booted_container(): void
+    {
+        $routines = CoreModule::upgradeRoutines();
+
+        $this->assertNotEmpty($routines);
+        foreach ($routines as $routine) {
+            $this->assertInstanceOf(UpgradeRoutine::class, $routine);
+        }
+    }
+
+    public function test_a_fresh_activation_stamps_the_routines_without_running_them(): void
+    {
+        delete_option(UpgradeRunner::OPTION_DONE);
+        delete_option('dono_db_version');
+
+        Plugin::onActivation();
+
+        $done = UpgradeRunner::completed();
+
+        foreach (CoreModule::upgradeRoutines() as $routine) {
+            $this->assertContains(
+                $routine->id(),
+                $done,
+                'a new site has nothing to migrate, so its routines are recorded rather than run'
+            );
+        }
     }
 }

@@ -40,7 +40,16 @@ abstract class UpgradeTestCase extends IntegrationTestCase
 
         global $wpdb;
         $this->realPrefix = $wpdb->prefix;
-        $wpdb->set_prefix(self::SCRATCH_PREFIX);
+
+        // The property, not set_prefix(). set_prefix() also repoints $wpdb's
+        // table map, so options moves to wpupg_options, which does not exist -
+        // and Model::migrate() reads and writes its per-table version through
+        // get_option. The tests still passed, because migrate(true) forces past
+        // that check, but every run sprayed database errors. Queryable resolves
+        // table names through $wpdb->prefix at call time, so setting the
+        // property alone points the models at scratch tables and leaves
+        // WordPress's own tables where they are.
+        $wpdb->prefix = self::SCRATCH_PREFIX;
 
         $this->dropScratchTables();
     }
@@ -50,7 +59,7 @@ abstract class UpgradeTestCase extends IntegrationTestCase
         $this->dropScratchTables();
 
         global $wpdb;
-        $wpdb->set_prefix($this->realPrefix);
+        $wpdb->prefix = $this->realPrefix;
 
         parent::tearDown();
     }
@@ -145,7 +154,7 @@ abstract class UpgradeTestCase extends IntegrationTestCase
         // Model::migrate() short-circuits on a per-table version option, so a
         // dropped table would not be rebuilt without clearing these.
         $wpdb->query(
-            "DELETE FROM {$this->realPrefix}options WHERE option_name LIKE 'queryable\\_%\\_version'"
+            "DELETE FROM {$wpdb->options} WHERE option_name LIKE 'queryable\\_%\\_version'"
         );
     }
 }

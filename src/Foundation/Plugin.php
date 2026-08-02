@@ -152,7 +152,7 @@ final class Plugin
         // one that assumes the shape an older release wrote from ever seeing a
         // table that release never touched.
         if ($fresh) {
-            UpgradeRunner::markAllDone(self::instance()->container->get(UpgradeRunner::class));
+            UpgradeRunner::markAllDone(new UpgradeRunner(CoreModule::upgradeRoutines()));
         }
         // Stamp the schema version so the boot-time gate doesn't re-migrate on
         // the first request after activation.
