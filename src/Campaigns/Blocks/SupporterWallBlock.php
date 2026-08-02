@@ -134,11 +134,13 @@ final class SupporterWallBlock extends CampaignBlock
         if (! $byDonor) {
             return View::loadRelative(__DIR__, 'views/supporter-wall', [
                 'title'        => (string) ($attrs['title'] ?? ''),
-            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('Be the first to support this campaign.', 'dono'),
+            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('No supporters on the wall yet.', 'dono'),
             // No button when the campaign cannot take the money: a
             // draft or finished campaign has nothing to offer.
             'donateUrl'    => $campaign->acceptsDonations() ? '#dono-form' : '',
-            'donateLabel'  => __('Donate', 'dono'),
+            'donateLabel'  => __('Be the first', 'dono'),
+            'emptySubText' => __('Add your name to this campaign.', 'dono'),
+            'emptyIcon'    => 'supporters',
                 'entries'      => [],
                 'showMessage'  => $showMessage,
                 'showAmount'   => (bool) ($attrs['showAmount'] ?? false),
@@ -180,11 +182,13 @@ final class SupporterWallBlock extends CampaignBlock
 
         return View::loadRelative(__DIR__, 'views/supporter-wall', [
             'title'        => (string) ($attrs['title'] ?? ''),
-            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('Be the first to support this campaign.', 'dono'),
+            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('No supporters on the wall yet.', 'dono'),
             // No button when the campaign cannot take the money: a
             // draft or finished campaign has nothing to offer.
             'donateUrl'    => $campaign->acceptsDonations() ? '#dono-form' : '',
-            'donateLabel'  => __('Donate', 'dono'),
+            'donateLabel'  => __('Be the first', 'dono'),
+            'emptySubText' => __('Add your name to this campaign.', 'dono'),
+            'emptyIcon'    => 'supporters',
             'entries'      => $entries,
             'showMessage'  => $showMessage,
             'showAmount'   => (bool) ($attrs['showAmount'] ?? false),

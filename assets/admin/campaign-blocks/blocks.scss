@@ -233,43 +233,59 @@ body.dono-modal-open { overflow: hidden; }
     font-size: 13px;
 }
 
-.dono-block__empty-text { margin: 0; }
-
-// With somewhere to send them, the empty state is the ask rather than a
-// report. Solid rather than dashed: a dashed box reads as something missing,
-// and nothing is missing here, the campaign is simply new.
-.dono-block__empty--cta {
+// Empty state for the donation lists. Centred, with room to breathe: on a new
+// campaign this is the largest thing on the page, so it either invites or it
+// wastes the best space there is.
+.dono-empty {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 20px;
+    text-align: center;
+    gap: 8px;
+    padding: 40px 24px;
     border-style: solid;
     background: var(--dono-bg, #fff);
     color: var(--dono-text, #{$text-fallback});
-    font-size: 15px;
 }
 
-.dono-block__empty-btn {
+.dono-empty__icon {
+    color: var(--dono-text-muted, #{$text-muted-fallback});
+    line-height: 0;
+    margin-bottom: 4px;
+}
+
+.dono-empty__title {
+    margin: 0;
+    font-size: 17px;
+    font-weight: var(--dono-heading-weight, 600);
+    color: var(--dono-text, #{$text-fallback});
+}
+
+.dono-empty__sub {
+    margin: 0;
+    font-size: 14px;
+    color: var(--dono-text-muted, #{$text-muted-fallback});
+}
+
+// Outlined rather than filled. The page already has a primary Donate in the
+// hero and another on the form; a third solid button competes with both, and
+// this one is an invitation rather than the main ask.
+.dono-empty__btn {
+    margin-top: 12px;
     display: inline-block;
-    padding: 10px 20px;
+    padding: 10px 22px;
+    border: 1px solid var(--dono-accent, #{$accent-fallback});
     border-radius: var(--dono-radius-sm, #{$radius-sm-fallback});
-    // Same token chain as the form's own submit button, border included: a
-    // campaign whose button style is an outline sets a transparent background
-    // and carries the shape in the border, so omitting it rendered bare text.
-    background: var(--dono-button-bg, var(--dono-accent, #{$accent-fallback}));
-    border: var(--dono-button-border, 0);
-    color: var(--dono-button-fg, #fff);
+    background: transparent;
+    color: var(--dono-accent, #{$accent-fallback});
     font-weight: var(--dono-button-weight, 600);
     font-size: 14px;
     line-height: 1.2;
     text-decoration: none;
-    white-space: nowrap;
 
     &:hover,
     &:focus {
-        background: var(--dono-button-hover-bg, var(--dono-button-bg, var(--dono-accent, #{$accent-fallback})));
+        background: var(--dono-accent, #{$accent-fallback});
         color: var(--dono-button-fg, #fff);
     }
 }

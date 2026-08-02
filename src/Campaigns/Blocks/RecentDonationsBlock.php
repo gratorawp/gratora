@@ -100,11 +100,13 @@ final class RecentDonationsBlock extends CampaignBlock
 
         return View::loadRelative(__DIR__, 'views/recent-donations', [
             'title'        => (string) ($attrs['title'] ?? ''),
-            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('Be the first to donate.', 'dono'),
+            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('Every campaign starts with one donation.', 'dono'),
             // No button when the campaign cannot take the money: a
             // draft or finished campaign has nothing to offer.
             'donateUrl'    => $campaign->acceptsDonations() ? '#dono-form' : '',
-            'donateLabel'  => __('Donate', 'dono'),
+            'donateLabel'  => __('Be the first', 'dono'),
+            'emptySubText' => __('Be the one to make it happen.', 'dono'),
+            'emptyIcon'    => 'donation',
             'entries'      => $entries,
             'showAmount'   => (bool) ($attrs['showAmount'] ?? true),
             'showTime'     => (bool) ($attrs['showTime'] ?? true),

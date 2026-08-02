@@ -97,11 +97,13 @@ final class TopDonorsBlock extends CampaignBlock
 
         return View::loadRelative(__DIR__, 'views/top-donors', [
             'title'          => (string) ($attrs['title'] ?? ''),
-            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('Be the first to donate.', 'dono'),
+            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('No top donors yet.', 'dono'),
             // No button when the campaign cannot take the money: a
             // draft or finished campaign has nothing to offer.
             'donateUrl'    => $campaign->acceptsDonations() ? '#dono-form' : '',
-            'donateLabel'  => __('Donate', 'dono'),
+            'donateLabel'  => __('Be the first donor', 'dono'),
+            'emptySubText' => __('Be one of the first to make an impact.', 'dono'),
+            'emptyIcon'    => 'donor',
             'entries'        => $entries,
             'currency'       => $campaign->currency,
             'showAmount'     => (bool) ($attrs['showAmount'] ?? true),
