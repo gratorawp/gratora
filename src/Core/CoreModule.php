@@ -132,6 +132,7 @@ use Dono\Foundation\Time\Clock;
 use Dono\Foundation\Time\SystemClock;
 use Dono\Funds\Fund;
 use Dono\Funds\FundReassignmentJob;
+use Dono\Recurring\CampaignCancelRecurringJob;
 use Dono\Funds\FundRepository;
 use Dono\Funds\FundResolver;
 use Dono\Funds\FundService;
@@ -697,13 +698,20 @@ final class CoreModule implements DonoModule
         ));
         $c->get(RecurringResumer::class)->register();
 
+        $c->bind(CampaignCancelRecurringJob::class, fn (Container $c) => new CampaignCancelRecurringJob(
+            $c->get(AsyncDispatcher::class),
+            $c->get(RecurringCanceller::class),
+        ));
+        $c->get(CampaignCancelRecurringJob::class)->register();
+
         $c->bind(AdminCampaignsController::class, fn (Container $c) => new AdminCampaignsController(
             $c->get(CampaignRepository::class),
             $c->get(CampaignService::class),
             $c->get(CampaignMetricsService::class),
             $c->get(FundRepository::class),
             $c->get(RecurringPlanRepository::class),
-            $c->get(RecurringCanceller::class)
+            $c->get(RecurringCanceller::class),
+            $c->get(CampaignCancelRecurringJob::class)
         ));
 
         $c->bind(AdminFundsController::class, fn (Container $c) => new AdminFundsController(

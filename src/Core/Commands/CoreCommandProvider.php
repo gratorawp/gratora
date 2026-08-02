@@ -39,6 +39,7 @@ use Dono\Mail\Mailer;
 use Dono\Receipts\ReceiptIssuer;
 use Dono\Reports\CampaignReportBuilder;
 use Dono\Reports\TaxStatementBuilder;
+use Dono\Recurring\CampaignCancelRecurringJob;
 use Dono\Recurring\RecurringCanceller;
 use Dono\Recurring\RecurringPlan;
 use Dono\Recurring\RecurringPlanRepository;
@@ -1090,14 +1091,22 @@ final class CoreCommandProvider
                 if (! $c->get(CampaignRepository::class)->findById($campaignId)) {
                     throw new CommandError('Campaign not found.');
                 }
-                $result = $c->get(RecurringCanceller::class)->cancelActiveForCampaign(
+                // Queued, for the reason on CampaignCancelRecurringJob: one
+                // blocking gateway call per plan does not fit in a request.
+                $queued = (int) RecurringPlan::query()
+                    ->where('campaign_id', $campaignId)
+                    ->where('status', 'active')
+                    ->where('is_test', false)
+                    ->count();
+
+                $c->get(CampaignCancelRecurringJob::class)->start(
                     $campaignId,
                     isset($in['reason']) ? (string) $in['reason'] : null,
                 );
+
                 return [
                     'campaign_id' => $campaignId,
-                    'cancelled'   => (int) $result['cancelled'],
-                    'failed'      => (int) $result['failed'],
+                    'queued'      => $queued,
                 ];
             },
             $this->meta(['destructive' => true, 'agent_hint' => 'Cancels ALL active recurring donations on the campaign at once and cannot be undone. To cancel a single plan use recurring.cancel instead.']),

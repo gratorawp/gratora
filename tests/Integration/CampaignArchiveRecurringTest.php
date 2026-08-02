@@ -7,6 +7,7 @@ namespace Dono\Tests\Integration;
 use Dono\Campaigns\Campaign;
 use Dono\Donors\DonorService;
 use Dono\Foundation\Plugin;
+use Dono\Recurring\CampaignCancelRecurringJob;
 use Dono\Recurring\RecurringPlan;
 use WP_REST_Request;
 
@@ -84,8 +85,44 @@ final class CampaignArchiveRecurringTest extends IntegrationTestCase
 
         $this->assertSame(200, $this->archive((int) $c->id, ['cancel_recurring' => true]));
 
+        // Queued rather than run in the request: each plan is a blocking
+        // gateway call, and a campaign can have thousands.
+        $this->assertSame(
+            'active',
+            RecurringPlan::query()->where('id', $plan->id)->get()->status,
+            'the archive itself returns without waiting on the gateway'
+        );
+
+        $this->runPendingAsyncJobs();
+
         $fresh = RecurringPlan::query()->where('id', $plan->id)->get();
         $this->assertSame('cancelled', $fresh->status, 'the opt-in flag cancels active subscriptions');
+    }
+
+    public function test_a_run_larger_than_one_batch_finishes_across_ticks(): void
+    {
+        $c = $this->makeCampaign();
+
+        // More than the 25 gateway round trips a single tick allows, which is
+        // the whole reason this moved off the request.
+        $plans = [];
+        for ($i = 0; $i < 30; $i++) {
+            $plans[] = $this->seedActivePlan((int) $c->id);
+        }
+
+        $this->archive((int) $c->id, ['cancel_recurring' => true]);
+        $this->runPendingAsyncJobs(10);
+
+        $stillActive = RecurringPlan::query()
+            ->where('campaign_id', (int) $c->id)
+            ->where('status', 'active')
+            ->count();
+
+        $this->assertSame(0, (int) $stillActive, 'every plan is cancelled, not just the first batch');
+        $this->assertFalse(
+            CampaignCancelRecurringJob::isRunning((int) $c->id),
+            'and the run clears itself rather than rescheduling forever'
+        );
     }
 
     public function test_recurring_summary_reports_active_plans(): void

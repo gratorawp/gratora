@@ -128,15 +128,22 @@ export default function Detail( { id, tab } ) {
                 method: 'PUT',
                 data: { status: nextStatus, ...( cancelRecurring ? { cancel_recurring: true } : {} ) },
             } );
-            const failed = res?.recurring_cancel?.failed || 0;
-            if ( failed > 0 ) {
-                // Stay on the page: the campaign is archived but some gateway
-                // cancellations failed and need attention, not a blind reload.
-                setError( sprintf(
+            // Cancellation runs in the background now: each plan is a gateway
+            // round trip, and a campaign can have thousands. Saying so beats
+            // reporting a failure count the request cannot know yet.
+            const queued = res?.recurring_cancel?.queued || 0;
+            if ( queued > 0 ) {
+                notify.success( sprintf(
                     /* translators: %d: number of subscriptions */
-                    __( 'Campaign archived, but %d subscription cancellation(s) failed at the gateway. Those plans are still active.', 'dono' ),
-                    failed
+                    _n(
+                        'Campaign archived. Cancelling %d subscription in the background.',
+                        'Campaign archived. Cancelling %d subscriptions in the background.',
+                        queued,
+                        'dono'
+                    ),
+                    queued
                 ) );
+                window.location.reload();
                 return;
             }
             notify.success( nextStatus === 'archived'

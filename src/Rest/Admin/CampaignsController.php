@@ -13,7 +13,9 @@ use Dono\Campaigns\CampaignService;
 use Dono\Forms\Form;
 use Dono\Funds\Fund;
 use Dono\Funds\FundRepository;
+use Dono\Recurring\CampaignCancelRecurringJob;
 use Dono\Recurring\RecurringCanceller;
+use Dono\Recurring\RecurringPlan;
 use Dono\Recurring\RecurringPlanRepository;
 use Dono\Rest\Schemas\CampaignSchemas;
 use InvalidArgumentException;
@@ -40,6 +42,7 @@ final class CampaignsController
         private FundRepository $funds,
         private RecurringPlanRepository $plans,
         private RecurringCanceller $canceller,
+        private CampaignCancelRecurringJob $cancelJob,
     ) {
     }
 
@@ -221,12 +224,20 @@ final class CampaignsController
         // Archiving is non-destructive to subscriptions by default: existing
         // recurring donations keep renewing (and are still credited here). The
         // admin can opt to stop them too via the archive dialog's checkbox.
+        // Queued, not run here: each plan is a blocking gateway round trip, and
+        // a campaign with a few thousand monthly donors needs more wall time
+        // than this request has. See CampaignCancelRecurringJob.
         $recurringCancel = null;
         if ($wasActive && $campaign->status === 'archived' && ! empty($body['cancel_recurring'])) {
-            $recurringCancel = $this->canceller->cancelActiveForCampaign(
-                (int) $campaign->id,
-                __('Campaign archived', 'dono')
-            );
+            $queued = (int) RecurringPlan::query()
+                ->where('campaign_id', (int) $campaign->id)
+                ->where('status', 'active')
+                ->where('is_test', false)
+                ->count();
+
+            $this->cancelJob->start((int) $campaign->id, __('Campaign archived', 'dono'));
+
+            $recurringCancel = ['queued' => $queued];
         }
 
         $payload = $this->shapeFull($campaign, 'all-time');

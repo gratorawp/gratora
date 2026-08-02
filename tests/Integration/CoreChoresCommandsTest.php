@@ -117,8 +117,17 @@ final class CoreChoresCommandsTest extends IntegrationTestCase
         ], $ctx);
 
         $this->assertTrue($res->ok, $res->error ?? '');
-        $this->assertGreaterThanOrEqual(1, $res->data['cancelled']);
-        $this->assertSame(0, $res->data['failed']);
+        $this->assertGreaterThanOrEqual(1, $res->data['queued'], 'it reports what it queued');
+
+        // Queued rather than cancelled inline: each plan is a blocking gateway
+        // round trip and a campaign can have thousands.
+        $this->assertSame(
+            'active',
+            RecurringPlan::query()->where('id', $plan->id)->get()->status,
+            'the command returns without waiting on the gateway'
+        );
+
+        $this->runPendingAsyncJobs();
 
         $fresh = RecurringPlan::query()->where('id', $plan->id)->get();
         $this->assertSame('cancelled', $fresh->status, 'the active plan must no longer be active');

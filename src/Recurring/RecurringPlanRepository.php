@@ -142,7 +142,7 @@ final class RecurringPlanRepository
     /**
      * Active recurring plans attributed to a campaign, plus their base-currency
      * monthly-equivalent total. Drives the archive dialog's "N active recurring
-     * donations (~$X/mo)" and matches what cancelActiveForCampaign would cancel.
+     * donations (~$X/mo)" and matches what the archive cancel run would cancel.
      *
      * @return array{count:int, mrr_cents:int, unconverted:int}
      */
