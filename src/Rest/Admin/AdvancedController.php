@@ -143,33 +143,41 @@ final class AdvancedController
         // counted by them rather than waiting for the next run. Recording a
         // donation never blocks on FX, so these rows are real payments sitting
         // outside every total until a rate exists for their currency.
+        $converted = 0;
         if ($scope === 'all' || $scope === 'currency') {
-            $fx = $this->fxBackfill->run();
-            $counts['converted_donations'] = $fx['converted'];
+            $fx        = $this->fxBackfill->run();
+            $converted = $fx['converted'];
+            $counts['converted_donations'] = $converted;
             if ($fx['unconvertible'] > 0) {
                 $counts['still_unconvertible'] = $fx['unconvertible'];
             }
         }
 
-        if ($scope === 'all' || $scope === 'donors') {
+        // Converting a donation changes every total it belongs to, so the
+        // aggregate passes have to run whatever the scope was. Without this,
+        // "Currency conversions" wrote base amounts, rebuilt nothing, and
+        // reported success while every total stayed exactly as wrong as before.
+        $rebuildAll = $scope === 'all' || $converted > 0;
+
+        if ($rebuildAll || $scope === 'donors') {
             foreach (self::idsOf(Donor::class) as $id) {
                 $this->aggregates->syncDonor($id);
                 $counts['donors']++;
             }
         }
-        if ($scope === 'all' || $scope === 'funds') {
+        if ($rebuildAll || $scope === 'funds') {
             foreach (self::idsOf(Fund::class) as $id) {
                 $this->aggregates->syncFund($id);
                 $counts['funds']++;
             }
         }
-        if ($scope === 'all' || $scope === 'campaigns') {
+        if ($rebuildAll || $scope === 'campaigns') {
             foreach (self::idsOf(Campaign::class) as $id) {
                 $this->aggregates->syncCampaign($id);
                 $counts['campaigns']++;
             }
         }
-        if ($scope === 'all' || $scope === 'forms') {
+        if ($rebuildAll || $scope === 'forms') {
             foreach (self::idsOf(Form::class) as $id) {
                 $this->aggregates->syncForm($id);
                 $counts['forms']++;
@@ -179,7 +187,7 @@ final class AdvancedController
         // Add-ons recompute theirs from the same source rows. Fired after the
         // core passes so anything derived from a campaign total is rebuilt from
         // a campaign total that is already correct.
-        $counts = (array) apply_filters('dono.recalculate.counts', $counts, $scope);
+        $counts = (array) apply_filters('dono.recalculate.counts', $counts, $rebuildAll ? 'all' : $scope);
 
         return new WP_REST_Response([
             'ok'     => true,
