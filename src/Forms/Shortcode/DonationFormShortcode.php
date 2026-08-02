@@ -612,6 +612,8 @@ HTML;
                 'total'          => __('Total', 'dono'),
                 'donor'          => __('Donor', 'dono'),
                 'paymentMethod'  => __('Payment method', 'dono'),
+                /* translators: %s: the selected currency code, e.g. INR. */
+                'noGatewayForCurrency' => __('No payment method here accepts %s. Choose another currency to continue.', 'dono'),
                 'testModeNotice' => __('Test mode is on. No real payment is taken and this donation is excluded from reporting.', 'dono'),
                 'back'           => __('Back', 'dono'),
                 'next'           => __('Continue', 'dono'),

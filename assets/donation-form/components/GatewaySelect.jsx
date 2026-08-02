@@ -23,6 +23,22 @@ export default function GatewaySelect( { state, dispatch, config } ) {
         }
     }, [ idsKey, current ] );
 
+    // Nothing takes this currency. The section used to render nothing at all,
+    // which read as "no payment step" rather than "not this currency", and the
+    // stale gateway stayed selected because the effect above only runs when
+    // there is something to select. The donor found out on submit.
+    if ( ! opts.length ) {
+        const template = ( config.i18n && config.i18n.noGatewayForCurrency ) || '';
+        const message  = template
+            ? template.replace( '%s', String( state.currency || '' ).toUpperCase() )
+            : '';
+        return (
+            <div class="dono-form__payment">
+                <div class="dono-form__gateways-empty" role="alert">{ message }</div>
+            </div>
+        );
+    }
+
     if ( ! testMode && opts.length <= 1 ) return null;
 
     return (

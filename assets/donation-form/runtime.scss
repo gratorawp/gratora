@@ -611,6 +611,18 @@
         font-weight: 600;
     }
 
+    // Shown when nothing accepts the chosen currency. Same weight as the test
+    // banner: it is a condition to act on, not an error the donor caused.
+    &__gateways-empty {
+        padding: 10px 14px;
+        border-radius: var(--dono-radius-sm);
+        border: var(--dono-border-width, 1px) solid var(--dono-warning-fg, #92400e);
+        background: var(--dono-warning-bg, #fef3c7);
+        color: var(--dono-warning-fg, #92400e);
+        font-size: 13px;
+        font-weight: 600;
+    }
+
     &__gateways {
         margin: 0;
         padding: 0;
