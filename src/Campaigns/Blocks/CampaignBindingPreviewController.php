@@ -52,7 +52,8 @@ final class CampaignBindingPreviewController
     /**
      * Editing capability, not a campaign capability: this returns nothing a
      * visitor of the published page cannot already read, and it is needed by
-     * anyone the site lets edit a page.
+     * anyone the site lets edit a page. What it may return is narrowed
+     * separately, in resolve().
      */
     public function canAccess(): bool
     {
@@ -70,12 +71,21 @@ final class CampaignBindingPreviewController
         ]);
     }
 
-    /** An explicitly pinned campaign, else the one the edited page belongs to. */
+    /**
+     * An explicitly pinned campaign, else the one the edited page belongs to.
+     *
+     * findRenderable, not findById: the same gate the front end resolves this
+     * binding through, so a draft or archived campaign reaches only a caller
+     * who can manage campaigns. Any other edit_posts holder - a Contributor,
+     * say - gets what the rendered page would give them, which is nothing.
+     * campaign_id comes straight off the request, so without this the route
+     * read out any campaign on the site by id.
+     */
     private function resolve(WP_REST_Request $request): ?Campaign
     {
         $explicit = (int) ($request['campaign_id'] ?? 0);
         if ($explicit > 0) {
-            return $this->campaigns->findById($explicit);
+            return $this->campaigns->findRenderable($explicit);
         }
 
         $postId = (int) $request['id'];
@@ -84,6 +94,6 @@ final class CampaignBindingPreviewController
         }
         $bound = (int) get_post_meta($postId, '_dono_campaign_id', true);
 
-        return $bound > 0 ? $this->campaigns->findById($bound) : null;
+        return $bound > 0 ? $this->campaigns->findRenderable($bound) : null;
     }
 }
