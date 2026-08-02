@@ -110,7 +110,11 @@
     // so themes can override, e.g. `.dono-donation-form { --dono-form-padding: 20px 24px; }`.
     &--framed {
         background: var(--dono-form-bg, #fff);
-        border-radius: var(--dono-form-radius, 14px);
+        // Falls back to the campaign's corner radius, not a literal.
+        // --dono-form-radius is a theme override hook and is never set by us,
+        // so the hardcoded 14px was what every framed form actually used: a
+        // campaign set to square corners still had a rounded card around it.
+        border-radius: var(--dono-form-radius, var(--dono-radius, 14px));
         box-shadow: var(--dono-form-shadow, 0 1px 2px rgba(15, 23, 42, .04), 0 12px 32px rgba(15, 23, 42, .06));
         padding: var(--dono-form-padding, 36px 40px 44px);
     }
