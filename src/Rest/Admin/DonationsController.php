@@ -10,6 +10,7 @@ use Dono\Campaigns\Campaign;
 use Dono\Currency\Currency;
 use Dono\Donations\ChannelClassifier;
 use Dono\Donations\Donation;
+use Dono\Donations\DonationQueries;
 use Dono\Donations\DonationIntent;
 use Dono\Donations\DonationNoteRepository;
 use Dono\Donations\DonationRepository;
@@ -97,6 +98,16 @@ final class DonationsController
             'methods'             => WP_REST_Server::READABLE,
             'callback'            => [$this, 'campaignOptions'],
             'permission_callback' => [$this, 'canAccess'],
+        ]);
+
+        // Before the (?P<reference>...) route, which would otherwise swallow it.
+        register_rest_route(self::NAMESPACE, '/admin/donations/gateway-options', [
+            'methods'             => WP_REST_Server::READABLE,
+            'callback'            => [$this, 'gatewayOptions'],
+            'permission_callback' => [$this, 'canAccess'],
+            'args'                => [
+                'include_test' => ['type' => 'boolean', 'default' => false],
+            ],
         ]);
 
         register_rest_route(self::NAMESPACE, '/admin/donations/stats', [
@@ -1266,6 +1277,71 @@ final class DonationsController
     {
         $cur = (new SettingsService())->get('currency-locale');
         return strtoupper((string) ($cur['default_currency'] ?? 'USD'));
+    }
+
+
+    /**
+     * Gateway filter options: the distinct slugs actually present in the
+     * donations table, scoped the way the list is.
+     *
+     * From the data rather than from GatewayManager, because the two sets
+     * differ in both directions. A slug outlives its gateway being
+     * disconnected or its add-on being deactivated, and the Give importer
+     * writes slugs core never registers. The filter carried a hardcoded
+     * stripe/offline pair, so PayPal was money you could see and not narrow to.
+     *
+     * PaymentGateway::label() is deliberately unused: that is donor-facing
+     * payment-method copy, and several gateways answer "Credit card", which
+     * would put identical options in one dropdown.
+     */
+    public function gatewayOptions(WP_REST_Request $request): WP_REST_Response
+    {
+        // gateway is NOT NULL varchar(32); '' is the only empty case.
+        $q = Donation::query()->distinct()->whereRaw("gateway <> ''");
+        if (! $request['include_test']) {
+            $q = DonationQueries::live($q);
+        }
+
+        $slugs = array_values(array_filter(array_map(
+            'strval',
+            $q->orderBy('gateway', 'ASC')->pluck('gateway')
+        )));
+
+        return new WP_REST_Response(array_map(
+            static fn (string $slug): array => [
+                'value' => $slug,
+                'label' => self::gatewayLabel($slug),
+            ],
+            $slugs
+        ), 200);
+    }
+
+    /**
+     * Admin-facing display name for a gateway slug. Core names what it ships
+     * plus the slugs the Give importer writes; add-ons name their own through
+     * the filter; an unnamed slug still gets a usable option rather than being
+     * dropped, which is the failure this replaces.
+     */
+    public static function gatewayLabel(string $slug): string
+    {
+        $known = [
+            'stripe'  => __('Stripe', 'dono'),
+            'paypal'  => __('PayPal', 'dono'),
+            'offline' => __('Offline', 'dono'),
+            'sandbox' => __('Test donation', 'dono'),
+            'manual'  => __('Manually entered', 'dono'),
+        ];
+
+        if (isset($known[$slug])) {
+            return $known[$slug];
+        }
+
+        $added = (array) apply_filters('dono.gateway_admin_labels', []);
+        $label = $added[$slug] ?? null;
+
+        return is_string($label) && $label !== ''
+            ? $label
+            : ucwords(str_replace(['-', '_'], ' ', $slug));
     }
 
     private function indexArgs(): array

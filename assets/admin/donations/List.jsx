@@ -111,6 +111,7 @@ export default function List() {
     const [ campaigns, setCampaigns ] = useState( [] );
     // Pending confirm dialog. Shape: { title, message, confirmLabel, isDestructive, onConfirm }.
     const [ confirm, setConfirm ] = useState( null );
+    const [ gatewayOptions, setGatewayOptions ] = useState( [] );
 
     // Campaign list for the campaign filter dropdown. Forms could follow the
     // same pattern, but they typically run into the hundreds per org and
@@ -122,6 +123,20 @@ export default function List() {
             .catch( () => { if ( ! aborted ) setCampaigns( [] ); } );
         return () => { aborted = true; };
     }, [] );
+
+    // Gateway options come from the rows, not from the registry: a slug
+    // outlives the gateway being disconnected, and the Give importer carries in
+    // slugs core never registers. Refetches with the test scope so the dropdown
+    // never offers an option that would return nothing.
+    useEffect( () => {
+        let aborted = false;
+        apiFetch( { path: addQueryArgs( '/dono/v1/admin/donations/gateway-options', {
+            include_test: includeTest || undefined,
+        } ) } )
+            .then( ( res ) => { if ( ! aborted ) setGatewayOptions( Array.isArray( res ) ? res : [] ); } )
+            .catch( () => { if ( ! aborted ) setGatewayOptions( [] ); } );
+        return () => { aborted = true; };
+    }, [ includeTest ] );
 
     const filterValue = ( field ) => view.filters?.find( ( f ) => f.field === field )?.value;
     const statusFilter   = filterValue( 'status' );
@@ -242,16 +257,17 @@ export default function List() {
             render:        ( { item } ) => <StatusBadge status={ item.status } />,
         },
         {
-            id:     'gateway',
-            label:  __( 'Gateway', 'dono' ),
-            elements: [
-                { value: 'stripe',  label: __( 'Stripe', 'dono' ) },
-                { value: 'offline', label: __( 'Offline', 'dono' ) },
-            ],
+            id:       'gateway',
+            label:    __( 'Gateway', 'dono' ),
+            elements: gatewayOptions,
             filterBy: { operators: [ 'is' ] },
-            render: ( { item } ) => (
-                <span style={ { textTransform: 'capitalize' } }>{ item.gateway || '-' }</span>
-            ),
+            render: ( { item } ) => {
+                if ( ! item.gateway ) return <span>-</span>;
+                const named = gatewayOptions.find( ( g ) => g.value === item.gateway );
+                return named
+                    ? <span>{ named.label }</span>
+                    : <span style={ { textTransform: 'capitalize' } }>{ item.gateway }</span>;
+            },
         },
         {
             id:       'campaign',
@@ -297,7 +313,7 @@ export default function List() {
                 </span>
             ),
         },
-    ], [ campaigns ] );
+    ], [ campaigns, gatewayOptions ] );
 
     const paginationInfo = useMemo(
         () => ( {
