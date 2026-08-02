@@ -384,6 +384,38 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
         $this->assertSame(1, (int) $plan->payments_count, 'and it is still counted exactly once');
     }
 
+    public function test_the_opening_sale_delivered_twice_is_counted_once(): void
+    {
+        $reference = $this->createRecurringDonation();
+        $this->recordSubscription($reference);
+
+        $sale = [
+            'id'                   => 'SALE-DUP',
+            'billing_agreement_id' => 'I-SUB-1',
+            'amount'               => ['total' => '25.00', 'currency' => 'USD'],
+        ];
+
+        // Sequential redelivery is already closed upstream: the signup lookup
+        // filters on status = pending, so the second delivery never reaches
+        // that branch and falls through to createRenewal, which dedups on the
+        // sale id. This locks that in; the concurrent case, where both
+        // deliveries read pending before either confirms, is what the claim in
+        // the handler guards and is not reachable from a sequential test.
+        $this->postWebhook('PAYMENT.SALE.COMPLETED', $sale);
+        $this->postWebhook('PAYMENT.SALE.COMPLETED', $sale);
+
+        $plan = $this->plans()->findBySubscriptionId('paypal', 'I-SUB-1');
+
+        $this->assertSame(1, (int) $plan->payments_count, 'one charge is one payment');
+        $this->assertSame(2500, (int) $plan->total_paid_cents);
+
+        $this->assertSame(
+            'paid',
+            $this->donations()->findByReference($reference)->status,
+            'and the signup donation is still the one that got paid'
+        );
+    }
+
     /** A later billing cycle is a genuine new donation. */
     public function test_a_later_sale_creates_a_renewal_donation(): void
     {

@@ -536,13 +536,40 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware
             ->get();
 
         if ($signup instanceof Donation) {
+            // Claiming the sale id on the still-pending row is the single-winner
+            // transition for the opening payment, the same shape the renewal
+            // branch below gets from $renewal['created']. recordPayment
+            // increments unconditionally, so without it two deliveries of one
+            // sale both bump payments_count - and PayPal redelivers by design,
+            // which the 503 early-sale path now makes more likely, not less.
+            //
+            // A targeted UPDATE rather than save(): a whole-row write from the
+            // loser's stale copy would push status back to pending over the
+            // winner's paid row. <=> is null-safe, so a row with no intent id
+            // yet still claims.
+            // whereRaw first: it emits no AND connector, so anywhere else in
+            // the chain it fuses onto the preceding condition.
+            $won = Donation::query()
+                ->whereRaw('NOT (gateway_intent_id <=> %s)', $saleId)
+                ->where('id', (int) $signup->id)
+                ->where('status', 'pending')
+                ->update([
+                    'gateway_intent_id' => $saleId,
+                    'updated_at'        => $this->now(),
+                ])
+                ->affectedRows > 0;
+
+            // confirm() stays unconditional: it is idempotent, and a loser that
+            // still finds the row pending heals a delivery that died between
+            // the claim and the confirm rather than stranding it.
             $signup->gateway_intent_id = $saleId;
-            $signup->save();
             $this->donationService->confirm($signup, $confirmResult);
 
-            $fresh = $this->planRepo->findBySubscriptionId($this->id(), $subId);
-            if ($fresh) {
-                $this->planRepo->recordPayment($fresh, $amount, $this->now());
+            if ($won) {
+                $fresh = $this->planRepo->findBySubscriptionId($this->id(), $subId);
+                if ($fresh) {
+                    $this->planRepo->recordPayment($fresh, $amount, $this->now());
+                }
             }
 
             return new WebhookOutcome(
