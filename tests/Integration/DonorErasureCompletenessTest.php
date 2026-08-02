@@ -7,6 +7,7 @@ namespace Dono\Tests\Integration;
 use Dono\Donations\Donation;
 use Dono\Donations\DonationNote;
 use Dono\Donations\Refund;
+use Dono\Donors\Consent;
 use Dono\Donors\Donor;
 use Dono\Donors\DonorService;
 use Dono\Foundation\Plugin;
@@ -95,6 +96,36 @@ final class DonorErasureCompletenessTest extends IntegrationTestCase
         $p->created_at        = $now;
         $p->updated_at        = $now;
         $p->save();
+
+        $consent = Consent::make();
+        $consent->donor_id        = $this->donorId;
+        $consent->purpose         = 'marketing';
+        $consent->granted         = true;
+        $consent->source          = 'donation_form';
+        $consent->ip_hash         = str_repeat('a', 64);
+        $consent->user_agent_hash = str_repeat('b', 64);
+        $consent->occurred_at     = $now;
+        $consent->save();
+
+        $this->consentId = (int) $consent->id;
+    }
+
+    private int $consentId = 0;
+
+    public function test_erasure_keeps_the_consent_but_drops_its_identifying_hashes(): void
+    {
+        $this->erase();
+
+        $consent = Consent::query()->where('id', $this->consentId)->get();
+
+        $this->assertNotNull($consent, 'the consent fact is lawful-basis evidence and survives');
+        $this->assertSame('marketing', $consent->purpose);
+        $this->assertTrue((bool) $consent->granted);
+
+        // ip_hash is a salted digest over a space small enough to enumerate and
+        // user_agent_hash is unsalted, so both re-link the row to the person.
+        $this->assertNull($consent->ip_hash);
+        $this->assertNull($consent->user_agent_hash);
     }
 
     private function erase(): void

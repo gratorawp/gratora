@@ -6,6 +6,7 @@ namespace Dono\Donors\Erasure;
 
 use Dono\Donations\Donation;
 use Dono\Donations\DonationNote;
+use Dono\Donors\Consent;
 use Dono\Donors\DonorNote;
 use Dono\Donors\MagicLinkToken;
 use Dono\Recurring\RecurringPlan;
@@ -81,5 +82,16 @@ final class CoreDonorDataHandler implements ErasureHandler
         // Staff notes about the donor are free-text PII and in DSAR export
         // scope (DonorMetricsService::exportData), so erasure removes them.
         DonorNote::query()->where('donor_id', $request->donorId)->delete();
+
+        // The consent fact and its timestamp are the lawful-basis evidence for
+        // everything sent before the erasure, so the row stays. The hashes are
+        // not evidence of anything: ip_hash is a salted digest over a space
+        // small enough to enumerate, and user_agent_hash is unsalted and so
+        // stable across installs. Both re-link an erased row to the person.
+        // AnalyticsEventHandler clears the same two columns on dono_events and
+        // says why in the same words.
+        Consent::query()
+            ->where('donor_id', $request->donorId)
+            ->update(['ip_hash' => null, 'user_agent_hash' => null]);
     }
 }

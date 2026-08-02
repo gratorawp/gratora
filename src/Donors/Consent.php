@@ -12,6 +12,10 @@ use Dono\Vendor\Queryable\Schema\Table;
  * originals are never mutated (GDPR audit trail). Current consent = newest row
  * per (donor, purpose) by occurred_at.
  *
+ * Erasure is the one exception: it nulls ip_hash and user_agent_hash on the
+ * erased donor's rows. The fact, the purpose and the timestamp are never
+ * touched, because those are the evidence; the hashes only re-identify.
+ *
  * @version 1.0.0
  */
 final class Consent extends Model
