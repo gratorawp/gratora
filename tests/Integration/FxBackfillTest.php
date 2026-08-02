@@ -120,4 +120,31 @@ final class FxBackfillTest extends IntegrationTestCase
         $this->assertSame(0, $counts['converted_donations'] ?? -1);
         $this->assertSame(0, $counts['campaigns'] ?? -1, 'no conversion means no needless full rebuild');
     }
+
+    /**
+     * A foreign plan with no base counts as zero in recurring revenue, so a
+     * rate added later has to reach plans as well as donations.
+     */
+    public function test_recurring_plans_are_converted_too(): void
+    {
+        $plan = \Dono\Recurring\RecurringPlan::make();
+        $plan->status            = 'active';
+        $plan->gateway           = 'offline';
+        $plan->amount_cents      = 2500;
+        $plan->currency          = 'EUR';
+        $plan->base_amount_cents = null;
+        $plan->fx_rate           = null;
+        $plan->interval_unit     = 'month';
+        $plan->interval_count    = 1;
+        $plan->created_at        = gmdate('Y-m-d H:i:s');
+        $plan->save();
+
+        $result = (new FxBackfill(new FxRates()))->run();
+
+        $this->assertSame(1, $result['plans']);
+
+        $reloaded = \Dono\Recurring\RecurringPlan::query()->find('id', (int) $plan->id);
+        $this->assertSame(2500, (int) $reloaded->base_amount_cents);
+        $this->assertNotNull($reloaded->fx_rate);
+    }
 }

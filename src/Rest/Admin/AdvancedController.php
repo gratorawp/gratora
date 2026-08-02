@@ -148,6 +148,12 @@ final class AdvancedController
             $fx        = $this->fxBackfill->run();
             $converted = $fx['converted'];
             $counts['converted_donations'] = $converted;
+            if (($fx['plans'] ?? 0) > 0) {
+                $counts['converted_plans'] = (int) $fx['plans'];
+            }
+            // A plan carries its own base amount, so converting one changes
+            // recurring revenue even when no donation moved.
+            $converted += (int) ($fx['plans'] ?? 0);
             if ($fx['unconvertible'] > 0) {
                 $counts['still_unconvertible'] = $fx['unconvertible'];
             }

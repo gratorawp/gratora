@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dono\Currency;
 
 use Dono\Donations\Donation;
+use Dono\Recurring\RecurringPlan;
 use Dono\Foundation\Helpers\Money;
 
 /**
@@ -35,7 +36,7 @@ final class FxBackfill
     }
 
     /**
-     * @return array{converted:int, unconvertible:int, currencies:array<int,string>}
+     * @return array{converted:int, plans:int, unconvertible:int, currencies:array<int,string>}
      *   currencies lists what is still missing a rate, so the caller can name it.
      */
     public function run(): array
@@ -73,11 +74,48 @@ final class FxBackfill
             $converted++;
         }
 
+        // Recurring plans carry their own base amount, copied from the first
+        // donation, and MRR scores a foreign plan with no base as zero. Left
+        // alone, a rate added today fixed the donation totals while every
+        // renewal-driven figure stayed understated until the plan next charged.
+        $plans = $this->runForPlans($base, $unconvertible);
+
         return [
             'converted'     => $converted,
+            'plans'         => $plans,
             'unconvertible' => count($unconvertible),
             'currencies'    => array_keys($unconvertible),
         ];
+    }
+
+    /**
+     * @param array<string,bool> $unconvertible collected across both passes
+     */
+    private function runForPlans(string $base, array &$unconvertible): int
+    {
+        $converted = 0;
+
+        foreach (RecurringPlan::query()->whereNull('base_amount_cents')->getAll() as $plan) {
+            $currency = strtoupper((string) $plan->currency);
+            if ($currency === '') {
+                continue;
+            }
+
+            $rate = $currency === $base ? 1.0 : $this->fx->rate($currency, $base);
+            if ($rate === null) {
+                $unconvertible[$currency] = true;
+                continue;
+            }
+
+            // No base_currency column here: a plan is always valued in the org
+            // base, and the rate it was struck at is the audit trail.
+            $plan->fx_rate           = sprintf('%.8F', $rate);
+            $plan->base_amount_cents = (int) round((int) $plan->amount_cents * $rate);
+            $plan->save();
+            $converted++;
+        }
+
+        return $converted;
     }
 
     /**
