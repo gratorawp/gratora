@@ -14,7 +14,8 @@ use RuntimeException;
  * Per-scope counter (donation / receipt / refund), atomically incremented via
  * MySQL LAST_INSERT_ID() - gap-free and race-safe. Configurable via the
  * dono_reference_settings option. reset_yearly (default true) starts a fresh
- * counter each Jan 1; false gives continuous numbering across years.
+ * counter each Jan 1, which requires include_year to tell the two sequences
+ * apart; without it, numbering is continuous across years either way.
  *
  * @version 1.0.0
  */
@@ -124,7 +125,7 @@ final class ReferenceGenerator
         $key = $this->counterOption($scope, $year);
 
         if (get_option($key, null) === null) {
-            add_option($key, '0', '', false);
+            add_option($key, (string) $this->seedFor($scope, $key), '', false);
         }
 
         DB::raw(
@@ -147,13 +148,83 @@ final class ReferenceGenerator
         return $new;
     }
 
+    /**
+     * The counter is namespaced by whatever the printed reference is namespaced
+     * by, and nothing else.
+     *
+     * These were keyed off two different settings: the counter off reset_yearly,
+     * the reference off include_year. They are independent toggles, so turning
+     * either one changed which counter was read without changing what the
+     * reference looked like, and the generator re-issued numbers it had already
+     * used. UNIQUE(reference) then rejected the insert - and because next() is
+     * called inside the donation's own transaction, the counter's increment
+     * rolled back with it, so it never advanced and every later donation failed
+     * the same way. A checkbox on the Numbering screen could stop a site taking
+     * money, permanently, behind a generic error.
+     *
+     * A year-scoped counter is only sound when the year is in the reference to
+     * tell the two sequences apart. reset_yearly without include_year is
+     * therefore continuous numbering, which is the only reading that does not
+     * mint DONO-00001 twice.
+     */
     private function counterOption(string $scope, int $year): string
     {
         $s = $this->settings();
-        // Yearly reset embeds the year so counters restart each Jan 1.
-        return ! empty($s['reset_yearly'])
+
+        return ! empty($s['reset_yearly']) && ! empty($s['include_year'])
             ? "dono_reference_counter_{$scope}_{$year}"
             : "dono_reference_counter_{$scope}";
+    }
+
+    /**
+     * What a counter must clear before it issues its first number.
+     *
+     * A counter that did not exist yet used to start at zero, which is right on
+     * a new site and wrong when a numbering setting has just moved the
+     * generator onto a key it has never used: starting that at zero walks back
+     * over references already on donations.
+     *
+     * Which counters it has to clear depends on which key it is, because that
+     * decides which of them could have printed the same string:
+     *
+     *  - A year-scoped counter is usually just January, and January must start
+     *    at 1; that is the whole point of the yearly reset, and it is safe
+     *    because the year is in the reference. The one counter that can already
+     *    have issued a number inside *this* year is the continuous one, so that
+     *    is the only thing it clears.
+     *  - The continuous counter can print any year's format, so it clears every
+     *    counter this scope has ever kept.
+     *
+     * Counter values rather than parsed references on purpose: prefix,
+     * separator and padding are all configurable, so the printed form is not
+     * something to reverse-engineer.
+     */
+    private function seedFor(string $scope, string $key): int
+    {
+        $continuous = "dono_reference_counter_{$scope}";
+
+        if ($key !== $continuous) {
+            return (int) get_option($continuous, 0);
+        }
+
+        $result = DB::raw(
+            'SELECT option_name, option_value FROM ' . DB::getPrefix() . "options
+             WHERE option_name LIKE 'dono_reference_counter%'"
+        );
+
+        $high = 0;
+        foreach (($result['rows'] ?? []) as $row) {
+            $name = (string) ($row->option_name ?? '');
+            // Exactly this scope, or this scope plus a year suffix. Filtered
+            // here rather than in the LIKE, where every underscore in the
+            // option name is a single-character wildcard.
+            if ($name !== $continuous && ! str_starts_with($name, $continuous . '_')) {
+                continue;
+            }
+            $high = max($high, (int) $row->option_value);
+        }
+
+        return $high;
     }
 
     /** @return array<string,mixed> */
