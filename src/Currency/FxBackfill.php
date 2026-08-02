@@ -31,6 +31,9 @@ use Dono\Foundation\Helpers\Money;
  */
 final class FxBackfill
 {
+    /** Rows held in memory at once. */
+    private const CHUNK = 500;
+
     public function __construct(private FxRates $fx)
     {
     }
@@ -43,35 +46,47 @@ final class FxBackfill
     {
         $base = strtoupper(Money::defaultCurrency());
 
-        $rows = Donation::query()
-            ->whereNull('base_amount_cents')
-            ->getAll();
-
         $converted     = 0;
         $unconvertible = [];
 
-        foreach ($rows as $donation) {
-            $currency = strtoupper((string) $donation->currency);
-            if ($currency === '') {
-                continue;
+        // Paged by id rather than loaded in one go. The backlog is unbounded by
+        // definition -- it is every donation in a currency nobody had a rate
+        // for, which on an imported history can be the whole history -- and
+        // this runs inside a REST request.
+        $afterId = 0;
+        while (true) {
+            $rows = Donation::query()
+                ->whereNull('base_amount_cents')
+                ->where('id', $afterId, '>')
+                ->orderBy('id', 'ASC')
+                ->limit(self::CHUNK)
+                ->getAll();
+
+            if ($rows === []) {
+                break;
             }
 
-            if ($currency === $base) {
-                $rate = 1.0;
-            } else {
-                $rate = $this->fx->rate($currency, $base);
-            }
+            foreach ($rows as $donation) {
+                $afterId = (int) $donation->id;
 
-            if ($rate === null) {
-                $unconvertible[$currency] = true;
-                continue;
-            }
+                $currency = strtoupper((string) $donation->currency);
+                if ($currency === '') {
+                    continue;
+                }
 
-            $donation->base_currency     = $base;
-            $donation->fx_rate           = sprintf('%.8F', $rate);
-            $donation->base_amount_cents = (int) round((int) $donation->amount_cents * $rate);
-            $donation->save();
-            $converted++;
+                $rate = $currency === $base ? 1.0 : $this->fx->rate($currency, $base);
+
+                if ($rate === null) {
+                    $unconvertible[$currency] = true;
+                    continue;
+                }
+
+                $donation->base_currency     = $base;
+                $donation->fx_rate           = sprintf('%.8F', $rate);
+                $donation->base_amount_cents = (int) round((int) $donation->amount_cents * $rate);
+                $donation->save();
+                $converted++;
+            }
         }
 
         // Recurring plans carry their own base amount, copied from the first
@@ -94,25 +109,41 @@ final class FxBackfill
     private function runForPlans(string $base, array &$unconvertible): int
     {
         $converted = 0;
+        $afterId   = 0;
 
-        foreach (RecurringPlan::query()->whereNull('base_amount_cents')->getAll() as $plan) {
-            $currency = strtoupper((string) $plan->currency);
-            if ($currency === '') {
-                continue;
+        while (true) {
+            $plans = RecurringPlan::query()
+                ->whereNull('base_amount_cents')
+                ->where('id', $afterId, '>')
+                ->orderBy('id', 'ASC')
+                ->limit(self::CHUNK)
+                ->getAll();
+
+            if ($plans === []) {
+                break;
             }
 
-            $rate = $currency === $base ? 1.0 : $this->fx->rate($currency, $base);
-            if ($rate === null) {
-                $unconvertible[$currency] = true;
-                continue;
-            }
+            foreach ($plans as $plan) {
+                $afterId = (int) $plan->id;
 
-            // No base_currency column here: a plan is always valued in the org
-            // base, and the rate it was struck at is the audit trail.
-            $plan->fx_rate           = sprintf('%.8F', $rate);
-            $plan->base_amount_cents = (int) round((int) $plan->amount_cents * $rate);
-            $plan->save();
-            $converted++;
+                $currency = strtoupper((string) $plan->currency);
+                if ($currency === '') {
+                    continue;
+                }
+
+                $rate = $currency === $base ? 1.0 : $this->fx->rate($currency, $base);
+                if ($rate === null) {
+                    $unconvertible[$currency] = true;
+                    continue;
+                }
+
+                // No base_currency column here: a plan is always valued in the
+                // org base, and the rate it was struck at is the audit trail.
+                $plan->fx_rate           = sprintf('%.8F', $rate);
+                $plan->base_amount_cents = (int) round((int) $plan->amount_cents * $rate);
+                $plan->save();
+                $converted++;
+            }
         }
 
         return $converted;
@@ -126,20 +157,21 @@ final class FxBackfill
      */
     public static function pending(): array
     {
+        // Counted by the database. This runs on every load of the screen, and
+        // hydrating a model per stranded donation to add up two numbers is the
+        // one shape guaranteed to be slowest exactly where the backlog is
+        // largest.
         $rows = Donation::query()
+            ->selectRaw('UPPER(currency) AS currency, COUNT(*) AS cnt, COALESCE(SUM(amount_cents), 0) AS total')
             ->whereNull('base_amount_cents')
+            ->groupByRaw('UPPER(currency)')
+            ->orderByRaw('total DESC')
             ->getAll();
 
-        $out = [];
-        foreach ($rows as $donation) {
-            $currency = strtoupper((string) $donation->currency);
-            if (! isset($out[$currency])) {
-                $out[$currency] = ['currency' => $currency, 'count' => 0, 'amount_cents' => 0];
-            }
-            $out[$currency]['count']++;
-            $out[$currency]['amount_cents'] += (int) $donation->amount_cents;
-        }
-
-        return array_values($out);
+        return array_map(static fn ($r): array => [
+            'currency'     => (string) $r['currency'],
+            'count'        => (int) $r['cnt'],
+            'amount_cents' => (int) $r['total'],
+        ], $rows);
     }
 }

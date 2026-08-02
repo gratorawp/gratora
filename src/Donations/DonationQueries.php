@@ -78,8 +78,17 @@ final class DonationQueries
         // fx_rate is NULL only for a foreign donation we could not convert to
         // base (no rate available); such a row contributes nothing to base
         // totals, so its refunds must net to 0 too - scale by 0, not 1.
+        //
+        // Summed before rounding, not after. base_amount_cents is rounded once
+        // from the whole amount, so rounding each refund separately and adding
+        // them up can exceed the correctly-rounded value of the same total: at
+        // 0.5107, two refunds of 50.00 gave back 2554 + 2554 = 5108 where the
+        // 100.00 they add up to is worth 5107. A foreign donation refunded in
+        // instalments handed back a cent it never took in, and every total it
+        // feeds -- campaign raised, donor lifetime value, fund, dashboard --
+        // inherited the shortfall. One rounding at the end, on one product.
         return "COALESCE((
-            SELECT SUM(ROUND(amount_cents * COALESCE({$donations}.fx_rate, 0)))
+            SELECT ROUND(SUM(amount_cents) * COALESCE({$donations}.fx_rate, 0))
             FROM {$refunds}
             WHERE donation_id = {$donations}.id AND status = 'succeeded'
         ), 0)";

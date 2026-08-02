@@ -741,13 +741,17 @@ final class DonationRepository
         // the base currency, matching the donations' base_amount_cents they get
         // netted against (and DonationQueries::refundedBaseExpr on the public
         // path). Summing raw amount_cents mixed foreign cents into base totals.
+        //
+        // Summed before rounding for the reason given on refundedBaseExpr: a
+        // foreign donation refunded in instalments drifts a cent past what the
+        // same total is actually worth in base.
         return $q->joinRaw(
             "LEFT JOIN (
-                SELECT rf.donation_id, SUM(ROUND(rf.amount_cents * COALESCE(d.fx_rate, 0))) AS refunded
+                SELECT rf.donation_id, ROUND(SUM(rf.amount_cents) * COALESCE(d.fx_rate, 0)) AS refunded
                 FROM {$prefix}dono_refunds rf
                 JOIN {$prefix}dono_donations d ON d.id = rf.donation_id
                 WHERE rf.status = 'succeeded'
-                GROUP BY rf.donation_id
+                GROUP BY rf.donation_id, d.fx_rate
             ) r ON r.donation_id = {$prefix}dono_donations.id"
         );
     }
