@@ -20,7 +20,13 @@ final class BlockAvatar
             return '<span class="dono-avatar dono-avatar--anon" aria-hidden="true">?</span>';
         }
 
-        $initial = mb_strtoupper(mb_substr($name, 0, 1));
+        // Decoded and letter-first, matching DonoP2P\Blocks\Initials. Names
+        // are stored HTML-encoded, so a donor written with quotes put an
+        // ampersand in the circle, and all of them shared one hue.
+        $decoded = html_entity_decode($name, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $initial = preg_match('/\p{L}|\p{N}/u', $decoded, $m) === 1
+            ? mb_strtoupper($m[0])
+            : mb_strtoupper(mb_substr($decoded, 0, 1));
         // From the same character the avatar shows, not from the first byte.
         // ord() on a UTF-8 string reads the lead byte, which is shared across a
         // whole range: every name beginning with a Latin letter carrying a

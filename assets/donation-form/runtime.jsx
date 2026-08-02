@@ -480,6 +480,9 @@ function FormBody( { state, dispatch, config } ) {
 }
 
 function SinglePageView( { state, dispatch, config, onSubmit } ) {
+    // Same rule as the paged view. Fixing only that one left every single-page
+    // form showing a live Donate button under "No payment method accepts X".
+    const noGateway  = visibleGateways( config, state ).length === 0;
     const submitStep = state.steps.find( ( s ) => s.type === 'submit' );
     const submitLabel = interpolateLabel(
         submitStep?.label || config.i18n.donateNow,
@@ -503,8 +506,8 @@ function SinglePageView( { state, dispatch, config, onSubmit } ) {
                 <button
                     type="button"
                     class="dono-form__button dono-form__button--primary"
-                    disabled={ state.status === 'submitting' }
-                    onClick={ onSubmit }
+                    disabled={ state.status === 'submitting' || noGateway }
+                    onClick={ () => { if ( ! noGateway ) onSubmit(); } }
                 >
                     { state.status === 'submitting' ? config.i18n.processing : submitLabel }
                 </button>

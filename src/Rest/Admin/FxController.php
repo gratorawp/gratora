@@ -149,7 +149,10 @@ final class FxController
             if ($code === '') {
                 continue;
             }
-            if ($this->gateways->availableFor(null, $code, 'one_time') === []) {
+            // optionsFor(), not availableFor(): the latter filters on
+            // canCharge() alone and ignores the per-gateway enabled flag,
+            // so a disabled Offline still counted and this never fired.
+            if ($this->gateways->optionsFor([], null, $code, 'one_time') === []) {
                 $out[] = $code;
             }
         }

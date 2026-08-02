@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dono\Currency;
 
 use Dono\Foundation\Helpers\Money;
+use Dono\Settings\SettingsService;
 
 /**
  * The currencies an organisation accepts.
@@ -45,12 +46,20 @@ final class SupportedCurrencies
             || in_array($currency, $list, true);
     }
 
-    /** @return array<int,string> uppercased, possibly empty when unconfigured */
+    /**
+     * @return array<int,string> uppercased, possibly empty when unconfigured
+     *
+     * Through the settings service, not get_option(). The option is written
+     * only when someone saves the Currency screen, and the service merges the
+     * ['USD'] default for a site that never has. Reading the raw option turned
+     * an untouched site from USD-only into one accepting any three letters,
+     * which is exactly the unreportable row this class exists to refuse.
+     */
     public static function all(): array
     {
-        $opt  = get_option('dono_currency_locale');
-        $list = is_array($opt) && is_array($opt['supported_currencies'] ?? null)
-            ? $opt['supported_currencies']
+        $cfg  = (new SettingsService())->get('currency-locale');
+        $list = is_array($cfg['supported_currencies'] ?? null)
+            ? $cfg['supported_currencies']
             : [];
 
         return array_values(array_map(
