@@ -233,6 +233,47 @@ body.dono-modal-open { overflow: hidden; }
     font-size: 13px;
 }
 
+.dono-block__empty-text { margin: 0; }
+
+// With somewhere to send them, the empty state is the ask rather than a
+// report. Solid rather than dashed: a dashed box reads as something missing,
+// and nothing is missing here, the campaign is simply new.
+.dono-block__empty--cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 20px;
+    border-style: solid;
+    background: var(--dono-bg, #fff);
+    color: var(--dono-text, #{$text-fallback});
+    font-size: 15px;
+}
+
+.dono-block__empty-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: var(--dono-radius-sm, #{$radius-sm-fallback});
+    // Same token chain as the form's own submit button, border included: a
+    // campaign whose button style is an outline sets a transparent background
+    // and carries the shape in the border, so omitting it rendered bare text.
+    background: var(--dono-button-bg, var(--dono-accent, #{$accent-fallback}));
+    border: var(--dono-button-border, 0);
+    color: var(--dono-button-fg, #fff);
+    font-weight: var(--dono-button-weight, 600);
+    font-size: 14px;
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+
+    &:hover,
+    &:focus {
+        background: var(--dono-button-hover-bg, var(--dono-button-bg, var(--dono-accent, #{$accent-fallback})));
+        color: var(--dono-button-fg, #fff);
+    }
+}
+
 // ServerSideRender suppresses its own <h3> (REST_REQUEST) so the editor's
 // inline RichText title is the one shown; style it to match the frontend.
 .dono-campaign-block-edit {

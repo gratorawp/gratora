@@ -25,7 +25,7 @@ $donoBar = static function (int $cents) use ($maxAmount): string {
     <?php endif; ?>
 
     <?php if (! $entries): ?>
-        <p class="dono-block__empty"><?php echo esc_html($emptyText); ?></p>
+        <?php require __DIR__ . '/empty-cta.php'; ?>
     <?php elseif ($layout === 'podium'): ?>
         <?php
         $podium = array_slice($entries, 0, 3);

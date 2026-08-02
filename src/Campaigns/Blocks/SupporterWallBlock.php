@@ -134,7 +134,11 @@ final class SupporterWallBlock extends CampaignBlock
         if (! $byDonor) {
             return View::loadRelative(__DIR__, 'views/supporter-wall', [
                 'title'        => (string) ($attrs['title'] ?? ''),
-            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('No supporters to show yet.', 'dono'),
+            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('Be the first to support this campaign.', 'dono'),
+            // No button when the campaign cannot take the money: a
+            // draft or finished campaign has nothing to offer.
+            'donateUrl'    => $campaign->acceptsDonations() ? '#dono-form' : '',
+            'donateLabel'  => __('Donate', 'dono'),
                 'entries'      => [],
                 'showMessage'  => $showMessage,
                 'showAmount'   => (bool) ($attrs['showAmount'] ?? false),
@@ -176,7 +180,11 @@ final class SupporterWallBlock extends CampaignBlock
 
         return View::loadRelative(__DIR__, 'views/supporter-wall', [
             'title'        => (string) ($attrs['title'] ?? ''),
-            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('No supporters to show yet.', 'dono'),
+            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('Be the first to support this campaign.', 'dono'),
+            // No button when the campaign cannot take the money: a
+            // draft or finished campaign has nothing to offer.
+            'donateUrl'    => $campaign->acceptsDonations() ? '#dono-form' : '',
+            'donateLabel'  => __('Donate', 'dono'),
             'entries'      => $entries,
             'showMessage'  => $showMessage,
             'showAmount'   => (bool) ($attrs['showAmount'] ?? false),

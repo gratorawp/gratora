@@ -18,7 +18,7 @@ defined('ABSPATH') || exit;
     <?php endif; ?>
 
     <?php if (! $entries): ?>
-        <p class="dono-block__empty"><?php echo esc_html($emptyText); ?></p>
+        <?php require __DIR__ . '/empty-cta.php'; ?>
     <?php else: ?>
         <ul class="dono-recent-donations__list">
             <?php foreach ($entries as $entry): ?>
