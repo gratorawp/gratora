@@ -1064,10 +1064,30 @@ final class CoreCommandProvider
             function (array $in) use ($c): array {
                 [$plan, $sub] = $this->resolvePlan($c, (int) $in['plan_id']);
                 $amount = (int) $in['amount_cents'];
+
+                // Both guards are the donor portal's, verbatim: this is the
+                // same edit through a different door and it had neither.
+                //
+                // Amounts are major units x 100, so a fractional amount in a
+                // zero-decimal currency rounds at the gateway rather than being
+                // refused - 1.50 JPY is billed as 2 - and the plan row keeps
+                // the value nobody is charging, on every renewal.
+                if (Currency::minorUnits((string) $plan->currency) === 0 && $amount % 100 !== 0) {
+                    throw new CommandError('This currency does not support fractional amounts.');
+                }
+
                 if ($sub) {
                     $sub->updateSubscriptionAmount($plan, $amount);
                 }
+
                 $plan->amount_cents = $amount;
+                // Keep the base-currency snapshot in step with the new amount.
+                // Every base-currency aggregate reads this in preference to
+                // amount_cents, so leaving it stale pinned MRR to the old
+                // figure permanently.
+                $plan->base_amount_cents = $plan->fx_rate !== null
+                    ? (int) round($amount * (float) $plan->fx_rate)
+                    : null;
                 $plan->save();
                 do_action('dono.recurring.plan_amount_changed', $plan);
                 return ['plan_id' => (int) $plan->id, 'amount_cents' => (int) $plan->amount_cents];
