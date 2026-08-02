@@ -25,6 +25,7 @@ final class UpgradeRoutineTest extends IntegrationTestCase
         parent::setUp();
         delete_option(UpgradeRunner::OPTION_DONE);
         delete_option('dono_upgrade_clear_consent_hashes_after');
+        delete_option(UpgradeRunner::OPTION_FAILED);
     }
 
     private function erasedDonorWithConsent(): int
@@ -117,6 +118,72 @@ final class UpgradeRoutineTest extends IntegrationTestCase
         $this->assertTrue(
             $runner->hasPending(),
             'stamping a routine that failed would strand whatever it had not reached'
+        );
+    }
+
+    public function test_a_failure_is_recorded_with_its_attempt_count(): void
+    {
+        $routine = new class implements UpgradeRoutine {
+            public function id(): string
+            {
+                return 'test_records_failure';
+            }
+            public function description(): string
+            {
+                return 'test';
+            }
+            public function step(): bool
+            {
+                throw new \RuntimeException('table is on fire');
+            }
+        };
+
+        $runner = new UpgradeRunner([$routine]);
+        $runner->step();
+        $runner->step();
+
+        $failure = UpgradeRunner::failures()['test_records_failure'] ?? null;
+
+        $this->assertNotNull($failure, 'a stuck routine has to be distinguishable from a slow one');
+        $this->assertStringContainsString('table is on fire', $failure['message']);
+        $this->assertSame(2, $failure['attempts'], 'and repeated failure has to look different from the first');
+    }
+
+    public function test_a_recovered_routine_stops_reporting_its_old_failure(): void
+    {
+        $fail = true;
+        $routine = new class ($fail) implements UpgradeRoutine {
+            public function __construct(private bool &$fail)
+            {
+            }
+            public function id(): string
+            {
+                return 'test_recovers';
+            }
+            public function description(): string
+            {
+                return 'test';
+            }
+            public function step(): bool
+            {
+                if ($this->fail) {
+                    throw new \RuntimeException('transient');
+                }
+                return true;
+            }
+        };
+
+        $runner = new UpgradeRunner([$routine]);
+        $runner->step();
+        $this->assertArrayHasKey('test_recovers', UpgradeRunner::failures());
+
+        $fail = false;
+        $runner->step();
+
+        $this->assertArrayNotHasKey(
+            'test_recovers',
+            UpgradeRunner::failures(),
+            'a transient failure must not leave a permanent error on the screen'
         );
     }
 

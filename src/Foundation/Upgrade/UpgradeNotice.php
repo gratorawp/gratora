@@ -48,6 +48,29 @@ final class UpgradeNotice
 
         $url = admin_url('admin.php?page=dono-settings&tab=advanced');
 
+        // A routine that keeps failing reads exactly like one working through a
+        // large table, and the difference is the whole point of saying anything.
+        $failures = UpgradeRunner::failures();
+        $stuck = false;
+        foreach ($pending as $routine) {
+            if (($failures[$routine->id()]['attempts'] ?? 0) > 0) {
+                $stuck = true;
+                break;
+            }
+        }
+
+        if ($stuck) {
+            printf(
+                '<div class="notice notice-error"><p><strong>%s</strong> %s <a href="%s">%s</a></p></div>',
+                esc_html__('Dono could not finish a data update.', 'dono'),
+                esc_html__('It stopped with an error and will be retried. Until it finishes, some records are only partly updated.', 'dono'),
+                esc_url($url),
+                esc_html__('See what failed', 'dono')
+            );
+
+            return;
+        }
+
         printf(
             '<div class="notice notice-warning"><p><strong>%s</strong> %s <a href="%s">%s</a></p></div>',
             esc_html__('Dono is finishing a data update.', 'dono'),

@@ -220,7 +220,24 @@ export default function AdvancedPanel( { s, active } ) {
                 >
                     <ul className="dono-advanced-cron">
                         { info.pending_upgrades.map( ( u ) => (
-                            <li key={ u.id }>{ u.description }</li>
+                            <li key={ u.id }>
+                                { u.description }
+                                { u.failure && (
+                                    <div className="dono-advanced-notice dono-advanced-notice--error" style={ { marginTop: 6 } }>
+                                        { sprintf(
+                                            /* translators: 1: error message, 2: number of attempts */
+                                            _n(
+                                                'Stopped with: %1$s (failed %2$d time)',
+                                                'Stopped with: %1$s (failed %2$d times)',
+                                                u.failure.attempts,
+                                                'dono'
+                                            ),
+                                            u.failure.message,
+                                            u.failure.attempts
+                                        ) }
+                                    </div>
+                                ) }
+                            </li>
                         ) ) }
                     </ul>
                     <div className="dono-advanced-actions" style={ { marginTop: 12 } }>

@@ -373,7 +373,11 @@ final class AdvancedController
             // half-migrated, and Action Scheduler rides WP-cron, which plenty
             // of hosts disable. The screen has to be able to say so.
             'pending_upgrades'      => array_map(
-                static fn ($r): array => ['id' => $r->id(), 'description' => $r->description()],
+                static fn ($r): array => [
+                    'id'          => $r->id(),
+                    'description' => $r->description(),
+                    'failure'     => UpgradeRunner::failures()[$r->id()] ?? null,
+                ],
                 $this->upgrades->pending()
             ),
             'recalc_scopes'         => array_map(

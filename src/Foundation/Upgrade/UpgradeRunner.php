@@ -21,6 +21,9 @@ final class UpgradeRunner
 {
     public const OPTION_DONE = 'dono_upgrade_routines_done';
 
+    /** Last failure per routine id, so a stuck one is distinguishable. */
+    public const OPTION_FAILED = 'dono_upgrade_routines_failed';
+
     /** @var list<UpgradeRoutine> */
     private array $routines;
 
@@ -79,8 +82,14 @@ final class UpgradeRunner
             $finished = $routine->step();
         } catch (\Throwable $e) {
             // Left unstamped on purpose: a routine that threw has not finished,
-            // and marking it done would strand whatever it had not reached. The
-            // admin notice keeps saying so, which is the point.
+            // and marking it done would strand whatever it had not reached.
+            //
+            // Recorded rather than only logged. "Still outstanding" reads the
+            // same whether a routine is working through a large table or has
+            // failed forty times, and nobody reads the PHP error log of a site
+            // they installed a plugin on.
+            self::recordFailure($routine->id(), $e->getMessage());
+
             error_log(sprintf(
                 'dono: upgrade routine %s failed: %s',
                 $routine->id(),
@@ -90,11 +99,48 @@ final class UpgradeRunner
             return false;
         }
 
+        self::clearFailure($routine->id());
+
         if ($finished) {
             self::markDone($routine->id());
         }
 
         return $this->hasPending();
+    }
+
+    /**
+     * Why a routine last failed, keyed by id, with how many times running.
+     *
+     * @return array<string,array{message:string, attempts:int, at:string}>
+     */
+    public static function failures(): array
+    {
+        $failed = get_option(self::OPTION_FAILED, []);
+
+        return is_array($failed) ? $failed : [];
+    }
+
+    private static function recordFailure(string $id, string $message): void
+    {
+        $failed = self::failures();
+        $failed[$id] = [
+            'message'  => mb_substr($message, 0, 500),
+            'attempts' => (int) ($failed[$id]['attempts'] ?? 0) + 1,
+            'at'       => gmdate('c'),
+        ];
+
+        update_option(self::OPTION_FAILED, $failed, false);
+    }
+
+    private static function clearFailure(string $id): void
+    {
+        $failed = self::failures();
+        if (! array_key_exists($id, $failed)) {
+            return;
+        }
+
+        unset($failed[$id]);
+        update_option(self::OPTION_FAILED, $failed, false);
     }
 
     /** @return list<string> */
