@@ -456,4 +456,27 @@ final class AdminManualDonationTest extends IntegrationTestCase
 
         return (int) rest_do_request($req)->get_data()['id'];
     }
+
+    /**
+     * The public route has always checked the accepted list; this one validated
+     * the code as three letters and took whatever it was given. A gift recorded
+     * in a currency with no configured rate has no base amount, so it sits
+     * outside every total with nothing on any screen saying so.
+     */
+    public function test_a_currency_the_org_does_not_accept_is_refused(): void
+    {
+        // The suite accepts USD, EUR and GBP.
+        $res = $this->record(['currency' => 'BGN']);
+
+        $this->assertSame(422, $res->get_status());
+        $this->assertSame('dono_unsupported_currency', $res->get_data()['code'] ?? null);
+        $this->assertSame(0, Donation::query()->where('currency', 'BGN')->count());
+    }
+
+    public function test_an_accepted_currency_still_records(): void
+    {
+        $res = $this->record(['currency' => 'GBP']);
+
+        $this->assertSame(201, $res->get_status());
+    }
 }

@@ -6,6 +6,7 @@ namespace Dono\Rest;
 
 use Dono\Campaigns\Campaign;
 use Dono\Currency\Currency;
+use Dono\Currency\SupportedCurrencies;
 use Dono\Donations\AntiSpamGuard;
 use Dono\Donations\Donation;
 use Dono\Donations\ChannelClassifier;
@@ -501,14 +502,7 @@ final class DonationsController
      */
     private function isSupportedCurrency(string $currency): bool
     {
-        $cfg       = $this->settings->get('currency-locale');
-        $base      = strtoupper((string) ($cfg['default_currency'] ?? 'USD'));
-        $supported = is_array($cfg['supported_currencies'] ?? null) ? $cfg['supported_currencies'] : [];
-        $supported = array_map(static fn ($c): string => strtoupper((string) $c), $supported);
-
-        // The base currency is always accepted, even if it was never added to
-        // the supported list explicitly.
-        return $supported === [] || $currency === $base || in_array($currency, $supported, true);
+        return SupportedCurrencies::accepts($currency);
     }
 
     private function resolveCampaignId(?Form $form, mixed $submitted): ?int

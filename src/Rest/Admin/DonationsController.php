@@ -18,6 +18,7 @@ use Dono\Donors\Donor;
 use Dono\Donors\DonorRepository;
 use Dono\Donors\DonorService;
 use Dono\Foundation\Helpers\Csv;
+use Dono\Currency\SupportedCurrencies;
 use Dono\Foundation\Helpers\Money;
 use Dono\Forms\Blocks\CustomFieldLabels;
 use Dono\Forms\Form;
@@ -296,6 +297,23 @@ final class DonationsController
         }
 
         $currency = strtoupper((string) ($request['currency'] ?: Money::defaultCurrency()));
+
+        // The public route has always checked this; this one validated the code
+        // as three letters and took whatever it was given. An offline gift in a
+        // currency with no configured rate is recorded and then sits outside
+        // every total, which is not something to accept by typo.
+        if (! SupportedCurrencies::accepts($currency)) {
+            return new WP_Error(
+                'dono_unsupported_currency',
+                sprintf(
+                    /* translators: 1: the currency code entered, 2: the accepted codes. */
+                    __('%1$s is not one of your accepted currencies (%2$s). Add it under Settings, Currency, so it can be converted into your reporting totals.', 'dono'),
+                    $currency,
+                    implode(', ', SupportedCurrencies::all())
+                ),
+                ['status' => 422]
+            );
+        }
 
         if (! (bool) $request['confirm_duplicate']) {
             $existing = $this->donationLike(
