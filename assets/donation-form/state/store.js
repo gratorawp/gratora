@@ -1,7 +1,7 @@
 /** @jsxImportSource preact */
 import { evaluateCondition } from './conditions';
 import { mergePayload, registeredErrors, registeredValues } from './fields';
-import { convertCents, displayPreset, isZeroDecimal } from '../util/fx';
+import { convertCents, displayPreset, isZeroDecimal, roundToCurrency } from '../util/fx';
 import { formatAmount } from '../util/format';
 /**
  * Donation-form state: single useReducer source of truth
@@ -203,7 +203,9 @@ export function reducer( state, action ) {
 
             // If a preset tile is selected, keep that tile selected and show
             // its converted, nice-rounded value in the new currency. A custom
-            // amount converts precisely.
+            // amount converts precisely, then snaps to a whole major unit when
+            // the target currency has no sub-unit: EUR 12.50 into JPY is
+            // 2004.62 yen, which the server refuses.
             const presets = presetCentsOf( state );
             const cur     = state.values.amount_cents;
             const idx = presets.findIndex(
@@ -211,7 +213,7 @@ export function reducer( state, action ) {
             );
             const nextCents = idx >= 0
                 ? displayPreset( state.fx, presets[ idx ], state.presetCurrency, to )
-                : convertCents( state.fx, cur, from, to );
+                : roundToCurrency( convertCents( state.fx, cur, from, to ), to );
 
             return {
                 ...state,

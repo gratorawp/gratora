@@ -1,7 +1,7 @@
 /** @jsxImportSource preact */
 
 import { formatAmount } from '../util/format';
-import { displayPreset } from '../util/fx';
+import { displayPreset, roundToCurrency } from '../util/fx';
 import { decodeEntities } from '../util/entities';
 import AmountInput from '../components/AmountInput';
 import CurrencySwitcher from '../components/CurrencySwitcher';
@@ -60,7 +60,7 @@ export default function AmountStep( { step, state, dispatch, config } ) {
                         value={ isCustom && cents > 0 ? cents / 100 : 0 }
                         onChange={ ( n ) => {
                             const nextCents = Math.max( 0, Math.round( Number( n || 0 ) * 100 ) );
-                            setCents( nextCents );
+                            setCents( roundToCurrency( nextCents, state.currency ) );
                         } }
                         currency={ state.currency }
                         min={ 0 }

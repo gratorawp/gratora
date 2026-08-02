@@ -17,6 +17,14 @@ export function isZeroDecimal( currency ) {
     return ZERO_DECIMAL.includes( String( currency || '' ).toUpperCase() );
 }
 
+// Storage is major x 100 in every currency, so a zero-decimal amount has to
+// land on a whole major unit or the server refuses it.
+export function roundToCurrency( cents, currency ) {
+    const n = Number( cents ) || 0;
+    if ( ! isZeroDecimal( currency ) ) return n;
+    return Math.round( n / 100 ) * 100;
+}
+
 /** Convert integer minor units between currencies. Safe no-op when unknown. */
 export function convertCents( fx, cents, from, to ) {
     const n = Number( cents ) || 0;
