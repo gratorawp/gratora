@@ -114,6 +114,21 @@ final class DonationsController
             /* translators: %s: gateway identifier */
             return new WP_Error('dono_invalid_gateway', sprintf(__('Unknown gateway: %s', 'dono'), $gatewayId), ['status' => 400]);
         }
+        // The form only offers gateways that take this currency, and a crafted
+        // payload could name one that does not. Refusing here says so; letting
+        // it through failed at the gateway with whatever wording it chose.
+        if (! $this->gateways->acceptsCurrency($gatewayId, $currency)) {
+            return new WP_Error(
+                'dono_gateway_currency',
+                sprintf(
+                    /* translators: 1: gateway identifier, 2: currency code */
+                    __('%1$s cannot take payments in %2$s.', 'dono'),
+                    $gatewayId,
+                    $currency
+                ),
+                ['status' => 400]
+            );
+        }
         if ($err = $this->spam->consumeEmailQuota($email)) return $err;
 
         $profile = (array) ($body['profile'] ?? []);

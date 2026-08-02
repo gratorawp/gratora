@@ -118,6 +118,32 @@ final class GatewayManager
     }
 
     /** @return array<string, PaymentGateway> */
+    /**
+     * Can this gateway take this currency?
+     *
+     * availableFor() applies the same rule when deciding what to offer a donor,
+     * but the create path only checked that the gateway existed, so a crafted
+     * payload could name one that cannot take the currency and fail later at
+     * the gateway instead of here.
+     *
+     * A wildcard means the gateway does its own validation, which is the right
+     * answer for Stripe (its list runs to well over a hundred currencies and
+     * moves) and for Offline (a cheque can be written in anything). Hardcoding
+     * either would be a list that goes stale and starts refusing real money.
+     */
+    public function acceptsCurrency(string $gatewayId, string $currency): bool
+    {
+        $gateway = $this->get($gatewayId);
+        if ($gateway === null) {
+            return false;
+        }
+
+        $currencies = array_map('strtoupper', $gateway->currencies());
+
+        return in_array('*', $currencies, true)
+            || in_array(strtoupper($currency), $currencies, true);
+    }
+
     public function availableFor(?string $country, string $currency, string $frequency = 'one_time'): array
     {
         $currency = strtoupper($currency);

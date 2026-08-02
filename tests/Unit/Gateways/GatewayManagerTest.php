@@ -89,6 +89,35 @@ final class GatewayManagerTest extends TestCase
         $this->assertArrayNotHasKey('usd_only', $available);
     }
 
+    /**
+     * The create path only checked that the gateway existed, so a payload
+     * naming one that cannot take the currency got through and failed later at
+     * the gateway with whatever wording it chose.
+     */
+    public function test_accepts_currency_matches_what_available_for_offers(): void
+    {
+        $gm = new GatewayManager();
+        $gm->register(new FakeGateway('eur_only',     ['one_time'], ['card'], ['*'], ['EUR']));
+        $gm->register(new FakeGateway('any_currency', ['one_time'], ['card'], ['*'], ['*']));
+
+        $this->assertTrue($gm->acceptsCurrency('eur_only', 'EUR'));
+        $this->assertFalse($gm->acceptsCurrency('eur_only', 'USD'));
+
+        // A wildcard defers to the gateway's own validation, which is right for
+        // Stripe and Offline and is why neither list is hardcoded here.
+        $this->assertTrue($gm->acceptsCurrency('any_currency', 'BGN'));
+
+        $this->assertFalse($gm->acceptsCurrency('nope', 'EUR'), 'an unknown gateway takes nothing');
+    }
+
+    public function test_accepts_currency_is_case_insensitive(): void
+    {
+        $gm = new GatewayManager();
+        $gm->register(new FakeGateway('eur_only', ['one_time'], ['card'], ['*'], ['eur']));
+
+        $this->assertTrue($gm->acceptsCurrency('eur_only', 'EUR'));
+    }
+
     public function test_available_for_excludes_gateways_that_cannot_charge(): void
     {
         $gm = new GatewayManager();
