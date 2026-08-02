@@ -556,10 +556,9 @@ final class DonationsController
         $campaignIds = array_unique(array_filter(array_map(fn ($d) => (int) $d->campaign_id, $result['items'])));
         $formIds     = array_unique(array_filter(array_map(fn ($d) => (int) $d->form_id,     $result['items'])));
 
-        $donorsById    = [];
-        foreach ($donorIds as $id) {
-            $donorsById[$id] = $this->donors->findById($id);
-        }
+        // Campaigns and forms were batched and donors were not, under a comment
+        // saying all three were.
+        $donorsById = $this->donors->findManyByIds(array_values($donorIds));
         $campaignsById = [];
         if ($campaignIds !== []) {
             foreach (Campaign::query()->whereIn('id', array_values($campaignIds))->getAll() as $c) {
@@ -1178,10 +1177,22 @@ final class DonationsController
             __('Refunded at', 'dono'),
         ]);
 
+        // Cached per donor rather than per row, which bounded this at the number
+        // of distinct donors instead of the number of donations: still one
+        // round trip each, inside one synchronous request, over an export
+        // capped at 50,000 rows. Loaded up front in chunks instead, so the
+        // trips are counted in dozens rather than thousands.
         $donorCache = [];
+        foreach (array_chunk(array_unique(array_map(
+            static fn ($d): int => (int) $d->donor_id,
+            $rows
+        )), 500) as $chunk) {
+            $donorCache += $this->donors->findManyByIds($chunk);
+        }
+
         foreach ($rows as $d) {
             /** @var Donation $d */
-            $donor = $donorCache[$d->donor_id] ??= $this->donors->findById($d->donor_id);
+            $donor = $donorCache[(int) $d->donor_id] ?? null;
             Csv::writeRow($out, [
                 $d->reference,
                 $d->status,
