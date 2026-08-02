@@ -219,27 +219,26 @@ registerBlockType( 'dono/campaign-hero', {
                         onChange={ ( v ) => setAttributes( { showSummary: v } ) }
                         __nextHasNoMarginBottom
                     />
-                    <SelectControl
-                        label={ __( 'Heading level', 'dono' ) }
-                        value={ String( attributes.headingLevel || 1 ) }
-                        options={ [
-                            { value: '1', label: __( 'H1', 'dono' ) },
-                            { value: '2', label: __( 'H2', 'dono' ) },
-                            { value: '3', label: __( 'H3', 'dono' ) },
-                        ] }
-                        onChange={ ( v ) => setAttributes( { headingLevel: Number( v ) || 1 } ) }
+                    <ToggleControl
+                        label={ __( 'Show title', 'dono' ) }
+                        checked={ attributes.showTitle }
+                        onChange={ ( v ) => setAttributes( { showTitle: v } ) }
+                        help={ __( 'The seeded layout puts an editable Heading block above this one and turns this off. Turn it on to use the built-in title instead.', 'dono' ) }
                         __nextHasNoMarginBottom
                     />
-                    <SelectControl
-                        label={ __( 'Alignment', 'dono' ) }
-                        value={ attributes.align }
-                        options={ [
-                            { value: 'left',   label: __( 'Left',   'dono' ) },
-                            { value: 'center', label: __( 'Center', 'dono' ) },
-                        ] }
-                        onChange={ ( v ) => setAttributes( { align: v } ) }
-                        __nextHasNoMarginBottom
-                    />
+                    { attributes.showTitle && (
+                        <SelectControl
+                            label={ __( 'Heading level', 'dono' ) }
+                            value={ String( attributes.headingLevel || 1 ) }
+                            options={ [
+                                { value: '1', label: __( 'H1', 'dono' ) },
+                                { value: '2', label: __( 'H2', 'dono' ) },
+                                { value: '3', label: __( 'H3', 'dono' ) },
+                            ] }
+                            onChange={ ( v ) => setAttributes( { headingLevel: Number( v ) || 1 } ) }
+                            __nextHasNoMarginBottom
+                        />
+                    ) }
                 </PanelBody>
             </InspectorControls>
             <CampaignCanvas
