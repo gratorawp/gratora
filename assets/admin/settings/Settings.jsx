@@ -279,7 +279,7 @@ export default function Settings() {
 
             <div className="dono-settings-page__body">
                 <div hidden={ tab !== 'setup' }>
-                    <SetupPanel onJumpTo={ jumpTo } />
+                    <SetupPanel onJumpTo={ jumpTo } active={ tab === 'setup' } />
                 </div>
                 <div hidden={ tab !== 'organization' }>
                     <OrganizationPanel s={ org } />
@@ -300,7 +300,7 @@ export default function Settings() {
                     <ReceiptsPanel s={ receipts } />
                 </div>
                 <div hidden={ tab !== 'numbering' }>
-                    <NumberingPanel s={ numbering } />
+                    <NumberingPanel s={ numbering } active={ tab === 'numbering' } />
                 </div>
                 <div hidden={ tab !== 'privacy' }>
                     <PrivacyPanel s={ privacy } />

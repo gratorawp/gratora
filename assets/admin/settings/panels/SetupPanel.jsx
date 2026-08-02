@@ -17,7 +17,7 @@ const GROUPS = [
     { id: 'licenses', title: __( 'Add-ons and licenses', 'dono' ),  sub: __( 'Updates and security fixes for what you installed', 'dono' ) },
 ];
 
-export default function SetupPanel( { onJumpTo } ) {
+export default function SetupPanel( { onJumpTo, active } ) {
     const [ report, setReport ] = useState( null );
     const [ error, setError ]   = useState( false );
 
@@ -28,7 +28,11 @@ export default function SetupPanel( { onJumpTo } ) {
             .catch( () => setError( true ) );
     }, [] );
 
-    useEffect( () => { load(); }, [ load ] );
+    // Tabs are hidden, not unmounted, so a mount-once fetch showed whatever was
+    // true when the screen first opened. The whole point of this panel is that
+    // its Fix links jump to another tab: an operator connected Stripe, came
+    // back, and was still told Stripe was not connected.
+    useEffect( () => { if ( active ) load(); }, [ active, load ] );
 
     if ( error ) {
         return (

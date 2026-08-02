@@ -39,7 +39,7 @@ function clampPad( v ) {
     return Math.max( 1, Math.min( 12, Number( v ) || 5 ) );
 }
 
-export default function NumberingPanel( { s } ) {
+export default function NumberingPanel( { s , active } ) {
     const year = new Date().getFullYear();
 
     // Live (possibly unsaved) format drives the format-card preview.
@@ -87,7 +87,11 @@ export default function NumberingPanel( { s } ) {
             .catch( () => { setCounters( null ); setLoadError( true ); } );
     };
 
-    useEffect( () => { loadCounters(); }, [] );
+    // The counter a scope reads from depends on the numbering settings above
+    // it: reset-each-year and include-year together decide whether the counter
+    // is year-scoped. Saving those on this very panel moves which counter is
+    // live, so a mount-once fetch showed the previous namespace's number.
+    useEffect( () => { if ( active ) loadCounters(); }, [ active ] );
 
     const setDraft = ( key, v ) => setDrafts( ( prev ) => ( { ...prev, [ key ]: v } ) );
 
