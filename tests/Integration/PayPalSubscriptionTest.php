@@ -333,6 +333,57 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
         $this->assertSame(2500, (int) $plan->total_paid_cents);
     }
 
+    public function test_a_sale_arriving_before_the_plan_exists_is_redelivered(): void
+    {
+        // The donor approved and PayPal charged, but the browser POST that
+        // writes the plan has not landed: a closed tab, a dropped connection,
+        // or simply the webhook winning the race.
+        $reference = $this->createRecurringDonation();
+
+        $res = $this->postWebhook('PAYMENT.SALE.COMPLETED', [
+            'id'                   => 'SALE-EARLY',
+            'billing_agreement_id' => 'I-SUB-1',
+            'amount'               => ['total' => '25.00', 'currency' => 'USD'],
+        ]);
+
+        $this->assertGreaterThanOrEqual(
+            500,
+            $res->get_status(),
+            'a 200 tells PayPal the payment was accepted and it never comes back'
+        );
+
+        $signup = $this->donations()->findByReference($reference);
+        $this->assertNotSame('paid', $signup->status, 'nothing was booked from an event we could not match');
+    }
+
+    public function test_the_redelivered_sale_lands_once_the_plan_exists(): void
+    {
+        $reference = $this->createRecurringDonation();
+
+        // First delivery, too early.
+        $this->postWebhook('PAYMENT.SALE.COMPLETED', [
+            'id'                   => 'SALE-EARLY',
+            'billing_agreement_id' => 'I-SUB-1',
+            'amount'               => ['total' => '25.00', 'currency' => 'USD'],
+        ]);
+
+        // The browser catches up.
+        $this->recordSubscription($reference);
+
+        // PayPal redelivers, which is the whole point of the 5xx.
+        $res = $this->postWebhook('PAYMENT.SALE.COMPLETED', [
+            'id'                   => 'SALE-EARLY',
+            'billing_agreement_id' => 'I-SUB-1',
+            'amount'               => ['total' => '25.00', 'currency' => 'USD'],
+        ]);
+
+        $this->assertSame(200, $res->get_status(), wp_json_encode($res->get_data()));
+        $this->assertSame('paid', $this->donations()->findByReference($reference)->status);
+
+        $plan = $this->plans()->findBySubscriptionId('paypal', 'I-SUB-1');
+        $this->assertSame(1, (int) $plan->payments_count, 'and it is still counted exactly once');
+    }
+
     /** A later billing cycle is a genuine new donation. */
     public function test_a_later_sale_creates_a_renewal_donation(): void
     {

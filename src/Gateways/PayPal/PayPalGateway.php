@@ -482,7 +482,28 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware
 
         $plan = $this->planRepo->findBySubscriptionId($this->id(), $subId);
         if (! $plan) {
-            return $this->unmatched($eventId, $type, 'subscription');
+            // Not unmatched(): that returns 200 on the reasoning that a valid
+            // event which is not ours should not be retried for days. A sale
+            // carrying a billing_agreement_id arrived on our own account's
+            // webhook, so it is ours - the plan row simply does not exist yet.
+            //
+            // PayPal bills the moment the donor approves, and the plan is
+            // written by the browser's POST to /gateways/paypal/subscription.
+            // When the webhook wins that race, or the donor closes the tab
+            // before it fires, the 200 told PayPal the opening payment had been
+            // accepted and it never redelivered. The first payment of every
+            // affected subscription was simply never booked.
+            //
+            // 503 so PayPal redelivers while the browser call catches up. Its
+            // retry schedule ends on its own, so this cannot retry forever.
+            return new WebhookOutcome(
+                signature_ok: true,
+                external_id: $eventId,
+                event_type: $type,
+                handled: false,
+                error: "No local plan for subscription {$subId} yet; asking PayPal to redeliver",
+                http_status: 503,
+            );
         }
 
         $saleId   = (string) ($sale['id'] ?? '');
