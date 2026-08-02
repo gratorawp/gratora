@@ -15,6 +15,7 @@ import ConfirmDialog from '../_shared/components/ConfirmDialog';
 import { rowLinkProps } from '../_shared/rowLink';
 import notify from '../_shared/notify';
 import KpiStrip from '../_shared/components/KpiStrip';
+import { Switch } from '../_shared/components/Switch';
 import StatusBadge from '../_shared/components/StatusBadge';
 import { formatAmount, formatDate, STATUS_LABEL } from './format';
 import { timeAgo, detailHref as campaignDetailHref, formEditorHref } from '../_shared/format';
@@ -42,7 +43,22 @@ function initialFilters() {
         : [];
 }
 
+// A view preference, not a setting: it belongs to the person looking at the
+// screen, and having it reset on every page load would make it useless for the
+// thing it is for, which is watching test donations arrive while you make them.
+const TEST_PREF = 'dono.donations.includeTest';
+
+const readTestPref = () => {
+    try {
+        return window.localStorage?.getItem( TEST_PREF ) === '1';
+    } catch ( e ) {
+        return false;
+    }
+};
+
 export default function List() {
+    const [ includeTest, setIncludeTest ] = useState( readTestPref );
+
     const [ view, setView ] = useState( {
         type:    'table',
         perPage: 25,
@@ -50,10 +66,33 @@ export default function List() {
         sort:    { field: 'created_at', direction: 'desc' },
         filters: initialFilters(),
         search:  '',
-        fields:  [ 'reference', 'status', 'donor', 'amount', 'gateway', 'campaign', 'form', 'created_at' ],
-        // is_test column is opt-in via column picker; the badge appears on the
-        // detail page regardless, so hiding it by default keeps the list lean.
+        // is_test is opt-in via the column picker while the list is live-only,
+        // since every row would carry the same value. It becomes mandatory the
+        // moment test rows can appear: a rehearsal donation that looks exactly
+        // like a real one is worse than not showing it at all.
+        fields:  readTestPref()
+            ? [ 'reference', 'status', 'donor', 'amount', 'is_test', 'gateway', 'campaign', 'form', 'created_at' ]
+            : [ 'reference', 'status', 'donor', 'amount', 'gateway', 'campaign', 'form', 'created_at' ],
     } );
+
+    const toggleTest = ( on ) => {
+        setIncludeTest( on );
+        try {
+            window.localStorage?.setItem( TEST_PREF, on ? '1' : '0' );
+        } catch ( e ) { /* private mode: the toggle still works for this visit */ }
+        setView( ( v ) => ( {
+            ...v,
+            page: 1,
+            fields: on
+                ? ( v.fields.includes( 'is_test' )
+                    ? v.fields
+                    : [ ...v.fields.slice( 0, 4 ), 'is_test', ...v.fields.slice( 4 ) ] )
+                : v.fields.filter( ( f ) => f !== 'is_test' ),
+            // The two exclusive filters and this scope answer different
+            // questions; leaving "Test only" on under it would be a contradiction.
+            filters: ( v.filters || [] ).filter( ( f ) => f.field !== 'is_test' ),
+        } ) );
+    };
 
     const [ data, setData ]       = useState( [] );
     const [ total, setTotal ]     = useState( 0 );
@@ -100,9 +139,10 @@ export default function List() {
         gateway:      gatewayFilter || undefined,
         campaign_id:  campaignFilter || undefined,
         is_test:      testFilter === 'yes' ? true : ( testFilter === 'no' ? false : undefined ),
+        include_test: includeTest || undefined,
         created_from: createdFrom || undefined,
         created_to:   createdTo   || undefined,
-    } ), [ view, statusFilter, gatewayFilter, campaignFilter, testFilter, createdFrom, createdTo ] );
+    } ), [ view, statusFilter, gatewayFilter, campaignFilter, testFilter, includeTest, createdFrom, createdTo ] );
 
     useEffect( () => {
         let aborted = false;
@@ -426,6 +466,14 @@ export default function List() {
                     <span className="dono-page-head__meta">
                         { sprintf( /* translators: %s: number of donations */ _n( '%s donation', '%s donations', total, 'dono' ), total.toLocaleString() ) }
                     </span>
+                    <label className="dono-inline-toggle">
+                        <Switch
+                            checked={ includeTest }
+                            onChange={ toggleTest }
+                            label={ __( 'Show test donations', 'dono' ) }
+                        />
+                        <span>{ __( 'Show test donations', 'dono' ) }</span>
+                    </label>
                     <Btn
                         variant="secondary"
                         onClick={ doExport }
@@ -466,7 +514,7 @@ export default function List() {
                 </div>
             ) }
 
-            { testHidden > 0 && (
+            { testHidden > 0 && ! includeTest && (
                 <div className="dono-advanced-notice" style={ { marginBottom: 12 } }>
                     { sprintf(
                         /* translators: %d: number of test donations hidden. */
@@ -479,23 +527,19 @@ export default function List() {
                         testHidden
                     ) }
                     { ' ' }
-                    <Btn
-                        variant="link"
-                        onClick={ () => setView( ( v ) => ( {
-                            ...v,
-                            page: 1,
-                            filters: [
-                                ...( v.filters || [] ).filter( ( f ) => f.field !== 'is_test' ),
-                                { field: 'is_test', operator: 'is', value: 'yes' },
-                            ],
-                        } ) ) }
-                    >
+                    <Btn variant="link" onClick={ () => toggleTest( true ) }>
                         { __( 'Show them', 'dono' ) }
                     </Btn>
                 </div>
             ) }
 
             <KpiStrip items={ donationKpis( stats ) } loading={ loading && ! stats } />
+
+            { includeTest && (
+                <p className="dono-list-note">
+                    { __( 'Test donations are in the list below. Paid, Raised and Unique donors count real money only, so they do not include them.', 'dono' ) }
+                </p>
+            ) }
 
             { ! loading && total === 0 && ! view.search && ! statusFilter && ! createdFrom && ! createdTo && ! view.filters?.length ? (
                 <EmptyState

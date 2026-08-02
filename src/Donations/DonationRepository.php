@@ -121,6 +121,8 @@ final class DonationRepository
      */
     public function countTestHidden(array $args = []): int
     {
+        // An explicit filter, so it wins over include_test and counts the test
+        // rows whatever scope the caller was using.
         $args['is_test'] = true;
 
         return (int) $this->applyAdminFilters(Donation::query(), $args)->count();
@@ -796,6 +798,9 @@ final class DonationRepository
 
         // "Raised" must reflect real money: exclude test donations from the
         // money aggregate unless the admin is explicitly viewing test data.
+        // include_test deliberately does NOT qualify. It widens the list so a
+        // run of donations can be seen as it happened; quoting rehearsal money
+        // as raised is a different thing, and the screen says which it is.
         $paidQuery = $applyFilters($base())->whereIn('status', ['paid', 'partial_refund']);
         if (! self::hasExplicitTestFilter($args)) {
             $paidQuery = $paidQuery->where('is_test', 0);
@@ -843,14 +848,18 @@ final class DonationRepository
         if (! empty($args['gateway'])) {
             $q = $q->where('gateway', (string) $args['gateway']);
         }
-        if (array_key_exists('is_test', $args) && $args['is_test'] !== '' && $args['is_test'] !== null) {
+        if (self::hasExplicitTestFilter($args)) {
             $q = $q->where('is_test', (bool) $args['is_test'] ? 1 : 0);
-        } else {
+        } elseif (empty($args['include_test'])) {
             // Live-only by default; test donations are a dev/staging concern and
             // surface (in the list, CSV export and the strip total alike) only
-            // when the admin explicitly filters to them.
+            // when the admin asks for them.
             $q = $q->where('is_test', 0);
         }
+        // include_test with no explicit is_test filter adds no predicate at all:
+        // the two exclusive filters could each show one kind, and there was no
+        // way to see a run of donations as it actually happened.
+
         if ($createdFrom !== null) {
             $q = $q->where('created_at', $createdFrom, '>=');
         }

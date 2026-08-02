@@ -545,6 +545,7 @@ final class DonationsController
             'form_id'            => $request['form_id']     !== null ? (int) $request['form_id']     : null,
             'gateway'            => $request['gateway']     !== null ? (string) $request['gateway'] : null,
             'is_test'            => $request['is_test']     !== null ? (bool) $request['is_test']    : null,
+            'include_test'       => (bool) $request['include_test'],
             'created_from'       => $request['created_from'] !== null ? (string) $request['created_from'] : null,
             'created_to'         => $request['created_to']   !== null ? (string) $request['created_to']   : null,
         ]);
@@ -589,8 +590,9 @@ final class DonationsController
         $response->header('X-WP-TotalPages', (string) max(1, (int) ceil($result['total'] / max(1, $perPage))));
 
         // Only when the caller did not ask about test rows: otherwise they are
-        // already looking at exactly what they chose.
-        if ($request['is_test'] === null) {
+        // already looking at exactly what they chose. Nothing is hidden once
+        // include_test is on either, so the count would just be noise.
+        if ($request['is_test'] === null && ! $request['include_test']) {
             $response->header('X-Dono-Test-Hidden', (string) $this->donations->countTestHidden([
                 'status'             => $request['status'] !== null ? (string) $request['status'] : null,
                 'search'             => $search !== '' ? $search : null,
@@ -629,6 +631,7 @@ final class DonationsController
             'form_id'            => $request['form_id']     !== null ? (int) $request['form_id']     : null,
             'gateway'            => $request['gateway']     !== null ? (string) $request['gateway'] : null,
             'is_test'            => $request['is_test']     !== null ? (bool) $request['is_test']    : null,
+            'include_test'       => (bool) $request['include_test'],
             'created_from'       => $request['created_from'] !== null ? (string) $request['created_from'] : null,
             'created_to'         => $request['created_to']   !== null ? (string) $request['created_to']   : null,
         ]);
@@ -1143,6 +1146,7 @@ final class DonationsController
             'form_id'            => $request['form_id']     !== null ? (int) $request['form_id']     : null,
             'gateway'            => $request['gateway']     !== null ? (string) $request['gateway'] : null,
             'is_test'            => $request['is_test']     !== null ? (bool) $request['is_test']    : null,
+            'include_test'       => (bool) $request['include_test'],
             'created_from'       => $request['created_from'] !== null ? (string) $request['created_from'] : null,
             'created_to'         => $request['created_to']   !== null ? (string) $request['created_to']   : null,
         ]);
@@ -1267,6 +1271,9 @@ final class DonationsController
             'form_id'      => ['type' => 'integer', 'minimum' => 1],
             'gateway'      => ['type' => 'string'],
             'is_test'      => ['type' => 'boolean'],
+            // Widens the scope to both kinds. is_test filters to one of them,
+            // so the two are different questions and the explicit filter wins.
+            'include_test' => ['type' => 'boolean', 'default' => false],
             'created_from' => ['type' => 'string'],
             'created_to'   => ['type' => 'string'],
         ];
