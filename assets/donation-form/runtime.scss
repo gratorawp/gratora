@@ -703,9 +703,20 @@
         cursor: pointer;
         margin-top: 4px;
 
-        input[type="checkbox"] {
+        // Themes routinely restyle checkboxes with appearance: none and their
+        // own box, at a specificity a single class cannot beat. Stripped of
+        // the native control, accent-color draws nothing, so the box rendered
+        // empty whatever its state: it toggled on click and looked broken.
+        // Restore the native control and pin the size, doubled on the form
+        // class so this outranks a theme's element rules.
+        input[type="checkbox"],
+        .dono-donation-form.dono-donation-form & input[type="checkbox"] {
+            appearance: auto;
+            -webkit-appearance: checkbox;
             width: 16px;
             height: 16px;
+            min-width: 16px;
+            min-height: 16px;
             accent-color: var(--dono-accent);
             margin: 0;
         }
