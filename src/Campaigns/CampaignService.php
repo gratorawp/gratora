@@ -519,9 +519,22 @@ final class CampaignService
         // its first save and the revision shows a change nobody made. Cosmetic,
         // and LayoutBlocks in the P2P add-on writes it the same way, so this
         // stays readable until the two are fixed together.
+        // Seeded content is written in the admin's language at creation, the
+        // same as a campaign's own title. Hardcoding English put it on the
+        // page of every site that does not run in it.
+        $t0 = __('Campaign name', 'dono');
+        $t1 = __('About this campaign', 'dono');
+        $t2 = __('What this campaign is raising for.', 'dono');
+        $t3 = __('Why this matters', 'dono');
+        $t4 = __('Tell the story behind this campaign. Who it helps, what the money pays for, and what changes when the goal is met. Add photos, quotes and headings here like any other page.', 'dono');
+        $t5 = __('Recent donations', 'dono');
+        $t6 = __('Top donors', 'dono');
+        $t7 = __('Donate', 'dono');
+        $t8 = __('More ways to give', 'dono');
+
         $default = <<<BLOCKS
 <!-- wp:heading {"level":1,"metadata":{"bindings":{"content":{"source":"dono/campaign","args":{"key":"title","campaign_id":{$id}}}}},"className":"dp-display dp-rail dp-top"} -->
-<h1 class="wp-block-heading dp-display dp-rail dp-top">Campaign name</h1>
+<h1 class="wp-block-heading dp-display dp-rail dp-top">{$t0}</h1>
 <!-- /wp:heading -->
 
 <!-- wp:dono/campaign-hero {"campaignId":{$id},"showTitle":false} /-->
@@ -529,11 +542,11 @@ final class CampaignService
 <!-- wp:group {"className":"dp-band dp-band--tight"} -->
 <div class="wp-block-group dp-band dp-band--tight">
 <!-- wp:heading {"level":2,"className":"dp-h2"} -->
-<h2 class="wp-block-heading dp-h2">About this campaign</h2>
+<h2 class="wp-block-heading dp-h2">{$t1}</h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"dono/campaign","args":{"key":"description","campaign_id":{$id}}}}},"className":"dp-body"} -->
-<p class="dp-body">What this campaign is raising for.</p>
+<p class="dp-body">{$t2}</p>
 <!-- /wp:paragraph -->
 </div>
 <!-- /wp:group -->
@@ -543,21 +556,21 @@ final class CampaignService
 <!-- wp:column {"width":"66%","className":"dp-layout__main"} -->
 <div class="wp-block-column dp-layout__main" style="flex-basis:66%">
 <!-- wp:heading {"level":2,"className":"dp-h2 dp-rail"} -->
-<h2 class="wp-block-heading dp-h2 dp-rail">Why this matters</h2>
+<h2 class="wp-block-heading dp-h2 dp-rail">{$t3}</h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"className":"dp-body dp-rail"} -->
-<p class="dp-body dp-rail">Tell the story behind this campaign. Who it helps, what the money pays for, and what changes when the goal is met. Add photos, quotes and headings here like any other page.</p>
+<p class="dp-body dp-rail">{$t4}</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:heading {"level":2,"className":"dp-h2 dp-rail"} -->
-<h2 class="wp-block-heading dp-h2 dp-rail">Recent donations</h2>
+<h2 class="wp-block-heading dp-h2 dp-rail">{$t5}</h2>
 <!-- /wp:heading -->
 
 <!-- wp:dono/recent-donations {"campaignId":{$id},"title":"","limit":5} /-->
 
 <!-- wp:heading {"level":2,"className":"dp-h2 dp-rail"} -->
-<h2 class="wp-block-heading dp-h2 dp-rail">Top donors</h2>
+<h2 class="wp-block-heading dp-h2 dp-rail">{$t6}</h2>
 <!-- /wp:heading -->
 
 <!-- wp:dono/top-donors {"campaignId":{$id},"title":"","limit":5,"layout":"list"} /-->
@@ -567,7 +580,7 @@ final class CampaignService
 <!-- wp:column {"width":"34%","className":"dp-layout__side"} -->
 <div class="wp-block-column dp-layout__side" style="flex-basis:34%">
 <!-- wp:heading {"level":2,"className":"dp-h2"} -->
-<h2 class="wp-block-heading dp-h2">Donate</h2>
+<h2 class="wp-block-heading dp-h2">{$t7}</h2>
 <!-- /wp:heading -->
 
 <!-- wp:dono/donation-form {"campaignId":{$id}} /-->
@@ -577,7 +590,7 @@ final class CampaignService
 <!-- /wp:columns -->
 
 <!-- wp:heading {"level":2,"className":"dp-h2 dp-rail"} -->
-<h2 class="wp-block-heading dp-h2 dp-rail">More ways to give</h2>
+<h2 class="wp-block-heading dp-h2 dp-rail">{$t8}</h2>
 <!-- /wp:heading -->
 
 <!-- wp:dono/campaign-grid {"campaignId":{$id},"heading":""} /-->

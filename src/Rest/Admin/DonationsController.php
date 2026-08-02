@@ -7,6 +7,7 @@ use Dono\Rest\Paging;
 use Dono\Foundation\Auth\Capabilities;
 
 use Dono\Campaigns\Campaign;
+use Dono\Currency\Currency;
 use Dono\Donations\ChannelClassifier;
 use Dono\Donations\Donation;
 use Dono\Donations\DonationIntent;
@@ -302,6 +303,17 @@ final class DonationsController
         // as three letters and took whatever it was given. An offline gift in a
         // currency with no configured rate is recorded and then sits outside
         // every total, which is not something to accept by typo.
+        // Storage is always major x 100, so an amount that does not land on a
+        // whole major unit in a zero-decimal currency rounds at the gateway and
+        // mischarges. The public route has always refused it; this one did not.
+        if (Currency::minorUnits($currency) === 0 && ((int) $request['amount_cents']) % 100 !== 0) {
+            return new WP_Error(
+                'dono_invalid_amount',
+                __('This currency does not support fractional amounts.', 'dono'),
+                ['status' => 422]
+            );
+        }
+
         if (! SupportedCurrencies::accepts($currency)) {
             return new WP_Error(
                 'dono_unsupported_currency',

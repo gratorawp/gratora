@@ -57,101 +57,6 @@ $shadow-fallback:     0 20px 50px rgba(0, 0, 0, .25);
     }
 }
 
-// Hero - title + description over the cover image with a gradient scrim.
-.dono-block--hero {
-    margin: 0 0 24px;
-
-    .dono-hero {
-        position: relative;
-        border-radius: var(--dono-radius-lg, 18px);
-        overflow: hidden;
-        border: 1px solid var(--dono-border, #{$border-fallback});
-        box-shadow: 0 6px 22px rgba(15, 23, 42, .10);
-    }
-
-    .dono-hero__cover {
-        position: relative;
-        aspect-ratio: 16 / 7;
-        display: flex;
-        align-items: flex-end;
-
-        img {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-
-        &.is-placeholder {
-            background:
-                radial-gradient(130% 120% at 12% 0%, rgba(255, 255, 255, .22), transparent 50%),
-                linear-gradient(135deg, var(--dono-accent, #{$accent-fallback}), color-mix(in srgb, var(--dono-accent, #{$accent-fallback}) 55%, #08160f));
-        }
-    }
-
-    .dono-hero__scrim {
-        position: relative;
-        width: 100%;
-        padding: 110px 36px 28px;
-        background: linear-gradient(180deg, transparent 0%, rgba(8, 22, 17, .28) 45%, rgba(8, 22, 17, .68) 100%);
-    }
-
-    .dono-hero__title {
-        margin: 0;
-        font-size: clamp(28px, 4.4vw, 42px);
-        font-weight: 800;
-        letter-spacing: -.025em;
-        line-height: 1.1;
-        color: #fff;
-        text-wrap: balance;
-    }
-
-    .dono-hero__description {
-        margin: 12px 0 0;
-        max-width: 640px;
-        font-size: clamp(15px, 1.6vw, 18px);
-        font-weight: 500;
-        line-height: 1.55;
-        color: rgba(255, 255, 255, .92);
-    }
-
-    .dono-hero__summary {
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 14px 22px;
-        margin-top: 22px;
-    }
-
-    .dono-hero__raised {
-        font-size: clamp(22px, 3vw, 30px);
-        font-weight: 800;
-        letter-spacing: -.02em;
-        color: #fff;
-
-        small {
-            display: block;
-            margin-top: 2px;
-            font-size: 13px;
-            font-weight: 500;
-            color: rgba(255, 255, 255, .78);
-            letter-spacing: 0;
-        }
-    }
-
-    &.is-align-center {
-        .dono-hero__scrim   { text-align: center; }
-        .dono-hero__description { margin-left: auto; margin-right: auto; }
-        .dono-hero__summary { justify-content: center; }
-    }
-
-    @media (max-width: 600px) {
-        .dono-hero__scrim { padding: 72px 20px 22px; }
-    }
-}
-
 // Stats (3-up)
 .dono-block--stats {
     display: grid;
@@ -674,12 +579,6 @@ body.dono-modal-open { overflow: hidden; }
 
 // Block option modifiers (pass 2). Left alignment, "md" size, and "auto"
 // columns are the base styles above, so only the non-default cases need rules.
-
-.dono-block--hero.is-align-center {
-    text-align: center;
-
-    .dono-hero__description { margin-left: auto; margin-right: auto; }
-}
 
 .dono-block--stats.is-align-center .dono-stat { text-align: center; }
 .dono-block--stats.is-align-right  .dono-stat { text-align: right; }

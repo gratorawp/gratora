@@ -858,7 +858,15 @@ registerBlockType( 'dono/campaign-grid', {
                         label={ __( 'Heading', 'dono' ) }
                         value={ attributes.heading }
                         onChange={ ( v ) => setAttributes( { heading: v } ) }
-                        placeholder={ __( 'More ways to give', 'dono' ) }
+                        help={ __( 'Leave empty when a Heading block above this one already names the section, as the seeded layout does.', 'dono' ) }
+                        __nextHasNoMarginBottom
+                    />
+                    <TextControl
+                        label={ __( 'Empty state text', 'dono' ) }
+                        value={ attributes.emptyText }
+                        onChange={ ( v ) => setAttributes( { emptyText: v } ) }
+                        placeholder={ __( 'More campaigns will appear here soon.', 'dono' ) }
+                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'dono' ) }
                         __nextHasNoMarginBottom
                     />
                     <RangeControl
@@ -938,6 +946,14 @@ registerBlockType( 'dono/donation-form', {
                         setAttributes={ setAttributes }
                         campaign={ campaign }
                         onCampaignPage={ onCampaignPage }
+                    />
+                    <TextControl
+                        label={ __( 'Empty state text', 'dono' ) }
+                        value={ attributes.emptyText }
+                        onChange={ ( v ) => setAttributes( { emptyText: v } ) }
+                        placeholder={ __( 'Donations are not open for this campaign yet.', 'dono' ) }
+                        help={ __( 'Shown when the campaign is not taking donations, so the heading above this block never captions an empty space.', 'dono' ) }
+                        __nextHasNoMarginBottom
                     />
                     { campaign && (
                         <p className="dono-block-note">

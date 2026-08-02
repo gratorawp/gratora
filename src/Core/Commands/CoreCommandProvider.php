@@ -8,6 +8,8 @@ use Dono\Analytics\Event;
 use Dono\Campaigns\CampaignMetricsService;
 use Dono\Campaigns\CampaignRepository;
 use Dono\Campaigns\CampaignService;
+use Dono\Currency\Currency;
+use Dono\Currency\SupportedCurrencies;
 use Dono\Dashboard\DashboardMetricsService;
 use Dono\Donations\AggregateSyncer;
 use Dono\Donations\DonationIntent;
@@ -103,6 +105,25 @@ final class CoreCommandProvider
             false,
             true,
             function (array $in) use ($c): array {
+                // Same rules the two REST routes apply. This one reaches
+                // DonationService directly, so without them the assistant could
+                // record a currency the org does not accept, or a fractional
+                // amount in a currency that has no minor unit.
+                $currency = strtoupper((string) $in['currency']);
+                if (! SupportedCurrencies::accepts($currency)) {
+                    throw new CommandError(sprintf(
+                        /* translators: 1: currency code, 2: the accepted codes. */
+                        __('%1$s is not one of your accepted currencies (%2$s).', 'dono'),
+                        $currency,
+                        implode(', ', SupportedCurrencies::all())
+                    ));
+                }
+                if (Currency::minorUnits($currency) === 0 && ((int) $in['amount_cents']) % 100 !== 0) {
+                    throw new CommandError(
+                        __('This currency does not support fractional amounts.', 'dono')
+                    );
+                }
+
                 $svc = $c->get(DonationService::class);
                 $res = $svc->createPending(new DonationIntent(
                     email: (string) $in['email'],
