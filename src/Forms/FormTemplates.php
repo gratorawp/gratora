@@ -12,9 +12,9 @@ namespace Dono\Forms;
 final class FormTemplates
 {
     /**
-     * Every built-in template, ordered by category (Blank, Starter, Standard,
-     * Recurring, Wizard, Premium). Templates defined below but not listed here stay
-     * unregistered; re-enable by appending, or via the dono.form.templates filter.
+     * Every built-in template that is registered. Several more are defined
+     * below but deliberately left out of this list; re-enable one by appending
+     * it, or add your own via the dono.form.templates filter.
      *
      * @return list<array{id:string,name:string,description:string,icon:string,category:string,thumbnail_hint:string,settings:array<string,mixed>,blocks:string}>
      */
@@ -29,7 +29,7 @@ final class FormTemplates
             self::sundayTithe(),      // Recurring
             self::essentialsWizard(), // Wizard
             self::workplaceMatch(),   // Wizard
-            self::galaPledge(),       // Premium
+            self::galaPledge(),       // Formal
         ];
         return (array) apply_filters('dono.form.templates', $templates);
     }
