@@ -1,4 +1,4 @@
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 
 import { formatAmount, formatAmountCompact, formatDate } from './helpers';
 import { IconCoin, IconHeart, IconActivity, IconRotate } from './icons';
@@ -39,8 +39,26 @@ export default function LifetimeMetrics( { lifetime } ) {
     const {
         total_cents, count, avg_cents, largest_cents,
         one_time_count, recurring_count,
-        mrr_cents, active_plan_count, next_payment_at, sparkline,
+        mrr_cents, mrr_unconverted, active_plan_count, next_payment_at, sparkline,
     } = lifetime;
+
+    // A plan in a currency the site has no rate for counts as zero, so the
+    // figure is short rather than wrong. Say which, instead of showing a total
+    // that quietly leaves a plan out.
+    const mrrSub = mrr_unconverted > 0
+        ? sprintf(
+            /* translators: %d: number of plans with no exchange rate */
+            _n(
+                '%d plan has no exchange rate and is not counted',
+                '%d plans have no exchange rate and are not counted',
+                mrr_unconverted,
+                'dono'
+            ),
+            mrr_unconverted
+        )
+        : ( active_plan_count > 0
+            ? sprintf( /* translators: 1: active plan count, 2: next payment date */ __( '%1$d active · next %2$s', 'dono' ), active_plan_count, formatDate( next_payment_at ) )
+            : __( 'No active plans', 'dono' ) );
 
     return (
         <div className="dp-metrics">
@@ -69,9 +87,7 @@ export default function LifetimeMetrics( { lifetime } ) {
                 icon={ <IconRotate width="16" height="16" /> }
                 label={ __( 'Recurring MRR', 'dono' ) }
                 value={ <span className="num">{ formatAmount( mrr_cents ) }<small> /mo</small></span> }
-                sub={ active_plan_count > 0
-                    ? sprintf( /* translators: 1: active plan count, 2: next payment date */ __( '%1$d active · next %2$s', 'dono' ), active_plan_count, formatDate( next_payment_at ) )
-                    : __( 'No active plans', 'dono' ) }
+                sub={ mrrSub }
             />
         </div>
     );

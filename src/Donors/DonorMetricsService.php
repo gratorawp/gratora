@@ -12,6 +12,7 @@ use Dono\Donations\Donation;
 use Dono\Donations\DonationQueries;
 use Dono\Donors\DonorNoteRepository;
 use Dono\Foundation\Helpers\Csv;
+use Dono\Foundation\Helpers\Money;
 use Dono\Foundation\Time\Clock;
 use Dono\Receipts\Receipt;
 use Dono\Recurring\RecurringPlan;
@@ -208,10 +209,17 @@ final class DonorMetricsService
         // MRR from active plans (cadence-normalised monthly equivalent).
         $mrrCents = 0;
         $activePlanCount = 0;
+        $mrrUnconverted  = 0;
         $nextPaymentAt = null;
         foreach ($recurringPlans as $p) {
             if ($p->status !== 'active') continue;
             $activePlanCount++;
+            // Counted, like recurringStats() does, so the card can say the
+            // figure is partial instead of quietly understating it.
+            if ($p->base_amount_cents === null
+                && strtoupper((string) $p->currency) !== strtoupper(Money::defaultCurrency())) {
+                $mrrUnconverted++;
+            }
             $mrrCents += $this->monthlyEquivalent($p);
             if ($nextPaymentAt === null || ($p->next_payment_at && $p->next_payment_at < $nextPaymentAt)) {
                 $nextPaymentAt = $p->next_payment_at;
@@ -313,6 +321,7 @@ final class DonorMetricsService
                 'one_time_count'       => $oneTimeCount,
                 'recurring_count'      => $recurringCount,
                 'mrr_cents'            => $mrrCents,
+                'mrr_unconverted'      => $mrrUnconverted,
                 'active_plan_count'    => $activePlanCount,
                 'next_payment_at'      => $nextPaymentAt,
                 'sparkline'            => $sparkline,
@@ -364,10 +373,36 @@ final class DonorMetricsService
         return $out;
     }
 
-    /** Monthly-equivalent value of one recurring plan, in cents. */
+    /**
+     * A plan's value in the org's base currency, or zero when there is none.
+     *
+     * The same rule RecurringPlanRepository::baseAmountExpr() uses in SQL: a
+     * plan in the base currency needs no conversion, and one in a foreign
+     * currency with no rate has no known base value, so it counts as nothing
+     * rather than folding its raw foreign cents into a base total.
+     */
+    private static function baseAmountOf(RecurringPlan $p): int
+    {
+        if ($p->base_amount_cents !== null) {
+            return (int) $p->base_amount_cents;
+        }
+
+        return strtoupper((string) $p->currency) === strtoupper(Money::defaultCurrency())
+            ? (int) $p->amount_cents
+            : 0;
+    }
+
+    /**
+     * Monthly-equivalent value of one recurring plan, in the org base currency.
+     *
+     * It used to normalise the cadence of the raw amount_cents, which is in the
+     * donor's currency, and the card renders the result with the org's symbol
+     * and no conversion. A 500.00 INR plan read as 500,00 EUR: a hundred and
+     * ten times what it is worth.
+     */
     private function monthlyEquivalent(RecurringPlan $p): int
     {
-        $amount = (int) $p->amount_cents;
+        $amount = self::baseAmountOf($p);
         $n      = max(1, (int) $p->interval_count);
         return match ($p->interval_unit) {
             'month' => (int) round($amount / $n),
