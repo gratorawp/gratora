@@ -560,21 +560,23 @@ final class PortalController
                     $months    = max(1, min(12, (int) ($body['months'] ?? 1)));
                     $resumesAt = gmdate('Y-m-d H:i:s', strtotime("+{$months} months"));
                     if ($sub) $sub->pauseSubscription($plan, $resumesAt);
-                    $plan->status          = 'paused';
-                    $plan->next_payment_at = $resumesAt;
                     // Only Stripe schedules its own resume; RecurringResumer
-                    // reads this so PayPal restarts too, instead of
+                    // reads resume_at so PayPal restarts too, instead of
                     // pausing forever behind a date the donor can see.
-                    $plan->resume_at       = $resumesAt;
-                    $plan->save();
+                    $this->writePlan($plan, [
+                        'status'          => 'paused',
+                        'next_payment_at' => $resumesAt,
+                        'resume_at'       => $resumesAt,
+                    ]);
                     do_action('dono.recurring.plan_paused', $plan, $months);
                     break;
 
                 case 'resume':
                     if ($sub) $sub->resumeSubscription($plan);
-                    $plan->status    = 'active';
-                    $plan->resume_at = null;
-                    $plan->save();
+                    $this->writePlan($plan, [
+                        'status'    => 'active',
+                        'resume_at' => null,
+                    ]);
                     do_action('dono.recurring.plan_resumed', $plan);
                     break;
 
@@ -589,9 +591,10 @@ final class PortalController
                         // missing one cycle, so status is left alone; the resume
                         // is driven by resume_at, not by status.
                         if ($sub) $sub->pauseSubscription($plan, $nextAt);
-                        $plan->next_payment_at = $nextAt;
-                        $plan->resume_at       = $nextAt;
-                        $plan->save();
+                        $this->writePlan($plan, [
+                            'next_payment_at' => $nextAt,
+                            'resume_at'       => $nextAt,
+                        ]);
                         do_action('dono.recurring.plan_skipped', $plan);
                     }
                     break;
@@ -607,12 +610,13 @@ final class PortalController
                         return new WP_Error('dono_invalid_input', __('This currency does not support fractional amounts.', 'dono'), ['status' => 422]);
                     }
                     if ($sub) $sub->updateSubscriptionAmount($plan, $newCents);
-                    $plan->amount_cents = $newCents;
-                    // Keep the base-currency snapshot in step with the new amount.
-                    $plan->base_amount_cents = $plan->fx_rate !== null
-                        ? (int) round($newCents * (float) $plan->fx_rate)
-                        : null;
-                    $plan->save();
+                    $this->writePlan($plan, [
+                        'amount_cents' => $newCents,
+                        // Keep the base-currency snapshot in step with the amount.
+                        'base_amount_cents' => $plan->fx_rate !== null
+                            ? (int) round($newCents * (float) $plan->fx_rate)
+                            : null,
+                    ]);
                     do_action('dono.recurring.plan_amount_changed', $plan);
                     break;
 
@@ -904,6 +908,32 @@ final class PortalController
         }
 
         return $this->consentsShow();
+    }
+
+    /**
+     * Write only the columns this action changed.
+     *
+     * save() serialises every column and UPDATEs all of them from the values
+     * loaded when the request began. Renewals deliberately use atomic
+     * increments so concurrent writes are not lost
+     * (RecurringPlanRepository::recordPayment), and a full-row write from here
+     * undid exactly that: a renewal landing between the donor opening their
+     * portal and pressing Pause had payments_count, total_paid_cents and
+     * last_payment_at rolled back to what they were on page load.
+     *
+     * @param array<string,mixed> $columns
+     */
+    private function writePlan(RecurringPlan $plan, array $columns): void
+    {
+        $columns['updated_at'] = gmdate('Y-m-d H:i:s');
+
+        RecurringPlan::query()->where('id', (int) $plan->id)->update($columns);
+
+        // The hooks fired after each action read the model, so keep the
+        // in-memory copy in step with the row rather than leaving it stale.
+        foreach ($columns as $column => $value) {
+            $plan->$column = $value;
+        }
     }
 
     private function requireDonor(): Donor|WP_Error
