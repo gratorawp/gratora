@@ -166,6 +166,9 @@ registerBlockType( 'dono/campaign-hero', {
         showCover:       { type: 'boolean', default: true },
         showSummary:     { type: 'boolean', default: true },
         showTitle:       { type: 'boolean', default: true },
+        showProgress:    { type: 'boolean', default: true },
+        showStats:       { type: 'boolean', default: true },
+        donateLabel:     { type: 'string',  default: '' },
         headingLevel:    { type: 'integer', default: 1 },
         align:           { type: 'string',  default: 'left' },
     },
@@ -186,15 +189,28 @@ registerBlockType( 'dono/campaign-hero', {
                         issues={ issues }
                     />
                     <ToggleControl
-                        label={ __( 'Show description', 'dono' ) }
-                        checked={ attributes.showDescription }
-                        onChange={ ( v ) => setAttributes( { showDescription: v } ) }
-                        __nextHasNoMarginBottom
-                    />
-                    <ToggleControl
                         label={ __( 'Show cover image', 'dono' ) }
                         checked={ attributes.showCover }
                         onChange={ ( v ) => setAttributes( { showCover: v } ) }
+                        __nextHasNoMarginBottom
+                    />
+                    <ToggleControl
+                        label={ __( 'Show progress bar', 'dono' ) }
+                        checked={ attributes.showProgress }
+                        onChange={ ( v ) => setAttributes( { showProgress: v } ) }
+                        __nextHasNoMarginBottom
+                    />
+                    <ToggleControl
+                        label={ __( 'Show stats', 'dono' ) }
+                        checked={ attributes.showStats }
+                        onChange={ ( v ) => setAttributes( { showStats: v } ) }
+                        __nextHasNoMarginBottom
+                    />
+                    <TextControl
+                        label={ __( 'Donate button label', 'dono' ) }
+                        value={ attributes.donateLabel }
+                        onChange={ ( v ) => setAttributes( { donateLabel: v } ) }
+                        placeholder={ __( 'Donate', 'dono' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl

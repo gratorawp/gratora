@@ -8,7 +8,7 @@ defined('ABSPATH') || exit;
  * @var string  $styleVars
  */
 ?>
-<section class="dono-block dono-block--donation-form" data-block="dono/donation-form"<?php echo $styleVars !== '' ? ' style="' . esc_attr($styleVars) . '"' : ''; ?>>
+<section id="dono-form" class="dono-block dono-block--donation-form" data-block="dono/donation-form"<?php echo $styleVars !== '' ? ' style="' . esc_attr($styleVars) . '"' : ''; ?>>
     <?php if (($mode ?? 'front') === 'empty'): ?>
         <p class="dono-block__empty"><?php echo esc_html($emptyText); ?></p>
         <?php if (($notice ?? '') !== ''): ?>

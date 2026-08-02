@@ -27,7 +27,13 @@ final class CampaignHeroBlock extends CampaignBlock
             'showCover'       => ['type' => 'boolean', 'default' => true],
             'showSummary'     => ['type' => 'boolean', 'default' => true],
             'showTitle'       => ['type' => 'boolean', 'default' => true],
+            'showProgress'    => ['type' => 'boolean', 'default' => true],
+            'showStats'       => ['type' => 'boolean', 'default' => true],
+            'donateLabel'     => ['type' => 'string',  'default' => ''],
             'headingLevel'    => ['type' => 'integer', 'default' => 1],
+            // Registered so saved pages stay valid. The readout is always left
+            // aligned now, and the description moved to the About section as a
+            // bound paragraph, so neither reaches the view.
             'align'           => ['type' => 'string',  'default' => 'left'],
         ];
     }
@@ -43,11 +49,13 @@ final class CampaignHeroBlock extends CampaignBlock
 
         $goalCents = $campaign->goal_type === 'amount' ? (int) $campaign->goal_cents : 0;
 
+        $goalPercent = $goalCents > 0
+            ? min(100, (int) round((int) $campaign->raised_cents / $goalCents * 100))
+            : 0;
+
         return View::loadRelative(__DIR__, 'views/campaign-hero', [
             'title'           => $campaign->title,
-            'description'     => $campaign->description,
             'imageUrl'        => $imageUrl,
-            'showDescription' => (bool) ($attrs['showDescription'] ?? true),
             'showCover'       => (bool) ($attrs['showCover'] ?? true) && $imageUrl,
             // Not gated on having raised something. A campaign on day one showed
             // no money line and no goal, so the hero made no ask at the one
@@ -61,10 +69,35 @@ final class CampaignHeroBlock extends CampaignBlock
                 /* translators: %s: formatted goal amount */
                 ? sprintf(__('raised of %s goal', 'dono'), Money::format($goalCents, $campaign->currency))
                 : __('raised so far', 'dono'),
+            'hasGoal'         => $goalCents > 0,
+            'percent'         => $goalPercent,
+            'showProgress'    => (bool) ($attrs['showProgress'] ?? true),
+            'showStats'       => (bool) ($attrs['showStats'] ?? true),
+            'donorsCount'     => (int) $campaign->donors_count,
+            'donationsCount'  => (int) $campaign->donations_count,
+            'daysLeft'        => $this->daysLeft($campaign),
+            'donateLabel'     => (string) ($attrs['donateLabel'] ?? '') ?: __('Donate', 'dono'),
+            'donateUrl'       => '#dono-form',
             'headingLevel'    => max(1, min(3, (int) ($attrs['headingLevel'] ?? 1))),
-            'align'           => in_array($attrs['align'] ?? 'left', ['left', 'center'], true)
-                ? (string) $attrs['align'] : 'left',
             'styleVars'       => $this->styleVars($campaign),
         ]);
+    }
+
+    /** Whole days until the campaign closes, or null when it does not. */
+    private function daysLeft(\Dono\Campaigns\Campaign $campaign): ?int
+    {
+        $endsAt = (string) ($campaign->ends_at ?? '');
+        if ($endsAt === '') {
+            return null;
+        }
+
+        $end = strtotime($endsAt);
+        if ($end === false) {
+            return null;
+        }
+
+        $days = (int) ceil(($end - time()) / DAY_IN_SECONDS);
+
+        return $days > 0 ? $days : 0;
     }
 }
