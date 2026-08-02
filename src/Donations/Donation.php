@@ -153,4 +153,12 @@ Donation::schema(function (Table $t): void {
     $t->index(['country', 'paid_at']);
     // Wide composite for per-campaign / per-donor GROUP BYs without filesort.
     $t->index(['campaign_id', 'status', 'donor_id', 'paid_at']);
+
+    // The admin donations list. Every composite above ends in paid_at, and the
+    // list sorts by created_at, so nothing served its ORDER BY: it always
+    // filters is_test = 0 and then sorted the whole live set to show 25 rows.
+    // EXPLAIN on the default view read `key=idx_is_test, Extra: Using
+    // filesort`; with these it is a backward index scan.
+    $t->index(['is_test', 'created_at']);
+    $t->index(['is_test', 'status', 'created_at']);
 });
