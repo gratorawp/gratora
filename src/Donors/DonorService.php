@@ -175,9 +175,25 @@ final class DonorService
 
     /**
      * Back-fill only empty donor profile fields from the donation payload
+     *
+     * "Only empty fields" makes an erased donor the ideal target rather than a
+     * protected one: erasure nulls every field this fills, so a single
+     * donor.refresh_profile call put the name, company, country, phone and
+     * address straight back onto the row. redacted_at stayed set, so redact()
+     * would early-return and neither the admin route nor the portal's own
+     * forget could ever wipe it again. This is the only donor writer that had
+     * no such guard; editProfile and changeEmail both throw.
+     *
+     * findOrCreate is unaffected: it clears redacted_at on a genuine
+     * reactivation before it calls through, and returns without calling at all
+     * when it must not reactivate.
      */
     public function refreshProfile(Donor $donor, array $profile): Donor
     {
+        if ($donor->redacted_at !== null) {
+            throw new InvalidArgumentException(__('This donor has been erased and can no longer be edited.', 'dono'));
+        }
+
         $changed = false;
         $fields = ['first_name', 'last_name', 'country', 'locale', 'company'];
 

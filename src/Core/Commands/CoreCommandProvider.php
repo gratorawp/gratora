@@ -376,6 +376,9 @@ final class CoreCommandProvider
                 if (! $donor) {
                     throw new CommandError('Donor not found.');
                 }
+                if ($donor->redacted_at !== null) {
+                    throw new CommandError('This donor has been erased and can no longer be edited.');
+                }
                 $updated = $c->get(DonorService::class)->refreshProfile(
                     $donor,
                     is_array($in['profile'] ?? null) ? $in['profile'] : [],
