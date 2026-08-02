@@ -18,6 +18,7 @@ use Dono\Async\AsyncDispatcher;
 use Dono\Campaigns\CampaignPermalinks;
 use Dono\Campaigns\CampaignTypeRegistry;
 use Dono\Campaigns\DefaultCampaignTypeHandler;
+use Dono\Currency\FxBackfill;
 use Dono\Currency\FxRates;
 use Dono\Currency\FxRatesUpdater;
 use Dono\Campaigns\Campaign;
@@ -744,6 +745,7 @@ final class CoreModule implements DonoModule
             new AdvancedController(
                 $c->get( AggregateSyncer::class),
                 $c->get( Mailer::class),
+                new FxBackfill($c->get( FxRates::class)),
             ),
             new OnboardingController(
                 $c->get( CampaignService::class),

@@ -1,13 +1,15 @@
 import { useEffect, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 
+import { formatAmount } from '@dono/ui/utils/format';
 import Card from '../../_shared/components/Card';
 import Btn from '../../_shared/components/Btn';
 import { ToggleRow } from '../../_shared/components/Switch';
 
 const RECALC_SCOPES = [
     { value: 'all',       label: __( 'Everything', 'dono' ) },
+    { value: 'currency',  label: __( 'Currency conversions', 'dono' ) },
     { value: 'donors',    label: __( 'Donors', 'dono' ) },
     { value: 'funds',     label: __( 'Funds', 'dono' ) },
     { value: 'campaigns', label: __( 'Campaigns', 'dono' ) },
@@ -165,6 +167,28 @@ export default function AdvancedPanel( { s } ) {
                     <p style={ { color: '#6b7280' } }>{ __( 'No Dono cron events scheduled.', 'dono' ) }</p>
                 ) }
             </Card>
+
+            { info?.unconverted_donations?.length > 0 && (
+                <Card
+                    title={ __( 'Donations missing from your totals', 'dono' ) }
+                    sub={ __( 'A donation is never refused for want of an exchange rate, so these were recorded in their own currency and left out of every total. Add a rate for the currency, then run Recalculate to bring them in.', 'dono' ) }
+                >
+                    <ul className="dono-advanced-cron">
+                        { info.unconverted_donations.map( ( row ) => (
+                            <li key={ row.currency }>
+                                <strong>{ row.currency }</strong>
+                                { ' ' }
+                                { sprintf(
+                                    /* translators: 1: how many donations, 2: their total in that currency. */
+                                    _n( '%1$s donation, %2$s', '%1$s donations, %2$s', row.count, 'dono' ),
+                                    row.count,
+                                    formatAmount( row.amount_cents, row.currency )
+                                ) }
+                            </li>
+                        ) ) }
+                    </ul>
+                </Card>
+            ) }
 
             <Card
                 title={ __( 'Recalculate aggregates', 'dono' ) }

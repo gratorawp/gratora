@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dono\Rest\Admin;
 
 use Dono\Campaigns\Campaign;
+use Dono\Currency\FxBackfill;
 use Dono\Donations\AggregateSyncer;
 use Dono\Donors\Donor;
 use Dono\Forms\Form;
@@ -27,6 +28,7 @@ final class AdvancedController
     public function __construct(
         private AggregateSyncer $aggregates,
         private \Dono\Mail\Mailer $mailer,
+        private FxBackfill $fxBackfill,
     ) {
     }
 
@@ -65,7 +67,7 @@ final class AdvancedController
                     // donation rows and drift the same way, so they can add a
                     // scope rather than ship a second Recalculate button.
                     'enum' => array_values(array_unique(array_merge(
-                        ['all', 'donors', 'funds', 'campaigns', 'forms'],
+                        ['all', 'donors', 'funds', 'campaigns', 'forms', 'currency'],
                         array_map('strval', (array) apply_filters('dono.recalculate.scopes', []))
                     ))),
                     'default' => 'all',
@@ -136,6 +138,18 @@ final class AdvancedController
         $scope = (string) ($request['scope'] ?? 'all');
 
         $counts = ['donors' => 0, 'funds' => 0, 'campaigns' => 0, 'forms' => 0];
+
+        // Before the aggregate passes, so a donation that finally has a rate is
+        // counted by them rather than waiting for the next run. Recording a
+        // donation never blocks on FX, so these rows are real payments sitting
+        // outside every total until a rate exists for their currency.
+        if ($scope === 'all' || $scope === 'currency') {
+            $fx = $this->fxBackfill->run();
+            $counts['converted_donations'] = $fx['converted'];
+            if ($fx['unconvertible'] > 0) {
+                $counts['still_unconvertible'] = $fx['unconvertible'];
+            }
+        }
 
         if ($scope === 'all' || $scope === 'donors') {
             foreach (self::idsOf(Donor::class) as $id) {
@@ -275,6 +289,10 @@ final class AdvancedController
             'site_url'  => site_url(),
             'tables'    => $tables,
             'cron'      => $cronEvents,
+            // Real payments sitting outside every total because no rate exists
+            // for their currency. Empty on a healthy site, which is why the
+            // screen only says anything when it is not.
+            'unconverted_donations' => FxBackfill::pending(),
         ], 200);
     }
 
