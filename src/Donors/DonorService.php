@@ -328,12 +328,17 @@ final class DonorService
         $donations = Donation::query()->where('donor_id', $donor->id)->getAll();
         $plans     = RecurringPlan::query()->where('donor_id', $donor->id)->getAll();
 
-        $candidates = [
+        // Unique by construction, so they are safe to search loose text for as
+        // substrings.
+        $identifiers = [
             $this->decryptEmail($donor),
             $this->decrypt($donor->phone_encrypted),
             $this->decrypt($donor->tax_id_encrypted),
-            $donor->first_name,
-            $donor->last_name,
+        ];
+
+        // Free text. The bare first and last name used to be searched too, and
+        // they are substrings of other people's data: see ErasureRequest::make.
+        $names = [
             trim((string) $donor->first_name . ' ' . (string) $donor->last_name),
             $donor->company,
         ];
@@ -341,19 +346,20 @@ final class DonorService
         $donationIds = [];
         foreach ($donations as $d) {
             $donationIds[]  = (int) $d->id;
-            $candidates[]   = $d->reference;
-            $candidates[]   = $d->gateway_intent_id;
-            $candidates[]   = $d->gateway_txn_id;
+            $identifiers[]  = $d->reference;
+            $identifiers[]  = $d->gateway_intent_id;
+            $identifiers[]  = $d->gateway_txn_id;
         }
         foreach ($plans as $p) {
-            $candidates[] = $p->gateway_subscription_id;
-            $candidates[] = $p->gateway_customer_id;
+            $identifiers[] = $p->gateway_subscription_id;
+            $identifiers[] = $p->gateway_customer_id;
         }
 
         return ErasureRequest::make(
             (int) $donor->id,
             $donationIds,
-            $candidates,
+            $identifiers,
+            $names,
             $this->clock->now()->format('Y-m-d H:i:s'),
         );
     }

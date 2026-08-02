@@ -28,6 +28,12 @@ final class ErasureRequest
     private const MIN_NEEDLE = 4;
 
     /**
+     * A name has to be at least this long, on top of having more than one part,
+     * before it is worth searching loose text for.
+     */
+    private const MIN_NAME_NEEDLE = 8;
+
+    /**
      * @param list<int>    $donationIds donations belonging to this donor
      * @param list<string> $needles     identifiers as they read before the wipe
      */
@@ -40,15 +46,45 @@ final class ErasureRequest
     }
 
     /**
-     * @param list<?string> $candidates
+     * Needles are searched as `LIKE '%needle%'` over longtext payloads, so what
+     * goes in the list decides whose rows get scrubbed. Four characters is long
+     * enough for a value that is unique by construction and nowhere near enough
+     * for a name: erasing Anna Bell matched joanna@example.com, susanna@,
+     * campbell@ and the string "Bellevue", and the handlers do not redact those
+     * rows, they blank them. Unrelated donors lost their analytics history and
+     * their donations lost the raw gateway payload they can be audited or
+     * replayed from, silently, on a schedule, because DonorRetention runs this.
+     *
+     * So the two kinds are kept apart. An identifier is unique by construction
+     * and is trusted as a substring. A name is not: only a multi-part one long
+     * enough to be distinctive is searched for, which keeps "Anna Bell" and
+     * drops the "Anna" and "Bell" that were doing the damage.
+     *
+     * @param list<?string> $identifiers unique by construction: email, phone,
+     *                                   tax id, references, gateway ids
+     * @param list<?string> $names       free text: personal and company names
      * @param list<int>     $donationIds
      */
-    public static function make(int $donorId, array $donationIds, array $candidates, string $at): self
-    {
+    public static function make(
+        int $donorId,
+        array $donationIds,
+        array $identifiers,
+        array $names,
+        string $at,
+    ): self {
         $needles = [];
-        foreach ($candidates as $value) {
+
+        foreach ($identifiers as $value) {
             $value = trim((string) $value);
             if (strlen($value) < self::MIN_NEEDLE) continue;
+            $needles[strtolower($value)] = $value;
+        }
+
+        foreach ($names as $value) {
+            $value = trim(preg_replace('/\s+/u', ' ', (string) $value) ?? '');
+            if (strlen($value) < self::MIN_NAME_NEEDLE) continue;
+            // One word is a word, not an identifier.
+            if (! str_contains($value, ' ')) continue;
             $needles[strtolower($value)] = $value;
         }
 
