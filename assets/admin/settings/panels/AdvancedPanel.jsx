@@ -7,16 +7,7 @@ import Card from '../../_shared/components/Card';
 import Btn from '../../_shared/components/Btn';
 import { ToggleRow } from '../../_shared/components/Switch';
 
-const RECALC_SCOPES = [
-    { value: 'all',       label: __( 'Everything', 'dono' ) },
-    { value: 'currency',  label: __( 'Currency conversions', 'dono' ) },
-    { value: 'donors',    label: __( 'Donors', 'dono' ) },
-    { value: 'funds',     label: __( 'Funds', 'dono' ) },
-    { value: 'campaigns', label: __( 'Campaigns', 'dono' ) },
-    { value: 'forms',     label: __( 'Forms', 'dono' ) },
-];
-
-export default function AdvancedPanel( { s } ) {
+export default function AdvancedPanel( { s, active } ) {
     const [ info, setInfo ]           = useState( null );
     const [ infoError, setInfoError ] = useState( false );
     const [ notice,    setNotice ]    = useState( null );
@@ -26,6 +17,10 @@ export default function AdvancedPanel( { s } ) {
     const [ recalcRunning, setRecalcRunning ] = useState( false );
     const [ recalcResult, setRecalcResult ]   = useState( null );
 
+    const scopes = info?.recalc_scopes?.length
+        ? info.recalc_scopes
+        : [ { value: 'all', label: __( 'Everything', 'dono' ) } ];
+
     const loadInfo = () => {
         setInfoError( false );
         apiFetch( { path: '/dono/v1/admin/advanced/info' } )
@@ -33,7 +28,11 @@ export default function AdvancedPanel( { s } ) {
             .catch( () => setInfoError( true ) );
     };
 
-    useEffect( () => { loadInfo(); }, [] );
+    // Tabs are hidden, not unmounted, so a mount-once fetch showed whatever
+    // was true when the screen first opened. Save a currency on the Currency
+    // tab and the donations that just became convertible were still listed
+    // here as stranded.
+    useEffect( () => { if ( active ) loadInfo(); }, [ active ] );
 
     const doExport = async () => {
         setExporting( true );
@@ -91,6 +90,9 @@ export default function AdvancedPanel( { s } ) {
             } );
             setRecalcResult( res?.counts || {} );
             setNotice( { type: 'success', text: __( 'Aggregates recomputed.', 'dono' ) } );
+            // Row counts and the stranded-donations card were both just
+            // rewritten by the run that finished.
+            loadInfo();
         } catch ( err ) {
             setNotice( { type: 'error', text: err?.message || __( 'Recalculation failed.', 'dono' ) } );
         } finally {
@@ -204,7 +206,7 @@ export default function AdvancedPanel( { s } ) {
                             disabled={ recalcRunning }
                             style={ { minWidth: 180 } }
                         >
-                            { RECALC_SCOPES.map( ( sc ) => (
+                            { scopes.map( ( sc ) => (
                                 <option key={ sc.value } value={ sc.value }>{ sc.label }</option>
                             ) ) }
                         </select>

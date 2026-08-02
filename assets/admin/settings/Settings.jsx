@@ -310,7 +310,7 @@ export default function Settings() {
                     <RolesPanel s={ roles } />
                 </div>
                 <div hidden={ tab !== 'advanced' }>
-                    <AdvancedPanel s={ advanced } />
+                    <AdvancedPanel s={ advanced } active={ tab === 'advanced' } />
                 </div>
                 <div hidden={ tab !== 'licenses' }>
                     <Licenses />

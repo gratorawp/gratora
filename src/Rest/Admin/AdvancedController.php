@@ -62,14 +62,8 @@ final class AdvancedController
             'permission_callback' => [$this, 'canAccess'],
             'args'                => [
                 'scope' => [
-                    'type' => 'string',
-                    // Add-ons denormalise their own counters from the same
-                    // donation rows and drift the same way, so they can add a
-                    // scope rather than ship a second Recalculate button.
-                    'enum' => array_values(array_unique(array_merge(
-                        ['all', 'donors', 'funds', 'campaigns', 'forms', 'currency'],
-                        array_map('strval', (array) apply_filters('dono.recalculate.scopes', []))
-                    ))),
+                    'type'    => 'string',
+                    'enum'    => array_keys(self::scopes()),
                     'default' => 'all',
                 ],
             ],
@@ -275,6 +269,43 @@ final class AdvancedController
         return current_user_can('manage_options');
     }
 
+    /**
+     * Scope slug => label.
+     *
+     * Add-ons denormalise their own counters from the same donation rows and
+     * drift the same way, so they can add a scope rather than ship a second
+     * Recalculate button. They pass a label with it: the screen lists whatever
+     * this returns, and a scope nobody can name is a scope nobody can pick.
+     * P2P registered one and it was unreachable, because the dropdown carried
+     * its own hardcoded copy of the core six.
+     *
+     * @return array<string,string>
+     */
+    public static function scopes(): array
+    {
+        $core = [
+            'all'       => __('Everything', 'dono'),
+            'currency'  => __('Currency conversions', 'dono'),
+            'donors'    => __('Donors', 'dono'),
+            'funds'     => __('Funds', 'dono'),
+            'campaigns' => __('Campaigns', 'dono'),
+            'forms'     => __('Forms', 'dono'),
+        ];
+
+        $added = (array) apply_filters('dono.recalculate.scopes', []);
+        foreach ($added as $slug => $label) {
+            $slug = strtolower(trim((string) $slug));
+            // A slug core already owns is not overridable: an add-on renaming
+            // "Everything" would be relabelling a scope it does not implement.
+            if ($slug === '' || isset($core[$slug]) || ! is_string($label) || $label === '') {
+                continue;
+            }
+            $core[$slug] = $label;
+        }
+
+        return $core;
+    }
+
     public function info(): WP_REST_Response
     {
         global $wpdb;
@@ -307,6 +338,11 @@ final class AdvancedController
             // for their currency. Empty on a healthy site, which is why the
             // screen only says anything when it is not.
             'unconverted_donations' => FxBackfill::pending(),
+            'recalc_scopes'         => array_map(
+                static fn ($slug, $label): array => ['value' => $slug, 'label' => $label],
+                array_keys(self::scopes()),
+                array_values(self::scopes())
+            ),
         ], 200);
     }
 
