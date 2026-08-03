@@ -25,12 +25,23 @@ final class DonorExportTest extends IntegrationTestCase
         return Plugin::instance()->container->get(DonorService::class);
     }
 
-    private function makeDonor(string $email, array $profile = []): object
+    /**
+     * A donor, meaning someone who gave: the export covers the population the
+     * Donors screen counts, so a record with no real donation is not in it.
+     * Pass $gave = false for the cases that are about exactly that.
+     */
+    private function makeDonor(string $email, array $profile = [], bool $gave = true): object
     {
-        return $this->donors()->findOrCreate($email, $profile + [
+        $donor = $this->donors()->findOrCreate($email, $profile + [
             'first_name' => 'Test',
             'last_name'  => 'Person',
         ]);
+
+        if ($gave) {
+            $this->gave((int) $donor->id, gmdate('Y-m-d H:i:s'));
+        }
+
+        return $donor;
     }
 
     private function gave(int $donorId, string $when): Donation
@@ -101,6 +112,26 @@ final class DonorExportTest extends IntegrationTestCase
         // A blank-column file reads as a broken export rather than an empty one.
         $this->assertNotEmpty($rows[0]);
         $this->assertContains('Email', $rows[0]);
+    }
+
+    public function test_someone_who_only_ever_test_donated_is_not_a_donor(): void
+    {
+        // The screen this export is started from counts donors with real
+        // donations. A file that disagrees with that count, and hands out
+        // contact details for people who never gave, is the wrong file.
+        $this->makeDonor('real@example.test');
+
+        $onlyTest = $this->makeDonor('tester@example.test', [], false);
+        $t = $this->gave((int) $onlyTest->id, gmdate('Y-m-d H:i:s'));
+        \Dono\Donations\Donation::query()->where('id', (int) $t->id)->update(['is_test' => 1]);
+
+        $this->makeDonor('never-gave@example.test', [], false);
+
+        $csv = $this->exporter()->toCsv(['columns' => ['email']]);
+
+        $this->assertStringContainsString('real@example.test', $csv);
+        $this->assertStringNotContainsString('tester@example.test', $csv);
+        $this->assertStringNotContainsString('never-gave@example.test', $csv);
     }
 
     public function test_a_redacted_donor_is_left_out(): void

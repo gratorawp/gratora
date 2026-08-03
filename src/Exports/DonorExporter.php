@@ -216,10 +216,20 @@ final class DonorExporter
         ))));
     }
 
-    /** Redacted donors carry no name or email worth exporting. */
+    /**
+     * The same population the Donors screen shows, minus anyone erased.
+     *
+     * Someone who only ever made a test donation is not a donor, and neither
+     * is a record created and never used. Exporting them hands out contact
+     * details for people who never gave, and makes the file disagree with the
+     * count on the screen it was started from.
+     */
     private function livePredicate(): string
     {
-        return 'redacted_at IS NULL';
+        $prefix = DB::getPrefix();
+
+        return "redacted_at IS NULL AND EXISTS (SELECT 1 FROM {$prefix}dono_donations d "
+            . "WHERE d.donor_id = {$prefix}dono_donors.id AND d.is_test = 0)";
     }
 
     private function day(?string $value): ?string
