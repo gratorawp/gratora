@@ -34,11 +34,146 @@
 
     flex: 0 0 auto;
 
-    // .dono-select is width:100%, which against an auto-width label resolves
-    // to the whole card.
-    .dono-select {
+    // .dono-select and .dono-input are width:100%, which against an auto-width
+    // label resolves to the whole container.
+    .dono-select,
+    .dono-input {
         width: auto;
         min-width: 200px;
+    }
+}
+
+.dono-exports {
+    width: 100%;
+    border-collapse: collapse;
+    background: $bg-card;
+    border: 1px solid $border-mid;
+    border-radius: $radius-md;
+    overflow: hidden;
+
+    thead th {
+        text-align: left;
+        padding: 12px 20px;
+        font-size: $text-sm;
+        font-weight: $weight-semibold;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        color: $text-muted;
+        border-bottom: 1px solid $border-mid;
+    }
+
+    tbody th,
+    tbody td {
+        padding: 20px;
+        border-bottom: 1px solid $border-soft;
+        vertical-align: top;
+        text-align: left;
+        font-weight: $weight-regular;
+    }
+
+    tbody tr:last-child th,
+    tbody tr:last-child td { border-bottom: 0; }
+
+    // Zebra striping earns its keep here: each row is tall enough that the eye
+    // loses which description belongs to which set of controls.
+    tbody tr:nth-child(odd) { background: $bg-page; }
+
+    tbody th {
+        width: 34%;
+        min-width: 240px;
+
+        strong {
+            display: block;
+            font-size: $text-lg;
+            font-weight: $weight-semibold;
+            color: $text;
+        }
+
+        p {
+            margin: 4px 0 0;
+            font-size: $text-base;
+            line-height: 1.5;
+            color: $text-muted;
+        }
+    }
+
+    &__controls {
+        display: flex;
+        align-items: flex-end;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    &__pair {
+        display: flex;
+        gap: 6px;
+
+        .dono-select { min-width: 92px; }
+    }
+
+    &__check,
+    &__radios label {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-size: $text-base;
+        color: $text;
+    }
+
+    &__check { margin-top: 12px; }
+
+    &__radios {
+        margin: 14px 0 0;
+        padding: 0;
+        border: 0;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px 18px;
+
+        legend {
+            padding: 0;
+            font-size: $text-sm;
+            color: $text-muted;
+        }
+    }
+
+    &__columns { margin-top: 18px; }
+
+    &__columns-head {
+        margin: 0 0 8px;
+        font-size: $text-sm;
+        font-weight: $weight-semibold;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        color: $text-muted;
+    }
+
+    &__grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+        gap: 8px 18px;
+
+        label {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: $text-base;
+            color: $text;
+        }
+    }
+
+    @media (max-width: 782px) {
+        thead { display: none; }
+
+        tbody th,
+        tbody td {
+            display: block;
+            width: auto;
+            min-width: 0;
+        }
+
+        tbody th { border-bottom: 0; padding-bottom: 0; }
     }
 }
 

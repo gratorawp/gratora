@@ -1,0 +1,237 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Dono\Exports;
+
+use Dono\Donations\DonationQueries;
+use Dono\Donors\Donor;
+use Dono\Donors\DonorService;
+use Dono\Foundation\Helpers\Csv;
+use Dono\Vendor\Queryable\DB;
+
+/**
+ * Streams the donor list as CSV.
+ *
+ * Columns are opt-in because most of them are PII that has to be decrypted one
+ * row at a time; an export nobody asked for should not pay for it, and a list
+ * mailed to a fulfilment house should carry only what that house needs.
+ *
+ * @version 1.0.0
+ */
+final class DonorExporter
+{
+    /** Column keys, in the order they are written to the file. */
+    public const COLUMNS = [
+        'first_name',
+        'last_name',
+        'email',
+        'phone',
+        'address',
+        'company',
+        'country',
+        'donor_type',
+        'donations_count',
+        'total_donated',
+        'first_donation',
+        'last_donation',
+        'created_at',
+        'donor_id',
+    ];
+
+    /** Written when the request names no valid column. */
+    private const FALLBACK = ['first_name', 'last_name', 'email', 'donations_count', 'total_donated'];
+
+    public const DATE_BASIS = ['donation', 'created'];
+
+    /** Rows held in memory at once while streaming. */
+    private const CHUNK = 500;
+
+    public function __construct(private DonorService $donors)
+    {
+    }
+
+    /**
+     * @param array{columns?:list<string>,from?:?string,to?:?string,basis?:string,campaign_id?:?int,form_id?:?int} $args
+     */
+    public function toCsv(array $args = []): string
+    {
+        $columns = $this->columns($args['columns'] ?? []);
+        $basis   = in_array($args['basis'] ?? '', self::DATE_BASIS, true) ? $args['basis'] : 'donation';
+        $from    = $this->day($args['from'] ?? null);
+        $to      = $this->day($args['to'] ?? null);
+        $scoped  = ((int) ($args['campaign_id'] ?? 0)) > 0 || ((int) ($args['form_id'] ?? 0)) > 0;
+
+        $out = fopen('php://temp', 'r+');
+        if ($out === false) {
+            return '';
+        }
+
+        // UTF-8 BOM so Excel reads accented names as text rather than mojibake.
+        fwrite($out, "\xEF\xBB\xBF");
+        $labels = self::labels();
+        Csv::writeRow($out, array_map(
+            static fn (string $key): string => $labels[$key] ?? $key,
+            $columns
+        ));
+
+        // A campaign or form filter, and "who donated in this window", are both
+        // questions about donations, so they resolve to a donor id set first.
+        // Without either, the donor table alone answers it and no id list is
+        // built - an org with a million donors would not fit one.
+        $ids = null;
+        if ($scoped || ($basis === 'donation' && ($from !== null || $to !== null))) {
+            $ids = $this->donorIdsWithDonations($from, $to, (int) ($args['campaign_id'] ?? 0), (int) ($args['form_id'] ?? 0));
+            if ($ids === []) {
+                rewind($out);
+                return (string) stream_get_contents($out);
+            }
+        }
+
+        $afterId = 0;
+        while (true) {
+            $q = Donor::query()
+                ->whereRaw($this->livePredicate())
+                ->where('id', $afterId, '>');
+
+            if ($ids !== null) {
+                $q = $q->whereIn('id', $ids);
+            }
+            if ($basis === 'created') {
+                if ($from !== null) $q = $q->where('created_at', $from . ' 00:00:00', '>=');
+                if ($to   !== null) $q = $q->where('created_at', $to   . ' 23:59:59', '<=');
+            }
+
+            $batch = $q->orderBy('id', 'ASC')->limit(self::CHUNK)->getAll();
+            if ($batch === []) {
+                break;
+            }
+
+            foreach ($batch as $donor) {
+                $afterId = (int) $donor->id;
+                Csv::writeRow($out, $this->row($donor, $columns));
+            }
+        }
+
+        rewind($out);
+
+        return (string) stream_get_contents($out);
+    }
+
+    /**
+     * Column key => header, also served to the UI so the checkbox labels and
+     * the file headers cannot drift apart. Spelled out rather than built from
+     * a variable, or none of it reaches a .pot file.
+     *
+     * @return array<string,string>
+     */
+    public static function labels(): array
+    {
+        return [
+            'first_name'      => __('First name', 'dono'),
+            'last_name'       => __('Last name', 'dono'),
+            'email'           => __('Email', 'dono'),
+            'phone'           => __('Phone', 'dono'),
+            'address'         => __('Address', 'dono'),
+            'company'         => __('Company', 'dono'),
+            'country'         => __('Country', 'dono'),
+            'donor_type'      => __('Type', 'dono'),
+            'donations_count' => __('Donations', 'dono'),
+            'total_donated'   => __('Total donated', 'dono'),
+            'first_donation'  => __('First donation', 'dono'),
+            'last_donation'   => __('Last donation', 'dono'),
+            'created_at'      => __('Donor since', 'dono'),
+            'donor_id'        => __('Donor ID', 'dono'),
+        ];
+    }
+
+    public static function filename(): string
+    {
+        return 'donors-' . gmdate('Y-m-d-His') . '.csv';
+    }
+
+    /** @return list<string> */
+    private function columns(array $requested): array
+    {
+        $valid = array_values(array_filter(
+            array_map('strval', $requested),
+            static fn (string $c): bool => in_array($c, self::COLUMNS, true)
+        ));
+
+        // An empty or entirely bogus selection would otherwise write a file of
+        // blank lines, which reads as "the export is broken".
+        if ($valid === []) {
+            return self::FALLBACK;
+        }
+
+        // Keep COLUMNS order regardless of the order they arrived in.
+        return array_values(array_filter(
+            self::COLUMNS,
+            static fn (string $c): bool => in_array($c, $valid, true)
+        ));
+    }
+
+    /** @param list<string> $columns */
+    private function row(Donor $donor, array $columns): array
+    {
+        $out = [];
+        foreach ($columns as $key) {
+            $out[] = match ($key) {
+                'first_name'      => (string) ($donor->first_name ?? ''),
+                'last_name'       => (string) ($donor->last_name ?? ''),
+                'email'           => (string) ($this->donors->decryptEmail($donor) ?? ''),
+                'phone'           => (string) ($this->donors->decryptPhone($donor) ?? ''),
+                'address'         => (string) ($this->donors->decryptAddress($donor) ?? ''),
+                'company'         => (string) ($donor->company ?? ''),
+                'country'         => (string) ($donor->country ?? ''),
+                'donor_type'      => (string) $donor->donor_type,
+                'donations_count' => (string) (int) $donor->donations_count,
+                // The raw major-unit number, not a formatted one: a currency
+                // symbol makes the column text in every spreadsheet.
+                'total_donated'   => number_format((int) $donor->total_donated_cents / 100, 2, '.', ''),
+                'first_donation'  => (string) ($donor->first_donation_at ?? ''),
+                'last_donation'   => (string) ($donor->last_donation_at ?? ''),
+                'created_at'      => (string) $donor->created_at,
+                'donor_id'        => (string) (int) $donor->id,
+                default           => '',
+            };
+        }
+        return $out;
+    }
+
+    /**
+     * Donor ids with at least one live donation matching the filters.
+     *
+     * @return list<int>
+     */
+    private function donorIdsWithDonations(?string $from, ?string $to, int $campaignId, int $formId): array
+    {
+        $q = DonationQueries::donationsOnly(DB::table('dono_donations'))
+            ->select('donor_id')
+            ->distinct()
+            ->whereNotNull('donor_id');
+
+        if ($from !== null)   $q = $q->where('created_at', $from . ' 00:00:00', '>=');
+        if ($to !== null)     $q = $q->where('created_at', $to   . ' 23:59:59', '<=');
+        if ($campaignId > 0)  $q = $q->where('campaign_id', $campaignId);
+        if ($formId > 0)      $q = $q->where('form_id', $formId);
+
+        return array_values(array_unique(array_filter(array_map(
+            static fn ($r): int => (int) ($r['donor_id'] ?? 0),
+            $q->getAll()
+        ))));
+    }
+
+    /** Redacted donors carry no name or email worth exporting. */
+    private function livePredicate(): string
+    {
+        return 'redacted_at IS NULL';
+    }
+
+    private function day(?string $value): ?string
+    {
+        $value = trim((string) $value);
+
+        return preg_match('/^\d{4}-\d{2}-\d{2}$/', $value) === 1 ? $value : null;
+    }
+}

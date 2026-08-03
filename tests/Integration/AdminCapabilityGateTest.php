@@ -119,6 +119,41 @@ final class AdminCapabilityGateTest extends IntegrationTestCase
         );
     }
 
+    public function test_bulk_exports_carry_the_capability_of_the_data_not_the_screen(): void
+    {
+        // Reading a donor on screen is one record at a time; the CSV is the
+        // whole list with decrypted emails, phones and addresses in a file that
+        // leaves the site.
+        $this->actAs(['dono_view_donors']);
+        $this->assertForbidden(
+            $this->status('GET', '/dono/v1/admin/exports/donors.csv'),
+            'viewing donors does not carry bulk export'
+        );
+
+        $this->actAs(['dono_export_donors']);
+        $this->assertAllowed(
+            $this->status('GET', '/dono/v1/admin/exports/donors.csv'),
+            'the export capability does'
+        );
+
+        // Revenue figures are aggregates, so they sit behind reports and must
+        // not be reachable with the donor export cap alone.
+        $this->assertForbidden(
+            $this->status('GET', '/dono/v1/admin/exports/revenue.csv'),
+            'donor export does not carry revenue reporting'
+        );
+
+        $this->actAs(['dono_view_reports']);
+        $this->assertAllowed(
+            $this->status('GET', '/dono/v1/admin/exports/revenue.csv'),
+            'reports viewer reads revenue'
+        );
+        $this->assertForbidden(
+            $this->status('GET', '/dono/v1/admin/exports/donors.csv'),
+            'reports viewer is not handed the donor list'
+        );
+    }
+
     public function test_full_admin_can_manage_roles(): void
     {
         // The IntegrationTestCase default user is an administrator (manage_options).

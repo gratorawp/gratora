@@ -732,7 +732,9 @@ final class DonationRepository
      */
     private function netPaidQuery(?string $from, ?string $to, ?int $campaignId): QueryBuilder
     {
-        $q = DonationQueries::live(DB::table('dono_donations')->whereIn('status', ['paid', 'partial_refund']));
+        // donationsOnly, not live: every caller below is donation reporting,
+        // and a ticket order is a purchase riding the same table.
+        $q = DonationQueries::donationsOnly(DB::table('dono_donations')->whereIn('status', ['paid', 'partial_refund']));
         if ($from !== null)       $q = $q->where('paid_at', $from . ' 00:00:00', '>=');
         if ($to   !== null)       $q = $q->where('paid_at', $to   . ' 23:59:59', '<=');
         if ($campaignId !== null) $q = $q->where('campaign_id', $campaignId);

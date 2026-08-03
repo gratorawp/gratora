@@ -156,6 +156,9 @@ use Dono\Gateways\TestMode;
 use Dono\Mail\Mailer;
 use Dono\Onboarding\Onboarding;
 use Dono\Onboarding\OnboardingPage;
+use Dono\Exports\DonorExporter;
+use Dono\Exports\RevenueExporter;
+use Dono\Reports\RevenueReportBuilder;
 use Dono\Receipts\PdfBuilder;
 use Dono\Reports\CampaignReportBuilder;
 use Dono\Reports\TaxStatementBuilder;
@@ -167,6 +170,7 @@ use Dono\Recurring\RecurringPlan;
 use Dono\Recurring\RecurringCanceller;
 use Dono\Recurring\RecurringPlanRepository;
 use Dono\Recurring\RecurringResumer;
+use Dono\Rest\Admin\ExportsController;
 use Dono\Rest\Admin\ToolsController;
 use Dono\Rest\Admin\NumberingController;
 use Dono\Rest\Admin\CampaignsController as AdminCampaignsController;
@@ -460,6 +464,19 @@ final class CoreModule implements DonoModule
 
         $c->bind(AnnualStatementBuilder::class, fn (Container $c) => new AnnualStatementBuilder(
             $c->get(PdfBuilder::class)
+        ));
+
+        $c->bind(RevenueExporter::class, fn (Container $c) => new RevenueExporter(
+            $c->get(DonationRepository::class),
+        ));
+
+        $c->bind(DonorExporter::class, fn (Container $c) => new DonorExporter(
+            $c->get(DonorService::class),
+        ));
+
+        $c->bind(RevenueReportBuilder::class, fn (Container $c) => new RevenueReportBuilder(
+            $c->get(PdfBuilder::class),
+            $c->get(RevenueExporter::class),
         ));
 
         $c->bind(CampaignReportBuilder::class, fn (Container $c) => new CampaignReportBuilder(
@@ -790,6 +807,11 @@ final class CoreModule implements DonoModule
                 $c->get( Mailer::class),
                 new FxBackfill($c->get( FxRates::class)),
                 $c->get(UpgradeRunner::class),
+            ),
+            new ExportsController(
+                $c->get(DonorExporter::class),
+                $c->get(RevenueExporter::class),
+                $c->get(RevenueReportBuilder::class),
             ),
             new OnboardingController(
                 $c->get( CampaignService::class),
