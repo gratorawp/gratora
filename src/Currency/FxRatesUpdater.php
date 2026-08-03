@@ -32,15 +32,53 @@ final class FxRatesUpdater
         add_action('init', fn () => $this->async->scheduleRecurring(self::HOOK, self::DAILY));
     }
 
-    /** Scheduled daily run. No-op when the org turned auto-refresh off. */
+    /**
+     * Scheduled daily run. No-op when the org turned auto-refresh off, and no-op
+     * when the site has nothing to convert.
+     */
     public function run(): void
     {
         if (! (new FxRates())->auto()) {
             return;
         }
+        if (! $this->needsRates()) {
+            return;
+        }
         if (! $this->fetchAndStore()) {
             ErrorLog::record('currency.fx', 'Rate fetch failed; keeping the previous snapshot.');
         }
+    }
+
+    /**
+     * Whether any money on this site is in a currency other than the org's.
+     *
+     * A single-currency site converts nothing, so the daily call to a third
+     * party buys it nothing and still has to be disclosed and justified.
+     *
+     * Two sources, not one. Accepted currencies cover what donors can give
+     * next; donations already recorded without a rate cover what is stranded
+     * now, and those are not necessarily in a currency the org still accepts.
+     */
+    private function needsRates(): bool
+    {
+        $base = strtoupper(Money::defaultCurrency());
+
+        $opt       = get_option('dono_currency_locale', []);
+        $supported = is_array($opt) ? (array) ($opt['supported_currencies'] ?? []) : [];
+
+        foreach ($supported as $code) {
+            if (strtoupper((string) $code) !== $base) {
+                return true;
+            }
+        }
+
+        foreach (FxBackfill::pending() as $row) {
+            if (strtoupper((string) ($row['currency'] ?? '')) !== $base) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /** Manual "Fetch now" from settings: ignores the auto toggle. */

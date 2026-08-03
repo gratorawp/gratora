@@ -182,7 +182,7 @@ Privacy: https://stripe.com/privacy
 Terms: https://www.paypal.com/legalhub/useragreement-full
 Privacy: https://www.paypal.com/legalhub/privacy-full
 
-**Frankfurter** - used to fetch daily currency exchange rates so donations taken in other currencies can be reported in your organisation's currency. Only the currency code is sent. No donor or site data is sent. Turn it off under Dono > Settings > Currency, or enter rates by hand instead.
+**Frankfurter** - used to fetch daily currency exchange rates so donations taken in other currencies can be reported in your organisation's currency. Only the currency code is sent. No donor or site data is sent. Nothing is requested at all unless you accept a second currency, so a single-currency site never contacts it. You can also turn it off under Dono > Settings > Currency, or enter rates by hand instead.
 Service: https://frankfurter.dev
 Terms and privacy: https://frankfurter.dev
 
