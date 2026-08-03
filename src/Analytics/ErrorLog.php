@@ -20,6 +20,17 @@ final class ErrorLog
     public const PREFIX = 'error.';
 
     /**
+     * Newest errors kept. The retention window governs dono_events as a whole
+     * and is measured in days, which bounds nothing when a webhook retries
+     * every minute for a week. Errors are read newest-first from one screen,
+     * so anything past this is unreachable anyway.
+     */
+    public const KEEP = 500;
+
+    /** Overhang tolerated before pruning, so the delete runs once per SLACK errors. */
+    private const SLACK = 100;
+
+    /**
      * @param string              $source  dotted scope, e.g. 'gateway.paypal'
      * @param array<string,mixed> $context ids and detail; stored, so no secrets
      */
@@ -44,6 +55,39 @@ final class ErrorLog
             ['payload' => ['message' => mb_substr($message, 0, 1000)]
                 + array_diff_key($context, array_flip($scoped))]
         ));
+
+        self::prune();
+    }
+
+    /**
+     * Drop everything past the newest KEEP errors. The count runs on every
+     * write, over an index and a set bounded by KEEP + SLACK, so it stays
+     * cheap precisely when errors are arriving fast.
+     */
+    private static function prune(): void
+    {
+        $total = (int) Event::query()->whereLike('type', self::PREFIX . '%')->count();
+        if ($total <= self::KEEP + self::SLACK) {
+            return;
+        }
+
+        // The id of the oldest error worth keeping. Deleting by id beats an
+        // OFFSET delete, which MySQL does not allow.
+        $oldestKept = Event::query()
+            ->whereLike('type', self::PREFIX . '%')
+            ->orderBy('id', 'DESC')
+            ->limit(1)
+            ->offset(self::KEEP - 1)
+            ->get();
+
+        if (! $oldestKept) {
+            return;
+        }
+
+        Event::query()
+            ->whereLike('type', self::PREFIX . '%')
+            ->where('id', (int) $oldestKept->id, '<')
+            ->delete();
     }
 
     /** Null before the container is up; the error_log line above still lands. */

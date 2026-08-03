@@ -136,9 +136,9 @@ final class CoreSettingsCommandsTest extends IntegrationTestCase
         $ctx = $this->adminCtx();
 
         // gateways holds Stripe secrets + bank details; roles is a privilege
-        // surface. Both (and advanced/privacy/telemetry) are outside the enum,
-        // so the schema rejects them before the handler ever runs.
-        foreach (['gateways', 'roles', 'advanced', 'privacy', 'telemetry'] as $group) {
+        // surface. Both (and privacy/telemetry) are outside the enum, so the
+        // schema rejects them before the handler ever runs.
+        foreach (['gateways', 'roles', 'privacy', 'telemetry'] as $group) {
             $get = $this->registry()->dispatch('settings.get', ['group' => $group], $ctx);
             $this->assertFalse($get->ok, "settings.get must reject excluded group {$group}");
             $this->assertSame('command.invalid_input', $get->error_code, "excluded group {$group} must fail as invalid_input");

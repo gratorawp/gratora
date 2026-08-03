@@ -103,7 +103,7 @@ final class FxBackfillTest extends IntegrationTestCase
         $c->save();
         $this->unconverted('EUR', 2500);
 
-        $req = new \WP_REST_Request('POST', '/dono/v1/admin/advanced/recalculate');
+        $req = new \WP_REST_Request('POST', '/dono/v1/admin/tools/recalculate');
         $req->set_body_params(['scope' => 'currency']);
         $counts = (array) (rest_do_request($req)->get_data()['counts'] ?? []);
 
@@ -113,7 +113,7 @@ final class FxBackfillTest extends IntegrationTestCase
 
     public function test_currency_scope_with_nothing_to_convert_rebuilds_nothing(): void
     {
-        $req = new \WP_REST_Request('POST', '/dono/v1/admin/advanced/recalculate');
+        $req = new \WP_REST_Request('POST', '/dono/v1/admin/tools/recalculate');
         $req->set_body_params(['scope' => 'currency']);
         $counts = (array) (rest_do_request($req)->get_data()['counts'] ?? []);
 

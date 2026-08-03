@@ -111,12 +111,6 @@ final class SettingsService
                 ],
             ],
         ],
-        'advanced' => [
-            'option'   => 'dono_advanced',
-            'defaults' => [
-                'debug_logging' => false,
-            ],
-        ],
         'consents' => [
             'option'   => 'dono_consents',
             'defaults' => [

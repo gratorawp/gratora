@@ -20,15 +20,14 @@ import NumberingPanel from './panels/NumberingPanel';
 import ConsentsPanel from './panels/ConsentsPanel';
 import PrivacyPanel from './panels/PrivacyPanel';
 import RolesPanel from './panels/RolesPanel';
-import AdvancedPanel from './panels/AdvancedPanel';
 import {
     IconSetup, IconOrganization, IconCurrency, IconGateways, IconBrand,
     IconEmail, IconReceipt, IconNumbering, IconPrivacy, IconRoles,
-    IconLicense, IconExtension, IconAdvanced,
+    IconLicense, IconExtension,
 } from './icons';
 
 // Ordered by how often an operator opens it, money first. Add-on tabs land
-// after these, ahead of Licenses and Advanced.
+// after these, ahead of Licenses.
 const TABS = [
     { key: 'setup',        label: __( 'Setup', 'dono' ),                Icon: IconSetup },
     { key: 'gateways',     label: __( 'Payments', 'dono' ),             Icon: IconGateways },
@@ -53,7 +52,6 @@ const TAIL_TABS = [
     ...( window.dono?.pro?.active ? [
         { key: 'licenses', label: __( 'Licenses', 'dono' ),             Icon: IconLicense },
     ] : [] ),
-    { key: 'advanced',     label: __( 'Advanced', 'dono' ),             Icon: IconAdvanced },
 ];
 
 // Save-job slug -> human label, for failure messages (job slugs are not tab keys).
@@ -69,7 +67,6 @@ const SECTION_LABELS = {
     'consents':        __( 'Consents', 'dono' ),
     'privacy':         __( 'Data & privacy', 'dono' ),
     'roles':           __( 'Roles & permissions', 'dono' ),
-    'advanced':        __( 'Advanced', 'dono' ),
 };
 
 function initialTab() {
@@ -105,7 +102,6 @@ export default function Settings() {
     const consents = useDonoSettings( 'consents' );
     const privacy  = useDonoSettings( 'privacy' );
     const roles    = useDonoSettings( 'roles' );
-    const advanced = useDonoSettings( 'advanced' );
 
     // Re-run when extTabs changes so this closure never holds a stale list: an
     // add-on tab registers after mount, and a hash-only navigation to it never
@@ -138,7 +134,7 @@ export default function Settings() {
         return () => window.removeEventListener( 'hashchange', onHash );
     }, [ extTabs ] );
 
-    const anyDirty = org.isDirty || brand.isDirty || currency.isDirty || fx.isDirty || gateways.isDirty || email.isDirty || receipts.isDirty || numbering.isDirty || consents.isDirty || privacy.isDirty || roles.isDirty || advanced.isDirty;
+    const anyDirty = org.isDirty || brand.isDirty || currency.isDirty || fx.isDirty || gateways.isDirty || email.isDirty || receipts.isDirty || numbering.isDirty || consents.isDirty || privacy.isDirty || roles.isDirty;
     useEffect( () => {
         if ( ! anyDirty ) return undefined;
         const handler = ( e ) => { e.preventDefault(); e.returnValue = ''; return ''; };
@@ -170,8 +166,7 @@ export default function Settings() {
         numbering:    numbering.isDirty,
         privacy:      privacy.isDirty || consents.isDirty,
         roles:        roles.isDirty,
-        advanced:     advanced.isDirty,
-    } ), [ org.isDirty, brand.isDirty, currency.isDirty, fx.isDirty, gateways.isDirty, email.isDirty, receipts.isDirty, numbering.isDirty, consents.isDirty, privacy.isDirty, roles.isDirty, advanced.isDirty ] );
+    } ), [ org.isDirty, brand.isDirty, currency.isDirty, fx.isDirty, gateways.isDirty, email.isDirty, receipts.isDirty, numbering.isDirty, consents.isDirty, privacy.isDirty, roles.isDirty ] );
 
     const dirtySections = Object.values( dirtyByTab ).filter( Boolean ).length;
 
@@ -188,7 +183,6 @@ export default function Settings() {
         if ( consents.isDirty ) jobs.push( { name: 'consents',        run: consents.save } );
         if ( privacy.isDirty )  jobs.push( { name: 'privacy',         run: privacy.save } );
         if ( roles.isDirty )    jobs.push( { name: 'roles',           run: roles.save } );
-        if ( advanced.isDirty ) jobs.push( { name: 'advanced',        run: advanced.save } );
 
         const results = await Promise.allSettled( jobs.map( ( j ) => j.run() ) );
         const failed = results
@@ -226,10 +220,9 @@ export default function Settings() {
         consents.discard();
         privacy.discard();
         roles.discard();
-        advanced.discard();
     };
 
-    const anySaving = org.isSaving || brand.isSaving || currency.isSaving || fx.isSaving || gateways.isSaving || email.isSaving || receipts.isSaving || numbering.isSaving || consents.isSaving || privacy.isSaving || roles.isSaving || advanced.isSaving;
+    const anySaving = org.isSaving || brand.isSaving || currency.isSaving || fx.isSaving || gateways.isSaving || email.isSaving || receipts.isSaving || numbering.isSaving || consents.isSaving || privacy.isSaving || roles.isSaving;
 
     return (
         <div className="dono-settings-page">
@@ -316,9 +309,6 @@ export default function Settings() {
                 </div>
                 <div hidden={ tab !== 'roles' }>
                     <RolesPanel s={ roles } />
-                </div>
-                <div hidden={ tab !== 'advanced' }>
-                    <AdvancedPanel s={ advanced } active={ tab === 'advanced' } />
                 </div>
                 { window.dono?.pro?.active && (
                     <div hidden={ tab !== 'licenses' }>

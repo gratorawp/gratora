@@ -11,6 +11,7 @@ use Dono\Admin\Pages\DonationsPage;
 use Dono\Admin\Pages\DonorsPage;
 use Dono\Admin\Pages\FormsPage;
 use Dono\Admin\Pages\FundsPage;
+use Dono\Admin\Pages\ToolsPage;
 use Dono\Admin\Pages\SettingsPage;
 use Dono\Analytics\Event;
 use Dono\Analytics\EventRecorder;
@@ -166,7 +167,7 @@ use Dono\Recurring\RecurringPlan;
 use Dono\Recurring\RecurringCanceller;
 use Dono\Recurring\RecurringPlanRepository;
 use Dono\Recurring\RecurringResumer;
-use Dono\Rest\Admin\AdvancedController;
+use Dono\Rest\Admin\ToolsController;
 use Dono\Rest\Admin\NumberingController;
 use Dono\Rest\Admin\CampaignsController as AdminCampaignsController;
 use Dono\Rest\Admin\CommandsController;
@@ -784,7 +785,7 @@ final class CoreModule implements DonoModule
             new AdminLicenseController($c->get(LicenseService::class)),
             $c->get(PortalController::class),
             new RolesController(),
-            new AdvancedController(
+            new ToolsController(
                 $c->get( AggregateSyncer::class),
                 $c->get( Mailer::class),
                 new FxBackfill($c->get( FxRates::class)),
@@ -960,6 +961,7 @@ final class CoreModule implements DonoModule
             (new DonorsPage())->register();
             (new FormsPage())->register();
             (new FundsPage())->register();
+            (new ToolsPage())->register();
             (new SettingsPage($c))->register();
             (new OnboardingPage())->register();
             (new Onboarding())->register();

@@ -110,11 +110,11 @@ final class AdminCapabilityGateTest extends IntegrationTestCase
         );
         // ...nor restore/export a settings bundle (applies the mapping + leaks secrets).
         $this->assertForbidden(
-            $this->status('POST', '/dono/v1/admin/advanced/import', ['settings' => []]),
+            $this->status('POST', '/dono/v1/admin/tools/import', ['settings' => []]),
             'settings manager cannot import a settings bundle'
         );
         $this->assertForbidden(
-            $this->status('GET', '/dono/v1/admin/advanced/export'),
+            $this->status('GET', '/dono/v1/admin/tools/export'),
             'settings manager cannot export secrets'
         );
     }
@@ -127,7 +127,7 @@ final class AdminCapabilityGateTest extends IntegrationTestCase
             'an admin can manage the roles mapping'
         );
         $this->assertAllowed(
-            $this->status('GET', '/dono/v1/admin/advanced/export'),
+            $this->status('GET', '/dono/v1/admin/tools/export'),
             'an admin can export'
         );
     }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Rest;
 
+use Dono\Analytics\ErrorLog;
 use Dono\Campaigns\Campaign;
 use Dono\Currency\Currency;
 use Dono\Currency\SupportedCurrencies;
@@ -264,13 +265,15 @@ final class DonationsController
             custom:             $custom,
         );
 
-        $this->debugLog("donation submit: gateway={$gatewayId} amount={$intent->amount_cents} currency={$intent->currency}");
-
         try {
             $created = $this->donations->createPending($intent);
         } catch ( Throwable $e) {
-            // Never leak DB/gateway internals to the public client.
-            $this->debugLog('donation create failed: ' . $e->getMessage());
+            // Never leak DB/gateway internals to the public client, so the
+            // detail only reaches the admin error log.
+            ErrorLog::record('donation.create', $e->getMessage(), [
+                'form_id' => $formId,
+                'gateway' => $gatewayId,
+            ]);
             return new WP_Error(
                 'dono_create_failed',
                 __('We could not process your donation just now. Please try again.', 'dono'),
@@ -303,7 +306,11 @@ final class DonationsController
                         'ua'          => $ua,
                     ]);
                 } catch (Throwable $e) {
-                    $this->debugLog('consent record failed: ' . $e->getMessage());
+                    ErrorLog::record('donation.consent', $e->getMessage(), [
+                        'donor_id'    => (int) $donation->donor_id,
+                        'donation_id' => (int) $donation->id,
+                        'purpose'     => $key,
+                    ]);
                 }
             }
         }
@@ -313,7 +320,10 @@ final class DonationsController
         try {
             $gatewayResult = $gateway->createIntent($donation);
         } catch ( Throwable $e) {
-            $this->debugLog("gateway createIntent failed: {$e->getMessage()}");
+            ErrorLog::record('gateway.intent', $e->getMessage(), [
+                'donation_id' => (int) $donation->id,
+                'gateway'     => $gatewayId,
+            ]);
             $this->donations->markFailed($donation, 'Gateway createIntent threw: ' . $e->getMessage());
             return new WP_Error('dono_gateway_intent_failed', __('We could not start your payment. Please try again in a moment.', 'dono'), ['status' => 502]);
         }
@@ -551,11 +561,4 @@ final class DonationsController
         return DonationSchemas::create();
     }
 
-    private function debugLog(string $message): void
-    {
-        $cfg = get_option('dono_advanced', []);
-        if (is_array($cfg) && ! empty($cfg['debug_logging'])) {
-            error_log('[dono] ' . $message);
-        }
-    }
 }

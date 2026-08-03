@@ -8,6 +8,7 @@ use Dono\Campaigns\Campaign;
 use Dono\Analytics\ErrorLog;
 use Dono\Analytics\Event;
 use Dono\Currency\FxBackfill;
+use Dono\Settings\SecretRedactor;
 use Dono\Foundation\Upgrade\UpgradeRunner;
 use Dono\Donations\AggregateSyncer;
 use Dono\Donors\Donor;
@@ -24,7 +25,7 @@ use WP_REST_Server;
  *
  * @version 1.1.0
  */
-final class AdvancedController
+final class ToolsController
 {
     private const NAMESPACE = 'dono/v1';
 
@@ -38,7 +39,7 @@ final class AdvancedController
 
     public function registerRoutes(): void
     {
-        register_rest_route(self::NAMESPACE, '/admin/advanced/info', [
+        register_rest_route(self::NAMESPACE, '/admin/tools/info', [
             'methods'             => WP_REST_Server::READABLE,
             'callback'            => [$this, 'info'],
             'permission_callback' => [$this, 'canAccess'],
@@ -48,25 +49,25 @@ final class AdvancedController
         // mapping + secrets, so both need full admin, not the delegatable
         // dono_manage_settings (which a scoped role could otherwise use to
         // read the webhook secret or grant itself capabilities via import).
-        register_rest_route(self::NAMESPACE, '/admin/advanced/export', [
+        register_rest_route(self::NAMESPACE, '/admin/tools/export', [
             'methods'             => WP_REST_Server::READABLE,
             'callback'            => [$this, 'export'],
             'permission_callback' => [$this, 'canManage'],
         ]);
 
-        register_rest_route(self::NAMESPACE, '/admin/advanced/import', [
+        register_rest_route(self::NAMESPACE, '/admin/tools/import', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'import'],
             'permission_callback' => [$this, 'canManage'],
         ]);
 
-        register_rest_route(self::NAMESPACE, '/admin/advanced/run-upgrades', [
+        register_rest_route(self::NAMESPACE, '/admin/tools/run-upgrades', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'runUpgrades'],
             'permission_callback' => [$this, 'canManage'],
         ]);
 
-        register_rest_route(self::NAMESPACE, '/admin/advanced/recalculate', [
+        register_rest_route(self::NAMESPACE, '/admin/tools/recalculate', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'recalculate'],
             'permission_callback' => [$this, 'canAccess'],
@@ -76,6 +77,24 @@ final class AdvancedController
                     'enum'    => array_keys(self::scopes()),
                     'default' => 'all',
                 ],
+            ],
+        ]);
+
+        register_rest_route(self::NAMESPACE, '/admin/tools/errors', [
+            [
+                'methods'             => WP_REST_Server::READABLE,
+                'callback'            => [$this, 'errors'],
+                'permission_callback' => [$this, 'canAccess'],
+                'args'                => [
+                    'page'     => ['type' => 'integer', 'default' => 1, 'minimum' => 1],
+                    'per_page' => ['type' => 'integer', 'default' => 25, 'minimum' => 1, 'maximum' => 100],
+                    'source'   => ['type' => 'string', 'default' => ''],
+                ],
+            ],
+            [
+                'methods'             => WP_REST_Server::DELETABLE,
+                'callback'            => [$this, 'clearErrors'],
+                'permission_callback' => [$this, 'canManage'],
             ],
         ]);
 
@@ -90,6 +109,89 @@ final class AdvancedController
                 ],
             ],
         ]);
+    }
+
+    /** Paged error log, newest first, optionally narrowed to one source. */
+    public function errors(\WP_REST_Request $request): WP_REST_Response
+    {
+        $page    = max(1, (int) $request['page']);
+        $perPage = max(1, min(100, (int) $request['per_page']));
+        $source  = preg_replace('/[^a-z0-9_.]/', '', strtolower((string) $request['source'])) ?: '';
+
+        $prefix = ErrorLog::PREFIX . ($source !== '' ? $source : '');
+
+        $total = (int) Event::query()->whereLike('type', $prefix . '%')->count();
+
+        $rows = Event::query()
+            ->whereLike('type', $prefix . '%')
+            ->orderBy('occurred_at', 'DESC')
+            ->orderBy('id', 'DESC')
+            ->limit($perPage)
+            ->offset(($page - 1) * $perPage)
+            ->getAll();
+
+        return new WP_REST_Response([
+            'items'    => array_map([self::class, 'errorRow'], $rows),
+            'total'    => $total,
+            'page'     => $page,
+            'per_page' => $perPage,
+            'sources'  => self::errorSources(),
+        ], 200);
+    }
+
+    public function clearErrors(): WP_REST_Response
+    {
+        $deleted = Event::query()->whereLike('type', ErrorLog::PREFIX . '%')->delete();
+
+        return new WP_REST_Response(['ok' => true, 'deleted' => (int) $deleted->affectedRows], 200);
+    }
+
+    /** @return array<string,mixed> */
+    private static function errorRow(Event $e): array
+    {
+        $payload = is_array($e->payload) ? $e->payload : [];
+        $message = (string) ($payload['message'] ?? '');
+        unset($payload['message']);
+
+        // ErrorLog promotes these to columns, so they are absent from the
+        // payload and have to be folded back in or the one id that identifies
+        // the failing record is unreachable from this screen.
+        foreach (['donation_id', 'donor_id', 'campaign_id', 'form_id', 'recurring_plan_id'] as $col) {
+            if (! empty($e->{$col})) {
+                $payload = [$col => (int) $e->{$col}] + $payload;
+            }
+        }
+
+        return [
+            'id'          => (int) $e->id,
+            'source'      => substr((string) $e->type, strlen(ErrorLog::PREFIX)),
+            'message'     => $message !== '' ? $message : __('No detail recorded.', 'dono'),
+            'context'     => $payload,
+            'occurred_at' => (string) $e->occurred_at,
+        ];
+    }
+
+    /**
+     * Sources present in the log, so the filter offers what is actually there
+     * rather than every source Dono can emit.
+     *
+     * @return list<string>
+     */
+    private static function errorSources(): array
+    {
+        $rows = Event::query()
+            ->select('type')
+            ->distinct()
+            ->whereLike('type', ErrorLog::PREFIX . '%')
+            ->orderBy('type', 'ASC')
+            ->getAll();
+
+        $sources = array_map(
+            static fn ($e): string => substr((string) $e->type, strlen(ErrorLog::PREFIX)),
+            $rows
+        );
+
+        return array_values(array_unique(array_filter($sources)));
     }
 
     /**
@@ -223,7 +325,6 @@ final class AdvancedController
         'dono_gateway_config',
         'dono_privacy',
         'dono_roles',
-        'dono_advanced',
         'dono_consents',
         'dono_receipt_settings',
         'dono_email_settings',
@@ -241,8 +342,19 @@ final class AdvancedController
         ];
         foreach (self::SETTINGS_OPTIONS as $opt) {
             $value = get_option($opt, null);
-            if ($value !== null) $data['settings'][$opt] = $value;
+            if ($value === null) {
+                continue;
+            }
+
+            // An export is a file people attach to support tickets and commit
+            // to repositories. dono_gateway_config holds the Stripe webhook
+            // signing secret, which is the only authentication on the webhook
+            // route, so it leaves masked or not at all.
+            $data['settings'][$opt] = is_array($value)
+                ? SecretRedactor::redact($value)
+                : $value;
         }
+
         return new WP_REST_Response($data, 200);
     }
 
@@ -256,10 +368,22 @@ final class AdvancedController
 
         $applied = 0;
         foreach (self::SETTINGS_OPTIONS as $opt) {
-            if (array_key_exists($opt, $settings)) {
-                update_option($opt, $settings[$opt]);
-                $applied++;
+            if (! array_key_exists($opt, $settings)) {
+                continue;
             }
+
+            $incoming = $settings[$opt];
+
+            // A masked value in the file means "whatever is already stored",
+            // so importing an export cannot wipe the secrets it could not
+            // carry.
+            if (is_array($incoming)) {
+                $stored   = get_option($opt, []);
+                $incoming = SecretRedactor::restore($incoming, is_array($stored) ? $stored : []);
+            }
+
+            update_option($opt, $incoming);
+            $applied++;
         }
 
         if (isset($settings['dono_roles']['mapping']) && is_array($settings['dono_roles']['mapping'])) {
@@ -344,21 +468,6 @@ final class AdvancedController
      *
      * @return list<array{type:string, message:string, occurred_at:string}>
      */
-    private static function recentErrors(int $limit = 15): array
-    {
-        $rows = Event::query()
-            ->whereLike('type', ErrorLog::PREFIX . '%')
-            ->orderBy('occurred_at', 'DESC')
-            ->limit($limit)
-            ->getAll();
-
-        return array_map(static fn ($e): array => [
-            'type'        => substr((string) $e->type, strlen(ErrorLog::PREFIX)),
-            'message'     => (string) (($e->payload['message'] ?? '') ?: 'No detail recorded.'),
-            'occurred_at' => (string) $e->occurred_at,
-        ], $rows);
-    }
-
     public function info(): WP_REST_Response
     {
         $cronEvents = [];
@@ -382,7 +491,6 @@ final class AdvancedController
             // for their currency. Empty on a healthy site, which is why the
             // screen only says anything when it is not.
             'unconverted_donations' => FxBackfill::pending(),
-            'recent_errors'         => self::recentErrors(),
             // A data migration that never runs leaves the site quietly
             // half-migrated, and Action Scheduler rides WP-cron, which plenty
             // of hosts disable. The screen has to be able to say so.

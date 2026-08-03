@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Rest;
 
+use Dono\Analytics\ErrorLog;
 use Dono\Foundation\Time\Clock;
 use Dono\Gateways\GatewayManager;
 use Dono\Gateways\WebhookOutcome;
@@ -51,14 +52,12 @@ final class WebhookController
             return new WP_Error('dono_unknown_gateway', sprintf(__('Unknown gateway: %s', 'dono'), $gatewayId), ['status' => 404]);
         }
 
-        $this->debugLog("webhook received: gateway={$gatewayId}");
-
         try {
             $outcome = $gateway->handleWebhook($request);
         } catch (\Throwable $e) {
             // An out-of-order or malformed event must not fatal the endpoint;
             // record a delivery row and 500 so the gateway retries.
-            $this->debugLog("webhook handler threw: gateway={$gatewayId}: " . $e->getMessage());
+            ErrorLog::record('webhook.' . $gatewayId, $e->getMessage());
             $outcome = new WebhookOutcome(
                 signature_ok: true,
                 event_type:   'exception',
@@ -66,8 +65,6 @@ final class WebhookController
                 http_status:  500,
             );
         }
-
-        $this->debugLog("webhook processed: gateway={$gatewayId} event={$outcome->event_type} handled=" . ($outcome->handled ? 'yes' : 'no') . " sig_ok=" . ($outcome->signature_ok ? 'yes' : 'no'));
 
         $this->logDelivery($gatewayId, $request, $outcome);
 
@@ -118,14 +115,14 @@ final class WebhookController
         // Dedup via the UNIQUE index: Queryable throws QueryException on the
         // expected "Duplicate entry" for a redelivered event. Logging must
         // never fail the webhook response (a 5xx makes the gateway retry
-        // forever), so non-duplicate insert failures are swallowed too, after
-        // recording them to the debug log.
+        // forever), so non-duplicate insert failures are recorded to the
+        // error log and swallowed.
         $prevSuppress = $wpdb ? $wpdb->suppress_errors(true) : false;
         try {
             $log->save();
         } catch (QueryException $e) {
             if (stripos($e->getMessage(), 'Duplicate entry') === false) {
-                $this->debugLog('webhook log insert failed: ' . $e->getMessage());
+                ErrorLog::record('webhook.log', $e->getMessage(), ['gateway' => $gateway]);
             }
             if ($wpdb) {
                 $wpdb->last_error = '';
@@ -137,11 +134,4 @@ final class WebhookController
         }
     }
 
-    private function debugLog(string $message): void
-    {
-        $cfg = get_option('dono_advanced', []);
-        if (is_array($cfg) && ! empty($cfg['debug_logging'])) {
-            error_log('[dono] ' . $message);
-        }
-    }
 }

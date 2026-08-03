@@ -83,4 +83,43 @@ final class ErrorLogTest extends IntegrationTestCase
             'an error old enough to prune is pruned, like any other event'
         );
     }
+
+    public function test_a_runaway_loop_cannot_grow_the_log_without_bound(): void
+    {
+        // The retention window is measured in days, so a webhook retrying every
+        // minute would sit inside it for two years.
+        for ($i = 0; $i < ErrorLog::KEEP + 150; $i++) {
+            ErrorLog::record('webhook.stripe', "Signature verification failed ({$i})");
+        }
+
+        $rows = $this->errors();
+
+        $this->assertLessThanOrEqual(
+            ErrorLog::KEEP + 100,
+            count($rows),
+            'the error log is capped'
+        );
+
+        // Pruning takes the oldest, so the failure that just happened survives.
+        $this->assertSame(
+            'Signature verification failed (' . (ErrorLog::KEEP + 149) . ')',
+            $rows[0]->payload['message'],
+            'the newest error is kept'
+        );
+    }
+
+    public function test_pruning_leaves_other_events_alone(): void
+    {
+        $recorder = Plugin::instance()->container->get(\Dono\Analytics\EventRecorder::class);
+        $recorder->record('donation.completed', ['payload' => ['keep' => 'me']]);
+
+        for ($i = 0; $i < ErrorLog::KEEP + 150; $i++) {
+            ErrorLog::record('mail', "send failed ({$i})");
+        }
+
+        $this->assertNotNull(
+            Event::query()->where('type', 'donation.completed')->get(),
+            'an ordinary event is not collateral of an error-log prune'
+        );
+    }
 }

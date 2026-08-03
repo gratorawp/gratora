@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Dono\Rest;
 
 use Dono\Foundation\Hooks\HookProvider;
-use Dono\Rest\Admin\AdvancedController as AdminAdvancedController;
+use Dono\Rest\Admin\ToolsController as AdminToolsController;
 use Dono\Rest\Admin\CampaignsController as AdminCampaignsController;
 use Dono\Rest\Admin\CommandsController as AdminCommandsController;
 use Dono\Rest\Admin\DashboardController as AdminDashboardController;
@@ -48,7 +48,7 @@ final class RestProvider extends HookProvider
         private AdminLicenseController $adminLicense,
         private PortalController $portal,
         private AdminRolesController $adminRoles,
-        private AdminAdvancedController $adminAdvanced,
+        private AdminToolsController $adminTools,
         private AdminOnboardingController $adminOnboarding,
         private StripeKeysController $stripeKeys,
         private PayPalKeysController $payPalKeys,
@@ -82,7 +82,7 @@ final class RestProvider extends HookProvider
         $this->adminLicense->registerRoutes();
         $this->portal->registerRoutes();
         $this->adminRoles->registerRoutes();
-        $this->adminAdvanced->registerRoutes();
+        $this->adminTools->registerRoutes();
         $this->adminOnboarding->registerRoutes();
         $this->stripeKeys->registerRoutes();
         $this->payPalKeys->registerRoutes();
