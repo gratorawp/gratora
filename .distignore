@@ -80,3 +80,5 @@ Thumbs.db
 /vendor-prefixed/setasign/fpdi/local-tests
 /vendor-prefixed/mpdf/mpdf/tests
 /vendor-prefixed/mpdf/mpdf/phpstan-baseline.neon
+
+/.cache

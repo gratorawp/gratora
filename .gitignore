@@ -43,3 +43,6 @@ ROADMAP.md
 
 # Packaged zips from `npm run package`.
 /dist/
+
+# make-pot scratch: the intermediate @dono/ui template, see "npm run i18n".
+/.cache
