@@ -159,24 +159,6 @@ export default function AdvancedPanel( { s, active } ) {
             </Card>
 
             <Card
-                title={ __( 'Database tables', 'dono' ) }
-                sub={ __( 'Tables Dono owns and current row counts.', 'dono' ) }
-            >
-                { info?.tables?.length ? (
-                    <table className="dono-advanced-table">
-                        <thead><tr><th>{ __( 'Table', 'dono' ) }</th><th>{ __( 'Rows', 'dono' ) }</th></tr></thead>
-                        <tbody>
-                            { info.tables.map( ( t ) => (
-                                <tr key={ t.name }><td><code>{ t.name }</code></td><td>{ t.rows.toLocaleString() }</td></tr>
-                            ) ) }
-                        </tbody>
-                    </table>
-                ) : (
-                    <p style={ { color: '#6b7280' } }>{ __( 'No Dono tables found. Deactivate and reactivate the plugin to create them.', 'dono' ) }</p>
-                ) }
-            </Card>
-
-            <Card
                 title={ __( 'Scheduled tasks', 'dono' ) }
                 sub={ __( 'Dono cron events queued via WP-Cron.', 'dono' ) }
             >

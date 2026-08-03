@@ -339,14 +339,6 @@ final class AdvancedController
 
     public function info(): WP_REST_Response
     {
-        global $wpdb;
-
-        $tables = [];
-        foreach ((array) $wpdb->get_col("SHOW TABLES LIKE '{$wpdb->prefix}dono_%'") as $t) {
-            $count = (int) $wpdb->get_var("SELECT COUNT(*) FROM `{$t}`");
-            $tables[] = ['name' => (string) $t, 'rows' => $count];
-        }
-
         $cronEvents = [];
         $crons = _get_cron_array() ?: [];
         foreach ($crons as $timestamp => $hooks) {
@@ -363,7 +355,6 @@ final class AdvancedController
             'wp'        => get_bloginfo('version'),
             'rest_root' => esc_url_raw(rest_url('dono/v1/')),
             'site_url'  => site_url(),
-            'tables'    => $tables,
             'cron'      => $cronEvents,
             // Real payments sitting outside every total because no rate exists
             // for their currency. Empty on a healthy site, which is why the
