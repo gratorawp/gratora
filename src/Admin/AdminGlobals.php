@@ -97,6 +97,11 @@ final class AdminGlobals extends HookProvider
     private function isDonoAdminPage(): bool
     {
         $page = is_string($_GET['page'] ?? null) ? (string) $_GET['page'] : '';
-        return $page !== '' && strpos($page, 'dono-') === 0;
+
+        // The dashboard's slug is the bare "dono"; every other screen is
+        // "dono-something". Matching only the prefix left the one screen a new
+        // install opens first without a config object, so its money rendered in
+        // a default format while every other screen used the org's.
+        return $page === 'dono' || strpos($page, 'dono-') === 0;
     }
 }
