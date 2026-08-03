@@ -374,7 +374,7 @@ final class SettingsService
         if (! $cfg) return [];
 
         $current = $this->get($group);
-        $next    = $this->merge($current, $input);
+        $next    = $this->merge($current, $this->accept($group, $cfg, $input));
 
         // Replace mapping wholesale; deep-merge would prevent removing roles.
         if ($group === 'roles' && array_key_exists('mapping', $input)) {
@@ -385,6 +385,75 @@ final class SettingsService
 
         do_action('dono.settings.updated', $group, $next);
         return $next;
+    }
+
+
+    /**
+     * Keep only what this group declares, at the type it declares it.
+     *
+     * update() used to merge whatever arrived straight into the option. A
+     * mistyped key persisted forever as a setting nothing reads, and a string
+     * landed wherever an int was expected, so a retention window could be saved
+     * as "" and every comparison against it silently became zero.
+     *
+     * Top level only, deliberately. roles.mapping is role => capabilities and
+     * numbering.prefixes is scope => prefix; both have keys core cannot know,
+     * so recursing would throw away exactly the data the screen is editing.
+     * Add-ons registering a group through dono.settings.groups are covered by
+     * the same rule, since a group has to declare its defaults to work at all.
+     *
+     * @param array<string,mixed> $cfg
+     * @param array<string,mixed> $input
+     * @return array<string,mixed>
+     */
+    private function accept(string $group, array $cfg, array $input): array
+    {
+        $defaults = is_array($cfg['defaults'] ?? null) ? $cfg['defaults'] : [];
+
+        $kept     = [];
+        $rejected = [];
+
+        foreach ($input as $key => $value) {
+            if (! array_key_exists($key, $defaults)) {
+                $rejected[] = $key;
+                continue;
+            }
+
+            $default = $defaults[$key];
+
+            // A shape mismatch is a bug in the caller, not a value to coerce:
+            // casting an array to int, or a scalar to array, produces nonsense
+            // that then looks like a saved setting.
+            if (is_array($default) !== is_array($value)) {
+                $rejected[] = $key;
+                continue;
+            }
+
+            $kept[$key] = match (true) {
+                is_array($default) => $value,
+                // A null default is "nothing yet", not a type. telemetry's
+                // opted_in_at defaults to null and stores a timestamp, so
+                // coercing against the default turned the int into a string.
+                is_null($default)  => $value,
+                is_bool($default)  => (bool) $value,
+                is_int($default)   => (int) $value,
+                is_float($default) => (float) $value,
+                default            => is_scalar($value) ? (string) $value : '',
+            };
+        }
+
+        if ($rejected !== []) {
+            // Not silent. Dropping a key without a word is how a setting stops
+            // saving and nobody finds out until someone asks why it reverted.
+            error_log(sprintf(
+                'dono: settings group %s rejected unknown or mistyped keys: %s',
+                $group,
+                implode(', ', $rejected)
+            ));
+            do_action('dono.settings.rejected', $group, $rejected);
+        }
+
+        return $kept;
     }
 
     /**
