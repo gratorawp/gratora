@@ -4,6 +4,7 @@ import { __ } from '@wordpress/i18n';
 
 import Btn from '../../_shared/components/Btn';
 import DateField from '../../_shared/components/DateField';
+import MonthField from '../../_shared/components/MonthField';
 
 /** Fetch rather than a bare link: the REST route needs the nonce header. */
 async function download( path, setNotice, setBusy, fallbackName ) {
@@ -56,8 +57,6 @@ export default function ExportTab( { setNotice } ) {
 
     const [ pdfYear, setPdfYear ] = useState( 0 );
 
-    // Month granularity, held as a date so DateField can drive it. Only the
-    // YYYY-MM prefix is sent, so any day in a month selects that whole month.
     const [ statsFrom, setStatsFrom ] = useState( '' );
     const [ statsTo, setStatsTo ]     = useState( '' );
 
@@ -71,8 +70,8 @@ export default function ExportTab( { setNotice } ) {
             .then( ( o ) => {
                 setOpts( o );
                 setPdfYear( o.current_year );
-                setStatsFrom( `${ o.current_year }-01-01` );
-                setStatsTo( `${ o.current_month }-01` );
+                setStatsFrom( `${ o.current_year }-01` );
+                setStatsTo( o.current_month );
                 // Every column on by default: a file silently missing a column
                 // is worse than one carrying a column nobody wanted.
                 setColumns( ( o.donor_columns || [] ).map( ( c ) => c.key ) );
@@ -81,7 +80,6 @@ export default function ExportTab( { setNotice } ) {
     }, [] );
 
     const years = opts?.years || [];
-    const month = ( v ) => String( v || '' ).slice( 0, 7 );
 
     const toggleColumn = ( key ) => setColumns( ( c ) => (
         c.includes( key ) ? c.filter( ( k ) => k !== key ) : [ ...c, key ]
@@ -105,7 +103,7 @@ export default function ExportTab( { setNotice } ) {
         return `/dono/v1/admin/exports/donors.csv?${ q.toString() }`;
     }, [ donorsFrom, donorsTo, donorsCampaign, columns ] );
 
-    const statsPath = `/dono/v1/admin/exports/revenue.csv?from=${ month( statsFrom ) }&to=${ month( statsTo ) }`;
+    const statsPath = `/dono/v1/admin/exports/revenue.csv?from=${ statsFrom }&to=${ statsTo }`;
 
     const canDonors  = opts?.can_export_donors !== false;
     const canReports = opts?.can_view_reports !== false;
@@ -211,21 +209,19 @@ export default function ExportTab( { setNotice } ) {
                             <div className="dono-exports__controls">
                                 <span className="dono-tools-field">
                                     { __( 'From', 'dono' ) }
-                                    <DateField
+                                    <MonthField
                                         value={ statsFrom }
-                                        onChange={ ( v ) => setStatsFrom( v || '' ) }
-                                        format="F Y"
-                                        allowClear={ false }
+                                        onChange={ setStatsFrom }
+                                        max={ opts?.current_month }
                                         ariaLabel={ __( 'Revenue from month', 'dono' ) }
                                     />
                                 </span>
                                 <span className="dono-tools-field">
                                     { __( 'To', 'dono' ) }
-                                    <DateField
+                                    <MonthField
                                         value={ statsTo }
-                                        onChange={ ( v ) => setStatsTo( v || '' ) }
-                                        format="F Y"
-                                        allowClear={ false }
+                                        onChange={ setStatsTo }
+                                        max={ opts?.current_month }
                                         ariaLabel={ __( 'Revenue to month', 'dono' ) }
                                     />
                                 </span>
