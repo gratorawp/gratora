@@ -12,27 +12,36 @@ Donation forms, recurring giving, campaigns and encrypted donor records. Your ow
 
 == Description ==
 
-Dono is a fundraising platform for WordPress. Donations run through your own payment account, land in your own database, and are reported on from your own admin. Nothing is routed through anyone else, and Dono takes no cut.
+**Take donations on your own site, through your own payment account, into your own database.**
 
-Everything below is in the free plugin. There is no donation cap, no second payment method held back, and recurring giving is not saved for a paid tier.
+Dono is a complete fundraising platform for WordPress. Build a campaign page, put a donation form on it, and start accepting one-time and recurring donations the same afternoon. Every donation lands in your database. Every donor record is yours. Dono never touches the money and never takes a cut.
 
-= Campaigns you design, not templates you tolerate =
+It is built the way WordPress is built. Campaign pages are pages. Donation forms are blocks. If you know the editor, you already know how to change any of it.
 
-A campaign in Dono is a real WordPress page. Open it in the editor and change it the way you change any other page, because it is any other page.
+= 💚 Everything here is free =
 
-* Drop in progress bars, stats, recent donations, top donors and a supporter wall wherever you want them
-* Rearrange, restyle or delete any of it, including the parts Dono put there
-* Set a goal by amount raised, number of donations or number of donors, with an optional end date
-* Show a grid of campaigns anywhere on your site
-* Save a look as a brand preset and reuse it across campaigns and forms
+Not a trial, and not a teaser. Recurring giving, both payment gateways, unlimited campaigns and forms, the donor portal, PDF receipts and reporting are all in this plugin.
 
-= Forms built from blocks =
+There is no donation cap. There is no platform fee. You will not hit a wall at your fiftieth donation or discover that monthly giving costs extra.
 
-The form builder is the WordPress editor. If you can build a page, you can build a donation form. Start from a template and adjust it, or start from nothing.
+= 🎨 Campaigns you design, not templates you tolerate =
+
+Most donation plugins hand you a campaign page and let you change the colours. Dono hands you a WordPress page.
+
+Open it in the editor and it behaves like every other page on your site, because it is one. Move the progress bar. Delete the stats. Put your own content between them. Nothing is locked, including the blocks Dono added when it created the page.
+
+* Progress bars, stats, recent donations, top donors and a supporter wall, placed wherever you want them
+* Goals by amount raised, number of donations or number of donors, with an optional end date
+* A grid of campaigns for a landing page or a sidebar
+* Save a look as a brand preset and reuse it across every campaign and form
+
+= 🧱 Forms built from blocks =
+
+The form builder is the WordPress editor. There is no separate interface to learn and no proprietary builder to fight. Start from one of the templates and adjust it, or start from an empty canvas.
 
 * Suggested amounts, a custom amount, and a minimum you set
 * One-time, weekly, fortnightly, monthly, quarterly and yearly, offered from the same form
-* Split a long form into steps, or keep it on one screen
+* Split a long form into steps, or keep everything on one screen
 * Show and hide fields based on what the donor has already chosen
 * Name, email, phone, address, country, dropdowns, checkboxes, radio buttons, dates, numbers and free text
 * Ask donors to cover the processing fee
@@ -40,23 +49,28 @@ The form builder is the WordPress editor. If you can build a page, you can build
 * A currency switcher when you accept more than one currency
 * Consent checkboxes and a privacy notice, recorded against the donation
 
-= Recurring giving, included =
+= 🔁 Recurring giving, included =
+
+Recurring donors are worth many times a one-off, which is exactly why so many plugins put them behind a paid tier. Dono does not.
 
 * Subscriptions through Stripe or PayPal
-* Five recurring frequencies, and you choose which ones a form offers
-* Donors cancel or change their own plans from the portal, without emailing you
+* Five recurring frequencies, and you decide which ones a form offers
+* Donors cancel or change their own plans from the portal, without emailing you first
 * Cancelled and failed plans are reflected in your totals rather than quietly inflating them
 
-= Donors, and a portal they can use themselves =
+= 👥 Donors, and a portal they can use themselves =
+
+Every donation builds a donor record, and every donor gets a way in without you creating an account for them.
+
+They receive a link, and from there they can see their giving history, download a receipt, change a subscription or update their consent. No password to forget, and no account admin for you.
 
 * Donor records with lifetime totals, full history and private notes
 * Households, donor types, and per-donor annual tax statements
-* A passwordless portal where donors see their giving, download receipts, change a subscription and manage consent
-* No donor accounts to administer, and no passwords to reset
+* Segment and export by campaign or by when the record was created
 
-= Privacy and GDPR =
+= 🔒 Privacy and GDPR, handled properly =
 
-Donor data is treated as something you are responsible for, rather than something to collect as much of as possible.
+Donor data is treated as something you are responsible for, rather than something to collect as much of as possible. This is not a checkbox and a privacy policy link.
 
 * Names, emails, phone numbers, addresses and tax IDs are encrypted at rest
 * Consent is recorded per donation, with the purpose, the time and where it was given
@@ -65,37 +79,43 @@ Donor data is treated as something you are responsible for, rather than somethin
 * IP anonymisation, on by default
 * Let donors export or delete their own data from the portal, or turn either off
 * Decide how long activity data is kept
-* Point donors at your privacy policy from the form itself
+* Choose exactly which columns leave the site in an export, because an export is a file that travels
 
-= Receipts and documents =
+= 📊 Reporting you can act on =
+
+* A dashboard with revenue, donation and donor metrics over any period
+* Campaign performance as a one-page PDF you can hand to a board
+* CSV exports for donations, donors, and revenue month by month
+* An error log in the admin, so a declined payment or a bounced receipt is something you can see rather than something you hear about later
+
+= 💳 Payments =
+
+* Stripe and PayPal, using your own account and your own API keys
+* Offline and manual donations for cash, cheques and bank transfers
+* Refunds, including partial ones, recorded against the donation
+* Test mode for a single form or the whole site, kept out of your reporting
+
+= 🧾 Receipts and documents =
 
 * Email receipts sent automatically, in your branding
 * PDF receipts and year-end annual statements
 * Sequential reference numbers for donations, receipts and refunds, in a format you set
 
-= Reporting =
+= 🌱 Your first campaign =
 
-* A dashboard with revenue, donation and donor metrics over any period
-* Campaign performance as a PDF you can hand to a board
-* CSV exports for donations, donors, and revenue month by month
-* Choose exactly which donor columns leave the site, because an export is a file that travels
+Install the plugin and a short setup asks for your organisation name, your country and your currency. Add your Stripe or PayPal keys, or skip payments entirely and start with offline donations.
 
-= Payments =
+Create a campaign and Dono builds the page for you, form included. Edit it like any other page. When it looks right, publish.
 
-* Stripe and PayPal, using your own account and your own keys
-* Offline and manual donations for cash, cheques and bank transfers
-* Refunds, including partial ones, recorded against the donation
-* Test mode for one form or the whole site, kept out of your reporting
+= 🤝 Who Dono is for =
 
-= Running it day to day =
+Nonprofits and registered charities that need receipts, tax statements and a donor list they actually own. Churches, schools, clubs and mutual aid groups collecting from a community. Individuals running a personal cause or a memorial fund. Developers building any of the above for a client.
 
-* Roles and capabilities, so whoever enters cheques is not also able to export your donor list
-* Multiple currencies, with rates fetched daily or entered by hand
-* An error log in the admin, so a failed payment or a bounced receipt is something you can see rather than something you hear about later
+= 🛠️ Open source, and built to extend =
 
-= Built to extend =
+Dono is GPL and developed in the open. It is ordinary WordPress underneath: blocks are blocks, pages are pages, and your data sits in your own database in tables you can query.
 
-Dono is ordinary WordPress underneath. Blocks are blocks, pages are pages, and your data sits in your own database in tables you can query. Filters and actions are provided for settings, capabilities, admin screens and the donation lifecycle.
+Filters and actions are provided for settings, capabilities, admin screens and the donation lifecycle, and the REST API the admin runs on is available to you as well.
 
 == Installation ==
 
@@ -108,23 +128,31 @@ Dono is ordinary WordPress underneath. Blocks are blocks, pages are pages, and y
 
 = Is Dono really free? =
 
-Yes, and there is no paid tier you have to reach before it is useful. Recurring giving, both payment methods, campaigns, the donor portal and reporting are all in the free plugin.
+Yes, and there is no paid tier you have to reach before it is useful. Recurring giving, both payment methods, unlimited campaigns and forms, the donor portal, PDF receipts and reporting are all in this plugin.
 
 = Does Dono take a percentage of donations? =
 
 No. Card payments run through your own Stripe or PayPal account, so their usual processing fees apply, but Dono adds nothing on top and never touches the money.
 
-= Where do donations go? =
+= Why not just use a PayPal button? =
 
-Straight to your own Stripe or PayPal account. Dono never holds your funds.
+A button takes a payment. It does not give you a donor record, a recurring plan the donor can manage, a receipt with a sequential number, a campaign page with a live total, or a report at the end of the year. Dono is the part around the payment.
+
+= Why not a general form plugin with a payment add-on? =
+
+Because a form plugin gives you submissions, not donors. There is no lifetime total, no recurring management, no tax statement, no refund recorded against the original donation, and no answer when someone asks you to delete their data.
+
+= This is version 1.0. Why should I trust it with donations? =
+
+Fair question. Dono is new, so judge it on what you can check rather than on how long it has existed. The code is open source and readable. Payments go through Stripe and PayPal directly with your own keys, so your money never depends on Dono staying in business. Your data is in your own database in plain tables, and you can export all of it as CSV at any time. If Dono is not for you, you are not locked in.
+
+= Can I change how a campaign page looks? =
+
+All of it. A campaign page is an ordinary WordPress page, so you can move, restyle or remove anything on it, including the blocks Dono added.
 
 = Do I need a page builder or a separate form plugin? =
 
 No. Campaign pages and donation forms are both built from blocks in the WordPress editor.
-
-= Can I change how a campaign page looks? =
-
-Yes, all of it. A campaign page is an ordinary WordPress page, so you can move, restyle or remove anything on it, including the blocks Dono added.
 
 = Does it support recurring donations? =
 
