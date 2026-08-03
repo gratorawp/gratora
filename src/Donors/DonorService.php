@@ -162,8 +162,8 @@ final class DonorService
         }
 
         // One write path: the encrypted fields are set on the model above and
-        // persisted by this single save(), so an unchanged phone/address no
-        // longer issues a second UPDATE or fires donor.updated on a no-op.
+        // persisted by this single save(), so an unchanged phone/address costs
+        // no second UPDATE and fires no donor.updated on a no-op.
         if ($changed) {
             $donor->updated_at = $this->clock->now()->format('Y-m-d H:i:s');
             $donor->save();
@@ -174,15 +174,12 @@ final class DonorService
     }
 
     /**
-     * Back-fill only empty donor profile fields from the donation payload
+     * Back-fill only empty donor profile fields from the donation payload.
      *
-     * "Only empty fields" makes an erased donor the ideal target rather than a
-     * protected one: erasure nulls every field this fills, so a single
-     * donor.refresh_profile call put the name, company, country, phone and
-     * address straight back onto the row. redacted_at stayed set, so redact()
-     * would early-return and neither the admin route nor the portal's own
-     * forget could ever wipe it again. This is the only donor writer that had
-     * no such guard; editProfile and changeEmail both throw.
+     * An erased donor is rejected rather than being the ideal target: erasure
+     * nulls every field this fills, so one call would put the name, company,
+     * country, phone and address back on the row with redacted_at still set,
+     * and redact() early-returns on such a row, so nothing could wipe it again.
      *
      * findOrCreate is unaffected: it clears redacted_at on a genuine
      * reactivation before it calls through, and returns without calling at all
@@ -336,8 +333,8 @@ final class DonorService
             $this->decrypt($donor->tax_id_encrypted),
         ];
 
-        // Free text. The bare first and last name used to be searched too, and
-        // they are substrings of other people's data: see ErasureRequest::make.
+        // Free text. Bare first and last names are excluded: they are
+        // substrings of other people's data (see ErasureRequest::make).
         $names = [
             trim((string) $donor->first_name . ' ' . (string) $donor->last_name),
             $donor->company,

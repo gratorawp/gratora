@@ -275,12 +275,6 @@ final class SettingsService
     }
 
     /**
-     * Fills in defaults that depend on runtime install state (blog name, admin email).
-     *
-     * @param array<string,mixed> $static
-     * @return array<string,mixed>
-     */
-    /**
      * The merge tags each template's sender actually passes.
      *
      * Lives here, next to the templates, because the admin editor offers these
@@ -324,6 +318,12 @@ final class SettingsService
         return array_values((array) apply_filters('dono.email.template_meta', []));
     }
 
+    /**
+     * Fills in defaults that depend on runtime install state (blog name, admin email).
+     *
+     * @param array<string,mixed> $static
+     * @return array<string,mixed>
+     */
     private function resolveDynamicDefaults(string $group, array $static): array
     {
         if ($group !== 'email') return $static;
@@ -392,10 +392,9 @@ final class SettingsService
     /**
      * Keep only what this group declares, at the type it declares it.
      *
-     * update() used to merge whatever arrived straight into the option. A
-     * mistyped key persisted forever as a setting nothing reads, and a string
-     * landed wherever an int was expected, so a retention window could be saved
-     * as "" and every comparison against it silently became zero.
+     * A key absent from the defaults would persist as a setting nothing reads,
+     * and a string landing where an int belongs makes a retention window saved
+     * as "" compare as zero everywhere.
      *
      * Top level only, deliberately. roles.mapping is role => capabilities and
      * numbering.prefixes is scope => prefix; both have keys core cannot know,
@@ -433,8 +432,8 @@ final class SettingsService
             $kept[$key] = match (true) {
                 is_array($default) => $value,
                 // A null default is "nothing yet", not a type. telemetry's
-                // opted_in_at defaults to null and stores a timestamp, so
-                // coercing against the default turned the int into a string.
+                // opted_in_at defaults to null and stores a timestamp, which
+                // coercing against the default would turn into a string.
                 is_null($default)  => $value,
                 is_bool($default)  => (bool) $value,
                 is_int($default)   => (int) $value,

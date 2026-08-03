@@ -68,12 +68,9 @@ final class Campaign extends Model
     }
 
     /**
-     * The single answer to "can this campaign take money right now".
-     *
-     * The rule was previously spelled out at each gate as a bare status check,
-     * in three places, and not one of them read the schedule the admin set: a
-     * campaign that closed on Friday still took donations on Saturday. Adding a
-     * condition here now reaches every gate at once.
+     * The single answer to "can this campaign take money right now". Every gate
+     * calls this, so status and the admin's schedule are read the same way in
+     * all of them, and a new condition reaches every gate at once.
      *
      * $now is UTC, matching how starts_at / ends_at are stored and how
      * CampaignRepository already compares them.

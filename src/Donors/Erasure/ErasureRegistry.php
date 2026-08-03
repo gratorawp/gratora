@@ -8,11 +8,6 @@ namespace Dono\Donors\Erasure;
  * Every plugin that stores donor data subscribes a handler here, and erasure
  * runs all of them.
  *
- * Replaces the `dono.donor.redacted` action, which was fire-and-forget in both
- * directions that mattered: it fired after the identifiers were gone so a
- * handler could not search for them, and nothing noticed when a plugin simply
- * never listened. The QA sweep found four tables in that second category.
- *
  * Register with the `dono.donor.erasure_handlers` filter at boot:
  *
  *     add_filter('dono.donor.erasure_handlers', static function (array $h): array {

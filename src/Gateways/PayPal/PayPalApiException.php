@@ -10,16 +10,13 @@ use RuntimeException;
  * A PayPal API error, carrying the machine-readable issue codes alongside the
  * human message.
  *
- * The codes used to be reachable only by grepping the formatted message, and
  * `PayPalApi::errorMessage()` prefers `details[].description` over
- * `details[].issue`, so the codes were dropped before any caller saw them.
- * `ORDER_ALREADY_CAPTURED` therefore never matched on PayPal's real response
- * shape, and re-entrant capture silently failed the donor on a payment PayPal
- * had already taken. The `already` needle in the subscription-state check had
- * the mirror problem: it matched the *description* "Order already captured"
- * for an unrelated call.
+ * `details[].issue`, so the codes do not survive into the formatted message.
+ * Matching on the message text is lossy in that direction and wrong in the
+ * other: an `already` needle also hits the description "Order already
+ * captured" on unrelated calls. Callers match on issues() instead.
  *
- * Extends RuntimeException so existing catch blocks keep working.
+ * Extends RuntimeException so catch blocks up the stack still work.
  *
  * @version 1.0.0
  */

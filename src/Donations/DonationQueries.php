@@ -35,16 +35,29 @@ final class DonationQueries
      * Event ticket orders ride the same table with kind='order'. They are a
      * purchase, not a donation, so they must stay out of donor lifetime totals,
      * campaign and fund rollups, donation reporting, receipts and the year-end
-     * tax statement. The QA sweep found kind filtered in exactly one place in
-     * core, which is why a ticket buyer's lifetime total inflated and a ticket
-     * appeared on a tax-deductible statement.
+     * tax statement.
      *
-     * This is the single owner of that rule. Reach for it wherever "donations"
-     * is meant, rather than repeating the where().
+     * Single owner of that rule: reach for it wherever "donations" is meant,
+     * rather than repeating the where().
      */
     public static function donationsOnly($q)
     {
         return self::live($q)->where('kind', 'donation');
+    }
+
+    /**
+     * Rows whose base-currency value is unknown, so a total built on
+     * netBaseExpr() is missing them.
+     *
+     * base_amount_cents is NULL when the donation's currency had no FX rate at
+     * the time it was taken: money is never gated on reporting being
+     * configured, so the donation is accepted and contributes 0. Counting them
+     * lets a screen explain a campaign showing 22 donations raising what 21
+     * raised.
+     */
+    public static function unconvertedExpr(): string
+    {
+        return 'SUM(CASE WHEN base_amount_cents IS NULL THEN 1 ELSE 0 END)';
     }
 
     /**
@@ -54,22 +67,6 @@ final class DonationQueries
      * fx_rate (base per donation unit; NULL when the donation already is base).
      * Use only where dono_donations is the main/correlated table.
      */
-    /**
-     * Rows whose base-currency value is unknown, so a total built on
-     * netBaseExpr() is missing them.
-     *
-     * base_amount_cents is NULL when the donation's currency had no FX rate at
-     * the time it was taken. Money is never gated on reporting being
-     * configured, so the donation is accepted and simply contributes 0. That is
-     * invisible unless a caller says so, which is what this counts: a campaign
-     * showing 22 donations raising what 21 raised is a bug report waiting to
-     * happen, and this is how the screen can explain it instead.
-     */
-    public static function unconvertedExpr(): string
-    {
-        return 'SUM(CASE WHEN base_amount_cents IS NULL THEN 1 ELSE 0 END)';
-    }
-
     public static function refundedBaseExpr(): string
     {
         $prefix    = DB::getPrefix();
@@ -82,11 +79,8 @@ final class DonationQueries
         // Summed before rounding, not after. base_amount_cents is rounded once
         // from the whole amount, so rounding each refund separately and adding
         // them up can exceed the correctly-rounded value of the same total: at
-        // 0.5107, two refunds of 50.00 gave back 2554 + 2554 = 5108 where the
-        // 100.00 they add up to is worth 5107. A foreign donation refunded in
-        // instalments handed back a cent it never took in, and every total it
-        // feeds -- campaign raised, donor lifetime value, fund, dashboard --
-        // inherited the shortfall. One rounding at the end, on one product.
+        // 0.5107, two refunds of 50.00 give 2554 + 2554 = 5108 where the 100.00
+        // they add up to is worth 5107. One rounding at the end, on one product.
         return "COALESCE((
             SELECT ROUND(SUM(amount_cents) * COALESCE({$donations}.fx_rate, 0))
             FROM {$refunds}

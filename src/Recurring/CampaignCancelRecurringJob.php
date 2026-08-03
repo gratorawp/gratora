@@ -10,12 +10,10 @@ use Dono\Async\AsyncDispatcher;
 /**
  * Cancels a campaign's live recurring plans in bounded, resumable batches.
  *
- * Archiving used to do this inline: an unbounded getAll() of every active plan
- * on the campaign, then one blocking gateway round trip each, inside the
- * PUT /campaigns/{id} request. A campaign with a few thousand monthly donors
- * needed more wall time than PHP or any reverse proxy allows, so the request
- * died partway with no record of how far it got, and the next attempt started
- * again from the top.
+ * Cancelling costs one blocking gateway round trip per plan, so a campaign with
+ * a few thousand monthly donors needs more wall time than PHP or any reverse
+ * proxy allows inside the PUT /campaigns/{id} request. The cursor is persisted
+ * so a run that dies partway resumes where it stopped.
  *
  * A cursor rather than "the next N active plans" on purpose. A plan the gateway
  * refuses to cancel stays active, so re-reading the same window would hand back

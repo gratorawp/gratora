@@ -32,9 +32,7 @@ abstract class CampaignBlock implements Block
 
     /**
      * The campaign's full token map, for the block wrapper's style attribute.
-     *
-     * Blocks used to pass the accent alone, which left every other token in the
-     * stylesheet resolving to its Sass fallback. See CampaignStyleVars.
+     * See CampaignStyleVars.
      *
      * Empty when the page is already about this campaign, because PageStyle has
      * put the same tokens on the body, where an organiser's own headings and
@@ -86,11 +84,10 @@ abstract class CampaignBlock implements Block
     /**
      * Why this block rendered nothing, for someone who can do something about it.
      *
-     * It always said "not bound to a campaign", which is one of two reasons and
-     * usually the wrong one. resolveCampaign() also returns null for a campaign
-     * that exists and is bound but is not renderable for this viewer, a draft or
-     * an archived one, and telling an editor to go and pick a campaign they had
-     * already picked sent them looking for a setting that was not wrong.
+     * resolveCampaign() returns null for two reasons: nothing is bound, or the
+     * bound campaign is not renderable for this viewer (draft or archived).
+     * Telling an editor to pick a campaign they have already picked sends them
+     * looking for a setting that is not wrong.
      */
     protected function notBoundNotice(array $attrs = []): string
     {

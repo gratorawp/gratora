@@ -152,20 +152,17 @@ final class ReferenceGenerator
      * The counter is namespaced by whatever the printed reference is namespaced
      * by, and nothing else.
      *
-     * These were keyed off two different settings: the counter off reset_yearly,
-     * the reference off include_year. They are independent toggles, so turning
-     * either one changed which counter was read without changing what the
-     * reference looked like, and the generator re-issued numbers it had already
-     * used. UNIQUE(reference) then rejected the insert - and because next() is
-     * called inside the donation's own transaction, the counter's increment
-     * rolled back with it, so it never advanced and every later donation failed
-     * the same way. A checkbox on the Numbering screen could stop a site taking
-     * money, permanently, behind a generic error.
+     * reset_yearly and include_year are independent toggles, so keying the
+     * counter off reset_yearly alone would change which counter is read without
+     * changing what the reference looks like, re-issuing numbers already in use.
+     * UNIQUE(reference) rejects the insert, and because next() runs inside the
+     * donation's own transaction the increment rolls back with it, so the
+     * counter never advances and every later donation fails the same way.
      *
      * A year-scoped counter is only sound when the year is in the reference to
      * tell the two sequences apart. reset_yearly without include_year is
-     * therefore continuous numbering, which is the only reading that does not
-     * mint DONO-00001 twice.
+     * therefore continuous numbering, the only reading that does not mint
+     * DONO-00001 twice.
      */
     private function counterOption(string $scope, int $year): string
     {
@@ -179,19 +176,17 @@ final class ReferenceGenerator
     /**
      * What a counter must clear before it issues its first number.
      *
-     * A counter that did not exist yet used to start at zero, which is right on
-     * a new site and wrong when a numbering setting has just moved the
-     * generator onto a key it has never used: starting that at zero walks back
-     * over references already on donations.
+     * Starting a fresh counter at zero is right on a new site and wrong when a
+     * numbering setting has moved the generator onto a key it has never used:
+     * zero walks back over references already on donations.
      *
      * Which counters it has to clear depends on which key it is, because that
      * decides which of them could have printed the same string:
      *
-     *  - A year-scoped counter is usually just January, and January must start
-     *    at 1; that is the whole point of the yearly reset, and it is safe
-     *    because the year is in the reference. The one counter that can already
-     *    have issued a number inside *this* year is the continuous one, so that
-     *    is the only thing it clears.
+     *  - A year-scoped counter must be free to start at 1; that is the point of
+     *    the yearly reset, and it is safe because the year is in the reference.
+     *    The one counter that can already have issued a number inside *this*
+     *    year is the continuous one, so that is all it clears.
      *  - The continuous counter can print any year's format, so it clears every
      *    counter this scope has ever kept.
      *

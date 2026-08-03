@@ -15,8 +15,8 @@ use RuntimeException;
  * plan is created on demand per (amount, currency, interval) and then reused,
  * otherwise a busy month would litter the merchant's account with duplicates.
  *
- * Both the product id and the plan ids are cached in options, keyed by mode,
- * because sandbox and live are separate PayPal accounts.
+ * Both the product id and the plan ids are cached in options, keyed by mode and
+ * account: sandbox and live are separate PayPal accounts.
  *
  * @version 1.0.0
  */
@@ -133,8 +133,7 @@ final class PayPalPlans
         return implode('_', [
             $test ? 'test' : 'live',
             // A plan hangs off a product inside one merchant account and means
-            // nothing in another. Without this, connecting a different account
-            // kept handing the old one's plan ids to the new one.
+            // nothing in another.
             AccountFingerprint::of($this->account->clientIdFor($test)),
             strtolower($currency),
             $amountCents,

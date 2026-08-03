@@ -8,7 +8,7 @@ namespace Dono\Foundation\License;
  * Tells an admin their license needs attention, on any screen.
  *
  * The Licenses page shows per add-on status, but nobody visits it unprompted,
- * so a refused key was invisible until something stopped working.
+ * so a refused key stays invisible until something stops working.
  *
  * @version 1.0.0
  */

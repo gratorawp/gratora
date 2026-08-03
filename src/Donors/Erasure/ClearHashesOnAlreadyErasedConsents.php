@@ -9,17 +9,14 @@ use Dono\Donors\Donor;
 use Dono\Foundation\Upgrade\UpgradeRoutine;
 
 /**
- * Clear the re-identifying hashes on consent rows belonging to donors who were
- * erased before erasure started doing it.
+ * Clears the re-identifying hashes on consent rows of donors already erased.
  *
- * CoreDonorDataHandler now nulls ip_hash and user_agent_hash when a donor is
- * erased, which fixes it going forward and does nothing for anyone already
- * erased. Their rows still carry a salted IP digest over a space small enough
- * to enumerate and an unsalted user-agent digest that is stable across
- * installs, on a record the admin screen reports as erased.
+ * ip_hash is a salted digest over a space small enough to enumerate and
+ * user_agent_hash is unsalted and so stable across installs. On a record the
+ * admin screen reports as erased, both re-link it to a person.
  *
- * The consent fact, purpose and timestamp are untouched: those are the
- * lawful-basis evidence for everything sent before the erasure.
+ * The consent fact, purpose and timestamp stay: they are the lawful-basis
+ * evidence for everything sent before the erasure.
  *
  * @version 1.0.0
  */

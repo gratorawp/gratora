@@ -9,17 +9,14 @@ use Dono\Async\AsyncDispatcher;
 /**
  * Drains the outstanding upgrade routines off the request.
  *
- * A backfill over a few hundred thousand donations cannot run inside the
- * request that noticed the plugin had been updated, and the site would be down
- * for the length of it if it tried. Each tick does one bounded step and
- * re-enqueues while anything is left.
+ * A backfill over a few hundred thousand donations would hold the request open
+ * for its whole duration, so each tick does one bounded step and re-enqueues
+ * while anything is left.
  *
- * Action Scheduler rides WP-cron, which is disabled or throttled on plenty of
- * hosts, so this is not the only way the routines can run: UpgradeRunner::step
- * is callable directly and the Advanced screen exposes a button that does
- * exactly that. Without it a broken cron would leave a site silently
- * half-migrated with no way to recover short of shell access, which is not
- * something to assume on someone else's install.
+ * Not the only way they run: Action Scheduler rides WP-cron, which many hosts
+ * disable, and a site left half-migrated needs a way back that does not assume
+ * shell access. UpgradeRunner::step is callable directly and the Advanced
+ * screen has a button for it.
  *
  * @version 1.0.0
  */

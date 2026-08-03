@@ -11,12 +11,11 @@ use WP_REST_Server;
 /**
  * The roles available for capability mapping, and the capabilities to map.
  *
- * The capability list belongs here rather than in the panel's own source: an
- * add-on registers its caps through the `dono.capabilities` filter, which
- * `Capabilities::maps()` applies and `applyMapping()` honours. The screen had
- * its own hardcoded copy, so an add-on's capability was enforced on every route
- * and could not be granted through the one screen whose job is granting
- * capabilities. dono-p2p's `dono_manage_fundraisers` was invisible there.
+ * The capability list belongs here rather than in the panel's own source:
+ * add-ons register their caps through the `dono.capabilities` filter, which
+ * `Capabilities::maps()` applies and `applyMapping()` honours. A hardcoded copy
+ * in the screen would enforce an add-on's capability on every route while
+ * leaving it ungrantable (dono-p2p's `dono_manage_fundraisers`).
  *
  * @version 1.0.0
  */

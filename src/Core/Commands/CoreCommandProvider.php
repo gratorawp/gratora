@@ -66,7 +66,6 @@ final class CoreCommandProvider
      */
     private const SETTINGS_GROUPS = ['org-profile', 'currency-locale', 'org-brand', 'receipts', 'email', 'numbering', 'consents'];
 
-    /** Key names that name a secret; their values are redacted on read and refused on write, at any depth. */
     public function register(CommandRegistry $r, Container $c): void
     {
         $this->donations($r, $c);
@@ -1065,13 +1064,10 @@ final class CoreCommandProvider
                 [$plan, $sub] = $this->resolvePlan($c, (int) $in['plan_id']);
                 $amount = (int) $in['amount_cents'];
 
-                // Both guards are the donor portal's, verbatim: this is the
-                // same edit through a different door and it had neither.
-                //
                 // Amounts are major units x 100, so a fractional amount in a
                 // zero-decimal currency rounds at the gateway rather than being
-                // refused - 1.50 JPY is billed as 2 - and the plan row keeps
-                // the value nobody is charging, on every renewal.
+                // refused (1.50 JPY is billed as 2), and the plan row keeps a
+                // value nobody is charging, on every renewal.
                 if (Currency::minorUnits((string) $plan->currency) === 0 && $amount % 100 !== 0) {
                     throw new CommandError('This currency does not support fractional amounts.');
                 }
@@ -1081,10 +1077,9 @@ final class CoreCommandProvider
                 }
 
                 $plan->amount_cents = $amount;
-                // Keep the base-currency snapshot in step with the new amount.
                 // Every base-currency aggregate reads this in preference to
-                // amount_cents, so leaving it stale pinned MRR to the old
-                // figure permanently.
+                // amount_cents, so leaving it stale pins MRR to a figure that
+                // is no longer charged.
                 $plan->base_amount_cents = $plan->fx_rate !== null
                     ? (int) round($amount * (float) $plan->fx_rate)
                     : null;
@@ -1854,10 +1849,8 @@ final class CoreCommandProvider
     }
 
     /**
-     * Secrets are masked by SecretRedactor, the single owner of this rule. The
-     * REST settings read used to skip it and returned the Stripe webhook
-     * signing secret in plaintext, so it now lives in one place both callers
-     * use.
+     * SecretRedactor is the single owner of this rule, so every caller masks
+     * identically.
      *
      * @param array<string,mixed> $values
      * @return array<string,mixed>
@@ -1940,10 +1933,6 @@ final class CoreCommandProvider
     }
 
     /**
-     * Stringify a settings value for a preview row: scalars as-is, booleans as
-     * yes/no, structured values as compact JSON, a missing value as "not set".
-     */
-    /**
      * @param array<string,mixed> $in
      * @return array{rows:list<array<string,string>>, inverse:array<string,mixed>|null}
      */
@@ -2013,14 +2002,9 @@ final class CoreCommandProvider
      * The preview an operator approves and the inverse that undoes it, derived
      * from one field map so they cannot disagree.
      *
-     * They used to be written out separately: the preview enumerated every
-     * changed field and the inverse handled only `status`. Approving a rename
-     * plus a publish and then clicking Undo restored the status, left the
-     * rename applied, and reported "Reverted."
-     *
      * A field that cannot be put back (campaign_type promotion is one-way)
-     * makes the whole change irreversible rather than partly so. Offering Undo
-     * for a change it can only half-undo is the bug, not the absence of Undo.
+     * makes the whole change irreversible rather than partly so: offering Undo
+     * for a change it can only half-undo is worse than offering none.
      *
      * @param array<string,mixed> $in
      * @param array<string,array{label:string,current:callable,format?:callable,reversible?:bool}> $fields

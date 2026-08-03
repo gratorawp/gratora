@@ -17,18 +17,13 @@ final class RecurringPlanRepository
     /**
      * Base-currency amount of a plan.
      *
-     * Three cases, and the middle one is the bug this replaced. A plan with a
-     * snapshot uses it. A plan already IN the base currency needs no snapshot
-     * and no rate: its own amount is the base amount, which matters because the
-     * Give importer never writes a snapshot. Anything else is a foreign plan we
-     * could not convert, so its base value is genuinely unknown and it must
-     * contribute 0.
-     *
-     * This used to COALESCE straight to amount_cents, treating every foreign
-     * amount as if it were already base: exactly what DonationQueries documents
-     * as "would corrupt every base-currency total". A JPY 10,000/mo plan
-     * reported MRR as 10,000 in the base currency, 186x too high. Callers also
-     * get an `unconverted` count so a partial figure can say so.
+     * A plan with a snapshot uses it. A plan already IN the base currency needs
+     * no snapshot and no rate: its own amount is the base amount, which matters
+     * because the Give importer never writes a snapshot. Anything else is a
+     * foreign plan we could not convert, so its base value is genuinely unknown
+     * and must contribute 0: coalescing straight to amount_cents would report a
+     * JPY 10,000/mo plan as 10,000 base, 186x too high. Callers get an
+     * `unconverted` count so a partial figure can say so.
      */
     private static function baseAmountExpr(): string
     {

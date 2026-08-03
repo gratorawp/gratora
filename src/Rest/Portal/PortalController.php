@@ -323,8 +323,7 @@ final class PortalController
     /**
      * Action Scheduler executes do_action_ref_array($hook, array_values($args)),
      * so the enqueued ['donor_id'=>.., 'email'=>..] arrives as two positional
-     * params, not one array (single-key jobs hide this; this two-key one didn't).
-     * Accept both shapes so the sign-in link actually sends.
+     * params, not one array. Accept both shapes.
      *
      * @param array{donor_id?:int, email?:string}|int $args
      */
@@ -675,11 +674,9 @@ final class PortalController
             if ($r->donation_id !== null && isset($testDonationIds[(int) $r->donation_id])) {
                 continue;
             }
-            // Mint a short-lived download token for the donor's current
-            // session. The /receipts/{id}/download endpoint is public-by-token
-            // (mirrors the email-attached download flow), so we need a token
-            // here too. 1-hour TTL keeps the URL useful for the page lifetime
-            // without becoming a long-lived link if copied out of the portal.
+            // /receipts/{id}/download is public-by-token (it mirrors the
+            // email-attached flow), so mint one for this session. A 1-hour TTL
+            // covers the page lifetime without surviving as a copied link.
             $token = $this->magicLinks->issue($donorId, 'download_receipt', (int) $r->id, 3600);
             $url   = rest_url('dono/v1/receipts/' . $r->id . '/download');
             $out[] = [
@@ -848,12 +845,11 @@ final class PortalController
                 'version'        => $currentVersion,
                 'stored_version' => $storedVersion,
                 'stale'          => $stale,
-                // The record is the truth. `default` is the donation form's
+                // The record is the truth: `default` is the donation form's
                 // pre-selection at the point of collection, not a subscription
-                // the donor already holds: with no record they have not
-                // consented, and this is exactly what the delivery gate and the
-                // admin consent view both read (row && granted), so a box ticked
-                // from `default` here would claim a subscription nothing honours.
+                // the donor holds. The delivery gate and the admin consent view
+                // both read (row && granted), so a box ticked from `default`
+                // here would claim a subscription nothing honours.
                 'granted'        => $row !== null && (bool) $row->granted,
                 'occurred_at'    => $row->occurred_at ?? null,
                 'has_record'     => $row !== null,
@@ -914,13 +910,11 @@ final class PortalController
     /**
      * Write only the columns this action changed.
      *
-     * save() serialises every column and UPDATEs all of them from the values
-     * loaded when the request began. Renewals deliberately use atomic
-     * increments so concurrent writes are not lost
-     * (RecurringPlanRepository::recordPayment), and a full-row write from here
-     * undid exactly that: a renewal landing between the donor opening their
-     * portal and pressing Pause had payments_count, total_paid_cents and
-     * last_payment_at rolled back to what they were on page load.
+     * save() UPDATEs every column from the values loaded when the request began.
+     * Renewals use atomic increments so concurrent writes are not lost
+     * (RecurringPlanRepository::recordPayment); a full-row write from here would
+     * roll payments_count, total_paid_cents and last_payment_at back to their
+     * page-load values whenever a renewal lands mid-request.
      *
      * @param array<string,mixed> $columns
      */
@@ -954,9 +948,8 @@ final class PortalController
     private static function normalizePrefs(array $raw): array
     {
         $bool = static fn ($v) => (bool) $v;
-        // Channels + topics were a UI that nothing consumed (no mail layer reads
-        // them); that UI was removed, so they are no longer persisted. Only the
-        // wired preferences remain.
+        // Only the wired preferences are persisted; nothing in the mail layer
+        // reads channels or topics.
         return [
             'always_anonymous' => $bool($raw['always_anonymous'] ?? false),
             'pause_until'      => ! empty($raw['pause_until']) ? (string) $raw['pause_until'] : null,

@@ -113,10 +113,8 @@ final class ReadinessService
     /** @return array<string,mixed> */
     private function gatewayCheck(): array
     {
-        // Asked of the registry rather than named one by one. Naming them meant
-        // an organisation whose only payment method arrives in an add-on was
-        // told it had none configured, which was wrong about the single thing
-        // this check exists to report.
+        // Asked of the registry, not a fixed list of names: an organisation
+        // whose only payment method ships in an add-on can still take money.
         $ready = [];
         foreach ($this->gateways->all() as $gateway) {
             if ($gateway->canCharge()) {

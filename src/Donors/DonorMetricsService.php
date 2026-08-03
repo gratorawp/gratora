@@ -395,10 +395,9 @@ final class DonorMetricsService
     /**
      * Monthly-equivalent value of one recurring plan, in the org base currency.
      *
-     * It used to normalise the cadence of the raw amount_cents, which is in the
-     * donor's currency, and the card renders the result with the org's symbol
-     * and no conversion. A 500.00 INR plan read as 500,00 EUR: a hundred and
-     * ten times what it is worth.
+     * Normalises the base amount, never the raw amount_cents (which is in the
+     * donor's currency): the card renders the result with the org's symbol and
+     * no conversion, so a 500.00 INR plan would read as 500,00 EUR.
      */
     private function monthlyEquivalent(RecurringPlan $p): int
     {

@@ -102,20 +102,11 @@ final class DonationRepository
     }
 
     /**
-     * Paginated list for the admin. `matching_donor_ids` lets the caller
-     * pre-resolve a search term to donor ids so the search covers donor
-     * name / exact email as well as `reference`.
-     *
-     * @param array{page?:int,per_page?:int,orderby?:string,order?:string,status?:string,search?:string,matching_donor_ids?:array<int>} $args
-     * @return array{items: array<Donation>, total: int}
-     */
-    /**
      * How many test donations the same filters would have matched.
      *
-     * The list is live-only unless asked otherwise, which is right - but it
-     * excluded them in total silence, so an admin donating while the org is in
-     * test mode watched their donation vanish. This is what the screen needs to
-     * say so.
+     * The list is live-only unless asked otherwise, and silent exclusion means
+     * an admin donating while the org is in test mode watches their donation
+     * vanish. This is what the screen needs to say so.
      *
      * @param array<string,mixed> $args
      */
@@ -128,6 +119,14 @@ final class DonationRepository
         return (int) $this->applyAdminFilters(Donation::query(), $args)->count();
     }
 
+    /**
+     * Paginated list for the admin. `matching_donor_ids` lets the caller
+     * pre-resolve a search term to donor ids so the search covers donor
+     * name / exact email as well as `reference`.
+     *
+     * @param array{page?:int,per_page?:int,orderby?:string,order?:string,status?:string,search?:string,matching_donor_ids?:array<int>} $args
+     * @return array{items: array<Donation>, total: int}
+     */
     public function listAdmin(array $args = []): array
     {
         $page    = max(1, (int) ($args['page']     ?? 1));
@@ -170,17 +169,17 @@ final class DonationRepository
 
         $prefix = DB::getPrefix();
         // Correlated NOT EXISTS against a non-voided receipt for the donation.
-        // Kept the FIRST where-condition: whereRaw adds no AND connector, but the
-        // where()s chained after it (status, is_test, campaign) do.
+        // Must stay the FIRST where-condition: whereRaw adds no AND connector,
+        // but the where()s chained after it (status, is_test, campaign) do.
         $noReceipt = "NOT EXISTS (SELECT 1 FROM {$prefix}dono_receipts rc "
             . "WHERE rc.donation_id = {$prefix}dono_donations.id AND rc.voided = 0)";
 
         // A hand-recorded donation with no receipt is not one that went missing:
         // the admin was asked and said not to send one, because the donor never
-        // gave this site an address. Left in, every cheque ever entered sits in
-        // this report permanently, and the AI assistant reports them as donors
-        // who never got their receipt. The ones where a receipt WAS asked for
-        // have a row, so the check above already excludes them.
+        // gave this site an address. Left in, every cheque ever entered would
+        // sit in this report permanently and the AI assistant would report them
+        // as donors who never got their receipt. The ones where a receipt WAS
+        // asked for have a row, so the check above already excludes them.
         //
         // Matches ChannelClassifier::MANUAL, which core reserves and the public
         // route strips; there is no channel column to read instead.
@@ -742,11 +741,12 @@ final class DonationRepository
         // Scale each refund by its donation's fx_rate so refunded cents land in
         // the base currency, matching the donations' base_amount_cents they get
         // netted against (and DonationQueries::refundedBaseExpr on the public
-        // path). Summing raw amount_cents mixed foreign cents into base totals.
+        // path). Summing raw amount_cents would mix foreign cents into base
+        // totals.
         //
         // Summed before rounding for the reason given on refundedBaseExpr: a
-        // foreign donation refunded in instalments drifts a cent past what the
-        // same total is actually worth in base.
+        // foreign donation refunded in instalments otherwise drifts a cent past
+        // what the same total is worth in base.
         return $q->joinRaw(
             "LEFT JOIN (
                 SELECT rf.donation_id, ROUND(SUM(rf.amount_cents) * COALESCE(d.fx_rate, 0)) AS refunded
@@ -823,8 +823,7 @@ final class DonationRepository
 
     /**
      * Shared admin filter set for the donations list, CSV export, and KPI
-     * aggregate. Single source of truth so the three can never drift apart -
-     * the export previously dropped campaign_id/form_id/gateway/is_test here.
+     * aggregate. Single source of truth so the three cannot drift apart.
      *
      * @param array<string,mixed> $args
      */
@@ -857,8 +856,8 @@ final class DonationRepository
             $q = $q->where('is_test', 0);
         }
         // include_test with no explicit is_test filter adds no predicate at all:
-        // the two exclusive filters could each show one kind, and there was no
-        // way to see a run of donations as it actually happened.
+        // the two exclusive filters each show one kind only, so neither can
+        // show a run of donations as it actually happened.
 
         if ($createdFrom !== null) {
             $q = $q->where('created_at', $createdFrom, '>=');

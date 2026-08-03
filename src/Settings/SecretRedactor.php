@@ -7,11 +7,10 @@ namespace Dono\Settings;
 /**
  * The single owner of "never hand a stored secret back out".
  *
- * This rule used to live only inside the command provider, which meant the REST
- * settings read returned the Stripe webhook signing secret in plaintext to any
- * holder of the delegatable `dono_manage_settings` cap. That secret is the only
- * authentication on the webhook route, so reading it was enough to forge a paid
- * donation without any donations capability at all.
+ * The Stripe webhook signing secret is the only authentication on the webhook
+ * route, so handing it back over REST would let any holder of the delegatable
+ * `dono_manage_settings` cap forge a paid donation with no donations capability
+ * at all.
  *
  * Redacted values come back as {@see self::MASK}. The write path must call
  * {@see self::restore()} so a client that echoes a masked value back does not
@@ -23,12 +22,11 @@ final class SecretRedactor
 {
     public const MASK = '***';
 
-    // The trailing (?![a-z]) stops a secret word from matching as the prefix of
-    // a longer word. Without it "tokens" (a brand preset's design tokens) matched
-    // "token" and the whole tokens object was masked to "***", so every preset's
-    // colours vanished over REST while the localized copy kept them. Real secret
-    // keys (webhook_secret_test, access_token, secret_key, client_secret) end the
-    // secret word at a separator or the end of the key, so they still match.
+    // The trailing (?![a-z]) stops a secret word from matching as the prefix of a
+    // longer word: "tokens" (a brand preset's design tokens) would match "token"
+    // and mask the whole object, dropping every preset's colours over REST. Real
+    // secret keys (webhook_secret_test, access_token, secret_key, client_secret)
+    // end the secret word at a separator or the end of the key, so they match.
     private const SECRET_KEY_PATTERN = '/(?:secret|password|token|api[_-]?key|private[_-]?key|webhook)(?![a-z])/i';
 
     public static function isSecretKey(string $key): bool

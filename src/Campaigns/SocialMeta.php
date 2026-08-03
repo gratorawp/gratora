@@ -63,11 +63,10 @@ final class SocialMeta extends HookProvider
     {
         $description = self::excerptText((string) ($campaign->description ?? ''));
         if ($description === '') {
-            // The page's own excerpt only. Falling back to post_content used to
-            // be harmless when a campaign page was a handful of dynamic blocks
-            // with no prose in the markup. The seeded layout carries starter
-            // copy, so scraping it shared "Campaign name About this campaign
-            // What this campaign is raising for" as the campaign's description.
+            // The page's own excerpt only: the seeded layout carries starter
+            // copy, so scraping post_content would share "Campaign name About
+            // this campaign What this campaign is raising for" as the
+            // campaign's description.
             $page = get_post($pageId);
             if ($page instanceof \WP_Post && $page->post_excerpt !== '') {
                 $description = self::excerptText($page->post_excerpt);
@@ -88,7 +87,7 @@ final class SocialMeta extends HookProvider
             'og:title'     => $campaign->title,
             // Decoded first: WordPress stores blogname esc_html'd, and every
             // value here is escaped again on output, so an ampersand in the
-            // site name shipped as &amp;amp; in the tag.
+            // site name would otherwise go out as &amp;amp;.
             'og:site_name' => wp_specialchars_decode((string) get_bloginfo('name'), ENT_QUOTES),
         ];
         if ($description !== '') {

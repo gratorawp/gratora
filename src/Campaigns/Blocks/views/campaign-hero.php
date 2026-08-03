@@ -3,12 +3,9 @@ defined('ABSPATH') || exit;
 /**
  * The campaign hero, built from the shared campaign page foundation.
  *
- * It used to be a cover photo with a scrim, and the title, description and
- * money printed over it, which made the page's one call to action a caption on
- * a photograph and pushed the amount down with the image. The photo is now a
- * figure with the readout card overlapping it, so the amount, the bar and the
- * Donate button sit on a surface of their own and stay above the fold.
- * See assets/campaign-page/page.css.
+ * The photo is a figure with the readout card overlapping it, so the amount,
+ * the bar and the Donate button sit on a surface of their own and stay above
+ * the fold. See assets/campaign-page/page.css.
  *
  * @var string  $title
  * @var ?string $imageUrl
@@ -44,14 +41,14 @@ $hTag     = 'h' . max(1, min(3, (int) $headingLevel));
             <div class="dp-hero-media">
                 <?php if ($hasPhoto): ?>
                     <?php
-                    // Through the attachment rather than by URL, which is what
-                    // supplies srcset and sizes: every visitor was served the
-                    // full "large" file, phones included.
+                    // Through the attachment rather than by URL: that is what
+                    // supplies srcset and sizes, so phones are not served the
+                    // full "large" file.
                     echo wp_get_attachment_image($imageId, 'large', false, [
                         'class' => 'dp-figure',
                         // This is the largest thing above the fold and so the
-                        // element LCP is measured on. Lazy told the browser to
-                        // wait for layout before even asking for it.
+                        // element LCP is measured on; lazy loading would make
+                        // the browser wait for layout before asking for it.
                         'loading'       => 'eager',
                         'fetchpriority' => 'high',
                         'decoding'      => 'async',
@@ -73,8 +70,9 @@ $hTag     = 'h' . max(1, min(3, (int) $headingLevel));
 
                 <?php if ($showProgress && $hasGoal): ?>
                     <?php
-                    // The amounts above are readable; how far along they are was
-                    // conveyed by the length of a coloured div and nothing else.
+                    // The amounts above are readable; without this, how far
+                    // along they are is the length of a coloured div and
+                    // nothing else.
                     ?>
                     <div class="dp-bar" role="progressbar"
                          aria-valuenow="<?php echo esc_attr((string) $percent); ?>"

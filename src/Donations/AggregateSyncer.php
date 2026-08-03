@@ -16,9 +16,8 @@ final class AggregateSyncer
 {
     /**
      * Delegates to DonorAggregateSyncer, which is what the live
-     * dono.donation.completed hook runs. This used to be a second, independent
-     * implementation of the same rollup: it had the kind filter and the live
-     * one did not, so a resync silently disagreed with the live path.
+     * dono.donation.completed hook runs, so a resync and the live path cannot
+     * disagree.
      */
     public function syncDonor(int $donorId): void
     {

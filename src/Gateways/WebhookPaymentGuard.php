@@ -11,10 +11,10 @@ use Dono\Recurring\RecurringPlan;
  * The check every webhook must pass before it is allowed to mark a donation paid.
  *
  * A verified signature only proves the event came from the processor. It does not
- * prove the event is about *this* donation, for *this* amount, in *this* mode. The
- * QA sweep of 2026-07-28 found all three gaps live: a $0.01 PayPal capture
- * confirmed a $10,000 donation, one gateway's event confirmed another's donation, and
- * a test-mode signing secret confirmed live money on two gateways.
+ * prove the event is about *this* donation, for *this* amount, in *this* mode.
+ * Without all three checks a $0.01 capture confirms a $10,000 donation, one
+ * gateway's event confirms another's donation, and a test-mode signing secret
+ * confirms live money.
  *
  * The donor-facing amount is always exactly `donation.amount_cents` on every
  * gateway (a covered fee is a portion of that total, not an addition), so an
@@ -77,11 +77,10 @@ final class WebhookPaymentGuard
     /**
      * May this event act on this donation at all?
      *
-     * The sweep hardened the handlers that confirm money and left the ones that
-     * reverse it. A refund, a failure and a cancellation each need the same two
-     * answers a confirmation needs (right gateway, right mode) but cannot use
-     * refuse(): a refund states its own amount rather than the donation's, and
-     * a cancellation states none, so the amount check would refuse them all.
+     * A refund, a failure and a cancellation each need the same two answers a
+     * confirmation needs (right gateway, right mode) but cannot use refuse():
+     * a refund states its own amount rather than the donation's, and a
+     * cancellation states none, so the amount check would refuse them all.
      *
      * @return string|null null when the event may act, otherwise why not.
      */
