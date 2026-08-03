@@ -104,13 +104,6 @@
         gap: 10px;
     }
 
-    &__pair {
-        display: flex;
-        gap: 6px;
-
-        .dono-select { min-width: 92px; }
-    }
-
     &__check {
         display: inline-flex;
         align-items: center;

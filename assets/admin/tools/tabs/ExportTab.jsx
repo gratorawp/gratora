@@ -3,12 +3,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
 
 import Btn from '../../_shared/components/Btn';
-
-const monthNames = () => [
-    __( 'Jan', 'dono' ), __( 'Feb', 'dono' ), __( 'Mar', 'dono' ), __( 'Apr', 'dono' ),
-    __( 'May', 'dono' ), __( 'Jun', 'dono' ), __( 'Jul', 'dono' ), __( 'Aug', 'dono' ),
-    __( 'Sep', 'dono' ), __( 'Oct', 'dono' ), __( 'Nov', 'dono' ), __( 'Dec', 'dono' ),
-];
+import DateField from '../../_shared/components/DateField';
 
 /** Fetch rather than a bare link: the REST route needs the nonce header. */
 async function download( path, setNotice, setBusy, fallbackName ) {
@@ -61,10 +56,10 @@ export default function ExportTab( { setNotice } ) {
 
     const [ pdfYear, setPdfYear ] = useState( 0 );
 
-    const [ statsFromYear, setStatsFromYear ]   = useState( 0 );
-    const [ statsFromMonth, setStatsFromMonth ] = useState( 0 );
-    const [ statsToYear, setStatsToYear ]       = useState( 0 );
-    const [ statsToMonth, setStatsToMonth ]     = useState( 0 );
+    // Month granularity, held as a date so DateField can drive it. Only the
+    // YYYY-MM prefix is sent, so any day in a month selects that whole month.
+    const [ statsFrom, setStatsFrom ] = useState( '' );
+    const [ statsTo, setStatsTo ]     = useState( '' );
 
     const [ donorsFrom, setDonorsFrom ]   = useState( '' );
     const [ donorsTo, setDonorsTo ]       = useState( '' );
@@ -76,9 +71,8 @@ export default function ExportTab( { setNotice } ) {
             .then( ( o ) => {
                 setOpts( o );
                 setPdfYear( o.current_year );
-                setStatsFromYear( o.current_year );
-                setStatsToYear( o.current_year );
-                setStatsToMonth( new Date().getMonth() );
+                setStatsFrom( `${ o.current_year }-01-01` );
+                setStatsTo( `${ o.current_month }-01` );
                 // Every column on by default: a file silently missing a column
                 // is worse than one carrying a column nobody wanted.
                 setColumns( ( o.donor_columns || [] ).map( ( c ) => c.key ) );
@@ -86,9 +80,8 @@ export default function ExportTab( { setNotice } ) {
             .catch( () => setOpts( { donor_columns: [], campaigns: [], years: [ new Date().getFullYear() ] } ) );
     }, [] );
 
-    const years  = opts?.years || [];
-    const months = monthNames();
-    const pad    = ( n ) => String( n + 1 ).padStart( 2, '0' );
+    const years = opts?.years || [];
+    const month = ( v ) => String( v || '' ).slice( 0, 7 );
 
     const toggleColumn = ( key ) => setColumns( ( c ) => (
         c.includes( key ) ? c.filter( ( k ) => k !== key ) : [ ...c, key ]
@@ -112,7 +105,7 @@ export default function ExportTab( { setNotice } ) {
         return `/dono/v1/admin/exports/donors.csv?${ q.toString() }`;
     }, [ donorsFrom, donorsTo, donorsCampaign, columns ] );
 
-    const statsPath = `/dono/v1/admin/exports/revenue.csv?from=${ statsFromYear }-${ pad( statsFromMonth ) }&to=${ statsToYear }-${ pad( statsToMonth ) }`;
+    const statsPath = `/dono/v1/admin/exports/revenue.csv?from=${ month( statsFrom ) }&to=${ month( statsTo ) }`;
 
     const canDonors  = opts?.can_export_donors !== false;
     const canReports = opts?.can_view_reports !== false;
@@ -153,14 +146,24 @@ export default function ExportTab( { setNotice } ) {
                         description={ __( 'Every donation as a CSV: reference, donor, amount, status, campaign and gateway.', 'dono' ) }
                     >
                         <div className="dono-exports__controls">
-                            <label className="dono-tools-field">
+                            <span className="dono-tools-field">
                                 { __( 'From', 'dono' ) }
-                                <input type="date" className="dono-input" value={ donationsFrom } onChange={ ( e ) => setDonationsFrom( e.target.value ) } />
-                            </label>
-                            <label className="dono-tools-field">
+                                <DateField
+                                    value={ donationsFrom }
+                                    onChange={ ( v ) => setDonationsFrom( v || '' ) }
+                                    ariaLabel={ __( 'Export donations from', 'dono' ) }
+                                    placeholder={ __( 'Any', 'dono' ) }
+                                />
+                            </span>
+                            <span className="dono-tools-field">
                                 { __( 'To', 'dono' ) }
-                                <input type="date" className="dono-input" value={ donationsTo } onChange={ ( e ) => setDonationsTo( e.target.value ) } />
-                            </label>
+                                <DateField
+                                    value={ donationsTo }
+                                    onChange={ ( v ) => setDonationsTo( v || '' ) }
+                                    ariaLabel={ __( 'Export donations to', 'dono' ) }
+                                    placeholder={ __( 'Any', 'dono' ) }
+                                />
+                            </span>
                             <Btn
                                 variant="secondary"
                                 disabled={ busy === 'donations' }
@@ -206,28 +209,26 @@ export default function ExportTab( { setNotice } ) {
                             description={ __( 'Revenue, donation count and average gift for every month in the range. Quiet months are written as zero rows, so the file charts as a continuous series.', 'dono' ) }
                         >
                             <div className="dono-exports__controls">
-                                <label className="dono-tools-field">
+                                <span className="dono-tools-field">
                                     { __( 'From', 'dono' ) }
-                                    <span className="dono-exports__pair">
-                                        <select className="dono-select" value={ statsFromYear } onChange={ ( e ) => setStatsFromYear( Number( e.target.value ) ) }>
-                                            { years.map( ( y ) => <option key={ y } value={ y }>{ y }</option> ) }
-                                        </select>
-                                        <select className="dono-select" value={ statsFromMonth } onChange={ ( e ) => setStatsFromMonth( Number( e.target.value ) ) }>
-                                            { months.map( ( m, i ) => <option key={ m } value={ i }>{ m }</option> ) }
-                                        </select>
-                                    </span>
-                                </label>
-                                <label className="dono-tools-field">
+                                    <DateField
+                                        value={ statsFrom }
+                                        onChange={ ( v ) => setStatsFrom( v || '' ) }
+                                        format="F Y"
+                                        allowClear={ false }
+                                        ariaLabel={ __( 'Revenue from month', 'dono' ) }
+                                    />
+                                </span>
+                                <span className="dono-tools-field">
                                     { __( 'To', 'dono' ) }
-                                    <span className="dono-exports__pair">
-                                        <select className="dono-select" value={ statsToYear } onChange={ ( e ) => setStatsToYear( Number( e.target.value ) ) }>
-                                            { years.map( ( y ) => <option key={ y } value={ y }>{ y }</option> ) }
-                                        </select>
-                                        <select className="dono-select" value={ statsToMonth } onChange={ ( e ) => setStatsToMonth( Number( e.target.value ) ) }>
-                                            { months.map( ( m, i ) => <option key={ m } value={ i }>{ m }</option> ) }
-                                        </select>
-                                    </span>
-                                </label>
+                                    <DateField
+                                        value={ statsTo }
+                                        onChange={ ( v ) => setStatsTo( v || '' ) }
+                                        format="F Y"
+                                        allowClear={ false }
+                                        ariaLabel={ __( 'Revenue to month', 'dono' ) }
+                                    />
+                                </span>
                                 <Btn
                                     variant="secondary"
                                     disabled={ busy === 'stats' }
@@ -246,14 +247,24 @@ export default function ExportTab( { setNotice } ) {
                             description={ __( 'The donor list as a CSV, by when each donor record was created. Take only the columns you need: names, emails, phone numbers and addresses are personal data, and this file is not encrypted once it leaves the site.', 'dono' ) }
                         >
                             <div className="dono-exports__controls">
-                                <label className="dono-tools-field">
+                                <span className="dono-tools-field">
                                     { __( 'From', 'dono' ) }
-                                    <input type="date" className="dono-input" value={ donorsFrom } onChange={ ( e ) => setDonorsFrom( e.target.value ) } />
-                                </label>
-                                <label className="dono-tools-field">
+                                    <DateField
+                                        value={ donorsFrom }
+                                        onChange={ ( v ) => setDonorsFrom( v || '' ) }
+                                        ariaLabel={ __( 'Export donors from', 'dono' ) }
+                                        placeholder={ __( 'Any', 'dono' ) }
+                                    />
+                                </span>
+                                <span className="dono-tools-field">
                                     { __( 'To', 'dono' ) }
-                                    <input type="date" className="dono-input" value={ donorsTo } onChange={ ( e ) => setDonorsTo( e.target.value ) } />
-                                </label>
+                                    <DateField
+                                        value={ donorsTo }
+                                        onChange={ ( v ) => setDonorsTo( v || '' ) }
+                                        ariaLabel={ __( 'Export donors to', 'dono' ) }
+                                        placeholder={ __( 'Any', 'dono' ) }
+                                    />
+                                </span>
                                 <label className="dono-tools-field">
                                     { __( 'Campaign', 'dono' ) }
                                     <select className="dono-select" value={ donorsCampaign } onChange={ ( e ) => setDonorsCampaign( Number( e.target.value ) ) }>
