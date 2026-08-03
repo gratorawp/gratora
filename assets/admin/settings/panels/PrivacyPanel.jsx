@@ -40,6 +40,36 @@ export default function PrivacyPanel( { s } ) {
                     />
                 </FormRow>
 
+                <FormRow
+                    label={ __( 'Erase donors inactive for', 'dono' ) }
+                    help={ __( 'Years. A donor who has not given for this long is redacted automatically, exactly as an erasure request would. Anyone with an active or paused recurring plan is skipped, however long ago they last gave. Their donations stay counted. 0 turns this off.', 'dono' ) }
+                >
+                    <input
+                        type="number"
+                        min={ 0 }
+                        max={ 100 }
+                        className="dono-input"
+                        style={ { maxWidth: 120 } }
+                        value={ s.value( 'donor_retention_years', 10 ) }
+                        onChange={ ( e ) => s.edit( { donor_retention_years: parseInt( e.target.value, 10 ) || 0 } ) }
+                    />
+                </FormRow>
+
+                <FormRow
+                    label={ __( 'Keep the activity log for', 'dono' ) }
+                    help={ __( 'Days. Older entries are deleted. The log records what happened and when, and backs the donor timeline and recent-activity views; donations, donors and receipts are never touched by it. 0 turns this off and the log grows without limit.', 'dono' ) }
+                >
+                    <input
+                        type="number"
+                        min={ 0 }
+                        max={ 36500 }
+                        className="dono-input"
+                        style={ { maxWidth: 120 } }
+                        value={ s.value( 'event_retention_days', 730 ) }
+                        onChange={ ( e ) => s.edit( { event_retention_days: parseInt( e.target.value, 10 ) || 0 } ) }
+                    />
+                </FormRow>
+
                 <ToggleRow
                     title={ __( 'Anonymise IPs in event logs', 'dono' ) }
                     sub={ __( 'IPs are hashed (SHA-256) before storage. Only the country is kept in clear text.', 'dono' ) }
@@ -63,7 +93,7 @@ export default function PrivacyPanel( { s } ) {
 
                 <ToggleRow
                     title={ __( 'Allow account delete from portal', 'dono' ) }
-                    sub={ __( 'Donors can request redaction directly. Receipt retention rules above still apply.', 'dono' ) }
+                    sub={ __( 'Donors can request redaction directly. Donations and receipts are kept either way, for tax and accounting; only the personal details are erased.', 'dono' ) }
                     checked={ !! s.value( 'allow_account_delete', true ) }
                     onChange={ s.setValue( 'allow_account_delete' ) }
                 />
