@@ -539,52 +539,6 @@ body.dono-onboarding-fullscreen {
         line-height: 1.45;
     }
 
-    &__telemetry {
-        margin-top: 8px;
-        padding-top: 18px;
-        border-top: 1px solid $border-soft;
-    }
-
-    &__telemetry-row {
-        display: grid;
-        grid-template-columns: 18px 1fr;
-        gap: 12px;
-        align-items: start;
-        cursor: pointer;
-    }
-
-    // Element-prefixed selector with `!important` reset: WP admin's
-    // `input[type=checkbox]` rules (appearance: none + custom blue check)
-    // otherwise win on specificity and turn the checkbox into a 20px blue
-    // square that overflows the 18px grid column.
-    input[type="checkbox"].dono-onboarding__telemetry-input {
-        appearance: auto;
-        -webkit-appearance: auto;
-        accent-color: $accent;
-        width: 16px;
-        height: 16px;
-        min-width: 16px;
-        min-height: 16px;
-        max-width: 16px;
-        max-height: 16px;
-        margin: 2px 0 0 !important;
-        padding: 0;
-        border: 0;
-        background: none;
-        box-shadow: none;
-
-        &::before { content: none; }
-    }
-
-    &__telemetry-body {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-
-        strong { font-size: 13px; font-weight: 600; color: $text; }
-        span   { font-size: 12.5px; color: $text-muted; line-height: 1.5; }
-    }
-
     &__country-row {
         display: flex;
         flex-direction: column;

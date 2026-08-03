@@ -62,10 +62,26 @@ final class SettingsInputTest extends IntegrationTestCase
 
     public function test_a_null_default_declares_no_type_and_passes_through(): void
     {
-        // telemetry.opted_in_at defaults to null and stores a timestamp.
-        $after = $this->service()->update('telemetry', ['opted_in_at' => 1735689600]);
+        // A null default means "nothing yet", not "string". Coercing against it
+        // turns a stored timestamp into "1735689600". Registered through the
+        // add-on filter because no core group declares one, and an add-on is
+        // exactly who would.
+        $register = static function (array $groups): array {
+            $groups['test_null_default'] = [
+                'option'   => 'dono_test_null_default',
+                'defaults' => ['seen_at' => null],
+            ];
+            return $groups;
+        };
+        add_filter('dono.settings.groups', $register);
 
-        $this->assertSame(1735689600, $after['opted_in_at']);
+        try {
+            $after = $this->service()->update('test_null_default', ['seen_at' => 1735689600]);
+            $this->assertSame(1735689600, $after['seen_at']);
+        } finally {
+            remove_filter('dono.settings.groups', $register);
+            delete_option('dono_test_null_default');
+        }
     }
 
     public function test_every_group_round_trips_its_own_values_unchanged(): void

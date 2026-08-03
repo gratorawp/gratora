@@ -329,7 +329,6 @@ final class ToolsController
         'dono_receipt_settings',
         'dono_email_settings',
         'dono_reference_settings',
-        'dono_telemetry',
     ];
 
     public function export(): WP_REST_Response

@@ -149,9 +149,8 @@ export default function Onboarding() {
     const [ currency, setCurrency ] = useState( { default_currency: 'USD' } );
     const [ brand, setBrand ] = useState( { preset_id: defaultId } );
     const [ cause, setCause ] = useState( {
-        user_type:          '',
-        cause:              '',
-        telemetry_enabled:  false,
+        user_type: '',
+        cause:     '',
     } );
     const [ goal, setGoal ] = useState( {
         mode:   'target',   // 'target' | 'ongoing'
@@ -200,12 +199,6 @@ export default function Onboarding() {
                 } ) );
             } )
             .catch( () => {} );
-        apiFetch( { path: '/dono/v1/admin/settings/telemetry' } )
-            .then( ( d ) => {
-                if ( ! d ) return;
-                setCause( ( prev ) => ( { ...prev, telemetry_enabled: !! d.enabled } ) );
-            } )
-            .catch( () => {} );
         // Reload the saved brand preset id so a resumed wizard reflects the
         // latest org-brand option, not the page-load snapshot of window.dono.
         apiFetch( { path: '/dono/v1/admin/settings/org-brand' } )
@@ -250,10 +243,6 @@ export default function Onboarding() {
                 await persist( 'org-profile', {
                     user_type: cause.user_type,
                     cause:     cause.cause,
-                } );
-                await persist( 'telemetry', {
-                    enabled:     cause.telemetry_enabled,
-                    opted_in_at: cause.telemetry_enabled ? Math.floor( Date.now() / 1000 ) : null,
                 } );
             } else if ( step === 1 ) {
                 if ( ! org.country ) {
@@ -499,23 +488,6 @@ function CauseStep( { value, onChange } ) {
                 />
             </div>
 
-            <div className="dono-onboarding__telemetry">
-                <label className="dono-onboarding__telemetry-row" htmlFor="dono-onboarding-telemetry">
-                    <input
-                        id="dono-onboarding-telemetry"
-                        type="checkbox"
-                        className="dono-onboarding__telemetry-input"
-                        checked={ !! value.telemetry_enabled }
-                        onChange={ ( e ) => set( { telemetry_enabled: e.target.checked } ) }
-                    />
-                    <span className="dono-onboarding__telemetry-body">
-                        <strong>{ __( 'Help improve Dono', 'dono' ) }</strong>
-                        <span>
-                            { __( 'Send anonymous usage events so we know which features get used. No donor data, no personal information, ever. You can change this any time in Settings.', 'dono' ) }
-                        </span>
-                    </span>
-                </label>
-            </div>
         </div>
     );
 }

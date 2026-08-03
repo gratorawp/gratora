@@ -61,7 +61,7 @@ final class CoreCommandProvider
     /**
      * Benign settings groups the assistant may read and write. Deliberately
      * omits roles (privilege-escalation surface), gateways (Stripe secrets and
-     * bank details), advanced, privacy, and telemetry - those stay human-only.
+     * bank details) and privacy - those stay human-only.
      * An out-of-list group is rejected by the schema enum as command.invalid_input.
      */
     private const SETTINGS_GROUPS = ['org-profile', 'currency-locale', 'org-brand', 'receipts', 'email', 'numbering', 'consents'];
@@ -1772,7 +1772,7 @@ final class CoreCommandProvider
     /**
      * Read and write benign org settings. Security-critical: only SETTINGS_GROUPS
      * is reachable (the enum rejects anything else as command.invalid_input), so
-     * roles, gateways, advanced, privacy, and telemetry can never be touched
+     * roles, gateways and privacy can never be touched
      * here. Secret-shaped values are redacted on read and refused on write as
      * defence in depth, even though no allowlisted group holds one today.
      */

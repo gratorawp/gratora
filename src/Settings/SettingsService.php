@@ -166,15 +166,6 @@ final class SettingsService
                 'templates'  => [],
             ],
         ],
-        // telemetry opt-in is captured during onboarding; no Settings panel
-        // surfaces it. Kept here so the SettingsService recognises the group.
-        'telemetry' => [
-            'option'   => 'dono_telemetry',
-            'defaults' => [
-                'enabled'     => false,
-                'opted_in_at' => null,
-            ],
-        ],
     ];
 
     /** @var array<string,mixed>|null memoised once per request (container instance lives one request) */
@@ -425,9 +416,8 @@ final class SettingsService
 
             $kept[$key] = match (true) {
                 is_array($default) => $value,
-                // A null default is "nothing yet", not a type. telemetry's
-                // opted_in_at defaults to null and stores a timestamp, which
-                // coercing against the default would turn into a string.
+                // A null default is "nothing yet", not a type. Coercing a
+                // timestamp against it would turn it into a string.
                 is_null($default)  => $value,
                 is_bool($default)  => (bool) $value,
                 is_int($default)   => (int) $value,

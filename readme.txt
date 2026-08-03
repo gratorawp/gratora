@@ -135,3 +135,5 @@ Terms and privacy: https://frankfurter.dev
 
 = 1.0.0 =
 * Initial release.
+
+The full history lives in changelog.txt.
