@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Rest\Portal;
 
+use Dono\Analytics\ErrorLog;
 use Dono\Async\AsyncDispatcher;
 use Dono\Campaigns\Campaign;
 use Dono\Currency\Currency;
@@ -634,7 +635,7 @@ final class PortalController
         } catch (\Throwable $e) {
             // Gateway (or any downstream) failed; local state intentionally left
             // unchanged. Degrade to a clean 502 rather than a 500.
-            error_log('[dono] portal recurring action failure: ' . $e->getMessage());
+            ErrorLog::record('portal.recurring', $e->getMessage());
             return new WP_Error(
                 'dono_gateway_error',
                 __('We could not complete this change with the payment provider. Please try again in a moment.', 'dono'),

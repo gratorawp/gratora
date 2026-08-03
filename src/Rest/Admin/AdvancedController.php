@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Dono\Rest\Admin;
 
 use Dono\Campaigns\Campaign;
+use Dono\Analytics\ErrorLog;
+use Dono\Analytics\Event;
 use Dono\Currency\FxBackfill;
 use Dono\Foundation\Upgrade\UpgradeRunner;
 use Dono\Donations\AggregateSyncer;
@@ -337,6 +339,26 @@ final class AdvancedController
         ], 200);
     }
 
+    /**
+     * The last failures Dono recorded, newest first.
+     *
+     * @return list<array{type:string, message:string, occurred_at:string}>
+     */
+    private static function recentErrors(int $limit = 15): array
+    {
+        $rows = Event::query()
+            ->whereLike('type', ErrorLog::PREFIX . '%')
+            ->orderBy('occurred_at', 'DESC')
+            ->limit($limit)
+            ->getAll();
+
+        return array_map(static fn ($e): array => [
+            'type'        => substr((string) $e->type, strlen(ErrorLog::PREFIX)),
+            'message'     => (string) (($e->payload['message'] ?? '') ?: 'No detail recorded.'),
+            'occurred_at' => (string) $e->occurred_at,
+        ], $rows);
+    }
+
     public function info(): WP_REST_Response
     {
         $cronEvents = [];
@@ -360,6 +382,7 @@ final class AdvancedController
             // for their currency. Empty on a healthy site, which is why the
             // screen only says anything when it is not.
             'unconverted_donations' => FxBackfill::pending(),
+            'recent_errors'         => self::recentErrors(),
             // A data migration that never runs leaves the site quietly
             // half-migrated, and Action Scheduler rides WP-cron, which plenty
             // of hosts disable. The screen has to be able to say so.

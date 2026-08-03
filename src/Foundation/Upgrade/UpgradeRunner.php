@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Foundation\Upgrade;
 
+use Dono\Analytics\ErrorLog;
 /**
  * Runs the outstanding data migrations, one bounded step at a time.
  *
@@ -90,8 +91,8 @@ final class UpgradeRunner
             // they installed a plugin on.
             self::recordFailure($routine->id(), $e->getMessage());
 
-            error_log(sprintf(
-                'dono: upgrade routine %s failed: %s',
+            ErrorLog::record('upgrade', sprintf(
+                'Routine %s stopped: %s',
                 $routine->id(),
                 $e->getMessage()
             ));

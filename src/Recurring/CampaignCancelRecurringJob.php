@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Recurring;
 
+use Dono\Analytics\ErrorLog;
 use Dono\Async\AsyncDispatcher;
 
 /**
@@ -95,11 +96,11 @@ final class CampaignCancelRecurringJob
                 $this->canceller->cancel($plan, $reason);
             } catch (\Throwable $e) {
                 // One donor's gateway failure must not strand the rest.
-                error_log(sprintf(
-                    'dono: archive-cancel failed for plan %d: %s',
-                    (int) $plan->id,
-                    $e->getMessage()
-                ));
+                ErrorLog::record(
+                    'recurring.cancel',
+                    'Could not cancel this plan at the gateway: ' . $e->getMessage(),
+                    ['recurring_plan_id' => (int) $plan->id]
+                );
             }
         }
 

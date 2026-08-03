@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Rest\Admin;
 
+use Dono\Analytics\ErrorLog;
 use Dono\Foundation\Auth\Capabilities;
 use Dono\Gateways\Stripe\ApplePayDomain;
 use Dono\Gateways\Stripe\StripeAccount;
@@ -229,7 +230,7 @@ final class StripeKeysController
         try {
             (new StripeWebhookProvisioner($this->api, $this->account))->provision($isTest);
         } catch (\Throwable $e) {
-            error_log('[dono] Stripe webhook auto-provision failed: ' . $e->getMessage());
+            ErrorLog::record('gateway.stripe', 'Webhook auto-provision failed: ' . $e->getMessage());
         }
     }
 }

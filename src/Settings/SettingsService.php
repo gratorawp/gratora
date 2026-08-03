@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Settings;
 
+use Dono\Analytics\ErrorLog;
 use Dono\Foundation\References\ReferenceGenerator;
 
 /**
@@ -445,8 +446,8 @@ final class SettingsService
         if ($rejected !== []) {
             // Not silent. Dropping a key without a word is how a setting stops
             // saving and nobody finds out until someone asks why it reverted.
-            error_log(sprintf(
-                'dono: settings group %s rejected unknown or mistyped keys: %s',
+            ErrorLog::record('settings', sprintf(
+                'Group %s rejected unknown or mistyped keys: %s',
                 $group,
                 implode(', ', $rejected)
             ));

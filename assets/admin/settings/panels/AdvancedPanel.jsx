@@ -7,6 +7,11 @@ import Card from '../../_shared/components/Card';
 import Btn from '../../_shared/components/Btn';
 import { ToggleRow } from '../../_shared/components/Switch';
 
+function formatWhen( iso ) {
+    const d = new Date( ( iso || '' ).replace( ' ', 'T' ) + 'Z' );
+    return isNaN( d ) ? '' : d.toLocaleString();
+}
+
 export default function AdvancedPanel( { s, active } ) {
     const [ info, setInfo ]           = useState( null );
     const [ infoError, setInfoError ] = useState( false );
@@ -157,6 +162,22 @@ export default function AdvancedPanel( { s, active } ) {
                     </Btn>
                 </div>
             </Card>
+
+            { info?.recent_errors?.length > 0 && (
+                <Card
+                    title={ __( 'Recent errors', 'dono' ) }
+                    sub={ __( 'What Dono could not finish, newest first. These are kept with the activity log and age out with it.', 'dono' ) }
+                >
+                    <ul className="dono-advanced-cron">
+                        { info.recent_errors.map( ( e, i ) => (
+                            <li key={ i }>
+                                <code>{ e.type }</code> { e.message }
+                                <span className="dono-advanced-when"> { formatWhen( e.occurred_at ) }</span>
+                            </li>
+                        ) ) }
+                    </ul>
+                </Card>
+            ) }
 
             <Card
                 title={ __( 'Scheduled tasks', 'dono' ) }

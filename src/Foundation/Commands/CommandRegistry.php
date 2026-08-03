@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Foundation\Commands;
 
+use Dono\Analytics\ErrorLog;
 use Dono\Analytics\EventRecorder;
 use RuntimeException;
 
@@ -140,14 +141,14 @@ final class CommandRegistry
             // input that trips a service exception (invalid slug, unpublishable
             // form, ...) comes back as a failed result the model can react to.
             $this->audit('command.failed', $command, $ctx, $canonical, $e->getMessage());
-            error_log(sprintf('[dono] command %s threw %s: %s', $id, get_class($e), $e->getMessage()));
+            ErrorLog::record('command', sprintf('%s threw %s: %s', $id, get_class($e), $e->getMessage()));
             return CommandResult::error('command.failed', $e->getMessage());
         }
 
         if (defined('WP_DEBUG') && WP_DEBUG && $command->outputSchema !== []) {
             $checked = rest_validate_value_from_schema($data, $command->outputSchema, $id . '.output');
             if (is_wp_error($checked)) {
-                error_log("[dono] command '{$id}' output schema mismatch: " . $checked->get_error_message());
+                ErrorLog::record('command', sprintf('%s returned data its schema rejects: %s', $id, $checked->get_error_message()));
             }
         }
 

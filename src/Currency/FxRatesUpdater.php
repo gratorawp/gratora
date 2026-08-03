@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Currency;
 
+use Dono\Analytics\ErrorLog;
 use Dono\Async\AsyncDispatcher;
 use Dono\Foundation\Helpers\Money;
 
@@ -38,7 +39,7 @@ final class FxRatesUpdater
             return;
         }
         if (! $this->fetchAndStore()) {
-            error_log('[dono] FX rates fetch failed; keeping previous snapshot.');
+            ErrorLog::record('currency.fx', 'Rate fetch failed; keeping the previous snapshot.');
         }
     }
 
