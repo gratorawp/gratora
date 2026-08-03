@@ -27,7 +27,7 @@ export default function PrivacyPanel( { s } ) {
 
                 <FormRow
                     label={ __( 'Reunite window after redaction', 'dono' ) }
-                    help={ __( 'A redacted donor who gives again within this many days is recognised and reunited with their giving history. After it, the last link to their email is severed and they are treated as a new donor. Their past donations stay counted either way. 0 severs it at redaction; unlike the retention settings below, 0 does not mean "off".', 'dono' ) }
+                    fieldHelp={ __( 'A redacted donor who gives again within this many days is recognised and reunited with their giving history. After it, the last link to their email is severed and they are treated as a new donor. Their past donations stay counted either way. 0 severs it at redaction; unlike the retention settings below, 0 does not mean "off".', 'dono' ) }
                 >
                     <input
                         type="number"
@@ -42,7 +42,7 @@ export default function PrivacyPanel( { s } ) {
 
                 <FormRow
                     label={ __( 'Erase donors inactive for', 'dono' ) }
-                    help={ __( 'Years. A donor who has not given for this long is redacted automatically, exactly as an erasure request would. Anyone with an active or paused recurring plan is skipped, however long ago they last gave. Their donations stay counted. 0 turns this off.', 'dono' ) }
+                    fieldHelp={ __( 'Years. A donor who has not given for this long is redacted automatically, exactly as an erasure request would. Anyone with an active or paused recurring plan is skipped, however long ago they last gave. Their donations stay counted. 0 turns this off.', 'dono' ) }
                 >
                     <input
                         type="number"
@@ -57,7 +57,7 @@ export default function PrivacyPanel( { s } ) {
 
                 <FormRow
                     label={ __( 'Keep the activity log for', 'dono' ) }
-                    help={ __( 'Days. Older entries are deleted. The log records what happened and when, and backs the donor timeline and recent-activity views; donations, donors and receipts are never touched by it. 0 turns this off and the log grows without limit.', 'dono' ) }
+                    fieldHelp={ __( 'Days. Older entries are deleted. The log records what happened and when, and backs the donor timeline and recent-activity views; donations, donors and receipts are never touched by it. 0 turns this off and the log grows without limit.', 'dono' ) }
                 >
                     <input
                         type="number"
