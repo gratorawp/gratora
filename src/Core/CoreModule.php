@@ -812,6 +812,7 @@ final class CoreModule implements DonoModule
                 $c->get(DonorExporter::class),
                 $c->get(RevenueExporter::class),
                 $c->get(RevenueReportBuilder::class),
+                $c->get(DonationRepository::class),
             ),
             new OnboardingController(
                 $c->get( CampaignService::class),

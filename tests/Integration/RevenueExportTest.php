@@ -95,6 +95,27 @@ final class RevenueExportTest extends IntegrationTestCase
         $this->assertStringContainsString('2026-01,0,0.00,0.00', $csv);
     }
 
+    public function test_the_picker_is_bounded_by_the_first_donation(): void
+    {
+        $this->paid('2026-03-10 12:00:00', 10000);
+
+        $req = new \WP_REST_Request('GET', '/dono/v1/admin/exports/options');
+        $opts = rest_do_request($req)->get_data();
+
+        // Offering a fixed span of past years invites an export of months that
+        // never had a donation, whose zero rows read as a fault.
+        $this->assertSame('2026-03', $opts['first_month']);
+        $this->assertSame([2026], array_values($opts['years']));
+    }
+
+    public function test_a_site_with_no_donations_still_offers_this_month(): void
+    {
+        $req = new \WP_REST_Request('GET', '/dono/v1/admin/exports/options');
+        $opts = rest_do_request($req)->get_data();
+
+        $this->assertSame((string) wp_date('Y-m'), $opts['first_month']);
+    }
+
     public function test_a_malformed_month_falls_back_rather_than_throwing(): void
     {
         $series = $this->exporter()->series('not-a-month', '2026-13');

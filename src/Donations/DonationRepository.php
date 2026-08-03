@@ -271,16 +271,23 @@ final class DonationRepository
         ], $rows);
     }
 
-    /** Earliest paid_at (Y-m-d) among a campaign's live donations, or null if none. */
-    public function firstPaidDate(int $campaignId): ?string
+    /**
+     * Earliest paid_at (Y-m-d) among live donations, or null if none.
+     *
+     * @param int|null $campaignId narrow to one campaign, or null for the org
+     */
+    public function firstPaidDate(?int $campaignId = null): ?string
     {
-        $row = DonationQueries::live(DB::table('dono_donations')
+        $q = DonationQueries::donationsOnly(DB::table('dono_donations')
             ->selectRaw('MIN(paid_at) AS first_paid')
-            ->whereIn('status', ['paid', 'partial_refund']))
-            ->where('campaign_id', $campaignId)
-            ->get();
+            ->whereIn('status', ['paid', 'partial_refund']));
 
-        $val = $row['first_paid'] ?? null;
+        if ($campaignId !== null) {
+            $q = $q->where('campaign_id', $campaignId);
+        }
+
+        $val = $q->get()['first_paid'] ?? null;
+
         return $val ? substr((string) $val, 0, 10) : null;
     }
 

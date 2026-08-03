@@ -70,7 +70,10 @@ export default function ExportTab( { setNotice } ) {
             .then( ( o ) => {
                 setOpts( o );
                 setPdfYear( o.current_year );
-                setStatsFrom( `${ o.current_year }-01` );
+                // The first month with donations, not January: a range opening
+                // on months that never had one starts the file with zero rows
+                // that read as a fault.
+                setStatsFrom( o.first_month || `${ o.current_year }-01` );
                 setStatsTo( o.current_month );
                 // Every column on by default: a file silently missing a column
                 // is worse than one carrying a column nobody wanted.
@@ -212,6 +215,7 @@ export default function ExportTab( { setNotice } ) {
                                     <MonthField
                                         value={ statsFrom }
                                         onChange={ setStatsFrom }
+                                        min={ opts?.first_month }
                                         max={ opts?.current_month }
                                         ariaLabel={ __( 'Revenue from month', 'dono' ) }
                                     />
@@ -221,6 +225,7 @@ export default function ExportTab( { setNotice } ) {
                                     <MonthField
                                         value={ statsTo }
                                         onChange={ setStatsTo }
+                                        min={ opts?.first_month }
                                         max={ opts?.current_month }
                                         ariaLabel={ __( 'Revenue to month', 'dono' ) }
                                     />

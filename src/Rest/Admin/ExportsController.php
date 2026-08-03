@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dono\Rest\Admin;
 
 use Dono\Campaigns\Campaign;
+use Dono\Donations\DonationRepository;
 use Dono\Exports\DonorExporter;
 use Dono\Exports\RevenueExporter;
 use Dono\Reports\RevenueReportBuilder;
@@ -29,6 +30,7 @@ final class ExportsController
         private DonorExporter $donors,
         private RevenueExporter $revenue,
         private RevenueReportBuilder $revenueReport,
+        private DonationRepository $donations,
     ) {
     }
 
@@ -78,6 +80,13 @@ final class ExportsController
     {
         $thisYear = (int) wp_date('Y');
 
+        // Bound the pickers by the data. Offering a fixed span of past years
+        // invites someone to export a decade of months that never had a
+        // donation in them and read the empty rows as a fault.
+        $firstPaid = $this->donations->firstPaidDate();
+        $firstYear = $firstPaid !== null ? (int) substr($firstPaid, 0, 4) : $thisYear;
+        $firstYear = max(2000, min($firstYear, $thisYear));
+
         return new WP_REST_Response([
             'donor_columns'  => array_map(
                 static fn (string $key): array => ['key' => $key, 'label' => DonorExporter::labels()[$key] ?? $key],
@@ -94,9 +103,10 @@ final class ExportsController
                     ->limit(500)
                     ->getAll()
             ),
-            'years'          => range($thisYear, max(2000, $thisYear - 15)),
+            'years'          => range($thisYear, $firstYear),
             'current_year'   => $thisYear,
             'current_month'  => (string) wp_date('Y-m'),
+            'first_month'    => $firstPaid !== null ? substr($firstPaid, 0, 7) : (string) wp_date('Y-m'),
             'can_export_donors' => current_user_can('dono_export_donors'),
             'can_view_reports'  => current_user_can('dono_view_reports'),
         ], 200);
