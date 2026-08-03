@@ -1549,3 +1549,40 @@ $sidebar-width: 300px;
         line-height: 1.45;
     }
 }
+
+// WordPress ToggleControl, wearing the Dono switch.
+//
+// Scoped to this editor on purpose. It used to load on
+// enqueue_block_editor_assets, which is every block editor: opening any page in
+// Gutenberg re-skinned the toggles of core blocks and every other plugin's too.
+// The form builder is our own screen, so it can look like ours; the post editor
+// is WordPress's and should look like WordPress.
+//
+// !important because @wordpress/components ships more specific rules.
+.dono-form-editor {
+    .components-form-toggle__track {
+        width: 34px !important;
+        height: 20px !important;
+        border-radius: 999px !important;
+        background-color: #d6dadf !important;
+        border: none !important;
+    }
+
+    .components-form-toggle__thumb {
+        width: 16px !important;
+        height: 16px !important;
+        top: 2px !important;
+        left: 2px !important;
+        background-color: #fff !important;
+        border: none !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, .15) !important;
+    }
+
+    .components-form-toggle.is-checked .components-form-toggle__track {
+        background-color: $accent !important;
+    }
+
+    .components-form-toggle.is-checked .components-form-toggle__thumb {
+        transform: translateX(14px) !important;
+    }
+}

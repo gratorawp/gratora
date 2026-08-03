@@ -91,16 +91,6 @@ final class BlockEditorIntegration
             . wp_json_encode(['bindingFields' => CampaignBindings::fields()]) . ' );',
             'before'
         );
-
-        // Re-skin WP ToggleControl in the editor chrome (inspector panels) to
-        // the Dono switch look, so block settings toggles match the rest of the
-        // admin. Static CSS (chrome has no compiled-token context).
-        wp_enqueue_style(
-            'dono-editor-toggle',
-            DONO_URL . 'assets/admin/editor-toggle.css',
-            [],
-            DONO_VERSION
-        );
     }
 
     /**
