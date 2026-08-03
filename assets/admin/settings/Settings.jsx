@@ -43,8 +43,16 @@ const TABS = [
 ];
 
 // Always last, whatever add-ons register in between.
+//
+// Licenses appears only once something is installed that has a license to
+// manage. Core on its own has nothing to key, and a tab that can only ever say
+// "nothing to see" is a tab that makes people look for a paid version. This is
+// the rule LicenseNotice and ReadinessService already follow: both go quiet
+// when entitlements() is empty.
 const TAIL_TABS = [
-    { key: 'licenses',     label: __( 'Licenses', 'dono' ),             Icon: IconLicense },
+    ...( window.dono?.pro?.active ? [
+        { key: 'licenses', label: __( 'Licenses', 'dono' ),             Icon: IconLicense },
+    ] : [] ),
     { key: 'advanced',     label: __( 'Advanced', 'dono' ),             Icon: IconAdvanced },
 ];
 
@@ -312,9 +320,11 @@ export default function Settings() {
                 <div hidden={ tab !== 'advanced' }>
                     <AdvancedPanel s={ advanced } active={ tab === 'advanced' } />
                 </div>
-                <div hidden={ tab !== 'licenses' }>
-                    <Licenses />
-                </div>
+                { window.dono?.pro?.active && (
+                    <div hidden={ tab !== 'licenses' }>
+                        <Licenses />
+                    </div>
+                ) }
                 { extTabs.map( ( t ) => (
                     <div key={ t.id } hidden={ tab !== t.id }>
                         <ExtensionTabPanel tab={ t } context={ {} } />
