@@ -12,6 +12,7 @@ use Dono\Admin\Pages\DonorsPage;
 use Dono\Admin\Pages\FormsPage;
 use Dono\Admin\Pages\FundsPage;
 use Dono\Admin\Pages\ToolsPage;
+use Dono\Admin\TestModeBadge;
 use Dono\Admin\Pages\SettingsPage;
 use Dono\Analytics\Event;
 use Dono\Analytics\EventRecorder;
@@ -976,6 +977,11 @@ final class CoreModule implements DonoModule
             }
         }, 10, 2);
 
+
+        // Outside the is_admin guard on purpose: the admin bar renders on the
+        // front end too, and a campaign page you are looking at is exactly
+        // where "this form takes no real money" needs saying.
+        (new TestModeBadge())->register();
 
         if (is_admin()) {
             (new AdminMenu())->register();
