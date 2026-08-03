@@ -54,7 +54,6 @@ function Row( { title, description, children } ) {
 export default function ExportTab( { setNotice } ) {
     const [ opts, setOpts ]   = useState( null );
     const [ busy, setBusy ]   = useState( '' );
-    const [ forms, setForms ] = useState( [] );
 
     const [ donationsFrom, setDonationsFrom ] = useState( '' );
     const [ donationsTo, setDonationsTo ]     = useState( '' );
@@ -69,8 +68,7 @@ export default function ExportTab( { setNotice } ) {
 
     const [ donorsFrom, setDonorsFrom ]   = useState( '' );
     const [ donorsTo, setDonorsTo ]       = useState( '' );
-    const [ donorsBasis, setDonorsBasis ] = useState( 'donation' );
-    const [ donorsForm, setDonorsForm ]   = useState( 0 );
+    const [ donorsCampaign, setDonorsCampaign ] = useState( 0 );
     const [ columns, setColumns ]         = useState( [] );
 
     useEffect( () => {
@@ -85,11 +83,7 @@ export default function ExportTab( { setNotice } ) {
                 // is worse than one carrying a column nobody wanted.
                 setColumns( ( o.donor_columns || [] ).map( ( c ) => c.key ) );
             } )
-            .catch( () => setOpts( { donor_columns: [], years: [ new Date().getFullYear() ] } ) );
-
-        apiFetch( { path: '/dono/v1/admin/forms?per_page=100' } )
-            .then( ( r ) => setForms( Array.isArray( r?.items ) ? r.items : [] ) )
-            .catch( () => setForms( [] ) );
+            .catch( () => setOpts( { donor_columns: [], campaigns: [], years: [ new Date().getFullYear() ] } ) );
     }, [] );
 
     const years  = opts?.years || [];
@@ -113,11 +107,10 @@ export default function ExportTab( { setNotice } ) {
         const q = new URLSearchParams();
         if ( donorsFrom ) q.set( 'from', donorsFrom );
         if ( donorsTo )   q.set( 'to', donorsTo );
-        q.set( 'basis', donorsBasis );
-        if ( donorsForm ) q.set( 'form_id', String( donorsForm ) );
+        if ( donorsCampaign ) q.set( 'campaign_id', String( donorsCampaign ) );
         if ( columns.length ) q.set( 'columns', columns.join( ',' ) );
         return `/dono/v1/admin/exports/donors.csv?${ q.toString() }`;
-    }, [ donorsFrom, donorsTo, donorsBasis, donorsForm, columns ] );
+    }, [ donorsFrom, donorsTo, donorsCampaign, columns ] );
 
     const statsPath = `/dono/v1/admin/exports/revenue.csv?from=${ statsFromYear }-${ pad( statsFromMonth ) }&to=${ statsToYear }-${ pad( statsToMonth ) }`;
 
@@ -250,7 +243,7 @@ export default function ExportTab( { setNotice } ) {
                     { canDonors && (
                         <Row
                             title={ __( 'Donors', 'dono' ) }
-                            description={ __( 'The donor list as a CSV. Take only the columns you need: names, emails, phone numbers and addresses are personal data, and this file is not encrypted once it leaves the site.', 'dono' ) }
+                            description={ __( 'The donor list as a CSV, by when each donor record was created. Take only the columns you need: names, emails, phone numbers and addresses are personal data, and this file is not encrypted once it leaves the site.', 'dono' ) }
                         >
                             <div className="dono-exports__controls">
                                 <label className="dono-tools-field">
@@ -262,10 +255,12 @@ export default function ExportTab( { setNotice } ) {
                                     <input type="date" className="dono-input" value={ donorsTo } onChange={ ( e ) => setDonorsTo( e.target.value ) } />
                                 </label>
                                 <label className="dono-tools-field">
-                                    { __( 'Form', 'dono' ) }
-                                    <select className="dono-select" value={ donorsForm } onChange={ ( e ) => setDonorsForm( Number( e.target.value ) ) }>
-                                        <option value={ 0 }>{ __( 'All forms', 'dono' ) }</option>
-                                        { forms.map( ( f ) => <option key={ f.id } value={ f.id }>{ f.title || `#${ f.id }` }</option> ) }
+                                    { __( 'Campaign', 'dono' ) }
+                                    <select className="dono-select" value={ donorsCampaign } onChange={ ( e ) => setDonorsCampaign( Number( e.target.value ) ) }>
+                                        <option value={ 0 }>{ __( 'All campaigns', 'dono' ) }</option>
+                                        { ( opts?.campaigns || [] ).map( ( c ) => (
+                                            <option key={ c.id } value={ c.id }>{ c.title || `#${ c.id }` }</option>
+                                        ) ) }
                                     </select>
                                 </label>
                                 <Btn
@@ -277,28 +272,6 @@ export default function ExportTab( { setNotice } ) {
                                     { __( 'Generate CSV', 'dono' ) }
                                 </Btn>
                             </div>
-
-                            <fieldset className="dono-exports__radios">
-                                <legend>{ __( 'Match those dates against', 'dono' ) }</legend>
-                                <label>
-                                    <input
-                                        type="radio"
-                                        name="dono-donor-basis"
-                                        checked={ donorsBasis === 'donation' }
-                                        onChange={ () => setDonorsBasis( 'donation' ) }
-                                    />
-                                    { __( 'When they gave', 'dono' ) }
-                                </label>
-                                <label>
-                                    <input
-                                        type="radio"
-                                        name="dono-donor-basis"
-                                        checked={ donorsBasis === 'created' }
-                                        onChange={ () => setDonorsBasis( 'created' ) }
-                                    />
-                                    { __( 'When the donor record was created', 'dono' ) }
-                                </label>
-                            </fieldset>
 
                             <div className="dono-exports__columns">
                                 <p className="dono-exports__columns-head">{ __( 'Columns', 'dono' ) }</p>

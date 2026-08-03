@@ -33,7 +33,7 @@ final class DonorExportTest extends IntegrationTestCase
         ]);
     }
 
-    private function gave(int $donorId, string $when, int $formId = 0): Donation
+    private function gave(int $donorId, string $when): Donation
     {
         $d = Donation::make();
         $d->reference    = 'REF-' . uniqid();
@@ -45,9 +45,6 @@ final class DonorExportTest extends IntegrationTestCase
         $d->currency     = 'USD';
         $d->base_amount_cents = 5000;
         $d->is_test      = false;
-        if ($formId > 0) {
-            $d->form_id = $formId;
-        }
         $d->created_at = $when;
         $d->paid_at    = $when;
         $d->save();
@@ -116,8 +113,10 @@ final class DonorExportTest extends IntegrationTestCase
         $this->assertStringNotContainsString('erased@example.test', $csv);
     }
 
-    public function test_the_two_date_bases_ask_different_questions(): void
+    public function test_the_dates_match_the_donor_record_not_the_donations(): void
     {
+        // A long-standing supporter who gave inside the window is still outside
+        // it: the range is about when the record was created.
         $old = $this->makeDonor('long-standing@example.test');
         \Dono\Donors\Donor::query()->where('id', (int) $old->id)
             ->update(['created_at' => '2024-02-01 09:00:00']);
@@ -127,39 +126,55 @@ final class DonorExportTest extends IntegrationTestCase
         \Dono\Donors\Donor::query()->where('id', (int) $new->id)
             ->update(['created_at' => '2026-06-02 09:00:00']);
 
-        $gave = $this->exporter()->toCsv([
+        $csv = $this->exporter()->toCsv([
             'columns' => ['email'],
-            'basis'   => 'donation',
-            'from'    => '2026-06-01',
-            'to'      => '2026-06-30',
-        ]);
-        $created = $this->exporter()->toCsv([
-            'columns' => ['email'],
-            'basis'   => 'created',
             'from'    => '2026-06-01',
             'to'      => '2026-06-30',
         ]);
 
-        $this->assertStringContainsString('long-standing@example.test', $gave);
-        $this->assertStringNotContainsString('brand-new@example.test', $gave, 'a donor who gave nothing did not give in June');
-
-        $this->assertStringContainsString('brand-new@example.test', $created);
-        $this->assertStringNotContainsString('long-standing@example.test', $created, 'a 2024 record was not created in June 2026');
+        $this->assertStringContainsString('brand-new@example.test', $csv);
+        $this->assertStringNotContainsString('long-standing@example.test', $csv);
     }
 
-    public function test_a_window_with_no_donations_yields_a_header_and_nothing_else(): void
+    public function test_a_window_with_no_donors_yields_a_header_and_nothing_else(): void
     {
-        $donor = $this->makeDonor('quiet@example.test');
-        $this->gave((int) $donor->id, '2026-06-15 09:00:00');
+        $this->makeDonor('quiet@example.test');
 
         $rows = $this->parse($this->exporter()->toCsv([
             'columns' => ['email'],
-            'basis'   => 'donation',
             'from'    => '1999-01-01',
             'to'      => '1999-12-31',
         ]));
 
         $this->assertCount(1, $rows, 'the header survives so the file opens as a spreadsheet');
+    }
+
+    public function test_a_campaign_filter_narrows_to_that_campaign_s_donors(): void
+    {
+        $campaign = \Dono\Campaigns\Campaign::make();
+        $campaign->title      = 'Winter appeal';
+        $campaign->slug       = 'winter-appeal-' . uniqid();
+        $campaign->status     = 'published';
+        $campaign->currency   = 'USD';
+        $campaign->created_at = gmdate('Y-m-d H:i:s');
+        $campaign->updated_at = gmdate('Y-m-d H:i:s');
+        $campaign->save();
+
+        $backer = $this->makeDonor('backer@example.test');
+        $gift   = $this->gave((int) $backer->id, gmdate('Y-m-d H:i:s'));
+        \Dono\Donations\Donation::query()->where('id', (int) $gift->id)
+            ->update(['campaign_id' => (int) $campaign->id]);
+
+        $stranger = $this->makeDonor('stranger@example.test');
+        $this->gave((int) $stranger->id, gmdate('Y-m-d H:i:s'));
+
+        $csv = $this->exporter()->toCsv([
+            'columns'     => ['email'],
+            'campaign_id' => (int) $campaign->id,
+        ]);
+
+        $this->assertStringContainsString('backer@example.test', $csv);
+        $this->assertStringNotContainsString('stranger@example.test', $csv);
     }
 
     public function test_a_name_that_looks_like_a_formula_is_neutralised(): void

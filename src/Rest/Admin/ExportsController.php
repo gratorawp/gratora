@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Rest\Admin;
 
+use Dono\Campaigns\Campaign;
 use Dono\Exports\DonorExporter;
 use Dono\Exports\RevenueExporter;
 use Dono\Reports\RevenueReportBuilder;
@@ -47,9 +48,7 @@ final class ExportsController
             'args'                => [
                 'from'        => ['type' => 'string', 'default' => ''],
                 'to'          => ['type' => 'string', 'default' => ''],
-                'basis'       => ['type' => 'string', 'enum' => DonorExporter::DATE_BASIS, 'default' => 'donation'],
                 'campaign_id' => ['type' => 'integer', 'default' => 0],
-                'form_id'     => ['type' => 'integer', 'default' => 0],
                 'columns'     => ['type' => 'string', 'default' => ''],
             ],
         ]);
@@ -84,6 +83,17 @@ final class ExportsController
                 static fn (string $key): array => ['key' => $key, 'label' => DonorExporter::labels()[$key] ?? $key],
                 DonorExporter::COLUMNS
             ),
+            // Served here rather than from the donations controller's picker:
+            // that one needs view-donations, which a role created purely to
+            // pull the donor list has no reason to hold.
+            'campaigns'      => array_map(
+                static fn (Campaign $c): array => ['id' => (int) $c->id, 'title' => (string) $c->title],
+                Campaign::query()
+                    ->whereIn('status', ['published', 'archived'])
+                    ->orderBy('created_at', 'DESC')
+                    ->limit(500)
+                    ->getAll()
+            ),
             'years'          => range($thisYear, max(2000, $thisYear - 15)),
             'current_year'   => $thisYear,
             'current_month'  => (string) wp_date('Y-m'),
@@ -103,9 +113,7 @@ final class ExportsController
             'columns'     => $columns,
             'from'        => (string) $request['from'],
             'to'          => (string) $request['to'],
-            'basis'       => (string) $request['basis'],
             'campaign_id' => (int) $request['campaign_id'],
-            'form_id'     => (int) $request['form_id'],
         ]);
 
         return $this->streamCsv($request, $csv, DonorExporter::filename());

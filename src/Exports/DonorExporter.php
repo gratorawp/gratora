@@ -42,8 +42,6 @@ final class DonorExporter
     /** Written when the request names no valid column. */
     private const FALLBACK = ['first_name', 'last_name', 'email', 'donations_count', 'total_donated'];
 
-    public const DATE_BASIS = ['donation', 'created'];
-
     /** Rows held in memory at once while streaming. */
     private const CHUNK = 500;
 
@@ -52,15 +50,17 @@ final class DonorExporter
     }
 
     /**
-     * @param array{columns?:list<string>,from?:?string,to?:?string,basis?:string,campaign_id?:?int,form_id?:?int} $args
+     * Dates match when the donor record was created, which is the date the
+     * screen offers and the only one the donor table answers on its own.
+     *
+     * @param array{columns?:list<string>,from?:?string,to?:?string,campaign_id?:?int} $args
      */
     public function toCsv(array $args = []): string
     {
-        $columns = $this->columns($args['columns'] ?? []);
-        $basis   = in_array($args['basis'] ?? '', self::DATE_BASIS, true) ? $args['basis'] : 'donation';
-        $from    = $this->day($args['from'] ?? null);
-        $to      = $this->day($args['to'] ?? null);
-        $scoped  = ((int) ($args['campaign_id'] ?? 0)) > 0 || ((int) ($args['form_id'] ?? 0)) > 0;
+        $columns    = $this->columns($args['columns'] ?? []);
+        $from       = $this->day($args['from'] ?? null);
+        $to         = $this->day($args['to'] ?? null);
+        $campaignId = (int) ($args['campaign_id'] ?? 0);
 
         $out = fopen('php://temp', 'r+');
         if ($out === false) {
@@ -75,13 +75,13 @@ final class DonorExporter
             $columns
         ));
 
-        // A campaign or form filter, and "who donated in this window", are both
-        // questions about donations, so they resolve to a donor id set first.
-        // Without either, the donor table alone answers it and no id list is
-        // built - an org with a million donors would not fit one.
+        // A campaign filter is a question about donations, so it resolves to a
+        // donor id set first. Without one the donor table answers on its own
+        // and no id list is built - an org with a million donors would not fit
+        // one in memory.
         $ids = null;
-        if ($scoped || ($basis === 'donation' && ($from !== null || $to !== null))) {
-            $ids = $this->donorIdsWithDonations($from, $to, (int) ($args['campaign_id'] ?? 0), (int) ($args['form_id'] ?? 0));
+        if ($campaignId > 0) {
+            $ids = $this->donorIdsForCampaign($campaignId);
             if ($ids === []) {
                 rewind($out);
                 return (string) stream_get_contents($out);
@@ -97,10 +97,8 @@ final class DonorExporter
             if ($ids !== null) {
                 $q = $q->whereIn('id', $ids);
             }
-            if ($basis === 'created') {
-                if ($from !== null) $q = $q->where('created_at', $from . ' 00:00:00', '>=');
-                if ($to   !== null) $q = $q->where('created_at', $to   . ' 23:59:59', '<=');
-            }
+            if ($from !== null) $q = $q->where('created_at', $from . ' 00:00:00', '>=');
+            if ($to   !== null) $q = $q->where('created_at', $to   . ' 23:59:59', '<=');
 
             $batch = $q->orderBy('id', 'ASC')->limit(self::CHUNK)->getAll();
             if ($batch === []) {
@@ -200,21 +198,17 @@ final class DonorExporter
     }
 
     /**
-     * Donor ids with at least one live donation matching the filters.
+     * Donor ids with at least one live donation to the given campaign.
      *
      * @return list<int>
      */
-    private function donorIdsWithDonations(?string $from, ?string $to, int $campaignId, int $formId): array
+    private function donorIdsForCampaign(int $campaignId): array
     {
         $q = DonationQueries::donationsOnly(DB::table('dono_donations'))
             ->select('donor_id')
             ->distinct()
-            ->whereNotNull('donor_id');
-
-        if ($from !== null)   $q = $q->where('created_at', $from . ' 00:00:00', '>=');
-        if ($to !== null)     $q = $q->where('created_at', $to   . ' 23:59:59', '<=');
-        if ($campaignId > 0)  $q = $q->where('campaign_id', $campaignId);
-        if ($formId > 0)      $q = $q->where('form_id', $formId);
+            ->whereNotNull('donor_id')
+            ->where('campaign_id', $campaignId);
 
         return array_values(array_unique(array_filter(array_map(
             static fn ($r): int => (int) ($r['donor_id'] ?? 0),
