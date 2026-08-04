@@ -12,6 +12,7 @@ use Dono\Donors\Portal\PortalPage;
 use Dono\Foundation\Auth\Capabilities;
 use Dono\Foundation\Container\Container;
 use Dono\Foundation\Modules\ModuleManager;
+use Dono\Async\AsyncDispatcher;
 use Dono\Foundation\Upgrade\UpgradeJob;
 use Dono\Foundation\Upgrade\UpgradeRunner;
 use Dono\Foundation\Time\SystemClock;
@@ -105,6 +106,16 @@ final class Plugin
             // the plugin had been updated.
             self::instance()->container->get(UpgradeJob::class)->start();
         }, 99);
+
+        // The bump above is the only thing that queued a drain, so a release
+        // adding a routine and no schema change never ran it, and a queue
+        // cleared by the host (or a drain that died mid-way) never came back.
+        // Admin-only: one option read, and the scheduler lookup happens only
+        // while something is actually outstanding.
+        add_action('admin_init', static function (): void {
+            $c = self::instance()->container;
+            UpgradeJob::reconcile($c->get(AsyncDispatcher::class), $c->get(UpgradeRunner::class));
+        });
 
         // Re-ensure the donor portal page once per DONO_VERSION bump so existing
         // installs that skip a reactivation still get the page (and recover from

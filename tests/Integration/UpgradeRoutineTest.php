@@ -8,6 +8,9 @@ use Dono\Donors\Consent;
 use Dono\Donors\Donor;
 use Dono\Donors\Erasure\ClearHashesOnAlreadyErasedConsents;
 use Dono\Foundation\Upgrade\UpgradeRoutine;
+use Dono\Async\AsyncDispatcher;
+use Dono\Foundation\Plugin;
+use Dono\Foundation\Upgrade\UpgradeJob;
 use Dono\Foundation\Upgrade\UpgradeRunner;
 
 /**
@@ -60,6 +63,66 @@ final class UpgradeRoutineTest extends IntegrationTestCase
         }
 
         return $steps;
+    }
+
+    public function test_an_outstanding_routine_is_requeued_on_admin_load(): void
+    {
+        // A drain was queued only when DONO_DB_VERSION changed, so a release
+        // that adds a routine and no schema change never ran it, and a queue
+        // the host cleared never came back.
+        $routine = new class implements UpgradeRoutine {
+            public function id(): string
+            {
+                return 'test_reconcile';
+            }
+            public function description(): string
+            {
+                return 'test';
+            }
+            public function step(): bool
+            {
+                return true;
+            }
+        };
+
+        $async  = Plugin::instance()->container->get(AsyncDispatcher::class);
+        $runner = new UpgradeRunner([$routine]);
+
+        $this->assertFalse(\as_has_scheduled_action(UpgradeJob::HOOK, [], AsyncDispatcher::GROUP));
+
+        UpgradeJob::reconcile($async, $runner);
+        $this->assertTrue(
+            \as_has_scheduled_action(UpgradeJob::HOOK, [], AsyncDispatcher::GROUP),
+            'the outstanding routine is queued without waiting for a version bump'
+        );
+
+        // Idempotent: an admin clicking around does not pile up drains.
+        UpgradeJob::reconcile($async, $runner);
+        $this->assertSame(
+            1,
+            $this->scheduledUpgradeDrains(),
+            'a second admin load does not queue a second drain'
+        );
+    }
+
+    public function test_nothing_outstanding_queues_nothing(): void
+    {
+        UpgradeJob::reconcile(
+            Plugin::instance()->container->get(AsyncDispatcher::class),
+            new UpgradeRunner([])
+        );
+
+        $this->assertSame(0, $this->scheduledUpgradeDrains());
+    }
+
+    private function scheduledUpgradeDrains(): int
+    {
+        global $wpdb;
+
+        return (int) $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->prefix}actionscheduler_actions WHERE hook = %s AND status = 'pending'",
+            UpgradeJob::HOOK
+        ));
     }
 
     public function test_a_routine_runs_once_and_is_not_repeated(): void
