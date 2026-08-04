@@ -166,6 +166,13 @@ final class CampaignsController
 
     public function index(WP_REST_Request $request): WP_REST_Response
     {
+        // Re-queue an archive's cancellation sweep whose job was dropped, so a
+        // campaign cannot sit half-cancelled with the rest of its donors still
+        // being charged. reconcile() existed and had no caller; the only
+        // continuation was the job re-enqueuing itself, so one lost tick ended
+        // the run. Idempotent and cheap, like the funds list does.
+        $this->cancelJob->reconcilePending();
+
         $perPage = (int) ($request['per_page'] ?? 25);
 
         $result = $this->campaigns->listAdmin([

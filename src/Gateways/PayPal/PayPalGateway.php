@@ -437,6 +437,30 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware
     }
 
     /** @param array<string,mixed> $sub */
+    /**
+     * When the next charge is due, from the plan's own interval.
+     *
+     * Stripe reads this off the invoice's period end; PayPal's sale event does
+     * not carry it, and fetching the subscription would cost an API round trip
+     * on every renewal. Left unwritten, next_payment_at kept the value set at
+     * signup, so it went stale on the donor's portal and on the admin screen,
+     * and "skip next payment" computed its new date from a moment in the past.
+     */
+    private function nextPaymentAfter(RecurringPlan $plan): ?string
+    {
+        try {
+            $next = FrequencyMap::nextRenewalAfter(
+                (int) $this->clock->now()->format('U'),
+                (string) $plan->interval_unit,
+                max(1, (int) $plan->interval_count)
+            );
+        } catch (RuntimeException $e) {
+            return null;
+        }
+
+        return gmdate('Y-m-d H:i:s', $next);
+    }
+
     private function handleSubscriptionEnded(string $eventId, string $type, array $sub): WebhookOutcome
     {
         $plan = $this->planRepo->findBySubscriptionId($this->id(), (string) ($sub['id'] ?? ''));
@@ -444,14 +468,22 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware
             return $this->unmatched($eventId, $type, 'subscription');
         }
 
+        $reason = $type === 'BILLING.SUBSCRIPTION.EXPIRED'
+            ? 'Subscription expired at PayPal'
+            : 'Cancelled at PayPal';
+
         // markCancelled is idempotent and owns the status/timestamp writes.
-        $this->planRepo->markCancelled(
-            $plan,
-            $this->now(),
-            $type === 'BILLING.SUBSCRIPTION.EXPIRED'
-                ? 'Subscription expired at PayPal'
-                : 'Cancelled at PayPal'
-        );
+        $won = $this->planRepo->markCancelled($plan, $this->now(), $reason);
+
+        // Gated on winning the transition, as Stripe's handler is: a cancel
+        // that started in the portal already recorded the event before telling
+        // PayPal, so only a PayPal-initiated end emits here and the donor gets
+        // exactly one email. Without this a subscription ended at PayPal (by
+        // the donor there, or by dunning) left no recurring.cancelled event and
+        // sent the donor nothing at all.
+        if ($won) {
+            $this->donationService->recordRecurringCancellation($plan, $reason);
+        }
 
         return new WebhookOutcome(
             signature_ok: true,
@@ -568,7 +600,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware
             if ($won) {
                 $fresh = $this->planRepo->findBySubscriptionId($this->id(), $subId);
                 if ($fresh) {
-                    $this->planRepo->recordPayment($fresh, $amount, $this->now());
+                    $this->planRepo->recordPayment($fresh, $amount, $this->now(), $this->nextPaymentAfter($fresh));
                 }
             }
 
@@ -595,7 +627,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware
         if ($renewal['created']) {
             $fresh = $this->planRepo->findBySubscriptionId($this->id(), $subId);
             if ($fresh) {
-                $this->planRepo->recordPayment($fresh, $amount, $this->now());
+                $this->planRepo->recordPayment($fresh, $amount, $this->now(), $this->nextPaymentAfter($fresh));
             }
         }
 

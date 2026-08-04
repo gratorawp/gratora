@@ -180,6 +180,16 @@ final class CampaignCancelRecurringJob
     }
 
     /**
+     * Instance entry point for the admin campaigns list, which holds the job
+     * rather than the dispatcher. Idempotent and cheap: one option read when
+     * nothing is pending.
+     */
+    public function reconcilePending(): void
+    {
+        self::reconcile($this->async);
+    }
+
+    /**
      * Re-enqueues any run whose job was dropped. Safe to call on every admin
      * campaigns load, like FundReassignmentJob::reconcile.
      */
