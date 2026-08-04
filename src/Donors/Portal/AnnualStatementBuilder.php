@@ -37,10 +37,12 @@ final class AnnualStatementBuilder
             return $override;
         }
 
-        $start = sprintf('%04d-01-01 00:00:00', $year);
-        $end   = sprintf('%04d-12-31 23:59:59', $year);
+        [$start, $end] = DonationQueries::yearBoundsUtc($year);
 
-        $rows = DonationQueries::live(Donation::query())
+        // donationsOnly, matching the admin-side statement: a ticket purchase
+        // is goods received, not a gift, and must never be itemised on a
+        // document the donor files as deductible.
+        $rows = DonationQueries::donationsOnly(Donation::query())
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('donor_id', $donor->id)
             ->whereBetween('paid_at', $start, $end)

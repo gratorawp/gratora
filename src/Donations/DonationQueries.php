@@ -103,4 +103,31 @@ final class DonationQueries
         // always have base_amount_cents set, so they are unaffected.
         return '(COALESCE(base_amount_cents, 0) - ' . self::refundedBaseExpr() . ')';
     }
+
+    /**
+     * A calendar year in the org's timezone, expressed as the UTC window to
+     * compare paid_at against.
+     *
+     * paid_at is stored UTC, but every date printed on a statement or receipt
+     * goes through wp_date() into the site's timezone. Filtering on a bare
+     * "{year}-01-01 00:00:00" compares a local year against UTC timestamps, so
+     * on any site west of UTC a late-December gift lands on the following
+     * year's statement while its own line prints the December date, and the
+     * donor's records disagree with the one the tax office sees.
+     *
+     * @return array{0:string,1:string} inclusive UTC start and end
+     */
+    public static function yearBoundsUtc(int $year): array
+    {
+        $site = function_exists('wp_timezone') ? wp_timezone() : new \DateTimeZone('UTC');
+        $utc  = new \DateTimeZone('UTC');
+
+        $start = new \DateTimeImmutable(sprintf('%04d-01-01 00:00:00', $year), $site);
+        $end   = new \DateTimeImmutable(sprintf('%04d-12-31 23:59:59', $year), $site);
+
+        return [
+            $start->setTimezone($utc)->format('Y-m-d H:i:s'),
+            $end->setTimezone($utc)->format('Y-m-d H:i:s'),
+        ];
+    }
 }

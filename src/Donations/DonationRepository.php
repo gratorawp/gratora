@@ -39,8 +39,7 @@ final class DonationRepository
      */
     public function paidForDonorInYear(int $donorId, int $year): array
     {
-        $start = sprintf('%04d-01-01 00:00:00', $year);
-        $end   = sprintf('%04d-12-31 23:59:59', $year);
+        [$start, $end] = DonationQueries::yearBoundsUtc($year);
 
         // donationsOnly: a ticket purchase is goods received, not a gift, and
         // must never appear on a tax-deductible year-end statement.
