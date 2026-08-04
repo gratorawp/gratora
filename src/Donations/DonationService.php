@@ -1001,6 +1001,92 @@ final class DonationService
     }
 
     /**
+     * Undo an external refund the gateway has reversed.
+     *
+     * A dispute Dono lost is recorded as a refund, which drops the money out of
+     * every total and voids the receipt. Winning it later puts the money back
+     * on the balance, so leaving the refund standing keeps the donation missing
+     * from the org's own reporting for good.
+     *
+     * Idempotent on the gateway refund id: a redelivered reinstatement finds
+     * nothing still succeeded and returns null.
+     */
+    public function reverseExternalRefund(Donation $donation, string $gatewayRefundId): ?Refund
+    {
+        if ($gatewayRefundId === '') {
+            return null;
+        }
+
+        $refund = Refund::query()
+            ->where('gateway_refund_id', $gatewayRefundId)
+            ->where('status', 'succeeded')
+            ->get();
+
+        if (! $refund || (int) $refund->donation_id !== (int) $donation->id) {
+            return null;
+        }
+
+        $now    = $this->clock->now()->format('Y-m-d H:i:s');
+        $amount = (int) $refund->amount_cents;
+
+        DB::transaction(function () use ($donation, $refund, $amount, $now) {
+            // Guarded decrement, mirroring the reservation on the way in, so
+            // two reinstatements for one dispute cannot drive the counter
+            // below zero.
+            $released = DB::table('dono_donations')
+                ->whereRaw('id = ' . (int) $donation->id . ' AND refunded_cents >= ' . $amount)
+                ->increment('refunded_cents', -$amount);
+            if ($released->affectedRows < 1) {
+                throw new RuntimeException(
+                    "Cannot reverse refund on {$donation->reference}: the refunded total is already below it."
+                );
+            }
+
+            $refund->status     = 'reversed';
+            $refund->save();
+
+            $newTotal = (int) (DB::table('dono_donations')
+                ->where('id', $donation->id)
+                ->selectRaw('refunded_cents AS total')
+                ->get()['total'] ?? 0);
+
+            $donation->refunded_cents = $newTotal;
+            $donation->status         = $newTotal > 0 ? 'partial_refund' : 'paid';
+            $donation->refunded_at    = $newTotal > 0 ? $donation->refunded_at : null;
+            $donation->updated_at     = $now;
+            $donation->save();
+
+            $this->events->record('donation.refund_reversed', [
+                'donor_id'     => $donation->donor_id,
+                'donation_id'  => $donation->id,
+                'form_id'      => $donation->form_id,
+                'campaign_id'  => $donation->campaign_id,
+                'amount_cents' => $amount,
+                'currency'     => $donation->currency,
+                'payload'      => [
+                    'gateway'           => $donation->gateway,
+                    'refund_id'         => $refund->id,
+                    'gateway_refund_id' => (string) $refund->gateway_refund_id,
+                ],
+            ]);
+
+            if ($donation->campaign_id) {
+                $this->aggregates->syncCampaign((int) $donation->campaign_id);
+            }
+            if ($donation->form_id) {
+                $this->aggregates->syncForm((int) $donation->form_id);
+            }
+            if ($donation->fund_id) {
+                $this->aggregates->syncFund((int) $donation->fund_id);
+            }
+        });
+
+        do_action('dono.donation.refund_reversed', $donation, $refund);
+
+        return $refund;
+    }
+
+    /**
      * Refund all or part of a paid donation.
      *
      * @throws RuntimeException when the donation isn't refundable or the gateway rejects.

@@ -25,6 +25,8 @@ final class StripeWebhookProvisioner
         'payment_intent.payment_failed',
         'charge.refunded',
         'charge.dispute.funds_withdrawn',
+        // Won on appeal: Stripe puts the money back, so Dono has to as well.
+        'charge.dispute.funds_reinstated',
         'invoice.payment_succeeded',
         'invoice.payment_failed',
         'customer.subscription.deleted',

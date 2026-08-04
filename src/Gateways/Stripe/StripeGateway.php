@@ -220,6 +220,9 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
             case 'charge.dispute.funds_withdrawn':
                 return $this->handleDisputeFundsWithdrawn($eventId, $type, $object);
 
+            case 'charge.dispute.funds_reinstated':
+                return $this->handleDisputeFundsReinstated($eventId, $type, $object);
+
             case 'invoice.payment_succeeded':
                 return $this->handleInvoicePaymentSucceeded($eventId, $type, $object);
 
@@ -542,6 +545,53 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
             'dispute',
             $dispute
         );
+
+        return new WebhookOutcome(
+            signature_ok: true,
+            external_id:  $eventId,
+            event_type:   $type,
+            handled:      true,
+        );
+    }
+
+    /**
+     * `charge.dispute.funds_reinstated`: the dispute was won and Stripe has
+     * returned the money. Undo the refund the loss recorded, or the donation
+     * stays missing from every total for good.
+     */
+    private function handleDisputeFundsReinstated(string $eventId, string $type, array $dispute): WebhookOutcome
+    {
+        $intentId  = (string) ($dispute['payment_intent'] ?? '');
+        $disputeId = (string) ($dispute['id'] ?? '');
+
+        if ($intentId === '' || $disputeId === '') {
+            return new WebhookOutcome(
+                signature_ok: true,
+                external_id:  $eventId,
+                event_type:   $type,
+                handled:      false,
+                error:        'dispute event missing payment_intent or id.',
+            );
+        }
+
+        $donation = $this->donations->findByGatewayIntent($this->id(), $intentId);
+        if (! $donation) {
+            return new WebhookOutcome(
+                signature_ok: true,
+                external_id:  $eventId,
+                event_type:   $type,
+                handled:      false,
+                error:        "No donation found for PaymentIntent {$intentId}",
+            );
+        }
+
+        if ($reason = $this->wrongMode((bool) $donation->is_test)) {
+            return $this->refused($eventId, $type, $reason);
+        }
+
+        // Null when there is nothing still standing to reverse, which is what a
+        // redelivered event looks like.
+        $this->donationService->reverseExternalRefund($donation, $disputeId);
 
         return new WebhookOutcome(
             signature_ok: true,
