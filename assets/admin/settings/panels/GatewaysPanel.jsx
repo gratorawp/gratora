@@ -1,3 +1,4 @@
+import { useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 import { useExtensionPanels, ExtensionSection } from '../../_shared/extensionTabs';
@@ -9,7 +10,35 @@ import { ToggleRow } from '../../_shared/components/Switch';
 import StripeKeysCard from './StripeKeysCard';
 import PayPalKeysCard from './PayPalKeysCard';
 
+/** Placeholders the offline bank-details template expands at render time. */
+const BANK_PLACEHOLDERS = [ '{amount}', '{reference}', '{donor_name}' ];
+
 export default function GatewaysPanel( { s } ) {
+    const bankRef = useRef( null );
+
+    // At the caret, matching the email templates: a placeholder belongs where
+    // the line needs it, and these sit inside a formatted block where appending
+    // to the end is never what was meant.
+    const insertPlaceholder = ( tag ) => {
+        const el      = bankRef.current;
+        const current = String( s.value( 'offline.bank_details', '' ) );
+        const write   = s.setValue( 'offline.bank_details' );
+
+        if ( ! el ) {
+            write( current + tag );
+            return;
+        }
+
+        const start = el.selectionStart;
+        const end   = el.selectionEnd;
+        write( current.slice( 0, start ) + tag + current.slice( end ) );
+
+        window.requestAnimationFrame( () => {
+            el.focus();
+            el.setSelectionRange( start + tag.length, start + tag.length );
+        } );
+    };
+
     // Gateways that ship in an add-on belong beside the ones core ships, not
     // in a tab of their own: an admin looking for how to take a payment should
     // find every answer in one place.
@@ -80,10 +109,23 @@ export default function GatewaysPanel( { s } ) {
 
                 <FormRow
                     label={ __( 'Bank details template', 'dono' ) }
-                    help={ <>{ __( 'Placeholders:', 'dono' ) } <code>{'{amount}'}</code> · <code>{'{reference}'}</code> · <code>{'{donor_name}'}</code></> }
+                    help={ __( 'Click a placeholder to drop it in. They expand when the donor is shown their transfer details.', 'dono' ) }
                     wide
                 >
+                    <div className="dono-merge-tags">
+                        { BANK_PLACEHOLDERS.map( ( tag ) => (
+                            <button
+                                key={ tag }
+                                type="button"
+                                className="dono-merge-tag"
+                                onClick={ () => insertPlaceholder( tag ) }
+                            >
+                                { tag }
+                            </button>
+                        ) ) }
+                    </div>
                     <textarea
+                        ref={ bankRef }
                         className="dono-textarea dono-textarea--mono"
                         rows={ 5 }
                         placeholder={ 'Account holder: …\nIBAN: …\nBIC:  …\nReference: {reference}\nAmount:    {amount}' }
