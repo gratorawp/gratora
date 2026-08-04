@@ -860,6 +860,41 @@ final class PortalController
                 'has_record'     => $row !== null,
             ];
         }
+
+        // A donation form may define its own consent purposes, and the create
+        // path deliberately records them. Listing only the org registry meant
+        // any purpose that lives on a form and not in Settings > Consents was
+        // invisible here: the donor agreed to it on the form and then had no
+        // way to see it, let alone withdraw it.
+        $known = [];
+        foreach ($purposes as $p) {
+            $known[$p['key']] = true;
+        }
+
+        foreach ($latest as $key => $row) {
+            if (isset($known[$key])) {
+                continue;
+            }
+
+            $out[] = [
+                'key'   => (string) $key,
+                // No label is stored with the record and the form that defined
+                // it may be gone, so the key is humanised rather than shown raw.
+                'label' => ucfirst(str_replace(['_', '-'], ' ', (string) $key)),
+                'description'    => '',
+                // Nothing off the registry can be required: "required" is a
+                // property of a registered purpose, and treating it as one
+                // would make a consent the donor cannot withdraw.
+                'required'       => false,
+                'version'        => (int) $row->purpose_version,
+                'stored_version' => (int) $row->purpose_version,
+                'stale'          => false,
+                'granted'        => (bool) $row->granted,
+                'occurred_at'    => $row->occurred_at ?? null,
+                'has_record'     => true,
+            ];
+        }
+
         return $out;
     }
 
@@ -886,6 +921,16 @@ final class PortalController
         $byKey   = [];
         foreach ($this->consents->purposes() as $p) $byKey[$p['key']] = $p;
         $latest  = $this->consents->latestByPurpose((int) $donor->id);
+
+        // A purpose the donor already has a record for is one they agreed to,
+        // so they can withdraw it even when it lives on a form rather than in
+        // the org registry. Never required, and never a key they have no
+        // record for: this widens what can be revoked, not what can be granted.
+        foreach ($latest as $key => $_row) {
+            if (! isset($byKey[$key])) {
+                $byKey[$key] = ['key' => (string) $key, 'required' => false, 'version' => (int) $_row->purpose_version];
+            }
+        }
 
         foreach ($items as $it) {
             $key = (string) ($it['key'] ?? '');
