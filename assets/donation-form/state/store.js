@@ -517,7 +517,13 @@ function normalizeFrequency( raw ) {
 function suppressedFields( state ) {
     const v = state.values;
     const CUSTOM = [ 'text', 'number', 'date', 'dropdown', 'radio', 'checkbox', 'multi-select', 'hidden' ];
-    const out = { custom: new Set(), frequency: false, fund: false, anon: false, fees: false };
+    const out = {
+        custom: new Set(), frequency: false, fund: false, anon: false, fees: false,
+        // A consent block behind a false condition was never shown, so its
+        // seeded value is not something the donor agreed to, and a hidden
+        // comment block would still publish text on the supporter wall.
+        consents: new Set(), comment: false,
+    };
     for ( const step of fieldSteps( state ) ) {
         for ( const f of fieldsOf( step ) ) {
             if ( evaluateCondition( f.condition, v ) ) continue;
@@ -525,6 +531,12 @@ function suppressedFields( state ) {
             else if ( f.kind === 'fund' ) out.fund = true;
             else if ( f.kind === 'anonymous' ) out.anon = true;
             else if ( f.kind === 'cover_fees' ) out.fees = true;
+            else if ( f.kind === 'comment' ) out.comment = true;
+            else if ( f.kind === 'consent' ) {
+                for ( const p of ( f.purposes || [] ) ) {
+                    if ( p?.id ) out.consents.add( String( p.id ) );
+                }
+            }
             else if ( CUSTOM.includes( f.kind ) && f.field ) out.custom.add( String( f.field ) );
         }
     }
@@ -544,11 +556,11 @@ export function buildPayload( state ) {
         gateway:           state.gateway,
         form_id:           state.formId || undefined,
         campaign_id:       state.campaignId || undefined,
-        note_to_org:       ( v.note_to_org || '' ).trim() || undefined,
-        note_public:       v.note_public ? true : undefined,
+        note_to_org:       sup.comment ? undefined : ( ( v.note_to_org || '' ).trim() || undefined ),
+        note_public:       sup.comment ? undefined : ( v.note_public ? true : undefined ),
         is_anonymous:      sup.anon ? false : !! v.is_anonymous,
         fund_id:           sup.fund ? undefined : ( ( v.fund_id || '' ).trim() || undefined ),
-        consents:          buildConsents( v.consents ),
+        consents:          buildConsents( v.consents, sup.consents ),
         frequency:         sup.frequency ? 'one_time' : normalizeFrequency( v.frequency ),
         custom:            buildCustom( v.custom, sup.custom ),
         source_attribution: buildSourceAttribution(),
@@ -576,10 +588,14 @@ function buildAddress( a ) {
     return empty ? undefined : out;
 }
 
-function buildConsents( c ) {
+function buildConsents( c, suppressed ) {
     if ( ! c || typeof c !== 'object' ) return undefined;
     const out = {};
-    for ( const k of Object.keys( c ) ) out[ k ] = !! c[ k ];
+    for ( const k of Object.keys( c ) ) {
+        // Consent for a purpose the donor was never shown is not consent.
+        if ( suppressed && suppressed.has( String( k ) ) ) continue;
+        out[ k ] = !! c[ k ];
+    }
     return Object.keys( out ).length === 0 ? undefined : out;
 }
 

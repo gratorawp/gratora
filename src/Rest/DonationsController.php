@@ -189,6 +189,13 @@ final class DonationsController
                 if (! FormSubmissionValidator::hasBlock((string) ($form->blocks ?? ''), 'dono/fund-picker')) {
                     unset($body['fund_id']);
                 }
+
+                // Same rule for the donor's message. note_public puts text on
+                // the campaign's supporter wall, so a form with no comment
+                // block accepting one is an unmoderated publish route.
+                if (! FormSubmissionValidator::hasBlock((string) ($form->blocks ?? ''), 'dono/comment')) {
+                    unset($body['note_to_org'], $body['note_public']);
+                }
             }
         }
 
