@@ -7,6 +7,7 @@ namespace Dono\Rest\Admin;
 use Dono\Campaigns\Campaign;
 use Dono\Donations\DonationRepository;
 use Dono\Exports\DonorExporter;
+use Dono\Foundation\Auth\Capabilities;
 use Dono\Exports\RevenueExporter;
 use Dono\Reports\RevenueReportBuilder;
 use WP_REST_Request;
@@ -39,14 +40,14 @@ final class ExportsController
         register_rest_route(self::NAMESPACE, '/admin/exports/options', [
             'methods'             => WP_REST_Server::READABLE,
             'callback'            => [$this, 'options'],
-            'permission_callback' => static fn (): bool => current_user_can('dono_view_reports')
-                || current_user_can('dono_export_donors'),
+            'permission_callback' => static fn (): bool => Capabilities::userCan('dono_view_reports')
+                || Capabilities::userCan('dono_export_donors'),
         ]);
 
         register_rest_route(self::NAMESPACE, '/admin/exports/donors\.csv', [
             'methods'             => WP_REST_Server::READABLE,
             'callback'            => [$this, 'donorsCsv'],
-            'permission_callback' => static fn (): bool => current_user_can('dono_export_donors'),
+            'permission_callback' => static fn (): bool => Capabilities::userCan('dono_export_donors'),
             'args'                => [
                 'from'        => ['type' => 'string', 'default' => ''],
                 'to'          => ['type' => 'string', 'default' => ''],
@@ -58,7 +59,7 @@ final class ExportsController
         register_rest_route(self::NAMESPACE, '/admin/exports/revenue\.csv', [
             'methods'             => WP_REST_Server::READABLE,
             'callback'            => [$this, 'revenueCsv'],
-            'permission_callback' => static fn (): bool => current_user_can('dono_view_reports'),
+            'permission_callback' => static fn (): bool => Capabilities::userCan('dono_view_reports'),
             'args'                => [
                 'from' => ['type' => 'string', 'default' => ''],
                 'to'   => ['type' => 'string', 'default' => ''],
@@ -68,7 +69,7 @@ final class ExportsController
         register_rest_route(self::NAMESPACE, '/admin/exports/revenue\.pdf', [
             'methods'             => WP_REST_Server::READABLE,
             'callback'            => [$this, 'revenuePdf'],
-            'permission_callback' => static fn (): bool => current_user_can('dono_view_reports'),
+            'permission_callback' => static fn (): bool => Capabilities::userCan('dono_view_reports'),
             'args'                => [
                 'year' => ['type' => 'integer', 'default' => 0],
             ],
@@ -107,8 +108,8 @@ final class ExportsController
             'current_year'   => $thisYear,
             'current_month'  => (string) wp_date('Y-m'),
             'first_month'    => $firstPaid !== null ? substr($firstPaid, 0, 7) : (string) wp_date('Y-m'),
-            'can_export_donors' => current_user_can('dono_export_donors'),
-            'can_view_reports'  => current_user_can('dono_view_reports'),
+            'can_export_donors' => Capabilities::userCan('dono_export_donors'),
+            'can_view_reports'  => Capabilities::userCan('dono_view_reports'),
         ], 200);
     }
 

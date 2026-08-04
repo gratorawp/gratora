@@ -73,6 +73,12 @@ final class AdminCapabilityGateTest extends IntegrationTestCase
         $this->assertAllowed($this->status('GET', '/dono/v1/admin/campaigns'), 'admin sees campaigns');
         $this->assertAllowed($this->status('GET', '/dono/v1/admin/dashboard'), 'admin sees dashboard');
         $this->assertAllowed($this->status('GET', '/dono/v1/admin/settings/general'), 'admin sees settings');
+
+        // A fresh install grants nobody the granular caps, so a strict
+        // current_user_can() locked the site owner out of their own exports.
+        $this->assertAllowed($this->status('GET', '/dono/v1/admin/exports/donors.csv'), 'admin exports donors');
+        $this->assertAllowed($this->status('GET', '/dono/v1/admin/exports/revenue.csv'), 'admin exports revenue');
+        $this->assertAllowed($this->status('GET', '/dono/v1/admin/exports/options'), 'admin reads export options');
     }
 
     public function test_settings_requires_settings_cap(): void
