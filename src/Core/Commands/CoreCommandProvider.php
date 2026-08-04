@@ -1015,11 +1015,25 @@ final class CoreCommandProvider
                 if ($sub) {
                     $sub->pauseSubscription($plan, $resumesAt);
                 }
-                $plan->status = 'paused';
+                // resume_at, not just next_payment_at: RecurringResumer keys
+                // entirely on resume_at, and PayPal's suspend is indefinite, so
+                // without it the plan stops forever behind a restart date the
+                // admin and the donor can both see. The portal's pause has
+                // always written it.
+                $patch = ['status' => 'paused'];
                 if ($resumesAt !== null) {
-                    $plan->next_payment_at = $resumesAt;
+                    $patch['next_payment_at'] = $resumesAt;
+                    $patch['resume_at']       = $resumesAt;
                 }
-                $plan->save();
+                $patch['updated_at'] = gmdate('Y-m-d H:i:s');
+
+                // Column-scoped, so a webhook that lands mid-command is not
+                // overwritten by a snapshot taken before it.
+                RecurringPlan::query()->where('id', (int) $plan->id)->update($patch);
+                foreach ($patch as $col => $val) {
+                    $plan->{$col} = $val;
+                }
+
                 do_action('dono.recurring.plan_paused', $plan);
                 return ['plan_id' => (int) $plan->id, 'status' => (string) $plan->status];
             },

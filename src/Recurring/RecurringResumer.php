@@ -101,19 +101,61 @@ final class RecurringResumer
                 // batch, which is what stops the sweep spinning on a gateway
                 // that is failing every call.
                 $now = $this->clock->now();
-                $plan->resume_at  = $now->modify('+1 day')->format('Y-m-d H:i:s');
-                $plan->updated_at = $now->format('Y-m-d H:i:s');
-                $plan->save();
+                $this->writeColumns($plan, [
+                    'resume_at'  => $now->modify('+1 day')->format('Y-m-d H:i:s'),
+                    'updated_at' => $now->format('Y-m-d H:i:s'),
+                ]);
                 do_action('dono.recurring.resume_failed', $plan, $e);
                 return;
             }
         }
 
-        $plan->status     = 'active';
-        $plan->resume_at  = null;
-        $plan->updated_at = $this->clock->now()->format('Y-m-d H:i:s');
-        $plan->save();
+        // Guarded on the same predicate the batch selected with. The batch was
+        // read before a gateway call that blocks per plan, so a donor can
+        // cancel while the sweep is partway through it, and going 'active'
+        // unconditionally would restart a subscription that is already gone.
+        // Not "still paused": a plan that reads active with a stale resume_at
+        // is a skipped cycle, and clearing its marker is the point of the sweep.
+        $written = $this->writeColumns($plan, [
+            'status'     => 'active',
+            'resume_at'  => null,
+            'updated_at' => $this->clock->now()->format('Y-m-d H:i:s'),
+        ], true);
 
-        do_action('dono.recurring.plan_resumed', $plan);
+        if ($written) {
+            do_action('dono.recurring.plan_resumed', $plan);
+        }
+    }
+
+    /**
+     * Write named columns, never the whole row.
+     *
+     * Model::save() UPDATEs every column from the snapshot the batch was loaded
+     * with, so anything that committed during the sweep - a cancel from the
+     * portal, a renewal counter from a webhook - is written back to its old
+     * value. One blocking gateway call per plan makes that window wide.
+     *
+     * @param array<string,mixed> $columns
+     * @param bool                $skipIfCancelled leave a plan alone that
+     *                                             reached a terminal state
+     *                                             while this sweep was running
+     */
+    private function writeColumns(RecurringPlan $plan, array $columns, bool $skipIfCancelled = false): bool
+    {
+        $q = RecurringPlan::query()->where('id', (int) $plan->id);
+        if ($skipIfCancelled) {
+            $q = $q->where('status', 'cancelled', '<>');
+        }
+
+        $result = $q->update($columns);
+        if ((int) $result->affectedRows === 0) {
+            return false;
+        }
+
+        foreach ($columns as $col => $value) {
+            $plan->{$col} = $value;
+        }
+
+        return true;
     }
 }
