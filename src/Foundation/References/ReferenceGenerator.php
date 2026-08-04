@@ -64,7 +64,7 @@ final class ReferenceGenerator
         $year  = (int) $this->clock->now()->format('Y');
         $key   = $this->counterOption($scope, $year);
 
-        $current = (int) get_option($key, 0);
+        $current = $this->currentCounter($scope, $key);
         if ($nextValue <= $current) {
             throw new \RuntimeException(
                 "Cannot set counter for {$scope} to {$nextValue}; current counter is already {$current}. " .
@@ -85,8 +85,27 @@ final class ReferenceGenerator
     {
         $scope = $this->normaliseScope($scope);
         $year  = (int) $this->clock->now()->format('Y');
-        $key   = $this->counterOption($scope, $year);
-        return (int) get_option($key, 0) + 1;
+
+        return $this->currentCounter($scope, $this->counterOption($scope, $year)) + 1;
+    }
+
+    /**
+     * What next() would treat as the last used value, seeding included but not
+     * persisted.
+     *
+     * Turning "reset numbering each year" on or off changes which option holds
+     * the counter, and the new one does not exist yet. Reading it raw answers 0
+     * while sibling counters hold the real high-water mark, so the screen
+     * offered "next: 00001" on a site already at 00500 and the setter accepted
+     * 2, handing the next five hundred donations references that were already
+     * printed on someone else's receipt. next() has always seeded through
+     * seedFor; these two read past it.
+     */
+    private function currentCounter(string $scope, string $key): int
+    {
+        $stored = get_option($key, null);
+
+        return $stored === null ? $this->seedFor($scope, $key) : (int) $stored;
     }
 
     /** Build the formatted reference string. Pure, no DB. */
