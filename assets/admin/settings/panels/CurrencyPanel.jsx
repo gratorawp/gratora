@@ -188,6 +188,9 @@ function ExchangeRatesCard( { fx, base } ) {
 
 export default function CurrencyPanel( { s, fx } ) {
     const defaultCurrency = s.value( 'default_currency', 'USD' );
+    // Server-computed, read-only: once money is in, every stored base amount is
+    // already denominated in this currency and nothing restates them.
+    const baseLocked = !! s.record.base_currency_locked;
     const supported = Array.isArray( s.record.supported_currencies ) ? s.record.supported_currencies : [ 'USD' ];
 
     const decimalPlaces  = Number( s.value( 'format.decimal_places', 2 ) );
@@ -211,10 +214,17 @@ export default function CurrencyPanel( { s, fx } ) {
             <Card title={ __( 'Currencies', 'dono' ) } edited={ s.isDirty }>
                 <FormRow
                     label={ __( 'Base currency', 'dono' ) }
-                    help={ __( 'All reporting and totals roll up to this. Existing campaigns keep their own currency.', 'dono' ) }
+                    help={ baseLocked
+                        ? sprintf(
+                            /* translators: %s: base currency code */
+                            __( 'Locked to %s: donations are already recorded against it, and their stored totals would be reread as the new currency. Existing campaigns keep their own currency.', 'dono' ),
+                            defaultCurrency
+                        )
+                        : __( 'All reporting and totals roll up to this, and it cannot be changed once donations come in. Existing campaigns keep their own currency.', 'dono' ) }
                 >
                     <select
                         className="dono-select"
+                        disabled={ baseLocked }
                         value={ defaultCurrency }
                         onChange={ ( e ) => {
                             const code = e.target.value;
