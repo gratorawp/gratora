@@ -1,6 +1,31 @@
-import { __ } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 
 import { formatAmount, formatDate, planStatusPill } from '../helpers';
+
+/**
+ * "month", "2 week" and so on came straight from the database, so the cell
+ * never translated and never pluralised. Spelled out per unit because a
+ * translator needs both forms and the singular is not the column value.
+ */
+function intervalLabel( unit, count ) {
+    const n = Number( count ) || 1;
+    switch ( unit ) {
+        case 'day':
+            /* translators: %d: number of days between charges. */
+            return sprintf( _n( '%d day', '%d days', n, 'dono' ), n );
+        case 'week':
+            /* translators: %d: number of weeks between charges. */
+            return sprintf( _n( '%d week', '%d weeks', n, 'dono' ), n );
+        case 'month':
+            /* translators: %d: number of months between charges. */
+            return sprintf( _n( '%d month', '%d months', n, 'dono' ), n );
+        case 'year':
+            /* translators: %d: number of years between charges. */
+            return sprintf( _n( '%d year', '%d years', n, 'dono' ), n );
+        default:
+            return n > 1 ? `${ n } ${ unit }` : String( unit );
+    }
+}
 
 export default function RecurringTab( { recurring } ) {
     const plans = recurring?.plans || [];
@@ -33,7 +58,7 @@ export default function RecurringTab( { recurring } ) {
                                                         { p.gateway_subscription_id }
                                                     </code>
                                                 </td>
-                                                <td>{ formatAmount( p.amount_cents, p.currency ) } / { p.interval_count > 1 ? `${ p.interval_count } ` : '' }{ p.interval_unit }</td>
+                                                <td>{ formatAmount( p.amount_cents, p.currency ) } / { intervalLabel( p.interval_unit, p.interval_count ) }</td>
                                                 <td><span className={ `dp-pill ${ pill.cls }` }>{ pill.label }</span></td>
                                                 <td>{ p.status === 'cancelled' ? '-' : formatDate( p.next_payment_at ) }</td>
                                                 <td className="num-cell">

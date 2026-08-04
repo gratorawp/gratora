@@ -89,6 +89,7 @@ export default function List() {
     const [ error, setError ]       = useState( null );
     const [ editing, setEditing ]   = useState( null );
     const [ deleteTarget, setDeleteTarget ] = useState( null );
+    const [ allFunds, setAllFunds ] = useState( [] );
     const [ stats, setStats ]       = useState( null );
     const [ statsLoading, setStatsLoading ] = useState( true );
     const [ reload, setReload ]     = useState( 0 );
@@ -126,6 +127,30 @@ export default function List() {
         return () => { aborted = true; };
     }, [ view, statusFilter ] );
 
+    // The parent and reassign pickers were fed the table's current page, so a
+    // second page of funds was unreachable as a parent and as a reassign
+    // target. They need the whole set, filters and pagination aside.
+    const loadAll = useCallback( () => {
+        const collect = async () => {
+            const out = [];
+            for ( let page = 1; page <= 20; page++ ) {
+                const res = await apiFetch( {
+                    path: addQueryArgs( '/dono/v1/admin/funds', { page, per_page: 100, orderby: 'sort_order', order: 'asc' } ),
+                } );
+                const items = Array.isArray( res ) ? res : [];
+                out.push( ...items );
+                if ( items.length < 100 ) break;
+            }
+            return out;
+        };
+
+        collect()
+            .then( setAllFunds )
+            // The table itself already surfaced any load failure; leaving the
+            // pickers empty is better than blocking the dialog on a retry.
+            .catch( ( err ) => window.console?.error( '[dono] fund picker list failed to load', err ) );
+    }, [] );
+
     const loadStats = useCallback( () => {
         setStatsLoading( true );
         apiFetch( { path: '/dono/v1/admin/funds/stats' } )
@@ -140,6 +165,7 @@ export default function List() {
 
     useEffect( () => load(), [ load, reload ] );
     useEffect( () => loadStats(), [ loadStats, reload ] );
+    useEffect( () => loadAll(), [ loadAll, reload ] );
 
     const afterChange = useCallback( () => {
         setReload( ( n ) => n + 1 );
@@ -360,7 +386,7 @@ export default function List() {
             { editing && (
                 <FundEditor
                     fund={ editing }
-                    allFunds={ data }
+                    allFunds={ allFunds }
                     onClose={ () => setEditing( null ) }
                     onSaved={ () => { setEditing( null ); afterChange(); } }
                 />
@@ -369,7 +395,7 @@ export default function List() {
             { deleteTarget && (
                 <FundDeleteModal
                     fund={ deleteTarget }
-                    funds={ data }
+                    funds={ allFunds }
                     onClose={ () => setDeleteTarget( null ) }
                     onError={ ( m ) => setError( m ) }
                     onDone={ ( msg ) => { setDeleteTarget( null ); notify.success( msg ); afterChange(); } }

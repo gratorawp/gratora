@@ -559,6 +559,11 @@ export function buildPayload( state ) {
         note_to_org:       sup.comment ? undefined : ( ( v.note_to_org || '' ).trim() || undefined ),
         note_public:       sup.comment ? undefined : ( v.note_public ? true : undefined ),
         is_anonymous:      sup.anon ? false : !! v.is_anonymous,
+        // "Cover fees" is an authorable condition source, and the server
+        // evaluates conditions against this payload. Sending only the computed
+        // cents left it with no value to compare, so any field shown behind
+        // that condition was stripped as one the donor never saw.
+        cover_fees:        sup.fees ? false : !! v.cover_fees,
         fund_id:           sup.fund ? undefined : ( ( v.fund_id || '' ).trim() || undefined ),
         consents:          buildConsents( v.consents, sup.consents ),
         frequency:         sup.frequency ? 'one_time' : normalizeFrequency( v.frequency ),

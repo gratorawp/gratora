@@ -38,7 +38,7 @@ const TABS = [
     { key: 'currency',     label: __( 'Currency', 'dono' ),             Icon: IconCurrency },
     { key: 'numbering',    label: __( 'Numbering', 'dono' ),            Icon: IconNumbering },
     { key: 'privacy',      label: __( 'Privacy', 'dono' ),              Icon: IconPrivacy },
-    { key: 'roles',        label: __( 'Roles', 'dono' ),                Icon: IconRoles },
+    { key: 'roles',        label: __( 'Roles', 'dono' ),                Icon: IconRoles, adminOnly: true },
 ];
 
 // Always last, whatever add-ons register in between.
@@ -48,6 +48,12 @@ const TABS = [
 // "nothing to see" is a tab that makes people look for a paid version. This is
 // the rule LicenseNotice and ReadinessService already follow: both go quiet
 // when entitlements() is empty.
+// Roles assigns Dono capabilities, so the REST route requires full admin. A
+// settings manager was still offered the tab and only learned their save was
+// refused after editing the grid.
+const visibleTabs = () =>
+    TABS.filter( ( t ) => ! t.adminOnly || !! window.dono?.can?.manage_options );
+
 const TAIL_TABS = [
     ...( window.dono?.pro?.active ? [
         { key: 'licenses', label: __( 'Licenses', 'dono' ),             Icon: IconLicense },
@@ -71,17 +77,17 @@ const SECTION_LABELS = {
 
 function initialTab() {
     const hash = ( window.location.hash || '' ).replace( /^#/, '' ).split( '/' )[ 0 ];
-    if ( [ ...TABS, ...TAIL_TABS ].some( ( t ) => t.key === hash ) ) return hash;
+    if ( [ ...visibleTabs(), ...TAIL_TABS ].some( ( t ) => t.key === hash ) ) return hash;
     const params = new URLSearchParams( window.location.search );
     const q = params.get( 'tab' );
-    return [ ...TABS, ...TAIL_TABS ].some( ( t ) => t.key === q ) ? q : 'setup';
+    return [ ...visibleTabs(), ...TAIL_TABS ].some( ( t ) => t.key === q ) ? q : 'setup';
 }
 
 export default function Settings() {
     const [ tab, setTab ]                 = useState( initialTab );
     const extTabs                         = useExtensionTabs( 'settings' );
     const allTabs                         = [
-        ...TABS,
+        ...visibleTabs(),
         // An add-on may ship its own icon component; otherwise it reads as a plug-in.
         ...extTabs.map( ( t ) => ( {
             key: t.id,
@@ -108,7 +114,7 @@ export default function Settings() {
     // reloads the page.
     useEffect( () => {
         const known = ( h ) =>
-            [ ...TABS, ...TAIL_TABS ].some( ( t ) => t.key === h ) || extTabs.some( ( t ) => t.id === h );
+            [ ...visibleTabs(), ...TAIL_TABS ].some( ( t ) => t.key === h ) || extTabs.some( ( t ) => t.id === h );
         const read  = () => ( window.location.hash || '' ).replace( /^#/, '' ).split( '/' )[ 0 ];
 
         const onHash = () => {

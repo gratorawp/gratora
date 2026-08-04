@@ -259,6 +259,11 @@ function DonorsApp( { toggleSlot } ) {
                     message,
                     confirmLabel: __( 'Redact', 'dono' ),
                     destructive:  true,
+                    // The profile dialog makes you type the donor's email. In
+                    // bulk there is no single email to type, and the callback
+                    // fills the server's confirmation in from each row - so
+                    // without this the list route erased PII on one click.
+                    requireText:  __( 'REDACT', 'dono' ),
                     onConfirm: async () => {
                         try {
                             await Promise.all( items.map( ( i ) => apiFetch( {

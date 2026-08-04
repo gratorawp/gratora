@@ -85,6 +85,9 @@ final class DonationSchemas
             'is_anonymous'       => ['type' => 'boolean', 'default' => false],
             'country'            => ['type' => 'string', 'pattern' => '^[A-Za-z]{2}$'],
             'fee_covered_cents'  => ['type' => 'integer', 'minimum' => 0, 'default' => 0],
+            // Not stored: the covered amount is. Carried so a field conditioned
+            // on "Cover fees" evaluates the same on both sides.
+            'cover_fees'         => ['type' => 'boolean', 'default' => false],
         ];
     }
 }

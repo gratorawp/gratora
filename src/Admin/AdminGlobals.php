@@ -84,6 +84,12 @@ final class AdminGlobals extends HookProvider
             // Templates that ship outside core: the editor has no other way to
             // learn they exist.
             'email_template_meta' => SettingsService::templateMeta(),
+            // Roles assigns capabilities, so only a full administrator may save
+            // it. Without this the tab rendered for a settings manager, who
+            // could edit the grid and only learn it was refused on save.
+            'can' => [
+                'manage_options' => current_user_can('manage_options'),
+            ],
         ];
 
         printf(

@@ -362,9 +362,19 @@ export default function List() {
                                 path:   `/dono/v1/admin/donations/${ encodeURIComponent( i.reference ) }/mark-paid`,
                                 method: 'POST',
                             } ) ) );
-                            refetch();
+                            notify.success( sprintf(
+                                /* translators: %d: donation count */
+                                _n( '%d donation marked paid.', '%d donations marked paid.', n, 'dono' ),
+                                n
+                            ) );
                         } catch ( err ) {
                             setActionError( err?.message || __( 'Could not mark one or more donations paid.', 'dono' ) );
+                        } finally {
+                            // In the finally, not the try: a partial failure
+                            // still paid some of them and emailed their donors
+                            // a receipt, and skipping the refetch left those
+                            // rows reading Pending on screen.
+                            refetch();
                         }
                     },
                 } );
@@ -399,6 +409,14 @@ export default function List() {
                                 path:   `/dono/v1/admin/donations/${ encodeURIComponent( i.reference ) }/resend-receipt`,
                                 method: 'POST',
                             } ) ) );
+                            // Silence read as "nothing happened", so admins
+                            // clicked again and donors received the same
+                            // receipt twice.
+                            notify.success( sprintf(
+                                /* translators: %d: receipt count */
+                                _n( '%d receipt resent.', '%d receipts resent.', n, 'dono' ),
+                                n
+                            ) );
                         } catch ( err ) {
                             setActionError( err?.message || __( 'Could not resend one or more receipts.', 'dono' ) );
                         }

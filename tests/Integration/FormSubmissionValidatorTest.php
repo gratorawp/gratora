@@ -320,6 +320,35 @@ BLOCKS;
         $this->assertNull($this->validator()->validate($form, $base + ['custom' => ['donor_type' => 'business', 'company' => 'Acme']]));
     }
 
+    public function test_a_condition_on_cover_fees_is_evaluated(): void
+    {
+        // "Cover fees" is offered as a condition source in the editor, but the
+        // payload carried only the computed cents. The server had nothing to
+        // compare, so it read every such field as hidden and enforced none of
+        // them - the exact rule a crafted POST is checked against.
+        $blocks = <<<BLOCKS
+<!-- wp:dono/donation-amount {"presets":[{"cents":2500}]} /-->
+<!-- wp:dono/cover-fees {"percent":2.9,"fixed":30} /-->
+<!-- wp:dono/text-input {"label":"Employer","field":"employer","required":true,"condition":{"field":"cover_fees","op":"=","value":"true"}} /-->
+<!-- wp:dono/submit-button /-->
+BLOCKS;
+        $form = $this->form($blocks);
+        $base = ['amount_cents' => 2500, 'frequency' => 'one_time'];
+
+        $this->assertNotNull(
+            $this->validator()->validate($form, $base + ['cover_fees' => true, 'custom' => []]),
+            'the donor covered fees, so they were shown the field and it is required'
+        );
+        $this->assertNull(
+            $this->validator()->validate($form, $base + ['cover_fees' => true, 'custom' => ['employer' => 'Acme']]),
+            'filled in, it passes'
+        );
+        $this->assertNull(
+            $this->validator()->validate($form, $base + ['cover_fees' => false, 'custom' => []]),
+            'they did not cover fees, so the field was never shown'
+        );
+    }
+
     public function test_number_and_pattern_constraints_are_enforced(): void
     {
         $blocks = <<<BLOCKS
