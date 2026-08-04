@@ -6,6 +6,7 @@ namespace Dono\Rest\Admin;
 
 use Dono\Campaigns\Campaign;
 use Dono\Analytics\ErrorLog;
+use Dono\Async\AsyncDispatcher;
 use Dono\Analytics\Event;
 use Dono\Currency\FxBackfill;
 use Dono\Settings\SecretRedactor;
@@ -469,13 +470,30 @@ final class ToolsController
      */
     public function info(): WP_REST_Response
     {
+        // Action Scheduler, not WP-Cron: every Dono job is queued through
+        // AsyncDispatcher into the 'dono' group, and nothing in the plugin
+        // calls wp_schedule_event. Reading _get_cron_array() found none of them
+        // and the card reported "nothing queued" on a site with a backlog,
+        // which is exactly backwards for a diagnostic.
         $cronEvents = [];
-        $crons = _get_cron_array() ?: [];
-        foreach ($crons as $timestamp => $hooks) {
-            foreach ($hooks as $hook => $_dicts) {
-                if (str_starts_with((string) $hook, 'dono.')) {
-                    $cronEvents[] = ['hook' => (string) $hook, 'next' => gmdate('c', (int) $timestamp)];
+        if (function_exists('as_get_scheduled_actions')) {
+            $pending = \as_get_scheduled_actions([
+                'group'    => AsyncDispatcher::GROUP,
+                'status'   => \ActionScheduler_Store::STATUS_PENDING,
+                'per_page' => 50,
+                'orderby'  => 'date',
+                'order'    => 'ASC',
+            ], 'OBJECT');
+
+            foreach ((array) $pending as $action) {
+                if (! is_object($action) || ! method_exists($action, 'get_hook')) {
+                    continue;
                 }
+                $date = method_exists($action, 'get_schedule') ? $action->get_schedule()?->get_date() : null;
+                $cronEvents[] = [
+                    'hook' => (string) $action->get_hook(),
+                    'next' => $date instanceof \DateTimeInterface ? $date->format('c') : '',
+                ];
             }
         }
 

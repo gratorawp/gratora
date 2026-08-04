@@ -4,10 +4,31 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 
 import Card from '../../_shared/components/Card';
 import Btn from '../../_shared/components/Btn';
+import ConfirmDialog from '../../_shared/components/ConfirmDialog';
 
 export default function ImportTab( { setNotice } ) {
     const [ importing, setImporting ] = useState( false );
+    const [ confirm, setConfirm ]     = useState( null );
     const fileRef = useRef( null );
+
+    // Picking a file used to be the whole interaction: the overwrite ran on
+    // change, before the admin could read what they had chosen. It replaces
+    // live gateway, email, receipt and role configuration and there is no undo,
+    // so the file is named back to them first.
+    const askImport = ( file ) => {
+        if ( ! file ) return;
+        setConfirm( {
+            title:        __( 'Replace settings from this file', 'dono' ),
+            message:      sprintf(
+                /* translators: %s: the chosen file name. */
+                __( '%s will overwrite your gateway, email, receipt, numbering and role settings. Donations, donors and campaigns are untouched. This cannot be undone.', 'dono' ),
+                file.name
+            ),
+            confirmLabel: __( 'Replace settings', 'dono' ),
+            destructive:  true,
+            onConfirm:    () => doImport( file ),
+        } );
+    };
 
     const doImport = async ( file ) => {
         if ( ! file ) return;
@@ -72,13 +93,19 @@ export default function ImportTab( { setNotice } ) {
                         type="file"
                         accept="application/json,.json"
                         style={ { display: 'none' } }
-                        onChange={ ( e ) => doImport( e.target.files?.[ 0 ] ) }
+                        onChange={ ( e ) => askImport( e.target.files?.[ 0 ] ) }
                     />
                 </div>
                 <p className="dono-tools-note">
                     { __( 'A masked secret in the file leaves the stored key untouched, so importing an export cannot wipe a gateway key it was unable to carry.', 'dono' ) }
                 </p>
             </Card>
+
+            <ConfirmDialog confirm={ confirm } onClose={ () => {
+                setConfirm( null );
+                // Clear the input so choosing the same file again re-prompts.
+                if ( fileRef.current ) fileRef.current.value = '';
+            } } />
         </div>
     );
 }
