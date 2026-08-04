@@ -158,8 +158,12 @@ BLOCKS;
 
     public function test_presets_only_skips_membership_for_a_switched_currency(): void
     {
+        // The switcher is what makes the leniency legitimate: without it the
+        // donor cannot convert anything, so another currency in the payload is
+        // a crafted one and the allow-list still applies.
         $blocks = <<<BLOCKS
 <!-- wp:dono/donation-amount {"presets":[{"cents":5000}],"allowCustom":false} /-->
+<!-- wp:dono/currency-switcher /-->
 <!-- wp:dono/submit-button /-->
 BLOCKS;
         $base = ['frequency' => 'one_time', 'custom' => [], 'consents' => []];

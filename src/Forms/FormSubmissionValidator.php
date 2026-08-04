@@ -23,10 +23,14 @@ final class FormSubmissionValidator
 {
     private ?Form $form = null;
 
+    /** Whether the authored form lets the donor pick a currency at all. */
+    private bool $offersCurrencyChoice = false;
+
     public function validate(Form $form, array $body): ?WP_Error
     {
         $this->form = $form;
         $blocks = parse_blocks((string) ($form->blocks ?? ''));
+        $this->offersCurrencyChoice = self::treeHasBlock($blocks, 'dono/currency-switcher');
 
         // The rendered amount step falls back to the campaign's presets when the
         // block omits its own (see DonationFormShortcode::buildSteps). The
@@ -193,11 +197,19 @@ final class FormSubmissionValidator
                     // value this side cannot reproduce (rates drift between
                     // render and submit), so membership is only enforceable in
                     // the authored currency; the amount floor/cap still apply.
+                    //
+                    // Keyed on the form offering that choice, not merely on the
+                    // currency posted. A form with no switcher can only be paid
+                    // in the authored currency, so naming another one in the
+                    // JSON was a way to skip the allow-list entirely and send
+                    // any amount to a fixed-amount form.
                     $submittedCurrency = strtoupper((string) ($body['currency'] ?? ''));
                     $presetCurrency    = strtoupper(Money::defaultCurrency());
-                    if (($submittedCurrency === '' || $submittedCurrency === $presetCurrency)
-                        && ! in_array($net, $allowedCents, true)
-                    ) {
+                    $convertedByDonor  = $this->offersCurrencyChoice
+                        && $submittedCurrency !== ''
+                        && $submittedCurrency !== $presetCurrency;
+
+                    if (! $convertedByDonor && ! in_array($net, $allowedCents, true)) {
                         return $this->reject(__('Choose one of the listed donation amounts.', 'dono'));
                     }
                 }
