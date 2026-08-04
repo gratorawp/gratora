@@ -83,7 +83,10 @@ final class DonorErasureCompletenessTest extends IntegrationTestCase
 
         $p = RecurringPlan::make();
         $p->donor_id          = $this->donorId;
-        $p->gateway           = 'stripe';
+        // Offline, so erasure can end the plan without a processor round
+        // trip. What this test is about is what survives erasure, not which
+        // gateway held the mandate.
+        $p->gateway           = 'offline';
         $p->gateway_subscription_id = 'sub_erase_1';
         $p->gateway_customer_id     = 'cus_erase_needle';
         $p->amount_cents      = 5000;

@@ -7,6 +7,7 @@ namespace Dono\Donors;
 use Dono\Donations\Donation;
 use Dono\Donors\Erasure\ErasureRegistry;
 use Dono\Donors\Erasure\ErasureRequest;
+use Dono\Recurring\RecurringCanceller;
 use Dono\Recurring\RecurringPlan;
 use Dono\Foundation\Crypto\Crypto;
 use Dono\Foundation\Identity\IdentityHasher;
@@ -281,6 +282,16 @@ final class DonorService
             return $donor;
         }
 
+        // Before anything is destroyed, because erasing first strands the
+        // mandate: the plan keeps billing, every renewal writes the donor's
+        // name and email back into the webhook log, and the person who asked to
+        // be forgotten is locked out of the portal that could have stopped it.
+        // DonorRetention already refuses to auto-erase anyone on a live plan
+        // and the privacy screen promises as much; the donor-initiated and
+        // admin paths reach the same rule from the other side by ending the
+        // plan first.
+        $this->stopRecurringBefore($donor);
+
         $request = $this->erasureRequest($donor);
 
         $donor->email_encrypted    = '';
@@ -320,6 +331,32 @@ final class DonorService
      * donor_id: `pi_...` or `cus_...` is the only thread back from the raw
      * payload to the person it describes.
      */
+    /**
+     * End any live subscription this donor has, so erasure never leaves money
+     * moving. Anything that cannot be stopped aborts the erasure rather than
+     * completing it and losing the handles needed to stop it later.
+     *
+     * Resolved from the container rather than injected: RecurringCanceller
+     * reaches DonationService, which reaches back here.
+     */
+    private function stopRecurringBefore(Donor $donor): void
+    {
+        $plans = RecurringPlan::query()
+            ->where('donor_id', (int) $donor->id)
+            ->whereIn('status', ['active', 'paused'])
+            ->getAll();
+
+        if ($plans === []) {
+            return;
+        }
+
+        $canceller = \Dono\Foundation\Plugin::instance()->container->get(RecurringCanceller::class);
+
+        foreach ($plans as $plan) {
+            $canceller->cancel($plan, __('The donor asked for their data to be erased.', 'dono'));
+        }
+    }
+
     private function erasureRequest(Donor $donor): ErasureRequest
     {
         $donations = Donation::query()->where('donor_id', $donor->id)->getAll();
