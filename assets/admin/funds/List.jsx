@@ -87,7 +87,6 @@ export default function List() {
     const [ total, setTotal ]       = useState( 0 );
     const [ loading, setLoading ]   = useState( false );
     const [ error, setError ]       = useState( null );
-    const [ creating, setCreating ] = useState( false );
     const [ editing, setEditing ]   = useState( null );
     const [ deleteTarget, setDeleteTarget ] = useState( null );
     const [ stats, setStats ]       = useState( null );
@@ -155,24 +154,17 @@ export default function List() {
         }
     }, [ afterChange ] );
 
-    const onCreate = async () => {
-        setCreating( true );
+    // A draft, not a record. Creating the fund up front and opening the editor
+    // on it meant Cancel left a live "Untitled fund" behind: active by default,
+    // so the fund picker offered it to donors, and invisible in this list until
+    // the next page load because Cancel does not refetch.
+    const onCreate = () => {
         setError( null );
-        try {
-            const fund = await apiFetch( {
-                path:   '/dono/v1/admin/funds',
-                method: 'POST',
-                data:   {
-                    code: 'fund-' + Date.now().toString( 36 ),
-                    name: __( 'Untitled fund', 'dono' ),
-                },
-            } );
-            setEditing( fund );
-        } catch ( err ) {
-            setError( err?.message || __( 'Could not create fund.', 'dono' ) );
-        } finally {
-            setCreating( false );
-        }
+        setEditing( {
+            code:      'fund-' + Date.now().toString( 36 ),
+            name:      '',
+            is_active: true,
+        } );
     };
 
     const fields = useMemo( () => [
@@ -322,7 +314,7 @@ export default function List() {
                     <span className="dono-page-head__meta">
                         { sprintf( /* translators: %s: number of funds */ _n( '%s fund', '%s funds', total, 'dono' ), total.toLocaleString() ) }
                     </span>
-                    <Btn variant="primary" onClick={ onCreate } isBusy={ creating } disabled={ creating }>
+                    <Btn variant="primary" onClick={ onCreate }>
                         { __( 'New fund', 'dono' ) }
                     </Btn>
                 </div>
@@ -344,7 +336,7 @@ export default function List() {
                     title={ __( 'No funds yet', 'dono' ) }
                     body={ __( 'Funds route donations to specific causes within your organisation. Forms without a fund picker drop into the organisation default.', 'dono' ) }
                     action={
-                        <Btn variant="primary" onClick={ onCreate } isBusy={ creating } disabled={ creating }>
+                        <Btn variant="primary" onClick={ onCreate }>
                             { __( 'Create your first fund', 'dono' ) }
                         </Btn>
                     }
@@ -412,7 +404,9 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
         setSaveError( null );
         try {
             await apiFetch( {
-                path:   `/dono/v1/admin/funds/${ fund.id }`,
+                // No id means this fund has never been saved, so this is the
+                // create rather than an update.
+                path:   fund.id ? `/dono/v1/admin/funds/${ fund.id }` : '/dono/v1/admin/funds',
                 method: 'POST',
                 data:   {
                     name:            form.name,

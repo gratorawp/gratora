@@ -67,6 +67,11 @@ final class IdentityHasher
         SystemSetting::write(self::SETTING_EMAIL_PEPPER, $pepper);
 
         if ($this->donorsExist()) {
+            // Flag first, then try. This runs at plugins_loaded on a fresh
+            // install, before Action Scheduler's data store exists, so the
+            // enqueue silently does nothing; the flag is what gets it picked up
+            // on init instead of losing the rehash for good.
+            DonorEmailRehasher::markPending();
             $this->async->enqueue(DonorEmailRehasher::HOOK, []);
         }
 

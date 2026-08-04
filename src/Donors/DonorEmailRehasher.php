@@ -20,6 +20,19 @@ use Dono\Vendor\Queryable\DB;
 final class DonorEmailRehasher
 {
     public const HOOK  = 'dono.async.rehash_donor_email_hashes';
+
+    /**
+     * Set when a rehash is owed and cleared when it finishes.
+     *
+     * The pepper is written first and only once, so an enqueue that fails is
+     * never retried and every existing donor keeps a hash nobody can reproduce:
+     * they stop being findable by email and the next donation makes a duplicate
+     * of each of them. The enqueue does fail on a fresh install, because the
+     * pepper is generated at plugins_loaded and Action Scheduler's data store
+     * only exists from init.
+     */
+    public const PENDING_OPTION = 'dono_donor_rehash_pending';
+
     private const BATCH = 200;
 
     public function __construct(
@@ -32,6 +45,30 @@ final class DonorEmailRehasher
     public function register(): void
     {
         add_action(self::HOOK, [$this, 'run']);
+
+        // Late enough that Action Scheduler is up, and cheap: one option read
+        // when nothing is owed.
+        add_action('init', [$this, 'reconcile'], 20);
+    }
+
+    /** Mark a rehash as owed. Safe to call before Action Scheduler exists. */
+    public static function markPending(): void
+    {
+        update_option(self::PENDING_OPTION, '1', false);
+    }
+
+    /** Queue the owed rehash once, if it is not already running. */
+    public function reconcile(): void
+    {
+        if (get_option(self::PENDING_OPTION) !== '1') {
+            return;
+        }
+
+        if (\as_has_scheduled_action(self::HOOK, [], AsyncDispatcher::GROUP)) {
+            return;
+        }
+
+        $this->async->enqueue(self::HOOK, []);
     }
 
     /**
@@ -49,7 +86,11 @@ final class DonorEmailRehasher
             ->select('id, email_encrypted')
             ->getAll();
 
-        if (empty($rows)) return;
+        if (empty($rows)) {
+            // Walked the whole table, so nothing is owed any more.
+            delete_option(self::PENDING_OPTION);
+            return;
+        }
 
         $lastId = $afterId;
         foreach ($rows as $row) {
@@ -69,6 +110,9 @@ final class DonorEmailRehasher
 
         if (count($rows) === self::BATCH) {
             $this->async->enqueue(self::HOOK, ['after_id' => $lastId]);
+            return;
         }
+
+        delete_option(self::PENDING_OPTION);
     }
 }
