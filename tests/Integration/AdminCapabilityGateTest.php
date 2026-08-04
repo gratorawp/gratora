@@ -34,6 +34,13 @@ final class AdminCapabilityGateTest extends IntegrationTestCase
         return rest_do_request($req)->get_status();
     }
 
+    private function body(string $method, string $route): string
+    {
+        $res = rest_do_request(new WP_REST_Request($method, $route));
+
+        return (string) $res->get_data();
+    }
+
     private function assertForbidden(int $status, string $msg): void
     {
         $this->assertContains($status, [401, 403], $msg . " (got {$status})");
@@ -141,6 +148,21 @@ final class AdminCapabilityGateTest extends IntegrationTestCase
         $this->assertForbidden(
             $this->status('GET', '/dono/v1/admin/exports/revenue.csv'),
             'donor export does not carry revenue reporting'
+        );
+
+        // The donations CSV is a second route to the same donor list. Gating
+        // the donors export while this one shipped names and emails under the
+        // weaker cap made dono_export_donors decorative.
+        $this->actAs(['dono_view_donations']);
+        $csv = $this->body('GET', '/dono/v1/admin/donations/export.csv');
+        $this->assertStringNotContainsString('@', $csv, 'a donations viewer gets no donor emails');
+        $this->assertStringNotContainsString('Donor email', $csv, 'and no column promising them');
+
+        $this->actAs(['dono_view_donations', 'dono_export_donors']);
+        $this->assertStringContainsString(
+            'Donor email',
+            $this->body('GET', '/dono/v1/admin/donations/export.csv'),
+            'holding the export capability restores the columns'
         );
 
         $this->actAs(['dono_view_reports']);

@@ -1166,10 +1166,16 @@ final class DonationsController
             return '';
         }
 
+        // Whether this caller may take donor identities away in bulk. The rest
+        // of the file is donation records, which dono_view_donations covers;
+        // the name and email columns are the donor list by another route, and
+        // that is what dono_export_donors exists to gate.
+        $withDonorPii = Capabilities::userCan('dono_export_donors');
+
         // UTF-8 BOM so Excel auto-detects the encoding for accented donor names.
         fwrite($out, "\xEF\xBB\xBF");
 
-        Csv::writeRow($out, [
+        Csv::writeRow($out, array_merge([
             __('Reference', 'dono'),
             __('Status', 'dono'),
             __('Amount', 'dono'),
@@ -1181,12 +1187,14 @@ final class DonationsController
             __('Gateway', 'dono'),
             __('Frequency', 'dono'),
             __('Country', 'dono'),
+        ], $withDonorPii ? [
             __('Donor name', 'dono'),
             __('Donor email', 'dono'),
+        ] : [], [
             __('Created at', 'dono'),
             __('Paid at', 'dono'),
             __('Refunded at', 'dono'),
-        ]);
+        ]));
 
         // Cached per donor rather than per row, which bounded this at the number
         // of distinct donors instead of the number of donations: still one
@@ -1204,7 +1212,7 @@ final class DonationsController
         foreach ($rows as $d) {
             /** @var Donation $d */
             $donor = $donorCache[(int) $d->donor_id] ?? null;
-            Csv::writeRow($out, [
+            Csv::writeRow($out, array_merge([
                 $d->reference,
                 $d->status,
                 number_format($d->amount_cents / 100, 2, '.', ''),
@@ -1216,12 +1224,14 @@ final class DonationsController
                 $d->gateway,
                 $d->frequency,
                 $d->country ?? '',
+            ], $withDonorPii ? [
                 $donor ? $this->donorName($donor) : '',
                 $donor ? $this->donorService->decryptEmail($donor) : '',
+            ] : [], [
                 $d->created_at,
                 $d->paid_at ?? '',
                 $d->refunded_at ?? '',
-            ]);
+            ]));
         }
 
         rewind($out);
