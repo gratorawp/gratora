@@ -223,7 +223,31 @@ final class CoreChoresCommandsTest extends IntegrationTestCase
         return $plan;
     }
 
-    private function seedReceipt(int $donationId, int $donorId, bool $voided): Receipt
+    public function test_a_receipt_that_was_never_sent_still_counts_as_missing(): void
+    {
+        $ctx  = $this->adminCtx();
+        $repo = Plugin::instance()->container->get(DonationRepository::class);
+
+        // The receipt row is committed before the PDF renders and before the
+        // send is attempted, and the send is skipped outright when the donor
+        // has no address. A numbered receipt nobody received is exactly what
+        // this report exists to surface.
+        $ref = $this->driveDonationToPaid('never-sent@example.com');
+        $d   = $repo->findByReference($ref);
+        Receipt::query()->where('donation_id', $d->id)->delete();
+        $this->seedReceipt((int) $d->id, (int) $d->donor_id, false, false);
+
+        $res = $this->registry()->dispatch('donation.missing_receipts', ['per_page' => 100], $ctx);
+
+        $this->assertTrue($res->ok, $res->error ?? '');
+        $this->assertContains(
+            $ref,
+            array_column($res->data['items'], 'reference'),
+            'issued is not delivered'
+        );
+    }
+
+    private function seedReceipt(int $donationId, int $donorId, bool $voided, bool $sent = true): Receipt
     {
         $now                = gmdate('Y-m-d H:i:s');
         $receipt            = Receipt::make();
@@ -235,6 +259,9 @@ final class CoreChoresCommandsTest extends IntegrationTestCase
         $receipt->voided         = $voided;
         $receipt->voided_at      = $voided ? $now : null;
         $receipt->issued_at      = $now;
+        // A receipt the donor actually got. The row is written before the send
+        // is attempted, so the gap report keys on this rather than the row.
+        $receipt->sent_to_email_at = $sent ? $now : null;
         $receipt->save();
         return $receipt;
     }

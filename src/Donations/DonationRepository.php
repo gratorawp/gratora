@@ -167,11 +167,20 @@ final class DonationRepository
         $campaignId = isset($args['campaign_id']) ? (int) $args['campaign_id'] : null;
 
         $prefix = DB::getPrefix();
-        // Correlated NOT EXISTS against a non-voided receipt for the donation.
-        // Must stay the FIRST where-condition: whereRaw adds no AND connector,
-        // but the where()s chained after it (status, is_test, campaign) do.
+        // Correlated NOT EXISTS against a non-voided receipt that actually
+        // reached the donor. Must stay the FIRST where-condition: whereRaw adds
+        // no AND connector, but the where()s chained after it (status, is_test,
+        // campaign) do.
+        //
+        // sent_to_email_at, not merely the row: ReceiptIssuer commits the
+        // receipt in its own transaction before it renders the PDF and before
+        // it attempts the send, and skips the send outright when the donor has
+        // no address. Keying on the row meant a receipt that was numbered and
+        // never delivered counted as delivered, so the one report whose whole
+        // job is finding donors who got nothing was blind to exactly them.
         $noReceipt = "NOT EXISTS (SELECT 1 FROM {$prefix}dono_receipts rc "
-            . "WHERE rc.donation_id = {$prefix}dono_donations.id AND rc.voided = 0)";
+            . "WHERE rc.donation_id = {$prefix}dono_donations.id "
+            . "AND rc.voided = 0 AND rc.sent_to_email_at IS NOT NULL)";
 
         // A hand-recorded donation with no receipt is not one that went missing:
         // the admin was asked and said not to send one, because the donor never
