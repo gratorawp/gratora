@@ -408,8 +408,9 @@ final class PortalController
 
     public function donationsList(): WP_REST_Response|WP_Error
     {
-        $donorId = $this->session->currentDonorId();
-        if (! $donorId) return new WP_Error('dono_unauthorized', '', ['status' => 401]);
+        $donor = $this->requireDonor();
+        if ($donor instanceof WP_Error) return $donor;
+        $donorId = (int) $donor->id;
 
         $rows = DonationQueries::live(Donation::query())
             ->whereIn('status', ['paid', 'partial_refund'])
@@ -505,8 +506,9 @@ final class PortalController
 
     public function recurring(): WP_REST_Response|WP_Error
     {
-        $donorId = $this->session->currentDonorId();
-        if (! $donorId) return new WP_Error('dono_unauthorized', '', ['status' => 401]);
+        $donor = $this->requireDonor();
+        if ($donor instanceof WP_Error) return $donor;
+        $donorId = (int) $donor->id;
 
         $rows = RecurringPlan::query()
             ->where('donor_id', $donorId)
@@ -652,8 +654,9 @@ final class PortalController
 
     public function receiptsList(): WP_REST_Response|WP_Error
     {
-        $donorId = $this->session->currentDonorId();
-        if (! $donorId) return new WP_Error('dono_unauthorized', '', ['status' => 401]);
+        $donor = $this->requireDonor();
+        if ($donor instanceof WP_Error) return $donor;
+        $donorId = (int) $donor->id;
 
         $rows = Receipt::query()
             ->where('donor_id', $donorId)
@@ -697,8 +700,9 @@ final class PortalController
      */
     public function receiptDownloadUrl(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
-        $donorId = $this->session->currentDonorId();
-        if (! $donorId) return new WP_Error('dono_unauthorized', '', ['status' => 401]);
+        $donor = $this->requireDonor();
+        if ($donor instanceof WP_Error) return $donor;
+        $donorId = (int) $donor->id;
 
         $receiptId = (int) $request['id'];
         $receipt   = Receipt::query()
@@ -786,8 +790,9 @@ final class PortalController
 
     public function preferencesShow(): WP_REST_Response|WP_Error
     {
-        $donorId = $this->session->currentDonorId();
-        if (! $donorId) return new WP_Error('dono_unauthorized', '', ['status' => 401]);
+        $donor = $this->requireDonor();
+        if ($donor instanceof WP_Error) return $donor;
+        $donorId = (int) $donor->id;
 
         $flags = (array) ($this->donors->findById($donorId)?->flags ?? []);
         $prefs = is_array($flags['prefs'] ?? null) ? $flags['prefs'] : [];
@@ -931,6 +936,16 @@ final class PortalController
         }
     }
 
+    /**
+     * The donor this session belongs to, or 401.
+     *
+     * Every authenticated portal endpoint goes through here rather than reading
+     * the session id directly. Erasure deletes the donor's magic-link tokens so
+     * no emailed link can open a new session, but a cookie minted before it
+     * kept working for its full life: still listing the erased donor's
+     * donations and still minting fresh receipt download tokens, which is the
+     * revocation undone.
+     */
     private function requireDonor(): Donor|WP_Error
     {
         $donorId = $this->session->currentDonorId();
