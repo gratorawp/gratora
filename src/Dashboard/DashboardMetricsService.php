@@ -372,10 +372,12 @@ final class DashboardMetricsService
         // reported however many of the last 60 happened to carry one, and the
         // number was worded as donors while counting notes. One donor leaving
         // three notes read as three donors.
-        $noteRows = DonationQueries::live(DB::table('dono_donations'))
+        // whereRaw emits no AND connector, so it has to open the chain.
+        $noteRows = DonationQueries::live(
+            DB::table('dono_donations')->whereRaw("TRIM(COALESCE(note_to_org, '')) <> ''")
+        )
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('paid_at', $since7d, '>=')
-            ->whereRaw("TRIM(COALESCE(note_to_org, '')) <> ''")
             ->selectRaw('COUNT(*) AS notes, COUNT(DISTINCT donor_id) AS donors')
             ->get();
 
@@ -386,10 +388,11 @@ final class DashboardMetricsService
         // profile, several mean the donor list.
         $noteDonors = [];
         if ($noteCount > 0 && $donorCount === 1) {
-            $one = DonationQueries::live(DB::table('dono_donations'))
+            $one = DonationQueries::live(
+                DB::table('dono_donations')->whereRaw("TRIM(COALESCE(note_to_org, '')) <> ''")
+            )
                 ->whereIn('status', ['paid', 'partial_refund'])
                 ->where('paid_at', $since7d, '>=')
-                ->whereRaw("TRIM(COALESCE(note_to_org, '')) <> ''")
                 ->selectRaw('MIN(donor_id) AS donor_id')
                 ->get();
             $id = (int) ($one['donor_id'] ?? 0);
