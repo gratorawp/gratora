@@ -75,6 +75,10 @@ final class StripeWebhookProvisioner
             'url'            => $url,
             'enabled_events' => self::EVENTS,
             'description'    => 'Dono',
+            // Without this the endpoint renders events at whatever the account
+            // defaults to, which on any account created since March 2025 is a
+            // version that moved fields the handlers read.
+            'api_version'    => StripeApi::API_VERSION,
         ]);
 
         $secret = (string) ($created['secret'] ?? '');

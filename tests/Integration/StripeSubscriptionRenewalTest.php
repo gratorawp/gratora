@@ -355,6 +355,60 @@ final class StripeSubscriptionRenewalTest extends IntegrationTestCase
         ];
     }
 
+    /**
+     * The same invoice as Stripe renders it from 2025-03-31.basil onwards: the
+     * subscription moved under parent.subscription_details and the
+     * PaymentIntent into the payments list.
+     */
+    private function buildBasilInvoice(RecurringPlan $plan, int $amountCents, string $billingReason): array
+    {
+        $flat = $this->buildInvoice($plan, $amountCents, $billingReason);
+        $piId = $flat['payment_intent'];
+
+        unset($flat['subscription'], $flat['payment_intent']);
+
+        $flat['parent'] = [
+            'type'                  => 'subscription_details',
+            'subscription_details'  => ['subscription' => $plan->gateway_subscription_id],
+        ];
+        $flat['payments'] = [
+            'data' => [
+                ['payment' => ['type' => 'payment_intent', 'payment_intent' => $piId]],
+            ],
+        ];
+
+        return $flat;
+    }
+
+    public function test_a_renewal_is_recorded_from_a_basil_shaped_invoice(): void
+    {
+        // Webhook events render at the endpoint's api_version, and an endpoint
+        // created without one renders at the account default. On a Stripe
+        // account created since March 2025 that is Basil, both flat fields are
+        // gone, and every renewal was answered 200 and dropped: charged by
+        // Stripe, never recorded here, never retried.
+        $plan   = $this->seedPlan();
+        $before = Donation::query()->where('recurring_plan_id', (int) $plan->id)->count();
+
+        $this->postWebhook('invoice.payment_succeeded', $this->buildBasilInvoice($plan, 2500, 'subscription_cycle'));
+
+        $this->assertSame(
+            $before + 1,
+            (int) Donation::query()->where('recurring_plan_id', (int) $plan->id)->count(),
+            'the renewal is recorded whichever shape the invoice arrived in'
+        );
+    }
+
+    public function test_a_failed_renewal_is_counted_from_a_basil_shaped_invoice(): void
+    {
+        $plan = $this->seedPlan();
+
+        $this->postWebhook('invoice.payment_failed', $this->buildBasilInvoice($plan, 2500, 'subscription_cycle'));
+
+        $fresh = RecurringPlan::query()->find('id', (int) $plan->id);
+        $this->assertSame(1, (int) $fresh->failed_renewals_count, 'dunning is not silent either');
+    }
+
     private function postWebhook(string $type, array $object): void
     {
         $event = [

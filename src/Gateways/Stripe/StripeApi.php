@@ -14,7 +14,12 @@ use RuntimeException;
 final class StripeApi
 {
     private const API_BASE = 'https://api.stripe.com/v1';
-    private const API_VERSION = '2024-12-18.acacia';
+    /**
+     * Public because the webhook endpoint has to be created pinned to it.
+     * An endpoint with no api_version renders events at the account default,
+     * and Stripe moved fields these handlers read in 2025-03-31.basil.
+     */
+    public const API_VERSION = '2024-12-18.acacia';
     private const TIMEOUT = 10;
 
     public function __construct(private StripeAccount $account)

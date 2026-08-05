@@ -25,6 +25,7 @@ use Dono\Recurring\RecurringPlan;
 use Dono\Recurring\RecurringPlanRepository;
 use RuntimeException;
 use WP_REST_Request;
+use Throwable;
 
 /**
  * Stripe gateway via Connect. createIntent posts to /v1/payment_intents and
@@ -861,6 +862,64 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
     }
 
     /**
+     * The subscription and PaymentIntent an invoice belongs to, whichever
+     * shape it arrived in.
+     *
+     * Stripe moved both out of the top level in 2025-03-31.basil: the
+     * subscription into parent.subscription_details and the PaymentIntent into
+     * the expandable payments list. Webhook events render at the endpoint's own
+     * api_version, and endpoints created before this release, or by hand in the
+     * Dashboard, carry none, so they render at the account default. On any
+     * Stripe account created since then that default is Basil, both reads
+     * returned '', and every renewal was answered 200 and dropped: charged by
+     * Stripe, absent from Dono, never retried.
+     *
+     * payments is expandable and is not guaranteed to be in the payload, so
+     * when the flat fields are missing the invoice is re-read through the API,
+     * which is pinned by the Stripe-Version header and answers in the shape
+     * these handlers were written for.
+     *
+     * @param array<string, mixed> $invoice
+     * @return array{0: string, 1: string} [subscription id, payment intent id]
+     */
+    private function invoiceRefs(array $invoice): array
+    {
+        $subscriptionId = (string) ($invoice['subscription'] ?? '');
+        $piId           = (string) ($invoice['payment_intent'] ?? '');
+
+        if ($subscriptionId === '') {
+            $subscriptionId = (string) ($invoice['parent']['subscription_details']['subscription'] ?? '');
+        }
+        if ($piId === '') {
+            $piId = (string) ($invoice['payments']['data'][0]['payment']['payment_intent'] ?? '');
+        }
+
+        if ($subscriptionId !== '' && $piId !== '') {
+            return [$subscriptionId, $piId];
+        }
+
+        $invoiceId = (string) ($invoice['id'] ?? '');
+        if ($invoiceId === '') {
+            return [$subscriptionId, $piId];
+        }
+
+        try {
+            $fresh = $this->api->get('/invoices/' . rawurlencode($invoiceId));
+        } catch (Throwable $e) {
+            return [$subscriptionId, $piId];
+        }
+
+        if ($subscriptionId === '') {
+            $subscriptionId = (string) ($fresh['subscription'] ?? '');
+        }
+        if ($piId === '') {
+            $piId = (string) ($fresh['payment_intent'] ?? '');
+        }
+
+        return [$subscriptionId, $piId];
+    }
+
+    /**
      * `invoice.payment_succeeded` for `billing_reason=subscription_cycle` is a
      * renewal. The first invoice (`subscription_create`) is paid by the one-off
      * PaymentIntent and ignored here to avoid double-counting.
@@ -879,7 +938,8 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
             );
         }
 
-        $subscriptionId = (string) ($invoice['subscription'] ?? '');
+        [$subscriptionId, $piId] = $this->invoiceRefs($invoice);
+
         $plan = $this->plans->findBySubscriptionId($this->id(), $subscriptionId);
         if (! $plan) {
             return new WebhookOutcome(
@@ -902,7 +962,6 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
             return $this->refused($eventId, $type, $reason);
         }
 
-        $piId        = (string) ($invoice['payment_intent'] ?? '');
         $currency    = strtoupper((string) ($invoice['currency'] ?? $plan->currency));
         $amountCents = Currency::fromMinorUnits((int) ($invoice['amount_paid'] ?? 0), $currency);
 
@@ -962,7 +1021,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
 
     private function handleInvoicePaymentFailed(string $eventId, string $type, array $invoice): WebhookOutcome
     {
-        $subscriptionId = (string) ($invoice['subscription'] ?? '');
+        [$subscriptionId] = $this->invoiceRefs($invoice);
         $plan = $this->plans->findBySubscriptionId($this->id(), $subscriptionId);
         if (! $plan) {
             return new WebhookOutcome(
