@@ -1,7 +1,40 @@
 /** @jsxImportSource preact */
 
 import { useEffect, useState } from 'preact/hooks';
-import { getActiveNumberFormat, groupDigits, parseAmount } from '../util/format';
+import { getActiveNumberFormat, groupDigits } from '../util/format';
+
+/**
+ * A typed amount, read the way the donor meant it.
+ *
+ * The box accepts both separators because donors type whichever one they are
+ * used to. parseAmount then removed whichever one the org had configured as
+ * its thousands separator, so a site formatting in en-US read "25,50" as 2550
+ * and charged a hundred times the intended gift, and a site formatting in
+ * de-DE did exactly the same to "25.50".
+ *
+ * Read positionally instead, which holds in both conventions: the last
+ * separator is a decimal point when one or two digits follow it, and grouping
+ * otherwise. Nobody groups thousands two digits at a time, and no currency
+ * here has more than two decimal places.
+ */
+export function typedAmountToNumber( raw, dp ) {
+    const cleaned = String( raw ?? '' ).replace( /[^\d.,]/g, '' );
+    if ( cleaned === '' ) return 0;
+
+    const ungrouped = () => Number( cleaned.replace( /[.,]/g, '' ) ) || 0;
+
+    // A zero-decimal currency has no fractional part to protect.
+    if ( ! dp ) return ungrouped();
+
+    const lastSep = Math.max( cleaned.lastIndexOf( '.' ), cleaned.lastIndexOf( ',' ) );
+    if ( lastSep === -1 ) return Number( cleaned ) || 0;
+
+    const decimals = cleaned.length - lastSep - 1;
+    if ( decimals < 1 || decimals > 2 ) return ungrouped();
+
+    const whole = cleaned.slice( 0, lastSep ).replace( /[.,]/g, '' );
+    return Number( `${ whole || '0' }.${ cleaned.slice( lastSep + 1 ) }` ) || 0;
+}
 
 // `value` is in major units (50 = €50.00). Number format comes from the
 // runtime's active format, seeded once at boot from `config.numberFormat`.
@@ -34,7 +67,7 @@ export default function AmountInput( {
     }, [ value, focused, dp, fmt.thousandSep, fmt.decimalSep ] );
 
     const emit = ( raw ) => {
-        let n = parseAmount( raw );
+        let n = typedAmountToNumber( raw, dp );
         if ( typeof min === 'number' && n < min ) n = min;
         if ( typeof max === 'number' && n > max ) n = max;
         onChange && onChange( n );
