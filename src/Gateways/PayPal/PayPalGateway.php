@@ -14,6 +14,7 @@ use Dono\Gateways\PaymentGateway;
 use Dono\Gateways\RefundResult;
 use Dono\Gateways\SubscriptionAware;
 use Dono\Gateways\WebhookOutcome;
+use Dono\Gateways\SubscriptionChangeNeedsApproval;
 use Dono\Gateways\WebhookPaymentGuard;
 use Dono\Recurring\FrequencyMap;
 use Dono\Recurring\RecurringPlan;
@@ -818,10 +819,31 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware
             (int) $plan->interval_count
         );
 
-        $this->api->post(
+        $revised = $this->api->post(
             '/v1/billing/subscriptions/' . rawurlencode($plan->gateway_subscription_id) . '/revise',
             ['plan_id' => $planId]
         );
+
+        // PayPal does not apply a revise until the subscriber approves it, and
+        // says so by handing back an approve link. The response was discarded,
+        // so the caller wrote the new amount to the plan while PayPal carried
+        // on charging the old one: the portal showed the donor the figure they
+        // asked for and their card showed the figure they had. Nothing later
+        // reconciled the two.
+        $approveUrl = '';
+        foreach ((array) ($revised['links'] ?? []) as $link) {
+            if (strtolower((string) ($link['rel'] ?? '')) === 'approve') {
+                $approveUrl = (string) ($link['href'] ?? '');
+                break;
+            }
+        }
+
+        if ($approveUrl !== '') {
+            throw new SubscriptionChangeNeedsApproval(
+                'PayPal needs the donor to approve this change before it takes effect.',
+                $approveUrl
+            );
+        }
     }
 
     /**

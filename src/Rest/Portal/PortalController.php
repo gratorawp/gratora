@@ -644,6 +644,17 @@ final class PortalController
                 default:
                     return new WP_Error('dono_invalid_action', '', ['status' => 422]);
             }
+        } catch (\Dono\Gateways\SubscriptionChangeNeedsApproval $e) {
+            // Not a failure: the processor took the request and is waiting on
+            // the donor. Local state stays as it is, because writing the new
+            // amount here would tell the donor a change had happened that their
+            // card would not agree with. Retrying does not help, so the message
+            // does not suggest it.
+            return new WP_Error(
+                'dono_change_needs_approval',
+                __('Your payment provider needs you to approve this change before it takes effect. Nothing has changed yet.', 'dono'),
+                ['status' => 409, 'approve_url' => $e->approveUrl]
+            );
         } catch (\Throwable $e) {
             // Gateway (or any downstream) failed; local state intentionally left
             // unchanged. Degrade to a clean 502 rather than a 500.

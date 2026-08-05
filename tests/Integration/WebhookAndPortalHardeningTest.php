@@ -136,6 +136,54 @@ final class WebhookAndPortalHardeningTest extends IntegrationTestCase
         }
     }
 
+    public function test_an_unapplied_amount_change_is_not_recorded_as_applied(): void
+    {
+        // PayPal does not apply a revise until the subscriber approves it, and
+        // says so with an approve link. Treating that as success wrote the new
+        // amount to the plan while PayPal carried on charging the old one, and
+        // nothing later reconciled the two.
+        $donor = Plugin::instance()->container->get(DonorService::class)
+            ->findOrCreate('approve-' . uniqid() . '@example.test');
+
+        $plan = \Dono\Recurring\RecurringPlan::make();
+        $plan->donor_id                = (int) $donor->id;
+        $plan->gateway                 = 'needsapproval';
+        $plan->gateway_subscription_id = 'I-' . strtoupper(bin2hex(random_bytes(4)));
+        $plan->amount_cents            = 2500;
+        $plan->currency                = 'USD';
+        $plan->interval_unit           = 'month';
+        $plan->interval_count          = 1;
+        $plan->status                  = 'active';
+        $plan->started_at              = gmdate('Y-m-d H:i:s');
+        $plan->created_at              = gmdate('Y-m-d H:i:s');
+        $plan->updated_at              = gmdate('Y-m-d H:i:s');
+        $plan->save();
+
+        Plugin::instance()->container->get(\Dono\Gateways\GatewayManager::class)
+            ->register(new NeedsApprovalGateway());
+
+        $sid = bin2hex(random_bytes(32));
+        set_transient('dono_portal_' . hash('sha256', $sid), ['donor_id' => (int) $donor->id, 'csrf' => 'tok'], 3600);
+        $_COOKIE['dono_donor_session'] = $sid;
+
+        $req = new WP_REST_Request('POST', '/dono/v1/portal/recurring/' . (int) $plan->id . '/action');
+        $req->set_header('content-type', 'application/json');
+        $req->set_header('X-Dono-Csrf', 'tok');
+        $req->set_body((string) wp_json_encode(['action' => 'change_amount', 'amount_cents' => 5000]));
+        $res = rest_do_request($req);
+
+        unset($_COOKIE['dono_donor_session']);
+
+        $this->assertSame(409, $res->get_status(), 'the donor is told it is waiting on them');
+
+        $fresh = \Dono\Recurring\RecurringPlan::query()->find('id', (int) $plan->id);
+        $this->assertSame(
+            2500,
+            (int) $fresh->amount_cents,
+            'the plan still says what the card is actually being charged'
+        );
+    }
+
     public function test_register_still_names_a_donor_it_creates(): void
     {
         $email = 'brand-new-' . uniqid() . '@example.test';
@@ -152,5 +200,50 @@ final class WebhookAndPortalHardeningTest extends IntegrationTestCase
         $this->assertNotNull($fresh, 'the donor is created');
         $this->assertSame('Ada', (string) $fresh->first_name, 'and keeps the name they gave for themselves');
         $this->assertSame('Lovelace', (string) $fresh->last_name);
+    }
+}
+
+/** Answers a revise the way PayPal does when the subscriber must approve it. */
+final class NeedsApprovalGateway implements \Dono\Gateways\PaymentGateway, \Dono\Gateways\SubscriptionAware
+{
+    public function id(): string { return 'needsapproval'; }
+    public function label(): string { return 'Needs approval'; }
+    public function description(): string { return ''; }
+    public function frequencies(): array { return ['monthly']; }
+    public function paymentMethods(): array { return []; }
+    public function countries(): array { return []; }
+    public function currencies(): array { return ['USD']; }
+    public function canCharge(): bool { return true; }
+
+    public function createIntent(\Dono\Donations\Donation $donation): \Dono\Gateways\GatewayIntentResult
+    {
+        return new \Dono\Gateways\GatewayIntentResult(ok: false, error: 'not used');
+    }
+
+    public function confirm(\Dono\Donations\Donation $donation, array $payload = []): \Dono\Gateways\GatewayConfirmResult
+    {
+        return new \Dono\Gateways\GatewayConfirmResult(ok: false, error: 'not used');
+    }
+
+    public function handleWebhook(WP_REST_Request $request): \Dono\Gateways\WebhookOutcome
+    {
+        return new \Dono\Gateways\WebhookOutcome(signature_ok: false, external_id: '', event_type: '', handled: false);
+    }
+
+    public function refund(\Dono\Donations\Donation $donation, int $amountCents, ?string $reason = null): \Dono\Gateways\RefundResult
+    {
+        return new \Dono\Gateways\RefundResult(ok: false, error: 'not used');
+    }
+
+    public function cancelSubscription(\Dono\Recurring\RecurringPlan $plan, ?string $reason = null): void {}
+    public function pauseSubscription(\Dono\Recurring\RecurringPlan $plan, ?string $resumesAt = null): void {}
+    public function resumeSubscription(\Dono\Recurring\RecurringPlan $plan): void {}
+
+    public function updateSubscriptionAmount(\Dono\Recurring\RecurringPlan $plan, int $amountCents): void
+    {
+        throw new \Dono\Gateways\SubscriptionChangeNeedsApproval(
+            'needs approval',
+            'https://www.paypal.com/approve/xyz'
+        );
     }
 }
