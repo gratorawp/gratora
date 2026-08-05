@@ -375,6 +375,14 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware
             return $this->unmatched($eventId, $type, 'capture');
         }
 
+        // The browser picks custom_id when it creates the order, so this event
+        // names a donation an attacker chose. handleCaptureCompleted checks the
+        // pair; the two that reverse a payment did not, so a sandbox-signed
+        // event could fail a live donation.
+        if ($reason = WebhookPaymentGuard::refuseToTouch($donation, $this->id(), $this->verifiedIsTest)) {
+            return $this->refused($eventId, $type, $reason);
+        }
+
         $this->donationService->markFailed($donation, 'PayPal declined the payment.');
 
         return new WebhookOutcome(
@@ -398,6 +406,15 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware
 
         if (! $donation) {
             return $this->unmatched($eventId, $type, 'refund');
+        }
+
+        // custom_id is chosen by whoever created the order, so this refund
+        // names a donation of the caller's choosing. Without the pair check a
+        // sandbox credential could refund live money: the donation drops out of
+        // every total, its receipt is voided, and the donor is emailed about a
+        // refund PayPal never made.
+        if ($reason = WebhookPaymentGuard::refuseToTouch($donation, $this->id(), $this->verifiedIsTest)) {
+            return $this->refused($eventId, $type, $reason);
         }
 
         $currency = strtoupper((string) ($refund['amount']['currency_code'] ?? $donation->currency));

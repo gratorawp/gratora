@@ -300,9 +300,19 @@ final class PortalController
         $hash = $this->hasher->emailHash($this->hasher->normalizeEmail($email));
         if (! $this->consumeEmailQuota($hash)) return $ok;
 
+        // The name is only ever written to a donor this request is creating.
+        // This endpoint takes no session and proves nothing about who is
+        // calling, and findOrCreate() back-fills any empty field on a donor it
+        // finds. So anyone knowing an address could write a name onto that
+        // donor's record, and it would then print on their year-end tax
+        // statement and on every receipt re-download that carries no name of
+        // its own. An existing donor sets their own name from the profile
+        // endpoint, which is behind their session.
+        $existing = $this->donors->findByEmailHash($hash);
+
         $profile = [];
         $name = trim((string) ($request['name'] ?? ''));
-        if ($name !== '') {
+        if ($existing === null && $name !== '') {
             $parts = preg_split('/\s+/', $name, 2) ?: [];
             $profile['first_name'] = (string) ($parts[0] ?? '');
             if (isset($parts[1])) {
@@ -310,7 +320,7 @@ final class PortalController
             }
         }
 
-        $donor = $this->donorService->findOrCreate($email, $profile);
+        $donor = $existing ?? $this->donorService->findOrCreate($email, $profile);
 
         $this->async->enqueue(self::SEND_LINK_HOOK, [
             'donor_id' => (int) $donor->id,

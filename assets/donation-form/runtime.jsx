@@ -174,7 +174,7 @@ function FormBody( { state, dispatch, config } ) {
 
     // Honeypot hidden via SCSS; token is HMAC-signed so scripted submissions
     // can't mint one. Both gates enforced server-side in AntiSpamGuard.
-    const honeypotName = config.spam?.honeypotName || 'website';
+    const honeypotName = config.spam?.honeypotName || 'form_ref';
     const formToken    = config.spam?.formToken || '';
     const [ honeypot, setHoneypot ] = useState( '' );
 
@@ -217,6 +217,12 @@ function FormBody( { state, dispatch, config } ) {
             } );
             const data = await res.json();
             if ( ! res.ok ) {
+                // The trap is invisible, so a donor who somehow has a value in
+                // it cannot see or clear one, and every retry would be refused
+                // the same way. Clearing it here means a second attempt is a
+                // real attempt. A bot refilling it on retry is refused again,
+                // which is the point.
+                setHoneypot( '' );
                 dispatch( { type: 'SUBMIT_ERROR', message: data.message || config.i18n.error } );
                 return;
             }
@@ -441,7 +447,7 @@ function FormBody( { state, dispatch, config } ) {
     const honeypotInput = (
         <div class="dono-form__hp" aria-hidden="true">
             <label>
-                Website (leave blank)
+                Leave this field empty
                 <input
                     type="text"
                     name={ honeypotName }

@@ -509,8 +509,18 @@ HTML;
         $hasGatewaysBlock = $this->hasPaymentGatewaysBlock($form);
 
         // Rotate the honeypot field name per render so a generic bot cannot
-        // denylist a fixed name; the pool stays plausible bait.
-        $honeypotPool = ['website', 'url', 'homepage', 'company', 'web', 'company_url', 'your_site'];
+        // denylist a fixed name.
+        //
+        // Every name here is one no browser has a field type for. The pool used
+        // to read website, url, homepage, company, which are exactly the tokens
+        // Chrome and Safari match for autofill, and they fill by field name and
+        // label whatever autocomplete="off" says. A donor using autofill with an
+        // organisation or website saved would have it written into the trap, and
+        // the submission was then refused with "Submission rejected." on every
+        // retry, because the value is held in state the donor cannot see or
+        // clear. It worked six renders in seven, which reads as a flaky site
+        // rather than a bug.
+        $honeypotPool = ['form_ref', 'aux_code', 'extra_note', 'alt_ref', 'note_two', 'field_ref', 'checksum'];
         $honeypotName = $honeypotPool[random_int(0, count($honeypotPool) - 1)];
 
         $gatewaysCfg = null;
