@@ -22,6 +22,7 @@ import RecentActivity from './widgets/RecentActivity';
 import TopCampaigns from './widgets/TopCampaigns';
 import RecurringForecast from './widgets/RecurringForecast';
 import NeedsAttention from './widgets/NeedsAttention';
+import { Notice } from '@wordpress/components';
 
 const SCOPE = 'dashboard';
 
@@ -165,6 +166,15 @@ export default function Dashboard() {
                     />
                 </div>
             </div>
+
+            { /* A range change that fails leaves the previous range's numbers on
+                 screen with nothing marking them, so they read as belonging to
+                 the range now selected. */ }
+            { metrics !== null && fetchError && (
+                <Notice status="error" onRemove={ () => setFetchError( false ) }>
+                    { __( 'These numbers are from the previous range. The one you picked could not be loaded.', 'dono' ) }
+                </Notice>
+            ) }
 
             { metrics === null && fetchError ? (
                 <EmptyState

@@ -31,6 +31,7 @@ use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
+use Dono\Vendor\Queryable\DB;
 
 /**
  * Donor portal REST surface: authentication, profile, donations, recurring
@@ -274,13 +275,13 @@ final class PortalController
         // Lock per-email before the lookup so a hammered address can't reveal existence.
         if (! $this->consumeEmailQuota($hash)) return $ok;
 
-        $donor = $this->donors->findByEmailHash($hash);
-        if (! $donor) return $ok;
-
-        $this->async->enqueue(self::SEND_LINK_HOOK, [
-            'donor_id' => (int) $donor->id,
-            'email'    => $email,
-        ]);
+        // Enqueued for every address that gets this far, known or not, and the
+        // lookup happens in the job. Doing it here meant the donor branch wrote
+        // several Action Scheduler rows before answering while the unknown
+        // branch returned at once, and that difference is a reliable test of
+        // whether an address is one of the charity's donors, which is exactly
+        // what the identical 200 exists to hide.
+        $this->async->enqueue(self::SEND_LINK_HOOK, ['email' => $email]);
 
         return $ok;
     }
@@ -346,10 +347,18 @@ final class PortalController
         } else {
             $donorId = (int) $args;
         }
-        if ($donorId <= 0 || $email === '' || ! is_email($email)) return;
+        if ($email === '' || ! is_email($email)) return;
 
-        $donor = $this->donors->findById($donorId);
+        // Resolved here rather than in the request, so the request does the same
+        // work for an address that is a donor and one that is not. donor_id is
+        // still honoured for jobs queued before that moved, and by registerDonor
+        // which already knows the row it just created.
+        $donor = $donorId > 0
+            ? $this->donors->findById($donorId)
+            : $this->donors->findByEmailHash($this->hasher->emailHash($this->hasher->normalizeEmail($email)));
+
         if (! $donor) return;
+        $donorId = (int) $donor->id;
 
         $raw = $this->magicLinks->issue($donorId, 'donor_portal');
         $url = add_query_arg('token', $raw, $this->portalUrl());
@@ -408,6 +417,13 @@ final class PortalController
             'last_name'           => (string) ($donor->last_name ?? ''),
             'country'             => (string) ($donor->country ?? ''),
             'total_donated_cents' => (int) $donor->total_donated_cents,
+            // A donation taken in a currency the org had no rate for carries a
+            // NULL base amount and contributes nothing to the lifetime figure,
+            // which is built on the base. The count beside it is a plain count,
+            // so a donor could read "3 donations" next to a lifetime total of
+            // zero with nothing explaining the gap. Admin screens pair the same
+            // figure with this count; the portal now can too.
+            'unconverted_count'   => $this->unconvertedDonationCount((int) $donor->id),
             'donations_count'     => (int) $donor->donations_count,
             'first_donation_at'   => $donor->first_donation_at,
             'last_donation_at'    => $donor->last_donation_at,
@@ -415,6 +431,18 @@ final class PortalController
             'csrf'                => (string) ($this->session->csrfToken() ?? ''),
             'consents_pending'    => $this->staleConsentCount((int) $donor->id),
         ], 200);
+    }
+
+    /** Donations of this donor's that no lifetime total can include. */
+    private function unconvertedDonationCount(int $donorId): int
+    {
+        $row = DonationQueries::donationsOnly(DB::table('dono_donations'))
+            ->whereIn('status', ['paid', 'partial_refund'])
+            ->where('donor_id', $donorId)
+            ->selectRaw(DonationQueries::unconvertedExpr() . ' AS n')
+            ->get();
+
+        return (int) ($row['n'] ?? 0);
     }
 
     public function donationsList(): WP_REST_Response|WP_Error

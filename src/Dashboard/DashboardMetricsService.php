@@ -366,19 +366,34 @@ final class DashboardMetricsService
         }
 
         // 4. Recent donor notes worth a reply (last 7 days, non-empty note).
-        $candidates = DonationQueries::live(Donation::query())
+        //
+        // Counted in SQL over the whole window. It used to read the 60 most
+        // recent donations and count the notes among them, so a busy week
+        // reported however many of the last 60 happened to carry one, and the
+        // number was worded as donors while counting notes. One donor leaving
+        // three notes read as three donors.
+        $noteRows = DonationQueries::live(DB::table('dono_donations'))
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('paid_at', $since7d, '>=')
-            ->orderBy('paid_at', 'DESC')
-            ->limit(60)
-            ->getAll();
-        $noteCount   = 0;
-        $noteDonors  = [];
-        foreach ($candidates as $d) {
-            if (trim((string) ($d->note_to_org ?? '')) === '') continue;
-            $noteCount++;
-            $donorId = (int) ($d->donor_id ?? 0);
-            if ($donorId > 0) $noteDonors[$donorId] = true;
+            ->whereRaw("TRIM(COALESCE(note_to_org, '')) <> ''")
+            ->selectRaw('COUNT(*) AS notes, COUNT(DISTINCT donor_id) AS donors')
+            ->get();
+
+        $noteCount  = (int) ($noteRows['notes'] ?? 0);
+        $donorCount = (int) ($noteRows['donors'] ?? 0);
+
+        // Still capped, but only for the link target: one donor means their
+        // profile, several mean the donor list.
+        $noteDonors = [];
+        if ($noteCount > 0 && $donorCount === 1) {
+            $one = DonationQueries::live(DB::table('dono_donations'))
+                ->whereIn('status', ['paid', 'partial_refund'])
+                ->where('paid_at', $since7d, '>=')
+                ->whereRaw("TRIM(COALESCE(note_to_org, '')) <> ''")
+                ->selectRaw('MIN(donor_id) AS donor_id')
+                ->get();
+            $id = (int) ($one['donor_id'] ?? 0);
+            if ($id > 0) $noteDonors[$id] = true;
         }
         if ($noteCount > 0) {
             // The note is the donor's, so open their profile when it points at one
@@ -392,14 +407,14 @@ final class DashboardMetricsService
                 'key'   => 'donor-notes',
                 'tone'  => 'info',
                 'title' => sprintf(
-                    /* translators: %d: notes count */
+                    /* translators: %d: number of donors who left a note */
                     _n(
                         '%d donor left a note in the last 7 days.',
                         '%d donors left notes in the last 7 days.',
-                        $noteCount,
+                        $donorCount,
                         'dono'
                     ),
-                    $noteCount
+                    $donorCount
                 ),
                 'action_label' => __('Read', 'dono'),
                 'action_href'  => $href,

@@ -449,6 +449,20 @@ function Overview( { me } ) {
                 <Kpi label={ __( 'Donations', 'dono' ) } value={ String( me.donations_count ) } />
                 <Kpi label={ __( 'Donor since', 'dono' ) } value={ me.first_donation_at ? formatDate( me.first_donation_at ) : '-' } />
             </div>
+            { me.unconverted_count > 0 && (
+                <p class="dp-hint">
+                    { sprintf(
+                        /* translators: %d: number of donations given in another currency. */
+                        _n(
+                            'Lifetime giving does not include %d donation you gave in another currency.',
+                            'Lifetime giving does not include %d donations you gave in other currencies.',
+                            me.unconverted_count,
+                            'dono'
+                        ),
+                        me.unconverted_count
+                    ) }
+                </p>
+            ) }
             <p class="dp-hint">{ __( 'Manage recurring donations, download receipts, and update preferences from the tabs above.', 'dono' ) }</p>
         </div>
     );
