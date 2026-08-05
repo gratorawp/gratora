@@ -201,7 +201,7 @@ function CohortHeatmap( { retention } ) {
     const cols = Array.from( { length: maxOffset + 1 }, ( _, i ) => i );
 
     const cellStyle = ( pct ) => {
-        if ( pct <= 0 ) return { background: 'var(--dono-bg-soft, #f3f4f6)', color: 'var(--dono-text-muted, #9ca3af)' };
+        if ( pct <= 0 ) return { background: 'var(--dono-bg-soft, #f3f4f6)', color: 'var(--dono-text-muted, #6b7280)' };
         // Linear interpolation from light to accent green.
         const intensity = Math.min( 1, pct / 100 );
         const r = Math.round( 240 + ( 30 - 240 ) * intensity );
