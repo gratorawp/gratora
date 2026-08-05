@@ -423,7 +423,11 @@ final class PortalController
         if ($donor instanceof WP_Error) return $donor;
         $donorId = (int) $donor->id;
 
-        $rows = DonationQueries::live(Donation::query())
+        // donationsOnly, not live: an event ticket order rides the same table
+        // with kind='order', and every other donor-facing total in core
+        // excludes those. Listed here they read to the donor as gifts they made,
+        // and the list then disagreed with the lifetime figure above it.
+        $rows = DonationQueries::donationsOnly(Donation::query())
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('donor_id', $donorId)
             ->orderBy('paid_at', 'DESC')
@@ -454,7 +458,9 @@ final class PortalController
         if ($donor instanceof WP_Error) return $donor;
 
         $d = $this->donations->findByReference((string) $request['reference']);
-        if (! $d || $d->donor_id !== $donor->id) {
+        // kind, as well as owner: the list excludes ticket orders, so a
+        // reference naming one must not open here either.
+        if (! $d || $d->donor_id !== $donor->id || (string) $d->kind !== 'donation') {
             return new WP_Error('dono_not_found', '', ['status' => 404]);
         }
 
@@ -699,18 +705,20 @@ final class PortalController
             if ($r->donation_id !== null && isset($testDonationIds[(int) $r->donation_id])) {
                 continue;
             }
-            // /receipts/{id}/download is public-by-token (it mirrors the
-            // email-attached flow), so mint one for this session. A 1-hour TTL
-            // covers the page lifetime without surviving as a copied link.
-            $token = $this->magicLinks->issue($donorId, 'download_receipt', (int) $r->id, 3600);
-            $url   = rest_url('dono/v1/receipts/' . $r->id . '/download');
+            // No token here. This used to mint a live one-hour download
+            // credential for every receipt in the list, up to two hundred of
+            // them, every time the tab was opened. The portal never read the
+            // field: it asks /receipts/{id}/download-url at click time, which is
+            // why that endpoint exists. So each of those was an unauthenticated
+            // credential for a donor's receipt, valid for an hour, issued for
+            // nobody and counting against the same validation budget the donor
+            // needs to sign in.
             $out[] = [
                 'id'             => (int) $r->id,
                 'receipt_number' => (string) $r->receipt_number,
                 'renderer_id'    => (string) $r->renderer_id,
                 'issued_at'      => $r->issued_at,
                 'donation_id'    => $r->donation_id ? (int) $r->donation_id : null,
-                'download_url'   => esc_url_raw(add_query_arg('token', $token, $url)),
             ];
         }
         return new WP_REST_Response($out, 200);
@@ -1165,7 +1173,24 @@ final class PortalController
             );
         }
 
-        $this->donorService->redact($donor);
+        try {
+            $this->donorService->redact($donor);
+        } catch (\Dono\Recurring\GatewayUnreachable $e) {
+            // Erasure cancels the donor's live recurring plans first, on
+            // purpose: wiping the donor while a subscription keeps billing is
+            // worse than not wiping them. When the gateway is gone the
+            // cancellation cannot happen, and this used to escape the callback
+            // as a fatal, so the donor exercising their right to erasure was
+            // told only that the request failed, with nothing to do next.
+            ErrorLog::record('portal.forget', $e->getMessage());
+
+            return new WP_Error(
+                'dono_erasure_blocked',
+                __('We could not stop your recurring donation with the payment provider, so your account has not been deleted yet. Please contact the organisation and they will finish this for you.', 'dono'),
+                ['status' => 409]
+            );
+        }
+
         $this->session->destroy();
 
         return new WP_REST_Response(['ok' => true], 200);

@@ -48,7 +48,7 @@ final class MagicLinkService
     public function validate(string $rawToken, string $purpose, ?int $targetId = null): ?MagicLinkToken
     {
         if ($rawToken === '') return null;
-        if ($this->isRateLimited()) return null;
+        if ($this->isRateLimited($purpose)) return null;
         $hash = hash('sha256', $rawToken);
 
         $query = MagicLinkToken::query()
@@ -60,9 +60,13 @@ final class MagicLinkService
         }
 
         $token = $query->get();
-        if (! $token) return null;
+        if (! $token) {
+            $this->recordFailure($purpose);
+            return null;
+        }
 
         if (strtotime($token->expires_at) < $this->clock->now()->getTimestamp()) {
+            $this->recordFailure($purpose);
             return null;
         }
 
@@ -72,7 +76,7 @@ final class MagicLinkService
     public function consumeAndValidate(string $rawToken, string $purpose, ?int $targetId = null): ?MagicLinkToken
     {
         if ($rawToken === '') return null;
-        if ($this->isRateLimited()) return null;
+        if ($this->isRateLimited($purpose)) return null;
         $hash = hash('sha256', $rawToken);
         $now  = $this->clock->now()->format('Y-m-d H:i:s');
 
@@ -87,7 +91,10 @@ final class MagicLinkService
         }
 
         $result = $claim->update(['used_at' => $now]);
-        if ($result->affectedRows < 1) return null;
+        if ($result->affectedRows < 1) {
+            $this->recordFailure($purpose);
+            return null;
+        }
 
         $reload = MagicLinkToken::query()
             ->where('token_hash', $hash)
@@ -106,15 +113,36 @@ final class MagicLinkService
         $token->save();
     }
 
-    /** Rate-limit token validation attempts per IP (20 per 15 minutes). */
-    private function isRateLimited(): bool
+    /**
+     * Rate-limit token guessing, per purpose and per IP (20 per 15 minutes).
+     *
+     * Two things were wrong with counting every validation against one shared
+     * budget. Successes counted, so a donor opening their receipts tab spent
+     * the budget on their own valid tokens; and the budget was shared across
+     * purposes, so spending it there locked them out of signing in, with the
+     * portal telling them their link had expired. Both are ordinary use.
+     *
+     * What the limit is actually for is guessing, and a guess is a failure, so
+     * only failures count now. Still keyed on REMOTE_ADDR, which donors behind
+     * one NAT share, but a shared budget of failed attempts is a far smaller
+     * thing to share than a shared budget of successful ones.
+     */
+    private function isRateLimited(string $purpose): bool
     {
-        $ip  = (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
-        $key = 'dono_ml_val_' . hash('sha256', $ip);
-        $count = (int) get_transient($key);
-        if ($count >= 20) return true;
-        set_transient($key, $count + 1, 900);
-        return false;
+        return (int) get_transient($this->rateKey($purpose)) >= 20;
+    }
+
+    private function recordFailure(string $purpose): void
+    {
+        $key = $this->rateKey($purpose);
+        set_transient($key, ((int) get_transient($key)) + 1, 900);
+    }
+
+    private function rateKey(string $purpose): string
+    {
+        $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+
+        return 'dono_ml_val_' . hash('sha256', $purpose . '|' . $ip);
     }
 
     /** Delete tokens that have expired or been consumed. */
