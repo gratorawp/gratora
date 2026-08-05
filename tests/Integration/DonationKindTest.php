@@ -15,8 +15,7 @@ use Dono\Foundation\Plugin;
 
 /**
  * The donation `kind` discriminator: non-donation money (event ticket orders)
- * rides the payment rails but stays out of donor lifetime rollups. Campaign and
- * org revenue keep including it.
+ * rides the payment rails and stays out of every total that means giving.
  */
 final class DonationKindTest extends IntegrationTestCase
 {
@@ -80,7 +79,7 @@ final class DonationKindTest extends IntegrationTestCase
         $this->assertSame(1, (int) $fresh->donations_count);
     }
 
-    public function test_campaign_aggregates_include_order_kind(): void
+    public function test_campaign_aggregates_exclude_order_kind(): void
     {
         $now = gmdate('Y-m-d H:i:s');
         $c = Campaign::make();
@@ -98,7 +97,11 @@ final class DonationKindTest extends IntegrationTestCase
 
         Plugin::instance()->container->get(AggregateSyncer::class)->syncCampaign((int) $c->id);
 
+        // Raised means gifts, at every level. A campaign used to count orders
+        // while its funds did not, so a campaign disagreed with the sum of its
+        // own funds, and a ticket buyer who received something of value was
+        // counted as having given.
         $fresh = Campaign::query()->where('id', $c->id)->get();
-        $this->assertSame(7000, (int) $fresh->raised_cents, 'campaign revenue includes ticket orders');
+        $this->assertSame(2000, (int) $fresh->raised_cents, 'the gift, not the ticket');
     }
 }

@@ -28,7 +28,7 @@ final class AggregateSyncer
     {
         if ($campaignId <= 0) return;
 
-        $row = DonationQueries::live(DB::table('dono_donations')
+        $row = DonationQueries::donationsOnly(DB::table('dono_donations')
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('campaign_id', $campaignId))
             ->selectRaw("
@@ -54,7 +54,7 @@ final class AggregateSyncer
     {
         if ($fundId <= 0) return;
 
-        $row = DonationQueries::live(DB::table('dono_donations')
+        $row = DonationQueries::donationsOnly(DB::table('dono_donations')
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('fund_id', $fundId))
             ->selectRaw("
@@ -82,7 +82,7 @@ final class AggregateSyncer
     {
         if ($formId <= 0) return;
 
-        $row = DonationQueries::live(DB::table('dono_donations')
+        $row = DonationQueries::donationsOnly(DB::table('dono_donations')
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('form_id', $formId))
             ->selectRaw("

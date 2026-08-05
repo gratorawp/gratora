@@ -70,9 +70,18 @@ final class Donation extends Model
     public bool $is_test = false;
     /**
      * What the money is: 'donation', or a non-donation kind an add-on moves
-     * through the rails (e.g. 'order' for event ticket orders). Non-donation
-     * kinds stay out of donor lifetime rollups; campaign and org revenue
-     * include every kind.
+     * through the rails (e.g. 'order' for event ticket orders).
+     *
+     * One rule, at every level: raised means gifts. A ticket buyer received
+     * something of value, so their order is an exchange rather than a
+     * contribution, and it stays out of donor lifetime totals, campaign, fund
+     * and form rollups, receipts and the year-end statement alike.
+     *
+     * The rollups matter as much as the compliance surfaces because they have
+     * to reconcile with each other: a campaign counting orders while its funds
+     * did not meant a campaign disagreed with the sum of its own funds. An
+     * add-on that wants to show what tickets brought in is better placed to
+     * say so plainly than a blended figure is.
      */
     public string $kind = 'donation';
     public ?string $failure_reason = null;
