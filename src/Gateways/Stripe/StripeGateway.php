@@ -293,8 +293,11 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
             );
         }
 
-        // Idempotent: DonationService::confirm() no-ops on already-paid donations.
-        $this->donationService->confirm($donation, $confirm->toArray());
+        // Take the row confirm() hands back, not the one we walked in with. A
+        // redirect return and this webhook race each other, and the loser's
+        // in-memory model still reads pending. Carrying it forward meant the
+        // whole-row saves below wrote a paid donation back to pending.
+        $donation = $this->donationService->confirm($donation, $confirm->toArray());
 
         // For recurring donations, convert the saved card into a Stripe
         // Subscription so future renewals fire `invoice.payment_succeeded`.
@@ -786,8 +789,12 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
         // reuse the plan already linked to it rather than inserting a duplicate.
         $existingPlan = $this->plans->findBySubscriptionId($this->id(), $subId);
         if ($existingPlan) {
+            // One column, not the whole row: everything else on this model was
+            // read before confirm() ran.
+            Donation::query()
+                ->where('id', (int) $donation->id)
+                ->update(['recurring_plan_id' => (int) $existingPlan->id]);
             $donation->recurring_plan_id = (int) $existingPlan->id;
-            $donation->save();
             return;
         }
 
@@ -821,8 +828,10 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
         $plan->save();
 
         // Link donation back to the plan it spawned.
+        Donation::query()
+            ->where('id', (int) $donation->id)
+            ->update(['recurring_plan_id' => (int) $plan->id]);
         $donation->recurring_plan_id = (int) $plan->id;
-        $donation->save();
     }
 
     /**

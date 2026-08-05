@@ -172,15 +172,34 @@ export default function DonationsTab( { donorId, redacted } ) {
                     message,
                     confirmLabel: __( 'Mark as paid', 'dono' ),
                     onConfirm: async () => {
-                        try {
-                            await Promise.all( targets.map( ( i ) => apiFetch( {
-                                path:   `/dono/v1/admin/donations/${ encodeURIComponent( i.reference ) }/mark-paid`,
-                                method: 'POST',
-                            } ) ) );
-                            refetch();
-                        } catch ( err ) {
-                            notify.error( err?.message || __( 'Could not mark donations paid.', 'dono' ) );
+                        // allSettled and a finally: a partial failure still
+                        // confirmed some of them and emailed those donors a
+                        // receipt, and skipping the refetch left those rows
+                        // reading Pending on screen.
+                        const results = await Promise.allSettled( targets.map( ( i ) => apiFetch( {
+                            path:   `/dono/v1/admin/donations/${ encodeURIComponent( i.reference ) }/mark-paid`,
+                            method: 'POST',
+                        } ) ) );
+
+                        const done   = results.filter( ( r ) => r.status === 'fulfilled' ).length;
+                        const failed = results.length - done;
+
+                        if ( done > 0 ) {
+                            notify.success( sprintf(
+                                /* translators: %d: donation count */
+                                _n( '%d donation marked paid.', '%d donations marked paid.', done, 'dono' ),
+                                done
+                            ) );
                         }
+                        if ( failed > 0 ) {
+                            notify.error( sprintf(
+                                /* translators: %d: donation count */
+                                _n( '%d donation could not be marked paid.', '%d donations could not be marked paid.', failed, 'dono' ),
+                                failed
+                            ) );
+                        }
+
+                        refetch();
                     },
                 } );
             },
@@ -193,7 +212,11 @@ export default function DonationsTab( { donorId, redacted } ) {
             // An erased donor has no address left to send a receipt to.
             isEligible:   ( item ) => item.status === 'paid' && ! redacted,
             callback: ( items ) => {
-                const targets = items.filter( ( i ) => i.status === 'paid' );
+                // DataViews hands the callback the whole selection, not the
+                // eligible subset, so the redacted guard from isEligible has to
+                // be repeated here or a bulk resend tries to email an erased
+                // donor who has no address left.
+                const targets = items.filter( ( i ) => i.status === 'paid' && ! redacted );
                 if ( ! targets.length ) return;
                 const n = targets.length;
                 const message = n === 1
@@ -208,13 +231,29 @@ export default function DonationsTab( { donorId, redacted } ) {
                     message,
                     confirmLabel: __( 'Resend', 'dono' ),
                     onConfirm: async () => {
-                        try {
-                            await Promise.all( targets.map( ( i ) => apiFetch( {
-                                path:   `/dono/v1/admin/donations/${ encodeURIComponent( i.reference ) }/resend-receipt`,
-                                method: 'POST',
-                            } ) ) );
-                        } catch ( err ) {
-                            notify.error( err?.message || __( 'Could not resend receipts.', 'dono' ) );
+                        // Silence read as nothing happening, so admins pressed
+                        // it again and donors got the receipt twice.
+                        const results = await Promise.allSettled( targets.map( ( i ) => apiFetch( {
+                            path:   `/dono/v1/admin/donations/${ encodeURIComponent( i.reference ) }/resend-receipt`,
+                            method: 'POST',
+                        } ) ) );
+
+                        const sent   = results.filter( ( r ) => r.status === 'fulfilled' ).length;
+                        const failed = results.length - sent;
+
+                        if ( sent > 0 ) {
+                            notify.success( sprintf(
+                                /* translators: %d: receipt count */
+                                _n( '%d receipt resent.', '%d receipts resent.', sent, 'dono' ),
+                                sent
+                            ) );
+                        }
+                        if ( failed > 0 ) {
+                            notify.error( sprintf(
+                                /* translators: %d: receipt count */
+                                _n( '%d receipt could not be resent.', '%d receipts could not be resent.', failed, 'dono' ),
+                                failed
+                            ) );
                         }
                     },
                 } );

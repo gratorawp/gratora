@@ -537,6 +537,22 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
     const pageTitle = decodeEntities( page.title || '' );
     const showPageTitle = page.showTitle !== false && pageTitle !== '';
 
+    // Moving between pages replaced the whole form body with no announcement
+    // and no focus move, so a screen reader carried on reading the button that
+    // had just been swapped underneath it and a keyboard user was left at the
+    // bottom of a page that no longer existed. Same pattern the onboarding
+    // wizard already uses for the same reason.
+    const pageMounted = useRef( false );
+    useEffect( () => {
+        if ( ! pageMounted.current ) { pageMounted.current = true; return; }
+        const root = document.querySelector( '.dono-donation-form' );
+        const h    = root?.querySelector( '.dono-form__page-title, .dono-form__bar-title' );
+        if ( h ) {
+            h.setAttribute( 'tabindex', '-1' );
+            h.focus();
+        }
+    }, [ current ] );
+
     const onPrev = useCallback( () => dispatch( { type: 'PREV' } ), [ dispatch ] );
 
     const onNext = useCallback( () => {
@@ -770,7 +786,12 @@ function App( { config } ) {
         clearStripeReturnParams();
         resolveStripeReturn( config.stripe.publishableKey, ret.clientSecret )
             .then( ( status ) => {
-                if ( status === 'succeeded' || status === 'processing' ) {
+                if ( status === 'processing' ) {
+                    dispatch( {
+                        type: 'SUBMIT_PENDING',
+                        data: { reference: ret.reference, status: 'processing' },
+                    } );
+                } else if ( status === 'succeeded' ) {
                     dispatch( { type: 'SUBMIT_SUCCESS', data: { reference: ret.reference } } );
                 } else {
                     dispatch( { type: 'SUBMIT_ERROR', message: config.i18n.error } );

@@ -76,7 +76,20 @@ export default function StripePayment( { config, payment, dispatch } ) {
             return;
         }
 
-        if ( paymentIntent && ( paymentIntent.status === 'succeeded' || paymentIntent.status === 'processing' ) ) {
+        // processing is not succeeded. Stripe is still working on it, and some
+        // methods take days and can still fail. Showing the completed screen
+        // told the donor their gift had gone through, and the org counted a
+        // donation that had not settled. The reducer already has a processing
+        // state and the form already has a screen for it.
+        if ( paymentIntent && paymentIntent.status === 'processing' ) {
+            dispatch( {
+                type: 'SUBMIT_PENDING',
+                data: { reference: payment.reference, status: 'processing' },
+            } );
+            return;
+        }
+
+        if ( paymentIntent && paymentIntent.status === 'succeeded' ) {
             dispatch( { type: 'SUBMIT_SUCCESS', data: { reference: payment.reference } } );
             return;
         }
