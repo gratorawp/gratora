@@ -522,6 +522,7 @@ final class CoreModule implements DonoModule
             $c->get(AsyncDispatcher::class),
             $c->get(DonationService::class),
             $c->get(RecurringCanceller::class),
+            $c->get(DonorMetricsService::class),
         ));
 
         $c->bind(AggregateSyncer::class, fn () => new AggregateSyncer());

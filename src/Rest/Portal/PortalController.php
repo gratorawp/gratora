@@ -62,6 +62,7 @@ final class PortalController
         private AsyncDispatcher $async,
         private \Dono\Donations\DonationService $donationService,
         private RecurringCanceller $canceller,
+        private \Dono\Donors\DonorMetricsService $metrics,
     ) {
     }
 
@@ -1092,22 +1093,20 @@ final class PortalController
             ];
         }, $plans);
 
-        $bundle = [
-            'exported_at' => gmdate('c'),
-            'donor' => [
-                'id'           => (int) $donor->id,
-                'email'        => $email,
-                'first_name'   => $donor->first_name,
-                'last_name'    => $donor->last_name,
-                'phone'        => $phone,
-                'country'      => $donor->country,
-                'company'      => $donor->company,
-                'created_at'   => $donor->created_at,
-            ],
-            'donations'      => $donationRows,
-            'consents'       => $consentRows,
-            'recurring'      => $planRows,
+        // The org-side export is core's own answer to "everything we hold on
+        // this donor", and the donor's right of access is to that same set. The
+        // hand-built bundle here was a thinner one: no address, no receipts, no
+        // analytics events, no consent history beyond the latest per purpose,
+        // no donor type, and none of what the donor typed into the form. Two
+        // definitions of the same legal obligation is one too many, so this
+        // asks for the canonical one.
+        $bundle = $this->metrics->exportData((int) $donor->id) ?? [
+            'donor'     => ['id' => (int) $donor->id, 'email' => $email],
+            'donations' => $donationRows,
+            'consents'  => $consentRows,
+            'recurring' => $planRows,
         ];
+        $bundle['exported_at'] = gmdate('c');
 
         $json     = wp_json_encode($bundle, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         $filename = sprintf('dono-my-data-%d-%s.json', $donor->id, gmdate('Y-m-d'));

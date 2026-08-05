@@ -91,6 +91,51 @@ final class WebhookAndPortalHardeningTest extends IntegrationTestCase
         $this->assertNull($fresh->last_name);
     }
 
+    public function test_the_donor_export_holds_everything_the_org_export_holds(): void
+    {
+        // Right of access is to everything held on the donor, and core already
+        // has one answer to what that is: the org-side export. The portal built
+        // its own thinner bundle, so the same legal obligation had two
+        // definitions and the donor got the smaller one.
+        $email = 'export-' . uniqid() . '@example.test';
+        $donor = Plugin::instance()->container->get(DonorService::class)->findOrCreate($email, [
+            'first_name' => 'Ada',
+            'country'    => 'GB',
+        ]);
+
+        $canonical = Plugin::instance()->container
+            ->get(\Dono\Donors\DonorMetricsService::class)
+            ->exportData((int) $donor->id);
+
+        $sid = bin2hex(random_bytes(32));
+        set_transient('dono_portal_' . hash('sha256', $sid), ['donor_id' => (int) $donor->id, 'csrf' => 'tok'], 3600);
+        $_COOKIE['dono_donor_session'] = $sid;
+
+        // The bundle is streamed from a rest_pre_serve_request filter, which
+        // only fires when the server actually serves. rest_do_request stops
+        // short of that, so the filter is invoked here the way the server would.
+        $req = new WP_REST_Request('POST', '/dono/v1/portal/data-export');
+        $req->set_header('X-Dono-Csrf', 'tok');
+        $res = rest_do_request($req);
+
+        ob_start();
+        apply_filters('rest_pre_serve_request', false, $res, $req, rest_get_server());
+        $body = ob_get_clean();
+
+        unset($_COOKIE['dono_donor_session']);
+
+        $bundle = json_decode((string) $body, true);
+        $this->assertIsArray($bundle, 'the export streams a JSON body');
+
+        foreach (array_keys($canonical) as $section) {
+            $this->assertArrayHasKey(
+                $section,
+                $bundle,
+                "the donor's own export is missing the {$section} the org export holds"
+            );
+        }
+    }
+
     public function test_register_still_names_a_donor_it_creates(): void
     {
         $email = 'brand-new-' . uniqid() . '@example.test';
