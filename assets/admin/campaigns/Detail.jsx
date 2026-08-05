@@ -1381,7 +1381,9 @@ function SettingsTab( { campaign, onError } ) {
     const [ forms, setForms ]   = useState( [] );
 
     useEffect( () => {
-        apiFetch( { path: '/dono/v1/admin/campaigns/funds' } )
+        apiFetch( { path: addQueryArgs( '/dono/v1/admin/campaigns/funds', {
+            include: campaign?.default_fund_id || undefined,
+        } ) } )
             .then( setFunds )
             .catch( () => onError?.( __( 'Could not load funds.', 'dono' ) ) );
         apiFetch( { path: `/dono/v1/admin/forms?campaign_id=${ campaign.id }&per_page=100` } )
@@ -1944,7 +1946,15 @@ function DefaultsPanel( { c, forms, funds } ) {
                     <select className={ selectCls( c, 'default_fund_id' ) } { ...c.bindNumber( 'default_fund_id' ) }>
                         <option value="">{ __( '( Unassigned )', 'dono' ) }</option>
                         { funds.map( ( f ) => (
-                            <option key={ f.id } value={ f.id }>{ f.name }</option>
+                            <option key={ f.id } value={ f.id }>
+                                { f.is_active === false
+                                    ? sprintf(
+                                        /* translators: %s: fund name */
+                                        __( '%s (inactive)', 'dono' ),
+                                        f.name
+                                    )
+                                    : f.name }
+                            </option>
                         ) ) }
                     </select>
                 </FormRow>

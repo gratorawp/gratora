@@ -74,6 +74,11 @@ final class CampaignsController
             'methods'             => WP_REST_Server::READABLE,
             'callback'            => [$this, 'funds'],
             'permission_callback' => [$this, 'canAccess'],
+            'args'                => [
+                // A campaign's own default fund, so a deactivated one is still
+                // shown as what it is set to rather than as unassigned.
+                'include' => ['type' => 'integer', 'default' => 0],
+            ],
         ]);
 
         register_rest_route(self::NAMESPACE, '/admin/campaigns/stats', [
@@ -361,15 +366,31 @@ final class CampaignsController
         return new WP_REST_Response($stats, 200);
     }
 
-    public function funds(): WP_REST_Response
+    public function funds(WP_REST_Request $request): WP_REST_Response
     {
         $rows = Fund::query()->where('is_active', 1)->orderBy('sort_order', 'ASC')->getAll();
+
+        // A campaign can be pointed at a fund that was deactivated afterwards.
+        // Offering only active funds meant its own setting was not among the
+        // options, so the picker fell back to "( Unassigned )" and told the
+        // reader the campaign had no default fund while it quietly still had
+        // one. Included when asked for, and marked, so the screen shows what
+        // the campaign is actually set to without inviting a new one.
+        $keep = (int) ($request['include'] ?? 0);
+        if ($keep > 0 && ! in_array($keep, array_map(static fn (Fund $f): int => (int) $f->id, $rows), true)) {
+            $current = Fund::query()->find('id', $keep);
+            if ($current) {
+                $rows[] = $current;
+            }
+        }
+
         $shaped = array_map(
             fn (Fund $f): array => [
                 'id'         => $f->id,
                 'code'       => $f->code,
                 'name'       => $f->name,
                 'is_default' => (bool) $f->is_default,
+                'is_active'  => (bool) $f->is_active,
             ],
             $rows
         );
