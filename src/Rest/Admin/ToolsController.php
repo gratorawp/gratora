@@ -18,6 +18,7 @@ use Dono\Foundation\Auth\Capabilities;
 use Dono\Funds\Fund;
 use WP_REST_Response;
 use WP_REST_Server;
+use Dono\Vendor\Queryable\DB;
 
 /**
  * Admin endpoints for system info, settings export, settings import, and
@@ -273,25 +274,25 @@ final class ToolsController
         $rebuildAll = $scope === 'all' || $converted > 0;
 
         if ($rebuildAll || $scope === 'donors') {
-            foreach (self::idsOf(Donor::class) as $id) {
+            foreach (self::eachId('dono_donors') as $id) {
                 $this->aggregates->syncDonor($id);
                 $counts['donors']++;
             }
         }
         if ($rebuildAll || $scope === 'funds') {
-            foreach (self::idsOf(Fund::class) as $id) {
+            foreach (self::eachId('dono_funds') as $id) {
                 $this->aggregates->syncFund($id);
                 $counts['funds']++;
             }
         }
         if ($rebuildAll || $scope === 'campaigns') {
-            foreach (self::idsOf(Campaign::class) as $id) {
+            foreach (self::eachId('dono_campaigns') as $id) {
                 $this->aggregates->syncCampaign($id);
                 $counts['campaigns']++;
             }
         }
         if ($rebuildAll || $scope === 'forms') {
-            foreach (self::idsOf(Form::class) as $id) {
+            foreach (self::eachId('dono_forms') as $id) {
                 $this->aggregates->syncForm($id);
                 $counts['forms']++;
             }
@@ -309,14 +310,45 @@ final class ToolsController
         ], 200);
     }
 
+    /** How many ids to hold at once while walking a table. */
+    private const RECALC_CHUNK = 500;
+
     /**
-     * @param class-string $model
-     * @return list<int>
+     * Every id in a table, a chunk at a time.
+     *
+     * This used to hydrate the whole table into model objects before the first
+     * sync ran, so a site with a real donor list exhausted memory inside the
+     * request and the rebuild died partway, leaving some totals rebuilt and the
+     * rest as wrong as they were. Ids only, in bounded chunks, so the memory a
+     * rebuild needs no longer grows with the org.
+     *
+     * @return \Generator<int>
      */
-    private static function idsOf(string $model): array
+    private static function eachId(string $table): \Generator
     {
-        $rows = $model::query()->getAll();
-        return array_values(array_map(static fn ($r) => (int) $r->id, $rows));
+        $after = 0;
+
+        while (true) {
+            $rows = DB::table($table)
+                ->select('id')
+                ->where('id', $after, '>')
+                ->orderBy('id')
+                ->limit(self::RECALC_CHUNK)
+                ->getAll();
+
+            if (! $rows) {
+                return;
+            }
+
+            foreach ($rows as $row) {
+                // DB::table() yields plain rows, not hydrated models.
+                $after = (int) (is_array($row) ? ($row['id'] ?? 0) : $row->id);
+                if ($after <= 0) {
+                    return;
+                }
+                yield $after;
+            }
+        }
     }
 
     private const SETTINGS_OPTIONS = [

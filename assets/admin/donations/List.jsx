@@ -116,11 +116,20 @@ export default function List() {
     // Campaign list for the campaign filter dropdown. Forms could follow the
     // same pattern, but they typically run into the hundreds per org and
     // aren't worth front-loading here; the donor portal scopes by donor_id.
+    //
+    // Not /admin/campaigns, for the reason RecordDonationDrawer already gives:
+    // that route needs dono_manage_campaigns, which this screen does not, so a
+    // role scoped to viewing donations got a 403 and a filter with no options
+    // in it and nothing saying why.
     useEffect( () => {
         let aborted = false;
-        apiFetch( { path: addQueryArgs( '/dono/v1/admin/campaigns', { per_page: 100 } ) } )
+        apiFetch( { path: '/dono/v1/admin/donations/campaign-options' } )
             .then( ( res ) => { if ( ! aborted ) setCampaigns( Array.isArray( res ) ? res : [] ); } )
-            .catch( () => { if ( ! aborted ) setCampaigns( [] ); } );
+            .catch( ( err ) => {
+                if ( aborted ) return;
+                setCampaigns( [] );
+                notify.error( err?.message || __( 'The campaign filter could not be loaded.', 'dono' ) );
+            } );
         return () => { aborted = true; };
     }, [] );
 

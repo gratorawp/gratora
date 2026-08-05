@@ -14,6 +14,7 @@ import ConfirmDialog from '../_shared/components/ConfirmDialog';
 import KpiStrip from '../_shared/components/KpiStrip';
 import GoalBar from '../_shared/components/GoalBar';
 import CreateCampaignDrawer from './CreateCampaignDrawer';
+import notify from '../_shared/notify';
 
 const STATUS_OPTIONS = Object.entries( STATUS_LABEL ).map( ( [ value, label ] ) => ( { value, label } ) );
 
@@ -232,16 +233,21 @@ export default function List() {
             icon:          () => <TrashIcon size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             supportsBulk:  true,
+            // The server refuses to delete a campaign that has donations, so
+            // offering it was offering something that could not happen. The
+            // copy said donations stay in your database, which read as a
+            // promise that the campaign would go and they would remain.
+            isEligible:    ( item ) => ! ( ( item.donations_count ?? 0 ) > 0 ),
             callback: ( items ) => {
                 if ( ! items.length ) return;
                 const n = items.length;
                 const message = n === 1
-                    ? __( 'Permanently delete this campaign? Its forms will be deleted too. Donations stay in your database. This cannot be undone.', 'dono' )
+                    ? __( 'Permanently delete this campaign? Its forms will be deleted too. A campaign that has donations cannot be deleted. This cannot be undone.', 'dono' )
                     : sprintf(
                         /* translators: %d: number of campaigns to delete */
                         _n(
-                            'Permanently delete %d campaign? Forms attached to it will be deleted too. Donations stay in your database. This cannot be undone.',
-                            'Permanently delete %d campaigns? Forms attached to them will be deleted too. Donations stay in your database. This cannot be undone.',
+                            'Permanently delete %d campaign? Forms attached to it will be deleted too. Any campaign that has donations cannot be deleted. This cannot be undone.',
+                            'Permanently delete %d campaigns? Forms attached to them will be deleted too. Any campaign that has donations cannot be deleted. This cannot be undone.',
                             n,
                             'dono'
                         ),
@@ -253,15 +259,34 @@ export default function List() {
                     confirmLabel: __( 'Delete', 'dono' ),
                     destructive:  true,
                     onConfirm: async () => {
-                        try {
-                            await Promise.all( items.map( ( i ) => apiFetch( {
-                                path:   `/dono/v1/admin/campaigns/${ i.id }`,
-                                method: 'DELETE',
-                            } ) ) );
-                            load();
-                        } catch ( err ) {
-                            setError( err?.message || __( 'Could not delete one or more campaigns.', 'dono' ) );
+                        // allSettled, not all: one refusal used to reject the
+                        // whole batch, so campaigns that really had been deleted
+                        // stayed on screen with a single error above them and no
+                        // refetch. Each campaign now reports its own outcome.
+                        const results = await Promise.allSettled( items.map( ( i ) => apiFetch( {
+                            path:   `/dono/v1/admin/campaigns/${ i.id }`,
+                            method: 'DELETE',
+                        } ) ) );
+
+                        const refused = items.filter( ( _i, idx ) => results[ idx ].status === 'rejected' );
+                        const deleted = items.length - refused.length;
+
+                        if ( deleted > 0 ) {
+                            notify.success( sprintf(
+                                /* translators: %d: number of campaigns deleted */
+                                _n( '%d campaign deleted.', '%d campaigns deleted.', deleted, 'dono' ),
+                                deleted
+                            ) );
                         }
+                        if ( refused.length > 0 ) {
+                            setError( sprintf(
+                                /* translators: %s: comma separated campaign titles */
+                                __( 'These campaigns were not deleted, because they have donations: %s', 'dono' ),
+                                refused.map( ( c ) => c.title || `#${ c.id }` ).join( ', ' )
+                            ) );
+                        }
+
+                        load();
                     },
                 } );
             },
