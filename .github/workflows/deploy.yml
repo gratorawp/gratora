@@ -136,3 +136,8 @@ jobs:
           SLUG: dono
           BUILD_DIR: dist/dono
           VERSION: ${{ github.ref_name }}
+          # The banner, icon and screenshots the plugin directory shows. These
+          # live in SVN's assets/ rather than in the plugin, so without this
+          # they are never published and the listing renders with a placeholder
+          # icon and no screenshots, however many readme.txt declares.
+          ASSETS_DIR: .wordpress-org
