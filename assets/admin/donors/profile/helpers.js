@@ -71,44 +71,64 @@ export function planStatusPill( status ) {
     }
 }
 
-// Event type → timeline dot variant + label builder.
+// Event type → timeline dot variant + label builder. Keys are the types
+// EventRecorder actually writes; anything else falls through to readable().
 export function eventMeta( event ) {
     const { type } = event;
     switch ( type ) {
-        case 'donation.paid':
-        case 'recurring_plan.renewed':
-            return { dot: 'is-ok',     label: __( 'Donation paid',   'dono' ) };
-        case 'donation.created':
-            return { dot: 'is-muted',  label: __( 'Donation created','dono' ) };
+        case 'donation.intent_created':
+            return { dot: 'is-muted',  label: __( 'Donation started',     'dono' ) };
+        case 'donation.pending':
+            return { dot: 'is-muted',  label: __( 'Awaiting payment',     'dono' ) };
+        case 'donation.processing':
+            return { dot: 'is-info',   label: __( 'Payment processing',   'dono' ) };
+        case 'donation.completed':
+            return { dot: 'is-ok',     label: __( 'Donation paid',        'dono' ) };
+        case 'donation.failed':
+            return { dot: 'is-error',  label: __( 'Payment failed',       'dono' ) };
         case 'donation.refunded':
-        case 'refund.issued':
-            return { dot: 'is-error',  label: __( 'Refund issued',   'dono' ) };
+            return { dot: 'is-error',  label: __( 'Refund issued',        'dono' ) };
+        case 'donation.refund_reversed':
+            return { dot: 'is-warn',   label: __( 'Refund reversed',      'dono' ) };
         case 'donation.disputed':
-            return { dot: 'is-warn',   label: __( 'Dispute opened',  'dono' ) };
+            return { dot: 'is-warn',   label: __( 'Dispute opened',       'dono' ) };
+        case 'donation.reversal_reinstated':
+            return { dot: 'is-warn',   label: __( 'Reversal reinstated',  'dono' ) };
         case 'receipt.issued':
-        case 'receipt.sent':
-            return { dot: 'is-info',   label: __( 'Receipt issued',  'dono' ) };
-        case 'recurring_plan.created':
-        case 'recurring_plan.updated':
-            return { dot: 'is-violet', label: __( 'Recurring plan',  'dono' ) };
-        case 'recurring_plan.cancelled':
-            return { dot: 'is-muted',  label: __( 'Plan cancelled',  'dono' ) };
-        case 'consent.granted':
-            return { dot: 'is-ok',     label: __( 'Consent granted', 'dono' ) };
-        case 'consent.revoked':
-            return { dot: 'is-muted',  label: __( 'Consent revoked', 'dono' ) };
-        case 'magic_link.issued':
-            return { dot: 'is-info',   label: __( 'Magic link issued','dono' ) };
-        case 'note.added':
-        case 'donor.note_added':
-            return { dot: 'is-rose',   label: __( 'Note added',      'dono' ) };
-        case 'donor.created':
-            return { dot: 'is-ok',     label: __( 'Donor created',   'dono' ) };
-        case 'donor.redacted':
-            return { dot: 'is-muted',  label: __( 'Donor redacted',  'dono' ) };
+            return { dot: 'is-info',   label: __( 'Receipt issued',       'dono' ) };
+        case 'recurring.renewed':
+            return { dot: 'is-ok',     label: __( 'Recurring payment',    'dono' ) };
+        case 'recurring.paused':
+            return { dot: 'is-muted',  label: __( 'Recurring paused',     'dono' ) };
+        case 'recurring.resumed':
+            return { dot: 'is-ok',     label: __( 'Recurring resumed',    'dono' ) };
+        case 'recurring.skipped':
+            return { dot: 'is-muted',  label: __( 'Next payment skipped', 'dono' ) };
+        case 'recurring.amount_changed':
+            return { dot: 'is-violet', label: __( 'Recurring amount changed', 'dono' ) };
+        case 'recurring.cancelled_by_admin':
+            return { dot: 'is-muted',  label: __( 'Recurring plan cancelled', 'dono' ) };
+        case 'recurring.failed':
+            return { dot: 'is-error',  label: __( 'Renewal failed',       'dono' ) };
+        case 'recurring.cancelled':
+            return { dot: 'is-muted',  label: __( 'Recurring plan cancelled', 'dono' ) };
+        case 'recurring.subscription_creation_failed':
+            return { dot: 'is-error',  label: __( 'Subscription not created',  'dono' ) };
         default:
-            return { dot: 'is-muted',  label: type };
+            return { dot: 'is-muted',  label: readableEventType( type ) };
     }
+}
+
+/**
+ * Last resort for a type with no label of its own, so an add-on's event reads
+ * as words rather than as a machine key: "foo.bar_baz" becomes "Bar baz".
+ */
+function readableEventType( type ) {
+    const tail = String( type || '' ).split( '.' ).pop().replace( /_/g, ' ' ).trim();
+    if ( ! tail ) {
+        return String( type || '' );
+    }
+    return tail.charAt( 0 ).toUpperCase() + tail.slice( 1 );
 }
 
 export const SEGMENT_LABELS = {

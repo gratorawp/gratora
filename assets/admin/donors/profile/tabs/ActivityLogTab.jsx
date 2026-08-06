@@ -6,7 +6,12 @@ import { addQueryArgs } from '@wordpress/url';
 import { __ } from '@wordpress/i18n';
 
 import { eventMeta, formatAmount, formatDateTime, timeAgo } from '../helpers';
-import { TimelineDot } from './ActivityTab';
+import { TimelineDot, eventTitle } from './ActivityTab';
+
+// Deep-link to a donation's detail view, the same target the timeline uses.
+function donationHref( reference ) {
+    return addQueryArgs( window.location.pathname, { page: 'dono-donations', view: 'detail', reference } );
+}
 
 // The full activity log for one donor, paginated server-side. The overview tab
 // shows the 10 most recent; this is the whole history.
@@ -18,7 +23,7 @@ export default function ActivityLogTab( { donorId } ) {
         sort:    { field: 'occurred_at', direction: 'desc' },
         filters: [],
         search:  '',
-        fields:  [ 'event', 'campaign', 'amount', 'occurred_at' ],
+        fields:  [ 'event', 'reference', 'campaign', 'amount', 'occurred_at' ],
     } );
 
     const [ data, setData ]       = useState( [] );
@@ -59,12 +64,41 @@ export default function ActivityLogTab( { donorId } ) {
                     <span className="dp-actlog__event">
                         <TimelineDot variant={ meta.dot } />
                         <span>
-                            { meta.label }
+                            { /* The same sentence the overview timeline shows,
+                                 minus the campaign: this table has a column for
+                                 it, and the timeline does not. */ }
+                            { eventTitle( item ) }
+                            { item.payload?.by === 'admin' && (
+                                <span className="dp-actlog__note">{ __( 'by an admin', 'dono' ) }</span>
+                            ) }
                             { item.note && (
                                 <span className="dp-actlog__note">“{ item.note }”</span>
                             ) }
                         </span>
                     </span>
+                );
+            },
+        },
+        {
+            id:    'reference',
+            label: __( 'Reference', 'dono' ),
+            enableSorting: false,
+            // A receipt event carries both a donation and a receipt, so
+            // returning on the first would have meant a receipt row never
+            // showed the number that identifies it.
+            render: ( { item } ) => {
+                if ( ! item.reference && ! item.receipt_number ) return '-';
+                return (
+                    <div className="dono-row">
+                        <div className="dono-row__body">
+                            { item.reference && (
+                                <a className="dono-mono-link" href={ donationHref( item.reference ) }>{ item.reference }</a>
+                            ) }
+                            { item.receipt_number && (
+                                <div className="dono-row__sub dono-row__sub--mono">{ item.receipt_number }</div>
+                            ) }
+                        </div>
+                    </div>
                 );
             },
         },
@@ -90,10 +124,16 @@ export default function ActivityLogTab( { donorId } ) {
             id:    'occurred_at',
             label: __( 'When', 'dono' ),
             enableSorting: true,
+            // Relative over absolute, the way the overview timeline reads it:
+            // a bare "15h ago" with the real moment hidden in a tooltip made
+            // the column impossible to scan by date.
             render: ( { item } ) => (
-                <span title={ formatDateTime( item.occurred_at ) } style={ { fontSize: 12, color: '#6b7280' } }>
-                    { timeAgo( item.occurred_at ) }
-                </span>
+                <div className="dono-row">
+                    <div className="dono-row__body">
+                        <div className="dono-row__name">{ timeAgo( item.occurred_at ) }</div>
+                        <div className="dono-row__sub">{ formatDateTime( item.occurred_at ) }</div>
+                    </div>
+                </div>
             ),
         },
     ], [] );

@@ -334,8 +334,22 @@ export default function CurrencyPanel( { s, fx } ) {
                         value={ symbolPosition }
                         onChange={ ( e ) => s.edit( { format: { symbol_position: e.target.value } } ) }
                     >
-                        <option value="before">{ __( 'Before amount (€10,00)', 'dono' ) }</option>
-                        <option value="after">{ __( 'After amount (10,00 €)', 'dono' ) }</option>
+                        { /* Built from the chosen currency and separators: a fixed
+                             example contradicts the preview above it. */ }
+                        <option value="before">
+                            { sprintf(
+                                /* translators: %s: an example amount, e.g. $10.00 */
+                                __( 'Before amount (%s)', 'dono' ),
+                                previewAmount( 10, { decimalPlaces, decimalSep, thousandSep, symbol, symbolPosition: 'before' } )
+                            ) }
+                        </option>
+                        <option value="after">
+                            { sprintf(
+                                /* translators: %s: an example amount, e.g. 10.00 $ */
+                                __( 'After amount (%s)', 'dono' ),
+                                previewAmount( 10, { decimalPlaces, decimalSep, thousandSep, symbol, symbolPosition: 'after' } )
+                            ) }
+                        </option>
                     </select>
                 </FormRow>
             </Card>

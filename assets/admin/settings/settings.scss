@@ -254,6 +254,9 @@ $border: $border-mid;
     font-size: 11.5px;
     font-weight: 500;
 
+    // This screen keeps its own base rule (roomier padding, no leading dot)
+    // and does not import admin-base, so it carries its own copy of the
+    // colour modifiers. Every other screen gets them from @dono/ui.
     &--green { background: $accent-soft; color: $accent-dark; }
     &--amber { background: $amber-soft;  color: $amber; }
     &--red   { background: $red-soft;    color: $red; }

@@ -211,11 +211,19 @@ final class ReceiptIssuer
             // a concurrent issue that found the existing row must not re-fire.
             if ($created) {
                 do_action('dono.receipt.issued', $receipt, $ctx);
+                // Campaign and amount come from the donation being receipted.
+                // Without them the row reads as an event with no context, and
+                // the donor timeline showed a receipt against no campaign and
+                // no figure.
                 $this->events->record('receipt.issued', [
-                    'donor_id'    => $ctx->donor->id,
-                    'donation_id' => $ctx->donation->id,
-                    'receipt_id'  => $receipt->id,
-                    'payload'     => ['renderer_id' => $renderer->id()],
+                    'donor_id'     => $ctx->donor->id,
+                    'donation_id'  => $ctx->donation->id,
+                    'receipt_id'   => $receipt->id,
+                    'campaign_id'  => $ctx->donation->campaign_id,
+                    'form_id'      => $ctx->donation->form_id,
+                    'amount_cents' => $ctx->donation->amount_cents,
+                    'currency'     => $ctx->donation->currency,
+                    'payload'      => ['renderer_id' => $renderer->id()],
                 ]);
             }
 

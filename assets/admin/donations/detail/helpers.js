@@ -59,10 +59,6 @@ export function donationStatusPill( status ) {
     }
 }
 
-export const RECEIPT_RENDERER_LABEL = {
-    'generic.v1': __( 'Generic receipt', 'dono' ),
-};
-
 export const CHANNEL_LABEL = {
     direct:        __( 'Direct',         'dono' ),
     email:         __( 'Email',          'dono' ),

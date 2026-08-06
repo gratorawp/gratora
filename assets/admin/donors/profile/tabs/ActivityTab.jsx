@@ -1,4 +1,4 @@
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import { Coins, History } from 'lucide-react';
 
@@ -29,44 +29,108 @@ export function TimelineDot( { variant } ) {
     );
 }
 
-function TimelineRow( { event, campaigns } ) {
+/**
+ * What an event says, in a sentence.
+ *
+ * Shared by the overview timeline and the paged log so the two cannot drift.
+ * The cases are the event types the recorder actually writes: they were keyed
+ * off names nothing emitted (donation.paid, recurring_plan.renewed,
+ * consent.granted), so every row fell through to a bare label and the amount
+ * these branches exist to show was never rendered.
+ *
+ * `campaignTitle` is passed in because the two callers hold it differently:
+ * the overview has a map keyed by id, the log has it on the row.
+ */
+export function eventTitle( event, campaignTitle ) {
     const meta = eventMeta( event );
-    const camp = event.campaign_id ? campaigns?.[ event.campaign_id ] : null;
     const amount = event.amount_cents !== null && event.amount_cents !== undefined
         ? formatAmount( event.amount_cents, event.currency )
         : null;
 
-    let title = <>{ meta.label }</>;
-    // A note the donor left with the gift. Shown in quotes so it reads as their
-    // words, not ours.
-    const sub = event.note ? <span className="dp-tl-note">“{ event.note }”</span> : null;
+    const toCampaign = campaignTitle
+        ? <> { __( 'to', 'dono' ) } <span className="dp-tl-camp">{ campaignTitle }</span></>
+        : null;
 
-    if ( event.type === 'donation.paid' && amount ) {
-        title = (
-            <>
-                { __( 'Donated', 'dono' ) } <strong>{ amount }</strong>
-                { camp && <> { __( 'to', 'dono' ) } <span className="dp-tl-camp">{ camp.title }</span></> }
-            </>
+    let title = <>{ meta.label }</>;
+
+    switch ( event.type ) {
+        case 'donation.completed':
+            title = amount
+                ? <>{ __( 'Donated', 'dono' ) } <strong>{ amount }</strong>{ toCampaign }</>
+                : title;
+            break;
+        case 'donation.intent_created':
+            title = amount
+                ? <>{ __( 'Started a donation of', 'dono' ) } <strong>{ amount }</strong>{ toCampaign }</>
+                : title;
+            break;
+        case 'donation.failed':
+            title = amount
+                ? <>{ __( 'Payment of', 'dono' ) } <strong>{ amount }</strong> { __( 'failed', 'dono' ) }</>
+                : title;
+            break;
+        case 'donation.refunded':
+            title = amount
+                ? <>{ __( 'Refund of', 'dono' ) } <strong>{ amount }</strong> { __( 'issued', 'dono' ) }</>
+                : title;
+            break;
+        case 'recurring.renewed':
+            title = amount
+                ? <>{ __( 'Recurring renewal of', 'dono' ) } <strong>{ amount }</strong>{ toCampaign }</>
+                : title;
+            break;
+        case 'recurring.failed':
+            title = amount
+                ? <>{ __( 'Renewal of', 'dono' ) } <strong>{ amount }</strong> { __( 'was declined', 'dono' ) }</>
+                : title;
+            break;
+        case 'recurring.amount_changed': {
+            const from = event.payload?.from_cents;
+            const to   = event.payload?.to_cents;
+            title = ( from !== undefined && to !== undefined )
+                ? (
+                    <>
+                        { __( 'Recurring amount changed from', 'dono' ) } <strong>{ formatAmount( from, event.currency ) }</strong>
+                        { ' ' }{ __( 'to', 'dono' ) } <strong>{ formatAmount( to, event.currency ) }</strong>
+                    </>
+                )
+                : title;
+            break;
+        }
+        default:
+            break;
+    }
+
+    return title;
+}
+
+/** One line of the donor's history on the overview. */
+function TimelineRow( { event, campaigns } ) {
+    const meta = eventMeta( event );
+    const camp = event.campaign_id ? campaigns?.[ event.campaign_id ] : null;
+    const title = eventTitle( event, camp?.title );
+
+    // What the row is about, so it can be found again: the reference for a
+    // donation, the number for a receipt, and who made the change when it was
+    // not the donor.
+    const facts = [];
+    if ( event.reference ) {
+        facts.push(
+            <a key="ref" className="dp-tl-ref" href={ donationHref( event.reference ) }>{ event.reference }</a>
         );
-    } else if ( event.type === 'recurring_plan.renewed' && amount ) {
-        title = (
-            <>
-                { __( 'Recurring renewal paid', 'dono' ) } <strong>{ amount }</strong>
-                { camp && <> { __( 'to', 'dono' ) } <span className="dp-tl-camp">{ camp.title }</span></> }
-            </>
-        );
-    } else if ( event.type === 'donation.refunded' && amount ) {
-        title = <>{ __( 'Refund of', 'dono' ) } <strong>{ amount }</strong> { __( 'issued', 'dono' ) }</>;
-    } else if ( event.type === 'recurring_plan.created' ) {
-        title = <>{ __( 'Recurring plan created', 'dono' ) }</>;
-    } else if ( event.type === 'recurring_plan.cancelled' ) {
-        title = <>{ __( 'Recurring plan cancelled', 'dono' ) }</>;
-    } else if ( event.type === 'consent.granted' ) {
-        title = <>{ __( 'Marketing consent', 'dono' ) } <strong>{ __( 'granted', 'dono' ) }</strong></>;
-    } else if ( event.type === 'consent.revoked' ) {
-        title = <>{ __( 'Marketing consent', 'dono' ) } <strong>{ __( 'revoked', 'dono' ) }</strong></>;
-    } else if ( event.type === 'donor.created' ) {
-        title = <>{ __( 'Donor record created', 'dono' ) }</>;
+    }
+    if ( event.receipt_number ) {
+        facts.push( <span key="rec" className="dp-tl-ref">{ event.receipt_number }</span> );
+    }
+    if ( event.payload?.by === 'admin' ) {
+        facts.push( <span key="by">{ __( 'by an admin', 'dono' ) }</span> );
+    }
+
+    // A note the donor left with the gift, in the same row as the rest so the
+    // container's gap separates it. In its own block it butted against the
+    // reference with no space.
+    if ( event.note ) {
+        facts.push( <span key="note" className="dp-tl-note">“{ event.note }”</span> );
     }
 
     return (
@@ -74,7 +138,9 @@ function TimelineRow( { event, campaigns } ) {
             <TimelineDot variant={ meta.dot } />
             <div className="dp-tl-body">
                 <div className="dp-tl-title">{ title }</div>
-                { sub && <div className="dp-tl-sub">{ sub }</div> }
+                { /* .dp-tl-sub is already an inline-flex row with a gap, so the
+                     items space themselves; separators would double it. */ }
+                { facts.length > 0 && <div className="dp-tl-sub">{ facts }</div> }
             </div>
             <div className="dp-tl-when">
                 { timeAgo( event.occurred_at ) }
@@ -179,10 +245,9 @@ function Row( { label, value, strong = false } ) {
 
 const OVERVIEW_EVENTS = 10;
 
-export default function ActivityTab( { donations, events, campaigns, recurring, lifetime, onAllDonations, onSeeAllActivity } ) {
+export default function ActivityTab( { donations, events, eventsTotal, campaigns, recurring, lifetime, onAllDonations, onSeeAllActivity } ) {
     // The overview is a preview; the Activity tab holds the full, paged log.
     const recentEvents = events.slice( 0, OVERVIEW_EVENTS );
-    const hasMore = events.length > OVERVIEW_EVENTS;
     return (
         <div className="dp-activity">
             <div className="dp-activity-grid">
@@ -206,20 +271,34 @@ export default function ActivityTab( { donations, events, campaigns, recurring, 
                                     />
                                 )
                                 : (
-                                    <>
-                                        <div className="dp-timeline">
-                                            { recentEvents.map( ( e ) => (
-                                                <TimelineRow key={ e.id } event={ e } campaigns={ campaigns } />
-                                            ) ) }
-                                        </div>
-                                        { hasMore && onSeeAllActivity && (
-                                            <button type="button" className="dp-activity__see-all" onClick={ onSeeAllActivity }>
-                                                { __( 'See all activity', 'dono' ) } →
-                                            </button>
-                                        ) }
-                                    </>
+                                    <div className="dp-timeline">
+                                        { recentEvents.map( ( e ) => (
+                                            <TimelineRow key={ e.id } event={ e } campaigns={ campaigns } />
+                                        ) ) }
+                                    </div>
                                 ) }
                         </div>
+                        { /* Same footer shape as the donations card above it:
+                             the count on the left, the way out on the right. */ }
+                        { events.length > 0 && (
+                            <div className="dp-card__foot">
+                                <span className="num">
+                                    { sprintf(
+                                        /* translators: %d: total number of recorded events for this donor. */
+                                        _n( '%d event', '%d events', eventsTotal, 'dono' ),
+                                        eventsTotal
+                                    ) }
+                                </span>
+                                { onSeeAllActivity && (
+                                    <a
+                                        href="#activity"
+                                        onClick={ ( e ) => { e.preventDefault(); onSeeAllActivity(); } }
+                                    >
+                                        { __( 'All activity →', 'dono' ) }
+                                    </a>
+                                ) }
+                            </div>
+                        ) }
                     </div>
                 </div>
 

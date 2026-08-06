@@ -25,6 +25,31 @@ const STATUS_OPTIONS = Object.entries( STATUS_LABEL ).map( ( [ value, label ] ) 
     label,
 } ) );
 
+/**
+ * The stored frequency as a short badge. Values come from the column, so an
+ * unknown one is shown rather than swallowed.
+ */
+function frequencyLabel( frequency ) {
+    switch ( frequency ) {
+        case 'monthly':   return __( 'Monthly', 'dono' );
+        case 'yearly':    return __( 'Yearly', 'dono' );
+        case 'weekly':    return __( 'Weekly', 'dono' );
+        case 'quarterly': return __( 'Quarterly', 'dono' );
+        default:          return __( 'Recurring', 'dono' );
+    }
+}
+
+// 'recurring' is the useful default question ("which of these repeat?");
+// the individual cadences are there for orgs that run more than one.
+const FREQUENCY_OPTIONS = [
+    { value: 'recurring', label: __( 'Recurring (any)', 'dono' ) },
+    { value: 'one_time',  label: __( 'One time', 'dono' ) },
+    { value: 'monthly',   label: __( 'Monthly', 'dono' ) },
+    { value: 'yearly',    label: __( 'Yearly', 'dono' ) },
+    { value: 'weekly',    label: __( 'Weekly', 'dono' ) },
+    { value: 'quarterly', label: __( 'Quarterly', 'dono' ) },
+];
+
 function detailHref( reference ) {
     return addQueryArgs( window.location.pathname, {
         page:      'dono-donations',
@@ -70,9 +95,11 @@ export default function List() {
         // since every row would carry the same value. It becomes mandatory the
         // moment test rows can appear: a rehearsal donation that looks exactly
         // like a real one is worse than not showing it at all.
+        // 'form' is defined but not shown: most orgs run one form per campaign,
+        // so the column repeats the campaign next to it. Still in the picker.
         fields:  readTestPref()
-            ? [ 'reference', 'status', 'donor', 'amount', 'is_test', 'gateway', 'campaign', 'form', 'created_at' ]
-            : [ 'reference', 'status', 'donor', 'amount', 'gateway', 'campaign', 'form', 'created_at' ],
+            ? [ 'reference', 'frequency', 'status', 'donor', 'amount', 'is_test', 'gateway', 'campaign', 'created_at' ]
+            : [ 'reference', 'frequency', 'status', 'donor', 'amount', 'gateway', 'campaign', 'created_at' ],
     } );
 
     const toggleTest = ( on ) => {
@@ -83,10 +110,16 @@ export default function List() {
         setView( ( v ) => ( {
             ...v,
             page: 1,
+            // Placed after 'amount' by name. A fixed index moved the column
+            // the moment another was added ahead of it.
             fields: on
                 ? ( v.fields.includes( 'is_test' )
                     ? v.fields
-                    : [ ...v.fields.slice( 0, 4 ), 'is_test', ...v.fields.slice( 4 ) ] )
+                    : ( () => {
+                        const at = v.fields.indexOf( 'amount' );
+                        const cut = at === -1 ? v.fields.length : at + 1;
+                        return [ ...v.fields.slice( 0, cut ), 'is_test', ...v.fields.slice( cut ) ];
+                    } )() )
                 : v.fields.filter( ( f ) => f !== 'is_test' ),
             // The two exclusive filters and this scope answer different
             // questions; leaving "Test only" on under it would be a contradiction.
@@ -97,7 +130,6 @@ export default function List() {
     const [ data, setData ]       = useState( [] );
     const [ total, setTotal ]     = useState( 0 );
     const [ loading, setLoading ] = useState( false );
-    const [ exporting, setExporting ] = useState( false );
     const [ actionError, setActionError ] = useState( null );
     const [ recording, setRecording ] = useState( false );
     const [ fetchError, setFetchError ]   = useState( null );
@@ -150,6 +182,7 @@ export default function List() {
     const filterValue = ( field ) => view.filters?.find( ( f ) => f.field === field )?.value;
     const statusFilter   = filterValue( 'status' );
     const gatewayFilter  = filterValue( 'gateway' );
+    const frequencyFilter = filterValue( 'frequency' );
     const campaignFilter = filterValue( 'campaign' );
     const testFilter     = filterValue( 'is_test' );
 
@@ -161,12 +194,13 @@ export default function List() {
         search:       view.search || undefined,
         status:       statusFilter || undefined,
         gateway:      gatewayFilter || undefined,
+        frequency:    frequencyFilter || undefined,
         campaign_id:  campaignFilter || undefined,
         is_test:      testFilter === 'yes' ? true : ( testFilter === 'no' ? false : undefined ),
         include_test: includeTest || undefined,
         created_from: createdFrom || undefined,
         created_to:   createdTo   || undefined,
-    } ), [ view, statusFilter, gatewayFilter, campaignFilter, testFilter, includeTest, createdFrom, createdTo ] );
+    } ), [ view, statusFilter, gatewayFilter, frequencyFilter, campaignFilter, testFilter, includeTest, createdFrom, createdTo ] );
 
     useEffect( () => {
         let aborted = false;
@@ -217,6 +251,21 @@ export default function List() {
                 <a className="dono-mono-link" href={ detailHref( item.reference ) } { ...rowLinkProps }>
                     { item.reference }
                 </a>
+            ),
+        },
+        {
+            id:    'frequency',
+            label: __( 'Frequency', 'dono' ),
+            // Nothing on the row said whether the money came from a standing
+            // gift or a one-off, which is the first thing asked of it.
+            elements: FREQUENCY_OPTIONS,
+            filterBy: { operators: [ 'is' ] },
+            // Not StatusBadge: "monthly" is a cadence, not a lifecycle status,
+            // so it has no entry in that map and would come out grey.
+            render: ( { item } ) => (
+                item.frequency && item.frequency !== 'one_time'
+                    ? <span className="dono-pill dono-pill--blue">{ frequencyLabel( item.frequency ) }</span>
+                    : <span className="dono-pill dono-pill--gray">{ __( 'One time', 'dono' ) }</span>
             ),
         },
         {
@@ -435,40 +484,6 @@ export default function List() {
         },
     ], [] );
 
-    const doExport = async () => {
-        setExporting( true );
-        setActionError( null );
-        try {
-            // The CSV endpoint takes the same filters as the JSON list so the
-            // export matches what the admin is currently viewing. `parse:false`
-            // gives us the raw Response object - apiFetch otherwise tries to
-            // JSON-decode the CSV body.
-            const params = { ...apiParams, _wpnonce: window.wpApiSettings?.nonce };
-            delete params.page;
-            delete params.per_page;
-            const res = await fetch(
-                addQueryArgs( window.wpApiSettings.root + 'dono/v1/admin/donations/export.csv', params ),
-                {
-                    credentials: 'include',
-                    headers:     { 'X-WP-Nonce': window.wpApiSettings.nonce },
-                }
-            );
-            if ( ! res.ok ) throw new Error( `Export failed (${ res.status })` );
-            const blob = await res.blob();
-            const url  = URL.createObjectURL( blob );
-            const a    = document.createElement( 'a' );
-            const ts   = new Date().toISOString().replace( /[:.]/g, '-' ).slice( 0, 19 );
-            a.href     = url;
-            a.download = `dono-donations-${ ts }.csv`;
-            a.click();
-            URL.revokeObjectURL( url );
-        } catch ( err ) {
-            setActionError( err?.message || __( 'Export failed.', 'dono' ) );
-        } finally {
-            setExporting( false );
-        }
-    };
-
     return (
         <div>
             <div className="dono-crumbs">
@@ -509,22 +524,19 @@ export default function List() {
                     <span className="dono-page-head__meta">
                         { sprintf( /* translators: %s: number of donations */ _n( '%s donation', '%s donations', total, 'dono' ), total.toLocaleString() ) }
                     </span>
-                    <label className="dono-inline-toggle">
-                        <Switch
-                            checked={ includeTest }
-                            onChange={ toggleTest }
-                            label={ __( 'Show test donations', 'dono' ) }
-                        />
-                        <span>{ __( 'Show test donations', 'dono' ) }</span>
-                    </label>
-                    <Btn
-                        variant="secondary"
-                        onClick={ doExport }
-                        disabled={ exporting || total === 0 }
-                        isBusy={ exporting }
-                    >
-                        { exporting ? __( 'Exporting…', 'dono' ) : __( 'Export CSV', 'dono' ) }
-                    </Btn>
+                    { /* Nothing to reveal on a site that has never taken a test
+                         donation, so the control is only offered once some
+                         exist, or while it is on and needs turning off. */ }
+                    { ( testHidden > 0 || includeTest ) && (
+                        <label className="dono-inline-toggle">
+                            <Switch
+                                checked={ includeTest }
+                                onChange={ toggleTest }
+                                label={ __( 'Show test donations', 'dono' ) }
+                            />
+                            <span>{ __( 'Show test donations', 'dono' ) }</span>
+                        </label>
+                    ) }
                     <Btn variant="primary" onClick={ () => setRecording( true ) }>
                         <Plus size={ 16 } strokeWidth={ 1.75 } />
                         { __( 'Record a donation', 'dono' ) }

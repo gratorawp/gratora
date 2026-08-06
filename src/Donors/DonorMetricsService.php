@@ -35,6 +35,7 @@ final class DonorMetricsService
         private DonorNoteRepository $notes,
         private MagicLinkService $magicLinks,
         private Clock $clock,
+        private \Dono\Gateways\GatewayManager $gateways,
     ) {
     }
 
@@ -160,6 +161,10 @@ final class DonorMetricsService
             ->limit(100)
             ->getAll();
 
+        // The list above is capped, so its length is not the donor's history.
+        // The overview footer states the real figure.
+        $eventsTotal = Event::query()->where('donor_id', $donorId)->count();
+
         $consents = Consent::query()
             ->where('donor_id', $donorId)
             ->orderBy('occurred_at', 'DESC')
@@ -168,6 +173,12 @@ final class DonorMetricsService
         $notes      = $this->notes->listForDonor($donorId);
         $timeline   = $this->donors->monthlyTimelineForDonor($donorId);
         $attribution = $this->donors->attributionMixForDonor($donorId);
+
+        // The note a donor left with a gift lives on the donation, not the event.
+        // Pull the notes for the events' donations in one query so the timeline
+        // can show the message inline instead of leaving it a click away.
+        $eventNotes    = $this->noteMapForEvents($events);
+        $eventReceipts = $this->receiptNumbersForEvents($events);
 
         // One query for campaign titles to avoid N+1 in donations/events.
         $campaignIds = array_unique(array_filter(array_merge(
@@ -180,11 +191,6 @@ final class DonorMetricsService
                 $campaigns[(int) $c->id] = ['id' => (int) $c->id, 'title' => (string) $c->title, 'slug' => (string) $c->slug];
             }
         }
-
-        // The note a donor left with a gift lives on the donation, not the event.
-        // Pull the notes for the events' donations in one query so the timeline
-        // can show the message inline instead of leaving it a click away.
-        $eventNotes = $this->noteMapForEvents($events);
 
         // Lifetime extras
         $totalCents = (int) $donor->total_donated_cents;
@@ -211,7 +217,20 @@ final class DonorMetricsService
         $activePlanCount = 0;
         $mrrUnconverted  = 0;
         $nextPaymentAt = null;
+        // A paused or past-due plan bills nothing, so MRR is legitimately zero
+        // while the donor still has a subscription. Counted per status so the
+        // card can say which rather than reading as "this donor has none".
+        $planCounts = [];
         foreach ($recurringPlans as $p) {
+            // Rehearsal plans stay in the tab's table, labelled, because an
+            // admin testing wants to see them. They stay out of every figure on
+            // this card: recurringStats() already excludes them, so counting
+            // them here made a donor's MRR disagree with the Subscriptions
+            // totals it rolls up into.
+            if ($p->is_test) {
+                continue;
+            }
+            $planCounts[(string) $p->status] = ($planCounts[(string) $p->status] ?? 0) + 1;
             if ($p->status !== 'active') continue;
             $activePlanCount++;
             // Counted, like recurringStats() does, so the card can say the
@@ -282,7 +301,30 @@ final class DonorMetricsService
             if ($p->status === 'past_due') { $pastDuePlan = $p; break; }
         }
         if ($pastDuePlan) {
-            $banners[] = ['kind' => 'past_due', 'message' => __('1 subscription is in dunning. Open the Recurring tab to retry.', 'dono')];
+            // The message used to say "open the Recurring tab to retry" on every
+            // gateway, including the ones with no retry endpoint at all, which
+            // sent the admin looking for a button that could not exist. Three
+            // outcomes, because "cannot retry" has two very different causes.
+            $gateway  = $this->gateways->get((string) $pastDuePlan->gateway);
+            $name     = ucfirst((string) $pastDuePlan->gateway);
+
+            if ($gateway instanceof \Dono\Gateways\SupportsPaymentRetry) {
+                $message = __('A renewal was declined. Open the Recurring tab to collect it again.', 'dono');
+            } elseif ($gateway === null) {
+                $message = sprintf(
+                    /* translators: %s: the payment gateway name, e.g. Stripe. */
+                    __('A renewal was declined, but the %s connection is not active, so nothing can be collected from here. Reconnect it in Settings, Payments.', 'dono'),
+                    $name
+                );
+            } else {
+                $message = sprintf(
+                    /* translators: %s: the payment gateway name, e.g. PayPal. */
+                    __('A renewal was declined. %s retries on its own schedule; to fix it sooner, ask the donor to update their card in the donor portal.', 'dono'),
+                    $name
+                );
+            }
+
+            $banners[] = ['kind' => 'past_due', 'message' => $message];
         }
 
         // Gated: this mints a 30-day portal login that impersonates the donor,
@@ -323,6 +365,7 @@ final class DonorMetricsService
                 'mrr_cents'            => $mrrCents,
                 'mrr_unconverted'      => $mrrUnconverted,
                 'active_plan_count'    => $activePlanCount,
+                'plan_counts'          => (object) $planCounts,
                 'next_payment_at'      => $nextPaymentAt,
                 'sparkline'            => $sparkline,
             ],
@@ -330,12 +373,19 @@ final class DonorMetricsService
             'recurring' => [
                 'plans' => array_map(fn (RecurringPlan $p) => $this->mapRecurringPlanRow($p), $recurringPlans),
             ],
-            'receipts' => array_map(fn (Receipt $r) => $this->mapReceiptRow($r), $receipts),
-            'events' => array_map(function (Event $e) use ($eventNotes) {
+            'receipts' => $this->mapReceiptRows($receipts),
+            'events' => array_map(function (Event $e) use ($eventNotes, $eventReceipts) {
                 $row = $this->mapEventRow($e);
                 $row['note'] = $this->noteForEvent($e, $eventNotes);
+                $row['reference'] = $e->donation_id !== null
+                    ? ($eventNotes[(int) $e->donation_id]['reference'] ?? null)
+                    : null;
+                $row['receipt_number'] = $e->receipt_id !== null
+                    ? ($eventReceipts[(int) $e->receipt_id] ?? null)
+                    : null;
                 return $row;
             }, $events),
+            'events_total' => (int) $eventsTotal,
             'consents' => [
                 'current' => array_values($consentCurrent),
                 'history' => array_map(fn (Consent $c) => $this->mapConsentRow($c), $consents),
@@ -522,21 +572,52 @@ final class DonorMetricsService
             'payments_count'        => (int) $p->payments_count,
             'total_paid_cents'      => (int) $p->total_paid_cents,
             'failed_renewals_count' => (int) $p->failed_renewals_count,
+            // The Recurring tab offers Retry only where the gateway can do it;
+            // this shaper is separate from the Subscriptions one, so the flag
+            // has to be set in both or the tab silently loses the action.
+            'can_retry'             => $this->gateways->get((string) $p->gateway)
+                instanceof \Dono\Gateways\SupportsPaymentRetry,
             'campaign_id'           => $p->campaign_id !== null ? (int) $p->campaign_id : null,
+            'is_test'               => (bool) $p->is_test,
         ];
     }
 
-    /** @return array<string,mixed> */
-    private function mapReceiptRow(Receipt $r): array
+    /**
+     * A receipt number identifies the document, not the gift it covers, so the
+     * reference is resolved for the whole page in one query rather than per row.
+     *
+     * @param array<int,Receipt> $receipts
+     * @return array<int,array<string,mixed>>
+     */
+    private function mapReceiptRows(array $receipts): array
+    {
+        $ids = array_values(array_unique(array_filter(
+            array_map(static fn (Receipt $r) => (int) $r->donation_id, $receipts)
+        )));
+        $references = [];
+        if ($ids) {
+            foreach (Donation::query()->whereIn('id', $ids)->getAll() as $d) {
+                $references[(int) $d->id] = (string) $d->reference;
+            }
+        }
+        return array_map(fn (Receipt $r) => $this->mapReceiptRow($r, $references), $receipts);
+    }
+
+    /**
+     * @param array<int,string> $references Donation reference keyed by donation id.
+     * @return array<string,mixed>
+     */
+    private function mapReceiptRow(Receipt $r, array $references): array
     {
         return [
-            'id'               => (int) $r->id,
-            'receipt_number'   => (string) $r->receipt_number,
-            'renderer_id'      => (string) $r->renderer_id,
-            'donation_id'      => (int) $r->donation_id,
-            'sent_to_email_at' => $r->sent_to_email_at,
-            'voided'           => (bool) $r->voided,
-            'issued_at'        => (string) $r->issued_at,
+            'id'                 => (int) $r->id,
+            'receipt_number'     => (string) $r->receipt_number,
+            'renderer_id'        => (string) $r->renderer_id,
+            'donation_id'        => (int) $r->donation_id,
+            'donation_reference' => $references[(int) $r->donation_id] ?? null,
+            'sent_to_email_at'   => $r->sent_to_email_at,
+            'voided'             => (bool) $r->voided,
+            'issued_at'          => (string) $r->issued_at,
         ];
     }
 
@@ -583,12 +664,21 @@ final class DonorMetricsService
             ->getAll();
 
         $notes     = $this->noteMapForEvents($events);
+        $receipts  = $this->receiptNumbersForEvents($events);
         $campaigns = $this->campaignTitlesForEvents($events);
 
-        $items = array_map(function (Event $e) use ($notes, $campaigns) {
+        $items = array_map(function (Event $e) use ($notes, $receipts, $campaigns) {
             $row             = $this->mapEventRow($e);
             $row['note']     = $this->noteForEvent($e, $notes);
             $row['campaign'] = $e->campaign_id !== null ? ($campaigns[(int) $e->campaign_id] ?? null) : null;
+            // Same identifiers the overview timeline carries, so a row in
+            // either place can be traced back to what it is about.
+            $row['reference'] = $e->donation_id !== null
+                ? ($notes[(int) $e->donation_id]['reference'] ?? null)
+                : null;
+            $row['receipt_number'] = $e->receipt_id !== null
+                ? ($receipts[(int) $e->receipt_id] ?? null)
+                : null;
             return $row;
         }, $events);
 
@@ -602,6 +692,13 @@ final class DonorMetricsService
      * @param  array<int,Event> $events
      * @return array<int,string>
      */
+    /**
+     * Note and reference for every donation the timeline mentions, in one
+     * query. A timeline row saying only "Donation paid" cannot be matched to
+     * anything; the reference is what makes it findable.
+     *
+     * @return array<int,array{note:?string,reference:string}>
+     */
     private function noteMapForEvents(array $events): array
     {
         $ids = array_values(array_unique(array_filter(
@@ -611,7 +708,29 @@ final class DonorMetricsService
         if ($ids) {
             foreach (Donation::query()->whereIn('id', $ids)->getAll() as $d) {
                 $note = trim((string) ($d->note_to_org ?? ''));
-                if ($note !== '') $map[(int) $d->id] = $note;
+                $map[(int) $d->id] = [
+                    'note'      => $note !== '' ? $note : null,
+                    'reference' => (string) $d->reference,
+                ];
+            }
+        }
+        return $map;
+    }
+
+    /**
+     * Receipt numbers for receipt events, in one query.
+     *
+     * @return array<int,string>
+     */
+    private function receiptNumbersForEvents(array $events): array
+    {
+        $ids = array_values(array_unique(array_filter(
+            array_map(static fn ($e) => $e->receipt_id !== null ? (int) $e->receipt_id : 0, $events)
+        )));
+        $map = [];
+        if ($ids) {
+            foreach (Receipt::query()->whereIn('id', $ids)->getAll() as $r) {
+                $map[(int) $r->id] = (string) $r->receipt_number;
             }
         }
         return $map;
@@ -627,7 +746,11 @@ final class DonorMetricsService
     private function noteForEvent(Event $e, array $noteMap): ?string
     {
         $isGift = in_array((string) $e->type, ['donation.completed', 'donation.paid'], true);
-        return $isGift && $e->donation_id !== null ? ($noteMap[(int) $e->donation_id] ?? null) : null;
+        if (! $isGift || $e->donation_id === null) {
+            return null;
+        }
+
+        return $noteMap[(int) $e->donation_id]['note'] ?? null;
     }
 
     /**
@@ -733,7 +856,7 @@ final class DonorMetricsService
             'recurring' => [
                 'plans' => array_map(fn (RecurringPlan $p) => $this->mapRecurringPlanRow($p), $recurringPlans),
             ],
-            'receipts'  => array_map(fn (Receipt $r) => $this->mapReceiptRow($r), $receipts),
+            'receipts'  => $this->mapReceiptRows($receipts),
             'events'    => array_map(fn (Event $e) => $this->mapEventRow($e), $events),
             'consents'  => [
                 'current' => array_values($consentCurrent),

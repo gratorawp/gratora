@@ -1,6 +1,6 @@
 import { __ } from '@wordpress/i18n';
 
-import { formatDateTime, RECEIPT_RENDERER_LABEL } from '../helpers';
+import { formatDateTime } from '../helpers';
 import { IconReceipt, IconDownload } from '../icons';
 import { downloadFile } from '../../../_shared/download';
 import notify from '../../../_shared/notify';
@@ -29,14 +29,12 @@ export default function ReceiptCard( { donation, receipts, onResend } ) {
         <div className="dd-card">
             <div className="dd-card__body">
                 { receipts.map( ( r ) => {
-                    const rendererLabel = RECEIPT_RENDERER_LABEL[ r.renderer_id ] || r.renderer_id;
                     return (
                     <div key={ r.id } className="dd-receipt-row">
                         <span className="dd-receipt-row__icon"><IconReceipt width="18" height="18" /></span>
                         <div className="dd-receipt-row__main">
                             <span className="dd-receipt-row__line">
                                 <span className={ `dd-receipt-row__num mono${ r.voided ? ' is-strike' : '' }` }>{ r.receipt_number }</span>
-                                <span className="dd-receipt-row__renderer">{ rendererLabel }</span>
                             </span>
                             <div className="dd-receipt-row__meta">
                                 { __( 'Issued', 'dono' ) } <strong>{ formatDateTime( r.issued_at ) }</strong>

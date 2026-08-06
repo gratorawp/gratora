@@ -4,6 +4,8 @@ import { __ } from '@wordpress/i18n';
 
 import Header from './profile/Header';
 import ConfirmDialog from '../_shared/components/ConfirmDialog';
+import Dialog from '../_shared/components/Dialog';
+import Btn from '../_shared/components/Btn';
 import { COUNTRIES } from '../../_shared/countries';
 import LifetimeMetrics from './profile/LifetimeMetrics';
 import Tabs from './profile/Tabs';
@@ -82,7 +84,8 @@ function EditPanel( { donor, onCancel, onSaved } ) {
     };
 
     const submit = async ( e ) => {
-        e.preventDefault();
+        // The footer lives outside the form element, so it calls this directly.
+        if ( e ) e.preventDefault();
         if ( phoneInvalid ) {
             setError( __( 'Phone number looks malformed. Use digits, +, spaces, parentheses, or dashes.', 'dono' ) );
             return;
@@ -115,8 +118,27 @@ function EditPanel( { donor, onCancel, onSaved } ) {
     };
 
     return (
-        <div className="dp-card" style={ { marginBottom: 16 } }>
-            <div className="dp-card__body">
+        <>
+            <Dialog
+                title={ __( 'Edit donor details', 'dono' ) }
+                onClose={ () => ( saving ? null : onCancel() ) }
+                size="wide"
+                foot={
+                    <>
+                        <Btn variant="secondary" onClick={ onCancel } disabled={ saving }>
+                            { __( 'Cancel', 'dono' ) }
+                        </Btn>
+                        <Btn
+                            variant="primary"
+                            onClick={ () => submit() }
+                            isBusy={ saving }
+                            disabled={ saving || phoneInvalid }
+                        >
+                            { saving ? __( 'Saving…', 'dono' ) : __( 'Save', 'dono' ) }
+                        </Btn>
+                    </>
+                }
+            >
                 <form className="dp-edit-form" onSubmit={ submit }>
                     <label style={ { gridColumn: '1 / -1' } }>
                         { __( 'Email', 'dono' ) }
@@ -243,18 +265,16 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                         />
                     </label>
                     { error && <div className="dp-edit-form__error">{ error }</div> }
-                    <div className="dp-edit-form__actions">
-                        <button type="button" className="btn" onClick={ onCancel } disabled={ saving }>
-                            { __( 'Cancel', 'dono' ) }
-                        </button>
-                        <button type="submit" className="btn btn--primary" disabled={ saving || phoneInvalid }>
-                            { saving ? __( 'Saving…', 'dono' ) : __( 'Save', 'dono' ) }
-                        </button>
-                    </div>
+                    { /* Submit stays in the form so Enter still saves, but it is
+                         not shown: the dialog footer carries the real buttons. */ }
+                    <button type="submit" style={ { display: 'none' } } aria-hidden="true" tabIndex={ -1 } />
                 </form>
-            </div>
+            </Dialog>
+
+            { /* Outside the dialog, so the email-change confirmation stacks on
+                 top of it rather than inside its scrolling body. */ }
             <ConfirmDialog confirm={ confirm } onClose={ () => setConfirm( null ) } />
-        </div>
+        </>
     );
 }
 
@@ -292,6 +312,7 @@ export default function DonorProfile( { id, onBack } ) {
     const {
         donor, lifetime, donations, recurring, receipts, notes, consents,
         events, campaigns, banners, magic_link_url: magicLinkUrl,
+        events_total: eventsTotal,
     } = data;
 
     const tabCounts = {
@@ -348,6 +369,7 @@ export default function DonorProfile( { id, onBack } ) {
                         <ActivityTab
                             donations={ donations }
                             events={ events }
+                            eventsTotal={ eventsTotal }
                             campaigns={ campaigns }
                             recurring={ recurring }
                             lifetime={ lifetime }
@@ -357,8 +379,8 @@ export default function DonorProfile( { id, onBack } ) {
                     ) }
                     { tab === 'activity'  && <ActivityLogTab donorId={ donor.id } /> }
                     { tab === 'donations' && <DonationsTab donorId={ donor.id } redacted={ !! donor.redacted_at } /> }
-                    { tab === 'recurring' && <RecurringTab recurring={ recurring } /> }
-                    { tab === 'receipts'  && <ReceiptsTab receipts={ receipts } /> }
+                    { tab === 'recurring' && <RecurringTab recurring={ recurring } onChange={ load } /> }
+                    { tab === 'receipts'  && <ReceiptsTab receipts={ receipts } redacted={ !! donor.redacted_at } /> }
                     { tab === 'notes'     && <NotesTab donorId={ donor.id } notes={ notes } onChanged={ load } /> }
                     { tab === 'consent'   && <ConsentTab consents={ consents } donor={ donor } onChanged={ load } /> }
                 </main>

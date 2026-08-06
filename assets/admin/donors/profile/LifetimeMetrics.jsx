@@ -39,12 +39,35 @@ export default function LifetimeMetrics( { lifetime } ) {
     const {
         total_cents, count, avg_cents, largest_cents,
         one_time_count, recurring_count,
-        mrr_cents, mrr_unconverted, active_plan_count, next_payment_at, sparkline,
+        mrr_cents, mrr_unconverted, active_plan_count, plan_counts, next_payment_at, sparkline,
     } = lifetime;
 
     // A plan in a currency the site has no rate for counts as zero, so the
     // figure is short rather than wrong. Say which, instead of showing a total
     // that quietly leaves a plan out.
+    // A paused or past-due plan bills nothing, so the card is right to read
+    // $0.00 -- but "No active plans" on its own says the donor has no
+    // subscription at all, which is a different thing. Name the state instead.
+    const dormant = [];
+    if ( plan_counts?.past_due > 0 ) {
+        dormant.push( sprintf(
+            /* translators: %d: number of plans the gateway could not collect. */
+            _n( '%d past due', '%d past due', plan_counts.past_due, 'dono' ),
+            plan_counts.past_due
+        ) );
+    }
+    if ( plan_counts?.paused > 0 ) {
+        dormant.push( sprintf(
+            /* translators: %d: number of paused plans. */
+            _n( '%d paused', '%d paused', plan_counts.paused, 'dono' ),
+            plan_counts.paused
+        ) );
+    }
+
+    const activePart = active_plan_count > 0
+        ? sprintf( /* translators: 1: active plan count, 2: next payment date */ __( '%1$d active · next %2$s', 'dono' ), active_plan_count, formatDate( next_payment_at ) )
+        : __( 'No active plans', 'dono' );
+
     const mrrSub = mrr_unconverted > 0
         ? sprintf(
             /* translators: %d: number of plans with no exchange rate */
@@ -56,9 +79,7 @@ export default function LifetimeMetrics( { lifetime } ) {
             ),
             mrr_unconverted
         )
-        : ( active_plan_count > 0
-            ? sprintf( /* translators: 1: active plan count, 2: next payment date */ __( '%1$d active · next %2$s', 'dono' ), active_plan_count, formatDate( next_payment_at ) )
-            : __( 'No active plans', 'dono' ) );
+        : [ activePart, ...dormant ].join( ' · ' );
 
     return (
         <div className="dp-metrics">

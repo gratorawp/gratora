@@ -899,6 +899,13 @@ $bar-radius:    6px;
     margin-top: 3px;
     display: inline-flex; gap: 10px; align-items: center; flex-wrap: wrap;
 }
+.dp-tl-ref {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 11px;
+    color: $text-muted;
+
+    &:hover { color: $accent; }
+}
 .dp-tl-note {
     font-size: 12px;
     font-style: italic;
