@@ -36,7 +36,6 @@ final class SettingsService
                 'vat_id'        => '',
                 'email'         => '',
                 'user_type'     => '',
-                'cause'         => '',
             ],
         ],
         'currency-locale' => [
@@ -67,8 +66,9 @@ final class SettingsService
                 // Org-wide test mode; per-form settings.test_mode also triggers it.
                 'test_mode' => false,
                 'stripe' => [
-                    // `enabled` is derived from the Connect onboarding flow,
-                    // not stored here. Webhook signing secrets are configured
+                    // No `enabled` flag: a credentialed gateway is on when it
+                    // can charge, which GatewayManager::isOn() decides from the
+                    // connected account. Webhook signing secrets are configured
                     // manually, per mode (Stripe issues a distinct secret for
                     // the test and live endpoints).
                     'webhook_secret_test' => '',
@@ -251,6 +251,29 @@ final class SettingsService
                 'subject' => __('Your recurring donation has been cancelled', 'dono'),
                 'body'    => __("Hi {donor_name},\n\nYour recurring donation of {amount} to {campaign_title} has been cancelled. No further charges will be made.\n\nThank you for the donations you made along the way.\n\nThanks,\n{organisation_name}", 'dono'),
             ],
+            // Sent only when someone at the organisation changes a plan on the
+            // donor's behalf. A donor changing their own gift is looking at the
+            // screen that did it and gets nothing.
+            'recurring_amount_changed' => [
+                'enabled' => true,
+                'subject' => __('Your recurring donation amount has changed', 'dono'),
+                'body'    => __("Hi {donor_first_name},\n\nYour recurring donation to {campaign_title} has been changed from {old_amount} to {amount}, starting with your next payment.\n\nIf that is not what you expected, you can change it back or stop the donation here:\n{portal_url}\n\nThanks,\n{organisation_name}", 'dono'),
+            ],
+            'recurring_paused' => [
+                'enabled' => true,
+                'subject' => __('Your recurring donation is paused', 'dono'),
+                'body'    => __("Hi {donor_first_name},\n\nYour recurring donation of {amount} to {campaign_title} has been paused. Nothing will be charged until it restarts on {resumes_at}.\n\nYou can restart it sooner, or stop it altogether, here:\n{portal_url}\n\nThanks,\n{organisation_name}", 'dono'),
+            ],
+            'recurring_resumed' => [
+                'enabled' => true,
+                'subject' => __('Your recurring donation has restarted', 'dono'),
+                'body'    => __("Hi {donor_first_name},\n\nYour recurring donation of {amount} to {campaign_title} has restarted. Your next payment is due on {next_payment_at}.\n\nYou can manage it any time here:\n{portal_url}\n\nThanks,\n{organisation_name}", 'dono'),
+            ],
+            'recurring_skipped' => [
+                'enabled' => true,
+                'subject' => __('Your next donation has been skipped', 'dono'),
+                'body'    => __("Hi {donor_first_name},\n\nYour next recurring donation of {amount} to {campaign_title} has been skipped. Nothing will be charged this time, and the donation continues on {next_payment_at}.\n\nYou can manage it any time here:\n{portal_url}\n\nThanks,\n{organisation_name}", 'dono'),
+            ],
             'magic_link' => [
                 'enabled' => true,
                 'subject' => __('Your sign-in link for {organisation_name}', 'dono'),
@@ -284,6 +307,10 @@ final class SettingsService
             'recurring_renewal'           => array_merge($donation, ['receipt_number', 'reference']),
             'subscription_payment_failed' => array_merge($donation, ['portal_url']),
             'subscription_cancelled'      => $donation,
+            'recurring_amount_changed'    => array_merge($donation, ['old_amount', 'portal_url']),
+            'recurring_paused'            => array_merge($donation, ['resumes_at', 'portal_url']),
+            'recurring_resumed'           => array_merge($donation, ['next_payment_at', 'portal_url']),
+            'recurring_skipped'           => array_merge($donation, ['next_payment_at', 'portal_url']),
             'magic_link'                  => ['donor_name', 'organisation_name', 'portal_url'],
         ]);
     }

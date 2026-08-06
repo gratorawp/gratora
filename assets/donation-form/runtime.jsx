@@ -298,6 +298,12 @@ function FormBody( { state, dispatch, config } ) {
                             intentId:     data.intent_id,
                             amountCents:  data.amount_cents,
                             currency:     data.currency,
+                            // Handed to the Payment Element as defaultValues so
+                            // Stripe stops asking for details this form already
+                            // collected a step earlier.
+                            donorName:   [ state.values.profile?.first_name, state.values.profile?.last_name ]
+                                .filter( Boolean ).join( ' ' ),
+                            donorEmail:  state.values.email || '',
                         },
                     } );
                 } else {
@@ -1011,11 +1017,23 @@ function bootAll() {
     // a postMessage channel so the styling editor can push token updates
     // without re-fetching the whole document.
     if ( inIframe ) {
+        // A srcdoc preview has an opaque origin: its document URL is
+        // about:srcdoc, so location.origin is the string "null" and every
+        // postMessage from the parent carries the parent's real origin. The
+        // equality check below therefore rejected every token push, which is
+        // why switching preset never repainted the preview.
+        //
+        // The guard still matters for the public form, which a hostile page
+        // could frame by URL and push --dono-* vars into (UI-redress on a
+        // payment form). That form is loaded from a real URL, so it keeps the
+        // strict check; only a srcdoc document, whose entire HTML we wrote,
+        // trusts its parent.
+        const isSrcdocPreview = window.location.origin === 'null'
+            || document.URL === 'about:srcdoc';
+
         window.addEventListener( 'message', ( event ) => {
-            // Same-origin only: the styling editor previews the form on the same
-            // site. Without this, any page that frames the public donation form
-            // could push --dono-* CSS vars (UI-redress on a payment form).
-            if ( event.origin !== window.location.origin ) return;
+            if ( ! isSrcdocPreview && event.origin !== window.location.origin ) return;
+            if ( isSrcdocPreview && event.source !== window.parent ) return;
             const data = event.data;
             if ( ! data || typeof data !== 'object' ) return;
             if ( data.type !== 'dono:apply-tokens' || ! data.tokens ) return;

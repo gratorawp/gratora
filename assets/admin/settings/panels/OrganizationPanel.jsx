@@ -66,7 +66,7 @@ export default function OrganizationPanel( { s } ) {
 
                 <FormRow
                     label={ __( 'Address', 'dono' ) }
-                    required
+                    help={ __( 'Optional. Receipts print it when set; donors claiming tax relief usually need it.', 'dono' ) }
                 >
                     <div className="dono-stack-12">
                         <input

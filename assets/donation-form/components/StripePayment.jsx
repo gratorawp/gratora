@@ -39,7 +39,21 @@ export default function StripePayment( { config, payment, dispatch } ) {
                     appearance: { theme: 'stripe', variables: stripeVars( mountRef.current ) },
                 } );
                 elementsRef.current = elements;
-                const el = elements.create( 'payment', { layout: 'tabs' } );
+                // Prefilling is Stripe's recommended Link integration: without
+                // it the Element asks for an email the donor already gave us,
+                // and Link's prefill tool scrapes the surrounding page for it.
+                // Link itself is a Dashboard setting, not something Elements
+                // can turn off.
+                const billingDetails = {};
+                if ( payment.donorEmail ) billingDetails.email = payment.donorEmail;
+                if ( payment.donorName )  billingDetails.name  = payment.donorName;
+
+                const el = elements.create( 'payment', {
+                    layout: 'tabs',
+                    ...( Object.keys( billingDetails ).length
+                        ? { defaultValues: { billingDetails } }
+                        : {} ),
+                } );
                 elRef.current = el;
                 el.on( 'ready', () => { if ( ! cancelled ) setReady( true ); } );
                 el.mount( mountRef.current );

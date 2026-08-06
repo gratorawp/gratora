@@ -53,6 +53,7 @@ final class AdminGlobals extends HookProvider
                 'home_url'     => esc_url_raw(home_url('/')),
                 'dashboard_url' => esc_url_raw(admin_url('admin.php?page=dono')),
                 'settings_url' => esc_url_raw(admin_url('admin.php?page=dono-settings')),
+                'campaigns_url' => esc_url_raw(admin_url('admin.php?page=dono-campaigns')),
             ],
             'privacy_policy_url' => (function () {
                 $opt = get_option('dono_privacy', []);

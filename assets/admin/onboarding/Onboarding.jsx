@@ -3,14 +3,13 @@ import { useState, useEffect, useMemo, useRef, useCallback } from '@wordpress/el
 import { __, sprintf } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 
-import { CURRENCIES, currencySymbol, groupDigits } from '../_shared/currency';
-import AmountInput from '../_shared/components/AmountInput';
+import { CURRENCIES } from '../_shared/currency';
 import CountrySelect from '../_shared/components/CountrySelect';
 import DonoMark from '../_shared/components/DonoMark';
 import LocalIcon from '../_shared/components/Icon';
 import SearchableSelect from '../_shared/components/SearchableSelect';
 
-const TOTAL = 5;
+const TOTAL = 4;
 
 // Pre-fills currency when country changes; falls back to USD.
 const COUNTRY_TO_CURRENCY = {
@@ -50,27 +49,6 @@ function deriveNumberFormat( country ) {
     return us.includes( ( country || '' ).toUpperCase() ) ? 'us' : 'eu';
 }
 
-// Suggested goal presets by cause; plain integer amount in chosen currency.
-const GOAL_PRESETS_DEFAULT = [ 5000, 25000, 50000, 100000 ];
-const GOAL_PRESETS_BY_CAUSE = {
-    memorial:    [ 2000, 5000, 10000, 25000 ],
-    personal:    [ 1000, 3000, 5000, 10000 ],
-    sports:      [ 2500, 5000, 15000, 50000 ],
-    animals:     [ 5000, 15000, 50000, 100000 ],
-    arts:        [ 5000, 15000, 50000, 100000 ],
-    community:   [ 5000, 15000, 50000, 100000 ],
-    education:   [ 10000, 25000, 100000, 250000 ],
-    health:      [ 10000, 25000, 100000, 250000 ],
-    environment: [ 10000, 25000, 100000, 250000 ],
-    humanitarian:[ 10000, 25000, 100000, 250000 ],
-    human_rights:[ 10000, 25000, 100000, 250000 ],
-    faith:       [ 5000, 25000, 50000, 100000 ],
-    other:       GOAL_PRESETS_DEFAULT,
-};
-
-function goalPresetsFor( cause ) {
-    return GOAL_PRESETS_BY_CAUSE[ cause ] || GOAL_PRESETS_DEFAULT;
-}
 
 
 const USER_TYPES = [
@@ -100,22 +78,6 @@ const USER_TYPES = [
     },
 ];
 
-const CAUSE_OPTIONS = [
-    { value: 'education',     label: __( 'Education and schools', 'dono' ) },
-    { value: 'health',        label: __( 'Health and medical', 'dono' ) },
-    { value: 'animals',       label: __( 'Animals and wildlife', 'dono' ) },
-    { value: 'environment',   label: __( 'Environment and climate', 'dono' ) },
-    { value: 'arts',          label: __( 'Arts and culture', 'dono' ) },
-    { value: 'faith',         label: __( 'Faith and religious community', 'dono' ) },
-    { value: 'community',     label: __( 'Community and local causes', 'dono' ) },
-    { value: 'humanitarian',  label: __( 'Humanitarian and disaster relief', 'dono' ) },
-    { value: 'human_rights',  label: __( 'Human rights and advocacy', 'dono' ) },
-    { value: 'sports',        label: __( 'Sports, youth, and recreation', 'dono' ) },
-    { value: 'memorial',      label: __( 'Memorial or in-memoriam', 'dono' ) },
-    { value: 'personal',      label: __( 'Personal or family need', 'dono' ) },
-    { value: 'other',         label: __( 'Something else', 'dono' ) },
-];
-
 export default function Onboarding() {
     const wp = window.dono?.wp || {};
     const presets   = Array.isArray( window.dono?.styling?.presets ) ? window.dono.styling.presets : [];
@@ -140,21 +102,12 @@ export default function Onboarding() {
         name:           wp.site_name || '',
         email:          wp.admin_email || '',
         country:        '',
-        address_line1:  '',
-        address_line2:  '',
-        city:           '',
-        postal_code:    '',
         state:          '',
     } );
     const [ currency, setCurrency ] = useState( { default_currency: 'USD' } );
     const [ brand, setBrand ] = useState( { preset_id: defaultId } );
-    const [ cause, setCause ] = useState( {
+    const [ who, setWho ] = useState( {
         user_type: '',
-        cause:     '',
-    } );
-    const [ goal, setGoal ] = useState( {
-        mode:   'target',   // 'target' | 'ongoing'
-        amount: 25000,
     } );
 
     // Holds finalize response (campaign + form URLs) for checklist links.
@@ -169,16 +122,11 @@ export default function Onboarding() {
                     name:          d.name          || prev.name,
                     email:         d.email         || prev.email,
                     country:       d.country       || prev.country,
-                    address_line1: d.address_line1 || prev.address_line1,
-                    address_line2: d.address_line2 || prev.address_line2,
-                    city:          d.city          || prev.city,
-                    postal_code:   d.postal_code   || prev.postal_code,
                     state:         d.state         || prev.state,
                 } ) );
-                setCause( ( prev ) => ( {
+                setWho( ( prev ) => ( {
                     ...prev,
                     user_type: d.user_type || prev.user_type,
-                    cause:     d.cause     || prev.cause,
                 } ) );
             } )
             .catch( () => {} );
@@ -206,19 +154,6 @@ export default function Onboarding() {
                 if ( d?.default_id ) setBrand( { preset_id: String( d.default_id ) } );
             } )
             .catch( () => {} );
-        // Onboarding goal isn't persisted to its own option (no schema for it)
-        // but we stash a draft on the onboarding-status option so a partial
-        // resume picks up the previously-typed value instead of resetting.
-        apiFetch( { path: '/dono/v1/admin/onboarding/draft' } )
-            .then( ( d ) => {
-                if ( d?.goal && typeof d.goal === 'object' ) {
-                    setGoal( ( prev ) => ( {
-                        mode:   d.goal.mode === 'ongoing' ? 'ongoing' : 'target',
-                        amount: Number( d.goal.amount ) || prev.amount,
-                    } ) );
-                }
-            } )
-            .catch( () => {} );
     }, [] );
 
     const persist = async ( group, payload ) => {
@@ -234,47 +169,26 @@ export default function Onboarding() {
         setBusy( true );
         try {
             if ( step === 0 ) {
-                if ( ! cause.user_type ) {
+                if ( ! who.user_type ) {
                     throw new Error( __( 'Pick who is fundraising to continue.', 'dono' ) );
                 }
-                if ( ! cause.cause ) {
-                    throw new Error( __( 'Pick a cause area to continue.', 'dono' ) );
-                }
-                await persist( 'org-profile', {
-                    user_type: cause.user_type,
-                    cause:     cause.cause,
-                } );
+                await persist( 'org-profile', { user_type: who.user_type } );
             } else if ( step === 1 ) {
                 if ( ! org.country ) {
                     throw new Error( __( 'Pick a country to continue.', 'dono' ) );
                 }
-                if ( cause.user_type !== 'exploring' ) {
-                    if ( ! org.address_line1.trim() || ! org.city.trim() || ! org.postal_code.trim() ) {
-                        throw new Error( __( 'Add your address to continue.', 'dono' ) );
-                    }
-                    // Countries that subdivide require the state/province too,
-                    // otherwise receipts read as half-an-address.
-                    if ( STATES_BY_COUNTRY[ org.country ] && ! ( org.state || '' ).trim() ) {
-                        throw new Error( __( 'Pick a state or province to continue.', 'dono' ) );
-                    }
+                // A country that subdivides still needs its state: it is part of
+                // where the organisation is, and it is one click. The postal
+                // address is not asked for here -- it is optional in Settings,
+                // and the receipt renderer omits the block when it is unset.
+                if ( STATES_BY_COUNTRY[ org.country ] && ! ( org.state || '' ).trim() ) {
+                    throw new Error( __( 'Pick a state or province to continue.', 'dono' ) );
                 }
-                // Flat address_lines for receipt renderers; structured fields stored alongside.
-                const addressLines = [
-                    org.address_line1,
-                    org.address_line2,
-                    [ org.city, org.state, org.postal_code ].filter( Boolean ).join( ' ' ).trim(),
-                ].filter( ( l ) => !! l && l.trim() !== '' );
-
                 await persist( 'org-profile', {
                     name:           org.name,
                     email:          org.email,
                     country:        org.country,
-                    address_line1:  org.address_line1,
-                    address_line2:  org.address_line2,
-                    city:           org.city,
-                    postal_code:    org.postal_code,
                     state:          org.state,
-                    address_lines:  addressLines,
                 } );
 
                 const fmt = numberFormatPair( deriveNumberFormat( org.country ) );
@@ -296,17 +210,6 @@ export default function Onboarding() {
                     },
                 } );
             } else if ( step === 2 ) {
-                if ( goal.mode === 'target' && ( ! goal.amount || goal.amount < 1 ) ) {
-                    throw new Error( __( 'Pick a goal amount to continue, or switch to ongoing.', 'dono' ) );
-                }
-                // Stash the goal in the onboarding-draft option so a partial
-                // resume keeps the selection. Cleared on finalize.
-                await apiFetch( {
-                    path:   '/dono/v1/admin/onboarding/draft',
-                    method: 'PUT',
-                    data:   { goal: { mode: goal.mode, amount: goal.amount } },
-                } ).catch( () => {} );
-            } else if ( step === 3 ) {
                 await persist( 'org-brand', { default_id: brand.preset_id } );
                 const r = await apiFetch( {
                     path:   '/dono/v1/admin/onboarding/finalize',
@@ -315,10 +218,7 @@ export default function Onboarding() {
                         campaign_title: org.name
                             ? `${ org.name } - ${ __( 'General donations', 'dono' ) }`
                             : __( 'General donations', 'dono' ),
-                        currency:       currency.default_currency,
-                        goal_mode:      goal.mode,
-                        goal_amount:    goal.mode === 'target' ? goal.amount : 0,
-                        user_type:      cause.user_type,
+                        user_type:      who.user_type,
                     },
                 } );
                 if ( ! r?.ok ) throw new Error( __( 'Could not finalize onboarding.', 'dono' ) );
@@ -355,7 +255,7 @@ export default function Onboarding() {
 
     return (
         <div className="dono-onboarding">
-            <div className={ `dono-onboarding__top${ step === 3 ? ' is-wide' : '' }` }>
+            <div className={ `dono-onboarding__top${ step === 2 ? ' is-wide' : '' }` }>
                 <span className="dono-onboarding__brand">
                     <DonoMark size={ 28 } />
                     <span className="dono-onboarding__brand-name">Dono</span>
@@ -367,7 +267,7 @@ export default function Onboarding() {
                 ) }
             </div>
 
-            <section ref={ frameRef } className={ `dono-onboarding__frame${ step === 3 ? ' is-wide' : '' }` }>
+            <section ref={ frameRef } className={ `dono-onboarding__frame${ step === 2 ? ' is-wide' : '' }` }>
                 <div className="dono-onboarding__meta">
                     <span className="dono-onboarding__caption">
                         { sprintf( /* translators: %1$d: current step number. %2$d: total number of steps. */ __( 'Step %1$d of %2$d', 'dono' ), step + 1, TOTAL ) }
@@ -382,15 +282,15 @@ export default function Onboarding() {
                     </span>
                 </div>
 
-                { step === 0 && <CauseStep value={ cause } onChange={ setCause } /> }
-                { step === 1 && <LocationStep value={ org } onChange={ setOrg } currency={ currency } onCurrencyChange={ setCurrency } userType={ cause.user_type } /> }
-                { step === 2 && <GoalStep value={ goal } onChange={ setGoal } cause={ cause.cause } currency={ currency.default_currency } format={ deriveNumberFormat( org.country ) } /> }
-                { step === 3 && <BrandStep value={ brand } onChange={ setBrand } presets={ presets } currency={ currency.default_currency } /> }
-                { step === 4 && (
+                { step === 0 && <FundraiserTypeStep value={ who } onChange={ setWho } /> }
+                { step === 1 && <LocationStep value={ org } onChange={ setOrg } currency={ currency } onCurrencyChange={ setCurrency } userType={ who.user_type } /> }
+                { step === 2 && <BrandStep value={ brand } onChange={ setBrand } presets={ presets } currency={ currency.default_currency } /> }
+                { step === 3 && (
                     <ChecklistStep
                         finalized={ finalized }
                         settingsUrl={ wp.settings_url }
                         dashboardUrl={ wp.dashboard_url }
+                        campaignsUrl={ wp.campaigns_url }
                     />
                 ) }
 
@@ -429,27 +329,23 @@ export default function Onboarding() {
 function ctaLabel( step, busy ) {
     if ( busy ) return __( 'Saving…', 'dono' );
     if ( step === 0 ) return __( 'Get started', 'dono' );
-    if ( step === 3 ) return __( 'Finish setup', 'dono' ) + ' →';
+    if ( step === 2 ) return __( 'Finish setup', 'dono' ) + ' →';
     return __( 'Next', 'dono' ) + ' →';
 }
 
-// Step 1: About your cause
-function CauseStep( { value, onChange } ) {
+// Step 1: who is fundraising
+function FundraiserTypeStep( { value, onChange } ) {
     const set = ( patch ) => onChange( { ...value, ...patch } );
     return (
         <div>
             <h2 className="dono-onboarding__headline">
-                { __( 'What are you fundraising for?', 'dono' ) }
+                { __( "Who's fundraising?", 'dono' ) }
             </h2>
             <p className="dono-onboarding__subtitle">
-                { __( 'A bit of context so Dono can suggest sensible defaults.', 'dono' ) }
+                { __( 'Pick the one that fits best.', 'dono' ) }
             </p>
 
             <div className="dono-onboarding__section">
-                <div className="dono-onboarding__section-label">{ __( "Who's fundraising?", 'dono' ) }</div>
-                <div className="dono-onboarding__section-help">
-                    { __( 'Pick the one that fits best. You can change this later.', 'dono' ) }
-                </div>
                 <div className="dono-onboarding__usertype">
                     { USER_TYPES.map( ( t ) => {
                         const isSel = value.user_type === t.id;
@@ -475,19 +371,6 @@ function CauseStep( { value, onChange } ) {
                 </div>
             </div>
 
-            <div className="dono-onboarding__section">
-                <div className="dono-onboarding__section-label">{ __( 'Cause area', 'dono' ) }</div>
-                <div className="dono-onboarding__section-help">
-                    { __( 'Shapes suggested amounts and default copy.', 'dono' ) }
-                </div>
-                <SearchableSelect
-                    value={ value.cause }
-                    onChange={ ( v ) => set( { cause: v } ) }
-                    options={ CAUSE_OPTIONS }
-                    placeholder={ __( 'Pick a cause area', 'dono' ) }
-                />
-            </div>
-
         </div>
     );
 }
@@ -495,7 +378,7 @@ function CauseStep( { value, onChange } ) {
 // Step 3: Location & money
 function LocationStep( { value, onChange, currency, onCurrencyChange, userType } ) {
     const set = ( patch ) => onChange( { ...value, ...patch } );
-    const isExploring = userType === 'exploring';
+    const isIndividual = userType === 'individual';
 
     const currencyOptions = useMemo(
         () => CURRENCIES.map( ( c ) => ( {
@@ -527,10 +410,14 @@ function LocationStep( { value, onChange, currency, onCurrencyChange, userType }
             </p>
 
             <div className="dono-onboarding__section">
-                <div className="dono-onboarding__section-label">{ __( 'Organisation', 'dono' ) }</div>
+                <div className="dono-onboarding__section-label">
+                    { isIndividual ? __( 'About you', 'dono' ) : __( 'Organisation', 'dono' ) }
+                </div>
                 <div className="dono-onboarding__address">
                     <div className="span-2">
-                        <label className="dono-onboarding__field-label">{ __( 'Organisation name', 'dono' ) }</label>
+                        <label className="dono-onboarding__field-label">
+                            { isIndividual ? __( 'Your name', 'dono' ) : __( 'Organisation name', 'dono' ) }
+                        </label>
                         <input
                             type="text"
                             className="dono-onboarding__input"
@@ -573,54 +460,6 @@ function LocationStep( { value, onChange, currency, onCurrencyChange, userType }
                 </div>
             </div>
 
-            { ! isExploring && (
-                <div className="dono-onboarding__section">
-                    <div className="dono-onboarding__section-label">{ __( 'Address', 'dono' ) }</div>
-                    <div className="dono-onboarding__address">
-                        <div className="span-2">
-                            <label className="dono-onboarding__field-label">{ __( 'Street address', 'dono' ) }</label>
-                            <input
-                                type="text"
-                                className="dono-onboarding__input"
-                                value={ value.address_line1 }
-                                onChange={ ( e ) => set( { address_line1: e.target.value } ) }
-                                placeholder={ __( 'Enter your street address', 'dono' ) }
-                            />
-                        </div>
-                        <div className="span-2">
-                            <label className="dono-onboarding__field-label">
-                                { __( 'Apartment, suite, etc.', 'dono' ) }
-                                <span className="dono-onboarding__field-optional"> ({ __( 'optional', 'dono' ) })</span>
-                            </label>
-                            <input
-                                type="text"
-                                className="dono-onboarding__input"
-                                value={ value.address_line2 }
-                                onChange={ ( e ) => set( { address_line2: e.target.value } ) }
-                                placeholder={ __( 'Suite 200', 'dono' ) }
-                            />
-                        </div>
-                        <div>
-                            <label className="dono-onboarding__field-label">{ __( 'City', 'dono' ) }</label>
-                            <input
-                                type="text"
-                                className="dono-onboarding__input"
-                                value={ value.city }
-                                onChange={ ( e ) => set( { city: e.target.value } ) }
-                            />
-                        </div>
-                        <div>
-                            <label className="dono-onboarding__field-label">{ __( 'Postal code', 'dono' ) }</label>
-                            <input
-                                type="text"
-                                className="dono-onboarding__input"
-                                value={ value.postal_code }
-                                onChange={ ( e ) => set( { postal_code: e.target.value } ) }
-                            />
-                        </div>
-                    </div>
-                </div>
-            ) }
 
             <div className="dono-onboarding__section">
                 <div className="dono-onboarding__section-label">{ __( 'Currency', 'dono' ) }</div>
@@ -636,87 +475,6 @@ function LocationStep( { value, onChange, currency, onCurrencyChange, userType }
 }
 
 // Step 4: Goal
-function GoalStep( { value, onChange, cause, currency, format = 'us' } ) {
-    const set = ( patch ) => onChange( { ...value, ...patch } );
-    const presets = goalPresetsFor( cause );
-    const symbol  = currencySymbol( currency || 'USD' );
-    const isTarget = value.mode === 'target';
-
-    return (
-        <div>
-            <h2 className="dono-onboarding__headline">{ __( 'Set your fundraising goal', 'dono' ) }</h2>
-            <p className="dono-onboarding__subtitle">
-                { __( 'Drives the progress bar on your campaign page. You can change it anytime.', 'dono' ) }
-            </p>
-
-            <div className="dono-onboarding__section">
-                <div className="dono-onboarding__section-label">{ __( 'Campaign type', 'dono' ) }</div>
-                <div className="dono-onboarding__segmented">
-                    <button
-                        type="button"
-                        className={ isTarget ? 'is-on' : '' }
-                        onClick={ () => set( { mode: 'target' } ) }
-                    >
-                        { __( 'Single target', 'dono' ) }
-                    </button>
-                    <button
-                        type="button"
-                        className={ ! isTarget ? 'is-on' : '' }
-                        onClick={ () => set( { mode: 'ongoing' } ) }
-                    >
-                        { __( 'Ongoing collection', 'dono' ) }
-                    </button>
-                </div>
-            </div>
-
-            { isTarget && (
-                <>
-                    <div className="dono-onboarding__section">
-                        <div className="dono-onboarding__section-label">{ __( 'Target amount', 'dono' ) }</div>
-                        <div className="dono-onboarding__amounts">
-                            { presets.map( ( amount ) => {
-                                const isSel = Number( value.amount ) === amount;
-                                return (
-                                    <button
-                                        key={ amount }
-                                        type="button"
-                                        className={ `dono-onboarding__amount${ isSel ? ' is-selected' : '' }` }
-                                        onClick={ () => set( { amount } ) }
-                                    >
-                                        { format === 'eu'
-                                            ? <>{ groupDigits( amount, format, 0 ) } { symbol }</>
-                                            : <>{ symbol }{ groupDigits( amount, format, 0 ) }</> }
-                                    </button>
-                                );
-                            } ) }
-                        </div>
-                        <div className="dono-onboarding__custom-amount">
-                            <AmountInput
-                                value={ value.amount }
-                                onChange={ ( n ) => set( { amount: n } ) }
-                                currency={ currency || 'USD' }
-                                format={ format }
-                                decimalPlaces={ 0 }
-                                min={ 0 }
-                                max={ 100000000 }
-                                placeholder={ __( 'Or type a custom amount', 'dono' ) }
-                            />
-                        </div>
-                    </div>
-                </>
-            ) }
-
-            { ! isTarget && (
-                <div className="dono-onboarding__section">
-                    <div className="dono-onboarding__section-label">{ __( 'No target needed', 'dono' ) }</div>
-                    <div className="dono-onboarding__section-help">
-                        { __( 'Dono will count every donation toward your campaign total. You can add a target later if you change your mind.', 'dono' ) }
-                    </div>
-                </div>
-            ) }
-        </div>
-    );
-}
 
 // Step 4: Brand preset
 const PRESET_CARDS = [
@@ -787,15 +545,17 @@ function BrandStep( { value, onChange, presets, currency = 'USD' } ) {
     const pushTokens = useCallback( () => {
         const win = frameRef.current?.contentWindow;
         if ( ! win ) return;
-        win.postMessage(
-            { type: 'dono:apply-tokens', tokens: selectedPreset?.tokens || {} },
-            window.location.origin
-        );
+        // '*' rather than our own origin: the preview is a srcdoc document with
+        // an opaque origin, so a targeted post is never delivered. The frame is
+        // one we built and its HTML is ours, so there is no third party to leak
+        // a preset's colours to.
+        win.postMessage( { type: 'dono:apply-tokens', tokens: selectedPreset?.tokens || {} }, '*' );
     }, [ selectedPreset ] );
 
     useEffect( () => {
         const onMsg = ( e ) => {
-            if ( e.origin !== window.location.origin ) return;
+            // Same reason: a srcdoc frame announces itself with origin "null".
+            if ( e.source !== frameRef.current?.contentWindow ) return;
             if ( e?.data?.type === 'dono:preview-ready' ) {
                 setReady( true );
                 pushTokens();
@@ -882,19 +642,21 @@ function BrandStep( { value, onChange, presets, currency = 'USD' } ) {
 }
 
 // Step 5: Get-started checklist
-function ChecklistStep( { finalized, settingsUrl, dashboardUrl } ) {
-    const formUrl =
-        finalized?.form_edit_url ||
-        finalized?.campaign_page ||
-        dashboardUrl ||
-        '#';
+function ChecklistStep( { finalized, settingsUrl, dashboardUrl, campaignsUrl } ) {
+    const campaignId = finalized?.campaign_id || 0;
     const gatewayUrl = settingsUrl ? `${ settingsUrl }#gateways` : ( dashboardUrl || '#' );
+    // Hands off to the campaigns screen with the create drawer already open,
+    // so a campaign is built with the same form as every other one rather than
+    // conjured from the wizard's answers.
+    const newCampaignUrl = campaignsUrl
+        ? `${ campaignsUrl }${ campaignsUrl.includes( '?' ) ? '&' : '?' }action=new`
+        : ( dashboardUrl || '#' );
 
     return (
         <div>
             <h1 className="dono-onboarding__headline">{ __( "You're set up", 'dono' ) }</h1>
             <p className="dono-onboarding__subtitle">
-                { __( "We've created your first campaign and donation form. Two quick things and you're live.", 'dono' ) }
+                { __( 'Your organisation details are saved. Here is what is left before you can take a donation.', 'dono' ) }
             </p>
 
             <ul className="dono-onboarding__checklist">
@@ -904,13 +666,23 @@ function ChecklistStep( { finalized, settingsUrl, dashboardUrl } ) {
                     href={ gatewayUrl }
                     cta={ __( 'Connect', 'dono' ) }
                 />
-                <ChecklistItem
-                    title={ __( 'Build your first form', 'dono' ) }
-                    description={ __( 'Pick a layout, set amounts, brand it. Donors can give as soon as a gateway is live.', 'dono' ) }
-                    href={ formUrl }
-                    cta={ __( 'Build', 'dono' ) }
-                />
+                { campaignId ? (
+                    <ChecklistItem
+                        title={ __( 'Build your first form', 'dono' ) }
+                        description={ __( 'Pick a layout, set amounts, brand it. Donors can give as soon as a gateway is live.', 'dono' ) }
+                        href={ finalized?.form_edit_url || finalized?.campaign_page || dashboardUrl || '#' }
+                        cta={ __( 'Build', 'dono' ) }
+                    />
+                ) : (
+                    <ChecklistItem
+                        title={ __( 'Create your first campaign', 'dono' ) }
+                        description={ __( 'A campaign holds your donation forms and totals. We can start one from your answers, or you can build your own later.', 'dono' ) }
+                        href={ newCampaignUrl }
+                        cta={ __( 'Create', 'dono' ) }
+                    />
+                ) }
             </ul>
+
 
             <p className="dono-onboarding__checklist-foot">
                 <a className="dono-onboarding__checklist-skip" href={ dashboardUrl || '#' }>
@@ -921,7 +693,7 @@ function ChecklistStep( { finalized, settingsUrl, dashboardUrl } ) {
     );
 }
 
-function ChecklistItem( { title, description, href, cta } ) {
+function ChecklistItem( { title, description, href, cta, onClick, busy } ) {
     return (
         <li className="dono-onboarding__checklist-item">
             <span className="dono-onboarding__checklist-bullet" aria-hidden="true" />
@@ -929,7 +701,18 @@ function ChecklistItem( { title, description, href, cta } ) {
                 <strong className="dono-onboarding__checklist-title">{ title }</strong>
                 <span className="dono-onboarding__checklist-desc">{ description }</span>
             </div>
-            <a className="dono-btn dono-btn--primary" href={ href }>{ cta }</a>
+            { onClick
+                ? (
+                    <button
+                        type="button"
+                        className="dono-btn dono-btn--primary"
+                        onClick={ onClick }
+                        disabled={ busy }
+                    >
+                        { cta }
+                    </button>
+                )
+                : <a className="dono-btn dono-btn--primary" href={ href }>{ cta }</a> }
         </li>
     );
 }
