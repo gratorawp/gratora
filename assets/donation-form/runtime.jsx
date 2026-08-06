@@ -506,11 +506,6 @@ function SinglePageView( { state, dispatch, config, onSubmit } ) {
             { state.steps.map( ( s, i ) => (
                 <StepView key={ i } step={ s } state={ state } dispatch={ dispatch } config={ config } />
             ) ) }
-            { ! config.paymentGatewaysPositioned && (
-                <ErrorBoundary>
-                    <GatewaySelect state={ state } dispatch={ dispatch } config={ config } />
-                </ErrorBoundary>
-            ) }
             { state.status === 'error' && state.message && (
                 <div class="dono-form__error" role="alert">{ state.message }</div>
             ) }
@@ -616,13 +611,11 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
         <div class="dono-form__error" role="alert">{ state.message }</div>
     );
 
-    // Fallback only: when no payment-gateways block is placed, render with the
-    // summary on the final page.
-    const gatewaySection = isLast && ! config.paymentGatewaysPositioned && (
-        <ErrorBoundary>
-            <GatewaySelect state={ state } dispatch={ dispatch } config={ config } />
-        </ErrorBoundary>
-    );
+    // No gateway section here on purpose. The payment-gateways block decides
+    // where the selector goes and whether there is one at all; rendering it as
+    // a fallback meant removing the block in the editor did not remove it from
+    // the form. A form that offers a choice without placing the block is caught
+    // by the readiness check, where the author can see it.
 
     if ( progressStyle === 'bar' ) {
         const pct = pages.length > 1
@@ -661,7 +654,6 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
                     { pageSteps.map( ( s, i ) => (
                         <StepView key={ i } step={ s } state={ state } dispatch={ dispatch } config={ config } />
                     ) ) }
-                    { gatewaySection }
                     { error }
                     <div class={ `dono-form__nav dono-form__nav--align-${ ( isLast ? submitStep?.align : null ) || 'end' }` }>{ primary }</div>
                 </div>
@@ -678,7 +670,6 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
             { pageSteps.map( ( s, i ) => (
                 <StepView key={ i } step={ s } state={ state } dispatch={ dispatch } config={ config } />
             ) ) }
-            { gatewaySection }
             { error }
             <div class={ `dono-form__nav${ isLast && submitStep?.align ? ` dono-form__nav--align-${ submitStep.align }` : '' }` }>
                 { current > 0 ? (

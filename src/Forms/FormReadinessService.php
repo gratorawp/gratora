@@ -41,6 +41,7 @@ final class FormReadinessService
     {
         return [
             $this->gatewayCheck($form),
+            $this->gatewayBlockCheck($form),
             $this->testModeCheck($form),
             $this->receiptSenderCheck(),
             $this->receiptTemplateCheck(),
@@ -91,6 +92,63 @@ final class FormReadinessService
      * @param array<int,array<string,mixed>> $blocks
      * @return array<string,mixed>|null
      */
+    /**
+     * A form that offers a choice of gateway needs the block that renders it.
+     *
+     * The runtime used to fall back to drawing the selector on the last page
+     * when the block was absent, so removing it in the editor did not remove it
+     * from the form. Blocks render where they are dropped, so the fallback is
+     * gone -- which means an author who deletes it now ships a form that picks
+     * a gateway for the donor without asking. Say so here, where they can see
+     * it, rather than letting it surface as a donor complaint.
+     *
+     * @return array<string,mixed>
+     */
+    private function gatewayBlockCheck(Form $form): array
+    {
+        $allowed = $this->formAllowedGateways($form);
+        $offered = [];
+        foreach ($this->gateways->all() as $id => $gateway) {
+            if ($allowed !== [] && ! in_array($id, $allowed, true)) continue;
+            if ($this->gateways->isOn($id)) {
+                $offered[] = $gateway->label();
+            }
+        }
+
+        if (count($offered) < 2 || $this->hasBlock(parse_blocks((string) $form->blocks), 'dono/payment-gateways')) {
+            return [
+                'id'     => 'gateway-block',
+                'status' => 'pass',
+                'label'  => __('Donors can pick how to pay', 'dono'),
+            ];
+        }
+
+        return [
+            'id'           => 'gateway-block',
+            'status'       => 'warn',
+            'label'        => __('This form does not let the donor choose a payment method', 'dono'),
+            'detail'       => sprintf(
+                /* translators: %s: comma-separated list of enabled gateway names. */
+                __('%s are available, but the form has no payment methods block, so donors get whichever comes first. Add the block where you want the choice to appear.', 'dono'),
+                implode(', ', $offered)
+            ),
+            'action_url'   => admin_url('admin.php?page=dono-forms&form=' . (int) $form->id),
+            'action_label' => __('Edit the form', 'dono'),
+        ];
+    }
+
+    /** @param array<int,mixed> $blocks */
+    private function hasBlock(array $blocks, string $name): bool
+    {
+        foreach ($blocks as $b) {
+            if (! is_array($b)) continue;
+            if (($b['blockName'] ?? null) === $name) return true;
+            $inner = $b['innerBlocks'] ?? null;
+            if (is_array($inner) && $this->hasBlock($inner, $name)) return true;
+        }
+        return false;
+    }
+
     private function findRecurringToggleAttrs(array $blocks): ?array
     {
         foreach ($blocks as $b) {

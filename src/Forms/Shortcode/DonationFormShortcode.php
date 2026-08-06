@@ -506,7 +506,6 @@ HTML;
         $currencies = $this->detectCurrencies($form);
         $fxConfig   = $this->fxConfig($currency, $currencies);
         $swCfg      = $this->currencySwitcherConfig($form);
-        $hasGatewaysBlock = $this->hasPaymentGatewaysBlock($form);
 
         // Rotate the honeypot field name per render so a generic bot cannot
         // denylist a fixed name.
@@ -577,7 +576,6 @@ HTML;
             'fx'          => $fxConfig,
             'currencySwitcher' => $swCfg,
             'currencySwitcherPositioned' => $swCfg !== null,
-            'paymentGatewaysPositioned' => $hasGatewaysBlock,
             'numberFormat' => $numberFormat,
             'layout'      => $layout,
             'theme'      => [
