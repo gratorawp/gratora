@@ -110,17 +110,30 @@ final class FormReadinessService
     /** @return array<string,mixed> */
     private function gatewayCheck(Form $form): array
     {
-        $gw = $this->settings->get('gateways');
         $allowed = $this->formAllowedGateways($form);
-        // Stripe lives behind the Connect onboarding flow, not the gateway
-        // option's `enabled` flag, so treat a connected Connect account as
-        // "stripe enabled" here.
-        $stripeEnabled = $this->stripeAccount->isConnected();
+
+        // Specific before generic: a connected Stripe that cannot charge yet is
+        // worth naming, where the generic message would send the admin looking
+        // for a gateway to switch on that is already there.
+        if ($this->stripeAccount->isConnected()
+            && ($allowed === [] || in_array('stripe', $allowed, true))
+            && ! $this->stripeAccount->canCharge()) {
+            return [
+                'id'           => 'gateway',
+                'status'       => 'fail',
+                'label'        => __('Stripe account is not ready to take donations', 'dono'),
+                'detail'       => __('Finish the remaining Stripe verification steps or donations will fail.', 'dono'),
+                'action_url'   => admin_url('admin.php?page=dono-settings#gateways'),
+                'action_label' => __('Open settings', 'dono'),
+            ];
+        }
+
+        // GatewayManager::isOn() is what the donor form resolves against, so
+        // asking it here is what keeps this check honest.
         $enabled = [];
         foreach ($this->gateways->all() as $id => $gateway) {
             if ($allowed !== [] && ! in_array($id, $allowed, true)) continue;
-            $on = $id === 'stripe' ? $stripeEnabled : ! empty($gw[$id]['enabled']);
-            if ($on) {
+            if ($this->gateways->isOn($id)) {
                 $enabled[] = $gateway->label();
             }
         }
@@ -134,19 +147,6 @@ final class FormReadinessService
                 'action_url'   => admin_url('admin.php?page=dono-settings#gateways'),
                 'action_label' => __('Configure gateways', 'dono'),
             ];
-        }
-
-        if ($stripeEnabled && ($allowed === [] || in_array('stripe', $allowed, true))) {
-            if (! $this->stripeAccount->canCharge()) {
-                return [
-                    'id'           => 'gateway',
-                    'status'       => 'fail',
-                    'label'        => __('Stripe account is not ready to take donations', 'dono'),
-                    'detail'       => __('Finish the remaining Stripe verification steps or donations will fail.', 'dono'),
-                    'action_url'   => admin_url('admin.php?page=dono-settings#gateways'),
-                    'action_label' => __('Open settings', 'dono'),
-                ];
-            }
         }
 
         return [
@@ -271,23 +271,17 @@ final class FormReadinessService
             ];
         }
 
-        $gatewaySettings = $this->settings->get('gateways');
         $recurringCapable = [];
         foreach ($this->gateways->all() as $id => $gateway) {
             if (in_array('recurring', $gateway->frequencies(), true)) {
                 $recurringCapable[$id] = $gateway;
             }
         }
-        // Stripe is enabled through Connect, not the gateways `enabled` flag -
-        // mirror gatewayCheck() so a Connect-only install does not falsely
-        // report "no recurring gateway" while gatewayCheck() says it is enabled.
-        $stripeEnabled    = $this->stripeAccount->isConnected();
         $allowed = $this->formAllowedGateways($form);
         $enabledRecurring = [];
         foreach ($recurringCapable as $id => $gateway) {
             if ($allowed !== [] && ! in_array($id, $allowed, true)) continue;
-            $on = $id === 'stripe' ? $stripeEnabled : ! empty($gatewaySettings[$id]['enabled']);
-            if ($on) {
+            if ($this->gateways->isOn($id)) {
                 $enabledRecurring[$id] = $gateway;
             }
         }

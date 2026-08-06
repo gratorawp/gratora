@@ -29,3 +29,38 @@ export function visibleGateways( config, state ) {
         return true;
     } );
 }
+
+/**
+ * Why visibleGateways() came back empty: 'none' when the form allows no gateway
+ * that is switched on, 'currency' or 'frequency' when some gateway exists but
+ * this context rules them all out.
+ *
+ * Without this the UI blamed the currency for every empty list, including the
+ * case where an administrator had simply not enabled a gateway.
+ */
+export function emptyReason( config, state ) {
+    const g   = config && config.gateways;
+    const all = g && Array.isArray( g.options ) ? g.options : [];
+    if ( ! all.length ) return 'none';
+
+    // Same context, currency lifted: if that alone brings something back, the
+    // currency really is the blocker.
+    const currency = String( state && state.currency ? state.currency : '' ).toUpperCase();
+    const matchesCurrency = all.filter( ( o ) => {
+        const cur = ( o.currencies || [] ).map( ( c ) => String( c ).toUpperCase() );
+        return ! cur.length || cur.includes( '*' ) || cur.includes( currency );
+    } );
+    if ( ! matchesCurrency.length ) return 'currency';
+
+    const freqRaw = ( state && state.values && state.values.frequency ) || 'one-time';
+    const bucket  = ( freqRaw === 'one-time' || freqRaw === 'one_time' ) ? 'one_time' : 'recurring';
+    const matchesFreq = matchesCurrency.filter( ( o ) => {
+        const fr = o.frequencies || [];
+        return ! fr.length || fr.includes( bucket );
+    } );
+    if ( ! matchesFreq.length ) return 'frequency';
+
+    // Everything else (country) has no message of its own; the neutral one is
+    // honest, where naming the currency would not be.
+    return 'none';
+}

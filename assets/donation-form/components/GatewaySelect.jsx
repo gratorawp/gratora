@@ -1,7 +1,7 @@
 /** @jsxImportSource preact */
 
 import { useEffect } from 'preact/hooks';
-import { visibleGateways } from '../util/gateways';
+import { visibleGateways, emptyReason } from '../util/gateways';
 
 /**
  * Test-mode notice + payment-gateway selector. The selector hides when one
@@ -23,15 +23,19 @@ export default function GatewaySelect( { state, dispatch, config } ) {
         }
     }, [ idsKey, current ] );
 
-    // Nothing takes this currency. The section used to render nothing at all,
-    // which read as "no payment step" rather than "not this currency", and the
-    // stale gateway stayed selected because the effect above only runs when
-    // there is something to select. The donor found out on submit.
+    // Nothing to offer. The section used to render nothing at all, which read
+    // as "no payment step", and the stale gateway stayed selected because the
+    // effect above only runs when there is something to select -- the donor
+    // found out on submit. Which of the three reasons it is matters: blaming
+    // the currency when every gateway is switched off sends the donor looking
+    // for a fix that was never theirs to make.
     if ( ! opts.length ) {
-        const template = ( config.i18n && config.i18n.noGatewayForCurrency ) || '';
-        const message  = template
-            ? template.replace( '%s', String( state.currency || '' ).toUpperCase() )
-            : '';
+        const reason  = emptyReason( config, state );
+        const i18n    = config.i18n || {};
+        const template = reason === 'currency'  ? ( i18n.noGatewayForCurrency || '' )
+            : reason === 'frequency' ? ( i18n.noGatewayForFrequency || '' )
+            : ( i18n.noGatewayAvailable || '' );
+        const message = template.replace( '%s', String( state.currency || '' ).toUpperCase() );
         return (
             <div class="dono-form__payment">
                 <div class="dono-form__gateways-empty" role="alert">{ message }</div>

@@ -624,6 +624,11 @@ HTML;
                 'paymentMethod'  => __('Payment method', 'dono'),
                 /* translators: %s: the selected currency code, e.g. INR. */
                 'noGatewayForCurrency' => __('No payment method here accepts %s. Choose another currency to continue.', 'dono'),
+                'noGatewayForFrequency' => __('No payment method here can take a recurring donation. Choose a one-time donation to continue.', 'dono'),
+                // Not a currency problem: the form allows no gateway that is
+                // switched on. Saying "choose another currency" sent donors
+                // hunting for a fix that was never theirs to make.
+                'noGatewayAvailable' => __('Online donations are unavailable right now. Please try again later.', 'dono'),
                 'testModeNotice' => __('Test mode is on. No real payment is taken and this donation is excluded from reporting.', 'dono'),
                 'back'           => __('Back', 'dono'),
                 'next'           => __('Continue', 'dono'),

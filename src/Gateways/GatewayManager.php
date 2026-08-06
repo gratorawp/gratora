@@ -78,6 +78,31 @@ final class GatewayManager
     }
 
     /**
+     * Is this gateway on for donors?
+     *
+     * The single definition. Readiness used to ask its own version -- a Stripe
+     * special case plus `! empty($cfg[$id]['enabled'])`, which treats an absent
+     * key as off where this treats it as on -- so an admin could be told a form
+     * was ready while the donor was offered nothing.
+     *
+     * A credentialed gateway has no enable toggle by design: connecting keys is
+     * the switch, and canCharge() is what that amounts to. The `enabled` flag
+     * belongs to gateways configured entirely in settings, like offline.
+     */
+    public function isOn(string $id): bool
+    {
+        $g = $this->gateways[$id] ?? null;
+        if (! $g) {
+            return false;
+        }
+
+        $cfg = get_option('dono_gateway_config', []);
+        $cfg = is_array($cfg) ? $cfg : [];
+
+        return ($cfg[$id]['enabled'] ?? true) && $g->canCharge();
+    }
+
+    /**
      * Full gateway metadata for a form, not context-filtered, so the donor
      * runtime can re-resolve visible options as currency or frequency changes
      * client-side without a round trip.
@@ -87,12 +112,9 @@ final class GatewayManager
      */
     public function optionsMetaFor(array $allowed): array
     {
-        $cfg = get_option('dono_gateway_config', []);
-        $cfg = is_array($cfg) ? $cfg : [];
-
         $enabledIds = [];
-        foreach ($this->gateways as $id => $g) {
-            if (($cfg[$id]['enabled'] ?? true) && $g->canCharge()) {
+        foreach ($this->gateways as $id => $_g) {
+            if ($this->isOn($id)) {
                 $enabledIds[] = $id;
             }
         }
