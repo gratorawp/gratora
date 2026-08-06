@@ -9,7 +9,7 @@ import { notify } from '../_shared/notify';
 import { __, _n, sprintf } from '@wordpress/i18n';
 
 import { useDonoRecord } from '../_shared/useDonoRecord';
-import { rowLinkProps } from '../_shared/rowLink';
+import { rowLinkProps, stopRowSelect } from '../_shared/rowLink';
 import { StatusBadge, STATUS_LABEL, formatAmount, defaultCurrency, formatDate, timeAgo, listHref, detailHref, formEditorHref } from '../_shared/format';
 import Card from '../_shared/components/Card';
 import FormRow from '../_shared/components/FormRow';
@@ -998,12 +998,16 @@ function ShortcodeCell( { slug } ) {
         return <span className="dono-row__sub">—</span>;
     }
     const code = `[dono_donation_form slug="${ slug }"]`;
-    const copy = async () => {
+    // The cell sits in a DataViews row, which toggles its bulk selection on
+    // click. Without stopping the event, copying the shortcode also ticked the
+    // row, which is not what the button says it does.
+    const copy = async ( e ) => {
+        stopRowSelect( e );
         try {
             await navigator.clipboard.writeText( code );
             setCopied( true );
             setTimeout( () => setCopied( false ), 1500 );
-        } catch ( e ) {
+        } catch ( err ) {
             // Clipboard API unavailable (insecure context); the code stays visible to copy by hand.
         }
     };
@@ -1011,6 +1015,7 @@ function ShortcodeCell( { slug } ) {
         <button
             type="button"
             className="dono-shortcode-copy"
+            onMouseDown={ stopRowSelect }
             onClick={ copy }
             title={ __( 'Copy shortcode', 'dono' ) }
             aria-label={ __( 'Copy shortcode', 'dono' ) }
