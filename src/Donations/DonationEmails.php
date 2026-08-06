@@ -12,6 +12,7 @@ use Dono\Foundation\Helpers\Money;
 use Dono\Foundation\Hooks\HookProvider;
 use Dono\Mail\Mailer;
 use Dono\Recurring\RecurringPlan;
+use Dono\Recurring\RecurringPlanChange;
 use Dono\Settings\SettingsService;
 
 /**
@@ -47,6 +48,9 @@ final class DonationEmails extends HookProvider
             // 2-arg: $plan, $context
             'dono.recurring.renewal_failed' => ['onRecurringFailed', 10, 2],
             'dono.donation.completed'      => 'onDonationCompleted',
+            // 2-arg: $plan, RecurringPlanChange. Fires for every plan change,
+            // donor-made or admin-made; the handler decides whether to send.
+            'dono.recurring.plan_changed'  => ['onPlanChanged', 10, 2],
         ];
     }
 
@@ -142,6 +146,62 @@ final class DonationEmails extends HookProvider
                 ? (($c = $this->campaigns->findById((int) $plan->campaign_id)) ? (string) $c->title : '')
                 : '',
         ]);
+    }
+
+    /**
+     * A plan someone changed. Cancellation already has its own notice through
+     * the canceller, so it is not repeated here.
+     *
+     * Only sends when the change asked for it, which is admin-initiated
+     * changes by default: a donor who just used the portal does not need an
+     * email telling them what they did a second ago, but someone whose monthly
+     * amount was altered for them has no other way of finding out.
+     */
+    public function onPlanChanged(RecurringPlan $plan, RecurringPlanChange $change): void
+    {
+        if (! $change->notifyDonor) return;
+
+        $template = match ($change->action) {
+            'change_amount' => 'recurring_amount_changed',
+            'pause'         => 'recurring_paused',
+            'resume'        => 'recurring_resumed',
+            'skip_next'     => 'recurring_skipped',
+            default         => null,
+        };
+        if ($template === null) return;
+
+        $donor = $this->donors->findById((int) $plan->donor_id);
+        if (! $donor) return;
+        $email = $this->donorService->decryptEmail($donor);
+        if ($email === null || $email === '') return;
+
+        $currency = (string) $plan->currency;
+        $oldCents = isset($change->detail['from_cents']) ? (int) $change->detail['from_cents'] : null;
+
+        $this->mailer->sendTemplate($template, $email, [
+            'donor_first_name'  => trim((string) ($donor->first_name ?? '')),
+            'donor_name'        => trim(($donor->first_name ?? '') . ' ' . ($donor->last_name ?? '')),
+            'organisation_name' => (string) get_bloginfo('name'),
+            'amount'            => Money::format((int) $plan->amount_cents, $currency),
+            'old_amount'        => $oldCents !== null ? Money::format($oldCents, $currency) : '',
+            'resumes_at'        => $this->onDate($plan->resume_at),
+            'next_payment_at'   => $this->onDate($plan->next_payment_at),
+            'portal_url'        => (new PortalPage())->url(),
+            'campaign_title'    => $plan->campaign_id
+                ? (($c = $this->campaigns->findById((int) $plan->campaign_id)) ? (string) $c->title : '')
+                : '',
+        ]);
+    }
+
+    /** A stored UTC timestamp as the site would write the date. */
+    private function onDate(?string $timestamp): string
+    {
+        if ($timestamp === null || $timestamp === '') {
+            return '';
+        }
+        $ts = strtotime($timestamp);
+
+        return $ts ? wp_date((string) get_option('date_format', 'Y-m-d'), $ts) : '';
     }
 
     /**

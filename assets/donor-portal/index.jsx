@@ -5,6 +5,7 @@ import { useEffect, useState, useCallback, useRef } from 'preact/hooks';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { formatAmount } from '@dono/ui/utils/format';
 import { COUNTRIES } from '../_shared/countries';
+import { loadStripeJs } from '../donation-form/util/stripe';
 import './portal.scss';
 
 const cfg = window.donoPortal || { rest: '/wp-json/dono/v1/portal/', nonce: '' };
@@ -611,7 +612,7 @@ function Recurring() {
                         </div>
                         <div class="dp-list__actions">
                             <span class={ `dp-pill dp-pill--${ p.status }` }>{ recurringStatusLabel( p.status ) }</span>
-                            { p.status === 'active' && (
+                            { ( p.status === 'active' || p.status === 'past_due' ) && (
                                 <button class="dp-link" onClick={ () => setAction( p ) }>{ __( 'Manage', 'dono' ) }</button>
                             ) }
                             { p.status === 'paused' && (
@@ -660,6 +661,9 @@ function RecurringActionSheet( { plan, onClose, onDone } ) {
                         <button class="dp-action" onClick={ () => setStage( 'pause' ) }>{ __( 'Pause', 'dono' ) }</button>
                         <button class="dp-action" onClick={ () => call( { action: 'skip_next' } ) }>{ __( 'Skip next charge', 'dono' ) }</button>
                         <button class="dp-action" onClick={ () => setStage( 'amount' ) }>{ __( 'Change amount', 'dono' ) }</button>
+                        { plan.can_update_payment_method && (
+                            <button class="dp-action" onClick={ () => setStage( 'payment' ) }>{ __( 'Update payment method', 'dono' ) }</button>
+                        ) }
                         <button class="dp-action dp-action--danger" onClick={ () => setStage( 'cancel' ) }>{ __( 'Cancel donation', 'dono' ) }</button>
                     </>
                 ) }
@@ -679,6 +683,10 @@ function RecurringActionSheet( { plan, onClose, onDone } ) {
                     <ChangeAmountForm plan={ plan } onSubmit={ ( cents ) => call( { action: 'change_amount', amount_cents: cents } ) } />
                 ) }
 
+                { stage === 'payment' && (
+                    <UpdatePaymentMethod plan={ plan } onDone={ onDone } onError={ setErr } />
+                ) }
+
                 { stage === 'cancel' && (
                     <CancelDeflection plan={ plan }
                         onPause={  () => setStage( 'pause' ) }
@@ -689,6 +697,130 @@ function RecurringActionSheet( { plan, onClose, onDone } ) {
                 ) }
             </div>
         </div>
+    );
+}
+
+/**
+ * Change the card behind a plan.
+ *
+ * Two shapes, because the processors differ. Stripe returns a SetupIntent the
+ * browser confirms, so the card is entered against Stripe and never touches
+ * this site. PayPal will not let anyone else collect a funding source, so the
+ * only honest answer is to send the donor to PayPal and say so first.
+ */
+function UpdatePaymentMethod( { plan, onDone, onError } ) {
+    const [ mode, setMode ]       = useState( '' );
+    const [ redirect, setRedirect ] = useState( '' );
+    const [ label, setLabel ]     = useState( '' );
+    const [ ready, setReady ]     = useState( false );
+    const [ saving, setSaving ]   = useState( false );
+    const mountRef    = useRef( null );
+    const stripeRef   = useRef( null );
+    const elementsRef = useRef( null );
+
+    useEffect( () => {
+        let cancelled = false;
+
+        api( `recurring/${ plan.id }/payment-method`, { method: 'POST' } )
+            .then( ( res ) => {
+                if ( cancelled ) return;
+                setMode( res.mode );
+                if ( res.mode === 'redirect' ) {
+                    setRedirect( res.redirect_url || '' );
+                    setLabel( res.gateway_label || '' );
+                    return;
+                }
+                return loadStripeJs().then( ( Stripe ) => {
+                    if ( cancelled ) return;
+                    const stripe = Stripe( res.publishable_key );
+                    stripeRef.current = stripe;
+                    const elements = stripe.elements( {
+                        clientSecret: res.client_secret,
+                        appearance: { theme: 'stripe' },
+                    } );
+                    elementsRef.current = elements;
+                    const el = elements.create( 'payment', { layout: 'tabs' } );
+                    el.on( 'ready', () => { if ( ! cancelled ) setReady( true ); } );
+                    el.mount( mountRef.current );
+                } );
+            } )
+            .catch( ( e ) => { if ( ! cancelled ) onError( e.message || __( 'Something went wrong.', 'dono' ) ); } );
+
+        return () => { cancelled = true; };
+    }, [ plan.id ] );
+
+    const save = async () => {
+        const stripe = stripeRef.current;
+        const elements = elementsRef.current;
+        if ( ! stripe || ! elements || saving ) return;
+
+        setSaving( true );
+        onError( '' );
+
+        // if_required keeps the donor here for a card that needs no challenge;
+        // one that does is sent to its bank and comes back to this same page,
+        // which the effect above picks up.
+        const { error, setupIntent } = await stripe.confirmSetup( {
+            elements,
+            confirmParams: { return_url: window.location.href },
+            redirect: 'if_required',
+        } );
+
+        if ( error ) {
+            onError( error.message || __( 'That card could not be saved.', 'dono' ) );
+            setSaving( false );
+            return;
+        }
+
+        const token = setupIntent && setupIntent.payment_method;
+        if ( ! token ) {
+            onError( __( 'That card could not be saved.', 'dono' ) );
+            setSaving( false );
+            return;
+        }
+
+        api( `recurring/${ plan.id }/payment-method/complete`, {
+            method: 'POST',
+            body: JSON.stringify( { token } ),
+        } )
+            .then( onDone )
+            .catch( ( e ) => { onError( e.message || __( 'That card could not be saved.', 'dono' ) ); setSaving( false ); } );
+    };
+
+    if ( mode === 'redirect' ) {
+        return (
+            <>
+                <h3>{ __( 'Update payment method', 'dono' ) }</h3>
+                <p>
+                    { sprintf(
+                        /* translators: %s: the payment provider's name, e.g. PayPal. */
+                        __( '%s handles this on their own site. You will be taken there to choose how you pay, and your donation carries on unchanged.', 'dono' ),
+                        label || __( 'Your payment provider', 'dono' )
+                    ) }
+                </p>
+                <a class="dp-action" href={ redirect } rel="noopener">
+                    { label
+                        ? sprintf(
+                            /* translators: %s: the payment provider's name, e.g. PayPal. */
+                            __( 'Continue to %s', 'dono' ),
+                            label
+                        )
+                        : __( 'Continue', 'dono' ) }
+                </a>
+            </>
+        );
+    }
+
+    return (
+        <>
+            <h3>{ __( 'Update payment method', 'dono' ) }</h3>
+            <p>{ __( 'Enter the card you would like future donations charged to.', 'dono' ) }</p>
+            <div ref={ mountRef } />
+            { ! ready && <p class="dp-hint">{ __( 'Loading secure card form…', 'dono' ) }</p> }
+            <button class="dp-action" disabled={ ! ready || saving } onClick={ save }>
+                { saving ? __( 'Saving…', 'dono' ) : __( 'Save card', 'dono' ) }
+            </button>
+        </>
     );
 }
 

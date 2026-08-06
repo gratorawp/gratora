@@ -12,7 +12,9 @@ use Dono\Gateways\GatewayConfirmResult;
 use Dono\Gateways\GatewayIntentResult;
 use Dono\Gateways\PaymentGateway;
 use Dono\Gateways\RefundResult;
+use Dono\Gateways\PaymentMethodUpdate;
 use Dono\Gateways\SubscriptionAware;
+use Dono\Gateways\SupportsPaymentMethodUpdate;
 use Dono\Gateways\WebhookOutcome;
 use Dono\Gateways\SubscriptionChangeNeedsApproval;
 use Dono\Gateways\WebhookPaymentGuard;
@@ -36,7 +38,7 @@ use WP_REST_Request;
  *
  * @version 1.0.0
  */
-final class PayPalGateway implements PaymentGateway, SubscriptionAware
+final class PayPalGateway implements PaymentGateway, SubscriptionAware, SupportsPaymentMethodUpdate
 {
     /**
      * Mode of the credentials that verified the current webhook. Set once per
@@ -807,6 +809,57 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware
      * lives on the plan, so changing it means revising the subscription onto a
      * plan at the new amount (provisioned on demand and reused).
      */
+    /**
+     * PayPal will not let anyone else collect a funding source for one of its
+     * subscriptions, so there is no card field to render. Revising the
+     * subscription onto its own current plan produces an approval link, which
+     * is the page where the subscriber can change how they pay.
+     */
+    public function startPaymentMethodUpdate(RecurringPlan $plan): PaymentMethodUpdate
+    {
+        $this->account->useTestMode((bool) $plan->is_test);
+
+        $subId = (string) $plan->gateway_subscription_id;
+        if ($subId === '') {
+            throw new RuntimeException(__('This donation has no PayPal subscription.', 'dono'));
+        }
+
+        // Same plan id, so nothing about the schedule or the amount changes:
+        // the revise exists purely to get an approval link.
+        $planId = $this->plans->resolvePlan(
+            (bool) $plan->is_test,
+            (int) $plan->amount_cents,
+            strtoupper((string) $plan->currency),
+            (string) $plan->interval_unit,
+            (int) $plan->interval_count
+        );
+
+        $revised = $this->api->post(
+            '/v1/billing/subscriptions/' . rawurlencode($subId) . '/revise',
+            ['plan_id' => $planId]
+        );
+
+        foreach ((array) ($revised['links'] ?? []) as $link) {
+            if (strtolower((string) ($link['rel'] ?? '')) === 'approve') {
+                $href = (string) ($link['href'] ?? '');
+                if ($href !== '') {
+                    return PaymentMethodUpdate::redirect($href);
+                }
+            }
+        }
+
+        throw new RuntimeException(__('PayPal did not return a link for changing the payment method.', 'dono'));
+    }
+
+    /**
+     * Nothing to do: the donor finishes on PayPal, and the subscription's own
+     * webhook is what tells us the funding source moved. Treating a local call
+     * as the completion would claim a change PayPal has not made.
+     */
+    public function completePaymentMethodUpdate(RecurringPlan $plan, string $token): void
+    {
+    }
+
     public function updateSubscriptionAmount(RecurringPlan $plan, int $amountCents): void
     {
         $this->account->useTestMode((bool) $plan->is_test);

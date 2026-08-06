@@ -16,7 +16,11 @@ use Dono\Gateways\AccountFingerprint;
 use Dono\Gateways\GatewayIntentResult;
 use Dono\Gateways\PaymentGateway;
 use Dono\Gateways\RefundResult;
+use Dono\Gateways\PaymentRetryUnavailable;
 use Dono\Gateways\SubscriptionAware;
+use Dono\Gateways\PaymentMethodUpdate;
+use Dono\Gateways\SupportsPaymentMethodUpdate;
+use Dono\Gateways\SupportsPaymentRetry;
 use Dono\Gateways\TestMode;
 use Dono\Gateways\WebhookOutcome;
 use Dono\Gateways\WebhookPaymentGuard;
@@ -34,7 +38,7 @@ use Throwable;
  *
  * @version 1.0.0
  */
-final class StripeGateway implements PaymentGateway, SubscriptionAware
+final class StripeGateway implements PaymentGateway, SubscriptionAware, SupportsPaymentRetry, SupportsPaymentMethodUpdate
 {
     /**
      * Mode of the signing secret that verified the current webhook. Set once
@@ -60,14 +64,20 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
         return 'stripe';
     }
 
+    // Deliberately not a list of methods. What the Payment Element actually
+    // offers depends on the account's enabled methods, the currency, the
+    // donor's country and their device -- Apple Pay in particular needs domain
+    // verification and silently never appears without it. Naming them here
+    // promised things the donor could not see. This label also stands in for
+    // the gateway in admin readiness, so it names the processor.
     public function label(): string
     {
-        return __('Stripe (Card, SEPA, iDEAL, Bancontact, Apple Pay, Google Pay)', 'dono');
+        return __('Stripe', 'dono');
     }
 
     public function description(): string
     {
-        return __('Card, Apple Pay, Google Pay and local methods, processed securely by Stripe.', 'dono');
+        return __('Pay securely by card, or another method offered at checkout.', 'dono');
     }
 
     public function frequencies(): array
@@ -1200,6 +1210,132 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware
     }
 
     /** @throws RuntimeException on a non-recoverable gateway error. */
+    /**
+     * Collect the outstanding renewal now.
+     *
+     * Stripe leaves a past_due subscription with an open invoice and retries it
+     * on its own schedule; paying that invoice is what "retry now" means. The
+     * plan is deliberately not written here: invoice.payment_succeeded is what
+     * confirms the money, and treating this call's response as payment would
+     * book a renewal that can still fail asynchronously.
+     */
+    /**
+     * A SetupIntent the donor's browser confirms, so the card is entered
+     * against Stripe and never reaches this site.
+     *
+     * off_session usage, because what is being saved is the card that later
+     * renewals will be charged against with nobody present.
+     */
+    public function startPaymentMethodUpdate(RecurringPlan $plan): PaymentMethodUpdate
+    {
+        $this->account->useTestMode((bool) $plan->is_test);
+
+        $customerId = (string) $plan->gateway_customer_id;
+        if ($customerId === '') {
+            // Older plans and imported ones may carry no customer. Read it back
+            // off the subscription rather than refusing the donor outright.
+            $subId = (string) $plan->gateway_subscription_id;
+            if ($subId !== '') {
+                $sub = $this->api->get('/subscriptions/' . rawurlencode($subId));
+                $customerId = is_array($sub['customer'] ?? null)
+                    ? (string) ($sub['customer']['id'] ?? '')
+                    : (string) ($sub['customer'] ?? '');
+            }
+        }
+        if ($customerId === '') {
+            throw new RuntimeException(__('This donation has no Stripe customer to attach a card to.', 'dono'));
+        }
+
+        $intent = $this->api->post('/setup_intents', [
+            'customer' => $customerId,
+            'usage'    => 'off_session',
+            'automatic_payment_methods' => ['enabled' => 'true'],
+        ]);
+
+        $secret = (string) ($intent['client_secret'] ?? '');
+        if ($secret === '') {
+            throw new RuntimeException(__('Stripe did not return a setup secret.', 'dono'));
+        }
+
+        return PaymentMethodUpdate::inline(
+            $secret,
+            $this->api->publishableKeyFor((bool) $plan->is_test)
+        );
+    }
+
+    /**
+     * Point both the subscription and the customer at the new card.
+     *
+     * The subscription alone is not enough: an invoice created before the
+     * change, which is exactly the unpaid one in a dunning cycle, bills the
+     * customer's default rather than the subscription's, so a donor who fixed
+     * their card would watch the same invoice decline again.
+     */
+    public function completePaymentMethodUpdate(RecurringPlan $plan, string $token): void
+    {
+        $this->account->useTestMode((bool) $plan->is_test);
+
+        $token = trim($token);
+        if ($token === '') {
+            throw new RuntimeException(__('No payment method was supplied.', 'dono'));
+        }
+
+        $subId = (string) $plan->gateway_subscription_id;
+        if ($subId === '') {
+            throw new RuntimeException(__('This plan has no Stripe subscription.', 'dono'));
+        }
+
+        $sub = $this->api->get('/subscriptions/' . rawurlencode($subId));
+        $customerId = is_array($sub['customer'] ?? null)
+            ? (string) ($sub['customer']['id'] ?? '')
+            : (string) ($sub['customer'] ?? '');
+
+        if ($customerId !== '') {
+            $this->api->post('/customers/' . rawurlencode($customerId), [
+                'invoice_settings' => ['default_payment_method' => $token],
+            ]);
+        }
+
+        $this->api->post('/subscriptions/' . rawurlencode($subId), [
+            'default_payment_method' => $token,
+        ]);
+    }
+
+    public function retryPayment(RecurringPlan $plan): void
+    {
+        $this->account->useTestMode((bool) $plan->is_test);
+        $subId = (string) $plan->gateway_subscription_id;
+        if ($subId === '') {
+            throw new PaymentRetryUnavailable(__('This plan never reached Stripe, so there is nothing to collect.', 'dono'));
+        }
+
+        $sub = $this->api->get('/subscriptions/' . rawurlencode($subId));
+
+        // latest_invoice is an id unless expanded.
+        $invoiceId = is_array($sub['latest_invoice'] ?? null)
+            ? (string) ($sub['latest_invoice']['id'] ?? '')
+            : (string) ($sub['latest_invoice'] ?? '');
+        if ($invoiceId === '') {
+            throw new PaymentRetryUnavailable(__('Stripe has no invoice outstanding on this subscription.', 'dono'));
+        }
+
+        $invoice = $this->api->get('/invoices/' . rawurlencode($invoiceId));
+        $status  = (string) ($invoice['status'] ?? '');
+
+        // Only an open invoice can be collected. draft has not been finalised,
+        // and paid/void/uncollectible are settled one way or another, so an
+        // attempt would either error or silently do nothing.
+        if ($status !== 'open') {
+            throw new PaymentRetryUnavailable(sprintf(
+                /* translators: %s: the Stripe invoice status, e.g. paid. */
+                __('Nothing to collect: the latest invoice is %s.', 'dono'),
+                $status !== '' ? $status : __('unavailable', 'dono')
+            ));
+        }
+
+        $this->api->post('/invoices/' . rawurlencode($invoiceId) . '/pay', []);
+    }
+
     public function cancelSubscription(RecurringPlan $plan, ?string $reason = null): void
     {
         $this->account->useTestMode((bool) $plan->is_test);

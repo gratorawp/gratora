@@ -7,7 +7,6 @@ namespace Dono\Rest\Portal;
 use Dono\Analytics\ErrorLog;
 use Dono\Async\AsyncDispatcher;
 use Dono\Campaigns\Campaign;
-use Dono\Currency\Currency;
 use Dono\Donations\Donation;
 use Dono\Donations\DonationQueries;
 use Dono\Donations\DonationRepository;
@@ -20,12 +19,13 @@ use Dono\Donors\Portal\AnnualStatementBuilder;
 use Dono\Donors\Portal\PortalSession;
 use Dono\Foundation\Identity\IdentityHasher;
 use Dono\Gateways\GatewayManager;
-use Dono\Gateways\SubscriptionAware;
+use Dono\Gateways\SupportsPaymentMethodUpdate;
 use Dono\Mail\Mailer;
 use Dono\Receipts\Receipt;
 use Dono\Receipts\ReceiptRepository;
-use Dono\Recurring\RecurringCanceller;
 use Dono\Recurring\RecurringPlan;
+use Dono\Recurring\RecurringPlanActions;
+use Dono\Recurring\RecurringPlanChange;
 use RuntimeException;
 use WP_Error;
 use WP_REST_Request;
@@ -58,12 +58,12 @@ final class PortalController
         private IdentityHasher $hasher,
         private AnnualStatementBuilder $annualStatements,
         private ConsentService $consents,
-        private GatewayManager $gateways,
         private Mailer $mailer,
         private AsyncDispatcher $async,
         private \Dono\Donations\DonationService $donationService,
-        private RecurringCanceller $canceller,
         private \Dono\Donors\DonorMetricsService $metrics,
+        private RecurringPlanActions $planActions,
+        private GatewayManager $gateways,
     ) {
     }
 
@@ -141,6 +141,19 @@ final class PortalController
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'recurringAction'],
             'permission_callback' => [$this, 'sessionWithCsrf'],
+        ]);
+
+        register_rest_route(self::NAMESPACE, '/portal/recurring/(?P<id>\d+)/payment-method', [
+            'methods'             => WP_REST_Server::CREATABLE,
+            'callback'            => [$this, 'startPaymentMethodUpdate'],
+            'permission_callback' => [$this, 'sessionWithCsrf'],
+        ]);
+
+        register_rest_route(self::NAMESPACE, '/portal/recurring/(?P<id>\d+)/payment-method/complete', [
+            'methods'             => WP_REST_Server::CREATABLE,
+            'callback'            => [$this, 'completePaymentMethodUpdate'],
+            'permission_callback' => [$this, 'sessionWithCsrf'],
+            'args'                => ['token' => ['type' => 'string', 'required' => true]],
         ]);
 
         register_rest_route(self::NAMESPACE, '/portal/receipts', [
@@ -555,8 +568,13 @@ final class PortalController
         if ($donor instanceof WP_Error) return $donor;
         $donorId = (int) $donor->id;
 
+        // Live only, like the donations and receipts lists. A test-mode plan is
+        // the organisation rehearsing, not something this donor set up, and
+        // showing it here offered them a subscription to cancel that was never
+        // theirs.
         $rows = RecurringPlan::query()
             ->where('donor_id', $donorId)
+            ->where('is_test', 0)
             ->orderBy('status', 'ASC')
             ->orderBy('next_payment_at', 'ASC')
             ->getAll();
@@ -572,6 +590,10 @@ final class PortalController
                 'status'          => (string) $p->status,
                 'next_payment_at' => $p->next_payment_at,
                 'campaign_id'     => $p->campaign_id ? (int) $p->campaign_id : null,
+                // Offline plans have no card, and a gateway that cannot take a
+                // new one must not be offered the option.
+                'can_update_payment_method' => $this->gateways->get((string) $p->gateway)
+                    instanceof SupportsPaymentMethodUpdate,
             ];
         }
         return new WP_REST_Response($out, 200);
@@ -579,106 +601,50 @@ final class PortalController
 
     public function recurringAction(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
-        $donor = $this->requireDonor();
-        if ($donor instanceof WP_Error) return $donor;
+        // Through donorPlan(), not a second copy of the same check: this route
+        // and the payment-method ones each had their own, and only one of them
+        // learned that a test plan is out of scope.
+        $plan = $this->donorPlan($request);
+        if ($plan instanceof WP_Error) return $plan;
 
-        $plan = RecurringPlan::query()->find('id', (int) $request['id']);
-        if (! $plan || $plan->donor_id !== $donor->id) {
-            return new WP_Error('dono_not_found', '', ['status' => 404]);
-        }
         $body   = (array) ($request->get_json_params() ?? []);
         $action = (string) ($body['action'] ?? '');
         $now    = gmdate('Y-m-d H:i:s');
 
-        // Terminal plans accept no further actions. The UI only offers actions
-        // on active/paused plans; this guards crafted requests against a donor's
-        // own already-cancelled/expired plan (esp. Offline plans with no gateway).
-        if (in_array((string) $plan->status, ['cancelled', 'expired'], true)) {
-            return new WP_Error('dono_plan_terminal', __('This donation is no longer active.', 'dono'), ['status' => 422]);
-        }
-
-        // Null when the gateway isn't SubscriptionAware (e.g. Offline); action only flips local state then.
-        $gateway = $this->gateways->get((string) $plan->gateway);
-        $sub     = $gateway instanceof SubscriptionAware ? $gateway : null;
+        // The guards, the gateway calls and the writes all live in
+        // RecurringPlanActions so the admin screen and the command registry
+        // cannot drift from what the donor gets. Only the HTTP shape is here.
+        $change = RecurringPlanChange::byDonor($action);
 
         try {
             switch ($action) {
                 case 'pause':
-                    $months    = max(1, min(12, (int) ($body['months'] ?? 1)));
-                    $resumesAt = gmdate('Y-m-d H:i:s', strtotime("+{$months} months"));
-                    if ($sub) $sub->pauseSubscription($plan, $resumesAt);
-                    // Only Stripe schedules its own resume; RecurringResumer
-                    // reads resume_at so PayPal restarts too, instead of
-                    // pausing forever behind a date the donor can see.
-                    $this->writePlan($plan, [
-                        'status'          => 'paused',
-                        'next_payment_at' => $resumesAt,
-                        'resume_at'       => $resumesAt,
-                    ]);
-                    do_action('dono.recurring.plan_paused', $plan, $months);
+                    $this->planActions->pause($plan, RecurringPlanActions::monthsFromNow((int) ($body['months'] ?? 1)), $change);
                     break;
 
                 case 'resume':
-                    if ($sub) $sub->resumeSubscription($plan);
-                    $this->writePlan($plan, [
-                        'status'    => 'active',
-                        'resume_at' => null,
-                    ]);
-                    do_action('dono.recurring.plan_resumed', $plan);
+                    $this->planActions->resume($plan, $change);
                     break;
 
                 case 'skip_next':
-                    if ($plan->next_payment_at) {
-                        $unit  = ($plan->interval_unit === 'year') ? 'year' : ($plan->interval_unit === 'week' ? 'week' : 'month');
-                        $count = max(1, (int) $plan->interval_count);
-                        $nextAt = gmdate('Y-m-d H:i:s', strtotime("+{$count} {$unit}", strtotime($plan->next_payment_at)));
-                        // Pause at the gateway so the original charge is
-                        // skipped, and record when to lift it. The plan is not
-                        // "paused" to the donor, it is an active monthly gift
-                        // missing one cycle, so status is left alone; the resume
-                        // is driven by resume_at, not by status.
-                        if ($sub) $sub->pauseSubscription($plan, $nextAt);
-                        $this->writePlan($plan, [
-                            'next_payment_at' => $nextAt,
-                            'resume_at'       => $nextAt,
-                        ]);
-                        do_action('dono.recurring.plan_skipped', $plan);
-                    }
+                    $this->planActions->skipNext($plan, $change);
                     break;
 
                 case 'change_amount':
-                    $newCents = (int) ($body['amount_cents'] ?? 0);
-                    if ($newCents < 50) return new WP_Error('dono_invalid_input', __('Amount is too low.', 'dono'), ['status' => 422]);
-                    if ($newCents > 99999999) return new WP_Error('dono_invalid_input', __('Amount is too high.', 'dono'), ['status' => 422]);
-                    // Same zero-decimal guard as the create path: storage is
-                    // major x 100, so a fractional JPY amount would round at
-                    // the gateway and permanently disagree with the plan.
-                    if (Currency::minorUnits((string) $plan->currency) === 0 && $newCents % 100 !== 0) {
-                        return new WP_Error('dono_invalid_input', __('This currency does not support fractional amounts.', 'dono'), ['status' => 422]);
-                    }
-                    if ($sub) $sub->updateSubscriptionAmount($plan, $newCents);
-                    $this->writePlan($plan, [
-                        'amount_cents' => $newCents,
-                        // Keep the base-currency snapshot in step with the amount.
-                        'base_amount_cents' => $plan->fx_rate !== null
-                            ? (int) round($newCents * (float) $plan->fx_rate)
-                            : null,
-                    ]);
-                    do_action('dono.recurring.plan_amount_changed', $plan);
+                    $this->planActions->changeAmount($plan, (int) ($body['amount_cents'] ?? 0), $change);
                     break;
 
                 case 'cancel':
-                    $reason = isset($body['reason']) ? (string) $body['reason'] : null;
-                    // Gateway cancel + winner-gated local side effects, so one
-                    // cancellation email goes out even if the gateway's
-                    // subscription.deleted webhook races this request.
-                    $this->canceller->cancel($plan, $reason);
+                    $this->planActions->cancel($plan, isset($body['reason']) ? (string) $body['reason'] : null, $change);
                     break;
 
                 default:
                     return new WP_Error('dono_invalid_action', '', ['status' => 422]);
             }
         } catch (\Dono\Gateways\SubscriptionChangeNeedsApproval $e) {
+            // Ahead of the RuntimeException arm below, which is its parent and
+            // would otherwise swallow it and report a live plan as terminal.
+            //
             // Not a failure: the processor took the request and is waiting on
             // the donor. Local state stays as it is, because writing the new
             // amount here would tell the donor a change had happened that their
@@ -689,6 +655,10 @@ final class PortalController
                 __('Your payment provider needs you to approve this change before it takes effect. Nothing has changed yet.', 'dono'),
                 ['status' => 409, 'approve_url' => $e->approveUrl]
             );
+        } catch (\InvalidArgumentException $e) {
+            return new WP_Error('dono_invalid_input', $e->getMessage(), ['status' => 422]);
+        } catch (\RuntimeException $e) {
+            return new WP_Error('dono_plan_terminal', $e->getMessage(), ['status' => 422]);
         } catch (\Throwable $e) {
             // Gateway (or any downstream) failed; local state intentionally left
             // unchanged. Degrade to a clean 502 rather than a 500.
@@ -706,6 +676,96 @@ final class PortalController
             'next_payment_at' => $plan->next_payment_at,
             'amount_cents'    => (int) $plan->amount_cents,
         ], 200);
+    }
+
+    /**
+     * Begin changing the card behind a plan.
+     *
+     * The dunning email has always pointed the donor here, so this is the page
+     * that has to be able to do it. A declined renewal is usually an expired
+     * card, which retrying cannot fix.
+     */
+    public function startPaymentMethodUpdate(WP_REST_Request $request): WP_REST_Response|WP_Error
+    {
+        $plan = $this->donorPlan($request);
+        if ($plan instanceof WP_Error) return $plan;
+
+        $gateway = $this->gateways->get((string) $plan->gateway);
+        if (! $gateway instanceof SupportsPaymentMethodUpdate) {
+            return new WP_Error(
+                'dono_not_supported',
+                __('This donation\'s payment method cannot be changed here. Please contact us and we will help.', 'dono'),
+                ['status' => 422]
+            );
+        }
+
+        try {
+            $session = $gateway->startPaymentMethodUpdate($plan);
+        } catch (\Throwable $e) {
+            ErrorLog::record('portal.payment_method', $e->getMessage());
+            return new WP_Error(
+                'dono_gateway_error',
+                __('We could not reach the payment provider. Please try again in a moment.', 'dono'),
+                ['status' => 502]
+            );
+        }
+
+        // The redirect copy names the processor, so it has to come from the
+        // gateway; the mode is generic and any gateway may use it.
+        return new WP_REST_Response(
+            $session->toArray() + ['gateway_label' => $gateway->label()],
+            200
+        );
+    }
+
+    /**
+     * Put the card the donor just entered behind the plan.
+     *
+     * The browser confirmed the setup against the processor, so what arrives
+     * here is only an identifier for it; the money path is unchanged and no
+     * card detail passes through this site.
+     */
+    public function completePaymentMethodUpdate(WP_REST_Request $request): WP_REST_Response|WP_Error
+    {
+        $plan = $this->donorPlan($request);
+        if ($plan instanceof WP_Error) return $plan;
+
+        $gateway = $this->gateways->get((string) $plan->gateway);
+        if (! $gateway instanceof SupportsPaymentMethodUpdate) {
+            return new WP_Error('dono_not_supported', '', ['status' => 422]);
+        }
+
+        try {
+            $gateway->completePaymentMethodUpdate($plan, (string) $request['token']);
+        } catch (\Throwable $e) {
+            ErrorLog::record('portal.payment_method', $e->getMessage());
+            return new WP_Error(
+                'dono_gateway_error',
+                __('The new card could not be saved. Please try again in a moment.', 'dono'),
+                ['status' => 502]
+            );
+        }
+
+        do_action('dono.recurring.payment_method_updated', $plan);
+
+        return new WP_REST_Response(['ok' => true], 200);
+    }
+
+    /** The named plan, only if it belongs to the donor whose session this is. */
+    private function donorPlan(WP_REST_Request $request): RecurringPlan|WP_Error
+    {
+        $donor = $this->requireDonor();
+        if ($donor instanceof WP_Error) return $donor;
+
+        $plan = RecurringPlan::query()->find('id', (int) $request['id']);
+        // Ownership is not the only gate: a test plan is not listed, so it must
+        // not be actionable either. Every pause, cancel, amount change and card
+        // update comes through here.
+        if (! $plan || (int) $plan->donor_id !== (int) $donor->id || $plan->is_test) {
+            return new WP_Error('dono_not_found', '', ['status' => 404]);
+        }
+
+        return $plan;
     }
 
     public function receiptsList(): WP_REST_Response|WP_Error
@@ -1013,30 +1073,6 @@ final class PortalController
         }
 
         return $this->consentsShow();
-    }
-
-    /**
-     * Write only the columns this action changed.
-     *
-     * save() UPDATEs every column from the values loaded when the request began.
-     * Renewals use atomic increments so concurrent writes are not lost
-     * (RecurringPlanRepository::recordPayment); a full-row write from here would
-     * roll payments_count, total_paid_cents and last_payment_at back to their
-     * page-load values whenever a renewal lands mid-request.
-     *
-     * @param array<string,mixed> $columns
-     */
-    private function writePlan(RecurringPlan $plan, array $columns): void
-    {
-        $columns['updated_at'] = gmdate('Y-m-d H:i:s');
-
-        RecurringPlan::query()->where('id', (int) $plan->id)->update($columns);
-
-        // The hooks fired after each action read the model, so keep the
-        // in-memory copy in step with the row rather than leaving it stale.
-        foreach ($columns as $column => $value) {
-            $plan->$column = $value;
-        }
     }
 
     /**

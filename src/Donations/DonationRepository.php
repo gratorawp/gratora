@@ -864,6 +864,16 @@ final class DonationRepository
         if (! empty($args['gateway'])) {
             $q = $q->where('gateway', (string) $args['gateway']);
         }
+        // "recurring" is every cadence at once, which is the question actually
+        // asked of this column; the individual cadences filter on themselves.
+        if (! empty($args['frequency'])) {
+            $frequency = (string) $args['frequency'];
+            if ($frequency === 'recurring') {
+                $q = $q->where('frequency', 'one_time', '<>');
+            } else {
+                $q = $q->where('frequency', $frequency);
+            }
+        }
         if (self::hasExplicitTestFilter($args)) {
             $q = $q->where('is_test', (bool) $args['is_test'] ? 1 : 0);
         } elseif (empty($args['include_test'])) {
