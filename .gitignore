@@ -46,3 +46,8 @@ ROADMAP.md
 
 # make-pot scratch: the intermediate @dono/ui template, see "npm run i18n".
 /.cache
+
+# graphify knowledge graph: an 8MB graph.json rebuilt from source on demand.
+# The nested one is where the AST extractor writes its cache when handed a
+# subdirectory, so ignore it at any depth rather than only at the root.
+graphify-out/
