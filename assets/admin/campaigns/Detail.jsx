@@ -16,7 +16,7 @@ import FormRow from '../_shared/components/FormRow';
 import { ToggleRow } from '../_shared/components/Switch';
 import Btn from '../_shared/components/Btn';
 import TokenEditor from '../_shared/styling/TokenEditor';
-import { Copy as CopyIcon, Trash2 as TrashIcon, Coins, HandHeart, Users as UsersIcon, ListChecks } from 'lucide-react';
+import { Copy as CopyIcon, Trash2 as TrashIcon, Coins, HandHeart, Users as UsersIcon, ListChecks, Plus } from 'lucide-react';
 import EmptyState from '../_shared/components/EmptyState';
 import FormTemplatePicker from '../_shared/components/FormTemplatePicker';
 import { IconCoins, IconHeart, IconUsers, IconActivity } from './icons';
@@ -1278,6 +1278,7 @@ function FormsTab( { campaign } ) {
                     <span style={ { color: '#666', fontWeight: 400, marginLeft: 8 } }>({ total })</span>
                 </h2>
                 <Btn variant="primary" onClick={ () => setPickerOpen( true ) } disabled={ creating }>
+                    <Plus size={ 16 } strokeWidth={ 1.75 } />
                     { __( 'Add new form', 'dono' ) }
                 </Btn>
             </div>

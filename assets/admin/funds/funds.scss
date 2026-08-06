@@ -9,6 +9,8 @@
 @import '@dono/ui/scss/components/dialog';
 @import '@dono/ui/scss/components/searchable-select';
 @import '@dono/ui/scss/components/form';
+@import '@dono/ui/scss/components/date-field';
+@import '../_shared/schedule-fields';
 
 .dono-crumbs {
     font-size: 13px;
@@ -50,39 +52,6 @@
     max-width: 720px;
 }
 
-// ---- Row actions ----
-.dono-row-actions {
-    display: flex;
-    align-items: center;
-    gap: 2px;
-    justify-content: flex-end;
-}
-
-.dono-icon-btn {
-    appearance: none;
-    border: 0;
-    background: transparent;
-    color: $text-soft;
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-
-    &:hover { background: $bg-page; color: $text; }
-}
-
-// DropdownMenu toggle (the kebab) inherits the same quiet icon-button look.
-.dono-row-actions .components-dropdown-menu__toggle {
-    min-width: 28px;
-    height: 28px;
-    padding: 0;
-    color: $text-soft;
-
-    &:hover:not(:disabled) { background: $bg-page; color: $text; }
-}
 
 // ---- Table cell chrome ----
 .dono-fund-name {

@@ -1,0 +1,46 @@
+// Chrome for ScheduleFields. Lifted out of campaigns.scss when funds grew the
+// same control, so the two schedule blocks stay one object.
+
+.dono-sched__toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px;
+    background: var(--dono-color-bg-page, $bg-page);
+    border: 1px solid var(--dono-color-border-soft, $border-soft);
+    border-radius: 8px;
+}
+
+.dono-sched__toggle-txt {
+    flex: 1;
+    min-width: 0;
+}
+
+.dono-sched__toggle-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--dono-color-text, $text);
+}
+
+.dono-sched__toggle-sub {
+    margin-top: 1px;
+    font-size: 11.5px;
+    color: var(--dono-color-text-muted, $text-muted);
+}
+
+.dono-sched__date-lbl {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--dono-color-text-muted, $text-muted);
+}
+
+.dono-sched__dates {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 14px;
+}

@@ -4,7 +4,7 @@ import Notice from '../_shared/components/Notice';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { Copy as CopyIcon, Trash2 as TrashIcon, Target } from 'lucide-react';
+import { Copy as CopyIcon, Trash2 as TrashIcon, Target, Plus } from 'lucide-react';
 
 import { StatusBadge, STATUS_LABEL, formatAmount, formatDate, timeAgo, detailHref } from '../_shared/format';
 import Btn from '../_shared/components/Btn';
@@ -309,6 +309,7 @@ export default function List() {
                         { sprintf( /* translators: %s: number of campaigns */ _n( '%s campaign', '%s campaigns', total, 'dono' ), total.toLocaleString() ) }
                     </span>
                     <Btn variant="primary" onClick={ () => setDrawerOpen( true ) }>
+                        <Plus size={ 16 } strokeWidth={ 1.75 } />
                         { __( 'Add new campaign', 'dono' ) }
                     </Btn>
                 </div>

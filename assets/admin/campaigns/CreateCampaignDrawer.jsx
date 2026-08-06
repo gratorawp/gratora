@@ -9,7 +9,7 @@ import Field from '../_shared/components/Field';
 import Segmented from '../_shared/components/Segmented';
 import AmountInput from '../_shared/components/AmountInput';
 import SearchableSelect from '../_shared/components/SearchableSelect';
-import DateField from '../_shared/components/DateField';
+import ScheduleFields from '../_shared/components/ScheduleFields';
 import { Switch } from '../_shared/components/Switch';
 import Btn from '../_shared/components/Btn';
 
@@ -281,35 +281,14 @@ export default function CreateCampaignDrawer( { onClose } ) {
                 label={ __( 'Schedule', 'dono' ) }
                 help={ __( 'By default the campaign is always on with no end date.', 'dono' ) }
             >
-                <div className="dono-cc__toggle-row">
-                    <div className="dono-cc__toggle-txt">
-                        <div className="dono-cc__toggle-title">{ __( 'Set a schedule', 'dono' ) }</div>
-                        <div className="dono-cc__toggle-sub">{ __( 'Add an optional start and end date', 'dono' ) }</div>
-                    </div>
-                    <Switch checked={ scheduleOn } onChange={ setScheduleOn } label={ __( 'Set a schedule', 'dono' ) } />
-                </div>
-                { scheduleOn && (
-                    <div className="dono-cc__dates">
-                        <div>
-                            <span className="dono-cc__date-lbl">{ __( 'Start date', 'dono' ) }</span>
-                            <DateField
-                                value={ startsAt }
-                                onChange={ setStartsAt }
-                                placeholder={ __( 'Starts immediately', 'dono' ) }
-                                ariaLabel={ __( 'Start date', 'dono' ) }
-                            />
-                        </div>
-                        <div>
-                            <span className="dono-cc__date-lbl">{ __( 'End date', 'dono' ) }</span>
-                            <DateField
-                                value={ endsAt }
-                                onChange={ setEndsAt }
-                                placeholder={ __( 'No end date', 'dono' ) }
-                                ariaLabel={ __( 'End date', 'dono' ) }
-                            />
-                        </div>
-                    </div>
-                ) }
+                <ScheduleFields
+                    enabled={ scheduleOn }
+                    onToggle={ setScheduleOn }
+                    startsAt={ startsAt }
+                    onStartsAt={ setStartsAt }
+                    endsAt={ endsAt }
+                    onEndsAt={ setEndsAt }
+                />
             </Field>
 
             <Field label={ __( 'Cover image', 'dono' ) }>

@@ -5,13 +5,14 @@ import { notify } from '../_shared/notify';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { Pencil, Trash2 as TrashIcon, Star, Power, PowerOff, Wallet } from 'lucide-react';
+import { Pencil, Trash2 as TrashIcon, Star, Power, PowerOff, Wallet, Plus } from 'lucide-react';
 
 import { formatAmount } from '../_shared/format';
 import Btn from '../_shared/components/Btn';
 import { stopRowSelect } from '../_shared/rowLink';
 import EmptyState from '../_shared/components/EmptyState';
 import Dialog from '../_shared/components/Dialog';
+import ScheduleFields from '../_shared/components/ScheduleFields';
 import { ToggleRow } from '../_shared/components/Switch';
 import KpiStrip from '../_shared/components/KpiStrip';
 import GoalBar from '../_shared/components/GoalBar';
@@ -341,6 +342,7 @@ export default function List() {
                         { sprintf( /* translators: %s: number of funds */ _n( '%s fund', '%s funds', total, 'dono' ), total.toLocaleString() ) }
                     </span>
                     <Btn variant="primary" onClick={ onCreate }>
+                        <Plus size={ 16 } strokeWidth={ 1.75 } />
                         { __( 'New fund', 'dono' ) }
                     </Btn>
                 </div>
@@ -420,6 +422,7 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
         ends_at:         fund.ends_at || '',
         accounting_code: fund.accounting_code || '',
     } );
+    const [ scheduleOn, setScheduleOn ] = useState( !! ( fund.starts_at || fund.ends_at ) );
     const [ saving, setSaving ] = useState( false );
     const [ saveError, setSaveError ] = useState( null );
 
@@ -525,16 +528,14 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
                             <label>{ __( 'Goal amount', 'dono' ) } <span className="dono-fld__opt">{ __( 'optional', 'dono' ) }</span></label>
                             <input className="dono-input" type="number" min="0" step="0.01" placeholder={ __( 'No goal', 'dono' ) } value={ form.goal } onChange={ ( e ) => set( 'goal', e.target.value ) } />
                         </div>
-                        <div className="dono-grid2">
-                            <div className="dono-fld">
-                                <label>{ __( 'Active from', 'dono' ) }</label>
-                                <input className="dono-input" type="date" value={ form.starts_at ? form.starts_at.slice( 0, 10 ) : '' } onChange={ ( e ) => set( 'starts_at', e.target.value ) } />
-                            </div>
-                            <div className="dono-fld">
-                                <label>{ __( 'Active until', 'dono' ) }</label>
-                                <input className="dono-input" type="date" value={ form.ends_at ? form.ends_at.slice( 0, 10 ) : '' } onChange={ ( e ) => set( 'ends_at', e.target.value ) } />
-                            </div>
-                        </div>
+                        <ScheduleFields
+                            enabled={ scheduleOn }
+                            onToggle={ setScheduleOn }
+                            startsAt={ form.starts_at ? form.starts_at.slice( 0, 10 ) : '' }
+                            onStartsAt={ ( v ) => set( 'starts_at', v || '' ) }
+                            endsAt={ form.ends_at ? form.ends_at.slice( 0, 10 ) : '' }
+                            onEndsAt={ ( v ) => set( 'ends_at', v || '' ) }
+                        />
                     </fieldset>
 
                     <fieldset className="dono-fset">
