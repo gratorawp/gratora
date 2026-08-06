@@ -191,8 +191,9 @@ Terms and privacy: https://frankfurter.dev
 1. The block-based donation form builder.
 2. A campaign page with a live progress bar and donation form.
 3. The admin dashboard with donation and donor metrics.
-4. Donor records and the self-service donor portal.
-5. Settings: payment methods, currency, and receipts.
+4. A donor record with lifetime giving, history, and their recurring plan.
+5. The self-service donor portal, where a donor sees their own giving.
+6. Settings: payment methods, currency, and receipts.
 
 == Changelog ==
 
