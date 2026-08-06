@@ -555,6 +555,7 @@ final class DonationsController
             'campaign_id'        => $request['campaign_id'] !== null ? (int) $request['campaign_id'] : null,
             'form_id'            => $request['form_id']     !== null ? (int) $request['form_id']     : null,
             'gateway'            => $request['gateway']     !== null ? (string) $request['gateway'] : null,
+            'frequency'          => $request['frequency']   !== null ? (string) $request['frequency'] : null,
             'is_test'            => $request['is_test']     !== null ? (bool) $request['is_test']    : null,
             'include_test'       => (bool) $request['include_test'],
             'created_from'       => $request['created_from'] !== null ? (string) $request['created_from'] : null,
@@ -611,6 +612,7 @@ final class DonationsController
                 'campaign_id'        => $request['campaign_id'] !== null ? (int) $request['campaign_id'] : null,
                 'form_id'            => $request['form_id']     !== null ? (int) $request['form_id']     : null,
                 'gateway'            => $request['gateway']     !== null ? (string) $request['gateway'] : null,
+                'frequency'          => $request['frequency']   !== null ? (string) $request['frequency'] : null,
                 'created_from'       => $request['created_from'] !== null ? (string) $request['created_from'] : null,
                 'created_to'         => $request['created_to']   !== null ? (string) $request['created_to']   : null,
             ]));
@@ -640,6 +642,7 @@ final class DonationsController
             'campaign_id'        => $request['campaign_id'] !== null ? (int) $request['campaign_id'] : null,
             'form_id'            => $request['form_id']     !== null ? (int) $request['form_id']     : null,
             'gateway'            => $request['gateway']     !== null ? (string) $request['gateway'] : null,
+            'frequency'          => $request['frequency']   !== null ? (string) $request['frequency'] : null,
             'is_test'            => $request['is_test']     !== null ? (bool) $request['is_test']    : null,
             'include_test'       => (bool) $request['include_test'],
             'created_from'       => $request['created_from'] !== null ? (string) $request['created_from'] : null,
@@ -814,11 +817,28 @@ final class DonationsController
                 ['status' => 422]
             );
         }
-        try {
-            $this->donationService->confirm($donation, [
+        // Only an offline donation gets an offline marker. A gateway donation
+        // confirmed by hand -- a webhook that never arrived, a card the admin
+        // watched clear in the processor's dashboard -- still moved its money
+        // through that gateway. Stamping `offline` on it fabricated a
+        // transaction id and recorded a card payment as offline, so anyone
+        // reconciling the site against a Stripe payout found no such id.
+        // confirm() falls back to the row's own values, so an empty array here
+        // keeps whatever the gateway already recorded.
+        $confirmation = [];
+        if ($donation->gateway === 'offline') {
+            $confirmation = [
                 'gateway_txn_id' => 'offline-' . wp_generate_password(12, false),
                 'payment_method' => 'offline',
-            ]);
+            ];
+        } elseif ((string) ($donation->gateway_txn_id ?? '') === '') {
+            // No settlement id without the webhook; the intent is the honest
+            // identifier, and it is what you search for at the processor.
+            $confirmation = ['gateway_txn_id' => (string) $donation->gateway_intent_id];
+        }
+
+        try {
+            $this->donationService->confirm($donation, $confirmation);
         } catch (RuntimeException $e) {
             return new WP_Error('dono_confirm_failed', $e->getMessage(), ['status' => 500]);
         }
@@ -1155,6 +1175,7 @@ final class DonationsController
             'campaign_id'        => $request['campaign_id'] !== null ? (int) $request['campaign_id'] : null,
             'form_id'            => $request['form_id']     !== null ? (int) $request['form_id']     : null,
             'gateway'            => $request['gateway']     !== null ? (string) $request['gateway'] : null,
+            'frequency'          => $request['frequency']   !== null ? (string) $request['frequency'] : null,
             'is_test'            => $request['is_test']     !== null ? (bool) $request['is_test']    : null,
             'include_test'       => (bool) $request['include_test'],
             'created_from'       => $request['created_from'] !== null ? (string) $request['created_from'] : null,
@@ -1367,6 +1388,8 @@ final class DonationsController
             'campaign_id'  => ['type' => 'integer', 'minimum' => 1],
             'form_id'      => ['type' => 'integer', 'minimum' => 1],
             'gateway'      => ['type' => 'string'],
+            // 'recurring' means any cadence; the rest match the stored value.
+            'frequency'    => ['type' => 'string', 'enum' => ['recurring', 'one_time', 'weekly', 'monthly', 'quarterly', 'yearly']],
             'is_test'      => ['type' => 'boolean'],
             // Widens the scope to both kinds. is_test filters to one of them,
             // so the two are different questions and the explicit filter wins.
