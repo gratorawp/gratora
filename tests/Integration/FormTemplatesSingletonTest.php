@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Dono\Tests\Integration;
 
+use Dono\Campaigns\CampaignService;
+use Dono\Forms\Form;
 use Dono\Forms\FormTemplates;
+use Dono\Foundation\Plugin;
 
 /**
  * Several Dono blocks register `supports.multiple = false` in their editor
@@ -57,6 +60,56 @@ final class FormTemplatesSingletonTest extends IntegrationTestCase
             $offences,
             "Templates duplicate single-instance blocks (editor silently drops the extras):\n  "
             . implode("\n  ", $offences)
+        );
+    }
+
+    /**
+     * A template that can be submitted has to say where the donor picks how to
+     * pay. The runtime used to draw the selector on the last page when no block
+     * was placed, so a template could omit it and still work; that fallback is
+     * gone, and a template without the block now ships a form that chooses a
+     * gateway for the donor without asking.
+     */
+    public function test_every_submittable_template_places_the_payment_gateways_block(): void
+    {
+        $missing = [];
+        foreach (FormTemplates::all() as $template) {
+            $blocks = (string) ($template['blocks'] ?? '');
+            if (! str_contains($blocks, 'wp:dono/submit-button')) {
+                continue;   // Blank ships no markup at all, by design.
+            }
+            if (! str_contains($blocks, 'wp:dono/payment-gateways')) {
+                $missing[] = (string) $template['id'];
+            }
+        }
+
+        $this->assertSame(
+            [],
+            $missing,
+            "Templates can be submitted but never ask how to pay:\n  " . implode("\n  ", $missing)
+        );
+    }
+
+    /**
+     * The form every campaign is born with does not come from FormTemplates: it
+     * is CampaignService's own starter markup, which is the copy most installs
+     * actually see. Fixing the templates alone left it without a selector.
+     */
+    public function test_the_default_campaign_form_places_the_payment_gateways_block(): void
+    {
+        $campaign = Plugin::instance()->container->get(CampaignService::class)->create([
+            'title'  => 'Starter blocks probe',
+            'status' => 'draft',
+        ]);
+
+        $form = Form::query()->find('id', (int) $campaign->default_form_id);
+
+        $this->assertNotNull($form, 'a campaign is created with a default form');
+        $this->assertStringContainsString('wp:dono/submit-button', (string) $form->blocks);
+        $this->assertStringContainsString(
+            'wp:dono/payment-gateways',
+            (string) $form->blocks,
+            'the starter form must ask how to pay, like every template does'
         );
     }
 }

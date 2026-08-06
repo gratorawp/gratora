@@ -625,6 +625,8 @@ BLOCKS;
 
 <!-- wp:dono/email {"required":true} /-->
 
+<!-- wp:dono/payment-gateways {"style":"cards"} /-->
+
 <!-- wp:dono/submit-button {"label":"Donate","align":"left"} /-->
 BLOCKS;
     }
