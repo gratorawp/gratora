@@ -29,6 +29,7 @@ module.exports = {
         'admin/donors':            path.resolve( __dirname, 'assets/admin/donors/index.jsx' ),
         'admin/forms':             path.resolve( __dirname, 'assets/admin/forms/index.jsx' ),
         'admin/funds':             path.resolve( __dirname, 'assets/admin/funds/index.jsx' ),
+        'admin/subscriptions':     path.resolve( __dirname, 'assets/admin/subscriptions/index.jsx' ),
         'admin/tools':             path.resolve( __dirname, 'assets/admin/tools/index.jsx' ),
         'admin/onboarding':        path.resolve( __dirname, 'assets/admin/onboarding/index.jsx' ),
         'admin/campaign-blocks':   path.resolve( __dirname, 'assets/admin/campaign-blocks/index.jsx' ),

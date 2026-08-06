@@ -1,0 +1,11 @@
+import { createRoot } from '@wordpress/element';
+
+import List from './List';
+import Toaster from '../_shared/components/Toaster';
+import './subscriptions.scss';
+
+document.addEventListener( 'DOMContentLoaded', () => {
+    const root = document.getElementById( 'dono-admin-subscriptions' );
+    if ( ! root ) return;
+    createRoot( root ).render( <><List /><Toaster /></> );
+} );

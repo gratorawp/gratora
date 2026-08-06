@@ -73,6 +73,13 @@ final class RecurringPlanRepository
         $update = [
             'last_payment_at' => $occurredAt,
             'updated_at'      => $occurredAt,
+            // Consecutive failures, which is what dunning means and what
+            // recordRecurringFailure documents `attempt` as. Only ever
+            // incremented, it turned into a lifetime tally: a plan that
+            // declined once and has paid every month since kept a permanent
+            // warning on the donor screen, and its next decline escalated from
+            // the wrong attempt number.
+            'failed_renewals_count' => 0,
         ];
         if ($nextPaymentAt !== null) {
             $update['next_payment_at'] = $nextPaymentAt;
@@ -86,9 +93,10 @@ final class RecurringPlanRepository
             DB::table('dono_recurring_plans')->where('id', $plan->id)->increment('total_paid_cents', $amountCents);
         });
 
-        $plan->payments_count   = (int) $plan->payments_count + 1;
-        $plan->total_paid_cents = (int) $plan->total_paid_cents + $amountCents;
-        $plan->last_payment_at  = $occurredAt;
+        $plan->payments_count         = (int) $plan->payments_count + 1;
+        $plan->total_paid_cents       = (int) $plan->total_paid_cents + $amountCents;
+        $plan->failed_renewals_count  = 0;
+        $plan->last_payment_at        = $occurredAt;
         if ($nextPaymentAt !== null) $plan->next_payment_at = $nextPaymentAt;
         $plan->updated_at = $occurredAt;
     }
@@ -178,6 +186,111 @@ final class RecurringPlanRepository
      *   active_amount_avg_cents:int
      * }
      */
+    /**
+     * Shared filter set for the admin list and its count, so the two cannot
+     * disagree about what is being looked at.
+     *
+     * @param array<string,mixed> $args
+     */
+    private function applyAdminFilters(mixed $q, array $args): mixed
+    {
+        if (! empty($args['status'])) {
+            $q = $q->where('status', (string) $args['status']);
+        }
+        if (! empty($args['gateway'])) {
+            $q = $q->where('gateway', (string) $args['gateway']);
+        }
+        if (! empty($args['campaign_id'])) {
+            $q = $q->where('campaign_id', (int) $args['campaign_id']);
+        }
+        if (! empty($args['interval'])) {
+            $q = $q->where('interval_unit', (string) $args['interval']);
+        }
+        // Anything the gateway could not collect from. Not the same as
+        // status = past_due: a plan can be carrying a decline before the
+        // gateway has moved it, and a cancelled one can still be the reason
+        // an admin is looking.
+        if (! empty($args['failing'])) {
+            $q = $q->where('failed_renewals_count', 0, '>');
+        }
+        if (empty($args['include_test'])) {
+            $q = $q->where('is_test', 0);
+        }
+
+        // A search term that resolved to no donor must return nothing, not
+        // everything: falling through would silently widen the result to the
+        // whole book and read as "no such donor has plans" being false.
+        if (($args['search'] ?? '') !== '') {
+            $ids = array_values(array_filter(array_map('intval', (array) ($args['donor_ids'] ?? []))));
+            $q = $q->whereIn('donor_id', $ids ?: [0]);
+        }
+
+        return $q;
+    }
+
+    /** @param array<string,mixed> $args */
+    public function countAdmin(array $args = []): int
+    {
+        return (int) $this->applyAdminFilters(RecurringPlan::query(), $args)->count();
+    }
+
+    /**
+     * @param array<string,mixed> $args
+     * @param array<string,mixed> $page
+     * @return list<RecurringPlan>
+     */
+    public function listAdmin(array $args = [], array $page = []): array
+    {
+        $sortable = [
+            'next_payment_at', 'started_at', 'amount_cents', 'status',
+            'total_paid_cents', 'payments_count', 'failed_renewals_count', 'id',
+        ];
+        $orderby = in_array((string) ($page['orderby'] ?? ''), $sortable, true)
+            ? (string) $page['orderby']
+            : 'next_payment_at';
+        $order = strtolower((string) ($page['order'] ?? 'asc')) === 'desc' ? 'DESC' : 'ASC';
+
+        $q = $this->applyAdminFilters(RecurringPlan::query(), $args);
+
+        // A cancelled plan has no next payment, and NULL sorts first ascending,
+        // so the default view opened on dead plans and buried the live ones.
+        if ($orderby === 'next_payment_at') {
+            $q = $q->orderByRaw("next_payment_at IS NULL ASC, next_payment_at {$order}");
+        } else {
+            $q = $q->orderBy($orderby, $order);
+        }
+
+        $q = $q->orderBy('id', 'DESC')
+            ->limit((int) ($page['limit'] ?? 25))
+            ->offset((int) ($page['offset'] ?? 0));
+
+        return $q->getAll();
+    }
+
+    /**
+     * Gateway slugs that actually appear on plans, as filter options.
+     *
+     * @return list<array{value:string,label:string}>
+     */
+    public function gatewaysInUse(): array
+    {
+        $rows = DB::table('dono_recurring_plans')
+            ->selectRaw('DISTINCT gateway')
+            ->orderBy('gateway', 'ASC')
+            ->getAll();
+
+        $out = [];
+        foreach ($rows as $row) {
+            $slug = (string) ($row['gateway'] ?? '');
+            if ($slug === '') {
+                continue;
+            }
+            $out[] = ['value' => $slug, 'label' => ucfirst($slug)];
+        }
+
+        return $out;
+    }
+
     public function recurringStats(string $today): array
     {
         $monthStart = esc_sql((new \DateTimeImmutable($today))->modify('first day of this month')->format('Y-m-d 00:00:00'));
@@ -209,12 +322,22 @@ final class RecurringPlanRepository
             ->where('is_test', 0)
             ->count();
 
+        // Plans carrying a decline, whatever the gateway currently calls them:
+        // a failure can sit on a plan still marked active until the gateway
+        // gives up on it.
+        $failingCount = (int) DB::table('dono_recurring_plans')
+            ->where('failed_renewals_count', 0, '>')
+            ->whereIn('status', ['active', 'past_due', 'paused'])
+            ->where('is_test', 0)
+            ->count();
+
         $activeCount = (int) ($active['cnt'] ?? 0);
         $churnBase   = $activeCount + $churnedCount;
         $churnPct    = $churnBase > 0 ? round(($churnedCount / $churnBase) * 100, 1) : 0.0;
 
         return [
             'active_count'             => $activeCount,
+            'failing_count'            => $failingCount,
             'mrr_cents'                => (int) round((float) ($active['mrr'] ?? 0)),
             'new_this_month'           => $newCount,
             'churned_this_month'       => $churnedCount,

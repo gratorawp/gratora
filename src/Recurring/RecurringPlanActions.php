@@ -1,0 +1,277 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Dono\Recurring;
+
+use Dono\Analytics\EventRecorder;
+use Dono\Currency\Currency;
+use Dono\Gateways\GatewayManager;
+use Dono\Gateways\SubscriptionAware;
+use Dono\Gateways\SupportsPaymentRetry;
+use InvalidArgumentException;
+use RuntimeException;
+
+/**
+ * Every change a plan can undergo, in one place.
+ *
+ * The donor portal and the admin screen offer the same five actions, and the
+ * command registry a subset of them. Written separately they drifted: resume
+ * left `resume_at` set, so RecurringResumer would lift a pause that had
+ * already been lifted; two of them wrote the whole row back from a snapshot
+ * taken before the gateway call, so a webhook landing mid-request was
+ * overwritten. Routing all three callers through here also means a plan cannot
+ * change without an event being written for it.
+ *
+ * @version 1.0.0
+ */
+final class RecurringPlanActions
+{
+    /** A plan in one of these states accepts no further changes. */
+    private const TERMINAL = ['cancelled', 'expired'];
+
+    public function __construct(
+        private GatewayManager $gateways,
+        private RecurringCanceller $canceller,
+        private EventRecorder $events,
+    ) {
+    }
+
+    /**
+     * Pause until an explicit date.
+     *
+     * The date is the argument, not a number of months: a caller that already
+     * has one (the command registry takes `resumes_at` verbatim) must get that
+     * date back, and rounding it into whole months moved a two-month pause to
+     * three. Callers working in months use monthsFromNow().
+     *
+     * `resume_at` is always written, never just `next_payment_at`: PayPal's
+     * suspend is indefinite and only RecurringResumer restarts it, and it keys
+     * on `resume_at` alone. Without it a paused plan stops forever behind a
+     * restart date the donor can see but nothing acts on.
+     */
+    public function pause(RecurringPlan $plan, string $resumesAt, RecurringPlanChange $change): void
+    {
+        $this->assertChangeable($plan);
+
+        $this->subscription($plan)?->pauseSubscription($plan, $resumesAt);
+
+        $this->write($plan, [
+            'status'          => 'paused',
+            'next_payment_at' => $resumesAt,
+            'resume_at'       => $resumesAt,
+        ]);
+
+        $change->detail += ['resumes_at' => $resumesAt];
+        $this->finish($plan, $change, 'recurring.paused');
+        do_action('dono.recurring.plan_paused', $plan, $resumesAt);
+    }
+
+    /** A resume date the pause UI can express, clamped to what it offers. */
+    public static function monthsFromNow(int $months): string
+    {
+        $months = max(1, min(12, $months));
+
+        return gmdate('Y-m-d H:i:s', strtotime("+{$months} months"));
+    }
+
+    public function resume(RecurringPlan $plan, RecurringPlanChange $change): void
+    {
+        $this->assertChangeable($plan);
+
+        $this->subscription($plan)?->resumeSubscription($plan);
+
+        // Clearing resume_at is the point: left set, the resumer lifts a pause
+        // that is no longer in effect and the plan charges early.
+        $this->write($plan, [
+            'status'    => 'active',
+            'resume_at' => null,
+        ]);
+
+        $this->finish($plan, $change, 'recurring.resumed');
+        do_action('dono.recurring.plan_resumed', $plan);
+    }
+
+    /**
+     * Skip exactly one cycle. The plan stays active on purpose: to the donor
+     * this is a monthly gift missing one month, not a paused donation, and the
+     * restart is driven by resume_at rather than by status.
+     */
+    public function skipNext(RecurringPlan $plan, RecurringPlanChange $change): void
+    {
+        $this->assertChangeable($plan);
+
+        if (! $plan->next_payment_at) {
+            throw new InvalidArgumentException(__('This donation has no scheduled payment to skip.', 'dono'));
+        }
+
+        $unit   = in_array($plan->interval_unit, ['year', 'week'], true) ? $plan->interval_unit : 'month';
+        $count  = max(1, (int) $plan->interval_count);
+        $nextAt = gmdate('Y-m-d H:i:s', strtotime("+{$count} {$unit}", strtotime($plan->next_payment_at)));
+
+        $this->subscription($plan)?->pauseSubscription($plan, $nextAt);
+
+        $this->write($plan, [
+            'next_payment_at' => $nextAt,
+            'resume_at'       => $nextAt,
+        ]);
+
+        $change->detail = ['next_payment_at' => $nextAt];
+        $this->finish($plan, $change, 'recurring.skipped');
+        do_action('dono.recurring.plan_skipped', $plan);
+    }
+
+    /**
+     * Change what the card is charged from the next cycle on.
+     *
+     * @throws \Dono\Gateways\SubscriptionChangeNeedsApproval When the processor
+     *         accepted the change but is waiting on the donor to approve it, in
+     *         which case nothing local is written: the plan must not claim an
+     *         amount the card is not being charged.
+     */
+    public function changeAmount(RecurringPlan $plan, int $amountCents, RecurringPlanChange $change): void
+    {
+        $this->assertChangeable($plan);
+
+        if ($amountCents < 50) {
+            throw new InvalidArgumentException(__('Amount is too low.', 'dono'));
+        }
+        if ($amountCents > 99999999) {
+            throw new InvalidArgumentException(__('Amount is too high.', 'dono'));
+        }
+        // Storage is major units x 100, so a fractional amount in a zero-decimal
+        // currency rounds at the gateway and the row keeps a figure nobody is
+        // charging, on every renewal.
+        if (Currency::minorUnits((string) $plan->currency) === 0 && $amountCents % 100 !== 0) {
+            throw new InvalidArgumentException(__('This currency does not support fractional amounts.', 'dono'));
+        }
+
+        $was = (int) $plan->amount_cents;
+        if ($was === $amountCents) {
+            return;
+        }
+
+        $this->subscription($plan)?->updateSubscriptionAmount($plan, $amountCents);
+
+        $this->write($plan, [
+            'amount_cents' => $amountCents,
+            // Every base-currency rollup reads this ahead of amount_cents, so a
+            // stale value pins MRR to a figure that is no longer charged.
+            'base_amount_cents' => $plan->fx_rate !== null
+                ? (int) round($amountCents * (float) $plan->fx_rate)
+                : null,
+        ]);
+
+        $change->detail = ['from_cents' => $was, 'to_cents' => $amountCents, 'currency' => (string) $plan->currency];
+        $this->finish($plan, $change, 'recurring.amount_changed');
+        do_action('dono.recurring.plan_amount_changed', $plan);
+    }
+
+    /**
+     * Ask the gateway to collect the outstanding renewal now.
+     *
+     * Nothing local is written. The gateway's webhook is what turns a
+     * collection into a donation and clears the failure count; recording
+     * success here would book money on the strength of an API call that can
+     * still fail minutes later.
+     */
+    public function retryPayment(RecurringPlan $plan, RecurringPlanChange $change): void
+    {
+        $this->assertChangeable($plan);
+
+        $gateway = $this->gateways->get((string) $plan->gateway);
+        if (! $gateway instanceof SupportsPaymentRetry) {
+            throw new InvalidArgumentException(sprintf(
+                /* translators: %s: the payment gateway name, e.g. PayPal. */
+                __('%s does not allow a renewal to be retried on demand. It retries on its own schedule; ask the donor to update their card from the donor portal.', 'dono'),
+                ucfirst((string) $plan->gateway)
+            ));
+        }
+
+        $gateway->retryPayment($plan);
+
+        $this->finish($plan, $change, 'recurring.retry_requested');
+    }
+
+    /**
+     * Cancel through the canceller, which gates the local side effects on a
+     * single winner so one cancellation email goes out even when the gateway's
+     * own subscription.deleted webhook races this request. It records
+     * recurring.cancelled itself, so this only adds who did it.
+     */
+    public function cancel(RecurringPlan $plan, ?string $reason, RecurringPlanChange $change): void
+    {
+        $this->assertChangeable($plan);
+
+        $this->canceller->cancel($plan, $reason);
+
+        $change->detail = ['reason' => $reason];
+        if ($change->isByAdmin()) {
+            $this->record($plan, $change, 'recurring.cancelled_by_admin');
+        }
+        do_action('dono.recurring.plan_changed', $plan, $change);
+    }
+
+    // ---------------------------------------------------------------- internals
+
+    private function assertChangeable(RecurringPlan $plan): void
+    {
+        if (in_array((string) $plan->status, self::TERMINAL, true)) {
+            throw new RuntimeException(__('This donation is no longer active.', 'dono'));
+        }
+    }
+
+    /** Null when the gateway has no subscriptions at all, as Offline does. */
+    private function subscription(RecurringPlan $plan): ?SubscriptionAware
+    {
+        $gateway = $this->gateways->get((string) $plan->gateway);
+
+        return $gateway instanceof SubscriptionAware ? $gateway : null;
+    }
+
+    /**
+     * Column-scoped write. Saving the whole model would push back a snapshot
+     * taken before the gateway call and silently undo any webhook that landed
+     * in between.
+     *
+     * @param array<string,mixed> $columns
+     */
+    private function write(RecurringPlan $plan, array $columns): void
+    {
+        $columns['updated_at'] = gmdate('Y-m-d H:i:s');
+
+        RecurringPlan::query()->where('id', (int) $plan->id)->update($columns);
+
+        // Hooks and mail read the model, so keep the in-memory copy in step
+        // with the row rather than leaving it stale.
+        foreach ($columns as $column => $value) {
+            $plan->$column = $value;
+        }
+    }
+
+    private function finish(RecurringPlan $plan, RecurringPlanChange $change, string $eventType): void
+    {
+        $this->record($plan, $change, $eventType);
+
+        // Carries the actor and the notify flag, which the plain per-action
+        // hooks above cannot: those are a published signature.
+        do_action('dono.recurring.plan_changed', $plan, $change);
+    }
+
+    private function record(RecurringPlan $plan, RecurringPlanChange $change, string $eventType): void
+    {
+        $this->events->record($eventType, [
+            'donor_id'          => $plan->donor_id,
+            'recurring_plan_id' => $plan->id,
+            'form_id'           => $plan->form_id,
+            'campaign_id'       => $plan->campaign_id,
+            'amount_cents'      => $plan->amount_cents,
+            'currency'          => $plan->currency,
+            'user_id'           => $change->userId,
+            'payload'           => [
+                'gateway' => $plan->gateway,
+                'by'      => $change->by,
+            ] + $change->detail,
+        ]);
+    }
+}

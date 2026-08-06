@@ -21,6 +21,12 @@ const STATUS = {
     disputed:           { variant: 'red',   label: __( 'Disputed', 'dono' ) },
     abandoned:          { variant: 'gray',  label: __( 'Abandoned', 'dono' ) },
     cancelled:          { variant: 'gray',  label: __( 'Cancelled', 'dono' ) },
+    // Recurring plan lifecycle. Here rather than hand-rolled on the
+    // subscriptions screen, so a plan's status pill matches a donation's.
+    active:             { variant: 'green', label: __( 'Active', 'dono' ) },
+    past_due:           { variant: 'amber', label: __( 'Past due', 'dono' ) },
+    paused:             { variant: 'gray',  label: __( 'Paused', 'dono' ) },
+    expired:            { variant: 'gray',  label: __( 'Expired', 'dono' ) },
 };
 
 export default function StatusBadge( { status, label } ) {

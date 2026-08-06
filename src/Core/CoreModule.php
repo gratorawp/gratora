@@ -8,6 +8,7 @@ use Dono\Admin\AdminGlobals;
 use Dono\Admin\AdminMenu;
 use Dono\Admin\Pages\CampaignsPage;
 use Dono\Admin\Pages\DonationsPage;
+use Dono\Admin\Pages\SubscriptionsPage;
 use Dono\Admin\Pages\DonorsPage;
 use Dono\Admin\Pages\FormsPage;
 use Dono\Admin\Pages\FundsPage;
@@ -169,6 +170,7 @@ use Dono\Receipts\ReceiptRepository;
 use Dono\Receipts\Renderers\GenericReceiptRenderer;
 use Dono\Recurring\RecurringPlan;
 use Dono\Recurring\RecurringCanceller;
+use Dono\Recurring\RecurringPlanActions;
 use Dono\Recurring\RecurringPlanRepository;
 use Dono\Recurring\RecurringResumer;
 use Dono\Rest\Admin\ExportsController;
@@ -186,6 +188,7 @@ use Dono\Rest\Admin\LicenseController as AdminLicenseController;
 use Dono\Rest\Admin\OnboardingController;
 use Dono\Rest\Admin\ReadinessController;
 use Dono\Rest\Admin\ReportsController;
+use Dono\Rest\Admin\RecurringController;
 use Dono\Rest\Admin\RolesController;
 use Dono\Rest\Admin\SettingsController;
 use Dono\Rest\Admin\PayPalKeysController;
@@ -446,7 +449,8 @@ final class CoreModule implements DonoModule
             $c->get(RecurringPlanRepository::class),
             $c->get(DonorNoteRepository::class),
             $c->get(MagicLinkService::class),
-            $c->get(Clock::class)
+            $c->get(Clock::class),
+            $c->get(GatewayManager::class)
         ));
 
         $c->bind(MagicLinkService::class, fn (Container $c) => new MagicLinkService(
@@ -517,12 +521,12 @@ final class CoreModule implements DonoModule
             $c->get(IdentityHasher::class),
             $c->get(AnnualStatementBuilder::class),
             $c->get(ConsentService::class),
-            $c->get(GatewayManager::class),
             $c->get(Mailer::class),
             $c->get(AsyncDispatcher::class),
             $c->get(DonationService::class),
-            $c->get(RecurringCanceller::class),
             $c->get(DonorMetricsService::class),
+            $c->get(RecurringPlanActions::class),
+            $c->get(GatewayManager::class),
         ));
 
         $c->bind(AggregateSyncer::class, fn () => new AggregateSyncer());
@@ -728,6 +732,15 @@ final class CoreModule implements DonoModule
             $c->get(GatewayManager::class)
         ));
 
+        // The one way a plan changes. The portal, the admin screen and the
+        // command registry all go through it, so the three cannot drift apart
+        // again and every change leaves an event behind.
+        $c->bind(RecurringPlanActions::class, fn (Container $c) => new RecurringPlanActions(
+            $c->get(GatewayManager::class),
+            $c->get(RecurringCanceller::class),
+            $c->get(EventRecorder::class)
+        ));
+
         // Lifts a pause when its window closes. PayPal cannot
         // schedule their own resume, so without this a donor's "skip next
         // payment" stopped the subscription for good.
@@ -803,6 +816,14 @@ final class CoreModule implements DonoModule
             new SettingsController(new SettingsService()),
             new AdminLicenseController($c->get(LicenseService::class)),
             $c->get(PortalController::class),
+            new RecurringController(
+                $c->get(RecurringPlanActions::class),
+                $c->get(RecurringPlanRepository::class),
+                $c->get(DonorRepository::class),
+                $c->get(DonorService::class),
+                $c->get(CampaignRepository::class),
+                $c->get(GatewayManager::class),
+            ),
             new RolesController(),
             new ToolsController(
                 $c->get( AggregateSyncer::class),
@@ -817,7 +838,6 @@ final class CoreModule implements DonoModule
                 $c->get(DonationRepository::class),
             ),
             new OnboardingController(
-                $c->get( CampaignService::class),
                 $c->get( SettingsService::class),
             ),
             new StripeKeysController(
@@ -988,6 +1008,7 @@ final class CoreModule implements DonoModule
             (new AdminMenu())->register();
             (new CampaignsPage())->register();
             (new DonationsPage())->register();
+            (new SubscriptionsPage())->register();
             (new DonorsPage())->register();
             (new FormsPage())->register();
             (new FundsPage())->register();

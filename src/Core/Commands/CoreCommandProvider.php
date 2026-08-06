@@ -34,14 +34,14 @@ use Dono\Foundation\Identity\IdentityHasher;
 use Dono\Funds\FundRepository;
 use Dono\Funds\FundService;
 use Dono\Gateways\GatewayManager;
-use Dono\Gateways\SubscriptionAware;
 use Dono\Mail\Mailer;
 use Dono\Receipts\ReceiptIssuer;
 use Dono\Reports\CampaignReportBuilder;
 use Dono\Reports\TaxStatementBuilder;
 use Dono\Recurring\CampaignCancelRecurringJob;
-use Dono\Recurring\RecurringCanceller;
 use Dono\Recurring\RecurringPlan;
+use Dono\Recurring\RecurringPlanActions;
+use Dono\Recurring\RecurringPlanChange;
 use Dono\Recurring\RecurringPlanRepository;
 use Dono\Settings\SettingsService;
 use Dono\Settings\SecretRedactor;
@@ -988,11 +988,15 @@ final class CoreCommandProvider
             false,
             true,
             function (array $in) use ($c): array {
-                [$plan] = $this->resolvePlan($c, (int) $in['plan_id']);
+                $plan   = $this->resolvePlan($c, (int) $in['plan_id']);
                 $reason = isset($in['reason']) ? (string) $in['reason'] : null;
                 // Gateway cancel + winner-gated local side effects (one email
                 // even if the gateway's subscription.deleted webhook races).
-                $c->get(RecurringCanceller::class)->cancel($plan, $reason);
+                $c->get(RecurringPlanActions::class)->cancel(
+                    $plan,
+                    $reason,
+                    RecurringPlanChange::byAdmin('cancel', false)
+                );
                 return ['plan_id' => (int) $plan->id, 'status' => (string) $plan->status];
             },
             $this->meta(['destructive' => true]),
@@ -1010,31 +1014,18 @@ final class CoreCommandProvider
             true,
             true,
             function (array $in) use ($c): array {
-                [$plan, $sub] = $this->resolvePlan($c, (int) $in['plan_id']);
-                $resumesAt = isset($in['resumes_at']) ? (string) $in['resumes_at'] : null;
-                if ($sub) {
-                    $sub->pauseSubscription($plan, $resumesAt);
-                }
-                // resume_at, not just next_payment_at: RecurringResumer keys
-                // entirely on resume_at, and PayPal's suspend is indefinite, so
-                // without it the plan stops forever behind a restart date the
-                // admin and the donor can both see. The portal's pause has
-                // always written it.
-                $patch = ['status' => 'paused'];
-                if ($resumesAt !== null) {
-                    $patch['next_payment_at'] = $resumesAt;
-                    $patch['resume_at']       = $resumesAt;
-                }
-                $patch['updated_at'] = gmdate('Y-m-d H:i:s');
-
-                // Column-scoped, so a webhook that lands mid-command is not
-                // overwritten by a snapshot taken before it.
-                RecurringPlan::query()->where('id', (int) $plan->id)->update($patch);
-                foreach ($patch as $col => $val) {
-                    $plan->{$col} = $val;
-                }
-
-                do_action('dono.recurring.plan_paused', $plan);
+                $plan = $this->resolvePlan($c, (int) $in['plan_id']);
+                // The caller's own date wins. A pause always needs a restart
+                // date: PayPal's suspend is indefinite and only
+                // RecurringResumer lifts it, keying on resume_at.
+                $resumesAt = isset($in['resumes_at']) && (string) $in['resumes_at'] !== ''
+                    ? (string) $in['resumes_at']
+                    : RecurringPlanActions::monthsFromNow(1);
+                $c->get(RecurringPlanActions::class)->pause(
+                    $plan,
+                    $resumesAt,
+                    RecurringPlanChange::byAdmin('pause', false)
+                );
                 return ['plan_id' => (int) $plan->id, 'status' => (string) $plan->status];
             },
             self::META,
@@ -1051,13 +1042,11 @@ final class CoreCommandProvider
             true,
             true,
             function (array $in) use ($c): array {
-                [$plan, $sub] = $this->resolvePlan($c, (int) $in['plan_id']);
-                if ($sub) {
-                    $sub->resumeSubscription($plan);
-                }
-                $plan->status = 'active';
-                $plan->save();
-                do_action('dono.recurring.plan_resumed', $plan);
+                $plan = $this->resolvePlan($c, (int) $in['plan_id']);
+                $c->get(RecurringPlanActions::class)->resume(
+                    $plan,
+                    RecurringPlanChange::byAdmin('resume', false)
+                );
                 return ['plan_id' => (int) $plan->id, 'status' => (string) $plan->status];
             },
             self::META,
@@ -1075,30 +1064,16 @@ final class CoreCommandProvider
             true,
             true,
             function (array $in) use ($c): array {
-                [$plan, $sub] = $this->resolvePlan($c, (int) $in['plan_id']);
-                $amount = (int) $in['amount_cents'];
-
-                // Amounts are major units x 100, so a fractional amount in a
-                // zero-decimal currency rounds at the gateway rather than being
-                // refused (1.50 JPY is billed as 2), and the plan row keeps a
-                // value nobody is charging, on every renewal.
-                if (Currency::minorUnits((string) $plan->currency) === 0 && $amount % 100 !== 0) {
-                    throw new CommandError('This currency does not support fractional amounts.');
+                $plan = $this->resolvePlan($c, (int) $in['plan_id']);
+                try {
+                    $c->get(RecurringPlanActions::class)->changeAmount(
+                        $plan,
+                        (int) $in['amount_cents'],
+                        RecurringPlanChange::byAdmin('change_amount', false)
+                    );
+                } catch (\InvalidArgumentException $e) {
+                    throw new CommandError($e->getMessage());
                 }
-
-                if ($sub) {
-                    $sub->updateSubscriptionAmount($plan, $amount);
-                }
-
-                $plan->amount_cents = $amount;
-                // Every base-currency aggregate reads this in preference to
-                // amount_cents, so leaving it stale pins MRR to a figure that
-                // is no longer charged.
-                $plan->base_amount_cents = $plan->fx_rate !== null
-                    ? (int) round($amount * (float) $plan->fx_rate)
-                    : null;
-                $plan->save();
-                do_action('dono.recurring.plan_amount_changed', $plan);
                 return ['plan_id' => (int) $plan->id, 'amount_cents' => (int) $plan->amount_cents];
             },
             self::META,
@@ -2172,18 +2147,15 @@ final class CoreCommandProvider
     }
 
     /**
-     * Resolves a plan and its gateway (null for Offline, which has no remote subscription).
-     *
-     * @return array{0: RecurringPlan, 1: ?SubscriptionAware}
+     * The plan a command names. Gateway resolution belongs to
+     * RecurringPlanActions now, which every one of these commands calls.
      */
-    private function resolvePlan(Container $c, int $planId): array
+    private function resolvePlan(Container $c, int $planId): RecurringPlan
     {
         $plan = RecurringPlan::query()->find('id', $planId);
         if (! $plan) {
             throw new CommandError('Recurring plan not found.');
         }
-        $gateway = $c->get(GatewayManager::class)->get((string) $plan->gateway);
-        $sub     = $gateway instanceof SubscriptionAware ? $gateway : null;
-        return [$plan, $sub];
+        return $plan;
     }
 }
