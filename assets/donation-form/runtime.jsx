@@ -84,6 +84,32 @@ function statusTokenFor( reference, state ) {
         || '';
 }
 
+/** Which component collects payment for the gateway this donation is using. */
+function paymentComponentFor( payment ) {
+    if ( payment?.paypal ) return PayPalPayment;
+    if ( payment?.gateway ) {
+        return registeredGateway( payment.gateway )?.component || StripePayment;
+    }
+    return StripePayment;
+}
+
+/**
+ * Whether the author placed a gateway block anywhere, at any nesting depth.
+ * Read from the same config the form renders from rather than published as a
+ * separate server flag, so the two cannot disagree about a form that was edited
+ * between render and submit.
+ */
+function hasGatewayBlock( config ) {
+    const seen = ( items ) => ( Array.isArray( items ) ? items : [] ).some( ( it ) => {
+        if ( ! it ) return false;
+        if ( it.kind === 'payment-gateways' ) return true;
+        return seen( it.children );
+    } );
+
+    return ( Array.isArray( config?.steps ) ? config.steps : [] )
+        .some( ( step ) => seen( step?.items ) || seen( step?.decorations ) );
+}
+
 function registeredGateway( id ) {
     if ( ! id ) return null;
     const reg = typeof window !== 'undefined' ? window.dono?.formGateways : null;
@@ -356,12 +382,12 @@ function FormBody( { state, dispatch, config } ) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ state.status, state.submission, state.payment, config.thanks?.redirect ] );
 
-    if ( state.status === 'payment' ) {
-        let PaymentStep = StripePayment;
-        if ( state.payment?.paypal ) PaymentStep = PayPalPayment;
-        else if ( state.payment?.gateway ) {
-            PaymentStep = registeredGateway( state.payment.gateway )?.component || PaymentStep;
-        }
+    // The payment UI belongs where the author put the gateway block: the donor
+    // picked how to pay there, so that is where paying happens, and the form
+    // they filled in stays on screen behind it. Replacing the whole body is the
+    // fallback for a form with no block, which readiness already warns about.
+    if ( state.status === 'payment' && ! hasGatewayBlock( config ) ) {
+        const PaymentStep = paymentComponentFor( state.payment );
         return (
             <ErrorBoundary>
                 <PaymentStep config={ config } payment={ state.payment } dispatch={ dispatch } />
@@ -622,7 +648,7 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
             ? Math.round( ( ( current + 1 ) / pages.length ) * 100 )
             : 100;
         return (
-            <div class="dono-form dono-form--paged-bar">
+            <div class={ `dono-form dono-form--paged-bar${ state.status === 'payment' ? ' dono-form--settled' : '' }` }>
                 <header class="dono-form__bar-header">
                     { current > 0 ? (
                         <button
@@ -663,7 +689,7 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
 
     // Default: dots-at-bottom variant.
     return (
-        <div class="dono-form">
+        <div class={ `dono-form${ state.status === 'payment' ? ' dono-form--settled' : '' }` }>
             { showPageTitle && (
                 <h3 class="dono-form__page-title">{ pageTitle }</h3>
             ) }
@@ -886,10 +912,25 @@ function renderDecorationItem( d, i, values, ctx ) {
         );
     }
     if ( d.kind === 'payment-gateways' ) {
+        const st = ctx?.state;
+        if ( st?.status === 'payment' ) {
+            const PaymentStep = paymentComponentFor( st.payment );
+            return (
+                <ErrorBoundary key={ i }>
+                    <div class="dono-form__payment-mount">
+                        <PaymentStep
+                            config={ ctx?.config }
+                            payment={ st.payment }
+                            dispatch={ ctx?.dispatch }
+                        />
+                    </div>
+                </ErrorBoundary>
+            );
+        }
         return (
             <ErrorBoundary key={ i }>
                 <GatewaySelect
-                    state={ ctx?.state }
+                    state={ st }
                     dispatch={ ctx?.dispatch }
                     config={ ctx?.config }
                 />

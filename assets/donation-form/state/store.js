@@ -185,7 +185,36 @@ function resolveHiddenValue( f ) {
     return value || fallback;
 }
 
+/**
+ * Actions that describe what is being donated, as opposed to where the form is
+ * in its own lifecycle. Once an intent exists these are settled: the charge is
+ * fixed on the gateway's side, so letting them through would leave the donor
+ * reading a total that is not the one leaving their account. Navigation is in
+ * the list because a paged form renders only the current page, and stepping
+ * away unmounts the payment element mid-entry.
+ */
+const SETTLED_BY_PAYMENT = [
+    'SET_FIELD',
+    'SET_AMOUNT',
+    'SET_CURRENCY',
+    'SET_FREQUENCY',
+    'SET_GATEWAY',
+    'NEXT',
+    'PREV',
+];
+
 export function reducer( state, action ) {
+    // Enforced here rather than by disabling inputs, so it holds however the
+    // action was raised: a stray dispatch, a component that forgot the prop, or
+    // a keyboard reaching a control the styling only looked like it had closed.
+    if ( state.status === 'payment' && SETTLED_BY_PAYMENT.includes( action.type ) ) {
+        // A fresh object, not the same one: a control the donor reached anyway
+        // has already moved its own DOM, and only a re-render puts it back to
+        // what state says. Returning the identical reference leaves a checkbox
+        // showing one thing while the total shows another.
+        return { ...state };
+    }
+
     switch ( action.type ) {
         case 'SET_FIELD':
             return {

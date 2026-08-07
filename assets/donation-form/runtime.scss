@@ -944,6 +944,27 @@
         }
     }
 
+    // Paying. The reducer has already stopped these controls changing anything;
+    // this is what says so. The payment mount is exempt, and so is anything
+    // Stripe draws inside it.
+    &--settled {
+        .dono-form__step,
+        .dono-form__amount,
+        .dono-form__nav {
+            opacity: .55;
+            pointer-events: none;
+        }
+
+        .dono-form__payment-mount {
+            opacity: 1;
+            pointer-events: auto;
+        }
+    }
+
+    &__payment-mount {
+        margin-top: 4px;
+    }
+
     &__terms {
         display: flex;
         flex-direction: column;
