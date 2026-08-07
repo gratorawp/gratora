@@ -80,15 +80,18 @@ final class DataEraser
         do_action('dono.uninstall');
 
         $plan = $this->plan();
-        // Read before the drop: the page ids live in the campaigns table, and
-        // asking after it is gone leaves every campaign page behind.
-        $pages = $this->pageIds();
+
+        // Pages go first, while the tables are still there. wp_delete_post
+        // fires WordPress's own post hooks, and this plugin is listening to
+        // them: CampaignService::onPageDeleted looks the campaign up by page
+        // id. Dropping first means our own listener queries a table we just
+        // removed and takes the whole deactivation down with it.
+        $this->deletePages($this->pageIds());
 
         $this->dropTables($plan['tables']);
         foreach ($plan['options'] as $option) {
             delete_option($option);
         }
-        $this->deletePages($pages);
         $this->removeRoles();
     }
 

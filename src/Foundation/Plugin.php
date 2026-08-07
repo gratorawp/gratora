@@ -197,15 +197,24 @@ final class Plugin
 
     public static function onDeactivation(): void
     {
-        // Asked for on the way out, and acted on here rather than at uninstall:
-        // a site owner who ticks the box watches it happen instead of being
-        // told it will happen later, to something they can no longer see.
-        if (DataEraser::requested()) {
-            (new DataEraser())->erase();
-        }
-
+        // Anything that reads Dono's own tables runs before the wipe, because
+        // the plugin is still loaded and hooked for the rest of this request.
         flush_rewrite_rules();
 
         do_action('dono.deactivated');
+
+        if (! DataEraser::requested()) {
+            return;
+        }
+
+        try {
+            (new DataEraser())->erase();
+        } catch (\Throwable $e) {
+            // WordPress writes active_plugins only after this hook returns, so
+            // an exception escaping here leaves the plugin switched on with its
+            // tables gone and every request from then on fatal, including the
+            // screen you would deactivate it from.
+            error_log('[dono] deleting data on deactivation failed: ' . $e->getMessage());
+        }
     }
 }
