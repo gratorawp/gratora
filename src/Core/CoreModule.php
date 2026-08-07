@@ -13,6 +13,7 @@ use Dono\Admin\Pages\DonorsPage;
 use Dono\Admin\Pages\FormsPage;
 use Dono\Admin\Pages\FundsPage;
 use Dono\Admin\Pages\ToolsPage;
+use Dono\Admin\DeactivationSurvey;
 use Dono\Admin\ManagedPageStates;
 use Dono\Admin\TestModeBadge;
 use Dono\Admin\Pages\SettingsPage;
@@ -1043,6 +1044,7 @@ final class CoreModule implements DonoModule
 
         if (is_admin()) {
             (new ManagedPageStates())->register();
+            (new DeactivationSurvey())->register();
             (new AdminMenu())->register();
             (new CampaignsPage())->register();
             (new DonationsPage())->register();

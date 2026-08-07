@@ -1,0 +1,77 @@
+( function () {
+    var cfg = window.donoDeactivation || {};
+    var dialog = document.getElementById( 'dono-deact' );
+    if ( ! dialog || ! cfg.slug ) return;
+
+    var deactivateUrl = null;
+
+    function rowLink() {
+        var row = document.querySelector( 'tr[data-plugin="' + cfg.slug + '"]' );
+        return row ? row.querySelector( 'a[href*="action=deactivate"]' ) : null;
+    }
+
+    function open( href ) {
+        deactivateUrl = href;
+        dialog.hidden = false;
+        document.body.classList.add( 'dono-deact-open' );
+        var first = dialog.querySelector( 'input[name="dono_deact_reason"]' );
+        if ( first ) first.focus();
+    }
+
+    function close() {
+        dialog.hidden = true;
+        document.body.classList.remove( 'dono-deact-open' );
+    }
+
+    function leave() {
+        // The href carries WordPress's own nonce, so deactivation still goes
+        // through core's handler rather than anything of ours.
+        if ( deactivateUrl ) window.location.assign( deactivateUrl );
+    }
+
+    function send( done ) {
+        var checked = dialog.querySelector( 'input[name="dono_deact_reason"]:checked' );
+        var body = new URLSearchParams();
+        body.set( 'action', cfg.action );
+        body.set( '_wpnonce', cfg.nonce );
+        body.set( 'reason', checked ? checked.value : '' );
+        body.set( 'details', ( dialog.querySelector( '.dono-deact__details' ) || {} ).value || '' );
+        if ( dialog.querySelector( '#dono-deact-wipe' ).checked ) body.set( 'wipe', '1' );
+
+        fetch( cfg.ajaxUrl, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: body.toString(),
+        } ).then( done, done );
+    }
+
+    var link = rowLink();
+    if ( link ) {
+        link.addEventListener( 'click', function ( e ) {
+            e.preventDefault();
+            open( link.href );
+        } );
+    }
+
+    dialog.addEventListener( 'click', function ( e ) {
+        if ( e.target.closest( '[data-dono-deact-cancel]' ) ) {
+            close();
+            return;
+        }
+        // Skip still records the data choice: the checkbox is the one answer
+        // that changes what happens, and skipping the survey is not a decision
+        // to keep or drop the records.
+        if ( e.target.closest( '[data-dono-deact-skip]' ) ) {
+            send( leave );
+            return;
+        }
+        if ( e.target.closest( '[data-dono-deact-submit]' ) ) {
+            send( leave );
+        }
+    } );
+
+    document.addEventListener( 'keydown', function ( e ) {
+        if ( e.key === 'Escape' && ! dialog.hidden ) close();
+    } );
+}() );
