@@ -12,13 +12,9 @@ use Dono\Foundation\Helpers\Csv;
 use Dono\Vendor\Queryable\DB;
 
 /**
- * Streams the donor list as CSV.
- *
- * Columns are opt-in because most of them are PII that has to be decrypted one
- * row at a time; an export nobody asked for should not pay for it, and a list
- * mailed to a fulfilment house should carry only what that house needs.
- *
- * @version 1.0.0
+ * Streams the donor list as CSV. Columns are opt-in because most of them are
+ * PII decrypted one row at a time, and a list mailed to a fulfilment house
+ * should carry only what that house needs.
  */
 final class DonorExporter
 {
@@ -40,10 +36,8 @@ final class DonorExporter
         'donor_id',
     ];
 
-    /** Written when the request names no valid column. */
     private const FALLBACK = ['first_name', 'last_name', 'email', 'donations_count', 'total_donated'];
 
-    /** Rows held in memory at once while streaming. */
     private const CHUNK = 500;
 
     public function __construct(private DonorService $donors)
@@ -77,9 +71,8 @@ final class DonorExporter
         ));
 
         // A campaign filter is a question about donations, so it resolves to a
-        // donor id set first. Without one the donor table answers on its own
-        // and no id list is built - an org with a million donors would not fit
-        // one in memory.
+        // donor id set first. Without one the donor table answers on its own,
+        // since an org with a million donors would not fit an id list in memory.
         $ids = null;
         if ($campaignId > 0) {
             $ids = $this->donorIdsForCampaign($campaignId);
@@ -118,11 +111,9 @@ final class DonorExporter
     }
 
     /**
-     * Column key => header, also served to the UI so the checkbox labels and
-     * the file headers cannot drift apart. Spelled out rather than built from
-     * a variable, or none of it reaches a .pot file.
-     *
-     * @return array<string,string>
+     * Also served to the UI so the checkbox labels and the file headers cannot
+     * drift apart. Spelled out rather than built from a variable, or none of it
+     * reaches a .pot file.
      */
     public static function labels(): array
     {
@@ -149,7 +140,6 @@ final class DonorExporter
         return 'donors-' . gmdate('Y-m-d-His') . '.csv';
     }
 
-    /** @return list<string> */
     private function columns(array $requested): array
     {
         $valid = array_values(array_filter(
@@ -157,8 +147,8 @@ final class DonorExporter
             static fn (string $c): bool => in_array($c, self::COLUMNS, true)
         ));
 
-        // An empty or entirely bogus selection would otherwise write a file of
-        // blank lines, which reads as "the export is broken".
+        // An entirely bogus selection would otherwise write a file of blank
+        // lines, which reads as "the export is broken".
         if ($valid === []) {
             return self::FALLBACK;
         }
@@ -170,7 +160,6 @@ final class DonorExporter
         ));
     }
 
-    /** @param list<string> $columns */
     private function row(Donor $donor, array $columns): array
     {
         $out = [];
@@ -198,11 +187,6 @@ final class DonorExporter
         return $out;
     }
 
-    /**
-     * Donor ids with at least one live donation to the given campaign.
-     *
-     * @return list<int>
-     */
     private function donorIdsForCampaign(int $campaignId): array
     {
         $q = DonationQueries::donationsOnly(DB::table('dono_donations'))
@@ -218,9 +202,8 @@ final class DonorExporter
     }
 
     /**
-     * The same population the Donors screen shows, minus anyone erased. Taken
-     * from the screen's own definition rather than restated here, so the file
-     * cannot come out disagreeing with the count it was started from.
+     * The screen's own definition rather than a restatement of it, so the file
+     * cannot disagree with the count it was started from.
      */
     private function livePredicate(): string
     {

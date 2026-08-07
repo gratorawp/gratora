@@ -44,7 +44,6 @@ final class DonationsController
     ) {
     }
 
-    /** Registers all public donation routes. */
     public function registerRoutes(): void
     {
         register_rest_route(self::NAMESPACE, '/donations', [
@@ -74,7 +73,6 @@ final class DonationsController
         ]);
     }
 
-    /** Creates a pending donation and returns gateway intent data. */
     public function create(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $body = (array) $request->get_json_params();
@@ -99,10 +97,9 @@ final class DonationsController
         if (strlen($currency) !== 3) {
             return new WP_Error('dono_invalid_currency', __('Currency must be a 3-letter ISO code.', 'dono'), ['status' => 400]);
         }
-        // Enforce the org's accepted-currency allow-list server-side. The form
-        // currency switcher only offers these, but a crafted payload could
-        // submit any code; donations in an unsupported currency have no base
-        // conversion, so reject them rather than record an unreportable row.
+        // The switcher only offers accepted currencies, but a crafted payload
+        // could submit any code, and a donation in an unsupported currency has
+        // no base conversion and so would be an unreportable row.
         if (! $this->isSupportedCurrency($currency)) {
             return new WP_Error('dono_unsupported_currency', __('This currency is not accepted.', 'dono'), ['status' => 400]);
         }
@@ -116,9 +113,9 @@ final class DonationsController
             /* translators: %s: gateway identifier */
             return new WP_Error('dono_invalid_gateway', sprintf(__('Unknown gateway: %s', 'dono'), $gatewayId), ['status' => 400]);
         }
-        // The form only offers gateways that take this currency, and a crafted
-        // payload could name one that does not. Refusing here says so; letting
-        // it through failed at the gateway with whatever wording it chose.
+        // A crafted payload could name a gateway that does not take this
+        // currency. Refusing here says so, rather than failing at the gateway
+        // with whatever wording it chooses.
         if (! $this->gateways->acceptsCurrency($gatewayId, $currency)) {
             return new WP_Error(
                 'dono_gateway_currency',
@@ -142,9 +139,8 @@ final class DonationsController
         if ($formId !== null) {
             $form = Form::query()->where('id', $formId)->get();
             // A form_id that no longer resolves must not skip the gates below:
-            // form tokens stay valid for days, so a deleted form's token (or a
-            // stubbed preview id) would otherwise bypass the status gates and
-            // the whole block-level validator.
+            // form tokens stay valid for days, so a deleted form's token would
+            // otherwise bypass the status gates and the block-level validator.
             if (! $form) {
                 return new WP_Error(
                     'dono_form_not_available',
@@ -161,11 +157,10 @@ final class DonationsController
                         ['status' => 403]
                     );
                 }
-                // The render gate applies the same rule; enforce it here too so
-                // an archived, unpublished or out-of-schedule campaign stops
-                // taking donations. Otherwise a stale (day-bucketed) form token
-                // or a direct POST lands on the closed campaign, inflating its
-                // totals and re-arming the delete guard so it can't be removed.
+                // The render gate applies the same rule, and it is enforced
+                // here too: otherwise a stale day-bucketed form token or a
+                // direct POST lands on a closed campaign, inflating its totals
+                // and re-arming the delete guard so it cannot be removed.
                 if ($form->campaign_id) {
                     $campaign = Campaign::query()->find('id', (int) $form->campaign_id);
                     if (! $campaign || ! $campaign->acceptsDonations()) {
@@ -183,9 +178,9 @@ final class DonationsController
                     return $invalid;
                 }
 
-                // A fund choice is only meaningful when the form offered one;
-                // otherwise a crafted POST routes money to any active fund the
-                // form never listed. Cleared, the resolver falls back to the
+                // A fund choice is only meaningful when the form offered one,
+                // or a crafted POST routes money to any active fund the form
+                // never listed. Cleared, the resolver falls back to the
                 // form/campaign/org default chain.
                 if (! FormSubmissionValidator::hasBlock((string) ($form->blocks ?? ''), 'dono/fund-picker')) {
                     unset($body['fund_id']);
@@ -200,8 +195,8 @@ final class DonationsController
             }
         }
 
-        // Gateway must be one the form actually offers in this context, not
-        // just any registered gateway. Closes a crafted-payload hole.
+        // The gateway must be one the form actually offers in this context, not
+        // just any registered one.
         $formAllowed = ($form && is_array($form->settings['gateways']['allowed'] ?? null))
             ? $form->settings['gateways']['allowed']
             : [];
@@ -219,12 +214,10 @@ final class DonationsController
             );
         }
         $clientExtra = is_array($body['extra'] ?? null) ? $body['extra'] : [];
-        // Attribution ids are derived server-side from the signed fundraiser
-        // context (the p2p add-on validates extra['fundraiser_ctx'] on
-        // dono.donation.intent_creating and stamps these). A public caller must
-        // never supply them directly, or it could credit an arbitrary
-        // fundraiser's / team's totals and leaderboard rank. The signed
-        // fundraiser_ctx is preserved for the add-on to validate.
+        // Attribution ids are stamped server-side from the signed fundraiser
+        // context, which is preserved for the add-on to validate. A public
+        // caller must never supply them directly, or it could credit an
+        // arbitrary fundraiser's totals and leaderboard rank.
         unset($clientExtra['fundraiser_id'], $clientExtra['fundraiser_team_id']);
         $extra = array_merge(
             $clientExtra,
@@ -232,18 +225,16 @@ final class DonationsController
         );
         $custom = is_array($body['custom'] ?? null) ? $body['custom'] : [];
 
-        // Bound the unauthenticated blob inputs by encoded size. source_attribution
-        // is persisted verbatim and custom is AES-encrypted; the per-IP cap limits
-        // volume, not per-request size, so cap the bytes here.
+        // The per-IP cap limits volume, not per-request size, so the
+        // unauthenticated blobs are bounded by encoded size here.
         $sourceAttribution = isset($body['source_attribution']) ? (array) $body['source_attribution'] : null;
         if ($sourceAttribution !== null && strlen((string) wp_json_encode($sourceAttribution)) > 4096) {
             return new WP_Error('dono_attribution_too_large', __('Attribution data is too large.', 'dono'), ['status' => 400]);
         }
-        // `manual` is reserved: it means an admin recorded money that arrived off
-        // the site, and it suppresses the offline payment instructions. This blob
-        // comes from the donor's own query string, so without this a visitor
-        // arriving on ?utm_medium=manual would silently be denied the bank
-        // details they need in order to pay.
+        // `manual` is reserved for money an admin recorded off the site, and it
+        // suppresses the offline payment instructions. This blob comes from the
+        // donor's own query string, so a visitor arriving on
+        // ?utm_medium=manual would otherwise be denied the bank details.
         if (is_array($sourceAttribution) && strtolower(trim((string) ($sourceAttribution['utm_medium'] ?? ''))) === ChannelClassifier::MANUAL) {
             unset($sourceAttribution['utm_medium']);
         }
@@ -292,20 +283,19 @@ final class DonationsController
         $donation       = $created['donation'];
         $rawStatusToken = $created['status_token'];
 
-        // Record any consents the donor gave on the form (GDPR/marketing
-        // opt-ins) as append-only audit rows tied to this donation. Only known
-        // purposes are recorded; a consent write must never break the donation.
+        // Append-only audit rows tied to this donation. Only known purposes are
+        // recorded, and a consent write must never break the donation.
         $consents = is_array($body['consents'] ?? null) ? $body['consents'] : [];
         if ($consents && $donation->donor_id) {
             $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? '');
             $ua = (string) ($_SERVER['HTTP_USER_AGENT'] ?? '');
-            // Accept the form's own consent-block purposes (keyed by id), not
-            // just the org settings registry, or form-defined consents drop.
+            // The form's own consent-block purposes as well as the org settings
+            // registry, or form-defined consents drop.
             $formConsentIds = $form ? FormSubmissionValidator::consentPurposeIds((string) $form->blocks) : [];
-            // Agreeing to the terms is recorded like any other consent, but the
-            // version is the revision of the text as it stood, not a number from
-            // the purposes registry. That is what makes the row answer "what did
-            // they agree to" after the terms are edited.
+            // Terms are recorded like any other consent, but the version is the
+            // revision of the text as it stood, not a number from the purposes
+            // registry, so the row still answers "what did they agree to" after
+            // the terms are edited.
             $termsRevision = $form ? FormSubmissionValidator::termsRevision((string) $form->blocks) : null;
             foreach ($consents as $key => $granted) {
                 $key     = (string) $key;
@@ -363,10 +353,9 @@ final class DonationsController
             $this->donations->markPending($donation, 'requires_action', (array) $gatewayResult->metadata);
         }
 
-        // Synchronous gateways (e.g. sandbox) have no redirect / no webhook,
-        // so the donation would otherwise stay pending forever. Confirm in
-        // the same request so the donor sees a real paid donation and the
-        // receipt + rollup side effects fire.
+        // Synchronous gateways have no redirect and no webhook, so confirming
+        // in the same request is what stops the donation sitting pending
+        // forever with no receipt and no rollup.
         if ($gatewayResult->auto_confirm && $donation->status === 'pending') {
             try {
                 $confirmResult = $gateway->confirm($donation, []);
@@ -397,11 +386,9 @@ final class DonationsController
     }
 
     /**
-     * The browser-facing slice a gateway that ships outside core declares for
-     * itself, keyed by its own id. Same whitelist rule as the two built-ins
-     * above: the gateway states what may leave, never the raw metadata.
-     *
-     * @return array<string,array<string,mixed>>
+     * The browser-facing slice a gateway outside core declares for itself. Same
+     * whitelist rule as payPalPayload: the gateway states what may leave, never
+     * the raw metadata.
      */
     private function browserAwarePayload(PaymentGateway $gateway, GatewayIntentResult $result): array
     {
@@ -419,11 +406,8 @@ final class DonationsController
     }
 
     /**
-     * The handful of PayPal fields the SDK buttons need. Kept to an explicit
-     * whitelist rather than echoing the gateway metadata, so a future gateway
-     * field cannot leak to the browser by accident.
-     *
-     * @return array{kind:string,order_id:string,plan_id:string}|null
+     * An explicit whitelist rather than an echo of the gateway metadata, so a
+     * future gateway field cannot leak to the browser by accident.
      */
     private function payPalPayload(GatewayIntentResult $result): ?array
     {
@@ -533,23 +517,19 @@ final class DonationsController
     }
 
     /**
-     * Resolve the campaign a donation credits. A campaign-bound form is
-     * authoritative; otherwise a body campaign_id is only trusted when it
-     * points at a real campaign. Stops crafted public payloads from inflating
-     * an arbitrary campaign's totals + leaderboards.
-     *
-     * @param mixed $submitted
-     */
-    /**
-     * Is the (uppercased) currency in the org's accepted list? An empty/absent
-     * list means "unconfigured" - accept any valid code rather than reject
-     * everything.
+     * An empty or absent accepted-currency list means unconfigured, so any
+     * valid code is accepted rather than everything rejected.
      */
     private function isSupportedCurrency(string $currency): bool
     {
         return SupportedCurrencies::accepts($currency);
     }
 
+    /**
+     * A campaign-bound form is authoritative; otherwise a submitted campaign_id
+     * is only trusted when it points at a real campaign, so a crafted payload
+     * cannot inflate an arbitrary campaign's totals and leaderboards.
+     */
     private function resolveCampaignId(?Form $form, mixed $submitted): ?int
     {
         if ($form && (int) ($form->campaign_id ?? 0) > 0) {
@@ -559,9 +539,9 @@ final class DonationsController
         if ($id <= 0) {
             return null;
         }
-        // Only campaigns currently open take credit for client-submitted ids;
-        // the form-bound path enforces the same gate above, and crediting a
-        // closed campaign would inflate its totals and re-arm its delete guard.
+        // Only campaigns currently open take credit for a client-submitted id:
+        // crediting a closed one would inflate its totals and re-arm its
+        // delete guard.
         $campaign = Campaign::query()->where('id', $id)->get();
         return ($campaign && $campaign->acceptsDonations()) ? $id : null;
     }
@@ -574,7 +554,7 @@ final class DonationsController
 
     /**
      * Structural validation lives in DonationSchemas::create(). The handler
-     * keeps its own gateway check because the registered set is dynamic.
+     * keeps its own gateway check, because the registered set is dynamic.
      */
     private function createArgs(): array
     {

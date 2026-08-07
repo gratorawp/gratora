@@ -21,12 +21,6 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 
-/**
- * Admin donor endpoints. Email is encrypted at rest; responses decrypt it.
- * Capability-gated.
- *
- * @version 1.0.0
- */
 final class DonorsController
 {
     private const NAMESPACE = 'dono/v1';
@@ -171,8 +165,8 @@ final class DonorsController
         register_rest_route(self::NAMESPACE, '/admin/donors/(?P<id>\d+)', [
             'methods'             => 'DELETE',
             'callback'            => [$this, 'delete'],
-            // Erasing and deleting are both irreversible and both about getting
-            // rid of a record, so they answer to the same capability.
+            // Erasing and deleting are both irreversible, so they answer to the
+            // same capability.
             'permission_callback' => static fn () => Capabilities::userCan('dono_redact_donors'),
             'args'                => [
                 'id' => ['type' => 'integer', 'required' => true],
@@ -231,16 +225,16 @@ final class DonorsController
         if (! $donor) {
             return new WP_Error('dono_not_found', __('Donor not found.', 'dono'), ['status' => 404]);
         }
-        // A redacted donor is erased: this handler writes name/company/country
-        // via a direct UPDATE and phone/address via setEncryptedField, none of
-        // which pass through DonorService::editProfile's guard, so block the
-        // whole edit here or those writes would re-populate the erased row.
+        // This handler writes name/company/country via a direct UPDATE and
+        // phone/address via setEncryptedField, neither of which passes through
+        // DonorService::editProfile's guard, so the whole edit is blocked here
+        // or those writes would re-populate an erased row.
         if ($donor->redacted_at !== null) {
             return new WP_Error('dono_donor_redacted', __('This donor has been erased and can no longer be edited.', 'dono'), ['status' => 422]);
         }
 
-        // Explicit edit: present keys set the value, empty string clears to NULL.
-        // Direct UPDATE because model save() drops NULLs via array_filter.
+        // Present keys set the value, empty string clears to NULL. Direct
+        // UPDATE because model save() drops NULLs via array_filter.
         $params = $request->get_json_params() ?: $request->get_body_params();
         if (! $params) $params = [];
         $update = [];
@@ -273,7 +267,6 @@ final class DonorsController
             }
         }
 
-        // Drop no-op fields.
         foreach ($update as $field => $value) {
             if ($donor->$field === $value) unset($update[$field]);
         }
@@ -378,7 +371,6 @@ final class DonorsController
         if (! $note) {
             return new WP_Error('dono_not_found', __('Note not found.', 'dono'), ['status' => 404]);
         }
-        // Author or admin can delete. Anyone with manage_options gets through canAccess already.
         if ($note->author_user_id && $note->author_user_id !== get_current_user_id() && ! current_user_can('manage_options')) {
             return new WP_Error('dono_forbidden', __('You cannot delete this note.', 'dono'), ['status' => 403]);
         }
@@ -386,10 +378,7 @@ final class DonorsController
         return new WP_REST_Response(['deleted' => true], 200);
     }
 
-    /**
-     * GDPR/DSAR export. Bundles the donor record and related data into a
-     * JSON download, decrypting PII on the way out.
-     */
+    /** GDPR/DSAR export, decrypting PII on the way out. */
     public function exportPersonalData(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $donor = $this->donors->findById((int) $request['id']);
@@ -437,12 +426,8 @@ final class DonorsController
 
     /**
      * A DSAR must return the donor's per-donation personal data: the custom
-     * form-field answers they submitted (decrypted) and the name they gave
-     * for that donation. Redaction clears both, so a post-erasure export
-     * reports them empty.
-     *
-     * @param list<array<string,mixed>> $donations
-     * @return list<array<string,mixed>>
+     * form-field answers they submitted and the name they gave for that
+     * donation. Erasure clears both, so a later export reports them empty.
      */
     private function enrichDonations(int $donorId, array $donations): array
     {
@@ -471,15 +456,9 @@ final class DonorsController
     }
 
     /**
-     * GDPR redact. Confirmation must match the donor's current email, or
-     * 'DONOR_<id>' for anonymous/redacted-no-email cases.
-     */
-    /**
-     * Removes a donor who should not have been a record at all.
-     *
-     * No confirmation string, unlike redact: there is nothing here to lose. A
-     * donor with donations cannot reach this at all, and the refusal says which
-     * path to take instead rather than just declining.
+     * No confirmation string, unlike redact: a donor who reaches here has
+     * nothing to lose, and one with donations is refused with the path to take
+     * instead.
      */
     public function delete(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
@@ -498,6 +477,10 @@ final class DonorsController
         return new WP_REST_Response(['deleted' => true, 'id' => (int) $request['id']], 200);
     }
 
+    /**
+     * Confirmation must match the donor's current email, or 'DONOR_<id>' when
+     * there is no readable email.
+     */
     public function redact(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $donor = $this->donors->findById((int) $request['id']);

@@ -106,8 +106,8 @@ export default function ConsentTab( { consents, donor, onChanged } ) {
                                                         ? <span className="dp-pill is-ok">{ __( 'Granted', 'dono' ) }</span>
                                                         : <span className="dp-pill is-muted">{ __( 'Revoked', 'dono' ) }</span> }
                                             </td>
-                                            <td>{ c.occurred_at ? formatDateTime( c.occurred_at ) : '—' }</td>
-                                            <td className="consent-source">{ c.source || '—' }</td>
+                                            <td>{ c.occurred_at ? formatDateTime( c.occurred_at ) : '-' }</td>
+                                            <td className="consent-source">{ c.source || '-' }</td>
                                         </tr>
                                     ) ) }
                                 </tbody>

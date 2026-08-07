@@ -8,17 +8,11 @@ use DateTimeImmutable;
 use Dono\Donations\DonationQueries;
 use Dono\Vendor\Queryable\DB;
 
-/**
- * Repository over the Donor model.
- *
- * @version 1.0.0
- */
 final class DonorRepository
 {
-    // Donor lifecycle windows, in days since last donation. Shared by the KPI
-    // buckets and the at-risk list/export so the headline count and the listed
-    // rows always describe the same donors. active: <ACTIVE; at_risk:
-    // ACTIVE..AT_RISK; lapsed: AT_RISK..LAPSED; lost: >LAPSED.
+    // Days since last donation: active <ACTIVE, at_risk ACTIVE..AT_RISK,
+    // lapsed AT_RISK..LAPSED, lost >LAPSED. Shared by the KPI buckets and the
+    // at-risk list so the headline count and the listed rows agree.
     private const NEW_DAYS     = 30;
     private const ACTIVE_DAYS  = 90;
     private const AT_RISK_DAYS = 180;
@@ -29,12 +23,7 @@ final class DonorRepository
         return Donor::query()->find('id', $id);
     }
 
-    /**
-     * Batch lookup keyed by id to avoid N+1 queries.
-     *
-     * @param array<int> $ids
-     * @return array<int, Donor>
-     */
+    /** @return array<int, Donor> */
     public function findManyByIds(array $ids): array
     {
         $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
@@ -57,13 +46,12 @@ final class DonorRepository
 
     /**
      * Who belongs in the admin donor list. A donor row is written for every
-     * donation, so rehearsing in test mode mints donors nobody ever gave to,
-     * and those are the only ones held back: a donor whose entire footprint is
-     * test-mode. Somebody who signed up in the portal and has not given yet is
-     * a real person with a real address, so they are listed with nothing
-     * against their name. Parenthesised because it is an OR, and it must be the
-     * FIRST where-condition on a query - whereRaw adds no AND connector, but a
-     * where() chained after it does.
+     * donation, so the only ones held back are those whose entire footprint is
+     * test-mode; somebody who signed up and has not given yet is a real person.
+     *
+     * Parenthesised because it is an OR, and it must be the FIRST
+     * where-condition on a query: whereRaw adds no AND connector, but a where()
+     * chained after it does.
      */
     public static function visibleDonorPredicate(): string
     {
@@ -74,9 +62,8 @@ final class DonorRepository
     }
 
     /**
-     * Stricter: donors who have actually given. A lifecycle stage is a stage of
-     * giving, so somebody who has never given has none, and counting them would
-     * dilute every share on the insights screen.
+     * A lifecycle stage is a stage of giving, so somebody who has never given
+     * has none and counting them dilutes every share on the insights screen.
      */
     private function givingDonorPredicate(): string
     {
@@ -87,7 +74,6 @@ final class DonorRepository
 
     /**
      * @param array{page?:int,per_page?:int,orderby?:string,order?:string,country?:string,matching_ids?:array<int>,has_search?:bool} $args
-     * @return array{items: array<Donor>, total: int}
      */
     public function listAdmin(array $args = []): array
     {
@@ -112,7 +98,7 @@ final class DonorRepository
                 $q = $q->where('donor_type', (string) $args['donor_type']);
             }
             if ($hasSearch) {
-                // Empty $ids → never-matches sentinel, otherwise narrow to ids.
+                // Empty $ids is a never-matches sentinel, not "no filter".
                 $q = $q->whereIn('id', $ids ?: [0]);
             }
             return $q;
@@ -129,10 +115,6 @@ final class DonorRepository
     }
 
     /**
-     * KPI-strip aggregates for the donors admin list, honoring the listAdmin() filters.
-     * Totals come from the denormalized donor counters; avg_ltv_cents averages only
-     * donors who have given at least once.
-     *
      * @param array{country?:?string,donor_type?:?string,has_search?:bool,matching_ids?:array<int>} $args
      * @return array{total_count:int,with_donations:int,total_donated_cents:int,avg_ltv_cents:int}
      */
@@ -173,9 +155,6 @@ final class DonorRepository
     }
 
     /**
-     * Lifecycle KPI roll-up in one round-trip. Thresholds are configurable;
-     * excludes redacted donors.
-     *
      * @return array{
      *   total:int,
      *   new:int,
@@ -210,9 +189,9 @@ final class DonorRepository
             ->get();
 
         $total = (int) ($row['total'] ?? 0);
-        // Avg / median lifetime value describe donors who actually gave, not the
-        // whole base: test-created and never-gave donor rows would drag both
-        // toward 0 and disagree with the donors-list "Avg lifetime value".
+        // Avg and median lifetime value describe donors who actually gave:
+        // never-gave rows would drag both toward 0 and disagree with the
+        // donors-list "Avg lifetime value".
         $givers = (int) ($row['givers'] ?? 0);
         $avgLtv = $givers > 0 ? (int) round(((int) ($row['ltv_total'] ?? 0)) / $givers) : 0;
         $median = $givers > 0 ? $this->medianLtv($givers) : 0;
@@ -231,11 +210,8 @@ final class DonorRepository
     }
 
     /**
-     * Paged donors in the at-risk window: last_donation_at between activeDays
-     * and atRiskDays ago - the exact bucket lifecycleKpi() counts as `at_risk`,
-     * so the headline count and these rows always agree. Ordered by LTV desc.
-     *
-     * @return array{rows:array<array<string,mixed>>, total:int}
+     * The exact bucket lifecycleKpi() counts as `at_risk`, so the headline
+     * count and these rows always agree.
      */
     public function listAtRisk(string $today, int $page = 1, int $perPage = 25, int $activeDays = self::ACTIVE_DAYS, int $atRiskDays = self::AT_RISK_DAYS): array
     {
@@ -271,8 +247,6 @@ final class DonorRepository
     }
 
     /**
-     * Top donors by lifetime value. Returns plain rows; caller decrypts/shapes.
-     *
      * @return array<array{
      *   id:int, first_name:?string, last_name:?string, country:?string,
      *   total_donated_cents:int, donations_count:int, last_donation_at:?string
@@ -299,10 +273,8 @@ final class DonorRepository
     }
 
     /**
-     * Buckets donor lifetime value across fixed cent thresholds with an
-     * overflow bucket above the highest threshold.
+     * The last bucket is an overflow above the highest threshold.
      *
-     * @param array<int> $thresholdsCents
      * @return array<array{min_cents:int, max_cents:?int, donor_count:int, total_ltv_cents:int}>
      */
     public function lifetimeValueHistogram(array $thresholdsCents): array
@@ -353,11 +325,6 @@ final class DonorRepository
     }
 
     /**
-     * RFM-style segmentation in one round trip over the full donor base
-     * (excluding redacted).
-     *
-     * Segments: champions, loyal, new, at_risk, hibernating, lost, other.
-     *
      * @return array<array{segment:string, donor_count:int, total_ltv_cents:int, avg_ltv_cents:int}>
      */
     public function rfmSegments(string $today, int $activeDays = 90, int $atRiskDays = 180, int $lostDays = 365, int $newDays = 30): array
@@ -367,7 +334,6 @@ final class DonorRepository
         $lostCut   = esc_sql($this->daysAgo($today, $lostDays));
         $newCut    = esc_sql($this->daysAgo($today, $newDays));
 
-        // Tier thresholds: high LTV >= 25 000 cents, frequent >= 4 donations.
         $segmentCase = "
             CASE
                 WHEN last_donation_at IS NULL THEN 'other'
@@ -401,16 +367,12 @@ final class DonorRepository
                 'avg_ltv_cents'   => (int) round((float) $r['ltv_avg']),
             ];
         }
-        // Stable UI ordering.
         $order = ['champions', 'loyal', 'new', 'at_risk', 'hibernating', 'lost', 'other'];
         usort($out, static fn ($a, $b) => array_search($a['segment'], $order, true) <=> array_search($b['segment'], $order, true));
         return $out;
     }
 
     /**
-     * Cohort retention matrix. Rows are cohorts (month of first donation);
-     * columns are elapsed months; values are distinct donor counts. One SQL pass.
-     *
      * @return array{
      *   cohorts: array<array{
      *     month:string, size:int,
@@ -425,13 +387,13 @@ final class DonorRepository
         $donationsT = DB::getPrefix() . 'dono_donations';
         $cutoff     = esc_sql((new DateTimeImmutable("first day of -{$cohortMonths} months"))->format('Y-m-d'));
 
-        // Anchor each donor's cohort on their own earliest live donation
-        // (MIN over the SAME status set the offsets count), not the
-        // denormalized first_donation_at. Otherwise a donor whose first gift
-        // isn't a plain 'paid' row misses offset 0, so the cohort size
-        // undercounts while later offsets still populate (>100% retention).
-        // The MIN spans all of the donor's donations, then cohorts are trimmed
-        // to the window, so a pre-window first gift can't mis-anchor a donor.
+        // Anchor each donor's cohort on their own earliest live donation, over
+        // the SAME status set the offsets count, not the denormalized
+        // first_donation_at: otherwise a donor whose first gift is not a plain
+        // 'paid' row misses offset 0, so the cohort size undercounts while
+        // later offsets still populate (>100% retention). The MIN spans all of
+        // the donor's donations, then cohorts are trimmed to the window, so a
+        // pre-window first gift cannot mis-anchor a donor.
         $sql = "
             SELECT
                 DATE_FORMAT(fd.first_paid, '%Y-%m') AS cohort,
@@ -467,7 +429,6 @@ final class DonorRepository
             $grid[$cohort][$offset] = $count;
         }
 
-        // Cohort size = donors at offset 0.
         $cohorts = [];
         foreach ($grid as $cohort => $offsets) {
             $size = (int) ($offsets[0] ?? 0);
@@ -486,8 +447,6 @@ final class DonorRepository
     }
 
     /**
-     * Monthly donation series for one donor.
-     *
      * @return array<array{month:string, amount_cents:int, donations_count:int}>
      */
     public function monthlyTimelineForDonor(int $donorId): array
@@ -509,8 +468,6 @@ final class DonorRepository
     }
 
     /**
-     * Attribution mix for one donor across all paid donations.
-     *
      * @return array<array{utm_source:?string, utm_medium:?string, amount_cents:int, donations_count:int}>
      */
     public function attributionMixForDonor(int $donorId): array
@@ -539,7 +496,6 @@ final class DonorRepository
         ], $rows);
     }
 
-    /** Median LTV among donors who gave, via OFFSET at their midpoint. */
     private function medianLtv(int $giverCount): int
     {
         if ($giverCount === 0) return 0;

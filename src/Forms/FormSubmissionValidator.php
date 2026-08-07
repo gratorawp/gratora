@@ -15,16 +15,14 @@ use Dono\Foundation\Helpers\Money;
 use WP_Error;
 
 /**
- * Server-side submit-time validation of a public donation payload against the
- * form's authored blocks. The REST schema can't express "required iff the author
- * toggled it", so per-field rules are enforced here after the form resolves.
- * The Preact client validates the same rules; this closes the crafted-POST hole.
+ * The REST schema cannot express "required iff the author toggled it", so
+ * per-field rules are enforced here once the form resolves. The Preact client
+ * validates the same rules; this side closes the crafted-POST hole.
  */
 final class FormSubmissionValidator
 {
     private ?Form $form = null;
 
-    /** Whether the authored form lets the donor pick a currency at all. */
     private bool $offersCurrencyChoice = false;
 
     public function validate(Form $form, array $body): ?WP_Error
@@ -61,7 +59,6 @@ final class FormSubmissionValidator
         return null;
     }
 
-    /** Consent purpose ids the form's own consent block defines. */
     public static function consentPurposeIds(string $blocks): array
     {
         $ids = [];
@@ -70,16 +67,14 @@ final class FormSubmissionValidator
     }
 
     /**
-     * Which revision of this form's terms a donor is agreeing to, or null when
-     * the form has nothing to agree to. Recorded alongside the acceptance, so
-     * editing the terms later cannot rewrite what somebody already agreed to.
+     * Recorded alongside the acceptance, so editing the terms later cannot
+     * rewrite what somebody already agreed to. Null when there is nothing to agree to.
      */
     public static function termsRevision(string $blocks): ?int
     {
         return self::findTermsRevision(parse_blocks($blocks));
     }
 
-    /** @param array<int,array<string,mixed>> $blocks */
     private static function findTermsRevision(array $blocks): ?int
     {
         foreach ($blocks as $block) {
@@ -100,13 +95,11 @@ final class FormSubmissionValidator
         return null;
     }
 
-    /** Whether the authored form contains a block, at any nesting depth. */
     public static function hasBlock(string $blocks, string $blockName): bool
     {
         return self::treeHasBlock(parse_blocks($blocks), $blockName);
     }
 
-    /** @param array<int,array<string,mixed>> $blocks */
     private static function treeHasBlock(array $blocks, string $blockName): bool
     {
         foreach ($blocks as $block) {
@@ -120,10 +113,6 @@ final class FormSubmissionValidator
         return false;
     }
 
-    /**
-     * @param array<int,array<string,mixed>> $blocks
-     * @param array<string,bool>             $offered passed by ref; accumulates offered frequencies
-     */
     private function walk(array $blocks, array $body, array &$offered, ?array $campaignPresets): ?WP_Error
     {
         foreach ($blocks as $block) {
@@ -170,10 +159,8 @@ final class FormSubmissionValidator
                 break;
 
             case 'dono/terms':
-                // A tick the client could skip is not agreement. Enforced here
-                // because this is the only side the donor cannot edit, and the
-                // record written afterwards is only worth keeping if the answer
-                // it records was actually required.
+                // The consent record is only worth keeping if agreement was
+                // actually required, and this is the only side the donor cannot edit.
                 if (TermsBlock::isConfigured($attrs)) {
                     $consents = is_array($body['consents'] ?? null) ? $body['consents'] : [];
                     if (empty($consents[TermsBlock::PURPOSE])) {
@@ -219,8 +206,8 @@ final class FormSubmissionValidator
                         $raw = $campaignPresets;
                     }
                     // Renderer parity: the amounts the donor was shown pass
-                    // through the same filter (render-only variant/visitor
-                    // context is unavailable at submit time).
+                    // through the same filter (variant/visitor context is
+                    // render-only and unavailable at submit time).
                     $presets = (array) apply_filters(
                         'dono.form.amounts',
                         DonationAmountBlock::normalizePresets($raw),
@@ -237,17 +224,14 @@ final class FormSubmissionValidator
                     $gross = (int) ($body['amount_cents'] ?? 0);
                     $fee   = min($gross, max(0, (int) ($body['fee_covered_cents'] ?? 0)));
                     $net   = $gross - $fee;
-                    // Presets are authored in the org base currency. A donor
-                    // who switched currency pays a converted, nice-rounded
-                    // value this side cannot reproduce (rates drift between
-                    // render and submit), so membership is only enforceable in
-                    // the authored currency; the amount floor/cap still apply.
-                    //
-                    // Keyed on the form offering that choice, not merely on the
-                    // currency posted. A form with no switcher can only be paid
-                    // in the authored currency, so naming another one in the
-                    // JSON was a way to skip the allow-list entirely and send
-                    // any amount to a fixed-amount form.
+                    // Presets are authored in the org base currency. A donor who
+                    // switched currency pays a converted, rounded value this side
+                    // cannot reproduce (rates drift between render and submit), so
+                    // membership is only enforceable in the authored currency; the
+                    // amount floor/cap still apply. Keyed on the form offering that
+                    // choice, not on the currency posted: a form with no switcher
+                    // can only be paid in the authored currency, so naming another
+                    // one in the JSON would skip the allow-list entirely.
                     $submittedCurrency = strtoupper((string) ($body['currency'] ?? ''));
                     $presetCurrency    = strtoupper(Money::defaultCurrency());
                     $convertedByDonor  = $this->offersCurrencyChoice
@@ -391,8 +375,8 @@ final class FormSubmissionValidator
 
             case 'dono/recurring-toggle':
                 // Gutenberg omits an attribute equal to its registered default,
-                // so an absent frequencies key means the default set, not none -
-                // must match the renderer's fallback or offered frequencies are
+                // so an absent frequencies key means the default set, not none.
+                // Must match the renderer's fallback or offered frequencies are
                 // rejected on submit.
                 $freqs = RecurringToggleBlock::normalizeFrequencies($attrs['frequencies'] ?? RecurringToggleBlock::DEFAULT_FREQUENCIES);
                 if (! in_array('one-time', $freqs, true) && ! empty($freqs)) {
@@ -409,7 +393,6 @@ final class FormSubmissionValidator
         return null;
     }
 
-    /** @param array<string,bool> $ids */
     private static function collectConsentIds(array $blocks, array &$ids): void
     {
         foreach ($blocks as $block) {

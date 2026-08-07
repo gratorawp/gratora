@@ -6,24 +6,13 @@ namespace Dono\Forms\Blocks;
 
 use Dono\Foundation\Helpers\View;
 
-/**
- * Form submit button block.
- *
- * @version 1.0.0
- */
 final class SubmitButtonBlock implements Block
 {
-    /**
-     * Block type name.
-     */
     public function name(): string
     {
         return 'dono/submit-button';
     }
 
-    /**
-     * Block attribute schema.
-     */
     public function attributes(): array
     {
         return [
@@ -32,9 +21,6 @@ final class SubmitButtonBlock implements Block
         ];
     }
 
-    /**
-     * Renders the submit button.
-     */
     public function render(array $attrs, string $content): string
     {
         $align = (string) ($attrs['align'] ?? 'left');

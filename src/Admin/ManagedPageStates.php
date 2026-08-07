@@ -10,18 +10,11 @@ use Dono\Vendor\Queryable\DB;
 use WP_Post;
 
 /**
- * Labels the pages Dono owns in wp-admin's Pages list, the way core labels the
- * front page and the privacy policy.
- *
- * Without it a campaign page and the donor portal are indistinguishable from
- * anything else somebody wrote by hand, so the two pages that break the product
- * when they are edited or trashed carry no warning that they are load-bearing.
- *
- * @version 1.0.0
+ * Labels campaign pages and the donor portal in wp-admin's Pages list, so the
+ * two pages that break the product when edited or trashed read as load-bearing.
  */
 final class ManagedPageStates extends HookProvider
 {
-    /** @var list<int>|null Campaign main-page ids, read once per request. */
     private ?array $campaignPageIds = null;
 
     protected function filters(): array
@@ -31,10 +24,6 @@ final class ManagedPageStates extends HookProvider
         ];
     }
 
-    /**
-     * @param array<string,string> $states
-     * @return array<string,string>
-     */
     public function label(array $states, WP_Post $post): array
     {
         if ($post->post_type !== 'page') {
@@ -55,13 +44,7 @@ final class ManagedPageStates extends HookProvider
 
     /**
      * A campaign's own page, not every page carrying its id: P2P layout
-     * subpages hold _dono_campaign_id too, and calling those the campaign
-     * would put the same label on several rows.
-     *
-     * Read in one query rather than per row, or a list of twenty pages costs
-     * twenty lookups to draw a label.
-     *
-     * @return list<int>
+     * subpages hold _dono_campaign_id too, and those are not the campaign.
      */
     private function campaignPageIds(): array
     {

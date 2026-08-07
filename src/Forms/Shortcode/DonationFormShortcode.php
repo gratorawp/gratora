@@ -34,24 +34,18 @@ use Throwable;
 /**
  * `[dono_donation_form]` shortcode. Renders a form's blocks plus a
  * data-dono-form-config script the Preact runtime reads.
- *
- * @version 1.0.0
  */
 final class DonationFormShortcode extends HookProvider
 {
     private const TAG    = 'dono_donation_form';
     private const HANDLE = 'dono-donation-form-runtime';
 
-    /** Set once the stylesheet link has been emitted inline (late render path). */
     private bool $cssLinkInlined = false;
 
-    /** Set once the JS-gated FOUC cloak markup has been emitted this request. */
     private bool $cloakEmitted = false;
 
-    /** Cached CSS version string (mtime) computed once per request. */
     private ?string $cssVersion = null;
 
-    /** @internal */
     public function __construct(
         private FormRepository $forms,
         private ?CampaignStyleResolver $styles = null,
@@ -62,7 +56,6 @@ final class DonationFormShortcode extends HookProvider
     ) {
     }
 
-    /** Hook map. */
     protected function actions(): array
     {
         return [
@@ -71,9 +64,8 @@ final class DonationFormShortcode extends HookProvider
     }
 
     /**
-     * Register the shortcode and wire the hook map. Overriding without the
-     * parent call left maybeEnqueue unhooked, so the head-time enqueue for
-     * shortcode pages never ran and every render used the late fallback.
+     * parent::register() wires the hook map; without it maybeEnqueue never runs
+     * and every render falls back to the late enqueue path.
      */
     public function register(): void
     {
@@ -81,7 +73,6 @@ final class DonationFormShortcode extends HookProvider
         parent::register();
     }
 
-    /** Enqueue assets only when a page actually uses the shortcode. */
     public function maybeEnqueue(): void
     {
         if (! is_singular()) return;
@@ -90,7 +81,6 @@ final class DonationFormShortcode extends HookProvider
         $this->enqueue();
     }
 
-    /** Register and enqueue the runtime script and style. */
     private function enqueue(): void
     {
         FormGatewayAssets::enqueue();
@@ -122,17 +112,11 @@ final class DonationFormShortcode extends HookProvider
         }
     }
 
-    /** Stylesheet file for the current text direction (a -rtl build exists). */
     private function cssFileName(): string
     {
         return is_rtl() ? 'runtime-rtl.css' : 'runtime.css';
     }
 
-    /**
-     * Render the shortcode output for the requested form slug.
-     *
-     * @param array<string,mixed>|string $atts Shortcode attribute array (or empty string when none).
-     */
     public function render($atts = []): string
     {
         $atts = is_array($atts) ? $atts : [];
@@ -150,12 +134,9 @@ final class DonationFormShortcode extends HookProvider
             ));
         }
 
-        // Public front end: the form must be published and its campaign must be
-        // open (published, and inside its schedule if it has one). Rendering a
-        // form the submit gate will refuse is worse than rendering nothing.
-        // A block add-on can preview an unpublished form in the editor by opting
-        // in through this filter; it only takes effect for a user who can edit,
-        // so the gate is never bypassed for a public visitor.
+        // Rendering a form the submit gate will refuse is worse than rendering
+        // nothing. The preview filter only takes effect for a user who can
+        // edit, so the gate is never bypassed for a public visitor.
         $editorPreview = current_user_can('edit_posts')
             && (bool) apply_filters('dono.form.editor_preview', false, $form);
         if (! $editorPreview) {
@@ -176,8 +157,7 @@ final class DonationFormShortcode extends HookProvider
 
         // Rendered after <head> (block, modal, or do_shortcode): wp_enqueue_style
         // would defer the stylesheet to the footer and the form paints unstyled
-        // first. Emit the link inline at the form's position and drop the
-        // deferred copy. Once per request is enough; the rule set is global.
+        // first. Once per request is enough; the rule set is global.
         if (
             ! $this->cssLinkInlined
             && did_action('wp_head')
@@ -190,12 +170,11 @@ final class DonationFormShortcode extends HookProvider
             $html = '<link rel="stylesheet" id="dono-runtime-css" href="' . esc_url($href) . '">' . $html;
         }
 
-        // JS-gated cloak: the server fallback markup is not styled by the
-        // runtime CSS, so it would flash unstyled until the (footer) runtime
-        // mounts. Hide the form until the runtime sets data-dono-ready. The
-        // `dono-js` class is only added when JS runs, so no-JS visitors keep
-        // the visible fallback. A timeout failsafe reveals the form if the
-        // runtime never loads, so the form can't stay invisible. Once/request.
+        // The server fallback markup is not styled by the runtime CSS, so it
+        // flashes unstyled until the (footer) runtime mounts. The `dono-js`
+        // class is only added when JS runs, so no-JS visitors keep the visible
+        // fallback, and the timeout failsafe reveals the form if the runtime
+        // never loads. Once per request.
         if (! $this->cloakEmitted) {
             $this->cloakEmitted = true;
             $html = "<style>.dono-js .dono-donation-form:not([data-dono-ready]){visibility:hidden}</style>"
@@ -208,7 +187,6 @@ final class DonationFormShortcode extends HookProvider
         return $html;
     }
 
-    /** Render the form element, inner blocks, and config script. */
     private function renderBlocks(Form $form): string
     {
         $formId = 'dono-form-' . wp_unique_id();
@@ -235,9 +213,8 @@ final class DonationFormShortcode extends HookProvider
         $styleDecls = $this->tokenStyle($tokens) . $containerDecls;
         $styleAttr  = $styleDecls !== '' ? ' style="' . esc_attr($styleDecls) . '"' : '';
 
-        // The runtime replaces this markup on mount, so a no-JS visitor is the
-        // only one who sees the fallback: tell them JS is required rather than
-        // leaving a dead form whose submit would GET their inputs into the URL.
+        // Only a no-JS visitor sees this: a dead form would GET their inputs
+        // into the URL on submit.
         $noscript = '<noscript><div class="dono-donation-form__noscript">'
             . esc_html__('This donation form needs JavaScript enabled. Please turn it on and reload the page to donate.', 'dono')
             . '</div></noscript>';
@@ -252,28 +229,20 @@ final class DonationFormShortcode extends HookProvider
             $variant ? ' data-variant="' . esc_attr($variant) . '"' : '',
             $styleAttr,
             $noscript . $inner,
-            // JSON_HEX_TAG escapes < and > to </> so no config string
-            // (e.g. a thank-you message containing </script>) can break out of
-            // this inline JSON block and inject markup on the public page. The
-            // client JSON.parse decodes it back transparently.
+            // JSON_HEX_TAG so no config string (e.g. a thank-you message
+            // containing </script>) can break out of this inline JSON block and
+            // inject markup. The client JSON.parse decodes it back transparently.
             wp_json_encode($config, JSON_HEX_TAG | JSON_UNESCAPED_UNICODE)
         );
     }
 
-    /**
-     * Container CSS class suffix and inline style declarations.
-     *
-     * @return array{0:string,1:string} [class-suffix, style-declarations]
-     */
+    /** @return array{0:string,1:string} [class-suffix, style-declarations] */
     private function containerAttrs(Form $form): array
     {
         $container = is_array($form->settings['container'] ?? null) ? $form->settings['container'] : [];
 
-        // Plain by default. A form is nearly always dropped into a page that
-        // already has its own card, panel or column, and a second frame around
-        // it reads as a box inside a box. An author who wants the frame asks
-        // for it; the ones who never open the setting get the version that sits
-        // in someone else's design without arguing with it.
+        // Plain by default: a form is nearly always dropped into a page that
+        // already has its own card, and a second frame reads as a box in a box.
         $style = (string) ($container['style'] ?? 'plain');
         if (! in_array($style, ['frame', 'plain'], true)) {
             $style = 'plain';
@@ -296,12 +265,7 @@ final class DonationFormShortcode extends HookProvider
         return [$classSuffix, $containerDecls];
     }
 
-    /**
-     * Resolved style tokens as inline custom-property declarations so the
-     * server-rendered form is themed before the runtime mounts.
-     *
-     * @param array<string,mixed> $tokens
-     */
+    /** Inline custom properties, so the form is themed before the runtime mounts. */
     private function tokenStyle(array $tokens): string
     {
         $out = '';
@@ -317,11 +281,7 @@ final class DonationFormShortcode extends HookProvider
     }
 
 
-    /**
-     * Render HTML for an unsaved form (admin preview pane).
-     *
-     * @return array{html:string, cssUrl:string, jsUrl:string, jsDeps:list<string>}
-     */
+    /** @return array{html:string, cssUrl:string, jsUrl:string, jsDeps:list<string>} */
     public function renderPreview(string $blocks, ?array $settings = null, ?int $campaignId = null): array
     {
         $stub = Form::make();
@@ -332,7 +292,7 @@ final class DonationFormShortcode extends HookProvider
         $stub->blocks      = $blocks;
         $stub->settings    = is_array($settings) ? $settings : null;
         // Preview can be invoked before a campaign is bound; the gate only
-        // applies to public render(), so 0 is safe as a placeholder here.
+        // applies to public render(), so 0 is safe here.
         $stub->campaign_id = $campaignId !== null && $campaignId > 0 ? $campaignId : 0;
         $stub->created_at  = current_time('mysql');
         $stub->updated_at  = current_time('mysql');
@@ -352,19 +312,8 @@ final class DonationFormShortcode extends HookProvider
     }
 
     /**
-     * Wrap a renderPreview() result into a self-contained HTML document: its own
-     * stylesheet plus the runtime and its script-handle deps inlined, so the form
-     * boots in isolation inside an iframe srcdoc (the host editor never runs the
-     * runtime, and the iframe can't reach the editor's scripts). Shared by the
-     * forms editor preview pane and the campaign donation-form block editor.
-     *
-     * @param array{html:string, cssUrl:string, jsUrl:string, jsDeps:list<string>} $preview
-     * @param bool $autoResize Size the iframe to its content from inside the
-     *                         srcdoc (same-origin, so window.frameElement works);
-     *                         the forms pane sizes with CSS and opts out.
-     * @param bool $transparent Drop the pane background so the form blends into
-     *                          the host editor canvas (the block editor); the
-     *                          forms pane keeps its grey for card contrast.
+     * A self-contained document: the host editor never runs the runtime and the
+     * iframe srcdoc cannot reach the editor's scripts, so both are inlined here.
      */
     public function buildPreviewDocument(array $preview, bool $autoResize = false, bool $transparent = false): string
     {
@@ -384,14 +333,12 @@ final class DonationFormShortcode extends HookProvider
             }
         }
 
-        // Auto-resize hugs content, so the body must NOT stretch to the viewport
-        // (min-height:100vh + padding would inflate the measured height and, fed
-        // back into the frame height each observer tick, run away). The delta
-        // guard and cap are belt-and-suspenders against any residual loop.
+        // Auto-resize hugs content, so the body must NOT stretch to the viewport:
+        // min-height:100vh plus padding inflates the measured height and, fed back
+        // into the frame height each observer tick, runs away.
         $bodyMinHeight = $autoResize ? '0' : '100vh';
-        // White like a real page: the builder's preview frame plays a browser
-        // window, and a grey page inside it read as a second window floating
-        // over the editor stage (which is the same grey).
+        // White like a real page: the preview frame plays a browser window, and a
+        // grey page inside it reads as a second window over the editor stage.
         $background    = $transparent ? 'transparent' : '#fff';
         $resize = $autoResize
             ? '<script>(function(){var l=0;function s(){try{if(!window.frameElement)return;var h=Math.min(document.documentElement.scrollHeight,4000);if(Math.abs(h-l)>2){l=h;window.frameElement.style.height=h+"px"}}catch(e){}}addEventListener("load",s);if(window.ResizeObserver){new ResizeObserver(s).observe(document.documentElement)}setTimeout(s,300);setTimeout(s,1200)})();</script>'
@@ -419,11 +366,6 @@ final class DonationFormShortcode extends HookProvider
 HTML;
     }
 
-    /**
-     * Visitor context passed to filters and gateway resolution.
-     *
-     * @return array<string,mixed>
-     */
     private function visitorContext(): array
     {
         $base = [
@@ -434,10 +376,6 @@ HTML;
         return (array) apply_filters('dono.form.visitor_context', $base);
     }
 
-    /**
-     * The form's default gateway: the first resolved option for the form's
-     * currency and the visitor's country, or offline as a last resort.
-     */
     private function pickGateway(Form $form): string
     {
         $allowed = is_array($form->settings['gateways']['allowed'] ?? null)
@@ -460,11 +398,6 @@ HTML;
         return 'offline';
     }
 
-    /**
-     * Build the JSON config the runtime reads.
-     *
-     * @return array<string,mixed>
-     */
     private function buildConfig(Form $form, string $gateway, ?string $variant = null): array
     {
         $visitor = $this->visitorContext();
@@ -474,7 +407,6 @@ HTML;
         $pageNav  = $built['pageNav'];
         $preamble = $built['preamble'] ?? [];
 
-        // Embed style only: inline or modal.
         $layout = (string) ($form->settings['layout'] ?? 'inline');
         if (! in_array($layout, ['inline', 'modal'], true)) {
             $layout = 'inline';
@@ -513,18 +445,11 @@ HTML;
         $fxConfig   = $this->fxConfig($currency, $currencies);
         $swCfg      = $this->currencySwitcherConfig($form);
 
-        // Rotate the honeypot field name per render so a generic bot cannot
-        // denylist a fixed name.
-        //
-        // Every name here is one no browser has a field type for. The pool used
-        // to read website, url, homepage, company, which are exactly the tokens
-        // Chrome and Safari match for autofill, and they fill by field name and
-        // label whatever autocomplete="off" says. A donor using autofill with an
-        // organisation or website saved would have it written into the trap, and
-        // the submission was then refused with "Submission rejected." on every
-        // retry, because the value is held in state the donor cannot see or
-        // clear. It worked six renders in seven, which reads as a flaky site
-        // rather than a bug.
+        // Rotated per render so a generic bot cannot denylist a fixed name.
+        // Every name here is one no browser has a field type for: browsers
+        // autofill by field name and label whatever autocomplete="off" says, and
+        // a donor whose autofill writes into the trap has their donation refused
+        // with no way to see or clear the value.
         $honeypotPool = ['form_ref', 'aux_code', 'extra_note', 'alt_ref', 'note_two', 'field_ref', 'checksum'];
         $honeypotName = $honeypotPool[random_int(0, count($honeypotPool) - 1)];
 
@@ -541,9 +466,6 @@ HTML;
                 'one_time'
             );
 
-            // Pick up block-level overrides: `style` (cards|list) and the
-            // per-gateway `descriptions` map. Defaults preserved when block
-            // isn't present.
             $blockAttrs   = $this->findPaymentGatewaysBlockAttrs($form) ?? [];
             $blockStyle   = (string) ($blockAttrs['style'] ?? 'cards');
             $descriptions = is_array($blockAttrs['descriptions'] ?? null) ? $blockAttrs['descriptions'] : [];
@@ -589,24 +511,22 @@ HTML;
                 'accent' => (string) $resolvedStyle['accent'],
             ],
             'rest'        => esc_url_raw(rest_url('dono/v1/donations')),
-            // Only logged-in users need a REST nonce (CSRF for their cookie
-            // session). Anonymous donors send none, so a page-cached form
-            // never carries a stale nonce that the REST layer would 403. The
-            // create route is public; spam/rate-limit gates protect it.
+            // Anonymous donors send none, so a page-cached form never carries a
+            // stale nonce the REST layer would 403. The create route is public;
+            // spam and rate-limit gates protect it.
             'nonce'       => is_user_logged_in() ? wp_create_nonce('wp_rest') : '',
             'thanks'      => [
                 'message'  => $thankYouMessage,
                 'redirect' => $redirectUrl !== '' ? esc_url_raw($redirectUrl) : '',
             ],
             'privacyPolicyUrl' => $privacyUrl !== '' ? esc_url_raw($privacyUrl) : '',
-            // Offered on the thank-you card so a donor can reach their giving
-            // without typing their address again. Sending the link is what
-            // proves the address; the donation did not, because the form takes
-            // an address on trust and a card need not match it.
+            // Sending the link is what proves the address; the donation did not,
+            // because the form takes an address on trust and a card need not
+            // match it.
             'portal'      => [
                 'url'      => ( new \Dono\Donors\Portal\PortalPage() )->url(),
-                // Published whole rather than built from the donations endpoint,
-                // which is a full URL and not a base to append to.
+                // Published whole: the donations endpoint is a full URL, not a
+                // base to append to.
                 'sendLink' => esc_url_raw(rest_url('dono/v1/portal/send-link')),
                 'token'    => $this->spam ? $this->spam->mintPortalToken() : '',
             ],
@@ -614,8 +534,8 @@ HTML;
             'spam'        => [
                 'formToken'   => $this->spam ? $this->spam->mintFormToken((int) $form->id) : '',
                 'honeypotName' => $honeypotName,
-                // Mirror the server's minimum so the donor sees it at the amount
-                // field, not only after submitting. Same filter as AntiSpamGuard.
+                // Same filter as AntiSpamGuard, so the donor sees the minimum at
+                // the amount field rather than only after submitting.
                 'minAmountCents' => (int) apply_filters('dono.spam.min_amount_cents', 100),
             ],
             'steps'      => $steps,
@@ -642,9 +562,9 @@ HTML;
                 /* translators: %s: the selected currency code, e.g. INR. */
                 'noGatewayForCurrency' => __('No payment method here accepts %s. Choose another currency to continue.', 'dono'),
                 'noGatewayForFrequency' => __('No payment method here can take a recurring donation. Choose a one-time donation to continue.', 'dono'),
-                // Not a currency problem: the form allows no gateway that is
-                // switched on. Saying "choose another currency" sent donors
-                // hunting for a fix that was never theirs to make.
+                // Not a currency problem: no allowed gateway is switched on.
+                // Naming the currency sends donors hunting for a fix that is not
+                // theirs to make.
                 'noGatewayAvailable' => __('Online donations are unavailable right now. Please try again later.', 'dono'),
                 'testModeNotice' => __('Test mode is on. No real payment is taken and this donation is excluded from reporting.', 'dono'),
                 'back'           => __('Back', 'dono'),
@@ -655,8 +575,8 @@ HTML;
                 'pendingTitle'   => __('Your donation is pending', 'dono'),
                 'pendingMessage' => __('Thank you. We have emailed you instructions to complete your payment.', 'dono'),
                 // Bank debit: the donor has finished and nothing is expected of
-                // them. Reusing the pending copy would tell someone who has
-                // already paid that we are still waiting on them.
+                // them. The pending copy would tell someone who has already paid
+                // that we are still waiting on them.
                 'processingTitle'   => __('Thank you, your donation is on its way', 'dono'),
                 'processingMessage' => __('Your bank is transferring your donation. It usually takes a few working days to arrive, and we will email you once it does.', 'dono'),
                 'donateAgain'    => __('Donate again', 'dono'),
@@ -724,26 +644,24 @@ HTML;
     }
 
     /**
-     * Walk the block tree into the runtime's step/page model.
-     *
      * @return array{
      *   steps: list<array<string,mixed>>,
      *   pages: list<array{title:string}>,
      *   pageNav: array{prevLabel:string,nextLabel:string,progressStyle:string},
+     *   preamble: list<array<string,mixed>>,
      * }
      */
     private function buildSteps(Form $form, ?string $variant = null, array $visitor = []): array
     {
         $blocks       = parse_blocks((string) $form->blocks);
         $steps        = [];
-        // Single ordered stream of fields + content for the current step, so the
-        // runtime renders them in authored order (fields and content interleaved)
-        // rather than all content then all fields.
+        // One ordered stream of fields and content, so the runtime renders them
+        // interleaved in authored order rather than all content then all fields.
         $items        = [];
-        // Root content before a dono/steps wizard: rendered once above the wizard.
+        // Root content before a dono/steps wizard: rendered once above it.
         $preamble     = [];
         $rowSeq       = 0;
-        // Steps are tagged with the dono/step index they sit in (0 = none).
+        // The dono/step index a step sits in (0 = none).
         $currentPage  = 0;
         $stepDefs     = [];
         $pageNav      = [
@@ -752,8 +670,7 @@ HTML;
             'progressStyle' => 'dots',
         ];
 
-        // Emit the accumulated ordered items as one donor step. A content-only
-        // run is valid (e.g. an intro paragraph on its own wizard page).
+        // A content-only run is valid: an intro paragraph on its own wizard page.
         $flushItems = static function () use (&$steps, &$items, &$currentPage): void {
             if (empty($items)) return;
             $steps[] = ['type' => 'donor', 'page' => $currentPage, 'items' => array_values($items)];
@@ -776,7 +693,6 @@ HTML;
             return $field;
         };
 
-        // Decoration counterpart of $tagRow: bake a show/hide condition onto a non-field entry.
         $withCond = static function (array $deco, array $attrs): array {
             $deco['t'] = 'deco';
             $cond = $attrs['condition'] ?? null;
@@ -903,8 +819,8 @@ HTML;
                     $items              = [];
                     $children           = (array) ($block['innerBlocks'] ?? []);
                     $walk($children, $row);
-                    // Content container: a stray field bubbles back out to the
-                    // step (columns stay content-only in v1); decorations nest.
+                    // Columns are content-only: a stray field bubbles back out to
+                    // the step, decorations nest.
                     $columnsChildren = [];
                     $bubbled         = [];
                     foreach ($items as $it) {
@@ -929,8 +845,8 @@ HTML;
                         'nextLabel'     => (string) ($attrs['nextLabel'] ?? ''),
                         'progressStyle' => $progressStyle,
                     ];
-                    // Root content authored before the wizard renders once above
-                    // it, instead of collapsing onto the first page.
+                    // Root content authored before the wizard renders above it,
+                    // instead of collapsing onto the first page.
                     if (! empty($items)) {
                         $preamble = array_merge($preamble, array_values($items));
                         $items    = [];
@@ -948,11 +864,9 @@ HTML;
                     ];
                     $children = (array) ($block['innerBlocks'] ?? []);
                     $walk($children, $row);
-                    // Emit this page's items (fields + content interleaved, or a
-                    // content-only page); flushItems no-ops when the step is empty.
                     $flushItems();
-                    // A step left empty in the builder would otherwise publish a
-                    // blank wizard page; drop it so donors never click through one.
+                    // A step left empty in the builder would publish a blank
+                    // wizard page; drop it so donors never click through one.
                     $pageHasContent = false;
                     foreach ($steps as $emitted) {
                         if (($emitted['page'] ?? null) === $currentPage) {
@@ -1153,8 +1067,7 @@ HTML;
                 case 'dono/donation-summary':
                     // A decoration, not a field: it reads state back rather than
                     // collecting anything, and only decorations reach
-                    // renderDecorationItem. Tagged as a field it joined the field
-                    // run, went to DonorStep, and rendered nothing at all.
+                    // renderDecorationItem.
                     $items[] = $withCond([
                         'kind'        => 'summary',
                         'showDonor'   => (bool) ($attrs['showDonor']   ?? true),
@@ -1176,8 +1089,8 @@ HTML;
                     break;
 
                 case 'dono/donation-amount':
-                    // Flush any preceding content as its own step; the amount UI
-                    // is a fixed step, so content leads it rather than nesting.
+                    // The amount UI is a fixed step, so preceding content leads
+                    // it as its own step rather than nesting inside it.
                     $flushItems();
                     if ((string) ($attrs['donationType'] ?? 'multi') === 'fixed') {
                         $steps[] = [
@@ -1351,10 +1264,9 @@ HTML;
                     break;
 
                 default:
-                    // A field block that ships outside core. The add-on answers
-                    // with the runtime item its component renders from; a block
-                    // nobody claims stays out of the config rather than
-                    // reaching the donor as a half-built field.
+                    // A field block shipped outside core answers with the runtime
+                    // item its component renders from; a block nobody claims stays
+                    // out of the config rather than reaching the donor half-built.
                     $extra = apply_filters('dono.form.block_field', null, $name, $attrs, $form);
                     if (is_array($extra) && isset($extra['kind'])) {
                         $items[] = $tagRow($extra, $row, $attrs);
@@ -1365,7 +1277,6 @@ HTML;
         };
 
         $walk($blocks);
-        // Emit any trailing items (fields and/or content) as a final donor step.
         $flushItems();
 
         $hasSubmit = false;
@@ -1373,7 +1284,6 @@ HTML;
             if ($s['type'] === 'submit') { $hasSubmit = true; break; }
         }
         if (! $hasSubmit) {
-            // Fallback submit on the current (last) page.
             $steps[] = ['type' => 'submit', 'page' => $currentPage, 'label' => __('Donate now', 'dono')];
         }
 
@@ -1403,11 +1313,7 @@ HTML;
         ];
     }
 
-    /**
-     * Currency from the first donation-amount block, scanning nested blocks
-     * (multi-step forms wrap the amount block in step/page containers).
-     * Falls back to the org currency, never a hardcoded USD.
-     */
+    /** Falls back to the org currency, never a hardcoded USD. */
     private function detectCurrency(Form $form): string
     {
         $found = null;
@@ -1427,11 +1333,6 @@ HTML;
         return $found ?? Money::defaultCurrency();
     }
 
-    /**
-     * Currencies offered by every currency-switcher block.
-     *
-     * @return list<string>
-     */
     private function detectCurrencies(Form $form): array
     {
         $codes  = [];
@@ -1450,11 +1351,6 @@ HTML;
         return $codes;
     }
 
-    /**
-     * Presentation settings from the first currency-switcher block, or null.
-     *
-     * @return array{label:string,style:string,align:string}|null
-     */
     private function currencySwitcherConfig(Form $form): ?array
     {
         $found  = null;
@@ -1475,18 +1371,11 @@ HTML;
         return $found;
     }
 
-    /** Whether the form tree contains a payment-gateways block. */
     private function hasPaymentGatewaysBlock(Form $form): bool
     {
         return $this->findPaymentGatewaysBlockAttrs($form) !== null;
     }
 
-    /**
-     * First dono/payment-gateways block's attrs, or null if the block isn't
-     * present. Used to surface its `style` and `descriptions` to the runtime.
-     *
-     * @return array<string,mixed>|null
-     */
     private function findPaymentGatewaysBlockAttrs(Form $form): ?array
     {
         $found  = null;
@@ -1506,11 +1395,8 @@ HTML;
     }
 
     /**
-     * FX rates for currency conversion. rates[CCY] = units of CCY per 1 base;
-     * missing rates are omitted so the runtime does not guess.
-     *
-     * @param list<string> $switcherCurrencies
-     * @return array{base:string,rates:array<string,float>}
+     * rates[CCY] = units of CCY per 1 base; a missing rate is omitted so the
+     * runtime does not guess.
      */
     private function fxConfig(string $formCurrency, array $switcherCurrencies): array
     {
@@ -1533,7 +1419,6 @@ HTML;
         return ['base' => $base, 'rates' => $rates];
     }
 
-    /** Admin-visible diagnostic; visitors see an empty string. */
     private function renderError(string $message): string
     {
         if (! current_user_can('manage_options') && ! current_user_can('manage_dono')) {
@@ -1554,14 +1439,7 @@ HTML;
         return $this->cssVersion;
     }
 
-    /**
-     * Client-side Stripe config for the Payment Element: the publishable key
-     * for the mode the intent will be created in. Emitted only when the
-     * stripe gateway is offered on this form.
-     *
-     * @param array<int,array<string,mixed>> $options
-     * @return array{publishableKey:string}|null
-     */
+    /** The publishable key for the mode the intent will be created in. */
     private function stripePublicConfig(array $options, string $defaultGateway, bool $testMode): ?array
     {
         $ids   = array_column($options, 'id');
@@ -1580,12 +1458,8 @@ HTML;
     }
 
     /**
-     * Client-side PayPal config for the SDK buttons: the client id for the mode
-     * the order will be created in. The client id is public by design, like a
-     * Stripe publishable key. Emitted only when PayPal is offered on this form.
-     *
-     * @param array<int,array<string,mixed>> $options
-     * @return array{clientId:string,currency:string,intent:string}|null
+     * The client id for the mode the order will be created in. It is public by
+     * design, like a Stripe publishable key.
      */
     private function payPalPublicConfig(array $options, string $defaultGateway, bool $testMode, string $currency): ?array
     {
@@ -1609,15 +1483,9 @@ HTML;
     }
 
     /**
-     * Public config from every registered gateway that owns a browser step,
-     * keyed by gateway id. The three built-ins keep their own methods above;
-     * this is how a gateway that ships in an add-on reaches the page.
-     *
-     * A throwing gateway is skipped rather than taking the whole form down
-     * with it: a misconfigured payment method must not stop donations through
+     * How a gateway that ships in an add-on reaches the page. A throwing gateway
+     * is skipped: a misconfigured payment method must not stop donations through
      * the others.
-     *
-     * @return array<string,array<string,mixed>>
      */
     private function browserAwareConfig(bool $testMode, string $currency): array
     {

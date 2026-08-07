@@ -1,5 +1,5 @@
-// Form editor styles. Fullscreen chrome-hiding lives server-side in
-// FormsPage::maybePrintFullscreenStyles (inlined in <head>).
+// Fullscreen chrome-hiding lives server-side in
+// FormsPage::maybePrintFullscreenStyles, inlined in <head>.
 
 @import '@dono/ui/scss/tokens';
 @import '../_shared/admin-base';
@@ -29,9 +29,9 @@ $sidebar-width: 300px;
     background: #fff;
     color: $text;
 
-    // Mirror runtime.scss: when the resolved tokens omit --dono-accent-soft
-    // (catalogue default, not explicitly paired) the preview derives it from
-    // --dono-accent like the published form does, instead of a static tint.
+    // Mirrors runtime.scss: with no explicitly paired --dono-accent-soft the
+    // preview derives one from --dono-accent, as the published form does,
+    // rather than showing a static tint.
     --dono-accent-soft: #{$accent-soft};
     --dono-accent-soft: color-mix(in srgb, var(--dono-accent) 12%, #fff);
 
@@ -68,7 +68,6 @@ $sidebar-width: 300px;
             gap: 14px;
         }
 
-        // Strip Gutenberg's outer block padding that creates double-card feel.
         .block-editor-block-list__block { margin: 0; }
 
         .block-list-appender {
@@ -196,9 +195,8 @@ $sidebar-width: 300px;
         display: flex;
         justify-content: center;
         // Stretch sizes the device frame to the stage's content box, so the
-        // stage itself never scrolls: the iframe is the only scroller, like a
-        // real browser window. flex-start + height:100% made the frame overlap
-        // the stage padding and nest a second scrollbar around the iframe's.
+        // iframe stays the only scroller. flex-start with height:100% overlaps
+        // the stage padding and nests a second scrollbar.
         align-items: stretch;
         padding: 28px 20px;
     }
@@ -220,10 +218,10 @@ $sidebar-width: 300px;
                 0 16px 40px rgba(0, 0, 0, .18);
             padding: 0;
             position: relative;
-            // The phone keeps its screen shape; an explicit height opts out of
-            // the stage's align-items: stretch. Capped to the stage so a short
-            // window shrinks the phone instead of adding an outer scrollbar
-            // (border-box so the 10px bezel counts against the cap).
+            // An explicit height opts out of the stage's align-items: stretch
+            // so the phone keeps its screen shape, capped to the stage so a
+            // short window shrinks it rather than adding an outer scrollbar.
+            // border-box counts the 10px bezel against that cap.
             box-sizing: border-box;
             height: min(780px, 100%);
             align-self: center;
@@ -259,26 +257,25 @@ $sidebar-width: 300px;
     }
 }
 
-// InterfaceSkeleton fills the viewport. WP admin chrome (bar + sidebar) is hidden
-// in FormsPage::maybePrintFullscreenStyles, so we don't reserve space for it.
+// WP admin chrome is hidden in FormsPage::maybePrintFullscreenStyles, so the
+// skeleton reserves no space for it.
 .dono-form-editor .interface-interface-skeleton {
     position: fixed;
     inset: 0;
     height: auto;
 }
 
-// Rebrand WP's admin-theme blue with Dono accent green for any block-editor primitive
-// rendered while this stylesheet is loaded. Root-level scope catches popovers that
-// portal out of .dono-form-editor (block-list insertion inserter, slot popovers, etc.).
-// Safe because this stylesheet is only enqueued on the form editor page.
+// Root-level scope, not .dono-form-editor, so it also catches popovers that
+// portal out of the editor. Safe because this stylesheet is only enqueued on
+// the form editor page.
 :root {
     --wp-admin-theme-color:           #{$accent};
     --wp-admin-theme-color-darker-10: #{$accent-dark};
     --wp-admin-theme-color-darker-20: #{$accent-dark};
     --wp-admin-border-width-focus:    2px;
-    // WP 7+ Button reads --wp-components-color-accent first and only falls
-    // back to --wp-admin-theme-color, so secondary/tertiary buttons stay
-    // WP-admin-blue unless we override this too. Mirrors campaigns.scss.
+    // WP 7+ Button reads --wp-components-color-accent first and only falls back
+    // to --wp-admin-theme-color, so secondary and tertiary buttons stay
+    // admin-blue without this. Mirrors campaigns.scss.
     --wp-components-color-accent:           #{$accent};
     --wp-components-color-accent-darker-10: #{$accent-dark};
     --wp-components-color-accent-darker-20: #{$accent-dark};
@@ -294,15 +291,15 @@ $sidebar-width: 300px;
         }
     }
 
-    // Newer overlay-based selection (Gutenberg 14+).
+    // Overlay-based selection, Gutenberg 14+.
     .block-editor-block-popover__overlay,
     .block-editor-block-list__layout .is-selected > .block-editor-block-list__block-popover {
         outline-color: #{$accent} !important;
     }
 }
 
-// Between-blocks inserter is portaled outside .dono-form-editor; use unscoped selectors.
-// editor.scss is only enqueued on the form editor page, so this can't bleed elsewhere.
+// The between-blocks inserter portals outside .dono-form-editor, so these
+// selectors are unscoped.
 .block-editor-block-list__insertion-point-indicator {
     background: #{$accent} !important;
     height: 2px !important;
@@ -349,20 +346,19 @@ $sidebar-width: 300px;
 }
 
 .dono-form-editor .interface-interface-skeleton__secondary-sidebar {
-    // The skeleton animates an inline width while a panel opens, then drops
-    // it; this rule is what holds the rail open afterwards (core's base is
-    // width:auto, which collapses around the absolutely-positioned content
-    // wrapper). Keep in step with .dono-form-editor__secondary below.
+    // The skeleton animates an inline width while a panel opens, then drops it,
+    // and core's base width:auto collapses around the absolutely-positioned
+    // content wrapper. This is what holds the rail open. Keep in step with
+    // .dono-form-editor__secondary below.
     width: 350px;
     border-right: 1px solid $border-soft;
     background: #fff;
 }
 
 .dono-form-editor__secondary {
-    // The skeleton's animation wrapper is width:fit-content, so the panel
-    // needs an explicit width or it shrink-wraps (the list view collapsed to
-    // its widest label). 350px matches the inserter's intrinsic width so the
-    // rail doesn't jump when toggling between the two.
+    // The skeleton's animation wrapper is width:fit-content, so without an
+    // explicit width the panel shrink-wraps to its widest label. 350px matches
+    // the inserter's intrinsic width, so the rail does not jump when toggling.
     width: 350px;
     height: 100%;
     display: flex;
@@ -371,10 +367,9 @@ $sidebar-width: 300px;
     background: #fff;
 
     &--inserter {
-        // Strip the Blocks/Patterns/Media tab strip + internal close button;
-        // the header toggle (X) is the only close affordance. Do NOT hide
-        // `.block-editor-inserter__panel-header`: in newer WP it carries the
-        // per-category section header (the category titles we want to keep).
+        // The header toggle is the only close affordance. Do not add
+        // `.block-editor-inserter__panel-header` to this list: in newer WP it
+        // carries the per-category section titles, which stay.
         .block-editor-inserter__tabs,
         .block-editor-tabbed-sidebar__tablist,
         .block-editor-tabbed-sidebar__tabs,
@@ -440,7 +435,6 @@ $sidebar-width: 300px;
     }
 }
 
-// Header layout: [back][+][undo][redo] | [title] | [pill tabs][save][gear]
 .dono-editor-header {
     height: $header-height;
     display: grid;
@@ -599,9 +593,8 @@ $sidebar-width: 300px;
         }
     }
 
-    // Secondary text actions (Save / Saved / Unpublish). Without this they fall
-    // back to WP's default ~2px radius and read square next to the pill tabs and
-    // the 6px primary button.
+    // Without this, WP's default ~2px radius reads square next to the pill tabs
+    // and the 6px primary button.
     .components-button.is-secondary {
         background: #fff;
         color: $text;
@@ -630,9 +623,8 @@ $sidebar-width: 300px;
 
         &:disabled,
         &[aria-disabled="true"] {
-            // WP's disabled rule re-adds an inset box-shadow "border" that
-            // doubles up with the real border and reads heavier than the
-            // enabled Unpublish button; keep the single flat border.
+            // WP's disabled rule adds an inset box-shadow "border" that doubles
+            // up with the real one and reads heavier than the enabled button.
             box-shadow: none;
             opacity: .6;
             cursor: default;
@@ -713,9 +705,8 @@ $sidebar-width: 300px;
             }
         }
 
-        // @wordpress/components v28+ defaults block-supports inputs to 40px,
-        // tuned for the post editor's wide sidebar; too dominant in our 300px
-        // sidebar, so trim while staying tall enough for touch targets.
+        // @wordpress/components v28+ defaults these to 40px, tuned for the post
+        // editor's wide sidebar and too dominant in a 300px one.
         .components-input-control__container .components-input-control__input,
         .components-number-control input,
         .components-unit-control input,
@@ -724,11 +715,10 @@ $sidebar-width: 300px;
         .components-select-control__input {
             min-height: 32px;
         }
-        // The header row geometry is owned solely by the toggle button so the
-        // collapsed and expanded headers are pixel-identical. WP's default
+        // The toggle button alone owns the header row geometry, so collapsed
+        // and expanded headers are pixel-identical. WP's default
         // ".is-opened > .components-panel__body-title { margin: -16px }" assumes
-        // a 16px body padding; we use a compact sidebar, so the body carries no
-        // vertical padding and the opened title margin is realigned to match.
+        // 16px body padding, which this compact sidebar does not have.
         .components-panel__body {
             padding: 0 16px;
         }
@@ -747,9 +737,8 @@ $sidebar-width: 300px;
         .components-panel__body-title {
             font-size: 12px;
         }
-        // WP recolours the panel-header focus ring to our accent at 2px. On a
-        // collapsed panel the toggle keeps focus after a click, so that heavy
-        // green inset box lingers on the header. Drop it for pointer focus;
+        // A collapsed panel's toggle keeps focus after a click, leaving WP's
+        // 2px accent inset ring on the header. Dropped for pointer focus only;
         // keyboard focus keeps a visible ring.
         .components-panel__body-toggle:focus:not(:focus-visible) {
             box-shadow: none;
@@ -1287,7 +1276,7 @@ $sidebar-width: 300px;
         justify-content: center;
     }
 
-    // Dashed border kept on purpose: it's a container the user fills.
+    // Dashed on purpose: it is a container the author fills.
     &--step {
         padding: 16px 18px;
         background: #fff;
@@ -1331,8 +1320,8 @@ $sidebar-width: 300px;
     }
     &__hidden-meta { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
 
-    // The recap the donor reads before submitting. Rows rather than a browser
-    // default <dl>, whose indented <dd> on its own line reads as broken markup.
+    // Rows rather than a browser-default <dl>, whose indented <dd> on its own
+    // line reads as broken markup.
     &--summary {
         background: #f8fafb;
         border: 1px solid $border-mid;
@@ -1609,13 +1598,9 @@ $sidebar-width: 300px;
     }
 }
 
-// WordPress ToggleControl, wearing the Dono switch.
-//
-// Scoped to this editor on purpose. It used to load on
-// enqueue_block_editor_assets, which is every block editor: opening any page in
-// Gutenberg re-skinned the toggles of core blocks and every other plugin's too.
-// The form builder is our own screen, so it can look like ours; the post editor
-// is WordPress's and should look like WordPress.
+// WordPress ToggleControl, wearing the Dono switch. Scoped to this editor on
+// purpose: loading it on enqueue_block_editor_assets would re-skin the toggles
+// of core blocks and every other plugin in every block editor.
 //
 // !important because @wordpress/components ships more specific rules.
 .dono-form-editor {

@@ -10,18 +10,9 @@ use Dono\Vendor\Queryable\Schema\Table;
 /**
  * An address somebody typed into the portal that nobody has proven yet.
  *
- * Signing up takes no session and proves nothing about who is calling, so the
- * address it carries is a claim. It waits here until the emailed link comes
- * back, and only then becomes a donor. Nothing in the admin reads this table:
- * an unproven address is not a donor and must not be counted, listed, exported
- * or mailed as one.
- *
- * Same crypto split as Donor, because it holds the same thing: the address is
- * encrypted, and the peppered hash is the lookup key. Names are plaintext,
- * matching the donor table, and are only ever used for the donor this row
- * eventually creates.
- *
- * @version 1.0.0
+ * An unproven address is not a donor and must not be counted, listed, exported
+ * or mailed as one; redeeming the emailed link is what creates the donor. Same
+ * crypto split as Donor: address encrypted, peppered hash as the lookup key.
  */
 final class PendingSignup extends Model
 {

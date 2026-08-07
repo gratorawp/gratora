@@ -31,10 +31,8 @@ require_once __DIR__ . '/vendor/woocommerce/action-scheduler/action-scheduler.ph
 
 define('DONO_VERSION', '1.0.0');
 // Bumped whenever a model's schema() changes: a new table, column or index.
-// Deliberately separate from DONO_VERSION, which is the release version and so
-// stays put through a development cycle. Gating migration on the release
-// version meant a column added mid-cycle never migrated, and the first query
-// against it died with "unknown column" until someone reactivated the plugin.
+// Separate from DONO_VERSION, which stays put through a development cycle, so
+// a column added mid-cycle still migrates.
 define('DONO_DB_VERSION', '6');
 define('DONO_FILE', __FILE__);
 define('DONO_DIR', plugin_dir_path(__FILE__));

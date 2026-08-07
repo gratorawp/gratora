@@ -8,18 +8,11 @@ use Dono\Foundation\Crypto\Crypto;
 use Dono\Foundation\Identity\IdentityHasher;
 use Dono\Foundation\Time\Clock;
 
-/**
- * Reads and writes the unproven addresses waiting to become donors.
- *
- * @version 1.0.0
- */
 final class PendingSignupRepository
 {
     /**
-     * How long an unproven address is kept. Long enough to survive a spam
-     * folder and a weekend, short enough that an address nobody confirmed is
-     * not sitting here indefinitely. The link is issued with the same life, so
-     * a live link never points at a row that has already gone.
+     * The link is issued with the same life, so a live link never points at a
+     * row that has already gone.
      */
     public const TTL_SECONDS = 7 * DAY_IN_SECONDS;
 
@@ -31,8 +24,7 @@ final class PendingSignupRepository
     }
 
     /**
-     * Records a claim on an address, replacing any claim already standing for
-     * it. Signing up twice is a person who lost the first email, not a second
+     * Signing up twice is a person who lost the first email, not a second
      * person, so the newer names and the fresher expiry win.
      */
     public function put(string $email, ?string $firstName, ?string $lastName): PendingSignup
@@ -67,7 +59,6 @@ final class PendingSignupRepository
         return PendingSignup::query()->find('email_hash', $hash);
     }
 
-    /** The address as it was typed, for the donor this row is about to create. */
     public function decryptEmail(PendingSignup $row): ?string
     {
         return $this->crypto->decrypt($row->email_encrypted);
@@ -82,7 +73,7 @@ final class PendingSignupRepository
 
     /**
      * Erasure reaches this table by address, because a row here has no donor to
-     * reach it by. Nothing else identifies the person.
+     * reach it by.
      */
     public function deleteByEmailHash(string $hash): void
     {
@@ -91,7 +82,6 @@ final class PendingSignupRepository
         }
     }
 
-    /** Unproven addresses are not kept past their window. */
     public function purgeExpired(): int
     {
         return PendingSignup::query()

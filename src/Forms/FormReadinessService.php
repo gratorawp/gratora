@@ -9,14 +9,8 @@ use Dono\Gateways\Stripe\StripeAccount;
 use Dono\Gateways\TestMode;
 use Dono\Settings\SettingsService;
 
-/**
- * Builds the "is this form safe to publish?" checklist for the form editor.
- *
- * @version 1.0.0
- */
 final class FormReadinessService
 {
-    /** @internal */
     public function __construct(
         private SettingsService $settings,
         private GatewayManager $gateways,
@@ -26,8 +20,6 @@ final class FormReadinessService
     }
 
     /**
-     * Run every readiness check for the given form.
-     *
      * @return list<array{
      *   id:string,
      *   status:'pass'|'warn'|'fail',
@@ -52,11 +44,8 @@ final class FormReadinessService
     }
 
     /**
-     * The recurring-toggle block silently vanishes at render time when fewer
-     * than 2 effective frequencies are configured. Surface that as a warn so
-     * the author notices instead of saving + publishing a phantom block.
-     *
-     * @return array<string,mixed>
+     * The recurring-toggle block silently vanishes at render time with fewer
+     * than 2 effective frequencies, so warn instead of publishing a phantom block.
      */
     private function recurringToggleFrequenciesCheck(Form $form): array
     {
@@ -89,20 +78,9 @@ final class FormReadinessService
     }
 
     /**
-     * @param array<int,array<string,mixed>> $blocks
-     * @return array<string,mixed>|null
-     */
-    /**
-     * A form that offers a choice of gateway needs the block that renders it.
-     *
-     * The runtime used to fall back to drawing the selector on the last page
-     * when the block was absent, so removing it in the editor did not remove it
-     * from the form. Blocks render where they are dropped, so the fallback is
-     * gone -- which means an author who deletes it now ships a form that picks
-     * a gateway for the donor without asking. Say so here, where they can see
-     * it, rather than letting it surface as a donor complaint.
-     *
-     * @return array<string,mixed>
+     * Blocks render where they are dropped, so a form offering a choice of
+     * gateway with no gateways block picks one for the donor without asking.
+     * Say so to the author rather than letting it surface as a donor complaint.
      */
     private function gatewayBlockCheck(Form $form): array
     {
@@ -137,7 +115,6 @@ final class FormReadinessService
         ];
     }
 
-    /** @param array<int,mixed> $blocks */
     private function hasBlock(array $blocks, string $name): bool
     {
         foreach ($blocks as $b) {
@@ -165,14 +142,12 @@ final class FormReadinessService
         return null;
     }
 
-    /** @return array<string,mixed> */
     private function gatewayCheck(Form $form): array
     {
         $allowed = $this->formAllowedGateways($form);
 
-        // Specific before generic: a connected Stripe that cannot charge yet is
-        // worth naming, where the generic message would send the admin looking
-        // for a gateway to switch on that is already there.
+        // Specific before generic: the generic message would send the admin
+        // looking for a gateway to switch on that is already there.
         if ($this->stripeAccount->isConnected()
             && ($allowed === [] || in_array('stripe', $allowed, true))
             && ! $this->stripeAccount->canCharge()) {
@@ -215,7 +190,6 @@ final class FormReadinessService
         ];
     }
 
-    /** @return array<string,mixed> */
     private function testModeCheck(Form $form): array
     {
         if (! $this->testMode->forForm($form)) {
@@ -236,12 +210,7 @@ final class FormReadinessService
         ];
     }
 
-    /**
-     * Public because the org-wide readiness check asks the same question and
-     * neither of these depends on a form.
-     *
-     * @return array<string,mixed>
-     */
+    /** Public because the org-wide readiness check asks the same question. */
     public function receiptSenderCheck(): array
     {
         $email = $this->settings->get('email');
@@ -265,7 +234,6 @@ final class FormReadinessService
         ];
     }
 
-    /** @return array<string,mixed> */
     public function receiptTemplateCheck(): array
     {
         $email = $this->settings->get('email');
@@ -289,7 +257,6 @@ final class FormReadinessService
         ];
     }
 
-    /** @return array<string,mixed> */
     private function httpsCheck(Form $form): array
     {
         if (is_ssl()) {
@@ -299,9 +266,8 @@ final class FormReadinessService
                 'label'  => __('Site is served over HTTPS', 'dono'),
             ];
         }
-        // Test mode doesn't move real money, so HTTPS is a warning rather than
-        // a publish-blocker. Live mode still fails because live Stripe charges
-        // would be rejected by Stripe on non-HTTPS sites.
+        // Test mode moves no real money, so HTTPS only warns. Live mode fails:
+        // Stripe rejects live charges on non-HTTPS sites.
         if ($this->testMode->forForm($form)) {
             return [
                 'id'     => 'https',
@@ -318,7 +284,6 @@ final class FormReadinessService
         ];
     }
 
-    /** @return array<string,mixed> */
     private function recurringSupportCheck(Form $form): array
     {
         if (! $this->formOffersRecurring($form)) {
@@ -379,7 +344,7 @@ final class FormReadinessService
         ];
     }
 
-    /** @return list<string> the form's allowed gateway ids, or [] for no restriction */
+    /** [] means no restriction. */
     private function formAllowedGateways(Form $form): array
     {
         $allowed = $form->settings['gateways']['allowed'] ?? null;
@@ -387,18 +352,12 @@ final class FormReadinessService
         return array_values(array_filter(array_map('strval', $allowed), static fn ($s) => $s !== ''));
     }
 
-    /** Whether the form exposes more than one donation frequency. */
     private function formOffersRecurring(Form $form): bool
     {
         $blocks = parse_blocks((string) $form->blocks);
         return $this->walkForRecurring($blocks);
     }
 
-    /**
-     * Recursively scan blocks for a recurring-toggle offering two or more frequencies.
-     *
-     * @param array<int,array<string,mixed>> $blocks
-     */
     private function walkForRecurring(array $blocks): bool
     {
         foreach ($blocks as $b) {

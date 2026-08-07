@@ -3,9 +3,8 @@
     --dp-text:     var(--dono-text, #111827);
     --dp-muted:    var(--dono-text-muted, #6b7280);
     --dp-border:   var(--dono-border, #e5e7eb);
-    // Hairline between rows, distinct from the boundary above. Matches
-    // @dono/ui's $border-soft; using --dp-border for both made cards and
-    // row dividers the same weight.
+    // Hairline between rows, lighter than a card boundary. Matches @dono/ui's
+    // $border-soft.
     --dp-rule:     var(--dono-border-soft, #eef0f2);
     --dp-bg:       var(--dono-bg, #fff);
     --dp-bg-soft:  var(--dono-bg-soft, #f8fafb);
@@ -53,9 +52,8 @@
         display: flex;
         gap: 4px;
         border-bottom: 1px solid var(--dp-border);
-        // Add-ons register their own tabs (My tickets, My fundraising), so the
-        // row can outgrow the width. Keep it one line and scroll rather than
-        // letting labels wrap to two lines.
+        // Add-ons register their own tabs, so the row can outgrow the width.
+        // It scrolls rather than wrapping labels to a second line.
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
@@ -129,7 +127,6 @@
 
         strong  { font-variant-numeric: tabular-nums; font-weight: 600; }
 
-        // Only rows wired as buttons open a detail view; keep plain list rows flat.
         &[role="button"] {
             cursor: pointer;
             transition: border-color .15s, background .15s;
@@ -197,8 +194,7 @@
     }
 }
 
-// Signing in is one field and sits on a single line. Creating an account is
-// three, so it stacks and the pair of name fields shares a line.
+// Registration has three fields, so it stacks; sign-in is one field on a line.
 .dp-signin form.is-stacked {
     flex-direction: column;
     align-items: stretch;
@@ -326,7 +322,6 @@
             border: 1px solid var(--dp-border);
         }
 
-        // Size the action to its label instead of filling the row.
         .dp-action { width: auto; margin-bottom: 0; flex: 0 0 auto; }
     }
 }

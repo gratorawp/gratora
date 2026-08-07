@@ -8,11 +8,6 @@ use Dono\Donors\DonorRepository;
 use Dono\Donors\MagicLinkService;
 use Dono\Donors\SignupRedemption;
 
-/**
- * Manages authenticated donor portal sessions via cookie and transient.
- *
- * @version 1.0.0
- */
 final class PortalSession
 {
     private const COOKIE      = 'dono_donor_session';
@@ -26,15 +21,11 @@ final class PortalSession
     }
 
     /**
-     * Exchanges a raw magic-link token for an authenticated portal session.
-     *
      * Two kinds of link arrive here. A sign-in link names a donor who already
-     * exists. A signup link names no donor at all: it points at an address
-     * somebody claimed in the portal, and redeeming it is the moment that claim
-     * is proven and becomes a donor. Whoever opens the link controls the
-     * mailbox, which is the only evidence the address was ever theirs.
-     *
-     * @return array{donor_id:int,csrf:string}|null
+     * exists. A signup link names none: it points at an address somebody
+     * claimed, and redeeming it is the moment that claim becomes a donor.
+     * Whoever opens the link controls the mailbox, which is the only evidence
+     * the address was ever theirs.
      */
     public function startFromToken(string $rawToken): ?array
     {
@@ -47,9 +38,6 @@ final class PortalSession
         return $this->startFromSignupToken($rawToken);
     }
 
-    /**
-     * @return array{donor_id:int,csrf:string}|null
-     */
     private function startFromSignupToken(string $rawToken): ?array
     {
         $donorId = $this->signups->redeem($rawToken);
@@ -57,11 +45,6 @@ final class PortalSession
         return $donorId > 0 ? $this->open($donorId) : null;
     }
 
-    /**
-     * Opens a portal session. Returns donor id and a session-bound CSRF token.
-     *
-     * @return array{donor_id:int,csrf:string}
-     */
     public function open(int $donorId): array
     {
         $sid  = bin2hex(random_bytes(32));
@@ -95,7 +78,6 @@ final class PortalSession
         $this->setCookie('', time() - 3600);
     }
 
-    /** @return array{donor_id:int,csrf:string}|null */
     private function readSession(): ?array
     {
         $sid = isset($_COOKIE[self::COOKIE]) ? (string) $_COOKIE[self::COOKIE] : '';
@@ -113,8 +95,8 @@ final class PortalSession
     private function setCookie(string $value, ?int $expires = null): void
     {
         $expires = $expires ?? (time() + self::TTL_SECONDS);
-        // No-op if output already started (CLI/test, or a theme that echoes
-        // early): setcookie() would only warn and fail to set the header.
+        // Output already started (CLI/test, or a theme that echoes early):
+        // setcookie() would only warn and fail to set the header.
         if (headers_sent()) {
             return;
         }

@@ -44,9 +44,8 @@ function useFocusTrap( ref, active, onClose ) {
     }, [ active ] );
 }
 
-// Portal session CSRF token. Lives only in memory; populated from the
-// /portal/me or /portal/exchange response. State-changing endpoints reject
-// the request without a matching `X-Dono-Csrf` header.
+// In memory only, populated from /portal/me or /portal/exchange. State-changing
+// endpoints reject a request without a matching `X-Dono-Csrf` header.
 let csrfToken = '';
 
 function setCsrfFromResponse( payload ) {
@@ -55,17 +54,16 @@ function setCsrfFromResponse( payload ) {
     }
 }
 
-// Armed by App only while signed in, so a 401/403 from any per-tab request
-// (expired session cookie) bounces the whole app back to the sign-in screen
-// instead of leaving one tab stuck on a raw "Request failed".
+// A 401/403 from any per-tab request bounces the whole app back to sign-in
+// rather than leaving one tab stuck on a raw "Request failed".
 let onSessionExpired = null;
 
 function api( path, init = {} ) {
     const headers = {
         'Content-Type': 'application/json',
-        // Nonce only when the page minted one (logged-in WP user). Anonymous
-        // visitors send none: a cached page's stale nonce would make core's
-        // cookie check 403 every request, including magic-link sign-in.
+        // Nonce only when the page minted one (logged-in WP user): a cached
+        // page's stale nonce would make core's cookie check 403 every request,
+        // including magic-link sign-in.
         ...( cfg.nonce ? { 'X-WP-Nonce': cfg.nonce } : {} ),
         ...( init.headers || {} ),
     };
@@ -91,9 +89,9 @@ function api( path, init = {} ) {
     } );
 }
 
-// Preserve the page's intent params (e.g. ?dono_fundraise=10) across the
-// magic-link round-trip through email, so a brand-new fundraiser who registers
-// lands back in the create flow rather than the portal overview.
+// Preserves the page's intent params (e.g. ?dono_fundraise=10) across the
+// magic-link round-trip through email, so registering lands back in the flow
+// the donor started rather than the portal overview.
 const RETURN_KEY = 'dono_portal_return';
 
 function stashReturn() {
@@ -118,9 +116,8 @@ function popReturn() {
     }
 }
 
-// Extension-tab seam (preact side). Mirrors assets/admin/_shared/extensionTabs.jsx
-// but built on preact/hooks since the portal is a standalone preact app. Add-ons
-// register portal tabs into window.dono.tabs (defined by ExtensionAssets).
+// Extension-tab seam, on preact/hooks because the portal is a standalone preact
+// app; assets/admin/_shared/extensionTabs.jsx is the React counterpart.
 const TAB_EVENT   = 'dono:tabs:changed';
 const PANEL_EVENT = 'dono:panels:changed';
 
@@ -199,9 +196,9 @@ function App() {
         return api( 'me' )
             .then( setMe )
             .catch( ( err ) => {
-                // 401/403 means the session is genuinely gone -> show sign-in.
-                // A transient failure (network blip, 5xx) must NOT bounce a
-                // signed-in donor to the sign-in screen; offer a retry instead.
+                // 401/403 means the session is gone. A transient failure
+                // (network blip, 5xx) must not bounce a signed-in donor to
+                // sign-in; it gets a retry instead.
                 if ( err && ( err.status === 401 || err.status === 403 ) ) {
                     setMe( null );
                 } else {
@@ -211,9 +208,8 @@ function App() {
             .finally( () => setLoading( false ) );
     }, [] );
 
-    // Arm the session-expired hook only while signed in, so a per-tab 401/403
-    // returns the donor to sign-in with a clear message (an initial "not signed
-    // in yet" 401 during the magic-link flow must not trip it).
+    // Armed only while signed in: the initial "not signed in yet" 401 during
+    // the magic-link flow must not trip it.
     useEffect( () => {
         if ( ! me ) return undefined;
         onSessionExpired = () => {
@@ -223,9 +219,9 @@ function App() {
         return () => { onSessionExpired = null; };
     }, [ me ] );
 
-    // Let an add-on tab claim the initial view from URL params (e.g. the P2P
-    // "Start fundraising" link lands on ?dono_fundraise=<id>). Runs once, after
-    // sign-in, when the registry has populated.
+    // Lets an add-on tab claim the initial view from URL params (e.g. a
+    // "Start fundraising" link landing on ?dono_fundraise=<id>). Runs once,
+    // after sign-in, when the registry has populated.
     useEffect( () => {
         if ( initialExtTabApplied.current || ! me || ! extTabs.length ) return;
         const params = new URLSearchParams( window.location.search );
@@ -243,17 +239,16 @@ function App() {
         const params = new URLSearchParams( window.location.search );
         const token  = params.get( 'token' );
         if ( token ) {
-            // Strip the single-use token from the URL up front so a failed
-            // exchange never leaves it in the address bar, history, or Referer
-            // (the server may have already consumed it).
+            // Strip the single-use token up front so a failed exchange never
+            // leaves it in the address bar, history or Referer.
             const cleanUrl = new URL( window.location.href );
             cleanUrl.searchParams.delete( 'token' );
             window.history.replaceState( {}, '', cleanUrl.toString() );
 
             api( 'exchange', { method: 'POST', body: JSON.stringify( { token } ) } )
                 .then( () => {
-                    // Restore the pre-login intent (e.g. ?dono_fundraise=10) so
-                    // the add-on tab's initialMatch reopens the create flow.
+                    // Restore the pre-login intent so an add-on tab's
+                    // initialMatch reopens the flow the donor started.
                     const ret = popReturn();
                     if ( ret ) {
                         const url = new URL( window.location.href );
@@ -729,14 +724,9 @@ function RecurringActionSheet( { plan, onClose, onDone } ) {
     );
 }
 
-/**
- * Change the card behind a plan.
- *
- * Two shapes, because the processors differ. Stripe returns a SetupIntent the
- * browser confirms, so the card is entered against Stripe and never touches
- * this site. PayPal will not let anyone else collect a funding source, so the
- * only honest answer is to send the donor to PayPal and say so first.
- */
+// Two shapes, because the processors differ. Stripe returns a SetupIntent the
+// browser confirms, so the card never touches this site. PayPal will not let
+// anyone else collect a funding source, so the donor is sent to PayPal.
 function UpdatePaymentMethod( { plan, onDone, onError } ) {
     const [ mode, setMode ]       = useState( '' );
     const [ redirect, setRedirect ] = useState( '' );
@@ -787,8 +777,7 @@ function UpdatePaymentMethod( { plan, onDone, onError } ) {
         onError( '' );
 
         // if_required keeps the donor here for a card that needs no challenge;
-        // one that does is sent to its bank and comes back to this same page,
-        // which the effect above picks up.
+        // one that does goes to its bank and returns to this same page.
         const { error, setupIntent } = await stripe.confirmSetup( {
             elements,
             confirmParams: { return_url: window.location.href },
@@ -939,8 +928,8 @@ function Receipts() {
             const a    = document.createElement( 'a' );
             a.href     = url;
             a.download = `dono-annual-${ year }.pdf`;
-            // Append before click + defer the revoke so the download isn't
-            // cancelled mid-flight (matches the GDPR export below).
+            // Append before click and defer the revoke, or the browser cancels
+            // the download mid-flight.
             document.body.appendChild( a );
             a.click();
             a.remove();
@@ -1280,9 +1269,9 @@ function Consents() {
     };
 
     const confirmStale = ( key ) => {
-        // The donor accepts the new version without flipping the toggle. We
-        // re-send the current `granted` state so the server records a fresh
-        // row with the new purpose_version, clearing the stale flag.
+        // Accepting the new version without flipping the toggle: re-sending the
+        // current `granted` state makes the server record a fresh row at the
+        // new purpose_version, clearing the stale flag.
         const cur = list.find( ( p ) => p.key === key );
         if ( ! cur ) return;
         const items = [ { key, granted: !! cur.granted } ];

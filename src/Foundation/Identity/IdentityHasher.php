@@ -10,14 +10,9 @@ use Dono\Donors\DonorEmailRehasher;
 use Dono\Foundation\Config\SystemSetting;
 
 /**
- * Hash helpers for indexed lookup of sensitive identifiers.
- *
- * email_hash: HMAC-SHA-256 with a per-install pepper (email_pepper_v1).
- * Pepper loss while donor rows exist triggers a background rehash; dedup self-recovers.
- * ip_hash: per-install salt (ip_salt_v1); salt loss is harmless.
- * userAgentHash: unsalted.
- *
- * @version 1.0.0
+ * Hash helpers for indexed lookup of sensitive identifiers. Losing the email
+ * pepper while donor rows exist triggers a background rehash; losing the IP
+ * salt is harmless, and userAgentHash is unsalted.
  */
 final class IdentityHasher
 {
@@ -33,13 +28,11 @@ final class IdentityHasher
         $this->emailPepper = $this->loadEmailPepper();
     }
 
-    /** Return HMAC-SHA-256 of the normalised email, keyed by the install pepper. */
     public function emailHash(string $email): string
     {
         return hash_hmac('sha256', $this->normalizeEmail($email), $this->emailPepper);
     }
 
-    /** Lowercase and trim an email address. */
     public function normalizeEmail(string $email): string
     {
         return strtolower(trim($email));
@@ -47,15 +40,12 @@ final class IdentityHasher
 
     /**
      * The mailbox an address actually reaches, for rate limiting only.
+     * "a+1@gmail.com" and "a.a@gmail.com" are different donors but one inbox,
+     * so a per-address send limit does not limit sends to a person.
      *
-     * "a+1@gmail.com", "a+2@gmail.com" and "a.a@gmail.com" are three different
-     * addresses and three different donors, but one inbox. A per-address send
-     * limit therefore does not limit sends to a person, and anything that mails
-     * on demand becomes a way to flood somebody else's mail.
-     *
-     * Never use this for identity. emailHash() is the UNIQUE key on the donor
-     * table and the handle erasure severs, and collapsing distinct addresses
-     * into one donor would merge two people's giving history.
+     * Never use this for identity: emailHash() is the UNIQUE key on the donor
+     * table, and collapsing distinct addresses would merge two people's giving
+     * history.
      */
     public function rateLimitMailbox(string $email): string
     {
@@ -69,8 +59,8 @@ final class IdentityHasher
         $plus = strpos($local, '+');
         if ($plus !== false) $local = substr($local, 0, $plus);
 
-        // Dots are only insignificant on some providers, so this is not applied
-        // everywhere: elsewhere the two addresses can be different mailboxes.
+        // Dots are only insignificant on some providers; elsewhere the two
+        // addresses can be different mailboxes.
         if (in_array($domain, ['gmail.com', 'googlemail.com'], true)) {
             $local  = str_replace('.', '', $local);
             $domain = 'gmail.com';
@@ -91,7 +81,6 @@ final class IdentityHasher
         return hash('sha256', $ua);
     }
 
-    /** Load or generate the email pepper, enqueuing a rehash if donors exist. */
     private function loadEmailPepper(): string
     {
         $stored = SystemSetting::read(self::SETTING_EMAIL_PEPPER);
@@ -101,10 +90,9 @@ final class IdentityHasher
         SystemSetting::write(self::SETTING_EMAIL_PEPPER, $pepper);
 
         if ($this->donorsExist()) {
-            // Flag first, then try. This runs at plugins_loaded on a fresh
-            // install, before Action Scheduler's data store exists, so the
-            // enqueue silently does nothing; the flag is what gets it picked up
-            // on init instead of losing the rehash for good.
+            // Flag first, then try: this runs at plugins_loaded before Action
+            // Scheduler's data store exists, so the enqueue silently does
+            // nothing and the flag is what gets it picked up on init.
             DonorEmailRehasher::markPending();
             $this->async->enqueue(DonorEmailRehasher::HOOK, []);
         }
@@ -112,7 +100,6 @@ final class IdentityHasher
         return $pepper;
     }
 
-    /** Load or generate the IP salt. */
     private function loadIpSalt(): string
     {
         $stored = SystemSetting::read(self::SETTING_IP_SALT);

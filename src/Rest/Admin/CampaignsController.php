@@ -25,12 +25,6 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 
-/**
- * Admin REST endpoints for campaigns: list, show, create, update, delete,
- * duplicate, metrics, goal context, and fund picker.
- *
- * @version 1.0.0
- */
 final class CampaignsController
 {
     private const NAMESPACE = 'dono/v1';
@@ -146,10 +140,6 @@ final class CampaignsController
         ]);
     }
 
-    /**
-     * Active recurring plans + monthly-equivalent for a campaign. Drives the
-     * archive confirmation ("N active recurring donations that keep renewing").
-     */
     public function recurringSummary(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $campaign = $this->campaigns->findById((int) $request['id']);
@@ -171,11 +161,9 @@ final class CampaignsController
 
     public function index(WP_REST_Request $request): WP_REST_Response
     {
-        // Re-queue an archive's cancellation sweep whose job was dropped, so a
-        // campaign cannot sit half-cancelled with the rest of its donors still
-        // being charged. reconcile() existed and had no caller; the only
-        // continuation was the job re-enqueuing itself, so one lost tick ended
-        // the run. Idempotent and cheap, like the funds list does.
+        // Re-queue an archive's cancellation sweep whose job was dropped: the
+        // only continuation is the job re-enqueuing itself, so one lost tick
+        // would leave a campaign half-cancelled and still charging donors.
         $this->cancelJob->reconcilePending();
 
         $perPage = (int) ($request['per_page'] ?? 25);
@@ -233,12 +221,10 @@ final class CampaignsController
             return new WP_Error('dono_invalid_input', $e->getMessage(), ['status' => 422]);
         }
 
-        // Archiving is non-destructive to subscriptions by default: existing
-        // recurring donations keep renewing (and are still credited here). The
-        // admin can opt to stop them too via the archive dialog's checkbox.
-        // Queued, not run here: each plan is a blocking gateway round trip, and
-        // a campaign with a few thousand monthly donors needs more wall time
-        // than this request has. See CampaignCancelRecurringJob.
+        // Archiving is non-destructive to subscriptions by default; the admin
+        // opts in to stopping them. Queued, not run here: each plan is a
+        // blocking gateway round trip, and a campaign with a few thousand
+        // monthly donors needs more wall time than this request has.
         $recurringCancel = null;
         if ($wasActive && $campaign->status === 'archived' && ! empty($body['cancel_recurring'])) {
             $queued = (int) RecurringPlan::query()
@@ -260,10 +246,6 @@ final class CampaignsController
         return new WP_REST_Response($payload, 200);
     }
 
-    /**
-     * Historical raised totals for non-archived campaigns other than the
-     * current one. Drives the ambition meter on the Goal sub-tab.
-     */
     public function goalContext(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $current = $this->campaigns->findById((int) $request['id']);
@@ -347,8 +329,8 @@ final class CampaignsController
         $range   = (string) ($request['range']   ?? 'all-time');
         $compare = (string) ($request['compare'] ?? 'none');
 
-        // ?include= comma-separated widget keys. Absent = compute all
-        // (back-compat); present but empty = compute nothing.
+        // ?include= comma-separated widget keys. Absent computes everything;
+        // present but empty computes nothing.
         $include = null;
         if ($request['include'] !== null) {
             $include = array_values(array_filter(array_map('trim', explode(',', (string) $request['include']))));
@@ -370,12 +352,9 @@ final class CampaignsController
     {
         $rows = Fund::query()->where('is_active', 1)->orderBy('sort_order', 'ASC')->getAll();
 
-        // A campaign can be pointed at a fund that was deactivated afterwards.
-        // Offering only active funds meant its own setting was not among the
-        // options, so the picker fell back to "( Unassigned )" and told the
-        // reader the campaign had no default fund while it quietly still had
-        // one. Included when asked for, and marked, so the screen shows what
-        // the campaign is actually set to without inviting a new one.
+        // A campaign can point at a fund that was deactivated afterwards.
+        // Offering only active funds would leave its own setting out of the
+        // options and read as unassigned, so it is included when asked for.
         $keep = (int) ($request['include'] ?? 0);
         if ($keep > 0 && ! in_array($keep, array_map(static fn (Fund $f): int => (int) $f->id, $rows), true)) {
             $current = Fund::query()->find('id', $keep);
@@ -453,13 +432,6 @@ final class CampaignsController
         ];
     }
 
-    /**
-     * Only the sections in $include are aggregated; absent keys come back
-     * null/empty. `null` $include computes everything (legacy behaviour).
-     *
-     * @param array<int,string>|null $include  Widget keys the client currently shows.
-     * @return array<string,mixed>
-     */
     private function buildMetrics(Campaign $c, string $range, string $compare, ?array $include = null): array
     {
         $want = static function (string ...$keys) use ($include): bool {
@@ -470,7 +442,7 @@ final class CampaignsController
             return false;
         };
 
-        // Summary KPIs feed both the kpis widget and the revenue comparison line.
+        // Summary KPIs feed both the kpis widget and the revenue comparison.
         $needSummary = $want('kpis', 'revenue');
 
         $payload = ['range' => $range];

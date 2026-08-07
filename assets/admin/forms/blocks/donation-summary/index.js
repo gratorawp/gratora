@@ -16,10 +16,10 @@ function Edit( { attributes, setAttributes } ) {
     const blockProps = useBlockProps( { className: 'dono-block-preview dono-block-preview--summary' } );
 
     const rows = [
-        [ __( 'Amount', 'dono' ), '—' ],
-        ...( showDonor   ? [ [ __( 'Donor', 'dono' ), '—' ], [ __( 'Email', 'dono' ), '—' ] ] : [] ),
-        ...( showGateway ? [ [ __( 'Payment method', 'dono' ), '—' ] ] : [] ),
-        [ __( 'Total', 'dono' ), '—' ],
+        [ __( 'Amount', 'dono' ), '-' ],
+        ...( showDonor   ? [ [ __( 'Donor', 'dono' ), '-' ], [ __( 'Email', 'dono' ), '-' ] ] : [] ),
+        ...( showGateway ? [ [ __( 'Payment method', 'dono' ), '-' ] ] : [] ),
+        [ __( 'Total', 'dono' ), '-' ],
     ];
 
     return (

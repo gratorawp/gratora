@@ -50,7 +50,6 @@ const DONO_CATEGORIES = [
 function ensureCategories() {
     try {
         const existing = select( 'core/blocks' ).getCategories();
-        // Drop any categories we own (slug prefix `dono`), then re-add ours at the top.
         const keep = existing.filter( ( c ) => ! String( c.slug ).startsWith( 'dono' ) );
         dispatch( 'core/blocks' ).setCategories( [ ...DONO_CATEGORIES, ...keep ] );
     } catch ( err ) {
@@ -92,8 +91,8 @@ addAction( 'dono.editor.registerBlocks', 'dono/core-blocks', ( api ) => {
     registerNumberInputBlock( api );
     registerRecurringToggleBlock( api );
     registerSectionBlock( api );
-    // Register the Step child first so its definition exists by the time the
-    // parent template instantiates one on insertion.
+    // Step must be registered before Steps: the parent template instantiates
+    // one on insertion.
     registerStepBlock( api );
     registerStepsBlock( api );
     registerHiddenBlock( api );

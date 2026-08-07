@@ -1,7 +1,6 @@
-/**
- * Form editor on @wordpress/block-editor directly (no isolated-block-editor): we own
- * the chrome, and block data lives in a useReducer history so undo/redo stay local.
- */
+// Built on @wordpress/block-editor directly rather than isolated-block-editor:
+// the chrome is ours, and block data lives in a useReducer history so undo and
+// redo stay local.
 
 import { useEffect, useCallback, useMemo, useReducer, useRef, useState } from '@wordpress/element';
 import {
@@ -91,7 +90,6 @@ function mergeFormSettings( stored ) {
     };
 }
 
-// Walk the live block tree for a block by name (handles nested inner blocks).
 function blocksInclude( list, name ) {
     for ( const b of Array.isArray( list ) ? list : [] ) {
         if ( b?.name === name ) return true;
@@ -107,9 +105,6 @@ function ensureBlocksRegistered() {
     blocksReady = true;
 }
 
-// Stub template list. Surfaced via window.dono.forms.templates later; for now
-// inline a couple of canonical shapes so the picker has something to pick.
-// Block history reducer (undo/redo).
 const initialHistory = { past: [], present: [], future: [] };
 
 function historyReducer( state, action ) {
@@ -159,7 +154,6 @@ export default function Editor( { formId } ) {
     const [ lastSavedSerialized, setLastSavedSerialized ] = useState( '' );
     const seededRef = useRef( false );
     const [ templatePickerOpen, setTemplatePickerOpen ] = useState( false );
-    // Template awaiting replace confirmation (picker chose it over existing content).
     const [ pendingTemplate, setPendingTemplate ] = useState( null );
     // Which header action is in flight, so only its button shows the spinner.
     const [ savingAction, setSavingAction ] = useState( null );
@@ -184,9 +178,8 @@ export default function Editor( { formId } ) {
         }
     }, [ selectedBlockId ] );
 
-    // Authoring secondary views (inserter / list view) only make sense in
-    // Develop. Close them when leaving and restore the same state - open
-    // panel or deliberately closed - on the way back.
+    // Inserter and list view only make sense in Develop, so they close on the
+    // way out and come back in whatever state they were left.
     const lastSecondaryView = useRef( secondaryView );
     useEffect( () => {
         if ( view !== 'develop' ) {
@@ -201,8 +194,8 @@ export default function Editor( { formId } ) {
 
     ensureBlocksRegistered();
 
-    // Campaigns + gateways are dropdown sources, not entities; fetch once.
-    // Surface a per-source failure instead of leaving the select silently empty.
+    // Dropdown sources, not entities, so they are fetched once. A per-source
+    // failure surfaces rather than leaving a select silently empty.
     useEffect( () => {
         apiFetch( { path: '/dono/v1/admin/forms/campaigns' } )
             .then( setCampaigns )
@@ -226,18 +219,18 @@ export default function Editor( { formId } ) {
         return () => { delete window.donoFormEditor; };
     }, [ formId, c.record.campaign_id, c.record.settings, campaigns ] );
 
-    // Seed the local block-history reducer once when the entity first resolves.
-    // A form created by onboarding ships with empty `blocks`; surface a
-    // template picker on first open so the user picks a starting shape.
+    // Seeds the block-history reducer once, when the entity first resolves. A
+    // form created by onboarding ships with empty `blocks`, so first open shows
+    // the template picker.
     useEffect( () => {
         if ( seededRef.current || ! c.savedRecord ) return;
         seededRef.current = true;
         const saved  = c.savedRecord.blocks || '';
         const parsed = saved ? parse( saved ) : [];
         dispatchHistory( { type: 'RESET', blocks: parsed } );
-        // Baseline against the re-serialized form (what the dirty check compares),
-        // not the raw stored markup; serialize(parse(x)) !== x for non-canonical
-        // markup (default attrs dropped), which would flag a pristine form dirty.
+        // Baseline against the re-serialized form, which is what the dirty check
+        // compares: serialize(parse(x)) !== x for non-canonical markup, so the
+        // raw stored markup would flag a pristine form dirty.
         setLastSavedSerialized( serialize( parsed ) );
         if ( parsed.length === 0 ) {
             setTemplatePickerOpen( true );
@@ -250,8 +243,8 @@ export default function Editor( { formId } ) {
         // CHANGE keeps it in history (undoable) when replacing existing content;
         // RESET sets a fresh baseline for the first-open empty-form seeding.
         dispatchHistory( { type: hasContent ? 'CHANGE' : 'RESET', blocks: parsed } );
-        // Templates ship their own form settings (goal, recurring defaults); apply
-        // them alongside the blocks so the picked shape is complete, not blocks-only.
+        // Templates ship their own form settings (goal, recurring defaults), so
+        // the picked shape is more than blocks.
         if ( template?.settings && typeof template.settings === 'object' ) {
             c.edit( { settings: mergeFormSettings( template.settings ) } );
         }
@@ -261,8 +254,7 @@ export default function Editor( { formId } ) {
 
     const applyTemplate = useCallback( ( template ) => {
         if ( history.present.length > 0 ) {
-            // Replacing real content needs an explicit confirm; the dialog's
-            // primary action runs performApplyTemplate with hasContent true.
+            // Replacing real content needs an explicit confirm.
             setPendingTemplate( template );
             return;
         }
@@ -302,9 +294,8 @@ export default function Editor( { formId } ) {
         setError( null );
         const serialized = serialize( blocks );
         try {
-            // Persist any pending field edits (title, status, campaign, ...)
-            // plus the current block content and a complete settings object.
-            // Sent as one explicit PUT so it can't race the edits store.
+            // Pending field edits, blocks and a complete settings object go in
+            // one explicit PUT so it cannot race the edits store.
             await c.saveEntity( {
                 ...c.edits,
                 blocks:   serialized,
@@ -336,10 +327,8 @@ export default function Editor( { formId } ) {
         allowedBlockTypes: blockRegistry.allowed,
         hasFixedToolbar:   false,
         focusMode:         false,
-        // Mirror theme.json's `settings` shape so block-supports panels
-        // (color / border / spacing / shadow / typography) actually render
-        // in our isolated block-editor host. Without this the supports are
-        // declared on each block but the inspector ignores them.
+        // Mirrors theme.json's `settings` shape. Without it the block supports
+        // are declared on each block but the inspector ignores them.
         __experimentalFeatures: {
             appearanceTools: true,
             useRootPaddingAwareAlignments: false,
@@ -349,9 +338,9 @@ export default function Editor( { formId } ) {
                 link:           true,
                 button:         true,
                 heading:        true,
-                // `custom` enables the free-form picker. Without it, only
-                // palette swatches would render (and our palette is empty
-                // until we wire theme tokens in, so the panel would be blank).
+                // `custom` enables the free-form picker. Without it only palette
+                // swatches render, and the palette is empty, so the panel would
+                // be blank.
                 custom:         true,
                 customGradient: true,
                 customDuotone:  true,
@@ -372,7 +361,6 @@ export default function Editor( { formId } ) {
             },
             shadow: {
                 defaultPresets: true,
-                // Lets authors write a custom box-shadow CSS string.
                 custom:         true,
             },
             typography: {
@@ -421,8 +409,6 @@ export default function Editor( { formId } ) {
         if ( ok ) notify.success( __( 'Form moved to draft.', 'dono' ) );
     }, [ persist ] );
 
-    // Warn before leaving with unsaved block or field edits, mirroring the
-    // campaign editor; the back link is a real navigation so this catches it.
     const dirtyForUnload = c.isDirty || serialize( blocks ) !== lastSavedSerialized;
     useEffect( () => {
         if ( ! dirtyForUnload ) return undefined;
@@ -431,8 +417,8 @@ export default function Editor( { formId } ) {
         return () => window.removeEventListener( 'beforeunload', handler );
     }, [ dirtyForUnload ] );
 
-    // Editor-level shortcuts. Cmd/Ctrl+S saves from anywhere; undo/redo only
-    // fire outside text fields so native text undo keeps working inside blocks.
+    // Cmd/Ctrl+S saves from anywhere; undo and redo only fire outside text
+    // fields so native text undo keeps working inside blocks.
     useEffect( () => {
         const onKey = ( e ) => {
             if ( ! ( e.metaKey || e.ctrlKey ) ) return;
@@ -515,8 +501,6 @@ export default function Editor( { formId } ) {
         </div>
     );
 
-    // Develop: Block inspector. Preview: pre-launch readiness checklist.
-    // Settings has its own centred panel and no right sidebar.
     let sidebar = null;
     if ( sidebarOpen && view === 'develop' ) {
         sidebar = <FormSidebar hasSelection={ !! selectedBlockId } />;
@@ -564,10 +548,9 @@ export default function Editor( { formId } ) {
             ...formInlineTokens,
         };
 
-        // Mirror CampaignStyleResolver: when accent-soft is just the catalogue
-        // default and nothing deliberately paired one with the accent, drop it
-        // so the stylesheet's color-mix derives it from --dono-accent (matches
-        // the published form). Anything that explicitly set it is kept.
+        // Mirrors CampaignStyleResolver: an accent-soft that is only the
+        // catalogue default is dropped, so the stylesheet's color-mix derives it
+        // from --dono-accent as the published form does. An explicit one stays.
         const explicitSoft =
             ( chosenPreset?.tokens && 'dono-accent-soft' in chosenPreset.tokens ) ||
             ( ! formPresetId && 'dono-accent-soft' in campaignInlineTokens ) ||
@@ -583,8 +566,8 @@ export default function Editor( { formId } ) {
             }
         }
 
-        // Drives the Build canvas sheet width so it matches the published
-        // form's container width (clamp mirrors the runtime in PHP).
+        // Matches the published form's container width; the clamp mirrors the
+        // runtime in PHP.
         const cw = Number( merged.container?.width );
         if ( cw >= 320 && cw <= 1600 ) {
             sx[ '--dono-editor-sheet-width' ] = `${ cw }px`;
@@ -696,9 +679,8 @@ export default function Editor( { formId } ) {
     );
 }
 
-// Template picker shown when a form has no blocks.
-// Mirrors the block-editor store's selection into a React state setter on the parent.
-// Lives inside BlockEditorProvider so useSelect is guaranteed to see the populated store.
+// Lives inside BlockEditorProvider so useSelect is guaranteed to see the
+// populated store.
 function BlockSelectionSync( { onChange } ) {
     const selectedBlockId = useSelect(
         ( s ) => s( 'core/block-editor' ).getSelectedBlockClientId(),
@@ -710,11 +692,8 @@ function BlockSelectionSync( { onChange } ) {
     return null;
 }
 
-/**
- * Clear the block selection on mousedown outside a block, its popovers, or the
- * sidebars. Must dispatch via useRegistry(): BlockEditorProvider scopes the
- * block-editor store to a sub-registry the global wp.data.dispatch never reaches.
- */
+// Must dispatch via useRegistry(): BlockEditorProvider scopes the block-editor
+// store to a sub-registry the global wp.data.dispatch never reaches.
 function DeselectOnOutsideClick() {
     const registry = useRegistry();
     useEffect( () => {
@@ -737,14 +716,10 @@ function DeselectOnOutsideClick() {
     return null;
 }
 
-/**
- * A generic block-manipulation bridge for extensions (the AI form assistant uses
- * it): reads the current fields and inserts/updates/removes/moves them. Lives
- * inside BlockEditorProvider and dispatches via useRegistry() so it reaches the
- * scoped store, and every change flows through onChange, so undo and the dirty
- * check treat an extension edit exactly like a hand edit. Nothing is persisted
- * until the operator saves the form.
- */
+// Block-manipulation bridge for extensions such as the AI form assistant. It
+// dispatches via useRegistry() to reach the scoped store, and every change flows
+// through onChange so undo and the dirty check treat an extension edit exactly
+// like a hand edit. Nothing is persisted until the operator saves.
 function AssistantBridge() {
     const registry = useRegistry();
     useEffect( () => {
@@ -796,9 +771,9 @@ function CanvasEmpty() {
 const VIEW_TABS = [
     { id: 'develop',  label: __( 'Build', 'dono' ),    icon: <LocalIcon name="edit"     size={ 15 } /> },
     { id: 'preview',  label: __( 'Preview', 'dono' ),  icon: <LocalIcon name="eye"      size={ 15 } /> },
-    // Settings is a third view of the same form, so it belongs with the other
-    // two rather than behind a cog on the far side of the bar, where it read as
-    // a tool acting on the current view instead of a view of its own.
+    // Settings is a third view of the same form, so it sits with the other two
+    // rather than behind a cog, which reads as a tool acting on the current
+    // view.
     { id: 'settings', label: __( 'Settings', 'dono' ), icon: <LocalIcon name="settings" size={ 15 } /> },
 ];
 
@@ -822,8 +797,8 @@ function EditorHeader( {
             missing.join( ', ' )
         )
         : '';
-    // Inserter / list-view / undo / redo are authoring tools; hide them in
-    // Preview + Settings so the chrome matches the mode.
+    // Inserter, list view, undo and redo are authoring tools, so the chrome
+    // drops them outside Develop.
     const showAuthoringTools = view === 'develop';
 
     return (
@@ -969,7 +944,6 @@ function PreviewPane( { loading, html, device, onDeviceChange } ) {
                             srcDoc={ html }
                         />
                         { loading && (
-                            // Dim the stale render while a refresh is in flight.
                             <div
                                 className="dono-form-editor__preview-spinner"
                                 style={ { position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.6)' } }
@@ -1021,12 +995,8 @@ function FormSidebar( { hasSelection } ) {
 
 const STATUS_RANK = { fail: 0, warn: 1, pass: 2 };
 
-/**
- * Preview-mode sidebar: a "pre-launch readiness" checklist. Server-side
- * checks come from /admin/forms/{id}/readiness; the editor adds block-level
- * checks (required fields) on top, because those depend on the in-memory
- * (unsaved) block markup.
- */
+// Server checks come from /admin/forms/{id}/readiness; the block-level checks
+// are added here because they depend on the in-memory, unsaved block markup.
 function PreviewSidebar( { formId, blocks, missingRequired } ) {
     const [ serverChecks, setServerChecks ] = useState( null );
     const [ error, setError ] = useState( null );
@@ -1036,8 +1006,7 @@ function PreviewSidebar( { formId, blocks, missingRequired } ) {
         let cancelled = false;
         setServerChecks( null );
         setError( null );
-        // POST the live blocks so the checks reflect unsaved edits, not the
-        // last-saved form the adjacent preview no longer matches.
+        // The live blocks are posted so the checks reflect unsaved edits.
         apiFetch( {
             path:   `/dono/v1/admin/forms/${ formId }/readiness`,
             method: 'POST',
@@ -1073,7 +1042,7 @@ function PreviewSidebar( { formId, blocks, missingRequired } ) {
 
     const allChecks = useMemo( () => {
         const merged = [ ...blockChecks, ...( serverChecks || [] ) ];
-        // Sort failures first, warnings next, passes last. Stable within each bucket.
+        // Failures first, warnings next, passes last; stable within a bucket.
         return merged
             .map( ( c, i ) => [ c, i ] )
             .sort( ( a, b ) => ( STATUS_RANK[ a[ 0 ].status ] - STATUS_RANK[ b[ 0 ].status ] ) || ( a[ 1 ] - b[ 1 ] ) )
@@ -1086,16 +1055,16 @@ function PreviewSidebar( { formId, blocks, missingRequired } ) {
         return out;
     }, [ allChecks ] );
 
-    // Only surface what needs attention. Passing checks are noise: the
-    // summary line already states whether the form is safe to publish.
+    // Passing checks are noise: the summary line already states whether the
+    // form is safe to publish.
     const visibleChecks = useMemo(
         () => allChecks.filter( ( c ) => c.status !== 'pass' ),
         [ allChecks ]
     );
 
-    // Missing required blocks are the only hard publish block (enforced by the
-    // server). Gateway/HTTPS/receipt checks are things to fix before donors can
-    // actually give, but do not block saving the form as published.
+    // Missing required blocks are the only hard publish block, enforced by the
+    // server. Gateway, HTTPS and receipt checks matter before donors can give
+    // but do not stop the form being saved as published.
     const blockFail  = useMemo( () => blockChecks.filter( ( c ) => c.status === 'fail' ).length, [ blockChecks ] );
     const serverFail = useMemo( () => ( serverChecks || [] ).filter( ( c ) => c.status === 'fail' ).length, [ serverChecks ] );
 
@@ -1296,10 +1265,10 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
                 <SelectControl
                     value={ c.value( 'status', 'draft' ) }
                     options={ ( () => {
-                        // Publishing only flows through the gated Publish
-                        // button so the readiness checks can't be bypassed.
-                        // "Published" stays in the list only when the form
-                        // is already published so admins can see the state.
+                        // Publishing flows only through the gated Publish
+                        // button, so the readiness checks cannot be bypassed
+                        // here. "Published" is listed when the form already is
+                        // one, so the state stays visible.
                         const status = c.value( 'status', 'draft' );
                         const opts = [
                             { value: 'draft',    label: STATUS_LABEL.draft },
@@ -1456,11 +1425,10 @@ function GoalSection( { settings, setSettings } ) {
 }
 function GatewaysSection( { gateways, settings, setSettings, blocks = [] } ) {
     // The payment-gateways block is the single writer of the allowed list on
-    // save (FormService::syncGatewayAllowed). When the block is on the form,
-    // editing the checkboxes here would be silently overwritten on save, so
-    // we surface that and disable the controls instead of pretending otherwise.
-    // Read the live editor blocks so adding/removing the block reflects here
-    // immediately; the saved markup lags behind until the next save.
+    // save (FormService::syncGatewayAllowed), so with the block on the form
+    // these checkboxes would be overwritten silently and are disabled instead.
+    // Read from the live editor blocks: the saved markup lags a block that was
+    // just added or removed.
     const blockManaged = blocksInclude( blocks, 'dono/payment-gateways' );
 
     const toggleGateway = ( id ) => {
@@ -1589,7 +1557,7 @@ function ShortcodeField( { value } ) {
             await navigator.clipboard?.writeText( value );
             setCopied( true );
         } catch ( e ) {
-            // No clipboard access; user can copy manually.
+            // No clipboard access; the value stays visible to copy by hand.
         }
     };
 

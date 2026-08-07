@@ -60,7 +60,7 @@ final class RevenueReportBuilder
             'stats'          => [
                 ['label' => __('Donations', 'dono'),        'value' => number_format_i18n($totalCount)],
                 ['label' => __('Average donation', 'dono'), 'value' => Money::format($totalCount > 0 ? intdiv($totalCents, $totalCount) : 0, $currency)],
-                ['label' => __('Best month', 'dono'),       'value' => $best !== null && $best['amount_cents'] > 0 ? $this->monthLabel($best['month']) : '—'],
+                ['label' => __('Best month', 'dono'),       'value' => $best !== null && $best['amount_cents'] > 0 ? $this->monthLabel($best['month']) : '-'],
             ],
             'generated_date' => (string) wp_date(get_option('date_format')),
         ]);

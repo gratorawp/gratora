@@ -22,6 +22,7 @@ use Dono\Donors\Portal\AnnualStatementBuilder;
 use Dono\Donors\Portal\PortalSession;
 use Dono\Foundation\Identity\IdentityHasher;
 use Dono\Gateways\GatewayManager;
+use Dono\Gateways\SubscriptionChangeNeedsApproval;
 use Dono\Gateways\SupportsPaymentMethodUpdate;
 use Dono\Mail\Mailer;
 use Dono\Receipts\Receipt;
@@ -37,12 +38,6 @@ use WP_REST_Response;
 use WP_REST_Server;
 use Dono\Vendor\Queryable\DB;
 
-/**
- * Donor portal REST surface: authentication, profile, donations, recurring
- * plans, receipts, consents, data export, and account erasure.
- *
- * @version 1.0.0
- */
 final class PortalController
 {
     private const NAMESPACE = 'dono/v1';
@@ -113,8 +108,8 @@ final class PortalController
         register_rest_route(self::NAMESPACE, '/portal/logout', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'logout'],
-            // CSRF-gated: the portal JS already sends X-Dono-Csrf on every call,
-            // so a cross-site forged POST can't sign the donor out.
+            // The portal JS sends X-Dono-Csrf on every call, so a cross-site
+            // forged POST cannot sign the donor out.
             'permission_callback' => [$this, 'sessionWithCsrf'],
         ]);
 
@@ -240,7 +235,6 @@ final class PortalController
         ]);
     }
 
-    /** Read a single setting from the `dono_privacy` group with a typed default. */
     private function privacySetting(string $key, $default)
     {
         $opt = get_option('dono_privacy', []);
@@ -253,10 +247,7 @@ final class PortalController
         return $this->session->currentDonorId() !== null;
     }
 
-    /**
-     * Session plus matching `X-Dono-Csrf` header. Writes only; defence in
-     * depth on top of the SameSite=Lax cookie.
-     */
+    /** Writes only; defence in depth on top of the SameSite=Lax cookie. */
     public function sessionWithCsrf(WP_REST_Request $request): bool
     {
         $expected = $this->session->csrfToken();
@@ -290,8 +281,8 @@ final class PortalController
         $ok    = new WP_REST_Response(['ok' => true], 200);
 
         // Checked before anything else is read, so a caller that never loaded
-        // the portal cannot spend a real donor's rate limit on their behalf.
-        // It says nothing about the address, so it costs no enumeration cover.
+        // the portal cannot spend a real donor's rate limit on their behalf. It
+        // says nothing about the address, so it costs no enumeration cover.
         if ($err = $this->spam->verifyPortalToken((string) ($request['token'] ?? ''))) return $err;
 
         $email = trim((string) ($request['email'] ?? ''));
@@ -304,39 +295,30 @@ final class PortalController
         if (! $this->consumeEmailQuota($email)) return $ok;
 
         // Enqueued for every address that gets this far, known or not, and the
-        // lookup happens in the job. Doing it here meant the donor branch wrote
-        // several Action Scheduler rows before answering while the unknown
-        // branch returned at once, and that difference is a reliable test of
-        // whether an address is one of the charity's donors, which is exactly
-        // what the identical 200 exists to hide.
+        // lookup happens in the job. Doing it here would make the donor branch
+        // do visibly more work than the unknown one, which is exactly what the
+        // identical 200 exists to hide.
         $this->async->enqueue(self::SEND_LINK_HOOK, ['email' => $email]);
 
         return $ok;
     }
 
     /**
-     * Self-register so somebody who has not donated (a would-be fundraiser, say)
-     * can get into the portal.
+     * Self-registration, so somebody who has not donated can get into the
+     * portal. Nothing here becomes a donor: anyone can type anyone's address,
+     * so the claim waits in dono_pending_signups until the emailed link comes
+     * back, and redeeming it is what creates the donor.
      *
-     * Nothing here becomes a donor. The endpoint takes no session and proves
-     * nothing about who is calling, so the address it carries is a claim, not a
-     * fact: anyone can type anyone's address. The claim waits in
-     * dono_pending_signups until the emailed link comes back, and redeeming
-     * that link is what creates the donor. So an address nobody proved never
-     * reaches the donor table, the admin screens, the export or the counts.
-     *
-     * No lookup happens here either. Whether the address is already a donor
-     * decides what gets emailed, and that decision belongs in the job for the
-     * same reason sendLink() moved it there: the two branches must not do
-     * visibly different amounts of work in the request, or the identical 200 is
-     * undone by the clock.
+     * No lookup happens here either, for the same reason sendLink() has none:
+     * the two branches must not do visibly different amounts of work, or the
+     * identical 200 is undone by the clock.
      */
     public function registerDonor(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $ok = new WP_REST_Response(['ok' => true], 200);
 
-        // The one unauthenticated write on this controller. The donation
-        // endpoint has always demanded the same proof for the same reason.
+        // The one unauthenticated write on this controller, so it demands the
+        // same proof the donation endpoint does.
         if ($err = $this->spam->verifyPortalToken((string) ($request['token'] ?? ''))) return $err;
 
         $email = trim((string) ($request['email'] ?? ''));
@@ -345,10 +327,9 @@ final class PortalController
         if (! $this->consumeIpQuota()) return $ok;
         if (! $this->consumeEmailQuota($email)) return $ok;
 
-        // Held against the claim, not against a donor, and only ever used for
-        // the donor the claim eventually creates. Truncated to the column width
-        // rather than rejected: a signup that fails because a surname is long is
-        // worse than a surname that is short.
+        // Held against the claim, not a donor. Truncated to the column width
+        // rather than rejected: a signup that fails because a surname is long
+        // is worse than a surname that is short.
         $names = [];
         foreach (['first_name', 'last_name'] as $field) {
             $value = trim(sanitize_text_field((string) ($request[$field] ?? '')));
@@ -377,8 +358,7 @@ final class PortalController
         } elseif (is_string($args)) {
             // Action Scheduler spreads with array_values, so a job enqueued as
             // ['email' => ...] arrives as one string in the first parameter and
-            // nothing in the second. Reading it as a donor id left the address
-            // empty and returned here, which is a sign-in link nobody was sent.
+            // nothing in the second.
             $email   = $args;
             $donorId = 0;
         } else {
@@ -386,18 +366,16 @@ final class PortalController
         }
         if ($email === '' || ! is_email($email)) return;
 
-        // Resolved here rather than in the request, so the request does the same
-        // work for an address that is a donor and one that is not. donor_id is
-        // still honoured for jobs queued before that moved.
+        // Resolved here rather than in the request, so the request does the
+        // same work for an address that is a donor and one that is not.
         $hash  = $this->hasher->emailHash($this->hasher->normalizeEmail($email));
         $donor = $donorId > 0
             ? $this->donors->findById($donorId)
             : $this->donors->findByEmailHash($hash);
 
         if ($donor) {
-            // Already a donor, so there is nothing to prove and nothing to
-            // create. Any claim standing against this address is moot: signing
-            // up for an address that already has an account is a sign-in.
+            // Already a donor, so any claim standing against this address is
+            // moot: signing up for an address that has an account is a sign-in.
             $this->pending->deleteByEmailHash($hash);
             $this->mailLink(
                 $email,
@@ -407,9 +385,8 @@ final class PortalController
             return;
         }
 
-        // Not a donor. The link carries the claim instead, and redeeming it is
-        // what creates the donor. No donor id exists yet, so the token points at
-        // the claim through target_id.
+        // Not a donor, so the link carries the claim instead. No donor id
+        // exists yet, so the token points at the claim through target_id.
         $claim = $this->pending->findByEmailHash($hash);
         if (! $claim || ! $this->pending->isLive($claim)) return;
 
@@ -445,10 +422,10 @@ final class PortalController
     }
 
     /**
-     * Keyed by the mailbox the address reaches, not the address. The limit
+     * Keyed by the mailbox the address reaches, not the address: the limit
      * exists to stop this endpoint mailing a person on demand, and one inbox
-     * answers to unlimited addresses, so keying by address limits nothing.
-     * Hashed only to keep a plaintext address out of the options table.
+     * answers to unlimited addresses. Hashed only to keep a plaintext address
+     * out of the options table.
      */
     private function consumeEmailQuota(string $email): bool
     {
@@ -471,8 +448,8 @@ final class PortalController
         $donorId = $this->session->currentDonorId();
         $donor = $donorId ? $this->donors->findById($donorId) : null;
         if (! $donor || $donor->redacted_at !== null) {
-            // A redacted donor's session is invalid even if a prior link was
-            // already exchanged - the row no longer represents a real person.
+            // A redacted donor's session is invalid even when a link was
+            // already exchanged: the row no longer represents a real person.
             return new WP_Error('dono_session_invalid', __('Session expired.', 'dono'), ['status' => 401]);
         }
 
@@ -490,10 +467,8 @@ final class PortalController
             'total_donated_cents' => (int) $donor->total_donated_cents,
             // A donation taken in a currency the org had no rate for carries a
             // NULL base amount and contributes nothing to the lifetime figure,
-            // which is built on the base. The count beside it is a plain count,
-            // so a donor could read "3 donations" next to a lifetime total of
-            // zero with nothing explaining the gap. Admin screens pair the same
-            // figure with this count; the portal now can too.
+            // so a donor could otherwise read "3 donations" next to a lifetime
+            // total of zero with nothing explaining the gap.
             'unconverted_count'   => $this->unconvertedDonationCount((int) $donor->id),
             'donations_count'     => (int) $donor->donations_count,
             'first_donation_at'   => $donor->first_donation_at,
@@ -522,10 +497,9 @@ final class PortalController
         if ($donor instanceof WP_Error) return $donor;
         $donorId = (int) $donor->id;
 
-        // donationsOnly, not live: an event ticket order rides the same table
-        // with kind='order', and every other donor-facing total in core
-        // excludes those. Listed here they read to the donor as gifts they made,
-        // and the list then disagreed with the lifetime figure above it.
+        // donationsOnly, not live: a ticket order rides the same table with
+        // kind='order' and would read to the donor as a gift they made, which
+        // the lifetime figure above it excludes.
         $rows = DonationQueries::donationsOnly(Donation::query())
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('donor_id', $donorId)
@@ -569,9 +543,9 @@ final class PortalController
             if ($campaign && $campaign->page_id) {
                 $perma = get_permalink((int) $campaign->page_id);
                 if ($perma) {
-                    // Prefill the net amount: amount_cents folds the covered
-                    // fee in, and the form re-adds the fee on top of the
-                    // prefill, so gross would double-count last time's fee.
+                    // Net, not gross: amount_cents folds the covered fee in and
+                    // the form re-adds the fee on top of the prefill, so gross
+                    // would double-count last time's fee.
                     $net = (int) $d->amount_cents - min((int) $d->amount_cents, max(0, (int) ($d->fee_covered_cents ?? 0)));
                     $giveAgainUrl = add_query_arg([
                         'dono_amount'    => $net,
@@ -581,9 +555,8 @@ final class PortalController
             }
         }
 
-        // Add-ons own records that hang off a donation, and the donor is
-        // entitled to see them here. The filter is how those reach the portal
-        // without core knowing what they are.
+        // Add-ons own records that hang off a donation, and the filter is how
+        // those reach the portal without core knowing what they are.
         $payload = (array) apply_filters('dono.portal.donation', [
             'id'                => (int) $d->id,
             'reference'         => (string) $d->reference,
@@ -627,9 +600,8 @@ final class PortalController
         $donorId = (int) $donor->id;
 
         // Live only, like the donations and receipts lists. A test-mode plan is
-        // the organisation rehearsing, not something this donor set up, and
-        // showing it here offered them a subscription to cancel that was never
-        // theirs.
+        // the organisation rehearsing, so showing it would offer the donor a
+        // subscription to cancel that was never theirs.
         $rows = RecurringPlan::query()
             ->where('donor_id', $donorId)
             ->where('is_test', 0)
@@ -659,9 +631,8 @@ final class PortalController
 
     public function recurringAction(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
-        // Through donorPlan(), not a second copy of the same check: this route
-        // and the payment-method ones each had their own, and only one of them
-        // learned that a test plan is out of scope.
+        // Through donorPlan(), so ownership and the test-plan rule are checked
+        // in one place rather than copied per route.
         $plan = $this->donorPlan($request);
         if ($plan instanceof WP_Error) return $plan;
 
@@ -669,7 +640,7 @@ final class PortalController
         $action = (string) ($body['action'] ?? '');
         $now    = gmdate('Y-m-d H:i:s');
 
-        // The guards, the gateway calls and the writes all live in
+        // The guards, the gateway calls and the writes live in
         // RecurringPlanActions so the admin screen and the command registry
         // cannot drift from what the donor gets. Only the HTTP shape is here.
         $change = RecurringPlanChange::byDonor($action);
@@ -699,15 +670,14 @@ final class PortalController
                 default:
                     return new WP_Error('dono_invalid_action', '', ['status' => 422]);
             }
-        } catch (\Dono\Gateways\SubscriptionChangeNeedsApproval $e) {
+        } catch (SubscriptionChangeNeedsApproval $e) {
             // Ahead of the RuntimeException arm below, which is its parent and
             // would otherwise swallow it and report a live plan as terminal.
             //
             // Not a failure: the processor took the request and is waiting on
             // the donor. Local state stays as it is, because writing the new
-            // amount here would tell the donor a change had happened that their
-            // card would not agree with. Retrying does not help, so the message
-            // does not suggest it.
+            // amount would tell the donor a change had happened that their card
+            // would not agree with.
             return new WP_Error(
                 'dono_change_needs_approval',
                 __('Your payment provider needs you to approve this change before it takes effect. Nothing has changed yet.', 'dono'),
@@ -718,8 +688,8 @@ final class PortalController
         } catch (\RuntimeException $e) {
             return new WP_Error('dono_plan_terminal', $e->getMessage(), ['status' => 422]);
         } catch (\Throwable $e) {
-            // Gateway (or any downstream) failed; local state intentionally left
-            // unchanged. Degrade to a clean 502 rather than a 500.
+            // Local state is deliberately left unchanged when the gateway or
+            // anything downstream fails.
             ErrorLog::record('portal.recurring', $e->getMessage());
             return new WP_Error(
                 'dono_gateway_error',
@@ -737,11 +707,8 @@ final class PortalController
     }
 
     /**
-     * Begin changing the card behind a plan.
-     *
-     * The dunning email has always pointed the donor here, so this is the page
-     * that has to be able to do it. A declined renewal is usually an expired
-     * card, which retrying cannot fix.
+     * The dunning email points the donor here, and a declined renewal is
+     * usually an expired card, which retrying cannot fix.
      */
     public function startPaymentMethodUpdate(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
@@ -777,11 +744,9 @@ final class PortalController
     }
 
     /**
-     * Put the card the donor just entered behind the plan.
-     *
      * The browser confirmed the setup against the processor, so what arrives
-     * here is only an identifier for it; the money path is unchanged and no
-     * card detail passes through this site.
+     * here is only an identifier for it: no card detail passes through this
+     * site.
      */
     public function completePaymentMethodUpdate(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
@@ -817,8 +782,7 @@ final class PortalController
 
         $plan = RecurringPlan::query()->find('id', (int) $request['id']);
         // Ownership is not the only gate: a test plan is not listed, so it must
-        // not be actionable either. Every pause, cancel, amount change and card
-        // update comes through here.
+        // not be actionable either.
         if (! $plan || (int) $plan->donor_id !== (int) $donor->id || $plan->is_test) {
             return new WP_Error('dono_not_found', '', ['status' => 404]);
         }
@@ -851,14 +815,9 @@ final class PortalController
             if ($r->donation_id !== null && isset($testDonationIds[(int) $r->donation_id])) {
                 continue;
             }
-            // No token here. This used to mint a live one-hour download
-            // credential for every receipt in the list, up to two hundred of
-            // them, every time the tab was opened. The portal never read the
-            // field: it asks /receipts/{id}/download-url at click time, which is
-            // why that endpoint exists. So each of those was an unauthenticated
-            // credential for a donor's receipt, valid for an hour, issued for
-            // nobody and counting against the same validation budget the donor
-            // needs to sign in.
+            // No token here: the portal asks /receipts/{id}/download-url at
+            // click time, so minting one per row would issue up to two hundred
+            // unauthenticated receipt credentials nobody ever uses.
             $out[] = [
                 'id'             => (int) $r->id,
                 'receipt_number' => (string) $r->receipt_number,
@@ -871,8 +830,8 @@ final class PortalController
     }
 
     /**
-     * Mint a fresh download token at click time so a portal receipt link never
-     * opens expired. Gated on the portal session and the donor's own receipt.
+     * A fresh token at click time, so a portal receipt link never opens
+     * expired. Gated on the session and the donor's own receipt.
      */
     public function receiptDownloadUrl(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
@@ -909,8 +868,8 @@ final class PortalController
             return new WP_Error('dono_no_donations', __('No donations found for that year.', 'dono'), ['status' => 404]);
         }
 
-        // Stream PDF bytes directly so the REST server doesn't JSON-encode the
-        // binary body. Mirrors the admin receipts/at-risk-csv patterns.
+        // Streamed directly, so the REST server does not JSON-encode the binary
+        // body.
         $filename = sprintf('dono-annual-%d.pdf', $year);
         $route    = $request->get_route();
         add_filter('rest_pre_serve_request', function (bool $served, $result, $req, $server) use ($route, $pdf, $filename) {
@@ -957,9 +916,9 @@ final class PortalController
         foreach (['first_name', 'last_name', 'country', 'company', 'phone'] as $f) {
             if (array_key_exists($f, $body)) $patch[$f] = $body[$f];
         }
-        // editProfile (not refreshProfile): donors own their record and can
-        // explicitly overwrite previously-populated values. refreshProfile's
-        // lock-on-first-write is the donation-flow back-fill, not a portal edit.
+        // editProfile, not refreshProfile: donors own their record and can
+        // overwrite populated values. refreshProfile's lock-on-first-write is
+        // the donation-flow back-fill, not a portal edit.
         $this->donorService->editProfile($donor, $patch);
         return $this->profileShow();
     }
@@ -1000,12 +959,7 @@ final class PortalController
         return new WP_REST_Response($this->shapeConsents((int) $donor->id), 200);
     }
 
-    /**
-     * Per-purpose consent payload. `stale` is true when the stored version
-     * is behind the current purpose version.
-     *
-     * @return list<array<string,mixed>>
-     */
+    /** `stale` is true when the stored version is behind the purpose version. */
     private function shapeConsents(int $donorId): array
     {
         $purposes = $this->consents->purposes();
@@ -1026,22 +980,19 @@ final class PortalController
                 'version'        => $currentVersion,
                 'stored_version' => $storedVersion,
                 'stale'          => $stale,
-                // The record is the truth: `default` is the donation form's
+                // The record is the truth: `default` is the form's
                 // pre-selection at the point of collection, not a subscription
-                // the donor holds. The delivery gate and the admin consent view
-                // both read (row && granted), so a box ticked from `default`
-                // here would claim a subscription nothing honours.
+                // the donor holds, so a box ticked from it would claim one
+                // nothing honours.
                 'granted'        => $row !== null && (bool) $row->granted,
                 'occurred_at'    => $row->occurred_at ?? null,
                 'has_record'     => $row !== null,
             ];
         }
 
-        // A donation form may define its own consent purposes, and the create
-        // path deliberately records them. Listing only the org registry meant
-        // any purpose that lives on a form and not in Settings > Consents was
-        // invisible here: the donor agreed to it on the form and then had no
-        // way to see it, let alone withdraw it.
+        // A form may define its own consent purposes and the create path
+        // records them. The org registry alone would leave those invisible, so
+        // the donor could not withdraw what they agreed to.
         $known = [];
         foreach ($purposes as $p) {
             $known[$p['key']] = true;
@@ -1058,9 +1009,8 @@ final class PortalController
                 // it may be gone, so the key is humanised rather than shown raw.
                 'label' => ucfirst(str_replace(['_', '-'], ' ', (string) $key)),
                 'description'    => '',
-                // Nothing off the registry can be required: "required" is a
-                // property of a registered purpose, and treating it as one
-                // would make a consent the donor cannot withdraw.
+                // Nothing off the registry can be required, or it would be a
+                // consent the donor cannot withdraw.
                 'required'       => false,
                 'version'        => (int) $row->purpose_version,
                 'stored_version' => (int) $row->purpose_version,
@@ -1074,7 +1024,6 @@ final class PortalController
         return $out;
     }
 
-    /** Count how many of this donor's consents are behind their current version. */
     private function staleConsentCount(int $donorId): int
     {
         $count = 0;
@@ -1099,9 +1048,9 @@ final class PortalController
         $latest  = $this->consents->latestByPurpose((int) $donor->id);
 
         // A purpose the donor already has a record for is one they agreed to,
-        // so they can withdraw it even when it lives on a form rather than in
-        // the org registry. Never required, and never a key they have no
-        // record for: this widens what can be revoked, not what can be granted.
+        // so they can withdraw it even when it lives on a form rather than the
+        // org registry. This widens what can be revoked, never what can be
+        // granted.
         foreach ($latest as $key => $_row) {
             if (! isset($byKey[$key])) {
                 $byKey[$key] = ['key' => (string) $key, 'required' => false, 'version' => (int) $_row->purpose_version];
@@ -1115,8 +1064,8 @@ final class PortalController
             // Required purposes cannot be revoked, even via a crafted request.
             if (! $granted && ! empty($byKey[$key]['required'])) continue;
             $current = isset($latest[$key]) ? (bool) $latest[$key]->granted : false;
-            // Skip a true no-op, but still record when the donor re-affirms an
-            // unchanged grant against a newer purpose version (clears "stale").
+            // A true no-op is skipped, but re-affirming an unchanged grant
+            // against a newer purpose version still records, clearing "stale".
             $storedVersion = isset($latest[$key]) ? (int) $latest[$key]->purpose_version : -1;
             if (isset($latest[$key]) && $current === $granted
                 && $storedVersion >= (int) $byKey[$key]['version']) {
@@ -1134,14 +1083,10 @@ final class PortalController
     }
 
     /**
-     * The donor this session belongs to, or 401.
-     *
-     * Every authenticated portal endpoint goes through here rather than reading
-     * the session id directly. Erasure deletes the donor's magic-link tokens so
-     * no emailed link can open a new session, but a cookie minted before it
-     * kept working for its full life: still listing the erased donor's
-     * donations and still minting fresh receipt download tokens, which is the
-     * revocation undone.
+     * The donor this session belongs to, or 401. Every authenticated endpoint
+     * goes through here rather than reading the session id directly: erasure
+     * deletes the magic-link tokens, but a cookie minted before it would
+     * otherwise keep working for its full life.
      */
     private function requireDonor(): Donor|WP_Error
     {
@@ -1156,7 +1101,6 @@ final class PortalController
         return (new \Dono\Donors\Portal\PortalPage())->url();
     }
 
-    /** @param array<string,mixed> $raw */
     private static function normalizePrefs(array $raw): array
     {
         $bool = static fn ($v) => (bool) $v;
@@ -1168,9 +1112,7 @@ final class PortalController
         ];
     }
 
-    /**
-     * GDPR right of access. Gated by `privacy.allow_data_export`.
-     */
+    /** GDPR right of access. */
     public function dataExport(): WP_REST_Response|WP_Error
     {
         if (! $this->privacySetting('allow_data_export', true)) {
@@ -1235,12 +1177,9 @@ final class PortalController
         }, $plans);
 
         // The org-side export is core's own answer to "everything we hold on
-        // this donor", and the donor's right of access is to that same set. The
-        // hand-built bundle here was a thinner one: no address, no receipts, no
-        // analytics events, no consent history beyond the latest per purpose,
-        // no donor type, and none of what the donor typed into the form. Two
-        // definitions of the same legal obligation is one too many, so this
-        // asks for the canonical one.
+        // this donor", and the donor's right of access is to that same set. Two
+        // definitions of one legal obligation is one too many, so this asks for
+        // the canonical one and only falls back when it cannot answer.
         $bundle = $this->metrics->exportData((int) $donor->id) ?? [
             'donor'     => ['id' => (int) $donor->id, 'email' => $email],
             'donations' => $donationRows,
@@ -1252,8 +1191,8 @@ final class PortalController
         $json     = wp_json_encode($bundle, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         $filename = sprintf('dono-my-data-%d-%s.json', $donor->id, gmdate('Y-m-d'));
 
-        // Stream the JSON as an attachment so the donor's browser saves a
-        // file instead of receiving the REST envelope.
+        // Streamed as an attachment, so the donor's browser saves a file
+        // instead of receiving the REST envelope.
         add_filter('rest_pre_serve_request', function (bool $served, $result, $req, $server) use ($json, $filename) {
             if ((string) $req->get_route() !== '/dono/v1/portal/data-export') return $served;
             $server->send_header('Content-Type', 'application/json; charset=utf-8');
@@ -1272,8 +1211,8 @@ final class PortalController
     }
 
     /**
-     * GDPR right to erasure. Soft-redact: zeroes PII but keeps donation
-     * totals for tax/audit. Gated by `privacy.allow_account_delete`.
+     * GDPR right to erasure. Soft-redact: zeroes PII but keeps donation totals
+     * for tax and audit.
      */
     public function forget(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
@@ -1300,10 +1239,8 @@ final class PortalController
         } catch (GatewayUnreachable $e) {
             // Erasure cancels the donor's live recurring plans first, on
             // purpose: wiping the donor while a subscription keeps billing is
-            // worse than not wiping them. When the gateway is gone the
-            // cancellation cannot happen, and this used to escape the callback
-            // as a fatal, so the donor exercising their right to erasure was
-            // told only that the request failed, with nothing to do next.
+            // worse than not wiping them. An unreachable gateway must not
+            // surface as a fatal with nothing for the donor to do next.
             ErrorLog::record('portal.forget', $e->getMessage());
 
             return new WP_Error(

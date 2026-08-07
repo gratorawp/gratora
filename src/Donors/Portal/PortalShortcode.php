@@ -11,11 +11,6 @@ use Dono\Donations\AntiSpamGuard;
 use Dono\Foundation\Helpers\Money;
 use Dono\Foundation\Hooks\HookProvider;
 
-/**
- * Registers and renders the [dono_donor_portal] shortcode.
- *
- * @version 1.0.0
- */
 final class PortalShortcode extends HookProvider
 {
     private const TAG    = 'dono_donor_portal';
@@ -52,12 +47,11 @@ final class PortalShortcode extends HookProvider
         if (file_exists($assetPath)) {
             $asset = require $assetPath;
 
-            // Extension seam: register the window.dono.tabs registry and let
-            // add-ons enqueue their portal tabs (e.g. dono-p2p "My fundraising").
+            // Extension seam: registers window.dono.tabs so add-ons can enqueue
+            // their own portal tabs.
             ExtensionAssets::enqueue('portal');
-            // Org currency config on window.dono so @dono/ui formatAmount renders
-            // money the same on the front end as in admin (the portal + add-on
-            // tabs read it). Admin gets this via AdminGlobals.
+            // Org currency config on window.dono so @dono/ui formatAmount
+            // renders money the same on the front end as in admin.
             wp_add_inline_script(
                 ExtensionAssets::HANDLE,
                 'window.dono = window.dono || {};'
@@ -76,31 +70,26 @@ final class PortalShortcode extends HookProvider
             );
             wp_localize_script(self::HANDLE, 'donoPortal', [
                 'rest'  => esc_url_raw(rest_url('dono/v1/portal/')),
-                // Same rule as the donation form: only logged-in users get a
-                // REST nonce. Anonymous visitors send none, so a page-cached
-                // portal never carries a stale nonce that WP's cookie check
-                // would 403 (which would break magic-link sign-in itself).
-                // Portal auth is the session cookie + X-Dono-Csrf, not this.
+                // Only logged-in users get a REST nonce, so a page-cached
+                // portal never carries a stale one that WP's cookie check
+                // would 403. Portal auth is the session cookie + X-Dono-Csrf.
                 'nonce' => is_user_logged_in() ? wp_create_nonce('wp_rest') : '',
-                // What a REST nonce cannot be here. Signing up and asking for a
-                // link write to the database without any session to check, and
-                // this proves the caller loaded the page. It is a coarse day
-                // bucket precisely so a cached portal keeps working.
+                // Signing up and asking for a link write without any session to
+                // check, and this proves the caller loaded the page.
                 'token' => $this->spam->mintPortalToken(),
             ]);
             wp_set_script_translations(self::HANDLE, 'dono', DONO_DIR . 'languages');
         }
         $cssPath = DONO_DIR . 'build/donor-portal/index.css';
         if (file_exists($cssPath)) {
-            // Version by file mtime, not DONO_VERSION, so a rebuilt stylesheet
-            // busts the browser cache without a plugin version bump.
+            // Versioned by file mtime, so a rebuilt stylesheet busts the
+            // browser cache without a plugin version bump.
             wp_enqueue_style(self::HANDLE, DONO_URL . 'build/donor-portal/index.css', [], (string) filemtime($cssPath));
             wp_style_add_data(self::HANDLE, 'rtl', 'replace');
             wp_add_inline_style(self::HANDLE, $this->brandCss());
         }
     }
 
-    /** @param array<string,mixed>|string $atts */
     public function render($atts = []): string
     {
         $this->enqueue();
@@ -108,8 +97,8 @@ final class PortalShortcode extends HookProvider
     }
 
     /**
-     * Org preset tokens as CSS custom properties. Output lands in a style
-     * block; chars that could escape the rule are filtered defensively.
+     * Output lands in a style block, so chars that could escape the rule are
+     * filtered.
      */
     private function brandCss(): string
     {

@@ -4,37 +4,30 @@ declare(strict_types=1);
 
 namespace Dono\Forms;
 
-/**
- * Built-in donation form templates (block markup plus form settings).
- *
- * @version 1.0.0
- */
 final class FormTemplates
 {
     /**
-     * Every built-in template that is registered. Several more are defined
-     * below but deliberately left out of this list; re-enable one by appending
-     * it, or add your own via the dono.form.templates filter.
+     * Several templates are defined below but deliberately left out of this
+     * list; re-enable one by appending it, or add your own via the filter.
      *
      * @return list<array{id:string,name:string,description:string,icon:string,category:string,thumbnail_hint:string,settings:array<string,mixed>,blocks:string}>
      */
     public static function all(): array
     {
         $templates = [
-            self::blank(),            // Blank
-            self::quickGive(),        // Starter
-            self::conversionModal(), // Standard
-            self::posterHero(),       // Standard
-            self::impactTiers(),      // Standard
-            self::sundayTithe(),      // Recurring
-            self::essentialsWizard(), // Wizard
-            self::workplaceMatch(),   // Wizard
-            self::galaPledge(),       // Formal
+            self::blank(),
+            self::quickGive(),
+            self::conversionModal(),
+            self::posterHero(),
+            self::impactTiers(),
+            self::sundayTithe(),
+            self::essentialsWizard(),
+            self::workplaceMatch(),
+            self::galaPledge(),
         ];
         return (array) apply_filters('dono.form.templates', $templates);
     }
 
-    /** Find a template by id. */
     public static function find(string $id): ?array
     {
         foreach (self::all() as $t) {
@@ -43,7 +36,6 @@ final class FormTemplates
         return null;
     }
 
-    /** Serialize a block (with optional attrs and inner markup) to comment markup. */
     private static function block(string $name, array $attrs = [], string $inner = ''): string
     {
         $attrsJson = $attrs ? ' ' . wp_json_encode($attrs) : '';
@@ -53,7 +45,6 @@ final class FormTemplates
         return "<!-- wp:{$name}{$attrsJson} -->\n{$inner}<!-- /wp:{$name} -->\n";
     }
 
-    /** Build amount presets; $preselectedIndex marks the default tile by index. */
     private static function presets(array $dollars, array $impactLabels = [], int $preselectedIndex = -1): array
     {
         $out = [];
@@ -67,7 +58,6 @@ final class FormTemplates
         return $out;
     }
 
-    /** Baseline form settings shared by most templates. */
     private static function defaultSettings(): array
     {
         return [
@@ -81,7 +71,6 @@ final class FormTemplates
         ];
     }
 
-    /** Empty starter template. */
     private static function blank(): array
     {
         return [
@@ -96,7 +85,6 @@ final class FormTemplates
         ];
     }
 
-    /** Modal donation form template for high-intent traffic. */
     private static function conversionModal(): array
     {
         $row = self::block('dono/name', ['requireFirst' => true, 'requireLast' => true])
@@ -138,7 +126,6 @@ final class FormTemplates
         ];
     }
 
-    /** Casual, low-friction give template. */
     private static function quickGive(): array
     {
         $blocks = self::block('dono/heading', ['text' => __('Chip in', 'dono'), 'level' => 2])
@@ -201,7 +188,6 @@ final class FormTemplates
         ];
     }
 
-    /** Image-led single-outcome template. */
     private static function posterHero(): array
     {
         $blocks = self::block('dono/heading', ['text' => __('100% goes to the cause', 'dono'), 'level' => 1])
@@ -252,7 +238,6 @@ final class FormTemplates
         ];
     }
 
-    /** Signed-letter appeal template. */
     private static function personalAppeal(): array
     {
         $appeal = __("I'll keep this short. I'm Sara, and I've worked on this project for nine years. We don't run ads. We don't sell your address. We don't pay a fundraising firm a cut of what you give. What we do is answer the phone when a teacher writes asking for help, and we keep the lights on with small donations from people who read this far. If what we do has been useful to you this year, please consider giving what a cup of coffee costs. If it hasn't, that's okay too, thank you for reading. - Sara", 'dono');
@@ -297,7 +282,6 @@ final class FormTemplates
         ];
     }
 
-    /** Tiered campaign template mapping amounts to named outcomes. */
     private static function impactTiers(): array
     {
         $blocks = self::block('dono/heading', ['text' => __('$50 makes a real difference', 'dono'), 'level' => 1])
@@ -357,7 +341,6 @@ final class FormTemplates
         ];
     }
 
-    /** Catalog-style template where each amount is a named kit. */
     private static function concreteKit(): array
     {
         $blocks = self::block('dono/heading', ['text' => __('Choose what you want to send', 'dono'), 'level' => 1])
@@ -415,7 +398,6 @@ final class FormTemplates
         ];
     }
 
-    /** Mobile-first recurring giving template for churches. */
     private static function sundayTithe(): array
     {
         $blocks = self::block('dono/heading', ['text' => __('Give to our church', 'dono'), 'level' => 1])
@@ -481,7 +463,6 @@ final class FormTemplates
         ];
     }
 
-    /** Time-bound campaign template with goal bar and countdown. */
     private static function campaignThermometer(): array
     {
         $row = self::block('dono/name', ['requireFirst' => true, 'requireLast' => true])
@@ -499,7 +480,7 @@ final class FormTemplates
                             __('$250 - a major push', 'dono'),
                             __('$500 - helps close the gap', 'dono'),
                         ],
-                        2 // Preselect $100 ("40 meals") as the default amount.
+                        2
                     ),
                     'allowCustom' => true,
                 ])
@@ -546,7 +527,6 @@ final class FormTemplates
         ];
     }
 
-    /** Multi-step institutional donation template with project portfolios. */
     private static function stewardshipWizard(): array
     {
         $blocks = self::block('dono/heading', ['text' => __('Make your donation', 'dono'), 'level' => 2])
@@ -622,7 +602,6 @@ final class FormTemplates
         ];
     }
 
-    /** Two-step wizard template that steers donors toward monthly giving. */
     private static function sustainerPath(): array
     {
         $hero = self::block(
@@ -690,7 +669,6 @@ final class FormTemplates
         ];
     }
 
-    /** Urgency-led modal template for disaster relief appeals. */
     private static function rapidResponse(): array
     {
         $hero = self::block(
@@ -743,7 +721,6 @@ final class FormTemplates
         ];
     }
 
-    /** Tiered pledge template for galas and paddle-raise events. */
     private static function galaPledge(): array
     {
         $header = self::block(
@@ -808,7 +785,6 @@ final class FormTemplates
         ];
     }
 
-    /** Multi-step template that captures employer-match details inline. */
     private static function workplaceMatch(): array
     {
         $step1 = self::block(
@@ -904,10 +880,6 @@ final class FormTemplates
         ];
     }
 
-    /**
-     * Three-step donation wizard with the essentials only: amount, donor
-     * details, confirm. The lean "first multi-step form" starting point.
-     */
     private static function essentialsWizard(): array
     {
         $amountStep = self::block(

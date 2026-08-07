@@ -1,10 +1,4 @@
-/**
- * Lucide icon elements for every Dono block.
- *
- * WP's `registerBlockType` takes the icon as a React element. Pre-rendering
- * here means each block file imports one constant instead of pulling in
- * lucide-react itself. Block icons render at 24px in the inserter.
- */
+// registerBlockType takes the icon as a rendered element, not a component.
 
 import {
     AlignLeft,
@@ -45,7 +39,6 @@ import {
 
 const BLOCK = { size: 24, strokeWidth: 1.75 };
 
-// Per-block icons, keyed by block file name (matches blocks/<name>/index.js).
 export const BlockIcons = {
     address:           <MapPin           { ...BLOCK } />,
     'anonymous-toggle':<EyeOff           { ...BLOCK } />,

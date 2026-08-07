@@ -23,8 +23,7 @@ $linkLabel = $linkText !== '' ? $linkText : __('Read the terms', 'dono');
     </label>
 
     <?php if (trim($terms) !== ''): ?>
-        <?php // Scrolls rather than grows: long terms above a submit button push
-              // it off the screen, and a donor who cannot find it does not give. ?>
+        <?php // Scrolls rather than grows: long terms would push the submit button off the screen. ?>
         <div class="dono-terms__text" tabindex="0" role="region" aria-label="<?php echo esc_attr($labelText); ?>">
             <?php echo wp_kses_post(wpautop($terms)); ?>
         </div>

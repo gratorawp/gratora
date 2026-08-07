@@ -44,10 +44,8 @@ const DESCRIPTION_MAX = 120;
 
 const TABS = [ 'overview', 'forms', 'settings' ];
 
-/**
- * Builds the campaign-deletion confirm message. Surfaces the number of forms
- * that will be cascade-deleted so the admin can't miss the blast radius.
- */
+// Names the number of forms that will be cascade-deleted, so the blast radius
+// is on screen before the admin confirms.
 async function campaignDeleteMessage( campaignId ) {
     let count = 0;
     try {
@@ -57,8 +55,8 @@ async function campaignDeleteMessage( campaignId ) {
         } );
         count = Number( res.headers.get( 'x-wp-total' ) ) || 0;
     } catch {
-        // Soft-fail: fall back to the generic message rather than blocking
-        // the admin from deleting when the count probe fails.
+        // A failed probe falls back to the generic message rather than blocking
+        // the delete.
     }
     return count > 0
         ? sprintf(
@@ -77,17 +75,9 @@ async function campaignDeleteMessage( campaignId ) {
         );
 }
 
-/**
- * Says so when the campaign is turning donations away.
- *
- * A campaign is created as a draft, and nothing on the screen previously said
- * that a form on it would refuse every donor. The organiser sets it up, shares
- * the link, and finds out from the person who tried to give.
- *
- * The reason comes from the server, which reads it off the same rule the
- * donation gate uses. Working it out here from status and dates would be a
- * second answer to the question, free to disagree with the one that matters.
- */
+// The reason comes from the server, which reads it off the same rule the
+// donation gate uses. Deriving it here from status and dates would be a second
+// answer to the question, free to disagree with the one that matters.
 function NotAcceptingNotice( { campaign, onPublish } ) {
     const reason = campaign?.not_accepting;
     if ( ! reason ) return null;
@@ -118,13 +108,12 @@ export default function Detail( { id, tab } ) {
     const c = useDonoRecord( 'campaign', id );
     const [ error, setError ]   = useState( null );
     const [ confirm, setConfirm ] = useState( null );
-    // Archive confirmation for campaigns with active subscriptions.
     const [ archivePrompt, setArchivePrompt ] = useState( null );
     const [ cancelSubs, setCancelSubs ]       = useState( false );
     const extTabsAll = useExtensionTabs( 'campaign' );
 
-    // One-shot "Duplicated from X" toast surfaced after a redirect from the
-    // duplicate action. Strip the query arg from the URL after reading.
+    // One-shot toast after the duplicate action redirects here; the query arg is
+    // stripped once read.
     useEffect( () => {
         const params = new URLSearchParams( window.location.search );
         const from = params.get( 'duplicated_from' );
@@ -165,9 +154,9 @@ export default function Detail( { id, tab } ) {
                 method: 'PUT',
                 data: { status: nextStatus, ...( cancelRecurring ? { cancel_recurring: true } : {} ) },
             } );
-            // Cancellation runs in the background now: each plan is a gateway
-            // round trip, and a campaign can have thousands. Saying so beats
-            // reporting a failure count the request cannot know yet.
+            // Cancellation runs in the background: each plan is a gateway round
+            // trip and a campaign can have thousands, so the request cannot
+            // know a failure count yet.
             const queued = res?.recurring_cancel?.queued || 0;
             if ( queued > 0 ) {
                 notify.success( sprintf(
@@ -215,8 +204,6 @@ export default function Detail( { id, tab } ) {
             return;
         }
         if ( name === 'archive' ) {
-            // If the campaign has active subscriptions, ask what to do with them
-            // before archiving; otherwise archive straight away.
             try {
                 const summary = await apiFetch( {
                     path: `/dono/v1/admin/campaigns/${ campaign.id }/recurring-summary`,
@@ -227,7 +214,7 @@ export default function Detail( { id, tab } ) {
                     return;
                 }
             } catch ( e ) {
-                // Best-effort: fall through to a plain archive if the check fails.
+                // A failed check falls through to a plain archive.
             }
             await runArchive( 'archived', false );
             return;
@@ -449,7 +436,6 @@ function ViewToggle( { active, campaignId, extra = [] } ) {
     );
 }
 
-// Persistent campaign nav: section tabs, edit-page link, and the overflow menu.
 function DetailNav( { campaign, activeTab, onAction, extraTabs = [] } ) {
     return (
         <div className="dono-detail-nav">
@@ -591,7 +577,7 @@ function useLastSavedLabel( updatedAt ) {
 }
 
 
-// Stable widget keys. Order is the default layout; new keys appended here appear at the end.
+// Order is the default layout, so a new key appended here lands at the end.
 const WIDGET_KEYS = [
     'kpis',
     'revenue',
@@ -616,7 +602,6 @@ function OverviewTab( { campaign, nav, onError } ) {
     // Layout is a UI preference shared across all campaigns, not per-campaign.
     const layout = useDonoLayout( 'campaign_overview', WIDGET_KEYS );
 
-    // Only fetch sections for visible widgets; hiding/unhiding changes the include= param.
     const includeKey = useMemo( () => layout.visibleOrder.join( ',' ), [ layout.visibleOrder ] );
 
     useEffect( () => {
@@ -633,9 +618,8 @@ function OverviewTab( { campaign, nav, onError } ) {
         return () => { aborted = true; };
     }, [ range, compareMode, campaign.id, includeKey ] );
 
-    // Merge the fallback ALWAYS, not just while metrics is null: an include=-
-    // limited response (e.g. after hiding then unhiding a widget) returns an
-    // object missing the excluded keys, and the wrappers below deref rows
+    // Merged always, not just while metrics is null: an include=-limited
+    // response omits the excluded keys, and the wrappers below deref rows
     // directly, so an absent key must still resolve to its empty default.
     const m = {
         amount_raised_cents: 0,
@@ -839,9 +823,8 @@ function RecentDonations( { rows } ) {
 function TopForms( { rows, currency, donationsCount = 0 } ) {
     const total = rows.reduce( ( s, r ) => s + r.amount_cents, 0 );
     if ( rows.length === 0 ) {
-        // Two different nothings. A campaign with donations that came in
-        // without a form, recorded by hand or through the API, was told to wait
-        // for donations it had already received.
+        // Two different nothings: a campaign whose donations came in without a
+        // form must not be told to wait for donations it already has.
         const gotDonations = donationsCount > 0;
         return (
             <EmptyState
@@ -984,8 +967,8 @@ function GoalProgressCard( { campaign } ) {
     const target = goalType === 'amount'
         ? ( campaign.goal_cents ?? 0 )
         : ( campaign.goal_count ?? 0 );
-    // Goal progress is cumulative — always the campaign-lifetime totals, never
-    // the range-scoped metrics, or picking a range with no gifts reads 0% on an
+    // Goal progress is cumulative: campaign-lifetime totals, never the
+    // range-scoped metrics, or a range with no gifts reads 0% on an
     // already-funded campaign.
     const current = goalType === 'amount'
         ? ( campaign.raised_cents ?? 0 )
@@ -994,8 +977,8 @@ function GoalProgressCard( { campaign } ) {
             : ( campaign.donors_count ?? 0 );
     const pct = target > 0 ? Math.min( 100, Math.round( ( current / target ) * 100 ) ) : null;
 
-    // Raised totals are summed in the org base currency; format with the org
-    // default (no per-campaign currency arg), like every other money widget.
+    // Raised totals are summed in the org base currency, so they format with
+    // the org default and take no per-campaign currency argument.
     const fmt = ( v ) => goalType === 'amount'
         ? formatAmount( v )
         : Number( v ).toLocaleString();
@@ -1034,12 +1017,12 @@ const FORM_STATUS_OPTIONS = Object.entries( STATUS_LABEL ).map( ( [ value, label
 function ShortcodeCell( { slug } ) {
     const [ copied, setCopied ] = useState( false );
     if ( ! slug ) {
-        return <span className="dono-row__sub">—</span>;
+        return <span className="dono-row__sub">-</span>;
     }
     const code = `[dono_donation_form slug="${ slug }"]`;
     // The cell sits in a DataViews row, which toggles its bulk selection on
-    // click. Without stopping the event, copying the shortcode also ticked the
-    // row, which is not what the button says it does.
+    // click, so copying the shortcode has to stop the event or it ticks the
+    // row too.
     const copy = async ( e ) => {
         stopRowSelect( e );
         try {
@@ -1047,7 +1030,8 @@ function ShortcodeCell( { slug } ) {
             setCopied( true );
             setTimeout( () => setCopied( false ), 1500 );
         } catch ( err ) {
-            // Clipboard API unavailable (insecure context); the code stays visible to copy by hand.
+            // Clipboard API unavailable on an insecure context; the code stays
+            // visible to copy by hand.
         }
     };
     return (
@@ -1233,18 +1217,15 @@ function FormsTab( { campaign } ) {
         {
             id:    'duplicate',
             label: __( 'Duplicate', 'dono' ),
-            // WP `<Icon>` `cloneElement`s an icon-as-element with its own
-            // size={24}, overriding ours. Passing a render function instead
-            // takes the `typeof === 'function'` branch and lets us pin the
-            // size on the lucide component directly.
+            // WP `<Icon>` cloneElements an icon-as-element with its own
+            // size={24}. A render function takes the `typeof === 'function'`
+            // branch instead, where the size sticks.
             icon:  () => <CopyIcon size={ 16 } strokeWidth={ 1.75 } />,
             supportsBulk: true,
             callback: async ( items ) => {
                 if ( ! items.length ) return;
                 try {
                     if ( items.length === 1 ) {
-                        // Single-row duplicate: jump straight into the new
-                        // form's editor so the admin can edit the copy.
                         const copy = await apiFetch( {
                             path:   `/dono/v1/admin/forms/${ items[ 0 ].id }/duplicate`,
                             method: 'POST',
@@ -1252,7 +1233,6 @@ function FormsTab( { campaign } ) {
                         window.location.href = formEditorHref( copy.id );
                         return;
                     }
-                    // Bulk duplicate: spawn copies in place, refresh the list.
                     await Promise.all( items.map( ( i ) => apiFetch( {
                         path:   `/dono/v1/admin/forms/${ i.id }/duplicate`,
                         method: 'POST',
@@ -1269,9 +1249,8 @@ function FormsTab( { campaign } ) {
             icon:   () => <TrashIcon size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             supportsBulk: true,
-            // Default form can't be deleted - hidden via isEligible so the
-            // row action doesn't appear for it, and the bulk callback also
-            // filters by the same predicate as a defence in depth.
+            // The default form cannot be deleted. The bulk callback filters on
+            // the same predicate, as defence in depth.
             isEligible: ( item ) => item.id !== defaultFormId,
             callback: ( items ) => {
                 const targets = items.filter( ( i ) => i.id !== defaultFormId );
@@ -1371,7 +1350,6 @@ function FormsTab( { campaign } ) {
     );
 }
 
-// FormTemplatePicker lives in _shared/components/ now and is imported above.
 
 const GOAL_TYPES = [
     { value: 'amount',    label: __( 'Amount raised', 'dono' ) },
@@ -1387,7 +1365,6 @@ const SUB_TABS = [
     { key: 'advanced',   label: __( 'Advanced', 'dono' ),   Icon: IconAdvanced },
 ];
 
-// Maps record fields to their subtab for the per-tab dirty indicator.
 const FIELD_TO_SUBTAB = {
     title: 'general', description: 'general', slug: 'general', status: 'general',
     starts_at: 'general', ends_at: 'general',
@@ -1397,7 +1374,6 @@ const FIELD_TO_SUBTAB = {
     default_form_id: 'defaults', default_fund_id: 'defaults',
 };
 
-// Maps record fields to card names for the save-bar summary.
 const fieldToCard = () => ( {
     title:                __( 'Identity', 'dono' ),
     description:          __( 'Identity', 'dono' ),
@@ -1436,7 +1412,6 @@ function SettingsTab( { campaign, onError } ) {
             .catch( () => onError?.( __( 'Could not load forms.', 'dono' ) ) );
     }, [ campaign.id ] );
 
-    // Warn before leaving the page if there are unsaved edits.
     useEffect( () => {
         if ( ! c.isDirty ) return undefined;
         const handler = ( e ) => { e.preventDefault(); e.returnValue = ''; return ''; };
@@ -1834,22 +1809,21 @@ function AppearancePanel( { c } ) {
     const style    = rawStyle && typeof rawStyle === 'object' ? rawStyle : {};
     const presetId = String( style.preset_id || '' );
     const inline   = ( style.tokens && typeof style.tokens === 'object' ) ? style.tokens : {};
-    // Keyed on presence of `tokens`, not content, so editor stays open before first override.
+    // Keyed on the presence of `tokens`, not its content, so the editor stays
+    // open before the first override.
     const isCustomizing = !! ( style.tokens && typeof style.tokens === 'object' );
     const editedCount   = c.edits?.style !== undefined ? 1 : 0;
 
     const presets   = Array.isArray( window.dono?.styling?.presets ) ? window.dono.styling.presets : [];
     const defaultId = String( window.dono?.styling?.default_id || '' );
-    // Token-editor baseline = global defaults + the selected preset's tokens,
-    // so each control shows the chosen theme's value (inline overrides on top).
+    // Baseline is global defaults plus the selected preset's tokens, so each
+    // control shows the chosen theme's value with inline overrides on top.
     const presetBase = resolveEffectiveTokens( { tokens: {}, presetId, layer: 'campaign', styling: window.dono?.styling || {} } );
 
     const writeStyle = ( next ) => c.edit( { style: next } );
 
     const selectPreset = ( id ) => {
-        // Keep existing inline overrides when switching presets.
         if ( id === '' ) {
-            // "Use org default" - drop the style entirely.
             writeStyle( isCustomizing ? { tokens: { ...inline } } : null );
             return;
         }
@@ -1862,7 +1836,7 @@ function AppearancePanel( { c } ) {
         if ( on ) {
             writeStyle( { ...style, tokens: { ...inline } } );
         } else if ( presetId === '' ) {
-            // No preset either - drop the field so brand default takes over.
+            // No preset either, so drop the field and let the brand default win.
             writeStyle( null );
         } else {
             writeStyle( { preset_id: presetId } );

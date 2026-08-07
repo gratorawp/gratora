@@ -16,11 +16,6 @@ use InvalidArgumentException;
 use Throwable;
 use Dono\Vendor\Queryable\DB;
 
-/**
- * Domain operations on donors.
- *
- * @version 1.0.0
- */
 final class DonorService
 {
     public function __construct(
@@ -34,8 +29,6 @@ final class DonorService
     }
 
     /**
-     * Find an existing donor by email, or create one with the given profile.
-     *
      * @param array{
      *     first_name?: ?string,
      *     last_name?: ?string,
@@ -53,10 +46,9 @@ final class DonorService
         $existing = $this->donors->findByEmailHash($hash);
         if ($existing !== null) {
             // One donor per email. Only a genuine new donation re-activates a
-            // redacted donor (restoring the encrypted email + clearing the
-            // flag). A bare lookup - e.g. an unauthenticated portal link
-            // request - must leave the erased row untouched: never un-redact it
-            // and never re-populate PII through refreshProfile below.
+            // redacted donor. A bare lookup, such as an unauthenticated portal
+            // link request, must leave the erased row untouched: never
+            // un-redact it and never re-populate PII through refreshProfile.
             if ($existing->redacted_at !== null) {
                 if (! $reactivateIfRedacted) {
                     return $existing;
@@ -99,7 +91,6 @@ final class DonorService
         return $donor;
     }
 
-    /** Look a donor up without creating one and without touching an erased row. */
     public function findByEmail(string $email): ?Donor
     {
         return $this->donors->findByEmailHash(
@@ -108,9 +99,9 @@ final class DonorService
     }
 
     /**
-     * Donor-initiated portal edit: overwrites any field present in the patch (unlike
-     * refreshProfile's lock-on-first-write back-fill). Empty string clears to null;
-     * absent keys are untouched.
+     * Donor-initiated portal edit: overwrites any field present in the patch,
+     * unlike refreshProfile's lock-on-first-write back-fill. Empty string
+     * clears to null; absent keys are untouched.
      *
      * @param array{first_name?:?string,last_name?:?string,country?:?string,company?:?string,locale?:?string,phone?:?string,address?:array<string,mixed>|null} $patch
      */
@@ -162,9 +153,9 @@ final class DonorService
             }
         }
 
-        // One write path: the encrypted fields are set on the model above and
-        // persisted by this single save(), so an unchanged phone/address costs
-        // no second UPDATE and fires no donor.updated on a no-op.
+        // The encrypted fields are set on the model above and persisted by this
+        // single save(), so an unchanged phone or address costs no second
+        // UPDATE and fires no donor.updated on a no-op.
         if ($changed) {
             $donor->updated_at = $this->clock->now()->format('Y-m-d H:i:s');
             $donor->save();
@@ -175,16 +166,11 @@ final class DonorService
     }
 
     /**
-     * Back-fill only empty donor profile fields from the donation payload.
+     * Back-fills only empty profile fields from the donation payload.
      *
-     * An erased donor is rejected rather than being the ideal target: erasure
-     * nulls every field this fills, so one call would put the name, company,
-     * country, phone and address back on the row with redacted_at still set,
-     * and redact() early-returns on such a row, so nothing could wipe it again.
-     *
-     * findOrCreate is unaffected: it clears redacted_at on a genuine
-     * reactivation before it calls through, and returns without calling at all
-     * when it must not reactivate.
+     * An erased donor is rejected: erasure nulls every field this fills, and
+     * redact() early-returns on an already-redacted row, so a back-fill here
+     * would restore PII nothing could wipe again.
      */
     public function refreshProfile(Donor $donor, array $profile): Donor
     {
@@ -199,7 +185,6 @@ final class DonorService
             if (! array_key_exists($f, $profile)) continue;
             $value = $profile[$f];
             if ($value === null || $value === '') continue;
-            // Only fill empty fields; never overwrite a populated one.
             if (! empty($donor->$f)) continue;
 
             if ($f === 'country') {
@@ -231,7 +216,6 @@ final class DonorService
         return $donor;
     }
 
-    /** Admin-only email change. Recomputes email_hash and email_encrypted. */
     public function changeEmail(Donor $donor, string $newEmail): Donor
     {
         if ($donor->redacted_at !== null) {
@@ -268,25 +252,13 @@ final class DonorService
     }
 
     /**
-     * GDPR soft-redact: zeroes PII, preserves the row and donation totals.
-     * Financial records (amount, reference, dates) are retained for legal/tax
-     * purposes; custom form-field answers and per-donation names are cleared.
-     *
-     * The identifiers are read before anything is wiped, because handlers for
-     * tables with no donor_id (webhook bodies, AI transcripts, importer maps)
-     * can only find the donor by searching for the values themselves.
-     */
-    /**
      * Why this donor cannot be deleted, or null when they can be.
      *
-     * Deletion is for records that should not have existed: an address somebody
-     * typed that never became a gift. It is not the erasure path. A donor who
-     * gave keeps their row, because the donation is a financial record that has
-     * to survive and a donation whose donor is gone is a broken one; erasure is
-     * how that person is forgotten, and it deliberately leaves the row.
-     *
-     * Add-ons veto through the same filter, because core cannot know what they
-     * hang off a donor. Returning a reason is what stops the delete.
+     * Deletion is for a record that should not have existed, not the erasure
+     * path. A donor who gave keeps their row: the donation is a financial
+     * record that has to survive, and erasure is how that person is forgotten.
+     * Add-ons veto through the filter, because core cannot know what they hang
+     * off a donor.
      */
     public function undeletableReason(Donor $donor): ?string
     {
@@ -303,12 +275,7 @@ final class DonorService
         return is_string($vetoed) && $vetoed !== '' ? $vetoed : null;
     }
 
-    /**
-     * Removes a donor who has nothing worth keeping, along with the rows that
-     * exist only to describe them.
-     *
-     * @throws InvalidArgumentException when the donor must be kept.
-     */
+    /** @throws InvalidArgumentException when the donor must be kept. */
     public function delete(Donor $donor): void
     {
         $reason = $this->undeletableReason($donor);
@@ -344,14 +311,9 @@ final class DonorService
             return $donor;
         }
 
-        // Before anything is destroyed, because erasing first strands the
-        // mandate: the plan keeps billing, every renewal writes the donor's
-        // name and email back into the webhook log, and the person who asked to
-        // be forgotten is locked out of the portal that could have stopped it.
-        // DonorRetention already refuses to auto-erase anyone on a live plan
-        // and the privacy screen promises as much; the donor-initiated and
-        // admin paths reach the same rule from the other side by ending the
-        // plan first.
+        // Before anything is destroyed: erasing first strands the mandate, so
+        // the plan keeps billing and every renewal writes the donor's name and
+        // email back into the webhook log.
         $this->stopRecurringBefore($donor);
 
         $request = $this->erasureRequest($donor);
@@ -370,13 +332,12 @@ final class DonorService
         DB::transaction(function () use ($donor, $request) {
             $donor->save();
 
-            // Core and every add-on erase through the same registry, inside
-            // this transaction: a handler that cannot finish its part rolls the
-            // whole thing back rather than leaving the donor marked erased when
-            // only some of their data went.
+            // Inside this transaction: a handler that cannot finish its part
+            // rolls the whole thing back rather than leaving the donor marked
+            // erased when only some of their data went.
             $this->erasure->run($request);
 
-            // A zero retention window means there is no grace period in which a
+            // A zero retention window leaves no grace period in which a
             // returning donor is reunited with this record, so the handle goes
             // now rather than on tomorrow's sweep.
             if ($this->purge->purgesOnRedaction()) {
@@ -388,15 +349,8 @@ final class DonorService
     }
 
     /**
-     * Snapshot of everything that identifies this donor, taken while it is
-     * still readable. Gateway ids are in here because a webhook body has no
-     * donor_id: `pi_...` or `cus_...` is the only thread back from the raw
-     * payload to the person it describes.
-     */
-    /**
-     * End any live subscription this donor has, so erasure never leaves money
-     * moving. Anything that cannot be stopped aborts the erasure rather than
-     * completing it and losing the handles needed to stop it later.
+     * Anything that cannot be stopped aborts the erasure rather than completing
+     * it and losing the handles needed to stop it later.
      *
      * Resolved from the container rather than injected: RecurringCanceller
      * reaches DonationService, which reaches back here.
@@ -419,6 +373,11 @@ final class DonorService
         }
     }
 
+    /**
+     * Everything that identifies this donor, read while it is still readable.
+     * Gateway ids are in here because a webhook body has no donor_id: `pi_...`
+     * or `cus_...` is the only thread back to the person it describes.
+     */
     private function erasureRequest(Donor $donor): ErasureRequest
     {
         $donations = Donation::query()->where('donor_id', $donor->id)->getAll();
@@ -471,9 +430,7 @@ final class DonorService
         }
     }
 
-    /**
-     * Decrypts donor email. Authorized contexts only; never from public APIs.
-     */
+    /** Authorized contexts only; never from public APIs. */
     public function decryptEmail(Donor $donor): ?string
     {
         if ($donor->redacted_at !== null || $donor->email_encrypted === '') {
@@ -492,9 +449,8 @@ final class DonorService
     }
 
     /**
-     * Structured address form (the EditPanel writes this shape on save). Returns
-     * the raw decoded struct as stored, so callers can render it any way they
-     * like. Use decryptAddress() when you only want the joined display string.
+     * The raw struct as stored; decryptAddress() gives the joined display
+     * string.
      *
      * @return array{line1?:string,line2?:string,city?:string,region?:string,postal?:string,country?:string}|null
      */
@@ -540,12 +496,6 @@ final class DonorService
         return $lines === [] ? null : implode("\n", $lines);
     }
 
-    /**
-     * Normalise a structured address into a JSON payload ready for encryption.
-     * Returns null when every field is empty.
-     *
-     * @param array<string,mixed>|null $address
-     */
     public function addressPayload(?array $address): ?string
     {
         if (! is_array($address)) return null;
@@ -558,7 +508,6 @@ final class DonorService
         return $out === [] ? null : (string) wp_json_encode($out);
     }
 
-    /** Encrypts and persists a value into an encrypted donor column. Null/empty clears it. */
     public function setEncryptedField(Donor $donor, string $field, ?string $value): void
     {
         if ($donor->redacted_at !== null) {
@@ -574,11 +523,7 @@ final class DonorService
         $donor->$field = $encrypted ?? '';
     }
 
-    /**
-     * Donor ids matching a free-text term. Name uses LIKE; email is exact hash match.
-     *
-     * @return array<int>
-     */
+    /** Name uses LIKE; email is an exact hash match. */
     public function findIdsBySearch(string $term): array
     {
         $term = trim($term);

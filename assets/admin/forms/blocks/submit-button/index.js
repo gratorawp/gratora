@@ -1,9 +1,4 @@
-/**
- * dono/submit-button: the donate button.
- *
- * Editor side mirrors the server-side render in
- * src/Forms/Blocks/SubmitButtonBlock.php.
- */
+// Mirrors the server render in src/Forms/Blocks/SubmitButtonBlock.php.
 
 import { useBlockProps, InspectorControls, RichText } from '@wordpress/block-editor';
 import { PanelBody } from '@wordpress/components';
@@ -77,9 +72,6 @@ function Edit( { attributes, setAttributes } ) {
     );
 }
 
-/**
- * @param {{register: (name: string, def: object) => any}} api
- */
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,

@@ -11,26 +11,20 @@ use Dono\Gateways\TestMode;
 use WP_Error;
 
 /**
- * Anti-spam / anti-card-testing gates for the public donation endpoint.
- *
- * Layered checks: honeypot, HMAC-signed form token with a minimum render
- * time, per-IP rate cap, per-email cap, minimum amount. Each check returns
- * null on pass or a WP_Error on fail.
- *
- * @version 1.0.0
+ * Anti-spam gates for the public donation endpoint. Each check returns null on
+ * pass or a WP_Error on fail.
  */
 final class AntiSpamGuard
 {
     private const SETTING_SECRET = 'form_signing_secret_v1';
 
     private const IP_MAX             = 10;
-    private const IP_WINDOW          = 900;       // 15 minutes
+    private const IP_WINDOW          = 900;
     private const EMAIL_MAX          = 3;
-    private const EMAIL_WINDOW       = 3600;      // 1 hour
-    // Token validity in whole days. The token is a coarse day bucket (not a
-    // per-render timestamp) so it survives page caching: a cached form up to
-    // this many days old still validates. Replay within the window is bounded
-    // by the IP/email rate limits, which are the real card-testing defense.
+    private const EMAIL_WINDOW       = 3600;
+    // The token is a coarse day bucket, not a per-render timestamp, so a form
+    // served from a page cache still validates. Replay inside the window is
+    // bounded by the IP/email rate limits.
     private const TOKEN_WINDOW_DAYS  = 30;
     private const MIN_AMOUNT_CENTS   = 100;
 
@@ -39,9 +33,8 @@ final class AntiSpamGuard
     }
 
     /**
-     * True when the org-wide test-mode kill switch is on. Rate-limit checks
-     * relax in that case because test submissions never move real money, and
-     * automation (Playwright, demos) bursts through the production caps.
+     * Rate limits relax under the org-wide test-mode switch: test submissions
+     * move no real money, and automation bursts through the production caps.
      */
     private function inGlobalTestMode(): bool
     {
@@ -53,18 +46,14 @@ final class AntiSpamGuard
     }
 
     /**
-     * Coarse day-bucket signed with a per-install secret, echoed back on submit.
-     * Bucketing (vs a per-render timestamp) keeps the token stable across a
-     * page-cache window, so cached donation forms still submit. The form id is
-     * folded into the signature so a token minted on one form can't be replayed
-     * against another (verification recomputes with the submitted form id).
+     * The form id is folded into the signature, so a token minted on one form
+     * cannot be replayed against another.
      */
     public function mintFormToken(int $formId = 0): string
     {
         return $this->signed((string) $formId);
     }
 
-    /** Day bucket signed together with whatever scopes the token. */
     private function signed(string $scope): string
     {
         $payload = (string) $this->currentBucket();
@@ -74,12 +63,9 @@ final class AntiSpamGuard
     }
 
     /**
-     * The same proof for surfaces that are not a donation form. Anything public
-     * and cacheable that writes without a session wants this: the portal signs
-     * people up, add-ons open fundraiser pages.
-     *
-     * Namespaced so one surface's token is not accepted at another, and so a
-     * context can never be mistaken for a form id, which is a bare integer.
+     * The same proof for surfaces that are not a donation form. Namespaced so
+     * one surface's token is not accepted at another, and so a context can
+     * never be mistaken for a form id, which is a bare integer.
      */
     public function mintToken(string $context): string
     {
@@ -123,12 +109,12 @@ final class AntiSpamGuard
         $expected = hash_hmac('sha256', $scope . '|' . $payload, $this->secret());
         if (! hash_equals($expected, $sig)) return $generic;
 
-        if ((string) (int) $payload !== $payload) return $generic; // non-numeric bucket
+        if ((string) (int) $payload !== $payload) return $generic;
         $bucket  = (int) $payload;
         $current = $this->currentBucket();
 
-        // Valid for the current bucket and up to TOKEN_WINDOW_DAYS back, so a
-        // cached page keeps working; reject future buckets (clock games).
+        // A future bucket is a clock game; a past one inside the window is a
+        // cached page.
         if ($bucket > $current || $bucket < $current - self::TOKEN_WINDOW_DAYS) {
             return $generic;
         }
@@ -136,7 +122,6 @@ final class AntiSpamGuard
         return null;
     }
 
-    /** Whole-day bucket index (UTC) used to date the form token. */
     private function currentBucket(): int
     {
         return (int) floor(time() / DAY_IN_SECONDS);

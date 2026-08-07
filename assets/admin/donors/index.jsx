@@ -1,6 +1,6 @@
-// Dono admin: Donors list.
-// Email is encrypted at rest; client-side substring search on email is not possible.
-// The REST endpoint resolves search via name substring + exact email-hash lookup.
+// Email is encrypted at rest, so client-side substring search on it is not
+// possible: the REST endpoint resolves search via name substring plus exact
+// email-hash lookup.
 
 import { createRoot, useState, useEffect, useMemo, useCallback } from '@wordpress/element';
 import { DataViews } from '@wordpress/dataviews';
@@ -107,7 +107,6 @@ function DonorsApp( { toggleSlot } ) {
             } )
             .finally( () => ! aborted && setLoading( false ) );
 
-        // Filter-aware aggregates for the KPI strip (same filters, no paging).
         apiFetch( {
             path: addQueryArgs( '/dono/v1/admin/donors/stats', {
                 search:     view.search || undefined,
@@ -238,10 +237,9 @@ function DonorsApp( { toggleSlot } ) {
             icon:          () => <DeleteIcon size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             supportsBulk:  true,
-            // Offered only where there is nothing to keep. A donor who gave has
-            // a financial record attached and is erased instead, which is the
-            // action below. The server refuses either way; this keeps the menu
-            // from offering something that can only fail.
+            // A donor who gave has a financial record attached and is redacted
+            // instead. The server refuses either way; this keeps the menu from
+            // offering something that can only fail.
             isEligible:    ( item ) => ! item.donations_count,
             callback: ( items ) => {
                 if ( ! items.length ) return;
@@ -304,10 +302,9 @@ function DonorsApp( { toggleSlot } ) {
                     message,
                     confirmLabel: __( 'Redact', 'dono' ),
                     destructive:  true,
-                    // The profile dialog makes you type the donor's email. In
-                    // bulk there is no single email to type, and the callback
-                    // fills the server's confirmation in from each row - so
-                    // without this the list route erased PII on one click.
+                    // The callback fills the server's confirmation from each
+                    // row, so nothing else stands between one click and erased
+                    // PII here.
                     requireText:  __( 'REDACT', 'dono' ),
                     onConfirm: async () => {
                         try {
