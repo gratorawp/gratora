@@ -944,6 +944,40 @@
         }
     }
 
+    &__terms {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    &__terms-agree {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        font-size: 14px;
+        color: var(--dono-text);
+        cursor: pointer;
+
+        input { margin-top: 3px; flex: 0 0 auto; }
+    }
+    &__terms-text {
+        // Capped rather than free-growing: a long policy above the submit
+        // button pushes it off the screen, and a donor who cannot find the
+        // button does not give.
+        max-height: 180px;
+        overflow-y: auto;
+        padding: 12px 14px;
+        border: 1px solid var(--dono-border);
+        border-radius: var(--dono-radius, 8px);
+        font-size: 13px;
+        line-height: 1.5;
+        color: var(--dono-text-muted);
+        white-space: pre-wrap;
+    }
+    &__terms-link {
+        margin: 0;
+        font-size: 13px;
+    }
+
     &__consent {
         border: 0;
         padding: 0;

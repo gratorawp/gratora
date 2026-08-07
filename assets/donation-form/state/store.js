@@ -101,6 +101,11 @@ function initialConsents( donorSteps ) {
     const list = Array.isArray( donorSteps ) ? donorSteps : [ donorSteps ];
     for ( const s of list ) {
         for ( const f of fieldsOf( s ) ) {
+            // Agreeing is a gesture the donor makes, so it never starts made.
+            if ( f.kind === 'terms' ) {
+                out[ String( f.purpose || 'terms' ) ] = false;
+                continue;
+            }
             if ( f.kind !== 'consent' ) continue;
             const defaultOn = f.defaultState === 'opt-out';
             for ( const p of ( f.purposes || [] ) ) {
@@ -435,6 +440,12 @@ export function validateStep( step, state ) {
                         }
                     }
                 }
+                if ( f.kind === 'terms' ) {
+                    const id = String( f.purpose || 'terms' );
+                    if ( ! v.consents?.[ id ] ) {
+                        e[ `consents.${ id }` ] = msg( 'termsRequired', 'Please agree to continue.' );
+                    }
+                }
                 if ( ( f.kind === 'date' || f.kind === 'text' || f.kind === 'number' ) && f.required ) {
                     const name = String( f.field || '' );
                     if ( name && ! String( v.custom?.[ name ] ?? '' ).trim() ) {
@@ -537,6 +548,7 @@ function suppressedFields( state ) {
                     if ( p?.id ) out.consents.add( String( p.id ) );
                 }
             }
+            else if ( f.kind === 'terms' ) out.consents.add( String( f.purpose || 'terms' ) );
             else if ( CUSTOM.includes( f.kind ) && f.field ) out.custom.add( String( f.field ) );
         }
     }

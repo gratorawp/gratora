@@ -10,6 +10,7 @@ use Dono\Campaigns\Styling\CampaignStyleResolver;
 use Dono\Donations\AntiSpamGuard;
 use Dono\Forms\Blocks\ColumnsBlock;
 use Dono\Forms\Blocks\ConsentBlock;
+use Dono\Forms\Blocks\TermsBlock;
 use Dono\Forms\Blocks\CurrencySwitcherBlock;
 use Dono\Forms\Blocks\DateBlock;
 use Dono\Forms\Blocks\DividerBlock;
@@ -1129,6 +1130,19 @@ HTML;
                         'purposes'     => $cPurposes,
                         'defaultState' => $cDefault,
                     ], $row, $attrs);
+                    break;
+
+                case 'dono/terms':
+                    if (TermsBlock::isConfigured($attrs)) {
+                        $items[] = $tagRow([
+                            'kind'     => 'terms',
+                            'purpose'  => TermsBlock::PURPOSE,
+                            'label'    => (string) ($attrs['label']    ?? ''),
+                            'terms'    => (string) ($attrs['terms']    ?? ''),
+                            'linkUrl'  => (string) ($attrs['linkUrl']  ?? ''),
+                            'linkText' => (string) ($attrs['linkText'] ?? ''),
+                        ], $row, $attrs);
+                    }
                     break;
 
                 case 'dono/donation-amount':

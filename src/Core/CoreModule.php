@@ -88,6 +88,7 @@ use Dono\Forms\Blocks\AnonymousToggleBlock;
 use Dono\Forms\Blocks\BlockRegistry;
 use Dono\Forms\Blocks\CommentBlock;
 use Dono\Forms\Blocks\ConsentBlock;
+use Dono\Forms\Blocks\TermsBlock;
 use Dono\Forms\Blocks\CountryBlock;
 use Dono\Forms\Blocks\CoverFeesBlock;
 use Dono\Forms\Blocks\CurrencySwitcherBlock;
@@ -935,6 +936,7 @@ final class CoreModule implements DonoModule
         $blocks->add(new FundPickerBlock());
         $blocks->add(new AddressBlock());
         $blocks->add(new ConsentBlock());
+        $blocks->add(new TermsBlock());
         $blocks->add(new PrivacyNoticeBlock());
         $blocks->add(new SubmitButtonBlock());
         $blocks->add(new DateBlock());

@@ -16,6 +16,7 @@ use Dono\Donations\DonationRepository;
 use Dono\Donations\DonationService;
 use Dono\Donors\ConsentService;
 use Dono\Forms\Form;
+use Dono\Forms\Blocks\TermsBlock;
 use Dono\Forms\FormSubmissionValidator;
 use Dono\Gateways\BrowserAware;
 use Dono\Gateways\GatewayIntentResult;
@@ -301,17 +302,29 @@ final class DonationsController
             // Accept the form's own consent-block purposes (keyed by id), not
             // just the org settings registry, or form-defined consents drop.
             $formConsentIds = $form ? FormSubmissionValidator::consentPurposeIds((string) $form->blocks) : [];
+            // Agreeing to the terms is recorded like any other consent, but the
+            // version is the revision of the text as it stood, not a number from
+            // the purposes registry. That is what makes the row answer "what did
+            // they agree to" after the terms are edited.
+            $termsRevision = $form ? FormSubmissionValidator::termsRevision((string) $form->blocks) : null;
             foreach ($consents as $key => $granted) {
-                $key = (string) $key;
-                if ($this->consents->findPurpose($key) === null && ! isset($formConsentIds[$key])) continue;
+                $key     = (string) $key;
+                $isTerms = $key === TermsBlock::PURPOSE && $termsRevision !== null;
+                if (! $isTerms
+                    && $this->consents->findPurpose($key) === null
+                    && ! isset($formConsentIds[$key])
+                ) {
+                    continue;
+                }
                 try {
-                    $this->consents->record((int) $donation->donor_id, $key, (bool) $granted, [
+                    $this->consents->record((int) $donation->donor_id, $key, (bool) $granted, array_filter([
                         'source'      => 'donation',
                         'form_id'     => $formId,
                         'donation_id' => (int) $donation->id,
                         'ip'          => $ip,
                         'ua'          => $ua,
-                    ]);
+                        'version'     => $isTerms ? $termsRevision : null,
+                    ], static fn ($v): bool => $v !== null));
                 } catch (Throwable $e) {
                     ErrorLog::record('donation.consent', $e->getMessage(), [
                         'donor_id'    => (int) $donation->donor_id,

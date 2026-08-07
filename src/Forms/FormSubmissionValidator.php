@@ -6,6 +6,7 @@ namespace Dono\Forms;
 
 use Dono\Campaigns\Campaign;
 use Dono\Forms\Blocks\ConsentBlock;
+use Dono\Forms\Blocks\TermsBlock;
 use Dono\Forms\Blocks\DateBlock;
 use Dono\Forms\Blocks\DonationAmountBlock;
 use Dono\Forms\Blocks\DropdownBlock;
@@ -66,6 +67,37 @@ final class FormSubmissionValidator
         $ids = [];
         self::collectConsentIds(parse_blocks((string) $blocks), $ids);
         return $ids;
+    }
+
+    /**
+     * Which revision of this form's terms a donor is agreeing to, or null when
+     * the form has nothing to agree to. Recorded alongside the acceptance, so
+     * editing the terms later cannot rewrite what somebody already agreed to.
+     */
+    public static function termsRevision(string $blocks): ?int
+    {
+        return self::findTermsRevision(parse_blocks($blocks));
+    }
+
+    /** @param array<int,array<string,mixed>> $blocks */
+    private static function findTermsRevision(array $blocks): ?int
+    {
+        foreach ($blocks as $block) {
+            if (($block['blockName'] ?? '') === 'dono/terms') {
+                $attrs = is_array($block['attrs'] ?? null) ? $block['attrs'] : [];
+                if (TermsBlock::isConfigured($attrs)) {
+                    return TermsBlock::revisionOf(
+                        (string) ($attrs['terms']   ?? ''),
+                        (string) ($attrs['linkUrl'] ?? '')
+                    );
+                }
+            }
+            if (! empty($block['innerBlocks']) && is_array($block['innerBlocks'])) {
+                $found = self::findTermsRevision($block['innerBlocks']);
+                if ($found !== null) return $found;
+            }
+        }
+        return null;
     }
 
     /** Whether the authored form contains a block, at any nesting depth. */
@@ -134,6 +166,19 @@ final class FormSubmissionValidator
                 }
                 if ((bool) ($attrs['requireLast'] ?? true) && ! $this->filled($profile['last_name'] ?? null)) {
                     return $this->requiredError(__('Last name', 'dono'));
+                }
+                break;
+
+            case 'dono/terms':
+                // A tick the client could skip is not agreement. Enforced here
+                // because this is the only side the donor cannot edit, and the
+                // record written afterwards is only worth keeping if the answer
+                // it records was actually required.
+                if (TermsBlock::isConfigured($attrs)) {
+                    $consents = is_array($body['consents'] ?? null) ? $body['consents'] : [];
+                    if (empty($consents[TermsBlock::PURPOSE])) {
+                        return $this->reject(__('Please agree to the terms to continue.', 'dono'));
+                    }
                 }
                 break;
 

@@ -406,6 +406,42 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
             );
         }
 
+        case 'terms': {
+            const id      = String( f.purpose || 'terms' );
+            const errKey  = `consents.${ id }`;
+            const agreed  = !! ( v.consents || {} )[ id ];
+            const label   = decodeEntities( f.label || '' ) || ( config.i18n.agreeToTerms || 'I agree to the terms' );
+            return (
+                <div key={ key } class="dono-form__terms">
+                    <label class="dono-form__terms-agree">
+                        <input
+                            type="checkbox"
+                            checked={ agreed }
+                            onChange={ onCheck( errKey ) }
+                            aria-invalid={ !! err[ errKey ] }
+                        />
+                        <span class="dono-form__terms-label">{ label }</span>
+                    </label>
+                    { f.terms && (
+                        // Scrolls rather than grows: long terms above the submit
+                        // button push it off the screen, and a donor who cannot
+                        // find it does not give.
+                        <div class="dono-form__terms-text" tabindex="0" role="region" aria-label={ label }>
+                            { decodeEntities( f.terms ) }
+                        </div>
+                    ) }
+                    { f.linkUrl && (
+                        <p class="dono-form__terms-link">
+                            <a href={ f.linkUrl } target="_blank" rel="noopener noreferrer">
+                                { decodeEntities( f.linkText || '' ) || ( config.i18n.readTerms || 'Read the terms' ) }
+                            </a>
+                        </p>
+                    ) }
+                    { err[ errKey ] && <span class="dono-form__error">{ err[ errKey ] }</span> }
+                </div>
+            );
+        }
+
         case 'consent': {
             const purposes = Array.isArray( f.purposes ) ? f.purposes : [];
             const consents = v.consents || {};
