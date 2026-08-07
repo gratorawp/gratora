@@ -168,6 +168,17 @@ final class DonorsController
             ],
         ]);
 
+        register_rest_route(self::NAMESPACE, '/admin/donors/(?P<id>\d+)', [
+            'methods'             => 'DELETE',
+            'callback'            => [$this, 'delete'],
+            // Erasing and deleting are both irreversible and both about getting
+            // rid of a record, so they answer to the same capability.
+            'permission_callback' => static fn () => Capabilities::userCan('dono_redact_donors'),
+            'args'                => [
+                'id' => ['type' => 'integer', 'required' => true],
+            ],
+        ]);
+
         register_rest_route(self::NAMESPACE, '/admin/donors/(?P<id>\d+)/redact', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'redact'],
@@ -463,6 +474,30 @@ final class DonorsController
      * GDPR redact. Confirmation must match the donor's current email, or
      * 'DONOR_<id>' for anonymous/redacted-no-email cases.
      */
+    /**
+     * Removes a donor who should not have been a record at all.
+     *
+     * No confirmation string, unlike redact: there is nothing here to lose. A
+     * donor with donations cannot reach this at all, and the refusal says which
+     * path to take instead rather than just declining.
+     */
+    public function delete(WP_REST_Request $request): WP_REST_Response|WP_Error
+    {
+        $donor = $this->donors->findById((int) $request['id']);
+        if (! $donor) {
+            return new WP_Error('dono_not_found', __('Donor not found.', 'dono'), ['status' => 404]);
+        }
+
+        $reason = $this->donorService->undeletableReason($donor);
+        if ($reason !== null) {
+            return new WP_Error('dono_donor_not_deletable', $reason, ['status' => 409]);
+        }
+
+        $this->donorService->delete($donor);
+
+        return new WP_REST_Response(['deleted' => true, 'id' => (int) $request['id']], 200);
+    }
+
     public function redact(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $donor = $this->donors->findById((int) $request['id']);

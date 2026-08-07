@@ -276,6 +276,68 @@ final class DonorService
      * tables with no donor_id (webhook bodies, AI transcripts, importer maps)
      * can only find the donor by searching for the values themselves.
      */
+    /**
+     * Why this donor cannot be deleted, or null when they can be.
+     *
+     * Deletion is for records that should not have existed: an address somebody
+     * typed that never became a gift. It is not the erasure path. A donor who
+     * gave keeps their row, because the donation is a financial record that has
+     * to survive and a donation whose donor is gone is a broken one; erasure is
+     * how that person is forgotten, and it deliberately leaves the row.
+     *
+     * Add-ons veto through the same filter, because core cannot know what they
+     * hang off a donor. Returning a reason is what stops the delete.
+     */
+    public function undeletableReason(Donor $donor): ?string
+    {
+        if (Donation::query()->where('donor_id', (int) $donor->id)->exists()) {
+            return __('This donor has donations on record, which have to be kept. Erase them instead.', 'dono');
+        }
+
+        if (RecurringPlan::query()->where('donor_id', (int) $donor->id)->exists()) {
+            return __('This donor has a recurring plan. Cancel it first.', 'dono');
+        }
+
+        $vetoed = apply_filters('dono.donor.undeletable_reason', null, $donor);
+
+        return is_string($vetoed) && $vetoed !== '' ? $vetoed : null;
+    }
+
+    /**
+     * Removes a donor who has nothing worth keeping, along with the rows that
+     * exist only to describe them.
+     *
+     * @throws InvalidArgumentException when the donor must be kept.
+     */
+    public function delete(Donor $donor): void
+    {
+        $reason = $this->undeletableReason($donor);
+        if ($reason !== null) {
+            throw new InvalidArgumentException($reason);
+        }
+
+        $id   = (int) $donor->id;
+        $hash = (string) $donor->email_hash;
+
+        DB::transaction(function () use ($donor, $id, $hash): void {
+            Consent::query()->where('donor_id', $id)->delete();
+            DonorNote::query()->where('donor_id', $id)->delete();
+            MagicLinkToken::query()->where('donor_id', $id)->delete();
+
+            // Keyed by address, not by donor, so it is reached by hash or not
+            // at all. A claim left behind would still carry a live link.
+            if ($hash !== '') {
+                PendingSignup::query()->where('email_hash', $hash)->delete();
+            }
+
+            Donor::query()->where('id', $id)->delete();
+
+            // After the row is gone, so a listener cannot resurrect it by
+            // writing something that references a donor which no longer exists.
+            do_action('dono.donor.deleted', $id, $hash);
+        });
+    }
+
     public function redact(Donor $donor): Donor
     {
         if ($donor->redacted_at !== null) {

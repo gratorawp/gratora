@@ -7,7 +7,7 @@ import { DataViews } from '@wordpress/dataviews';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { UserX as RedactIcon, Users as UsersIcon } from 'lucide-react';
+import { UserX as RedactIcon, Users as UsersIcon, Trash2 as DeleteIcon } from 'lucide-react';
 import Notice from '../_shared/components/Notice';
 import Toaster from '../_shared/components/Toaster';
 
@@ -232,6 +232,51 @@ function DonorsApp( { toggleSlot } ) {
     );
 
     const actions = useMemo( () => [
+        {
+            id:            'delete',
+            label:         __( 'Delete', 'dono' ),
+            icon:          () => <DeleteIcon size={ 16 } strokeWidth={ 1.75 } />,
+            isDestructive: true,
+            supportsBulk:  true,
+            // Offered only where there is nothing to keep. A donor who gave has
+            // a financial record attached and is erased instead, which is the
+            // action below. The server refuses either way; this keeps the menu
+            // from offering something that can only fail.
+            isEligible:    ( item ) => ! item.donations_count,
+            callback: ( items ) => {
+                if ( ! items.length ) return;
+                const n = items.length;
+                setConfirm( {
+                    title:        _n( 'Delete donor', 'Delete donors', n, 'dono' ),
+                    message: n === 1
+                        ? __( 'Delete this donor? They have no donations, so nothing is kept: the record and anything describing it go for good.', 'dono' )
+                        : sprintf(
+                            /* translators: %d: number of donors to delete */
+                            _n(
+                                'Delete %d donor? They have no donations, so nothing is kept.',
+                                'Delete %d donors? They have no donations, so nothing is kept.',
+                                n,
+                                'dono'
+                            ),
+                            n
+                        ),
+                    confirmLabel: __( 'Delete', 'dono' ),
+                    destructive:  true,
+                    onConfirm: async () => {
+                        try {
+                            await Promise.all( items.map( ( i ) => apiFetch( {
+                                path:   `/dono/v1/admin/donors/${ i.id }`,
+                                method: 'DELETE',
+                            } ) ) );
+                        } catch ( err ) {
+                            setError( err?.message || __( 'Could not delete one or more donors.', 'dono' ) );
+                        } finally {
+                            load();
+                        }
+                    },
+                } );
+            },
+        },
         {
             id:            'redact',
             label:         __( 'Redact (anonymize)', 'dono' ),
