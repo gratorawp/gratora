@@ -30,18 +30,24 @@ final class CampaignPageBlocksTest extends IntegrationTestCase
         $campaign = $this->createCampaign(['title' => 'Starter block test']);
         $page = get_post((int) $campaign['page_id']);
 
-        $this->assertStringContainsString('wp:dono/campaign-hero',    $page->post_content);
-        $this->assertStringContainsString('wp:dono/donation-form',    $page->post_content);
-        $this->assertStringContainsString('wp:dono/top-donors',       $page->post_content);
-        $this->assertStringContainsString('wp:dono/recent-donations', $page->post_content);
+        $this->assertStringContainsString('wp:dono/campaign-image',    $page->post_content);
+        $this->assertStringContainsString('wp:dono/campaign-progress', $page->post_content);
+        $this->assertStringContainsString('wp:dono/donation-form',     $page->post_content);
+        $this->assertStringContainsString('wp:dono/top-donors',        $page->post_content);
+        $this->assertStringContainsString('wp:dono/recent-donations',  $page->post_content);
 
-        // The hero states the money, so repeating it twice more above the fold
-        // said nothing new. The grid sends a visitor away from the page they
-        // were asked to give on, which is the wrong default for a page whose
-        // job is one campaign. All three stay registered for custom layouts.
-        $this->assertStringNotContainsString('wp:dono/campaign-stats',    $page->post_content);
-        $this->assertStringNotContainsString('wp:dono/campaign-progress', $page->post_content);
-        $this->assertStringNotContainsString('wp:dono/campaign-grid',     $page->post_content);
+        // Each figure is its own block, so the seed places several rather than
+        // one block that draws them all.
+        $this->assertGreaterThanOrEqual(
+            3,
+            substr_count($page->post_content, 'wp:dono/campaign-stat '),
+            'the starter layout places individual stat blocks'
+        );
+
+        // The grid sends a visitor away from the page they were asked to give
+        // on, which is the wrong default for a page whose job is one campaign.
+        // It stays registered for custom layouts.
+        $this->assertStringNotContainsString('wp:dono/campaign-grid', $page->post_content);
 
         // The title is a core Heading block, not markup inside a render
         // callback, so an organiser owns the words.
@@ -53,29 +59,27 @@ final class CampaignPageBlocksTest extends IntegrationTestCase
         // though the campaign had written them.
         $this->assertStringNotContainsString('Tell the story behind', $page->post_content);
 
-        // The form sits beside the hero, so the hero's own donate button would
-        // only scroll to something already on screen.
-        $this->assertStringContainsString('"showDonate":false', $page->post_content);
+        // The form sits beside the figures, so a donate button in the main
+        // column would only scroll to something already on screen.
+        $this->assertStringNotContainsString('wp:dono/donate-button', $page->post_content);
     }
 
-    public function test_hero_block_renders_campaign_title(): void
+    public function test_page_renders_the_campaign_title(): void
     {
         $campaign = $this->createCampaign(['title' => 'Save the bees']);
         $html = $this->renderPage((int) $campaign['page_id']);
 
-        $this->assertStringContainsString('dono-block--hero', $html);
         $this->assertStringContainsString('Save the bees', $html);
     }
 
-    public function test_stats_block_renders_zero_values_for_fresh_campaign(): void
+    public function test_a_stat_block_renders_one_named_figure(): void
     {
         $campaign = $this->createCampaign(['title' => 'Fresh stats']);
-        $html = $this->renderBlockPage('dono/campaign-stats', (int) $campaign['id']);
+        $html = $this->renderBlockPage('dono/campaign-stat', (int) $campaign['id']);
 
-        $this->assertStringContainsString('dono-block--stats', $html);
-        $this->assertStringContainsString('class="dono-stat__label">Raised', $html);
-        $this->assertStringContainsString('class="dono-stat__label">Donations', $html);
-        $this->assertStringContainsString('class="dono-stat__label">Donors', $html);
+        $this->assertStringContainsString('dono-block--stat', $html);
+        $this->assertStringContainsString('data-metric="raised"', $html);
+        $this->assertStringContainsString('class="dono-stat__label">Amount raised', $html);
     }
 
     public function test_progress_block_renders_bar_with_percent_role(): void
@@ -139,13 +143,15 @@ final class CampaignPageBlocksTest extends IntegrationTestCase
             'post_title'   => 'Manual page',
             'post_status'  => 'publish',
             'post_type'    => 'page',
-            'post_content' => '<!-- wp:dono/campaign-hero /-->',
+            'post_content' => '<!-- wp:dono/campaign-stat /-->',
             'meta_input'   => ['_dono_campaign_id' => (int) $campaign['id']],
         ]);
 
         $html = $this->renderPage((int) $pageId);
 
-        $this->assertStringContainsString('Meta-bound block', $html);
+        // A stat only renders once a campaign resolved, so its presence is the
+        // proof the meta was read.
+        $this->assertStringContainsString('data-metric="raised"', $html);
     }
 
     public function test_blocks_show_not_bound_notice_when_no_campaign_can_be_resolved(): void

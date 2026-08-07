@@ -17,9 +17,9 @@ final class CampaignBlocksVisibilitySupportTest extends IntegrationTestCase
     public function campaignBlockNames(): array
     {
         return [
-            ['dono/campaign-hero'],
+            ['dono/campaign-image'],
             ['dono/campaign-progress'],
-            ['dono/campaign-stats'],
+            ['dono/campaign-stat'],
             ['dono/donate-button'],
             ['dono/top-donors'],
             ['dono/recent-donations'],

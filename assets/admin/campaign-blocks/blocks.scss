@@ -1,13 +1,11 @@
-// Campaign block styles, loaded in the editor and on the public page.
 // Theme-sensitive surfaces read CSS custom properties so a wrapper carrying
 // `style="--dono-accent: ..."` recolours a block without recompiling.
 
 $accent-fallback:     #1e8a4e;
 $accent-soft-fallback: rgba(30, 138, 78, .12);
-// The soft tint must track the accent: the resolver emits --dono-accent-soft
-// only when a preset or the campaign deliberately pairs one, so derive it from
-// the accent otherwise. A literal fallback here would wash a purple campaign
-// in green.
+// The resolver emits --dono-accent-soft only when a preset or the campaign
+// pairs one with the accent; deriving it otherwise keeps a purple campaign from
+// washing its own pages in green.
 $accent-soft: var(--dono-accent-soft, color-mix(in srgb, var(--dono-accent, #{$accent-fallback}) 12%, #fff));
 $text-fallback:       #1e1e1e;
 $text-muted-fallback: #6b7280;
@@ -23,11 +21,10 @@ $shadow-fallback:     0 20px 50px rgba(0, 0, 0, .25);
     color: var(--dono-text, #{$text-fallback});
 
     // Twenty Twenty-Five ships `html :where([style*="border-width"]) {
-    // border-style: solid }` to catch blocks carrying an inline border width.
-    // Our blocks emit a --dono-stroke custom property, and the selector
-    // matches on the substring, so the theme drew a 3px currentColor border
-    // around every campaign block. Declaring our own border keeps a theme's
-    // substring match from deciding it. Blocks that want one set it themselves.
+    // border-style: solid }`, which matches on the substring, and our blocks
+    // emit a --dono-stroke custom property. Declaring a border here keeps the
+    // theme from drawing a 3px currentColor one; blocks that want a border set
+    // it themselves.
     border: 0;
 }
 
@@ -65,19 +62,18 @@ $shadow-fallback:     0 20px 50px rgba(0, 0, 0, .25);
     }
 }
 
-// Stats (3-up)
-.dono-block--stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 16px;
-
-    .dono-stat {
-        background: var(--dono-bg, #{$bg-fallback});
-        border: 1px solid var(--dono-border, #{$border-fallback});
-        border-radius: var(--dono-radius, #{$radius-fallback});
-        padding: 20px 22px;
+// Deliberately not a card: one stat per block means several sit side by side,
+// and a border each would draw a grid nobody asked for.
+.dono-block--stat {
+    .dono-stat__label {
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        color: var(--dono-text-muted, #{$text-muted-fallback});
     }
     .dono-stat__value {
+        margin-top: 4px;
         font-size: 30px;
         font-weight: 800;
         letter-spacing: -.02em;
@@ -85,16 +81,35 @@ $shadow-fallback:     0 20px 50px rgba(0, 0, 0, .25);
         line-height: 1.1;
         font-variant-numeric: tabular-nums;
     }
-    .dono-stat__label {
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: .06em;
-        color: var(--dono-text-muted, #{$text-muted-fallback});
-        margin-top: 6px;
-    }
+
+    &.is-sm .dono-stat__value { font-size: 21px; }
+    &.is-lg .dono-stat__value { font-size: 42px; letter-spacing: -.028em; }
 }
 
-// Progress
+// aspect-ratio with object-fit so a portrait upload and a landscape one crop to
+// the same shape rather than shoving the page around.
+.dono-block--image {
+    margin: 0;
+
+    .dono-block__image {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    &.is-rounded {
+        overflow: hidden;
+        border-radius: var(--dono-radius, #{$radius-fallback});
+    }
+
+    &.is-ratio-16-9 .dono-block__image { aspect-ratio: 16 / 9; }
+    &.is-ratio-3-2  .dono-block__image { aspect-ratio: 3 / 2; }
+    &.is-ratio-4-3  .dono-block__image { aspect-ratio: 4 / 3; }
+    &.is-ratio-1-1  .dono-block__image { aspect-ratio: 1 / 1; }
+    &.is-ratio-auto .dono-block__image { aspect-ratio: auto; height: auto; }
+}
+
 .dono-block--progress {
     .dono-progress__labels {
         display: flex;
@@ -135,7 +150,6 @@ $shadow-fallback:     0 20px 50px rgba(0, 0, 0, .25);
     }
 }
 
-// Donate button
 .dono-block--donate-button {
     &.is-align-left   { text-align: left; }
     &.is-align-center { text-align: center; }
@@ -163,7 +177,6 @@ $shadow-fallback:     0 20px 50px rgba(0, 0, 0, .25);
     }
 }
 
-// Modal (opened from donate button)
 body.dono-modal-open { overflow: hidden; }
 
 .dono-donate-modal {
@@ -222,7 +235,6 @@ body.dono-modal-open { overflow: hidden; }
     to   { opacity: 1; }
 }
 
-// Shared title affordance
 .dono-block__title {
     margin: 0 0 16px;
     font-size: 20px;
@@ -241,9 +253,6 @@ body.dono-modal-open { overflow: hidden; }
     font-size: 13px;
 }
 
-// Empty state for the donation lists. Centred, with room to breathe: on a new
-// campaign this is the largest thing on the page, so it either invites or it
-// wastes the best space there is.
 .dono-empty {
     display: flex;
     flex-direction: column;
@@ -275,9 +284,8 @@ body.dono-modal-open { overflow: hidden; }
     color: var(--dono-text-muted, #{$text-muted-fallback});
 }
 
-// Outlined rather than filled. The page already has a primary Donate in the
-// hero and another on the form; a third solid button competes with both, and
-// this one is an invitation rather than the main ask.
+// Outlined, not filled: the page already carries a primary Donate in the hero
+// and another on the form, and a third solid button competes with both.
 .dono-empty__btn {
     margin-top: 12px;
     display: inline-block;
@@ -316,7 +324,6 @@ body.dono-modal-open { overflow: hidden; }
     }
 }
 
-// Top donors
 .dono-block--top-donors {
     .dono-top-donors__list {
         list-style: none;
@@ -384,7 +391,6 @@ body.dono-modal-open { overflow: hidden; }
         font-variant-numeric: tabular-nums;
     }
 
-    // Share-of-top bar; sits on its own line below the row (flex-basis 100%).
     .dono-top-donors__bar {
         flex: 0 0 100%;
         height: 6px;
@@ -495,7 +501,6 @@ body.dono-modal-open { overflow: hidden; }
     }
 }
 
-// Recent donations
 .dono-block--recent-donations {
     .dono-recent-donations__list {
         list-style: none;
@@ -573,7 +578,6 @@ body.dono-modal-open { overflow: hidden; }
     }
 }
 
-// Supporter wall
 .dono-block--supporter-wall {
     .dono-supporter-wall {
         list-style: none;
@@ -642,11 +646,11 @@ body.dono-modal-open { overflow: hidden; }
     }
 }
 
-// Block option modifiers (pass 2). Left alignment, "md" size, and "auto"
-// columns are the base styles above, so only the non-default cases need rules.
+// Left alignment, "md" size and "auto" columns are the base styles above, so
+// only the non-default cases need rules.
 
-.dono-block--stats.is-align-center .dono-stat { text-align: center; }
-.dono-block--stats.is-align-right  .dono-stat { text-align: right; }
+.dono-block--stat.is-align-center { text-align: center; }
+.dono-block--stat.is-align-right  { text-align: right; }
 
 .dono-block--progress.is-align-center .dono-progress__labels {
     justify-content: center;
@@ -682,7 +686,6 @@ body.dono-modal-open { overflow: hidden; }
     }
 }
 
-// Campaigns grid - "more ways to give" cards.
 .dono-block--grid {
     margin: 28px 0 24px;
 }
@@ -805,9 +808,8 @@ body.dono-modal-open { overflow: hidden; }
     &:hover &__link svg { transform: translateX(2px); }
 }
 
-// Donation form block - inline form wrapper + editor placeholder. The form
-// itself is centred by its own `margin: 0 auto` + max-width, so no alignment
-// handling is needed here.
+// The form centres itself with its own `margin: 0 auto` and max-width, so no
+// alignment handling belongs here.
 .dono-block--donation-form {
     margin: 0 0 24px;
 }
@@ -826,7 +828,6 @@ body.dono-modal-open { overflow: hidden; }
     span   { font-size: 13px; }
 }
 
-// Circular initial avatar for donor-activity blocks (top donors, recent).
 .dono-avatar {
     flex: 0 0 auto;
     display: inline-flex;
@@ -847,11 +848,10 @@ body.dono-modal-open { overflow: hidden; }
 }
 
 // One shared rail: campaign blocks align to the same 1080px container as the
-// P2P sections and the start page instead of stretching to the template width.
-// Last in the file so the margin-inline centering wins over the per-block
-// margin shorthands above.
-.dono-block--hero,
-.dono-block--stats,
+// P2P sections and the start page. Last in the file so the centering wins over
+// the per-block margin shorthands above.
+.dono-block--image,
+.dono-block--stat,
 .dono-block--progress,
 .dono-block--donate-button,
 .dono-block--top-donors,

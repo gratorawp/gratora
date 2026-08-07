@@ -30,6 +30,7 @@ use Dono\Campaigns\CampaignChrome;
 use Dono\Campaigns\CampaignPageTemplate;
 use Dono\Campaigns\Styling\PageStyle;
 use Dono\Campaigns\CampaignMetricsService;
+use Dono\Campaigns\CampaignStatMetrics;
 use Dono\Campaigns\CampaignRepository;
 use Dono\Campaigns\CampaignService;
 use Dono\Campaigns\SocialMeta;
@@ -75,9 +76,9 @@ use Dono\Campaigns\Blocks\BlockEditorIntegration as CampaignBlockEditorIntegrati
 use Dono\Campaigns\Blocks\CampaignBindingPreviewController;
 use Dono\Campaigns\Blocks\CampaignBindings;
 use Dono\Campaigns\Blocks\CampaignGridBlock;
-use Dono\Campaigns\Blocks\CampaignHeroBlock;
+use Dono\Campaigns\Blocks\CampaignImageBlock;
 use Dono\Campaigns\Blocks\CampaignProgressBlock;
-use Dono\Campaigns\Blocks\CampaignStatsBlock;
+use Dono\Campaigns\Blocks\CampaignStatBlock;
 use Dono\Campaigns\Blocks\DonateButtonBlock;
 use Dono\Campaigns\Blocks\DonationFormBlock;
 use Dono\Campaigns\Blocks\RecentDonationsBlock;
@@ -418,6 +419,11 @@ final class CoreModule implements DonoModule
             $c->get(Clock::class),
             $c->get(DonationRepository::class),
             $c->get(DonorRepository::class)
+        ));
+
+        $c->bind(CampaignStatMetrics::class, fn (Container $c) => new CampaignStatMetrics(
+            $c->get(DonationRepository::class),
+            $c->get(Clock::class)
         ));
 
         $c->bind(Activator::class, fn (Container $c) => new Activator(
@@ -952,9 +958,12 @@ final class CoreModule implements DonoModule
         $blocks->add(new CheckboxBlock());
         $blocks->add(new MultiSelectBlock());
 
-        $blocks->add(new CampaignHeroBlock($c->get(CampaignRepository::class)));
+        $blocks->add(new CampaignImageBlock($c->get(CampaignRepository::class)));
         $blocks->add(new CampaignProgressBlock($c->get(CampaignRepository::class)));
-        $blocks->add(new CampaignStatsBlock($c->get(CampaignRepository::class)));
+        $blocks->add(new CampaignStatBlock(
+            $c->get(CampaignRepository::class),
+            $c->get(CampaignStatMetrics::class),
+        ));
         $blocks->add(new CampaignGridBlock($c->get(CampaignRepository::class)));
         $blocks->add(new DonateButtonBlock(
             $c->get(CampaignRepository::class),

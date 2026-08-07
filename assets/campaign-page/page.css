@@ -1,36 +1,20 @@
-/* Campaign page foundation.
-   The shared vocabulary every campaign page is built from: the --dp-* layer
-   derived from the campaign's own tokens, the page measure and bands, the type
-   ramp, and the primitives (money readout, bar, stats, rows, cards, avatars,
-   buttons, hero and profile headers).
-
-   This began life in the peer-to-peer add-on, which is why the class prefix is
-   dp- and why dono-p2p-* names appear as aliases. None of it was ever specific
-   to peer-to-peer: a standard campaign page needs the same vocabulary, and
-   duplicating it in both plugins would leave two definitions of .dp-band
-   resolving by load order.
+/* Campaign page foundation: the --dp-* token layer, the page measure and bands,
+   the type ramp and the shared primitives. The dono-p2p-* selectors are aliases
+   of the same vocabulary, so one definition serves both plugins.
 
    Nothing below may hardcode a colour, radius, font or shadow. Read a token,
    with the design's own value as the fallback, so an unstyled campaign renders
    exactly as designed and a styled one carries its identity throughout. */
 
-/* Design tokens shared across every campaign page.
+/* Declared on body, not :root: the campaign's values land on body via the
+   dono-campaign-styled class (see Styling\PageStyle) and a property set on body
+   is invisible to :root above it. Body also covers anything an organiser drops
+   beside our blocks, which sits in no wrapper of ours.
 
-   Defined on body, not on :root, because the campaign's own values land on
-   body via the dono-campaign-styled class (see Styling\PageStyle) and a custom
-   property set on body is invisible to :root above it.
-
-   Body rather than our own wrappers alone, because these pages are editable:
-   a heading or a button an organiser drops beside our blocks is not inside any
-   wrapper of ours, and it should still read as part of the campaign. The
-   wrapper list stays so a block rendered on a page that is not a P2P page,
-   an editor preview among them, still styles itself.
-
-   .editor-styles-wrapper is named as well as body because the editor cannot
-   put the campaign values on body, which it shares with the whole admin, and
-   a token declared on body resolves there: it would read the fallback and
-   hand the already-resolved default down, so the canvas would show the design
-   green whatever colour the campaign is. */
+   .editor-styles-wrapper is named too because the editor cannot put campaign
+   values on the body it shares with the whole admin: a token declared there
+   would resolve to the fallback and the canvas would show the design green
+   whatever colour the campaign is. */
 
 body,
 .editor-styles-wrapper,
@@ -44,30 +28,23 @@ body,
 .dono-p2p-sponsors,
 .dono-p2p-welcome,
 .dp-layout{
-    /* Every block wrapper carries the campaign's resolved style as core's own
-       custom properties (see Styling\CampaignStyleVars). Read them here with
-       the design's values as fallbacks: an unstyled campaign renders exactly
-       as designed, a styled one carries its identity across every P2P page.
-       Nothing below may hardcode a colour, radius or face that a campaign can
-       set, or its style stops at the campaign page and never reaches the
-       fundraiser, team and start pages. */
+    /* Block wrappers carry the campaign's resolved style as core's own custom
+       properties (see Styling\CampaignStyleVars). */
     --dp-accent:      var(--dono-accent, #1e8a4e);
     --dp-accent-dark: color-mix(in srgb, var(--dp-accent) 78%, #000);
     /* The resolver emits --dono-accent-soft only when a preset or the campaign
-       deliberately pairs one with the accent; otherwise derive it, or a purple
-       campaign washes its own pages in the default green. */
+       pairs one with the accent; deriving it otherwise keeps a purple campaign
+       from washing its own pages in the default green. */
     --dp-accent-soft: var(--dono-accent-soft, color-mix(in srgb, var(--dp-accent) 12%, #fff));
 
     --dp-text:        var(--dono-text, #141821);
-    /* Secondary prose sits between body and muted. Core has no token for it,
-       so mix the two it lives between rather than picking a literal that would
-       ignore a campaign's palette. */
+    /* Core has no token between body and muted, so mix the two rather than pick
+       a literal that would ignore a campaign's palette. */
     --dp-text-2:      color-mix(in srgb, var(--dp-text) 70%, var(--dp-muted) 30%);
     --dp-muted:       var(--dono-text-muted, #7a8398);
 
-    /* Boundary weight, inherited from core. This was #eef0f2, which is
-       @dono/ui's hairline-divider token, so every card boundary on the
-       public pages sat at about 3% contrast and read as unfinished. */
+    /* Boundary weight, inherited from core. Not @dono/ui's hairline-divider
+       value: at about 3% contrast a card boundary reads as unfinished. */
     --dp-border:      var(--dono-border, #e8ebf0);
     /* The lighter within-list rule, derived so it tracks a custom border. */
     --dp-rule:        color-mix(in srgb, var(--dp-border) 55%, var(--dp-card));
@@ -79,10 +56,9 @@ body,
     --dp-font:        var(--dono-typeface, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
     --dp-shadow:      var(--dono-card-shadow, 0 1px 2px rgba(15, 23, 42, .04), 0 2px 6px rgba(15, 23, 42, .06));
 
-    /* Campaign button tokens. Match core's .dono-donate-button so every
-       call-to-action on a campaign page reads as the same button. Colour and
-       weight follow the campaign's button group where it sets one, falling
-       back to the accent. */
+    /* Match core's .dono-donate-button so every call to action on a campaign
+       page reads as the same button, following the campaign's button group
+       where it sets one. */
     --dp-btn-bg:             var(--dono-button-bg, var(--dp-accent));
     --dp-btn-fg:             var(--dono-button-fg, #fff);
     --dp-btn-hover-bg:       var(--dono-button-hover-bg, var(--dp-accent-dark));
@@ -93,22 +69,20 @@ body,
     --dp-btn-font-weight:    var(--dono-button-weight, 500);
 }
 
-/* Two-column sections are core's columns block now, so core owns the layout:
-   the flex basis comes from the block's own width attribute and its stacking
-   breakpoint is WordPress's. Only the page measure and the sticky rail are
-   ours. Overriding display here would break the block in the editor. */
+/* Core's columns block owns two-column layout: the flex basis comes from the
+   block's width attribute and the stacking breakpoint is WordPress's. Only the
+   page measure and the sticky rail are ours, and overriding display here would
+   break the block in the editor. */
 
 .dono-p2p-layout,
 .dp-layout{
     box-sizing: border-box;
     max-width: 1080px;
     margin-inline: auto;
-    /* The page gutter lives here, not inside each band. Below 1080px the
-       columns had no inset at all: the right rail's heading and the donation
-       form's inputs sat at x=0, glued to the window edge, on every viewport
-       between the stacking breakpoint and 1080. Bands and rails inside the
-       columns give theirs up so the two columns start on the same line, and
-       at 1080 the content measure is unchanged at 1032. */
+    /* The page gutter lives here, not inside each band, or between the stacking
+       breakpoint and 1080px the columns carry no inset and sit glued to the
+       window edge. Bands and rails inside the columns give theirs up so both
+       columns start on the same line; at 1080 the measure is still 1032. */
     padding-inline: 24px;
 }
 
@@ -132,6 +106,21 @@ body,
     align-self: flex-start;
 }
 
+/* Core's column gap is sized for prose and reads as a hole between two figures
+   that belong together, and it only stacks at 781px, far too late for two large
+   numerals inside a narrow rail. */
+.dp-figures{
+    gap: 20px;
+    margin-block: 22px;
+}
+
+@media (max-width: 600px) {
+    .dp-figures{
+        flex-wrap: wrap;
+        gap: 14px;
+    }
+}
+
 /* Core stacks columns at 781px; drop the sticky with it. */
 @media (max-width: 781px) {
     .dp-layout__side,
@@ -144,18 +133,11 @@ body,
     scroll-margin-top: 24px;
 }
 
-/* ============================================================================
-   Public page foundation.
-
-   The shared vocabulary the four public pages are built from: campaign,
-   fundraiser, team, start. Every value here resolves through the --dp-* token
-   layer at the top of this file, which in turn reads the campaign's own style.
-   Nothing below may hardcode a colour, radius or face.
+/* Primitives shared by the campaign, fundraiser, team and start pages.
 
    Anti-clutter contract: one idea per band, space does the separating, and
    exactly one filled button per band. Selected states are ink, never accent,
-   so the accent stays spent on the amount, the bar and the one real action.
-   ========================================================================= */
+   so the accent stays spent on the amount, the bar and the one real action. */
 
 .dp-page {
     color: var(--dp-text);
@@ -166,9 +148,7 @@ body,
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
 
-    /* Each section used to be a card with its own width, padding, border and
-       shadow. On the foundation a section only hosts bands: the band owns the
-       measure and the spacing, and the rhythm comes from space, not boxes.
+    /* A section only hosts bands: the band owns the measure and the spacing.
        These rules sit after the section rules, so equal specificity resolves
        here rather than needing !important. */
     max-width: none;
@@ -184,9 +164,9 @@ body,
 .dp-page *::before,
 .dp-page *::after { box-sizing: border-box; }
 
-/* rhythm *//* Matches .dono-p2p-layout, so a single column page and a page with a rail
-   present at the same width instead of the single column one reading narrower.
-   Inside a layout column the column constrains this anyway. */
+/* Matches .dono-p2p-layout, so a single-column page and a page with a rail
+   present at the same width. Inside a layout column the column constrains this
+   anyway. */
 
 .dp-band{ max-width: 1080px; margin: 0 auto; padding: 0 24px 72px; }
 
@@ -195,8 +175,6 @@ body,
 .dp-band--tight { padding-bottom: 40px; }
 
 .dp-top { padding-top: 64px; }
-
-/* type scale */
 
 .dp-display { margin: 0; font-size: 44px; line-height: 1.08; font-weight: var(--dono-heading-weight, 650); letter-spacing: -.022em; text-wrap: balance; }
 
@@ -208,13 +186,11 @@ body,
 
 .dp-body { margin: 0 0 14px; color: var(--dp-text-2); }
 
-/* Content the organiser owns, standing outside the block it belongs to: a
-   lifted section title, a bound description. The bands inset their own
-   contents, so match that inset or it hangs off to the left of what it names.
-   Declared after the type scale so the auto inline margins survive .dp-h2's
-   margin shorthand. *//* border-box because these sit outside .dp-page, which is where the reset
-   lives: without it the padding is added to the max-width and the rail comes
-   out 48px wider than every band, putting its text 24px out of step. */
+/* Organiser content standing outside the block it belongs to: match the band
+   inset or it hangs off to the left of what it names. Declared after the type
+   scale so the auto inline margins survive .dp-h2's margin shorthand, and
+   box-sizing set here because the reset lives on .dp-page, which these sit
+   outside: without it the rail comes out 48px wider than every band. */
 
 .dp-rail {
     box-sizing: border-box;
@@ -223,18 +199,16 @@ body,
     padding-inline: 24px;
 }
 
-/* A bound value that resolves to nothing leaves its paragraph empty. Hide the
-   section rather than print a title over a blank: a campaign with no short
-   description should not announce that it has one. The editor keeps it, so an
-   organiser can still see the blocks and remove them deliberately. */
+/* A bound value that resolves to nothing leaves its paragraph empty, so hide
+   the section rather than print a title over a blank. The editor keeps it, so
+   an organiser can still see the blocks and remove them deliberately. */
 
 .dp-band--tight:has(> p.dp-body:empty) { display: none; }
 
 .editor-styles-wrapper .dp-band--tight:has(> p.dp-body:empty) { display: revert; }
 
-/* A core Buttons block wearing the campaign's button. Opt-in by class rather
-   than restyling every core button, so an organiser who picks their own button
-   style still gets it. */
+/* Opt-in by class rather than restyling every core button, so an organiser who
+   picks their own button style still gets it. */
 
 .dp-cta .wp-block-button__link,
 .wp-block-button.dp-cta .wp-block-button__link {
@@ -250,8 +224,6 @@ body,
 .dp-cta .wp-block-button__link:hover,
 .wp-block-button.dp-cta .wp-block-button__link:hover { background: var(--dp-btn-hover-bg); color: var(--dp-btn-fg); }
 
-/* The secondary of a pair: the same button, said quietly. */
-
 .dp-cta--quiet .wp-block-button__link,
 .wp-block-button.dp-cta--quiet .wp-block-button__link {
     background: transparent;
@@ -264,8 +236,8 @@ body,
 .dp-cta--quiet .wp-block-button__link:hover,
 .wp-block-button.dp-cta--quiet .wp-block-button__link:hover { background: transparent; color: var(--dp-text); }
 
-/* The page title, now a block of its own above the readout. It carries the gap
-   the band it used to sit in provided. */
+/* The title is a block of its own above the readout, so it carries the gap a
+   band would otherwise provide. */
 
 .dp-display.dp-rail { margin-block-end: 40px; }
 
@@ -277,8 +249,6 @@ body,
 .dp-band > .dp-meta { max-width: 68ch; }
 
 .dp-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: var(--dp-muted); }
-
-/* media */
 
 .dp-figure {
     width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block;
@@ -294,17 +264,7 @@ body,
 
 .dp-avatar--sm { width: 34px; height: 34px; font-size: 12.5px; }
 
-/* The same circle, filled with the fundraiser's or team's own photo. The alt is
-   empty on purpose: the name sits beside it, so a screen reader would otherwise
-   hear it twice. */
-
 .dp-avatar--photo { object-fit: cover; background: var(--dp-rule); }
-
-/* Centred profile header (the "v2" direction). A shallow accent-tinted cover,
-   the portrait straddling its edge, then name, meta, actions and the money on
-   one symmetrical axis. The 1080px row is used as a stage rather than a line to
-   fill, which is what left it looking empty when it held only a name.
-   Everything reads from --dp-* so a campaign's own palette carries through. */
 
 .dp-profile {
     max-width: 1080px;
@@ -461,8 +421,6 @@ body,
 .dp-profile__actions .dp-link { width: 100%; }
 }
 
-/* money: the amount is the loudest thing on the page */
-
 .dp-money { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-top: 28px; font-variant-numeric: tabular-nums; }
 
 .dp-raised { font-size: 36px; font-weight: var(--dono-heading-weight, 650); letter-spacing: -.022em; color: var(--dp-accent); }
@@ -473,8 +431,6 @@ body,
 
 .dp-bar i { display: block; height: 100%; border-radius: 999px; background: var(--dp-accent); }
 
-/* stats: bare numbers, hairline dividers, no icons, no boxes */
-
 .dp-stats { display: flex; flex-wrap: wrap; margin-top: 26px; border-top: 1px solid var(--dp-border); }
 
 .dp-stat { flex: 1 1 120px; padding: 16px 18px 0 0; }
@@ -484,8 +440,6 @@ body,
 .dp-stat b { display: block; font-size: 22px; font-weight: var(--dono-heading-weight, 650); letter-spacing: -.018em; font-variant-numeric: tabular-nums; }
 
 .dp-stat span { display: block; margin-top: 3px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: var(--dp-muted); }
-
-/* actions: exactly one filled per band */
 
 .dp-actions { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin-top: 26px; }
 
@@ -508,8 +462,6 @@ body,
 
 .dp-link--quiet { color: var(--dp-muted); font-weight: 500; }
 
-/* rows: rosters, donors, leaderboards. Five, then "see all". */
-
 .dp-row { display: flex; align-items: center; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--dp-rule); }
 
 .dp-row:last-of-type { border-bottom: 0; }
@@ -521,7 +473,7 @@ body,
 .dp-row-sub { display: block; font-size: 13px; color: var(--dp-muted); margin-top: 1px; }
 
 /* Truncate rather than wrap: a long headline must not make one row twice the
-   height of its neighbours, which is what makes a ranked list unreadable. */
+   height of its neighbours. */
 
 .dp-row-sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
@@ -531,19 +483,13 @@ body,
     color: var(--dp-accent-dark); background: var(--dp-accent-soft); border-radius: 999px;
 }
 
-/* the message is the feature, so it gets body scale, not metadata styling */
-
 .dp-row-msg { display: block; font-size: 15px; line-height: 1.5; color: var(--dp-text-2); margin: 4px 0 2px; }
 
 .dp-row-amt { font-weight: 650; font-variant-numeric: tabular-nums; flex: none; }
 
 .dp-rank { width: 26px; font-size: 13px; font-weight: 700; color: var(--dp-muted); font-variant-numeric: tabular-nums; flex: none; }
 
-/* card: only when a thing must detach from the page */
-
 .dp-card { border: 1px solid var(--dp-border); border-radius: var(--dp-radius); padding: 22px 24px; background: var(--dp-card); }
-
-/* the quiet footer: owner and admin affordances live ONLY here */
 
 .dp-foot { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; padding-top: 22px; border-top: 1px solid var(--dp-border); }
 
@@ -560,37 +506,32 @@ body,
 
 .dp-row.dp-inline-link:hover .dp-row-name { text-decoration: underline; text-underline-offset: 3px; }
 
-/* Images inside a story. wp_kses_post already allows <img>; without this an
-   inserted image renders at natural width and breaks the column. No aspect
-   lock, unlike the hero figure: people insert portrait photos and cropping
-   them is not our call. */
+/* wp_kses_post allows <img>, and without this an inserted image renders at its
+   natural width and breaks the column. No aspect lock, unlike the hero figure:
+   organisers insert portrait photos and cropping them is not our call. */
 
 .dp-prose img { display: block; width: 100%; height: auto; border-radius: var(--dp-radius); margin: 26px 0; }
 
 .dp-figure--story { aspect-ratio: auto; min-height: 190px; margin: 26px 0; }
 
-/* ---- hero: the numbers overlap the image instead of sitting under it ----
-   Text never goes ON the photo. Uploaded photos are unpredictable and legible
-   overlay needs a scrim, which muddies the one emotional asset on the page.
-   The card carries its own surface, so contrast is guaranteed whatever gets
-   uploaded, and it pulls the amount and the bar back above the fold. */
+/* The numbers overlap the image rather than sitting on it: legible overlay text
+   needs a scrim over an unpredictable upload, while a card carries its own
+   surface and guarantees contrast. */
 
 .dp-hero {
     position: relative; margin-top: 26px;
-    /* The card inside responds to this box, not to the window. The hero now
-       sits in a 62% column on the campaign page, where the viewport is wide
-       and the card is not, and the viewport queries that used to size it
-       never fired. */
+    /* The card inside responds to this box, not the window: in a 62% column the
+       viewport is wide while the card is not, so viewport queries never fire at
+       the size that matters. */
     container-type: inline-size;
 }
 
 .dp-hero .dp-figure { margin-bottom: 0; }
 
-/* At 16:9 across the 1080px measure the photo is 581px tall, and with the
-   title above it the readout landed around 790px down: below the fold on a
-   laptop, so the page asked before it had persuaded anyone. The -38px overlap
-   below was never going to cover that. Cap the height once there is a wide
-   viewport to cap and let object-fit crop; the phone layout already worked. */
+/* At 16:9 across the 1080px measure the photo is 581px tall, which puts the
+   readout about 790px down, below the fold on a laptop. Cap the height once
+   there is a wide viewport to cap and let object-fit crop; the phone layout
+   needs no cap. */
 @media (min-width: 782px) {
     .dp-hero .dp-figure { max-height: 46vh; }
 }
@@ -603,21 +544,14 @@ body,
     border-radius: var(--dp-radius-sm); box-shadow: var(--dp-shadow);
 }
 
-/* Two actions, two homes. Recruit sits on the photo, top right, out of the
-   readout's way; donate rides the money line it belongs to. Neither adds a
-   row, so the card keeps its height. */
-
 .dp-hero-top { position: absolute; top: 14px; right: 14px; }
 
-/* white, not accent: legible on any uploaded photo, and it leaves the accent
-   as the single filled action on the page, which is donate */
+/* White, not accent: legible on any uploaded photo, and it leaves the accent to
+   the one filled action on the page, which is donate. */
 
 .dp-hero-top .dp-btn { background: #fff; color: var(--dp-text); font-size: 13.5px; padding: 9px 16px; box-shadow: 0 2px 12px rgba(15, 23, 42, .2); }
 
 .dp-hero-top .dp-btn:hover { background: var(--dp-page); color: var(--dp-text); }
-
-/* Compact by design. The card is a readout, not a hero in its own right: it
-   hands the eye back to the photo and the ask, so every value steps down. */
 
 .dp-hero-card .dp-money { margin-top: 0; gap: 7px; flex-wrap: nowrap; }
 
@@ -640,9 +574,6 @@ body,
 .dp-hero-card .dp-stat b { font-size: 12.5px; letter-spacing: -.008em; }
 
 .dp-hero-card .dp-stat span { margin-top: 1px; font-size: 9px; letter-spacing: .07em; }
-
-/* No photo, and plenty of campaigns will have none: the card stops floating
-   and becomes a plain block. Nothing else about the band changes. */
 
 .dp-hero--flat .dp-figure { display: none; }
 
@@ -671,8 +602,6 @@ body,
     .dp-display { font-size: 34px; }
 }
 
-/* Share sheet, opened by the one quiet share link the design allows. */
-
 .dp-sharesheet {
     position: absolute; top: calc(100% + 8px); left: 0; z-index: 20;
     min-width: 170px; padding: 6px;
@@ -689,10 +618,9 @@ body,
 
 .dp-sharesheet__item:hover { background: var(--dp-accent-soft); color: var(--dp-text); }
 
-/* ---- the donation form on a P2P page ----
-   Only the band spacing. Whether the form wears a card is the form's own
-   Style setting (Frame or Plain), honoured by the shortcode this block
-   renders; forcing it flat here would override the organiser's choice. */
+/* Band spacing only. Whether the form wears a card is its own Style setting
+   (Frame or Plain), honoured by the shortcode this block renders; forcing it
+   flat here would override the organiser's choice. */
 
 .dono-p2p-form-band,
 .dono-form-band{

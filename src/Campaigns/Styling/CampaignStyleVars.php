@@ -7,22 +7,11 @@ namespace Dono\Campaigns\Styling;
 use Dono\Campaigns\Campaign;
 
 /**
- * A campaign's style is a map of 26 tokens, not one colour.
- *
- * The campaign blocks emitted only `--dono-accent`, and `campaign-stats` emitted
- * nothing at all, while their stylesheet reads `--dono-text`, `--dono-bg`,
- * `--dono-border` and `--dono-radius` 73 times between them. Those four are
- * defined in `donation-form/runtime.scss` and nowhere else, so a campaign's
- * Corner radius, Background and Text settings reached the donation form and
- * stopped there: every other block on the page fell back to the Sass literals.
- * The page also carries a `dono-campaign-styled` body class that only the P2P
- * add-on ever defined, so on a standard campaign it promised a rule that was
- * never printed.
- *
- * This emits the whole resolved map as inline custom properties on a block's
- * wrapper. The stylesheet reads them with the design's own values as fallbacks,
- * so an unstyled campaign renders exactly as designed and a styled one carries
- * its identity across every block.
+ * A campaign's style is a map of 26 tokens, not one colour. This emits the
+ * whole resolved map as inline custom properties on a block wrapper; the
+ * stylesheets read them with the design's own values as fallbacks, so an
+ * unstyled campaign renders as designed and a styled one carries its identity
+ * across every block.
  */
 final class CampaignStyleVars
 {

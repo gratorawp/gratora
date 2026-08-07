@@ -8,12 +8,7 @@ use Dono\Campaigns\Styling\CampaignStyleResolver;
 use Dono\Vendor\Queryable\Model;
 use Dono\Vendor\Queryable\Schema\Table;
 
-/**
- * Fundraising campaign. Each campaign owns one public-facing WP page
- * (linked via `page_id`) and zero or more donation forms.
- *
- * @version 1.0.0
- */
+/** Owns one public-facing WP page (via `page_id`) and zero or more donation forms. */
 final class Campaign extends Model
 {
     protected string $table = 'dono_campaigns';
@@ -25,10 +20,7 @@ final class Campaign extends Model
     public ?string $description = null;
     public ?int $image_attachment_id = null;
     public string $status = 'draft';
-    /**
-     * Campaign-type discriminator. 'standard' by default. VARCHAR so add-ons
-     * can register new types without a schema change.
-     */
+    /** VARCHAR so add-ons can register new types without a schema change. */
     public string $campaign_type = 'standard';
     public string $goal_type = 'amount';
     public ?int $goal_cents = null;
@@ -45,51 +37,29 @@ final class Campaign extends Model
     public ?array $default_amount_presets = null;
 
     /**
-     * Styling choice, resolved by CampaignStyleResolver: null/[] = org default preset;
+     * Resolved by CampaignStyleResolver: null/[] = org default preset;
      * ['preset_id' => id] picks a brand preset, optionally with 'tokens' inline overrides.
      */
     public ?array $style = null;
 
-    /** Hide the theme's header/footer on this campaign's public pages. */
     public bool $hide_header = false;
     public bool $hide_footer = false;
 
     public string $created_at;
     public string $updated_at;
 
-    /**
-     * Resolved accent color for this campaign. Used by server-rendered campaign
-     * blocks (donate-button, hero, progress, top-donors, etc.) that need a
-     * single colour rather than the full token map.
-     */
     public function accentColor(): string
     {
         return (new CampaignStyleResolver())->accentFor($this);
     }
 
-    /**
-     * The single answer to "can this campaign take money right now". Every gate
-     * calls this, so status and the admin's schedule are read the same way in
-     * all of them, and a new condition reaches every gate at once.
-     *
-     * $now is UTC, matching how starts_at / ends_at are stored and how
-     * CampaignRepository already compares them.
-     */
+    /** $now is UTC, matching how starts_at / ends_at are stored. */
     public function acceptsDonations(?string $now = null): bool
     {
         return $this->notAcceptingReason($now) === null;
     }
 
-    /**
-     * Why this campaign is turning donations away, or null when it is not.
-     *
-     * The same walk acceptsDonations does, returning which test failed rather
-     * than only that one did. Admin screens need to say what is wrong, and
-     * working that out from status and dates a second time is how the answer
-     * on the screen drifts from the answer at the gate.
-     *
-     * @return null|'draft'|'archived'|'scheduled'|'ended'
-     */
+    /** @return null|'draft'|'archived'|'scheduled'|'ended' */
     public function notAcceptingReason(?string $now = null): ?string
     {
         if ($this->status === 'archived')  return 'archived';
@@ -115,13 +85,9 @@ final class Campaign extends Model
 
     /**
      * An end date is inclusive of the whole of that day: "ends 28 July" still
-     * takes a donation at 10am on the 28th.
-     *
-     * The column is a datetime, so a date the admin picked has already been
-     * normalised to midnight by the time we read it back, and midnight is not
-     * distinguishable from a deliberate 00:00:00 end. The schedule UI only ever
-     * emits dates, so reading midnight as end-of-day matches what was actually
-     * chosen; the alternative silently costs every campaign its final day.
+     * takes a donation at 10am on the 28th. The column is a datetime and the
+     * schedule UI only emits dates, so a stored midnight means end-of-day;
+     * reading it literally costs every campaign its final day.
      */
     private static function endBoundary(?string $stamp): ?string
     {

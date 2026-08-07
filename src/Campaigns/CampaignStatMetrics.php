@@ -1,0 +1,107 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Dono\Campaigns;
+
+use Dono\Donations\DonationRepository;
+use Dono\Foundation\Helpers\Money;
+use Dono\Foundation\Time\Clock;
+
+/**
+ * A metric answers null when the campaign cannot support it, so a stat block
+ * placed on a campaign it does not suit renders nothing instead of a confident
+ * zero.
+ */
+final class CampaignStatMetrics
+{
+    /** @var array<int,int> campaign id => largest net paid gift, in cents */
+    private array $topCache = [];
+
+    public function __construct(
+        private readonly DonationRepository $donations,
+        private readonly Clock $clock,
+    ) {
+    }
+
+    public static function labels(): array
+    {
+        return [
+            'raised'    => __('Amount raised', 'dono'),
+            'goal'      => __('Our goal', 'dono'),
+            'remaining' => __('Still needed', 'dono'),
+            'percent'   => __('Of goal reached', 'dono'),
+            'donations' => __('Donations', 'dono'),
+            'donors'    => __('Donors', 'dono'),
+            'average'   => __('Average donation', 'dono'),
+            'top'       => __('Top donation', 'dono'),
+            'days_left' => __('Days left', 'dono'),
+        ];
+    }
+
+    public static function keys(): array
+    {
+        return array_keys(self::labels());
+    }
+
+    public static function isKey(string $metric): bool
+    {
+        return array_key_exists($metric, self::labels());
+    }
+
+    public function value(Campaign $campaign, string $metric): ?string
+    {
+        $currency  = (string) $campaign->currency;
+        $raised    = (int) $campaign->raised_cents;
+        $goal      = (int) $campaign->goal_cents;
+        $donations = (int) $campaign->donations_count;
+
+        return match ($metric) {
+            'raised'    => Money::format($raised, $currency),
+            'goal'      => $goal > 0 ? Money::format($goal, $currency) : null,
+            'remaining' => $goal > 0 ? Money::format(max(0, $goal - $raised), $currency) : null,
+            'percent'   => $goal > 0
+                ? sprintf('%d%%', (int) min(100, floor(($raised / $goal) * 100)))
+                : null,
+            'donations' => number_format_i18n($donations),
+            'donors'    => number_format_i18n((int) $campaign->donors_count),
+            // Integer division on purpose. An average is a summary, and cents
+            // of one put a false precision on it.
+            'average'   => $donations > 0
+                ? Money::format((int) round($raised / $donations), $currency)
+                : null,
+            'top'       => $this->topOrNull($campaign, $currency),
+            'days_left' => $this->daysLeftOrNull($campaign),
+            default     => null,
+        };
+    }
+
+    public function label(string $metric, string $custom = ''): string
+    {
+        $custom = trim($custom);
+        return $custom !== '' ? $custom : (self::labels()[$metric] ?? '');
+    }
+
+    // Gated on the query, not on donations_count: a drifted counter would hide
+    // the figure silently. Memoised so several stat blocks cost one aggregate.
+    private function topOrNull(Campaign $campaign, string $currency): ?string
+    {
+        $id = (int) $campaign->id;
+        $this->topCache[$id] ??= $this->donations->maxNetPaidAmount($id);
+
+        return $this->topCache[$id] > 0 ? Money::format($this->topCache[$id], $currency) : null;
+    }
+
+    // An ended campaign reads zero rather than a negative count.
+    private function daysLeftOrNull(Campaign $campaign): ?string
+    {
+        if (empty($campaign->ends_at)) {
+            return null;
+        }
+
+        $end = new \DateTimeImmutable((string) $campaign->ends_at);
+        $now = $this->clock->now();
+
+        return number_format_i18n($end < $now ? 0 : (int) $now->diff($end)->format('%a'));
+    }
+}

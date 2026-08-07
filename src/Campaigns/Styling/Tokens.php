@@ -4,12 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Campaigns\Styling;
 
-/**
- * Canonical donation-form style token catalogue. Each token maps to a CSS
- * custom property injected on the rendered form element.
- *
- * @version 1.0.0
- */
+/** Each token maps to a CSS custom property injected on the rendered form element. */
 final class Tokens
 {
     /**
@@ -134,14 +129,12 @@ final class Tokens
                 'step'    => 1,
                 'help'    => __('Buttons, inputs, chips and other controls.', 'dono'),
             ],
-            // Not 'dono-border-width'. These names ship inside a block's inline
-            // style attribute, and both WordPress and themes select on
-            // substrings of it -- twentytwentyfive's
-            // `html :where([style*="border-width"]) { border-style: solid }`
-            // matched the custom property and drew a 3px border on every
-            // campaign block. Same reason for dono-typeface, dono-type-size and
-            // dono-button-size: no token name may contain a CSS property that
-            // a [style*=] selector targets.
+            // Not 'dono-border-width'. Token names ship inside a block's inline
+            // style attribute, and themes select on substrings of it:
+            // twentytwentyfive's `html :where([style*="border-width"])` matches
+            // the custom property and draws a border on every campaign block.
+            // Same for dono-typeface, dono-type-size and dono-button-size: no
+            // token name may contain a CSS property a [style*=] selector targets.
             'dono-stroke' => [
                 'group'   => 'radius',
                 'label'   => __('Border width', 'dono'),
@@ -258,7 +251,6 @@ final class Tokens
         ];
     }
 
-    /** Group slug → display label. */
     public static function groups(): array
     {
         return [
@@ -272,7 +264,6 @@ final class Tokens
         ];
     }
 
-    /** Full default token map (every token at its catalogue default). */
     public static function defaults(): array
     {
         $out = [];
@@ -283,9 +274,8 @@ final class Tokens
     }
 
     /**
-     * Sanitize an inbound token map: drop unknown keys, coerce values to strings,
-     * drop empties. Values land verbatim in CSS; `;` or `}` would break out of
-     * the declaration, so each is validated against its control's expected shape.
+     * Values land verbatim in CSS, where `;` or `}` breaks out of the
+     * declaration, so each is validated against its control's expected shape.
      */
     public static function sanitize(array $tokens): array
     {
@@ -302,13 +292,7 @@ final class Tokens
         return $out;
     }
 
-    /**
-     * Validate a single token value against its catalogue definition. Returns
-     * the value if it's safe, or null to drop it. Catches values that could
-     * break out of a CSS declaration up front, then tightens per control.
-     *
-     * @param array<string,mixed> $def
-     */
+    /** Null drops the value. */
     private static function sanitiseValue(array $def, string $value): ?string
     {
         if (preg_match('/[;{}<>\\\\]/', $value)) return null;
@@ -323,8 +307,7 @@ final class Tokens
                 // variants explicitly.
                 if (preg_match('/^#(?:[0-9a-fA-F]{4}|[0-9a-fA-F]{8})$/', $value)) return strtolower($value);
                 if (preg_match('/^(rgb|rgba|hsl|hsla)\(\s*[0-9.,\s%\/-]+\s*\)$/i', $value)) return $value;
-                // Accept CSS color keywords used by outlined / inherited
-                // button presets (Quiet's transparent fill, etc.).
+                // Keywords used by outlined / inherited button presets.
                 if (in_array(strtolower($value), ['transparent', 'currentcolor', 'inherit'], true)) {
                     return strtolower($value) === 'currentcolor' ? 'currentColor' : strtolower($value);
                 }

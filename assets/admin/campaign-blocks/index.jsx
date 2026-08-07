@@ -1,6 +1,6 @@
-// Campaign content blocks for the WP post/page editor.
-// All blocks are server-rendered; the editor uses ServerSideRender for live preview.
-// campaignId=0 falls back to the page's _dono_campaign_id post meta.
+// Every block here is server-rendered, so the editor previews through
+// ServerSideRender. campaignId=0 falls back to the page's _dono_campaign_id
+// post meta.
 
 import { useSelect } from '@wordpress/data';
 import { useEntityRecord, useEntityRecords } from '@wordpress/core-data';
@@ -39,8 +39,8 @@ function useBoundCampaign( campaignId ) {
         return Number( meta._dono_campaign_id || 0 );
     }, [] );
 
-    // The page itself is bound to a campaign (a campaign landing page): blocks
-    // auto-inherit it, so the picker is hidden. Elsewhere the author picks one.
+    // On a campaign landing page the blocks inherit the page's campaign, so the
+    // picker is hidden. Elsewhere the author picks one.
     const onCampaignPage = postMetaId > 0;
     const resolvedId = campaignId || postMetaId || 0;
     const { record } = useEntityRecord( 'dono/v1', 'campaign', resolvedId, {
@@ -52,8 +52,8 @@ function useBoundCampaign( campaignId ) {
 function CampaignPicker( { value, onChange, noneLabel } ) {
     const { records } = useEntityRecords( 'dono/v1', 'campaign', { per_page: 100 } );
     // useEntityRecords yields `records: null` until the fetch resolves, and a
-    // destructuring default only replaces `undefined`, not `null` - so guard
-    // before mapping or the inspector throws the moment a block is selected.
+    // destructuring default only replaces `undefined`, so this guard is what
+    // keeps the inspector from throwing on selection.
     const campaigns = Array.isArray( records ) ? records : [];
     return (
         <SelectControl
@@ -95,11 +95,6 @@ function BoundCampaignNote( { campaign, issues = [] } ) {
     );
 }
 
-/**
- * Inspector campaign control: the picker is shown only when the block lives
- * somewhere other than a campaign page; on a campaign page the block inherits
- * that page's campaign automatically, so we just show the bound note.
- */
 function CampaignField( { attributes, setAttributes, campaign, onCampaignPage, issues = [] } ) {
     return (
         <>
@@ -114,11 +109,8 @@ function CampaignField( { attributes, setAttributes, campaign, onCampaignPage, i
     );
 }
 
-/**
- * Canvas body for a campaign block: unbound on a non-campaign page shows an inline
- * picker Placeholder; otherwise previews via ServerSideRender with the resolved
- * campaign id (block-renderer has no post context).
- */
+// The block-renderer endpoint has no post context, so the resolved campaign id
+// has to be passed to ServerSideRender explicitly.
 function CampaignCanvas( { block, attributes, setAttributes, onCampaignPage, resolvedId, icon = 'megaphone', className, children, isSelected = false, interactive = false, editableTitle = false } ) {
     const blockProps = useBlockProps( className ? { className } : {} );
 
@@ -139,17 +131,15 @@ function CampaignCanvas( { block, attributes, setAttributes, onCampaignPage, res
         );
     }
 
-    // Interactive previews (the live donation form) stay disabled until the
-    // block is selected, so the first click selects the block and later clicks
-    // drive the form. Toggling isDisabled (vs swapping elements) keeps the
-    // iframe from remounting on every selection change.
+    // Interactive previews stay disabled until the block is selected, so the
+    // first click selects and later clicks drive the form. Toggling isDisabled
+    // rather than swapping elements keeps the iframe from remounting.
     return (
         <div { ...blockProps }>
             { children }
             <Disabled isDisabled={ interactive ? ! isSelected : true }>
-                { /* A block whose title is edited in the canvas above must not
-                     render it again in the preview: the server view prints its
-                     own h3, so a title typed here appeared twice. */ }
+                { /* The server view prints its own h3, so a title edited in the
+                     canvas above is blanked here or it renders twice. */ }
                 <ServerSideRender
                     block={ block }
                     attributes={ editableTitle
@@ -161,34 +151,27 @@ function CampaignCanvas( { block, attributes, setAttributes, onCampaignPage, res
     );
 }
 
-// dono/campaign-hero
-registerBlockType( 'dono/campaign-hero', {
+registerBlockType( 'dono/campaign-image', {
     apiVersion: 3,
-    title:      __( 'Campaign hero', 'dono' ),
-    description: __( 'Title, description and cover image for the campaign.', 'dono' ),
-    category:   'dono',
-    icon:       'megaphone',
+    title:       __( 'Campaign image', 'dono' ),
+    description: __( "The campaign's cover photo. Follows the campaign, not the page it sits on.", 'dono' ),
+    category:    'dono',
+    icon:        'format-image',
     attributes: {
-        campaignId:      { type: 'integer', default: 0 },
-        showDonate: { type: 'boolean', default: true },
-        showCover:       { type: 'boolean', default: true },
-        showSummary:     { type: 'boolean', default: true },
-        showTitle:       { type: 'boolean', default: true },
-        showProgress:    { type: 'boolean', default: true },
-        showStats:       { type: 'boolean', default: true },
-        donateLabel:     { type: 'string',  default: '' },
-        headingLevel:    { type: 'integer', default: 1 },
-        align:           { type: 'string',  default: 'left' },
+        campaignId:  { type: 'integer', default: 0 },
+        aspectRatio: { type: 'string',  default: '16-9' },
+        rounded:     { type: 'boolean', default: true },
+        priority:    { type: 'boolean', default: true },
     },
-    edit: function HeroEdit( { attributes, setAttributes } ) {
+    edit: function CampaignImageEdit( { attributes, setAttributes } ) {
         const { campaign, onCampaignPage, resolvedId } = useBoundCampaign( attributes.campaignId );
         const issues = [];
-        if ( campaign && attributes.showCover && ! campaign.image_attachment_id ) {
-            issues.push( __( 'This campaign has no cover image set. The hero will render without one.', 'dono' ) );
+        if ( campaign && ! campaign.image_attachment_id ) {
+            issues.push( __( 'This campaign has no cover image yet. Add one in the campaign settings.', 'dono' ) );
         }
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Hero', 'dono' ) }>
+                <PanelBody title={ __( 'Image', 'dono' ) }>
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
@@ -196,95 +179,99 @@ registerBlockType( 'dono/campaign-hero', {
                         onCampaignPage={ onCampaignPage }
                         issues={ issues }
                     />
-                    <ToggleControl
-                        label={ __( 'Show cover image', 'dono' ) }
-                        checked={ attributes.showCover }
-                        onChange={ ( v ) => setAttributes( { showCover: v } ) }
+                    <SelectControl
+                        label={ __( 'Aspect ratio', 'dono' ) }
+                        value={ attributes.aspectRatio }
+                        options={ [
+                            { value: '16-9', label: __( 'Wide (16:9)',     'dono' ) },
+                            { value: '3-2',  label: __( 'Photo (3:2)',     'dono' ) },
+                            { value: '4-3',  label: __( 'Classic (4:3)',   'dono' ) },
+                            { value: '1-1',  label: __( 'Square (1:1)',    'dono' ) },
+                            { value: 'auto', label: __( "The image's own", 'dono' ) },
+                        ] }
+                        onChange={ ( v ) => setAttributes( { aspectRatio: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show progress bar', 'dono' ) }
-                        checked={ attributes.showProgress }
-                        onChange={ ( v ) => setAttributes( { showProgress: v } ) }
+                        label={ __( 'Rounded corners', 'dono' ) }
+                        checked={ attributes.rounded }
+                        onChange={ ( v ) => setAttributes( { rounded: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show stats', 'dono' ) }
-                        checked={ attributes.showStats }
-                        onChange={ ( v ) => setAttributes( { showStats: v } ) }
+                        label={ __( 'Load with priority', 'dono' ) }
+                        help={ __( 'Leave on when this is the first image a visitor sees. Turn it off further down the page so it loads only when needed.', 'dono' ) }
+                        checked={ attributes.priority }
+                        onChange={ ( v ) => setAttributes( { priority: v } ) }
                         __nextHasNoMarginBottom
                     />
-                    <TextControl
-                        label={ __( 'Donate button label', 'dono' ) }
-                        value={ attributes.donateLabel }
-                        onChange={ ( v ) => setAttributes( { donateLabel: v } ) }
-                        placeholder={ __( 'Donate', 'dono' ) }
-                        __nextHasNoMarginBottom
-                    />
-                    <ToggleControl
-                        label={ __( 'Show amount raised', 'dono' ) }
-                        checked={ attributes.showSummary }
-                        onChange={ ( v ) => setAttributes( { showSummary: v } ) }
-                        __nextHasNoMarginBottom
-                    />
-                    <ToggleControl
-                        label={ __( 'Show title', 'dono' ) }
-                        checked={ attributes.showTitle }
-                        onChange={ ( v ) => setAttributes( { showTitle: v } ) }
-                        help={ __( 'The seeded layout puts an editable Heading block above this one and turns this off. Turn it on to use the built-in title instead.', 'dono' ) }
-                        __nextHasNoMarginBottom
-                    />
-                    { attributes.showTitle && (
-                        <SelectControl
-                            label={ __( 'Heading level', 'dono' ) }
-                            value={ String( attributes.headingLevel || 1 ) }
-                            options={ [
-                                { value: '1', label: __( 'H1', 'dono' ) },
-                                { value: '2', label: __( 'H2', 'dono' ) },
-                                { value: '3', label: __( 'H3', 'dono' ) },
-                            ] }
-                            onChange={ ( v ) => setAttributes( { headingLevel: Number( v ) || 1 } ) }
-                            __nextHasNoMarginBottom
-                        />
-                    ) }
                 </PanelBody>
             </InspectorControls>
             <CampaignCanvas
-                block="dono/campaign-hero"
+                block="dono/campaign-image"
                 attributes={ attributes }
                 setAttributes={ setAttributes }
                 onCampaignPage={ onCampaignPage }
                 resolvedId={ resolvedId }
-                icon="megaphone"
+                icon="format-image"
             />
         </>;
     },
     save: () => null,
 } );
 
-// dono/campaign-stats
-registerBlockType( 'dono/campaign-stats', {
+// Mirrors CampaignStatMetrics::labels() in PHP, which is what actually renders;
+// a key here that is not there falls back to raised.
+const STAT_METRICS = [
+    { value: 'raised',    label: __( 'Amount raised',    'dono' ) },
+    { value: 'goal',      label: __( 'Our goal',         'dono' ) },
+    { value: 'remaining', label: __( 'Still needed',     'dono' ) },
+    { value: 'percent',   label: __( 'Of goal reached',  'dono' ) },
+    { value: 'donations', label: __( 'Donations',        'dono' ) },
+    { value: 'donors',    label: __( 'Donors',           'dono' ) },
+    { value: 'average',   label: __( 'Average donation', 'dono' ) },
+    { value: 'top',       label: __( 'Top donation',     'dono' ) },
+    { value: 'days_left', label: __( 'Days left',        'dono' ) },
+];
+
+// Metrics this campaign cannot answer, so the editor says so instead of leaving
+// the author a block that renders nothing on the front end.
+function statIssue( campaign, metric ) {
+    if ( ! campaign ) return null;
+    const noGoal = ! Number( campaign.goal_cents );
+    if ( noGoal && [ 'goal', 'remaining', 'percent' ].includes( metric ) ) {
+        return __( 'This campaign has no goal, so this stat will not render.', 'dono' );
+    }
+    if ( metric === 'days_left' && ! campaign.ends_at ) {
+        return __( 'This campaign has no end date, so this stat will not render.', 'dono' );
+    }
+    if ( [ 'average', 'top' ].includes( metric ) && ! Number( campaign.donations_count ) ) {
+        return __( 'No donations yet, so this stat will not render until the first one arrives.', 'dono' );
+    }
+    return null;
+}
+
+registerBlockType( 'dono/campaign-stat', {
     apiVersion: 3,
-    title:      __( 'Campaign stats', 'dono' ),
-    description: __( 'Amount raised, donations count, donors count.', 'dono' ),
-    category:   'dono',
-    icon:       'chart-bar',
+    title:       __( 'Campaign stat', 'dono' ),
+    description: __( 'A single campaign figure. Add one per number you want to show.', 'dono' ),
+    category:    'dono',
+    icon:        'chart-bar',
     attributes: {
-        campaignId:    { type: 'integer', default: 0 },
-        showRaised:    { type: 'boolean', default: true },
-        showDonations: { type: 'boolean', default: true },
-        showDonors:    { type: 'boolean', default: true },
-        align:         { type: 'string',  default: 'left' },
+        campaignId: { type: 'integer', default: 0 },
+        metric:     { type: 'string',  default: 'raised' },
+        label:      { type: 'string',  default: '' },
+        size:       { type: 'string',  default: 'md' },
+        align:      { type: 'string',  default: 'left' },
     },
-    edit: function StatsEdit( { attributes, setAttributes } ) {
+    edit: function CampaignStatEdit( { attributes, setAttributes } ) {
         const { campaign, onCampaignPage, resolvedId } = useBoundCampaign( attributes.campaignId );
-        const issues = [];
-        if ( campaign && Number( campaign.donations_count ) === 0 ) {
-            issues.push( __( 'No donations yet. All stats will display zero on the page.', 'dono' ) );
-        }
+        const issue  = statIssue( campaign, attributes.metric );
+        const issues = issue ? [ issue ] : [];
+        const fallbackLabel = ( STAT_METRICS.find( ( m ) => m.value === attributes.metric ) || {} ).label || '';
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Stats', 'dono' ) }>
+                <PanelBody title={ __( 'Stat', 'dono' ) }>
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
@@ -292,22 +279,29 @@ registerBlockType( 'dono/campaign-stats', {
                         onCampaignPage={ onCampaignPage }
                         issues={ issues }
                     />
-                    <ToggleControl
-                        label={ __( 'Show amount raised', 'dono' ) }
-                        checked={ attributes.showRaised }
-                        onChange={ ( v ) => setAttributes( { showRaised: v } ) }
+                    <SelectControl
+                        label={ __( 'Figure', 'dono' ) }
+                        value={ attributes.metric }
+                        options={ STAT_METRICS }
+                        onChange={ ( v ) => setAttributes( { metric: v } ) }
                         __nextHasNoMarginBottom
                     />
-                    <ToggleControl
-                        label={ __( 'Show donations count', 'dono' ) }
-                        checked={ attributes.showDonations }
-                        onChange={ ( v ) => setAttributes( { showDonations: v } ) }
+                    <TextControl
+                        label={ __( 'Label', 'dono' ) }
+                        value={ attributes.label }
+                        onChange={ ( v ) => setAttributes( { label: v } ) }
+                        placeholder={ fallbackLabel }
                         __nextHasNoMarginBottom
                     />
-                    <ToggleControl
-                        label={ __( 'Show donors count', 'dono' ) }
-                        checked={ attributes.showDonors }
-                        onChange={ ( v ) => setAttributes( { showDonors: v } ) }
+                    <SelectControl
+                        label={ __( 'Size', 'dono' ) }
+                        value={ attributes.size }
+                        options={ [
+                            { value: 'sm', label: __( 'Small',  'dono' ) },
+                            { value: 'md', label: __( 'Medium', 'dono' ) },
+                            { value: 'lg', label: __( 'Large',  'dono' ) },
+                        ] }
+                        onChange={ ( v ) => setAttributes( { size: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
@@ -324,7 +318,7 @@ registerBlockType( 'dono/campaign-stats', {
                 </PanelBody>
             </InspectorControls>
             <CampaignCanvas
-                block="dono/campaign-stats"
+                block="dono/campaign-stat"
                 attributes={ attributes }
                 setAttributes={ setAttributes }
                 onCampaignPage={ onCampaignPage }
@@ -336,7 +330,6 @@ registerBlockType( 'dono/campaign-stats', {
     save: () => null,
 } );
 
-// dono/campaign-progress
 registerBlockType( 'dono/campaign-progress', {
     apiVersion: 3,
     title:      __( 'Campaign progress', 'dono' ),
@@ -399,7 +392,6 @@ registerBlockType( 'dono/campaign-progress', {
     save: () => null,
 } );
 
-// dono/donate-button
 registerBlockType( 'dono/donate-button', {
     apiVersion: 3,
     title:      __( 'Donate button', 'dono' ),
@@ -482,7 +474,6 @@ registerBlockType( 'dono/donate-button', {
     save: () => null,
 } );
 
-// dono/top-donors
 registerBlockType( 'dono/top-donors', {
     apiVersion: 3,
     title:      __( 'Top donors', 'dono' ),
@@ -601,7 +592,6 @@ registerBlockType( 'dono/top-donors', {
     save: () => null,
 } );
 
-// dono/recent-donations
 registerBlockType( 'dono/recent-donations', {
     apiVersion: 3,
     title:      __( 'Recent donations', 'dono' ),
@@ -707,7 +697,6 @@ registerBlockType( 'dono/recent-donations', {
     save: () => null,
 } );
 
-// dono/supporter-wall
 registerBlockType( 'dono/supporter-wall', {
     apiVersion: 3,
     title:      __( 'Supporter wall', 'dono' ),
@@ -731,8 +720,8 @@ registerBlockType( 'dono/supporter-wall', {
         if ( campaign && Number( campaign.donations_count ) === 0 ) {
             issues.push( __( 'No donations yet, so the wall will be empty on the page.', 'dono' ) );
         }
-        // Display in major units; store as cents. Entry decimals follow the org
-        // currency (JPY none, BHD three) so the step matches what renders.
+        // Displayed in major units, stored as cents. Entry decimals follow the
+        // org currency (JPY none, BHD three) so the step matches what renders.
         const minAmountMajor = ( Number( attributes.minAmountCents ) || 0 ) / 100;
         const minAmountDp    = currencyDecimals( defaultCurrency() );
         const minAmountStep  = minAmountDp > 0 ? '0.' + '0'.repeat( minAmountDp - 1 ) + '1' : '1';
@@ -846,7 +835,6 @@ registerBlockType( 'dono/supporter-wall', {
     save: () => null,
 } );
 
-// dono/campaign-grid
 registerBlockType( 'dono/campaign-grid', {
     apiVersion: 3,
     title:       __( 'Campaigns grid', 'dono' ),
@@ -926,7 +914,6 @@ registerBlockType( 'dono/campaign-grid', {
     save: () => null,
 } );
 
-// dono/donation-form
 registerBlockType( 'dono/donation-form', {
     apiVersion: 3,
     title:       __( 'Donation form', 'dono' ),
@@ -940,9 +927,9 @@ registerBlockType( 'dono/donation-form', {
     edit: function DonationFormEdit( { attributes, setAttributes, isSelected } ) {
         const { campaign, onCampaignPage, resolvedId } = useBoundCampaign( attributes.campaignId );
         const formId = Number( campaign?.default_form_id || 0 );
-        // Without a form there is nothing for the forms screen to open - it is a
-        // hidden page that renders only an editor - so send them to the campaign's
-        // Forms tab, where a form can actually be created.
+        // The forms screen is a hidden page that renders only an editor, so
+        // with no form to open the author goes to the campaign's Forms tab,
+        // where one can be created.
         const formEditUrl = new URL(
             formId
                 ? `admin.php?page=dono-forms&form=${ formId }`

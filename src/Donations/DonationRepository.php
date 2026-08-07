@@ -8,11 +8,6 @@ use Dono\Receipts\Receipt;
 use Dono\Vendor\Queryable\DB;
 use Dono\Vendor\Queryable\QueryBuilder;
 
-/**
- * Query and aggregate helpers for the donations table.
- *
- * @version 1.0.0
- */
 final class DonationRepository
 {
     public function findById(int $id): ?Donation
@@ -26,14 +21,10 @@ final class DonationRepository
     }
 
     /**
-     * Every paid (paid or partial_refund), non-test donation by one donor within
-     * a calendar year, oldest first, for a year-end tax statement. The year
-     * boundary uses paid_at (when the money actually arrived), not created_at.
-     *
-     * Each row carries the gross amount plus the succeeded-refund total for that
-     * donation (source of truth is the Refund table, matching the receipt/annual
-     * statement renderers) so the caller can net it to a deductible figure.
-     * receipt_number is the issued, non-voided receipt's number when one exists.
+     * For a year-end tax statement. The year boundary is paid_at, when the
+     * money arrived, not created_at. Rows carry gross plus the succeeded-refund
+     * total from the Refund table so the caller can net them to a deductible
+     * figure.
      *
      * @return list<array{date:string,amount_cents:int,refunded_cents:int,currency:string,reference:string,receipt_number:?string}>
      */
@@ -101,30 +92,25 @@ final class DonationRepository
     }
 
     /**
-     * How many test donations the same filters would have matched.
-     *
-     * The list is live-only unless asked otherwise, and silent exclusion means
-     * an admin donating while the org is in test mode watches their donation
-     * vanish. This is what the screen needs to say so.
-     *
-     * @param array<string,mixed> $args
+     * How many test donations the same filters would have matched. The list is
+     * live-only, and silent exclusion means an admin donating while the org is
+     * in test mode watches their donation vanish.
      */
     public function countTestHidden(array $args = []): int
     {
-        // An explicit filter, so it wins over include_test and counts the test
-        // rows whatever scope the caller was using.
+        // Explicit filter, so it wins over include_test whatever scope the
+        // caller was using.
         $args['is_test'] = true;
 
         return (int) $this->applyAdminFilters(Donation::query(), $args)->count();
     }
 
     /**
-     * Paginated list for the admin. `matching_donor_ids` lets the caller
-     * pre-resolve a search term to donor ids so the search covers donor
-     * name / exact email as well as `reference`.
+     * `matching_donor_ids` lets the caller pre-resolve a search term to donor
+     * ids so the search covers donor name and exact email as well as
+     * `reference`.
      *
      * @param array{page?:int,per_page?:int,orderby?:string,order?:string,status?:string,search?:string,matching_donor_ids?:array<int>} $args
-     * @return array{items: array<Donation>, total: int}
      */
     public function listAdmin(array $args = []): array
     {
@@ -152,12 +138,9 @@ final class DonationRepository
     }
 
     /**
-     * Paid (paid or partial_refund), non-test donations that have no issued,
-     * non-voided receipt - the "these donors never got their receipt" sweep.
-     * Paged (1..100), newest paid first, optionally scoped to one campaign.
+     * The "these donors never got their receipt" sweep.
      *
      * @param array{page?:int,per_page?:int,campaign_id?:int} $args
-     * @return array{items: array<Donation>, total: int}
      */
     public function paidWithoutReceipt(array $args = []): array
     {
@@ -167,30 +150,22 @@ final class DonationRepository
         $campaignId = isset($args['campaign_id']) ? (int) $args['campaign_id'] : null;
 
         $prefix = DB::getPrefix();
-        // Correlated NOT EXISTS against a non-voided receipt that actually
-        // reached the donor. Must stay the FIRST where-condition: whereRaw adds
-        // no AND connector, but the where()s chained after it (status, is_test,
-        // campaign) do.
+        // Must stay the FIRST where-condition: whereRaw adds no AND connector,
+        // but the where()s chained after it (status, is_test, campaign) do.
         //
         // sent_to_email_at, not merely the row: ReceiptIssuer commits the
-        // receipt in its own transaction before it renders the PDF and before
-        // it attempts the send, and skips the send outright when the donor has
-        // no address. Keying on the row meant a receipt that was numbered and
-        // never delivered counted as delivered, so the one report whose whole
-        // job is finding donors who got nothing was blind to exactly them.
+        // receipt before it renders the PDF and before it attempts the send,
+        // and skips the send outright when the donor has no address, so a
+        // numbered receipt is not a delivered one.
         $noReceipt = "NOT EXISTS (SELECT 1 FROM {$prefix}dono_receipts rc "
             . "WHERE rc.donation_id = {$prefix}dono_donations.id "
             . "AND rc.voided = 0 AND rc.sent_to_email_at IS NOT NULL)";
 
-        // A hand-recorded donation with no receipt is not one that went missing:
-        // the admin was asked and said not to send one, because the donor never
-        // gave this site an address. Left in, every cheque ever entered would
-        // sit in this report permanently and the AI assistant would report them
-        // as donors who never got their receipt. The ones where a receipt WAS
-        // asked for have a row, so the check above already excludes them.
-        //
-        // Matches ChannelClassifier::MANUAL, which core reserves and the public
-        // route strips; there is no channel column to read instead.
+        // A hand-recorded donation with no receipt is not one that went
+        // missing: the admin was asked and declined, because the donor never
+        // gave this site an address. Matches ChannelClassifier::MANUAL, which
+        // core reserves and the public route strips; there is no channel column
+        // to read instead.
         $notByHand = "(source_attribution IS NULL OR JSON_UNQUOTE(JSON_EXTRACT("
             . "source_attribution, '$.utm_medium')) <> 'manual')";
 
@@ -216,12 +191,7 @@ final class DonationRepository
         return ['items' => $items, 'total' => $total];
     }
 
-    /**
-     * All matching rows for export. Same filter shape as listAdmin(). Capped at 50k rows.
-     *
-     * @param array<string,mixed> $args
-     * @return array<Donation>
-     */
+    /** Same filter shape as listAdmin(). */
     public function listForExport(array $args = []): array
     {
         $allowedSort = ['created_at', 'paid_at', 'amount_cents', 'reference', 'status'];
@@ -240,9 +210,6 @@ final class DonationRepository
      */
     public function aggregatePaidBetween(?string $from = null, ?string $to = null, ?int $campaignId = null): array
     {
-        // Refund-aware totals. Include partial_refund so the net portion still
-        // counts, then LEFT JOIN a per-donation refunded-sum subquery so we can
-        // subtract refunded cents from the donation amount in a single SUM.
         $prefix = DB::getPrefix();
         $row = $this->netPaidQuery($from, $to, $campaignId)
             ->selectRaw(
@@ -260,8 +227,6 @@ final class DonationRepository
     }
 
     /**
-     * Per-day series of paid donations
-     *
      * @return array<array{day:string, amount_cents:int, donations_count:int}>
      */
     public function dailyPaidBetween(string $from, string $to, ?int $campaignId = null): array
@@ -280,10 +245,21 @@ final class DonationRepository
     }
 
     /**
-     * Earliest paid_at (Y-m-d) among live donations, or null if none.
-     *
-     * @param int|null $campaignId narrow to one campaign, or null for the org
+     * Net of refunds so it agrees with the raised total shown beside it: a
+     * headline gift that was half refunded is not still the biggest one.
      */
+    public function maxNetPaidAmount(?int $campaignId = null): int
+    {
+        $prefix = DB::getPrefix();
+        $row = $this->netPaidQuery(null, null, $campaignId)
+            ->selectRaw(
+                "COALESCE(MAX(COALESCE({$prefix}dono_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS top"
+            )
+            ->get();
+
+        return max(0, (int) ($row['top'] ?? 0));
+    }
+
     public function firstPaidDate(?int $campaignId = null): ?string
     {
         $q = DonationQueries::donationsOnly(DB::table('dono_donations')
@@ -300,9 +276,8 @@ final class DonationRepository
     }
 
     /**
-     * Most-common currency among paid donations in scope. Used when callers
-     * need a single currency to format aggregated totals against a
-     * mixed-currency pool (the dashboard KPI strip).
+     * A single currency to format aggregated totals against a mixed-currency
+     * pool.
      */
     public function topCurrencyForPaid(?string $from = null, ?string $to = null): ?string
     {
@@ -318,9 +293,6 @@ final class DonationRepository
     }
 
     /**
-     * Group paid donations by (utm_source, utm_medium) tuples. The dashboard
-     * passes each row through ChannelClassifier to bucket into a channel name.
-     *
      * @return array<array{utm_source:?string, utm_medium:?string, amount_cents:int, donations_count:int}>
      */
     public function aggregatePaidByAttribution(?string $from = null, ?string $to = null, ?int $campaignId = null): array
@@ -348,8 +320,6 @@ final class DonationRepository
     }
 
     /**
-     * Top N campaigns by paid-donation total in scope.
-     *
      * @return array<array{campaign_id:int, amount_cents:int, donations_count:int}>
      */
     public function topPaidCampaigns(?string $from = null, ?string $to = null, int $limit = 5): array
@@ -370,8 +340,6 @@ final class DonationRepository
     }
 
     /**
-     * Per-day paid-donation totals for one campaign.
-     *
      * @return array<array{day:string, amount_cents:int}>
      */
     public function dailyPaidForCampaignBetween(int $campaignId, string $from, string $to): array
@@ -389,10 +357,9 @@ final class DonationRepository
     }
 
     /**
-     * Per-day paid totals for a batch of campaigns. Used by the dashboard's
-     * top-campaigns sparkline so we don't fire one daily query per row.
+     * Batched so the top-campaigns sparkline does not fire one daily query per
+     * row.
      *
-     * @param list<int> $campaignIds
      * @return array<int, array<string, int>> map of campaign_id => [day => amount_cents]
      */
     public function dailyPaidByCampaignsBetween(array $campaignIds, string $from, string $to): array
@@ -416,8 +383,6 @@ final class DonationRepository
     }
 
     /**
-     * Group paid donations by gateway. Optionally scoped to a campaign.
-     *
      * @return array<array{gateway:string, amount_cents:int, donations_count:int}>
      */
     public function aggregatePaidByGateway(?string $from = null, ?string $to = null, ?int $campaignId = null): array
@@ -437,8 +402,6 @@ final class DonationRepository
     }
 
     /**
-     * Group paid donations by frequency (one_time / monthly / yearly / weekly).
-     *
      * @return array<array{frequency:string, amount_cents:int, donations_count:int}>
      */
     public function aggregatePaidByFrequency(?string $from = null, ?string $to = null, ?int $campaignId = null): array
@@ -458,8 +421,6 @@ final class DonationRepository
     }
 
     /**
-     * Top N forms by paid-donation total in scope.
-     *
      * @return array<array{form_id:int, amount_cents:int, donations_count:int}>
      */
     public function topPaidForms(?string $from = null, ?string $to = null, ?int $campaignId = null, int $limit = 5): array
@@ -479,12 +440,6 @@ final class DonationRepository
         ], $rows);
     }
 
-    /**
-     * Most recent paid donations for a campaign. Returns hydrated Donation
-     * rows so views can pull amount/currency/note/anonymity per donation.
-     *
-     * @return array<Donation>
-     */
     public function recentForCampaign(int $campaignId, int $limit = 10, bool $includeAnonymous = true): array
     {
         $q = DonationQueries::live(Donation::query()
@@ -499,8 +454,6 @@ final class DonationRepository
     }
 
     /**
-     * Top N donors by paid-donation total in scope.
-     *
      * @return array<array{donor_id:int, amount_cents:int, donations_count:int}>
      */
     public function topPaidDonors(?string $from = null, ?string $to = null, ?int $campaignId = null, int $limit = 5, bool $includeAnonymous = true): array
@@ -526,12 +479,7 @@ final class DonationRepository
         ], $rows);
     }
 
-    /**
-     * Net paid total + count of anonymous donations in scope, for surfacing
-     * anonymous giving as one masked aggregate without naming anyone.
-     *
-     * @return array{amount_cents:int, donations_count:int}
-     */
+    /** One masked aggregate, so anonymous giving shows without naming anyone. */
     public function anonymousPaidTotal(?string $from = null, ?string $to = null, ?int $campaignId = null): array
     {
         $prefix = DB::getPrefix();
@@ -547,9 +495,6 @@ final class DonationRepository
     }
 
     /**
-     * Donation-amount histogram
-     *
-     * @param array<int> $thresholdsCents  e.g. [1000, 2500, 5000, 10000, 50000]
      * @return array<array{label:string, threshold:?int, donations_count:int, amount_cents:int}>
      */
     public function amountHistogramBuckets(array $thresholdsCents, ?string $from = null, ?string $to = null, ?int $campaignId = null): array
@@ -603,8 +548,6 @@ final class DonationRepository
     }
 
     /**
-     * 7×24 day-of-week × hour count grid of paid donations.
-     *
      * @return array<array{dow:int, hour:int, donations_count:int, amount_cents:int}>
      */
     public function dowHourGridForPaid(?string $from = null, ?string $to = null, ?int $campaignId = null): array
@@ -633,10 +576,9 @@ final class DonationRepository
         if ($totalCount === 0) return 0;
         $offset = (int) floor($totalCount / 2);
 
-        // Order over the same set the histogram counts (paid + partial_refund)
-        // and in the same currency it buckets by (base_amount_cents). paidQuery()
-        // is paid-only, so an offset from the paid+partial total would overshoot;
-        // ordering by donor-currency amount_cents would rank foreign gifts
+        // Ordered over the same set the histogram counts and in the same
+        // currency it buckets by: an offset from a paid-only total would
+        // overshoot, and donor-currency amount_cents would rank foreign gifts
         // against org-currency ones.
         $q = DonationQueries::live(
             DB::table('dono_donations')->whereIn('status', ['paid', 'partial_refund'])
@@ -655,9 +597,6 @@ final class DonationRepository
     }
 
     /**
-     * Per-donor cohort rows for a campaign. One row per donor who donated in
-     * the range
-     *
      * @return array<array{
      *   donor_id:int,
      *   first_paid_at:string,
@@ -695,7 +634,7 @@ final class DonationRepository
         $out = [];
         foreach ($rows as $r) {
             $inRange = (int) $r['in_range_count'];
-            if ($inRange === 0) continue; // donor exists in campaign but not in range
+            if ($inRange === 0) continue;
             $out[] = [
                 'donor_id'               => (int) $r['donor_id'],
                 'first_paid_at'          => (string) $r['first_paid_at'],
@@ -708,11 +647,7 @@ final class DonationRepository
         return $out;
     }
 
-    /**
-     * Distinct donors with a paid recurring donation for a campaign (the
-     * "Recurring donors" KPI). Counts donors, not rows: a donor with six
-     * monthly renewals is one recurring donor, not six.
-     */
+    /** Donors, not rows: six monthly renewals are one recurring donor. */
     public function countActiveRecurringForCampaign(int $campaignId): int
     {
         $row = DonationQueries::live(DB::table('dono_donations')
@@ -725,8 +660,6 @@ final class DonationRepository
         return (int) ($row['c'] ?? 0);
     }
 
-    // ── Shared query builder ──────────────────────────────────────────────
-
     private function paidQuery(?string $from, ?string $to, ?int $campaignId): QueryBuilder
     {
         $q = DonationQueries::live(DB::table('dono_donations')->where('status', 'paid'));
@@ -737,13 +670,9 @@ final class DonationRepository
     }
 
     /**
-     * paidQuery + partial_refund + LEFT JOIN to per-donation refund totals as
-     * alias `r`. Use when the caller wants to subtract refunded cents from the
-     * SUM (and so cares about partial_refund as well as paid).
-     *
-     * `joinRaw` doesn't auto-prefix table names like DB::table() does, so the
-     * subquery + the table referenced from selectRaw have to use the prefixed
-     * names explicitly.
+     * `joinRaw` does not auto-prefix table names the way DB::table() does, so
+     * the subquery and anything referenced from selectRaw have to use the
+     * prefixed names explicitly.
      */
     private function netPaidQuery(?string $from, ?string $to, ?int $campaignId): QueryBuilder
     {
@@ -755,13 +684,11 @@ final class DonationRepository
         if ($campaignId !== null) $q = $q->where('campaign_id', $campaignId);
 
         $prefix = DB::getPrefix();
-        // Scale each refund by its donation's fx_rate so refunded cents land in
-        // the base currency, matching the donations' base_amount_cents they get
-        // netted against (and DonationQueries::refundedBaseExpr on the public
-        // path). Summing raw amount_cents would mix foreign cents into base
-        // totals.
+        // Each refund is scaled by its donation's fx_rate so refunded cents
+        // land in the base currency they get netted against; summing raw
+        // amount_cents would mix foreign cents into base totals.
         //
-        // Summed before rounding for the reason given on refundedBaseExpr: a
+        // Summed before rounding, for the reason given on refundedBaseExpr: a
         // foreign donation refunded in instalments otherwise drifts a cent past
         // what the same total is worth in base.
         return $q->joinRaw(
@@ -791,33 +718,28 @@ final class DonationRepository
     }
 
     /**
-     * Aggregate KPIs for the admin donations list, scoped by the listAdmin() filter shape.
-     * Raised totals are paid-only; currency is the most common in the filtered set.
-     *
      * @return array{total_count:int,paid_count:int,raised_cents:int,currency:?string,donors_count:int}
      */
     public function aggregateAdmin(array $args = []): array
     {
         $applyFilters = fn ($q) => $this->applyAdminFilters($q, $args);
 
-        // Uses DB::table (raw query builder) so selectRaw/get() return arrays
-        // rather than hydrated Donation models. The Donation::query() path is
-        // for list pages where we want model rows.
+        // DB::table, so selectRaw/get() return arrays rather than hydrated
+        // Donation models.
         $base = fn () => DB::table('dono_donations');
 
-        // total mirrors the list row count (test rows included), while the money
-        // KPIs below are live-only; the strip's "total" is a view count, not a
+        // total mirrors the list row count, test rows included, while the money
+        // KPIs below are live-only: the strip's "total" is a view count, not a
         // money metric.
         $totalCount = (int) $applyFilters($base())->count();
 
         // Net refunds in base currency to match the base-currency raised sum.
         $refundedExpr = DonationQueries::refundedBaseExpr();
 
-        // "Raised" must reflect real money: exclude test donations from the
-        // money aggregate unless the admin is explicitly viewing test data.
-        // include_test deliberately does NOT qualify. It widens the list so a
-        // run of donations can be seen as it happened; quoting rehearsal money
-        // as raised is a different thing, and the screen says which it is.
+        // "Raised" must reflect real money, so test donations are excluded
+        // unless the admin is explicitly viewing test data. include_test does
+        // NOT qualify: it widens the list, and quoting rehearsal money as
+        // raised is a different thing.
         $paidQuery = $applyFilters($base())->whereIn('status', ['paid', 'partial_refund']);
         if (! self::hasExplicitTestFilter($args)) {
             $paidQuery = $paidQuery->where('is_test', 0);
@@ -831,18 +753,16 @@ final class DonationRepository
             'total_count'  => $totalCount,
             'paid_count'   => (int) ($paidRow['cnt']    ?? 0),
             'raised_cents' => (int) ($paidRow['amount'] ?? 0),
-            // raised_cents sums the base/org currency; label it as such, not the
-            // most-common donation currency.
+            // raised_cents sums the base currency, so it is labelled as such,
+            // not as the most-common donation currency.
             'currency'     => \Dono\Foundation\Helpers\Money::defaultCurrency(),
             'donors_count' => (int) ($paidRow['donors'] ?? 0),
         ];
     }
 
     /**
-     * Shared admin filter set for the donations list, CSV export, and KPI
-     * aggregate. Single source of truth so the three cannot drift apart.
-     *
-     * @param array<string,mixed> $args
+     * Shared by the donations list, the CSV export and the KPI aggregate, so
+     * the three cannot drift apart.
      */
     private function applyAdminFilters($q, array $args)
     {
@@ -877,14 +797,13 @@ final class DonationRepository
         if (self::hasExplicitTestFilter($args)) {
             $q = $q->where('is_test', (bool) $args['is_test'] ? 1 : 0);
         } elseif (empty($args['include_test'])) {
-            // Live-only by default; test donations are a dev/staging concern and
-            // surface (in the list, CSV export and the strip total alike) only
-            // when the admin asks for them.
+            // Live-only by default; test donations surface in the list, the CSV
+            // export and the strip total only when the admin asks for them.
             $q = $q->where('is_test', 0);
         }
-        // include_test with no explicit is_test filter adds no predicate at all:
-        // the two exclusive filters each show one kind only, so neither can
-        // show a run of donations as it actually happened.
+        // include_test with no explicit is_test filter adds no predicate at
+        // all: the two exclusive filters each show one kind only, so neither
+        // can show a run of donations as it actually happened.
 
         if ($createdFrom !== null) {
             $q = $q->where('created_at', $createdFrom, '>=');
@@ -922,23 +841,15 @@ final class DonationRepository
         return $q;
     }
 
-    /**
-     * True when the caller passed an explicit is_test filter (true or false).
-     * When false, money KPIs default to live-only so test donations never
-     * inflate "Raised".
-     *
-     * @param array<string,mixed> $args
-     */
     private static function hasExplicitTestFilter(array $args): bool
     {
         return array_key_exists('is_test', $args) && $args['is_test'] !== '' && $args['is_test'] !== null;
     }
 
     /**
-     * Accept "YYYY-MM-DD" or a full datetime and normalise to "YYYY-MM-DD 00:00:00".
-     * When `$endOfDay` is true, normalises a bare date to "YYYY-MM-DD 23:59:59"
-     * so the inclusive-upper-bound feels natural. Returns null for unparseable
-     * / empty input so the caller can skip the filter.
+     * A bare date normalises to the start of the day, or the end of it for an
+     * inclusive upper bound. Null for unparseable input, so the caller can skip
+     * the filter.
      */
     private static function normaliseDateFilter(mixed $value, bool $endOfDay = false): ?string
     {
@@ -948,7 +859,6 @@ final class DonationRepository
         if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $raw)) {
             return $raw . ($endOfDay ? ' 23:59:59' : ' 00:00:00');
         }
-        // Otherwise pass through if it parses as a date.
         $ts = strtotime($raw);
         return $ts !== false ? gmdate('Y-m-d H:i:s', $ts) : null;
     }

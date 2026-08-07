@@ -495,38 +495,24 @@ final class CampaignService
     }
 
     /**
-     * The layout a new campaign page starts from.
+     * Headings are core Heading blocks rather than markup inside a render
+     * callback, so the words belong to whoever owns the page. That relies on
+     * every block below a heading rendering something: one returning an empty
+     * string would leave its heading captioning whatever came next.
      *
-     * Seven bare dynamic blocks became a page an organiser can actually edit.
-     * Every heading here is a core Heading block rather than markup baked into
-     * a render callback, so the words belong to whoever owns the page. That is
-     * only safe because each block below a heading now always renders
-     * something: a block that returned an empty string would leave its heading
-     * captioning whatever came next.
-     *
-     * campaign-stats and campaign-progress leave the seed. Both stay
-     * registered for anyone who wants them, but the hero already states the
-     * money, and repeating it three times above the fold said nothing new.
-     *
-     * The class names come from the shared campaign page foundation
-     * (assets/campaign-page/page.css), which is why they read dp-.
+     * dp- class names come from assets/campaign-page/page.css.
      */
     private function pageStarterBlocks(Campaign $campaign): string
     {
         $id = (int) $campaign->id;
-        // Known nit: both serializers escape the double hyphen in a class name
-        // inside an attribute value, so the editor rewrites dp-band--tight on
-        // its first save and the revision shows a change nobody made. Cosmetic,
-        // and LayoutBlocks in the P2P add-on writes it the same way, so this
-        // stays readable until the two are fixed together.
-        // Seeded content is written in the admin's language at creation, the
-        // same as a campaign's own title. Hardcoding English put it on the
-        // page of every site that does not run in it.
+        // Both serializers escape the double hyphen inside an attribute value,
+        // so the editor rewrites dp-band--tight on its first save and the
+        // revision shows a change nobody made. Cosmetic, and P2P's LayoutBlocks
+        // writes it the same way.
         $t0 = __('Campaign name', 'dono');
-        // The description is bound, so this is only what an organiser who has
-        // written none sees in the editor. Nothing else is seeded as prose: the
-        // old story slot shipped its own instructions to donors on every page
-        // nobody edited, which read as the campaign's own words.
+        // Bound, so this is only what an organiser who has written no
+        // description sees in the editor. Nothing else is seeded as prose:
+        // seeded words read to a donor as the campaign's own.
         $t2 = __('What this campaign is raising for.', 'dono');
         $t5 = __('Recent donations', 'dono');
         $t6 = __('Top donors', 'dono');
@@ -546,7 +532,25 @@ final class CampaignService
 <div class="wp-block-columns dp-layout">
 <!-- wp:column {"width":"62%","className":"dp-layout__main"} -->
 <div class="wp-block-column dp-layout__main" style="flex-basis:62%">
-<!-- wp:dono/campaign-hero {"campaignId":{$id},"showTitle":false,"showDonate":false} /-->
+<!-- wp:dono/campaign-image {"campaignId":{$id}} /-->
+
+<!-- wp:columns {"className":"dp-figures"} -->
+<div class="wp-block-columns dp-figures">
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:dono/campaign-stat {"campaignId":{$id},"metric":"raised","size":"lg"} /-->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:dono/campaign-stat {"campaignId":{$id},"metric":"goal","size":"lg"} /-->
+</div>
+<!-- /wp:column -->
+</div>
+<!-- /wp:columns -->
+
+<!-- wp:dono/campaign-progress {"campaignId":{$id}} /-->
 
 <!-- wp:group {"className":"dp-band dp-band--tight"} -->
 <div class="wp-block-group dp-band dp-band--tight">
@@ -565,6 +569,22 @@ final class CampaignService
 <!-- wp:column {"width":"38%","className":"dp-layout__side"} -->
 <div class="wp-block-column dp-layout__side" style="flex-basis:38%">
 <!-- wp:dono/donation-form {"campaignId":{$id}} /-->
+
+<!-- wp:columns {"className":"dp-figures"} -->
+<div class="wp-block-columns dp-figures">
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:dono/campaign-stat {"campaignId":{$id},"metric":"donors","size":"sm"} /-->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:dono/campaign-stat {"campaignId":{$id},"metric":"average","size":"sm"} /-->
+</div>
+<!-- /wp:column -->
+</div>
+<!-- /wp:columns -->
 </div>
 <!-- /wp:column -->
 </div>

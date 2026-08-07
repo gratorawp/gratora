@@ -4,11 +4,6 @@ declare(strict_types=1);
 
 namespace Dono\Campaigns\Blocks;
 
-/**
- * Registers the Dono block category and enqueues campaign block assets.
- *
- * @version 1.0.0
- */
 final class BlockEditorIntegration
 {
     private const HANDLE_EDITOR   = 'dono-campaign-blocks-editor';
@@ -17,8 +12,8 @@ final class BlockEditorIntegration
 
     // Must list every registered campaign block: gates the front-end CSS enqueue.
     private const BLOCK_NAMES = [
-        'dono/campaign-hero',
-        'dono/campaign-stats',
+        'dono/campaign-image',
+        'dono/campaign-stat',
         'dono/campaign-progress',
         'dono/campaign-grid',
         'dono/donate-button',
@@ -39,9 +34,8 @@ final class BlockEditorIntegration
     }
 
     /**
-     * Expose the page -> campaign back-link (_dono_campaign_id meta) through REST so
-     * editor-side block UIs can hide their campaign picker on posts already tied to
-     * a campaign.
+     * Exposed through REST so editor-side block UIs can hide their campaign
+     * picker on a post already tied to a campaign.
      */
     public function registerPageMeta(): void
     {
@@ -53,7 +47,6 @@ final class BlockEditorIntegration
         ]);
     }
 
-    /** @param array<int,array<string,string>> $categories */
     public function registerCategory(array $categories): array
     {
         foreach ($categories as $category) {
@@ -82,9 +75,9 @@ final class BlockEditorIntegration
         );
         wp_set_script_translations(self::HANDLE_EDITOR, 'dono', DONO_DIR . 'languages');
 
-        // The field list the editor's binding picker offers, named here so the
-        // labels are translated once and the two halves cannot disagree about
-        // which values exist.
+        // The binding picker's field list is handed over rather than repeated in
+        // JS, so the labels are translated once and the two halves cannot
+        // disagree about which values exist.
         wp_add_inline_script(
             self::HANDLE_EDITOR,
             'window.donoCampaignBlocks = Object.assign( window.donoCampaignBlocks || {}, '
@@ -94,10 +87,8 @@ final class BlockEditorIntegration
     }
 
     /**
-     * Load the block stylesheet into the editor canvas. enqueue_block_assets is
-     * the only hook that reaches the (iframed, since WP 6.3) editor canvas, so
-     * the ServerSideRender previews are styled the same as the front end.
-     * Front-end loading stays conditional in enqueueFrontendAssets().
+     * enqueue_block_assets is the only hook that reaches the iframed editor
+     * canvas, so ServerSideRender previews are styled like the front end.
      */
     public function enqueueEditorCanvasStyle(): void
     {
@@ -120,7 +111,6 @@ final class BlockEditorIntegration
 
     public function enqueueFrontendAssets(): void
     {
-        // Only load on singular pages that contain a Dono campaign block.
         if (! is_singular()) {
             return;
         }
@@ -145,7 +135,6 @@ final class BlockEditorIntegration
 
         $this->enqueueBlockStyle();
 
-        // Modal JS only needed when the donate-button block is present.
         if ($hasDonateButton) {
             $this->enqueueDonateButtonModal();
         }
@@ -153,11 +142,8 @@ final class BlockEditorIntegration
 
     /**
      * has_block() only sees the post's own content, so a Dono block nested in a
-     * synced pattern or template part renders unstyled. render_block fires for
-     * every block wherever it lives; enqueue lazily then. Late enqueues still
-     * print, so the block is never left without its CSS or modal script.
-     *
-     * @param array<string,mixed> $block
+     * synced pattern or template part would render unstyled. render_block fires
+     * wherever the block lives, and a late enqueue still prints.
      */
     public function enqueueOnRender(string $content, array $block): string
     {
