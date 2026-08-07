@@ -1,7 +1,7 @@
 /** @jsxImportSource preact */
 
 import { render } from 'preact';
-import { useCallback, useReducer, useRef, useState, useEffect } from 'preact/hooks';
+import { useCallback, useMemo, useReducer, useRef, useState, useEffect } from 'preact/hooks';
 
 import { reducer, initialState, validateStep, buildPayload, fieldSteps } from './state/store';
 import { visibleGateways } from './util/gateways';
@@ -731,8 +731,11 @@ function useFocusTrap( ref, active ) {
     }, [ active ] );
 }
 
-function ModalShell( { children, openLabel, config } ) {
-    const [ open, setOpen ] = useState( false );
+function ModalShell( { children, openLabel, config, initiallyOpen = false } ) {
+    // Read once, on the first render: a donor coming back from their bank did
+    // not press the trigger, and the shut modal never mounts the body that
+    // shows the outcome and fires the completion event.
+    const [ open, setOpen ] = useState( !! initiallyOpen );
     const panelRef = useRef( null );
 
     useFocusTrap( panelRef, open );
@@ -777,7 +780,10 @@ function App( { config } ) {
     // Redirect-based methods (iDEAL, Bancontact) bounce back to return_url with
     // Stripe's markers. Resolve the PaymentIntent and show the outcome inline.
     useEffect( () => {
-        const ret = detectStripeReturn();
+        // Scoped to this form's own submission: two forms on a page both read
+        // the same URL, and the first to run strips the params from under the
+        // other. readPending() is what this form stashed when it submitted.
+        const ret = detectStripeReturn( readPending().reference || null );
         if ( ! ret || ! config.stripe?.publishableKey ) return;
         dispatch( { type: 'CONFIRMING' } );
         clearStripeReturnParams();
@@ -799,9 +805,20 @@ function App( { config } ) {
 
     const body = <FormBody state={ state } dispatch={ dispatch } config={ config } />;
 
+    // Computed during the first render, before the effect above strips the
+    // params, so a modal form can open itself on a return that is its own.
+    const returningHere = useMemo(
+        () => detectStripeReturn( readPending().reference || null ) !== null,
+        []
+    );
+
     if ( config.layout === 'modal' ) {
         return (
-            <ModalShell openLabel={ config.i18n.donateNow } config={ config }>
+            <ModalShell
+                openLabel={ config.i18n.donateNow }
+                config={ config }
+                initiallyOpen={ returningHere }
+            >
                 { body }
             </ModalShell>
         );

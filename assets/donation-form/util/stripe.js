@@ -36,13 +36,23 @@ export function loadStripeJs() {
  * Reads the markers a Stripe redirect appends to return_url. Returns null when
  * this is a normal page load (not a payment return).
  */
-export function detectStripeReturn() {
+export function detectStripeReturn( ownReference = null ) {
     const params = new URLSearchParams( window.location.search );
     const clientSecret = params.get( 'payment_intent_client_secret' );
     if ( ! clientSecret || params.get( 'dono_return' ) !== '1' ) return null;
+
+    const reference = params.get( 'dono_ref' ) || '';
+
+    // The markers are on the URL, which every form on the page can read, and
+    // claiming one strips it for the others. A form only owns the return whose
+    // reference matches the submission it stashed. Passing null keeps the old
+    // any-form behaviour for a caller that has nothing to match against, which
+    // is still the right answer when there is only one form.
+    if ( ownReference && reference && ownReference !== reference ) return null;
+
     return {
         clientSecret,
-        reference: params.get( 'dono_ref' ) || '',
+        reference,
         redirectStatus: params.get( 'redirect_status' ) || '',
     };
 }

@@ -145,7 +145,12 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
 
         // Charged directly on the organisation's own Stripe account: the full
         // amount settles to them, Dono takes nothing.
-        $intent = $this->api->post('/payment_intents', $params);
+        // Keyed on the donation, like /subscriptions and /refunds already are.
+        // Without it a create that times out after Stripe accepted it leaves a
+        // charged intent nothing points at, and the retry charges again.
+        $intent = $this->api->post('/payment_intents', $params, [
+            'Idempotency-Key' => 'dono_pi_' . $donation->id,
+        ]);
 
         return new GatewayIntentResult(
             intent_id:      $intent['id'],
@@ -264,6 +269,26 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     {
         $intentId = (string) ($intent['id'] ?? '');
         $donation = $this->donations->findByGatewayIntent($this->id(), $intentId);
+
+        // The id on the donation row is not the only handle we have. createIntent
+        // stamps the reference into the intent's metadata, and that copy lives on
+        // Stripe's side, so it survives whatever stopped the id being written
+        // here. Without this the miss below is terminal: the 200 is correct for a
+        // PaymentIntent that genuinely is not ours, but for one that is, it means
+        // Stripe never retries and the money is taken against a donation that
+        // stays pending for good, with no receipt and no campaign total.
+        if (! $donation) {
+            $reference = (string) ($intent['metadata']['dono_reference'] ?? '');
+            if ($reference !== '') {
+                $donation = $this->donations->findByReference($reference);
+                if ($donation && $intentId !== '' && (string) ($donation->gateway_intent_id ?? '') === '') {
+                    // Heal the row so every later event for this intent, and the
+                    // admin looking for it, resolve the direct way.
+                    $donation->gateway_intent_id = $intentId;
+                    $donation->save();
+                }
+            }
+        }
 
         if (! $donation) {
             return new WebhookOutcome(
@@ -719,7 +744,14 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         if ($email !== null && $email !== '') $params['email'] = $email;
         if ($name !== '')                     $params['name']  = $name;
 
-        $customer = $this->api->post('/customers', $params);
+        // Keyed on the donor, not the donation: this method creates
+        // unconditionally despite its name, so without a key every retried
+        // recurring donation mints another Customer for the same person. The
+        // duplicates fragment the portal's change-card path, which resolves a
+        // donor through the Customer their subscription is bound to.
+        $customer = $this->api->post('/customers', $params, [
+            'Idempotency-Key' => 'dono_cus_' . (int) $donation->donor_id,
+        ]);
         $id       = (string) ($customer['id'] ?? '');
         if ($id === '') {
             throw new RuntimeException('Stripe customer creation returned no id.');
