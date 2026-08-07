@@ -948,15 +948,15 @@
     // this is what says so. The payment mount is exempt, and so is anything
     // Stripe draws inside it.
     &--settled {
-        // Targeted at the field groups, never at .dono-form__step. The payment
-        // element mounts inside that step, and opacity applies to the whole
-        // subtree: a child cannot undo an ancestor's opacity, so dimming the
-        // step dimmed the card fields the donor is trying to read and no rule
-        // here could bring them back.
+        // Paying is one job. The gateway already names the charge and shows the
+        // amount, so a fee toggle that no longer moves anything and a recap of
+        // details the donor cannot edit are just things to read past on the way
+        // to the button. They go, rather than sitting there greyed out looking
+        // like something went wrong.
         .dono-form__donor,
-        .dono-form__amount {
-            opacity: .55;
-            pointer-events: none;
+        .dono-form__amount,
+        .dono-form__confirm {
+            display: none;
         }
 
         // The form's own Back and Donate go away rather than dim. Two sets of
@@ -972,15 +972,7 @@
             display: flex;
         }
 
-        // The summary is the thing they are checking before they pay, so it
-        // stays at full contrast. There is nothing to type into it.
-        .dono-form__confirm {
-            opacity: 1;
-            pointer-events: none;
-        }
-
         .dono-form__payment-mount {
-            opacity: 1;
             pointer-events: auto;
         }
     }

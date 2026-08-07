@@ -94,11 +94,17 @@ test.describe('payment step placement', () => {
         await expect(donor.form.locator('.dono-form__gateways')).toHaveCount(0);
     });
 
-    test('the donor can still see what they are about to pay', async ({ donor, page }) => {
+    /**
+     * Paying is one job. The gateway names the charge and shows the amount, so
+     * the fee toggle and the recap of details the donor can no longer edit are
+     * only things to read past on the way to the button.
+     */
+    test('the pay screen carries nothing but the gateway', async ({ donor, page }) => {
         test.skip(! await submitToPayment(donor, page), 'seeded form places no gateway block');
 
-        // The form body survived rather than being swapped out.
-        await expect(donor.form.locator('.dono-form__step').first()).toBeVisible();
+        await expect(donor.form.locator('.dono-form__confirm')).toBeHidden();
+        await expect(donor.form.locator('.dono-form__donor').first()).toBeHidden();
+        await expect(donor.form.locator('.dono-form__payment-mount')).toBeVisible();
     });
 
     /**
@@ -167,17 +173,22 @@ test.describe('payment step placement', () => {
         expect(faded, 'an ancestor of the payment mount is faded').toBeNull();
     });
 
-    test('the settled form is not interactive', async ({ donor, page }) => {
+    /** Whatever is still in the tree must not be reachable. */
+    test('nothing outside the gateway can be interacted with', async ({ donor, page }) => {
         test.skip(! await submitToPayment(donor, page), 'seeded form places no gateway block');
 
-        const pointerEvents = await donor.form.locator('.dono-form__donor').first()
-            .evaluate((el) => getComputedStyle(el).pointerEvents);
-        expect(pointerEvents).toBe('none');
-
-        // Except where the donor is meant to be typing.
-        const mountEvents = await donor.form.locator('.dono-form__payment-mount')
-            .evaluate((el) => getComputedStyle(el).pointerEvents);
-        expect(mountEvents).toBe('auto');
+        const reachable = await donor.form.evaluate((form) => {
+            const mount = form.querySelector('.dono-form__payment-mount');
+            return [...form.querySelectorAll('input, select, textarea, button')]
+                .filter((el) => ! mount?.contains(el))
+                // The honeypot stays: it is parked off-screen rather than
+                // hidden precisely so a bot fills it in, which means it is
+                // laid out and would count as reachable here.
+                .filter((el) => ! el.closest('.dono-form__hp'))
+                .filter((el) => (el as HTMLElement).offsetParent !== null)
+                .map((el) => `${el.tagName}.${(el as HTMLElement).className}`);
+        });
+        expect(reachable, 'a control outside the gateway is still on screen').toEqual([]);
     });
 
     /**
