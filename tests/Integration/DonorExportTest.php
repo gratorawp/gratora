@@ -116,22 +116,34 @@ final class DonorExportTest extends IntegrationTestCase
 
     public function test_someone_who_only_ever_test_donated_is_not_a_donor(): void
     {
-        // The screen this export is started from counts donors with real
-        // donations. A file that disagrees with that count, and hands out
-        // contact details for people who never gave, is the wrong file.
+        // A rehearsal writes a donor row like any other donation does. Nobody
+        // gave, so the file the screen hands over must not say they did.
         $this->makeDonor('real@example.test');
 
         $onlyTest = $this->makeDonor('tester@example.test', [], false);
         $t = $this->gave((int) $onlyTest->id, gmdate('Y-m-d H:i:s'));
         \Dono\Donations\Donation::query()->where('id', (int) $t->id)->update(['is_test' => 1]);
 
-        $this->makeDonor('never-gave@example.test', [], false);
-
         $csv = $this->exporter()->toCsv(['columns' => ['email']]);
 
         $this->assertStringContainsString('real@example.test', $csv);
         $this->assertStringNotContainsString('tester@example.test', $csv);
-        $this->assertStringNotContainsString('never-gave@example.test', $csv);
+    }
+
+    /**
+     * Somebody who signed up in the portal and has not given yet handed over
+     * their own address to do it. They are on the screen the export is started
+     * from, so leaving them out would make the file disagree with the count
+     * above it. See DonorVisibilityTest for the rule itself.
+     */
+    public function test_someone_who_signed_up_without_giving_is_exported(): void
+    {
+        $this->makeDonor('never-gave@example.test', [], false);
+
+        $this->assertStringContainsString(
+            'never-gave@example.test',
+            $this->exporter()->toCsv(['columns' => ['email']])
+        );
     }
 
     public function test_a_redacted_donor_is_left_out(): void

@@ -6,6 +6,7 @@ namespace Dono\Exports;
 
 use Dono\Donations\DonationQueries;
 use Dono\Donors\Donor;
+use Dono\Donors\DonorRepository;
 use Dono\Donors\DonorService;
 use Dono\Foundation\Helpers\Csv;
 use Dono\Vendor\Queryable\DB;
@@ -217,19 +218,13 @@ final class DonorExporter
     }
 
     /**
-     * The same population the Donors screen shows, minus anyone erased.
-     *
-     * Someone who only ever made a test donation is not a donor, and neither
-     * is a record created and never used. Exporting them hands out contact
-     * details for people who never gave, and makes the file disagree with the
-     * count on the screen it was started from.
+     * The same population the Donors screen shows, minus anyone erased. Taken
+     * from the screen's own definition rather than restated here, so the file
+     * cannot come out disagreeing with the count it was started from.
      */
     private function livePredicate(): string
     {
-        $prefix = DB::getPrefix();
-
-        return "redacted_at IS NULL AND EXISTS (SELECT 1 FROM {$prefix}dono_donations d "
-            . "WHERE d.donor_id = {$prefix}dono_donors.id AND d.is_test = 0)";
+        return 'redacted_at IS NULL AND ' . DonorRepository::visibleDonorPredicate();
     }
 
     private function day(?string $value): ?string

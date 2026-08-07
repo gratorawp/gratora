@@ -56,13 +56,29 @@ final class DonorRepository
     }
 
     /**
-     * SQL predicate for "real donor": has at least one live (non-test) donation.
-     * Donor rows are created for every donation, so test-mode donations spawn
-     * donor records that would otherwise inflate the admin counts and list. Must
-     * be the FIRST where-condition on a query - whereRaw adds no AND connector,
-     * but a where() chained after it does.
+     * Who belongs in the admin donor list. A donor row is written for every
+     * donation, so rehearsing in test mode mints donors nobody ever gave to,
+     * and those are the only ones held back: a donor whose entire footprint is
+     * test-mode. Somebody who signed up in the portal and has not given yet is
+     * a real person with a real address, so they are listed with nothing
+     * against their name. Parenthesised because it is an OR, and it must be the
+     * FIRST where-condition on a query - whereRaw adds no AND connector, but a
+     * where() chained after it does.
      */
-    private function liveDonorPredicate(): string
+    public static function visibleDonorPredicate(): string
+    {
+        $prefix = DB::getPrefix();
+        $any    = "SELECT 1 FROM {$prefix}dono_donations d WHERE d.donor_id = {$prefix}dono_donors.id";
+
+        return "(EXISTS ({$any} AND d.is_test = 0) OR NOT EXISTS ({$any}))";
+    }
+
+    /**
+     * Stricter: donors who have actually given. A lifecycle stage is a stage of
+     * giving, so somebody who has never given has none, and counting them would
+     * dilute every share on the insights screen.
+     */
+    private function givingDonorPredicate(): string
     {
         $prefix = DB::getPrefix();
         return "EXISTS (SELECT 1 FROM {$prefix}dono_donations d "
@@ -102,8 +118,8 @@ final class DonorRepository
             return $q;
         };
 
-        $total = (int) $applyFilters(Donor::query()->whereRaw($this->liveDonorPredicate()))->count();
-        $items = $applyFilters(Donor::query()->whereRaw($this->liveDonorPredicate()))
+        $total = (int) $applyFilters(Donor::query()->whereRaw(self::visibleDonorPredicate()))->count();
+        $items = $applyFilters(Donor::query()->whereRaw(self::visibleDonorPredicate()))
             ->orderBy($orderBy, $order)
             ->limit($perPage)
             ->offset($offset)
@@ -138,7 +154,7 @@ final class DonorRepository
             return $q;
         };
 
-        $base = fn () => DB::table('dono_donors')->whereRaw($this->liveDonorPredicate());
+        $base = fn () => DB::table('dono_donors')->whereRaw(self::visibleDonorPredicate());
 
         $totalCount    = (int) $applyFilters($base())->count();
         $withDonations = (int) $applyFilters($base())->where('donations_count', 0, '>')->count();
@@ -180,7 +196,7 @@ final class DonorRepository
         $lapsedCut = esc_sql($this->daysAgo($today, $lapsedDays));
 
         $row = DB::table('dono_donors')
-            ->whereRaw('redacted_at IS NULL AND ' . $this->liveDonorPredicate())
+            ->whereRaw('redacted_at IS NULL AND ' . $this->givingDonorPredicate())
             ->selectRaw("
                 COUNT(*) AS total,
                 SUM(CASE WHEN created_at >= '{$newCut}' THEN 1 ELSE 0 END) AS new_donors,
