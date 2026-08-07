@@ -175,7 +175,6 @@
     &--inline {
         gap: 24px;
 
-        .dono-form__step { min-height: 0; }
         .dono-form__nav {
             display: flex;
             padding-top: 8px;
@@ -183,7 +182,11 @@
     }
 
     &__step {
-        min-height: 200px;
+        // No floor. A step used to be padded to 200px whichever way it was
+        // laid out, so a page holding a heading and an amount picker reserved
+        // 400px for 146px of content and the donor saw a gap where the form
+        // should have been. The inline layout already opted out of it.
+        min-height: 0;
     }
 
     &__step-title {
