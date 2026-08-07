@@ -10,7 +10,7 @@ import CountrySelect from '../components/CountrySelect';
 
 export default function DonorStep( { fields: fieldsProp, step, state, dispatch, config } ) {
     // `fieldsProp` is a run of field-items from StepView's ordered walk;
-    // `step.fields` is the legacy shape. Either way, render the donor inputs.
+    // `step.fields` is the flat alternative.
     const allFields = fieldsProp || step?.fields || [];
     const v      = state.values;
     const err    = state.errors;
@@ -259,8 +259,8 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                         ) }
                         { options.map( ( o ) => {
                             const id = String( o.id || '' );
-                            // A parent that has children is a group header, not
-                            // a choice - donors pick a specific sub-fund.
+                            // A parent with children is a group header, not a
+                            // choice: donors pick a specific sub-fund.
                             if ( o.selectable === false ) {
                                 return (
                                     <div key={ `g-${ id }` } class="dono-form__fund-group">
@@ -423,9 +423,8 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                         <span class="dono-form__terms-label">{ label }</span>
                     </label>
                     { f.terms && (
-                        // Scrolls rather than grows: long terms above the submit
-                        // button push it off the screen, and a donor who cannot
-                        // find it does not give.
+                        // Scrolls rather than grows: long terms would push the
+                        // submit button off the screen.
                         <div class="dono-form__terms-text" tabindex="0" role="region" aria-label={ label }>
                             { decodeEntities( f.terms ) }
                         </div>
@@ -623,9 +622,9 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                         { f.placeholder ? (
                             <option value="">{ decodeEntities( f.placeholder ) }</option>
                         ) : (
-                            // No placeholder and nothing chosen: without this the
-                            // control displays the first option while state holds
-                            // '', so the choice never submits despite looking set.
+                            // No placeholder and nothing chosen: without an empty
+                            // option the control shows the first one while state
+                            // holds '', so the choice never submits.
                             cur === '' && <option value="" disabled></option>
                         ) }
                         { options.map( ( o ) => (
@@ -764,14 +763,13 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
         }
 
         case 'hidden':
-            // No UI: value lives in state.values.custom[field] and rides the
-            // payload via buildPayload's custom serializer.
+            // No UI: the value rides the payload via buildPayload's custom
+            // serializer.
             return null;
 
         default: {
-            // A field kind an add-on contributes. It gets the same context the
-            // built-ins render from, so it can read values, report errors and
-            // dispatch like any of them.
+            // A field kind contributed by an add-on, rendered with the same
+            // context as the built-ins.
             const entry = fieldEntry( f.kind );
             if ( ! entry || typeof entry.component !== 'function' ) return null;
             const Component = entry.component;

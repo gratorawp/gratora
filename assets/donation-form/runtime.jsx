@@ -24,32 +24,21 @@ import './runtime.scss';
 const STEP_RENDERERS = {
     amount: AmountStep,
     donor:  DonorStep,
-    // The submit step draws nothing of its own. It carries the button's label
-    // and alignment, which FormBody reads directly, and it used to draw the
-    // recap as well - that is the dono/donation-summary block now, rendered
-    // wherever the author dropped it. Mapped rather than omitted so the step
-    // does not fall through to the unknown-step message.
+    // The submit step draws nothing of its own: it carries the button's label
+    // and alignment, which FormBody reads directly, and the recap is the
+    // dono/donation-summary block. Mapped rather than omitted so the step does
+    // not fall through to the unknown-step message.
     submit: () => null,
 };
 
-/**
- * Payment steps for gateways that ship outside core. An add-on registers with
- * window.dono.formGateways.register( id, { component, ready } ) before the
- * runtime mounts; `ready` gets the gateway's own slice of the form config and
- * answers whether it can actually collect a payment.
- */
-/**
- * Where a redirect gateway picks the donation back up. Session-scoped, so it
- * dies with the tab rather than following the donor around.
- */
+// Where a redirect gateway picks the donation back up. Session-scoped, so it
+// dies with the tab rather than following the donor around.
 export const PENDING_KEY = 'dono:pending-donation';
 
-/**
- * Fired on window once per donation, the moment this browser learns the money
- * moved. Carries the reference and its status token and nothing else: a
- * listener that needs the amount reads it back from the status endpoint, which
- * is server-authoritative and returns no donor data.
- */
+// Fired on window once per donation, the moment this browser learns the money
+// moved. It carries the reference and its status token and nothing else: a
+// listener that needs the amount reads it back from the status endpoint, which
+// is server-authoritative and returns no donor data.
 export const COMPLETED_EVENT = 'dono:donation:completed';
 
 function rememberPending( data, values ) {
@@ -80,12 +69,10 @@ function readPending() {
     }
 }
 
-/**
- * The token lands in a different place on each payment path: in the submit
- * response for auto-confirmed gateways, on the payment step for the ones that
- * mount a component, and only in session storage for a gateway that navigated
- * away and came back.
- */
+// The token lands in a different place on each payment path: the submit
+// response for auto-confirmed gateways, the payment step for the ones that
+// mount a component, and only session storage for a gateway that navigated away
+// and came back.
 function statusTokenFor( reference, state ) {
     const stored = readPending();
 
@@ -95,7 +82,6 @@ function statusTokenFor( reference, state ) {
         || '';
 }
 
-/** Which component collects payment for the gateway this donation is using. */
 function paymentComponentFor( payment ) {
     if ( payment?.paypal ) return PayPalPayment;
     if ( payment?.gateway ) {
@@ -104,12 +90,9 @@ function paymentComponentFor( payment ) {
     return StripePayment;
 }
 
-/**
- * Whether the author placed a gateway block anywhere, at any nesting depth.
- * Read from the same config the form renders from rather than published as a
- * separate server flag, so the two cannot disagree about a form that was edited
- * between render and submit.
- */
+// Read from the same config the form renders from rather than a separate server
+// flag, so the two cannot disagree about a form edited between render and
+// submit.
 function hasGatewayBlock( config ) {
     const seen = ( items ) => ( Array.isArray( items ) ? items : [] ).some( ( it ) => {
         if ( ! it ) return false;
@@ -121,14 +104,10 @@ function hasGatewayBlock( config ) {
         .some( ( step ) => seen( step?.items ) || seen( step?.decorations ) );
 }
 
-/**
- * What the donor actually gave, for the card they land on afterwards.
- *
- * Read server-first: the submit response is the only number that matches what
- * was charged. A redirect gateway brings the donor back on a fresh page where
- * none of that survives, so the stash written at submit is the fallback, and
- * the form's own values are last because a reset would have cleared them.
- */
+// Server-first: the submit response is the only number that matches what was
+// charged. A redirect gateway returns the donor on a fresh page where none of
+// that survives, so the stash written at submit is the fallback, and the form's
+// own values come last because a reset would have cleared them.
 function receiptOf( state ) {
     const stash  = readPending();
     const sub    = state.submission || {};
@@ -146,14 +125,10 @@ function receiptOf( state ) {
     };
 }
 
-/**
- * Reaching your giving from the thank-you card.
- *
- * The donation did not prove the address: the form takes one on trust and a
- * card need not match it. So this sends the same link the portal sends, and the
- * mailbox does the proving. It never reports whether the address is known, for
- * the same reason the portal's own endpoint does not.
- */
+// The donation did not prove the address: the form takes one on trust and a card
+// need not match it, so this sends the same link the portal sends and the
+// mailbox does the proving. It never reports whether the address is known, for
+// the same reason the portal's own endpoint does not.
 function PortalLink( { email, config } ) {
     const [ sent, setSent ]     = useState( false );
     const [ failed, setFailed ] = useState( false );
@@ -162,9 +137,9 @@ function PortalLink( { email, config } ) {
 
     if ( ! portal.url || ! email ) return null;
 
-    // The same element the donor pressed, still where they left it, saying
-    // what happened. Swapping it for a line of grey text read as the button
-    // having failed and vanished.
+    // The same element the donor pressed, still where they left it, saying what
+    // happened: a line of grey text instead reads as the button having failed
+    // and vanished.
     if ( sent ) {
         return (
             <button
@@ -177,9 +152,8 @@ function PortalLink( { email, config } ) {
         );
     }
 
-    // The request never got there. Saying "check your email" anyway would send
-    // the donor to wait for something nobody sent, so the portal is offered
-    // plainly instead and they can ask for the link themselves.
+    // Saying "check your email" after a failed request sends the donor to wait
+    // for something nobody sent, so the portal is offered plainly instead.
     if ( failed ) {
         return (
             <a class="dono-form__button dono-form__button--secondary" href={ portal.url }>
@@ -215,7 +189,6 @@ function PortalLink( { email, config } ) {
     );
 }
 
-/** The few facts worth repeating back: what, how often, and where the receipt went. */
 function DonationReceipt( { receipt, config } ) {
     const i18n  = config.i18n || {};
     const freq  = frequencyLabel( receipt.frequency, i18n );
@@ -249,6 +222,10 @@ function DonationReceipt( { receipt, config } ) {
     );
 }
 
+// A gateway shipped outside core registers with
+// window.dono.formGateways.register( id, { component, ready } ) before the
+// runtime mounts; `ready` gets that gateway's slice of the form config and
+// answers whether it can actually collect a payment.
 function registeredGateway( id ) {
     if ( ! id ) return null;
     const reg = typeof window !== 'undefined' ? window.dono?.formGateways : null;
@@ -257,9 +234,8 @@ function registeredGateway( id ) {
     return entry && typeof entry.component === 'function' ? entry : null;
 }
 
-// After a failed validation the invalid field may be off-screen (long or paged
-// form), so clicking the button looks like a dead click. Move focus and scroll
-// to the first invalid field once the error re-render has committed.
+// On a long or paged form the invalid field may be off-screen, so the button
+// reads as a dead click. Runs after the error re-render has committed.
 function focusFirstInvalid() {
     requestAnimationFrame( () => {
         const el = document.querySelector( '.dono-donation-form [aria-invalid="true"]' );
@@ -280,9 +256,9 @@ function readConfig( form ) {
     }
 }
 
-// A donor step's items interleave fields and content in authored order. Render
-// each maximal run of consecutive field-items as one DonorStep (so a row grid
-// stays intact), and each decoration inline between them.
+// A donor step's items interleave fields and content in authored order. Each
+// maximal run of consecutive field-items renders as one DonorStep, so a row
+// grid stays intact, with decorations inline between the runs.
 function StepItems( { items, state, dispatch, config } ) {
     const list = Array.isArray( items ) ? items : [];
     const out  = [];
@@ -337,16 +313,15 @@ function FormBody( { state, dispatch, config } ) {
     const pages   = Array.isArray( config.pages ) ? config.pages : [];
     const isPaged = pages.length > 1;
 
-    // Honeypot hidden via SCSS; token is HMAC-signed so scripted submissions
-    // can't mint one. Both gates enforced server-side in AntiSpamGuard.
+    // The honeypot is hidden in SCSS and the token is HMAC-signed, so a scripted
+    // submission cannot mint one. Both gates are enforced in AntiSpamGuard.
     const honeypotName = config.spam?.honeypotName || 'form_ref';
     const formToken    = config.spam?.formToken || '';
     const [ honeypot, setHoneypot ] = useState( '' );
 
-    // Re-entrancy guard: a double-click fires onSubmit twice in the same tick
-    // (the disabled re-render lands later), creating two pending donations.
-    // The ref flips synchronously; the finally re-arms on every exit, and the
-    // 'submitting' status keeps the button disabled while the fetch is out.
+    // Re-entrancy guard: a double-click fires onSubmit twice in the same tick,
+    // before the disabled re-render lands, which would create two pending
+    // donations. The ref flips synchronously and re-arms on every exit.
     const inFlight = useRef( false );
 
     const onSubmit = useCallback( async () => {
@@ -356,18 +331,17 @@ function FormBody( { state, dispatch, config } ) {
             for ( const s of fieldSteps( state ) ) {
                 const errors = validateStep( s, state );
                 if ( Object.keys( errors ).length > 0 ) {
-                    // Jump to the page that owns the errored field so the message is
-                    // visible; otherwise a paged form dead-ends with no feedback when
-                    // the error is on an earlier page than the submit button.
+                    // Jump to the page owning the errored field, or a paged form
+                    // dead-ends with no feedback when the error is on a page
+                    // before the submit button.
                     dispatch( { type: 'SET_ERRORS', errors, step: s.page || 0 } );
                     focusFirstInvalid();
                     return;
                 }
             }
             dispatch( { type: 'SUBMIT_START' } );
-            // Send X-WP-Nonce only when present (logged-in users). Anonymous
-            // donors omit it so a page-cached form never sends a stale nonce
-            // the REST layer would reject with a 403.
+            // X-WP-Nonce only when present (logged-in users), so a page-cached
+            // form never sends a stale nonce the REST layer would 403.
             const headers = { 'Content-Type': 'application/json' };
             if ( config.nonce ) headers[ 'X-WP-Nonce' ] = config.nonce;
             const res = await fetch( config.rest, {
@@ -382,19 +356,16 @@ function FormBody( { state, dispatch, config } ) {
             } );
             const data = await res.json();
             if ( ! res.ok ) {
-                // The trap is invisible, so a donor who somehow has a value in
-                // it cannot see or clear one, and every retry would be refused
-                // the same way. Clearing it here means a second attempt is a
-                // real attempt. A bot refilling it on retry is refused again,
-                // which is the point.
+                // The trap is invisible, so a donor who somehow has a value in it
+                // cannot clear it and every retry would be refused the same way.
+                // A bot that refills it on retry is refused again.
                 setHoneypot( '' );
                 dispatch( { type: 'SUBMIT_ERROR', message: data.message || config.i18n.error } );
                 return;
             }
-            // Stashed on every path, not just the redirecting one. The status
-            // token is not in the return URL, deliberately, so anything that
-            // outlives this closure (a gateway that navigates away, a listener
-            // reading the amount back after completion) has no other source.
+            // Stashed on every path, not just the redirecting one: the status
+            // token is deliberately kept out of the return URL, so anything
+            // outliving this closure has no other source for it.
             rememberPending( data, state.values );
 
             if ( data.redirect_url ) {
@@ -402,8 +373,8 @@ function FormBody( { state, dispatch, config } ) {
                 return;
             }
             // PayPal hands back its own buttons step instead of a secret. Same
-            // rule as Stripe: without a client id we cannot collect payment, so
-            // fail rather than fall through to a thank-you with no money taken.
+            // rule as Stripe: with no client id there is no way to collect
+            // payment, so fail rather than thank a donor who paid nothing.
             if ( data.paypal ) {
                 if ( config.paypal?.clientId ) {
                     dispatch( {
@@ -421,9 +392,9 @@ function FormBody( { state, dispatch, config } ) {
                 }
                 return;
             }
-            // A gateway that ships outside core: it declared a browser payload
+            // A gateway shipped outside core, which declared a browser payload
             // server-side and registered a component here. Same rule as the
-            // three above, with the gateway itself deciding what "ready" means.
+            // ones above, with the gateway deciding what "ready" means.
             const extra = registeredGateway( data.gateway );
             if ( extra && data[ data.gateway ] ) {
                 if ( ! extra.ready || extra.ready( config[ data.gateway ] || {} ) ) {
@@ -451,8 +422,8 @@ function FormBody( { state, dispatch, config } ) {
                 return;
             }
             // A client_secret means the gateway needs a client-side payment
-            // step. Without a publishable key we cannot collect it, so this is
-            // an error - never fall through to a "thank you" with no payment.
+            // step, which a missing publishable key makes impossible: an error,
+            // never a "thank you" with no payment.
             if ( data.client_secret ) {
                 if ( config.stripe?.publishableKey ) {
                     dispatch( {
@@ -463,8 +434,8 @@ function FormBody( { state, dispatch, config } ) {
                             intentId:     data.intent_id,
                             amountCents:  data.amount_cents,
                             currency:     data.currency,
-                            // Handed to the Payment Element as defaultValues so
-                            // Stripe stops asking for details this form already
+                            // Passed to the Payment Element as defaultValues so
+                            // Stripe does not ask again for details this form
                             // collected a step earlier.
                             donorName:   [ state.values.profile?.first_name, state.values.profile?.last_name ]
                                 .filter( Boolean ).join( ' ' ),
@@ -476,10 +447,9 @@ function FormBody( { state, dispatch, config } ) {
                 }
                 return;
             }
-            // Money has actually moved only when the server reports 'paid'
-            // (auto-confirmed gateways). An offline / otherwise-pending donation
-            // returns here with no redirect or secret - show a distinct pending
-            // state, never the completed thank-you.
+            // Money has moved only when the server reports 'paid'. An offline or
+            // otherwise pending donation arrives here with no redirect and no
+            // secret, and gets its own state, never the completed thank-you.
             dispatch( {
                 type: data.status === 'paid' ? 'SUBMIT_SUCCESS' : 'SUBMIT_PENDING',
                 data,
@@ -512,19 +482,17 @@ function FormBody( { state, dispatch, config } ) {
         } ) );
 
         // After the announcement, never before: a thank-you URL replaces the
-        // page, and a listener that has not run by then never will. This also
-        // keeps the navigation out of render, where it used to fire on every
-        // pass rather than once.
+        // page, and a listener that has not run by then never will. Keeping it
+        // in the effect also fires it once rather than on every render pass.
         if ( state.status === 'success' && config.thanks?.redirect ) {
             window.location.assign( config.thanks.redirect );
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ state.status, state.submission, state.payment, config.thanks?.redirect ] );
 
-    // The payment UI belongs where the author put the gateway block: the donor
-    // picked how to pay there, so that is where paying happens, and the form
-    // they filled in stays on screen behind it. Replacing the whole body is the
-    // fallback for a form with no block, which readiness already warns about.
+    // The payment UI belongs where the author put the gateway block, so the form
+    // stays on screen behind it. Replacing the whole body is the fallback for a
+    // form with no block, which readiness already warns about.
     if ( state.status === 'payment' && ! hasGatewayBlock( config ) ) {
         const PaymentStep = paymentComponentFor( state.payment );
         return (
@@ -571,9 +539,9 @@ function FormBody( { state, dispatch, config } ) {
     }
 
     if ( state.status === 'pending' ) {
-        // Donation recorded but not yet paid (e.g. offline / bank transfer):
-        // no money has moved, so do not honor the completed-donation redirect
-        // or show the paid thank-you. Instructions are emailed on submit.
+        // Recorded but not paid, as with an offline or bank transfer: no
+        // completed-donation redirect and no paid thank-you. Instructions go out
+        // by email on submit.
         return (
             <div class="dono-form__success dono-form__success--pending" role="status">
                 <div class="dono-form__success-icon dono-form__success-icon--pending" aria-hidden="true">⏳</div>
@@ -598,9 +566,9 @@ function FormBody( { state, dispatch, config } ) {
     }
 
     if ( state.status === 'success' ) {
-        // A configured thank-you URL takes precedence over this card, but the
+        // A configured thank-you URL takes precedence over this card, but that
         // navigation happens in the completion effect above so anything
-        // listening for the donation gets to run first.
+        // listening for the donation runs first.
         const message = config.thanks?.message || '';
         return (
             <div class="dono-form__success" role="status">
@@ -643,8 +611,8 @@ function FormBody( { state, dispatch, config } ) {
         </div>
     );
 
-    // Root content authored before a dono/steps wizard: rendered once above the
-    // form, so it doesn't collapse onto the first page.
+    // Root content authored before a dono/steps wizard, rendered once above the
+    // form so it does not collapse onto the first page.
     const preamble = ( Array.isArray( config.preamble ) && config.preamble.length ) ? (
         <StepItems items={ config.preamble } state={ state } dispatch={ dispatch } config={ config } />
     ) : null;
@@ -668,9 +636,19 @@ function FormBody( { state, dispatch, config } ) {
     );
 }
 
+// Paying settles the form: the fields, the recap and the form's own Donate go
+// quiet so the gateway's Pay is the only button on screen. Shared here rather
+// than in each layout, where one could omit it and leave two buttons competing
+// for the same money.
+const formRootClass = ( state, variant ) => [
+    'dono-form',
+    variant,
+    state.status === 'payment' && 'dono-form--settled',
+].filter( Boolean ).join( ' ' );
+
 function SinglePageView( { state, dispatch, config, onSubmit } ) {
-    // Same rule as the paged view. Fixing only that one left every single-page
-    // form showing a live Donate button under "No payment method accepts X".
+    // Same rule as the paged view: without it a single-page form shows a live
+    // Donate button under "No payment method accepts X".
     const noGateway  = visibleGateways( config, state ).length === 0;
     const submitStep = state.steps.find( ( s ) => s.type === 'submit' );
     const submitLabel = interpolateLabel(
@@ -679,7 +657,7 @@ function SinglePageView( { state, dispatch, config, onSubmit } ) {
         config
     );
     return (
-        <div class="dono-form dono-form--inline">
+        <div class={ formRootClass( state, 'dono-form--inline' ) }>
             { state.steps.map( ( s, i ) => (
                 <StepView key={ i } step={ s } state={ state } dispatch={ dispatch } config={ config } />
             ) ) }
@@ -706,20 +684,18 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
     const current = Math.max( 0, Math.min( state.step, pages.length - 1 ) );
     const isLast  = current === pages.length - 1;
     const pageSteps = state.steps.filter( ( s ) => ( s.page || 0 ) === current );
-    // Validation walks fieldSteps so fields authored above the wizard (the
-    // preamble, rendered once by FormBody, never as a page step) check with
-    // the first page instead of bypassing validation entirely.
+    // Validation walks fieldSteps so preamble fields, which FormBody renders
+    // once and never as a page step, check with the first page instead of
+    // bypassing validation entirely.
     const checkSteps = fieldSteps( state ).filter( ( s ) => ( s.page || 0 ) === current );
 
     const page = pages[ current ] || {};
     const pageTitle = decodeEntities( page.title || '' );
     const showPageTitle = page.showTitle !== false && pageTitle !== '';
 
-    // Moving between pages replaced the whole form body with no announcement
-    // and no focus move, so a screen reader carried on reading the button that
-    // had just been swapped underneath it and a keyboard user was left at the
-    // bottom of a page that no longer existed. Same pattern the onboarding
-    // wizard already uses for the same reason.
+    // Moving between pages replaces the whole form body, so without moving
+    // focus a screen reader keeps reading a button that was swapped underneath
+    // it and a keyboard user is left at the bottom of a page that is gone.
     const pageMounted = useRef( false );
     useEffect( () => {
         if ( ! pageMounted.current ) { pageMounted.current = true; return; }
@@ -742,9 +718,9 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
         if ( Object.keys( errors ).length > 0 ) focusFirstInvalid();
     }, [ checkSteps, state, dispatch ] );
 
-    // No enabled gateway takes the chosen currency. GatewaySelect says so
-    // where the choice is made; this stops the donor reaching a server refusal
-    // by pressing the button anyway.
+    // No enabled gateway takes the chosen currency. GatewaySelect says so where
+    // the choice is made; this stops the donor reaching a server refusal by
+    // pressing the button anyway.
     const noGateway = visibleGateways( config, state ).length === 0;
 
     const submit = useCallback( () => {
@@ -788,18 +764,17 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
         <div class="dono-form__error" role="alert">{ state.message }</div>
     );
 
-    // No gateway section here on purpose. The payment-gateways block decides
-    // where the selector goes and whether there is one at all; rendering it as
-    // a fallback meant removing the block in the editor did not remove it from
-    // the form. A form that offers a choice without placing the block is caught
-    // by the readiness check, where the author can see it.
+    // No gateway section here on purpose: the payment-gateways block decides
+    // where the selector goes and whether there is one at all, and a fallback
+    // here would keep rendering one the author removed in the editor. A form
+    // offering a choice without the block is caught by the readiness check.
 
     if ( progressStyle === 'bar' ) {
         const pct = pages.length > 1
             ? Math.round( ( ( current + 1 ) / pages.length ) * 100 )
             : 100;
         return (
-            <div class={ `dono-form dono-form--paged-bar${ state.status === 'payment' ? ' dono-form--settled' : '' }` }>
+            <div class={ formRootClass( state, 'dono-form--paged-bar' ) }>
                 <header class="dono-form__bar-header">
                     { current > 0 ? (
                         <button
@@ -838,9 +813,8 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
         );
     }
 
-    // Default: dots-at-bottom variant.
     return (
-        <div class={ `dono-form${ state.status === 'payment' ? ' dono-form--settled' : '' }` }>
+        <div class={ formRootClass( state ) }>
             { showPageTitle && (
                 <h3 class="dono-form__page-title">{ pageTitle }</h3>
             ) }
@@ -858,8 +832,8 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
                         { prevLabel }
                     </button>
                 ) : (
-                    // Placeholder so flex space-between keeps the primary
-                    // button anchored to the right on the first page.
+                    // Placeholder so space-between keeps the primary button
+                    // anchored right on the first page.
                     <span aria-hidden="true" />
                 ) }
                 { primary }
@@ -909,9 +883,9 @@ function useFocusTrap( ref, active ) {
 }
 
 function ModalShell( { children, openLabel, config, initiallyOpen = false } ) {
-    // Read once, on the first render: a donor coming back from their bank did
-    // not press the trigger, and the shut modal never mounts the body that
-    // shows the outcome and fires the completion event.
+    // Read once, on the first render: a donor coming back from their bank never
+    // pressed the trigger, and a shut modal never mounts the body that shows
+    // the outcome and fires the completion event.
     const [ open, setOpen ] = useState( !! initiallyOpen );
     const panelRef = useRef( null );
 
@@ -954,8 +928,8 @@ function ModalShell( { children, openLabel, config, initiallyOpen = false } ) {
 function App( { config } ) {
     const [ state, dispatch ] = useReducer( reducer, config, initialState );
 
-    // Redirect-based methods (iDEAL, Bancontact) bounce back to return_url with
-    // Stripe's markers. Resolve the PaymentIntent and show the outcome inline.
+    // Redirect-based methods such as iDEAL and Bancontact bounce back to
+    // return_url carrying Stripe's markers.
     useEffect( () => {
         // Scoped to this form's own submission: two forms on a page both read
         // the same URL, and the first to run strips the params from under the
@@ -1148,8 +1122,6 @@ function applyUrlPrefills( config ) {
             const isPreset = !! list.find( ( p ) => ( typeof p === 'number' ? p : p?.cents ) === cents );
             // Presets-only forms reject non-preset amounts server-side, so a
             // non-preset prefill would preselect a tile that can never submit.
-            // Only honor it when custom amounts are allowed or it already
-            // matches an authored preset.
             if ( isPreset || amount.allowCustom !== false ) {
                 if ( ! isPreset ) {
                     amount.presets = [ ...list, { cents, impact: '' } ];
@@ -1177,8 +1149,8 @@ function applyThemeTokens( form, theme ) {
 function mount( form ) {
     if ( form.dataset.donoMounted === 'true' ) return;
 
-    // Uncloak on every exit path (success, no-op, failure) so the JS-gated
-    // cloak can never leave the form permanently hidden.
+    // Called on every exit path, or the JS-gated cloak can leave the form
+    // permanently hidden.
     const reveal = () => { form.dataset.donoReady = 'true'; };
 
     const config = readConfig( form );
@@ -1192,17 +1164,16 @@ function mount( form ) {
 
     applyUrlPrefills( config );
 
-    // Seed number-format from the server so amounts honour the org's choices,
-    // not the visitor's browser locale.
+    // Seeded from the server so amounts honour the org's choices rather than
+    // the visitor's browser locale.
     setActiveNumberFormat( config.numberFormat );
 
     const snapshot = form.innerHTML;
     form.innerHTML = '';
     form.dataset.donoMounted = 'true';
 
-    // The host element is a real <form> and the Preact UI uses type="button",
-    // so a native submit (Enter on a single-field step) would reload the page
-    // and wipe all in-progress state. Block it; navigation is button-driven.
+    // The host element is a real <form>, so a native submit (Enter on a
+    // single-field step) would reload the page and wipe in-progress state.
     form.addEventListener( 'submit', ( e ) => e.preventDefault() );
 
     applyThemeTokens( form, config.theme );
@@ -1210,8 +1181,7 @@ function mount( form ) {
     try {
         render( <App config={ config } />, form );
     } catch ( err ) {
-        // If the Preact app throws on first render, restore the static HTML
-        // so the form is at least visible.
+        // Restore the static HTML so the form is at least visible.
         // eslint-disable-next-line no-console
         console.error( '[dono] mount failed', err );
         form.innerHTML = snapshot;
@@ -1225,21 +1195,19 @@ function bootAll() {
 
     const inIframe = window.parent && window.parent !== window;
 
-    // If we're inside a preview iframe (parent window is different), expose
-    // a postMessage channel so the styling editor can push token updates
-    // without re-fetching the whole document.
+    // Inside a preview iframe, a postMessage channel lets the styling editor
+    // push token updates without re-fetching the whole document.
     if ( inIframe ) {
         // A srcdoc preview has an opaque origin: its document URL is
-        // about:srcdoc, so location.origin is the string "null" and every
-        // postMessage from the parent carries the parent's real origin. The
-        // equality check below therefore rejected every token push, which is
-        // why switching preset never repainted the preview.
+        // about:srcdoc, location.origin is the string "null", and every
+        // postMessage from the parent carries the parent's real origin, so a
+        // strict origin check rejects every token push.
         //
         // The guard still matters for the public form, which a hostile page
-        // could frame by URL and push --dono-* vars into (UI-redress on a
-        // payment form). That form is loaded from a real URL, so it keeps the
-        // strict check; only a srcdoc document, whose entire HTML we wrote,
-        // trusts its parent.
+        // could frame by URL and push --dono-* vars into, UI-redress on a
+        // payment form. That form loads from a real URL and keeps the strict
+        // check; only a srcdoc document, whose HTML is entirely ours, trusts
+        // its parent.
         const isSrcdocPreview = window.location.origin === 'null'
             || document.URL === 'about:srcdoc';
 
@@ -1250,8 +1218,8 @@ function bootAll() {
             if ( ! data || typeof data !== 'object' ) return;
             if ( data.type !== 'dono:apply-tokens' || ! data.tokens ) return;
             document.querySelectorAll( '.dono-donation-form' ).forEach( ( form ) => {
-                // Clear existing --dono-* inline vars first so a preset that
-                // omits a token reverts to the stylesheet default, not a stale value.
+                // Existing --dono-* inline vars go first, so a preset that omits
+                // a token reverts to the stylesheet default, not a stale value.
                 const st = form.style;
                 const drop = [];
                 for ( let i = 0; i < st.length; i++ ) {
@@ -1270,11 +1238,10 @@ function bootAll() {
         }
     }
 
-    // The block editor injects the form after load via ServerSideRender, and its
-    // canvas may be iframed (site editor) or inline in the page (post editor).
-    // bootAll has already run, so watch for forms added later and mount them.
-    // Scoped to editor/preview surfaces (iframe or block-editor-page) so the
-    // public front end is untouched; mount() guards against double-mounts.
+    // The block editor injects the form after load via ServerSideRender, once
+    // bootAll has run, so forms arriving later need watching. Scoped to editor
+    // and preview surfaces so the public front end is untouched; mount() guards
+    // against double-mounts.
     const inEditor = inIframe
         || ( document.body && document.body.classList.contains( 'block-editor-page' ) );
     if ( inEditor ) {

@@ -1,8 +1,5 @@
-/**
- * Lazy-loads Stripe.js from Stripe's CDN. Stripe requires the script be served
- * from js.stripe.com (PCI scope), so it is never bundled. Cached after the
- * first call; safe to call from multiple forms on one page.
- */
+// Stripe requires the script be served from js.stripe.com (PCI scope), so it
+// is never bundled.
 
 let loader = null;
 
@@ -32,10 +29,6 @@ export function loadStripeJs() {
     return loader;
 }
 
-/**
- * Reads the markers a Stripe redirect appends to return_url. Returns null when
- * this is a normal page load (not a payment return).
- */
 export function detectStripeReturn( ownReference = null ) {
     const params = new URLSearchParams( window.location.search );
     const clientSecret = params.get( 'payment_intent_client_secret' );
@@ -43,11 +36,10 @@ export function detectStripeReturn( ownReference = null ) {
 
     const reference = params.get( 'dono_ref' ) || '';
 
-    // The markers are on the URL, which every form on the page can read, and
-    // claiming one strips it for the others. A form only owns the return whose
-    // reference matches the submission it stashed. Passing null keeps the old
-    // any-form behaviour for a caller that has nothing to match against, which
-    // is still the right answer when there is only one form.
+    // The markers sit on the URL, which every form on the page can read, and
+    // claiming one strips it for the others. A form owns only the return whose
+    // reference matches the submission it stashed; null matches any, which is
+    // right when there is a single form.
     if ( ownReference && reference && ownReference !== reference ) return null;
 
     return {
@@ -57,7 +49,6 @@ export function detectStripeReturn( ownReference = null ) {
     };
 }
 
-/** Retrieves the PaymentIntent status after a redirect-based confirmation. */
 export async function resolveStripeReturn( publishableKey, clientSecret ) {
     const Stripe = await loadStripeJs();
     const stripe = Stripe( publishableKey );
@@ -65,7 +56,6 @@ export async function resolveStripeReturn( publishableKey, clientSecret ) {
     return paymentIntent ? paymentIntent.status : null;
 }
 
-/** Strips the Stripe return markers from the address bar without reloading. */
 export function clearStripeReturnParams() {
     try {
         const url = new URL( window.location.href );

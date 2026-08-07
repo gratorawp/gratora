@@ -95,16 +95,40 @@ test.describe('payment step placement', () => {
     });
 
     /**
-     * Paying is one job. The gateway names the charge and shows the amount, so
-     * the fee toggle and the recap of details the donor can no longer edit are
-     * only things to read past on the way to the button.
+     * Paying is one job. The fields, the fee toggle and the recap of choices
+     * already made are things to read past on the way to the button, and the
+     * gateway owns this screen and shows the charge itself.
      */
     test('the pay screen carries nothing but the gateway', async ({ donor, page }) => {
         test.skip(! await submitToPayment(donor, page), 'seeded form places no gateway block');
 
-        await expect(donor.form.locator('.dono-form__confirm')).toBeHidden();
         await expect(donor.form.locator('.dono-form__donor').first()).toBeHidden();
+        await expect(donor.form.locator('.dono-form__amount').first()).toBeHidden();
         await expect(donor.form.locator('.dono-form__payment-mount')).toBeVisible();
+
+        // The recap is a block the author places, so a form may not have one.
+        // Present or absent it must not be on screen while paying.
+        const recap = donor.form.locator('.dono-form__confirm');
+        if (await recap.count() > 0) await expect(recap.first()).toBeHidden();
+    });
+
+    /**
+     * The settling rule is a property of the form, not of one layout. Every
+     * variant builds its own root class, and the single-page one is the shape
+     * most sites ship, so the modifier is asserted against whichever variant
+     * the seed produced rather than assumed to be the paged one.
+     */
+    test('the form settles whichever layout it is', async ({ donor, page }) => {
+        test.skip(! await submitToPayment(donor, page), 'seeded form places no gateway block');
+
+        const root = donor.form.locator('.dono-form--settled');
+        await expect(root).toHaveCount(1);
+
+        const variant = await root.evaluate((el) =>
+            [...el.classList].find((c) => c.startsWith('dono-form--') && c !== 'dono-form--settled') || 'dots',
+        );
+        // Named so a failure says which shape stopped settling.
+        expect(['dono-form--inline', 'dono-form--paged-bar', 'dots']).toContain(variant);
     });
 
     /**

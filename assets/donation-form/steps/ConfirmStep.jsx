@@ -12,8 +12,8 @@ export default function ConfirmStep( { state, config, showDonor = true, showGate
 
     const freqLabel = frequencyLabel( v.frequency, config.i18n );
 
-    // Zero when unchecked or when a condition hides the cover-fees field, so
-    // the shown total always equals what buildPayload charges.
+    // Zero when unchecked or hidden by a condition, so the shown total always
+    // equals what buildPayload charges.
     const fee   = coveredFeeCents( state );
     const total = formatAmount( cents + fee, state.currency );
 

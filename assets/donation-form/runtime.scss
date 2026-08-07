@@ -1,5 +1,5 @@
-// Donation-form runtime styles. Scoped to `.dono-form` to avoid fighting
-// theme CSS; CSS variables let themes/campaigns override.
+// Scoped to `.dono-form` to avoid fighting theme CSS; CSS variables are the
+// override surface for themes and campaigns.
 
 .dono-donation-form .dono-modal-host {
     display: inline-block;
@@ -23,9 +23,9 @@
     &__panel {
         position: relative;
         background: var(--dono-bg, #fff);
-        // The modal is always a card; keep it legible even when the form's
-        // container style is "plain" (which makes the in-page form inherit
-        // the theme's text colour).
+        // The modal is always a card, so it stays legible even when the
+        // container style is "plain" and the in-page form inherits the theme's
+        // text colour.
         color: var(--dono-text, #111827);
         border-radius: var(--dono-radius, 12px);
         max-width: 560px;
@@ -50,28 +50,26 @@
     }
 }
 
-// Token defaults live on the outermost wrapper (`.dono-donation-form`) so
-// inline `style="--dono-accent: …"` written by applyThemeTokens() wins on the
-// same element and cascades down. Declaring them on a descendant (`.dono-form`)
-// would shadow the inherited inline values, since direct declarations override
-// inherited custom-property values regardless of specificity.
+// Token defaults sit on the outermost wrapper so the inline
+// `style="--dono-accent: …"` applyThemeTokens() writes wins on the same element
+// and cascades down. On a descendant they would shadow the inherited inline
+// values, since a direct declaration beats an inherited custom property
+// whatever the specificity.
 .dono-donation-form {
     // Reset host-theme defaults that some block themes apply to <form>.
     border: 0;
     padding: 0;
     margin: 0 auto;
 
-    // Bounded by the admin-set max width with a hard-coded fallback. Theme
-    // CSS can override this at any level via `--dono-form-max-width`.
+    // The admin-set max width, overridable at any level by theme CSS.
     max-width: var(--dono-form-max-width, 720px);
     width: 100%;
     box-sizing: border-box;
 
     --dono-accent:         #1e8a4e;
-    // Selected/soft tint tracks the brand accent. Legacy literal first, then
-    // an accent-derived mix for modern browsers (last valid declaration wins;
-    // unsupported color-mix is ignored). A brand preset can still set
-    // --dono-accent-soft explicitly to override both.
+    // Literal first, accent-derived mix second: the last valid declaration wins
+    // and an unsupported color-mix is ignored. A brand preset can still set
+    // --dono-accent-soft explicitly and override both.
     --dono-accent-soft:    #e7f5ec;
     --dono-accent-soft:    color-mix(in srgb, var(--dono-accent) 12%, #fff);
     --dono-text:           #111827;
@@ -91,10 +89,9 @@
     --dono-body-weight:    400;
     --dono-radius:         10px;
     --dono-radius-sm:      8px;
-    // --dono-button-radius / --dono-switcher-radius are intentionally NOT
-    // defaulted: left unset they fall back to --dono-radius-sm (shared with
-    // the amount tiles). Set either in a brand preset / theme CSS to override
-    // just the donate button or just the currency switcher.
+    // --dono-button-radius and --dono-switcher-radius are deliberately not
+    // defaulted: unset they fall back to --dono-radius-sm, and setting either
+    // overrides just the donate button or just the currency switcher.
     --dono-pill-radius:    999px;
     --dono-preset-hover:   rgba(0, 0, 0, .04);
     --dono-stroke:   1px;
@@ -110,23 +107,20 @@
     // so themes can override, e.g. `.dono-donation-form { --dono-form-padding: 20px 24px; }`.
     &--framed {
         background: var(--dono-form-bg, #fff);
-        // Falls back to the campaign's corner radius, not a literal.
-        // --dono-form-radius is a theme override hook and is never set by us,
-        // so the hardcoded 14px was what every framed form actually used: a
-        // campaign set to square corners still had a rounded card around it.
+        // --dono-form-radius is a theme override hook that nothing here sets,
+        // so the fallback has to be the campaign's own radius: a literal would
+        // put a rounded card around a campaign set to square corners.
         border-radius: var(--dono-form-radius, var(--dono-radius, 14px));
         box-shadow: var(--dono-form-shadow, 0 1px 2px rgba(15, 23, 42, .04), 0 12px 32px rgba(15, 23, 42, .06));
         padding: var(--dono-form-padding, 36px 40px 44px);
     }
 }
 
-// Defensive boundary against host-theme element styles spilling in. Kept at
-// specificity 0 via :where() so every dono component class still wins and
-// --dono-* variable theming is untouched. Deliberately leaves <a>, list-style
-// and colour alone so admin-authored rich text (privacy notice, HTML/paragraph
-// blocks) keeps its link/list affordances; only the high-spill, low-risk
-// surface is neutralised. Light-DOM caveat remains: a theme rule with higher
-// specificity than a single class can still override component styles.
+// Boundary against host-theme element styles spilling in, kept at specificity 0
+// via :where() so every dono component class still wins. It leaves <a>,
+// list-style and colour alone, so admin-authored rich text keeps its link and
+// list affordances. A theme rule more specific than a single class can still
+// win: this is light DOM.
 :where(.dono-form) {
     :where(button, input, select, textarea) {
         margin: 0;
@@ -143,11 +137,10 @@
     :where(legend)   { padding: 0; }
 }
 
-// "Plain" container: no card, blends into the host page. Background and text
-// colour follow the page/theme instead of the branded card tokens, so a plain
-// embed reads correctly on light or dark sections. A dev can still re-introduce
-// a surface via --dono-form-bg. Doubled wrapper class keeps this above the
-// base `.dono-donation-form .dono-form` rule regardless of source order.
+// "Plain" container: background and text colour follow the host page rather
+// than the branded card tokens, so the embed reads correctly on a light or a
+// dark section. The doubled wrapper class keeps this above the base
+// `.dono-donation-form .dono-form` rule whatever the source order.
 .dono-donation-form.dono-donation-form--plain .dono-form {
     background: var(--dono-form-bg, transparent);
     color: inherit;
@@ -163,8 +156,8 @@
     font-size: var(--dono-type-size);
     font-weight: var(--dono-body-weight);
     line-height: 1.5;
-    // Cut the inheritance chain for typography a host theme can push in via
-    // body/.entry-content that font/color/line-height don't already cover.
+    // Cuts the inheritance chain for the typography a host theme pushes in via
+    // body or .entry-content that font, color and line-height do not cover.
     text-align: start;
     text-transform: none;
     letter-spacing: normal;
@@ -182,10 +175,8 @@
     }
 
     &__step {
-        // No floor. A step used to be padded to 200px whichever way it was
-        // laid out, so a page holding a heading and an amount picker reserved
-        // 400px for 146px of content and the donor saw a gap where the form
-        // should have been. The inline layout already opted out of it.
+        // No floor: a step reserving height it does not use leaves the donor
+        // looking at a gap where the form should be.
         min-height: 0;
     }
 
@@ -203,8 +194,8 @@
         gap: 12px;
         padding-top: 4px;
 
-        // Donate-button alignment (single-page form). Same specificity as the
-        // rule above and declared after it, so the modifier wins the tie.
+        // Same specificity as the rule above and declared after it, so the
+        // modifier wins the tie.
         &--align-left   { justify-content: flex-start; }
         &--align-center { justify-content: center; }
         &--align-right  { justify-content: flex-end; }
@@ -220,8 +211,8 @@
         font-variant-numeric: tabular-nums;
     }
 
-    // dono/divider: structure + default line colour. Spacing, thickness and
-    // an explicit colour are set inline by the block.
+    // Structure and default line colour only: spacing, thickness and an
+    // explicit colour are set inline by the block.
     &__divider {
         margin: 0;
         border: 0;
@@ -236,9 +227,8 @@
         padding: 0 22px;
         font-size: 14px;
         font-weight: var(--dono-button-weight, 600);
-        // Defaults to the shared --dono-radius-sm (so the button matches the
-        // amount tiles / brand radius); --dono-button-radius overrides just
-        // the button when set.
+        // Falls back to the shared --dono-radius-sm so the button matches the
+        // amount tiles; --dono-button-radius overrides the button alone.
         border-radius: var(--dono-button-radius, var(--dono-radius-sm, 8px));
         cursor: pointer;
         transition: filter .15s, background .15s, box-shadow .15s;
@@ -271,8 +261,7 @@
         gap: 8px;
         margin-bottom: 14px;
     }
-    // Filled gray tile with accent outline for the selected / preselected
-    // amount. Mirrors the editor preview in
+    // Mirrors the editor preview in
     // admin/forms/blocks/donation-amount/index.js.
     &__preset {
         position: relative;
@@ -318,8 +307,7 @@
         line-height: 1.3;
     }
 
-    // Two render styles (set on the block): "pills" = rounded segmented
-    // buttons, "tabs" = underline-style nav. Both use brand tokens.
+    // The block picks between two render styles: "pills" and "tabs".
     &__frequency {
         margin: 0 0 14px;
         padding: 0;
@@ -433,10 +421,9 @@
     }
 }
 
-// Honeypot field. Hidden off-screen, never seen by humans. Scripted bots that
-// crawl the DOM and fill all inputs populate it; the server then silently
-// rejects the submission. Using `position: absolute` instead of `display:
-// none` because some bots intentionally skip display:none fields.
+// Honeypot field: a bot that crawls the DOM and fills every input populates it,
+// and the server then rejects the submission silently. Hidden with `position:
+// absolute` rather than `display: none` because some bots skip hidden fields.
 .dono-donation-form .dono-form__hp {
     position: absolute;
     left: -10000px;
@@ -618,8 +605,8 @@
         font-weight: 600;
     }
 
-    // Shown when nothing accepts the chosen currency. Same weight as the test
-    // banner: it is a condition to act on, not an error the donor caused.
+    // Shown when nothing accepts the chosen currency. Weighted like the test
+    // banner: a condition to act on, not an error the donor caused.
     &__gateways-empty {
         padding: 10px 14px;
         border-radius: var(--dono-radius-sm);
@@ -678,7 +665,6 @@
         font-size: 13px;
     }
 
-    // Compact list variant: no card chrome, just radios + label/desc inline.
     &__gateways--list &__gateways-list { gap: 4px; }
     &__gateways--list &__gateway {
         padding: 6px 0;
@@ -692,14 +678,10 @@
         display: grid;
         gap: 12px;
 
-        // A name field is already a two-up row of its own. Dropped into one
-        // column of a row alongside another field it became a row inside a
-        // row: three inputs across one line, and in a sidebar column that is
-        // about 77px each, too narrow to type a name into.
-        //
-        // So a row holding one stops being a row. Spanning only the name would
-        // leave whatever sits beside it stranded at half width with empty space
-        // alongside, which looks like a mistake rather than a layout.
+        // A name field is a two-up row of its own, so in one column of another
+        // row it nests: three inputs on a line, about 77px each in a sidebar.
+        // A row holding one therefore stops being a row. Spanning only the name
+        // would strand its neighbour at half width beside empty space.
         &:has(> .dono-form__row--two-up) > * {
             grid-column: 1 / -1;
         }
@@ -719,11 +701,10 @@
         margin-top: 4px;
 
         // Themes routinely restyle checkboxes with appearance: none and their
-        // own box, at a specificity a single class cannot beat. Stripped of
-        // the native control, accent-color draws nothing, so the box rendered
-        // empty whatever its state: it toggled on click and looked broken.
-        // Restore the native control and pin the size, doubled on the form
-        // class so this outranks a theme's element rules.
+        // own box, at a specificity a single class cannot beat. Stripped of the
+        // native control, accent-color draws nothing and the box renders empty
+        // whatever its state. This restores the native control and pins the
+        // size, doubled on the form class to outrank a theme's element rules.
         input[type="checkbox"],
         .dono-donation-form.dono-donation-form & input[type="checkbox"] {
             appearance: auto;
@@ -948,22 +929,19 @@
     // this is what says so. The payment mount is exempt, and so is anything
     // Stripe draws inside it.
     &--settled {
-        // Paying is one job. The gateway already names the charge and shows the
-        // amount, so a fee toggle that no longer moves anything and a recap of
-        // details the donor cannot edit are just things to read past on the way
-        // to the button. They go, rather than sitting there greyed out looking
-        // like something went wrong.
+        // Controls that cannot move anything once paying starts are hidden
+        // rather than greyed out, which reads as something having gone wrong.
+        // The gateway owns this screen and shows the charge itself.
         .dono-form__donor,
         .dono-form__amount,
         .dono-form__confirm {
             display: none;
         }
 
-        // The form's own Back and Donate go away rather than dim. Two sets of
-        // buttons on one screen is a donor deciding which one takes their
-        // money. Scoped back in below the mount, because the gateway draws its
-        // Pay and Cancel in a nav of the same name: hiding both would leave
-        // nobody able to pay at all.
+        // The form's own Back and Donate go away rather than dim: two sets of
+        // buttons is a donor deciding which one takes their money. Scoped back
+        // in below the mount, because the gateway draws its Pay and Cancel in a
+        // nav of the same name.
         .dono-form__nav {
             display: none;
         }
@@ -987,14 +965,20 @@
         gap: 10px;
         justify-content: center;
     }
-    // Confirmed, not broken: it keeps the button's shape so the donor can see
-    // the thing they pressed is still there and has answered them.
+    // Confirmed, not broken: the button keeps its shape so the donor can see
+    // the thing they pressed is still there.
     &__portal-link.is-sent {
         opacity: .75;
         cursor: default;
     }
 
-    // The same summary the donor read before paying, shown back to them after.
+    // The step stacks its children flush, so the tinted recap needs its own
+    // separation from whatever sits above. Scoped to a following sibling:
+    // placed first, it should start where the step starts.
+    &__confirm:not(:first-child) {
+        margin-top: 20px;
+    }
+
     // Constrained and centred because the card it sits in is centred, and a
     // full-width list under a centred heading reads as a different section.
     &__summary--receipt {
@@ -1019,9 +1003,8 @@
         input { margin-top: 3px; flex: 0 0 auto; }
     }
     &__terms-text {
-        // Capped rather than free-growing: a long policy above the submit
-        // button pushes it off the screen, and a donor who cannot find the
-        // button does not give.
+        // Capped rather than free-growing: a long policy would push the submit
+        // button off the screen.
         max-height: 180px;
         overflow-y: auto;
         padding: 12px 14px;
@@ -1353,11 +1336,9 @@
         color: var(--dono-text);
     }
 
-    // Author styling is owned by WP's block-supports (colour / border /
-    // spacing / shadow panels); the wrapper just renders the inline style
-    // the Style Engine produced. Only structural CSS lives here.
+    // Author styling belongs to WP's block-supports: the wrapper renders the
+    // inline style the Style Engine produced, so only structure lives here.
     .dono-block--section {
-        // Nested decorations should stack vertically without doubled bottom margin.
         > .dono-form__decorations { margin-bottom: 0; }
     }
 

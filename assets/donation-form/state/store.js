@@ -3,17 +3,11 @@ import { evaluateCondition } from './conditions';
 import { mergePayload, registeredErrors, registeredValues } from './fields';
 import { convertCents, displayPreset, isZeroDecimal, roundToCurrency } from '../util/fx';
 import { formatAmount } from '../util/format';
-/**
- * Donation-form state: single useReducer source of truth
- * (step, steps, values, errors, status, submission, message).
- */
 
-// Every field-bearing collection: fields authored above a wizard live in
-// `preamble` (rendered once above the form, not inside a step), so fold them
-// in as a synthetic first-page donor step. Validation, fees, suppression and
-// payload building must all walk this, never `steps` alone, or preamble
-// fields become orphaned, never-validated, never-suppressed inputs. Works on
-// both the boot config and the reducer state (same preamble/steps keys).
+// Fields authored above a wizard live in `preamble`, outside any step, so they
+// are folded in as a synthetic first-page donor step. Validation, fees,
+// suppression and payload building must walk this, never `steps` alone, or
+// preamble fields go unvalidated and unsuppressed.
 export function fieldSteps( src ) {
     const pre = ( Array.isArray( src.preamble ) && src.preamble.length )
         ? [ { type: 'donor', page: 0, items: src.preamble } ]
@@ -43,8 +37,8 @@ export function initialState( config ) {
         pages:       Array.isArray( config.pages )   ? config.pages   : [],
         pageNav:     ( config.pageNav && typeof config.pageNav === 'object' ) ? config.pageNav : {},
         currency:    config.currency,
-        // Presets are authored in config.currency; fx converts to whatever
-        // currency the donor switches to.
+        // Presets are authored in config.currency; fx converts from it when the
+        // donor switches.
         presetCurrency: config.currency,
         fx:          ( config.fx && typeof config.fx === 'object' )
             ? config.fx
@@ -84,9 +78,8 @@ export function initialState( config ) {
 }
 
 // Portal give-again links prefill ?dono_frequency= in the stored underscore
-// vocabulary ('one_time'); form state uses hyphens. Apply the prefill only
-// when the form's frequency field actually offers it; otherwise fall back to
-// the authored default.
+// vocabulary ('one_time'); form state uses hyphens. The prefill only applies
+// when the form's frequency field actually offers it.
 function initialFrequency( config, freqField ) {
     const fallback = freqField ? String( freqField.default || 'one-time' ) : 'one-time';
     const raw = String( config.__prefillFrequency || '' ).trim();
@@ -117,8 +110,7 @@ function initialConsents( donorSteps ) {
 }
 
 function initialCustom( donorSteps ) {
-    // Multi-page wizards emit one donor step per page; aggregate all fields
-    // so the initial custom values cover the whole form.
+    // Multi-page wizards emit one donor step per page.
     const all = [];
     for ( const s of ( Array.isArray( donorSteps ) ? donorSteps : [ donorSteps ] ) ) {
         for ( const f of fieldsOf( s ) ) all.push( f );
@@ -185,14 +177,10 @@ function resolveHiddenValue( f ) {
     return value || fallback;
 }
 
-/**
- * Actions that describe what is being donated, as opposed to where the form is
- * in its own lifecycle. Once an intent exists these are settled: the charge is
- * fixed on the gateway's side, so letting them through would leave the donor
- * reading a total that is not the one leaving their account. Navigation is in
- * the list because a paged form renders only the current page, and stepping
- * away unmounts the payment element mid-entry.
- */
+// Once an intent exists the charge is fixed gateway-side, so these would leave
+// the donor reading a total that is not the one leaving their account.
+// Navigation counts: a paged form renders only the current page, and stepping
+// away unmounts the payment element mid-entry.
 const SETTLED_BY_PAYMENT = [
     'SET_FIELD',
     'SET_AMOUNT',
@@ -205,13 +193,11 @@ const SETTLED_BY_PAYMENT = [
 
 export function reducer( state, action ) {
     // Enforced here rather than by disabling inputs, so it holds however the
-    // action was raised: a stray dispatch, a component that forgot the prop, or
-    // a keyboard reaching a control the styling only looked like it had closed.
+    // action was raised.
     if ( state.status === 'payment' && SETTLED_BY_PAYMENT.includes( action.type ) ) {
-        // A fresh object, not the same one: a control the donor reached anyway
-        // has already moved its own DOM, and only a re-render puts it back to
-        // what state says. Returning the identical reference leaves a checkbox
-        // showing one thing while the total shows another.
+        // A fresh object, not the same reference: a control the donor reached
+        // anyway has already moved its own DOM, and only a re-render puts it
+        // back to what state says.
         return { ...state };
     }
 
@@ -235,11 +221,10 @@ export function reducer( state, action ) {
             const to   = action.currency;
             if ( ! to || from === to ) return { ...state, currency: to };
 
-            // If a preset tile is selected, keep that tile selected and show
-            // its converted, nice-rounded value in the new currency. A custom
-            // amount converts precisely, then snaps to a whole major unit when
-            // the target currency has no sub-unit: EUR 12.50 into JPY is
-            // 2004.62 yen, which the server refuses.
+            // A selected preset keeps its tile and shows the nice-rounded
+            // conversion. A custom amount converts precisely, then snaps to a
+            // whole major unit where the currency has no sub-unit: EUR 12.50
+            // into JPY is 2004.62 yen, which the server refuses.
             const presets = presetCentsOf( state );
             const cur     = state.values.amount_cents;
             const idx = presets.findIndex(
@@ -270,16 +255,16 @@ export function reducer( state, action ) {
             if ( Object.keys( errors ).length > 0 ) {
                 return { ...state, errors };
             }
-            // state.step is the current wizard page index, bounded by pages,
-            // not by the flat semantic-step list.
+            // state.step is the wizard page index, bounded by pages, not by the
+            // flat semantic-step list.
             const total = Array.isArray( state.pages ) ? state.pages.length : 0;
             const max   = Math.max( 0, total - 1 );
             return { ...state, step: Math.min( state.step + 1, max ), errors: {} };
         }
 
         case 'SET_ERRORS':
-            // An optional `step` lets a full-form re-validation jump to the page
-            // owning the first errored field so the error is actually visible.
+            // `step` lets a full-form re-validation jump to the page owning the
+            // first errored field, so the error is visible.
             return {
                 ...state,
                 errors: action.errors || {},
@@ -314,10 +299,9 @@ export function reducer( state, action ) {
         case 'SUBMIT_PENDING':
             return {
                 ...state,
-                // Two different things are not paid yet. `pending` means the
-                // donor still has something to do; `processing` means a bank
-                // debit is on its way and they are finished. Showing the wrong
-                // one asks someone who has already paid to pay again.
+                // `pending` means the donor still has something to do;
+                // `processing` means a bank debit is on its way and they are
+                // finished. The wrong one asks someone who paid to pay again.
                 status:     action.data?.status === 'processing' ? 'processing' : 'pending',
                 submission: action.data,
                 message:    '',
@@ -331,8 +315,6 @@ export function reducer( state, action ) {
             };
 
         case 'CANCEL_PAYMENT':
-            // Back out of the card step without wiping the form: keep every
-            // entered value and the current step, just drop the payment intent.
             return {
                 ...state,
                 status:  'idle',
@@ -341,11 +323,9 @@ export function reducer( state, action ) {
             };
 
         case 'RESET': {
-            // Giving again is the same person, so they are not asked who they
-            // are a second time. Carried in memory only: nothing is written to
-            // the browser, because a store on this origin is readable by every
-            // other script on the site, and the browser's own autofill already
-            // covers the returning-visitor case without that exposure.
+            // Giving again is the same person, so identity carries over. In
+            // memory only: anything stored on this origin is readable by every
+            // other script on the site.
             const known = {
                 email:   state.values?.email || '',
                 profile: {
@@ -390,8 +370,8 @@ function findStep( steps, type ) {
     return ( steps || [] ).find( ( s ) => s.type === type );
 }
 
-// Donor steps carry fields as items tagged t:'field' (interleaved with t:'deco'
-// content); fall back to a flat fields array for any step not shaped that way.
+// Donor steps interleave fields (t:'field') with deco content; other steps
+// carry a flat fields array.
 function fieldsOf( step ) {
     if ( Array.isArray( step?.items ) ) {
         return step.items.filter( ( it ) => it && it.t === 'field' );
@@ -403,7 +383,7 @@ function findField( step, kind ) {
     return fieldsOf( step ).find( ( f ) => f.kind === kind );
 }
 
-/** Raw preset amounts (in presetCurrency cents) from the amount step. */
+// Raw preset amounts, in presetCurrency cents.
 function presetCentsOf( state ) {
     const list = findStep( state.steps, 'amount' )?.presets || [];
     return list.map( ( p ) => ( typeof p === 'number' ? Number( p ) : Number( p?.cents ) || 0 ) );
@@ -429,8 +409,6 @@ function clearError( errors, path ) {
 // Returns a `{ fieldName: 'message' }` map; empty means valid.
 export function validateStep( step, state ) {
     const e = {};
-    // Localized validation messages come from config.i18n.validation (threaded
-    // into state at init); the English literals are the fallback.
     const vi = ( state.i18n && state.i18n.validation ) || {};
     const msg = ( key, fallback, arg ) => {
         const s = vi[ key ] || fallback;
@@ -443,8 +421,9 @@ export function validateStep( step, state ) {
             if ( ! amt || amt <= 0 ) {
                 e[ 'amount_cents' ] = msg( 'pickAmount', 'Pick or enter an amount.' );
             } else if ( min > 0 && amt < min ) {
-                // Server enforces the same minimum; surface it at the field so a
-                // paged form jumps back here instead of failing on submit.
+                // The server enforces the same minimum; surfacing it at the
+                // field makes a paged form jump back here instead of failing on
+                // submit.
                 const fmt = formatAmount( min, state.currency );
                 e[ 'amount_cents' ] = msg( 'minAmount', `Minimum donation is ${ fmt }.`, fmt );
             }
@@ -456,8 +435,8 @@ export function validateStep( step, state ) {
             const fields = fieldsOf( step ).filter( ( f ) => evaluateCondition( f.condition, v ) );
             for ( const f of fields ) {
                 if ( f.kind === 'email' ) {
-                    // Always required: the server hard-requires a valid email,
-                    // so never let a form config make it optional (-> 400).
+                    // The server hard-requires a valid email, so no form config
+                    // may make it optional (-> 400).
                     if ( ! v.email || ! /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test( v.email ) ) {
                         e[ 'email' ] = msg( 'invalidEmail', 'Enter a valid email.' );
                     }
@@ -576,17 +555,14 @@ function normalizeFrequency( raw ) {
     return f === 'one-time' ? 'one_time' : f;
 }
 
-// Fields hidden by a false condition must not submit their seeded default
-// (a hidden recurring toggle would otherwise enroll the donor in a subscription
-// they never saw). Collect what to suppress from the currently-hidden fields.
+// Fields hidden by a false condition must not submit their seeded default: a
+// hidden recurring toggle would enroll the donor in a subscription they never
+// saw, and a hidden consent value is not consent.
 function suppressedFields( state ) {
     const v = state.values;
     const CUSTOM = [ 'text', 'number', 'date', 'dropdown', 'radio', 'checkbox', 'multi-select', 'hidden' ];
     const out = {
         custom: new Set(), frequency: false, fund: false, anon: false, fees: false,
-        // A consent block behind a false condition was never shown, so its
-        // seeded value is not something the donor agreed to, and a hidden
-        // comment block would still publish text on the supporter wall.
         consents: new Set(), comment: false,
     };
     for ( const step of fieldSteps( state ) ) {
@@ -625,10 +601,9 @@ export function buildPayload( state ) {
         note_to_org:       sup.comment ? undefined : ( ( v.note_to_org || '' ).trim() || undefined ),
         note_public:       sup.comment ? undefined : ( v.note_public ? true : undefined ),
         is_anonymous:      sup.anon ? false : !! v.is_anonymous,
-        // "Cover fees" is an authorable condition source, and the server
-        // evaluates conditions against this payload. Sending only the computed
-        // cents left it with no value to compare, so any field shown behind
-        // that condition was stripped as one the donor never saw.
+        // "Cover fees" is an authorable condition source and the server
+        // evaluates conditions against this payload, so the flag must ride
+        // along with the computed cents or it has nothing to compare.
         cover_fees:        sup.fees ? false : !! v.cover_fees,
         fund_id:           sup.fund ? undefined : ( ( v.fund_id || '' ).trim() || undefined ),
         consents:          buildConsents( v.consents, sup.consents ),
@@ -670,9 +645,8 @@ function buildConsents( c, suppressed ) {
     return Object.keys( out ).length === 0 ? undefined : out;
 }
 
-// Capture traffic attribution from the landing URL + referrer so the server's
-// ChannelClassifier can bucket the donation (utm_* -> paid/social, referrer ->
-// referral, neither -> direct) instead of everything reading as 'direct'.
+// The server's ChannelClassifier buckets the donation from these: utm_* ->
+// paid/social, referrer -> referral, neither -> direct.
 function buildSourceAttribution() {
     if ( typeof window === 'undefined' ) return undefined;
     const out = {};
@@ -699,26 +673,24 @@ function buildCustom( c, suppress ) {
 }
 
 export function computeFees( state, base ) {
-    // Multi-page wizards emit one donor step per page; scan all for cover-fees.
+    // Multi-page wizards emit one donor step per page.
     const donorSteps = fieldSteps( state ).filter( ( s ) => s.type === 'donor' );
     const f = donorSteps.map( ( s ) => findField( s, 'cover_fees' ) ).find( Boolean );
     if ( ! f ) return 0;
-    // The fixed component is authored in the org base currency; convert it
-    // when the donor switched, so a 30-cent fixed never rides as 0.30 EUR.
+    // The fixed component is authored in the org base currency, so it converts
+    // when the donor switched: a 30-cent fixed must not ride as 0.30 EUR.
     const fixed = convertCents( state.fx, Number( f.fixed || 0 ), state.presetCurrency, state.currency );
     let fee = Math.round( base * ( ( f.percent || 0 ) / 100 ) ) + fixed;
     if ( isZeroDecimal( state.currency ) ) {
-        // Storage is major x 100: round to a whole major unit (nearest, ties
-        // away from zero) so base + fee passes the server's no-fractional-
-        // amounts check for this currency.
+        // Storage is major x 100: round to a whole major unit so base + fee
+        // passes the server's no-fractional-amounts check for this currency.
         fee = Math.round( fee / 100 ) * 100;
     }
     return Math.max( 0, fee );
 }
 
-// The fee actually charged: zero when the donor left cover-fees unchecked or
-// a condition hides the field. Display sites (summary, submit label) must use
-// this, not computeFees directly, so shown totals always match the payload.
+// The fee actually charged. Display sites (summary, submit label) must use
+// this, not computeFees, so shown totals always match the payload.
 export function coveredFeeCents( state ) {
     if ( ! state.values.cover_fees ) return 0;
     if ( suppressedFields( state ).fees ) return 0;
