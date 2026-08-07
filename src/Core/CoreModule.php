@@ -528,6 +528,7 @@ final class CoreModule implements DonoModule
             $c->get(DonorMetricsService::class),
             $c->get(RecurringPlanActions::class),
             $c->get(GatewayManager::class),
+            $c->get(AntiSpamGuard::class),
         ));
 
         $c->bind(AggregateSyncer::class, fn () => new AggregateSyncer());
@@ -980,7 +981,7 @@ final class CoreModule implements DonoModule
 
         $formShortcode->register();
 
-        (new PortalShortcode())->register();
+        (new PortalShortcode($c->get(AntiSpamGuard::class)))->register();
         // Serves Apple's domain association file on the front end, so it must
         // register outside any is_admin() gate.
         $c->get(ApplePayDomain::class)->register();

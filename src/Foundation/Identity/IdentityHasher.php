@@ -45,6 +45,40 @@ final class IdentityHasher
         return strtolower(trim($email));
     }
 
+    /**
+     * The mailbox an address actually reaches, for rate limiting only.
+     *
+     * "a+1@gmail.com", "a+2@gmail.com" and "a.a@gmail.com" are three different
+     * addresses and three different donors, but one inbox. A per-address send
+     * limit therefore does not limit sends to a person, and anything that mails
+     * on demand becomes a way to flood somebody else's mail.
+     *
+     * Never use this for identity. emailHash() is the UNIQUE key on the donor
+     * table and the handle erasure severs, and collapsing distinct addresses
+     * into one donor would merge two people's giving history.
+     */
+    public function rateLimitMailbox(string $email): string
+    {
+        $email = $this->normalizeEmail($email);
+        $at    = strrpos($email, '@');
+        if ($at === false) return $email;
+
+        $local  = substr($email, 0, $at);
+        $domain = substr($email, $at + 1);
+
+        $plus = strpos($local, '+');
+        if ($plus !== false) $local = substr($local, 0, $plus);
+
+        // Dots are only insignificant on some providers, so this is not applied
+        // everywhere: elsewhere the two addresses can be different mailboxes.
+        if (in_array($domain, ['gmail.com', 'googlemail.com'], true)) {
+            $local  = str_replace('.', '', $local);
+            $domain = 'gmail.com';
+        }
+
+        return $local . '@' . $domain;
+    }
+
     public function ipHash(?string $ip): ?string
     {
         if ($ip === null || $ip === '') return null;

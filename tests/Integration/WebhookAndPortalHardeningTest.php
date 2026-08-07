@@ -21,6 +21,18 @@ use WP_REST_Request;
  */
 final class WebhookAndPortalHardeningTest extends IntegrationTestCase
 {
+    /**
+     * Signing up is gated on proof the caller loaded the portal page. Without
+     * it these requests are refused before they reach the behaviour under test,
+     * and the assertions pass for the wrong reason.
+     */
+    private function portalToken(): string
+    {
+        return Plugin::instance()->container
+            ->get(\Dono\Donations\AntiSpamGuard::class)
+            ->mintPortalToken();
+    }
+
     private function paidDonation(bool $isTest, string $gateway = 'paypal'): Donation
     {
         $d = Donation::make();
@@ -84,6 +96,7 @@ final class WebhookAndPortalHardeningTest extends IntegrationTestCase
             'email'      => $email,
             'first_name' => 'Rude',
             'last_name'  => 'Word',
+            'token'      => $this->portalToken(),
         ]));
         rest_do_request($req);
 
@@ -198,6 +211,7 @@ final class WebhookAndPortalHardeningTest extends IntegrationTestCase
             'email'      => $email,
             'first_name' => 'Ada',
             'last_name'  => 'Lovelace',
+            'token'      => $this->portalToken(),
         ]));
         rest_do_request($req);
 
@@ -225,6 +239,7 @@ final class WebhookAndPortalHardeningTest extends IntegrationTestCase
             'email'      => $email,
             'first_name' => 'Mary Jane',
             'last_name'  => 'van der Meer',
+            'token'      => $this->portalToken(),
         ]));
         rest_do_request($req);
 
@@ -243,7 +258,11 @@ final class WebhookAndPortalHardeningTest extends IntegrationTestCase
 
         $req = new WP_REST_Request('POST', '/dono/v1/portal/register');
         $req->set_header('content-type', 'application/json');
-        $req->set_body((string) wp_json_encode(['email' => $email, 'first_name' => 'Prince']));
+        $req->set_body((string) wp_json_encode([
+            'email'      => $email,
+            'first_name' => 'Prince',
+            'token'      => $this->portalToken(),
+        ]));
         rest_do_request($req);
 
         $fresh = Donor::query()

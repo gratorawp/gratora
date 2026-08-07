@@ -7,6 +7,7 @@ namespace Dono\Rest\Portal;
 use Dono\Analytics\ErrorLog;
 use Dono\Async\AsyncDispatcher;
 use Dono\Campaigns\Campaign;
+use Dono\Donations\AntiSpamGuard;
 use Dono\Donations\Donation;
 use Dono\Donations\DonationQueries;
 use Dono\Donations\DonationRepository;
@@ -64,6 +65,7 @@ final class PortalController
         private \Dono\Donors\DonorMetricsService $metrics,
         private RecurringPlanActions $planActions,
         private GatewayManager $gateways,
+        private AntiSpamGuard $spam,
     ) {
     }
 
@@ -86,7 +88,10 @@ final class PortalController
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'sendLink'],
             'permission_callback' => '__return_true',
-            'args'                => ['email' => ['type' => 'string', 'required' => true]],
+            'args'                => [
+                'email' => ['type' => 'string', 'required' => true],
+                'token' => ['type' => 'string'],
+            ],
         ]);
 
         register_rest_route(self::NAMESPACE, '/portal/register', [
@@ -97,6 +102,7 @@ final class PortalController
                 'email'      => ['type' => 'string', 'required' => true],
                 'first_name' => ['type' => 'string'],
                 'last_name'  => ['type' => 'string'],
+                'token'      => ['type' => 'string'],
             ],
         ]);
 
@@ -275,19 +281,23 @@ final class PortalController
      * belongs to a donor. Rate limited per-IP and per-email; issuance runs
      * async so timing doesn't leak the lookup result either.
      */
-    public function sendLink(WP_REST_Request $request): WP_REST_Response
+    public function sendLink(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $ok    = new WP_REST_Response(['ok' => true], 200);
+
+        // Checked before anything else is read, so a caller that never loaded
+        // the portal cannot spend a real donor's rate limit on their behalf.
+        // It says nothing about the address, so it costs no enumeration cover.
+        if ($err = $this->spam->verifyPortalToken((string) ($request['token'] ?? ''))) return $err;
+
         $email = trim((string) ($request['email'] ?? ''));
 
         if ($email === '' || ! is_email($email)) return $ok;
 
         if (! $this->consumeIpQuota()) return $ok;
 
-        $hash = $this->hasher->emailHash($this->hasher->normalizeEmail($email));
-
-        // Lock per-email before the lookup so a hammered address can't reveal existence.
-        if (! $this->consumeEmailQuota($hash)) return $ok;
+        // Locked before the lookup so a hammered address can't reveal existence.
+        if (! $this->consumeEmailQuota($email)) return $ok;
 
         // Enqueued for every address that gets this far, known or not, and the
         // lookup happens in the job. Doing it here meant the donor branch wrote
@@ -306,15 +316,21 @@ final class PortalController
      * the donor and email a magic link; a session only starts when they click it.
      * Same 200 whether the email is new or existing, so it can't enumerate donors.
      */
-    public function registerDonor(WP_REST_Request $request): WP_REST_Response
+    public function registerDonor(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
-        $ok    = new WP_REST_Response(['ok' => true], 200);
+        $ok = new WP_REST_Response(['ok' => true], 200);
+
+        // Signing up writes a donor row with no session behind it, which is the
+        // one unauthenticated write on this controller. The donation endpoint
+        // has always demanded the same proof for the same reason.
+        if ($err = $this->spam->verifyPortalToken((string) ($request['token'] ?? ''))) return $err;
+
         $email = trim((string) ($request['email'] ?? ''));
         if ($email === '' || ! is_email($email)) return $ok;
 
         if (! $this->consumeIpQuota()) return $ok;
+        if (! $this->consumeEmailQuota($email)) return $ok;
         $hash = $this->hasher->emailHash($this->hasher->normalizeEmail($email));
-        if (! $this->consumeEmailQuota($hash)) return $ok;
 
         // The name is only ever written to a donor this request is creating.
         // This endpoint takes no session and proves nothing about who is
@@ -398,9 +414,17 @@ final class PortalController
         return true;
     }
 
-    private function consumeEmailQuota(string $emailHash): bool
+    /**
+     * Keyed by the mailbox the address reaches, not the address. The limit
+     * exists to stop this endpoint mailing a person on demand, and one inbox
+     * answers to unlimited addresses, so keying by address limits nothing.
+     * Hashed only to keep a plaintext address out of the options table.
+     */
+    private function consumeEmailQuota(string $email): bool
     {
-        $key = 'dono_send_link_email_' . substr($emailHash, 0, 32);
+        $key = 'dono_send_link_mailbox_'
+            . substr($this->hasher->emailHash($this->hasher->rateLimitMailbox($email)), 0, 32);
+
         if (get_transient($key) !== false) return false;
         set_transient($key, 1, self::SEND_LINK_EMAIL_WINDOW);
         return true;

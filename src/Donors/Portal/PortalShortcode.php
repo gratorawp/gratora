@@ -7,6 +7,7 @@ namespace Dono\Donors\Portal;
 use Dono\Admin\ExtensionAssets;
 use Dono\Campaigns\Styling\StylePresets;
 use Dono\Campaigns\Styling\Tokens;
+use Dono\Donations\AntiSpamGuard;
 use Dono\Foundation\Helpers\Money;
 use Dono\Foundation\Hooks\HookProvider;
 
@@ -19,6 +20,10 @@ final class PortalShortcode extends HookProvider
 {
     private const TAG    = 'dono_donor_portal';
     private const HANDLE = 'dono-donor-portal';
+
+    public function __construct(private AntiSpamGuard $spam)
+    {
+    }
 
     protected function actions(): array
     {
@@ -77,6 +82,11 @@ final class PortalShortcode extends HookProvider
                 // would 403 (which would break magic-link sign-in itself).
                 // Portal auth is the session cookie + X-Dono-Csrf, not this.
                 'nonce' => is_user_logged_in() ? wp_create_nonce('wp_rest') : '',
+                // What a REST nonce cannot be here. Signing up and asking for a
+                // link write to the database without any session to check, and
+                // this proves the caller loaded the page. It is a coarse day
+                // bucket precisely so a cached portal keeps working.
+                'token' => $this->spam->mintPortalToken(),
             ]);
             wp_set_script_translations(self::HANDLE, 'dono', DONO_DIR . 'languages');
         }

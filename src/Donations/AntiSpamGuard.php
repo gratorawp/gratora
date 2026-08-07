@@ -66,6 +66,24 @@ final class AntiSpamGuard
         return $payload . '.' . $sig;
     }
 
+    /**
+     * The donor portal signs up and signs in from a page that is public and
+     * cacheable, exactly like a donation form, so it wants the same token. Real
+     * form ids are positive, so a reserved negative context keeps a token
+     * minted on a donation form from being replayed at the portal.
+     */
+    private const PORTAL_CONTEXT = -1;
+
+    public function mintPortalToken(): string
+    {
+        return $this->mintFormToken(self::PORTAL_CONTEXT);
+    }
+
+    public function verifyPortalToken(string $token): ?WP_Error
+    {
+        return $this->verifyFormToken($token, self::PORTAL_CONTEXT);
+    }
+
     public function checkHoneypot(string $value): ?WP_Error
     {
         if ($value === '') return null;

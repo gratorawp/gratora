@@ -379,6 +379,9 @@ function SignInPrompt( { initialError } ) {
         if ( ! email || ( isRegister && ! firstName.trim() ) ) return;
         setSending( true );
         setError( null );
+        // Both routes write without a session to check, so both want proof the
+        // caller loaded this page. Minted per day bucket, so a cached portal
+        // still carries a token the server accepts.
         const req = isRegister
             ? api( 'register', {
                 method: 'POST',
@@ -386,9 +389,13 @@ function SignInPrompt( { initialError } ) {
                     email,
                     first_name: firstName.trim(),
                     last_name:  lastName.trim(),
+                    token:      cfg.token || '',
                 } ),
             } )
-            : api( 'send-link', { method: 'POST', body: JSON.stringify( { email } ) } );
+            : api( 'send-link', {
+                method: 'POST',
+                body:   JSON.stringify( { email, token: cfg.token || '' } ),
+            } );
         req
             .then( () => { stashReturn(); setSent( true ); } )
             .catch( ( err ) => setError( err.message ) )
