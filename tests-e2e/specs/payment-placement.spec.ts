@@ -206,6 +206,30 @@ test.describe('payment step placement', () => {
     });
 
     /**
+     * Reaching your giving without typing your address again. The donation did
+     * not prove the address, so this sends the link rather than opening a
+     * session, and it answers the same either way so it cannot be used to ask
+     * whether an address is one of the charity's donors.
+     */
+    test('the thank-you card offers a way into the portal', async ({ donor, page }) => {
+        let sentTo: string | null = null;
+        await page.route('**/dono/v1/portal/send-link', async (route) => {
+            sentTo = JSON.parse(route.request().postData() || '{}').email ?? null;
+            await route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' });
+        });
+
+        await fillAndSubmit(donor, page, 'offline');
+        await donor.expectThankYou();
+
+        const button = donor.form.locator('.dono-form__portal-link');
+        await expect(button).toBeVisible();
+        await button.click();
+
+        await expect(donor.form.locator('.dono-form__portal-sent')).toBeVisible();
+        expect(sentTo, 'the link goes to the address that just donated').toContain('@');
+    });
+
+    /**
      * A gateway with no browser step must not be dragged through any of this.
      * Offline settles server-side, so it goes straight to the thank-you and
      * never enters the payment phase at all.

@@ -981,6 +981,18 @@
         margin-top: 4px;
     }
 
+    &__success-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+    }
+    &__portal-sent {
+        margin: 0;
+        font-size: 13px;
+        color: var(--dono-text-muted);
+    }
+
     // The same summary the donor read before paying, shown back to them after.
     // Constrained and centred because the card it sits in is centred, and a
     // full-width list under a centred heading reads as a different section.

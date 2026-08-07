@@ -594,6 +594,17 @@ HTML;
                 'redirect' => $redirectUrl !== '' ? esc_url_raw($redirectUrl) : '',
             ],
             'privacyPolicyUrl' => $privacyUrl !== '' ? esc_url_raw($privacyUrl) : '',
+            // Offered on the thank-you card so a donor can reach their giving
+            // without typing their address again. Sending the link is what
+            // proves the address; the donation did not, because the form takes
+            // an address on trust and a card need not match it.
+            'portal'      => [
+                'url'      => ( new \Dono\Donors\Portal\PortalPage() )->url(),
+                // Published whole rather than built from the donations endpoint,
+                // which is a full URL and not a base to append to.
+                'sendLink' => esc_url_raw(rest_url('dono/v1/portal/send-link')),
+                'token'    => $this->spam ? $this->spam->mintPortalToken() : '',
+            ],
             // HMAC token (tied to render timestamp) echoed back on submit.
             'spam'        => [
                 'formToken'   => $this->spam ? $this->spam->mintFormToken((int) $form->id) : '',
@@ -619,6 +630,8 @@ HTML;
                 'frequency'      => __('Donation frequency', 'dono'),
                 'fees'           => __('Processing fee', 'dono'),
                 'total'          => __('Total', 'dono'),
+                'manageGiving'   => __('Manage your giving', 'dono'),
+                'portalLinkSent' => __('Check your email for a link to your giving.', 'dono'),
                 'donor'          => __('Donor', 'dono'),
                 'paymentMethod'  => __('Payment method', 'dono'),
                 /* translators: %s: the selected currency code, e.g. INR. */

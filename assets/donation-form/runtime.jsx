@@ -141,6 +141,64 @@ function receiptOf( state ) {
     };
 }
 
+/**
+ * Reaching your giving from the thank-you card.
+ *
+ * The donation did not prove the address: the form takes one on trust and a
+ * card need not match it. So this sends the same link the portal sends, and the
+ * mailbox does the proving. It never reports whether the address is known, for
+ * the same reason the portal's own endpoint does not.
+ */
+function PortalLink( { email, config } ) {
+    const [ sent, setSent ]     = useState( false );
+    const [ failed, setFailed ] = useState( false );
+    const [ busy, setBusy ]     = useState( false );
+    const portal = config.portal || {};
+
+    if ( ! portal.url || ! email ) return null;
+
+    if ( sent ) {
+        return <p class="dono-form__portal-sent">{ config.i18n.portalLinkSent }</p>;
+    }
+
+    // The request never got there. Saying "check your email" anyway would send
+    // the donor to wait for something nobody sent, so the portal is offered
+    // plainly instead and they can ask for the link themselves.
+    if ( failed ) {
+        return (
+            <a class="dono-form__button dono-form__button--secondary" href={ portal.url }>
+                { config.i18n.manageGiving }
+            </a>
+        );
+    }
+
+    const send = () => {
+        setBusy( true );
+        fetch( portal.sendLink, {
+            method:      'POST',
+            credentials: 'same-origin',
+            headers:     { 'Content-Type': 'application/json' },
+            body:        JSON.stringify( { email, token: portal.token || '' } ),
+        } )
+            // The endpoint answers the same for an address it knows and one it
+            // does not, so a 200 is reported as sent without asking which.
+            .then( ( res ) => { setSent( res.ok ); setFailed( ! res.ok ); } )
+            .catch( () => setFailed( true ) )
+            .finally( () => setBusy( false ) );
+    };
+
+    return (
+        <button
+            type="button"
+            class="dono-form__button dono-form__button--secondary dono-form__portal-link"
+            disabled={ busy }
+            onClick={ send }
+        >
+            { config.i18n.manageGiving }
+        </button>
+    );
+}
+
 /** The few facts worth repeating back: what, how often, and where the receipt went. */
 function DonationReceipt( { receipt, config } ) {
     const i18n  = config.i18n || {};
@@ -482,13 +540,16 @@ function FormBody( { state, dispatch, config } ) {
                 { state.submission?.reference && (
                     <p class="dono-form__reference">{ state.submission.reference }</p>
                 ) }
-                <button
-                    type="button"
-                    class="dono-form__button dono-form__button--secondary"
-                    onClick={ () => dispatch( { type: 'RESET' } ) }
-                >
-                    { config.i18n.donateAgain }
-                </button>
+                <div class="dono-form__success-actions">
+                    <button
+                        type="button"
+                        class="dono-form__button dono-form__button--secondary"
+                        onClick={ () => dispatch( { type: 'RESET' } ) }
+                    >
+                        { config.i18n.donateAgain }
+                    </button>
+                    <PortalLink email={ receiptOf( state ).email } config={ config } />
+                </div>
             </div>
         );
     }
@@ -506,13 +567,16 @@ function FormBody( { state, dispatch, config } ) {
                 { state.submission?.reference && (
                     <p class="dono-form__reference">{ state.submission.reference }</p>
                 ) }
-                <button
-                    type="button"
-                    class="dono-form__button dono-form__button--secondary"
-                    onClick={ () => dispatch( { type: 'RESET' } ) }
-                >
-                    { config.i18n.donateAgain }
-                </button>
+                <div class="dono-form__success-actions">
+                    <button
+                        type="button"
+                        class="dono-form__button dono-form__button--secondary"
+                        onClick={ () => dispatch( { type: 'RESET' } ) }
+                    >
+                        { config.i18n.donateAgain }
+                    </button>
+                    <PortalLink email={ receiptOf( state ).email } config={ config } />
+                </div>
             </div>
         );
     }
@@ -533,13 +597,16 @@ function FormBody( { state, dispatch, config } ) {
                 { state.submission?.reference && (
                     <p class="dono-form__reference">{ state.submission.reference }</p>
                 ) }
-                <button
-                    type="button"
-                    class="dono-form__button dono-form__button--secondary"
-                    onClick={ () => dispatch( { type: 'RESET' } ) }
-                >
-                    { config.i18n.donateAgain }
-                </button>
+                <div class="dono-form__success-actions">
+                    <button
+                        type="button"
+                        class="dono-form__button dono-form__button--secondary"
+                        onClick={ () => dispatch( { type: 'RESET' } ) }
+                    >
+                        { config.i18n.donateAgain }
+                    </button>
+                    <PortalLink email={ receiptOf( state ).email } config={ config } />
+                </div>
             </div>
         );
     }

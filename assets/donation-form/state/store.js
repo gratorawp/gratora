@@ -340,8 +340,21 @@ export function reducer( state, action ) {
                 message: '',
             };
 
-        case 'RESET':
-            return initialState( {
+        case 'RESET': {
+            // Giving again is the same person, so they are not asked who they
+            // are a second time. Carried in memory only: nothing is written to
+            // the browser, because a store on this origin is readable by every
+            // other script on the site, and the browser's own autofill already
+            // covers the returning-visitor case without that exposure.
+            const known = {
+                email:   state.values?.email || '',
+                profile: {
+                    first_name: state.values?.profile?.first_name || '',
+                    last_name:  state.values?.profile?.last_name  || '',
+                },
+            };
+
+            const fresh = initialState( {
                 steps:       state.steps,
                 preamble:    state.preamble,
                 pages:       state.pages,
@@ -355,6 +368,18 @@ export function reducer( state, action ) {
                 i18n:        state.i18n,
                 spam:        { minAmountCents: state.minAmountCents },
             } );
+
+            return {
+                ...fresh,
+                values: {
+                    ...fresh.values,
+                    email:   known.email || fresh.values.email,
+                    profile: { ...fresh.values.profile, ...Object.fromEntries(
+                        Object.entries( known.profile ).filter( ( [ , v ] ) => v !== '' )
+                    ) },
+                },
+            };
+        }
 
         default:
             return state;
