@@ -531,6 +531,12 @@ final class CampaignService
         $t6 = __('Top donors', 'dono');
         $t7 = __('Donate', 'dono');
 
+        // These two sections are titled by the block itself rather than a
+        // Heading above it, which rendered the words twice. json_encode so a
+        // translated title carrying a quote cannot break the block comment.
+        $t5j = json_encode($t5, JSON_UNESCAPED_UNICODE);
+        $t6j = json_encode($t6, JSON_UNESCAPED_UNICODE);
+
         $default = <<<BLOCKS
 <!-- wp:heading {"level":1,"metadata":{"bindings":{"content":{"source":"dono/campaign","args":{"key":"title","campaign_id":{$id}}}}},"className":"dp-display dp-rail dp-top"} -->
 <h1 class="wp-block-heading dp-display dp-rail dp-top">{$t0}</h1>
@@ -562,17 +568,9 @@ final class CampaignService
 <p class="dp-body dp-rail">{$t4}</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:heading {"level":2,"className":"dp-h2 dp-rail"} -->
-<h2 class="wp-block-heading dp-h2 dp-rail">{$t5}</h2>
-<!-- /wp:heading -->
+<!-- wp:dono/recent-donations {"campaignId":{$id},"title":{$t5j},"limit":5} /-->
 
-<!-- wp:dono/recent-donations {"campaignId":{$id},"title":"","limit":5} /-->
-
-<!-- wp:heading {"level":2,"className":"dp-h2 dp-rail"} -->
-<h2 class="wp-block-heading dp-h2 dp-rail">{$t6}</h2>
-<!-- /wp:heading -->
-
-<!-- wp:dono/top-donors {"campaignId":{$id},"title":"","limit":5,"layout":"list"} /-->
+<!-- wp:dono/top-donors {"campaignId":{$id},"title":{$t6j},"limit":5,"layout":"list"} /-->
 </div>
 <!-- /wp:column -->
 

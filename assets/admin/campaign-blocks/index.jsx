@@ -119,7 +119,7 @@ function CampaignField( { attributes, setAttributes, campaign, onCampaignPage, i
  * picker Placeholder; otherwise previews via ServerSideRender with the resolved
  * campaign id (block-renderer has no post context).
  */
-function CampaignCanvas( { block, attributes, setAttributes, onCampaignPage, resolvedId, icon = 'megaphone', className, children, isSelected = false, interactive = false } ) {
+function CampaignCanvas( { block, attributes, setAttributes, onCampaignPage, resolvedId, icon = 'megaphone', className, children, isSelected = false, interactive = false, editableTitle = false } ) {
     const blockProps = useBlockProps( className ? { className } : {} );
 
     if ( ! onCampaignPage && ! attributes.campaignId ) {
@@ -147,7 +147,15 @@ function CampaignCanvas( { block, attributes, setAttributes, onCampaignPage, res
         <div { ...blockProps }>
             { children }
             <Disabled isDisabled={ interactive ? ! isSelected : true }>
-                <ServerSideRender block={ block } attributes={ { ...attributes, campaignId: resolvedId } } />
+                { /* A block whose title is edited in the canvas above must not
+                     render it again in the preview: the server view prints its
+                     own h3, so a title typed here appeared twice. */ }
+                <ServerSideRender
+                    block={ block }
+                    attributes={ editableTitle
+                        ? { ...attributes, campaignId: resolvedId, title: '' }
+                        : { ...attributes, campaignId: resolvedId } }
+                />
             </Disabled>
         </div>
     );
@@ -571,6 +579,7 @@ registerBlockType( 'dono/top-donors', {
             </InspectorControls>
             <CampaignCanvas
                 block="dono/top-donors"
+                editableTitle
                 attributes={ attributes }
                 setAttributes={ setAttributes }
                 onCampaignPage={ onCampaignPage }
@@ -676,6 +685,7 @@ registerBlockType( 'dono/recent-donations', {
             </InspectorControls>
             <CampaignCanvas
                 block="dono/recent-donations"
+                editableTitle
                 attributes={ attributes }
                 setAttributes={ setAttributes }
                 onCampaignPage={ onCampaignPage }
@@ -814,6 +824,7 @@ registerBlockType( 'dono/supporter-wall', {
             </InspectorControls>
             <CampaignCanvas
                 block="dono/supporter-wall"
+                editableTitle
                 attributes={ attributes }
                 setAttributes={ setAttributes }
                 onCampaignPage={ onCampaignPage }

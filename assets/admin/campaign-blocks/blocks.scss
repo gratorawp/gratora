@@ -21,6 +21,14 @@ $shadow-fallback:     0 20px 50px rgba(0, 0, 0, .25);
 .dono-block {
     margin: 0 0 24px;
     color: var(--dono-text, #{$text-fallback});
+
+    // Twenty Twenty-Five ships `html :where([style*="border-width"]) {
+    // border-style: solid }` to catch blocks carrying an inline border width.
+    // Our blocks emit a --dono-border-width custom property, and the selector
+    // matches on the substring, so the theme drew a 3px currentColor border
+    // around every campaign block. Declaring our own border keeps a theme's
+    // substring match from deciding it. Blocks that want one set it themselves.
+    border: 0;
 }
 
 .dono-block-notice {
