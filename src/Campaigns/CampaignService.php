@@ -530,7 +530,6 @@ final class CampaignService
         $t5 = __('Recent donations', 'dono');
         $t6 = __('Top donors', 'dono');
         $t7 = __('Donate', 'dono');
-        $t8 = __('More ways to give', 'dono');
 
         $default = <<<BLOCKS
 <!-- wp:heading {"level":1,"metadata":{"bindings":{"content":{"source":"dono/campaign","args":{"key":"title","campaign_id":{$id}}}}},"className":"dp-display dp-rail dp-top"} -->
@@ -589,11 +588,6 @@ final class CampaignService
 </div>
 <!-- /wp:columns -->
 
-<!-- wp:heading {"level":2,"className":"dp-h2 dp-rail"} -->
-<h2 class="wp-block-heading dp-h2 dp-rail">{$t8}</h2>
-<!-- /wp:heading -->
-
-<!-- wp:dono/campaign-grid {"campaignId":{$id},"heading":""} /-->
 BLOCKS;
 
         // Add-ons can seed a richer starter layout per campaign type (e.g. the

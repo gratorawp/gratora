@@ -34,12 +34,14 @@ final class CampaignPageBlocksTest extends IntegrationTestCase
         $this->assertStringContainsString('wp:dono/donation-form',    $page->post_content);
         $this->assertStringContainsString('wp:dono/top-donors',       $page->post_content);
         $this->assertStringContainsString('wp:dono/recent-donations', $page->post_content);
-        $this->assertStringContainsString('wp:dono/campaign-grid',    $page->post_content);
 
         // The hero states the money, so repeating it twice more above the fold
-        // said nothing new. Both blocks stay registered for custom layouts.
+        // said nothing new. The grid sends a visitor away from the page they
+        // were asked to give on, which is the wrong default for a page whose
+        // job is one campaign. All three stay registered for custom layouts.
         $this->assertStringNotContainsString('wp:dono/campaign-stats',    $page->post_content);
         $this->assertStringNotContainsString('wp:dono/campaign-progress', $page->post_content);
+        $this->assertStringNotContainsString('wp:dono/campaign-grid',     $page->post_content);
 
         // Headings are core Heading blocks, not markup inside a render
         // callback, so an organiser owns the words.
