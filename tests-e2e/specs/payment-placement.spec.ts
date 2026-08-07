@@ -192,6 +192,20 @@ test.describe('payment step placement', () => {
     });
 
     /**
+     * The thank-you card repeats what was given. Offline reaches it without a
+     * browser payment step, so it is the cheapest way to assert the card.
+     */
+    test('the thank-you card says what was donated', async ({ donor, page }) => {
+        await fillAndSubmit(donor, page, 'offline');
+        await donor.expectThankYou();
+
+        const receipt = donor.form.locator('.dono-form__summary--receipt');
+        await expect(receipt).toBeVisible();
+        // The amount the server settled on, not one the client recomputed.
+        await expect(receipt).toContainText(/\d/);
+    });
+
+    /**
      * A gateway with no browser step must not be dragged through any of this.
      * Offline settles server-side, so it goes straight to the thank-you and
      * never enters the payment phase at all.

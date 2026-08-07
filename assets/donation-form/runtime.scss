@@ -981,6 +981,15 @@
         margin-top: 4px;
     }
 
+    // The same summary the donor read before paying, shown back to them after.
+    // Constrained and centred because the card it sits in is centred, and a
+    // full-width list under a centred heading reads as a different section.
+    &__summary--receipt {
+        max-width: 320px;
+        margin: 16px auto;
+        text-align: left;
+    }
+
     &__terms {
         display: flex;
         flex-direction: column;

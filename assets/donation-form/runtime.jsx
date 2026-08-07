@@ -17,7 +17,7 @@ import PayPalPayment from './components/PayPalPayment';
 import { detectStripeReturn, resolveStripeReturn, clearStripeReturnParams } from './util/stripe';
 import { interpolateLabel } from './util/interpolate';
 import { decodeEntities } from './util/entities';
-import { setActiveNumberFormat } from './util/format';
+import { setActiveNumberFormat, formatAmount, frequencyLabel } from './util/format';
 import { evaluateCondition } from './state/conditions';
 import './runtime.scss';
 
@@ -47,12 +47,18 @@ export const PENDING_KEY = 'dono:pending-donation';
  */
 export const COMPLETED_EVENT = 'dono:donation:completed';
 
-function rememberPending( data ) {
+function rememberPending( data, values ) {
     try {
         window.sessionStorage.setItem( PENDING_KEY, JSON.stringify( {
             reference:   data.reference,
             statusToken: data.status_token,
             gateway:     data.gateway || '',
+            // Enough to tell the donor what they gave when they land back here
+            // from their bank on a fresh page, where nothing else survives.
+            amountCents: data.amount_cents,
+            currency:    data.currency,
+            frequency:   values?.frequency || '',
+            email:       values?.email || '',
         } ) );
     } catch ( e ) {
         // Private browsing can refuse storage. The donation is still made and
@@ -108,6 +114,65 @@ function hasGatewayBlock( config ) {
 
     return ( Array.isArray( config?.steps ) ? config.steps : [] )
         .some( ( step ) => seen( step?.items ) || seen( step?.decorations ) );
+}
+
+/**
+ * What the donor actually gave, for the card they land on afterwards.
+ *
+ * Read server-first: the submit response is the only number that matches what
+ * was charged. A redirect gateway brings the donor back on a fresh page where
+ * none of that survives, so the stash written at submit is the fallback, and
+ * the form's own values are last because a reset would have cleared them.
+ */
+function receiptOf( state ) {
+    const stash  = readPending();
+    const sub    = state.submission || {};
+    const paid   = state.payment || {};
+    const values = state.values   || {};
+
+    const amountCents = sub.amount_cents ?? paid.amountCents ?? stash.amountCents;
+
+    return {
+        amountCents,
+        currency:  sub.currency ?? paid.currency ?? stash.currency ?? '',
+        frequency: stash.frequency || values.frequency || '',
+        email:     values.email || stash.email || '',
+        reference: sub.reference || stash.reference || '',
+    };
+}
+
+/** The few facts worth repeating back: what, how often, and where the receipt went. */
+function DonationReceipt( { receipt, config } ) {
+    const i18n  = config.i18n || {};
+    const freq  = frequencyLabel( receipt.frequency, i18n );
+    const known = Number.isFinite( receipt.amountCents ) && receipt.currency;
+
+    if ( ! known && ! receipt.email ) return null;
+
+    return (
+        <dl class="dono-form__summary dono-form__summary--receipt">
+            { known && (
+                <div class="dono-form__summary-row">
+                    <dt>{ freq ? i18n.amount : i18n.total }</dt>
+                    <dd class="dono-form__summary-amount">
+                        { formatAmount( receipt.amountCents, receipt.currency ) }
+                    </dd>
+                </div>
+            ) }
+            { freq && (
+                <div class="dono-form__summary-row">
+                    <dt>{ i18n.frequency }</dt>
+                    <dd>{ freq }</dd>
+                </div>
+            ) }
+            { receipt.email && (
+                <div class="dono-form__summary-row">
+                    <dt>{ i18n.email }</dt>
+                    <dd>{ receipt.email }</dd>
+                </div>
+            ) }
+        </dl>
+    );
 }
 
 function registeredGateway( id ) {
@@ -256,7 +321,7 @@ function FormBody( { state, dispatch, config } ) {
             // token is not in the return URL, deliberately, so anything that
             // outlives this closure (a gateway that navigates away, a listener
             // reading the amount back after completion) has no other source.
-            rememberPending( data );
+            rememberPending( data, state.values );
 
             if ( data.redirect_url ) {
                 window.location.assign( data.redirect_url );
@@ -413,6 +478,7 @@ function FormBody( { state, dispatch, config } ) {
                 <div class="dono-form__success-icon dono-form__success-icon--pending" aria-hidden="true">⏳</div>
                 <h3>{ config.i18n.processingTitle || config.i18n.pendingTitle }</h3>
                 <p class="dono-form__thank-you">{ config.i18n.processingMessage || config.i18n.pendingMessage }</p>
+                <DonationReceipt receipt={ receiptOf( state ) } config={ config } />
                 { state.submission?.reference && (
                     <p class="dono-form__reference">{ state.submission.reference }</p>
                 ) }
@@ -436,6 +502,7 @@ function FormBody( { state, dispatch, config } ) {
                 <div class="dono-form__success-icon dono-form__success-icon--pending" aria-hidden="true">⏳</div>
                 <h3>{ config.i18n.pendingTitle }</h3>
                 <p class="dono-form__thank-you">{ config.i18n.pendingMessage }</p>
+                <DonationReceipt receipt={ receiptOf( state ) } config={ config } />
                 { state.submission?.reference && (
                     <p class="dono-form__reference">{ state.submission.reference }</p>
                 ) }
@@ -462,6 +529,7 @@ function FormBody( { state, dispatch, config } ) {
                 { message && (
                     <p class="dono-form__thank-you">{ message }</p>
                 ) }
+                <DonationReceipt receipt={ receiptOf( state ) } config={ config } />
                 { state.submission?.reference && (
                     <p class="dono-form__reference">{ state.submission.reference }</p>
                 ) }

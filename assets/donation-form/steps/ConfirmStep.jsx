@@ -1,15 +1,7 @@
 /** @jsxImportSource preact */
 
-import { formatAmount } from '../util/format';
+import { formatAmount, frequencyLabel } from '../util/format';
 import { coveredFeeCents } from '../state/store';
-
-const FREQUENCY_DEFAULTS = {
-    'weekly':    'Weekly',
-    'biweekly':  'Every 2 weeks',
-    'monthly':   'Monthly',
-    'quarterly': 'Quarterly',
-    'yearly':    'Yearly',
-};
 
 export default function ConfirmStep( { step, state, config } ) {
     // The submit block can hide the pre-submit summary; default is to show it.
@@ -20,11 +12,7 @@ export default function ConfirmStep( { step, state, config } ) {
     const amount   = formatAmount( cents, state.currency );
     const fullName = [ v.profile.first_name, v.profile.last_name ].filter( Boolean ).join( ' ' );
 
-    const freq     = v.frequency || '';
-    const freqKey   = { 'weekly': 'freqWeekly', 'biweekly': 'freqBiweekly', 'monthly': 'freqMonthly', 'quarterly': 'freqQuarterly', 'yearly': 'freqYearly' };
-    const freqLabel = freq && freq !== 'one-time' && freq !== 'one_time'
-        ? ( config.i18n[ freqKey[ freq ] ] || FREQUENCY_DEFAULTS[ freq ] || freq )
-        : '';
+    const freqLabel = frequencyLabel( v.frequency, config.i18n );
 
     // Zero when unchecked or when a condition hides the cover-fees field, so
     // the shown total always equals what buildPayload charges.
