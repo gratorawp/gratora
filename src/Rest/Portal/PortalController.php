@@ -94,8 +94,9 @@ final class PortalController
             'callback'            => [$this, 'registerDonor'],
             'permission_callback' => '__return_true',
             'args'                => [
-                'email' => ['type' => 'string', 'required' => true],
-                'name'  => ['type' => 'string'],
+                'email'      => ['type' => 'string', 'required' => true],
+                'first_name' => ['type' => 'string'],
+                'last_name'  => ['type' => 'string'],
             ],
         ]);
 
@@ -326,12 +327,15 @@ final class PortalController
         $existing = $this->donors->findByEmailHash($hash);
 
         $profile = [];
-        $name = trim((string) ($request['name'] ?? ''));
-        if ($existing === null && $name !== '') {
-            $parts = preg_split('/\s+/', $name, 2) ?: [];
-            $profile['first_name'] = (string) ($parts[0] ?? '');
-            if (isset($parts[1])) {
-                $profile['last_name'] = (string) $parts[1];
+        if ($existing === null) {
+            // Truncated to the column width rather than rejected: a signup that
+            // fails because a surname is long is worse than a stored surname
+            // that is short.
+            foreach (['first_name', 'last_name'] as $field) {
+                $value = trim(sanitize_text_field((string) ($request[$field] ?? '')));
+                if ($value !== '') {
+                    $profile[$field] = mb_substr($value, 0, 100);
+                }
             }
         }
 

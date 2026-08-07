@@ -197,6 +197,25 @@
     }
 }
 
+// Signing in is one field and sits on a single line. Creating an account is
+// three, so it stacks and the pair of name fields shares a line.
+.dp-signin form.is-stacked {
+    flex-direction: column;
+    align-items: stretch;
+    max-width: 420px;
+    margin-inline: auto;
+
+    input,
+    button { width: 100%; min-width: 0; }
+}
+
+.dp-signin__row {
+    display: flex;
+    gap: 8px;
+
+    input { flex: 1 1 0; }
+}
+
 .dp-modal {
     position: fixed;
     inset: 0;
@@ -596,6 +615,8 @@
         input { min-width: 0; width: 100%; }
         button { width: 100%; }
     }
+
+    .dp-signin__row { flex-direction: column; }
 
     .dp-form__row { grid-template-columns: 1fr; }
 

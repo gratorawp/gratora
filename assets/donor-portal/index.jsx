@@ -364,22 +364,30 @@ const TABS = [
 ];
 
 function SignInPrompt( { initialError } ) {
-    const [ mode, setMode ]       = useState( 'signin' ); // 'signin' | 'register'
-    const [ email, setEmail ]     = useState( '' );
-    const [ name, setName ]       = useState( '' );
-    const [ sent, setSent ]       = useState( false );
-    const [ sending, setSending ] = useState( false );
-    const [ error, setError ]     = useState( initialError || null );
+    const [ mode, setMode ]           = useState( 'signin' ); // 'signin' | 'register'
+    const [ email, setEmail ]         = useState( '' );
+    const [ firstName, setFirstName ] = useState( '' );
+    const [ lastName, setLastName ]   = useState( '' );
+    const [ sent, setSent ]           = useState( false );
+    const [ sending, setSending ]     = useState( false );
+    const [ error, setError ]         = useState( initialError || null );
 
     const isRegister = mode === 'register';
 
     const submit = ( e ) => {
         e.preventDefault();
-        if ( ! email || ( isRegister && ! name.trim() ) ) return;
+        if ( ! email || ( isRegister && ! firstName.trim() ) ) return;
         setSending( true );
         setError( null );
         const req = isRegister
-            ? api( 'register', { method: 'POST', body: JSON.stringify( { email, name: name.trim() } ) } )
+            ? api( 'register', {
+                method: 'POST',
+                body:   JSON.stringify( {
+                    email,
+                    first_name: firstName.trim(),
+                    last_name:  lastName.trim(),
+                } ),
+            } )
             : api( 'send-link', { method: 'POST', body: JSON.stringify( { email } ) } );
         req
             .then( () => { stashReturn(); setSent( true ); } )
@@ -408,20 +416,34 @@ function SignInPrompt( { initialError } ) {
                     ? __( "Set up an account to start fundraising. We'll email you a link to confirm.", 'dono' )
                     : __( "Enter the email you donated with and we'll send a sign-in link.", 'dono' ) }
             </p>
-            <form onSubmit={ submit }>
+            <form class={ isRegister ? 'is-stacked' : null } onSubmit={ submit }>
                 { isRegister && (
-                    <input
-                        type="text"
-                        required
-                        value={ name }
-                        aria-label={ __( 'Your name', 'dono' ) }
-                        placeholder={ __( 'Your name', 'dono' ) }
-                        onInput={ ( e ) => setName( e.target.value ) }
-                    />
+                    <div class="dp-signin__row">
+                        <input
+                            type="text"
+                            required
+                            autocomplete="given-name"
+                            value={ firstName }
+                            aria-label={ __( 'First name', 'dono' ) }
+                            placeholder={ __( 'First name', 'dono' ) }
+                            onInput={ ( e ) => setFirstName( e.target.value ) }
+                        />
+                        { /* Not required: plenty of people go by one name, and a
+                             blocked signup is worse than a blank surname. */ }
+                        <input
+                            type="text"
+                            autocomplete="family-name"
+                            value={ lastName }
+                            aria-label={ __( 'Last name', 'dono' ) }
+                            placeholder={ __( 'Last name', 'dono' ) }
+                            onInput={ ( e ) => setLastName( e.target.value ) }
+                        />
+                    </div>
                 ) }
                 <input
                     type="email"
                     required
+                    autocomplete="email"
                     value={ email }
                     aria-label={ __( 'Email address', 'dono' ) }
                     placeholder={ __( 'Enter your email address', 'dono' ) }

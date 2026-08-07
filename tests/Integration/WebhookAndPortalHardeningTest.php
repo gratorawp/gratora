@@ -80,7 +80,11 @@ final class WebhookAndPortalHardeningTest extends IntegrationTestCase
 
         $req = new WP_REST_Request('POST', '/dono/v1/portal/register');
         $req->set_header('content-type', 'application/json');
-        $req->set_body((string) wp_json_encode(['email' => $email, 'name' => 'Rude Word']));
+        $req->set_body((string) wp_json_encode([
+            'email'      => $email,
+            'first_name' => 'Rude',
+            'last_name'  => 'Word',
+        ]));
         rest_do_request($req);
 
         $fresh = Donor::query()
@@ -190,7 +194,11 @@ final class WebhookAndPortalHardeningTest extends IntegrationTestCase
 
         $req = new WP_REST_Request('POST', '/dono/v1/portal/register');
         $req->set_header('content-type', 'application/json');
-        $req->set_body((string) wp_json_encode(['email' => $email, 'name' => 'Ada Lovelace']));
+        $req->set_body((string) wp_json_encode([
+            'email'      => $email,
+            'first_name' => 'Ada',
+            'last_name'  => 'Lovelace',
+        ]));
         rest_do_request($req);
 
         $fresh = Donor::query()
@@ -200,6 +208,51 @@ final class WebhookAndPortalHardeningTest extends IntegrationTestCase
         $this->assertNotNull($fresh, 'the donor is created');
         $this->assertSame('Ada', (string) $fresh->first_name, 'and keeps the name they gave for themselves');
         $this->assertSame('Lovelace', (string) $fresh->last_name);
+    }
+
+    /**
+     * Where a name divides is the donor's to say, not ours to guess: no rule
+     * about spaces gets "Mary Jane" and "van der Meer" both right. The two
+     * parts are stored exactly as they were typed.
+     */
+    public function test_register_stores_each_name_part_as_given(): void
+    {
+        $email = 'compound-' . uniqid() . '@example.test';
+
+        $req = new WP_REST_Request('POST', '/dono/v1/portal/register');
+        $req->set_header('content-type', 'application/json');
+        $req->set_body((string) wp_json_encode([
+            'email'      => $email,
+            'first_name' => 'Mary Jane',
+            'last_name'  => 'van der Meer',
+        ]));
+        rest_do_request($req);
+
+        $fresh = Donor::query()
+            ->where('email_hash', Plugin::instance()->container->get(IdentityHasher::class)->emailHash($email))
+            ->get();
+
+        $this->assertSame('Mary Jane', (string) $fresh->first_name);
+        $this->assertSame('van der Meer', (string) $fresh->last_name);
+    }
+
+    /** Going by one name must not block the signup. */
+    public function test_register_accepts_a_donor_with_no_surname(): void
+    {
+        $email = 'mononym-' . uniqid() . '@example.test';
+
+        $req = new WP_REST_Request('POST', '/dono/v1/portal/register');
+        $req->set_header('content-type', 'application/json');
+        $req->set_body((string) wp_json_encode(['email' => $email, 'first_name' => 'Prince']));
+        rest_do_request($req);
+
+        $fresh = Donor::query()
+            ->where('email_hash', Plugin::instance()->container->get(IdentityHasher::class)->emailHash($email))
+            ->get();
+
+        $this->assertNotNull($fresh, 'the donor is created');
+        $this->assertSame('Prince', (string) $fresh->first_name);
+        $this->assertNull($fresh->last_name);
     }
 }
 
