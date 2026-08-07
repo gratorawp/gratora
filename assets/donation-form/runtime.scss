@@ -85,8 +85,8 @@
     --dono-warning-fg:     #92400e;
     --dono-on-accent:      #ffffff;
     --dono-required:       #d63384;
-    --dono-font-family:    system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    --dono-font-size:      15px;
+    --dono-typeface:    system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --dono-type-size:      15px;
     --dono-heading-weight: 600;
     --dono-body-weight:    400;
     --dono-radius:         10px;
@@ -97,10 +97,10 @@
     // just the donate button or just the currency switcher.
     --dono-pill-radius:    999px;
     --dono-preset-hover:   rgba(0, 0, 0, .04);
-    --dono-border-width:   1px;
+    --dono-stroke:   1px;
     --dono-gap:            20px;
     --dono-field-gap:      6px;
-    --dono-button-height:  48px;
+    --dono-button-size:  48px;
     --dono-button-weight:  600;
     --dono-button-shadow:  0 1px 2px rgba(0, 0, 0, .08);
     --dono-focus-ring:     #1e8a4e;
@@ -159,8 +159,8 @@
     gap: var(--dono-gap);
     background: var(--dono-bg);
     color: var(--dono-text);
-    font-family: var(--dono-font-family);
-    font-size: var(--dono-font-size);
+    font-family: var(--dono-typeface);
+    font-size: var(--dono-type-size);
     font-weight: var(--dono-body-weight);
     line-height: 1.5;
     // Cut the inheritance chain for typography a host theme can push in via
@@ -232,7 +232,7 @@
     &__button {
         appearance: none;
         border: var(--dono-button-border, 0);
-        min-height: var(--dono-button-height, 48px);
+        min-height: var(--dono-button-size, 48px);
         padding: 0 22px;
         font-size: 14px;
         font-weight: var(--dono-button-weight, 600);
@@ -404,7 +404,7 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        border: var(--dono-border-width, 1px) solid var(--dono-border);
+        border: var(--dono-stroke, 1px) solid var(--dono-border);
         border-radius: var(--dono-radius-sm);
         padding: 0 12px;
         background: var(--dono-bg);
@@ -470,7 +470,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    border: var(--dono-border-width, 1px) solid var(--dono-border);
+    border: var(--dono-stroke, 1px) solid var(--dono-border);
     border-radius: var(--dono-radius-sm);
     padding: 0 12px;
     background: var(--dono-bg);
@@ -544,10 +544,10 @@
 
     &__field input {
         appearance: none;
-        border: var(--dono-border-width, 1px) solid var(--dono-border);
+        border: var(--dono-stroke, 1px) solid var(--dono-border);
         border-radius: var(--dono-radius-sm);
         padding: 10px 12px;
-        font-size: var(--dono-font-size, 15px);
+        font-size: var(--dono-type-size, 15px);
         background: var(--dono-bg);
         color: var(--dono-text);
         font-family: inherit;
@@ -591,7 +591,7 @@
     &__summary-row--total {
         margin-top: 4px;
         padding-top: 12px;
-        border-top: var(--dono-border-width, 1px) solid var(--dono-border);
+        border-top: var(--dono-stroke, 1px) solid var(--dono-border);
 
         dt { color: var(--dono-text); font-size: 15px; font-weight: 600; }
     }
@@ -611,7 +611,7 @@
     &__test-banner {
         padding: 10px 14px;
         border-radius: var(--dono-radius-sm);
-        border: var(--dono-border-width, 1px) solid var(--dono-warning-fg, #92400e);
+        border: var(--dono-stroke, 1px) solid var(--dono-warning-fg, #92400e);
         background: var(--dono-warning-bg, #fef3c7);
         color: var(--dono-warning-fg, #92400e);
         font-size: 13px;
@@ -623,7 +623,7 @@
     &__gateways-empty {
         padding: 10px 14px;
         border-radius: var(--dono-radius-sm);
-        border: var(--dono-border-width, 1px) solid var(--dono-warning-fg, #92400e);
+        border: var(--dono-stroke, 1px) solid var(--dono-warning-fg, #92400e);
         background: var(--dono-warning-bg, #fef3c7);
         color: var(--dono-warning-fg, #92400e);
         font-size: 13px;
@@ -651,7 +651,7 @@
         align-items: flex-start;
         gap: 10px;
         padding: 12px 14px;
-        border: var(--dono-border-width, 1px) solid var(--dono-border);
+        border: var(--dono-stroke, 1px) solid var(--dono-border);
         // A control, not a tile: it sits in the same column as the amount
         // buttons and the inputs, which all take the small radius.
         border-radius: var(--dono-radius-sm);
@@ -894,7 +894,7 @@
         flex-direction: column;
         gap: 2px;
         padding: 12px;
-        border: calc(var(--dono-border-width, 1px) * 2) solid var(--dono-border);
+        border: calc(var(--dono-stroke, 1px) * 2) solid var(--dono-border);
         border-radius: var(--dono-radius-sm);
         background: var(--dono-bg);
         cursor: pointer;
@@ -975,7 +975,7 @@
         gap: 10px;
         align-items: flex-start;
         padding: 10px 12px;
-        border: var(--dono-border-width, 1px) solid var(--dono-border);
+        border: var(--dono-stroke, 1px) solid var(--dono-border);
         border-radius: var(--dono-radius-sm);
         background: var(--dono-bg);
         cursor: pointer;
@@ -1033,7 +1033,7 @@
 
         select {
             padding: 6px 10px;
-            border: var(--dono-border-width, 1px) solid var(--dono-border);
+            border: var(--dono-stroke, 1px) solid var(--dono-border);
             border-radius: var(--dono-switcher-radius, var(--dono-radius-sm, 8px));
             font: inherit;
             background: var(--dono-bg);
@@ -1076,7 +1076,7 @@
     textarea {
         width: 100%;
         padding: 10px 12px;
-        border: var(--dono-border-width, 1px) solid var(--dono-border);
+        border: var(--dono-stroke, 1px) solid var(--dono-border);
         border-radius: var(--dono-radius-sm);
         font: inherit;
         line-height: 1.5;
@@ -1355,7 +1355,7 @@
     &-input {
         width: 100%;
         padding: 9px 32px 9px 12px;
-        border: var(--dono-border-width, 1px) solid var(--dono-border);
+        border: var(--dono-stroke, 1px) solid var(--dono-border);
         border-radius: var(--dono-radius-sm, 8px);
         background: var(--dono-bg, #fff);
         color: var(--dono-text);
@@ -1395,7 +1395,7 @@
         padding: 4px;
         list-style: none;
         background: var(--dono-bg, #fff);
-        border: var(--dono-border-width, 1px) solid var(--dono-border);
+        border: var(--dono-stroke, 1px) solid var(--dono-border);
         border-radius: var(--dono-radius-sm, 8px);
         box-shadow: 0 8px 24px rgba(15, 23, 42, .08);
     }

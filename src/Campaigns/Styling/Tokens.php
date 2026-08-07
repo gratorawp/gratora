@@ -75,13 +75,13 @@ final class Tokens
                 'control' => 'color',
             ],
 
-            'dono-font-family' => [
+            'dono-typeface' => [
                 'group'   => 'typography',
                 'label'   => __('Font family', 'dono'),
                 'default' => 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
                 'control' => 'font',
             ],
-            'dono-font-size' => [
+            'dono-type-size' => [
                 'group'   => 'typography',
                 'label'   => __('Base font size', 'dono'),
                 'default' => '15px',
@@ -134,7 +134,15 @@ final class Tokens
                 'step'    => 1,
                 'help'    => __('Buttons, inputs, chips and other controls.', 'dono'),
             ],
-            'dono-border-width' => [
+            // Not 'dono-border-width'. These names ship inside a block's inline
+            // style attribute, and both WordPress and themes select on
+            // substrings of it -- twentytwentyfive's
+            // `html :where([style*="border-width"]) { border-style: solid }`
+            // matched the custom property and drew a 3px border on every
+            // campaign block. Same reason for dono-typeface, dono-type-size and
+            // dono-button-size: no token name may contain a CSS property that
+            // a [style*=] selector targets.
+            'dono-stroke' => [
                 'group'   => 'radius',
                 'label'   => __('Border width', 'dono'),
                 'default' => '1px',
@@ -165,7 +173,7 @@ final class Tokens
                 'step'    => 1,
             ],
 
-            'dono-button-height' => [
+            'dono-button-size' => [
                 'group'   => 'buttons',
                 'label'   => __('Button height', 'dono'),
                 'default' => '48px',

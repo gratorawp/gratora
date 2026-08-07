@@ -15,8 +15,8 @@
     margin: 0 auto;
     padding: 32px 20px;
     color: var(--dp-text);
-    font-family: var(--dono-font-family, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
-    font-size: var(--dono-font-size, 15px);
+    font-family: var(--dono-typeface, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
+    font-size: var(--dono-type-size, 15px);
     line-height: 1.55;
 
     * { box-sizing: border-box; }
