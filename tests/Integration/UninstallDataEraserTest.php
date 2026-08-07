@@ -44,8 +44,8 @@ final class UninstallDataEraserTest extends IntegrationTestCase
     }
 
     /**
-     * The refusal that protects a site that changed its mind: a wipe consented
-     * to on the way out must not survive switching Dono back on.
+     * The wipe runs on deactivation, so a flag that outlived it is a wipe
+     * waiting to fire on a site that has since changed its mind.
      */
     public function test_reactivating_withdraws_a_pending_wipe(): void
     {
@@ -54,6 +54,23 @@ final class UninstallDataEraserTest extends IntegrationTestCase
         Plugin::instance()->container->get(Activator::class)->activate();
 
         $this->assertFalse(DataEraser::requested());
+    }
+
+    /**
+     * The page ids live in the campaigns table, so they have to be read before
+     * it is dropped. Read after, every campaign page is left behind.
+     */
+    public function test_page_ids_are_readable_before_anything_is_dropped(): void
+    {
+        $req = new \WP_REST_Request('POST', '/dono/v1/admin/campaigns');
+        $req->set_header('content-type', 'application/json');
+        $req->set_body(json_encode(['title' => 'Erase probe', 'status' => 'published']));
+        $created = rest_do_request($req)->get_data();
+
+        $pageId = (int) ($created['page_id'] ?? 0);
+        $this->assertGreaterThan(0, $pageId, 'precondition: the campaign has a page');
+
+        $this->assertContains($pageId, (new DataEraser())->pageIds());
     }
 
     public function test_only_tables_core_owns_are_planned(): void

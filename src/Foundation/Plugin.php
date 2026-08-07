@@ -12,6 +12,7 @@ use Dono\Donors\Portal\PortalPage;
 use Dono\Foundation\Auth\Capabilities;
 use Dono\Foundation\Container\Container;
 use Dono\Foundation\Modules\ModuleManager;
+use Dono\Foundation\Uninstall\DataEraser;
 use Dono\Async\AsyncDispatcher;
 use Dono\Foundation\Upgrade\UpgradeJob;
 use Dono\Foundation\Upgrade\UpgradeRunner;
@@ -194,9 +195,15 @@ final class Plugin
         do_action('dono.activated');
     }
 
-    /** Flush rewrite rules on deactivation. */
     public static function onDeactivation(): void
     {
+        // Asked for on the way out, and acted on here rather than at uninstall:
+        // a site owner who ticks the box watches it happen instead of being
+        // told it will happen later, to something they can no longer see.
+        if (DataEraser::requested()) {
+            (new DataEraser())->erase();
+        }
+
         flush_rewrite_rules();
 
         do_action('dono.deactivated');

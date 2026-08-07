@@ -18,7 +18,7 @@ use ReflectionClass;
  */
 final class DataEraser
 {
-    public const OPT_IN = 'dono_delete_data_on_uninstall';
+    public const OPT_IN = 'dono_delete_data';
 
     /**
      * Options core writes. Listed rather than matched on a prefix for the same
@@ -29,7 +29,7 @@ final class DataEraser
         'dono_activated_at',
         'dono_currency_locale',
         'dono_db_version',
-        'dono_delete_data_on_uninstall',
+        'dono_delete_data',
         'dono_fx_rates',
         'dono_gateway_config',
         'dono_licensing_status',
@@ -80,12 +80,15 @@ final class DataEraser
         do_action('dono.uninstall');
 
         $plan = $this->plan();
+        // Read before the drop: the page ids live in the campaigns table, and
+        // asking after it is gone leaves every campaign page behind.
+        $pages = $this->pageIds();
 
         $this->dropTables($plan['tables']);
         foreach ($plan['options'] as $option) {
             delete_option($option);
         }
-        $this->deletePages();
+        $this->deletePages($pages);
         $this->removeRoles();
     }
 
@@ -157,10 +160,9 @@ final class DataEraser
      * because the peer-to-peer add-on puts that meta on its fundraiser and team
      * subpages too, and those are its to remove.
      *
-     * Trashed rather than force-deleted: an organiser who wrote their own
-     * content onto a campaign page should get it back out of the bin.
+     * @return int[]
      */
-    private function deletePages(): void
+    public function pageIds(): array
     {
         $ids = [(int) get_option('dono_portal_page_id', 0)];
 
@@ -168,7 +170,18 @@ final class DataEraser
             $ids[] = (int) ($campaign->page_id ?? 0);
         }
 
-        foreach (array_unique(array_filter($ids)) as $id) {
+        return array_values(array_unique(array_filter($ids)));
+    }
+
+    /**
+     * Trashed rather than force-deleted: an organiser who wrote their own
+     * content onto a campaign page should get it back out of the bin.
+     *
+     * @param int[] $ids
+     */
+    private function deletePages(array $ids): void
+    {
+        foreach ($ids as $id) {
             if (get_post($id)) {
                 wp_delete_post($id, false);
             }

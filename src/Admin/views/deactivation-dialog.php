@@ -34,13 +34,13 @@ defined('ABSPATH') || exit;
         <div class="dono-deact__data">
             <label class="dono-deact__data-check">
                 <input type="checkbox" id="dono-deact-wipe" <?php checked($wipeOptIn); ?>>
-                <span><?php esc_html_e('Also delete all Dono data when I uninstall the plugin', 'dono'); ?></span>
+                <span><?php esc_html_e('Delete all Dono data as well', 'dono'); ?></span>
             </label>
             <p class="dono-deact__data-help">
-                <?php esc_html_e('Deactivating changes nothing on its own: your donations, donors, campaigns and settings stay exactly as they are, and switching Dono back on picks up where you left off.', 'dono'); ?>
+                <?php esc_html_e('Leave this alone and deactivating changes nothing: your donations, donors, campaigns and settings stay exactly as they are, and switching Dono back on picks up where you left off.', 'dono'); ?>
             </p>
             <p class="dono-deact__data-warn">
-                <?php esc_html_e('Tick this only if you are removing Dono for good. Every donation record, donor and receipt is deleted when you delete the plugin, and that cannot be undone. Export anything you need first.', 'dono'); ?>
+                <?php esc_html_e('Tick it and every donation, donor, campaign, form and receipt is deleted the moment you deactivate. This happens straight away, it cannot be undone, and reactivating will not bring any of it back. Export anything you need first.', 'dono'); ?>
             </p>
         </div>
 
