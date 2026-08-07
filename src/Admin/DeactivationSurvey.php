@@ -37,17 +37,20 @@ final class DeactivationSurvey
             return;
         }
 
+        // mtime, not DONO_VERSION: these are shipped as source rather than
+        // built, so a fix lands without a release and a stale cache means the
+        // dialog silently keeps the old behaviour.
         wp_enqueue_style(
             'dono-deactivation',
             DONO_URL . 'assets/deactivation/dialog.css',
             [],
-            DONO_VERSION
+            $this->assetVersion('dialog.css')
         );
         wp_enqueue_script(
             'dono-deactivation',
             DONO_URL . 'assets/deactivation/dialog.js',
             [],
-            DONO_VERSION,
+            $this->assetVersion('dialog.js'),
             true
         );
         wp_localize_script('dono-deactivation', 'donoDeactivation', [
@@ -56,6 +59,13 @@ final class DeactivationSurvey
             'nonce'   => wp_create_nonce(self::ACTION),
             'slug'    => plugin_basename(DONO_FILE),
         ]);
+    }
+
+    private function assetVersion(string $file): string
+    {
+        $path = DONO_DIR . 'assets/deactivation/' . $file;
+
+        return (string) (@filemtime($path) ?: DONO_VERSION);
     }
 
     public function renderDialog(): void

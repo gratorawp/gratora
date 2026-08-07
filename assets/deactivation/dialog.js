@@ -1,8 +1,6 @@
 ( function () {
     var cfg = window.donoDeactivation || {};
-    var dialog = document.getElementById( 'dono-deact' );
-    if ( ! dialog || ! cfg.slug ) return;
-
+    var dialog = null;
     var deactivateUrl = null;
 
     function rowLink() {
@@ -46,32 +44,45 @@
         } ).then( done, done );
     }
 
-    var link = rowLink();
-    if ( link ) {
-        link.addEventListener( 'click', function ( e ) {
-            e.preventDefault();
-            open( link.href );
+    function init() {
+        dialog = document.getElementById( 'dono-deact' );
+        if ( ! dialog || ! cfg.slug ) return;
+
+        var link = rowLink();
+        if ( link ) {
+            link.addEventListener( 'click', function ( e ) {
+                e.preventDefault();
+                open( link.href );
+            } );
+        }
+
+        dialog.addEventListener( 'click', function ( e ) {
+            if ( e.target.closest( '[data-dono-deact-cancel]' ) ) {
+                close();
+                return;
+            }
+            // Skip still records the data choice: the checkbox is the one
+            // answer that changes what happens, and skipping the survey is not
+            // a decision to keep or drop the records.
+            if ( e.target.closest( '[data-dono-deact-skip]' ) ) {
+                send( leave );
+                return;
+            }
+            if ( e.target.closest( '[data-dono-deact-submit]' ) ) {
+                send( leave );
+            }
+        } );
+
+        document.addEventListener( 'keydown', function ( e ) {
+            if ( e.key === 'Escape' && ! dialog.hidden ) close();
         } );
     }
 
-    dialog.addEventListener( 'click', function ( e ) {
-        if ( e.target.closest( '[data-dono-deact-cancel]' ) ) {
-            close();
-            return;
-        }
-        // Skip still records the data choice: the checkbox is the one answer
-        // that changes what happens, and skipping the survey is not a decision
-        // to keep or drop the records.
-        if ( e.target.closest( '[data-dono-deact-skip]' ) ) {
-            send( leave );
-            return;
-        }
-        if ( e.target.closest( '[data-dono-deact-submit]' ) ) {
-            send( leave );
-        }
-    } );
-
-    document.addEventListener( 'keydown', function ( e ) {
-        if ( e.key === 'Escape' && ! dialog.hidden ) close();
-    } );
+    // admin_print_footer_scripts fires before admin_footer-{hook}, so this
+    // script runs while the dialog markup is still unparsed.
+    if ( document.readyState === 'loading' ) {
+        document.addEventListener( 'DOMContentLoaded', init );
+    } else {
+        init();
+    }
 }() );
