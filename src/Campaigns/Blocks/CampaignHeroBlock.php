@@ -23,9 +23,12 @@ final class CampaignHeroBlock extends CampaignBlock
     public function attributes(): array
     {
         return $this->campaignIdAttr() + [
-            'showDescription' => ['type' => 'boolean', 'default' => true],
             'showCover'       => ['type' => 'boolean', 'default' => true],
             'showSummary'     => ['type' => 'boolean', 'default' => true],
+            // Separate from showSummary, which also carries the raised and goal
+            // figures. Beside a donation form the button is the only redundant
+            // part: it scrolls to something already on screen.
+            'showDonate'      => ['type' => 'boolean', 'default' => true],
             'showTitle'       => ['type' => 'boolean', 'default' => true],
             'showProgress'    => ['type' => 'boolean', 'default' => true],
             'showStats'       => ['type' => 'boolean', 'default' => true],
@@ -74,6 +77,7 @@ final class CampaignHeroBlock extends CampaignBlock
             // no money line and no goal, so the hero made no ask at the one
             // moment it has nothing else to show.
             'showSummary'     => (bool) ($attrs['showSummary'] ?? true),
+            'showDonate'      => (bool) ($attrs['showDonate'] ?? true),
             // The seeded layout puts a bound Heading block above this block so
             // the words are editable, and turns the built-in title off.
             'showTitle'       => (bool) ($attrs['showTitle'] ?? true),

@@ -62,9 +62,11 @@ $hTag     = 'h' . max(1, min(3, (int) $headingLevel));
                     <div class="dp-money">
                         <span class="dp-raised"><?php echo esc_html($raised); ?></span>
                         <span class="dp-goal"><?php echo esc_html($goalLabel); ?></span>
-                        <a class="dp-btn" href="<?php echo esc_url($donateUrl); ?>">
-                            <?php echo esc_html($donateLabel); ?>
-                        </a>
+                        <?php if ($showDonate): ?>
+                            <a class="dp-btn" href="<?php echo esc_url($donateUrl); ?>">
+                                <?php echo esc_html($donateLabel); ?>
+                            </a>
+                        <?php endif; ?>
                     </div>
                 <?php endif; ?>
 

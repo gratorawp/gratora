@@ -43,11 +43,19 @@ final class CampaignPageBlocksTest extends IntegrationTestCase
         $this->assertStringNotContainsString('wp:dono/campaign-progress', $page->post_content);
         $this->assertStringNotContainsString('wp:dono/campaign-grid',     $page->post_content);
 
-        // Headings are core Heading blocks, not markup inside a render
+        // The title is a core Heading block, not markup inside a render
         // callback, so an organiser owns the words.
         $this->assertStringContainsString('wp:heading', $page->post_content);
-        $this->assertStringContainsString('Why this matters', $page->post_content);
         $this->assertStringContainsString('wp:columns', $page->post_content);
+
+        // Nothing is seeded as prose. The old story slot shipped its own
+        // instructions, and a page nobody edited published them to donors as
+        // though the campaign had written them.
+        $this->assertStringNotContainsString('Tell the story behind', $page->post_content);
+
+        // The form sits beside the hero, so the hero's own donate button would
+        // only scroll to something already on screen.
+        $this->assertStringContainsString('"showDonate":false', $page->post_content);
     }
 
     public function test_hero_block_renders_campaign_title(): void

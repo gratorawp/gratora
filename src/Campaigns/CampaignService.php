@@ -523,13 +523,13 @@ final class CampaignService
         // same as a campaign's own title. Hardcoding English put it on the
         // page of every site that does not run in it.
         $t0 = __('Campaign name', 'dono');
-        $t1 = __('About this campaign', 'dono');
+        // The description is bound, so this is only what an organiser who has
+        // written none sees in the editor. Nothing else is seeded as prose: the
+        // old story slot shipped its own instructions to donors on every page
+        // nobody edited, which read as the campaign's own words.
         $t2 = __('What this campaign is raising for.', 'dono');
-        $t3 = __('Why this matters', 'dono');
-        $t4 = __('Tell the story behind this campaign. Who it helps, what the money pays for, and what changes when the goal is met. Add photos, quotes and headings here like any other page.', 'dono');
         $t5 = __('Recent donations', 'dono');
         $t6 = __('Top donors', 'dono');
-        $t7 = __('Donate', 'dono');
 
         // These two sections are titled by the block itself rather than a
         // Heading above it, which rendered the words twice. json_encode so a
@@ -542,31 +542,19 @@ final class CampaignService
 <h1 class="wp-block-heading dp-display dp-rail dp-top">{$t0}</h1>
 <!-- /wp:heading -->
 
-<!-- wp:dono/campaign-hero {"campaignId":{$id},"showTitle":false} /-->
+<!-- wp:columns {"className":"dp-layout"} -->
+<div class="wp-block-columns dp-layout">
+<!-- wp:column {"width":"62%","className":"dp-layout__main"} -->
+<div class="wp-block-column dp-layout__main" style="flex-basis:62%">
+<!-- wp:dono/campaign-hero {"campaignId":{$id},"showTitle":false,"showDonate":false} /-->
 
 <!-- wp:group {"className":"dp-band dp-band--tight"} -->
 <div class="wp-block-group dp-band dp-band--tight">
-<!-- wp:heading {"level":2,"className":"dp-h2"} -->
-<h2 class="wp-block-heading dp-h2">{$t1}</h2>
-<!-- /wp:heading -->
-
 <!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"dono/campaign","args":{"key":"description","campaign_id":{$id}}}}},"className":"dp-body"} -->
 <p class="dp-body">{$t2}</p>
 <!-- /wp:paragraph -->
 </div>
 <!-- /wp:group -->
-
-<!-- wp:columns {"className":"dp-layout"} -->
-<div class="wp-block-columns dp-layout">
-<!-- wp:column {"width":"66%","className":"dp-layout__main"} -->
-<div class="wp-block-column dp-layout__main" style="flex-basis:66%">
-<!-- wp:heading {"level":2,"className":"dp-h2 dp-rail"} -->
-<h2 class="wp-block-heading dp-h2 dp-rail">{$t3}</h2>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph {"className":"dp-body dp-rail"} -->
-<p class="dp-body dp-rail">{$t4}</p>
-<!-- /wp:paragraph -->
 
 <!-- wp:dono/recent-donations {"campaignId":{$id},"title":{$t5j},"limit":5} /-->
 
@@ -574,12 +562,8 @@ final class CampaignService
 </div>
 <!-- /wp:column -->
 
-<!-- wp:column {"width":"34%","className":"dp-layout__side"} -->
-<div class="wp-block-column dp-layout__side" style="flex-basis:34%">
-<!-- wp:heading {"level":2,"className":"dp-h2"} -->
-<h2 class="wp-block-heading dp-h2">{$t7}</h2>
-<!-- /wp:heading -->
-
+<!-- wp:column {"width":"38%","className":"dp-layout__side"} -->
+<div class="wp-block-column dp-layout__side" style="flex-basis:38%">
 <!-- wp:dono/donation-form {"campaignId":{$id}} /-->
 </div>
 <!-- /wp:column -->
@@ -618,6 +602,8 @@ BLOCKS;
 <!-- wp:dono/email {"required":true} /-->
 
 <!-- wp:dono/payment-gateways {"style":"cards"} /-->
+
+<!-- wp:dono/donation-summary /-->
 
 <!-- wp:dono/submit-button {"label":"Donate","align":"left"} /-->
 BLOCKS;

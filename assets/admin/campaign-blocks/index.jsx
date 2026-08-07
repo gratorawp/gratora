@@ -170,7 +170,7 @@ registerBlockType( 'dono/campaign-hero', {
     icon:       'megaphone',
     attributes: {
         campaignId:      { type: 'integer', default: 0 },
-        showDescription: { type: 'boolean', default: true },
+        showDonate: { type: 'boolean', default: true },
         showCover:       { type: 'boolean', default: true },
         showSummary:     { type: 'boolean', default: true },
         showTitle:       { type: 'boolean', default: true },

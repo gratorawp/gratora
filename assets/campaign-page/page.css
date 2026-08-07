@@ -575,7 +575,14 @@ body,
    The card carries its own surface, so contrast is guaranteed whatever gets
    uploaded, and it pulls the amount and the bar back above the fold. */
 
-.dp-hero { position: relative; margin-top: 26px; }
+.dp-hero {
+    position: relative; margin-top: 26px;
+    /* The card inside responds to this box, not to the window. The hero now
+       sits in a 62% column on the campaign page, where the viewport is wide
+       and the card is not, and the viewport queries that used to size it
+       never fired. */
+    container-type: inline-size;
+}
 
 .dp-hero .dp-figure { margin-bottom: 0; }
 
@@ -647,15 +654,20 @@ body,
 
 .dp-hero--flat .dp-hero-top .dp-btn:hover { background: var(--dp-btn-hover-bg); }
 
-@media (max-width: 900px) {
+@container (max-width: 900px) {
     .dp-hero-card { margin: -38px 36px 0; }
 }
 
-@media (max-width: 560px) {
+@container (max-width: 560px) {
     .dp-hero-card { margin: -28px 12px 0; padding: 11px 13px; }
     .dp-hero-card .dp-money { flex-wrap: wrap; }
     .dp-hero-card .dp-money .dp-btn { margin-left: 0; width: 100%; justify-content: center; margin-top: 9px; }
     .dp-hero-top { top: 10px; right: 10px; }
+}
+
+/* The title is a sibling of the hero, not inside it, so it still answers to
+   the window. */
+@media (max-width: 560px) {
     .dp-display { font-size: 34px; }
 }
 
