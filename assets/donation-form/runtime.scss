@@ -987,10 +987,11 @@
         gap: 10px;
         justify-content: center;
     }
-    &__portal-sent {
-        margin: 0;
-        font-size: 13px;
-        color: var(--dono-text-muted);
+    // Confirmed, not broken: it keeps the button's shape so the donor can see
+    // the thing they pressed is still there and has answered them.
+    &__portal-link.is-sent {
+        opacity: .75;
+        cursor: default;
     }
 
     // The same summary the donor read before paying, shown back to them after.

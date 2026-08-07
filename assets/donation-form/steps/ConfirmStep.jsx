@@ -3,9 +3,7 @@
 import { formatAmount, frequencyLabel } from '../util/format';
 import { coveredFeeCents } from '../state/store';
 
-export default function ConfirmStep( { step, state, config } ) {
-    // The submit block can hide the pre-submit summary; default is to show it.
-    if ( step && step.showSummary === false ) return null;
+export default function ConfirmStep( { state, config, showDonor = true, showGateway = true } ) {
 
     const v        = state.values;
     const cents    = v.amount_cents || 0;
@@ -38,26 +36,30 @@ export default function ConfirmStep( { step, state, config } ) {
                         <dd>{ formatAmount( fee, state.currency ) }</dd>
                     </div>
                 ) }
-                { fullName && (
+                { showDonor && fullName && (
                     <div class="dono-form__summary-row">
                         <dt>{ config.i18n.donor }</dt>
                         <dd>{ fullName }</dd>
                     </div>
                 ) }
-                <div class="dono-form__summary-row">
-                    <dt>{ config.i18n.email }</dt>
-                    <dd>{ v.email }</dd>
-                </div>
-                { v.profile.country && (
+                { showDonor && (
+                    <div class="dono-form__summary-row">
+                        <dt>{ config.i18n.email }</dt>
+                        <dd>{ v.email }</dd>
+                    </div>
+                ) }
+                { showDonor && v.profile.country && (
                     <div class="dono-form__summary-row">
                         <dt>{ config.i18n.country }</dt>
                         <dd>{ v.profile.country }</dd>
                     </div>
                 ) }
-                <div class="dono-form__summary-row">
-                    <dt>{ config.i18n.paymentMethod }</dt>
-                    <dd>{ gatewayLabel( state.gateway, config ) }</dd>
-                </div>
+                { showGateway && (
+                    <div class="dono-form__summary-row">
+                        <dt>{ config.i18n.paymentMethod }</dt>
+                        <dd>{ gatewayLabel( state.gateway, config ) }</dd>
+                    </div>
+                ) }
                 <div class="dono-form__summary-row dono-form__summary-row--total">
                     <dt>{ config.i18n.total }</dt>
                     <dd class="dono-form__summary-amount">{ total }</dd>

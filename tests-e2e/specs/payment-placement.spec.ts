@@ -225,7 +225,10 @@ test.describe('payment step placement', () => {
         await expect(button).toBeVisible();
         await button.click();
 
-        await expect(donor.form.locator('.dono-form__portal-sent')).toBeVisible();
+        // The button stays where it was and says what happened, rather than
+        // vanishing and leaving a line of grey text that reads as a failure.
+        await expect(donor.form.locator('.dono-form__portal-link.is-sent')).toBeVisible();
+        await expect(donor.form.locator('.dono-form__portal-link')).toBeDisabled();
         expect(sentTo, 'the link goes to the address that just donated').toContain('@');
     });
 

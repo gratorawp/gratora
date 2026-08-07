@@ -6,7 +6,7 @@
  */
 
 import { useBlockProps, InspectorControls, RichText } from '@wordpress/block-editor';
-import { PanelBody, ToggleControl } from '@wordpress/components';
+import { PanelBody } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { BlockIcons } from '../_shared/block-icons';
 import Segmented from '../../../_shared/components/Segmented';
@@ -21,7 +21,7 @@ const ALIGN_OPTIONS = [
 ];
 
 function Edit( { attributes, setAttributes } ) {
-    const { label = '', align = 'left', showSummary = true } = attributes;
+    const { label = '', align = 'left' } = attributes;
 
     const justify = {
         left:   'flex-start',
@@ -51,20 +51,8 @@ function Edit( { attributes, setAttributes } ) {
                     <p style={ { fontSize: 12, color: '#6b7280', margin: '12px 0 0' } }>
                         { __( 'Use {amount} and {frequency} in the label to insert the live values at runtime, e.g. "Donate {amount} {frequency}".', 'dono' ) }
                     </p>
-                    <ToggleControl
-                        label={ __( 'Show donation summary', 'dono' ) }
-                        help={ __( 'Shows the donor a summary (amount, fees, total) just above this button before they submit.', 'dono' ) }
-                        checked={ showSummary }
-                        onChange={ ( v ) => setAttributes( { showSummary: v } ) }
-                        __nextHasNoMarginBottom
-                    />
                 </PanelBody>
             </InspectorControls>
-            { showSummary && (
-                <div style={ { fontSize: 11, color: '#6b7280', padding: '0 16px', fontStyle: 'italic' } }>
-                    { __( '↑ A donation summary appears here for the donor', 'dono' ) }
-                </div>
-            ) }
             <div { ...blockProps }>
                 <RichText
                     tagName="span"
@@ -103,7 +91,6 @@ export default function register( api ) {
         attributes: {
             label:       { type: 'string',  default: '' },
             align:       { type: 'string',  default: 'left' },
-            showSummary: { type: 'boolean', default: true },
         },
         edit: Edit,
         save: () => null,

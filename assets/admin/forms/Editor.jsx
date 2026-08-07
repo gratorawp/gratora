@@ -53,7 +53,6 @@ const CloseIcon      = () => <LocalIcon name="close"         size={ 18 } />;
 const ListViewIcon   = () => <LocalIcon name="list-view"     size={ 18 } />;
 const UndoIcon       = () => <LocalIcon name="undo"          size={ 18 } />;
 const RedoIcon       = () => <LocalIcon name="redo"          size={ 18 } />;
-const CogIcon        = () => <LocalIcon name="settings"      size={ 18 } />;
 const PanelRightIcon = () => <LocalIcon name="panel-right"   size={ 18 } />;
 const DesktopIcon    = () => <LocalIcon name="desktop"       size={ 18 } />;
 const TabletIcon     = () => <LocalIcon name="tablet"        size={ 18 } />;
@@ -63,7 +62,7 @@ function defaultFormSettings() {
     return {
         layout:    'inline',
         style:     { preset_id: '' },
-        container: { width: 540, style: 'frame' },
+        container: { width: 540, style: 'plain' },
         gateways:  { allowed: [] },
         goal:      { type: 'none', amount_cents: 0, count: 0 },
         thank_you_message: '',
@@ -795,8 +794,12 @@ function CanvasEmpty() {
 }
 
 const VIEW_TABS = [
-    { id: 'develop',  label: __( 'Build', 'dono' ),   icon: <LocalIcon name="edit" size={ 15 } /> },
-    { id: 'preview',  label: __( 'Preview', 'dono' ), icon: <LocalIcon name="eye"  size={ 15 } /> },
+    { id: 'develop',  label: __( 'Build', 'dono' ),    icon: <LocalIcon name="edit"     size={ 15 } /> },
+    { id: 'preview',  label: __( 'Preview', 'dono' ),  icon: <LocalIcon name="eye"      size={ 15 } /> },
+    // Settings is a third view of the same form, so it belongs with the other
+    // two rather than behind a cog on the far side of the bar, where it read as
+    // a tool acting on the current view instead of a view of its own.
+    { id: 'settings', label: __( 'Settings', 'dono' ), icon: <LocalIcon name="settings" size={ 15 } /> },
 ];
 
 function EditorHeader( {
@@ -810,7 +813,6 @@ function EditorHeader( {
 } ) {
     const inserterOpen   = secondaryView === 'inserter';
     const listViewOpen   = secondaryView === 'listview';
-    const settingsActive = view === 'settings';
     const isPublished    = status === 'published';
     const missing        = Array.isArray( missingRequiredLabels ) ? missingRequiredLabels : [];
     const publishDisabledReason = missing.length > 0
@@ -915,13 +917,6 @@ function EditorHeader( {
                         { __( 'Publish', 'dono' ) }
                     </Button>
                 ) }
-                <Button
-                    icon={ CogIcon }
-                    label={ __( 'Form settings', 'dono' ) }
-                    onClick={ () => onViewChange( settingsActive ? 'develop' : 'settings' ) }
-                    isPressed={ settingsActive }
-                    showTooltip
-                />
                 <Button
                     icon={ PanelRightIcon }
                     label={ __( 'Toggle side panel', 'dono' ) }
@@ -1376,7 +1371,7 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
                 />
                 <Segmented
                     label={ __( 'Container', 'dono' ) }
-                    value={ settings.container?.style ?? 'frame' }
+                    value={ settings.container?.style ?? 'plain' }
                     onChange={ ( v ) => setSettings( { container: { ...settings.container, style: v } } ) }
                     options={ [
                         { value: 'frame', label: __( 'Frame', 'dono' ) },

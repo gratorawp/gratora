@@ -134,4 +134,42 @@ final class FormFieldSeamTest extends IntegrationTestCase
 
         return (string) $created['slug'];
     }
+
+    /**
+     * The recap is a block now, not something the submit step draws. Where it
+     * ends up is the author's decision, so it has to reach the runtime as a
+     * positioned item like any other block rather than as a property of the
+     * submit step.
+     */
+    public function test_the_summary_reaches_the_runtime_where_it_was_dropped(): void
+    {
+        $config = $this->configFor(
+            '<!-- wp:dono/donation-amount /-->'
+            . '<!-- wp:dono/donation-summary /-->'
+            . '<!-- wp:dono/submit-button /-->'
+        );
+
+        $this->assertStringContainsString('"kind":"summary"', $config);
+
+        // As a decoration. Tagged as a field it joins the field run, goes to
+        // DonorStep, and renders nothing: the block is in the markup, the item
+        // is in the config, and the donor sees no summary at all.
+        $this->assertMatchesRegularExpression(
+            '/"kind":"summary"[^}]*"t":"deco"/',
+            $config,
+            'the summary must reach the runtime as a decoration'
+        );
+    }
+
+    /** And a form without the block asks for nothing to be drawn. */
+    public function test_a_form_without_the_block_gets_no_summary(): void
+    {
+        $config = $this->configFor(
+            '<!-- wp:dono/donation-amount /--><!-- wp:dono/submit-button /-->'
+        );
+
+        $this->assertStringNotContainsString('"kind":"summary"', $config);
+        // And the submit step no longer carries the switch that used to decide.
+        $this->assertStringNotContainsString('showSummary', $config);
+    }
 }

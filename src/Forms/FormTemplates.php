@@ -115,6 +115,7 @@ final class FormTemplates
                     'defaultOn' => true,
                 ])
                 . self::block('dono/payment-gateways', ['style' => 'cards'])
+                . self::block('dono/donation-summary')
                 . self::block('dono/submit-button', ['label' => __('Donate {amount}', 'dono')]);
 
         return [
@@ -177,6 +178,7 @@ final class FormTemplates
                     'defaultOn' => false,
                 ])
                 . self::block('dono/payment-gateways', ['style' => 'cards'])
+                . self::block('dono/donation-summary')
                 . self::block('dono/submit-button', ['label' => __('Send {amount}', 'dono')]);
 
         return [
@@ -227,6 +229,7 @@ final class FormTemplates
                     'defaultOn' => true,
                 ])
                 . self::block('dono/payment-gateways', ['style' => 'cards'])
+                . self::block('dono/donation-summary')
                 . self::block('dono/submit-button', ['label' => __('Donate now', 'dono')]);
 
         return [
@@ -271,6 +274,7 @@ final class FormTemplates
                     'defaultOn' => false,
                 ])
                 . self::block('dono/payment-gateways', ['style' => 'cards'])
+                . self::block('dono/donation-summary')
                 . self::block('dono/submit-button', ['label' => __('Continue', 'dono')]);
 
         return [
@@ -330,6 +334,7 @@ final class FormTemplates
                     'defaultOn' => false,
                 ])
                 . self::block('dono/payment-gateways', ['style' => 'cards'])
+                . self::block('dono/donation-summary')
                 . self::block('dono/submit-button', ['label' => __('Give {amount}', 'dono')]);
 
         return [
@@ -387,6 +392,7 @@ final class FormTemplates
                     'defaultOn' => true,
                 ])
                 . self::block('dono/payment-gateways', ['style' => 'cards'])
+                . self::block('dono/donation-summary')
                 . self::block('dono/submit-button', ['label' => __('Send the kit', 'dono')]);
 
         return [
@@ -452,6 +458,7 @@ final class FormTemplates
                     'required' => false,
                 ])
                 . self::block('dono/payment-gateways', ['style' => 'cards'])
+                . self::block('dono/donation-summary')
                 . self::block('dono/submit-button', ['label' => __('Give {amount} {frequency}', 'dono')]);
 
         return [
@@ -516,6 +523,7 @@ final class FormTemplates
                     'defaultOn' => true,
                 ])
                 . self::block('dono/payment-gateways', ['style' => 'cards'])
+                . self::block('dono/donation-summary')
                 . self::block('dono/submit-button', ['label' => __('Give {amount} now', 'dono')]);
 
         return [
@@ -591,6 +599,7 @@ final class FormTemplates
                     'defaultOn' => false,
                 ])
                 . self::block('dono/payment-gateways', ['style' => 'cards'])
+                . self::block('dono/donation-summary')
                 . self::block('dono/submit-button', ['label' => __('Complete my donation', 'dono')]);
 
         return [
@@ -653,7 +662,8 @@ final class FormTemplates
             ])
             . self::block('dono/consent')
             . self::block('dono/payment-gateways', ['style' => 'cards'])
-            . self::block('dono/submit-button', ['label' => __('Start monthly support', 'dono')])
+            . self::block('dono/donation-summary')
+                . self::block('dono/submit-button', ['label' => __('Start monthly support', 'dono')])
         );
 
         return [
@@ -710,6 +720,7 @@ final class FormTemplates
                     'defaultOn' => true,
                 ])
                 . self::block('dono/payment-gateways', ['style' => 'cards'])
+                . self::block('dono/donation-summary')
                 . self::block('dono/submit-button', ['label' => __('Send help now', 'dono')]);
 
         return [
@@ -774,6 +785,7 @@ final class FormTemplates
                     'required'    => false,
                 ])
                 . self::block('dono/payment-gateways', ['style' => 'cards'])
+                . self::block('dono/donation-summary')
                 . self::block('dono/submit-button', ['label' => __('Pledge tonight', 'dono')]);
 
         return [
@@ -864,7 +876,8 @@ final class FormTemplates
             ])
             . self::block('dono/consent')
             . self::block('dono/payment-gateways', ['style' => 'cards'])
-            . self::block('dono/submit-button', ['label' => __('Donate and request match', 'dono')])
+            . self::block('dono/donation-summary')
+                . self::block('dono/submit-button', ['label' => __('Donate and request match', 'dono')])
         );
 
         return [
@@ -926,7 +939,8 @@ final class FormTemplates
                 'label'     => __('Cover the processing fee so 100% reaches us', 'dono'),
                 'defaultOn' => true,
             ])
-            . self::block('dono/submit-button', ['label' => __('Donate {amount}', 'dono')])
+            . self::block('dono/donation-summary')
+                . self::block('dono/submit-button', ['label' => __('Donate {amount}', 'dono')])
         );
 
         return [

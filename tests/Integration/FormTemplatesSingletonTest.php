@@ -28,6 +28,7 @@ final class FormTemplatesSingletonTest extends IntegrationTestCase
         'dono/cover-fees',
         'dono/submit-button',
         'dono/donation-amount',
+        'dono/donation-summary',
         'dono/payment-gateways',
         'dono/consent',
         'dono/currency-switcher',
@@ -111,5 +112,25 @@ final class FormTemplatesSingletonTest extends IntegrationTestCase
             (string) $form->blocks,
             'the starter form must ask how to pay, like every template does'
         );
+    }
+
+    /**
+     * The recap used to be drawn by the submit step, so it always sat directly
+     * above the button whatever the author wanted. It is a block now, which
+     * means a template that forgot it ships a form that never shows the donor
+     * what they are about to give.
+     */
+    public function test_every_template_that_submits_also_recaps(): void
+    {
+        foreach (FormTemplates::all() as $id => $template) {
+            $blocks = (string) ($template['blocks'] ?? '');
+            if (! str_contains($blocks, 'dono/submit-button')) continue;
+
+            $this->assertStringContainsString(
+                'dono/donation-summary',
+                $blocks,
+                "template {$id} asks for money without showing the total"
+            );
+        }
     }
 }

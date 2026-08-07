@@ -269,9 +269,14 @@ final class DonationFormShortcode extends HookProvider
     {
         $container = is_array($form->settings['container'] ?? null) ? $form->settings['container'] : [];
 
-        $style = (string) ($container['style'] ?? 'frame');
+        // Plain by default. A form is nearly always dropped into a page that
+        // already has its own card, panel or column, and a second frame around
+        // it reads as a box inside a box. An author who wants the frame asks
+        // for it; the ones who never open the setting get the version that sits
+        // in someone else's design without arguing with it.
+        $style = (string) ($container['style'] ?? 'plain');
         if (! in_array($style, ['frame', 'plain'], true)) {
-            $style = 'frame';
+            $style = 'plain';
         }
 
         $width = (int) ($container['width'] ?? 540);
@@ -631,7 +636,7 @@ HTML;
                 'fees'           => __('Processing fee', 'dono'),
                 'total'          => __('Total', 'dono'),
                 'manageGiving'   => __('Manage your giving', 'dono'),
-                'portalLinkSent' => __('Check your email for a link to your giving.', 'dono'),
+                'portalLinkSent' => __('Check your email', 'dono'),
                 'donor'          => __('Donor', 'dono'),
                 'paymentMethod'  => __('Payment method', 'dono'),
                 /* translators: %s: the selected currency code, e.g. INR. */
@@ -1145,6 +1150,18 @@ HTML;
                     ], $row, $attrs);
                     break;
 
+                case 'dono/donation-summary':
+                    // A decoration, not a field: it reads state back rather than
+                    // collecting anything, and only decorations reach
+                    // renderDecorationItem. Tagged as a field it joined the field
+                    // run, went to DonorStep, and rendered nothing at all.
+                    $items[] = $withCond([
+                        'kind'        => 'summary',
+                        'showDonor'   => (bool) ($attrs['showDonor']   ?? true),
+                        'showGateway' => (bool) ($attrs['showGateway'] ?? true),
+                    ], $attrs);
+                    break;
+
                 case 'dono/terms':
                     if (TermsBlock::isConfigured($attrs)) {
                         $items[] = $tagRow([
@@ -1199,7 +1216,6 @@ HTML;
                         'page'        => $currentPage,
                         'label'       => (string) ($attrs['label'] ?? __('Donate now', 'dono')),
                         'align'       => $sbAlign,
-                        'showSummary' => (bool) ($attrs['showSummary'] ?? true),
                     ];
                     break;
 

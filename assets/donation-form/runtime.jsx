@@ -24,7 +24,12 @@ import './runtime.scss';
 const STEP_RENDERERS = {
     amount: AmountStep,
     donor:  DonorStep,
-    submit: ConfirmStep,
+    // The submit step draws nothing of its own. It carries the button's label
+    // and alignment, which FormBody reads directly, and it used to draw the
+    // recap as well - that is the dono/donation-summary block now, rendered
+    // wherever the author dropped it. Mapped rather than omitted so the step
+    // does not fall through to the unknown-step message.
+    submit: () => null,
 };
 
 /**
@@ -157,8 +162,19 @@ function PortalLink( { email, config } ) {
 
     if ( ! portal.url || ! email ) return null;
 
+    // The same element the donor pressed, still where they left it, saying
+    // what happened. Swapping it for a line of grey text read as the button
+    // having failed and vanished.
     if ( sent ) {
-        return <p class="dono-form__portal-sent">{ config.i18n.portalLinkSent }</p>;
+        return (
+            <button
+                type="button"
+                class="dono-form__button dono-form__button--secondary dono-form__portal-link is-sent"
+                disabled
+            >
+                { config.i18n.portalLinkSent }
+            </button>
+        );
     }
 
     // The request never got there. Saying "check your email" anyway would send
@@ -1044,6 +1060,18 @@ function renderDecorationItem( d, i, values, ctx ) {
                 label={ d.label }
                 ariaLabel={ ctx?.config?.i18n?.currency }
             />
+        );
+    }
+    if ( d.kind === 'summary' ) {
+        return (
+            <ErrorBoundary key={ i }>
+                <ConfirmStep
+                    state={ ctx?.state }
+                    config={ ctx?.config }
+                    showDonor={ d.showDonor !== false }
+                    showGateway={ d.showGateway !== false }
+                />
+            </ErrorBoundary>
         );
     }
     if ( d.kind === 'payment-gateways' ) {

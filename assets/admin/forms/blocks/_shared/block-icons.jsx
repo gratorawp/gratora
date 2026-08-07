@@ -8,6 +8,7 @@
 
 import {
     AlignLeft,
+    ReceiptText,
     Calendar,
     Code,
     CheckSquare,
@@ -58,6 +59,7 @@ export const BlockIcons = {
     date:              <Calendar         { ...BLOCK } />,
     'donation-amount': <CircleDollarSign { ...BLOCK } />,
     'payment-gateways':<HandCoins        { ...BLOCK } />,
+    'donation-summary':<ReceiptText     { ...BLOCK } />,
     dropdown:          <ChevronDown      { ...BLOCK } />,
     hidden:            <Tag              { ...BLOCK } />,
     html:              <Code             { ...BLOCK } />,

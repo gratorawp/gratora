@@ -29,7 +29,6 @@ final class SubmitButtonBlock implements Block
         return [
             'label'       => ['type' => 'string',  'default' => ''],
             'align'       => ['type' => 'string',  'default' => 'left'],
-            'showSummary' => ['type' => 'boolean', 'default' => true],
         ];
     }
 

@@ -23,6 +23,7 @@ import registerFundPickerBlock      from './fund-picker';
 import registerAddressBlock         from './address';
 import registerConsentBlock         from './consent';
 import registerTermsBlock           from './terms';
+import registerDonationSummaryBlock from './donation-summary';
 import registerDropdownBlock        from './dropdown';
 import registerRadioBlock           from './radio';
 import registerCheckboxBlock        from './checkbox';
@@ -78,6 +79,7 @@ addAction( 'dono.editor.registerBlocks', 'dono/core-blocks', ( api ) => {
     registerAddressBlock( api );
     registerConsentBlock( api );
     registerTermsBlock( api );
+    registerDonationSummaryBlock( api );
     registerPrivacyNoticeBlock( api );
     registerAnonymousToggleBlock( api );
     registerSubmitButtonBlock( api );
