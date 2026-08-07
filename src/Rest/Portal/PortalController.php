@@ -24,6 +24,7 @@ use Dono\Gateways\SupportsPaymentMethodUpdate;
 use Dono\Mail\Mailer;
 use Dono\Receipts\Receipt;
 use Dono\Receipts\ReceiptRepository;
+use Dono\Recurring\GatewayUnreachable;
 use Dono\Recurring\RecurringPlan;
 use Dono\Recurring\RecurringPlanActions;
 use Dono\Recurring\RecurringPlanChange;
@@ -1267,7 +1268,7 @@ final class PortalController
 
         try {
             $this->donorService->redact($donor);
-        } catch (\Dono\Recurring\GatewayUnreachable $e) {
+        } catch (GatewayUnreachable $e) {
             // Erasure cancels the donor's live recurring plans first, on
             // purpose: wiping the donor while a subscription keeps billing is
             // worse than not wiping them. When the gateway is gone the

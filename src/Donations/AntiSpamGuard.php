@@ -61,27 +61,44 @@ final class AntiSpamGuard
      */
     public function mintFormToken(int $formId = 0): string
     {
+        return $this->signed((string) $formId);
+    }
+
+    /** Day bucket signed together with whatever scopes the token. */
+    private function signed(string $scope): string
+    {
         $payload = (string) $this->currentBucket();
-        $sig     = hash_hmac('sha256', $formId . '|' . $payload, $this->secret());
+        $sig     = hash_hmac('sha256', $scope . '|' . $payload, $this->secret());
+
         return $payload . '.' . $sig;
     }
 
     /**
-     * The donor portal signs up and signs in from a page that is public and
-     * cacheable, exactly like a donation form, so it wants the same token. Real
-     * form ids are positive, so a reserved negative context keeps a token
-     * minted on a donation form from being replayed at the portal.
+     * The same proof for surfaces that are not a donation form. Anything public
+     * and cacheable that writes without a session wants this: the portal signs
+     * people up, add-ons open fundraiser pages.
+     *
+     * Namespaced so one surface's token is not accepted at another, and so a
+     * context can never be mistaken for a form id, which is a bare integer.
      */
-    private const PORTAL_CONTEXT = -1;
+    public function mintToken(string $context): string
+    {
+        return $this->signed('ctx:' . $context);
+    }
+
+    public function verifyToken(string $token, string $context): ?WP_Error
+    {
+        return $this->check($token, 'ctx:' . $context);
+    }
 
     public function mintPortalToken(): string
     {
-        return $this->mintFormToken(self::PORTAL_CONTEXT);
+        return $this->mintToken('portal');
     }
 
     public function verifyPortalToken(string $token): ?WP_Error
     {
-        return $this->verifyFormToken($token, self::PORTAL_CONTEXT);
+        return $this->verifyToken($token, 'portal');
     }
 
     public function checkHoneypot(string $value): ?WP_Error
@@ -92,13 +109,18 @@ final class AntiSpamGuard
 
     public function verifyFormToken(string $token, int $formId = 0): ?WP_Error
     {
+        return $this->check($token, (string) $formId);
+    }
+
+    private function check(string $token, string $scope): ?WP_Error
+    {
         $generic = new WP_Error('dono_invalid_submission', __('Please refresh the page and try again.', 'dono'), ['status' => 400]);
 
         $parts = explode('.', $token, 2);
         if (count($parts) !== 2) return $generic;
 
         [$payload, $sig] = $parts;
-        $expected = hash_hmac('sha256', $formId . '|' . $payload, $this->secret());
+        $expected = hash_hmac('sha256', $scope . '|' . $payload, $this->secret());
         if (! hash_equals($expected, $sig)) return $generic;
 
         if ((string) (int) $payload !== $payload) return $generic; // non-numeric bucket
