@@ -16,6 +16,8 @@ use Dono\Donors\Donor;
 use Dono\Donors\DonorRepository;
 use Dono\Donors\DonorService;
 use Dono\Donors\MagicLinkService;
+use Dono\Donors\PendingSignupRepository;
+use Dono\Donors\SignupRedemption;
 use Dono\Donors\Portal\AnnualStatementBuilder;
 use Dono\Donors\Portal\PortalSession;
 use Dono\Foundation\Identity\IdentityHasher;
@@ -67,6 +69,7 @@ final class PortalController
         private RecurringPlanActions $planActions,
         private GatewayManager $gateways,
         private AntiSpamGuard $spam,
+        private PendingSignupRepository $pending,
     ) {
     }
 
@@ -312,18 +315,28 @@ final class PortalController
     }
 
     /**
-     * Self-register as a donor so non-donors (e.g. would-be fundraisers) can get
-     * into the portal without donating first. Verification-first: we create-or-find
-     * the donor and email a magic link; a session only starts when they click it.
-     * Same 200 whether the email is new or existing, so it can't enumerate donors.
+     * Self-register so somebody who has not donated (a would-be fundraiser, say)
+     * can get into the portal.
+     *
+     * Nothing here becomes a donor. The endpoint takes no session and proves
+     * nothing about who is calling, so the address it carries is a claim, not a
+     * fact: anyone can type anyone's address. The claim waits in
+     * dono_pending_signups until the emailed link comes back, and redeeming
+     * that link is what creates the donor. So an address nobody proved never
+     * reaches the donor table, the admin screens, the export or the counts.
+     *
+     * No lookup happens here either. Whether the address is already a donor
+     * decides what gets emailed, and that decision belongs in the job for the
+     * same reason sendLink() moved it there: the two branches must not do
+     * visibly different amounts of work in the request, or the identical 200 is
+     * undone by the clock.
      */
     public function registerDonor(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $ok = new WP_REST_Response(['ok' => true], 200);
 
-        // Signing up writes a donor row with no session behind it, which is the
-        // one unauthenticated write on this controller. The donation endpoint
-        // has always demanded the same proof for the same reason.
+        // The one unauthenticated write on this controller. The donation
+        // endpoint has always demanded the same proof for the same reason.
         if ($err = $this->spam->verifyPortalToken((string) ($request['token'] ?? ''))) return $err;
 
         $email = trim((string) ($request['email'] ?? ''));
@@ -331,37 +344,20 @@ final class PortalController
 
         if (! $this->consumeIpQuota()) return $ok;
         if (! $this->consumeEmailQuota($email)) return $ok;
-        $hash = $this->hasher->emailHash($this->hasher->normalizeEmail($email));
 
-        // The name is only ever written to a donor this request is creating.
-        // This endpoint takes no session and proves nothing about who is
-        // calling, and findOrCreate() back-fills any empty field on a donor it
-        // finds. So anyone knowing an address could write a name onto that
-        // donor's record, and it would then print on their year-end tax
-        // statement and on every receipt re-download that carries no name of
-        // its own. An existing donor sets their own name from the profile
-        // endpoint, which is behind their session.
-        $existing = $this->donors->findByEmailHash($hash);
-
-        $profile = [];
-        if ($existing === null) {
-            // Truncated to the column width rather than rejected: a signup that
-            // fails because a surname is long is worse than a stored surname
-            // that is short.
-            foreach (['first_name', 'last_name'] as $field) {
-                $value = trim(sanitize_text_field((string) ($request[$field] ?? '')));
-                if ($value !== '') {
-                    $profile[$field] = mb_substr($value, 0, 100);
-                }
-            }
+        // Held against the claim, not against a donor, and only ever used for
+        // the donor the claim eventually creates. Truncated to the column width
+        // rather than rejected: a signup that fails because a surname is long is
+        // worse than a surname that is short.
+        $names = [];
+        foreach (['first_name', 'last_name'] as $field) {
+            $value = trim(sanitize_text_field((string) ($request[$field] ?? '')));
+            $names[$field] = $value !== '' ? mb_substr($value, 0, 100) : null;
         }
 
-        $donor = $existing ?? $this->donorService->findOrCreate($email, $profile);
+        $this->pending->put($email, $names['first_name'], $names['last_name']);
 
-        $this->async->enqueue(self::SEND_LINK_HOOK, [
-            'donor_id' => (int) $donor->id,
-            'email'    => $email,
-        ]);
+        $this->async->enqueue(self::SEND_LINK_HOOK, ['email' => $email]);
 
         return $ok;
     }
@@ -378,6 +374,13 @@ final class PortalController
         if (is_array($args)) {
             $email   = (string) ($args['email'] ?? '');
             $donorId = (int) ($args['donor_id'] ?? 0);
+        } elseif (is_string($args)) {
+            // Action Scheduler spreads with array_values, so a job enqueued as
+            // ['email' => ...] arrives as one string in the first parameter and
+            // nothing in the second. Reading it as a donor id left the address
+            // empty and returned here, which is a sign-in link nobody was sent.
+            $email   = $args;
+            $donorId = 0;
         } else {
             $donorId = (int) $args;
         }
@@ -385,23 +388,49 @@ final class PortalController
 
         // Resolved here rather than in the request, so the request does the same
         // work for an address that is a donor and one that is not. donor_id is
-        // still honoured for jobs queued before that moved, and by registerDonor
-        // which already knows the row it just created.
+        // still honoured for jobs queued before that moved.
+        $hash  = $this->hasher->emailHash($this->hasher->normalizeEmail($email));
         $donor = $donorId > 0
             ? $this->donors->findById($donorId)
-            : $this->donors->findByEmailHash($this->hasher->emailHash($this->hasher->normalizeEmail($email)));
+            : $this->donors->findByEmailHash($hash);
 
-        if (! $donor) return;
-        $donorId = (int) $donor->id;
+        if ($donor) {
+            // Already a donor, so there is nothing to prove and nothing to
+            // create. Any claim standing against this address is moot: signing
+            // up for an address that already has an account is a sign-in.
+            $this->pending->deleteByEmailHash($hash);
+            $this->mailLink(
+                $email,
+                $this->magicLinks->issue((int) $donor->id, 'donor_portal'),
+                trim(($donor->first_name ?? '') . ' ' . ($donor->last_name ?? ''))
+            );
+            return;
+        }
 
-        $raw = $this->magicLinks->issue($donorId, 'donor_portal');
-        $url = add_query_arg('token', $raw, $this->portalUrl());
-        $donorName = trim(($donor->first_name ?? '') . ' ' . ($donor->last_name ?? ''));
+        // Not a donor. The link carries the claim instead, and redeeming it is
+        // what creates the donor. No donor id exists yet, so the token points at
+        // the claim through target_id.
+        $claim = $this->pending->findByEmailHash($hash);
+        if (! $claim || ! $this->pending->isLive($claim)) return;
 
+        $this->mailLink(
+            $email,
+            $this->magicLinks->issue(
+                0,
+                SignupRedemption::PURPOSE,
+                (int) $claim->id,
+                PendingSignupRepository::TTL_SECONDS
+            ),
+            trim(($claim->first_name ?? '') . ' ' . ($claim->last_name ?? ''))
+        );
+    }
+
+    private function mailLink(string $email, string $rawToken, string $name): void
+    {
         $this->mailer->sendTemplate('magic_link', $email, [
-            'donor_name'        => $donorName !== '' ? $donorName : $email,
+            'donor_name'        => $name !== '' ? $name : $email,
             'organisation_name' => (string) get_bloginfo('name'),
-            'portal_url'        => $url,
+            'portal_url'        => add_query_arg('token', $rawToken, $this->portalUrl()),
         ]);
     }
 

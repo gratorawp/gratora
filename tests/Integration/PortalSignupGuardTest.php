@@ -7,6 +7,7 @@ namespace Dono\Tests\Integration;
 use Dono\Donations\AntiSpamGuard;
 use Dono\Donors\Donor;
 use Dono\Foundation\Identity\IdentityHasher;
+use Dono\Donors\PendingSignupRepository;
 use Dono\Foundation\Plugin;
 use WP_REST_Request;
 
@@ -64,7 +65,7 @@ final class PortalSignupGuardTest extends IntegrationTestCase
         $this->assertFalse($this->donorExists($email));
     }
 
-    public function test_a_signup_from_the_portal_page_still_works(): void
+    public function test_a_signup_from_the_portal_page_records_a_claim(): void
     {
         $email = 'with-token-' . uniqid() . '@example.test';
 
@@ -75,7 +76,13 @@ final class PortalSignupGuardTest extends IntegrationTestCase
         ]);
 
         $this->assertSame(200, $res->get_status());
-        $this->assertTrue($this->donorExists($email), 'a real signup still creates the donor');
+        $this->assertFalse($this->donorExists($email), 'an unproven address is not a donor');
+        $this->assertNotNull(
+            Plugin::instance()->container->get(PendingSignupRepository::class)->findByEmailHash(
+                Plugin::instance()->container->get(IdentityHasher::class)->emailHash($email)
+            ),
+            'the claim is waiting for the link'
+        );
     }
 
     /**
@@ -116,7 +123,7 @@ final class PortalSignupGuardTest extends IntegrationTestCase
     public function test_the_refusal_says_nothing_about_the_address(): void
     {
         $known = 'known-' . uniqid() . '@example.test';
-        $this->post('register', ['email' => $known, 'token' => $this->guard()->mintPortalToken()]);
+        Plugin::instance()->container->get(\Dono\Donors\DonorService::class)->findOrCreate($known);
         $this->assertTrue($this->donorExists($known));
 
         $a = $this->post('send-link', ['email' => $known]);

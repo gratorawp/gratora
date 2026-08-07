@@ -33,6 +33,35 @@ final class WebhookAndPortalHardeningTest extends IntegrationTestCase
             ->mintPortalToken();
     }
 
+    /**
+     * Signing up records a claim; the donor appears when the emailed link comes
+     * back. These tests are about what the claim is allowed to write, so they
+     * redeem it rather than stopping at the 200.
+     *
+     * @param array<string,mixed> $body
+     */
+    private function signUpAndRedeem(array $body): int
+    {
+        $req = new WP_REST_Request('POST', '/dono/v1/portal/register');
+        $req->set_header('content-type', 'application/json');
+        $req->set_body((string) wp_json_encode($body + ['token' => $this->portalToken()]));
+        rest_do_request($req);
+
+        $c     = Plugin::instance()->container;
+        $claim = $c->get(\Dono\Donors\PendingSignupRepository::class)->findByEmailHash(
+            $c->get(IdentityHasher::class)->emailHash((string) $body['email'])
+        );
+        if ($claim === null) return 0;
+
+        $raw = $c->get(\Dono\Donors\MagicLinkService::class)->issue(
+            0,
+            \Dono\Donors\SignupRedemption::PURPOSE,
+            (int) $claim->id
+        );
+
+        return $c->get(\Dono\Donors\SignupRedemption::class)->redeem($raw);
+    }
+
     private function paidDonation(bool $isTest, string $gateway = 'paypal'): Donation
     {
         $d = Donation::make();
@@ -90,15 +119,7 @@ final class WebhookAndPortalHardeningTest extends IntegrationTestCase
         $donor = Plugin::instance()->container->get(DonorService::class)->findOrCreate($email);
         $this->assertNull($donor->first_name, 'seeded with no name');
 
-        $req = new WP_REST_Request('POST', '/dono/v1/portal/register');
-        $req->set_header('content-type', 'application/json');
-        $req->set_body((string) wp_json_encode([
-            'email'      => $email,
-            'first_name' => 'Rude',
-            'last_name'  => 'Word',
-            'token'      => $this->portalToken(),
-        ]));
-        rest_do_request($req);
+        $this->signUpAndRedeem(['email' => $email, 'first_name' => 'Rude', 'last_name' => 'Word']);
 
         $fresh = Donor::query()
             ->where('email_hash', Plugin::instance()->container->get(IdentityHasher::class)->emailHash($email))
@@ -205,15 +226,7 @@ final class WebhookAndPortalHardeningTest extends IntegrationTestCase
     {
         $email = 'brand-new-' . uniqid() . '@example.test';
 
-        $req = new WP_REST_Request('POST', '/dono/v1/portal/register');
-        $req->set_header('content-type', 'application/json');
-        $req->set_body((string) wp_json_encode([
-            'email'      => $email,
-            'first_name' => 'Ada',
-            'last_name'  => 'Lovelace',
-            'token'      => $this->portalToken(),
-        ]));
-        rest_do_request($req);
+        $this->signUpAndRedeem(['email' => $email, 'first_name' => 'Ada', 'last_name' => 'Lovelace']);
 
         $fresh = Donor::query()
             ->where('email_hash', Plugin::instance()->container->get(IdentityHasher::class)->emailHash($email))
@@ -233,15 +246,7 @@ final class WebhookAndPortalHardeningTest extends IntegrationTestCase
     {
         $email = 'compound-' . uniqid() . '@example.test';
 
-        $req = new WP_REST_Request('POST', '/dono/v1/portal/register');
-        $req->set_header('content-type', 'application/json');
-        $req->set_body((string) wp_json_encode([
-            'email'      => $email,
-            'first_name' => 'Mary Jane',
-            'last_name'  => 'van der Meer',
-            'token'      => $this->portalToken(),
-        ]));
-        rest_do_request($req);
+        $this->signUpAndRedeem(['email' => $email, 'first_name' => 'Mary Jane', 'last_name' => 'van der Meer']);
 
         $fresh = Donor::query()
             ->where('email_hash', Plugin::instance()->container->get(IdentityHasher::class)->emailHash($email))
@@ -256,14 +261,7 @@ final class WebhookAndPortalHardeningTest extends IntegrationTestCase
     {
         $email = 'mononym-' . uniqid() . '@example.test';
 
-        $req = new WP_REST_Request('POST', '/dono/v1/portal/register');
-        $req->set_header('content-type', 'application/json');
-        $req->set_body((string) wp_json_encode([
-            'email'      => $email,
-            'first_name' => 'Prince',
-            'token'      => $this->portalToken(),
-        ]));
-        rest_do_request($req);
+        $this->signUpAndRedeem(['email' => $email, 'first_name' => 'Prince']);
 
         $fresh = Donor::query()
             ->where('email_hash', Plugin::instance()->container->get(IdentityHasher::class)->emailHash($email))

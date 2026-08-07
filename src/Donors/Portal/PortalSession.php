@@ -6,6 +6,7 @@ namespace Dono\Donors\Portal;
 
 use Dono\Donors\DonorRepository;
 use Dono\Donors\MagicLinkService;
+use Dono\Donors\SignupRedemption;
 
 /**
  * Manages authenticated donor portal sessions via cookie and transient.
@@ -20,11 +21,18 @@ final class PortalSession
     public function __construct(
         private MagicLinkService $magicLinks,
         private DonorRepository $donors,
+        private SignupRedemption $signups,
     ) {
     }
 
     /**
      * Exchanges a raw magic-link token for an authenticated portal session.
+     *
+     * Two kinds of link arrive here. A sign-in link names a donor who already
+     * exists. A signup link names no donor at all: it points at an address
+     * somebody claimed in the portal, and redeeming it is the moment that claim
+     * is proven and becomes a donor. Whoever opens the link controls the
+     * mailbox, which is the only evidence the address was ever theirs.
      *
      * @return array{donor_id:int,csrf:string}|null
      */
@@ -32,8 +40,21 @@ final class PortalSession
     {
         // Single-use: once redeemed the session cookie carries the donor.
         $token = $this->magicLinks->consumeAndValidate($rawToken, 'donor_portal');
-        if (! $token) return null;
-        return $this->open((int) $token->donor_id);
+        if ($token) {
+            return $this->open((int) $token->donor_id);
+        }
+
+        return $this->startFromSignupToken($rawToken);
+    }
+
+    /**
+     * @return array{donor_id:int,csrf:string}|null
+     */
+    private function startFromSignupToken(string $rawToken): ?array
+    {
+        $donorId = $this->signups->redeem($rawToken);
+
+        return $donorId > 0 ? $this->open($donorId) : null;
     }
 
     /**

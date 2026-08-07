@@ -395,6 +395,7 @@ final class DonorService
             $identifiers,
             $names,
             $this->clock->now()->format('Y-m-d H:i:s'),
+            (string) $donor->email_hash,
         );
     }
 

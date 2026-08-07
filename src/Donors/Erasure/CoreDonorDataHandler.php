@@ -9,6 +9,7 @@ use Dono\Donations\DonationNote;
 use Dono\Donors\Consent;
 use Dono\Donors\DonorNote;
 use Dono\Donors\MagicLinkToken;
+use Dono\Donors\PendingSignup;
 use Dono\Recurring\RecurringPlan;
 use Dono\Donations\Refund;
 
@@ -78,6 +79,14 @@ final class CoreDonorDataHandler implements ErasureHandler
         // Revoke outstanding magic-link tokens so a previously-emailed
         // portal link can no longer open a session for the redacted donor.
         MagicLinkToken::query()->where('donor_id', $request->donorId)->delete();
+
+        // An unproven signup for this address holds the address itself and has
+        // no donor id to be found by, so it is reached by hash or not at all.
+        // Left behind it would survive the erasure and, worse, its link would
+        // still be live and would rebuild the donor on redemption.
+        if ($request->emailHash !== '') {
+            PendingSignup::query()->where('email_hash', $request->emailHash)->delete();
+        }
 
         // Staff notes about the donor are free-text PII and in DSAR export
         // scope (DonorMetricsService::exportData), so erasure removes them.

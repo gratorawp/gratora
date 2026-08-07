@@ -36,12 +36,16 @@ final class ErasureRequest
     /**
      * @param list<int>    $donationIds donations belonging to this donor
      * @param list<string> $needles     identifiers as they read before the wipe
+     * @param string       $emailHash   reaches rows keyed by address rather
+     *                                  than by donor id, which is the only
+     *                                  handle an unproven signup ever has
      */
     public function __construct(
         public readonly int $donorId,
         public readonly array $donationIds,
         public readonly array $needles,
         public readonly string $at,
+        public readonly string $emailHash = '',
     ) {
     }
 
@@ -71,6 +75,7 @@ final class ErasureRequest
         array $identifiers,
         array $names,
         string $at,
+        string $emailHash = '',
     ): self {
         $needles = [];
 
@@ -88,7 +93,7 @@ final class ErasureRequest
             $needles[strtolower($value)] = $value;
         }
 
-        return new self($donorId, array_values($donationIds), array_values($needles), $at);
+        return new self($donorId, array_values($donationIds), array_values($needles), $at, $emailHash);
     }
 
     /** True when there is nothing specific enough to search text for. */

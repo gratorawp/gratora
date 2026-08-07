@@ -64,6 +64,9 @@ use Dono\Donors\Erasure\ErasureRegistry;
 use Dono\Donors\Erasure\WebhookLogHandler;
 use Dono\Donors\MagicLinkService;
 use Dono\Donors\MagicLinkToken;
+use Dono\Donors\PendingSignup;
+use Dono\Donors\PendingSignupRepository;
+use Dono\Donors\SignupRedemption;
 use Dono\Donors\Portal\AnnualStatementBuilder;
 use Dono\Donors\Portal\PortalPage;
 use Dono\Donors\Portal\PortalSession;
@@ -320,7 +323,12 @@ final class CoreModule implements DonoModule
 
         // Purge expired magic-link tokens daily to prevent unbounded table growth.
         $async = $c->get(AsyncDispatcher::class);
-        add_action('dono.cron.magic_link_gc', fn () => $c->get(MagicLinkService::class)->purgeExpired());
+        add_action('dono.cron.magic_link_gc', function () use ($c): void {
+            $c->get(MagicLinkService::class)->purgeExpired();
+            // An address nobody proved is not kept past its window. Same job,
+            // because a pending row and its link expire together.
+            $c->get(PendingSignupRepository::class)->purgeExpired();
+        });
         add_action('init', fn () => $async->scheduleRecurring('dono.cron.magic_link_gc', 86400));
 
         // Daily FX snapshot; last-good value on failure.
@@ -458,14 +466,27 @@ final class CoreModule implements DonoModule
             $c->get(Clock::class)
         ));
 
+        $c->bind(PendingSignupRepository::class, fn (Container $c) => new PendingSignupRepository(
+            $c->get(Crypto::class),
+            $c->get(IdentityHasher::class),
+            $c->get(Clock::class),
+        ));
+
         $c->bind(ConsentService::class, fn (Container $c) => new ConsentService(
             $c->get(IdentityHasher::class),
             $c->get(Clock::class)
         ));
 
+        $c->bind(SignupRedemption::class, fn (Container $c) => new SignupRedemption(
+            $c->get(MagicLinkService::class),
+            $c->get(PendingSignupRepository::class),
+            $c->get(DonorService::class),
+        ));
+
         $c->bind(PortalSession::class, fn (Container $c) => new PortalSession(
             $c->get(MagicLinkService::class),
-            $c->get(DonorRepository::class)
+            $c->get(DonorRepository::class),
+            $c->get(SignupRedemption::class),
         ));
 
         $c->bind(AnnualStatementBuilder::class, fn (Container $c) => new AnnualStatementBuilder(
@@ -529,6 +550,7 @@ final class CoreModule implements DonoModule
             $c->get(RecurringPlanActions::class),
             $c->get(GatewayManager::class),
             $c->get(AntiSpamGuard::class),
+            $c->get(PendingSignupRepository::class),
         ));
 
         $c->bind(AggregateSyncer::class, fn () => new AggregateSyncer());
@@ -1068,6 +1090,7 @@ final class CoreModule implements DonoModule
             Consent::class,
             DonorNote::class,
             MagicLinkToken::class,
+            PendingSignup::class,
             Campaign::class,
             Fund::class,
             Donation::class,
