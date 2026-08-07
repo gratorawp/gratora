@@ -77,17 +77,33 @@ final class Campaign extends Model
      */
     public function acceptsDonations(?string $now = null): bool
     {
-        if ($this->status !== 'published') return false;
+        return $this->notAcceptingReason($now) === null;
+    }
+
+    /**
+     * Why this campaign is turning donations away, or null when it is not.
+     *
+     * The same walk acceptsDonations does, returning which test failed rather
+     * than only that one did. Admin screens need to say what is wrong, and
+     * working that out from status and dates a second time is how the answer
+     * on the screen drifts from the answer at the gate.
+     *
+     * @return null|'draft'|'archived'|'scheduled'|'ended'
+     */
+    public function notAcceptingReason(?string $now = null): ?string
+    {
+        if ($this->status === 'archived')  return 'archived';
+        if ($this->status !== 'published') return 'draft';
 
         $now ??= gmdate('Y-m-d H:i:s');
 
         $starts = self::startBoundary($this->starts_at);
-        if ($starts !== null && $starts > $now) return false;
+        if ($starts !== null && $starts > $now) return 'scheduled';
 
         $ends = self::endBoundary($this->ends_at);
-        if ($ends !== null && $ends < $now) return false;
+        if ($ends !== null && $ends < $now) return 'ended';
 
-        return true;
+        return null;
     }
 
     private static function startBoundary(?string $stamp): ?string

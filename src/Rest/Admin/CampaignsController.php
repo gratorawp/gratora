@@ -406,6 +406,9 @@ final class CampaignsController
             'title'               => $c->title,
             'slug'                => $c->slug,
             'status'              => $c->status,
+            // The gate's own answer, not one the screen works out again from
+            // status and dates. Null means donations are being taken.
+            'not_accepting'       => $c->notAcceptingReason(),
             'campaign_type'       => $c->campaign_type,
             'campaign_type_label' => $c->campaign_type === 'standard' ? '' : (string) (
                 ((array) apply_filters('dono.campaign.types', ['standard' => '']))[$c->campaign_type]

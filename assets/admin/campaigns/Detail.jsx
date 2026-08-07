@@ -77,6 +77,43 @@ async function campaignDeleteMessage( campaignId ) {
         );
 }
 
+/**
+ * Says so when the campaign is turning donations away.
+ *
+ * A campaign is created as a draft, and nothing on the screen previously said
+ * that a form on it would refuse every donor. The organiser sets it up, shares
+ * the link, and finds out from the person who tried to give.
+ *
+ * The reason comes from the server, which reads it off the same rule the
+ * donation gate uses. Working it out here from status and dates would be a
+ * second answer to the question, free to disagree with the one that matters.
+ */
+function NotAcceptingNotice( { campaign, onPublish } ) {
+    const reason = campaign?.not_accepting;
+    if ( ! reason ) return null;
+
+    const COPY = {
+        draft:     __( 'This campaign is a draft, so it is not taking donations yet. Anyone who opens its form is turned away.', 'dono' ),
+        archived:  __( 'This campaign is archived and is not taking donations.', 'dono' ),
+        scheduled: __( 'This campaign has not started yet, so it is not taking donations until its start date.', 'dono' ),
+        ended:     __( 'This campaign has ended and is no longer taking donations.', 'dono' ),
+    };
+
+    return (
+        <Notice status="warning" isDismissible={ false }>
+            { COPY[ reason ] || COPY.draft }
+            { reason === 'draft' && (
+                <>
+                    { ' ' }
+                    <Button variant="link" onClick={ onPublish }>
+                        { __( 'Publish it now', 'dono' ) }
+                    </Button>
+                </>
+            ) }
+        </Notice>
+    );
+}
+
 export default function Detail( { id, tab } ) {
     const c = useDonoRecord( 'campaign', id );
     const [ error, setError ]   = useState( null );
@@ -237,6 +274,8 @@ export default function Detail( { id, tab } ) {
     return (
         <div className="dono-campaign-detail">
             <Header campaign={ campaign } />
+
+            <NotAcceptingNotice campaign={ campaign } onPublish={ () => onHeaderAction( 'publish' ) } />
 
             { error && (
                 <Notice status="error" onRemove={ () => setError( null ) }>{ error }</Notice>
