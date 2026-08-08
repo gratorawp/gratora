@@ -349,7 +349,7 @@ export default function List() {
             </div>
 
             <p className="dono-funds-intro">
-                { __( 'Organization-wide designations donations are allocated to. Funds persist across campaigns and years so restricted giving and accounting roll up correctly.', 'dono' ) }
+                { __( 'Organization-wide designations donations are allocated to.', 'dono' ) }
             </p>
 
             <KpiStrip items={ fundKpis( stats ) } loading={ statsLoading } />
