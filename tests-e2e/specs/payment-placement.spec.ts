@@ -58,6 +58,17 @@ test.describe('payment step placement', () => {
             if (await email.count() > 0 && await email.first().isVisible()) {
                 await donor.fillEmail(`placement+${Date.now()}@example.com`);
             }
+            // Whatever else the seeded form asks for. This spec is about the
+            // payment step, so it should not fail because the fixture happens
+            // to collect an address: an unfilled required field blocks the
+            // submit and the failure reads as a broken pay screen.
+            const line1 = donor.form.locator('input[autocomplete="address-line1"]');
+            if (await line1.count() > 0 && await line1.first().isVisible()) {
+                await donor.fillAddress({
+                    line1: '1 Test Street', city: 'Testville', postal: '12345',
+                    country: 'United States',
+                });
+            }
             if (gateway) await donor.selectGateway(gateway);
 
             const next = donor.form.locator('.dono-form__button--primary');

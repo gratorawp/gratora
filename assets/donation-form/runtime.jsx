@@ -190,11 +190,12 @@ function PortalLink( { email, config } ) {
 }
 
 function DonationReceipt( { receipt, config } ) {
-    const i18n  = config.i18n || {};
-    const freq  = frequencyLabel( receipt.frequency, i18n );
     const known = Number.isFinite( receipt.amountCents ) && receipt.currency;
 
     if ( ! known && ! receipt.email ) return null;
+
+    const i18n = config.i18n || {};
+    const freq = frequencyLabel( receipt.frequency, i18n );
 
     return (
         <dl class="dono-form__summary dono-form__summary--receipt">
