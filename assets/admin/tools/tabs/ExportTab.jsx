@@ -304,6 +304,25 @@ export default function ExportTab( { setNotice } ) {
                     ) }
 
                     <Row
+                        title={ __( 'Everything', 'dono' ) }
+                        description={ __( 'Campaigns, funds, forms, donors, donations, recurring plans and receipts as one JSON file, which the Import tab can restore onto another Dono site.', 'dono' ) }
+                    >
+                        <div className="dono-exports__controls">
+                            <Btn
+                                variant="secondary"
+                                disabled={ busy === 'everything' }
+                                isBusy={ busy === 'everything' }
+                                onClick={ () => download( '/dono/v1/admin/tools/export-all', setNotice, ( b ) => setBusy( b ? 'everything' : '' ), 'dono-export.json' ) }
+                            >
+                                { __( 'Export JSON', 'dono' ) }
+                            </Btn>
+                        </div>
+                        <p className="dono-tools-note">
+                            { __( 'Donor names, email addresses and postal addresses are readable in this file. They have to be, or it could only ever be restored onto the site it came from. Treat it like the donor database it is.', 'dono' ) }
+                        </p>
+                    </Row>
+
+                    <Row
                         title={ __( 'Settings', 'dono' ) }
                         description={ __( 'Every Dono setting as JSON, to lift a configured site onto another install. Donations, donors and campaigns are not included.', 'dono' ) }
                     >

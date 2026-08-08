@@ -15,27 +15,48 @@ export default function ImportTab( { setNotice } ) {
     // change, before the admin could read what they had chosen. It replaces
     // live gateway, email, receipt and role configuration and there is no undo,
     // so the file is named back to them first.
-    const askImport = ( file ) => {
+    // Read before asking, because the two kinds of file do different things and
+    // the settings wording ("donors and campaigns are untouched") is a lie
+    // about a full export.
+    const askImport = async ( file ) => {
         if ( ! file ) return;
+
+        let parsed;
+        try {
+            parsed = JSON.parse( await file.text() );
+        } catch ( e ) {
+            setNotice( { type: 'error', text: __( 'That file is not JSON. Use a file the Export tab produced.', 'dono' ) } );
+            return;
+        }
+
+        const isFullExport = !! parsed?.tables;
+
         setConfirm( {
-            title:        __( 'Replace settings from this file', 'dono' ),
-            message:      sprintf(
-                /* translators: %s: the chosen file name. */
-                __( '%s will overwrite your gateway, email, receipt, numbering and role settings. Donations, donors and campaigns are untouched. This cannot be undone.', 'dono' ),
-                file.name
-            ),
-            confirmLabel: __( 'Replace settings', 'dono' ),
-            destructive:  true,
-            onConfirm:    () => doImport( file ),
+            title: isFullExport
+                ? __( 'Restore records from this file', 'dono' )
+                : __( 'Replace settings from this file', 'dono' ),
+            message: isFullExport
+                ? sprintf(
+                    /* translators: %s: the chosen file name. */
+                    __( '%s will add its campaigns, funds, forms, donors, donations, recurring plans and receipts to this site. Anything already here is left as it is, so running it twice is safe. Donors erased on this site stay erased.', 'dono' ),
+                    file.name
+                )
+                : sprintf(
+                    /* translators: %s: the chosen file name. */
+                    __( '%s will overwrite your gateway, email, receipt, numbering and role settings. Donations, donors and campaigns are untouched. This cannot be undone.', 'dono' ),
+                    file.name
+                ),
+            confirmLabel: isFullExport ? __( 'Restore', 'dono' ) : __( 'Replace settings', 'dono' ),
+            destructive:  ! isFullExport,
+            onConfirm:    () => doImport( parsed ),
         } );
     };
 
-    const doImport = async ( file ) => {
-        if ( ! file ) return;
+    const doImport = async ( parsed ) => {
+        if ( ! parsed ) return;
         setImporting( true );
         setNotice( null );
         try {
-            const parsed = JSON.parse( await file.text() );
             const res = await apiFetch( {
                 path:   '/dono/v1/admin/tools/import',
                 method: 'POST',
@@ -43,24 +64,48 @@ export default function ImportTab( { setNotice } ) {
             } );
 
             const applied = Number( res?.applied ) || 0;
-            setNotice( applied > 0
-                ? {
-                    type: 'success',
-                    text: sprintf(
-                        /* translators: %d: number of settings groups restored. */
-                        _n(
-                            '%d settings group restored. Reload the page to see it.',
-                            '%d settings groups restored. Reload the page to see them.',
-                            applied,
-                            'dono'
-                        ),
-                        applied
-                    ),
+            const parts   = [];
+
+            if ( res?.records ) {
+                const sum = ( bucket ) => Object.values( bucket || {} ).reduce( ( a, b ) => a + Number( b || 0 ), 0 );
+                const created  = sum( res.records.created );
+                const existing = sum( res.records.existing );
+                const skipped  = sum( res.records.skipped );
+
+                parts.push( sprintf(
+                    /* translators: %d: number of records. */
+                    _n( '%d record restored', '%d records restored', created, 'dono' ),
+                    created
+                ) );
+                // Said plainly, because "already here" is the expected answer on
+                // a second run and looks like failure if it goes unexplained.
+                if ( existing ) {
+                    parts.push( sprintf(
+                        /* translators: %d: number of records. */
+                        _n( '%d was already here', '%d were already here', existing, 'dono' ),
+                        existing
+                    ) );
                 }
-                : {
-                    type: 'error',
-                    text: __( 'Nothing in that file matched a Dono setting.', 'dono' ),
+                if ( skipped ) {
+                    parts.push( sprintf(
+                        /* translators: %d: number of records. */
+                        _n( '%d skipped', '%d skipped', skipped, 'dono' ),
+                        skipped
+                    ) );
                 }
+            }
+
+            if ( applied > 0 ) {
+                parts.push( sprintf(
+                    /* translators: %d: number of settings groups. */
+                    _n( '%d settings group restored', '%d settings groups restored', applied, 'dono' ),
+                    applied
+                ) );
+            }
+
+            setNotice( parts.length
+                ? { type: 'success', text: parts.join( ', ' ) + '. ' + __( 'Reload the page to see it.', 'dono' ) }
+                : { type: 'error', text: __( 'Nothing in that file matched a Dono setting or record.', 'dono' ) }
             );
         } catch ( err ) {
             setNotice( {

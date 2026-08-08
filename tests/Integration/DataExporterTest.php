@@ -141,17 +141,4 @@ final class DataExporterTest extends IntegrationTestCase
         $this->assertLessThan($order['dono_receipts'], $order['dono_donations']);
     }
 
-    public function test_the_donations_csv_carries_the_donor_address_inline(): void
-    {
-        $this->seedDonor('csv@example.test');
-
-        $out = fopen('php://temp', 'r+');
-        $this->exporter()->writeDonorsCsv($out);
-        rewind($out);
-        $csv = (string) stream_get_contents($out);
-        fclose($out);
-
-        $this->assertStringContainsString('id,email,first_name', $csv);
-        $this->assertStringContainsString('csv@example.test', $csv);
-    }
 }

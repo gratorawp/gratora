@@ -69,15 +69,6 @@ final class ToolsController
             'permission_callback' => [$this, 'canManage'],
         ]);
 
-        register_rest_route(self::NAMESPACE, '/admin/tools/export-csv', [
-            'methods'             => WP_REST_Server::READABLE,
-            'callback'            => [$this, 'exportCsv'],
-            'permission_callback' => [$this, 'canManage'],
-            'args'                => [
-                'what' => ['type' => 'string', 'enum' => ['donors', 'donations'], 'default' => 'donors'],
-            ],
-        ]);
-
         register_rest_route(self::NAMESPACE, '/admin/tools/import', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'import'],
@@ -399,24 +390,6 @@ final class ToolsController
         nocache_headers();
         header('Content-Type: application/json; charset=utf-8');
         header('Content-Disposition: attachment; filename="dono-export-' . gmdate('Y-m-d') . '.json"');
-        fpassthru($out);
-        fclose($out);
-        exit;
-    }
-
-    public function exportCsv(WP_REST_Request $request): void
-    {
-        $what = (string) $request['what'];
-
-        $out = fopen('php://temp/maxmemory:8388608', 'r+');
-        $what === 'donations'
-            ? $this->exporter->writeDonationsCsv($out)
-            : $this->exporter->writeDonorsCsv($out);
-        rewind($out);
-
-        nocache_headers();
-        header('Content-Type: text/csv; charset=utf-8');
-        header('Content-Disposition: attachment; filename="dono-' . $what . '-' . gmdate('Y-m-d') . '.csv"');
         fpassthru($out);
         fclose($out);
         exit;
