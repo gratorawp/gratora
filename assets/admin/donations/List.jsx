@@ -91,15 +91,14 @@ export default function List() {
         sort:    { field: 'created_at', direction: 'desc' },
         filters: initialFilters(),
         search:  '',
-        // is_test is opt-in via the column picker while the list is live-only,
-        // since every row would carry the same value. It becomes mandatory the
-        // moment test rows can appear: a rehearsal donation that looks exactly
-        // like a real one is worse than not showing it at all.
+        // is_test stays out of the columns. A rehearsal donation that looks
+        // exactly like a real one is worse than not showing it at all, so it is
+        // badged on the reference instead: visible on the row it belongs to,
+        // without a column that reads the same on every other row. Still in the
+        // picker, and still a filter.
         // 'form' is defined but not shown: most orgs run one form per campaign,
         // so the column repeats the campaign next to it. Still in the picker.
-        fields:  readTestPref()
-            ? [ 'reference', 'frequency', 'status', 'donor', 'amount', 'is_test', 'gateway', 'campaign', 'created_at' ]
-            : [ 'reference', 'frequency', 'status', 'donor', 'amount', 'gateway', 'campaign', 'created_at' ],
+        fields:  [ 'reference', 'frequency', 'status', 'donor', 'amount', 'gateway', 'campaign', 'created_at' ],
     } );
 
     const toggleTest = ( on ) => {
@@ -110,17 +109,6 @@ export default function List() {
         setView( ( v ) => ( {
             ...v,
             page: 1,
-            // Placed after 'amount' by name. A fixed index moved the column
-            // the moment another was added ahead of it.
-            fields: on
-                ? ( v.fields.includes( 'is_test' )
-                    ? v.fields
-                    : ( () => {
-                        const at = v.fields.indexOf( 'amount' );
-                        const cut = at === -1 ? v.fields.length : at + 1;
-                        return [ ...v.fields.slice( 0, cut ), 'is_test', ...v.fields.slice( cut ) ];
-                    } )() )
-                : v.fields.filter( ( f ) => f !== 'is_test' ),
             // The two exclusive filters and this scope answer different
             // questions; leaving "Test only" on under it would be a contradiction.
             filters: ( v.filters || [] ).filter( ( f ) => f.field !== 'is_test' ),
@@ -247,10 +235,19 @@ export default function List() {
             id:            'reference',
             label:         __( 'Reference', 'dono' ),
             enableSorting: true,
+            // The badge rides the reference rather than occupying a column of
+            // its own: on a live-only list that column is the same value on
+            // every row, and the thing worth knowing is that this particular
+            // donation took no money.
             render: ( { item } ) => (
-                <a className="dono-mono-link" href={ detailHref( item.reference ) } { ...rowLinkProps }>
-                    { item.reference }
-                </a>
+                <span className="dono-ref-cell">
+                    <a className="dono-mono-link" href={ detailHref( item.reference ) } { ...rowLinkProps }>
+                        { item.reference }
+                    </a>
+                    { item.is_test && (
+                        <span className="dono-pill dono-pill--warning">{ __( 'Test', 'dono' ) }</span>
+                    ) }
+                </span>
             ),
         },
         {
