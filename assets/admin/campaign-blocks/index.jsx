@@ -271,7 +271,7 @@ registerBlockType( 'dono/campaign-stat', {
         campaignId: { type: 'integer', default: 0 },
         metric:     { type: 'string',  default: 'raised' },
         label:      { type: 'string',  default: '' },
-        size:       { type: 'string',  default: 'md' },
+        size:       { type: 'string',  default: 'sm' },
         align:      { type: 'string',  default: 'left' },
     },
     edit: function CampaignStatEdit( { attributes, setAttributes } ) {

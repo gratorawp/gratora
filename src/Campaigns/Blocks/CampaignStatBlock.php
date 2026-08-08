@@ -34,7 +34,7 @@ final class CampaignStatBlock extends CampaignBlock
         return $this->campaignIdAttr() + [
             'metric' => ['type' => 'string',  'default' => 'raised'],
             'label'  => ['type' => 'string',  'default' => ''],
-            'size'   => ['type' => 'string',  'default' => 'md'],
+            'size'   => ['type' => 'string',  'default' => 'sm'],
             'align'  => ['type' => 'string',  'default' => 'left'],
         ];
     }
@@ -58,8 +58,8 @@ final class CampaignStatBlock extends CampaignBlock
             'metric'    => $metric,
             'value'     => $value,
             'label'     => $this->metrics->label($metric, (string) ($attrs['label'] ?? '')),
-            'size'      => in_array($attrs['size'] ?? 'md', ['sm', 'md', 'lg'], true)
-                ? (string) $attrs['size'] : 'md',
+            'size'      => in_array($attrs['size'] ?? 'sm', ['sm', 'md', 'lg'], true)
+                ? (string) $attrs['size'] : 'sm',
             'align'     => in_array($attrs['align'] ?? 'left', ['left', 'center', 'right'], true)
                 ? (string) $attrs['align'] : 'left',
             'styleVars' => $this->styleVars($campaign),
