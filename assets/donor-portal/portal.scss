@@ -635,13 +635,43 @@
     align-items: center;
     gap: 16px;
 
-    &__preview {
+    &__frame {
+        position: relative;
         flex: 0 0 auto;
+        display: inline-flex;
+        width: 64px;
+        height: 64px;
+
+        &.is-uploading .dp-avatar-field__preview {
+            opacity: 0.4;
+        }
+    }
+
+    &__preview {
         width: 64px;
         height: 64px;
         border-radius: 999px;
         object-fit: cover;
         background: var(--dp-bg-soft, #f1f5f9);
+        transition: opacity 120ms ease;
+    }
+
+    // Over the picture rather than beside it, so the thing being replaced is
+    // visibly the thing that is busy.
+    &__spinner {
+        position: absolute;
+        inset: 50% auto auto 50%;
+        width: 22px;
+        height: 22px;
+        margin: -11px 0 0 -11px;
+        border: 2px solid var(--dp-border, #cbd5e1);
+        border-top-color: var(--dp-accent, #2f6f4f);
+        border-radius: 999px;
+        animation: dp-avatar-spin 700ms linear infinite;
+    }
+
+    &__error {
+        margin-top: 6px;
     }
 
     &__controls {
@@ -666,4 +696,14 @@
     label.dp-btn {
         cursor: pointer;
     }
+}
+
+@keyframes dp-avatar-spin {
+    to { transform: rotate(360deg); }
+}
+
+// A label cannot be disabled the way a button can, so the state is drawn.
+.dp-btn.is-disabled {
+    opacity: 0.6;
+    pointer-events: none;
 }

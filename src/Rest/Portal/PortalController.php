@@ -947,6 +947,24 @@ final class PortalController
         $files = $request->get_file_params();
         $file  = $files['file'] ?? null;
         if (! is_array($file)) {
+            // Over post_max_size, PHP throws the whole body away before this
+            // runs: no file, no fields, no error code. The only trace is a
+            // content length larger than the server would accept, so without
+            // this the donor is told nothing was sent when in fact too much was.
+            $sent = (int) ($_SERVER['CONTENT_LENGTH'] ?? 0);
+            $max  = wp_convert_hr_to_bytes((string) ini_get('post_max_size'));
+            if ($max > 0 && $sent > $max) {
+                return new WP_Error(
+                    'dono_upload_too_large',
+                    sprintf(
+                        /* translators: %s: file size, e.g. "2 MB". */
+                        __('That picture is too large. The most this site takes is %s.', 'dono'),
+                        size_format(\Dono\Donors\DonorAvatarUploader::maxBytes())
+                    ),
+                    ['status' => 413]
+                );
+            }
+
             return new WP_Error('dono_upload_missing', __('No picture was sent.', 'dono'), ['status' => 400]);
         }
 

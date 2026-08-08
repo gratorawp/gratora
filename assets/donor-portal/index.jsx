@@ -995,6 +995,10 @@ function Profile( { onSaved } ) {
     const [ saving, setSaving ] = useState( false );
     const [ saved,  setSaved  ] = useState( false );
     const [ err,    setErr    ] = useState( '' );
+    // Kept apart from the form's own state: the picture saves on its own, and
+    // its error belongs beside the picture rather than down by the Save button.
+    const [ uploading, setUploading ] = useState( false );
+    const [ picErr,    setPicErr    ] = useState( '' );
 
     useEffect( () => { api( 'profile' ).then( ( v ) => setForm( withDefaults( v ) ) ).catch( ( e ) => setErr( e.message || __( 'Could not load your profile.', 'dono' ) ) ); }, [] );
 
@@ -1023,57 +1027,82 @@ function Profile( { onSaved } ) {
         e.target.value = '';
         if ( ! file ) return;
 
+        // Refused here rather than sent and refused: past post_max_size the
+        // server never sees the request as an upload at all, so the donor
+        // would wait for a round trip that could only end in confusion.
+        const max = Number( cfg.avatarMaxBytes || 0 );
+        if ( max > 0 && file.size > max ) {
+            setPicErr( sprintf(
+                /* translators: %s: file size, e.g. "2 MB". */
+                __( 'That picture is too large. The most this site takes is %s.', 'dono' ),
+                cfg.avatarMaxLabel || `${ Math.floor( max / 1048576 ) } MB`
+            ) );
+            return;
+        }
+
         const body = new FormData();
         body.append( 'file', file );
-        setSaving( true );
-        setErr( '' );
+        setUploading( true );
+        setPicErr( '' );
         api( 'avatar', { method: 'POST', body } )
             .then( ( next ) => {
                 setForm( withDefaults( next ) );
                 onSaved && onSaved();
             } )
-            .catch( ( e2 ) => setErr( e2.message || __( 'Could not upload that picture.', 'dono' ) ) )
-            .finally( () => setSaving( false ) );
+            .catch( ( e2 ) => setPicErr( e2.message || __( 'Could not upload that picture.', 'dono' ) ) )
+            .finally( () => setUploading( false ) );
     };
 
     const removePicture = () => {
-        setSaving( true );
-        setErr( '' );
+        setUploading( true );
+        setPicErr( '' );
         api( 'avatar', { method: 'DELETE' } )
             .then( ( next ) => {
                 setForm( withDefaults( next ) );
                 onSaved && onSaved();
             } )
-            .catch( ( e2 ) => setErr( e2.message || __( 'Could not remove that picture.', 'dono' ) ) )
-            .finally( () => setSaving( false ) );
+            .catch( ( e2 ) => setPicErr( e2.message || __( 'Could not remove that picture.', 'dono' ) ) )
+            .finally( () => setUploading( false ) );
     };
 
     return (
         <div class="dp-form">
             <div class="dp-avatar-field">
-                { form.avatar_url
-                    ? <img class="dp-avatar-field__preview" src={ form.avatar_url } alt="" />
-                    : <span class="dp-avatar-field__preview dp-avatar-field__preview--empty" aria-hidden="true" /> }
+                <span class={ `dp-avatar-field__frame${ uploading ? ' is-uploading' : '' }` }>
+                    { form.avatar_url
+                        ? <img class="dp-avatar-field__preview" src={ form.avatar_url } alt="" />
+                        : <span class="dp-avatar-field__preview dp-avatar-field__preview--empty" aria-hidden="true" /> }
+                    { uploading && <span class="dp-avatar-field__spinner" aria-hidden="true" /> }
+                </span>
                 <div class="dp-avatar-field__controls">
                     <span class="dp-avatar-field__label">{ __( 'Profile picture', 'dono' ) }</span>
-                    <small>{ __( 'Shown next to your name where the organisation lists supporters. JPEG, PNG, GIF or WebP, under 3 MB.', 'dono' ) }</small>
+                    <small>
+                        { sprintf(
+                            /* translators: %s: file size, e.g. "2 MB". */
+                            __( 'Shown next to your name where the organisation lists supporters. JPEG, PNG, GIF or WebP, up to %s.', 'dono' ),
+                            cfg.avatarMaxLabel || __( '2 MB', 'dono' )
+                        ) }
+                    </small>
                     <div class="dp-avatar-field__buttons">
-                        <label class="dp-btn dp-btn--ghost">
-                            { form.avatar_url ? __( 'Replace', 'dono' ) : __( 'Upload', 'dono' ) }
+                        <label class={ `dp-btn dp-btn--ghost${ uploading ? ' is-disabled' : '' }` }>
+                            { uploading
+                                ? __( 'Uploading…', 'dono' )
+                                : form.avatar_url ? __( 'Replace', 'dono' ) : __( 'Upload', 'dono' ) }
                             <input
                                 type="file"
                                 accept="image/jpeg,image/png,image/gif,image/webp"
                                 onChange={ pickPicture }
-                                disabled={ saving }
+                                disabled={ uploading }
                                 hidden
                             />
                         </label>
-                        { form.avatar_url && (
-                            <button type="button" class="dp-btn dp-btn--ghost" onClick={ removePicture } disabled={ saving }>
+                        { form.avatar_url && ! uploading && (
+                            <button type="button" class="dp-btn dp-btn--ghost" onClick={ removePicture }>
                                 { __( 'Remove', 'dono' ) }
                             </button>
                         ) }
                     </div>
+                    { picErr && <span class="dp-error dp-avatar-field__error" role="alert">{ picErr }</span> }
                 </div>
             </div>
             <label>{ __( 'Email', 'dono' ) }

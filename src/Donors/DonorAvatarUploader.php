@@ -20,7 +20,24 @@ use WP_Error;
  */
 final class DonorAvatarUploader
 {
+    /** Our own ceiling. PHP's may be lower, and usually is. */
     private const MAX_BYTES = 3145728; // 3 MB
+
+    /**
+     * The largest picture this server will actually take: our cap or PHP's,
+     * whichever gives way first. Published to the portal so the donor is told
+     * the real number instead of one we would like to be true.
+     */
+    public static function maxBytes(): int
+    {
+        $limits = [self::MAX_BYTES];
+        foreach (['upload_max_filesize', 'post_max_size'] as $key) {
+            $bytes = wp_convert_hr_to_bytes((string) ini_get($key));
+            if ($bytes > 0) $limits[] = $bytes;
+        }
+
+        return min($limits);
+    }
 
     /** Raster only. SVG is markup, and markup on a public page is a script. */
     private const ALLOWED = [
@@ -36,13 +53,24 @@ final class DonorAvatarUploader
      */
     public function store(Donor $donor, array $file): int|WP_Error
     {
+        // PHP rejects an oversized upload before any of this runs, so the size
+        // cases are read off the error code rather than off the size.
         $error = (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE);
+        if (in_array($error, [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true)) {
+            return self::tooLarge();
+        }
+        if ($error === UPLOAD_ERR_NO_FILE) {
+            return new WP_Error('dono_upload_missing', __('No picture was sent.', 'dono'), ['status' => 400]);
+        }
+        if ($error === UPLOAD_ERR_PARTIAL) {
+            return new WP_Error('dono_upload_failed', __('That upload was cut short. Try again.', 'dono'), ['status' => 400]);
+        }
         if ($error !== UPLOAD_ERR_OK) {
             return new WP_Error('dono_upload_failed', __('That file did not upload. Try again.', 'dono'), ['status' => 400]);
         }
 
-        if ((int) ($file['size'] ?? 0) > self::MAX_BYTES) {
-            return new WP_Error('dono_upload_too_large', __('Pictures need to be under 3 MB.', 'dono'), ['status' => 413]);
+        if ((int) ($file['size'] ?? 0) > self::maxBytes()) {
+            return self::tooLarge();
         }
 
         // getimagesize reads the file's own header, so a .png that is really
@@ -91,6 +119,19 @@ final class DonorAvatarUploader
         $this->deleteAttachment($previous);
 
         return (int) $attachmentId;
+    }
+
+    private static function tooLarge(): WP_Error
+    {
+        return new WP_Error(
+            'dono_upload_too_large',
+            sprintf(
+                /* translators: %s: file size, e.g. "2 MB". */
+                __('That picture is too large. The most this site takes is %s.', 'dono'),
+                size_format(self::maxBytes())
+            ),
+            ['status' => 413]
+        );
     }
 
     /** Clears the picture and takes the file with it. */

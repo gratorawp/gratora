@@ -77,6 +77,10 @@ final class PortalShortcode extends HookProvider
                 // Signing up and asking for a link write without any session to
                 // check, and this proves the caller loaded the page.
                 'token' => $this->spam->mintPortalToken(),
+                // So the picture field can refuse an oversized file before
+                // sending it, and name the real limit rather than a guess.
+                'avatarMaxBytes' => \Dono\Donors\DonorAvatarUploader::maxBytes(),
+                'avatarMaxLabel' => size_format(\Dono\Donors\DonorAvatarUploader::maxBytes()),
             ]);
             wp_set_script_translations(self::HANDLE, 'dono', DONO_DIR . 'languages');
         }
