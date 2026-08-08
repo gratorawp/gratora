@@ -1909,7 +1909,7 @@ function AppearancePanel( { c } ) {
 
             <Card
                 title={ __( 'Page header & footer', 'dono' ) }
-                sub={ __( "Hide the theme's header or footer on every page this campaign renders on, for a focused, distraction-free experience.", 'dono' ) }
+                sub={ __( "Hide the theme's header or footer on every page this campaign renders on.", 'dono' ) }
                 edited={ ( c.edits?.hide_header !== undefined ? 1 : 0 ) + ( c.edits?.hide_footer !== undefined ? 1 : 0 ) }
             >
                 <ToggleRow
