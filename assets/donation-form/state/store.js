@@ -100,9 +100,10 @@ function initialConsents( donorSteps ) {
                 continue;
             }
             if ( f.kind !== 'consent' ) continue;
-            const defaultOn = f.defaultState === 'opt-out';
+            // The server decided the initial state from the org registry, so
+            // the runtime does not second-guess it with a per-form default.
             for ( const p of ( f.purposes || [] ) ) {
-                out[ p.id ] = !! p.requiredByLaw || defaultOn;
+                out[ p.id ] = !! p.checked;
             }
         }
     }
@@ -468,7 +469,7 @@ export function validateStep( step, state ) {
                 }
                 if ( f.kind === 'consent' ) {
                     for ( const p of ( f.purposes || [] ) ) {
-                        if ( p.requiredByLaw && ! v.consents?.[ p.id ] ) {
+                        if ( p.required && ! v.consents?.[ p.id ] ) {
                             e[ `consents.${ p.id }` ] = msg( 'required', 'Required.' );
                         }
                     }

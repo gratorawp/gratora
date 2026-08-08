@@ -9,6 +9,7 @@ use Dono\Campaigns\CampaignRepository;
 use Dono\Campaigns\Styling\CampaignStyleResolver;
 use Dono\Donations\AntiSpamGuard;
 use Dono\Forms\Blocks\ColumnsBlock;
+use Dono\Donors\ConsentService;
 use Dono\Forms\Blocks\ConsentBlock;
 use Dono\Forms\Blocks\TermsBlock;
 use Dono\Forms\Blocks\CurrencySwitcherBlock;
@@ -1059,15 +1060,28 @@ HTML;
                     break;
 
                 case 'dono/consent':
-                    $cPurposes = ConsentBlock::normalizePurposes($attrs['purposes'] ?? null);
-                    $cDefault  = (string) ($attrs['defaultState'] ?? 'opt-in');
-                    if (! in_array($cDefault, ['opt-in', 'opt-out'], true)) $cDefault = 'opt-in';
+                    // Resolved from the org registry, same as the server render:
+                    // the block names purposes, it does not define them, so a
+                    // key the org deleted drops out rather than being invented.
+                    $consentRegistry = Plugin::instance()->container->get(ConsentService::class);
+                    $cPurposes = [];
+                    foreach (ConsentBlock::purposeKeys($attrs) as $cKey) {
+                        $cp = $consentRegistry->findPurpose($cKey);
+                        if ($cp === null) continue;
+                        $cPurposes[] = [
+                            'id'          => (string) $cp['key'],
+                            'label'       => (string) $cp['label'],
+                            'description' => (string) $cp['description'],
+                            'required'    => (bool) $cp['required'],
+                            'checked'     => (bool) $cp['required'] || (bool) $cp['default'],
+                        ];
+                    }
+                    if ($cPurposes === []) break;
                     $items[] = $tagRow([
-                        'kind'         => 'consent',
-                        'label'        => (string) ($attrs['label']    ?? ''),
-                        'helpText'     => (string) ($attrs['helpText'] ?? ''),
-                        'purposes'     => $cPurposes,
-                        'defaultState' => $cDefault,
+                        'kind'     => 'consent',
+                        'label'    => (string) ($attrs['label']    ?? ''),
+                        'helpText' => (string) ($attrs['helpText'] ?? ''),
+                        'purposes' => $cPurposes,
                     ], $row, $attrs);
                     break;
 

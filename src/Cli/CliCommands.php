@@ -262,6 +262,8 @@ final class CliCommands
             WP_CLI::log("  campaign reused: id={$campaign->id}");
         }
 
+        $this->e2eRegisterConsentPurposes();
+
         $singleUrl = $this->e2eUpsertFormAndPage(
             $forms,
             (int) $campaign->id,
@@ -375,15 +377,29 @@ final class CliCommands
         return trailingslashit(home_url('/' . $pageSlug));
     }
 
+    /**
+     * The consent block names purposes; the org defines them. Core ships none,
+     * so the fixture registers its own before seeding a form that asks for them.
+     */
+    private function e2eRegisterConsentPurposes(): void
+    {
+        $this->container()->get(SettingsService::class)->update('consents', [
+            'purposes' => [
+                ['key' => 'tos',     'label' => 'I accept the terms',               'description' => '', 'required' => true,  'default' => false, 'version' => 1],
+                ['key' => 'updates', 'label' => 'Send me updates about this cause', 'description' => '', 'required' => false, 'default' => false, 'version' => 1],
+            ],
+        ]);
+        WP_CLI::log('  consent purposes registered: tos, updates');
+    }
+
     /** Blocks markup for the canonical e2e form. */
     private static function e2eCanonicalBlocks(): string
     {
+        // Keys only. The purposes themselves are registered on the org, which
+        // e2eRegisterConsentPurposes does before the form is seeded.
         $consent = wp_json_encode([
-            'label'    => 'Consent',
-            'purposes' => [
-                ['id' => 'tos',     'label' => 'I accept the terms',                 'requiredByLaw' => true],
-                ['id' => 'updates', 'label' => 'Send me updates about this cause',   'requiredByLaw' => false],
-            ],
+            'label'       => 'Consent',
+            'purposeKeys' => ['tos', 'updates'],
         ]);
         $dropdown = wp_json_encode([
             'label'   => 'How did you hear about us?',

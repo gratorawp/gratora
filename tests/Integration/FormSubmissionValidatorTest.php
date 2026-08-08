@@ -22,6 +22,36 @@ final class FormSubmissionValidatorTest extends IntegrationTestCase
         return $f;
     }
 
+    /**
+     * The block names a purpose; the org registry decides whether it is
+     * required. Registered here because core ships none.
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        \Dono\Foundation\Plugin::instance()->container
+            ->get(\Dono\Settings\SettingsService::class)
+            ->update('consents', [
+                'purposes' => [
+                    [
+                        'key'         => 'gdpr',
+                        'label'       => 'I agree to the terms',
+                        'description' => '',
+                        'required'    => true,
+                        'default'     => false,
+                        'version'     => 1,
+                    ],
+                ],
+            ]);
+    }
+
+    protected function tearDown(): void
+    {
+        delete_option('dono_consents');
+        parent::tearDown();
+    }
+
     private function validator(): FormSubmissionValidator
     {
         return new FormSubmissionValidator();
@@ -32,7 +62,7 @@ final class FormSubmissionValidatorTest extends IntegrationTestCase
 <!-- wp:dono/email {"required":true} /-->
 <!-- wp:dono/name {"requireFirst":true,"requireLast":false} /-->
 <!-- wp:dono/text-input {"label":"Nickname","required":true} /-->
-<!-- wp:dono/consent {"purposes":[{"id":"gdpr","label":"I agree to the terms","requiredByLaw":true}]} /-->
+<!-- wp:dono/consent {"purposeKeys":["gdpr"]} /-->
 <!-- wp:dono/submit-button /-->
 BLOCKS;
 

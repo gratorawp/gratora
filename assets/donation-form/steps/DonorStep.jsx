@@ -451,7 +451,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                     <div class="dono-form__consent-purposes">
                         { purposes.map( ( p ) => {
                             const id       = String( p.id || '' );
-                            const required = !! p.requiredByLaw;
+                            const required = !! p.required;
                             const checked  = required ? true : !! consents[ id ];
                             const errKey   = `consents.${ id }`;
                             return (

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dono\Forms;
 
 use Dono\Campaigns\Campaign;
+use Dono\Donors\ConsentService;
 use Dono\Forms\Blocks\ConsentBlock;
 use Dono\Forms\Blocks\TermsBlock;
 use Dono\Forms\Blocks\DateBlock;
@@ -362,8 +363,15 @@ final class FormSubmissionValidator
 
             case 'dono/consent':
                 $consents = is_array($body['consents'] ?? null) ? $body['consents'] : [];
-                foreach (ConsentBlock::normalizePurposes($attrs['purposes'] ?? null) as $p) {
-                    if (! empty($p['requiredByLaw']) && empty($consents[$p['id']])) {
+                // Required lives on the org's purpose, not on the block, so a
+                // form cannot make something mandatory the registry does not.
+                // Resolved rather than injected: this validator is constructed
+                // inline at the one call site and takes no dependencies.
+                $registry = \Dono\Foundation\Plugin::instance()->container->get(ConsentService::class);
+                foreach (ConsentBlock::purposeKeys($attrs) as $key) {
+                    $p = $registry->findPurpose($key);
+                    if ($p === null) continue;
+                    if (! empty($p['required']) && empty($consents[$key])) {
                         return $this->reject(sprintf(
                             /* translators: %s: consent purpose label */
                             __('Please agree to: %s', 'dono'),
@@ -398,9 +406,8 @@ final class FormSubmissionValidator
         foreach ($blocks as $block) {
             if (($block['blockName'] ?? '') === 'dono/consent') {
                 $attrs = is_array($block['attrs'] ?? null) ? $block['attrs'] : [];
-                foreach (ConsentBlock::normalizePurposes($attrs['purposes'] ?? null) as $p) {
-                    $id = (string) ($p['id'] ?? '');
-                    if ($id !== '') $ids[$id] = true;
+                foreach (ConsentBlock::purposeKeys($attrs) as $key) {
+                    $ids[$key] = true;
                 }
             }
             if (! empty($block['innerBlocks']) && is_array($block['innerBlocks'])) {

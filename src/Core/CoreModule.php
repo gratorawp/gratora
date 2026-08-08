@@ -954,7 +954,7 @@ final class CoreModule implements DonoModule
         $blocks->add(new CurrencySwitcherBlock());
         $blocks->add(new FundPickerBlock());
         $blocks->add(new AddressBlock());
-        $blocks->add(new ConsentBlock());
+        $blocks->add(new ConsentBlock($c->get(ConsentService::class)));
         $blocks->add(new TermsBlock());
         $blocks->add(new DonationSummaryBlock());
         $blocks->add(new PrivacyNoticeBlock());

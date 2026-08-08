@@ -6,6 +6,7 @@ namespace Dono\Admin\Pages;
 
 use Dono\Foundation\Hooks\HookProvider;
 use Dono\Foundation\Plugin;
+use Dono\Donors\ConsentService;
 use Dono\Gateways\GatewayManager;
 
 /**
@@ -148,7 +149,23 @@ final class FormsPage extends HookProvider
                 'enabled' => $manager->isOn($g->id()),
             ];
         }
-        wp_localize_script(self::HANDLE, 'donoFormsEditor', ['gateways' => $gateways]);
+        // The consent block picks from these rather than defining purposes of
+        // its own, so the editor needs the registry the front end will resolve.
+        $consents = array_map(
+            static fn (array $p): array => [
+                'key'         => $p['key'],
+                'label'       => $p['label'],
+                'description' => $p['description'],
+                'required'    => $p['required'],
+            ],
+            Plugin::instance()->container->get(ConsentService::class)->purposes()
+        );
+
+        wp_localize_script(self::HANDLE, 'donoFormsEditor', [
+            'gateways' => $gateways,
+            'consents' => $consents,
+            'consentsSettingsUrl' => admin_url('admin.php?page=dono-settings&tab=consents'),
+        ]);
 
         do_action('dono.editor.assets', self::HANDLE);
 

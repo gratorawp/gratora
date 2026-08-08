@@ -3,8 +3,7 @@ defined('ABSPATH') || exit;
 /**
  * @var string                                                                            $label
  * @var string                                                                            $helpText
- * @var list<array{id:string,label:string,description:string,requiredByLaw:bool}>         $purposes
- * @var string                                                                            $defaultState
+ * @var list<array{key:string,label:string,description:string,required:bool,default:bool}> $purposes
  */
 $labelText = $label !== '' ? $label : __('How can we stay in touch?', 'dono');
 ?>
@@ -15,11 +14,13 @@ $labelText = $label !== '' ? $label : __('How can we stay in touch?', 'dono');
     <?php endif; ?>
     <div class="dono-consent__purposes">
         <?php foreach ($purposes as $p):
-            $id          = (string) $p['id'];
+            $id          = (string) $p['key'];
             $pLabel      = (string) $p['label'];
             $desc        = (string) $p['description'];
-            $required    = (bool)   $p['requiredByLaw'];
-            $checked     = $required || $defaultState === 'opt-out';
+            $required    = (bool)   $p['required'];
+            // Pre-ticked only where the registry says so, and the registry is
+            // the one place that decides it.
+            $checked     = $required || (bool) $p['default'];
             ?>
             <label class="dono-consent__purpose">
                 <input type="checkbox"
