@@ -246,3 +246,58 @@
     font-size: 13px;
     color: $text-muted;
 }
+
+// Column mapping. A table because that is what it is: one Dono field per row,
+// the admin's column beside it, and the first value from their file so they can
+// see they picked the right one without opening the spreadsheet.
+.dono-csv-map {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+
+    th, td {
+        padding: 8px 10px;
+        border-bottom: 1px solid var(--dono-border, #e5e7eb);
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    thead th {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: var(--dono-text-muted, #6b7280);
+    }
+
+    tbody th { font-weight: 600; white-space: nowrap; }
+
+    &__req { color: #b91c1c; }
+
+    &__sample {
+        color: var(--dono-text-muted, #6b7280);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 12px;
+        max-width: 240px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+.dono-csv-preview {
+    margin-top: 12px;
+    padding: 12px 14px;
+    background: var(--dono-bg-soft, #f8fafc);
+    border-radius: 8px;
+
+    p { margin: 0 0 8px; }
+
+    &__skips, &__errors {
+        margin: 0 0 8px;
+        padding-left: 18px;
+        color: var(--dono-text-muted, #6b7280);
+        font-size: 13px;
+    }
+
+    &__errors { color: #b91c1c; }
+}

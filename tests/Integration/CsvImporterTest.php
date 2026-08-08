@@ -1,0 +1,184 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Dono\Tests\Integration;
+
+use Dono\Donations\Donation;
+use Dono\Donors\Donor;
+use Dono\Donors\DonorService;
+use Dono\Foundation\Plugin;
+use Dono\Foundation\Transfer\CsvImporter;
+
+/**
+ * Someone else's spreadsheet, which is the only thing this can assume about it.
+ *
+ * The promise the dry run makes is that its numbers are the numbers: an admin
+ * who is told 3 will be imported and 1 skipped has to get exactly that, or the
+ * preview is worse than no preview.
+ */
+final class CsvImporterTest extends IntegrationTestCase
+{
+    private function importer(): CsvImporter
+    {
+        return Plugin::instance()->container->get(CsvImporter::class);
+    }
+
+    private const MAPPING = [
+        'email'      => 'Email',
+        'first_name' => 'First Name',
+        'last_name'  => 'Last Name',
+        'amount'     => 'Amount',
+        'date'       => 'Date',
+    ];
+
+    private function csv(string ...$rows): string
+    {
+        return "Email,First Name,Last Name,Amount,Date\n" . implode("\n", $rows) . "\n";
+    }
+
+    public function test_it_guesses_a_mapping_from_the_headers(): void
+    {
+        $found = $this->importer()->inspect("Email Address,Full Name,Total,Donation Date\na@b.test,A B,10,2026-01-01\n");
+
+        $this->assertSame('Email Address', $found['mapping']['email'] ?? null);
+        $this->assertSame('Full Name', $found['mapping']['full_name'] ?? null);
+        $this->assertSame('Total', $found['mapping']['amount'] ?? null);
+        $this->assertSame('Donation Date', $found['mapping']['date'] ?? null);
+        $this->assertSame(1, $found['rows']);
+    }
+
+    /** The whole point of a preview. */
+    public function test_a_dry_run_writes_nothing(): void
+    {
+        $before = Donation::query()->count();
+
+        $result = $this->importer()->import(
+            $this->csv('dry@example.test,Dry,Run,25.00,2026-01-01'),
+            self::MAPPING,
+            true
+        );
+
+        $this->assertSame(1, $result['imported']);
+        $this->assertTrue($result['dry_run']);
+        $this->assertSame($before, Donation::query()->count(), 'a preview must not write');
+    }
+
+    public function test_the_dry_run_count_matches_what_the_real_run_does(): void
+    {
+        $csv = $this->csv(
+            'match1@example.test,One,Donor,10.00,2026-01-01',
+            'match2@example.test,Two,Donor,20.00,2026-01-02',
+            ',No,Email,30.00,2026-01-03'
+        );
+
+        $preview = $this->importer()->import($csv, self::MAPPING, true);
+        $real    = $this->importer()->import($csv, self::MAPPING, false);
+
+        $this->assertSame($preview['imported'], $real['imported'], 'the preview promised this number');
+        $this->assertSame($preview['skipped'], $real['skipped'], 'and these reasons');
+    }
+
+    public function test_running_the_same_file_twice_imports_nothing_the_second_time(): void
+    {
+        $csv = $this->csv('twice@example.test,Run,Twice,42.00,2026-02-02');
+
+        $first  = $this->importer()->import($csv, self::MAPPING, false);
+        $second = $this->importer()->import($csv, self::MAPPING, false);
+
+        $this->assertSame(1, $first['imported']);
+        $this->assertSame(0, $second['imported']);
+        $this->assertSame(1, $second['skipped']['already_imported'] ?? 0);
+    }
+
+    /** A file that repeats a row should not create the donation twice. */
+    public function test_a_row_repeated_inside_one_file_is_counted_once(): void
+    {
+        $result = $this->importer()->import(
+            $this->csv(
+                'dupe@example.test,Dupe,Row,15.00,2026-03-03',
+                'dupe@example.test,Dupe,Row,15.00,2026-03-03'
+            ),
+            self::MAPPING,
+            true
+        );
+
+        $this->assertSame(1, $result['imported']);
+        $this->assertSame(1, $result['skipped']['duplicate_in_file'] ?? 0);
+    }
+
+    public function test_rows_without_a_usable_email_or_amount_are_skipped_by_reason(): void
+    {
+        $result = $this->importer()->import(
+            $this->csv(
+                ',No,Email,10.00,2026-01-01',
+                'not-an-address,Bad,Email,10.00,2026-01-01',
+                'noamount@example.test,No,Amount,,2026-01-01',
+                'zero@example.test,Zero,Amount,0.00,2026-01-01'
+            ),
+            self::MAPPING,
+            true
+        );
+
+        $this->assertSame(0, $result['imported']);
+        $this->assertSame(1, $result['skipped']['no_email'] ?? 0);
+        $this->assertSame(1, $result['skipped']['invalid_email'] ?? 0);
+        $this->assertSame(2, $result['skipped']['invalid_amount'] ?? 0);
+    }
+
+    /** Erasure is a decision. A spreadsheet from before it is not consent. */
+    public function test_a_donor_erased_here_is_not_brought_back(): void
+    {
+        $donor = Plugin::instance()->container->get(DonorService::class)
+            ->findOrCreate('erased-csv@example.test', ['first_name' => 'Gone']);
+        Plugin::instance()->container->get(DonorService::class)->redact($donor);
+
+        $result = $this->importer()->import(
+            $this->csv('erased-csv@example.test,Gone,Away,99.00,2026-04-04'),
+            self::MAPPING,
+            false
+        );
+
+        $this->assertSame(0, $result['imported']);
+        $this->assertSame(1, $result['skipped']['donor_erased'] ?? 0);
+    }
+
+    /** Exports write money in more than one shape. */
+    public function test_it_reads_the_amount_formats_exports_actually_produce(): void
+    {
+        $csv = "Email,First Name,Last Name,Amount,Date\n"
+            . "a1@example.test,A,One,\"\$1,234.56\",2026-01-01\n"
+            . "a2@example.test,A,Two,\"1.234,56\",2026-01-01\n"
+            . "a3@example.test,A,Three,99,2026-01-01\n";
+
+        $this->importer()->import($csv, self::MAPPING, false);
+
+        $one = Donation::query()->where('donor_id', $this->donorId('a1@example.test'))->get();
+        $two = Donation::query()->where('donor_id', $this->donorId('a2@example.test'))->get();
+        $three = Donation::query()->where('donor_id', $this->donorId('a3@example.test'))->get();
+
+        $this->assertSame(123456, (int) $one->amount_cents, 'thousands separator and symbol');
+        $this->assertSame(123456, (int) $two->amount_cents, 'european decimal comma');
+        $this->assertSame(9900, (int) $three->amount_cents, 'no decimals at all');
+    }
+
+    public function test_it_refuses_to_run_without_the_columns_it_needs(): void
+    {
+        $result = $this->importer()->import(
+            $this->csv('x@example.test,No,Mapping,10.00,2026-01-01'),
+            ['first_name' => 'First Name'],
+            true
+        );
+
+        $this->assertSame(0, $result['imported']);
+        $this->assertNotSame([], $result['errors']);
+    }
+
+    private function donorId(string $email): int
+    {
+        $hasher = Plugin::instance()->container->get(\Dono\Foundation\Identity\IdentityHasher::class);
+        $donor  = Donor::query()->where('email_hash', $hasher->emailHash($email))->get();
+
+        return is_array($donor) ? (int) $donor['id'] : (int) ($donor->id ?? 0);
+    }
+}

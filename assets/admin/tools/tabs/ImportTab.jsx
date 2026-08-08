@@ -5,6 +5,7 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import Card from '../../_shared/components/Card';
 import Btn from '../../_shared/components/Btn';
 import ConfirmDialog from '../../_shared/components/ConfirmDialog';
+import CsvImportCard from './CsvImportCard';
 
 export default function ImportTab( { setNotice } ) {
     const [ importing, setImporting ] = useState( false );
@@ -151,6 +152,7 @@ export default function ImportTab( { setNotice } ) {
                 // Clear the input so choosing the same file again re-prompts.
                 if ( fileRef.current ) fileRef.current.value = '';
             } } />
+            <CsvImportCard setNotice={ setNotice } />
         </div>
     );
 }

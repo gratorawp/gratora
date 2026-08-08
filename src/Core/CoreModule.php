@@ -60,6 +60,7 @@ use Dono\Donors\DonorRepository;
 use Dono\Donors\DonorService;
 use Dono\Donors\Erasure\AnalyticsEventHandler;
 use Dono\Donors\Erasure\ClearHashesOnAlreadyErasedConsents;
+use Dono\Foundation\Transfer\CsvImporter;
 use Dono\Foundation\Transfer\DataExporter;
 use Dono\Foundation\Transfer\DataImporter;
 use Dono\Foundation\Upgrade\UpgradeRunner;
@@ -421,6 +422,11 @@ final class CoreModule implements DonoModule
         }, 10, 3);
 
         $c->bind(DataExporter::class, fn (Container $c) => new DataExporter($c->get(Crypto::class)));
+
+        $c->bind(CsvImporter::class, fn (Container $c) => new CsvImporter(
+            $c->get(DonorService::class),
+            $c->get(IdentityHasher::class)
+        ));
 
         $c->bind(DataImporter::class, fn (Container $c) => new DataImporter(
             $c->get(Crypto::class),
@@ -887,6 +893,7 @@ final class CoreModule implements DonoModule
                 $c->get(UpgradeRunner::class),
                 $c->get(DataExporter::class),
                 $c->get(DataImporter::class),
+                $c->get(CsvImporter::class),
             ),
             new ExportsController(
                 $c->get(DonorExporter::class),

@@ -10,6 +10,7 @@ use Dono\Async\AsyncDispatcher;
 use Dono\Analytics\Event;
 use Dono\Currency\FxBackfill;
 use Dono\Settings\SecretRedactor;
+use Dono\Foundation\Transfer\CsvImporter;
 use Dono\Foundation\Transfer\DataExporter;
 use Dono\Foundation\Transfer\DataImporter;
 use Dono\Foundation\Upgrade\UpgradeRunner;
@@ -40,6 +41,7 @@ final class ToolsController
         private UpgradeRunner $upgrades,
         private DataExporter $exporter,
         private DataImporter $importer,
+        private CsvImporter $csv,
     ) {
     }
 
@@ -66,6 +68,20 @@ final class ToolsController
         register_rest_route(self::NAMESPACE, '/admin/tools/export-all', [
             'methods'             => WP_REST_Server::READABLE,
             'callback'            => [$this, 'exportAll'],
+            'permission_callback' => [$this, 'canManage'],
+        ]);
+
+        // Two steps on purpose: nothing is written until the admin has seen
+        // what their mapping would do.
+        register_rest_route(self::NAMESPACE, '/admin/tools/csv-inspect', [
+            'methods'             => WP_REST_Server::CREATABLE,
+            'callback'            => [$this, 'csvInspect'],
+            'permission_callback' => [$this, 'canManage'],
+        ]);
+
+        register_rest_route(self::NAMESPACE, '/admin/tools/csv-import', [
+            'methods'             => WP_REST_Server::CREATABLE,
+            'callback'            => [$this, 'csvImport'],
             'permission_callback' => [$this, 'canManage'],
         ]);
 
@@ -419,6 +435,38 @@ final class ToolsController
         }
 
         return new WP_REST_Response($data, 200);
+    }
+
+    public function csvInspect(\WP_REST_Request $request): WP_REST_Response|\WP_Error
+    {
+        $csv = (string) ($request->get_json_params()['csv'] ?? '');
+        if (trim($csv) === '') {
+            return new \WP_Error('dono_invalid_csv', __('That file is empty.', 'dono'), ['status' => 422]);
+        }
+
+        return new WP_REST_Response($this->csv->inspect($csv) + ['fields' => CsvImporter::FIELDS], 200);
+    }
+
+    public function csvImport(\WP_REST_Request $request): WP_REST_Response|\WP_Error
+    {
+        $body    = (array) $request->get_json_params();
+        $csv     = (string) ($body['csv'] ?? '');
+        $mapping = is_array($body['mapping'] ?? null) ? array_map('strval', $body['mapping']) : [];
+        $dryRun  = (bool) ($body['dry_run'] ?? true);
+
+        if (trim($csv) === '') {
+            return new \WP_Error('dono_invalid_csv', __('That file is empty.', 'dono'), ['status' => 422]);
+        }
+
+        $result = $this->csv->import($csv, $mapping, $dryRun);
+
+        // A real run brings in years of history, so the retention sweep waits
+        // rather than acting on it that night.
+        if (! $dryRun && ($result['imported'] ?? 0) > 0) {
+            \Dono\Donors\DonorRetention::deferBy();
+        }
+
+        return new WP_REST_Response($result, 200);
     }
 
     public function import(\WP_REST_Request $request): WP_REST_Response|\WP_Error
