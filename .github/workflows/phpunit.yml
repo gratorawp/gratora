@@ -34,8 +34,21 @@ jobs:
           coverage: none
           tools: composer
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-progress
+
+      # The suite asserts on what the admin apps declare in their generated
+      # index.asset.php, so build/ has to exist. It is gitignored, and without
+      # this step those tests fail on a missing file rather than a real defect.
+      - name: Build assets
+        run: |
+          npm ci
+          npm run build
 
       - name: Provision WordPress test environment
         run: bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1 latest
