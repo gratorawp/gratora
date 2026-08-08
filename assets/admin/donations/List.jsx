@@ -245,7 +245,7 @@ export default function List() {
                         { item.reference }
                     </a>
                     { item.is_test && (
-                        <span className="dono-pill dono-pill--warning">{ __( 'Test', 'dono' ) }</span>
+                        <span className="dono-pill dono-pill--test">{ __( 'Test', 'dono' ) }</span>
                     ) }
                 </span>
             ),
@@ -345,7 +345,7 @@ export default function List() {
             filterBy:    { operators: [ 'is' ] },
             getValue:    ( { item } ) => ( item.is_test ? 'yes' : 'no' ),
             render:      ( { item } ) => item.is_test
-                ? <span className="dono-pill dono-pill--warning">{ __( 'Test', 'dono' ) }</span>
+                ? <span className="dono-pill dono-pill--test">{ __( 'Test', 'dono' ) }</span>
                 : <span className="dono-row__sub">-</span>,
         },
         {

@@ -738,6 +738,19 @@
     color: var(--dono-color-text-muted, #6b7280);
 }
 
+// The same amber the admin bar's test-mode badge uses, from the shared token
+// rather than its hex: one colour means test mode, wherever it is showing.
+// dono-pill--warning was never defined for pills, only for notices and toasts,
+// so this badge was rendering in the default grey.
+// Doubled class on purpose: a later .dono-pill rule (the pill-group button)
+// sets a transparent background at the same specificity and would win on
+// source order alone.
+.dono-pill.dono-pill--test {
+    background: $amber;
+    color: #fff;
+    font-weight: 600;
+}
+
 // Reference plus its test badge. Inline-flex so the badge sits on the
 // reference's baseline rather than wrapping under it in a narrow column.
 .dono-ref-cell {
