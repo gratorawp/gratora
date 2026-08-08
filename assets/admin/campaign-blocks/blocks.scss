@@ -364,7 +364,10 @@ body.dono-modal-open { overflow: hidden; }
         flex-wrap: wrap;
         align-items: center;
         gap: 12px;
-        padding: 12px 14px;
+        // Flush left, matching the recent-donations rows it sits under: both
+        // are avatar-led lists and a shared left edge is what makes them read
+        // as one column.
+        padding: 12px 0;
         border-bottom: 1px solid var(--dono-border, #{$border-fallback});
 
         &:last-child { border-bottom: 0; }
