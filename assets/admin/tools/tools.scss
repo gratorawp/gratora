@@ -254,6 +254,9 @@
     width: 100%;
     border-collapse: collapse;
     margin: 16px 0;
+    // Fixed, because the donor table and the donation table are two elements
+    // and their columns have to line up as though they were one.
+    table-layout: fixed;
 
     th, td {
         padding: 8px 10px;
@@ -269,15 +272,29 @@
         color: var(--dono-text-muted, #6b7280);
     }
 
-    tbody th { font-weight: 600; white-space: nowrap; }
+    tbody th { font-weight: 600; }
+
+    // By position rather than by element: only the donor table has a thead, so
+    // widths hung on th alone leave the donation table to size itself and the
+    // two sets of controls stop lining up.
+    tr > :first-child  { width: 34%; }
+    tr > :nth-child(2) { width: 40%; }
+    tr > :last-child   { width: 26%; }
 
     &__req { color: #b91c1c; }
+
+    &__heading {
+        margin: 22px 0 0;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: var(--dono-text-muted, #6b7280);
+    }
 
     &__sample {
         color: var(--dono-text-muted, #6b7280);
         font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
         font-size: 12px;
-        max-width: 240px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;

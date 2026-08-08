@@ -6,7 +6,7 @@ import Card from '../../_shared/components/Card';
 import Btn from '../../_shared/components/Btn';
 
 /**
- * Donors and donations from anyone else's CSV.
+ * Donors, and their donations when the file has any, from anyone else's CSV.
  *
  * Three steps, and the middle one is the point: the file is read, the admin
  * says which column means what, and a dry run reports exactly what a real run
@@ -18,18 +18,25 @@ const SKIP_LABELS = {
     no_email:          __( 'no email address', 'dono' ),
     invalid_email:     __( 'the email address is not one', 'dono' ),
     invalid_amount:    __( 'the amount is missing, zero or unreadable', 'dono' ),
-    duplicate_in_file: __( 'the same donation appears earlier in this file', 'dono' ),
+    duplicate_in_file: __( 'the same row appears earlier in this file', 'dono' ),
     already_imported:  __( 'already imported by an earlier run', 'dono' ),
     donor_erased:      __( 'the donor was erased on this site', 'dono' ),
     error:             __( 'the row could not be read', 'dono' ),
 };
 
+// Two groups, because the second one decides what the import does at all.
+const DONOR_FIELDS = [
+    'email', 'first_name', 'last_name', 'full_name', 'company', 'phone',
+    'address_line1', 'address_line2', 'city', 'region', 'postal', 'country',
+];
+const DONATION_FIELDS = [ 'amount', 'currency', 'date', 'status', 'reference' ];
+
 export default function CsvImportCard( { setNotice } ) {
-    const [ csv, setCsv ]         = useState( '' );
+    const [ csv, setCsv ]             = useState( '' );
     const [ inspected, setInspected ] = useState( null );
-    const [ mapping, setMapping ] = useState( {} );
-    const [ preview, setPreview ] = useState( null );
-    const [ busy, setBusy ]       = useState( '' );
+    const [ mapping, setMapping ]     = useState( {} );
+    const [ preview, setPreview ]     = useState( null );
+    const [ busy, setBusy ]           = useState( '' );
     const fileRef = useRef( null );
 
     const reset = () => {
@@ -79,18 +86,15 @@ export default function CsvImportCard( { setNotice } ) {
                 return;
             }
 
+            const landed = res.mode === 'donors'
+                ? res.donors_created + res.donors_matched
+                : res.donations_imported;
+
             setNotice( {
-                type: res.imported > 0 ? 'success' : 'error',
-                text: res.imported > 0
-                    ? sprintf(
-                        /* translators: 1: donations imported, 2: donors created. */
-                        __( 'Imported %1$d donations and created %2$d donors.', 'dono' ),
-                        res.imported,
-                        res.donors_created
-                    )
-                    : __( 'Nothing was imported. The preview above says why.', 'dono' ),
+                type: landed > 0 ? 'success' : 'error',
+                text: landed > 0 ? summarise( res ) : __( 'Nothing was imported. The preview above says why.', 'dono' ),
             } );
-            if ( res.imported > 0 ) reset();
+            if ( landed > 0 ) reset();
         } catch ( err ) {
             setNotice( { type: 'error', text: err?.message || __( 'The import failed.', 'dono' ) } );
         } finally {
@@ -98,16 +102,47 @@ export default function CsvImportCard( { setNotice } ) {
         }
     };
 
-    const setField = ( field ) => ( e ) => setMapping( { ...mapping, [ field ]: e.target.value } );
+    const setField = ( field ) => ( e ) => {
+        const next = { ...mapping };
+        if ( e.target.value ) {
+            next[ field ] = e.target.value;
+        } else {
+            delete next[ field ];
+        }
+        setMapping( next );
+    };
 
-    const fields  = inspected?.fields || {};
-    const headers = inspected?.headers || [];
-    const ready   = !! mapping.email && !! mapping.amount;
+    const fields     = inspected?.fields || {};
+    const headers    = inspected?.headers || [];
+    const ready      = !! mapping.email;
+    const withAmount = !! mapping.amount;
+
+    const rowFor = ( field ) => {
+        const chosen = mapping[ field ] || '';
+        const sample = chosen ? ( inspected.sample?.[ 0 ]?.[ chosen ] ?? '' ) : '';
+        return (
+            <tr key={ field }>
+                <th scope="row">
+                    { fields[ field ] || field }
+                    { field === 'email' && <span className="dono-csv-map__req"> *</span> }
+                </th>
+                <td>
+                    <select className="dono-input" value={ chosen } onChange={ setField( field ) }>
+                        <option value="">{ __( 'Not imported', 'dono' ) }</option>
+                        { headers.map( ( h ) => (
+                            <option key={ h } value={ h }>{ h }</option>
+                        ) ) }
+                    </select>
+                </td>
+                <td className="dono-csv-map__sample">{ sample || '-' }</td>
+            </tr>
+        );
+    };
 
     return (
         <Card
-            title={ __( 'Import donations from a CSV', 'dono' ) }
-            sub={ __( 'A file from another platform or a spreadsheet. Donors are matched on their email address, so a donor who is already here gains the donations rather than a second record.', 'dono' ) }
+            title={ __( 'Import from a CSV', 'dono' ) }
+            sub={ __( 'A file from another platform or a spreadsheet. Donors are matched on their email address, so a donor who is already here gains the donations rather than a second record. A file with no amounts imports the people on their own.', 'dono' ) }
         >
             <div className="dono-advanced-actions">
                 <Btn
@@ -143,6 +178,7 @@ export default function CsvImportCard( { setNotice } ) {
                         ) }
                     </p>
 
+                    <h4 className="dono-csv-map__heading">{ __( 'The donor', 'dono' ) }</h4>
                     <table className="dono-csv-map">
                         <thead>
                             <tr>
@@ -151,34 +187,17 @@ export default function CsvImportCard( { setNotice } ) {
                                 <th scope="col">{ __( 'First value', 'dono' ) }</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            { Object.entries( fields ).map( ( [ field, label ] ) => {
-                                const chosen = mapping[ field ] || '';
-                                const sample = chosen ? ( inspected.sample?.[ 0 ]?.[ chosen ] ?? '' ) : '';
-                                const required = field === 'email' || field === 'amount';
-                                return (
-                                    <tr key={ field }>
-                                        <th scope="row">
-                                            { label }
-                                            { required && <span className="dono-csv-map__req"> *</span> }
-                                        </th>
-                                        <td>
-                                            <select
-                                                className="dono-input"
-                                                value={ chosen }
-                                                onChange={ setField( field ) }
-                                            >
-                                                <option value="">{ __( 'Not imported', 'dono' ) }</option>
-                                                { headers.map( ( h ) => (
-                                                    <option key={ h } value={ h }>{ h }</option>
-                                                ) ) }
-                                            </select>
-                                        </td>
-                                        <td className="dono-csv-map__sample">{ sample || '-' }</td>
-                                    </tr>
-                                );
-                            } ) }
-                        </tbody>
+                        <tbody>{ DONOR_FIELDS.map( rowFor ) }</tbody>
+                    </table>
+
+                    <h4 className="dono-csv-map__heading">{ __( 'The donation', 'dono' ) }</h4>
+                    <p className="dono-tools-note">
+                        { withAmount
+                            ? __( 'Each row will be imported as a donation.', 'dono' )
+                            : __( 'No amount column is mapped, so this file will import donors only. Map Amount to bring their donations in as well.', 'dono' ) }
+                    </p>
+                    <table className="dono-csv-map">
+                        <tbody>{ DONATION_FIELDS.map( rowFor ) }</tbody>
                     </table>
 
                     <div className="dono-advanced-actions">
@@ -190,40 +209,27 @@ export default function CsvImportCard( { setNotice } ) {
                         >
                             { __( 'Preview', 'dono' ) }
                         </Btn>
-                        { preview && preview.imported > 0 && (
+                        { preview && hasWork( preview ) && (
                             <Btn
                                 variant="primary"
                                 onClick={ () => run( false ) }
                                 disabled={ busy !== '' }
                                 isBusy={ busy === 'import' }
                             >
-                                { sprintf(
-                                    /* translators: %d: number of donations. */
-                                    _n( 'Import %d donation', 'Import %d donations', preview.imported, 'dono' ),
-                                    preview.imported
-                                ) }
+                                { __( 'Import', 'dono' ) }
                             </Btn>
                         ) }
                     </div>
 
                     { ! ready && (
                         <p className="dono-tools-note">
-                            { __( 'Email and Amount have to be mapped. Everything else is optional.', 'dono' ) }
+                            { __( 'Email has to be mapped. Everything else is optional.', 'dono' ) }
                         </p>
                     ) }
 
                     { preview && (
                         <div className="dono-csv-preview">
-                            <p>
-                                <strong>
-                                    { sprintf(
-                                        /* translators: 1: donations, 2: donors. */
-                                        __( '%1$d donations would be imported, creating %2$d donors.', 'dono' ),
-                                        preview.imported,
-                                        preview.donors_created
-                                    ) }
-                                </strong>
-                            </p>
+                            <p><strong>{ summarise( preview ) }</strong></p>
                             { Object.keys( preview.skipped || {} ).length > 0 && (
                                 <ul className="dono-csv-preview__skips">
                                     { Object.entries( preview.skipped ).map( ( [ reason, n ] ) => (
@@ -243,13 +249,56 @@ export default function CsvImportCard( { setNotice } ) {
                                     { preview.errors.map( ( e, i ) => <li key={ i }>{ e }</li> ) }
                                 </ul>
                             ) }
-                            <p className="dono-tools-note">
-                                { __( 'Nothing has been written yet. Imported donations are marked as coming from a CSV and can be told apart from donations this site took.', 'dono' ) }
-                            </p>
+                            { preview.dry_run && (
+                                <p className="dono-tools-note">
+                                    { preview.mode === 'donors'
+                                        ? __( 'Nothing has been written yet.', 'dono' )
+                                        : __( 'Nothing has been written yet. Imported donations are marked as coming from a CSV and can be told apart from donations this site took.', 'dono' ) }
+                                </p>
+                            ) }
                         </div>
                     ) }
                 </>
             ) }
         </Card>
     );
+}
+
+function hasWork( res ) {
+    return res.donations_imported > 0 || res.donors_created > 0 || res.donors_matched > 0;
+}
+
+/** One sentence covering both modes, in the tense the caller needs. */
+function summarise( res ) {
+    const people = res.dry_run
+        ? sprintf(
+            /* translators: 1: donors to create, 2: donors already here. */
+            __( '%1$d donors would be created and %2$d matched to donors already here.', 'dono' ),
+            res.donors_created,
+            res.donors_matched
+        )
+        : sprintf(
+            /* translators: 1: donors created, 2: donors already here. */
+            __( 'Created %1$d donors and matched %2$d to donors already here.', 'dono' ),
+            res.donors_created,
+            res.donors_matched
+        );
+
+    if ( res.mode === 'donors' ) {
+        return people;
+    }
+
+    const gifts = res.dry_run
+        ? sprintf(
+            /* translators: %d: number of donations. */
+            _n( '%d donation would be imported.', '%d donations would be imported.', res.donations_imported, 'dono' ),
+            res.donations_imported
+        )
+        : sprintf(
+            /* translators: %d: number of donations. */
+            _n( 'Imported %d donation.', 'Imported %d donations.', res.donations_imported, 'dono' ),
+            res.donations_imported
+        );
+
+    return `${ gifts } ${ people }`;
 }

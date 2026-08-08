@@ -12,11 +12,17 @@ use Dono\Foundation\Identity\IdentityHasher;
 use Throwable;
 
 /**
- * Brings donors and donations in from anyone else's CSV.
+ * Brings donors, and their donations when the file has any, in from anyone
+ * else's CSV.
  *
  * The Give importer reads a database it understands. This reads a file it has
  * never seen, so the admin says which column means what, and nothing is written
  * until they have seen what that mapping would do.
+ *
+ * A file without amounts is a donor list, and importing one is the normal way
+ * an org arrives: the mailing list and the gift history are usually separate
+ * exports, and the list comes first. So the amount column is optional, and
+ * leaving it unmapped imports people rather than refusing the file.
  *
  * Donations carry no external id column, and reference is the unique one, so
  * that is what makes a row identifiable. A file with its own transaction ids
@@ -24,41 +30,69 @@ use Throwable;
  * the date, which is stable enough that importing the same file twice matches
  * rather than duplicates.
  *
- * Deliberately donors and donations only. Recurring plans are the tempting
- * next field and the wrong one: a plan imported without its gateway
+ * Deliberately no recurring plans. A plan imported without its gateway
  * subscription looks live in the admin and never bills, which is worse than
  * not having it.
  *
- * @version 1.0.0
+ * @version 1.1.0
  */
 final class CsvImporter
 {
     /** What a column can be mapped to. */
     public const FIELDS = [
-        'email'      => 'Email',
-        'first_name' => 'First name',
-        'last_name'  => 'Last name',
-        'full_name'  => 'Full name',
-        'amount'     => 'Amount',
-        'currency'   => 'Currency',
-        'date'       => 'Date',
-        'status'     => 'Status',
-        'reference'  => 'Transaction id',
+        'email'         => 'Email',
+        'first_name'    => 'First name',
+        'last_name'     => 'Last name',
+        'full_name'     => 'Full name',
+        'company'       => 'Organisation',
+        'phone'         => 'Phone',
+        'address_line1' => 'Address',
+        'address_line2' => 'Address line 2',
+        'city'          => 'City',
+        'region'        => 'State or region',
+        'postal'        => 'Postcode',
+        'country'       => 'Country (two-letter code)',
+        'amount'        => 'Amount',
+        'currency'      => 'Currency',
+        'date'          => 'Date',
+        'status'        => 'Status',
+        'reference'     => 'Transaction id',
     ];
 
-    private const REQUIRED = ['email', 'amount'];
+    /**
+     * An address is the only thing every file has. Everything else, including
+     * the amount, is optional: without it this imports the people alone.
+     */
+    private const REQUIRED = ['email'];
+
+    /** The parts of an address, in the shape DonorService stores them. */
+    private const ADDRESS_PARTS = [
+        'address_line1' => 'line1',
+        'address_line2' => 'line2',
+        'city'          => 'city',
+        'region'        => 'region',
+        'postal'        => 'postal',
+    ];
 
     /** Header names that usually mean a given field, lowercased. */
     private const GUESSES = [
-        'email'      => ['email', 'email address', 'donor email', 'e-mail'],
-        'first_name' => ['first name', 'first', 'firstname', 'given name'],
-        'last_name'  => ['last name', 'last', 'lastname', 'surname', 'family name'],
-        'full_name'  => ['name', 'full name', 'donor', 'donor name'],
-        'amount'     => ['amount', 'total', 'donation amount', 'gift amount', 'value'],
-        'currency'   => ['currency', 'currency code'],
-        'date'       => ['date', 'donation date', 'created', 'created at', 'paid at', 'timestamp'],
-        'status'     => ['status', 'state'],
-        'reference'  => ['transaction id', 'reference', 'id', 'donation id', 'charge id', 'payment id'],
+        'email'         => ['email', 'email address', 'donor email', 'e-mail'],
+        'first_name'    => ['first name', 'first', 'firstname', 'given name'],
+        'last_name'     => ['last name', 'last', 'lastname', 'surname', 'family name'],
+        'full_name'     => ['name', 'full name', 'donor', 'donor name'],
+        'company'       => ['company', 'organisation', 'organization', 'employer'],
+        'phone'         => ['phone', 'phone number', 'telephone', 'mobile'],
+        'address_line1' => ['address', 'address 1', 'address line 1', 'street', 'street address'],
+        'address_line2' => ['address 2', 'address line 2'],
+        'city'          => ['city', 'town'],
+        'region'        => ['state', 'region', 'province', 'county'],
+        'postal'        => ['zip', 'zip code', 'postcode', 'postal code'],
+        'country'       => ['country', 'country code'],
+        'amount'        => ['amount', 'total', 'donation amount', 'gift amount', 'value'],
+        'currency'      => ['currency', 'currency code'],
+        'date'          => ['date', 'donation date', 'created', 'created at', 'paid at', 'timestamp'],
+        'status'        => ['status'],
+        'reference'     => ['transaction id', 'reference', 'id', 'donation id', 'charge id', 'payment id'],
     ];
 
     /** Statuses a row may claim. Anything else is imported as paid. */
@@ -74,7 +108,7 @@ final class CsvImporter
      * Headers and the first few rows, so the admin maps against what is
      * actually in their file rather than against field names alone.
      *
-     * @return array{headers:list<string>, sample:list<array<string,string>>, rows:int, mapping:array<string,string>}
+     * @return array{headers:list<string>, sample:list<array<string,string>>, rows:int, mapping:array<string,string>, fields:array<string,string>}
      */
     public function inspect(string $csv, int $sampleSize = 5): array
     {
@@ -85,21 +119,26 @@ final class CsvImporter
             'sample'  => array_slice($rows, 0, $sampleSize),
             'rows'    => count($rows),
             'mapping' => $this->guessMapping($headers),
+            'fields'  => self::FIELDS,
         ];
     }
 
     /**
      * @param  array<string,string> $mapping field => header
-     * @return array{imported:int, donors_created:int, skipped:array<string,int>, errors:list<string>, dry_run:bool}
+     * @return array{mode:string, donations_imported:int, donors_created:int, donors_matched:int, skipped:array<string,int>, errors:list<string>, dry_run:bool}
      */
     public function import(string $csv, array $mapping, bool $dryRun = true): array
     {
-        [$headers, $rows] = $this->parse($csv);
+        [, $rows] = $this->parse($csv);
 
-        $missing = array_values(array_diff(self::REQUIRED, array_keys(array_filter($mapping))));
+        $mapping = array_filter($mapping);
+        $mode    = isset($mapping['amount']) ? 'donations' : 'donors';
+
+        $missing = array_values(array_diff(self::REQUIRED, array_keys($mapping)));
         if ($missing !== []) {
             return [
-                'imported' => 0, 'donors_created' => 0, 'skipped' => [], 'dry_run' => $dryRun,
+                'mode' => $mode, 'donations_imported' => 0, 'donors_created' => 0,
+                'donors_matched' => 0, 'skipped' => [], 'dry_run' => $dryRun,
                 'errors' => [sprintf(
                     /* translators: %s: comma-separated field names. */
                     __('Map a column to %s before importing.', 'dono'),
@@ -108,19 +147,22 @@ final class CsvImporter
             ];
         }
 
-        $imported = 0;
-        $created  = 0;
-        $skipped  = [];
-        $errors   = [];
+        $donations = 0;
+        $created   = 0;
+        $matched   = 0;
+        $skipped   = [];
+        $errors    = [];
 
         // A dry run counts what a real one would do, which means it has to see
-        // the same duplicates. Held here rather than read back from the
-        // database, which a dry run never writes to.
-        $seen = [];
+        // the same repeats. Held here rather than read back from the database,
+        // which a dry run never writes to: without this a file listing one new
+        // donor on two rows would promise two donors and then create one.
+        $seen      = [];
+        $seenEmail = [];
 
         foreach ($rows as $i => $row) {
             try {
-                $outcome = $this->row($row, $mapping, $dryRun, $seen);
+                $outcome = $this->row($row, $mapping, $mode, $dryRun, $seen, $seenEmail);
             } catch (Throwable $e) {
                 $errors[] = sprintf(
                     /* translators: 1: row number, 2: error message. */
@@ -137,16 +179,19 @@ final class CsvImporter
                 continue;
             }
 
-            $imported++;
+            if ($outcome['donation']) $donations++;
             if ($outcome['donor_created']) $created++;
+            if ($outcome['donor_matched']) $matched++;
         }
 
         return [
-            'imported'       => $imported,
-            'donors_created' => $created,
-            'skipped'        => $skipped,
-            'errors'         => array_slice($errors, 0, 20),
-            'dry_run'        => $dryRun,
+            'mode'               => $mode,
+            'donations_imported' => $donations,
+            'donors_created'     => $created,
+            'donors_matched'     => $matched,
+            'skipped'            => $skipped,
+            'errors'             => array_slice($errors, 0, 20),
+            'dry_run'            => $dryRun,
         ];
     }
 
@@ -154,54 +199,97 @@ final class CsvImporter
      * @param  array<string,string> $row
      * @param  array<string,string> $mapping
      * @param  array<string,bool>   $seen
-     * @return array{skip:?string, donor_created:bool}
+     * @param  array<string,bool>   $seenEmail
+     * @return array{skip:?string, donation:bool, donor_created:bool, donor_matched:bool}
      */
-    private function row(array $row, array $mapping, bool $dryRun, array &$seen): array
+    private function row(array $row, array $mapping, string $mode, bool $dryRun, array &$seen, array &$seenEmail): array
     {
+        $nothing = ['skip' => null, 'donation' => false, 'donor_created' => false, 'donor_matched' => false];
+        $skip    = static fn (string $why): array => ['skip' => $why, 'donation' => false, 'donor_created' => false, 'donor_matched' => false];
+
         $get = static fn (string $field): string => trim((string) ($row[$mapping[$field] ?? ''] ?? ''));
 
         $email = strtolower($get('email'));
         if ($email === '') {
-            return ['skip' => 'no_email', 'donor_created' => false];
+            return $skip('no_email');
         }
         if (! is_email($email)) {
-            return ['skip' => 'invalid_email', 'donor_created' => false];
+            return $skip('invalid_email');
         }
 
-        $amountCents = $this->cents($get('amount'));
-        if ($amountCents === null) {
-            return ['skip' => 'invalid_amount', 'donor_created' => false];
+        $amountCents = null;
+        if ($mode === 'donations') {
+            $amountCents = $this->cents($get('amount'));
+            if ($amountCents === null) {
+                return $skip('invalid_amount');
+            }
         }
 
-        $reference = $this->reference($email, $amountCents, $get('date'), $get('reference'));
+        // A donor list is deduplicated by the person; a donation list by the
+        // donation, since one donor legitimately appears on many rows.
+        $key = $mode === 'donations'
+            ? $this->reference($email, (int) $amountCents, $get('date'), $get('reference'))
+            : 'donor:' . $email;
 
-        if (isset($seen[$reference])) {
-            return ['skip' => 'duplicate_in_file', 'donor_created' => false];
+        if (isset($seen[$key])) {
+            return $skip('duplicate_in_file');
         }
-        $seen[$reference] = true;
+        $seen[$key] = true;
 
-        if (Donation::query()->where('reference', $reference)->get() !== null) {
-            return ['skip' => 'already_imported', 'donor_created' => false];
+        if ($mode === 'donations' && Donation::query()->where('reference', $key)->get() !== null) {
+            return $skip('already_imported');
         }
 
         // Someone erased here asked to be forgotten. A spreadsheet from before
         // that is not consent to bring them back.
         $existing = Donor::query()->where('email_hash', $this->hasher->emailHash($email))->get();
         if (is_array($existing) ? ($existing['redacted_at'] ?? null) : ($existing->redacted_at ?? null)) {
-            return ['skip' => 'donor_erased', 'donor_created' => false];
+            return $skip('donor_erased');
         }
 
-        $donorCreated = $existing === null;
+        // Counted once per person even when they hold several rows, so the two
+        // donor numbers describe people rather than lines in the file.
+        $firstSighting = ! isset($seenEmail[$email]);
+        $seenEmail[$email] = true;
+
+        $donorCreated = $firstSighting && $existing === null;
+        $donorMatched = $firstSighting && $existing !== null;
 
         if ($dryRun) {
-            return ['skip' => null, 'donor_created' => $donorCreated];
+            return ['skip' => null, 'donation' => $mode === 'donations', 'donor_created' => $donorCreated, 'donor_matched' => $donorMatched];
         }
 
         [$first, $last] = $this->names($get('first_name'), $get('last_name'), $get('full_name'));
-        $donor = $this->donors->findOrCreate($email, array_filter([
+
+        // Only non-empty values are offered: DonorService fills blanks and
+        // never overwrites, so an empty cell must not present itself as an
+        // answer. A CSV can enrich a donor; it cannot blank one.
+        $profile = array_filter([
             'first_name' => $first,
             'last_name'  => $last,
-        ]));
+            'company'    => $get('company'),
+            'phone'      => $get('phone'),
+            'country'    => $this->countryCode($get('country')),
+        ]);
+
+        $address = [];
+        foreach (self::ADDRESS_PARTS as $field => $part) {
+            $value = $get($field);
+            if ($value !== '') $address[$part] = $value;
+        }
+        $country = $this->countryCode($get('country'));
+        if ($address !== [] && $country !== '') {
+            $address['country'] = $country;
+        }
+        if ($address !== []) {
+            $profile['address'] = $address;
+        }
+
+        $donor = $this->donors->findOrCreate($email, $profile);
+
+        if ($mode !== 'donations') {
+            return ['skip' => null, 'donation' => false, 'donor_created' => $donorCreated, 'donor_matched' => $donorMatched];
+        }
 
         $paidAt   = $this->date($get('date'));
         $currency = strtoupper($get('currency')) ?: Money::defaultCurrency();
@@ -209,10 +297,10 @@ final class CsvImporter
         if (! in_array($status, self::STATUSES, true)) $status = 'paid';
 
         $donation = Donation::make();
-        $donation->reference    = $reference;
+        $donation->reference    = $key;
         $donation->donor_id     = (int) $donor->id;
-        $donation->amount_cents = $amountCents;
-        $donation->net_cents    = $amountCents;
+        $donation->amount_cents = (int) $amountCents;
+        $donation->net_cents    = (int) $amountCents;
         $donation->currency     = $currency;
         $donation->status       = $status;
         $donation->gateway      = 'imported';
@@ -225,7 +313,20 @@ final class CsvImporter
         $donation->source_attribution = ['source' => 'csv_import'];
         $donation->save();
 
-        return ['skip' => null, 'donor_created' => $donorCreated];
+        return ['skip' => null, 'donation' => true, 'donor_created' => $donorCreated, 'donor_matched' => $donorMatched];
+    }
+
+    /**
+     * Only a real code is accepted. Files write "United States" as often as
+     * "US", and there is no country list on the PHP side to resolve it, so a
+     * name is left unset rather than stored as the "UN" its first two letters
+     * would produce.
+     */
+    private function countryCode(string $raw): string
+    {
+        $raw = trim($raw);
+
+        return preg_match('/^[A-Za-z]{2}$/', $raw) === 1 ? strtoupper($raw) : '';
     }
 
     /**
@@ -296,14 +397,28 @@ final class CsvImporter
         return gmdate('Y-m-d H:i:s', $ts !== false ? $ts : time());
     }
 
-    /** @param list<string> $headers @return array<string,string> */
+    /**
+     * One column means one thing. Synonyms overlap across fields, so without
+     * claiming a header the first time it matches, "State" lands on both the
+     * region and the donation status and the admin is shown a mapping that
+     * reads their address as a payment state.
+     *
+     * @param  list<string> $headers
+     * @return array<string,string>
+     */
     private function guessMapping(array $headers): array
     {
-        $out = [];
+        $out    = [];
+        $taken  = [];
+
         foreach (self::GUESSES as $field => $candidates) {
             foreach ($headers as $header) {
+                if (isset($taken[$header])) {
+                    continue;
+                }
                 if (in_array(strtolower(trim($header)), $candidates, true)) {
-                    $out[$field] = $header;
+                    $out[$field]    = $header;
+                    $taken[$header] = true;
                     break;
                 }
             }
