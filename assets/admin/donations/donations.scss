@@ -738,16 +738,20 @@
     color: var(--dono-color-text-muted, #6b7280);
 }
 
-// The same amber the admin bar's test-mode badge uses, from the shared token
-// rather than its hex: one colour means test mode, wherever it is showing.
+// The amber that means test mode, from the shared token rather than a second
+// copy of the hex, so the admin bar strip and this badge cannot drift apart.
+// Tinted rather than solid: every other pill on this row is a tint, and a block
+// of colour beside them read as an error instead of a label.
+//
 // dono-pill--warning was never defined for pills, only for notices and toasts,
 // so this badge was rendering in the default grey.
+//
 // Doubled class on purpose: a later .dono-pill rule (the pill-group button)
 // sets a transparent background at the same specificity and would win on
 // source order alone.
 .dono-pill.dono-pill--test {
-    background: $amber;
-    color: #fff;
+    background: $amber-soft;
+    color: $amber;
     font-weight: 600;
 }
 
