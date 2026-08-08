@@ -10,18 +10,12 @@ use Dono\Foundation\Uninstall\DataEraser;
 /**
  * The dialog shown when someone deactivates Dono from the plugins screen.
  *
- * It exists for the data question, not the survey: nothing else in WordPress
- * asks whether the site owner wants their donation records kept, and by the
- * time they reach the Delete link the plugin is gone and cannot ask.
- *
- * The reason radios are recorded locally. Sending them anywhere needs a
- * collector that does not exist yet, and a survey that posts into the void is
- * worse than none.
+ * It asks one thing, because nothing else in WordPress asks it: whether the
+ * site owner wants their donation records kept. By the time they reach the
+ * Delete link the plugin is gone and cannot ask.
  */
-final class DeactivationSurvey
+final class DeactivationDialog
 {
-    public const OPTION_LAST_REASON = 'dono_deactivation_reason';
-
     private const ACTION = 'dono_deactivation_choice';
 
     public function register(): void
@@ -75,7 +69,6 @@ final class DeactivationSurvey
         }
 
         echo View::loadRelative(__DIR__, 'views/deactivation-dialog', [
-            'reasons'   => $this->reasons(),
             'wipeOptIn' => DataEraser::requested(),
         ]);
     }
@@ -88,21 +81,6 @@ final class DeactivationSurvey
             wp_send_json_error(null, 403);
         }
 
-        $reason = sanitize_key((string) ($_POST['reason'] ?? ''));
-        if ($reason !== '' && array_key_exists($reason, $this->reasons())) {
-            $feedback = [
-                'reason'  => $reason,
-                'details' => sanitize_textarea_field((string) ($_POST['details'] ?? '')),
-                'at'      => gmdate('c'),
-            ];
-            update_option(self::OPTION_LAST_REASON, $feedback, false);
-
-            // Nothing in core sends this anywhere. The answer is the site
-            // owner's, given on their own machine, and it leaves only if
-            // something is deliberately attached to carry it.
-            do_action('dono.deactivation.feedback', $feedback);
-        }
-
         // Deliberately explicit rather than a toggle: an absent checkbox in the
         // payload has to mean "keep my data", never "no answer, leave it set".
         $wipe = ! empty($_POST['wipe']);
@@ -113,20 +91,5 @@ final class DeactivationSurvey
         }
 
         wp_send_json_success(['wipe' => $wipe]);
-    }
-
-    /** @return array<string,string> */
-    private function reasons(): array
-    {
-        return [
-            'temporary'   => __('I am only deactivating temporarily', 'dono'),
-            'not_needed'  => __('I no longer need it', 'dono'),
-            'switched'    => __('I found something that suits us better', 'dono'),
-            'short_term'  => __('We only needed it for a short campaign', 'dono'),
-            'broke_site'  => __('It broke my site', 'dono'),
-            'stopped'     => __('It stopped working', 'dono'),
-            'hard_to_use' => __('I could not work out how to set it up', 'dono'),
-            'other'       => __('Something else', 'dono'),
-        ];
     }
 }

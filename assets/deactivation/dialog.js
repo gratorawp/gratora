@@ -12,8 +12,7 @@
         deactivateUrl = href;
         dialog.hidden = false;
         document.body.classList.add( 'dono-deact-open' );
-        const first = dialog.querySelector( 'input[name="dono_deact_reason"]' );
-        if ( first ) first.focus();
+        dialog.querySelector( '#dono-deact-wipe' ).focus();
     }
 
     function close() {
@@ -28,12 +27,9 @@
     }
 
     function send( done ) {
-        const checked = dialog.querySelector( 'input[name="dono_deact_reason"]:checked' );
         const body = new URLSearchParams();
         body.set( 'action', cfg.action );
         body.set( '_wpnonce', cfg.nonce );
-        body.set( 'reason', checked ? checked.value : '' );
-        body.set( 'details', ( dialog.querySelector( '.dono-deact__details' ) || {} ).value || '' );
         if ( dialog.querySelector( '#dono-deact-wipe' ).checked ) body.set( 'wipe', '1' );
 
         fetch( cfg.ajaxUrl, {
@@ -59,13 +55,6 @@
         dialog.addEventListener( 'click', function ( e ) {
             if ( e.target.closest( '[data-dono-deact-cancel]' ) ) {
                 close();
-                return;
-            }
-            // Skip still records the data choice: the checkbox is the one
-            // answer that changes what happens, and skipping the survey is not
-            // a decision to keep or drop the records.
-            if ( e.target.closest( '[data-dono-deact-skip]' ) ) {
-                send( leave );
                 return;
             }
             if ( e.target.closest( '[data-dono-deact-submit]' ) ) {

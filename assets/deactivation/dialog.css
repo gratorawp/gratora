@@ -32,30 +32,6 @@ body.dono-deact-open { overflow: hidden; }
     line-height: 1.25;
 }
 
-.dono-deact__lede {
-    margin: 0 0 16px;
-    color: #50575e;
-}
-
-.dono-deact__reasons {
-    margin: 0 0 12px;
-    padding: 0;
-    list-style: none;
-}
-
-.dono-deact__reasons li { margin: 0 0 6px; }
-
-.dono-deact__reasons label {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-}
-
-.dono-deact__details {
-    width: 100%;
-    margin-bottom: 18px;
-}
-
 .dono-deact__data {
     padding: 14px 16px;
     border: 1px solid #f0c33c;
@@ -82,11 +58,8 @@ body.dono-deact-open { overflow: hidden; }
 
 .dono-deact__actions {
     display: flex;
+    justify-content: flex-end;
     align-items: center;
     gap: 10px;
     margin-top: 20px;
 }
-
-.dono-deact__spacer { flex: 1; }
-
-.dono-deact__skip { color: #50575e; }
