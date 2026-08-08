@@ -9,6 +9,7 @@ use Dono\Donations\Donation;
 use Dono\Donations\DonationQueries;
 use Dono\Donations\DonationRepository;
 use Dono\Donors\Donor;
+use Dono\Donors\DonorAvatars;
 use Dono\Foundation\Helpers\Money;
 use Dono\Foundation\Helpers\View;
 
@@ -23,6 +24,7 @@ final class SupporterWallBlock extends CampaignBlock
     public function __construct(
         CampaignRepository $campaigns,
         private readonly DonationRepository $donations,
+        private readonly DonorAvatars $avatars,
     ) {
         parent::__construct($campaigns);
     }
@@ -153,15 +155,21 @@ final class SupporterWallBlock extends CampaignBlock
             $donorsById[(int) $d->id] = $d;
         }
 
+        $avatarUrls = $this->avatars->urlsFor($donorsById);
+
         $entries = [];
         foreach ($byDonor as $id => $info) {
             $donor = $donorsById[$id] ?? null;
             if (! $donor) continue;
+            // The wall is names and their words, so a hidden donor has nothing
+            // left to show here. Their donation still counts toward the total.
+            if ($donor->public_hidden_at !== null) continue;
             $name = trim((string) $donor->first_name . ' ' . (string) $donor->last_name);
             if ($name === '') continue;
 
             $entries[] = [
                 'name'           => $name,
+                'avatar_url'     => $avatarUrls[(int) $id] ?? '',
                 'message'        => $info['message'],
                 'amount_cents'   => $info['total_cents'],
                 'currency'       => $info['currency'],

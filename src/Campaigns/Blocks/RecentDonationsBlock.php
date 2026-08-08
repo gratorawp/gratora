@@ -81,7 +81,10 @@ final class RecentDonationsBlock extends CampaignBlock
                 ? trim((string) $donor->first_name . ' ' . (string) $donor->last_name)
                 : '';
 
-            if ($isAnonymous || $name === '') {
+            // An admin hiding a donor has to reach the name and the message
+            // too. A suppressed picture beside their name and their words
+            // would be no answer at all.
+            if ($isAnonymous || $name === '' || ($donor && $donor->public_hidden_at !== null)) {
                 $name = __('Anonymous', 'dono');
                 $isAnonymous = true;
             }

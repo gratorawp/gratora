@@ -39,6 +39,8 @@ final class Donor extends Model
     /** When the last re-identification handle was severed. See DonorPurge. */
     public ?string $purged_at = null;
     public ?string $notes_encrypted = null;
+    public ?int $avatar_attachment_id = null;
+    public ?string $public_hidden_at = null;
     public ?array $flags = null;
     public string $created_at;
     public string $updated_at;
@@ -65,6 +67,11 @@ Donor::schema(function (Table $t): void {
     $t->datetime('redacted_at')->nullable()->index();
     $t->datetime('purged_at')->nullable();
     $t->text('notes_encrypted')->nullable();
+    $t->bigInteger('avatar_attachment_id')->unsigned()->nullable();
+    // Suppresses this donor everywhere the public can see them, without
+    // touching the donation history the org still has to account for.
+    // Redaction is the only other lever and it destroys the record.
+    $t->datetime('public_hidden_at')->nullable();
     $t->json('flags')->nullable();
     $t->datetime('created_at');
     $t->datetime('updated_at');

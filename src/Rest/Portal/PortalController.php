@@ -65,6 +65,8 @@ final class PortalController
         private GatewayManager $gateways,
         private AntiSpamGuard $spam,
         private PendingSignupRepository $pending,
+        private \Dono\Donors\DonorAvatarUploader $avatarUploader,
+        private \Dono\Donors\DonorAvatars $avatars,
     ) {
     }
 
@@ -189,6 +191,19 @@ final class PortalController
             [
                 'methods'             => WP_REST_Server::EDITABLE,
                 'callback'            => [$this, 'profileUpdate'],
+                'permission_callback' => [$this, 'sessionWithCsrf'],
+            ],
+        ]);
+
+        register_rest_route(self::NAMESPACE, '/portal/avatar', [
+            [
+                'methods'             => WP_REST_Server::CREATABLE,
+                'callback'            => [$this, 'avatarUpload'],
+                'permission_callback' => [$this, 'sessionWithCsrf'],
+            ],
+            [
+                'methods'             => WP_REST_Server::DELETABLE,
+                'callback'            => [$this, 'avatarDelete'],
                 'permission_callback' => [$this, 'sessionWithCsrf'],
             ],
         ]);
@@ -902,6 +917,7 @@ final class PortalController
             'last_name'  => (string) ($donor->last_name ?? ''),
             'country'    => (string) ($donor->country ?? ''),
             'company'    => (string) ($donor->company ?? ''),
+            'avatar_url' => $this->avatars->uploadedUrl($donor),
         ], 200);
     }
 
@@ -920,6 +936,33 @@ final class PortalController
         // overwrite populated values. refreshProfile's lock-on-first-write is
         // the donation-flow back-fill, not a portal edit.
         $this->donorService->editProfile($donor, $patch);
+        return $this->profileShow();
+    }
+
+    public function avatarUpload(WP_REST_Request $request): WP_REST_Response|WP_Error
+    {
+        $donor = $this->requireDonor();
+        if ($donor instanceof WP_Error) return $donor;
+
+        $files = $request->get_file_params();
+        $file  = $files['file'] ?? null;
+        if (! is_array($file)) {
+            return new WP_Error('dono_upload_missing', __('No picture was sent.', 'dono'), ['status' => 400]);
+        }
+
+        $result = $this->avatarUploader->store($donor, $file);
+        if ($result instanceof WP_Error) return $result;
+
+        return $this->profileShow();
+    }
+
+    public function avatarDelete(): WP_REST_Response|WP_Error
+    {
+        $donor = $this->requireDonor();
+        if ($donor instanceof WP_Error) return $donor;
+
+        $this->avatarUploader->remove($donor);
+
         return $this->profileShow();
     }
 

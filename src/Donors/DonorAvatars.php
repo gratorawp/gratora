@@ -35,6 +35,33 @@ final class DonorAvatars
     }
 
     /**
+     * Suppressed from every public surface by an admin. The record and the
+     * money stay; only what a visitor can see goes. Redaction is the other
+     * lever and it destroys the donor, which is no way to answer a bad picture.
+     */
+    public function hidden(Donor $donor): bool
+    {
+        return ($donor->public_hidden_at ?? null) !== null;
+    }
+
+    /**
+     * A donor's own picture, which beats Gravatar because they chose it here.
+     * Unlike Gravatar this needs no setting: nothing leaves the site, and a
+     * donor who uploaded one has already asked for it to be shown.
+     */
+    public function uploadedUrl(Donor $donor): string
+    {
+        $id = (int) ($donor->avatar_attachment_id ?? 0);
+        if ($id <= 0) {
+            return '';
+        }
+
+        $url = wp_get_attachment_image_url($id, 'thumbnail');
+
+        return is_string($url) ? $url : '';
+    }
+
+    /**
      * Avatar URL per donor id, keyed for lookup while rendering a list.
      *
      * Anonymous donors are excluded by the caller passing them as anonymous:
@@ -47,13 +74,28 @@ final class DonorAvatars
      */
     public function urlsFor(array $donors, array $anonymous = []): array
     {
-        if (! $this->enabled() || $donors === []) {
+        if ($donors === []) {
             return [];
         }
 
+        $gravatar = $this->enabled();
         $out = [];
         foreach ($donors as $id => $donor) {
-            if (! empty($anonymous[$id])) {
+            // Hidden by an admin, or hidden by their own choice: either way the
+            // public gets the plain initial, never a face.
+            if (! empty($anonymous[$id]) || $this->hidden($donor)) {
+                continue;
+            }
+
+            // Their own upload first. They chose it here, so it beats a picture
+            // they may have set on some other service years ago.
+            $uploaded = $this->uploadedUrl($donor);
+            if ($uploaded !== '') {
+                $out[(int) $id] = $uploaded;
+                continue;
+            }
+
+            if (! $gravatar) {
                 continue;
             }
 

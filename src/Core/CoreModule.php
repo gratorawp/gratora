@@ -54,6 +54,7 @@ use Dono\Donors\DonorMetricsService;
 use Dono\Donors\DonorNote;
 use Dono\Donors\DonorNoteRepository;
 use Dono\Donors\DonorPurge;
+use Dono\Donors\DonorAvatarUploader;
 use Dono\Donors\DonorAvatars;
 use Dono\Donors\DonorRepository;
 use Dono\Donors\DonorService;
@@ -417,6 +418,8 @@ final class CoreModule implements DonoModule
             $c->get(CampaignService::class)->onPagePublished((string) $new, (string) $old, $post);
         }, 10, 3);
 
+        $c->bind(DonorAvatarUploader::class, fn () => new DonorAvatarUploader());
+
         $c->bind(DonorAvatars::class, fn (Container $c) => new DonorAvatars(
             $c->get(Crypto::class),
             $c->get(SettingsService::class)
@@ -566,6 +569,8 @@ final class CoreModule implements DonoModule
             $c->get(GatewayManager::class),
             $c->get(AntiSpamGuard::class),
             $c->get(PendingSignupRepository::class),
+            $c->get(DonorAvatarUploader::class),
+            $c->get(DonorAvatars::class),
         ));
 
         $c->bind(AggregateSyncer::class, fn () => new AggregateSyncer());
@@ -1007,6 +1012,7 @@ final class CoreModule implements DonoModule
         $blocks->add(new SupporterWallBlock(
             $c->get(CampaignRepository::class),
             $c->get(DonationRepository::class),
+            $c->get(DonorAvatars::class),
         ));
 
         // Broadcast on init, not here: add-on modules boot after core, so a

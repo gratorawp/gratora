@@ -353,6 +353,7 @@ final class DonorMetricsService
                 'last_donation_at'    => $donor->last_donation_at,
                 'created_at'          => $donor->created_at,
                 'redacted_at'         => $donor->redacted_at,
+                'public_hidden'       => $donor->public_hidden_at !== null,
                 'is_anonymous'        => $this->isAnonymous($donor),
             ],
             'lifetime' => [

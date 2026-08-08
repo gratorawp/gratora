@@ -318,7 +318,13 @@ final class DonorService
 
         $request = $this->erasureRequest($donor);
 
+        // Captured before the column is cleared so the file can go once the
+        // transaction has actually committed. A picture the donor uploaded is
+        // their data, and it sits on a public URL until it is deleted.
+        $avatarAttachmentId = (int) ($donor->avatar_attachment_id ?? 0);
+
         $donor->email_encrypted    = '';
+        $donor->avatar_attachment_id = null;
         $donor->first_name         = null;
         $donor->last_name          = null;
         $donor->address_encrypted  = null;
@@ -344,6 +350,12 @@ final class DonorService
                 $this->purge->purge($donor);
             }
         });
+
+        // After the commit: file deletion cannot be rolled back, so a failed
+        // erasure must not have already destroyed the picture.
+        if ($avatarAttachmentId > 0) {
+            wp_delete_attachment($avatarAttachmentId, true);
+        }
 
         return $donor;
     }

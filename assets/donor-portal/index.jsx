@@ -59,8 +59,11 @@ function setCsrfFromResponse( payload ) {
 let onSessionExpired = null;
 
 function api( path, init = {} ) {
+    // FormData sets its own content type, boundary and all. Declaring JSON over
+    // it makes the body unparseable at the other end.
+    const isForm = typeof FormData !== 'undefined' && init.body instanceof FormData;
     const headers = {
-        'Content-Type': 'application/json',
+        ...( isForm ? {} : { 'Content-Type': 'application/json' } ),
         // Nonce only when the page minted one (logged-in WP user): a cached
         // page's stale nonce would make core's cookie check 403 every request,
         // including magic-link sign-in.
@@ -1015,8 +1018,64 @@ function Profile( { onSaved } ) {
             .finally( () => setSaving( false ) );
     };
 
+    const pickPicture = ( e ) => {
+        const file = e.target.files && e.target.files[ 0 ];
+        e.target.value = '';
+        if ( ! file ) return;
+
+        const body = new FormData();
+        body.append( 'file', file );
+        setSaving( true );
+        setErr( '' );
+        api( 'avatar', { method: 'POST', body } )
+            .then( ( next ) => {
+                setForm( withDefaults( next ) );
+                onSaved && onSaved();
+            } )
+            .catch( ( e2 ) => setErr( e2.message || __( 'Could not upload that picture.', 'dono' ) ) )
+            .finally( () => setSaving( false ) );
+    };
+
+    const removePicture = () => {
+        setSaving( true );
+        setErr( '' );
+        api( 'avatar', { method: 'DELETE' } )
+            .then( ( next ) => {
+                setForm( withDefaults( next ) );
+                onSaved && onSaved();
+            } )
+            .catch( ( e2 ) => setErr( e2.message || __( 'Could not remove that picture.', 'dono' ) ) )
+            .finally( () => setSaving( false ) );
+    };
+
     return (
         <div class="dp-form">
+            <div class="dp-avatar-field">
+                { form.avatar_url
+                    ? <img class="dp-avatar-field__preview" src={ form.avatar_url } alt="" />
+                    : <span class="dp-avatar-field__preview dp-avatar-field__preview--empty" aria-hidden="true" /> }
+                <div class="dp-avatar-field__controls">
+                    <span class="dp-avatar-field__label">{ __( 'Profile picture', 'dono' ) }</span>
+                    <small>{ __( 'Shown next to your name where the organisation lists supporters. JPEG, PNG, GIF or WebP, under 3 MB.', 'dono' ) }</small>
+                    <div class="dp-avatar-field__buttons">
+                        <label class="dp-btn dp-btn--ghost">
+                            { form.avatar_url ? __( 'Replace', 'dono' ) : __( 'Upload', 'dono' ) }
+                            <input
+                                type="file"
+                                accept="image/jpeg,image/png,image/gif,image/webp"
+                                onChange={ pickPicture }
+                                disabled={ saving }
+                                hidden
+                            />
+                        </label>
+                        { form.avatar_url && (
+                            <button type="button" class="dp-btn dp-btn--ghost" onClick={ removePicture } disabled={ saving }>
+                                { __( 'Remove', 'dono' ) }
+                            </button>
+                        ) }
+                    </div>
+                </div>
+            </div>
             <label>{ __( 'Email', 'dono' ) }
                 <input type="email" value={ form.email } disabled readOnly />
                 <small>{ __( 'To change your email, contact the organisation.', 'dono' ) }</small>
@@ -1171,6 +1230,7 @@ function withDefaults( v ) {
         last_name:  '',
         country:    '',
         company:    '',
+        avatar_url: '',
         ...( v || {} ),
     };
 }

@@ -114,6 +114,7 @@ final class DonorsController
                     ],
                 ],
                 'donor_type' => ['type' => 'string', 'enum' => ['individual', 'organization', 'household']],
+                'public_hidden' => ['type' => 'boolean'],
             ],
         ]);
 
@@ -258,6 +259,20 @@ final class DonorsController
             $country = $params['country'];
             $country = $country === null || $country === '' ? null : strtoupper(substr((string) $country, 0, 2));
             $update['country'] = $country;
+        }
+
+        // The moderation lever. Redaction is the only other way to take a
+        // donor off the public pages and it destroys them, which is no answer
+        // to a bad picture or an unwanted name.
+        if (array_key_exists('public_hidden', $params)) {
+            $update['public_hidden_at'] = $params['public_hidden']
+                ? gmdate('Y-m-d H:i:s')
+                : null;
+            // Already hidden stays hidden at its original time rather than
+            // being restamped by an unrelated save.
+            if ($params['public_hidden'] && $donor->public_hidden_at !== null) {
+                unset($update['public_hidden_at']);
+            }
         }
 
         if (array_key_exists('donor_type', $params)) {
@@ -508,6 +523,7 @@ final class DonorsController
         return new WP_REST_Response([
             'redacted'    => true,
             'redacted_at' => $donor->redacted_at,
+            'public_hidden' => $donor->public_hidden_at !== null,
         ], 200);
     }
 

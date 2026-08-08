@@ -627,3 +627,43 @@
 
     .dp-prefs { grid-template-columns: 1fr; }
 }
+
+// Profile picture field. The preview is the same circle the campaign pages
+// draw, so a donor sees what supporters will see rather than a form control.
+.dp-avatar-field {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    &__preview {
+        flex: 0 0 auto;
+        width: 64px;
+        height: 64px;
+        border-radius: 999px;
+        object-fit: cover;
+        background: var(--dp-bg-soft, #f1f5f9);
+    }
+
+    &__controls {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
+    }
+
+    &__label {
+        font-weight: 600;
+    }
+
+    &__buttons {
+        display: flex;
+        gap: 8px;
+        margin-top: 4px;
+    }
+
+    // The upload control is a label wrapping a hidden input, so it needs the
+    // button's own affordances rather than inheriting a label's.
+    label.dp-btn {
+        cursor: pointer;
+    }
+}

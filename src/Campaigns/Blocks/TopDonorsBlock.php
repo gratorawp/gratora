@@ -72,7 +72,9 @@ final class TopDonorsBlock extends CampaignBlock
             $name    = $donor
                 ? trim((string) $donor->first_name . ' ' . (string) $donor->last_name)
                 : '';
-            $isAnonymousAggregate = ($name === '');
+            // Hidden reads the same as unnamed: the amount still ranks, the
+            // person behind it does not appear.
+            $isAnonymousAggregate = ($name === '' || ($donor && $donor->public_hidden_at !== null));
 
             if ($hideAnonymous && $isAnonymousAggregate) continue;
 

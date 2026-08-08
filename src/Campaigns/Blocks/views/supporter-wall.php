@@ -24,7 +24,7 @@ defined('ABSPATH') || exit;
             <?php foreach ($entries as $entry): ?>
                 <li class="dono-supporter-wall__card<?php echo $entry['message'] !== '' && $showMessage ? ' has-message' : ''; ?>">
                     <div class="dono-supporter-wall__top">
-                        <?php echo \Dono\Campaigns\Blocks\BlockAvatar::markup($entry['name'], false); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                        <?php echo \Dono\Campaigns\Blocks\BlockAvatar::markup($entry['name'], false, (string) ($entry['avatar_url'] ?? '')); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                         <div class="dono-supporter-wall__name"><?php echo esc_html($entry['name']); ?></div>
                     </div>
                     <?php if ($showAmount && $entry['amount_cents'] > 0): ?>
