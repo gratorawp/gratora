@@ -32,11 +32,6 @@ npm install
 npm run build
 ```
 
-`composer install` also builds `vendor-prefixed/`, the Strauss-prefixed
-dependencies the plugin loads at runtime. It is generated rather than
-committed. `composer strauss` rebuilds it on its own, and `npm run package`
-refuses to build a zip without it.
-
 ## Commands
 
 | Command | What it does |
