@@ -88,7 +88,7 @@ final class SettingsService
                 'privacy_policy_url'             => '',
                 'retention_days_after_redaction' => 90,
                 // Anonymise inactive donors after N years; 0 disables. Donation rows are kept.
-                'donor_retention_years'          => 10,
+                'donor_retention_years'          => 7,
                 // Prune dono_events older than N days; 0 disables.
                 'event_retention_days'           => 730,
                 'anonymize_ips'                  => true,

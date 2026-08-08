@@ -1,8 +1,77 @@
-import { __ } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
+import { useEffect, useState } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
 
 import Card from '../../_shared/components/Card';
 import FormRow from '../../_shared/components/FormRow';
 import { ToggleRow } from '../../_shared/components/Switch';
+import Notice from '../../_shared/components/Notice';
+
+/**
+ * What the nightly sweep would take. Erasure is the one thing here that runs
+ * without being asked and cannot be undone, so the number is shown before it
+ * happens rather than discovered afterwards as blank names.
+ */
+function RetentionPreview() {
+    const [ data, setData ] = useState( null );
+
+    useEffect( () => {
+        apiFetch( { path: '/dono/v1/admin/settings/retention-preview?days=30' } )
+            .then( setData )
+            .catch( () => setData( null ) );
+    }, [] );
+
+    if ( ! data || ! data.years ) return null;
+
+    const startsAt = Number( data.starts_at || 0 ) * 1000;
+    const pending  = startsAt > Date.now();
+
+    if ( pending ) {
+        return (
+            <Notice status="info" isDismissible={ false }>
+                { sprintf(
+                    /* translators: %s: a date. */
+                    __( 'Automatic erasure has not started on this site yet. The first run is %s, which leaves time to import your history and check the window above.', 'dono' ),
+                    new Date( startsAt ).toLocaleDateString()
+                ) }
+            </Notice>
+        );
+    }
+
+    if ( ! data.eligible_now && ! data.within_days ) {
+        return (
+            <Notice status="info" isDismissible={ false }>
+                { __( 'No donor is due to be erased in the next 30 days.', 'dono' ) }
+            </Notice>
+        );
+    }
+
+    return (
+        <Notice status="warning" isDismissible={ false }>
+            { data.eligible_now > 0 && sprintf(
+                /* translators: %s: number of donors. */
+                _n(
+                    '%s donor is past the window and will be erased on the next nightly run.',
+                    '%s donors are past the window and will be erased on the next nightly run.',
+                    data.eligible_now,
+                    'dono'
+                ),
+                data.eligible_now.toLocaleString()
+            ) }
+            { ' ' }
+            { data.within_days > data.eligible_now && sprintf(
+                /* translators: %s: number of donors. */
+                _n(
+                    '%s in total will have gone within 30 days.',
+                    '%s in total will have gone within 30 days.',
+                    data.within_days,
+                    'dono'
+                ),
+                data.within_days.toLocaleString()
+            ) }
+        </Notice>
+    );
+}
 
 export default function PrivacyPanel( { s } ) {
     return (
@@ -50,10 +119,12 @@ export default function PrivacyPanel( { s } ) {
                         max={ 100 }
                         className="dono-input"
                         style={ { maxWidth: 120 } }
-                        value={ s.value( 'donor_retention_years', 10 ) }
+                        value={ s.value( 'donor_retention_years', 7 ) }
                         onChange={ ( e ) => s.edit( { donor_retention_years: parseInt( e.target.value, 10 ) || 0 } ) }
                     />
                 </FormRow>
+
+                <RetentionPreview />
 
                 <FormRow
                     label={ __( 'Keep the activity log for (days)', 'dono' ) }

@@ -7,6 +7,7 @@ namespace Dono\Foundation;
 use Dono\Campaigns\CampaignPermalinks;
 use Dono\Core\Activator;
 use Dono\Core\CoreModule;
+use Dono\Donors\DonorRetention;
 use Dono\Foundation\Commands\CommandRegistry;
 use Dono\Donors\Portal\PortalPage;
 use Dono\Foundation\Auth\Capabilities;
@@ -173,6 +174,11 @@ final class Plugin
         Capabilities::applyMapping(
             Capabilities::currentMapping()
         );
+
+        // Retention destroys donor PII on a schedule and nothing asks first,
+        // so it does not start today. An org importing years of history would
+        // otherwise lose part of it before seeing the setting.
+        DonorRetention::deferBy();
 
         Onboarding::maybeSeedOnActivation();
 

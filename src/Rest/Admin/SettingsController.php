@@ -7,6 +7,7 @@ use Dono\Foundation\Auth\Capabilities;
 
 use Dono\Donations\Donation;
 use Dono\Donations\DonationQueries;
+use Dono\Donors\DonorRetention;
 use Dono\Settings\SettingsService;
 use WP_Error;
 use WP_REST_Request;
@@ -23,12 +24,30 @@ final class SettingsController
 {
     private const NAMESPACE = 'dono/v1';
 
-    public function __construct(private SettingsService $settings)
+    public function __construct(
+        private SettingsService $settings,
+        private DonorRetention $retention,
+    ) {
+    }
+
+    public function retentionPreview(WP_REST_Request $request): WP_REST_Response
     {
+        return new WP_REST_Response($this->retention->preview((int) $request['days']), 200);
     }
 
     public function registerRoutes(): void
     {
+        // Read-only, and deliberately not part of the privacy group: it is a
+        // count of what the retention sweep would take, not a setting.
+        register_rest_route(self::NAMESPACE, '/admin/settings/retention-preview', [
+            'methods'             => WP_REST_Server::READABLE,
+            'callback'            => [$this, 'retentionPreview'],
+            'permission_callback' => [$this, 'canAccess'],
+            'args'                => [
+                'days' => ['type' => 'integer', 'default' => 30, 'minimum' => 1, 'maximum' => 365],
+            ],
+        ]);
+
         register_rest_route(self::NAMESPACE, '/admin/settings/(?P<group>[a-z0-9_-]+)', [
             [
                 'methods'             => WP_REST_Server::READABLE,

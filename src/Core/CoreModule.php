@@ -857,7 +857,7 @@ final class CoreModule implements DonoModule
                     $c->get(RecurringPlanRepository::class),
                 )
             ),
-            new SettingsController(new SettingsService()),
+            new SettingsController(new SettingsService(), $c->get(DonorRetention::class)),
             new AdminLicenseController($c->get(LicenseService::class)),
             $c->get(PortalController::class),
             new RecurringController(
