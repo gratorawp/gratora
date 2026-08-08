@@ -39,13 +39,22 @@ function useBoundCampaign( campaignId ) {
         return Number( meta._dono_campaign_id || 0 );
     }, [] );
 
-    // On a campaign landing page the blocks inherit the page's campaign, so the
-    // picker is hidden. Elsewhere the author picks one.
-    const onCampaignPage = postMetaId > 0;
     const resolvedId = campaignId || postMetaId || 0;
-    const { record } = useEntityRecord( 'dono/v1', 'campaign', resolvedId, {
+    const { record, hasResolved } = useEntityRecord( 'dono/v1', 'campaign', resolvedId, {
         enabled: resolvedId > 0,
     } );
+
+    // A page keeps _dono_campaign_id after the campaign it names is deleted.
+    // Treating the meta alone as context hid the picker on a page that could no
+    // longer resolve a campaign at all, so the canvas said to pick one in a
+    // sidebar that was not offering the control.
+    const orphaned = postMetaId > 0 && hasResolved && ! record;
+
+    // Blocks on a campaign landing page inherit its campaign, so there is
+    // nothing to pick. Undecided while the lookup is in flight, or the picker
+    // flashes in and out on every load.
+    const onCampaignPage = postMetaId > 0 && ! orphaned;
+
     return { campaign: record, onCampaignPage, resolvedId };
 }
 
