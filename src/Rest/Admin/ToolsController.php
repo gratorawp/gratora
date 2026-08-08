@@ -11,6 +11,7 @@ use Dono\Analytics\Event;
 use Dono\Currency\FxBackfill;
 use Dono\Settings\SecretRedactor;
 use Dono\Foundation\Transfer\DataExporter;
+use Dono\Foundation\Transfer\DataImporter;
 use Dono\Foundation\Upgrade\UpgradeRunner;
 use Dono\Donations\AggregateSyncer;
 use Dono\Donors\Donor;
@@ -38,6 +39,7 @@ final class ToolsController
         private FxBackfill $fxBackfill,
         private UpgradeRunner $upgrades,
         private DataExporter $exporter,
+        private DataImporter $importer,
     ) {
     }
 
@@ -449,8 +451,22 @@ final class ToolsController
     public function import(\WP_REST_Request $request): WP_REST_Response|\WP_Error
     {
         $body = (array) $request->get_json_params();
+
+        // A file carrying tables is a full export. Data first, so a settings
+        // import cannot be mistaken for a restore that quietly dropped
+        // everything except the settings.
+        $records = null;
+        if (is_array($body['tables'] ?? null)) {
+            $records = $this->importer->import($body);
+            \Dono\Donors\DonorRetention::deferBy();
+        }
+
         $settings = is_array($body['settings'] ?? null) ? $body['settings'] : null;
         if ($settings === null) {
+            if ($records !== null) {
+                return new WP_REST_Response(['imported' => true, 'records' => $records, 'settings_applied' => 0], 200);
+            }
+
             return new \WP_Error('dono_invalid_import', __('No settings payload found.', 'dono'), ['status' => 422]);
         }
 
@@ -478,7 +494,12 @@ final class ToolsController
             Capabilities::applyMapping($settings['dono_roles']['mapping']);
         }
 
-        return new WP_REST_Response(['ok' => true, 'applied' => $applied], 200);
+        return new WP_REST_Response([
+            'ok'       => true,
+            'applied'  => $applied,
+            'imported' => $records !== null,
+            'records'  => $records,
+        ], 200);
     }
 
     public function canAccess(): bool

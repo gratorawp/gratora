@@ -61,6 +61,7 @@ use Dono\Donors\DonorService;
 use Dono\Donors\Erasure\AnalyticsEventHandler;
 use Dono\Donors\Erasure\ClearHashesOnAlreadyErasedConsents;
 use Dono\Foundation\Transfer\DataExporter;
+use Dono\Foundation\Transfer\DataImporter;
 use Dono\Foundation\Upgrade\UpgradeRunner;
 use Dono\Foundation\Upgrade\UpgradeJob;
 use Dono\Foundation\Upgrade\UpgradeNotice;
@@ -420,6 +421,11 @@ final class CoreModule implements DonoModule
         }, 10, 3);
 
         $c->bind(DataExporter::class, fn (Container $c) => new DataExporter($c->get(Crypto::class)));
+
+        $c->bind(DataImporter::class, fn (Container $c) => new DataImporter(
+            $c->get(Crypto::class),
+            $c->get(IdentityHasher::class)
+        ));
 
         $c->bind(DonorAvatarUploader::class, fn () => new DonorAvatarUploader());
 
@@ -878,6 +884,7 @@ final class CoreModule implements DonoModule
                 new FxBackfill($c->get( FxRates::class)),
                 $c->get(UpgradeRunner::class),
                 $c->get(DataExporter::class),
+                $c->get(DataImporter::class),
             ),
             new ExportsController(
                 $c->get(DonorExporter::class),
