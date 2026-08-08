@@ -362,9 +362,18 @@
     }
     &__actions {
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
         gap: 12px;
         margin-top: 4px;
+
+        // Their own row rather than beside the button. A message says
+        // something specific ("the most this site takes is 3 MB"), and beside
+        // a button it is squeezed into a column and wraps into a paragraph.
+        .dp-form__saved,
+        .dp-error {
+            flex: 1 0 100%;
+        }
     }
     &__saved {
         color: var(--dp-accent);
