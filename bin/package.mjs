@@ -76,6 +76,28 @@ if ( stragglers.length > 0 ) {
     process.exit( 1 );
 }
 
+/**
+ * The prefixed vendor is what the plugin actually loads at runtime, and it is
+ * Strauss output rather than anything composer restores. A zip without it
+ * installs cleanly and then fatals on the first query or the first receipt,
+ * and it cannot be caught by running the plugin locally, where the directory
+ * is present whether or not the build produced it.
+ */
+const REQUIRED_PREFIXED = [
+    [ 'dono', 'queryable' ],   // every database call
+    [ 'mpdf', 'mpdf' ],        // receipts and annual statements
+];
+
+const missingPrefixed = REQUIRED_PREFIXED
+    .filter( ( parts ) => ! existsSync( path.join( root, 'vendor-prefixed', ...parts ) ) )
+    .map( ( parts ) => parts.join( '/' ) );
+
+if ( missingPrefixed.length > 0 ) {
+    console.error( `vendor-prefixed/ is missing: ${ missingPrefixed.join( ', ' ) }` );
+    console.error( 'Run `composer strauss` before packaging.' );
+    process.exit( 1 );
+}
+
 const matchers = rules().map( toMatcher );
 const excluded = [];
 
