@@ -254,8 +254,14 @@ final class DonorRepository
      */
     public function topByLifetimeValue(int $limit = 20): array
     {
+        // Donors who have given nothing are not part of a lifetime-value
+        // ranking. Without this they pad the list to its limit, so a site with
+        // three donors showed seventeen rows of nobody at 0.00.
         $rows = DB::table('dono_donors')
-            ->whereRaw('redacted_at IS NULL')
+            // One fragment, not two: whereRaw contributes no AND connector, so
+            // a second call runs straight into the first and the SQL will not
+            // parse.
+            ->whereRaw('redacted_at IS NULL AND total_donated_cents > 0')
             ->selectRaw('id, first_name, last_name, country, total_donated_cents, donations_count, last_donation_at')
             ->orderBy('total_donated_cents', 'DESC')
             ->limit($limit)

@@ -174,7 +174,11 @@ function TopDonorsLeaderboard( { rows } ) {
                 { rows.map( ( r, i ) => (
                     <tr key={ r.id }>
                         <td className="dono-num dono-rank">{ i + 1 }</td>
-                        <td><a href={ donorHref( r.id ) }>{ r.name }</a></td>
+                        <td>
+                            <a className="dono-row__link dono-row__link--strong" href={ donorHref( r.id ) }>
+                                { r.name }
+                            </a>
+                        </td>
                         <td>{ r.country || '-' }</td>
                         <td className="dono-num">{ r.donations_count }</td>
                         <td className="dono-num">{ formatAmount( r.total_donated_cents ) }</td>
@@ -314,23 +318,32 @@ function AtRiskTable() {
 
     return (
         <div className="dono-at-risk">
-            <div className="dono-at-risk__head">
-                <span className="dono-at-risk__count">
-                    { total === 1
-                        ? __( '1 at-risk donor', 'dono' )
-                        : sprintf( /* translators: %s: count */ __( '%s at-risk donors', 'dono' ), total.toLocaleString() ) }
-                </span>
-                <button
-                    type="button"
-                    className="components-button is-secondary"
-                    onClick={ () => downloadFile( '/dono/v1/admin/donors/at-risk/export', `dono-at-risk-${ new Date().toISOString().slice( 0, 10 ) }.csv` ).catch( ( e ) => notify.error( e?.message || __( 'Could not export the list.', 'dono' ) ) ) }
-                >
-                    { __( 'Export CSV', 'dono' ) }
-                </button>
-            </div>
+            { total > 0 && (
+                <div className="dono-at-risk__head">
+                    <span className="dono-at-risk__count">
+                        { total === 1
+                            ? __( '1 at-risk donor', 'dono' )
+                            : sprintf( /* translators: %s: count */ __( '%s at-risk donors', 'dono' ), total.toLocaleString() ) }
+                    </span>
+                    <button
+                        type="button"
+                        className="components-button is-secondary"
+                        onClick={ () => downloadFile( '/dono/v1/admin/donors/at-risk/export', `dono-at-risk-${ new Date().toISOString().slice( 0, 10 ) }.csv` ).catch( ( e ) => notify.error( e?.message || __( 'Could not export the list.', 'dono' ) ) ) }
+                    >
+                        { __( 'Export CSV', 'dono' ) }
+                    </button>
+                </div>
+            ) }
             { loading && ! data && <p className="dono-loading">{ __( 'Loading…', 'dono' ) }</p> }
             { error && ! loading && <p className="dono-error">{ error }</p> }
-            { ! error && data && data.length === 0 && <p className="dono-empty">{ __( 'No donors are slipping. Nice work.', 'dono' ) }</p> }
+            { ! error && data && data.length === 0 && (
+                <EmptyState
+                    compact
+                    icon={ <UsersIcon size={ 22 } strokeWidth={ 1.75 } /> }
+                    title={ __( 'No donors are slipping', 'dono' ) }
+                    body={ __( 'Donors appear here when they have gone quiet for longer than usual, so you can reach them before they lapse.', 'dono' ) }
+                />
+            ) }
             { data && data.length > 0 && (
                 <>
                     <table className="dono-table">
@@ -346,7 +359,11 @@ function AtRiskTable() {
                         <tbody>
                             { data.map( ( r ) => (
                                 <tr key={ r.id }>
-                                    <td><a href={ donorHref( r.id ) }>{ r.name }</a></td>
+                                    <td>
+                                        <a className="dono-row__link dono-row__link--strong" href={ donorHref( r.id ) }>
+                                            { r.name }
+                                        </a>
+                                    </td>
                                     <td>{ r.email || '-' }</td>
                                     <td>{ r.country || '-' }</td>
                                     <td className="dono-num">{ formatAmount( r.total_donated_cents ) }</td>
