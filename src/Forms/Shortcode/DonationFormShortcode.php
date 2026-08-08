@@ -479,9 +479,16 @@ HTML;
                 }, $opts);
             }
 
+            // The author's choice only when the donor can actually use it in
+            // this context; otherwise the first one they can, as before.
+            $preselected = (string) ($blockAttrs['preselected'] ?? '');
+            $default     = in_array($preselected, $ctxIds, true)
+                ? $preselected
+                : ($ctxIds[0] ?? ($opts[0]['id'] ?? $gateway));
+
             $gatewaysCfg = [
                 'options' => $opts,
-                'default' => $ctxIds[0] ?? ($opts[0]['id'] ?? $gateway),
+                'default' => $default,
                 'style'   => in_array($blockStyle, ['cards', 'list'], true) ? $blockStyle : 'cards',
             ];
         }

@@ -89,6 +89,34 @@ final class GatewayManager
      * the switch, and canCharge() is what that amounts to. The `enabled` flag
      * belongs to gateways configured entirely in settings, like offline.
      */
+    /**
+     * Declare an `enabled` flag per registered gateway on the gateways settings
+     * group, so the screen can persist one through the normal save.
+     *
+     * SettingsService::accept() drops top-level keys a group does not declare,
+     * and a gateway id is only knowable at runtime: an add-on's would be
+     * rejected silently, giving the org a toggle that never saved.
+     *
+     * @param array<string,mixed> $groups
+     * @return array<string,mixed>
+     */
+    public function declareSettings(array $groups): array
+    {
+        if (! is_array($groups['gateways']['defaults'] ?? null)) {
+            return $groups;
+        }
+
+        foreach (array_keys($this->gateways) as $id) {
+            $existing = is_array($groups['gateways']['defaults'][$id] ?? null)
+                ? $groups['gateways']['defaults'][$id]
+                : [];
+            // Union, not merge: a gateway declaring its own defaults keeps them.
+            $groups['gateways']['defaults'][$id] = $existing + ['enabled' => true];
+        }
+
+        return $groups;
+    }
+
     public function isOn(string $id): bool
     {
         $g = $this->gateways[$id] ?? null;

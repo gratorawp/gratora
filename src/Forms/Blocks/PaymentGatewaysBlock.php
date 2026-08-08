@@ -38,6 +38,10 @@ final class PaymentGatewaysBlock implements Block
             'allowed'      => ['type' => 'array',  'default' => []],
             'descriptions' => ['type' => 'object', 'default' => null],
             'style'        => ['type' => 'string', 'default' => 'cards'],
+            // Empty means the first one the donor can actually use. Naming one
+            // is a preference, not a guarantee: it is skipped when it cannot
+            // serve the chosen currency or frequency.
+            'preselected'  => ['type' => 'string', 'default' => ''],
         ];
     }
 

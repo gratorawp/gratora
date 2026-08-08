@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
 import Card from '../../_shared/components/Card';
+import { ToggleRow } from '../../_shared/components/Switch';
 import Btn from '../../_shared/components/Btn';
 import BrandMark from '../../_shared/components/BrandMark';
 import FormRow from '../../_shared/components/FormRow';
@@ -391,6 +392,15 @@ export default function StripeKeysCard( { s } ) {
                         { __( 'Find them in the Stripe dashboard under Developers, API keys. Add your test keys first to try a donation safely.', 'dono' ) }
                     </p>
                 </>
+            ) }
+
+            { connected && (
+                <ToggleRow
+                    title={ __( 'Offer Stripe to donors', 'dono' ) }
+                    sub={ __( 'Turn off to stop showing it without removing your keys.', 'dono' ) }
+                    checked={ !! s.value( 'stripe.enabled', true ) }
+                    onChange={ s.setValue( 'stripe.enabled' ) }
+                />
             ) }
 
             { connected && ! canCharge && (

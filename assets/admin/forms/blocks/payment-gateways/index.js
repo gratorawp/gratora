@@ -11,7 +11,7 @@ function registeredGateways() {
 }
 
 function Edit( { attributes, setAttributes } ) {
-    const { allowed = [], descriptions = {}, style = 'cards' } = attributes;
+    const { allowed = [], descriptions = {}, style = 'cards', preselected = '' } = attributes;
     const gateways = registeredGateways();
     const allIds   = gateways.map( ( g ) => g.id );
 
@@ -61,6 +61,17 @@ function Edit( { attributes, setAttributes } ) {
                         </div>
                     ) ) }
                     <SelectControl
+                        label={ __( 'Preselected', 'dono' ) }
+                        help={ __( 'Skipped for a donor whose currency or frequency it cannot take, who then gets the first one that works.', 'dono' ) }
+                        value={ shown.some( ( g ) => g.id === preselected ) ? preselected : '' }
+                        options={ [
+                            { value: '', label: __( 'First one that applies', 'dono' ) },
+                            ...shown.map( ( g ) => ( { value: g.id, label: g.label } ) ),
+                        ] }
+                        onChange={ ( v ) => setAttributes( { preselected: v } ) }
+                        __nextHasNoMarginBottom
+                    />
+                    <SelectControl
                         label={ __( 'Style', 'dono' ) }
                         value={ style }
                         options={ [
@@ -104,6 +115,7 @@ export default function register( api ) {
             allowed:      { type: 'array',  default: [] },
             descriptions: { type: 'object', default: {} },
             style:        { type: 'string', default: 'cards' },
+            preselected:  { type: 'string', default: '' },
         },
         edit: Edit,
         save: () => null,

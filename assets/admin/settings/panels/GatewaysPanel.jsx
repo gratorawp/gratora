@@ -71,11 +71,12 @@ export default function GatewaysPanel( { s } ) {
             </Card>
 
             <StripeKeysCard s={ s } />
-            <PayPalKeysCard />
+            <PayPalKeysCard s={ s } />
 
             { gatewayPanels.map( ( panel ) => (
                 <ExtensionSection key={ panel.id } panel={ panel } />
             ) ) }
+
 
             <Card
                 leading={ <BrandMark letter="O" variant="offline" /> }

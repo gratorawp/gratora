@@ -66,11 +66,12 @@ final class SettingsService
                 // Org-wide test mode; per-form settings.test_mode also triggers it.
                 'test_mode' => false,
                 'stripe' => [
-                    // No `enabled` flag: a credentialed gateway is on when it
-                    // can charge, which GatewayManager::isOn() decides from the
-                    // connected account. Webhook signing secrets are configured
-                    // manually, per mode (Stripe issues a distinct secret for
-                    // the test and live endpoints).
+                    // `enabled` is declared at runtime for every registered
+                    // gateway, see GatewayManager::declareSettings(). A gateway
+                    // is offered when it is enabled AND can charge, so keys can
+                    // stay on file while the method is paused. Webhook secrets
+                    // are set per mode, since Stripe issues a distinct one for
+                    // the test and live endpoints.
                     'webhook_secret_test' => '',
                     'webhook_secret_live' => '',
                 ],

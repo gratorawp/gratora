@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
 import Card from '../../_shared/components/Card';
+import { ToggleRow } from '../../_shared/components/Switch';
 import Btn from '../../_shared/components/Btn';
 import BrandMark from '../../_shared/components/BrandMark';
 import FormRow from '../../_shared/components/FormRow';
@@ -145,7 +146,7 @@ function ModeKeys( { mode, account, onSaved, onRemove } ) {
     );
 }
 
-export default function PayPalKeysCard() {
+export default function PayPalKeysCard( { s } ) {
     const [ status, setStatus ]       = useState( null );
     const [ loading, setLoading ]     = useState( true );
     const [ loadError, setLoadError ] = useState( false );
@@ -233,6 +234,15 @@ export default function PayPalKeysCard() {
                         { __( 'Create an app at developer.paypal.com under Apps and Credentials. Sandbox and live are separate apps, so each needs its own credentials here.', 'dono' ) }
                     </p>
                 </>
+            ) }
+
+            { connected && (
+                <ToggleRow
+                    title={ __( 'Offer PayPal to donors', 'dono' ) }
+                    sub={ __( 'Turn off to stop showing it without removing your credentials.', 'dono' ) }
+                    checked={ !! s.value( 'paypal.enabled', true ) }
+                    onChange={ s.setValue( 'paypal.enabled' ) }
+                />
             ) }
 
             { connected && (

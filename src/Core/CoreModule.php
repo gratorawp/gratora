@@ -959,6 +959,11 @@ final class CoreModule implements DonoModule
         $blocks->add(new CheckboxBlock());
         $blocks->add(new MultiSelectBlock());
 
+        add_filter(
+            'dono.settings.groups',
+            [$c->get(GatewayManager::class), 'declareSettings']
+        );
+
         $blocks->add(new CampaignImageBlock($c->get(CampaignRepository::class)));
         $blocks->add(new CampaignProgressBlock($c->get(CampaignRepository::class)));
         $blocks->add(new CampaignStatBlock(
