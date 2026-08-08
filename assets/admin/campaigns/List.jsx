@@ -12,7 +12,7 @@ import EmptyState from '../_shared/components/EmptyState';
 import { rowLinkProps } from '../_shared/rowLink';
 import ConfirmDialog from '../_shared/components/ConfirmDialog';
 import KpiStrip from '../_shared/components/KpiStrip';
-import GoalBar from '../_shared/components/GoalBar';
+import { GoalCell } from '../_shared/components/GoalBar';
 import CreateCampaignDrawer from './CreateCampaignDrawer';
 import notify from '../_shared/notify';
 
@@ -133,33 +133,7 @@ export default function List() {
         {
             id:    'goal',
             label: __( 'Goal', 'dono' ),
-            render: ( { item } ) => {
-                const type = item.goal_type || 'amount';
-                const isAmount = type === 'amount';
-                const target   = Number( ( isAmount ? item.goal_cents : item.goal_count ) || 0 );
-                const current  = Number( ( isAmount
-                    ? item.raised_cents
-                    : ( type === 'donors' ? item.donors_count : item.donations_count )
-                ) || 0 );
-                const hasGoal = target > 0;
-                const pct     = hasGoal ? Math.min( 100, Math.max( 0, Math.round( ( current / target ) * 100 ) ) ) : 0;
-                const template = type === 'donors'
-                    ? /* translators: %s: donor count */ _n( '%s donor', '%s donors', target, 'dono' )
-                    : /* translators: %s: donation count */ _n( '%s donation', '%s donations', target, 'dono' );
-                const label   = ! hasGoal
-                    ? __( 'No goal', 'dono' )
-                    : isAmount
-                        ? formatAmount( target, item.currency )
-                        : sprintf( template, target.toLocaleString() );
-                return (
-                    <GoalBar
-                        left={ label }
-                        right={ hasGoal ? `${ pct }%` : '-' }
-                        pct={ pct }
-                        muted={ ! hasGoal }
-                    />
-                );
-            },
+            render: ( { item } ) => <GoalCell item={ item } />,
         },
         {
             id:            'donations_count',

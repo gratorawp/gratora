@@ -19,6 +19,7 @@ import TokenEditor from '../_shared/styling/TokenEditor';
 import { Copy as CopyIcon, Trash2 as TrashIcon, Coins, HandHeart, Users as UsersIcon, ListChecks, Plus } from 'lucide-react';
 import EmptyState from '../_shared/components/EmptyState';
 import FormTemplatePicker from '../_shared/components/FormTemplatePicker';
+import { GoalCell } from '../_shared/components/GoalBar';
 import { IconCoins, IconHeart, IconUsers, IconActivity } from './icons';
 import { IconGeneral, IconGoal, IconAppearance, IconDefaults, IconAdvanced } from './settings-icons';
 import { useExtensionTabs, ExtensionTabPanel } from '../_shared/extensionTabs';
@@ -1061,7 +1062,7 @@ function FormsTab( { campaign } ) {
         sort:    { field: 'updated_at', direction: 'desc' },
         filters: [],
         search:  '',
-        fields:  [ 'title', 'status', 'shortcode', 'updated_at' ],
+        fields:  [ 'title', 'status', 'goal', 'shortcode', 'updated_at' ],
     } );
     const [ data, setData ]         = useState( [] );
     const [ total, setTotal ]       = useState( 0 );
@@ -1175,6 +1176,11 @@ function FormsTab( { campaign } ) {
                     { formatDate( item.updated_at ) }
                 </span>
             ),
+        },
+        {
+            id:    'goal',
+            label: __( 'Goal', 'dono' ),
+            render: ( { item } ) => <GoalCell item={ item } />,
         },
         {
             id:     'shortcode',

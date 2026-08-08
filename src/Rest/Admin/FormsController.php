@@ -14,7 +14,9 @@ use Dono\Forms\FormRepository;
 use Dono\Forms\FormService;
 use Dono\Forms\FormTemplates;
 use Dono\Forms\Shortcode\DonationFormShortcode;
+use Dono\Foundation\Helpers\Money;
 use Dono\Funds\FundRepository;
+use Dono\Vendor\Queryable\DB;
 use Dono\Gateways\GatewayManager;
 use Dono\Rest\Schemas\FormSchemas;
 use Dono\Settings\SettingsService;
@@ -176,8 +178,14 @@ final class FormsController
             $campaignCache[$cid] = $this->campaigns->findById((int) $cid);
         }
 
+        $statsCache = $this->statsFor(array_map(fn (Form $f): int => (int) $f->id, $result['items']));
+
         $shaped = array_map(
-            fn (Form $f): array => $this->shapeFormSummary($f, $campaignCache[$f->campaign_id] ?? null),
+            fn (Form $f): array => $this->shapeFormSummary(
+                $f,
+                $campaignCache[$f->campaign_id] ?? null,
+                $statsCache[(int) $f->id] ?? null,
+            ),
             $result['items'],
         );
 
@@ -366,8 +374,43 @@ final class FormsController
         return new WP_REST_Response(['deleted' => true, 'id' => $form->id], 200);
     }
 
-    private function shapeFormSummary(Form $f, ?Campaign $c): array
+    /**
+     * Per-form totals for a whole page of forms in one query, keyed by form id.
+     * A form with no donations yet has no row at all, hence the null default at
+     * the call site rather than zeros here.
+     *
+     * @param  int[] $formIds
+     * @return array<int, array<string, mixed>>
+     */
+    private function statsFor(array $formIds): array
     {
+        if ($formIds === []) {
+            return [];
+        }
+
+        $rows = DB::table('dono_form_donation_stats')
+            ->whereIn('form_id', array_values(array_unique($formIds)))
+            ->getAll();
+
+        $byForm = [];
+        foreach (is_array($rows) ? $rows : [] as $row) {
+            $row = (array) $row;
+            $byForm[(int) ($row['form_id'] ?? 0)] = $row;
+        }
+
+        return $byForm;
+    }
+
+    /** @param array<string, mixed>|null $stats */
+    private function shapeFormSummary(Form $f, ?Campaign $c, ?array $stats = null): array
+    {
+        $settings = is_array($f->settings) ? $f->settings : [];
+        $goal     = is_array($settings['goal'] ?? null) ? $settings['goal'] : [];
+        $goalType = (string) ($goal['type'] ?? 'none');
+        if (! in_array($goalType, ['amount', 'donations', 'donors'], true)) {
+            $goalType = 'none';
+        }
+
         return [
             'id'           => $f->id,
             'title'        => $f->title,
@@ -378,6 +421,15 @@ final class FormsController
             'published_at' => $f->published_at,
             'updated_at'   => $f->updated_at,
             'created_at'   => $f->created_at,
+            // The form's own goal, not the campaign's. A form may have none
+            // while its campaign does, and the two are never added together.
+            'goal_type'       => $goalType,
+            'goal_cents'      => (int) ($goal['amount_cents'] ?? 0),
+            'goal_count'      => (int) ($goal['count'] ?? 0),
+            'currency'        => $c ? (string) $c->currency : Money::defaultCurrency(),
+            'raised_cents'    => (int) ($stats['raised_cents'] ?? 0),
+            'donations_count' => (int) ($stats['donations_count'] ?? 0),
+            'donors_count'    => (int) ($stats['donors_count'] ?? 0),
         ];
     }
 
