@@ -46,11 +46,13 @@ final class TestModeBadge extends HookProvider
             return;
         }
 
+        // Both name Dono: other plugins put their own test badge in this bar,
+        // and a bare "test mode" leaves the operator guessing whose till is open.
         $title = $orgWide
-            ? __('Dono test mode', 'dono')
+            ? __('Dono is in test mode', 'dono')
             : sprintf(
                 /* translators: %d: how many published forms are in test mode. */
-                _n('%d form in test mode', '%d forms in test mode', $forms, 'dono'),
+                _n('%d Dono form in test mode', '%d Dono forms in test mode', $forms, 'dono'),
                 $forms
             );
 
@@ -60,14 +62,27 @@ final class TestModeBadge extends HookProvider
             // where the eye already goes. The default group buries it among
             // the site and comment links.
             'parent' => 'top-secondary',
-            'title'  => '<span class="dono-test-mode-badge">' . esc_html($title) . '</span>',
-            'href'   => esc_url(admin_url('admin.php?page=dono-settings#payments')),
+            'title'  => '<span class="dono-test-mode-badge">' . $this->icon() . esc_html($title) . '</span>',
+            'href'   => esc_url(admin_url('admin.php?page=dono-settings&tab=gateways')),
             'meta'  => [
                 'title' => $orgWide
                     ? __('No card is charged and these donations stay out of your reporting. Turn this off before you go live.', 'dono')
                     : __('These forms take no real money. Every other form on the site does.', 'dono'),
             ],
         ]);
+    }
+
+    /** lucide flask-conical, inlined so the badge does not wait on an icon font. */
+    private function icon(): string
+    {
+        return '<svg class="dono-test-mode-badge__icon" viewBox="0 0 24 24" fill="none"'
+            . ' stroke="currentColor" stroke-width="2" stroke-linecap="round"'
+            . ' stroke-linejoin="round" aria-hidden="true" focusable="false">'
+            . '<path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0'
+            . ' 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"/>'
+            . '<path d="M6.453 15h11.094"/>'
+            . '<path d="M8.5 2h7"/>'
+            . '</svg>';
     }
 
     public function styles(): void
@@ -81,12 +96,19 @@ final class TestModeBadge extends HookProvider
         ?>
         <style>
             #wpadminbar #wp-admin-bar-dono-test-mode .dono-test-mode-badge {
-                display: inline-block;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
                 padding: 0 10px;
                 background: #b97a05;
                 color: #fff;
                 font-weight: 600;
                 line-height: 32px;
+            }
+            #wpadminbar #wp-admin-bar-dono-test-mode .dono-test-mode-badge__icon {
+                width: 15px;
+                height: 15px;
+                flex: none;
             }
             #wpadminbar #wp-admin-bar-dono-test-mode:hover .dono-test-mode-badge { background: #a06a04; }
             #wpadminbar #wp-admin-bar-dono-test-mode > .ab-item { padding: 0; }

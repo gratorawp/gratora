@@ -68,7 +68,7 @@ final class TestModeBadgeTest extends IntegrationTestCase
     {
         $this->orgWide(true);
 
-        $this->assertSame('Dono test mode', $this->title());
+        $this->assertSame('Dono is in test mode', $this->title());
     }
 
     public function test_a_single_form_left_in_test_mode_is_called_out_on_its_own(): void
@@ -78,7 +78,7 @@ final class TestModeBadgeTest extends IntegrationTestCase
         $this->orgWide(false);
         $this->publishedForm(true);
 
-        $this->assertSame('1 form in test mode', $this->title());
+        $this->assertSame('1 Dono form in test mode', $this->title());
     }
 
     public function test_the_count_is_of_forms_not_of_anything_else(): void
@@ -88,7 +88,7 @@ final class TestModeBadgeTest extends IntegrationTestCase
         $this->publishedForm(true);
         $this->publishedForm(false);
 
-        $this->assertSame('2 forms in test mode', $this->title());
+        $this->assertSame('2 Dono forms in test mode', $this->title());
     }
 
     public function test_a_draft_form_in_test_mode_is_not_worth_warning_about(): void
@@ -107,7 +107,29 @@ final class TestModeBadgeTest extends IntegrationTestCase
         $this->publishedForm(true);
 
         // Both are true, but "some forms" understates a site where nothing is real.
-        $this->assertSame('Dono test mode', $this->title());
+        $this->assertSame('Dono is in test mode', $this->title());
+    }
+
+    /** The badge is the shortest route to the switch, so it has to land on it. */
+    public function test_the_badge_links_to_the_tab_that_holds_the_switch(): void
+    {
+        $this->orgWide(true);
+
+        $href = (string) $this->bar()->get_node('dono-test-mode')->href;
+
+        $this->assertStringContainsString('page=dono-settings', $href);
+        $this->assertStringContainsString('tab=gateways', $href);
+    }
+
+    public function test_the_badge_carries_an_icon_that_screen_readers_skip(): void
+    {
+        $this->orgWide(true);
+
+        $title = (string) $this->bar()->get_node('dono-test-mode')->title;
+
+        $this->assertStringContainsString('<svg', $title);
+        // The words already say it; the icon repeating them is just noise.
+        $this->assertStringContainsString('aria-hidden="true"', $title);
     }
 
     public function test_someone_who_cannot_see_donations_is_not_shown_the_till(): void
