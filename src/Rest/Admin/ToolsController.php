@@ -10,6 +10,7 @@ use Dono\Async\AsyncDispatcher;
 use Dono\Analytics\Event;
 use Dono\Currency\FxBackfill;
 use Dono\Settings\SecretRedactor;
+use Dono\Foundation\Transfer\DataExporter;
 use Dono\Foundation\Upgrade\UpgradeRunner;
 use Dono\Donations\AggregateSyncer;
 use Dono\Donors\Donor;
@@ -36,6 +37,7 @@ final class ToolsController
         private \Dono\Mail\Mailer $mailer,
         private FxBackfill $fxBackfill,
         private UpgradeRunner $upgrades,
+        private DataExporter $exporter,
     ) {
     }
 
@@ -55,6 +57,23 @@ final class ToolsController
             'methods'             => WP_REST_Server::READABLE,
             'callback'            => [$this, 'export'],
             'permission_callback' => [$this, 'canManage'],
+        ]);
+
+        // Everything the org owns, in one file that restores on another site.
+        // Same permission as settings export: it carries donor PII.
+        register_rest_route(self::NAMESPACE, '/admin/tools/export-all', [
+            'methods'             => WP_REST_Server::READABLE,
+            'callback'            => [$this, 'exportAll'],
+            'permission_callback' => [$this, 'canManage'],
+        ]);
+
+        register_rest_route(self::NAMESPACE, '/admin/tools/export-csv', [
+            'methods'             => WP_REST_Server::READABLE,
+            'callback'            => [$this, 'exportCsv'],
+            'permission_callback' => [$this, 'canManage'],
+            'args'                => [
+                'what' => ['type' => 'string', 'enum' => ['donors', 'donations'], 'default' => 'donors'],
+            ],
         ]);
 
         register_rest_route(self::NAMESPACE, '/admin/tools/import', [
@@ -363,6 +382,43 @@ final class ToolsController
         'dono_email_settings',
         'dono_reference_settings',
     ];
+
+    /**
+     * Served straight to the client rather than through WP_REST_Response: the
+     * body is built a page at a time, and handing it back as one string would
+     * put the whole site in memory to say it did not need to be.
+     */
+    public function exportAll(): void
+    {
+        $out = fopen('php://temp/maxmemory:8388608', 'r+');
+        $this->exporter->writeJson($out);
+        rewind($out);
+
+        nocache_headers();
+        header('Content-Type: application/json; charset=utf-8');
+        header('Content-Disposition: attachment; filename="dono-export-' . gmdate('Y-m-d') . '.json"');
+        fpassthru($out);
+        fclose($out);
+        exit;
+    }
+
+    public function exportCsv(WP_REST_Request $request): void
+    {
+        $what = (string) $request['what'];
+
+        $out = fopen('php://temp/maxmemory:8388608', 'r+');
+        $what === 'donations'
+            ? $this->exporter->writeDonationsCsv($out)
+            : $this->exporter->writeDonorsCsv($out);
+        rewind($out);
+
+        nocache_headers();
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="dono-' . $what . '-' . gmdate('Y-m-d') . '.csv"');
+        fpassthru($out);
+        fclose($out);
+        exit;
+    }
 
     public function export(): WP_REST_Response
     {

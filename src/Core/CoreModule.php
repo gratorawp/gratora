@@ -60,6 +60,7 @@ use Dono\Donors\DonorRepository;
 use Dono\Donors\DonorService;
 use Dono\Donors\Erasure\AnalyticsEventHandler;
 use Dono\Donors\Erasure\ClearHashesOnAlreadyErasedConsents;
+use Dono\Foundation\Transfer\DataExporter;
 use Dono\Foundation\Upgrade\UpgradeRunner;
 use Dono\Foundation\Upgrade\UpgradeJob;
 use Dono\Foundation\Upgrade\UpgradeNotice;
@@ -417,6 +418,8 @@ final class CoreModule implements DonoModule
             if (! $post instanceof \WP_Post) return;
             $c->get(CampaignService::class)->onPagePublished((string) $new, (string) $old, $post);
         }, 10, 3);
+
+        $c->bind(DataExporter::class, fn (Container $c) => new DataExporter($c->get(Crypto::class)));
 
         $c->bind(DonorAvatarUploader::class, fn () => new DonorAvatarUploader());
 
@@ -874,6 +877,7 @@ final class CoreModule implements DonoModule
                 $c->get( Mailer::class),
                 new FxBackfill($c->get( FxRates::class)),
                 $c->get(UpgradeRunner::class),
+                $c->get(DataExporter::class),
             ),
             new ExportsController(
                 $c->get(DonorExporter::class),
