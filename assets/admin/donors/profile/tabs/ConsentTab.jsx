@@ -69,8 +69,25 @@ function RedactDialog( { donor, onClose, onDone } ) {
 
 export default function ConsentTab( { consents, donor, onChanged } ) {
     const [ showRedact, setShowRedact ] = useState( false );
+    const [ hiding, setHiding ] = useState( false );
     const current = consents?.current || [];
     const history = consents?.history || [];
+
+    const setPublicHidden = async ( hidden ) => {
+        setHiding( true );
+        try {
+            await apiFetch( {
+                path:   `/dono/v1/admin/donors/${ donor.id }`,
+                method: 'PATCH',
+                data:   { public_hidden: hidden },
+            } );
+            onChanged && onChanged();
+        } catch ( err ) {
+            notify.error( err?.message || __( 'Could not change this.', 'dono' ) );
+        } finally {
+            setHiding( false );
+        }
+    };
 
     return (
         <div>
@@ -118,6 +135,27 @@ export default function ConsentTab( { consents, donor, onChanged } ) {
 
             <div className="dp-card" style={ { marginTop: 14 } }>
                 <div className="dp-card__body">
+                    <div className="dp-data-action">
+                        <div className="dp-data-action__body">
+                            <div className="dp-data-action__title">{ __( 'Public visibility', 'dono' ) }</div>
+                            <div className="dp-data-action__sub">
+                                { donor?.public_hidden
+                                    ? __( 'Hidden. This donor does not appear in supporter walls, recent donations or top donor lists, and their picture and message are not shown. Their donations still count toward campaign totals.', 'dono' )
+                                    : __( 'Visible. This donor can appear by name in supporter walls, recent donations and top donor lists, with their picture and any public message.', 'dono' ) }
+                            </div>
+                        </div>
+                        { donor && ! donor.redacted_at && (
+                            <button
+                                type="button"
+                                className="btn"
+                                disabled={ hiding }
+                                onClick={ () => setPublicHidden( ! donor.public_hidden ) }
+                            >
+                                { donor.public_hidden ? __( 'Show publicly', 'dono' ) : __( 'Hide from public pages', 'dono' ) }
+                            </button>
+                        ) }
+                    </div>
+
                     <div className="dp-data-action">
                         <div className="dp-data-action__body">
                             <div className="dp-data-action__title">{ __( 'Data export', 'dono' ) }</div>
