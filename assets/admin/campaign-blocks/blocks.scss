@@ -86,6 +86,31 @@ $shadow-fallback:     0 20px 50px rgba(0, 0, 0, .25);
     &.is-lg .dono-stat__value { font-size: 42px; letter-spacing: -.028em; }
 }
 
+// Editor only: a stat whose figure this campaign cannot answer. Dashed and
+// muted rather than red, because nothing is wrong; the number does not exist
+// yet, and on the page the block simply renders nothing.
+.dono-stat-empty {
+    padding: 14px 16px;
+    border: 1px dashed var(--dono-border, #{$border-fallback});
+    border-radius: var(--dono-radius-sm, #{$radius-sm-fallback});
+    background: var(--dono-bg-soft, #{$bg-soft-fallback});
+
+    &__label {
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        color: var(--dono-text-muted, #{$text-muted-fallback});
+    }
+
+    &__note {
+        margin: 6px 0 0;
+        font-size: 13px;
+        line-height: 1.45;
+        color: var(--dono-text-muted, #{$text-muted-fallback});
+    }
+}
+
 // aspect-ratio with object-fit so a portrait upload and a landscape one crop to
 // the same shape rather than shoving the page around.
 .dono-block--image {

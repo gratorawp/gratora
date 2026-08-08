@@ -251,6 +251,24 @@ function statIssue( campaign, metric ) {
     return null;
 }
 
+/**
+ * Stands in for a stat the campaign cannot answer.
+ *
+ * Shows the figure's own label so the block still reads as the thing the
+ * author placed, greyed rather than styled as an error: nothing is broken,
+ * the number simply does not exist yet.
+ */
+function StatNotRendering( { label, issue } ) {
+    const blockProps = useBlockProps( { className: 'dono-stat-empty' } );
+
+    return (
+        <div { ...blockProps }>
+            <div className="dono-stat-empty__label">{ label }</div>
+            <p className="dono-stat-empty__note">{ issue }</p>
+        </div>
+    );
+}
+
 registerBlockType( 'dono/campaign-stat', {
     apiVersion: 3,
     title:       __( 'Campaign stat', 'dono' ),
@@ -317,14 +335,22 @@ registerBlockType( 'dono/campaign-stat', {
                     />
                 </PanelBody>
             </InspectorControls>
-            <CampaignCanvas
-                block="dono/campaign-stat"
-                attributes={ attributes }
-                setAttributes={ setAttributes }
-                onCampaignPage={ onCampaignPage }
-                resolvedId={ resolvedId }
-                icon="chart-bar"
-            />
+            { issue ? (
+                // A metric the campaign cannot answer renders nothing, which is
+                // right on the page and useless here: the editor would show
+                // WordPress's own "Block rendered as empty" and leave the author
+                // guessing which of their choices caused it.
+                <StatNotRendering label={ fallbackLabel } issue={ issue } />
+            ) : (
+                <CampaignCanvas
+                    block="dono/campaign-stat"
+                    attributes={ attributes }
+                    setAttributes={ setAttributes }
+                    onCampaignPage={ onCampaignPage }
+                    resolvedId={ resolvedId }
+                    icon="chart-bar"
+                />
+            ) }
         </>;
     },
     save: () => null,
