@@ -30,7 +30,7 @@ import {
 import { InterfaceSkeleton } from '@wordpress/interface';
 import { ShortcutProvider } from '@wordpress/keyboard-shortcuts';
 import { createBlock, parse, serialize } from '@wordpress/blocks';
-import { useRegistry, useSelect } from '@wordpress/data';
+import { useDispatch, useRegistry, useSelect } from '@wordpress/data';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 
@@ -88,14 +88,6 @@ function mergeFormSettings( stored ) {
         gateways:  { ...def.gateways,  ...( stored.gateways  || {} ) },
         goal:      { ...def.goal,      ...( stored.goal      || {} ) },
     };
-}
-
-function blocksInclude( list, name ) {
-    for ( const b of Array.isArray( list ) ? list : [] ) {
-        if ( b?.name === name ) return true;
-        if ( Array.isArray( b?.innerBlocks ) && b.innerBlocks.length && blocksInclude( b.innerBlocks, name ) ) return true;
-    }
-    return false;
 }
 
 let blocksReady = false;
@@ -606,7 +598,6 @@ export default function Editor( { formId } ) {
                                         campaigns={ campaigns }
                                         gateways={ gateways }
                                         funds={ funds }
-                                        blocks={ blocks }
                                     />
                                 ) : (
                                     <div className="dono-form-editor__canvas">
@@ -958,7 +949,7 @@ function PreviewPane( { loading, html, device, onDeviceChange } ) {
     );
 }
 
-function SettingsView( { c, campaigns, gateways, funds, blocks } ) {
+function SettingsView( { c, campaigns, gateways, funds } ) {
     return (
         <div className="dono-form-editor__settings">
             <FormSettingsPanel
@@ -966,7 +957,6 @@ function SettingsView( { c, campaigns, gateways, funds, blocks } ) {
                 campaigns={ campaigns }
                 gateways={ gateways }
                 funds={ funds }
-                blocks={ blocks }
             />
         </div>
     );
@@ -1171,7 +1161,7 @@ const SETTINGS_TABS = [
     { id: 'embed',     label: __( 'Embed', 'dono' ) },
 ];
 
-function FormSettingsPanel( { c, campaigns, gateways, funds, blocks } ) {
+function FormSettingsPanel( { c, campaigns, gateways, funds } ) {
     const settings = useMemo(
         () => mergeFormSettings( c.record.settings ),
         [ c.record.settings ]
@@ -1201,7 +1191,7 @@ function FormSettingsPanel( { c, campaigns, gateways, funds, blocks } ) {
             <main className="dono-form-settings__main">
                 { activeTab === 'general'   && <GeneralSection   c={ c } campaigns={ campaigns } funds={ funds } settings={ settings } setSettings={ setSettings } /> }
                 { activeTab === 'goal'      && <GoalSection      settings={ settings } setSettings={ setSettings } /> }
-                { activeTab === 'gateways'  && <GatewaysSection  gateways={ gateways } settings={ settings } setSettings={ setSettings } blocks={ blocks } /> }
+                { activeTab === 'gateways'  && <GatewaysSection  gateways={ gateways } settings={ settings } setSettings={ setSettings } /> }
                 { activeTab === 'after'     && <AfterSection     settings={ settings } setSettings={ setSettings } /> }
                 { activeTab === 'embed'     && <EmbedSection     slug={ c.value( 'slug' ) } /> }
             </main>
@@ -1423,19 +1413,41 @@ function GoalSection( { settings, setSettings } ) {
         </SettingsRow>
     );
 }
-function GatewaysSection( { gateways, settings, setSettings, blocks = [] } ) {
-    // The payment-gateways block is the single writer of the allowed list on
-    // save (FormService::syncGatewayAllowed), so with the block on the form
-    // these checkboxes would be overwritten silently and are disabled instead.
-    // Read from the live editor blocks: the saved markup lags a block that was
-    // just added or removed.
-    const blockManaged = blocksInclude( blocks, 'dono/payment-gateways' );
+// Still listed and still tickable: what a form allows is the author's answer,
+// and Settings switching a gateway off is a separate one that can be undone.
+function gatewayLabel( g ) {
+    if ( g.enabled !== false ) return g.label;
+
+    /* translators: %s: payment gateway name. */
+    return sprintf( __( '%s (off in Settings)', 'dono' ), g.label );
+}
+
+function GatewaysSection( { gateways, settings, setSettings } ) {
+    // FormService::syncGatewayAllowed makes the payment-gateways block the sole
+    // writer of the allowed list on save, so when the form carries one these
+    // checkboxes edit the block rather than the setting. Writing to settings
+    // here would be overwritten by the block on the next save.
+    const block = useSelect( ( s ) => {
+        const store = s( 'core/block-editor' );
+        const id = store
+            .getClientIdsWithDescendants()
+            .find( ( cid ) => store.getBlockName( cid ) === 'dono/payment-gateways' );
+
+        return id ? { clientId: id, allowed: store.getBlockAttributes( id )?.allowed || [] } : null;
+    }, [] );
+    const { updateBlockAttributes } = useDispatch( 'core/block-editor' );
+
+    const allowed = block ? block.allowed : ( settings.gateways.allowed || [] );
 
     const toggleGateway = ( id ) => {
-        const current = settings.gateways.allowed || [];
-        const next = current.includes( id )
-            ? current.filter( ( g ) => g !== id )
-            : [ ...current, id ];
+        const next = allowed.includes( id )
+            ? allowed.filter( ( g ) => g !== id )
+            : [ ...allowed, id ];
+
+        if ( block ) {
+            updateBlockAttributes( block.clientId, { allowed: next } );
+            return;
+        }
         setSettings( { gateways: { ...settings.gateways, allowed: next } } );
     };
     return (
@@ -1443,21 +1455,15 @@ function GatewaysSection( { gateways, settings, setSettings, blocks = [] } ) {
             title={ __( 'Allowed gateways', 'dono' ) }
             description={ __( 'Pick which payment gateways are offered on this form. Leave empty to allow every gateway configured in Settings.', 'dono' ) }
         >
-            { blockManaged && (
-                <p className="dono-form-settings__notice">
-                    { __( 'A Payment gateways block on this form controls the list. Edit gateways from the form builder, not here.', 'dono' ) }
-                </p>
-            ) }
             <div className="dono-sidebar-list">
                 { gateways.map( ( g ) => (
                     <label key={ g.id } className="dono-sidebar-check">
                         <input
                             type="checkbox"
-                            checked={ ( settings.gateways.allowed || [] ).includes( g.id ) }
+                            checked={ allowed.includes( g.id ) }
                             onChange={ () => toggleGateway( g.id ) }
-                            disabled={ blockManaged }
                         />
-                        <span>{ g.label }</span>
+                        <span>{ gatewayLabel( g ) }</span>
                     </label>
                 ) ) }
             </div>

@@ -218,6 +218,9 @@ final class FormsController
                 'id'         => $gateway->id(),
                 'label'      => $gateway->label(),
                 'frequencies' => $gateway->frequencies(),
+                // Off in Settings means no donor sees it whatever a form
+                // allows, so the builder has to say so rather than offer it.
+                'enabled'    => $this->gateways->isOn($gateway->id()),
             ];
         }
         return new WP_REST_Response($shaped, 200);
