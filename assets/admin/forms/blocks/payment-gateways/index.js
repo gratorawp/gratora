@@ -1,9 +1,27 @@
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import { PanelBody, ToggleControl, TextControl, SelectControl, Notice } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { BlockIcons } from '../_shared/block-icons';
 
 const NAME = 'dono/payment-gateways';
+
+/**
+ * Why the count is lower than the switches suggest. Without this the hint reads
+ * "one gateway is live" beside two gateways switched on.
+ */
+function settingsReason( offInSettings ) {
+    const names = offInSettings.map( ( g ) => g.label ).join( ', ' );
+
+    /* translators: %s: comma-separated payment gateway names. */
+    const template = _n(
+        '%s is allowed here but switched off in Settings.',
+        '%s are allowed here but switched off in Settings.',
+        offInSettings.length,
+        'dono'
+    );
+
+    return sprintf( template, names );
+}
 
 function registeredGateways() {
     const g = typeof window !== 'undefined' && window.donoFormsEditor && window.donoFormsEditor.gateways;
@@ -35,6 +53,9 @@ function Edit( { attributes, setAttributes } ) {
     // it is left out of the preview and cannot be preselected.
     const live  = gateways.filter( ( g ) => g.enabled !== false );
     const shown = live.filter( ( g ) => isOn( g.id ) );
+    // Switched on here, switched off org-wide: the gap between what the
+    // toggles say and what the donor gets.
+    const offInSettings = gateways.filter( ( g ) => g.enabled === false && isOn( g.id ) );
 
     return (
         <>
@@ -98,9 +119,12 @@ function Edit( { attributes, setAttributes } ) {
                             { descriptions[ g.id ] ? ' - ' + descriptions[ g.id ] : '' }
                         </div>
                     ) ) }
-                { shown.length === 1 && (
+                { shown.length <= 1 && (
                     <em className="dono-block-preview__hint">
-                        { __( 'With one gateway the selector is hidden for donors.', 'dono' ) }
+                        { shown.length === 1
+                            ? __( 'One gateway is live, so the selector is hidden for donors.', 'dono' )
+                            : __( 'No gateway is live, so donors see nothing here.', 'dono' ) }
+                        { offInSettings.length > 0 && ' ' + settingsReason( offInSettings ) }
                     </em>
                 ) }
             </div>
