@@ -395,10 +395,10 @@ export default function StripeKeysCard( { s } ) {
             ) }
 
             <ToggleRow
-                title={ __( 'Enable Stripe gateway', 'dono' ) }
+                title={ __( 'Enable the Stripe gateway', 'dono' ) }
                 sub={ connected
                     ? __( 'Your keys stay on file while it is off.', 'dono' )
-                    : __( 'Add your keys below to switch this on.', 'dono' ) }
+                    : __( 'Available once your keys are saved.', 'dono' ) }
                 checked={ connected && !! s.value( 'stripe.enabled', true ) }
                 onChange={ s.setValue( 'stripe.enabled' ) }
                 disabled={ ! connected }

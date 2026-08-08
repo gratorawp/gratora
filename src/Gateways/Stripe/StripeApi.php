@@ -117,7 +117,7 @@ final class StripeApi
             // field), so be explicit about which connection is missing.
             $mode = $this->account->isTestMode() ? 'test' : 'live';
             throw new RuntimeException(sprintf(
-                'Stripe has no %s connection. Connect the %s Stripe account in Settings, Gateways.',
+                'Stripe has no %s connection. Connect the %s Stripe account in Settings, Payment gateways.',
                 $mode,
                 $mode
             ));

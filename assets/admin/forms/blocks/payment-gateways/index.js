@@ -42,7 +42,7 @@ function Edit( { attributes, setAttributes } ) {
                 <PanelBody title={ __( 'Payment gateways', 'dono' ) } initialOpen>
                     { gateways.length === 0 && (
                         <Notice status="warning" isDismissible={ false }>
-                            { __( 'No gateways are connected yet. Set one up in Settings, Gateways.', 'dono' ) }
+                            { __( 'No gateways are connected yet. Set one up in Settings, Payment gateways.', 'dono' ) }
                         </Notice>
                     ) }
                     { gateways.map( ( g ) => (

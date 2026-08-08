@@ -336,7 +336,7 @@ final class FormReadinessService
             'label'        => __('None of your enabled gateways supports recurring', 'dono'),
             'detail'       => sprintf(
                 /* translators: %s: comma-separated list of recurring-capable gateway names. */
-                __('Enable one of %s in Settings → Gateways, or remove the recurring-toggle block from this form.', 'dono'),
+                __('Enable one of %s in Settings → Payment gateways, or remove the recurring-toggle block from this form.', 'dono'),
                 implode(', ', $names)
             ),
             'action_url'   => admin_url('admin.php?page=dono-settings#gateways'),

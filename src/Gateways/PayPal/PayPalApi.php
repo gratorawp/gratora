@@ -56,7 +56,7 @@ final class PayPalApi
         $secret   = $this->account->activeSecret();
         if ($clientId === '' || $secret === '') {
             throw new RuntimeException(sprintf(
-                'PayPal has no %s credentials. Add them in Settings, Gateways.',
+                'PayPal has no %s credentials. Add them in Settings, Payment gateways.',
                 $test ? 'sandbox' : 'live'
             ));
         }
@@ -121,7 +121,7 @@ final class PayPalApi
         if (! $this->isConfigured()) {
             $mode = $this->account->isTestMode() ? 'sandbox' : 'live';
             throw new RuntimeException(sprintf(
-                'PayPal has no %s credentials. Add them in Settings, Gateways.',
+                'PayPal has no %s credentials. Add them in Settings, Payment gateways.',
                 $mode
             ));
         }

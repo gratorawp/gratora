@@ -30,7 +30,7 @@ import {
 // after these, ahead of Licenses.
 const TABS = [
     { key: 'setup',        label: __( 'Setup', 'dono' ),                Icon: IconSetup },
-    { key: 'gateways',     label: __( 'Payments', 'dono' ),             Icon: IconGateways },
+    { key: 'gateways',     label: __( 'Payment gateways', 'dono' ),     Icon: IconGateways },
     { key: 'organization', label: __( 'Organization', 'dono' ),         Icon: IconOrganization },
     { key: 'brand',        label: __( 'Brand', 'dono' ),                Icon: IconBrand },
     { key: 'email',        label: __( 'Emails', 'dono' ),               Icon: IconEmail },

@@ -237,10 +237,10 @@ export default function PayPalKeysCard( { s } ) {
             ) }
 
             <ToggleRow
-                title={ __( 'Enable PayPal gateway', 'dono' ) }
+                title={ __( 'Enable the PayPal gateway', 'dono' ) }
                 sub={ connected
                     ? __( 'Your credentials stay on file while it is off.', 'dono' )
-                    : __( 'Add your credentials below to switch this on.', 'dono' ) }
+                    : __( 'Available once your credentials are saved.', 'dono' ) }
                 checked={ connected && !! s.value( 'paypal.enabled', true ) }
                 onChange={ s.setValue( 'paypal.enabled' ) }
                 disabled={ ! connected }

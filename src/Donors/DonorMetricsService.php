@@ -313,7 +313,7 @@ final class DonorMetricsService
             } elseif ($gateway === null) {
                 $message = sprintf(
                     /* translators: %s: the payment gateway name, e.g. Stripe. */
-                    __('A renewal was declined, but the %s connection is not active, so nothing can be collected from here. Reconnect it in Settings, Payments.', 'dono'),
+                    __('A renewal was declined, but the %s connection is not active, so nothing can be collected from here. Reconnect it in Settings, Payment gateways.', 'dono'),
                     $name
                 );
             } else {
