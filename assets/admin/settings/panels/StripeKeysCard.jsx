@@ -394,14 +394,15 @@ export default function StripeKeysCard( { s } ) {
                 </>
             ) }
 
-            { connected && (
-                <ToggleRow
-                    title={ __( 'Enable Stripe gateway', 'dono' ) }
-                    sub={ __( 'Your keys stay on file while it is off.', 'dono' ) }
-                    checked={ !! s.value( 'stripe.enabled', true ) }
-                    onChange={ s.setValue( 'stripe.enabled' ) }
-                />
-            ) }
+            <ToggleRow
+                title={ __( 'Enable Stripe gateway', 'dono' ) }
+                sub={ connected
+                    ? __( 'Your keys stay on file while it is off.', 'dono' )
+                    : __( 'Add your keys below to switch this on.', 'dono' ) }
+                checked={ connected && !! s.value( 'stripe.enabled', true ) }
+                onChange={ s.setValue( 'stripe.enabled' ) }
+                disabled={ ! connected }
+            />
 
             { connected && ! canCharge && (
                 <Notice tone="amber" icon="⚠">

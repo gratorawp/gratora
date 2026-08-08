@@ -236,14 +236,15 @@ export default function PayPalKeysCard( { s } ) {
                 </>
             ) }
 
-            { connected && (
-                <ToggleRow
-                    title={ __( 'Enable PayPal gateway', 'dono' ) }
-                    sub={ __( 'Your credentials stay on file while it is off.', 'dono' ) }
-                    checked={ !! s.value( 'paypal.enabled', true ) }
-                    onChange={ s.setValue( 'paypal.enabled' ) }
-                />
-            ) }
+            <ToggleRow
+                title={ __( 'Enable PayPal gateway', 'dono' ) }
+                sub={ connected
+                    ? __( 'Your credentials stay on file while it is off.', 'dono' )
+                    : __( 'Add your credentials below to switch this on.', 'dono' ) }
+                checked={ connected && !! s.value( 'paypal.enabled', true ) }
+                onChange={ s.setValue( 'paypal.enabled' ) }
+                disabled={ ! connected }
+            />
 
             { connected && (
                 <Notice tone="accent" icon="✓">
