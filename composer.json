@@ -25,10 +25,7 @@
     "autoload": {
         "psr-4": {
             "Dono\\": "src/"
-        },
-        "classmap": [
-            "vendor-prefixed/"
-        ]
+        }
     },
     "autoload-dev": {
         "psr-4": {
@@ -49,7 +46,14 @@
             "@php -r \"file_put_contents('vendor/composer/autoload_aliases.php', '<?php');\"",
             "@composer dump-autoload"
         ],
-        "test:setup": "bash bin/install-wp-tests.sh"
+        "test:setup": "bash bin/install-wp-tests.sh",
+        "strauss:auto": "@php -r \"if (!file_exists('vendor/bin/strauss')) { exit(0); } passthru(escapeshellarg(getenv('COMPOSER_BINARY')) . ' strauss', $c); exit($c);\"",
+        "post-install-cmd": [
+            "@strauss:auto"
+        ],
+        "post-update-cmd": [
+            "@strauss:auto"
+        ]
     },
     "extra": {
         "strauss": {

@@ -24,11 +24,7 @@
 # The lock files carried by the vendored libraries themselves are a different
 # thing and stay out: they record those libraries' own dev dependencies, which
 # mean nothing once Strauss has flattened the code into our namespace.
-# The directory itself is tracked (empty) because composer.json classmaps it:
-# without it on disk `composer install` cannot dump an autoloader, and the
-# only thing that creates it is Strauss, which needs a working install first.
-/vendor-prefixed/*
-!/vendor-prefixed/.gitkeep
+/vendor-prefixed/
 
 # Local wp-env override (machine-specific plugin paths)
 .wp-env.override.json

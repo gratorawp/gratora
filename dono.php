@@ -25,14 +25,10 @@ if (! defined('ABSPATH')) {
 }
 
 require __DIR__ . '/vendor/autoload.php';
-
-// Action Scheduler self-registers on require - must be loaded before plugins_loaded.
+require __DIR__ . '/vendor-prefixed/autoload.php';
 require_once __DIR__ . '/vendor/woocommerce/action-scheduler/action-scheduler.php';
 
 define('DONO_VERSION', '1.0.0');
-// Bumped whenever a model's schema() changes: a new table, column or index.
-// Separate from DONO_VERSION, which stays put through a development cycle, so
-// a column added mid-cycle still migrates.
 define('DONO_DB_VERSION', '6');
 define('DONO_FILE', __FILE__);
 define('DONO_DIR', plugin_dir_path(__FILE__));

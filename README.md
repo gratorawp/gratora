@@ -28,15 +28,14 @@ advanced reporting.
 git clone https://github.com/getdono/dono.git
 cd dono
 composer install
-composer strauss
 npm install
 npm run build
 ```
 
-`composer strauss` builds `vendor-prefixed/`, which is what the plugin loads
-at runtime. It is generated rather than committed, so a clone without this
-step installs and then fatals on the first query. `npm run package` refuses to
-build a zip without it.
+`composer install` also builds `vendor-prefixed/`, the Strauss-prefixed
+dependencies the plugin loads at runtime. It is generated rather than
+committed. `composer strauss` rebuilds it on its own, and `npm run package`
+refuses to build a zip without it.
 
 ## Commands
 
