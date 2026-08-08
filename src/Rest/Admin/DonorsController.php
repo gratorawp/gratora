@@ -31,6 +31,7 @@ final class DonorsController
         private DonorMetricsService $metrics,
         private DonorNoteRepository $notes,
         private DonationService $donationService,
+        private \Dono\Donors\DonorAvatars $avatars,
     ) {
     }
 
@@ -524,6 +525,7 @@ final class DonorsController
             'redacted'    => true,
             'redacted_at' => $donor->redacted_at,
             'public_hidden' => $donor->public_hidden_at !== null,
+            'avatar_url'    => $this->avatars->adminUrl($donor),
         ], 200);
     }
 
@@ -582,6 +584,7 @@ final class DonorsController
                 'last_donation_at'    => $d->last_donation_at,
                 'created_at'          => $d->created_at,
                 'redacted'            => $d->redacted_at !== null,
+                'avatar_url'          => $this->avatars->adminUrl($d),
             ],
             $result['items'],
         );

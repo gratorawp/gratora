@@ -35,6 +35,42 @@ final class DonorAvatars
     }
 
     /**
+     * The picture as an admin should see it: their upload, or their Gravatar
+     * when the org has that on.
+     *
+     * Deliberately ignores public_hidden. Hiding a donor is a decision about
+     * what visitors see, and the screen where an admin makes that decision is
+     * the one place the picture has to be visible: judging a photo you are not
+     * shown is not a decision.
+     */
+    public function adminUrl(Donor $donor): string
+    {
+        // Redaction already cleared the attachment and the address, so this is
+        // belt and braces: an erased donor has no face anywhere.
+        if (($donor->redacted_at ?? null) !== null) {
+            return '';
+        }
+
+        $uploaded = $this->uploadedUrl($donor);
+        if ($uploaded !== '') {
+            return $uploaded;
+        }
+
+        if (! $this->enabled()) {
+            return '';
+        }
+
+        $email = $this->crypto->decrypt((string) ($donor->email_encrypted ?? ''));
+        if ($email === null || trim($email) === '') {
+            return '';
+        }
+
+        $url = get_avatar_url($email, ['size' => 96, 'default' => 'blank']);
+
+        return is_string($url) ? $url : '';
+    }
+
+    /**
      * Suppressed from every public surface by an admin. The record and the
      * money stay; only what a visitor can see goes. Redaction is the other
      * lever and it destroys the donor, which is no way to answer a bad picture.

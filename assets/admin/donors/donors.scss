@@ -577,6 +577,25 @@ $bar-radius:    6px;
 .dp-id-top {
     display: flex; align-items: flex-start; gap: 12px;
 }
+// The picture lies over the initials rather than replacing them, so a donor
+// with no photo keeps their letters and a Gravatar that resolves to nothing
+// leaves them showing through. Same arrangement the campaign blocks use.
+.dp-avatar,
+.dono-row__avatar {
+    position: relative;
+    overflow: hidden;
+}
+
+.dp-avatar__photo,
+.dono-row__avatar-photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    object-fit: cover;
+}
+
 .dp-avatar {
     width: 48px; height: 48px;
     border-radius: 50%;

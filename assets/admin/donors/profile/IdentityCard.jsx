@@ -74,7 +74,12 @@ export default function IdentityCard( { donor, magicLinkUrl } ) {
         <div className="dp-card dp-identity">
             <div className="dp-card__body">
                 <div className="dp-id-top">
-                    <span className={ avatarClass }>{ avatarText }</span>
+                    <span className={ avatarClass }>
+                        { avatarText }
+                        { donor.avatar_url && ! isRedacted && (
+                            <img className="dp-avatar__photo" src={ donor.avatar_url } alt="" loading="lazy" decoding="async" />
+                        ) }
+                    </span>
                     <div className="dp-id-name-block">
                         <div className={ `dp-id-name ${ isRedacted ? 'is-redacted' : isAnon ? 'is-anon' : '' }` }>
                             { donor.name }

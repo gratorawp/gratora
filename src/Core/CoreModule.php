@@ -486,7 +486,8 @@ final class CoreModule implements DonoModule
             $c->get(DonorNoteRepository::class),
             $c->get(MagicLinkService::class),
             $c->get(Clock::class),
-            $c->get(GatewayManager::class)
+            $c->get(GatewayManager::class),
+            $c->get(DonorAvatars::class)
         ));
 
         $c->bind(MagicLinkService::class, fn (Container $c) => new MagicLinkService(
@@ -759,7 +760,8 @@ final class CoreModule implements DonoModule
             $c->get(DonorService::class),
             $c->get(DonorMetricsService::class),
             $c->get(DonorNoteRepository::class),
-            $c->get(DonationService::class)
+            $c->get(DonationService::class),
+            $c->get(DonorAvatars::class)
         ));
 
         $c->bind( FormReadinessService::class, fn (Container $c) => new FormReadinessService(

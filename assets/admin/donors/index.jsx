@@ -132,7 +132,12 @@ function DonorsApp( { toggleSlot } ) {
                 const name = item.name || __( '(no name)', 'dono' );
                 return (
                     <div className="dono-row">
-                        <span className="dono-row__avatar" aria-hidden="true">{ initials( name ) }</span>
+                        <span className="dono-row__avatar" aria-hidden="true">
+                            { initials( name ) }
+                            { item.avatar_url && (
+                                <img className="dono-row__avatar-photo" src={ item.avatar_url } alt="" loading="lazy" decoding="async" />
+                            ) }
+                        </span>
                         <div className="dono-row__body">
                             <a className="dono-row__link dono-row__link--strong" href={ `#donor/${ item.id }` } { ...rowLinkProps }>
                                 { name }

@@ -36,6 +36,7 @@ final class DonorMetricsService
         private MagicLinkService $magicLinks,
         private Clock $clock,
         private \Dono\Gateways\GatewayManager $gateways,
+        private DonorAvatars $avatars,
     ) {
     }
 
@@ -354,6 +355,9 @@ final class DonorMetricsService
                 'created_at'          => $donor->created_at,
                 'redacted_at'         => $donor->redacted_at,
                 'public_hidden'       => $donor->public_hidden_at !== null,
+                // The screen that decides whether the public sees this picture
+                // is the screen that has to show it.
+                'avatar_url'          => $this->avatars->adminUrl($donor),
                 'is_anonymous'        => $this->isAnonymous($donor),
             ],
             'lifetime' => [
