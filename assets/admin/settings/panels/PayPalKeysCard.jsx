@@ -238,8 +238,8 @@ export default function PayPalKeysCard( { s } ) {
 
             { connected && (
                 <ToggleRow
-                    title={ __( 'Offer PayPal to donors', 'dono' ) }
-                    sub={ __( 'Turn off to stop showing it without removing your credentials.', 'dono' ) }
+                    title={ __( 'Enable PayPal gateway', 'dono' ) }
+                    sub={ __( 'Your credentials stay on file while it is off.', 'dono' ) }
                     checked={ !! s.value( 'paypal.enabled', true ) }
                     onChange={ s.setValue( 'paypal.enabled' ) }
                 />
