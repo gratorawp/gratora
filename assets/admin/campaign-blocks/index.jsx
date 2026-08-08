@@ -69,33 +69,15 @@ function CampaignPicker( { value, onChange, noneLabel } ) {
     );
 }
 
-function BoundCampaignNote( { campaign, issues = [] } ) {
-    if ( ! campaign ) {
-        return (
-            <p className="dono-block-note dono-block-note--muted">
-                { __( 'Not bound to a campaign yet.', 'dono' ) }
-            </p>
-        );
-    }
-    return (
-        <>
-            <p className="dono-block-note">
-                { __( 'Linked to:', 'dono' ) } <strong>{ campaign.title }</strong>
-                { campaign.status === 'archived' && (
-                    <span className="dono-block-note__pill">{ __( 'Archived', 'dono' ) }</span>
-                ) }
-                { campaign.status === 'draft' && (
-                    <span className="dono-block-note__pill">{ __( 'Draft', 'dono' ) }</span>
-                ) }
-            </p>
-            { issues.map( ( msg, i ) => (
-                <Notice key={ i } status="warning" isDismissible={ false }>{ msg }</Notice>
-            ) ) }
-        </>
-    );
-}
-
-function CampaignField( { attributes, setAttributes, campaign, onCampaignPage, issues = [] } ) {
+/**
+ * The campaign a block reads from.
+ *
+ * On a campaign page the block inherits that page's campaign and there is
+ * nothing to decide, so this renders nothing at all. Anywhere else it is the
+ * picker and only the picker. Warnings still come through, because they name
+ * something the author can act on rather than restating the binding.
+ */
+function CampaignField( { attributes, setAttributes, onCampaignPage, issues = [] } ) {
     return (
         <>
             { ! onCampaignPage && (
@@ -104,7 +86,9 @@ function CampaignField( { attributes, setAttributes, campaign, onCampaignPage, i
                     onChange={ ( v ) => setAttributes( { campaignId: v } ) }
                 />
             ) }
-            <BoundCampaignNote campaign={ campaign } issues={ issues } />
+            { issues.map( ( msg, i ) => (
+                <Notice key={ i } status="warning" isDismissible={ false }>{ msg }</Notice>
+            ) ) }
         </>
     );
 }
@@ -175,7 +159,6 @@ registerBlockType( 'dono/campaign-image', {
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
-                        campaign={ campaign }
                         onCampaignPage={ onCampaignPage }
                         issues={ issues }
                     />
@@ -293,7 +276,6 @@ registerBlockType( 'dono/campaign-stat', {
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
-                        campaign={ campaign }
                         onCampaignPage={ onCampaignPage }
                         issues={ issues }
                     />
@@ -383,7 +365,6 @@ registerBlockType( 'dono/campaign-progress', {
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
-                        campaign={ campaign }
                         onCampaignPage={ onCampaignPage }
                         issues={ issues }
                     />
@@ -446,7 +427,6 @@ registerBlockType( 'dono/donate-button', {
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
-                        campaign={ campaign }
                         onCampaignPage={ onCampaignPage }
                         issues={ issues }
                     />
@@ -529,7 +509,6 @@ registerBlockType( 'dono/top-donors', {
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
-                        campaign={ campaign }
                         onCampaignPage={ onCampaignPage }
                         issues={ issues }
                     />
@@ -646,7 +625,6 @@ registerBlockType( 'dono/recent-donations', {
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
-                        campaign={ campaign }
                         onCampaignPage={ onCampaignPage }
                         issues={ issues }
                     />
@@ -757,7 +735,6 @@ registerBlockType( 'dono/supporter-wall', {
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
-                        campaign={ campaign }
                         onCampaignPage={ onCampaignPage }
                         issues={ issues }
                     />
@@ -968,7 +945,6 @@ registerBlockType( 'dono/donation-form', {
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
-                        campaign={ campaign }
                         onCampaignPage={ onCampaignPage }
                     />
                     <TextControl

@@ -1,10 +1,10 @@
 ( function () {
-    var cfg = window.donoDeactivation || {};
-    var dialog = null;
-    var deactivateUrl = null;
+    const cfg = window.donoDeactivation || {};
+    let dialog = null;
+    let deactivateUrl = null;
 
     function rowLink() {
-        var row = document.querySelector( 'tr[data-plugin="' + cfg.slug + '"]' );
+        const row = document.querySelector( 'tr[data-plugin="' + cfg.slug + '"]' );
         return row ? row.querySelector( 'a[href*="action=deactivate"]' ) : null;
     }
 
@@ -12,7 +12,7 @@
         deactivateUrl = href;
         dialog.hidden = false;
         document.body.classList.add( 'dono-deact-open' );
-        var first = dialog.querySelector( 'input[name="dono_deact_reason"]' );
+        const first = dialog.querySelector( 'input[name="dono_deact_reason"]' );
         if ( first ) first.focus();
     }
 
@@ -28,8 +28,8 @@
     }
 
     function send( done ) {
-        var checked = dialog.querySelector( 'input[name="dono_deact_reason"]:checked' );
-        var body = new URLSearchParams();
+        const checked = dialog.querySelector( 'input[name="dono_deact_reason"]:checked' );
+        const body = new URLSearchParams();
         body.set( 'action', cfg.action );
         body.set( '_wpnonce', cfg.nonce );
         body.set( 'reason', checked ? checked.value : '' );
@@ -48,7 +48,7 @@
         dialog = document.getElementById( 'dono-deact' );
         if ( ! dialog || ! cfg.slug ) return;
 
-        var link = rowLink();
+        const link = rowLink();
         if ( link ) {
             link.addEventListener( 'click', function ( e ) {
                 e.preventDefault();
