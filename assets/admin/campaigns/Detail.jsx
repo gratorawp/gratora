@@ -1909,19 +1909,17 @@ function AppearancePanel( { c } ) {
 
             <Card
                 title={ __( 'Page header & footer', 'dono' ) }
-                sub={ __( "Hide the theme's header or footer on this campaign's public pages for a focused, distraction-free experience.", 'dono' ) }
+                sub={ __( "Hide the theme's header or footer on every page this campaign renders on, for a focused, distraction-free experience.", 'dono' ) }
                 edited={ ( c.edits?.hide_header !== undefined ? 1 : 0 ) + ( c.edits?.hide_footer !== undefined ? 1 : 0 ) }
             >
                 <ToggleRow
                     title={ __( 'Hide theme header', 'dono' ) }
-                    sub={ __( "Removes the theme's header on the campaign, fundraiser, team and start pages.", 'dono' ) }
                     checked={ !! c.value( 'hide_header', false ) }
                     onChange={ ( v ) => c.edit( { hide_header: v } ) }
                 />
                 <div style={ { marginTop: 16 } }>
                     <ToggleRow
                         title={ __( 'Hide theme footer', 'dono' ) }
-                        sub={ __( "Removes the theme's footer on the campaign, fundraiser, team and start pages.", 'dono' ) }
                         checked={ !! c.value( 'hide_footer', false ) }
                         onChange={ ( v ) => c.edit( { hide_footer: v } ) }
                     />

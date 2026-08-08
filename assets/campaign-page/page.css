@@ -133,7 +133,8 @@ body,
     scroll-margin-top: 24px;
 }
 
-/* Primitives shared by the campaign, fundraiser, team and start pages.
+/* Primitives for the campaign page, and for the add-on routes (fundraiser,
+   team, start) that render through it.
 
    Anti-clutter contract: one idea per band, space does the separating, and
    exactly one filled button per band. Selected states are ink, never accent,
