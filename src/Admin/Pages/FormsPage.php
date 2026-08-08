@@ -135,10 +135,18 @@ final class FormsPage extends HookProvider
 
         wp_set_script_translations(self::HANDLE, 'dono', DONO_DIR . 'languages');
 
-        // Registered gateways so the payment-gateways block can list them.
+        // Registered gateways so the payment-gateways block can list them,
+        // each carrying whether the org is currently offering it: a gateway
+        // switched off in Settings still belongs in the list, or the block
+        // silently drops a choice the author made and cannot see why.
+        $manager  = Plugin::instance()->container->get(GatewayManager::class);
         $gateways = [];
-        foreach ( Plugin::instance()->container->get( GatewayManager::class)->all() as $g) {
-            $gateways[] = ['id' => $g->id(), 'label' => $g->label()];
+        foreach ($manager->all() as $g) {
+            $gateways[] = [
+                'id'      => $g->id(),
+                'label'   => $g->label(),
+                'enabled' => $manager->isOn($g->id()),
+            ];
         }
         wp_localize_script(self::HANDLE, 'donoFormsEditor', ['gateways' => $gateways]);
 

@@ -31,7 +31,10 @@ function Edit( { attributes, setAttributes } ) {
         setAttributes( { descriptions: { ...descriptions, [ id ]: text } } );
 
     const blockProps = useBlockProps( { className: 'dono-block-preview dono-block-preview--gateways' } );
-    const shown = gateways.filter( ( g ) => isOn( g.id ) );
+    // Off in Settings means no donor sees it, whatever this form allows, so
+    // it is left out of the preview and cannot be preselected.
+    const live  = gateways.filter( ( g ) => g.enabled !== false );
+    const shown = live.filter( ( g ) => isOn( g.id ) );
 
     return (
         <>
@@ -45,7 +48,9 @@ function Edit( { attributes, setAttributes } ) {
                     { gateways.map( ( g ) => (
                         <div key={ g.id } style={ { marginBottom: 12 } }>
                             <ToggleControl
-                                label={ g.label }
+                                label={ g.enabled === false
+                                    ? `${ g.label } ${ __( '(off in Settings)', 'dono' ) }`
+                                    : g.label }
                                 checked={ isOn( g.id ) }
                                 onChange={ () => toggle( g.id ) }
                                 __nextHasNoMarginBottom
