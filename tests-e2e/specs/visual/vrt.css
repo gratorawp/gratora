@@ -13,3 +13,24 @@
 #wpadminbar {
     display: none !important;
 }
+
+/*
+ * The host theme decides root padding, heading scale and block gap through
+ * theme.json, so swapping the theme on the fixture site moves every capture:
+ * that is what turned a theme change into nine failing goldens rather than one
+ * honest diff. Pinned here so these measure the form, not whatever theme the
+ * site happens to be wearing.
+ */
+/*
+ * body as well as :root. WordPress emits these custom properties on both, and
+ * the padded wrappers are descendants of body, so a :root-only override is
+ * inherited straight past.
+ */
+:root,
+body {
+    --wp--style--root--padding-top: 0 !important;
+    --wp--style--root--padding-right: 15px !important;
+    --wp--style--root--padding-bottom: 0 !important;
+    --wp--style--root--padding-left: 15px !important;
+    --wp--style--block-gap: 24px !important;
+}

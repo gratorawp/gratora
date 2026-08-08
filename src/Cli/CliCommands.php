@@ -6,6 +6,7 @@ namespace Dono\Cli;
 
 use Dono\Campaigns\Campaign;
 use Dono\Campaigns\CampaignService;
+use Dono\Currency\FxRates;
 use Dono\Donations\AggregateSyncer;
 use Dono\Donations\DonationIntent;
 use Dono\Donations\DonationService;
@@ -14,6 +15,7 @@ use Dono\Forms\Form;
 use Dono\Forms\FormService;
 use Dono\Foundation\Plugin;
 use Dono\Funds\Fund;
+use Dono\Funds\FundService;
 use Dono\Settings\SettingsService;
 use WP_CLI;
 
@@ -228,10 +230,23 @@ final class CliCommands
 
         // Enable a few currencies so the currency-switcher specs have
         // something to switch between.
+        //
+        // The number format is pinned rather than left to defaults. It is not
+        // derived from the currency or the locale, it is a stored org setting,
+        // so an unpinned fixture renders whatever the last person to touch
+        // settings chose and every amount in every visual golden moves with it.
         $settings->update('currency-locale', [
             'default_currency'     => 'EUR',
             'supported_currencies' => ['EUR', 'USD', 'GBP'],
+            'format'               => [
+                'decimal_sep'     => ',',
+                'thousand_sep'    => '.',
+                'decimal_places'  => 2,
+                'symbol_position' => 'before',
+            ],
         ]);
+
+        $this->e2ePinFxRates();
 
         // Org-wide test mode on. Required for AntiSpamGuard to relax the IP
         // and email rate limits (automation bursts through the prod caps).
@@ -263,6 +278,7 @@ final class CliCommands
         }
 
         $this->e2eRegisterConsentPurposes();
+        $this->e2eSeedFundsAndGoal($campaign);
 
         $singleUrl = $this->e2eUpsertFormAndPage(
             $forms,
@@ -332,6 +348,14 @@ final class CliCommands
         string $pageTitle,
         string $blocks
     ): string {
+        // Pinned rather than left to the shortcode default. The default is a
+        // product decision that is allowed to change, and when it did every
+        // golden moved with it: the fixture should assert its own appearance.
+        $settings = [
+            'gateways'  => ['allowed' => ['offline', 'sandbox']],
+            'container' => ['style' => 'frame', 'width' => 540],
+        ];
+
         $form = Form::query()->where('slug', $formSlug)->get();
         if (! $form) {
             $form = $forms->create([
@@ -340,6 +364,7 @@ final class CliCommands
                 'status'      => 'published',
                 'campaign_id' => $campaignId,
                 'blocks'      => $blocks,
+                'settings'    => $settings,
             ]);
             WP_CLI::log("  form created: slug={$form->slug} id={$form->id}");
         } else {
@@ -347,12 +372,24 @@ final class CliCommands
                 'campaign_id' => $campaignId,
                 'blocks'      => $blocks,
                 'status'      => 'published',
+                'settings'    => $settings,
             ]);
             WP_CLI::log("  form updated: slug={$form->slug} id={$form->id}");
         }
 
         $content = '[dono_donation_form slug="' . esc_attr($form->slug) . '"]';
         $page    = get_page_by_path($pageSlug, OBJECT, 'page');
+
+        // A campaign owns its page, and a campaign slug can collide with a form
+        // page slug. Reusing one replaces a campaign page with a bare shortcode
+        // and the campaign loses the page it points at, so leave it alone and
+        // take the next slug instead.
+        if ($page && Campaign::query()->where('page_id', (int) $page->ID)->get()) {
+            WP_CLI::warning("  page {$page->ID} belongs to a campaign; using {$pageSlug}-form instead");
+            $pageSlug .= '-form';
+            $page = get_page_by_path($pageSlug, OBJECT, 'page');
+        }
+
         if (! $page) {
             $pageId = wp_insert_post([
                 'post_title'   => $pageTitle,
@@ -375,6 +412,60 @@ final class CliCommands
         }
 
         return trailingslashit(home_url('/' . $pageSlug));
+    }
+
+    /**
+     * A fixed FX snapshot, so a currency switch converts.
+     *
+     * The rates normally arrive from a daily cron making a live call, which
+     * means a fixture that has never run it has no rates at all: the switcher
+     * still changes the symbol, conversion silently no-ops, and USD renders
+     * identical to EUR. A visual golden captured in that state stops testing
+     * conversion without ever failing. auto is off so the cron cannot replace
+     * these with live rates mid-run and move every amount.
+     */
+    private function e2ePinFxRates(): void
+    {
+        update_option(FxRates::OPTION, [
+            'base'       => 'EUR',
+            'date'       => '2026-01-02',
+            'fetched_at' => '2026-01-02 00:00:00',
+            'auto'       => false,
+            'rates'      => ['USD' => 1.10, 'GBP' => 0.85],
+        ], false);
+        WP_CLI::log('  fx rates pinned: EUR base, USD 1.10, GBP 0.85');
+    }
+
+    /**
+     * Funds to pick between and a goal to fill.
+     *
+     * The layout form seeds a fund-picker and a goal block, and both render
+     * empty against a site with one fund and no goal, so the fixture has to
+     * supply the data those blocks exist to display.
+     */
+    private function e2eSeedFundsAndGoal(Campaign $campaign): void
+    {
+        $funds = $this->container()->get(FundService::class);
+
+        $wanted = [
+            ['code' => 'e2e-water',     'name' => 'Clean water',      'sort_order' => 1],
+            ['code' => 'e2e-education', 'name' => 'Education',        'sort_order' => 2],
+            ['code' => 'e2e-emergency', 'name' => 'Emergency relief', 'sort_order' => 3, 'is_restricted' => true],
+        ];
+
+        foreach ($wanted as $spec) {
+            if (Fund::query()->where('code', $spec['code'])->get()) {
+                continue;
+            }
+            $funds->create($spec + ['is_active' => true]);
+            WP_CLI::log("  fund created: {$spec['code']}");
+        }
+
+        if (($campaign->goal_cents ?? null) === null) {
+            $campaign->goal_cents = 500000;
+            $campaign->save();
+            WP_CLI::log('  campaign goal set: 500000');
+        }
     }
 
     /**
@@ -427,6 +518,7 @@ final class CliCommands
 <!-- wp:dono/dropdown {$dropdown} /-->
 <!-- wp:dono/consent {$consent} /-->
 <!-- wp:dono/payment-gateways {"style":"radio","allowed":["offline","sandbox"]} /-->
+<!-- wp:dono/donation-summary /-->
 <!-- wp:dono/submit-button {"label":"Donate now"} /-->
 BLOCKS;
     }
@@ -451,6 +543,7 @@ BLOCKS;
 
 <!-- wp:dono/step {"title":"Confirm"} -->
 <!-- wp:dono/payment-gateways {"style":"radio","allowed":["offline","sandbox"]} /-->
+<!-- wp:dono/donation-summary /-->
 <!-- wp:dono/submit-button {"label":"Donate now"} /-->
 <!-- /wp:dono/step -->
 <!-- /wp:dono/steps -->
@@ -491,6 +584,7 @@ BLOCKS;
 <!-- wp:dono/goal {"showAmount":true} /-->
 <!-- wp:dono/privacy-notice {"text":"LAYOUT_PRIVACY_TEXT"} /-->
 <!-- wp:dono/payment-gateways {"style":"radio","allowed":["offline","sandbox"]} /-->
+<!-- wp:dono/donation-summary /-->
 <!-- wp:dono/submit-button {"label":"Donate now"} /-->
 BLOCKS;
     }
@@ -528,6 +622,7 @@ BLOCKS;
 <!-- wp:dono/multi-select {$multi} /-->
 <!-- wp:dono/hidden {"field":"cf_hidden","defaultValue":"hidden-default"} /-->
 <!-- wp:dono/payment-gateways {"style":"radio","allowed":["offline","sandbox"]} /-->
+<!-- wp:dono/donation-summary /-->
 <!-- wp:dono/submit-button {"label":"Donate now"} /-->
 BLOCKS;
     }
@@ -569,6 +664,7 @@ BLOCKS;
 <!-- wp:dono/text-input {$hiddenRequiredTextInput} /-->
 <!-- wp:dono/comment {$commentVisibleWhenAnyValue} /-->
 <!-- wp:dono/payment-gateways {"style":"radio","allowed":["offline","sandbox"]} /-->
+<!-- wp:dono/donation-summary /-->
 <!-- wp:dono/submit-button {"label":"Donate now"} /-->
 BLOCKS;
     }
