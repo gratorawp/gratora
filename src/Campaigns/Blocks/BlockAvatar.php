@@ -13,12 +13,13 @@ namespace Dono\Campaigns\Blocks;
  */
 final class BlockAvatar
 {
-    public static function markup(string $name, bool $anonymous = false): string
+    public static function markup(string $name, bool $anonymous = false, string $imageUrl = ''): string
     {
         $name = trim($name);
         if ($anonymous || $name === '') {
             return '<span class="dono-avatar dono-avatar--anon" aria-hidden="true">?</span>';
         }
+
 
         // Decoded and letter-first, matching DonoP2P\Blocks\Initials. Names
         // are stored HTML-encoded, so a donor written with quotes put an
@@ -34,10 +35,21 @@ final class BlockAvatar
         // letter drawn on top was correct.
         $hue = ((mb_ord($initial, 'UTF-8') ?: 0) * 47) % 360;
 
+        // The picture sits over the initial rather than replacing it. Gravatar
+        // is asked for a transparent image when it has none on file, so a donor
+        // who never signed up keeps their coloured letter instead of the
+        // generic silhouette every one of them would otherwise share. No
+        // scripting, no broken-image icon, nothing to wait for.
+        $photo = $imageUrl === '' ? '' : sprintf(
+            '<img class="dono-avatar__photo" src="%s" alt="" loading="lazy" decoding="async">',
+            esc_url($imageUrl)
+        );
+
         return sprintf(
-            '<span class="dono-avatar" aria-hidden="true" style="background: hsl(%d 52%% 42%%);">%s</span>',
+            '<span class="dono-avatar" aria-hidden="true" style="background: hsl(%d 52%% 42%%);">%s%s</span>',
             $hue,
-            esc_html($initial)
+            esc_html($initial),
+            $photo
         );
     }
 }

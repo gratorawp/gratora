@@ -826,6 +826,8 @@ body.dono-modal-open { overflow: hidden; }
 }
 
 .dono-avatar {
+    position: relative;
+    overflow: hidden;
     flex: 0 0 auto;
     display: inline-flex;
     align-items: center;
@@ -841,6 +843,17 @@ body.dono-modal-open { overflow: hidden; }
     &--anon {
         background: var(--dono-bg-soft, #{$bg-soft-fallback});
         color: var(--dono-text-muted, #{$text-muted-fallback});
+    }
+
+    // Sits over the initial, so a donor with no picture on file keeps their
+    // letter showing through the transparent pixel Gravatar returns.
+    &__photo {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: inherit;
+        object-fit: cover;
     }
 }
 

@@ -7,6 +7,7 @@ namespace Dono\Campaigns\Blocks;
 use Dono\Campaigns\CampaignRepository;
 use Dono\Donations\DonationRepository;
 use Dono\Donors\Donor;
+use Dono\Donors\DonorAvatars;
 use Dono\Foundation\Helpers\View;
 
 /**
@@ -19,6 +20,7 @@ final class TopDonorsBlock extends CampaignBlock
     public function __construct(
         CampaignRepository $campaigns,
         private readonly DonationRepository $donations,
+        private readonly DonorAvatars $avatars,
     ) {
         parent::__construct($campaigns);
     }
@@ -61,6 +63,8 @@ final class TopDonorsBlock extends CampaignBlock
             }
         }
 
+        $avatarUrls = $this->avatars->urlsFor($donorsById);
+
         $entries = [];
         foreach ($rows as $row) {
             $donorId = (int) $row['donor_id'];
@@ -77,6 +81,7 @@ final class TopDonorsBlock extends CampaignBlock
                 'amount_cents'    => (int) $row['amount_cents'],
                 'donations_count' => (int) $row['donations_count'],
                 'is_anonymous'    => $isAnonymousAggregate,
+                'avatar_url'      => $isAnonymousAggregate ? '' : ($avatarUrls[$donorId] ?? ''),
             ];
         }
 
@@ -88,6 +93,7 @@ final class TopDonorsBlock extends CampaignBlock
                     'amount_cents'    => $anon['amount_cents'],
                     'donations_count' => $anon['donations_count'],
                     'is_anonymous'    => true,
+                    'avatar_url'      => '',
                 ];
                 usort($entries, static fn ($a, $b) => $b['amount_cents'] <=> $a['amount_cents']);
                 $entries = array_slice($entries, 0, $limit);

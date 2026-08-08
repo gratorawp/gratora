@@ -7,6 +7,7 @@ namespace Dono\Campaigns\Blocks;
 use Dono\Campaigns\CampaignRepository;
 use Dono\Donations\DonationRepository;
 use Dono\Donors\Donor;
+use Dono\Donors\DonorAvatars;
 use Dono\Foundation\Helpers\View;
 
 /**
@@ -19,6 +20,7 @@ final class RecentDonationsBlock extends CampaignBlock
     public function __construct(
         CampaignRepository $campaigns,
         private readonly DonationRepository $donations,
+        private readonly DonorAvatars $avatars,
     ) {
         parent::__construct($campaigns);
     }
@@ -65,6 +67,12 @@ final class RecentDonationsBlock extends CampaignBlock
 
         $nowTs = time();
 
+        $anonymousByDonor = [];
+        foreach ($donations as $d) {
+            if ($d->is_anonymous) $anonymousByDonor[(int) $d->donor_id] = true;
+        }
+        $avatarUrls = $this->avatars->urlsFor($donorsById, $anonymousByDonor);
+
         $entries = [];
         foreach ($donations as $donation) {
             $isAnonymous = (bool) $donation->is_anonymous;
@@ -89,6 +97,7 @@ final class RecentDonationsBlock extends CampaignBlock
             $entries[] = [
                 'name'         => $name,
                 'is_anonymous' => $isAnonymous,
+                'avatar_url'   => $isAnonymous ? '' : ($avatarUrls[(int) $donation->donor_id] ?? ''),
                 'amount_cents' => (int) $donation->amount_cents,
                 'currency'     => (string) $donation->currency,
                 'time_ago'     => $timeAgo,

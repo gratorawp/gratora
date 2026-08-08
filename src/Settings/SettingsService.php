@@ -92,6 +92,10 @@ final class SettingsService
                 // Prune dono_events older than N days; 0 disables.
                 'event_retention_days'           => 730,
                 'anonymize_ips'                  => true,
+                // Off by default: a Gravatar request carries a hash of the
+                // donor's address to a third party, from the visitor's browser,
+                // on a public page. That is the org's call to make, not ours.
+                'gravatar_avatars'               => false,
                 'always_anonymous_default'       => false,
                 'allow_data_export'              => true,
                 'allow_account_delete'           => true,

@@ -23,7 +23,7 @@ defined('ABSPATH') || exit;
         <ul class="dono-recent-donations__list">
             <?php foreach ($entries as $entry): ?>
                 <li class="dono-recent-donations__item">
-                    <?php echo \Dono\Campaigns\Blocks\BlockAvatar::markup($entry['name'], $entry['is_anonymous']); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                    <?php echo \Dono\Campaigns\Blocks\BlockAvatar::markup($entry['name'], $entry['is_anonymous'], (string) ($entry['avatar_url'] ?? '')); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                     <div class="dono-recent-donations__content">
                         <div class="dono-recent-donations__header">
                             <span class="dono-recent-donations__name<?php echo $entry['is_anonymous'] ? ' is-anonymous' : ''; ?>">

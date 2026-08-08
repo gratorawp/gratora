@@ -33,7 +33,7 @@ defined('ABSPATH') || exit;
             <?php foreach ($renderOrder as [$rank, $entry]): ?>
                 <li class="dono-top-donors__podium-tier dono-top-donors__podium-tier--<?php echo esc_attr((string) $rank); ?>">
                     <div class="dono-top-donors__podium-rank"><?php echo esc_html((string) $rank); ?></div>
-                    <?php echo \Dono\Campaigns\Blocks\BlockAvatar::markup($entry['name'], $entry['is_anonymous']); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                    <?php echo \Dono\Campaigns\Blocks\BlockAvatar::markup($entry['name'], $entry['is_anonymous'], (string) ($entry['avatar_url'] ?? '')); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                     <div class="dono-top-donors__podium-name<?php echo $entry['is_anonymous'] ? ' is-anonymous' : ''; ?>">
                         <?php echo esc_html($entry['name']); ?>
                     </div>
@@ -59,7 +59,7 @@ defined('ABSPATH') || exit;
             <ol class="dono-top-donors__list" start="4">
                 <?php foreach ($rest as $i => $entry): ?>
                     <li class="dono-top-donors__row">
-                        <?php echo \Dono\Campaigns\Blocks\BlockAvatar::markup($entry['name'], $entry['is_anonymous']); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                        <?php echo \Dono\Campaigns\Blocks\BlockAvatar::markup($entry['name'], $entry['is_anonymous'], (string) ($entry['avatar_url'] ?? '')); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                         <span class="dono-top-donors__name<?php echo $entry['is_anonymous'] ? ' is-anonymous' : ''; ?>">
                             <?php echo esc_html($entry['name']); ?>
                         </span>
@@ -85,7 +85,7 @@ defined('ABSPATH') || exit;
         <ol class="dono-top-donors__list">
             <?php foreach ($entries as $i => $entry): ?>
                 <li class="dono-top-donors__row">
-                    <?php echo \Dono\Campaigns\Blocks\BlockAvatar::markup($entry['name'], $entry['is_anonymous']); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                    <?php echo \Dono\Campaigns\Blocks\BlockAvatar::markup($entry['name'], $entry['is_anonymous'], (string) ($entry['avatar_url'] ?? '')); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                     <span class="dono-top-donors__name<?php echo $entry['is_anonymous'] ? ' is-anonymous' : ''; ?>">
                         <?php echo esc_html($entry['name']); ?>
                     </span>

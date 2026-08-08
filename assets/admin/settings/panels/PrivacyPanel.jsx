@@ -78,6 +78,13 @@ export default function PrivacyPanel( { s } ) {
                 />
 
                 <ToggleRow
+                    title={ __( 'Show Gravatar profile pictures', 'dono' ) }
+                    sub={ __( "Donor lists show each donor's Gravatar instead of their initials. Their browser asks gravatar.com for it, which means a hash of the donor's email address reaches a third party from every visit to a public campaign page. Anonymous donors are never shown one.", 'dono' ) }
+                    checked={ !! s.value( 'gravatar_avatars', false ) }
+                    onChange={ s.setValue( 'gravatar_avatars' ) }
+                />
+
+                <ToggleRow
                     title={ __( 'Default new donations to anonymous', 'dono' ) }
                     sub={ __( 'Pre-check the anonymous toggle on every donation form. Donors can opt out.', 'dono' ) }
                     checked={ !! s.value( 'always_anonymous_default', false ) }

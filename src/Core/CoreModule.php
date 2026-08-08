@@ -54,6 +54,7 @@ use Dono\Donors\DonorMetricsService;
 use Dono\Donors\DonorNote;
 use Dono\Donors\DonorNoteRepository;
 use Dono\Donors\DonorPurge;
+use Dono\Donors\DonorAvatars;
 use Dono\Donors\DonorRepository;
 use Dono\Donors\DonorService;
 use Dono\Donors\Erasure\AnalyticsEventHandler;
@@ -415,6 +416,11 @@ final class CoreModule implements DonoModule
             if (! $post instanceof \WP_Post) return;
             $c->get(CampaignService::class)->onPagePublished((string) $new, (string) $old, $post);
         }, 10, 3);
+
+        $c->bind(DonorAvatars::class, fn (Container $c) => new DonorAvatars(
+            $c->get(Crypto::class),
+            $c->get(SettingsService::class)
+        ));
 
         $c->bind(CampaignMetricsService::class, fn (Container $c) => new CampaignMetricsService(
             $c->get(Clock::class),
@@ -991,10 +997,12 @@ final class CoreModule implements DonoModule
         $blocks->add(new TopDonorsBlock(
             $c->get(CampaignRepository::class),
             $c->get(DonationRepository::class),
+            $c->get(DonorAvatars::class),
         ));
         $blocks->add(new RecentDonationsBlock(
             $c->get(CampaignRepository::class),
             $c->get(DonationRepository::class),
+            $c->get(DonorAvatars::class),
         ));
         $blocks->add(new SupporterWallBlock(
             $c->get(CampaignRepository::class),
