@@ -165,6 +165,15 @@
 
     * { box-sizing: border-box; }
 
+    // Steps are the form's only direct children, so the gap above separates
+    // groups and nothing separates the fields inside one. Slightly tighter than
+    // the form's own gap, so a group still reads as a group.
+    .dono-form__step {
+        display: flex;
+        flex-direction: column;
+        gap: var(--dono-gap);
+    }
+
     &--inline {
         gap: 24px;
 
@@ -970,13 +979,6 @@
     &__portal-link.is-sent {
         opacity: .75;
         cursor: default;
-    }
-
-    // The step stacks its children flush, so the tinted recap needs its own
-    // separation from whatever sits above. Scoped to a following sibling:
-    // placed first, it should start where the step starts.
-    &__confirm:not(:first-child) {
-        margin-top: 20px;
     }
 
     // Constrained and centred because the card it sits in is centred, and a
