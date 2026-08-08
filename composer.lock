@@ -938,16 +938,16 @@
         },
         {
             "name": "dono/queryable",
-            "version": "v1.0.1",
+            "version": "v1.0.2",
             "source": {
                 "type": "git",
-                "url": "git@github.com:getdono/queryable.git",
-                "reference": "9683907430d231d0bca1b47eac8f3290fd1ccd29"
+                "url": "https://github.com/getdono/queryable.git",
+                "reference": "d80367c560797fea26c9dc5be11d46dec8a526b4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/getdono/queryable/zipball/9683907430d231d0bca1b47eac8f3290fd1ccd29",
-                "reference": "9683907430d231d0bca1b47eac8f3290fd1ccd29",
+                "url": "https://api.github.com/repos/getdono/queryable/zipball/d80367c560797fea26c9dc5be11d46dec8a526b4",
+                "reference": "d80367c560797fea26c9dc5be11d46dec8a526b4",
                 "shasum": ""
             },
             "require": {
@@ -981,7 +981,11 @@
                 "MIT"
             ],
             "description": "A fluent SQL query builder for WordPress",
-            "time": "2026-08-08T04:27:56+00:00"
+            "support": {
+                "source": "https://github.com/getdono/queryable/tree/v1.0.2",
+                "issues": "https://github.com/getdono/queryable/issues"
+            },
+            "time": "2026-08-08T11:26:46+00:00"
         },
         {
             "name": "elazar/flystream",
