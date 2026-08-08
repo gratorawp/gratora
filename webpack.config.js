@@ -1,24 +1,6 @@
 const path = require( 'path' );
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 
-// @dono/ui ships JSX/SCSS source (not a built dist) so it compiles with our exact
-// toolchain. @wordpress/scripts excludes all node_modules from babel; let our own
-// package through by swapping the node_modules exclude for one that spares @dono/ui.
-const allowDonoUi = /node_modules\/(?!@dono\/ui\/)/;
-const patchExcludes = ( rules ) => {
-    for ( const rule of rules || [] ) {
-        if ( rule.exclude ) {
-            const list = Array.isArray( rule.exclude ) ? rule.exclude : [ rule.exclude ];
-            rule.exclude = list.map( ( e ) =>
-                e instanceof RegExp && e.toString().includes( 'node_modules' ) ? allowDonoUi : e
-            );
-        }
-        if ( rule.oneOf ) patchExcludes( rule.oneOf );
-        if ( rule.rules )  patchExcludes( rule.rules );
-    }
-};
-patchExcludes( defaultConfig.module && defaultConfig.module.rules );
-
 module.exports = {
     ...defaultConfig,
     entry: {
