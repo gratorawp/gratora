@@ -118,25 +118,13 @@ final class SettingsService
         ],
         'consents' => [
             'option'   => 'dono_consents',
+            // Empty on purpose. A consent purpose names something the
+            // organisation actually does, and we do not know what that is.
+            // Shipping "Newsletter" put a permanent "No response" on every
+            // donor profile and offered donors a subscription that may not
+            // exist, which is a record of consent to nothing.
             'defaults' => [
-                'purposes' => [
-                    [
-                        'key'         => 'newsletter',
-                        'label'       => 'Newsletter',
-                        'description' => 'Receive our monthly newsletter with stories and impact updates.',
-                        'required'    => false,
-                        'default'     => false,
-                        'version'     => 1,
-                    ],
-                    [
-                        'key'         => 'campaign_updates',
-                        'label'       => 'Campaign updates',
-                        'description' => 'Get updates on campaigns you have supported.',
-                        'required'    => false,
-                        'default'     => true,
-                        'version'     => 1,
-                    ],
-                ],
+                'purposes' => [],
             ],
         ],
         'receipts' => [
