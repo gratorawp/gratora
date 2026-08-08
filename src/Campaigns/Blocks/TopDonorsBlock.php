@@ -100,8 +100,6 @@ final class TopDonorsBlock extends CampaignBlock
             'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('No donors to rank yet.', 'dono'),
             // No button when the campaign cannot take the money: a
             // draft or finished campaign has nothing to offer.
-            'donateUrl'    => $campaign->acceptsDonations() ? '#dono-form' : '',
-            'donateLabel'  => __('Donate', 'dono'),
             'emptySubText' => __('The first donation starts the list.', 'dono'),
             'emptyIcon'    => 'donor',
             'entries'        => $entries,

@@ -103,7 +103,25 @@ npm run test:e2e -- --project=p2p          # just the peer-to-peer suite
 Reports / traces / screenshots on failure land in `test-results/` (gitignored).
 
 If you hit `dono_rate_limited` (429), re-run `wp dono e2e-seed` to clear the
-AntiSpamGuard IP transients and start fresh.
+AntiSpamGuard IP transients and start fresh. Better: put the fixture site in
+org test mode (Settings, or `dono_gateway_config['test_mode']`), which the
+guard short-circuits. Repeated local runs trip the IP quota otherwise, at ten
+attempts per fifteen minutes, and the suite is well past that.
+
+### The payment suite needs a browser-paying gateway
+
+`specs/payment-placement.spec.ts` exercises the phase after submit, where the
+gateway mounts its own element. Offline and sandbox settle server-side and
+never mount one, so on a site offering only those the suite skips seven of its
+ten specs and says so by name:
+
+> no gateway on this site pays in the browser (offered: offline, sandbox).
+> Configure Stripe test keys on the fixture site.
+
+Stripe test keys on the fixture site are the whole prerequisite. No Stripe
+account is contacted: the specs stub the donation POST with the payload the
+server would return, so the keys only need to exist for the gateway to be
+offered.
 
 ## Visual regression
 

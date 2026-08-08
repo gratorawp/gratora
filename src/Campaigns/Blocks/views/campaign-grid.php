@@ -7,8 +7,6 @@ defined('ABSPATH') || exit;
  * @var ?string $emptyText     set only when there are no cards
  * @var ?string $emptySubText
  * @var ?string $emptyIcon
- * @var ?string $donateLabel
- * @var ?string $donateUrl     empty when this campaign is not taking donations
  * @var ?string $notice        editor-only explanation, empty for visitors
  */
 ?>

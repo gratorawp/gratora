@@ -4,22 +4,18 @@ defined('ABSPATH') || exit;
  * The empty state for a donation list.
  *
  * These lists sit under a heading an organiser has already written, on a page
- * whose whole purpose is the ask, and a flat "No donations yet" spent that
- * space saying nothing. The first visitor to a new campaign is exactly who the
- * page most wants to reach, so the empty state carries the invitation: an
- * icon, the line that matters, a softer line under it, and a way to act.
- *
- * The button is omitted when the campaign is not taking donations. A campaign
- * that is a draft, finished, or not yet open has nothing to offer, and a button
- * that scrolls to a form which is not there is worse than no button. The rest
- * still renders, so the heading above is never left captioning nothing.
+ * whose whole purpose is the ask, so the first one carries the invitation
+ * rather than a flat "No donations yet". Only the first: see EmptyState.
  *
  * @var string $emptyText    the headline; editable per block via emptyText
  * @var string $emptySubText the softer line under it
  * @var string $emptyIcon    'donation' | 'donor' | 'supporters'
- * @var string $donateLabel
- * @var string $donateUrl    empty when the campaign is not taking donations
  */
+$full = \Dono\Campaigns\Blocks\EmptyState::claimFull();
+if (! $full) {
+    printf('<p class="dono-block__empty dono-empty--quiet">%s</p>', esc_html($emptyText));
+    return;
+}
 $icons = [
     // Stroked at 1.5 to sit quietly: this is a prompt, not a warning.
     'donation'   => '<path d="M20.8 5.6a5 5 0 0 0-7.1 0L12 7.3l-1.7-1.7a5 5 0 0 0-7.1 7.1l1.7 1.7L12 21.5l7.1-7.1 1.7-1.7a5 5 0 0 0 0-7.1z"/>',
@@ -39,10 +35,5 @@ $icon = $icons[$emptyIcon] ?? $icons['donation'];
     <p class="dono-empty__title"><?php echo esc_html($emptyText); ?></p>
     <?php if (($emptySubText ?? '') !== ''): ?>
         <p class="dono-empty__sub"><?php echo esc_html($emptySubText); ?></p>
-    <?php endif; ?>
-    <?php if ($donateUrl !== ''): ?>
-        <a class="dono-empty__btn" href="<?php echo esc_url($donateUrl); ?>">
-            <?php echo esc_html($donateLabel); ?>
-        </a>
     <?php endif; ?>
 </div>

@@ -58,8 +58,6 @@ final class CampaignGridBlock extends CampaignBlock
                 // give that exists today.
                 'emptySubText' => __('Which makes it an easy choice.', 'dono'),
                 'emptyIcon'    => 'campaigns',
-                'donateLabel'  => __('Donate', 'dono'),
-                'donateUrl'    => ($current && $current->acceptsDonations()) ? '#dono-form' : '',
                 'notice'    => (is_user_logged_in() && current_user_can('edit_posts'))
                     ? __('Only this campaign is published, so there is nothing to list. Visitors see the message above; this line is editor-only.', 'dono')
                     : '',

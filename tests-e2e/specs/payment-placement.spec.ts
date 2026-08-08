@@ -70,13 +70,51 @@ test.describe('payment step placement', () => {
         await donor.submit();
     }
 
+    /** Why this run cannot reach the payment phase, or '' when it can. */
+    let blocked: string | null = null;
+
     /**
      * Walks to the gateway block, which on a paged form is on the last page.
-     * Returns false when the form places none, so a seed without one skips
-     * rather than failing for the wrong reason. Looking for it at load time
-     * instead reported four green skips and tested nothing.
+     *
+     * Answers WHY it could not get there, not just that it could not. A skip
+     * reason that names the wrong cause is worse than a failure: it reads as
+     * coverage, and it sent the last investigation looking at the block
+     * placement when the site simply had no gateway that pays in the browser.
      */
+    async function whyBlocked(donor, page): Promise<string> {
+        if (blocked !== null) return blocked;
+
+        // The form's own config, not the rendered radios: a form offering a
+        // single gateway draws no selector at all, so counting radios reports
+        // a missing block on a form that places one.
+        //
+        // Read from the served HTML rather than the DOM, because the runtime
+        // consumes this script at boot and removes it.
+        const html = await (await page.request.get(page.url())).text();
+        const raw  = /data-dono-form-config[^>]*>([\s\S]*?)<\/script>/.exec(html);
+        if (! raw) return blocked = 'no Dono form config on the page under test';
+        const cfg = JSON.parse(raw[1]);
+
+        const ids   = ((cfg.gateways?.options ?? []) as Array<{ id: string }>).map((o) => o.id);
+        const items = ((cfg.steps ?? []) as Array<{ items?: Array<{ kind?: string }> }>)
+            .flatMap((s) => s.items ?? []);
+
+        if (! items.some((i) => i.kind === 'payment-gateways')) {
+            return blocked = 'the seeded form places no payment-gateways block';
+        }
+        // Offline and sandbox settle server-side, so neither ever mounts a
+        // payment element and neither can exercise this suite.
+        if (ids.filter((g) => g !== 'offline' && g !== 'sandbox').length === 0) {
+            return blocked =
+                `no gateway on this site pays in the browser (offered: ${ids.join(', ') || 'none'}). ` +
+                'Configure Stripe test keys on the fixture site.';
+        }
+        return blocked = '';
+    }
+
     async function submitToPayment(donor, page): Promise<boolean> {
+        if (await whyBlocked(donor, page) !== '') return false;
+
         await stubStripeIntent(page);
         await fillAndSubmit(donor, page, 'stripe');
 
@@ -85,8 +123,14 @@ test.describe('payment step placement', () => {
         return true;
     }
 
+    /** Skips naming the real reason, so a skipped run is never mistaken for a passing one. */
+    async function requirePayment(donor, page): Promise<void> {
+        const why = await whyBlocked(donor, page);
+        test.skip(why !== '' || ! await submitToPayment(donor, page), why || 'payment phase not reached');
+    }
+
     test('payment mounts at the gateway block, not over the whole form', async ({ donor, page }) => {
-        test.skip(! await submitToPayment(donor, page), 'seeded form places no gateway block');
+        await requirePayment(donor, page);
 
         await expect(donor.form.locator('.dono-form__payment-mount')).toHaveCount(1);
         // The selector it replaces is gone, so the donor is not offered a
@@ -100,7 +144,7 @@ test.describe('payment step placement', () => {
      * gateway owns this screen and shows the charge itself.
      */
     test('the pay screen carries nothing but the gateway', async ({ donor, page }) => {
-        test.skip(! await submitToPayment(donor, page), 'seeded form places no gateway block');
+        await requirePayment(donor, page);
 
         await expect(donor.form.locator('.dono-form__donor').first()).toBeHidden();
         await expect(donor.form.locator('.dono-form__amount').first()).toBeHidden();
@@ -119,7 +163,7 @@ test.describe('payment step placement', () => {
      * the seed produced rather than assumed to be the paged one.
      */
     test('the form settles whichever layout it is', async ({ donor, page }) => {
-        test.skip(! await submitToPayment(donor, page), 'seeded form places no gateway block');
+        await requirePayment(donor, page);
 
         const root = donor.form.locator('.dono-form--settled');
         await expect(root).toHaveCount(1);
@@ -140,7 +184,7 @@ test.describe('payment step placement', () => {
      * exactly what the reducer guard is there to survive.
      */
     test('nothing about the donation can change once payment has started', async ({ donor, page }) => {
-        test.skip(! await submitToPayment(donor, page), 'seeded form places no gateway block');
+        await requirePayment(donor, page);
 
         const totalBefore = await donor.form.innerText();
 
@@ -159,7 +203,7 @@ test.describe('payment step placement', () => {
      * buttons on one screen is a donor deciding which one takes their money.
      */
     test('only the gateway offers a way to pay', async ({ donor, page }) => {
-        test.skip(! await submitToPayment(donor, page), 'seeded form places no gateway block');
+        await requirePayment(donor, page);
 
         // The gateway's own Pay lives in a nav of the same name, so this is
         // about which navs survive, not about hiding the class.
@@ -176,7 +220,7 @@ test.describe('payment step placement', () => {
      * to the whole subtree and a descendant cannot undo it.
      */
     test('the donor can actually read and press Pay', async ({ donor, page }) => {
-        test.skip(! await submitToPayment(donor, page), 'seeded form places no gateway block');
+        await requirePayment(donor, page);
 
         // Present and visible is the claim. It stays disabled until Stripe
         // reports the element ready, which it never does against an invented
@@ -199,7 +243,7 @@ test.describe('payment step placement', () => {
 
     /** Whatever is still in the tree must not be reachable. */
     test('nothing outside the gateway can be interacted with', async ({ donor, page }) => {
-        test.skip(! await submitToPayment(donor, page), 'seeded form places no gateway block');
+        await requirePayment(donor, page);
 
         const reachable = await donor.form.evaluate((form) => {
             const mount = form.querySelector('.dono-form__payment-mount');

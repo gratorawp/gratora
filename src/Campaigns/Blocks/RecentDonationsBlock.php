@@ -103,8 +103,6 @@ final class RecentDonationsBlock extends CampaignBlock
             'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('No donations to show yet.', 'dono'),
             // No button when the campaign cannot take the money: a
             // draft or finished campaign has nothing to offer.
-            'donateUrl'    => $campaign->acceptsDonations() ? '#dono-form' : '',
-            'donateLabel'  => __('Donate', 'dono'),
             'emptySubText' => __('Donations tend to follow the first one.', 'dono'),
             'emptyIcon'    => 'donation',
             'entries'      => $entries,

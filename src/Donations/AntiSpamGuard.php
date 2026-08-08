@@ -131,18 +131,16 @@ final class AntiSpamGuard
     {
         if ($this->inGlobalTestMode()) return null;
 
-        $ip  = (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
-        $key = 'dono_donate_ip_' . hash('sha256', $ip);
-        $count = (int) get_transient($key);
-        if ($count >= self::IP_MAX) {
-            return new WP_Error(
-                'dono_rate_limited',
-                __('Too many attempts. Please try again in a few minutes.', 'dono'),
-                ['status' => 429]
-            );
+        $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+        if ($this->hit('dono_donate_ip_' . hash('sha256', $ip), self::IP_WINDOW) <= self::IP_MAX) {
+            return null;
         }
-        set_transient($key, $count + 1, self::IP_WINDOW);
-        return null;
+
+        return new WP_Error(
+            'dono_rate_limited',
+            __('Too many attempts. Please try again in a few minutes.', 'dono'),
+            ['status' => 429]
+        );
     }
 
     public function consumeEmailQuota(string $email): ?WP_Error
@@ -152,16 +150,56 @@ final class AntiSpamGuard
 
         $hash = $this->hasher->emailHash($this->hasher->normalizeEmail($email));
         $key  = 'dono_donate_email_' . substr($hash, 0, 32);
-        $count = (int) get_transient($key);
-        if ($count >= self::EMAIL_MAX) {
-            return new WP_Error(
-                'dono_rate_limited',
-                __('Too many recent attempts for this email. Please try again later.', 'dono'),
-                ['status' => 429]
-            );
+        if ($this->hit($key, self::EMAIL_WINDOW) <= self::EMAIL_MAX) {
+            return null;
         }
-        set_transient($key, $count + 1, self::EMAIL_WINDOW);
-        return null;
+
+        return new WP_Error(
+            'dono_rate_limited',
+            __('Too many recent attempts for this email. Please try again later.', 'dono'),
+            ['status' => 429]
+        );
+    }
+
+    /**
+     * Count this attempt and answer how many the window has now seen.
+     *
+     * Incremented before it is judged, and incremented atomically, because
+     * read-then-write lets two requests both read the last allowed value and
+     * both write it back: the limit is walked past exactly as fast as a
+     * caller can open connections.
+     *
+     * The window is a fixed bucket in the key rather than a sliding expiry.
+     * Re-setting a transient on every attempt pushes its expiry out, so a
+     * caller who keeps trying holds their own lockout open forever, and the
+     * person it strands is the donor whose card was declined twice.
+     */
+    private function hit(string $base, int $window): int
+    {
+        global $wpdb;
+
+        $key  = $base . '_' . (int) floor(time() / $window);
+        $name = '_transient_' . $key;
+
+        // add_option is an INSERT against option_name's unique index, so of any
+        // number of concurrent first attempts exactly one creates the row and
+        // the rest fall through to the UPDATE, which MySQL serialises.
+        if (! add_option($name, '1', '', false)) {
+            $wpdb->query($wpdb->prepare(
+                "UPDATE {$wpdb->options} SET option_value = option_value + 1 WHERE option_name = %s",
+                $name
+            ));
+            wp_cache_delete($name, 'options');
+        }
+
+        // Only so the existing transient GC reclaims the bucket; expiry itself
+        // is structural, an old bucket is simply never named again.
+        add_option('_transient_timeout_' . $key, (string) (time() + $window * 2), '', false);
+
+        return (int) $wpdb->get_var($wpdb->prepare(
+            "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s",
+            $name
+        ));
     }
 
     public function checkMinAmount(int $cents): ?WP_Error
