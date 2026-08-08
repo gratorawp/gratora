@@ -7,8 +7,11 @@ namespace Dono\Forms;
 final class FormTemplates
 {
     /**
-     * Several templates are defined below but deliberately left out of this
-     * list; re-enable one by appending it, or add your own via the filter.
+     * One template per donor situation, and only situations core can actually
+     * build. Memorial, tribute, event ticketing and peer-to-peer need blocks
+     * that live in add-ons, so those add-ons register their own through the
+     * dono.form.templates filter rather than core shipping a template whose
+     * fields go missing when the add-on is not installed.
      *
      * @return list<array{id:string,name:string,description:string,icon:string,category:string,thumbnail_hint:string,settings:array<string,mixed>,blocks:string}>
      */
@@ -16,14 +19,14 @@ final class FormTemplates
     {
         $templates = [
             self::blank(),
+            self::everyday(),
+            self::guided(),
             self::quickGive(),
-            self::conversionModal(),
-            self::posterHero(),
+            self::monthlySustainer(),
+            self::emergencyAppeal(),
+            self::designated(),
+            self::campaignPage(),
             self::impactTiers(),
-            self::sundayTithe(),
-            self::essentialsWizard(),
-            self::workplaceMatch(),
-            self::galaPledge(),
         ];
         return (array) apply_filters('dono.form.templates', $templates);
     }
@@ -85,52 +88,12 @@ final class FormTemplates
         ];
     }
 
-    private static function conversionModal(): array
-    {
-        $row = self::block('dono/name', ['requireFirst' => true, 'requireLast' => true])
-             . self::block('dono/country', ['required' => true]);
-        $blocks = self::block('dono/heading', ['text' => __('Support our work', 'dono'), 'level' => 2])
-                . self::block('dono/paragraph', ['text' => __('Recurring donations go further. Most donors choose monthly.', 'dono')])
-                . self::block('dono/donation-amount', [
-                    'presets' => self::presets([25, 50, 100, 250, 500]),
-                    'allowCustom' => true,
-                ])
-                . self::block('dono/email', ['required' => true])
-                . self::block('dono/row', ['columns' => 2, 'gap' => 12], $row)
-                . self::block('dono/cover-fees', [
-                    'percent' => 2.9, 'fixed' => 30,
-                    'label' => __('Cover transaction fees so 100% reaches us', 'dono'),
-                    'defaultOn' => true,
-                ])
-                . self::block('dono/payment-gateways', ['style' => 'cards'])
-                . self::block('dono/donation-summary')
-                . self::block('dono/submit-button', ['label' => __('Donate {amount}', 'dono')]);
-
-        return [
-            'id'             => 'conversion-modal',
-            'name'           => __('Conversion Modal', 'dono'),
-            'description'    => __('Drop-in modal donation form for high-intent traffic. Frequency pill, five amount tiles, pre-checked fee cover.', 'dono'),
-            'icon'           => 'external',
-            'category'       => 'Standard',
-            'thumbnail_hint' => 'Overlay modal on a dimmed page, frequency pill, five amount tiles, single primary CTA.',
-            'settings'       => [
-                'layout'            => 'modal',
-                'style'            => ['preset_id' => ''],
-                'recurring'         => ['enabled' => true, 'frequencies' => ['monthly']],
-                'gateways'          => ['allowed' => []],
-                'anonymous_allowed' => false,
-                'thank_you_message' => __('Your donation is on its way. Watch your inbox.', 'dono'),
-                'redirect_url'      => '',
-            ],
-            'blocks'         => $blocks,
-        ];
-    }
-
     private static function quickGive(): array
     {
+        // Short because that is the entire point. A goal bar, phone number,
+        // message box and anonymity toggle all belong on some other template.
         $blocks = self::block('dono/heading', ['text' => __('Chip in', 'dono'), 'level' => 2])
                 . self::block('dono/paragraph', ['text' => __('Every bit helps. Takes 20 seconds.', 'dono')])
-                . self::block('dono/goal', ['showAmount' => true, 'showDonors' => true, 'showDeadline' => false])
                 . self::block('dono/donation-amount', [
                     'presets' => self::presets(
                         [10, 25, 50, 100],
@@ -143,30 +106,12 @@ final class FormTemplates
                     ),
                     'allowCustom' => true,
                 ])
-                . self::block('dono/cover-fees', [
-                    'percent' => 2.9, 'fixed' => 30,
-                    'label' => __("Sweet, I'll cover the fees so 100% goes to the cause", 'dono'),
-                    'defaultOn' => true,
-                ])
-                . self::block('dono/email', ['required' => true])
                 . self::block('dono/name', ['requireFirst' => true, 'requireLast' => false])
-                . self::block('dono/phone', [
-                    'label' => __('Get text receipts', 'dono'),
-                    'placeholder' => __('Optional', 'dono'),
-                    'required' => false,
-                ])
-                . self::block('dono/comment', [
-                    'label' => __('Say something nice', 'dono'),
-                    'placeholder' => __('140 chars, keep it kind', 'dono'),
-                    'required' => false,
-                ])
-                . self::block('dono/anonymous-toggle', [
-                    'label' => __('Show me as Anonymous', 'dono'),
-                    'defaultOn' => false,
-                ])
-                . self::block('dono/payment-gateways', ['style' => 'cards'])
-                . self::block('dono/donation-summary')
-                . self::block('dono/submit-button', ['label' => __('Send {amount}', 'dono')]);
+                . self::block('dono/email', ['required' => true])
+                . self::checkout(
+                    __('Send {amount}', 'dono'),
+                    __("I'll cover the fees so 100% goes to the cause", 'dono')
+                );
 
         return [
             'id'             => 'quick-give',
@@ -182,100 +127,6 @@ final class FormTemplates
                 'gateways'          => ['allowed' => []],
                 'anonymous_allowed' => true,
                 'thank_you_message' => __("You're amazing. Share to multiply your impact.", 'dono'),
-                'redirect_url'      => '',
-            ],
-            'blocks'         => $blocks,
-        ];
-    }
-
-    private static function posterHero(): array
-    {
-        $blocks = self::block('dono/heading', ['text' => __('100% goes to the cause', 'dono'), 'level' => 1])
-                . self::block('dono/paragraph', ['text' => __('Private donors cover our operations, so every dollar you give goes straight to the people we serve.', 'dono')])
-                . self::block('dono/goal', ['showAmount' => true, 'showDonors' => true, 'showDeadline' => false])
-                . self::block('dono/donation-amount', [
-                    'presets' => self::presets(
-                        [30, 60, 120, 240, 500],
-                        [
-                            __('$30 supports one person', 'dono'),
-                            __('$60 supports two people', 'dono'),
-                            __('$120 supports a family', 'dono'),
-                            __('$240 supports a classroom', 'dono'),
-                            __('$500 funds a community project', 'dono'),
-                        ]
-                    ),
-                    'allowCustom' => true,
-                ])
-                . self::block('dono/name', ['requireFirst' => true, 'requireLast' => true])
-                . self::block('dono/email', ['required' => true])
-                . self::block('dono/country', ['required' => false])
-                . self::block('dono/cover-fees', [
-                    'percent' => 2.9, 'fixed' => 30,
-                    'label' => __('Add a little to cover processing so 100% reaches the cause', 'dono'),
-                    'defaultOn' => true,
-                ])
-                . self::block('dono/payment-gateways', ['style' => 'cards'])
-                . self::block('dono/donation-summary')
-                . self::block('dono/submit-button', ['label' => __('Donate now', 'dono')]);
-
-        return [
-            'id'             => 'poster-hero',
-            'name'           => __('Poster Hero', 'dono'),
-            'description'    => __('One photograph, one outcome, one button. Built for organisations with strong imagery.', 'dono'),
-            'icon'           => 'format-image',
-            'category'       => 'Standard',
-            'thumbnail_hint' => 'Oversized lowercase yellow headline on near-black, single tile row, full-width yellow CTA.',
-            'settings'       => [
-                'layout'            => 'inline',
-                'style'            => ['preset_id' => ''],
-                'recurring'         => ['enabled' => true, 'frequencies' => ['monthly']],
-                'gateways'          => ['allowed' => []],
-                'anonymous_allowed' => true,
-                'thank_you_message' => __("Thank you. Your donation is already on its way to the people we serve. We'll send one email when it is put to work, and one more when the project is complete. That's it.", 'dono'),
-                'redirect_url'      => '',
-            ],
-            'blocks'         => $blocks,
-        ];
-    }
-
-    private static function personalAppeal(): array
-    {
-        $appeal = __("I'll keep this short. I'm Sara, and I've worked on this project for nine years. We don't run ads. We don't sell your address. We don't pay a fundraising firm a cut of what you give. What we do is answer the phone when a teacher writes asking for help, and we keep the lights on with small donations from people who read this far. If what we do has been useful to you this year, please consider giving what a cup of coffee costs. If it hasn't, that's okay too, thank you for reading. - Sara", 'dono');
-
-        $blocks = self::block('dono/paragraph', ['text' => $appeal])
-                . self::block('dono/donation-amount', [
-                    'presets' => self::presets([3, 5, 10, 20, 50]),
-                    'allowCustom' => true,
-                ])
-                . self::block('dono/email', ['required' => true])
-                . self::block('dono/name', ['requireFirst' => false, 'requireLast' => false])
-                . self::block('dono/comment', [
-                    'label' => __('Why you gave (optional)', 'dono'),
-                    'placeholder' => '',
-                    'required' => false,
-                ])
-                . self::block('dono/anonymous-toggle', [
-                    'label' => __('Keep my donation anonymous', 'dono'),
-                    'defaultOn' => false,
-                ])
-                . self::block('dono/payment-gateways', ['style' => 'cards'])
-                . self::block('dono/donation-summary')
-                . self::block('dono/submit-button', ['label' => __('Continue', 'dono')]);
-
-        return [
-            'id'             => 'personal-appeal',
-            'name'           => __('Personal Appeal', 'dono'),
-            'description'    => __('A signed letter on warm paper. Narrow column, serif body, anti-marketing tone.', 'dono'),
-            'icon'           => 'edit',
-            'category'       => 'Story-led',
-            'thumbnail_hint' => 'Beige column, serif paragraph signed by name, plain number tiles, link-style CTA.',
-            'settings'       => [
-                'layout'            => 'inline',
-                'style'            => ['preset_id' => ''],
-                'recurring'         => ['enabled' => true, 'frequencies' => ['monthly']],
-                'gateways'          => ['allowed' => []],
-                'anonymous_allowed' => true,
-                'thank_you_message' => __("Thank you. I read every comment that comes in, and I'm grateful you took a minute on a day when you didn't have to. Your receipt is in your inbox. - Sara", 'dono'),
                 'redirect_url'      => '',
             ],
             'blocks'         => $blocks,
@@ -341,593 +192,268 @@ final class FormTemplates
         ];
     }
 
-    private static function concreteKit(): array
+    /**
+     * Standard fee-cover block. The rate matches the common card cost; an org
+     * on different pricing edits the numbers rather than the wording.
+     */
+    private static function coverFees(string $label): string
     {
-        $blocks = self::block('dono/heading', ['text' => __('Choose what you want to send', 'dono'), 'level' => 1])
-                . self::block('dono/paragraph', ['text' => __('Every kit is a real bundle delivered to someone who needs it. Pick one, or give any amount toward whatever is most urgent this month.', 'dono')])
-                . self::block('dono/currency-switcher', [
-                    'currencies' => ['USD', 'EUR', 'GBP', 'CAD', 'AUD'],
-                    'label' => __('Currency', 'dono'),
-                ])
-                . self::block('dono/donation-amount', [
-                    'presets' => self::presets(
-                        [19.99, 42.50, 65.00, 110.00],
-                        [
-                            __('Starter Kit - supports one person', 'dono'),
-                            __('Essentials Kit - supports one person', 'dono'),
-                            __('Monthly Kit - supports one person for a month', 'dono'),
-                            __('Family Kit - supports one family', 'dono'),
-                        ]
-                    ),
-                    'allowCustom' => true,
-                ])
-                . self::block('dono/name', ['requireFirst' => true, 'requireLast' => true])
-                . self::block('dono/email', ['required' => true])
-                . self::block('dono/phone', [
-                    'label' => __('Phone (optional)', 'dono'),
-                    'placeholder' => __('For shipping updates only', 'dono'),
-                    'required' => false,
-                ])
-                . self::block('dono/country', ['required' => true])
-                . self::block('dono/cover-fees', [
-                    'percent' => 2.9, 'fixed' => 30,
-                    'label' => __('Cover the processing fee so the full kit value reaches the cause', 'dono'),
-                    'defaultOn' => true,
-                ])
-                . self::block('dono/payment-gateways', ['style' => 'cards'])
-                . self::block('dono/donation-summary')
-                . self::block('dono/submit-button', ['label' => __('Send the kit', 'dono')]);
-
-        return [
-            'id'             => 'concrete-kit',
-            'name'           => __('Concrete Kit', 'dono'),
-            'description'    => __('Catalog-style donation flow where each amount is a named kit being sent on the donor behalf.', 'dono'),
-            'icon'           => 'cart',
-            'category'       => 'Niche',
-            'thumbnail_hint' => 'UNICEF-blue header over a four-tile product grid with kit thumbnails.',
-            'settings'       => [
-                'layout'            => 'inline',
-                'style'            => ['preset_id' => ''],
-                'recurring'         => ['enabled' => false, 'frequencies' => []],
-                'gateways'          => ['allowed' => []],
-                'anonymous_allowed' => true,
-                'thank_you_message' => __("Your kit is on its way. We'll email you when it ships, and you can download a printable donation card to share with someone special.", 'dono'),
-                'redirect_url'      => '',
-            ],
-            'blocks'         => $blocks,
-        ];
+        return self::block('dono/cover-fees', [
+            'percent'   => 2.9,
+            'fixed'     => 30,
+            'label'     => $label,
+            'defaultOn' => true,
+        ]);
     }
 
-    private static function sundayTithe(): array
+    /** Gateways, running total, button. Every template ends this way. */
+    private static function checkout(string $submitLabel, string $feeLabel): string
     {
-        $blocks = self::block('dono/heading', ['text' => __('Give to our church', 'dono'), 'level' => 1])
-                . self::block('dono/paragraph', ['text' => __('Your generosity sustains our ministry, our missions, and our neighborhood.', 'dono')])
-                . self::block('dono/donation-amount', [
-                    'presets' => self::presets(
-                        [25, 50, 100, 250],
-                        [
-                            __('General Fund', 'dono'),
-                            __('Missions', 'dono'),
-                            __('Building', 'dono'),
-                            __('Benevolence', 'dono'),
-                        ]
-                    ),
-                    'allowCustom' => true,
-                ])
-                . self::block('dono/cover-fees', [
-                    'percent' => 2.9, 'fixed' => 30,
-                    'label' => __('Cover the processing fee so the full amount supports our ministry', 'dono'),
-                    'defaultOn' => true,
-                ])
-                . self::block('dono/email', [
-                    'placeholder' => __('For your tax receipt', 'dono'),
-                    'required' => true,
-                ])
-                . self::block('dono/name', [
-                    'firstPlaceholder' => 'First',
-                    'lastPlaceholder' => 'Last',
-                    'requireFirst' => true,
-                    'requireLast' => true,
-                ])
-                . self::block('dono/phone', [
-                    'label' => __('Mobile', 'dono'),
-                    'placeholder' => __('For text giving receipts', 'dono'),
-                    'required' => false,
-                ])
-                . self::block('dono/comment', [
-                    'label' => __('Add a prayer request or note', 'dono'),
-                    'placeholder' => __('Our pastoral team reads every one.', 'dono'),
-                    'required' => false,
-                ])
-                . self::block('dono/payment-gateways', ['style' => 'cards'])
-                . self::block('dono/donation-summary')
-                . self::block('dono/submit-button', ['label' => __('Give {amount} {frequency}', 'dono')]);
-
-        return [
-            'id'             => 'sunday-tithe',
-            'name'           => __('Sunday Tithe', 'dono'),
-            'description'    => __('Mobile-first recurring giving card for churches. Designed for repeat tithers finishing in under thirty seconds.', 'dono'),
-            'icon'           => 'sos',
-            'category'       => 'Recurring',
-            'thumbnail_hint' => 'Soft teal card, frequency pills with Monthly selected, four amount tiles, large rounded CTA.',
-            'settings'       => [
-                'layout'            => 'inline',
-                'style'            => ['preset_id' => ''],
-                'recurring'         => ['enabled' => true, 'frequencies' => ['weekly', 'biweekly', 'monthly']],
-                'gateways'          => ['allowed' => []],
-                'anonymous_allowed' => false,
-                'thank_you_message' => __('Thank you for your generosity. A receipt is on its way.', 'dono'),
-                'redirect_url'      => '',
-            ],
-            'blocks'         => $blocks,
-        ];
+        return self::coverFees($feeLabel)
+            . self::block('dono/payment-gateways', ['style' => 'cards'])
+            . self::block('dono/donation-summary')
+            . self::block('dono/submit-button', ['label' => $submitLabel]);
     }
 
-    private static function campaignThermometer(): array
+    private static function everyday(): array
     {
-        $row = self::block('dono/name', ['requireFirst' => true, 'requireLast' => true])
-             . self::block('dono/email', ['required' => true]);
-        $blocks = self::block('dono/goal', ['showAmount' => true, 'showDonors' => true, 'showDeadline' => true])
-                . self::block('dono/heading', ['text' => __('Help us reach our goal by Tuesday', 'dono'), 'level' => 2])
-                . self::block('dono/paragraph', ['text' => __('We are almost there, with 72 hours on the clock. Your donation right now is what closes the gap.', 'dono')])
+        $blocks = self::block('dono/heading', ['text' => __('Make a donation', 'dono'), 'level' => 1])
                 . self::block('dono/donation-amount', [
-                    'presets' => self::presets(
-                        [25, 50, 100, 250, 500],
-                        [
-                            __('$25 - gets us started', 'dono'),
-                            __('$50 - builds momentum', 'dono'),
-                            __('$100 - makes a real dent', 'dono'),
-                            __('$250 - a major push', 'dono'),
-                            __('$500 - helps close the gap', 'dono'),
-                        ],
-                        2
-                    ),
+                    'presets'     => self::presets([25, 50, 100, 250], [], 1),
                     'allowCustom' => true,
                 ])
-                . self::block('dono/currency-switcher', [
-                    'currencies' => ['USD', 'EUR', 'GBP', 'CAD', 'AUD'],
-                    'label' => __('Currency', 'dono'),
-                ])
-                . self::block('dono/row', ['columns' => 2, 'gap' => 12], $row)
-                . self::block('dono/anonymous-toggle', [
-                    'label' => __('Show my name on the supporter wall', 'dono'),
-                    'defaultOn' => true,
-                ])
-                . self::block('dono/comment', [
-                    'label' => __('Leave a message of support', 'dono'),
-                    'placeholder' => __('Cheering you on...', 'dono'),
-                    'required' => false,
-                ])
-                . self::block('dono/cover-fees', [
-                    'percent' => 2.9, 'fixed' => 30,
-                    'label' => __('Cover the processing fee so 100% reaches the kitchen', 'dono'),
-                    'defaultOn' => true,
-                ])
-                . self::block('dono/payment-gateways', ['style' => 'cards'])
-                . self::block('dono/donation-summary')
-                . self::block('dono/submit-button', ['label' => __('Give {amount} now', 'dono')]);
-
-        return [
-            'id'             => 'campaign-thermometer',
-            'name'           => __('Campaign Thermometer', 'dono'),
-            'description'    => __('Time-bound campaign form with goal bar, countdown, and supporter wall for urgency-driven pushes.', 'dono'),
-            'icon'           => 'chart-bar',
-            'category'       => 'Event',
-            'thumbnail_hint' => 'Coral progress bar at 67%, countdown clock "3 days left", supporter avatars trailing below.',
-            'settings'       => [
-                'layout'            => 'inline',
-                'style'            => ['preset_id' => ''],
-                'recurring'         => ['enabled' => true, 'frequencies' => ['monthly']],
-                'gateways'          => ['allowed' => []],
-                'anonymous_allowed' => true,
-                'thank_you_message' => __('You did it. You just helped us hit 67% of our goal. Share to push us to 100%.', 'dono'),
-                'redirect_url'      => '',
-            ],
-            'blocks'         => $blocks,
-        ];
-    }
-
-    private static function stewardshipWizard(): array
-    {
-        $blocks = self::block('dono/heading', ['text' => __('Make your donation', 'dono'), 'level' => 2])
-                . self::block('dono/paragraph', ['text' => __('Your support funds the programs below. A member of our development team will follow up personally to confirm how your donation is being directed.', 'dono')])
-                . self::block('dono/donation-amount', [
-                    'presets' => self::presets([50, 100, 250, 500, 1000]),
-                    'allowCustom' => true,
-                ])
-                . self::block('dono/currency-switcher', [
-                    'currencies' => ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'CHF'],
-                    'label' => __('Currency', 'dono'),
-                ])
-                . self::block('dono/donation-amount', [
-                    'presets' => self::presets(
-                        [0, 0, 0, 0],
-                        [
-                            __('Education - educates one student for a term', 'dono'),
-                            __('Health - provides medical care for one family', 'dono'),
-                            __('Food Security - supports a community for a week', 'dono'),
-                            __('Where the need is greatest - let our team allocate', 'dono'),
-                        ]
-                    ),
-                    'allowCustom' => false,
+                . self::block('dono/recurring-toggle', [
+                    'label'            => __('Make this a repeating gift', 'dono'),
+                    'defaultFrequency' => 'one-time',
+                    'frequencies'      => ['one-time', 'monthly'],
+                    'style'            => 'pills',
                 ])
                 . self::block('dono/name', ['requireFirst' => true, 'requireLast' => true])
                 . self::block('dono/email', ['required' => true])
                 . self::block('dono/country', ['required' => false])
-                . self::block('dono/phone', [
-                    'label' => __('Phone (optional)', 'dono'),
-                    'placeholder' => '',
-                    'required' => false,
-                ])
-                . self::block('dono/comment', [
-                    'label' => __('Mailing address (street, city, region, postal)', 'dono'),
-                    'placeholder' => __('123 Main Street', 'dono'),
-                    'required' => true,
-                ])
-                . self::block('dono/anonymous-toggle', [
-                    'label' => __('Withhold my name from public recognition lists', 'dono'),
-                    'defaultOn' => false,
-                ])
-                . self::block('dono/comment', [
-                    'label' => __('Message to our team', 'dono'),
-                    'placeholder' => __("Anything you'd like our development team to know...", 'dono'),
-                    'required' => false,
-                ])
-                . self::block('dono/cover-fees', [
-                    'percent' => 2.9, 'fixed' => 30,
-                    'label' => __('Add 3% to cover processing costs', 'dono'),
-                    'defaultOn' => false,
-                ])
-                . self::block('dono/payment-gateways', ['style' => 'cards'])
-                . self::block('dono/donation-summary')
-                . self::block('dono/submit-button', ['label' => __('Complete my donation', 'dono')]);
+                . self::checkout(
+                    __('Donate {amount}', 'dono'),
+                    __('Cover the processing fee so the full amount reaches us', 'dono')
+                );
 
         return [
-            'id'             => 'stewardship-wizard',
-            'name'           => __('Stewardship Wizard', 'dono'),
-            'description'    => __('Three-step institutional donation form for mid-to-large nonprofits with project portfolios and stewardship workflows.', 'dono'),
-            'icon'           => 'businessman',
-            'category'       => 'Enterprise',
-            'thumbnail_hint' => 'Navy header with serif "Make your donation", three-dot stepper, restrained tile grid below.',
-            'settings'       => [
-                'layout'            => 'inline',
-                'style'            => ['preset_id' => ''],
-                'recurring'         => ['enabled' => true, 'frequencies' => ['monthly', 'yearly']],
-                'gateways'          => ['allowed' => []],
-                'anonymous_allowed' => true,
-                'thank_you_message' => __('We have received your donation. A member of our development team will be in touch within five business days.', 'dono'),
-                'redirect_url'      => '',
-            ],
+            'id'             => 'everyday',
+            'name'           => __('Everyday donation', 'dono'),
+            'description'    => __('The general-purpose form: pick an amount, optionally make it monthly, pay. Start here if no other template fits.', 'dono'),
+            'icon'           => 'heart',
+            'category'       => 'Standard',
+            'thumbnail_hint' => 'Single column, four amount tiles, one-time/monthly pills, three donor fields, pay button.',
+            'settings'       => self::defaultSettings(),
             'blocks'         => $blocks,
         ];
     }
 
-    private static function sustainerPath(): array
+    private static function guided(): array
     {
-        $hero = self::block(
-            'dono/section',
-            [
-                'background' => '#e7f5ec',
-                'padding'    => ['top' => 32, 'right' => 32, 'bottom' => 32, 'left' => 32],
-                'border'     => ['radius' => 12],
-            ],
-            self::block('dono/heading',   ['text' => __('Become a monthly sustainer', 'dono'), 'level' => 2])
-            . self::block('dono/paragraph', ['text' => __('A small recurring donation goes further than a single big one. Pick what works for you.', 'dono')])
-        );
-
-        $detailsRow = self::block('dono/name',  ['requireFirst' => true, 'requireLast' => true])
-                    . self::block('dono/email', ['required' => true]);
-
-        $step1 = self::block(
-            'dono/step',
-            ['title' => __('Choose your impact', 'dono')],
-            $hero
-            . self::block('dono/recurring-toggle', ['defaultFrequency' => 'monthly', 'style' => 'pills', 'frequencies' => ['one-time', 'monthly']])
-            . self::block('dono/donation-amount', [
-                'presets'     => self::presets([10, 25, 50, 100], [], 1),
-                'allowCustom' => true,
-            ])
-            . self::block('dono/paragraph', ['text' => __('Monthly donors fund 70% of our year-round programs.', 'dono')])
-        );
-
-        $step2 = self::block(
-            'dono/step',
-            ['title' => __('Your details', 'dono')],
-            self::block('dono/row', ['columns' => 2, 'gap' => 12], $detailsRow)
-            . self::block('dono/cover-fees', [
-                'percent' => 2.9, 'fixed' => 30,
-                'label' => __('Cover transaction fees so 100% reaches us', 'dono'),
-                'defaultOn' => true,
-            ])
-            . self::block('dono/consent')
-            . self::block('dono/payment-gateways', ['style' => 'cards'])
-            . self::block('dono/donation-summary')
-                . self::block('dono/submit-button', ['label' => __('Start monthly support', 'dono')])
-        );
-
-        return [
-            'id'             => 'sustainer-path',
-            'name'           => __('Sustainer Path', 'dono'),
-            'description'    => __('Two-step wizard that coaches donors toward monthly giving. Highest-ROI pattern for recurring acquisition.', 'dono'),
-            'icon'           => 'update',
-            'category'       => 'Recurring',
-            'thumbnail_hint' => 'Two-step wizard. Step 1: accent-soft hero with monthly default, four amount tiles ($25 preselected). Step 2: name + email row, fee cover, consent.',
-            'settings'       => [
-                'layout'            => 'inline',
-                'style'             => ['preset_id' => 'classic'],
-                'recurring'         => ['enabled' => true, 'frequencies' => ['monthly', 'yearly']],
-                'gateways'          => ['allowed' => []],
-                'anonymous_allowed' => true,
-                'thank_you_message' => __('Welcome to our sustainer community. Your first donation is on its way and we\'ll send updates monthly.', 'dono'),
-                'redirect_url'      => '',
-            ],
-            'blocks'         => self::block(
-                'dono/steps',
-                ['progressStyle' => 'dots'],
-                $step1 . $step2
-            ),
-        ];
-    }
-
-    private static function rapidResponse(): array
-    {
-        $hero = self::block(
-            'dono/section',
-            [
-                'background' => '#e7f5ec',
-                'padding'    => ['top' => 32, 'right' => 32, 'bottom' => 32, 'left' => 32],
-                'border'     => ['radius' => 16],
-            ],
-            self::block('dono/heading',   ['text' => __('Help families in crisis today', 'dono'), 'level' => 2])
-            . self::block('dono/paragraph', ['text' => __('An emergency is unfolding. Our teams are already on the ground. Every dollar gets there within 24 hours.', 'dono')])
-        );
-
-        $detailsRow = self::block('dono/name',  ['requireFirst' => true, 'requireLast' => true])
-                    . self::block('dono/email', ['required' => true]);
-
-        $blocks = $hero
-                . self::block('dono/goal', ['showAmount' => true, 'showDonors' => true, 'showDeadline' => false])
-                . self::block('dono/donation-amount', [
-                    'presets'     => self::presets([50, 100, 250, 500]),
-                    'allowCustom' => true,
-                ])
-                . self::block('dono/row', ['columns' => 2, 'gap' => 12], $detailsRow)
-                . self::block('dono/cover-fees', [
-                    'percent' => 2.9, 'fixed' => 30,
-                    'label' => __('Cover the fees so 100% reaches the response', 'dono'),
-                    'defaultOn' => true,
-                ])
-                . self::block('dono/payment-gateways', ['style' => 'cards'])
-                . self::block('dono/donation-summary')
-                . self::block('dono/submit-button', ['label' => __('Send help now', 'dono')]);
-
-        return [
-            'id'             => 'rapid-response',
-            'name'           => __('Rapid Response', 'dono'),
-            'description'    => __('Modal popup for disaster relief and breaking-news appeals. Urgency-led, single page, no friction.', 'dono'),
-            'icon'           => 'warning',
-            'category'       => 'Urgent',
-            'thumbnail_hint' => 'Modal overlay. Bold hero with relief headline, goal bar framed as "raised in first 72 hours", four amount tiles, "Send help now" CTA.',
-            'settings'       => [
-                'layout'            => 'modal',
-                'style'             => ['preset_id' => 'bold'],
-                'recurring'         => ['enabled' => false, 'frequencies' => []],
-                'gateways'          => ['allowed' => []],
-                'anonymous_allowed' => true,
-                'thank_you_message' => __('Help is on the way. We\'ll send an update in 48 hours.', 'dono'),
-                'redirect_url'      => '',
-            ],
-            'blocks'         => $blocks,
-        ];
-    }
-
-    private static function galaPledge(): array
-    {
-        $header = self::block(
-            'dono/section',
-            [
-                'border'  => ['width' => 1, 'style' => 'solid', 'color' => '#e5e7eb', 'radius' => 10],
-                'padding' => ['top' => 32, 'right' => 32, 'bottom' => 32, 'left' => 32],
-            ],
-            self::block('dono/heading',   ['text' => __('The Annual Gala', 'dono'), 'level' => 2])
-            . self::block('dono/paragraph', ['text' => __('Choose your pledge level below. Every level keeps our mission going for another year.', 'dono')])
-        );
-
-        $detailsRow = self::block('dono/name',  ['requireFirst' => true, 'requireLast' => true])
-                    . self::block('dono/email', ['required' => true]);
-
-        $blocks = $header
-                . self::block('dono/donation-amount', [
-                    'presets' => self::presets(
-                        [500, 1000, 2500, 5000, 10000],
-                        [
-                            __('Friend',     'dono'),
-                            __('Patron',     'dono'),
-                            __('Benefactor', 'dono'),
-                            __('Founder',    'dono'),
-                            __('Visionary',  'dono'),
-                        ],
-                        2
-                    ),
-                    'allowCustom' => true,
-                ])
-                . self::block('dono/row', ['columns' => 2, 'gap' => 12], $detailsRow)
-                . self::block('dono/phone', [
-                    'label'    => __('Phone (for stewardship follow-up)', 'dono'),
-                    'required' => true,
-                ])
-                . self::block('dono/comment', [
-                    'label'       => __('A note for the honoree', 'dono'),
-                    'placeholder' => __('Optional', 'dono'),
-                    'required'    => false,
-                ])
-                . self::block('dono/payment-gateways', ['style' => 'cards'])
-                . self::block('dono/donation-summary')
-                . self::block('dono/submit-button', ['label' => __('Pledge tonight', 'dono')]);
-
-        return [
-            'id'             => 'gala-pledge',
-            'name'           => __('Gala Pledge', 'dono'),
-            'description'    => __('Tiered pledge form for galas and paddle-raise events. Named giving tiers, dedication option, stewardship phone capture.', 'dono'),
-            'icon'           => 'awards',
-            'category'       => 'Formal',
-            'thumbnail_hint' => 'Quiet, formal. Bordered hero, five named tiers (Friend through Visionary), dedication panel, stewardship phone, comment to honoree.',
-            'settings'       => [
-                'layout'            => 'inline',
-                'style'             => ['preset_id' => 'quiet'],
-                'recurring'         => ['enabled' => false, 'frequencies' => []],
-                'gateways'          => ['allowed' => []],
-                'anonymous_allowed' => false,
-                'thank_you_message' => __('Your pledge is recorded. Look for your name on the wall before dessert.', 'dono'),
-                'redirect_url'      => '',
-            ],
-            'blocks'         => $blocks,
-        ];
-    }
-
-    private static function workplaceMatch(): array
-    {
-        $step1 = self::block(
+        $amount = self::block(
             'dono/step',
             ['title' => __('Your donation', 'dono')],
-            self::block('dono/heading',   ['text' => __('Double your impact', 'dono'), 'level' => 2])
-            . self::block('dono/paragraph', ['text' => __("Many employers match employee donations 1:1, sometimes 2:1. Tell us where you work and we'll handle the rest.", 'dono')])
-            . self::block('dono/donation-amount', [
-                'presets'     => self::presets([50, 100, 250, 500]),
+            self::block('dono/donation-amount', [
+                'presets'     => self::presets([25, 50, 100, 250], [], 1),
                 'allowCustom' => true,
             ])
-            . self::block('dono/recurring-toggle', ['defaultFrequency' => 'one-time', 'style' => 'pills', 'frequencies' => ['one-time', 'weekly', 'biweekly', 'monthly']])
-        );
-
-        $employerHero = self::block(
-            'dono/section',
-            [
-                'background' => '#f8fafb',
-                'padding'    => ['top' => 20, 'right' => 20, 'bottom' => 20, 'left' => 20],
-                'border'     => ['radius' => 8],
-            ],
-            self::block('dono/heading',   ['text' => __('Your employer', 'dono'), 'level' => 3])
-            . self::block('dono/paragraph', ['text' => __("We'll check our database and pre-fill the match form.", 'dono')])
-        );
-
-        $step2 = self::block(
-            'dono/step',
-            ['title' => __('Employer match', 'dono')],
-            $employerHero
-            . self::block('dono/text-input', [
-                'label'    => __('Employer name', 'dono'),
-                'required' => true,
-                'field'    => 'employer_name',
-            ])
-            . self::block('dono/dropdown', [
-                'label'   => __('Your role', 'dono'),
-                'field'   => 'employer_role',
-                'options' => [
-                    ['value' => 'employee', 'label' => __('Employee',           'dono'), 'isDefault' => true],
-                    ['value' => 'retiree',  'label' => __('Retiree',            'dono'), 'isDefault' => false],
-                    ['value' => 'spouse',   'label' => __('Spouse of employee', 'dono'), 'isDefault' => false],
-                    ['value' => 'board',    'label' => __('Board member',       'dono'), 'isDefault' => false],
-                ],
-                'required' => false,
-            ])
-            . self::block('dono/text-input', [
-                'label'    => __('Work email (for verification)', 'dono'),
-                'field'    => 'work_email',
-                'required' => false,
+            . self::block('dono/recurring-toggle', [
+                'label'            => __('Make this a repeating gift', 'dono'),
+                'defaultFrequency' => 'one-time',
+                'frequencies'      => ['one-time', 'monthly'],
+                'style'            => 'pills',
             ])
         );
 
-        $detailsRow = self::block('dono/name',  ['requireFirst' => true, 'requireLast' => true])
-                    . self::block('dono/email', ['required' => true]);
-
-        $step3 = self::block(
+        $details = self::block(
             'dono/step',
             ['title' => __('Your details', 'dono')],
-            self::block('dono/row', ['columns' => 2, 'gap' => 12], $detailsRow)
-            . self::block('dono/address', ['requireCountry' => true, 'requirePostal' => true])
-            . self::block('dono/cover-fees', [
-                'percent' => 2.9, 'fixed' => 30,
-                'label' => __('Cover the fees so 100% reaches us', 'dono'),
-                'defaultOn' => true,
-            ])
-            . self::block('dono/consent')
-            . self::block('dono/payment-gateways', ['style' => 'cards'])
-            . self::block('dono/donation-summary')
-                . self::block('dono/submit-button', ['label' => __('Donate and request match', 'dono')])
+            self::block('dono/name', ['requireFirst' => true, 'requireLast' => true])
+            . self::block('dono/email', ['required' => true])
+            . self::block('dono/country', ['required' => false])
+        );
+
+        $confirm = self::block(
+            'dono/step',
+            ['title' => __('Confirm', 'dono')],
+            self::checkout(
+                __('Donate {amount}', 'dono'),
+                __('Cover the processing fee so the full amount reaches us', 'dono')
+            )
         );
 
         return [
-            'id'             => 'workplace-match',
-            'name'           => __('Workplace Match', 'dono'),
-            'description'    => __('Three-step form that captures employer info inline. Unlocks employer matching at the donation moment instead of post-hoc.', 'dono'),
-            'icon'           => 'building',
+            'id'             => 'guided',
+            'name'           => __('Guided donation', 'dono'),
+            'description'    => __('The same fields as the everyday form, split across three steps. Fewer decisions per screen, which suits longer forms and small screens.', 'dono'),
+            'icon'           => 'forms',
             'category'       => 'Wizard',
-            'thumbnail_hint' => 'Three-step wizard. Step 1 donation selection. Step 2 employer capture in a soft section. Step 3 donor details with full address.',
+            'thumbnail_hint' => 'Three-step wizard with dot progress: amounts, then donor fields, then payment.',
+            'settings'       => self::defaultSettings(),
+            'blocks'         => self::block('dono/steps', ['progressStyle' => 'dots'], $amount . $details . $confirm),
+        ];
+    }
+
+    private static function monthlySustainer(): array
+    {
+        $blocks = self::block('dono/heading', ['text' => __('Become a monthly supporter', 'dono'), 'level' => 1])
+                . self::block('dono/paragraph', ['text' => __('A gift that arrives every month lets us plan further ahead than any single donation can.', 'dono')])
+                // Preselected monthly, and no one-time option: a form that offers
+                // both is the everyday one. Add one-time here if you want both.
+                . self::block('dono/recurring-toggle', [
+                    'label'            => __('How often', 'dono'),
+                    'defaultFrequency' => 'monthly',
+                    'frequencies'      => ['monthly', 'yearly'],
+                    'style'            => 'pills',
+                ])
+                . self::block('dono/donation-amount', [
+                    'presets' => self::presets([10, 25, 50, 100], [
+                        __('$10 a month', 'dono'),
+                        __('$25 a month', 'dono'),
+                        __('$50 a month', 'dono'),
+                        __('$100 a month', 'dono'),
+                    ], 1),
+                    'allowCustom' => true,
+                ])
+                . self::block('dono/name', ['requireFirst' => true, 'requireLast' => true])
+                . self::block('dono/email', ['required' => true])
+                . self::coverFees(__('Cover the processing fee on each payment', 'dono'))
+                . self::block('dono/payment-gateways', ['style' => 'cards'])
+                . self::block('dono/donation-summary')
+                // Next to the button, not on a screen already passed: this is the
+                // last moment the donor can act on what they are agreeing to.
+                . self::block('dono/paragraph', ['text' => __('Your first payment is taken today, then the same amount on this date each month. Change or stop it any time from your donor portal.', 'dono')])
+                . self::block('dono/submit-button', ['label' => __('Start my monthly gift', 'dono')]);
+
+        return [
+            'id'             => 'monthly-sustainer',
+            'name'           => __('Monthly sustainer', 'dono'),
+            'description'    => __('For recruiting regular givers. Monthly is preselected, amounts are framed per month, and the commitment is restated next to the button.', 'dono'),
+            'icon'           => 'update',
+            'category'       => 'Recurring',
+            'thumbnail_hint' => 'Monthly/yearly pills with monthly active, per-month amount tiles, commitment sentence above the button.',
             'settings'       => [
                 'layout'            => 'inline',
                 'style'             => ['preset_id' => ''],
                 'recurring'         => ['enabled' => true, 'frequencies' => ['monthly', 'yearly']],
                 'gateways'          => ['allowed' => []],
-                'anonymous_allowed' => false,
-                'thank_you_message' => __("Donation received. We've emailed you the next step to submit your match. It takes about 2 minutes.", 'dono'),
+                'anonymous_allowed' => true,
+                'thank_you_message' => __('Thank you. Your first payment is on its way, and we will email you before anything changes.', 'dono'),
                 'redirect_url'      => '',
             ],
-            'blocks'         => self::block(
-                'dono/steps',
-                ['progressStyle' => 'dots'],
-                $step1 . $step2 . $step3
-            ),
+            'blocks'         => $blocks,
         ];
     }
 
-    private static function essentialsWizard(): array
+    private static function emergencyAppeal(): array
     {
-        $amountStep = self::block(
-            'dono/step',
-            ['title' => __('Your donation', 'dono')],
-            self::block('dono/heading',   ['text' => __('Make your donation', 'dono'), 'level' => 2])
-            . self::block('dono/donation-amount', [
-                'presets'     => self::presets([25, 50, 100, 250], [], 1),
-                'allowCustom' => true,
-            ])
-        );
-
-        $detailsStep = self::block(
-            'dono/step',
-            ['title' => __('Your details', 'dono')],
-            self::block('dono/name',  ['requireFirst' => true, 'requireLast' => true])
-            . self::block('dono/email', ['required' => true])
-            . self::block('dono/country', ['required' => false])
-        );
-
-        $confirmStep = self::block(
-            'dono/step',
-            ['title' => __('Confirm', 'dono')],
-            self::block('dono/paragraph', ['text' => __('One last look before we charge your card.', 'dono')])
-            . self::block('dono/payment-gateways', ['style' => 'cards'])
-            . self::block('dono/cover-fees', [
-                'percent'   => 2.9,
-                'fixed'     => 30,
-                'label'     => __('Cover the processing fee so 100% reaches us', 'dono'),
-                'defaultOn' => true,
-            ])
-            . self::block('dono/donation-summary')
-                . self::block('dono/submit-button', ['label' => __('Donate {amount}', 'dono')])
-        );
+        $blocks = self::block('dono/heading', ['text' => __('Emergency appeal', 'dono'), 'level' => 1])
+                . self::block('dono/paragraph', ['text' => __('Say what happened, who it affects, and what a donation pays for today. Keep it to a few sentences.', 'dono')])
+                . self::block('dono/goal', ['showAmount' => true, 'showDonors' => true, 'showDeadline' => true])
+                . self::block('dono/donation-amount', [
+                    'presets'     => self::presets([25, 50, 100, 250], [], 1),
+                    'allowCustom' => true,
+                ])
+                // No fund picker: the appeal is the designation. Nothing optional
+                // either, because every extra field costs gifts while it matters.
+                . self::block('dono/name', ['requireFirst' => true, 'requireLast' => true])
+                . self::block('dono/email', ['required' => true])
+                . self::checkout(
+                    __('Give now', 'dono'),
+                    __('Cover the processing fee so the full amount reaches the response', 'dono')
+                );
 
         return [
-            'id'             => 'essentials-wizard',
-            'name'           => __('Essentials wizard', 'dono'),
-            'description'    => __('Three-step donation flow with the basics: amount, donor details, confirm + pay. The cleanest starting point for a multi-step form.', 'dono'),
-            'icon'           => 'forms',
-            'category'       => 'Wizard',
-            'thumbnail_hint' => 'Three-step wizard, dots progress indicator, amount tiles on step 1, name/email/country on step 2, payment options + cover-fees on step 3.',
-            'settings'       => self::defaultSettings(),
-            'blocks'         => self::block(
-                'dono/steps',
-                ['progressStyle' => 'dots'],
-                $amountStep . $detailsStep . $confirmStep
-            ),
+            'id'             => 'emergency-appeal',
+            'name'           => __('Emergency appeal', 'dono'),
+            'description'    => __('For a crisis with a deadline. Leads with the goal and countdown, asks only for what a receipt needs, and offers no fund choice because the appeal is the fund.', 'dono'),
+            'icon'           => 'megaphone',
+            'category'       => 'Campaign',
+            'thumbnail_hint' => 'Bold headline over a goal bar with countdown, four amount tiles, two donor fields, one button.',
+            'settings'       => [
+                'layout'            => 'inline',
+                'style'             => ['preset_id' => ''],
+                'recurring'         => ['enabled' => false, 'frequencies' => []],
+                'gateways'          => ['allowed' => []],
+                'anonymous_allowed' => true,
+                'thank_you_message' => __('Thank you. Your donation is already part of the response.', 'dono'),
+                'redirect_url'      => '',
+            ],
+            'blocks'         => $blocks,
         ];
     }
+
+    private static function designated(): array
+    {
+        $blocks = self::block('dono/heading', ['text' => __('Choose where your donation goes', 'dono'), 'level' => 1])
+                . self::block('dono/paragraph', ['text' => __('Pick the work you want to fund, or leave it to us to send it wherever it is needed most.', 'dono')])
+                // Needs at least two real funds to be worth showing. The
+                // greatest-need option is what a donor with no preference picks.
+                . self::block('dono/fund-picker', [
+                    'label'            => __('Fund', 'dono'),
+                    'allowEmpty'       => true,
+                    'emptyLabel'       => __('Wherever the need is greatest', 'dono'),
+                    'emptyDescription' => __('We direct it to the most urgent work that month.', 'dono'),
+                ])
+                . self::block('dono/donation-amount', [
+                    'presets'     => self::presets([25, 50, 100, 250], [], 1),
+                    'allowCustom' => true,
+                ])
+                . self::block('dono/name', ['requireFirst' => true, 'requireLast' => true])
+                . self::block('dono/email', ['required' => true])
+                . self::block('dono/country', ['required' => false])
+                . self::checkout(
+                    __('Donate {amount}', 'dono'),
+                    __('Cover the processing fee so the full amount reaches this fund', 'dono')
+                );
+
+        return [
+            'id'             => 'designated',
+            'name'           => __('Designated giving', 'dono'),
+            'description'    => __('Lets the donor say which fund their money goes to. Set up your funds first, since a picker with one option is just a label.', 'dono'),
+            'icon'           => 'portfolio',
+            'category'       => 'Campaign',
+            'thumbnail_hint' => 'Fund dropdown above the amount tiles, greatest-need option listed last.',
+            'settings'       => self::defaultSettings(),
+            'blocks'         => $blocks,
+        ];
+    }
+
+    private static function campaignPage(): array
+    {
+        $blocks = self::block('dono/goal', ['showAmount' => true, 'showDonors' => true, 'showDeadline' => true])
+                . self::block('dono/donation-amount', [
+                    'presets'     => self::presets([25, 50, 100, 250], [], 1),
+                    'allowCustom' => true,
+                ])
+                . self::block('dono/name', ['requireFirst' => true, 'requireLast' => true])
+                . self::block('dono/email', ['required' => true])
+                // Both of these assume a public supporter list. Remove them if
+                // the page has none: a privacy promise about nothing reads badly.
+                . self::block('dono/comment', [
+                    'label'       => __('Add a message of support', 'dono'),
+                    'placeholder' => __('Shown on the supporter wall', 'dono'),
+                    'required'    => false,
+                ])
+                . self::block('dono/anonymous-toggle', [
+                    'label'     => __('Hide my name from the supporter wall', 'dono'),
+                    'defaultOn' => false,
+                ])
+                . self::checkout(
+                    __('Donate {amount}', 'dono'),
+                    __('Cover the processing fee so 100% reaches the campaign', 'dono')
+                );
+
+        return [
+            'id'             => 'campaign-page',
+            'name'           => __('Campaign page', 'dono'),
+            'description'    => __('For a public campaign with a goal and a supporter wall. Carries a progress bar, a message field and a name-hiding toggle.', 'dono'),
+            'icon'           => 'chart-area',
+            'category'       => 'Campaign',
+            'thumbnail_hint' => 'Goal bar on top, amount tiles, message box and anonymity checkbox above the button.',
+            'settings'       => self::defaultSettings(),
+            'blocks'         => $blocks,
+        ];
+    }
+
 }
