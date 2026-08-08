@@ -38,7 +38,6 @@ final class TopDonorsBlock extends CampaignBlock
             'showDonorCount' => ['type' => 'boolean', 'default' => false],
             'hideAnonymous'  => ['type' => 'boolean', 'default' => false],
             'layout'         => ['type' => 'string',  'default' => 'list'],
-            'showRank'       => ['type' => 'boolean', 'default' => true],
         ];
     }
 
@@ -107,7 +106,6 @@ final class TopDonorsBlock extends CampaignBlock
             'showAmount'     => (bool) ($attrs['showAmount'] ?? true),
             'showDonorCount' => (bool) ($attrs['showDonorCount'] ?? false),
             'layout'         => (string) ($attrs['layout'] ?? 'list') === 'podium' ? 'podium' : 'list',
-            'showRank'       => (bool) ($attrs['showRank'] ?? true),
             'styleVars'      => $this->styleVars($campaign),
         ]);
     }

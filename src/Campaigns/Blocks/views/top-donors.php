@@ -7,15 +7,9 @@ defined('ABSPATH') || exit;
  * @var string $currency
  * @var bool   $showAmount
  * @var bool   $showDonorCount
- * @var bool   $showRank
  * @var string $layout         list|podium
  * @var string $styleVars
  */
-$maxAmount = $entries ? (int) ($entries[0]['amount_cents'] ?? 0) : 0;
-$donoBar = static function (int $cents) use ($maxAmount): string {
-    $w = $maxAmount > 0 ? max(3, min(100, (int) round($cents / $maxAmount * 100))) : 0;
-    return '<span class="dono-top-donors__bar" aria-hidden="true" style="--dono-bar-w: ' . $w . '%;"></span>';
-};
 ?>
 <section class="dono-block dono-block--top-donors dono-block--layout-<?php echo esc_attr($layout); ?>"
          data-block="dono/top-donors"
@@ -38,9 +32,7 @@ $donoBar = static function (int $cents) use ($maxAmount): string {
         <ol class="dono-top-donors__podium">
             <?php foreach ($renderOrder as [$rank, $entry]): ?>
                 <li class="dono-top-donors__podium-tier dono-top-donors__podium-tier--<?php echo esc_attr((string) $rank); ?>">
-                    <?php if ($showRank): ?>
-                        <div class="dono-top-donors__podium-rank"><?php echo esc_html((string) $rank); ?></div>
-                    <?php endif; ?>
+                    <div class="dono-top-donors__podium-rank"><?php echo esc_html((string) $rank); ?></div>
                     <?php echo \Dono\Campaigns\Blocks\BlockAvatar::markup($entry['name'], $entry['is_anonymous']); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                     <div class="dono-top-donors__podium-name<?php echo $entry['is_anonymous'] ? ' is-anonymous' : ''; ?>">
                         <?php echo esc_html($entry['name']); ?>
@@ -67,9 +59,6 @@ $donoBar = static function (int $cents) use ($maxAmount): string {
             <ol class="dono-top-donors__list" start="4">
                 <?php foreach ($rest as $i => $entry): ?>
                     <li class="dono-top-donors__row">
-                        <?php if ($showRank): ?>
-                            <span class="dono-top-donors__rank"><?php echo esc_html((string) ($i + 4)); ?></span>
-                        <?php endif; ?>
                         <?php echo \Dono\Campaigns\Blocks\BlockAvatar::markup($entry['name'], $entry['is_anonymous']); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                         <span class="dono-top-donors__name<?php echo $entry['is_anonymous'] ? ' is-anonymous' : ''; ?>">
                             <?php echo esc_html($entry['name']); ?>
@@ -87,7 +76,6 @@ $donoBar = static function (int $cents) use ($maxAmount): string {
                             <span class="dono-top-donors__amount">
                                 <?php echo esc_html(\Dono\Foundation\Helpers\Money::format($entry['amount_cents'], $currency, true)); ?>
                             </span>
-                            <?php echo $donoBar((int) $entry['amount_cents']); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                         <?php endif; ?>
                     </li>
                 <?php endforeach; ?>
@@ -97,9 +85,6 @@ $donoBar = static function (int $cents) use ($maxAmount): string {
         <ol class="dono-top-donors__list">
             <?php foreach ($entries as $i => $entry): ?>
                 <li class="dono-top-donors__row">
-                    <?php if ($showRank): ?>
-                        <span class="dono-top-donors__rank"><?php echo esc_html((string) ($i + 1)); ?></span>
-                    <?php endif; ?>
                     <?php echo \Dono\Campaigns\Blocks\BlockAvatar::markup($entry['name'], $entry['is_anonymous']); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                     <span class="dono-top-donors__name<?php echo $entry['is_anonymous'] ? ' is-anonymous' : ''; ?>">
                         <?php echo esc_html($entry['name']); ?>
@@ -117,7 +102,6 @@ $donoBar = static function (int $cents) use ($maxAmount): string {
                         <span class="dono-top-donors__amount">
                             <?php echo esc_html(\Dono\Foundation\Helpers\Money::format($entry['amount_cents'], $currency, true)); ?>
                         </span>
-                        <?php echo $donoBar((int) $entry['amount_cents']); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                     <?php endif; ?>
                 </li>
             <?php endforeach; ?>

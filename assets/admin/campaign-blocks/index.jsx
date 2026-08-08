@@ -504,7 +504,6 @@ registerBlockType( 'dono/top-donors', {
         showDonorCount: { type: 'boolean', default: false },
         hideAnonymous:  { type: 'boolean', default: false },
         layout:         { type: 'string',  default: 'list' },
-        showRank:       { type: 'boolean', default: true },
     },
     edit: function TopDonorsEdit( { attributes, setAttributes } ) {
         const { campaign, onCampaignPage, resolvedId } = useBoundCampaign( attributes.campaignId );
@@ -571,13 +570,6 @@ registerBlockType( 'dono/top-donors', {
                         checked={ attributes.hideAnonymous }
                         onChange={ ( v ) => setAttributes( { hideAnonymous: v } ) }
                         help={ __( 'When off, anonymous donors appear as "Anonymous".', 'dono' ) }
-                        __nextHasNoMarginBottom
-                    />
-                    <ToggleControl
-                        label={ __( 'Show rank', 'dono' ) }
-                        checked={ attributes.showRank }
-                        onChange={ ( v ) => setAttributes( { showRank: v } ) }
-                        help={ __( 'Show the numbered position for each donor.', 'dono' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>

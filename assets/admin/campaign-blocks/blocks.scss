@@ -359,29 +359,15 @@ body.dono-modal-open { overflow: hidden; }
 
     .dono-top-donors__row {
         display: flex;
+        // Wrap is the narrow-container fallback only: the row is avatar, name
+        // and amount, and they fit on one line at any sane width.
         flex-wrap: wrap;
         align-items: center;
-        gap: 8px 12px;
+        gap: 12px;
         padding: 12px 14px;
         border-bottom: 1px solid var(--dono-border, #{$border-fallback});
 
         &:last-child { border-bottom: 0; }
-    }
-
-    .dono-top-donors__rank {
-        flex: 0 0 auto;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 28px;
-        height: 28px;
-        padding: 0 8px;
-        border-radius: 999px;
-        background: var(--dono-bg-soft, #{$bg-soft-fallback});
-        color: var(--dono-text-muted, #{$text-muted-fallback});
-        font-size: 12px;
-        font-weight: 600;
-        font-variant-numeric: tabular-nums;
     }
 
     .dono-top-donors__name {
@@ -414,23 +400,6 @@ body.dono-modal-open { overflow: hidden; }
         font-weight: 600;
         color: var(--dono-accent, #{$accent-fallback});
         font-variant-numeric: tabular-nums;
-    }
-
-    .dono-top-donors__bar {
-        flex: 0 0 100%;
-        height: 6px;
-        background: var(--dono-bg-soft, #{$bg-soft-fallback});
-        border-radius: 999px;
-        overflow: hidden;
-
-        &::before {
-            content: '';
-            display: block;
-            height: 100%;
-            width: var(--dono-bar-w, 0%);
-            background: linear-gradient(90deg, var(--dono-accent, #{$accent-fallback}), color-mix(in srgb, var(--dono-accent, #{$accent-fallback}) 65%, #fff));
-            border-radius: 999px;
-        }
     }
 
     .dono-top-donors__podium .dono-avatar {
