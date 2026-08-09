@@ -161,6 +161,11 @@ $bar-radius:    6px;
 }
 
 .dono-at-risk {
+    // Seven columns crowd a narrow admin. Why is last, so it is the first to
+    // sit off-edge; Donor and Email never move.
+    &__scroll { overflow-x: auto; }
+    .dono-table { min-width: 780px; }
+
     &__head {
         display: flex;
         justify-content: space-between;

@@ -79,12 +79,17 @@ final class DonorMetricsService
         $today = $this->clock->now()->format('Y-m-d');
         $result = $this->donors->listAtRisk($today, $page, $perPage);
 
-        $result['rows'] = array_map(function (array $r): array {
+        // One grouped query for the whole page, not one per row.
+        $plans  = $this->recurring->stateForDonors(array_column($result['rows'], 'id'));
+        $labels = AtRiskReason::labels();
+
+        $result['rows'] = array_map(function (array $r) use ($plans, $labels, $today): array {
             $donor = Donor::make();
             $donor->email_encrypted = (string) $r['email_encrypted'];
             $email = $this->donorService->decryptEmail($donor);
             unset($r['email_encrypted']);
             $name = trim(($r['first_name'] ?? '') . ' ' . ($r['last_name'] ?? ''));
+            $reason = AtRiskReason::classify($r, $plans[(int) $r['id']] ?? null, $today);
             return [
                 'id'                  => $r['id'],
                 'name'                => $name !== '' ? $name : __('Donor', 'dono') . ' #' . $r['id'],
@@ -94,6 +99,9 @@ final class DonorMetricsService
                 'total_donated_cents' => $r['total_donated_cents'],
                 'last_donation_at'    => $r['last_donation_at'],
                 'first_donation_at'   => $r['first_donation_at'],
+                'risk_reason'         => $reason['key'],
+                'risk_reason_label'   => $labels[$reason['key']],
+                'avg_gap_days'        => $reason['avg_gap_days'],
             ];
         }, $result['rows']);
 
@@ -106,7 +114,9 @@ final class DonorMetricsService
         $result = $this->atRisk(1, 10000);
 
         $out = fopen('php://temp', 'r+');
-        Csv::writeRow($out, ['id', 'name', 'email', 'country', 'donations', 'total_donated', 'first_donation_at', 'last_donation_at']);
+        // Appended, never inserted: every existing column index stays put for
+        // anyone with a saved import mapping.
+        Csv::writeRow($out, ['id', 'name', 'email', 'country', 'donations', 'total_donated', 'first_donation_at', 'last_donation_at', 'risk_reason', 'risk_reason_label', 'avg_gap_days']);
         foreach ($result['rows'] as $r) {
             Csv::writeRow($out, [
                 $r['id'],
@@ -117,6 +127,12 @@ final class DonorMetricsService
                 number_format($r['total_donated_cents'] / 100, 2, '.', ''),
                 $r['first_donation_at'] ?? '',
                 $r['last_donation_at'] ?? '',
+                // The key as well as the label: the key is what a fundraiser
+                // filters and pivots on, and must not move when the site
+                // language does.
+                $r['risk_reason'] ?? '',
+                $r['risk_reason_label'] ?? '',
+                $r['avg_gap_days'] ?? '',
             ]);
         }
         rewind($out);

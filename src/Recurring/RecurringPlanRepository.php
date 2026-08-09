@@ -291,6 +291,59 @@ final class RecurringPlanRepository
         return $out;
     }
 
+    /**
+     * Plan state for a set of donors, in one grouped query.
+     *
+     * The at-risk reason needs this per row, and a lookup per row is a query
+     * per row on a screen that was tuned to 8ms by removing exactly that.
+     * Served by the (donor_id, status) index.
+     *
+     * 'failing' is the same rule the Recurring admin filter uses: a decline can
+     * sit on a plan the gateway still calls active, so the count is what marks
+     * it, not the status.
+     *
+     * @param  array<int> $donorIds
+     * @return array<int, array{failing:int, paused:int, live:int, cancelled_at:?string}>
+     */
+    public function stateForDonors(array $donorIds): array
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $donorIds))));
+        if ($ids === []) {
+            return [];
+        }
+
+        $out = [];
+        foreach (array_chunk($ids, 1000) as $chunk) {
+            $rows = DB::table('dono_recurring_plans')
+                ->whereIn('donor_id', $chunk)
+                ->where('is_test', 0)
+                ->selectRaw("
+                    donor_id,
+                    MAX(CASE WHEN failed_renewals_count > 0
+                              AND status IN ('active','past_due','paused') THEN 1 ELSE 0 END) AS failing,
+                    MAX(CASE WHEN status = 'paused' THEN 1 ELSE 0 END) AS paused,
+                    MAX(CASE WHEN status IN ('active','past_due') THEN 1 ELSE 0 END) AS live,
+                    MAX(CASE WHEN status = 'cancelled' THEN cancelled_at END) AS cancelled_at
+                ")
+                ->groupByRaw('donor_id')
+                ->getAll();
+
+            foreach ($rows as $r) {
+                $out[(int) $r['donor_id']] = [
+                    'failing'      => (int) $r['failing'],
+                    'paused'       => (int) $r['paused'],
+                    'live'         => (int) $r['live'],
+                    // markCancelled always writes cancelled_at with the status,
+                    // so there is no reason to fall back to updated_at, which a
+                    // bulk job would re-date into the grace window.
+                    'cancelled_at' => $r['cancelled_at'] !== null ? (string) $r['cancelled_at'] : null,
+                ];
+            }
+        }
+
+        return $out;
+    }
+
     public function recurringStats(string $today): array
     {
         $monthStart = esc_sql((new \DateTimeImmutable($today))->modify('first day of this month')->format('Y-m-d 00:00:00'));

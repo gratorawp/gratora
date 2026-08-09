@@ -1,6 +1,6 @@
 import { useEffect, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { Users as UsersIcon, History } from 'lucide-react';
 
 import EmptyState from '../_shared/components/EmptyState';
@@ -147,9 +147,47 @@ function donorHref( id ) {
     return `#donor/${ id }`;
 }
 
+// Deliberately not SEGMENT_META's colours: every row here is already the
+// at-risk segment, so segment colours on this pill would argue with the
+// segment chart on the same screen. These tones are about urgency.
+const REASON_TONE = {
+    plan_failing:    'is-error',
+    plan_paused:     'is-info',
+    plan_cancelled:  'is-warn',
+    plan_active:     'is-ok',
+    first_gift_only: 'is-violet',
+    no_gap_yet:      'is-muted',
+    well_past_gap:   'is-warn',
+    past_gap:        'is-info',
+    within_gap:      'is-ok',
+};
+
+function ReasonPill( { row } ) {
+    if ( ! row.risk_reason_label ) return '-';
+    const title = row.avg_gap_days
+        ? sprintf(
+            /* translators: %d: number of days */
+            _n(
+                'About %d day between gifts, on average.',
+                'About %d days between gifts, on average.',
+                row.avg_gap_days,
+                'dono'
+            ),
+            row.avg_gap_days
+        )
+        : undefined;
+    return (
+        <span className={ `dp-pill ${ REASON_TONE[ row.risk_reason ] || 'is-muted' }` } title={ title }>
+            { row.risk_reason_label }
+        </span>
+    );
+}
+
 // One table for both donor lists. They were two, and drifted: the same donor
 // rendered as a link in one and as plain text in the other.
-function DonorTable( { rows } ) {
+// showReason is opt-in rather than sniffed from the rows: the leaderboard
+// shares this table and has no reason to carry.
+function DonorTable( { rows, showReason } ) {
     return (
         <table className="dono-table">
             <thead>
@@ -160,6 +198,7 @@ function DonorTable( { rows } ) {
                     <th className="dono-num">{ __( 'Donations', 'dono' ) }</th>
                     <th className="dono-num">{ __( 'Total', 'dono' ) }</th>
                     <th className="dono-date">{ __( 'Last donation', 'dono' ) }</th>
+                    { showReason && <th>{ __( 'Why', 'dono' ) }</th> }
                 </tr>
             </thead>
             <tbody>
@@ -175,6 +214,7 @@ function DonorTable( { rows } ) {
                         <td className="dono-num">{ r.donations_count ?? '-' }</td>
                         <td className="dono-num">{ formatAmount( r.total_donated_cents ) }</td>
                         <td className="dono-date">{ formatDate( r.last_donation_at ) }</td>
+                        { showReason && <td><ReasonPill row={ r } /></td> }
                     </tr>
                 ) ) }
             </tbody>
@@ -352,7 +392,9 @@ function AtRiskTable() {
             ) }
             { data && data.length > 0 && (
                 <>
-                    <DonorTable rows={ data } />
+                    <div className="dono-at-risk__scroll">
+                        <DonorTable rows={ data } showReason />
+                    </div>
                     { pageCount > 1 && (
                         <div className="dono-pagination">
                             <button type="button" disabled={ page <= 1 } onClick={ () => setPage( ( p ) => p - 1 ) }>
