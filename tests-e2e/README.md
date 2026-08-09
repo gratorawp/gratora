@@ -35,7 +35,7 @@ Two suites, split into Playwright projects:
      date/dropdown, currency-switcher, payment-gateways, submit).
    - Creates / updates the multi-step form `dono-e2e-wizard` (published) for
      the multi-step regression spec.
-   - Creates / updates `/dono-e2e/` and `/dono-e2e-wizard/` pages with their
+   - Creates / updates `/dono-e2e-form/` and `/dono-e2e-wizard/` pages with their
      respective shortcodes.
    - Enables EUR / USD / GBP in org settings so the currency-switcher specs
      have something to switch between.
@@ -47,7 +47,7 @@ Two suites, split into Playwright projects:
 3. Export them (or drop them into `tests-e2e/.env`):
    ```sh
    export DONO_E2E_URL='http://localhost:10075'
-   export DONO_E2E_FORM_PATH='/dono-e2e/'
+   export DONO_E2E_FORM_PATH='/dono-e2e-form/'
    export DONO_E2E_MULTI_STEP_FORM_PATH='/dono-e2e-wizard/'
    export DONO_E2E_CONDITIONAL_FORM_PATH='/dono-e2e-conditional/'
    export DONO_E2E_CUSTOM_FIELDS_FORM_PATH='/dono-e2e-custom-fields/'
