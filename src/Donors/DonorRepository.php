@@ -262,7 +262,7 @@ final class DonorRepository
             // a second call runs straight into the first and the SQL will not
             // parse.
             ->whereRaw('redacted_at IS NULL AND total_donated_cents > 0')
-            ->selectRaw('id, first_name, last_name, country, total_donated_cents, donations_count, last_donation_at')
+            ->selectRaw('id, first_name, last_name, email_encrypted, country, total_donated_cents, donations_count, last_donation_at')
             ->orderBy('total_donated_cents', 'DESC')
             ->limit($limit)
             ->getAll();
@@ -271,6 +271,7 @@ final class DonorRepository
             'id'                  => (int) $r['id'],
             'first_name'          => $r['first_name'],
             'last_name'           => $r['last_name'],
+            'email_encrypted'     => $r['email_encrypted'],
             'country'             => $r['country'],
             'total_donated_cents' => (int) $r['total_donated_cents'],
             'donations_count'     => (int) $r['donations_count'],

@@ -147,6 +147,41 @@ function donorHref( id ) {
     return `#donor/${ id }`;
 }
 
+// One table for both donor lists. They were two, and drifted: the same donor
+// rendered as a link in one and as plain text in the other.
+function DonorTable( { rows } ) {
+    return (
+        <table className="dono-table">
+            <thead>
+                <tr>
+                    <th>{ __( 'Donor', 'dono' ) }</th>
+                    <th>{ __( 'Email', 'dono' ) }</th>
+                    <th>{ __( 'Country', 'dono' ) }</th>
+                    <th className="dono-num">{ __( 'Donations', 'dono' ) }</th>
+                    <th className="dono-num">{ __( 'Total', 'dono' ) }</th>
+                    <th className="dono-date">{ __( 'Last donation', 'dono' ) }</th>
+                </tr>
+            </thead>
+            <tbody>
+                { rows.map( ( r ) => (
+                    <tr key={ r.id }>
+                        <td>
+                            <a className="dono-row__link dono-row__link--strong" href={ donorHref( r.id ) }>
+                                { r.name }
+                            </a>
+                        </td>
+                        <td>{ r.email || '-' }</td>
+                        <td>{ r.country || '-' }</td>
+                        <td className="dono-num">{ r.donations_count ?? '-' }</td>
+                        <td className="dono-num">{ formatAmount( r.total_donated_cents ) }</td>
+                        <td className="dono-date">{ formatDate( r.last_donation_at ) }</td>
+                    </tr>
+                ) ) }
+            </tbody>
+        </table>
+    );
+}
+
 function TopDonorsLeaderboard( { rows } ) {
     if ( ! rows.length ) {
         return (
@@ -158,36 +193,7 @@ function TopDonorsLeaderboard( { rows } ) {
             />
         );
     }
-    return (
-        <table className="dono-top-donors">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>{ __( 'Donor', 'dono' ) }</th>
-                    <th>{ __( 'Country', 'dono' ) }</th>
-                    <th className="dono-num">{ __( 'Donations', 'dono' ) }</th>
-                    <th className="dono-num">{ __( 'Total', 'dono' ) }</th>
-                    <th className="dono-date">{ __( 'Last donation', 'dono' ) }</th>
-                </tr>
-            </thead>
-            <tbody>
-                { rows.map( ( r, i ) => (
-                    <tr key={ r.id }>
-                        <td className="dono-num dono-rank">{ i + 1 }</td>
-                        <td>
-                            <a className="dono-row__link dono-row__link--strong" href={ donorHref( r.id ) }>
-                                { r.name }
-                            </a>
-                        </td>
-                        <td>{ r.country || '-' }</td>
-                        <td className="dono-num">{ r.donations_count }</td>
-                        <td className="dono-num">{ formatAmount( r.total_donated_cents ) }</td>
-                        <td className="dono-date">{ formatDate( r.last_donation_at ) }</td>
-                    </tr>
-                ) ) }
-            </tbody>
-        </table>
-    );
+    return <DonorTable rows={ rows } />;
 }
 
 function CohortHeatmap( { retention } ) {
@@ -346,32 +352,7 @@ function AtRiskTable() {
             ) }
             { data && data.length > 0 && (
                 <>
-                    <table className="dono-table">
-                        <thead>
-                            <tr>
-                                <th>{ __( 'Donor', 'dono' ) }</th>
-                                <th>{ __( 'Email', 'dono' ) }</th>
-                                <th>{ __( 'Country', 'dono' ) }</th>
-                                <th className="dono-num">{ __( 'Total', 'dono' ) }</th>
-                                <th className="dono-date">{ __( 'Last donation', 'dono' ) }</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            { data.map( ( r ) => (
-                                <tr key={ r.id }>
-                                    <td>
-                                        <a className="dono-row__link dono-row__link--strong" href={ donorHref( r.id ) }>
-                                            { r.name }
-                                        </a>
-                                    </td>
-                                    <td>{ r.email || '-' }</td>
-                                    <td>{ r.country || '-' }</td>
-                                    <td className="dono-num">{ formatAmount( r.total_donated_cents ) }</td>
-                                    <td className="dono-date">{ formatDate( r.last_donation_at ) }</td>
-                                </tr>
-                            ) ) }
-                        </tbody>
-                    </table>
+                    <DonorTable rows={ data } />
                     { pageCount > 1 && (
                         <div className="dono-pagination">
                             <button type="button" disabled={ page <= 1 } onClick={ () => setPage( ( p ) => p - 1 ) }>

@@ -513,11 +513,14 @@ final class DonorMetricsService
     /** @param array<array<string,mixed>> $rows */
     private function shapeTopDonors(array $rows): array
     {
-        return array_map(static function (array $r): array {
+        return array_map(function (array $r): array {
+            $donor = Donor::make();
+            $donor->email_encrypted = (string) ($r['email_encrypted'] ?? '');
             $name = trim(($r['first_name'] ?? '') . ' ' . ($r['last_name'] ?? ''));
             return [
                 'id'                  => $r['id'],
                 'name'                => $name !== '' ? $name : __('Donor', 'dono') . ' #' . $r['id'],
+                'email'               => $this->donorService->decryptEmail($donor),
                 'country'             => $r['country'],
                 'total_donated_cents' => $r['total_donated_cents'],
                 'donations_count'     => $r['donations_count'],

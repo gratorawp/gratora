@@ -175,8 +175,7 @@ $bar-radius:    6px;
 
 // One rule for both donor tables. They were separate and near-identical, and
 // had already drifted: only one of them coloured its donor links.
-.dono-table,
-.dono-top-donors {
+.dono-table {
     width: 100%;
     font-size: 13px;
     border-collapse: collapse;
@@ -192,7 +191,6 @@ $bar-radius:    6px;
     // A right-aligned amount sitting against a left-aligned date read as one
     // value, so the trailing pair is right-aligned together.
     .dono-num, .dono-date { text-align: right; font-variant-numeric: tabular-nums; }
-    .dono-rank { color: $text-muted; width: 32px; }
     a { color: $accent; text-decoration: none; }
     a:hover { text-decoration: underline; }
     code {
