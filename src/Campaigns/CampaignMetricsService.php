@@ -589,7 +589,27 @@ final class CampaignMetricsService
         return $this->clock->now()->modify("-{$n} days")->format('Y-m-d');
     }
 
+    /**
+     * Every widget resolves its own range, and on the default range they all
+     * land here. Ten of them meant the campaign row was read ten times and the
+     * earliest-donation scan ran nine times over, a third of the endpoint's SQL
+     * time. The container hands out one instance per request, so this memo
+     * lives exactly as long as the request that filled it.
+     *
+     * @var array<int,string>
+     */
+    private array $startDates = [];
+
     private function campaignStartDate(int $campaignId): string
+    {
+        if (isset($this->startDates[$campaignId])) {
+            return $this->startDates[$campaignId];
+        }
+
+        return $this->startDates[$campaignId] = $this->resolveCampaignStartDate($campaignId);
+    }
+
+    private function resolveCampaignStartDate(int $campaignId): string
     {
         $c = Campaign::query()->find('id', $campaignId);
         $start = $c ? substr((string) ($c->starts_at ?? $c->created_at), 0, 10) : $this->daysAgo(30);
