@@ -103,22 +103,6 @@ Donor details are encrypted, consent is recorded per donation, and you can erase
 
 Yes. Import a CSV of donors, or donors and donations together, mapping your columns to Dono fields.
 
-== External services ==
-
-Dono connects to the following third-party services. Nothing is sent to any of them unless the relevant feature is in use.
-
-**Stripe** - used when you enable Stripe as a payment method. Donation amount, currency, and the donor's name and email are sent to Stripe to create and confirm a payment, and Stripe sends webhooks back to your site. Data is sent only when a donation is made through Stripe, and only using the API keys you supply.
-Terms: https://stripe.com/legal
-Privacy: https://stripe.com/privacy
-
-**PayPal** - used when you enable PayPal as a payment method. Donation amount, currency, and the donor's name and email are sent to PayPal to create and capture a payment, and PayPal sends webhooks back to your site. Data is sent only when a donation is made through PayPal, and only using the API credentials you supply.
-Terms: https://www.paypal.com/legalhub/useragreement-full
-Privacy: https://www.paypal.com/legalhub/privacy-full
-
-**Frankfurter** - used to fetch daily currency exchange rates so donations taken in other currencies can be reported in your organisation's currency. Only the currency code is sent. No donor or site data is sent. Nothing is requested at all unless you accept a second currency, so a single-currency site never contacts it. You can also turn it off under Dono > Settings > Currency, or enter rates by hand instead.
-Service: https://frankfurter.dev
-Terms and privacy: https://frankfurter.dev
-
 == Screenshots ==
 
 1. The block-based donation form builder.
