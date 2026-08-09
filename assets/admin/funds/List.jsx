@@ -81,7 +81,7 @@ export default function List() {
         sort:    { field: 'sort_order', direction: 'asc' },
         filters: [],
         search:  '',
-        fields:  [ 'name', 'type', 'goal', 'status' ],
+        fields:  [ 'name', 'type', 'raised', 'goal', 'status' ],
     } );
 
     const [ data, setData ]         = useState( [] );
@@ -232,6 +232,16 @@ export default function List() {
                     : 'dono-fund-badge--unrestricted' ) }>
                     { item.is_restricted ? __( 'Restricted', 'dono' ) : __( 'Unrestricted', 'dono' ) }
                 </span>
+            ),
+        },
+        {
+            id:    'raised',
+            label: __( 'Raised', 'dono' ),
+            // Same reason the goal column is not sortable: a parent's raised is
+            // rolled up in PHP after the query.
+            enableSorting: false,
+            render: ( { item } ) => (
+                <span className="dono-fund-raised">{ formatAmount( item.raised_cents ) }</span>
             ),
         },
         {

@@ -167,7 +167,7 @@ function TopDonorsLeaderboard( { rows } ) {
                     <th>{ __( 'Country', 'dono' ) }</th>
                     <th className="dono-num">{ __( 'Donations', 'dono' ) }</th>
                     <th className="dono-num">{ __( 'Total', 'dono' ) }</th>
-                    <th>{ __( 'Last donation', 'dono' ) }</th>
+                    <th className="dono-date">{ __( 'Last donation', 'dono' ) }</th>
                 </tr>
             </thead>
             <tbody>
@@ -182,7 +182,7 @@ function TopDonorsLeaderboard( { rows } ) {
                         <td>{ r.country || '-' }</td>
                         <td className="dono-num">{ r.donations_count }</td>
                         <td className="dono-num">{ formatAmount( r.total_donated_cents ) }</td>
-                        <td>{ formatDate( r.last_donation_at ) }</td>
+                        <td className="dono-date">{ formatDate( r.last_donation_at ) }</td>
                     </tr>
                 ) ) }
             </tbody>
@@ -353,7 +353,7 @@ function AtRiskTable() {
                                 <th>{ __( 'Email', 'dono' ) }</th>
                                 <th>{ __( 'Country', 'dono' ) }</th>
                                 <th className="dono-num">{ __( 'Total', 'dono' ) }</th>
-                                <th>{ __( 'Last donation', 'dono' ) }</th>
+                                <th className="dono-date">{ __( 'Last donation', 'dono' ) }</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -367,7 +367,7 @@ function AtRiskTable() {
                                     <td>{ r.email || '-' }</td>
                                     <td>{ r.country || '-' }</td>
                                     <td className="dono-num">{ formatAmount( r.total_donated_cents ) }</td>
-                                    <td>{ formatDate( r.last_donation_at ) }</td>
+                                    <td className="dono-date">{ formatDate( r.last_donation_at ) }</td>
                                 </tr>
                             ) ) }
                         </tbody>
