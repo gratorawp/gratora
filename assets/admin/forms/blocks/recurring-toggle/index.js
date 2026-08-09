@@ -17,6 +17,10 @@ const FREQ_OPTIONS = [
     { value: 'yearly',    label: __( 'Yearly', 'dono' ) },
 ];
 
+// One-time is not listed: every form accepts a single gift, so the server
+// prepends it and a checkbox for it would never turn off.
+const RECURRING_OPTIONS = FREQ_OPTIONS.filter( ( f ) => f.value !== 'one-time' );
+
 const DEFAULT_FREQUENCIES = [ 'one-time', 'monthly' ];
 
 function Edit( { attributes, setAttributes } ) {
@@ -81,11 +85,11 @@ function Edit( { attributes, setAttributes } ) {
                         ] }
                     />
                     <Field
-                        label={ __( 'Allowed frequencies', 'dono' ) }
-                        help={ __( 'Donors pick from these. The block hides itself if fewer than two are selected.', 'dono' ) }
+                        label={ __( 'Recurring options', 'dono' ) }
+                        help={ __( 'Donors can always give once. Pick the recurring options to offer alongside it.', 'dono' ) }
                     >
                         <div className="dono-sidebar-list">
-                            { FREQ_OPTIONS.map( ( f ) => (
+                            { RECURRING_OPTIONS.map( ( f ) => (
                                 <label key={ f.value } className="dono-sidebar-check">
                                     <input
                                         type="checkbox"
@@ -99,13 +103,13 @@ function Edit( { attributes, setAttributes } ) {
                     </Field>
                     { willHide && (
                         <Notice status="warning" isDismissible={ false }>
-                            { __( 'Enable at least two frequencies (for example one-time and monthly) or this block will not appear on the form.', 'dono' ) }
+                            { __( 'Pick at least one recurring option, or this block will not appear on the form.', 'dono' ) }
                         </Notice>
                     ) }
                     <SelectControl
                         label={ __( 'Default selection', 'dono' ) }
                         value={ defaultFrequency }
-                        options={ FREQ_OPTIONS.filter( ( f ) => safeFreqs.includes( f.value ) ) }
+                        options={ FREQ_OPTIONS.filter( ( f ) => effectiveFreqs.includes( f.value ) ) }
                         onChange={ ( v ) => setAttributes( { defaultFrequency: v } ) }
                         __nextHasNoMarginBottom
                     />
