@@ -156,6 +156,29 @@ abstract class IntegrationTestCase extends WP_UnitTestCase
      *   $this->assertSame('subject', $mails[0]['subject']);
      */
     /**
+     * Body of a streaming endpoint. rest_do_request never serves, so the
+     * rest_pre_serve_request hook these routes write from does not fire and
+     * get_data() is empty by design.
+     *
+     * @param array<string,mixed> $params
+     */
+    protected function serveBody(string $route, array $params = []): string
+    {
+        $request = new \WP_REST_Request('GET', $route);
+        foreach ($params as $k => $v) {
+            $request->set_param($k, $v);
+        }
+
+        $server = rest_get_server();
+        $result = $server->dispatch($request);
+
+        ob_start();
+        apply_filters('rest_pre_serve_request', false, $result, $request, $server);
+
+        return (string) ob_get_clean();
+    }
+
+    /**
      * A live portal session for the donor. Returns the session id; the caller
      * sets $_COOKIE['dono_donor_session'] to it.
      */

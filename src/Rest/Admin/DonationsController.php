@@ -44,6 +44,9 @@ final class DonationsController
 {
     private const NAMESPACE = 'dono/v1';
 
+    private const EXPORT_PAGE     = 1000;
+    private const EXPORT_MAX_ROWS = 50000;
+
     public function __construct(
         private DonationRepository $donations,
         private DonorRepository $donors,
@@ -1126,10 +1129,10 @@ final class DonationsController
 
     public function exportCsv(WP_REST_Request $request): WP_REST_Response
     {
-        // CSV via rest_pre_serve_request to bypass the JSON serializer.
-        $body = $this->buildCsvBody($request);
-
-        add_filter('rest_pre_serve_request', function (bool $served, $result, $req, $server) use ($request, $body) {
+        // CSV via rest_pre_serve_request to bypass the JSON serializer, written
+        // straight to the socket: a full export held as one string cost 313MB
+        // for 8.8MB of CSV and exhausted a 256MB limit at 50,000 rows.
+        add_filter('rest_pre_serve_request', function (bool $served, $result, $req, $server) use ($request) {
             $route = $request->get_route();
             if ((string) $req->get_route() !== $route) {
                 return $served;
@@ -1143,20 +1146,24 @@ final class DonationsController
             $server->send_header('Pragma', 'no-cache');
             $server->send_header('Expires', '0');
 
-            echo $body;
+            $out = fopen('php://output', 'w');
+            if ($out !== false) {
+                $this->writeCsv($out, $request);
+                fclose($out);
+            }
+
             return true;
         }, 10, 4);
 
         $response = new WP_REST_Response(null, 200);
-        $response->set_headers([
-            'Content-Type'        => 'text/csv; charset=utf-8',
-            'X-Dono-Export-Bytes' => (string) strlen($body),
-        ]);
-        $response->set_data($body);
+        $response->set_headers(['Content-Type' => 'text/csv; charset=utf-8']);
         return $response;
     }
 
-    private function buildCsvBody(WP_REST_Request $request): string
+    /**
+     * @param resource $out
+     */
+    private function writeCsv($out, WP_REST_Request $request): void
     {
         $search  = $request['search']   !== null ? trim((string) $request['search']) : '';
         $donorId = $request['donor_id'] !== null ? (int) $request['donor_id'] : 0;
@@ -1165,7 +1172,7 @@ final class DonationsController
             ? []
             : ($search !== '' ? $this->donorService->findIdsBySearch($search) : []);
 
-        $rows = $this->donations->listForExport([
+        $filters = [
             'orderby'            => (string) ($request['orderby'] ?? 'created_at'),
             'order'              => (string) ($request['order']   ?? 'desc'),
             'status'             => $request['status'] !== null ? (string) $request['status'] : null,
@@ -1180,12 +1187,7 @@ final class DonationsController
             'include_test'       => (bool) $request['include_test'],
             'created_from'       => $request['created_from'] !== null ? (string) $request['created_from'] : null,
             'created_to'         => $request['created_to']   !== null ? (string) $request['created_to']   : null,
-        ]);
-
-        $out = fopen('php://temp', 'r+');
-        if ($out === false) {
-            return '';
-        }
+        ];
 
         // Whether this caller may take donor identities away in bulk. The rest
         // of the file is donation records, which dono_view_donations covers;
@@ -1217,49 +1219,54 @@ final class DonationsController
             __('Refunded at', 'dono'),
         ]));
 
-        // Cached per donor rather than per row, which bounded this at the number
-        // of distinct donors instead of the number of donations: still one
-        // round trip each, inside one synchronous request, over an export
-        // capped at 50,000 rows. Loaded up front in chunks instead, so the
-        // trips are counted in dozens rather than thousands.
-        $donorCache = [];
-        foreach (array_chunk(array_unique(array_map(
-            static fn ($d): int => (int) $d->donor_id,
-            $rows
-        )), 500) as $chunk) {
-            $donorCache += $this->donors->findManyByIds($chunk);
+        $ids = $this->donations->listIdsForExport($filters + ['limit' => self::EXPORT_MAX_ROWS]);
+
+        foreach (array_chunk($ids, self::EXPORT_PAGE) as $idChunk) {
+            $byId = $this->donations->findManyDonationsByIds($idChunk);
+
+            $rows = [];
+            foreach ($idChunk as $id) {
+                if (isset($byId[$id])) $rows[] = $byId[$id];
+            }
+
+            // Per page, so the cache is bounded by the page rather than by the
+            // number of distinct donors in the whole export.
+            $donorCache = [];
+            foreach (array_chunk(array_unique(array_map(
+                static fn ($d): int => (int) $d->donor_id,
+                $rows
+            )), 500) as $chunk) {
+                $donorCache += $this->donors->findManyByIds($chunk);
+            }
+
+            foreach ($rows as $d) {
+                /** @var Donation $d */
+                $donor = $donorCache[(int) $d->donor_id] ?? null;
+                Csv::writeRow($out, array_merge([
+                    $d->reference,
+                    $d->status,
+                    number_format($d->amount_cents / 100, 2, '.', ''),
+                    strtoupper($d->currency),
+                    $d->base_amount_cents !== null ? number_format($d->base_amount_cents / 100, 2, '.', '') : '',
+                    $d->base_currency !== null ? strtoupper($d->base_currency) : '',
+                    number_format($d->fee_cents / 100, 2, '.', ''),
+                    number_format($d->net_cents / 100, 2, '.', ''),
+                    $d->gateway,
+                    $d->frequency,
+                    $d->country ?? '',
+                ], $withDonorPii ? [
+                    $donor ? $this->donorName($donor) : '',
+                    $donor ? $this->donorService->decryptEmail($donor) : '',
+                ] : [], [
+                    $d->created_at,
+                    $d->paid_at ?? '',
+                    $d->refunded_at ?? '',
+                ]));
+            }
+
+            unset($rows, $byId, $donorCache);
+            flush();
         }
-
-        foreach ($rows as $d) {
-            /** @var Donation $d */
-            $donor = $donorCache[(int) $d->donor_id] ?? null;
-            Csv::writeRow($out, array_merge([
-                $d->reference,
-                $d->status,
-                number_format($d->amount_cents / 100, 2, '.', ''),
-                strtoupper($d->currency),
-                $d->base_amount_cents !== null ? number_format($d->base_amount_cents / 100, 2, '.', '') : '',
-                $d->base_currency !== null ? strtoupper($d->base_currency) : '',
-                number_format($d->fee_cents / 100, 2, '.', ''),
-                number_format($d->net_cents / 100, 2, '.', ''),
-                $d->gateway,
-                $d->frequency,
-                $d->country ?? '',
-            ], $withDonorPii ? [
-                $donor ? $this->donorName($donor) : '',
-                $donor ? $this->donorService->decryptEmail($donor) : '',
-            ] : [], [
-                $d->created_at,
-                $d->paid_at ?? '',
-                $d->refunded_at ?? '',
-            ]));
-        }
-
-        rewind($out);
-        $body = stream_get_contents($out);
-        fclose($out);
-
-        return (string) $body;
     }
 
     private function shapeDonation(Donation $d, ?Donor $donor, ?Campaign $campaign = null, ?Form $form = null): array

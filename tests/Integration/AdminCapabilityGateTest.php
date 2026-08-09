@@ -36,9 +36,7 @@ final class AdminCapabilityGateTest extends IntegrationTestCase
 
     private function body(string $method, string $route): string
     {
-        $res = rest_do_request(new WP_REST_Request($method, $route));
-
-        return (string) $res->get_data();
+        return $this->serveBody($route);
     }
 
     private function assertForbidden(int $status, string $msg): void

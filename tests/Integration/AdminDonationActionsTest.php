@@ -328,6 +328,6 @@ final class AdminDonationActionsTest extends IntegrationTestCase
      */
     private function captureCsv(string $path, array $params = []): string
     {
-        return (string) $this->get($path, $params)->get_data();
+        return $this->serveBody($path, $params);
     }
 }

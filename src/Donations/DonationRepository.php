@@ -191,8 +191,16 @@ final class DonationRepository
         return ['items' => $items, 'total' => $total];
     }
 
-    /** Same filter shape as listAdmin(). */
-    public function listForExport(array $args = []): array
+    /**
+     * Ids only, in export order. Paging the export by OFFSET made MySQL walk
+     * and discard every earlier row for each page, which is quadratic in the
+     * export size. This is one ordered pass, and each page is then a
+     * primary-key lookup.
+     *
+     * @param  array<string,mixed> $args
+     * @return list<int>
+     */
+    public function listIdsForExport(array $args = []): array
     {
         $allowedSort = ['created_at', 'paid_at', 'amount_cents', 'reference', 'status'];
         $orderBy = in_array($args['orderby'] ?? '', $allowedSort, true)
@@ -200,9 +208,31 @@ final class DonationRepository
             : 'created_at';
         $order = strtoupper((string) ($args['order'] ?? 'desc')) === 'ASC' ? 'ASC' : 'DESC';
 
-        $q = $this->applyAdminFilters(Donation::query(), $args);
+        $rows = $this->applyAdminFilters(DB::table('dono_donations')->selectRaw('id'), $args)
+            ->orderBy($orderBy, $order)
+            ->orderBy('id', $order)
+            ->limit((int) ($args['limit'] ?? 50000))
+            ->getAll();
 
-        return $q->orderBy($orderBy, $order)->limit(50000)->getAll();
+        return array_map(static fn ($r): int => (int) (is_array($r) ? $r['id'] : $r->id), $rows);
+    }
+
+    /**
+     * @param  list<int> $ids
+     * @return array<int, Donation> keyed by id
+     */
+    public function findManyDonationsByIds(array $ids): array
+    {
+        if ($ids === []) {
+            return [];
+        }
+
+        $out = [];
+        foreach (Donation::query()->whereIn('id', $ids)->getAll() as $donation) {
+            $out[(int) $donation->id] = $donation;
+        }
+
+        return $out;
     }
 
     /**
