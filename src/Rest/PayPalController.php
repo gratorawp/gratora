@@ -87,6 +87,24 @@ final class PayPalController
         // redirect this at another order.
         $result = $gateway->confirm($donation);
 
+        // A held capture is money PayPal has taken and will settle by webhook.
+        // Reporting it as a failure sent the donor back to give again, and threw
+        // away the capture id that the refund path and the settling webhook
+        // both need.
+        if (! $result->success && $result->pending) {
+            $donation->gateway_txn_id = (string) $result->gateway_txn_id;
+            $this->donationService->markProcessing(
+                $donation,
+                'paypal_capture_pending',
+                array_filter((array) $result->metadata)
+            );
+
+            return new WP_REST_Response([
+                'status'    => 'processing',
+                'reference' => $donation->reference,
+            ], 200);
+        }
+
         if (! $result->success) {
             return $this->error(
                 'dono_paypal_capture_failed',

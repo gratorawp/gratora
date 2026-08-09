@@ -20,6 +20,10 @@ final class GatewayConfirmResult
         public readonly ?int $fee_cents = null,
         public readonly ?string $error = null,
         public readonly ?array $metadata = null,
+        // Not success, but not failure either: the processor took the money and
+        // is holding it. A caller that treats this as failure tells the donor
+        // their payment did not go through while it is still going through.
+        public readonly bool $pending = false,
     ) {
     }
 

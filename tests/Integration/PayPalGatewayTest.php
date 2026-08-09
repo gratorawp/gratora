@@ -26,6 +26,9 @@ final class PayPalGatewayTest extends IntegrationTestCase
     /** @var array<int,array{method:string,url:string,body:array<string,mixed>}> */
     private array $calls = [];
 
+    /** Canned capture comes back PENDING (eCheck / review hold) when set. */
+    private bool $pendingCapture = false;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -103,7 +106,7 @@ final class PayPalGatewayTest extends IntegrationTestCase
                 'purchase_units' => [[
                     'payments' => ['captures' => [[
                         'id'     => 'CAPTURE-1',
-                        'status' => 'COMPLETED',
+                        'status' => $this->pendingCapture ? 'PENDING' : 'COMPLETED',
                         'seller_receivable_breakdown' => [
                             'paypal_fee' => ['value' => '1.05', 'currency_code' => 'USD'],
                         ],
@@ -346,5 +349,48 @@ final class PayPalGatewayTest extends IntegrationTestCase
         ]);
 
         $this->assertSame(200, $res->get_status());
+    }
+
+    /**
+     * eCheck and review holds settle later by webhook. Calling that a failed
+     * payment sends a donor who has already paid back to pay again, and drops
+     * the capture id the refund path and the settling webhook both need.
+     */
+    public function test_a_held_capture_is_processing_not_failed(): void
+    {
+        $this->pendingCapture = true;
+        $reference = $this->createDonation();
+
+        $req = new WP_REST_Request('POST', '/dono/v1/gateways/paypal/capture');
+        $req->set_header('content-type', 'application/json');
+        $req->set_body((string) wp_json_encode(['reference' => $reference]));
+        $res = rest_do_request($req);
+
+        $this->assertSame(200, $res->get_status(), 'the donor is not told it failed');
+        $this->assertSame('processing', $res->get_data()['status']);
+
+        $donation = (new DonationRepository())->findByReference($reference);
+        $this->assertSame('processing', $donation->status);
+        $this->assertSame('CAPTURE-1', (string) $donation->gateway_txn_id, 'the capture id is kept');
+    }
+
+    public function test_a_held_capture_settles_when_the_webhook_lands(): void
+    {
+        $this->pendingCapture = true;
+        $reference = $this->createDonation();
+
+        $req = new WP_REST_Request('POST', '/dono/v1/gateways/paypal/capture');
+        $req->set_header('content-type', 'application/json');
+        $req->set_body((string) wp_json_encode(['reference' => $reference]));
+        rest_do_request($req);
+
+        $this->postWebhook('PAYMENT.CAPTURE.COMPLETED', [
+            'id'        => 'CAPTURE-1',
+            'custom_id' => $reference,
+            'amount'    => ['value' => '25.00', 'currency_code' => 'USD'],
+        ]);
+
+        $donation = (new DonationRepository())->findByReference($reference);
+        $this->assertSame('paid', $donation->status, 'the hold clears to paid');
     }
 }

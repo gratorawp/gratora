@@ -144,7 +144,7 @@ export default function PayPalPayment( { config, payment, dispatch } ) {
             ) : null }
 
             { ! ready && ! error ? (
-                <p className="dono-form__paypal-loading">{ i18n.loading || '' }</p>
+                <p className="dono-form__paypal-loading">{ i18n.paymentLoading || 'Loading secure payment…' }</p>
             ) : null }
 
             <div ref={ mountRef } className="dono-form__paypal-buttons" />

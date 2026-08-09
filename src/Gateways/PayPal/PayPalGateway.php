@@ -288,6 +288,10 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
                 'paypal_capture_id' => (string) ($capture['id'] ?? ''),
                 'payer_email'       => (string) ($order['payer']['email_address'] ?? ''),
             ],
+            // eCheck, a review hold, or a manually accepted off-currency
+            // payment. PayPal has the money and will settle it later by
+            // webhook, so this is not a failed donation.
+            pending: $captureStatus === 'PENDING',
         );
     }
 
