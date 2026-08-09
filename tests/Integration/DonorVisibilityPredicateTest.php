@@ -124,4 +124,29 @@ final class DonorVisibilityPredicateTest extends IntegrationTestCase
 
         $this->assertSame($slow, $fast);
     }
+
+    /**
+     * The lifecycle KPI counts donors who have given, and takes the same
+     * shortcut. A ticket order is a live donation the counter does not count,
+     * so the buyer has to survive the fall-through here too.
+     */
+    public function test_the_kpi_counts_a_ticket_only_buyer_as_having_given(): void
+    {
+        $id = $this->donorId('kpi-order');
+        $this->donation($id, false, 'order');
+
+        $kpi = Plugin::instance()->container->get(\Dono\Donors\DonorRepository::class)
+            ->lifecycleKpi(gmdate('Y-m-d'));
+
+        $withOrder = (int) $kpi['total'];
+
+        $hidden = $this->donorId('kpi-test-only');
+        $this->donation($hidden, true);
+
+        $after = (int) Plugin::instance()->container->get(\Dono\Donors\DonorRepository::class)
+            ->lifecycleKpi(gmdate('Y-m-d'))['total'];
+
+        $this->assertSame($withOrder, $after, 'a test-only donor does not join the KPI');
+        $this->assertGreaterThan(0, $withOrder);
+    }
 }

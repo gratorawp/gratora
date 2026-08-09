@@ -75,8 +75,12 @@ final class DonorRepository
     private function givingDonorPredicate(): string
     {
         $prefix = DB::getPrefix();
-        return "EXISTS (SELECT 1 FROM {$prefix}dono_donations d "
-            . "WHERE d.donor_id = {$prefix}dono_donors.id AND d.is_test = 0)";
+
+        // Same shortcut as visibleDonorPredicate, and the same reason it leads
+        // rather than replaces: a live donation the counter does not count, a
+        // ticket order, still has to satisfy this. 55ms to 5ms over 8,023.
+        return "({$prefix}dono_donors.donations_count > 0 OR EXISTS (SELECT 1 FROM {$prefix}dono_donations d "
+            . "WHERE d.donor_id = {$prefix}dono_donors.id AND d.is_test = 0))";
     }
 
     /**
