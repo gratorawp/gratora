@@ -736,6 +736,14 @@ body.dono-onboarding-fullscreen {
 
 }
 
+// @dono/ui's admin base restates border-radius on :focus, to win back the shape
+// wp-admin's a:focus steals when .dono-btn renders as an anchor. It restates one
+// radius, so a pill flattens to 8px the moment it is clicked. Its selector ties
+// with a plain .dono-onboarding .dono-btn:focus and wins on order, so this needs
+// the extra element to outrank it.
+body .dono-onboarding .dono-btn:focus,
+body .dono-onboarding .dono-btn:active { border-radius: 999px; }
+
 .dono-onboarding .dono-btn {
     appearance: none;
     border: 1px solid transparent;
@@ -751,6 +759,7 @@ body.dono-onboarding-fullscreen {
     &:hover,
     &:focus,
     &:active { text-decoration: none; }
+
 
     &:disabled { opacity: .55; cursor: default; }
 
