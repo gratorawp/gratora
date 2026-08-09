@@ -25,11 +25,7 @@ final class PortalPlanConcurrentRenewalTest extends IntegrationTestCase
     {
         $sid  = bin2hex(random_bytes(32));
         $csrf = bin2hex(random_bytes(16));
-        set_transient(
-            'dono_portal_' . hash('sha256', $sid),
-            ['donor_id' => $donorId, 'csrf' => $csrf],
-            HOUR_IN_SECONDS
-        );
+        $sid = $this->portalSession($donorId, $csrf);
         $_COOKIE['dono_donor_session'] = $sid;
 
         return $csrf;

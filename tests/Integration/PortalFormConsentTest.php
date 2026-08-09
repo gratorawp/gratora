@@ -28,12 +28,7 @@ final class PortalFormConsentTest extends IntegrationTestCase
         $this->donor = Plugin::instance()->container->get(DonorService::class)
             ->findOrCreate('consent-' . uniqid() . '@example.test');
 
-        $sid = bin2hex(random_bytes(32));
-        set_transient(
-            'dono_portal_' . hash('sha256', $sid),
-            ['donor_id' => (int) $this->donor->id, 'csrf' => self::CSRF],
-            3600
-        );
+        $sid = $this->portalSession((int) $this->donor->id, self::CSRF);
         $_COOKIE['dono_donor_session'] = $sid;
     }
 

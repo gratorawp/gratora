@@ -21,8 +21,7 @@ final class PortalMediumsTest extends IntegrationTestCase
         $this->donor = Plugin::instance()->container->get(DonorService::class)
             ->findOrCreate('portal-med-' . uniqid() . '@example.test');
 
-        $sid = bin2hex(random_bytes(32));
-        set_transient('dono_portal_' . hash('sha256', $sid), ['donor_id' => (int) $this->donor->id, 'csrf' => 'tok'], 3600);
+        $sid = $this->portalSession((int) $this->donor->id, 'tok');
         $_COOKIE['dono_donor_session'] = $sid;
     }
 

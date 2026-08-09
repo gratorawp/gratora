@@ -65,12 +65,7 @@ final class PortalDonationSeamTest extends IntegrationTestCase
     {
         $donation = Donation::query()->find('reference', $reference);
 
-        $sid = bin2hex(random_bytes(32));
-        set_transient(
-            'dono_portal_' . hash('sha256', $sid),
-            ['donor_id' => (int) $donation->donor_id, 'csrf' => bin2hex(random_bytes(8))],
-            HOUR_IN_SECONDS
-        );
+        $sid = $this->portalSession((int) $donation->donor_id, bin2hex(random_bytes(8)));
         $_COOKIE['dono_donor_session'] = $sid;
 
         try {

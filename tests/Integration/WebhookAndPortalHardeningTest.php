@@ -145,8 +145,7 @@ final class WebhookAndPortalHardeningTest extends IntegrationTestCase
             ->get(\Dono\Donors\DonorMetricsService::class)
             ->exportData((int) $donor->id);
 
-        $sid = bin2hex(random_bytes(32));
-        set_transient('dono_portal_' . hash('sha256', $sid), ['donor_id' => (int) $donor->id, 'csrf' => 'tok'], 3600);
+        $sid = $this->portalSession((int) $donor->id, 'tok');
         $_COOKIE['dono_donor_session'] = $sid;
 
         // The bundle is streamed from a rest_pre_serve_request filter, which
@@ -200,8 +199,7 @@ final class WebhookAndPortalHardeningTest extends IntegrationTestCase
         Plugin::instance()->container->get(\Dono\Gateways\GatewayManager::class)
             ->register(new NeedsApprovalGateway());
 
-        $sid = bin2hex(random_bytes(32));
-        set_transient('dono_portal_' . hash('sha256', $sid), ['donor_id' => (int) $donor->id, 'csrf' => 'tok'], 3600);
+        $sid = $this->portalSession((int) $donor->id, 'tok');
         $_COOKIE['dono_donor_session'] = $sid;
 
         $req = new WP_REST_Request('POST', '/dono/v1/portal/recurring/' . (int) $plan->id . '/action');

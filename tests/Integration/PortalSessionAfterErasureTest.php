@@ -48,12 +48,7 @@ final class PortalSessionAfterErasureTest extends IntegrationTestCase
         $donor = Plugin::instance()->container->get(DonorService::class)
             ->findOrCreate('portal-' . uniqid() . '@example.test', ['first_name' => 'Sam']);
 
-        $sid = bin2hex(random_bytes(32));
-        set_transient(
-            'dono_portal_' . hash('sha256', $sid),
-            ['donor_id' => (int) $donor->id, 'csrf' => bin2hex(random_bytes(8))],
-            3600
-        );
+        $sid = $this->portalSession((int) $donor->id, bin2hex(random_bytes(8)));
         $_COOKIE['dono_donor_session'] = $sid;
 
         return $donor;

@@ -69,12 +69,7 @@ final class PortalConsentDefaultTest extends IntegrationTestCase
     /** @return list<array<string,mixed>> */
     private function portalConsents(int $donorId): array
     {
-        $sid = bin2hex(random_bytes(32));
-        set_transient(
-            'dono_portal_' . hash('sha256', $sid),
-            ['donor_id' => $donorId, 'csrf' => bin2hex(random_bytes(8))],
-            HOUR_IN_SECONDS
-        );
+        $sid = $this->portalSession($donorId, bin2hex(random_bytes(8)));
         $_COOKIE['dono_donor_session'] = $sid;
 
         try {

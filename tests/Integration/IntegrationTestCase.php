@@ -155,6 +155,23 @@ abstract class IntegrationTestCase extends WP_UnitTestCase
      *   $this->assertCount(1, $mails);
      *   $this->assertSame('subject', $mails[0]['subject']);
      */
+    /**
+     * A live portal session for the donor. Returns the session id; the caller
+     * sets $_COOKIE['dono_donor_session'] to it.
+     */
+    protected function portalSession(int $donorId, string $csrf = 'tok', ?int $startedAt = null): string
+    {
+        $sid = bin2hex(random_bytes(32));
+        set_transient('dono_portal_' . hash('sha256', $sid), [
+            'donor_id' => $donorId,
+            'csrf'     => $csrf,
+            'started'  => $startedAt ?? time(),
+            'seen'     => time(),
+        ], HOUR_IN_SECONDS);
+
+        return $sid;
+    }
+
     protected function captureMails(): \ArrayObject
     {
         $mails = new \ArrayObject();

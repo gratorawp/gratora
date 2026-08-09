@@ -115,6 +115,12 @@ final class PortalController
             'permission_callback' => [$this, 'sessionWithCsrf'],
         ]);
 
+        register_rest_route(self::NAMESPACE, '/portal/logout-everywhere', [
+            'methods'             => WP_REST_Server::CREATABLE,
+            'callback'            => [$this, 'logoutEverywhere'],
+            'permission_callback' => [$this, 'sessionWithCsrf'],
+        ]);
+
         register_rest_route(self::NAMESPACE, '/portal/me', [
             'methods'             => WP_REST_Server::READABLE,
             'callback'            => [$this, 'me'],
@@ -456,6 +462,16 @@ final class PortalController
     {
         $this->session->destroy();
         return new WP_REST_Response(['ok' => true], 200);
+    }
+
+    public function logoutEverywhere(): WP_REST_Response|WP_Error
+    {
+        $donorId = $this->session->currentDonorId();
+        if ($donorId === null) {
+            return new WP_Error('dono_unauthorized', '', ['status' => 401]);
+        }
+
+        return new WP_REST_Response(['ok' => true, 'ended' => $this->session->destroyAllFor($donorId)], 200);
     }
 
     public function me(): WP_REST_Response|WP_Error
