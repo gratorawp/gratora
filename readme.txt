@@ -24,6 +24,8 @@ Unlimited campaigns and forms. No paid tier, and no cap on what you raise.
 
 = Donation forms =
 
+Create beautiful, fully customisable donation forms in the WordPress editor.
+
 * Suggested amounts, a custom amount, and a minimum you set
 * One-time, weekly, fortnightly, monthly, quarterly and yearly
 * Multi-step, or everything on one screen
