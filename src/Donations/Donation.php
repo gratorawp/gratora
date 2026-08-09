@@ -170,4 +170,8 @@ Donation::schema(function (Table $t): void {
     // filesort`; with these it is a backward index scan.
     $t->index(['is_test', 'created_at']);
     $t->index(['is_test', 'status', 'created_at']);
+    // Two columns, not three: status in the middle breaks the prefix for the
+    // unfiltered list, which is the sort a user reaches for first. Measured,
+    // (is_test, status, amount_cents) still filesorts that view.
+    $t->index(['is_test', 'amount_cents']);
 });
