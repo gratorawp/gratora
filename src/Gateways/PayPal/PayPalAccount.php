@@ -195,6 +195,30 @@ final class PayPalAccount
         delete_transient($this->tokenKey($test));
     }
 
+    /**
+     * The stored blob as it stands, for a caller that has to write credentials
+     * before it can test them and needs to put the old ones back if they fail.
+     *
+     * @return array<string,mixed>|null
+     */
+    public function snapshot(): ?array
+    {
+        return $this->raw();
+    }
+
+    /** @param array<string,mixed>|null $data a value from snapshot() */
+    public function restore(?array $data): void
+    {
+        if ($data === null) {
+            $this->forget();
+            return;
+        }
+
+        SystemSetting::write(self::KEY, (string) wp_json_encode($data));
+        $this->forgetToken(true);
+        $this->forgetToken(false);
+    }
+
     /** Remove one mode's credentials, leaving the other intact. */
     public function forgetMode(bool $test): void
     {

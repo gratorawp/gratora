@@ -506,4 +506,65 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
         $gateway->cancelSubscription($plan, 'donor asked');
         $this->assertTrue(true, 'cancelling an already-ended subscription does not throw');
     }
+
+    /**
+     * The one-time capture path refuses a sale that does not match the donation
+     * it names, and says why in a comment about a $0.01 capture confirming a
+     * $10,000 donation. The opening sale of a subscription reaches the same
+     * pending row by a different door, so it has to be refused the same way.
+     */
+    public function test_an_opening_sale_for_the_wrong_amount_does_not_confirm_the_signup(): void
+    {
+        $reference = $this->createRecurringDonation(100000);
+        $this->recordSubscription($reference);
+
+        $res = $this->postWebhook('PAYMENT.SALE.COMPLETED', [
+            'id'                    => 'SALE-CHEAP',
+            'billing_agreement_id'  => 'I-SUB-1',
+            'amount'                => ['total' => '0.01', 'currency' => 'USD'],
+        ]);
+
+        $donation = (new DonationRepository())->findByReference($reference);
+
+        $this->assertSame('pending', $donation->status, 'a one-cent sale cannot pay a $1,000 signup');
+        $this->assertSame(0, (int) $donation->payments_count ?: 0, 'and nothing is banked for it');
+        // 200 on purpose: a refusal is terminal, so PayPal must stop redelivering.
+        $this->assertSame(200, $res->get_status());
+        $this->assertFalse($res->get_data()['handled']);
+
+        $log = \Dono\Webhooks\WebhookLog::query()->orderBy('id', 'DESC')->get();
+        $this->assertStringStartsWith('Refused:', (string) $log->error, 'and the reason is on the delivery');
+    }
+
+    public function test_an_opening_sale_in_the_wrong_currency_does_not_confirm_the_signup(): void
+    {
+        $reference = $this->createRecurringDonation(2500);
+        $this->recordSubscription($reference);
+
+        $this->postWebhook('PAYMENT.SALE.COMPLETED', [
+            'id'                   => 'SALE-FX',
+            'billing_agreement_id' => 'I-SUB-1',
+            'amount'               => ['total' => '25.00', 'currency' => 'JPY'],
+        ]);
+
+        $donation = (new DonationRepository())->findByReference($reference);
+
+        $this->assertSame('pending', $donation->status, '25 JPY is not 25 USD');
+    }
+
+    public function test_an_opening_sale_that_matches_still_confirms(): void
+    {
+        $reference = $this->createRecurringDonation(2500);
+        $this->recordSubscription($reference);
+
+        $this->postWebhook('PAYMENT.SALE.COMPLETED', [
+            'id'                   => 'SALE-OK',
+            'billing_agreement_id' => 'I-SUB-1',
+            'amount'               => ['total' => '25.00', 'currency' => 'USD'],
+        ]);
+
+        $donation = (new DonationRepository())->findByReference($reference);
+
+        $this->assertSame('paid', $donation->status, 'the guard must not break the happy path');
+    }
 }

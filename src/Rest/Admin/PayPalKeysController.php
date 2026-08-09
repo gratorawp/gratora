@@ -90,6 +90,13 @@ final class PayPalKeysController
             );
         }
 
+        // Credentials have to be stored before they can be tested, because the
+        // token call reads them from the account. Keep the working set so a
+        // transient failure during a routine rotation does not take the mode
+        // down with it: forgetMode() blanks the webhook id too, and without
+        // that id recurring stops being offered at all.
+        $previous = $this->account->snapshot();
+
         $this->account->saveKeys($test, $clientId, $secret);
         $this->account->useTestMode($test);
 
@@ -99,7 +106,7 @@ final class PayPalKeysController
         try {
             $this->api->accessToken();
         } catch (RuntimeException $e) {
-            $this->account->forgetMode($test);
+            $this->account->restore($previous);
             return new WP_Error(
                 'dono_paypal_key_rejected',
                 sprintf(

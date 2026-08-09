@@ -195,4 +195,86 @@ final class PayPalKeysControllerTest extends IntegrationTestCase
         $this->assertSame(403, $res->get_status());
         $this->assertFalse($this->account()->hasKeysFor(true));
     }
+
+    /**
+     * Credentials have to be written before the token call can test them, so a
+     * failure has to put the old ones back. Blanking the mode instead takes the
+     * webhook id with it, and without that id recurring stops being offered:
+     * a five-second PayPal wobble during a routine secret rotation would have
+     * quietly turned every monthly donor into a one-off.
+     */
+    public function test_a_failed_re_save_leaves_the_working_credentials_alone(): void
+    {
+        $account = Plugin::instance()->container->get(PayPalAccount::class);
+        $account->forget();
+        $account->saveKeys(true, 'GOOD_client', 'GOOD_secret');
+        $account->saveWebhookId(true, 'WH-WORKING');
+
+        // The token call is the credential check; make it fail.
+        add_filter('pre_http_request', static function ($pre, $args, $url) {
+            if (is_string($url) && str_contains($url, 'oauth2/token')) {
+                return new \WP_Error('http_request_failed', 'cURL error 28: timed out');
+            }
+            return $pre;
+        }, 5, 3);
+
+        $req = new WP_REST_Request('POST', '/dono/v1/gateways/paypal/keys');
+        $req->set_header('content-type', 'application/json');
+        $req->set_body((string) wp_json_encode([
+            'mode' => 'test', 'client_id' => 'NEW_client', 'client_secret' => 'NEW_secret',
+        ]));
+        $res = rest_do_request($req);
+
+        $this->assertGreaterThanOrEqual(400, $res->get_status(), 'the save is refused');
+        $this->assertSame('WH-WORKING', $account->webhookId(true), 'the webhook id survives');
+        $this->assertTrue($account->hasKeysFor(true), 'and so do the credentials that worked');
+    }
+
+    public function test_recurring_is_not_offered_without_a_webhook_id(): void
+    {
+        $c = Plugin::instance()->container;
+        $account = $c->get(PayPalAccount::class);
+        $account->forget();
+        $account->saveKeys(true, 'AeA1_client', 'EO42_secret');
+        update_option('dono_gateway_config', ['test_mode' => true]);
+
+        $gateway = new \Dono\Gateways\PayPal\PayPalGateway(
+            $c->get(\Dono\Gateways\PayPal\PayPalApi::class),
+            $account,
+            $c->get(\Dono\Donations\DonationRepository::class),
+            $c->get(\Dono\Donations\DonationService::class),
+            $c->get(\Dono\Gateways\PayPal\PayPalPlans::class),
+            $c->get(\Dono\Recurring\RecurringPlanRepository::class),
+            $c->get(\Dono\Foundation\Time\Clock::class),
+        );
+
+        $this->assertSame(['one_time'], $gateway->frequencies(), 'no webhook, no recurring');
+
+        $account->saveWebhookId(true, 'WH-1');
+        $this->assertContains('recurring', $gateway->frequencies(), 'and it comes back with one');
+    }
+
+    public function test_paypal_does_not_offer_currencies_it_would_reject(): void
+    {
+        $c = Plugin::instance()->container;
+        $gateway = new \Dono\Gateways\PayPal\PayPalGateway(
+            $c->get(\Dono\Gateways\PayPal\PayPalApi::class),
+            $c->get(PayPalAccount::class),
+            $c->get(\Dono\Donations\DonationRepository::class),
+            $c->get(\Dono\Donations\DonationService::class),
+            $c->get(\Dono\Gateways\PayPal\PayPalPlans::class),
+            $c->get(\Dono\Recurring\RecurringPlanRepository::class),
+            $c->get(\Dono\Foundation\Time\Clock::class),
+        );
+
+        // PayPal rejects decimals on these two, and PayPalMoney sends decimals
+        // for both because Currency::minorUnits answers 2 for Stripe's sake.
+        foreach (['HUF', 'TWD'] as $code) {
+            $this->assertNotContains($code, $gateway->currencies(), $code . ' would fail at the boundary');
+            $this->assertStringContainsString('.', \Dono\Gateways\PayPal\PayPalMoney::toValue(100000, $code));
+        }
+
+        $this->assertContains('JPY', $gateway->currencies(), 'JPY is genuinely zero-decimal and works');
+        $this->assertSame('1000', \Dono\Gateways\PayPal\PayPalMoney::toValue(100000, 'JPY'));
+    }
 }

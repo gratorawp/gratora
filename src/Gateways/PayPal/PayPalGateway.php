@@ -74,7 +74,29 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
 
     public function frequencies(): array
     {
+        // PayPal takes the first payment the moment the donor approves, and the
+        // opening sale webhook is the only thing that records it: createPlan
+        // leaves the signup donation pending on purpose. With no webhook id the
+        // signature has nothing to verify against and every delivery is
+        // refused, so a recurring gift would be charged and banked nowhere.
+        // One-time survives that, because the browser confirms its capture.
+        if ($this->account->webhookId($this->siteTestMode()) === '') {
+            return ['one_time'];
+        }
+
         return ['one_time', 'recurring'];
+    }
+
+    /**
+     * The mode a donation started right now would run in. frequencies() is
+     * asked before any donation exists, so it cannot use the per-donation
+     * override the credential-bearing calls set.
+     */
+    private function siteTestMode(): bool
+    {
+        $cfg = get_option('dono_gateway_config', []);
+
+        return is_array($cfg) && ! empty($cfg['test_mode']);
     }
 
     public function paymentMethods(): array
@@ -96,9 +118,15 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
     public function currencies(): array
     {
         return [
-            'AUD', 'BRL', 'CAD', 'CHF', 'CZK', 'DKK', 'EUR', 'GBP', 'HKD', 'HUF',
+            // HUF and TWD are PayPal currencies but PayPal rejects decimals on
+            // them, and PayPalMoney takes its decimal count from
+            // Currency::minorUnits, whose 2 for those two is a deliberate
+            // Stripe decision that must not be changed here. Until PayPalMoney
+            // carries its own zero-decimal set, offering them would only fail
+            // at the boundary.
+            'AUD', 'BRL', 'CAD', 'CHF', 'CZK', 'DKK', 'EUR', 'GBP', 'HKD',
             'ILS', 'JPY', 'MXN', 'MYR', 'NOK', 'NZD', 'PHP', 'PLN', 'SEK', 'SGD',
-            'THB', 'TWD', 'USD',
+            'THB', 'USD',
         ];
     }
 
@@ -588,6 +616,22 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
             ->get();
 
         if ($signup instanceof Donation) {
+            // The same reasoning as handleCaptureCompleted, by a different door:
+            // a PayPal-signed sale proves PayPal sent it, not that it settles
+            // this row for this amount. The browser picks the plan the
+            // subscription bills on, so an unguarded confirm banks a signup at
+            // its full amount for whatever the sale actually collected.
+            $refusal = WebhookPaymentGuard::refuse(
+                $signup,
+                $this->id(),
+                $this->verifiedIsTest,
+                $amount,
+                $currency,
+            );
+            if ($refusal !== null) {
+                return $this->refused($eventId, $type, $refusal);
+            }
+
             // Claiming the sale id on the still-pending row is the single-winner
             // transition for the opening payment, the same shape the renewal
             // branch below gets from $renewal['created']. recordPayment
