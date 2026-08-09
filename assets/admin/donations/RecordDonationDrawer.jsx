@@ -39,6 +39,8 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
     const [ note, setNote ]           = useState( '' );
     const [ sendReceipt, setReceipt ] = useState( false );
 
+    const [ fundId, setFund ]                   = useState( '' );
+    const [ funds, setFunds ]                   = useState( [] );
     const [ campaigns, setCampaigns ]           = useState( [] );
     const [ campaignsFailed, setCampaignsFailed ] = useState( false );
     const [ saving, setSaving ]       = useState( false );
@@ -52,6 +54,19 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
         // Not /admin/campaigns: that needs dono_manage_campaigns, which a role
         // created just to enter checks will not have, and the picker rendered
         // blank so every donation they recorded went uncategorised.
+        apiFetch( { path: '/dono/v1/admin/donations/fund-options' } )
+            .then( ( res ) => setFunds( ( Array.isArray( res ) ? res : [] ).map( ( f ) => {
+                /* translators: %s: fund name. */
+                const isDefault = __( '%s (default)', 'dono' );
+                return {
+                    value: String( f.id ),
+                    label: f.is_default ? sprintf( isDefault, f.name ) : f.name,
+                };
+            } ) ) )
+            // Silent: leaving this empty just means the org default applies,
+            // which is what happens when nobody picks a fund anyway.
+            .catch( () => setFunds( [] ) );
+
         apiFetch( { path: '/dono/v1/admin/donations/campaign-options' } )
             .then( ( res ) => {
                 if ( aborted ) return;
@@ -101,6 +116,7 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                     payment_method: method,
                     received_at: receivedAt,
                     campaign_id: campaignId === '' ? null : Number( campaignId ),
+                    fund_id: fundId === '' ? null : Number( fundId ),
                     note_to_org: note.trim(),
                     send_receipt: sendReceipt,
                     confirm_duplicate: anyway,
@@ -218,6 +234,20 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                             : __( 'No campaign', 'dono' ) }
                     />
                 </Field>
+
+                { funds.length > 0 && (
+                    <Field
+                        label={ __( 'Fund', 'dono' ) }
+                        help={ __( 'Optional. Leave empty to use the default fund.', 'dono' ) }
+                    >
+                        <SearchableSelect
+                            value={ fundId }
+                            onChange={ setFund }
+                            options={ funds }
+                            placeholder={ __( 'Default fund', 'dono' ) }
+                        />
+                    </Field>
+                ) }
 
                 <Field label={ __( 'Note', 'dono' ) } help={ __( 'Only your team sees this.', 'dono' ) }>
                     <textarea className="dono-input" rows={ 2 } value={ note } onChange={ ( e ) => setNote( e.target.value ) } />

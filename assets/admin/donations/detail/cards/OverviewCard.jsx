@@ -50,6 +50,12 @@ export default function OverviewCard( { donation } ) {
                         </KvRow>
                     ) }
 
+                    { donation.fund && (
+                        <KvRow label={ __( 'Fund', 'dono' ) }>
+                            { donation.fund.name }
+                        </KvRow>
+                    ) }
+
                     { donation.form && (
                         <KvRow label={ __( 'Form', 'dono' ) }>
                             <a href={ formEditorHref( donation.form.id ) }>{ donation.form.title }</a>

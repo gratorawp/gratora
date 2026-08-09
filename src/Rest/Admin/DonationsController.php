@@ -24,6 +24,7 @@ use Dono\Currency\SupportedCurrencies;
 use Dono\Foundation\Helpers\Money;
 use Dono\Forms\Blocks\CustomFieldLabels;
 use Dono\Forms\Form;
+use Dono\Funds\Fund;
 use Dono\Receipts\Receipt;
 use Dono\Receipts\ReceiptIssuer;
 use Dono\Receipts\ReceiptRepository;
@@ -100,6 +101,16 @@ final class DonationsController
         register_rest_route(self::NAMESPACE, '/admin/donations/campaign-options', [
             'methods'             => WP_REST_Server::READABLE,
             'callback'            => [$this, 'campaignOptions'],
+            'permission_callback' => [$this, 'canAccess'],
+        ]);
+
+        // Fund names for the record-a-donation picker, under the donations
+        // capability for the same reason campaign-options exists: /admin/funds
+        // needs dono_manage_campaigns, which the bookkeeper entering the
+        // envelope does not have.
+        register_rest_route(self::NAMESPACE, '/admin/donations/fund-options', [
+            'methods'             => WP_REST_Server::READABLE,
+            'callback'            => [$this, 'fundOptions'],
             'permission_callback' => [$this, 'canAccess'],
         ]);
 
@@ -237,6 +248,24 @@ final class DonationsController
      * check that arrived during last year's appeal belongs to last year's
      * appeal, and by the time someone is entering it the appeal is usually over.
      */
+    public function fundOptions(): WP_REST_Response
+    {
+        $rows = Fund::query()
+            ->where('is_active', 1)
+            ->orderBy('sort_order', 'ASC')
+            ->limit(500)
+            ->getAll();
+
+        return new WP_REST_Response(array_map(
+            static fn (Fund $f): array => [
+                'id'         => (int) $f->id,
+                'name'       => (string) $f->name,
+                'is_default' => (bool) $f->is_default,
+            ],
+            $rows,
+        ), 200);
+    }
+
     public function campaignOptions(): WP_REST_Response
     {
         $rows = Campaign::query()
@@ -570,6 +599,7 @@ final class DonationsController
         $donorIds    = array_unique(array_filter(array_map(fn ($d) => (int) $d->donor_id,    $result['items'])));
         $campaignIds = array_unique(array_filter(array_map(fn ($d) => (int) $d->campaign_id, $result['items'])));
         $formIds     = array_unique(array_filter(array_map(fn ($d) => (int) $d->form_id,     $result['items'])));
+        $fundIds     = array_unique(array_filter(array_map(fn ($d) => (int) $d->fund_id,     $result['items'])));
 
         // Campaigns and forms were batched and donors were not, under a comment
         // saying all three were.
@@ -586,6 +616,12 @@ final class DonationsController
                 $formsById[(int) $f->id] = $f;
             }
         }
+        $fundsById = [];
+        if ($fundIds !== []) {
+            foreach (Fund::query()->whereIn('id', array_values($fundIds))->getAll() as $f) {
+                $fundsById[(int) $f->id] = $f;
+            }
+        }
 
         $shaped = [];
         foreach ($result['items'] as $d) {
@@ -595,6 +631,7 @@ final class DonationsController
                 $donorsById[$d->donor_id]    ?? null,
                 $d->campaign_id ? ($campaignsById[$d->campaign_id] ?? null) : null,
                 $d->form_id     ? ($formsById[$d->form_id]         ?? null) : null,
+                $d->fund_id     ? ($fundsById[$d->fund_id]         ?? null) : null,
             );
         }
 
@@ -711,6 +748,7 @@ final class DonationsController
         // Campaign + form labels (display-only lookups, cheap).
         $campaign = $donation->campaign_id ? Campaign::query()->find('id', $donation->campaign_id) : null;
         $form     = $donation->form_id ? Form::query()->find('id', $donation->form_id) : null;
+        $fund     = $donation->fund_id ? Fund::query()->find('id', (int) $donation->fund_id) : null;
 
         // 5 most recent other donations from this donor, sidebar context.
         $related = $donor
@@ -762,7 +800,7 @@ final class DonationsController
         }
 
         return new WP_REST_Response([
-            'donation' => $this->shapeDonation($donation, $donor) + [
+            'donation' => $this->shapeDonation($donation, $donor, $campaign, $form, $fund) + [
                 // Fields the list endpoint doesn't include.
                 'fee_cents'            => $donation->fee_cents,
                 'net_cents'            => $donation->net_cents,
@@ -785,8 +823,12 @@ final class DonationsController
                 'refundable_cents'     => max(0, $donation->amount_cents - $refundedTotal),
                 'recurring_plan_id'    => $donation->recurring_plan_id,
                 'frequency'            => $donation->frequency,
-                'campaign'             => $campaign ? ['id' => (int) $campaign->id, 'title' => (string) $campaign->title, 'slug' => (string) $campaign->slug] : null,
-                'form'                 => $form ? ['id' => (int) $form->id, 'title' => (string) $form->title, 'slug' => (string) $form->slug] : null,
+                // Slugs only. shapeDonation already carries id and title for
+                // all three, and array union keeps the LEFT value, so restating
+                // them here silently threw the richer version away: campaign
+                // and form have been null on this endpoint since it was written.
+                'campaign_slug'        => $campaign ? (string) $campaign->slug : null,
+                'form_slug'            => $form ? (string) $form->slug : null,
             ],
             'donor'    => $donorBlock,
             'receipts' => $receipts,
@@ -1209,6 +1251,7 @@ final class DonationsController
             __('Net', 'dono'),
             __('Gateway', 'dono'),
             __('Frequency', 'dono'),
+            __('Fund', 'dono'),
             __('Country', 'dono'),
         ], $withDonorPii ? [
             __('Donor name', 'dono'),
@@ -1239,6 +1282,17 @@ final class DonationsController
                 $donorCache += $this->donors->findManyByIds($chunk);
             }
 
+            $fundIds = array_values(array_filter(array_unique(array_map(
+                static fn ($d): int => (int) $d->fund_id,
+                $rows
+            ))));
+            $fundNames = [];
+            if ($fundIds !== []) {
+                foreach (Fund::query()->whereIn('id', $fundIds)->getAll() as $f) {
+                    $fundNames[(int) $f->id] = (string) $f->name;
+                }
+            }
+
             foreach ($rows as $d) {
                 /** @var Donation $d */
                 $donor = $donorCache[(int) $d->donor_id] ?? null;
@@ -1253,6 +1307,7 @@ final class DonationsController
                     number_format($d->net_cents / 100, 2, '.', ''),
                     $d->gateway,
                     $d->frequency,
+                    $fundNames[(int) $d->fund_id] ?? '',
                     $d->country ?? '',
                 ], $withDonorPii ? [
                     $donor ? $this->donorName($donor) : '',
@@ -1264,12 +1319,12 @@ final class DonationsController
                 ]));
             }
 
-            unset($rows, $byId, $donorCache);
+            unset($rows, $byId, $donorCache, $fundNames);
             flush();
         }
     }
 
-    private function shapeDonation(Donation $d, ?Donor $donor, ?Campaign $campaign = null, ?Form $form = null): array
+    private function shapeDonation(Donation $d, ?Donor $donor, ?Campaign $campaign = null, ?Form $form = null, ?Fund $fund = null): array
     {
         return [
             'id'           => $d->id,
@@ -1301,6 +1356,13 @@ final class DonationsController
             'form'         => $form ? [
                 'id'    => (int) $form->id,
                 'title' => (string) $form->title,
+            ] : null,
+            // Every donation is assigned one by FundResolver, and until now the
+            // designation the donor picked was stored and never shown back.
+            'fund'         => $fund ? [
+                'id'   => (int) $fund->id,
+                'name' => (string) $fund->name,
+                'code' => (string) $fund->code,
             ] : null,
         ];
     }
