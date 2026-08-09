@@ -21,6 +21,11 @@ use ReflectionProperty;
  * That has happened, so the rule is pinned here rather than left to memory.
  * When this fails, you changed a schema: bump DONO_DB_VERSION in dono.php and
  * put the new fingerprint below.
+ *
+ * The bump is today's date as YYYYMMDDNN, NN counting schema changes within
+ * the day. The gate compares for equality, so the only requirement is that it
+ * differs from the last one; the date is there so an install reporting its
+ * version says when it last migrated.
  */
 final class SchemaVersionTest extends IntegrationTestCase
 {
@@ -39,6 +44,20 @@ final class SchemaVersionTest extends IntegrationTestCase
             $actual,
             "A model's schema changed. Bump DONO_DB_VERSION in dono.php so existing"
             . " installs migrate on update, then set FINGERPRINT to:\n{$actual}"
+        );
+    }
+
+    /**
+     * A counter says nothing; a date says when the install last migrated.
+     * Fixed width and digits only, so the value keeps sorting correctly if
+     * anything ever compares it for order rather than equality.
+     */
+    public function test_the_db_version_is_a_dated_stamp(): void
+    {
+        $this->assertMatchesRegularExpression(
+            '/^20\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\d{2}$/',
+            DONO_DB_VERSION,
+            'DONO_DB_VERSION is YYYYMMDDNN, NN counting schema changes within the day'
         );
     }
 
