@@ -17,7 +17,10 @@ $formatValue = static function (int $value, string $type, string $currency): str
     return (string) number_format_i18n($value);
 };
 ?>
-<section class="dono-block dono-block--progress is-align-<?php echo esc_attr($align); ?>" data-block="dono/campaign-progress"<?php echo $styleVars !== '' ? ' style="' . esc_attr($styleVars) . '"' : ''; ?>>
+<section <?php echo get_block_wrapper_attributes(array_filter([
+    'class' => 'dono-block dono-block--progress is-align-' . $align,
+    'style' => $styleVars,
+])); ?> data-block="dono/campaign-progress">
     <?php if ($showLabels): ?>
         <div class="dono-progress__labels">
             <div class="dono-progress__current">

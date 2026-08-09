@@ -61,11 +61,20 @@ abstract class CampaignBlock implements Block
      * regular pages (not the form walker), so core's render_block filter can wrap
      * them with the wp-block-hidden-* classes.
      *
+     * The style groups are here for the same reason: a campaign page is an
+     * ordinary page, so its blocks answer to the editor's own colour, spacing
+     * and type controls rather than only to the brand preset.
+     *
      * @return array<string,mixed>
      */
     public function supports(): array
     {
-        return ['visibility' => true];
+        return [
+            'visibility' => true,
+            'color'      => ['background' => true, 'text' => true, 'gradients' => true],
+            'spacing'    => ['margin' => true, 'padding' => true],
+            'typography' => ['fontSize' => true, 'lineHeight' => true],
+        ];
     }
 
     /** @param array<string,mixed> $attrs */

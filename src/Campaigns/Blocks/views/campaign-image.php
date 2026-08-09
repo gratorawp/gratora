@@ -10,7 +10,10 @@ defined('ABSPATH') || exit;
  */
 $classes = 'dono-block dono-block--image is-ratio-' . $ratio . ($rounded ? ' is-rounded' : '');
 ?>
-<figure class="<?php echo esc_attr($classes); ?>" data-block="dono/campaign-image"<?php echo $styleVars !== '' ? ' style="' . esc_attr($styleVars) . '"' : ''; ?>>
+<figure <?php echo get_block_wrapper_attributes(array_filter([
+    'class' => $classes,
+    'style' => $styleVars,
+])); ?> data-block="dono/campaign-image">
     <?php
     // By attachment, not URL: that is what supplies srcset and sizes.
     echo wp_get_attachment_image($imageId, 'large', false, [

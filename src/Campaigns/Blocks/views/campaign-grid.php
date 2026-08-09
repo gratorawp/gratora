@@ -10,7 +10,10 @@ defined('ABSPATH') || exit;
  * @var ?string $notice        editor-only explanation, empty for visitors
  */
 ?>
-<section class="dono-block dono-block--grid" data-block="dono/campaign-grid"<?php echo $styleVars !== '' ? ' style="' . esc_attr($styleVars) . '"' : ''; ?>>
+<section <?php echo get_block_wrapper_attributes(array_filter([
+    'class' => 'dono-block dono-block--grid',
+    'style' => $styleVars,
+])); ?> data-block="dono/campaign-grid">
     <?php if ($heading !== ''): ?>
         <div class="dono-grid__head">
             <h2 class="dono-grid__title"><?php echo esc_html($heading); ?></h2>

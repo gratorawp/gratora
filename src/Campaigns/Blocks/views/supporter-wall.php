@@ -10,9 +10,11 @@ defined('ABSPATH') || exit;
  * @var string $styleVars
  */
 ?>
-<section class="dono-block dono-block--supporter-wall"
-         data-block="dono/supporter-wall"
-        <?php echo $styleVars !== '' ? ' style="' . esc_attr($styleVars) . '"' : ''; ?>>
+<section <?php echo get_block_wrapper_attributes(array_filter([
+    'class' => 'dono-block dono-block--supporter-wall',
+    'style' => $styleVars,
+])); ?>
+         data-block="dono/supporter-wall">
     <?php if ($title !== ''): ?>
         <h3 class="dono-block__title"><?php echo esc_html($title); ?></h3>
     <?php endif; ?>
