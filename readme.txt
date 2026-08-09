@@ -1,6 +1,6 @@
 === Dono - Fundraising Platform ===
 Contributors: donodp
-Tags: donations, donation form, fundraising, stripe, nonprofit
+Tags: donations, donation form, fundraising, recurring donations, nonprofit
 Requires at least: 7.0
 Tested up to: 7.0.3
 Requires PHP: 8.1
@@ -8,7 +8,7 @@ Stable tag: 1.0.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Donation forms, recurring giving, campaigns and encrypted donor records. Your own Stripe or PayPal account, and no platform fee.
+Donation forms, recurring giving, campaigns and encrypted donor records, self-hosted on the WordPress site you already run.
 
 == Description ==
 
