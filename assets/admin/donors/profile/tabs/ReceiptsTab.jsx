@@ -5,6 +5,7 @@ import { addQueryArgs } from '@wordpress/url';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { Receipt, Download as DownloadIcon, Mail as MailIcon } from 'lucide-react';
 
+import Btn from '../../../_shared/components/Btn';
 import ConfirmDialog from '../../../_shared/components/ConfirmDialog';
 import EmptyState from '../../../_shared/components/EmptyState';
 import { formatDateTime, timeAgo } from '../helpers';
@@ -27,7 +28,69 @@ function StackedDate( { iso } ) {
     );
 }
 
-export default function ReceiptsTab( { receipts, redacted } ) {
+/**
+ * Year-end tax statement. The document the donor downloads from the portal is a
+ * giving summary; this is the one with the org's tax id and the goods-and-
+ * services line on it, which is what a donor needs at tax time and only staff
+ * can issue.
+ */
+function TaxStatement( { donorId, donations } ) {
+    const years = useMemo( () => {
+        const found = new Set();
+        ( donations || [] ).forEach( ( d ) => {
+            if ( d.status !== 'paid' && d.status !== 'partial_refund' ) return;
+            const when = d.paid_at || d.created_at;
+            if ( when ) found.add( Number( String( when ).slice( 0, 4 ) ) );
+        } );
+        return [ ...found ].sort( ( a, b ) => b - a );
+    }, [ donations ] );
+
+    const [ year, setYear ] = useState( null );
+    const [ busy, setBusy ] = useState( false );
+    const chosen = year ?? years[ 0 ];
+
+    if ( ! years.length ) return null;
+
+    return (
+        <div className="dp-tax-statement">
+            <div className="dp-tax-statement__text">
+                <strong>{ __( 'Annual tax statement', 'dono' ) }</strong>
+                <span>{ __( 'Every paid donation for the year on one document, net of refunds.', 'dono' ) }</span>
+            </div>
+            <select
+                className="dono-input dp-tax-statement__year"
+                value={ chosen }
+                onChange={ ( e ) => setYear( Number( e.target.value ) ) }
+                aria-label={ __( 'Statement year', 'dono' ) }
+            >
+                { years.map( ( y ) => <option key={ y } value={ y }>{ y }</option> ) }
+            </select>
+            <Btn
+                variant="secondary"
+                icon={ <DownloadIcon size={ 16 } strokeWidth={ 1.75 } /> }
+                disabled={ busy }
+                isBusy={ busy }
+                onClick={ async () => {
+                    setBusy( true );
+                    try {
+                        await downloadFile(
+                            `/dono/v1/reports/donor/${ donorId }/tax-statement/${ chosen }`,
+                            `tax-statement-${ chosen }.pdf`
+                        );
+                    } catch ( err ) {
+                        notify.error( err?.message || __( 'Could not build the statement.', 'dono' ) );
+                    } finally {
+                        setBusy( false );
+                    }
+                } }
+            >
+                { __( 'Download statement', 'dono' ) }
+            </Btn>
+        </div>
+    );
+}
+
+export default function ReceiptsTab( { receipts, donations, donor, redacted } ) {
     const [ confirm, setConfirm ] = useState( null );
     const [ view, setView ] = useState( {
         type:    'table',
@@ -159,21 +222,29 @@ export default function ReceiptsTab( { receipts, redacted } ) {
         },
     ], [ redacted ] );
 
+    const statement = ! redacted && donor?.id
+        ? <TaxStatement donorId={ donor.id } donations={ donations } />
+        : null;
+
     if ( ! receipts.length ) {
         return (
-            <div className="dp-card">
+            <>
+                { statement }
+                <div className="dp-card">
                 <EmptyState
                     compact
                     icon={ <Receipt size={ 22 } strokeWidth={ 1.75 } /> }
                     title={ __( 'No receipts yet', 'dono' ) }
                     body={ __( 'Receipts are issued automatically once a donation lands as paid.', 'dono' ) }
-                />
-            </div>
+                    />
+                </div>
+            </>
         );
     }
 
     return (
         <div className="dono-dataviews dp-receipts-dv">
+            { statement }
             <DataViews
                 data={ rows }
                 isLoading={ false }

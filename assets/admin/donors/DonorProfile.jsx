@@ -380,7 +380,7 @@ export default function DonorProfile( { id, onBack } ) {
                     { tab === 'activity'  && <ActivityLogTab donorId={ donor.id } /> }
                     { tab === 'donations' && <DonationsTab donorId={ donor.id } redacted={ !! donor.redacted_at } /> }
                     { tab === 'recurring' && <RecurringTab recurring={ recurring } onChange={ load } /> }
-                    { tab === 'receipts'  && <ReceiptsTab receipts={ receipts } redacted={ !! donor.redacted_at } /> }
+                    { tab === 'receipts'  && <ReceiptsTab receipts={ receipts } donations={ donations } donor={ donor } redacted={ !! donor.redacted_at } /> }
                     { tab === 'notes'     && <NotesTab donorId={ donor.id } notes={ notes } onChanged={ load } /> }
                     { tab === 'consent'   && <ConsentTab consents={ consents } donor={ donor } onChanged={ load } /> }
                 </main>

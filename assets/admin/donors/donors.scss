@@ -1304,3 +1304,37 @@ $bar-radius:    6px;
     font-size: 11px;
     font-weight: 600;
 }
+
+.dp-tax-statement {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    background: $bg-card;
+    border: 1px solid $border-soft;
+    border-radius: 10px;
+
+    &__text {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        margin-right: auto;
+
+        span { color: $text-muted; font-size: 13px; }
+    }
+
+    // select. rather than a bare class: .dono-input sets width:100% and is
+    // ordered after this, so it fills the row and stops at wp-core-ui's
+    // select max-width of 25rem. One element outranks it.
+    select#{&}__year {
+        flex: 0 0 auto;
+        width: auto;
+        min-width: 104px;
+    }
+
+    @media (max-width: 600px) {
+        flex-wrap: wrap;
+        &__text { margin-right: 0; width: 100%; }
+    }
+}
