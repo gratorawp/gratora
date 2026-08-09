@@ -14,6 +14,7 @@ import Toaster from '../_shared/components/Toaster';
 import EmptyState from '../_shared/components/EmptyState';
 import ConfirmDialog from '../_shared/components/ConfirmDialog';
 import { rowLinkProps } from '../_shared/rowLink';
+import { downloadFile } from '../_shared/download';
 import { tablistKeyDown } from '../_shared/tablistKeys';
 import KpiStrip from '../_shared/components/KpiStrip';
 import { formatAmount, formatDate, timeAgo } from '../_shared/format';
@@ -73,6 +74,20 @@ function DonorsApp( { toggleSlot } ) {
     const [ confirm, setConfirm ] = useState( null );
 
     const filterValue = ( field ) => view.filters?.find( ( f ) => f.field === field )?.value;
+
+    const canExport  = window.dono?.can?.export_donors !== false;
+    const isFiltered = Boolean( view.search || filterValue( 'country' ) || filterValue( 'donor_type' ) );
+
+    // Carries the list's own filters, so what downloads is what is on screen
+    // rather than every donor in the database.
+    const exportRows = () => downloadFile(
+        addQueryArgs( '/dono/v1/admin/exports/donors.csv', {
+            search:     view.search || undefined,
+            country:    filterValue( 'country' )    || undefined,
+            donor_type: filterValue( 'donor_type' ) || undefined,
+        } ),
+        `dono-donors-${ new Date().toISOString().slice( 0, 10 ) }.csv`
+    ).catch( ( err ) => setError( err?.message || __( 'Could not export the donor list.', 'dono' ) ) );
 
     const load = useCallback( () => {
         let aborted = false;
@@ -344,6 +359,17 @@ function DonorsApp( { toggleSlot } ) {
                     <span className="dono-page-head__meta">
                         { sprintf( /* translators: %s: number of donors */ _n( '%s donor', '%s donors', total, 'dono' ), total.toLocaleString() ) }
                     </span>
+                    { canExport && total > 0 && (
+                        <button
+                            type="button"
+                            className="components-button is-secondary"
+                            onClick={ exportRows }
+                        >
+                            { isFiltered
+                                ? __( 'Export these donors', 'dono' )
+                                : __( 'Export CSV', 'dono' ) }
+                        </button>
+                    ) }
                     { toggleSlot }
                 </div>
             </div>

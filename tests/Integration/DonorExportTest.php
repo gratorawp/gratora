@@ -246,4 +246,65 @@ final class DonorExportTest extends IntegrationTestCase
         // every spreadsheet, and the recipient cannot sum it.
         $this->assertSame('1234.56', $rows[1][0]);
     }
+
+    public function test_a_country_filter_narrows_the_file(): void
+    {
+        $this->makeDonor('in-ie@example.test', ['country' => 'IE']);
+        $this->makeDonor('in-us@example.test', ['country' => 'US']);
+
+        $csv = $this->exporter()->toCsv(['columns' => ['email'], 'country' => 'IE']);
+
+        $this->assertStringContainsString('in-ie@example.test', $csv);
+        $this->assertStringNotContainsString('in-us@example.test', $csv);
+    }
+
+    public function test_a_donor_type_filter_narrows_the_file(): void
+    {
+        $this->makeDonor('person@example.test', ['donor_type' => 'individual']);
+        $this->makeDonor('charity@example.test', ['donor_type' => 'organization']);
+
+        $csv = $this->exporter()->toCsv(['columns' => ['email'], 'donor_type' => 'organization']);
+
+        $this->assertStringContainsString('charity@example.test', $csv);
+        $this->assertStringNotContainsString('person@example.test', $csv);
+    }
+
+    public function test_a_search_narrows_the_file(): void
+    {
+        $this->makeDonor('wanted@example.test', ['first_name' => 'Wilhelmina']);
+        $this->makeDonor('other@example.test', ['first_name' => 'Gregor']);
+
+        $csv = $this->exporter()->toCsv(['columns' => ['email'], 'search' => 'Wilhelmina']);
+
+        $this->assertStringContainsString('wanted@example.test', $csv);
+        $this->assertStringNotContainsString('other@example.test', $csv);
+    }
+
+    /**
+     * Two filters have to narrow each other. Widening on the second one hands
+     * over rows the operator never asked for, which for PII is the whole point.
+     */
+    public function test_filters_combine_rather_than_widen(): void
+    {
+        $this->makeDonor('both@example.test',  ['first_name' => 'Ottoline', 'country' => 'IE']);
+        $this->makeDonor('one-of@example.test', ['first_name' => 'Ottoline', 'country' => 'US']);
+
+        $csv = $this->exporter()->toCsv([
+            'columns' => ['email'],
+            'search'  => 'Ottoline',
+            'country' => 'IE',
+        ]);
+
+        $this->assertStringContainsString('both@example.test', $csv);
+        $this->assertStringNotContainsString('one-of@example.test', $csv);
+    }
+
+    public function test_a_search_matching_nobody_exports_no_rows(): void
+    {
+        $this->makeDonor('somebody@example.test');
+
+        $rows = $this->parse($this->exporter()->toCsv(['columns' => ['email'], 'search' => 'nobodyhasthisname']));
+
+        $this->assertCount(1, $rows, 'header only');
+    }
 }

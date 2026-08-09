@@ -48,7 +48,7 @@ final class DonorExporter
      * Dates match when the donor record was created, which is the date the
      * screen offers and the only one the donor table answers on its own.
      *
-     * @param array{columns?:list<string>,from?:?string,to?:?string,campaign_id?:?int} $args
+     * @param array{columns?:list<string>,from?:?string,to?:?string,campaign_id?:?int,country?:?string,donor_type?:?string,search?:?string} $args
      */
     public function toCsv(array $args = []): string
     {
@@ -56,6 +56,9 @@ final class DonorExporter
         $from       = $this->day($args['from'] ?? null);
         $to         = $this->day($args['to'] ?? null);
         $campaignId = (int) ($args['campaign_id'] ?? 0);
+        $country    = strtoupper(trim((string) ($args['country'] ?? '')));
+        $donorType  = trim((string) ($args['donor_type'] ?? ''));
+        $search     = trim((string) ($args['search'] ?? ''));
 
         $out = fopen('php://temp', 'r+');
         if ($out === false) {
@@ -73,13 +76,18 @@ final class DonorExporter
         // A campaign filter is a question about donations, so it resolves to a
         // donor id set first. Without one the donor table answers on its own,
         // since an org with a million donors would not fit an id list in memory.
+        // Search resolves the same way, and the two narrow each other.
         $ids = null;
         if ($campaignId > 0) {
             $ids = $this->donorIdsForCampaign($campaignId);
-            if ($ids === []) {
-                rewind($out);
-                return (string) stream_get_contents($out);
-            }
+        }
+        if ($search !== '') {
+            $found = $this->donors->findIdsBySearch($search);
+            $ids   = $ids === null ? $found : array_values(array_intersect($ids, $found));
+        }
+        if ($ids !== null && $ids === []) {
+            rewind($out);
+            return (string) stream_get_contents($out);
         }
 
         $afterId = 0;
@@ -91,6 +99,8 @@ final class DonorExporter
             if ($ids !== null) {
                 $q = $q->whereIn('id', $ids);
             }
+            if ($country   !== '') $q = $q->where('country', $country);
+            if ($donorType !== '') $q = $q->where('donor_type', $donorType);
             if ($from !== null) $q = $q->where('created_at', $from . ' 00:00:00', '>=');
             if ($to   !== null) $q = $q->where('created_at', $to   . ' 23:59:59', '<=');
 

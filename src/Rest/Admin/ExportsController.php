@@ -53,6 +53,11 @@ final class ExportsController
                 'to'          => ['type' => 'string', 'default' => ''],
                 'campaign_id' => ['type' => 'integer', 'default' => 0],
                 'columns'     => ['type' => 'string', 'default' => ''],
+                // Mirrors the donor list's own filters so a segment you can see
+                // on screen is a segment you can take away with you.
+                'country'     => ['type' => 'string', 'default' => ''],
+                'donor_type'  => ['type' => 'string', 'default' => '', 'enum' => ['', 'individual', 'organization', 'company', 'household']],
+                'search'      => ['type' => 'string', 'default' => ''],
             ],
         ]);
 
@@ -125,6 +130,9 @@ final class ExportsController
             'from'        => (string) $request['from'],
             'to'          => (string) $request['to'],
             'campaign_id' => (int) $request['campaign_id'],
+            'country'     => (string) $request['country'],
+            'donor_type'  => (string) $request['donor_type'],
+            'search'      => (string) $request['search'],
         ]);
 
         return $this->streamCsv($request, $csv, DonorExporter::filename());

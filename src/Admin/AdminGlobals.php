@@ -8,6 +8,7 @@ use Dono\Settings\SettingsService;
 use Dono\Campaigns\Styling\StylePresets;
 use Dono\Campaigns\Styling\Tokens;
 use Dono\Forms\FormService;
+use Dono\Foundation\Auth\Capabilities;
 use Dono\Foundation\Hooks\HookProvider;
 use Dono\Foundation\Helpers\Money;
 use Dono\Foundation\License\LicenseService;
@@ -90,6 +91,7 @@ final class AdminGlobals extends HookProvider
             // could edit the grid and only learn it was refused on save.
             'can' => [
                 'manage_options' => current_user_can('manage_options'),
+                'export_donors'  => Capabilities::userCan('dono_export_donors'),
             ],
         ];
 
