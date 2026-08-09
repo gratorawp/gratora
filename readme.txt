@@ -45,12 +45,12 @@ Create beautiful, fully customizable donation forms in the WordPress editor.
 * Subscriptions through your payment provider
 * Five frequencies, and you choose which ones each form offers
 * Donors cancel or change their own plans
-* Retry a failed renewal
+* Retry a failed renewal on Stripe
 
 = Donors =
 
 * Lifetime totals, full giving history and private notes
-* Households, donor types and annual tax statements
+* Donor types and annual tax statements
 * A donor portal reached by email link, with no password to forget
 * Segment and export
 
@@ -63,9 +63,9 @@ Create beautiful, fully customizable donation forms in the WordPress editor.
 
 = Receipts =
 
-* Branded email receipts, sent automatically
-* PDF receipts and year-end statements
-* Sequential reference numbers in a format you set
+* Receipts emailed automatically
+* Branded PDF receipts and year-end statements
+* Sequential reference numbers with your own prefix and padding
 
 = Reporting =
 
@@ -75,7 +75,7 @@ Create beautiful, fully customizable donation forms in the WordPress editor.
 
 = Privacy =
 
-* Donor details encrypted at rest
+* Email, phone, address and tax ID encrypted at rest
 * Consent recorded per donation
 * Erase or anonymize a donor on request
 * IP anonymization, on by default
@@ -99,7 +99,7 @@ No. Campaign pages and donation forms are built from blocks in the WordPress edi
 
 = Is Dono GDPR-friendly? =
 
-Donor details are encrypted, consent is recorded per donation, and you can erase or anonymize a donor on request. Dono gives you the tools; compliance depends on how you use them.
+Email, phone, address and tax ID are encrypted at rest, consent is recorded per donation, and you can erase or anonymize a donor on request. Dono gives you the tools; compliance depends on how you use them.
 
 = Can I bring donations in from somewhere else? =
 
