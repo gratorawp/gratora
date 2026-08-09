@@ -22,7 +22,7 @@ function FundTiles( { funds, selectedId, allowEmpty, emptyLabel, emptyDescriptio
     if ( funds.length === 0 ) {
         return (
             <Notice status="warning" isDismissible={ false }>
-                { __( 'No active funds yet. Create funds under Donations → Funds; donations will use your organisation default until then.', 'dono' ) }
+                { __( 'No active funds yet. Create funds under Donations → Funds; donations will use your organization default until then.', 'dono' ) }
                 {' '}
                 <a href={ FUNDS_ADMIN_URL }>{ __( 'Manage funds', 'dono' ) }</a>
             </Notice>
@@ -212,7 +212,7 @@ function Edit( { attributes, setAttributes } ) {
                         value={ defaultId }
                         options={ preselectChoices }
                         onChange={ ( v ) => setAttributes( { defaultId: v } ) }
-                        help={ __( 'Leave on the first fund to follow the form, campaign, then organisation default order.', 'dono' ) }
+                        help={ __( 'Leave on the first fund to follow the form, campaign, then organization default order.', 'dono' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl

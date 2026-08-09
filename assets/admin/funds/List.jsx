@@ -372,7 +372,7 @@ export default function List() {
                 <EmptyState
                     icon={ <Wallet size={ 22 } strokeWidth={ 1.75 } /> }
                     title={ __( 'No funds yet', 'dono' ) }
-                    body={ __( 'Funds route donations to specific causes within your organisation. Forms without a fund picker drop into the organisation default.', 'dono' ) }
+                    body={ __( 'Funds route donations to specific causes within your organization. Forms without a fund picker drop into the organization default.', 'dono' ) }
                     action={
                         <Btn variant="primary" onClick={ onCreate }>
                             { __( 'Create your first fund', 'dono' ) }

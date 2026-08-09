@@ -11,7 +11,7 @@ defined('ABSPATH') || exit;
  * intentionally NOT passed through translation so it stays exact.
  *
  * @var int    $year                statement year
- * @var string $org_name            organisation name
+ * @var string $org_name            organization name
  * @var array  $org_address_lines   list of address lines (may be empty)
  * @var string $org_tax_id          tax id / EIN, '' when not configured (EIN line omitted)
  * @var string $donor_name          donor display name
@@ -68,7 +68,7 @@ tfoot td{font-weight:700;border-top:2px solid #000;border-bottom:0;padding-top:9
 <h1><?php echo esc_html(sprintf(/* translators: %d: statement year */ __('%d Annual Donation Statement', 'dono'), $year)); ?></h1>
 
 <p class="intro"><?php echo esc_html(sprintf(
-    /* translators: 1: statement year, 2: organisation name */
+    /* translators: 1: statement year, 2: organization name */
     __('Thank you for your %1$d contributions to %2$s.', 'dono'),
     $year,
     $org_name
@@ -106,7 +106,7 @@ tfoot td{font-weight:700;border-top:2px solid #000;border-bottom:0;padding-top:9
 
 <?php
 // Printed verbatim and intentionally not translated so the required 501(c)(3)
-// acknowledgement wording stays exact. A real org may need to customise it.
+// acknowledgement wording stays exact. A real org may need to customize it.
 ?>
 <p class="ack">No goods or services were provided in exchange for these contributions.</p>
 

@@ -24,7 +24,7 @@ use WP_REST_Request;
  *
  * FIXED: is_test is now resolved before the insert, via a
  * DonationIntent field record() sets to false, so no listener ever sees a
- * hand-recorded cheque as a test donation.
+ * hand-recorded check as a test donation.
  */
 final class ManualDonationTestModeWindowTest extends IntegrationTestCase
 {
@@ -58,7 +58,7 @@ final class ManualDonationTestModeWindowTest extends IntegrationTestCase
         $this->assertSame(
             [false],
             $seen,
-            'a listener saw the recorded cheque as a test donation, which is where Gift Aid decides'
+            'a listener saw the recorded check as a test donation, which is where Gift Aid decides'
         );
 
         // The already-passing half, kept together so a fix cannot satisfy one

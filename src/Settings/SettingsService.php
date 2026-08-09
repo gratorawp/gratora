@@ -87,7 +87,7 @@ final class SettingsService
             'defaults' => [
                 'privacy_policy_url'             => '',
                 'retention_days_after_redaction' => 90,
-                // Anonymise inactive donors after N years; 0 disables. Donation rows are kept.
+                // Anonymize inactive donors after N years; 0 disables. Donation rows are kept.
                 'donor_retention_years'          => 7,
                 // Prune dono_events older than N days; 0 disables.
                 'event_retention_days'           => 730,
@@ -119,7 +119,7 @@ final class SettingsService
         'consents' => [
             'option'   => 'dono_consents',
             // Empty on purpose. A consent purpose names something the
-            // organisation actually does, and we do not know what that is.
+            // organization actually does, and we do not know what that is.
             // Shipping "Newsletter" put a permanent "No response" on every
             // donor profile and offered donors a subscription that may not
             // exist, which is a record of consent to nothing.
@@ -133,7 +133,7 @@ final class SettingsService
                 'header_title'       => 'Donation receipt',
                 'intro'              => '',
                 'signoff'            => 'Thank you for your support, {donor_name}.',
-                'footer_note'        => "This is a non-fiscal acknowledgement of receipt. Whether your donation is tax-deductible depends on your local jurisdiction and the recipient organisation's status. Keep this receipt for your records.",
+                'footer_note'        => "This is a non-fiscal acknowledgement of receipt. Whether your donation is tax-deductible depends on your local jurisdiction and the recipient organization's status. Keep this receipt for your records.",
                 'show_tax_id'        => true,
                 'show_donor_address' => false,
                 'logo_attachment_id' => 0,
@@ -197,7 +197,7 @@ final class SettingsService
     /**
      * Transactional email template defaults. Built here (not in the const) so
      * subjects and bodies pass through __() and are translatable; the stored
-     * option overlays these in get() when an admin customises a template.
+     * option overlays these in get() when an admin customizes a template.
      *
      * @return array<string,array{enabled:bool,subject:string,body:string}>
      */
@@ -244,7 +244,7 @@ final class SettingsService
                 'subject' => __('Your recurring donation has been cancelled', 'dono'),
                 'body'    => __("Hi {donor_name},\n\nYour recurring donation of {amount} to {campaign_title} has been cancelled. No further charges will be made.\n\nThank you for the donations you made along the way.\n\nThanks,\n{organisation_name}", 'dono'),
             ],
-            // Sent only when someone at the organisation changes a plan on the
+            // Sent only when someone at the organization changes a plan on the
             // donor's behalf. A donor changing their own gift is looking at the
             // screen that did it and gets nothing.
             'recurring_amount_changed' => [
@@ -338,7 +338,7 @@ final class SettingsService
         // add-on registering its own templates (dono.settings.groups) cannot
         // displace the core set - otherwise activating an add-on silently
         // drops core transactional emails (receipts, magic link). The stored
-        // option overlays both in get(), so a customised template still wins.
+        // option overlays both in get(), so a customized template still wins.
         $static['templates'] = array_merge(
             $this->emailTemplateDefaults(),
             is_array($static['templates'] ?? null) ? $static['templates'] : []

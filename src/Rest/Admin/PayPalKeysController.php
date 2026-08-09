@@ -14,7 +14,7 @@ use WP_REST_Response;
 use WP_REST_Server;
 
 /**
- * PayPal setup with the organisation's own REST app credentials.
+ * PayPal setup with the organization's own REST app credentials.
  *
  * Credentials are exchanged for a token against PayPal before they are stored,
  * so a wrong client id or a sandbox key pasted into live is caught at save time

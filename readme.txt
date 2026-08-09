@@ -24,10 +24,10 @@ Unlimited campaigns and forms. No paid tier, and no cap on what you raise.
 
 = Donation forms =
 
-Create beautiful, fully customisable donation forms in the WordPress editor.
+Create beautiful, fully customizable donation forms in the WordPress editor.
 
 * Suggested amounts, a custom amount, and a minimum you set
-* One-time, weekly, fortnightly, monthly, quarterly and yearly
+* One-time, weekly, biweekly, monthly, quarterly and yearly
 * Multi-step, or everything on one screen
 * Conditional fields
 * Fee recovery, anonymous giving, a donor message and a fund picker
@@ -57,7 +57,7 @@ Create beautiful, fully customisable donation forms in the WordPress editor.
 = Payments =
 
 * Stripe and PayPal, using your own accounts
-* Cash, cheque and bank transfer recorded alongside online giving
+* Cash, check and bank transfer recorded alongside online giving
 * Full and partial refunds
 * Test mode, kept out of reporting
 
@@ -77,8 +77,8 @@ Create beautiful, fully customisable donation forms in the WordPress editor.
 
 * Donor details encrypted at rest
 * Consent recorded per donation
-* Erase or anonymise a donor on request
-* IP anonymisation, on by default
+* Erase or anonymize a donor on request
+* IP anonymization, on by default
 
 == Installation ==
 
@@ -99,7 +99,7 @@ No. Campaign pages and donation forms are built from blocks in the WordPress edi
 
 = Is Dono GDPR-friendly? =
 
-Donor details are encrypted, consent is recorded per donation, and you can erase or anonymise a donor on request. Dono gives you the tools; compliance depends on how you use them.
+Donor details are encrypted, consent is recorded per donation, and you can erase or anonymize a donor on request. Dono gives you the tools; compliance depends on how you use them.
 
 = Can I bring donations in from somewhere else? =
 

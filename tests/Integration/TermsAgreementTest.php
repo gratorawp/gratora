@@ -12,7 +12,7 @@ use Dono\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
- * Agreement to the organisation's terms, and the record it leaves.
+ * Agreement to the organization's terms, and the record it leaves.
  *
  * The checkbox is the cheap half: a tick the client could skip is not
  * agreement, so the refusal is enforced server-side. What has value afterwards

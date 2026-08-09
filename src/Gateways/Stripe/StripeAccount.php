@@ -8,7 +8,7 @@ use Dono\Foundation\Config\SystemSetting;
 use Dono\Foundation\Crypto\Crypto;
 
 /**
- * The organisation's own Stripe API keys, stored per mode.
+ * The organization's own Stripe API keys, stored per mode.
  *
  * Dono is not a Stripe platform: the org pastes the keys from their own Stripe
  * dashboard and every call is made directly as that account. Secret keys are

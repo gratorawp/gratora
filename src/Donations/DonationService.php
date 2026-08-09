@@ -355,7 +355,7 @@ final class DonationService
         }
 
         $now = $this->clock->now()->format('Y-m-d H:i:s');
-        // An admin recording a cheque banked last month is stating when the
+        // An admin recording a check banked last month is stating when the
         // money arrived, which is not when they got round to typing it in.
         // Everything else leaves this unset and gets the clock.
         $paidAt = $this->paidAtFrom($result['paid_at'] ?? null, $now);

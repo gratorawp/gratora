@@ -101,7 +101,7 @@ final class ReceiptsController
             // under the same receipt number.
             return new WP_Error(
                 'dono_renderer_missing',
-                __('This receipt was produced by an extension that is no longer active. Please contact the organisation.', 'dono'),
+                __('This receipt was produced by an extension that is no longer active. Please contact the organization.', 'dono'),
                 ['status' => 410, 'renderer_id' => (string) $receipt->renderer_id]
             );
         }

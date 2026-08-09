@@ -7,7 +7,7 @@ namespace Dono\Gateways\Stripe;
 use RuntimeException;
 
 /**
- * Registers Dono's webhook endpoint on the organisation's own Stripe account
+ * Registers Dono's webhook endpoint on the organization's own Stripe account
  * successful connect, so paid / refund / renewal / dispute events flow without
  * the org hand-building a webhook in Stripe. Direct charges fire on the
  * account, so the endpoint is created with the account's own secret key.

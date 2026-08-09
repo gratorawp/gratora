@@ -82,7 +82,7 @@ final class ReadinessServiceTest extends IntegrationTestCase
         $this->assertTrue($check['blocker']);
     }
 
-    /** Offline alone is a real answer: cheques and transfers are donations. */
+    /** Offline alone is a real answer: checks and transfers are donations. */
     public function test_offline_with_instructions_counts_as_a_way_to_charge(): void
     {
         $this->enableOffline();

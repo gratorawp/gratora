@@ -548,7 +548,7 @@ export default function List() {
                         setRecording( false );
                         refetch();
                         // A donation dated to when the money arrived sorts by
-                        // that date, so a January cheque entered in July lands
+                        // that date, so a January check entered in July lands
                         // pages down a newest-first list and the admin sees
                         // nothing happen. The toast is the only confirmation
                         // they get, so it names the row.

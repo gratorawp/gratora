@@ -109,7 +109,7 @@ final class GenericReceiptRenderer implements ReceiptRenderer
             'intro'              => '',
             'signoff'            => __('Thank you for your support.', 'dono'),
             'footer_note'        => __(
-                "This is a non-fiscal acknowledgement of receipt. Whether your donation is tax-deductible depends on your local jurisdiction and the recipient organisation's status. Keep this receipt for your records.",
+                "This is a non-fiscal acknowledgement of receipt. Whether your donation is tax-deductible depends on your local jurisdiction and the recipient organization's status. Keep this receipt for your records.",
                 'dono'
             ),
             'show_tax_id'        => true,

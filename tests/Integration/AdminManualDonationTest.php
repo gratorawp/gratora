@@ -10,7 +10,7 @@ use WP_REST_Request;
 /**
  * POST /admin/donations: an admin recording money that arrived off the site.
  *
- * Cheques, cash in a bucket at an event, a bank transfer nobody told the site
+ * Checks, cash in a bucket at an event, a bank transfer nobody told the site
  * about. Until this existed the only way in was an admin filling in the public
  * form as the donor, which runs the anti-spam gates and emails the donor
  * instructions to pay something they had already paid.
@@ -60,7 +60,7 @@ final class AdminManualDonationTest extends IntegrationTestCase
     }
 
     /**
-     * A cheque banked in June and entered in August belongs to June. Stamping
+     * A check banked in June and entered in August belongs to June. Stamping
      * it with the clock puts the money in the wrong month, which is wrong in
      * the campaign total, wrong in the year-end summary, and invisible.
      */
@@ -78,7 +78,7 @@ final class AdminManualDonationTest extends IntegrationTestCase
      * The offline gateway emails bank details and payment instructions when a
      * donation intent is created, which is right for a donor who chose to pay
      * offline and wrong for money already banked. Asking someone to send a
-     * cheque they sent six weeks ago is the worst thing this feature could do.
+     * check they sent six weeks ago is the worst thing this feature could do.
      */
     public function test_it_does_not_ask_the_donor_to_pay_again(): void
     {
@@ -101,7 +101,7 @@ final class AdminManualDonationTest extends IntegrationTestCase
         }
     }
 
-    /** Silence is the default: an admin entering last month's cheques must not fire fifty receipts. */
+    /** Silence is the default: an admin entering last month's checks must not fire fifty receipts. */
     public function test_no_receipt_unless_the_admin_asks_for_one(): void
     {
         $mails = $this->captureMails();
@@ -124,7 +124,7 @@ final class AdminManualDonationTest extends IntegrationTestCase
 
     /**
      * Test mode excludes a donation from every report. A site left in test
-     * mode while an admin enters real cheques would void them all, silently,
+     * mode while an admin enters real checks would void them all, silently,
      * and the admin would find out at year end.
      */
     public function test_real_money_is_recorded_even_while_the_site_is_in_test_mode(): void
@@ -138,7 +138,7 @@ final class AdminManualDonationTest extends IntegrationTestCase
 
         $this->assertFalse(
             (bool) $this->donation($reference)->is_test,
-            'a hand-recorded cheque was flagged as a test donation'
+            'a hand-recorded check was flagged as a test donation'
         );
     }
 
@@ -192,7 +192,7 @@ final class AdminManualDonationTest extends IntegrationTestCase
         $this->assertSame(400, $this->record(['payment_method' => 'bitcoin'])->get_status());
     }
 
-    /** A future-dated cheque is a typo, and it would sit in a period that has not happened. */
+    /** A future-dated check is a typo, and it would sit in a period that has not happened. */
     public function test_it_rejects_a_date_in_the_future(): void
     {
         $this->assertSame(400, $this->record(['received_at' => '2099-01-01'])->get_status());
@@ -223,7 +223,7 @@ final class AdminManualDonationTest extends IntegrationTestCase
     }
 
     /**
-     * M4. Two cheques for the same amount from the same donor on the same day
+     * M4. Two checks for the same amount from the same donor on the same day
      * are genuinely possible, so this cannot dedupe silently: swallowing a real
      * second gift is worse than the double entry it would prevent. It warns,
      * and names the donation it thinks this is a copy of.
@@ -278,7 +278,7 @@ final class AdminManualDonationTest extends IntegrationTestCase
         $reference = (string) $this->record(['amount_cents' => 4200])->get_data()['reference'];
 
         $donor = \Dono\Donors\Donor::query()->find('id', $donorId);
-        $this->assertNotNull($donor->redacted_at, 'a hand-recorded cheque un-erased a donor who asked to be forgotten');
+        $this->assertNotNull($donor->redacted_at, 'a hand-recorded check un-erased a donor who asked to be forgotten');
 
         $donation = $this->donation($reference);
         $this->assertSame($donorId, (int) $donation->donor_id, 'the money still has to be on the books');
@@ -327,7 +327,7 @@ final class AdminManualDonationTest extends IntegrationTestCase
     /**
      * M6, the half that bites hardest. A listener throwing after the transition
      * means the money IS on the books, and the old catch reported 500 anyway.
-     * The admin, told it failed, enters the same cheque again.
+     * The admin, told it failed, enters the same check again.
      *
      * The throw is on a listener rather than inside confirm() because by the
      * time a test can reach a hook the row is already paid, which is precisely
@@ -381,7 +381,7 @@ final class AdminManualDonationTest extends IntegrationTestCase
 
     /**
      * M9. paidWithoutReceipt() feeds the AI assistant's "donors who never got
-     * their receipt" report. A cheque the admin deliberately sent no receipt for
+     * their receipt" report. A check the admin deliberately sent no receipt for
      * matched it forever.
      */
     public function test_a_recorded_donation_is_not_reported_as_a_missing_receipt(): void
@@ -392,7 +392,7 @@ final class AdminManualDonationTest extends IntegrationTestCase
             ->get(\Dono\Donations\DonationRepository::class)
             ->paidWithoutReceipt();
 
-        $this->assertSame(0, (int) $missing['total'], 'a hand-recorded cheque is not a receipt that went missing');
+        $this->assertSame(0, (int) $missing['total'], 'a hand-recorded check is not a receipt that went missing');
     }
 
     /** An online donation with no receipt still is one. */
@@ -416,7 +416,7 @@ final class AdminManualDonationTest extends IntegrationTestCase
 
     /**
      * M8. The drawer's picker used /admin/campaigns, which needs
-     * dono_manage_campaigns: exactly what a role created to enter cheques does
+     * dono_manage_campaigns: exactly what a role created to enter checks does
      * not have. The catch was empty, so it rendered blank and every donation
      * that role recorded went uncategorised.
      */

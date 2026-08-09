@@ -142,7 +142,7 @@ export default function PrivacyPanel( { s } ) {
                 </FormRow>
 
                 <ToggleRow
-                    title={ __( 'Anonymise IPs in event logs', 'dono' ) }
+                    title={ __( 'Anonymize IPs in event logs', 'dono' ) }
                     sub={ __( 'IPs are hashed (SHA-256) before storage. Only the country is kept in clear text.', 'dono' ) }
                     checked={ !! s.value( 'anonymize_ips', true ) }
                     onChange={ s.setValue( 'anonymize_ips' ) }

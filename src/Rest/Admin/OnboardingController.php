@@ -53,7 +53,7 @@ final class OnboardingController
     }
 
     /**
-     * Close out the wizard. Settles the organisation only.
+     * Close out the wizard. Settles the organization only.
      *
      * Publishing a campaign here meant every install ended up with one whether
      * or not it was wanted, and an org whose first real campaign was something

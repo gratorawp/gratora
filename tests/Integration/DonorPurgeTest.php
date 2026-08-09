@@ -14,7 +14,7 @@ use Dono\Foundation\Plugin;
  * and no PHP ever read it.
  *
  * It is the grace period in which a redacted donor who gives again is still
- * recognised. Redaction keeps `email_hash` on purpose, and findOrCreate matches
+ * recognized. Redaction keeps `email_hash` on purpose, and findOrCreate matches
  * on it to un-redact and reunite them with their history. When the window
  * closes the hash is replaced, so the same person becomes a new donor and their
  * old giving stays on an anonymous shell.

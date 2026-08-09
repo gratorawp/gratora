@@ -6,7 +6,7 @@ defined('ABSPATH') || exit;
  * so the literal colors below are intentional and self-contained.
  *
  * @var int    $year       statement year
- * @var string $org_name   organisation name
+ * @var string $org_name   organization name
  * @var string $donor_name donor display name
  * @var array  $lines      list of ['date','reference','currency','amount'] (pre-formatted, raw)
  * @var array  $totals     list of ['currency','amount'] (pre-formatted), one per currency

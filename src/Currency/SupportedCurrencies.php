@@ -8,7 +8,7 @@ use Dono\Foundation\Helpers\Money;
 use Dono\Settings\SettingsService;
 
 /**
- * The currencies an organisation accepts.
+ * The currencies an organization accepts.
  *
  * The public donation route has always checked this. The admin's own
  * "record a donation" form did not: it validated the code as three letters and

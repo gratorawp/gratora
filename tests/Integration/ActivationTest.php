@@ -94,7 +94,7 @@ final class ActivationTest extends IntegrationTestCase
         Plugin::onActivation();
 
         $profile = get_option(Activator::OPT_ORG_PROFILE);
-        $this->assertSame('Custom Org Name', $profile['name'],  'Activator must not overwrite an already-customised profile');
+        $this->assertSame('Custom Org Name', $profile['name'],  'Activator must not overwrite an already-customized profile');
         $this->assertSame(['Line 1', 'Line 2'], $profile['address_lines']);
         $this->assertSame('TAX-123', $profile['tax_id']);
     }

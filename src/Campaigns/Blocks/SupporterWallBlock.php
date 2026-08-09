@@ -84,7 +84,7 @@ final class SupporterWallBlock extends CampaignBlock
             $amount = (int) ($donation->base_amount_cents ?? $donation->amount_cents);
             $paidAt = (string) ($donation->paid_at ?: $donation->created_at);
             // Only donors who opted in to a public message are shown; note_to_org
-            // is otherwise a private note to the organisation.
+            // is otherwise a private note to the organization.
             $note   = $donation->note_public ? trim((string) ($donation->note_to_org ?? '')) : '';
 
             if (! isset($byDonor[$id])) {

@@ -34,9 +34,9 @@ final class DonationFirstEmailTest extends IntegrationTestCase
     }
 
     /**
-     * A cheque an admin typed in is not the donor saying hello, so it sends
+     * A check an admin typed in is not the donor saying hello, so it sends
      * nothing. What it must not do is use up the welcome: the aggregate crosses
-     * 0 -> 1 on the cheque, and if that crossing is what the email watches, the
+     * 0 -> 1 on the check, and if that crossing is what the email watches, the
      * donor's own first donation moves it 1 -> 2 and they are never welcomed at
      * all. M5 from the manual-donations review.
      */
@@ -45,7 +45,7 @@ final class DonationFirstEmailTest extends IntegrationTestCase
         $mails = $this->captureMails();
 
         $this->recordDonationByHand('margit@example.com', 'Margit');
-        $this->assertCount(0, $this->mailsBySubject($mails, 'first'), 'a hand-recorded cheque welcomed nobody');
+        $this->assertCount(0, $this->mailsBySubject($mails, 'first'), 'a hand-recorded check welcomed nobody');
 
         $this->completeOfflineDonation('margit@example.com', 'Margit');
 
@@ -54,7 +54,7 @@ final class DonationFirstEmailTest extends IntegrationTestCase
         $this->assertStringContainsString('Margit', (string) $welcome[0]['message']);
     }
 
-    /** And still only once: the cheque before it does not earn a second. */
+    /** And still only once: the check before it does not earn a second. */
     public function test_the_welcome_is_not_repeated_after_a_hand_recorded_start(): void
     {
         $mails = $this->captureMails();

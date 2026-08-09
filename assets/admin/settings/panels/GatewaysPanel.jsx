@@ -90,7 +90,7 @@ export default function GatewaysPanel( { s } ) {
             >
                 <ToggleRow
                     title={ __( 'Enable offline donations', 'dono' ) }
-                    sub={ __( 'For cash, cheque, or bank transfer donations marked paid by admin.', 'dono' ) }
+                    sub={ __( 'For cash, check, or bank transfer donations marked paid by admin.', 'dono' ) }
                     checked={ offlineEnabled }
                     onChange={ s.setValue( 'offline.enabled' ) }
                 />

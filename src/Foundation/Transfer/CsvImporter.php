@@ -44,7 +44,7 @@ final class CsvImporter
         'first_name'    => 'First name',
         'last_name'     => 'Last name',
         'full_name'     => 'Full name',
-        'company'       => 'Organisation',
+        'company'       => 'Organization',
         'phone'         => 'Phone',
         'address_line1' => 'Address',
         'address_line2' => 'Address line 2',

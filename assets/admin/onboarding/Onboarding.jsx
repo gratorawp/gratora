@@ -56,7 +56,7 @@ const USER_TYPES = [
         id:   'nonprofit',
         icon: 'building',
         name: __( 'Nonprofit or charity', 'dono' ),
-        desc: __( 'Registered organisation collecting tax-deductible donations.', 'dono' ),
+        desc: __( 'Registered organization collecting tax-deductible donations.', 'dono' ),
     },
     {
         id:   'community',
@@ -178,7 +178,7 @@ export default function Onboarding() {
                     throw new Error( __( 'Pick a country to continue.', 'dono' ) );
                 }
                 // A country that subdivides still needs its state: it is part of
-                // where the organisation is, and it is one click. The postal
+                // where the organization is, and it is one click. The postal
                 // address is not asked for here -- it is optional in Settings,
                 // and the receipt renderer omits the block when it is unset.
                 if ( STATES_BY_COUNTRY[ org.country ] && ! ( org.state || '' ).trim() ) {
@@ -411,12 +411,12 @@ function LocationStep( { value, onChange, currency, onCurrencyChange, userType }
 
             <div className="dono-onboarding__section">
                 <div className="dono-onboarding__section-label">
-                    { isIndividual ? __( 'About you', 'dono' ) : __( 'Organisation', 'dono' ) }
+                    { isIndividual ? __( 'About you', 'dono' ) : __( 'Organization', 'dono' ) }
                 </div>
                 <div className="dono-onboarding__address">
                     <div className="span-2">
                         <label className="dono-onboarding__field-label">
-                            { isIndividual ? __( 'Your name', 'dono' ) : __( 'Organisation name', 'dono' ) }
+                            { isIndividual ? __( 'Your name', 'dono' ) : __( 'Organization name', 'dono' ) }
                         </label>
                         <input
                             type="text"
@@ -656,7 +656,7 @@ function ChecklistStep( { finalized, settingsUrl, dashboardUrl, campaignsUrl } )
         <div>
             <h1 className="dono-onboarding__headline">{ __( "You're set up", 'dono' ) }</h1>
             <p className="dono-onboarding__subtitle">
-                { __( 'Your organisation details are saved. Here is what is left before you can take a donation.', 'dono' ) }
+                { __( 'Your organization details are saved. Here is what is left before you can take a donation.', 'dono' ) }
             </p>
 
             <ul className="dono-onboarding__checklist">

@@ -66,7 +66,7 @@ export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
         title:      __( 'Comment', 'dono' ),
-        description: __( 'Optional message from the donor to the organisation.', 'dono' ),
+        description: __( 'Optional message from the donor to the organization.', 'dono' ),
         category:   'dono-fields',
         icon:       BlockIcons[ 'comment' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

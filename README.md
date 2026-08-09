@@ -8,7 +8,7 @@
 
 ### A complete fundraising platform for WordPress
 
-Dono gives an organisation the whole fundraising stack in one plugin: a
+Dono gives an organization the whole fundraising stack in one plugin: a
 block-based donation form builder, one-time and recurring giving, campaigns and
 funds, encrypted donor records with a self-service portal, receipts, and
 advanced reporting.

@@ -181,7 +181,7 @@ function DonorsApp( { toggleSlot } ) {
             label: __( 'Donor type', 'dono' ),
             elements: [
                 { value: 'individual',   label: __( 'Individual', 'dono' ) },
-                { value: 'organization', label: __( 'Organisation', 'dono' ) },
+                { value: 'organization', label: __( 'Organization', 'dono' ) },
                 { value: 'household',    label: __( 'Household', 'dono' ) },
             ],
             filterBy: { operators: [ 'is' ] },

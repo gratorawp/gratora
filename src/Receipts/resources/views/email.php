@@ -35,7 +35,7 @@ $greeting = $donorFirst !== ''
     <?php
     printf(
         wp_kses(
-            /* translators: 1: amount with currency (e.g. "50,00 EUR"), 2: organisation name */
+            /* translators: 1: amount with currency (e.g. "50,00 EUR"), 2: organization name */
             __('Thank you for your <strong>%1$s</strong> donation to <strong>%2$s</strong>.', 'dono'),
             ['strong' => []]
         ),

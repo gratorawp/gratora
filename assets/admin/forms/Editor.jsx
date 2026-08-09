@@ -1300,7 +1300,7 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
                     value={ String( c.value( 'default_fund_id', 0 ) || 0 ) }
                     options={ fundSelectOptions( funds ) }
                     onChange={ ( v ) => c.edit( { default_fund_id: Number( v ) || null } ) }
-                    help={ __( 'Leave on the default to fall back to the campaign fund, then the organisation default.', 'dono' ) }
+                    help={ __( 'Leave on the default to fall back to the campaign fund, then the organization default.', 'dono' ) }
                     __nextHasNoMarginBottom
                 />
             </SettingsRow>

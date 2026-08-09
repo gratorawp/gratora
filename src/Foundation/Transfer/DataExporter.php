@@ -9,7 +9,7 @@ use Dono\Settings\SecretRedactor;
 use Dono\Vendor\Queryable\DB;
 
 /**
- * Writes everything an organisation owns to a file they can take elsewhere.
+ * Writes everything an organization owns to a file they can take elsewhere.
  *
  * Two things shape this. It has to restore on a different site, and it has to
  * be safe to hand to somebody.
@@ -31,7 +31,7 @@ final class DataExporter
     private const PAGE = 500;
 
     /**
-     * Tables that carry the organisation's own records.
+     * Tables that carry the organization's own records.
      *
      * Order matters on the way back in: a donation needs its donor, a receipt
      * needs its donation. The importer walks this list as written.
@@ -68,7 +68,7 @@ final class DataExporter
      *
      * dono_form_donation_stats and dono_events are derived or observational.
      * The stats are recomputed on import; the log describes what happened on
-     * one site, not what the organisation owns.
+     * one site, not what the organization owns.
      */
     private const SKIP = [
         'dono_system_settings',

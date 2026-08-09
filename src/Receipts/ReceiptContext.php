@@ -23,7 +23,7 @@ final class ReceiptContext
         public readonly Donor $donor,
         /** Donor's preferred locale at receipt-issue time. */
         public readonly string $locale,
-        /** Organisation profile (legal name, address, tax id, logo). */
+        /** Organization profile (legal name, address, tax id, logo). */
         public readonly array $org,
         /** Decrypted donor email, populated by ReceiptIssuer for renderer use. */
         public readonly ?string $donor_email = null,

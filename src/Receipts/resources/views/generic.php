@@ -23,7 +23,7 @@ use Dono\Donors\Donor;
  * @var array    $custom_field_labels
  */
 
-$orgName = (string) ($org['name'] ?? __('Your Organisation', 'dono'));
+$orgName = (string) ($org['name'] ?? __('Your Organization', 'dono'));
 $orgAddressLines = (array) ($org['address_lines'] ?? []);
 $orgTaxId  = (string) ($org['tax_id'] ?? '');
 $orgEmail  = (string) ($org['email'] ?? '');
@@ -181,7 +181,7 @@ $netDisplay      = $refundedCents > 0
     <?php endif; ?>
 
     <?php if ($showTaxId && $orgTaxId !== ''): ?>
-        <dt><?php esc_html_e('Organisation tax ID', 'dono'); ?></dt>
+        <dt><?php esc_html_e('Organization tax ID', 'dono'); ?></dt>
         <dd><?php echo esc_html($orgTaxId); ?></dd>
     <?php endif; ?>
 </dl>
@@ -195,7 +195,7 @@ $netDisplay      = $refundedCents > 0
     </thead>
     <tbody>
         <tr>
-            <td><?php /* translators: %s: organisation name. */ printf(esc_html__('Donation to %s', 'dono'), esc_html($orgName)); ?></td>
+            <td><?php /* translators: %s: organization name. */ printf(esc_html__('Donation to %s', 'dono'), esc_html($orgName)); ?></td>
             <td class="amt"><?php echo esc_html($amount_display); ?></td>
         </tr>
         <?php if ($refundedDisplay !== ''): ?>

@@ -164,7 +164,7 @@ final class DonationFlowTest extends IntegrationTestCase
 
     public function test_note_to_org_is_private_unless_the_donor_opts_in(): void
     {
-        // note_to_org is a note to the organisation; it only appears on the
+        // note_to_org is a note to the organization; it only appears on the
         // public supporter wall / recent donations when the donor ticks the
         // opt-in, so the stored note_public flag must reflect that choice.
         $public = $this->postDonation([

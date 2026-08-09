@@ -70,14 +70,14 @@ final class CoreSettingsCommandsTest extends IntegrationTestCase
         $this->assertTrue($res->ok, $res->error ?? '');
         $this->assertSame('org-profile', $res->data['group']);
         $this->assertIsArray($res->data['values']);
-        $this->assertArrayHasKey('name', $res->data['values'], 'org-profile carries the organisation name key');
+        $this->assertArrayHasKey('name', $res->data['values'], 'org-profile carries the organization name key');
     }
 
     public function test_settings_update_persists_a_real_key(): void
     {
         $ctx = $this->adminCtx();
 
-        // `name` is the org-profile organisation-name key (SettingsService GROUPS).
+        // `name` is the org-profile organization-name key (SettingsService GROUPS).
         $res = $this->registry()->dispatch('settings.update', [
             'group'  => 'org-profile',
             'values' => ['name' => 'Hope Foundation'],

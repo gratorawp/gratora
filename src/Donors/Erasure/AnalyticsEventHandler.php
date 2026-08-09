@@ -13,7 +13,7 @@ use Dono\Analytics\Event;
  * `payload` is in DSAR export scope already (DonorMetricsService::exportData
  * hands the donor their own event payloads), which settles the question of
  * whether it is their personal data. The hashes go with it: a session, IP or
- * user-agent hash is exactly what re-links an anonymised row back to a person.
+ * user-agent hash is exactly what re-links an anonymized row back to a person.
  *
  * @version 1.0.0
  */

@@ -14,7 +14,7 @@ use Dono\Gateways\WebhookOutcome;
 use WP_REST_Request;
 
 /**
- * Offline gateway for cash, cheque, or bank transfer. No external API calls,
+ * Offline gateway for cash, check, or bank transfer. No external API calls,
  * no webhooks. createIntent returns a stable id derived from the donation
  * reference; confirmation is explicit via the admin.
  *
@@ -38,7 +38,7 @@ final class OfflineGateway implements PaymentGateway
 
     public function description(): string
     {
-        return __('Pay by bank transfer, cheque or cash. We confirm it manually.', 'dono');
+        return __('Pay by bank transfer, check or cash. We confirm it manually.', 'dono');
     }
 
     public function frequencies(): array

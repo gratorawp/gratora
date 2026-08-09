@@ -1320,7 +1320,7 @@ function FormsTab( { campaign } ) {
                 <EmptyState
                     icon={ <ListChecks size={ 22 } strokeWidth={ 1.75 } /> }
                     title={ __( 'No forms yet', 'dono' ) }
-                    body={ __( 'Donation forms collect the actual donations for this campaign. Pick a template to get started, then customise everything inside.', 'dono' ) }
+                    body={ __( 'Donation forms collect the actual donations for this campaign. Pick a template to get started, then customize everything inside.', 'dono' ) }
                     action={
                         <Btn variant="primary" onClick={ () => setPickerOpen( true ) } disabled={ creating }>
                             { __( 'Add your first form', 'dono' ) }

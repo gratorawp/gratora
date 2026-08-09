@@ -56,7 +56,7 @@ export default function IdentityCard( { donor, magicLinkUrl } ) {
     const statusClass = isRedacted ? 'is-redact' : isAnon ? 'is-anon' : '';
 
     const typeLabel = donor.donor_type === 'organization'
-        ? __( 'Organisation', 'dono' )
+        ? __( 'Organization', 'dono' )
         : donor.donor_type === 'household'
             ? __( 'Household', 'dono' )
             : __( 'Individual', 'dono' );

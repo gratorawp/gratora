@@ -49,7 +49,7 @@ final class DonationIntent
         /**
          * Overrides the org's test-mode switch. Null means "ask TestMode",
          * which is what every donor-facing path wants. An admin recording
-         * money that already arrived sets false: a real cheque is real money
+         * money that already arrived sets false: a real check is real money
          * even on a site that happens to be rehearsing, and the answer has to
          * be settled before the row is written, because listeners on
          * dono.donation.creating decide things from it that are never revisited.
@@ -58,7 +58,7 @@ final class DonationIntent
         /**
          * Whether money from an erased donor un-erases them, reuniting it with
          * their giving history. A donation someone made themselves is exactly
-         * the re-engagement the retention window exists for, and does. A cheque
+         * the re-engagement the retention window exists for, and does. A check
          * an admin types in is not: someone exercised their right to erasure,
          * and a third party entering their email address is not them asking to
          * come back.

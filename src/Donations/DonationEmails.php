@@ -60,7 +60,7 @@ final class DonationEmails extends HookProvider
 
         // A hand-recorded donation is money already banked. It rides the
         // offline gateway because that is what it is, but sending the bank
-        // details asks the donor to pay a cheque they posted six weeks ago.
+        // details asks the donor to pay a check they posted six weeks ago.
         if (ChannelClassifier::classify((array) ($donation->source_attribution ?? [])) === 'manual') return;
 
         $email = $this->resolveDonorEmail($donation);
@@ -260,7 +260,7 @@ final class DonationEmails extends HookProvider
      *
      * Not dono.donor.first_donation_completed, which is the aggregate's 0 -> 1
      * crossing. Nobody typed their address into this site when an admin entered
-     * a cheque, so no welcome goes out for one - but that cheque still crosses
+     * a check, so no welcome goes out for one - but that check still crosses
      * 0 -> 1, and when the donor later gives online the count moves 1 -> 2, the
      * crossing never happens again, and they are never welcomed at all.
      * Counting what this donor has actually given themselves, rather than
@@ -269,7 +269,7 @@ final class DonationEmails extends HookProvider
      */
     public function onDonationCompleted(Donation $donation): void
     {
-        // A ticket order, a rehearsal, or a cheque an admin typed in is not the
+        // A ticket order, a rehearsal, or a check an admin typed in is not the
         // donor's own first donation, and must not be counted as one either:
         // otherwise it welcomes a donor whose real first donation is still to
         // come, on the strength of a row that will never be part of the count.

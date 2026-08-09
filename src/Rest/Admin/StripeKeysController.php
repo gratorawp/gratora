@@ -17,7 +17,7 @@ use WP_REST_Response;
 use WP_REST_Server;
 
 /**
- * Stripe setup with the organisation's own API keys. Keys are verified against
+ * Stripe setup with the organization's own API keys. Keys are verified against
  * Stripe before they are stored, so a typo is caught at save time rather than
  * at the first donation. Secret keys are write-only over REST: they go in, and
  * only a last-4 hint ever comes back.

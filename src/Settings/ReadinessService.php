@@ -113,7 +113,7 @@ final class ReadinessService
     /** @return array<string,mixed> */
     private function gatewayCheck(): array
     {
-        // Asked of the registry, not a fixed list of names: an organisation
+        // Asked of the registry, not a fixed list of names: an organization
         // whose only payment method ships in an add-on can still take money.
         $ready = [];
         foreach ($this->gateways->all() as $gateway) {
@@ -387,11 +387,11 @@ final class ReadinessService
             'org-identity',
             'receipts',
             sprintf(
-                /* translators: %s: comma-separated list of missing organisation details. */
+                /* translators: %s: comma-separated list of missing organization details. */
                 __('Receipts are missing %s', 'dono'),
                 $this->join($missing)
             ),
-            __('Receipts print your organisation details at the top. Donors claiming tax relief usually need them.', 'dono'),
+            __('Receipts print your organization details at the top. Donors claiming tax relief usually need them.', 'dono'),
             'organization',
             __('Add the details', 'dono')
         );

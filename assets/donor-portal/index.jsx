@@ -1079,7 +1079,7 @@ function Profile( { onSaved } ) {
                     <small>
                         { sprintf(
                             /* translators: %s: file size, e.g. "2 MB". */
-                            __( 'Shown next to your name where the organisation lists supporters. JPEG, PNG, GIF or WebP, up to %s.', 'dono' ),
+                            __( 'Shown next to your name where the organization lists supporters. JPEG, PNG, GIF or WebP, up to %s.', 'dono' ),
                             cfg.avatarMaxLabel || __( '2 MB', 'dono' )
                         ) }
                     </small>
@@ -1107,7 +1107,7 @@ function Profile( { onSaved } ) {
             </div>
             <label>{ __( 'Email', 'dono' ) }
                 <input type="email" value={ form.email } disabled readOnly />
-                <small>{ __( 'To change your email, contact the organisation.', 'dono' ) }</small>
+                <small>{ __( 'To change your email, contact the organization.', 'dono' ) }</small>
             </label>
             <div class="dp-form__row">
                 <label>{ __( 'First name', 'dono' ) } <input type="text" value={ form.first_name } onInput={ set( 'first_name' ) } /></label>
@@ -1195,7 +1195,7 @@ function PrivacyActions() {
                 </button>
             </div>
             <p class="dp-privacy__note">
-                { __( "Download returns a JSON copy of everything we hold on you. Deletion anonymizes your record; donation totals stay for the organisation's tax records.", 'dono' ) }
+                { __( "Download returns a JSON copy of everything we hold on you. Deletion anonymizes your record; donation totals stay for the organization's tax records.", 'dono' ) }
             </p>
             { confirmOpen && (
                 <DeleteAccountModal
@@ -1329,7 +1329,7 @@ function Consents() {
         return () => clearTimeout( t );
     }, [ savedAt ] );
 
-    // Add-on sections are not about consent purposes, so an organisation that
+    // Add-on sections are not about consent purposes, so an organization that
     // has defined none must still see them.
     const sections = extSections.map( ( panel ) => (
         <ExtensionSection key={ panel.id } panel={ panel } context={ { api } } className="dp-ext-section" />
@@ -1340,7 +1340,7 @@ function Consents() {
         <div class="dp-consents">
             <div class="dp-empty">
                 <p>{ __( 'No consent purposes are defined yet.', 'dono' ) }</p>
-                <p class="dp-hint">{ __( 'The organisation has not configured any subscriptions or consents.', 'dono' ) }</p>
+                <p class="dp-hint">{ __( 'The organization has not configured any subscriptions or consents.', 'dono' ) }</p>
             </div>
             { sections }
         </div>

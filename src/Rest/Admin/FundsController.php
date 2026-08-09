@@ -18,7 +18,7 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 
-/** Admin CRUD surface for funds (organisation-wide donation designations). */
+/** Admin CRUD surface for funds (organization-wide donation designations). */
 final class FundsController
 {
     private const NAMESPACE = 'dono/v1';

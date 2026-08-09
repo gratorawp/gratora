@@ -6,7 +6,7 @@ defined('ABSPATH') || exit;
  * context), so the literal colors below are intentional and self-contained.
  * Aggregate figures only: no donor names or PII appear on this document.
  *
- * @var string $org_name       organisation name
+ * @var string $org_name       organization name
  * @var string $campaign_title campaign title
  * @var string $range_label    human-readable reporting window
  * @var string $raised         formatted amount raised (big figure)
@@ -60,7 +60,7 @@ table.stats td{padding:14px 6px;border-bottom:1px solid #eee;vertical-align:top;
 </tr></table>
 
 <p class="footer"><?php echo esc_html(sprintf(
-    /* translators: 1: generation date, 2: organisation name */
+    /* translators: 1: generation date, 2: organization name */
     __('Generated %1$s, %2$s', 'dono'),
     $generated_date,
     $org_name

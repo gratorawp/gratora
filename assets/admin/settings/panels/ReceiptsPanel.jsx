@@ -171,7 +171,7 @@ export default function ReceiptsPanel( { s } ) {
 
                 <FormRow
                     label={ __( 'Footer note', 'dono' ) }
-                    help={ __( 'Small print at the bottom. Use this for the tax-deduction disclaimer, contact info, or organisation registration details.', 'dono' ) }
+                    help={ __( 'Small print at the bottom. Use this for the tax-deduction disclaimer, contact info, or organization registration details.', 'dono' ) }
                     wide
                 >
                     <MergeTagInserter onInsert={ ( t ) => setFooter( `${ footerNote }${ t }` ) } />
@@ -184,7 +184,7 @@ export default function ReceiptsPanel( { s } ) {
                 </FormRow>
 
                 <ToggleRow
-                    title={ __( 'Show organisation tax ID', 'dono' ) }
+                    title={ __( 'Show organization tax ID', 'dono' ) }
                     sub={ __( 'Includes the tax ID from your Organization settings in the reference block.', 'dono' ) }
                     checked={ showTaxId }
                     onChange={ setShowTax }

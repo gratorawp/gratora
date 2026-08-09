@@ -193,7 +193,7 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                         { __( 'Type', 'dono' ) }
                         <select className="dono-select" value={ form.donor_type } onChange={ set( 'donor_type' ) }>
                             <option value="individual">{ __( 'Individual', 'dono' ) }</option>
-                            <option value="organization">{ __( 'Organisation', 'dono' ) }</option>
+                            <option value="organization">{ __( 'Organization', 'dono' ) }</option>
                             <option value="household">{ __( 'Household', 'dono' ) }</option>
                         </select>
                     </label>

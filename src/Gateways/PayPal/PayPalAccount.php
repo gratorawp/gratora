@@ -8,7 +8,7 @@ use Dono\Foundation\Config\SystemSetting;
 use Dono\Foundation\Crypto\Crypto;
 
 /**
- * The organisation's own PayPal REST app credentials, stored per mode.
+ * The organization's own PayPal REST app credentials, stored per mode.
  *
  * PayPal's client id is public (it goes in the JS SDK URL, like a Stripe
  * publishable key); the secret is private and encrypted at rest. The webhook id

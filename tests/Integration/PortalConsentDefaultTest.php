@@ -16,7 +16,7 @@ use WP_REST_Request;
  * agree, or a donor sees a ticked box for a subscription nothing will honour.
  *
  * The purposes are registered here rather than relied upon: core ships none,
- * because a purpose names something a particular organisation does.
+ * because a purpose names something a particular organization does.
  */
 final class PortalConsentDefaultTest extends IntegrationTestCase
 {

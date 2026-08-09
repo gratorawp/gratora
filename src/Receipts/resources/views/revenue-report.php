@@ -6,7 +6,7 @@ defined('ABSPATH') || exit;
  * the literal colors below are intentional and self-contained. Aggregate
  * figures only: no donor names or PII appear on this document.
  *
- * @var string $org_name       organisation name
+ * @var string $org_name       organization name
  * @var string $year           four-digit year
  * @var string $total          formatted year total (big figure)
  * @var array  $months         list of ['label','count','amount'] rows

@@ -10,7 +10,7 @@ use Dono\Foundation\Plugin;
 use Dono\Settings\SettingsService;
 
 /**
- * The consent block names purposes the organisation defined; it does not invent
+ * The consent block names purposes the organization defined; it does not invent
  * them. A purpose invented on a form exists on that form and nowhere else, so
  * the wording a donor agreed to and the wording the org later edits could never
  * be the same text, and the portal would have no label to offer for withdrawal.

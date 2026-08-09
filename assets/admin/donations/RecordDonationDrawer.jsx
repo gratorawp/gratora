@@ -13,7 +13,7 @@ import Btn from '../_shared/components/Btn';
 
 // The offline gateway's own list. Anything else is rejected server-side.
 const METHODS = [
-    { value: 'cheque',        label: __( 'Cheque', 'dono' ) },
+    { value: 'cheque',        label: __( 'Check', 'dono' ) },
     { value: 'cash',          label: __( 'Cash', 'dono' ) },
     { value: 'bank_transfer', label: __( 'Bank transfer', 'dono' ) },
     { value: 'other',         label: __( 'Other', 'dono' ) },
@@ -50,7 +50,7 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
     useEffect( () => {
         let aborted = false;
         // Not /admin/campaigns: that needs dono_manage_campaigns, which a role
-        // created just to enter cheques will not have, and the picker rendered
+        // created just to enter checks will not have, and the picker rendered
         // blank so every donation they recorded went uncategorised.
         apiFetch( { path: '/dono/v1/admin/donations/campaign-options' } )
             .then( ( res ) => {
@@ -144,7 +144,7 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
             foot={ foot }
         >
             <p className="dono-dialog__help">
-                { __( 'Money that arrived off the site: a cheque, cash at an event, a bank transfer.', 'dono' ) }
+                { __( 'Money that arrived off the site: a check, cash at an event, a bank transfer.', 'dono' ) }
             </p>
             <div className="dono-rd">
                 { error !== '' && (
@@ -186,7 +186,7 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
 
                 <Field
                     label={ __( 'Date received', 'dono' ) }
-                    help={ __( 'When the money arrived, which is not always today. A cheque banked last month belongs to last month, and the totals for that month depend on this.', 'dono' ) }
+                    help={ __( 'When the money arrived, which is not always today. A check banked last month belongs to last month, and the totals for that month depend on this.', 'dono' ) }
                 >
                     <DateField
                         value={ receivedAt }

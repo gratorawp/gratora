@@ -92,7 +92,7 @@ final class DonationsController
         // Campaign names for the record-a-donation picker.
         //
         // /admin/campaigns needs dono_manage_campaigns, which is exactly what a
-        // bookkeeper role created to enter cheques will not have, and the picker
+        // bookkeeper role created to enter checks will not have, and the picker
         // rendered blank so every donation they recorded went uncategorised. The
         // donations list already shows campaign titles to anyone who can read
         // it, so serving the names under the same capability discloses nothing
@@ -234,7 +234,7 @@ final class DonationsController
 
     /**
      * Id and title only, for the picker. Archived campaigns are included: a
-     * cheque that arrived during last year's appeal belongs to last year's
+     * check that arrived during last year's appeal belongs to last year's
      * appeal, and by the time someone is entering it the appeal is usually over.
      */
     public function campaignOptions(): WP_REST_Response
@@ -276,7 +276,7 @@ final class DonationsController
     }
 
     /**
-     * Record money that arrived off the site: a cheque, cash in a bucket, a
+     * Record money that arrived off the site: a check, cash in a bucket, a
      * bank transfer nobody told the site about.
      *
      * It runs the same createPending + confirm path a donated donation runs,
@@ -373,7 +373,7 @@ final class DonationsController
             // the offline instructions email. ChannelClassifier maps it.
             source_attribution: ['utm_source' => 'admin', 'utm_medium' => ChannelClassifier::MANUAL],
             note_to_org: (string) $request['note_to_org'] ?: null,
-            // A real cheque is real money even on a site left rehearsing. This
+            // A real check is real money even on a site left rehearsing. This
             // has to be settled before the insert rather than corrected after
             // it: Gift Aid reads the flag on dono.donation.creating to decide
             // whether to write a claim snapshot, and it never asks again, so a
@@ -427,7 +427,7 @@ final class DonationsController
             // The money is on the books and something after it failed: a
             // listener on the completed event, or the note below. Reporting
             // failure here is a lie that invites the admin to enter the same
-            // cheque a second time.
+            // check a second time.
             if ($recorded !== null && (string) $recorded->status === 'paid') {
                 return new WP_REST_Response([
                     'reference' => $recorded->reference,
@@ -437,7 +437,7 @@ final class DonationsController
             }
 
             // createPending commits its own transaction, so a failure inside
-            // confirm() leaves a pending row dated to the cheque, which reads on
+            // confirm() leaves a pending row dated to the check, which reads on
             // the list as money the org is still waiting for and is never
             // reconciled because nobody knows it is there. Marked failed it says
             // what happened, and unlike deleting it does not orphan rows an
@@ -455,7 +455,7 @@ final class DonationsController
         $this->notes->create(
             (int) $donation->id,
             sprintf(
-                /* translators: %s: how the money arrived, e.g. cheque. */
+                /* translators: %s: how the money arrived, e.g. check. */
                 __('Recorded by hand. Received as %s.', 'dono'),
                 $method
             ),
@@ -472,11 +472,11 @@ final class DonationsController
     /**
      * A donation already on the books that this one would be a second copy of.
      *
-     * Two cheques for the same amount from the same donor on the same day are
+     * Two checks for the same amount from the same donor on the same day are
      * genuinely possible, so this cannot silently dedupe: swallowing a real
      * second gift is worse than the double-entry it would prevent. It warns,
      * and the admin decides. What it catches is the timed-out request retried,
-     * the second admin working the same envelope, and the cheque recorded by
+     * the second admin working the same envelope, and the check recorded by
      * hand that the donor had in fact already paid online.
      */
     private function donationLike(string $email, int $amountCents, string $currency, string $receivedAt): ?Donation

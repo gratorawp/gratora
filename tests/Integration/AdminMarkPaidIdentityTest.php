@@ -13,7 +13,7 @@ use WP_REST_Request;
  * What "mark as paid" records about how the money arrived.
  *
  * The action exists for two different situations that look the same from the
- * button: a cheque an admin banked, and a card donation the site never heard
+ * button: a check an admin banked, and a card donation the site never heard
  * back about because the webhook did not arrive. They are not the same event.
  * Stamping every one of them `offline` with an invented transaction id
  * mislabelled card payments and put an id in the record that exists nowhere
@@ -50,7 +50,7 @@ final class AdminMarkPaidIdentityTest extends IntegrationTestCase
         ));
     }
 
-    /** A cheque really did arrive outside any gateway, so it is marked as such. */
+    /** A check really did arrive outside any gateway, so it is marked as such. */
     public function test_an_offline_donation_still_gets_an_offline_marker(): void
     {
         $donation = $this->createDonation('offline');

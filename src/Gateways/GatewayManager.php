@@ -178,7 +178,7 @@ final class GatewayManager
      *
      * A wildcard means the gateway does its own validation, which is the right
      * answer for Stripe (its list runs to well over a hundred currencies and
-     * moves) and for Offline (a cheque can be written in anything). Hardcoding
+     * moves) and for Offline (a check can be written in anything). Hardcoding
      * either would be a list that goes stale and starts refusing real money.
      */
     public function acceptsCurrency(string $gatewayId, string $currency): bool

@@ -10,7 +10,7 @@ use Dono\Settings\SettingsService;
 use WP_REST_Request;
 
 /**
- * Finishing the wizard settles the organisation and nothing else.
+ * Finishing the wizard settles the organization and nothing else.
  *
  * It used to publish a campaign, which left every install with one whether or
  * not it was wanted. The last screen now links to the campaigns page with its

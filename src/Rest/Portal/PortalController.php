@@ -631,7 +631,7 @@ final class PortalController
         $donorId = (int) $donor->id;
 
         // Live only, like the donations and receipts lists. A test-mode plan is
-        // the organisation rehearsing, so showing it would offer the donor a
+        // the organization rehearsing, so showing it would offer the donor a
         // subscription to cancel that was never theirs.
         $rows = RecurringPlan::query()
             ->where('donor_id', $donorId)
@@ -1195,7 +1195,7 @@ final class PortalController
         if (! $this->privacySetting('allow_data_export', true)) {
             return new WP_Error(
                 'dono_export_disabled',
-                __('Data export is disabled by the organisation.', 'dono'),
+                __('Data export is disabled by the organization.', 'dono'),
                 ['status' => 403]
             );
         }
@@ -1296,7 +1296,7 @@ final class PortalController
         if (! $this->privacySetting('allow_account_delete', true)) {
             return new WP_Error(
                 'dono_delete_disabled',
-                __('Account deletion is disabled by the organisation.', 'dono'),
+                __('Account deletion is disabled by the organization.', 'dono'),
                 ['status' => 403]
             );
         }
@@ -1322,7 +1322,7 @@ final class PortalController
 
             return new WP_Error(
                 'dono_erasure_blocked',
-                __('We could not stop your recurring donation with the payment provider, so your account has not been deleted yet. Please contact the organisation and they will finish this for you.', 'dono'),
+                __('We could not stop your recurring donation with the payment provider, so your account has not been deleted yet. Please contact the organization and they will finish this for you.', 'dono'),
                 ['status' => 409]
             );
         }

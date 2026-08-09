@@ -17,7 +17,7 @@ final class CustomFieldLabelsTest extends IntegrationTestCase
     public function test_resolves_text_and_choice_fields_with_canonical_slugs(): void
     {
         $blocks = <<<BLOCKS
-<!-- wp:dono/text-input {"field":"Donor Org","label":"Your organisation"} /-->
+<!-- wp:dono/text-input {"field":"Donor Org","label":"Your organization"} /-->
 <!-- wp:dono/dropdown {"label":"How did you hear?"} /-->
 BLOCKS;
 
@@ -27,7 +27,7 @@ BLOCKS;
         $ddSlug   = DropdownBlock::deriveField('', 'How did you hear?');
 
         $this->assertSame('donor_org', $textSlug, 'sanity: slug algorithm unchanged');
-        $this->assertSame('Your organisation', $map[$textSlug] ?? null);
+        $this->assertSame('Your organization', $map[$textSlug] ?? null);
         $this->assertSame('How did you hear?', $map[$ddSlug] ?? null);
     }
 

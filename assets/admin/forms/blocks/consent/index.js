@@ -7,7 +7,7 @@ import { BlockIcons } from '../_shared/block-icons';
 const NAME = 'dono/consent';
 
 /**
- * The organisation's consent purposes. The block picks from these rather than
+ * The organization's consent purposes. The block picks from these rather than
  * defining its own: a purpose invented on a form exists nowhere else, so the
  * wording a donor agreed to and the wording the org later edits could never
  * agree, and the donor portal would have nothing to label it with.
@@ -65,7 +65,7 @@ function Edit( { attributes, setAttributes } ) {
 
                     { registry.length === 0 ? (
                         <Notice status="warning" isDismissible={ false }>
-                            { __( 'No consent purposes exist yet. A purpose names something your organisation actually does, so you define it once and every form asks for it the same way.', 'dono' ) }
+                            { __( 'No consent purposes exist yet. A purpose names something your organization actually does, so you define it once and every form asks for it the same way.', 'dono' ) }
                             { settingsUrl() && (
                                 <>
                                     { ' ' }
@@ -136,7 +136,7 @@ export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
         title:      __( 'Consent', 'dono' ),
-        description: __( 'Asks the donor to opt in to purposes your organisation has defined in Settings.', 'dono' ),
+        description: __( 'Asks the donor to opt in to purposes your organization has defined in Settings.', 'dono' ),
         category:   'dono-extras',
         icon:       BlockIcons[ 'consent' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },
