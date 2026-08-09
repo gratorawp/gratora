@@ -15,8 +15,9 @@ import Card from '../_shared/components/Card';
 import FormRow from '../_shared/components/FormRow';
 import { ToggleRow } from '../_shared/components/Switch';
 import Btn from '../_shared/components/Btn';
+import { downloadFile } from '../_shared/download';
 import TokenEditor from '../_shared/styling/TokenEditor';
-import { Copy as CopyIcon, Trash2 as TrashIcon, Coins, HandHeart, Users as UsersIcon, ListChecks, Plus } from 'lucide-react';
+import { Copy as CopyIcon, Trash2 as TrashIcon, Coins, HandHeart, Users as UsersIcon, ListChecks, Plus, Download as DownloadIcon } from 'lucide-react';
 import EmptyState from '../_shared/components/EmptyState';
 import FormTemplatePicker from '../_shared/components/FormTemplatePicker';
 import { GoalCell } from '../_shared/components/GoalBar';
@@ -728,6 +729,36 @@ function OverviewTab( { campaign, nav, onError } ) {
         },
     };
 
+function CampaignReportButton( { campaignId, reportRange } ) {
+    const [ busy, setBusy ] = useState( false );
+
+    return (
+        <Btn
+            variant="tertiary"
+            icon={ <DownloadIcon size={ 16 } strokeWidth={ 1.75 } /> }
+            disabled={ busy }
+            isBusy={ busy }
+            onClick={ async () => {
+                setBusy( true );
+                try {
+                    // Same range the widgets are showing, so the PDF and the
+                    // screen it was taken from cannot disagree.
+                    await downloadFile(
+                        addQueryArgs( `/dono/v1/reports/campaign/${ campaignId }/pdf`, { range: reportRange } ),
+                        `campaign-${ campaignId }.pdf`
+                    );
+                } catch ( err ) {
+                    notify.error( err?.message || __( 'Could not build the report.', 'dono' ) );
+                } finally {
+                    setBusy( false );
+                }
+            } }
+        >
+            { __( 'Download report', 'dono' ) }
+        </Btn>
+    );
+}
+
     return (
         <div className="dono-overview" data-loading={ loading ? 'true' : undefined }>
             <SectionBar
@@ -736,12 +767,15 @@ function OverviewTab( { campaign, nav, onError } ) {
                 compareMode={ compareMode } onCompareModeChange={ setCompareMode }
                 compareAvailable={ rangeIsComparable }
                 layoutSlot={
-                    <LayoutControls
-                        hidden={ layout.hidden }
-                        registry={ registry }
-                        onUnhide={ layout.unhide }
-                        onReset={ layout.reset }
-                    />
+                    <>
+                        <CampaignReportButton campaignId={ campaign.id } reportRange={ range } />
+                        <LayoutControls
+                            hidden={ layout.hidden }
+                            registry={ registry }
+                            onUnhide={ layout.unhide }
+                            onReset={ layout.reset }
+                        />
+                    </>
                 }
             />
             <WidgetGrid

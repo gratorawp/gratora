@@ -14,13 +14,13 @@ Donation forms, campaigns, recurring giving, donor management, receipts and repo
 
 **Dono is a complete fundraising platform for WordPress.**
 
-Build a campaign, add a donation form, and start taking one-time and recurring donations today. Campaign pages are pages and donation forms are blocks, so if you can use the WordPress editor, you can change anything here.
+Build a campaign, add a donation form, and start taking one-time and recurring donations today.
 
 = Everything is included =
 
-Recurring giving at five frequencies, funds and designated giving, a donor-facing currency switcher, fee recovery, conditional fields, the donor portal, PDF receipts and annual tax statements, offline donations and refunds.
+Recurring giving, funds and designated giving, a donor-facing currency switcher, fee recovery, conditional fields, the donor portal, PDF receipts and annual tax statements, offline donations and more.
 
-Unlimited campaigns and forms. No paid tier, and no cap on what you raise.
+Unlimited campaigns and forms.
 
 = Donation forms =
 
