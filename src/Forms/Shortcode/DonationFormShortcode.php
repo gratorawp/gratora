@@ -543,8 +543,13 @@ HTML;
                 'formToken'   => $this->spam ? $this->spam->mintFormToken((int) $form->id) : '',
                 'honeypotName' => $honeypotName,
                 // Same filter as AntiSpamGuard, so the donor sees the minimum at
-                // the amount field rather than only after submitting.
-                'minAmountCents' => (int) apply_filters('dono.spam.min_amount_cents', 100),
+                // the amount field rather than only after submitting. A minimum
+                // set on the amount block raises it for this form; the org-wide
+                // floor still applies underneath, so take the larger.
+                'minAmountCents' => max(
+                    (int) apply_filters('dono.spam.min_amount_cents', 100),
+                    self::amountBlockMinCents($form)
+                ),
             ],
             'steps'      => $steps,
             'pages'      => $pages,
@@ -1530,5 +1535,23 @@ HTML;
         }
 
         return $out;
+    }
+
+    /** The minimum an admin set on this form's amount block, or 0 for none. */
+    private static function amountBlockMinCents($form): int
+    {
+        if (! preg_match_all('/<!--\s+wp:dono\/donation-amount\s+(\{.*?\})\s+\/?-->/s', (string) $form->blocks, $m)) {
+            return 0;
+        }
+
+        $min = 0;
+        foreach ($m[1] as $json) {
+            $attrs = json_decode($json, true);
+            if (is_array($attrs)) {
+                $min = max($min, (int) ($attrs['minCents'] ?? 0));
+            }
+        }
+
+        return $min;
     }
 }

@@ -1,5 +1,5 @@
 import { useBlockProps, InspectorControls, RichText } from '@wordpress/block-editor';
-import { PanelBody, ToggleControl } from '@wordpress/components';
+import { PanelBody, ToggleControl, TextControl } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { formatAmount, defaultCurrency } from '../../../_shared/format';
@@ -35,7 +35,7 @@ function normalizePresets( presets ) {
 
 function Edit( { attributes, setAttributes, clientId } ) {
     // Preview in the org currency, not a hardcoded USD, when the block has none.
-    const { allowCustom = true, currency: currencyAttr = '', donationType = 'multi' } = attributes;
+    const { allowCustom = true, currency: currencyAttr = '', donationType = 'multi', minCents = 0 } = attributes;
     const currency = currencyAttr || defaultCurrency();
     const presets = normalizePresets( attributes.presets );
 
@@ -104,6 +104,22 @@ function Edit( { attributes, setAttributes, clientId } ) {
                         onChange={ ( v ) => setAttributes( { allowCustom: v } ) }
                         __nextHasNoMarginBottom
                     />
+
+                    { allowCustom && (
+                        <TextControl
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            label={ __( 'Minimum amount', 'dono' ) }
+                            help={ __( 'Leave empty for no minimum beyond the site default.', 'dono' ) }
+                            value={ minCents ? String( minCents / 100 ) : '' }
+                            onChange={ ( v ) => setAttributes( {
+                                minCents: v === '' ? 0 : Math.max( 0, Math.round( parseFloat( v ) * 100 ) || 0 ),
+                            } ) }
+                            __nextHasNoMarginBottom
+                            __next40pxDefaultSize
+                        />
+                    ) }
                     <div className="dono-amounts-head">
                         <span className="dono-amounts-head__label">{ __( 'Options', 'dono' ) }</span>
                         <button

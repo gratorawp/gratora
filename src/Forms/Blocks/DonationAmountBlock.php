@@ -31,6 +31,9 @@ final class DonationAmountBlock implements Block
                 ['cents' => 10000, 'impact' => '', 'preselected' => false],
             ]],
             'allowCustom'  => ['type' => 'boolean', 'default' => true],
+            // 0 means "no form-level minimum", and the org-wide spam floor
+            // still applies underneath.
+            'minCents'     => ['type' => 'number',  'default' => 0],
             'currency'     => ['type' => 'string',  'default' => ''],
             'donationType' => ['type' => 'string',  'default' => 'multi'],
         ];

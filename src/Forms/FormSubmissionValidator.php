@@ -201,6 +201,21 @@ final class FormSubmissionValidator
                 // 'fixed' donation type is a single custom input, so it's exempt.
                 $amountType = (string) ($attrs['donationType'] ?? 'multi');
                 $allowCustom = $amountType === 'fixed' ? true : (bool) ($attrs['allowCustom'] ?? true);
+
+                // A minimum set on the block. Checked against the net, like the
+                // preset check below: covering the fee is not the donor giving
+                // more, so it must not lift them over the bar.
+                $minCents = (int) ($attrs['minCents'] ?? 0);
+                if ($minCents > 0) {
+                    $net = (int) ($body['amount_cents'] ?? 0) - (int) ($body['fee_covered_cents'] ?? 0);
+                    if ($net < $minCents) {
+                        return $this->reject(sprintf(
+                            /* translators: %s: minimum donation amount, formatted. */
+                            __('The smallest donation this form accepts is %s.', 'dono'),
+                            Money::format($minCents)
+                        ));
+                    }
+                }
                 if (! $allowCustom) {
                     $raw = $attrs['presets'] ?? null;
                     if (! is_array($raw) || empty($raw)) {
