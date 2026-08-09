@@ -14,7 +14,7 @@ Donation forms, recurring giving, campaigns and encrypted donor records. Your ow
 
 **Take donations on your own site, through your own payment account, into your own database.**
 
-Dono is the most advanced fundraising platform for WordPress: a fundraising stack, not just a donate button. Build a campaign page, put a donation form on it, and start accepting one-time and recurring donations the same afternoon. Every donation lands in your database. Every donor record is yours. Dono never touches the money and never takes a cut.
+Dono is a complete fundraising platform for WordPress: a fundraising stack, not just a donate button. Build a campaign page, put a donation form on it, and start accepting one-time and recurring donations the same afternoon. Every donation lands in your database. Every donor record is yours. Dono never touches the money and never takes a cut.
 
 The form builder, recurring billing, campaigns, donor records and reporting are one tool that lives entirely on the WordPress site you already control. There is no account to be locked out of, no onboarding call and no sales process.
 

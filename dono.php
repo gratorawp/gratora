@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Dono - Fundraising Platform
  * Plugin URI: https://getdono.com
- * Description: The most advanced fundraising platform for WordPress
+ * Description: A complete fundraising platform for WordPress
  * Version: 1.0.0
  * Requires at least: 7.0
  * Requires PHP: 8.1

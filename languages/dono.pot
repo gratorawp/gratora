@@ -467,7 +467,7 @@ msgstr ""
 
 #. Description of the plugin
 #: dono.php
-msgid "The most advanced fundraising platform for WordPress"
+msgid "A complete fundraising platform for WordPress"
 msgstr ""
 
 #. Author of the plugin
