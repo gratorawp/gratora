@@ -8,7 +8,7 @@ Stable tag: 1.0.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Donation forms, recurring giving, campaigns and encrypted donor records, self-hosted on the WordPress site you already run.
+Donation forms, campaigns, recurring giving, donor management, receipts and reporting.
 
 == Description ==
 
