@@ -14,7 +14,9 @@ Donation forms, recurring giving, campaigns and encrypted donor records. Your ow
 
 **Take donations on your own site, through your own payment account, into your own database.**
 
-Dono is a complete fundraising platform for WordPress. Build a campaign page, put a donation form on it, and start accepting one-time and recurring donations the same afternoon. Every donation lands in your database. Every donor record is yours. Dono never touches the money and never takes a cut.
+Dono is the most advanced fundraising platform for WordPress: a fundraising stack, not just a donate button. Build a campaign page, put a donation form on it, and start accepting one-time and recurring donations the same afternoon. Every donation lands in your database. Every donor record is yours. Dono never touches the money and never takes a cut.
+
+The form builder, recurring billing, campaigns, donor records and reporting are one tool that lives entirely on the WordPress site you already control. There is no account to be locked out of, no onboarding call and no sales process.
 
 It is built the way WordPress is built. Campaign pages are pages. Donation forms are blocks. If you know the editor, you already know how to change any of it.
 
@@ -111,6 +113,19 @@ Create a campaign and Dono builds the page for you, form included. Edit it like 
 
 Nonprofits and registered charities that need receipts, tax statements and a donor list they actually own. Churches, schools, clubs and mutual aid groups collecting from a community. Individuals running a personal cause or a memorial fund. Developers building any of the above for a client.
 
+= 📈 Built to scale =
+
+A donation plugin is easy to make feel fast on a demo site with forty donations. Dono is built for the year you have fifty thousand.
+
+* Donations, donors, campaigns and funds live in Dono's own database tables, indexed for the questions the admin actually asks, rather than being spread across WordPress post meta
+* Campaign, fund and donor totals are kept as you go, so a campaign page shows its progress bar without recounting every donation that built it
+* The donation list, donor list and reporting screens page and filter in the database, not in PHP after the fact
+* Exports stream to the browser as they are generated, so a large CSV does not have to fit in memory first
+* Importing years of history runs in batches across requests and resumes where it stopped, rather than depending on one long request surviving
+* A data backfill after an upgrade is queued rather than run inside the request that happened to notice the plugin had been updated
+
+Tested with 50,000 donations across 8,000 donors and a dozen campaigns, which is more than most organisations will raise in a decade.
+
 = 🛠️ Open source, and built to extend =
 
 Dono is GPL and developed in the open. It is ordinary WordPress underneath: blocks are blocks, pages are pages, and your data sits in your own database in tables you can query.
@@ -145,6 +160,12 @@ Because a form plugin gives you submissions, not donors. There is no lifetime to
 = This is version 1.0. Why should I trust it with donations? =
 
 Fair question. Dono is new, so judge it on what you can check rather than on how long it has existed. The code is open source and readable. Payments go through Stripe and PayPal directly with your own keys, so your money never depends on Dono staying in business. Your data is in your own database in plain tables, and you can export all of it as CSV at any time. If Dono is not for you, you are not locked in.
+
+= Will it slow my site down once donations add up? =
+
+Dono keeps its data in its own tables rather than in WordPress post meta, and those tables are indexed for the queries the admin screens run. Totals are stored as donations arrive, so a campaign page reads one number instead of adding up its whole history on every visit. It has been tested with 50,000 donations, and the admin screens are paged and filtered in the database so the work does not grow with the size of your donor list.
+
+The donation form itself is a block on your page. It does not query your donation history to render, so a busy fundraising year does not make your public pages slower.
 
 = Can I change how a campaign page looks? =
 
