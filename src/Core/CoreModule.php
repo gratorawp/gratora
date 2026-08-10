@@ -166,6 +166,7 @@ use Dono\Gateways\PayPal\PayPalGateway;
 use Dono\Gateways\PayPal\PayPalPlans;
 use Dono\Gateways\Stripe\ApplePayDomain;
 use Dono\Gateways\Stripe\StripeAccount;
+use Dono\Gateways\Stripe\StripeWebhookNotice;
 use Dono\Gateways\Stripe\StripeGateway;
 use Dono\Gateways\TestMode;
 use Dono\Mail\Mailer;
@@ -1121,19 +1122,10 @@ final class CoreModule implements DonoModule
             // Stripe connected but no webhook signing secret: verifyWebhookSignature
             // fails closed, so every webhook is silently rejected and recurring
             // renewals and async confirmations never process.
-            add_action('admin_notices', static function () use ($c): void {
-                if (! current_user_can('manage_options')) return;
-                if (! $c->get(StripeAccount::class)->isConnected()) return;
-                if ($c->get(StripeApi::class)->hasWebhookSecret()) return;
-                echo '<div class="notice dono-admin-notice" role="alert" style="'
-                    . 'border:1px solid #e5e7eb;border-left:3px solid #b54708;border-radius:8px;'
-                    . 'background:#fffaf5;color:#b54708;padding:11px 14px;'
-                    . 'font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Oxygen,Ubuntu,sans-serif;'
-                    . 'font-size:13px;line-height:1.45;">'
-                    . '<strong>Dono:</strong> '
-                    . esc_html__('Stripe is connected but its webhook signing secret is missing. Recurring renewals, payment confirmations, and account updates will not process until you add it under Dono, Settings, Payment gateways.', 'dono')
-                    . '</div>';
-            });
+            (new StripeWebhookNotice(
+                $c->get(StripeAccount::class),
+                $c->get(StripeApi::class),
+            ))->register();
         }
     }
 
