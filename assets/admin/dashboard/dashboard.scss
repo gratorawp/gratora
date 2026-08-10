@@ -386,4 +386,38 @@
         .is-warn  & { color: #6b4d00; }
         .is-info  & { color: $accent-dark; }
     }
+
+    // Quiet until the row is hovered or it takes focus: dismissing is the least
+    // important thing you can do to an item that says something needs doing.
+    &__dismiss {
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        padding: 0;
+        border: 0;
+        border-radius: 6px;
+        background: none;
+        cursor: pointer;
+        color: $text-muted;
+        opacity: 0;
+
+        &:hover { background: rgba(255, 255, 255, .6); color: $text; }
+
+        &:focus-visible {
+            opacity: 1;
+            outline: 2px solid $accent;
+            outline-offset: 1px;
+        }
+
+        .dono-attention__item:hover &,
+        .dono-attention__item:focus-within & { opacity: 1; }
+    }
+}
+
+// Coarse pointers have no hover, so the control would never appear.
+@media (hover: none) {
+    .dono-attention__dismiss { opacity: 1; }
 }

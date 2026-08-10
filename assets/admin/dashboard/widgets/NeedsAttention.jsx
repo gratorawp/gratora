@@ -1,7 +1,53 @@
+import { useState } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
+import { X as DismissIcon } from 'lucide-react';
+import notify from '../../_shared/notify';
 
 export default function NeedsAttention( { items = [] } ) {
-    if ( items.length === 0 ) {
+    // Dismissed locally as well as on the server: the widget is fed by the
+    // dashboard's own fetch, which does not re-run on a dismiss.
+    const [ hidden, setHidden ] = useState( [] );
+
+    const visible = items.filter( ( i ) => ! hidden.includes( i.key ) );
+
+    const dismiss = async ( item ) => {
+        setHidden( ( h ) => [ ...h, item.key ] );
+        try {
+            await apiFetch( {
+                path:   '/dono/v1/admin/me/attention/dismiss',
+                method: 'POST',
+                data:   { key: item.key, signature: item.signature || 'x' },
+            } );
+            notify.success( __( 'Dismissed. It comes back if the situation changes.', 'dono' ), {
+                // The default 4s is not long enough to read the sentence and
+                // decide, and the row is already gone by then.
+                duration: 10000,
+                action: {
+                    label:   __( 'Undo', 'dono' ),
+                    onClick: () => restore( item ),
+                },
+            } );
+        } catch ( err ) {
+            setHidden( ( h ) => h.filter( ( k ) => k !== item.key ) );
+            notify.error( err?.message || __( 'Could not dismiss that.', 'dono' ) );
+        }
+    };
+
+    const restore = async ( item ) => {
+        try {
+            await apiFetch( {
+                path:   '/dono/v1/admin/me/attention/restore',
+                method: 'POST',
+                data:   { key: item.key },
+            } );
+            setHidden( ( h ) => h.filter( ( k ) => k !== item.key ) );
+        } catch ( err ) {
+            notify.error( err?.message || __( 'Could not bring that back.', 'dono' ) );
+        }
+    };
+
+    if ( visible.length === 0 ) {
         return (
             <p className="dono-attention__empty">
                 { __( 'Nothing needs attention right now.', 'dono' ) }
@@ -11,7 +57,7 @@ export default function NeedsAttention( { items = [] } ) {
 
     return (
         <ul className="dono-attention">
-            { items.map( ( item ) => (
+            { visible.map( ( item ) => (
                 <li key={ item.key } className={ `dono-attention__item is-${ item.tone }` }>
                     <span className="dono-attention__dot" aria-hidden="true" />
                     <span className="dono-attention__title">{ item.title }</span>
@@ -20,6 +66,15 @@ export default function NeedsAttention( { items = [] } ) {
                             { item.action_label || __( 'Open', 'dono' ) } →
                         </a>
                     ) }
+                    <button
+                        type="button"
+                        className="dono-attention__dismiss"
+                        onClick={ () => dismiss( item ) }
+                        aria-label={ __( 'Dismiss', 'dono' ) }
+                        title={ __( 'Dismiss', 'dono' ) }
+                    >
+                        <DismissIcon size={ 14 } strokeWidth={ 2 } />
+                    </button>
                 </li>
             ) ) }
         </ul>

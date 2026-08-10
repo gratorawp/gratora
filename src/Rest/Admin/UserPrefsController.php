@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 namespace Dono\Rest\Admin;
+use Dono\Dashboard\AttentionDismissals;
 use Dono\Foundation\Auth\Capabilities;
 
 use WP_REST_Request;
@@ -10,9 +11,12 @@ use WP_REST_Response;
 use WP_REST_Server;
 
 /**
- * Per-user widget layout stored in user meta as JSON keyed by scope:
- * { [scope]: { order: string[], hidden: string[] } }. Unknown scope keys
- * are ignored client-side, so new widgets need no migration.
+ * Per-user admin preferences: widget layout, and the attention items this user
+ * has waved off.
+ *
+ * Layout is user meta as JSON keyed by scope: { [scope]: { order: string[],
+ * hidden: string[] } }. Unknown scope keys are ignored client-side, so new
+ * widgets need no migration.
  *
  * @version 1.0.0
  */
@@ -43,6 +47,48 @@ final class UserPrefsController
                 ],
             ],
         ]);
+
+        register_rest_route(self::NAMESPACE, '/admin/me/attention/dismiss', [
+            'methods'             => WP_REST_Server::CREATABLE,
+            'callback'            => [$this, 'dismissAttention'],
+            'permission_callback' => [$this, 'canAccess'],
+            'args'                => [
+                'key'       => ['type' => 'string', 'required' => true],
+                // The state the user was looking at. Held so the item returns
+                // when that state moves on rather than staying hidden for good.
+                'signature' => ['type' => 'string', 'default' => 'x'],
+            ],
+        ]);
+
+        register_rest_route(self::NAMESPACE, '/admin/me/attention/restore', [
+            'methods'             => WP_REST_Server::CREATABLE,
+            'callback'            => [$this, 'restoreAttention'],
+            'permission_callback' => [$this, 'canAccess'],
+            'args'                => [
+                'key' => ['type' => 'string', 'required' => true],
+            ],
+        ]);
+    }
+
+    public function dismissAttention(WP_REST_Request $request): WP_REST_Response
+    {
+        (new AttentionDismissals())->dismiss(
+            get_current_user_id(),
+            (string) $request->get_param('key'),
+            (string) $request->get_param('signature'),
+        );
+
+        return new WP_REST_Response(['dismissed' => true], 200);
+    }
+
+    public function restoreAttention(WP_REST_Request $request): WP_REST_Response
+    {
+        (new AttentionDismissals())->restore(
+            get_current_user_id(),
+            (string) $request->get_param('key'),
+        );
+
+        return new WP_REST_Response(['dismissed' => false], 200);
     }
 
     public function canAccess(): bool

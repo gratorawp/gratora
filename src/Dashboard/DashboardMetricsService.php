@@ -440,7 +440,13 @@ final class DashboardMetricsService
         $toneOrder = ['error' => 0, 'warn' => 1, 'info' => 2];
         usort($items, fn ($a, $b) => $toneOrder[$a['tone']] <=> $toneOrder[$b['tone']]);
 
-        return $items;
+        // The signature travels with the item so the client can hand it back on
+        // dismiss, and the dismissal lapses as soon as the state moves on.
+        foreach ($items as $i => $item) {
+            $items[$i]['signature'] = AttentionDismissals::signatureFor($item);
+        }
+
+        return (new AttentionDismissals())->filter($items, get_current_user_id());
     }
 
     /**
