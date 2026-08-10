@@ -1,9 +1,13 @@
 name: Build plugin zip
 
-# An installable zip for testing: on every push to main, and on demand from any
-# branch. Releases still go through deploy.yml; this exists so that getting a
-# build to try on a test site does not mean running a workflow called "Deploy
-# to WordPress.org" and trusting its dry-run flag.
+# An installable zip for testing, built on request from any branch. Releases
+# still go through deploy.yml; this exists so that getting a build to try on a
+# test site does not mean running a workflow called "Deploy to WordPress.org"
+# and trusting its dry-run flag.
+#
+# On request only: a full build runs composer twice, installs npm and compiles
+# every asset, which is minutes of runner time for an artefact nobody asked
+# for on most pushes.
 #
 # The artefact is NOT the git checkout. vendor/ and build/ are both gitignored
 # and dono.php requires them at boot, so a zip cut from a checkout installs and
@@ -11,8 +15,6 @@ name: Build plugin zip
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
 
 jobs:
   build:

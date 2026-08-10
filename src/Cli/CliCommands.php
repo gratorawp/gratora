@@ -16,6 +16,7 @@ use Dono\Forms\FormService;
 use Dono\Foundation\Plugin;
 use Dono\Funds\Fund;
 use Dono\Funds\FundService;
+use Dono\Onboarding\Onboarding;
 use Dono\Settings\SettingsService;
 use WP_CLI;
 
@@ -227,6 +228,12 @@ final class CliCommands
         $forms      = $this->container()->get(FormService::class);
         $campaigns  = $this->container()->get(CampaignService::class);
         $settings   = $this->container()->get(SettingsService::class);
+
+        // Activation leaves onboarding pending, and while it is pending every
+        // admin screen redirects to it. A spec that drives a Dono admin page
+        // never arrives, and the failure reads as a missing control rather
+        // than a redirect.
+        update_option(Onboarding::OPTION, 'completed', false);
 
         // Enable a few currencies so the currency-switcher specs have
         // something to switch between.
