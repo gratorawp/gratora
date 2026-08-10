@@ -7,12 +7,26 @@ on:
 
 jobs:
   test:
-    name: Unit + Integration
+    name: Unit + Integration (${{ matrix.db.name }})
     runs-on: ubuntu-latest
+
+    # Both engines, because they are not the same database. MariaDB has no JSON
+    # type and rejects CAST(x AS JSON) as a syntax error, which reached a live
+    # site as a white screen on every front-end page: the badge query runs on
+    # wp_head. A suite that only ever meets MySQL cannot see that class of bug,
+    # and most WordPress hosting is MariaDB.
+    strategy:
+      fail-fast: false
+      matrix:
+        db:
+          - name: MySQL 8.0
+            image: mysql:8.0
+          - name: MariaDB 10.11
+            image: mariadb:10.11
 
     services:
       mysql:
-        image: mysql:8.0
+        image: ${{ matrix.db.image }}
         env:
           MYSQL_ROOT_PASSWORD: root
         ports:

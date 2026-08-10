@@ -143,10 +143,16 @@ final class TestModeBadge extends HookProvider
         // whereRaw first: it contributes no AND connector, so anything before
         // it runs straight into the fragment and the SQL will not parse.
         //
-        // test_mode is written as a JSON boolean today; the IN also matches a
-        // 1, so a future writer storing an int does not silently stop counting.
+        // Compared as text rather than as JSON. MariaDB has no JSON type and
+        // rejects CAST(x AS JSON) as a syntax error, and this runs on wp_head,
+        // so the whole front end dies with it. JSON_UNQUOTE gives 'true' for a
+        // JSON boolean on both engines.
+        //
+        // test_mode is written as a JSON boolean today; matching '1' as well
+        // means a future writer storing an int or a string does not silently
+        // stop counting.
         return (int) DB::table('dono_forms')
-            ->whereRaw("JSON_EXTRACT(settings, '\$.test_mode') IN (CAST('true' AS JSON), CAST('1' AS JSON))")
+            ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(settings, '\$.test_mode')) IN ('true', '1')")
             ->where('status', 'published')
             ->count();
     }

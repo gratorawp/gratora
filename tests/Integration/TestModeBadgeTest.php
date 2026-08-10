@@ -81,6 +81,34 @@ final class TestModeBadgeTest extends IntegrationTestCase
         $this->assertSame('1 Dono form in test mode', $this->title());
     }
 
+    /**
+     * The flag is read as text, not as JSON, because MariaDB has no JSON type
+     * and rejects CAST(x AS JSON) outright. This runs on wp_head, so getting
+     * it wrong takes the front end down rather than the badge.
+     *
+     * Counting the string forms too is deliberate: whichever shape a writer
+     * stores, a form in test mode should be reported as one.
+     */
+    public function test_every_shape_of_the_flag_is_counted(): void
+    {
+        foreach ([true, 1, 'true', '1'] as $on) {
+            $f = $this->publishedForm(false);
+            $f->settings = ['test_mode' => $on];
+            $f->save();
+        }
+        foreach ([false, 0, 'false', '0'] as $off) {
+            $f = $this->publishedForm(false);
+            $f->settings = ['test_mode' => $off];
+            $f->save();
+        }
+
+        $this->assertStringContainsString(
+            '4',
+            (string) $this->title(),
+            'the four forms that are on are counted, whatever shape the flag is stored in'
+        );
+    }
+
     public function test_the_count_is_of_forms_not_of_anything_else(): void
     {
         $this->orgWide(false);
