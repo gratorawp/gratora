@@ -63,6 +63,18 @@
 # internal working notes to every customer.
 /CLAUDE.md
 /qa
+# Generated codebase analysis. Gitignored, which is exactly why it reached a
+# customer zip: git never sees it, and this list is the only thing that stops
+# it. 19 MB of internal notes about our own source.
+/graphify-out
+
+# Our own build and release scripts. They run from a checkout, never from an
+# install, and package.mjs shipping inside its own output is just odd.
+/bin
+# Runtime loads vendor/autoload.php directly, so the manifest is not needed to
+# run the plugin. package.json and webpack.config.js deliberately stay: see the
+# note at the top about keeping build/ reviewable.
+/composer.json
 
 /vendor/phpunit
 /vendor/bin
