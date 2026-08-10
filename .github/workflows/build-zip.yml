@@ -1,0 +1,72 @@
+name: Build plugin zip
+
+# An installable zip for testing: on every push to main, and on demand from any
+# branch. Releases still go through deploy.yml; this exists so that getting a
+# build to try on a test site does not mean running a workflow called "Deploy
+# to WordPress.org" and trusting its dry-run flag.
+#
+# The artefact is NOT the git checkout. vendor/ and build/ are both gitignored
+# and dono.php requires them at boot, so a zip cut from a checkout installs and
+# then fatals on activation.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    name: Build and verify
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: mysqli, gd, intl, zip, mbstring, dom, curl
+          coverage: none
+          tools: composer
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # @dono/ui is a public git dependency, but npm normalises a github: spec
+      # to ssh://git@github.com, which a runner has no key for: the install
+      # dies on "Permission denied (publickey)" before anything runs.
+      - name: Fetch git dependencies over https
+        run: git config --global url."https://github.com/".insteadOf ssh://git@github.com/
+
+      # Strauss is a development dependency, and `strauss:auto` exits 0 when its
+      # binary is absent. Installing --no-dev straight onto a fresh checkout
+      # therefore produces no vendor/vendor-prefixed at all, and packaging stops
+      # on the missing directory. Install with dev first so Strauss runs.
+      - name: Install dependencies and run Strauss
+        run: composer install --prefer-dist --no-progress
+
+      # vendor/vendor-prefixed is Strauss output rather than a composer package,
+      # so stripping the dev dependencies leaves it standing.
+      - name: Drop development dependencies
+        run: composer install --no-dev --prefer-dist --no-progress --optimize-autoloader
+
+      # build/ is gitignored, and without it every admin screen renders nothing.
+      - name: Build assets
+        run: |
+          npm ci
+          npm run build
+
+      - name: Package
+        run: npm run package
+
+      - name: Verify the artefact
+        run: bash bin/verify-zip.sh
+
+      - name: Upload the artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dono-plugin-${{ github.sha }}
+          path: dist/dono.zip
+          retention-days: 14
