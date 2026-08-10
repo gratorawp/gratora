@@ -531,14 +531,14 @@ final class DonorRepository
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('donor_id', $donorId))
             ->selectRaw("
-                JSON_UNQUOTE(JSON_EXTRACT(source_attribution, '$.utm_source')) AS utm_source,
-                JSON_UNQUOTE(JSON_EXTRACT(source_attribution, '$.utm_medium')) AS utm_medium,
+                JSON_UNQUOTE(JSON_EXTRACT(IF(JSON_VALID(source_attribution), source_attribution, NULL), '$.utm_source')) AS utm_source,
+                JSON_UNQUOTE(JSON_EXTRACT(IF(JSON_VALID(source_attribution), source_attribution, NULL), '$.utm_medium')) AS utm_medium,
                 COALESCE(SUM({$netExpr}), 0) AS amount,
                 COUNT(*) AS cnt
             ")
             ->groupByRaw("
-                JSON_UNQUOTE(JSON_EXTRACT(source_attribution, '$.utm_source')),
-                JSON_UNQUOTE(JSON_EXTRACT(source_attribution, '$.utm_medium'))
+                JSON_UNQUOTE(JSON_EXTRACT(IF(JSON_VALID(source_attribution), source_attribution, NULL), '$.utm_source')),
+                JSON_UNQUOTE(JSON_EXTRACT(IF(JSON_VALID(source_attribution), source_attribution, NULL), '$.utm_medium'))
             ")
             ->getAll();
 

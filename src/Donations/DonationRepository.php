@@ -179,8 +179,12 @@ final class DonationRepository
         // gave this site an address. Matches ChannelClassifier::MANUAL, which
         // core reserves and the public route strips; there is no channel column
         // to read instead.
+        // IF(JSON_VALID(...)) because the column is LONGTEXT, so nothing stops a
+        // non-JSON string reaching it. MySQL raises an error on one, MariaDB
+        // returns NULL; guarding makes both return NULL.
         $notByHand = "(source_attribution IS NULL OR JSON_UNQUOTE(JSON_EXTRACT("
-            . "source_attribution, '$.utm_medium')) <> 'manual')";
+            . "IF(JSON_VALID(source_attribution), source_attribution, NULL), "
+            . "'$.utm_medium')) <> 'manual')";
 
         $build = function () use ($noReceipt, $notByHand, $campaignId) {
             $q = DonationQueries::live(
@@ -358,14 +362,14 @@ final class DonationRepository
         $prefix = DB::getPrefix();
         $rows = $this->netPaidQuery($from, $to, $campaignId)
             ->selectRaw("
-                JSON_UNQUOTE(JSON_EXTRACT({$prefix}dono_donations.source_attribution, '$.utm_source')) AS utm_source,
-                JSON_UNQUOTE(JSON_EXTRACT({$prefix}dono_donations.source_attribution, '$.utm_medium')) AS utm_medium,
+                JSON_UNQUOTE(JSON_EXTRACT(IF(JSON_VALID({$prefix}dono_donations.source_attribution), {$prefix}dono_donations.source_attribution, NULL), '$.utm_source')) AS utm_source,
+                JSON_UNQUOTE(JSON_EXTRACT(IF(JSON_VALID({$prefix}dono_donations.source_attribution), {$prefix}dono_donations.source_attribution, NULL), '$.utm_medium')) AS utm_medium,
                 COALESCE(SUM(COALESCE({$prefix}dono_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount,
                 COUNT(*) AS cnt
             ")
             ->groupByRaw("
-                JSON_UNQUOTE(JSON_EXTRACT({$prefix}dono_donations.source_attribution, '$.utm_source')),
-                JSON_UNQUOTE(JSON_EXTRACT({$prefix}dono_donations.source_attribution, '$.utm_medium'))
+                JSON_UNQUOTE(JSON_EXTRACT(IF(JSON_VALID({$prefix}dono_donations.source_attribution), {$prefix}dono_donations.source_attribution, NULL), '$.utm_source')),
+                JSON_UNQUOTE(JSON_EXTRACT(IF(JSON_VALID({$prefix}dono_donations.source_attribution), {$prefix}dono_donations.source_attribution, NULL), '$.utm_medium'))
             ")
             ->getAll();
 

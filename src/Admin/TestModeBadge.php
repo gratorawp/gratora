@@ -148,11 +148,18 @@ final class TestModeBadge extends HookProvider
         // so the whole front end dies with it. JSON_UNQUOTE gives 'true' for a
         // JSON boolean on both engines.
         //
+        // IF(JSON_VALID(...)) because the column is LONGTEXT, so nothing stops
+        // a non-JSON string reaching it. MySQL raises an error on one, MariaDB
+        // returns NULL; guarding makes both return NULL.
+        //
         // test_mode is written as a JSON boolean today; matching '1' as well
         // means a future writer storing an int or a string does not silently
         // stop counting.
         return (int) DB::table('dono_forms')
-            ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(settings, '\$.test_mode')) IN ('true', '1')")
+            ->whereRaw(
+                "JSON_UNQUOTE(JSON_EXTRACT(IF(JSON_VALID(settings), settings, NULL), "
+                . "'\$.test_mode')) IN ('true', '1')"
+            )
             ->where('status', 'published')
             ->count();
     }
