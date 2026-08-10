@@ -3,7 +3,7 @@
 import { render } from 'preact';
 import { useEffect, useState, useCallback, useRef } from 'preact/hooks';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { formatAmount } from '@dono/ui/utils/format';
+import { formatAmount, parseTimestamp } from '@dono/ui/utils/format';
 import { COUNTRIES } from '../_shared/countries';
 import { loadStripeJs } from '../donation-form/util/stripe';
 import './portal.scss';
@@ -914,7 +914,7 @@ function Receipts() {
             .then( ( me ) => {
                 const now   = new Date().getFullYear();
                 const first = me?.first_donation_at
-                    ? new Date( String( me.first_donation_at ).replace( ' ', 'T' ) ).getFullYear()
+                    ? parseTimestamp( me.first_donation_at ).getFullYear()
                     : now;
                 const safe  = Math.min( now, Math.max( now - 9, first || now ) );
                 const span  = Math.max( 1, now - safe + 1 );

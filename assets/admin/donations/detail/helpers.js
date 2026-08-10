@@ -1,11 +1,13 @@
-// Money in minor units; REST dates are MySQL strings needing the T separator.
+// Money in minor units; REST dates are MySQL strings in UTC with no zone
+// marker, which a browser reads as local time. parseTimestamp marks them.
 import { __, sprintf } from '@wordpress/i18n';
+import { parseTimestamp } from '@dono/ui/utils/format';
 
 export { formatAmount, formatAmountCompact, currencyDecimals } from '../../_shared/format';
 
 export function formatDateTime( iso ) {
     if ( ! iso ) return '-';
-    const d = new Date( String( iso ).replace( ' ', 'T' ) );
+    const d = parseTimestamp( iso );
     if ( Number.isNaN( d.getTime() ) ) return iso;
     return d.toLocaleString( undefined, {
         month: 'short', day: '2-digit', year: 'numeric',
@@ -15,21 +17,21 @@ export function formatDateTime( iso ) {
 
 export function formatDateShort( iso ) {
     if ( ! iso ) return '-';
-    const d = new Date( String( iso ).replace( ' ', 'T' ) );
+    const d = parseTimestamp( iso );
     if ( Number.isNaN( d.getTime() ) ) return iso;
     return d.toLocaleDateString( undefined, { month: 'short', day: '2-digit' } );
 }
 
 export function formatDate( iso ) {
     if ( ! iso ) return '-';
-    const d = new Date( String( iso ).replace( ' ', 'T' ) );
+    const d = parseTimestamp( iso );
     if ( Number.isNaN( d.getTime() ) ) return iso;
     return d.toLocaleDateString( undefined, { year: 'numeric', month: 'short', day: '2-digit' } );
 }
 
 export function timeAgo( iso ) {
     if ( ! iso ) return '-';
-    const d = new Date( String( iso ).replace( ' ', 'T' ) );
+    const d = parseTimestamp( iso );
     if ( Number.isNaN( d.getTime() ) ) return iso;
     const diff = Math.max( 0, ( Date.now() - d.getTime() ) / 1000 );
     if ( diff < 60 )      return __( 'just now', 'dono' );

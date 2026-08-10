@@ -1,4 +1,7 @@
 import { __ } from '@wordpress/i18n';
+// MySQL strings arrive in UTC with no zone marker, which a browser reads as
+// local time. parseTimestamp marks them.
+import { parseTimestamp } from '@dono/ui/utils/format';
 
 export const STATUS_LABEL = {
     draft:     __( 'Draft', 'dono' ),
@@ -8,7 +11,7 @@ export const STATUS_LABEL = {
 
 export function formatDate( iso, opts = {} ) {
     if ( ! iso ) return '-';
-    const d = new Date( String( iso ).replace( ' ', 'T' ) );
+    const d = parseTimestamp( iso );
     if ( Number.isNaN( d.getTime() ) ) return iso;
     return d.toLocaleString( undefined, {
         year:   'numeric',
