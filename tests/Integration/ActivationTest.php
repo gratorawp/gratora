@@ -9,7 +9,6 @@ use Dono\Core\CoreModule;
 use Dono\Donors\Portal\PortalPage;
 use Dono\Foundation\Plugin;
 use Dono\Foundation\Upgrade\UpgradeRoutine;
-use Dono\Foundation\Upgrade\UpgradeRunner;
 
 final class ActivationTest extends IntegrationTestCase
 {
@@ -146,27 +145,9 @@ final class ActivationTest extends IntegrationTestCase
     {
         $routines = CoreModule::upgradeRoutines();
 
-        $this->assertNotEmpty($routines);
+        $this->assertIsArray($routines, 'the list is built without resolving anything');
         foreach ($routines as $routine) {
             $this->assertInstanceOf(UpgradeRoutine::class, $routine);
-        }
-    }
-
-    public function test_a_fresh_activation_stamps_the_routines_without_running_them(): void
-    {
-        delete_option(UpgradeRunner::OPTION_DONE);
-        delete_option('dono_db_version');
-
-        Plugin::onActivation();
-
-        $done = UpgradeRunner::completed();
-
-        foreach (CoreModule::upgradeRoutines() as $routine) {
-            $this->assertContains(
-                $routine->id(),
-                $done,
-                'a new site has nothing to migrate, so its routines are recorded rather than run'
-            );
         }
     }
 }

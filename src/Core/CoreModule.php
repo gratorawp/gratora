@@ -59,7 +59,6 @@ use Dono\Donors\DonorAvatars;
 use Dono\Donors\DonorRepository;
 use Dono\Donors\DonorService;
 use Dono\Donors\Erasure\AnalyticsEventHandler;
-use Dono\Donors\Erasure\ClearHashesOnAlreadyErasedConsents;
 use Dono\Foundation\Transfer\CsvImporter;
 use Dono\Foundation\Transfer\DataExporter;
 use Dono\Foundation\Transfer\DataImporter;
@@ -272,7 +271,6 @@ final class CoreModule implements DonoModule
     public static function upgradeRoutines(): array
     {
         return [
-            new ClearHashesOnAlreadyErasedConsents(),
         ];
     }
 

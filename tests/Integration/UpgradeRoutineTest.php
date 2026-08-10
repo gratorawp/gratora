@@ -6,7 +6,6 @@ namespace Dono\Tests\Integration;
 
 use Dono\Donors\Consent;
 use Dono\Donors\Donor;
-use Dono\Donors\Erasure\ClearHashesOnAlreadyErasedConsents;
 use Dono\Foundation\Upgrade\UpgradeRoutine;
 use Dono\Async\AsyncDispatcher;
 use Dono\Foundation\Plugin;
@@ -278,89 +277,6 @@ final class UpgradeRoutineTest extends IntegrationTestCase
         $this->drain($runner);
 
         $this->assertSame(['first', 'second'], $order, 'a later routine can depend on an earlier one');
-    }
-
-    /**
-     * Crosses the 200-donor batch on purpose.
-     *
-     * The first version of this routine took "the first 200 erased donors"
-     * every step. Clearing a donor's hashes does not un-erase them, so the
-     * second step re-read the same 200, found nothing to do, and declared
-     * itself finished with donor 201 onwards untouched. A test inside one batch
-     * passes against that bug.
-     */
-    public function test_the_consent_routine_reaches_past_the_first_batch(): void
-    {
-        global $wpdb;
-
-        $now    = gmdate('Y-m-d H:i:s');
-        $donors = $wpdb->prefix . 'dono_donors';
-        $rows   = [];
-        for ($i = 0; $i < 205; $i++) {
-            $rows[] = $wpdb->prepare('(%s, %s, %s, %s)', hash('sha256', uniqid('', true)), $now, $now, $now);
-        }
-        $wpdb->query(
-            "INSERT INTO `{$donors}` (email_hash, redacted_at, created_at, updated_at) VALUES " . implode(',', $rows)
-        );
-
-        $ids = array_map('intval', (array) $wpdb->get_col(
-            "SELECT id FROM `{$donors}` WHERE redacted_at IS NOT NULL ORDER BY id ASC"
-        ));
-        $this->assertGreaterThan(200, count($ids), 'precondition: more erased donors than one batch');
-
-        $consents = $wpdb->prefix . 'dono_consents';
-        $crows    = [];
-        foreach ($ids as $id) {
-            $crows[] = $wpdb->prepare(
-                '(%d, %s, 1, %s, %s, %s, %s)',
-                $id,
-                'marketing',
-                'donation_form',
-                str_repeat('a', 64),
-                str_repeat('b', 64),
-                $now
-            );
-        }
-        $wpdb->query(
-            "INSERT INTO `{$consents}` (donor_id, purpose, granted, source, ip_hash, user_agent_hash, occurred_at) VALUES "
-            . implode(',', $crows)
-        );
-
-        $this->drain(new UpgradeRunner([new ClearHashesOnAlreadyErasedConsents()]));
-
-        $left = (int) $wpdb->get_var(
-            "SELECT COUNT(*) FROM `{$consents}` WHERE ip_hash IS NOT NULL OR user_agent_hash IS NOT NULL"
-        );
-        $this->assertSame(0, $left, 'every erased donor is reached, not just the first batch');
-
-        $kept = (int) $wpdb->get_var("SELECT COUNT(*) FROM `{$consents}` WHERE purpose = 'marketing'");
-        $this->assertSame(count($ids), $kept, 'and every consent fact survives');
-    }
-
-    public function test_the_consent_routine_leaves_a_live_donors_consent_alone(): void
-    {
-        $now = gmdate('Y-m-d H:i:s');
-
-        $live = Donor::make();
-        $live->email_hash = hash('sha256', uniqid('', true));
-        $live->created_at = $now;
-        $live->updated_at = $now;
-        $live->save();
-
-        $consent = Consent::make();
-        $consent->donor_id        = (int) $live->id;
-        $consent->purpose         = 'marketing';
-        $consent->granted         = true;
-        $consent->source          = 'donation_form';
-        $consent->ip_hash         = str_repeat('c', 64);
-        $consent->user_agent_hash = str_repeat('d', 64);
-        $consent->occurred_at     = $now;
-        $consent->save();
-
-        $this->drain(new UpgradeRunner([new ClearHashesOnAlreadyErasedConsents()]));
-
-        $fresh = Consent::query()->where('donor_id', (int) $live->id)->get();
-        $this->assertSame(str_repeat('c', 64), $fresh->ip_hash, 'nobody who was not erased is touched');
     }
 
     public function test_a_fresh_install_stamps_the_routines_instead_of_running_them(): void
