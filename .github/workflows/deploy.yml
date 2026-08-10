@@ -124,7 +124,7 @@ jobs:
           '
 
           # Receipts pick their faces out of the pruned font set.
-          test -f "$P/vendor-prefixed/mpdf/mpdf/ttfonts/DejaVuSansCondensed.ttf" \
+          test -f "$P/vendor/vendor-prefixed/mpdf/mpdf/ttfonts/DejaVuSansCondensed.ttf" \
             || { echo "::error::the fallback font was pruned away"; exit 1; }
 
       - name: Upload the artefact

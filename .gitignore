@@ -13,18 +13,18 @@
 .DS_Store
 
 # composer.lock and package-lock.json are deliberately TRACKED, and matter more
-# now that vendor-prefixed/ is built rather than committed: the locks are the
+# now that vendor/vendor-prefixed/ is built rather than committed: the locks are the
 # only thing pinning which versions Strauss prefixes. .distignore keeps them out
 # of the zip.
 #
-# vendor-prefixed/ is Strauss output. `composer strauss` rebuilds it, and
+# vendor/vendor-prefixed/ is Strauss output. `composer strauss` rebuilds it, and
 # bin/package.mjs refuses to build a zip without it, because a zip missing it
 # installs cleanly and then fatals on the first query.
 #
 # The lock files carried by the vendored libraries themselves are a different
 # thing and stay out: they record those libraries' own dev dependencies, which
 # mean nothing once Strauss has flattened the code into our namespace.
-/vendor-prefixed/
+/vendor/vendor-prefixed/
 
 # Local wp-env override (machine-specific plugin paths)
 .wp-env.override.json

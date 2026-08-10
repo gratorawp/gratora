@@ -13,7 +13,7 @@
 declare(strict_types=1);
 
 require __DIR__ . '/../vendor/autoload.php';
-require __DIR__ . '/../vendor-prefixed/autoload.php';
+require __DIR__ . '/../vendor/vendor-prefixed/autoload.php';
 
 // In-memory option store for tests
 if (! isset($GLOBALS['_dono_test_options'])) {

@@ -88,14 +88,14 @@ Thumbs.db
 # Vendor test suites. Strauss copies dependencies whole, so their own tests and
 # fixtures come with them: fpdi ships 30 MB of sample PDFs and mpdf 5 MB more,
 # which is over half the plugin and none of it runs.
-/vendor-prefixed/setasign/fpdi/tests
-/vendor-prefixed/setasign/fpdi/local-tests
-/vendor-prefixed/mpdf/mpdf/tests
-/vendor-prefixed/mpdf/mpdf/phpstan-baseline.neon
+/vendor/vendor-prefixed/setasign/fpdi/tests
+/vendor/vendor-prefixed/setasign/fpdi/local-tests
+/vendor/vendor-prefixed/mpdf/mpdf/tests
+/vendor/vendor-prefixed/mpdf/mpdf/phpstan-baseline.neon
 # Queryable is ours, so it was easy to miss: Strauss copies it whole like any
 # other dependency, tests and lockfile included.
-/vendor-prefixed/dono/queryable/tests
-/vendor-prefixed/dono/queryable/composer.lock
-/vendor-prefixed/dono/queryable/phpunit.xml.dist
+/vendor/vendor-prefixed/dono/queryable/tests
+/vendor/vendor-prefixed/dono/queryable/composer.lock
+/vendor/vendor-prefixed/dono/queryable/phpunit.xml.dist
 
 /.cache

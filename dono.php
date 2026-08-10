@@ -25,7 +25,7 @@ if (! defined('ABSPATH')) {
 }
 
 require __DIR__ . '/vendor/autoload.php';
-require __DIR__ . '/vendor-prefixed/autoload.php';
+require __DIR__ . '/vendor/vendor-prefixed/autoload.php';
 require_once __DIR__ . '/vendor/woocommerce/action-scheduler/action-scheduler.php';
 
 define('DONO_VERSION', '1.0.0');

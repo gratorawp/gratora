@@ -17,7 +17,7 @@
 import { readdirSync, statSync, unlinkSync } from 'node:fs';
 import path from 'node:path';
 
-const dir = path.join( process.cwd(), 'vendor-prefixed/mpdf/mpdf/ttfonts' );
+const dir = path.join( process.cwd(), 'vendor/vendor-prefixed/mpdf/mpdf/ttfonts' );
 
 // Keep the family, and the licence/readme that has to travel with it.
 const KEEP = /^(DejaVu|.*\.txt$)/i;

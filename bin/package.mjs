@@ -89,11 +89,11 @@ const REQUIRED_PREFIXED = [
 ];
 
 const missingPrefixed = REQUIRED_PREFIXED
-    .filter( ( parts ) => ! existsSync( path.join( root, 'vendor-prefixed', ...parts ) ) )
+    .filter( ( parts ) => ! existsSync( path.join( root, 'vendor', 'vendor-prefixed', ...parts ) ) )
     .map( ( parts ) => parts.join( '/' ) );
 
 if ( missingPrefixed.length > 0 ) {
-    console.error( `vendor-prefixed/ is missing: ${ missingPrefixed.join( ', ' ) }` );
+    console.error( `vendor/vendor-prefixed/ is missing: ${ missingPrefixed.join( ', ' ) }` );
     console.error( 'Run `composer strauss` before packaging.' );
     process.exit( 1 );
 }

@@ -41,7 +41,7 @@
         "test:integration": "phpunit --configuration phpunit-integration.xml.dist",
         "strauss": [
             "@php -d memory_limit=1G vendor/bin/strauss",
-            "find vendor-prefixed -type d -name .git -exec rm -rf {} +",
+            "find vendor/vendor-prefixed -type d -name .git -exec rm -rf {} +",
             "node bin/prune-fonts.mjs",
             "@php -r \"file_put_contents('vendor/composer/autoload_aliases.php', '<?php');\"",
             "@composer dump-autoload"
@@ -57,7 +57,7 @@
     },
     "extra": {
         "strauss": {
-            "target_directory": "vendor-prefixed",
+            "target_directory": "vendor/vendor-prefixed",
             "namespace_prefix": "Dono\\Vendor\\",
             "classmap_prefix": "Dono_Vendor_",
             "constant_prefix": "DONO_VENDOR_",
