@@ -942,12 +942,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/getdono/queryable.git",
-                "reference": "d80367c560797fea26c9dc5be11d46dec8a526b4"
+                "reference": "11b6778aa5238992e292a50a2f5858a4b4476af0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/getdono/queryable/zipball/d80367c560797fea26c9dc5be11d46dec8a526b4",
-                "reference": "d80367c560797fea26c9dc5be11d46dec8a526b4",
+                "url": "https://api.github.com/repos/getdono/queryable/zipball/11b6778aa5238992e292a50a2f5858a4b4476af0",
+                "reference": "11b6778aa5238992e292a50a2f5858a4b4476af0",
                 "shasum": ""
             },
             "require": {
