@@ -7,8 +7,6 @@ import EmptyState from '../_shared/components/EmptyState';
 import MetricCard from '../_shared/widgets/MetricCard';
 import { WidgetCard } from '../_shared/widgets/Widget';
 import { formatAmount, formatAmountCompact, formatDate } from '../_shared/format';
-import { downloadFile } from '../_shared/download';
-import notify from '../_shared/notify';
 import { IconUsers, IconHeart, IconActivity, IconCoins } from '../_shared/widgets/icons';
 
 const SEGMENT_META = {
@@ -198,7 +196,7 @@ function DonorTable( { rows, showReason } ) {
                     <th className="dono-num">{ __( 'Donations', 'dono' ) }</th>
                     <th className="dono-num">{ __( 'Total', 'dono' ) }</th>
                     <th className="dono-date">{ __( 'Last donation', 'dono' ) }</th>
-                    { showReason && <th>{ __( 'Why', 'dono' ) }</th> }
+                    { showReason && <th className="dono-why">{ __( 'Why', 'dono' ) }</th> }
                 </tr>
             </thead>
             <tbody>
@@ -214,7 +212,7 @@ function DonorTable( { rows, showReason } ) {
                         <td className="dono-num">{ r.donations_count ?? '-' }</td>
                         <td className="dono-num">{ formatAmount( r.total_donated_cents ) }</td>
                         <td className="dono-date">{ formatDate( r.last_donation_at ) }</td>
-                        { showReason && <td><ReasonPill row={ r } /></td> }
+                        { showReason && <td className="dono-why"><ReasonPill row={ r } /></td> }
                     </tr>
                 ) ) }
             </tbody>
@@ -371,13 +369,6 @@ function AtRiskTable() {
                             ? __( '1 at-risk donor', 'dono' )
                             : sprintf( /* translators: %s: count */ __( '%s at-risk donors', 'dono' ), total.toLocaleString() ) }
                     </span>
-                    <button
-                        type="button"
-                        className="components-button is-secondary"
-                        onClick={ () => downloadFile( '/dono/v1/admin/donors/at-risk/export', `dono-at-risk-${ new Date().toISOString().slice( 0, 10 ) }.csv` ).catch( ( e ) => notify.error( e?.message || __( 'Could not export the list.', 'dono' ) ) ) }
-                    >
-                        { __( 'Export CSV', 'dono' ) }
-                    </button>
                 </div>
             ) }
             { loading && ! data && <p className="dono-loading">{ __( 'Loading…', 'dono' ) }</p> }

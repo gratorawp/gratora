@@ -192,6 +192,9 @@ $bar-radius:    6px;
     }
     th:first-child, td:first-child { padding-left: 0; }
     th:last-child,  td:last-child  { padding-right: 0; }
+    // A right-aligned column ends hard against a left-aligned neighbour: the
+    // date and the reason pill met with nothing between them.
+    .dono-why { padding-left: 24px; }
     th { font-weight: 600; color: $text-muted; }
     // A right-aligned amount sitting against a left-aligned date read as one
     // value, so the trailing pair is right-aligned together.
