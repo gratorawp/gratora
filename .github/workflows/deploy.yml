@@ -60,6 +60,13 @@ jobs:
       - name: Install production dependencies
         run: composer install --no-dev --prefer-dist --no-progress --optimize-autoloader
 
+      # @dono/ui is a public git dependency, but npm normalises a github:
+      # spec to ssh://git@github.com, which a runner has no key for: the
+      # install then dies on "Permission denied (publickey)" before anything
+      # runs. Rewrite it to https, which needs no credentials.
+      - name: Fetch git dependencies over https
+        run: git config --global url."https://github.com/".insteadOf ssh://git@github.com/
+
       # build/ is gitignored, and without it every admin screen renders nothing.
       - name: Build assets
         run: |

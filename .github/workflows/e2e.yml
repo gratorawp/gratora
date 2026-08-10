@@ -42,6 +42,13 @@ jobs:
         with:
           node-version: '20'
 
+      # @dono/ui is a public git dependency, but npm normalises a github:
+      # spec to ssh://git@github.com, which a runner has no key for: the
+      # install then dies on "Permission denied (publickey)" before anything
+      # runs. Rewrite it to https, which needs no credentials.
+      - name: Fetch git dependencies over https
+        run: git config --global url."https://github.com/".insteadOf ssh://git@github.com/
+
       - name: Build core
         run: |
           composer install --no-interaction --prefer-dist --no-progress
