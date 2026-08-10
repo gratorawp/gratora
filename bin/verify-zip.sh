@@ -50,7 +50,8 @@ done
 for leak in \
     tests tests-e2e node_modules .git .github .claude \
     CLAUDE.md phpunit.xml.dist phpunit-integration.xml.dist \
-    .npmrc graphify-out qa bin composer.json composer.lock
+    .npmrc graphify-out qa bin \
+    composer.json composer.lock package.json package-lock.json webpack.config.js
 do
     test ! -e "$OUT/$leak" || fail "$leak is in the zip"
 done

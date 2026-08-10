@@ -1,7 +1,12 @@
 # Files and directories excluded from the published WordPress.org package.
-# Human-readable source (assets/) and the build config (webpack.config.js,
-# package.json) are intentionally kept so the minified build/ output is
-# reproducible and reviewable (Plugin Guideline 4).
+#
+# The zip carries what runs and nothing else. Build tooling, manifests and
+# configuration stay behind: none of it is read at runtime, and a customer
+# opening the plugin folder should find the plugin.
+#
+# Plugin Guideline 4 wants the source behind minified build/ output to be
+# reachable. The public repository is what satisfies it, so readme.txt needs a
+# link to the repository before the plugin goes to the directory.
 #
 # Note: run `composer install --no-dev` before packaging so vendor/ ships
 # without development dependencies. .distignore cannot strip those itself.
@@ -71,10 +76,12 @@
 # Our own build and release scripts. They run from a checkout, never from an
 # install, and package.mjs shipping inside its own output is just odd.
 /bin
-# Runtime loads vendor/autoload.php directly, so the manifest is not needed to
-# run the plugin. package.json and webpack.config.js deliberately stay: see the
-# note at the top about keeping build/ reviewable.
+# Dependency manifests and build configuration. Runtime loads
+# vendor/autoload.php and the compiled build/ directly, so none of this is
+# read once the plugin is installed.
 /composer.json
+/package.json
+/webpack.config.js
 
 /vendor/phpunit
 /vendor/bin
