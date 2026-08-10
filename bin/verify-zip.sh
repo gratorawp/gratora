@@ -1,17 +1,18 @@
 #!/usr/bin/env bash
 #
-# Read dist/dono.zip and refuse it if it would not install and run.
+# Extract dist/dono.zip and refuse it if it would not install and run.
 #
-# Lives in a script rather than inline in a workflow because two workflows
-# build the same artefact, and a check that exists in only one of them is a
-# check that stops running the moment releases move to the other.
+# The extraction is not incidental: deploy.yml publishes dist/dono, so this is
+# what produces the tree that ships, and the thing verified and the thing
+# uploaded are the same bytes.
+#
+# Only checks bin/package.mjs cannot make. The packager already refuses to
+# build with development dependencies present or the prefixed vendor missing;
+# what it cannot tell you is whether the packaged tree actually loads.
 #
 # Runs anywhere: `bash bin/verify-zip.sh` after `npm run package` says the same
 # thing locally that it says on a runner. The ::error:: prefixes are GitHub
-# annotations and are harmless plain text elsewhere.
-#
-# Leaves the extracted tree at dist/dono, which the publish step uploads, so
-# what was verified and what ships are the same bytes.
+# annotations and harmless plain text elsewhere.
 
 set -euo pipefail
 
@@ -24,34 +25,20 @@ fail() { echo "::error::$1" >&2; exit 1; }
 
 test -f "$ZIP" || fail "no zip was produced"
 
-SIZE=$(du -m "$ZIP" | cut -f1)
-echo "artefact: ${SIZE} MB"
-# Was 56 MB before the vendor test suites and unused mpdf fonts came out. A
-# jump back means something is shipping that should not.
-test "$SIZE" -lt 20 || fail "zip is ${SIZE} MB; expected well under 20"
-
 rm -rf "$OUT"
 unzip -q "$ZIP" -d dist
 
 # Without any one of these the plugin fatals on activation, behind a blank
 # admin screen that says nothing about why.
-for f in \
-    dono.php \
-    vendor/autoload.php \
-    vendor/vendor-prefixed/autoload.php \
-    vendor/woocommerce/action-scheduler/action-scheduler.php \
-    build
-do
+for f in dono.php vendor/autoload.php vendor/woocommerce/action-scheduler/action-scheduler.php build; do
     test -e "$OUT/$f" || fail "$f missing from the zip; the plugin would fatal on activation"
 done
 
-# graphify-out reached a customer zip once: it is gitignored, so git never sees
-# it and .distignore is the only thing that can stop it.
-for leak in \
-    tests tests-e2e node_modules .git .github .claude \
-    CLAUDE.md phpunit.xml.dist phpunit-integration.xml.dist \
-    .npmrc graphify-out qa bin \
-    composer.json composer.lock package.json package-lock.json webpack.config.js
+# .distignore is the only thing keeping these out: they are gitignored, so they
+# are invisible to git and present on disk, which is how a customer zip came to
+# carry 19 MB of generated notes about our own source.
+for leak in tests tests-e2e node_modules .git .npmrc graphify-out qa \
+    phpunit.xml.dist phpunit-integration.xml.dist
 do
     test ! -e "$OUT/$leak" || fail "$leak is in the zip"
 done

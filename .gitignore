@@ -11,46 +11,18 @@
 /tests-e2e/.env
 *.log
 .DS_Store
-
-# composer.lock and package-lock.json are deliberately TRACKED, and matter more
-# now that vendor/vendor-prefixed/ is built rather than committed: the locks are the
-# only thing pinning which versions Strauss prefixes. .distignore keeps them out
-# of the zip.
-#
-# vendor/vendor-prefixed/ is Strauss output. `composer strauss` rebuilds it, and
-# bin/package.mjs refuses to build a zip without it, because a zip missing it
-# installs cleanly and then fatals on the first query.
-#
-# The lock files carried by the vendored libraries themselves are a different
-# thing and stay out: they record those libraries' own dev dependencies, which
-# mean nothing once Strauss has flattened the code into our namespace.
 /vendor/vendor-prefixed/
-
-# Local wp-env override (machine-specific plugin paths)
 .wp-env.override.json
 /.wp-env/
+CLAUDE.md
+/dist/
+/.cache
+graphify-out/
 
 # Internal working material. This plugin is going to be open sourced, so
 # anything that is not shipped code stays out of the repo: planning docs,
-# competitor research, and above all the QA findings, which describe how to
-# attack the product. Their home is ~/Local Sites/dono/dono-pro-addon-specs/.
+# engineering direction, and above all the QA findings, which describe how to
+# attack the product.
 /docs/
 /qa/
-# Working notes for whoever is building this, not for whoever is reading it:
-# it describes the Pro add-on line and the licensing model, which have no place
-# in the free core's public repo. Kept on disk, just not published.
-CLAUDE.md
-# Internal engineering direction: what we deferred, declined and are watching.
-# Useful to us, useful to a competitor, and not shipped code.
 ROADMAP.md
-
-# Packaged zips from `npm run package`.
-/dist/
-
-# make-pot scratch: the intermediate @dono/ui template, see "npm run i18n".
-/.cache
-
-# graphify knowledge graph: an 8MB graph.json rebuilt from source on demand.
-# The nested one is where the AST extractor writes its cache when handed a
-# subdirectory, so ignore it at any depth rather than only at the root.
-graphify-out/
