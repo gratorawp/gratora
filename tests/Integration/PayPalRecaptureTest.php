@@ -102,6 +102,7 @@ final class PayPalRecaptureTest extends IntegrationTestCase
                 $c->get(PayPalPlans::class),
                 $c->get(RecurringPlanRepository::class),
                 $c->get(Clock::class),
+                $c->get(\Dono\Gateways\PayPal\PayPalPlanRecorder::class),
             ));
         }
     }

@@ -54,6 +54,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         private PayPalPlans $plans,
         private RecurringPlanRepository $planRepo,
         private Clock $clock,
+        private ?PayPalPlanRecorder $planRecorder = null,
     ) {
     }
 
@@ -474,6 +475,15 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
     private function handleSubscriptionActivated(string $eventId, string $type, array $sub): WebhookOutcome
     {
         $plan = $this->planRepo->findBySubscriptionId($this->id(), (string) ($sub['id'] ?? ''));
+
+        // PayPal has charged by now, and the plan row is normally written by
+        // the donor's browser. When that POST never landed there is nothing to
+        // record the payment against and no way to cancel, so this event is the
+        // second chance: the resource carries every field the browser sent.
+        if (! $plan) {
+            $plan = $this->recoverPlan($sub);
+        }
+
         if ($plan && $plan->status !== 'active') {
             $plan->status     = 'active';
             $plan->updated_at = $this->now();
@@ -486,6 +496,52 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
             event_type: $type,
             handled: $plan !== null,
         );
+    }
+
+    /**
+     * Recover a plan when only the subscription id is known, as on a sale.
+     *
+     * Costs one API call, and only on the path that would otherwise have
+     * nothing to record the money against.
+     */
+    private function recoverPlanBySubscriptionId(string $subId): ?RecurringPlan
+    {
+        if ($this->planRecorder === null || $subId === '') {
+            return null;
+        }
+
+        // The mode is whichever credentials signed this delivery.
+        $this->account->useTestMode((bool) $this->verifiedIsTest);
+
+        try {
+            $sub = $this->api->get('/v1/billing/subscriptions/' . rawurlencode($subId));
+        } catch (RuntimeException $e) {
+            return null;
+        }
+
+        return $this->recoverPlan($sub + ['id' => $subId]);
+    }
+
+    /**
+     * Write the plan a lost browser POST never did.
+     *
+     * Same recorder the donor-facing route uses, so the ownership and amount
+     * checks are identical: a subscription that does not answer for a donation
+     * awaiting one is refused here exactly as it would be there.
+     *
+     * @param array<string,mixed> $sub a PayPal subscription resource
+     */
+    private function recoverPlan(array $sub): ?RecurringPlan
+    {
+        if ($this->planRecorder === null) {
+            return null;
+        }
+
+        try {
+            return $this->planRecorder->record($sub);
+        } catch (PayPalPlanRefused $e) {
+            return null;
+        }
     }
 
     /** @param array<string,mixed> $sub */
@@ -565,6 +621,17 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         }
 
         $plan = $this->planRepo->findBySubscriptionId($this->id(), $subId);
+
+        // Ask PayPal what this subscription is and write the plan ourselves.
+        // Waiting for the browser was the whole defect: when that POST never
+        // arrives, redelivery only buys time until PayPal gives up, and the
+        // subscription then bills forever with nothing on file and no cancel
+        // path, because every cancel reads gateway_subscription_id off a row
+        // that was never created.
+        if (! $plan) {
+            $plan = $this->recoverPlanBySubscriptionId($subId);
+        }
+
         if (! $plan) {
             // Not unmatched(): that returns 200 on the reasoning that a valid
             // event which is not ours should not be retried for days. A sale

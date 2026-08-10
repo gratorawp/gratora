@@ -163,6 +163,7 @@ use Dono\Gateways\Stripe\StripeApi;
 use Dono\Gateways\PayPal\PayPalAccount;
 use Dono\Gateways\PayPal\PayPalApi;
 use Dono\Gateways\PayPal\PayPalGateway;
+use Dono\Gateways\PayPal\PayPalPlanRecorder;
 use Dono\Gateways\PayPal\PayPalPlans;
 use Dono\Gateways\Stripe\ApplePayDomain;
 use Dono\Gateways\Stripe\StripeAccount;
@@ -642,6 +643,11 @@ final class CoreModule implements DonoModule
         $c->bind(PayPalApi::class, fn (Container $c) => new PayPalApi(
             $c->get(PayPalAccount::class)
         ));
+        $c->bind(PayPalPlanRecorder::class, fn (Container $c) => new PayPalPlanRecorder(
+            $c->get(DonationRepository::class),
+            $c->get(Clock::class),
+        ));
+
         $c->bind(PayPalPlans::class, fn (Container $c) => new PayPalPlans(
             $c->get(PayPalApi::class),
             $c->get(PayPalAccount::class)
@@ -682,6 +688,7 @@ final class CoreModule implements DonoModule
                 $c->get(PayPalPlans::class),
                 $c->get(RecurringPlanRepository::class),
                 $c->get(Clock::class),
+                $c->get(PayPalPlanRecorder::class),
             ));
         }
 
@@ -921,8 +928,7 @@ final class CoreModule implements DonoModule
                 $c->get(GatewayManager::class),
                 $c->get(PayPalApi::class),
                 $c->get(PayPalAccount::class),
-                $c->get(RecurringPlanRepository::class),
-                $c->get(Clock::class),
+                $c->get(PayPalPlanRecorder::class),
             ),
             new FxController(
                 $c->get(FxRates::class),

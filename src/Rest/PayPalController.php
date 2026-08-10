@@ -7,15 +7,14 @@ namespace Dono\Rest;
 use Dono\Donations\Donation;
 use Dono\Donations\DonationRepository;
 use Dono\Donations\DonationService;
-use Dono\Foundation\Time\Clock;
 use Dono\Gateways\GatewayManager;
 use Dono\Gateways\PayPal\PayPalAccount;
 use Dono\Gateways\PayPal\PayPalApi;
 use Dono\Gateways\PayPal\PayPalGateway;
+use Dono\Gateways\PayPal\PayPalPlanRecorder;
+use Dono\Gateways\PayPal\PayPalPlanRefused;
 use Dono\Gateways\PayPal\PayPalMoney;
 use Dono\Recurring\FrequencyMap;
-use Dono\Recurring\RecurringPlan;
-use Dono\Recurring\RecurringPlanRepository;
 use RuntimeException;
 use WP_Error;
 use WP_REST_Request;
@@ -43,8 +42,7 @@ final class PayPalController
         private GatewayManager $gateways,
         private PayPalApi $api,
         private PayPalAccount $account,
-        private RecurringPlanRepository $plans,
-        private Clock $clock,
+        private PayPalPlanRecorder $planRecorder,
     ) {
     }
 
@@ -137,11 +135,6 @@ final class PayPalController
         if (! FrequencyMap::isRecurring((string) $donation->frequency)) {
             return $this->error('dono_paypal_not_recurring', __('That donation is not recurring.', 'dono'), 400);
         }
-        if ($donation->recurring_plan_id) {
-            // Already recorded: a double submit, not an error.
-            return new WP_REST_Response(['status' => $donation->status, 'reference' => $donation->reference], 200);
-        }
-
         $subId = trim((string) $request->get_param('subscription_id'));
         if ($subId === '') {
             return $this->error('dono_paypal_bad_subscription', __('Missing subscription id.', 'dono'), 400);
@@ -155,92 +148,20 @@ final class PayPalController
             return $this->error('dono_paypal_subscription_lookup', $e->getMessage(), 400);
         }
 
-        // The browser supplied this id, so bind it to this donation before
-        // trusting it: PayPal echoes back the custom_id set at create time.
-        if ((string) ($sub['custom_id'] ?? '') !== (string) $donation->reference) {
-            return $this->error(
-                'dono_paypal_subscription_mismatch',
-                __('That subscription does not belong to this donation.', 'dono'),
-                403
-            );
+        // Every check and the write itself live in the recorder, because the
+        // webhook handlers have to apply exactly the same ones when they
+        // recover a plan this route never got to record.
+        try {
+            $plan = $this->planRecorder->record($sub + ['id' => $subId]);
+        } catch (PayPalPlanRefused $e) {
+            return $this->error($e->errorCode, $e->getMessage(), $e->status);
         }
-
-        // custom_id proves which donation the subscription is for. It says
-        // nothing about the money, and the browser chooses the plan: the SDK is
-        // handed a plan id for this donation's amount, and can just as easily
-        // create the subscription on a cheaper plan and hand that back here.
-        // Nothing compared the two, so a 1.00 subscription could stand behind a
-        // 1000.00 recurring donation, and the plan would be recorded, reported
-        // and renewed at the amount nobody was charging.
-        $meta         = (array) ($donation->gateway_metadata ?? []);
-        $expectedPlan = (string) ($meta['paypal_plan_id'] ?? '');
-        if ($expectedPlan === '' || (string) ($sub['plan_id'] ?? '') !== $expectedPlan) {
-            return $this->error(
-                'dono_paypal_subscription_plan_mismatch',
-                __('That subscription is not for this donation amount.', 'dono'),
-                403
-            );
-        }
-
-        $status = (string) ($sub['status'] ?? '');
-        if (! in_array($status, ['ACTIVE', 'APPROVED', 'APPROVAL_PENDING'], true)) {
-            return $this->error(
-                'dono_paypal_subscription_status',
-                sprintf(
-                    /* translators: %s: PayPal subscription status */
-                    __('PayPal reports this subscription as %s.', 'dono'),
-                    $status
-                ),
-                400
-            );
-        }
-
-        $plan = $this->createPlan($donation, $subId, $sub, $status);
 
         return new WP_REST_Response([
             'status'    => $donation->status,
             'reference' => $donation->reference,
             'plan_id'   => (int) $plan->id,
         ], 200);
-    }
-
-    /** @param array<string,mixed> $sub */
-    private function createPlan(Donation $donation, string $subId, array $sub, string $status): RecurringPlan
-    {
-        $now = $this->clock->now()->format('Y-m-d H:i:s');
-        [$unit, $count] = FrequencyMap::toStripe((string) $donation->frequency);
-
-        $plan = RecurringPlan::make();
-        $plan->donor_id           = (int) $donation->donor_id;
-        $plan->form_id            = $donation->form_id;
-        $plan->campaign_id        = $donation->campaign_id;
-        $plan->fund_id            = $donation->fund_id;
-        $plan->fundraiser_id      = $donation->fundraiser_id;
-        $plan->fundraiser_team_id = $donation->fundraiser_team_id;
-        $plan->gateway            = 'paypal';
-        $plan->gateway_subscription_id = $subId;
-        $plan->gateway_customer_id     = (string) ($sub['subscriber']['payer_id'] ?? '') ?: null;
-        $plan->amount_cents       = (int) $donation->amount_cents;
-        $plan->currency           = (string) $donation->currency;
-        $plan->base_amount_cents  = $donation->base_amount_cents;
-        $plan->fx_rate            = $donation->fx_rate;
-        $plan->interval_unit      = $unit;
-        $plan->interval_count     = $count;
-        // Payment counters stay at zero: the opening sale webhook records them,
-        // so the plan is never credited for money that has not landed.
-        $plan->status             = $status === 'ACTIVE' ? 'active' : 'pending';
-        $plan->is_test            = (bool) $donation->is_test;
-        $plan->started_at         = $now;
-        $plan->next_payment_at    = (string) ($sub['billing_info']['next_billing_time'] ?? '') ?: null;
-        $plan->created_at         = $now;
-        $plan->updated_at         = $now;
-        $plan->save();
-
-        $donation->recurring_plan_id = (int) $plan->id;
-        $donation->gateway_intent_id = $subId;
-        $donation->save();
-
-        return $plan;
     }
 
     private function pendingDonation(string $reference): Donation|WP_Error

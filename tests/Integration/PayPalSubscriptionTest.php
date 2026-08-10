@@ -60,6 +60,7 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
                 $c->get(PayPalPlans::class),
                 $c->get(RecurringPlanRepository::class),
                 $c->get(\Dono\Foundation\Time\Clock::class),
+                $c->get(\Dono\Gateways\PayPal\PayPalPlanRecorder::class),
             ));
         }
     }
@@ -94,8 +95,12 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
         if (str_contains($path, '/v1/catalogs/products'))     return ['id' => 'PROD-1'];
         if (str_contains($path, '/v1/billing/plans'))         return ['id' => 'P-PLAN-1'];
         if (str_contains($path, '/v1/billing/subscriptions/')) {
+            // Echo the subscription actually asked for: PayPal answers about
+            // the id in the URL, and a fake that always names the same one
+            // hides every bug about which subscription is which.
+            $asked = rawurldecode(basename($path));
             return [
-                'id'         => 'I-SUB-1',
+                'id'         => $asked !== '' ? $asked : 'I-SUB-1',
                 'status'     => 'ACTIVE',
                 'custom_id'  => $this->currentReference,
                 // A real subscription always names the plan it bills on, which
@@ -333,12 +338,14 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
         $this->assertSame(2500, (int) $plan->total_paid_cents);
     }
 
-    public function test_a_sale_arriving_before_the_plan_exists_is_redelivered(): void
+    public function test_a_sale_we_cannot_place_is_redelivered_rather_than_accepted(): void
     {
-        // The donor approved and PayPal charged, but the browser POST that
-        // writes the plan has not landed: a closed tab, a dropped connection,
-        // or simply the webhook winning the race.
+        // The plan is normally recovered from the subscription itself. When
+        // even that cannot place the sale - here PayPal reports it against a
+        // different donation - the delivery must not be accepted: a 200 tells
+        // PayPal the payment was booked and it never comes back.
         $reference = $this->createRecurringDonation();
+        $this->currentReference = 'DONO-SOMEONE-ELSE';
 
         $res = $this->postWebhook('PAYMENT.SALE.COMPLETED', [
             'id'                   => 'SALE-EARLY',
@@ -566,5 +573,98 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
         $donation = (new DonationRepository())->findByReference($reference);
 
         $this->assertSame('paid', $donation->status, 'the guard must not break the happy path');
+    }
+
+    /**
+     * The plan row is what records the money, shows the donor their plan, and
+     * lets anyone cancel it: every cancel path reads gateway_subscription_id
+     * off it. It used to be written only by one un-retried POST from the
+     * donor's browser, so a closed tab left PayPal billing forever against
+     * nothing.
+     */
+    public function test_the_activation_webhook_records_a_plan_the_browser_never_did(): void
+    {
+        $reference = $this->createRecurringDonation(2500);
+        // No recordSubscription() call: this is the lost POST.
+
+        $res = $this->postWebhook('BILLING.SUBSCRIPTION.ACTIVATED', [
+            'id'         => 'I-SUB-1',
+            'status'     => 'ACTIVE',
+            'custom_id'  => $reference,
+            'plan_id'    => $this->subscriptionPlanId,
+            'subscriber' => ['payer_id' => 'PAYER-1'],
+        ]);
+
+        $this->assertSame(200, $res->get_status());
+
+        $donation = (new DonationRepository())->findByReference($reference);
+        $this->assertNotNull($donation->recurring_plan_id, 'the plan exists now');
+
+        $plan = RecurringPlan::query()->where('id', (int) $donation->recurring_plan_id)->get();
+        $this->assertSame('I-SUB-1', $plan->gateway_subscription_id, 'so it can be cancelled');
+        $this->assertSame(2500, (int) $plan->amount_cents);
+    }
+
+    public function test_a_recovered_plan_then_books_the_opening_payment(): void
+    {
+        $reference = $this->createRecurringDonation(2500);
+
+        $this->postWebhook('BILLING.SUBSCRIPTION.ACTIVATED', [
+            'id'        => 'I-SUB-1',
+            'status'    => 'ACTIVE',
+            'custom_id' => $reference,
+            'plan_id'   => $this->subscriptionPlanId,
+        ]);
+        $this->postWebhook('PAYMENT.SALE.COMPLETED', [
+            'id'                   => 'SALE-REC',
+            'billing_agreement_id' => 'I-SUB-1',
+            'amount'               => ['total' => '25.00', 'currency' => 'USD'],
+        ]);
+
+        $donation = (new DonationRepository())->findByReference($reference);
+        $this->assertSame('paid', $donation->status, 'the money is recorded');
+
+        $plan = RecurringPlan::query()->where('id', (int) $donation->recurring_plan_id)->get();
+        $this->assertSame(1, (int) $plan->payments_count);
+    }
+
+    /**
+     * The sale can beat the activation. Redelivery alone only bought time: when
+     * the browser POST was never coming, PayPal eventually gave up and the
+     * first payment was lost for good.
+     */
+    public function test_a_sale_arriving_first_recovers_rather_than_asking_forever(): void
+    {
+        $reference = $this->createRecurringDonation(2500);
+
+        $res = $this->postWebhook('PAYMENT.SALE.COMPLETED', [
+            'id'                   => 'SALE-FIRST',
+            'billing_agreement_id' => 'I-SUB-1',
+            'amount'               => ['total' => '25.00', 'currency' => 'USD'],
+        ]);
+
+        $this->assertSame(200, $res->get_status(), 'not a 503 for PayPal to retry until it stops');
+
+        $donation = (new DonationRepository())->findByReference($reference);
+        $this->assertNotNull($donation->recurring_plan_id);
+        $this->assertSame('paid', $donation->status);
+    }
+
+    /**
+     * Two subscriptions for one donation means the donor is being billed twice.
+     * Binding the second would hide the first, which keeps billing unrecorded.
+     */
+    public function test_a_second_different_subscription_is_refused(): void
+    {
+        $reference = $this->createRecurringDonation(2500);
+        $this->recordSubscription($reference, 'I-SUB-1');
+
+        $res = $this->recordSubscription($reference, 'I-SUB-OTHER');
+
+        $this->assertSame(409, $res->get_status());
+
+        $donation = (new DonationRepository())->findByReference($reference);
+        $plan = RecurringPlan::query()->where('id', (int) $donation->recurring_plan_id)->get();
+        $this->assertSame('I-SUB-1', $plan->gateway_subscription_id, 'the first one still stands');
     }
 }

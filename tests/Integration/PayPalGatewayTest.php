@@ -59,6 +59,7 @@ final class PayPalGatewayTest extends IntegrationTestCase
                 $c->get(PayPalPlans::class),
                 $c->get(\Dono\Recurring\RecurringPlanRepository::class),
                 $c->get(\Dono\Foundation\Time\Clock::class),
+                $c->get(\Dono\Gateways\PayPal\PayPalPlanRecorder::class),
             ));
         }
     }
