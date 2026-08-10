@@ -8,11 +8,15 @@ namespace Dono\Rest\Schemas;
  * JSON-Schema arg specs for the admin funds endpoints. update() reuses
  * properties() with everything optional for partial PATCH updates.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class FundSchemas
 {
-    /** @return array<string, array<string,mixed>> */
+    /**
+     * @return array<string, array<string,mixed>>
+     *
+     * @since 1.0.0
+     */
     public static function create(): array
     {
         $props = self::properties();
@@ -21,13 +25,21 @@ final class FundSchemas
         return $props;
     }
 
-    /** @return array<string, array<string,mixed>> */
+    /**
+     * @return array<string, array<string,mixed>>
+     *
+     * @since 1.0.0
+     */
     public static function update(): array
     {
         return self::properties();
     }
 
-    /** @return array<string, array<string,mixed>> */
+    /**
+     * @return array<string, array<string,mixed>>
+     *
+     * @since 1.0.0
+     */
     private static function properties(): array
     {
         return [

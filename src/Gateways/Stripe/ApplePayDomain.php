@@ -23,7 +23,7 @@ use RuntimeException;
  * admin: they are not secret, but they do change, so Dono stores whatever the
  * admin provides rather than shipping a copy that would silently go stale.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class ApplePayDomain extends HookProvider
 {
@@ -32,10 +32,12 @@ final class ApplePayDomain extends HookProvider
     private const FILE_KEY   = 'apple_pay_domain_file';
     private const STATUS_KEY = 'apple_pay_domain_status';
 
+    /** @since 1.0.0 */
     public function __construct(private StripeApi $api, private StripeAccount $account)
     {
     }
 
+    /** @since 1.0.0 */
     protected function actions(): array
     {
         // Bound early and matched on the raw path: the file has to be reachable
@@ -44,30 +46,41 @@ final class ApplePayDomain extends HookProvider
         return ['init' => 'maybeServeAssociationFile'];
     }
 
-    /** The domain Apple and Stripe will verify, taken from the site address. */
+    /**
+     * The domain Apple and Stripe will verify, taken from the site address.
+     *
+     * @since 1.0.0
+     */
     public function domain(): string
     {
         return (string) (wp_parse_url(home_url(), PHP_URL_HOST) ?: '');
     }
 
+    /** @since 1.0.0 */
     public function associationFile(): string
     {
         $stored = SystemSetting::read(self::FILE_KEY);
         return is_string($stored) ? $stored : '';
     }
 
+    /** @since 1.0.0 */
     public function storeAssociationFile(string $contents): void
     {
         SystemSetting::write(self::FILE_KEY, trim($contents));
     }
 
+    /** @since 1.0.0 */
     public function forgetAssociationFile(): void
     {
         SystemSetting::forget(self::FILE_KEY);
         SystemSetting::forget(self::STATUS_KEY);
     }
 
-    /** True when the file is in place, which is the precondition for Stripe's check. */
+    /**
+     * True when the file is in place, which is the precondition for Stripe's check.
+     *
+     * @since 1.0.0
+     */
     public function isFileReady(): bool
     {
         return $this->associationFile() !== '';
@@ -76,6 +89,8 @@ final class ApplePayDomain extends HookProvider
     /**
      * Serve the association file. Plain text, no theme, no trailing newline
      * games: Apple compares the body byte for byte.
+     *
+     * @since 1.0.0
      */
     public function maybeServeAssociationFile(): void
     {
@@ -97,6 +112,8 @@ final class ApplePayDomain extends HookProvider
      * What this request should be answered with, or null to let WordPress carry
      * on. Split out from the emit above so the whole decision is testable
      * without the exit.
+     *
+     * @since 1.0.0
      */
     public function bodyForRequest(string $requestUri): ?string
     {
@@ -118,6 +135,8 @@ final class ApplePayDomain extends HookProvider
      * @return array{status:string,message:string} status is 'active',
      *         'inactive' or 'unknown'.
      * @throws RuntimeException when Stripe rejects the call outright.
+     *
+     * @since 1.0.0
      */
     public function registerDomain(bool $test): array
     {
@@ -133,7 +152,11 @@ final class ApplePayDomain extends HookProvider
         return $this->recordStatus($test, $result);
     }
 
-    /** Re-check a domain Stripe already knows about. */
+    /**
+     * Re-check a domain Stripe already knows about.
+     *
+     * @since 1.0.0
+     */
     public function refresh(bool $test): array
     {
         $this->account->useTestMode($test);
@@ -160,7 +183,11 @@ final class ApplePayDomain extends HookProvider
         return $this->recordStatus($test, $first);
     }
 
-    /** @return array{status:string,message:string} */
+    /**
+     * @return array{status:string,message:string}
+     *
+     * @since 1.0.0
+     */
     public function status(bool $test): array
     {
         $all = $this->storedStatus();
@@ -175,6 +202,8 @@ final class ApplePayDomain extends HookProvider
     /**
      * @param array<string,mixed> $domainObject
      * @return array{status:string,message:string}
+     *
+     * @since 1.0.0
      */
     private function recordStatus(bool $test, array $domainObject): array
     {
@@ -197,7 +226,11 @@ final class ApplePayDomain extends HookProvider
         return ['status' => $status, 'message' => $message];
     }
 
-    /** @return array<string,mixed> */
+    /**
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
     private function storedStatus(): array
     {
         $json = SystemSetting::read(self::STATUS_KEY);

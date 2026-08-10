@@ -11,7 +11,7 @@ use Dono\Foundation\References\ReferenceGenerator;
  * Reads and writes plugin settings, grouped by area (org-profile, gateways, email).
  * Each group maps to its own WP option. Add a group to GROUPS and REST + UI pick it up.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class SettingsService
 {
@@ -120,9 +120,9 @@ final class SettingsService
             'option'   => 'dono_consents',
             // Empty on purpose. A consent purpose names something the
             // organization actually does, and we do not know what that is.
-            // Shipping "Newsletter" put a permanent "No response" on every
-            // donor profile and offered donors a subscription that may not
-            // exist, which is a record of consent to nothing.
+            // Shipping a "Newsletter" purpose puts a permanent "No response"
+            // on every donor profile and offers donors a subscription that may
+            // not exist, which is a record of consent to nothing.
             'defaults' => [
                 'purposes' => [],
             ],
@@ -165,9 +165,11 @@ final class SettingsService
     private ?array $groupsCache = null;
 
     /**
-     * Returns the group map, including any groups registered via `dono.settings.groups`.
+     * The group map, including any groups registered via `dono.settings.groups`.
      *
      * @return array<string,mixed>
+     *
+     * @since 1.0.0
      */
     public function groups(): array
     {
@@ -178,13 +180,17 @@ final class SettingsService
         return $this->groupsCache;
     }
 
-    /** Returns true when the named group is registered. */
+    /** @since 1.0.0 */
     public function knows(string $group): bool
     {
         return array_key_exists($group, $this->groups());
     }
 
-    /** @return array<string,mixed> */
+    /**
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
     public function get(string $group): array
     {
         $cfg = $this->groups()[$group] ?? null;
@@ -200,6 +206,8 @@ final class SettingsService
      * option overlays these in get() when an admin customizes a template.
      *
      * @return array<string,array{enabled:bool,subject:string,body:string}>
+     *
+     * @since 1.0.0
      */
     private function emailTemplateDefaults(): array
     {
@@ -245,8 +253,8 @@ final class SettingsService
                 'body'    => __("Hi {donor_name},\n\nYour recurring donation of {amount} to {campaign_title} has been cancelled. No further charges will be made.\n\nThank you for the donations you made along the way.\n\nThanks,\n{organisation_name}", 'dono'),
             ],
             // Sent only when someone at the organization changes a plan on the
-            // donor's behalf. A donor changing their own gift is looking at the
-            // screen that did it and gets nothing.
+            // donor's behalf. A donor changing their own donation is looking at
+            // the screen that did it and gets nothing.
             'recurring_amount_changed' => [
                 'enabled' => true,
                 'subject' => __('Your recurring donation amount has changed', 'dono'),
@@ -285,6 +293,8 @@ final class SettingsService
      * and the promise is kept by whoever calls sendTemplate.
      *
      * @return array<string, list<string>>
+     *
+     * @since 1.0.0
      */
     public static function templateTags(): array
     {
@@ -317,6 +327,8 @@ final class SettingsService
      * editor bundle, so this starts empty.
      *
      * @return list<array{id:string,label:string,desc?:string,recipient?:string}>
+     *
+     * @since 1.0.0
      */
     public static function templateMeta(): array
     {
@@ -328,6 +340,8 @@ final class SettingsService
      *
      * @param array<string,mixed> $static
      * @return array<string,mixed>
+     *
+     * @since 1.0.0
      */
     private function resolveDynamicDefaults(string $group, array $static): array
     {
@@ -373,6 +387,8 @@ final class SettingsService
      *
      * @param array<string,mixed> $input
      * @return array<string,mixed>
+     *
+     * @since 1.0.0
      */
     public function update(string $group, array $input): array
     {
@@ -410,6 +426,8 @@ final class SettingsService
      * @param array<string,mixed> $cfg
      * @param array<string,mixed> $input
      * @return array<string,mixed>
+     *
+     * @since 1.0.0
      */
     private function accept(string $group, array $cfg, array $input): array
     {
@@ -466,6 +484,8 @@ final class SettingsService
      * @param array<string,mixed> $base
      * @param array<string,mixed> $over
      * @return array<string,mixed>
+     *
+     * @since 1.0.0
      */
     private function merge(array $base, array $over): array
     {
@@ -479,6 +499,7 @@ final class SettingsService
         return $base;
     }
 
+    /** @since 1.0.0 */
     private function isAssoc(array $a): bool
     {
         return $a !== [] && array_keys($a) !== range(0, count($a) - 1);

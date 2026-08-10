@@ -14,24 +14,24 @@ use Dono\Vendor\Queryable\DB;
  * Goal progress block. Display only: shows the form's own goal or the
  * parent campaign's goal; the goal itself is never configured on the block.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class GoalBlock implements Block
 {
-    /** Inject campaign and form repositories. */
+    /** @since 1.0.0 */
     public function __construct(
         private CampaignRepository $campaigns,
         private FormRepository $forms,
     ) {
     }
 
-    /** Block name. */
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/goal';
     }
 
-    /** Editor attribute schema. */
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         return [
@@ -45,7 +45,7 @@ final class GoalBlock implements Block
         ];
     }
 
-    /** Render server-side markup. */
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         return (string) ($attrs['source'] ?? 'campaign') === 'form'
@@ -53,7 +53,7 @@ final class GoalBlock implements Block
             : $this->renderCampaign($attrs);
     }
 
-    /** Render against the linked campaign's goal. */
+    /** @since 1.0.0 */
     private function renderCampaign(array $attrs): string
     {
         $campaignId = (int) ($attrs['campaignId'] ?? 0);
@@ -89,7 +89,7 @@ final class GoalBlock implements Block
         );
     }
 
-    /** Render against the form's own configured goal. */
+    /** @since 1.0.0 */
     private function renderForm(array $attrs): string
     {
         $formId = (int) ($attrs['formId'] ?? 0);
@@ -139,7 +139,7 @@ final class GoalBlock implements Block
         );
     }
 
-    /** Compute the percentage and render the goal view. */
+    /** @since 1.0.0 */
     private function view(
         string $goalType,
         int $current,
@@ -165,7 +165,11 @@ final class GoalBlock implements Block
         ]);
     }
 
-    /** Fallback markup shown when no goal can be resolved. */
+    /**
+     * Fallback markup shown when no goal can be resolved.
+     *
+     * @since 1.0.0
+     */
     private function missing(string $message): string
     {
         // Setup hints are for the admin building the form; public donors see

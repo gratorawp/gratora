@@ -9,7 +9,7 @@ use Dono\Foundation\Hooks\HookProvider;
 /**
  * Registers the Dono top-level admin menu and its dynamic subpages.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class AdminMenu extends HookProvider
 {
@@ -18,6 +18,7 @@ final class AdminMenu extends HookProvider
     private const HANDLE     = 'dono-admin-dashboard';
     private const BUILD_DIR  = 'build/admin/dashboard';
 
+    /** @since 1.0.0 */
     protected function actions(): array
     {
         return [
@@ -26,6 +27,7 @@ final class AdminMenu extends HookProvider
         ];
     }
 
+    /** @since 1.0.0 */
     public function registerMenu(): void
     {
         add_menu_page(
@@ -54,6 +56,7 @@ final class AdminMenu extends HookProvider
         }
     }
 
+    /** @since 1.0.0 */
     private static function menuIcon(): string
     {
         $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="black" fill-rule="evenodd">'
@@ -67,6 +70,8 @@ final class AdminMenu extends HookProvider
      * Adds Dono actions (go to donations, new campaign, ...) to the WP 7.0
      * global command palette (Cmd/Ctrl+K). Loads on every admin screen so the
      * commands are available from anywhere.
+     *
+     * @since 1.0.0
      */
     public function enqueueCommandPalette(): void
     {
@@ -90,6 +95,7 @@ final class AdminMenu extends HookProvider
         ]);
     }
 
+    /** @since 1.0.0 */
     public function renderDashboard(): void
     {
         $this->enqueueAssets();
@@ -103,6 +109,7 @@ final class AdminMenu extends HookProvider
         <?php
     }
 
+    /** @since 1.0.0 */
     private function enqueueAssets(): void
     {
         $assetPath = DONO_DIR . self::BUILD_DIR . '/index.asset.php';

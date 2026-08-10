@@ -11,7 +11,7 @@ use Dono\Vendor\Queryable\Schema\Table;
  * Incoming webhook delivery log. Backs dedup, raw-payload replay, and
  * missing-donation debugging.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class WebhookLog extends Model
 {

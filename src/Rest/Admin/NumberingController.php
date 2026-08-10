@@ -17,17 +17,19 @@ use WP_REST_Server;
  * scope, and override it. Overrides only move forward; the generator rejects a
  * value <= the current counter so references can never duplicate.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class NumberingController
 {
     private const NAMESPACE = 'dono/v1';
     private const SCOPES = ['donation', 'receipt', 'refund'];
 
+    /** @since 1.0.0 */
     public function __construct(private ReferenceGenerator $references)
     {
     }
 
+    /** @since 1.0.0 */
     public function registerRoutes(): void
     {
         register_rest_route(self::NAMESPACE, '/admin/numbering/counters', [
@@ -55,12 +57,17 @@ final class NumberingController
         ]);
     }
 
+    /** @since 1.0.0 */
     public function canAccess(): bool
     {
         return Capabilities::userCan('dono_manage_settings');
     }
 
-    /** Next reference number per scope, without incrementing. */
+    /**
+     * Next reference number per scope, without incrementing.
+     *
+     * @since 1.0.0
+     */
     public function counters(): WP_REST_Response
     {
         $out = [];
@@ -70,7 +77,11 @@ final class NumberingController
         return new WP_REST_Response($out, 200);
     }
 
-    /** Override a scope's counter so the next reference uses $next. */
+    /**
+     * Override a scope's counter so the next reference uses $next.
+     *
+     * @since 1.0.0
+     */
     public function setCounter(WP_REST_Request $request)
     {
         $scope = (string) $request->get_param('scope');

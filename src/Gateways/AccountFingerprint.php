@@ -18,13 +18,15 @@ namespace Dono\Gateways;
  * trade: an unused Product costs nothing, a stale one costs every recurring
  * donation the org has.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class AccountFingerprint
 {
     /**
      * Short and non-reversible: this ends up inside an option key, which is not
      * a place to put a credential.
+     *
+     * @since 1.0.0
      */
     public static function of(string $credential): string
     {

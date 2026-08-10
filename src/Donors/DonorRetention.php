@@ -16,7 +16,7 @@ use Dono\Vendor\Queryable\DB;
  * does not start the day it is installed. An org importing years of history
  * would otherwise have part of it redacted before they had seen the setting.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class DonorRetention
 {
@@ -29,18 +29,21 @@ final class DonorRetention
     private const DAILY = 86400;
     private const BATCH = 100;
 
+    /** @since 1.0.0 */
     public function __construct(
         private DonorService $donorService,
         private AsyncDispatcher $async,
     ) {
     }
 
+    /** @since 1.0.0 */
     public function register(): void
     {
         add_action(self::HOOK, [$this, 'run']);
         add_action('init', fn () => $this->async->scheduleRecurring(self::HOOK, self::DAILY));
     }
 
+    /** @since 1.0.0 */
     public function run(): void
     {
         $years = (int) $this->retentionYears();
@@ -82,6 +85,7 @@ final class DonorRetention
         }
     }
 
+    /** @since 1.0.0 */
     public function retentionYears(): int
     {
         $opt = get_option('dono_privacy', []);
@@ -93,12 +97,17 @@ final class DonorRetention
         return (int) apply_filters('dono.donor.retention_years', $stored);
     }
 
+    /** @since 1.0.0 */
     private static function cutoff(int $years): string
     {
         return gmdate('Y-m-d H:i:s', time() - ($years * 365 * self::DAILY));
     }
 
-    /** When the sweep is first allowed to run. */
+    /**
+     * When the sweep is first allowed to run.
+     *
+     * @since 1.0.0
+     */
     public static function startsAt(): int
     {
         $stored = (int) get_option(self::STARTS_AT_OPTION, 0);
@@ -110,6 +119,8 @@ final class DonorRetention
      * Pushes the first sweep out. Called on activation, and by anything that
      * loads a pile of donors at once: an import is exactly the moment when
      * years of history arrive and none of it has been looked at yet.
+     *
+     * @since 1.0.0
      */
     public static function deferBy(int $days = self::GRACE_DAYS): void
     {
@@ -123,6 +134,8 @@ final class DonorRetention
      * What the next sweeps would take, without taking it.
      *
      * @return array{eligible_now:int, within_days:int, days:int, starts_at:int, years:int}
+     *
+     * @since 1.0.0
      */
     public function preview(int $days = 30): array
     {
@@ -145,6 +158,7 @@ final class DonorRetention
         ];
     }
 
+    /** @since 1.0.0 */
     private function countBefore(string $cutoff): int
     {
         $prefix = DB::getPrefix();

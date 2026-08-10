@@ -7,7 +7,7 @@ namespace Dono\Foundation\Auth;
 /**
  * All plugin capability constants and role-mapping helpers.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class Capabilities
 {
@@ -52,12 +52,10 @@ final class Capabilities
     ];
 
     /**
-     * The capability maps with add-on registrations applied. Add-ons extend
-     * via the dono.capabilities filter, receiving and returning
-     * ['all' => string[], 'groups' => array<string,string[]>,
-     * 'labels' => array<string,string>].
+     * The capability maps with add-on registrations applied.
      *
      * @return array{all:array<int,string>,groups:array<string,array<int,string>>,labels:array<string,string>}
+     * @since 1.0.0
      */
     private static function maps(): array
     {
@@ -76,19 +74,28 @@ final class Capabilities
         ];
     }
 
-    /** @return array<int,string> */
+    /**
+     * @return array<int,string>
+     * @since 1.0.0
+     */
     public static function all(): array
     {
         return self::maps()['all'];
     }
 
-    /** @return array<string,array<int,string>> */
+    /**
+     * @return array<string,array<int,string>>
+     * @since 1.0.0
+     */
     public static function groups(): array
     {
         return self::maps()['groups'];
     }
 
-    /** @return array<string,string> */
+    /**
+     * @return array<string,string>
+     * @since 1.0.0
+     */
     public static function labels(): array
     {
         return self::maps()['labels'];
@@ -99,13 +106,19 @@ final class Capabilities
      * (manage_options) always pass so a default administrator never loses
      * access to the admin UI; otherwise the specific granular cap is required,
      * which is how a custom role gets scoped access.
+     *
+     * @since 1.0.0
      */
     public static function userCan(string $cap): bool
     {
         return current_user_can('manage_options') || current_user_can($cap);
     }
 
-    /** True for anyone who may reach the Dono admin area at all (menu/base gate). */
+    /**
+     * True for anyone who may reach the Dono admin area at all (menu/base gate).
+     *
+     * @since 1.0.0
+     */
     public static function canAccessAdmin(): bool
     {
         if (current_user_can('manage_options') || current_user_can(self::MANAGE)) {
@@ -135,7 +148,11 @@ final class Capabilities
         'dono_access_settings'  => 'dono_manage_settings',
     ];
 
-    /** `user_has_cap` filter granting the virtual menu meta-caps (see MENU_AREAS). */
+    /**
+     * `user_has_cap` filter granting the virtual menu meta-caps (see MENU_AREAS).
+     *
+     * @since 1.0.0
+     */
     public static function grantMetaCaps(array $allcaps): array
     {
         $super   = ! empty($allcaps['manage_options']);
@@ -180,6 +197,8 @@ final class Capabilities
      * receives at least one granular cap also gets the MANAGE umbrella so it
      * can see the Dono menu; the administrator always keeps MANAGE. Runs on
      * activation and whenever the roles mapping is saved.
+     *
+     * @since 1.0.0
      */
     public static function applyMapping(array $mapping): void
     {
@@ -203,7 +222,7 @@ final class Capabilities
         }
     }
 
-    /** Return the stored role-to-caps mapping from wp_options. */
+    /** @since 1.0.0 */
     public static function currentMapping(): array
     {
         $stored = get_option('dono_roles', []);

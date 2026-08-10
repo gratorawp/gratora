@@ -21,7 +21,7 @@ use Dono\Vendor\Queryable\DB;
  *
  * Safe to hand over is why several tables never appear. See SKIP.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class DataExporter
 {
@@ -92,6 +92,7 @@ final class DataExporter
         'dono_reference_settings',
     ];
 
+    /** @since 1.0.0 */
     public function __construct(private Crypto $crypto)
     {
     }
@@ -102,6 +103,7 @@ final class DataExporter
      *
      * @param  resource $out
      * @return array<string,int> rows written per table
+     * @since 1.0.0
      */
     public function writeJson($out): array
     {
@@ -133,6 +135,7 @@ final class DataExporter
     /**
      * @param  resource $out
      * @return int rows written
+     * @since 1.0.0
      */
     private function writeTable($out, string $table): int
     {
@@ -173,6 +176,7 @@ final class DataExporter
      *
      * @param  array<string,mixed> $row
      * @return array<string,mixed>
+     * @since 1.0.0
      */
     private function shape(string $table, array $row): array
     {
@@ -198,7 +202,10 @@ final class DataExporter
         return $row;
     }
 
-    /** @return array<string,mixed> */
+    /**
+     * @return array<string,mixed>
+     * @since 1.0.0
+     */
     private function settings(): array
     {
         $out = [];
@@ -222,6 +229,7 @@ final class DataExporter
      * silently left them behind would be the wrong kind of complete.
      *
      * @return list<string>
+     * @since 1.0.0
      */
     public static function tables(): array
     {
@@ -234,7 +242,10 @@ final class DataExporter
         ));
     }
 
-    /** @return list<string> */
+    /**
+     * @return list<string>
+     * @since 1.0.0
+     */
     public static function skipped(): array
     {
         return self::SKIP;

@@ -9,6 +9,8 @@ namespace Dono\Currency;
  * Storage is always major units x 100 regardless of the currency's real precision; the
  * rescale to the processor's smallest unit happens only here, at the gateway boundary
  * (prevents the 100x JPY / 10x BHD mischarge).
+ *
+ * @since 1.0.0
  */
 final class Currency
 {
@@ -28,6 +30,8 @@ final class Currency
      * expect them as major x 100 (ISK/UGX are represented two-decimal with the
      * decimals always 00; HUF/TWD's divisible-by-100 rule applies to payouts,
      * not charges), which is exactly what the internal x100 storage holds.
+     *
+     * @since 1.0.0
      */
     public static function minorUnits(string $code): int
     {
@@ -46,6 +50,8 @@ final class Currency
      * Exact integer math; never invents sub-unit precision the currency lacks
      * (for 3-decimal currencies the result is always a multiple of 10, which is
      * what Stripe requires).
+     *
+     * @since 1.0.0
      */
     public static function toMinorUnits(int $storedCents, string $code): int
     {
@@ -59,7 +65,11 @@ final class Currency
         return (int) round($storedCents / (10 ** (2 - $exponent)));
     }
 
-    /** Smallest currency unit (processor amount) -> internal storage (major x 100). */
+    /**
+     * Smallest currency unit (processor amount) -> internal storage (major x 100).
+     *
+     * @since 1.0.0
+     */
     public static function fromMinorUnits(int $minorUnits, string $code): int
     {
         $exponent = self::minorUnits($code);

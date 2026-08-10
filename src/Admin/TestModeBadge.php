@@ -20,10 +20,11 @@ use WP_Admin_Bar;
  * single form left behind after a launch is quieter and worse, so it is called
  * out separately rather than folded into the same message.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class TestModeBadge extends HookProvider
 {
+    /** @since 1.0.0 */
     protected function actions(): array
     {
         return [
@@ -33,6 +34,7 @@ final class TestModeBadge extends HookProvider
         ];
     }
 
+    /** @since 1.0.0 */
     public function addNode(WP_Admin_Bar $bar): void
     {
         if (! $this->visibleToCurrentUser()) {
@@ -72,7 +74,11 @@ final class TestModeBadge extends HookProvider
         ]);
     }
 
-    /** lucide flask-conical, inlined so the badge does not wait on an icon font. */
+    /**
+     * lucide flask-conical, inlined so the badge does not wait on an icon font.
+     *
+     * @since 1.0.0
+     */
     private function icon(): string
     {
         return '<svg class="dono-test-mode-badge__icon" viewBox="0 0 24 24" fill="none"'
@@ -85,6 +91,7 @@ final class TestModeBadge extends HookProvider
             . '</svg>';
     }
 
+    /** @since 1.0.0 */
     public function styles(): void
     {
         if (! is_admin_bar_showing() || ! $this->visibleToCurrentUser()) {
@@ -116,6 +123,7 @@ final class TestModeBadge extends HookProvider
         <?php
     }
 
+    /** @since 1.0.0 */
     private function orgWide(): bool
     {
         $cfg = get_option('dono_gateway_config', []);
@@ -127,6 +135,8 @@ final class TestModeBadge extends HookProvider
      * Published forms carrying their own test_mode. Counted per request rather
      * than cached: the count has to be right the moment someone flips it off,
      * and a stale badge is worse than no badge.
+     *
+     * @since 1.0.0
      */
     private function formsInTestMode(): int
     {
@@ -141,7 +151,11 @@ final class TestModeBadge extends HookProvider
             ->count();
     }
 
-    /** Whoever cannot see a donation has no use for the state of the till. */
+    /**
+     * Whoever cannot see a donation has no use for the state of the till.
+     *
+     * @since 1.0.0
+     */
     private function visibleToCurrentUser(): bool
     {
         return is_user_logged_in() && Capabilities::userCan('dono_view_donations');

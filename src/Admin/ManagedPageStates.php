@@ -12,11 +12,14 @@ use WP_Post;
 /**
  * Labels campaign pages and the donor portal in wp-admin's Pages list, so the
  * two pages that break the product when edited or trashed read as load-bearing.
+ *
+ * @since 1.0.0
  */
 final class ManagedPageStates extends HookProvider
 {
     private ?array $campaignPageIds = null;
 
+    /** @since 1.0.0 */
     protected function filters(): array
     {
         return [
@@ -24,6 +27,7 @@ final class ManagedPageStates extends HookProvider
         ];
     }
 
+    /** @since 1.0.0 */
     public function label(array $states, WP_Post $post): array
     {
         if ($post->post_type !== 'page') {
@@ -45,6 +49,8 @@ final class ManagedPageStates extends HookProvider
     /**
      * A campaign's own page, not every page carrying its id: P2P layout
      * subpages hold _dono_campaign_id too, and those are not the campaign.
+     *
+     * @since 1.0.0
      */
     private function campaignPageIds(): array
     {

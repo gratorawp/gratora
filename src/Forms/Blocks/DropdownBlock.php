@@ -9,17 +9,17 @@ use Dono\Foundation\Helpers\View;
 /**
  * Single-select dropdown field block.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class DropdownBlock implements Block
 {
-    /** Block name. */
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/dropdown';
     }
 
-    /** Editor attribute schema. */
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         return [
@@ -33,7 +33,7 @@ final class DropdownBlock implements Block
         ];
     }
 
-    /** Render server-side markup. */
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         $options = self::normalizeOptions($attrs['options'] ?? null);
@@ -53,7 +53,11 @@ final class DropdownBlock implements Block
         ]);
     }
 
-    /** @return list<array{label:string,value:string,isDefault:bool}> */
+    /**
+     * @return list<array{label:string,value:string,isDefault:bool}>
+     *
+     * @since 1.0.0
+     */
     public static function normalizeOptions(mixed $raw): array
     {
         $items = is_array($raw) ? $raw : [];
@@ -79,7 +83,11 @@ final class DropdownBlock implements Block
         return $out;
     }
 
-    /** Derive a snake_case field key from an explicit field or the label. */
+    /**
+     * Derive a snake_case field key from an explicit field or the label.
+     *
+     * @since 1.0.0
+     */
     public static function deriveField(string $field, string $label): string
     {
         $f = self::slugifySnake($field);
@@ -88,7 +96,11 @@ final class DropdownBlock implements Block
         return $f !== '' ? $f : 'field';
     }
 
-    /** Slugify to a hyphenated value. */
+    /**
+     * Slugify to a hyphenated value.
+     *
+     * @since 1.0.0
+     */
     private static function slugify(string $s): string
     {
         $s = strtolower($s);
@@ -96,7 +108,11 @@ final class DropdownBlock implements Block
         return trim($s, '-');
     }
 
-    /** Slugify to snake_case. */
+    /**
+     * Slugify to snake_case.
+     *
+     * @since 1.0.0
+     */
     private static function slugifySnake(string $s): string
     {
         $s = strtolower($s);

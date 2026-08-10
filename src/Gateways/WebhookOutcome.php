@@ -10,10 +10,11 @@ namespace Dono\Gateways;
  * record whether the action ran. `handled=true` also covers a recognized
  * duplicate that was intentionally no-op'd.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class WebhookOutcome
 {
+    /** @since 1.0.0 */
     public function __construct(
         public readonly bool $signature_ok,
         public readonly ?string $external_id = null,
@@ -24,7 +25,7 @@ final class WebhookOutcome
     ) {
     }
 
-    /** Factory for a 401 signature failure. */
+    /** @since 1.0.0 */
     public static function badSignature(string $error = 'Invalid signature.'): self
     {
         return new self(
@@ -34,7 +35,7 @@ final class WebhookOutcome
         );
     }
 
-    /** Factory for a 405 when the gateway does not accept webhooks. */
+    /** @since 1.0.0 */
     public static function notSupported(string $gateway): self
     {
         return new self(

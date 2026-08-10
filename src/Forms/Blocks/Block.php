@@ -7,16 +7,20 @@ namespace Dono\Forms\Blocks;
 /**
  * Server-side render contract for a dono block.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 interface Block
 {
-    /** Block name. */
+    /** @since 1.0.0 */
     public function name(): string;
 
-    /** @return array<string, array{type:string, default?:mixed}> */
+    /**
+     * @return array<string, array{type:string, default?:mixed}>
+     *
+     * @since 1.0.0
+     */
     public function attributes(): array;
 
-    /** Render server-side markup. */
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string;
 }

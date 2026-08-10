@@ -9,20 +9,23 @@ use Dono\Vendor\Queryable\DB;
 /**
  * Fund query helpers.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class FundRepository
 {
+    /** @since 1.0.0 */
     public function findById(int $id): ?Fund
     {
         return Fund::query()->find('id', $id);
     }
 
+    /** @since 1.0.0 */
     public function findByCode(string $code): ?Fund
     {
         return Fund::query()->find('code', $code);
     }
 
+    /** @since 1.0.0 */
     public function default(): ?Fund
     {
         return Fund::query()->where('is_default', 1)->get();
@@ -30,7 +33,11 @@ final class FundRepository
 
     /**
      * Active funds for donor-facing pickers, parents before their children so
-     * the UI can group a one-level hierarchy. @return array<Fund>
+     * the UI can group a one-level hierarchy.
+     *
+     * @return array<Fund>
+     *
+     * @since 1.0.0
      */
     public function listActive(): array
     {
@@ -74,6 +81,8 @@ final class FundRepository
      *
      * @param list<int>|null $allowedIds
      * @return list<array{id:string,label:string,description:string,depth:int,selectable:bool}>
+     *
+     * @since 1.0.0
      */
     public function pickerOptions(?array $allowedIds = null): array
     {
@@ -115,7 +124,11 @@ final class FundRepository
         return $options;
     }
 
-    /** @return array{total:int,active:int,restricted:int,raised_cents:int,default:?array{id:int,name:string}} */
+    /**
+     * @return array{total:int,active:int,restricted:int,raised_cents:int,default:?array{id:int,name:string}}
+     *
+     * @since 1.0.0
+     */
     public function stats(): array
     {
         $default = Fund::query()->where('is_default', 1)->get();
@@ -131,6 +144,7 @@ final class FundRepository
         ];
     }
 
+    /** @since 1.0.0 */
     public function codeExists(string $code, ?int $exceptId = null): bool
     {
         $q = Fund::query()->where('code', $code);
@@ -143,6 +157,8 @@ final class FundRepository
     /**
      * @param array{page?:int,per_page?:int,orderby?:string,order?:string,status?:string,search?:string} $args
      * @return array{items: array<Fund>, total: int}
+     *
+     * @since 1.0.0
      */
     public function listAdmin(array $args = []): array
     {
@@ -195,6 +211,8 @@ final class FundRepository
      * total-raised KPI is never double-counted.
      *
      * @param array<Fund> $items
+     *
+     * @since 1.0.0
      */
     private function rollUpParents(array $items): void
     {

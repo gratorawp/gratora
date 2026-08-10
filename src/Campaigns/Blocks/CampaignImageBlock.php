@@ -9,14 +9,18 @@ use Dono\Foundation\Helpers\View;
 /**
  * Core's featured-image block reads the post, which is only the page a campaign
  * happens to be rendered on. This reads the campaign, so it works on any page.
+ *
+ * @since 1.0.0
  */
 final class CampaignImageBlock extends CampaignBlock
 {
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/campaign-image';
     }
 
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         return $this->campaignIdAttr() + [
@@ -28,6 +32,7 @@ final class CampaignImageBlock extends CampaignBlock
         ];
     }
 
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         $campaign = $this->resolveCampaign($attrs);
@@ -50,7 +55,11 @@ final class CampaignImageBlock extends CampaignBlock
         ]);
     }
 
-    /** Shown only to whoever can act on it; a visitor gets nothing. */
+    /**
+     * Shown only to whoever can act on it; a visitor gets nothing.
+     *
+     * @since 1.0.0
+     */
     private function noImageNotice(): string
     {
         if (! is_user_logged_in() || ! current_user_can('edit_posts')) {

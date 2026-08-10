@@ -10,17 +10,17 @@ use Dono\Foundation\Helpers\View;
 /**
  * Donation amount block with preset tiers and optional custom input.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class DonationAmountBlock implements Block
 {
-    /** Block name. */
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/donation-amount';
     }
 
-    /** Editor attribute schema. */
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         return [
@@ -39,7 +39,7 @@ final class DonationAmountBlock implements Block
         ];
     }
 
-    /** Render server-side markup. */
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         $fixed   = (string) ($attrs['donationType'] ?? 'multi') === 'fixed';
@@ -61,7 +61,11 @@ final class DonationAmountBlock implements Block
         ]);
     }
 
-    /** @return list<array{cents:int,impact:string,preselected:bool}> */
+    /**
+     * @return list<array{cents:int,impact:string,preselected:bool}>
+     *
+     * @since 1.0.0
+     */
     public static function normalizePresets(mixed $raw): array
     {
         $items = is_array($raw) ? $raw : [];

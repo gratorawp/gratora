@@ -49,7 +49,7 @@ use Dono\Settings\SecretRedactor;
 /**
  * Registers core domain operations as Command objects.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class CoreCommandProvider
 {
@@ -66,6 +66,7 @@ final class CoreCommandProvider
      */
     private const SETTINGS_GROUPS = ['org-profile', 'currency-locale', 'org-brand', 'receipts', 'email', 'numbering', 'consents'];
 
+    /** @since 1.0.0 */
     public function register(CommandRegistry $r, Container $c): void
     {
         $this->donations($r, $c);
@@ -81,6 +82,7 @@ final class CoreCommandProvider
         $this->settings($r, $c);
     }
 
+    /** @since 1.0.0 */
     private function donations(CommandRegistry $r, Container $c): void
     {
         $r->register(new Command(
@@ -337,6 +339,7 @@ final class CoreCommandProvider
         ));
     }
 
+    /** @since 1.0.0 */
     private function donors(CommandRegistry $r, Container $c): void
     {
         $r->register(new Command(
@@ -528,6 +531,7 @@ final class CoreCommandProvider
         ));
     }
 
+    /** @since 1.0.0 */
     private function campaigns(CommandRegistry $r, Container $c): void
     {
         // Built from the LIVE registry so a type a Pro add-on contributes (e.g.
@@ -659,6 +663,7 @@ final class CoreCommandProvider
         ));
     }
 
+    /** @since 1.0.0 */
     private function forms(CommandRegistry $r, Container $c): void
     {
         $templates    = FormTemplates::all();
@@ -837,6 +842,7 @@ final class CoreCommandProvider
         ));
     }
 
+    /** @since 1.0.0 */
     private function funds(CommandRegistry $r, Container $c): void
     {
         $r->register(new Command(
@@ -934,6 +940,7 @@ final class CoreCommandProvider
         ));
     }
 
+    /** @since 1.0.0 */
     private function receipts(CommandRegistry $r, Container $c): void
     {
         $r->register(new Command(
@@ -974,6 +981,7 @@ final class CoreCommandProvider
         ));
     }
 
+    /** @since 1.0.0 */
     private function recurring(CommandRegistry $r, Container $c): void
     {
         $r->register(new Command(
@@ -1128,6 +1136,7 @@ final class CoreCommandProvider
         ));
     }
 
+    /** @since 1.0.0 */
     private function reads(CommandRegistry $r, Container $c): void
     {
         $r->register(new Command(
@@ -1421,6 +1430,8 @@ final class CoreCommandProvider
      * donor metrics services so the assistant can answer "how are we doing",
      * "what's our recurring revenue", and "who's at risk of lapsing". All
      * non-mutating + idempotent, so they skip the confirmation gate.
+     *
+     * @since 1.0.0
      */
     private function reports(CommandRegistry $r, Container $c): void
     {
@@ -1643,6 +1654,8 @@ final class CoreCommandProvider
      * non-mutating + idempotent and skip the confirmation gate. The link points
      * at a core REST route that regenerates and streams the PDF on demand; the
      * donor tax statement carries PII and is gated on dono_view_donors.
+     *
+     * @since 1.0.0
      */
     private function reportDocuments(CommandRegistry $r, Container $c): void
     {
@@ -1740,6 +1753,8 @@ final class CoreCommandProvider
      * lifetime (see linkExpiryHint).
      *
      * @param array<string,scalar> $args
+     *
+     * @since 1.0.0
      */
     private function reportUrl(string $path, array $args): string
     {
@@ -1747,7 +1762,7 @@ final class CoreCommandProvider
         return esc_url_raw(add_query_arg($args, rest_url($path)));
     }
 
-    /** Human hint for how long a nonce-signed download link stays valid. */
+    /** @since 1.0.0 */
     private function linkExpiryHint(): string
     {
         $life = (int) apply_filters('nonce_life', DAY_IN_SECONDS);
@@ -1763,7 +1778,9 @@ final class CoreCommandProvider
      * is reachable (the enum rejects anything else as command.invalid_input), so
      * roles, gateways and privacy can never be touched
      * here. Secret-shaped values are redacted on read and refused on write as
-     * defence in depth, even though no allowlisted group holds one today.
+     * defense in depth, even though no allowlisted group holds one today.
+     *
+     * @since 1.0.0
      */
     private function settings(CommandRegistry $r, Container $c): void
     {
@@ -1843,6 +1860,8 @@ final class CoreCommandProvider
      *
      * @param array<string,mixed> $values
      * @return array<string,mixed>
+     *
+     * @since 1.0.0
      */
     private function redactSecrets(array $values): array
     {
@@ -1853,6 +1872,8 @@ final class CoreCommandProvider
      * @param array<string,array<string,mixed>> $properties
      * @param list<string>                       $required
      * @return array<string,mixed>
+     *
+     * @since 1.0.0
      */
     private function schema(array $properties, array $required = []): array
     {
@@ -1870,11 +1891,12 @@ final class CoreCommandProvider
     /**
      * Command meta. `agent_hint` is guidance sent only to the model (appended to
      * the tool description); it never appears in the human-facing Tools tab,
-     * which shows the plain `summary`. Keeps operator-facing copy clean while
-     * still steering the assistant.
+     * which shows the plain `summary`.
      *
      * @param array<string,mixed> $extra
      * @return array<string,mixed>
+     *
+     * @since 1.0.0
      */
     private function meta(array $extra = []): array
     {
@@ -1886,6 +1908,8 @@ final class CoreCommandProvider
      *
      * @param array<string,array<string,mixed>> $extra
      * @return array<string,mixed>
+     *
+     * @since 1.0.0
      */
     private function listSchema(array $extra = []): array
     {
@@ -1903,6 +1927,8 @@ final class CoreCommandProvider
      * @param array<string,mixed> $in
      * @param list<array<string,mixed>> $items
      * @return array{items: list<array<string,mixed>>, total: int, page: int, per_page: int}
+     *
+     * @since 1.0.0
      */
     private function page(array $in, array $items, int $total): array
     {
@@ -1914,7 +1940,11 @@ final class CoreCommandProvider
         ];
     }
 
-    /** Display name from the plaintext first/last columns; email stays encrypted. */
+    /**
+     * Display name from the plaintext first/last columns; email stays encrypted.
+     *
+     * @since 1.0.0
+     */
     private static function donorName(object $donor): string
     {
         $full = trim(((string) ($donor->first_name ?? '')) . ' ' . ((string) ($donor->last_name ?? '')));
@@ -1924,6 +1954,8 @@ final class CoreCommandProvider
     /**
      * @param array<string,mixed> $in
      * @return array{rows:list<array<string,string>>, inverse:array<string,mixed>|null}
+     *
+     * @since 1.0.0
      */
     private function campaignChangeSet(array $in, object $campaign): array
     {
@@ -1949,6 +1981,8 @@ final class CoreCommandProvider
     /**
      * @param array<string,mixed> $in
      * @return array{rows:list<array<string,string>>, inverse:array<string,mixed>|null}
+     *
+     * @since 1.0.0
      */
     private function formChangeSet(array $in, object $form): array
     {
@@ -1998,6 +2032,8 @@ final class CoreCommandProvider
      * @param array<string,mixed> $in
      * @param array<string,array{label:string,current:callable,format?:callable,reversible?:bool}> $fields
      * @return array{rows:list<array<string,string>>, inverse:array<string,mixed>|null}
+     *
+     * @since 1.0.0
      */
     private function changeSet(array $in, array $fields): array
     {
@@ -2034,6 +2070,7 @@ final class CoreCommandProvider
         ];
     }
 
+    /** @since 1.0.0 */
     private function previewValue(mixed $value): string
     {
         if ($value === null) {
@@ -2054,6 +2091,8 @@ final class CoreCommandProvider
      * silently ignored.
      *
      * @return array<string,mixed>
+     *
+     * @since 1.0.0
      */
     private function profileSchema(): array
     {
@@ -2093,6 +2132,8 @@ final class CoreCommandProvider
      * settable here.
      *
      * @return array<string,mixed>
+     *
+     * @since 1.0.0
      */
     private function formSettingsSchema(): array
     {
@@ -2136,6 +2177,8 @@ final class CoreCommandProvider
     /**
      * DashboardMetricsService is not container-bound; build it exactly as the
      * dashboard REST controller does (Clock plus the donation + recurring repos).
+     *
+     * @since 1.0.0
      */
     private function dashboardMetrics(Container $c): DashboardMetricsService
     {
@@ -2148,7 +2191,9 @@ final class CoreCommandProvider
 
     /**
      * The plan a command names. Gateway resolution belongs to
-     * RecurringPlanActions now, which every one of these commands calls.
+     * RecurringPlanActions, which every one of these commands calls.
+     *
+     * @since 1.0.0
      */
     private function resolvePlan(Container $c, int $planId): RecurringPlan
     {

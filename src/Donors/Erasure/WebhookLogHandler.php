@@ -19,17 +19,19 @@ use Dono\Webhooks\WebhookLog;
  * There is no donor_id here to key on, which is why the registry hands over the
  * identifiers captured before the wipe.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class WebhookLogHandler implements ErasureHandler
 {
     private const CLEARED = ['payload' => '', 'headers' => null, 'error' => null];
 
+    /** @since 1.0.0 */
     public function key(): string
     {
         return 'dono.webhook_log';
     }
 
+    /** @since 1.0.0 */
     public function erase(ErasureRequest $request): void
     {
         if ($request->hasNoNeedles()) return;

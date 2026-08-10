@@ -10,14 +10,18 @@ use RuntimeException;
 /**
  * Registry of form type handlers keyed by type identifier.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class FormTypeRegistry
 {
     /** @var array<string,FormTypeHandler> */
     private array $handlers = [];
 
-    /** Register a handler; throws if its type is already registered. */
+    /**
+     * Register a handler; throws if its type is already registered.
+     *
+     * @since 1.0.0
+     */
     public function register(FormTypeHandler $handler): void
     {
         $type = $handler->type();
@@ -27,19 +31,23 @@ final class FormTypeRegistry
         $this->handlers[$type] = $handler;
     }
 
-    /** Whether a handler is registered for the type. */
+    /** @since 1.0.0 */
     public function has(string $type): bool
     {
         return isset($this->handlers[$type]);
     }
 
-    /** Handler for the type, or null. */
+    /** @since 1.0.0 */
     public function get(string $type): ?FormTypeHandler
     {
         return $this->handlers[$type] ?? null;
     }
 
-    /** Resolve the handler for an intent, falling back to the default. */
+    /**
+     * Resolve the handler for an intent, falling back to the default.
+     *
+     * @since 1.0.0
+     */
     public function handlerFor(DonationIntent $intent): FormTypeHandler
     {
         $type = (string) ($intent->extra['form_type'] ?? 'donation');
@@ -49,9 +57,9 @@ final class FormTypeRegistry
     }
 
     /**
-     * All registered handlers.
-     *
      * @return array<string,FormTypeHandler>
+     *
+     * @since 1.0.0
      */
     public function all(): array
     {

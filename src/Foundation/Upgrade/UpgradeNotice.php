@@ -16,19 +16,22 @@ namespace Dono\Foundation\Upgrade;
  *
  * A notice is the only thing that reaches someone who is not looking for it.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class UpgradeNotice
 {
+    /** @since 1.0.0 */
     public function __construct(private UpgradeRunner $runner)
     {
     }
 
+    /** @since 1.0.0 */
     public function register(): void
     {
         add_action('admin_notices', [$this, 'render']);
     }
 
+    /** @since 1.0.0 */
     public function render(): void
     {
         if (! current_user_can('manage_dono')) {

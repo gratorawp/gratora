@@ -14,18 +14,26 @@ use Dono\Currency\Currency;
  * currency's own number of decimal places, and rejects the value otherwise
  * (JPY "1000" is fine, JPY "1000.00" is not).
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class PayPalMoney
 {
-    /** Internal stored cents -> the decimal string PayPal expects. */
+    /**
+     * Internal stored cents -> the decimal string PayPal expects.
+     *
+     * @since 1.0.0
+     */
     public static function toValue(int $storedCents, string $code): string
     {
         $decimals = Currency::minorUnits($code);
         return number_format($storedCents / 100, $decimals, '.', '');
     }
 
-    /** A PayPal decimal string -> internal stored cents (major x 100). */
+    /**
+     * A PayPal decimal string -> internal stored cents (major x 100).
+     *
+     * @since 1.0.0
+     */
     public static function toStoredCents(string $value, string $code): int
     {
         return (int) round(((float) $value) * 100);

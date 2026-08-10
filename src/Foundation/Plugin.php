@@ -24,7 +24,7 @@ use Dono\Onboarding\Onboarding;
 /**
  * Plugin singleton. Owns the Container and ModuleManager and runs the boot pipeline.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class Plugin
 {
@@ -34,6 +34,7 @@ final class Plugin
     public readonly Container $container;
     public readonly ModuleManager $modules;
 
+    /** @since 1.0.0 */
     private function __construct()
     {
         $this->container = new Container();
@@ -43,13 +44,17 @@ final class Plugin
         $this->container->instance(ModuleManager::class, $this->modules);
     }
 
-    /** Return the plugin singleton, creating it on first call. */
+    /** @since 1.0.0 */
     public static function instance(): self
     {
         return self::$instance ??= new self();
     }
 
-    /** Load text domain, register and boot all modules. Idempotent. */
+    /**
+     * Load text domain, register and boot all modules. Idempotent.
+     *
+     * @since 1.0.0
+     */
     public static function boot(): void
     {
         // Guard against double-boot: CLI/test scripts may call boot().
@@ -109,11 +114,11 @@ final class Plugin
             self::instance()->container->get(UpgradeJob::class)->start();
         }, 99);
 
-        // The bump above is the only thing that queued a drain, so a release
-        // adding a routine and no schema change never ran it, and a queue
-        // cleared by the host (or a drain that died mid-way) never came back.
-        // Admin-only: one option read, and the scheduler lookup happens only
-        // while something is actually outstanding.
+        // The bump above is the only thing that queues a drain, so a release
+        // adding a routine and no schema change would never run it, and a queue
+        // cleared by the host (or a drain that dies mid-way) would never come
+        // back. Admin-only: one option read, and the scheduler lookup happens
+        // only while something is actually outstanding.
         add_action('admin_init', static function (): void {
             $c = self::instance()->container;
             UpgradeJob::reconcile($c->get(AsyncDispatcher::class), $c->get(UpgradeRunner::class));
@@ -134,6 +139,8 @@ final class Plugin
      * and safe to call before plugins_loaded - the integration test bootstrap
      * calls this so the dono_* tables exist before boot() constructs services
      * (e.g. IdentityHasher) that read them.
+     *
+     * @since 1.0.0
      */
     public static function migrateSchema(): void
     {
@@ -153,7 +160,7 @@ final class Plugin
         }
     }
 
-    /** Run migrations, set capabilities, seed onboarding, flush rewrite rules. */
+    /** @since 1.0.0 */
     public static function onActivation(): void
     {
         $fresh = get_option('dono_db_version', null) === null;
@@ -201,6 +208,7 @@ final class Plugin
         do_action('dono.activated');
     }
 
+    /** @since 1.0.0 */
     public static function onDeactivation(): void
     {
         // Anything that reads Dono's own tables runs before the wipe, because

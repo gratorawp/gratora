@@ -18,17 +18,23 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 
-/** Admin CRUD surface for funds (organization-wide donation designations). */
+/**
+ * Admin CRUD surface for funds (organization-wide donation designations).
+ *
+ * @since 1.0.0
+ */
 final class FundsController
 {
     private const NAMESPACE = 'dono/v1';
 
+    /** @since 1.0.0 */
     public function __construct(
         private FundRepository $funds,
         private FundService $fundService,
     ) {
     }
 
+    /** @since 1.0.0 */
     public function registerRoutes(): void
     {
         register_rest_route(self::NAMESPACE, '/admin/funds', [
@@ -82,11 +88,13 @@ final class FundsController
         ]);
     }
 
+    /** @since 1.0.0 */
     public function canAccess(): bool
     {
         return Capabilities::userCan('dono_manage_campaigns');
     }
 
+    /** @since 1.0.0 */
     public function index(WP_REST_Request $request): WP_REST_Response
     {
         // Re-queue any reassignment whose background job was lost so a stale
@@ -104,7 +112,7 @@ final class FundsController
             'search'   => $request['search'] !== null ? (string) $request['search'] : null,
         ]);
 
-        // donations_count is denormalised on the fund row (written by
+        // donations_count is denormalized on the fund row (written by
         // AggregateSyncer::syncFund). Pass null so shape() reads the column.
         $deletable = $this->fundService->deletableMap(
             array_map(static fn (Fund $f) => (int) $f->id, $result['items'])
@@ -120,11 +128,13 @@ final class FundsController
         return $response;
     }
 
+    /** @since 1.0.0 */
     public function stats(WP_REST_Request $request): WP_REST_Response
     {
         return new WP_REST_Response($this->funds->stats(), 200);
     }
 
+    /** @since 1.0.0 */
     public function show(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $fund = $this->funds->findById((int) $request['id']);
@@ -134,6 +144,7 @@ final class FundsController
         return new WP_REST_Response($this->shapeOne($fund), 200);
     }
 
+    /** @since 1.0.0 */
     public function create(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $body = (array) ($request->get_json_params() ?? []);
@@ -147,6 +158,7 @@ final class FundsController
         return new WP_REST_Response($this->shapeOne($fund), 201);
     }
 
+    /** @since 1.0.0 */
     public function update(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $fund = $this->funds->findById((int) $request['id']);
@@ -162,6 +174,7 @@ final class FundsController
         return new WP_REST_Response($this->shapeOne($fund), 200);
     }
 
+    /** @since 1.0.0 */
     public function delete(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $fund = $this->funds->findById((int) $request['id']);
@@ -182,13 +195,18 @@ final class FundsController
         return new WP_REST_Response(['id' => (int) $fund->id] + $result, $status);
     }
 
-    /** @return array<string,mixed> */
+    /**
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
     private function shapeOne(Fund $f): array
     {
         $deletable = $this->fundService->deletableMap([(int) $f->id]);
         return $this->shape($f, null, $deletable[(int) $f->id] ?? false);
     }
 
+    /** @since 1.0.0 */
     private function shape(Fund $f, ?int $donationsCount = null, bool $deletable = false): array
     {
         return [
@@ -210,7 +228,7 @@ final class FundsController
             'accounting_code' => $f->accounting_code,
             'created_at'      => $f->created_at,
             'updated_at'      => $f->updated_at,
-            // Prefer the denormalised column written by AggregateSyncer;
+            // Prefer the denormalized column written by AggregateSyncer;
             // batch override lets the list endpoint short-circuit a per-row
             // COUNT(*) until the next migration backfills the column.
             'donations_count' => $donationsCount ?? (int) $f->donations_count,

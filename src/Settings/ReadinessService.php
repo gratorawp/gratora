@@ -24,9 +24,9 @@ use Dono\Gateways\Stripe\StripeApi;
  * Every row is derived, never stored: the wizard collects the facts nobody can
  * compute, this reports the ones that drift afterwards. A key gets rotated, a
  * page gets trashed, test mode stays on, the queue wedges. Each of those is
- * silent today.
+ * otherwise silent.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class ReadinessService
 {
@@ -43,6 +43,7 @@ final class ReadinessService
     /** Enough to say "more than a hundred" without counting a runaway table. */
     private const QUEUE_PROBE = 101;
 
+    /** @since 1.0.0 */
     public function __construct(
         private SettingsService $settings,
         private FormReadinessService $formReadiness,
@@ -67,6 +68,8 @@ final class ReadinessService
      *   action_label?:string,
      *   blocker?:bool,
      * }>
+     *
+     * @since 1.0.0
      */
     public function check(): array
     {
@@ -82,7 +85,11 @@ final class ReadinessService
         return array_values(array_filter($checks));
     }
 
-    /** True when nothing on the list blocks a live donation. */
+    /**
+     * True when nothing on the list blocks a live donation.
+     *
+     * @since 1.0.0
+     */
     public function isLive(array $checks): bool
     {
         foreach ($checks as $check) {
@@ -96,7 +103,11 @@ final class ReadinessService
 
     // -- money ---------------------------------------------------------------
 
-    /** @return list<array<string,mixed>> */
+    /**
+     * @return list<array<string,mixed>>
+     *
+     * @since 1.0.0
+     */
     private function moneyChecks(): array
     {
         $checks = [$this->gatewayCheck(), $this->modeCheck(), $this->httpsCheck()];
@@ -110,7 +121,11 @@ final class ReadinessService
         return $checks;
     }
 
-    /** @return array<string,mixed> */
+    /**
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
     private function gatewayCheck(): array
     {
         // Asked of the registry, not a fixed list of names: an organization
@@ -161,7 +176,11 @@ final class ReadinessService
         );
     }
 
-    /** @return array<string,mixed> */
+    /**
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
     private function modeCheck(): array
     {
         if ($this->testMode()) {
@@ -187,6 +206,8 @@ final class ReadinessService
          * processor set up for test and never for live.
          *
          * @param list<string> $missing gateway labels with no live credentials
+         *
+         * @since 1.0.0
          */
         $missing = (array) apply_filters('dono.readiness.live_mode_gaps', $missing);
 
@@ -209,7 +230,11 @@ final class ReadinessService
         return $this->pass('mode', 'money', __('Live mode, with live keys on file', 'dono'));
     }
 
-    /** @return array<string,mixed> */
+    /**
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
     private function httpsCheck(): array
     {
         if (is_ssl()) {
@@ -236,7 +261,11 @@ final class ReadinessService
         );
     }
 
-    /** @return array<string,mixed>|null null when Stripe is not in play */
+    /**
+     * @return array<string,mixed>|null null when Stripe is not in play
+     *
+     * @since 1.0.0
+     */
     private function stripeWebhookCheck(): ?array
     {
         if (! $this->stripe->isConnected()) {
@@ -256,7 +285,11 @@ final class ReadinessService
         );
     }
 
-    /** @return array<string,mixed>|null null when PayPal is not in play */
+    /**
+     * @return array<string,mixed>|null null when PayPal is not in play
+     *
+     * @since 1.0.0
+     */
     private function payPalWebhookCheck(): ?array
     {
         if (! $this->payPal->isConnected()) {
@@ -276,7 +309,11 @@ final class ReadinessService
         );
     }
 
-    /** @return array<string,mixed>|null null when Stripe is not in play */
+    /**
+     * @return array<string,mixed>|null null when Stripe is not in play
+     *
+     * @since 1.0.0
+     */
     private function applePayCheck(): ?array
     {
         if (! $this->stripe->isConnected()) {
@@ -298,7 +335,11 @@ final class ReadinessService
 
     // -- the public page -----------------------------------------------------
 
-    /** @return array<string,mixed> */
+    /**
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
     private function donationPageCheck(): array
     {
         $campaigns = Campaign::query()->where('status', 'published')->getAll();
@@ -347,7 +388,11 @@ final class ReadinessService
 
     // -- receipts ------------------------------------------------------------
 
-    /** @return list<array<string,mixed>> */
+    /**
+     * @return list<array<string,mixed>>
+     *
+     * @since 1.0.0
+     */
     private function receiptChecks(): array
     {
         $sender   = $this->formReadiness->receiptSenderCheck() + ['group' => 'receipts'];
@@ -362,6 +407,8 @@ final class ReadinessService
      * asks for one.
      *
      * @return array<string,mixed>
+     *
+     * @since 1.0.0
      */
     private function orgIdentityCheck(): array
     {
@@ -404,6 +451,8 @@ final class ReadinessService
      * hearing back with nothing else looking wrong.
      *
      * @return array<string,mixed>
+     *
+     * @since 1.0.0
      */
     private function backgroundJobsCheck(): array
     {
@@ -448,7 +497,11 @@ final class ReadinessService
         );
     }
 
-    /** @return array{0:int,1:int}|null [count, age of the oldest in seconds] */
+    /**
+     * @return array{0:int,1:int}|null [count, age of the oldest in seconds]
+     *
+     * @since 1.0.0
+     */
     private function oldestPendingJob(): ?array
     {
         $query = [
@@ -483,6 +536,8 @@ final class ReadinessService
      * page turns every one of those links into a 404 silently.
      *
      * @return array<string,mixed>
+     *
+     * @since 1.0.0
      */
     private function donorPortalCheck(): array
     {
@@ -504,7 +559,11 @@ final class ReadinessService
 
     // -- licenses ------------------------------------------------------------
 
-    /** @return list<array<string,mixed>> */
+    /**
+     * @return list<array<string,mixed>>
+     *
+     * @since 1.0.0
+     */
     private function licenseChecks(): array
     {
         $addons = $this->license->entitlements();
@@ -571,6 +630,7 @@ final class ReadinessService
 
     // -- helpers -------------------------------------------------------------
 
+    /** @since 1.0.0 */
     private function testMode(): bool
     {
         $cfg = get_option('dono_gateway_config', []);
@@ -578,6 +638,7 @@ final class ReadinessService
         return is_array($cfg) && ! empty($cfg['test_mode']);
     }
 
+    /** @since 1.0.0 */
     private function offlineReady(): bool
     {
         $gw = $this->settings->get('gateways');
@@ -585,6 +646,7 @@ final class ReadinessService
         return ! empty($gw['offline']['enabled']) && trim((string) ($gw['offline']['instructions'] ?? '')) !== '';
     }
 
+    /** @since 1.0.0 */
     private function showTaxId(): bool
     {
         $receipts = $this->settings->get('receipts');
@@ -592,13 +654,21 @@ final class ReadinessService
         return ! array_key_exists('show_tax_id', $receipts) || (bool) $receipts['show_tax_id'];
     }
 
-    /** @param array<int,array{name:string}> $addons */
+    /**
+     * @param array<int,array{name:string}> $addons
+     *
+     * @since 1.0.0
+     */
     private function names(array $addons): string
     {
         return implode(', ', array_map(static fn (array $a): string => (string) $a['name'], $addons));
     }
 
-    /** @param list<string> $items */
+    /**
+     * @param list<string> $items
+     *
+     * @since 1.0.0
+     */
     private function join(array $items): string
     {
         if (count($items) < 2) {
@@ -609,25 +679,41 @@ final class ReadinessService
         return implode(', ', $items) . ' ' . __('and', 'dono') . ' ' . $last;
     }
 
-    /** @return array<string,mixed> */
+    /**
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
     private function pass(string $id, string $group, string $label): array
     {
         return ['id' => $id, 'group' => $group, 'status' => self::PASS, 'label' => $label];
     }
 
-    /** @return array<string,mixed> */
+    /**
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
     private function warn(string $id, string $group, string $label, string $detail = '', ?string $tab = null, ?string $actionLabel = null): array
     {
         return $this->row(self::WARN, $id, $group, $label, $detail, $tab, $actionLabel, false);
     }
 
-    /** @return array<string,mixed> */
+    /**
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
     private function fail(string $id, string $group, string $label, string $detail = '', ?string $tab = null, ?string $actionLabel = null, bool $blocker = false): array
     {
         return $this->row(self::FAIL, $id, $group, $label, $detail, $tab, $actionLabel, $blocker);
     }
 
-    /** @return array<string,mixed> */
+    /**
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
     private function row(string $status, string $id, string $group, string $label, string $detail, ?string $tab, ?string $actionLabel, bool $blocker): array
     {
         $row = ['id' => $id, 'group' => $group, 'status' => $status, 'label' => $label];

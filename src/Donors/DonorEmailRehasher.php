@@ -15,7 +15,7 @@ use Dono\Vendor\Queryable\DB;
  * Old hashes used the lost pepper; dedup only survives by decrypting
  * email_encrypted and rehashing against the new pepper.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class DonorEmailRehasher
 {
@@ -35,6 +35,7 @@ final class DonorEmailRehasher
 
     private const BATCH = 200;
 
+    /** @since 1.0.0 */
     public function __construct(
         private IdentityHasher $hasher,
         private Crypto $crypto,
@@ -42,6 +43,7 @@ final class DonorEmailRehasher
     ) {
     }
 
+    /** @since 1.0.0 */
     public function register(): void
     {
         add_action(self::HOOK, [$this, 'run']);
@@ -51,13 +53,21 @@ final class DonorEmailRehasher
         add_action('init', [$this, 'reconcile'], 20);
     }
 
-    /** Mark a rehash as owed. Safe to call before Action Scheduler exists. */
+    /**
+     * Mark a rehash as owed. Safe to call before Action Scheduler exists.
+     *
+     * @since 1.0.0
+     */
     public static function markPending(): void
     {
         update_option(self::PENDING_OPTION, '1', false);
     }
 
-    /** Queue the owed rehash once, if it is not already running. */
+    /**
+     * Queue the owed rehash once, if it is not already running.
+     *
+     * @since 1.0.0
+     */
     public function reconcile(): void
     {
         if (get_option(self::PENDING_OPTION) !== '1') {
@@ -73,6 +83,8 @@ final class DonorEmailRehasher
 
     /**
      * @param array{after_id?:int}|int $args
+     *
+     * @since 1.0.0
      */
     public function run(mixed $args = []): void
     {

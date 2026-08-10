@@ -12,7 +12,7 @@ use Dono\Gateways\GatewayManager;
 /**
  * Registers and renders the Forms admin page, including full-screen editor mode.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class FormsPage extends HookProvider
 {
@@ -20,11 +20,13 @@ final class FormsPage extends HookProvider
     private const HANDLE    = 'dono-admin-forms';
     private const BUILD_DIR = 'build/admin/forms';
 
+    /** @since 1.0.0 */
     protected function filters(): array
     {
         return ['dono.admin.pages' => 'registerPage'];
     }
 
+    /** @since 1.0.0 */
     protected function actions(): array
     {
         return ['admin_head' => 'maybePrintFullscreenStyles'];
@@ -32,9 +34,11 @@ final class FormsPage extends HookProvider
 
     /**
      * True when the forms screen is showing an editor. The page is hidden and
-     * has no other view, so the form id is the only signal that matters - the
-     * React root gates on the same thing, which keeps the fullscreen chrome and
-     * the editor from disagreeing about what is on screen.
+     * has no other view, so the form id is the only signal that matters, and
+     * the React root gates on the same thing, which keeps the fullscreen chrome
+     * and the editor from disagreeing about what is on screen.
+     *
+     * @since 1.0.0
      */
     public static function isFormEditView(): bool
     {
@@ -43,6 +47,7 @@ final class FormsPage extends HookProvider
             && (int) ($_GET['form'] ?? 0) > 0;
     }
 
+    /** @since 1.0.0 */
     public function maybePrintFullscreenStyles(): void
     {
         if (! self::isFormEditView()) return;
@@ -56,6 +61,7 @@ final class FormsPage extends HookProvider
             . '</style>';
     }
 
+    /** @since 1.0.0 */
     public function registerPage(array $pages): array
     {
         $pages[] = [
@@ -69,6 +75,7 @@ final class FormsPage extends HookProvider
         return $pages;
     }
 
+    /** @since 1.0.0 */
     public function render(): void
     {
         $this->bootBlockEditorContext();
@@ -80,6 +87,7 @@ final class FormsPage extends HookProvider
         <?php
     }
 
+    /** @since 1.0.0 */
     private function bootBlockEditorContext(): void
     {
         // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
@@ -105,6 +113,7 @@ final class FormsPage extends HookProvider
         }, 99);
     }
 
+    /** @since 1.0.0 */
     private function enqueueAssets(): void
     {
         wp_enqueue_script('wp-block-library');

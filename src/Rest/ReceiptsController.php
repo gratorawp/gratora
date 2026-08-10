@@ -21,11 +21,14 @@ use WP_REST_Server;
 /**
  * Magic-link receipt re-download. The token is multi-use within its TTL so donors
  * can re-download from any device.
+ *
+ * @since 1.0.0
  */
 final class ReceiptsController
 {
     private const NAMESPACE = 'dono/v1';
 
+    /** @since 1.0.0 */
     public function __construct(
         private ReceiptRepository $receipts,
         private DonationRepository $donations,
@@ -35,7 +38,7 @@ final class ReceiptsController
     ) {
     }
 
-    /** Registers the receipt download route. */
+    /** @since 1.0.0 */
     public function registerRoutes(): void
     {
         register_rest_route(self::NAMESPACE, '/receipts/(?P<receipt_id>\d+)/download', [
@@ -49,7 +52,7 @@ final class ReceiptsController
         ]);
     }
 
-    /** Validates the token, renders the PDF, and streams it to the browser. */
+    /** @since 1.0.0 */
     public function download(WP_REST_Request $request): WP_Error|null
     {
         $receiptId = (int) $request['receipt_id'];
@@ -120,6 +123,7 @@ final class ReceiptsController
         return null;
     }
 
+    /** @since 1.0.0 */
     private function findRendererById(string $id): ?ReceiptRenderer
     {
         foreach ((array) apply_filters('dono.receipt.renderers', []) as $r) {
@@ -128,6 +132,7 @@ final class ReceiptsController
         return null;
     }
 
+    /** @since 1.0.0 */
     private function stream(string $bytes, string $filenameBase): void
     {
         $filename = preg_replace('/[^A-Za-z0-9_\-]/', '', $filenameBase) ?: 'receipt';
@@ -139,7 +144,11 @@ final class ReceiptsController
         exit;
     }
 
-    /** @return array<string,mixed> */
+    /**
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
     private function loadOrgProfile(): array
     {
         $defaults = [
@@ -152,6 +161,7 @@ final class ReceiptsController
         return is_array($stored) ? array_merge($defaults, $stored) : $defaults;
     }
 
+    /** @since 1.0.0 */
     private function resolveDonorName(Donation $donation, Donor $donor): string
     {
         $first = $donation->donor_first_name;
@@ -163,6 +173,7 @@ final class ReceiptsController
         return trim((string) $first . ' ' . (string) $last);
     }
 
+    /** @since 1.0.0 */
     private function loadCampaign(Donation $donation): ?Campaign
     {
         $cid = (int) ($donation->campaign_id ?? 0);

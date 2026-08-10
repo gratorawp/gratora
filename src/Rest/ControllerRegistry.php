@@ -8,19 +8,24 @@ namespace Dono\Rest;
  * Registry for add-on REST controllers. Any object with registerRoutes(): void
  * can be contributed via dono.rest.register without modifying RestProvider.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class ControllerRegistry
 {
     /** @var list<object> */
     private array $controllers = [];
 
+    /** @since 1.0.0 */
     public function add(object $controller): void
     {
         $this->controllers[] = $controller;
     }
 
-    /** @return list<object> */
+    /**
+     * @return list<object>
+     *
+     * @since 1.0.0
+     */
     public function all(): array
     {
         return $this->controllers;

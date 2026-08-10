@@ -15,7 +15,7 @@ namespace Dono\Donors;
  *
  * Pure: no I/O, no queries. atRiskCsv runs this up to 10,000 times.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class AtRiskReason
 {
@@ -44,6 +44,8 @@ final class AtRiskReason
      * @param  array<string,mixed>                                              $row  a listAtRisk row
      * @param  array{failing:int,paused:int,live:int,cancelled_at:?string}|null $plan batched plan state
      * @return array{key:string, avg_gap_days:?int}
+     *
+     * @since 1.0.0
      */
     public static function classify(array $row, ?array $plan, string $today): array
     {
@@ -65,7 +67,7 @@ final class AtRiskReason
             if (! empty($plan['live'])) return self::verdict(self::PLAN_ACTIVE);
         }
 
-        // Guard the count before any span maths: n - 1 must never be zero, and
+        // Guard the count before any span math: n - 1 must never be zero, and
         // a drifted count of 0 must not read as "first gift".
         $count = (int) ($row['donations_count'] ?? 0);
         if ($count === 1) {
@@ -106,6 +108,8 @@ final class AtRiskReason
      * .pot file.
      *
      * @return array<string,string>
+     *
+     * @since 1.0.0
      */
     public static function labels(): array
     {
@@ -122,7 +126,11 @@ final class AtRiskReason
         ];
     }
 
-    /** @return array{key:string, avg_gap_days:?int} */
+    /**
+     * @return array{key:string, avg_gap_days:?int}
+     *
+     * @since 1.0.0
+     */
     private static function verdict(string $key, ?int $avgGap = null): array
     {
         return ['key' => $key, 'avg_gap_days' => $avgGap];
@@ -132,6 +140,8 @@ final class AtRiskReason
      * Whole days between two dates, floored to the day the way daysAgo() is.
      * strtotime on the date part rather than DateTimeImmutable: this runs once
      * per exported row.
+     *
+     * @since 1.0.0
      */
     private static function days(string $from, string $to): ?int
     {

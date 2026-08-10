@@ -15,11 +15,15 @@ namespace Dono\Donors\Erasure;
  *         return $h;
  *     });
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class ErasureRegistry
 {
-    /** @return list<ErasureHandler> */
+    /**
+     * @return list<ErasureHandler>
+     *
+     * @since 1.0.0
+     */
     public function handlers(): array
     {
         $handlers = apply_filters('dono.donor.erasure_handlers', []);
@@ -37,6 +41,8 @@ final class ErasureRegistry
      * runs this inside a transaction, so a plugin that cannot complete its part
      * rolls back the rest rather than reporting a compliance action as done
      * when it only partly happened.
+     *
+     * @since 1.0.0
      */
     public function run(ErasureRequest $request): void
     {

@@ -18,24 +18,30 @@ use Dono\Async\AsyncDispatcher;
  * shell access. UpgradeRunner::step is callable directly and the Advanced
  * screen has a button for it.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class UpgradeJob
 {
     public const HOOK = 'dono.async.run_upgrades';
 
+    /** @since 1.0.0 */
     public function __construct(
         private AsyncDispatcher $async,
         private UpgradeRunner $runner,
     ) {
     }
 
+    /** @since 1.0.0 */
     public function register(): void
     {
         add_action(self::HOOK, [$this, 'run']);
     }
 
-    /** Queue a drain if there is anything to drain. */
+    /**
+     * Queue a drain if there is anything to drain.
+     *
+     * @since 1.0.0
+     */
     public function start(): void
     {
         if (! $this->runner->hasPending()) {
@@ -45,6 +51,7 @@ final class UpgradeJob
         $this->async->enqueue(self::HOOK, []);
     }
 
+    /** @since 1.0.0 */
     public function run(): void
     {
         if ($this->runner->step()) {
@@ -55,6 +62,8 @@ final class UpgradeJob
     /**
      * Re-enqueue a drain whose job was dropped, the way FundReassignmentJob
      * does. Safe on every admin load: one option read when nothing is pending.
+     *
+     * @since 1.0.0
      */
     public static function reconcile(AsyncDispatcher $async, UpgradeRunner $runner): void
     {

@@ -18,34 +18,40 @@ use Dono\Receipts\ReceiptRenderer;
  * No legal tax-deduction language; that is handled by country-specific
  * renderers.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class GenericReceiptRenderer implements ReceiptRenderer
 {
+    /** @since 1.0.0 */
     public function __construct(private PdfBuilder $pdf)
     {
     }
 
+    /** @since 1.0.0 */
     public function id(): string
     {
         return 'generic.v1';
     }
 
+    /** @since 1.0.0 */
     public function label(): string
     {
         return __('Generic Receipt', 'dono');
     }
 
+    /** @since 1.0.0 */
     public function referenceScope(): string
     {
         return 'receipt';
     }
 
+    /** @since 1.0.0 */
     public function appliesTo(ReceiptContext $ctx): bool
     {
         return $ctx->donation->status === 'paid';
     }
 
+    /** @since 1.0.0 */
     public function render(ReceiptContext $ctx): string
     {
         $template       = $this->loadTemplate();
@@ -98,6 +104,8 @@ final class GenericReceiptRenderer implements ReceiptRenderer
      * built-in defaults so a stale option never produces a blank receipt.
      *
      * @return array{header_title:string,signoff:string,footer_note:string,show_tax_id:bool}
+     *
+     * @since 1.0.0
      */
     private function loadTemplate(): array
     {
@@ -137,10 +145,10 @@ final class GenericReceiptRenderer implements ReceiptRenderer
     }
 
     /**
-     * Substitutes merge tags in the template strings.
-     *
      * @param array<string,mixed> $template
      * @return array<string,mixed>
+     *
+     * @since 1.0.0
      */
     private function expandMergeTags(array $template, ReceiptContext $ctx, string $amountDisplay): array
     {

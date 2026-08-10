@@ -17,7 +17,7 @@ use Dono\Foundation\Crypto\Crypto;
  * Sandbox and live are entirely separate PayPal apps, so each mode holds its
  * own triple.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class PayPalAccount
 {
@@ -30,11 +30,12 @@ final class PayPalAccount
      */
     private ?bool $testOverride = null;
 
+    /** @since 1.0.0 */
     public function __construct(private Crypto $crypto)
     {
     }
 
-    /** Persist one mode's credentials. Modes are independent. */
+    /** @since 1.0.0 */
     public function saveKeys(bool $test, string $clientId, string $secret): void
     {
         $data = $this->raw() ?? [];
@@ -49,7 +50,7 @@ final class PayPalAccount
         $this->forgetToken($test);
     }
 
-    /** The webhook id PayPal assigns to the endpoint, needed to verify signatures. */
+    /** @since 1.0.0 */
     public function saveWebhookId(bool $test, string $webhookId): void
     {
         $data = $this->raw() ?? [];
@@ -57,6 +58,7 @@ final class PayPalAccount
         SystemSetting::write(self::KEY, (string) wp_json_encode($data));
     }
 
+    /** @since 1.0.0 */
     public function webhookId(bool $test): string
     {
         $data = $this->raw();
@@ -73,6 +75,8 @@ final class PayPalAccount
      *   secret_hint_test:string, secret_hint_live:string,
      *   webhook_test:bool, webhook_live:bool
      * }|null
+     *
+     * @since 1.0.0
      */
     public function get(): ?array
     {
@@ -94,12 +98,17 @@ final class PayPalAccount
         ];
     }
 
-    /** True when either mode has credentials: the gateway registers on this. */
+    /**
+     * True when either mode has credentials: the gateway registers on this.
+     *
+     * @since 1.0.0
+     */
     public function isConnected(): bool
     {
         return $this->hasKeysFor(true) || $this->hasKeysFor(false);
     }
 
+    /** @since 1.0.0 */
     public function hasKeysFor(bool $test): bool
     {
         $data = $this->raw();
@@ -115,42 +124,52 @@ final class PayPalAccount
      *
      * Deliberately mode-independent. This answers "may the form offer PayPal",
      * which is asked before any donation has fixed a mode, and the mode
-     * override is per-operation state on a shared instance: keying off it made
-     * a live-mode call earlier in the request hide PayPal from a sandbox form.
-     * A charge in a mode with no credentials still fails closed in PayPalApi.
+     * override is per-operation state on a shared instance. A charge in a mode
+     * with no credentials still fails closed in PayPalApi.
+     *
+     * @since 1.0.0
      */
     public function canCharge(): bool
     {
         return $this->isConnected();
     }
 
+    /** @since 1.0.0 */
     public function useTestMode(bool $test): void
     {
         $this->testOverride = $test;
     }
 
-    /** Fails safe to test (sandbox) when no caller set the mode. */
+    /**
+     * Fails safe to test (sandbox) when no caller set the mode.
+     *
+     * @since 1.0.0
+     */
     public function isTestMode(): bool
     {
         return $this->testOverride ?? true;
     }
 
+    /** @since 1.0.0 */
     public function activeClientId(): string
     {
         return $this->clientIdFor($this->isTestMode());
     }
 
+    /** @since 1.0.0 */
     public function clientIdFor(bool $test): string
     {
         $data = $this->raw();
         return $data === null ? '' : (string) ($data[$test ? 'client_id_test' : 'client_id_live'] ?? '');
     }
 
+    /** @since 1.0.0 */
     public function activeSecret(): string
     {
         return $this->secretFor($this->isTestMode());
     }
 
+    /** @since 1.0.0 */
     public function secretFor(bool $test): string
     {
         $data = $this->raw();
@@ -161,7 +180,11 @@ final class PayPalAccount
         return is_string($plain) ? $plain : '';
     }
 
-    /** Merge merchant details learned from the credential check. */
+    /**
+     * Merge merchant details learned from the credential check.
+     *
+     * @since 1.0.0
+     */
     public function refresh(array $identity): void
     {
         $data = $this->raw();
@@ -177,6 +200,8 @@ final class PayPalAccount
      * OAuth2 access tokens are short-lived; cache per mode so every API call
      * does not pay for a token round-trip. Stored in a transient, not the
      * settings blob, because it is disposable.
+     *
+     * @since 1.0.0
      */
     public function cachedToken(bool $test): string
     {
@@ -184,12 +209,14 @@ final class PayPalAccount
         return is_string($t) ? $t : '';
     }
 
+    /** @since 1.0.0 */
     public function cacheToken(bool $test, string $token, int $expiresIn): void
     {
         // Expire a minute early so a token never dies mid-request.
         set_transient($this->tokenKey($test), $token, max(60, $expiresIn - 60));
     }
 
+    /** @since 1.0.0 */
     public function forgetToken(bool $test): void
     {
         delete_transient($this->tokenKey($test));
@@ -200,13 +227,19 @@ final class PayPalAccount
      * before it can test them and needs to put the old ones back if they fail.
      *
      * @return array<string,mixed>|null
+     *
+     * @since 1.0.0
      */
     public function snapshot(): ?array
     {
         return $this->raw();
     }
 
-    /** @param array<string,mixed>|null $data a value from snapshot() */
+    /**
+     * @param array<string,mixed>|null $data a value from snapshot()
+     *
+     * @since 1.0.0
+     */
     public function restore(?array $data): void
     {
         if ($data === null) {
@@ -219,7 +252,11 @@ final class PayPalAccount
         $this->forgetToken(false);
     }
 
-    /** Remove one mode's credentials, leaving the other intact. */
+    /**
+     * Remove one mode's credentials, leaving the other intact.
+     *
+     * @since 1.0.0
+     */
     public function forgetMode(bool $test): void
     {
         $data = $this->raw();
@@ -241,6 +278,7 @@ final class PayPalAccount
         SystemSetting::write(self::KEY, (string) wp_json_encode($data));
     }
 
+    /** @since 1.0.0 */
     public function forget(): void
     {
         $this->forgetToken(true);
@@ -248,18 +286,24 @@ final class PayPalAccount
         SystemSetting::forget(self::KEY);
     }
 
+    /** @since 1.0.0 */
     private function tokenKey(bool $test): string
     {
         return 'dono_paypal_token_' . ($test ? 'test' : 'live');
     }
 
+    /** @since 1.0.0 */
     private function hint(bool $test): string
     {
         $s = $this->secretFor($test);
         return $s === '' ? '' : substr($s, -4);
     }
 
-    /** @return array<string,mixed>|null */
+    /**
+     * @return array<string,mixed>|null
+     *
+     * @since 1.0.0
+     */
     private function raw(): ?array
     {
         $json = SystemSetting::read(self::KEY);

@@ -14,16 +14,18 @@ use Dono\Receipts\PdfBuilder;
  * Builds a single-page campaign performance PDF: raised vs goal, a progress bar,
  * and a small stats row. Aggregate figures only, no donor PII.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class CampaignReportBuilder
 {
+    /** @since 1.0.0 */
     public function __construct(
         private PdfBuilder $pdf,
         private CampaignMetricsService $metrics,
     ) {
     }
 
+    /** @since 1.0.0 */
     public function build(Campaign $campaign, string $range): string
     {
         $campaignId = (int) $campaign->id;
@@ -61,7 +63,11 @@ final class CampaignReportBuilder
         ]);
     }
 
-    /** Stable download filename shared by the command link and the streaming route. */
+    /**
+     * Stable download filename shared by the command link and the streaming route.
+     *
+     * @since 1.0.0
+     */
     public static function filename(int $campaignId, string $range): string
     {
         return sprintf('dono-campaign-%d-%s.pdf', $campaignId, $range);
@@ -73,6 +79,8 @@ final class CampaignReportBuilder
      *
      * @param array<string,mixed> $summary
      * @return array{0:bool,1:string,2:int,3:int} [has_goal, goal_display, percent, bar_width]
+     *
+     * @since 1.0.0
      */
     private function goal(Campaign $campaign, array $summary, string $currency): array
     {
@@ -85,7 +93,6 @@ final class CampaignReportBuilder
             return [true, Money::format($goalCents, $currency), $percent, $this->clamp($percent)];
         }
 
-        // Count goals: donations or donors.
         $goalCount = (int) ($campaign->goal_count ?? 0);
         if ($goalCount <= 0) return [false, '', 0, 0];
 
@@ -103,11 +110,13 @@ final class CampaignReportBuilder
         return [true, $display, $percent, $this->clamp($percent)];
     }
 
+    /** @since 1.0.0 */
     private function clamp(int $percent): int
     {
         return max(0, min(100, $percent));
     }
 
+    /** @since 1.0.0 */
     private function rangeLabel(string $range): string
     {
         return match ($range) {

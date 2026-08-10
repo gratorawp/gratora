@@ -8,10 +8,11 @@ namespace Dono\Gateways;
  * Result of `PaymentGateway::refund()`. `success = true` means the gateway
  * accepted the refund.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class RefundResult
 {
+    /** @since 1.0.0 */
     public function __construct(
         public readonly bool $success,
         public readonly ?string $gateway_refund_id = null,
@@ -21,7 +22,7 @@ final class RefundResult
     ) {
     }
 
-    /** Factory for a failed refund with an error message. */
+    /** @since 1.0.0 */
     public static function failure(string $error): self
     {
         return new self(success: false, error: $error);

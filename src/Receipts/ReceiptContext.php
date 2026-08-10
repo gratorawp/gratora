@@ -14,10 +14,11 @@ use Dono\Donors\Donor;
  * Modules extend context via `dono.receipt.context`. Keys in `extras` must
  * be namespaced by the module to avoid collisions.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class ReceiptContext
 {
+    /** @since 1.0.0 */
     public function __construct(
         public readonly Donation $donation,
         public readonly Donor $donor,
@@ -45,6 +46,7 @@ final class ReceiptContext
     ) {
     }
 
+    /** @since 1.0.0 */
     public function with(string $key, mixed $value): self
     {
         return new self(

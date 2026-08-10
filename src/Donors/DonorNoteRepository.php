@@ -11,10 +11,11 @@ use Dono\Vendor\Queryable\DB;
 /**
  * Repository for DonorNote. Encrypts/decrypts body at the boundary.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class DonorNoteRepository
 {
+    /** @since 1.0.0 */
     public function __construct(
         private Crypto $crypto,
         private Clock $clock,
@@ -22,12 +23,14 @@ final class DonorNoteRepository
     }
 
     /**
-     * Newest-first notes with decrypted body. Authorisation is the caller's responsibility.
+     * Newest-first notes with decrypted body. Authorization is the caller's responsibility.
      *
      * @return array<array{
      *   id:int, donor_id:int, author_user_id:?int, body:string,
      *   created_at:string, updated_at:string
      * }>
+     *
+     * @since 1.0.0
      */
     public function listForDonor(int $donorId, int $limit = 50): array
     {
@@ -40,6 +43,7 @@ final class DonorNoteRepository
         return array_map(fn (DonorNote $n) => $this->shape($n), $rows);
     }
 
+    /** @since 1.0.0 */
     public function create(int $donorId, string $body, ?int $authorUserId): array
     {
         $now = $this->clock->now()->format('Y-m-d H:i:s');
@@ -53,6 +57,7 @@ final class DonorNoteRepository
         return $this->shape($note);
     }
 
+    /** @since 1.0.0 */
     public function delete(int $noteId): bool
     {
         $note = DonorNote::query()->find('id', $noteId);
@@ -61,12 +66,17 @@ final class DonorNoteRepository
         return true;
     }
 
+    /** @since 1.0.0 */
     public function findById(int $id): ?DonorNote
     {
         return DonorNote::query()->find('id', $id);
     }
 
-    /** @return array{id:int,donor_id:int,author_user_id:?int,author_display_name:?string,author_role:?string,body:string,created_at:string,updated_at:string} */
+    /**
+     * @return array{id:int,donor_id:int,author_user_id:?int,author_display_name:?string,author_role:?string,body:string,created_at:string,updated_at:string}
+     *
+     * @since 1.0.0
+     */
     private function shape(DonorNote $n): array
     {
         [$displayName, $role] = $this->resolveAuthor($n->author_user_id !== null ? (int) $n->author_user_id : null);
@@ -82,7 +92,11 @@ final class DonorNoteRepository
         ];
     }
 
-    /** @return array{0:?string,1:?string} */
+    /**
+     * @return array{0:?string,1:?string}
+     *
+     * @since 1.0.0
+     */
     private function resolveAuthor(?int $userId): array
     {
         static $cache = [];

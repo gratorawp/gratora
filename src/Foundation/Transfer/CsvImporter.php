@@ -34,7 +34,7 @@ use Throwable;
  * subscription looks live in the admin and never bills, which is worse than
  * not having it.
  *
- * @version 1.1.0
+ * @since 1.0.0
  */
 final class CsvImporter
 {
@@ -98,6 +98,7 @@ final class CsvImporter
     /** Statuses a row may claim. Anything else is imported as paid. */
     private const STATUSES = ['paid', 'pending', 'failed', 'refunded', 'cancelled'];
 
+    /** @since 1.0.0 */
     public function __construct(
         private DonorService $donors,
         private IdentityHasher $hasher,
@@ -109,6 +110,7 @@ final class CsvImporter
      * actually in their file rather than against field names alone.
      *
      * @return array{headers:list<string>, sample:list<array<string,string>>, rows:int, mapping:array<string,string>, fields:array<string,string>}
+     * @since 1.0.0
      */
     public function inspect(string $csv, int $sampleSize = 5): array
     {
@@ -126,6 +128,7 @@ final class CsvImporter
     /**
      * @param  array<string,string> $mapping field => header
      * @return array{mode:string, donations_imported:int, donors_created:int, donors_matched:int, skipped:array<string,int>, errors:list<string>, dry_run:bool}
+     * @since 1.0.0
      */
     public function import(string $csv, array $mapping, bool $dryRun = true): array
     {
@@ -201,6 +204,7 @@ final class CsvImporter
      * @param  array<string,bool>   $seen
      * @param  array<string,bool>   $seenEmail
      * @return array{skip:?string, donation:bool, donor_created:bool, donor_matched:bool}
+     * @since 1.0.0
      */
     private function row(array $row, array $mapping, string $mode, bool $dryRun, array &$seen, array &$seenEmail): array
     {
@@ -321,6 +325,8 @@ final class CsvImporter
      * "US", and there is no country list on the PHP side to resolve it, so a
      * name is left unset rather than stored as the "UN" its first two letters
      * would produce.
+     *
+     * @since 1.0.0
      */
     private function countryCode(string $raw): string
     {
@@ -333,6 +339,8 @@ final class CsvImporter
      * Stable across runs so the same file matches itself. The transaction id
      * is used when the file has one, since that is the only thing the other
      * platform guaranteed to be unique.
+     *
+     * @since 1.0.0
      */
     private function reference(string $email, int $cents, string $date, string $external): string
     {
@@ -343,7 +351,10 @@ final class CsvImporter
         return 'CSV-' . strtoupper(substr(hash('sha256', $seed), 0, 12));
     }
 
-    /** @return array{0:string,1:string} */
+    /**
+     * @return array{0:string,1:string}
+     * @since 1.0.0
+     */
     private function names(string $first, string $last, string $full): array
     {
         if ($first !== '' || $last !== '') {
@@ -363,6 +374,8 @@ final class CsvImporter
      * Money as the file wrote it. Thousands separators, currency symbols and a
      * trailing minus all appear in exports, and a value that cannot be read as
      * an amount is refused rather than guessed into a zero-value donation.
+     *
+     * @since 1.0.0
      */
     private function cents(string $raw): ?int
     {
@@ -389,6 +402,7 @@ final class CsvImporter
         return $cents > 0 ? $cents : null;
     }
 
+    /** @since 1.0.0 */
     private function date(string $raw): string
     {
         $raw = trim($raw);
@@ -405,6 +419,7 @@ final class CsvImporter
      *
      * @param  list<string> $headers
      * @return array<string,string>
+     * @since 1.0.0
      */
     private function guessMapping(array $headers): array
     {
@@ -427,7 +442,10 @@ final class CsvImporter
         return $out;
     }
 
-    /** @return array{0:list<string>, 1:list<array<string,string>>} */
+    /**
+     * @return array{0:list<string>, 1:list<array<string,string>>}
+     * @since 1.0.0
+     */
     private function parse(string $csv): array
     {
         $handle = fopen('php://temp', 'r+');

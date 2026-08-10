@@ -18,7 +18,7 @@ namespace Dono\Dashboard;
  * campaign that ends, a form that gets set) stop being generated at all, and
  * their stale dismissal is harmless.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class AttentionDismissals
 {
@@ -32,6 +32,7 @@ final class AttentionDismissals
      * count; the rest carry their identity in the key already.
      *
      * @param array<string,mixed> $item
+     * @since 1.0.0
      */
     public static function signatureFor(array $item): string
     {
@@ -43,6 +44,7 @@ final class AttentionDismissals
      *
      * @param  array<int,array<string,mixed>> $items
      * @return array<int,array<string,mixed>>
+     * @since 1.0.0
      */
     public function filter(array $items, int $userId): array
     {
@@ -58,6 +60,7 @@ final class AttentionDismissals
         }));
     }
 
+    /** @since 1.0.0 */
     public function dismiss(int $userId, string $key, string $signature): void
     {
         $key = trim($key);
@@ -77,6 +80,7 @@ final class AttentionDismissals
         update_user_meta($userId, self::META_KEY, wp_json_encode($all));
     }
 
+    /** @since 1.0.0 */
     public function restore(int $userId, string $key): void
     {
         $all = $this->all($userId);
@@ -88,7 +92,10 @@ final class AttentionDismissals
         update_user_meta($userId, self::META_KEY, wp_json_encode($all));
     }
 
-    /** @return array<string,string> */
+    /**
+     * @return array<string,string>
+     * @since 1.0.0
+     */
     public function all(int $userId): array
     {
         if ($userId <= 0) {

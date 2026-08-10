@@ -11,10 +11,11 @@ use Dono\Settings\SettingsService;
 /**
  * Records analytics events to the dono_events table.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class EventRecorder
 {
+    /** @since 1.0.0 */
     public function __construct(
         private IdentityHasher $hasher,
         private Clock $clock,
@@ -23,11 +24,11 @@ final class EventRecorder
     }
 
     /**
-     * Record an event.
-     *
      * @param string $type  e.g. 'donation.completed', 'form.viewed'
      * @param array  $ctx   any of: donor_id, donation_id, recurring_plan_id, form_id, campaign_id,
      *                      receipt_id, session_hash, user_id, country, amount_cents, currency, payload
+     *
+     * @since 1.0.0
      */
     public function record(string $type, array $ctx = []): void
     {
@@ -40,6 +41,7 @@ final class EventRecorder
         }
     }
 
+    /** @since 1.0.0 */
     private function write(string $type, array $ctx): void
     {
         $ctx = apply_filters('dono.event.recording', $ctx, $type);

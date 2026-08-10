@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace Dono\Campaigns\Blocks;
 
+/**
+ * Registers the campaign block category, editor assets and front-end enqueues.
+ *
+ * @since 1.0.0
+ */
 final class BlockEditorIntegration
 {
     private const HANDLE_EDITOR   = 'dono-campaign-blocks-editor';
@@ -23,6 +28,7 @@ final class BlockEditorIntegration
         'dono/supporter-wall',
     ];
 
+    /** @since 1.0.0 */
     public function register(): void
     {
         add_filter('block_categories_all', [$this, 'registerCategory'], 10, 1);
@@ -36,6 +42,8 @@ final class BlockEditorIntegration
     /**
      * Exposed through REST so editor-side block UIs can hide their campaign
      * picker on a post already tied to a campaign.
+     *
+     * @since 1.0.0
      */
     public function registerPageMeta(): void
     {
@@ -47,6 +55,7 @@ final class BlockEditorIntegration
         ]);
     }
 
+    /** @since 1.0.0 */
     public function registerCategory(array $categories): array
     {
         foreach ($categories as $category) {
@@ -60,6 +69,7 @@ final class BlockEditorIntegration
         return $categories;
     }
 
+    /** @since 1.0.0 */
     public function enqueueEditorAssets(): void
     {
         $assetPath = DONO_DIR . self::BUILD_DIR . '/index.asset.php';
@@ -89,6 +99,8 @@ final class BlockEditorIntegration
     /**
      * enqueue_block_assets is the only hook that reaches the iframed editor
      * canvas, so ServerSideRender previews are styled like the front end.
+     *
+     * @since 1.0.0
      */
     public function enqueueEditorCanvasStyle(): void
     {
@@ -109,6 +121,7 @@ final class BlockEditorIntegration
         }
     }
 
+    /** @since 1.0.0 */
     public function enqueueFrontendAssets(): void
     {
         if (! is_singular()) {
@@ -144,6 +157,8 @@ final class BlockEditorIntegration
      * has_block() only sees the post's own content, so a Dono block nested in a
      * synced pattern or template part would render unstyled. render_block fires
      * wherever the block lives, and a late enqueue still prints.
+     *
+     * @since 1.0.0
      */
     public function enqueueOnRender(string $content, array $block): string
     {
@@ -158,6 +173,7 @@ final class BlockEditorIntegration
         return $content;
     }
 
+    /** @since 1.0.0 */
     private function enqueueBlockStyle(): void
     {
         if (wp_style_is(self::HANDLE_FRONTEND, 'enqueued')) {
@@ -175,6 +191,7 @@ final class BlockEditorIntegration
         }
     }
 
+    /** @since 1.0.0 */
     private function enqueueDonateButtonModal(): void
     {
         if (wp_script_is('dono-donate-button-modal', 'enqueued')) {

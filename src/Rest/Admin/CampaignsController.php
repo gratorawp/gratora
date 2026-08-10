@@ -25,10 +25,17 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 
+/**
+ * Admin campaign endpoints: list, show, create, update, delete, duplicate,
+ * metrics, and the funds picker.
+ *
+ * @since 1.0.0
+ */
 final class CampaignsController
 {
     private const NAMESPACE = 'dono/v1';
 
+    /** @since 1.0.0 */
     public function __construct(
         private CampaignRepository $campaigns,
         private CampaignService $campaignService,
@@ -40,6 +47,7 @@ final class CampaignsController
     ) {
     }
 
+    /** @since 1.0.0 */
     public function registerRoutes(): void
     {
         register_rest_route(self::NAMESPACE, '/admin/campaigns', [
@@ -140,6 +148,7 @@ final class CampaignsController
         ]);
     }
 
+    /** @since 1.0.0 */
     public function recurringSummary(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $campaign = $this->campaigns->findById((int) $request['id']);
@@ -154,11 +163,13 @@ final class CampaignsController
         ], 200);
     }
 
+    /** @since 1.0.0 */
     public function canAccess(): bool
     {
         return Capabilities::userCan('dono_manage_campaigns');
     }
 
+    /** @since 1.0.0 */
     public function index(WP_REST_Request $request): WP_REST_Response
     {
         // Re-queue an archive's cancellation sweep whose job was dropped: the
@@ -185,6 +196,7 @@ final class CampaignsController
         return $response;
     }
 
+    /** @since 1.0.0 */
     public function show(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $campaign = $this->campaigns->findById((int) $request['id']);
@@ -194,6 +206,7 @@ final class CampaignsController
         return new WP_REST_Response($this->shapeFull($campaign, (string) ($request['range'] ?? 'all-time')), 200);
     }
 
+    /** @since 1.0.0 */
     public function create(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $body = (array) ($request->get_json_params() ?? []);
@@ -207,6 +220,7 @@ final class CampaignsController
         return new WP_REST_Response($this->shapeFull($campaign, 'all-time'), 201);
     }
 
+    /** @since 1.0.0 */
     public function update(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $campaign = $this->campaigns->findById((int) $request['id']);
@@ -246,6 +260,7 @@ final class CampaignsController
         return new WP_REST_Response($payload, 200);
     }
 
+    /** @since 1.0.0 */
     public function goalContext(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $current = $this->campaigns->findById((int) $request['id']);
@@ -280,6 +295,7 @@ final class CampaignsController
         ], 200);
     }
 
+    /** @since 1.0.0 */
     private function verdict(int $target, int $avg, int $sampleCount): string
     {
         if ($sampleCount === 0)         return 'first_campaign';
@@ -292,6 +308,7 @@ final class CampaignsController
         return 'very_ambitious';
     }
 
+    /** @since 1.0.0 */
     public function duplicate(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $source = $this->campaigns->findById((int) $request['id']);
@@ -306,6 +323,7 @@ final class CampaignsController
         return new WP_REST_Response($this->shapeFull($copy, 'all-time'), 201);
     }
 
+    /** @since 1.0.0 */
     public function delete(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $campaign = $this->campaigns->findById((int) $request['id']);
@@ -320,6 +338,7 @@ final class CampaignsController
         return new WP_REST_Response(['deleted' => true, 'id' => $campaign->id], 200);
     }
 
+    /** @since 1.0.0 */
     public function metrics(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $campaign = $this->campaigns->findById((int) $request['id']);
@@ -339,6 +358,7 @@ final class CampaignsController
         return new WP_REST_Response($this->buildMetrics($campaign, $range, $compare, $include), 200);
     }
 
+    /** @since 1.0.0 */
     public function stats(WP_REST_Request $request): WP_REST_Response
     {
         $stats = $this->campaigns->aggregateAdmin([
@@ -348,6 +368,7 @@ final class CampaignsController
         return new WP_REST_Response($stats, 200);
     }
 
+    /** @since 1.0.0 */
     public function funds(WP_REST_Request $request): WP_REST_Response
     {
         $rows = Fund::query()->where('is_active', 1)->orderBy('sort_order', 'ASC')->getAll();
@@ -376,6 +397,7 @@ final class CampaignsController
         return new WP_REST_Response($shaped, 200);
     }
 
+    /** @since 1.0.0 */
     private function shapeSummary(Campaign $c): array
     {
         $formsCount = (int) Form::query()->where('campaign_id', $c->id)->count();
@@ -415,6 +437,7 @@ final class CampaignsController
         ];
     }
 
+    /** @since 1.0.0 */
     private function shapeFull(Campaign $c, string $range): array
     {
         $pageEditUrl = $c->page_id ? admin_url('post.php?post=' . $c->page_id . '&action=edit') : null;
@@ -436,6 +459,7 @@ final class CampaignsController
         ];
     }
 
+    /** @since 1.0.0 */
     private function buildMetrics(Campaign $c, string $range, string $compare, ?array $include = null): array
     {
         $want = static function (string ...$keys) use ($include): bool {

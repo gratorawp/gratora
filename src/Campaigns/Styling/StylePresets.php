@@ -8,6 +8,8 @@ namespace Dono\Campaigns\Styling;
  * Brand style presets (built-ins + user customs), stored in dono_org_brand as
  * ['presets' => [...], 'default_id' => id]. Built-ins are always present in all();
  * users may edit a built-in's tokens but cannot delete one.
+ *
+ * @since 1.0.0
  */
 final class StylePresets
 {
@@ -21,6 +23,8 @@ final class StylePresets
      *   tokens: array<string,string>,
      *   builtin?: bool
      * }>
+     *
+     * @since 1.0.0
      */
     public static function builtins(): array
     {
@@ -85,6 +89,8 @@ final class StylePresets
      * followed by user-created custom presets.
      *
      * @return array<int, array{id:string, name:string, description?:string, tokens:array<string,string>, builtin?:bool}>
+     *
+     * @since 1.0.0
      */
     public static function all(): array
     {
@@ -137,6 +143,8 @@ final class StylePresets
     /**
      * Derive a preset from the active theme's theme.json palette + button styles.
      * Returns null when the theme exposes nothing useful.
+     *
+     * @since 1.0.0
      */
     public static function themePreset(): ?array
     {
@@ -191,6 +199,7 @@ final class StylePresets
         ];
     }
 
+    /** @since 1.0.0 */
     public static function find(string $id): ?array
     {
         foreach (self::all() as $p) {
@@ -199,7 +208,11 @@ final class StylePresets
         return null;
     }
 
-    /** Tokens for a preset id, or empty if unknown. */
+    /**
+     * Tokens for a preset id, or empty if unknown.
+     *
+     * @since 1.0.0
+     */
     public static function tokensFor(string $id): array
     {
         $p = self::find($id);
@@ -209,6 +222,8 @@ final class StylePresets
     /**
      * Default preset id (the one new campaigns/forms inherit when nothing is
      * explicitly chosen). Falls back to the first built-in.
+     *
+     * @since 1.0.0
      */
     public static function defaultId(): string
     {
@@ -219,7 +234,11 @@ final class StylePresets
         return $first ? (string) $first['id'] : 'classic';
     }
 
-    /** Coerce one preset record into a normalised shape. */
+    /**
+     * Coerce one preset record into a normalized shape.
+     *
+     * @since 1.0.0
+     */
     private static function normalise(array $p): array
     {
         return [

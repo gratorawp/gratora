@@ -26,10 +26,11 @@ use RuntimeException;
  * Gateway interaction lives in the gateway abstraction; this service records
  * the result and fires hooks for observers.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class DonationService
 {
+    /** @since 1.0.0 */
     public function __construct(
         private DonationRepository $donations,
         private DonorService $donors,
@@ -53,6 +54,8 @@ final class DonationService
      * the raw value lives only in the response.
      *
      * @return array{donation: Donation, status_token: string}
+     *
+     * @since 1.0.0
      */
     public function createPending(DonationIntent $intent): array
     {
@@ -183,7 +186,11 @@ final class DonationService
         return ['donation' => $donation, 'status_token' => $rawStatusToken];
     }
 
-    /** Persist gateway-side identifiers + metadata after the gateway returns its intent. */
+    /**
+     * Persist gateway-side identifiers + metadata after the gateway returns its intent.
+     *
+     * @since 1.0.0
+     */
     public function setGatewayIntent(Donation $donation, string $intentId, ?array $metadata = null): Donation
     {
         $donation->gateway_intent_id = $intentId;
@@ -204,6 +211,8 @@ final class DonationService
      * donation including immediately-charged ones.
      *
      * @param array<string,mixed> $metadata
+     *
+     * @since 1.0.0
      */
     public function markPending(Donation $donation, string $reason, array $metadata = []): void
     {
@@ -246,6 +255,8 @@ final class DonationService
      * webhook.
      *
      * @param array<string,mixed> $metadata
+     *
+     * @since 1.0.0
      */
     public function markProcessing(Donation $donation, string $reason, array $metadata = []): Donation
     {
@@ -309,6 +320,8 @@ final class DonationService
      * confirm even if the timestamp attached to it is nonsense. So a value that
      * cannot be believed is replaced by the clock and said out loud, the same
      * trade refund() makes when a gateway over-reports.
+     *
+     * @since 1.0.0
      */
     private function paidAtFrom(mixed $raw, string $now): string
     {
@@ -340,9 +353,7 @@ final class DonationService
         return $stamp;
     }
 
-    /**
-     * Transition donation to paid
-     */
+    /** @since 1.0.0 */
     public function confirm(Donation $donation, array $result): Donation
     {
         // Only pending/processing/failed may move to paid. Guards every caller
@@ -429,11 +440,12 @@ final class DonationService
      * intent): an existing donation is returned without a second renewal event.
      *
      * @param array<string,mixed> $confirmResult Same shape DonationService::confirm() consumes.
-     */
-    /**
+     *
      * @return array{donation: Donation, created: bool} `created` is false for a
      *   redelivered webhook (the renewal row already existed), so the caller can
      *   skip non-idempotent side effects like bumping plan payment counters.
+     *
+     * @since 1.0.0
      */
     public function createRenewal(
         \Dono\Recurring\RecurringPlan $plan,
@@ -565,6 +577,8 @@ final class DonationService
      * Record a failed PaymentIntent -> Subscription conversion. The first charge is
      * already collected, so no refund; subscription_creation_failed* flags give the
      * admin a retry affordance instead of silently losing all future renewals.
+     *
+     * @since 1.0.0
      */
     public function recordSubscriptionCreationFailure(Donation $donation, \Throwable $e): void
     {
@@ -597,9 +611,7 @@ final class DonationService
         do_action('dono.recurring.subscription_creation_failed', $donation, $e);
     }
 
-    /**
-     * Clear the subscription-creation failure flags after a successful retry.
-     */
+    /** @since 1.0.0 */
     public function clearSubscriptionCreationFailure(Donation $donation): void
     {
         $flags = (array) ($donation->flags ?? []);
@@ -618,11 +630,12 @@ final class DonationService
      *
      * Counted by the repository, announced here, so every surface that cares
      * hears the same thing: the donor's dunning email, reporting, and anything
-     * an add-on wires up. Before this the failure only moved a counter, which
-     * meant a monthly gift could lapse without one person being told.
+     * an add-on wires up.
      *
      * `attempt` is the running failure count for this plan, so a listener can
      * distinguish a first decline from a card that has been dead for a month.
+     *
+     * @since 1.0.0
      */
     public function recordRecurringFailure(\Dono\Recurring\RecurringPlan $plan, ?string $reason = null): void
     {
@@ -650,6 +663,7 @@ final class DonationService
         ]);
     }
 
+    /** @since 1.0.0 */
     public function recordRecurringCancellation(\Dono\Recurring\RecurringPlan $plan, ?string $reason = null): void
     {
         $this->events->record('recurring.cancelled', [
@@ -669,6 +683,7 @@ final class DonationService
         do_action('dono.recurring.cancelled', $plan, $reason);
     }
 
+    /** @since 1.0.0 */
     private function frequencyFromPlan(\Dono\Recurring\RecurringPlan $plan): string
     {
         // Plan stores Stripe-shaped interval; donations carry the Dono label.
@@ -695,6 +710,8 @@ final class DonationService
      * which the aggregate syncers do for free once the status is off `paid`.
      *
      * @param string $kind chargeback or late_failure
+     *
+     * @since 1.0.0
      */
     public function markReversed(Donation $donation, string $kind, ?string $reason = null): Donation
     {
@@ -748,6 +765,8 @@ final class DonationService
      * The charity contested the reversal and won, so the money is theirs again.
      * Clears the kind: the row should not keep claiming it was charged back
      * once the claim has been thrown out.
+     *
+     * @since 1.0.0
      */
     public function reinstateReversed(Donation $donation): Donation
     {
@@ -792,6 +811,7 @@ final class DonationService
         return $donation;
     }
 
+    /** @since 1.0.0 */
     private function resyncAggregatesFor(Donation $donation): void
     {
         if ($donation->campaign_id) {
@@ -805,6 +825,7 @@ final class DonationService
         }
     }
 
+    /** @since 1.0.0 */
     public function markFailed(Donation $donation, ?string $reason = null): Donation
     {
         // Paid money is refunded, not failed; refund states are terminal.
@@ -854,6 +875,8 @@ final class DonationService
 
     /**
      * Record a refund the gateway already executed externally.
+     *
+     * @since 1.0.0
      */
     public function recordExternalRefund(
         Donation $donation,
@@ -1010,6 +1033,8 @@ final class DonationService
      *
      * Idempotent on the gateway refund id: a redelivered reinstatement finds
      * nothing still succeeded and returns null.
+     *
+     * @since 1.0.0
      */
     public function reverseExternalRefund(Donation $donation, string $gatewayRefundId): ?Refund
     {
@@ -1090,6 +1115,8 @@ final class DonationService
      * Refund all or part of a paid donation.
      *
      * @throws RuntimeException when the donation isn't refundable or the gateway rejects.
+     *
+     * @since 1.0.0
      */
     public function refund(
         Donation $donation,
@@ -1218,7 +1245,11 @@ final class DonationService
         return $refund;
     }
 
-    /** Void non-voided receipts for a refunded donation (legal retention). */
+    /**
+     * Void non-voided receipts for a refunded donation (legal retention).
+     *
+     * @since 1.0.0
+     */
     private function voidReceiptsFor(Donation $donation, string $now): void
     {
         $receipts = Receipt::query()
@@ -1234,6 +1265,8 @@ final class DonationService
 
     /**
      * @param array<string,mixed> $custom
+     *
+     * @since 1.0.0
      */
     private function encodeCustom(array $custom): ?string
     {
@@ -1248,6 +1281,8 @@ final class DonationService
      * only (admin donation detail). Empty array when absent or unreadable.
      *
      * @return array<string,mixed>
+     *
+     * @since 1.0.0
      */
     public function decryptCustomData(Donation $donation): array
     {

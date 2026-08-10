@@ -19,17 +19,21 @@ use WP_REST_Server;
  * Incoming-webhook dispatcher: POST /dono/v1/webhooks/{gateway}; handleWebhook()
  * verifies the signature. Dedup relies on the (gateway, external_id) UNIQUE index,
  * not a SELECT pre-check, which would race under concurrent redeliveries.
+ *
+ * @since 1.0.0
  */
 final class WebhookController
 {
     private const NAMESPACE = 'dono/v1';
 
+    /** @since 1.0.0 */
     public function __construct(
         private GatewayManager $gateways,
         private Clock $clock,
     ) {
     }
 
+    /** @since 1.0.0 */
     public function registerRoutes(): void
     {
         register_rest_route(self::NAMESPACE, '/webhooks/(?P<gateway>[a-z0-9_-]+)', [
@@ -42,6 +46,7 @@ final class WebhookController
         ]);
     }
 
+    /** @since 1.0.0 */
     public function dispatch(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $gatewayId = (string) $request['gateway'];
@@ -91,6 +96,7 @@ final class WebhookController
         ], $outcome->http_status);
     }
 
+    /** @since 1.0.0 */
     private function logDelivery(string $gateway, WP_REST_Request $request, $outcome): void
     {
         global $wpdb;

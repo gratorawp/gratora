@@ -8,6 +8,11 @@ use Dono\Foundation\Crypto\Crypto;
 use Dono\Foundation\Identity\IdentityHasher;
 use Dono\Foundation\Time\Clock;
 
+/**
+ * Repository for PendingSignup. Encrypts the address at the boundary.
+ *
+ * @since 1.0.0
+ */
 final class PendingSignupRepository
 {
     /**
@@ -16,6 +21,7 @@ final class PendingSignupRepository
      */
     public const TTL_SECONDS = 7 * DAY_IN_SECONDS;
 
+    /** @since 1.0.0 */
     public function __construct(
         private Crypto $crypto,
         private IdentityHasher $hasher,
@@ -26,6 +32,8 @@ final class PendingSignupRepository
     /**
      * Signing up twice is a person who lost the first email, not a second
      * person, so the newer names and the fresher expiry win.
+     *
+     * @since 1.0.0
      */
     public function put(string $email, ?string $firstName, ?string $lastName): PendingSignup
     {
@@ -49,21 +57,25 @@ final class PendingSignupRepository
         return $row;
     }
 
+    /** @since 1.0.0 */
     public function findById(int $id): ?PendingSignup
     {
         return $id > 0 ? PendingSignup::query()->find('id', $id) : null;
     }
 
+    /** @since 1.0.0 */
     public function findByEmailHash(string $hash): ?PendingSignup
     {
         return PendingSignup::query()->find('email_hash', $hash);
     }
 
+    /** @since 1.0.0 */
     public function decryptEmail(PendingSignup $row): ?string
     {
         return $this->crypto->decrypt($row->email_encrypted);
     }
 
+    /** @since 1.0.0 */
     public function delete(int $id): void
     {
         if ($id > 0) {
@@ -74,6 +86,8 @@ final class PendingSignupRepository
     /**
      * Erasure reaches this table by address, because a row here has no donor to
      * reach it by.
+     *
+     * @since 1.0.0
      */
     public function deleteByEmailHash(string $hash): void
     {
@@ -82,6 +96,7 @@ final class PendingSignupRepository
         }
     }
 
+    /** @since 1.0.0 */
     public function purgeExpired(): int
     {
         return PendingSignup::query()
@@ -90,6 +105,7 @@ final class PendingSignupRepository
             ->affectedRows;
     }
 
+    /** @since 1.0.0 */
     public function isLive(PendingSignup $row): bool
     {
         return strtotime($row->expires_at) >= $this->clock->now()->getTimestamp();

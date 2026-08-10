@@ -12,18 +12,22 @@ use Dono\Foundation\Time\Clock;
  * A metric answers null when the campaign cannot support it, so a stat block
  * placed on a campaign it does not suit renders nothing instead of a confident
  * zero.
+ *
+ * @since 1.0.0
  */
 final class CampaignStatMetrics
 {
     /** @var array<int,int> campaign id => largest net paid gift, in cents */
     private array $topCache = [];
 
+    /** @since 1.0.0 */
     public function __construct(
         private readonly DonationRepository $donations,
         private readonly Clock $clock,
     ) {
     }
 
+    /** @since 1.0.0 */
     public static function labels(): array
     {
         return [
@@ -39,16 +43,19 @@ final class CampaignStatMetrics
         ];
     }
 
+    /** @since 1.0.0 */
     public static function keys(): array
     {
         return array_keys(self::labels());
     }
 
+    /** @since 1.0.0 */
     public static function isKey(string $metric): bool
     {
         return array_key_exists($metric, self::labels());
     }
 
+    /** @since 1.0.0 */
     public function value(Campaign $campaign, string $metric): ?string
     {
         $currency  = (string) $campaign->currency;
@@ -76,14 +83,19 @@ final class CampaignStatMetrics
         };
     }
 
+    /** @since 1.0.0 */
     public function label(string $metric, string $custom = ''): string
     {
         $custom = trim($custom);
         return $custom !== '' ? $custom : (self::labels()[$metric] ?? '');
     }
 
-    // Gated on the query, not on donations_count: a drifted counter would hide
-    // the figure silently. Memoised so several stat blocks cost one aggregate.
+    /**
+     * Gated on the query, not on donations_count: a drifted counter would hide
+     * the figure silently. Memoized so several stat blocks cost one aggregate.
+     *
+     * @since 1.0.0
+     */
     private function topOrNull(Campaign $campaign, string $currency): ?string
     {
         $id = (int) $campaign->id;
@@ -92,7 +104,11 @@ final class CampaignStatMetrics
         return $this->topCache[$id] > 0 ? Money::format($this->topCache[$id], $currency) : null;
     }
 
-    // An ended campaign reads zero rather than a negative count.
+    /**
+     * An ended campaign reads zero rather than a negative count.
+     *
+     * @since 1.0.0
+     */
     private function daysLeftOrNull(Campaign $campaign): ?string
     {
         if (empty($campaign->ends_at)) {

@@ -9,21 +9,17 @@ use Dono\Foundation\Helpers\View;
 /**
  * First/last name field block.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class NameBlock implements Block
 {
-    /**
-     * Block type name.
-     */
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/name';
     }
 
-    /**
-     * Block attribute schema.
-     */
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         return [
@@ -36,9 +32,7 @@ final class NameBlock implements Block
         ];
     }
 
-    /**
-     * Renders the name fields.
-     */
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         return View::loadRelative(__DIR__, 'views/name', [

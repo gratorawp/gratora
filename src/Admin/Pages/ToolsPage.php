@@ -9,7 +9,7 @@ use Dono\Foundation\Hooks\HookProvider;
 /**
  * Registers and renders the Tools admin page.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class ToolsPage extends HookProvider
 {
@@ -17,11 +17,13 @@ final class ToolsPage extends HookProvider
     private const HANDLE    = 'dono-admin-tools';
     private const BUILD_DIR = 'build/admin/tools';
 
+    /** @since 1.0.0 */
     protected function filters(): array
     {
         return ['dono.admin.pages' => 'registerPage'];
     }
 
+    /** @since 1.0.0 */
     public function registerPage(array $pages): array
     {
         $pages[] = [
@@ -36,6 +38,7 @@ final class ToolsPage extends HookProvider
         return $pages;
     }
 
+    /** @since 1.0.0 */
     public function render(): void
     {
         $this->enqueueAssets();
@@ -47,6 +50,7 @@ final class ToolsPage extends HookProvider
         <?php
     }
 
+    /** @since 1.0.0 */
     private function enqueueAssets(): void
     {
         $assetPath = DONO_DIR . self::BUILD_DIR . '/index.asset.php';

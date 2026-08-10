@@ -7,17 +7,17 @@ namespace Dono\Forms;
 /**
  * Thin repository over the Form model.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class FormRepository
 {
-    /** Find a form by id. */
+    /** @since 1.0.0 */
     public function findById(int $id): ?Form
     {
         return Form::query()->find('id', $id);
     }
 
-    /** Find a form by slug. */
+    /** @since 1.0.0 */
     public function findBySlug(string $slug): ?Form
     {
         return Form::query()->find('slug', $slug);
@@ -28,6 +28,8 @@ final class FormRepository
      * is published, otherwise the most recently updated published form for the
      * campaign. Lets a campaign/fundraiser page render a working form even when
      * default_form_id still points at a draft.
+     *
+     * @since 1.0.0
      */
     public function publishedForCampaign(int $campaignId, ?int $preferFormId = null): ?Form
     {
@@ -47,7 +49,11 @@ final class FormRepository
             ->get();
     }
 
-    /** Whether a slug is taken, optionally ignoring one form id. */
+    /**
+     * Whether a slug is taken, optionally ignoring one form id.
+     *
+     * @since 1.0.0
+     */
     public function slugExists(string $slug, ?int $exceptId = null): bool
     {
         $q = Form::query()->where('slug', $slug);
@@ -62,6 +68,8 @@ final class FormRepository
      *
      * @param array{page?:int,per_page?:int,orderby?:string,order?:string,status?:string,campaign_id?:int,search?:string} $args
      * @return array{items: array<Form>, total: int}
+     *
+     * @since 1.0.0
      */
     public function listAdmin(array $args = []): array
     {

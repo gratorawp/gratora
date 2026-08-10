@@ -11,10 +11,11 @@ use Dono\Settings\SettingsService;
 /**
  * Reads, records, and retrieves donor consent rows.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class ConsentService
 {
+    /** @since 1.0.0 */
     public function __construct(
         private IdentityHasher $hasher,
         private Clock $clock,
@@ -23,6 +24,8 @@ final class ConsentService
 
     /**
      * @return list<array{key:string,label:string,description:string,required:bool,default:bool,version:int}>
+     *
+     * @since 1.0.0
      */
     public function purposes(): array
     {
@@ -49,6 +52,7 @@ final class ConsentService
         return $out;
     }
 
+    /** @since 1.0.0 */
     public function findPurpose(string $key): ?array
     {
         foreach ($this->purposes() as $p) {
@@ -61,6 +65,8 @@ final class ConsentService
      * Newest Consent row per purpose for a donor.
      *
      * @return array<string, Consent>
+     *
+     * @since 1.0.0
      */
     public function latestByPurpose(int $donorId): array
     {
@@ -83,6 +89,8 @@ final class ConsentService
 
     /**
      * @param array{source?:string,form_id?:int,donation_id?:int,ip?:string,ua?:string,version?:int} $ctx
+     *
+     * @since 1.0.0
      */
     public function record(int $donorId, string $purposeKey, bool $granted, array $ctx = []): Consent
     {

@@ -13,6 +13,8 @@ use WP_Error;
 /**
  * Anti-spam gates for the public donation endpoint. Each check returns null on
  * pass or a WP_Error on fail.
+ *
+ * @since 1.0.0
  */
 final class AntiSpamGuard
 {
@@ -28,6 +30,7 @@ final class AntiSpamGuard
     private const TOKEN_WINDOW_DAYS  = 30;
     private const MIN_AMOUNT_CENTS   = 100;
 
+    /** @since 1.0.0 */
     public function __construct(private IdentityHasher $hasher, private ?TestMode $testMode = null)
     {
     }
@@ -35,6 +38,8 @@ final class AntiSpamGuard
     /**
      * Rate limits relax under the org-wide test-mode switch: test submissions
      * move no real money, and automation bursts through the production caps.
+     *
+     * @since 1.0.0
      */
     private function inGlobalTestMode(): bool
     {
@@ -48,12 +53,15 @@ final class AntiSpamGuard
     /**
      * The form id is folded into the signature, so a token minted on one form
      * cannot be replayed against another.
+     *
+     * @since 1.0.0
      */
     public function mintFormToken(int $formId = 0): string
     {
         return $this->signed((string) $formId);
     }
 
+    /** @since 1.0.0 */
     private function signed(string $scope): string
     {
         $payload = (string) $this->currentBucket();
@@ -66,38 +74,46 @@ final class AntiSpamGuard
      * The same proof for surfaces that are not a donation form. Namespaced so
      * one surface's token is not accepted at another, and so a context can
      * never be mistaken for a form id, which is a bare integer.
+     *
+     * @since 1.0.0
      */
     public function mintToken(string $context): string
     {
         return $this->signed('ctx:' . $context);
     }
 
+    /** @since 1.0.0 */
     public function verifyToken(string $token, string $context): ?WP_Error
     {
         return $this->check($token, 'ctx:' . $context);
     }
 
+    /** @since 1.0.0 */
     public function mintPortalToken(): string
     {
         return $this->mintToken('portal');
     }
 
+    /** @since 1.0.0 */
     public function verifyPortalToken(string $token): ?WP_Error
     {
         return $this->verifyToken($token, 'portal');
     }
 
+    /** @since 1.0.0 */
     public function checkHoneypot(string $value): ?WP_Error
     {
         if ($value === '') return null;
         return new WP_Error('dono_invalid_submission', __('Submission rejected.', 'dono'), ['status' => 400]);
     }
 
+    /** @since 1.0.0 */
     public function verifyFormToken(string $token, int $formId = 0): ?WP_Error
     {
         return $this->check($token, (string) $formId);
     }
 
+    /** @since 1.0.0 */
     private function check(string $token, string $scope): ?WP_Error
     {
         $generic = new WP_Error('dono_invalid_submission', __('Please refresh the page and try again.', 'dono'), ['status' => 400]);
@@ -122,11 +138,13 @@ final class AntiSpamGuard
         return null;
     }
 
+    /** @since 1.0.0 */
     private function currentBucket(): int
     {
         return (int) floor(time() / DAY_IN_SECONDS);
     }
 
+    /** @since 1.0.0 */
     public function consumeIpQuota(): ?WP_Error
     {
         if ($this->inGlobalTestMode()) return null;
@@ -143,6 +161,7 @@ final class AntiSpamGuard
         );
     }
 
+    /** @since 1.0.0 */
     public function consumeEmailQuota(string $email): ?WP_Error
     {
         if ($email === '') return null;
@@ -173,6 +192,8 @@ final class AntiSpamGuard
      * Re-setting a transient on every attempt pushes its expiry out, so a
      * caller who keeps trying holds their own lockout open forever, and the
      * person it strands is the donor whose card was declined twice.
+     *
+     * @since 1.0.0
      */
     private function hit(string $base, int $window): int
     {
@@ -202,6 +223,7 @@ final class AntiSpamGuard
         ));
     }
 
+    /** @since 1.0.0 */
     public function checkMinAmount(int $cents): ?WP_Error
     {
         $min = (int) apply_filters('dono.spam.min_amount_cents', self::MIN_AMOUNT_CENTS);
@@ -216,6 +238,7 @@ final class AntiSpamGuard
         return null;
     }
 
+    /** @since 1.0.0 */
     private function secret(): string
     {
         $stored = SystemSetting::read(self::SETTING_SECRET);

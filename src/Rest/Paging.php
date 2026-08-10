@@ -6,14 +6,10 @@ namespace Dono\Rest;
 
 /**
  * The one place a page number from a request becomes a number we will do
- * arithmetic on.
+ * arithmetic on. Callers multiply page by per_page, so an unbounded page
+ * overflows into a float and breaks the int-typed offset downstream.
  *
- * `page=9223372036854775807` overflowed `($page - 1) * $perPage` into a float,
- * and QueryBuilder::offset() is typed `int`, so every admin list route died on
- * an uncaught TypeError. The schemas set `minimum: 1` and no maximum, and six
- * controllers each read `(int) $request['page']` for themselves.
- *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class Paging
 {
@@ -23,6 +19,7 @@ final class Paging
      */
     public const MAX_PAGE = 1000000;
 
+    /** @since 1.0.0 */
     public static function page(mixed $raw, int $default = 1): int
     {
         $page = is_numeric($raw) ? (int) $raw : $default;

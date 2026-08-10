@@ -8,6 +8,11 @@ use Dono\Donors\DonorRepository;
 use Dono\Donors\MagicLinkService;
 use Dono\Donors\SignupRedemption;
 
+/**
+ * Cookie-backed donor session for the portal, opened by a magic link.
+ *
+ * @since 1.0.0
+ */
 final class PortalSession
 {
     private const COOKIE = 'dono_donor_session';
@@ -24,6 +29,7 @@ final class PortalSession
     /** Oldest sessions beyond this are revoked when a donor signs in again. */
     private const MAX_PER_DONOR = 5;
 
+    /** @since 1.0.0 */
     public function __construct(
         private MagicLinkService $magicLinks,
         private DonorRepository $donors,
@@ -35,6 +41,8 @@ final class PortalSession
      * A sign-in link names a donor who already exists. A signup link names none:
      * whoever opens it controls the mailbox, which is the only evidence the
      * address was ever theirs.
+     *
+     * @since 1.0.0
      */
     public function startFromToken(string $rawToken): ?array
     {
@@ -46,6 +54,7 @@ final class PortalSession
         return $this->startFromSignupToken($rawToken);
     }
 
+    /** @since 1.0.0 */
     private function startFromSignupToken(string $rawToken): ?array
     {
         $donorId = $this->signups->redeem($rawToken);
@@ -53,6 +62,7 @@ final class PortalSession
         return $donorId > 0 ? $this->open($donorId) : null;
     }
 
+    /** @since 1.0.0 */
     public function open(int $donorId): array
     {
         $sid  = bin2hex(random_bytes(32));
@@ -72,17 +82,23 @@ final class PortalSession
         return ['donor_id' => $donorId, 'csrf' => $csrf];
     }
 
+    /** @since 1.0.0 */
     public function currentDonorId(): ?int
     {
         return $this->readSession()['donor_id'] ?? null;
     }
 
+    /** @since 1.0.0 */
     public function csrfToken(): ?string
     {
         return $this->readSession()['csrf'] ?? null;
     }
 
-    /** Seconds since this session's magic link was redeemed, for step-up checks. */
+    /**
+     * Seconds since this session's magic link was redeemed, for step-up checks.
+     *
+     * @since 1.0.0
+     */
     public function authenticatedSecondsAgo(): ?int
     {
         $session = $this->readSession();
@@ -90,6 +106,7 @@ final class PortalSession
         return $session === null ? null : time() - (int) $session['started'];
     }
 
+    /** @since 1.0.0 */
     public function destroy(): void
     {
         $sid = $this->cookieSid();
@@ -103,7 +120,11 @@ final class PortalSession
         $this->setCookie('', time() - 3600);
     }
 
-    /** Every device. The cookie elsewhere survives but resolves to nothing. */
+    /**
+     * Every device. The cookie elsewhere survives but resolves to nothing.
+     *
+     * @since 1.0.0
+     */
     public function destroyAllFor(int $donorId): int
     {
         $index = $this->index($donorId);
@@ -119,6 +140,7 @@ final class PortalSession
         return count($index);
     }
 
+    /** @since 1.0.0 */
     private function readSession(): ?array
     {
         $sid = $this->cookieSid();
@@ -147,7 +169,11 @@ final class PortalSession
         ];
     }
 
-    /** @return list<string> sid hashes */
+    /**
+     * @return list<string> sid hashes
+     *
+     * @since 1.0.0
+     */
     private function index(int $donorId): array
     {
         $stored = get_transient(self::indexKey($donorId));
@@ -155,6 +181,7 @@ final class PortalSession
         return is_array($stored) ? array_values(array_filter($stored, 'is_string')) : [];
     }
 
+    /** @since 1.0.0 */
     private function track(int $donorId, string $sid): void
     {
         $index   = $this->index($donorId);
@@ -167,6 +194,7 @@ final class PortalSession
         set_transient(self::indexKey($donorId), $index, self::MAX_SECONDS);
     }
 
+    /** @since 1.0.0 */
     private function untrack(int $donorId, string $sid): void
     {
         $index = array_values(array_diff($this->index($donorId), [self::hash($sid)]));
@@ -177,6 +205,7 @@ final class PortalSession
         set_transient(self::indexKey($donorId), $index, self::MAX_SECONDS);
     }
 
+    /** @since 1.0.0 */
     private function cookieSid(): string
     {
         $sid = isset($_COOKIE[self::COOKIE]) ? (string) $_COOKIE[self::COOKIE] : '';
@@ -184,6 +213,7 @@ final class PortalSession
         return $sid !== '' && ctype_xdigit($sid) ? $sid : '';
     }
 
+    /** @since 1.0.0 */
     private function setCookie(string $value, ?int $expires = null): void
     {
         // Output already started (CLI/test, or a theme that echoes early).
@@ -199,16 +229,19 @@ final class PortalSession
         ]);
     }
 
+    /** @since 1.0.0 */
     private static function hash(string $sid): string
     {
         return hash('sha256', $sid);
     }
 
+    /** @since 1.0.0 */
     private static function transientKey(string $sid): string
     {
         return 'dono_portal_' . self::hash($sid);
     }
 
+    /** @since 1.0.0 */
     private static function indexKey(int $donorId): string
     {
         return 'dono_portal_sids_' . $donorId;

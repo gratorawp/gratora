@@ -8,10 +8,11 @@ namespace Dono\Gateways;
  * Result of `PaymentGateway::createIntent()`. `intent_id` is stored on
  * donation.gateway_intent_id for webhook matching.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class GatewayIntentResult
 {
+    /** @since 1.0.0 */
     public function __construct(
         public readonly string $intent_id,
         public readonly ?string $redirect_url = null,

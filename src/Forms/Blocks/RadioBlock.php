@@ -9,21 +9,17 @@ use Dono\Foundation\Helpers\View;
 /**
  * Radio button group field block.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class RadioBlock implements Block
 {
-    /**
-     * Block type name.
-     */
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/radio';
     }
 
-    /**
-     * Block attribute schema.
-     */
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         return [
@@ -37,9 +33,7 @@ final class RadioBlock implements Block
         ];
     }
 
-    /**
-     * Renders the radio group field.
-     */
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         $options = DropdownBlock::normalizeOptions($attrs['options'] ?? null);

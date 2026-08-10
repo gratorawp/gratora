@@ -10,14 +10,18 @@ use Dono\Foundation\Helpers\View;
 /**
  * Responsive card grid of other published campaigns ("more ways to give" section
  * or a standalone browse page).
+ *
+ * @since 1.0.0
  */
 final class CampaignGridBlock extends CampaignBlock
 {
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/campaign-grid';
     }
 
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         // campaignId here means "the campaign to exclude" (the current one).
@@ -29,6 +33,7 @@ final class CampaignGridBlock extends CampaignBlock
         ];
     }
 
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         $excludeId = (int) ($attrs['campaignId'] ?? 0);
@@ -90,7 +95,7 @@ final class CampaignGridBlock extends CampaignBlock
 
         // An empty heading means no heading, not "use ours". The seeded layout
         // puts a core Heading block above this one so the words are editable,
-        // and a default here rendered it a second time.
+        // so a default here would render the heading twice.
         $heading = trim((string) ($attrs['heading'] ?? ''));
 
         return View::loadRelative(__DIR__, 'views/campaign-grid', [

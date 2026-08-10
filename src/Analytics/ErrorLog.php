@@ -13,7 +13,7 @@ namespace Dono\Analytics;
  * dono_events rather than its own table, so errors inherit the retention window
  * and the erasure handler that already clear it.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class ErrorLog
 {
@@ -33,6 +33,8 @@ final class ErrorLog
     /**
      * @param string              $source  dotted scope, e.g. 'gateway.paypal'
      * @param array<string,mixed> $context ids and detail; stored, so no secrets
+     *
+     * @since 1.0.0
      */
     public static function record(string $source, string $message, array $context = []): void
     {
@@ -63,6 +65,8 @@ final class ErrorLog
      * Drop everything past the newest KEEP errors. The count runs on every
      * write, over an index and a set bounded by KEEP + SLACK, so it stays
      * cheap precisely when errors are arriving fast.
+     *
+     * @since 1.0.0
      */
     private static function prune(): void
     {
@@ -90,7 +94,11 @@ final class ErrorLog
             ->delete();
     }
 
-    /** Null before the container is up; the error_log line above still lands. */
+    /**
+     * Null before the container is up; the error_log line above still lands.
+     *
+     * @since 1.0.0
+     */
     private static function recorder(): ?EventRecorder
     {
         try {

@@ -13,7 +13,7 @@ namespace Dono\Gateways;
  * the subscriber has to approve the change on PayPal's own pages, so the only
  * honest answer is a link to send them to.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class PaymentMethodUpdate
 {
@@ -23,6 +23,7 @@ final class PaymentMethodUpdate
     /** The donor finishes on the processor's own site. */
     public const REDIRECT = 'redirect';
 
+    /** @since 1.0.0 */
     private function __construct(
         public readonly string $mode,
         public readonly ?string $clientSecret = null,
@@ -31,17 +32,23 @@ final class PaymentMethodUpdate
     ) {
     }
 
+    /** @since 1.0.0 */
     public static function inline(string $clientSecret, string $publishableKey): self
     {
         return new self(self::INLINE, $clientSecret, $publishableKey);
     }
 
+    /** @since 1.0.0 */
     public static function redirect(string $url): self
     {
         return new self(self::REDIRECT, null, null, $url);
     }
 
-    /** @return array<string,mixed> The portal's view of it; never carries a secret it does not need. */
+    /**
+     * @return array<string,mixed> The portal's view of it; never carries a secret it does not need.
+     *
+     * @since 1.0.0
+     */
     public function toArray(): array
     {
         return $this->mode === self::INLINE

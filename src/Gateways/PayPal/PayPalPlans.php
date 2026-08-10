@@ -18,13 +18,14 @@ use RuntimeException;
  * Both the product id and the plan ids are cached in options, keyed by mode and
  * account: sandbox and live are separate PayPal accounts.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class PayPalPlans
 {
     private const PRODUCT_OPTION = 'dono_paypal_product';
     private const PLANS_OPTION   = 'dono_paypal_plans';
 
+    /** @since 1.0.0 */
     public function __construct(private PayPalApi $api, private PayPalAccount $account)
     {
     }
@@ -33,6 +34,8 @@ final class PayPalPlans
      * Plan id for this amount + interval, created on first use.
      *
      * @throws RuntimeException when PayPal refuses to create the plan.
+     *
+     * @since 1.0.0
      */
     public function resolvePlan(bool $test, int $amountCents, string $currency, string $intervalUnit, int $intervalCount): string
     {
@@ -91,6 +94,8 @@ final class PayPalPlans
     /**
      * The single "Donation" product every plan hangs off. Created once per
      * mode and remembered.
+     *
+     * @since 1.0.0
      */
     private function resolveProduct(bool $test): string
     {
@@ -121,13 +126,18 @@ final class PayPalPlans
         return $productId;
     }
 
-    /** @return array<string,string> */
+    /**
+     * @return array<string,string>
+     *
+     * @since 1.0.0
+     */
     private function plans(): array
     {
         $stored = get_option(self::PLANS_OPTION, []);
         return is_array($stored) ? $stored : [];
     }
 
+    /** @since 1.0.0 */
     private function planKey(bool $test, int $amountCents, string $currency, string $unit, int $count): string
     {
         return implode('_', [
@@ -142,6 +152,7 @@ final class PayPalPlans
         ]);
     }
 
+    /** @since 1.0.0 */
     private function intervalLabel(string $unit, int $count): string
     {
         if ($count === 1) {

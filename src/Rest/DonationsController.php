@@ -30,10 +30,17 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 
+/**
+ * Public donation endpoints: create a pending donation and start its gateway
+ * intent, poll status by reference, and confirm offline payments.
+ *
+ * @since 1.0.0
+ */
 final class DonationsController
 {
     private const NAMESPACE = 'dono/v1';
 
+    /** @since 1.0.0 */
     public function __construct(
         private DonationService $donations,
         private DonationRepository $repository,
@@ -44,6 +51,7 @@ final class DonationsController
     ) {
     }
 
+    /** @since 1.0.0 */
     public function registerRoutes(): void
     {
         register_rest_route(self::NAMESPACE, '/donations', [
@@ -73,6 +81,7 @@ final class DonationsController
         ]);
     }
 
+    /** @since 1.0.0 */
     public function create(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $body = (array) $request->get_json_params();
@@ -389,6 +398,8 @@ final class DonationsController
      * The browser-facing slice a gateway outside core declares for itself. Same
      * whitelist rule as payPalPayload: the gateway states what may leave, never
      * the raw metadata.
+     *
+     * @since 1.0.0
      */
     private function browserAwarePayload(PaymentGateway $gateway, GatewayIntentResult $result): array
     {
@@ -408,6 +419,8 @@ final class DonationsController
     /**
      * An explicit whitelist rather than an echo of the gateway metadata, so a
      * future gateway field cannot leak to the browser by accident.
+     *
+     * @since 1.0.0
      */
     private function payPalPayload(GatewayIntentResult $result): ?array
     {
@@ -427,6 +440,8 @@ final class DonationsController
     /**
      * Requires `status_token` to prevent reference enumeration. Token mismatch
      * returns the same 404 as not-found so existing references don't leak.
+     *
+     * @since 1.0.0
      */
     public function getStatus(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
@@ -454,7 +469,11 @@ final class DonationsController
         ], 200);
     }
 
-    /** Admin-only synchronous confirmation for offline/manual payments. */
+    /**
+     * Admin-only synchronous confirmation for offline/manual payments.
+     *
+     * @since 1.0.0
+     */
     public function confirm(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $donation = $this->repository->findByReference((string) $request['reference']);
@@ -519,6 +538,8 @@ final class DonationsController
     /**
      * An empty or absent accepted-currency list means unconfigured, so any
      * valid code is accepted rather than everything rejected.
+     *
+     * @since 1.0.0
      */
     private function isSupportedCurrency(string $currency): bool
     {
@@ -529,6 +550,8 @@ final class DonationsController
      * A campaign-bound form is authoritative; otherwise a submitted campaign_id
      * is only trusted when it points at a real campaign, so a crafted payload
      * cannot inflate an arbitrary campaign's totals and leaderboards.
+     *
+     * @since 1.0.0
      */
     private function resolveCampaignId(?Form $form, mixed $submitted): ?int
     {
@@ -546,6 +569,7 @@ final class DonationsController
         return ($campaign && $campaign->acceptsDonations()) ? $id : null;
     }
 
+    /** @since 1.0.0 */
     public function confirmPermission(): bool
     {
         // Synchronous confirmation is admin-only; webhooks bypass this endpoint.
@@ -555,6 +579,8 @@ final class DonationsController
     /**
      * Structural validation lives in DonationSchemas::create(). The handler
      * keeps its own gateway check, because the registered set is dynamic.
+     *
+     * @since 1.0.0
      */
     private function createArgs(): array
     {

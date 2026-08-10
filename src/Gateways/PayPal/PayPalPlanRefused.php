@@ -11,10 +11,11 @@ use RuntimeException;
  * names one already settled. Carries the code and status the donor-facing
  * route reports; the webhook path only records the reason.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class PayPalPlanRefused extends RuntimeException
 {
+    /** @since 1.0.0 */
     public function __construct(
         public readonly string $errorCode,
         string $message,

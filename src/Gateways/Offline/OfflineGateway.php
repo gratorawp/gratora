@@ -18,29 +18,34 @@ use WP_REST_Request;
  * no webhooks. createIntent returns a stable id derived from the donation
  * reference; confirmation is explicit via the admin.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class OfflineGateway implements PaymentGateway
 {
+    /** @since 1.0.0 */
     public function __construct(private Clock $clock)
     {
     }
 
+    /** @since 1.0.0 */
     public function id(): string
     {
         return 'offline';
     }
 
+    /** @since 1.0.0 */
     public function label(): string
     {
         return __('Offline donations', 'dono');
     }
 
+    /** @since 1.0.0 */
     public function description(): string
     {
         return __('Pay by bank transfer, check or cash. We confirm it manually.', 'dono');
     }
 
+    /** @since 1.0.0 */
     public function frequencies(): array
     {
         // Offline donations are confirmed by hand and have no stored payment
@@ -49,26 +54,31 @@ final class OfflineGateway implements PaymentGateway
         return ['one_time'];
     }
 
+    /** @since 1.0.0 */
     public function paymentMethods(): array
     {
         return ['cash', 'cheque', 'bank_transfer', 'other'];
     }
 
+    /** @since 1.0.0 */
     public function countries(): array
     {
         return ['*'];
     }
 
+    /** @since 1.0.0 */
     public function currencies(): array
     {
         return ['*'];
     }
 
+    /** @since 1.0.0 */
     public function canCharge(): bool
     {
         return true;
     }
 
+    /** @since 1.0.0 */
     public function createIntent(Donation $donation): GatewayIntentResult
     {
         $intentId = 'offline_' . $donation->reference;
@@ -82,6 +92,7 @@ final class OfflineGateway implements PaymentGateway
         );
     }
 
+    /** @since 1.0.0 */
     public function confirm(Donation $donation, array $payload = []): GatewayConfirmResult
     {
         return new GatewayConfirmResult(
@@ -99,11 +110,13 @@ final class OfflineGateway implements PaymentGateway
         );
     }
 
+    /** @since 1.0.0 */
     public function handleWebhook(WP_REST_Request $request): WebhookOutcome
     {
         return WebhookOutcome::notSupported($this->id());
     }
 
+    /** @since 1.0.0 */
     public function refund(Donation $donation, int $amountCents, ?string $reason = null): RefundResult
     {
         return new RefundResult(

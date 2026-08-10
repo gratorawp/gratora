@@ -9,17 +9,17 @@ use Dono\Foundation\Helpers\View;
 /**
  * Free-text message field block.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class CommentBlock implements Block
 {
-    /** Block name. */
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/comment';
     }
 
-    /** Editor attribute schema. */
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         return [
@@ -29,7 +29,7 @@ final class CommentBlock implements Block
         ];
     }
 
-    /** Render server-side markup. */
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         return View::loadRelative(__DIR__, 'views/comment', [

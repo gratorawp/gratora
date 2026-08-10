@@ -9,21 +9,17 @@ use Dono\Foundation\Helpers\View;
 /**
  * Multi-select field block.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class MultiSelectBlock implements Block
 {
-    /**
-     * Block type name.
-     */
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/multi-select';
     }
 
-    /**
-     * Block attribute schema.
-     */
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         return [
@@ -38,9 +34,7 @@ final class MultiSelectBlock implements Block
         ];
     }
 
-    /**
-     * Renders the multi-select field.
-     */
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         $options = DropdownBlock::normalizeOptions($attrs['options'] ?? null);

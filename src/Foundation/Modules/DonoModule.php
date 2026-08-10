@@ -10,7 +10,7 @@ use Dono\Foundation\Container\Container;
  * Implemented by every gateway, integration, add-on, and core.
  * All modules plug into the same boot pipeline, schema migrations, and admin/REST.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 interface DonoModule
 {
@@ -19,27 +19,54 @@ interface DonoModule
     public const TIER_FREE = 'free';
     public const TIER_PRO  = 'pro';
 
-    /** Globally-unique identifier, e.g. 'core', 'dono-p2p'. */
+    /**
+     * Globally-unique identifier, e.g. 'core', 'dono-p2p'.
+     *
+     * @since 1.0.0
+     */
     public function id(): string;
 
-    /** Human-readable name. */
+    /** @since 1.0.0 */
     public function name(): string;
 
-    /** Semver. */
+    /**
+     * Semver.
+     *
+     * @since 1.0.0
+     */
     public function version(): string;
 
-    /** Dependency constraints, e.g. ['core' => '^0.1', 'modules' => ['analytics']]. */
+    /**
+     * Dependency constraints, e.g. ['core' => '^0.1', 'modules' => ['analytics']].
+     *
+     * @since 1.0.0
+     */
     public function requires(): array;
 
-    /** Return false when the module requires a license that is not active. */
+    /**
+     * Return false when the module requires a license that is not active.
+     *
+     * @since 1.0.0
+     */
     public function isLicensed(): bool;
 
-    /** Distribution tier, one of the TIER_* constants. */
+    /**
+     * Distribution tier, one of the TIER_* constants.
+     *
+     * @since 1.0.0
+     */
     public function tier(): string;
 
-    /** Bind services, register routes/blocks/hooks/admin pages. */
+    /**
+     * Bind services, register routes/blocks/hooks/admin pages.
+     *
+     * @since 1.0.0
+     */
     public function boot(Container $container): void;
 
-    /** @return array<class-string<\Dono\Vendor\Queryable\Model>> */
+    /**
+     * @return array<class-string<\Dono\Vendor\Queryable\Model>>
+     * @since 1.0.0
+     */
     public function migrations(): array;
 }

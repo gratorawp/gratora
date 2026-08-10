@@ -9,7 +9,7 @@ use Dono\Foundation\Helpers\View;
 /**
  * Recurring frequency selector block.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class RecurringToggleBlock implements Block
 {
@@ -19,17 +19,13 @@ final class RecurringToggleBlock implements Block
     // consumers must fall back to this when the frequencies attr is absent.
     public const DEFAULT_FREQUENCIES = ['one-time', 'monthly'];
 
-    /**
-     * Block type name.
-     */
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/recurring-toggle';
     }
 
-    /**
-     * Block attribute schema.
-     */
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         return [
@@ -41,9 +37,7 @@ final class RecurringToggleBlock implements Block
         ];
     }
 
-    /**
-     * Renders the frequency selector.
-     */
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         $style = (string) ($attrs['style'] ?? 'pills');
@@ -66,6 +60,8 @@ final class RecurringToggleBlock implements Block
 
     /**
      * @return list<string>
+     *
+     * @since 1.0.0
      */
     public static function normalizeFrequencies($raw): array
     {

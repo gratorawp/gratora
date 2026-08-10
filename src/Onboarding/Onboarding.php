@@ -9,17 +9,19 @@ use Dono\Foundation\Hooks\HookProvider;
 /**
  * Redirects to the onboarding page while `dono_onboarding_status` is 'pending'.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class Onboarding extends HookProvider
 {
     public const OPTION = 'dono_onboarding_status';
 
+    /** @since 1.0.0 */
     protected function actions(): array
     {
         return ['admin_init' => 'maybeRedirect'];
     }
 
+    /** @since 1.0.0 */
     public function maybeRedirect(): void
     {
         if (wp_doing_ajax() || wp_doing_cron()) return;
@@ -39,7 +41,7 @@ final class Onboarding extends HookProvider
         exit;
     }
 
-    /** Seed the option on activation if it doesn't exist yet. */
+    /** @since 1.0.0 */
     public static function maybeSeedOnActivation(): void
     {
         if (get_option(self::OPTION, null) === null) {

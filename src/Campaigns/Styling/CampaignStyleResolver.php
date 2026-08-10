@@ -13,7 +13,7 @@ use Dono\Forms\Form;
  * Cascade: defaults -> resolved preset.tokens -> campaign inline overrides
  * (campaign inline overrides are skipped when the form picked its own preset).
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class CampaignStyleResolver
 {
@@ -24,6 +24,8 @@ final class CampaignStyleResolver
      *   preset_id: string,
      *   preset_seeded: ?string
      * }
+     *
+     * @since 1.0.0
      */
     public function resolve(Form $form, ?Campaign $campaign = null): array
     {
@@ -60,7 +62,11 @@ final class CampaignStyleResolver
         ];
     }
 
-    /** Accent color for a campaign, used by block renderers. */
+    /**
+     * Accent color for a campaign, used by block renderers.
+     *
+     * @since 1.0.0
+     */
     public function accentFor(?Campaign $campaign): string
     {
         $tokens = $this->resolveForCampaign($campaign);
@@ -71,6 +77,8 @@ final class CampaignStyleResolver
      * Resolve tokens for a campaign with no form context.
      *
      * @return array<string,string>
+     *
+     * @since 1.0.0
      */
     public function resolveForCampaign(?Campaign $campaign): array
     {
@@ -106,6 +114,8 @@ final class CampaignStyleResolver
      *
      * @param array<string,string> $tokens
      * @return array<string,string>
+     *
+     * @since 1.0.0
      */
     private function dropUnpairedSoft(array $tokens, bool $explicitSoft): array
     {
@@ -118,7 +128,11 @@ final class CampaignStyleResolver
         return $tokens;
     }
 
-    /** Pull a preset id from form settings, normalised to '' when unset. */
+    /**
+     * Pull a preset id from form settings, normalized to '' when unset.
+     *
+     * @since 1.0.0
+     */
     private function formPresetId(Form $form): string
     {
         $style = is_array($form->settings['style'] ?? null) ? $form->settings['style'] : [];
@@ -126,12 +140,14 @@ final class CampaignStyleResolver
     }
 
     /**
-     * Extract a sanitised inline token map from a campaign.style array.
-     * Accepts both the canonical `{ preset_id, tokens: {...} }` shape and the
-     * legacy flat token-map-at-root shape.
+     * Extract a sanitized inline token map from a campaign.style array.
+     * Accepts both the canonical `{ preset_id, tokens: {...} }` shape and a
+     * flat token map at root.
      *
      * @param array<string,mixed> $style
      * @return array<string,string>
+     *
+     * @since 1.0.0
      */
     private function inlineTokens(array $style): array
     {

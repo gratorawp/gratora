@@ -16,7 +16,7 @@ namespace Dono\Settings;
  * {@see self::restore()} so a client that echoes a masked value back does not
  * overwrite the real secret with the mask.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class SecretRedactor
 {
@@ -24,11 +24,12 @@ final class SecretRedactor
 
     // The trailing (?![a-z]) stops a secret word from matching as the prefix of a
     // longer word: "tokens" (a brand preset's design tokens) would match "token"
-    // and mask the whole object, dropping every preset's colours over REST. Real
+    // and mask the whole object, dropping every preset's colors over REST. Real
     // secret keys (webhook_secret_test, access_token, secret_key, client_secret)
     // end the secret word at a separator or the end of the key, so they match.
     private const SECRET_KEY_PATTERN = '/(?:secret|password|token|api[_-]?key|private[_-]?key|webhook)(?![a-z])/i';
 
+    /** @since 1.0.0 */
     public static function isSecretKey(string $key): bool
     {
         return (bool) preg_match(self::SECRET_KEY_PATTERN, $key);
@@ -44,6 +45,8 @@ final class SecretRedactor
      *
      * @param array<string,mixed> $values
      * @return array<string,mixed>
+     *
+     * @since 1.0.0
      */
     public static function redact(array $values): array
     {
@@ -67,6 +70,8 @@ final class SecretRedactor
      * @param array<string,mixed> $incoming what the client sent
      * @param array<string,mixed> $stored   what is on disk
      * @return array<string,mixed>
+     *
+     * @since 1.0.0
      */
     public static function restore(array $incoming, array $stored): array
     {
@@ -85,7 +90,11 @@ final class SecretRedactor
         return $incoming;
     }
 
-    /** @return mixed the mask, or an untouched empty value. */
+    /**
+     * @return mixed the mask, or an untouched empty value.
+     *
+     * @since 1.0.0
+     */
     private static function maskValue(mixed $value): mixed
     {
         if ($value === '' || $value === null) {

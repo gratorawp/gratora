@@ -10,17 +10,17 @@ use Dono\Settings\SettingsService;
 /**
  * Currency switcher block.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class CurrencySwitcherBlock implements Block
 {
-    /** Block name. */
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/currency-switcher';
     }
 
-    /** Editor attribute schema. */
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         // Empty currencies = offer the org base only.
@@ -32,7 +32,7 @@ final class CurrencySwitcherBlock implements Block
         ];
     }
 
-    /** Render server-side markup. */
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         $s = self::settings($attrs);
@@ -49,6 +49,8 @@ final class CurrencySwitcherBlock implements Block
      *
      * @param array<string,mixed> $attrs
      * @return array{label:string,style:string,align:string}
+     *
+     * @since 1.0.0
      */
     public static function settings(array $attrs): array
     {
@@ -66,6 +68,8 @@ final class CurrencySwitcherBlock implements Block
      * Never offers a currency the org has not enabled.
      *
      * @return list<string>
+     *
+     * @since 1.0.0
      */
     public static function resolve(mixed $rawCurrencies): array
     {
@@ -91,13 +95,19 @@ final class CurrencySwitcherBlock implements Block
      * Parse raw codes with a non-empty fallback.
      *
      * @return list<string>
+     *
+     * @since 1.0.0
      */
     public static function normalize(mixed $raw): array
     {
         return self::parse($raw) ?: ['USD'];
     }
 
-    /** @return list<string> */
+    /**
+     * @return list<string>
+     *
+     * @since 1.0.0
+     */
     private static function parse(mixed $raw): array
     {
         $codes = is_array($raw) ? $raw : [];

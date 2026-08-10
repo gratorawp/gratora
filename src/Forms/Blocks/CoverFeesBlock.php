@@ -9,17 +9,17 @@ use Dono\Foundation\Helpers\View;
 /**
  * Toggle for the donor to cover the transaction fee.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class CoverFeesBlock implements Block
 {
-    /** Block name. */
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/cover-fees';
     }
 
-    /** Editor attribute schema. */
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         return [
@@ -30,7 +30,7 @@ final class CoverFeesBlock implements Block
         ];
     }
 
-    /** Render server-side markup. */
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         return View::loadRelative(__DIR__, 'views/cover-fees', [

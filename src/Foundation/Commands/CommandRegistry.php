@@ -11,7 +11,7 @@ use RuntimeException;
 /**
  * Registers, introspects, and dispatches commands.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class CommandRegistry
 {
@@ -21,11 +21,16 @@ final class CommandRegistry
     /** @var array<string,Command> */
     private array $commands = [];
 
+    /** @since 1.0.0 */
     public function __construct(private ?EventRecorder $events = null)
     {
     }
 
-    /** Register a command; throws if the id is already taken. */
+    /**
+     * Register a command; throws if the id is already taken.
+     *
+     * @since 1.0.0
+     */
     public function register(Command $command): void
     {
         if (isset($this->commands[$command->id])) {
@@ -34,28 +39,32 @@ final class CommandRegistry
         $this->commands[$command->id] = $command;
     }
 
-    /** Return whether a command with $id is registered. */
+    /** @since 1.0.0 */
     public function has(string $id): bool
     {
         return isset($this->commands[$id]);
     }
 
-    /** Return the command for $id, or null if not registered. */
+    /** @since 1.0.0 */
     public function get(string $id): ?Command
     {
         return $this->commands[$id] ?? null;
     }
 
-    /** @return array<string,Command> */
+    /**
+     * @return array<string,Command>
+     * @since 1.0.0
+     */
     public function all(): array
     {
         return $this->commands;
     }
 
     /**
-     * Serialisable command manifest; handler closure is omitted intentionally.
+     * Serializable command manifest; handler closure is omitted intentionally.
      *
      * @return list<array<string,mixed>>
+     * @since 1.0.0
      */
     public function manifest(): array
     {
@@ -81,6 +90,7 @@ final class CommandRegistry
      * confirmation gate (mcp + mutating), dry-run, audit, handler, output check.
      *
      * @param array<string,mixed> $input
+     * @since 1.0.0
      */
     public function dispatch(string $id, array $input, CommandContext $ctx): CommandResult
     {
@@ -165,6 +175,7 @@ final class CommandRegistry
      *
      * @param array<string,mixed> $input
      * @return list<array{label:string, from?:string, to:string}>
+     * @since 1.0.0
      */
     public function previewFor(string $id, array $input, CommandContext $ctx): array
     {
@@ -196,6 +207,7 @@ final class CommandRegistry
      *
      * @param array<string,mixed> $input
      * @return array<string,mixed>|null
+     * @since 1.0.0
      */
     public function reverseFor(string $id, array $input, CommandContext $ctx): ?array
     {
@@ -225,6 +237,7 @@ final class CommandRegistry
      * is recorded (dispatch does; a read-only preview does not).
      *
      * @return Command|CommandResult
+     * @since 1.0.0
      */
     private function authorize(string $id, CommandContext $ctx): Command|CommandResult
     {
@@ -248,6 +261,7 @@ final class CommandRegistry
      *
      * @param array<string,mixed> $input
      * @return array<string,mixed>|CommandResult
+     * @since 1.0.0
      */
     private function canonicalize(Command $command, array $input): array|CommandResult
     {
@@ -268,6 +282,8 @@ final class CommandRegistry
     /**
      * Fixed-window token bucket per (rate-limit key, source), backed by WP transients.
      * meta.rate_limit = cap per 60 s window; meta.rate_limit_key groups commands; <= 0 disables.
+     *
+     * @since 1.0.0
      */
     private function rateLimited(Command $command, CommandContext $ctx): bool
     {
@@ -288,9 +304,10 @@ final class CommandRegistry
     }
 
     /**
-     * Record to the dono_events firehose. Input is hashed - PII never stored raw.
+     * Record to the dono_events firehose. Input is hashed, PII never stored raw.
      *
      * @param array<string,mixed> $input
+     * @since 1.0.0
      */
     private function audit(string $type, Command $command, CommandContext $ctx, array $input, ?string $error = null): void
     {

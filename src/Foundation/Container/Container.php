@@ -13,7 +13,7 @@ use RuntimeException;
  * Bind by class-string; reserve string ids for non-classes.
  * Domain classes receive deps via constructor; only a module's boot() resolves services.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class Container
 {
@@ -23,20 +23,24 @@ final class Container
     /** @var array<string, object> */
     private array $instances = [];
 
-    /** Factory receives the container so it can resolve collaborators. */
+    /**
+     * Factory receives the container so it can resolve collaborators.
+     *
+     * @since 1.0.0
+     */
     public function bind(string $id, Closure $factory): void
     {
         $this->bindings[$id] = $factory;
         unset($this->instances[$id]);
     }
 
-    /** Register an already-constructed instance. */
+    /** @since 1.0.0 */
     public function instance(string $id, object $instance): void
     {
         $this->instances[$id] = $instance;
     }
 
-    /** Return whether a binding or instance exists for $id. */
+    /** @since 1.0.0 */
     public function has(string $id): bool
     {
         return isset($this->bindings[$id]) || isset($this->instances[$id]);
@@ -46,6 +50,7 @@ final class Container
      * @template T of object
      * @param class-string<T>|string $id
      * @return T|object
+     * @since 1.0.0
      */
     public function get(string $id): object
     {

@@ -16,19 +16,22 @@ use Dono\Foundation\License\LicenseService;
 /**
  * Injects global Dono JS config into admin pages.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class AdminGlobals extends HookProvider
 {
+    /** @since 1.0.0 */
     public function __construct(private LicenseService $license)
     {
     }
 
+    /** @since 1.0.0 */
     protected function actions(): array
     {
         return ['admin_print_scripts' => 'inject'];
     }
 
+    /** @since 1.0.0 */
     public function inject(): void
     {
         if (! $this->isDonoAdminPage()) return;
@@ -87,8 +90,8 @@ final class AdminGlobals extends HookProvider
             // learn they exist.
             'email_template_meta' => SettingsService::templateMeta(),
             // Roles assigns capabilities, so only a full administrator may save
-            // it. Without this the tab rendered for a settings manager, who
-            // could edit the grid and only learn it was refused on save.
+            // it. Without this the tab renders for a settings manager, who can
+            // edit the grid and only learns it is refused on save.
             'can' => [
                 'manage_options' => current_user_can('manage_options'),
                 'export_donors'  => Capabilities::userCan('dono_export_donors'),
@@ -103,14 +106,13 @@ final class AdminGlobals extends HookProvider
         );
     }
 
+    /** @since 1.0.0 */
     private function isDonoAdminPage(): bool
     {
         $page = is_string($_GET['page'] ?? null) ? (string) $_GET['page'] : '';
 
         // The dashboard's slug is the bare "dono"; every other screen is
-        // "dono-something". Matching only the prefix left the one screen a new
-        // install opens first without a config object, so its money rendered in
-        // a default format while every other screen used the org's.
+        // "dono-something", so a prefix match alone would miss the dashboard.
         return $page === 'dono' || strpos($page, 'dono-') === 0;
     }
 }

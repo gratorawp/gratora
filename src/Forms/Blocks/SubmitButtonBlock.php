@@ -6,13 +6,16 @@ namespace Dono\Forms\Blocks;
 
 use Dono\Foundation\Helpers\View;
 
+/** @since 1.0.0 */
 final class SubmitButtonBlock implements Block
 {
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/submit-button';
     }
 
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         return [
@@ -21,6 +24,7 @@ final class SubmitButtonBlock implements Block
         ];
     }
 
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         $align = (string) ($attrs['align'] ?? 'left');

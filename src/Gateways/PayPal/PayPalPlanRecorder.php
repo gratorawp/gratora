@@ -19,15 +19,14 @@ use Dono\Recurring\RecurringPlan;
  * path reads gateway_subscription_id off this row: without it the donor is
  * billed monthly forever with no way for the site to stop it.
  *
- * It used to be written in one place, by one un-retried POST from the donor's
- * browser. A closed tab, a dropped connection or a transient failure of Dono's
- * own subscription lookup lost it permanently. The webhook handlers call this
- * too now, so the browser is the fast path rather than the only one.
+ * The webhook handlers call this as well as the donor's browser, so a closed
+ * tab or a dropped connection does not lose the row.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class PayPalPlanRecorder
 {
+    /** @since 1.0.0 */
     public function __construct(
         private DonationRepository $donations,
         private Clock $clock,
@@ -42,6 +41,8 @@ final class PayPalPlanRecorder
      *
      * @param  array<string,mixed> $sub a PayPal subscription resource
      * @throws PayPalPlanRefused when it does not answer for a donation awaiting it
+     *
+     * @since 1.0.0
      */
     public function record(array $sub): RecurringPlan
     {
@@ -111,7 +112,11 @@ final class PayPalPlanRecorder
         return $this->write($donation, $subId, $sub, $status);
     }
 
-    /** @param array<string,mixed> $sub */
+    /**
+     * @param array<string,mixed> $sub
+     *
+     * @since 1.0.0
+     */
     private function write(Donation $donation, string $subId, array $sub, string $status): RecurringPlan
     {
         $now = $this->clock->now()->format('Y-m-d H:i:s');

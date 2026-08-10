@@ -15,7 +15,7 @@ namespace Dono\Gateways;
  * A gateway that redirects, or settles entirely server-side, does not
  * implement this.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 interface BrowserAware
 {
@@ -25,6 +25,8 @@ interface BrowserAware
      * under the gateway's own id in the form config. Return [] for none.
      *
      * @return array<string,mixed>
+     *
+     * @since 1.0.0
      */
     public function publicConfig(bool $test, string $currency): array;
 
@@ -34,6 +36,8 @@ interface BrowserAware
      * this particular intent needs nothing client-side.
      *
      * @return array<string,mixed>|null
+     *
+     * @since 1.0.0
      */
     public function browserPayload(GatewayIntentResult $result): ?array;
 }

@@ -7,32 +7,36 @@ namespace Dono\Forms\Blocks;
 /**
  * Server-side dono block registry.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class BlockRegistry
 {
     /** @var array<string, Block> */
     private array $blocks = [];
 
-    /** Add a block to the registry. */
+    /** @since 1.0.0 */
     public function add(Block $block): void
     {
         $this->blocks[$block->name()] = $block;
     }
 
-    /** Whether a block name is registered. */
+    /** @since 1.0.0 */
     public function has(string $name): bool
     {
         return isset($this->blocks[$name]);
     }
 
-    /** @return array<string, Block> */
+    /**
+     * @return array<string, Block>
+     *
+     * @since 1.0.0
+     */
     public function all(): array
     {
         return $this->blocks;
     }
 
-    /** Register every block with WordPress. */
+    /** @since 1.0.0 */
     public function register(): void
     {
         foreach ($this->blocks as $name => $block) {

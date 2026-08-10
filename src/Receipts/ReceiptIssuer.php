@@ -31,12 +31,13 @@ use Dono\Vendor\Queryable\DB;
  * persists a Receipt row, renders the PDF in memory, and emails the donor.
  * No file storage; re-sends regenerate from the same context.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class ReceiptIssuer
 {
     private const HOOK = 'dono.async.issue_receipt';
 
+    /** @since 1.0.0 */
     public function __construct(
         private DonationRepository $donations,
         private DonorRepository $donors,
@@ -56,17 +57,19 @@ final class ReceiptIssuer
     ) {
     }
 
+    /** @since 1.0.0 */
     public function register(): void
     {
         add_action('dono.donation.completed', [$this, 'onDonationCompleted']);
         add_action(self::HOOK, [$this, 'issueForDonation']);
     }
 
+    /** @since 1.0.0 */
     public function onDonationCompleted(Donation $donation): void
     {
         // Ticket orders ride the donations table but are a purchase, not a
         // gift. Issuing a donation receipt for one misstates what the payer
-        // received, and the receipt then fed the tax-deductible statement.
+        // received, and that receipt feeds the tax-deductible statement.
         // Add-ons that sell things issue their own confirmation.
         //
         // The filter exists because "no receipt" is the safe answer, not the
@@ -81,7 +84,11 @@ final class ReceiptIssuer
         $this->async->enqueue(self::HOOK, ['donation_id' => $donation->id]);
     }
 
-    /** Admin "resend receipt": clear sent_to_email_at and re-queue the issuer. */
+    /**
+     * Admin "resend receipt": clear sent_to_email_at and re-queue the issuer.
+     *
+     * @since 1.0.0
+     */
     public function requeueForDonation(int $donationId): bool
     {
         $donation = $this->donations->findById($donationId);
@@ -102,6 +109,8 @@ final class ReceiptIssuer
 
     /**
      * @param array{donation_id:int}|int $args
+     *
+     * @since 1.0.0
      */
     public function issueForDonation(mixed $args): void
     {
@@ -135,6 +144,7 @@ final class ReceiptIssuer
         }
     }
 
+    /** @since 1.0.0 */
     private function loadCampaign(Donation $donation): ?Campaign
     {
         $cid = (int) ($donation->campaign_id ?? 0);
@@ -145,6 +155,8 @@ final class ReceiptIssuer
      * Decrypted custom_data answers for the donation. Empty array when none.
      *
      * @return array<string,mixed>
+     *
+     * @since 1.0.0
      */
     private function decryptCustomData(Donation $donation): array
     {
@@ -163,6 +175,8 @@ final class ReceiptIssuer
      * raw machine-keyed JSON.
      *
      * @return array<string,string>
+     *
+     * @since 1.0.0
      */
     private function loadCustomFieldLabels(Donation $donation): array
     {
@@ -173,11 +187,11 @@ final class ReceiptIssuer
         return CustomFieldLabels::forBlocks((string) $form->blocks);
     }
 
+    /** @since 1.0.0 */
     private function processRenderer(ReceiptRenderer $renderer, ReceiptContext $ctx): void
     {
         $existing = $this->receipts->findFor($ctx->donation->id, $renderer->id());
 
-        // Already issued and emailed: nothing to do.
         if ($existing && $existing->sent_to_email_at !== null) {
             return;
         }
@@ -193,8 +207,7 @@ final class ReceiptIssuer
         // {receipt_number} resolves on the PDF and not just on the email subject.
         $ctx = $ctx->with('receipt_number', (string) $receipt->receipt_number);
 
-        // Thread donor-submitted custom-field answers + their form labels into
-        // the receipt context so the PDF can show "Question - Answer" rows.
+        // The PDF renders these as "Question - Answer" rows.
         $custom = $this->decryptCustomData($ctx->donation);
         if ($custom !== []) {
             $ctx = $ctx->with('custom_data', $custom);
@@ -212,9 +225,8 @@ final class ReceiptIssuer
             if ($created) {
                 do_action('dono.receipt.issued', $receipt, $ctx);
                 // Campaign and amount come from the donation being receipted.
-                // Without them the row reads as an event with no context, and
-                // the donor timeline showed a receipt against no campaign and
-                // no figure.
+                // Without them the donor timeline shows a receipt against no
+                // campaign and no figure.
                 $this->events->record('receipt.issued', [
                     'donor_id'     => $ctx->donor->id,
                     'donation_id'  => $ctx->donation->id,
@@ -263,6 +275,8 @@ final class ReceiptIssuer
      * Switch WP to the donor's locale if it differs from the current one and
      * is a known locale. Returns true when an actual switch happened (caller
      * must restore_previous_locale()), false otherwise.
+     *
+     * @since 1.0.0
      */
     private function switchLocale(string $locale): bool
     {
@@ -275,6 +289,8 @@ final class ReceiptIssuer
     /**
      * @return array{0: Receipt, 1: bool} The receipt and whether THIS call
      *   created it (false when a concurrent issue won the insert race).
+     *
+     * @since 1.0.0
      */
     private function createReceiptRecord(ReceiptRenderer $renderer, ReceiptContext $ctx): array
     {
@@ -305,6 +321,7 @@ final class ReceiptIssuer
         return [$receipt, true];
     }
 
+    /** @since 1.0.0 */
     private function sendEmail(Receipt $receipt, ReceiptContext $ctx, string $pdfBytes): bool
     {
         $emailCfg = $this->settings->get('email');
@@ -399,6 +416,8 @@ final class ReceiptIssuer
     /**
      * Name for this receipt: the per-donation snapshot, falling back to the
      * donor record.
+     *
+     * @since 1.0.0
      */
     private function resolveDonorName(Donation $donation, Donor $donor): string
     {
@@ -411,6 +430,7 @@ final class ReceiptIssuer
         return trim((string) $first . ' ' . (string) $last);
     }
 
+    /** @since 1.0.0 */
     private function writeTempPdf(string $bytes, string $reference): string
     {
         $tmp = get_temp_dir() . 'dono-receipt-' . $reference . '-' . bin2hex(random_bytes(4)) . '.pdf';
@@ -422,6 +442,8 @@ final class ReceiptIssuer
      * Re-renders the PDF for a previously-issued receipt.
      *
      * Returns null if the receipt, donation, or renderer cannot be resolved.
+     *
+     * @since 1.0.0
      */
     public function renderReceiptPdf(int $receiptId): ?string
     {
@@ -467,13 +489,21 @@ final class ReceiptIssuer
         }
     }
 
-    /** @return array<ReceiptRenderer> */
+    /**
+     * @return array<ReceiptRenderer>
+     *
+     * @since 1.0.0
+     */
     private function collectRenderers(): array
     {
         return (array) apply_filters('dono.receipt.renderers', []);
     }
 
-    /** @return array<string,mixed> */
+    /**
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
     private function loadOrgProfile(): array
     {
         $defaults = [

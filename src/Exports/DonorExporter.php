@@ -13,8 +13,10 @@ use Dono\Vendor\Queryable\DB;
 
 /**
  * Streams the donor list as CSV. Columns are opt-in because most of them are
- * PII decrypted one row at a time, and a list mailed to a fulfilment house
+ * PII decrypted one row at a time, and a list mailed to a fulfillment house
  * should carry only what that house needs.
+ *
+ * @since 1.0.0
  */
 final class DonorExporter
 {
@@ -40,6 +42,7 @@ final class DonorExporter
 
     private const CHUNK = 500;
 
+    /** @since 1.0.0 */
     public function __construct(private DonorService $donors)
     {
     }
@@ -49,6 +52,7 @@ final class DonorExporter
      * screen offers and the only one the donor table answers on its own.
      *
      * @param array{columns?:list<string>,from?:?string,to?:?string,campaign_id?:?int,country?:?string,donor_type?:?string,search?:?string} $args
+     * @since 1.0.0
      */
     public function toCsv(array $args = []): string
     {
@@ -124,6 +128,8 @@ final class DonorExporter
      * Also served to the UI so the checkbox labels and the file headers cannot
      * drift apart. Spelled out rather than built from a variable, or none of it
      * reaches a .pot file.
+     *
+     * @since 1.0.0
      */
     public static function labels(): array
     {
@@ -145,11 +151,13 @@ final class DonorExporter
         ];
     }
 
+    /** @since 1.0.0 */
     public static function filename(): string
     {
         return 'donors-' . gmdate('Y-m-d-His') . '.csv';
     }
 
+    /** @since 1.0.0 */
     private function columns(array $requested): array
     {
         $valid = array_values(array_filter(
@@ -170,6 +178,7 @@ final class DonorExporter
         ));
     }
 
+    /** @since 1.0.0 */
     private function row(Donor $donor, array $columns): array
     {
         $out = [];
@@ -197,6 +206,7 @@ final class DonorExporter
         return $out;
     }
 
+    /** @since 1.0.0 */
     private function donorIdsForCampaign(int $campaignId): array
     {
         $q = DonationQueries::donationsOnly(DB::table('dono_donations'))
@@ -214,12 +224,15 @@ final class DonorExporter
     /**
      * The screen's own definition rather than a restatement of it, so the file
      * cannot disagree with the count it was started from.
+     *
+     * @since 1.0.0
      */
     private function livePredicate(): string
     {
         return 'redacted_at IS NULL AND ' . DonorRepository::visibleDonorPredicate();
     }
 
+    /** @since 1.0.0 */
     private function day(?string $value): ?string
     {
         $value = trim((string) $value);

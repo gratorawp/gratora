@@ -24,10 +24,11 @@ use Throwable;
 /**
  * Builds donor-insights and donor-profile payloads for the admin UI.
  *
- * @version 1.0.0“
+ * @since 1.0.0
  */
 final class DonorMetricsService
 {
+    /** @since 1.0.0 */
     public function __construct(
         private DonorRepository $donors,
         private DonorService $donorService,
@@ -40,7 +41,11 @@ final class DonorMetricsService
     ) {
     }
 
-    /** @return array<string,mixed> */
+    /**
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
     public function insights(): array
     {
         $today = $this->clock->now()->format('Y-m-d');
@@ -73,6 +78,8 @@ final class DonorMetricsService
      * Paged at-risk donors with decrypted email.
      *
      * @return array{rows:array<array<string,mixed>>, total:int}
+     *
+     * @since 1.0.0
      */
     public function atRisk(int $page = 1, int $perPage = 25): array
     {
@@ -108,7 +115,11 @@ final class DonorMetricsService
         return $result;
     }
 
-    /** All at-risk donors as CSV. Capped at 10k rows to bound memory. */
+    /**
+     * All at-risk donors as CSV. Capped at 10k rows to bound memory.
+     *
+     * @since 1.0.0
+     */
     public function atRiskCsv(): string
     {
         $result = $this->atRisk(1, 10000);
@@ -145,6 +156,8 @@ final class DonorMetricsService
      * Full profile payload for the donor detail screen.
      *
      * @return array<string,mixed>|null null when donor doesn't exist.
+     *
+     * @since 1.0.0
      */
     public function profile(int $donorId, bool $includeMagicLink = false): ?array
     {
@@ -229,7 +242,7 @@ final class DonorMetricsService
             else $recurringCount++;
         }
 
-        // MRR from active plans (cadence-normalised monthly equivalent).
+        // MRR from active plans (cadence-normalized monthly equivalent).
         $mrrCents = 0;
         $activePlanCount = 0;
         $mrrUnconverted  = 0;
@@ -239,11 +252,11 @@ final class DonorMetricsService
         // card can say which rather than reading as "this donor has none".
         $planCounts = [];
         foreach ($recurringPlans as $p) {
-            // Rehearsal plans stay in the tab's table, labelled, because an
+            // Rehearsal plans stay in the tab's table, labeled, because an
             // admin testing wants to see them. They stay out of every figure on
             // this card: recurringStats() already excludes them, so counting
-            // them here made a donor's MRR disagree with the Subscriptions
-            // totals it rolls up into.
+            // them here would make a donor's MRR disagree with the
+            // Subscriptions totals it rolls up into.
             if ($p->is_test) {
                 continue;
             }
@@ -318,10 +331,10 @@ final class DonorMetricsService
             if ($p->status === 'past_due') { $pastDuePlan = $p; break; }
         }
         if ($pastDuePlan) {
-            // The message used to say "open the Recurring tab to retry" on every
-            // gateway, including the ones with no retry endpoint at all, which
-            // sent the admin looking for a button that could not exist. Three
-            // outcomes, because "cannot retry" has two very different causes.
+            // Three outcomes, because "cannot retry" has two very different
+            // causes: a gateway with no retry endpoint, and a gateway that is
+            // not connected. Offering a retry the gateway cannot do sends the
+            // admin looking for a button that does not exist.
             $gateway  = $this->gateways->get((string) $pastDuePlan->gateway);
             $name     = ucfirst((string) $pastDuePlan->gateway);
 
@@ -420,6 +433,7 @@ final class DonorMetricsService
         ];
     }
 
+    /** @since 1.0.0 */
     private function isAnonymous(Donor $d): bool
     {
         if ($d->redacted_at !== null) return false; // redacted is a distinct state from anonymous
@@ -431,6 +445,8 @@ final class DonorMetricsService
      *
      * @param array<array{month:string,amount_cents:int,donations_count:int}> $timeline
      * @return array<int>
+     *
+     * @since 1.0.0
      */
     private function buildSparkline(array $timeline, int $buckets): array
     {
@@ -451,6 +467,8 @@ final class DonorMetricsService
      * plan in the base currency needs no conversion, and one in a foreign
      * currency with no rate has no known base value, so it counts as nothing
      * rather than folding its raw foreign cents into a base total.
+     *
+     * @since 1.0.0
      */
     private static function baseAmountOf(RecurringPlan $p): int
     {
@@ -466,9 +484,11 @@ final class DonorMetricsService
     /**
      * Monthly-equivalent value of one recurring plan, in the org base currency.
      *
-     * Normalises the base amount, never the raw amount_cents (which is in the
+     * Normalizes the base amount, never the raw amount_cents (which is in the
      * donor's currency): the card renders the result with the org's symbol and
      * no conversion, so a 500.00 INR plan would read as 500,00 EUR.
+     *
+     * @since 1.0.0
      */
     private function monthlyEquivalent(RecurringPlan $p): int
     {
@@ -486,6 +506,8 @@ final class DonorMetricsService
     /**
      * Issues a self-service magic link. Raw token returned once; never stored cleartext.
      * Profile responses are admin-only.
+     *
+     * @since 1.0.0
      */
     private function magicLinkUrl(Donor $donor): ?string
     {
@@ -497,6 +519,7 @@ final class DonorMetricsService
         return add_query_arg('token', $token, (new \Dono\Donors\Portal\PortalPage())->url());
     }
 
+    /** @since 1.0.0 */
     private function donorName(Donor $d): string
     {
         $name = trim(($d->first_name ?? '') . ' ' . ($d->last_name ?? ''));
@@ -506,6 +529,8 @@ final class DonorMetricsService
     /**
      * Classifies one donor into a segment. Must stay in sync with the SQL CASE
      * in DonorRepository::rfmSegments().
+     *
+     * @since 1.0.0
      */
     private function classifySegment(Donor $d, string $today): string
     {
@@ -526,7 +551,11 @@ final class DonorMetricsService
         return 'other';
     }
 
-    /** @param array<array<string,mixed>> $rows */
+    /**
+     * @param array<array<string,mixed>> $rows
+     *
+     * @since 1.0.0
+     */
     private function shapeTopDonors(array $rows): array
     {
         return array_map(function (array $r): array {
@@ -545,7 +574,11 @@ final class DonorMetricsService
         }, $rows);
     }
 
-    /** @return array<string,mixed> */
+    /**
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
     private function mapDonationRow(Donation $d): array
     {
         return [
@@ -566,6 +599,8 @@ final class DonorMetricsService
      * Uncapped donation list for a DSAR export. profile() caps at 25 for admin UI.
      *
      * @return list<array<string,mixed>>
+     *
+     * @since 1.0.0
      */
     public function donationsForExport(int $donorId): array
     {
@@ -577,7 +612,11 @@ final class DonorMetricsService
         return array_map(fn (Donation $d) => $this->mapDonationRow($d), $rows);
     }
 
-    /** @return array<string,mixed> */
+    /**
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
     private function mapRecurringPlanRow(RecurringPlan $p): array
     {
         return [
@@ -612,6 +651,8 @@ final class DonorMetricsService
      *
      * @param array<int,Receipt> $receipts
      * @return array<int,array<string,mixed>>
+     *
+     * @since 1.0.0
      */
     private function mapReceiptRows(array $receipts): array
     {
@@ -630,6 +671,8 @@ final class DonorMetricsService
     /**
      * @param array<int,string> $references Donation reference keyed by donation id.
      * @return array<string,mixed>
+     *
+     * @since 1.0.0
      */
     private function mapReceiptRow(Receipt $r, array $references): array
     {
@@ -645,7 +688,11 @@ final class DonorMetricsService
         ];
     }
 
-    /** @return array<string,mixed> */
+    /**
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
     private function mapEventRow(Event $e): array
     {
         return [
@@ -668,6 +715,8 @@ final class DonorMetricsService
      * so the table needs no side lookups.
      *
      * @return array{items: array<int,array<string,mixed>>, total: int}
+     *
+     * @since 1.0.0
      */
     public function eventsPage(int $donorId, int $page, int $perPage, string $order = 'desc'): array
     {
@@ -710,18 +759,14 @@ final class DonorMetricsService
     }
 
     /**
-     * Notes the donors left with their gifts, keyed by donation id, for the
-     * donations behind these events. One query, only the non-empty ones.
-     *
-     * @param  array<int,Event> $events
-     * @return array<int,string>
-     */
-    /**
      * Note and reference for every donation the timeline mentions, in one
      * query. A timeline row saying only "Donation paid" cannot be matched to
      * anything; the reference is what makes it findable.
      *
+     * @param  array<int,Event> $events
      * @return array<int,array{note:?string,reference:string}>
+     *
+     * @since 1.0.0
      */
     private function noteMapForEvents(array $events): array
     {
@@ -745,6 +790,8 @@ final class DonorMetricsService
      * Receipt numbers for receipt events, in one query.
      *
      * @return array<int,string>
+     *
+     * @since 1.0.0
      */
     private function receiptNumbersForEvents(array $events): array
     {
@@ -766,6 +813,8 @@ final class DonorMetricsService
      * on every row that shares the donation id.
      *
      * @param array<int,string> $noteMap
+     *
+     * @since 1.0.0
      */
     private function noteForEvent(Event $e, array $noteMap): ?string
     {
@@ -780,6 +829,8 @@ final class DonorMetricsService
     /**
      * @param  array<int,Event> $events
      * @return array<int,array{id:int,title:string}>
+     *
+     * @since 1.0.0
      */
     private function campaignTitlesForEvents(array $events): array
     {
@@ -795,7 +846,11 @@ final class DonorMetricsService
         return $map;
     }
 
-    /** @return array<string,mixed> */
+    /**
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
     private function mapConsentRow(Consent $c): array
     {
         return [
@@ -812,6 +867,8 @@ final class DonorMetricsService
      * donor's own data, not the admin-insights aggregate.
      *
      * @return array<string,mixed>|null
+     *
+     * @since 1.0.0
      */
     public function exportData(int $donorId): ?array
     {

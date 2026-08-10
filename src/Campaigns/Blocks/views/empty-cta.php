@@ -3,7 +3,7 @@ defined('ABSPATH') || exit;
 /**
  * The empty state for a donation list.
  *
- * These lists sit under a heading an organiser has already written, on a page
+ * These lists sit under a heading an organizer has already written, on a page
  * whose whole purpose is the ask, so the first one carries the invitation
  * rather than a flat "No donations yet". Only the first: see EmptyState.
  *

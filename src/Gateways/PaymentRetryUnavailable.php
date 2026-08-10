@@ -13,7 +13,7 @@ use RuntimeException;
  * has none open, so retrying cannot help and the admin needs telling that
  * rather than an error suggesting they try again.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class PaymentRetryUnavailable extends RuntimeException
 {

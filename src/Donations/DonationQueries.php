@@ -13,7 +13,7 @@ use Dono\Vendor\Queryable\DB;
  * aggregates, totals, and reports stay consistent. Raw-SQL callers add the
  * equivalent predicate inline.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class DonationQueries
 {
@@ -23,6 +23,8 @@ final class DonationQueries
      * @template T
      * @param  T $q
      * @return T
+     *
+     * @since 1.0.0
      */
     public static function live($q)
     {
@@ -39,6 +41,8 @@ final class DonationQueries
      *
      * Single owner of that rule: reach for it wherever "donations" is meant,
      * rather than repeating the where().
+     *
+     * @since 1.0.0
      */
     public static function donationsOnly($q)
     {
@@ -54,6 +58,8 @@ final class DonationQueries
      * configured, so the donation is accepted and contributes 0. Counting them
      * lets a screen explain a campaign showing 22 donations raising what 21
      * raised.
+     *
+     * @since 1.0.0
      */
     public static function unconvertedExpr(): string
     {
@@ -66,6 +72,8 @@ final class DonationQueries
      * stored in the donation currency, so each is scaled by the donation's
      * fx_rate (base per donation unit; NULL when the donation already is base).
      * Use only where dono_donations is the main/correlated table.
+     *
+     * @since 1.0.0
      */
     public static function refundedBaseExpr(): string
     {
@@ -93,6 +101,8 @@ final class DonationQueries
      * refunds (both in base). The canonical money expression every aggregate
      * should SUM, so cross-currency donations stay coherent and agree with the
      * campaign raised counter.
+     *
+     * @since 1.0.0
      */
     public static function netBaseExpr(): string
     {
@@ -116,6 +126,8 @@ final class DonationQueries
      * donor's records disagree with the one the tax office sees.
      *
      * @return array{0:string,1:string} inclusive UTC start and end
+     *
+     * @since 1.0.0
      */
     public static function yearBoundsUtc(int $year): array
     {

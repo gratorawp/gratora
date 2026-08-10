@@ -9,7 +9,7 @@ use Dono\Foundation\Hooks\HookProvider;
 /**
  * Registers and renders the Funds admin page.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class FundsPage extends HookProvider
 {
@@ -17,11 +17,13 @@ final class FundsPage extends HookProvider
     private const HANDLE    = 'dono-admin-funds';
     private const BUILD_DIR = 'build/admin/funds';
 
+    /** @since 1.0.0 */
     protected function filters(): array
     {
         return ['dono.admin.pages' => 'registerPage'];
     }
 
+    /** @since 1.0.0 */
     public function registerPage(array $pages): array
     {
         $pages[] = [
@@ -34,6 +36,7 @@ final class FundsPage extends HookProvider
         return $pages;
     }
 
+    /** @since 1.0.0 */
     public function render(): void
     {
         $this->enqueueAssets();
@@ -47,6 +50,7 @@ final class FundsPage extends HookProvider
         <?php
     }
 
+    /** @since 1.0.0 */
     private function enqueueAssets(): void
     {
         $asset = require DONO_DIR . self::BUILD_DIR . '/index.asset.php';

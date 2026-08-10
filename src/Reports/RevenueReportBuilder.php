@@ -14,16 +14,18 @@ use Dono\Receipts\PdfBuilder;
  * month-by-month table, and the best month. Aggregate figures only, no donor
  * PII, so it can be handed to a board or an auditor as it stands.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class RevenueReportBuilder
 {
+    /** @since 1.0.0 */
     public function __construct(
         private PdfBuilder $pdf,
         private RevenueExporter $revenue,
     ) {
     }
 
+    /** @since 1.0.0 */
     public function build(int $year): string
     {
         $currency = Money::defaultCurrency();
@@ -73,12 +75,17 @@ final class RevenueReportBuilder
         ]);
     }
 
+    /** @since 1.0.0 */
     public static function filename(int $year): string
     {
         return sprintf('dono-revenue-%d.pdf', $year);
     }
 
-    /** "2026-03" to a localised "March", falling back to the raw key. */
+    /**
+     * "2026-03" to a localized "March", falling back to the raw key.
+     *
+     * @since 1.0.0
+     */
     private function monthLabel(string $month): string
     {
         $ts = strtotime($month . '-01 12:00:00');

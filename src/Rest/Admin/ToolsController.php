@@ -26,15 +26,16 @@ use Dono\Vendor\Queryable\DB;
 
 /**
  * Admin endpoints for system info, settings export, settings import, and
- * recomputing denormalised aggregates (admin UI wrapper over the
+ * recomputing denormalized aggregates (admin UI wrapper over the
  * `wp dono recompute-aggregates` CLI).
  *
- * @version 1.1.0
+ * @since 1.0.0
  */
 final class ToolsController
 {
     private const NAMESPACE = 'dono/v1';
 
+    /** @since 1.0.0 */
     public function __construct(
         private AggregateSyncer $aggregates,
         private \Dono\Mail\Mailer $mailer,
@@ -47,6 +48,7 @@ final class ToolsController
     ) {
     }
 
+    /** @since 1.0.0 */
     public function registerRoutes(): void
     {
         register_rest_route(self::NAMESPACE, '/admin/tools/info', [
@@ -155,7 +157,11 @@ final class ToolsController
         ]);
     }
 
-    /** Paged error log, newest first, optionally narrowed to one source. */
+    /**
+     * Paged error log, newest first, optionally narrowed to one source.
+     *
+     * @since 1.0.0
+     */
     public function errors(\WP_REST_Request $request): WP_REST_Response
     {
         $page    = max(1, (int) $request['page']);
@@ -183,6 +189,7 @@ final class ToolsController
         ], 200);
     }
 
+    /** @since 1.0.0 */
     public function clearErrors(): WP_REST_Response
     {
         $deleted = Event::query()->whereLike('type', ErrorLog::PREFIX . '%')->delete();
@@ -190,7 +197,11 @@ final class ToolsController
         return new WP_REST_Response(['ok' => true, 'deleted' => (int) $deleted->affectedRows], 200);
     }
 
-    /** @return array<string,mixed> */
+    /**
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
     private static function errorRow(Event $e): array
     {
         $payload = is_array($e->payload) ? $e->payload : [];
@@ -220,6 +231,8 @@ final class ToolsController
      * rather than every source Dono can emit.
      *
      * @return list<string>
+     *
+     * @since 1.0.0
      */
     private static function errorSources(): array
     {
@@ -242,6 +255,8 @@ final class ToolsController
      * Send a test email through the configured sender + transport so the
      * admin can verify deliverability without waiting for a real donation.
      * Defaults to the current user's WP email when no `to` is provided.
+     *
+     * @since 1.0.0
      */
     public function sendTestEmail(\WP_REST_Request $request): WP_REST_Response|\WP_Error
     {
@@ -279,9 +294,11 @@ final class ToolsController
     }
 
     /**
-     * Recompute denormalised aggregates from source-of-truth donation rows.
+     * Recompute denormalized aggregates from source-of-truth donation rows.
      * Synchronous; the underlying syncs are idempotent and read-then-write
      * only on the derived counters.
+     *
+     * @since 1.0.0
      */
     public function recalculate(\WP_REST_Request $request): WP_REST_Response
     {
@@ -310,9 +327,9 @@ final class ToolsController
         }
 
         // Converting a donation changes every total it belongs to, so the
-        // aggregate passes have to run whatever the scope was. Without this,
-        // "Currency conversions" wrote base amounts, rebuilt nothing, and
-        // reported success while every total stayed exactly as wrong as before.
+        // aggregate passes have to run whatever the scope was. Without it, a
+        // currency-only pass writes base amounts, rebuilds nothing, and reports
+        // success while every total stays wrong.
         $rebuildAll = $scope === 'all' || $converted > 0;
 
         if ($rebuildAll || $scope === 'donors') {
@@ -356,15 +373,12 @@ final class ToolsController
     private const RECALC_CHUNK = 500;
 
     /**
-     * Every id in a table, a chunk at a time.
-     *
-     * This used to hydrate the whole table into model objects before the first
-     * sync ran, so a site with a real donor list exhausted memory inside the
-     * request and the rebuild died partway, leaving some totals rebuilt and the
-     * rest as wrong as they were. Ids only, in bounded chunks, so the memory a
-     * rebuild needs no longer grows with the org.
+     * Every id in a table, a chunk at a time. Ids only, never hydrated models,
+     * so the memory a rebuild needs does not grow with the org.
      *
      * @return \Generator<int>
+     *
+     * @since 1.0.0
      */
     private static function eachId(string $table): \Generator
     {
@@ -410,6 +424,8 @@ final class ToolsController
      * Served straight to the client rather than through WP_REST_Response: the
      * body is built a page at a time, and handing it back as one string would
      * put the whole site in memory to say it did not need to be.
+     *
+     * @since 1.0.0
      */
     public function exportAll(): void
     {
@@ -425,6 +441,7 @@ final class ToolsController
         exit;
     }
 
+    /** @since 1.0.0 */
     public function export(): WP_REST_Response
     {
         $data = [
@@ -451,6 +468,7 @@ final class ToolsController
         return new WP_REST_Response($data, 200);
     }
 
+    /** @since 1.0.0 */
     public function csvInspect(\WP_REST_Request $request): WP_REST_Response|\WP_Error
     {
         $csv = (string) ($request->get_json_params()['csv'] ?? '');
@@ -461,6 +479,7 @@ final class ToolsController
         return new WP_REST_Response($this->csv->inspect($csv) + ['fields' => CsvImporter::FIELDS], 200);
     }
 
+    /** @since 1.0.0 */
     public function csvImport(\WP_REST_Request $request): WP_REST_Response|\WP_Error
     {
         $body    = (array) $request->get_json_params();
@@ -483,6 +502,7 @@ final class ToolsController
         return new WP_REST_Response($result, 200);
     }
 
+    /** @since 1.0.0 */
     public function import(\WP_REST_Request $request): WP_REST_Response|\WP_Error
     {
         $body = (array) $request->get_json_params();
@@ -537,6 +557,7 @@ final class ToolsController
         ], 200);
     }
 
+    /** @since 1.0.0 */
     public function purgeTestData(\WP_REST_Request $request): WP_REST_Response|\WP_Error
     {
         // Typed, not clicked: the button is one keystroke away from a ledger
@@ -552,11 +573,13 @@ final class ToolsController
         return new WP_REST_Response($this->testData->purge(), 200);
     }
 
+    /** @since 1.0.0 */
     public function canAccess(): bool
     {
         return Capabilities::userCan('dono_manage_settings');
     }
 
+    /** @since 1.0.0 */
     public function canManage(): bool
     {
         return current_user_can('manage_options');
@@ -565,14 +588,14 @@ final class ToolsController
     /**
      * Scope slug => label.
      *
-     * Add-ons denormalise their own counters from the same donation rows and
+     * Add-ons denormalize their own counters from the same donation rows and
      * drift the same way, so they can add a scope rather than ship a second
      * Recalculate button. They pass a label with it: the screen lists whatever
      * this returns, and a scope nobody can name is a scope nobody can pick.
-     * P2P registered one and it was unreachable, because the dropdown carried
-     * its own hardcoded copy of the core six.
      *
      * @return array<string,string>
+     *
+     * @since 1.0.0
      */
     public static function scopes(): array
     {
@@ -606,6 +629,8 @@ final class ToolsController
      * which is not a rare state on shared hosting and is not something a site
      * owner can fix from the plugin. Bounded so the request still returns:
      * whatever is left stays pending and the button can be pressed again.
+     *
+     * @since 1.0.0
      */
     public function runUpgrades(): WP_REST_Response
     {
@@ -622,18 +647,13 @@ final class ToolsController
         ], 200);
     }
 
-    /**
-     * The last failures Dono recorded, newest first.
-     *
-     * @return list<array{type:string, message:string, occurred_at:string}>
-     */
+    /** @since 1.0.0 */
     public function info(): WP_REST_Response
     {
         // Action Scheduler, not WP-Cron: every Dono job is queued through
         // AsyncDispatcher into the 'dono' group, and nothing in the plugin
-        // calls wp_schedule_event. Reading _get_cron_array() found none of them
-        // and the card reported "nothing queued" on a site with a backlog,
-        // which is exactly backwards for a diagnostic.
+        // calls wp_schedule_event, so _get_cron_array() would report nothing
+        // queued on a site with a backlog.
         $cronEvents = [];
         if (function_exists('as_get_scheduled_actions')) {
             $pending = \as_get_scheduled_actions([

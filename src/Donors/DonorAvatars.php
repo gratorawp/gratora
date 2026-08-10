@@ -19,16 +19,18 @@ use Dono\Settings\SettingsService;
  * only need something to put in a src, and a plaintext address travelling
  * further than this class is a leak waiting for somewhere to happen.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class DonorAvatars
 {
+    /** @since 1.0.0 */
     public function __construct(
         private Crypto $crypto,
         private SettingsService $settings,
     ) {
     }
 
+    /** @since 1.0.0 */
     public function enabled(): bool
     {
         return (bool) ($this->settings->get('privacy')['gravatar_avatars'] ?? false);
@@ -42,6 +44,8 @@ final class DonorAvatars
      * what visitors see, and the screen where an admin makes that decision is
      * the one place the picture has to be visible: judging a photo you are not
      * shown is not a decision.
+     *
+     * @since 1.0.0
      */
     public function adminUrl(Donor $donor): string
     {
@@ -74,6 +78,8 @@ final class DonorAvatars
      * Suppressed from every public surface by an admin. The record and the
      * money stay; only what a visitor can see goes. Redaction is the other
      * lever and it destroys the donor, which is no way to answer a bad picture.
+     *
+     * @since 1.0.0
      */
     public function hidden(Donor $donor): bool
     {
@@ -84,6 +90,8 @@ final class DonorAvatars
      * A donor's own picture, which beats Gravatar because they chose it here.
      * Unlike Gravatar this needs no setting: nothing leaves the site, and a
      * donor who uploaded one has already asked for it to be shown.
+     *
+     * @since 1.0.0
      */
     public function uploadedUrl(Donor $donor): string
     {
@@ -107,6 +115,8 @@ final class DonorAvatars
      * @param  array<int, Donor> $donors     keyed by donor id
      * @param  array<int, bool>  $anonymous  donor id => is anonymous
      * @return array<int, string>            donor id => url, absent when none
+     *
+     * @since 1.0.0
      */
     public function urlsFor(array $donors, array $anonymous = []): array
     {
@@ -144,7 +154,7 @@ final class DonorAvatars
             // fallback: no image on file returns a transparent pixel rather
             // than a silhouette painted over the letter.
             // get_avatar_url rather than a hand-built gravatar.com URL: it
-            // honours the site's own avatar settings and the filters a host
+            // honors the site's own avatar settings and the filters a host
             // theme or privacy plugin may already rely on.
             $url = get_avatar_url($email, ['size' => 96, 'default' => 'blank']);
             if (is_string($url) && $url !== '') {

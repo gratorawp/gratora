@@ -13,16 +13,18 @@ use WP_REST_Server;
 /**
  * Admin dashboard metrics endpoint with widget-key filtering.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class DashboardController
 {
     private const NAMESPACE = 'dono/v1';
 
+    /** @since 1.0.0 */
     public function __construct(private DashboardMetricsService $metrics)
     {
     }
 
+    /** @since 1.0.0 */
     public function registerRoutes(): void
     {
         register_rest_route(self::NAMESPACE, '/admin/dashboard', [
@@ -41,18 +43,20 @@ final class DashboardController
         ]);
     }
 
+    /** @since 1.0.0 */
     public function canAccess(): bool
     {
         return Capabilities::userCan('dono_view_reports');
     }
 
+    /** @since 1.0.0 */
     public function show(WP_REST_Request $request): WP_REST_Response
     {
         $range   = (string) ($request['range']   ?? 'last-30');
         $compare = (string) ($request['compare'] ?? 'none');
 
-        // ?include= comma-separated widget keys. Absent = compute all
-        // (back-compat); present but empty = compute nothing.
+        // ?include= comma-separated widget keys. Absent = compute all;
+        // present but empty = compute nothing.
         $include = null;
         if ($request['include'] !== null) {
             $include = array_values(array_filter(array_map('trim', explode(',', (string) $request['include']))));

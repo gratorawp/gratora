@@ -225,35 +225,41 @@ use Dono\Foundation\Maintenance\TransientGc;
 /**
  * Always-on module: migrations, service bindings, admin/REST/asset wiring.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class CoreModule implements DonoModule
 {
+    /** @since 1.0.0 */
     public function id(): string
     {
         return 'core';
     }
 
+    /** @since 1.0.0 */
     public function name(): string
     {
         return __('Dono Core', 'dono');
     }
 
+    /** @since 1.0.0 */
     public function version(): string
     {
         return DONO_VERSION;
     }
 
+    /** @since 1.0.0 */
     public function requires(): array
     {
         return [];
     }
 
+    /** @since 1.0.0 */
     public function isLicensed(): bool
     {
         return true;
     }
 
+    /** @since 1.0.0 */
     public function tier(): string
     {
         return self::TIER_CORE;
@@ -267,6 +273,8 @@ final class CoreModule implements DonoModule
      * the container there asks for a binding that boot() has not made yet, and
      * the plugin dies on activation with WordPress reporting only "triggered a
      * fatal error".
+     *
+     * @since 1.0.0
      */
     public static function upgradeRoutines(): array
     {
@@ -274,6 +282,7 @@ final class CoreModule implements DonoModule
         ];
     }
 
+    /** @since 1.0.0 */
     public function boot(Container $c): void
     {
         // Cache-bust every Dono build/ stylesheet by file mtime instead of
@@ -658,8 +667,8 @@ final class CoreModule implements DonoModule
         $stripeAccount = $c->get(StripeAccount::class);
         // Register Stripe whenever an account is connected (mode-independent,
         // same check the readiness UI uses). The boot context has no mode set,
-        // so the old isConfigured() gate only ever saw the test token and would
-        // skip a live-only connection. Per-charge calls still fail closed via
+        // so a mode-specific gate here only ever sees the test token and skips
+        // a live-only connection. Per-charge calls still fail closed via
         // StripeApi::request()->isConfigured() for the active mode.
         if ($stripeAccount->isConnected()) {
             $gateways->register(new StripeGateway(
@@ -801,7 +810,7 @@ final class CoreModule implements DonoModule
 
         // The one way a plan changes. The portal, the admin screen and the
         // command registry all go through it, so the three cannot drift apart
-        // again and every change leaves an event behind.
+        // and every change leaves an event behind.
         $c->bind(RecurringPlanActions::class, fn (Container $c) => new RecurringPlanActions(
             $c->get(GatewayManager::class),
             $c->get(RecurringCanceller::class),
@@ -810,7 +819,7 @@ final class CoreModule implements DonoModule
 
         // Lifts a pause when its window closes. PayPal cannot
         // schedule their own resume, so without this a donor's "skip next
-        // payment" stopped the subscription for good.
+        // payment" would stop the subscription for good.
         $c->bind(RecurringResumer::class, fn (Container $c) => new RecurringResumer(
             $c->get(GatewayManager::class),
             $c->get(Clock::class),
@@ -1133,6 +1142,7 @@ final class CoreModule implements DonoModule
         }
     }
 
+    /** @since 1.0.0 */
     public function migrations(): array
     {
         return [

@@ -35,6 +35,8 @@ use Throwable;
 /**
  * `[dono_donation_form]` shortcode. Renders a form's blocks plus a
  * data-dono-form-config script the Preact runtime reads.
+ *
+ * @since 1.0.0
  */
 final class DonationFormShortcode extends HookProvider
 {
@@ -47,6 +49,7 @@ final class DonationFormShortcode extends HookProvider
 
     private ?string $cssVersion = null;
 
+    /** @since 1.0.0 */
     public function __construct(
         private FormRepository $forms,
         private ?CampaignStyleResolver $styles = null,
@@ -57,6 +60,7 @@ final class DonationFormShortcode extends HookProvider
     ) {
     }
 
+    /** @since 1.0.0 */
     protected function actions(): array
     {
         return [
@@ -67,6 +71,8 @@ final class DonationFormShortcode extends HookProvider
     /**
      * parent::register() wires the hook map; without it maybeEnqueue never runs
      * and every render falls back to the late enqueue path.
+     *
+     * @since 1.0.0
      */
     public function register(): void
     {
@@ -74,6 +80,7 @@ final class DonationFormShortcode extends HookProvider
         parent::register();
     }
 
+    /** @since 1.0.0 */
     public function maybeEnqueue(): void
     {
         if (! is_singular()) return;
@@ -82,6 +89,7 @@ final class DonationFormShortcode extends HookProvider
         $this->enqueue();
     }
 
+    /** @since 1.0.0 */
     private function enqueue(): void
     {
         FormGatewayAssets::enqueue();
@@ -113,11 +121,13 @@ final class DonationFormShortcode extends HookProvider
         }
     }
 
+    /** @since 1.0.0 */
     private function cssFileName(): string
     {
         return is_rtl() ? 'runtime-rtl.css' : 'runtime.css';
     }
 
+    /** @since 1.0.0 */
     public function render($atts = []): string
     {
         $atts = is_array($atts) ? $atts : [];
@@ -188,6 +198,7 @@ final class DonationFormShortcode extends HookProvider
         return $html;
     }
 
+    /** @since 1.0.0 */
     private function renderBlocks(Form $form): string
     {
         $formId = 'dono-form-' . wp_unique_id();
@@ -237,7 +248,11 @@ final class DonationFormShortcode extends HookProvider
         );
     }
 
-    /** @return array{0:string,1:string} [class-suffix, style-declarations] */
+    /**
+     * @return array{0:string,1:string} [class-suffix, style-declarations]
+     *
+     * @since 1.0.0
+     */
     private function containerAttrs(Form $form): array
     {
         $container = is_array($form->settings['container'] ?? null) ? $form->settings['container'] : [];
@@ -266,7 +281,11 @@ final class DonationFormShortcode extends HookProvider
         return [$classSuffix, $containerDecls];
     }
 
-    /** Inline custom properties, so the form is themed before the runtime mounts. */
+    /**
+     * Inline custom properties, so the form is themed before the runtime mounts.
+     *
+     * @since 1.0.0
+     */
     private function tokenStyle(array $tokens): string
     {
         $out = '';
@@ -282,7 +301,11 @@ final class DonationFormShortcode extends HookProvider
     }
 
 
-    /** @return array{html:string, cssUrl:string, jsUrl:string, jsDeps:list<string>} */
+    /**
+     * @return array{html:string, cssUrl:string, jsUrl:string, jsDeps:list<string>}
+     *
+     * @since 1.0.0
+     */
     public function renderPreview(string $blocks, ?array $settings = null, ?int $campaignId = null): array
     {
         $stub = Form::make();
@@ -315,6 +338,8 @@ final class DonationFormShortcode extends HookProvider
     /**
      * A self-contained document: the host editor never runs the runtime and the
      * iframe srcdoc cannot reach the editor's scripts, so both are inlined here.
+     *
+     * @since 1.0.0
      */
     public function buildPreviewDocument(array $preview, bool $autoResize = false, bool $transparent = false): string
     {
@@ -367,6 +392,7 @@ final class DonationFormShortcode extends HookProvider
 HTML;
     }
 
+    /** @since 1.0.0 */
     private function visitorContext(): array
     {
         $base = [
@@ -377,6 +403,7 @@ HTML;
         return (array) apply_filters('dono.form.visitor_context', $base);
     }
 
+    /** @since 1.0.0 */
     private function pickGateway(Form $form): string
     {
         $allowed = is_array($form->settings['gateways']['allowed'] ?? null)
@@ -399,6 +426,7 @@ HTML;
         return 'offline';
     }
 
+    /** @since 1.0.0 */
     private function buildConfig(Form $form, string $gateway, ?string $variant = null): array
     {
         $visitor = $this->visitorContext();
@@ -481,7 +509,7 @@ HTML;
             }
 
             // The author's choice only when the donor can actually use it in
-            // this context; otherwise the first one they can, as before.
+            // this context; otherwise the first one they can.
             $preselected = (string) ($blockAttrs['preselected'] ?? '');
             $default     = in_array($preselected, $ctxIds, true)
                 ? $preselected
@@ -663,6 +691,8 @@ HTML;
      *   pageNav: array{prevLabel:string,nextLabel:string,progressStyle:string},
      *   preamble: list<array<string,mixed>>,
      * }
+     *
+     * @since 1.0.0
      */
     private function buildSteps(Form $form, ?string $variant = null, array $visitor = []): array
     {
@@ -1339,7 +1369,11 @@ HTML;
         ];
     }
 
-    /** Falls back to the org currency, never a hardcoded USD. */
+    /**
+     * Falls back to the org currency, never a hardcoded USD.
+     *
+     * @since 1.0.0
+     */
     private function detectCurrency(Form $form): string
     {
         $found = null;
@@ -1359,6 +1393,7 @@ HTML;
         return $found ?? Money::defaultCurrency();
     }
 
+    /** @since 1.0.0 */
     private function detectCurrencies(Form $form): array
     {
         $codes  = [];
@@ -1377,6 +1412,7 @@ HTML;
         return $codes;
     }
 
+    /** @since 1.0.0 */
     private function currencySwitcherConfig(Form $form): ?array
     {
         $found  = null;
@@ -1397,11 +1433,13 @@ HTML;
         return $found;
     }
 
+    /** @since 1.0.0 */
     private function hasPaymentGatewaysBlock(Form $form): bool
     {
         return $this->findPaymentGatewaysBlockAttrs($form) !== null;
     }
 
+    /** @since 1.0.0 */
     private function findPaymentGatewaysBlockAttrs(Form $form): ?array
     {
         $found  = null;
@@ -1423,6 +1461,8 @@ HTML;
     /**
      * rates[CCY] = units of CCY per 1 base; a missing rate is omitted so the
      * runtime does not guess.
+     *
+     * @since 1.0.0
      */
     private function fxConfig(string $formCurrency, array $switcherCurrencies): array
     {
@@ -1445,6 +1485,7 @@ HTML;
         return ['base' => $base, 'rates' => $rates];
     }
 
+    /** @since 1.0.0 */
     private function renderError(string $message): string
     {
         if (! current_user_can('manage_options') && ! current_user_can('manage_dono')) {
@@ -1456,6 +1497,7 @@ HTML;
         );
     }
 
+    /** @since 1.0.0 */
     private function cssVersion(): string
     {
         if ($this->cssVersion === null) {
@@ -1465,7 +1507,11 @@ HTML;
         return $this->cssVersion;
     }
 
-    /** The publishable key for the mode the intent will be created in. */
+    /**
+     * The publishable key for the mode the intent will be created in.
+     *
+     * @since 1.0.0
+     */
     private function stripePublicConfig(array $options, string $defaultGateway, bool $testMode): ?array
     {
         $ids   = array_column($options, 'id');
@@ -1486,6 +1532,8 @@ HTML;
     /**
      * The client id for the mode the order will be created in. It is public by
      * design, like a Stripe publishable key.
+     *
+     * @since 1.0.0
      */
     private function payPalPublicConfig(array $options, string $defaultGateway, bool $testMode, string $currency): ?array
     {
@@ -1512,6 +1560,8 @@ HTML;
      * How a gateway that ships in an add-on reaches the page. A throwing gateway
      * is skipped: a misconfigured payment method must not stop donations through
      * the others.
+     *
+     * @since 1.0.0
      */
     private function browserAwareConfig(bool $testMode, string $currency): array
     {
@@ -1537,7 +1587,11 @@ HTML;
         return $out;
     }
 
-    /** The minimum an admin set on this form's amount block, or 0 for none. */
+    /**
+     * The minimum an admin set on this form's amount block, or 0 for none.
+     *
+     * @since 1.0.0
+     */
     private static function amountBlockMinCents($form): int
     {
         if (! preg_match_all('/<!--\s+wp:dono\/donation-amount\s+(\{.*?\})\s+\/?-->/s', (string) $form->blocks, $m)) {

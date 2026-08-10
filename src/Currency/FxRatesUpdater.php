@@ -14,7 +14,7 @@ use Dono\Foundation\Helpers\Money;
  * On any failure the previous snapshot is left intact so conversion never
  * breaks on a bad fetch.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class FxRatesUpdater
 {
@@ -22,10 +22,12 @@ final class FxRatesUpdater
     private const DAILY = 86400;
     private const ENDPOINT = 'https://api.frankfurter.app/latest';
 
+    /** @since 1.0.0 */
     public function __construct(private AsyncDispatcher $async)
     {
     }
 
+    /** @since 1.0.0 */
     public function register(): void
     {
         add_action(self::HOOK, [$this, 'run']);
@@ -35,6 +37,8 @@ final class FxRatesUpdater
     /**
      * Scheduled daily run. No-op when the org turned auto-refresh off, and no-op
      * when the site has nothing to convert.
+     *
+     * @since 1.0.0
      */
     public function run(): void
     {
@@ -58,6 +62,8 @@ final class FxRatesUpdater
      * Two sources, not one. Accepted currencies cover what donors can give
      * next; donations already recorded without a rate cover what is stranded
      * now, and those are not necessarily in a currency the org still accepts.
+     *
+     * @since 1.0.0
      */
     private function needsRates(): bool
     {
@@ -81,7 +87,11 @@ final class FxRatesUpdater
         return false;
     }
 
-    /** Manual "Fetch now" from settings: ignores the auto toggle. */
+    /**
+     * Manual "Fetch now" from settings: ignores the auto toggle.
+     *
+     * @since 1.0.0
+     */
     public function fetchNow(): bool
     {
         return $this->fetchAndStore();
@@ -91,6 +101,8 @@ final class FxRatesUpdater
      * Persist the auto toggle + manual overrides without refetching.
      *
      * @param array<string,mixed> $manual
+     *
+     * @since 1.0.0
      */
     public function saveSettings(bool $auto, array $manual): void
     {
@@ -106,6 +118,7 @@ final class FxRatesUpdater
         update_option(FxRates::OPTION, $opt, false);
     }
 
+    /** @since 1.0.0 */
     private function fetchAndStore(): bool
     {
         $snapshot = $this->fetch(strtoupper(Money::defaultCurrency()));
@@ -124,6 +137,8 @@ final class FxRatesUpdater
     /**
      * @param array<string,mixed> $raw
      * @return array<string,float>
+     *
+     * @since 1.0.0
      */
     private function cleanManual(array $raw): array
     {
@@ -140,6 +155,8 @@ final class FxRatesUpdater
 
     /**
      * @return array{base:string,date:string,fetched_at:string,rates:array<string,float>}|null
+     *
+     * @since 1.0.0
      */
     private function fetch(string $base): ?array
     {

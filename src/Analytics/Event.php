@@ -10,7 +10,7 @@ use Dono\Vendor\Queryable\Schema\Table;
 /**
  * Universal event log that every domain emits to this single table.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class Event extends Model
 {

@@ -13,15 +13,16 @@ use Dono\Forms\FormRepository;
  * (dono_gateway_config.test_mode). Once created, a donation carries its own
  * is_test; every later step reads that, never re-resolves.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class TestMode
 {
+    /** @since 1.0.0 */
     public function __construct(private FormRepository $forms)
     {
     }
 
-    /** True when the form or the org-wide flag opts into test mode. */
+    /** @since 1.0.0 */
     public function forForm(?Form $form): bool
     {
         if ($form !== null) {
@@ -36,7 +37,7 @@ final class TestMode
         return is_array($cfg) && ! empty($cfg['test_mode']);
     }
 
-    /** Convenience overload that accepts a form id instead of a Form object. */
+    /** @since 1.0.0 */
     public function forFormId(?int $formId): bool
     {
         $form = ($formId !== null && $formId > 0) ? $this->forms->findById($formId) : null;

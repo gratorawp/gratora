@@ -10,21 +10,24 @@ namespace Dono\Foundation\License;
  * The Licenses page shows per add-on status, but nobody visits it unprompted,
  * so a refused key stays invisible until something stops working.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class LicenseNotice
 {
     private const OPTION_KEY = 'dono_pro_license_key';
 
+    /** @since 1.0.0 */
     public function __construct(private readonly LicenseService $license)
     {
     }
 
+    /** @since 1.0.0 */
     public function register(): void
     {
         add_action('admin_notices', [$this, 'render']);
     }
 
+    /** @since 1.0.0 */
     public function render(): void
     {
         if (! current_user_can('manage_options')) {
@@ -73,7 +76,10 @@ final class LicenseNotice
         }
     }
 
-    /** @param array<int,array{name:string}> $addons */
+    /**
+     * @param array<int,array{name:string}> $addons
+     * @since 1.0.0
+     */
     private function names(array $addons): string
     {
         return implode(', ', array_map(static fn (array $a): string => (string) $a['name'], $addons));
@@ -82,6 +88,8 @@ final class LicenseNotice
     /**
      * Always a warning, never an error: an unlicensed add-on keeps running, it
      * just stops receiving updates. Red would overstate it.
+     *
+     * @since 1.0.0
      */
     private function notice(string $message): void
     {

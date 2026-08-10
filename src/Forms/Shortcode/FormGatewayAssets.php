@@ -13,7 +13,7 @@ namespace Dono\Forms\Shortcode;
  * bundle may load in either order relative to it. Only the registry itself has
  * to exist first, which the dependency below guarantees.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class FormGatewayAssets
 {
@@ -22,6 +22,7 @@ final class FormGatewayAssets
     /** Add-ons hook this to enqueue their payment components. */
     public const ACTION = 'dono.form.enqueued';
 
+    /** @since 1.0.0 */
     public static function enqueue(): void
     {
         if (! wp_script_is(self::HANDLE, 'registered')) {
@@ -33,6 +34,7 @@ final class FormGatewayAssets
         do_action(self::ACTION, self::HANDLE);
     }
 
+    /** @since 1.0.0 */
     private static function registryJs(): string
     {
         return <<<'JS'

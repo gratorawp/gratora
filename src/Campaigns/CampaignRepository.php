@@ -10,10 +10,11 @@ use Dono\Vendor\Queryable\DB;
 /**
  * Query helpers for the Campaign model.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class CampaignRepository
 {
+    /** @since 1.0.0 */
     public function findById(int $id): ?Campaign
     {
         return Campaign::query()->find('id', $id);
@@ -23,6 +24,8 @@ final class CampaignRepository
      * Resolve a campaign for PUBLIC rendering: published only, except that
      * edit-capable users still get draft/archived so they can preview a
      * campaign's pages while building it. Null when it must not render.
+     *
+     * @since 1.0.0
      */
     public function findRenderable(int $id): ?Campaign
     {
@@ -42,6 +45,8 @@ final class CampaignRepository
      * the given id; ordered by recency, funds raised, or soonest end date.
      *
      * @return list<Campaign>
+     *
+     * @since 1.0.0
      */
     public function otherPublished(int $excludeId = 0, int $limit = 3, string $orderBy = 'recent'): array
     {
@@ -68,11 +73,13 @@ final class CampaignRepository
         return $q->limit($limit)->getAll();
     }
 
+    /** @since 1.0.0 */
     public function findBySlug(string $slug): ?Campaign
     {
         return Campaign::query()->find('slug', $slug);
     }
 
+    /** @since 1.0.0 */
     public function slugExists(string $slug, ?int $exceptId = null): bool
     {
         $q = Campaign::query()->where('slug', $slug);
@@ -82,7 +89,13 @@ final class CampaignRepository
         return $q->get() !== null;
     }
 
-    /** Picker source for the form editor; archived campaigns excluded. @return array<Campaign> */
+    /**
+     * Picker source for the form editor; archived campaigns excluded.
+     *
+     * @return array<Campaign>
+     *
+     * @since 1.0.0
+     */
     public function listForPicker(int $limit = 200): array
     {
         return Campaign::query()
@@ -95,6 +108,8 @@ final class CampaignRepository
     /**
      * @param array{page?:int,per_page?:int,orderby?:string,order?:string,status?:string,search?:string} $args
      * @return array{items: array<Campaign>, total: int}
+     *
+     * @since 1.0.0
      */
     public function listAdmin(array $args = []): array
     {
@@ -139,6 +154,8 @@ final class CampaignRepository
      *
      * @param array{status?:?string,search?:?string} $args
      * @return array{total_count:int,active_count:int,raised_cents:int,currency:?string,donations_count:int}
+     *
+     * @since 1.0.0
      */
     public function aggregateAdmin(array $args = []): array
     {

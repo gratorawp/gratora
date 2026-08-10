@@ -13,16 +13,17 @@ use WP_REST_Server;
  *
  * The capability list belongs here rather than in the panel's own source:
  * add-ons register their caps through the `dono.capabilities` filter, which
- * `Capabilities::maps()` applies and `applyMapping()` honours. A hardcoded copy
+ * `Capabilities::maps()` applies and `applyMapping()` honors. A hardcoded copy
  * in the screen would enforce an add-on's capability on every route while
  * leaving it ungrantable (dono-p2p's `dono_manage_fundraisers`).
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class RolesController
 {
     private const NAMESPACE = 'dono/v1';
 
+    /** @since 1.0.0 */
     public function registerRoutes(): void
     {
         register_rest_route(self::NAMESPACE, '/admin/roles', [
@@ -32,11 +33,13 @@ final class RolesController
         ]);
     }
 
+    /** @since 1.0.0 */
     public function canAccess(): bool
     {
         return current_user_can('manage_options');
     }
 
+    /** @since 1.0.0 */
     public function index(): WP_REST_Response
     {
         return new WP_REST_Response([
@@ -45,7 +48,11 @@ final class RolesController
         ], 200);
     }
 
-    /** @return list<array{slug:string,name:string}> */
+    /**
+     * @return list<array{slug:string,name:string}>
+     *
+     * @since 1.0.0
+     */
     private function roles(): array
     {
         // Core WP roles only; third-party roles aren't capability-mapping targets.
@@ -69,6 +76,8 @@ final class RolesController
      * rather than dropped.
      *
      * @return list<array{label:string,caps:list<array{cap:string,label:string}>}>
+     *
+     * @since 1.0.0
      */
     private function capabilities(): array
     {

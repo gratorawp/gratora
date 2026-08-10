@@ -11,7 +11,7 @@ use Dono\Vendor\Queryable\Schema\Table;
  * Internal fundraiser notes on a donor. Body is encrypted; author is a WP
  * user id (null for system-generated notes).
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class DonorNote extends Model
 {

@@ -13,7 +13,7 @@ use RuntimeException;
  * client id + secret are exchanged for a short-lived OAuth2 bearer token, which
  * is cached per mode. Sandbox and live are different hosts entirely.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class PayPalApi
 {
@@ -21,17 +21,18 @@ final class PayPalApi
     private const SANDBOX_BASE = 'https://api-m.sandbox.paypal.com';
     private const TIMEOUT      = 15;
 
+    /** @since 1.0.0 */
     public function __construct(private PayPalAccount $account)
     {
     }
 
-    /** True when the active mode has credentials. */
+    /** @since 1.0.0 */
     public function isConfigured(): bool
     {
         return $this->account->hasKeysFor($this->account->isTestMode());
     }
 
-    /** API host for the active mode. Sandbox and live are separate systems. */
+    /** @since 1.0.0 */
     public function baseUrl(): string
     {
         return $this->account->isTestMode() ? self::SANDBOX_BASE : self::LIVE_BASE;
@@ -42,6 +43,8 @@ final class PayPalApi
      * before it expires.
      *
      * @throws RuntimeException when PayPal rejects the credentials.
+     *
+     * @since 1.0.0
      */
     public function accessToken(): string
     {
@@ -91,19 +94,31 @@ final class PayPalApi
         return $token;
     }
 
-    /** @return array<string,mixed> */
+    /**
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
     public function post(string $path, array $body = [], array $headers = []): array
     {
         return $this->request('POST', $path, $body, $headers);
     }
 
-    /** @return array<string,mixed> */
+    /**
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
     public function get(string $path, array $headers = []): array
     {
         return $this->request('GET', $path, null, $headers);
     }
 
-    /** @return array<string,mixed> */
+    /**
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
     public function patch(string $path, array $body = [], array $headers = []): array
     {
         return $this->request('PATCH', $path, $body, $headers);
@@ -115,6 +130,8 @@ final class PayPalApi
      *
      * @return array<string,mixed>
      * @throws RuntimeException on transport failure or a >=400 response.
+     *
+     * @since 1.0.0
      */
     private function request(string $method, string $path, ?array $body, array $extraHeaders): array
     {
@@ -170,6 +187,8 @@ final class PayPalApi
     /**
      * PayPal nests the useful detail in `details[]`; the top-level message is
      * often just "The requested action could not be performed".
+     *
+     * @since 1.0.0
      */
     private function errorMessage(array $body, int $code): string
     {
@@ -198,6 +217,8 @@ final class PayPalApi
      * stored webhook id we cannot verify, and must reject rather than trust.
      *
      * @param array<string,string> $headers PAYPAL-* transmission headers.
+     *
+     * @since 1.0.0
      */
     public function verifyWebhookSignature(array $headers, string $rawBody): bool
     {

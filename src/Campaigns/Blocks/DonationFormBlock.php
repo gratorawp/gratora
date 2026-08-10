@@ -13,10 +13,11 @@ use Dono\Foundation\Helpers\View;
  * Renders a campaign's donation form inline on the page (the in-page
  * counterpart to the donate-button modal).
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class DonationFormBlock extends CampaignBlock
 {
+    /** @since 1.0.0 */
     public function __construct(
         CampaignRepository $campaigns,
         private readonly FormRepository $forms,
@@ -25,11 +26,13 @@ final class DonationFormBlock extends CampaignBlock
         parent::__construct($campaigns);
     }
 
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/donation-form';
     }
 
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         return $this->campaignIdAttr() + [
@@ -37,6 +40,7 @@ final class DonationFormBlock extends CampaignBlock
         ];
     }
 
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         $campaign = $this->resolveCampaign($attrs);

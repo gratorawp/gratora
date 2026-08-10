@@ -13,14 +13,14 @@ use Dono\Vendor\Queryable\Schema\Table;
  * Every form lives under a campaign. Deleting the campaign deletes the forms;
  * there is no detached / orphan state.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class Form extends Model
 {
     protected string $table = 'dono_forms';
     protected string $version = '1.0.0';
 
-    /** Model relations. */
+    /** @since 1.0.0 */
     protected function relations(): array
     {
         return [

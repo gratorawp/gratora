@@ -15,7 +15,7 @@ use RuntimeException;
  * Key loss is unrecoverable: if the key is missing but encrypted records exist, the
  * admin UI is flagged and a fresh key is generated so new writes still work.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class Crypto
 {
@@ -28,12 +28,17 @@ final class Crypto
 
     private string $key;
 
+    /** @since 1.0.0 */
     public function __construct()
     {
         $this->key = $this->loadKey();
     }
 
-    /** Encrypt plaintext; returns base64-encoded IV + tag + ciphertext. */
+    /**
+     * Encrypt plaintext; returns base64-encoded IV + tag + ciphertext.
+     *
+     * @since 1.0.0
+     */
     public function encrypt(string $plaintext): string
     {
         $iv = random_bytes(self::IV_LEN);
@@ -54,7 +59,11 @@ final class Crypto
         return base64_encode($iv . $tag . $ciphertext);
     }
 
-    /** Null when payload is malformed or tampered. */
+    /**
+     * Null when payload is malformed or tampered.
+     *
+     * @since 1.0.0
+     */
     public function decrypt(string $payload): ?string
     {
         $raw = base64_decode($payload, true);
@@ -77,14 +86,14 @@ final class Crypto
         return $plaintext === false ? null : $plaintext;
     }
 
-    /** Has the encryption key been lost on this install? */
+    /** @since 1.0.0 */
     public static function keyLostAt(): ?string
     {
         $v = SystemSetting::read(self::SETTING_KEY_LOST_FLAG);
         return is_string($v) && $v !== '' ? $v : null;
     }
 
-    /** Load the AES key from settings, generating one if absent. */
+    /** @since 1.0.0 */
     private function loadKey(): string
     {
         $stored = SystemSetting::read(self::SETTING_KEY);
@@ -103,7 +112,7 @@ final class Crypto
         return $key;
     }
 
-    /** Return whether any donor row has a non-empty email_encrypted. */
+    /** @since 1.0.0 */
     private function encryptedRecordsExist(): bool
     {
         $result = DB::raw(

@@ -10,7 +10,7 @@ use Dono\Foundation\Hooks\HookProvider;
 /**
  * Registers and renders the Donations admin page.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class DonationsPage extends HookProvider
 {
@@ -18,11 +18,13 @@ final class DonationsPage extends HookProvider
     private const HANDLE    = 'dono-admin-donations';
     private const BUILD_DIR = 'build/admin/donations';
 
+    /** @since 1.0.0 */
     protected function filters(): array
     {
         return ['dono.admin.pages' => 'registerPage'];
     }
 
+    /** @since 1.0.0 */
     public function registerPage(array $pages): array
     {
         $pages[] = [
@@ -35,6 +37,7 @@ final class DonationsPage extends HookProvider
         return $pages;
     }
 
+    /** @since 1.0.0 */
     public function render(): void
     {
         $this->enqueueAssets();
@@ -48,13 +51,13 @@ final class DonationsPage extends HookProvider
         <?php
     }
 
+    /** @since 1.0.0 */
     private function enqueueAssets(): void
     {
         $asset = require DONO_DIR . self::BUILD_DIR . '/index.asset.php';
 
-        // Register the extension-panel registry and let add-ons enqueue their
-        // donation bundles, then depend on it so the registry is defined
-        // before the app reads it.
+        // The registry must be defined before the app reads it, hence the
+        // dependency on its handle below.
         ExtensionAssets::enqueue('donation');
 
         wp_enqueue_script(

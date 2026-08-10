@@ -11,17 +11,22 @@ use Dono\Vendor\Queryable\DB;
 /**
  * Encrypt/decrypt seam for donation-scoped admin notes.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class DonationNoteRepository
 {
+    /** @since 1.0.0 */
     public function __construct(
         private Crypto $crypto,
         private Clock $clock,
     ) {
     }
 
-    /** @return array<array{id:int,donation_id:int,author_user_id:?int,body:string,created_at:string,updated_at:string}> */
+    /**
+     * @return array<array{id:int,donation_id:int,author_user_id:?int,body:string,created_at:string,updated_at:string}>
+     *
+     * @since 1.0.0
+     */
     public function listForDonation(int $donationId, int $limit = 50): array
     {
         $rows = DonationNote::query()
@@ -33,6 +38,7 @@ final class DonationNoteRepository
         return array_map(fn (DonationNote $n) => $this->shape($n), $rows);
     }
 
+    /** @since 1.0.0 */
     public function create(int $donationId, string $body, ?int $authorUserId): array
     {
         $now = $this->clock->now()->format('Y-m-d H:i:s');
@@ -46,6 +52,7 @@ final class DonationNoteRepository
         return $this->shape($note);
     }
 
+    /** @since 1.0.0 */
     public function delete(int $noteId): bool
     {
         $note = DonationNote::query()->find('id', $noteId);
@@ -54,12 +61,17 @@ final class DonationNoteRepository
         return true;
     }
 
+    /** @since 1.0.0 */
     public function findById(int $id): ?DonationNote
     {
         return DonationNote::query()->find('id', $id);
     }
 
-    /** @return array{id:int,donation_id:int,author_user_id:?int,author_display_name:?string,author_role:?string,body:string,created_at:string,updated_at:string} */
+    /**
+     * @return array{id:int,donation_id:int,author_user_id:?int,author_display_name:?string,author_role:?string,body:string,created_at:string,updated_at:string}
+     *
+     * @since 1.0.0
+     */
     private function shape(DonationNote $n): array
     {
         [$displayName, $role] = $this->resolveAuthor($n->author_user_id !== null ? (int) $n->author_user_id : null);
@@ -80,6 +92,8 @@ final class DonationNoteRepository
      * so a list of notes hits get_userdata() once per author, not per row.
      *
      * @return array{0:?string,1:?string}
+     *
+     * @since 1.0.0
      */
     private function resolveAuthor(?int $userId): array
     {

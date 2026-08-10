@@ -14,7 +14,7 @@ use Dono\Vendor\Queryable\Schema\Table;
  * donation status becomes 'refunded' or 'partial_refund'. Associated receipts
  * are voided, not deleted.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class Refund extends Model
 {

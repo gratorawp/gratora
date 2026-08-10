@@ -15,7 +15,7 @@ use Dono\Analytics\Event;
  * whether it is their personal data. The hashes go with it: a session, IP or
  * user-agent hash is exactly what re-links an anonymized row back to a person.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class AnalyticsEventHandler implements ErasureHandler
 {
@@ -27,11 +27,13 @@ final class AnalyticsEventHandler implements ErasureHandler
         'country'         => null,
     ];
 
+    /** @since 1.0.0 */
     public function key(): string
     {
         return 'dono.analytics_events';
     }
 
+    /** @since 1.0.0 */
     public function erase(ErasureRequest $request): void
     {
         Event::query()->where('donor_id', $request->donorId)->update(self::CLEARED);

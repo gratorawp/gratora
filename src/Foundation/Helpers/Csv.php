@@ -11,16 +11,20 @@ namespace Dono\Foundation\Helpers;
  * a crafted donor name could exfiltrate data on export. safe() prefixes such
  * cells with an apostrophe (rendered as text) and writeRow() applies it to all cells.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class Csv
 {
-    /** @param resource $stream */
+    /**
+     * @param resource $stream
+     * @since 1.0.0
+     */
     public static function writeRow($stream, array $row): void
     {
         fputcsv($stream, array_map([self::class, 'safe'], $row));
     }
 
+    /** @since 1.0.0 */
     public static function safe(mixed $value): string
     {
         $str = is_scalar($value) || $value === null ? (string) $value : '';

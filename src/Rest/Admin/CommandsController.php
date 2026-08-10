@@ -16,16 +16,18 @@ use WP_REST_Server;
  * Route-level gate is manage_options; per-command capability is enforced
  * inside CommandRegistry::dispatch().
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class CommandsController
 {
     private const NAMESPACE = 'dono/v1';
 
+    /** @since 1.0.0 */
     public function __construct(private CommandRegistry $registry)
     {
     }
 
+    /** @since 1.0.0 */
     public function registerRoutes(): void
     {
         register_rest_route(self::NAMESPACE, '/admin/commands', [
@@ -41,16 +43,19 @@ final class CommandsController
         ]);
     }
 
+    /** @since 1.0.0 */
     public function canAccess(): bool
     {
         return current_user_can('manage_options');
     }
 
+    /** @since 1.0.0 */
     public function manifest(): WP_REST_Response
     {
         return new WP_REST_Response($this->registry->manifest(), 200);
     }
 
+    /** @since 1.0.0 */
     public function dispatch(WP_REST_Request $request): WP_REST_Response
     {
         $id   = (string) $request['id'];
@@ -77,6 +82,7 @@ final class CommandsController
         ], $this->statusFor((string) $result->error_code));
     }
 
+    /** @since 1.0.0 */
     private function statusFor(string $code): int
     {
         return match ($code) {

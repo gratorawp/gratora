@@ -17,10 +17,11 @@ use Dono\Foundation\Helpers\View;
  * Renders a supporter wall: one card per non-anonymous donor, optionally
  * showing their total amount and message.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class SupporterWallBlock extends CampaignBlock
 {
+    /** @since 1.0.0 */
     public function __construct(
         CampaignRepository $campaigns,
         private readonly DonationRepository $donations,
@@ -29,11 +30,13 @@ final class SupporterWallBlock extends CampaignBlock
         parent::__construct($campaigns);
     }
 
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/supporter-wall';
     }
 
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         return $this->campaignIdAttr() + [
@@ -48,6 +51,7 @@ final class SupporterWallBlock extends CampaignBlock
         ];
     }
 
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         $campaign = $this->resolveCampaign($attrs);
@@ -76,7 +80,6 @@ final class SupporterWallBlock extends CampaignBlock
 
         $donations = $query->orderBy('paid_at', 'DESC')->limit($poolSize)->getAll();
 
-        // Aggregate per donor.
         $byDonor = [];
         foreach ($donations as $donation) {
             $id = (int) $donation->donor_id;

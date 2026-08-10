@@ -9,17 +9,17 @@ use Dono\Foundation\Helpers\View;
 /**
  * Single checkbox field block.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class CheckboxBlock implements Block
 {
-    /** Block name. */
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/checkbox';
     }
 
-    /** Editor attribute schema. */
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         return [
@@ -31,7 +31,7 @@ final class CheckboxBlock implements Block
         ];
     }
 
-    /** Render server-side markup. */
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         $field = DropdownBlock::deriveField((string) ($attrs['field'] ?? ''), (string) ($attrs['label'] ?? ''));

@@ -31,12 +31,13 @@ use WP_REST_Server;
  * Admin form endpoints: list, show, create, update, delete, campaigns picker,
  * preview render.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class FormsController
 {
     private const NAMESPACE = 'dono/v1';
 
+    /** @since 1.0.0 */
     public function __construct(
         private FormRepository $forms,
         private FormService $formService,
@@ -48,6 +49,7 @@ final class FormsController
     ) {
     }
 
+    /** @since 1.0.0 */
     public function registerRoutes(): void
     {
         register_rest_route(self::NAMESPACE, '/admin/forms', [
@@ -149,11 +151,13 @@ final class FormsController
         ]);
     }
 
+    /** @since 1.0.0 */
     public function canAccess(): bool
     {
         return Capabilities::userCan('dono_manage_forms');
     }
 
+    /** @since 1.0.0 */
     public function index(WP_REST_Request $request): WP_REST_Response
     {
         $perPage = (int) ($request['per_page'] ?? 25);
@@ -195,6 +199,7 @@ final class FormsController
         return $response;
     }
 
+    /** @since 1.0.0 */
     public function campaigns(): WP_REST_Response
     {
         $shaped = array_map(
@@ -218,6 +223,7 @@ final class FormsController
         return new WP_REST_Response($shaped, 200);
     }
 
+    /** @since 1.0.0 */
     public function gatewaysList(): WP_REST_Response
     {
         $shaped = [];
@@ -234,6 +240,7 @@ final class FormsController
         return new WP_REST_Response($shaped, 200);
     }
 
+    /** @since 1.0.0 */
     public function fundsList(): WP_REST_Response
     {
         return new WP_REST_Response($this->funds->pickerOptions(), 200);
@@ -242,6 +249,8 @@ final class FormsController
     /**
      * Org-enabled currencies the currency-switcher block may offer. Base
      * first; the block can only pick from this set.
+     *
+     * @since 1.0.0
      */
     public function currenciesList(): WP_REST_Response
     {
@@ -257,11 +266,13 @@ final class FormsController
         return new WP_REST_Response(['base' => $base, 'currencies' => $codes], 200);
     }
 
+    /** @since 1.0.0 */
     public function templates(): WP_REST_Response
     {
         return new WP_REST_Response(FormTemplates::all(), 200);
     }
 
+    /** @since 1.0.0 */
     public function readiness(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $form = $this->forms->findById((int) $request['id']);
@@ -281,6 +292,7 @@ final class FormsController
         ], 200);
     }
 
+    /** @since 1.0.0 */
     public function preview(WP_REST_Request $request): WP_REST_Response
     {
         $body       = (array) ($request->get_json_params() ?? []);
@@ -300,6 +312,7 @@ final class FormsController
         ], 200);
     }
 
+    /** @since 1.0.0 */
     public function show(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $form = $this->forms->findById((int) $request['id']);
@@ -310,6 +323,7 @@ final class FormsController
         return new WP_REST_Response($this->shapeFormFull($form, $campaign), 200);
     }
 
+    /** @since 1.0.0 */
     public function duplicate(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $source = $this->forms->findById((int) $request['id']);
@@ -325,6 +339,7 @@ final class FormsController
         return new WP_REST_Response($this->shapeFormFull($copy, $campaign), 201);
     }
 
+    /** @since 1.0.0 */
     public function create(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $body = (array) ($request->get_json_params() ?? []);
@@ -340,6 +355,7 @@ final class FormsController
         return new WP_REST_Response($this->shapeFormFull($form, $campaign), 201);
     }
 
+    /** @since 1.0.0 */
     public function update(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $form = $this->forms->findById((int) $request['id']);
@@ -358,6 +374,7 @@ final class FormsController
         return new WP_REST_Response($this->shapeFormFull($form, $campaign), 200);
     }
 
+    /** @since 1.0.0 */
     public function delete(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $form = $this->forms->findById((int) $request['id']);
@@ -381,6 +398,8 @@ final class FormsController
      *
      * @param  int[] $formIds
      * @return array<int, array<string, mixed>>
+     *
+     * @since 1.0.0
      */
     private function statsFor(array $formIds): array
     {
@@ -401,7 +420,11 @@ final class FormsController
         return $byForm;
     }
 
-    /** @param array<string, mixed>|null $stats */
+    /**
+     * @param array<string, mixed>|null $stats
+     *
+     * @since 1.0.0
+     */
     private function shapeFormSummary(Form $f, ?Campaign $c, ?array $stats = null): array
     {
         $settings = is_array($f->settings) ? $f->settings : [];
@@ -433,6 +456,7 @@ final class FormsController
         ];
     }
 
+    /** @since 1.0.0 */
     private function shapeFormFull(Form $f, ?Campaign $c): array
     {
         return $this->shapeFormSummary($f, $c) + [

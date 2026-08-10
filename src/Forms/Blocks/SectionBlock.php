@@ -7,21 +7,17 @@ namespace Dono\Forms\Blocks;
 /**
  * Styled content container block.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class SectionBlock implements Block
 {
-    /**
-     * Block type name.
-     */
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/section';
     }
 
-    /**
-     * Block attribute schema.
-     */
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         return [
@@ -35,9 +31,7 @@ final class SectionBlock implements Block
         ];
     }
 
-    /**
-     * Renders the section container with computed inline styles.
-     */
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         $style = self::sectionStyle($attrs);
@@ -52,6 +46,8 @@ final class SectionBlock implements Block
      * Strings sanitised at source; safecss_filter_attr() is the final gate.
      *
      * @param array<string,mixed> $attrs
+     *
+     * @since 1.0.0
      */
     public static function sectionStyle(array $attrs): string
     {
@@ -94,9 +90,7 @@ final class SectionBlock implements Block
         return safecss_filter_attr(implode(';', $rules));
     }
 
-    /**
-     * Validates and returns a safe CSS color value.
-     */
+    /** @since 1.0.0 */
     private static function safeColor(mixed $raw): string
     {
         if (! is_string($raw)) return '';
@@ -118,9 +112,7 @@ final class SectionBlock implements Block
         return '';
     }
 
-    /**
-     * Returns a valid CSS border-style keyword.
-     */
+    /** @since 1.0.0 */
     private static function safeBorderStyle(mixed $raw): string
     {
         $allowed = ['none', 'solid', 'dashed', 'dotted', 'double', 'groove', 'ridge', 'inset', 'outset'];
@@ -128,9 +120,7 @@ final class SectionBlock implements Block
         return in_array($v, $allowed, true) ? $v : 'solid';
     }
 
-    /**
-     * Validates a box-shadow value; rejects strings with CSS-breaking characters.
-     */
+    /** @since 1.0.0 */
     private static function safeShadow(mixed $raw): string
     {
         if (! is_string($raw)) return '';

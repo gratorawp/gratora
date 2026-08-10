@@ -20,7 +20,7 @@ use Dono\Recurring\RecurringPlan;
  * gateway (a covered fee is a portion of that total, not an addition), so an
  * exact match is the correct test rather than a tolerance.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class WebhookPaymentGuard
 {
@@ -37,6 +37,8 @@ final class WebhookPaymentGuard
      *
      * @return string|null null when the payment may confirm this donation,
      *                     otherwise the reason it may not.
+     *
+     * @since 1.0.0
      */
     public static function refuse(
         Donation $donation,
@@ -83,6 +85,8 @@ final class WebhookPaymentGuard
      * cancellation states none, so the amount check would refuse them all.
      *
      * @return string|null null when the event may act, otherwise why not.
+     *
+     * @since 1.0.0
      */
     public static function refuseToTouch(
         Donation $donation,
@@ -98,7 +102,11 @@ final class WebhookPaymentGuard
         );
     }
 
-    /** The same question for a recurring plan, which carries the same two facts. */
+    /**
+     * The same question for a recurring plan, which carries the same two facts.
+     *
+     * @since 1.0.0
+     */
     public static function refuseToTouchPlan(
         RecurringPlan $plan,
         string $gateway,
@@ -113,6 +121,7 @@ final class WebhookPaymentGuard
         );
     }
 
+    /** @since 1.0.0 */
     private static function sameGatewayAndMode(
         string $rowGateway,
         bool $rowIsTest,

@@ -21,11 +21,14 @@ use WP_REST_Server;
  * Stripe before they are stored, so a typo is caught at save time rather than
  * at the first donation. Secret keys are write-only over REST: they go in, and
  * only a last-4 hint ever comes back.
+ *
+ * @since 1.0.0
  */
 final class StripeKeysController
 {
     private const NAMESPACE = 'dono/v1';
 
+    /** @since 1.0.0 */
     public function __construct(
         private StripeApi $api,
         private StripeAccount $account,
@@ -33,6 +36,7 @@ final class StripeKeysController
     ) {
     }
 
+    /** @since 1.0.0 */
     public function registerRoutes(): void
     {
         register_rest_route(self::NAMESPACE, '/gateways/stripe/status', [
@@ -80,6 +84,8 @@ final class StripeKeysController
      * Store Apple's association file, then ask Stripe to register and verify
      * the domain. Both halves have to be true before Apple Pay renders, so this
      * does them together and reports whichever one is missing.
+     *
+     * @since 1.0.0
      */
     public function enableApplePay(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
@@ -115,11 +121,13 @@ final class StripeKeysController
         ], 200);
     }
 
+    /** @since 1.0.0 */
     public function canManage(): bool
     {
         return Capabilities::userCan('dono_manage_settings');
     }
 
+    /** @since 1.0.0 */
     public function status(): WP_REST_Response
     {
         return new WP_REST_Response([
@@ -141,6 +149,8 @@ final class StripeKeysController
      * Verify a key pair against Stripe, then store it. The retrieve doubles as
      * the credential check and as the source of the account's display details
      * and charges_enabled flag.
+     *
+     * @since 1.0.0
      */
     public function saveKeys(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
@@ -177,6 +187,7 @@ final class StripeKeysController
         return $this->status();
     }
 
+    /** @since 1.0.0 */
     public function removeKeys(WP_REST_Request $request): WP_REST_Response
     {
         $mode = (string) $request->get_param('mode');
@@ -191,6 +202,8 @@ final class StripeKeysController
     /**
      * Catch the two mistakes that actually happen: pasting the publishable key
      * into the secret field, and pasting live keys into the test slot.
+     *
+     * @since 1.0.0
      */
     private function validateShape(bool $test, string $secret, string $publishable): ?WP_Error
     {
@@ -224,6 +237,8 @@ final class StripeKeysController
      * and renewal events flow without hand-building it in the Stripe dashboard.
      * Best effort: an unreachable (local) site keeps the manual signing-secret
      * path, and a failure must never block saving working keys.
+     *
+     * @since 1.0.0
      */
     private function provisionWebhook(bool $isTest): void
     {

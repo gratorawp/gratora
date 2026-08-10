@@ -7,17 +7,17 @@ namespace Dono\Forms\Blocks;
 /**
  * dono/html: inline HTML decoration.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class HtmlBlock implements Block
 {
-    /** Block name. */
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/html';
     }
 
-    /** Editor attribute schema. */
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         return [
@@ -25,7 +25,7 @@ final class HtmlBlock implements Block
         ];
     }
 
-    /** Render server-side markup. */
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         $raw = (string) ($attrs['content'] ?? '');
@@ -33,7 +33,11 @@ final class HtmlBlock implements Block
         return sprintf('<div class="dono-block dono-block--html">%s</div>', self::sanitize($raw));
     }
 
-    /** Strip scripts, event handlers, and javascript: URLs via wp_kses_post. */
+    /**
+     * Strip scripts, event handlers, and javascript: URLs via wp_kses_post.
+     *
+     * @since 1.0.0
+     */
     public static function sanitize(string $raw): string
     {
         return wp_kses_post($raw);

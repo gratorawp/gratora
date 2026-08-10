@@ -13,16 +13,18 @@ use WP_REST_Server;
  * One round trip for the Setup screen's whole verdict, rather than a fan-out
  * over every gateway, page and queue endpoint.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class ReadinessController
 {
     private const NAMESPACE = 'dono/v1';
 
+    /** @since 1.0.0 */
     public function __construct(private ReadinessService $readiness)
     {
     }
 
+    /** @since 1.0.0 */
     public function registerRoutes(): void
     {
         register_rest_route(self::NAMESPACE, '/admin/readiness', [
@@ -32,11 +34,13 @@ final class ReadinessController
         ]);
     }
 
+    /** @since 1.0.0 */
     public function canAccess(): bool
     {
         return Capabilities::userCan('dono_manage_settings') || current_user_can('manage_options');
     }
 
+    /** @since 1.0.0 */
     public function show(): WP_REST_Response
     {
         $checks = $this->readiness->check();

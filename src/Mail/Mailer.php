@@ -10,7 +10,7 @@ use Dono\Settings\SettingsService;
  * Wraps wp_mail with configured From, Reply-To, and BCC, and per-template
  * subject/body from dono_email_settings.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class Mailer
 {
@@ -20,6 +20,7 @@ final class Mailer
      */
     private const NO_ADMIN_BCC = ['magic_link'];
 
+    /** @since 1.0.0 */
     public function __construct(private SettingsService $settings)
     {
     }
@@ -28,6 +29,7 @@ final class Mailer
      * @param array<string,string|int> $tokens
      * @param list<string> $attachments
      * @return bool false when the template is disabled or absent; otherwise wp_mail's result.
+     * @since 1.0.0
      */
     public function sendTemplate(string $key, string $to, array $tokens, array $attachments = []): bool
     {
@@ -54,6 +56,7 @@ final class Mailer
      *     reply_to?:string,
      *     bcc?:list<string>,
      * } $opts
+     * @since 1.0.0
      */
     public function sendRaw(string $to, string $subject, string $body, array $opts = []): bool
     {
@@ -77,10 +80,9 @@ final class Mailer
         } else {
             // Plain text is the default, and nothing decodes entities in it.
             // Names arrive already HTML-encoded, both ours (sanitize_text_field
-            // turns < into &lt;) and WordPress's own: sanitize_option() stores
-            // blogname esc_html'd, so a site called "Cats & Dogs Trust" signed
-            // off every email as "Cats &amp; Dogs Trust". Decode for the plain
-            // text body only; in an HTML body the entities are already right.
+            // turns < into &lt;) and WordPress's own (sanitize_option() stores
+            // blogname esc_html'd). Decode for the plain text body only; in an
+            // HTML body the entities are already right.
             $body = html_entity_decode($body, ENT_QUOTES | ENT_HTML5, 'UTF-8');
         }
         if ($replyTo !== '' && is_email($replyTo)) {
@@ -120,13 +122,13 @@ final class Mailer
 
     /**
      * Strip CR / LF / control chars so a value is safe in an email header.
+     *
+     * @since 1.0.0
      */
     private function stripHeaderValue(string $value): string
     {
-        // A subject is not HTML, and names reach it already HTML-encoded, so a
-        // team called Team <3 & "Q" arrived as Team &lt;3 &amp; &quot;Q&quot;
-        // in the inbox. On a page the browser decodes it and nobody notices;
-        // in a header nothing does.
+        // A subject is not HTML, and names reach it already HTML-encoded. On a
+        // page the browser decodes them; in a header nothing does.
         //
         // Decode before stripping, never after: an encoded newline such as
         // &#13;&#10; would otherwise survive the strip and then decode into a
@@ -139,6 +141,7 @@ final class Mailer
 
     /**
      * @param array<string,string|int> $tokens
+     * @since 1.0.0
      */
     private function interpolate(string $source, array $tokens): string
     {

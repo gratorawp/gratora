@@ -9,6 +9,8 @@ namespace Dono\Admin;
  * inline and fires an action so add-ons can enqueue bundles per surface. A tab is
  * a whole screen; a panel is a section inside one (the portal's donation detail).
  * Core React apps read the registries via the shared useExtensionTabs hook.
+ *
+ * @since 1.0.0
  */
 final class ExtensionAssets
 {
@@ -20,6 +22,8 @@ final class ExtensionAssets
     /**
      * Ensure the registry script is enqueued, then let add-ons enqueue their
      * tab bundles (declaring self::HANDLE as a dependency) for this surface.
+     *
+     * @since 1.0.0
      */
     public static function enqueue(string $surface): void
     {
@@ -32,6 +36,7 @@ final class ExtensionAssets
         do_action(self::ACTION, $surface);
     }
 
+    /** @since 1.0.0 */
     private static function registryJs(): string
     {
         return <<<'JS'

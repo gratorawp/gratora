@@ -14,16 +14,14 @@ use Dono\Forms\Form;
 use Dono\Foundation\Time\Clock;
 
 /**
- * Computes aggregate metrics + lists for the Campaign Overview tab.
- * Date range is the same as the UI selector (today / 7d / 30d / 90d / all-time).
- */
-/**
  * Computes aggregate metrics and lists for campaign analytics.
+ * Date range matches the UI selector (today / 7d / 30d / 90d / all-time).
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class CampaignMetricsService
 {
+    /** @since 1.0.0 */
     public function __construct(
         private Clock $clock,
         private DonationRepository $donations,
@@ -31,7 +29,11 @@ final class CampaignMetricsService
     ) {
     }
 
-    /** @return array{amount_raised_cents:int,donations_count:int,donors_count:int,avg_donation_cents:int} */
+    /**
+     * @return array{amount_raised_cents:int,donations_count:int,donors_count:int,avg_donation_cents:int}
+     *
+     * @since 1.0.0
+     */
     public function summary(int $campaignId, string $range = 'all-time'): array
     {
         return $this->summaryForRange($campaignId, $this->rangeBounds($range, $campaignId), $range === 'all-time');
@@ -43,6 +45,8 @@ final class CampaignMetricsService
      * 'none' skips it. all-time always gets null.
      *
      * @return array<string,mixed>
+     *
+     * @since 1.0.0
      */
     public function summaryWithComparison(
         int $campaignId,
@@ -72,7 +76,11 @@ final class CampaignMetricsService
         ]];
     }
 
-    /** @return array<array{form_id:int,form_title:string,amount_cents:int,donations_count:int}> */
+    /**
+     * @return array<array{form_id:int,form_title:string,amount_cents:int,donations_count:int}>
+     *
+     * @since 1.0.0
+     */
     public function topForms(int $campaignId, string $range = 'all-time', int $limit = 5): array
     {
         [$from, $to, $isAllTime] = $this->rangeArgs($range, $campaignId);
@@ -99,7 +107,11 @@ final class CampaignMetricsService
         return $out;
     }
 
-    /** @return array<array{gateway:string,amount_cents:int,donations_count:int}> */
+    /**
+     * @return array<array{gateway:string,amount_cents:int,donations_count:int}>
+     *
+     * @since 1.0.0
+     */
     public function byGateway(int $campaignId, string $range = 'all-time'): array
     {
         [$from, $to, $isAllTime] = $this->rangeArgs($range, $campaignId);
@@ -110,7 +122,11 @@ final class CampaignMetricsService
         );
     }
 
-    /** @return array<array{frequency:string,amount_cents:int,donations_count:int}> */
+    /**
+     * @return array<array{frequency:string,amount_cents:int,donations_count:int}>
+     *
+     * @since 1.0.0
+     */
     public function byFrequency(int $campaignId, string $range = 'all-time'): array
     {
         [$from, $to, $isAllTime] = $this->rangeArgs($range, $campaignId);
@@ -121,7 +137,11 @@ final class CampaignMetricsService
         );
     }
 
-    /** @param array{0:string,1:string} $bounds */
+    /**
+     * @param array{0:string,1:string} $bounds
+     *
+     * @since 1.0.0
+     */
     private function summaryForRange(int $campaignId, array $bounds, bool $isAllTime): array
     {
         $agg = $this->donations->aggregatePaidBetween(
@@ -140,7 +160,11 @@ final class CampaignMetricsService
         ];
     }
 
-    /** @return float|null Null when the previous value was 0 and current also 0; otherwise change in % (rounded). */
+    /**
+     * @return float|null Null when the previous value was 0 and current also 0; otherwise change in % (rounded).
+     *
+     * @since 1.0.0
+     */
     private function percentChange(int $previous, int $current): ?float
     {
         if ($previous === 0 && $current === 0) return null;
@@ -150,7 +174,10 @@ final class CampaignMetricsService
 
     /**
      * Daily revenue series for charting. Zero-fills dates without donations.
+     *
      * @return array<array{date:string,amount_cents:int,donations_count:int}>
+     *
+     * @since 1.0.0
      */
     public function revenueSeries(int $campaignId, string $range = 'all-time'): array
     {
@@ -161,7 +188,12 @@ final class CampaignMetricsService
         );
     }
 
-    /** @param array{0:string,1:string} $bounds @return array<array{date:string,amount_cents:int,donations_count:int}> */
+    /**
+     * @param array{0:string,1:string} $bounds
+     * @return array<array{date:string,amount_cents:int,donations_count:int}>
+     *
+     * @since 1.0.0
+     */
     private function revenueSeriesBetween(int $campaignId, array $bounds, bool $unbounded): array
     {
         [$from, $to] = $bounds;
@@ -194,6 +226,8 @@ final class CampaignMetricsService
     /**
      * @param array<int> $ids
      * @return array<int,Form>
+     *
+     * @since 1.0.0
      */
     private function formsByIds(array $ids): array
     {
@@ -206,7 +240,11 @@ final class CampaignMetricsService
         return $byId;
     }
 
-    /** @return array<array{id:int,donor_name:string,amount_cents:int,currency:string,paid_at:?string,form_title:?string,is_anonymous:bool}> */
+    /**
+     * @return array<array{id:int,donor_name:string,amount_cents:int,currency:string,paid_at:?string,form_title:?string,is_anonymous:bool}>
+     *
+     * @since 1.0.0
+     */
     public function recentDonations(int $campaignId, int $limit = 10): array
     {
         $rows = DonationQueries::live(Donation::query())
@@ -242,7 +280,11 @@ final class CampaignMetricsService
         return $out;
     }
 
-    /** @return array<array{donor_id:int,name:string,total_cents:int,donations_count:int}> */
+    /**
+     * @return array<array{donor_id:int,name:string,total_cents:int,donations_count:int}>
+     *
+     * @since 1.0.0
+     */
     public function topDonors(int $campaignId, int $limit = 5, string $range = 'all-time'): array
     {
         [$from, $to, $isAllTime] = $this->rangeArgs($range, $campaignId);
@@ -283,6 +325,8 @@ final class CampaignMetricsService
      *   recurring_new_in_range:int,
      *   recurring_share_pct:int
      * }
+     *
+     * @since 1.0.0
      */
     public function cohort(int $campaignId, string $range = 'all-time'): array
     {
@@ -341,6 +385,8 @@ final class CampaignMetricsService
      * for the Stories widget. Anonymous notes are kept; donor name is hidden.
      *
      * @return array<array{id:int,donor_name:string,amount_cents:int,currency:string,paid_at:?string,note:string,is_anonymous:bool}>
+     *
+     * @since 1.0.0
      */
     public function notes(int $campaignId, int $limit = 6): array
     {
@@ -387,6 +433,8 @@ final class CampaignMetricsService
      * the front-end formats labels.
      *
      * @return array{buckets:array<array{min_cents:int,max_cents:?int,count:int,amount_cents:int}>,median_cents:int,total_count:int}
+     *
+     * @since 1.0.0
      */
     public function distributionBuckets(int $campaignId, string $range = 'all-time'): array
     {
@@ -450,6 +498,8 @@ final class CampaignMetricsService
      * (European ordering). Hours are 0..23.
      *
      * @return array{ grid: int[][], max: int, total: int }
+     *
+     * @since 1.0.0
      */
     public function dowHourGrid(int $campaignId, string $range = 'all-time'): array
     {
@@ -480,6 +530,8 @@ final class CampaignMetricsService
      * buckets; raw values stay on the donation row.
      *
      * @return array<array{channel:string,amount_cents:int,donations_count:int}>
+     *
+     * @since 1.0.0
      */
     public function byChannel(int $campaignId, string $range = 'all-time'): array
     {
@@ -517,7 +569,11 @@ final class CampaignMetricsService
         return $out;
     }
 
-    /** @return array{kind:'remaining'|'ended'|'running',days:int,total_days:?int} */
+    /**
+     * @return array{kind:'remaining'|'ended'|'running',days:int,total_days:?int}
+     *
+     * @since 1.0.0
+     */
     public function timeline(Campaign $c): array
     {
         $now = $this->clock->now();
@@ -534,7 +590,11 @@ final class CampaignMetricsService
         return ['kind' => 'running', 'days' => (int) $start->diff($now)->format('%a'), 'total_days' => null];
     }
 
-    /** @return array{0:string,1:string,2:bool} (from, to, isAllTime) */
+    /**
+     * @return array{0:string,1:string,2:bool} (from, to, isAllTime)
+     *
+     * @since 1.0.0
+     */
     private function rangeArgs(string $range, int $campaignId): array
     {
         $bounds = $this->rangeBounds($range, $campaignId);
@@ -546,6 +606,8 @@ final class CampaignMetricsService
      *
      * Mode 'period': the same-length window immediately before the current one.
      * Mode 'year':   the same window shifted back exactly one calendar year.
+     *
+     * @since 1.0.0
      */
     private function previousRangeBounds(string $range, int $campaignId, string $mode = 'period'): array
     {
@@ -571,7 +633,11 @@ final class CampaignMetricsService
         };
     }
 
-    /** @return array{0:string,1:string} [from, to] in Y-m-d */
+    /**
+     * @return array{0:string,1:string} [from, to] in Y-m-d
+     *
+     * @since 1.0.0
+     */
     private function rangeBounds(string $range, int $campaignId): array
     {
         $today = $this->clock->now()->format('Y-m-d');
@@ -584,6 +650,7 @@ final class CampaignMetricsService
         };
     }
 
+    /** @since 1.0.0 */
     private function daysAgo(int $n): string
     {
         return $this->clock->now()->modify("-{$n} days")->format('Y-m-d');
@@ -591,15 +658,15 @@ final class CampaignMetricsService
 
     /**
      * Every widget resolves its own range, and on the default range they all
-     * land here. Ten of them meant the campaign row was read ten times and the
-     * earliest-donation scan ran nine times over, a third of the endpoint's SQL
-     * time. The container hands out one instance per request, so this memo
-     * lives exactly as long as the request that filled it.
+     * land here, so the campaign row and the earliest-donation scan are read
+     * once instead of once per widget. The container hands out one instance per
+     * request, so this memo lives exactly as long as the request that filled it.
      *
      * @var array<int,string>
      */
     private array $startDates = [];
 
+    /** @since 1.0.0 */
     private function campaignStartDate(int $campaignId): string
     {
         if (isset($this->startDates[$campaignId])) {
@@ -609,6 +676,7 @@ final class CampaignMetricsService
         return $this->startDates[$campaignId] = $this->resolveCampaignStartDate($campaignId);
     }
 
+    /** @since 1.0.0 */
     private function resolveCampaignStartDate(int $campaignId): string
     {
         $c = Campaign::query()->find('id', $campaignId);

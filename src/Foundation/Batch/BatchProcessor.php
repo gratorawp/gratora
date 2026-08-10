@@ -11,6 +11,8 @@ use Dono\Vendor\Queryable\DB;
  * One bounded, resumable tick of a batched data operation. The caller must operate
  * on a shrinking match set (items handled by $apply stop matching $next) so
  * re-querying the first N stays correct without OFFSET; batches may be transactional.
+ *
+ * @since 1.0.0
  */
 final class BatchProcessor
 {
@@ -19,6 +21,7 @@ final class BatchProcessor
      * @param Closure(array<mixed>):void $apply process them (must remove them from $next)
      * @return bool true if the batch was full (more may remain - re-enqueue),
      *              false once the set is drained
+     * @since 1.0.0
      */
     public static function step( Closure $next, Closure $apply, int $size, bool $transactional = true): bool
     {

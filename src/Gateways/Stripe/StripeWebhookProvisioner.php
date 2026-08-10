@@ -8,13 +8,14 @@ use RuntimeException;
 
 /**
  * Registers Dono's webhook endpoint on the organization's own Stripe account
- * successful connect, so paid / refund / renewal / dispute events flow without
- * the org hand-building a webhook in Stripe. Direct charges fire on the
+ * after a successful connect, so paid / refund / renewal / dispute events flow
+ * without the org hand-building a webhook in Stripe. Charges fire on the
  * account, so the endpoint is created with the account's own secret key.
- * access token). Best-effort: the caller catches failures, and a
- * local/unreachable site keeps the manual signing-secret path.
  *
- * @version 1.0.0
+ * Best-effort: the caller catches failures, and a local or unreachable site
+ * keeps the manual signing-secret path.
+ *
+ * @since 1.0.0
  */
 final class StripeWebhookProvisioner
 {
@@ -33,6 +34,7 @@ final class StripeWebhookProvisioner
         'account.updated',
     ];
 
+    /** @since 1.0.0 */
     public function __construct(
         private StripeApi $api,
         private StripeAccount $account,
@@ -43,6 +45,8 @@ final class StripeWebhookProvisioner
      * Create (or refresh) the webhook endpoint on the account and
      * store its signing secret for the given mode. Throws on API failure so the
      * caller can log; a thrown error must never block the connect itself.
+     *
+     * @since 1.0.0
      */
     public function provision(bool $isTest): void
     {
@@ -92,6 +96,8 @@ final class StripeWebhookProvisioner
      * environments, dev TLDs, and private/loopback addresses cannot receive
      * webhooks, and provisioning against them would overwrite a working
      * manually-entered (Stripe CLI) signing secret with a dead endpoint's.
+     *
+     * @since 1.0.0
      */
     private static function stripeCanReach(string $url): bool
     {
@@ -117,6 +123,7 @@ final class StripeWebhookProvisioner
         return true;
     }
 
+    /** @since 1.0.0 */
     private function storeSecret(bool $isTest, string $secret): void
     {
         $opt = get_option('dono_gateway_config', []);

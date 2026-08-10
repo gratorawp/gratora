@@ -16,7 +16,7 @@ use Dono\Vendor\Queryable\Schema\Table;
  * erased donor's rows. The fact, the purpose and the timestamp are never
  * touched, because those are the evidence; the hashes only re-identify.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class Consent extends Model
 {

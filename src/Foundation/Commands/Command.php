@@ -10,7 +10,7 @@ use InvalidArgumentException;
 /**
  * Immutable descriptor for a registered command.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class Command
 {
@@ -21,6 +21,7 @@ final class Command
      * @param array<string,mixed>                       $meta
      * @param ?Closure(array): list<array{label:string, from?:string, to:string}> $preview  Read-only change rows computed from the same canonical input the handler receives. Must never write; it may read current state to compute a "from". `from` is omitted for creates and actions.
      * @param ?Closure(array): (array<string,mixed>|null) $reverse  Given the canonical input, returns the inverse input that would undo a reversible change, read from the current (pre-mutation) state, or null when nothing is reversible. Read-only; must never write.
+     * @since 1.0.0
      */
     public function __construct(
         public readonly string $id,

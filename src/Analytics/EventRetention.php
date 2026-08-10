@@ -14,7 +14,7 @@ use Dono\Vendor\Queryable\DB;
  * Default: 730 days. Override via `dono.event.retention_days` filter or
  * the `dono_privacy.event_retention_days` option. 0 disables pruning.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class EventRetention
 {
@@ -22,16 +22,19 @@ final class EventRetention
     private const DAILY = 86400;
     private const BATCH = 1000;
 
+    /** @since 1.0.0 */
     public function __construct(private AsyncDispatcher $async)
     {
     }
 
+    /** @since 1.0.0 */
     public function register(): void
     {
         add_action(self::HOOK, [$this, 'run']);
         add_action('init', fn () => $this->async->scheduleRecurring(self::HOOK, self::DAILY));
     }
 
+    /** @since 1.0.0 */
     public function run(): void
     {
         $days = (int) $this->retentionDays();
@@ -68,6 +71,7 @@ final class EventRetention
         }
     }
 
+    /** @since 1.0.0 */
     private function retentionDays(): int
     {
         $opt = get_option('dono_privacy', []);

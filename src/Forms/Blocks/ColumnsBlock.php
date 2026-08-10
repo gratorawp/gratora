@@ -7,17 +7,17 @@ namespace Dono\Forms\Blocks;
 /**
  * dono/columns: multi-column container for content blocks.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class ColumnsBlock implements Block
 {
-    /** Block name. */
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/columns';
     }
 
-    /** Editor attribute schema. */
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         return [
@@ -27,7 +27,7 @@ final class ColumnsBlock implements Block
         ];
     }
 
-    /** Render server-side markup. */
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         return sprintf(
@@ -39,6 +39,8 @@ final class ColumnsBlock implements Block
 
     /**
      * @param array<string,mixed> $attrs
+     *
+     * @since 1.0.0
      */
     public static function columnsStyle(array $attrs): string
     {

@@ -14,16 +14,20 @@ use WP_Error;
 /**
  * First-run onboarding lifecycle transitions (finalize, dismiss). Per-step settings
  * are persisted by /admin/settings/{group}, not here.
+ *
+ * @since 1.0.0
  */
 final class OnboardingController
 {
     private const NAMESPACE = 'dono/v1';
 
+    /** @since 1.0.0 */
     public function __construct(
         private SettingsService $settings,
     ) {
     }
 
+    /** @since 1.0.0 */
     public function registerRoutes(): void
     {
         register_rest_route(self::NAMESPACE, '/admin/onboarding/finalize', [
@@ -47,19 +51,18 @@ final class OnboardingController
     }
 
 
+    /** @since 1.0.0 */
     public function canAccess(): bool
     {
         return current_user_can('manage_options');
     }
 
     /**
-     * Close out the wizard. Settles the organization only.
+     * Close out the wizard. Settles the organization only, and deliberately
+     * creates no campaign; the last screen links to the campaigns page with
+     * its create drawer open instead.
      *
-     * Publishing a campaign here meant every install ended up with one whether
-     * or not it was wanted, and an org whose first real campaign was something
-     * else had to find and delete it. The last screen now links to the
-     * campaigns page with its create drawer open, so the first campaign is
-     * built with the same form as every other one.
+     * @since 1.0.0
      */
     public function finalize(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
@@ -78,6 +81,7 @@ final class OnboardingController
     }
 
 
+    /** @since 1.0.0 */
     public function dismiss(): WP_REST_Response
     {
         update_option(Onboarding::OPTION, 'dismissed', false);

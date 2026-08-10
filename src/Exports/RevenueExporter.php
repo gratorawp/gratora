@@ -16,18 +16,22 @@ use Dono\Foundation\Helpers\Money;
  * file charts as a continuous series and a quiet month is visible instead of
  * absent.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class RevenueExporter
 {
     /** Months per file. Twenty years of monthly rows is already generous. */
     private const MAX_MONTHS = 240;
 
+    /** @since 1.0.0 */
     public function __construct(private DonationRepository $donations)
     {
     }
 
-    /** @return list<array{month:string,amount_cents:int,donations_count:int}> */
+    /**
+     * @return list<array{month:string,amount_cents:int,donations_count:int}>
+     * @since 1.0.0
+     */
     public function series(string $fromMonth, string $toMonth): array
     {
         [$start, $end] = $this->bounds($fromMonth, $toMonth);
@@ -62,6 +66,7 @@ final class RevenueExporter
         return $series;
     }
 
+    /** @since 1.0.0 */
     public function toCsv(string $fromMonth, string $toMonth): string
     {
         $currency = Money::defaultCurrency();
@@ -97,16 +102,18 @@ final class RevenueExporter
         return (string) stream_get_contents($out);
     }
 
+    /** @since 1.0.0 */
     public static function filename(string $fromMonth, string $toMonth): string
     {
         return sprintf('revenue-%s-to-%s.csv', $fromMonth, $toMonth);
     }
 
     /**
-     * Both ends normalised to the first of their month, swapped if reversed so
+     * Both ends normalized to the first of their month, swapped if reversed so
      * a backwards range returns that range rather than nothing.
      *
      * @return array{0:DateTimeImmutable,1:DateTimeImmutable}
+     * @since 1.0.0
      */
     private function bounds(string $fromMonth, string $toMonth): array
     {
@@ -116,6 +123,7 @@ final class RevenueExporter
         return $start <= $end ? [$start, $end] : [$end, $start];
     }
 
+    /** @since 1.0.0 */
     private function month(string $value): ?DateTimeImmutable
     {
         if (preg_match('/^(\d{4})-(\d{2})$/', trim($value), $m) !== 1) {

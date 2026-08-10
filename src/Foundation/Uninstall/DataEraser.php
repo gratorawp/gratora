@@ -15,6 +15,8 @@ use ReflectionClass;
  * Tables come from CoreModule::migrations() rather than a `dono_%` glob. The
  * add-ons share that prefix, so a glob run from core would drop the tickets,
  * gift aid and peer-to-peer tables of add-ons that are still installed.
+ *
+ * @since 1.0.0
  */
 final class DataEraser
 {
@@ -51,6 +53,7 @@ final class DataEraser
         'dono_reference_counter_',
     ];
 
+    /** @since 1.0.0 */
     public static function requested(): bool
     {
         return (bool) get_option(self::OPT_IN, false);
@@ -64,6 +67,7 @@ final class DataEraser
      * which means the only alternative is an untested wipe.
      *
      * @return array{tables: string[], options: string[]}
+     * @since 1.0.0
      */
     public function plan(): array
     {
@@ -73,6 +77,7 @@ final class DataEraser
         ];
     }
 
+    /** @since 1.0.0 */
     public function erase(): void
     {
         // Before the tables go, so an add-on can still read what it needs to
@@ -95,7 +100,10 @@ final class DataEraser
         $this->removeRoles();
     }
 
-    /** @param string[] $tables */
+    /**
+     * @param string[] $tables
+     * @since 1.0.0
+     */
     private function dropTables(array $tables): void
     {
         global $wpdb;
@@ -115,6 +123,7 @@ final class DataEraser
      * it can observe, and what actually protects the add-ons, is this list.
      *
      * @return string[] unprefixed
+     * @since 1.0.0
      */
     public function coreTables(): array
     {
@@ -135,7 +144,10 @@ final class DataEraser
         return $tables;
     }
 
-    /** @return string[] */
+    /**
+     * @return string[]
+     * @since 1.0.0
+     */
     private function optionsToDelete(): array
     {
         global $wpdb;
@@ -164,6 +176,7 @@ final class DataEraser
      * subpages too, and those are its to remove.
      *
      * @return int[]
+     * @since 1.0.0
      */
     public function pageIds(): array
     {
@@ -177,10 +190,11 @@ final class DataEraser
     }
 
     /**
-     * Trashed rather than force-deleted: an organiser who wrote their own
+     * Trashed rather than force-deleted: an organizer who wrote their own
      * content onto a campaign page should get it back out of the bin.
      *
      * @param int[] $ids
+     * @since 1.0.0
      */
     private function deletePages(array $ids): void
     {
@@ -195,6 +209,8 @@ final class DataEraser
      * Core's own capabilities by name, not everything matching dono_. An add-on
      * that is still installed keeps its caps: dono_manage_fundraisers belongs
      * to the peer-to-peer plugin and taking it would break a live site.
+     *
+     * @since 1.0.0
      */
     private function removeRoles(): void
     {

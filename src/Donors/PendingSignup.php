@@ -13,6 +13,8 @@ use Dono\Vendor\Queryable\Schema\Table;
  * An unproven address is not a donor and must not be counted, listed, exported
  * or mailed as one; redeeming the emailed link is what creates the donor. Same
  * crypto split as Donor: address encrypted, peppered hash as the lookup key.
+ *
+ * @since 1.0.0
  */
 final class PendingSignup extends Model
 {

@@ -25,22 +25,18 @@ use WP_REST_Response;
 use WP_REST_Server;
 
 /**
- * The admin side of a recurring plan.
- *
- * The donor portal has always been able to pause, resume, skip, re-price and
- * cancel a plan; the admin screen could only look at one. Support requests
- * arrive by phone and email, so the person taking the call needs the same five
- * actions, gated on the capability that already governs changing what a card
- * is charged.
+ * The admin side of a recurring plan: pause, resume, skip, re-price and cancel,
+ * gated on the capability that already governs changing what a card is charged.
  *
  * The work itself lives in RecurringPlanActions, shared with the portal.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class RecurringController
 {
     private const NAMESPACE = 'dono/v1';
 
+    /** @since 1.0.0 */
     public function __construct(
         private RecurringPlanActions $actions,
         private RecurringPlanRepository $plans,
@@ -51,6 +47,7 @@ final class RecurringController
     ) {
     }
 
+    /** @since 1.0.0 */
     public function registerRoutes(): void
     {
         register_rest_route(self::NAMESPACE, '/admin/recurring', [
@@ -102,11 +99,9 @@ final class RecurringController
     }
 
     /**
-     * The org-wide plan list.
+     * The org-wide plan list, not scoped to a single donor.
      *
-     * Plans were only reachable through the donor who owns them, so questions
-     * asked of the whole book (what is past due, what renews this week, what is
-     * the MRR by campaign) had nowhere to be asked.
+     * @since 1.0.0
      */
     public function index(WP_REST_Request $request): WP_REST_Response
     {
@@ -144,6 +139,7 @@ final class RecurringController
         return $response;
     }
 
+    /** @since 1.0.0 */
     public function stats(): WP_REST_Response
     {
         return new WP_REST_Response(
@@ -157,13 +153,19 @@ final class RecurringController
      * gateway being disconnected, and an imported plan carries slugs core never
      * registers, so a registry-built filter would offer options that match
      * nothing and hide plans that exist.
+     *
+     * @since 1.0.0
      */
     public function gatewayOptions(): WP_REST_Response
     {
         return new WP_REST_Response($this->plans->gatewaysInUse(), 200);
     }
 
-    /** @return list<int> Donor ids whose name or address matches the term. */
+    /**
+     * @return list<int> Donor ids whose name or address matches the term.
+     *
+     * @since 1.0.0
+     */
     private function donorIdsMatching(string $search): array
     {
         $search = trim($search);
@@ -171,7 +173,11 @@ final class RecurringController
         return $search === '' ? [] : $this->donorService->findIdsBySearch($search);
     }
 
-    /** @return array<string,mixed> */
+    /**
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
     private function shape(RecurringPlan $p): array
     {
         $donor    = $p->donor_id ? $this->donors->findById((int) $p->donor_id) : null;
@@ -213,6 +219,7 @@ final class RecurringController
         ];
     }
 
+    /** @since 1.0.0 */
     private function donorName(Donor $d): string
     {
         $full = trim(($d->first_name ?? '') . ' ' . ($d->last_name ?? ''));
@@ -220,6 +227,7 @@ final class RecurringController
         return $full !== '' ? $full : '-';
     }
 
+    /** @since 1.0.0 */
     public function act(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $plan = RecurringPlan::query()->find('id', (int) $request['id']);

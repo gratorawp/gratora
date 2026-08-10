@@ -11,15 +11,22 @@ use Dono\Donations\AntiSpamGuard;
 use Dono\Foundation\Helpers\Money;
 use Dono\Foundation\Hooks\HookProvider;
 
+/**
+ * Mounts the donor portal app on the [dono_donor_portal] shortcode.
+ *
+ * @since 1.0.0
+ */
 final class PortalShortcode extends HookProvider
 {
     private const TAG    = 'dono_donor_portal';
     private const HANDLE = 'dono-donor-portal';
 
+    /** @since 1.0.0 */
     public function __construct(private AntiSpamGuard $spam)
     {
     }
 
+    /** @since 1.0.0 */
     protected function actions(): array
     {
         return [
@@ -28,11 +35,13 @@ final class PortalShortcode extends HookProvider
         ];
     }
 
+    /** @since 1.0.0 */
     public function register(): void
     {
         add_shortcode(self::TAG, [$this, 'render']);
     }
 
+    /** @since 1.0.0 */
     public function maybeEnqueue(): void
     {
         if (! is_singular()) return;
@@ -41,6 +50,7 @@ final class PortalShortcode extends HookProvider
         $this->enqueue();
     }
 
+    /** @since 1.0.0 */
     private function enqueue(): void
     {
         $assetPath = DONO_DIR . 'build/donor-portal/index/index.asset.php';
@@ -94,6 +104,7 @@ final class PortalShortcode extends HookProvider
         }
     }
 
+    /** @since 1.0.0 */
     public function render($atts = []): string
     {
         $this->enqueue();
@@ -103,6 +114,8 @@ final class PortalShortcode extends HookProvider
     /**
      * Output lands in a style block, so chars that could escape the rule are
      * filtered.
+     *
+     * @since 1.0.0
      */
     private function brandCss(): string
     {

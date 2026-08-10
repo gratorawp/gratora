@@ -10,20 +10,20 @@ use Dono\Funds\FundRepository;
 /**
  * Fund picker block.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class FundPickerBlock implements Block
 {
     /** Campaign default fund for the current SSR render, set by the shortcode. */
     public static int $renderCampaignDefaultFundId = 0;
 
-    /** Block name. */
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/fund-picker';
     }
 
-    /** Editor attribute schema. */
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         return [
@@ -37,7 +37,7 @@ final class FundPickerBlock implements Block
         ];
     }
 
-    /** Render server-side markup. */
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         $funds      = new FundRepository();

@@ -16,10 +16,11 @@ use RuntimeException;
  * charge then disagree forever, with the donor's portal showing the number they
  * asked for and their card showing the old one.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class SubscriptionChangeNeedsApproval extends RuntimeException
 {
+    /** @since 1.0.0 */
     public function __construct(
         string $message,
         public readonly string $approveUrl = '',

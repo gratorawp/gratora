@@ -10,11 +10,15 @@ namespace Dono\Forms\Blocks;
  * Slugs must match the derived field keys the donor runtime stores
  * (DropdownBlock::deriveField).
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class CustomFieldLabels
 {
-    /** @return array<string,string> */
+    /**
+     * @return array<string,string>
+     *
+     * @since 1.0.0
+     */
     public static function forBlocks(string $blocks): array
     {
         if (trim($blocks) === '') {
@@ -28,6 +32,8 @@ final class CustomFieldLabels
     /**
      * @param array<int,array<string,mixed>> $blocks
      * @param array<string,string>           $out
+     *
+     * @since 1.0.0
      */
     private static function walk(array $blocks, array &$out): void
     {

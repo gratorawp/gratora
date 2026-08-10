@@ -9,17 +9,17 @@ use Dono\Foundation\Helpers\View;
 /**
  * Date input field block.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class DateBlock implements Block
 {
-    /** Block name. */
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/date';
     }
 
-    /** Editor attribute schema. */
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         return [
@@ -32,7 +32,7 @@ final class DateBlock implements Block
         ];
     }
 
-    /** Render server-side markup. */
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         return View::loadRelative(__DIR__, 'views/date', [
@@ -45,14 +45,22 @@ final class DateBlock implements Block
         ]);
     }
 
-    /** Validate an ISO date string, returning '' when malformed. */
+    /**
+     * Validate an ISO date string, returning '' when malformed.
+     *
+     * @since 1.0.0
+     */
     public static function normalizeDate(string $raw): string
     {
         $raw = trim($raw);
         return preg_match('/^\d{4}-\d{2}-\d{2}$/', $raw) ? $raw : '';
     }
 
-    /** Slugify a field name to snake_case. */
+    /**
+     * Slugify a field name to snake_case.
+     *
+     * @since 1.0.0
+     */
     public static function slugifyField(string $raw): string
     {
         $s = strtolower((string) preg_replace('/[^a-z0-9]+/', '_', strtolower($raw)));

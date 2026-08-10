@@ -10,21 +10,15 @@ use WP_Post;
 /**
  * Put a campaign's style on the page once, not on each block.
  *
- * Emitting the tokens per block wrapper meant only our own blocks were styled.
- * Anything an organiser added from the editor, a heading, a paragraph, a
- * button, sat outside every wrapper and inherited nothing, so a campaign's
- * style stopped at the blocks we happened to ship. Campaign pages are ordinary
- * pages an organiser edits, so the tokens belong to the page.
+ * Campaign pages are ordinary pages an organizer edits. A heading, a paragraph
+ * or a button added from the editor sits outside every block wrapper and
+ * inherits nothing from it, so per-wrapper tokens would style only the blocks
+ * we ship. The tokens belong to the page.
  *
- * This began in the P2P add-on, where the same reasoning applies to fundraiser
- * and team pages. Nothing about it was ever P2P specific: it resolves a
- * campaign from any post, so a standard campaign page needs exactly this. The
- * body class was even reaching standard campaign pages already, because P2P
- * added it for any campaign page it could resolve, while the rule defining the
- * tokens was attached to the P2P stylesheet and so never printed there. The
- * class promised a rule that did not exist.
+ * Resolves a campaign from any post, so add-on routes (fundraiser and team
+ * pages) are covered by the same path.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class PageStyle
 {
@@ -37,12 +31,13 @@ final class PageStyle
      *
      * Deliberately not the block stylesheet's handle: that one is enqueued only
      * when a campaign block is on the page, and a page holding nothing but an
-     * organiser's own headings and paragraphs still belongs to its campaign.
+     * organizer's own headings and paragraphs still belongs to its campaign.
      */
     public const HANDLE = 'dono-campaign-page';
 
     private ?Campaign $campaign = null;
 
+    /** @since 1.0.0 */
     public function register(): void
     {
         add_action('wp', [$this, 'resolve']);
@@ -57,6 +52,7 @@ final class PageStyle
         add_action('enqueue_block_assets', [$this, 'emitForEditor'], 20);
     }
 
+    /** @since 1.0.0 */
     public function registerStyle(): void
     {
         if (wp_style_is(self::HANDLE, 'registered')) {
@@ -76,6 +72,8 @@ final class PageStyle
     /**
      * The campaign whose page is being viewed. Resolved on `wp`, before the
      * header runs, so body_class and the enqueue both see it.
+     *
+     * @since 1.0.0
      */
     public function resolve(): void
     {
@@ -95,8 +93,10 @@ final class PageStyle
      * A campaign page is the campaign's own page_id. Add-on routes (the
      * fundraiser, team and start pages) resolve to that same page, so page_id
      * covers them too. A layout page is a child and is nobody's page_id, so
-     * fall back to the campaign it carries: an organiser previewing one should
-     * see their own colours, not the defaults.
+     * fall back to the campaign it carries: an organizer previewing one should
+     * see their own colors, not the defaults.
+     *
+     * @since 1.0.0
      */
     public static function campaignForPost(int $postId): ?Campaign
     {
@@ -113,6 +113,8 @@ final class PageStyle
     /**
      * @param  array<int,string> $classes
      * @return array<int,string>
+     *
+     * @since 1.0.0
      */
     public function bodyClass(array $classes): array
     {
@@ -125,6 +127,8 @@ final class PageStyle
     /**
      * Scoped to the body class rather than :root so a campaign page cannot
      * restyle the admin bar or anything else outside it.
+     *
+     * @since 1.0.0
      */
     public function emit(): void
     {
@@ -144,9 +148,11 @@ final class PageStyle
 
     /**
      * The same tokens inside the editor canvas, so a page is composed in the
-     * campaign's own colours rather than the design defaults. Scoped to the
+     * campaign's own colors rather than the design defaults. Scoped to the
      * canvas wrapper, which is where the editor puts the content, so nothing
      * leaks into the surrounding admin.
+     *
+     * @since 1.0.0
      */
     public function emitForEditor(): void
     {

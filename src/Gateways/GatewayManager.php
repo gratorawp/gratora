@@ -9,14 +9,14 @@ use RuntimeException;
 /**
  * Registry of PaymentGateway implementations.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class GatewayManager
 {
     /** @var array<string, PaymentGateway> */
     private array $gateways = [];
 
-    /** Register a gateway; throws if its id is already taken. */
+    /** @since 1.0.0 */
     public function register(PaymentGateway $gateway): void
     {
         $id = $gateway->id();
@@ -26,13 +26,13 @@ final class GatewayManager
         $this->gateways[$id] = $gateway;
     }
 
-    /** Return the gateway for the given id, or null if not registered. */
+    /** @since 1.0.0 */
     public function get(string $id): ?PaymentGateway
     {
         return $this->gateways[$id] ?? null;
     }
 
-    /** Return the gateway for the given id; throws if not registered. */
+    /** @since 1.0.0 */
     public function require(string $id): PaymentGateway
     {
         $g = $this->get($id);
@@ -42,7 +42,11 @@ final class GatewayManager
         return $g;
     }
 
-    /** @return array<string, PaymentGateway> */
+    /**
+     * @return array<string, PaymentGateway>
+     *
+     * @since 1.0.0
+     */
     public function all(): array
     {
         return $this->gateways;
@@ -56,6 +60,8 @@ final class GatewayManager
      *
      * @param  list<string> $allowed form.settings.gateways.allowed
      * @return list<string>
+     *
+     * @since 1.0.0
      */
     public function optionsFor(array $allowed, ?string $country, string $currency, string $frequency = 'one_time'): array
     {
@@ -78,18 +84,6 @@ final class GatewayManager
     }
 
     /**
-     * Is this gateway on for donors?
-     *
-     * The single definition. Readiness used to ask its own version -- a Stripe
-     * special case plus `! empty($cfg[$id]['enabled'])`, which treats an absent
-     * key as off where this treats it as on -- so an admin could be told a form
-     * was ready while the donor was offered nothing.
-     *
-     * A credentialed gateway has no enable toggle by design: connecting keys is
-     * the switch, and canCharge() is what that amounts to. The `enabled` flag
-     * belongs to gateways configured entirely in settings, like offline.
-     */
-    /**
      * Declare an `enabled` flag per registered gateway on the gateways settings
      * group, so the screen can persist one through the normal save.
      *
@@ -99,6 +93,8 @@ final class GatewayManager
      *
      * @param array<string,mixed> $groups
      * @return array<string,mixed>
+     *
+     * @since 1.0.0
      */
     public function declareSettings(array $groups): array
     {
@@ -117,6 +113,13 @@ final class GatewayManager
         return $groups;
     }
 
+    /**
+     * A credentialed gateway has no enable toggle by design: connecting keys is
+     * the switch, and canCharge() is what that amounts to. The `enabled` flag
+     * belongs to gateways configured entirely in settings, like offline.
+     *
+     * @since 1.0.0
+     */
     public function isOn(string $id): bool
     {
         $g = $this->gateways[$id] ?? null;
@@ -137,6 +140,8 @@ final class GatewayManager
      *
      * @param  list<string> $allowed
      * @return list<array{id:string,label:string,description:string,currencies:list<string>,countries:list<string>,frequencies:list<string>}>
+     *
+     * @since 1.0.0
      */
     public function optionsMetaFor(array $allowed): array
     {
@@ -167,19 +172,13 @@ final class GatewayManager
         return $out;
     }
 
-    /** @return array<string, PaymentGateway> */
     /**
-     * Can this gateway take this currency?
-     *
-     * availableFor() applies the same rule when deciding what to offer a donor,
-     * but the create path only checked that the gateway existed, so a crafted
-     * payload could name one that cannot take the currency and fail later at
-     * the gateway instead of here.
-     *
      * A wildcard means the gateway does its own validation, which is the right
      * answer for Stripe (its list runs to well over a hundred currencies and
      * moves) and for Offline (a check can be written in anything). Hardcoding
      * either would be a list that goes stale and starts refusing real money.
+     *
+     * @since 1.0.0
      */
     public function acceptsCurrency(string $gatewayId, string $currency): bool
     {
@@ -194,6 +193,11 @@ final class GatewayManager
             || in_array(strtoupper($currency), $currencies, true);
     }
 
+    /**
+     * @return array<string, PaymentGateway>
+     *
+     * @since 1.0.0
+     */
     public function availableFor(?string $country, string $currency, string $frequency = 'one_time'): array
     {
         $currency = strtoupper($currency);

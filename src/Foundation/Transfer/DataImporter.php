@@ -26,7 +26,7 @@ use Dono\Vendor\Queryable\DB;
  * it is rather than duplicated or overwritten, which is also what makes a
  * half-finished import safe to resume.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class DataImporter
 {
@@ -114,6 +114,7 @@ final class DataImporter
     /** @var array<string,int> */
     private array $skipped = [];
 
+    /** @since 1.0.0 */
     public function __construct(
         private Crypto $crypto,
         private IdentityHasher $hasher,
@@ -123,6 +124,7 @@ final class DataImporter
     /**
      * @param  array<string,mixed> $export
      * @return array{created:array<string,int>, existing:array<string,int>, skipped:array<string,int>}
+     * @since 1.0.0
      */
     public function import(array $export): array
     {
@@ -143,7 +145,10 @@ final class DataImporter
         ];
     }
 
-    /** @param array<string,mixed> $row */
+    /**
+     * @param array<string,mixed> $row
+     * @since 1.0.0
+     */
     private function importRow(string $table, array $row): void
     {
         $sourceId = (int) ($row['id'] ?? 0);
@@ -184,6 +189,7 @@ final class DataImporter
      *
      * @param  array<string,mixed> $row
      * @return array<string,mixed>|null null when the row cannot be placed here
+     * @since 1.0.0
      */
     private function prepare(string $table, array $row): ?array
     {
@@ -225,6 +231,7 @@ final class DataImporter
     /**
      * @param  array<string,mixed> $row
      * @return array<string,mixed>|null
+     * @since 1.0.0
      */
     private function prepareDonor(array $row): ?array
     {
@@ -249,7 +256,10 @@ final class DataImporter
         return $row;
     }
 
-    /** @param array<string,mixed> $row */
+    /**
+     * @param array<string,mixed> $row
+     * @since 1.0.0
+     */
     private function findExisting(string $table, array $row): int
     {
         $key = self::NATURAL_KEY[$table] ?? null;
@@ -279,6 +289,7 @@ final class DataImporter
      * The columns that pointed at a table not yet walked when their row landed.
      *
      * @param array<string,mixed> $tables
+     * @since 1.0.0
      */
     private function resolveDeferred(array $tables): void
     {
@@ -306,7 +317,10 @@ final class DataImporter
         }
     }
 
-    /** @param array<string,int> $bucket */
+    /**
+     * @param array<string,int> $bucket
+     * @since 1.0.0
+     */
     private function bump(array &$bucket, string $table): void
     {
         $bucket[$table] = ($bucket[$table] ?? 0) + 1;

@@ -15,7 +15,7 @@ use Dono\Foundation\Crypto\Crypto;
  * encrypted at rest and never leave the server; publishable keys are public by
  * design and are handed to the browser to mount the Payment Element.
  *
- * @version 2.0.0
+ * @since 1.0.0
  */
 final class StripeAccount
 {
@@ -28,6 +28,7 @@ final class StripeAccount
      */
     private ?bool $testOverride = null;
 
+    /** @since 1.0.0 */
     public function __construct(private Crypto $crypto)
     {
     }
@@ -35,6 +36,8 @@ final class StripeAccount
     /**
      * Persist one mode's key pair. Modes are independent, so saving live keys
      * never disturbs a working test connection.
+     *
+     * @since 1.0.0
      */
     public function saveKeys(bool $test, string $secret, string $publishable): void
     {
@@ -60,6 +63,8 @@ final class StripeAccount
      *   secret_hint_test:string, secret_hint_live:string,
      *   publishable_test:string, publishable_live:string
      * }|null
+     *
+     * @since 1.0.0
      */
     public function get(): ?array
     {
@@ -84,7 +89,11 @@ final class StripeAccount
         ];
     }
 
-    /** Stripe account id, learned from the key verification retrieve. */
+    /**
+     * Stripe account id, learned from the key verification retrieve.
+     *
+     * @since 1.0.0
+     */
     public function accountId(): ?string
     {
         $data = $this->raw();
@@ -96,20 +105,26 @@ final class StripeAccount
      * True when at least one mode has a secret key. The gateway registers on
      * this; each individual charge still fails closed via StripeApi when the
      * active mode has no key.
+     *
+     * @since 1.0.0
      */
     public function isConnected(): bool
     {
         return $this->hasKeysFor(true) || $this->hasKeysFor(false);
     }
 
-    /** True when the given mode has a secret key stored. */
+    /** @since 1.0.0 */
     public function hasKeysFor(bool $test): bool
     {
         $data = $this->raw();
         return $data !== null && ($data[$test ? 'secret_test' : 'secret_live'] ?? '') !== '';
     }
 
-    /** Stripe accepts charges only once the account is verified for it. */
+    /**
+     * Stripe accepts charges only once the account is verified for it.
+     *
+     * @since 1.0.0
+     */
     public function canCharge(): bool
     {
         $data = $this->raw();
@@ -120,13 +135,15 @@ final class StripeAccount
      * Select test vs live for the next key-bearing operation. Derived from the
      * donation's is_test (or TestMode::forForm() for form-context work), never
      * from a standalone gateway setting.
+     *
+     * @since 1.0.0
      */
     public function useTestMode(bool $test): void
     {
         $this->testOverride = $test;
     }
 
-    /** Returns the active test/live mode. Fails safe to test if unset. */
+    /** @since 1.0.0 */
     public function isTestMode(): bool
     {
         // Fail safe: if no caller set the mode, assume test so a live charge
@@ -134,13 +151,21 @@ final class StripeAccount
         return $this->testOverride ?? true;
     }
 
-    /** Decrypted secret key for the active mode. */
+    /**
+     * Decrypted secret key for the active mode.
+     *
+     * @since 1.0.0
+     */
     public function activeSecretKey(): string
     {
         return $this->secretKeyFor($this->isTestMode());
     }
 
-    /** Decrypted secret key for an explicit mode. */
+    /**
+     * Decrypted secret key for an explicit mode.
+     *
+     * @since 1.0.0
+     */
     public function secretKeyFor(bool $test): string
     {
         $data = $this->raw();
@@ -151,13 +176,13 @@ final class StripeAccount
         return is_string($plain) ? $plain : '';
     }
 
-    /** Publishable key for the active mode. */
+    /** @since 1.0.0 */
     public function activePublishableKey(): string
     {
         return $this->publishableKeyFor($this->isTestMode());
     }
 
-    /** Publishable key for an explicit mode. */
+    /** @since 1.0.0 */
     public function publishableKeyFor(bool $test): string
     {
         $data = $this->raw();
@@ -165,7 +190,11 @@ final class StripeAccount
         return (string) ($data[$test ? 'publishable_test' : 'publishable_live'] ?? '');
     }
 
-    /** Merge capability flags from an account retrieve / account.updated webhook. */
+    /**
+     * Merge capability flags from an account retrieve / account.updated webhook.
+     *
+     * @since 1.0.0
+     */
     public function refresh(array $accountObject): void
     {
         $data = $this->raw();
@@ -185,7 +214,11 @@ final class StripeAccount
         SystemSetting::write(self::KEY, (string) wp_json_encode($data));
     }
 
-    /** Remove one mode's keys, leaving the other mode intact. */
+    /**
+     * Remove one mode's keys, leaving the other mode intact.
+     *
+     * @since 1.0.0
+     */
     public function forgetMode(bool $test): void
     {
         $data = $this->raw();
@@ -201,20 +234,28 @@ final class StripeAccount
         SystemSetting::write(self::KEY, (string) wp_json_encode($data));
     }
 
-    /** Remove all stored Stripe credentials. */
+    /** @since 1.0.0 */
     public function forget(): void
     {
         SystemSetting::forget(self::KEY);
     }
 
-    /** Last 4 of a stored secret key, for "which key is this?" without exposing it. */
+    /**
+     * Last 4 of a stored secret key, for "which key is this?" without exposing it.
+     *
+     * @since 1.0.0
+     */
     private function hint(bool $test): string
     {
         $key = $this->secretKeyFor($test);
         return $key === '' ? '' : substr($key, -4);
     }
 
-    /** @return array<string,mixed>|null */
+    /**
+     * @return array<string,mixed>|null
+     *
+     * @since 1.0.0
+     */
     private function raw(): ?array
     {
         $json = SystemSetting::read(self::KEY);

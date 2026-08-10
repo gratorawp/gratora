@@ -23,13 +23,14 @@ use Dono\Vendor\Queryable\DB;
  * who also gave for real keeps their row, decided by the same rule the Donors
  * screen uses, add-on vetoes included.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class TestDataPurger
 {
     /** Bounds each statement; a long-lived sandbox can hold a lot of these. */
     private const CHUNK = 500;
 
+    /** @since 1.0.0 */
     public function __construct(private DonorService $donors)
     {
     }
@@ -38,6 +39,7 @@ final class TestDataPurger
      * What a purge would remove, without removing it.
      *
      * @return array{donations:int, recurring_plans:int, donors:int}
+     * @since 1.0.0
      */
     public function preview(): array
     {
@@ -52,6 +54,7 @@ final class TestDataPurger
 
     /**
      * @return array{donations:int, recurring_plans:int, donors:int}
+     * @since 1.0.0
      */
     public function purge(): array
     {
@@ -107,7 +110,10 @@ final class TestDataPurger
         return $removed;
     }
 
-    /** @return array<int> */
+    /**
+     * @return array<int>
+     * @since 1.0.0
+     */
     private function testDonationIds(): array
     {
         return array_map('intval', array_column(
@@ -119,6 +125,7 @@ final class TestDataPurger
     /**
      * @param  array<int> $donationIds
      * @return array<int>
+     * @since 1.0.0
      */
     private function donorIdsBehind(array $donationIds): array
     {
@@ -148,6 +155,7 @@ final class TestDataPurger
      *
      * @param  array<int> $donorIds
      * @return array<int>
+     * @since 1.0.0
      */
     private function donorsLeftWithNothing(array $donorIds): array
     {

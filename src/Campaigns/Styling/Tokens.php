@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace Dono\Campaigns\Styling;
 
-/** Each token maps to a CSS custom property injected on the rendered form element. */
+/**
+ * Each token maps to a CSS custom property injected on the rendered form element.
+ *
+ * @since 1.0.0
+ */
 final class Tokens
 {
     /**
@@ -19,6 +23,8 @@ final class Tokens
      *   options?: array<string,string>,
      *   help?: string
      * }>
+     *
+     * @since 1.0.0
      */
     public static function catalogue(): array
     {
@@ -251,6 +257,7 @@ final class Tokens
         ];
     }
 
+    /** @since 1.0.0 */
     public static function groups(): array
     {
         return [
@@ -264,6 +271,7 @@ final class Tokens
         ];
     }
 
+    /** @since 1.0.0 */
     public static function defaults(): array
     {
         $out = [];
@@ -276,6 +284,8 @@ final class Tokens
     /**
      * Values land verbatim in CSS, where `;` or `}` breaks out of the
      * declaration, so each is validated against its control's expected shape.
+     *
+     * @since 1.0.0
      */
     public static function sanitize(array $tokens): array
     {
@@ -292,7 +302,11 @@ final class Tokens
         return $out;
     }
 
-    /** Null drops the value. */
+    /**
+     * Null drops the value.
+     *
+     * @since 1.0.0
+     */
     private static function sanitiseValue(array $def, string $value): ?string
     {
         if (preg_match('/[;{}<>\\\\]/', $value)) return null;

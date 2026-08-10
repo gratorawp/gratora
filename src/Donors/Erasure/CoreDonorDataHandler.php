@@ -17,14 +17,18 @@ use Dono\Donations\Refund;
  * Core's own share of an erasure: everything hanging off the donor by foreign
  * key. Financial records survive; the PII on them does not. Core goes through
  * the registry like any add-on, so there is one place erasure happens.
+ *
+ * @since 1.0.0
  */
 final class CoreDonorDataHandler implements ErasureHandler
 {
+    /** @since 1.0.0 */
     public function key(): string
     {
         return 'dono.core';
     }
 
+    /** @since 1.0.0 */
     public function erase(ErasureRequest $request): void
     {
         foreach (Donation::query()->where('donor_id', $request->donorId)->getAll() as $donation) {

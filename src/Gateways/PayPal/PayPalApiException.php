@@ -18,22 +18,31 @@ use RuntimeException;
  *
  * Extends RuntimeException so catch blocks up the stack still work.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class PayPalApiException extends RuntimeException
 {
-    /** @param list<string> $issues PayPal's `details[].issue` codes, upper-case. */
+    /**
+     * @param list<string> $issues PayPal's `details[].issue` codes, upper-case.
+     *
+     * @since 1.0.0
+     */
     public function __construct(string $message, private array $issues = [])
     {
         parent::__construct($message);
     }
 
-    /** @return list<string> */
+    /**
+     * @return list<string>
+     *
+     * @since 1.0.0
+     */
     public function issues(): array
     {
         return $this->issues;
     }
 
+    /** @since 1.0.0 */
     public function hasIssue(string ...$codes): bool
     {
         foreach ($codes as $code) {
@@ -45,6 +54,8 @@ final class PayPalApiException extends RuntimeException
     /**
      * @param array<string,mixed> $body
      * @return list<string>
+     *
+     * @since 1.0.0
      */
     public static function issuesFrom(array $body): array
     {

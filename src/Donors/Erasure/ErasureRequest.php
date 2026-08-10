@@ -10,6 +10,8 @@ namespace Dono\Donors\Erasure;
  * Tables with no donor_id column (AI chat transcripts, webhook payloads,
  * importer mappings) hold the donor's email and name as loose text, and the
  * only way to reach them is to search for the values themselves.
+ *
+ * @since 1.0.0
  */
 final class ErasureRequest
 {
@@ -28,6 +30,8 @@ final class ErasureRequest
     /**
      * $emailHash reaches rows keyed by address rather than by donor id, which
      * is the only handle an unproven signup ever has.
+     *
+     * @since 1.0.0
      */
     public function __construct(
         public readonly int $donorId,
@@ -48,6 +52,8 @@ final class ErasureRequest
      * @param list<?string> $identifiers unique by construction: email, phone,
      *                                   tax id, references, gateway ids
      * @param list<?string> $names       free text: personal and company names
+     *
+     * @since 1.0.0
      */
     public static function make(
         int $donorId,
@@ -76,6 +82,7 @@ final class ErasureRequest
         return new self($donorId, array_values($donationIds), array_values($needles), $at, $emailHash);
     }
 
+    /** @since 1.0.0 */
     public function hasNoNeedles(): bool
     {
         return $this->needles === [];
@@ -84,6 +91,8 @@ final class ErasureRequest
     /**
      * Wildcards inside a needle are escaped: an unescaped `%` in a donor's own
      * data would widen the match to every row and scrub other people's records.
+     *
+     * @since 1.0.0
      */
     public function likePatterns(): array
     {

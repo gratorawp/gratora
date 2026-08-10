@@ -13,13 +13,17 @@ use Dono\Foundation\Hooks\HookProvider;
  * Block Bindings source resolving campaign stats for core blocks (e.g. bind a
  * Heading to dono/campaign:raised). args.campaign_id is optional; it falls back
  * to the page's _dono_campaign_id meta, same as CampaignBlock.
+ *
+ * @since 1.0.0
  */
 final class CampaignBindings extends HookProvider
 {
+    /** @since 1.0.0 */
     public function __construct(private CampaignRepository $campaigns)
     {
     }
 
+    /** @since 1.0.0 */
     protected function actions(): array
     {
         return [
@@ -34,6 +38,8 @@ final class CampaignBindings extends HookProvider
      * what a heading should say.
      *
      * @return array<string,string>
+     *
+     * @since 1.0.0
      */
     public static function fields(): array
     {
@@ -57,6 +63,8 @@ final class CampaignBindings extends HookProvider
      * code path as the front end, so the editor cannot drift from it.
      *
      * @return array<string,?string>
+     *
+     * @since 1.0.0
      */
     public function valuesFor(Campaign $campaign): array
     {
@@ -68,6 +76,7 @@ final class CampaignBindings extends HookProvider
         return $out;
     }
 
+    /** @since 1.0.0 */
     public function registerSource(): void
     {
         if (! function_exists('register_block_bindings_source')) return;
@@ -83,6 +92,8 @@ final class CampaignBindings extends HookProvider
      * @param array{key?:string,campaign_id?:int|string} $args
      * @param \WP_Block $block
      * @param string $attributeName Block attribute being resolved (content, url, ...).
+     *
+     * @since 1.0.0
      */
     public function resolve(array $args, $block, string $attributeName): ?string
     {
@@ -94,6 +105,7 @@ final class CampaignBindings extends HookProvider
         return $this->valueFor($campaign, $key);
     }
 
+    /** @since 1.0.0 */
     private function resolveCampaign(array $args, $block): ?Campaign
     {
         $explicit = isset($args['campaign_id']) ? (int) $args['campaign_id'] : 0;
@@ -115,6 +127,7 @@ final class CampaignBindings extends HookProvider
         return $bound > 0 ? $this->campaigns->findRenderable($bound) : null;
     }
 
+    /** @since 1.0.0 */
     private function valueFor(Campaign $campaign, string $key): ?string
     {
         // The model casts each column to its declared property type on hydration,
@@ -168,6 +181,8 @@ final class CampaignBindings extends HookProvider
      * Null rather than '' when the campaign has no cover: a binding that returns
      * null leaves the block's own attribute alone, so a pattern's placeholder
      * image survives instead of rendering a broken src.
+     *
+     * @since 1.0.0
      */
     private function imageUrl(Campaign $campaign): ?string
     {
@@ -176,6 +191,7 @@ final class CampaignBindings extends HookProvider
         return $src ?: null;
     }
 
+    /** @since 1.0.0 */
     private function imageAlt(Campaign $campaign): ?string
     {
         if (! $campaign->image_attachment_id) return null;
@@ -183,6 +199,7 @@ final class CampaignBindings extends HookProvider
         return is_string($alt) && $alt !== '' ? $alt : $campaign->title;
     }
 
+    /** @since 1.0.0 */
     private function pageUrl(Campaign $campaign): ?string
     {
         if (! $campaign->page_id) return null;
@@ -190,6 +207,7 @@ final class CampaignBindings extends HookProvider
         return $url ?: null;
     }
 
+    /** @since 1.0.0 */
     private function daysLeft(Campaign $campaign): ?int
     {
         if (! $campaign->ends_at) return null;

@@ -14,9 +14,12 @@ use Dono\Foundation\Helpers\View;
  *
  * Renders nothing when the metric does not apply to this campaign. See
  * CampaignStatMetrics for why that is silence rather than a zero.
+ *
+ * @since 1.0.0
  */
 final class CampaignStatBlock extends CampaignBlock
 {
+    /** @since 1.0.0 */
     public function __construct(
         CampaignRepository $campaigns,
         private readonly CampaignStatMetrics $metrics,
@@ -24,11 +27,13 @@ final class CampaignStatBlock extends CampaignBlock
         parent::__construct($campaigns);
     }
 
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/campaign-stat';
     }
 
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         return $this->campaignIdAttr() + [
@@ -39,6 +44,7 @@ final class CampaignStatBlock extends CampaignBlock
         ];
     }
 
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         $campaign = $this->resolveCampaign($attrs);

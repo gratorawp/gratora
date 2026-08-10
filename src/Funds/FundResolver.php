@@ -13,14 +13,16 @@ use Dono\Forms\Form;
  * Precedence (first active wins): donor choice, form default, campaign
  * default, org default, any active fund.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class FundResolver
 {
+    /** @since 1.0.0 */
     public function __construct(private FundRepository $funds)
     {
     }
 
+    /** @since 1.0.0 */
     public function resolve(?int $submittedFundId, ?int $formId, ?int $campaignId): ?int
     {
         if ($id = $this->selectableId($submittedFundId)) {
@@ -50,6 +52,7 @@ final class FundResolver
         return $anyActive ? (int) $anyActive->id : null;
     }
 
+    /** @since 1.0.0 */
     private function activeId(mixed $fundId): ?int
     {
         $fundId = (int) $fundId;
@@ -64,6 +67,8 @@ final class FundResolver
      * Donor-submitted choices only: a parent fund with active children is a
      * picker group header, not a choice, and the renderer never offers it.
      * Admin-configured defaults keep plain activeId semantics.
+     *
+     * @since 1.0.0
      */
     private function selectableId(mixed $fundId): ?int
     {

@@ -11,16 +11,20 @@ use WP_Post;
  * Serves campaign pages under /campaigns/<slug>/. Campaigns are ordinary top-level
  * pages; a rewrite maps the prefixed URL and a page_link filter keeps every
  * generated permalink carrying the prefix.
+ *
+ * @since 1.0.0
  */
 final class CampaignPermalinks extends HookProvider
 {
     public const PREFIX = 'campaigns';
 
+    /** @since 1.0.0 */
     protected function actions(): array
     {
         return ['init' => 'addRule'];
     }
 
+    /** @since 1.0.0 */
     protected function filters(): array
     {
         return [
@@ -29,6 +33,7 @@ final class CampaignPermalinks extends HookProvider
         ];
     }
 
+    /** @since 1.0.0 */
     public function addRule(): void
     {
         if (! get_option('permalink_structure')) {
@@ -41,6 +46,7 @@ final class CampaignPermalinks extends HookProvider
         );
     }
 
+    /** @since 1.0.0 */
     public function filterLink(string $link, int $postId): string
     {
         if (! get_option('permalink_structure') || ! $this->isCampaignPage($postId)) {
@@ -53,7 +59,11 @@ final class CampaignPermalinks extends HookProvider
         return home_url(user_trailingslashit(self::PREFIX . '/' . $page->post_name));
     }
 
-    /** @param string|false $redirect */
+    /**
+     * @param string|false $redirect
+     *
+     * @since 1.0.0
+     */
     public function guardCanonical($redirect)
     {
         if (is_page() && $this->isCampaignPage(get_queried_object_id())) {
@@ -62,6 +72,7 @@ final class CampaignPermalinks extends HookProvider
         return $redirect;
     }
 
+    /** @since 1.0.0 */
     private function isCampaignPage(int $postId): bool
     {
         return $postId > 0

@@ -20,13 +20,14 @@ use Dono\Receipts\PdfBuilder;
  * deductible, so a fully refunded donation is dropped and a partial refund is
  * netted.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class TaxStatementBuilder
 {
     /** Names this builder to the dono.statement.pdf filter. */
     public const KIND = 'tax';
 
+    /** @since 1.0.0 */
     public function __construct(
         private PdfBuilder $pdf,
         private DonationRepository $donations,
@@ -34,6 +35,7 @@ final class TaxStatementBuilder
     ) {
     }
 
+    /** @since 1.0.0 */
     public function build(Donor $donor, int $year): string
     {
         // See AnnualStatementBuilder: an add-on replacing annual documents
@@ -82,6 +84,8 @@ final class TaxStatementBuilder
      * the PDF uses so the command's reported figures match the document.
      *
      * @return array{donation_count:int,total_cents:int,currency:string}
+     *
+     * @since 1.0.0
      */
     public function summary(int $donorId, int $year): array
     {
@@ -93,7 +97,11 @@ final class TaxStatementBuilder
         ];
     }
 
-    /** Stable download filename shared by the command link and the streaming route. */
+    /**
+     * Stable download filename shared by the command link and the streaming route.
+     *
+     * @since 1.0.0
+     */
     public static function filename(int $donorId, int $year): string
     {
         return sprintf('dono-tax-statement-%d-donor-%d.pdf', $year, $donorId);
@@ -107,6 +115,8 @@ final class TaxStatementBuilder
      *
      * @param list<array{date:string,amount_cents:int,refunded_cents:int,currency:string,reference:string,receipt_number:?string}> $rows
      * @return array{lines:list<array<string,string>>,totals:list<array{label:string,amount:string}>,donation_count:int,total_cents:int,currency:string}
+     *
+     * @since 1.0.0
      */
     private function itemize(array $rows): array
     {
@@ -168,6 +178,8 @@ final class TaxStatementBuilder
      *
      * @param array<string,mixed> $org
      * @return list<string>
+     *
+     * @since 1.0.0
      */
     private function orgAddressLines(array $org): array
     {
@@ -206,6 +218,8 @@ final class TaxStatementBuilder
      * Optional org receipt disclaimer to append. Read from the raw stored option
      * (not the merged default) so only a footer the org actually configured is
      * appended to the statement.
+     *
+     * @since 1.0.0
      */
     private function orgDisclaimer(): string
     {

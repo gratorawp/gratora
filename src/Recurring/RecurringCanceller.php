@@ -14,9 +14,12 @@ use Dono\Gateways\SubscriptionAware;
  * winning markCancelled's conditional update, so they fire exactly once even
  * when a gateway webhook races the same cancel. Shared by the donor portal, the
  * admin CLI, and campaign archiving.
+ *
+ * @since 1.0.0
  */
 final class RecurringCanceller
 {
+    /** @since 1.0.0 */
     public function __construct(
         private RecurringPlanRepository $plans,
         private DonationService $donations,
@@ -30,19 +33,20 @@ final class RecurringCanceller
      *
      * @throws GatewayUnreachable when the plan lives at a processor this site
      *                            cannot currently talk to
+     *
+     * @since 1.0.0
      */
     public function cancel(RecurringPlan $plan, ?string $reason = null): bool
     {
         $gateway = $this->gateways->get((string) $plan->gateway);
 
-        // Two different things were being read as one. Offline is registered
-        // and simply has no subscriptions, so a local flip is the whole of it.
-        // A gateway that is absent entirely is a different answer: Stripe and
-        // PayPal register only while their credentials are stored, so a
-        // disconnected Stripe means "cannot reach the processor", not "this
-        // plan has no processor". Flipping local state on that reading marks
-        // the plan cancelled, emails the donor to say so, and leaves the card
-        // charged every month with the renewals no longer even handled.
+        // Offline is registered and simply has no subscriptions, so a local flip
+        // is the whole of it. A gateway that is absent entirely is a different
+        // answer: Stripe and PayPal register only while their credentials are
+        // stored, so a disconnected Stripe means "cannot reach the processor",
+        // not "this plan has no processor". Flipping local state on that reading
+        // marks the plan cancelled, emails the donor to say so, and leaves the
+        // card charged every month with the renewals no longer even handled.
         if ($gateway === null) {
             throw new GatewayUnreachable(sprintf(
                 'Cannot cancel plan %d: the %s gateway is not available, so its subscription would keep billing.',

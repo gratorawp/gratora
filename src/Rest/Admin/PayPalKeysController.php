@@ -19,17 +19,21 @@ use WP_REST_Server;
  * Credentials are exchanged for a token against PayPal before they are stored,
  * so a wrong client id or a sandbox key pasted into live is caught at save time
  * rather than at the first donation. The secret is write-only over REST.
+ *
+ * @since 1.0.0
  */
 final class PayPalKeysController
 {
     private const NAMESPACE = 'dono/v1';
 
+    /** @since 1.0.0 */
     public function __construct(
         private PayPalApi $api,
         private PayPalAccount $account,
     ) {
     }
 
+    /** @since 1.0.0 */
     public function registerRoutes(): void
     {
         register_rest_route(self::NAMESPACE, '/gateways/paypal/status', [
@@ -60,11 +64,13 @@ final class PayPalKeysController
         ]);
     }
 
+    /** @since 1.0.0 */
     public function canManage(): bool
     {
         return Capabilities::userCan('dono_manage_settings');
     }
 
+    /** @since 1.0.0 */
     public function status(): WP_REST_Response
     {
         return new WP_REST_Response([
@@ -75,6 +81,7 @@ final class PayPalKeysController
         ], 200);
     }
 
+    /** @since 1.0.0 */
     public function saveKeys(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $test      = $request->get_param('mode') === 'test';
@@ -126,6 +133,7 @@ final class PayPalKeysController
         return $this->status();
     }
 
+    /** @since 1.0.0 */
     public function removeKeys(WP_REST_Request $request): WP_REST_Response
     {
         $mode = (string) $request->get_param('mode');

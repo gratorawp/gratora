@@ -16,7 +16,7 @@ use Dono\Analytics\ErrorLog;
  * because a site can be several releases behind and needs every routine it
  * missed, in order, not just the newest one.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class UpgradeRunner
 {
@@ -28,7 +28,10 @@ final class UpgradeRunner
     /** @var list<UpgradeRoutine> */
     private array $routines;
 
-    /** @param list<UpgradeRoutine> $routines */
+    /**
+     * @param list<UpgradeRoutine> $routines
+     * @since 1.0.0
+     */
     public function __construct(array $routines = [])
     {
         // Add-ons register their own; core's ship in the order they are listed.
@@ -40,13 +43,19 @@ final class UpgradeRunner
         ));
     }
 
-    /** @return list<UpgradeRoutine> */
+    /**
+     * @return list<UpgradeRoutine>
+     * @since 1.0.0
+     */
     public function all(): array
     {
         return $this->routines;
     }
 
-    /** @return list<UpgradeRoutine> in registration order */
+    /**
+     * @return list<UpgradeRoutine> in registration order
+     * @since 1.0.0
+     */
     public function pending(): array
     {
         $done = self::completed();
@@ -57,6 +66,7 @@ final class UpgradeRunner
         ));
     }
 
+    /** @since 1.0.0 */
     public function hasPending(): bool
     {
         return $this->pending() !== [];
@@ -69,6 +79,7 @@ final class UpgradeRunner
      * earlier one having finished.
      *
      * @return bool true while work remains, so the caller knows to come back
+     * @since 1.0.0
      */
     public function step(): bool
     {
@@ -113,6 +124,7 @@ final class UpgradeRunner
      * Why a routine last failed, keyed by id, with how many times running.
      *
      * @return array<string,array{message:string, attempts:int, at:string}>
+     * @since 1.0.0
      */
     public static function failures(): array
     {
@@ -121,6 +133,7 @@ final class UpgradeRunner
         return is_array($failed) ? $failed : [];
     }
 
+    /** @since 1.0.0 */
     private static function recordFailure(string $id, string $message): void
     {
         $failed = self::failures();
@@ -133,6 +146,7 @@ final class UpgradeRunner
         update_option(self::OPTION_FAILED, $failed, false);
     }
 
+    /** @since 1.0.0 */
     private static function clearFailure(string $id): void
     {
         $failed = self::failures();
@@ -144,7 +158,10 @@ final class UpgradeRunner
         update_option(self::OPTION_FAILED, $failed, false);
     }
 
-    /** @return list<string> */
+    /**
+     * @return list<string>
+     * @since 1.0.0
+     */
     public static function completed(): array
     {
         $done = get_option(self::OPTION_DONE, []);
@@ -152,6 +169,7 @@ final class UpgradeRunner
         return is_array($done) ? array_values(array_map('strval', $done)) : [];
     }
 
+    /** @since 1.0.0 */
     public static function markDone(string $id): void
     {
         $done = self::completed();
@@ -169,6 +187,8 @@ final class UpgradeRunner
      * For a fresh install: a new site has nothing to migrate, and running a
      * backfill over an empty table is at best wasted work and at worst wrong,
      * since some routines assume the shape of data an older release wrote.
+     *
+     * @since 1.0.0
      */
     public static function markAllDone(UpgradeRunner $runner): void
     {

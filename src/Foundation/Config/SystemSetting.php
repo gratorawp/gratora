@@ -11,7 +11,7 @@ use Dono\Vendor\Queryable\Schema\Table;
 /**
  * Persistent install-level settings stored in dono_system_settings.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class SystemSetting extends Model
 {
@@ -23,7 +23,7 @@ final class SystemSetting extends Model
     public string $setting_value = '';
     public string $updated_at;
 
-    /** Return a setting value by key, or null if absent. */
+    /** @since 1.0.0 */
     public static function read(string $key): ?string
     {
         $row = DB::table('dono_system_settings')
@@ -35,7 +35,7 @@ final class SystemSetting extends Model
         return isset($row['setting_value']) ? (string) $row['setting_value'] : null;
     }
 
-    /** Upsert a setting by key. */
+    /** @since 1.0.0 */
     public static function write(string $key, string $value): void
     {
         $now = gmdate('Y-m-d H:i:s');
@@ -50,7 +50,7 @@ final class SystemSetting extends Model
         );
     }
 
-    /** Return whether a setting row exists for $key. */
+    /** @since 1.0.0 */
     public static function exists(string $key): bool
     {
         return DB::table('dono_system_settings')
@@ -58,7 +58,7 @@ final class SystemSetting extends Model
             ->exists();
     }
 
-    /** Delete the setting row for $key. */
+    /** @since 1.0.0 */
     public static function forget(string $key): void
     {
         DB::table('dono_system_settings')

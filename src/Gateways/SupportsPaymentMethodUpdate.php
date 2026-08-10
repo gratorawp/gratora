@@ -18,13 +18,15 @@ use Dono\Recurring\RecurringPlan;
  * A declined renewal is usually an expired card, which no amount of retrying
  * fixes; this is the flow that actually resolves dunning.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 interface SupportsPaymentMethodUpdate
 {
     /**
      * Begin the change. The returned shape tells the portal whether to collect
      * the card in place or to send the donor to the processor.
+     *
+     * @since 1.0.0
      */
     public function startPaymentMethodUpdate(RecurringPlan $plan): PaymentMethodUpdate;
 
@@ -35,6 +37,8 @@ interface SupportsPaymentMethodUpdate
      * completed by the processor, and its webhook is what tells us.
      *
      * @param string $token The processor's id for the method the browser confirmed.
+     *
+     * @since 1.0.0
      */
     public function completePaymentMethodUpdate(RecurringPlan $plan, string $token): void;
 }

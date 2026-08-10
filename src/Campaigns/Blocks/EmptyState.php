@@ -11,11 +11,14 @@ namespace Dono\Campaigns\Blocks;
  * to yet, and they are usually placed together, so the same "be the first"
  * card renders twice under two different headings. The first one claims the
  * full card and the rest fall back to a single line.
+ *
+ * @since 1.0.0
  */
 final class EmptyState
 {
     private static bool $claimed = false;
 
+    /** @since 1.0.0 */
     public static function claimFull(): bool
     {
         if (self::$claimed) {

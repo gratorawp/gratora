@@ -10,7 +10,7 @@ use Dono\Currency\Currency;
  * Canonical money formatter for human-facing cents values.
  * DB/API/repository layers keep working in integer cents; only display calls this.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class Money
 {
@@ -43,6 +43,7 @@ final class Money
      * @param int    $cents    Whole-cents amount (negative allowed for refunds).
      * @param string $currency ISO 4217 code. Empty falls back to org default_currency.
      * @param bool   $compact  Drop trailing .00 on whole amounts.
+     * @since 1.0.0
      */
     public static function format(int $cents, string $currency = '', bool $compact = false): string
     {
@@ -71,6 +72,8 @@ final class Money
      * its own default currency (an org may tune its display), otherwise the
      * currency's ISO minor-unit count so JPY shows none and BHD shows three.
      * Amounts are stored as major x 100 regardless, so only rendering changes.
+     *
+     * @since 1.0.0
      */
     private static function decimalsFor(string $code): int
     {
@@ -84,6 +87,7 @@ final class Money
      * Org-wide number-format settings, cached per request.
      *
      * @return array{decimal_places:int, decimal_sep:string, thousand_sep:string, symbol_position:string}
+     * @since 1.0.0
      */
     public static function numberFormat(): array
     {
@@ -101,6 +105,7 @@ final class Money
         ];
     }
 
+    /** @since 1.0.0 */
     public static function compact(int $cents, string $currency = ''): string
     {
         return self::format($cents, $currency, true);
@@ -112,6 +117,7 @@ final class Money
      * formatAmount falls back to its own table for other currencies.
      *
      * @return array{decimalPlaces:int, decimalSep:string, thousandSep:string, symbolPosition:string, symbol:string}
+     * @since 1.0.0
      */
     public static function jsNumberFormat(): array
     {
@@ -125,14 +131,18 @@ final class Money
         ];
     }
 
-    /** Best-effort ISO 4217 to symbol lookup. */
+    /** @since 1.0.0 */
     public static function symbolFor(string $currency): string
     {
         $code = strtoupper(trim($currency));
         return self::SYMBOLS[$code] ?? $code;
     }
 
-    /** Bare major-unit number with org grouping, no symbol. */
+    /**
+     * Bare major-unit number with org grouping, no symbol.
+     *
+     * @since 1.0.0
+     */
     public static function major(int $cents, bool $compact = false): string
     {
         $major    = $cents / 100;
@@ -143,7 +153,7 @@ final class Money
         return $major < 0 ? '-' . $out : $out;
     }
 
-    /** Org default currency, USD if settings aren't initialised. */
+    /** @since 1.0.0 */
     public static function defaultCurrency(): string
     {
         static $cached = null;

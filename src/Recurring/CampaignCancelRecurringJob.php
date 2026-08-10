@@ -20,7 +20,7 @@ use Dono\Async\AsyncDispatcher;
  * the same failure forever. The cursor steps past it, the failure is logged,
  * and the run still finishes.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class CampaignCancelRecurringJob
 {
@@ -31,18 +31,20 @@ final class CampaignCancelRecurringJob
     /** Gateway round trips per tick, not rows: each one is an HTTPS call. */
     private const BATCH = 25;
 
+    /** @since 1.0.0 */
     public function __construct(
         private AsyncDispatcher $async,
         private RecurringCanceller $canceller,
     ) {
     }
 
+    /** @since 1.0.0 */
     public function register(): void
     {
         add_action(self::HOOK, [$this, 'run']);
     }
 
-    /** Queue the work and return immediately. */
+    /** @since 1.0.0 */
     public function start(int $campaignId, ?string $reason = null): void
     {
         if ($campaignId <= 0) {
@@ -58,7 +60,7 @@ final class CampaignCancelRecurringJob
      * Action Scheduler passes args positionally, so ['campaign_id' => N]
      * arrives as the first scalar; direct callers may pass the array.
      *
-     * @param mixed $args campaign id (AS) or ['campaign_id' => N] (direct)
+     * @since 1.0.0
      */
     public function run(mixed $args = null): void
     {
@@ -106,7 +108,7 @@ final class CampaignCancelRecurringJob
         $this->async->enqueue(self::HOOK, ['campaign_id' => $campaignId]);
     }
 
-    /** How many live plans are still waiting, for a screen that wants to say so. */
+    /** @since 1.0.0 */
     public static function remainingFor(int $campaignId): int
     {
         if (! array_key_exists($campaignId, self::pending())) {
@@ -121,12 +123,17 @@ final class CampaignCancelRecurringJob
             ->count();
     }
 
+    /** @since 1.0.0 */
     public static function isRunning(int $campaignId): bool
     {
         return array_key_exists($campaignId, self::pending());
     }
 
-    /** @return array<int,int> campaign_id => cursor */
+    /**
+     * @return array<int,int> campaign_id => cursor
+     *
+     * @since 1.0.0
+     */
     public static function pending(): array
     {
         $map = get_option(self::OPTION, []);
@@ -134,11 +141,13 @@ final class CampaignCancelRecurringJob
         return is_array($map) ? array_map('intval', $map) : [];
     }
 
+    /** @since 1.0.0 */
     private static function cursor(int $campaignId): int
     {
         return (int) (self::pending()[$campaignId] ?? 0);
     }
 
+    /** @since 1.0.0 */
     private static function setCursor(int $campaignId, int $after): void
     {
         $map               = self::pending();
@@ -146,6 +155,7 @@ final class CampaignCancelRecurringJob
         update_option(self::OPTION, $map, false);
     }
 
+    /** @since 1.0.0 */
     private static function clear(int $campaignId): void
     {
         $map = self::pending();
@@ -162,6 +172,8 @@ final class CampaignCancelRecurringJob
     /**
      * The cancellation reason reaches the donor's notice, so it has to survive
      * between ticks rather than ride in the job args.
+     *
+     * @since 1.0.0
      */
     private function reason(int $campaignId, ?string $set = null): ?string
     {
@@ -180,9 +192,9 @@ final class CampaignCancelRecurringJob
     }
 
     /**
-     * Instance entry point for the admin campaigns list, which holds the job
-     * rather than the dispatcher. Idempotent and cheap: one option read when
-     * nothing is pending.
+     * Idempotent and cheap: one option read when nothing is pending.
+     *
+     * @since 1.0.0
      */
     public function reconcilePending(): void
     {
@@ -191,7 +203,9 @@ final class CampaignCancelRecurringJob
 
     /**
      * Re-enqueues any run whose job was dropped. Safe to call on every admin
-     * campaigns load, like FundReassignmentJob::reconcile.
+     * campaigns load.
+     *
+     * @since 1.0.0
      */
     public static function reconcile(AsyncDispatcher $async): void
     {

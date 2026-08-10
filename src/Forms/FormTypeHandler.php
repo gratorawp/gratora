@@ -13,22 +13,34 @@ use Dono\Donations\DonationIntent;
  * prepareIntent must return a new DonationIntent (it is readonly), not mutate
  * the argument.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 interface FormTypeHandler
 {
-    /** Form type identifier. */
+    /** @since 1.0.0 */
     public function type(): string;
 
-    /** Human-facing type name. */
+    /** @since 1.0.0 */
     public function label(): string;
 
-    /** @param array<string,mixed> $body the intent's extra bag */
+    /**
+     * @param array<string,mixed> $body the intent's extra bag
+     *
+     * @since 1.0.0
+     */
     public function prepareIntent(DonationIntent $intent, array $body): DonationIntent;
 
-    /** @param array<string,mixed> $body the intent's extra bag */
+    /**
+     * @param array<string,mixed> $body the intent's extra bag
+     *
+     * @since 1.0.0
+     */
     public function onDonationCreated(Donation $donation, array $body): void;
 
-    /** @return class-string<\Dono\Vendor\Queryable\Model>|null sidecar PK = parent id, or null */
+    /**
+     * @return class-string<\Dono\Vendor\Queryable\Model>|null sidecar PK = parent id, or null
+     *
+     * @since 1.0.0
+     */
     public function sidecarModel(): ?string;
 }

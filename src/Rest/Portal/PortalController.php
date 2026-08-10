@@ -38,6 +38,12 @@ use WP_REST_Response;
 use WP_REST_Server;
 use Dono\Vendor\Queryable\DB;
 
+/**
+ * The donor portal API: magic-link sign-in, self-registration, and the signed-in
+ * donor's own donations, recurring plans, receipts, profile and privacy actions.
+ *
+ * @since 1.0.0
+ */
 final class PortalController
 {
     private const NAMESPACE = 'dono/v1';
@@ -47,6 +53,7 @@ final class PortalController
     private const SEND_LINK_IP_WINDOW    = 15 * MINUTE_IN_SECONDS;
     private const SEND_LINK_EMAIL_WINDOW = 5 * MINUTE_IN_SECONDS;
 
+    /** @since 1.0.0 */
     public function __construct(
         private PortalSession $session,
         private DonorRepository $donors,
@@ -70,12 +77,14 @@ final class PortalController
     ) {
     }
 
+    /** @since 1.0.0 */
     public function registerHooks(): void
     {
         // Action Scheduler spreads the enqueued args positionally, so accept 2.
         add_action(self::SEND_LINK_HOOK, [$this, 'handleSendLinkAsync'], 10, 2);
     }
 
+    /** @since 1.0.0 */
     public function registerRoutes(): void
     {
         register_rest_route(self::NAMESPACE, '/portal/exchange', [
@@ -256,6 +265,7 @@ final class PortalController
         ]);
     }
 
+    /** @since 1.0.0 */
     private function privacySetting(string $key, $default)
     {
         $opt = get_option('dono_privacy', []);
@@ -263,12 +273,17 @@ final class PortalController
         return array_key_exists($key, $opt) ? $opt[$key] : $default;
     }
 
+    /** @since 1.0.0 */
     public function session(): bool
     {
         return $this->session->currentDonorId() !== null;
     }
 
-    /** Writes only; defence in depth on top of the SameSite=Lax cookie. */
+    /**
+     * Writes only; defense in depth on top of the SameSite=Lax cookie.
+     *
+     * @since 1.0.0
+     */
     public function sessionWithCsrf(WP_REST_Request $request): bool
     {
         $expected = $this->session->csrfToken();
@@ -278,6 +293,7 @@ final class PortalController
         return hash_equals($expected, $provided);
     }
 
+    /** @since 1.0.0 */
     public function exchange(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $token = (string) $request['token'];
@@ -296,6 +312,8 @@ final class PortalController
      * Always returns 200 so the response can't reveal whether the address
      * belongs to a donor. Rate limited per-IP and per-email; issuance runs
      * async so timing doesn't leak the lookup result either.
+     *
+     * @since 1.0.0
      */
     public function sendLink(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
@@ -333,6 +351,8 @@ final class PortalController
      * No lookup happens here either, for the same reason sendLink() has none:
      * the two branches must not do visibly different amounts of work, or the
      * identical 200 is undone by the clock.
+     *
+     * @since 1.0.0
      */
     public function registerDonor(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
@@ -370,6 +390,8 @@ final class PortalController
      * params, not one array. Accept both shapes.
      *
      * @param array{donor_id?:int, email?:string}|int $args
+     *
+     * @since 1.0.0
      */
     public function handleSendLinkAsync(mixed $args = 0, string $email = ''): void
     {
@@ -423,6 +445,7 @@ final class PortalController
         );
     }
 
+    /** @since 1.0.0 */
     private function mailLink(string $email, string $rawToken, string $name): void
     {
         $this->mailer->sendTemplate('magic_link', $email, [
@@ -432,6 +455,7 @@ final class PortalController
         ]);
     }
 
+    /** @since 1.0.0 */
     private function consumeIpQuota(): bool
     {
         $ip  = (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
@@ -447,6 +471,8 @@ final class PortalController
      * exists to stop this endpoint mailing a person on demand, and one inbox
      * answers to unlimited addresses. Hashed only to keep a plaintext address
      * out of the options table.
+     *
+     * @since 1.0.0
      */
     private function consumeEmailQuota(string $email): bool
     {
@@ -458,12 +484,14 @@ final class PortalController
         return true;
     }
 
+    /** @since 1.0.0 */
     public function logout(): WP_REST_Response
     {
         $this->session->destroy();
         return new WP_REST_Response(['ok' => true], 200);
     }
 
+    /** @since 1.0.0 */
     public function logoutEverywhere(): WP_REST_Response|WP_Error
     {
         $donorId = $this->session->currentDonorId();
@@ -474,6 +502,7 @@ final class PortalController
         return new WP_REST_Response(['ok' => true, 'ended' => $this->session->destroyAllFor($donorId)], 200);
     }
 
+    /** @since 1.0.0 */
     public function me(): WP_REST_Response|WP_Error
     {
         $donorId = $this->session->currentDonorId();
@@ -510,7 +539,11 @@ final class PortalController
         ], 200);
     }
 
-    /** Donations of this donor's that no lifetime total can include. */
+    /**
+     * Donations of this donor's that no lifetime total can include.
+     *
+     * @since 1.0.0
+     */
     private function unconvertedDonationCount(int $donorId): int
     {
         $row = DonationQueries::donationsOnly(DB::table('dono_donations'))
@@ -522,6 +555,7 @@ final class PortalController
         return (int) ($row['n'] ?? 0);
     }
 
+    /** @since 1.0.0 */
     public function donationsList(): WP_REST_Response|WP_Error
     {
         $donor = $this->requireDonor();
@@ -556,6 +590,7 @@ final class PortalController
         return new WP_REST_Response($out, 200);
     }
 
+    /** @since 1.0.0 */
     public function donationShow(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $donor = $this->requireDonor();
@@ -606,6 +641,7 @@ final class PortalController
         return new WP_REST_Response($payload, 200);
     }
 
+    /** @since 1.0.0 */
     public function donationAnonymity(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $donor = $this->requireDonor();
@@ -624,6 +660,7 @@ final class PortalController
         return new WP_REST_Response(['ok' => true, 'is_anonymous' => $d->is_anonymous], 200);
     }
 
+    /** @since 1.0.0 */
     public function recurring(): WP_REST_Response|WP_Error
     {
         $donor = $this->requireDonor();
@@ -660,6 +697,7 @@ final class PortalController
         return new WP_REST_Response($out, 200);
     }
 
+    /** @since 1.0.0 */
     public function recurringAction(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         // Through donorPlan(), so ownership and the test-plan rule are checked
@@ -740,6 +778,8 @@ final class PortalController
     /**
      * The dunning email points the donor here, and a declined renewal is
      * usually an expired card, which retrying cannot fix.
+     *
+     * @since 1.0.0
      */
     public function startPaymentMethodUpdate(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
@@ -778,6 +818,8 @@ final class PortalController
      * The browser confirmed the setup against the processor, so what arrives
      * here is only an identifier for it: no card detail passes through this
      * site.
+     *
+     * @since 1.0.0
      */
     public function completePaymentMethodUpdate(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
@@ -805,7 +847,11 @@ final class PortalController
         return new WP_REST_Response(['ok' => true], 200);
     }
 
-    /** The named plan, only if it belongs to the donor whose session this is. */
+    /**
+     * The named plan, only if it belongs to the donor whose session this is.
+     *
+     * @since 1.0.0
+     */
     private function donorPlan(WP_REST_Request $request): RecurringPlan|WP_Error
     {
         $donor = $this->requireDonor();
@@ -821,6 +867,7 @@ final class PortalController
         return $plan;
     }
 
+    /** @since 1.0.0 */
     public function receiptsList(): WP_REST_Response|WP_Error
     {
         $donor = $this->requireDonor();
@@ -863,6 +910,8 @@ final class PortalController
     /**
      * A fresh token at click time, so a portal receipt link never opens
      * expired. Gated on the session and the donor's own receipt.
+     *
+     * @since 1.0.0
      */
     public function receiptDownloadUrl(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
@@ -885,6 +934,7 @@ final class PortalController
         return new WP_REST_Response(['url' => esc_url_raw($url)], 200);
     }
 
+    /** @since 1.0.0 */
     public function annualStatement(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $donor = $this->requireDonor();
@@ -920,6 +970,7 @@ final class PortalController
         return $response;
     }
 
+    /** @since 1.0.0 */
     public function profileShow(): WP_REST_Response|WP_Error
     {
         $donorId = $this->session->currentDonorId();
@@ -937,6 +988,7 @@ final class PortalController
         ], 200);
     }
 
+    /** @since 1.0.0 */
     public function profileUpdate(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $donorId = $this->session->currentDonorId();
@@ -955,6 +1007,7 @@ final class PortalController
         return $this->profileShow();
     }
 
+    /** @since 1.0.0 */
     public function avatarUpload(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $donor = $this->requireDonor();
@@ -990,6 +1043,7 @@ final class PortalController
         return $this->profileShow();
     }
 
+    /** @since 1.0.0 */
     public function avatarDelete(): WP_REST_Response|WP_Error
     {
         $donor = $this->requireDonor();
@@ -1000,6 +1054,7 @@ final class PortalController
         return $this->profileShow();
     }
 
+    /** @since 1.0.0 */
     public function preferencesShow(): WP_REST_Response|WP_Error
     {
         $donor = $this->requireDonor();
@@ -1012,6 +1067,7 @@ final class PortalController
         return new WP_REST_Response(self::normalizePrefs($prefs), 200);
     }
 
+    /** @since 1.0.0 */
     public function preferencesUpdate(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $donor = $this->requireDonor();
@@ -1028,6 +1084,7 @@ final class PortalController
         return new WP_REST_Response($next, 200);
     }
 
+    /** @since 1.0.0 */
     public function consentsShow(): WP_REST_Response|WP_Error
     {
         $donor = $this->requireDonor();
@@ -1036,7 +1093,11 @@ final class PortalController
         return new WP_REST_Response($this->shapeConsents((int) $donor->id), 200);
     }
 
-    /** `stale` is true when the stored version is behind the purpose version. */
+    /**
+     * `stale` is true when the stored version is behind the purpose version.
+     *
+     * @since 1.0.0
+     */
     private function shapeConsents(int $donorId): array
     {
         $purposes = $this->consents->purposes();
@@ -1083,7 +1144,7 @@ final class PortalController
             $out[] = [
                 'key'   => (string) $key,
                 // No label is stored with the record and the form that defined
-                // it may be gone, so the key is humanised rather than shown raw.
+                // it may be gone, so the key is humanized rather than shown raw.
                 'label' => ucfirst(str_replace(['_', '-'], ' ', (string) $key)),
                 'description'    => '',
                 // Nothing off the registry can be required, or it would be a
@@ -1101,6 +1162,7 @@ final class PortalController
         return $out;
     }
 
+    /** @since 1.0.0 */
     private function staleConsentCount(int $donorId): int
     {
         $count = 0;
@@ -1110,6 +1172,7 @@ final class PortalController
         return $count;
     }
 
+    /** @since 1.0.0 */
     public function consentsUpdate(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $donor = $this->requireDonor();
@@ -1164,6 +1227,8 @@ final class PortalController
      * goes through here rather than reading the session id directly: erasure
      * deletes the magic-link tokens, but a cookie minted before it would
      * otherwise keep working for its full life.
+     *
+     * @since 1.0.0
      */
     private function requireDonor(): Donor|WP_Error
     {
@@ -1173,11 +1238,13 @@ final class PortalController
         return $donor;
     }
 
+    /** @since 1.0.0 */
     private function portalUrl(): string
     {
         return (new \Dono\Donors\Portal\PortalPage())->url();
     }
 
+    /** @since 1.0.0 */
     private static function normalizePrefs(array $raw): array
     {
         $bool = static fn ($v) => (bool) $v;
@@ -1189,7 +1256,11 @@ final class PortalController
         ];
     }
 
-    /** GDPR right of access. */
+    /**
+     * GDPR right of access.
+     *
+     * @since 1.0.0
+     */
     public function dataExport(): WP_REST_Response|WP_Error
     {
         if (! $this->privacySetting('allow_data_export', true)) {
@@ -1290,6 +1361,8 @@ final class PortalController
     /**
      * GDPR right to erasure. Soft-redact: zeroes PII but keeps donation totals
      * for tax and audit.
+     *
+     * @since 1.0.0
      */
     public function forget(WP_REST_Request $request): WP_REST_Response|WP_Error
     {

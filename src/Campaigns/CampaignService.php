@@ -17,7 +17,7 @@ use RuntimeException;
 /**
  * Creates, updates, duplicates, and deletes campaigns and their linked WP pages.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class CampaignService
 {
@@ -30,6 +30,7 @@ final class CampaignService
      */
     private array $deletingPageIds = [];
 
+    /** @since 1.0.0 */
     public function __construct(
         private CampaignRepository $campaigns,
         private FormService $forms,
@@ -39,6 +40,8 @@ final class CampaignService
 
     /**
      * @param array<string,mixed> $input
+     *
+     * @since 1.0.0
      */
     public function create(array $input): Campaign
     {
@@ -87,7 +90,11 @@ final class CampaignService
         return $campaign;
     }
 
-    /** @param array<string,mixed> $input */
+    /**
+     * @param array<string,mixed> $input
+     *
+     * @since 1.0.0
+     */
     public function update(Campaign $campaign, array $input): Campaign
     {
         $now = $this->clock->now()->format('Y-m-d H:i:s');
@@ -194,7 +201,6 @@ final class CampaignService
         $campaign->updated_at = $now;
         $campaign->save();
 
-        // Keep the linked WP page in sync with the campaign record.
         $this->syncPage($campaign, [
             'title'  => $prevTitle  !== $campaign->title,
             'slug'   => $prevSlug   !== $campaign->slug,
@@ -226,6 +232,8 @@ final class CampaignService
      * non-ticket donations only, and a campaign whose single donation is
      * pending, failed, test-mode or a ticket order reads zero there while this
      * still refuses.
+     *
+     * @since 1.0.0
      */
     public function deleteBlockedReason(Campaign $campaign): ?string
     {
@@ -239,6 +247,7 @@ final class CampaignService
         return null;
     }
 
+    /** @since 1.0.0 */
     public function delete(Campaign $campaign): void
     {
         $blocked = $this->deleteBlockedReason($campaign);
@@ -280,6 +289,8 @@ final class CampaignService
      * Resolve an image_attachment_id input to a validated id or null. A
      * non-empty value must point at an actual image (create() and update()
      * share this so they can't diverge).
+     *
+     * @since 1.0.0
      */
     private function validateImageAttachment(mixed $value): ?int
     {
@@ -294,8 +305,10 @@ final class CampaignService
     }
 
     /**
-     * Normalise the incoming campaign.style payload.
+     * Normalize the incoming campaign.style payload.
      * Shape: ['preset_id' => '<id>'?, 'tokens' => [...]?]
+     *
+     * @since 1.0.0
      */
     private function sanitiseStyle(mixed $style): ?array
     {
@@ -316,6 +329,8 @@ final class CampaignService
     /**
      * Clone the campaign: copy editable fields, reset metrics, draft status,
      * fresh page + default form. Donations are not carried over.
+     *
+     * @since 1.0.0
      */
     public function duplicate(Campaign $source): Campaign
     {
@@ -368,6 +383,8 @@ final class CampaignService
      * campaign back to draft and clear `page_id` so the admin can see the
      * page is gone and choose to recreate it. Donations + the form record
      * stay untouched.
+     *
+     * @since 1.0.0
      */
     public function onPageDeleted(int $postId): void
     {
@@ -398,6 +415,8 @@ final class CampaignService
      * campaign isn't left orphaned with the admin offering to recreate a
      * duplicate page. If the page came back published, bring the campaign live
      * too, mirroring onPagePublished.
+     *
+     * @since 1.0.0
      */
     public function onPageRestored(int $postId): void
     {
@@ -427,6 +446,8 @@ final class CampaignService
      * page doesn't leave the campaign (and the donation form, which is gated on a
      * published campaign) in draft. The campaign->page sync that update() runs
      * would re-enter here, so we bail once the campaign is already published.
+     *
+     * @since 1.0.0
      */
     public function onPagePublished(string $newStatus, string $oldStatus, \WP_Post $post): void
     {
@@ -451,6 +472,8 @@ final class CampaignService
      * form changes status, re-sync the campaign page so its visibility
      * always tracks the combined campaign + form state. Public only when
      * both are published.
+     *
+     * @since 1.0.0
      */
     public function onFormUpdated(Form $form): void
     {
@@ -477,6 +500,8 @@ final class CampaignService
      * otherwise the public page would render a form that rejects donations
      * with a 403. Single source of truth for both the campaign-publish path
      * (syncPage) and the form-publish path (onFormUpdated).
+     *
+     * @since 1.0.0
      */
     private function desiredPageStatus(Campaign $campaign): string
     {
@@ -493,6 +518,7 @@ final class CampaignService
         return 'publish';
     }
 
+    /** @since 1.0.0 */
     private function createPageFor(Campaign $campaign, bool $formIsDraft = false): int
     {
         // Page is public only when both the campaign and default form are published.
@@ -521,6 +547,8 @@ final class CampaignService
      * string would leave its heading captioning whatever came next.
      *
      * dp- class names come from assets/campaign-page/page.css.
+     *
+     * @since 1.0.0
      */
     private function pageStarterBlocks(Campaign $campaign): string
     {
@@ -530,7 +558,7 @@ final class CampaignService
         // revision shows a change nobody made. Cosmetic, and P2P's LayoutBlocks
         // writes it the same way.
         $t0 = __('Campaign name', 'dono');
-        // Bound, so this is only what an organiser who has written no
+        // Bound, so this is only what an organizer who has written no
         // description sees in the editor. Nothing else is seeded as prose:
         // seeded words read to a donor as the campaign's own.
         $t2 = __('What this campaign is raising for.', 'dono');
@@ -538,8 +566,8 @@ final class CampaignService
         $t6 = __('Top donors', 'dono');
 
         // These two sections are titled by the block itself rather than a
-        // Heading above it, which rendered the words twice. json_encode so a
-        // translated title carrying a quote cannot break the block comment.
+        // Heading above it, which would render the words twice. json_encode so
+        // a translated title carrying a quote cannot break the block comment.
         $t5j = json_encode($t5, JSON_UNESCAPED_UNICODE);
         $t6j = json_encode($t6, JSON_UNESCAPED_UNICODE);
 
@@ -617,6 +645,7 @@ BLOCKS;
         return (string) apply_filters('dono.campaign.starter_blocks', $default, $campaign);
     }
 
+    /** @since 1.0.0 */
     private function createDefaultFormFor(Campaign $campaign, bool $skipTemplate = false): int
     {
         $form = $this->forms->create([
@@ -631,6 +660,7 @@ BLOCKS;
         return $form->id;
     }
 
+    /** @since 1.0.0 */
     private function starterBlocks(string $currency): string
     {
         $currency = esc_attr(strtoupper($currency));
@@ -654,6 +684,8 @@ BLOCKS;
      * the fields that moved to avoid unnecessary wp_update_post calls.
      *
      * @param array{title?:bool,slug?:bool,status?:bool} $changed
+     *
+     * @since 1.0.0
      */
     private function syncPage(Campaign $campaign, array $changed): void
     {
@@ -680,18 +712,21 @@ BLOCKS;
         wp_update_post($patch);
     }
 
+    /** @since 1.0.0 */
     private function coerceStatus(string $status): string
     {
         $status = strtolower(trim($status));
         return in_array($status, ['draft', 'published', 'archived'], true) ? $status : 'draft';
     }
 
+    /** @since 1.0.0 */
     private function coerceGoalType(string $type): string
     {
         $type = strtolower(trim($type));
         return in_array($type, ['amount', 'donations', 'donors'], true) ? $type : 'amount';
     }
 
+    /** @since 1.0.0 */
     private function uniqueSlug(string $source): string
     {
         $base = sanitize_title($source) ?: 'campaign';

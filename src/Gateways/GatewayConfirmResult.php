@@ -7,10 +7,11 @@ namespace Dono\Gateways;
 /**
  * Result of `PaymentGateway::confirm()`.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class GatewayConfirmResult
 {
+    /** @since 1.0.0 */
     public function __construct(
         public readonly bool $success,
         public readonly ?string $gateway_txn_id = null,
@@ -27,7 +28,7 @@ final class GatewayConfirmResult
     ) {
     }
 
-    /** Serialise to an array for persistence. */
+    /** @since 1.0.0 */
     public function toArray(): array
     {
         return [

@@ -13,7 +13,7 @@ use Dono\Funds\FundRepository;
 /**
  * Idempotent activation: each step checks state and only acts on what's missing.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class Activator
 {
@@ -21,12 +21,14 @@ final class Activator
     public const OPT_ORG_PROFILE  = 'dono_org_profile';
     public const CAP_MANAGE       = 'manage_dono';
 
+    /** @since 1.0.0 */
     public function __construct(
         private FundRepository $funds,
         private Clock $clock,
     ) {
     }
 
+    /** @since 1.0.0 */
     public function activate(): void
     {
         $this->seedDefaultFund();
@@ -42,12 +44,14 @@ final class Activator
         do_action('dono.activator.ran');
     }
 
+    /** @since 1.0.0 */
     private function seedReferenceSettings(): void
     {
         if (get_option(ReferenceGenerator::OPTION_SETTINGS, false) !== false) return;
         add_option(ReferenceGenerator::OPTION_SETTINGS, ReferenceGenerator::DEFAULT_SETTINGS, '', false);
     }
 
+    /** @since 1.0.0 */
     private function seedDefaultFund(): void
     {
         if ($this->funds->default() !== null) return;
@@ -69,6 +73,7 @@ final class Activator
         $fund->save();
     }
 
+    /** @since 1.0.0 */
     private function grantCapabilities(): void
     {
         $admin = get_role('administrator');
@@ -77,6 +82,7 @@ final class Activator
         }
     }
 
+    /** @since 1.0.0 */
     private function seedOrgProfile(): void
     {
         if (get_option(self::OPT_ORG_PROFILE, false) !== false) return;
@@ -89,6 +95,7 @@ final class Activator
         ], '', false);
     }
 
+    /** @since 1.0.0 */
     private function markActivated(): void
     {
         if (get_option(self::OPT_ACTIVATED_AT, false) !== false) return;

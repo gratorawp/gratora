@@ -8,7 +8,7 @@ namespace Dono\Donations;
  * Maps `donations.source_attribution` (utm_source/utm_medium) into a canonical
  * channel bucket. Used by every aggregator that wants channel-grouped numbers.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class ChannelClassifier
 {
@@ -59,7 +59,11 @@ final class ChannelClassifier
         'newsletter', 'mailchimp', 'sendinblue', 'mailerlite', 'mailgun',
     ];
 
-    /** @param array<string,mixed> $attr */
+    /**
+     * @param array<string,mixed> $attr
+     *
+     * @since 1.0.0
+     */
     public static function classify(array $attr): string
     {
         $source = strtolower(trim((string) ($attr['utm_source'] ?? '')));

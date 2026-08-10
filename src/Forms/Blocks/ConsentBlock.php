@@ -10,21 +10,22 @@ use Dono\Foundation\Helpers\View;
 /**
  * Consent / opt-in purposes block.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class ConsentBlock implements Block
 {
+    /** @since 1.0.0 */
     public function __construct(private ConsentService $consents)
     {
     }
 
-    /** Block name. */
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/consent';
     }
 
-    /** Editor attribute schema. */
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         return [
@@ -38,7 +39,7 @@ final class ConsentBlock implements Block
         ];
     }
 
-    /** Render server-side markup. */
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         $purposes = $this->resolvePurposes(self::purposeKeys($attrs));
@@ -69,6 +70,8 @@ final class ConsentBlock implements Block
      *
      * @param  list<string> $keys
      * @return list<array{key:string,label:string,description:string,required:bool,default:bool}>
+     *
+     * @since 1.0.0
      */
     private function resolvePurposes(array $keys): array
     {
@@ -90,6 +93,8 @@ final class ConsentBlock implements Block
     /**
      * @param  array<string,mixed> $attrs
      * @return list<string>
+     *
+     * @since 1.0.0
      */
     public static function purposeKeys(array $attrs): array
     {

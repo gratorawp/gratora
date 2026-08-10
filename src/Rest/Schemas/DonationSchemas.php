@@ -9,11 +9,15 @@ namespace Dono\Rest\Schemas;
  * automatically (failures: rest_invalid_param, 400); DonationService guards
  * remain as defense-in-depth.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class DonationSchemas
 {
-    /** @return array<string, array<string,mixed>> */
+    /**
+     * @return array<string, array<string,mixed>>
+     *
+     * @since 1.0.0
+     */
     public static function create(): array
     {
         return [

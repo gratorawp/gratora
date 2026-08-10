@@ -10,7 +10,7 @@ use Dono\Vendor\Queryable\Schema\Table;
 /**
  * One-time token for donor self-service.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class MagicLinkToken extends Model
 {

@@ -13,16 +13,18 @@ use Dono\Recurring\RecurringPlan;
  * delivery is refused: recurring renewals, async payment confirmations and
  * account updates never process, and nothing else says so.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class StripeWebhookNotice
 {
+    /** @since 1.0.0 */
     public function __construct(
         private readonly StripeAccount $account,
         private readonly StripeApi $api,
     ) {
     }
 
+    /** @since 1.0.0 */
     public function register(): void
     {
         add_action('admin_notices', [$this, 'render']);
@@ -31,6 +33,8 @@ final class StripeWebhookNotice
     /**
      * Separate from render() so the rule can be tested: the rendering half is
      * behind an is_admin() gate that a test environment never satisfies.
+     *
+     * @since 1.0.0
      */
     public function shouldWarn(): bool
     {
@@ -59,6 +63,8 @@ final class StripeWebhookNotice
      * The Settings flag itself, not GatewayManager::isOn: that also asks
      * whether the gateway is registered and can charge, and the question here
      * is only whether an admin switched it off.
+     *
+     * @since 1.0.0
      */
     private function switchedOn(): bool
     {
@@ -70,6 +76,7 @@ final class StripeWebhookNotice
         return (bool) ($cfg['stripe']['enabled'] ?? true);
     }
 
+    /** @since 1.0.0 */
     public function render(): void
     {
         if (! current_user_can('manage_options') || ! $this->shouldWarn()) {

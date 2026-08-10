@@ -10,7 +10,7 @@ use Dono\Donors\DonorAggregateSyncer;
 /**
  * Recomputes denormalised donation aggregates for a donor, campaign, or form.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class AggregateSyncer
 {
@@ -18,12 +18,15 @@ final class AggregateSyncer
      * Delegates to DonorAggregateSyncer, which is what the live
      * dono.donation.completed hook runs, so a resync and the live path cannot
      * disagree.
+     *
+     * @since 1.0.0
      */
     public function syncDonor(int $donorId): void
     {
         (new DonorAggregateSyncer())->syncForDonor($donorId);
     }
 
+    /** @since 1.0.0 */
     public function syncCampaign(int $campaignId): void
     {
         if ($campaignId <= 0) return;
@@ -50,6 +53,7 @@ final class AggregateSyncer
             ]);
     }
 
+    /** @since 1.0.0 */
     public function syncFund(int $fundId): void
     {
         if ($fundId <= 0) return;
@@ -78,6 +82,7 @@ final class AggregateSyncer
             ]);
     }
 
+    /** @since 1.0.0 */
     public function syncForm(int $formId): void
     {
         if ($formId <= 0) return;
@@ -120,6 +125,7 @@ final class AggregateSyncer
     // refunded_cents over-refund counter.
     // Fully-qualified table name on both sides: unqualified `id` would bind
     // to wp_dono_refunds.id since refunds also has an id column.
+    /** @since 1.0.0 */
     private function refundedSubquery(): string
     {
         return DonationQueries::refundedBaseExpr();

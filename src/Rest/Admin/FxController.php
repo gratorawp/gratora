@@ -17,11 +17,14 @@ use WP_REST_Server;
 /**
  * Exchange-rate settings surface for the Currency panel; POST /fetch refreshes
  * immediately regardless of the auto toggle.
+ *
+ * @since 1.0.0
  */
 final class FxController
 {
     private const NAMESPACE = 'dono/v1';
 
+    /** @since 1.0.0 */
     public function __construct(
         private FxRates $fx,
         private FxRatesUpdater $updater,
@@ -30,6 +33,7 @@ final class FxController
     ) {
     }
 
+    /** @since 1.0.0 */
     public function registerRoutes(): void
     {
         register_rest_route(self::NAMESPACE, '/admin/currency/fx', [
@@ -52,16 +56,19 @@ final class FxController
         ]);
     }
 
+    /** @since 1.0.0 */
     public function canAccess(): bool
     {
         return Capabilities::userCan('dono_manage_settings');
     }
 
+    /** @since 1.0.0 */
     public function show(): WP_REST_Response
     {
         return new WP_REST_Response($this->state(), 200);
     }
 
+    /** @since 1.0.0 */
     public function update(WP_REST_Request $request): WP_REST_Response
     {
         $body = (array) $request->get_json_params();
@@ -82,6 +89,7 @@ final class FxController
         return new WP_REST_Response($this->state(), 200);
     }
 
+    /** @since 1.0.0 */
     public function fetch(): WP_REST_Response
     {
         $ok = $this->updater->fetchNow();
@@ -90,7 +98,11 @@ final class FxController
         return new WP_REST_Response($state, 200);
     }
 
-    /** @return array<string,mixed> */
+    /**
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
     private function state(): array
     {
         $base = strtoupper(Money::defaultCurrency());
@@ -140,6 +152,8 @@ final class FxController
     /**
      * @param  array<int,string> $supported
      * @return array<int,string>
+     *
+     * @since 1.0.0
      */
     private function currenciesWithoutGateway(array $supported): array
     {
@@ -150,8 +164,7 @@ final class FxController
                 continue;
             }
             // optionsFor(), not availableFor(): the latter filters on
-            // canCharge() alone and ignores the per-gateway enabled flag,
-            // so a disabled Offline still counted and this never fired.
+            // canCharge() alone and ignores the per-gateway enabled flag.
             if ($this->gateways->optionsFor([], null, $code, 'one_time') === []) {
                 $out[] = $code;
             }

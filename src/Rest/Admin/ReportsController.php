@@ -24,7 +24,7 @@ use WP_REST_Server;
  * ('wp_rest') for cookie auth to validate. The link is therefore time-limited to
  * the nonce lifetime.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class ReportsController
 {
@@ -33,6 +33,7 @@ final class ReportsController
     /** Reporting windows, matching report.dashboard / CampaignMetricsService. */
     private const RANGES = ['today', 'last-7', 'last-30', 'last-90', 'all-time'];
 
+    /** @since 1.0.0 */
     public function __construct(
         private CampaignRepository $campaigns,
         private CampaignReportBuilder $campaignReport,
@@ -41,6 +42,7 @@ final class ReportsController
     ) {
     }
 
+    /** @since 1.0.0 */
     public function registerRoutes(): void
     {
         register_rest_route(self::NAMESPACE, '/reports/campaign/(?P<id>\d+)/pdf', [
@@ -64,16 +66,19 @@ final class ReportsController
         ]);
     }
 
+    /** @since 1.0.0 */
     public function canViewReports(): bool
     {
         return current_user_can('dono_view_reports');
     }
 
+    /** @since 1.0.0 */
     public function canViewDonors(): bool
     {
         return current_user_can('dono_view_donors');
     }
 
+    /** @since 1.0.0 */
     public function campaignPdf(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $campaign = $this->campaigns->findById((int) $request['id']);
@@ -91,6 +96,7 @@ final class ReportsController
         return $this->stream($request, $pdf, CampaignReportBuilder::filename((int) $campaign->id, $range));
     }
 
+    /** @since 1.0.0 */
     public function donorTaxStatement(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $year = (int) $request['year'];
@@ -112,9 +118,11 @@ final class ReportsController
     }
 
     /**
-     * Stream PDF bytes as a download. Mirrors the portal annual-statement path:
-     * the REST server would otherwise JSON-encode the binary body, so the bytes
-     * are echoed from a rest_pre_serve_request closure bound to this route.
+     * Stream PDF bytes as a download. The REST server would JSON-encode a binary
+     * body, so the bytes are echoed from a rest_pre_serve_request closure bound
+     * to this route.
+     *
+     * @since 1.0.0
      */
     private function stream(WP_REST_Request $request, string $pdf, string $filename): WP_REST_Response
     {

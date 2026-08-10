@@ -14,7 +14,7 @@ use Dono\Vendor\Queryable\DB;
  * Retention default 30 days; filter `dono.webhook_log.retention_days`.
  * Set to 0 or negative to disable.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class WebhookLogRetention
 {
@@ -23,16 +23,19 @@ final class WebhookLogRetention
     private const DEFAULT_RETENTION_DAYS = 30;
     private const BATCH = 1000;
 
+    /** @since 1.0.0 */
     public function __construct(private AsyncDispatcher $async)
     {
     }
 
+    /** @since 1.0.0 */
     public function register(): void
     {
         add_action(self::HOOK, [$this, 'run']);
         add_action('init', fn () => $this->async->scheduleRecurring(self::HOOK, self::DAILY));
     }
 
+    /** @since 1.0.0 */
     public function run(): void
     {
         $days = (int) apply_filters('dono.webhook_log.retention_days', self::DEFAULT_RETENTION_DAYS);

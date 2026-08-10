@@ -10,10 +10,11 @@ namespace Dono\Foundation\Modules;
  * Supports: ^x.y / ^x.y.z (caret), ~x.y / ~x.y.z (tilde),
  * >=x.y (lower bound), x.y - x.z (inclusive range), x.y.z (exact).
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class VersionConstraint
 {
+    /** @since 1.0.0 */
     public static function satisfies(string $version, string $constraint): bool
     {
         $v = self::normalize($version);
@@ -53,14 +54,22 @@ final class VersionConstraint
         return version_compare($v, self::normalize($c), '==');
     }
 
-    /** Pad a partial version to "a.b.c" with zeros. */
+    /**
+     * Pad a partial version to "a.b.c" with zeros.
+     *
+     * @since 1.0.0
+     */
     private static function normalize(string $v): string
     {
         [$maj, $min, $patch] = self::parts($v);
         return $maj . '.' . $min . '.' . $patch;
     }
 
-    /** Upper bound for a range endpoint: a partial "x.y" allows any patch. */
+    /**
+     * Upper bound for a range endpoint: a partial "x.y" allows any patch.
+     *
+     * @since 1.0.0
+     */
     private static function ceiling(string $v): string
     {
         $trimmed = trim($v);
@@ -70,7 +79,10 @@ final class VersionConstraint
             : $maj . '.' . $min . '.' . ($patch + 1);
     }
 
-    /** @return array{0:int,1:int,2:int} */
+    /**
+     * @return array{0:int,1:int,2:int}
+     * @since 1.0.0
+     */
     private static function parts(string $v): array
     {
         $bits = explode('.', trim($v));

@@ -7,17 +7,17 @@ namespace Dono\Forms\Blocks;
 /**
  * dono/hidden: invisible value captured with the donation.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class HiddenBlock implements Block
 {
-    /** Block name. */
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/hidden';
     }
 
-    /** Editor attribute schema. */
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         return [
@@ -28,7 +28,11 @@ final class HiddenBlock implements Block
         ];
     }
 
-    /** Hidden block renders no visible markup. */
+    /**
+     * Hidden block renders no visible markup.
+     *
+     * @since 1.0.0
+     */
     public function render(array $attrs, string $content): string
     {
         return '';

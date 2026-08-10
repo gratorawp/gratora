@@ -12,7 +12,7 @@ use InvalidArgumentException;
 /**
  * Form CRUD. Lifecycle: draft, published, archived.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class FormService
 {
@@ -27,7 +27,11 @@ final class FormService
         ['block' => 'dono/email',           'label' => 'Email'],
     ];
 
-    /** @internal */
+    /**
+     * @internal
+     *
+     * @since 1.0.0
+     */
     public function __construct(
         private FormRepository $forms,
         private CampaignRepository $campaigns,
@@ -36,9 +40,9 @@ final class FormService
     }
 
     /**
-     * Blocks every published form must contain.
-     *
      * @return list<array{block:string,label:string}>
+     *
+     * @since 1.0.0
      */
     public static function requiredBlocks(): array
     {
@@ -48,7 +52,11 @@ final class FormService
         );
     }
 
-    /** Translate the fixed required-block labels at read time (not const-time). */
+    /**
+     * Translate the fixed required-block labels at read time (not const-time).
+     *
+     * @since 1.0.0
+     */
     private static function requiredLabel(string $label): string
     {
         return match ($label) {
@@ -60,9 +68,9 @@ final class FormService
     }
 
     /**
-     * Required blocks absent from the given markup.
-     *
      * @return list<array{block:string,label:string}>
+     *
+     * @since 1.0.0
      */
     public static function missingRequiredBlocks(string $blocksMarkup): array
     {
@@ -81,6 +89,8 @@ final class FormService
      * Create a form, publishing it when the input asks for it.
      *
      * @param array{title?:string, slug?:string, status?:string, campaign_id?:int, blocks?:string, settings?:array} $input
+     *
+     * @since 1.0.0
      */
     public function create(array $input): Form
     {
@@ -125,6 +135,8 @@ final class FormService
      *
      * @param array<string,mixed>|null $settings
      * @return array<string,mixed>|null
+     *
+     * @since 1.0.0
      */
     private function normaliseSettings(?array $settings): ?array
     {
@@ -147,6 +159,8 @@ final class FormService
     /**
      * The payment-gateways block is the single writer of
      * settings.gateways.allowed. No block leaves the existing value alone.
+     *
+     * @since 1.0.0
      */
     private function syncGatewayAllowed(Form $form): void
     {
@@ -168,6 +182,8 @@ final class FormService
      *
      * @param  array<int,array<string,mixed>> $blocks
      * @return list<string>|null
+     *
+     * @since 1.0.0
      */
     private function findGatewayAllowed(array $blocks): ?array
     {
@@ -193,6 +209,8 @@ final class FormService
      * Partial update: only the fields present in $input are touched.
      *
      * @param array<string,mixed> $input
+     *
+     * @since 1.0.0
      */
     public function update(Form $form, array $input): Form
     {
@@ -272,6 +290,8 @@ final class FormService
      * Delete a form. Refuses when the form is the campaign default - admin
      * has to pick a different default first so the campaign isn't left in
      * a half-broken state.
+     *
+     * @since 1.0.0
      */
     public function delete(Form $form): void
     {
@@ -291,7 +311,11 @@ final class FormService
         do_action('dono.form.deleted', $form);
     }
 
-    /** Copy a form as a new draft. */
+    /**
+     * Copy a form as a new draft.
+     *
+     * @since 1.0.0
+     */
     public function duplicate(Form $source): Form
     {
         $now = $this->clock->now()->format('Y-m-d H:i:s');
@@ -319,14 +343,22 @@ final class FormService
         return $copy;
     }
 
-    /** Clamp an arbitrary status string to a known lifecycle state. */
+    /**
+     * Clamp an arbitrary status string to a known lifecycle state.
+     *
+     * @since 1.0.0
+     */
     private function coerceStatus(string $status): string
     {
         $status = strtolower(trim($status));
         return in_array($status, ['draft', 'published', 'archived'], true) ? $status : 'draft';
     }
 
-    /** Throw when the form is missing blocks required to publish. */
+    /**
+     * Throw when the form is missing blocks required to publish.
+     *
+     * @since 1.0.0
+     */
     private function assertPublishable(Form $form): void
     {
         $missing = self::missingRequiredBlocks((string) $form->blocks);
@@ -342,7 +374,11 @@ final class FormService
         );
     }
 
-    /** Resolve a required campaign id to a Campaign, or throw. */
+    /**
+     * Resolve a required campaign id to a Campaign, or throw.
+     *
+     * @since 1.0.0
+     */
     private function resolveCampaign(mixed $idOrNull): Campaign
     {
         $id = (int) ($idOrNull ?? 0);
@@ -356,7 +392,7 @@ final class FormService
         return $campaign;
     }
 
-    /** Slugify the source and suffix it until it is unique. */
+    /** @since 1.0.0 */
     private function uniqueSlug(string $source): string
     {
         $base = sanitize_title($source) ?: 'form';
@@ -378,6 +414,8 @@ final class FormService
      * literal HTML chunks + re-serialize so block-delimiter JSON survives intact
      * (blanket wp_kses_post would mangle it). Without this, a scoped form manager
      * could plant a script that runs on the public donation page via do_blocks.
+     *
+     * @since 1.0.0
      */
     public function sanitizeBlocks(string $markup): string
     {
@@ -387,6 +425,7 @@ final class FormService
         return serialize_blocks($this->ksesBlockList(parse_blocks($markup)));
     }
 
+    /** @since 1.0.0 */
     private function ksesBlockList(array $blocks): array
     {
         foreach ($blocks as &$block) {
@@ -412,6 +451,8 @@ final class FormService
      * dashboard's missing-form check only looks for a null id, so nothing
      * would report it. Refuse the move and let the organiser choose a
      * different default first.
+     *
+     * @since 1.0.0
      */
     private function guardDefaultFormStays(Form $form): void
     {

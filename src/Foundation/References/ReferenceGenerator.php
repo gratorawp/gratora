@@ -17,7 +17,7 @@ use RuntimeException;
  * counter each Jan 1, which requires include_year to tell the two sequences
  * apart; without it, numbering is continuous across years either way.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class ReferenceGenerator
 {
@@ -35,11 +35,12 @@ final class ReferenceGenerator
         'separator'    => '-',
     ];
 
+    /** @since 1.0.0 */
     public function __construct(private Clock $clock)
     {
     }
 
-    /** Increment the counter for $scope and return the formatted reference. */
+    /** @since 1.0.0 */
     public function next(string $scope = 'donation'): string
     {
         $scope = $this->normaliseScope($scope);
@@ -53,6 +54,8 @@ final class ReferenceGenerator
     /**
      * Set the counter so the next call to next() returns $nextValue.
      * Throws if $nextValue <= current counter (would create duplicates).
+     *
+     * @since 1.0.0
      */
     public function nextNumber(string $scope, int $nextValue): void
     {
@@ -80,7 +83,11 @@ final class ReferenceGenerator
         }
     }
 
-    /** Current counter for a scope without incrementing. */
+    /**
+     * Current counter for a scope without incrementing.
+     *
+     * @since 1.0.0
+     */
     public function peekNext(string $scope = 'donation'): int
     {
         $scope = $this->normaliseScope($scope);
@@ -95,11 +102,11 @@ final class ReferenceGenerator
      *
      * Turning "reset numbering each year" on or off changes which option holds
      * the counter, and the new one does not exist yet. Reading it raw answers 0
-     * while sibling counters hold the real high-water mark, so the screen
-     * offered "next: 00001" on a site already at 00500 and the setter accepted
-     * 2, handing the next five hundred donations references that were already
-     * printed on someone else's receipt. next() has always seeded through
-     * seedFor; these two read past it.
+     * while sibling counters hold the real high-water mark, so peekNext() and
+     * nextNumber() must seed through seedFor() the way next() does, or they
+     * hand out references already printed on someone else's receipt.
+     *
+     * @since 1.0.0
      */
     private function currentCounter(string $scope, string $key): int
     {
@@ -108,7 +115,11 @@ final class ReferenceGenerator
         return $stored === null ? $this->seedFor($scope, $key) : (int) $stored;
     }
 
-    /** Build the formatted reference string. Pure, no DB. */
+    /**
+     * Build the formatted reference string. Pure, no DB.
+     *
+     * @since 1.0.0
+     */
     public function format(string $scope, int $year, int $counter): string
     {
         $s = $this->settings();
@@ -128,6 +139,7 @@ final class ReferenceGenerator
         return implode($sep, $parts);
     }
 
+    /** @since 1.0.0 */
     private function sanitizeToken(string $raw, string $fallback): string
     {
         $clean = preg_replace('/[^A-Za-z0-9_-]/', '', $raw);
@@ -138,6 +150,8 @@ final class ReferenceGenerator
      * Atomic increment: one UPDATE stashes the new value in LAST_INSERT_ID(expr),
      * the follow-up SELECT reads it. Both run through DB::raw on the same $wpdb
      * connection, so the value survives; no read-modify-write, no lost updates.
+     *
+     * @since 1.0.0
      */
     private function nextCounter(string $scope, int $year): int
     {
@@ -182,6 +196,8 @@ final class ReferenceGenerator
      * tell the two sequences apart. reset_yearly without include_year is
      * therefore continuous numbering, the only reading that does not mint
      * DONO-00001 twice.
+     *
+     * @since 1.0.0
      */
     private function counterOption(string $scope, int $year): string
     {
@@ -212,6 +228,8 @@ final class ReferenceGenerator
      * Counter values rather than parsed references on purpose: prefix,
      * separator and padding are all configurable, so the printed form is not
      * something to reverse-engineer.
+     *
+     * @since 1.0.0
      */
     private function seedFor(string $scope, string $key): int
     {
@@ -241,7 +259,10 @@ final class ReferenceGenerator
         return $high;
     }
 
-    /** @return array<string,mixed> */
+    /**
+     * @return array<string,mixed>
+     * @since 1.0.0
+     */
     private function settings(): array
     {
         $stored = get_option(self::OPTION_SETTINGS, []);
@@ -251,6 +272,7 @@ final class ReferenceGenerator
         return array_replace_recursive(self::DEFAULT_SETTINGS, $stored);
     }
 
+    /** @since 1.0.0 */
     private function normaliseScope(string $scope): string
     {
         $clean = preg_replace('/[^a-z0-9_]/', '', strtolower($scope));

@@ -21,10 +21,17 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 
+/**
+ * Admin donor endpoints: list, stats, insights, profile, timeline, notes,
+ * profile edits, and the DSAR export / erasure pair.
+ *
+ * @since 1.0.0
+ */
 final class DonorsController
 {
     private const NAMESPACE = 'dono/v1';
 
+    /** @since 1.0.0 */
     public function __construct(
         private DonorRepository $donors,
         private DonorService $donorService,
@@ -35,6 +42,7 @@ final class DonorsController
     ) {
     }
 
+    /** @since 1.0.0 */
     public function registerRoutes(): void
     {
         register_rest_route(self::NAMESPACE, '/admin/donors', [
@@ -186,11 +194,13 @@ final class DonorsController
         ]);
     }
 
+    /** @since 1.0.0 */
     public function insights(WP_REST_Request $request): WP_REST_Response
     {
         return new WP_REST_Response($this->metrics->insights(), 200);
     }
 
+    /** @since 1.0.0 */
     public function profile(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $payload = $this->metrics->profile((int) $request['id'], Capabilities::userCan('dono_edit_donors'));
@@ -200,6 +210,7 @@ final class DonorsController
         return new WP_REST_Response($payload, 200);
     }
 
+    /** @since 1.0.0 */
     public function events(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $donor = $this->donors->findById((int) $request['id']);
@@ -221,6 +232,7 @@ final class DonorsController
         return $response;
     }
 
+    /** @since 1.0.0 */
     public function update(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $donor = $this->donors->findById((int) $request['id']);
@@ -329,6 +341,7 @@ final class DonorsController
         return new WP_REST_Response($this->metrics->profile($donor->id, Capabilities::userCan('dono_edit_donors')), 200);
     }
 
+    /** @since 1.0.0 */
     public function atRisk(WP_REST_Request $request): WP_REST_Response
     {
         $perPage = (int) ($request['per_page'] ?? 25);
@@ -342,6 +355,7 @@ final class DonorsController
         return $response;
     }
 
+    /** @since 1.0.0 */
     public function atRiskExport(WP_REST_Request $request): WP_REST_Response
     {
         $csv      = $this->metrics->atRiskCsv();
@@ -365,6 +379,7 @@ final class DonorsController
         return $response;
     }
 
+    /** @since 1.0.0 */
     public function createNote(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $donorId = (int) $request['id'];
@@ -380,6 +395,7 @@ final class DonorsController
         return new WP_REST_Response($note, 201);
     }
 
+    /** @since 1.0.0 */
     public function deleteNote(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $noteId = (int) $request['note_id'];
@@ -394,7 +410,11 @@ final class DonorsController
         return new WP_REST_Response(['deleted' => true], 200);
     }
 
-    /** GDPR/DSAR export, decrypting PII on the way out. */
+    /**
+     * GDPR/DSAR export, decrypting PII on the way out.
+     *
+     * @since 1.0.0
+     */
     public function exportPersonalData(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $donor = $this->donors->findById((int) $request['id']);
@@ -444,6 +464,8 @@ final class DonorsController
      * A DSAR must return the donor's per-donation personal data: the custom
      * form-field answers they submitted and the name they gave for that
      * donation. Erasure clears both, so a later export reports them empty.
+     *
+     * @since 1.0.0
      */
     private function enrichDonations(int $donorId, array $donations): array
     {
@@ -475,6 +497,8 @@ final class DonorsController
      * No confirmation string, unlike redact: a donor who reaches here has
      * nothing to lose, and one with donations is refused with the path to take
      * instead.
+     *
+     * @since 1.0.0
      */
     public function delete(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
@@ -496,6 +520,8 @@ final class DonorsController
     /**
      * Confirmation must match the donor's current email, or 'DONOR_<id>' when
      * there is no readable email.
+     *
+     * @since 1.0.0
      */
     public function redact(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
@@ -529,11 +555,13 @@ final class DonorsController
         ], 200);
     }
 
+    /** @since 1.0.0 */
     public function canAccess(): bool
     {
         return Capabilities::userCan('dono_view_donors');
     }
 
+    /** @since 1.0.0 */
     public function stats(WP_REST_Request $request): WP_REST_Response
     {
         $search = $request['search'] !== null ? trim((string) $request['search']) : '';
@@ -552,6 +580,7 @@ final class DonorsController
         return new WP_REST_Response($stats, 200);
     }
 
+    /** @since 1.0.0 */
     public function index(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $search = $request['search'] !== null ? trim((string) $request['search']) : '';
@@ -596,6 +625,7 @@ final class DonorsController
         return $response;
     }
 
+    /** @since 1.0.0 */
     private function donorName(Donor $d): string
     {
         $full = trim(($d->first_name ?? '') . ' ' . ($d->last_name ?? ''));

@@ -14,12 +14,10 @@ use Throwable;
 /**
  * Restarts paused plans when their pause window closes.
  *
- * `SubscriptionAware::pauseSubscription()` documents `$resumesAt` as honoured.
- * Only Stripe actually can: PayPal's suspend is
- * indefinite and were dropping the date on the floor while the portal wrote a
- * next payment date the donor could see. A donor clicking "skip this month"
- * had in fact cancelled, and neither they nor the org would find out until
- * someone went looking for the missing revenue.
+ * `SubscriptionAware::pauseSubscription()` documents `$resumesAt` as honored,
+ * but only Stripe can honor it. PayPal's suspend is indefinite, so without this
+ * sweep a donor who clicks "skip this month" has in fact cancelled, behind a
+ * next payment date the portal still shows them.
  *
  * Rather than teach each gateway to schedule its own resume, the schedule
  * lives here once and applies to all of them. Stripe will already have
@@ -36,7 +34,7 @@ use Throwable;
  * leaving the plan stopped forever, which a one-shot scheduled action months
  * out would not survive.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class RecurringResumer
 {
@@ -44,6 +42,7 @@ final class RecurringResumer
     private const DAILY = 86400;
     private const BATCH = 100;
 
+    /** @since 1.0.0 */
     public function __construct(
         private GatewayManager $gateways,
         private Clock $clock,
@@ -51,12 +50,14 @@ final class RecurringResumer
     ) {
     }
 
+    /** @since 1.0.0 */
     public function register(): void
     {
         add_action(self::HOOK, [$this, 'run']);
         add_action('init', fn () => $this->async->scheduleRecurring(self::HOOK, self::DAILY));
     }
 
+    /** @since 1.0.0 */
     public function run(): void
     {
         $now = $this->clock->now()->format('Y-m-d H:i:s');
@@ -86,6 +87,7 @@ final class RecurringResumer
         }
     }
 
+    /** @since 1.0.0 */
     private function resume(RecurringPlan $plan): void
     {
         $gateway = $this->gateways->get((string) $plan->gateway);
@@ -139,6 +141,8 @@ final class RecurringResumer
      * @param bool                $skipIfCancelled leave a plan alone that
      *                                             reached a terminal state
      *                                             while this sweep was running
+     *
+     * @since 1.0.0
      */
     private function writeColumns(RecurringPlan $plan, array $columns, bool $skipIfCancelled = false): bool
     {

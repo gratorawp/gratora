@@ -9,18 +9,19 @@ use Dono\Foundation\Time\Clock;
 /**
  * Issues and validates magic-link tokens for donor self-service.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class MagicLinkService
 {
+    /** @since 1.0.0 */
     public function __construct(private Clock $clock)
     {
     }
 
     /**
-     * Generates and persists a token.
-     *
      * @param int $ttlSeconds default 30 days
+     *
+     * @since 1.0.0
      */
     public function issue(int $donorId, string $purpose, ?int $targetId = null, int $ttlSeconds = 2_592_000): string
     {
@@ -44,7 +45,7 @@ final class MagicLinkService
         return $raw;
     }
 
-    /** Validates a raw token for the given purpose and optional target. */
+    /** @since 1.0.0 */
     public function validate(string $rawToken, string $purpose, ?int $targetId = null): ?MagicLinkToken
     {
         if ($rawToken === '') return null;
@@ -73,6 +74,7 @@ final class MagicLinkService
         return $token;
     }
 
+    /** @since 1.0.0 */
     public function consumeAndValidate(string $rawToken, string $purpose, ?int $targetId = null): ?MagicLinkToken
     {
         if ($rawToken === '') return null;
@@ -106,7 +108,7 @@ final class MagicLinkService
         return $reload->get();
     }
 
-    /** Mark a token as consumed (single-use flows). */
+    /** @since 1.0.0 */
     public function consume(MagicLinkToken $token): void
     {
         $token->used_at = $this->clock->now()->format('Y-m-d H:i:s');
@@ -116,28 +118,26 @@ final class MagicLinkService
     /**
      * Rate-limit token guessing, per purpose and per IP (20 per 15 minutes).
      *
-     * Two things were wrong with counting every validation against one shared
-     * budget. Successes counted, so a donor opening their receipts tab spent
-     * the budget on their own valid tokens; and the budget was shared across
-     * purposes, so spending it there locked them out of signing in, with the
-     * portal telling them their link had expired. Both are ordinary use.
+     * Only failures count: a guess is a failure, and counting successes would
+     * spend a donor's budget on their own valid tokens. Keyed per purpose so
+     * exhausting one purpose cannot lock a donor out of another, and on
+     * REMOTE_ADDR, which donors behind one NAT share.
      *
-     * What the limit is actually for is guessing, and a guess is a failure, so
-     * only failures count now. Still keyed on REMOTE_ADDR, which donors behind
-     * one NAT share, but a shared budget of failed attempts is a far smaller
-     * thing to share than a shared budget of successful ones.
+     * @since 1.0.0
      */
     private function isRateLimited(string $purpose): bool
     {
         return (int) get_transient($this->rateKey($purpose)) >= 20;
     }
 
+    /** @since 1.0.0 */
     private function recordFailure(string $purpose): void
     {
         $key = $this->rateKey($purpose);
         set_transient($key, ((int) get_transient($key)) + 1, 900);
     }
 
+    /** @since 1.0.0 */
     private function rateKey(string $purpose): string
     {
         $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
@@ -145,7 +145,11 @@ final class MagicLinkService
         return 'dono_ml_val_' . hash('sha256', $purpose . '|' . $ip);
     }
 
-    /** Delete tokens that have expired or been consumed. */
+    /**
+     * Delete tokens that have expired or been consumed.
+     *
+     * @since 1.0.0
+     */
     public function purgeExpired(): int
     {
         $now = $this->clock->now()->format('Y-m-d H:i:s');

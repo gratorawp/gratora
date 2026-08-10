@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Forms;
 
+/** @since 1.0.0 */
 final class FormTemplates
 {
     /**
@@ -14,6 +15,8 @@ final class FormTemplates
      * fields go missing when the add-on is not installed.
      *
      * @return list<array{id:string,name:string,description:string,icon:string,category:string,thumbnail_hint:string,settings:array<string,mixed>,blocks:string}>
+     *
+     * @since 1.0.0
      */
     public static function all(): array
     {
@@ -31,6 +34,7 @@ final class FormTemplates
         return (array) apply_filters('dono.form.templates', $templates);
     }
 
+    /** @since 1.0.0 */
     public static function find(string $id): ?array
     {
         foreach (self::all() as $t) {
@@ -39,6 +43,7 @@ final class FormTemplates
         return null;
     }
 
+    /** @since 1.0.0 */
     private static function block(string $name, array $attrs = [], string $inner = ''): string
     {
         $attrsJson = $attrs ? ' ' . wp_json_encode($attrs) : '';
@@ -48,6 +53,7 @@ final class FormTemplates
         return "<!-- wp:{$name}{$attrsJson} -->\n{$inner}<!-- /wp:{$name} -->\n";
     }
 
+    /** @since 1.0.0 */
     private static function presets(array $dollars, array $impactLabels = [], int $preselectedIndex = -1): array
     {
         $out = [];
@@ -61,6 +67,7 @@ final class FormTemplates
         return $out;
     }
 
+    /** @since 1.0.0 */
     private static function defaultSettings(): array
     {
         return [
@@ -74,6 +81,7 @@ final class FormTemplates
         ];
     }
 
+    /** @since 1.0.0 */
     private static function blank(): array
     {
         return [
@@ -88,6 +96,7 @@ final class FormTemplates
         ];
     }
 
+    /** @since 1.0.0 */
     private static function quickGive(): array
     {
         // Short because that is the entire point. A goal bar, phone number,
@@ -133,6 +142,7 @@ final class FormTemplates
         ];
     }
 
+    /** @since 1.0.0 */
     private static function impactTiers(): array
     {
         $blocks = self::block('dono/heading', ['text' => __('$50 makes a real difference', 'dono'), 'level' => 1])
@@ -195,6 +205,8 @@ final class FormTemplates
     /**
      * Standard fee-cover block. The rate matches the common card cost; an org
      * on different pricing edits the numbers rather than the wording.
+     *
+     * @since 1.0.0
      */
     private static function coverFees(string $label): string
     {
@@ -206,7 +218,11 @@ final class FormTemplates
         ]);
     }
 
-    /** Gateways, running total, button. Every template ends this way. */
+    /**
+     * Gateways, running total, button. Every template ends this way.
+     *
+     * @since 1.0.0
+     */
     private static function checkout(string $submitLabel, string $feeLabel): string
     {
         return self::coverFees($feeLabel)
@@ -215,6 +231,7 @@ final class FormTemplates
             . self::block('dono/submit-button', ['label' => $submitLabel]);
     }
 
+    /** @since 1.0.0 */
     private static function everyday(): array
     {
         $blocks = self::block('dono/heading', ['text' => __('Make a donation', 'dono'), 'level' => 1])
@@ -248,6 +265,7 @@ final class FormTemplates
         ];
     }
 
+    /** @since 1.0.0 */
     private static function guided(): array
     {
         $amount = self::block(
@@ -294,6 +312,7 @@ final class FormTemplates
         ];
     }
 
+    /** @since 1.0.0 */
     private static function monthlySustainer(): array
     {
         $blocks = self::block('dono/heading', ['text' => __('Become a monthly supporter', 'dono'), 'level' => 1])
@@ -345,6 +364,7 @@ final class FormTemplates
         ];
     }
 
+    /** @since 1.0.0 */
     private static function emergencyAppeal(): array
     {
         $blocks = self::block('dono/heading', ['text' => __('Emergency appeal', 'dono'), 'level' => 1])
@@ -383,6 +403,7 @@ final class FormTemplates
         ];
     }
 
+    /** @since 1.0.0 */
     private static function designated(): array
     {
         $blocks = self::block('dono/heading', ['text' => __('Choose where your donation goes', 'dono'), 'level' => 1])
@@ -419,6 +440,7 @@ final class FormTemplates
         ];
     }
 
+    /** @since 1.0.0 */
     private static function campaignPage(): array
     {
         $blocks = self::block('dono/goal', ['showAmount' => true, 'showDonors' => true, 'showDeadline' => true])

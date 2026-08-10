@@ -7,21 +7,17 @@ namespace Dono\Forms\Blocks;
 /**
  * Multi-step wizard container block.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class StepsBlock implements Block
 {
-    /**
-     * Block type name.
-     */
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/steps';
     }
 
-    /**
-     * Block attribute schema.
-     */
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         return [
@@ -31,9 +27,7 @@ final class StepsBlock implements Block
         ];
     }
 
-    /**
-     * Renders the steps wrapper.
-     */
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         return sprintf('<div class="dono-block dono-block--steps">%s</div>', $content);

@@ -10,7 +10,7 @@ use Dono\Foundation\Helpers\Money;
 /**
  * Aggregate queries over RecurringPlan rows. List views use the model directly.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class RecurringPlanRepository
 {
@@ -24,6 +24,8 @@ final class RecurringPlanRepository
      * and must contribute 0: coalescing straight to amount_cents would report a
      * JPY 10,000/mo plan as 10,000 base, 186x too high. Callers get an
      * `unconverted` count so a partial figure can say so.
+     *
+     * @since 1.0.0
      */
     private static function baseAmountExpr(): string
     {
@@ -31,14 +33,24 @@ final class RecurringPlanRepository
         return "COALESCE(base_amount_cents, CASE WHEN currency = '{$base}' THEN amount_cents ELSE 0 END)";
     }
 
-    /** Plans whose base value is genuinely unknown, so callers can say the total is partial. */
+    /**
+     * Plans whose base value is genuinely unknown, so callers can say the total
+     * is partial.
+     *
+     * @since 1.0.0
+     */
     private static function unconvertedExpr(): string
     {
         $base = esc_sql(Money::defaultCurrency());
         return "SUM(CASE WHEN base_amount_cents IS NULL AND currency <> '{$base}' THEN 1 ELSE 0 END)";
     }
 
-    /** Monthly-equivalent of a plan's base amount. interval_count=0 would divide by zero. */
+    /**
+     * Monthly-equivalent of a plan's base amount. interval_count=0 would divide
+     * by zero.
+     *
+     * @since 1.0.0
+     */
     private static function mrrExpr(): string
     {
         $amt = self::baseAmountExpr();
@@ -55,6 +67,7 @@ final class RecurringPlanRepository
         ";
     }
 
+    /** @since 1.0.0 */
     public function findBySubscriptionId(string $gateway, string $subscriptionId): ?RecurringPlan
     {
         if ($subscriptionId === '') return null;
@@ -65,8 +78,10 @@ final class RecurringPlanRepository
     }
 
     /**
-     * Apply a successful renewal: bump counters and timestamps. Idempotent on
+     * Apply a successful renewal: bump counters and timestamps. Idempotency on
      * (plan, donation_id) is enforced by the caller; this method just persists.
+     *
+     * @since 1.0.0
      */
     public function recordPayment(RecurringPlan $plan, int $amountCents, string $occurredAt, ?string $nextPaymentAt = null): void
     {
@@ -74,11 +89,11 @@ final class RecurringPlanRepository
             'last_payment_at' => $occurredAt,
             'updated_at'      => $occurredAt,
             // Consecutive failures, which is what dunning means and what
-            // recordRecurringFailure documents `attempt` as. Only ever
-            // incremented, it turned into a lifetime tally: a plan that
-            // declined once and has paid every month since kept a permanent
-            // warning on the donor screen, and its next decline escalated from
-            // the wrong attempt number.
+            // recordRecurringFailure documents `attempt` as. Without this reset
+            // it becomes a lifetime tally: a plan that declined once and has
+            // paid every month since keeps a permanent warning on the donor
+            // screen, and its next decline escalates from the wrong attempt
+            // number.
             'failed_renewals_count' => 0,
         ];
         if ($nextPaymentAt !== null) {
@@ -101,6 +116,7 @@ final class RecurringPlanRepository
         $plan->updated_at = $occurredAt;
     }
 
+    /** @since 1.0.0 */
     public function recordFailedRenewal(RecurringPlan $plan, string $occurredAt): void
     {
         DB::table('dono_recurring_plans')->where('id', $plan->id)->update(['updated_at' => $occurredAt]);
@@ -114,6 +130,8 @@ final class RecurringPlanRepository
      * @return bool True if this call won the active->cancelled transition, so
      *   the caller can fire cancellation side effects exactly once even when
      *   two webhook deliveries race (both may pre-read status='active').
+     *
+     * @since 1.0.0
      */
     public function markCancelled(RecurringPlan $plan, string $occurredAt, ?string $reason = null): bool
     {
@@ -148,6 +166,8 @@ final class RecurringPlanRepository
      * donations (~$X/mo)" and matches what the archive cancel run would cancel.
      *
      * @return array{count:int, mrr_cents:int, unconverted:int}
+     *
+     * @since 1.0.0
      */
     public function activeForCampaign(int $campaignId): array
     {
@@ -174,23 +194,12 @@ final class RecurringPlanRepository
     }
 
     /**
-     * Recurring revenue health roll-up. Normalises each active plan to its monthly
-     * equivalent so MRR is comparable across cadences.
-     *
-     * @return array{
-     *   active_count:int,
-     *   mrr_cents:int,
-     *   new_this_month:int,
-     *   churned_this_month:int,
-     *   churn_pct:float,
-     *   active_amount_avg_cents:int
-     * }
-     */
-    /**
      * Shared filter set for the admin list and its count, so the two cannot
      * disagree about what is being looked at.
      *
      * @param array<string,mixed> $args
+     *
+     * @since 1.0.0
      */
     private function applyAdminFilters(mixed $q, array $args): mixed
     {
@@ -228,7 +237,11 @@ final class RecurringPlanRepository
         return $q;
     }
 
-    /** @param array<string,mixed> $args */
+    /**
+     * @param array<string,mixed> $args
+     *
+     * @since 1.0.0
+     */
     public function countAdmin(array $args = []): int
     {
         return (int) $this->applyAdminFilters(RecurringPlan::query(), $args)->count();
@@ -238,6 +251,8 @@ final class RecurringPlanRepository
      * @param array<string,mixed> $args
      * @param array<string,mixed> $page
      * @return list<RecurringPlan>
+     *
+     * @since 1.0.0
      */
     public function listAdmin(array $args = [], array $page = []): array
     {
@@ -253,7 +268,8 @@ final class RecurringPlanRepository
         $q = $this->applyAdminFilters(RecurringPlan::query(), $args);
 
         // A cancelled plan has no next payment, and NULL sorts first ascending,
-        // so the default view opened on dead plans and buried the live ones.
+        // so a plain sort opens the default view on dead plans and buries the
+        // live ones.
         if ($orderby === 'next_payment_at') {
             $q = $q->orderByRaw("next_payment_at IS NULL ASC, next_payment_at {$order}");
         } else {
@@ -271,6 +287,8 @@ final class RecurringPlanRepository
      * Gateway slugs that actually appear on plans, as filter options.
      *
      * @return list<array{value:string,label:string}>
+     *
+     * @since 1.0.0
      */
     public function gatewaysInUse(): array
     {
@@ -294,9 +312,8 @@ final class RecurringPlanRepository
     /**
      * Plan state for a set of donors, in one grouped query.
      *
-     * The at-risk reason needs this per row, and a lookup per row is a query
-     * per row on a screen that was tuned to 8ms by removing exactly that.
-     * Served by the (donor_id, status) index.
+     * The at-risk reason needs this per row, so a per-row lookup would be a
+     * query per row. Served by the (donor_id, status) index.
      *
      * 'failing' is the same rule the Recurring admin filter uses: a decline can
      * sit on a plan the gateway still calls active, so the count is what marks
@@ -304,6 +321,8 @@ final class RecurringPlanRepository
      *
      * @param  array<int> $donorIds
      * @return array<int, array{failing:int, paused:int, live:int, cancelled_at:?string}>
+     *
+     * @since 1.0.0
      */
     public function stateForDonors(array $donorIds): array
     {
@@ -344,6 +363,23 @@ final class RecurringPlanRepository
         return $out;
     }
 
+    /**
+     * Recurring revenue health roll-up. Normalizes each active plan to its
+     * monthly equivalent so MRR is comparable across cadences.
+     *
+     * @return array{
+     *   active_count:int,
+     *   failing_count:int,
+     *   mrr_cents:int,
+     *   new_this_month:int,
+     *   churned_this_month:int,
+     *   churn_pct:float,
+     *   active_amount_avg_cents:int,
+     *   unconverted:int
+     * }
+     *
+     * @since 1.0.0
+     */
     public function recurringStats(string $today): array
     {
         $monthStart = esc_sql((new \DateTimeImmutable($today))->modify('first day of this month')->format('Y-m-d 00:00:00'));

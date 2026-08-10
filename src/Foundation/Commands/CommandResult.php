@@ -7,11 +7,14 @@ namespace Dono\Foundation\Commands;
 /**
  * Value object returned from every CommandRegistry::dispatch() call.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class CommandResult
 {
-    /** @param array<string,mixed> $data */
+    /**
+     * @param array<string,mixed> $data
+     * @since 1.0.0
+     */
     private function __construct(
         public readonly bool $ok,
         public readonly array $data,
@@ -20,18 +23,25 @@ final class CommandResult
     ) {
     }
 
-    /** @param array<string,mixed> $data */
+    /**
+     * @param array<string,mixed> $data
+     * @since 1.0.0
+     */
     public static function ok(array $data = []): self
     {
         return new self(true, $data, null, null);
     }
 
+    /** @since 1.0.0 */
     public static function error(string $code, string $message): self
     {
         return new self(false, [], $code, $message);
     }
 
-    /** @param array<string,mixed> $preview */
+    /**
+     * @param array<string,mixed> $preview
+     * @since 1.0.0
+     */
     public static function confirmationRequired(array $preview, string $confirmDigest): self
     {
         return new self(
@@ -42,7 +52,10 @@ final class CommandResult
         );
     }
 
-    /** @param array<string,mixed> $canonicalInput */
+    /**
+     * @param array<string,mixed> $canonicalInput
+     * @since 1.0.0
+     */
     public static function dryRun(array $canonicalInput, string $confirmDigest): self
     {
         return new self(

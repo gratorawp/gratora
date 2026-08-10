@@ -21,12 +21,13 @@ use WP_REST_Server;
  * the screen it is reached from: the donor list is bulk PII and needs the
  * export cap, while the revenue figures are aggregates and need only reports.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class ExportsController
 {
     private const NAMESPACE = 'dono/v1';
 
+    /** @since 1.0.0 */
     public function __construct(
         private DonorExporter $donors,
         private RevenueExporter $revenue,
@@ -35,6 +36,7 @@ final class ExportsController
     ) {
     }
 
+    /** @since 1.0.0 */
     public function registerRoutes(): void
     {
         register_rest_route(self::NAMESPACE, '/admin/exports/options', [
@@ -81,7 +83,11 @@ final class ExportsController
         ]);
     }
 
-    /** What the Export screen needs to build its controls. */
+    /**
+     * What the Export screen needs to build its controls.
+     *
+     * @since 1.0.0
+     */
     public function options(): WP_REST_Response
     {
         $thisYear = (int) wp_date('Y');
@@ -118,6 +124,7 @@ final class ExportsController
         ], 200);
     }
 
+    /** @since 1.0.0 */
     public function donorsCsv(WP_REST_Request $request): WP_REST_Response
     {
         $columns = array_values(array_filter(array_map(
@@ -138,6 +145,7 @@ final class ExportsController
         return $this->streamCsv($request, $csv, DonorExporter::filename());
     }
 
+    /** @since 1.0.0 */
     public function revenueCsv(WP_REST_Request $request): WP_REST_Response
     {
         $from = (string) $request['from'] ?: gmdate('Y-01');
@@ -150,6 +158,7 @@ final class ExportsController
         );
     }
 
+    /** @since 1.0.0 */
     public function revenuePdf(WP_REST_Request $request): WP_REST_Response
     {
         $year = (int) $request['year'] ?: (int) wp_date('Y');
@@ -163,6 +172,7 @@ final class ExportsController
         );
     }
 
+    /** @since 1.0.0 */
     private function streamCsv(WP_REST_Request $request, string $body, string $filename): WP_REST_Response
     {
         return $this->stream($request, $body, $filename, 'text/csv; charset=utf-8');
@@ -171,6 +181,8 @@ final class ExportsController
     /**
      * The REST server would JSON-encode a binary or CSV body, so the bytes are
      * echoed from a rest_pre_serve_request closure bound to this route.
+     *
+     * @since 1.0.0
      */
     private function stream(WP_REST_Request $request, string $body, string $filename, string $type): WP_REST_Response
     {

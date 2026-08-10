@@ -8,7 +8,7 @@ namespace Dono\Foundation\Hooks;
  * Base class for declarative WP hook attachment.
  * Subclasses override actions() and/or filters() and call register().
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 abstract class HookProvider
 {
@@ -16,18 +16,23 @@ abstract class HookProvider
      * Map of hook name to method name or [method, priority, args].
      *
      * @return array<string, string|array{0:string,1?:int,2?:int}>
+     * @since 1.0.0
      */
     protected function actions(): array
     {
         return [];
     }
 
-    /** @return array<string, string|array{0:string,1?:int,2?:int}> */
+    /**
+     * @return array<string, string|array{0:string,1?:int,2?:int}>
+     * @since 1.0.0
+     */
     protected function filters(): array
     {
         return [];
     }
 
+    /** @since 1.0.0 */
     public function register(): void
     {
         foreach ($this->actions() as $hook => $spec) {
@@ -41,7 +46,11 @@ abstract class HookProvider
         }
     }
 
-    /** Normalise a hook spec to [method, priority, accepted_args]. */
+    /**
+     * Normalize a hook spec to [method, priority, accepted_args].
+     *
+     * @since 1.0.0
+     */
     private function normalize(string|array $spec): array
     {
         if (is_string($spec)) {

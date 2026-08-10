@@ -9,7 +9,7 @@ use RuntimeException;
 /**
  * Thin Stripe REST API wrapper.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class StripeApi
 {
@@ -22,36 +22,35 @@ final class StripeApi
     public const API_VERSION = '2024-12-18.acacia';
     private const TIMEOUT = 10;
 
+    /** @since 1.0.0 */
     public function __construct(private StripeAccount $account)
     {
     }
 
-    /** True when an access token is available for the active mode. */
+    /** @since 1.0.0 */
     public function isConfigured(): bool
     {
         return $this->secretKey() !== '';
     }
 
-    /** Per-account access token for the active mode (Bearer auth). */
+    /**
+     * Per-account access token for the active mode (Bearer auth).
+     *
+     * @since 1.0.0
+     */
     public function secretKey(): string
     {
         return $this->account->activeSecretKey();
     }
 
     /**
-     * Candidate webhook signing secrets. Test and live mode each have their
-     * own endpoint secret in Stripe, even at a shared URL; a single shared
-     * secret is also accepted for one-endpoint setups. Verification tries
-     * each, so a delivery from either mode is accepted.
-     *
-     * @return list<string> non-empty secrets
-     */
-    /**
      * Signing secrets by mode. Deliberately keyed rather than flattened: which
      * mode a secret belongs to is what stops a test secret confirming live
-     * money, so a secret whose mode is unknown is no longer usable at all.
+     * money, so a secret whose mode is unknown is not usable at all.
      *
      * @return array<string,string> 'test' and/or 'live'
+     *
+     * @since 1.0.0
      */
     public function webhookSecrets(): array
     {
@@ -61,24 +60,25 @@ final class StripeApi
         ], static fn (string $s): bool => $s !== '');
     }
 
-    /** True when at least one webhook signing secret is configured. */
+    /** @since 1.0.0 */
     public function hasWebhookSecret(): bool
     {
         return $this->webhookSecrets() !== [];
     }
 
-    /** Returns the publishable key for the active mode. */
+    /** @since 1.0.0 */
     public function publishableKey(): string
     {
         return $this->account->activePublishableKey();
     }
 
-    /** Returns the publishable key for an explicit mode. */
+    /** @since 1.0.0 */
     public function publishableKeyFor(bool $test): string
     {
         return $this->account->publishableKeyFor($test);
     }
 
+    /** @since 1.0.0 */
     private function gatewayConfig(string $key): string
     {
         $opt = get_option('dono_gateway_config', []);
@@ -91,24 +91,35 @@ final class StripeApi
      * Stripe's API takes application/x-www-form-urlencoded, not JSON.
      *
      * @return array<string,mixed> Decoded JSON response.
+     *
+     * @since 1.0.0
      */
     public function post(string $path, array $params, array $headers = []): array
     {
         return $this->request('POST', $path, $params, $headers);
     }
 
-    /** @return array<string,mixed> Decoded JSON response. */
+    /**
+     * @return array<string,mixed> Decoded JSON response.
+     *
+     * @since 1.0.0
+     */
     public function get(string $path, array $headers = []): array
     {
         return $this->request('GET', $path, [], $headers);
     }
 
-    /** @return array<string,mixed> Decoded JSON response. */
+    /**
+     * @return array<string,mixed> Decoded JSON response.
+     *
+     * @since 1.0.0
+     */
     public function delete(string $path, array $headers = []): array
     {
         return $this->request('DELETE', $path, [], $headers);
     }
 
+    /** @since 1.0.0 */
     private function request(string $method, string $path, array $params, array $extraHeaders): array
     {
         if (! $this->isConfigured()) {
@@ -163,25 +174,26 @@ final class StripeApi
         return $decoded;
     }
 
-    /** Stripe expects nested params as `bracket[key]=value` form params. */
+    /**
+     * Stripe expects nested params as `bracket[key]=value` form params.
+     *
+     * @since 1.0.0
+     */
     private function buildBody(array $params): string
     {
         return http_build_query($params, '', '&', PHP_QUERY_RFC3986);
     }
 
     /**
-     * Verify a `Stripe-Signature` header against the body. Returns false on a
-     * malformed header or hash mismatch. Tolerance is the standard 5 minutes.
-     */
-    /**
      * Verify a Stripe signature and report which mode's secret matched.
      *
      * Returning the mode rather than a bool is the point: the caller must be
-     * able to refuse a test-signed event that claims to be live. A bool made
-     * that impossible, and a test secret could refund live donations.
+     * able to refuse a test-signed event that claims to be live.
      *
      * @return bool|null null when nothing verified, true when the TEST secret
      *                   matched, false when the LIVE secret matched.
+     *
+     * @since 1.0.0
      */
     public function verifiedWebhookMode(string $payload, string $sigHeader, int $tolerance = 300): ?bool
     {

@@ -25,11 +25,11 @@ use WP_CLI;
  * Operational commands (migrate, recompute-aggregates) are production-safe;
  * seed writes fake data and is gated on org-wide test mode.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class CliCommands
 {
-    /** Returns the plugin service container. */
+    /** @since 1.0.0 */
     private function container(): \Dono\Foundation\Container\Container
     {
         return Plugin::instance()->container;
@@ -40,6 +40,7 @@ final class CliCommands
      * on production after a deploy that changed a schema closure.
      *
      * @when after_wp_load
+     * @since 1.0.0
      */
     public function migrate(array $args, array $assoc): void
     {
@@ -57,7 +58,7 @@ final class CliCommands
     }
 
     /**
-     * Recompute denormalised aggregates from the source-of-truth donation
+     * Recompute denormalized aggregates from the source-of-truth donation
      * rows. Production-safe (read-then-write of derived counters only).
      *
      * ## OPTIONS
@@ -75,6 +76,7 @@ final class CliCommands
      * ---
      *
      * @when after_wp_load
+     * @since 1.0.0
      */
     public function recompute_aggregates(array $args, array $assoc): void
     {
@@ -127,6 +129,7 @@ final class CliCommands
      * : Skip the confirmation prompt.
      *
      * @when after_wp_load
+     * @since 1.0.0
      */
     public function seed(array $args, array $assoc): void
     {
@@ -222,6 +225,7 @@ final class CliCommands
      *     export DONO_E2E_MULTI_STEP_FORM_PATH="/dono-e2e-wizard/"
      *
      * @when after_wp_load
+     * @since 1.0.0
      */
     public function e2e_seed(array $args, array $assoc): void
     {
@@ -262,7 +266,7 @@ final class CliCommands
         $gatewayConfig['test_mode'] = true;
         update_option('dono_gateway_config', $gatewayConfig, false);
 
-        // Drop AntiSpamGuard rate-limit transients so a run isn't penalised
+        // Drop AntiSpamGuard rate-limit transients so a run isn't penalized
         // by prior attempts from the same IP / email range.
         global $wpdb;
         $wpdb->query(
@@ -345,6 +349,8 @@ final class CliCommands
     /**
      * Idempotent create-or-update for an e2e form + its embedding page.
      * Returns the public URL of the page.
+     *
+     * @since 1.0.0
      */
     private function e2eUpsertFormAndPage(
         FormService $forms,
@@ -356,8 +362,8 @@ final class CliCommands
         string $blocks
     ): string {
         // Pinned rather than left to the shortcode default. The default is a
-        // product decision that is allowed to change, and when it did every
-        // golden moved with it: the fixture should assert its own appearance.
+        // product decision that is allowed to change, and every visual golden
+        // moves with it: the fixture asserts its own appearance.
         $settings = [
             'gateways'  => ['allowed' => ['offline', 'sandbox']],
             'container' => ['style' => 'frame', 'width' => 540],
@@ -430,6 +436,8 @@ final class CliCommands
      * identical to EUR. A visual golden captured in that state stops testing
      * conversion without ever failing. auto is off so the cron cannot replace
      * these with live rates mid-run and move every amount.
+     *
+     * @since 1.0.0
      */
     private function e2ePinFxRates(): void
     {
@@ -449,6 +457,8 @@ final class CliCommands
      * The layout form seeds a fund-picker and a goal block, and both render
      * empty against a site with one fund and no goal, so the fixture has to
      * supply the data those blocks exist to display.
+     *
+     * @since 1.0.0
      */
     private function e2eSeedFundsAndGoal(Campaign $campaign): void
     {
@@ -478,6 +488,8 @@ final class CliCommands
     /**
      * The consent block names purposes; the org defines them. Core ships none,
      * so the fixture registers its own before seeding a form that asks for them.
+     *
+     * @since 1.0.0
      */
     private function e2eRegisterConsentPurposes(): void
     {
@@ -490,7 +502,7 @@ final class CliCommands
         WP_CLI::log('  consent purposes registered: tos, updates');
     }
 
-    /** Blocks markup for the canonical e2e form. */
+    /** @since 1.0.0 */
     private static function e2eCanonicalBlocks(): string
     {
         // Keys only. The purposes themselves are registered on the org, which
@@ -532,8 +544,9 @@ BLOCKS;
 
     /**
      * Multi-step variant: a dono/steps wizard with at least an amount step
-     * and a donor step so multi-step.spec.ts can exercise the Continue flow
-     * (regression cover for the setField scope bug fixed in 7d6c64b).
+     * and a donor step so multi-step.spec.ts can exercise the Continue flow.
+     *
+     * @since 1.0.0
      */
     private static function e2eMultiStepBlocks(): string
     {
@@ -562,6 +575,8 @@ BLOCKS;
      * row, section, recurring-toggle, fund-picker, privacy-notice, goal.
      * Each gets a unique marker so the spec can assert the block survived to
      * the public render in the right shape.
+     *
+     * @since 1.0.0
      */
     private static function e2eLayoutBlocks(): string
     {
@@ -596,6 +611,7 @@ BLOCKS;
 BLOCKS;
     }
 
+    /** @since 1.0.0 */
     private static function e2eCustomFieldsBlocks(): string
     {
         $radio = wp_json_encode([
@@ -634,6 +650,7 @@ BLOCKS;
 BLOCKS;
     }
 
+    /** @since 1.0.0 */
     private static function e2eConditionalBlocks(): string
     {
         $dropdown = wp_json_encode([
@@ -677,10 +694,9 @@ BLOCKS;
     }
 
     /**
-     * Return all ids for a model class.
-     *
      * @param class-string $model
      * @return list<int>
+     * @since 1.0.0
      */
     private function ids(string $model): array
     {

@@ -9,10 +9,11 @@ use RuntimeException;
 /**
  * Thrown when the requested email already belongs to a different donor row.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class EmailAlreadyAssignedException extends RuntimeException
 {
+    /** @since 1.0.0 */
     public function __construct(public readonly int $existingDonorId)
     {
         parent::__construct('Email already assigned to donor #' . $existingDonorId);

@@ -8,7 +8,11 @@ use Dono\Campaigns\Styling\CampaignStyleResolver;
 use Dono\Vendor\Queryable\Model;
 use Dono\Vendor\Queryable\Schema\Table;
 
-/** Owns one public-facing WP page (via `page_id`) and zero or more donation forms. */
+/**
+ * Owns one public-facing WP page (via `page_id`) and zero or more donation forms.
+ *
+ * @since 1.0.0
+ */
 final class Campaign extends Model
 {
     protected string $table = 'dono_campaigns';
@@ -48,18 +52,27 @@ final class Campaign extends Model
     public string $created_at;
     public string $updated_at;
 
+    /** @since 1.0.0 */
     public function accentColor(): string
     {
         return (new CampaignStyleResolver())->accentFor($this);
     }
 
-    /** $now is UTC, matching how starts_at / ends_at are stored. */
+    /**
+     * $now is UTC, matching how starts_at / ends_at are stored.
+     *
+     * @since 1.0.0
+     */
     public function acceptsDonations(?string $now = null): bool
     {
         return $this->notAcceptingReason($now) === null;
     }
 
-    /** @return null|'draft'|'archived'|'scheduled'|'ended' */
+    /**
+     * @return null|'draft'|'archived'|'scheduled'|'ended'
+     *
+     * @since 1.0.0
+     */
     public function notAcceptingReason(?string $now = null): ?string
     {
         if ($this->status === 'archived')  return 'archived';
@@ -76,6 +89,7 @@ final class Campaign extends Model
         return null;
     }
 
+    /** @since 1.0.0 */
     private static function startBoundary(?string $stamp): ?string
     {
         $stamp = self::clean($stamp);
@@ -88,6 +102,8 @@ final class Campaign extends Model
      * takes a donation at 10am on the 28th. The column is a datetime and the
      * schedule UI only emits dates, so a stored midnight means end-of-day;
      * reading it literally costs every campaign its final day.
+     *
+     * @since 1.0.0
      */
     private static function endBoundary(?string $stamp): ?string
     {
@@ -99,6 +115,7 @@ final class Campaign extends Model
             : $stamp;
     }
 
+    /** @since 1.0.0 */
     private static function clean(?string $stamp): ?string
     {
         $stamp = trim(str_replace('T', ' ', (string) $stamp));

@@ -13,11 +13,15 @@ use RuntimeException;
  * biweekly, monthly, quarterly, yearly. Stripe Prices take an `interval`
  * (day|week|month|year) plus `interval_count`; this mapper produces the pair.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class FrequencyMap
 {
-    /** @return array{0:string,1:int} [interval_unit, interval_count] */
+    /**
+     * @return array{0:string,1:int} [interval_unit, interval_count]
+     *
+     * @since 1.0.0
+     */
     public static function toStripe(string $frequency): array
     {
         return match ($frequency) {
@@ -31,9 +35,10 @@ final class FrequencyMap
     }
 
     /**
-     * Compute the timestamp of the next renewal relative to `now`. Used as the
-     * `billing_cycle_anchor` so Stripe doesn't double-charge a donor who just
-     * paid their first instalment through the one-off PaymentIntent.
+     * Used as the `billing_cycle_anchor` so Stripe doesn't double-charge a donor
+     * who just paid their first installment through the one-off PaymentIntent.
+     *
+     * @since 1.0.0
      */
     public static function nextRenewalAfter(int $nowEpoch, string $interval, int $intervalCount): int
     {
@@ -50,6 +55,7 @@ final class FrequencyMap
             ->getTimestamp();
     }
 
+    /** @since 1.0.0 */
     public static function isRecurring(string $frequency): bool
     {
         return $frequency !== '' && $frequency !== 'one_time';

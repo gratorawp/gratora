@@ -20,7 +20,7 @@ use Dono\Foundation\Batch\BatchProcessor;
  * The fund stays deactivated until this job confirms zero remaining
  * references; interrupted runs resume from the database. Idempotent.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class FundReassignmentJob
 {
@@ -29,12 +29,14 @@ final class FundReassignmentJob
     private const OPTION = 'dono_fund_reassignments';
     private const BATCH  = 500;
 
+    /** @since 1.0.0 */
     public function __construct(
         private AsyncDispatcher $async,
         private AggregateSyncer $aggregates,
     ) {
     }
 
+    /** @since 1.0.0 */
     public function register(): void
     {
         add_action(self::HOOK, [$this, 'run']);
@@ -46,6 +48,8 @@ final class FundReassignmentJob
      * from the pending map, never from args.
      *
      * @param mixed $args fund id (AS) or ['fund_id' => N] (direct)
+     *
+     * @since 1.0.0
      */
     public function run(mixed $args = null): void
     {
@@ -136,13 +140,18 @@ final class FundReassignmentJob
         do_action('dono.fund.deleted', $source);
     }
 
-    /** @return array<int,int> fund_id => target_id */
+    /**
+     * @return array<int,int> fund_id => target_id
+     *
+     * @since 1.0.0
+     */
     public static function pending(): array
     {
         $map = get_option(self::OPTION, []);
         return is_array($map) ? array_map('intval', $map) : [];
     }
 
+    /** @since 1.0.0 */
     public static function markPending(int $fundId, int $targetId): void
     {
         $map           = self::pending();
@@ -150,6 +159,7 @@ final class FundReassignmentJob
         update_option(self::OPTION, $map, false);
     }
 
+    /** @since 1.0.0 */
     public static function clearPending(int $fundId): void
     {
         $map = self::pending();
@@ -161,6 +171,8 @@ final class FundReassignmentJob
     /**
      * Ensures every pending reassignment has a live Action Scheduler job.
      * Re-enqueues any that were dropped. Safe to call on every admin funds load.
+     *
+     * @since 1.0.0
      */
     public static function reconcile(AsyncDispatcher $async): void
     {

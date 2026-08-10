@@ -17,10 +17,11 @@ use RuntimeException;
 /**
  * Fund lifecycle: create, update, delete/deactivate, reassign.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class FundService
 {
+    /** @since 1.0.0 */
     public function __construct(
         private FundRepository $funds,
         private Clock $clock,
@@ -28,7 +29,11 @@ final class FundService
     ) {
     }
 
-    /** @param array<string,mixed> $input */
+    /**
+     * @param array<string,mixed> $input
+     *
+     * @since 1.0.0
+     */
     public function create(array $input): Fund
     {
         $now = $this->clock->now()->format('Y-m-d H:i:s');
@@ -74,7 +79,11 @@ final class FundService
         return $fund;
     }
 
-    /** @param array<string,mixed> $input */
+    /**
+     * @param array<string,mixed> $input
+     *
+     * @since 1.0.0
+     */
     public function update(Fund $fund, array $input): Fund
     {
         if (array_key_exists('code', $input)) {
@@ -173,6 +182,8 @@ final class FundService
      * deactivated and kept for reporting.
      *
      * @return array{action:string,donations?:int,campaigns?:int,target_id?:int}
+     *
+     * @since 1.0.0
      */
     public function delete(Fund $fund, ?int $reassignTo = null): array
     {
@@ -253,6 +264,8 @@ final class FundService
      *
      * @param list<int> $fundIds
      * @return array<int,bool>
+     *
+     * @since 1.0.0
      */
     public function deletableMap(array $fundIds): array
     {
@@ -288,12 +301,17 @@ final class FundService
         return $out;
     }
 
-    /** Re-queue any reassignment whose background job was lost. Idempotent. */
+    /**
+     * Re-queue any reassignment whose background job was lost. Idempotent.
+     *
+     * @since 1.0.0
+     */
     public function reconcilePendingReassignments(): void
     {
         FundReassignmentJob::reconcile($this->async);
     }
 
+    /** @since 1.0.0 */
     private function demoteOtherDefaults(int $keepId): void
     {
         foreach (Fund::query()->where('is_default', 1)->getAll() as $other) {
@@ -304,16 +322,17 @@ final class FundService
         }
     }
 
+    /** @since 1.0.0 */
     private function hasChildren(int $fundId): bool
     {
         return Fund::query()->where('parent_fund_id', $fundId)->get() !== null;
     }
 
     /**
-     * Validates and resolves a parent fund id.
-     *
      * Funds nest one level deep; every consumer assumes a shallow tree.
      * Raising the depth requires updating all consumers.
+     *
+     * @since 1.0.0
      */
     private function resolveParent(mixed $value, ?int $selfId): ?int
     {
@@ -341,11 +360,13 @@ final class FundService
         return $parentId;
     }
 
+    /** @since 1.0.0 */
     private function normalizeCode(string $code): string
     {
         return strtolower(trim($code));
     }
 
+    /** @since 1.0.0 */
     private function nullableString(mixed $value): ?string
     {
         if ($value === null) {
@@ -355,6 +376,7 @@ final class FundService
         return $value === '' ? null : $value;
     }
 
+    /** @since 1.0.0 */
     private function nullableInt(mixed $value): ?int
     {
         if ($value === null || $value === '') {

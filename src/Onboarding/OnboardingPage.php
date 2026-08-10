@@ -9,7 +9,7 @@ use Dono\Foundation\Hooks\HookProvider;
 /**
  * Full-screen first-run onboarding page (hidden submenu, no WP chrome).
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class OnboardingPage extends HookProvider
 {
@@ -17,6 +17,7 @@ final class OnboardingPage extends HookProvider
     private const HANDLE   = 'dono-admin-onboarding';
     private const BUILD_DIR = 'build/admin/onboarding';
 
+    /** @since 1.0.0 */
     protected function filters(): array
     {
         return [
@@ -25,6 +26,7 @@ final class OnboardingPage extends HookProvider
         ];
     }
 
+    /** @since 1.0.0 */
     public function registerPage(array $pages): array
     {
         $pages[] = [
@@ -38,6 +40,7 @@ final class OnboardingPage extends HookProvider
         return $pages;
     }
 
+    /** @since 1.0.0 */
     public function maybeAddBodyClass(string $classes): string
     {
         if ($this->isCurrentPage()) {
@@ -46,6 +49,7 @@ final class OnboardingPage extends HookProvider
         return $classes;
     }
 
+    /** @since 1.0.0 */
     public function render(): void
     {
         $this->enqueueAssets();
@@ -54,12 +58,14 @@ final class OnboardingPage extends HookProvider
         <?php
     }
 
+    /** @since 1.0.0 */
     private function isCurrentPage(): bool
     {
         $page = is_string($_GET['page'] ?? null) ? (string) $_GET['page'] : '';
         return $page === self::PAGE_ID;
     }
 
+    /** @since 1.0.0 */
     private function enqueueAssets(): void
     {
         $assetPath = DONO_DIR . self::BUILD_DIR . '/index.asset.php';

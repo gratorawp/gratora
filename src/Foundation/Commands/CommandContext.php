@@ -7,10 +7,11 @@ namespace Dono\Foundation\Commands;
 /**
  * Execution context passed to every command dispatch.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class CommandContext
 {
+    /** @since 1.0.0 */
     public function __construct(
         public readonly ?int $user_id,
         public readonly string $source,

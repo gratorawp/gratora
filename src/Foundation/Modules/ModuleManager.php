@@ -14,7 +14,7 @@ use RuntimeException;
  * when a required module is absent, or when its requires()['core'] constraint
  * is not satisfied by the running DONO_VERSION.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class ModuleManager
 {
@@ -32,10 +32,12 @@ final class ModuleManager
      */
     private array $incompatible = [];
 
+    /** @since 1.0.0 */
     public function __construct(private Container $container)
     {
     }
 
+    /** @since 1.0.0 */
     public function register(DonoModule $module): void
     {
         $id = $module->id();
@@ -47,12 +49,16 @@ final class ModuleManager
         $this->modules[$id] = $module;
     }
 
+    /** @since 1.0.0 */
     public function get(string $id): ?DonoModule
     {
         return $this->modules[$id] ?? null;
     }
 
-    /** @return array<string, DonoModule> */
+    /**
+     * @return array<string, DonoModule>
+     * @since 1.0.0
+     */
     public function all(): array
     {
         return $this->modules;
@@ -62,6 +68,7 @@ final class ModuleManager
      * Modules skipped because their requires()['core'] constraint was not met.
      *
      * @return array<string, array{0:string,1:string}> id => [DONO_VERSION, constraint]
+     * @since 1.0.0
      */
     public function incompatible(): array
     {
@@ -70,6 +77,8 @@ final class ModuleManager
 
     /**
      * Return the status of a module: booted | unlicensed | unmet-deps | incompatible | not-registered.
+     *
+     * @since 1.0.0
      */
     public function status(string $id): string
     {
@@ -95,7 +104,11 @@ final class ModuleManager
         return ($this->booted[$id] ?? false) ? 'booted' : 'unmet-deps';
     }
 
-    /** Boot every registered module in dependency order, skipping unlicensed ones. */
+    /**
+     * Boot every registered module in dependency order, skipping unlicensed ones.
+     *
+     * @since 1.0.0
+     */
     public function bootAll(): void
     {
         foreach (array_keys($this->modules) as $id) {
@@ -103,6 +116,7 @@ final class ModuleManager
         }
     }
 
+    /** @since 1.0.0 */
     private function bootModule(string $id): void
     {
         if (isset($this->booted[$id])) {
@@ -129,7 +143,6 @@ final class ModuleManager
             return;
         }
 
-        // Boot dependencies first, then this module.
         $required = $module->requires()['modules'] ?? [];
         foreach ($required as $depId) {
             if (! isset($this->modules[$depId])) {
@@ -147,6 +160,7 @@ final class ModuleManager
      * Collect all module-owned model classes for migrations.
      *
      * @return array<class-string<\Dono\Vendor\Queryable\Model>>
+     * @since 1.0.0
      */
     public function allMigrations(): array
     {

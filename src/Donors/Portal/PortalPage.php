@@ -10,6 +10,8 @@ use WP_Post;
  * Guarantees the donor-portal WP page (hosts [dono_donor_portal]) exists and is
  * published: magic-link emails point at its URL, so a missing page silently breaks
  * donor self-service. url() is the single source of truth unless dono.portal.url is set.
+ *
+ * @since 1.0.0
  */
 final class PortalPage
 {
@@ -22,6 +24,8 @@ final class PortalPage
     /**
      * Idempotent: keeps a stored id that still resolves to a published page, else
      * adopts an existing page at the canonical slug, else inserts a fresh one.
+     *
+     * @since 1.0.0
      */
     public function ensure(): int
     {
@@ -57,8 +61,9 @@ final class PortalPage
 
     /**
      * Returns the published portal-page id, or 0 if the stored id is missing,
-     * trashed, draft, or a non-page post type. Cheap (one option + one
-     * get_post cache hit).
+     * trashed, draft, or a non-page post type.
+     *
+     * @since 1.0.0
      */
     public function resolve(): int
     {
@@ -77,10 +82,11 @@ final class PortalPage
     }
 
     /**
-     * Canonical portal URL. The `dono.portal.url` filter still overrides
-     * (existing contract); otherwise the URL is the permalink of the stored
-     * page, or the slug-based home_url() fallback while the page is being
-     * provisioned.
+     * Canonical portal URL. The `dono.portal.url` filter overrides; otherwise
+     * the URL is the permalink of the stored page, or the slug-based
+     * home_url() fallback while the page is being provisioned.
+     *
+     * @since 1.0.0
      */
     public function url(): string
     {
@@ -104,6 +110,8 @@ final class PortalPage
      * Heal pass for plugin updates: register_activation_hook does not fire
      * on updates, so we re-run ensure() once per DONO_VERSION bump. Steady
      * state is a single option read.
+     *
+     * @since 1.0.0
      */
     public function maybeHeal(): void
     {

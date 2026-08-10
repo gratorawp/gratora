@@ -16,7 +16,7 @@ use WP_Error;
  * the previous one is deleted rather than orphaned, and an admin can suppress
  * the donor entirely (public_hidden_at) when a check is not enough.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class DonorAvatarUploader
 {
@@ -27,6 +27,8 @@ final class DonorAvatarUploader
      * The largest picture this server will actually take: our cap or PHP's,
      * whichever gives way first. Published to the portal so the donor is told
      * the real number instead of one we would like to be true.
+     *
+     * @since 1.0.0
      */
     public static function maxBytes(): int
     {
@@ -50,6 +52,8 @@ final class DonorAvatarUploader
     /**
      * @param  array<string, mixed> $file a single $_FILES entry
      * @return int|WP_Error the new attachment id
+     *
+     * @since 1.0.0
      */
     public function store(Donor $donor, array $file): int|WP_Error
     {
@@ -121,6 +125,7 @@ final class DonorAvatarUploader
         return (int) $attachmentId;
     }
 
+    /** @since 1.0.0 */
     private static function tooLarge(): WP_Error
     {
         return new WP_Error(
@@ -134,7 +139,11 @@ final class DonorAvatarUploader
         );
     }
 
-    /** Clears the picture and takes the file with it. */
+    /**
+     * Clears the picture and takes the file with it.
+     *
+     * @since 1.0.0
+     */
     public function remove(Donor $donor): void
     {
         $previous = (int) ($donor->avatar_attachment_id ?? 0);
@@ -146,6 +155,8 @@ final class DonorAvatarUploader
     /**
      * Deleted after the record stops pointing at it, so a failure here leaves
      * an unused file rather than a donor pointing at nothing.
+     *
+     * @since 1.0.0
      */
     private function deleteAttachment(int $id): void
     {

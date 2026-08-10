@@ -26,13 +26,13 @@ use Dono\Foundation\Time\Clock;
  * derived from the row id alone, so it stays unique and says nothing about
  * anyone.
  *
- * Note the setting reads differently from its neighbours on the privacy panel:
+ * Note the setting reads differently from its neighbors on the privacy panel:
  * `donor_retention_years` and `event_retention_days` treat 0 as "disabled",
  * whereas here 0 means "sever at redaction time". There is deliberately no
  * "never": leaving a re-identification handle on an erased donor indefinitely
  * would undo the erasure it belongs to.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class DonorPurge
 {
@@ -40,12 +40,14 @@ final class DonorPurge
     private const DAILY = 86400;
     private const BATCH = 200;
 
+    /** @since 1.0.0 */
     public function __construct(
         private AsyncDispatcher $async,
         private Clock $clock,
     ) {
     }
 
+    /** @since 1.0.0 */
     public function register(): void
     {
         add_action(self::HOOK, [$this, 'run']);
@@ -55,12 +57,15 @@ final class DonorPurge
     /**
      * What `email_hash` becomes. Unique per row (the id already is), derived
      * from nothing about the person.
+     *
+     * @since 1.0.0
      */
     public static function severedHash(int $donorId): string
     {
         return hash('sha256', 'dono-purged:' . $donorId);
     }
 
+    /** @since 1.0.0 */
     public function run(): void
     {
         $cutoff = $this->cutoff();
@@ -89,7 +94,11 @@ final class DonorPurge
         }
     }
 
-    /** Idempotent: a second call finds the row already stamped and changes nothing. */
+    /**
+     * Idempotent: a second call finds the row already stamped and changes nothing.
+     *
+     * @since 1.0.0
+     */
     public function purge(Donor $donor): void
     {
         if ($donor->purged_at !== null) return;
@@ -107,12 +116,17 @@ final class DonorPurge
         $donor->save();
     }
 
-    /** True when the window is zero, so redaction severs the handle on the spot. */
+    /**
+     * True when the window is zero, so redaction severs the handle on the spot.
+     *
+     * @since 1.0.0
+     */
     public function purgesOnRedaction(): bool
     {
         return $this->retentionDays() <= 0;
     }
 
+    /** @since 1.0.0 */
     private function cutoff(): string
     {
         $days = $this->retentionDays();
@@ -122,6 +136,7 @@ final class DonorPurge
             ->format('Y-m-d H:i:s');
     }
 
+    /** @since 1.0.0 */
     private function retentionDays(): int
     {
         $opt    = get_option('dono_privacy', []);

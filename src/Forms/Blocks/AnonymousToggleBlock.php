@@ -9,17 +9,17 @@ use Dono\Foundation\Helpers\View;
 /**
  * Toggle that lets a donor make the donation anonymous.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class AnonymousToggleBlock implements Block
 {
-    /** Block name. */
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/anonymous-toggle';
     }
 
-    /** Editor attribute schema. */
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         return [
@@ -28,7 +28,7 @@ final class AnonymousToggleBlock implements Block
         ];
     }
 
-    /** Render server-side markup. */
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         // OR the org always-anonymous default in, matching the walker.

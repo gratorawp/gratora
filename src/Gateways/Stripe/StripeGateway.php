@@ -31,6 +31,12 @@ use RuntimeException;
 use WP_REST_Request;
 use Throwable;
 
+/**
+ * Stripe gateway via PaymentIntents for one-time donations and Subscriptions
+ * for recurring ones, charging on the organization's own Stripe account.
+ *
+ * @since 1.0.0
+ */
 final class StripeGateway implements PaymentGateway, SubscriptionAware, SupportsPaymentRetry, SupportsPaymentMethodUpdate
 {
     /**
@@ -39,6 +45,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
      */
     private ?bool $verifiedIsTest = null;
 
+    /** @since 1.0.0 */
     public function __construct(
         private StripeApi $api,
         private DonationRepository $donations,
@@ -52,46 +59,57 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     }
 
 
+    /** @since 1.0.0 */
     public function id(): string
     {
         return 'stripe';
     }
 
-    // Not a list of methods: what the Payment Element offers depends on the
-    // account, the currency, the donor's country and their device, and Apple
-    // Pay in particular silently never appears without domain verification.
+    /** @since 1.0.0 */
     public function label(): string
     {
         return __('Stripe', 'dono');
     }
 
+    /**
+     * Not a list of methods: what the Payment Element offers depends on the
+     * account, the currency, the donor's country and their device, and Apple
+     * Pay in particular silently never appears without domain verification.
+     *
+     * @since 1.0.0
+     */
     public function description(): string
     {
         return __('Pay securely by card, or another method offered at checkout.', 'dono');
     }
 
+    /** @since 1.0.0 */
     public function frequencies(): array
     {
         return ['one_time', 'recurring'];
     }
 
+    /** @since 1.0.0 */
     public function paymentMethods(): array
     {
         return ['card', 'sepa_debit', 'ideal', 'bancontact', 'apple_pay', 'google_pay'];
     }
 
+    /** @since 1.0.0 */
     public function countries(): array
     {
         // Wildcard: defer to Stripe's own country validation.
         return ['*'];
     }
 
+    /** @since 1.0.0 */
     public function currencies(): array
     {
         // Wildcard: defer to Stripe's own currency validation.
         return ['*'];
     }
 
+    /** @since 1.0.0 */
     public function canCharge(): bool
     {
         // A mid-onboarding account cannot charge yet, and gating here keeps the
@@ -99,6 +117,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         return $this->account->canCharge();
     }
 
+    /** @since 1.0.0 */
     public function createIntent(Donation $donation): GatewayIntentResult
     {
         $this->account->useTestMode((bool) $donation->is_test);
@@ -150,6 +169,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         );
     }
 
+    /** @since 1.0.0 */
     public function confirm(Donation $donation, array $payload = []): GatewayConfirmResult
     {
         // Exposed so an admin can re-poll a stuck PaymentIntent by hand.
@@ -163,6 +183,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         return $this->buildConfirmResultFromIntent($intent);
     }
 
+    /** @since 1.0.0 */
     public function handleWebhook(WP_REST_Request $request): WebhookOutcome
     {
         $payload = (string) $request->get_body();
@@ -251,6 +272,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         }
     }
 
+    /** @since 1.0.0 */
     private function handlePaymentIntentSucceeded(string $eventId, string $type, array $intent): WebhookOutcome
     {
         $intentId = (string) ($intent['id'] ?? '');
@@ -343,6 +365,8 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
      * ACH and the other delayed-notification methods reach this; a card goes
      * straight to succeeded. It is emphatically not paid: the debit can still
      * bounce, and `payment_intent.succeeded` is what settles it.
+     *
+     * @since 1.0.0
      */
     private function handlePaymentIntentProcessing(string $eventId, string $type, array $intent): WebhookOutcome
     {
@@ -389,6 +413,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         );
     }
 
+    /** @since 1.0.0 */
     private function handlePaymentIntentFailed(string $eventId, string $type, array $intent): WebhookOutcome
     {
         $intentId = (string) ($intent['id'] ?? '');
@@ -422,6 +447,8 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     /**
      * `charge.refunded` fires for refunds from our own `refund()` and for ones
      * made in the Stripe Dashboard or by dispute resolution.
+     *
+     * @since 1.0.0
      */
     private function handleChargeRefunded(string $eventId, string $type, array $charge): WebhookOutcome
     {
@@ -507,6 +534,8 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
      * A lost dispute pulled funds from our balance. Recorded as a
      * 'dispute'-sourced refund so counters drop, idempotent via the dispute id
      * standing in as the refund id.
+     *
+     * @since 1.0.0
      */
     private function handleDisputeFundsWithdrawn(string $eventId, string $type, array $dispute): WebhookOutcome
     {
@@ -573,6 +602,8 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
      * The dispute was won and Stripe has returned the money, so the refund the
      * loss recorded is undone, or the donation stays missing from every total
      * for good.
+     *
+     * @since 1.0.0
      */
     private function handleDisputeFundsReinstated(string $eventId, string $type, array $dispute): WebhookOutcome
     {
@@ -616,6 +647,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         );
     }
 
+    /** @since 1.0.0 */
     private function handleAccountUpdated(string $eventId, string $type, array $account): WebhookOutcome
     {
         $acctId  = (string) ($account['id'] ?? '');
@@ -636,6 +668,8 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     /**
      * Local state is dropped so we stop charging an account we can no longer
      * touch. The account id is on the envelope, not the data object.
+     *
+     * @since 1.0.0
      */
     private function handleAccountDeauthorized(string $eventId, string $type, array $event): WebhookOutcome
     {
@@ -658,6 +692,8 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
      * The PaymentIntent is re-fetched rather than reused, so the current
      * payment_method is picked up even when the donor authenticated minutes
      * later.
+     *
+     * @since 1.0.0
      */
     public function retrySubscriptionCreation(Donation $donation): RecurringPlan
     {
@@ -689,6 +725,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         return $plan;
     }
 
+    /** @since 1.0.0 */
     private function getOrCreateStripeCustomer(Donation $donation): string
     {
         $donor = $this->donors->findById((int) $donation->donor_id);
@@ -722,6 +759,8 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
      * Hands the saved card off to a real Stripe Subscription so Stripe drives
      * every renewal. `billing_cycle_anchor` is set one interval into the future
      * so the transition does not double-charge the donor on the same day.
+     *
+     * @since 1.0.0
      */
     private function createSubscriptionFromFirstCharge(Donation $donation, array $piIntent): void
     {
@@ -837,6 +876,8 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
      * account fingerprint is part of the key because a Product lives inside one
      * Stripe account, so a newly connected account must not be handed the old
      * account's product id.
+     *
+     * @since 1.0.0
      */
     private function resolveDonationProduct(bool $isTest): string
     {
@@ -875,6 +916,8 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
      * is pinned by the Stripe-Version header.
      *
      * @return array{0: string, 1: string} [subscription id, payment intent id]
+     *
+     * @since 1.0.0
      */
     private function invoiceRefs(array $invoice): array
     {
@@ -917,6 +960,8 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
      * Only `billing_reason=subscription_cycle` is a renewal. The first invoice
      * is paid by the one-off PaymentIntent, so counting it here would
      * double-count; anything else is out of scope.
+     *
+     * @since 1.0.0
      */
     private function handleInvoicePaymentSucceeded(string $eventId, string $type, array $invoice): WebhookOutcome
     {
@@ -1009,6 +1054,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         );
     }
 
+    /** @since 1.0.0 */
     private function handleInvoicePaymentFailed(string $eventId, string $type, array $invoice): WebhookOutcome
     {
         [$subscriptionId] = $this->invoiceRefs($invoice);
@@ -1049,6 +1095,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         );
     }
 
+    /** @since 1.0.0 */
     private function handleSubscriptionDeleted(string $eventId, string $type, array $sub): WebhookOutcome
     {
         $subscriptionId = (string) ($sub['id'] ?? '');
@@ -1092,6 +1139,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         );
     }
 
+    /** @since 1.0.0 */
     public function refund(Donation $donation, int $amountCents, ?string $reason = null): RefundResult
     {
         if (! $donation->gateway_intent_id) {
@@ -1142,6 +1190,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         );
     }
 
+    /** @since 1.0.0 */
     private function buildConfirmResultFromIntent(array $intent): GatewayConfirmResult
     {
         if (($intent['status'] ?? '') !== 'succeeded') {
@@ -1176,6 +1225,8 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
      * against Stripe and never reaches this site. off_session usage, because
      * what is being saved is the card later renewals are charged against with
      * nobody present.
+     *
+     * @since 1.0.0
      */
     public function startPaymentMethodUpdate(RecurringPlan $plan): PaymentMethodUpdate
     {
@@ -1219,6 +1270,8 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
      * enough: an invoice created before the change, which is exactly the unpaid
      * one in a dunning cycle, bills the customer's default, so a donor who
      * fixed their card would watch the same invoice decline again.
+     *
+     * @since 1.0.0
      */
     public function completePaymentMethodUpdate(RecurringPlan $plan, string $token): void
     {
@@ -1255,6 +1308,8 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
      * that invoice is what "retry now" means. The plan is deliberately not
      * written here: invoice.payment_succeeded confirms the money, and this
      * call's response can still fail asynchronously.
+     *
+     * @since 1.0.0
      */
     public function retryPayment(RecurringPlan $plan): void
     {
@@ -1291,6 +1346,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         $this->api->post('/invoices/' . rawurlencode($invoiceId) . '/pay', []);
     }
 
+    /** @since 1.0.0 */
     public function cancelSubscription(RecurringPlan $plan, ?string $reason = null): void
     {
         $this->account->useTestMode((bool) $plan->is_test);
@@ -1309,7 +1365,11 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         }
     }
 
-    /** @throws RuntimeException on a non-recoverable gateway error. */
+    /**
+     * @throws RuntimeException on a non-recoverable gateway error.
+     *
+     * @since 1.0.0
+     */
     public function pauseSubscription(RecurringPlan $plan, ?string $resumesAt = null): void
     {
         $this->account->useTestMode((bool) $plan->is_test);
@@ -1327,7 +1387,11 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         ]);
     }
 
-    /** @throws RuntimeException on a non-recoverable gateway error. */
+    /**
+     * @throws RuntimeException on a non-recoverable gateway error.
+     *
+     * @since 1.0.0
+     */
     public function resumeSubscription(RecurringPlan $plan): void
     {
         $this->account->useTestMode((bool) $plan->is_test);
@@ -1340,7 +1404,11 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         ]);
     }
 
-    /** @throws RuntimeException on a non-recoverable gateway error. */
+    /**
+     * @throws RuntimeException on a non-recoverable gateway error.
+     *
+     * @since 1.0.0
+     */
     public function updateSubscriptionAmount(RecurringPlan $plan, int $amountCents): void
     {
         $this->account->useTestMode((bool) $plan->is_test);
@@ -1391,7 +1459,11 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         ]);
     }
 
-    /** True when Stripe's error means the subscription is already gone. */
+    /**
+     * True when Stripe's error means the subscription is already gone.
+     *
+     * @since 1.0.0
+     */
     private function isAlreadyHandled(RuntimeException $e): bool
     {
         $msg = strtolower($e->getMessage());
@@ -1404,6 +1476,8 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
      * Checked against the secret that verified, never against the event body,
      * so a leaked test secret cannot reach live records even when the body
      * omits livemode.
+     *
+     * @since 1.0.0
      */
     private function wrongMode(bool $recordIsTest): ?string
     {
@@ -1423,6 +1497,8 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     /**
      * 200, not 5xx: the event is genuine, it just may not do what it asked, and
      * a 5xx would make Stripe retry it for days.
+     *
+     * @since 1.0.0
      */
     private function refused(string $eventId, string $type, string $reason): WebhookOutcome
     {

@@ -15,27 +15,30 @@ use WP_REST_Server;
  *
  * The block editor resolves bindings on the client and cannot call a PHP
  * source, so without this a block bound to dono/campaign displays the source's
- * label, "Dono campaign", and the organiser composes a page they cannot read.
+ * label, "Dono campaign", and the organizer composes a page they cannot read.
  * This hands the editor the same values the front end will render, computed by
  * the same code, so the preview cannot drift from the page.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class CampaignBindingPreviewController
 {
     private const NS = 'dono/v1';
 
+    /** @since 1.0.0 */
     public function __construct(
         private CampaignRepository $campaigns,
         private CampaignBindings $bindings,
     ) {
     }
 
+    /** @since 1.0.0 */
     public function register(): void
     {
         add_action('rest_api_init', [$this, 'registerRoutes']);
     }
 
+    /** @since 1.0.0 */
     public function registerRoutes(): void
     {
         register_rest_route(self::NS, '/campaign-binding-preview/(?P<id>\d+)', [
@@ -54,12 +57,15 @@ final class CampaignBindingPreviewController
      * visitor of the published page cannot already read, and it is needed by
      * anyone the site lets edit a page. What it may return is narrowed
      * separately, in resolve().
+     *
+     * @since 1.0.0
      */
     public function canAccess(): bool
     {
         return current_user_can('edit_posts');
     }
 
+    /** @since 1.0.0 */
     public function show(WP_REST_Request $request): WP_REST_Response
     {
         $campaign = $this->resolve($request);
@@ -78,8 +84,10 @@ final class CampaignBindingPreviewController
      * binding through, so a draft or archived campaign reaches only a caller
      * who can manage campaigns. Any other edit_posts holder - a Contributor,
      * say - gets what the rendered page would give them, which is nothing.
-     * campaign_id comes straight off the request, so without this the route
-     * read out any campaign on the site by id.
+     * campaign_id comes straight off the request, so without that gate the
+     * route would read out any campaign on the site by id.
+     *
+     * @since 1.0.0
      */
     private function resolve(WP_REST_Request $request): ?Campaign
     {

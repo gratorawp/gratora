@@ -36,7 +36,7 @@ use WP_REST_Request;
  * Webhooks are the source of truth for money movement and are idempotent, so a
  * capture that also arrives by webhook is confirmed only once.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class PayPalGateway implements PaymentGateway, SubscriptionAware, SupportsPaymentMethodUpdate
 {
@@ -46,6 +46,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
      */
     private ?bool $verifiedIsTest = null;
 
+    /** @since 1.0.0 */
     public function __construct(
         private PayPalApi $api,
         private PayPalAccount $account,
@@ -58,21 +59,25 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
     ) {
     }
 
+    /** @since 1.0.0 */
     public function id(): string
     {
         return 'paypal';
     }
 
+    /** @since 1.0.0 */
     public function label(): string
     {
         return __('PayPal', 'dono');
     }
 
+    /** @since 1.0.0 */
     public function description(): string
     {
         return __('Pay with your PayPal balance, a bank account, or a card. No PayPal account required.', 'dono');
     }
 
+    /** @since 1.0.0 */
     public function frequencies(): array
     {
         // PayPal takes the first payment the moment the donor approves, and the
@@ -92,6 +97,8 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
      * The mode a donation started right now would run in. frequencies() is
      * asked before any donation exists, so it cannot use the per-donation
      * override the credential-bearing calls set.
+     *
+     * @since 1.0.0
      */
     private function siteTestMode(): bool
     {
@@ -100,11 +107,13 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         return is_array($cfg) && ! empty($cfg['test_mode']);
     }
 
+    /** @since 1.0.0 */
     public function paymentMethods(): array
     {
         return ['paypal', 'venmo', 'paylater', 'card'];
     }
 
+    /** @since 1.0.0 */
     public function countries(): array
     {
         // Wildcard: defer to PayPal's own country rules.
@@ -115,6 +124,8 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
      * PayPal settles in a fixed set of currencies and, unlike Stripe, rejects
      * anything outside it outright. Listing them keeps the donor form from
      * offering PayPal for a currency the order would fail on.
+     *
+     * @since 1.0.0
      */
     public function currencies(): array
     {
@@ -131,6 +142,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         ];
     }
 
+    /** @since 1.0.0 */
     public function canCharge(): bool
     {
         return $this->account->canCharge();
@@ -140,6 +152,8 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
      * One-time: create the Order now so the donation carries a gateway id
      * before the donor approves. Recurring: no order exists, so hand the
      * browser the plan id to open a Subscription against.
+     *
+     * @since 1.0.0
      */
     public function createIntent(Donation $donation): GatewayIntentResult
     {
@@ -193,6 +207,8 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
      * Recurring needs a Plan, not an Order. The plan is keyed on amount plus
      * interval and reused across donors, so a repeat monthly amount does not
      * create a second plan on the PayPal account.
+     *
+     * @since 1.0.0
      */
     private function createSubscriptionIntent(Donation $donation): GatewayIntentResult
     {
@@ -222,6 +238,8 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
      * donor finishes in the PayPal popup, and safe to re-enter: PayPal reports
      * ORDER_ALREADY_CAPTURED, which we treat as success and let the stored
      * capture stand.
+     *
+     * @since 1.0.0
      */
     public function confirm(Donation $donation, array $payload = []): GatewayConfirmResult
     {
@@ -253,7 +271,11 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         return $this->buildConfirmResultFromOrder($result);
     }
 
-    /** @param array<string,mixed> $order */
+    /**
+     * @param array<string,mixed> $order
+     *
+     * @since 1.0.0
+     */
     private function buildConfirmResultFromOrder(array $order): GatewayConfirmResult
     {
         $status = (string) ($order['status'] ?? '');
@@ -296,6 +318,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         );
     }
 
+    /** @since 1.0.0 */
     public function handleWebhook(WP_REST_Request $request): WebhookOutcome
     {
         $raw = (string) $request->get_body();
@@ -362,7 +385,11 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         };
     }
 
-    /** @param array<string,mixed> $capture */
+    /**
+     * @param array<string,mixed> $capture
+     *
+     * @since 1.0.0
+     */
     private function handleCaptureCompleted(string $eventId, string $type, array $capture): WebhookOutcome
     {
         $donation = $this->donationForCapture($capture);
@@ -372,8 +399,8 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
 
         // A PayPal-signed event proves PayPal sent it, not that it is about this
         // donation for this amount. The browser picks custom_id and the amount
-        // when it creates the order, so without this a $0.01 capture confirmed a
-        // $10,000 donation.
+        // when it creates the order, so without this guard a $0.01 capture
+        // confirms a $10,000 donation.
         $currency = strtoupper((string) ($capture['amount']['currency_code'] ?? ''));
         $refusal  = WebhookPaymentGuard::refuse(
             $donation,
@@ -403,7 +430,11 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         );
     }
 
-    /** @param array<string,mixed> $capture */
+    /**
+     * @param array<string,mixed> $capture
+     *
+     * @since 1.0.0
+     */
     private function handleCaptureDenied(string $eventId, string $type, array $capture): WebhookOutcome
     {
         $donation = $this->donationForCapture($capture);
@@ -412,9 +443,8 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         }
 
         // The browser picks custom_id when it creates the order, so this event
-        // names a donation an attacker chose. handleCaptureCompleted checks the
-        // pair; the two that reverse a payment did not, so a sandbox-signed
-        // event could fail a live donation.
+        // names a donation an attacker chose. Without the gateway and mode pair
+        // check a sandbox-signed event could fail a live donation.
         if ($reason = WebhookPaymentGuard::refuseToTouch($donation, $this->id(), $this->verifiedIsTest)) {
             return $this->refused($eventId, $type, $reason);
         }
@@ -434,6 +464,8 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
      * match PayPal without an admin re-entering it.
      *
      * @param array<string,mixed> $refund
+     *
+     * @since 1.0.0
      */
     private function handleCaptureRefunded(string $eventId, string $type, array $refund): WebhookOutcome
     {
@@ -471,7 +503,11 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         );
     }
 
-    /** @param array<string,mixed> $sub */
+    /**
+     * @param array<string,mixed> $sub
+     *
+     * @since 1.0.0
+     */
     private function handleSubscriptionActivated(string $eventId, string $type, array $sub): WebhookOutcome
     {
         $plan = $this->planRepo->findBySubscriptionId($this->id(), (string) ($sub['id'] ?? ''));
@@ -503,6 +539,8 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
      *
      * Costs one API call, and only on the path that would otherwise have
      * nothing to record the money against.
+     *
+     * @since 1.0.0
      */
     private function recoverPlanBySubscriptionId(string $subId): ?RecurringPlan
     {
@@ -530,6 +568,8 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
      * awaiting one is refused here exactly as it would be there.
      *
      * @param array<string,mixed> $sub a PayPal subscription resource
+     *
+     * @since 1.0.0
      */
     private function recoverPlan(array $sub): ?RecurringPlan
     {
@@ -544,15 +584,14 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         }
     }
 
-    /** @param array<string,mixed> $sub */
     /**
      * When the next charge is due, from the plan's own interval.
      *
      * Stripe reads this off the invoice's period end; PayPal's sale event does
      * not carry it, and fetching the subscription would cost an API round trip
-     * on every renewal. Left unwritten, next_payment_at kept the value set at
-     * signup, so it went stale on the donor's portal and on the admin screen,
-     * and "skip next payment" computed its new date from a moment in the past.
+     * on every renewal.
+     *
+     * @since 1.0.0
      */
     private function nextPaymentAfter(RecurringPlan $plan): ?string
     {
@@ -569,6 +608,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         return gmdate('Y-m-d H:i:s', $next);
     }
 
+    /** @since 1.0.0 */
     private function handleSubscriptionEnded(string $eventId, string $type, array $sub): WebhookOutcome
     {
         $plan = $this->planRepo->findBySubscriptionId($this->id(), (string) ($sub['id'] ?? ''));
@@ -607,6 +647,8 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
      * existing donation for this billing period must not double-count.
      *
      * @param array<string,mixed> $sale
+     *
+     * @since 1.0.0
      */
     private function handleRenewalPaid(string $eventId, string $type, array $sale): WebhookOutcome
     {
@@ -623,11 +665,11 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         $plan = $this->planRepo->findBySubscriptionId($this->id(), $subId);
 
         // Ask PayPal what this subscription is and write the plan ourselves.
-        // Waiting for the browser was the whole defect: when that POST never
-        // arrives, redelivery only buys time until PayPal gives up, and the
-        // subscription then bills forever with nothing on file and no cancel
-        // path, because every cancel reads gateway_subscription_id off a row
-        // that was never created.
+        // Waiting for the browser is not enough: when that POST never arrives,
+        // redelivery only buys time until PayPal gives up, and the subscription
+        // then bills forever with nothing on file and no cancel path, because
+        // every cancel reads gateway_subscription_id off a row that was never
+        // created.
         if (! $plan) {
             $plan = $this->recoverPlanBySubscriptionId($subId);
         }
@@ -640,10 +682,9 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
             //
             // PayPal bills the moment the donor approves, and the plan is
             // written by the browser's POST to /gateways/paypal/subscription.
-            // When the webhook wins that race, or the donor closes the tab
-            // before it fires, the 200 told PayPal the opening payment had been
-            // accepted and it never redelivered. The first payment of every
-            // affected subscription was simply never booked.
+            // A 200 here would tell PayPal the opening payment had been
+            // accepted, and it would never redeliver, so that first payment
+            // would never be booked.
             //
             // 503 so PayPal redelivers while the browser call catches up. Its
             // retry schedule ends on its own, so this cannot retry forever.
@@ -708,7 +749,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
             // branch below gets from $renewal['created']. recordPayment
             // increments unconditionally, so without it two deliveries of one
             // sale both bump payments_count - and PayPal redelivers by design,
-            // which the 503 early-sale path now makes more likely, not less.
+            // which the 503 early-sale path makes more likely.
             //
             // A targeted UPDATE rather than save(): a whole-row write from the
             // loser's stale copy would push status back to pending over the
@@ -774,13 +815,21 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         );
     }
 
-    /** Clock returns a DateTimeImmutable; the models store MySQL datetimes. */
+    /**
+     * Clock returns a DateTimeImmutable; the models store MySQL datetimes.
+     *
+     * @since 1.0.0
+     */
     private function now(): string
     {
         return $this->clock->now()->format('Y-m-d H:i:s');
     }
 
-    /** @param array<string,mixed> $capture */
+    /**
+     * @param array<string,mixed> $capture
+     *
+     * @since 1.0.0
+     */
     private function donationForCapture(array $capture): ?Donation
     {
         $reference = (string) ($capture['custom_id'] ?? '');
@@ -799,6 +848,8 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
     /**
      * A genuinely PayPal-signed event that must not touch this donation. 200,
      * not 5xx: retrying will not make it acceptable.
+     *
+     * @since 1.0.0
      */
     private function refused(string $eventId, string $type, string $reason): WebhookOutcome
     {
@@ -812,6 +863,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         );
     }
 
+    /** @since 1.0.0 */
     private function unmatched(string $eventId, string $type, string $what): WebhookOutcome
     {
         // 200, not 5xx: the event is valid, it just is not ours. A 5xx would
@@ -826,6 +878,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         );
     }
 
+    /** @since 1.0.0 */
     public function refund(Donation $donation, int $amountCents, ?string $reason = null): RefundResult
     {
         $captureId = (string) ($donation->gateway_txn_id ?? '');
@@ -873,6 +926,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         );
     }
 
+    /** @since 1.0.0 */
     public function cancelSubscription(RecurringPlan $plan, ?string $reason = null): void
     {
         $this->account->useTestMode((bool) $plan->is_test);
@@ -889,6 +943,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         }
     }
 
+    /** @since 1.0.0 */
     public function pauseSubscription(RecurringPlan $plan, ?string $resumesAt = null): void
     {
         $this->account->useTestMode((bool) $plan->is_test);
@@ -904,6 +959,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         }
     }
 
+    /** @since 1.0.0 */
     public function resumeSubscription(RecurringPlan $plan): void
     {
         $this->account->useTestMode((bool) $plan->is_test);
@@ -920,15 +976,12 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
     }
 
     /**
-     * PayPal has no "change the price on this subscription" call: the amount
-     * lives on the plan, so changing it means revising the subscription onto a
-     * plan at the new amount (provisioned on demand and reused).
-     */
-    /**
      * PayPal will not let anyone else collect a funding source for one of its
      * subscriptions, so there is no card field to render. Revising the
      * subscription onto its own current plan produces an approval link, which
      * is the page where the subscriber can change how they pay.
+     *
+     * @since 1.0.0
      */
     public function startPaymentMethodUpdate(RecurringPlan $plan): PaymentMethodUpdate
     {
@@ -970,11 +1023,20 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
      * Nothing to do: the donor finishes on PayPal, and the subscription's own
      * webhook is what tells us the funding source moved. Treating a local call
      * as the completion would claim a change PayPal has not made.
+     *
+     * @since 1.0.0
      */
     public function completePaymentMethodUpdate(RecurringPlan $plan, string $token): void
     {
     }
 
+    /**
+     * PayPal has no "change the price on this subscription" call: the amount
+     * lives on the plan, so changing it means revising the subscription onto a
+     * plan at the new amount (provisioned on demand and reused).
+     *
+     * @since 1.0.0
+     */
     public function updateSubscriptionAmount(RecurringPlan $plan, int $amountCents): void
     {
         $this->account->useTestMode((bool) $plan->is_test);
@@ -993,11 +1055,9 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         );
 
         // PayPal does not apply a revise until the subscriber approves it, and
-        // says so by handing back an approve link. The response was discarded,
-        // so the caller wrote the new amount to the plan while PayPal carried
-        // on charging the old one: the portal showed the donor the figure they
-        // asked for and their card showed the figure they had. Nothing later
-        // reconciled the two.
+        // says so by handing back an approve link. Ignoring that link would
+        // write a new amount to the plan while PayPal carries on charging the
+        // old one, and nothing reconciles the two.
         $approveUrl = '';
         foreach ((array) ($revised['links'] ?? []) as $link) {
             if (strtolower((string) ($link['rel'] ?? '')) === 'approve') {
@@ -1017,8 +1077,10 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
     /**
      * @return array{0:string,1:int} interval unit + count for a Dono frequency.
      *
-     * Delegates to FrequencyMap rather than repeating the table: a local match
-     * with a monthly default silently billed biweekly donors once a month.
+     * Delegates to FrequencyMap rather than repeating the table: a local copy
+     * with a monthly default silently bills biweekly donors once a month.
+     *
+     * @since 1.0.0
      */
     private function intervalFor(string $frequency): array
     {
@@ -1029,11 +1091,11 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
      * A second capture on an order PayPal already took. Safe to re-enter: the
      * caller re-reads the order and confirms the donation from it.
      *
-     * PayPal always sends a `description` next to the issue code, and the
-     * message builder prefers the description, so grepping the message for the
-     * code only ever worked against a response shape PayPal does not send. A
-     * double-click or a retried tab therefore told the donor the payment had
-     * failed on money already taken.
+     * Matched on the issue code, not the message: PayPal always sends a
+     * `description` next to the code and the message builder prefers it, so the
+     * code never reaches the formatted message.
+     *
+     * @since 1.0.0
      */
     private function isAlreadyCaptured(RuntimeException $e): bool
     {
@@ -1044,9 +1106,10 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
      * Pause/resume/cancel are safe to re-enter, so PayPal telling us the
      * subscription is already in the state we asked for is success, not failure.
      *
-     * Matched on the issue codes rather than on the message: the previous
-     * `already` needle also matched the *description* of unrelated errors, and
-     * the codes it looked for never survived message formatting anyway.
+     * Matched on the issue codes rather than on the message: message text also
+     * carries the description of unrelated errors.
+     *
+     * @since 1.0.0
      */
     private function isAlreadyInThatState(RuntimeException $e): bool
     {

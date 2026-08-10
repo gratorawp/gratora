@@ -9,17 +9,17 @@ use Dono\Foundation\Helpers\View;
 /**
  * Heading text block.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class HeadingBlock implements Block
 {
-    /** Block name. */
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/heading';
     }
 
-    /** Editor attribute schema. */
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         return [
@@ -29,7 +29,7 @@ final class HeadingBlock implements Block
         ];
     }
 
-    /** Render server-side markup. */
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         $level = (int) ($attrs['level'] ?? 2);

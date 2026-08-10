@@ -12,10 +12,11 @@ use Dono\Vendor\Queryable\DB;
  * Keeps pre-aggregated donor columns in sync when donations are paid, refunded
  * or reversed by the bank.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class DonorAggregateSyncer
 {
+    /** @since 1.0.0 */
     public function register(): void
     {
         add_action('dono.donation.completed', function (Donation $d): void {
@@ -38,6 +39,7 @@ final class DonorAggregateSyncer
         });
     }
 
+    /** @since 1.0.0 */
     public function syncForDonor(int $donorId): void
     {
         if ($donorId <= 0) return;
@@ -49,8 +51,7 @@ final class DonorAggregateSyncer
             $netExpr = DonationQueries::netBaseExpr();
 
             // donationsOnly, not live: a ticket order is a purchase, not a
-            // gift, and counting it inflated the buyer's lifetime total until
-            // a resync silently reversed it.
+            // gift, and counting it would inflate the buyer's lifetime total.
             $row = DonationQueries::donationsOnly(DB::table('dono_donations')
                 ->whereIn('status', ['paid', 'partial_refund'])
                 ->where('donor_id', $donorId))
@@ -84,7 +85,11 @@ final class DonorAggregateSyncer
         $this->fireDeltaHooks($donorId, $delta['before'], $delta['after']);
     }
 
-    /** Row-level write lock so concurrent calls for the same donor serialise. */
+    /**
+     * Row-level write lock so concurrent calls for the same donor serialize.
+     *
+     * @since 1.0.0
+     */
     private function lockAndReadDonor(int $donorId): ?array
     {
         $prefix = DB::getPrefix();
@@ -108,6 +113,7 @@ final class DonorAggregateSyncer
         ];
     }
 
+    /** @since 1.0.0 */
     private function fireDeltaHooks(int $donorId, array $before, array $after): void
     {
         do_action('dono.donor.aggregates_synced', $donorId, $after, $before);

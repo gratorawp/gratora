@@ -10,10 +10,11 @@ use Dono\Foundation\Helpers\View;
 /**
  * Renders the donate button and its inline form modal.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class DonateButtonBlock extends CampaignBlock
 {
+    /** @since 1.0.0 */
     public function __construct(
         \Dono\Campaigns\CampaignRepository $campaigns,
         private readonly FormRepository $forms,
@@ -21,11 +22,13 @@ final class DonateButtonBlock extends CampaignBlock
         parent::__construct($campaigns);
     }
 
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/donate-button';
     }
 
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         return $this->campaignIdAttr() + [
@@ -36,6 +39,7 @@ final class DonateButtonBlock extends CampaignBlock
         ];
     }
 
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         $campaign = $this->resolveCampaign($attrs);
@@ -67,7 +71,7 @@ final class DonateButtonBlock extends CampaignBlock
 
         return View::loadRelative(__DIR__, 'views/donate-button', [
             // ?: not ??: the attribute exists and is an empty string when the
-            // organiser has not renamed it, so ?? would hand the view ''.
+            // organizer has not renamed it, so ?? would hand the view ''.
             'label'        => (string) ($attrs['label'] ?? '') ?: __('Donate now', 'dono'),
             'align'        => (string) ($attrs['align'] ?? 'left'),
             'size'         => in_array($attrs['size'] ?? 'md', ['sm', 'md', 'lg'], true)

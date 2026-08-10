@@ -17,9 +17,12 @@ namespace Dono\Donations;
  *     company?: ?string,
  *     donor_type?: 'individual'|'organization'|'household',
  * }
+ *
+ * @since 1.0.0
  */
 final class DonationIntent
 {
+    /** @since 1.0.0 */
     public function __construct(
         public readonly string $email,
         public readonly int $amount_cents,

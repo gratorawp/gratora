@@ -18,13 +18,14 @@ use WP_REST_Server;
  * hidden: string[] } }. Unknown scope keys are ignored client-side, so new
  * widgets need no migration.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class UserPrefsController
 {
     private const NAMESPACE = 'dono/v1';
     private const META_KEY  = 'dono_widget_layout';
 
+    /** @since 1.0.0 */
     public function registerRoutes(): void
     {
         register_rest_route(self::NAMESPACE, '/admin/me/layout', [
@@ -70,6 +71,7 @@ final class UserPrefsController
         ]);
     }
 
+    /** @since 1.0.0 */
     public function dismissAttention(WP_REST_Request $request): WP_REST_Response
     {
         (new AttentionDismissals())->dismiss(
@@ -81,6 +83,7 @@ final class UserPrefsController
         return new WP_REST_Response(['dismissed' => true], 200);
     }
 
+    /** @since 1.0.0 */
     public function restoreAttention(WP_REST_Request $request): WP_REST_Response
     {
         (new AttentionDismissals())->restore(
@@ -91,11 +94,13 @@ final class UserPrefsController
         return new WP_REST_Response(['dismissed' => false], 200);
     }
 
+    /** @since 1.0.0 */
     public function canAccess(): bool
     {
         return is_user_logged_in() && Capabilities::canAccessAdmin();
     }
 
+    /** @since 1.0.0 */
     public function show(WP_REST_Request $request): WP_REST_Response
     {
         $all = $this->readAll();
@@ -108,6 +113,7 @@ final class UserPrefsController
         ], 200);
     }
 
+    /** @since 1.0.0 */
     public function update(WP_REST_Request $request): WP_REST_Response
     {
         $all  = $this->readAll();
@@ -124,7 +130,11 @@ final class UserPrefsController
         return new WP_REST_Response($all[$key], 200);
     }
 
-    /** @return array<string, array{order:array<int,string>, hidden:array<int,string>}> */
+    /**
+     * @return array<string, array{order:array<int,string>, hidden:array<int,string>}>
+     *
+     * @since 1.0.0
+     */
     private function readAll(): array
     {
         $raw = get_user_meta(get_current_user_id(), self::META_KEY, true);
@@ -132,6 +142,7 @@ final class UserPrefsController
         return is_array($all) ? $all : [];
     }
 
+    /** @since 1.0.0 */
     private function scopeKey(WP_REST_Request $request): string
     {
         $scope = (string) ($request->get_param('scope') ?? '');

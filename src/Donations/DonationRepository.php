@@ -8,13 +8,16 @@ use Dono\Receipts\Receipt;
 use Dono\Vendor\Queryable\DB;
 use Dono\Vendor\Queryable\QueryBuilder;
 
+/** @since 1.0.0 */
 final class DonationRepository
 {
+    /** @since 1.0.0 */
     public function findById(int $id): ?Donation
     {
         return Donation::query()->find('id', $id);
     }
 
+    /** @since 1.0.0 */
     public function findByReference(string $reference): ?Donation
     {
         return Donation::query()->find('reference', $reference);
@@ -27,6 +30,8 @@ final class DonationRepository
      * figure.
      *
      * @return list<array{date:string,amount_cents:int,refunded_cents:int,currency:string,reference:string,receipt_number:?string}>
+     *
+     * @since 1.0.0
      */
     public function paidForDonorInYear(int $donorId, int $year): array
     {
@@ -75,6 +80,7 @@ final class DonationRepository
         return $out;
     }
 
+    /** @since 1.0.0 */
     public function findByGatewayIntent(string $gateway, string $intentId): ?Donation
     {
         return Donation::query()
@@ -83,6 +89,7 @@ final class DonationRepository
             ->get();
     }
 
+    /** @since 1.0.0 */
     public function findByGatewayTxn(string $gateway, string $txnId): ?Donation
     {
         return Donation::query()
@@ -95,6 +102,8 @@ final class DonationRepository
      * How many test donations the same filters would have matched. The list is
      * live-only, and silent exclusion means an admin donating while the org is
      * in test mode watches their donation vanish.
+     *
+     * @since 1.0.0
      */
     public function countTestHidden(array $args = []): int
     {
@@ -111,6 +120,8 @@ final class DonationRepository
      * `reference`.
      *
      * @param array{page?:int,per_page?:int,orderby?:string,order?:string,status?:string,search?:string,matching_donor_ids?:array<int>} $args
+     *
+     * @since 1.0.0
      */
     public function listAdmin(array $args = []): array
     {
@@ -141,6 +152,8 @@ final class DonationRepository
      * The "these donors never got their receipt" sweep.
      *
      * @param array{page?:int,per_page?:int,campaign_id?:int} $args
+     *
+     * @since 1.0.0
      */
     public function paidWithoutReceipt(array $args = []): array
     {
@@ -192,13 +205,15 @@ final class DonationRepository
     }
 
     /**
-     * Ids only, in export order. Paging the export by OFFSET made MySQL walk
+     * Ids only, in export order. Paging the export by OFFSET makes MySQL walk
      * and discard every earlier row for each page, which is quadratic in the
      * export size. This is one ordered pass, and each page is then a
      * primary-key lookup.
      *
      * @param  array<string,mixed> $args
      * @return list<int>
+     *
+     * @since 1.0.0
      */
     public function listIdsForExport(array $args = []): array
     {
@@ -220,6 +235,8 @@ final class DonationRepository
     /**
      * @param  list<int> $ids
      * @return array<int, Donation> keyed by id
+     *
+     * @since 1.0.0
      */
     public function findManyDonationsByIds(array $ids): array
     {
@@ -237,6 +254,8 @@ final class DonationRepository
 
     /**
      * @return array{amount_cents:int, donations_count:int, donors_count:int}
+     *
+     * @since 1.0.0
      */
     public function aggregatePaidBetween(?string $from = null, ?string $to = null, ?int $campaignId = null): array
     {
@@ -258,6 +277,8 @@ final class DonationRepository
 
     /**
      * @return array<array{day:string, amount_cents:int, donations_count:int}>
+     *
+     * @since 1.0.0
      */
     public function dailyPaidBetween(string $from, string $to, ?int $campaignId = null): array
     {
@@ -277,6 +298,8 @@ final class DonationRepository
     /**
      * Net of refunds so it agrees with the raised total shown beside it: a
      * headline gift that was half refunded is not still the biggest one.
+     *
+     * @since 1.0.0
      */
     public function maxNetPaidAmount(?int $campaignId = null): int
     {
@@ -290,6 +313,7 @@ final class DonationRepository
         return max(0, (int) ($row['top'] ?? 0));
     }
 
+    /** @since 1.0.0 */
     public function firstPaidDate(?int $campaignId = null): ?string
     {
         $q = DonationQueries::donationsOnly(DB::table('dono_donations')
@@ -308,6 +332,8 @@ final class DonationRepository
     /**
      * A single currency to format aggregated totals against a mixed-currency
      * pool.
+     *
+     * @since 1.0.0
      */
     public function topCurrencyForPaid(?string $from = null, ?string $to = null): ?string
     {
@@ -324,6 +350,8 @@ final class DonationRepository
 
     /**
      * @return array<array{utm_source:?string, utm_medium:?string, amount_cents:int, donations_count:int}>
+     *
+     * @since 1.0.0
      */
     public function aggregatePaidByAttribution(?string $from = null, ?string $to = null, ?int $campaignId = null): array
     {
@@ -351,6 +379,8 @@ final class DonationRepository
 
     /**
      * @return array<array{campaign_id:int, amount_cents:int, donations_count:int}>
+     *
+     * @since 1.0.0
      */
     public function topPaidCampaigns(?string $from = null, ?string $to = null, int $limit = 5): array
     {
@@ -371,6 +401,8 @@ final class DonationRepository
 
     /**
      * @return array<array{day:string, amount_cents:int}>
+     *
+     * @since 1.0.0
      */
     public function dailyPaidForCampaignBetween(int $campaignId, string $from, string $to): array
     {
@@ -391,6 +423,8 @@ final class DonationRepository
      * row.
      *
      * @return array<int, array<string, int>> map of campaign_id => [day => amount_cents]
+     *
+     * @since 1.0.0
      */
     public function dailyPaidByCampaignsBetween(array $campaignIds, string $from, string $to): array
     {
@@ -414,6 +448,8 @@ final class DonationRepository
 
     /**
      * @return array<array{gateway:string, amount_cents:int, donations_count:int}>
+     *
+     * @since 1.0.0
      */
     public function aggregatePaidByGateway(?string $from = null, ?string $to = null, ?int $campaignId = null): array
     {
@@ -433,6 +469,8 @@ final class DonationRepository
 
     /**
      * @return array<array{frequency:string, amount_cents:int, donations_count:int}>
+     *
+     * @since 1.0.0
      */
     public function aggregatePaidByFrequency(?string $from = null, ?string $to = null, ?int $campaignId = null): array
     {
@@ -452,6 +490,8 @@ final class DonationRepository
 
     /**
      * @return array<array{form_id:int, amount_cents:int, donations_count:int}>
+     *
+     * @since 1.0.0
      */
     public function topPaidForms(?string $from = null, ?string $to = null, ?int $campaignId = null, int $limit = 5): array
     {
@@ -470,6 +510,7 @@ final class DonationRepository
         ], $rows);
     }
 
+    /** @since 1.0.0 */
     public function recentForCampaign(int $campaignId, int $limit = 10, bool $includeAnonymous = true): array
     {
         $q = DonationQueries::live(Donation::query()
@@ -485,6 +526,8 @@ final class DonationRepository
 
     /**
      * @return array<array{donor_id:int, amount_cents:int, donations_count:int}>
+     *
+     * @since 1.0.0
      */
     public function topPaidDonors(?string $from = null, ?string $to = null, ?int $campaignId = null, int $limit = 5, bool $includeAnonymous = true): array
     {
@@ -509,7 +552,11 @@ final class DonationRepository
         ], $rows);
     }
 
-    /** One masked aggregate, so anonymous giving shows without naming anyone. */
+    /**
+     * One masked aggregate, so anonymous giving shows without naming anyone.
+     *
+     * @since 1.0.0
+     */
     public function anonymousPaidTotal(?string $from = null, ?string $to = null, ?int $campaignId = null): array
     {
         $prefix = DB::getPrefix();
@@ -526,6 +573,8 @@ final class DonationRepository
 
     /**
      * @return array<array{label:string, threshold:?int, donations_count:int, amount_cents:int}>
+     *
+     * @since 1.0.0
      */
     public function amountHistogramBuckets(array $thresholdsCents, ?string $from = null, ?string $to = null, ?int $campaignId = null): array
     {
@@ -579,6 +628,8 @@ final class DonationRepository
 
     /**
      * @return array<array{dow:int, hour:int, donations_count:int, amount_cents:int}>
+     *
+     * @since 1.0.0
      */
     public function dowHourGridForPaid(?string $from = null, ?string $to = null, ?int $campaignId = null): array
     {
@@ -601,6 +652,7 @@ final class DonationRepository
         }, $rows);
     }
 
+    /** @since 1.0.0 */
     public function medianPaidAmount(?string $from, ?string $to, ?int $campaignId, int $totalCount): int
     {
         if ($totalCount === 0) return 0;
@@ -635,6 +687,8 @@ final class DonationRepository
      *   one_time_amount_cents:int,
      *   recurring_new_count:int
      * }>
+     *
+     * @since 1.0.0
      */
     public function donorCohortRowsForCampaign(int $campaignId, ?string $from, ?string $to): array
     {
@@ -677,7 +731,11 @@ final class DonationRepository
         return $out;
     }
 
-    /** Donors, not rows: six monthly renewals are one recurring donor. */
+    /**
+     * Donors, not rows: six monthly renewals are one recurring donor.
+     *
+     * @since 1.0.0
+     */
     public function countActiveRecurringForCampaign(int $campaignId): int
     {
         $row = DonationQueries::live(DB::table('dono_donations')
@@ -690,6 +748,7 @@ final class DonationRepository
         return (int) ($row['c'] ?? 0);
     }
 
+    /** @since 1.0.0 */
     private function paidQuery(?string $from, ?string $to, ?int $campaignId): QueryBuilder
     {
         $q = DonationQueries::live(DB::table('dono_donations')->where('status', 'paid'));
@@ -703,6 +762,8 @@ final class DonationRepository
      * `joinRaw` does not auto-prefix table names the way DB::table() does, so
      * the subquery and anything referenced from selectRaw have to use the
      * prefixed names explicitly.
+     *
+     * @since 1.0.0
      */
     private function netPaidQuery(?string $from, ?string $to, ?int $campaignId): QueryBuilder
     {
@@ -732,6 +793,7 @@ final class DonationRepository
         );
     }
 
+    /** @since 1.0.0 */
     private function formatBucketLabel(int $lowExclusiveCents, int $highInclusiveCents): string
     {
         if ($lowExclusiveCents === 0) {
@@ -740,6 +802,7 @@ final class DonationRepository
         return $this->formatMoneyShort($lowExclusiveCents) . '-' . $this->formatMoneyShort($highInclusiveCents);
     }
 
+    /** @since 1.0.0 */
     private function formatMoneyShort(int $cents): string
     {
         $major = $cents / 100;
@@ -749,6 +812,8 @@ final class DonationRepository
 
     /**
      * @return array{total_count:int,paid_count:int,raised_cents:int,currency:?string,donors_count:int}
+     *
+     * @since 1.0.0
      */
     public function aggregateAdmin(array $args = []): array
     {
@@ -793,6 +858,8 @@ final class DonationRepository
     /**
      * Shared by the donations list, the CSV export and the KPI aggregate, so
      * the three cannot drift apart.
+     *
+     * @since 1.0.0
      */
     private function applyAdminFilters($q, array $args)
     {
@@ -871,6 +938,7 @@ final class DonationRepository
         return $q;
     }
 
+    /** @since 1.0.0 */
     private static function hasExplicitTestFilter(array $args): bool
     {
         return array_key_exists('is_test', $args) && $args['is_test'] !== '' && $args['is_test'] !== null;
@@ -880,6 +948,8 @@ final class DonationRepository
      * A bare date normalises to the start of the day, or the end of it for an
      * inclusive upper bound. Null for unparseable input, so the caller can skip
      * the filter.
+     *
+     * @since 1.0.0
      */
     private static function normaliseDateFilter(mixed $value, bool $endOfDay = false): ?string
     {

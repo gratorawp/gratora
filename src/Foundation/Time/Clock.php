@@ -10,9 +10,10 @@ use DateTimeImmutable;
  * Single source of "now". Inject a Clock; never call new DateTimeImmutable() directly.
  * Tests use FrozenClock.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 interface Clock
 {
+    /** @since 1.0.0 */
     public function now(): DateTimeImmutable;
 }

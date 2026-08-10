@@ -20,10 +20,11 @@ use Dono\Vendor\Queryable\DB;
 /**
  * Aggregates metrics across all campaigns for the platform dashboard.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class DashboardMetricsService
 {
+    /** @since 1.0.0 */
     public function __construct(
         private Clock $clock,
         private DonationRepository $donations,
@@ -31,7 +32,10 @@ final class DashboardMetricsService
     ) {
     }
 
-    /** @return array<string,mixed> */
+    /**
+     * @return array<string,mixed>
+     * @since 1.0.0
+     */
     public function kpi(string $range = 'last-30', string $compare = 'none'): array
     {
         $bounds = $this->rangeBounds($range);
@@ -66,6 +70,7 @@ final class DashboardMetricsService
      *   series:array<array{date:string,amount_cents:int,donations_count:int}>,
      *   previous_series:?array<array{date:string,amount_cents:int,donations_count:int}>
      * }
+     * @since 1.0.0
      */
     public function revenueSeries(string $range = 'last-30', string $compare = 'none'): array
     {
@@ -87,6 +92,7 @@ final class DashboardMetricsService
      * Last-24-hour activity summary for the live ribbon at the top.
      *
      * @return array{donations_count:int,amount_raised_cents:int,refunds_count:int,notes_count:int,currency:string}
+     * @since 1.0.0
      */
     public function today(): array
     {
@@ -148,6 +154,7 @@ final class DashboardMetricsService
      *   paid_at:?string, campaign_id:?int, campaign_title:?string,
      *   is_anonymous:bool, frequency:string
      * }>
+     * @since 1.0.0
      */
     public function recentActivity(int $limit = 8): array
     {
@@ -204,6 +211,7 @@ final class DashboardMetricsService
      * is always continuous.
      *
      * @param array{0:string,1:string} $bounds
+     * @since 1.0.0
      */
     private function seriesBetween(array $bounds, bool $unbounded): array
     {
@@ -249,6 +257,7 @@ final class DashboardMetricsService
      *
      * @param array<string,array{amount:int,count:int}> $byDate
      * @return array<array{date:string,amount_cents:int,donations_count:int}>
+     * @since 1.0.0
      */
     private function monthlySeries(array $byDate, DateTimeImmutable $start, DateTimeImmutable $end): array
     {
@@ -287,6 +296,7 @@ final class DashboardMetricsService
      *   action_href?:string,
      *   count?:int
      * }>
+     * @since 1.0.0
      */
     public function attention(): array
     {
@@ -366,12 +376,8 @@ final class DashboardMetricsService
         }
 
         // 4. Recent donor notes worth a reply (last 7 days, non-empty note).
-        //
-        // Counted in SQL over the whole window. It used to read the 60 most
-        // recent donations and count the notes among them, so a busy week
-        // reported however many of the last 60 happened to carry one, and the
-        // number was worded as donors while counting notes. One donor leaving
-        // three notes read as three donors.
+        // Counted in SQL over the whole window. The title counts distinct
+        // donors, so one donor leaving three notes is one donor.
         // whereRaw emits no AND connector, so it has to open the chain.
         $noteRows = DonationQueries::live(
             DB::table('dono_donations')->whereRaw("TRIM(COALESCE(note_to_org, '')) <> ''")
@@ -384,8 +390,8 @@ final class DashboardMetricsService
         $noteCount  = (int) ($noteRows['notes'] ?? 0);
         $donorCount = (int) ($noteRows['donors'] ?? 0);
 
-        // Still capped, but only for the link target: one donor means their
-        // profile, several mean the donor list.
+        // Resolved only for the link target: one donor means their profile,
+        // several mean the donor list.
         $noteDonors = [];
         if ($noteCount > 0 && $donorCount === 1) {
             $one = DonationQueries::live(
@@ -455,6 +461,7 @@ final class DashboardMetricsService
      * of rows are classified in PHP and summed into channel buckets.
      *
      * @return array<array{channel:string,amount_cents:int,donations_count:int}>
+     * @since 1.0.0
      */
     public function byChannel(string $range = 'last-30'): array
     {
@@ -495,14 +502,15 @@ final class DashboardMetricsService
 
     /**
      * Top campaigns by amount raised in range, with a per-row sparkline series.
+     *
      * @return array<array<string,mixed>>
+     * @since 1.0.0
      */
     public function topCampaigns(string $range = 'last-30', int $limit = 5): array
     {
         $bounds    = $this->rangeBounds($range);
         $unbounded = $range === 'all-time';
 
-        // SQL-side top-N by amount.
         $tops = $this->donations->topPaidCampaigns(
             $unbounded ? null : $bounds[0],
             $unbounded ? null : $bounds[1],
@@ -564,12 +572,12 @@ final class DashboardMetricsService
      *   active_plans:int, mrr_cents:int, projected_30d_cents:int,
      *   new_this_month:int, currency:string
      * }
+     * @since 1.0.0
      */
     public function recurring(): array
     {
-        // Single SQL roll-up over dono_recurring_plans instead of rehydrating
-        // up to 60 days of donations into PHP. Same MRR math (monthly-normalised
-        // amount), but bounded memory and currency-correct via base column.
+        // Single SQL roll-up over dono_recurring_plans: monthly-normalized
+        // amounts, bounded memory, currency-correct via the base column.
         $stats = $this->recurringPlans->recurringStats($this->clock->now()->format('Y-m-d'));
         $currency = strtoupper(Money::defaultCurrency());
 
@@ -584,7 +592,9 @@ final class DashboardMetricsService
 
     /**
      * Published campaigns ordered by raised, newest tiebreaker.
+     *
      * @return array<int, array<string,mixed>>
+     * @since 1.0.0
      */
     public function activeCampaigns(int $limit = 6): array
     {
@@ -596,7 +606,7 @@ final class DashboardMetricsService
         if ($rows === []) return [];
 
         // Batch the "last donation paid_at" per campaign in a single grouped
-        // query so the widget stops doing N round-trips per render.
+        // query so the widget does not make N round-trips per render.
         $campaignIds = array_map(static fn ($c) => (int) $c->id, $rows);
         $lastByCampaign = [];
         $lastRows = DonationQueries::live(DB::table('dono_donations')
@@ -635,6 +645,7 @@ final class DashboardMetricsService
      * runs in SQL and never hydrates rows into PHP.
      *
      * @param array{0:string,1:string} $bounds
+     * @since 1.0.0
      */
     private function aggregateInSql(array $bounds, bool $unbounded): array
     {
@@ -659,6 +670,7 @@ final class DashboardMetricsService
         ];
     }
 
+    /** @since 1.0.0 */
     private function percentChange(int $previous, int $current): ?float
     {
         if ($previous === 0 && $current === 0) return null;
@@ -672,6 +684,8 @@ final class DashboardMetricsService
      * `all-time` uses the earliest paid donation's date as the lower bound so
      * the chart can show daily series from the very beginning, not just the
      * last 365 days. Falls back to 365 days when there are no donations yet.
+     *
+     * @since 1.0.0
      */
     private function rangeBounds(string $range): array
     {
@@ -686,6 +700,7 @@ final class DashboardMetricsService
         };
     }
 
+    /** @since 1.0.0 */
     private function earliestPaidDate(): ?string
     {
         $row = DB::table('dono_donations')
@@ -698,7 +713,10 @@ final class DashboardMetricsService
         return substr($val, 0, 10);
     }
 
-    /** @return array{0:string,1:string} */
+    /**
+     * @return array{0:string,1:string}
+     * @since 1.0.0
+     */
     private function previousRangeBounds(string $range, string $mode): array
     {
         $today = $this->clock->now();
@@ -718,6 +736,7 @@ final class DashboardMetricsService
         };
     }
 
+    /** @since 1.0.0 */
     private function daysAgo(int $n): string
     {
         return $this->clock->now()->modify("-{$n} days")->format('Y-m-d');

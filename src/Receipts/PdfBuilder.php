@@ -13,10 +13,11 @@ use Dono\Vendor\Mpdf\Output\Destination;
  * Temp dir is forced to wp-content/uploads/dono/tmp because /tmp is
  * ephemeral on many deployment environments.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class PdfBuilder
 {
+    /** @since 1.0.0 */
     public function fromHtml(string $html, array $options = []): string
     {
         $tmpDir = $this->ensureTmpDir();
@@ -42,6 +43,7 @@ final class PdfBuilder
         return (string) $mpdf->Output('', Destination::STRING_RETURN);
     }
 
+    /** @since 1.0.0 */
     private function ensureTmpDir(): string
     {
         $uploads = wp_upload_dir();

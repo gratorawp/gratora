@@ -15,21 +15,18 @@ use RuntimeException;
 /**
  * Every change a plan can undergo, in one place.
  *
- * The donor portal and the admin screen offer the same five actions, and the
- * command registry a subset of them. Written separately they drifted: resume
- * left `resume_at` set, so RecurringResumer would lift a pause that had
- * already been lifted; two of them wrote the whole row back from a snapshot
- * taken before the gateway call, so a webhook landing mid-request was
- * overwritten. Routing all three callers through here also means a plan cannot
- * change without an event being written for it.
+ * The donor portal, the admin screen and the command registry all route their
+ * actions through here, so a plan cannot change without an event being written
+ * for it.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class RecurringPlanActions
 {
     /** A plan in one of these states accepts no further changes. */
     private const TERMINAL = ['cancelled', 'expired'];
 
+    /** @since 1.0.0 */
     public function __construct(
         private GatewayManager $gateways,
         private RecurringCanceller $canceller,
@@ -42,13 +39,15 @@ final class RecurringPlanActions
      *
      * The date is the argument, not a number of months: a caller that already
      * has one (the command registry takes `resumes_at` verbatim) must get that
-     * date back, and rounding it into whole months moved a two-month pause to
+     * date back, and rounding it into whole months turns a two-month pause into
      * three. Callers working in months use monthsFromNow().
      *
      * `resume_at` is always written, never just `next_payment_at`: PayPal's
      * suspend is indefinite and only RecurringResumer restarts it, and it keys
      * on `resume_at` alone. Without it a paused plan stops forever behind a
      * restart date the donor can see but nothing acts on.
+     *
+     * @since 1.0.0
      */
     public function pause(RecurringPlan $plan, string $resumesAt, RecurringPlanChange $change): void
     {
@@ -67,7 +66,11 @@ final class RecurringPlanActions
         do_action('dono.recurring.plan_paused', $plan, $resumesAt);
     }
 
-    /** A resume date the pause UI can express, clamped to what it offers. */
+    /**
+     * A resume date the pause UI can express, clamped to what it offers.
+     *
+     * @since 1.0.0
+     */
     public static function monthsFromNow(int $months): string
     {
         $months = max(1, min(12, $months));
@@ -75,6 +78,7 @@ final class RecurringPlanActions
         return gmdate('Y-m-d H:i:s', strtotime("+{$months} months"));
     }
 
+    /** @since 1.0.0 */
     public function resume(RecurringPlan $plan, RecurringPlanChange $change): void
     {
         $this->assertChangeable($plan);
@@ -94,8 +98,10 @@ final class RecurringPlanActions
 
     /**
      * Skip exactly one cycle. The plan stays active on purpose: to the donor
-     * this is a monthly gift missing one month, not a paused donation, and the
-     * restart is driven by resume_at rather than by status.
+     * this is a monthly donation missing one month, not a paused donation, and
+     * the restart is driven by resume_at rather than by status.
+     *
+     * @since 1.0.0
      */
     public function skipNext(RecurringPlan $plan, RecurringPlanChange $change): void
     {
@@ -128,6 +134,8 @@ final class RecurringPlanActions
      *         accepted the change but is waiting on the donor to approve it, in
      *         which case nothing local is written: the plan must not claim an
      *         amount the card is not being charged.
+     *
+     * @since 1.0.0
      */
     public function changeAmount(RecurringPlan $plan, int $amountCents, RecurringPlanChange $change): void
     {
@@ -174,6 +182,8 @@ final class RecurringPlanActions
      * collection into a donation and clears the failure count; recording
      * success here would book money on the strength of an API call that can
      * still fail minutes later.
+     *
+     * @since 1.0.0
      */
     public function retryPayment(RecurringPlan $plan, RecurringPlanChange $change): void
     {
@@ -198,6 +208,8 @@ final class RecurringPlanActions
      * single winner so one cancellation email goes out even when the gateway's
      * own subscription.deleted webhook races this request. It records
      * recurring.cancelled itself, so this only adds who did it.
+     *
+     * @since 1.0.0
      */
     public function cancel(RecurringPlan $plan, ?string $reason, RecurringPlanChange $change): void
     {
@@ -214,6 +226,7 @@ final class RecurringPlanActions
 
     // ---------------------------------------------------------------- internals
 
+    /** @since 1.0.0 */
     private function assertChangeable(RecurringPlan $plan): void
     {
         if (in_array((string) $plan->status, self::TERMINAL, true)) {
@@ -221,7 +234,11 @@ final class RecurringPlanActions
         }
     }
 
-    /** Null when the gateway has no subscriptions at all, as Offline does. */
+    /**
+     * Null when the gateway has no subscriptions at all, as Offline does.
+     *
+     * @since 1.0.0
+     */
     private function subscription(RecurringPlan $plan): ?SubscriptionAware
     {
         $gateway = $this->gateways->get((string) $plan->gateway);
@@ -235,6 +252,8 @@ final class RecurringPlanActions
      * in between.
      *
      * @param array<string,mixed> $columns
+     *
+     * @since 1.0.0
      */
     private function write(RecurringPlan $plan, array $columns): void
     {
@@ -249,6 +268,7 @@ final class RecurringPlanActions
         }
     }
 
+    /** @since 1.0.0 */
     private function finish(RecurringPlan $plan, RecurringPlanChange $change, string $eventType): void
     {
         $this->record($plan, $change, $eventType);
@@ -258,6 +278,7 @@ final class RecurringPlanActions
         do_action('dono.recurring.plan_changed', $plan, $change);
     }
 
+    /** @since 1.0.0 */
     private function record(RecurringPlan $plan, RecurringPlanChange $change, string $eventType): void
     {
         $this->events->record($eventType, [

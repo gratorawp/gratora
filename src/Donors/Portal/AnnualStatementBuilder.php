@@ -15,17 +15,19 @@ use Dono\Receipts\PdfBuilder;
 /**
  * Builds a PDF annual donation statement for a donor.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class AnnualStatementBuilder
 {
     /** Names this builder to the dono.statement.pdf filter. */
     public const KIND = 'portal';
 
+    /** @since 1.0.0 */
     public function __construct(private PdfBuilder $pdf)
     {
     }
 
+    /** @since 1.0.0 */
     public function build(Donor $donor, int $year): string
     {
         // An add-on that issues jurisdiction-correct annual documents replaces
@@ -40,7 +42,7 @@ final class AnnualStatementBuilder
         [$start, $end] = DonationQueries::yearBoundsUtc($year);
 
         // donationsOnly, matching the admin-side statement: a ticket purchase
-        // is goods received, not a gift, and must never be itemised on a
+        // is goods received, not a gift, and must never be itemized on a
         // document the donor files as deductible.
         $rows = DonationQueries::donationsOnly(Donation::query())
             ->whereIn('status', ['paid', 'partial_refund'])

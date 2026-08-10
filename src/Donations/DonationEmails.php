@@ -20,10 +20,11 @@ use Dono\Settings\SettingsService;
  * notice, pending notice). Each fires via Mailer::sendTemplate, so the
  * `enabled` toggle and the user-edited subject/body are both honored.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class DonationEmails extends HookProvider
 {
+    /** @since 1.0.0 */
     public function __construct(
         private Mailer $mailer,
         private DonorRepository $donors,
@@ -33,27 +34,24 @@ final class DonationEmails extends HookProvider
     ) {
     }
 
+    /** @since 1.0.0 */
     protected function actions(): array
     {
         return [
             'dono.donation.intent_created' => 'onIntentCreated',
-            // 3-arg: $donation, $reason, $metadata
             'dono.donation.pending'        => ['onPending', 10, 3],
-            // 2-arg: $donation, $refund
             'dono.donation.refunded'       => ['onRefunded', 10, 2],
-            // 2-arg: $donation, $plan
             'dono.recurring.renewed'       => ['onRecurringRenewed', 10, 2],
-            // 2-arg: $plan, $reason
             'dono.recurring.cancelled'     => ['onRecurringCancelled', 10, 2],
-            // 2-arg: $plan, $context
             'dono.recurring.renewal_failed' => ['onRecurringFailed', 10, 2],
             'dono.donation.completed'      => 'onDonationCompleted',
-            // 2-arg: $plan, RecurringPlanChange. Fires for every plan change,
-            // donor-made or admin-made; the handler decides whether to send.
+            // Fires for every plan change, donor-made or admin-made; the
+            // handler decides whether to send.
             'dono.recurring.plan_changed'  => ['onPlanChanged', 10, 2],
         ];
     }
 
+    /** @since 1.0.0 */
     public function onIntentCreated(Donation $donation): void
     {
         if ($donation->gateway !== 'offline') return;
@@ -93,6 +91,7 @@ final class DonationEmails extends HookProvider
         ]);
     }
 
+    /** @since 1.0.0 */
     public function onPending(Donation $donation, string $reason, array $metadata): void
     {
         $email = $this->resolveDonorEmail($donation);
@@ -108,6 +107,7 @@ final class DonationEmails extends HookProvider
         ]);
     }
 
+    /** @since 1.0.0 */
     public function onRecurringRenewed(Donation $donation, RecurringPlan $plan): void
     {
         $email = $this->resolveDonorEmail($donation);
@@ -127,6 +127,7 @@ final class DonationEmails extends HookProvider
         ]);
     }
 
+    /** @since 1.0.0 */
     public function onRecurringCancelled(RecurringPlan $plan, ?string $reason = null): void
     {
         $donor = $this->donors->findById((int) $plan->donor_id);
@@ -156,6 +157,8 @@ final class DonationEmails extends HookProvider
      * changes by default: a donor who just used the portal does not need an
      * email telling them what they did a second ago, but someone whose monthly
      * amount was altered for them has no other way of finding out.
+     *
+     * @since 1.0.0
      */
     public function onPlanChanged(RecurringPlan $plan, RecurringPlanChange $change): void
     {
@@ -193,7 +196,11 @@ final class DonationEmails extends HookProvider
         ]);
     }
 
-    /** A stored UTC timestamp as the site would write the date. */
+    /**
+     * A stored UTC timestamp as the site would write the date.
+     *
+     * @since 1.0.0
+     */
     private function onDate(?string $timestamp): string
     {
         if ($timestamp === null || $timestamp === '') {
@@ -210,6 +217,8 @@ final class DonationEmails extends HookProvider
      * out when it is cancelled.
      *
      * @param array<string,mixed> $context
+     *
+     * @since 1.0.0
      */
     public function onRecurringFailed(RecurringPlan $plan, array $context = []): void
     {
@@ -239,6 +248,7 @@ final class DonationEmails extends HookProvider
         ]);
     }
 
+    /** @since 1.0.0 */
     public function onRefunded(Donation $donation, Refund $refund): void
     {
         $email = $this->resolveDonorEmail($donation);
@@ -266,6 +276,8 @@ final class DonationEmails extends HookProvider
      * Counting what this donor has actually given themselves, rather than
      * watching a counter move, welcomes them the day they donate and never
      * twice: an existing repeat donor is already past one and stays silent.
+     *
+     * @since 1.0.0
      */
     public function onDonationCompleted(Donation $donation): void
     {
@@ -290,8 +302,10 @@ final class DonationEmails extends HookProvider
 
     /**
      * How many donations this donor has made themselves, counting the one that
-     * just completed. Scoped exactly as DonorAggregateSyncer scopes the counter
-     * this replaces (real money, given as a gift), minus the hand-recorded ones.
+     * just completed. Scoped exactly as DonorAggregateSyncer scopes its counter
+     * (real money, given as a gift), minus the hand-recorded ones.
+     *
+     * @since 1.0.0
      */
     private function ownDonationCount(int $donorId): int
     {
@@ -308,6 +322,7 @@ final class DonationEmails extends HookProvider
         return $count;
     }
 
+    /** @since 1.0.0 */
     private function countsAsTheirOwn(Donation $donation): bool
     {
         return (string) $donation->kind === 'donation'
@@ -315,6 +330,7 @@ final class DonationEmails extends HookProvider
             && ChannelClassifier::classify((array) ($donation->source_attribution ?? [])) !== 'manual';
     }
 
+    /** @since 1.0.0 */
     private function resolveDonorEmail(Donation $donation): ?string
     {
         $donor = $this->donors->findById((int) $donation->donor_id);
@@ -323,6 +339,7 @@ final class DonationEmails extends HookProvider
         return $email !== '' && $email !== null ? $email : null;
     }
 
+    /** @since 1.0.0 */
     private function donorName(Donation $donation): string
     {
         $first = trim((string) ($donation->donor_first_name ?? ''));
@@ -334,6 +351,7 @@ final class DonationEmails extends HookProvider
         return trim(($donor->first_name ?? '') . ' ' . ($donor->last_name ?? ''));
     }
 
+    /** @since 1.0.0 */
     private function donorFirstName(Donation $donation): string
     {
         $first = trim((string) ($donation->donor_first_name ?? ''));
@@ -342,6 +360,7 @@ final class DonationEmails extends HookProvider
         return $donor ? trim((string) ($donor->first_name ?? '')) : '';
     }
 
+    /** @since 1.0.0 */
     private function campaignTitle(Donation $donation): string
     {
         if (! $donation->campaign_id) return '';

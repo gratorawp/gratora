@@ -16,16 +16,20 @@ use WP_Post;
  *
  * Registered before the add-on route filters on the same hook, so a route
  * template (e.g. a fundraiser page) unshifts later and keeps precedence.
+ *
+ * @since 1.0.0
  */
 final class CampaignPageTemplate extends HookProvider
 {
     public const SLUG = 'dono-campaign-page';
 
+    /** @since 1.0.0 */
     protected function actions(): array
     {
         return ['init' => 'registerTemplate'];
     }
 
+    /** @since 1.0.0 */
     protected function filters(): array
     {
         // Block themes only; a classic theme resolves page templates to PHP
@@ -33,6 +37,7 @@ final class CampaignPageTemplate extends HookProvider
         return wp_is_block_theme() ? ['page_template_hierarchy' => 'forceTemplate'] : [];
     }
 
+    /** @since 1.0.0 */
     public function registerTemplate(): void
     {
         if (! function_exists('register_block_template')) {
@@ -52,6 +57,8 @@ final class CampaignPageTemplate extends HookProvider
     /**
      * @param string[] $templates
      * @return string[]
+     *
+     * @since 1.0.0
      */
     public function forceTemplate(array $templates): array
     {

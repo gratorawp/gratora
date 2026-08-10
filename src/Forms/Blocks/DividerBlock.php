@@ -9,17 +9,17 @@ use Dono\Foundation\Helpers\View;
 /**
  * dono/divider: a horizontal rule with author-set spacing and line colour.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class DividerBlock implements Block
 {
-    /** Block name. */
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/divider';
     }
 
-    /** Editor attribute schema. */
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         return [
@@ -31,7 +31,7 @@ final class DividerBlock implements Block
         ];
     }
 
-    /** Render server-side markup. */
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         return View::loadRelative(__DIR__, 'views/divider', self::settings($attrs));
@@ -42,6 +42,8 @@ final class DividerBlock implements Block
      *
      * @param array<string,mixed> $attrs
      * @return array{marginTop:int,marginBottom:int,thickness:int,color:string}
+     *
+     * @since 1.0.0
      */
     public static function settings(array $attrs): array
     {

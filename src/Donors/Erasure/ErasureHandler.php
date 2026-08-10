@@ -10,12 +10,17 @@ namespace Dono\Donors\Erasure;
  * Handlers run inside the redaction transaction, so throwing rolls the whole
  * erasure back rather than leaving the donor half-erased and marked done.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 interface ErasureHandler
 {
-    /** Stable id, unique across core and add-ons. Used in logs and tests. */
+    /**
+     * Stable id, unique across core and add-ons. Used in logs and tests.
+     *
+     * @since 1.0.0
+     */
     public function key(): string;
 
+    /** @since 1.0.0 */
     public function erase(ErasureRequest $request): void;
 }

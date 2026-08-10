@@ -13,7 +13,7 @@ use Dono\Vendor\Queryable\Schema\Table;
  * PDFs are rendered on demand; no file is stored. Re-sends regenerate
  * deterministically from the donation and donor context.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class Receipt extends Model
 {

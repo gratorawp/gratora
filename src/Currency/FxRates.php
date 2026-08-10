@@ -10,13 +10,17 @@ namespace Dono\Currency;
  * Option shape: { base, date, fetched_at, rates } - units of CCY per 1 base.
  * Conversion is read-only; FxRatesUpdater is the only writer.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class FxRates
 {
     public const OPTION = 'dono_fx_rates';
 
-    /** @return array{base:string,date:string,rates:array<string,mixed>,manual?:array<string,mixed>,auto?:bool}|null */
+    /**
+     * @return array{base:string,date:string,rates:array<string,mixed>,manual?:array<string,mixed>,auto?:bool}|null
+     *
+     * @since 1.0.0
+     */
     private function data(): ?array
     {
         $opt = get_option(self::OPTION);
@@ -26,25 +30,32 @@ final class FxRates
         return $opt;
     }
 
+    /** @since 1.0.0 */
     public function base(): ?string
     {
         $d = $this->data();
         return $d ? strtoupper((string) $d['base']) : null;
     }
 
+    /** @since 1.0.0 */
     public function date(): ?string
     {
         $d = $this->data();
         return $d && ! empty($d['date']) ? (string) $d['date'] : null;
     }
 
+    /** @since 1.0.0 */
     public function fetchedAt(): ?string
     {
         $d = $this->data();
         return $d && ! empty($d['fetched_at']) ? (string) $d['fetched_at'] : null;
     }
 
-    /** True when the daily auto-refresh is enabled (default on). */
+    /**
+     * True when the daily auto-refresh is enabled (default on).
+     *
+     * @since 1.0.0
+     */
     public function auto(): bool
     {
         $d = $this->data();
@@ -56,6 +67,8 @@ final class FxRates
      * fetched rate for that currency.
      *
      * @return array<string,float>
+     *
+     * @since 1.0.0
      */
     public function manual(): array
     {
@@ -67,6 +80,8 @@ final class FxRates
      * Last fetched rates only, no manual overlay.
      *
      * @return array<string,float>
+     *
+     * @since 1.0.0
      */
     public function fetchedRates(): array
     {
@@ -74,7 +89,6 @@ final class FxRates
         return $d ? $this->cleanMap($d['rates']) : [];
     }
 
-    /** Units of $code per 1 base, manual override winning. Null if unknown. */
     /**
      * Of the currencies given, the ones with no usable rate to the base.
      *
@@ -87,6 +101,8 @@ final class FxRates
      *
      * @param list<string> $codes
      * @return list<string> upper-cased, in the order given
+     *
+     * @since 1.0.0
      */
     public function unconvertible(array $codes): array
     {
@@ -101,6 +117,11 @@ final class FxRates
         return array_values(array_unique($out));
     }
 
+    /**
+     * Units of $code per 1 base, manual override winning. Null if unknown.
+     *
+     * @since 1.0.0
+     */
     public function effectiveRate(string $code): ?float
     {
         $code = strtoupper(trim($code));
@@ -117,6 +138,8 @@ final class FxRates
     /**
      * @param array<string,mixed> $raw
      * @return array<string,float>
+     *
+     * @since 1.0.0
      */
     private function cleanMap(array $raw): array
     {
@@ -136,6 +159,8 @@ final class FxRates
      *
      * @param array<string,mixed> $d
      * @return array<string,float>
+     *
+     * @since 1.0.0
      */
     private function effectiveMap(array $d): array
     {
@@ -150,6 +175,8 @@ final class FxRates
     /**
      * Units of $to for one unit of $from, or null when either side has no
      * usable rate. The stored base is unity within its own table.
+     *
+     * @since 1.0.0
      */
     public function rate(string $from, string $to): ?float
     {
@@ -178,7 +205,11 @@ final class FxRates
         return $rt / $rf;
     }
 
-    /** Converts integer minor units. Null when no rate is available. */
+    /**
+     * Converts integer minor units. Null when no rate is available.
+     *
+     * @since 1.0.0
+     */
     public function convertCents(int $cents, string $from, string $to): ?int
     {
         $rate = $this->rate($from, $to);
@@ -188,7 +219,11 @@ final class FxRates
         return (int) round($cents * $rate);
     }
 
-    /** True when there is no snapshot or it is older than $maxAgeDays. */
+    /**
+     * True when there is no snapshot or it is older than $maxAgeDays.
+     *
+     * @since 1.0.0
+     */
     public function isStale(int $maxAgeDays = 2): bool
     {
         $d = $this->data();

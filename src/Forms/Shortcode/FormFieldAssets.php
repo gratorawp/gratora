@@ -15,7 +15,7 @@ namespace Dono\Forms\Shortcode;
  * registry at render, validation and submit, so a bundle may load in either
  * order relative to it.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class FormFieldAssets
 {
@@ -24,6 +24,7 @@ final class FormFieldAssets
     /** Add-ons hook this to enqueue their field components. */
     public const ACTION = 'dono.form.fields';
 
+    /** @since 1.0.0 */
     public static function enqueue(): void
     {
         if (! wp_script_is(self::HANDLE, 'registered')) {
@@ -35,6 +36,7 @@ final class FormFieldAssets
         do_action(self::ACTION, self::HANDLE);
     }
 
+    /** @since 1.0.0 */
     private static function registryJs(): string
     {
         return <<<'JS'

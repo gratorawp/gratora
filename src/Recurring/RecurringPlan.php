@@ -10,7 +10,7 @@ use Dono\Vendor\Queryable\Schema\Table;
 /**
  * Mirror of a gateway-side subscription. One plan to many donation renewals.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class RecurringPlan extends Model
 {

@@ -16,8 +16,14 @@ use InvalidArgumentException;
 use Throwable;
 use Dono\Vendor\Queryable\DB;
 
+/**
+ * Donor writes: creation, profile edits, email changes, deletion and erasure.
+ *
+ * @since 1.0.0
+ */
 final class DonorService
 {
+    /** @since 1.0.0 */
     public function __construct(
         private DonorRepository $donors,
         private IdentityHasher $hasher,
@@ -37,6 +43,8 @@ final class DonorService
      *     company?: ?string,
      *     donor_type?: 'individual'|'organization'|'household',
      * } $profile
+     *
+     * @since 1.0.0
      */
     public function findOrCreate(string $email, array $profile = [], bool $reactivateIfRedacted = false): Donor
     {
@@ -91,6 +99,7 @@ final class DonorService
         return $donor;
     }
 
+    /** @since 1.0.0 */
     public function findByEmail(string $email): ?Donor
     {
         return $this->donors->findByEmailHash(
@@ -104,6 +113,8 @@ final class DonorService
      * clears to null; absent keys are untouched.
      *
      * @param array{first_name?:?string,last_name?:?string,country?:?string,company?:?string,locale?:?string,phone?:?string,address?:array<string,mixed>|null} $patch
+     *
+     * @since 1.0.0
      */
     public function editProfile(Donor $donor, array $patch): Donor
     {
@@ -171,6 +182,8 @@ final class DonorService
      * An erased donor is rejected: erasure nulls every field this fills, and
      * redact() early-returns on an already-redacted row, so a back-fill here
      * would restore PII nothing could wipe again.
+     *
+     * @since 1.0.0
      */
     public function refreshProfile(Donor $donor, array $profile): Donor
     {
@@ -216,6 +229,7 @@ final class DonorService
         return $donor;
     }
 
+    /** @since 1.0.0 */
     public function changeEmail(Donor $donor, string $newEmail): Donor
     {
         if ($donor->redacted_at !== null) {
@@ -259,6 +273,8 @@ final class DonorService
      * record that has to survive, and erasure is how that person is forgotten.
      * Add-ons veto through the filter, because core cannot know what they hang
      * off a donor.
+     *
+     * @since 1.0.0
      */
     public function undeletableReason(Donor $donor): ?string
     {
@@ -275,7 +291,11 @@ final class DonorService
         return is_string($vetoed) && $vetoed !== '' ? $vetoed : null;
     }
 
-    /** @throws InvalidArgumentException when the donor must be kept. */
+    /**
+     * @throws InvalidArgumentException when the donor must be kept.
+     *
+     * @since 1.0.0
+     */
     public function delete(Donor $donor): void
     {
         $reason = $this->undeletableReason($donor);
@@ -305,6 +325,7 @@ final class DonorService
         });
     }
 
+    /** @since 1.0.0 */
     public function redact(Donor $donor): Donor
     {
         if ($donor->redacted_at !== null) {
@@ -366,6 +387,8 @@ final class DonorService
      *
      * Resolved from the container rather than injected: RecurringCanceller
      * reaches DonationService, which reaches back here.
+     *
+     * @since 1.0.0
      */
     private function stopRecurringBefore(Donor $donor): void
     {
@@ -389,6 +412,8 @@ final class DonorService
      * Everything that identifies this donor, read while it is still readable.
      * Gateway ids are in here because a webhook body has no donor_id: `pi_...`
      * or `cus_...` is the only thread back to the person it describes.
+     *
+     * @since 1.0.0
      */
     private function erasureRequest(Donor $donor): ErasureRequest
     {
@@ -432,6 +457,7 @@ final class DonorService
         );
     }
 
+    /** @since 1.0.0 */
     private function decrypt(?string $value): ?string
     {
         if ($value === null || $value === '') return null;
@@ -442,7 +468,11 @@ final class DonorService
         }
     }
 
-    /** Authorized contexts only; never from public APIs. */
+    /**
+     * Authorized contexts only; never from public APIs.
+     *
+     * @since 1.0.0
+     */
     public function decryptEmail(Donor $donor): ?string
     {
         if ($donor->redacted_at !== null || $donor->email_encrypted === '') {
@@ -451,7 +481,11 @@ final class DonorService
         return $this->crypto->decrypt($donor->email_encrypted);
     }
 
-    /** Same authorisation contract as decryptEmail. */
+    /**
+     * Same authorization contract as decryptEmail.
+     *
+     * @since 1.0.0
+     */
     public function decryptPhone(Donor $donor): ?string
     {
         if ($donor->redacted_at !== null || ! $donor->phone_encrypted) {
@@ -465,6 +499,8 @@ final class DonorService
      * string.
      *
      * @return array{line1?:string,line2?:string,city?:string,region?:string,postal?:string,country?:string}|null
+     *
+     * @since 1.0.0
      */
     public function decryptAddressStruct(Donor $donor): ?array
     {
@@ -475,7 +511,11 @@ final class DonorService
         return is_array($decoded) && $decoded !== [] ? $decoded : null;
     }
 
-    /** Same authorisation contract as decryptEmail. */
+    /**
+     * Same authorization contract as decryptEmail.
+     *
+     * @since 1.0.0
+     */
     public function decryptAddress(Donor $donor): ?string
     {
         if ($donor->redacted_at !== null || ! $donor->address_encrypted) {
@@ -508,6 +548,7 @@ final class DonorService
         return $lines === [] ? null : implode("\n", $lines);
     }
 
+    /** @since 1.0.0 */
     public function addressPayload(?array $address): ?string
     {
         if (! is_array($address)) return null;
@@ -520,6 +561,7 @@ final class DonorService
         return $out === [] ? null : (string) wp_json_encode($out);
     }
 
+    /** @since 1.0.0 */
     public function setEncryptedField(Donor $donor, string $field, ?string $value): void
     {
         if ($donor->redacted_at !== null) {
@@ -535,7 +577,11 @@ final class DonorService
         $donor->$field = $encrypted ?? '';
     }
 
-    /** Name uses LIKE; email is an exact hash match. */
+    /**
+     * Name uses LIKE; email is an exact hash match.
+     *
+     * @since 1.0.0
+     */
     public function findIdsBySearch(string $term): array
     {
         $term = trim($term);
@@ -543,8 +589,8 @@ final class DonorService
 
         $hash = $this->hasher->emailHash($term);
 
-        // Ids, not donors: hydrating a model per match to read its id cost 20ms
-        // and 1.3MB for 534 rows where the id-only query costs 4ms.
+        // Ids, not donors: hydrating a model per match just to read its id
+        // costs far more time and memory than the id-only query.
         $rows = DB::table('dono_donors')
             ->selectRaw('id')
             ->where(function ($q) use ($term, $hash): void {

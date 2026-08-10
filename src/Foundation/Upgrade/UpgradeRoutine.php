@@ -9,11 +9,11 @@ namespace Dono\Foundation\Upgrade;
  *
  * dbDelta reconciles the shape of a table and nothing else. Anything that has
  * to touch the contents - backfilling a column a release added, recomputing a
- * denormalised counter, rewriting a stored format, or the ALTERs dbDelta will
+ * denormalized counter, rewriting a stored format, or the ALTERs dbDelta will
  * not do (dropping a column or index, changing nullability) - has no other
  * place to live.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 interface UpgradeRoutine
 {
@@ -23,10 +23,16 @@ interface UpgradeRoutine
      * It is written into an option and compared forever after, so renaming one
      * makes it run again on every site that already ran it. Date-prefix them
      * and treat the string as permanent.
+     *
+     * @since 1.0.0
      */
     public function id(): string;
 
-    /** Shown in the admin while the routine is outstanding. */
+    /**
+     * Shown in the admin while the routine is outstanding.
+     *
+     * @since 1.0.0
+     */
     public function description(): string;
 
     /**
@@ -40,6 +46,8 @@ interface UpgradeRoutine
      * Must be safe to run twice over the same rows: the process can die between
      * the last batch and the stamp that records completion, and it will then
      * start again from the top.
+     *
+     * @since 1.0.0
      */
     public function step(): bool;
 }

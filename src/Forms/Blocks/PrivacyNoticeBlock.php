@@ -9,21 +9,17 @@ use Dono\Foundation\Helpers\View;
 /**
  * Inline privacy notice. Link omitted when no privacy policy URL is set.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class PrivacyNoticeBlock implements Block
 {
-    /**
-     * Block type name.
-     */
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/privacy-notice';
     }
 
-    /**
-     * Block attribute schema.
-     */
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         return [
@@ -35,9 +31,7 @@ final class PrivacyNoticeBlock implements Block
         ];
     }
 
-    /**
-     * Renders the privacy notice text with an optional policy link.
-     */
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         $align = (string) ($attrs['align'] ?? 'left');

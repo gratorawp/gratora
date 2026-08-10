@@ -31,11 +31,14 @@ use WP_REST_Server;
  *    client posts, so a caller cannot point a capture at a different order;
  *  - the subscription route re-reads the subscription from PayPal and requires
  *    its custom_id to match the donation reference before it records anything.
+ *
+ * @since 1.0.0
  */
 final class PayPalController
 {
     private const NS = 'dono/v1';
 
+    /** @since 1.0.0 */
     public function __construct(
         private DonationRepository $donations,
         private DonationService $donationService,
@@ -46,6 +49,7 @@ final class PayPalController
     ) {
     }
 
+    /** @since 1.0.0 */
     public function registerRoutes(): void
     {
         register_rest_route(self::NS, '/gateways/paypal/capture', [
@@ -68,7 +72,7 @@ final class PayPalController
         ]);
     }
 
-    /** Capture the order the donor just approved and confirm the donation. */
+    /** @since 1.0.0 */
     public function capture(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $donation = $this->pendingDonation((string) $request->get_param('reference'));
@@ -86,9 +90,9 @@ final class PayPalController
         $result = $gateway->confirm($donation);
 
         // A held capture is money PayPal has taken and will settle by webhook.
-        // Reporting it as a failure sent the donor back to give again, and threw
-        // away the capture id that the refund path and the settling webhook
-        // both need.
+        // Reporting it as a failure would send the donor back to give again and
+        // throw away the capture id that the refund path and the settling
+        // webhook both need.
         if (! $result->success && $result->pending) {
             $donation->gateway_txn_id = (string) $result->gateway_txn_id;
             $this->donationService->markProcessing(
@@ -124,6 +128,8 @@ final class PayPalController
      * Record the subscription the donor approved. PayPal has already taken the
      * first payment by this point; the opening PAYMENT.SALE.COMPLETED webhook
      * confirms the donation and bumps the counters.
+     *
+     * @since 1.0.0
      */
     public function recordSubscription(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
@@ -164,6 +170,7 @@ final class PayPalController
         ], 200);
     }
 
+    /** @since 1.0.0 */
     private function pendingDonation(string $reference): Donation|WP_Error
     {
         $reference = trim($reference);
@@ -175,6 +182,7 @@ final class PayPalController
         return $donation;
     }
 
+    /** @since 1.0.0 */
     private function error(string $code, string $message, int $status): WP_Error
     {
         return new WP_Error($code, $message, ['status' => $status]);

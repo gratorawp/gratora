@@ -13,10 +13,11 @@ use Dono\Foundation\Helpers\View;
 /**
  * Renders a ranked list or podium of top donors for a campaign.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class TopDonorsBlock extends CampaignBlock
 {
+    /** @since 1.0.0 */
     public function __construct(
         CampaignRepository $campaigns,
         private readonly DonationRepository $donations,
@@ -25,11 +26,13 @@ final class TopDonorsBlock extends CampaignBlock
         parent::__construct($campaigns);
     }
 
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/top-donors';
     }
 
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         return $this->campaignIdAttr() + [
@@ -43,6 +46,7 @@ final class TopDonorsBlock extends CampaignBlock
         ];
     }
 
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         $campaign = $this->resolveCampaign($attrs);

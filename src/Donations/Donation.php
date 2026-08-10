@@ -14,7 +14,7 @@ use Dono\Vendor\Queryable\Schema\Table;
  * `disputed` is a reversal: money that landed and was taken back by the bank,
  * which only bank debit can do.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class Donation extends Model
 {
@@ -78,10 +78,8 @@ final class Donation extends Model
      * and form rollups, receipts and the year-end statement alike.
      *
      * The rollups matter as much as the compliance surfaces because they have
-     * to reconcile with each other: a campaign counting orders while its funds
-     * did not meant a campaign disagreed with the sum of its own funds. An
-     * add-on that wants to show what tickets brought in is better placed to
-     * say so plainly than a blended figure is.
+     * to reconcile with each other: a campaign that counts orders while its
+     * funds do not disagrees with the sum of its own funds.
      */
     public string $kind = 'donation';
     public ?string $failure_reason = null;
@@ -163,11 +161,9 @@ Donation::schema(function (Table $t): void {
     // Wide composite for per-campaign / per-donor GROUP BYs without filesort.
     $t->index(['campaign_id', 'status', 'donor_id', 'paid_at']);
 
-    // The admin donations list. Every composite above ends in paid_at, and the
-    // list sorts by created_at, so nothing served its ORDER BY: it always
-    // filters is_test = 0 and then sorted the whole live set to show 25 rows.
-    // EXPLAIN on the default view read `key=idx_is_test, Extra: Using
-    // filesort`; with these it is a backward index scan.
+    // The admin donations list filters is_test = 0 and sorts by created_at.
+    // Every composite above ends in paid_at, so none of them serves that
+    // ORDER BY and the whole live set gets sorted to show 25 rows.
     $t->index(['is_test', 'created_at']);
     $t->index(['is_test', 'status', 'created_at']);
     // Two columns, not three: status in the middle breaks the prefix for the

@@ -12,15 +12,16 @@ use Dono\Foundation\Modules\ModuleManager;
  * booted module reports the TIER_PRO tier - a structural fact about what is
  * installed, not a runtime flag a site can toggle.
  *
- * @version 2.0.0
+ * @since 1.0.0
  */
 final class LicenseService
 {
+    /** @since 1.0.0 */
     public function __construct(private ?ModuleManager $modules = null)
     {
     }
 
-    /** Whether any booted module reports the TIER_PRO tier. */
+    /** @since 1.0.0 */
     public function isPro(): bool
     {
         return $this->proFeatures() !== [];
@@ -30,13 +31,18 @@ final class LicenseService
      * Entitlement flags = ids of the booted TIER_PRO modules.
      *
      * @return string[]
+     * @since 1.0.0
      */
     public function features(): array
     {
         return $this->proFeatures();
     }
 
-    /** Whether a specific module (by id) is active. */
+    /**
+     * Whether a specific module (by id) is active.
+     *
+     * @since 1.0.0
+     */
     public function can(string $feature): bool
     {
         return in_array($feature, $this->proFeatures(), true);
@@ -48,6 +54,8 @@ final class LicenseService
      * dono.pro.license_status from the server's signed response. When no client
      * is loaded, the filter passes through the possession-based default so the
      * admin still reads sensibly.
+     *
+     * @since 1.0.0
      */
     public function status(): string
     {
@@ -68,6 +76,7 @@ final class LicenseService
      * screen must not imply entitlement it never checked.
      *
      * @return array<int,array{id:string,name:string,status:string,entitled:bool}>
+     * @since 1.0.0
      */
     public function entitlements(): array
     {
@@ -83,7 +92,11 @@ final class LicenseService
         return $out;
     }
 
-    /** Add-ons a licensing client actively refused, ignoring unchecked ones. */
+    /**
+     * Add-ons a licensing client actively refused, ignoring unchecked ones.
+     *
+     * @since 1.0.0
+     */
     public function unlicensed(): array
     {
         return array_values(array_filter(
@@ -92,7 +105,11 @@ final class LicenseService
         ));
     }
 
-    /** Entitled, but on borrowed time: updates stop when it lapses. */
+    /**
+     * Entitled, but on borrowed time: updates stop when it lapses.
+     *
+     * @since 1.0.0
+     */
     public function lapsing(): array
     {
         return array_values(array_filter(
@@ -106,6 +123,7 @@ final class LicenseService
      * back to the id when a module has no resolvable name.
      *
      * @return array<int,array{id:string,name:string}>
+     * @since 1.0.0
      */
     public function addons(): array
     {
@@ -127,6 +145,7 @@ final class LicenseService
 
     /**
      * @return array{active:bool,features:string[],status:string}
+     * @since 1.0.0
      */
     public function snapshot(): array
     {
@@ -139,7 +158,10 @@ final class LicenseService
         ];
     }
 
-    /** @return string[] */
+    /**
+     * @return string[]
+     * @since 1.0.0
+     */
     private function proFeatures(): array
     {
         if ($this->modules === null) {

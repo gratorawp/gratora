@@ -19,6 +19,8 @@ use WP_Error;
  * The REST schema cannot express "required iff the author toggled it", so
  * per-field rules are enforced here once the form resolves. The Preact client
  * validates the same rules; this side closes the crafted-POST hole.
+ *
+ * @since 1.0.0
  */
 final class FormSubmissionValidator
 {
@@ -26,6 +28,7 @@ final class FormSubmissionValidator
 
     private bool $offersCurrencyChoice = false;
 
+    /** @since 1.0.0 */
     public function validate(Form $form, array $body): ?WP_Error
     {
         $this->form = $form;
@@ -60,6 +63,7 @@ final class FormSubmissionValidator
         return null;
     }
 
+    /** @since 1.0.0 */
     public static function consentPurposeIds(string $blocks): array
     {
         $ids = [];
@@ -70,12 +74,15 @@ final class FormSubmissionValidator
     /**
      * Recorded alongside the acceptance, so editing the terms later cannot
      * rewrite what somebody already agreed to. Null when there is nothing to agree to.
+     *
+     * @since 1.0.0
      */
     public static function termsRevision(string $blocks): ?int
     {
         return self::findTermsRevision(parse_blocks($blocks));
     }
 
+    /** @since 1.0.0 */
     private static function findTermsRevision(array $blocks): ?int
     {
         foreach ($blocks as $block) {
@@ -96,11 +103,13 @@ final class FormSubmissionValidator
         return null;
     }
 
+    /** @since 1.0.0 */
     public static function hasBlock(string $blocks, string $blockName): bool
     {
         return self::treeHasBlock(parse_blocks($blocks), $blockName);
     }
 
+    /** @since 1.0.0 */
     private static function treeHasBlock(array $blocks, string $blockName): bool
     {
         foreach ($blocks as $block) {
@@ -114,6 +123,7 @@ final class FormSubmissionValidator
         return false;
     }
 
+    /** @since 1.0.0 */
     private function walk(array $blocks, array $body, array &$offered, ?array $campaignPresets): ?WP_Error
     {
         foreach ($blocks as $block) {
@@ -135,6 +145,7 @@ final class FormSubmissionValidator
         return null;
     }
 
+    /** @since 1.0.0 */
     private function validateBlock(string $name, array $attrs, array $body, array &$offered, ?array $campaignPresets): ?WP_Error
     {
         // A block hidden by its display condition submits no value by design, so
@@ -416,6 +427,7 @@ final class FormSubmissionValidator
         return null;
     }
 
+    /** @since 1.0.0 */
     private static function collectConsentIds(array $blocks, array &$ids): void
     {
         foreach ($blocks as $block) {
@@ -431,6 +443,7 @@ final class FormSubmissionValidator
         }
     }
 
+    /** @since 1.0.0 */
     private function customKey(array $attrs): string
     {
         return DropdownBlock::deriveField(
@@ -439,12 +452,14 @@ final class FormSubmissionValidator
         );
     }
 
+    /** @since 1.0.0 */
     private function label(array $attrs, string $fallback): string
     {
         $label = trim((string) ($attrs['label'] ?? ''));
         return $label !== '' ? $label : $fallback;
     }
 
+    /** @since 1.0.0 */
     private function filled(mixed $v): bool
     {
         if ($v === null) return false;
@@ -453,6 +468,7 @@ final class FormSubmissionValidator
         return $v !== '' && $v !== false;
     }
 
+    /** @since 1.0.0 */
     private function matchesPattern(string $pattern, string $value): bool
     {
         $regex = '~^(?:' . str_replace('~', '\\~', $pattern) . ')$~';
@@ -460,6 +476,7 @@ final class FormSubmissionValidator
         return $r === false ? true : $r === 1;
     }
 
+    /** @since 1.0.0 */
     private function requiredError(string $label): WP_Error
     {
         return $this->reject(sprintf(
@@ -469,6 +486,7 @@ final class FormSubmissionValidator
         ));
     }
 
+    /** @since 1.0.0 */
     private function reject(string $message): WP_Error
     {
         return new WP_Error('dono_form_validation', $message, ['status' => 400]);

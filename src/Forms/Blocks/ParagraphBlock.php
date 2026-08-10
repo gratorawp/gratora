@@ -9,21 +9,17 @@ use Dono\Foundation\Helpers\View;
 /**
  * Static paragraph text block.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class ParagraphBlock implements Block
 {
-    /**
-     * Block type name.
-     */
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/paragraph';
     }
 
-    /**
-     * Block attribute schema.
-     */
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         return [
@@ -32,9 +28,7 @@ final class ParagraphBlock implements Block
         ];
     }
 
-    /**
-     * Renders the paragraph element.
-     */
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         $align = (string) ($attrs['align'] ?? 'left');

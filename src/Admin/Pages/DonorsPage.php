@@ -10,7 +10,7 @@ use Dono\Admin\ExtensionAssets;
 /**
  * Registers and renders the Donors admin page.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class DonorsPage extends HookProvider
 {
@@ -18,11 +18,13 @@ final class DonorsPage extends HookProvider
     private const HANDLE    = 'dono-admin-donors';
     private const BUILD_DIR = 'build/admin/donors';
 
+    /** @since 1.0.0 */
     protected function filters(): array
     {
         return ['dono.admin.pages' => 'registerPage'];
     }
 
+    /** @since 1.0.0 */
     public function registerPage(array $pages): array
     {
         $pages[] = [
@@ -35,6 +37,7 @@ final class DonorsPage extends HookProvider
         return $pages;
     }
 
+    /** @since 1.0.0 */
     public function render(): void
     {
         $this->enqueueAssets();
@@ -48,6 +51,7 @@ final class DonorsPage extends HookProvider
         <?php
     }
 
+    /** @since 1.0.0 */
     private function enqueueAssets(): void
     {
         $asset = require DONO_DIR . self::BUILD_DIR . '/index.asset.php';

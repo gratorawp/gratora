@@ -31,10 +31,11 @@ use Dono\Rest\Portal\PortalController;
 /**
  * Registers all REST route groups on rest_api_init.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class RestProvider extends HookProvider
 {
+    /** @since 1.0.0 */
     public function __construct(
         private DonationsController $donations,
         private WebhookController $webhooks,
@@ -65,11 +66,13 @@ final class RestProvider extends HookProvider
     ) {
     }
 
+    /** @since 1.0.0 */
     protected function actions(): array
     {
         return ['rest_api_init' => 'registerRoutes'];
     }
 
+    /** @since 1.0.0 */
     public function registerRoutes(): void
     {
         $this->donations->registerRoutes();

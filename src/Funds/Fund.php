@@ -10,7 +10,7 @@ use Dono\Vendor\Queryable\Schema\Table;
 /**
  * Fund / designation model.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class Fund extends Model
 {

@@ -13,14 +13,16 @@ use Dono\Foundation\Hooks\HookProvider;
  * fundraiser's or team's own meta). A detected SEO plugin owns social meta,
  * so we stand down unless dono.social_meta.enabled opts back in.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class SocialMeta extends HookProvider
 {
+    /** @since 1.0.0 */
     public function __construct(private CampaignRepository $campaigns)
     {
     }
 
+    /** @since 1.0.0 */
     protected function actions(): array
     {
         return [
@@ -28,6 +30,7 @@ final class SocialMeta extends HookProvider
         ];
     }
 
+    /** @since 1.0.0 */
     public function printTags(): void
     {
         if (! $this->enabled()) {
@@ -58,7 +61,11 @@ final class SocialMeta extends HookProvider
         }
     }
 
-    /** @return array<string,string> */
+    /**
+     * @return array<string,string>
+     *
+     * @since 1.0.0
+     */
     private function tagsFor(Campaign $campaign, int $pageId): array
     {
         $description = self::excerptText((string) ($campaign->description ?? ''));
@@ -110,6 +117,8 @@ final class SocialMeta extends HookProvider
      * id must also equal the campaign's own page_id. Virtual add-on routes
      * (fundraiser/team) resolve to the campaign page and pass this gate; the
      * dono.social_meta filter then reshapes the tags for them.
+     *
+     * @since 1.0.0
      */
     private function currentCampaign(): ?Campaign
     {
@@ -131,6 +140,7 @@ final class SocialMeta extends HookProvider
         return $campaign;
     }
 
+    /** @since 1.0.0 */
     private function enabled(): bool
     {
         $seoActive = defined('WPSEO_VERSION')
@@ -140,7 +150,11 @@ final class SocialMeta extends HookProvider
         return (bool) apply_filters('dono.social_meta.enabled', ! $seoActive);
     }
 
-    /** Plain-text share description: shortcodes and tags stripped, whitespace collapsed, capped near 200 chars. */
+    /**
+     * Plain-text share description: shortcodes and tags stripped, whitespace collapsed, capped near 200 chars.
+     *
+     * @since 1.0.0
+     */
     public static function excerptText(string $text): string
     {
         $text = trim((string) preg_replace('/\s+/u', ' ', wp_strip_all_tags(strip_shortcodes($text))));

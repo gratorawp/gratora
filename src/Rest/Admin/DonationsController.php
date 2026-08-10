@@ -39,7 +39,7 @@ use WP_REST_Server;
  * Admin donation endpoints: list, detail, refund, resend-receipt, CSV export.
  * Responses include decrypted donor PII; capability-gated.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class DonationsController
 {
@@ -48,6 +48,7 @@ final class DonationsController
     private const EXPORT_PAGE     = 1000;
     private const EXPORT_MAX_ROWS = 50000;
 
+    /** @since 1.0.0 */
     public function __construct(
         private DonationRepository $donations,
         private DonorRepository $donors,
@@ -61,6 +62,7 @@ final class DonationsController
     ) {
     }
 
+    /** @since 1.0.0 */
     public function registerRoutes(): void
     {
         register_rest_route(self::NAMESPACE, '/admin/donations', [
@@ -93,11 +95,10 @@ final class DonationsController
         // Campaign names for the record-a-donation picker.
         //
         // /admin/campaigns needs dono_manage_campaigns, which is exactly what a
-        // bookkeeper role created to enter checks will not have, and the picker
-        // rendered blank so every donation they recorded went uncategorised. The
-        // donations list already shows campaign titles to anyone who can read
-        // it, so serving the names under the same capability discloses nothing
-        // new, and it does not widen the campaign-management surface.
+        // bookkeeper role created to enter checks will not have. The donations
+        // list already shows campaign titles to anyone who can read it, so
+        // serving the names under the same capability discloses nothing new,
+        // and it does not widen the campaign-management surface.
         register_rest_route(self::NAMESPACE, '/admin/donations/campaign-options', [
             'methods'             => WP_REST_Server::READABLE,
             'callback'            => [$this, 'campaignOptions'],
@@ -208,6 +209,7 @@ final class DonationsController
         ]);
     }
 
+    /** @since 1.0.0 */
     public function createNote(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $reference = (string) $request['reference'];
@@ -224,6 +226,7 @@ final class DonationsController
         return new WP_REST_Response($note, 201);
     }
 
+    /** @since 1.0.0 */
     public function deleteNote(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $noteId = (int) $request['note_id'];
@@ -238,16 +241,13 @@ final class DonationsController
         return new WP_REST_Response(['deleted' => true], 200);
     }
 
+    /** @since 1.0.0 */
     public function canAccess(): bool
     {
         return Capabilities::userCan('dono_view_donations');
     }
 
-    /**
-     * Id and title only, for the picker. Archived campaigns are included: a
-     * check that arrived during last year's appeal belongs to last year's
-     * appeal, and by the time someone is entering it the appeal is usually over.
-     */
+    /** @since 1.0.0 */
     public function fundOptions(): WP_REST_Response
     {
         $rows = Fund::query()
@@ -266,6 +266,13 @@ final class DonationsController
         ), 200);
     }
 
+    /**
+     * Id and title only, for the picker. Archived campaigns are included: a
+     * check that arrived during last year's appeal belongs to last year's
+     * appeal, and by the time someone is entering it the appeal is usually over.
+     *
+     * @since 1.0.0
+     */
     public function campaignOptions(): WP_REST_Response
     {
         $rows = Campaign::query()
@@ -284,7 +291,11 @@ final class DonationsController
         ), 200);
     }
 
-    /** @return array<string,mixed> */
+    /**
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
     private function recordArgs(): array
     {
         return [
@@ -314,6 +325,8 @@ final class DonationsController
      * the money is dated when it arrived rather than when it was typed in, the
      * donor is not emailed instructions to pay something already paid, and the
      * row is never flagged as a test even on a site left in test mode.
+     *
+     * @since 1.0.0
      */
     public function record(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
@@ -342,13 +355,11 @@ final class DonationsController
 
         $currency = strtoupper((string) ($request['currency'] ?: Money::defaultCurrency()));
 
-        // The public route has always checked this; this one validated the code
-        // as three letters and took whatever it was given. An offline gift in a
-        // currency with no configured rate is recorded and then sits outside
-        // every total, which is not something to accept by typo.
-        // Storage is always major x 100, so an amount that does not land on a
-        // whole major unit in a zero-decimal currency rounds at the gateway and
-        // mischarges. The public route has always refused it; this one did not.
+        // An offline gift in a currency with no configured rate is recorded and
+        // then sits outside every total, which is not something to accept by
+        // typo. Storage is always major x 100, so an amount that does not land
+        // on a whole major unit in a zero-decimal currency rounds at the gateway
+        // and mischarges.
         if (Currency::minorUnits($currency) === 0 && ((int) $request['amount_cents']) % 100 !== 0) {
             return new WP_Error(
                 'dono_invalid_amount',
@@ -443,9 +454,9 @@ final class DonationsController
                 remove_filter('dono.receipt.should_issue', $filter, 10);
             }
         } catch (\Throwable $e) {
-            // Throwable, not RuntimeException: anything else escaped as a PHP
-            // fatal, so the admin got a blank 500 with no JSON and no way to
-            // tell whether the money had been recorded.
+            // Throwable, not RuntimeException: anything else escapes as a PHP
+            // fatal, leaving the admin a blank 500 with no JSON and no way to
+            // tell whether the money was recorded.
             //
             // What state the row is actually in decides the answer, so read it
             // rather than assume the throw means nothing happened.
@@ -507,6 +518,8 @@ final class DonationsController
      * and the admin decides. What it catches is the timed-out request retried,
      * the second admin working the same envelope, and the check recorded by
      * hand that the donor had in fact already paid online.
+     *
+     * @since 1.0.0
      */
     private function donationLike(string $email, int $amountCents, string $currency, string $receivedAt): ?Donation
     {
@@ -535,6 +548,8 @@ final class DonationsController
     /**
      * Noon rather than midnight: a date-only value rendered in a timezone
      * behind the site would otherwise slide to the previous day.
+     *
+     * @since 1.0.0
      */
     private function receivedAt(string $raw): ?string
     {
@@ -565,6 +580,7 @@ final class DonationsController
         return $date->setTime(12, 0)->format('Y-m-d H:i:s');
     }
 
+    /** @since 1.0.0 */
     public function index(WP_REST_Request $request): WP_REST_Response
     {
         $search  = $request['search']   !== null ? trim((string) $request['search']) : '';
@@ -601,8 +617,6 @@ final class DonationsController
         $formIds     = array_unique(array_filter(array_map(fn ($d) => (int) $d->form_id,     $result['items'])));
         $fundIds     = array_unique(array_filter(array_map(fn ($d) => (int) $d->fund_id,     $result['items'])));
 
-        // Campaigns and forms were batched and donors were not, under a comment
-        // saying all three were.
         $donorsById = $this->donors->findManyByIds(array_values($donorIds));
         $campaignsById = [];
         if ($campaignIds !== []) {
@@ -664,6 +678,8 @@ final class DonationsController
     /**
      * Aggregate KPIs for the donations list. Mirrors the list filters so
      * "raised" and "donors" track whatever the user is currently viewing.
+     *
+     * @since 1.0.0
      */
     public function stats(WP_REST_Request $request): WP_REST_Response
     {
@@ -692,6 +708,7 @@ final class DonationsController
         return new WP_REST_Response($stats, 200);
     }
 
+    /** @since 1.0.0 */
     public function show(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $reference = (string) $request['reference'];
@@ -792,7 +809,7 @@ final class DonationsController
                     'count'        => (int) $donor->donations_count,
                     'total_cents'  => (int) $donor->total_donated_cents,
                     // total_donated_cents is the org base-currency aggregate,
-                    // so it must be labelled with the base currency - not this
+                    // so it must be labeled with the base currency, not this
                     // donation's currency, which may be foreign.
                     'currency'     => $this->baseCurrency(),
                 ],
@@ -825,8 +842,7 @@ final class DonationsController
                 'frequency'            => $donation->frequency,
                 // Slugs only. shapeDonation already carries id and title for
                 // all three, and array union keeps the LEFT value, so restating
-                // them here silently threw the richer version away: campaign
-                // and form have been null on this endpoint since it was written.
+                // them here would silently throw the richer version away.
                 'campaign_slug'        => $campaign ? (string) $campaign->slug : null,
                 'form_slug'            => $form ? (string) $form->slug : null,
             ],
@@ -838,6 +854,7 @@ final class DonationsController
         ], 200);
     }
 
+    /** @since 1.0.0 */
     public function markPaid(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $reference = (string) $request['reference'];
@@ -863,11 +880,11 @@ final class DonationsController
             );
         }
         // Only an offline donation gets an offline marker. A gateway donation
-        // confirmed by hand -- a webhook that never arrived, a card the admin
-        // watched clear in the processor's dashboard -- still moved its money
-        // through that gateway. Stamping `offline` on it fabricated a
-        // transaction id and recorded a card payment as offline, so anyone
-        // reconciling the site against a Stripe payout found no such id.
+        // confirmed by hand, a webhook that never arrived or a card the admin
+        // watched clear in the processor's dashboard, still moved its money
+        // through that gateway. Stamping `offline` on it would fabricate a
+        // transaction id and record a card payment as offline, so anyone
+        // reconciling the site against a Stripe payout would find no such id.
         // confirm() falls back to the row's own values, so an empty array here
         // keeps whatever the gateway already recorded.
         $confirmation = [];
@@ -890,6 +907,7 @@ final class DonationsController
         return $this->show($request);
     }
 
+    /** @since 1.0.0 */
     public function markFailed(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $reference = (string) $request['reference'];
@@ -926,6 +944,7 @@ final class DonationsController
         return $this->show($request);
     }
 
+    /** @since 1.0.0 */
     public function refund(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $reference = (string) $request['reference'];
@@ -967,6 +986,7 @@ final class DonationsController
         ], 200);
     }
 
+    /** @since 1.0.0 */
     public function resendReceipt(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $reference = (string) $request['reference'];
@@ -1008,6 +1028,8 @@ final class DonationsController
      * donation whose first charge succeeded but whose subscription creation
      * failed (Stripe Customer/Price/Subscription chain). Re-reads the PI from
      * Stripe and re-runs the chain; clears the failure flags on success.
+     *
+     * @since 1.0.0
      */
     public function retrySubscription(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
@@ -1053,6 +1075,7 @@ final class DonationsController
         ], 200);
     }
 
+    /** @since 1.0.0 */
     public function downloadReceipt(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $receiptId = (int) $request['receipt_id'];
@@ -1100,6 +1123,8 @@ final class DonationsController
      * and Donor so the admin can preview the template (with their current
      * settings + logo + merge-tag expansions) without sending a real receipt.
      * Returned inline so the browser displays the PDF.
+     *
+     * @since 1.0.0
      */
     public function previewReceipt(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
@@ -1169,11 +1194,13 @@ final class DonationsController
         return $response;
     }
 
+    /** @since 1.0.0 */
     public function exportCsv(WP_REST_Request $request): WP_REST_Response
     {
         // CSV via rest_pre_serve_request to bypass the JSON serializer, written
-        // straight to the socket: a full export held as one string cost 313MB
-        // for 8.8MB of CSV and exhausted a 256MB limit at 50,000 rows.
+        // straight to the socket: a full export held as one string costs orders
+        // of magnitude more memory than the CSV it produces and exhausts the
+        // memory limit well inside EXPORT_MAX_ROWS.
         add_filter('rest_pre_serve_request', function (bool $served, $result, $req, $server) use ($request) {
             $route = $request->get_route();
             if ((string) $req->get_route() !== $route) {
@@ -1204,6 +1231,8 @@ final class DonationsController
 
     /**
      * @param resource $out
+     *
+     * @since 1.0.0
      */
     private function writeCsv($out, WP_REST_Request $request): void
     {
@@ -1324,6 +1353,7 @@ final class DonationsController
         }
     }
 
+    /** @since 1.0.0 */
     private function shapeDonation(Donation $d, ?Donor $donor, ?Campaign $campaign = null, ?Form $form = null, ?Fund $fund = null): array
     {
         return [
@@ -1357,8 +1387,8 @@ final class DonationsController
                 'id'    => (int) $form->id,
                 'title' => (string) $form->title,
             ] : null,
-            // Every donation is assigned one by FundResolver, and until now the
-            // designation the donor picked was stored and never shown back.
+            // Every donation is assigned one by FundResolver, so the
+            // designation the donor picked is shown back here.
             'fund'         => $fund ? [
                 'id'   => (int) $fund->id,
                 'name' => (string) $fund->name,
@@ -1367,12 +1397,14 @@ final class DonationsController
         ];
     }
 
+    /** @since 1.0.0 */
     private function donorName(Donor $d): string
     {
         $full = trim(($d->first_name ?? '') . ' ' . ($d->last_name ?? ''));
         return $full !== '' ? $full : '-';
     }
 
+    /** @since 1.0.0 */
     private function baseCurrency(): string
     {
         $cur = (new SettingsService())->get('currency-locale');
@@ -1387,12 +1419,13 @@ final class DonationsController
      * From the data rather than from GatewayManager, because the two sets
      * differ in both directions. A slug outlives its gateway being
      * disconnected or its add-on being deactivated, and the Give importer
-     * writes slugs core never registers. The filter carried a hardcoded
-     * stripe/offline pair, so PayPal was money you could see and not narrow to.
+     * writes slugs core never registers.
      *
      * PaymentGateway::label() is deliberately unused: that is donor-facing
      * payment-method copy, and several gateways answer "Credit card", which
      * would put identical options in one dropdown.
+     *
+     * @since 1.0.0
      */
     public function gatewayOptions(WP_REST_Request $request): WP_REST_Response
     {
@@ -1420,7 +1453,9 @@ final class DonationsController
      * Admin-facing display name for a gateway slug. Core names what it ships
      * plus the slugs the Give importer writes; add-ons name their own through
      * the filter; an unnamed slug still gets a usable option rather than being
-     * dropped, which is the failure this replaces.
+     * dropped.
+     *
+     * @since 1.0.0
      */
     public static function gatewayLabel(string $slug): string
     {
@@ -1444,6 +1479,7 @@ final class DonationsController
             : ucwords(str_replace(['-', '_'], ' ', $slug));
     }
 
+    /** @since 1.0.0 */
     private function indexArgs(): array
     {
         return [

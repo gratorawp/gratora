@@ -17,7 +17,7 @@ use Dono\Recurring\RecurringPlan;
  * offering the action, so a plan that cannot be retried never shows a button
  * that would do nothing.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 interface SupportsPaymentRetry
 {
@@ -30,6 +30,8 @@ interface SupportsPaymentRetry
      *
      * @throws PaymentRetryUnavailable When there is nothing outstanding to collect.
      * @throws \RuntimeException       When the gateway refused the attempt.
+     *
+     * @since 1.0.0
      */
     public function retryPayment(RecurringPlan $plan): void;
 }

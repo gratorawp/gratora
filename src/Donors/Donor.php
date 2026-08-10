@@ -11,7 +11,7 @@ use Dono\Vendor\Queryable\Schema\Table;
  * Donor record. PII columns are AES-256-GCM encrypted; email_hash is the
  * indexed lookup key.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class Donor extends Model
 {

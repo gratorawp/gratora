@@ -9,11 +9,15 @@ namespace Dono\Rest\Schemas;
  * open-shaped: known fields are described but additional properties are
  * allowed because modules can extend it.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class FormSchemas
 {
-    /** @return array<string, array<string,mixed>> */
+    /**
+     * @return array<string, array<string,mixed>>
+     *
+     * @since 1.0.0
+     */
     public static function create(): array
     {
         $props = self::properties();
@@ -22,13 +26,21 @@ final class FormSchemas
         return $props;
     }
 
-    /** @return array<string, array<string,mixed>> */
+    /**
+     * @return array<string, array<string,mixed>>
+     *
+     * @since 1.0.0
+     */
     public static function update(): array
     {
         return self::properties();
     }
 
-    /** @return array<string, array<string,mixed>> */
+    /**
+     * @return array<string, array<string,mixed>>
+     *
+     * @since 1.0.0
+     */
     private static function properties(): array
     {
         return [
@@ -61,10 +73,9 @@ final class FormSchemas
                 'type'                 => 'object',
                 'additionalProperties' => true,
                 'properties'           => [
-                    // Recurring frequencies are configured per-block on
-                    // dono/recurring-toggle; anonymity is per-block on
-                    // dono/anonymous-toggle. Removed from settings to keep
-                    // form.settings reflecting only top-level form options.
+                    // Recurring frequencies and anonymity are per-block
+                    // (dono/recurring-toggle, dono/anonymous-toggle); settings
+                    // carries only top-level form options.
                     'gateways' => [
                         'type'       => 'object',
                         'properties' => [

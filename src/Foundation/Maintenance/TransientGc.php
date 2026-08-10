@@ -14,7 +14,7 @@ use Dono\Vendor\Queryable\DB;
  * Runs independently of wp_scheduled_delete (which may be disabled by perf plugins).
  * Uses delete_transient() so object cache entries are cleared too. Capped per run.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class TransientGc
 {
@@ -22,17 +22,19 @@ final class TransientGc
     private const DAILY = 86400;
     private const BATCH = 2000;
 
+    /** @since 1.0.0 */
     public function __construct(private AsyncDispatcher $async)
     {
     }
 
-    /** Register the GC action and schedule the daily recurring job. */
+    /** @since 1.0.0 */
     public function register(): void
     {
         add_action(self::HOOK, [$this, 'run']);
         add_action('init', fn () => $this->async->scheduleRecurring(self::HOOK, self::DAILY));
     }
 
+    /** @since 1.0.0 */
     public function run(): void
     {
         // Object cache means transients bypass wp_options entirely.

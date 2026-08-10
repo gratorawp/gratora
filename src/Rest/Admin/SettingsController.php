@@ -18,23 +18,26 @@ use Dono\Settings\SecretRedactor;
 /**
  * Admin settings read/write by group key.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class SettingsController
 {
     private const NAMESPACE = 'dono/v1';
 
+    /** @since 1.0.0 */
     public function __construct(
         private SettingsService $settings,
         private DonorRetention $retention,
     ) {
     }
 
+    /** @since 1.0.0 */
     public function retentionPreview(WP_REST_Request $request): WP_REST_Response
     {
         return new WP_REST_Response($this->retention->preview((int) $request['days']), 200);
     }
 
+    /** @since 1.0.0 */
     public function registerRoutes(): void
     {
         // Read-only, and deliberately not part of the privacy group: it is a
@@ -62,11 +65,13 @@ final class SettingsController
         ]);
     }
 
+    /** @since 1.0.0 */
     public function canAccess(): bool
     {
         return Capabilities::userCan('dono_manage_settings');
     }
 
+    /** @since 1.0.0 */
     public function show(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $group = (string) $request['group'];
@@ -75,7 +80,7 @@ final class SettingsController
         }
         // Never hand a stored secret back out. The gateways group holds the
         // Stripe webhook signing secret, which is the only authentication on
-        // the webhook route: reading it was enough to forge a paid donation.
+        // the webhook route: reading it is enough to forge a paid donation.
         $data = SecretRedactor::redact($this->settings->get($group));
 
         // Read-only, and not part of the stored shape: accept() drops it on the
@@ -88,6 +93,7 @@ final class SettingsController
         return new WP_REST_Response($data, 200);
     }
 
+    /** @since 1.0.0 */
     public function update(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $group = (string) $request['group'];
@@ -136,6 +142,8 @@ final class SettingsController
      * currency does not have.
      *
      * @param array<string,mixed> $body
+     *
+     * @since 1.0.0
      */
     private function guardBaseCurrency(array $body): ?WP_Error
     {
@@ -171,6 +179,8 @@ final class SettingsController
      *
      * @param array<string,mixed> $data
      * @return array<string,mixed>
+     *
+     * @since 1.0.0
      */
     private function sanitize(array $data): array
     {

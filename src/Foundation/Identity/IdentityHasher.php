@@ -13,6 +13,8 @@ use Dono\Foundation\Config\SystemSetting;
  * Hash helpers for indexed lookup of sensitive identifiers. Losing the email
  * pepper while donor rows exist triggers a background rehash; losing the IP
  * salt is harmless, and userAgentHash is unsalted.
+ *
+ * @since 1.0.0
  */
 final class IdentityHasher
 {
@@ -22,17 +24,20 @@ final class IdentityHasher
     private string $ipSalt;
     private string $emailPepper;
 
+    /** @since 1.0.0 */
     public function __construct(private AsyncDispatcher $async)
     {
         $this->ipSalt      = $this->loadIpSalt();
         $this->emailPepper = $this->loadEmailPepper();
     }
 
+    /** @since 1.0.0 */
     public function emailHash(string $email): string
     {
         return hash_hmac('sha256', $this->normalizeEmail($email), $this->emailPepper);
     }
 
+    /** @since 1.0.0 */
     public function normalizeEmail(string $email): string
     {
         return strtolower(trim($email));
@@ -46,6 +51,8 @@ final class IdentityHasher
      * Never use this for identity: emailHash() is the UNIQUE key on the donor
      * table, and collapsing distinct addresses would merge two people's giving
      * history.
+     *
+     * @since 1.0.0
      */
     public function rateLimitMailbox(string $email): string
     {
@@ -69,18 +76,21 @@ final class IdentityHasher
         return $local . '@' . $domain;
     }
 
+    /** @since 1.0.0 */
     public function ipHash(?string $ip): ?string
     {
         if ($ip === null || $ip === '') return null;
         return hash('sha256', $ip . '|' . $this->ipSalt);
     }
 
+    /** @since 1.0.0 */
     public function userAgentHash(?string $ua): ?string
     {
         if ($ua === null || $ua === '') return null;
         return hash('sha256', $ua);
     }
 
+    /** @since 1.0.0 */
     private function loadEmailPepper(): string
     {
         $stored = SystemSetting::read(self::SETTING_EMAIL_PEPPER);
@@ -100,6 +110,7 @@ final class IdentityHasher
         return $pepper;
     }
 
+    /** @since 1.0.0 */
     private function loadIpSalt(): string
     {
         $stored = SystemSetting::read(self::SETTING_IP_SALT);
@@ -110,6 +121,7 @@ final class IdentityHasher
         return $salt;
     }
 
+    /** @since 1.0.0 */
     private function donorsExist(): bool
     {
         return Donor::query()->exists();

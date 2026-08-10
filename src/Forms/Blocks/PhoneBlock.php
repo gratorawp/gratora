@@ -9,21 +9,17 @@ use Dono\Foundation\Helpers\View;
 /**
  * Phone number field block.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class PhoneBlock implements Block
 {
-    /**
-     * Block type name.
-     */
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/phone';
     }
 
-    /**
-     * Block attribute schema.
-     */
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         return [
@@ -33,9 +29,7 @@ final class PhoneBlock implements Block
         ];
     }
 
-    /**
-     * Renders the phone input field.
-     */
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         return View::loadRelative(__DIR__, 'views/phone', [

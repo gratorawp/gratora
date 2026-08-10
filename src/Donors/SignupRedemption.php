@@ -9,15 +9,18 @@ use Dono\Vendor\Queryable\DB;
 /**
  * Turns a proven claim into a donor. The emailed link coming back is the only
  * evidence the address belongs to whoever typed it.
+ *
+ * @since 1.0.0
  */
 final class SignupRedemption
 {
     /**
      * Kept apart from the sign-in purpose so a sign-in link can never
-     * materialise an account and a signup link can never open somebody else's.
+     * materialize an account and a signup link can never open somebody else's.
      */
     public const PURPOSE = 'donor_portal_signup';
 
+    /** @since 1.0.0 */
     public function __construct(
         private MagicLinkService $magicLinks,
         private PendingSignupRepository $pending,
@@ -30,6 +33,8 @@ final class SignupRedemption
      * it decides who wins a race, but if the donor cannot then be created the
      * link has to stay usable: a spent token with no account behind it is a
      * person locked out of an account they never got.
+     *
+     * @since 1.0.0
      */
     public function redeem(string $rawToken): int
     {

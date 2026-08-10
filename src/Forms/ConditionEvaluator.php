@@ -7,10 +7,16 @@ namespace Dono\Forms;
 /**
  * Server mirror of assets/donation-form/state/conditions.js so validation and
  * the client agree on which conditional blocks are shown for a given payload.
+ *
+ * @since 1.0.0
  */
 final class ConditionEvaluator
 {
-    /** @param array<string,mixed> $body the submitted donation payload */
+    /**
+     * @param array<string,mixed> $body the submitted donation payload
+     *
+     * @since 1.0.0
+     */
     public static function passes(?array $condition, array $body): bool
     {
         if (! $condition || empty($condition['field'])) {
@@ -30,7 +36,11 @@ final class ConditionEvaluator
         }
     }
 
-    /** @param array<string,mixed> $body */
+    /**
+     * @param array<string,mixed> $body
+     *
+     * @since 1.0.0
+     */
     private static function valueFor(string $field, array $body): mixed
     {
         // Authored conditions use the hyphenated frequency ('one-time'); the

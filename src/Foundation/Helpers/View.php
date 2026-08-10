@@ -12,15 +12,17 @@ use InvalidArgumentException;
  * Dot-notation: View::load('Admin.dashboard') resolves to
  * src/Admin/resources/views/dashboard.php. $args are extracted into template scope.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class View
 {
+    /** @since 1.0.0 */
     public static function load(string $path, array $args = []): string
     {
         return self::renderFile(self::resolve($path), $args);
     }
 
+    /** @since 1.0.0 */
     public static function render(string $path, array $args = []): void
     {
         echo self::load($path, $args);
@@ -29,6 +31,8 @@ final class View
     /**
      * Load a view relative to a caller-supplied base directory.
      * Use when the module layout does not match src/{Module}/resources/views/.
+     *
+     * @since 1.0.0
      */
     public static function loadRelative(string $baseDir, string $path, array $args = []): string
     {
@@ -37,6 +41,7 @@ final class View
         return self::renderFile($template, $args);
     }
 
+    /** @since 1.0.0 */
     private static function renderFile(string $template, array $args): string
     {
         if (! file_exists($template)) {
@@ -54,6 +59,7 @@ final class View
         return (string) ob_get_clean();
     }
 
+    /** @since 1.0.0 */
     private static function resolve(string $path): string
     {
         if (str_contains($path, '.')) {

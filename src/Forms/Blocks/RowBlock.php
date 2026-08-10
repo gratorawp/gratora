@@ -7,21 +7,17 @@ namespace Dono\Forms\Blocks;
 /**
  * Multi-column grid layout block.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class RowBlock implements Block
 {
-    /**
-     * Block type name.
-     */
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/row';
     }
 
-    /**
-     * Block attribute schema.
-     */
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         return [
@@ -31,9 +27,7 @@ final class RowBlock implements Block
         ];
     }
 
-    /**
-     * Renders the grid container.
-     */
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         $columns = (int) ($attrs['columns'] ?? 2);

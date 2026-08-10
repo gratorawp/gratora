@@ -13,25 +13,22 @@ use Dono\Gateways\GatewayManager;
  * single source of which gateways a form offers (mirrored into
  * form.settings.gateways.allowed on save by FormService).
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class PaymentGatewaysBlock implements Block
 {
+    /** @since 1.0.0 */
     public function __construct(private GatewayManager $gateways)
     {
     }
 
-    /**
-     * Block type name.
-     */
+    /** @since 1.0.0 */
     public function name(): string
     {
         return 'dono/payment-gateways';
     }
 
-    /**
-     * Block attribute schema.
-     */
+    /** @since 1.0.0 */
     public function attributes(): array
     {
         return [
@@ -45,9 +42,7 @@ final class PaymentGatewaysBlock implements Block
         ];
     }
 
-    /**
-     * Renders the gateway selector; returns empty string when only one gateway is active.
-     */
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         $allowed = is_array($attrs['allowed'] ?? null)

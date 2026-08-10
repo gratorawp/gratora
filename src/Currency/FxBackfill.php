@@ -17,23 +17,21 @@ use Dono\Foundation\Helpers\Money;
  * right call at the till, and it leaves a real payment outside every total,
  * because the aggregates score a null base as zero.
  *
- * Nothing put those rows right afterwards. The rate is captured per donation at
- * write time, so configuring the missing currency later changed nothing that
- * had already happened, and Recalculate rebuilt the same totals from the same
- * nulls. This is the missing half: once a rate exists, the money joins the
- * numbers.
+ * The rate is captured per donation at write time, so configuring the missing
+ * currency later leaves the existing rows untouched.
  *
  * Today's rate, not the rate on the day of the gift, which nobody recorded.
  * That is an approximation, and it is the same one the live path makes for
  * every donation it converts.
  *
- * @version 1.0.0
+ * @since 1.0.0
  */
 final class FxBackfill
 {
     /** Rows held in memory at once. */
     private const CHUNK = 500;
 
+    /** @since 1.0.0 */
     public function __construct(private FxRates $fx)
     {
     }
@@ -41,6 +39,8 @@ final class FxBackfill
     /**
      * @return array{converted:int, plans:int, unconvertible:int, currencies:array<int,string>}
      *   currencies lists what is still missing a rate, so the caller can name it.
+     *
+     * @since 1.0.0
      */
     public function run(): array
     {
@@ -90,9 +90,7 @@ final class FxBackfill
         }
 
         // Recurring plans carry their own base amount, copied from the first
-        // donation, and MRR scores a foreign plan with no base as zero. Left
-        // alone, a rate added today fixed the donation totals while every
-        // renewal-driven figure stayed understated until the plan next charged.
+        // donation, and MRR scores a foreign plan with no base as zero.
         $plans = $this->runForPlans($base, $unconvertible);
 
         return [
@@ -105,6 +103,8 @@ final class FxBackfill
 
     /**
      * @param array<string,bool> $unconvertible collected across both passes
+     *
+     * @since 1.0.0
      */
     private function runForPlans(string $base, array &$unconvertible): int
     {
@@ -154,6 +154,8 @@ final class FxBackfill
      * say so. Grouped by currency because that is the thing an admin fixes.
      *
      * @return array<int,array{currency:string, count:int, amount_cents:int}>
+     *
+     * @since 1.0.0
      */
     public static function pending(): array
     {
