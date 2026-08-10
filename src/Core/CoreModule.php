@@ -894,6 +894,7 @@ final class CoreModule implements DonoModule
                 $c->get(DataExporter::class),
                 $c->get(DataImporter::class),
                 $c->get(CsvImporter::class),
+                new \Dono\Foundation\Maintenance\TestDataPurger($c->get(DonorService::class)),
             ),
             new ExportsController(
                 $c->get(DonorExporter::class),

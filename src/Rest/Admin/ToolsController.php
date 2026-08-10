@@ -10,6 +10,7 @@ use Dono\Async\AsyncDispatcher;
 use Dono\Analytics\Event;
 use Dono\Currency\FxBackfill;
 use Dono\Settings\SecretRedactor;
+use Dono\Foundation\Maintenance\TestDataPurger;
 use Dono\Foundation\Transfer\CsvImporter;
 use Dono\Foundation\Transfer\DataExporter;
 use Dono\Foundation\Transfer\DataImporter;
@@ -42,6 +43,7 @@ final class ToolsController
         private DataExporter $exporter,
         private DataImporter $importer,
         private CsvImporter $csv,
+        private TestDataPurger $testData,
     ) {
     }
 
@@ -107,6 +109,18 @@ final class ToolsController
                     'enum'    => array_keys(self::scopes()),
                     'default' => 'all',
                 ],
+            ],
+        ]);
+
+        register_rest_route(self::NAMESPACE, '/admin/tools/purge-test-data', [
+            'methods'             => WP_REST_Server::CREATABLE,
+            // manage_options, not the settings capability: this deletes rows,
+            // and a settings manager is trusted with configuration, not with
+            // the ledger.
+            'permission_callback' => [$this, 'canManage'],
+            'callback'            => [$this, 'purgeTestData'],
+            'args'                => [
+                'confirmation' => ['type' => 'string', 'default' => ''],
             ],
         ]);
 
@@ -523,6 +537,21 @@ final class ToolsController
         ], 200);
     }
 
+    public function purgeTestData(\WP_REST_Request $request): WP_REST_Response|\WP_Error
+    {
+        // Typed, not clicked: the button is one keystroke away from a ledger
+        // that cannot be restored, and there is no undo behind it.
+        if (strtoupper(trim((string) $request->get_param('confirmation'))) !== 'DELETE') {
+            return new \WP_Error(
+                'dono_confirmation_required',
+                __('Type DELETE to confirm.', 'dono'),
+                ['status' => 400]
+            );
+        }
+
+        return new WP_REST_Response($this->testData->purge(), 200);
+    }
+
     public function canAccess(): bool
     {
         return Capabilities::userCan('dono_manage_settings');
@@ -649,6 +678,7 @@ final class ToolsController
                 ],
                 $this->upgrades->pending()
             ),
+            'test_data'             => $this->testData->preview(),
             'recalc_scopes'         => array_map(
                 static fn ($slug, $label): array => ['value' => $slug, 'label' => $label],
                 array_keys(self::scopes()),

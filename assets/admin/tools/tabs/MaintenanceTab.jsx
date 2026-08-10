@@ -11,6 +11,8 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
     const [ recalcRunning, setRecalcRunning ] = useState( false );
     const [ recalcResult, setRecalcResult ]   = useState( null );
     const [ upgrading, setUpgrading ]         = useState( false );
+    const [ purgeText, setPurgeText ]         = useState( '' );
+    const [ purging, setPurging ]             = useState( false );
 
     const scopes = info?.recalc_scopes?.length
         ? info.recalc_scopes
@@ -59,6 +61,37 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
             setRecalcRunning( false );
         }
     };
+
+    const doPurgeTestData = async () => {
+        setPurging( true );
+        setNotice( null );
+        try {
+            const res = await apiFetch( {
+                path:   '/dono/v1/admin/tools/purge-test-data',
+                method: 'POST',
+                data:   { confirmation: purgeText },
+            } );
+            setPurgeText( '' );
+            setNotice( {
+                type: 'success',
+                text: sprintf(
+                    /* translators: 1: donations removed, 2: recurring plans removed, 3: donors removed */
+                    __( 'Removed %1$d test donations, %2$d test recurring plans and %3$d donors left with nothing.', 'dono' ),
+                    res?.donations || 0,
+                    res?.recurring_plans || 0,
+                    res?.donors || 0,
+                ),
+            } );
+            loadInfo();
+        } catch ( err ) {
+            setNotice( { type: 'error', text: err?.message || __( 'Could not remove the test data.', 'dono' ) } );
+        } finally {
+            setPurging( false );
+        }
+    };
+
+    const testData  = info?.test_data;
+    const testTotal = ( testData?.donations || 0 ) + ( testData?.recurring_plans || 0 );
 
     return (
         <div className="dono-panel">
@@ -158,6 +191,66 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
                     </ul>
                 ) }
             </Card>
+
+            { testTotal > 0 && (
+                <Card
+                    title={ __( 'Test donations', 'dono' ) }
+                    sub={ __( 'Anything a gateway in test mode left behind. Test rows are already left out of every total, so this changes nothing you have reported: it clears the ledger you read by eye before going live. There is no undo.', 'dono' ) }
+                >
+                    <ul className="dono-advanced-cron">
+                        <li>
+                            { sprintf(
+                                /* translators: %d: number of test donations */
+                                _n( '%d test donation', '%d test donations', testData.donations, 'dono' ),
+                                testData.donations
+                            ) }
+                        </li>
+                        { testData.recurring_plans > 0 && (
+                            <li>
+                                { sprintf(
+                                    /* translators: %d: number of test recurring plans */
+                                    _n( '%d test recurring plan', '%d test recurring plans', testData.recurring_plans, 'dono' ),
+                                    testData.recurring_plans
+                                ) }
+                            </li>
+                        ) }
+                        { testData.donors > 0 && (
+                            <li>
+                                { sprintf(
+                                    /* translators: %d: number of donors that would be left with no records */
+                                    _n(
+                                        '%d donor, who would have nothing left on record',
+                                        '%d donors, who would have nothing left on record',
+                                        testData.donors,
+                                        'dono'
+                                    ),
+                                    testData.donors
+                                ) }
+                            </li>
+                        ) }
+                    </ul>
+                    <div className="dono-advanced-actions" style={ { marginTop: 12 } }>
+                        <label className="dono-tools-field">
+                            { __( 'Type DELETE to confirm', 'dono' ) }
+                            <input
+                                type="text"
+                                className="dono-input"
+                                value={ purgeText }
+                                onChange={ ( e ) => setPurgeText( e.target.value ) }
+                                disabled={ purging }
+                            />
+                        </label>
+                        <Btn
+                            variant="danger"
+                            onClick={ doPurgeTestData }
+                            disabled={ purging || purgeText.trim().toUpperCase() !== 'DELETE' }
+                            isBusy={ purging }
+                        >
+                            { purging ? __( 'Removing…', 'dono' ) : __( 'Delete test data', 'dono' ) }
+                        </Btn>
+                    </div>
+                </Card>
+            ) }
 
             <Card
                 title={ __( 'Setup wizard', 'dono' ) }
