@@ -9,9 +9,10 @@ use Dono\Gateways\Stripe\StripeAccount;
 use WP_REST_Request;
 
 /**
- * Saving Stripe keys verifies them against Stripe first, so a typo is caught at
- * save time instead of at the first donation. Bad keys are never persisted, and
- * a stored secret key is never readable back over REST.
+ * Saving Stripe keys tests them against Stripe, so a typo is caught at save
+ * time instead of at the first donation. A key Stripe refuses is not left
+ * behind, a refused rotation keeps the pair that was working, and a stored
+ * secret key is never readable back over REST.
  */
 final class StripeKeysControllerTest extends IntegrationTestCase
 {
@@ -122,6 +123,59 @@ final class StripeKeysControllerTest extends IntegrationTestCase
         $this->assertFalse(
             $this->account()->hasKeysFor(true),
             'a key Stripe rejected must not be left behind'
+        );
+    }
+
+    /**
+     * The API client reads its key from the account, so a pair has to be
+     * written before it can be tested and a failure has to put the old one
+     * back. Blanking the mode instead leaves an org that was rotating its live
+     * secret with no live secret at all, and donations stop until someone
+     * retypes it.
+     */
+    public function test_a_rejected_rotation_leaves_the_working_key_alone(): void
+    {
+        $this->mockStripe();
+        $this->save('live', 'sk_live_working', 'pk_live_working');
+        $this->assertTrue($this->account()->hasKeysFor(false), 'precondition: live keys work');
+
+        remove_all_filters('pre_http_request');
+        $this->mockStripe(false);
+        $res = $this->save('live', 'sk_live_typo', 'pk_live_typo');
+
+        $this->assertSame(400, $res->get_status(), 'the rotation is refused');
+        $this->assertSame(
+            'sk_live_working',
+            $this->account()->secretKeyFor(false),
+            'and the key that was working is still the stored one'
+        );
+    }
+
+    /**
+     * The catch is reached by a network failure as well as by a rejection:
+     * $this->api->get() throws for both. A Stripe that is briefly unreachable
+     * must not cost an org its credentials.
+     */
+    public function test_an_unreachable_stripe_does_not_cost_the_stored_key(): void
+    {
+        $this->mockStripe();
+        $this->save('live', 'sk_live_working', 'pk_live_working');
+
+        remove_all_filters('pre_http_request');
+        add_filter('pre_http_request', static function ($pre, $args, $url) {
+            if (is_string($url) && str_starts_with($url, 'https://api.stripe.com/')) {
+                return new \WP_Error('http_request_failed', 'cURL error 28: timed out');
+            }
+            return $pre;
+        }, 5, 3);
+
+        $res = $this->save('live', 'sk_live_rotated', 'pk_live_rotated');
+
+        $this->assertGreaterThanOrEqual(400, $res->get_status(), 'the save is refused');
+        $this->assertSame(
+            'sk_live_working',
+            $this->account()->secretKeyFor(false),
+            'a timeout is not a reason to forget a working key'
         );
     }
 

@@ -215,6 +215,34 @@ final class StripeAccount
     }
 
     /**
+     * The stored blob as it stands, for a caller that has to write credentials
+     * before it can test them and needs to put the old ones back if they fail.
+     *
+     * @return array<string,mixed>|null
+     *
+     * @since 1.0.0
+     */
+    public function snapshot(): ?array
+    {
+        return $this->raw();
+    }
+
+    /**
+     * @param array<string,mixed>|null $data a value from snapshot()
+     *
+     * @since 1.0.0
+     */
+    public function restore(?array $data): void
+    {
+        if ($data === null) {
+            $this->forget();
+            return;
+        }
+
+        SystemSetting::write(self::KEY, (string) wp_json_encode($data));
+    }
+
+    /**
      * Remove one mode's keys, leaving the other mode intact.
      *
      * @since 1.0.0

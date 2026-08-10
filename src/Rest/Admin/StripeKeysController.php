@@ -146,9 +146,9 @@ final class StripeKeysController
     }
 
     /**
-     * Verify a key pair against Stripe, then store it. The retrieve doubles as
-     * the credential check and as the source of the account's display details
-     * and charges_enabled flag.
+     * Store a key pair and test it against Stripe, putting the previous pair
+     * back if it is rejected. The retrieve doubles as the credential check and
+     * as the source of the account's display details and charges_enabled flag.
      *
      * @since 1.0.0
      */
@@ -162,14 +162,20 @@ final class StripeKeysController
             return $err;
         }
 
-        // Verify before persisting so bad keys are never stored.
+        // The API client reads its key from the account, so the pair has to be
+        // written before it can be tested. Snapshot first: a rejected key, or a
+        // Stripe that is simply unreachable, must not cost an org the working
+        // keys it was rotating away from. Blanking the mode instead would take
+        // live payments down until someone re-entered them by hand.
+        $previous = $this->account->snapshot();
+
         $this->account->saveKeys($test, $secret, $publishable);
         $this->account->useTestMode($test);
 
         try {
             $obj = $this->api->get('/account');
         } catch (RuntimeException $e) {
-            $this->account->forgetMode($test);
+            $this->account->restore($previous);
             return new WP_Error(
                 'dono_stripe_key_rejected',
                 sprintf(
