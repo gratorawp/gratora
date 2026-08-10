@@ -60,21 +60,20 @@ async function campaignDeleteMessage( campaignId ) {
         // A failed probe falls back to the generic message rather than blocking
         // the delete.
     }
+    // No line about donations: a campaign that has any is refused outright, so
+    // by the time this message is shown there are none to keep or to unlink.
     return count > 0
         ? sprintf(
             /* translators: %d: number of forms attached to the campaign. */
             _n(
-                'Permanently delete this campaign? Its %d form will also be deleted. Donations stay in your database for reporting but lose their campaign link. This cannot be undone.',
-                'Permanently delete this campaign? Its %d forms will also be deleted. Donations stay in your database for reporting but lose their campaign link. This cannot be undone.',
+                'Permanently delete this campaign? Its %d form will also be deleted. This cannot be undone.',
+                'Permanently delete this campaign? Its %d forms will also be deleted. This cannot be undone.',
                 count,
                 'dono'
             ),
             count,
         )
-        : __(
-            'Permanently delete this campaign? Donations stay in your database for reporting but lose their campaign link. This cannot be undone.',
-            'dono'
-        );
+        : __( 'Permanently delete this campaign? This cannot be undone.', 'dono' );
 }
 
 // The reason comes from the server, which reads it off the same rule the
@@ -239,6 +238,19 @@ export default function Detail( { id, tab } ) {
             return;
         }
         if ( name === 'delete' ) {
+            // The gate's own reason, not one worked out here from
+            // donations_count: that counter ignores pending, failed, test-mode
+            // and ticket rows, every one of which still blocks a delete.
+            if ( campaign.delete_blocked ) {
+                setConfirm( {
+                    title:        __( 'This campaign cannot be deleted', 'dono' ),
+                    message:      campaign.delete_blocked,
+                    confirmLabel: __( 'Archive instead', 'dono' ),
+                    onConfirm:    () => onHeaderAction( 'archive' ),
+                } );
+                return;
+            }
+
             const message = await campaignDeleteMessage( campaign.id );
             setConfirm( {
                 title:        __( 'Delete campaign', 'dono' ),

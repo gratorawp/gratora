@@ -429,6 +429,10 @@ final class CampaignsController
             'ends_at'       => $c->ends_at,
             'page_edit_url' => $pageEditUrl,
             'page_url'      => $pageUrl ?: null,
+            // The delete gate's own answer, so the screen can stop offering an
+            // action that can only fail. Detail only: it costs two counts, and
+            // the list would pay them once per row.
+            'delete_blocked' => $this->campaignService->deleteBlockedReason($c),
         ];
     }
 

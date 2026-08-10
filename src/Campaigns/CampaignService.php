@@ -212,18 +212,38 @@ final class CampaignService
         return $campaign;
     }
 
-    public function delete(Campaign $campaign): void
+    /**
+     * Why this campaign cannot be hard-deleted, or null when it can be.
+     *
+     * A campaign with donations (or recurring plans) is never hard-deleted: its
+     * donation rows would be orphaned against a missing campaign_id, losing that
+     * campaign's reporting. Archive keeps the records instead. Mirrors
+     * FundService::delete's reference guard.
+     *
+     * Public because the screen has to ask before it offers the action. Every
+     * row counts, whatever its status, kind or mode, so this cannot be answered
+     * from campaign->donations_count: that counter is synced over paid, live,
+     * non-ticket donations only, and a campaign whose single donation is
+     * pending, failed, test-mode or a ticket order reads zero there while this
+     * still refuses.
+     */
+    public function deleteBlockedReason(Campaign $campaign): ?string
     {
-        // A campaign with donations (or recurring plans) is never hard-deleted:
-        // its donation rows would be orphaned against a missing campaign_id,
-        // losing that campaign's reporting. Archive keeps the records instead.
-        // Mirrors FundService::delete's reference guard.
         $donations = (int) Donation::query()->where('campaign_id', $campaign->id)->count();
         $plans     = (int) RecurringPlan::query()->where('campaign_id', $campaign->id)->count();
+
         if ($donations > 0 || $plans > 0) {
-            throw new RuntimeException(
-                __('This campaign has donations and cannot be deleted. Archive it instead to keep its records.', 'dono')
-            );
+            return __('This campaign has donations and cannot be deleted. Archive it instead to keep its records.', 'dono');
+        }
+
+        return null;
+    }
+
+    public function delete(Campaign $campaign): void
+    {
+        $blocked = $this->deleteBlockedReason($campaign);
+        if ($blocked !== null) {
+            throw new RuntimeException($blocked);
         }
 
         // WP post deletion is not transactional; done first so the
