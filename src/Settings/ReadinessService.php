@@ -130,9 +130,13 @@ final class ReadinessService
     {
         // Asked of the registry, not a fixed list of names: an organization
         // whose only payment method ships in an add-on can still take money.
+        //
+        // isOn() rather than canCharge(): a gateway the org switched off is
+        // never offered to a donor, so naming it here says money can arrive by
+        // a route that is closed.
         $ready = [];
         foreach ($this->gateways->all() as $gateway) {
-            if ($gateway->canCharge()) {
+            if ($this->gateways->isOn($gateway->id())) {
                 $ready[] = $gateway->label();
             }
         }
@@ -154,7 +158,7 @@ final class ReadinessService
 
         // Stripe is the only gateway that can hold keys and still refuse to
         // charge, so it is the only one worth calling out separately.
-        if ($this->stripe->isConnected() && ! $this->stripe->canCharge()) {
+        if ($this->switchedOn('stripe') && $this->stripe->isConnected() && ! $this->stripe->canCharge()) {
             return $this->warn(
                 'gateway',
                 'money',
@@ -197,8 +201,8 @@ final class ReadinessService
         // Live mode reading a test key charges nobody, and the donor sees a
         // success page for a payment that never happened.
         $missing = [];
-        if ($this->stripe->isConnected() && ! $this->stripe->hasKeysFor(false)) $missing[] = __('Stripe', 'dono');
-        if ($this->payPal->isConnected() && ! $this->payPal->hasKeysFor(false)) $missing[] = __('PayPal', 'dono');
+        if ($this->switchedOn('stripe') && $this->stripe->isConnected() && ! $this->stripe->hasKeysFor(false)) $missing[] = __('Stripe', 'dono');
+        if ($this->switchedOn('paypal') && $this->payPal->isConnected() && ! $this->payPal->hasKeysFor(false)) $missing[] = __('PayPal', 'dono');
 
         /**
          * A gateway that ships in an add-on owns its own credentials, so it
@@ -268,7 +272,7 @@ final class ReadinessService
      */
     private function stripeWebhookCheck(): ?array
     {
-        if (! $this->stripe->isConnected()) {
+        if (! $this->switchedOn('stripe') || ! $this->stripe->isConnected()) {
             return null;
         }
         if ($this->stripeApi->hasWebhookSecret()) {
@@ -292,7 +296,7 @@ final class ReadinessService
      */
     private function payPalWebhookCheck(): ?array
     {
-        if (! $this->payPal->isConnected()) {
+        if (! $this->switchedOn('paypal') || ! $this->payPal->isConnected()) {
             return null;
         }
         if ($this->payPal->webhookId($this->testMode()) !== '') {
@@ -316,7 +320,7 @@ final class ReadinessService
      */
     private function applePayCheck(): ?array
     {
-        if (! $this->stripe->isConnected()) {
+        if (! $this->switchedOn('stripe') || ! $this->stripe->isConnected()) {
             return null;
         }
         if ($this->applePay->isFileReady()) {
@@ -644,6 +648,28 @@ final class ReadinessService
         $gw = $this->settings->get('gateways');
 
         return ! empty($gw['offline']['enabled']) && trim((string) ($gw['offline']['instructions'] ?? '')) !== '';
+    }
+
+    /**
+     * Whether the org has this gateway switched on, which is a different
+     * question from whether it could charge.
+     *
+     * A gateway that is off is not offered to a donor, so its credentials,
+     * webhook and domain verification are nobody's problem. Reporting them
+     * tells an org it is blocked by a processor it deliberately turned off.
+     *
+     * Deliberately not GatewayManager::isOn(), which also requires canCharge():
+     * a gateway that is on but half-configured is exactly what these checks
+     * exist to report.
+     *
+     * @since 1.0.0
+     */
+    private function switchedOn(string $id): bool
+    {
+        $cfg = get_option('dono_gateway_config', []);
+        $cfg = is_array($cfg) ? $cfg : [];
+
+        return (bool) ($cfg[$id]['enabled'] ?? true);
     }
 
     /** @since 1.0.0 */

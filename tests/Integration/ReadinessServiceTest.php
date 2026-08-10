@@ -141,6 +141,50 @@ final class ReadinessServiceTest extends IntegrationTestCase
         $this->assertSame(ReadinessService::WARN, $this->checks()['stripe-webhook']['status']);
     }
 
+    /**
+     * A gateway the org switched off is never offered to a donor, so its
+     * credentials, webhook and domain verification are nobody's problem.
+     *
+     * Reporting them told an org it was blocked from going live by a processor
+     * it had deliberately turned off, and counted that among the things
+     * stopping donations.
+     */
+    public function test_a_switched_off_gateway_raises_nothing(): void
+    {
+        (new StripeAccount(new Crypto()))->saveKeys(true, 'sk_test_x', 'pk_test_x');
+        $this->enableOffline();
+        update_option('dono_gateway_config', array_merge(
+            (array) get_option('dono_gateway_config', []),
+            ['stripe' => ['enabled' => false]]
+        ));
+
+        $checks = $this->checks();
+
+        $this->assertSame(
+            ReadinessService::PASS,
+            $checks['mode']['status'],
+            'test keys on a gateway that is off do not block going live'
+        );
+        $this->assertArrayNotHasKey('stripe-webhook', $checks);
+        $this->assertArrayNotHasKey('apple-pay', $checks);
+        $this->assertStringNotContainsString(
+            'Stripe',
+            (string) $checks['gateway']['label'],
+            'a gateway that is off is not named as a way money can arrive'
+        );
+    }
+
+    public function test_a_switched_on_gateway_still_raises_its_gaps(): void
+    {
+        (new StripeAccount(new Crypto()))->saveKeys(true, 'sk_test_x', 'pk_test_x');
+        update_option('dono_gateway_config', ['stripe' => ['enabled' => true]]);
+
+        $checks = $this->checks();
+
+        $this->assertSame(ReadinessService::FAIL, $checks['mode']['status']);
+        $this->assertArrayHasKey('stripe-webhook', $checks);
+    }
+
     public function test_a_published_campaign_whose_form_is_a_draft_is_not_a_live_page(): void
     {
         $this->publishedCampaign(publishForm: false);
