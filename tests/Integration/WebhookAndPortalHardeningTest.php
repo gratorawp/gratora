@@ -164,7 +164,15 @@ final class WebhookAndPortalHardeningTest extends IntegrationTestCase
         $bundle = json_decode((string) $body, true);
         $this->assertIsArray($bundle, 'the export streams a JSON body');
 
+        // Staff notes are the one section the donor does not get: they are the
+        // organization's working record of them, not a record of their giving.
+        // Everything else has to match, or the two exports drift into two
+        // answers to the same obligation again.
         foreach (array_keys($canonical) as $section) {
+            if ($section === 'notes') {
+                $this->assertArrayNotHasKey('notes', $bundle, 'staff notes are for staff');
+                continue;
+            }
             $this->assertArrayHasKey(
                 $section,
                 $bundle,

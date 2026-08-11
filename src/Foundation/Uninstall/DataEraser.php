@@ -6,6 +6,7 @@ namespace Dono\Foundation\Uninstall;
 
 use Dono\Campaigns\Campaign;
 use Dono\Core\CoreModule;
+use Dono\Donors\Donor;
 use Dono\Foundation\Auth\Capabilities;
 use ReflectionClass;
 
@@ -92,6 +93,10 @@ final class DataEraser
         // id. Dropping first means our own listener queries a table we just
         // removed and takes the whole deactivation down with it.
         $this->deletePages($this->pageIds());
+
+        // Also while the tables are there: the only pointer to a donor's
+        // picture is a column of dono_donors, and the file outlives the row.
+        $this->deleteAttachments($this->avatarAttachmentIds());
 
         $this->dropTables($plan['tables']);
         foreach ($plan['options'] as $option) {
@@ -187,6 +192,37 @@ final class DataEraser
         }
 
         return array_values(array_unique(array_filter($ids)));
+    }
+
+    /**
+     * Pictures donors uploaded of themselves, held as WordPress attachments on
+     * a public uploads URL. Nothing else names them as donor data, so read
+     * after the drop they are unfindable and stay served forever.
+     *
+     * @return int[]
+     * @since 1.0.0
+     */
+    public function avatarAttachmentIds(): array
+    {
+        $ids = Donor::query()
+            ->whereIsNotNull('avatar_attachment_id')
+            ->pluck('avatar_attachment_id');
+
+        return array_values(array_unique(array_filter(array_map('intval', (array) $ids))));
+    }
+
+    /**
+     * Force-deleted, unlike the pages: a site that asked for the donor data to
+     * go has not asked to keep their photographs in the bin.
+     *
+     * @param int[] $ids
+     * @since 1.0.0
+     */
+    private function deleteAttachments(array $ids): void
+    {
+        foreach ($ids as $id) {
+            wp_delete_attachment($id, true);
+        }
     }
 
     /**

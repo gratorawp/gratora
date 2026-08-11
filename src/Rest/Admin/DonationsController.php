@@ -792,15 +792,19 @@ final class DonationsController
         // Donor lifetime block (pre-aggregated on the donor row).
         $donorBlock = null;
         if ($donor) {
+            // Contact details are the donor record, not the donation record, so
+            // they follow dono_view_donors the way the CSV columns do.
+            $withDonorPii = $donor->redacted_at === null && $this->canReadDonorPii();
+
             $donorBlock = [
                 'id'                  => (int) $donor->id,
                 'name'                => $this->donorName($donor),
                 // Explicit, so the UI never has to infer erasure from a nulled
                 // email: nothing can be emailed to a donor who has been erased.
                 'redacted'            => $donor->redacted_at !== null,
-                'email'               => $donor->redacted_at === null ? $this->donorService->decryptEmail($donor) : null,
-                'phone'               => $donor->redacted_at === null ? $this->donorService->decryptPhone($donor) : null,
-                'address'             => $donor->redacted_at === null ? $this->donorService->decryptAddress($donor) : null,
+                'email'               => $withDonorPii ? $this->donorService->decryptEmail($donor) : null,
+                'phone'               => $withDonorPii ? $this->donorService->decryptPhone($donor) : null,
+                'address'             => $withDonorPii ? $this->donorService->decryptAddress($donor) : null,
                 'country'             => $donor->country,
                 'donor_type'          => $donor->donor_type,
                 'first_donation_at'   => $donor->first_donation_at,
@@ -1278,6 +1282,10 @@ final class DonationsController
             __('Base currency', 'dono'),
             __('Fee', 'dono'),
             __('Net', 'dono'),
+            // Its own column rather than netted off Net: Net is the amount less
+            // the processing fee, which is what the gateway settled, so a row
+            // refunded afterwards has to carry both figures to reconcile.
+            __('Refunded', 'dono'),
             __('Gateway', 'dono'),
             __('Frequency', 'dono'),
             __('Fund', 'dono'),
@@ -1334,6 +1342,7 @@ final class DonationsController
                     $d->base_currency !== null ? strtoupper($d->base_currency) : '',
                     number_format($d->fee_cents / 100, 2, '.', ''),
                     number_format($d->net_cents / 100, 2, '.', ''),
+                    number_format($d->refunded_cents / 100, 2, '.', ''),
                     $d->gateway,
                     $d->frequency,
                     $fundNames[(int) $d->fund_id] ?? '',
@@ -1376,7 +1385,9 @@ final class DonationsController
                 // Erasure means the address is gone: do not hand it back here,
                 // and let the row's actions see that there is nobody to email.
                 'redacted' => $donor->redacted_at !== null,
-                'email'    => $donor->redacted_at === null ? $this->donorService->decryptEmail($donor) : null,
+                'email'    => $donor->redacted_at === null && $this->canReadDonorPii()
+                    ? $this->donorService->decryptEmail($donor)
+                    : null,
                 'country'  => $donor->country,
             ] : null,
             'campaign'     => $campaign ? [
@@ -1395,6 +1406,19 @@ final class DonationsController
                 'code' => (string) $fund->code,
             ] : null,
         ];
+    }
+
+    /**
+     * Whether the caller may read donor contact details. Paging the donations
+     * list one email at a time is the donor list by another route, and that is
+     * what dono_view_donors gates; the donation record itself stays readable on
+     * dono_view_donations alone.
+     *
+     * @since 1.0.0
+     */
+    private function canReadDonorPii(): bool
+    {
+        return Capabilities::userCan('dono_view_donors');
     }
 
     /** @since 1.0.0 */

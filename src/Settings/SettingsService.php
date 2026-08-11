@@ -103,15 +103,18 @@ final class SettingsService
         ],
         'roles' => [
             'option'   => 'dono_roles',
+            // Administrator only. The Roles screen shows this mapping as
+            // granted, and CoreModule seeds it into real capabilities on the
+            // first admin load, so a role listed here holds what the screen
+            // says it holds. Every other role starts with nothing: donor
+            // records carry decrypted contact details, and who reads them is
+            // the org's decision to make on this screen.
             'defaults' => [
                 'mapping' => [
                     'administrator' => [
                         'dono_view_donors', 'dono_edit_donors', 'dono_export_donors', 'dono_redact_donors',
                         'dono_view_donations', 'dono_edit_donations', 'dono_refund_donations', 'dono_resend_receipt',
                         'dono_view_reports', 'dono_manage_campaigns', 'dono_manage_forms', 'dono_manage_settings',
-                    ],
-                    'editor' => [
-                        'dono_view_donors', 'dono_view_donations', 'dono_view_reports',
                     ],
                 ],
             ],
@@ -240,7 +243,7 @@ final class SettingsService
             'recurring_renewal' => [
                 'enabled' => true,
                 'subject' => __('Your recurring donation renewed', 'dono'),
-                'body'    => __("Hi {donor_name},\n\nYour recurring donation of {amount} to {campaign_title} was renewed today. Receipt number: {receipt_number}.\n\nThank you for your continued support.\n\nThanks,\n{organisation_name}", 'dono'),
+                'body'    => __("Hi {donor_name},\n\nYour recurring donation of {amount} to {campaign_title} was renewed today.\n\nReference: {reference}\n\nThank you for your continued support.\n\nThanks,\n{organisation_name}", 'dono'),
             ],
             'subscription_payment_failed' => [
                 'enabled' => true,
@@ -307,7 +310,9 @@ final class SettingsService
             'donation_pending'            => array_merge($donation, ['reference']),
             'donation_refunded'           => array_merge($donation, ['reference']),
             'offline_instructions'        => array_merge($donation, ['reference', 'bank_details', 'instructions']),
-            'recurring_renewal'           => array_merge($donation, ['receipt_number', 'reference']),
+            // No receipt_number: the renewal notice goes out before the receipt
+            // row is issued, so the tag could only ever resolve to nothing.
+            'recurring_renewal'           => array_merge($donation, ['reference']),
             'subscription_payment_failed' => array_merge($donation, ['portal_url']),
             'subscription_cancelled'      => $donation,
             'recurring_amount_changed'    => array_merge($donation, ['old_amount', 'portal_url']),

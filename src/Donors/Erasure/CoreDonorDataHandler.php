@@ -32,6 +32,8 @@ final class CoreDonorDataHandler implements ErasureHandler
     public function erase(ErasureRequest $request): void
     {
         foreach (Donation::query()->where('donor_id', $request->donorId)->getAll() as $donation) {
+            $attribution = self::channelOnly($donation->source_attribution);
+
             // Every field cleared below must be listed here, or the skip
             // silently protects it.
             if ($donation->custom_data_encrypted === null
@@ -39,6 +41,8 @@ final class CoreDonorDataHandler implements ErasureHandler
                 && $donation->donor_last_name === null
                 && ($donation->note_to_org ?? '') === ''
                 && $donation->gateway_metadata === null
+                && $attribution === $donation->source_attribution
+                && $donation->failure_reason === null
             ) {
                 continue;
             }
@@ -50,6 +54,9 @@ final class CoreDonorDataHandler implements ErasureHandler
             // The gateway's own record of the payer: PayPal payer_email,
             // Stripe billing_details, card last-4, all cleartext.
             $donation->gateway_metadata      = null;
+            $donation->source_attribution    = $attribution;
+            // Raw gateway error text, which quotes back what was submitted.
+            $donation->failure_reason        = null;
             $donation->updated_at            = $request->at;
             $donation->save();
         }
@@ -95,5 +102,33 @@ final class CoreDonorDataHandler implements ErasureHandler
         Consent::query()
             ->where('donor_id', $request->donorId)
             ->update(['ip_hash' => null, 'user_agent_hash' => null]);
+    }
+
+    /**
+     * What the channel rollups actually read is utm_source and utm_medium, so
+     * the donation keeps the channel it is counted under. `landing` is the URL
+     * the donor arrived on verbatim, and a link mailed through an ESP carries
+     * a per-recipient identifier in it that names the person; `referrer` is the
+     * page that sent them.
+     *
+     * @param  array<string,mixed>|null $attribution
+     * @return array<string,mixed>|null
+     *
+     * @since 1.0.0
+     */
+    private static function channelOnly(?array $attribution): ?array
+    {
+        if ($attribution === null) {
+            return null;
+        }
+
+        $kept = [];
+        foreach ($attribution as $key => $value) {
+            if (str_starts_with((string) $key, 'utm_')) {
+                $kept[(string) $key] = $value;
+            }
+        }
+
+        return $kept === [] ? null : $kept;
     }
 }

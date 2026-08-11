@@ -27,7 +27,6 @@ use Dono\Gateways\SupportsPaymentMethodUpdate;
 use Dono\Mail\Mailer;
 use Dono\Receipts\Receipt;
 use Dono\Receipts\ReceiptRepository;
-use Dono\Recurring\GatewayUnreachable;
 use Dono\Recurring\RecurringPlan;
 use Dono\Recurring\RecurringPlanActions;
 use Dono\Recurring\RecurringPlanChange;
@@ -1334,6 +1333,7 @@ final class PortalController
             'consents'  => $consentRows,
             'recurring' => $planRows,
         ];
+        $bundle = self::withoutStaffNotes($bundle);
         $bundle['exported_at'] = gmdate('c');
 
         $json     = wp_json_encode($bundle, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
@@ -1357,6 +1357,27 @@ final class PortalController
         ]);
         return $response;
     }
+
+    /**
+     * Staff notes are for staff.
+     *
+     * The org-side export carries them, decrypted, with the name and role of
+     * whoever wrote each one. That is the organization's own working record of
+     * a donor, kept so its people can talk to each other, and it is not handed
+     * to the person it discusses.
+     *
+     * @param  array<string,mixed> $bundle
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
+    private static function withoutStaffNotes(array $bundle): array
+    {
+        unset($bundle['notes']);
+
+        return $bundle;
+    }
+
 
     /**
      * GDPR right to erasure. Soft-redact: zeroes PII but keeps donation totals
@@ -1386,12 +1407,13 @@ final class PortalController
 
         try {
             $this->donorService->redact($donor);
-        } catch (GatewayUnreachable $e) {
+        } catch (\Throwable $e) {
             // Erasure cancels the donor's live recurring plans first, on
             // purpose: wiping the donor while a subscription keeps billing is
-            // worse than not wiping them. An unreachable gateway must not
-            // surface as a fatal with nothing for the donor to do next.
-            ErrorLog::record('portal.forget', $e->getMessage());
+            // worse than not wiping them. A gateway that is unreachable, that
+            // answers with a 500, or that times out must not surface as a fatal
+            // with nothing for the donor to do next.
+            ErrorLog::record('portal.forget', $e->getMessage(), ['donor_id' => (int) $donor->id]);
 
             return new WP_Error(
                 'dono_erasure_blocked',

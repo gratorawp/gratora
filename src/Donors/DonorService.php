@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Donors;
 
+use Dono\Analytics\ErrorLog;
 use Dono\Donations\Donation;
 use Dono\Donors\Erasure\ErasureRegistry;
 use Dono\Donors\Erasure\ErasureRequest;
@@ -403,8 +404,31 @@ final class DonorService
 
         $canceller = \Dono\Foundation\Plugin::instance()->container->get(RecurringCanceller::class);
 
+        $cancelled = [];
+
         foreach ($plans as $plan) {
-            $canceller->cancel($plan, __('The donor asked for their data to be erased.', 'dono'));
+            try {
+                $canceller->cancel($plan, __('The donor asked for their data to be erased.', 'dono'));
+                $cancelled[] = (int) $plan->id;
+            } catch (Throwable $e) {
+                // The erasure stops here, so the caller has to be told which
+                // plans are already stopped and which one still bills.
+                ErrorLog::record(
+                    'donor.erasure.recurring',
+                    sprintf(
+                        'Plan %d could not be cancelled, so the erasure was abandoned: %s',
+                        (int) $plan->id,
+                        $e->getMessage()
+                    ),
+                    [
+                        'donor_id'          => (int) $donor->id,
+                        'recurring_plan_id' => (int) $plan->id,
+                        'cancelled_first'   => $cancelled,
+                    ]
+                );
+
+                throw $e;
+            }
         }
     }
 
