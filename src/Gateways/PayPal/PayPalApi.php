@@ -153,7 +153,18 @@ final class PayPalApi
             ], $extraHeaders),
         ];
         if ($body !== null) {
-            $args['body'] = (string) wp_json_encode($body);
+            $encoded = wp_json_encode($body);
+            // Casting a false straight to string posts an empty body, and PayPal
+            // answers that with "the request JSON is not well formed", which
+            // reads as a schema problem in a request we never actually sent.
+            if (! is_string($encoded)) {
+                throw new RuntimeException(sprintf(
+                    'PayPal request body for %s could not be encoded as JSON: %s',
+                    $path,
+                    json_last_error_msg()
+                ));
+            }
+            $args['body'] = $encoded;
         }
 
         $response = wp_remote_request($this->baseUrl() . $path, $args);
@@ -175,8 +186,11 @@ final class PayPalApi
         }
 
         if ($code >= 400) {
+            // Naming the call: one donation can touch the token, a product, a
+            // plan, an order and a capture, and PayPal's own wording says
+            // nothing about which of them it is refusing.
             throw new PayPalApiException(
-                'PayPal API: ' . $this->errorMessage($decoded, $code),
+                sprintf('PayPal API (%s %s): %s', $method, $path, $this->errorMessage($decoded, $code)),
                 PayPalApiException::issuesFrom($decoded)
             );
         }
