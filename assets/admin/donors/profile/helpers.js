@@ -55,6 +55,9 @@ export function donationStatusPill( status ) {
     switch ( status ) {
         case 'paid':           return { cls: 'is-ok',    label: __( 'Paid',     'dono' ) };
         case 'pending':        return { cls: 'is-warn',  label: __( 'Pending',  'dono' ) };
+        // Not a warning like pending: the donor has paid and nothing is
+        // expected of them, the money is simply still moving.
+        case 'processing':     return { cls: 'is-info',  label: __( 'Processing', 'dono' ) };
         case 'failed':         return { cls: 'is-error', label: __( 'Failed',   'dono' ) };
         case 'refunded':       return { cls: 'is-info',  label: __( 'Refunded', 'dono' ) };
         case 'partial_refund': return { cls: 'is-info',  label: __( 'Partial',  'dono' ) };
