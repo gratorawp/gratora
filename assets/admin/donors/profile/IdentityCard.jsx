@@ -1,5 +1,6 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
 
 import { initials, formatMonth, formatDate, SEGMENT_LABELS } from './helpers';
 import { countryName } from '../../../_shared/countries';
@@ -37,8 +38,13 @@ function IdentityRow( { icon, value, copyable, sub, valClass = '' } ) {
     );
 }
 
-export default function IdentityCard( { donor, magicLinkUrl } ) {
+export default function IdentityCard( { donor } ) {
     const [ copiedMagic, setCopiedMagic ] = useState( false );
+    // Asked for, never arrived with: issuing one signs somebody in as this
+    // donor for thirty days and there is no way to take it back.
+    const [ magicLinkUrl, setMagicLinkUrl ] = useState( '' );
+    const [ issuing, setIssuing ]           = useState( false );
+    const [ issueError, setIssueError ]     = useState( '' );
     const isAnon     = donor.is_anonymous;
     const isRedacted = !! donor.redacted_at;
 
@@ -60,6 +66,22 @@ export default function IdentityCard( { donor, magicLinkUrl } ) {
         : donor.donor_type === 'household'
             ? __( 'Household', 'dono' )
             : __( 'Individual', 'dono' );
+
+    const issueMagic = async () => {
+        setIssuing( true );
+        setIssueError( '' );
+        try {
+            const res = await apiFetch( {
+                path:   `/dono/v1/admin/donors/${ donor.id }/portal-link`,
+                method: 'POST',
+            } );
+            setMagicLinkUrl( res.magic_link_url || '' );
+        } catch ( e ) {
+            setIssueError( e?.message || __( 'The link could not be created.', 'dono' ) );
+        } finally {
+            setIssuing( false );
+        }
+    };
 
     const copyMagic = async () => {
         if ( ! magicLinkUrl ) return;
@@ -142,6 +164,22 @@ export default function IdentityCard( { donor, magicLinkUrl } ) {
                         />
                     ) }
                 </div>
+
+                { ! isRedacted && ! magicLinkUrl && (
+                    <div className="dp-id-magic">
+                        <button
+                            type="button"
+                            className="dp-magic-link__copy"
+                            onClick={ issueMagic }
+                            disabled={ issuing }
+                        >
+                            { issuing ? __( 'Creating…', 'dono' ) : __( 'Create a sign-in link', 'dono' ) }
+                        </button>
+                        <div className="dp-id-magic__help">
+                            { issueError || __( 'Signs this donor in for 30 days. Create one only when they have asked.', 'dono' ) }
+                        </div>
+                    </div>
+                ) }
 
                 { magicLinkUrl && ! isRedacted && (
                     <div className="dp-id-magic">

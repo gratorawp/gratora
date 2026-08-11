@@ -109,6 +109,9 @@ export function useFxRates() {
         // accepted in full but count as zero in every base-currency total, so
         // the panel warns before the currency is offered.
         unconvertible: server?.unconvertible || [],
+        // Supported currencies no enabled gateway can charge. The form says so
+        // at the payment step, which is late: by then the donor has picked one.
+        no_gateway: server?.no_gateway || [],
         rows,
         auto,
         loading,

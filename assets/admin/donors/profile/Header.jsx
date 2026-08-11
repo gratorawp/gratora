@@ -2,7 +2,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 
 import { formatMonth } from './helpers';
-import { IconLink, IconRotate, IconAlert } from './icons';
+import { IconRotate, IconAlert } from './icons';
 
 function HeadChip( { children, tone = 'ok', mono = false } ) {
     const classes = [ 'head-chip' ];
@@ -34,17 +34,7 @@ function Banner( { kind, message, onAction } ) {
     );
 }
 
-export default function Header( { donor, banners, recurring, magicLinkUrl, onBack, onEdit, onTabSwitch } ) {
-    const [ copied, setCopied ] = useState( false );
-
-    const copyMagic = async () => {
-        if ( ! magicLinkUrl ) return;
-        try {
-            await navigator.clipboard.writeText( magicLinkUrl );
-            setCopied( true );
-            setTimeout( () => setCopied( false ), 1800 );
-        } catch ( _ ) {}
-    };
+export default function Header( { donor, banners, recurring, onBack, onEdit, onTabSwitch } ) {
 
     const isAnon     = donor.is_anonymous;
     const isRedacted = !! donor.redacted_at;
@@ -87,12 +77,6 @@ export default function Header( { donor, banners, recurring, magicLinkUrl, onBac
                     <button type="button" className="btn" onClick={ onEdit }>
                         { __( 'Edit details', 'dono' ) }
                     </button>
-                    { magicLinkUrl && (
-                        <button type="button" className="btn" onClick={ copyMagic } title={ magicLinkUrl }>
-                            <IconLink className="ic" />
-                            { copied ? __( 'Copied', 'dono' ) : __( 'Copy magic link', 'dono' ) }
-                        </button>
-                    ) }
                 </div>
             </div>
 

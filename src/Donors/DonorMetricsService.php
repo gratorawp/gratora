@@ -357,12 +357,13 @@ final class DonorMetricsService
             $banners[] = ['kind' => 'past_due', 'message' => $message];
         }
 
-        // Gated: this mints a 30-day portal login that impersonates the donor,
-        // so only edit-capable callers get it (never a view-only role).
+        // Never minted here. This is a read, and issuing a token from a read
+        // meant the number of live portal logins equalled the number of times
+        // anyone had opened a donor: a rep working through forty donors left
+        // forty credentials nobody asked for, each of them a 30-day login to
+        // someone else's account, printed into the response body and the page.
+        // The screen asks for one explicitly instead.
         $magicLinkUrl = null;
-        if ($includeMagicLink && $donor->redacted_at === null) {
-            $magicLinkUrl = $this->magicLinkUrl($donor);
-        }
 
         return [
             'donor' => [
@@ -509,6 +510,20 @@ final class DonorMetricsService
      *
      * @since 1.0.0
      */
+    /**
+     * Mint a portal login for this donor.
+     *
+     * Only ever from an explicit request. It impersonates the donor for thirty
+     * days and cannot be revoked, so nothing should create one as a side effect
+     * of looking at a record.
+     *
+     * @since 1.0.0
+     */
+    public function issuePortalLink(Donor $donor): ?string
+    {
+        return $donor->redacted_at === null ? $this->magicLinkUrl($donor) : null;
+    }
+
     private function magicLinkUrl(Donor $donor): ?string
     {
         try {

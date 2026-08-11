@@ -1739,7 +1739,12 @@ final class CoreCommandProvider
                     ),
                     'filename'       => TaxStatementBuilder::filename($donorId, $year),
                     'donation_count' => (int) $summary['donation_count'],
-                    'total_cents'    => (int) $summary['total_cents'],
+                    // Null when the year spans currencies, because there is no
+                    // one number to state. Casting it would answer a question
+                    // about tax with a confident zero.
+                    'total_cents'    => $summary['total_cents'] === null ? null : (int) $summary['total_cents'],
+                    'currency'       => $summary['currency'],
+                    'totals_by_currency' => $summary['totals_by_currency'],
                 ];
             },
             self::META,

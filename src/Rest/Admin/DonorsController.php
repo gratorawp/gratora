@@ -144,6 +144,18 @@ final class DonorsController
             'permission_callback' => static fn () => Capabilities::userCan('dono_export_donors'),
         ]);
 
+        // Minting a portal login is an action the admin takes, never something
+        // a page load does on their behalf: the token impersonates the donor
+        // for thirty days and cannot be revoked.
+        register_rest_route(self::NAMESPACE, '/admin/donors/(?P<id>\d+)/portal-link', [
+            'methods'             => WP_REST_Server::CREATABLE,
+            'callback'            => [$this, 'issuePortalLink'],
+            'permission_callback' => static fn () => Capabilities::userCan('dono_edit_donors'),
+            'args'                => [
+                'id' => ['type' => 'integer', 'required' => true],
+            ],
+        ]);
+
         register_rest_route(self::NAMESPACE, '/admin/donors/(?P<id>\d+)/notes', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'createNote'],
@@ -380,6 +392,27 @@ final class DonorsController
     }
 
     /** @since 1.0.0 */
+    /**
+     * @since 1.0.0
+     */
+    public function issuePortalLink(WP_REST_Request $request): WP_REST_Response|WP_Error
+    {
+        $donor = $this->donors->findById((int) $request['id']);
+        if (! $donor) {
+            return new WP_Error('dono_donor_not_found', __('Donor not found.', 'dono'), ['status' => 404]);
+        }
+
+        $url = $this->metrics->issuePortalLink($donor);
+        if ($url === null) {
+            return new WP_Error(
+                'dono_portal_link_unavailable',
+                __('A sign-in link cannot be issued for an erased donor.', 'dono'),
+                ['status' => 409]
+            );
+        }
+
+        return new WP_REST_Response(['magic_link_url' => $url], 201);
+    }
     public function createNote(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $donorId = (int) $request['id'];

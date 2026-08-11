@@ -311,7 +311,7 @@ export default function DonorProfile( { id, onBack } ) {
 
     const {
         donor, lifetime, donations, recurring, receipts, notes, consents,
-        events, campaigns, banners, magic_link_url: magicLinkUrl,
+        events, campaigns, banners,
         events_total: eventsTotal,
     } = data;
 
@@ -334,7 +334,6 @@ export default function DonorProfile( { id, onBack } ) {
                 lifetime={ lifetime }
                 banners={ banners }
                 recurring={ recurring }
-                magicLinkUrl={ magicLinkUrl }
                 onBack={ onBack }
                 onEdit={ () => setEditing( true ) }
                 onTabSwitch={ ( t ) => setTab( t ) }
@@ -354,7 +353,7 @@ export default function DonorProfile( { id, onBack } ) {
 
             <div className="dp-layout">
                 <aside className="dp-sidebar">
-                    <IdentityCard donor={ donor } magicLinkUrl={ magicLinkUrl } />
+                    <IdentityCard donor={ donor } />
                     { extensionPanels.map( ( panel ) => (
                         <ExtensionSection
                             key={ panel.id }
