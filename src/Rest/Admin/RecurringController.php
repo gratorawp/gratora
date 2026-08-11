@@ -103,6 +103,9 @@ final class RecurringController
             'methods'             => WP_REST_Server::READABLE,
             'permission_callback' => static fn () => Capabilities::userCan('dono_view_donations'),
             'callback'            => [$this, 'stats'],
+            'args'                => [
+                'include_test' => ['type' => 'boolean', 'default' => false],
+            ],
         ]);
 
         register_rest_route(self::NAMESPACE, '/admin/recurring/unlinked', [
@@ -189,10 +192,19 @@ final class RecurringController
         return $response;
     }
 
-    /** @since 1.0.0 */
-    public function stats(): WP_REST_Response
+    /**
+     * The figures above the list. include_test carries the same meaning it has
+     * on index(): the caller is looking at test plans, so the totals over that
+     * list have to count them too.
+     *
+     * @since 1.0.0
+     */
+    public function stats(WP_REST_Request $request): WP_REST_Response
     {
-        return new WP_REST_Response($this->plans->recurringStats(gmdate('Y-m-d H:i:s')), 200);
+        return new WP_REST_Response(
+            $this->plans->recurringStats(gmdate('Y-m-d H:i:s'), (bool) $request['include_test']),
+            200
+        );
     }
 
     /**

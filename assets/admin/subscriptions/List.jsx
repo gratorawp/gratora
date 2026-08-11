@@ -83,6 +83,10 @@ function donationHref( reference ) {
 // rows. A donation charged on a schedule that was never created has no plan
 // row for any filter here to return, so it is named in the sub line and left
 // out of the number, with the notice above as its surface.
+//
+// That second line counts test donations whichever way the test toggle is set,
+// which is why the card's note is worded about subscriptions: it is the number
+// and the first line that the toggle moves.
 function attentionSub( failing, unlinked ) {
     const declined = sprintf(
         /* translators: %d: number of plans carrying a failed renewal. */
@@ -127,7 +131,23 @@ function attentionSub( failing, unlinked ) {
     );
 }
 
-function subscriptionKpis( stats, unlinked ) {
+// Said on the card itself rather than once over the strip, so a figure read on
+// its own, or screenshotted, carries the disclaimer with it.
+function withTestNote( sub, includeTest ) {
+    if ( ! includeTest ) return sub;
+
+    const note = __( 'Includes test subscriptions', 'dono' );
+    if ( ! sub ) return note;
+
+    return (
+        <>
+            <div>{ sub }</div>
+            <div>{ note }</div>
+        </>
+    );
+}
+
+function subscriptionKpis( stats, unlinked, includeTest ) {
     if ( ! stats ) return [];
     const failing = Number( stats.failing_count ) || 0;
     return [
@@ -135,34 +155,45 @@ function subscriptionKpis( stats, unlinked ) {
             id:    'mrr',
             label: __( 'Monthly recurring revenue', 'dono' ),
             value: formatAmount( stats.mrr_cents ),
-            sub:   stats.unconverted > 0
-                ? sprintf(
-                    /* translators: %d: number of plans with no converted amount. */
-                    _n(
-                        '%d plan could not be converted and is not counted',
-                        '%d plans could not be converted and are not counted',
-                        stats.unconverted,
-                        'dono'
-                    ),
-                    stats.unconverted
-                )
-                : __( 'Active plans, normalised', 'dono' ),
+            sub:   withTestNote(
+                stats.unconverted > 0
+                    ? sprintf(
+                        /* translators: %d: number of plans with no converted amount. */
+                        _n(
+                            '%d plan could not be converted and is not counted',
+                            '%d plans could not be converted and are not counted',
+                            stats.unconverted,
+                            'dono'
+                        ),
+                        stats.unconverted
+                    )
+                    : __( 'Active plans, normalised', 'dono' ),
+                includeTest
+            ),
         },
-        { id: 'active',  label: __( 'Active plans', 'dono' ),   value: String( stats.active_count ) },
+        {
+            id:    'active',
+            label: __( 'Active plans', 'dono' ),
+            value: String( stats.active_count ),
+            sub:   withTestNote( null, includeTest ),
+        },
         {
             id:    'failing',
             label: __( 'Needs attention', 'dono' ),
             value: String( failing ),
-            sub:   attentionSub( failing, unlinked ),
+            sub:   withTestNote( attentionSub( failing, unlinked ), includeTest ),
         },
         {
             id:    'churn',
             label: __( 'Churn this month', 'dono' ),
             value: `${ stats.churn_pct }%`,
-            sub:   sprintf(
-                /* translators: %d: number of plans cancelled this month. */
-                _n( '%d cancelled', '%d cancelled', stats.churned_this_month, 'dono' ),
-                stats.churned_this_month
+            sub:   withTestNote(
+                sprintf(
+                    /* translators: %d: number of plans cancelled this month. */
+                    _n( '%d cancelled', '%d cancelled', stats.churned_this_month, 'dono' ),
+                    stats.churned_this_month
+                ),
+                includeTest
             ),
         },
     ];
@@ -438,10 +469,17 @@ export default function List() {
         return () => { aborted = true; };
     }, [ apiParams ] );
 
-    // The strip totals the whole book, so it is deliberately not filtered.
-    const loadStats = () => apiFetch( { path: '/dono/v1/admin/recurring/stats' } )
-        .then( setStats )
-        .catch( () => notify.error( __( 'The recurring totals could not be loaded.', 'dono' ) ) );
+    // The strip totals the whole book, so the list filters are deliberately not
+    // passed. The test toggle is not one of them: it decides what counts as the
+    // book, and figures that disagreed with the rows under them would read as a
+    // broken integration to an org whose plans are all still in test mode.
+    const fetchStats = ( test ) => apiFetch( {
+        path: addQueryArgs( '/dono/v1/admin/recurring/stats', { include_test: test || undefined } ),
+    } );
+
+    const statsError = () => notify.error( __( 'The recurring totals could not be loaded.', 'dono' ) );
+
+    const loadStats = () => fetchStats( includeTest ).then( setStats ).catch( statsError );
 
     // These donations have no plan row, so no filter on this list can reach
     // them; they are fetched on their own and read out above the table. A
@@ -464,7 +502,17 @@ export default function List() {
             error:      err?.message || __( 'The check could not be run.', 'dono' ),
         } ) );
 
-    useEffect( () => { loadStats(); loadUnlinked(); }, [] );
+    // Two flips of the toggle land in whatever order the network decides, and
+    // the loser would leave test money on a card carrying no note about it.
+    useEffect( () => {
+        let aborted = false;
+        fetchStats( includeTest )
+            .then( ( r ) => { if ( ! aborted ) setStats( r ); } )
+            .catch( () => { if ( ! aborted ) statsError(); } );
+        return () => { aborted = true; };
+    }, [ includeTest ] );
+
+    useEffect( () => { loadUnlinked(); }, [] );
 
     const fields = useMemo( () => [
         {
@@ -691,7 +739,7 @@ export default function List() {
                 onReload={ loadUnlinked }
             />
 
-            <KpiStrip items={ subscriptionKpis( stats, unlinked ) } loading={ ! stats } />
+            <KpiStrip items={ subscriptionKpis( stats, unlinked, includeTest ) } loading={ ! stats } />
 
             { fetchError && <div className="dono-error-notice">{ fetchError }</div> }
 

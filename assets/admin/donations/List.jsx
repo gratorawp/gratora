@@ -587,9 +587,13 @@ export default function List() {
 
             <KpiStrip items={ donationKpis( stats ) } loading={ loading && ! stats } />
 
-            { includeTest && (
+            { /* Driven by the figures themselves, not by the toggle: the note
+                 is what an org reads to decide whether a number can be quoted,
+                 so it may only appear over numbers that are actually counting
+                 test donations. */ }
+            { stats?.includes_test && (
                 <p className="dono-list-note">
-                    { __( 'Test donations are in the list below. Paid, Raised and Unique donors count real money only, so they do not include them.', 'dono' ) }
+                    { __( 'Test donations are counted in the figures above and shown in the list below. These totals include money that was never actually taken, so they cannot be quoted as income.', 'dono' ) }
                 </p>
             ) }
 
@@ -621,27 +625,44 @@ export default function List() {
 }
 
 function donationKpis( stats ) {
+    // Per card, not once above the strip: a single figure gets read out, quoted
+    // and screenshotted on its own, and it has to carry its own disclaimer.
+    const includesTest = !! stats?.includes_test;
+    const testSub = includesTest ? __( 'Includes test donations', 'dono' ) : null;
+
+    let raisedSub = testSub;
+    if ( stats?.currency ) {
+        raisedSub = includesTest
+            ? sprintf(
+                /* translators: %s: currency code */
+                __( 'in %s, includes test donations', 'dono' ),
+                stats.currency
+            )
+            : sprintf( /* translators: %s: currency code */ __( 'in %s', 'dono' ), stats.currency );
+    }
+
     return [
         {
             label: __( 'Total donations', 'dono' ),
             value: stats ? stats.total_count.toLocaleString() : '-',
+            sub:   testSub,
         },
         {
             label: __( 'Paid', 'dono' ),
             value: stats ? stats.paid_count.toLocaleString() : '-',
+            sub:   testSub,
         },
         {
             label: __( 'Raised', 'dono' ),
             value: stats
                 ? formatAmount( stats.raised_cents, stats.currency || undefined )
                 : '-',
-            sub: stats?.currency
-                ? sprintf( /* translators: %s: currency code */ __( 'in %s', 'dono' ), stats.currency )
-                : null,
+            sub: raisedSub,
         },
         {
             label: __( 'Unique donors', 'dono' ),
             value: stats ? stats.donors_count.toLocaleString() : '-',
+            sub:   testSub,
         },
     ];
 }

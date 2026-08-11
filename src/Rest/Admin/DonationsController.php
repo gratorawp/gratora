@@ -700,8 +700,10 @@ final class DonationsController
     }
 
     /**
-     * Aggregate KPIs for the donations list. Mirrors the list filters so
-     * "raised" and "donors" track whatever the user is currently viewing.
+     * Aggregate KPIs for the donations list. Takes the same args as index(),
+     * `include_test` among them, so "raised" and "donors" track whatever the
+     * user is currently viewing. The response carries `includes_test` for the
+     * screen to label the figures with.
      *
      * @since 1.0.0
      */

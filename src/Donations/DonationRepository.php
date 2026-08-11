@@ -815,7 +815,12 @@ final class DonationRepository
     }
 
     /**
-     * @return array{total_count:int,paid_count:int,raised_cents:int,currency:?string,donors_count:int}
+     * `include_test` widens every figure here, not just the row count, so the
+     * strip describes the same donations the list is showing. `includes_test`
+     * comes back with them so the caller can say so next to each number: a
+     * figure counting rehearsal money must never be readable as real money.
+     *
+     * @return array{total_count:int,paid_count:int,raised_cents:int,currency:?string,donors_count:int,includes_test:bool}
      *
      * @since 1.0.0
      */
@@ -827,36 +832,45 @@ final class DonationRepository
         // Donation models.
         $base = fn () => DB::table('dono_donations');
 
-        // total mirrors the list row count, test rows included, while the money
-        // KPIs below are live-only: the strip's "total" is a view count, not a
-        // money metric.
         $totalCount = (int) $applyFilters($base())->count();
 
         // Net refunds in base currency to match the base-currency raised sum.
         $refundedExpr = DonationQueries::refundedBaseExpr();
 
-        // "Raised" must reflect real money, so test donations are excluded
-        // unless the admin is explicitly viewing test data. include_test does
-        // NOT qualify: it widens the list, and quoting rehearsal money as
-        // raised is a different thing.
+        // paid_count, raised_cents and donors_count all read off this one
+        // query, so the three cannot disagree about which donations they are
+        // counting, and applyAdminFilters is the only thing scoping test rows.
         $paidQuery = $applyFilters($base())->whereIn('status', ['paid', 'partial_refund']);
-        if (! self::hasExplicitTestFilter($args)) {
-            $paidQuery = $paidQuery->where('is_test', 0);
-        }
 
         $paidRow = $paidQuery
             ->selectRaw("COALESCE(SUM(COALESCE(base_amount_cents, 0) - {$refundedExpr}), 0) AS amount, COUNT(*) AS cnt, COUNT(DISTINCT donor_id) AS donors")
             ->get();
 
         return [
-            'total_count'  => $totalCount,
-            'paid_count'   => (int) ($paidRow['cnt']    ?? 0),
-            'raised_cents' => (int) ($paidRow['amount'] ?? 0),
+            'total_count'   => $totalCount,
+            'paid_count'    => (int) ($paidRow['cnt']    ?? 0),
+            'raised_cents'  => (int) ($paidRow['amount'] ?? 0),
             // raised_cents sums the base currency, so it is labelled as such,
             // not as the most-common donation currency.
-            'currency'     => \Dono\Foundation\Helpers\Money::defaultCurrency(),
-            'donors_count' => (int) ($paidRow['donors'] ?? 0),
+            'currency'      => \Dono\Foundation\Helpers\Money::defaultCurrency(),
+            'donors_count'  => (int) ($paidRow['donors'] ?? 0),
+            'includes_test' => self::countsTestDonations($args),
         ];
+    }
+
+    /**
+     * Whether the admin filters let a test donation into a figure at all. The
+     * explicit filter wins both ways: "Test only" makes every figure test
+     * money, "Live only" keeps them clean whatever the scope is set to.
+     *
+     * @since 1.0.0
+     */
+    private static function countsTestDonations(array $args): bool
+    {
+        if (self::hasExplicitTestFilter($args)) {
+            return (bool) $args['is_test'];
+        }
+        return ! empty($args['include_test']);
     }
 
     /**
@@ -899,7 +913,7 @@ final class DonationRepository
             $q = $q->where('is_test', (bool) $args['is_test'] ? 1 : 0);
         } elseif (empty($args['include_test'])) {
             // Live-only by default; test donations surface in the list, the CSV
-            // export and the strip total only when the admin asks for them.
+            // export and the KPI figures only when the admin asks for them.
             $q = $q->where('is_test', 0);
         }
         // include_test with no explicit is_test filter adds no predicate at

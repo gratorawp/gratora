@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dono\Recurring;
 
 use Dono\Vendor\Queryable\DB;
+use Dono\Vendor\Queryable\QueryBuilder;
 use Dono\Foundation\Helpers\Money;
 
 /**
@@ -364,8 +365,27 @@ final class RecurringPlanRepository
     }
 
     /**
+     * The row scope every figure in recurringStats() starts from, so a caller
+     * looking at test plans cannot be handed a mix of figures that count them
+     * and figures that do not.
+     *
+     * @since 1.0.0
+     */
+    private static function statsQuery(bool $includeTest): QueryBuilder
+    {
+        $q = DB::table('dono_recurring_plans');
+
+        return $includeTest ? $q : $q->where('is_test', 0);
+    }
+
+    /**
      * Recurring revenue health roll-up. Normalizes each active plan to its
      * monthly equivalent so MRR is comparable across cadences.
+     *
+     * $includeTest is the caller saying it is showing test plans. Every figure
+     * then counts them, because a total that left them out while the list under
+     * it names them reads as broken, and an org setting recurring up in test
+     * mode has no other way to see that these figures compute at all.
      *
      * @return array{
      *   active_count:int,
@@ -380,44 +400,39 @@ final class RecurringPlanRepository
      *
      * @since 1.0.0
      */
-    public function recurringStats(string $today): array
+    public function recurringStats(string $today, bool $includeTest = false): array
     {
-        $monthStart = esc_sql((new \DateTimeImmutable($today))->modify('first day of this month')->format('Y-m-d 00:00:00'));
+        $monthStart = (new \DateTimeImmutable($today))->modify('first day of this month')->format('Y-m-d 00:00:00');
 
         // Normalize each plan to the org base currency; see baseAmountExpr()
         // for why an unconverted plan contributes nothing.
         $amt     = self::baseAmountExpr();
         $mrrExpr = self::mrrExpr();
 
-        // Exclude test-mode plans from the live MRR widget.
         // interval_count = 0 would be excluded from mrrExpr (NULLIF guard) but
         // still counted, so active_count and MRR would disagree; drop such
         // malformed plans from both.
-        $active = DB::table('dono_recurring_plans')
+        $active = self::statsQuery($includeTest)
             ->where('status', 'active')
-            ->where('is_test', 0)
             ->where('interval_count', 0, '>')
             ->selectRaw("COUNT(*) AS cnt, COALESCE({$mrrExpr}, 0) AS mrr, COALESCE(AVG({$amt}), 0) AS avg_amount, " . self::unconvertedExpr() . " AS unconverted")
             ->get();
 
-        $newCount = (int) DB::table('dono_recurring_plans')
-            ->whereRaw("started_at >= '{$monthStart}'")
-            ->where('is_test', 0)
+        $newCount = (int) self::statsQuery($includeTest)
+            ->where('started_at', $monthStart, '>=')
             ->count();
 
-        $churnedCount = (int) DB::table('dono_recurring_plans')
-            ->whereRaw("cancelled_at >= '{$monthStart}'")
+        $churnedCount = (int) self::statsQuery($includeTest)
+            ->where('cancelled_at', $monthStart, '>=')
             ->where('status', 'cancelled')
-            ->where('is_test', 0)
             ->count();
 
         // Plans carrying a decline, whatever the gateway currently calls them:
         // a failure can sit on a plan still marked active until the gateway
         // gives up on it.
-        $failingCount = (int) DB::table('dono_recurring_plans')
+        $failingCount = (int) self::statsQuery($includeTest)
             ->where('failed_renewals_count', 0, '>')
             ->whereIn('status', ['active', 'past_due', 'paused'])
-            ->where('is_test', 0)
             ->count();
 
         $activeCount = (int) ($active['cnt'] ?? 0);

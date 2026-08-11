@@ -82,6 +82,45 @@ final class RecurringTestVisibilityTest extends IntegrationTestCase
         $this->assertArrayNotHasKey('X-Dono-Test-Hidden', $res->get_headers());
     }
 
+    /** @return array<string,mixed> */
+    private function stats(array $params = []): array
+    {
+        $req = new WP_REST_Request('GET', '/dono/v1/admin/recurring/stats');
+        foreach ($params as $k => $v) {
+            $req->set_param($k, $v);
+        }
+        $res = rest_do_request($req);
+
+        $this->assertSame(200, $res->get_status(), (string) wp_json_encode($res->get_data()));
+
+        return (array) $res->get_data();
+    }
+
+    public function test_the_figures_leave_test_plans_out_by_default(): void
+    {
+        $this->plan(true);
+
+        $stats = $this->stats();
+
+        // The state a site sits in unless somebody asks otherwise, and the one
+        // a figure gets quoted from.
+        $this->assertSame(0, (int) $stats['active_count']);
+        $this->assertSame(0, (int) $stats['mrr_cents']);
+    }
+
+    public function test_asking_for_test_plans_puts_them_in_the_figures(): void
+    {
+        $this->plan(true);
+
+        $stats = $this->stats(['include_test' => true]);
+
+        // Listing three plans above a Monthly recurring revenue of zero cannot
+        // be read, and during setup the figures are the thing being checked:
+        // there is no other way to find out whether MRR computes at all.
+        $this->assertSame(1, (int) $stats['active_count']);
+        $this->assertGreaterThan(0, (int) $stats['mrr_cents']);
+    }
+
     public function test_a_live_plan_is_never_counted_as_hidden(): void
     {
         $this->plan(false);

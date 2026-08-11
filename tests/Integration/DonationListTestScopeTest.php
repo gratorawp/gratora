@@ -73,7 +73,19 @@ final class DonationListTestScopeTest extends IntegrationTestCase
         );
     }
 
-    public function test_the_money_kpis_stay_live_only_when_test_rows_are_listed(): void
+    public function test_the_money_kpis_count_real_money_only_by_default(): void
+    {
+        $stats = (new DonationRepository())->aggregateAdmin([
+            'campaign_id' => $this->campaignId,
+        ]);
+
+        // The state a site sits in unless somebody asks otherwise, and the one
+        // a figure gets quoted from. The 99.00 rehearsal donation is not in it.
+        $this->assertSame(2, (int) $stats['paid_count']);
+        $this->assertSame(8000, (int) $stats['raised_cents']);
+    }
+
+    public function test_asking_for_test_rows_puts_them_in_the_money_kpis_too(): void
     {
         $stats = (new DonationRepository())->aggregateAdmin([
             'campaign_id'  => $this->campaignId,
@@ -83,10 +95,11 @@ final class DonationListTestScopeTest extends IntegrationTestCase
         // The strip's total is a view count and mirrors the rows on screen.
         $this->assertSame(3, (int) $stats['total_count']);
 
-        // Raised is a money figure people quote, so the 99.00 rehearsal
-        // donation must not be in it.
-        $this->assertSame(2, (int) $stats['paid_count']);
-        $this->assertSame(8000, (int) $stats['raised_cents']);
+        // A screen that lists a donation and leaves it out of the figure above
+        // it cannot be read at all, and during setup the figures are the thing
+        // being checked. The card says it is including test data while it does.
+        $this->assertSame(3, (int) $stats['paid_count']);
+        $this->assertSame(17900, (int) $stats['raised_cents']);
     }
 
     public function test_the_hidden_count_reports_test_rows_whatever_the_scope(): void
