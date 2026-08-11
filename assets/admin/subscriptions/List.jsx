@@ -43,6 +43,18 @@ const FREQUENCY_LABEL = {
     yearly:    __( 'Yearly', 'dono' ),
 };
 
+// A view preference, not a setting: it belongs to the person looking at the
+// screen, and having it reset on every page load would make it useless for the
+// thing it is for, which is watching test plans appear while you make them.
+const TEST_PREF = 'dono.subscriptions.includeTest';
+
+const readTestPref = () => {
+    try {
+        return window.localStorage?.getItem( TEST_PREF ) === '1';
+    } catch ( e ) {
+        return false;
+    }
+};
 // How many the notice lists before it offers the rest behind a click.
 const UNLINKED_PREVIEW = 5;
 
@@ -325,16 +337,9 @@ function emptyStateCopy( unlinked, testHidden ) {
     if ( testHidden > 0 ) {
         return {
             title: __( 'No live subscriptions', 'dono' ),
-            body:  sprintf(
-                /* translators: %d: number of test subscriptions being hidden. */
-                _n(
-                    '%d test subscription is hidden. Turn on Show test subscriptions to see it.',
-                    '%d test subscriptions are hidden. Turn on Show test subscriptions to see them.',
-                    testHidden,
-                    'dono'
-                ),
-                testHidden
-            ),
+            // The count and the way to reveal them are in the notice above, so
+            // this says what the empty table means rather than repeating them.
+            body:  __( 'Nothing here is charging real money yet.', 'dono' ),
         };
     }
 
@@ -390,7 +395,7 @@ export default function List() {
         error:      null,
     } );
     const [ showAllUnlinked, setShowAllUnlinked ] = useState( false );
-    const [ includeTest, setIncludeTest ] = useState( false );
+    const [ includeTest, setIncludeTest ] = useState( readTestPref );
     const [ testHidden, setTestHidden ]   = useState( 0 );
 
     useEffect( () => {
@@ -406,6 +411,13 @@ export default function List() {
         return () => { aborted = true; };
     }, [] );
 
+    const toggleTest = ( on ) => {
+        setIncludeTest( on );
+        try {
+            window.localStorage?.setItem( TEST_PREF, on ? '1' : '0' );
+        } catch ( e ) { /* private mode: the toggle still works for this visit */ }
+        setView( ( v ) => ( { ...v, page: 1 } ) );
+    };
     const filterValue = ( field ) => view.filters?.find( ( f ) => f.field === field )?.value;
     const statusFilter   = filterValue( 'status' );
     const gatewayFilter  = filterValue( 'gateway' );
@@ -716,7 +728,7 @@ export default function List() {
                         <label className="dono-inline-toggle">
                             <Switch
                                 checked={ includeTest }
-                                onChange={ () => setIncludeTest( ( on ) => ! on ) }
+                                onChange={ () => toggleTest( ! includeTest ) }
                                 label={ __( 'Show test subscriptions', 'dono' ) }
                             />
                             <span>{ __( 'Show test subscriptions', 'dono' ) }</span>
@@ -732,6 +744,24 @@ export default function List() {
                 </div>
             </div>
 
+            { testHidden > 0 && ! includeTest && (
+                <div className="dono-advanced-notice" style={ { marginBottom: 12 } }>
+                    { sprintf(
+                        /* translators: %d: number of test subscriptions hidden. */
+                        _n(
+                            '%d test subscription is hidden.',
+                            '%d test subscriptions are hidden.',
+                            testHidden,
+                            'dono'
+                        ),
+                        testHidden
+                    ) }
+                    { ' ' }
+                    <Btn variant="link" onClick={ () => toggleTest( true ) }>
+                        { __( 'Show them', 'dono' ) }
+                    </Btn>
+                </div>
+            ) }
             <UnlinkedNotice
                 unlinked={ unlinked }
                 showAll={ showAllUnlinked }
