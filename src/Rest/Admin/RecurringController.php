@@ -6,7 +6,6 @@ namespace Dono\Rest\Admin;
 
 use Dono\Campaigns\CampaignRepository;
 use Dono\Donations\Donation;
-use Dono\Donations\DonationQueries;
 use Dono\Donors\Donor;
 use Dono\Donors\DonorRepository;
 use Dono\Donors\DonorService;
@@ -56,7 +55,7 @@ final class RecurringController
      * is created in the request that marks it paid, and a redirect-side confirm
      * can land ahead of the webhook that creates it.
      */
-    private const SETTLE_MINUTES = 60;
+    private const SETTLE_MINUTES = 15;
 
     /**
      * How far back the screen looks. A retry anchors the next charge to the
@@ -210,6 +209,7 @@ final class RecurringController
                 'amount_cents'     => (int) $d->amount_cents,
                 'currency'         => (string) $d->currency,
                 'frequency'        => (string) $d->frequency,
+                'is_test'          => (bool) $d->is_test,
                 // The retry endpoint takes a recorded failure only; the rest
                 // need the gateway looked at before anyone acts.
                 'failure_recorded' => ! empty(((array) ($d->flags ?? []))['subscription_creation_failed']),
@@ -248,24 +248,28 @@ final class RecurringController
         $now      = time();
         $gateways = $this->planCreatingGateways();
 
-        return DonationQueries::donationsOnly(
-            Donation::query()
-                ->whereNull('recurring_plan_id')
-                ->where('frequency', 'one_time', '<>')
-                ->whereIn('status', ['paid', 'partial_refund'])
-                ->whereBetween(
-                    'paid_at',
-                    gmdate('Y-m-d H:i:s', $now - (self::WINDOW_DAYS * DAY_IN_SECONDS)),
-                    gmdate('Y-m-d H:i:s', $now - (self::SETTLE_MINUTES * MINUTE_IN_SECONDS))
-                )
-                ->where(static function (QueryBuilder $q) use ($gateways): void {
-                    // First condition of the group: whereRaw carries no AND.
-                    $q->whereRaw(self::FAILURE_FLAG_PREDICATE);
-                    if ($gateways !== []) {
-                        $q->orWhereIn('gateway', $gateways);
-                    }
-                })
-        );
+        // Test donations count here, unlike every money figure on this screen.
+        // A recurring donation that produced no plan is a broken integration
+        // rather than revenue, and an org finding that out in test mode is the
+        // entire point: excluding them hides the fault until it happens for
+        // real.
+        return Donation::query()
+            ->where('kind', 'donation')
+            ->whereNull('recurring_plan_id')
+            ->where('frequency', 'one_time', '<>')
+            ->whereIn('status', ['paid', 'partial_refund'])
+            ->whereBetween(
+                'paid_at',
+                gmdate('Y-m-d H:i:s', $now - (self::WINDOW_DAYS * DAY_IN_SECONDS)),
+                gmdate('Y-m-d H:i:s', $now - (self::SETTLE_MINUTES * MINUTE_IN_SECONDS))
+            )
+            ->where(static function (QueryBuilder $q) use ($gateways): void {
+                // First condition of the group: whereRaw carries no AND.
+                $q->whereRaw(self::FAILURE_FLAG_PREDICATE);
+                if ($gateways !== []) {
+                    $q->orWhereIn('gateway', $gateways);
+                }
+            });
     }
 
     /**
