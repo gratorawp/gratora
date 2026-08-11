@@ -93,10 +93,15 @@ final class DataExporterTest extends IntegrationTestCase
         $this->assertArrayNotHasKey('dono_magic_link_tokens', $this->export()['tables'] ?? []);
     }
 
-    /** Raw gateway payloads carry other people's data and, on failures, secrets. */
-    public function test_the_webhook_log_is_never_exported(): void
+    /** A delivery records what arrived and what Dono did, never the body. */
+    public function test_an_exported_delivery_carries_no_gateway_payload(): void
     {
-        $this->assertArrayNotHasKey('dono_webhooks_log', $this->export()['tables'] ?? []);
+        $req = new \WP_REST_Request('POST', '/dono/v1/webhooks/offline');
+        $req->set_header('content-type', 'application/json');
+        $req->set_body((string) wp_json_encode(['payer' => ['email_address' => 'donor@example.test']]));
+        rest_do_request($req);
+
+        $this->assertStringNotContainsString('donor@example.test', (string) wp_json_encode($this->export()));
     }
 
     public function test_gateway_secrets_are_redacted_in_settings(): void

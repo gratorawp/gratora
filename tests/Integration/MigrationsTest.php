@@ -6,13 +6,13 @@ namespace Dono\Tests\Integration;
 
 final class MigrationsTest extends IntegrationTestCase
 {
-    public function test_all_11_core_tables_exist(): void
+    public function test_all_10_core_tables_exist(): void
     {
         $expected = [
             'dono_donors', 'dono_consents', 'dono_magic_link_tokens',
             'dono_campaigns', 'dono_funds',
             'dono_donations', 'dono_recurring_plans', 'dono_receipts',
-            'dono_forms', 'dono_events', 'dono_webhooks_log',
+            'dono_forms', 'dono_events',
         ];
 
         foreach ($expected as $t) {
@@ -51,18 +51,5 @@ final class MigrationsTest extends IntegrationTestCase
         $this->assertContains('idx_type_occurred_at', $names);
         $this->assertContains('idx_form_id_type_occurred_at', $names);
         $this->assertContains('idx_donation_id_occurred_at', $names);
-    }
-
-    public function test_webhooks_log_has_dedup_unique(): void
-    {
-        $tbl = self::$prefix . 'dono_webhooks_log';
-        $indexes = self::$wpdb->get_results("SHOW INDEX FROM {$tbl}");
-
-        $named = [];
-        foreach ($indexes as $row) {
-            $named[$row->Key_name][$row->Seq_in_index] = $row->Column_name;
-        }
-
-        $this->assertArrayHasKey('uk_gateway_external_id', $named);
     }
 }

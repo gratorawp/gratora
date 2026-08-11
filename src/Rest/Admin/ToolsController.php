@@ -20,7 +20,6 @@ use Dono\Donors\Donor;
 use Dono\Forms\Form;
 use Dono\Foundation\Auth\Capabilities;
 use Dono\Funds\Fund;
-use Dono\Webhooks\WebhookLog;
 use WP_REST_Response;
 use WP_REST_Server;
 use Dono\Vendor\Queryable\DB;
@@ -128,39 +127,25 @@ final class ToolsController
             ],
         ]);
 
-        register_rest_route(self::NAMESPACE, '/admin/tools/errors', [
+        register_rest_route(self::NAMESPACE, '/admin/tools/log', [
             [
                 'methods'             => WP_REST_Server::READABLE,
-                'callback'            => [$this, 'errors'],
+                'callback'            => [$this, 'log'],
                 'permission_callback' => [$this, 'canAccess'],
                 'args'                => [
                     'page'     => ['type' => 'integer', 'default' => 1, 'minimum' => 1],
                     'per_page' => ['type' => 'integer', 'default' => 25, 'minimum' => 1, 'maximum' => 100],
                     'source'   => ['type' => 'string', 'default' => ''],
+                    'status'   => ['type' => 'string', 'enum' => ['', 'failed'], 'default' => ''],
                 ],
             ],
             [
                 'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => [$this, 'clearErrors'],
+                'callback'            => [$this, 'clearLog'],
                 'permission_callback' => [$this, 'canManage'],
-            ],
-        ]);
-
-        // Deliveries only, never their bodies. payload and headers hold the raw
-        // gateway request: payer email and address, and on a refused delivery
-        // the credentials that failed. DataExporter keeps dono_webhooks_log out
-        // of a full export for that reason, and a read route that served those
-        // two columns would be the way around it, so nothing here selects them
-        // at any capability.
-        register_rest_route(self::NAMESPACE, '/admin/tools/webhooks', [
-            'methods'             => WP_REST_Server::READABLE,
-            'callback'            => [$this, 'webhooks'],
-            'permission_callback' => [$this, 'canAccess'],
-            'args'                => [
-                'page'     => ['type' => 'integer', 'default' => 1, 'minimum' => 1],
-                'per_page' => ['type' => 'integer', 'default' => 25, 'minimum' => 1, 'maximum' => 100],
-                'gateway'  => ['type' => 'string', 'default' => ''],
-                'status'   => ['type' => 'string', 'enum' => ['', 'failed'], 'default' => ''],
+                'args'                => [
+                    'source' => ['type' => 'string', 'default' => ''],
+                ],
             ],
         ]);
 
@@ -177,23 +162,41 @@ final class ToolsController
         ]);
     }
 
+    /** Inbound gateway deliveries, written as `webhook.<gateway id>`. */
+    private const WEBHOOK_PREFIX = 'webhook.';
+
     /**
-     * Paged error log, newest first, optionally narrowed to one source.
+     * A delivery that was refused at the signature, and one that verified and
+     * then threw, are both failures. A verified delivery Dono has no handler
+     * for is not, and it is the common case, so it must not be swept in here.
+     *
+     * Compared as text rather than as JSON: MariaDB has no JSON type and
+     * rejects CAST(x AS JSON) as a syntax error. JSON_UNQUOTE gives 'true' for
+     * a JSON boolean and JSON_TYPE gives 'NULL' for a JSON null on both
+     * engines. The column is LONGTEXT, so JSON_VALID guards the one case MySQL
+     * raises an error on and MariaDB answers NULL to.
+     */
+    private const WEBHOOK_FAILED_SQL =
+        "(COALESCE(JSON_UNQUOTE(JSON_EXTRACT(IF(JSON_VALID(payload), payload, NULL), '\$.verified')), 'false')"
+        . " NOT IN ('true', '1')"
+        . " OR JSON_TYPE(JSON_EXTRACT(IF(JSON_VALID(payload), payload, NULL), '\$.error')) NOT IN ('NULL'))";
+
+    /**
+     * Paged log, newest first: what Dono could not finish and what the
+     * gateways sent, optionally narrowed to one source or to the failures.
      *
      * @since 1.0.0
      */
-    public function errors(\WP_REST_Request $request): WP_REST_Response
+    public function log(\WP_REST_Request $request): WP_REST_Response
     {
         $page    = max(1, (int) $request['page']);
         $perPage = max(1, min(100, (int) $request['per_page']));
-        $source  = preg_replace('/[^a-z0-9_.]/', '', strtolower((string) $request['source'])) ?: '';
+        $source  = self::logSource((string) $request['source']);
+        $failed  = (string) $request['status'] === 'failed';
 
-        $prefix = ErrorLog::PREFIX . ($source !== '' ? $source : '');
+        $total = self::logQuery($source, $failed)->count();
 
-        $total = (int) Event::query()->whereLike('type', $prefix . '%')->count();
-
-        $rows = Event::query()
-            ->whereLike('type', $prefix . '%')
+        $rows = self::logQuery($source, $failed)
             ->orderBy('occurred_at', 'DESC')
             ->orderBy('id', 'DESC')
             ->limit($perPage)
@@ -201,20 +204,85 @@ final class ToolsController
             ->getAll();
 
         return new WP_REST_Response([
-            'items'    => array_map([self::class, 'errorRow'], $rows),
-            'total'    => $total,
-            'page'     => $page,
-            'per_page' => $perPage,
-            'sources'  => self::errorSources(),
+            'items'          => array_map([self::class, 'logRow'], $rows),
+            'total'          => $total,
+            'page'           => $page,
+            'per_page'       => $perPage,
+            'sources'        => self::logSources(),
+            'retention_days' => self::retentionDays(),
         ], 200);
     }
 
-    /** @since 1.0.0 */
-    public function clearErrors(): WP_REST_Response
+    /**
+     * Clears the whole log, or one source of it when the screen is showing
+     * one, so failures and deliveries can be cleared apart.
+     *
+     * @since 1.0.0
+     */
+    public function clearLog(\WP_REST_Request $request): WP_REST_Response
     {
-        $deleted = Event::query()->whereLike('type', ErrorLog::PREFIX . '%')->delete();
+        $deleted = self::logQuery(self::logSource((string) $request['source']), false)->delete();
 
         return new WP_REST_Response(['ok' => true, 'deleted' => (int) $deleted->affectedRows], 200);
+    }
+
+    /**
+     * dono_events carries every domain's history, most of it holding donor
+     * detail this screen has no business serving. Anything outside the two
+     * families it reads is dropped, so a hand-written source can neither widen
+     * the list nor widen a delete.
+     *
+     * @since 1.0.0
+     */
+    private static function logSource(string $raw): string
+    {
+        $source = preg_replace('/[^a-z0-9_.\-]/', '', strtolower(trim($raw))) ?: '';
+
+        return str_starts_with($source, ErrorLog::PREFIX) || str_starts_with($source, self::WEBHOOK_PREFIX)
+            ? $source
+            : '';
+    }
+
+    /** @since 1.0.0 */
+    private static function logQuery(string $source, bool $failedOnly): ModelQueryBuilder
+    {
+        $query = Event::query();
+
+        if ($source !== '') {
+            $query->whereLike('type', $source . '%');
+        } else {
+            $query->where(static function ($q): void {
+                $q->whereLike('type', ErrorLog::PREFIX . '%')
+                    ->orWhereLike('type', self::WEBHOOK_PREFIX . '%');
+            });
+        }
+
+        // Every recorded error is a failure; a delivery has to be read for it.
+        if ($failedOnly) {
+            $query->where(static function ($q): void {
+                $q->whereLike('type', ErrorLog::PREFIX . '%')
+                    ->orWhere(static function ($q): void {
+                        // Raw first: it contributes no AND connector, so
+                        // anything before it runs straight into the fragment.
+                        $q->whereRaw(self::WEBHOOK_FAILED_SQL)
+                            ->whereLike('type', self::WEBHOOK_PREFIX . '%');
+                    });
+            });
+        }
+
+        return $query;
+    }
+
+    /**
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
+    private static function logRow(Event $e): array
+    {
+        return str_starts_with((string) $e->type, self::WEBHOOK_PREFIX)
+            ? self::deliveryRow($e)
+            : self::errorRow($e);
     }
 
     /**
@@ -239,6 +307,7 @@ final class ToolsController
 
         return [
             'id'          => (int) $e->id,
+            'kind'        => 'error',
             'source'      => substr((string) $e->type, strlen(ErrorLog::PREFIX)),
             'message'     => $message !== '' ? $message : __('No detail recorded.', 'dono'),
             'context'     => $payload,
@@ -247,138 +316,74 @@ final class ToolsController
     }
 
     /**
-     * Sources present in the log, so the filter offers what is actually there
-     * rather than every source Dono can emit.
+     * A delivery reads out of its payload alone: which gateway, which event,
+     * and the three facts the screen turns into an outcome.
      *
-     * @return list<string>
-     *
-     * @since 1.0.0
-     */
-    private static function errorSources(): array
-    {
-        $rows = Event::query()
-            ->select('type')
-            ->distinct()
-            ->whereLike('type', ErrorLog::PREFIX . '%')
-            ->orderBy('type', 'ASC')
-            ->getAll();
-
-        $sources = array_map(
-            static fn ($e): string => substr((string) $e->type, strlen(ErrorLog::PREFIX)),
-            $rows
-        );
-
-        return array_values(array_unique(array_filter($sources)));
-    }
-
-    /**
-     * Paged inbound webhook deliveries, newest first, optionally narrowed to
-     * one gateway or to the failures.
-     *
-     * @since 1.0.0
-     */
-    public function webhooks(\WP_REST_Request $request): WP_REST_Response
-    {
-        $page    = max(1, (int) $request['page']);
-        $perPage = max(1, min(100, (int) $request['per_page']));
-        $gateway = preg_replace('/[^a-z0-9_-]/', '', strtolower((string) $request['gateway'])) ?: '';
-        $failed  = (string) $request['status'] === 'failed';
-
-        $total = self::webhookQuery($gateway, $failed)->count();
-
-        $rows = self::webhookQuery($gateway, $failed)
-            ->select('id', 'gateway', 'event_type', 'signature_ok', 'processed', 'error', 'received_at')
-            ->orderBy('received_at', 'DESC')
-            ->orderBy('id', 'DESC')
-            ->limit($perPage)
-            ->offset(($page - 1) * $perPage)
-            ->getAll();
-
-        return new WP_REST_Response([
-            'items'          => array_map([self::class, 'webhookRow'], $rows),
-            'total'          => $total,
-            'page'           => $page,
-            'per_page'       => $perPage,
-            'gateways'       => self::webhookGateways(),
-            'retention_days' => self::webhookRetentionDays(),
-        ], 200);
-    }
-
-    /**
-     * How far back the list can reach: the pruner drops older deliveries, so
-     * an absent one is only proof of nothing arriving inside this window. Read
-     * through the filter the pruner runs on, and 0 where a site disabled it.
-     *
-     * @since 1.0.0
-     */
-    private static function webhookRetentionDays(): int
-    {
-        $days = (int) apply_filters('dono.webhook_log.retention_days', 30);
-
-        return $days > 0 ? $days : 0;
-    }
-
-    /**
-     * @since 1.0.0
-     */
-    private static function webhookQuery(string $gateway, bool $failedOnly): ModelQueryBuilder
-    {
-        $query = WebhookLog::query();
-
-        if ($gateway !== '') {
-            $query->where('gateway', $gateway);
-        }
-
-        // A refused delivery and one that verified and then threw are both
-        // failures. A verified delivery Dono has no handler for is not, and it
-        // is the common case, so it must not be swept in here.
-        if ($failedOnly) {
-            $query->where(static function ($q): void {
-                $q->where('signature_ok', 0)->orWhereIsNotNull('error');
-            });
-        }
-
-        return $query;
-    }
-
-    /**
      * @return array<string,mixed>
      *
      * @since 1.0.0
      */
-    private static function webhookRow(WebhookLog $log): array
+    private static function deliveryRow(Event $e): array
     {
+        $payload = is_array($e->payload) ? $e->payload : [];
+        $event   = trim((string) ($payload['event_type'] ?? ''));
+        $error   = trim((string) ($payload['error'] ?? ''));
+
         return [
-            'id'           => (int) $log->id,
-            'gateway'      => (string) $log->gateway,
-            'event_type'   => (string) $log->event_type,
-            'signature_ok' => (bool) $log->signature_ok,
-            'processed'    => (bool) $log->processed,
-            'error'        => $log->error !== null ? (string) $log->error : null,
-            'received_at'  => (string) $log->received_at,
+            'id'          => (int) $e->id,
+            'kind'        => 'webhook',
+            'source'      => substr((string) $e->type, strlen(self::WEBHOOK_PREFIX)),
+            'message'     => $event !== '' ? $event : __('Unnamed event.', 'dono'),
+            'verified'    => (bool) ($payload['verified'] ?? false),
+            'processed'   => (bool) ($payload['processed'] ?? false),
+            'error'       => $error !== '' ? $error : null,
+            'context'     => [],
+            'occurred_at' => (string) $e->occurred_at,
         ];
     }
 
     /**
-     * Gateways present in the log, so the filter offers what has actually
-     * arrived. Every delivery is written with a gateway, so an empty list also
-     * tells the screen that nothing has ever reached this site.
+     * Types present in the log, so the filter offers what is actually there
+     * rather than every source Dono can emit and every gateway it supports.
+     * Empty also tells the screen that nothing has been recorded at all, which
+     * is not the same answer as nothing matching the current filters.
      *
      * @return list<string>
      *
      * @since 1.0.0
      */
-    private static function webhookGateways(): array
+    private static function logSources(): array
     {
-        $rows = WebhookLog::query()
-            ->select('gateway')
+        $rows = Event::query()
+            ->select('type')
             ->distinct()
-            ->orderBy('gateway', 'ASC')
+            ->where(static function ($q): void {
+                $q->whereLike('type', ErrorLog::PREFIX . '%')
+                    ->orWhereLike('type', self::WEBHOOK_PREFIX . '%');
+            })
+            ->orderBy('type', 'ASC')
             ->getAll();
 
-        $gateways = array_map(static fn (WebhookLog $l): string => (string) $l->gateway, $rows);
+        $types = array_map(static fn ($e): string => (string) $e->type, $rows);
 
-        return array_values(array_unique(array_filter($gateways)));
+        return array_values(array_unique(array_filter($types)));
+    }
+
+    /**
+     * How far back the list can reach: the pruner drops older entries, so an
+     * absent one is only proof of nothing happening inside this window. Read
+     * through the option and filter the pruner runs on, and 0 where a site
+     * disabled it.
+     *
+     * @since 1.0.0
+     */
+    private static function retentionDays(): int
+    {
+        $privacy = get_option('dono_privacy', []);
+        $stored  = is_array($privacy) ? (int) ($privacy['event_retention_days'] ?? 730) : 730;
+        $days    = (int) apply_filters('dono.event.retention_days', $stored);
+
+        return $days > 0 ? $days : 0;
     }
 
     /**

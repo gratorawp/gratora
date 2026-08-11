@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace Dono\Tests\Integration;
 
+use Dono\Analytics\Event;
 use Dono\Donations\Donation;
 use Dono\Donations\DonationRepository;
 use Dono\Donations\DonationService;
-use Dono\Vendor\Queryable\QueryException;
-use Dono\Webhooks\WebhookLog;
 use WP_REST_Request;
 
 /**
  * Pins the donation status-transition guards: refund states are terminal.
  * A replayed gateway webhook, a re-confirm, or a mark-failed must never
  * resurrect or mutate a refunded / partially refunded donation, and a
- * redelivered webhook must dedupe quietly instead of erroring.
+ * redelivered webhook must be answered quietly rather than with a 5xx that
+ * makes the gateway retry for ever.
  */
 final class DonationStateGuardsTest extends IntegrationTestCase
 {
@@ -107,51 +107,21 @@ final class DonationStateGuardsTest extends IntegrationTestCase
         $this->assertLessThan(500, $second->get_status(), 'Redelivery must not surface as a server error');
     }
 
-    public function test_deliveries_without_an_event_id_are_each_recorded(): void
+    public function test_each_attempt_at_a_delivery_is_kept(): void
     {
         rest_do_request(new WP_REST_Request('POST', '/dono/v1/webhooks/offline'));
         rest_do_request(new WP_REST_Request('POST', '/dono/v1/webhooks/offline'));
 
-        $count = (int) self::$wpdb->get_var(
-            'SELECT COUNT(*) FROM ' . self::$prefix . "dono_webhooks_log WHERE gateway = 'offline'"
-        );
+        $rows = Event::query()->whereLike('type', 'webhook.offline%')->orderBy('id', 'ASC')->getAll();
 
-        // A refused delivery carries no event id, so there is nothing to call
-        // it a duplicate of. Collapsing these hides a gateway whose every
-        // delivery is being turned away behind a single stale row.
-        $this->assertSame(2, $count, 'Each id-less delivery is its own evidence');
-    }
-
-    public function test_a_redelivered_event_id_still_dedupes(): void
-    {
-        $prevSuppress = self::$wpdb->suppress_errors(true);
-
-        foreach ([1, 2] as $_) {
-            $log = WebhookLog::make();
-            $log->gateway      = 'paypal';
-            $log->external_id  = 'WH-REDELIVERED-1';
-            $log->event_type   = 'PAYMENT.CAPTURE.COMPLETED';
-            $log->signature_ok = true;
-            $log->payload      = '{}';
-            $log->headers      = [];
-            $log->processed    = true;
-            $log->processed_at = '2026-08-11 12:00:00';
-            $log->received_at  = '2026-08-11 12:00:00';
-            try {
-                $log->save();
-            } catch (QueryException $e) {
-                $this->assertStringContainsStringIgnoringCase('duplicate entry', $e->getMessage());
-            }
+        // A gateway resends until it gets a 2xx, so two arrivals are two
+        // attempts and the newest one is the true outcome. Collapsing them
+        // would report a delivery that eventually succeeded as a failure, and
+        // would hide a gateway whose every delivery is being turned away.
+        $this->assertCount(2, $rows);
+        foreach ($rows as $row) {
+            $this->assertArrayHasKey('processed', (array) $row->payload);
         }
-
-        self::$wpdb->last_error = '';
-        self::$wpdb->suppress_errors($prevSuppress);
-
-        $count = (int) self::$wpdb->get_var(
-            'SELECT COUNT(*) FROM ' . self::$prefix
-            . "dono_webhooks_log WHERE external_id = 'WH-REDELIVERED-1'"
-        );
-        $this->assertSame(1, $count, 'A real event id must still collapse a redelivery');
     }
 
     /** Create an offline donation via the public API and confirm it. */

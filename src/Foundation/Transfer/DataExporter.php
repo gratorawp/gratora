@@ -63,9 +63,6 @@ final class DataExporter
      *
      * dono_pending_signups are half-finished donations nobody has confirmed.
      *
-     * dono_webhooks_log are raw gateway payloads: other people's card metadata
-     * and, in the failure cases worth keeping, secrets.
-     *
      * dono_form_donation_stats and dono_events are derived or observational.
      * The stats are recomputed on import; the log describes what happened on
      * one site, not what the organization owns.
@@ -74,7 +71,6 @@ final class DataExporter
         'dono_system_settings',
         'dono_magic_link_tokens',
         'dono_pending_signups',
-        'dono_webhooks_log',
         'dono_form_donation_stats',
         'dono_events',
     ];

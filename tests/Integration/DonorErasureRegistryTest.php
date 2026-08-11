@@ -12,7 +12,6 @@ use Dono\Donors\Erasure\ErasureHandler;
 use Dono\Donors\Erasure\ErasureRequest;
 use Dono\Foundation\Plugin;
 use RuntimeException;
-use Dono\Webhooks\WebhookLog;
 
 /**
  * The two tables the QA sweep found that erasure could not reach at all.
@@ -79,19 +78,6 @@ final class DonorErasureRegistryTest extends IntegrationTestCase
         return (int) $e->id;
     }
 
-    private function webhook(string $externalId, string $payload): int
-    {
-        $w = WebhookLog::make();
-        $w->gateway      = 'stripe';
-        $w->external_id  = $externalId;
-        $w->event_type   = 'payment_intent.succeeded';
-        $w->signature_ok = true;
-        $w->payload      = $payload;
-        $w->headers      = ['stripe-signature' => 't=1,v1=abc'];
-        $w->received_at  = gmdate('Y-m-d H:i:s');
-        $w->save();
-        return (int) $w->id;
-    }
 
     public function test_the_donors_analytics_payload_and_hashes_are_cleared(): void
     {
@@ -142,37 +128,34 @@ final class DonorErasureRegistryTest extends IntegrationTestCase
     }
 
     /**
-     * The gateway's own copy of the payer, which nothing could reach before.
+     * The strongest form of erasure is never holding the data. A delivery is
+     * recorded as what arrived and what Dono did about it, and the gateway's own
+     * copy of the payer is not part of that, so there is nothing here to erase.
      */
-    public function test_the_webhook_body_is_blanked_but_the_row_survives(): void
+    public function test_a_delivery_records_nothing_about_the_payer(): void
     {
-        $id = $this->webhook('evt_registry_1', (string) wp_json_encode([
+        $req = new \WP_REST_Request('POST', '/dono/v1/webhooks/offline');
+        $req->set_header('content-type', 'application/json');
+        $req->set_body((string) wp_json_encode([
             'id'   => 'evt_registry_1',
             'data' => ['object' => [
-                'id'              => 'pi_registry_needle',
                 'receipt_email'   => self::NEEDLE,
                 'billing_details' => ['name' => 'Wilhelmina Bletchley'],
             ]],
         ]));
+        rest_do_request($req);
 
-        $this->erase();
+        $rows = Event::query()->whereLike('type', 'webhook.%')->getAll();
+        $this->assertNotEmpty($rows, 'the delivery is recorded');
 
-        $w = WebhookLog::query()->find('id', $id);
-        $this->assertNotNull($w, 'the row stays: its unique key is what stops a redelivery being processed twice');
-        $this->assertSame('', $w->payload);
-        $this->assertNull($w->headers);
-        $this->assertSame('evt_registry_1', $w->external_id, 'the dedup key is untouched');
-    }
+        $stored = (string) wp_json_encode(array_map(
+            static fn ($e): array => ['type' => $e->type, 'payload' => $e->payload],
+            $rows
+        ));
 
-    public function test_someone_elses_webhook_is_left_alone(): void
-    {
-        $id = $this->webhook('evt_registry_2', (string) wp_json_encode([
-            'data' => ['object' => ['id' => 'pi_someone_else', 'receipt_email' => 'other@example.test']],
-        ]));
-
-        $this->erase();
-
-        $this->assertNotSame('', WebhookLog::query()->find('id', $id)->payload);
+        $this->assertStringNotContainsString(self::NEEDLE, $stored);
+        $this->assertStringNotContainsString('Wilhelmina', $stored);
+        $this->assertStringNotContainsString('billing_details', $stored);
     }
 
     /**

@@ -67,7 +67,6 @@ use Dono\Foundation\Upgrade\UpgradeJob;
 use Dono\Foundation\Upgrade\UpgradeNotice;
 use Dono\Donors\Erasure\CoreDonorDataHandler;
 use Dono\Donors\Erasure\ErasureRegistry;
-use Dono\Donors\Erasure\WebhookLogHandler;
 use Dono\Donors\MagicLinkService;
 use Dono\Donors\MagicLinkToken;
 use Dono\Donors\PendingSignup;
@@ -218,8 +217,6 @@ use Dono\Rest\RestProvider;
 use Dono\Rest\WebhookController;
 use Dono\Settings\ReadinessService;
 use Dono\Settings\SettingsService;
-use Dono\Webhooks\WebhookLog;
-use Dono\Webhooks\WebhookLogRetention;
 use Dono\Analytics\EventRetention;
 use Dono\Donors\DonorRetention;
 use Dono\Foundation\Maintenance\TransientGc;
@@ -358,7 +355,6 @@ final class CoreModule implements DonoModule
         ));
 
         (new DonorAggregateSyncer())->register();
-        (new WebhookLogRetention($c->get(AsyncDispatcher::class)))->register();
         // Prunes our own expired rate-limit transients independently of WP core's wp_scheduled_delete.
         (new TransientGc($c->get(AsyncDispatcher::class)))->register();
 
@@ -496,7 +492,6 @@ final class CoreModule implements DonoModule
         add_filter('dono.donor.erasure_handlers', static function (array $handlers) use ($c): array {
             $handlers[] = new CoreDonorDataHandler();
             $handlers[] = new AnalyticsEventHandler();
-            $handlers[] = new WebhookLogHandler();
             return $handlers;
         });
 
@@ -758,7 +753,7 @@ final class CoreModule implements DonoModule
 
         $c->bind(WebhookController::class, fn (Container $c) => new WebhookController(
             $c->get(GatewayManager::class),
-            $c->get(Clock::class)
+            $c->get(EventRecorder::class)
         ));
 
         $c->bind(ReceiptsController::class, fn (Container $c) => new ReceiptsController(
@@ -1208,7 +1203,6 @@ final class CoreModule implements DonoModule
             Form::class,
             FormDonationStats::class,
             Event::class,
-            WebhookLog::class,
         ];
     }
 }

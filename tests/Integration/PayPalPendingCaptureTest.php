@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Tests\Integration;
 
+use Dono\Analytics\Event;
 use Dono\Donations\DonationRepository;
 use Dono\Donations\DonationService;
 use Dono\Foundation\Plugin;
@@ -213,7 +214,7 @@ final class PayPalPendingCaptureTest extends IntegrationTestCase
         $this->assertSame(self::CAPTURE, $meta['paypal_capture_id'] ?? null);
     }
 
-    public function test_a_redelivery_replaces_the_outcome_of_the_attempt_it_repeats(): void
+    public function test_a_redelivery_is_recorded_as_its_own_attempt(): void
     {
         $reference = $this->newDonation();
         $this->capture($reference);
@@ -223,20 +224,23 @@ final class PayPalPendingCaptureTest extends IntegrationTestCase
         $this->deliverCompleted('WH-REDELIVER-1', 'NO-SUCH-REFERENCE');
         $this->deliverCompleted('WH-REDELIVER-1', $reference);
 
-        $row = self::$wpdb->get_row(
-            "SELECT processed, error FROM " . self::$prefix
-            . "dono_webhooks_log WHERE external_id = 'WH-REDELIVER-1'",
-            ARRAY_A
-        );
+        $rows = Event::query()
+            ->whereLike('type', 'webhook.paypal%')
+            ->orderBy('id', 'ASC')
+            ->getAll();
 
-        $this->assertNotNull($row, 'the delivery is recorded once, under its event id');
+        $this->assertCount(2, $rows, 'both attempts are kept');
         $this->assertSame('paid', $this->find($reference)->status);
 
-        // A gateway resends until it gets a 2xx, so the newest attempt is the
-        // one that says what happened. Keeping the first leaves a permanent red
-        // row for money that did land.
-        $this->assertSame(1, (int) $row['processed']);
-        $this->assertNull($row['error']);
+        // The newest attempt is the one that says what happened. Overwriting
+        // the first, or dropping the second, would leave a permanent failure
+        // recorded against money that did land.
+        $first = (array) $rows[0]->payload;
+        $last  = (array) $rows[1]->payload;
+
+        $this->assertFalse((bool) $first['processed']);
+        $this->assertTrue((bool) $last['processed']);
+        $this->assertNull($last['error'] ?? null);
     }
 
     private function deliverCompleted(string $eventId, string $reference): void

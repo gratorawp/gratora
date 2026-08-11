@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Dono\Tests\Integration;
 
+use Dono\Analytics\Event;
+
 use WP_REST_Request;
 
 final class WebhookRouterTest extends IntegrationTestCase
@@ -18,7 +20,7 @@ final class WebhookRouterTest extends IntegrationTestCase
         $this->assertSame(404, $res->get_status());
         $this->assertSame('dono_unknown_gateway', $res->get_data()['code']);
 
-        $logCount = (int) self::$wpdb->get_var("SELECT COUNT(*) FROM " . self::$prefix . "dono_webhooks_log");
+        $logCount = (int) Event::query()->whereLike('type', 'webhook.%')->count();
         $this->assertSame(0, $logCount, 'No log row when gateway is unknown - we never reached a handler');
     }
 
@@ -31,11 +33,13 @@ final class WebhookRouterTest extends IntegrationTestCase
 
         $this->assertSame(405, $res->get_status());
 
-        $log = self::$wpdb->get_row("SELECT * FROM " . self::$prefix . "dono_webhooks_log");
-        $this->assertNotNull($log);
-        $this->assertSame('offline', $log->gateway);
-        $this->assertFalse((bool) $log->signature_ok);
-        $this->assertFalse((bool) $log->processed);
-        $this->assertNotEmpty($log->error);
+        $rows = Event::query()->whereLike('type', 'webhook.%')->getAll();
+        $this->assertCount(1, $rows);
+        $this->assertSame('webhook.offline', $rows[0]->type);
+
+        $payload = (array) $rows[0]->payload;
+        $this->assertFalse((bool) $payload['verified']);
+        $this->assertFalse((bool) $payload['processed']);
+        $this->assertNotEmpty($payload['error']);
     }
 }

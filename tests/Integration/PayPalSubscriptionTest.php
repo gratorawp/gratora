@@ -539,8 +539,13 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
         $this->assertSame(200, $res->get_status());
         $this->assertFalse($res->get_data()['handled']);
 
-        $log = \Dono\Webhooks\WebhookLog::query()->orderBy('id', 'DESC')->get();
-        $this->assertStringStartsWith('Refused:', (string) $log->error, 'and the reason is on the delivery');
+        $rows = \Dono\Analytics\Event::query()->whereLike('type', 'webhook.%')->orderBy('id', 'DESC')->limit(1)->getAll();
+        $this->assertNotEmpty($rows);
+        $this->assertStringStartsWith(
+            'Refused:',
+            (string) ((array) $rows[0]->payload)['error'],
+            'and the reason is on the delivery'
+        );
     }
 
     public function test_an_opening_sale_in_the_wrong_currency_does_not_confirm_the_signup(): void

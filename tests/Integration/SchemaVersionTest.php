@@ -31,8 +31,12 @@ final class SchemaVersionTest extends IntegrationTestCase
     /**
      * sha256 of every registered model's compiled CREATE TABLE, in class order.
      * Update it in the same commit as the DONO_DB_VERSION bump.
+     *
+     * Dropping a model is the one schema change that needs no bump: migrate()
+     * iterates registered models, and dbDelta never drops a table, so there is
+     * nothing for a migration to do and the orphaned table is inert either way.
      */
-    private const FINGERPRINT = 'e7d077b4579d8d2c3a945aa9c9f0b1d5e6bf51d3ddf08cd9eabb49411fd083ab';
+    private const FINGERPRINT = '69e020fcd336d04d350676c1a98a7a23c56d4ebb176742bc5be52f0e022a851b';
 
     public function test_the_schema_matches_the_declared_db_version(): void
     {

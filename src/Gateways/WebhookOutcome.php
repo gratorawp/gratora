@@ -6,9 +6,10 @@ namespace Dono\Gateways;
 
 /**
  * Result of `PaymentGateway::handleWebhook()`. The router uses it to set the
- * HTTP status, write the `dono_webhooks_log` row (external_id for dedup), and
- * record whether the action ran. `handled=true` also covers a recognized
- * duplicate that was intentionally no-op'd.
+ * HTTP status and to record the delivery: what the gateway called the event,
+ * whether the signature verified, whether the action ran, and what went wrong.
+ * `handled=true` also covers a recognized duplicate that was intentionally
+ * no-op'd.
  *
  * @since 1.0.0
  */
