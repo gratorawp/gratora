@@ -734,27 +734,64 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     }
 
     /** @since 1.0.0 */
+    /**
+     * A Customer this donor already has at this gateway, in this mode.
+     *
+     * Test and live are separate Stripe accounts, so an id from one is not a
+     * record in the other.
+     *
+     * @since 1.0.0
+     */
+    private function knownCustomerId(Donation $donation): string
+    {
+        $rows = RecurringPlan::query()
+            ->where('donor_id', (int) $donation->donor_id)
+            ->where('gateway', $this->id())
+            ->where('is_test', (bool) $donation->is_test ? 1 : 0)
+            ->whereIsNotNull('gateway_customer_id')
+            ->where('gateway_customer_id', '', '!=')
+            ->orderBy('id', 'DESC')
+            ->limit(1)
+            ->getAll();
+
+        return $rows === [] ? '' : (string) $rows[0]->gateway_customer_id;
+    }
+
     private function getOrCreateStripeCustomer(Donation $donation): string
     {
         $donor = $this->donors->findById((int) $donation->donor_id);
         $email = $donor ? $this->donorService->decryptEmail($donor) : null;
         $name  = trim(($donation->donor_first_name ?? '') . ' ' . ($donation->donor_last_name ?? ''));
 
+        // A donor who already gives recurring has a Customer, and reusing it is
+        // what keeps one person from accumulating several: the portal's
+        // change-card path works from a single Customer, and a duplicate splits
+        // a donor's cards across records neither screen can reconcile.
+        $known = $this->knownCustomerId($donation);
+        if ($known !== '') {
+            return $known;
+        }
+
+        // The Customer belongs to the donor, not to whichever donation happened
+        // to create it, so nothing donation-specific goes on it. That also keeps
+        // the body identical across a donor's donations, which is what the
+        // idempotency key below requires.
         $params = [
             'metadata' => [
-                'dono_donor_id'    => (string) $donation->donor_id,
-                'dono_donation_id' => (string) $donation->id,
+                'dono_donor_id' => (string) $donation->donor_id,
             ],
         ];
         if ($email !== null && $email !== '') $params['email'] = $email;
         if ($name !== '')                     $params['name']  = $name;
 
-        // Keyed on the donor, not the donation: this method creates
-        // unconditionally despite its name, so without a key every retried
-        // recurring donation mints another Customer for the same person, and
-        // the duplicates fragment the portal's change-card path.
+        // Keyed on the donor and on what is being sent. Stripe refuses a key
+        // replayed with different parameters, and a donor who corrects their
+        // name between donations sends different parameters, so a key that
+        // ignored the body would fail their next donation outright rather than
+        // deduplicating anything.
         $customer = $this->api->post('/customers', $params, [
-            'Idempotency-Key' => 'dono_cus_' . (int) $donation->donor_id,
+            'Idempotency-Key' => 'dono_cus_' . (int) $donation->donor_id
+                . '_' . substr(hash('sha256', (string) wp_json_encode($params)), 0, 16),
         ]);
         $id       = (string) ($customer['id'] ?? '');
         if ($id === '') {
