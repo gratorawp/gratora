@@ -379,6 +379,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
 
         return match ($type) {
             'PAYMENT.CAPTURE.COMPLETED' => $this->handleCaptureCompleted($eventId, $type, $resource),
+            'PAYMENT.CAPTURE.PENDING'   => $this->handleCapturePending($eventId, $type, $resource),
             'PAYMENT.CAPTURE.DENIED',
             'PAYMENT.CAPTURE.DECLINED'  => $this->handleCaptureDenied($eventId, $type, $resource),
             'PAYMENT.CAPTURE.REFUNDED'  => $this->handleCaptureRefunded($eventId, $type, $resource),
@@ -431,6 +432,54 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
             'payment_method' => 'paypal',
             'metadata'       => ['paypal_capture_id' => (string) ($capture['id'] ?? '')],
         ]);
+
+        return new WebhookOutcome(
+            signature_ok: true,
+            external_id: $eventId,
+            event_type: $type,
+            handled: true,
+        );
+    }
+
+    /**
+     * PayPal held the money rather than taking or refusing it.
+     *
+     * The donor's browser normally learns this from the capture response and
+     * moves the donation itself, but a donor who closes the tab never sends
+     * that request. This is the only other moment PayPal states the reason, so
+     * without it such a donation sits at pending with nothing explaining it.
+     *
+     * @param array<string,mixed> $capture
+     *
+     * @since 1.0.0
+     */
+    private function handleCapturePending(string $eventId, string $type, array $capture): WebhookOutcome
+    {
+        $donation = $this->donationForCapture($capture);
+        if (! $donation) {
+            return $this->unmatched($eventId, $type, 'capture');
+        }
+
+        $currency = strtoupper((string) ($capture['amount']['currency_code'] ?? ''));
+        $refusal  = WebhookPaymentGuard::refuse(
+            $donation,
+            $this->id(),
+            $this->verifiedIsTest,
+            isset($capture['amount']['value'])
+                ? PayPalMoney::toStoredCents((string) $capture['amount']['value'], $currency ?: (string) $donation->currency)
+                : null,
+            $currency !== '' ? $currency : null,
+        );
+        if ($refusal !== null) {
+            return $this->refused($eventId, $type, $refusal);
+        }
+
+        // No-ops once the donation has left pending, so a capture response that
+        // already recorded the reason is not overwritten by this.
+        $this->donationService->markProcessing($donation, 'paypal_capture_pending', array_filter([
+            'paypal_capture_id'     => (string) ($capture['id'] ?? ''),
+            'paypal_pending_reason' => (string) ($capture['status_details']['reason'] ?? ''),
+        ], static fn ($v) => $v !== ''));
 
         return new WebhookOutcome(
             signature_ok: true,

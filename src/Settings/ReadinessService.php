@@ -307,7 +307,7 @@ final class ReadinessService
             'paypal-webhook',
             'money',
             __('PayPal has no webhook registered', 'dono'),
-            __('Subscription renewals and refunds made in PayPal will not reach this site.', 'dono'),
+            __('Every PayPal notification will be rejected. Donations PayPal settles after checkout will stay unpaid, and refunds, disputes and renewals will not reach this site.', 'dono'),
             'gateways',
             __('Register the webhook', 'dono')
         );

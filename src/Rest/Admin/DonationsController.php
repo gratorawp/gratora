@@ -16,6 +16,7 @@ use Dono\Donations\DonationNoteRepository;
 use Dono\Donations\DonationRepository;
 use Dono\Donations\DonationService;
 use Dono\Donations\Refund;
+use Dono\Gateways\PayPal\PayPalHoldReason;
 use Dono\Donors\Donor;
 use Dono\Donors\DonorRepository;
 use Dono\Donors\DonorService;
@@ -521,6 +522,29 @@ final class DonationsController
      *
      * @since 1.0.0
      */
+    /**
+     * Why the money has not landed yet, in words.
+     *
+     * A donation can sit at processing for days, and the gateway is the only
+     * thing that knows whether that is normal. Without this the screen says
+     * "Processing" and stops, which is indistinguishable from broken.
+     *
+     * @since 1.0.0
+     */
+    private static function processingReason(Donation $donation): ?string
+    {
+        if ($donation->status !== 'processing' || $donation->gateway !== 'paypal') {
+            return null;
+        }
+
+        $meta = (array) ($donation->gateway_metadata ?? []);
+        if (! array_key_exists('paypal_pending_reason', $meta)) {
+            return null;
+        }
+
+        return PayPalHoldReason::describe((string) $meta['paypal_pending_reason']);
+    }
+
     private function donationLike(string $email, int $amountCents, string $currency, string $receivedAt): ?Donation
     {
         $donor = $this->donorService->findByEmail($email);
@@ -836,6 +860,7 @@ final class DonationsController
                 'donor_name_given'     => trim((string) $donation->donor_first_name . ' ' . (string) $donation->donor_last_name) ?: null,
                 'is_anonymous'         => $donation->is_anonymous,
                 'failure_reason'       => $donation->failure_reason,
+                'processing_reason'    => self::processingReason($donation),
                 'source_attribution'   => $donation->source_attribution,
                 'channel'              => $channel,
                 'flags'                => $donation->flags,

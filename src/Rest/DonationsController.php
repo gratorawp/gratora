@@ -565,6 +565,31 @@ final class DonationsController
             return new WP_Error('dono_gateway_confirm_failed', __('We could not confirm your payment. Please try again in a moment.', 'dono'), ['status' => 502]);
         }
 
+        // A held capture is not a failure: the gateway has the money and will
+        // settle it by webhook. Failing the donation here would discard the
+        // transaction id that the settling webhook and the refund path both
+        // need, and would tell an admin the payment was declined when it was
+        // taken.
+        if (! $result->success && $result->pending) {
+            if ($result->gateway_txn_id) {
+                $donation->gateway_txn_id = (string) $result->gateway_txn_id;
+            }
+            $donation = $this->donations->markProcessing(
+                $donation,
+                'gateway_capture_pending',
+                array_filter((array) $result->metadata, static fn ($v) => $v !== null && $v !== '')
+            );
+
+            return new WP_REST_Response([
+                'reference'      => $donation->reference,
+                'status'         => $donation->status,
+                'amount_cents'   => $donation->amount_cents,
+                'currency'       => $donation->currency,
+                'paid_at'        => $donation->paid_at,
+                'gateway_txn_id' => $donation->gateway_txn_id,
+            ], 200);
+        }
+
         if (! $result->success) {
             $this->donations->markFailed($donation, $result->error ?? __('Gateway returned failure.', 'dono'));
             return new WP_Error('dono_confirm_failed', $result->error ?? __('Confirmation failed.', 'dono'), ['status' => 402]);

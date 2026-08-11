@@ -106,7 +106,7 @@ function ModeKeys( { mode, account, onSaved, onRemove } ) {
 
             { saved && ! hasHook && (
                 <p className="dono-connect-p">
-                    { __( 'No webhook id saved for this mode. Refunds and renewals from PayPal will be rejected until you add one.', 'dono' ) }
+                    { __( 'No webhook id saved for this mode. Every PayPal notification will be rejected until you add one, so donations PayPal settles later will stay unpaid, and refunds, disputes and renewals will not reach this site.', 'dono' ) }
                 </p>
             ) }
 
@@ -128,7 +128,10 @@ function ModeKeys( { mode, account, onSaved, onRemove } ) {
                         label={ __( 'Webhook id (optional)', 'dono' ) }
                         help={ __( 'From the webhook you created in the PayPal dashboard. PayPal cannot verify incoming events without it.', 'dono' ) }
                     >
-                        <KeyField value={ hook } onChange={ setHook } placeholder="WH-..." />
+                        { /* WH-... is the format of a PayPal event id, not of a
+                             webhook id, and the two sit next to each other in
+                             PayPal's dashboard. */ }
+                        <KeyField value={ hook } onChange={ setHook } placeholder="5ML12345AB678901C" />
                     </FormRow>
                     <div className="dono-stripe-mode__actions">
                         <Btn variant="primary" size="sm" onClick={ save } isBusy={ busy } disabled={ busy }>

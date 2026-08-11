@@ -98,7 +98,11 @@ final class PayPalController
             $this->donationService->markProcessing(
                 $donation,
                 'paypal_capture_pending',
-                array_filter((array) $result->metadata)
+                // Only genuinely absent values are dropped. A bare array_filter
+                // also discards '0' and false, and the key that survives this
+                // is the one an admin reads to find out why PayPal is holding
+                // the money.
+                array_filter((array) $result->metadata, static fn ($v) => $v !== null && $v !== '')
             );
 
             return new WP_REST_Response([

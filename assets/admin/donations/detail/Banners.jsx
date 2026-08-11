@@ -12,11 +12,12 @@ function Banner( { variant, children } ) {
 }
 
 export default function Banners( { donation } ) {
-    const isTest      = !! donation.is_test;
-    const isDisputed  = donation.status === 'disputed';
-    const isFailed    = donation.status === 'failed';
+    const isTest       = !! donation.is_test;
+    const isDisputed   = donation.status === 'disputed';
+    const isFailed     = donation.status === 'failed';
+    const isProcessing = donation.status === 'processing' && !! donation.processing_reason;
 
-    if ( ! isTest && ! isDisputed && ! isFailed ) return null;
+    if ( ! isTest && ! isDisputed && ! isFailed && ! isProcessing ) return null;
 
     return (
         <>
@@ -30,6 +31,12 @@ export default function Banners( { donation } ) {
                 <Banner variant="danger">
                     <strong>{ __( 'Chargeback in progress.', 'dono' ) }</strong>{ ' ' }
                     { __( 'Review the dispute in your gateway dashboard before refunding.', 'dono' ) }
+                </Banner>
+            ) }
+            { isProcessing && (
+                <Banner variant="warn">
+                    <strong>{ __( 'Payment not settled yet.', 'dono' ) }</strong>{ ' ' }
+                    { donation.processing_reason }
                 </Banner>
             ) }
             { isFailed && donation.failure_reason && (

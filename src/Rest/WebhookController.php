@@ -26,6 +26,10 @@ final class WebhookController
 {
     private const NAMESPACE = 'dono/v1';
 
+    /** One recorded refusal per gateway per window. */
+    private const REJECT_NOTICE_KEY = 'dono_webhook_rejected_';
+    private const REJECT_NOTICE_TTL = 15 * MINUTE_IN_SECONDS;
+
     /** @since 1.0.0 */
     public function __construct(
         private GatewayManager $gateways,
@@ -74,6 +78,24 @@ final class WebhookController
         $this->logDelivery($gatewayId, $request, $outcome);
 
         if (! $outcome->signature_ok && $outcome->http_status >= 400) {
+            // The delivery row alone is not enough: it has no reader, so a
+            // gateway whose every event is being refused looks exactly like a
+            // gateway that has sent nothing. This puts it on the screen an
+            // owner is already told to check when payments do not arrive.
+            //
+            // Throttled, and never for 405: this route is public and
+            // unauthenticated, so a row per rejection lets anyone flush the
+            // owner's real errors out of a bounded log by posting junk. A burst
+            // of refusals is one fact, and one row states it.
+            if ($outcome->http_status !== 405 && ! get_transient(self::REJECT_NOTICE_KEY . $gatewayId)) {
+                set_transient(self::REJECT_NOTICE_KEY . $gatewayId, 1, self::REJECT_NOTICE_TTL);
+                ErrorLog::record(
+                    'webhook.' . $gatewayId,
+                    $outcome->error ?? __('Signature verification failed. The webhook will keep being rejected until the gateway credentials and webhook id match this site.', 'dono'),
+                    ['gateway' => $gatewayId, 'event_type' => $outcome->event_type ?? 'unknown']
+                );
+            }
+
             return new WP_Error(
                 'dono_webhook_rejected',
                 $outcome->error ?? __('Webhook rejected.', 'dono'),
@@ -106,9 +128,22 @@ final class WebhookController
             $headers[$name] = is_array($values) ? implode(', ', $values) : (string) $values;
         }
 
+        // A rejected delivery has no event id to dedup on, and (gateway, '')
+        // is UNIQUE: without a synthetic id the first refusal is kept and every
+        // one after it is silently dropped as a duplicate, which is the exact
+        // opposite of what a run of refusals should look like.
+        $externalId = (string) ($outcome->external_id ?? '');
+        if ($externalId === '') {
+            $externalId = 'unverified-' . substr(
+                hash('sha256', $gateway . '|' . $request->get_body() . '|' . $this->clock->now()->format('Y-m-d H:i:s.u')),
+                0,
+                32
+            );
+        }
+
         $log = WebhookLog::make();
         $log->gateway      = $gateway;
-        $log->external_id  = $outcome->external_id ?? '';
+        $log->external_id  = $externalId;
         $log->event_type   = $outcome->event_type ?? 'unknown';
         $log->signature_ok = $outcome->signature_ok;
         $log->payload      = (string) $request->get_body();

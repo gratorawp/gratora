@@ -395,7 +395,13 @@ final class DonationService
             $donation->payment_method_last4 = $result['payment_method_last4'] ?? null;
             $donation->fee_cents            = isset($result['fee_cents']) ? (int) $result['fee_cents'] : 0;
             $donation->net_cents            = max(0, $donation->amount_cents - $donation->fee_cents);
-            $donation->gateway_metadata     = $result['metadata'] ?? $donation->gateway_metadata;
+            // Merged, not replaced: a donation reaches this point carrying what
+            // earlier steps learned about it, and the settling event only knows
+            // about itself. Replacing drops the hold reason, the order id and
+            // the payer email at the one moment somebody wants to read them.
+            $donation->gateway_metadata     = isset($result['metadata'])
+                ? ((array) $result['metadata']) + (array) ($donation->gateway_metadata ?? [])
+                : $donation->gateway_metadata;
             $donation->paid_at              = $paidAt;
             $donation->updated_at           = $now;
             $donation->save();

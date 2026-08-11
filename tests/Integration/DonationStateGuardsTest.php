@@ -7,6 +7,8 @@ namespace Dono\Tests\Integration;
 use Dono\Donations\Donation;
 use Dono\Donations\DonationRepository;
 use Dono\Donations\DonationService;
+use Dono\Vendor\Queryable\QueryException;
+use Dono\Webhooks\WebhookLog;
 use WP_REST_Request;
 
 /**
@@ -96,18 +98,60 @@ final class DonationStateGuardsTest extends IntegrationTestCase
         $this->assertSame('refunded', $this->donations()->findByReference($donation->reference)->status);
     }
 
-    public function test_duplicate_webhook_delivery_dedupes_quietly(): void
+    public function test_repeated_delivery_never_surfaces_as_a_server_error(): void
     {
         $first  = rest_do_request(new WP_REST_Request('POST', '/dono/v1/webhooks/offline'));
         $second = rest_do_request(new WP_REST_Request('POST', '/dono/v1/webhooks/offline'));
 
         $this->assertLessThan(500, $first->get_status());
         $this->assertLessThan(500, $second->get_status(), 'Redelivery must not surface as a server error');
+    }
+
+    public function test_deliveries_without_an_event_id_are_each_recorded(): void
+    {
+        rest_do_request(new WP_REST_Request('POST', '/dono/v1/webhooks/offline'));
+        rest_do_request(new WP_REST_Request('POST', '/dono/v1/webhooks/offline'));
 
         $count = (int) self::$wpdb->get_var(
             'SELECT COUNT(*) FROM ' . self::$prefix . "dono_webhooks_log WHERE gateway = 'offline'"
         );
-        $this->assertSame(1, $count, 'Redelivery must dedupe to a single log row');
+
+        // A refused delivery carries no event id, so there is nothing to call
+        // it a duplicate of. Collapsing these hides a gateway whose every
+        // delivery is being turned away behind a single stale row.
+        $this->assertSame(2, $count, 'Each id-less delivery is its own evidence');
+    }
+
+    public function test_a_redelivered_event_id_still_dedupes(): void
+    {
+        $prevSuppress = self::$wpdb->suppress_errors(true);
+
+        foreach ([1, 2] as $_) {
+            $log = WebhookLog::make();
+            $log->gateway      = 'paypal';
+            $log->external_id  = 'WH-REDELIVERED-1';
+            $log->event_type   = 'PAYMENT.CAPTURE.COMPLETED';
+            $log->signature_ok = true;
+            $log->payload      = '{}';
+            $log->headers      = [];
+            $log->processed    = true;
+            $log->processed_at = '2026-08-11 12:00:00';
+            $log->received_at  = '2026-08-11 12:00:00';
+            try {
+                $log->save();
+            } catch (QueryException $e) {
+                $this->assertStringContainsStringIgnoringCase('duplicate entry', $e->getMessage());
+            }
+        }
+
+        self::$wpdb->last_error = '';
+        self::$wpdb->suppress_errors($prevSuppress);
+
+        $count = (int) self::$wpdb->get_var(
+            'SELECT COUNT(*) FROM ' . self::$prefix
+            . "dono_webhooks_log WHERE external_id = 'WH-REDELIVERED-1'"
+        );
+        $this->assertSame(1, $count, 'A real event id must still collapse a redelivery');
     }
 
     /** Create an offline donation via the public API and confirm it. */
