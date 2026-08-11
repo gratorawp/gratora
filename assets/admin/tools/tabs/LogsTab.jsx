@@ -107,10 +107,10 @@ export default function LogsTab( { active, setNotice } ) {
         message: source
             ? sprintf(
                 /* translators: %s: the log source being cleared, e.g. webhook.stripe */
-                __( 'Deletes every entry recorded under %s, including the record of what that gateway sent this site. Nothing else is touched.', 'dono' ),
+                __( 'Deletes every entry recorded under %s. Nothing else is touched.', 'dono' ),
                 source
             )
-            : __( 'Deletes every entry: failures Dono recorded and the history of what your gateways sent this site. Nothing else is touched, and the log fills again as things happen.', 'dono' ),
+            : __( 'Deletes the failures Dono recorded and the history of what your gateways sent. What happened to donations, donors and subscriptions is kept: those entries are the record the donor timelines and the dashboard read from.', 'dono' ),
         confirmLabel: __( 'Clear log', 'dono' ),
         destructive:  true,
         onConfirm:    doClear,
@@ -127,14 +127,14 @@ export default function LogsTab( { active, setNotice } ) {
         ? sprintf(
             /* translators: %d: number of days entries are kept. */
             _n(
-                'What Dono could not finish and what your gateways sent this site, newest first. Entries are removed after %d day.',
-                'What Dono could not finish and what your gateways sent this site, newest first. Entries are removed after %d days.',
+                'Everything Dono recorded, newest first: what happened, what your gateways sent, and what it could not finish. Entries are removed after %d day.',
+                'Everything Dono recorded, newest first: what happened, what your gateways sent, and what it could not finish. Entries are removed after %d days.',
                 retention,
                 'dono'
             ),
             retention
         )
-        : __( 'What Dono could not finish and what your gateways sent this site, newest first.', 'dono' );
+        : __( 'Everything Dono recorded, newest first: what happened, what your gateways sent, and what it could not finish.', 'dono' );
 
     return (
         <div className="dono-panel">
@@ -191,7 +191,7 @@ export default function LogsTab( { active, setNotice } ) {
                     <p className="dono-tools-empty">
                         { filtered
                             ? __( 'Nothing matches those filters.', 'dono' )
-                            : __( 'Nothing recorded yet. No failures, and no gateway has sent anything to this site.', 'dono' ) }
+                            : __( 'Nothing recorded yet.', 'dono' ) }
                     </p>
                 ) : (
                     <ul className="dono-tools-log">
@@ -242,7 +242,7 @@ export default function LogsTab( { active, setNotice } ) {
 
                 { ! error && !! items.length && (
                     <p className="dono-tools-note">
-                        { __( 'A delivery marked as needing no action is normal: gateways send every event they have, and Dono acts only on the ones it needs. Request bodies are not kept, because they carry the donor details the gateway sent.', 'dono' ) }
+                        { __( 'A delivery marked as needing no action is normal: gateways send every event they have, and Dono acts only on the ones it needs. Request bodies are not kept, because they carry the donor details the gateway sent. Clearing the log removes failures and deliveries, not what happened to a donation.', 'dono' ) }
                     </p>
                 ) }
 

@@ -1,2 +1,13 @@
 // Forwarded to @dono/ui - the single source of truth for the shared admin chrome.
 @import '@dono/ui/scss/admin-base';
+
+// A switch and its label in a page head, beside the count it changes.
+.dono-inline-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--dono-color-text-muted, #6b7280);
+    white-space: nowrap;
+}

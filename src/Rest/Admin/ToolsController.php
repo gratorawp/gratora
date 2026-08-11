@@ -221,9 +221,30 @@ final class ToolsController
      */
     public function clearLog(\WP_REST_Request $request): WP_REST_Response
     {
-        $deleted = self::logQuery(self::logSource((string) $request['source']), false)->delete();
+        // Diagnostics only. The rest of this table is the record of what
+        // happened to people's money: the donor timelines read from it, so do
+        // the dashboard figures, and a button labelled Clear log must not be
+        // the thing that erases a donation's history.
+        $query = Event::query()->where(static function ($q): void {
+            $q->whereLike('type', ErrorLog::PREFIX . '%')
+                ->orWhereLike('type', self::WEBHOOK_PREFIX . '%');
+        });
+
+        $source = self::logSource((string) $request['source']);
+        if ($source !== '' && self::isDiagnostic($source)) {
+            $query = Event::query()->whereLike('type', $source . '%');
+        }
+
+        $deleted = $query->delete();
 
         return new WP_REST_Response(['ok' => true, 'deleted' => (int) $deleted->affectedRows], 200);
+    }
+
+    /** @since 1.0.0 */
+    private static function isDiagnostic(string $source): bool
+    {
+        return str_starts_with($source, ErrorLog::PREFIX)
+            || str_starts_with($source, self::WEBHOOK_PREFIX);
     }
 
     /**
@@ -238,9 +259,7 @@ final class ToolsController
     {
         $source = preg_replace('/[^a-z0-9_.\-]/', '', strtolower(trim($raw))) ?: '';
 
-        return str_starts_with($source, ErrorLog::PREFIX) || str_starts_with($source, self::WEBHOOK_PREFIX)
-            ? $source
-            : '';
+        return $source;
     }
 
     /** @since 1.0.0 */
@@ -250,11 +269,6 @@ final class ToolsController
 
         if ($source !== '') {
             $query->whereLike('type', $source . '%');
-        } else {
-            $query->where(static function ($q): void {
-                $q->whereLike('type', ErrorLog::PREFIX . '%')
-                    ->orWhereLike('type', self::WEBHOOK_PREFIX . '%');
-            });
         }
 
         // Every recorded error is a failure; a delivery has to be read for it.
@@ -280,11 +294,58 @@ final class ToolsController
      */
     private static function logRow(Event $e): array
     {
-        return str_starts_with((string) $e->type, self::WEBHOOK_PREFIX)
-            ? self::deliveryRow($e)
-            : self::errorRow($e);
+        if (str_starts_with((string) $e->type, self::WEBHOOK_PREFIX)) {
+            return self::deliveryRow($e);
+        }
+
+        return str_starts_with((string) $e->type, ErrorLog::PREFIX)
+            ? self::errorRow($e)
+            : self::activityRow($e);
     }
 
+    /**
+     * Everything that is neither a failure nor a delivery: what was done, and
+     * to which record. These rows are history rather than diagnostics, so the
+     * clear control leaves them alone.
+     *
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
+    private static function activityRow(Event $e): array
+    {
+        $payload = is_array($e->payload) ? $e->payload : [];
+
+        // The ids are columns of their own, so they are folded back in or the
+        // one thing that says which donation this was about is missing.
+        foreach (['donation_id', 'donor_id', 'recurring_plan_id', 'campaign_id', 'user_id'] as $key) {
+            if (! empty($e->{$key})) {
+                $payload[$key] = (int) $e->{$key};
+            }
+        }
+
+        return [
+            'id'          => (int) $e->id,
+            'kind'        => 'activity',
+            'source'      => (string) $e->type,
+            'message'     => self::readableType((string) $e->type),
+            'context'     => $payload,
+            'occurred_at' => (string) $e->occurred_at,
+        ];
+    }
+
+    /**
+     * "recurring.amount_changed" reads as "Recurring amount changed", so an
+     * add-on's own event type is words rather than a machine key.
+     *
+     * @since 1.0.0
+     */
+    private static function readableType(string $type): string
+    {
+        $words = trim(str_replace(['.', '_'], ' ', $type));
+
+        return $words === '' ? $type : ucfirst($words);
+    }
     /**
      * @return array<string,mixed>
      *
@@ -357,10 +418,6 @@ final class ToolsController
         $rows = Event::query()
             ->select('type')
             ->distinct()
-            ->where(static function ($q): void {
-                $q->whereLike('type', ErrorLog::PREFIX . '%')
-                    ->orWhereLike('type', self::WEBHOOK_PREFIX . '%');
-            })
             ->orderBy('type', 'ASC')
             ->getAll();
 
