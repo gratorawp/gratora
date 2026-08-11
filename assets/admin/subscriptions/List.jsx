@@ -376,7 +376,7 @@ export default function List() {
         sort:    { field: 'next_payment_at', direction: 'asc' },
         filters: [],
         search:  '',
-        fields:  [ 'donor', 'amount', 'status', 'next_payment_at', 'campaign', 'gateway', 'lifetime' ],
+        fields:  [ 'donor', 'amount', 'status', 'next_payment_at', 'started_at', 'campaign', 'gateway', 'lifetime' ],
     } );
 
     const [ data, setData ]         = useState( [] );
@@ -550,7 +550,9 @@ export default function List() {
             label:         __( 'Amount', 'dono' ),
             enableSorting: true,
             render: ( { item } ) => (
-                <span>
+                // Muted once the plan has ended: it describes a charge that will
+                // not happen again, and Lifetime beside it says what was taken.
+                <span className={ isTerminal( item.status ) ? 'dono-row__sub' : undefined }>
                     { formatAmount( item.amount_cents, item.currency ) }
                     <span className="dono-row__sub"> / { intervalLabel( item.interval_unit, item.interval_count ) }</span>
                 </span>
@@ -583,7 +585,24 @@ export default function List() {
             enableSorting: true,
             render: ( { item } ) => (
                 isTerminal( item.status )
-                    ? <span className="dono-row__sub">-</span>
+                    ? (
+                        <span className="dono-row__sub">
+                            { item.cancelled_at
+                                ? sprintf(
+                                    /* translators: %s: date the plan ended. */
+                                    __( 'Ended %s', 'dono' ),
+                                    formatDate( item.cancelled_at )
+                                )
+                                : __( 'Ended', 'dono' ) }
+                        </span>
+                    )
+                    : item.status === 'paused' && item.resume_at
+                        ? (
+                            <div className="dono-row">
+                                <div className="dono-row__name">{ formatDate( item.resume_at ) }</div>
+                                <div className="dono-row__sub">{ __( 'when it resumes', 'dono' ) }</div>
+                            </div>
+                        )
                     : (
                         <div className="dono-row">
                             <div className="dono-row__name">{ formatDate( item.next_payment_at ) }</div>
@@ -593,7 +612,16 @@ export default function List() {
             ),
         },
         {
-            id:       'campaign',
+            id:            'started_at',
+            label:         __( 'Giving since', 'dono' ),
+            enableSorting: true,
+            render: ( { item } ) => (
+                item.started_at
+                    ? <span>{ formatDate( item.started_at ) }</span>
+                    : <span className="dono-row__sub">-</span>
+            ),
+        },
+        {            id:       'campaign',
             label:    __( 'Campaign', 'dono' ),
             elements: campaigns.map( ( c ) => ( { value: String( c.id ), label: c.title || `#${ c.id }` } ) ),
             filterBy: { operators: [ 'is' ] },
@@ -609,10 +637,7 @@ export default function List() {
             elements: gateways,
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => (
-                <div className="dono-row">
-                    <div className="dono-row__name" style={ { textTransform: 'capitalize' } }>{ item.gateway }</div>
-                    <code className="dono-row__sub dono-row__sub--mono">{ item.gateway_subscription_id }</code>
-                </div>
+                <span style={ { textTransform: 'capitalize' } }>{ item.gateway }</span>
             ),
         },
         {
@@ -659,6 +684,22 @@ export default function List() {
     ], [ gateways, campaigns ] );
 
     const actions = useMemo( () => [
+        {
+            id:          'copy_subscription_id',
+            label:       __( 'Copy subscription id', 'dono' ),
+            isPrimary:   false,
+            isEligible:  ( item ) => !! item.gateway_subscription_id,
+            callback:    async ( [ item ] ) => {
+                try {
+                    await window.navigator?.clipboard?.writeText( item.gateway_subscription_id );
+                    notify.success( __( 'Subscription id copied.', 'dono' ) );
+                } catch ( e ) {
+                    // No clipboard permission, so show it instead of failing
+                    // silently: it is a lookup key and reading it is the point.
+                    notify.error( item.gateway_subscription_id );
+                }
+            },
+        },
         {
             id:    'retry',
             label: __( 'Retry payment', 'dono' ),
