@@ -14,7 +14,7 @@ import Dialog from '../_shared/components/Dialog';
 import Btn from '../_shared/components/Btn';
 import notify from '../_shared/notify';
 import { useExtensionTabs, ExtensionTabPanel } from '../_shared/extensionTabs';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 
 import Header   from './detail/Header';
 import Banners  from './detail/Banners';
@@ -162,9 +162,27 @@ export default function Detail( { reference } ) {
 
     const openRefund  = () => setShowRefund( true );
     const closeRefund = () => setShowRefund( false );
-    const refundDone  = () => {
+    const refundDone  = ( result ) => {
         setShowRefund( false );
-        notify.success( __( 'Refund issued.', 'dono' ) );
+        notify.success(
+                result?.plan?.stopped
+                    ? __( 'Refund issued, and the recurring schedule is stopped.', 'dono' )
+                    : __( 'Refund issued.', 'dono' )
+            );
+        // Sticky: the money moved and the schedule did not stop, so this has to
+        // survive long enough to be acted on.
+        if ( result?.plan && ! result.plan.stopped ) {
+            notify.error(
+                result.plan.error
+                    ? sprintf(
+                        /* translators: %s: why the schedule could not be cancelled */
+                        __( 'The refund went through, but the recurring schedule was not cancelled. Cancel it from the Subscriptions screen. Reason: %s', 'dono' ),
+                        result.plan.error
+                    )
+                    : __( 'The refund went through, but the recurring schedule was not cancelled. Cancel it from the Subscriptions screen.', 'dono' ),
+                { duration: 0 }
+            );
+        }
         load();
     };
 
@@ -234,7 +252,12 @@ export default function Detail( { reference } ) {
             </div>
 
             { showRefund && (
-                <RefundDialog donation={ donation } onClose={ closeRefund } onSuccess={ refundDone } />
+                <RefundDialog
+                    donation={ donation }
+                    plan={ payload.recurring_plan || null }
+                    onClose={ closeRefund }
+                    onSuccess={ refundDone }
+                />
             ) }
 
             { failOpen && (

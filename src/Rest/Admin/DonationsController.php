@@ -29,6 +29,7 @@ use Dono\Funds\Fund;
 use Dono\Receipts\Receipt;
 use Dono\Receipts\ReceiptIssuer;
 use Dono\Receipts\ReceiptRepository;
+use Dono\Recurring\RecurringPlan;
 use Dono\Settings\SettingsService;
 use RuntimeException;
 use WP_Error;
@@ -48,6 +49,9 @@ final class DonationsController
 
     private const EXPORT_PAGE     = 1000;
     private const EXPORT_MAX_ROWS = 50000;
+
+    /** Plan statuses that will not produce another charge. */
+    private const PLAN_ENDED = ['cancelled', 'expired'];
 
     /** @since 1.0.0 */
     public function __construct(
@@ -146,6 +150,9 @@ final class DonationsController
             'args'                => [
                 'amount_cents' => ['type' => 'integer', 'minimum' => 1],
                 'reason'       => ['type' => 'string'],
+                // Stopping the schedule is a separate instruction from giving
+                // the money back, so it is never inferred from the refund.
+                'cancel_plan'  => ['type' => 'boolean', 'default' => false],
             ],
         ]);
 
@@ -531,6 +538,34 @@ final class DonationsController
      *
      * @since 1.0.0
      */
+    /**
+     * The plan behind a recurring donation, or null when there is none.
+     *
+     * @return array<string,mixed>|null
+     *
+     * @since 1.0.0
+     */
+    private static function planSummary(Donation $donation): ?array
+    {
+        $planId = (int) ($donation->recurring_plan_id ?? 0);
+        if ($planId <= 0) {
+            return null;
+        }
+
+        $plan = RecurringPlan::query()->find('id', $planId);
+        if (! $plan instanceof RecurringPlan) {
+            return null;
+        }
+
+        return [
+            'id'              => (int) $plan->id,
+            'status'          => (string) $plan->status,
+            'next_payment_at' => $plan->next_payment_at,
+            'amount_cents'    => (int) $plan->amount_cents,
+            'currency'        => (string) $plan->currency,
+        ];
+    }
+
     private static function processingReason(Donation $donation): ?string
     {
         if ($donation->status !== 'processing' || $donation->gateway !== 'paypal') {
@@ -878,6 +913,10 @@ final class DonationsController
                 'form_slug'            => $form ? (string) $form->slug : null,
             ],
             'donor'    => $donorBlock,
+            // Enough to say whether money is still scheduled against this
+            // donor, and when next. Refunding one charge leaves the schedule
+            // running, so the screen offering the refund has to know.
+            'recurring_plan' => self::planSummary($donation),
             'receipts' => $receipts,
             'refunds'  => $refunds,
             'related'  => $related,
@@ -975,7 +1014,15 @@ final class DonationsController
         return $this->show($request);
     }
 
-    /** @since 1.0.0 */
+    /**
+     * Give the money back, and stop the schedule too when asked.
+     *
+     * The refund runs first and its failure is the whole request's failure. The
+     * cancel runs after and never is: once the money has moved, reporting the
+     * call as failed sends an admin back to refund a second time.
+     *
+     * @since 1.0.0
+     */
     public function refund(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $reference = (string) $request['reference'];
@@ -987,6 +1034,21 @@ final class DonationsController
         $body = (array) ($request->get_json_params() ?? []);
         $amount = isset($body['amount_cents']) ? (int) $body['amount_cents'] : (int) $donation->amount_cents;
         $reason = isset($body['reason']) && $body['reason'] !== '' ? (string) $body['reason'] : null;
+
+        $cancelPlan = (bool) $request['cancel_plan'];
+        $planId     = $donation->recurring_plan_id !== null ? (int) $donation->recurring_plan_id : 0;
+
+        // Refused here because refusing costs nothing yet: past the gateway call
+        // the money has moved and there is no way back to this point. Past the gateway call the money
+        // has moved and an incoherent request can no longer be answered with
+        // "nothing happened".
+        if ($cancelPlan && $planId === 0) {
+            return new WP_Error(
+                'dono_no_plan',
+                __('This donation is not part of a recurring schedule, so there is nothing to cancel. No refund was issued.', 'dono'),
+                ['status' => 422]
+            );
+        }
 
         try {
             $refund = $this->donationService->refund(
@@ -1002,7 +1064,7 @@ final class DonationsController
 
         $reloaded = $this->donations->findByReference($reference);
 
-        return new WP_REST_Response([
+        $payload = [
             'refund' => [
                 'id'                => $refund->id,
                 'amount_cents'      => $refund->amount_cents,
@@ -1014,7 +1076,74 @@ final class DonationsController
             ],
             'donation_status' => $reloaded?->status,
             'refunded_at'     => $reloaded?->refunded_at,
-        ], 200);
+        ];
+
+        if ($cancelPlan) {
+            $payload['plan'] = $this->stopRecurringPlan($planId, $reason);
+        }
+
+        return new WP_REST_Response($payload, 200);
+    }
+
+    /**
+     * Cancel the schedule a just-refunded donation belongs to.
+     *
+     * Dispatched at the Subscriptions screen's own route so cancelling keeps a
+     * single owner: its capability gate, its gateway error handling, the donor
+     * email and the recorded event all come from there.
+     *
+     * Returns an outcome rather than throwing, because the caller has already
+     * moved money and must answer 200 whatever happens here. `stopped` is read
+     * back off the row instead of taken from the call, so a gateway webhook
+     * that cancelled the plan in the same breath still reads as stopped.
+     *
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
+    private function stopRecurringPlan(int $planId, ?string $reason): array
+    {
+        $plan = RecurringPlan::query()->find('id', $planId);
+        if (! $plan) {
+            return [
+                'id'      => $planId,
+                'status'  => null,
+                'stopped' => false,
+                'error'   => __('The recurring schedule could not be found, so it is still running.', 'dono'),
+            ];
+        }
+
+        // Already ended is the outcome that was asked for, not a failure, and
+        // the plan route rejects a second cancel.
+        if (in_array((string) $plan->status, self::PLAN_ENDED, true)) {
+            return [
+                'id'      => $planId,
+                'status'  => (string) $plan->status,
+                'stopped' => true,
+                'error'   => null,
+            ];
+        }
+
+        $cancel = new WP_REST_Request('POST', '/' . self::NAMESPACE . '/admin/recurring/' . $planId . '/action');
+        $cancel->set_param('action', 'cancel');
+        if ($reason !== null) {
+            $cancel->set_param('reason', $reason);
+        }
+
+        $response = rest_do_request($cancel);
+
+        $fresh   = RecurringPlan::query()->find('id', $planId);
+        $status  = (string) ($fresh?->status ?? $plan->status);
+        $stopped = in_array($status, self::PLAN_ENDED, true);
+
+        return [
+            'id'      => $planId,
+            'status'  => $status,
+            'stopped' => $stopped,
+            'error'   => $stopped ? null : ($response->is_error()
+                ? $response->as_error()->get_error_message()
+                : __('The recurring schedule is still running.', 'dono')),
+        ];
     }
 
     /** @since 1.0.0 */

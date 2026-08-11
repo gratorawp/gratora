@@ -11,6 +11,7 @@ use Dono\Donors\DonorRepository;
 use Dono\Donors\DonorService;
 use Dono\Foundation\Auth\Capabilities;
 use Dono\Gateways\GatewayManager;
+use Dono\Gateways\GatewayTransportException;
 use Dono\Gateways\PaymentRetryUnavailable;
 use Dono\Gateways\SubscriptionAware;
 use Dono\Gateways\SubscriptionChangeNeedsApproval;
@@ -454,6 +455,20 @@ final class RecurringController
                 'dono_change_needs_approval',
                 __('The payment provider needs the donor to approve this change before it takes effect. Nothing has changed yet.', 'dono'),
                 ['status' => 409, 'approve_url' => $e->approveUrl]
+            );
+        } catch (GatewayTransportException $e) {
+            // The request never left this server, so nothing at the gateway was
+            // attempted, let alone refused. Reporting it as a rejected change
+            // sends an admin to look at the plan, the card and the gateway
+            // dashboard, none of which are involved.
+            return new WP_Error(
+                'dono_gateway_unreachable',
+                sprintf(
+                    /* translators: %s: transport error, e.g. a DNS failure */
+                    __('This site could not reach the payment provider, so nothing has changed: %s. That is a problem with this server rather than with the plan. Try again in a moment.', 'dono'),
+                    $e->getMessage()
+                ),
+                ['status' => 503]
             );
         } catch (PaymentRetryUnavailable $e) {
             return new WP_Error('dono_nothing_to_collect', $e->getMessage(), ['status' => 409]);

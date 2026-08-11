@@ -3,9 +3,14 @@ import { useState } from '@wordpress/element';
 import { Modal } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
 
-import { formatAmount, currencyDecimals } from './helpers';
+import { formatAmount, currencyDecimals, formatDate } from './helpers';
+import { IconAlert } from './icons';
 
-export default function RefundDialog( { donation, onClose, onSuccess } ) {
+// A schedule in one of these will not charge again, so it needs no warning.
+const PLAN_ENDED = [ 'cancelled', 'expired' ];
+
+export default function RefundDialog( { donation, onClose, onSuccess, plan = null } ) {
+    const planLive = !! plan && ! PLAN_ENDED.includes( plan.status );
     const maxCents = donation.refundable_cents;
     // Entry decimals follow the currency (JPY none, BHD three); the stored value
     // stays minor units (major x 100), so /100 and *100 are unchanged.
@@ -15,6 +20,8 @@ export default function RefundDialog( { donation, onClose, onSuccess } ) {
     const [ reason, setReason ] = useState( '' );
     const [ saving, setSaving ] = useState( false );
     const [ error, setError ]   = useState( null );
+    // Unchecked: refusing to decide leaves the schedule exactly as it is.
+    const [ cancelPlan, setCancelPlan ] = useState( false );
 
     const submit = async ( e ) => {
         e.preventDefault();
@@ -23,15 +30,19 @@ export default function RefundDialog( { donation, onClose, onSuccess } ) {
             setError( sprintf( /* translators: 1: minimum amount, 2: maximum amount */ __( 'Amount must be between %1$s and %2$s', 'dono' ), formatAmount( 1, donation.currency ), formatAmount( maxCents, donation.currency ) ) );
             return;
         }
+        const data = { amount_cents: cents, reason: reason.trim() || undefined };
+        if ( planLive && cancelPlan ) {
+            data.cancel_plan = true;
+        }
         setSaving( true );
         setError( null );
         try {
-            await apiFetch( {
+            const result = await apiFetch( {
                 path:   `/dono/v1/admin/donations/${ donation.reference }/refund`,
                 method: 'POST',
-                data:   { amount_cents: cents, reason: reason.trim() || undefined },
+                data,
             } );
-            onSuccess();
+            onSuccess( result );
         } catch ( err ) {
             setError( err?.message || __( 'Refund failed', 'dono' ) );
         } finally {
@@ -75,6 +86,37 @@ export default function RefundDialog( { donation, onClose, onSuccess } ) {
                         maxLength={ 200 }
                     />
                 </label>
+                { planLive && (
+                    <>
+                        <div className="dd-banner dd-banner--warn" style={ { gridColumn: '1 / -1' } } role="status">
+                            <IconAlert className="dd-banner__icon" width="20" height="20" />
+                            <div className="dd-banner__body">
+                                <strong>{ __( 'The recurring schedule is still running.', 'dono' ) }</strong>{ ' ' }
+                                { plan.next_payment_at
+                                    ? sprintf(
+                                        /* translators: %s: date of the next scheduled payment */
+                                        __( 'Refunding this donation does not stop it, and the donor will be charged again on %s.', 'dono' ),
+                                        formatDate( plan.next_payment_at )
+                                    )
+                                    : __( 'Refunding this donation does not stop it, and the donor will be charged again.', 'dono' ) }
+                            </div>
+                        </div>
+                        <label style={ { gridColumn: '1 / -1', flexDirection: 'row', alignItems: 'flex-start', gap: 8 } }>
+                            <input
+                                type="checkbox"
+                                checked={ cancelPlan }
+                                onChange={ ( e ) => setCancelPlan( e.target.checked ) }
+                                style={ { marginTop: 2 } }
+                            />
+                            <span>
+                                { __( 'Cancel the recurring schedule as well', 'dono' ) }
+                                <span style={ { display: 'block', marginTop: 2, fontSize: 12.5 } }>
+                                    { __( 'The donor is emailed when a schedule is cancelled.', 'dono' ) }
+                                </span>
+                            </span>
+                        </label>
+                    </>
+                ) }
                 { error && <div className="dd-edit-form__error">{ error }</div> }
                 <div className="dd-edit-form__actions">
                     <button type="button" className="btn" onClick={ onClose } disabled={ saving }>
