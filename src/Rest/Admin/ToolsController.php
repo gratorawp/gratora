@@ -20,9 +20,11 @@ use Dono\Donors\Donor;
 use Dono\Forms\Form;
 use Dono\Foundation\Auth\Capabilities;
 use Dono\Funds\Fund;
+use Dono\Webhooks\WebhookLog;
 use WP_REST_Response;
 use WP_REST_Server;
 use Dono\Vendor\Queryable\DB;
+use Dono\Vendor\Queryable\ModelQueryBuilder;
 
 /**
  * Admin endpoints for system info, settings export, settings import, and
@@ -144,6 +146,24 @@ final class ToolsController
             ],
         ]);
 
+        // Deliveries only, never their bodies. payload and headers hold the raw
+        // gateway request: payer email and address, and on a refused delivery
+        // the credentials that failed. DataExporter keeps dono_webhooks_log out
+        // of a full export for that reason, and a read route that served those
+        // two columns would be the way around it, so nothing here selects them
+        // at any capability.
+        register_rest_route(self::NAMESPACE, '/admin/tools/webhooks', [
+            'methods'             => WP_REST_Server::READABLE,
+            'callback'            => [$this, 'webhooks'],
+            'permission_callback' => [$this, 'canAccess'],
+            'args'                => [
+                'page'     => ['type' => 'integer', 'default' => 1, 'minimum' => 1],
+                'per_page' => ['type' => 'integer', 'default' => 25, 'minimum' => 1, 'maximum' => 100],
+                'gateway'  => ['type' => 'string', 'default' => ''],
+                'status'   => ['type' => 'string', 'enum' => ['', 'failed'], 'default' => ''],
+            ],
+        ]);
+
         register_rest_route(self::NAMESPACE, '/admin/email/test-send', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'sendTestEmail'],
@@ -249,6 +269,116 @@ final class ToolsController
         );
 
         return array_values(array_unique(array_filter($sources)));
+    }
+
+    /**
+     * Paged inbound webhook deliveries, newest first, optionally narrowed to
+     * one gateway or to the failures.
+     *
+     * @since 1.0.0
+     */
+    public function webhooks(\WP_REST_Request $request): WP_REST_Response
+    {
+        $page    = max(1, (int) $request['page']);
+        $perPage = max(1, min(100, (int) $request['per_page']));
+        $gateway = preg_replace('/[^a-z0-9_-]/', '', strtolower((string) $request['gateway'])) ?: '';
+        $failed  = (string) $request['status'] === 'failed';
+
+        $total = self::webhookQuery($gateway, $failed)->count();
+
+        $rows = self::webhookQuery($gateway, $failed)
+            ->select('id', 'gateway', 'event_type', 'signature_ok', 'processed', 'error', 'received_at')
+            ->orderBy('received_at', 'DESC')
+            ->orderBy('id', 'DESC')
+            ->limit($perPage)
+            ->offset(($page - 1) * $perPage)
+            ->getAll();
+
+        return new WP_REST_Response([
+            'items'          => array_map([self::class, 'webhookRow'], $rows),
+            'total'          => $total,
+            'page'           => $page,
+            'per_page'       => $perPage,
+            'gateways'       => self::webhookGateways(),
+            'retention_days' => self::webhookRetentionDays(),
+        ], 200);
+    }
+
+    /**
+     * How far back the list can reach: the pruner drops older deliveries, so
+     * an absent one is only proof of nothing arriving inside this window. Read
+     * through the filter the pruner runs on, and 0 where a site disabled it.
+     *
+     * @since 1.0.0
+     */
+    private static function webhookRetentionDays(): int
+    {
+        $days = (int) apply_filters('dono.webhook_log.retention_days', 30);
+
+        return $days > 0 ? $days : 0;
+    }
+
+    /**
+     * @since 1.0.0
+     */
+    private static function webhookQuery(string $gateway, bool $failedOnly): ModelQueryBuilder
+    {
+        $query = WebhookLog::query();
+
+        if ($gateway !== '') {
+            $query->where('gateway', $gateway);
+        }
+
+        // A refused delivery and one that verified and then threw are both
+        // failures. A verified delivery Dono has no handler for is not, and it
+        // is the common case, so it must not be swept in here.
+        if ($failedOnly) {
+            $query->where(static function ($q): void {
+                $q->where('signature_ok', 0)->orWhereIsNotNull('error');
+            });
+        }
+
+        return $query;
+    }
+
+    /**
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
+    private static function webhookRow(WebhookLog $log): array
+    {
+        return [
+            'id'           => (int) $log->id,
+            'gateway'      => (string) $log->gateway,
+            'event_type'   => (string) $log->event_type,
+            'signature_ok' => (bool) $log->signature_ok,
+            'processed'    => (bool) $log->processed,
+            'error'        => $log->error !== null ? (string) $log->error : null,
+            'received_at'  => (string) $log->received_at,
+        ];
+    }
+
+    /**
+     * Gateways present in the log, so the filter offers what has actually
+     * arrived. Every delivery is written with a gateway, so an empty list also
+     * tells the screen that nothing has ever reached this site.
+     *
+     * @return list<string>
+     *
+     * @since 1.0.0
+     */
+    private static function webhookGateways(): array
+    {
+        $rows = WebhookLog::query()
+            ->select('gateway')
+            ->distinct()
+            ->orderBy('gateway', 'ASC')
+            ->getAll();
+
+        $gateways = array_map(static fn (WebhookLog $l): string => (string) $l->gateway, $rows);
+
+        return array_values(array_unique(array_filter($gateways)));
     }
 
     /**

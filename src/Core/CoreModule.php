@@ -157,6 +157,7 @@ use Dono\Funds\FundRepository;
 use Dono\Funds\FundResolver;
 use Dono\Funds\FundService;
 use Dono\Gateways\GatewayManager;
+use Dono\Gateways\GatewayReconciler;
 use Dono\Gateways\Offline\OfflineGateway;
 use Dono\Gateways\Sandbox\SandboxGateway;
 use Dono\Gateways\Stripe\StripeApi;
@@ -721,6 +722,17 @@ final class CoreModule implements DonoModule
             ));
         }
 
+        // Reads PayPal for donations it may already hold money for. The
+        // settling webhook is the only other way out of processing, so a
+        // refused or lost delivery strands the money with nothing polling.
+        $c->bind(GatewayReconciler::class, fn (Container $c) => new GatewayReconciler(
+            $c->get(PayPalApi::class),
+            $c->get(PayPalAccount::class),
+            $c->get(DonationService::class),
+            $c->get(Clock::class),
+            $c->get(AsyncDispatcher::class),
+        ));
+        $c->get(GatewayReconciler::class)->register();
 
         // Sandbox gateway only available when org-wide test mode is on.
         $gwCfg = get_option('dono_gateway_config', []);

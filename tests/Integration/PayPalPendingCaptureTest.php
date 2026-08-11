@@ -213,6 +213,55 @@ final class PayPalPendingCaptureTest extends IntegrationTestCase
         $this->assertSame(self::CAPTURE, $meta['paypal_capture_id'] ?? null);
     }
 
+    public function test_a_redelivery_replaces_the_outcome_of_the_attempt_it_repeats(): void
+    {
+        $reference = $this->newDonation();
+        $this->capture($reference);
+
+        // Same event id twice, as PayPal does when the first attempt does not
+        // answer 2xx. The first cannot be matched to anything.
+        $this->deliverCompleted('WH-REDELIVER-1', 'NO-SUCH-REFERENCE');
+        $this->deliverCompleted('WH-REDELIVER-1', $reference);
+
+        $row = self::$wpdb->get_row(
+            "SELECT processed, error FROM " . self::$prefix
+            . "dono_webhooks_log WHERE external_id = 'WH-REDELIVER-1'",
+            ARRAY_A
+        );
+
+        $this->assertNotNull($row, 'the delivery is recorded once, under its event id');
+        $this->assertSame('paid', $this->find($reference)->status);
+
+        // A gateway resends until it gets a 2xx, so the newest attempt is the
+        // one that says what happened. Keeping the first leaves a permanent red
+        // row for money that did land.
+        $this->assertSame(1, (int) $row['processed']);
+        $this->assertNull($row['error']);
+    }
+
+    private function deliverCompleted(string $eventId, string $reference): void
+    {
+        $hook = new WP_REST_Request('POST', '/dono/v1/webhooks/paypal');
+        $hook->set_header('content-type', 'application/json');
+        $hook->set_header('paypal_transmission_id', 'tx-' . $eventId);
+        $hook->set_header('paypal_transmission_time', '2026-08-11T12:00:00Z');
+        $hook->set_header('paypal_transmission_sig', 'sig');
+        $hook->set_header('paypal_cert_url', 'https://api.sandbox.paypal.com/cert');
+        $hook->set_header('paypal_auth_algo', 'SHA256withRSA');
+        $hook->set_body((string) wp_json_encode([
+            'id'         => $eventId,
+            'event_type' => 'PAYMENT.CAPTURE.COMPLETED',
+            'resource'   => [
+                'id'        => self::CAPTURE,
+                'status'    => 'COMPLETED',
+                'custom_id' => $reference,
+                'amount'    => ['currency_code' => 'USD', 'value' => '10.00'],
+            ],
+        ]));
+
+        rest_do_request($hook);
+    }
+
     public function test_a_pending_webhook_records_the_reason_when_the_donor_never_returns(): void
     {
         $reference = $this->newDonation();

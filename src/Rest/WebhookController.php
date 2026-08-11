@@ -154,23 +154,69 @@ final class WebhookController
         $log->received_at  = $this->clock->now()->format('Y-m-d H:i:s');
 
         // Dedup via the UNIQUE index: Queryable throws QueryException on the
-        // expected "Duplicate entry" for a redelivered event. Logging must
-        // never fail the webhook response (a 5xx makes the gateway retry
-        // forever), so non-duplicate insert failures are recorded to the
-        // error log and swallowed.
+        // expected "Duplicate entry" for a redelivered event, which supersedes
+        // the row it collided with. Logging must never fail the webhook
+        // response (a 5xx makes the gateway retry forever), so non-duplicate
+        // insert failures are recorded to the error log and swallowed.
         $prevSuppress = $wpdb ? $wpdb->suppress_errors(true) : false;
         try {
             $log->save();
         } catch (QueryException $e) {
-            if (stripos($e->getMessage(), 'Duplicate entry') === false) {
-                ErrorLog::record('webhook.log', $e->getMessage(), ['gateway' => $gateway]);
-            }
+            // Cleared before anything else touches the database: Queryable
+            // raises on a non-empty last_error, so the next query would fail
+            // carrying this message.
             if ($wpdb) {
                 $wpdb->last_error = '';
+            }
+
+            if (stripos($e->getMessage(), 'Duplicate entry') !== false) {
+                $this->supersedeDelivery($log);
+            } else {
+                ErrorLog::record('webhook.log', $e->getMessage(), ['gateway' => $gateway]);
             }
         } finally {
             if ($wpdb) {
                 $wpdb->suppress_errors($prevSuppress);
+            }
+        }
+    }
+
+    /**
+     * Writes a redelivery over the attempt it duplicates. A gateway resends
+     * until it gets a 2xx, so the newest attempt is the one that says what
+     * happened to the event, and the row is the only record of it.
+     *
+     * @since 1.0.0
+     */
+    private function supersedeDelivery(WebhookLog $log): void
+    {
+        global $wpdb;
+
+        try {
+            $existing = WebhookLog::query()
+                ->select('id')
+                ->where('gateway', $log->gateway)
+                ->where('external_id', $log->external_id)
+                ->get();
+
+            $existingId = (int) ($existing->id ?? 0);
+            if ($existingId === 0) {
+                return;
+            }
+
+            $log->id = $existingId;
+            $log->save();
+        } catch (\Throwable $e) {
+            if ($wpdb) {
+                $wpdb->last_error = '';
+            }
+
+            try {
+                ErrorLog::record('webhook.log', $e->getMessage(), ['gateway' => $log->gateway]);
+            } catch (\Throwable) {
+                // Nothing may escape logging: dispatch() runs it outside its
+                // own try, and a 5xx keeps the gateway retrying. ErrorLog has
+                // written the message to error_log before its own row write.
             }
         }
     }

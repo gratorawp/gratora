@@ -8,10 +8,12 @@ import ImportTab from './tabs/ImportTab';
 import LogsTab from './tabs/LogsTab';
 import MaintenanceTab from './tabs/MaintenanceTab';
 import SystemInfoTab from './tabs/SystemInfoTab';
+import WebhooksTab from './tabs/WebhooksTab';
 
 const TABS = [
     { key: 'maintenance', label: __( 'Maintenance', 'dono' ) },
     { key: 'logs',        label: __( 'Logs', 'dono' ) },
+    { key: 'webhooks',    label: __( 'Webhooks', 'dono' ) },
     { key: 'system',      label: __( 'System info', 'dono' ) },
     { key: 'export',      label: __( 'Export', 'dono' ) },
     { key: 'import',      label: __( 'Import', 'dono' ) },
@@ -95,6 +97,7 @@ export default function Tools() {
             <div className="dono-settings-page__body">
                 <div hidden={ tab !== 'maintenance' }><MaintenanceTab { ...shared } active={ tab === 'maintenance' } /></div>
                 <div hidden={ tab !== 'logs' }><LogsTab { ...shared } active={ tab === 'logs' } /></div>
+                <div hidden={ tab !== 'webhooks' }><WebhooksTab { ...shared } active={ tab === 'webhooks' } /></div>
                 <div hidden={ tab !== 'system' }><SystemInfoTab { ...shared } /></div>
                 <div hidden={ tab !== 'export' }><ExportTab { ...shared } /></div>
                 <div hidden={ tab !== 'import' }><ImportTab { ...shared } /></div>

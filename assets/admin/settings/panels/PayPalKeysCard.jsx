@@ -34,7 +34,7 @@ function Notice( { tone, icon, children } ) {
  * One mode's PayPal REST app credentials. The webhook id sits here too because
  * PayPal cannot verify a webhook signature without it.
  */
-function ModeKeys( { mode, account, onSaved, onRemove } ) {
+function ModeKeys( { mode, account, onSaved, onRemove, askConfirm } ) {
     const isTest = mode === 'test';
     const saved  = isTest ? !! account?.has_test : !! account?.has_live;
     const hint   = ( isTest ? account?.secret_hint_test : account?.secret_hint_live ) || '';
@@ -42,6 +42,7 @@ function ModeKeys( { mode, account, onSaved, onRemove } ) {
     const hasHook  = isTest ? !! account?.webhook_test : !! account?.webhook_live;
 
     const [ open, setOpen ] = useState( ! saved );
+    const [ hookOpen, setHookOpen ] = useState( false );
     const [ id, setId ]     = useState( '' );
     const [ secret, setSecret ] = useState( '' );
     const [ hook, setHook ] = useState( '' );
@@ -49,36 +50,88 @@ function ModeKeys( { mode, account, onSaved, onRemove } ) {
 
     const label = isTest ? __( 'Sandbox credentials', 'dono' ) : __( 'Live credentials', 'dono' );
 
+    const post = ( data ) => {
+        setBusy( true );
+        return apiFetch( {
+            path:   '/dono/v1/gateways/paypal/keys',
+            method: 'POST',
+            data:   { mode, ...data },
+        } )
+            .then( ( res ) => {
+                onSaved( res );
+                return res;
+            } )
+            .finally( () => setBusy( false ) );
+    };
+
     const save = () => {
         if ( ! id.trim() || ! secret.trim() ) {
             notify.error( __( 'Enter both the client id and the secret.', 'dono' ) );
             return;
         }
-        setBusy( true );
-        apiFetch( {
-            path:   '/dono/v1/gateways/paypal/keys',
-            method: 'POST',
-            data:   {
-                mode,
-                client_id:     id.trim(),
-                client_secret: secret.trim(),
-                webhook_id:    hook.trim(),
-            },
+        post( {
+            client_id:     id.trim(),
+            client_secret: secret.trim(),
+            webhook_id:    hook.trim(),
         } )
             .then( ( res ) => {
                 setId( '' );
                 setSecret( '' );
-                setHook( '' );
                 setOpen( false );
                 notify.success(
                     isTest
                         ? __( 'Sandbox credentials verified and saved.', 'dono' )
                         : __( 'Live credentials verified and saved.', 'dono' )
                 );
-                onSaved( res );
+
+                /* The credentials went in without the webhook id. Hold the
+                   toast open and keep the typed id in the field so it can go
+                   straight back once the reason is dealt with. */
+                if ( res?.webhook_warning ) {
+                    setHookOpen( true );
+                    notify.warning( res.webhook_warning, { duration: 0 } );
+                    return;
+                }
+                setHook( '' );
+                setHookOpen( false );
             } )
-            .catch( ( err ) => notify.error( err?.message || __( 'Could not verify those credentials.', 'dono' ) ) )
-            .finally( () => setBusy( false ) );
+            .catch( ( err ) => notify.error( err?.message || __( 'Could not verify those credentials.', 'dono' ) ) );
+    };
+
+    const saveHook = () => {
+        if ( ! hook.trim() ) {
+            notify.error( __( 'Enter the webhook id from your PayPal app.', 'dono' ) );
+            return;
+        }
+        post( { webhook_id: hook.trim() } )
+            .then( () => {
+                setHook( '' );
+                setHookOpen( false );
+                notify.success( __( 'Webhook id checked with PayPal and saved.', 'dono' ) );
+            } )
+            .catch( ( err ) => notify.error( err?.message || __( 'Could not check that webhook id with PayPal.', 'dono' ) ) );
+    };
+
+    const removeHook = () => {
+        askConfirm( {
+            title: __( 'Remove webhook id', 'dono' ),
+            message: __( 'Remove the saved webhook id? The client id and secret stay on file, but PayPal notifications for this mode will be rejected until you add another one.', 'dono' ),
+            confirmLabel: __( 'Remove', 'dono' ),
+            destructive: true,
+            onConfirm: () => {
+                setBusy( true );
+                return apiFetch( {
+                    path:   `/dono/v1/gateways/paypal/webhook?mode=${ mode }`,
+                    method: 'DELETE',
+                } )
+                    .then( ( res ) => {
+                        onSaved( res );
+                        notify.success( __( 'Webhook id removed.', 'dono' ) );
+                    } )
+                    .catch( ( err ) => notify.error( err?.message || __( 'Could not remove the webhook id.', 'dono' ) ) )
+                    .finally( () => setBusy( false ) );
+            },
+        } );
     };
 
     return (
@@ -90,24 +143,61 @@ function ModeKeys( { mode, account, onSaved, onRemove } ) {
                     : <Pill tone="gray">{ __( 'Not set', 'dono' ) }</Pill> }
             </div>
 
-            { saved && ! open && (
-                <div className="dono-stripe-mode__saved">
-                    <span className="is-mono is-muted">{ clientId }</span>
-                    <div className="dono-stripe-mode__actions">
-                        <Btn variant="secondary" size="sm" onClick={ () => setOpen( true ) }>
-                            { __( 'Replace', 'dono' ) }
-                        </Btn>
-                        <Btn variant="ghost" size="sm" onClick={ () => onRemove( mode ) }>
-                            { __( 'Remove', 'dono' ) }
-                        </Btn>
-                    </div>
-                </div>
-            ) }
-
             { saved && ! hasHook && (
                 <p className="dono-connect-p">
                     { __( 'No webhook id saved for this mode. Every PayPal notification will be rejected until you add one, so donations PayPal settles later will stay unpaid, and refunds, disputes and renewals will not reach this site.', 'dono' ) }
                 </p>
+            ) }
+
+            { saved && ! open && (
+                <>
+                    <div className="dono-stripe-mode__saved">
+                        <span className="is-mono is-muted">{ clientId }</span>
+                        <div className="dono-stripe-mode__actions">
+                            <Btn variant="secondary" size="sm" onClick={ () => { setOpen( true ); setHookOpen( false ); } }>
+                                { __( 'Replace', 'dono' ) }
+                            </Btn>
+                            <Btn variant="ghost" size="sm" onClick={ () => onRemove( mode ) }>
+                                { __( 'Remove', 'dono' ) }
+                            </Btn>
+                        </div>
+                    </div>
+
+                    { hookOpen ? (
+                        <>
+                            <FormRow
+                                label={ __( 'Webhook id', 'dono' ) }
+                                help={ __( 'From the webhook you created in the PayPal dashboard. Dono checks it against this app, and the credentials on file stay as they are.', 'dono' ) }
+                            >
+                                <KeyField value={ hook } onChange={ setHook } placeholder="5ML12345AB678901C" />
+                            </FormRow>
+                            <div className="dono-stripe-mode__actions">
+                                <Btn variant="primary" size="sm" onClick={ saveHook } isBusy={ busy } disabled={ busy }>
+                                    { __( 'Save webhook id', 'dono' ) }
+                                </Btn>
+                                <Btn variant="ghost" size="sm" onClick={ () => { setHookOpen( false ); setHook( '' ); } }>
+                                    { __( 'Cancel', 'dono' ) }
+                                </Btn>
+                            </div>
+                        </>
+                    ) : (
+                        <div className="dono-stripe-mode__saved" style={ { marginTop: 12 } }>
+                            <span className="is-muted">
+                                { hasHook ? __( 'Webhook id checked with PayPal and saved', 'dono' ) : __( 'Webhook id not set', 'dono' ) }
+                            </span>
+                            <div className="dono-stripe-mode__actions">
+                                <Btn variant="secondary" size="sm" onClick={ () => setHookOpen( true ) }>
+                                    { hasHook ? __( 'Replace webhook id', 'dono' ) : __( 'Add webhook id', 'dono' ) }
+                                </Btn>
+                                { hasHook && (
+                                    <Btn variant="ghost" size="sm" onClick={ removeHook } disabled={ busy }>
+                                        { __( 'Remove', 'dono' ) }
+                                    </Btn>
+                                ) }
+                            </div>
+                        </div>
+                    ) }
+                </>
             ) }
 
             { open && (
@@ -125,8 +215,8 @@ function ModeKeys( { mode, account, onSaved, onRemove } ) {
                         <KeyField value={ secret } onChange={ setSecret } placeholder="EO422dn3..." secret />
                     </FormRow>
                     <FormRow
-                        label={ __( 'Webhook id (optional)', 'dono' ) }
-                        help={ __( 'From the webhook you created in the PayPal dashboard. PayPal cannot verify incoming events without it.', 'dono' ) }
+                        label={ __( 'Webhook id', 'dono' ) }
+                        help={ __( 'From the webhook you created in the PayPal dashboard. Without it PayPal cannot prove an event came from PayPal, so every notification is rejected and donations PayPal settles after checkout stay unpaid. You can add it after these credentials, but PayPal will not work properly until you do. Dono checks it against your app and only saves an id PayPal confirms.', 'dono' ) }
                     >
                         { /* WH-... is the format of a PayPal event id, not of a
                              webhook id, and the two sit next to each other in
@@ -257,8 +347,8 @@ export default function PayPalKeysCard( { s } ) {
             ) }
 
             <div className="dono-stripe-modes">
-                <ModeKeys mode="test" account={ account } onSaved={ setStatus } onRemove={ removeKeys } />
-                <ModeKeys mode="live" account={ account } onSaved={ setStatus } onRemove={ removeKeys } />
+                <ModeKeys mode="test" account={ account } onSaved={ setStatus } onRemove={ removeKeys } askConfirm={ setConfirm } />
+                <ModeKeys mode="live" account={ account } onSaved={ setStatus } onRemove={ removeKeys } askConfirm={ setConfirm } />
             </div>
 
             <div className="dono-connect-options">
