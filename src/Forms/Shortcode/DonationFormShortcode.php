@@ -625,11 +625,17 @@ HTML;
                 'thanks'         => __('Thank you for your donation!', 'dono'),
                 'pendingTitle'   => __('Your donation is pending', 'dono'),
                 'pendingMessage' => __('Thank you. We have emailed you instructions to complete your payment.', 'dono'),
-                // Bank debit: the donor has finished and nothing is expected of
-                // them. The pending copy would tell someone who has already paid
-                // that we are still waiting on them.
+                // The donor has finished and nothing is expected of them. The
+                // pending copy would tell someone who has already paid that we
+                // are still waiting on them.
+                //
+                // It says nothing about how the money is moving, because the
+                // form does not know: this screen is reached by a bank debit
+                // clearing, and by a card PayPal has held for review, and those
+                // owe the donor different explanations. Naming a bank told a
+                // card donor something untrue about their own payment.
                 'processingTitle'   => __('Thank you, your donation is on its way', 'dono'),
-                'processingMessage' => __('Your bank is transferring your donation. It usually takes a few working days to arrive, and we will email you once it does.', 'dono'),
+                'processingMessage' => __('Your payment is being processed. This can take a few working days, and we will email you once it completes.', 'dono'),
                 'donateAgain'    => __('Donate again', 'dono'),
                 'error'          => __('Sorry, something went wrong. Please try again.', 'dono'),
                 'paymentTitle'   => __('Complete your donation', 'dono'),
