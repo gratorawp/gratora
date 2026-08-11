@@ -174,6 +174,18 @@ final class RecurringController
         $response->header('X-WP-Total', (string) $total);
         $response->header('X-WP-TotalPages', (string) max(1, (int) ceil($total / max(1, $perPage))));
 
+        // How many plans the current filters would have shown if test ones
+        // counted. An org setting recurring up meets it entirely in test mode,
+        // and an empty screen reads as a broken integration rather than as a
+        // hidden one. Only asked when the caller has not already opted in,
+        // because then nothing is hidden and the number would be noise.
+        if (! $args['include_test']) {
+            $response->header(
+                'X-Dono-Test-Hidden',
+                (string) max(0, $this->plans->countAdmin(['include_test' => true] + $args) - $total)
+            );
+        }
+
         return $response;
     }
 
@@ -253,21 +265,28 @@ final class RecurringController
         // rather than revenue, and an org finding that out in test mode is the
         // entire point: excluding them hides the fault until it happens for
         // real.
+        $settled = gmdate('Y-m-d H:i:s', $now - (self::SETTLE_MINUTES * MINUTE_IN_SECONDS));
+
         return Donation::query()
             ->where('kind', 'donation')
             ->whereNull('recurring_plan_id')
             ->where('frequency', 'one_time', '<>')
             ->whereIn('status', ['paid', 'partial_refund'])
-            ->whereBetween(
-                'paid_at',
-                gmdate('Y-m-d H:i:s', $now - (self::WINDOW_DAYS * DAY_IN_SECONDS)),
-                gmdate('Y-m-d H:i:s', $now - (self::SETTLE_MINUTES * MINUTE_IN_SECONDS))
-            )
-            ->where(static function (QueryBuilder $q) use ($gateways): void {
+            ->where('paid_at', gmdate('Y-m-d H:i:s', $now - (self::WINDOW_DAYS * DAY_IN_SECONDS)), '>=')
+            ->where(static function (QueryBuilder $q) use ($gateways, $settled): void {
                 // First condition of the group: whereRaw carries no AND.
+                //
+                // A recorded failure is reported the moment it happens. The
+                // settling delay below exists because a donation with no plan
+                // may simply not have finished yet, and a donation that already
+                // says why it failed is not waiting on anything.
                 $q->whereRaw(self::FAILURE_FLAG_PREDICATE);
+
                 if ($gateways !== []) {
-                    $q->orWhereIn('gateway', $gateways);
+                    $q->orWhere(static function (QueryBuilder $inner) use ($gateways, $settled): void {
+                        $inner->whereIn('gateway', $gateways)
+                            ->where('paid_at', $settled, '<=');
+                    });
                 }
             });
     }

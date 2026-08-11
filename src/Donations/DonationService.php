@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Donations;
 
+use Dono\Analytics\ErrorLog;
 use Dono\Analytics\EventRecorder;
 use Dono\Currency\FxRates;
 use Dono\Donors\DonorService;
@@ -600,6 +601,20 @@ final class DonationService
         );
         $donation->updated_at = $now;
         $donation->save();
+
+        // Also to the log, because that is the screen someone opens when a
+        // recurring donation did not behave, and a donor left on a schedule
+        // nobody is collecting is exactly what it exists to report.
+        ErrorLog::record(
+            'recurring.' . $donation->gateway,
+            sprintf(
+                /* translators: 1: donation reference, 2: the gateway's own message */
+                __('No recurring plan was created for %1$s, so nothing will renew: %2$s', 'dono'),
+                (string) $donation->reference,
+                $e->getMessage()
+            ),
+            ['donation_id' => (int) $donation->id, 'gateway' => (string) $donation->gateway]
+        );
 
         $this->events->record('recurring.subscription_creation_failed', [
             'donor_id'     => $donation->donor_id,

@@ -86,6 +86,20 @@ final class SubscriptionRetryTest extends IntegrationTestCase
         $this->assertNotEmpty($afterFailure->flags['subscription_creation_failed_reason'] ?? null);
         $this->assertNotEmpty($afterFailure->flags['subscription_creation_failed_at'] ?? null);
 
+        // The log is where someone looks when a recurring donation misbehaved,
+        // and a donor left on a schedule nobody collects is the loudest thing
+        // it could be asked to report.
+        $logged = \Dono\Analytics\Event::query()
+            ->whereLike('type', \Dono\Analytics\ErrorLog::PREFIX . 'recurring.%')
+            ->getAll();
+
+        $this->assertNotEmpty($logged, 'the failure reaches the log');
+        $this->assertStringContainsString(
+            $reference,
+            (string) wp_json_encode(array_map(static fn ($e) => $e->payload, $logged)),
+            'and names the donation it happened to'
+        );
+
         // 3. Admin hits the retry endpoint. Stripe is healthy on the second pass.
         $this->failSubscriptionOnce = false;
         $this->stripeCalls          = [];

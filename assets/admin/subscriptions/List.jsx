@@ -13,6 +13,7 @@ import EmptyState from '../_shared/components/EmptyState';
 import KpiStrip from '../_shared/components/KpiStrip';
 import Notice from '../_shared/components/Notice';
 import StatusBadge from '../_shared/components/StatusBadge';
+import { Switch } from '../_shared/components/Switch';
 import PlanActionDialog, { actionsFor, dueIn, isTerminal, retryActionFor } from '../_shared/recurring/PlanActions';
 import notify from '../_shared/notify';
 import { rowLinkProps } from '../_shared/rowLink';
@@ -286,7 +287,26 @@ function UnlinkedNotice( { unlinked, showAll, onShowAll, onReload } ) {
     );
 }
 
-function emptyStateCopy( unlinked ) {
+function emptyStateCopy( unlinked, testHidden ) {
+    // Said before anything else: plans that exist and are merely filtered out are
+    // not an absence, and telling an org there is nothing here sends them to
+    // debug an integration that worked.
+    if ( testHidden > 0 ) {
+        return {
+            title: __( 'No live subscriptions', 'dono' ),
+            body:  sprintf(
+                /* translators: %d: number of test subscriptions being hidden. */
+                _n(
+                    '%d test subscription is hidden. Turn on Show test subscriptions to see it.',
+                    '%d test subscriptions are hidden. Turn on Show test subscriptions to see them.',
+                    testHidden,
+                    'dono'
+                ),
+                testHidden
+            ),
+        };
+    }
+
     if ( unlinked.error ) {
         return {
             title: __( 'No subscriptions to show', 'dono' ),
@@ -339,6 +359,8 @@ export default function List() {
         error:      null,
     } );
     const [ showAllUnlinked, setShowAllUnlinked ] = useState( false );
+    const [ includeTest, setIncludeTest ] = useState( false );
+    const [ testHidden, setTestHidden ]   = useState( 0 );
 
     useEffect( () => {
         let aborted = false;
@@ -371,7 +393,8 @@ export default function List() {
         interval:    intervalFilter || undefined,
         failing:     failingFilter === 'yes' ? true : undefined,
         search:      view.search || undefined,
-    } ), [ view, statusFilter, gatewayFilter, campaignFilter, intervalFilter, failingFilter ] );
+        include_test: includeTest || undefined,
+    } ), [ view, statusFilter, gatewayFilter, campaignFilter, intervalFilter, failingFilter, includeTest ] );
 
     const load = () => {
         setLoading( true );
@@ -380,12 +403,14 @@ export default function List() {
                 const items = await res.json();
                 setData( Array.isArray( items ) ? items : [] );
                 setTotal( parseInt( res.headers.get( 'X-WP-Total' ) || '0', 10 ) );
+                setTestHidden( parseInt( res.headers.get( 'X-Dono-Test-Hidden' ) || '0', 10 ) );
                 setError( null );
             } )
             .catch( ( err ) => {
                 setError( err?.message || __( 'Failed to load subscriptions.', 'dono' ) );
                 setData( [] );
                 setTotal( 0 );
+                setTestHidden( 0 );
             } )
             .finally( () => setLoading( false ) );
     };
@@ -399,6 +424,7 @@ export default function List() {
                 const items = await res.json();
                 setData( Array.isArray( items ) ? items : [] );
                 setTotal( parseInt( res.headers.get( 'X-WP-Total' ) || '0', 10 ) );
+                setTestHidden( parseInt( res.headers.get( 'X-Dono-Test-Hidden' ) || '0', 10 ) );
                 setError( null );
             } )
             .catch( ( err ) => {
@@ -406,6 +432,7 @@ export default function List() {
                 setError( err?.message || __( 'Failed to load subscriptions.', 'dono' ) );
                 setData( [] );
                 setTotal( 0 );
+                setTestHidden( 0 );
             } )
             .finally( () => { if ( ! aborted ) setLoading( false ); } );
         return () => { aborted = true; };
@@ -633,6 +660,20 @@ export default function List() {
                     <h1>{ __( 'Subscriptions', 'dono' ) }</h1>
                 </div>
                 <div className="dono-page-head__right">
+                    { /* Offered once there is something to reveal, or while it
+                         is on and needs turning off. An org sets recurring up
+                         entirely in test mode, and a screen that hides every
+                         plan it made reads as a broken integration. */ }
+                    { ( testHidden > 0 || includeTest ) && (
+                        <label className="dono-inline-toggle">
+                            <Switch
+                                checked={ includeTest }
+                                onChange={ () => setIncludeTest( ( on ) => ! on ) }
+                                label={ __( 'Show test subscriptions', 'dono' ) }
+                            />
+                            <span>{ __( 'Show test subscriptions', 'dono' ) }</span>
+                        </label>
+                    ) }
                     <span className="dono-page-head__meta">
                         { sprintf(
                             /* translators: %s: number of recurring plans. */
@@ -655,7 +696,7 @@ export default function List() {
             { fetchError && <div className="dono-error-notice">{ fetchError }</div> }
 
             { ! loading && total === 0 && ! fetchError ? (
-                <EmptyState { ...emptyStateCopy( unlinked ) } />
+                <EmptyState { ...emptyStateCopy( unlinked, testHidden ) } />
             ) : (
                 // The card chrome the other list screens sit in lives on this
                 // wrapper, so without it the table renders bare on the page.

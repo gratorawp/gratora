@@ -101,6 +101,25 @@ final class UnlinkedRecurringTest extends IntegrationTestCase
         $this->assertGreaterThanOrEqual(1, (int) $data['total']);
     }
 
+    public function test_a_recorded_failure_is_reported_the_moment_it_happens(): void
+    {
+        $donation = $this->donation([
+            'paid_at' => gmdate('Y-m-d H:i:s', time() - 30),
+            'flags'   => [
+                'subscription_creation_failed'        => true,
+                'subscription_creation_failed_reason' => 'Stripe said no.',
+            ],
+        ]);
+
+        $refs = array_column((array) $this->fetch()['items'], 'reference');
+
+        // The settling delay is for a donation that might still finish. One
+        // that already says why it failed is not waiting on anything, and an
+        // org watching this screen after a failed test should not be told
+        // nothing is wrong for a quarter of an hour.
+        $this->assertContains($donation->reference, $refs);
+    }
+
     public function test_a_donation_still_inside_its_own_flow_is_not_counted_yet(): void
     {
         $donation = $this->donation(['paid_at' => gmdate('Y-m-d H:i:s', time() - 60)]);
