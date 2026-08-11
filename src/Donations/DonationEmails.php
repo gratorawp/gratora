@@ -113,6 +113,9 @@ final class DonationEmails extends HookProvider
         $email = $this->resolveDonorEmail($donation);
         if ($email === null) return;
 
+        // No receipt number here: the receipt row is issued asynchronously and
+        // does not exist yet. The receipt email carries it, and a notice that
+        // needs it can be sent from dono.async.receipt_issued instead.
         $this->mailer->sendTemplate('recurring_renewal', $email, [
             'donor_first_name'  => $this->donorFirstName($donation),
             'donor_name'        => $this->donorName($donation),
@@ -120,10 +123,6 @@ final class DonationEmails extends HookProvider
             'amount'            => Money::format((int) $donation->amount_cents, (string) $donation->currency),
             'campaign_title'    => $this->campaignTitle($donation),
             'reference'         => (string) $donation->reference,
-            // Receipt number lives on the receipt row, which is async; left
-            // blank when not yet issued. Subscribers wanting to delay can hook
-            // on dono.async.receipt_issued instead.
-            'receipt_number'    => '',
         ]);
     }
 

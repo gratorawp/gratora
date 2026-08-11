@@ -41,10 +41,22 @@ $accent      = (string) ($tpl['accent_color'] ?? '#1e8a4e');
 $donorName = trim((string) ($donor_name ?? ''));
 if ($donorName === '') $donorName = '-';
 
+// The whole receipt renders in the donor's locale, so the frequency has to be
+// a translated label rather than the stored slug.
+$frequencyLabels = [
+    'weekly'    => __('Weekly', 'dono'),
+    'biweekly'  => __('Every 2 weeks', 'dono'),
+    'monthly'   => __('Monthly', 'dono'),
+    'quarterly' => __('Quarterly', 'dono'),
+    'yearly'    => __('Yearly', 'dono'),
+];
 $frequencyLabel = $donation->frequency === 'one_time'
     ? __('One-time donation', 'dono')
     /* translators: %s: frequency label (Monthly, Quarterly, Yearly, …). */
-    : sprintf(__('Recurring donation (%s)', 'dono'), ucfirst($donation->frequency));
+    : sprintf(
+        __('Recurring donation (%s)', 'dono'),
+        $frequencyLabels[(string) $donation->frequency] ?? ucfirst((string) $donation->frequency)
+    );
 
 $paidAt = $donation->paid_at
     ? wp_date(get_option('date_format') . ', H:i', strtotime($donation->paid_at))

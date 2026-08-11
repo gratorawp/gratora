@@ -262,7 +262,7 @@ export default function List() {
         {
             id:       'campaign',
             label:    __( 'Campaign', 'dono' ),
-            elements: campaigns,
+            elements: campaigns.map( ( c ) => ( { value: String( c.id ), label: c.title || `#${ c.id }` } ) ),
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => (
                 item.campaign

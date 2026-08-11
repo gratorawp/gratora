@@ -146,6 +146,7 @@ use Dono\Foundation\License\LicenseNotice;
 use Dono\Foundation\License\LicenseService;
 use Dono\Foundation\Modules\DonoModule;
 use Dono\Foundation\Modules\ModuleManager;
+use Dono\Foundation\Plugin;
 use Dono\Foundation\References\ReferenceGenerator;
 use Dono\Foundation\Time\Clock;
 use Dono\Foundation\Time\SystemClock;
@@ -221,6 +222,7 @@ use Dono\Webhooks\WebhookLogRetention;
 use Dono\Analytics\EventRetention;
 use Dono\Donors\DonorRetention;
 use Dono\Foundation\Maintenance\TransientGc;
+use Dono\Vendor\Queryable\QueryException;
 
 /**
  * Always-on module: migrations, service bindings, admin/REST/asset wiring.
@@ -303,6 +305,26 @@ final class CoreModule implements DonoModule
         $c->bind(IdentityHasher::class, fn (Container $c) => new IdentityHasher(
             $c->get(AsyncDispatcher::class)
         ));
+
+        // Both read dono_system_settings the moment they are constructed, and
+        // boot constructs them. plugins_loaded is far ahead of the wp_loaded
+        // migration, so on an install whose tables are absent (a subsite of a
+        // network activation, a half-restored database) that read throws and
+        // takes down every front-end page and wp-admin with it. Build the
+        // schema here instead and carry on with the request.
+        try {
+            $c->get(IdentityHasher::class);
+            $c->get(Crypto::class);
+        } catch (QueryException $e) {
+            try {
+                Plugin::migrateSchema();
+                $c->get(IdentityHasher::class);
+                $c->get(Crypto::class);
+            } catch (\Throwable $t) {
+                error_log('[dono] boot could not reach or create the schema: ' . $t->getMessage());
+            }
+        }
+
         $c->bind(PdfBuilder::class, fn () => new PdfBuilder());
         $c->bind(LicenseService::class, fn (Container $c) => new LicenseService($c->get(ModuleManager::class)));
 
@@ -1089,6 +1111,18 @@ final class CoreModule implements DonoModule
                 }
             }
         }, 10, 2);
+
+        // Activation applies Capabilities::currentMapping(), which reads the
+        // raw dono_roles option: until something writes it, no role holds a
+        // single dono_* capability while the Roles screen shows the defaults as
+        // granted, and an administrator is refused refunds and receipt resends
+        // by command dispatch on a screen that offers no way to grant them.
+        // Writing the option once puts the two in agreement, through the
+        // handler above.
+        add_action('admin_init', static function () use ($c): void {
+            if (get_option('dono_roles') !== false) return;
+            $c->get(SettingsService::class)->update('roles', []);
+        });
 
 
         // Outside the is_admin guard on purpose: the admin bar renders on the

@@ -82,7 +82,14 @@ export default function PayPalPayment( { config, payment, dispatch } ) {
                                     reference: payment.reference,
                                     subscription_id: data.subscriptionID,
                                 } );
-                                if ( ! cancelled ) dispatch( { type: 'SUBMIT_PENDING', data: out } );
+                                if ( ! cancelled ) {
+                                    // The first payment is taken, so the donor
+                                    // is finished even though the record only
+                                    // settles when the webhook lands.
+                                    dispatch( out.status === 'paid'
+                                        ? { type: 'SUBMIT_SUCCESS', data: out }
+                                        : { type: 'SUBMIT_PENDING', data: out, processing: true } );
+                                }
                             } catch ( err ) {
                                 if ( ! cancelled ) setError( err.message || i18n.error );
                             }

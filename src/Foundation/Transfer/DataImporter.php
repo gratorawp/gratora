@@ -225,7 +225,7 @@ final class DataImporter
             return $this->prepareDonor($row);
         }
 
-        return $row;
+        return $this->reseal($table, $row);
     }
 
     /**
@@ -236,21 +236,41 @@ final class DataImporter
     private function prepareDonor(array $row): ?array
     {
         $email = trim((string) ($row['email'] ?? ''));
-        unset($row['email']);
 
         if ($email === '') {
             // Nothing to match them on here or later, and no way to reach them.
             return null;
         }
 
-        $row['email_hash']      = $this->hasher->emailHash($email);
-        $row['email_encrypted'] = $this->crypto->encrypt($email);
+        $row['email']      = $email;
+        $row['email_hash'] = $this->hasher->emailHash($email);
 
-        foreach (['address', 'phone', 'tax_id', 'notes'] as $field) {
-            if (! array_key_exists($field, $row)) continue;
-            $value = (string) $row[$field];
-            unset($row[$field]);
-            if ($value !== '') $row[$field . '_encrypted'] = $this->crypto->encrypt($value);
+        return $this->reseal('dono_donors', $row);
+    }
+
+    /**
+     * Seals the plaintext the export carries under this site's key.
+     *
+     * Every table with PII needs this, not only donors: a staff note and a
+     * donation's custom field answers arrive as body and custom_data, and no
+     * table has a column by either name.
+     *
+     * @param  array<string,mixed> $row
+     * @return array<string,mixed>
+     * @since 1.0.0
+     */
+    private function reseal(string $table, array $row): array
+    {
+        foreach (DataExporter::encryptedColumns()[$table] ?? [] as $column => $required) {
+            $plain = $row[$column] ?? null;
+            $value = is_scalar($plain) ? (string) $plain : '';
+            unset($row[$column]);
+
+            // A NOT NULL column is written even when the export carried
+            // nothing, or the row it belongs to cannot land at all.
+            if ($value !== '' || $required) {
+                $row[$column . '_encrypted'] = $this->crypto->encrypt($value);
+            }
         }
 
         return $row;

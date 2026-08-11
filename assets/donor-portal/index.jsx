@@ -119,6 +119,65 @@ function popReturn() {
     }
 }
 
+// A payment method that confirms by navigation leaves the portal entirely and
+// comes back to the bare URL with the modal gone, so the plan it belongs to and
+// the key needed to read the intent are parked where the boot path finds them.
+const CARD_RETURN_KEY = 'dono_portal_card_return';
+
+function stashCardReturn( planId, publishableKey ) {
+    if ( ! planId || ! publishableKey ) return;
+    try {
+        window.sessionStorage.setItem(
+            CARD_RETURN_KEY,
+            JSON.stringify( { planId, publishableKey, ts: Date.now() } )
+        );
+    } catch ( e ) {}
+}
+
+function clearCardReturn() {
+    try {
+        window.sessionStorage.removeItem( CARD_RETURN_KEY );
+    } catch ( e ) {}
+}
+
+// Strips the setup-intent markers as it reads them, so a reload cannot replay
+// the attach.
+function takeCardReturn() {
+    const clientSecret = new URLSearchParams( window.location.search ).get( 'setup_intent_client_secret' );
+    if ( ! clientSecret ) return null;
+
+    try {
+        const url = new URL( window.location.href );
+        [ 'setup_intent', 'setup_intent_client_secret', 'redirect_status' ]
+            .forEach( ( k ) => url.searchParams.delete( k ) );
+        window.history.replaceState( {}, '', url.toString() );
+    } catch ( e ) {}
+
+    let stashed = null;
+    try {
+        const raw = window.sessionStorage.getItem( CARD_RETURN_KEY );
+        if ( raw ) stashed = JSON.parse( raw );
+    } catch ( e ) {}
+    clearCardReturn();
+
+    if ( ! stashed || ! stashed.planId || ! stashed.publishableKey || Date.now() - stashed.ts > 3600000 ) return null;
+    return { clientSecret, planId: stashed.planId, publishableKey: stashed.publishableKey };
+}
+
+function completeCardReturn( { clientSecret, planId, publishableKey } ) {
+    return loadStripeJs()
+        .then( ( Stripe ) => Stripe( publishableKey ).retrieveSetupIntent( clientSecret ) )
+        .then( ( res ) => {
+            const intent = res && res.setupIntent;
+            const token  = intent && intent.status === 'succeeded' ? intent.payment_method : '';
+            if ( ! token ) throw new Error( __( 'That payment method was not saved.', 'dono' ) );
+            return api( `recurring/${ planId }/payment-method/complete`, {
+                method: 'POST',
+                body:   JSON.stringify( { token } ),
+            } );
+        } );
+}
+
 // Extension-tab seam, on preact/hooks because the portal is a standalone preact
 // app; assets/admin/_shared/extensionTabs.jsx is the React counterpart.
 const TAB_EVENT   = 'dono:tabs:changed';
@@ -193,6 +252,8 @@ function App() {
     const initialExtTabApplied = useRef( false );
 
     const [ loadError, setLoadError ] = useState( null );
+    const [ cardNotice, setCardNotice ] = useState( null );
+    const pendingCardReturn = useRef( null );
 
     const loadMe = useCallback( () => {
         setLoadError( null );
@@ -239,6 +300,8 @@ function App() {
     }, [ me, extTabs ] );
 
     useEffect( () => {
+        pendingCardReturn.current = takeCardReturn();
+
         const params = new URLSearchParams( window.location.search );
         const token  = params.get( 'token' );
         if ( token ) {
@@ -260,11 +323,32 @@ function App() {
                     }
                     return loadMe();
                 } )
-                .catch( ( err ) => { setError( err.message ); setLoading( false ); } );
+                .catch( ( err ) => {
+                    // The token is single use, so re-opening the link from the
+                    // mailbox 401s while the session it already created is
+                    // still good. Only fall through to sign-in if that is gone
+                    // too, in which case this message is what the donor sees.
+                    setError( err.message );
+                    return loadMe();
+                } );
         } else {
             loadMe();
         }
     }, [ loadMe ] );
+
+    // Finishes the attach the inline path does in place, for a method that
+    // resolved by sending the donor away and back.
+    useEffect( () => {
+        const pending = pendingCardReturn.current;
+        if ( ! me || ! pending ) return;
+        pendingCardReturn.current = null;
+        completeCardReturn( pending )
+            .then( () => setCardNotice( { ok: true, text: __( 'Your new payment method is saved. Future donations will use it.', 'dono' ) } ) )
+            .catch( ( e ) => setCardNotice( {
+                ok:   false,
+                text: e.message || __( 'That payment method was not saved, so your donation still uses the old one.', 'dono' ),
+            } ) );
+    }, [ me ] );
 
     if ( loading ) return <div class="dp-loading">{ __( 'Loading…', 'dono' ) }</div>;
     if ( ! me && loadError ) {
@@ -293,6 +377,19 @@ function App() {
                     api( 'logout', { method: 'POST' } ).finally( () => window.location.reload() );
                 } }>{ __( 'Sign out', 'dono' ) }</button>
             </header>
+
+            { cardNotice && (
+                <div class="dp-banner" role={ cardNotice.ok ? 'status' : 'alert' }>
+                    <div class="dp-banner__text">{ cardNotice.text }</div>
+                    <button
+                        type="button"
+                        class="dp-banner__action"
+                        onClick={ () => { setCardNotice( null ); if ( ! cardNotice.ok ) setTab( 'recurring' ); } }
+                    >
+                        { cardNotice.ok ? __( 'Dismiss', 'dono' ) : __( 'Try again', 'dono' ) }
+                    </button>
+                </div>
+            ) }
 
             { consentsPending > 0 && tab !== 'consents' && (
                 <div class="dp-banner" role="status">
@@ -406,9 +503,17 @@ function SignInPrompt( { initialError } ) {
                 <h2>{ __( 'Check your email', 'dono' ) }</h2>
                 <p>{ sprintf(
                     /* translators: %s: action the link performs, either "finish setting up your account" or "sign in" */
-                    __( 'If that address is valid, we just sent a link to %s. Open it on any device.', 'dono' ),
+                    __( 'If that address is valid, a link to %s is on its way. Open it on any device.', 'dono' ),
                     isRegister ? __( 'finish setting up your account', 'dono' ) : __( 'sign in', 'dono' )
                 ) }</p>
+                { /* The server quietly refuses a second request inside its send
+                     window, so this copy promises nothing about timing. */ }
+                <p class="dp-hint">{ __( 'Only one link goes out every few minutes. If nothing arrives shortly, wait a moment before asking for another.', 'dono' ) }</p>
+                <p class="dp-signin__alt">
+                    <button type="button" class="dp-link" onClick={ () => { setSent( false ); setError( null ); } }>
+                        { __( 'Use a different email address', 'dono' ) }
+                    </button>
+                </p>
             </div>
         );
     }
@@ -739,6 +844,7 @@ function UpdatePaymentMethod( { plan, onDone, onError } ) {
     const mountRef    = useRef( null );
     const stripeRef   = useRef( null );
     const elementsRef = useRef( null );
+    const pubKeyRef   = useRef( '' );
 
     useEffect( () => {
         let cancelled = false;
@@ -752,6 +858,7 @@ function UpdatePaymentMethod( { plan, onDone, onError } ) {
                     setLabel( res.gateway_label || '' );
                     return;
                 }
+                pubKeyRef.current = res.publishable_key || '';
                 return loadStripeJs().then( ( Stripe ) => {
                     if ( cancelled ) return;
                     const stripe = Stripe( res.publishable_key );
@@ -780,12 +887,17 @@ function UpdatePaymentMethod( { plan, onDone, onError } ) {
         onError( '' );
 
         // if_required keeps the donor here for a card that needs no challenge;
-        // one that does goes to its bank and returns to this same page.
+        // one that does goes to its bank and returns to this same page, where
+        // this component no longer exists to finish the job.
+        stashCardReturn( plan.id, pubKeyRef.current );
+
         const { error, setupIntent } = await stripe.confirmSetup( {
             elements,
             confirmParams: { return_url: window.location.href },
             redirect: 'if_required',
         } );
+
+        clearCardReturn();
 
         if ( error ) {
             onError( error.message || __( 'That card could not be saved.', 'dono' ) );

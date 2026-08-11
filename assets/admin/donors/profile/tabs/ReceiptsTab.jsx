@@ -28,22 +28,43 @@ function StackedDate( { iso } ) {
     );
 }
 
+// 2000 is the earliest year the statement endpoint will build.
+function yearOf( iso ) {
+    const n = Number( String( iso || '' ).slice( 0, 4 ) );
+    return Number.isInteger( n ) && n >= 2000 ? n : 0;
+}
+
+/**
+ * The donations prop is the profile's most recent slice, so a frequent donor's
+ * earlier years are not in it. Their first and last donation dates span the
+ * whole history, and the statement endpoint builds any year from it.
+ */
+function statementYears( donor, donations ) {
+    const found = new Set();
+    ( donations || [] ).forEach( ( d ) => {
+        if ( d.status !== 'paid' && d.status !== 'partial_refund' ) return;
+        const when = d.paid_at || d.created_at;
+        if ( when ) found.add( yearOf( when ) );
+    } );
+
+    const first = yearOf( donor?.first_donation_at );
+    const last  = Math.max( first, yearOf( donor?.last_donation_at ) );
+    if ( first ) {
+        for ( let y = first; y <= last; y++ ) found.add( y );
+    }
+
+    return [ ...found ].filter( Boolean ).sort( ( a, b ) => b - a );
+}
+
 /**
  * Year-end tax statement. The document the donor downloads from the portal is a
  * giving summary; this is the one with the org's tax id and the goods-and-
  * services line on it, which is what a donor needs at tax time and only staff
  * can issue.
  */
-function TaxStatement( { donorId, donations } ) {
-    const years = useMemo( () => {
-        const found = new Set();
-        ( donations || [] ).forEach( ( d ) => {
-            if ( d.status !== 'paid' && d.status !== 'partial_refund' ) return;
-            const when = d.paid_at || d.created_at;
-            if ( when ) found.add( Number( String( when ).slice( 0, 4 ) ) );
-        } );
-        return [ ...found ].sort( ( a, b ) => b - a );
-    }, [ donations ] );
+function TaxStatement( { donor, donations } ) {
+    const donorId = donor.id;
+    const years = useMemo( () => statementYears( donor, donations ), [ donor, donations ] );
 
     const [ year, setYear ] = useState( null );
     const [ busy, setBusy ] = useState( false );
@@ -223,7 +244,7 @@ export default function ReceiptsTab( { receipts, donations, donor, redacted } ) 
     ], [ redacted ] );
 
     const statement = ! redacted && donor?.id
-        ? <TaxStatement donorId={ donor.id } donations={ donations } />
+        ? <TaxStatement donor={ donor } donations={ donations } />
         : null;
 
     if ( ! receipts.length ) {

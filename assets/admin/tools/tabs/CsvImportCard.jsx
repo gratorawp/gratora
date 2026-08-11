@@ -110,6 +110,9 @@ export default function CsvImportCard( { setNotice } ) {
             delete next[ field ];
         }
         setMapping( next );
+        // The preview describes the mapping it was run against, and Import is
+        // only offered for a mapping that has been dry-run.
+        setPreview( null );
     };
 
     const fields     = inspected?.fields || {};

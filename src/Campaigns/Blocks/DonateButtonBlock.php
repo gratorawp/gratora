@@ -64,9 +64,27 @@ final class DonateButtonBlock extends CampaignBlock
         // without an extra network roundtrip. Skipped in the block-editor
         // preview (the block renderer is a REST request, where is_admin() is
         // false) to avoid booting the form runtime inside the editor frame.
-        $formHtml = '';
-        if ($form && ! (defined('REST_REQUEST') && REST_REQUEST)) {
+        $editorPreview = defined('REST_REQUEST') && REST_REQUEST;
+        $formHtml      = '';
+        if (! $editorPreview) {
             $formHtml = do_shortcode('[dono_donation_form slug="' . esc_attr($form->slug) . '"]');
+        }
+
+        // The form gate renders nothing while the campaign sits outside its
+        // schedule, and the view only emits the modal alongside form HTML, so
+        // a button here would open nothing at all.
+        if (! $editorPreview && trim($formHtml) === '') {
+            $message = $campaign->notAcceptingReason() === 'ended'
+                ? __('This campaign has finished accepting donations.', 'dono')
+                : __('Donations are not open for this campaign yet.', 'dono');
+
+            $notice = (is_user_logged_in() && current_user_can('edit_posts'))
+                ? '<div class="dono-block-notice">'
+                    . esc_html__('This campaign is not accepting donations, so the donate button is hidden. Publish the campaign and check its schedule.', 'dono')
+                    . '</div>'
+                : '';
+
+            return '<p class="dono-block__empty">' . esc_html($message) . '</p>' . $notice;
         }
 
         return View::loadRelative(__DIR__, 'views/donate-button', [

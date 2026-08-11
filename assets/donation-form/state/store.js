@@ -301,9 +301,13 @@ export function reducer( state, action ) {
             return {
                 ...state,
                 // `pending` means the donor still has something to do;
-                // `processing` means a bank debit is on its way and they are
+                // `processing` means the money is on its way and they are
                 // finished. The wrong one asks someone who paid to pay again.
-                status:     action.data?.status === 'processing' ? 'processing' : 'pending',
+                // `action.processing` is for a gateway that charges the donor
+                // on approval while the record waits for its webhook.
+                status:     ( action.processing || action.data?.status === 'processing' )
+                    ? 'processing'
+                    : 'pending',
                 submission: action.data,
                 message:    '',
             };
@@ -586,6 +590,32 @@ function suppressedFields( state ) {
     return out;
 }
 
+const CUSTOM_PREFIX = 'custom.';
+
+// Custom values another block's display condition reads. The server evaluates
+// those conditions against this payload, where a missing value reads as empty,
+// so a chained condition resolves the other way and the validator demands a
+// field the donor was never shown. Suppression still drops every hidden value
+// nothing depends on.
+function conditionSourceKeys( state ) {
+    const out = new Set();
+    const walk = ( items ) => {
+        for ( const it of ( Array.isArray( items ) ? items : [] ) ) {
+            if ( ! it ) continue;
+            const field = String( it.condition?.field || '' );
+            if ( field.startsWith( CUSTOM_PREFIX ) ) {
+                out.add( field.slice( CUSTOM_PREFIX.length ) );
+            }
+            walk( it.children );
+        }
+    };
+    for ( const step of fieldSteps( state ) ) {
+        walk( step.items );
+        walk( step.fields );
+    }
+    return out;
+}
+
 export function buildPayload( state ) {
     const v = state.values;
     const sup = suppressedFields( state );
@@ -609,7 +639,7 @@ export function buildPayload( state ) {
         fund_id:           sup.fund ? undefined : ( ( v.fund_id || '' ).trim() || undefined ),
         consents:          buildConsents( v.consents, sup.consents ),
         frequency:         sup.frequency ? 'one_time' : normalizeFrequency( v.frequency ),
-        custom:            buildCustom( v.custom, sup.custom ),
+        custom:            buildCustom( v.custom, sup.custom, conditionSourceKeys( state ) ),
         source_attribution: buildSourceAttribution(),
         profile: {
             first_name: ( v.profile.first_name || '' ).trim() || undefined,
@@ -666,11 +696,11 @@ function buildSourceAttribution() {
     return Object.keys( out ).length ? out : undefined;
 }
 
-function buildCustom( c, suppress ) {
+function buildCustom( c, suppress, readByCondition ) {
     if ( ! c || typeof c !== 'object' ) return undefined;
     const out = {};
     for ( const k of Object.keys( c ) ) {
-        if ( suppress && suppress.has( k ) ) continue;
+        if ( suppress && suppress.has( k ) && ! readByCondition?.has( k ) ) continue;
         const raw = c[ k ];
         if ( raw === '' || raw === null || raw === undefined ) continue;
         out[ k ] = raw;

@@ -55,6 +55,9 @@ export function getDonorTemplates() {
     return [ ...coreTemplates(), ...addonTemplates() ];
 }
 
+// magic_link stays off this list until the editor can hide the "Send this
+// email" toggle for it: turning that off leaves a donor asking for a sign-in
+// link with a confirmation screen and no email.
 function coreTemplates() {
     return [
         {
@@ -115,6 +118,34 @@ function coreTemplates() {
             desc:      __( 'Sent when a recurring donation is cancelled, either by the donor or by an admin.', 'dono' ),
             recipient: __( 'Donor', 'dono' ),
             tags:      tagsFor( 'subscription_cancelled', [ '{donor_first_name}', '{donor_name}', '{organisation_name}', '{amount}', '{campaign_title}' ] ),
+        },
+        {
+            id:        'recurring_amount_changed',
+            label:     __( 'Recurring amount changed', 'dono' ),
+            desc:      __( 'Sent when someone at the organization changes the amount of a recurring donation. A donor who changes their own in the portal is not emailed.', 'dono' ),
+            recipient: __( 'Donor', 'dono' ),
+            tags:      tagsFor( 'recurring_amount_changed', [ '{donor_first_name}', '{donor_name}', '{organisation_name}', '{amount}', '{campaign_title}', '{old_amount}', '{portal_url}' ] ),
+        },
+        {
+            id:        'recurring_paused',
+            label:     __( 'Recurring donation paused', 'dono' ),
+            desc:      __( 'Sent when someone at the organization pauses a recurring donation, with the date it restarts. A donor who pauses their own in the portal is not emailed.', 'dono' ),
+            recipient: __( 'Donor', 'dono' ),
+            tags:      tagsFor( 'recurring_paused', [ '{donor_first_name}', '{donor_name}', '{organisation_name}', '{amount}', '{campaign_title}', '{resumes_at}', '{portal_url}' ] ),
+        },
+        {
+            id:        'recurring_resumed',
+            label:     __( 'Recurring donation restarted', 'dono' ),
+            desc:      __( 'Sent when someone at the organization restarts a paused recurring donation, with the next payment date.', 'dono' ),
+            recipient: __( 'Donor', 'dono' ),
+            tags:      tagsFor( 'recurring_resumed', [ '{donor_first_name}', '{donor_name}', '{organisation_name}', '{amount}', '{campaign_title}', '{next_payment_at}', '{portal_url}' ] ),
+        },
+        {
+            id:        'recurring_skipped',
+            label:     __( 'Next donation skipped', 'dono' ),
+            desc:      __( 'Sent when someone at the organization skips one upcoming payment. The recurring donation itself continues.', 'dono' ),
+            recipient: __( 'Donor', 'dono' ),
+            tags:      tagsFor( 'recurring_skipped', [ '{donor_first_name}', '{donor_name}', '{organisation_name}', '{amount}', '{campaign_title}', '{next_payment_at}', '{portal_url}' ] ),
         },
     ];
 }

@@ -79,6 +79,32 @@ final class DataExporter
         'dono_events',
     ];
 
+    /**
+     * Sealed columns, by the plaintext name they travel under.
+     *
+     * A column ending _encrypted leaves under its stripped name: body_encrypted
+     * ships as body. The importer reads this same map to seal it again under
+     * the name the schema knows, so the two sides cannot disagree about what a
+     * field is called.
+     *
+     * True marks a column the schema declares NOT NULL, which is what tells the
+     * importer to write it even when the export carried nothing for it.
+     *
+     * @var array<string, array<string,bool>>
+     */
+    private const ENCRYPTED = [
+        'dono_donors' => [
+            'email'   => true,
+            'address' => false,
+            'phone'   => false,
+            'tax_id'  => false,
+            'notes'   => false,
+        ],
+        'dono_donor_notes'    => ['body' => true],
+        'dono_donation_notes' => ['body' => true],
+        'dono_donations'      => ['custom_data' => false],
+    ];
+
     private const SETTINGS_OPTIONS = [
         'dono_org_profile',
         'dono_currency_locale',
@@ -180,18 +206,22 @@ final class DataExporter
      */
     private function shape(string $table, array $row): array
     {
-        foreach ($row as $column => $value) {
-            if (! str_ends_with((string) $column, '_encrypted')) {
-                continue;
-            }
+        // Only what the map names. A sealed column nobody declared travels
+        // sealed: stripping its suffix would hand the importer a plaintext
+        // field no table has a column for, and the restore dies on that row.
+        foreach (array_keys(self::encryptedColumns()[$table] ?? []) as $column) {
+            $sealed = $column . '_encrypted';
+            if (! array_key_exists($sealed, $row)) continue;
 
-            unset($row[$column]);
+            $value = $row[$sealed];
+            unset($row[$sealed]);
+
             $plain = is_string($value) && $value !== '' ? $this->crypto->decrypt($value) : null;
             // The key that sealed it is gone, or the value was never set. The
             // column is dropped rather than guessed at, and the importer treats
             // an absent field as empty.
             if ($plain !== null && $plain !== '') {
-                $row[substr((string) $column, 0, -strlen('_encrypted'))] = $plain;
+                $row[$column] = $plain;
             }
         }
 
@@ -240,6 +270,23 @@ final class DataExporter
             array_unique(array_map('strval', $tables)),
             self::SKIP
         ));
+    }
+
+    /**
+     * The sealed columns of every exported table, importer included.
+     *
+     * An add-on that contributes a table through dono.export.tables declares
+     * its sealed columns here, or they cross as ciphertext this site's key is
+     * the only one that opens.
+     *
+     * @return array<string, array<string,bool>> table => plaintext name => column is NOT NULL
+     * @since 1.0.0
+     */
+    public static function encryptedColumns(): array
+    {
+        $map = (array) apply_filters('dono.export.encrypted_columns', self::ENCRYPTED);
+
+        return array_filter($map, 'is_array');
     }
 
     /**
