@@ -648,16 +648,21 @@ function buildConsents( c, suppressed ) {
 
 // The server's ChannelClassifier buckets the donation from these: utm_* ->
 // paid/social, referrer -> referral, neither -> direct.
+// Every value is trimmed: an ad link carrying click ids, or a referrer from a
+// search page, runs past what the server keeps, and none of it is worth
+// risking the submission over.
+const ATTRIBUTION_VALUE_MAX = 500;
+
 function buildSourceAttribution() {
     if ( typeof window === 'undefined' ) return undefined;
     const out = {};
     const params = new URLSearchParams( window.location.search );
     for ( const k of [ 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content' ] ) {
         const val = params.get( k );
-        if ( val ) out[ k ] = val;
+        if ( val ) out[ k ] = String( val ).slice( 0, ATTRIBUTION_VALUE_MAX );
     }
-    if ( document.referrer ) out.referrer = document.referrer;
-    out.landing = window.location.href;
+    if ( document.referrer ) out.referrer = String( document.referrer ).slice( 0, ATTRIBUTION_VALUE_MAX );
+    out.landing = String( window.location.href ).slice( 0, ATTRIBUTION_VALUE_MAX );
     return Object.keys( out ).length ? out : undefined;
 }
 

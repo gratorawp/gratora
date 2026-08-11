@@ -237,9 +237,7 @@ final class DonationsController
         // The per-IP cap limits volume, not per-request size, so the
         // unauthenticated blobs are bounded by encoded size here.
         $sourceAttribution = isset($body['source_attribution']) ? (array) $body['source_attribution'] : null;
-        if ($sourceAttribution !== null && strlen((string) wp_json_encode($sourceAttribution)) > 4096) {
-            return new WP_Error('dono_attribution_too_large', __('Attribution data is too large.', 'dono'), ['status' => 400]);
-        }
+        $sourceAttribution = self::boundAttribution($sourceAttribution);
         // `manual` is reserved for money an admin recorded off the site, and it
         // suppresses the offline payment instructions. This blob comes from the
         // donor's own query string, so a visitor arriving on
@@ -392,6 +390,55 @@ final class DonationsController
             'paypal'          => $this->payPalPayload($gatewayResult),
             ...$this->browserAwarePayload($gateway, $gatewayResult),
         ], 201);
+    }
+
+    /** Longest single attribution value kept. A landing URL is the one that grows. */
+    private const ATTRIBUTION_VALUE_MAX = 500;
+
+    /** Past this the whole blob goes, rather than the donation. */
+    private const ATTRIBUTION_TOTAL_MAX = 4096;
+
+    /**
+     * Bound the attribution blob by discarding, never by refusing.
+     *
+     * This arrives from the donor's own address bar, so its size is decided by
+     * whoever wrote the ad link. An org running Google or Facebook ads sends
+     * donors to URLs carrying click ids that run past any sane limit, and
+     * rejecting those made the donation impossible from that link, on every
+     * attempt, with no way for the donor to work around it.
+     *
+     * Losing a landing URL costs a row in a report. Losing the donation costs
+     * the donation.
+     *
+     * @param  array<string,mixed>|null $attribution
+     * @return array<string,string>|null
+     *
+     * @since 1.0.0
+     */
+    private static function boundAttribution(?array $attribution): ?array
+    {
+        if ($attribution === null || $attribution === []) {
+            return null;
+        }
+
+        $out = [];
+        foreach ($attribution as $key => $value) {
+            if (! is_scalar($value)) {
+                continue;
+            }
+            $out[(string) $key] = mb_substr((string) $value, 0, self::ATTRIBUTION_VALUE_MAX);
+        }
+
+        if ($out === []) {
+            return null;
+        }
+
+        // Enough keys to still be too big means it is not attribution any more.
+        if (strlen((string) wp_json_encode($out)) > self::ATTRIBUTION_TOTAL_MAX) {
+            return null;
+        }
+
+        return $out;
     }
 
     /**

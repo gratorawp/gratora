@@ -162,6 +162,56 @@ final class DonationFlowTest extends IntegrationTestCase
         $this->assertSame(0, $this->columnOf($ref, 'fundraiser_team_id'), 'raw fundraiser_team_id must not be persisted');
     }
 
+    /**
+     * The blob is whatever the donor's address bar held, so its size belongs to
+     * whoever wrote the ad link. Google and Facebook click ids, or a marketing
+     * tool's tracking token, push a landing URL well past any limit worth
+     * setting, and a donor arriving on one could not give at all: WordPress
+     * rejected the request in core, before Dono could log or recover from it,
+     * and reloading kept the same URL.
+     */
+    public function test_an_enormous_landing_url_costs_the_attribution_not_the_donation(): void
+    {
+        $long = 'https://example.org/appeal?gclid=' . str_repeat('a', 900);
+
+        $res = $this->postDonation([
+            'email'              => 'adclick@example.com',
+            'amount_cents'       => 2500,
+            'currency'           => 'EUR',
+            'gateway'            => 'offline',
+            'source_attribution' => ['utm_source' => 'google', 'landing' => $long],
+        ]);
+
+        $this->assertSame(201, $res->get_status(), 'the donation is taken');
+
+        $ref  = $res->get_data()['reference'];
+        $blob = json_decode((string) self::$wpdb->get_var(self::$wpdb->prepare(
+            'SELECT source_attribution FROM ' . self::$prefix . 'dono_donations WHERE reference = %s',
+            $ref
+        )), true);
+
+        $this->assertSame('google', $blob['utm_source'] ?? null, 'the usable attribution survives');
+        $this->assertSame(500, mb_strlen((string) ($blob['landing'] ?? '')), 'the landing url is trimmed, not refused');
+    }
+
+    public function test_an_attribution_blob_too_big_to_keep_is_dropped_not_refused(): void
+    {
+        $attribution = [];
+        foreach (range(1, 40) as $i) {
+            $attribution['utm_' . $i] = str_repeat('x', 400);
+        }
+
+        $res = $this->postDonation([
+            'email'              => 'huge@example.com',
+            'amount_cents'       => 2500,
+            'currency'           => 'EUR',
+            'gateway'            => 'offline',
+            'source_attribution' => $attribution,
+        ]);
+
+        $this->assertSame(201, $res->get_status(), 'still no reason to refuse the money');
+    }
+
     public function test_note_to_org_is_private_unless_the_donor_opts_in(): void
     {
         // note_to_org is a note to the organization; it only appears on the

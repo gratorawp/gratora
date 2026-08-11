@@ -75,13 +75,20 @@ final class DonationSchemas
             ],
 
             'payment_method'     => ['type' => 'string', 'maxLength' => 32],
-            // Public, unauthenticated blobs: bound the leaves so they can't be
-            // used for storage amplification. A total-size cap is also enforced
-            // server-side before persisting (source_attribution is stored
-            // verbatim; custom is AES-encrypted).
+            // Public, unauthenticated blobs. custom is AES-encrypted and its
+            // total size is capped in the controller before persisting.
+            //
+            // source_attribution carries no maxLength on purpose. WordPress
+            // validates additionalProperties in core, before the callback, so a
+            // cap here rejects the whole donation: a donor arriving on an ad
+            // link with click ids past the limit could never give, and the
+            // refusal happens too early for Dono to log it. Attribution is
+            // telemetry. It is bounded by truncation in the controller instead,
+            // where being too long costs the org a landing URL rather than the
+            // donation.
             'source_attribution' => [
                 'type'                 => 'object',
-                'additionalProperties' => ['type' => 'string', 'maxLength' => 500],
+                'additionalProperties' => ['type' => 'string'],
             ],
             'custom'             => ['type' => 'object'],
             'locale'             => ['type' => 'string', 'maxLength' => 10],
