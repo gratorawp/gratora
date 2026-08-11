@@ -966,6 +966,14 @@
 
     &__payment-mount {
         margin-top: 4px;
+
+        // Gateways render their card fields in an iframe, and a browser's
+        // default for one is a 2px inset border in currentColor. On a theme
+        // that resets nothing, PayPal and Stripe both arrive wearing a heavy
+        // box in the form's text color.
+        iframe {
+            border: 0;
+        }
     }
 
     &__success-actions {
