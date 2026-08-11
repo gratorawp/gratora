@@ -10,10 +10,14 @@ use WP_REST_Request;
 use WP_REST_Response;
 
 /**
- * Render gate: `[dono_donation_form slug="..."]` returns '' unless the form is
- * published and its campaign is open. Regression coverage for the "form must
- * live under an active campaign" rule, which covers both the campaign's status
- * and the schedule the admin set on it.
+ * Render gate: `[dono_donation_form slug="..."]` renders no form unless the
+ * form is published and its campaign is open. Regression coverage for the
+ * "form must live under an active campaign" rule, which covers both the
+ * campaign's status and the schedule the admin set on it.
+ *
+ * A visitor sees nothing at all. Somebody who can manage Dono sees why, since
+ * otherwise a page quietly loses its form and only says so on a different
+ * screen they would have to think to visit. assertNoForm covers both.
  */
 final class CampaignFormGateTest extends IntegrationTestCase
 {
@@ -49,6 +53,25 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $form->save();
     }
 
+    /**
+     * No form rendered. For a manager the output explains itself; for everyone
+     * else it is empty.
+     */
+    private function assertNoForm(string $html, string $because = ''): void
+    {
+        $this->assertStringNotContainsString('data-form-slug=', $html, 'no form is rendered');
+
+        if (current_user_can('manage_options') || current_user_can('manage_dono')) {
+            $this->assertStringContainsString('dono-donation-form__error', $html, 'and a manager is told why');
+            if ($because !== '') {
+                $this->assertStringContainsString($because, $html);
+            }
+            return;
+        }
+
+        $this->assertSame('', $html, 'a visitor sees nothing');
+    }
+
     public function test_renders_when_both_form_and_campaign_are_published(): void
     {
         $html = do_shortcode('[dono_donation_form slug="' . $this->formSlug . '"]');
@@ -63,7 +86,7 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $form->save();
 
         $html = do_shortcode('[dono_donation_form slug="' . $this->formSlug . '"]');
-        $this->assertSame('', $html);
+        $this->assertNoForm($html);
     }
 
     public function test_empty_when_form_is_archived(): void
@@ -73,7 +96,7 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $form->save();
 
         $html = do_shortcode('[dono_donation_form slug="' . $this->formSlug . '"]');
-        $this->assertSame('', $html);
+        $this->assertNoForm($html);
     }
 
     public function test_empty_when_campaign_is_draft(): void
@@ -83,7 +106,7 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $campaign->save();
 
         $html = do_shortcode('[dono_donation_form slug="' . $this->formSlug . '"]');
-        $this->assertSame('', $html);
+        $this->assertNoForm($html);
     }
 
     public function test_empty_when_campaign_is_archived(): void
@@ -93,6 +116,42 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $campaign->save();
 
         $html = do_shortcode('[dono_donation_form slug="' . $this->formSlug . '"]');
+        $this->assertNoForm($html);
+    }
+
+    /**
+     * The diagnostic is for whoever can fix it. A visitor gets the same empty
+     * output they always did, and is told nothing about the campaign's state.
+     */
+    public function test_a_visitor_is_told_nothing_when_the_campaign_is_closed(): void
+    {
+        $campaign = Campaign::query()->find('id', $this->campaignId);
+        $campaign->status = 'archived';
+        $campaign->save();
+
+        $was = get_current_user_id();
+        wp_set_current_user(0);
+
+        $html = do_shortcode('[dono_donation_form slug="' . $this->formSlug . '"]');
+
+        wp_set_current_user($was);
+
+        $this->assertSame('', $html);
+    }
+
+    public function test_a_subscriber_is_told_nothing_either(): void
+    {
+        $campaign = Campaign::query()->find('id', $this->campaignId);
+        $campaign->status = 'archived';
+        $campaign->save();
+
+        $was = get_current_user_id();
+        wp_set_current_user(self::factory()->user->create(['role' => 'subscriber']));
+
+        $html = do_shortcode('[dono_donation_form slug="' . $this->formSlug . '"]');
+
+        wp_set_current_user($was);
+
         $this->assertSame('', $html);
     }
 
@@ -123,7 +182,7 @@ final class CampaignFormGateTest extends IntegrationTestCase
     {
         $this->schedule(null, gmdate('Y-m-d', strtotime('-1 day')));
 
-        $this->assertSame('', do_shortcode('[dono_donation_form slug="' . $this->formSlug . '"]'));
+        $this->assertNoForm(do_shortcode('[dono_donation_form slug="' . $this->formSlug . '"]'));
     }
 
     /**
@@ -160,7 +219,7 @@ final class CampaignFormGateTest extends IntegrationTestCase
     {
         $this->schedule(gmdate('Y-m-d', strtotime('+2 days')), null);
 
-        $this->assertSame('', do_shortcode('[dono_donation_form slug="' . $this->formSlug . '"]'));
+        $this->assertNoForm(do_shortcode('[dono_donation_form slug="' . $this->formSlug . '"]'));
         $this->assertSame(403, $this->postDonation()->get_status());
     }
 
@@ -236,7 +295,7 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $this->assertGreaterThan(0, $pageId);
         $this->assertSame('draft', (string) $campaign->status);
         $this->assertSame('draft', get_post_status($pageId));
-        $this->assertSame('', do_shortcode('[dono_donation_form slug="' . $this->formSlug . '"]'));
+        $this->assertNoForm(do_shortcode('[dono_donation_form slug="' . $this->formSlug . '"]'));
 
         // Publish the page, as the editor "Publish" button does.
         wp_update_post(['ID' => $pageId, 'post_status' => 'publish']);

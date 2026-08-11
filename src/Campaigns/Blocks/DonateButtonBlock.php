@@ -70,10 +70,15 @@ final class DonateButtonBlock extends CampaignBlock
             $formHtml = do_shortcode('[dono_donation_form slug="' . esc_attr($form->slug) . '"]');
         }
 
-        // The form gate renders nothing while the campaign sits outside its
+        // The form gate renders no form while the campaign sits outside its
         // schedule, and the view only emits the modal alongside form HTML, so
         // a button here would open nothing at all.
-        if (! $editorPreview && trim($formHtml) === '') {
+        //
+        // Asked of the markup rather than of emptiness: the gate also returns a
+        // short explanation to anyone who can manage Dono, and a button opening
+        // that is no better than a button opening nothing.
+        $hasForm = str_contains($formHtml, 'data-form-slug=');
+        if (! $editorPreview && ! $hasForm) {
             $message = $campaign->notAcceptingReason() === 'ended'
                 ? __('This campaign has finished accepting donations.', 'dono')
                 : __('Donations are not open for this campaign yet.', 'dono');

@@ -151,12 +151,22 @@ final class DonationFormShortcode extends HookProvider
         $editorPreview = current_user_can('edit_posts')
             && (bool) apply_filters('dono.form.editor_preview', false, $form);
         if (! $editorPreview) {
+            // Nothing renders for a visitor either way. renderError adds the
+            // reason for whoever can act on it, so a page that has quietly lost
+            // its form does not depend on the admin thinking to check the
+            // campaign screen. The equivalent block already explains itself.
             if ($form->status !== 'published') {
-                return '';
+                return $this->renderError(__('This form is not published, so it is hidden here.', 'dono'));
             }
             $campaign = $this->campaigns ? $this->campaigns->findById($form->campaign_id) : null;
-            if (! $campaign || ! $campaign->acceptsDonations()) {
-                return '';
+            if (! $campaign) {
+                return $this->renderError(__('The campaign this form belongs to no longer exists, so the form is hidden.', 'dono'));
+            }
+            if (! $campaign->acceptsDonations()) {
+                return $this->renderError(
+                    $campaign->notAcceptingReason()
+                    ?? __('This campaign is not accepting donations, so the form is hidden.', 'dono')
+                );
             }
         }
 
