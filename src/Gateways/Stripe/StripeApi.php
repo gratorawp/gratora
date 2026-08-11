@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Gateways\Stripe;
 
+use Dono\Gateways\GatewayTransportException;
 use RuntimeException;
 
 /**
@@ -155,7 +156,7 @@ final class StripeApi
         $response = wp_remote_request($url, $args);
 
         if (is_wp_error($response)) {
-            throw new RuntimeException('Stripe API transport error: ' . $response->get_error_message());
+            throw new GatewayTransportException('Stripe API transport error: ' . $response->get_error_message());
         }
 
         $code = (int) wp_remote_retrieve_response_code($response);

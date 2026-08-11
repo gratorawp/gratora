@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Gateways\PayPal;
 
+use Dono\Gateways\GatewayTransportException;
 use RuntimeException;
 
 /**
@@ -75,7 +76,7 @@ final class PayPalApi
         ]);
 
         if (is_wp_error($response)) {
-            throw new RuntimeException('PayPal transport error: ' . $response->get_error_message());
+            throw new GatewayTransportException('PayPal transport error: ' . $response->get_error_message());
         }
 
         $code = (int) wp_remote_retrieve_response_code($response);
@@ -174,7 +175,7 @@ final class PayPalApi
         $response = wp_remote_request($this->baseUrl() . $path, $args);
 
         if (is_wp_error($response)) {
-            throw new RuntimeException('PayPal transport error: ' . $response->get_error_message());
+            throw new GatewayTransportException('PayPal transport error: ' . $response->get_error_message());
         }
 
         $code = (int) wp_remote_retrieve_response_code($response);

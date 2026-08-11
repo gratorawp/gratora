@@ -10,6 +10,7 @@ use Dono\Gateways\Stripe\ApplePayDomain;
 use Dono\Gateways\Stripe\StripeAccount;
 use Dono\Gateways\Stripe\StripeApi;
 use Dono\Gateways\Stripe\StripeWebhookProvisioner;
+use Dono\Gateways\GatewayTransportException;
 use RuntimeException;
 use WP_Error;
 use WP_REST_Request;
@@ -174,6 +175,21 @@ final class StripeKeysController
 
         try {
             $obj = $this->api->get('/account');
+        } catch (GatewayTransportException $e) {
+            // The key was never shown to Stripe, so nothing about it is known.
+            // Reporting a rejection here sends an org to rotate credentials
+            // that are probably fine, when what failed is this server reaching
+            // the internet.
+            $this->account->restore($previous);
+            return new WP_Error(
+                'dono_stripe_unreachable',
+                sprintf(
+                    /* translators: %s: transport error, e.g. a DNS failure */
+                    __('This site could not reach Stripe, so the key has not been checked or saved: %s. That is a problem with this server rather than with the key. Payments will not work until it is resolved.', 'dono'),
+                    $e->getMessage()
+                ),
+                ['status' => 503]
+            );
         } catch (RuntimeException $e) {
             $this->account->restore($previous);
             return new WP_Error(

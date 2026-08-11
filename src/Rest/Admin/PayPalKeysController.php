@@ -7,6 +7,7 @@ namespace Dono\Rest\Admin;
 use Dono\Foundation\Auth\Capabilities;
 use Dono\Gateways\PayPal\PayPalAccount;
 use Dono\Gateways\PayPal\PayPalApi;
+use Dono\Gateways\GatewayTransportException;
 use RuntimeException;
 use WP_Error;
 use WP_REST_Request;
@@ -146,6 +147,21 @@ final class PayPalKeysController
         // different hosts entirely.
         try {
             $this->api->accessToken();
+        } catch (GatewayTransportException $e) {
+            // Nothing was shown to PayPal, so the pair is neither good nor bad.
+            // Calling it rejected sends an org to replace credentials that were
+            // never the problem.
+            $this->account->restore($previous);
+            return new WP_Error(
+                'dono_paypal_unreachable',
+                sprintf(
+                    /* translators: 1: sandbox or live, 2: transport error, e.g. a DNS failure */
+                    __('This site could not reach PayPal, so the %1$s credentials have not been checked or saved: %2$s. That is a problem with this server rather than with the credentials.', 'dono'),
+                    $this->modeLabel($test),
+                    $e->getMessage()
+                ),
+                ['status' => 503]
+            );
         } catch (RuntimeException $e) {
             $this->account->restore($previous);
             return new WP_Error(
