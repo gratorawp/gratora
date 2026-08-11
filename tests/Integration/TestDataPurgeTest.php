@@ -100,6 +100,65 @@ final class TestDataPurgeTest extends IntegrationTestCase
         $this->assertNull(Donor::query()->where('id', (int) $donor->id)->get());
     }
 
+    public function test_a_test_plan_goes_and_a_live_one_stays(): void
+    {
+        $donor = $this->donor('subscriber@example.test');
+
+        $ids = [];
+        foreach ([true, false] as $isTest) {
+            $p = RecurringPlan::make();
+            $p->donor_id                = (int) $donor->id;
+            $p->gateway                 = 'stripe';
+            $p->gateway_subscription_id = 'sub_' . uniqid();
+            $p->amount_cents            = 2500;
+            $p->currency                = 'USD';
+            $p->interval_unit           = 'week';
+            $p->interval_count          = 1;
+            $p->status                  = 'active';
+            $p->is_test                 = $isTest;
+            $p->started_at              = gmdate('Y-m-d H:i:s');
+            $p->created_at              = $p->started_at;
+            $p->updated_at              = $p->started_at;
+            $p->save();
+
+            $ids[$isTest ? 'test' : 'live'] = (int) $p->id;
+        }
+
+        $removed = $this->purger()->purge();
+
+        // Clearing the ledger before going live has to reach the schedules a
+        // sandbox left behind, or the Subscriptions screen opens on launch day
+        // full of plans nobody will ever be charged for.
+        $this->assertSame(1, $removed['recurring_plans']);
+        $this->assertNull(RecurringPlan::query()->where('id', $ids['test'])->get());
+        $this->assertNotNull(RecurringPlan::query()->where('id', $ids['live'])->get());
+    }
+
+    public function test_the_preview_counts_test_plans_before_anything_is_deleted(): void
+    {
+        $donor = $this->donor('previewer@example.test');
+
+        $p = RecurringPlan::make();
+        $p->donor_id                = (int) $donor->id;
+        $p->gateway                 = 'stripe';
+        $p->gateway_subscription_id = 'sub_' . uniqid();
+        $p->amount_cents            = 2500;
+        $p->currency                = 'USD';
+        $p->interval_unit           = 'week';
+        $p->interval_count          = 1;
+        $p->status                  = 'active';
+        $p->is_test                 = true;
+        $p->started_at              = gmdate('Y-m-d H:i:s');
+        $p->created_at              = $p->started_at;
+        $p->updated_at              = $p->started_at;
+        $p->save();
+
+        // The card lists what will go before anyone types DELETE, and a
+        // schedule missing from that list is one nobody agreed to remove.
+        $this->assertSame(1, $this->purger()->preview()['recurring_plans']);
+        $this->assertNotNull(RecurringPlan::query()->where('id', (int) $p->id)->get());
+    }
+
     public function test_a_donor_with_a_live_plan_is_kept_even_with_no_donations_left(): void
     {
         $donor = $this->donor('planner@example.test');

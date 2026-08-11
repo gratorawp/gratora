@@ -194,17 +194,19 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
 
             { testTotal > 0 && (
                 <Card
-                    title={ __( 'Test donations', 'dono' ) }
-                    sub={ __( 'Anything a gateway in test mode left behind. Test rows are already left out of every total, so this changes nothing you have reported: it clears the ledger you read by eye before going live. There is no undo.', 'dono' ) }
+                    title={ __( 'Test data', 'dono' ) }
+                    sub={ __( 'Everything a gateway in test mode left behind: donations, the recurring plans set up against them, and donors who would have nothing left on record. Test rows are already left out of every total, so this changes nothing you have reported: it clears the ledger you read by eye before going live. There is no undo.', 'dono' ) }
                 >
                     <ul className="dono-advanced-cron">
-                        <li>
-                            { sprintf(
-                                /* translators: %d: number of test donations */
-                                _n( '%d test donation', '%d test donations', testData.donations, 'dono' ),
-                                testData.donations
-                            ) }
-                        </li>
+                        { testData.donations > 0 && (
+                            <li>
+                                { sprintf(
+                                    /* translators: %d: number of test donations */
+                                    _n( '%d test donation', '%d test donations', testData.donations, 'dono' ),
+                                    testData.donations
+                                ) }
+                            </li>
+                        ) }
                         { testData.recurring_plans > 0 && (
                             <li>
                                 { sprintf(
