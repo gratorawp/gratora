@@ -11,13 +11,24 @@ function Banner( { variant, children } ) {
     );
 }
 
-export default function Banners( { donation } ) {
+export default function Banners( { donation, onRetrySubscription, retryBusy, retryError } ) {
     const isTest       = !! donation.is_test;
     const isDisputed   = donation.status === 'disputed';
     const isFailed     = donation.status === 'failed';
     const isProcessing = donation.status === 'processing' && !! donation.processing_reason;
 
-    if ( ! isTest && ! isDisputed && ! isFailed && ! isProcessing ) return null;
+    const isRecurring = !! donation.frequency && donation.frequency !== 'one_time';
+    // Only money the organisation still holds is owed a schedule: a full
+    // refund gave it back, a reversal took it away, and anything unsettled
+    // never bought a first period.
+    const holdsMoney  = [ 'paid', 'partial_refund' ].includes( donation.status );
+    const subFailed   = isRecurring
+        && holdsMoney
+        && ! donation.recurring_plan_id
+        && !! donation.flags?.subscription_creation_failed;
+    const subFailReason = donation.flags?.subscription_creation_failed_reason;
+
+    if ( ! isTest && ! isDisputed && ! isFailed && ! isProcessing && ! subFailed ) return null;
 
     return (
         <>
@@ -43,6 +54,38 @@ export default function Banners( { donation } ) {
                 <Banner variant="danger">
                     <strong>{ __( 'Payment failed.', 'dono' ) }</strong>{ ' ' }
                     { donation.failure_reason }
+                </Banner>
+            ) }
+            { subFailed && (
+                <Banner variant="danger">
+                    <strong>{ __( 'Recurring plan was not created.', 'dono' ) }</strong>{ ' ' }
+                    { __( 'The donor was charged for this donation, but no recurring plan exists at the gateway. Nothing will renew until this is fixed.', 'dono' ) }
+                    { subFailReason && (
+                        <div style={ { marginTop: 6 } }>
+                            <strong>{ __( 'Gateway reason:', 'dono' ) }</strong>{ ' ' }
+                            { subFailReason }
+                        </div>
+                    ) }
+                    { retryError && (
+                        <div style={ { marginTop: 6 } }>
+                            <strong>{ __( 'Last attempt failed:', 'dono' ) }</strong>{ ' ' }
+                            { retryError }
+                        </div>
+                    ) }
+                    { onRetrySubscription && (
+                        <div style={ { marginTop: 10 } }>
+                            <button
+                                type="button"
+                                className="btn btn--primary btn--sm"
+                                onClick={ onRetrySubscription }
+                                disabled={ retryBusy }
+                            >
+                                { retryBusy
+                                    ? __( 'Creating plan…', 'dono' )
+                                    : __( 'Create the recurring plan', 'dono' ) }
+                            </button>
+                        </div>
+                    ) }
                 </Banner>
             ) }
         </>

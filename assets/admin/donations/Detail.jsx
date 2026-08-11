@@ -56,6 +56,8 @@ export default function Detail( { reference } ) {
     const [ failOpen, setFailOpen ]     = useState( false );
     const [ failReason, setFailReason ] = useState( '' );
     const [ failBusy, setFailBusy ]     = useState( false );
+    const [ retryBusy, setRetryBusy ]   = useState( false );
+    const [ retryError, setRetryError ] = useState( null );
 
     const load = useCallback( () => {
         setLoading( true );
@@ -102,6 +104,33 @@ export default function Detail( { reference } ) {
                     load();
                 } catch ( err ) {
                     notify.error( err?.message || __( 'Could not mark donation as paid.', 'dono' ) );
+                }
+            },
+        } );
+    };
+
+    const retrySubscription = () => {
+        setConfirm( {
+            title:        __( 'Create the recurring plan', 'dono' ),
+            message:      __( 'Create the recurring plan at the gateway from this donation? The donor is not charged again today. The schedule restarts from now, so any renewal that fell due since this donation was made is not collected.', 'dono' ),
+            confirmLabel: __( 'Create plan', 'dono' ),
+            onConfirm: async () => {
+                setRetryBusy( true );
+                setRetryError( null );
+                try {
+                    await apiFetch( {
+                        path:   `/dono/v1/admin/donations/${ donation.reference }/retry-subscription`,
+                        method: 'POST',
+                    } );
+                    notify.success( __( 'Recurring plan created.', 'dono' ) );
+                    await load();
+                } catch ( err ) {
+                    // The gateway message is the diagnostic, so it goes through unedited.
+                    const reason = err?.message || __( 'Could not create the recurring plan.', 'dono' );
+                    setRetryError( reason );
+                    notify.error( reason );
+                } finally {
+                    setRetryBusy( false );
                 }
             },
         } );
@@ -154,7 +183,12 @@ export default function Detail( { reference } ) {
                 onRefund={ openRefund }
             />
 
-            <Banners donation={ donation } />
+            <Banners
+                donation={ donation }
+                onRetrySubscription={ retrySubscription }
+                retryBusy={ retryBusy }
+                retryError={ retryError }
+            />
 
             <div className="dd-layout">
                 <div className="dd-main">

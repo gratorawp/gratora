@@ -703,6 +703,14 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         if ($donation->recurring_plan_id) {
             throw new RuntimeException("Donation {$donation->reference} already has a recurring plan.");
         }
+        // A refunded or reversed PaymentIntent keeps its customer and
+        // payment_method, so the Stripe chain below would happily start billing
+        // a donor whose money has already gone back.
+        if (! in_array((string) $donation->status, ['paid', 'partial_refund'], true)) {
+            throw new RuntimeException(
+                "Donation {$donation->reference} is {$donation->status}; only a donation still paid for owes a schedule."
+            );
+        }
         if (! $donation->gateway_intent_id) {
             throw new RuntimeException("Donation {$donation->reference} has no gateway intent to re-read.");
         }
@@ -759,6 +767,11 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
      * Hands the saved card off to a real Stripe Subscription so Stripe drives
      * every renewal. `billing_cycle_anchor` is set one interval into the future
      * so the transition does not double-charge the donor on the same day.
+     *
+     * Stripe only accepts a future anchor, so the cycle is measured from now
+     * and not from `paid_at`: intervals that elapsed between the charge and
+     * this call are not billed. Backdating is possible only via
+     * `backdate_start_date`, which invoices the whole elapsed span at once.
      *
      * @since 1.0.0
      */

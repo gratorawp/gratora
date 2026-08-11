@@ -1077,6 +1077,17 @@ final class DonationsController
             );
         }
 
+        // The same set the unlinked-donation list counts and the one a reversal
+        // is allowed to act on: money the organisation still holds is the only
+        // money that bought a first period and is owed the ones after it.
+        if (! in_array((string) $donation->status, ['paid', 'partial_refund'], true)) {
+            return new WP_Error(
+                'dono_retry_not_allowed',
+                __('A recurring plan can only be created from a donation the organisation was paid and still holds. This one was refunded, reversed, or never settled.', 'dono'),
+                ['status' => 422]
+            );
+        }
+
         $gateway = $this->gateways->get((string) $donation->gateway);
         if (! $gateway instanceof \Dono\Gateways\Stripe\StripeGateway) {
             return new WP_Error(

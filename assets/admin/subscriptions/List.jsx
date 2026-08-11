@@ -8,8 +8,10 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 
 import { RotateCw } from 'lucide-react';
 
+import Btn from '../_shared/components/Btn';
 import EmptyState from '../_shared/components/EmptyState';
 import KpiStrip from '../_shared/components/KpiStrip';
+import Notice from '../_shared/components/Notice';
 import StatusBadge from '../_shared/components/StatusBadge';
 import PlanActionDialog, { actionsFor, dueIn, isTerminal, retryActionFor } from '../_shared/recurring/PlanActions';
 import notify from '../_shared/notify';
@@ -29,6 +31,19 @@ const INTERVAL_OPTIONS = [
     { value: 'year',  label: __( 'Yearly', 'dono' ) },
     { value: 'week',  label: __( 'Weekly', 'dono' ) },
 ];
+
+// A donation carries the cadence the donor chose on the form, not the plan's
+// interval pair, so it reads from its own labels.
+const FREQUENCY_LABEL = {
+    weekly:    __( 'Weekly', 'dono' ),
+    biweekly:  __( 'Every 2 weeks', 'dono' ),
+    monthly:   __( 'Monthly', 'dono' ),
+    quarterly: __( 'Quarterly', 'dono' ),
+    yearly:    __( 'Yearly', 'dono' ),
+};
+
+// How many the notice lists before it offers the rest behind a click.
+const UNLINKED_PREVIEW = 5;
 
 function intervalLabel( unit, count ) {
     const n = Number( count ) || 1;
@@ -53,8 +68,67 @@ function donorHref( donorId ) {
     return addQueryArgs( window.location.pathname, { page: 'dono-donors' } ) + `#donor/${ donorId }`;
 }
 
-function subscriptionKpis( stats ) {
+// The donation screen is where the retry lives, so each unlinked donation links
+// straight to its own record rather than to a list the org has to search.
+function donationHref( reference ) {
+    return addQueryArgs( window.location.pathname, {
+        page: 'dono-donations',
+        view: 'detail',
+        reference,
+    } );
+}
+
+// The card counts plans, and the failing filter below returns exactly those
+// rows. A donation charged on a schedule that was never created has no plan
+// row for any filter here to return, so it is named in the sub line and left
+// out of the number, with the notice above as its surface.
+function attentionSub( failing, unlinked ) {
+    const declined = sprintf(
+        /* translators: %d: number of plans carrying a failed renewal. */
+        _n(
+            '%d plan the gateway could not collect from',
+            '%d plans the gateway could not collect from',
+            failing,
+            'dono'
+        ),
+        failing
+    );
+
+    const noPlan = sprintf(
+        /* translators: %d: number of paid recurring donations with no plan. */
+        _n(
+            '%d paid recurring donation has no plan and is listed above',
+            '%d paid recurring donations have no plan and are listed above',
+            unlinked.total,
+            'dono'
+        ),
+        unlinked.total
+    );
+
+    // An unread count is not a zero, so the card says so rather than
+    // resolving the unknown half in the org's favour.
+    let second = null;
+    if ( unlinked.error ) {
+        second = __( 'Donations charged with no plan could not be checked', 'dono' );
+    } else if ( unlinked.total > 0 ) {
+        second = noPlan;
+    }
+
+    if ( second === null ) {
+        return failing > 0 ? declined : __( 'Nothing to chase', 'dono' );
+    }
+
+    return failing === 0 ? second : (
+        <>
+            <div>{ declined }</div>
+            <div>{ second }</div>
+        </>
+    );
+}
+
+function subscriptionKpis( stats, unlinked ) {
     if ( ! stats ) return [];
+    const failing = Number( stats.failing_count ) || 0;
     return [
         {
             id:    'mrr',
@@ -77,10 +151,8 @@ function subscriptionKpis( stats ) {
         {
             id:    'failing',
             label: __( 'Needs attention', 'dono' ),
-            value: String( stats.failing_count ),
-            sub:   stats.failing_count > 0
-                ? __( 'Renewals the gateway could not collect', 'dono' )
-                : __( 'No failed renewals', 'dono' ),
+            value: String( failing ),
+            sub:   attentionSub( failing, unlinked ),
         },
         {
             id:    'churn',
@@ -93,6 +165,151 @@ function subscriptionKpis( stats ) {
             ),
         },
     ];
+}
+
+// Money taken on a repeating schedule that the gateway never created: the
+// charge landed, the plan did not, and no row in the table below stands for it.
+function UnlinkedNotice( { unlinked, showAll, onShowAll, onReload } ) {
+    const { total, items, windowDays, canRetry, error } = unlinked;
+
+    if ( error ) {
+        return (
+            <Notice status="error" isDismissible={ false }>
+                <div>
+                    { __(
+                        'Recurring donations charged with no plan behind them could not be checked, so nothing on this screen rules them out.',
+                        'dono'
+                    ) }
+                </div>
+                <div className="dono-row__sub">{ error }</div>
+                <Btn variant="ghost" size="sm" onClick={ onReload }>
+                    { __( 'Check again', 'dono' ) }
+                </Btn>
+            </Notice>
+        );
+    }
+
+    if ( total === 0 ) return null;
+
+    const shown  = showAll ? items : items.slice( 0, UNLINKED_PREVIEW );
+    const hidden = items.length - shown.length;
+    const beyond = total - items.length;
+    const anyRecorded   = items.some( ( it ) => it.failure_recorded );
+    const anyUnrecorded = items.some( ( it ) => ! it.failure_recorded );
+
+    return (
+        <Notice status="warning" isDismissible={ false }>
+            <div>
+                { sprintf(
+                    /* translators: %d: number of paid recurring donations with no plan. */
+                    _n(
+                        '%d recurring donation was charged, but no plan was created for it. Nothing will collect the next payment.',
+                        '%d recurring donations were charged, but no plans were created for them. Nothing will collect their next payments.',
+                        total,
+                        'dono'
+                    ),
+                    total
+                ) }
+            </div>
+            { windowDays > 0 && (
+                <div className="dono-row__sub">
+                    { sprintf(
+                        /* translators: %d: number of days the check looks back over. */
+                        _n(
+                            'Covers donations paid in the last %d day.',
+                            'Covers donations paid in the last %d days.',
+                            windowDays,
+                            'dono'
+                        ),
+                        windowDays
+                    ) }
+                </div>
+            ) }
+            { shown.map( ( it ) => (
+                <div key={ it.reference }>
+                    <a href={ donationHref( it.reference ) }>{ it.reference }</a>
+                    { ' ' }
+                    { formatAmount( it.amount_cents, it.currency ) }
+                    { ' ' }
+                    { FREQUENCY_LABEL[ it.frequency ] || it.frequency }
+                    { ' ' }
+                    <span className="dono-row__sub">
+                        { it.failure_recorded
+                            ? __( 'failure recorded', 'dono' )
+                            : __( 'no failure recorded', 'dono' ) }
+                    </span>
+                </div>
+            ) ) }
+            { hidden > 0 && (
+                <Btn variant="ghost" size="sm" onClick={ onShowAll }>
+                    { sprintf(
+                        /* translators: %d: number of donations not yet listed. */
+                        _n( 'Show %d more', 'Show %d more', hidden, 'dono' ),
+                        hidden
+                    ) }
+                </Btn>
+            ) }
+            { beyond > 0 && showAll && (
+                <div>
+                    { sprintf(
+                        /* translators: %d: donations beyond the ones listed. */
+                        _n(
+                            '%d more is not listed here.',
+                            '%d more are not listed here.',
+                            beyond,
+                            'dono'
+                        ),
+                        beyond
+                    ) }
+                </div>
+            ) }
+            { canRetry && anyRecorded && (
+                <div>{ __( 'Open a donation with a recorded failure to create its plan.', 'dono' ) }</div>
+            ) }
+            { ! canRetry && (
+                <div>
+                    { __(
+                        'Creating a plan needs permission to issue refunds, so pass these references to someone who has it.',
+                        'dono'
+                    ) }
+                </div>
+            ) }
+            { anyUnrecorded && (
+                <div>
+                    { __(
+                        'Where no failure was recorded, check the payment provider for a subscription before asking the donor to set one up again.',
+                        'dono'
+                    ) }
+                </div>
+            ) }
+        </Notice>
+    );
+}
+
+function emptyStateCopy( unlinked ) {
+    if ( unlinked.error ) {
+        return {
+            title: __( 'No subscriptions to show', 'dono' ),
+            body:  __(
+                'Whether a recurring donation was charged with no plan behind it is unknown, so this is not the whole picture.',
+                'dono'
+            ),
+        };
+    }
+
+    if ( unlinked.total > 0 ) {
+        return {
+            title: __( 'No subscriptions were created', 'dono' ),
+            body:  unlinked.canRetry
+                ? __( 'The recurring donations above were charged, but no plan was ever created for them. Open one with a recorded failure to create its plan.', 'dono' )
+                : __( 'The recurring donations above were charged, but no plan was ever created for them. Creating a plan needs permission to issue refunds.', 'dono' ),
+        };
+    }
+
+    return {
+        title: __( 'No subscriptions yet', 'dono' ),
+        body:  __( 'Recurring plans appear here once a donor sets one up on a form that offers it.', 'dono' ),
+    };
 }
 
 export default function List() {
@@ -114,6 +331,14 @@ export default function List() {
     const [ gateways, setGateways ] = useState( [] );
     const [ campaigns, setCampaigns ] = useState( [] );
     const [ dialog, setDialog ]     = useState( null );
+    const [ unlinked, setUnlinked ] = useState( {
+        total:      0,
+        items:      [],
+        windowDays: 0,
+        canRetry:   false,
+        error:      null,
+    } );
+    const [ showAllUnlinked, setShowAllUnlinked ] = useState( false );
 
     useEffect( () => {
         let aborted = false;
@@ -191,7 +416,28 @@ export default function List() {
         .then( setStats )
         .catch( () => notify.error( __( 'The recurring totals could not be loaded.', 'dono' ) ) );
 
-    useEffect( () => { loadStats(); }, [] );
+    // These donations have no plan row, so no filter on this list can reach
+    // them; they are fetched on their own and read out above the table. A
+    // failure here is kept on screen: a count nobody could take is not a zero.
+    const loadUnlinked = () => apiFetch( {
+        path: addQueryArgs( '/dono/v1/admin/recurring/unlinked', { limit: 50 } ),
+    } )
+        .then( ( r ) => setUnlinked( {
+            total:      Number( r?.total ) || 0,
+            items:      Array.isArray( r?.items ) ? r.items : [],
+            windowDays: Number( r?.window_days ) || 0,
+            canRetry:   !! r?.can_retry,
+            error:      null,
+        } ) )
+        .catch( ( err ) => setUnlinked( {
+            total:      0,
+            items:      [],
+            windowDays: 0,
+            canRetry:   false,
+            error:      err?.message || __( 'The check could not be run.', 'dono' ),
+        } ) );
+
+    useEffect( () => { loadStats(); loadUnlinked(); }, [] );
 
     const fields = useMemo( () => [
         {
@@ -397,15 +643,19 @@ export default function List() {
                 </div>
             </div>
 
-            <KpiStrip items={ subscriptionKpis( stats ) } loading={ ! stats } />
+            <UnlinkedNotice
+                unlinked={ unlinked }
+                showAll={ showAllUnlinked }
+                onShowAll={ () => setShowAllUnlinked( true ) }
+                onReload={ loadUnlinked }
+            />
+
+            <KpiStrip items={ subscriptionKpis( stats, unlinked ) } loading={ ! stats } />
 
             { fetchError && <div className="dono-error-notice">{ fetchError }</div> }
 
             { ! loading && total === 0 && ! fetchError ? (
-                <EmptyState
-                    title={ __( 'No subscriptions yet', 'dono' ) }
-                    body={ __( 'Recurring plans appear here once a donor sets one up on a form that offers it.', 'dono' ) }
-                />
+                <EmptyState { ...emptyStateCopy( unlinked ) } />
             ) : (
                 // The card chrome the other list screens sit in lives on this
                 // wrapper, so without it the table renders bare on the page.

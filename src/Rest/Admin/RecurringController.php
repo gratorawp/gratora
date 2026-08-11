@@ -5,18 +5,23 @@ declare(strict_types=1);
 namespace Dono\Rest\Admin;
 
 use Dono\Campaigns\CampaignRepository;
+use Dono\Donations\Donation;
+use Dono\Donations\DonationQueries;
 use Dono\Donors\Donor;
 use Dono\Donors\DonorRepository;
 use Dono\Donors\DonorService;
 use Dono\Foundation\Auth\Capabilities;
 use Dono\Gateways\GatewayManager;
 use Dono\Gateways\PaymentRetryUnavailable;
+use Dono\Gateways\SubscriptionAware;
 use Dono\Gateways\SubscriptionChangeNeedsApproval;
 use Dono\Gateways\SupportsPaymentRetry;
 use Dono\Recurring\RecurringPlan;
 use Dono\Recurring\RecurringPlanActions;
 use Dono\Recurring\RecurringPlanChange;
 use Dono\Recurring\RecurringPlanRepository;
+use Dono\Vendor\Queryable\ModelQueryBuilder;
+use Dono\Vendor\Queryable\QueryBuilder;
 use InvalidArgumentException;
 use RuntimeException;
 use WP_Error;
@@ -35,6 +40,31 @@ use WP_REST_Server;
 final class RecurringController
 {
     private const NAMESPACE = 'dono/v1';
+
+    /**
+     * flags is LONGTEXT, so a non-JSON value can reach it: MySQL raises on one
+     * and MariaDB returns NULL, and the JSON_VALID guard makes both return NULL.
+     * The flag is written as a JSON boolean, which unquotes to the string
+     * 'true'; '1' covers a truthy value arriving from anywhere else.
+     */
+    private const FAILURE_FLAG_PREDICATE = "JSON_UNQUOTE(JSON_EXTRACT("
+        . "IF(JSON_VALID(flags), flags, NULL), "
+        . "'$.subscription_creation_failed')) IN ('true', '1')";
+
+    /**
+     * A donation is not stranded while its own flow can still finish: the plan
+     * is created in the request that marks it paid, and a redirect-side confirm
+     * can land ahead of the webhook that creates it.
+     */
+    private const SETTLE_MINUTES = 60;
+
+    /**
+     * How far back the screen looks. A retry anchors the next charge to the
+     * moment it is run, so past a quarter the schedule is a conversation with
+     * the donor rather than a click, and the bound keeps the read inside the
+     * (recurring_plan_id, paid_at) index range instead of every plan-less row.
+     */
+    private const WINDOW_DAYS = 90;
 
     /** @since 1.0.0 */
     public function __construct(
@@ -74,6 +104,15 @@ final class RecurringController
             'methods'             => WP_REST_Server::READABLE,
             'permission_callback' => static fn () => Capabilities::userCan('dono_view_donations'),
             'callback'            => [$this, 'stats'],
+        ]);
+
+        register_rest_route(self::NAMESPACE, '/admin/recurring/unlinked', [
+            'methods'             => WP_REST_Server::READABLE,
+            'permission_callback' => static fn () => Capabilities::userCan('dono_view_donations'),
+            'callback'            => [$this, 'unlinked'],
+            'args'                => [
+                'limit' => ['type' => 'integer', 'default' => 10, 'minimum' => 1, 'maximum' => 50],
+            ],
         ]);
 
         register_rest_route(self::NAMESPACE, '/admin/recurring/gateway-options', [
@@ -142,10 +181,111 @@ final class RecurringController
     /** @since 1.0.0 */
     public function stats(): WP_REST_Response
     {
-        return new WP_REST_Response(
-            $this->plans->recurringStats(gmdate('Y-m-d H:i:s')),
-            200
+        return new WP_REST_Response($this->plans->recurringStats(gmdate('Y-m-d H:i:s')), 200);
+    }
+
+    /**
+     * Recurring donations the donor is being charged for on a schedule that was
+     * never created at the gateway.
+     *
+     * @since 1.0.0
+     */
+    public function unlinked(WP_REST_Request $request): WP_REST_Response
+    {
+        $limit = (int) $request['limit'];
+        $rows  = $this->unlinkedQuery()
+            ->orderBy('paid_at', 'DESC')
+            ->limit($limit)
+            ->getAll();
+
+        return new WP_REST_Response([
+            // A page shorter than the limit already is the count.
+            'total'       => count($rows) < $limit ? count($rows) : $this->countUnlinked(),
+            'window_days' => self::WINDOW_DAYS,
+            // Creating the plan is a refund-grade action, so a reader with view
+            // access has to hand these on rather than act on them.
+            'can_retry'   => Capabilities::userCan('dono_refund_donations'),
+            'items'       => array_map(static fn (Donation $d): array => [
+                'reference'        => (string) $d->reference,
+                'amount_cents'     => (int) $d->amount_cents,
+                'currency'         => (string) $d->currency,
+                'frequency'        => (string) $d->frequency,
+                // The retry endpoint takes a recorded failure only; the rest
+                // need the gateway looked at before anyone acts.
+                'failure_recorded' => ! empty(((array) ($d->flags ?? []))['subscription_creation_failed']),
+            ], $rows),
+        ], 200);
+    }
+
+    /** @since 1.0.0 */
+    private function countUnlinked(): int
+    {
+        return (int) $this->unlinkedQuery()->count();
+    }
+
+    /**
+     * Money collected on a repeating schedule with nothing scheduled to collect
+     * it again: the first charge landed and no plan was ever linked to it.
+     *
+     * Two ways in, because the failure flag is written only where the handler
+     * survives long enough to catch its own error. A recorded failure is one. A
+     * paid recurring donation on a gateway that runs subscriptions of its own is
+     * the other, and it is the one that catches a worker killed mid-flight or a
+     * delivery that never arrived. A gateway that schedules nothing is left out:
+     * a plan-less donation of its own proves nothing about a schedule.
+     *
+     * Bounded at both ends: inside SETTLE_MINUTES the donation's own flow may
+     * still be running, and past WINDOW_DAYS it is history rather than
+     * something a retry recovers.
+     *
+     * A partial refund did not end the schedule, so it stays in scope; a full
+     * refund gave the money back and is not a renewal anyone is waiting on.
+     *
+     * @since 1.0.0
+     */
+    private function unlinkedQuery(): ModelQueryBuilder
+    {
+        $now      = time();
+        $gateways = $this->planCreatingGateways();
+
+        return DonationQueries::donationsOnly(
+            Donation::query()
+                ->whereNull('recurring_plan_id')
+                ->where('frequency', 'one_time', '<>')
+                ->whereIn('status', ['paid', 'partial_refund'])
+                ->whereBetween(
+                    'paid_at',
+                    gmdate('Y-m-d H:i:s', $now - (self::WINDOW_DAYS * DAY_IN_SECONDS)),
+                    gmdate('Y-m-d H:i:s', $now - (self::SETTLE_MINUTES * MINUTE_IN_SECONDS))
+                )
+                ->where(static function (QueryBuilder $q) use ($gateways): void {
+                    // First condition of the group: whereRaw carries no AND.
+                    $q->whereRaw(self::FAILURE_FLAG_PREDICATE);
+                    if ($gateways !== []) {
+                        $q->orWhereIn('gateway', $gateways);
+                    }
+                })
         );
+    }
+
+    /**
+     * Gateways that create a subscription of their own, so a paid recurring
+     * donation of theirs with no plan row means nothing is scheduled.
+     *
+     * @return list<string>
+     *
+     * @since 1.0.0
+     */
+    private function planCreatingGateways(): array
+    {
+        $ids = [];
+        foreach ($this->gateways->all() as $id => $gateway) {
+            if ($gateway instanceof SubscriptionAware) {
+                $ids[] = (string) $id;
+            }
+        }
+
+        return $ids;
     }
 
     /**
