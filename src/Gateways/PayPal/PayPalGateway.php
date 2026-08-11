@@ -892,13 +892,15 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         try {
             $refund = $this->api->post(
                 '/v2/payments/captures/' . rawurlencode($captureId) . '/refund',
-                [
+                // note_to_payer is omitted rather than sent as null: PayPal
+                // type-checks its optional fields and refuses the null.
+                array_filter([
                     'amount' => [
                         'currency_code' => $currency,
                         'value'         => PayPalMoney::toValue($amountCents, $currency),
                     ],
                     'note_to_payer' => $reason !== null ? substr($reason, 0, 255) : null,
-                ],
+                ], static fn ($v) => $v !== null),
                 [
                     // Stable per attempt so a timed-out refund that already
                     // processed returns the original instead of issuing a second.
