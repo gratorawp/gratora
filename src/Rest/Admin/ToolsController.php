@@ -137,6 +137,8 @@ final class ToolsController
                     'per_page' => ['type' => 'integer', 'default' => 25, 'minimum' => 1, 'maximum' => 100],
                     'source'   => ['type' => 'string', 'default' => ''],
                     'status'   => ['type' => 'string', 'enum' => ['', 'failed'], 'default' => ''],
+                    'orderby'  => ['type' => 'string', 'enum' => self::LOG_ORDER_COLUMNS, 'default' => 'occurred_at'],
+                    'order'    => ['type' => 'string', 'enum' => ['asc', 'desc'], 'default' => 'desc'],
                 ],
             ],
             [
@@ -165,6 +167,9 @@ final class ToolsController
     /** Inbound gateway deliveries, written as `webhook.<gateway id>`. */
     private const WEBHOOK_PREFIX = 'webhook.';
 
+    /** Columns the list may be ordered by. Nothing outside this reaches the query. */
+    private const LOG_ORDER_COLUMNS = ['occurred_at', 'type'];
+
     /**
      * A delivery that was refused at the signature, and one that verified and
      * then threw, are both failures. A verified delivery Dono has no handler
@@ -182,8 +187,9 @@ final class ToolsController
         . " OR JSON_TYPE(JSON_EXTRACT(IF(JSON_VALID(payload), payload, NULL), '\$.error')) NOT IN ('NULL'))";
 
     /**
-     * Paged log, newest first: what Dono could not finish and what the
-     * gateways sent, optionally narrowed to one source or to the failures.
+     * Paged log, newest first unless asked otherwise: what Dono could not
+     * finish and what the gateways sent, optionally narrowed to one source or
+     * to the failures.
      *
      * @since 1.0.0
      */
@@ -194,11 +200,19 @@ final class ToolsController
         $source  = self::logSource((string) $request['source']);
         $failed  = (string) $request['status'] === 'failed';
 
+        $orderBy = in_array((string) $request['orderby'], self::LOG_ORDER_COLUMNS, true)
+            ? (string) $request['orderby']
+            : 'occurred_at';
+        $order = strtolower((string) $request['order']) === 'asc' ? 'ASC' : 'DESC';
+
         $total = self::logQuery($source, $failed)->count();
 
         $rows = self::logQuery($source, $failed)
-            ->orderBy('occurred_at', 'DESC')
-            ->orderBy('id', 'DESC')
+            ->orderBy($orderBy, $order)
+            // Entries recorded in the same second, and whole families sharing a
+            // type, would otherwise page in an order the engine is free to
+            // change between requests.
+            ->orderBy('id', $order)
             ->limit($perPage)
             ->offset(($page - 1) * $perPage)
             ->getAll();

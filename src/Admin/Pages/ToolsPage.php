@@ -71,6 +71,14 @@ final class ToolsPage extends HookProvider
         wp_set_script_translations(self::HANDLE, 'dono', DONO_DIR . 'languages');
 
         wp_enqueue_style('wp-components');
+        // The list is a DataViews table, and its own layout CSS is a vendor file
+        // rather than anything the theme or wp-components provides.
+        wp_enqueue_style(
+            'dono-dataviews-vendor-tools',
+            DONO_URL . self::BUILD_DIR . '/dataviews.css',
+            ['wp-components'],
+            $asset['version'] ?? DONO_VERSION
+        );
         wp_enqueue_style(
             'dono-admin-tools',
             DONO_URL . 'build/admin/tools.css',

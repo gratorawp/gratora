@@ -1,16 +1,38 @@
-import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
+import { useCallback, useEffect, useMemo, useRef, useState } from '@wordpress/element';
+import { DataViews } from '@wordpress/dataviews';
 import apiFetch from '@wordpress/api-fetch';
+import { addQueryArgs } from '@wordpress/url';
 import { __, _n, sprintf } from '@wordpress/i18n';
 
 import Card from '../../_shared/components/Card';
 import Btn from '../../_shared/components/Btn';
 import ConfirmDialog from '../../_shared/components/ConfirmDialog';
+import Dialog from '../../_shared/components/Dialog';
 
 const PER_PAGE = 25;
+
+// Column id to the column the route orders by.
+const ORDER_BY = {
+    occurred_at: 'occurred_at',
+    source:      'type',
+};
 
 function formatWhen( iso ) {
     const d = new Date( ( iso || '' ).replace( ' ', 'T' ) + 'Z' );
     return isNaN( d ) ? '' : d.toLocaleString();
+}
+
+// The source filter offers whole types, and a row carries its family stripped
+// off, so the cell and the filter value are built back up to the same string.
+function fullType( row ) {
+    if ( row.kind === 'webhook' ) return `webhook.${ row.source }`;
+    if ( row.kind === 'error' ) return `error.${ row.source }`;
+
+    return row.source;
+}
+
+function hasContext( row ) {
+    return !! row.context && Object.keys( row.context ).length > 0;
 }
 
 /**
@@ -18,6 +40,13 @@ function formatWhen( iso ) {
  * Dono has no handler for is ordinary traffic: gateways send everything they
  * have, and most of it is none of our business.
  */
+/**
+ * What a clear can actually delete. Everything else in the log is a record.
+ */
+function isDiagnosticSource( source ) {
+    return source.startsWith( 'error.' ) || source.startsWith( 'webhook.' );
+}
+
 function deliveryOutcome( row ) {
     if ( ! row.verified ) {
         return { tone: 'red', label: __( 'Not verified', 'dono' ) };
@@ -31,14 +60,29 @@ function deliveryOutcome( row ) {
     return { tone: 'gray', label: __( 'No action needed', 'dono' ) };
 }
 
+function Pill( { tone, label } ) {
+    return (
+        <span className={ `dono-pill dono-pill--${ tone }` }>
+            <span className="dono-pill__dot" />
+            { label }
+        </span>
+    );
+}
+
 export default function LogsTab( { active, setNotice } ) {
+    const [ view, setView ] = useState( {
+        type:    'table',
+        perPage: PER_PAGE,
+        page:    1,
+        sort:    { field: 'occurred_at', direction: 'desc' },
+        filters: [],
+        fields:  [ 'occurred_at', 'source', 'message', 'outcome' ],
+    } );
+
     const [ log, setLog ]           = useState( null );
     const [ loading, setLoading ]   = useState( false );
     const [ error, setError ]       = useState( null );
-    const [ page, setPage ]         = useState( 1 );
-    const [ source, setSource ]     = useState( '' );
-    const [ status, setStatus ]     = useState( '' );
-    const [ open, setOpen ]         = useState( {} );
+    const [ detail, setDetail ]     = useState( null );
     const [ clearing, setClearing ] = useState( false );
     const [ confirm, setConfirm ]   = useState( null );
 
@@ -46,13 +90,23 @@ export default function LogsTab( { active, setNotice } ) {
     // rows the controls no longer ask for.
     const generation = useRef( 0 );
 
+    const filterValue = ( field ) => view.filters?.find( ( f ) => f.field === field )?.value;
+    const source = filterValue( 'source' ) || '';
+    const status = filterValue( 'outcome' ) || '';
+
+    const apiParams = useMemo( () => ( {
+        page:     view.page,
+        per_page: view.perPage,
+        source,
+        status,
+        orderby:  ORDER_BY[ view.sort?.field ] || 'occurred_at',
+        order:    view.sort?.direction || 'desc',
+    } ), [ view.page, view.perPage, view.sort, source, status ] );
+
     const load = useCallback( () => {
         const mine = ++generation.current;
         setLoading( true );
-        apiFetch( {
-            path: `/dono/v1/admin/tools/log?page=${ page }&per_page=${ PER_PAGE }`
-                + `&source=${ encodeURIComponent( source ) }&status=${ encodeURIComponent( status ) }`,
-        } )
+        apiFetch( { path: addQueryArgs( '/dono/v1/admin/tools/log', apiParams ) } )
             .then( ( res ) => {
                 if ( mine !== generation.current ) return;
                 setLog( res );
@@ -68,7 +122,7 @@ export default function LogsTab( { active, setNotice } ) {
             .finally( () => {
                 if ( mine === generation.current ) setLoading( false );
             } );
-    }, [ page, source, status ] );
+    }, [ apiParams ] );
 
     // Tabs are hidden rather than unmounted, so refetch on every visit: an entry
     // recorded while another tab was open belongs in this list.
@@ -78,10 +132,10 @@ export default function LogsTab( { active, setNotice } ) {
         setClearing( true );
         try {
             const res = await apiFetch( {
-                path:   `/dono/v1/admin/tools/log?source=${ encodeURIComponent( source ) }`,
+                path:   addQueryArgs( '/dono/v1/admin/tools/log', { source } ),
                 method: 'DELETE',
             } );
-            setPage( 1 );
+            setView( ( v ) => ( { ...v, page: 1 } ) );
             load();
             setNotice( {
                 type: 'success',
@@ -100,17 +154,29 @@ export default function LogsTab( { active, setNotice } ) {
 
     // Named for what it removes: filtered to a source it clears that source
     // only, and the delivery history goes with the failures either way.
+    // Only failures and deliveries can be cleared. Everything else is the
+    // record the donor timelines and the dashboard read from, so a source
+    // filtered to one of those types clears the diagnostics around it rather
+    // than the rows it names, and the confirmation has to say which.
+    const clearsTheFilteredSource = !! source && isDiagnosticSource( source );
+
     const askClear = () => setConfirm( {
-        title: source
+        title: clearsTheFilteredSource
             ? __( 'Clear this source', 'dono' )
             : __( 'Clear the log', 'dono' ),
-        message: source
+        message: clearsTheFilteredSource
             ? sprintf(
                 /* translators: %s: the log source being cleared, e.g. webhook.stripe */
                 __( 'Deletes every entry recorded under %s. Nothing else is touched.', 'dono' ),
                 source
             )
-            : __( 'Deletes the failures Dono recorded and the history of what your gateways sent. What happened to donations, donors and subscriptions is kept: those entries are the record the donor timelines and the dashboard read from.', 'dono' ),
+            : source
+                ? sprintf(
+                    /* translators: %s: the log source currently filtered to, e.g. donation.completed */
+                    __( 'Entries under %s are the record of what happened and are kept, along with the donor timelines and the dashboard figures that read from them. This deletes the failures Dono recorded and the history of what your gateways sent.', 'dono' ),
+                    source
+                )
+                : __( 'Deletes the failures Dono recorded and the history of what your gateways sent. What happened to donations, donors and subscriptions is kept: those entries are the record the donor timelines and the dashboard read from.', 'dono' ),
         confirmLabel: __( 'Clear log', 'dono' ),
         destructive:  true,
         onConfirm:    doClear,
@@ -118,65 +184,112 @@ export default function LogsTab( { active, setNotice } ) {
 
     const total     = log?.total || 0;
     const items     = log?.items || [];
-    const sources   = log?.sources || [];
     const retention = Number( log?.retention_days ) || 0;
-    const pages     = Math.max( 1, Math.ceil( total / PER_PAGE ) );
     const filtered  = !! source || !! status;
+
+    const sources = useMemo( () => log?.sources || [], [ log ] );
+
+    const fields = useMemo( () => [
+        {
+            id:            'occurred_at',
+            label:         __( 'When', 'dono' ),
+            enableSorting: true,
+            enableHiding:  false,
+            getValue:      ( { item } ) => item.occurred_at || '',
+            render:        ( { item } ) => formatWhen( item.occurred_at ),
+        },
+        {
+            id:            'source',
+            label:         __( 'Source', 'dono' ),
+            enableSorting: true,
+            elements:      sources.map( ( s ) => ( { value: s, label: s } ) ),
+            filterBy:      { operators: [ 'is' ] },
+            getValue:      ( { item } ) => fullType( item ),
+            render:        ( { item } ) => <code className="dono-log__source">{ fullType( item ) }</code>,
+        },
+        {
+            id:            'message',
+            label:         __( 'What it says', 'dono' ),
+            enableSorting: false,
+            getValue:      ( { item } ) => item.message || '',
+            render: ( { item } ) => (
+                <div className="dono-log__message">
+                    <div>{ item.message }</div>
+                    { item.kind === 'webhook' && item.error && (
+                        <div className="dono-row__sub dono-log__message-sub">{ item.error }</div>
+                    ) }
+                </div>
+            ),
+        },
+        {
+            id:            'outcome',
+            label:         __( 'Outcome', 'dono' ),
+            enableSorting: false,
+            // The one narrowing worth offering: everything else on this screen
+            // is ordinary traffic an org reads by scanning, not by filtering.
+            elements:      [ { value: 'failed', label: __( 'Problems only', 'dono' ) } ],
+            filterBy:      { operators: [ 'is' ] },
+            render: ( { item } ) => {
+                if ( item.kind === 'webhook' ) {
+                    return <Pill { ...deliveryOutcome( item ) } />;
+                }
+                if ( item.kind === 'error' ) {
+                    return <Pill tone="red" label={ __( 'Could not finish', 'dono' ) } />;
+                }
+
+                // What happened is a record, not a verdict.
+                return <span className="dono-row__sub">-</span>;
+            },
+        },
+    ], [ sources ] );
+
+    const actions = useMemo( () => [
+        {
+            id:         'detail',
+            label:      __( 'View detail', 'dono' ),
+            isEligible: hasContext,
+            callback:   ( [ item ] ) => setDetail( item ),
+        },
+    ], [] );
+
+    const paginationInfo = useMemo(
+        () => ( { totalItems: total, totalPages: Math.max( 1, Math.ceil( total / view.perPage ) ) } ),
+        [ total, view.perPage ]
+    );
 
     const sub = retention > 0
         ? sprintf(
             /* translators: %d: number of days entries are kept. */
             _n(
-                'Everything Dono recorded, newest first: what happened, what your gateways sent, and what it could not finish. Entries are removed after %d day.',
-                'Everything Dono recorded, newest first: what happened, what your gateways sent, and what it could not finish. Entries are removed after %d days.',
+                'Everything Dono recorded: what happened, what your gateways sent, and what it could not finish. Entries are removed after %d day.',
+                'Everything Dono recorded: what happened, what your gateways sent, and what it could not finish. Entries are removed after %d days.',
                 retention,
                 'dono'
             ),
             retention
         )
-        : __( 'Everything Dono recorded, newest first: what happened, what your gateways sent, and what it could not finish.', 'dono' );
+        : __( 'Everything Dono recorded: what happened, what your gateways sent, and what it could not finish.', 'dono' );
+
+    // Nothing at all has no filter to widen and no source to pick, so the table
+    // has nothing to offer. A filtered miss keeps it: the chips are the only way
+    // back to the rest of the log.
+    const emptyAndUnfiltered = ! loading && ! error && total === 0 && ! filtered;
 
     return (
         <div className="dono-panel">
             <Card title={ __( 'Log', 'dono' ) } sub={ sub }>
                 <div className="dono-tools-logbar">
-                    <label className="dono-tools-field">
-                        { __( 'Source', 'dono' ) }
-                        <select
-                            className="dono-select"
-                            value={ source }
-                            onChange={ ( e ) => { setSource( e.target.value ); setPage( 1 ); } }
-                        >
-                            <option value="">{ __( 'All sources', 'dono' ) }</option>
-                            { sources.map( ( sc ) => (
-                                <option key={ sc } value={ sc }>{ sc }</option>
-                            ) ) }
-                        </select>
-                    </label>
-                    <label className="dono-tools-field">
-                        { __( 'Show', 'dono' ) }
-                        <select
-                            className="dono-select"
-                            value={ status }
-                            onChange={ ( e ) => { setStatus( e.target.value ); setPage( 1 ); } }
-                        >
-                            <option value="">{ __( 'Everything', 'dono' ) }</option>
-                            <option value="failed">{ __( 'Problems only', 'dono' ) }</option>
-                        </select>
-                    </label>
-                    <div className="dono-tools-logbar__actions">
-                        <Btn variant="secondary" onClick={ load } disabled={ loading }>
-                            { __( 'Refresh', 'dono' ) }
-                        </Btn>
-                        <Btn
-                            variant="secondary"
-                            onClick={ askClear }
-                            disabled={ clearing || total === 0 }
-                            isBusy={ clearing }
-                        >
-                            { __( 'Clear log', 'dono' ) }
-                        </Btn>
-                    </div>
+                    <Btn variant="secondary" onClick={ load } disabled={ loading }>
+                        { __( 'Refresh', 'dono' ) }
+                    </Btn>
+                    <Btn
+                        variant="secondary"
+                        onClick={ askClear }
+                        disabled={ clearing || total === 0 }
+                        isBusy={ clearing }
+                    >
+                        { __( 'Clear log', 'dono' ) }
+                    </Btn>
                 </div>
 
                 { error ? (
@@ -185,59 +298,25 @@ export default function LogsTab( { active, setNotice } ) {
                         { ' ' }
                         <code>{ error }</code>
                     </p>
-                ) : loading && ! items.length ? (
-                    <p className="dono-tools-empty">{ __( 'Loading…', 'dono' ) }</p>
-                ) : ! items.length ? (
-                    <p className="dono-tools-empty">
-                        { filtered
-                            ? __( 'Nothing matches those filters.', 'dono' )
-                            : __( 'Nothing recorded yet.', 'dono' ) }
-                    </p>
+                ) : emptyAndUnfiltered ? (
+                    <p className="dono-tools-empty">{ __( 'Nothing recorded yet.', 'dono' ) }</p>
                 ) : (
-                    <ul className="dono-tools-log">
-                        { items.map( ( e ) => {
-                            const isDelivery = e.kind === 'webhook';
-                            const outcome    = isDelivery ? deliveryOutcome( e ) : null;
-                            const hasContext = e.context && Object.keys( e.context ).length > 0;
-
-                            return (
-                                <li key={ e.id }>
-                                    <div className="dono-tools-log__head">
-                                        <code className="dono-tools-log__source">
-                                            { isDelivery ? `webhook.${ e.source }` : e.source }
-                                        </code>
-                                        { outcome && (
-                                            <span className={ `dono-pill dono-pill--${ outcome.tone }` }>
-                                                <span className="dono-pill__dot" />
-                                                { outcome.label }
-                                            </span>
-                                        ) }
-                                        <span className="dono-tools-log__when">{ formatWhen( e.occurred_at ) }</span>
-                                    </div>
-                                    <div className="dono-tools-log__message">{ e.message }</div>
-                                    { isDelivery && e.error && (
-                                        <div className="dono-tools-log__message">{ e.error }</div>
-                                    ) }
-                                    { hasContext && (
-                                        <>
-                                            <button
-                                                type="button"
-                                                className="dono-tools-log__toggle"
-                                                onClick={ () => setOpen( ( o ) => ( { ...o, [ e.id ]: ! o[ e.id ] } ) ) }
-                                            >
-                                                { open[ e.id ] ? __( 'Hide detail', 'dono' ) : __( 'Show detail', 'dono' ) }
-                                            </button>
-                                            { open[ e.id ] && (
-                                                <pre className="dono-tools-log__context">
-                                                    { JSON.stringify( e.context, null, 2 ) }
-                                                </pre>
-                                            ) }
-                                        </>
-                                    ) }
-                                </li>
-                            );
-                        } ) }
-                    </ul>
+                    // The card chrome the other list screens sit in lives on this
+                    // wrapper, so without it the table renders bare on the page.
+                    <div className="dono-dataviews">
+                        <DataViews
+                            data={ items }
+                            fields={ fields }
+                            view={ view }
+                            onChangeView={ setView }
+                            actions={ actions }
+                            isLoading={ loading }
+                            paginationInfo={ paginationInfo }
+                            defaultLayouts={ { table: {} } }
+                            search={ false }
+                            getItemId={ ( item ) => String( item.id ) }
+                        />
+                    </div>
                 ) }
 
                 { ! error && !! items.length && (
@@ -245,26 +324,27 @@ export default function LogsTab( { active, setNotice } ) {
                         { __( 'A delivery marked as needing no action is normal: gateways send every event they have, and Dono acts only on the ones it needs. Request bodies are not kept, because they carry the donor details the gateway sent. Clearing the log removes failures and deliveries, not what happened to a donation.', 'dono' ) }
                     </p>
                 ) }
-
-                { ! error && pages > 1 && (
-                    <div className="dono-tools-pager">
-                        <Btn variant="secondary" disabled={ page <= 1 } onClick={ () => setPage( page - 1 ) }>
-                            { __( 'Previous', 'dono' ) }
-                        </Btn>
-                        <span>
-                            { sprintf(
-                                /* translators: 1: current page, 2: total pages. */
-                                __( 'Page %1$d of %2$d', 'dono' ),
-                                page,
-                                pages
-                            ) }
-                        </span>
-                        <Btn variant="secondary" disabled={ page >= pages } onClick={ () => setPage( page + 1 ) }>
-                            { __( 'Next', 'dono' ) }
-                        </Btn>
-                    </div>
-                ) }
             </Card>
+
+            { detail && (
+                <Dialog
+                    title={ __( 'Entry detail', 'dono' ) }
+                    size="wide"
+                    onClose={ () => setDetail( null ) }
+                    foot={ (
+                        <Btn variant="secondary" onClick={ () => setDetail( null ) }>
+                            { __( 'Close', 'dono' ) }
+                        </Btn>
+                    ) }
+                >
+                    <div className="dono-log__detail-head">
+                        <code className="dono-log__source">{ fullType( detail ) }</code>
+                        <span className="dono-row__sub">{ formatWhen( detail.occurred_at ) }</span>
+                    </div>
+                    <div className="dono-log__message">{ detail.message }</div>
+                    <pre className="dono-log__context">{ JSON.stringify( detail.context, null, 2 ) }</pre>
+                </Dialog>
+            ) }
 
             <ConfirmDialog confirm={ confirm } onClose={ () => setConfirm( null ) } />
         </div>

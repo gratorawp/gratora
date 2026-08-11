@@ -188,6 +188,30 @@ final class ToolsLogRouteTest extends IntegrationTestCase
         $this->assertNotNull(Event::query()->where('id', $kept)->get());
     }
 
+    public function test_the_order_can_be_reversed(): void
+    {
+        ErrorLog::record('gateway.first', 'Older.');
+        ErrorLog::record('gateway.second', 'Newer.');
+
+        $newestFirst = array_column((array) $this->fetch()['items'], 'source');
+        $oldestFirst = array_column((array) $this->fetch(['order' => 'asc'])['items'], 'source');
+
+        $this->assertSame(array_reverse($newestFirst), $oldestFirst);
+    }
+
+    public function test_an_unknown_sort_column_is_refused_rather_than_reaching_the_query(): void
+    {
+        ErrorLog::record('gateway.intent', 'Something.');
+
+        $req = new WP_REST_Request('GET', '/dono/v1/admin/tools/log');
+        $req->set_param('orderby', 'id; DROP TABLE wp_posts');
+        $res = rest_do_request($req);
+
+        // The enum refuses it before the callback runs, so nothing has to trust
+        // the string further down.
+        $this->assertGreaterThanOrEqual(400, $res->get_status());
+    }
+
     public function test_the_route_is_closed_to_a_subscriber(): void
     {
         wp_set_current_user(self::factory()->user->create(['role' => 'subscriber']));
