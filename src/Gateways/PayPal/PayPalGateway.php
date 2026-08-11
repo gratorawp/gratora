@@ -300,16 +300,26 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         $fee = $capture['seller_receivable_breakdown']['paypal_fee']['value'] ?? null;
         $feeCurrency = (string) ($capture['seller_receivable_breakdown']['paypal_fee']['currency_code'] ?? '');
 
+        // PayPal says why it is holding the money, and the reasons mean very
+        // different things: ECHECK settles itself in days, PENDING_REVIEW may
+        // clear on its own, and RECEIVING_PREFERENCE_MANDATES_MANUAL_ACTION
+        // never completes until somebody accepts the payment in the PayPal
+        // account. Without it "processing" is a status with no next step.
+        $pendingReason = (string) ($capture['status_details']['reason'] ?? '');
+
         return new GatewayConfirmResult(
             success: $captureStatus === 'COMPLETED',
             gateway_txn_id: (string) ($capture['id'] ?? ''),
             payment_method: 'paypal',
             fee_cents: $fee !== null ? PayPalMoney::toStoredCents((string) $fee, $feeCurrency) : null,
-            error: $captureStatus === 'COMPLETED' ? null : 'PayPal capture is pending review.',
+            error: $captureStatus === 'COMPLETED'
+                ? null
+                : trim('PayPal is holding this payment. ' . $pendingReason),
             metadata: [
-                'paypal_order_id'   => (string) ($order['id'] ?? ''),
-                'paypal_capture_id' => (string) ($capture['id'] ?? ''),
-                'payer_email'       => (string) ($order['payer']['email_address'] ?? ''),
+                'paypal_order_id'      => (string) ($order['id'] ?? ''),
+                'paypal_capture_id'    => (string) ($capture['id'] ?? ''),
+                'payer_email'          => (string) ($order['payer']['email_address'] ?? ''),
+                'paypal_pending_reason' => $pendingReason,
             ],
             // eCheck, a review hold, or a manually accepted off-currency
             // payment. PayPal has the money and will settle it later by
