@@ -51,7 +51,7 @@ final class Money
         $major    = $cents / 100;
         $isWhole  = ($cents % 100) === 0;
         $fmt      = self::numberFormat();
-        $decimals = ($compact && $isWhole) ? 0 : self::decimalsFor($code);
+        $decimals = ($compact && $isWhole) ? 0 : self::decimalsFor($code, $cents);
 
         $number = number_format(
             abs($major),
@@ -68,16 +68,18 @@ final class Money
     }
 
     /**
-     * Display decimal places for a currency: the org's configured places for
-     * its own default currency (an org may tune its display), otherwise the
-     * currency's ISO minor-unit count so JPY shows none and BHD shows three.
-     * Amounts are stored as major x 100 regardless, so only rendering changes.
+     * Display decimal places for an amount: the currency's ISO minor-unit count,
+     * so JPY shows none and BHD shows three. The org's configured places apply to
+     * its own default currency only when the amount has no minor units to drop,
+     * so a display preference can never render an amount other than the one
+     * charged. Amounts are stored as major x 100 regardless, so only rendering
+     * changes.
      *
      * @since 1.0.0
      */
-    private static function decimalsFor(string $code): int
+    private static function decimalsFor(string $code, int $cents): int
     {
-        if ($code === self::defaultCurrency()) {
+        if ($code === self::defaultCurrency() && ($cents % 100) === 0) {
             return (int) self::numberFormat()['decimal_places'];
         }
         return Currency::minorUnits($code);
@@ -139,7 +141,8 @@ final class Money
     }
 
     /**
-     * Bare major-unit number with org grouping, no symbol.
+     * Bare major-unit number with org grouping, no symbol. The amount is the org
+     * default currency's, so it is rendered at that currency's precision.
      *
      * @since 1.0.0
      */
@@ -148,7 +151,7 @@ final class Money
         $major    = $cents / 100;
         $isWhole  = ($cents % 100) === 0;
         $fmt      = self::numberFormat();
-        $decimals = ($compact && $isWhole) ? 0 : (int) $fmt['decimal_places'];
+        $decimals = ($compact && $isWhole) ? 0 : self::decimalsFor(self::defaultCurrency(), $cents);
         $out      = number_format(abs($major), $decimals, (string) $fmt['decimal_sep'], (string) $fmt['thousand_sep']);
         return $major < 0 ? '-' . $out : $out;
     }

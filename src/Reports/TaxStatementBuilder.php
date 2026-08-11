@@ -83,7 +83,12 @@ final class TaxStatementBuilder
      * Count and net deductible total for the year, computed from the same rows
      * the PDF uses so the command's reported figures match the document.
      *
-     * @return array{donation_count:int,total_cents:int,currency:string}
+     * total_cents is null and currency is empty when the year spans more than one
+     * currency: no single integer states that year in any of them. Callers that
+     * report a figure must report totals_by_currency in that case, and must state
+     * currency alongside total_cents in every case.
+     *
+     * @return array{donation_count:int,total_cents:?int,currency:string,totals_by_currency:array<string,int>}
      *
      * @since 1.0.0
      */
@@ -91,9 +96,10 @@ final class TaxStatementBuilder
     {
         $itemized = $this->itemize($this->donations->paidForDonorInYear($donorId, $year));
         return [
-            'donation_count' => $itemized['donation_count'],
-            'total_cents'    => $itemized['total_cents'],
-            'currency'       => $itemized['currency'],
+            'donation_count'     => $itemized['donation_count'],
+            'total_cents'        => $itemized['total_cents'],
+            'currency'           => $itemized['currency'],
+            'totals_by_currency' => $itemized['totals_by_currency'],
         ];
     }
 
@@ -109,12 +115,12 @@ final class TaxStatementBuilder
 
     /**
      * Net each donation (gross minus succeeded refunds), drop fully refunded
-     * gifts, and build display lines plus per-currency totals. total_cents is the
-     * net sum in minor units; for a single-currency donor (the common case) it is
-     * exact. currency is that single currency, else the org default.
+     * donations, and build display lines plus per-currency totals. total_cents is
+     * the net sum in minor units of the one currency named by currency, and both
+     * are absent (null, '') once the year spans more than one.
      *
      * @param list<array{date:string,amount_cents:int,refunded_cents:int,currency:string,reference:string,receipt_number:?string}> $rows
-     * @return array{lines:list<array<string,string>>,totals:list<array{label:string,amount:string}>,donation_count:int,total_cents:int,currency:string}
+     * @return array{lines:list<array<string,string>>,totals:list<array{label:string,amount:string}>,donation_count:int,total_cents:?int,currency:string,totals_by_currency:array<string,int>}
      *
      * @since 1.0.0
      */
@@ -159,16 +165,15 @@ final class TaxStatementBuilder
             ];
         }
 
-        $currency = count($totalsByCurrency) === 1
-            ? (string) array_key_first($totalsByCurrency)
-            : Money::defaultCurrency();
+        $single = count($totalsByCurrency) === 1 ? (string) array_key_first($totalsByCurrency) : '';
 
         return [
-            'lines'          => $lines,
-            'totals'         => $totals,
-            'donation_count' => $count,
-            'total_cents'    => $totalCents,
-            'currency'       => $currency,
+            'lines'              => $lines,
+            'totals'             => $totals,
+            'donation_count'     => $count,
+            'total_cents'        => $multi ? null : $totalCents,
+            'currency'           => $single,
+            'totals_by_currency' => $totalsByCurrency,
         ];
     }
 

@@ -12,22 +12,44 @@ function fmtRate( n ) {
     return Number.isFinite( v ) ? v.toFixed( 8 ) : '';
 }
 
+/**
+ * A positive rate, or null when the entry is not one. The decimal key emits
+ * ',' on most European keyboards and parseFloat('1,09') is 1, so the separator
+ * is normalised first and anything still unreadable is refused outright rather
+ * than half-read.
+ */
+export function parseRate( text ) {
+    const raw = String( text ).trim().replace( ',', '.' );
+    if ( raw === '' || ! /^\d*\.?\d*$/.test( raw ) ) return null;
+    const n = Number( raw );
+    return Number.isFinite( n ) && n > 0 ? n : null;
+}
+
 // Holds draft text while editing; commits a parsed number on change.
 function RateInput( { value, manual, onChange } ) {
     const [ text, setText ] = useState( null );
     const shown = text !== null ? text : fmtRate( value );
+    const invalid = text !== null && text.trim() !== '' && parseRate( text ) === null;
     return (
-        <input
-            className={ `dono-input dono-rate-input${ manual ? ' is-manual' : '' }` }
-            inputMode="decimal"
-            value={ shown }
-            onChange={ ( e ) => {
-                setText( e.target.value );
-                const n = parseFloat( e.target.value );
-                if ( Number.isFinite( n ) && n > 0 ) onChange( n );
-            } }
-            onBlur={ () => setText( null ) }
-        />
+        <>
+            <input
+                className={ `dono-input dono-rate-input${ manual ? ' is-manual' : '' }` }
+                inputMode="decimal"
+                aria-invalid={ invalid || undefined }
+                value={ shown }
+                onChange={ ( e ) => {
+                    setText( e.target.value );
+                    const n = parseRate( e.target.value );
+                    if ( n !== null ) onChange( n );
+                } }
+                onBlur={ () => setText( null ) }
+            />
+            { invalid && (
+                <div className="dono-fx__hint">
+                    <span>{ __( 'Not a rate. Enter a number like 1.09; the current rate stands until you do.', 'dono' ) }</span>
+                </div>
+            ) }
+        </>
     );
 }
 
@@ -87,7 +109,7 @@ function ExchangeRatesCard( { fx, base } ) {
                                 ( fx.unconvertible || [] ).join( ', ' )
                             ) }
                         </strong>{ ' ' }
-                        { __( 'Donations in these currencies are still accepted in full, but they cannot be valued in your base currency, so they count as zero in campaign, fund and donor totals. Add a rate below, or stop offering the currency.', 'dono' ) }
+                        { __( 'Donations in these currencies are still accepted, but nothing about them converts. A donor who switches is offered your preset amounts at face value, so a preset authored as 100 asks for 100 of that currency however little that is worth, and the donation counts as zero in campaign, fund and donor totals. Add a rate below, or stop offering the currency.', 'dono' ) }
                     </div>
                 </div>
             ) }

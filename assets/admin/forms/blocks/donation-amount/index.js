@@ -277,6 +277,9 @@ export default function register( api ) {
         attributes: {
             presets:     { type: 'array', default: DEFAULT_PRESETS },
             allowCustom:      { type: 'boolean', default: true },
+            // 0 means "no form-level minimum", and the org-wide spam floor
+            // still applies underneath. Mirrors DonationAmountBlock::attributes().
+            minCents:         { type: 'number',  default: 0 },
             currency:         { type: 'string',  default: '' },
             donationType:     { type: 'string',  default: 'multi' },
         },

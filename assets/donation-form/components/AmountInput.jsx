@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'preact/hooks';
 import { getActiveNumberFormat, groupDigits } from '../util/format';
+import { isZeroDecimal } from '../util/fx';
 
 /**
  * A typed amount, read the way the donor meant it.
@@ -36,8 +37,11 @@ export function typedAmountToNumber( raw, dp ) {
     return Number( `${ whole || '0' }.${ cleaned.slice( lastSep + 1 ) }` ) || 0;
 }
 
-// `value` is in major units (50 = €50.00). Number format comes from the
-// runtime's active format, seeded once at boot from `config.numberFormat`.
+// `value` is in major units (50 = €50.00). Separators come from the runtime's
+// active number format, seeded once at boot from `config.numberFormat`; how
+// many decimals an amount may carry comes from the currency being charged,
+// since the org's display preference says nothing about what a donor in
+// another currency can type.
 export default function AmountInput( {
     value,
     onChange,
@@ -52,7 +56,9 @@ export default function AmountInput( {
     inputProps     = {},
 } ) {
     const fmt = getActiveNumberFormat();
-    const dp  = typeof decimalPlaces === 'number' ? decimalPlaces : fmt.decimalPlaces;
+    const dp  = typeof decimalPlaces === 'number'
+        ? decimalPlaces
+        : ( isZeroDecimal( currency ) ? 0 : 2 );
 
     const format = ( n ) => {
         if ( n === '' || n === null || n === undefined || Number( n ) === 0 ) return '';

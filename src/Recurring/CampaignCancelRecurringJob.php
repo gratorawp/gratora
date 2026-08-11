@@ -26,6 +26,13 @@ final class CampaignCancelRecurringJob
 {
     public const HOOK = 'dono.async.cancel_campaign_recurring';
 
+    /**
+     * Every plan that can still take money. A paused plan resumes on its
+     * resume_at date and a past_due one is recovered by the gateway's own
+     * dunning, so leaving either behind bills a donor for a closed campaign.
+     */
+    private const LIVE_STATUSES = ['active', 'paused', 'past_due'];
+
     private const OPTION = 'dono_campaign_cancel_recurring';
 
     /** Gateway round trips per tick, not rows: each one is an HTTPS call. */
@@ -77,7 +84,7 @@ final class CampaignCancelRecurringJob
 
         $plans = RecurringPlan::query()
             ->where('campaign_id', $campaignId)
-            ->where('status', 'active')
+            ->whereIn('status', self::LIVE_STATUSES)
             ->where('is_test', false)
             ->where('id', $after, '>')
             ->orderBy('id', 'ASC')
@@ -117,7 +124,7 @@ final class CampaignCancelRecurringJob
 
         return (int) RecurringPlan::query()
             ->where('campaign_id', $campaignId)
-            ->where('status', 'active')
+            ->whereIn('status', self::LIVE_STATUSES)
             ->where('is_test', false)
             ->where('id', self::cursor($campaignId), '>')
             ->count();

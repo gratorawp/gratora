@@ -145,7 +145,7 @@ final class FormTemplates
     /** @since 1.0.0 */
     private static function impactTiers(): array
     {
-        $blocks = self::block('dono/heading', ['text' => __('$50 makes a real difference', 'dono'), 'level' => 1])
+        $blocks = self::block('dono/heading', ['text' => __('Every tier makes a real difference', 'dono'), 'level' => 1])
                 . self::block('dono/paragraph', ['text' => __('Last year, your support reached thousands of people across our community. Your donation moves a family from just getting by to getting ahead.', 'dono')])
                 . self::block('dono/donation-amount', [
                     'presets' => self::presets(
@@ -326,11 +326,13 @@ final class FormTemplates
                     'style'            => 'pills',
                 ])
                 . self::block('dono/donation-amount', [
+                    // The amount renders above the label in the org's currency and
+                    // the cadence is whichever pill is active, so labels name neither.
                     'presets' => self::presets([10, 25, 50, 100], [
-                        __('$10 a month', 'dono'),
-                        __('$25 a month', 'dono'),
-                        __('$50 a month', 'dono'),
-                        __('$100 a month', 'dono'),
+                        __('Supporter', 'dono'),
+                        __('Sustainer', 'dono'),
+                        __('Champion', 'dono'),
+                        __('Guardian', 'dono'),
                     ], 1),
                     'allowCustom' => true,
                 ])
@@ -341,16 +343,16 @@ final class FormTemplates
                 . self::block('dono/donation-summary')
                 // Next to the button, not on a screen already passed: this is the
                 // last moment the donor can act on what they are agreeing to.
-                . self::block('dono/paragraph', ['text' => __('Your first payment is taken today, then the same amount on this date each month. Change or stop it any time from your donor portal.', 'dono')])
+                . self::block('dono/paragraph', ['text' => __('Your first payment is taken today. If you chose a repeating frequency, the same amount is taken on this date at that frequency, and you can change or stop it any time from your donor portal.', 'dono')])
                 . self::block('dono/submit-button', ['label' => __('Start my monthly gift', 'dono')]);
 
         return [
             'id'             => 'monthly-sustainer',
             'name'           => __('Monthly sustainer', 'dono'),
-            'description'    => __('For recruiting regular givers. Monthly is preselected, amounts are framed per month, and the commitment is restated next to the button.', 'dono'),
+            'description'    => __('For recruiting regular givers. Monthly is preselected, amounts are named tiers, and the commitment is restated next to the button.', 'dono'),
             'icon'           => 'update',
             'category'       => 'Recurring',
-            'thumbnail_hint' => 'Monthly/yearly pills with monthly active, per-month amount tiles, commitment sentence above the button.',
+            'thumbnail_hint' => 'Monthly/yearly pills with monthly active, named amount tiles, commitment sentence above the button.',
             'settings'       => [
                 'layout'            => 'inline',
                 'style'             => ['preset_id' => ''],

@@ -81,6 +81,7 @@ final class RecentDonationsBlock extends CampaignBlock
         foreach ($donations as $donation) {
             $isAnonymous = (bool) $donation->is_anonymous;
             $donor       = $donorsById[(int) $donation->donor_id] ?? null;
+            $hidden      = $donor !== null && $donor->public_hidden_at !== null;
             $name        = $donor
                 ? trim((string) $donor->first_name . ' ' . (string) $donor->last_name)
                 : '';
@@ -88,7 +89,7 @@ final class RecentDonationsBlock extends CampaignBlock
             // An admin hiding a donor has to reach the name and the message
             // too. A suppressed picture beside their name and their words
             // would be no answer at all.
-            if ($isAnonymous || $name === '' || ($donor && $donor->public_hidden_at !== null)) {
+            if ($isAnonymous || $name === '' || $hidden) {
                 $name = __('Anonymous', 'dono');
                 $isAnonymous = true;
             }
@@ -105,12 +106,18 @@ final class RecentDonationsBlock extends CampaignBlock
                 'name'         => $name,
                 'is_anonymous' => $isAnonymous,
                 'avatar_url'   => $isAnonymous ? '' : ($avatarUrls[(int) $donation->donor_id] ?? ''),
-                'amount_cents' => (int) $donation->amount_cents,
+                // Net of refunds, in the donation's own currency, so a partly
+                // refunded donation agrees with the campaign counter and the
+                // other donor blocks rather than overstating what was given.
+                'amount_cents' => max(0, (int) $donation->amount_cents - (int) $donation->refunded_cents),
                 'currency'     => (string) $donation->currency,
                 'time_ago'     => $timeAgo,
                 'paid_at_iso'  => (string) $paidAt,
-                // Private unless the donor opted in to a public message.
-                'message'      => $donation->note_public ? (string) ($donation->note_to_org ?? '') : '',
+                // Private unless the donor opted in to a public message, and
+                // withheld outright once an admin hides the donor.
+                'message'      => (! $hidden && $donation->note_public)
+                    ? (string) ($donation->note_to_org ?? '')
+                    : '',
             ];
         }
 
