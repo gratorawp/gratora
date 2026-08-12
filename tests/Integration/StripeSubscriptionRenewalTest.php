@@ -86,6 +86,39 @@ final class StripeSubscriptionRenewalTest extends IntegrationTestCase
         $this->assertNotNull($renewalMail, 'recurring_renewal email goes out');
     }
 
+    /**
+     * The renewal date is stored in UTC whatever the process timezone is.
+     *
+     * WordPress sets PHP's default timezone to UTC at boot, so date() and
+     * gmdate() normally agree and this never shows. Plenty of plugins move it
+     * back, though, and then a renewal is written at the site's offset while
+     * every reader treats the column as UTC: a plan looks due hours early, and
+     * on a date boundary a day early.
+     */
+    public function test_the_next_payment_date_is_utc_whatever_the_process_timezone(): void
+    {
+        $plan     = $this->seedPlan();
+        $original = date_default_timezone_get();
+
+        // What a plugin doing this to the process looks like from here.
+        date_default_timezone_set('America/Los_Angeles');
+
+        try {
+            $this->postWebhook('invoice.payment_succeeded', $this->buildInvoice($plan, 2500, 'subscription_cycle'));
+        } finally {
+            date_default_timezone_set($original);
+        }
+
+        $fresh = \Dono\Recurring\RecurringPlan::query()->find('id', (int) $plan->id);
+
+        // period_end in the fixture, read as UTC.
+        $this->assertSame(
+            gmdate('Y-m-d H:i:s', 1740787200),
+            (string) $fresh->next_payment_at,
+            'the renewal date was written at the process offset rather than in UTC'
+        );
+    }
+
     public function test_renewal_inherits_the_plan_mode_not_the_current_setting(): void
     {
         // Plan is flagged test; the global mode resolves live (no top-level

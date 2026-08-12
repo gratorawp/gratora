@@ -1087,7 +1087,10 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         if ($renewal['created']) {
             $now    = $this->clock->now()->format('Y-m-d H:i:s');
             $nextAt = isset($invoice['lines']['data'][0]['period']['end'])
-                ? date('Y-m-d H:i:s', (int) $invoice['lines']['data'][0]['period']['end'])
+                // gmdate, not date: the column is UTC everywhere else, including
+                // $now on the line above, and date() would shift a renewal by
+                // the site's offset.
+                ? gmdate('Y-m-d H:i:s', (int) $invoice['lines']['data'][0]['period']['end'])
                 : null;
             // Re-read, so a stale row is not stomped.
             $fresh = $this->plans->findBySubscriptionId($this->id(), $subscriptionId);
