@@ -327,3 +327,12 @@
     }
 }
 
+
+// Under table-layout auto a declared width is a hint the browser overrides from
+// content, which is how three short columns took the row and left the message a
+// word wide. Fixed makes the declared widths authoritative and hands what is
+// left to the one column with none.
+.dono-panel .dono-dataviews .dataviews-view-table {
+    table-layout: fixed;
+    width: 100%;
+}
