@@ -54,10 +54,57 @@ final class DataEraser
         'dono_reference_counter_',
     ];
 
-    /** @since 1.0.0 */
+    /**
+     * How long a request to delete everything stays good for.
+     *
+     * The answer is given on the plugins screen and acted on by the very next
+     * request, so minutes is generous. What it rules out is the flag outliving
+     * the deactivation it belongs to: set the option, close the tab, and every
+     * later deactivation from any route at all, a bulk action, WP-CLI, a host's
+     * tooling, would find it still set and erase everything without asking.
+     */
+    private const INTENT_TTL = 300;
+
+    /**
+     * Whether someone asked, recently, for the data to go.
+     *
+     * Stored as the moment of the answer rather than a flag, so an answer that
+     * was never acted on expires instead of waiting. A value this cannot read
+     * as a timestamp counts as no answer, which is the safe direction.
+     *
+     * @since 1.0.0
+     */
     public static function requested(): bool
     {
-        return (bool) get_option(self::OPT_IN, false);
+        $answeredAt = (int) get_option(self::OPT_IN, 0);
+
+        return $answeredAt > 0 && (time() - $answeredAt) <= self::INTENT_TTL;
+    }
+
+    /** Spent, so nothing can act on the same answer twice. @since 1.0.0 */
+    public static function forgetRequest(): void
+    {
+        delete_option(self::OPT_IN);
+    }
+
+    /**
+     * Take the answer if there is a good one, leaving none behind.
+     *
+     * One call rather than asking and then clearing, because the two-step
+     * version is one early return away from erasing on an answer it never
+     * spent, which is the failure this whole guard exists to stop.
+     *
+     * @since 1.0.0
+     */
+    public static function claimRequest(): bool
+    {
+        if (! self::requested()) {
+            return false;
+        }
+
+        self::forgetRequest();
+
+        return true;
     }
 
     /**

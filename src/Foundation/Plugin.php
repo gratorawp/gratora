@@ -218,7 +218,9 @@ final class Plugin
 
         do_action('dono.deactivated');
 
-        if (! DataEraser::requested()) {
+        // Taking the answer is what spends it, so an erase that fails partway
+        // cannot be re-run by some later deactivation nobody asked about.
+        if (! DataEraser::claimRequest()) {
             return;
         }
 

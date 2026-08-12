@@ -38,7 +38,10 @@ final class UninstallDataEraserTest extends IntegrationTestCase
 
     public function test_the_opt_in_is_read_once_set(): void
     {
-        update_option(DataEraser::OPT_IN, true, false);
+        // The dialog records when the answer was given, not merely that it was:
+        // an answer nobody acted on has to expire rather than wait for some
+        // later deactivation to find it.
+        update_option(DataEraser::OPT_IN, time(), false);
 
         $this->assertTrue(DataEraser::requested());
     }

@@ -151,8 +151,16 @@ final class CsvImporterTest extends IntegrationTestCase
         $this->assertSame(1, $second['skipped']['already_imported'] ?? 0);
     }
 
-    /** A file that repeats a row should not create the donation twice. */
-    public function test_a_row_repeated_inside_one_file_is_counted_once(): void
+    /**
+     * Two identical donation rows are two donations.
+     *
+     * Nothing in a CSV distinguishes a donor who gave twice at the same event
+     * from a row someone pasted twice, and the two mistakes are not equal:
+     * an extra donation is visible and can be deleted, while a lost one is
+     * silent and leaves the org's totals wrong for good. Same-day repeat giving
+     * is ordinary at events and at year end.
+     */
+    public function test_a_donor_can_give_the_same_amount_twice_in_one_file(): void
     {
         $result = $this->importer()->import(
             $this->csv(
@@ -163,8 +171,56 @@ final class CsvImporterTest extends IntegrationTestCase
             true
         );
 
-        $this->assertSame(1, $result['donations_imported']);
-        $this->assertSame(1, $result['skipped']['duplicate_in_file'] ?? 0);
+        $this->assertSame(2, $result['donations_imported']);
+        $this->assertSame(0, $result['skipped']['duplicate_in_file'] ?? 0);
+    }
+
+    /**
+     * The counting is per file position, not per import, so the same file twice
+     * is still caught. This is what stops the change above from turning every
+     * re-import into a pile of duplicates.
+     */
+    public function test_the_same_repeated_file_imported_twice_adds_nothing(): void
+    {
+        $csv = $this->csv(
+            'twice@example.test,Twice,Over,15.00,2026-03-03',
+            'twice@example.test,Twice,Over,15.00,2026-03-03'
+        );
+
+        $first  = $this->importer()->import($csv, self::MAPPING, false);
+        $second = $this->importer()->import($csv, self::MAPPING, false);
+
+        $this->assertSame(2, $first['donations_imported']);
+        $this->assertSame(0, $second['donations_imported']);
+        $this->assertSame(2, $second['skipped']['already_imported'] ?? 0);
+    }
+
+    /**
+     * A donations row with no readable date is refused rather than dated today.
+     * The old fallback stamped the import moment, which put a decade of history
+     * in this afternoon's accounts and made the row's key change on every run,
+     * so re-importing the file imported it all again.
+     */
+    public function test_a_row_without_a_readable_date_is_refused(): void
+    {
+        $result = $this->importer()->import(
+            $this->csv('nodate@example.test,No,Date,15.00,'),
+            self::MAPPING,
+            false
+        );
+
+        $this->assertSame(0, $result['donations_imported']);
+        $this->assertSame(1, $result['skipped']['invalid_date'] ?? 0);
+    }
+
+    public function test_a_dateless_file_imported_twice_still_imports_nothing(): void
+    {
+        $csv = $this->csv('nodate@example.test,No,Date,15.00,');
+
+        $this->importer()->import($csv, self::MAPPING, false);
+        $second = $this->importer()->import($csv, self::MAPPING, false);
+
+        $this->assertSame(0, $second['donations_imported']);
     }
 
     public function test_rows_without_a_usable_email_or_amount_are_skipped_by_reason(): void

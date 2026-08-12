@@ -92,7 +92,7 @@ final class DeactivationDialog
         // payload has to mean "keep my data", never "no answer, leave it set".
         $wipe = ! empty($_POST['wipe']);
         if ($wipe) {
-            update_option(DataEraser::OPT_IN, true, false);
+            update_option(DataEraser::OPT_IN, time(), false);
         } else {
             delete_option(DataEraser::OPT_IN);
         }

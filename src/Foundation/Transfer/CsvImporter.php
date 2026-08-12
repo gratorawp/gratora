@@ -201,7 +201,7 @@ final class CsvImporter
     /**
      * @param  array<string,string> $row
      * @param  array<string,string> $mapping
-     * @param  array<string,bool>   $seen
+     * @param  array<string,bool|int> $seen  donor emails seen, or repeat counts per donation row
      * @param  array<string,bool>   $seenEmail
      * @return array{skip:?string, donation:bool, donor_created:bool, donor_matched:bool}
      * @since 1.0.0
@@ -222,23 +222,40 @@ final class CsvImporter
         }
 
         $amountCents = null;
+        $paidAt      = null;
         if ($mode === 'donations') {
             $amountCents = $this->cents($get('amount'));
             if ($amountCents === null) {
                 return $skip('invalid_amount');
             }
+
+            // No usable date means the row cannot say when the money arrived.
+            // Falling back to the clock dates a decade of history to the
+            // afternoon of the import, which is wrong in the accounts and wrong
+            // for the retention sweep that reads the same column.
+            $paidAt = $this->date($get('date'));
+            if ($paidAt === null) {
+                return $skip('invalid_date');
+            }
         }
 
-        // A donor list is deduplicated by the person; a donation list by the
-        // donation, since one donor legitimately appears on many rows.
-        $key = $mode === 'donations'
-            ? $this->reference($email, (int) $amountCents, $get('date'), $get('reference'))
-            : 'donor:' . $email;
-
-        if (isset($seen[$key])) {
-            return $skip('duplicate_in_file');
+        // A donor list is deduplicated by the person; a donation list is not
+        // deduplicated at all within the file. One donor giving the same amount
+        // twice on the same day is ordinary at an event or at year end, and
+        // collapsing those loses a real donation with no way to notice.
+        // Counting them instead keeps the key stable: the same file imported
+        // again produces the same counts, so already_imported still catches it.
+        if ($mode !== 'donations') {
+            $key = 'donor:' . $email;
+            if (isset($seen[$key])) {
+                return $skip('duplicate_in_file');
+            }
+            $seen[$key] = true;
+        } else {
+            $base = $email . '|' . (int) $amountCents . '|' . (string) $paidAt;
+            $seen[$base] = ($seen[$base] ?? 0) + 1;
+            $key = $this->reference($email, (int) $amountCents, (string) $paidAt, $get('reference'), (int) $seen[$base]);
         }
-        $seen[$key] = true;
 
         if ($mode === 'donations' && Donation::query()->where('reference', $key)->get() !== null) {
             return $skip('already_imported');
@@ -295,7 +312,6 @@ final class CsvImporter
             return ['skip' => null, 'donation' => false, 'donor_created' => $donorCreated, 'donor_matched' => $donorMatched];
         }
 
-        $paidAt   = $this->date($get('date'));
         $currency = strtoupper($get('currency')) ?: Money::defaultCurrency();
         $status   = strtolower($get('status'));
         if (! in_array($status, self::STATUSES, true)) $status = 'paid';
@@ -342,11 +358,11 @@ final class CsvImporter
      *
      * @since 1.0.0
      */
-    private function reference(string $email, int $cents, string $date, string $external): string
+    private function reference(string $email, int $cents, string $date, string $external, int $occurrence = 1): string
     {
         $seed = $external !== ''
             ? 'ext:' . $external
-            : sprintf('row:%s|%d|%s', $email, $cents, $this->date($date));
+            : sprintf('row:%s|%d|%s#%d', $email, $cents, $date, $occurrence);
 
         return 'CSV-' . strtoupper(substr(hash('sha256', $seed), 0, 12));
     }
@@ -402,13 +418,13 @@ final class CsvImporter
         return $cents > 0 ? $cents : null;
     }
 
-    /** @since 1.0.0 */
-    private function date(string $raw): string
+    /** Null when the row does not carry a date this can read. @since 1.0.0 */
+    private function date(string $raw): ?string
     {
         $raw = trim($raw);
         $ts  = $raw !== '' ? strtotime($raw) : false;
 
-        return gmdate('Y-m-d H:i:s', $ts !== false ? $ts : time());
+        return $ts !== false ? gmdate('Y-m-d H:i:s', $ts) : null;
     }
 
     /**
