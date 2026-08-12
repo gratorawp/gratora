@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Dono - Fundraising Platform
+ * Plugin Name: Dono Fundraising
  * Plugin URI: https://getdono.com
  * Description: A complete fundraising platform for WordPress
  * Version: 1.0.0

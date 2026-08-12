@@ -1,4 +1,4 @@
-=== Dono - Fundraising Platform ===
+=== Dono Fundraising ===
 Contributors: donodp
 Tags: donations, donation form, fundraising, recurring donations, nonprofit
 Requires at least: 7.0
