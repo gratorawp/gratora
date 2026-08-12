@@ -57,7 +57,8 @@ final class PayPalController
             'callback'            => [$this, 'capture'],
             'permission_callback' => '__return_true',
             'args'                => [
-                'reference' => ['type' => 'string', 'required' => true],
+                'reference'    => ['type' => 'string', 'required' => true],
+                'status_token' => ['type' => 'string', 'required' => true],
             ],
         ]);
 
@@ -67,6 +68,7 @@ final class PayPalController
             'permission_callback' => '__return_true',
             'args'                => [
                 'reference'       => ['type' => 'string', 'required' => true],
+                'status_token'    => ['type' => 'string', 'required' => true],
                 'subscription_id' => ['type' => 'string', 'required' => true],
             ],
         ]);
@@ -75,7 +77,7 @@ final class PayPalController
     /** @since 1.0.0 */
     public function capture(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
-        $donation = $this->pendingDonation((string) $request->get_param('reference'));
+        $donation = $this->pendingDonation($request);
         if ($donation instanceof WP_Error) {
             return $donation;
         }
@@ -137,7 +139,7 @@ final class PayPalController
      */
     public function recordSubscription(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
-        $donation = $this->pendingDonation((string) $request->get_param('reference'));
+        $donation = $this->pendingDonation($request);
         if ($donation instanceof WP_Error) {
             return $donation;
         }
@@ -175,14 +177,38 @@ final class PayPalController
     }
 
     /** @since 1.0.0 */
-    private function pendingDonation(string $reference): Donation|WP_Error
+    /**
+     * The donation this request is allowed to act on.
+     *
+     * References are sequential and printed on receipts, so they identify a
+     * donation without proving anything about who is asking. The status token
+     * is the per-donation secret the submit response handed to the browser, and
+     * both routes here move money.
+     *
+     * A wrong token answers exactly like a wrong reference: telling a stranger
+     * that DONO-2026-00007 exists is the same leak either way.
+     */
+    private function pendingDonation(WP_REST_Request $request): Donation|WP_Error
     {
-        $reference = trim($reference);
+        $notFound = $this->error(
+            'dono_paypal_no_donation',
+            __('We could not find that donation.', 'dono-fundraising-platform'),
+            404
+        );
+
+        $reference = trim((string) $request->get_param('reference'));
         $donation  = $reference !== '' ? $this->donations->findByReference($reference) : null;
 
         if (! $donation || $donation->gateway !== 'paypal') {
-            return $this->error('dono_paypal_no_donation', __('We could not find that donation.', 'dono-fundraising-platform'), 404);
+            return $notFound;
         }
+
+        $expected = (string) $donation->status_token_hash;
+        $provided = hash('sha256', (string) $request->get_param('status_token'));
+        if ($expected === '' || ! hash_equals($expected, $provided)) {
+            return $notFound;
+        }
+
         return $donation;
     }
 

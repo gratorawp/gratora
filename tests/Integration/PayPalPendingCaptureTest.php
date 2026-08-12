@@ -132,6 +132,7 @@ final class PayPalPendingCaptureTest extends IntegrationTestCase
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'reference' => $reference,
+            'status_token' => $this->stampStatusToken($reference),
             'order_id'  => self::ORDER,
         ]));
         $res = rest_do_request($req);

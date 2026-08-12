@@ -131,6 +131,7 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'reference'       => $reference,
+            'status_token'    => $this->stampStatusToken($reference),
             'subscription_id' => 'I-SUB-1',
         ]));
 
@@ -169,6 +170,7 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'reference' => $reference, 'subscription_id' => $subId,
+            'status_token' => $this->stampStatusToken($reference),
         ]));
         return rest_do_request($req);
     }

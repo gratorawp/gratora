@@ -210,4 +210,25 @@ abstract class IntegrationTestCase extends WP_UnitTestCase
         });
         return $mails;
     }
+    /**
+     * Give a donation a status token this test knows, and hand back the raw one.
+     *
+     * The gateway confirm routes take money, so they check the per-donation
+     * secret the submit response gave the browser. Only its hash is stored, so a
+     * test cannot read the token back off the row: it stamps one it chose.
+     *
+     * @since 1.0.0
+     */
+    protected function stampStatusToken(string $reference, string $token = 'browser-held-token'): string
+    {
+        $repo     = \Dono\Foundation\Plugin::instance()->container->get(\Dono\Donations\DonationRepository::class);
+        $donation = $repo->findByReference($reference);
+
+        $this->assertNotNull($donation, "no donation for {$reference}");
+
+        $donation->status_token_hash = hash('sha256', $token);
+        $donation->save();
+
+        return $token;
+    }
 }

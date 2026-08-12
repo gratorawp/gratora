@@ -61,10 +61,34 @@ final class StripeApi
         ], static fn (string $s): bool => $s !== '');
     }
 
-    /** @since 1.0.0 */
+    /**
+     * Whether the mode this site charges in has a signing secret.
+     *
+     * Asking whether ANY secret exists is the same question a site answers
+     * after rehearsing in test: the test secret is on file, the live one failed
+     * to provision, and every live event then fails its signature while the
+     * readiness screen reports that webhooks are signed. Cards are charged,
+     * donors are thanked, and the donations sit unpaid.
+     *
+     * A form can still opt itself into test mode on a live site. That mode's
+     * events failing is a nuisance rather than a loss, so the org setting is
+     * what this answers for.
+     *
+     * @since 1.0.0
+     */
     public function hasWebhookSecret(): bool
     {
-        return $this->webhookSecrets() !== [];
+        $secrets = $this->webhookSecrets();
+
+        return ($secrets[$this->orgTestMode() ? 'test' : 'live'] ?? '') !== '';
+    }
+
+    /** The org-wide switch, which lives above the per-gateway config. */
+    private function orgTestMode(): bool
+    {
+        $opt = get_option('dono_gateway_config', []);
+
+        return is_array($opt) && ! empty($opt['test_mode']);
     }
 
     /** @since 1.0.0 */

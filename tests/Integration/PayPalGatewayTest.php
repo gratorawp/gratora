@@ -207,7 +207,10 @@ final class PayPalGatewayTest extends IntegrationTestCase
 
         $req = new WP_REST_Request('POST', '/dono/v1/gateways/paypal/capture');
         $req->set_header('content-type', 'application/json');
-        $req->set_body((string) wp_json_encode(['reference' => $reference]));
+        $req->set_body((string) wp_json_encode([
+            'reference'    => $reference,
+            'status_token' => $this->stampStatusToken($reference),
+        ]));
         $res = rest_do_request($req);
 
         $this->assertSame(200, $res->get_status(), wp_json_encode($res->get_data()));
@@ -230,6 +233,7 @@ final class PayPalGatewayTest extends IntegrationTestCase
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'reference' => $reference,
+            'status_token' => $this->stampStatusToken($reference),
             'order_id'  => 'ORDER-SOMEONE-ELSE',
         ]));
         rest_do_request($req);
@@ -244,7 +248,7 @@ final class PayPalGatewayTest extends IntegrationTestCase
     {
         $req = new WP_REST_Request('POST', '/dono/v1/gateways/paypal/capture');
         $req->set_header('content-type', 'application/json');
-        $req->set_body((string) wp_json_encode(['reference' => 'DONO-NOPE']));
+        $req->set_body((string) wp_json_encode(['reference' => 'DONO-NOPE', 'status_token' => 'anything']));
         $res = rest_do_request($req);
 
         $this->assertSame(404, $res->get_status());
@@ -256,7 +260,10 @@ final class PayPalGatewayTest extends IntegrationTestCase
 
         $req = new WP_REST_Request('POST', '/dono/v1/gateways/paypal/capture');
         $req->set_header('content-type', 'application/json');
-        $req->set_body((string) wp_json_encode(['reference' => $reference]));
+        $req->set_body((string) wp_json_encode([
+            'reference'    => $reference,
+            'status_token' => $this->stampStatusToken($reference),
+        ]));
         rest_do_request($req);
 
         $donation = $this->donations()->findByReference($reference);
@@ -364,7 +371,10 @@ final class PayPalGatewayTest extends IntegrationTestCase
 
         $req = new WP_REST_Request('POST', '/dono/v1/gateways/paypal/capture');
         $req->set_header('content-type', 'application/json');
-        $req->set_body((string) wp_json_encode(['reference' => $reference]));
+        $req->set_body((string) wp_json_encode([
+            'reference'    => $reference,
+            'status_token' => $this->stampStatusToken($reference),
+        ]));
         $res = rest_do_request($req);
 
         $this->assertSame(200, $res->get_status(), 'the donor is not told it failed');
@@ -382,7 +392,10 @@ final class PayPalGatewayTest extends IntegrationTestCase
 
         $req = new WP_REST_Request('POST', '/dono/v1/gateways/paypal/capture');
         $req->set_header('content-type', 'application/json');
-        $req->set_body((string) wp_json_encode(['reference' => $reference]));
+        $req->set_body((string) wp_json_encode([
+            'reference'    => $reference,
+            'status_token' => $this->stampStatusToken($reference),
+        ]));
         rest_do_request($req);
 
         $this->postWebhook('PAYMENT.CAPTURE.COMPLETED', [

@@ -80,6 +80,7 @@ export default function PayPalPayment( { config, payment, dispatch } ) {
                             try {
                                 const out = await post( 'gateways/paypal/subscription', {
                                     reference: payment.reference,
+                                    status_token: payment.statusToken,
                                     subscription_id: data.subscriptionID,
                                 } );
                                 if ( ! cancelled ) {
@@ -103,7 +104,12 @@ export default function PayPalPayment( { config, payment, dispatch } ) {
                         onApprove: async () => {
                             try {
                                 const out = await post( 'gateways/paypal/capture', {
+                                    // Proves this browser is the one that
+                                    // submitted the donation. References are
+                                    // sequential, so without it a guess is
+                                    // enough to make someone else pay.
                                     reference: payment.reference,
+                                    status_token: payment.statusToken,
                                 } );
                                 if ( ! cancelled ) {
                                     dispatch( {
