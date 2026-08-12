@@ -61,7 +61,7 @@ final class OnboardingPage extends HookProvider
     /** @since 1.0.0 */
     private function isCurrentPage(): bool
     {
-        $page = is_string($_GET['page'] ?? null) ? (string) $_GET['page'] : '';
+        $page = isset($_GET['page']) ? sanitize_key(wp_unslash($_GET['page'])) : '';
         return $page === self::PAGE_ID;
     }
 

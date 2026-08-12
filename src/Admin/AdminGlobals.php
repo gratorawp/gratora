@@ -109,7 +109,7 @@ final class AdminGlobals extends HookProvider
     /** @since 1.0.0 */
     private function isDonoAdminPage(): bool
     {
-        $page = is_string($_GET['page'] ?? null) ? (string) $_GET['page'] : '';
+        $page = isset($_GET['page']) ? sanitize_key(wp_unslash($_GET['page'])) : '';
 
         // The dashboard's slug is the bare "dono"; every other screen is
         // "dono-something", so a prefix match alone would miss the dashboard.

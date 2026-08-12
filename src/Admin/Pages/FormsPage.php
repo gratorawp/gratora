@@ -43,7 +43,7 @@ final class FormsPage extends HookProvider
     public static function isFormEditView(): bool
     {
         return is_admin()
-            && ($_GET['page'] ?? '') === self::PAGE_ID
+            && (isset($_GET['page']) ? sanitize_key(wp_unslash($_GET['page'])) : '') === self::PAGE_ID
             && (int) ($_GET['form'] ?? 0) > 0;
     }
 

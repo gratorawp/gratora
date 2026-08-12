@@ -34,7 +34,7 @@ final class LicenseNotice
             return;
         }
         // Already on the screen that says all of this.
-        if (($_GET['page'] ?? '') === 'dono-settings') {
+        if ((isset($_GET['page']) ? sanitize_key(wp_unslash($_GET['page'])) : '') === 'dono-settings') {
             return;
         }
 
