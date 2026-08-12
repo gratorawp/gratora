@@ -383,6 +383,9 @@ function FormBody( { state, dispatch, config } ) {
                         payment: {
                             paypal:      data.paypal,
                             reference:   data.reference,
+                            // Capture refuses a reference on its own, so the
+                            // approval has nothing to send without this.
+                            statusToken: data.status_token,
                             intentId:    data.intent_id,
                             amountCents: data.amount_cents,
                             currency:    data.currency,

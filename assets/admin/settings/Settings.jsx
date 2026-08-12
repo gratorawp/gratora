@@ -5,7 +5,6 @@ import Toaster from '../_shared/components/Toaster';
 import { notify } from '../_shared/notify';
 import { tablistKeyDown } from '../_shared/tablistKeys';
 import { useExtensionTabs, ExtensionTabPanel } from '../_shared/extensionTabs';
-import Licenses from '../licenses/Licenses';
 
 import { useDonoSettings } from '../_shared/useDonoSettings';
 import { useFxRates } from '../_shared/useFxRates';
@@ -23,11 +22,11 @@ import RolesPanel from './panels/RolesPanel';
 import {
     IconSetup, IconOrganization, IconCurrency, IconGateways, IconBrand,
     IconEmail, IconReceipt, IconNumbering, IconPrivacy, IconRoles,
-    IconLicense, IconExtension,
+    IconExtension,
 } from './icons';
 
 // Ordered by how often an operator opens it, money first. Add-on tabs land
-// after these, ahead of Licenses.
+// after these.
 const TABS = [
     { key: 'setup',        label: __( 'Setup', 'dono-fundraising-platform' ),                Icon: IconSetup },
     { key: 'gateways',     label: __( 'Payment gateways', 'dono-fundraising-platform' ),     Icon: IconGateways },
@@ -43,22 +42,13 @@ const TABS = [
 
 // Always last, whatever add-ons register in between.
 //
-// Licenses appears only once something is installed that has a license to
-// manage. Core on its own has nothing to key, and a tab that can only ever say
-// "nothing to see" is a tab that makes people look for a paid version. This is
-// the rule LicenseNotice and ReadinessService already follow: both go quiet
-// when entitlements() is empty.
 // Roles assigns Dono capabilities, so the REST route requires full admin. A
 // settings manager was still offered the tab and only learned their save was
 // refused after editing the grid.
 const visibleTabs = () =>
     TABS.filter( ( t ) => ! t.adminOnly || !! window.dono?.can?.manage_options );
 
-const TAIL_TABS = [
-    ...( window.dono?.pro?.active ? [
-        { key: 'licenses', label: __( 'Licenses', 'dono-fundraising-platform' ),             Icon: IconLicense },
-    ] : [] ),
-];
+const TAIL_TABS = [];
 
 // Save-job slug -> human label, for failure messages (job slugs are not tab keys).
 const SECTION_LABELS = {
@@ -316,11 +306,6 @@ export default function Settings() {
                 <div hidden={ tab !== 'roles' }>
                     <RolesPanel s={ roles } />
                 </div>
-                { window.dono?.pro?.active && (
-                    <div hidden={ tab !== 'licenses' }>
-                        <Licenses />
-                    </div>
-                ) }
                 { extTabs.map( ( t ) => (
                     <div key={ t.id } hidden={ tab !== t.id }>
                         <ExtensionTabPanel tab={ t } context={ {} } />
