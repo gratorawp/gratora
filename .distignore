@@ -87,6 +87,14 @@
 /package.json
 /webpack.config.js
 
+# Strauss copies these into vendor-prefixed/ and the plugin loads only that copy.
+# The originals stay behind in vendor/ because they are direct requirements, so
+# without this the zip carries two of every PDF library: dead weight, and a
+# second unprefixed copy an add-on could autoload by accident.
+/vendor/dompdf
+/vendor/masterminds
+/vendor/sabberworm
+
 /vendor/phpunit
 /vendor/bin
 
@@ -97,12 +105,12 @@ Thumbs.db
 *.map
 
 # Vendor test suites. Strauss copies dependencies whole, so their own tests and
-# fixtures come with them: fpdi ships 30 MB of sample PDFs and mpdf 5 MB more,
-# which is over half the plugin and none of it runs.
-/vendor/vendor-prefixed/setasign/fpdi/tests
-/vendor/vendor-prefixed/setasign/fpdi/local-tests
-/vendor/vendor-prefixed/mpdf/mpdf/tests
-/vendor/vendor-prefixed/mpdf/mpdf/phpstan-baseline.neon
+# fixtures come with them, and none of it runs.
+/vendor/vendor-prefixed/dompdf/dompdf/tests
+/vendor/vendor-prefixed/dompdf/php-font-lib/tests
+/vendor/vendor-prefixed/dompdf/php-svg-lib/tests
+/vendor/vendor-prefixed/masterminds/html5/test
+/vendor/vendor-prefixed/sabberworm/php-css-parser/tests
 # Queryable is ours, so it was easy to miss: Strauss copies it whole like any
 # other dependency, tests and lockfile included.
 /vendor/vendor-prefixed/dono/queryable/tests

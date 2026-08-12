@@ -23,7 +23,7 @@ defined('ABSPATH') || exit;
  */
 ?>
 <html><head><meta charset="utf-8"><style>
-body{font-family:'Times New Roman',Times,serif;color:#000;font-size:12.5px;line-height:1.5}
+body{font-family:'DejaVu Serif',serif;color:#000;font-size:12.5px;line-height:1.5}
 .masthead{border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:18px}
 .org-name{font-size:17px;font-weight:700;margin:0 0 3px}
 .org-meta{font-size:11.5px;color:#222;margin:0;white-space:pre-line}

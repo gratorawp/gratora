@@ -97,7 +97,7 @@ $netDisplay      = $refundedCents > 0
 <head>
     <meta charset="utf-8">
     <style>
-        body  { font-family: dejavusans, sans-serif; color: #222; font-size: 11pt; }
+        body  { font-family: 'DejaVu Sans', sans-serif; color: #222; font-size: 11pt; }
         .logo { margin: 0 0 16pt; }
         .logo img { max-height: 56pt; }
         .org  { text-align: right; color: #555; font-size: 9pt; line-height: 1.5; }

@@ -53,7 +53,7 @@ php -r '
     require "dist/dono/vendor/vendor-prefixed/autoload.php";
     $need = [
       "Dono\\Vendor\\Queryable\\Model",
-      "Dono\\Vendor\\Mpdf\\Mpdf",
+      "Dono\\Vendor\\Dompdf\\Dompdf",
       "Dono\\Foundation\\Plugin",
       "Dono\\Receipts\\PdfBuilder",
     ];
@@ -63,8 +63,9 @@ php -r '
     echo "runtime classes resolve\n";
 '
 
-# Receipts pick their faces out of the pruned font set.
-test -f "$OUT/vendor/vendor-prefixed/mpdf/mpdf/ttfonts/DejaVuSansCondensed.ttf" \
-    || fail "the fallback font was pruned away"
+# Receipts name DejaVu because the core PDF fonts carry no Cyrillic or Greek,
+# and a donor whose name needs those gets question marks on a tax document.
+test -f "$OUT/vendor/vendor-prefixed/dompdf/dompdf/lib/fonts/DejaVuSans.ttf" \
+    || fail "DejaVu is missing, so non-Latin donor names would not render"
 
 echo "zip verified"

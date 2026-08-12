@@ -85,7 +85,7 @@ if ( stragglers.length > 0 ) {
  */
 const REQUIRED_PREFIXED = [
     [ 'dono', 'queryable' ],   // every database call
-    [ 'mpdf', 'mpdf' ],        // receipts and annual statements
+    [ 'dompdf', 'dompdf' ],    // receipts and annual statements
 ];
 
 const missingPrefixed = REQUIRED_PREFIXED

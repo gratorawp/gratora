@@ -10,8 +10,10 @@
     ],
     "require": {
         "php": ">=8.1",
-        "woocommerce/action-scheduler": "^3.7",
-        "ext-openssl": "*"
+        "ext-openssl": "*",
+        "dompdf/dompdf": "^3.1",
+        "sabberworm/php-css-parser": "^8.4",
+        "woocommerce/action-scheduler": "^3.7"
     },
     "require-dev": {
         "dono/queryable": "^1.0",
@@ -42,7 +44,7 @@
         "strauss": [
             "@php -d memory_limit=1G vendor/bin/strauss",
             "find vendor/vendor-prefixed -type d -name .git -exec rm -rf {} +",
-            "node bin/prune-fonts.mjs",
+            "node bin/fix-fontlib-prefix.mjs",
             "@php -r \"file_put_contents('vendor/composer/autoload_aliases.php', '<?php');\"",
             "@composer dump-autoload"
         ],
@@ -62,7 +64,11 @@
             "classmap_prefix": "Dono_Vendor_",
             "constant_prefix": "DONO_VENDOR_",
             "packages": [
-                "mpdf/mpdf",
+                "dompdf/dompdf",
+                "dompdf/php-font-lib",
+                "dompdf/php-svg-lib",
+                "masterminds/html5",
+                "sabberworm/php-css-parser",
                 "dono/queryable"
             ],
             "update_call_sites": false,

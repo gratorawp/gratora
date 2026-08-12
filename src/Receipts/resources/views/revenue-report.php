@@ -15,7 +15,7 @@ defined('ABSPATH') || exit;
  */
 ?>
 <html><head><meta charset="utf-8"><style>
-body{font-family:Helvetica,Arial,sans-serif;color:#111;font-size:13px}
+body{font-family:'DejaVu Sans',sans-serif;color:#111;font-size:13px}
 .eyebrow{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#666;margin:0 0 2px}
 h1{margin:0 0 2px;font-size:24px;line-height:1.15}
 .range{font-size:12px;color:#666;margin:0 0 26px}

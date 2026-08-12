@@ -13,7 +13,7 @@ defined('ABSPATH') || exit;
  */
 ?>
 <html><head><meta charset="utf-8"><style>
-body{font-family:Helvetica,Arial,sans-serif;color:#111;font-size:13px;padding:24px}
+body{font-family:'DejaVu Sans',sans-serif;color:#111;font-size:13px;padding:24px}
 h1{margin:0 0 4px;font-size:22px}h2{font-size:14px;color:#666;margin:0 0 24px;font-weight:normal}
 table{width:100%;border-collapse:collapse;margin-top:12px}th,td{padding:8px 6px;border-bottom:1px solid #eee;text-align:left}
 tfoot td{font-weight:700;border-top:2px solid #111;border-bottom:0}
