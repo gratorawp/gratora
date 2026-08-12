@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Foundation;
 
+use Dono\Analytics\ErrorLog;
 use Dono\Campaigns\CampaignPermalinks;
 use Dono\Core\Activator;
 use Dono\Core\CoreModule;
@@ -228,7 +229,7 @@ final class Plugin
             // an exception escaping here leaves the plugin switched on with its
             // tables gone and every request from then on fatal, including the
             // screen you would deactivate it from.
-            error_log('[dono] deleting data on deactivation failed: ' . $e->getMessage());
+            ErrorLog::toDebugLog('deleting data on deactivation failed: ' . $e->getMessage());
         }
     }
 }

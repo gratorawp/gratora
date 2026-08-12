@@ -155,7 +155,7 @@ final class WebhookController
         } catch (\Throwable $e) {
             // A 5xx makes the gateway retry forever, so nothing about recording
             // the delivery may reach the response.
-            error_log(sprintf('[dono] webhook delivery log failed (%s): %s', $gateway, $e->getMessage()));
+            ErrorLog::toDebugLog(sprintf('webhook delivery log failed (%s): %s', $gateway, $e->getMessage()));
         }
     }
 

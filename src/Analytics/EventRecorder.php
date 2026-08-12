@@ -37,7 +37,7 @@ final class EventRecorder
         } catch (\Throwable $e) {
             // Observability only: an analytics write must never abort the
             // donation transaction record() is often called within.
-            error_log('[dono] event record failed: ' . $e->getMessage());
+            ErrorLog::toDebugLog('event record failed: ' . $e->getMessage());
         }
     }
 

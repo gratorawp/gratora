@@ -333,7 +333,7 @@ final class DonationService
         $raw = trim($raw);
         $ts  = strtotime($raw);
         if ($ts === false) {
-            error_log(sprintf('[dono] unreadable paid_at %s; using the clock instead.', $raw));
+            ErrorLog::toDebugLog(sprintf('unreadable paid_at %s; using the clock instead.', $raw));
             return $now;
         }
 
@@ -347,7 +347,7 @@ final class DonationService
         $earliest = '2000-01-01 00:00:00';
 
         if ($stamp > $latest || $stamp < $earliest) {
-            error_log(sprintf('[dono] paid_at %s is outside the plausible range; using the clock instead.', $raw));
+            ErrorLog::toDebugLog(sprintf('paid_at %s is outside the plausible range; using the clock instead.', $raw));
             return $now;
         }
 
@@ -940,8 +940,8 @@ final class DonationService
         // aggregates negative.
         $maxRefundable = max(0, $donation->amount_cents - $alreadyRefunded);
         if ($amountCents > $maxRefundable) {
-            error_log(sprintf(
-                '[dono] external refund for %s reports %d cents but only %d is refundable; clamping.',
+            ErrorLog::toDebugLog(sprintf(
+                'external refund for %s reports %d cents but only %d is refundable; clamping.',
                 $donation->reference,
                 $amountCents,
                 $maxRefundable

@@ -31,6 +31,24 @@ final class ErrorLog
     private const SLACK = 100;
 
     /**
+     * The one place this plugin writes to PHP's log, and only where a developer
+     * asked for one. A plugin that writes to a production error log on its own
+     * schedule fills a disk it does not own, and the failures worth seeing are
+     * on the Tools screen either way.
+     *
+     * @since 1.0.0
+     */
+    public static function toDebugLog(string $message): void
+    {
+        if (! defined('WP_DEBUG') || ! WP_DEBUG) {
+            return;
+        }
+
+        // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+        error_log('[dono] ' . $message);
+    }
+
+    /**
      * @param string              $source  dotted scope, e.g. 'gateway.paypal'
      * @param array<string,mixed> $context ids and detail; stored, so no secrets
      *
@@ -41,7 +59,7 @@ final class ErrorLog
         $source  = preg_replace('/[^a-z0-9_.]/', '', strtolower($source)) ?: 'unknown';
         $message = trim($message);
 
-        error_log(sprintf('[dono] %s: %s', $source, $message));
+        self::toDebugLog(sprintf('%s: %s', $source, $message));
 
         $recorder = self::recorder();
         if ($recorder === null) {

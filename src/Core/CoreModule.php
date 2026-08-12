@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Core;
 
+use Dono\Analytics\ErrorLog;
 use Dono\Admin\AdminGlobals;
 use Dono\Admin\AdminMenu;
 use Dono\Admin\Pages\CampaignsPage;
@@ -319,7 +320,7 @@ final class CoreModule implements DonoModule
                 $c->get(IdentityHasher::class);
                 $c->get(Crypto::class);
             } catch (\Throwable $t) {
-                error_log('[dono] boot could not reach or create the schema: ' . $t->getMessage());
+                ErrorLog::toDebugLog('boot could not reach or create the schema: ' . $t->getMessage());
             }
         }
 
