@@ -300,7 +300,10 @@
 
     &__message {
         white-space: normal;
-        overflow-wrap: anywhere;
+        // Only where a word genuinely cannot fit, such as a gateway id. Anywhere
+        // breaks mid-word on every line and turns a sentence into a column of
+        // letters the moment the cell is narrow.
+        overflow-wrap: break-word;
     }
 
     &__message-sub {
@@ -325,14 +328,4 @@
         white-space: pre-wrap;
         overflow-wrap: anywhere;
     }
-}
-
-
-// Under table-layout auto a declared width is a hint the browser overrides from
-// content, which is how three short columns took the row and left the message a
-// word wide. Fixed makes the declared widths authoritative and hands what is
-// left to the one column with none.
-.dono-panel .dono-dataviews .dataviews-view-table {
-    table-layout: fixed;
-    width: 100%;
 }
