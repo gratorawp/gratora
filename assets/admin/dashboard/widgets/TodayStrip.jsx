@@ -11,7 +11,7 @@ export default function TodayStrip( { today } ) {
         chips.push( {
             key: 'donations',
             label: sprintf(
-                /* translators: %d: donation count */ _n( '%d donation', '%d donations', today.donations_count, 'dono' ),
+                /* translators: %d: number of donations */ _n( '%d donation', '%d donations', today.donations_count, 'dono' ),
                 today.donations_count
             ),
         } );
@@ -26,7 +26,7 @@ export default function TodayStrip( { today } ) {
         chips.push( {
             key: 'notes',
             label: sprintf(
-                /* translators: %d: donation count */ _n( '%d note', '%d notes', today.notes_count, 'dono' ),
+                /* translators: %d: number of donations */ _n( '%d note', '%d notes', today.notes_count, 'dono' ),
                 today.notes_count
             ),
         } );
@@ -36,7 +36,7 @@ export default function TodayStrip( { today } ) {
         chips.push( {
             key: 'refunds',
             label: sprintf(
-                /* translators: %d: donation count */ _n( '%d refund', '%d refunds', today.refunds_count, 'dono' ),
+                /* translators: %d: number of donations */ _n( '%d refund', '%d refunds', today.refunds_count, 'dono' ),
                 today.refunds_count
             ),
             tone: 'warn',

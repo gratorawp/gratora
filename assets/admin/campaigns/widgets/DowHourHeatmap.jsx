@@ -106,7 +106,7 @@ export default function DowHourHeatmap( { data } ) {
                     </strong>
                     { ' - ' }
                     { sprintf(
-                        /* translators: %d: donation count */
+                        /* translators: %d: number of donations */
                         _n( '%d donation', '%d donations', hovered.count, 'dono' ),
                         hovered.count
                     ) }

@@ -47,7 +47,7 @@ defined('ABSPATH') || exit;
                     <?php if ($showDonorCount && $entry['donations_count'] > 0): ?>
                         <div class="dono-top-donors__podium-count">
                             <?php echo esc_html(sprintf(
-                                /* translators: %s: donation count */
+                                /* translators: %s: number of donations */
                                 _n('%s donation', '%s donations', $entry['donations_count'], 'dono'),
                                 number_format_i18n($entry['donations_count'])
                             )); ?>

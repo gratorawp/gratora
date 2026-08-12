@@ -68,7 +68,7 @@ function intervalLabel( unit, count ) {
             /* translators: %d: number of years between charges. */
             return sprintf( _n( '%d year', '%d years', n, 'dono' ), n );
         case 'month':
-            /* translators: %d: number of months between charges. */
+            /* translators: %d: number of months */
             return sprintf( _n( '%d month', '%d months', n, 'dono' ), n );
         default:
             return n > 1 ? `${ n } ${ unit }` : String( unit );

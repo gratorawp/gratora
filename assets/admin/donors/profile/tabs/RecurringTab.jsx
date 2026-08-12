@@ -30,7 +30,7 @@ function intervalLabel( unit, count ) {
             /* translators: %d: number of weeks between charges. */
             return sprintf( _n( '%d week', '%d weeks', n, 'dono' ), n );
         case 'month':
-            /* translators: %d: number of months between charges. */
+            /* translators: %d: number of months */
             return sprintf( _n( '%d month', '%d months', n, 'dono' ), n );
         case 'year':
             /* translators: %d: number of years between charges. */
@@ -148,7 +148,7 @@ export default function RecurringTab( { recurring, onChange } ) {
                         <div className="dono-row__name">{ formatAmount( item.total_paid_cents, item.currency ) }</div>
                         <div className="dono-row__sub">
                             { sprintf(
-                                /* translators: %d: donations collected by this plan so far. */
+                                /* translators: %d: number of donations */
                                 _n( '%d donation', '%d donations', item.payments_count, 'dono' ),
                                 item.payments_count
                             ) }

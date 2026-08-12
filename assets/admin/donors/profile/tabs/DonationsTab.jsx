@@ -158,7 +158,7 @@ export default function DonationsTab( { donorId, redacted } ) {
                 const message = n === 1
                     ? __( 'Mark this donation as paid? A receipt will be sent.', 'dono' )
                     : sprintf(
-                        /* translators: %d: donation count */
+                        /* translators: %d: number of donations */
                         _n(
                             'Mark %d donation as paid? Receipts will be sent.',
                             'Mark %d donations as paid? Receipts will be sent.',
@@ -186,14 +186,14 @@ export default function DonationsTab( { donorId, redacted } ) {
 
                         if ( done > 0 ) {
                             notify.success( sprintf(
-                                /* translators: %d: donation count */
+                                /* translators: %d: number of donations */
                                 _n( '%d donation marked paid.', '%d donations marked paid.', done, 'dono' ),
                                 done
                             ) );
                         }
                         if ( failed > 0 ) {
                             notify.error( sprintf(
-                                /* translators: %d: donation count */
+                                /* translators: %d: number of donations */
                                 _n( '%d donation could not be marked paid.', '%d donations could not be marked paid.', failed, 'dono' ),
                                 failed
                             ) );
@@ -222,7 +222,7 @@ export default function DonationsTab( { donorId, redacted } ) {
                 const message = n === 1
                     ? __( 'Resend the receipt for this donation?', 'dono' )
                     : sprintf(
-                        /* translators: %d: donation count */
+                        /* translators: %d: number of donations */
                         _n( 'Resend receipts for %d donation?', 'Resend receipts for %d donations?', n, 'dono' ),
                         n
                     );

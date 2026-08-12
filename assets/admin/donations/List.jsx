@@ -398,7 +398,7 @@ export default function List() {
                 const message = n === 1
                     ? __( 'Mark this donation as paid? A receipt will be sent.', 'dono' )
                     : sprintf(
-                        /* translators: %d: donation count */
+                        /* translators: %d: number of donations */
                         _n(
                             'Mark %d donation as paid? Receipts will be sent to each donor.',
                             'Mark %d donations as paid? Receipts will be sent to each donor.',
@@ -418,7 +418,7 @@ export default function List() {
                                 method: 'POST',
                             } ) ) );
                             notify.success( sprintf(
-                                /* translators: %d: donation count */
+                                /* translators: %d: number of donations */
                                 _n( '%d donation marked paid.', '%d donations marked paid.', n, 'dono' ),
                                 n
                             ) );
@@ -450,7 +450,7 @@ export default function List() {
                 const message = n === 1
                     ? __( 'Resend the receipt for this donation?', 'dono' )
                     : sprintf(
-                        /* translators: %d: donation count */
+                        /* translators: %d: number of donations */
                         _n( 'Resend receipts for %d donation?', 'Resend receipts for %d donations?', n, 'dono' ),
                         n
                     );

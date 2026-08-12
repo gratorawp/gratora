@@ -904,7 +904,7 @@ function TopForms( { rows, currency, donationsCount = 0 } ) {
                             <td className="dono-table__right">
                                 <div className="dono-table__primary">{ formatAmount( r.amount_cents, currency ) }</div>
                                 <div className="dono-table__sub">
-                                    { sprintf( /* translators: %d: donation count */ _n( '%d donation', '%d donations', r.donations_count, 'dono' ), r.donations_count ) }
+                                    { sprintf( /* translators: %d: number of donations */ _n( '%d donation', '%d donations', r.donations_count, 'dono' ), r.donations_count ) }
                                 </div>
                             </td>
                         </tr>
@@ -993,7 +993,7 @@ function TopDonors( { rows, currency } ) {
                             <div className="dono-table__primary">{ r.name }</div>
                             <div className="dono-table__sub">
                                 { sprintf(
-                                    /* translators: %d: donation count */
+                                    /* translators: %d: number of donations */
                                     _n( '%d donation', '%d donations', r.donations_count, 'dono' ),
                                     r.donations_count
                                 ) }

@@ -18,8 +18,8 @@ export function GoalCell( { item } ) {
     const pct      = hasGoal ? Math.min( 100, Math.max( 0, Math.round( ( current / target ) * 100 ) ) ) : 0;
 
     const template = type === 'donors'
-        ? /* translators: %s: donor count */ _n( '%s donor', '%s donors', target, 'dono' )
-        : /* translators: %s: donation count */ _n( '%s donation', '%s donations', target, 'dono' );
+        ? /* translators: %s: number of donors */ _n( '%s donor', '%s donors', target, 'dono' )
+        : /* translators: %s: number of donations */ _n( '%s donation', '%s donations', target, 'dono' );
     const label = ! hasGoal
         ? __( 'No goal', 'dono' )
         : isAmount

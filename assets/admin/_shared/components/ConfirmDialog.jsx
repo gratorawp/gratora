@@ -49,7 +49,7 @@ export default function ConfirmDialog( { confirm, onClose } ) {
             <p style={ { margin: 0 } }>{ confirm.message }</p>
             { required !== '' && (
                 <label className="dono-fld" style={ { marginTop: 16, display: 'block' } }>
-                    { sprintf( /* translators: %s: word the user must type back. */ __( 'Type %s to confirm', 'dono' ), required ) }
+                    { sprintf( /* translators: %s: confirmation word */ __( 'Type %s to confirm', 'dono' ), required ) }
                     <input
                         className="dono-input"
                         type="text"

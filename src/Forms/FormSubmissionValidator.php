@@ -310,11 +310,11 @@ final class FormSubmissionValidator
                 if ($this->filled($val)) {
                     $max = (int) ($attrs['maxLength'] ?? 0);
                     if ($max > 0 && mb_strlen((string) $val) > $max) {
-                        return $this->reject(sprintf(__('%s is too long.', 'dono'), $this->label($attrs, $key)));
+                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is too long.', 'dono'), $this->label($attrs, $key)));
                     }
                     $pattern = (string) ($attrs['pattern'] ?? '');
                     if ($pattern !== '' && ! $this->matchesPattern($pattern, (string) $val)) {
-                        return $this->reject(sprintf(__('%s is not in the expected format.', 'dono'), $this->label($attrs, $key)));
+                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is not in the expected format.', 'dono'), $this->label($attrs, $key)));
                     }
                 }
                 break;
@@ -327,14 +327,14 @@ final class FormSubmissionValidator
                 }
                 if ($this->filled($val)) {
                     if (! is_numeric($val)) {
-                        return $this->reject(sprintf(__('%s must be a number.', 'dono'), $this->label($attrs, $key)));
+                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s must be a number.', 'dono'), $this->label($attrs, $key)));
                     }
                     $n = (float) $val;
                     if (isset($attrs['min']) && is_numeric($attrs['min']) && $n < (float) $attrs['min']) {
-                        return $this->reject(sprintf(__('%s is below the minimum.', 'dono'), $this->label($attrs, $key)));
+                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is below the minimum.', 'dono'), $this->label($attrs, $key)));
                     }
                     if (isset($attrs['max']) && is_numeric($attrs['max']) && $n > (float) $attrs['max']) {
-                        return $this->reject(sprintf(__('%s is above the maximum.', 'dono'), $this->label($attrs, $key)));
+                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is above the maximum.', 'dono'), $this->label($attrs, $key)));
                     }
                 }
                 break;
@@ -350,7 +350,7 @@ final class FormSubmissionValidator
                     $min = DateBlock::normalizeDate((string) ($attrs['minDate'] ?? ''));
                     $max = DateBlock::normalizeDate((string) ($attrs['maxDate'] ?? ''));
                     if (($min !== '' && $d < $min) || ($max !== '' && $d > $max)) {
-                        return $this->reject(sprintf(__('%s is outside the allowed range.', 'dono'), $this->label($attrs, $key)));
+                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is outside the allowed range.', 'dono'), $this->label($attrs, $key)));
                     }
                 }
                 break;
@@ -366,7 +366,7 @@ final class FormSubmissionValidator
             case 'dono/checkbox':
                 $key = $this->customKey($attrs);
                 if (! empty($attrs['required']) && empty($custom[$key])) {
-                    return $this->reject(sprintf(__('Please check %s.', 'dono'), $this->label($attrs, $key)));
+                    return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('Please check %s.', 'dono'), $this->label($attrs, $key)));
                 }
                 break;
 
@@ -380,10 +380,10 @@ final class FormSubmissionValidator
                 $min = max(0, (int) ($attrs['minSelections'] ?? 0));
                 $max = max(0, (int) ($attrs['maxSelections'] ?? 0));
                 if ($count > 0 && $min > 0 && $count < $min) {
-                    return $this->reject(sprintf(__('Select at least %d for %s.', 'dono'), $min, $this->label($attrs, $key)));
+                    return $this->reject(sprintf(/* translators: %1$d: smallest number of options allowed. %2$s: the label of the form field. */ __('Select at least %1$d for %2$s.', 'dono'), $min, $this->label($attrs, $key)));
                 }
                 if ($max > 0 && $count > $max) {
-                    return $this->reject(sprintf(__('Select at most %d for %s.', 'dono'), $max, $this->label($attrs, $key)));
+                    return $this->reject(sprintf(/* translators: %1$d: largest number of options allowed. %2$s: the label of the form field. */ __('Select at most %1$d for %2$s.', 'dono'), $max, $this->label($attrs, $key)));
                 }
                 break;
 

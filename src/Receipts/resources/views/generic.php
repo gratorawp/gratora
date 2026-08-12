@@ -52,8 +52,8 @@ $frequencyLabels = [
 ];
 $frequencyLabel = $donation->frequency === 'one_time'
     ? __('One-time donation', 'dono')
-    /* translators: %s: frequency label (Monthly, Quarterly, Yearly, …). */
     : sprintf(
+        /* translators: %s: frequency label (Monthly, Quarterly, Yearly, …). */
         __('Recurring donation (%s)', 'dono'),
         $frequencyLabels[(string) $donation->frequency] ?? ucfirst((string) $donation->frequency)
     );

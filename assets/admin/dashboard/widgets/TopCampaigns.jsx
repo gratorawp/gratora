@@ -60,7 +60,7 @@ export default function TopCampaigns( { rows = [] } ) {
                                 </div>
                                 <div className="dono-table__sub">
                                     { sprintf(
-                                        /* translators: %d: donation count */ _n( '%d donation', '%d donations', c.donations_count, 'dono' ),
+                                        /* translators: %d: number of donations */ _n( '%d donation', '%d donations', c.donations_count, 'dono' ),
                                         c.donations_count
                                     ) }
                                 </div>

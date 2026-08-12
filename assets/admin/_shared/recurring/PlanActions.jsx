@@ -163,7 +163,7 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
                             { [ 1, 2, 3, 6, 12 ].map( ( m ) => (
                                 <option key={ m } value={ m }>
                                     { sprintf(
-                                        /* translators: %d: number of months to pause for. */
+                                        /* translators: %d: number of months */
                                         _n( '%d month', '%d months', m, 'dono' ),
                                         m
                                     ) }

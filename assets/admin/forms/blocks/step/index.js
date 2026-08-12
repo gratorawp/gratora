@@ -49,7 +49,7 @@ function Edit( { attributes, setAttributes, clientId } ) {
             <div { ...blockProps }>
                 <div className="dono-block-preview__step-meta">
                     { sprintf(
-                        /* translators: 1: current step index, 2: total step count. */
+                        /* translators: %1$d: current step number. %2$d: total number of steps. */
                         __( 'Step %1$d of %2$d', 'dono' ),
                         index + 1,
                         total
