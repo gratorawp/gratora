@@ -54,7 +54,7 @@ final class Crypto
             self::TAG_LEN
         );
         if ($ciphertext === false) {
-            throw new RuntimeException('Dono Crypto: encryption failed.');
+            throw new RuntimeException(esc_html('Dono Crypto: encryption failed.'));
         }
         return base64_encode($iv . $tag . $ciphertext);
     }

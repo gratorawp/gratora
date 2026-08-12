@@ -152,11 +152,11 @@ final class StripeApi
             // the live token (activeSecretKey only reads the active mode's
             // field), so be explicit about which connection is missing.
             $mode = $this->account->isTestMode() ? 'test' : 'live';
-            throw new RuntimeException(sprintf(
+            throw new RuntimeException(esc_html(sprintf(
                 'Stripe has no %s connection. Connect the %s Stripe account in Settings, Payment gateways.',
                 $mode,
                 $mode
-            ));
+            )));
         }
 
         $url = self::API_BASE . '/' . ltrim($path, '/');
@@ -180,7 +180,7 @@ final class StripeApi
         $response = wp_remote_request($url, $args);
 
         if (is_wp_error($response)) {
-            throw new GatewayTransportException('Stripe API transport error: ' . $response->get_error_message());
+            throw new GatewayTransportException(esc_html('Stripe API transport error: ' . $response->get_error_message()));
         }
 
         $code = (int) wp_remote_retrieve_response_code($response);
@@ -188,12 +188,12 @@ final class StripeApi
         $decoded = json_decode($body, true);
 
         if (! is_array($decoded)) {
-            throw new RuntimeException("Stripe API returned non-JSON response (HTTP {$code}): " . substr($body, 0, 200));
+            throw new RuntimeException(esc_html("Stripe API returned non-JSON response (HTTP {$code}): " . substr($body, 0, 200)));
         }
 
         if ($code >= 400) {
             $msg = $decoded['error']['message'] ?? "Stripe API error (HTTP {$code})";
-            throw new RuntimeException("Stripe API: {$msg}");
+            throw new RuntimeException(esc_html("Stripe API: {$msg}"));
         }
 
         return $decoded;

@@ -13,7 +13,7 @@ $wrapClasses = 'dono-block dono-block--currency-switcher dono-currency'
 <?php
 $ariaName = $label !== '' ? $label : __('Currency', 'dono-fundraising-platform');
 ?>
-<div class="<?php echo $wrapClasses; ?>">
+<div class="<?php echo esc_attr($wrapClasses); ?>">
     <?php if ($label !== ''): ?>
         <span class="dono-currency__label"><?php echo esc_html((string) $label); ?></span>
     <?php endif; ?>

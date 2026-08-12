@@ -34,7 +34,7 @@ final class CommandRegistry
     public function register(Command $command): void
     {
         if (isset($this->commands[$command->id])) {
-            throw new RuntimeException("Command '{$command->id}' is already registered.");
+            throw new RuntimeException(esc_html("Command '{$command->id}' is already registered."));
         }
         $this->commands[$command->id] = $command;
     }

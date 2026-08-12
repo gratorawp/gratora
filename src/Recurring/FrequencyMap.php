@@ -30,7 +30,7 @@ final class FrequencyMap
             'monthly'   => ['month', 1],
             'quarterly' => ['month', 3],
             'yearly'    => ['year',  1],
-            default     => throw new RuntimeException("Cannot map non-recurring frequency '{$frequency}' to a Stripe interval."),
+            default     => throw new RuntimeException(esc_html("Cannot map non-recurring frequency '{$frequency}' to a Stripe interval.")),
         };
     }
 
@@ -47,7 +47,7 @@ final class FrequencyMap
             'week'  => '+' . ($intervalCount * 7) . ' day',
             'month' => "+{$intervalCount} month",
             'year'  => "+{$intervalCount} year",
-            default => throw new RuntimeException("Unknown interval '{$interval}'."),
+            default => throw new RuntimeException(esc_html("Unknown interval '{$interval}'.")),
         };
 
         return (new \DateTimeImmutable("@{$nowEpoch}"))

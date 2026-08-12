@@ -142,7 +142,7 @@ final class ApplePayDomain extends HookProvider
     {
         $domain = $this->domain();
         if ($domain === '') {
-            throw new RuntimeException('Could not determine this site\'s domain.');
+            throw new RuntimeException(esc_html('Could not determine this site\'s domain.'));
         }
 
         $this->account->useTestMode($test);

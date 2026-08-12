@@ -11,13 +11,20 @@ defined('ABSPATH') || exit;
  * @var string $styleVars
  */
 ?>
-<section <?php echo get_block_wrapper_attributes(array_filter([
+<section <?php
+// Core escapes these attributes; its own blocks print them the same way.
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+echo get_block_wrapper_attributes(array_filter([
     'class' => 'dono-block dono-block--top-donors dono-block--layout-' . $layout,
     'style' => $styleVars,
-])); ?>
+]));
+// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+?>
          data-block="dono/top-donors">
     <?php if ($title !== ''): ?>
-        <h3 class="dono-block__title"><?php echo esc_html($title); ?></h3>
+        <h3 class="dono-block__title"><?php echo esc_html($title);
+// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+?></h3>
     <?php endif; ?>
 
     <?php if (! $entries): ?>
@@ -33,15 +40,23 @@ defined('ABSPATH') || exit;
         ?>
         <ol class="dono-top-donors__podium">
             <?php foreach ($renderOrder as [$rank, $entry]): ?>
-                <li class="dono-top-donors__podium-tier dono-top-donors__podium-tier--<?php echo esc_attr((string) $rank); ?>">
-                    <div class="dono-top-donors__podium-rank"><?php echo esc_html((string) $rank); ?></div>
+                <li class="dono-top-donors__podium-tier dono-top-donors__podium-tier--<?php echo esc_attr((string) $rank);
+// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+?>">
+                    <div class="dono-top-donors__podium-rank"><?php echo esc_html((string) $rank);
+// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+?></div>
                     <?php echo \Dono\Campaigns\Blocks\BlockAvatar::markup($entry['name'], $entry['is_anonymous'], (string) ($entry['avatar_url'] ?? '')); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                     <div class="dono-top-donors__podium-name<?php echo $entry['is_anonymous'] ? ' is-anonymous' : ''; ?>">
-                        <?php echo esc_html($entry['name']); ?>
+                        <?php echo esc_html($entry['name']);
+// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+?>
                     </div>
                     <?php if ($showAmount): ?>
                         <div class="dono-top-donors__podium-amount">
-                            <?php echo esc_html(\Dono\Foundation\Helpers\Money::format($entry['amount_cents'], $currency, true)); ?>
+                            <?php echo esc_html(\Dono\Foundation\Helpers\Money::format($entry['amount_cents'], $currency, true));
+// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+?>
                         </div>
                     <?php endif; ?>
                     <?php if ($showDonorCount && $entry['donations_count'] > 0): ?>
@@ -50,7 +65,9 @@ defined('ABSPATH') || exit;
                                 /* translators: %s: number of donations */
                                 _n('%s donation', '%s donations', $entry['donations_count'], 'dono-fundraising-platform'),
                                 number_format_i18n($entry['donations_count'])
-                            )); ?>
+                            ));
+// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+?>
                         </div>
                     <?php endif; ?>
                 </li>
@@ -63,7 +80,9 @@ defined('ABSPATH') || exit;
                     <li class="dono-top-donors__row">
                         <?php echo \Dono\Campaigns\Blocks\BlockAvatar::markup($entry['name'], $entry['is_anonymous'], (string) ($entry['avatar_url'] ?? '')); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                         <span class="dono-top-donors__name<?php echo $entry['is_anonymous'] ? ' is-anonymous' : ''; ?>">
-                            <?php echo esc_html($entry['name']); ?>
+                            <?php echo esc_html($entry['name']);
+// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+?>
                         </span>
                         <?php if ($showDonorCount && $entry['donations_count'] > 0): ?>
                             <span class="dono-top-donors__count">
@@ -71,12 +90,16 @@ defined('ABSPATH') || exit;
                                     /* translators: %s: count */
                                     _n('(%s donation)', '(%s donations)', $entry['donations_count'], 'dono-fundraising-platform'),
                                     number_format_i18n($entry['donations_count'])
-                                )); ?>
+                                ));
+// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+?>
                             </span>
                         <?php endif; ?>
                         <?php if ($showAmount): ?>
                             <span class="dono-top-donors__amount">
-                                <?php echo esc_html(\Dono\Foundation\Helpers\Money::format($entry['amount_cents'], $currency, true)); ?>
+                                <?php echo esc_html(\Dono\Foundation\Helpers\Money::format($entry['amount_cents'], $currency, true));
+// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+?>
                             </span>
                         <?php endif; ?>
                     </li>
@@ -89,7 +112,9 @@ defined('ABSPATH') || exit;
                 <li class="dono-top-donors__row">
                     <?php echo \Dono\Campaigns\Blocks\BlockAvatar::markup($entry['name'], $entry['is_anonymous'], (string) ($entry['avatar_url'] ?? '')); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                     <span class="dono-top-donors__name<?php echo $entry['is_anonymous'] ? ' is-anonymous' : ''; ?>">
-                        <?php echo esc_html($entry['name']); ?>
+                        <?php echo esc_html($entry['name']);
+// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+?>
                     </span>
                     <?php if ($showDonorCount && $entry['donations_count'] > 0): ?>
                         <span class="dono-top-donors__count">
@@ -97,12 +122,16 @@ defined('ABSPATH') || exit;
                                 /* translators: %s: count */
                                 _n('(%s donation)', '(%s donations)', $entry['donations_count'], 'dono-fundraising-platform'),
                                 number_format_i18n($entry['donations_count'])
-                            )); ?>
+                            ));
+// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+?>
                         </span>
                     <?php endif; ?>
                     <?php if ($showAmount): ?>
                         <span class="dono-top-donors__amount">
-                            <?php echo esc_html(\Dono\Foundation\Helpers\Money::format($entry['amount_cents'], $currency, true)); ?>
+                            <?php echo esc_html(\Dono\Foundation\Helpers\Money::format($entry['amount_cents'], $currency, true));
+// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+?>
                         </span>
                     <?php endif; ?>
                 </li>

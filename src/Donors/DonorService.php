@@ -120,7 +120,7 @@ final class DonorService
     public function editProfile(Donor $donor, array $patch): Donor
     {
         if ($donor->redacted_at !== null) {
-            throw new InvalidArgumentException(__('This donor has been erased and can no longer be edited.', 'dono-fundraising-platform'));
+            throw new InvalidArgumentException(esc_html__('This donor has been erased and can no longer be edited.', 'dono-fundraising-platform'));
         }
         $changed = false;
         $textFields = ['first_name' => 100, 'last_name' => 100, 'company' => 150, 'locale' => 10];
@@ -189,7 +189,7 @@ final class DonorService
     public function refreshProfile(Donor $donor, array $profile): Donor
     {
         if ($donor->redacted_at !== null) {
-            throw new InvalidArgumentException(__('This donor has been erased and can no longer be edited.', 'dono-fundraising-platform'));
+            throw new InvalidArgumentException(esc_html__('This donor has been erased and can no longer be edited.', 'dono-fundraising-platform'));
         }
 
         $changed = false;
@@ -234,11 +234,11 @@ final class DonorService
     public function changeEmail(Donor $donor, string $newEmail): Donor
     {
         if ($donor->redacted_at !== null) {
-            throw new InvalidArgumentException(__('This donor has been erased and can no longer be edited.', 'dono-fundraising-platform'));
+            throw new InvalidArgumentException(esc_html__('This donor has been erased and can no longer be edited.', 'dono-fundraising-platform'));
         }
         $normalized = $this->hasher->normalizeEmail($newEmail);
         if ($normalized === '') {
-            throw new InvalidArgumentException(__('Email is required.', 'dono-fundraising-platform'));
+            throw new InvalidArgumentException(esc_html__('Email is required.', 'dono-fundraising-platform'));
         }
 
         $newHash = $this->hasher->emailHash($normalized);
@@ -248,7 +248,7 @@ final class DonorService
 
         $clash = $this->donors->findByEmailHash($newHash);
         if ($clash !== null && (int) $clash->id !== (int) $donor->id) {
-            throw new EmailAlreadyAssignedException((int) $clash->id);
+            throw new EmailAlreadyAssignedException(esc_html((int) $clash->id));
         }
 
         $oldHash = $donor->email_hash;
@@ -301,7 +301,7 @@ final class DonorService
     {
         $reason = $this->undeletableReason($donor);
         if ($reason !== null) {
-            throw new InvalidArgumentException($reason);
+            throw new InvalidArgumentException(esc_html($reason));
         }
 
         $id   = (int) $donor->id;
@@ -589,10 +589,10 @@ final class DonorService
     public function setEncryptedField(Donor $donor, string $field, ?string $value): void
     {
         if ($donor->redacted_at !== null) {
-            throw new InvalidArgumentException(__('This donor has been erased and can no longer be edited.', 'dono-fundraising-platform'));
+            throw new InvalidArgumentException(esc_html__('This donor has been erased and can no longer be edited.', 'dono-fundraising-platform'));
         }
         if (! in_array($field, ['phone_encrypted', 'address_encrypted', 'notes_encrypted', 'tax_id_encrypted'], true)) {
-            throw new InvalidArgumentException("Unsupported encrypted field: {$field}");
+            throw new InvalidArgumentException(esc_html("Unsupported encrypted field: {$field}"));
         }
         $encrypted = ($value === null || $value === '') ? null : $this->crypto->encrypt($value);
         DB::table('dono_donors')

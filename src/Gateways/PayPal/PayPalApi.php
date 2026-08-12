@@ -59,10 +59,10 @@ final class PayPalApi
         $clientId = $this->account->activeClientId();
         $secret   = $this->account->activeSecret();
         if ($clientId === '' || $secret === '') {
-            throw new RuntimeException(sprintf(
+            throw new RuntimeException(esc_html(sprintf(
                 'PayPal has no %s credentials. Add them in Settings, Payment gateways.',
                 $test ? 'sandbox' : 'live'
-            ));
+            )));
         }
 
         $response = wp_remote_post($this->baseUrl() . '/v1/oauth2/token', [
@@ -76,7 +76,7 @@ final class PayPalApi
         ]);
 
         if (is_wp_error($response)) {
-            throw new GatewayTransportException('PayPal transport error: ' . $response->get_error_message());
+            throw new GatewayTransportException(esc_html('PayPal transport error: ' . $response->get_error_message()));
         }
 
         $code = (int) wp_remote_retrieve_response_code($response);
@@ -86,7 +86,7 @@ final class PayPalApi
             $msg = is_array($body)
                 ? (string) ($body['error_description'] ?? $body['message'] ?? "HTTP {$code}")
                 : "HTTP {$code}";
-            throw new RuntimeException('PayPal rejected the credentials: ' . $msg);
+            throw new RuntimeException(esc_html('PayPal rejected the credentials: ' . $msg));
         }
 
         $token = (string) $body['access_token'];
@@ -138,10 +138,10 @@ final class PayPalApi
     {
         if (! $this->isConfigured()) {
             $mode = $this->account->isTestMode() ? 'sandbox' : 'live';
-            throw new RuntimeException(sprintf(
+            throw new RuntimeException(esc_html(sprintf(
                 'PayPal has no %s credentials. Add them in Settings, Payment gateways.',
                 $mode
-            ));
+            )));
         }
 
         $args = [
@@ -163,11 +163,11 @@ final class PayPalApi
             // answers that with "the request JSON is not well formed", which
             // reads as a schema problem in a request we never actually sent.
             if (! is_string($encoded)) {
-                throw new RuntimeException(sprintf(
+                throw new RuntimeException(esc_html(sprintf(
                     'PayPal request body for %s could not be encoded as JSON: %s',
                     $path,
                     json_last_error_msg()
-                ));
+                )));
             }
             $args['body'] = $encoded;
         }
@@ -175,7 +175,7 @@ final class PayPalApi
         $response = wp_remote_request($this->baseUrl() . $path, $args);
 
         if (is_wp_error($response)) {
-            throw new GatewayTransportException('PayPal transport error: ' . $response->get_error_message());
+            throw new GatewayTransportException(esc_html('PayPal transport error: ' . $response->get_error_message()));
         }
 
         $code = (int) wp_remote_retrieve_response_code($response);
@@ -187,7 +187,7 @@ final class PayPalApi
 
         $decoded = json_decode($raw, true);
         if (! is_array($decoded)) {
-            throw new RuntimeException("PayPal returned a non-JSON response (HTTP {$code}): " . substr($raw, 0, 200));
+            throw new RuntimeException(esc_html("PayPal returned a non-JSON response (HTTP {$code}): " . substr($raw, 0, 200)));
         }
 
         if ($code >= 400) {
@@ -195,7 +195,7 @@ final class PayPalApi
             // plan, an order and a capture, and PayPal's own wording says
             // nothing about which of them it is refusing.
             throw new PayPalApiException(
-                sprintf('PayPal API (%s %s): %s', $method, $path, $this->errorMessage($decoded, $code)),
+                esc_html(sprintf('PayPal API (%s %s): %s', $method, $path, $this->errorMessage($decoded, $code))),
                 PayPalApiException::issuesFrom($decoded)
             );
         }

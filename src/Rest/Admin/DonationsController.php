@@ -1277,6 +1277,9 @@ final class DonationsController
             $server->send_header('Content-Length', (string) strlen($pdf));
             $server->send_header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
 
+            // Bytes of a file being downloaded, sent under their own Content-Type
+            // header. Escaping them would corrupt the document.
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
             echo $pdf;
             return true;
         }, 10, 4);

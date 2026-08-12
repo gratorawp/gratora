@@ -60,7 +60,7 @@ final class ReferenceGenerator
     public function nextNumber(string $scope, int $nextValue): void
     {
         if ($nextValue < 1) {
-            throw new \InvalidArgumentException('Next number must be >= 1.');
+            throw new \InvalidArgumentException(esc_html('Next number must be >= 1.'));
         }
 
         $scope = $this->normaliseScope($scope);
@@ -70,8 +70,8 @@ final class ReferenceGenerator
         $current = $this->currentCounter($scope, $key);
         if ($nextValue <= $current) {
             throw new \RuntimeException(
-                "Cannot set counter for {$scope} to {$nextValue}; current counter is already {$current}. " .
-                'Choose a value > current to avoid duplicate references.'
+                esc_html("Cannot set counter for {$scope} to {$nextValue}; current counter is already {$current}. " .
+                'Choose a value > current to avoid duplicate references.')
             );
         }
 
@@ -172,7 +172,7 @@ final class ReferenceGenerator
         $new    = (int) ($result['rows'][0]->id ?? 0);
 
         if ($new < 1) {
-            throw new RuntimeException("ReferenceGenerator: counter update failed for {$key}");
+            throw new RuntimeException(esc_html("ReferenceGenerator: counter update failed for {$key}"));
         }
 
         wp_cache_delete($key, 'options');

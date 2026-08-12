@@ -21,7 +21,7 @@ final class CampaignTypeRegistry
     {
         $type = $handler->type();
         if (isset($this->handlers[$type])) {
-            throw new RuntimeException("Campaign type '{$type}' is already registered.");
+            throw new RuntimeException(esc_html("Campaign type '{$type}' is already registered."));
         }
         $this->handlers[$type] = $handler;
     }

@@ -113,16 +113,16 @@ final class CoreCommandProvider
                 // amount in a currency that has no minor unit.
                 $currency = strtoupper((string) $in['currency']);
                 if (! SupportedCurrencies::accepts($currency)) {
-                    throw new CommandError(sprintf(
+                    throw new CommandError(esc_html(sprintf(
                         /* translators: 1: currency code, 2: the accepted codes. */
                         __('%1$s is not one of your accepted currencies (%2$s).', 'dono-fundraising-platform'),
                         $currency,
                         implode(', ', SupportedCurrencies::all())
-                    ));
+                    )));
                 }
                 if (Currency::minorUnits($currency) === 0 && ((int) $in['amount_cents']) % 100 !== 0) {
                     throw new CommandError(
-                        __('This currency does not support fractional amounts.', 'dono-fundraising-platform')
+                        esc_html__('This currency does not support fractional amounts.', 'dono-fundraising-platform')
                     );
                 }
 
@@ -164,7 +164,7 @@ final class CoreCommandProvider
             function (array $in) use ($c): array {
                 $donation = $c->get(DonationRepository::class)->findByReference((string) $in['donation_reference']);
                 if (! $donation) {
-                    throw new CommandError('Donation not found.');
+                    throw new CommandError(esc_html('Donation not found.'));
                 }
                 $svc  = $c->get(DonationService::class);
                 $done = $svc->confirm($donation, is_array($in['result'] ?? null) ? $in['result'] : []);
@@ -187,7 +187,7 @@ final class CoreCommandProvider
             function (array $in) use ($c): array {
                 $donation = $c->get(DonationRepository::class)->findByReference((string) $in['donation_reference']);
                 if (! $donation) {
-                    throw new CommandError('Donation not found.');
+                    throw new CommandError(esc_html('Donation not found.'));
                 }
                 $svc  = $c->get(DonationService::class);
                 $done = $svc->markFailed($donation, isset($in['reason']) ? (string) $in['reason'] : null);
@@ -214,7 +214,7 @@ final class CoreCommandProvider
             function (array $in, CommandContext $ctx) use ($c): array {
                 $donation = $c->get(DonationRepository::class)->findByReference((string) $in['donation_reference']);
                 if (! $donation) {
-                    throw new CommandError('Donation not found.');
+                    throw new CommandError(esc_html('Donation not found.'));
                 }
                 $refund = $c->get(DonationService::class)->refund(
                     $donation,
@@ -260,7 +260,7 @@ final class CoreCommandProvider
             function (array $in) use ($c): array {
                 $donation = $c->get(DonationRepository::class)->findByReference((string) $in['donation_reference']);
                 if (! $donation) {
-                    throw new CommandError('Donation not found.');
+                    throw new CommandError(esc_html('Donation not found.'));
                 }
                 $refund = $c->get(DonationService::class)->recordExternalRefund(
                     $donation,
@@ -377,10 +377,10 @@ final class CoreCommandProvider
             function (array $in) use ($c): array {
                 $donor = $c->get(DonorRepository::class)->findById((int) $in['donor_id']);
                 if (! $donor) {
-                    throw new CommandError('Donor not found.');
+                    throw new CommandError(esc_html('Donor not found.'));
                 }
                 if ($donor->redacted_at !== null) {
-                    throw new CommandError('This donor has been erased and can no longer be edited.');
+                    throw new CommandError(esc_html('This donor has been erased and can no longer be edited.'));
                 }
                 $updated = $c->get(DonorService::class)->refreshProfile(
                     $donor,
@@ -405,7 +405,7 @@ final class CoreCommandProvider
             function (array $in) use ($c): array {
                 $donor = $c->get(DonorRepository::class)->findById((int) $in['donor_id']);
                 if (! $donor) {
-                    throw new CommandError('Donor not found.');
+                    throw new CommandError(esc_html('Donor not found.'));
                 }
                 $updated = $c->get(DonorService::class)->changeEmail($donor, (string) $in['new_email']);
                 return ['donor_id' => (int) $updated->id];
@@ -426,7 +426,7 @@ final class CoreCommandProvider
             function (array $in) use ($c): array {
                 $donor = $c->get(DonorRepository::class)->findById((int) $in['donor_id']);
                 if (! $donor) {
-                    throw new CommandError('Donor not found.');
+                    throw new CommandError(esc_html('Donor not found.'));
                 }
                 $redacted = $c->get(DonorService::class)->redact($donor);
                 return [
@@ -514,11 +514,11 @@ final class CoreCommandProvider
                 $donor = $c->get(DonorRepository::class)->findById((int) $in['donor_id']);
                 // A redacted donor has no address on file and must never be emailed.
                 if (! $donor || $donor->redacted_at !== null) {
-                    throw new CommandError('Donor not found.');
+                    throw new CommandError(esc_html('Donor not found.'));
                 }
                 $email = $c->get(DonorService::class)->decryptEmail($donor);
                 if ($email === null || $email === '') {
-                    throw new CommandError('Donor has no email address on file.');
+                    throw new CommandError(esc_html('Donor has no email address on file.'));
                 }
                 $sent = $c->get(Mailer::class)->sendRaw(
                     $email,
@@ -587,7 +587,7 @@ final class CoreCommandProvider
             function (array $in) use ($c): array {
                 $campaign = $c->get(CampaignRepository::class)->findById((int) $in['campaign_id']);
                 if (! $campaign) {
-                    throw new CommandError('Campaign not found.');
+                    throw new CommandError(esc_html('Campaign not found.'));
                 }
                 unset($in['campaign_id']);
                 $updated = $c->get(CampaignService::class)->update($campaign, $in);
@@ -623,7 +623,7 @@ final class CoreCommandProvider
             function (array $in) use ($c): array {
                 $campaign = $c->get(CampaignRepository::class)->findById((int) $in['campaign_id']);
                 if (! $campaign) {
-                    throw new CommandError('Campaign not found.');
+                    throw new CommandError(esc_html('Campaign not found.'));
                 }
                 $c->get(CampaignService::class)->delete($campaign);
                 return ['campaign_id' => (int) $in['campaign_id'], 'deleted' => true];
@@ -654,7 +654,7 @@ final class CoreCommandProvider
             function (array $in) use ($c): array {
                 $source = $c->get(CampaignRepository::class)->findById((int) $in['campaign_id']);
                 if (! $source) {
-                    throw new CommandError('Campaign not found.');
+                    throw new CommandError(esc_html('Campaign not found.'));
                 }
                 $copy = $c->get(CampaignService::class)->duplicate($source);
                 return ['campaign_id' => (int) $copy->id, 'slug' => (string) $copy->slug];
@@ -725,7 +725,7 @@ final class CoreCommandProvider
             function (array $in) use ($c): array {
                 $form = $c->get(FormRepository::class)->findById((int) $in['form_id']);
                 if (! $form) {
-                    throw new CommandError('Form not found.');
+                    throw new CommandError(esc_html('Form not found.'));
                 }
                 unset($in['form_id']);
                 // Saving replaces settings wholesale; merge the patch over what is
@@ -769,7 +769,7 @@ final class CoreCommandProvider
             function (array $in) use ($c): array {
                 $form = $c->get(FormRepository::class)->findById((int) $in['form_id']);
                 if (! $form) {
-                    throw new CommandError('Form not found.');
+                    throw new CommandError(esc_html('Form not found.'));
                 }
                 $blocks = [];
                 foreach (parse_blocks((string) $form->blocks) as $block) {
@@ -802,7 +802,7 @@ final class CoreCommandProvider
             function (array $in) use ($c): array {
                 $form = $c->get(FormRepository::class)->findById((int) $in['form_id']);
                 if (! $form) {
-                    throw new CommandError('Form not found.');
+                    throw new CommandError(esc_html('Form not found.'));
                 }
                 $c->get(FormService::class)->delete($form);
                 return ['form_id' => (int) $in['form_id'], 'deleted' => true];
@@ -833,7 +833,7 @@ final class CoreCommandProvider
             function (array $in) use ($c): array {
                 $source = $c->get(FormRepository::class)->findById((int) $in['form_id']);
                 if (! $source) {
-                    throw new CommandError('Form not found.');
+                    throw new CommandError(esc_html('Form not found.'));
                 }
                 $copy = $c->get(FormService::class)->duplicate($source);
                 return ['form_id' => (int) $copy->id, 'slug' => (string) $copy->slug];
@@ -887,7 +887,7 @@ final class CoreCommandProvider
             function (array $in) use ($c): array {
                 $fund = $c->get(FundRepository::class)->findById((int) $in['fund_id']);
                 if (! $fund) {
-                    throw new CommandError('Fund not found.');
+                    throw new CommandError(esc_html('Fund not found.'));
                 }
                 unset($in['fund_id']);
                 $updated = $c->get(FundService::class)->update($fund, $in);
@@ -910,7 +910,7 @@ final class CoreCommandProvider
             function (array $in) use ($c): array {
                 $fund = $c->get(FundRepository::class)->findById((int) $in['fund_id']);
                 if (! $fund) {
-                    throw new CommandError('Fund not found.');
+                    throw new CommandError(esc_html('Fund not found.'));
                 }
                 $result = $c->get(FundService::class)->delete(
                     $fund,
@@ -973,7 +973,7 @@ final class CoreCommandProvider
             function (array $in) use ($c): array {
                 $path = $c->get(ReceiptIssuer::class)->renderReceiptPdf((int) $in['receipt_id']);
                 if ($path === null) {
-                    throw new CommandError('Receipt or renderer not found.');
+                    throw new CommandError(esc_html('Receipt or renderer not found.'));
                 }
                 return ['path' => $path];
             },
@@ -1080,7 +1080,7 @@ final class CoreCommandProvider
                         RecurringPlanChange::byAdmin('change_amount', false)
                     );
                 } catch (\InvalidArgumentException $e) {
-                    throw new CommandError($e->getMessage());
+                    throw new CommandError(esc_html($e->getMessage()));
                 }
                 return ['plan_id' => (int) $plan->id, 'amount_cents' => (int) $plan->amount_cents];
             },
@@ -1101,7 +1101,7 @@ final class CoreCommandProvider
             function (array $in) use ($c): array {
                 $campaignId = (int) $in['campaign_id'];
                 if (! $c->get(CampaignRepository::class)->findById($campaignId)) {
-                    throw new CommandError('Campaign not found.');
+                    throw new CommandError(esc_html('Campaign not found.'));
                 }
                 // Queued, for the reason on CampaignCancelRecurringJob: one
                 // blocking gateway call per plan does not fit in a request.
@@ -1152,7 +1152,7 @@ final class CoreCommandProvider
             function (array $in) use ($c): array {
                 $donation = $c->get(DonationRepository::class)->findByReference((string) $in['donation_reference']);
                 if (! $donation) {
-                    throw new CommandError('Donation not found.');
+                    throw new CommandError(esc_html('Donation not found.'));
                 }
                 return [
                     'donation_id'  => (int) $donation->id,
@@ -1182,7 +1182,7 @@ final class CoreCommandProvider
             function (array $in) use ($c): array {
                 $donor = $c->get(DonorRepository::class)->findById((int) $in['donor_id']);
                 if (! $donor) {
-                    throw new CommandError('Donor not found.');
+                    throw new CommandError(esc_html('Donor not found.'));
                 }
                 return [
                     'donor_id'            => (int) $donor->id,
@@ -1680,7 +1680,7 @@ final class CoreCommandProvider
                 $campaignId = (int) $in['campaign_id'];
                 $campaign   = $c->get(CampaignRepository::class)->findById($campaignId);
                 if (! $campaign) {
-                    throw new CommandError('Campaign not found.');
+                    throw new CommandError(esc_html('Campaign not found.'));
                 }
                 $range = in_array($in['range'] ?? null, self::REPORT_RANGES, true)
                     ? (string) $in['range']
@@ -1719,11 +1719,11 @@ final class CoreCommandProvider
                 $donorId = (int) $in['donor_id'];
                 $year    = (int) $in['year'];
                 if ($year < 2000 || $year > $currentYear) {
-                    throw new CommandError('Statement year must be between 2000 and the current year.');
+                    throw new CommandError(esc_html('Statement year must be between 2000 and the current year.'));
                 }
                 $donor = $c->get(DonorRepository::class)->findById($donorId);
                 if (! $donor || $donor->redacted_at !== null) {
-                    throw new CommandError('Donor not found.');
+                    throw new CommandError(esc_html('Donor not found.'));
                 }
 
                 // Count + net total from the year's paid donations so the
@@ -1844,10 +1844,10 @@ final class CoreCommandProvider
                 $validated = [];
                 foreach ($values as $key => $value) {
                     if (is_string($key) && SecretRedactor::isSecretKey($key)) {
-                        throw new CommandError(sprintf('The "%s" setting holds a secret and cannot be set here.', $key));
+                        throw new CommandError(esc_html(sprintf('The "%s" setting holds a secret and cannot be set here.', $key)));
                     }
                     if (! isset($settable[$key])) {
-                        throw new CommandError(sprintf('Unknown setting "%s" for group "%s". Call settings.get first to see the settable keys.', (string) $key, $group));
+                        throw new CommandError(esc_html(sprintf('Unknown setting "%s" for group "%s". Call settings.get first to see the settable keys.', (string) $key, $group)));
                     }
                     $validated[$key] = $value;
                 }
@@ -2204,7 +2204,7 @@ final class CoreCommandProvider
     {
         $plan = RecurringPlan::query()->find('id', $planId);
         if (! $plan) {
-            throw new CommandError('Recurring plan not found.');
+            throw new CommandError(esc_html('Recurring plan not found.'));
         }
         return $plan;
     }

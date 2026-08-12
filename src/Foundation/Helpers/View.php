@@ -25,6 +25,8 @@ final class View
     /** @since 1.0.0 */
     public static function render(string $path, array $args = []): void
     {
+        // Markup from a template that escapes its own values as it prints them.
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
         echo self::load($path, $args);
     }
 
@@ -45,7 +47,7 @@ final class View
     private static function renderFile(string $template, array $args): string
     {
         if (! file_exists($template)) {
-            throw new InvalidArgumentException("Dono view template not found: {$template}");
+            throw new InvalidArgumentException(esc_html("Dono view template not found: {$template}"));
         }
 
         ob_start();

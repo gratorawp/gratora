@@ -166,10 +166,10 @@ final class DataEraser
             // prepare() has no placeholder for an identifier, so a table name
             // can only be interpolated. These come from this class's own list
             // and never from a request, which is what makes that safe.
-            // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+            // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
             $wpdb->query("DROP TABLE IF EXISTS `{$full}`");
             $wpdb->query("DROP TABLE IF EXISTS `{$full}_meta`");
-            // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+            // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
             delete_option('queryable_' . $table . '_version');
         }
     }

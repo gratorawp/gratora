@@ -114,10 +114,10 @@ final class CampaignService
             if ($raw !== '') {
                 $next = sanitize_title($raw);
                 if ($next === '') {
-                    throw new InvalidArgumentException(__('Invalid slug.', 'dono-fundraising-platform'));
+                    throw new InvalidArgumentException(esc_html__('Invalid slug.', 'dono-fundraising-platform'));
                 }
                 if ($next !== $campaign->slug && $this->campaigns->slugExists($next, $campaign->id)) {
-                    throw new InvalidArgumentException(__('Slug is already in use.', 'dono-fundraising-platform'));
+                    throw new InvalidArgumentException(esc_html__('Slug is already in use.', 'dono-fundraising-platform'));
                 }
                 $campaign->slug = $next;
             }
@@ -178,7 +178,7 @@ final class CampaignService
                 $formId = (int) $value;
                 $form = Form::query()->find('id', $formId);
                 if (! $form || $form->campaign_id !== $campaign->id) {
-                    throw new InvalidArgumentException(__('Selected form is not part of this campaign.', 'dono-fundraising-platform'));
+                    throw new InvalidArgumentException(esc_html__('Selected form is not part of this campaign.', 'dono-fundraising-platform'));
                 }
                 $campaign->default_form_id = $formId;
             }
@@ -252,7 +252,7 @@ final class CampaignService
     {
         $blocked = $this->deleteBlockedReason($campaign);
         if ($blocked !== null) {
-            throw new RuntimeException($blocked);
+            throw new RuntimeException(esc_html($blocked));
         }
 
         // WP post deletion is not transactional; done first so the
@@ -299,7 +299,7 @@ final class CampaignService
         }
         $attachmentId = (int) $value;
         if (! wp_attachment_is_image($attachmentId)) {
-            throw new InvalidArgumentException(__('Selected file is not an image.', 'dono-fundraising-platform'));
+            throw new InvalidArgumentException(esc_html__('Selected file is not an image.', 'dono-fundraising-platform'));
         }
         return $attachmentId;
     }
@@ -535,7 +535,7 @@ final class CampaignService
         ], true);
 
         if (is_wp_error($pageId)) {
-            throw new RuntimeException($pageId->get_error_message());
+            throw new RuntimeException(esc_html($pageId->get_error_message()));
         }
         return (int) $pageId;
     }

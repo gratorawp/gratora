@@ -228,10 +228,10 @@ final class FormService
             if ($raw !== '') {
                 $next = sanitize_title($raw);
                 if ($next === '') {
-                    throw new InvalidArgumentException(__('Invalid slug.', 'dono-fundraising-platform'));
+                    throw new InvalidArgumentException(esc_html__('Invalid slug.', 'dono-fundraising-platform'));
                 }
                 if ($next !== $form->slug && $this->forms->slugExists($next, $form->id)) {
-                    throw new InvalidArgumentException(__('Slug is already in use.', 'dono-fundraising-platform'));
+                    throw new InvalidArgumentException(esc_html__('Slug is already in use.', 'dono-fundraising-platform'));
                 }
                 $form->slug = $next;
             }
@@ -302,7 +302,7 @@ final class FormService
 
         if ($defaultFormId === (int) $form->id) {
             throw new InvalidArgumentException(
-                __('This form is the campaign default. Pick a different default form before deleting it.', 'dono-fundraising-platform')
+                esc_html__('This form is the campaign default. Pick a different default form before deleting it.', 'dono-fundraising-platform')
             );
         }
 
@@ -366,11 +366,11 @@ final class FormService
 
         $labels = array_map(fn (array $m): string => $m['label'], $missing);
         throw new InvalidArgumentException(
-            sprintf(
+            esc_html(sprintf(
                 /* translators: %s: comma-separated list of missing block labels (Amount, Name, Email). */
                 __('A published donation form needs these blocks: %s.', 'dono-fundraising-platform'),
                 implode(', ', $labels)
-            )
+            ))
         );
     }
 
@@ -383,11 +383,11 @@ final class FormService
     {
         $id = (int) ($idOrNull ?? 0);
         if ($id <= 0) {
-            throw new InvalidArgumentException(__('A campaign is required.', 'dono-fundraising-platform'));
+            throw new InvalidArgumentException(esc_html__('A campaign is required.', 'dono-fundraising-platform'));
         }
         $campaign = $this->campaigns->findById($id);
         if (! $campaign) {
-            throw new InvalidArgumentException(__('Campaign not found.', 'dono-fundraising-platform'));
+            throw new InvalidArgumentException(esc_html__('Campaign not found.', 'dono-fundraising-platform'));
         }
         return $campaign;
     }
@@ -461,10 +461,10 @@ final class FormService
             return;
         }
 
-        throw new InvalidArgumentException(sprintf(
+        throw new InvalidArgumentException(esc_html(sprintf(
             /* translators: %s: campaign title. */
             __('This is the default donation form for %s, so it cannot be moved. Make another form the default first.', 'dono-fundraising-platform'),
             $campaign->title
-        ));
+        )));
     }
 }

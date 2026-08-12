@@ -43,7 +43,7 @@ final class ModuleManager
         $id = $module->id();
 
         if (isset($this->modules[$id])) {
-            throw new RuntimeException("Dono module '{$id}' is already registered.");
+            throw new RuntimeException(esc_html("Dono module '{$id}' is already registered."));
         }
 
         $this->modules[$id] = $module;

@@ -195,6 +195,9 @@ final class ExportsController
             $server->send_header('Content-Type', $type);
             $server->send_header('Content-Disposition', 'attachment; filename="' . $filename . '"');
             $server->send_header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+            // Bytes of a file being downloaded, sent under their own Content-Type
+            // header. Escaping them would corrupt the document.
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
             echo $body;
             return true;
         }, 10, 4);

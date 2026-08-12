@@ -17,20 +17,29 @@ $formatValue = static function (int $value, string $type, string $currency): str
     return (string) number_format_i18n($value);
 };
 ?>
-<section <?php echo get_block_wrapper_attributes(array_filter([
+<section <?php
+// Core escapes these attributes; its own blocks print them the same way.
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+echo get_block_wrapper_attributes(array_filter([
     'class' => 'dono-block dono-block--progress is-align-' . $align,
     'style' => $styleVars,
-])); ?> data-block="dono/campaign-progress">
+]));
+// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+?> data-block="dono/campaign-progress">
     <?php if ($showLabels): ?>
         <div class="dono-progress__labels">
             <div class="dono-progress__current">
-                <span class="dono-progress__value"><?php echo esc_html($formatValue($current, $goalType, $currency)); ?></span>
+                <span class="dono-progress__value"><?php echo esc_html($formatValue($current, $goalType, $currency));
+// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+?></span>
                 <span class="dono-progress__caption">
                     <?php echo esc_html(match ($goalType) {
                         'donations' => __('donations', 'dono-fundraising-platform'),
                         'donors'    => __('donors', 'dono-fundraising-platform'),
                         default     => __('raised', 'dono-fundraising-platform'),
-                    }); ?>
+                    });
+// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+?>
                 </span>
             </div>
             <?php if ($target > 0): ?>
@@ -40,14 +49,20 @@ $formatValue = static function (int $value, string $type, string $currency): str
                         __('%1$d%% of %2$s goal', 'dono-fundraising-platform'),
                         $pct,
                         $formatValue($target, $goalType, $currency)
-                    )); ?>
+                    ));
+// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+?>
                 </div>
             <?php endif; ?>
         </div>
     <?php endif; ?>
     <div class="dono-progress__bar" role="progressbar"
-         aria-valuenow="<?php echo esc_attr((string) $pct); ?>"
+         aria-valuenow="<?php echo esc_attr((string) $pct);
+// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+?>"
          aria-valuemin="0" aria-valuemax="100">
-        <div class="dono-progress__bar-fill" style="width: <?php echo esc_attr((string) $pct); ?>%;"></div>
+        <div class="dono-progress__bar-fill" style="width: <?php echo esc_attr((string) $pct);
+// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+?>%;"></div>
     </div>
 </section>

@@ -48,11 +48,11 @@ final class RecurringCanceller
         // marks the plan cancelled, emails the donor to say so, and leaves the
         // card charged every month with the renewals no longer even handled.
         if ($gateway === null) {
-            throw new GatewayUnreachable(sprintf(
+            throw new GatewayUnreachable(esc_html(sprintf(
                 'Cannot cancel plan %d: the %s gateway is not available, so its subscription would keep billing.',
                 (int) $plan->id,
                 (string) $plan->gateway
-            ));
+            )));
         }
 
         // cancelSubscription is idempotent per its contract.

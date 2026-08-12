@@ -379,6 +379,8 @@ final class DonorsController
             $server->send_header('Content-Type', 'text/csv; charset=utf-8');
             $server->send_header('Content-Disposition', 'attachment; filename="' . $filename . '"');
             $server->send_header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+            // The body of a file being downloaded, sent under its own Content-Type. Escaping it would corrupt the document.
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
             echo $csv;
             return true;
         }, 10, 4);
@@ -481,6 +483,8 @@ final class DonorsController
             $server->send_header('Content-Disposition', 'attachment; filename="' . $filename . '"');
             $server->send_header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
 
+            // The body of a file being downloaded, sent under its own Content-Type. Escaping it would corrupt the document.
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
             echo $json;
             return true;
         }, 10, 4);

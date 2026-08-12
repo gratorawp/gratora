@@ -54,7 +54,7 @@ $unitLabel = match ($goalType) {
             <span class="dono-goal__donors">
                 <?php
                 /* translators: %d number of donors */
-                printf(esc_html(_n('%d donor', '%d donors', $donorsCount, 'dono-fundraising-platform')), $donorsCount);
+                printf(esc_html(_n('%d donor', '%d donors', $donorsCount, 'dono-fundraising-platform')), (int) $donorsCount);
                 ?>
             </span>
         <?php endif; ?>
@@ -64,7 +64,7 @@ $unitLabel = match ($goalType) {
                 <?php
                 $days = max(0, (int) floor((strtotime((string) $endsAt) - time()) / 86400));
                 /* translators: %d days remaining */
-                printf(esc_html(_n('%d day left', '%d days left', $days, 'dono-fundraising-platform')), $days);
+                printf(esc_html(_n('%d day left', '%d days left', $days, 'dono-fundraising-platform')), (int) $days);
                 ?>
             </span>
         <?php endif; ?>

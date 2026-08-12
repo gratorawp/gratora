@@ -908,10 +908,10 @@ final class DonationService
         ?array $metadata = null
     ): Refund {
         if ($amountCents <= 0) {
-            throw new RuntimeException("Invalid external refund amount: {$amountCents}.");
+            throw new RuntimeException(esc_html("Invalid external refund amount: {$amountCents}."));
         }
         if ($gatewayRefundId === '') {
-            throw new RuntimeException('External refund missing gateway_refund_id; cannot dedup.');
+            throw new RuntimeException(esc_html('External refund missing gateway_refund_id; cannot dedup.'));
         }
 
         // Redelivered webhook: idempotent return.
@@ -924,7 +924,7 @@ final class DonationService
 
         if ($donation->status !== 'paid' && $donation->status !== 'partial_refund') {
             throw new RuntimeException(
-                "Donation {$donation->reference} not refundable locally (status: {$donation->status})."
+                esc_html("Donation {$donation->reference} not refundable locally (status: {$donation->status}).")
             );
         }
 
@@ -950,7 +950,7 @@ final class DonationService
         }
         if ($amountCents <= 0) {
             throw new RuntimeException(
-                "External refund for {$donation->reference} exceeds the refundable balance."
+                esc_html("External refund for {$donation->reference} exceeds the refundable balance.")
             );
         }
 
@@ -972,7 +972,7 @@ final class DonationService
                 ->increment('refunded_cents', (int) $amountCents);
             if ($reserved->affectedRows < 1) {
                 throw new RuntimeException(
-                    "External refund for {$donation->reference} exceeds the refundable balance."
+                    esc_html("External refund for {$donation->reference} exceeds the refundable balance.")
                 );
             }
             $newTotal = (int) (DB::table('dono_donations')
@@ -1084,7 +1084,7 @@ final class DonationService
                 ->increment('refunded_cents', -$amount);
             if ($released->affectedRows < 1) {
                 throw new RuntimeException(
-                    "Cannot reverse refund on {$donation->reference}: the refunded total is already below it."
+                    esc_html("Cannot reverse refund on {$donation->reference}: the refunded total is already below it.")
                 );
             }
 
@@ -1147,7 +1147,7 @@ final class DonationService
         string $initiatedBy = 'admin'
     ): Refund {
         if ($donation->status !== 'paid' && $donation->status !== 'partial_refund') {
-            throw new RuntimeException("Donation {$donation->reference} is not refundable (status: {$donation->status}).");
+            throw new RuntimeException(esc_html("Donation {$donation->reference} is not refundable (status: {$donation->status})."));
         }
 
         $alreadyRefunded = (int) Refund::query()
@@ -1158,20 +1158,20 @@ final class DonationService
         $maxRefundable = max(0, $donation->amount_cents - $alreadyRefunded);
         if ($amountCents <= 0 || $amountCents > $maxRefundable) {
             throw new RuntimeException(
-                "Invalid refund amount: {$amountCents}. Available to refund: {$maxRefundable} cents."
+                esc_html("Invalid refund amount: {$amountCents}. Available to refund: {$maxRefundable} cents.")
             );
         }
 
         $gateway = $this->gateways->get($donation->gateway);
         if (! $gateway) {
-            throw new RuntimeException("Gateway '{$donation->gateway}' is no longer registered; cannot refund.");
+            throw new RuntimeException(esc_html("Gateway '{$donation->gateway}' is no longer registered; cannot refund."));
         }
 
         // Gateway call runs before the transaction: money moves before the local
         // write. If the local write fails, state is stale until a webhook re-syncs it.
         $result = $gateway->refund($donation, $amountCents, $reason);
         if (! $result->success) {
-            throw new RuntimeException($result->error ?? 'Gateway refund failed.');
+            throw new RuntimeException(esc_html($result->error ?? 'Gateway refund failed.'));
         }
 
         // The charge.refunded webhook records the same gateway refund and can win
@@ -1205,7 +1205,7 @@ final class DonationService
                 ->increment('refunded_cents', $recordedCents);
             if ($reserved->affectedRows < 1) {
                 throw new RuntimeException(
-                    "Refund for {$donation->reference} exceeds the refundable balance."
+                    esc_html("Refund for {$donation->reference} exceeds the refundable balance.")
                 );
             }
             $newTotal = (int) (DB::table('dono_donations')

@@ -82,7 +82,7 @@ final class PayPalPlans
 
         $planId = (string) ($plan['id'] ?? '');
         if ($planId === '') {
-            throw new RuntimeException('PayPal did not return a plan id.');
+            throw new RuntimeException(esc_html('PayPal did not return a plan id.'));
         }
 
         $cached[$key] = $planId;
@@ -117,7 +117,7 @@ final class PayPalPlans
 
         $productId = (string) ($product['id'] ?? '');
         if ($productId === '') {
-            throw new RuntimeException('PayPal did not return a product id.');
+            throw new RuntimeException(esc_html('PayPal did not return a product id.'));
         }
 
         $stored[$key] = $productId;

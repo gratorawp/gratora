@@ -21,7 +21,7 @@ final class GatewayManager
     {
         $id = $gateway->id();
         if (isset($this->gateways[$id])) {
-            throw new RuntimeException("Gateway '{$id}' is already registered.");
+            throw new RuntimeException(esc_html("Gateway '{$id}' is already registered."));
         }
         $this->gateways[$id] = $gateway;
     }
@@ -37,7 +37,7 @@ final class GatewayManager
     {
         $g = $this->get($id);
         if (! $g) {
-            throw new RuntimeException("Gateway '{$id}' is not registered.");
+            throw new RuntimeException(esc_html("Gateway '{$id}' is not registered."));
         }
         return $g;
     }

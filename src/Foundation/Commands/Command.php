@@ -37,7 +37,7 @@ final class Command
         public readonly ?Closure $reverse = null,
     ) {
         if ($id === '') {
-            throw new InvalidArgumentException('Command id must not be empty.');
+            throw new InvalidArgumentException(esc_html('Command id must not be empty.'));
         }
     }
 }

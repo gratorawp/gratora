@@ -40,15 +40,15 @@ final class FundService
 
         $code = $this->normalizeCode((string) ($input['code'] ?? ''));
         if ($code === '') {
-            throw new InvalidArgumentException(__('A fund code is required.', 'dono-fundraising-platform'));
+            throw new InvalidArgumentException(esc_html__('A fund code is required.', 'dono-fundraising-platform'));
         }
         if ($this->funds->codeExists($code)) {
-            throw new InvalidArgumentException(__('Fund code is already in use.', 'dono-fundraising-platform'));
+            throw new InvalidArgumentException(esc_html__('Fund code is already in use.', 'dono-fundraising-platform'));
         }
 
         $name = trim((string) ($input['name'] ?? ''));
         if ($name === '') {
-            throw new InvalidArgumentException(__('A fund name is required.', 'dono-fundraising-platform'));
+            throw new InvalidArgumentException(esc_html__('A fund name is required.', 'dono-fundraising-platform'));
         }
 
         $fund = Fund::make();
@@ -89,10 +89,10 @@ final class FundService
         if (array_key_exists('code', $input)) {
             $code = $this->normalizeCode((string) $input['code']);
             if ($code === '') {
-                throw new InvalidArgumentException(__('A fund code is required.', 'dono-fundraising-platform'));
+                throw new InvalidArgumentException(esc_html__('A fund code is required.', 'dono-fundraising-platform'));
             }
             if ($code !== $fund->code && $this->funds->codeExists($code, (int) $fund->id)) {
-                throw new InvalidArgumentException(__('Fund code is already in use.', 'dono-fundraising-platform'));
+                throw new InvalidArgumentException(esc_html__('Fund code is already in use.', 'dono-fundraising-platform'));
             }
             $fund->code = $code;
         }
@@ -115,7 +115,7 @@ final class FundService
         // accepts it directly), so a lexicographic compare is enough.
         if ($fund->starts_at && $fund->ends_at && $fund->starts_at > $fund->ends_at) {
             throw new InvalidArgumentException(
-                __('Fund "Active from" date must be before "Active until".', 'dono-fundraising-platform')
+                esc_html__('Fund "Active from" date must be before "Active until".', 'dono-fundraising-platform')
             );
         }
 
@@ -127,7 +127,7 @@ final class FundService
             $next = (bool) $input['is_active'];
             if (! $next && $fund->is_default) {
                 throw new InvalidArgumentException(
-                    __('The default fund cannot be deactivated. Set another fund as default first.', 'dono-fundraising-platform')
+                    esc_html__('The default fund cannot be deactivated. Set another fund as default first.', 'dono-fundraising-platform')
                 );
             }
             $fund->is_active = $next;
@@ -152,7 +152,7 @@ final class FundService
             $next = (bool) $input['is_default'];
             if (! $next && $fund->is_default) {
                 throw new InvalidArgumentException(
-                    __('Set another fund as the default rather than clearing this one.', 'dono-fundraising-platform')
+                    esc_html__('Set another fund as the default rather than clearing this one.', 'dono-fundraising-platform')
                 );
             }
             $becomesDefault = $next && ! $fund->is_default;
@@ -189,12 +189,12 @@ final class FundService
     {
         if ($fund->is_default) {
             throw new RuntimeException(
-                __('The default fund cannot be deleted. Set another fund as default first.', 'dono-fundraising-platform')
+                esc_html__('The default fund cannot be deleted. Set another fund as default first.', 'dono-fundraising-platform')
             );
         }
         if ($this->hasChildren((int) $fund->id)) {
             throw new RuntimeException(
-                __('Reassign or remove the sub-funds under this fund before deleting it.', 'dono-fundraising-platform')
+                esc_html__('Reassign or remove the sub-funds under this fund before deleting it.', 'dono-fundraising-platform')
             );
         }
 
@@ -210,12 +210,12 @@ final class FundService
             $target = $this->funds->findById($reassignTo);
             if (! $target || (int) $target->id === (int) $fund->id) {
                 throw new InvalidArgumentException(
-                    __('Choose a different, existing fund to reassign donations to.', 'dono-fundraising-platform')
+                    esc_html__('Choose a different, existing fund to reassign donations to.', 'dono-fundraising-platform')
                 );
             }
             if (! $target->is_active) {
                 throw new InvalidArgumentException(
-                    __('Reassign donations to an active fund.', 'dono-fundraising-platform')
+                    esc_html__('Reassign donations to an active fund.', 'dono-fundraising-platform')
                 );
             }
 
@@ -341,20 +341,20 @@ final class FundService
         }
         $parentId = (int) $value;
         if ($selfId !== null && $parentId === $selfId) {
-            throw new InvalidArgumentException(__('A fund cannot be its own parent.', 'dono-fundraising-platform'));
+            throw new InvalidArgumentException(esc_html__('A fund cannot be its own parent.', 'dono-fundraising-platform'));
         }
         $parent = $this->funds->findById($parentId);
         if (! $parent) {
-            throw new InvalidArgumentException(__('Parent fund not found.', 'dono-fundraising-platform'));
+            throw new InvalidArgumentException(esc_html__('Parent fund not found.', 'dono-fundraising-platform'));
         }
         if ($parent->parent_fund_id !== null) {
             throw new InvalidArgumentException(
-                __('Funds nest only one level deep. Pick a top-level fund as the parent.', 'dono-fundraising-platform')
+                esc_html__('Funds nest only one level deep. Pick a top-level fund as the parent.', 'dono-fundraising-platform')
             );
         }
         if ($selfId !== null && $this->hasChildren($selfId)) {
             throw new InvalidArgumentException(
-                __('This fund has sub-funds, so it cannot also become a sub-fund.', 'dono-fundraising-platform')
+                esc_html__('This fund has sub-funds, so it cannot also become a sub-fund.', 'dono-fundraising-platform')
             );
         }
         return $parentId;

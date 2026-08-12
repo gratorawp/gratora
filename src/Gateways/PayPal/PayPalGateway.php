@@ -188,7 +188,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
 
         $orderId = (string) ($order['id'] ?? '');
         if ($orderId === '') {
-            throw new RuntimeException('PayPal did not return an order id.');
+            throw new RuntimeException(esc_html('PayPal did not return an order id.'));
         }
 
         $donation->gateway_account_id = $this->account->clientIdFor((bool) $donation->is_test);
@@ -1050,7 +1050,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
 
         $subId = (string) $plan->gateway_subscription_id;
         if ($subId === '') {
-            throw new RuntimeException(__('This donation has no PayPal subscription.', 'dono-fundraising-platform'));
+            throw new RuntimeException(esc_html__('This donation has no PayPal subscription.', 'dono-fundraising-platform'));
         }
 
         // Same plan id, so nothing about the schedule or the amount changes:
@@ -1077,7 +1077,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
             }
         }
 
-        throw new RuntimeException(__('PayPal did not return a link for changing the payment method.', 'dono-fundraising-platform'));
+        throw new RuntimeException(esc_html__('PayPal did not return a link for changing the payment method.', 'dono-fundraising-platform'));
     }
 
     /**
@@ -1129,7 +1129,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
 
         if ($approveUrl !== '') {
             throw new SubscriptionChangeNeedsApproval(
-                'PayPal needs the donor to approve this change before it takes effect.',
+                esc_html('PayPal needs the donor to approve this change before it takes effect.'),
                 $approveUrl
             );
         }

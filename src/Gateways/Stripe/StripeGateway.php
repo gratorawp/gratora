@@ -698,21 +698,21 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     public function retrySubscriptionCreation(Donation $donation): RecurringPlan
     {
         if (! FrequencyMap::isRecurring($donation->frequency)) {
-            throw new RuntimeException("Donation {$donation->reference} is not recurring; nothing to convert.");
+            throw new RuntimeException(esc_html("Donation {$donation->reference} is not recurring; nothing to convert."));
         }
         if ($donation->recurring_plan_id) {
-            throw new RuntimeException("Donation {$donation->reference} already has a recurring plan.");
+            throw new RuntimeException(esc_html("Donation {$donation->reference} already has a recurring plan."));
         }
         // A refunded or reversed PaymentIntent keeps its customer and
         // payment_method, so the Stripe chain below would happily start billing
         // a donor whose money has already gone back.
         if (! in_array((string) $donation->status, ['paid', 'partial_refund'], true)) {
             throw new RuntimeException(
-                "Donation {$donation->reference} is {$donation->status}; only a donation still paid for owes a schedule."
+                esc_html("Donation {$donation->reference} is {$donation->status}; only a donation still paid for owes a schedule.")
             );
         }
         if (! $donation->gateway_intent_id) {
-            throw new RuntimeException("Donation {$donation->reference} has no gateway intent to re-read.");
+            throw new RuntimeException(esc_html("Donation {$donation->reference} has no gateway intent to re-read."));
         }
 
         $this->account->useTestMode((bool) $donation->is_test);
@@ -728,7 +728,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         $plan = $planId > 0 ? RecurringPlan::query()->find('id', $planId) : null;
         if (! $plan) {
             // Linked but unreadable, so the retry endpoint returns a 502.
-            throw new RuntimeException("Retry succeeded but plan row could not be re-read for donation {$donation->reference}.");
+            throw new RuntimeException(esc_html("Retry succeeded but plan row could not be re-read for donation {$donation->reference}."));
         }
         return $plan;
     }
@@ -795,7 +795,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         ]);
         $id       = (string) ($customer['id'] ?? '');
         if ($id === '') {
-            throw new RuntimeException('Stripe customer creation returned no id.');
+            throw new RuntimeException(esc_html('Stripe customer creation returned no id.'));
         }
         return $id;
     }
@@ -820,12 +820,12 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         $paymentMethodId = (string) ($piIntent['payment_method'] ?? '');
 
         if ($customerId === '' || $paymentMethodId === '') {
-            throw new RuntimeException(sprintf(
+            throw new RuntimeException(esc_html(sprintf(
                 'Cannot convert donation %s to a subscription: customer=%s, payment_method=%s',
                 $donation->reference,
                 $customerId === '' ? 'missing' : 'ok',
                 $paymentMethodId === '' ? 'missing' : 'ok'
-            ));
+            )));
         }
 
         // The customer's default, so the subscription bills against the same
@@ -946,7 +946,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
 
         $productId = (string) ($product['id'] ?? '');
         if ($productId === '') {
-            throw new RuntimeException('Stripe product creation returned no id.');
+            throw new RuntimeException(esc_html('Stripe product creation returned no id.'));
         }
 
         $stripe[$key]    = $productId;
@@ -1298,7 +1298,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             }
         }
         if ($customerId === '') {
-            throw new RuntimeException(__('This donation has no Stripe customer to attach a card to.', 'dono-fundraising-platform'));
+            throw new RuntimeException(esc_html__('This donation has no Stripe customer to attach a card to.', 'dono-fundraising-platform'));
         }
 
         $intent = $this->api->post('/setup_intents', [
@@ -1309,7 +1309,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
 
         $secret = (string) ($intent['client_secret'] ?? '');
         if ($secret === '') {
-            throw new RuntimeException(__('Stripe did not return a setup secret.', 'dono-fundraising-platform'));
+            throw new RuntimeException(esc_html__('Stripe did not return a setup secret.', 'dono-fundraising-platform'));
         }
 
         return PaymentMethodUpdate::inline(
@@ -1332,12 +1332,12 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
 
         $token = trim($token);
         if ($token === '') {
-            throw new RuntimeException(__('No payment method was supplied.', 'dono-fundraising-platform'));
+            throw new RuntimeException(esc_html__('No payment method was supplied.', 'dono-fundraising-platform'));
         }
 
         $subId = (string) $plan->gateway_subscription_id;
         if ($subId === '') {
-            throw new RuntimeException(__('This plan has no Stripe subscription.', 'dono-fundraising-platform'));
+            throw new RuntimeException(esc_html__('This plan has no Stripe subscription.', 'dono-fundraising-platform'));
         }
 
         $sub = $this->api->get('/subscriptions/' . rawurlencode($subId));
@@ -1369,7 +1369,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         $this->account->useTestMode((bool) $plan->is_test);
         $subId = (string) $plan->gateway_subscription_id;
         if ($subId === '') {
-            throw new PaymentRetryUnavailable(__('This plan never reached Stripe, so there is nothing to collect.', 'dono-fundraising-platform'));
+            throw new PaymentRetryUnavailable(esc_html__('This plan never reached Stripe, so there is nothing to collect.', 'dono-fundraising-platform'));
         }
 
         $sub = $this->api->get('/subscriptions/' . rawurlencode($subId));
@@ -1379,7 +1379,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             ? (string) ($sub['latest_invoice']['id'] ?? '')
             : (string) ($sub['latest_invoice'] ?? '');
         if ($invoiceId === '') {
-            throw new PaymentRetryUnavailable(__('Stripe has no invoice outstanding on this subscription.', 'dono-fundraising-platform'));
+            throw new PaymentRetryUnavailable(esc_html__('Stripe has no invoice outstanding on this subscription.', 'dono-fundraising-platform'));
         }
 
         $invoice = $this->api->get('/invoices/' . rawurlencode($invoiceId));
@@ -1389,11 +1389,11 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         // paid, void and uncollectible are settled one way or another, so an
         // attempt would either error or silently do nothing.
         if ($status !== 'open') {
-            throw new PaymentRetryUnavailable(sprintf(
+            throw new PaymentRetryUnavailable(esc_html(sprintf(
                 /* translators: %s: the Stripe invoice status, e.g. paid. */
                 __('Nothing to collect: the latest invoice is %s.', 'dono-fundraising-platform'),
                 $status !== '' ? $status : __('unavailable', 'dono-fundraising-platform')
-            ));
+            )));
         }
 
         $this->api->post('/invoices/' . rawurlencode($invoiceId) . '/pay', []);
@@ -1467,14 +1467,14 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         $this->account->useTestMode((bool) $plan->is_test);
         $subId = (string) $plan->gateway_subscription_id;
         if ($subId === '') return;
-        if ($amountCents <= 0) throw new RuntimeException('Amount must be positive.');
+        if ($amountCents <= 0) throw new RuntimeException(esc_html('Amount must be positive.'));
 
         // Stripe Prices are immutable, so a new one is minted and swapped onto
         // the subscription's first item.
         $sub = $this->api->get('/subscriptions/' . rawurlencode($subId));
         $items = is_array($sub['items']['data'] ?? null) ? $sub['items']['data'] : [];
         if (empty($items)) {
-            throw new RuntimeException('Stripe subscription has no items to update.');
+            throw new RuntimeException(esc_html('Stripe subscription has no items to update.'));
         }
         $itemId = (string) ($items[0]['id'] ?? '');
         $oldPrice = $items[0]['price'] ?? [];
@@ -1484,7 +1484,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         $currency = strtolower((string) ($oldPrice['currency'] ?? strtolower($plan->currency)));
 
         if ($itemId === '' || $productId === '') {
-            throw new RuntimeException('Stripe subscription item is missing required fields.');
+            throw new RuntimeException(esc_html('Stripe subscription item is missing required fields.'));
         }
 
         $newPrice = $this->api->post('/prices', [
@@ -1498,7 +1498,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         ]);
         $newPriceId = (string) ($newPrice['id'] ?? '');
         if ($newPriceId === '') {
-            throw new RuntimeException('Stripe price creation returned no id.');
+            throw new RuntimeException(esc_html('Stripe price creation returned no id.'));
         }
 
         // Proration off: this changes future renewals only, so there is no

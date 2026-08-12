@@ -59,7 +59,7 @@ final class Container
         }
 
         if (! isset($this->bindings[$id])) {
-            throw new RuntimeException("Dono container: no binding registered for {$id}");
+            throw new RuntimeException(esc_html("Dono container: no binding registered for {$id}"));
         }
 
         $instance = ($this->bindings[$id])($this);

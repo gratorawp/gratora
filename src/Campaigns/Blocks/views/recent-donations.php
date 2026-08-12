@@ -10,13 +10,20 @@ defined('ABSPATH') || exit;
  * @var string $styleVars
  */
 ?>
-<section <?php echo get_block_wrapper_attributes(array_filter([
+<section <?php
+// Core escapes these attributes; its own blocks print them the same way.
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+echo get_block_wrapper_attributes(array_filter([
     'class' => 'dono-block dono-block--recent-donations',
     'style' => $styleVars,
-])); ?>
+]));
+// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+?>
          data-block="dono/recent-donations">
     <?php if ($title !== ''): ?>
-        <h3 class="dono-block__title"><?php echo esc_html($title); ?></h3>
+        <h3 class="dono-block__title"><?php echo esc_html($title);
+// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+?></h3>
     <?php endif; ?>
 
     <?php if (! $entries): ?>
@@ -29,11 +36,15 @@ defined('ABSPATH') || exit;
                     <div class="dono-recent-donations__content">
                         <div class="dono-recent-donations__header">
                             <span class="dono-recent-donations__name<?php echo $entry['is_anonymous'] ? ' is-anonymous' : ''; ?>">
-                                <?php echo esc_html($entry['name']); ?>
+                                <?php echo esc_html($entry['name']);
+// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+?>
                             </span>
                             <?php if ($showAmount): ?>
                                 <span class="dono-recent-donations__amount">
-                                    <?php echo esc_html(\Dono\Foundation\Helpers\Money::format($entry['amount_cents'], $entry['currency'], true)); ?>
+                                    <?php echo esc_html(\Dono\Foundation\Helpers\Money::format($entry['amount_cents'], $entry['currency'], true));
+// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+?>
                                 </span>
                             <?php endif; ?>
                         </div>
@@ -41,13 +52,19 @@ defined('ABSPATH') || exit;
                             <div class="dono-recent-donations__meta">
                                 <?php if ($showTime): ?>
                                     <time class="dono-recent-donations__time"
-                                          datetime="<?php echo esc_attr($entry['paid_at_iso']); ?>">
-                                        <?php echo esc_html($entry['time_ago']); ?>
+                                          datetime="<?php echo esc_attr($entry['paid_at_iso']);
+// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+?>">
+                                        <?php echo esc_html($entry['time_ago']);
+// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+?>
                                     </time>
                                 <?php endif; ?>
                                 <?php if ($showMessage && $entry['message'] !== ''): ?>
                                     <blockquote class="dono-recent-donations__message">
-                                        <?php echo esc_html($entry['message']); ?>
+                                        <?php echo esc_html($entry['message']);
+// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+?>
                                     </blockquote>
                                 <?php endif; ?>
                             </div>
