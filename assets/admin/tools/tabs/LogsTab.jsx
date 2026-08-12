@@ -166,7 +166,6 @@ export default function LogsTab( { active, setNotice } ) {
 
     const total     = log?.total || 0;
     const items     = log?.items || [];
-    const retention = Number( log?.retention_days ) || 0;
     const filtered  = !! source || !! status;
 
     const sources = useMemo( () => log?.sources || [], [ log ] );
@@ -239,19 +238,6 @@ export default function LogsTab( { active, setNotice } ) {
         [ total, view.perPage ]
     );
 
-    const sub = retention > 0
-        ? sprintf(
-            /* translators: %d: number of days entries are kept. */
-            _n(
-                'What Dono could not finish and what your gateways sent this site. Entries are removed after %d day.',
-                'What Dono could not finish and what your gateways sent this site. Entries are removed after %d days.',
-                retention,
-                'dono'
-            ),
-            retention
-        )
-        : __( 'What Dono could not finish and what your gateways sent this site.', 'dono' );
-
     // Nothing at all has no filter to widen and no source to pick, so the table
     // has nothing to offer. A filtered miss keeps it: the chips are the only way
     // back to the rest of the log.
@@ -259,21 +245,18 @@ export default function LogsTab( { active, setNotice } ) {
 
     return (
         <div className="dono-panel">
-            <div className="dono-tools-loghead">
-                <p className="dono-tools-note" style={ { margin: 0 } }>{ sub }</p>
-                <div className="dono-tools-logbar">
-                    <Btn variant="secondary" onClick={ load } disabled={ loading }>
-                        { __( 'Refresh', 'dono' ) }
-                    </Btn>
-                    <Btn
-                        variant="secondary"
-                        onClick={ askClear }
-                        disabled={ clearing || total === 0 }
-                        isBusy={ clearing }
-                    >
-                        { __( 'Clear log', 'dono' ) }
-                    </Btn>
-                </div>
+            <div className="dono-tools-logbar">
+                <Btn variant="secondary" onClick={ load } disabled={ loading }>
+                    { __( 'Refresh', 'dono' ) }
+                </Btn>
+                <Btn
+                    variant="secondary"
+                    onClick={ askClear }
+                    disabled={ clearing || total === 0 }
+                    isBusy={ clearing }
+                >
+                    { __( 'Clear log', 'dono' ) }
+                </Btn>
             </div>
 
             { error ? (
@@ -300,12 +283,6 @@ export default function LogsTab( { active, setNotice } ) {
                         getItemId={ ( item ) => String( item.id ) }
                     />
                 </div>
-            ) }
-
-            { ! error && !! items.length && (
-                <p className="dono-tools-note">
-                    { __( 'A delivery marked as needing no action is normal: gateways send every event they have, and Dono acts only on the ones it needs. Request bodies are not kept, because they carry the donor details the gateway sent.', 'dono' ) }
-                </p>
             ) }
 
             { detail && (
