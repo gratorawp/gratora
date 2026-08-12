@@ -5,6 +5,7 @@ import { addQueryArgs } from '@wordpress/url';
 import { __, _n, sprintf } from '@wordpress/i18n';
 
 import Btn from '../../_shared/components/Btn';
+import { formatDate } from '../../donations/format';
 import ConfirmDialog from '../../_shared/components/ConfirmDialog';
 import Dialog from '../../_shared/components/Dialog';
 
@@ -15,11 +16,6 @@ const ORDER_BY = {
     occurred_at: 'occurred_at',
     source:      'type',
 };
-
-function formatWhen( iso ) {
-    const d = new Date( ( iso || '' ).replace( ' ', 'T' ) + 'Z' );
-    return isNaN( d ) ? '' : d.toLocaleString();
-}
 
 // The source filter offers whole types, and a row carries its family stripped
 // off, so the cell and the filter value are built back up to the same string.
@@ -69,6 +65,16 @@ export default function LogsTab( { active, setNotice } ) {
         sort:    { field: 'occurred_at', direction: 'desc' },
         filters: [],
         fields:  [ 'occurred_at', 'source', 'message', 'outcome' ],
+        // Keyed by field id rather than by position, so hiding or reordering a
+        // column cannot hand the width to a different one. Message takes what
+        // the others do not need: it is the column somebody came to read.
+        layout:  {
+            styles: {
+                occurred_at: { width: '180px' },
+                source:      { width: '180px' },
+                outcome:     { width: '150px' },
+            },
+        },
     } );
 
     const [ log, setLog ]           = useState( null );
@@ -177,7 +183,7 @@ export default function LogsTab( { active, setNotice } ) {
             enableSorting: true,
             enableHiding:  false,
             getValue:      ( { item } ) => item.occurred_at || '',
-            render:        ( { item } ) => formatWhen( item.occurred_at ),
+            render:        ( { item } ) => formatDate( item.occurred_at ),
         },
         {
             id:            'source',
@@ -214,12 +220,9 @@ export default function LogsTab( { active, setNotice } ) {
                 if ( item.kind === 'webhook' ) {
                     return <Pill { ...deliveryOutcome( item ) } />;
                 }
-                if ( item.kind === 'error' ) {
-                    return <Pill tone="red" label={ __( 'Could not finish', 'dono' ) } />;
-                }
-
-                // What happened is a record, not a verdict.
-                return <span className="dono-row__sub">-</span>;
+                // An error is a failure by definition: a pill on every one of
+                // them says nothing the source has not already said.
+                return null;
             },
         },
     ], [ sources ] );
@@ -298,7 +301,7 @@ export default function LogsTab( { active, setNotice } ) {
                 >
                     <div className="dono-log__detail-head">
                         <code className="dono-log__source">{ fullType( detail ) }</code>
-                        <span className="dono-row__sub">{ formatWhen( detail.occurred_at ) }</span>
+                        <span className="dono-row__sub">{ formatDate( detail.occurred_at ) }</span>
                     </div>
                     <div className="dono-log__message">{ detail.message }</div>
                     <pre className="dono-log__context">{ JSON.stringify( detail.context, null, 2 ) }</pre>

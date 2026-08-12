@@ -280,3 +280,50 @@
 
     &__errors { color: #b91c1c; }
 }
+
+// The log table. Without widths the message, which is the column somebody came
+// to read, is squeezed to a few characters while the timestamp takes a third of
+// the row.
+.dono-log {
+    &__when {
+        white-space: nowrap;
+    }
+
+    &__source {
+        display: inline-block;
+        padding: 2px 6px;
+        border-radius: 4px;
+        background: var(--dono-color-surface-2, #f3f4f6);
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    &__message {
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    &__message-sub {
+        margin-top: 2px;
+        white-space: normal;
+    }
+
+    &__detail-head {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+
+    &__context {
+        margin: 8px 0 0;
+        padding: 12px;
+        border-radius: 6px;
+        background: var(--dono-color-surface-2, #f3f4f6);
+        font-size: 12px;
+        overflow-x: auto;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+    }
+}
+
