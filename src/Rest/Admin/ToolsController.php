@@ -17,6 +17,7 @@ use Dono\Foundation\Transfer\DataImporter;
 use Dono\Foundation\Upgrade\UpgradeRunner;
 use Dono\Donations\AggregateSyncer;
 use Dono\Donors\Donor;
+use Dono\Donors\DonorRetention;
 use Dono\Forms\Form;
 use Dono\Foundation\Auth\Capabilities;
 use Dono\Funds\Fund;
@@ -666,7 +667,7 @@ final class ToolsController
         // A real run brings in years of history, so the retention sweep waits
         // rather than acting on it that night.
         if (! $dryRun && ($result['imported'] ?? 0) > 0) {
-            \Dono\Donors\DonorRetention::deferBy();
+            DonorRetention::deferBy();
         }
 
         return new WP_REST_Response($result, 200);
@@ -683,7 +684,7 @@ final class ToolsController
         $records = null;
         if (is_array($body['tables'] ?? null)) {
             $records = $this->importer->import($body);
-            \Dono\Donors\DonorRetention::deferBy();
+            DonorRetention::deferBy();
         }
 
         $settings = is_array($body['settings'] ?? null) ? $body['settings'] : null;
@@ -694,6 +695,8 @@ final class ToolsController
 
             return new \WP_Error('dono_invalid_import', __('No settings payload found.', 'dono'), ['status' => 422]);
         }
+
+        $erasureWasOn = self::erasureIsOn();
 
         $applied = 0;
         foreach (self::SETTINGS_OPTIONS as $opt) {
@@ -715,6 +718,14 @@ final class ToolsController
             $applied++;
         }
 
+        // A file can carry automatic erasure switched on, and it lands by
+        // option write rather than through the settings screen, so the screen's
+        // own re-arm never sees it. Without this, restoring a backup onto a
+        // site whose activation stamp is months past sweeps that same night.
+        if (! $erasureWasOn && self::erasureIsOn()) {
+            DonorRetention::deferBy();
+        }
+
         if (isset($settings['dono_roles']['mapping']) && is_array($settings['dono_roles']['mapping'])) {
             Capabilities::applyMapping($settings['dono_roles']['mapping']);
         }
@@ -725,6 +736,19 @@ final class ToolsController
             'imported' => $records !== null,
             'records'  => $records,
         ], 200);
+    }
+
+    /**
+     * Read the way the sweep itself reads it, straight off the option, so the
+     * two cannot disagree about whether erasure is armed.
+     *
+     * @since 1.0.0
+     */
+    private static function erasureIsOn(): bool
+    {
+        $privacy = get_option('dono_privacy', []);
+
+        return is_array($privacy) && ! empty($privacy['erase_inactive_donors']);
     }
 
     /** @since 1.0.0 */

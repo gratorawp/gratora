@@ -372,7 +372,8 @@ final class CoreModule implements DonoModule
         $c->bind(FxRates::class, fn () => new FxRates());
         (new FxRatesUpdater($c->get(AsyncDispatcher::class)))->register();
 
-        // GDPR retention: donor PII wiped after inactivity, events pruned by age.
+        // GDPR retention: donor PII wiped after inactivity where the org has
+        // switched that on, events pruned by age.
         // DonorRetention bound further down once DonorService exists.
         (new EventRetention($c->get(AsyncDispatcher::class)))->register();
         $c->bind(DonorRetention::class, fn (Container $c) => new DonorRetention(

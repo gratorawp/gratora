@@ -145,6 +145,30 @@ final class DonorPurgeTest extends IntegrationTestCase
         $this->assertNull($shell->flags);
     }
 
+    /**
+     * The window sits outside the automatic-erasure switch on purpose: it
+     * applies to every redaction, and a donor deleting their own account or an
+     * admin redacting by hand both happen on a site that never switched the
+     * nightly sweep on.
+     */
+    public function test_the_window_still_governs_a_hand_redaction_while_automatic_erasure_is_off(): void
+    {
+        update_option('dono_privacy', [
+            'erase_inactive_donors'          => false,
+            'retention_days_after_redaction' => 30,
+        ]);
+
+        $donor = $this->redactedDonor();
+        $this->backdateRedaction((int) $donor->id, 31);
+
+        $this->purger()->run();
+
+        $this->assertNotNull(Donor::query()->find('id', (int) $donor->id)->purged_at, 'the window still closes');
+
+        $back = $this->service()->findOrCreate(self::EMAIL, [], true);
+        $this->assertNotSame((int) $donor->id, (int) $back->id, 'and the handle is gone with it');
+    }
+
     /** Nothing here may touch a donor who was never redacted. */
     public function test_a_live_donor_is_never_purged(): void
     {

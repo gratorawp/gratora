@@ -49,6 +49,37 @@ final class SettingsInputTest extends IntegrationTestCase
         $this->assertTrue($after['anonymize_ips']);
     }
 
+    /**
+     * The panel writes a real boolean over REST, and the sweep reads the stored
+     * value with empty(). A "0" or "" stored as a string would read as off, but
+     * a "false" would read as on, so the declared type is what keeps them agreed.
+     */
+    public function test_the_erasure_switch_ships_off_and_stores_as_a_boolean(): void
+    {
+        $svc = $this->service();
+
+        $this->assertFalse($svc->get('privacy')['erase_inactive_donors'], 'nothing erases automatically until asked');
+
+        $this->assertTrue($svc->update('privacy', ['erase_inactive_donors' => '1'])['erase_inactive_donors']);
+        $this->assertFalse($svc->update('privacy', ['erase_inactive_donors' => ''])['erase_inactive_donors']);
+    }
+
+    /**
+     * The years box is cleared to be retyped, and the panel sends the cleared
+     * box as null rather than picking a number nobody typed. A window of
+     * nothing erases nobody, which is the direction a half-finished edit has to
+     * fall on the one setting that destroys donor records.
+     */
+    public function test_a_cleared_retention_window_stores_as_no_window(): void
+    {
+        $svc = $this->service();
+        $svc->update('privacy', ['erase_inactive_donors' => true, 'donor_retention_years' => 7]);
+
+        $after = $svc->update('privacy', ['donor_retention_years' => null]);
+
+        $this->assertSame(0, $after['donor_retention_years']);
+    }
+
     public function test_a_shape_mismatch_is_refused_rather_than_coerced(): void
     {
         // Casting an array to a string produces nonsense that then looks like a

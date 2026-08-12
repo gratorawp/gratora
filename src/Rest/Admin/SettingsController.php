@@ -34,20 +34,26 @@ final class SettingsController
     /** @since 1.0.0 */
     public function retentionPreview(WP_REST_Request $request): WP_REST_Response
     {
-        return new WP_REST_Response($this->retention->preview((int) $request['days']), 200);
+        $years = $request['years'] === null ? null : (int) $request['years'];
+
+        return new WP_REST_Response($this->retention->preview((int) $request['days'], $years), 200);
     }
 
     /** @since 1.0.0 */
     public function registerRoutes(): void
     {
         // Read-only, and deliberately not part of the privacy group: it is a
-        // count of what the retention sweep would take, not a setting.
+        // count of what the retention sweep would take, not a setting. Omitting
+        // years asks about the window in force; sending one asks about a window
+        // the panel is still choosing, which is when the count can still stop
+        // someone.
         register_rest_route(self::NAMESPACE, '/admin/settings/retention-preview', [
             'methods'             => WP_REST_Server::READABLE,
             'callback'            => [$this, 'retentionPreview'],
             'permission_callback' => [$this, 'canAccess'],
             'args'                => [
-                'days' => ['type' => 'integer', 'default' => 30, 'minimum' => 1, 'maximum' => 365],
+                'days'  => ['type' => 'integer', 'default' => 30, 'minimum' => 1, 'maximum' => 365],
+                'years' => ['type' => 'integer', 'minimum' => 0, 'maximum' => 100],
             ],
         ]);
 

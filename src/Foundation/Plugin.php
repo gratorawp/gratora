@@ -182,9 +182,9 @@ final class Plugin
             Capabilities::currentMapping()
         );
 
-        // Retention destroys donor PII on a schedule and nothing asks first,
-        // so it does not start today. An org importing years of history would
-        // otherwise lose part of it before seeing the setting.
+        // The sweep needs a start date to exist before anything can read one.
+        // It is pushed forward again wherever erasure gets switched on, which
+        // is what actually buys an org the time to notice.
         DonorRetention::deferBy();
 
         Onboarding::maybeSeedOnActivation();

@@ -13,8 +13,14 @@ use Dono\Vendor\Queryable\DB;
  * exceeds the configured window and have no active/paused recurring plan.
  *
  * This is the only thing in Dono that destroys data without being asked, so it
- * does not start the day it is installed. An org importing years of history
- * would otherwise have part of it redacted before they had seen the setting.
+ * takes two things to reach a donor. The privacy setting `erase_inactive_donors`
+ * has to be switched on: nothing is swept on a site whose admin never asked for
+ * it. And the sweep does not start the day it is switched on, because an org
+ * importing years of history would otherwise have part of it redacted before
+ * they had seen the window.
+ *
+ * The grace period is therefore measured from whichever of those came last,
+ * which is why switching the setting on stamps it again.
  *
  * @since 1.0.0
  */
@@ -41,6 +47,20 @@ final class DonorRetention
     {
         add_action(self::HOOK, [$this, 'run']);
         add_action('init', fn () => $this->async->scheduleRecurring(self::HOOK, self::DAILY));
+
+        // $previous defaults so a caller firing the action with two arguments
+        // is a re-arm rather than a fatal.
+        add_action('dono.settings.updated', static function (string $group, array $next, array $previous = []): void {
+            if ($group !== 'privacy') return;
+            if (empty($next['erase_inactive_donors']) || ! empty($previous['erase_inactive_donors'])) return;
+
+            // The stamp from activation says nothing about a site that has been
+            // running for a year: without this, the first sweep an org ever
+            // asks for takes everyone that same night. Only the transition,
+            // never a resave, or an org that edits this screen every month
+            // would push its own sweep away forever.
+            self::deferBy();
+        }, 10, 3);
     }
 
     /** @since 1.0.0 */
@@ -85,11 +105,22 @@ final class DonorRetention
         }
     }
 
-    /** @since 1.0.0 */
+    /**
+     * The window in force, in years. Zero means nothing is swept, and every
+     * caller reads the sweep through here so they cannot disagree about it.
+     *
+     * @since 1.0.0
+     */
     public function retentionYears(): int
     {
         $opt = get_option('dono_privacy', []);
-        $stored = is_array($opt) ? (int) ($opt['donor_retention_years'] ?? 7) : 7;
+
+        // Returns before the filter, not after: an add-on may widen a window
+        // that is in force, but nothing outside this option gets to start
+        // erasing donors on a site that did not ask for it.
+        if (! is_array($opt) || empty($opt['erase_inactive_donors'])) return 0;
+
+        $stored = (int) ($opt['donor_retention_years'] ?? 7);
 
         // An add-on with a legal floor of its own raises it here. Gift Aid
         // needs the donor's name and address for six years after the tax year,
@@ -116,9 +147,10 @@ final class DonorRetention
     }
 
     /**
-     * Pushes the first sweep out. Called on activation, and by anything that
-     * loads a pile of donors at once: an import is exactly the moment when
-     * years of history arrive and none of it has been looked at yet.
+     * Pushes the first sweep out. Called when erasure is switched on, on
+     * activation, and by anything that loads a pile of donors at once: an
+     * import is exactly the moment when years of history arrive and none of it
+     * has been looked at yet. The latest of those wins.
      *
      * @since 1.0.0
      */
@@ -133,28 +165,37 @@ final class DonorRetention
     /**
      * What the next sweeps would take, without taking it.
      *
+     * $years answers for a window that is not saved yet, which is the only
+     * moment the number is still worth anything to whoever is choosing it. It
+     * goes through the same filter as the window in force, or an add-on floor
+     * would hold back donors this promised to erase. Nothing here destroys, so
+     * it is deliberately not behind the opt-in gate.
+     *
      * @return array{eligible_now:int, within_days:int, days:int, starts_at:int, years:int}
      *
      * @since 1.0.0
      */
-    public function preview(int $days = 30): array
+    public function preview(int $days = 30, ?int $years = null): array
     {
-        $years = $this->retentionYears();
-        if ($years <= 0) {
+        $window = $years === null
+            ? $this->retentionYears()
+            : (int) apply_filters('dono.donor.retention_years', max(0, $years));
+
+        if ($window <= 0) {
             return ['eligible_now' => 0, 'within_days' => 0, 'days' => $days, 'starts_at' => self::startsAt(), 'years' => 0];
         }
 
         return [
-            'eligible_now' => $this->countBefore(self::cutoff($years)),
+            'eligible_now' => $this->countBefore(self::cutoff($window)),
             // Same cutoff moved forward: a donor becomes eligible as the window
             // slides past them, so "soon" is the same query dated later.
             'within_days'  => $this->countBefore(gmdate(
                 'Y-m-d H:i:s',
-                time() + ($days * self::DAILY) - ($years * 365 * self::DAILY)
+                time() + ($days * self::DAILY) - ($window * 365 * self::DAILY)
             )),
             'days'         => $days,
             'starts_at'    => self::startsAt(),
-            'years'        => $years,
+            'years'        => $window,
         ];
     }
 

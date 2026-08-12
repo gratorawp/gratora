@@ -87,7 +87,12 @@ final class SettingsService
             'defaults' => [
                 'privacy_policy_url'             => '',
                 'retention_days_after_redaction' => 90,
-                // Anonymize inactive donors after N years; 0 disables. Donation rows are kept.
+                // Off by default: erasure is the one thing here that destroys
+                // donor PII on a schedule, with nobody asking for it. An org
+                // opts into that in so many words or it does not happen.
+                'erase_inactive_donors'          => false,
+                // The window used once erasure is switched on: anonymize
+                // inactive donors after N years. Donation rows are kept.
                 'donor_retention_years'          => 7,
                 // Prune dono_events older than N days; 0 disables.
                 'event_retention_days'           => 730,
@@ -410,7 +415,10 @@ final class SettingsService
 
         update_option($cfg['option'], $next, false);
 
-        do_action('dono.settings.updated', $group, $next);
+        // The values as they were are handed along too: a listener that has to
+        // act on a setting being switched on, rather than on every save of the
+        // group it lives in, has no other way to tell the two apart.
+        do_action('dono.settings.updated', $group, $next, $current);
         return $next;
     }
 

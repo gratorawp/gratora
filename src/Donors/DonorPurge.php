@@ -26,6 +26,11 @@ use Dono\Foundation\Time\Clock;
  * derived from the row id alone, so it stays unique and says nothing about
  * anyone.
  *
+ * The window applies to every redaction, not only to the ones the nightly
+ * retention sweep makes: a donor deleting their own account from the portal and
+ * an admin redacting by hand both land here too, and both happen on a site that
+ * never switched automatic erasure on. So it is not gated by that setting.
+ *
  * Note the setting reads differently from its neighbors on the privacy panel:
  * `donor_retention_years` and `event_retention_days` treat 0 as "disabled",
  * whereas here 0 means "sever at redaction time". There is deliberately no

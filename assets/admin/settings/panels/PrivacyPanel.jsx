@@ -1,6 +1,7 @@
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { useEffect, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+import { formatDate } from '@dono/ui/utils/format';
 
 import Card from '../../_shared/components/Card';
 import FormRow from '../../_shared/components/FormRow';
@@ -8,72 +9,118 @@ import { ToggleRow } from '../../_shared/components/Switch';
 import Notice from '../../_shared/components/Notice';
 
 /**
- * What the nightly sweep would take. Erasure is the one thing here that runs
- * without being asked and cannot be undone, so the number is shown before it
- * happens rather than discovered afterwards as blank names.
+ * What the sweep would take at the window on screen. Erasure reaches donors who
+ * never asked for it and cannot be undone, so the number belongs in front of
+ * whoever is choosing the window, while they are still choosing it.
+ *
+ * inForce says whether that window is the saved one, because a count of donors
+ * nothing is going to touch yet must not be worded as a sentence already passed.
  */
-function RetentionPreview() {
+function RetentionPreview( { years, inForce } ) {
     const [ data, setData ] = useState( null );
 
+    // Saving re-arms the grace period, so the first-run date below has to come
+    // from a request made after it, which is what inForce brings in here.
     useEffect( () => {
-        apiFetch( { path: '/dono/v1/admin/settings/retention-preview?days=30' } )
-            .then( setData )
-            .catch( () => setData( null ) );
-    }, [] );
+        let aborted = false;
+        // Choosing a window is several keystrokes, and each one is a count over
+        // the donor table.
+        const timer = setTimeout( () => {
+            apiFetch( { path: `/dono/v1/admin/settings/retention-preview?days=30&years=${ years }` } )
+                .then( ( d ) => { if ( ! aborted ) setData( d ); } )
+                .catch( () => { if ( ! aborted ) setData( null ); } );
+        }, 400 );
 
-    if ( ! data || ! data.years ) return null;
+        return () => { aborted = true; clearTimeout( timer ); };
+    }, [ years, inForce ] );
+
+    if ( ! data ) return null;
+
+    if ( ! data.years ) {
+        return (
+            <Notice status="info" isDismissible={ false }>
+                { __( 'No window is set, so nothing is erased automatically. Enter a number of years above.', 'dono' ) }
+            </Notice>
+        );
+    }
 
     const startsAt = Number( data.starts_at || 0 ) * 1000;
     const pending  = startsAt > Date.now();
+    const now      = Number( data.eligible_now || 0 );
+    const soon     = Number( data.within_days || 0 );
 
-    if ( pending ) {
-        return (
-            <Notice status="info" isDismissible={ false }>
-                { sprintf(
-                    /* translators: %s: a date. */
-                    __( 'Automatic erasure has not started on this site yet. The first run is %s, which leaves time to import your history and check the window above.', 'dono' ),
-                    new Date( startsAt ).toLocaleDateString()
-                ) }
-            </Notice>
-        );
+    const lines = [];
+
+    if ( now > 0 ) {
+        lines.push( sprintf(
+            /* translators: %s: number of donors. */
+            _n(
+                '%s donor is past this window.',
+                '%s donors are past this window.',
+                now,
+                'dono'
+            ),
+            now.toLocaleString()
+        ) );
+
+        if ( soon > now ) {
+            lines.push( sprintf(
+                /* translators: %s: number of donors. */
+                _n(
+                    '%s in total reaches it within 30 days.',
+                    '%s in total reach it within 30 days.',
+                    soon,
+                    'dono'
+                ),
+                soon.toLocaleString()
+            ) );
+        }
+    } else if ( soon > 0 ) {
+        lines.push( sprintf(
+            /* translators: %s: number of donors. */
+            _n(
+                '%s donor reaches this window within 30 days.',
+                '%s donors reach this window within 30 days.',
+                soon,
+                'dono'
+            ),
+            soon.toLocaleString()
+        ) );
     }
 
-    if ( ! data.eligible_now && ! data.within_days ) {
-        return (
-            <Notice status="info" isDismissible={ false }>
-                { __( 'No donor is due to be erased in the next 30 days.', 'dono' ) }
-            </Notice>
-        );
+    if ( lines.length === 0 ) {
+        lines.push( __( 'No donor is past this window, or reaches it in the next 30 days.', 'dono' ) );
+    } else if ( ! inForce ) {
+        lines.push( __( 'Nothing is erased until this is saved.', 'dono' ) );
+    } else if ( ! pending ) {
+        lines.push( __( 'They are erased on the next nightly run.', 'dono' ) );
+    }
+
+    if ( pending ) {
+        lines.push( sprintf(
+            /* translators: %s: a date. */
+            __( 'Nothing is erased before %s. Dono waits after erasure is switched on, and after an import, so you can check this window first.', 'dono' ),
+            formatDate( new Date( startsAt ).toISOString() )
+        ) );
     }
 
     return (
-        <Notice status="warning" isDismissible={ false }>
-            { data.eligible_now > 0 && sprintf(
-                /* translators: %s: number of donors. */
-                _n(
-                    '%s donor is past the window and will be erased on the next nightly run.',
-                    '%s donors are past the window and will be erased on the next nightly run.',
-                    data.eligible_now,
-                    'dono'
-                ),
-                data.eligible_now.toLocaleString()
-            ) }
-            { ' ' }
-            { data.within_days > data.eligible_now && sprintf(
-                /* translators: %s: number of donors. */
-                _n(
-                    '%s in total will have gone within 30 days.',
-                    '%s in total will have gone within 30 days.',
-                    data.within_days,
-                    'dono'
-                ),
-                data.within_days.toLocaleString()
-            ) }
+        <Notice status={ now > 0 || soon > 0 ? 'warning' : 'info' } isDismissible={ false }>
+            { lines.join( ' ' ) }
         </Notice>
     );
 }
 
 export default function PrivacyPanel( { s } ) {
+    const eraseInactive = !! s.value( 'erase_inactive_donors', false );
+    // Read as text, so a box cleared to be retyped stays cleared: coercing an
+    // empty one to a number puts a digit in front of whatever is typed next,
+    // and the shortest window this field can express is the one that erases the
+    // most people. A cleared box saves as no window, which erases nobody.
+    const years         = s.value( 'donor_retention_years', '' );
+    const inForce       = !! s.savedRecord.erase_inactive_donors
+        && Number( s.savedRecord.donor_retention_years ) === Number( years );
+
     return (
         <div className="dono-panel">
             <Card
@@ -109,22 +156,32 @@ export default function PrivacyPanel( { s } ) {
                     />
                 </FormRow>
 
-                <FormRow
-                    label={ __( 'Erase donors inactive for (years)', 'dono' ) }
-                    fieldHelp={ __( 'Donors with no donation for this long are erased automatically, as if they had asked. Anyone on a recurring plan is skipped. Their donations stay counted. 0 turns this off.', 'dono' ) }
-                >
-                    <input
-                        type="number"
-                        min={ 0 }
-                        max={ 100 }
-                        className="dono-input"
-                        style={ { maxWidth: 120 } }
-                        value={ s.value( 'donor_retention_years', 7 ) }
-                        onChange={ ( e ) => s.edit( { donor_retention_years: parseInt( e.target.value, 10 ) || 0 } ) }
-                    />
-                </FormRow>
+                <ToggleRow
+                    title={ __( 'Erase inactive donors automatically', 'dono' ) }
+                    sub={ __( 'While this is off, a donor is only ever erased because they asked or because an admin erased them. Turning it on lets a nightly run erase donors who have gone years without giving.', 'dono' ) }
+                    checked={ eraseInactive }
+                    onChange={ s.setValue( 'erase_inactive_donors' ) }
+                />
 
-                <RetentionPreview />
+                { eraseInactive && (
+                    <>
+                        <FormRow
+                            label={ __( 'Erase donors inactive for (years)', 'dono' ) }
+                            fieldHelp={ __( 'Donors with no donation for this long are erased on the nightly run, as if they had asked. Anyone on a recurring plan is skipped. Their donations stay counted.', 'dono' ) }
+                        >
+                            <input
+                                type="number"
+                                min={ 1 }
+                                max={ 100 }
+                                className="dono-input"
+                                style={ { maxWidth: 120 } }
+                                { ...s.bindNumber( 'donor_retention_years' ) }
+                            />
+                        </FormRow>
+
+                        <RetentionPreview years={ Number( years ) || 0 } inForce={ inForce } />
+                    </>
+                ) }
 
                 <FormRow
                     label={ __( 'Keep the activity log for (days)', 'dono' ) }
@@ -150,7 +207,7 @@ export default function PrivacyPanel( { s } ) {
 
                 <ToggleRow
                     title={ __( 'Show Gravatar profile pictures', 'dono' ) }
-                    sub={ __( "Donor lists show each donor's Gravatar instead of their initials. Their browser asks gravatar.com for it, which means a hash of the donor's email address reaches a third party from every visit to a public campaign page. Anonymous donors are never shown one.", 'dono' ) }
+                    sub={ __( "Donor lists show Gravatars instead of initials. Each one sends a hash of the donor's email to gravatar.com from the visitor's browser. Anonymous donors are never shown one.", 'dono' ) }
                     checked={ !! s.value( 'gravatar_avatars', false ) }
                     onChange={ s.setValue( 'gravatar_avatars' ) }
                 />
