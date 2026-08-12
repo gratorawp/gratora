@@ -1,3 +1,12 @@
+/*
+ * The dialog sits on wp-admin's own Plugins screen, so it reads as WordPress
+ * rather than as Dono: core's button classes, core's type stack, core's red.
+ *
+ * It is calm until someone asks for the destructive option. Deactivating on its
+ * own changes nothing, and a warning shown before there is anything to warn
+ * about is a warning nobody reads by the time it matters.
+ */
+
 body.dono-deact-open { overflow: hidden; }
 
 .dono-deact {
@@ -11,55 +20,119 @@ body.dono-deact-open { overflow: hidden; }
 .dono-deact__backdrop {
     position: absolute;
     inset: 0;
-    background: rgba(15, 23, 42, .55);
+    background: rgba(15, 23, 42, .5);
 }
 
 .dono-deact__panel {
     position: relative;
-    max-width: 520px;
-    margin: 8vh auto 0;
-    max-height: 84vh;
+    max-width: 480px;
+    margin: 10vh auto 0;
+    max-height: 80vh;
     overflow-y: auto;
-    padding: 26px 28px 20px;
+    padding: 24px 26px 20px;
     background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 12px 40px rgba(15, 23, 42, .25);
+    border-radius: 6px;
+    box-shadow: 0 10px 36px rgba(15, 23, 42, .22);
+    /* The top edge is the state indicator: neutral until the box is ticked. */
+    border-top: 3px solid #dcdcde;
+    transition: border-color .15s ease;
 }
 
 .dono-deact__title {
-    margin: 0 0 6px;
-    font-size: 20px;
-    line-height: 1.25;
-}
-
-.dono-deact__data {
-    padding: 14px 16px;
-    border: 1px solid #f0c33c;
-    background: #fcf9e8;
-    border-radius: 8px;
-}
-
-.dono-deact__data-check {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
+    margin: 0 0 8px;
+    font-size: 18px;
     font-weight: 600;
+    line-height: 1.3;
+    color: #1d2327;
 }
 
-.dono-deact__data-help,
-.dono-deact__data-warn {
-    margin: 8px 0 0;
-    font-size: 12px;
-    line-height: 1.5;
+.dono-deact__lede {
+    margin: 0 0 18px;
+    font-size: 13px;
+    line-height: 1.6;
     color: #50575e;
 }
 
-.dono-deact__data-warn { color: #8a1f11; }
+/* The choice, not a warning: quiet frame, normal weight, no colour shouting. */
+.dono-deact__choice {
+    padding: 12px 14px;
+    border: 1px solid #dcdcde;
+    border-radius: 4px;
+    background: #f6f7f7;
+    transition: border-color .15s ease, background-color .15s ease;
+}
+
+.dono-deact__check {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1d2327;
+    cursor: pointer;
+}
+
+.dono-deact__check input { margin: 0; }
+
+.dono-deact__consequence {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #f0c9c9;
+}
+
+.dono-deact__consequence[hidden] { display: none; }
+
+.dono-deact__consequence-lead,
+.dono-deact__consequence-foot {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.55;
+    color: #8a2424;
+}
+
+.dono-deact__consequence-foot { margin-top: 10px; }
+
+.dono-deact__list {
+    margin: 8px 0 0;
+    padding-left: 18px;
+    font-size: 12px;
+    line-height: 1.7;
+    color: #8a2424;
+    list-style: disc;
+}
+
+/* Asked for. Now the dialog can shout. */
+.dono-deact.is-danger .dono-deact__panel { border-top-color: #b32d2e; }
+
+.dono-deact.is-danger .dono-deact__choice {
+    border-color: #e6a2a2;
+    background: #fcf0f0;
+}
+
+.dono-deact.is-danger .dono-deact__check { color: #8a2424; }
+
+.dono-deact.is-danger .button-primary,
+.dono-deact.is-danger .button-primary:hover,
+.dono-deact.is-danger .button-primary:focus {
+    background: #b32d2e;
+    border-color: #b32d2e;
+    color: #fff;
+    box-shadow: none;
+    text-shadow: none;
+}
+
+.dono-deact.is-danger .button-primary:focus { box-shadow: 0 0 0 2px #fff, 0 0 0 4px #b32d2e; }
 
 .dono-deact__actions {
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     margin-top: 20px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dono-deact__panel,
+    .dono-deact__choice { transition: none; }
 }

@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-12T16:22:15+00:00\n"
+"POT-Creation-Date: 2026-08-12T19:44:17+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: dono-fundraising-platform\n"
@@ -100,7 +100,7 @@ msgstr ""
 
 #: components/Dialog.js:53
 #: components/Drawer.js:56
-#: src/Campaigns/Blocks/views/donate-button.php:30
+#: src/Campaigns/Blocks/views/donate-button.php:45
 #: src/Forms/Shortcode/DonationFormShortcode.php:663
 #: assets/admin/tools/tabs/LogsTab.jsx:302
 #: assets/admin/_shared/recurring/PlanActions.jsx:117
@@ -174,7 +174,6 @@ msgstr ""
 #: assets/admin/funds/List.jsx:22
 #: assets/admin/funds/List.jsx:286
 #: assets/admin/funds/List.jsx:569
-#: assets/admin/licenses/Licenses.jsx:14
 #: assets/admin/subscriptions/List.jsx:23
 #: assets/admin/_shared/components/StatusBadge.jsx:11
 #: assets/admin/_shared/components/StatusBadge.jsx:26
@@ -195,7 +194,7 @@ msgid "Notifications"
 msgstr ""
 
 #: styling/StylePreview.js:94
-#: src/Campaigns/Blocks/views/campaign-progress.php:32
+#: src/Campaigns/Blocks/views/campaign-progress.php:39
 msgid "raised"
 msgstr ""
 
@@ -211,7 +210,7 @@ msgid "goal"
 msgstr ""
 
 #: styling/StylePreview.js:106
-#: src/Campaigns/Blocks/views/campaign-grid.php:61
+#: src/Campaigns/Blocks/views/campaign-grid.php:84
 #: assets/admin/onboarding/Onboarding.jsx:603
 msgid "Donate"
 msgstr ""
@@ -224,7 +223,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: styling/StylePreview.js:109
-#: src/Campaigns/Blocks/views/campaign-progress.php:31
+#: src/Campaigns/Blocks/views/campaign-progress.php:38
 #: assets/admin/donors/Insights.jsx:131
 #: assets/admin/forms/blocks/goal/index.js:171
 msgid "donors"
@@ -484,7 +483,7 @@ msgstr ""
 #: assets/admin/donors/index.jsx:335
 #: assets/admin/donors/profile/Header.jsx:46
 #: assets/admin/funds/List.jsx:342
-#: assets/admin/settings/Settings.jsx:236
+#: assets/admin/settings/Settings.jsx:226
 #: assets/admin/subscriptions/List.jsx:755
 #: assets/admin/tools/Tools.jsx:56
 msgid "Dono"
@@ -581,8 +580,8 @@ msgstr ""
 #: assets/admin/campaigns/Detail.jsx:429
 #: assets/admin/dashboard/widgets/QuickActions.jsx:69
 #: assets/admin/forms/Editor.jsx:768
-#: assets/admin/settings/Settings.jsx:238
-#: assets/admin/settings/Settings.jsx:245
+#: assets/admin/settings/Settings.jsx:228
+#: assets/admin/settings/Settings.jsx:235
 #: assets/admin/tools/tabs/ExportTab.jsx:326
 msgid "Settings"
 msgstr ""
@@ -619,23 +618,43 @@ msgstr ""
 msgid "These forms take no real money. Every other form on the site does."
 msgstr ""
 
-#: src/Admin/views/deactivation-dialog.php:10
+#: src/Admin/views/deactivation-dialog.php:12
 msgid "Deactivate Dono"
 msgstr ""
 
-#: src/Admin/views/deactivation-dialog.php:15
+#: src/Admin/views/deactivation-dialog.php:16
+msgid "Your donations, donors, campaigns and settings stay as they are. Switching Dono back on picks up where you left off."
+msgstr ""
+
+#: src/Admin/views/deactivation-dialog.php:22
 msgid "Delete all Dono data as well"
 msgstr ""
 
-#: src/Admin/views/deactivation-dialog.php:18
-msgid "Leave this alone and deactivating changes nothing: your donations, donors, campaigns and settings stay exactly as they are, and switching Dono back on picks up where you left off."
-msgstr ""
-
-#: src/Admin/views/deactivation-dialog.php:21
-msgid "Tick it and every donation, donor, campaign, form and receipt is deleted the moment you deactivate. This happens straight away, it cannot be undone, and reactivating will not bring any of it back. Export anything you need first."
-msgstr ""
-
 #: src/Admin/views/deactivation-dialog.php:27
+msgid "Deleted the moment you deactivate, and not recoverable:"
+msgstr ""
+
+#: src/Admin/views/deactivation-dialog.php:30
+msgid "Donations and refunds"
+msgstr ""
+
+#: src/Admin/views/deactivation-dialog.php:31
+msgid "Donors and their consent history"
+msgstr ""
+
+#: src/Admin/views/deactivation-dialog.php:32
+msgid "Campaigns, forms and funds"
+msgstr ""
+
+#: src/Admin/views/deactivation-dialog.php:33
+msgid "Receipts and annual statements"
+msgstr ""
+
+#: src/Admin/views/deactivation-dialog.php:36
+msgid "Reactivating will not bring any of it back. Export anything you need first."
+msgstr ""
+
+#: src/Admin/views/deactivation-dialog.php:43
 #: src/Forms/Shortcode/DonationFormShortcode.php:645
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:171
 #: assets/admin/campaigns/Detail.jsx:353
@@ -649,7 +668,6 @@ msgstr ""
 #: assets/admin/forms/Editor.jsx:662
 #: assets/admin/funds/List.jsx:480
 #: assets/admin/funds/List.jsx:631
-#: assets/admin/licenses/Licenses.jsx:253
 #: assets/admin/settings/panels/EmailPanel.jsx:231
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:178
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:231
@@ -663,10 +681,15 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
-#: src/Admin/views/deactivation-dialog.php:30
+#: src/Admin/views/deactivation-dialog.php:46
+#: src/Admin/views/deactivation-dialog.php:48
 #: assets/admin/funds/List.jsx:317
 #: assets/admin/funds/List.jsx:662
 msgid "Deactivate"
+msgstr ""
+
+#: src/Admin/views/deactivation-dialog.php:47
+msgid "Delete everything and deactivate"
 msgstr ""
 
 #: src/Campaigns/Blocks/CampaignBindings.php:47
@@ -846,17 +869,17 @@ msgstr ""
 msgid "The first donation starts the list."
 msgstr ""
 
-#: src/Campaigns/Blocks/views/campaign-progress.php:30
+#: src/Campaigns/Blocks/views/campaign-progress.php:37
 msgid "donations"
 msgstr ""
 
 #. translators: %1$s: percent, %2$s: target value
-#: src/Campaigns/Blocks/views/campaign-progress.php:40
+#: src/Campaigns/Blocks/views/campaign-progress.php:49
 #, php-format
 msgid "%1$d%% of %2$s goal"
 msgstr ""
 
-#: src/Campaigns/Blocks/views/donation-form.php:24
+#: src/Campaigns/Blocks/views/donation-form.php:33
 #: src/Forms/Shortcode/DonationFormShortcode.php:662
 #: assets/admin/campaign-blocks/index.jsx:923
 #: assets/admin/campaign-blocks/index.jsx:945
@@ -864,12 +887,12 @@ msgstr ""
 msgid "Donation form"
 msgstr ""
 
-#: src/Campaigns/Blocks/views/donation-form.php:32
+#: src/Campaigns/Blocks/views/donation-form.php:47
 msgid "Donation form - shown to visitors here."
 msgstr ""
 
 #. translators: %s: number of donations
-#: src/Campaigns/Blocks/views/top-donors.php:51
+#: src/Campaigns/Blocks/views/top-donors.php:66
 #: assets/admin/donations/List.jsx:522
 #: assets/admin/_shared/components/GoalBar.jsx:22
 #, php-format,js-format
@@ -879,8 +902,8 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: count
-#: src/Campaigns/Blocks/views/top-donors.php:72
-#: src/Campaigns/Blocks/views/top-donors.php:98
+#: src/Campaigns/Blocks/views/top-donors.php:91
+#: src/Campaigns/Blocks/views/top-donors.php:123
 #, php-format
 msgid "(%s donation)"
 msgid_plural "(%s donations)"
@@ -1322,12 +1345,12 @@ msgstr ""
 msgid "Link is time-limited to your login session (about %s); regenerate it if it stops working."
 msgstr ""
 
-#: src/Core/CoreModule.php:242
+#: src/Core/CoreModule.php:241
 msgid "Dono Core"
 msgstr ""
 
 #. translators: %s: timestamp the key loss was detected
-#: src/Core/CoreModule.php:1172
+#: src/Core/CoreModule.php:1170
 #, php-format
 msgid "Encryption key missing since %s. Donor PII written before this point cannot be decrypted. Restore dono_system_settings from a backup, or accept that historical PII is gone. New donations are encrypting against a freshly generated key."
 msgstr ""
@@ -1455,7 +1478,7 @@ msgid "Within their average gap"
 msgstr ""
 
 #: src/Donors/DonorAvatarUploader.php:67
-#: src/Rest/Portal/PortalController.php:1036
+#: src/Rest/Portal/PortalController.php:1038
 msgid "No picture was sent."
 msgstr ""
 
@@ -1478,7 +1501,7 @@ msgstr ""
 
 #. translators: %s: file size, e.g. "2 MB".
 #: src/Donors/DonorAvatarUploader.php:135
-#: src/Rest/Portal/PortalController.php:1029
+#: src/Rest/Portal/PortalController.php:1031
 #: assets/donor-portal/index.jsx:1149
 #, php-format,js-format
 msgid "That picture is too large. The most this site takes is %s."
@@ -1577,7 +1600,7 @@ msgstr ""
 #: src/Donors/Portal/views/annual-statement.php:28
 #: src/Receipts/resources/views/donor-tax-statement.php:80
 #: src/Receipts/resources/views/generic.php:176
-#: src/Rest/Admin/DonationsController.php:1444
+#: src/Rest/Admin/DonationsController.php:1447
 #: assets/admin/donations/detail/cards/RelatedDonationsCard.jsx:23
 #: assets/admin/donations/List.jsx:236
 #: assets/admin/donors/profile/tabs/ActivityLogTab.jsx:84
@@ -1588,11 +1611,11 @@ msgstr ""
 #: src/Donors/Portal/views/annual-statement.php:29
 #: src/Forms/Blocks/views/currency-switcher.php:14
 #: src/Forms/Shortcode/DonationFormShortcode.php:659
-#: src/Rest/Admin/DonationsController.php:1447
+#: src/Rest/Admin/DonationsController.php:1450
 #: assets/admin/forms/blocks/currency-switcher/index.js:139
 #: assets/admin/onboarding/Onboarding.jsx:465
 #: assets/admin/settings/panels/CurrencyPanel.jsx:147
-#: assets/admin/settings/Settings.jsx:38
+#: assets/admin/settings/Settings.jsx:37
 msgid "Currency"
 msgstr ""
 
@@ -1602,7 +1625,7 @@ msgstr ""
 #: src/Forms/Shortcode/DonationFormShortcode.php:605
 #: src/Receipts/resources/views/donor-tax-statement.php:81
 #: src/Receipts/resources/views/generic.php:205
-#: src/Rest/Admin/DonationsController.php:1446
+#: src/Rest/Admin/DonationsController.php:1449
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:19
 #: assets/admin/donations/detail/cards/OverviewCard.jsx:21
 #: assets/admin/donations/detail/cards/RefundsCard.jsx:28
@@ -1698,7 +1721,7 @@ msgstr ""
 #: src/Forms/FormSubmissionValidator.php:293
 #: src/Forms/Shortcode/DonationFormShortcode.php:603
 #: src/Forms/Shortcode/DonationFormShortcode.php:655
-#: src/Rest/Admin/DonationsController.php:1459
+#: src/Rest/Admin/DonationsController.php:1462
 #: assets/admin/donors/DonorProfile.jsx:168
 #: assets/admin/donors/index.jsx:166
 #: assets/admin/donors/Insights.jsx:195
@@ -2571,7 +2594,7 @@ msgid "Pick the work you want to fund, or leave it to us to send it wherever it 
 msgstr ""
 
 #: src/Forms/FormTemplates.php:416
-#: src/Rest/Admin/DonationsController.php:1458
+#: src/Rest/Admin/DonationsController.php:1461
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:269
 #: assets/admin/campaigns/Detail.jsx:2014
 #: assets/admin/donations/detail/cards/OverviewCard.jsx:54
@@ -2886,26 +2909,22 @@ msgid "Cover the processing fee so 100% of my donation reaches you"
 msgstr ""
 
 #. translators: %s: comma-separated add-on names
-#: src/Foundation/License/LicenseNotice.php:51
+#: src/Foundation/License/LicenseNotice.php:50
 #, php-format
 msgid "Your license does not cover %s. They keep running for now, but they will not receive updates or security fixes."
 msgstr ""
 
 #. translators: %s: comma-separated add-on names
-#: src/Foundation/License/LicenseNotice.php:64
+#: src/Foundation/License/LicenseNotice.php:63
 #, php-format
 msgid "The license for %s has lapsed. Renew to keep receiving updates and security fixes."
 msgstr ""
 
-#: src/Foundation/License/LicenseNotice.php:74
-msgid "Your Dono add-ons are not linked to a license key, so they will not receive updates or security fixes."
-msgstr ""
-
-#: src/Foundation/License/LicenseNotice.php:104
+#: src/Foundation/License/LicenseNotice.php:98
 msgid "Dono:"
 msgstr ""
 
-#: src/Foundation/License/LicenseNotice.php:107
+#: src/Foundation/License/LicenseNotice.php:101
 #: src/Settings/ReadinessService.php:590
 #: src/Settings/ReadinessService.php:606
 msgid "Manage licenses"
@@ -3021,7 +3040,7 @@ msgid "Pay by bank transfer, check or cash. We confirm it manually."
 msgstr ""
 
 #: src/Gateways/PayPal/PayPalGateway.php:71
-#: src/Rest/Admin/DonationsController.php:1655
+#: src/Rest/Admin/DonationsController.php:1658
 #: src/Settings/ReadinessService.php:205
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:279
 msgid "PayPal"
@@ -3082,29 +3101,29 @@ msgid "PayPal is holding this payment (%s)."
 msgstr ""
 
 #: src/Gateways/PayPal/PayPalPlanRecorder.php:51
-#: src/Rest/PayPalController.php:150
+#: src/Rest/PayPalController.php:152
 msgid "Missing subscription id."
 msgstr ""
 
-#: src/Gateways/PayPal/PayPalPlanRecorder.php:59
+#: src/Gateways/PayPal/PayPalPlanRecorder.php:58
 msgid "That subscription does not belong to this donation."
 msgstr ""
 
-#: src/Gateways/PayPal/PayPalPlanRecorder.php:65
-#: src/Rest/PayPalController.php:146
+#: src/Gateways/PayPal/PayPalPlanRecorder.php:64
+#: src/Rest/PayPalController.php:148
 msgid "That donation is not recurring."
 msgstr ""
 
-#: src/Gateways/PayPal/PayPalPlanRecorder.php:80
+#: src/Gateways/PayPal/PayPalPlanRecorder.php:78
 msgid "This donation already has a different PayPal subscription."
 msgstr ""
 
-#: src/Gateways/PayPal/PayPalPlanRecorder.php:95
+#: src/Gateways/PayPal/PayPalPlanRecorder.php:92
 msgid "That subscription is not for this donation amount."
 msgstr ""
 
 #. translators: %s: PayPal subscription status
-#: src/Gateways/PayPal/PayPalPlanRecorder.php:106
+#: src/Gateways/PayPal/PayPalPlanRecorder.php:102
 #, php-format
 msgid "PayPal reports this subscription as %s."
 msgstr ""
@@ -3120,7 +3139,7 @@ msgid "Recurring donation"
 msgstr ""
 
 #: src/Gateways/Sandbox/SandboxGateway.php:39
-#: src/Rest/Admin/DonationsController.php:1657
+#: src/Rest/Admin/DonationsController.php:1660
 msgid "Test donation"
 msgstr ""
 
@@ -3133,7 +3152,7 @@ msgid "This domain is not registered with Stripe yet."
 msgstr ""
 
 #: src/Gateways/Stripe/StripeGateway.php:71
-#: src/Rest/Admin/DonationsController.php:1654
+#: src/Rest/Admin/DonationsController.php:1657
 #: src/Settings/ReadinessService.php:204
 #: assets/admin/settings/panels/StripeKeysCard.jsx:339
 msgid "Stripe"
@@ -3147,45 +3166,45 @@ msgstr ""
 msgid "Payment declined."
 msgstr ""
 
-#: src/Gateways/Stripe/StripeGateway.php:1196
+#: src/Gateways/Stripe/StripeGateway.php:1199
 msgid "No gateway intent on donation; cannot refund via Stripe."
 msgstr ""
 
-#: src/Gateways/Stripe/StripeGateway.php:1202
+#: src/Gateways/Stripe/StripeGateway.php:1205
 msgid "Stripe is not configured."
 msgstr ""
 
-#: src/Gateways/Stripe/StripeGateway.php:1298
+#: src/Gateways/Stripe/StripeGateway.php:1301
 msgid "This donation has no Stripe customer to attach a card to."
 msgstr ""
 
-#: src/Gateways/Stripe/StripeGateway.php:1309
+#: src/Gateways/Stripe/StripeGateway.php:1312
 msgid "Stripe did not return a setup secret."
 msgstr ""
 
-#: src/Gateways/Stripe/StripeGateway.php:1332
+#: src/Gateways/Stripe/StripeGateway.php:1335
 msgid "No payment method was supplied."
 msgstr ""
 
-#: src/Gateways/Stripe/StripeGateway.php:1337
+#: src/Gateways/Stripe/StripeGateway.php:1340
 msgid "This plan has no Stripe subscription."
 msgstr ""
 
-#: src/Gateways/Stripe/StripeGateway.php:1369
+#: src/Gateways/Stripe/StripeGateway.php:1372
 msgid "This plan never reached Stripe, so there is nothing to collect."
 msgstr ""
 
-#: src/Gateways/Stripe/StripeGateway.php:1379
+#: src/Gateways/Stripe/StripeGateway.php:1382
 msgid "Stripe has no invoice outstanding on this subscription."
 msgstr ""
 
 #. translators: %s: the Stripe invoice status, e.g. paid.
-#: src/Gateways/Stripe/StripeGateway.php:1391
+#: src/Gateways/Stripe/StripeGateway.php:1394
 #, php-format
 msgid "Nothing to collect: the latest invoice is %s."
 msgstr ""
 
-#: src/Gateways/Stripe/StripeGateway.php:1392
+#: src/Gateways/Stripe/StripeGateway.php:1395
 msgid "unavailable"
 msgstr ""
 
@@ -3392,7 +3411,7 @@ msgid "Donation to %s"
 msgstr ""
 
 #: src/Receipts/resources/views/generic.php:215
-#: src/Rest/Admin/DonationsController.php:1455
+#: src/Rest/Admin/DonationsController.php:1458
 #: assets/admin/donations/detail/Header.jsx:58
 #: assets/admin/donations/detail/helpers.js:56
 #: assets/admin/donations/format.js:29
@@ -3535,17 +3554,17 @@ msgid "Donation not found."
 msgstr ""
 
 #: src/Rest/Admin/DonationsController.php:231
-#: src/Rest/Admin/DonorsController.php:425
+#: src/Rest/Admin/DonorsController.php:427
 msgid "Note body is required."
 msgstr ""
 
 #: src/Rest/Admin/DonationsController.php:243
-#: src/Rest/Admin/DonorsController.php:437
+#: src/Rest/Admin/DonorsController.php:439
 msgid "Note not found."
 msgstr ""
 
 #: src/Rest/Admin/DonationsController.php:246
-#: src/Rest/Admin/DonorsController.php:440
+#: src/Rest/Admin/DonorsController.php:442
 msgid "You cannot delete this note."
 msgstr ""
 
@@ -3640,7 +3659,7 @@ msgstr ""
 msgid "Could not regenerate the receipt PDF. The original renderer may have been removed."
 msgstr ""
 
-#: src/Rest/Admin/DonationsController.php:1445
+#: src/Rest/Admin/DonationsController.php:1448
 #: assets/admin/campaigns/Detail.jsx:1211
 #: assets/admin/campaigns/Detail.jsx:1779
 #: assets/admin/campaigns/List.jsx:118
@@ -3657,33 +3676,33 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
-#: src/Rest/Admin/DonationsController.php:1448
+#: src/Rest/Admin/DonationsController.php:1451
 msgid "Base amount"
 msgstr ""
 
-#: src/Rest/Admin/DonationsController.php:1449
+#: src/Rest/Admin/DonationsController.php:1452
 #: assets/admin/settings/panels/CurrencyPanel.jsx:195
 #: assets/admin/settings/panels/CurrencyPanel.jsx:238
 msgid "Base currency"
 msgstr ""
 
-#: src/Rest/Admin/DonationsController.php:1450
+#: src/Rest/Admin/DonationsController.php:1453
 msgid "Fee"
 msgstr ""
 
-#: src/Rest/Admin/DonationsController.php:1451
+#: src/Rest/Admin/DonationsController.php:1454
 #: assets/admin/donations/detail/cards/PaymentDetailsCard.jsx:62
 msgid "Net"
 msgstr ""
 
-#: src/Rest/Admin/DonationsController.php:1456
+#: src/Rest/Admin/DonationsController.php:1459
 #: assets/admin/donations/detail/cards/OverviewCard.jsx:35
 #: assets/admin/donations/List.jsx:316
 #: assets/admin/subscriptions/List.jsx:636
 msgid "Gateway"
 msgstr ""
 
-#: src/Rest/Admin/DonationsController.php:1457
+#: src/Rest/Admin/DonationsController.php:1460
 #: assets/admin/donations/detail/cards/OverviewCard.jsx:75
 #: assets/admin/donations/detail/rail/MetadataCard.jsx:19
 #: assets/admin/donations/List.jsx:255
@@ -3692,44 +3711,44 @@ msgstr ""
 msgid "Frequency"
 msgstr ""
 
-#: src/Rest/Admin/DonationsController.php:1461
+#: src/Rest/Admin/DonationsController.php:1464
 msgid "Donor name"
 msgstr ""
 
-#: src/Rest/Admin/DonationsController.php:1462
+#: src/Rest/Admin/DonationsController.php:1465
 #: assets/admin/donations/RecordDonationDrawer.jsx:180
 msgid "Donor email"
 msgstr ""
 
-#: src/Rest/Admin/DonationsController.php:1464
+#: src/Rest/Admin/DonationsController.php:1467
 msgid "Created at"
 msgstr ""
 
-#: src/Rest/Admin/DonationsController.php:1465
+#: src/Rest/Admin/DonationsController.php:1468
 msgid "Paid at"
 msgstr ""
 
-#: src/Rest/Admin/DonationsController.php:1466
+#: src/Rest/Admin/DonationsController.php:1469
 msgid "Refunded at"
 msgstr ""
 
-#: src/Rest/Admin/DonationsController.php:1656
+#: src/Rest/Admin/DonationsController.php:1659
 msgid "Offline"
 msgstr ""
 
-#: src/Rest/Admin/DonationsController.php:1658
+#: src/Rest/Admin/DonationsController.php:1661
 msgid "Manually entered"
 msgstr ""
 
 #: src/Rest/Admin/DonorsController.php:220
 #: src/Rest/Admin/DonorsController.php:230
 #: src/Rest/Admin/DonorsController.php:252
-#: src/Rest/Admin/DonorsController.php:402
-#: src/Rest/Admin/DonorsController.php:420
-#: src/Rest/Admin/DonorsController.php:455
-#: src/Rest/Admin/DonorsController.php:460
-#: src/Rest/Admin/DonorsController.php:540
-#: src/Rest/Admin/DonorsController.php:563
+#: src/Rest/Admin/DonorsController.php:404
+#: src/Rest/Admin/DonorsController.php:422
+#: src/Rest/Admin/DonorsController.php:457
+#: src/Rest/Admin/DonorsController.php:462
+#: src/Rest/Admin/DonorsController.php:544
+#: src/Rest/Admin/DonorsController.php:567
 #: src/Rest/Admin/ReportsController.php:109
 msgid "Donor not found."
 msgstr ""
@@ -3740,15 +3759,15 @@ msgstr ""
 msgid "Another donor (#%d) already uses that email. Merge donors first if you want to consolidate them."
 msgstr ""
 
-#: src/Rest/Admin/DonorsController.php:409
+#: src/Rest/Admin/DonorsController.php:411
 msgid "A sign-in link cannot be issued for an erased donor."
 msgstr ""
 
-#: src/Rest/Admin/DonorsController.php:566
+#: src/Rest/Admin/DonorsController.php:570
 msgid "This donor is already redacted."
 msgstr ""
 
-#: src/Rest/Admin/DonorsController.php:576
+#: src/Rest/Admin/DonorsController.php:580
 msgid "Confirmation does not match the donor email. Redact cancelled."
 msgstr ""
 
@@ -3765,14 +3784,6 @@ msgstr ""
 #: src/Rest/Admin/FundsController.php:166
 #: src/Rest/Admin/FundsController.php:182
 msgid "Fund not found."
-msgstr ""
-
-#: src/Rest/Admin/LicenseController.php:100
-msgid "Enter your license key."
-msgstr ""
-
-#: src/Rest/Admin/LicenseController.php:113
-msgid "That key was not accepted for any installed add-on."
 msgstr ""
 
 #: src/Rest/Admin/PayPalKeysController.php:131
@@ -3965,7 +3976,7 @@ msgid "No settings payload found."
 msgstr ""
 
 #: src/Rest/Admin/ToolsController.php:767
-#: src/Rest/Portal/PortalController.php:1403
+#: src/Rest/Portal/PortalController.php:1407
 msgid "Type DELETE to confirm."
 msgstr ""
 
@@ -4061,15 +4072,15 @@ msgstr ""
 msgid "Confirmation failed."
 msgstr ""
 
-#: src/Rest/PayPalController.php:85
+#: src/Rest/PayPalController.php:87
 msgid "PayPal is not available."
 msgstr ""
 
-#: src/Rest/PayPalController.php:117
+#: src/Rest/PayPalController.php:119
 msgid "PayPal could not complete this payment."
 msgstr ""
 
-#: src/Rest/PayPalController.php:184
+#: src/Rest/PayPalController.php:195
 msgid "We could not find that donation."
 msgstr ""
 
@@ -4101,15 +4112,15 @@ msgstr ""
 msgid "The new card could not be saved. Please try again in a moment."
 msgstr ""
 
-#: src/Rest/Portal/PortalController.php:1268
+#: src/Rest/Portal/PortalController.php:1270
 msgid "Data export is disabled by the organization."
 msgstr ""
 
-#: src/Rest/Portal/PortalController.php:1393
+#: src/Rest/Portal/PortalController.php:1397
 msgid "Account deletion is disabled by the organization."
 msgstr ""
 
-#: src/Rest/Portal/PortalController.php:1420
+#: src/Rest/Portal/PortalController.php:1424
 msgid "We could not stop your recurring donation with the payment provider, so your account has not been deleted yet. Please contact the organization and they will finish this for you."
 msgstr ""
 
@@ -5835,13 +5846,13 @@ msgstr ""
 
 #: assets/admin/campaigns/Detail.jsx:1501
 #: assets/admin/forms/Editor.jsx:300
-#: assets/admin/settings/Settings.jsx:213
+#: assets/admin/settings/Settings.jsx:203
 msgid "Save failed."
 msgstr ""
 
 #: assets/admin/campaigns/Detail.jsx:1528
 #: assets/admin/settings/panels/ReceiptsPanel.jsx:80
-#: assets/admin/settings/Settings.jsx:278
+#: assets/admin/settings/Settings.jsx:268
 msgid "Unsaved changes"
 msgstr ""
 
@@ -5856,12 +5867,12 @@ msgid "in"
 msgstr ""
 
 #: assets/admin/campaigns/Detail.jsx:1599
-#: assets/admin/settings/Settings.jsx:349
+#: assets/admin/settings/Settings.jsx:334
 msgid "Discard"
 msgstr ""
 
 #: assets/admin/campaigns/Detail.jsx:1607
-#: assets/admin/settings/Settings.jsx:357
+#: assets/admin/settings/Settings.jsx:342
 msgid "Save changes"
 msgstr ""
 
@@ -7433,8 +7444,8 @@ msgstr ""
 #: assets/admin/donors/index.jsx:184
 #: assets/admin/donors/profile/IdentityCard.jsx:65
 #: assets/admin/onboarding/Onboarding.jsx:414
-#: assets/admin/settings/Settings.jsx:34
-#: assets/admin/settings/Settings.jsx:65
+#: assets/admin/settings/Settings.jsx:33
+#: assets/admin/settings/Settings.jsx:55
 msgid "Organization"
 msgstr ""
 
@@ -8037,8 +8048,8 @@ msgid "Recurring MRR"
 msgstr ""
 
 #: assets/admin/donors/profile/Tabs.jsx:10
-#: assets/admin/settings/Settings.jsx:37
-#: assets/admin/settings/Settings.jsx:71
+#: assets/admin/settings/Settings.jsx:36
+#: assets/admin/settings/Settings.jsx:61
 msgid "Receipts"
 msgstr ""
 
@@ -8221,8 +8232,6 @@ msgstr ""
 
 #: assets/admin/donors/profile/tabs/ConsentTab.jsx:124
 #: assets/admin/donors/profile/tabs/ConsentTab.jsx:216
-#: assets/admin/licenses/Licenses.jsx:17
-#: assets/admin/licenses/Licenses.jsx:39
 msgid "Revoked"
 msgstr ""
 
@@ -8379,8 +8388,6 @@ msgid "Search receipts"
 msgstr ""
 
 #: assets/admin/donors/profile/tabs/RecurringTab.jsx:15
-#: assets/admin/licenses/Licenses.jsx:16
-#: assets/admin/licenses/Licenses.jsx:37
 #: assets/admin/subscriptions/List.jsx:27
 #: assets/admin/_shared/components/StatusBadge.jsx:29
 #: assets/donor-portal/index.jsx:1602
@@ -9349,8 +9356,8 @@ msgstr[1] ""
 
 #: assets/admin/forms/blocks/payment-gateways/index.js:63
 #: assets/admin/forms/blocks/payment-gateways/index.js:138
-#: assets/admin/settings/Settings.jsx:33
-#: assets/admin/settings/Settings.jsx:69
+#: assets/admin/settings/Settings.jsx:32
+#: assets/admin/settings/Settings.jsx:59
 msgid "Payment gateways"
 msgstr ""
 
@@ -10029,7 +10036,7 @@ msgid "Embed"
 msgstr ""
 
 #: assets/admin/forms/Editor.jsx:1177
-#: assets/admin/settings/Settings.jsx:258
+#: assets/admin/settings/Settings.jsx:248
 msgid "Settings sections"
 msgstr ""
 
@@ -10169,7 +10176,6 @@ msgstr ""
 
 #: assets/admin/funds/List.jsx:23
 #: assets/admin/funds/List.jsx:286
-#: assets/admin/licenses/Licenses.jsx:18
 msgid "Inactive"
 msgstr ""
 
@@ -10214,7 +10220,6 @@ msgid "Reassigning…"
 msgstr ""
 
 #: assets/admin/funds/List.jsx:324
-#: assets/admin/licenses/Licenses.jsx:245
 msgid "Activate"
 msgstr ""
 
@@ -10385,179 +10390,6 @@ msgstr ""
 
 #: assets/admin/funds/List.jsx:687
 msgid "Select a fund"
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:15
-msgid "Grace period"
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:35
-msgid "Licensed"
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:36
-msgid "In grace period"
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:38
-msgid "Site limit reached"
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:40
-msgid "Key not accepted"
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:41
-msgid "Not on this key"
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:42
-#: assets/admin/licenses/Licenses.jsx:221
-msgid "Not activated"
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:61
-msgid "We could not confirm your renewal."
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:62
-msgid "Your Pro add-ons keep working, so update your payment method to keep receiving updates."
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:69
-msgid "Your license expired."
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:70
-msgid "Your Pro add-ons keep working; only updates pause. Renew to restore updates and support."
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:77
-msgid "This key was not accepted."
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:78
-msgid "Check it against your purchase email. Until it is fixed your add-ons will not receive updates or security fixes."
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:85
-msgid "This key has no seats left."
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:86
-msgid "Deactivate it on a site you no longer use, or upgrade, to receive updates here."
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:93
-msgid "This license was revoked."
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:94
-msgid "Pro features are disabled on this site. Contact support if this is unexpected."
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:111
-msgid "Your add-ons"
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:112
-msgid "Installed Pro add-ons unlocked by your key."
-msgstr ""
-
-#. translators: 1: entitled add-ons, 2: installed add-ons
-#: assets/admin/licenses/Licenses.jsx:115
-#, js-format
-msgid "%1$d of %2$d licensed"
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:128
-msgid "Not checked"
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:161
-msgid "License activated."
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:163
-msgid "Could not activate this key."
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:177
-msgid "License deactivated on this site."
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:179
-msgid "Could not deactivate."
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:191
-msgid "License re-checked."
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:193
-msgid "Could not re-check right now."
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:204
-msgid "Could not load license status. Refresh to try again."
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:211
-msgid "Loading license status…"
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:219
-msgid "Change license key"
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:219
-msgid "Activate your license"
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:225
-#: assets/admin/licenses/Licenses.jsx:234
-#: assets/admin/licenses/Licenses.jsx:278
-msgid "License key"
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:226
-msgid "Paste the key from your purchase email. It activates every installed add-on at once."
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:261
-msgid "These add-ons are installed but not licensed, so they will not receive updates or security fixes."
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:271
-msgid "License"
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:275
-msgid "Pro features are disabled on this site."
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:276
-msgid "This key unlocks every installed Dono Pro add-on."
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:285
-msgid "License key, masked"
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:294
-msgid "Deactivate this site"
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:302
-msgid "Change key"
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:309
-msgid "Re-check entitlements"
-msgstr ""
-
-#: assets/admin/licenses/Licenses.jsx:323
-msgid "One key activates every Dono Pro add-on on this site."
 msgstr ""
 
 #: assets/admin/onboarding/Onboarding.jsx:58
@@ -10901,7 +10733,7 @@ msgstr ""
 
 #: assets/admin/settings/panels/CurrencyPanel.jsx:74
 #: assets/admin/settings/panels/CurrencyPanel.jsx:95
-#: assets/admin/settings/Settings.jsx:68
+#: assets/admin/settings/Settings.jsx:58
 msgid "Exchange rates"
 msgstr ""
 
@@ -12229,75 +12061,71 @@ msgstr ""
 msgid "From the live-mode Stripe webhook endpoint. Stripe issues a separate secret for live; without it, live webhooks are rejected. Once saved it is hidden, same as the test one."
 msgstr ""
 
-#: assets/admin/settings/Settings.jsx:32
+#: assets/admin/settings/Settings.jsx:31
 msgid "Setup"
 msgstr ""
 
-#: assets/admin/settings/Settings.jsx:35
-#: assets/admin/settings/Settings.jsx:66
+#: assets/admin/settings/Settings.jsx:34
+#: assets/admin/settings/Settings.jsx:56
 msgid "Brand"
 msgstr ""
 
-#: assets/admin/settings/Settings.jsx:36
-#: assets/admin/settings/Settings.jsx:70
+#: assets/admin/settings/Settings.jsx:35
+#: assets/admin/settings/Settings.jsx:60
 msgid "Emails"
 msgstr ""
 
-#: assets/admin/settings/Settings.jsx:39
-#: assets/admin/settings/Settings.jsx:72
+#: assets/admin/settings/Settings.jsx:38
+#: assets/admin/settings/Settings.jsx:62
 msgid "Numbering"
 msgstr ""
 
-#: assets/admin/settings/Settings.jsx:40
+#: assets/admin/settings/Settings.jsx:39
 #: assets/donor-portal/index.jsx:1567
 msgid "Privacy"
 msgstr ""
 
-#: assets/admin/settings/Settings.jsx:41
+#: assets/admin/settings/Settings.jsx:40
 msgid "Roles"
 msgstr ""
 
-#: assets/admin/settings/Settings.jsx:59
-msgid "Licenses"
-msgstr ""
-
-#: assets/admin/settings/Settings.jsx:67
+#: assets/admin/settings/Settings.jsx:57
 msgid "Currency & locale"
 msgstr ""
 
-#: assets/admin/settings/Settings.jsx:73
+#: assets/admin/settings/Settings.jsx:63
 #: assets/donor-portal/index.jsx:458
 msgid "Consents"
 msgstr ""
 
-#: assets/admin/settings/Settings.jsx:74
+#: assets/admin/settings/Settings.jsx:64
 msgid "Data & privacy"
 msgstr ""
 
-#: assets/admin/settings/Settings.jsx:75
+#: assets/admin/settings/Settings.jsx:65
 msgid "Roles & permissions"
 msgstr ""
 
-#: assets/admin/settings/Settings.jsx:199
+#: assets/admin/settings/Settings.jsx:189
 msgid "All changes saved."
 msgstr ""
 
 #. translators: %s: comma-separated section names that failed
-#: assets/admin/settings/Settings.jsx:210
+#: assets/admin/settings/Settings.jsx:200
 #, js-format
 msgid "Could not save: %s."
 msgstr ""
 
-#: assets/admin/settings/Settings.jsx:249
+#: assets/admin/settings/Settings.jsx:239
 msgid "Changes save when you click Save changes"
 msgstr ""
 
-#: assets/admin/settings/Settings.jsx:336
+#: assets/admin/settings/Settings.jsx:321
 msgid "Unsaved changes in 1 section"
 msgstr ""
 
 #. translators: %d: number of sections with unsaved changes
-#: assets/admin/settings/Settings.jsx:339
+#: assets/admin/settings/Settings.jsx:324
 #, js-format
 msgid "Unsaved changes across %d section"
 msgid_plural "Unsaved changes across %d sections"

@@ -2,6 +2,7 @@
     const cfg = window.donoDeactivation || {};
     let dialog = null;
     let deactivateUrl = null;
+    let opener = null;
 
     function rowLink() {
         const row = document.querySelector( 'tr[data-plugin="' + cfg.slug + '"]' );
@@ -10,14 +11,32 @@
 
     function open( href ) {
         deactivateUrl = href;
+        opener = dialog.ownerDocument.activeElement;
         dialog.hidden = false;
         document.body.classList.add( 'dono-deact-open' );
-        dialog.querySelector( '#dono-deact-wipe' ).focus();
+        sync();
+        // Cancel, not the checkbox: opening on a destructive control means a
+        // stray space bar arms the wipe before anyone has read the dialog.
+        dialog.querySelector( '[data-dono-deact-cancel]' ).focus();
     }
 
     function close() {
         dialog.hidden = true;
         document.body.classList.remove( 'dono-deact-open' );
+        if ( opener && opener.focus ) opener.focus();
+    }
+
+    /**
+     * The dialog only looks dangerous once someone asks for the dangerous
+     * thing, and the button says which of the two it is about to do.
+     */
+    function sync() {
+        const wipe = dialog.querySelector( '#dono-deact-wipe' ).checked;
+        const submit = dialog.querySelector( '[data-dono-deact-submit]' );
+
+        dialog.classList.toggle( 'is-danger', wipe );
+        dialog.querySelector( '#dono-deact-consequence' ).hidden = ! wipe;
+        submit.textContent = wipe ? submit.dataset.labelWipe : submit.dataset.labelKeep;
     }
 
     function leave() {
@@ -61,6 +80,8 @@
                 send( leave );
             }
         } );
+
+        dialog.querySelector( '#dono-deact-wipe' ).addEventListener( 'change', sync );
 
         document.addEventListener( 'keydown', function ( e ) {
             if ( e.key === 'Escape' && ! dialog.hidden ) close();
