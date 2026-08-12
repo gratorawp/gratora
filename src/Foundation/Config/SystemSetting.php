@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Dono\Foundation\Config;
 
+defined('ABSPATH') || exit;
+
 use Dono\Vendor\Queryable\DB;
 use Dono\Vendor\Queryable\Model;
 use Dono\Vendor\Queryable\Schema\Table;

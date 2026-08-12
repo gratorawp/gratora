@@ -2,7 +2,7 @@
 Contributors: donodp
 Tags: donations, donation form, fundraising, recurring donations, nonprofit
 Requires at least: 7.0
-Tested up to: 7.0.3
+Tested up to: 7.0
 Requires PHP: 8.1
 Stable tag: 1.0.0
 License: GPL-2.0-or-later

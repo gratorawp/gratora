@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Dono\Forms;
 
+defined('ABSPATH') || exit;
+
 use Dono\Vendor\Queryable\Model;
 use Dono\Vendor\Queryable\Schema\Table;
 

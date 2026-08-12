@@ -12,6 +12,12 @@
 
 declare(strict_types=1);
 
+// Shipped files guard against being served directly over HTTP with
+// `defined('ABSPATH') || exit`. Without this, autoloading one of them from a
+// unit test exits the runner mid-suite: no failure, no summary, just a short
+// row of dots and a zero exit code.
+defined('ABSPATH') || define('ABSPATH', dirname(__DIR__) . '/');
+
 require __DIR__ . '/../vendor/autoload.php';
 require __DIR__ . '/../vendor/vendor-prefixed/autoload.php';
 
