@@ -103,12 +103,6 @@ Only when you accept a currency other than your own. Requests European Central
 Bank rates once a day, sending a three-letter currency code and nothing else.
 Terms and privacy: https://frankfurter.dev
 
-**Gravatar** (gravatar.com)
-Off by default. When enabled, donor lists request avatars through WordPress's own
-avatar functions, sending a hash of the donor's email from the visitor's browser.
-Anonymous donors are never shown one.
-Terms: https://automattic.com/terms/ | Privacy: https://automattic.com/privacy/
-
 == Installation ==
 
 1. Install Dono from Plugins > Add New, or upload the `dono` folder to `/wp-content/plugins/` and activate it.
