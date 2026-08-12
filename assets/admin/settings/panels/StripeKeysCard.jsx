@@ -60,7 +60,7 @@ function AccountFoot( { account, onRemove, removing } ) {
  * One mode's key pair. Saved keys collapse to a last-4 summary: the secret is
  * write-only, so there is nothing to show and nothing to accidentally leak.
  */
-function ModeKeys( { mode, saved, hint, publishable, onSaved, onRemove } ) {
+function ModeKeys( { mode, saved, publishable, onSaved, onRemove } ) {
     const isTest = mode === 'test';
     const [ open, setOpen ] = useState( ! saved );
     const [ sk, setSk ]     = useState( '' );
@@ -101,7 +101,7 @@ function ModeKeys( { mode, saved, hint, publishable, onSaved, onRemove } ) {
             <div className="dono-stripe-mode__head">
                 <strong>{ label }</strong>
                 { saved
-                    ? <Pill tone="green">{ sprintf( /* translators: %s: last 4 characters of the key */ __( 'Saved, ending %s', 'dono' ), hint ) }</Pill>
+                    ? <Pill tone="green">{ __( 'Saved', 'dono' ) }</Pill>
                     : <Pill tone="gray">{ __( 'Not set', 'dono' ) }</Pill> }
             </div>
 
@@ -422,7 +422,6 @@ export default function StripeKeysCard( { s } ) {
                 <ModeKeys
                     mode="test"
                     saved={ !! account?.has_test }
-                    hint={ account?.secret_hint_test || '' }
                     publishable={ account?.publishable_test || '' }
                     onSaved={ setStatus }
                     onRemove={ removeKeys }
@@ -430,7 +429,6 @@ export default function StripeKeysCard( { s } ) {
                 <ModeKeys
                     mode="live"
                     saved={ !! account?.has_live }
-                    hint={ account?.secret_hint_live || '' }
                     publishable={ account?.publishable_live || '' }
                     onSaved={ setStatus }
                     onRemove={ removeKeys }

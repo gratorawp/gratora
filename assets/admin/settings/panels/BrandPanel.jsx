@@ -114,7 +114,7 @@ export default function BrandPanel( { s } ) {
                 <div className="dono-brand-layout__main">
                     <Card
                         title={ __( 'Brand presets', 'dono' ) }
-                        sub={ __( 'Named style presets. Campaigns and forms pick one as their look. Mark one as the org default for everything that hasn\'t chosen.', 'dono' ) }
+                        sub={ __( 'Named style presets. Campaigns and forms pick one as their look.', 'dono' ) }
                         edited={ s.isDirty }
                     >
                         <div className="dono-preset-mgr">

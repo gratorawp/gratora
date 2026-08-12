@@ -1,6 +1,6 @@
 import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState, useCallback } from '@wordpress/element';
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 
 import Card from '../../_shared/components/Card';
 import { ToggleRow } from '../../_shared/components/Switch';
@@ -37,7 +37,6 @@ function Notice( { tone, icon, children } ) {
 function ModeKeys( { mode, account, onSaved, onRemove, askConfirm } ) {
     const isTest = mode === 'test';
     const saved  = isTest ? !! account?.has_test : !! account?.has_live;
-    const hint   = ( isTest ? account?.secret_hint_test : account?.secret_hint_live ) || '';
     const clientId = ( isTest ? account?.client_id_test : account?.client_id_live ) || '';
     const hasHook  = isTest ? !! account?.webhook_test : !! account?.webhook_live;
 
@@ -139,7 +138,7 @@ function ModeKeys( { mode, account, onSaved, onRemove, askConfirm } ) {
             <div className="dono-stripe-mode__head">
                 <strong>{ label }</strong>
                 { saved
-                    ? <Pill tone="green">{ sprintf( /* translators: %s: last 4 characters of the secret */ __( 'Saved, ending %s', 'dono' ), hint ) }</Pill>
+                    ? <Pill tone="green">{ __( 'Saved', 'dono' ) }</Pill>
                     : <Pill tone="gray">{ __( 'Not set', 'dono' ) }</Pill> }
             </div>
 
