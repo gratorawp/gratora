@@ -106,7 +106,7 @@ jobs:
         env:
           SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
           SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
-          SLUG: dono
+          SLUG: dono-fundraising-platform
           BUILD_DIR: dist/dono
           VERSION: ${{ github.ref_name }}
           # The banner, icon and screenshots the plugin directory shows. These
