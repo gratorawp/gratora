@@ -20,7 +20,29 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve( path.dirname( fileURLToPath( import.meta.url ) ), '..' );
-const slug = path.basename( root );
+
+/**
+ * The directory the plugin installs into, taken from the header rather than
+ * from whatever this checkout happens to be called.
+ *
+ * WordPress.org derives the slug from the plugin name and requires the text
+ * domain to match it, so the header is the one place that already has to be
+ * right. Reading the folder name instead produced a zip that installed to
+ * wp-content/plugins/dono while the directory installs to
+ * dono-fundraising-platform: a site that took one from each channel would end
+ * up running the plugin twice.
+ */
+const slug = ( () => {
+    const header = readFileSync( path.join( root, 'dono.php' ), 'utf8' );
+    const match  = header.match( /^\s*\*\s*Text Domain:\s*(\S+)\s*$/m );
+
+    if ( ! match ) {
+        console.error( 'No Text Domain in the plugin header. Refusing to guess the install directory.' );
+        process.exit( 1 );
+    }
+
+    return match[ 1 ];
+} )();
 
 function rules() {
     const file = path.join( root, '.distignore' );

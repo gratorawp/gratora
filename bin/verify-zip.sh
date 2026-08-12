@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
-# Extract dist/dono.zip and refuse it if it would not install and run.
+# Extract the built zip and refuse it if it would not install and run.
 #
-# The extraction is not incidental: deploy.yml publishes dist/dono, so this is
+# The extraction is not incidental: deploy.yml publishes that same tree, so this is
 # what produces the tree that ships, and the thing verified and the thing
 # uploaded are the same bytes.
 #
@@ -18,8 +18,12 @@ set -euo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
-ZIP=dist/dono.zip
-OUT=dist/dono
+# Same source of truth as the packager: the header, not the checkout's name.
+SLUG=$(sed -n 's/^[[:space:]]*\*[[:space:]]*Text Domain:[[:space:]]*\([^[:space:]]*\).*/\1/p' dono.php | head -1)
+test -n "$SLUG" || { echo "::error::no Text Domain in the plugin header" >&2; exit 1; }
+
+ZIP="dist/$SLUG.zip"
+OUT="dist/$SLUG"
 
 fail() { echo "::error::$1" >&2; exit 1; }
 
@@ -48,9 +52,10 @@ done
 # prefixed one, and `composer install --no-dev` removes Strauss and regenerates
 # that file without the edit. Requiring only vendor/autoload.php therefore
 # fails against every real release build while the plugin itself is fine.
-php -r '
-    require "dist/dono/vendor/autoload.php";
-    require "dist/dono/vendor/vendor-prefixed/autoload.php";
+OUT="$OUT" php -r '
+    $out = getenv("OUT");
+    require "$out/vendor/autoload.php";
+    require "$out/vendor/vendor-prefixed/autoload.php";
     $need = [
       "Dono\\Vendor\\Queryable\\Model",
       "Dono\\Vendor\\Dompdf\\Dompdf",

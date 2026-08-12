@@ -97,7 +97,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dono-plugin
-          path: dist/dono.zip
+          path: dist/dono-fundraising-platform.zip
 
       # Only after everything above passed, and never on a dry run.
       - name: Publish to WordPress.org
@@ -107,7 +107,7 @@ jobs:
           SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
           SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
           SLUG: dono-fundraising-platform
-          BUILD_DIR: dist/dono
+          BUILD_DIR: dist/dono-fundraising-platform
           VERSION: ${{ github.ref_name }}
           # The banner, icon and screenshots the plugin directory shows. These
           # live in SVN's assets/ rather than in the plugin, so without this
