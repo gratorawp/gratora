@@ -139,10 +139,10 @@ final class SupporterWallBlock extends CampaignBlock
         if (! $byDonor) {
             return View::loadRelative(__DIR__, 'views/supporter-wall', [
                 'title'        => (string) ($attrs['title'] ?? ''),
-            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('The supporter wall is empty.', 'dono'),
+            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('The supporter wall is empty.', 'dono-fundraising-platform'),
             // No button when the campaign cannot take the money: a
             // draft or finished campaign has nothing to offer.
-            'emptySubText' => __('Add the first name to it.', 'dono'),
+            'emptySubText' => __('Add the first name to it.', 'dono-fundraising-platform'),
             'emptyIcon'    => 'supporters',
                 'entries'      => [],
                 'showMessage'  => $showMessage,
@@ -191,10 +191,10 @@ final class SupporterWallBlock extends CampaignBlock
 
         return View::loadRelative(__DIR__, 'views/supporter-wall', [
             'title'        => (string) ($attrs['title'] ?? ''),
-            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('The supporter wall is empty.', 'dono'),
+            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('The supporter wall is empty.', 'dono-fundraising-platform'),
             // No button when the campaign cannot take the money: a
             // draft or finished campaign has nothing to offer.
-            'emptySubText' => __('Add the first name to it.', 'dono'),
+            'emptySubText' => __('Add the first name to it.', 'dono-fundraising-platform'),
             'emptyIcon'    => 'supporters',
             'entries'      => $entries,
             'showMessage'  => $showMessage,

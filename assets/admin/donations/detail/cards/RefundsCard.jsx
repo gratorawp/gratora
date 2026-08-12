@@ -12,11 +12,11 @@ export default function RefundsCard( { donation, refunds, onIssue } ) {
             <div className="dd-card__body" style={ { padding: '14px 0' } }>
                 <div style={ { padding: '0 18px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' } }>
                     <span className="dd-pill is-info">
-                        { formatAmount( donation.refunded_cents, donation.currency ) } { __( 'refunded', 'dono' ) }
+                        { formatAmount( donation.refunded_cents, donation.currency ) } { __( 'refunded', 'dono-fundraising-platform' ) }
                     </span>
                     { donation.refundable_cents > 0 && (
                         <button type="button" className="btn--link" onClick={ onIssue }>
-                            { __( 'Issue another refund →', 'dono' ) }
+                            { __( 'Issue another refund →', 'dono-fundraising-platform' ) }
                         </button>
                     ) }
                 </div>
@@ -24,11 +24,11 @@ export default function RefundsCard( { donation, refunds, onIssue } ) {
                     <table className="dd-table">
                         <thead>
                             <tr>
-                                <th>{ __( 'When', 'dono' ) }</th>
-                                <th style={ { textAlign: 'right' } }>{ __( 'Amount', 'dono' ) }</th>
-                                <th>{ __( 'Reason', 'dono' ) }</th>
-                                <th>{ __( 'Gateway ID', 'dono' ) }</th>
-                                <th>{ __( 'Status', 'dono' ) }</th>
+                                <th>{ __( 'When', 'dono-fundraising-platform' ) }</th>
+                                <th style={ { textAlign: 'right' } }>{ __( 'Amount', 'dono-fundraising-platform' ) }</th>
+                                <th>{ __( 'Reason', 'dono-fundraising-platform' ) }</th>
+                                <th>{ __( 'Gateway ID', 'dono-fundraising-platform' ) }</th>
+                                <th>{ __( 'Status', 'dono-fundraising-platform' ) }</th>
                             </tr>
                         </thead>
                         <tbody>

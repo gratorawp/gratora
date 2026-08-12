@@ -61,8 +61,8 @@ final class Activator
 
         $fund = Fund::make();
         $fund->code           = 'general';
-        $fund->name           = __('General', 'dono');
-        $fund->description    = __('Default fund for unrestricted donations.', 'dono');
+        $fund->name           = __('General', 'dono-fundraising-platform');
+        $fund->description    = __('Default fund for unrestricted donations.', 'dono-fundraising-platform');
         $fund->is_restricted  = false;
         $fund->is_default     = true;
         $fund->is_active      = true;

@@ -26,7 +26,7 @@ export default function ImportTab( { setNotice } ) {
         try {
             parsed = JSON.parse( await file.text() );
         } catch ( e ) {
-            setNotice( { type: 'error', text: __( 'That file is not JSON. Use a file the Export tab produced.', 'dono' ) } );
+            setNotice( { type: 'error', text: __( 'That file is not JSON. Use a file the Export tab produced.', 'dono-fundraising-platform' ) } );
             return;
         }
 
@@ -34,20 +34,20 @@ export default function ImportTab( { setNotice } ) {
 
         setConfirm( {
             title: isFullExport
-                ? __( 'Restore records from this file', 'dono' )
-                : __( 'Replace settings from this file', 'dono' ),
+                ? __( 'Restore records from this file', 'dono-fundraising-platform' )
+                : __( 'Replace settings from this file', 'dono-fundraising-platform' ),
             message: isFullExport
                 ? sprintf(
                     /* translators: %s: the chosen file name. */
-                    __( '%s will add its campaigns, funds, forms, donors, donations, recurring plans and receipts to this site. Anything already here is left as it is, so running it twice is safe. Donors erased on this site stay erased.', 'dono' ),
+                    __( '%s will add its campaigns, funds, forms, donors, donations, recurring plans and receipts to this site. Anything already here is left as it is, so running it twice is safe. Donors erased on this site stay erased.', 'dono-fundraising-platform' ),
                     file.name
                 )
                 : sprintf(
                     /* translators: %s: the chosen file name. */
-                    __( '%s will overwrite your gateway, email, receipt, numbering and role settings. Donations, donors and campaigns are untouched. This cannot be undone.', 'dono' ),
+                    __( '%s will overwrite your gateway, email, receipt, numbering and role settings. Donations, donors and campaigns are untouched. This cannot be undone.', 'dono-fundraising-platform' ),
                     file.name
                 ),
-            confirmLabel: isFullExport ? __( 'Restore', 'dono' ) : __( 'Replace settings', 'dono' ),
+            confirmLabel: isFullExport ? __( 'Restore', 'dono-fundraising-platform' ) : __( 'Replace settings', 'dono-fundraising-platform' ),
             destructive:  ! isFullExport,
             onConfirm:    () => doImport( parsed ),
         } );
@@ -75,7 +75,7 @@ export default function ImportTab( { setNotice } ) {
 
                 parts.push( sprintf(
                     /* translators: %d: number of records. */
-                    _n( '%d record restored', '%d records restored', created, 'dono' ),
+                    _n( '%d record restored', '%d records restored', created, 'dono-fundraising-platform' ),
                     created
                 ) );
                 // Said plainly, because "already here" is the expected answer on
@@ -83,14 +83,14 @@ export default function ImportTab( { setNotice } ) {
                 if ( existing ) {
                     parts.push( sprintf(
                         /* translators: %d: number of records. */
-                        _n( '%d was already here', '%d were already here', existing, 'dono' ),
+                        _n( '%d was already here', '%d were already here', existing, 'dono-fundraising-platform' ),
                         existing
                     ) );
                 }
                 if ( skipped ) {
                     parts.push( sprintf(
                         /* translators: %d: number of records. */
-                        _n( '%d skipped', '%d skipped', skipped, 'dono' ),
+                        _n( '%d skipped', '%d skipped', skipped, 'dono-fundraising-platform' ),
                         skipped
                     ) );
                 }
@@ -99,19 +99,19 @@ export default function ImportTab( { setNotice } ) {
             if ( applied > 0 ) {
                 parts.push( sprintf(
                     /* translators: %d: number of settings groups. */
-                    _n( '%d settings group restored', '%d settings groups restored', applied, 'dono' ),
+                    _n( '%d settings group restored', '%d settings groups restored', applied, 'dono-fundraising-platform' ),
                     applied
                 ) );
             }
 
             setNotice( parts.length
-                ? { type: 'success', text: parts.join( ', ' ) + '. ' + __( 'Reload the page to see it.', 'dono' ) }
-                : { type: 'error', text: __( 'Nothing in that file matched a Dono setting or record.', 'dono' ) }
+                ? { type: 'success', text: parts.join( ', ' ) + '. ' + __( 'Reload the page to see it.', 'dono-fundraising-platform' ) }
+                : { type: 'error', text: __( 'Nothing in that file matched a Dono setting or record.', 'dono-fundraising-platform' ) }
             );
         } catch ( err ) {
             setNotice( {
                 type: 'error',
-                text: err?.message || __( 'Import failed. Check that the file is a Dono settings export.', 'dono' ),
+                text: err?.message || __( 'Import failed. Check that the file is a Dono settings export.', 'dono-fundraising-platform' ),
             } );
         } finally {
             setImporting( false );
@@ -122,8 +122,8 @@ export default function ImportTab( { setNotice } ) {
     return (
         <div className="dono-panel">
             <Card
-                title={ __( 'Import settings', 'dono' ) }
-                sub={ __( 'Reads a Dono settings export and replaces the matching settings on this site. Donations, donors and campaigns are left alone.', 'dono' ) }
+                title={ __( 'Import settings', 'dono-fundraising-platform' ) }
+                sub={ __( 'Reads a Dono settings export and replaces the matching settings on this site. Donations, donors and campaigns are left alone.', 'dono-fundraising-platform' ) }
             >
                 <div className="dono-advanced-actions">
                     <Btn
@@ -132,7 +132,7 @@ export default function ImportTab( { setNotice } ) {
                         disabled={ importing }
                         isBusy={ importing }
                     >
-                        { importing ? __( 'Importing…', 'dono' ) : __( 'Choose a JSON file', 'dono' ) }
+                        { importing ? __( 'Importing…', 'dono-fundraising-platform' ) : __( 'Choose a JSON file', 'dono-fundraising-platform' ) }
                     </Btn>
                     <input
                         ref={ fileRef }
@@ -143,7 +143,7 @@ export default function ImportTab( { setNotice } ) {
                     />
                 </div>
                 <p className="dono-tools-note">
-                    { __( 'A masked secret in the file leaves the stored key untouched, so importing an export cannot wipe a gateway key it was unable to carry.', 'dono' ) }
+                    { __( 'A masked secret in the file leaves the stored key untouched, so importing an export cannot wipe a gateway key it was unable to carry.', 'dono-fundraising-platform' ) }
                 </p>
             </Card>
 

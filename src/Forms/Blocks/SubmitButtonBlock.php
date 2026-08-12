@@ -33,7 +33,7 @@ final class SubmitButtonBlock implements Block
         }
 
         return View::loadRelative(__DIR__, 'views/submit-button', [
-            'label' => (string) ($attrs['label'] ?? '') ?: __('Donate now', 'dono'),
+            'label' => (string) ($attrs['label'] ?? '') ?: __('Donate now', 'dono-fundraising-platform'),
             'align' => $align,
         ]);
     }

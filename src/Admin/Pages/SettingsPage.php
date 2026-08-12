@@ -35,7 +35,7 @@ final class SettingsPage extends HookProvider
     {
         $pages[] = [
             'id'         => self::PAGE_ID,
-            'title'      => __('Settings', 'dono'),
+            'title'      => __('Settings', 'dono-fundraising-platform'),
             'capability' => 'dono_access_settings',
             'position'   => 90,
             'render'     => [$this, 'render'],
@@ -78,7 +78,7 @@ final class SettingsPage extends HookProvider
             $asset['version']      ?? DONO_VERSION,
             true
         );
-        wp_set_script_translations(self::HANDLE, 'dono', DONO_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE, 'dono-fundraising-platform', DONO_DIR . 'languages');
 
         wp_enqueue_style('wp-components');
         wp_enqueue_style(

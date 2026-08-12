@@ -17,12 +17,12 @@ export default function ScheduleFields( {
     onStartsAt,
     endsAt,
     onEndsAt,
-    title       = __( 'Set a schedule', 'dono' ),
-    sub         = __( 'Add an optional start and end date', 'dono' ),
-    startLabel  = __( 'Start date', 'dono' ),
-    endLabel    = __( 'End date', 'dono' ),
-    startPlaceholder = __( 'Starts immediately', 'dono' ),
-    endPlaceholder   = __( 'No end date', 'dono' ),
+    title       = __( 'Set a schedule', 'dono-fundraising-platform' ),
+    sub         = __( 'Add an optional start and end date', 'dono-fundraising-platform' ),
+    startLabel  = __( 'Start date', 'dono-fundraising-platform' ),
+    endLabel    = __( 'End date', 'dono-fundraising-platform' ),
+    startPlaceholder = __( 'Starts immediately', 'dono-fundraising-platform' ),
+    endPlaceholder   = __( 'No end date', 'dono-fundraising-platform' ),
 } ) {
     // Turning the schedule off clears the dates: otherwise a value picked and
     // then hidden is still submitted, and the form says "always on" while

@@ -20,10 +20,10 @@ export default function RelatedDonationsCard( { donor, related } ) {
                     <table className="dd-table">
                         <thead>
                             <tr>
-                                <th>{ __( 'Reference', 'dono' ) }</th>
-                                <th>{ __( 'Date', 'dono' ) }</th>
-                                <th style={ { textAlign: 'right' } }>{ __( 'Amount', 'dono' ) }</th>
-                                <th>{ __( 'Status', 'dono' ) }</th>
+                                <th>{ __( 'Reference', 'dono-fundraising-platform' ) }</th>
+                                <th>{ __( 'Date', 'dono-fundraising-platform' ) }</th>
+                                <th style={ { textAlign: 'right' } }>{ __( 'Amount', 'dono-fundraising-platform' ) }</th>
+                                <th>{ __( 'Status', 'dono-fundraising-platform' ) }</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -33,7 +33,7 @@ export default function RelatedDonationsCard( { donor, related } ) {
                                     <tr key={ d.id }>
                                         <td className="ref-cell">
                                             <a href={ donationHref( d.reference ) }>{ d.reference }</a>
-                                            { d.is_self && <span className="muted" style={ { fontFamily: 'inherit', fontSize: 11, marginLeft: 6 } }>{ __( '(this one)', 'dono' ) }</span> }
+                                            { d.is_self && <span className="muted" style={ { fontFamily: 'inherit', fontSize: 11, marginLeft: 6 } }>{ __( '(this one)', 'dono-fundraising-platform' ) }</span> }
                                         </td>
                                         <td>{ formatDate( d.paid_at || d.created_at ) }</td>
                                         <td className="num-cell">{ formatAmount( d.amount_cents, d.currency ) }</td>

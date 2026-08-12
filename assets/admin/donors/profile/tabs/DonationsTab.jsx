@@ -11,13 +11,13 @@ import { notify } from '../../../_shared/notify';
 import { formatAmount, formatDateTime, timeAgo, donationStatusPill } from '../helpers';
 
 const STATUS_OPTIONS = [
-    { value: 'paid',           label: __( 'Paid', 'dono' ) },
-    { value: 'pending',        label: __( 'Pending', 'dono' ) },
-    { value: 'processing',     label: __( 'Processing', 'dono' ) },
-    { value: 'failed',         label: __( 'Failed', 'dono' ) },
-    { value: 'refunded',       label: __( 'Refunded', 'dono' ) },
-    { value: 'partial_refund', label: __( 'Partial refund', 'dono' ) },
-    { value: 'disputed',       label: __( 'Disputed', 'dono' ) },
+    { value: 'paid',           label: __( 'Paid', 'dono-fundraising-platform' ) },
+    { value: 'pending',        label: __( 'Pending', 'dono-fundraising-platform' ) },
+    { value: 'processing',     label: __( 'Processing', 'dono-fundraising-platform' ) },
+    { value: 'failed',         label: __( 'Failed', 'dono-fundraising-platform' ) },
+    { value: 'refunded',       label: __( 'Refunded', 'dono-fundraising-platform' ) },
+    { value: 'partial_refund', label: __( 'Partial refund', 'dono-fundraising-platform' ) },
+    { value: 'disputed',       label: __( 'Disputed', 'dono-fundraising-platform' ) },
 ];
 
 function donationHref( reference ) {
@@ -68,7 +68,7 @@ export default function DonationsTab( { donorId, redacted } ) {
                 setTotal( parseInt( res.headers.get( 'X-WP-Total' ) || '0', 10 ) );
                 setError( '' );
             } )
-            .catch( () => { if ( ! aborted ) { setData( [] ); setTotal( 0 ); setError( __( 'Could not load donations. Refresh to try again.', 'dono' ) ); } } )
+            .catch( () => { if ( ! aborted ) { setData( [] ); setTotal( 0 ); setError( __( 'Could not load donations. Refresh to try again.', 'dono-fundraising-platform' ) ); } } )
             .finally( () => { if ( ! aborted ) setLoading( false ); } );
         return () => { aborted = true; };
     }, [ apiParams ] );
@@ -76,7 +76,7 @@ export default function DonationsTab( { donorId, redacted } ) {
     const fields = useMemo( () => [
         {
             id:    'reference',
-            label: __( 'Reference', 'dono' ),
+            label: __( 'Reference', 'dono-fundraising-platform' ),
             render: ( { item } ) => (
                 <a
                     href={ donationHref( item.reference ) }
@@ -88,7 +88,7 @@ export default function DonationsTab( { donorId, redacted } ) {
         },
         {
             id:    'amount',
-            label: __( 'Amount', 'dono' ),
+            label: __( 'Amount', 'dono-fundraising-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <span style={ { fontVariantNumeric: 'tabular-nums', fontWeight: 500 } }>
@@ -98,7 +98,7 @@ export default function DonationsTab( { donorId, redacted } ) {
         },
         {
             id:    'status',
-            label: __( 'Status', 'dono' ),
+            label: __( 'Status', 'dono-fundraising-platform' ),
             elements: STATUS_OPTIONS,
             enableSorting: false,
             filterBy: { operators: [ 'is' ] },
@@ -109,19 +109,19 @@ export default function DonationsTab( { donorId, redacted } ) {
         },
         {
             id:    'frequency',
-            label: __( 'Frequency', 'dono' ),
+            label: __( 'Frequency', 'dono-fundraising-platform' ),
             render: ( { item } ) => item.frequency === 'one_time'
-                ? __( 'One-time', 'dono' )
+                ? __( 'One-time', 'dono-fundraising-platform' )
                 : <span style={ { textTransform: 'capitalize' } }>{ item.frequency }</span>,
         },
         {
             id:    'campaign',
-            label: __( 'Campaign', 'dono' ),
+            label: __( 'Campaign', 'dono-fundraising-platform' ),
             render: ( { item } ) => item.campaign?.title || '-',
         },
         {
             id:    'created_at',
-            label: __( 'When', 'dono' ),
+            label: __( 'When', 'dono-fundraising-platform' ),
             enableSorting: true,
             render: ( { item } ) => {
                 const iso = item.paid_at || item.created_at;
@@ -147,7 +147,7 @@ export default function DonationsTab( { donorId, redacted } ) {
     const actions = useMemo( () => [
         {
             id:           'mark-paid',
-            label:        __( 'Mark as paid', 'dono' ),
+            label:        __( 'Mark as paid', 'dono-fundraising-platform' ),
             icon:         () => <CheckIcon size={ 16 } strokeWidth={ 1.75 } />,
             supportsBulk: true,
             isEligible:   ( item ) => item.status === 'pending' || item.status === 'processing',
@@ -156,21 +156,21 @@ export default function DonationsTab( { donorId, redacted } ) {
                 if ( ! targets.length ) return;
                 const n = targets.length;
                 const message = n === 1
-                    ? __( 'Mark this donation as paid? A receipt will be sent.', 'dono' )
+                    ? __( 'Mark this donation as paid? A receipt will be sent.', 'dono-fundraising-platform' )
                     : sprintf(
                         /* translators: %d: number of donations */
                         _n(
                             'Mark %d donation as paid? Receipts will be sent.',
                             'Mark %d donations as paid? Receipts will be sent.',
                             n,
-                            'dono'
+                            'dono-fundraising-platform'
                         ),
                         n
                     );
                 setConfirm( {
-                    title:        __( 'Mark donations as paid', 'dono' ),
+                    title:        __( 'Mark donations as paid', 'dono-fundraising-platform' ),
                     message,
-                    confirmLabel: __( 'Mark as paid', 'dono' ),
+                    confirmLabel: __( 'Mark as paid', 'dono-fundraising-platform' ),
                     onConfirm: async () => {
                         // allSettled and a finally: a partial failure still
                         // confirmed some of them and emailed those donors a
@@ -187,14 +187,14 @@ export default function DonationsTab( { donorId, redacted } ) {
                         if ( done > 0 ) {
                             notify.success( sprintf(
                                 /* translators: %d: number of donations */
-                                _n( '%d donation marked paid.', '%d donations marked paid.', done, 'dono' ),
+                                _n( '%d donation marked paid.', '%d donations marked paid.', done, 'dono-fundraising-platform' ),
                                 done
                             ) );
                         }
                         if ( failed > 0 ) {
                             notify.error( sprintf(
                                 /* translators: %d: number of donations */
-                                _n( '%d donation could not be marked paid.', '%d donations could not be marked paid.', failed, 'dono' ),
+                                _n( '%d donation could not be marked paid.', '%d donations could not be marked paid.', failed, 'dono-fundraising-platform' ),
                                 failed
                             ) );
                         }
@@ -206,7 +206,7 @@ export default function DonationsTab( { donorId, redacted } ) {
         },
         {
             id:           'resend-receipt',
-            label:        __( 'Resend receipt', 'dono' ),
+            label:        __( 'Resend receipt', 'dono-fundraising-platform' ),
             icon:         () => <MailIcon size={ 16 } strokeWidth={ 1.75 } />,
             supportsBulk: true,
             // An erased donor has no address left to send a receipt to.
@@ -220,16 +220,16 @@ export default function DonationsTab( { donorId, redacted } ) {
                 if ( ! targets.length ) return;
                 const n = targets.length;
                 const message = n === 1
-                    ? __( 'Resend the receipt for this donation?', 'dono' )
+                    ? __( 'Resend the receipt for this donation?', 'dono-fundraising-platform' )
                     : sprintf(
                         /* translators: %d: number of donations */
-                        _n( 'Resend receipts for %d donation?', 'Resend receipts for %d donations?', n, 'dono' ),
+                        _n( 'Resend receipts for %d donation?', 'Resend receipts for %d donations?', n, 'dono-fundraising-platform' ),
                         n
                     );
                 setConfirm( {
-                    title:        __( 'Resend receipts', 'dono' ),
+                    title:        __( 'Resend receipts', 'dono-fundraising-platform' ),
                     message,
-                    confirmLabel: __( 'Resend', 'dono' ),
+                    confirmLabel: __( 'Resend', 'dono-fundraising-platform' ),
                     onConfirm: async () => {
                         // Silence read as nothing happening, so admins pressed
                         // it again and donors got the receipt twice.
@@ -244,14 +244,14 @@ export default function DonationsTab( { donorId, redacted } ) {
                         if ( sent > 0 ) {
                             notify.success( sprintf(
                                 /* translators: %d: receipt count */
-                                _n( '%d receipt resent.', '%d receipts resent.', sent, 'dono' ),
+                                _n( '%d receipt resent.', '%d receipts resent.', sent, 'dono-fundraising-platform' ),
                                 sent
                             ) );
                         }
                         if ( failed > 0 ) {
                             notify.error( sprintf(
                                 /* translators: %d: receipt count */
-                                _n( '%d receipt could not be resent.', '%d receipts could not be resent.', failed, 'dono' ),
+                                _n( '%d receipt could not be resent.', '%d receipts could not be resent.', failed, 'dono-fundraising-platform' ),
                                 failed
                             ) );
                         }
@@ -276,7 +276,7 @@ export default function DonationsTab( { donorId, redacted } ) {
                 paginationInfo={ paginationInfo }
                 defaultLayouts={ { table: {} } }
                 getItemId={ ( item ) => String( item.id ) }
-                searchLabel={ __( 'Search by reference', 'dono' ) }
+                searchLabel={ __( 'Search by reference', 'dono-fundraising-platform' ) }
             />
             <ConfirmDialog confirm={ confirm } onClose={ () => setConfirm( null ) } />
         </div>

@@ -28,14 +28,14 @@ export default function RolesPanel( { s } ) {
             <div className="dono-panel">
                 <Card>
                     <p style={ { color: '#b42318', margin: '0 0 12px' } }>
-                        { __( 'Could not load roles.', 'dono' ) }
+                        { __( 'Could not load roles.', 'dono-fundraising-platform' ) }
                     </p>
-                    <Btn variant="secondary" onClick={ load }>{ __( 'Retry', 'dono' ) }</Btn>
+                    <Btn variant="secondary" onClick={ load }>{ __( 'Retry', 'dono-fundraising-platform' ) }</Btn>
                 </Card>
             </div>
         );
     }
-    if ( ! data ) return <p>{ __( 'Loading…', 'dono' ) }</p>;
+    if ( ! data ) return <p>{ __( 'Loading…', 'dono-fundraising-platform' ) }</p>;
 
     // Both come from the server: an add-on registers capabilities through the
     // dono.capabilities filter, so a list kept here could never include them.
@@ -66,7 +66,7 @@ export default function RolesPanel( { s } ) {
             <Card edited={ s.isDirty }>
                 <div className="dono-roles-table" style={ { '--dono-role-count': roles.length } }>
                     <div className="dono-roles-table__head">
-                        <div className="dono-roles-table__role-cell">{ __( 'Capability', 'dono' ) }</div>
+                        <div className="dono-roles-table__role-cell">{ __( 'Capability', 'dono-fundraising-platform' ) }</div>
                         { roles.map( ( r ) => (
                             <div key={ r.slug } className="dono-roles-table__role">
                                 <strong>{ r.name }</strong>
@@ -77,7 +77,7 @@ export default function RolesPanel( { s } ) {
                                         onClick={ () => setAll( r.slug, true ) }
                                         disabled={ r.slug === 'administrator' }
                                     >
-                                        { __( 'All', 'dono' ) }
+                                        { __( 'All', 'dono-fundraising-platform' ) }
                                     </Btn>
                                     <Btn
                                         variant="ghost"
@@ -85,7 +85,7 @@ export default function RolesPanel( { s } ) {
                                         onClick={ () => setAll( r.slug, false ) }
                                         disabled={ r.slug === 'administrator' }
                                     >
-                                        { __( 'None', 'dono' ) }
+                                        { __( 'None', 'dono-fundraising-platform' ) }
                                     </Btn>
                                 </div>
                             </div>

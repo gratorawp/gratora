@@ -10,8 +10,8 @@ export default function ActiveCampaigns( { rows = [] } ) {
             <EmptyState
                 compact
                 icon={ <Target size={ 22 } strokeWidth={ 1.75 } /> }
-                title={ __( 'No active campaigns', 'dono' ) }
-                body={ __( 'Publish a campaign to see it appear here with goal progress.', 'dono' ) }
+                title={ __( 'No active campaigns', 'dono-fundraising-platform' ) }
+                body={ __( 'Publish a campaign to see it appear here with goal progress.', 'dono-fundraising-platform' ) }
             />
         );
     }
@@ -45,14 +45,14 @@ export default function ActiveCampaigns( { rows = [] } ) {
                                 { target > 0 ? (
                                     sprintf(
                                         /* translators: 1: raised value, 2: target value, 3: percent */
-                                        __( '%1$s of %2$s · %3$d%%', 'dono' ),
+                                        __( '%1$s of %2$s · %3$d%%', 'dono-fundraising-platform' ),
                                         fmt( current ), fmt( target ), pct
                                     )
                                 ) : fmt( current ) }
                             </span>
                             { c.last_donation_at && (
                                 <span className="dono-active-campaigns__when">
-                                    { sprintf( /* translators: %s: relative time */ __( 'Last: %s', 'dono' ), timeAgo( c.last_donation_at ) ) }
+                                    { sprintf( /* translators: %s: relative time */ __( 'Last: %s', 'dono-fundraising-platform' ), timeAgo( c.last_donation_at ) ) }
                                 </span>
                             ) }
                         </div>

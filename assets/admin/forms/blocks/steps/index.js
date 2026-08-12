@@ -16,20 +16,20 @@ const NAME = 'dono/steps';
 const ALLOWED = [ 'dono/step' ];
 
 const TEMPLATE = [
-    [ 'dono/step', { title: __( 'Your donation', 'dono' ) } ],
-    [ 'dono/step', { title: __( 'Your info', 'dono' ) } ],
+    [ 'dono/step', { title: __( 'Your donation', 'dono-fundraising-platform' ) } ],
+    [ 'dono/step', { title: __( 'Your info', 'dono-fundraising-platform' ) } ],
 ];
 
 const PROGRESS_STYLES = [
-    { value: 'dots', label: __( 'Dots',   'dono' ) },
-    { value: 'bar',  label: __( 'Bar',    'dono' ) },
-    { value: 'none', label: __( 'None',   'dono' ) },
+    { value: 'dots', label: __( 'Dots',   'dono-fundraising-platform' ) },
+    { value: 'bar',  label: __( 'Bar',    'dono-fundraising-platform' ) },
+    { value: 'none', label: __( 'None',   'dono-fundraising-platform' ) },
 ];
 
 const PROGRESS_HELP = {
-    dots: __( 'Centered dots beneath the form.', 'dono' ),
-    bar:  __( 'Header bar with back arrow + title + progress fill.', 'dono' ),
-    none: __( 'No progress indicator.', 'dono' ),
+    dots: __( 'Centered dots beneath the form.', 'dono-fundraising-platform' ),
+    bar:  __( 'Header bar with back arrow + title + progress fill.', 'dono-fundraising-platform' ),
+    none: __( 'No progress indicator.', 'dono-fundraising-platform' ),
 };
 
 function Edit( { attributes, setAttributes, clientId } ) {
@@ -48,7 +48,7 @@ function Edit( { attributes, setAttributes, clientId } ) {
         const next = createBlock( 'dono/step', {
             title: sprintf(
                 /* translators: %d: new step number. */
-                __( 'Step %d', 'dono' ),
+                __( 'Step %d', 'dono-fundraising-platform' ),
                 childCount + 1
             ),
         } );
@@ -58,30 +58,30 @@ function Edit( { attributes, setAttributes, clientId } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Wizard navigation', 'dono' ) } initialOpen>
+                <PanelBody title={ __( 'Wizard navigation', 'dono-fundraising-platform' ) } initialOpen>
                     <Segmented
-                        label={ __( 'Progress style', 'dono' ) }
+                        label={ __( 'Progress style', 'dono-fundraising-platform' ) }
                         value={ progressStyle }
                         onChange={ ( v ) => setAttributes( { progressStyle: v } ) }
                         options={ PROGRESS_STYLES }
                         help={ PROGRESS_HELP[ progressStyle ] }
                     />
                     <TextControl
-                        label={ __( 'Back-button label', 'dono' ) }
+                        label={ __( 'Back-button label', 'dono-fundraising-platform' ) }
                         value={ prevLabel }
                         onChange={ ( v ) => setAttributes( { prevLabel: v } ) }
-                        placeholder={ __( 'Back', 'dono' ) }
+                        placeholder={ __( 'Back', 'dono-fundraising-platform' ) }
                         help={ progressStyle === 'bar'
-                            ? __( 'Used as the aria-label on the back arrow.', 'dono' )
+                            ? __( 'Used as the aria-label on the back arrow.', 'dono-fundraising-platform' )
                             : undefined
                         }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Next-button label', 'dono' ) }
+                        label={ __( 'Next-button label', 'dono-fundraising-platform' ) }
                         value={ nextLabel }
                         onChange={ ( v ) => setAttributes( { nextLabel: v } ) }
-                        placeholder={ __( 'Continue', 'dono' ) }
+                        placeholder={ __( 'Continue', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -95,7 +95,7 @@ function Edit( { attributes, setAttributes, clientId } ) {
                 />
                 <div className="dono-block-preview__steps-add">
                     <Button variant="secondary" onClick={ addStep }>
-                        { __( '+ Add step', 'dono' ) }
+                        { __( '+ Add step', 'dono-fundraising-platform' ) }
                     </Button>
                 </div>
             </div>
@@ -106,8 +106,8 @@ function Edit( { attributes, setAttributes, clientId } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Steps', 'dono' ),
-        description: __( 'Split the form into pages a donor clicks through. Add a Step inside to make a new page.', 'dono' ),
+        title:       __( 'Steps', 'dono-fundraising-platform' ),
+        description: __( 'Split the form into pages a donor clicks through. Add a Step inside to make a new page.', 'dono-fundraising-platform' ),
         category:    'dono-content',
         icon:        BlockIcons[ 'steps' ],
         supports:    { html: false, anchor: false, inserter: true, multiple: false },

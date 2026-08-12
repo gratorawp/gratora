@@ -19,18 +19,18 @@ export default function NeedsAttention( { items = [] } ) {
                 method: 'POST',
                 data:   { key: item.key, signature: item.signature || 'x' },
             } );
-            notify.success( __( 'Dismissed. It comes back if the situation changes.', 'dono' ), {
+            notify.success( __( 'Dismissed. It comes back if the situation changes.', 'dono-fundraising-platform' ), {
                 // The default 4s is not long enough to read the sentence and
                 // decide, and the row is already gone by then.
                 duration: 10000,
                 action: {
-                    label:   __( 'Undo', 'dono' ),
+                    label:   __( 'Undo', 'dono-fundraising-platform' ),
                     onClick: () => restore( item ),
                 },
             } );
         } catch ( err ) {
             setHidden( ( h ) => h.filter( ( k ) => k !== item.key ) );
-            notify.error( err?.message || __( 'Could not dismiss that.', 'dono' ) );
+            notify.error( err?.message || __( 'Could not dismiss that.', 'dono-fundraising-platform' ) );
         }
     };
 
@@ -43,14 +43,14 @@ export default function NeedsAttention( { items = [] } ) {
             } );
             setHidden( ( h ) => h.filter( ( k ) => k !== item.key ) );
         } catch ( err ) {
-            notify.error( err?.message || __( 'Could not bring that back.', 'dono' ) );
+            notify.error( err?.message || __( 'Could not bring that back.', 'dono-fundraising-platform' ) );
         }
     };
 
     if ( visible.length === 0 ) {
         return (
             <p className="dono-attention__empty">
-                { __( 'Nothing needs attention right now.', 'dono' ) }
+                { __( 'Nothing needs attention right now.', 'dono-fundraising-platform' ) }
             </p>
         );
     }
@@ -63,15 +63,15 @@ export default function NeedsAttention( { items = [] } ) {
                     <span className="dono-attention__title">{ item.title }</span>
                     { item.action_href && (
                         <a className="dono-attention__action" href={ item.action_href }>
-                            { item.action_label || __( 'Open', 'dono' ) } →
+                            { item.action_label || __( 'Open', 'dono-fundraising-platform' ) } →
                         </a>
                     ) }
                     <button
                         type="button"
                         className="dono-attention__dismiss"
                         onClick={ () => dismiss( item ) }
-                        aria-label={ __( 'Dismiss', 'dono' ) }
-                        title={ __( 'Dismiss', 'dono' ) }
+                        aria-label={ __( 'Dismiss', 'dono-fundraising-platform' ) }
+                        title={ __( 'Dismiss', 'dono-fundraising-platform' ) }
                     >
                         <DismissIcon size={ 14 } strokeWidth={ 2 } />
                     </button>

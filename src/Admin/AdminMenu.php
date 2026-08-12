@@ -31,8 +31,8 @@ final class AdminMenu extends HookProvider
     public function registerMenu(): void
     {
         add_menu_page(
-            __('Dono', 'dono'),
-            __('Dono', 'dono'),
+            __('Dono', 'dono-fundraising-platform'),
+            __('Dono', 'dono-fundraising-platform'),
             self::CAPABILITY,
             self::SLUG,
             [$this, 'renderDashboard'],
@@ -89,7 +89,7 @@ final class AdminMenu extends HookProvider
             $asset['version']      ?? DONO_VERSION,
             true
         );
-        wp_set_script_translations('dono-admin-command-palette', 'dono', DONO_DIR . 'languages');
+        wp_set_script_translations('dono-admin-command-palette', 'dono-fundraising-platform', DONO_DIR . 'languages');
         wp_localize_script('dono-admin-command-palette', 'donoCommandPalette', [
             'adminUrl' => admin_url(),
         ]);
@@ -124,7 +124,7 @@ final class AdminMenu extends HookProvider
             $asset['version']      ?? DONO_VERSION,
             true
         );
-        wp_set_script_translations(self::HANDLE, 'dono', DONO_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE, 'dono-fundraising-platform', DONO_DIR . 'languages');
 
         wp_enqueue_style('wp-components');
         wp_enqueue_style(

@@ -75,14 +75,14 @@ function TaxStatement( { donor, donations } ) {
     return (
         <div className="dp-tax-statement">
             <div className="dp-tax-statement__text">
-                <strong>{ __( 'Annual tax statement', 'dono' ) }</strong>
-                <span>{ __( 'Every paid donation for the year on one document, net of refunds.', 'dono' ) }</span>
+                <strong>{ __( 'Annual tax statement', 'dono-fundraising-platform' ) }</strong>
+                <span>{ __( 'Every paid donation for the year on one document, net of refunds.', 'dono-fundraising-platform' ) }</span>
             </div>
             <select
                 className="dono-input dp-tax-statement__year"
                 value={ chosen }
                 onChange={ ( e ) => setYear( Number( e.target.value ) ) }
-                aria-label={ __( 'Statement year', 'dono' ) }
+                aria-label={ __( 'Statement year', 'dono-fundraising-platform' ) }
             >
                 { years.map( ( y ) => <option key={ y } value={ y }>{ y }</option> ) }
             </select>
@@ -99,13 +99,13 @@ function TaxStatement( { donor, donations } ) {
                             `tax-statement-${ chosen }.pdf`
                         );
                     } catch ( err ) {
-                        notify.error( err?.message || __( 'Could not build the statement.', 'dono' ) );
+                        notify.error( err?.message || __( 'Could not build the statement.', 'dono-fundraising-platform' ) );
                     } finally {
                         setBusy( false );
                     }
                 } }
             >
-                { __( 'Download statement', 'dono' ) }
+                { __( 'Download statement', 'dono-fundraising-platform' ) }
             </Btn>
         </div>
     );
@@ -126,7 +126,7 @@ export default function ReceiptsTab( { receipts, donations, donor, redacted } ) 
     const fields = useMemo( () => [
         {
             id:    'receipt_number',
-            label: __( 'Receipt', 'dono' ),
+            label: __( 'Receipt', 'dono-fundraising-platform' ),
             enableSorting: true,
             enableGlobalSearch: true,
             // Plain mono, not a link: a receipt has no page of its own, and the
@@ -135,7 +135,7 @@ export default function ReceiptsTab( { receipts, donations, donor, redacted } ) 
         },
         {
             id:    'donation_reference',
-            label: __( 'Donation', 'dono' ),
+            label: __( 'Donation', 'dono-fundraising-platform' ),
             enableSorting: true,
             enableGlobalSearch: true,
             render: ( { item } ) => item.donation_reference
@@ -148,24 +148,24 @@ export default function ReceiptsTab( { receipts, donations, donor, redacted } ) 
         },
         {
             id:    'issued_at',
-            label: __( 'Issued', 'dono' ),
+            label: __( 'Issued', 'dono-fundraising-platform' ),
             enableSorting: true,
             render: ( { item } ) => <StackedDate iso={ item.issued_at } />,
         },
         {
             id:    'sent_to_email_at',
-            label: __( 'Sent', 'dono' ),
+            label: __( 'Sent', 'dono-fundraising-platform' ),
             enableSorting: true,
             render: ( { item } ) => <StackedDate iso={ item.sent_to_email_at } />,
         },
         {
             id:    'status',
-            label: __( 'Status', 'dono' ),
+            label: __( 'Status', 'dono-fundraising-platform' ),
             enableSorting: false,
             getValue: ( { item } ) => item.voided ? 'voided' : 'issued',
             render: ( { item } ) => item.voided
-                ? <span className="dp-pill is-muted">{ __( 'Voided', 'dono' ) }</span>
-                : <span className="dp-pill is-ok">{ __( 'Issued', 'dono' ) }</span>,
+                ? <span className="dp-pill is-muted">{ __( 'Voided', 'dono-fundraising-platform' ) }</span>
+                : <span className="dp-pill is-ok">{ __( 'Issued', 'dono-fundraising-platform' ) }</span>,
         },
     ], [] );
 
@@ -177,18 +177,18 @@ export default function ReceiptsTab( { receipts, donations, donor, redacted } ) 
     const actions = useMemo( () => [
         {
             id:       'download-pdf',
-            label:    __( 'Download PDF', 'dono' ),
+            label:    __( 'Download PDF', 'dono-fundraising-platform' ),
             icon:     () => <DownloadIcon size={ 16 } strokeWidth={ 1.75 } />,
             callback: ( items ) => {
                 items.forEach( ( r ) => downloadFile(
                     `/dono/v1/admin/receipts/${ r.id }/pdf`,
                     `${ r.receipt_number }.pdf`
-                ).catch( ( e ) => notify.error( e?.message || __( 'Could not download a receipt.', 'dono' ) ) ) );
+                ).catch( ( e ) => notify.error( e?.message || __( 'Could not download a receipt.', 'dono-fundraising-platform' ) ) ) );
             },
         },
         {
             id:           'resend',
-            label:        __( 'Resend receipt', 'dono' ),
+            label:        __( 'Resend receipt', 'dono-fundraising-platform' ),
             icon:         () => <MailIcon size={ 16 } strokeWidth={ 1.75 } />,
             supportsBulk: true,
             // Resend goes out over the donation, so a receipt with no reference
@@ -202,16 +202,16 @@ export default function ReceiptsTab( { receipts, donations, donor, redacted } ) 
                 if ( ! targets.length ) return;
                 const n = targets.length;
                 const message = n === 1
-                    ? __( 'Resend this receipt to the donor?', 'dono' )
+                    ? __( 'Resend this receipt to the donor?', 'dono-fundraising-platform' )
                     : sprintf(
                         /* translators: %d: receipt count */
-                        _n( 'Resend %d receipt to the donor?', 'Resend %d receipts to the donor?', n, 'dono' ),
+                        _n( 'Resend %d receipt to the donor?', 'Resend %d receipts to the donor?', n, 'dono-fundraising-platform' ),
                         n
                     );
                 setConfirm( {
-                    title:        __( 'Resend receipts', 'dono' ),
+                    title:        __( 'Resend receipts', 'dono-fundraising-platform' ),
                     message,
-                    confirmLabel: __( 'Resend', 'dono' ),
+                    confirmLabel: __( 'Resend', 'dono-fundraising-platform' ),
                     onConfirm: async () => {
                         // Silence reads as nothing happening, so admins press it
                         // again and the donor gets the receipt twice.
@@ -226,14 +226,14 @@ export default function ReceiptsTab( { receipts, donations, donor, redacted } ) 
                         if ( sent > 0 ) {
                             notify.success( sprintf(
                                 /* translators: %d: receipt count */
-                                _n( '%d receipt resent.', '%d receipts resent.', sent, 'dono' ),
+                                _n( '%d receipt resent.', '%d receipts resent.', sent, 'dono-fundraising-platform' ),
                                 sent
                             ) );
                         }
                         if ( failed > 0 ) {
                             notify.error( sprintf(
                                 /* translators: %d: receipt count */
-                                _n( '%d receipt could not be resent.', '%d receipts could not be resent.', failed, 'dono' ),
+                                _n( '%d receipt could not be resent.', '%d receipts could not be resent.', failed, 'dono-fundraising-platform' ),
                                 failed
                             ) );
                         }
@@ -255,8 +255,8 @@ export default function ReceiptsTab( { receipts, donations, donor, redacted } ) 
                 <EmptyState
                     compact
                     icon={ <Receipt size={ 22 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'No receipts yet', 'dono' ) }
-                    body={ __( 'Receipts are issued automatically once a donation lands as paid.', 'dono' ) }
+                    title={ __( 'No receipts yet', 'dono-fundraising-platform' ) }
+                    body={ __( 'Receipts are issued automatically once a donation lands as paid.', 'dono-fundraising-platform' ) }
                     />
                 </div>
             </>
@@ -276,7 +276,7 @@ export default function ReceiptsTab( { receipts, donations, donor, redacted } ) 
                 paginationInfo={ paginationInfo }
                 defaultLayouts={ { table: {} } }
                 getItemId={ ( item ) => String( item.id ) }
-                searchLabel={ __( 'Search receipts', 'dono' ) }
+                searchLabel={ __( 'Search receipts', 'dono-fundraising-platform' ) }
             />
             <ConfirmDialog confirm={ confirm } onClose={ () => setConfirm( null ) } />
         </div>

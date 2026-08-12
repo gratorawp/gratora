@@ -50,12 +50,12 @@ tfoot td{font-weight:700;border-top:2px solid #000;border-bottom:0;padding-top:9
         <p class="org-meta"><?php echo esc_html(implode("\n", $org_address_lines)); ?></p>
     <?php endif; ?>
     <?php if ($org_tax_id !== ''): ?>
-        <p class="ein"><?php echo esc_html(sprintf(/* translators: %s: tax id / EIN */ __('Tax ID (EIN): %s', 'dono'), $org_tax_id)); ?></p>
+        <p class="ein"><?php echo esc_html(sprintf(/* translators: %s: tax id / EIN */ __('Tax ID (EIN): %s', 'dono-fundraising-platform'), $org_tax_id)); ?></p>
     <?php endif; ?>
 </div>
 
 <div class="parties">
-    <p class="party-label"><?php esc_html_e('Issued to', 'dono'); ?></p>
+    <p class="party-label"><?php esc_html_e('Issued to', 'dono-fundraising-platform'); ?></p>
     <div class="donor-block"><?php
         $donorBlock = $donor_name;
         if (! empty($donor_address_lines)) {
@@ -65,20 +65,20 @@ tfoot td{font-weight:700;border-top:2px solid #000;border-bottom:0;padding-top:9
     ?></div>
 </div>
 
-<h1><?php echo esc_html(sprintf(/* translators: %d: statement year */ __('%d Annual Donation Statement', 'dono'), $year)); ?></h1>
+<h1><?php echo esc_html(sprintf(/* translators: %d: statement year */ __('%d Annual Donation Statement', 'dono-fundraising-platform'), $year)); ?></h1>
 
 <p class="intro"><?php echo esc_html(sprintf(
     /* translators: 1: statement year, 2: organization name */
-    __('Thank you for your %1$d contributions to %2$s.', 'dono'),
+    __('Thank you for your %1$d contributions to %2$s.', 'dono-fundraising-platform'),
     $year,
     $org_name
 )); ?></p>
 
 <table>
 <thead><tr>
-    <th><?php esc_html_e('Date', 'dono'); ?></th>
-    <th><?php esc_html_e('Reference', 'dono'); ?></th>
-    <th class="amt"><?php esc_html_e('Amount', 'dono'); ?></th>
+    <th><?php esc_html_e('Date', 'dono-fundraising-platform'); ?></th>
+    <th><?php esc_html_e('Reference', 'dono-fundraising-platform'); ?></th>
+    <th class="amt"><?php esc_html_e('Amount', 'dono-fundraising-platform'); ?></th>
 </tr></thead>
 <tbody>
 <?php foreach ($lines as $line): ?>
@@ -115,7 +115,7 @@ tfoot td{font-weight:700;border-top:2px solid #000;border-bottom:0;padding-top:9
 <?php endif; ?>
 
 <p class="footer">
-    <?php echo esc_html(sprintf(/* translators: %s: generation date */ __('Generated %s.', 'dono'), $generated_date)); ?>
-    <?php esc_html_e('Retain this statement for your tax records.', 'dono'); ?>
+    <?php echo esc_html(sprintf(/* translators: %s: generation date */ __('Generated %s.', 'dono-fundraising-platform'), $generated_date)); ?>
+    <?php esc_html_e('Retain this statement for your tax records.', 'dono-fundraising-platform'); ?>
 </p>
 </body></html>

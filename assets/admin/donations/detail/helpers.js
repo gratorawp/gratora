@@ -34,11 +34,11 @@ export function timeAgo( iso ) {
     const d = parseTimestamp( iso );
     if ( Number.isNaN( d.getTime() ) ) return iso;
     const diff = Math.max( 0, ( Date.now() - d.getTime() ) / 1000 );
-    if ( diff < 60 )      return __( 'just now', 'dono' );
-    if ( diff < 3600 )    return sprintf( /* translators: %d: number of minutes */ __( '%dm ago', 'dono' ),  Math.floor( diff / 60 ) );
-    if ( diff < 86400 )   return sprintf( /* translators: %d: number of hours */ __( '%dh ago', 'dono' ),  Math.floor( diff / 3600 ) );
-    if ( diff < 604800 )  return sprintf( /* translators: %d: number of days */ __( '%dd ago', 'dono' ),  Math.floor( diff / 86400 ) );
-    if ( diff < 2628000 ) return sprintf( /* translators: %d: number of weeks */ __( '%dw ago', 'dono' ),  Math.floor( diff / 604800 ) );
+    if ( diff < 60 )      return __( 'just now', 'dono-fundraising-platform' );
+    if ( diff < 3600 )    return sprintf( /* translators: %d: number of minutes */ __( '%dm ago', 'dono-fundraising-platform' ),  Math.floor( diff / 60 ) );
+    if ( diff < 86400 )   return sprintf( /* translators: %d: number of hours */ __( '%dh ago', 'dono-fundraising-platform' ),  Math.floor( diff / 3600 ) );
+    if ( diff < 604800 )  return sprintf( /* translators: %d: number of days */ __( '%dd ago', 'dono-fundraising-platform' ),  Math.floor( diff / 86400 ) );
+    if ( diff < 2628000 ) return sprintf( /* translators: %d: number of weeks */ __( '%dw ago', 'dono-fundraising-platform' ),  Math.floor( diff / 604800 ) );
     return formatDateShort( iso );
 }
 
@@ -50,26 +50,26 @@ export function initials( name ) {
 
 export function donationStatusPill( status ) {
     switch ( status ) {
-        case 'paid':           return { cls: 'is-ok',     label: __( 'Paid',     'dono' ) };
-        case 'pending':        return { cls: 'is-warn',   label: __( 'Pending',  'dono' ) };
-        case 'failed':         return { cls: 'is-error',  label: __( 'Failed',   'dono' ) };
-        case 'refunded':       return { cls: 'is-muted',  label: __( 'Refunded', 'dono' ) };
-        case 'partial_refund': return { cls: 'is-warn',   label: __( 'Partial',  'dono' ) };
-        case 'disputed':       return { cls: 'is-error',  label: __( 'Disputed', 'dono' ) };
-        case 'abandoned':      return { cls: 'is-muted',  label: __( 'Abandoned','dono' ) };
+        case 'paid':           return { cls: 'is-ok',     label: __( 'Paid',     'dono-fundraising-platform' ) };
+        case 'pending':        return { cls: 'is-warn',   label: __( 'Pending',  'dono-fundraising-platform' ) };
+        case 'failed':         return { cls: 'is-error',  label: __( 'Failed',   'dono-fundraising-platform' ) };
+        case 'refunded':       return { cls: 'is-muted',  label: __( 'Refunded', 'dono-fundraising-platform' ) };
+        case 'partial_refund': return { cls: 'is-warn',   label: __( 'Partial',  'dono-fundraising-platform' ) };
+        case 'disputed':       return { cls: 'is-error',  label: __( 'Disputed', 'dono-fundraising-platform' ) };
+        case 'abandoned':      return { cls: 'is-muted',  label: __( 'Abandoned','dono-fundraising-platform' ) };
         default:               return { cls: 'is-muted',  label: status };
     }
 }
 
 export const CHANNEL_LABEL = {
-    direct:        __( 'Direct',         'dono' ),
-    email:         __( 'Email',          'dono' ),
-    social:        __( 'Social',         'dono' ),
-    'paid-social': __( 'Paid social',    'dono' ),
-    organic:       __( 'Organic search', 'dono' ),
-    cpc:           __( 'Paid search',    'dono' ),
-    referral:      __( 'Referral',       'dono' ),
-    qr:            __( 'QR code',        'dono' ),
-    peer:          __( 'Peer-to-peer',   'dono' ),
-    other:         __( 'Other',          'dono' ),
+    direct:        __( 'Direct',         'dono-fundraising-platform' ),
+    email:         __( 'Email',          'dono-fundraising-platform' ),
+    social:        __( 'Social',         'dono-fundraising-platform' ),
+    'paid-social': __( 'Paid social',    'dono-fundraising-platform' ),
+    organic:       __( 'Organic search', 'dono-fundraising-platform' ),
+    cpc:           __( 'Paid search',    'dono-fundraising-platform' ),
+    referral:      __( 'Referral',       'dono-fundraising-platform' ),
+    qr:            __( 'QR code',        'dono-fundraising-platform' ),
+    peer:          __( 'Peer-to-peer',   'dono-fundraising-platform' ),
+    other:         __( 'Other',          'dono-fundraising-platform' ),
 };

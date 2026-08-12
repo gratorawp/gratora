@@ -48,7 +48,7 @@ final class PayPalPlanRecorder
     {
         $subId = trim((string) ($sub['id'] ?? ''));
         if ($subId === '') {
-            throw new PayPalPlanRefused('dono_paypal_bad_subscription', __('Missing subscription id.', 'dono'));
+            throw new PayPalPlanRefused('dono_paypal_bad_subscription', __('Missing subscription id.', 'dono-fundraising-platform'));
         }
 
         $reference = trim((string) ($sub['custom_id'] ?? ''));
@@ -56,13 +56,13 @@ final class PayPalPlanRecorder
         if (! $donation instanceof Donation) {
             throw new PayPalPlanRefused(
                 'dono_paypal_subscription_mismatch',
-                __('That subscription does not belong to this donation.', 'dono'),
+                __('That subscription does not belong to this donation.', 'dono-fundraising-platform'),
                 403
             );
         }
 
         if ((string) $donation->gateway !== 'paypal' || ! FrequencyMap::isRecurring((string) $donation->frequency)) {
-            throw new PayPalPlanRefused('dono_paypal_not_recurring', __('That donation is not recurring.', 'dono'));
+            throw new PayPalPlanRefused('dono_paypal_not_recurring', __('That donation is not recurring.', 'dono-fundraising-platform'));
         }
 
         // Already recorded. Same subscription is the ordinary double delivery;
@@ -77,7 +77,7 @@ final class PayPalPlanRecorder
                 }
                 throw new PayPalPlanRefused(
                     'dono_paypal_subscription_conflict',
-                    __('This donation already has a different PayPal subscription.', 'dono'),
+                    __('This donation already has a different PayPal subscription.', 'dono-fundraising-platform'),
                     409
                 );
             }
@@ -92,7 +92,7 @@ final class PayPalPlanRecorder
         if ($expectedPlan === '' || (string) ($sub['plan_id'] ?? '') !== $expectedPlan) {
             throw new PayPalPlanRefused(
                 'dono_paypal_subscription_plan_mismatch',
-                __('That subscription is not for this donation amount.', 'dono'),
+                __('That subscription is not for this donation amount.', 'dono-fundraising-platform'),
                 403
             );
         }
@@ -103,7 +103,7 @@ final class PayPalPlanRecorder
                 'dono_paypal_subscription_status',
                 sprintf(
                     /* translators: %s: PayPal subscription status */
-                    __('PayPal reports this subscription as %s.', 'dono'),
+                    __('PayPal reports this subscription as %s.', 'dono-fundraising-platform'),
                     $status
                 )
             );

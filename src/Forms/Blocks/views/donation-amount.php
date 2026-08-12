@@ -9,7 +9,7 @@ defined('ABSPATH') || exit;
 ?>
 <div class="dono-block dono-block--amount" data-block="dono/donation-amount">
     <fieldset class="dono-amount">
-        <legend class="dono-amount__legend"><?php esc_html_e('Choose an amount', 'dono'); ?></legend>
+        <legend class="dono-amount__legend"><?php esc_html_e('Choose an amount', 'dono-fundraising-platform'); ?></legend>
         <input type="hidden" name="amount_cents" value="<?php echo esc_attr((string) $default); ?>">
         <input type="hidden" name="currency"     value="<?php echo esc_attr($currency); ?>">
 
@@ -37,13 +37,13 @@ defined('ABSPATH') || exit;
 
         <?php if ($allowCustom): ?>
             <label class="dono-amount__custom">
-                <span class="dono-amount__custom-label"><?php esc_html_e('Custom amount', 'dono'); ?></span>
+                <span class="dono-amount__custom-label"><?php esc_html_e('Custom amount', 'dono-fundraising-platform'); ?></span>
                 <input type="number"
                        class="dono-amount__custom-input"
                        name="dono_amount_custom"
                        step="0.01"
                        min="0.5"
-                       placeholder="<?php esc_attr_e('0.00', 'dono'); ?>"
+                       placeholder="<?php esc_attr_e('0.00', 'dono-fundraising-platform'); ?>"
                        inputmode="decimal">
             </label>
         <?php endif; ?>

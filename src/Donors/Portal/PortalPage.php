@@ -42,7 +42,7 @@ final class PortalPage
 
         $id = wp_insert_post([
             'post_type'    => 'page',
-            'post_title'   => __('Donor portal', 'dono'),
+            'post_title'   => __('Donor portal', 'dono-fundraising-platform'),
             'post_name'    => self::SLUG,
             'post_status'  => 'publish',
             'post_content' => self::SHORTCODE,

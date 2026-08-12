@@ -52,21 +52,21 @@ export default function LifetimeMetrics( { lifetime } ) {
     if ( plan_counts?.past_due > 0 ) {
         dormant.push( sprintf(
             /* translators: %d: number of plans the gateway could not collect. */
-            _n( '%d past due', '%d past due', plan_counts.past_due, 'dono' ),
+            _n( '%d past due', '%d past due', plan_counts.past_due, 'dono-fundraising-platform' ),
             plan_counts.past_due
         ) );
     }
     if ( plan_counts?.paused > 0 ) {
         dormant.push( sprintf(
             /* translators: %d: number of paused plans. */
-            _n( '%d paused', '%d paused', plan_counts.paused, 'dono' ),
+            _n( '%d paused', '%d paused', plan_counts.paused, 'dono-fundraising-platform' ),
             plan_counts.paused
         ) );
     }
 
     const activePart = active_plan_count > 0
-        ? sprintf( /* translators: 1: active plan count, 2: next payment date */ __( '%1$d active · next %2$s', 'dono' ), active_plan_count, formatDate( next_payment_at ) )
-        : __( 'No active plans', 'dono' );
+        ? sprintf( /* translators: 1: active plan count, 2: next payment date */ __( '%1$d active · next %2$s', 'dono-fundraising-platform' ), active_plan_count, formatDate( next_payment_at ) )
+        : __( 'No active plans', 'dono-fundraising-platform' );
 
     const mrrSub = mrr_unconverted > 0
         ? sprintf(
@@ -75,7 +75,7 @@ export default function LifetimeMetrics( { lifetime } ) {
                 '%d plan has no exchange rate and is not counted',
                 '%d plans have no exchange rate and are not counted',
                 mrr_unconverted,
-                'dono'
+                'dono-fundraising-platform'
             ),
             mrr_unconverted
         )
@@ -85,28 +85,28 @@ export default function LifetimeMetrics( { lifetime } ) {
         <div className="dp-metrics">
             <Card
                 icon={ <IconCoin width="16" height="16" /> }
-                label={ __( 'Lifetime given', 'dono' ) }
+                label={ __( 'Lifetime given', 'dono-fundraising-platform' ) }
                 value={ <span className="num">{ formatAmount( total_cents ) }</span> }
                 spark={ sparkline }
-                sub={ count > 0 ? sprintf( /* translators: %s: amount */ __( 'Largest donation %s', 'dono' ), formatAmountCompact( largest_cents ) ) : null }
+                sub={ count > 0 ? sprintf( /* translators: %s: amount */ __( 'Largest donation %s', 'dono-fundraising-platform' ), formatAmountCompact( largest_cents ) ) : null }
             />
             <Card
                 icon={ <IconHeart width="16" height="16" /> }
-                label={ __( 'Donations', 'dono' ) }
+                label={ __( 'Donations', 'dono-fundraising-platform' ) }
                 value={ <span className="num">{ count }</span> }
                 sub={ count > 0
-                    ? sprintf( /* translators: 1: one-time donation count, 2: recurring donation count */ __( '%1$d one-time, %2$d recurring', 'dono' ), one_time_count, recurring_count )
-                    : __( 'No donations yet', 'dono' ) }
+                    ? sprintf( /* translators: 1: one-time donation count, 2: recurring donation count */ __( '%1$d one-time, %2$d recurring', 'dono-fundraising-platform' ), one_time_count, recurring_count )
+                    : __( 'No donations yet', 'dono-fundraising-platform' ) }
             />
             <Card
                 icon={ <IconActivity width="16" height="16" /> }
-                label={ __( 'Avg. donation', 'dono' ) }
+                label={ __( 'Avg. donation', 'dono-fundraising-platform' ) }
                 value={ <span className="num">{ formatAmount( avg_cents ) }</span> }
-                sub={ count > 0 ? __( 'Per donation', 'dono' ) : null }
+                sub={ count > 0 ? __( 'Per donation', 'dono-fundraising-platform' ) : null }
             />
             <Card
                 icon={ <IconRotate width="16" height="16" /> }
-                label={ __( 'Recurring MRR', 'dono' ) }
+                label={ __( 'Recurring MRR', 'dono-fundraising-platform' ) }
                 value={ <span className="num">{ formatAmount( mrr_cents ) }<small> /mo</small></span> }
                 sub={ mrrSub }
             />

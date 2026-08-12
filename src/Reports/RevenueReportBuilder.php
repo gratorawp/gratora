@@ -60,18 +60,18 @@ final class RevenueReportBuilder
             'total'          => Money::format($totalCents, $currency),
             'months'         => $months,
             'stats'          => [
-                ['label' => __('Donations', 'dono'),        'value' => number_format_i18n($totalCount)],
-                ['label' => __('Average donation', 'dono'), 'value' => Money::format($totalCount > 0 ? intdiv($totalCents, $totalCount) : 0, $currency)],
-                ['label' => __('Best month', 'dono'),       'value' => $best !== null && $best['amount_cents'] > 0 ? $this->monthLabel($best['month']) : '-'],
+                ['label' => __('Donations', 'dono-fundraising-platform'),        'value' => number_format_i18n($totalCount)],
+                ['label' => __('Average donation', 'dono-fundraising-platform'), 'value' => Money::format($totalCount > 0 ? intdiv($totalCents, $totalCount) : 0, $currency)],
+                ['label' => __('Best month', 'dono-fundraising-platform'),       'value' => $best !== null && $best['amount_cents'] > 0 ? $this->monthLabel($best['month']) : '-'],
             ],
             'generated_date' => (string) wp_date(get_option('date_format')),
         ]);
 
         return $this->pdf->fromHtml($html, [
             /* translators: %s: four-digit year. */
-            'title'   => sprintf(__('Revenue report %s', 'dono'), (string) $year),
+            'title'   => sprintf(__('Revenue report %s', 'dono-fundraising-platform'), (string) $year),
             'author'  => $orgName,
-            'subject' => __('Revenue and donations report', 'dono'),
+            'subject' => __('Revenue and donations report', 'dono-fundraising-platform'),
         ]);
     }
 

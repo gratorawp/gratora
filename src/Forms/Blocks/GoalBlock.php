@@ -59,7 +59,7 @@ final class GoalBlock implements Block
         $campaignId = (int) ($attrs['campaignId'] ?? 0);
         $campaign   = $campaignId ? $this->campaigns->findById($campaignId) : null;
         if (! $campaign) {
-            return $this->missing(__('Goal will appear once the form is linked to a campaign.', 'dono'));
+            return $this->missing(__('Goal will appear once the form is linked to a campaign.', 'dono-fundraising-platform'));
         }
 
         $type = (string) ($campaign->goal_type ?: 'amount');
@@ -70,7 +70,7 @@ final class GoalBlock implements Block
             ? (int) ($campaign->goal_cents ?? 0)
             : (int) ($campaign->goal_count ?? 0);
         if ($target <= 0) {
-            return $this->missing(__('The campaign has no goal set yet.', 'dono'));
+            return $this->missing(__('The campaign has no goal set yet.', 'dono-fundraising-platform'));
         }
         $current = match ($type) {
             'donations' => (int) ($campaign->donations_count ?? 0),
@@ -95,20 +95,20 @@ final class GoalBlock implements Block
         $formId = (int) ($attrs['formId'] ?? 0);
         $form   = $formId ? $this->forms->findById($formId) : null;
         if (! $form) {
-            return $this->missing(__('Goal will appear once the form is published.', 'dono'));
+            return $this->missing(__('Goal will appear once the form is published.', 'dono-fundraising-platform'));
         }
 
         $settings = is_array($form->settings) ? $form->settings : [];
         $goal     = is_array($settings['goal'] ?? null) ? $settings['goal'] : [];
         $type     = (string) ($goal['type'] ?? 'none');
         if (! in_array($type, ['amount', 'donations', 'donors'], true)) {
-            return $this->missing(__('This form has no goal set. Add one in the form settings.', 'dono'));
+            return $this->missing(__('This form has no goal set. Add one in the form settings.', 'dono-fundraising-platform'));
         }
         $target = $type === 'amount'
             ? (int) ($goal['amount_cents'] ?? 0)
             : (int) ($goal['count'] ?? 0);
         if ($target <= 0) {
-            return $this->missing(__('This form has no goal set. Add one in the form settings.', 'dono'));
+            return $this->missing(__('This form has no goal set. Add one in the form settings.', 'dono-fundraising-platform'));
         }
 
         $stats = DB::table('dono_form_donation_stats')

@@ -61,7 +61,7 @@ final class FormReadinessService
             return [
                 'id'     => 'recurring-toggle-frequencies',
                 'status' => 'pass',
-                'label'  => __('No recurring toggle on this form', 'dono'),
+                'label'  => __('No recurring toggle on this form', 'dono-fundraising-platform'),
             ];
         }
         $freqs = Blocks\RecurringToggleBlock::normalizeFrequencies($stub['frequencies'] ?? Blocks\RecurringToggleBlock::DEFAULT_FREQUENCIES);
@@ -72,14 +72,14 @@ final class FormReadinessService
             return [
                 'id'     => 'recurring-toggle-frequencies',
                 'status' => 'pass',
-                'label'  => __('Recurring toggle offers at least two frequencies', 'dono'),
+                'label'  => __('Recurring toggle offers at least two frequencies', 'dono-fundraising-platform'),
             ];
         }
         return [
             'id'           => 'recurring-toggle-frequencies',
             'status'       => 'warn',
-            'label'        => __('Recurring toggle has fewer than two frequencies', 'dono'),
-            'detail'       => __('The block needs at least two frequencies to render; with one or none, it is silently hidden on the form. Add a frequency in the block settings.', 'dono'),
+            'label'        => __('Recurring toggle has fewer than two frequencies', 'dono-fundraising-platform'),
+            'detail'       => __('The block needs at least two frequencies to render; with one or none, it is silently hidden on the form. Add a frequency in the block settings.', 'dono-fundraising-platform'),
         ];
     }
 
@@ -105,21 +105,21 @@ final class FormReadinessService
             return [
                 'id'     => 'gateway-block',
                 'status' => 'pass',
-                'label'  => __('Donors can pick how to pay', 'dono'),
+                'label'  => __('Donors can pick how to pay', 'dono-fundraising-platform'),
             ];
         }
 
         return [
             'id'           => 'gateway-block',
             'status'       => 'warn',
-            'label'        => __('This form does not let the donor choose a payment method', 'dono'),
+            'label'        => __('This form does not let the donor choose a payment method', 'dono-fundraising-platform'),
             'detail'       => sprintf(
                 /* translators: %s: comma-separated list of enabled gateway names. */
-                __('%s are available, but the form has no payment methods block, so donors get whichever comes first. Add the block where you want the choice to appear.', 'dono'),
+                __('%s are available, but the form has no payment methods block, so donors get whichever comes first. Add the block where you want the choice to appear.', 'dono-fundraising-platform'),
                 implode(', ', $offered)
             ),
             'action_url'   => admin_url('admin.php?page=dono-forms&form=' . (int) $form->id),
-            'action_label' => __('Edit the form', 'dono'),
+            'action_label' => __('Edit the form', 'dono-fundraising-platform'),
         ];
     }
 
@@ -165,10 +165,10 @@ final class FormReadinessService
             return [
                 'id'           => 'gateway',
                 'status'       => 'fail',
-                'label'        => __('Stripe account is not ready to take donations', 'dono'),
-                'detail'       => __('Finish the remaining Stripe verification steps or donations will fail.', 'dono'),
+                'label'        => __('Stripe account is not ready to take donations', 'dono-fundraising-platform'),
+                'detail'       => __('Finish the remaining Stripe verification steps or donations will fail.', 'dono-fundraising-platform'),
                 'action_url'   => admin_url('admin.php?page=dono-settings#gateways'),
-                'action_label' => __('Open settings', 'dono'),
+                'action_label' => __('Open settings', 'dono-fundraising-platform'),
             ];
         }
 
@@ -186,10 +186,10 @@ final class FormReadinessService
             return [
                 'id'           => 'gateway',
                 'status'       => 'fail',
-                'label'        => __('No payment gateway enabled for this form', 'dono'),
-                'detail'       => __('Donors cannot complete a donation without a gateway. Enable one, or widen the gateways this form allows.', 'dono'),
+                'label'        => __('No payment gateway enabled for this form', 'dono-fundraising-platform'),
+                'detail'       => __('Donors cannot complete a donation without a gateway. Enable one, or widen the gateways this form allows.', 'dono-fundraising-platform'),
                 'action_url'   => admin_url('admin.php?page=dono-settings#gateways'),
-                'action_label' => __('Configure gateways', 'dono'),
+                'action_label' => __('Configure gateways', 'dono-fundraising-platform'),
             ];
         }
 
@@ -197,7 +197,7 @@ final class FormReadinessService
             'id'     => 'gateway',
             'status' => 'pass',
             /* translators: %s: comma-separated list of enabled gateway names. */
-            'label'  => sprintf(__('Payment gateways enabled: %s', 'dono'), implode(', ', $enabled)),
+            'label'  => sprintf(__('Payment gateways enabled: %s', 'dono-fundraising-platform'), implode(', ', $enabled)),
         ];
     }
 
@@ -208,17 +208,17 @@ final class FormReadinessService
             return [
                 'id'     => 'test-mode',
                 'status' => 'pass',
-                'label'  => __('Test mode is off', 'dono'),
+                'label'  => __('Test mode is off', 'dono-fundraising-platform'),
             ];
         }
 
         return [
             'id'           => 'test-mode',
             'status'       => 'warn',
-            'label'        => __('This form is in test mode', 'dono'),
-            'detail'       => __('Donations will not be charged and are excluded from reporting. Turn test mode off before going live.', 'dono'),
+            'label'        => __('This form is in test mode', 'dono-fundraising-platform'),
+            'detail'       => __('Donations will not be charged and are excluded from reporting. Turn test mode off before going live.', 'dono-fundraising-platform'),
             'action_url'   => admin_url('admin.php?page=dono-settings#gateways'),
-            'action_label' => __('Open settings', 'dono'),
+            'action_label' => __('Open settings', 'dono-fundraising-platform'),
         ];
     }
 
@@ -236,17 +236,17 @@ final class FormReadinessService
             return [
                 'id'           => 'receipt-sender',
                 'status'       => 'warn',
-                'label'        => __('Receipt sender uses WordPress fallback', 'dono'),
-                'detail'       => __('Set a sender on your site domain (e.g. donations@yoursite.org) so receipts pass SPF and DKIM instead of being marked as spam.', 'dono'),
+                'label'        => __('Receipt sender uses WordPress fallback', 'dono-fundraising-platform'),
+                'detail'       => __('Set a sender on your site domain (e.g. donations@yoursite.org) so receipts pass SPF and DKIM instead of being marked as spam.', 'dono-fundraising-platform'),
                 'action_url'   => admin_url('admin.php?page=dono-settings#email'),
-                'action_label' => __('Set sender', 'dono'),
+                'action_label' => __('Set sender', 'dono-fundraising-platform'),
             ];
         }
         return [
             'id'     => 'receipt-sender',
             'status' => 'pass',
             /* translators: %s: from-email address used for donation receipts. */
-            'label'  => sprintf(__('Receipts sent from %s', 'dono'), $from),
+            'label'  => sprintf(__('Receipts sent from %s', 'dono-fundraising-platform'), $from),
         ];
     }
 
@@ -261,16 +261,16 @@ final class FormReadinessService
             return [
                 'id'           => 'receipt-template',
                 'status'       => 'fail',
-                'label'        => __('Donation receipt email is disabled', 'dono'),
-                'detail'       => __('Donors will not receive a confirmation after paying.', 'dono'),
+                'label'        => __('Donation receipt email is disabled', 'dono-fundraising-platform'),
+                'detail'       => __('Donors will not receive a confirmation after paying.', 'dono-fundraising-platform'),
                 'action_url'   => admin_url('admin.php?page=dono-settings#email'),
-                'action_label' => __('Enable template', 'dono'),
+                'action_label' => __('Enable template', 'dono-fundraising-platform'),
             ];
         }
         return [
             'id'     => 'receipt-template',
             'status' => 'pass',
-            'label'  => __('Donation receipt email is enabled', 'dono'),
+            'label'  => __('Donation receipt email is enabled', 'dono-fundraising-platform'),
         ];
     }
 
@@ -281,7 +281,7 @@ final class FormReadinessService
             return [
                 'id'     => 'https',
                 'status' => 'pass',
-                'label'  => __('Site is served over HTTPS', 'dono'),
+                'label'  => __('Site is served over HTTPS', 'dono-fundraising-platform'),
             ];
         }
         // Test mode moves no real money, so HTTPS only warns. Live mode fails:
@@ -290,15 +290,15 @@ final class FormReadinessService
             return [
                 'id'     => 'https',
                 'status' => 'warn',
-                'label'  => __('Site is not on HTTPS', 'dono'),
-                'detail' => __('Fine for test mode, but live Stripe charges will be rejected. Install an SSL certificate before turning test mode off.', 'dono'),
+                'label'  => __('Site is not on HTTPS', 'dono-fundraising-platform'),
+                'detail' => __('Fine for test mode, but live Stripe charges will be rejected. Install an SSL certificate before turning test mode off.', 'dono-fundraising-platform'),
             ];
         }
         return [
             'id'     => 'https',
             'status' => 'fail',
-            'label'  => __('Site is not on HTTPS', 'dono'),
-            'detail' => __('Stripe rejects live charges on non-HTTPS sites. Install an SSL certificate before publishing.', 'dono'),
+            'label'  => __('Site is not on HTTPS', 'dono-fundraising-platform'),
+            'detail' => __('Stripe rejects live charges on non-HTTPS sites. Install an SSL certificate before publishing.', 'dono-fundraising-platform'),
         ];
     }
 
@@ -309,7 +309,7 @@ final class FormReadinessService
             return [
                 'id'     => 'recurring-gateway',
                 'status' => 'pass',
-                'label'  => __('Form is one-time only', 'dono'),
+                'label'  => __('Form is one-time only', 'dono-fundraising-platform'),
             ];
         }
 
@@ -332,7 +332,7 @@ final class FormReadinessService
             return [
                 'id'     => 'recurring-gateway',
                 'status' => 'pass',
-                'label'  => __('Recurring donations are supported', 'dono'),
+                'label'  => __('Recurring donations are supported', 'dono-fundraising-platform'),
             ];
         }
 
@@ -340,10 +340,10 @@ final class FormReadinessService
             return [
                 'id'           => 'recurring-gateway',
                 'status'       => 'fail',
-                'label'        => __('No gateway supports recurring donations', 'dono'),
-                'detail'       => __('None of the installed gateways can charge recurring donations. Remove the recurring-toggle block from this form, or install a gateway that supports recurring.', 'dono'),
+                'label'        => __('No gateway supports recurring donations', 'dono-fundraising-platform'),
+                'detail'       => __('None of the installed gateways can charge recurring donations. Remove the recurring-toggle block from this form, or install a gateway that supports recurring.', 'dono-fundraising-platform'),
                 'action_url'   => admin_url('admin.php?page=dono-settings#gateways'),
-                'action_label' => __('Open gateways', 'dono'),
+                'action_label' => __('Open gateways', 'dono-fundraising-platform'),
             ];
         }
 
@@ -352,14 +352,14 @@ final class FormReadinessService
         return [
             'id'           => 'recurring-gateway',
             'status'       => 'fail',
-            'label'        => __('None of your enabled gateways supports recurring', 'dono'),
+            'label'        => __('None of your enabled gateways supports recurring', 'dono-fundraising-platform'),
             'detail'       => sprintf(
                 /* translators: %s: comma-separated list of recurring-capable gateway names. */
-                __('Enable one of %s in Settings → Payment gateways, or remove the recurring-toggle block from this form.', 'dono'),
+                __('Enable one of %s in Settings → Payment gateways, or remove the recurring-toggle block from this form.', 'dono-fundraising-platform'),
                 implode(', ', $names)
             ),
             'action_url'   => admin_url('admin.php?page=dono-settings#gateways'),
-            'action_label' => __('Open gateways', 'dono'),
+            'action_label' => __('Open gateways', 'dono-fundraising-platform'),
         ];
     }
 

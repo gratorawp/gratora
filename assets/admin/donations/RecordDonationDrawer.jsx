@@ -13,10 +13,10 @@ import Btn from '../_shared/components/Btn';
 
 // The offline gateway's own list. Anything else is rejected server-side.
 const METHODS = [
-    { value: 'cheque',        label: __( 'Check', 'dono' ) },
-    { value: 'cash',          label: __( 'Cash', 'dono' ) },
-    { value: 'bank_transfer', label: __( 'Bank transfer', 'dono' ) },
-    { value: 'other',         label: __( 'Other', 'dono' ) },
+    { value: 'cheque',        label: __( 'Check', 'dono-fundraising-platform' ) },
+    { value: 'cash',          label: __( 'Cash', 'dono-fundraising-platform' ) },
+    { value: 'bank_transfer', label: __( 'Bank transfer', 'dono-fundraising-platform' ) },
+    { value: 'other',         label: __( 'Other', 'dono-fundraising-platform' ) },
 ];
 
 function today() {
@@ -57,7 +57,7 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
         apiFetch( { path: '/dono/v1/admin/donations/fund-options' } )
             .then( ( res ) => setFunds( ( Array.isArray( res ) ? res : [] ).map( ( f ) => {
                 /* translators: %s: fund name. */
-                const isDefault = __( '%s (default)', 'dono' );
+                const isDefault = __( '%s (default)', 'dono-fundraising-platform' );
                 return {
                     value: String( f.id ),
                     label: f.is_default ? sprintf( isDefault, f.name ) : f.name,
@@ -75,7 +75,7 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                     label: c.archived
                         ? sprintf(
                             /* translators: %s: campaign title. */
-                            __( '%s (archived)', 'dono' ),
+                            __( '%s (archived)', 'dono-fundraising-platform' ),
                             c.title
                         )
                         : c.title,
@@ -127,7 +127,7 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
             if ( e?.code === 'dono_duplicate_donation' ) {
                 setDuplicate( e?.data?.reference || '?' );
             } else {
-                setError( e?.message || __( 'Could not record this donation.', 'dono' ) );
+                setError( e?.message || __( 'Could not record this donation.', 'dono-fundraising-platform' ) );
             }
             setSaving( false );
         }
@@ -142,25 +142,25 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                 isBusy={ saving }
             >
                 { saving
-                    ? __( 'Recording…', 'dono' )
+                    ? __( 'Recording…', 'dono-fundraising-platform' )
                     : duplicate !== ''
-                        ? __( 'Record it anyway', 'dono' )
-                        : __( 'Record donation', 'dono' ) }
+                        ? __( 'Record it anyway', 'dono-fundraising-platform' )
+                        : __( 'Record donation', 'dono-fundraising-platform' ) }
             </Btn>
             <Btn variant="ghost" onClick={ onClose } disabled={ saving }>
-                { __( 'Cancel', 'dono' ) }
+                { __( 'Cancel', 'dono-fundraising-platform' ) }
             </Btn>
         </div>
     );
 
     return (
         <Dialog
-            title={ __( 'Record a donation', 'dono' ) }
+            title={ __( 'Record a donation', 'dono-fundraising-platform' ) }
             onClose={ saving ? undefined : onClose }
             foot={ foot }
         >
             <p className="dono-dialog__help">
-                { __( 'Money that arrived off the site: a check, cash at an event, a bank transfer.', 'dono' ) }
+                { __( 'Money that arrived off the site: a check, cash at an event, a bank transfer.', 'dono-fundraising-platform' ) }
             </p>
             <div className="dono-rd">
                 { error !== '' && (
@@ -171,13 +171,13 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                     <Notice status="warning" isDismissible={ false }>
                         { sprintf(
                             /* translators: %s: the reference of the donation already on the books. */
-                            __( '%s is already down for this donor, this amount and this date. If they really gave twice, record it anyway. Otherwise change something above.', 'dono' ),
+                            __( '%s is already down for this donor, this amount and this date. If they really gave twice, record it anyway. Otherwise change something above.', 'dono-fundraising-platform' ),
                             duplicate
                         ) }
                     </Notice>
                 ) }
 
-                <Field label={ __( 'Donor email', 'dono' ) } help={ __( 'Matches an existing donor, or creates one.', 'dono' ) }>
+                <Field label={ __( 'Donor email', 'dono-fundraising-platform' ) } help={ __( 'Matches an existing donor, or creates one.', 'dono-fundraising-platform' ) }>
                     <input
                         className="dono-input"
                         type="email"
@@ -188,30 +188,30 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                 </Field>
 
                 <div className="dono-rd__row">
-                    <Field label={ __( 'First name', 'dono' ) }>
+                    <Field label={ __( 'First name', 'dono-fundraising-platform' ) }>
                         <input className="dono-input" type="text" value={ firstName } onChange={ ( e ) => setFirstName( e.target.value ) } />
                     </Field>
-                    <Field label={ __( 'Last name', 'dono' ) }>
+                    <Field label={ __( 'Last name', 'dono-fundraising-platform' ) }>
                         <input className="dono-input" type="text" value={ lastName } onChange={ ( e ) => setLastName( e.target.value ) } />
                     </Field>
                 </div>
 
-                <Field label={ __( 'Amount', 'dono' ) }>
+                <Field label={ __( 'Amount', 'dono-fundraising-platform' ) }>
                     <AmountInput value={ amount } onChange={ edited( setAmount ) } currency={ currency } placeholder="0" />
                 </Field>
 
                 <Field
-                    label={ __( 'Date received', 'dono' ) }
-                    help={ __( 'When the money arrived, which is not always today. A check banked last month belongs to last month, and the totals for that month depend on this.', 'dono' ) }
+                    label={ __( 'Date received', 'dono-fundraising-platform' ) }
+                    help={ __( 'When the money arrived, which is not always today. A check banked last month belongs to last month, and the totals for that month depend on this.', 'dono-fundraising-platform' ) }
                 >
                     <DateField
                         value={ receivedAt }
                         onChange={ ( next ) => edited( setReceived )( next || '' ) }
-                        ariaLabel={ __( 'Date received', 'dono' ) }
+                        ariaLabel={ __( 'Date received', 'dono-fundraising-platform' ) }
                     />
                 </Field>
 
-                <Field label={ __( 'How it arrived', 'dono' ) }>
+                <Field label={ __( 'How it arrived', 'dono-fundraising-platform' ) }>
                     <select className="dono-select" value={ method } onChange={ ( e ) => setMethod( e.target.value ) }>
                         { METHODS.map( ( m ) => (
                             <option key={ m.value } value={ m.value }>{ m.label }</option>
@@ -220,49 +220,49 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                 </Field>
 
                 <Field
-                    label={ __( 'Campaign', 'dono' ) }
+                    label={ __( 'Campaign', 'dono-fundraising-platform' ) }
                     help={ campaignsFailed
-                        ? __( 'Campaigns could not be loaded, so this will be recorded without one. Someone with campaign access can set it afterwards.', 'dono' )
-                        : __( 'Optional. Leave empty for a general donation.', 'dono' ) }
+                        ? __( 'Campaigns could not be loaded, so this will be recorded without one. Someone with campaign access can set it afterwards.', 'dono-fundraising-platform' )
+                        : __( 'Optional. Leave empty for a general donation.', 'dono-fundraising-platform' ) }
                 >
                     <SearchableSelect
                         value={ campaignId }
                         onChange={ setCampaign }
                         options={ campaigns }
                         placeholder={ campaignsFailed
-                            ? __( 'Unavailable', 'dono' )
-                            : __( 'No campaign', 'dono' ) }
+                            ? __( 'Unavailable', 'dono-fundraising-platform' )
+                            : __( 'No campaign', 'dono-fundraising-platform' ) }
                     />
                 </Field>
 
                 { funds.length > 0 && (
                     <Field
-                        label={ __( 'Fund', 'dono' ) }
-                        help={ __( 'Optional. Leave empty to use the default fund.', 'dono' ) }
+                        label={ __( 'Fund', 'dono-fundraising-platform' ) }
+                        help={ __( 'Optional. Leave empty to use the default fund.', 'dono-fundraising-platform' ) }
                     >
                         <SearchableSelect
                             value={ fundId }
                             onChange={ setFund }
                             options={ funds }
-                            placeholder={ __( 'Default fund', 'dono' ) }
+                            placeholder={ __( 'Default fund', 'dono-fundraising-platform' ) }
                         />
                     </Field>
                 ) }
 
-                <Field label={ __( 'Note', 'dono' ) } help={ __( 'Only your team sees this.', 'dono' ) }>
+                <Field label={ __( 'Note', 'dono-fundraising-platform' ) } help={ __( 'Only your team sees this.', 'dono-fundraising-platform' ) }>
                     <textarea className="dono-input" rows={ 2 } value={ note } onChange={ ( e ) => setNote( e.target.value ) } />
                 </Field>
 
                 { /* eslint-disable-next-line jsx-a11y/label-has-associated-control -- Switch is self-labeled via its label prop */ }
                 <label className="dono-rd__receipt">
-                    <Switch checked={ sendReceipt } onChange={ setReceipt } label={ __( 'Email the donor a receipt', 'dono' ) } />
+                    <Switch checked={ sendReceipt } onChange={ setReceipt } label={ __( 'Email the donor a receipt', 'dono-fundraising-platform' ) } />
                     <span className="dono-rd__receipt-txt">
                         <strong>{ sendReceipt
-                            ? __( 'Email a receipt', 'dono' )
-                            : __( 'Do not email the donor', 'dono' ) }</strong>
+                            ? __( 'Email a receipt', 'dono-fundraising-platform' )
+                            : __( 'Do not email the donor', 'dono-fundraising-platform' ) }</strong>
                         <span>{ sendReceipt
-                            ? __( 'The donor gets a receipt for this donation.', 'dono' )
-                            : __( 'Nothing is sent, not even a receipt.', 'dono' ) }</span>
+                            ? __( 'The donor gets a receipt for this donation.', 'dono-fundraising-platform' )
+                            : __( 'Nothing is sent, not even a receipt.', 'dono-fundraising-platform' ) }</span>
                     </span>
                 </label>
             </div>

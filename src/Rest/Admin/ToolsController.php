@@ -345,7 +345,7 @@ final class ToolsController
             'id'          => (int) $e->id,
             'kind'        => 'error',
             'source'      => substr((string) $e->type, strlen(ErrorLog::PREFIX)),
-            'message'     => $message !== '' ? $message : __('No detail recorded.', 'dono'),
+            'message'     => $message !== '' ? $message : __('No detail recorded.', 'dono-fundraising-platform'),
             'context'     => $payload,
             'occurred_at' => (string) $e->occurred_at,
         ];
@@ -369,7 +369,7 @@ final class ToolsController
             'id'          => (int) $e->id,
             'kind'        => 'webhook',
             'source'      => substr((string) $e->type, strlen(self::WEBHOOK_PREFIX)),
-            'message'     => $event !== '' ? $event : __('Unnamed event.', 'dono'),
+            'message'     => $event !== '' ? $event : __('Unnamed event.', 'dono-fundraising-platform'),
             'verified'    => (bool) ($payload['verified'] ?? false),
             'processed'   => (bool) ($payload['processed'] ?? false),
             'error'       => $error !== '' ? $error : null,
@@ -437,16 +437,16 @@ final class ToolsController
             $to = (string) ($user->user_email ?? '');
         }
         if (! is_email($to)) {
-            return new \WP_Error('dono_invalid_email', __('Provide a valid recipient email.', 'dono'), ['status' => 422]);
+            return new \WP_Error('dono_invalid_email', __('Provide a valid recipient email.', 'dono-fundraising-platform'), ['status' => 422]);
         }
 
-        $subject = __('Dono test email', 'dono');
-        $body    = '<p>' . esc_html__('This is a test email from Dono.', 'dono') . '</p>'
-                 . '<p>' . esc_html__('If it landed in your inbox, your sender + transport settings are working.', 'dono') . '</p>'
+        $subject = __('Dono test email', 'dono-fundraising-platform');
+        $body    = '<p>' . esc_html__('This is a test email from Dono.', 'dono-fundraising-platform') . '</p>'
+                 . '<p>' . esc_html__('If it landed in your inbox, your sender + transport settings are working.', 'dono-fundraising-platform') . '</p>'
                  . '<p style="color:#6b7280;font-size:12px">'
                  . esc_html(sprintf(
                      /* translators: %s: site URL */
-                     __('Sent at %1$s from %2$s', 'dono'),
+                     __('Sent at %1$s from %2$s', 'dono-fundraising-platform'),
                      gmdate('c'),
                      site_url()
                  ))
@@ -456,7 +456,7 @@ final class ToolsController
         if (! $ok) {
             return new \WP_Error(
                 'dono_test_send_failed',
-                __('wp_mail() returned false. Check your SMTP plugin / server mail logs.', 'dono'),
+                __('wp_mail() returned false. Check your SMTP plugin / server mail logs.', 'dono-fundraising-platform'),
                 ['status' => 500]
             );
         }
@@ -644,7 +644,7 @@ final class ToolsController
     {
         $csv = (string) ($request->get_json_params()['csv'] ?? '');
         if (trim($csv) === '') {
-            return new \WP_Error('dono_invalid_csv', __('That file is empty.', 'dono'), ['status' => 422]);
+            return new \WP_Error('dono_invalid_csv', __('That file is empty.', 'dono-fundraising-platform'), ['status' => 422]);
         }
 
         return new WP_REST_Response($this->csv->inspect($csv) + ['fields' => CsvImporter::FIELDS], 200);
@@ -659,7 +659,7 @@ final class ToolsController
         $dryRun  = (bool) ($body['dry_run'] ?? true);
 
         if (trim($csv) === '') {
-            return new \WP_Error('dono_invalid_csv', __('That file is empty.', 'dono'), ['status' => 422]);
+            return new \WP_Error('dono_invalid_csv', __('That file is empty.', 'dono-fundraising-platform'), ['status' => 422]);
         }
 
         $result = $this->csv->import($csv, $mapping, $dryRun);
@@ -698,7 +698,7 @@ final class ToolsController
                 return new WP_REST_Response(['imported' => true, 'records' => $records, 'settings_applied' => 0], 200);
             }
 
-            return new \WP_Error('dono_invalid_import', __('No settings payload found.', 'dono'), ['status' => 422]);
+            return new \WP_Error('dono_invalid_import', __('No settings payload found.', 'dono-fundraising-platform'), ['status' => 422]);
         }
 
         $erasureWasOn = self::erasureIsOn();
@@ -764,7 +764,7 @@ final class ToolsController
         if (strtoupper(trim((string) $request->get_param('confirmation'))) !== 'DELETE') {
             return new \WP_Error(
                 'dono_confirmation_required',
-                __('Type DELETE to confirm.', 'dono'),
+                __('Type DELETE to confirm.', 'dono-fundraising-platform'),
                 ['status' => 400]
             );
         }
@@ -799,12 +799,12 @@ final class ToolsController
     public static function scopes(): array
     {
         $core = [
-            'all'       => __('Everything', 'dono'),
-            'currency'  => __('Currency conversions', 'dono'),
-            'donors'    => __('Donors', 'dono'),
-            'funds'     => __('Funds', 'dono'),
-            'campaigns' => __('Campaigns', 'dono'),
-            'forms'     => __('Forms', 'dono'),
+            'all'       => __('Everything', 'dono-fundraising-platform'),
+            'currency'  => __('Currency conversions', 'dono-fundraising-platform'),
+            'donors'    => __('Donors', 'dono-fundraising-platform'),
+            'funds'     => __('Funds', 'dono-fundraising-platform'),
+            'campaigns' => __('Campaigns', 'dono-fundraising-platform'),
+            'forms'     => __('Forms', 'dono-fundraising-platform'),
         ];
 
         $added = (array) apply_filters('dono.recalculate.scopes', []);

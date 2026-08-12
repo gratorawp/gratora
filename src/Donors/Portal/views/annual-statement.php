@@ -19,15 +19,15 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{padding:8px 6px;
 tfoot td{font-weight:700;border-top:2px solid #111;border-bottom:0}
 .total{font-size:18px;margin-top:18px;text-align:right}
 </style></head><body>
-<h1><?php echo esc_html(sprintf(/* translators: %d: year */ __('Annual donation statement %d', 'dono'), $year)); ?></h1>
+<h1><?php echo esc_html(sprintf(/* translators: %d: year */ __('Annual donation statement %d', 'dono-fundraising-platform'), $year)); ?></h1>
 <h2><?php echo esc_html($org_name); ?></h2>
-<p><?php echo esc_html(sprintf(/* translators: %s: donor name */ __('Issued to %s', 'dono'), $donor_name)); ?></p>
+<p><?php echo esc_html(sprintf(/* translators: %s: donor name */ __('Issued to %s', 'dono-fundraising-platform'), $donor_name)); ?></p>
 <table>
 <thead><tr>
-    <th><?php esc_html_e('Date', 'dono'); ?></th>
-    <th><?php esc_html_e('Reference', 'dono'); ?></th>
-    <th><?php esc_html_e('Currency', 'dono'); ?></th>
-    <th style="text-align:right"><?php esc_html_e('Amount', 'dono'); ?></th>
+    <th><?php esc_html_e('Date', 'dono-fundraising-platform'); ?></th>
+    <th><?php esc_html_e('Reference', 'dono-fundraising-platform'); ?></th>
+    <th><?php esc_html_e('Currency', 'dono-fundraising-platform'); ?></th>
+    <th style="text-align:right"><?php esc_html_e('Amount', 'dono-fundraising-platform'); ?></th>
 </tr></thead>
 <tbody>
 <?php foreach ($lines as $line): ?>
@@ -44,8 +44,8 @@ tfoot td{font-weight:700;border-top:2px solid #111;border-bottom:0}
     <tr>
         <td colspan="3" style="text-align:right"><?php
             echo esc_html(count($totals) > 1
-                ? sprintf(/* translators: %s: currency code */ __('Total (%s)', 'dono'), $t['currency'])
-                : __('Total', 'dono'));
+                ? sprintf(/* translators: %s: currency code */ __('Total (%s)', 'dono-fundraising-platform'), $t['currency'])
+                : __('Total', 'dono-fundraising-platform'));
         ?></td>
         <td style="text-align:right"><?php echo esc_html($t['amount']); ?></td>
     </tr>

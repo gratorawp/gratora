@@ -55,7 +55,7 @@ final class DonateButtonBlock extends CampaignBlock
         if (! $form) {
             return (is_user_logged_in() && current_user_can('edit_posts'))
                 ? '<div class="dono-block-notice">'
-                    . esc_html__('This campaign has no published donation form yet.', 'dono')
+                    . esc_html__('This campaign has no published donation form yet.', 'dono-fundraising-platform')
                     . '</div>'
                 : '';
         }
@@ -80,12 +80,12 @@ final class DonateButtonBlock extends CampaignBlock
         $hasForm = str_contains($formHtml, 'data-form-slug=');
         if (! $editorPreview && ! $hasForm) {
             $message = $campaign->notAcceptingReason() === 'ended'
-                ? __('This campaign has finished accepting donations.', 'dono')
-                : __('Donations are not open for this campaign yet.', 'dono');
+                ? __('This campaign has finished accepting donations.', 'dono-fundraising-platform')
+                : __('Donations are not open for this campaign yet.', 'dono-fundraising-platform');
 
             $notice = (is_user_logged_in() && current_user_can('edit_posts'))
                 ? '<div class="dono-block-notice">'
-                    . esc_html__('This campaign is not accepting donations, so the donate button is hidden. Publish the campaign and check its schedule.', 'dono')
+                    . esc_html__('This campaign is not accepting donations, so the donate button is hidden. Publish the campaign and check its schedule.', 'dono-fundraising-platform')
                     . '</div>'
                 : '';
 
@@ -95,7 +95,7 @@ final class DonateButtonBlock extends CampaignBlock
         return View::loadRelative(__DIR__, 'views/donate-button', [
             // ?: not ??: the attribute exists and is an empty string when the
             // organizer has not renamed it, so ?? would hand the view ''.
-            'label'        => (string) ($attrs['label'] ?? '') ?: __('Donate now', 'dono'),
+            'label'        => (string) ($attrs['label'] ?? '') ?: __('Donate now', 'dono-fundraising-platform'),
             'align'        => (string) ($attrs['align'] ?? 'left'),
             'size'         => in_array($attrs['size'] ?? 'md', ['sm', 'md', 'lg'], true)
                 ? (string) $attrs['size'] : 'md',

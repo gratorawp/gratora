@@ -17,7 +17,7 @@ function CopyButton( { value, label } ) {
         } catch ( _ ) {}
     };
     return (
-        <button type="button" className="dp-id-row__copy" aria-label={ label } onClick={ copy } title={ ok ? __( 'Copied', 'dono' ) : label }>
+        <button type="button" className="dp-id-row__copy" aria-label={ label } onClick={ copy } title={ ok ? __( 'Copied', 'dono-fundraising-platform' ) : label }>
             <IconCopy width="12" height="12" />
         </button>
     );
@@ -32,7 +32,7 @@ function IdentityRow( { icon, value, copyable, sub, valClass = '' } ) {
                 { sub && <span className="dp-id-row__sub">{ sub }</span> }
             </span>
             { copyable
-                ? <CopyButton value={ copyable } label={ __( 'Copy', 'dono' ) } />
+                ? <CopyButton value={ copyable } label={ __( 'Copy', 'dono-fundraising-platform' ) } />
                 : <span /> }
         </div>
     );
@@ -55,17 +55,17 @@ export default function IdentityCard( { donor } ) {
 
     const segment = donor.segment || 'other';
     const statusLabel = isRedacted
-        ? __( 'Redacted', 'dono' )
+        ? __( 'Redacted', 'dono-fundraising-platform' )
         : isAnon
-            ? __( 'Anonymous', 'dono' )
+            ? __( 'Anonymous', 'dono-fundraising-platform' )
             : SEGMENT_LABELS[ segment ] || segment;
     const statusClass = isRedacted ? 'is-redact' : isAnon ? 'is-anon' : '';
 
     const typeLabel = donor.donor_type === 'organization'
-        ? __( 'Organization', 'dono' )
+        ? __( 'Organization', 'dono-fundraising-platform' )
         : donor.donor_type === 'household'
-            ? __( 'Household', 'dono' )
-            : __( 'Individual', 'dono' );
+            ? __( 'Household', 'dono-fundraising-platform' )
+            : __( 'Individual', 'dono-fundraising-platform' );
 
     const issueMagic = async () => {
         setIssuing( true );
@@ -77,7 +77,7 @@ export default function IdentityCard( { donor } ) {
             } );
             setMagicLinkUrl( res.magic_link_url || '' );
         } catch ( e ) {
-            setIssueError( e?.message || __( 'The link could not be created.', 'dono' ) );
+            setIssueError( e?.message || __( 'The link could not be created.', 'dono-fundraising-platform' ) );
         } finally {
             setIssuing( false );
         }
@@ -131,7 +131,7 @@ export default function IdentityCard( { donor } ) {
                     { isRedacted && (
                         <IdentityRow
                             icon={ <IconMail width="14" height="14" /> }
-                            value={ __( 'Redacted', 'dono' ) }
+                            value={ __( 'Redacted', 'dono-fundraising-platform' ) }
                             valClass="is-redacted"
                         />
                     ) }
@@ -159,8 +159,8 @@ export default function IdentityCard( { donor } ) {
                     { donor.first_donation_at && (
                         <IdentityRow
                             icon={ <IconCalendar width="14" height="14" /> }
-                            value={ sprintf( /* translators: %s: month */ __( 'Donor since %s', 'dono' ), formatMonth( donor.first_donation_at ) ) }
-                            sub={ donor.last_donation_at ? sprintf( /* translators: %s: date */ __( 'Last donation %s', 'dono' ), formatDate( donor.last_donation_at ) ) : null }
+                            value={ sprintf( /* translators: %s: month */ __( 'Donor since %s', 'dono-fundraising-platform' ), formatMonth( donor.first_donation_at ) ) }
+                            sub={ donor.last_donation_at ? sprintf( /* translators: %s: date */ __( 'Last donation %s', 'dono-fundraising-platform' ), formatDate( donor.last_donation_at ) ) : null }
                         />
                     ) }
                 </div>
@@ -173,10 +173,10 @@ export default function IdentityCard( { donor } ) {
                             onClick={ issueMagic }
                             disabled={ issuing }
                         >
-                            { issuing ? __( 'Creating…', 'dono' ) : __( 'Create a sign-in link', 'dono' ) }
+                            { issuing ? __( 'Creating…', 'dono-fundraising-platform' ) : __( 'Create a sign-in link', 'dono-fundraising-platform' ) }
                         </button>
                         <div className="dp-id-magic__help">
-                            { issueError || __( 'Signs this donor in for 30 days. Create one only when they have asked.', 'dono' ) }
+                            { issueError || __( 'Signs this donor in for 30 days. Create one only when they have asked.', 'dono-fundraising-platform' ) }
                         </div>
                     </div>
                 ) }
@@ -186,11 +186,11 @@ export default function IdentityCard( { donor } ) {
                         <div className="dp-magic-link" title={ magicLinkUrl }>
                             <span className="dp-magic-link__url">{ magicLinkUrl }</span>
                             <button type="button" className="dp-magic-link__copy" onClick={ copyMagic }>
-                                { copiedMagic ? __( 'Copied', 'dono' ) : __( 'Copy', 'dono' ) }
+                                { copiedMagic ? __( 'Copied', 'dono-fundraising-platform' ) : __( 'Copy', 'dono-fundraising-platform' ) }
                             </button>
                         </div>
                         <div className="dp-id-magic__help">
-                            { __( 'Donor self-service link. Reset history is not exposed.', 'dono' ) }
+                            { __( 'Donor self-service link. Reset history is not exposed.', 'dono-fundraising-platform' ) }
                         </div>
                     </div>
                 ) }

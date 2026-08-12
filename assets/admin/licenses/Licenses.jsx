@@ -11,11 +11,11 @@ import { notify } from '../_shared/notify';
 const BASE = '/dono/v1/admin/license';
 
 const STATUS_META = {
-    active:   { tone: 'green', label: __( 'Active', 'dono' ) },
-    grace:    { tone: 'amber', label: __( 'Grace period', 'dono' ) },
-    expired:  { tone: 'amber', label: __( 'Expired', 'dono' ) },
-    revoked:  { tone: 'red',   label: __( 'Revoked', 'dono' ) },
-    inactive: { tone: 'gray',  label: __( 'Inactive', 'dono' ) },
+    active:   { tone: 'green', label: __( 'Active', 'dono-fundraising-platform' ) },
+    grace:    { tone: 'amber', label: __( 'Grace period', 'dono-fundraising-platform' ) },
+    expired:  { tone: 'amber', label: __( 'Expired', 'dono-fundraising-platform' ) },
+    revoked:  { tone: 'red',   label: __( 'Revoked', 'dono-fundraising-platform' ) },
+    inactive: { tone: 'gray',  label: __( 'Inactive', 'dono-fundraising-platform' ) },
 };
 
 // Per add-on, from the licensing client. 'unknown' means nothing checked it,
@@ -32,14 +32,14 @@ const ADDON_PILL = {
 };
 
 const ADDON_LABEL = {
-    active: __( 'Licensed', 'dono' ),
-    grace: __( 'In grace period', 'dono' ),
-    expired: __( 'Expired', 'dono' ),
-    over_limit: __( 'Site limit reached', 'dono' ),
-    revoked: __( 'Revoked', 'dono' ),
-    invalid: __( 'Key not accepted', 'dono' ),
-    not_entitled: __( 'Not on this key', 'dono' ),
-    inactive: __( 'Not activated', 'dono' ),
+    active: __( 'Licensed', 'dono-fundraising-platform' ),
+    grace: __( 'In grace period', 'dono-fundraising-platform' ),
+    expired: __( 'Expired', 'dono-fundraising-platform' ),
+    over_limit: __( 'Site limit reached', 'dono-fundraising-platform' ),
+    revoked: __( 'Revoked', 'dono-fundraising-platform' ),
+    invalid: __( 'Key not accepted', 'dono-fundraising-platform' ),
+    not_entitled: __( 'Not on this key', 'dono-fundraising-platform' ),
+    inactive: __( 'Not activated', 'dono-fundraising-platform' ),
 };
 
 function StatusBadge( { status } ) {
@@ -58,40 +58,40 @@ function StateNotice( { status } ) {
     if ( status === 'grace' ) {
         return (
             <Notice status="warning" isDismissible={ false }>
-                <strong>{ __( 'We could not confirm your renewal.', 'dono' ) }</strong>{ ' ' }
-                { __( 'Your Pro add-ons keep working, so update your payment method to keep receiving updates.', 'dono' ) }
+                <strong>{ __( 'We could not confirm your renewal.', 'dono-fundraising-platform' ) }</strong>{ ' ' }
+                { __( 'Your Pro add-ons keep working, so update your payment method to keep receiving updates.', 'dono-fundraising-platform' ) }
             </Notice>
         );
     }
     if ( status === 'expired' ) {
         return (
             <Notice status="warning" isDismissible={ false }>
-                <strong>{ __( 'Your license expired.', 'dono' ) }</strong>{ ' ' }
-                { __( 'Your Pro add-ons keep working; only updates pause. Renew to restore updates and support.', 'dono' ) }
+                <strong>{ __( 'Your license expired.', 'dono-fundraising-platform' ) }</strong>{ ' ' }
+                { __( 'Your Pro add-ons keep working; only updates pause. Renew to restore updates and support.', 'dono-fundraising-platform' ) }
             </Notice>
         );
     }
     if ( status === 'invalid' || status === 'not_entitled' ) {
         return (
             <Notice status="warning" isDismissible={ false }>
-                <strong>{ __( 'This key was not accepted.', 'dono' ) }</strong>{ ' ' }
-                { __( 'Check it against your purchase email. Until it is fixed your add-ons will not receive updates or security fixes.', 'dono' ) }
+                <strong>{ __( 'This key was not accepted.', 'dono-fundraising-platform' ) }</strong>{ ' ' }
+                { __( 'Check it against your purchase email. Until it is fixed your add-ons will not receive updates or security fixes.', 'dono-fundraising-platform' ) }
             </Notice>
         );
     }
     if ( status === 'over_limit' ) {
         return (
             <Notice status="warning" isDismissible={ false }>
-                <strong>{ __( 'This key has no seats left.', 'dono' ) }</strong>{ ' ' }
-                { __( 'Deactivate it on a site you no longer use, or upgrade, to receive updates here.', 'dono' ) }
+                <strong>{ __( 'This key has no seats left.', 'dono-fundraising-platform' ) }</strong>{ ' ' }
+                { __( 'Deactivate it on a site you no longer use, or upgrade, to receive updates here.', 'dono-fundraising-platform' ) }
             </Notice>
         );
     }
     if ( status === 'revoked' ) {
         return (
             <Notice status="error" isDismissible={ false }>
-                <strong>{ __( 'This license was revoked.', 'dono' ) }</strong>{ ' ' }
-                { __( 'Pro features are disabled on this site. Contact support if this is unexpected.', 'dono' ) }
+                <strong>{ __( 'This license was revoked.', 'dono-fundraising-platform' ) }</strong>{ ' ' }
+                { __( 'Pro features are disabled on this site. Contact support if this is unexpected.', 'dono-fundraising-platform' ) }
             </Notice>
         );
     }
@@ -108,11 +108,11 @@ function AddonsCard( { addons } ) {
 
     return (
         <Card
-            title={ __( 'Your add-ons', 'dono' ) }
-            sub={ __( 'Installed Pro add-ons unlocked by your key.', 'dono' ) }
+            title={ __( 'Your add-ons', 'dono-fundraising-platform' ) }
+            sub={ __( 'Installed Pro add-ons unlocked by your key.', 'dono-fundraising-platform' ) }
             meta={ sprintf(
                 /* translators: 1: entitled add-ons, 2: installed add-ons */
-                __( '%1$d of %2$d licensed', 'dono' ),
+                __( '%1$d of %2$d licensed', 'dono-fundraising-platform' ),
                 addons.filter( ( a ) => a.entitled ).length,
                 addons.length,
             ) }
@@ -125,7 +125,7 @@ function AddonsCard( { addons } ) {
                             <div className="dono-lic-addon__id">{ a.id }</div>
                         </div>
                         <span className={ `dono-lic-pill dono-lic-pill--${ ADDON_PILL[ a.status ] || 'gray' }` }>
-                            { ADDON_LABEL[ a.status ] || __( 'Not checked', 'dono' ) }
+                            { ADDON_LABEL[ a.status ] || __( 'Not checked', 'dono-fundraising-platform' ) }
                         </span>
                     </div>
                 ) ) }
@@ -158,9 +158,9 @@ export default function Licenses() {
             setSnap( data );
             setKeyInput( '' );
             setChanging( false );
-            notify.success( __( 'License activated.', 'dono' ) );
+            notify.success( __( 'License activated.', 'dono-fundraising-platform' ) );
         } catch ( e ) {
-            notify.error( e?.message || __( 'Could not activate this key.', 'dono' ) );
+            notify.error( e?.message || __( 'Could not activate this key.', 'dono-fundraising-platform' ) );
         } finally {
             setBusy( false );
         }
@@ -174,9 +174,9 @@ export default function Licenses() {
             setSnap( data );
             setKeyInput( '' );
             setChanging( false );
-            notify.success( __( 'License deactivated on this site.', 'dono' ) );
+            notify.success( __( 'License deactivated on this site.', 'dono-fundraising-platform' ) );
         } catch ( e ) {
-            notify.error( e?.message || __( 'Could not deactivate.', 'dono' ) );
+            notify.error( e?.message || __( 'Could not deactivate.', 'dono-fundraising-platform' ) );
         } finally {
             setBusy( false );
         }
@@ -188,9 +188,9 @@ export default function Licenses() {
         try {
             const data = await apiFetch( { path: `${ BASE }/recheck`, method: 'POST' } );
             setSnap( data );
-            notify.success( __( 'License re-checked.', 'dono' ) );
+            notify.success( __( 'License re-checked.', 'dono-fundraising-platform' ) );
         } catch ( e ) {
-            notify.error( e?.message || __( 'Could not re-check right now.', 'dono' ) );
+            notify.error( e?.message || __( 'Could not re-check right now.', 'dono-fundraising-platform' ) );
         } finally {
             setBusy( false );
         }
@@ -201,14 +201,14 @@ export default function Licenses() {
         body = (
             <Card>
                 <p className="dono-lic-muted">
-                    { __( 'Could not load license status. Refresh to try again.', 'dono' ) }
+                    { __( 'Could not load license status. Refresh to try again.', 'dono-fundraising-platform' ) }
                 </p>
             </Card>
         );
     } else if ( snap === null ) {
         body = (
             <Card>
-                <p className="dono-lic-muted">{ __( 'Loading license status…', 'dono' ) }</p>
+                <p className="dono-lic-muted">{ __( 'Loading license status…', 'dono-fundraising-platform' ) }</p>
             </Card>
         );
     } else if ( ! snap.has_key || changing ) {
@@ -216,14 +216,14 @@ export default function Licenses() {
         body = (
             <>
             <Card
-                title={ changing ? __( 'Change license key', 'dono' ) : __( 'Activate your license', 'dono' ) }
+                title={ changing ? __( 'Change license key', 'dono-fundraising-platform' ) : __( 'Activate your license', 'dono-fundraising-platform' ) }
                 meta={ changing ? null : (
-                    <span className="dono-lic-pill dono-lic-pill--gray">{ __( 'Not activated', 'dono' ) }</span>
+                    <span className="dono-lic-pill dono-lic-pill--gray">{ __( 'Not activated', 'dono-fundraising-platform' ) }</span>
                 ) }
             >
                 <Field
-                    label={ __( 'License key', 'dono' ) }
-                    footer={ __( 'Paste the key from your purchase email. It activates every installed add-on at once.', 'dono' ) }
+                    label={ __( 'License key', 'dono-fundraising-platform' ) }
+                    footer={ __( 'Paste the key from your purchase email. It activates every installed add-on at once.', 'dono-fundraising-platform' ) }
                 >
                     <div className="dono-lic-keyrow">
                         <input
@@ -231,7 +231,7 @@ export default function Licenses() {
                             type="text"
                             value={ keyInput }
                             placeholder="DONO-XXXX-XXXX-XXXX"
-                            aria-label={ __( 'License key', 'dono' ) }
+                            aria-label={ __( 'License key', 'dono-fundraising-platform' ) }
                             disabled={ busy }
                             onChange={ ( e ) => setKeyInput( e.target.value ) }
                             onKeyDown={ ( e ) => { if ( e.key === 'Enter' ) activate(); } }
@@ -242,7 +242,7 @@ export default function Licenses() {
                             isBusy={ busy }
                             disabled={ ! keyInput.trim() }
                         >
-                            { __( 'Activate', 'dono' ) }
+                            { __( 'Activate', 'dono-fundraising-platform' ) }
                         </Btn>
                         { changing && (
                             <Btn
@@ -250,7 +250,7 @@ export default function Licenses() {
                                 onClick={ () => { setChanging( false ); setKeyInput( '' ); } }
                                 disabled={ busy }
                             >
-                                { __( 'Cancel', 'dono' ) }
+                                { __( 'Cancel', 'dono-fundraising-platform' ) }
                             </Btn>
                         ) }
                     </div>
@@ -258,7 +258,7 @@ export default function Licenses() {
             </Card>
             { ! changing && pending.length > 0 && (
                 <Notice status="warning" isDismissible={ false }>
-                    { __( 'These add-ons are installed but not licensed, so they will not receive updates or security fixes.', 'dono' ) }
+                    { __( 'These add-ons are installed but not licensed, so they will not receive updates or security fixes.', 'dono-fundraising-platform' ) }
                 </Notice>
             ) }
             <AddonsCard addons={ pending } />
@@ -268,21 +268,21 @@ export default function Licenses() {
         const addons = Array.isArray( snap.addons ) ? snap.addons : [];
         body = (
             <>
-                <Card title={ __( 'License', 'dono' ) } meta={ <StatusBadge status={ snap.status } /> }>
+                <Card title={ __( 'License', 'dono-fundraising-platform' ) } meta={ <StatusBadge status={ snap.status } /> }>
                     <StateNotice status={ snap.status } />
                     <p className="dono-lic-lead">
                         { snap.status === 'revoked'
-                            ? __( 'Pro features are disabled on this site.', 'dono' )
-                            : __( 'This key unlocks every installed Dono Pro add-on.', 'dono' ) }
+                            ? __( 'Pro features are disabled on this site.', 'dono-fundraising-platform' )
+                            : __( 'This key unlocks every installed Dono Pro add-on.', 'dono-fundraising-platform' ) }
                     </p>
-                    <Field label={ __( 'License key', 'dono' ) }>
+                    <Field label={ __( 'License key', 'dono-fundraising-platform' ) }>
                         <div className="dono-lic-keyrow">
                             <input
                                 className="dono-input dono-input--mono"
                                 type="text"
                                 value={ snap.key_masked || '' }
                                 readOnly
-                                aria-label={ __( 'License key, masked', 'dono' ) }
+                                aria-label={ __( 'License key, masked', 'dono-fundraising-platform' ) }
                             />
                             <div className="dono-lic-keyactions">
                                 <button
@@ -291,7 +291,7 @@ export default function Licenses() {
                                     onClick={ deactivate }
                                     disabled={ busy }
                                 >
-                                    { __( 'Deactivate this site', 'dono' ) }
+                                    { __( 'Deactivate this site', 'dono-fundraising-platform' ) }
                                 </button>
                                 <button
                                     type="button"
@@ -299,14 +299,14 @@ export default function Licenses() {
                                     onClick={ () => { setChanging( true ); setKeyInput( '' ); } }
                                     disabled={ busy }
                                 >
-                                    { __( 'Change key', 'dono' ) }
+                                    { __( 'Change key', 'dono-fundraising-platform' ) }
                                 </button>
                             </div>
                         </div>
                     </Field>
                     <div className="dono-lic-foot">
                         <Btn onClick={ recheck } isBusy={ busy }>
-                            { __( 'Re-check entitlements', 'dono' ) }
+                            { __( 'Re-check entitlements', 'dono-fundraising-platform' ) }
                         </Btn>
                     </div>
                 </Card>
@@ -320,7 +320,7 @@ export default function Licenses() {
     return (
         <div className="dono-licenses-page">
             <p className="dono-lic-intro">
-                { __( 'One key activates every Dono Pro add-on on this site.', 'dono' ) }
+                { __( 'One key activates every Dono Pro add-on on this site.', 'dono-fundraising-platform' ) }
             </p>
             { body }
         </div>

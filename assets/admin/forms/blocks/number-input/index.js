@@ -31,54 +31,54 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Number input', 'dono' ) } initialOpen>
+                <PanelBody title={ __( 'Number input', 'dono-fundraising-platform' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'dono' ) }
+                        label={ __( 'Label', 'dono-fundraising-platform' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label in the canvas to edit it inline.', 'dono' ) }
+                        help={ __( 'Click the label in the canvas to edit it inline.', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Placeholder', 'dono' ) }
+                        label={ __( 'Placeholder', 'dono-fundraising-platform' ) }
                         value={ placeholder }
                         onChange={ ( v ) => setAttributes( { placeholder: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Help text', 'dono' ) }
+                        label={ __( 'Help text', 'dono-fundraising-platform' ) }
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
-                        help={ __( 'For non-currency numbers (quantity, age, etc.). Use a donation-amount block for money.', 'dono' ) }
+                        help={ __( 'For non-currency numbers (quantity, age, etc.). Use a donation-amount block for money.', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Field name', 'dono' ) }
+                        label={ __( 'Field name', 'dono-fundraising-platform' ) }
                         value={ field }
                         onChange={ ( v ) => setAttributes( { field: slugify( v ) } ) }
-                        help={ __( 'Stored under values.custom[field]. Lowercase, snake_case.', 'dono' ) }
+                        help={ __( 'Stored under values.custom[field]. Lowercase, snake_case.', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'dono' ) }
+                        label={ __( 'Required', 'dono-fundraising-platform' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <NumberControl
-                        label={ __( 'Minimum', 'dono' ) }
+                        label={ __( 'Minimum', 'dono-fundraising-platform' ) }
                         value={ min === null ? '' : min }
                         onChange={ ( v ) => setAttributes( { min: v === '' || v === undefined ? null : Number( v ) } ) }
                         __nextHasNoMarginBottom
                     />
                     <NumberControl
-                        label={ __( 'Maximum', 'dono' ) }
+                        label={ __( 'Maximum', 'dono-fundraising-platform' ) }
                         value={ max === null ? '' : max }
                         onChange={ ( v ) => setAttributes( { max: v === '' || v === undefined ? null : Number( v ) } ) }
                         __nextHasNoMarginBottom
                     />
                     <NumberControl
-                        label={ __( 'Step', 'dono' ) }
+                        label={ __( 'Step', 'dono-fundraising-platform' ) }
                         value={ step }
                         min={ 0 }
                         onChange={ ( v ) => setAttributes( { step: Number( v ) || 1 } ) }
@@ -96,7 +96,7 @@ function Edit( { attributes, setAttributes } ) {
                     className="dono-block-preview__label"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Label', 'dono' ) }
+                    placeholder={ __( 'Label', 'dono-fundraising-platform' ) }
                     allowedFormats={ [] }
                 />
                 { required && <em className="dono-block-preview__req" aria-hidden="true">*</em> }
@@ -105,7 +105,7 @@ function Edit( { attributes, setAttributes } ) {
                         tagName="span"
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
-                        placeholder={ __( 'Help text', 'dono' ) }
+                        placeholder={ __( 'Help text', 'dono-fundraising-platform' ) }
                         allowedFormats={ [] }
                         style={ { fontSize: 11, color: '#6b7280', display: 'block', marginTop: 2 } }
                     />
@@ -119,8 +119,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Number input', 'dono' ),
-        description: __( 'Generic numeric field for non-currency values (quantity, age, etc.).', 'dono' ),
+        title:      __( 'Number input', 'dono-fundraising-platform' ),
+        description: __( 'Generic numeric field for non-currency values (quantity, age, etc.).', 'dono-fundraising-platform' ),
         category:   'dono-fields',
         icon:       BlockIcons[ 'number-input' ],
         supports: { html: false, anchor: false, inserter: true },

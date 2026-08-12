@@ -83,7 +83,7 @@ final class ReportsController
     {
         $campaign = $this->campaigns->findById((int) $request['id']);
         if (! $campaign) {
-            return new WP_Error('dono_campaign_not_found', __('Campaign not found.', 'dono'), ['status' => 404]);
+            return new WP_Error('dono_campaign_not_found', __('Campaign not found.', 'dono-fundraising-platform'), ['status' => 404]);
         }
 
         $range = (string) ($request['range'] ?? 'last-30');
@@ -101,17 +101,17 @@ final class ReportsController
     {
         $year = (int) $request['year'];
         if ($year < 2000 || $year > (int) wp_date('Y')) {
-            return new WP_Error('dono_invalid_year', __('Unsupported statement year.', 'dono'), ['status' => 422]);
+            return new WP_Error('dono_invalid_year', __('Unsupported statement year.', 'dono-fundraising-platform'), ['status' => 422]);
         }
 
         $donor = $this->donors->findById((int) $request['id']);
         if (! $donor || $donor->redacted_at !== null) {
-            return new WP_Error('dono_donor_not_found', __('Donor not found.', 'dono'), ['status' => 404]);
+            return new WP_Error('dono_donor_not_found', __('Donor not found.', 'dono-fundraising-platform'), ['status' => 404]);
         }
 
         $pdf = $this->taxStatement->build($donor, $year);
         if ($pdf === '') {
-            return new WP_Error('dono_no_donations', __('No donations found for that year.', 'dono'), ['status' => 404]);
+            return new WP_Error('dono_no_donations', __('No donations found for that year.', 'dono-fundraising-platform'), ['status' => 404]);
         }
 
         return $this->stream($request, $pdf, TaxStatementBuilder::filename((int) $donor->id, $year));

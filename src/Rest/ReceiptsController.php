@@ -60,23 +60,23 @@ final class ReceiptsController
 
         $valid = $this->magicLinks->validate($rawToken, 'download_receipt', $receiptId);
         if (! $valid) {
-            return new WP_Error('dono_invalid_token', __('Link is invalid or expired.', 'dono'), ['status' => 403]);
+            return new WP_Error('dono_invalid_token', __('Link is invalid or expired.', 'dono-fundraising-platform'), ['status' => 403]);
         }
 
         $receipt = $this->receipts->findById($receiptId);
         if (! $receipt || $receipt->voided) {
-            return new WP_Error('dono_receipt_not_found', __('Receipt not found.', 'dono'), ['status' => 404]);
+            return new WP_Error('dono_receipt_not_found', __('Receipt not found.', 'dono-fundraising-platform'), ['status' => 404]);
         }
 
         // Defense-in-depth: token must belong to the same donor as the receipt.
         if ($valid->donor_id !== $receipt->donor_id) {
-            return new WP_Error('dono_invalid_token', __('Link is invalid.', 'dono'), ['status' => 403]);
+            return new WP_Error('dono_invalid_token', __('Link is invalid.', 'dono-fundraising-platform'), ['status' => 403]);
         }
 
         $donation = $this->donations->findById($receipt->donation_id);
         $donor    = $this->donors->findById($receipt->donor_id);
         if (! $donation || ! $donor) {
-            return new WP_Error('dono_receipt_data_missing', __('Receipt data is no longer available.', 'dono'), ['status' => 410]);
+            return new WP_Error('dono_receipt_data_missing', __('Receipt data is no longer available.', 'dono-fundraising-platform'), ['status' => 410]);
         }
 
         $ctx = new ReceiptContext(
@@ -104,7 +104,7 @@ final class ReceiptsController
             // under the same receipt number.
             return new WP_Error(
                 'dono_renderer_missing',
-                __('This receipt was produced by an extension that is no longer active. Please contact the organization.', 'dono'),
+                __('This receipt was produced by an extension that is no longer active. Please contact the organization.', 'dono-fundraising-platform'),
                 ['status' => 410, 'renderer_id' => (string) $receipt->renderer_id]
             );
         }

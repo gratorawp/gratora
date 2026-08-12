@@ -16,7 +16,7 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
 
     const scopes = info?.recalc_scopes?.length
         ? info.recalc_scopes
-        : [ { value: 'all', label: __( 'Everything', 'dono' ) } ];
+        : [ { value: 'all', label: __( 'Everything', 'dono-fundraising-platform' ) } ];
 
     // Tabs are hidden rather than unmounted. Saving a currency on another
     // screen changes which donations are stranded, so refetch on each visit.
@@ -31,12 +31,12 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
             setNotice( {
                 type: 'success',
                 text: left > 0
-                    ? __( 'Progress made. There is more to do, run it again.', 'dono' )
-                    : __( 'Data updates finished.', 'dono' ),
+                    ? __( 'Progress made. There is more to do, run it again.', 'dono-fundraising-platform' )
+                    : __( 'Data updates finished.', 'dono-fundraising-platform' ),
             } );
             loadInfo();
         } catch ( err ) {
-            setNotice( { type: 'error', text: err?.message || __( 'Could not finish the data updates.', 'dono' ) } );
+            setNotice( { type: 'error', text: err?.message || __( 'Could not finish the data updates.', 'dono-fundraising-platform' ) } );
         } finally {
             setUpgrading( false );
         }
@@ -53,10 +53,10 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
                 data:   { scope: recalcScope },
             } );
             setRecalcResult( res?.counts || {} );
-            setNotice( { type: 'success', text: __( 'Aggregates recomputed.', 'dono' ) } );
+            setNotice( { type: 'success', text: __( 'Aggregates recomputed.', 'dono-fundraising-platform' ) } );
             loadInfo();
         } catch ( err ) {
-            setNotice( { type: 'error', text: err?.message || __( 'Recalculation failed.', 'dono' ) } );
+            setNotice( { type: 'error', text: err?.message || __( 'Recalculation failed.', 'dono-fundraising-platform' ) } );
         } finally {
             setRecalcRunning( false );
         }
@@ -76,7 +76,7 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
                 type: 'success',
                 text: sprintf(
                     /* translators: 1: donations removed, 2: recurring plans removed, 3: donors removed */
-                    __( 'Removed %1$d test donations, %2$d test recurring plans and %3$d donors left with nothing.', 'dono' ),
+                    __( 'Removed %1$d test donations, %2$d test recurring plans and %3$d donors left with nothing.', 'dono-fundraising-platform' ),
                     res?.donations || 0,
                     res?.recurring_plans || 0,
                     res?.donors || 0,
@@ -84,7 +84,7 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
             } );
             loadInfo();
         } catch ( err ) {
-            setNotice( { type: 'error', text: err?.message || __( 'Could not remove the test data.', 'dono' ) } );
+            setNotice( { type: 'error', text: err?.message || __( 'Could not remove the test data.', 'dono-fundraising-platform' ) } );
         } finally {
             setPurging( false );
         }
@@ -97,8 +97,8 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
         <div className="dono-panel">
             { info?.pending_upgrades?.length > 0 && (
                 <Card
-                    title={ __( 'Data updates are outstanding', 'dono' ) }
-                    sub={ __( 'These run by themselves in the background. If they are still here after a few minutes, this site\'s scheduled tasks are not running and you can finish them here.', 'dono' ) }
+                    title={ __( 'Data updates are outstanding', 'dono-fundraising-platform' ) }
+                    sub={ __( 'These run by themselves in the background. If they are still here after a few minutes, this site\'s scheduled tasks are not running and you can finish them here.', 'dono-fundraising-platform' ) }
                 >
                     <ul className="dono-advanced-cron">
                         { info.pending_upgrades.map( ( u ) => (
@@ -112,7 +112,7 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
                                                 'Stopped with: %1$s (failed %2$d time)',
                                                 'Stopped with: %1$s (failed %2$d times)',
                                                 u.failure.attempts,
-                                                'dono'
+                                                'dono-fundraising-platform'
                                             ),
                                             u.failure.message,
                                             u.failure.attempts
@@ -124,7 +124,7 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
                     </ul>
                     <div className="dono-advanced-actions" style={ { marginTop: 12 } }>
                         <Btn variant="primary" onClick={ doRunUpgrades } disabled={ upgrading } isBusy={ upgrading }>
-                            { upgrading ? __( 'Working…', 'dono' ) : __( 'Run them now', 'dono' ) }
+                            { upgrading ? __( 'Working…', 'dono-fundraising-platform' ) : __( 'Run them now', 'dono-fundraising-platform' ) }
                         </Btn>
                     </div>
                 </Card>
@@ -132,8 +132,8 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
 
             { info?.unconverted_donations?.length > 0 && (
                 <Card
-                    title={ __( 'Donations missing from your totals', 'dono' ) }
-                    sub={ __( 'A donation is never refused for want of an exchange rate, so these were recorded in their own currency and left out of every total. Add a rate for the currency, then recalculate to bring them in.', 'dono' ) }
+                    title={ __( 'Donations missing from your totals', 'dono-fundraising-platform' ) }
+                    sub={ __( 'A donation is never refused for want of an exchange rate, so these were recorded in their own currency and left out of every total. Add a rate for the currency, then recalculate to bring them in.', 'dono-fundraising-platform' ) }
                 >
                     <ul className="dono-advanced-cron">
                         { info.unconverted_donations.map( ( row ) => (
@@ -142,7 +142,7 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
                                 { ' ' }
                                 { sprintf(
                                     /* translators: 1: how many donations, 2: their total in that currency. */
-                                    _n( '%1$s donation, %2$s', '%1$s donations, %2$s', row.count, 'dono' ),
+                                    _n( '%1$s donation, %2$s', '%1$s donations, %2$s', row.count, 'dono-fundraising-platform' ),
                                     row.count,
                                     formatAmount( row.amount_cents, row.currency )
                                 ) }
@@ -153,12 +153,12 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
             ) }
 
             <Card
-                title={ __( 'Recalculate aggregates', 'dono' ) }
-                sub={ __( 'Re-derive donor, fund, campaign and form counters from the donation rows. Safe to run any time; donations are only read.', 'dono' ) }
+                title={ __( 'Recalculate aggregates', 'dono-fundraising-platform' ) }
+                sub={ __( 'Re-derive donor, fund, campaign and form counters from the donation rows. Safe to run any time; donations are only read.', 'dono-fundraising-platform' ) }
             >
                 <div className="dono-advanced-actions">
                     <label className="dono-tools-field">
-                        { __( 'Scope', 'dono' ) }
+                        { __( 'Scope', 'dono-fundraising-platform' ) }
                         <select
                             className="dono-select"
                             value={ recalcScope }
@@ -171,7 +171,7 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
                         </select>
                     </label>
                     <Btn variant="primary" onClick={ doRecalculate } disabled={ recalcRunning } isBusy={ recalcRunning }>
-                        { recalcRunning ? __( 'Recalculating…', 'dono' ) : __( 'Recalculate', 'dono' ) }
+                        { recalcRunning ? __( 'Recalculating…', 'dono-fundraising-platform' ) : __( 'Recalculate', 'dono-fundraising-platform' ) }
                     </Btn>
                 </div>
                 { recalcResult && (
@@ -182,7 +182,7 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
                                 <li key={ k }>
                                     { sprintf(
                                         /* translators: 1: scope label (Donors, Funds, ...), 2: count */
-                                        __( '%1$s: %2$d synced', 'dono' ),
+                                        __( '%1$s: %2$d synced', 'dono-fundraising-platform' ),
                                         k.charAt( 0 ).toUpperCase() + k.slice( 1 ),
                                         n
                                     ) }
@@ -194,15 +194,15 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
 
             { testTotal > 0 && (
                 <Card
-                    title={ __( 'Test data', 'dono' ) }
-                    sub={ __( 'Everything a gateway in test mode left behind: donations, the recurring plans set up against them, and donors who would have nothing left on record. Test rows are already left out of every total, so this changes nothing you have reported: it clears the ledger you read by eye before going live. There is no undo.', 'dono' ) }
+                    title={ __( 'Test data', 'dono-fundraising-platform' ) }
+                    sub={ __( 'Everything a gateway in test mode left behind: donations, the recurring plans set up against them, and donors who would have nothing left on record. Test rows are already left out of every total, so this changes nothing you have reported: it clears the ledger you read by eye before going live. There is no undo.', 'dono-fundraising-platform' ) }
                 >
                     <ul className="dono-advanced-cron">
                         { testData.donations > 0 && (
                             <li>
                                 { sprintf(
                                     /* translators: %d: number of test donations */
-                                    _n( '%d test donation', '%d test donations', testData.donations, 'dono' ),
+                                    _n( '%d test donation', '%d test donations', testData.donations, 'dono-fundraising-platform' ),
                                     testData.donations
                                 ) }
                             </li>
@@ -211,7 +211,7 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
                             <li>
                                 { sprintf(
                                     /* translators: %d: number of test recurring plans */
-                                    _n( '%d test recurring plan', '%d test recurring plans', testData.recurring_plans, 'dono' ),
+                                    _n( '%d test recurring plan', '%d test recurring plans', testData.recurring_plans, 'dono-fundraising-platform' ),
                                     testData.recurring_plans
                                 ) }
                             </li>
@@ -224,7 +224,7 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
                                         '%d donor, who would have nothing left on record',
                                         '%d donors, who would have nothing left on record',
                                         testData.donors,
-                                        'dono'
+                                        'dono-fundraising-platform'
                                     ),
                                     testData.donors
                                 ) }
@@ -233,7 +233,7 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
                     </ul>
                     <div className="dono-advanced-actions" style={ { marginTop: 12 } }>
                         <label className="dono-tools-field">
-                            { __( 'Type DELETE to confirm', 'dono' ) }
+                            { __( 'Type DELETE to confirm', 'dono-fundraising-platform' ) }
                             <input
                                 type="text"
                                 className="dono-input"
@@ -248,19 +248,19 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
                             disabled={ purging || purgeText.trim().toUpperCase() !== 'DELETE' }
                             isBusy={ purging }
                         >
-                            { purging ? __( 'Removing…', 'dono' ) : __( 'Delete test data', 'dono' ) }
+                            { purging ? __( 'Removing…', 'dono-fundraising-platform' ) : __( 'Delete test data', 'dono-fundraising-platform' ) }
                         </Btn>
                     </div>
                 </Card>
             ) }
 
             <Card
-                title={ __( 'Setup wizard', 'dono' ) }
-                sub={ __( 'Walks through currency, the first campaign, and a payment gateway. Re-running it changes nothing you have already set unless you complete a step.', 'dono' ) }
+                title={ __( 'Setup wizard', 'dono-fundraising-platform' ) }
+                sub={ __( 'Walks through currency, the first campaign, and a payment gateway. Re-running it changes nothing you have already set unless you complete a step.', 'dono-fundraising-platform' ) }
             >
                 <div className="dono-advanced-actions">
                     <Btn variant="secondary" href="admin.php?page=dono-onboarding">
-                        { __( 'Open setup wizard', 'dono' ) }
+                        { __( 'Open setup wizard', 'dono-fundraising-platform' ) }
                     </Btn>
                 </div>
             </Card>

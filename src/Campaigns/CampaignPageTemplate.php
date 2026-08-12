@@ -44,8 +44,8 @@ final class CampaignPageTemplate extends HookProvider
             return;
         }
         register_block_template('dono//' . self::SLUG, [
-            'title'       => __('Campaign page', 'dono'),
-            'description' => __('Site header and footer around the campaign page content, without the theme page banner.', 'dono'),
+            'title'       => __('Campaign page', 'dono-fundraising-platform'),
+            'description' => __('Site header and footer around the campaign page content, without the theme page banner.', 'dono-fundraising-platform'),
             'content'     => '<!-- wp:template-part {"slug":"header","tagName":"header"} /-->'
                 . '<!-- wp:group {"tagName":"main","layout":{"type":"default"}} -->'
                 . '<main class="wp-block-group"><!-- wp:post-content /--></main>'

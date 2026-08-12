@@ -65,10 +65,10 @@ final class UpgradeNotice
         if ($stuck) {
             printf(
                 '<div class="notice notice-error"><p><strong>%s</strong> %s <a href="%s">%s</a></p></div>',
-                esc_html__('Dono could not finish a data update.', 'dono'),
-                esc_html__('It stopped with an error and will be retried. Until it finishes, some records are only partly updated.', 'dono'),
+                esc_html__('Dono could not finish a data update.', 'dono-fundraising-platform'),
+                esc_html__('It stopped with an error and will be retried. Until it finishes, some records are only partly updated.', 'dono-fundraising-platform'),
                 esc_url($url),
-                esc_html__('See what failed', 'dono')
+                esc_html__('See what failed', 'dono-fundraising-platform')
             );
 
             return;
@@ -76,17 +76,17 @@ final class UpgradeNotice
 
         printf(
             '<div class="notice notice-warning"><p><strong>%s</strong> %s <a href="%s">%s</a></p></div>',
-            esc_html__('Dono is finishing a data update.', 'dono'),
+            esc_html__('Dono is finishing a data update.', 'dono-fundraising-platform'),
             esc_html(
                 _n(
                     'One job is still outstanding. It runs in the background; if it is still here in a few minutes, this site\'s scheduled tasks are not running.',
                     'Some jobs are still outstanding. They run in the background; if they are still here in a few minutes, this site\'s scheduled tasks are not running.',
                     count($pending),
-                    'dono'
+                    'dono-fundraising-platform'
                 )
             ),
             esc_url($url),
-            esc_html__('Finish them now', 'dono')
+            esc_html__('Finish them now', 'dono-fundraising-platform')
         );
     }
 }

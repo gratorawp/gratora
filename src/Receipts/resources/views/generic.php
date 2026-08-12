@@ -23,15 +23,15 @@ use Dono\Donors\Donor;
  * @var array    $custom_field_labels
  */
 
-$orgName = (string) ($org['name'] ?? __('Your Organization', 'dono'));
+$orgName = (string) ($org['name'] ?? __('Your Organization', 'dono-fundraising-platform'));
 $orgAddressLines = (array) ($org['address_lines'] ?? []);
 $orgTaxId  = (string) ($org['tax_id'] ?? '');
 $orgEmail  = (string) ($org['email'] ?? '');
 
 $tpl = is_array($receipt_template ?? null) ? $receipt_template : [];
-$headerTitle = (string) ($tpl['header_title'] ?? __('Donation receipt', 'dono'));
+$headerTitle = (string) ($tpl['header_title'] ?? __('Donation receipt', 'dono-fundraising-platform'));
 $intro       = (string) ($tpl['intro']        ?? '');
-$signoff     = (string) ($tpl['signoff']      ?? __('Thank you for your support.', 'dono'));
+$signoff     = (string) ($tpl['signoff']      ?? __('Thank you for your support.', 'dono-fundraising-platform'));
 $footerNote  = (string) ($tpl['footer_note']  ?? '');
 $showTaxId   = array_key_exists('show_tax_id', $tpl) ? (bool) $tpl['show_tax_id'] : true;
 $showDonorAddr = array_key_exists('show_donor_address', $tpl) ? (bool) $tpl['show_donor_address'] : false;
@@ -44,17 +44,17 @@ if ($donorName === '') $donorName = '-';
 // The whole receipt renders in the donor's locale, so the frequency has to be
 // a translated label rather than the stored slug.
 $frequencyLabels = [
-    'weekly'    => __('Weekly', 'dono'),
-    'biweekly'  => __('Every 2 weeks', 'dono'),
-    'monthly'   => __('Monthly', 'dono'),
-    'quarterly' => __('Quarterly', 'dono'),
-    'yearly'    => __('Yearly', 'dono'),
+    'weekly'    => __('Weekly', 'dono-fundraising-platform'),
+    'biweekly'  => __('Every 2 weeks', 'dono-fundraising-platform'),
+    'monthly'   => __('Monthly', 'dono-fundraising-platform'),
+    'quarterly' => __('Quarterly', 'dono-fundraising-platform'),
+    'yearly'    => __('Yearly', 'dono-fundraising-platform'),
 ];
 $frequencyLabel = $donation->frequency === 'one_time'
-    ? __('One-time donation', 'dono')
+    ? __('One-time donation', 'dono-fundraising-platform')
     : sprintf(
         /* translators: %s: frequency label (Monthly, Quarterly, Yearly, …). */
-        __('Recurring donation (%s)', 'dono'),
+        __('Recurring donation (%s)', 'dono-fundraising-platform'),
         $frequencyLabels[(string) $donation->frequency] ?? ucfirst((string) $donation->frequency)
     );
 
@@ -71,7 +71,7 @@ foreach ($customDataArr as $key => $value) {
     if ($label === '') continue;
 
     if (is_bool($value)) {
-        $display = $value ? __('Yes', 'dono') : __('No', 'dono');
+        $display = $value ? __('Yes', 'dono-fundraising-platform') : __('No', 'dono-fundraising-platform');
     } elseif (is_array($value)) {
         $display = implode(', ', array_map('strval', $value));
         if ($display === '') continue;
@@ -129,7 +129,7 @@ $netDisplay      = $refundedCents > 0
 
 <?php if (! empty($donation->is_test)): ?>
 <div style="border:2pt solid #b91c1c; color:#b91c1c; font-weight:700; text-align:center; padding:8pt; margin:0 0 18pt; letter-spacing:.5pt;">
-    <?php esc_html_e('TEST DONATION - NOT A REAL PAYMENT', 'dono'); ?>
+    <?php esc_html_e('TEST DONATION - NOT A REAL PAYMENT', 'dono-fundraising-platform'); ?>
 </div>
 <?php endif; ?>
 
@@ -138,7 +138,7 @@ $netDisplay      = $refundedCents > 0
     <?php
     printf(
         /* translators: %s: refunded amount. */
-        esc_html__('This donation has been refunded (%s).', 'dono'),
+        esc_html__('This donation has been refunded (%s).', 'dono-fundraising-platform'),
         esc_html($refundedDisplay)
     );
     ?>
@@ -169,21 +169,21 @@ $netDisplay      = $refundedCents > 0
 
 <dl class="ref">
     <?php if ($receiptNumber !== ''): ?>
-        <dt><?php esc_html_e('Receipt number', 'dono'); ?></dt>
+        <dt><?php esc_html_e('Receipt number', 'dono-fundraising-platform'); ?></dt>
         <dd><?php echo esc_html($receiptNumber); ?></dd>
     <?php endif; ?>
 
-    <dt><?php esc_html_e('Reference', 'dono'); ?></dt>
+    <dt><?php esc_html_e('Reference', 'dono-fundraising-platform'); ?></dt>
     <dd><?php echo esc_html($donation->reference); ?></dd>
 
-    <dt><?php esc_html_e('Date', 'dono'); ?></dt>
+    <dt><?php esc_html_e('Date', 'dono-fundraising-platform'); ?></dt>
     <dd><?php echo esc_html($paidAt); ?></dd>
 
-    <dt><?php esc_html_e('Donor', 'dono'); ?></dt>
+    <dt><?php esc_html_e('Donor', 'dono-fundraising-platform'); ?></dt>
     <dd><?php echo esc_html($donorName); ?></dd>
 
     <?php if ($showDonorAddr && $donorAddress !== ''): ?>
-        <dt><?php esc_html_e('Donor address', 'dono'); ?></dt>
+        <dt><?php esc_html_e('Donor address', 'dono-fundraising-platform'); ?></dt>
         <dd>
             <?php foreach (preg_split('/\R/', $donorAddress) as $line): ?>
                 <?php $line = trim((string) $line); if ($line === '') continue; ?>
@@ -193,7 +193,7 @@ $netDisplay      = $refundedCents > 0
     <?php endif; ?>
 
     <?php if ($showTaxId && $orgTaxId !== ''): ?>
-        <dt><?php esc_html_e('Organization tax ID', 'dono'); ?></dt>
+        <dt><?php esc_html_e('Organization tax ID', 'dono-fundraising-platform'); ?></dt>
         <dd><?php echo esc_html($orgTaxId); ?></dd>
     <?php endif; ?>
 </dl>
@@ -201,18 +201,18 @@ $netDisplay      = $refundedCents > 0
 <table class="lines">
     <thead>
         <tr>
-            <th><?php esc_html_e('Description', 'dono'); ?></th>
-            <th class="amt"><?php esc_html_e('Amount', 'dono'); ?></th>
+            <th><?php esc_html_e('Description', 'dono-fundraising-platform'); ?></th>
+            <th class="amt"><?php esc_html_e('Amount', 'dono-fundraising-platform'); ?></th>
         </tr>
     </thead>
     <tbody>
         <tr>
-            <td><?php /* translators: %s: organization name. */ printf(esc_html__('Donation to %s', 'dono'), esc_html($orgName)); ?></td>
+            <td><?php /* translators: %s: organization name. */ printf(esc_html__('Donation to %s', 'dono-fundraising-platform'), esc_html($orgName)); ?></td>
             <td class="amt"><?php echo esc_html($amount_display); ?></td>
         </tr>
         <?php if ($refundedDisplay !== ''): ?>
         <tr class="refund-row">
-            <td><?php esc_html_e('Refunded', 'dono'); ?></td>
+            <td><?php esc_html_e('Refunded', 'dono-fundraising-platform'); ?></td>
             <td class="amt">-<?php echo esc_html($refundedDisplay); ?></td>
         </tr>
         <?php endif; ?>
@@ -224,7 +224,7 @@ $netDisplay      = $refundedCents > 0
 
 <?php if (! empty($customRows)): ?>
 <div class="custom">
-    <h3><?php esc_html_e('Additional information', 'dono'); ?></h3>
+    <h3><?php esc_html_e('Additional information', 'dono-fundraising-platform'); ?></h3>
     <dl>
         <?php foreach ($customRows as $row): ?>
             <dt><?php echo esc_html($row['label']); ?></dt>

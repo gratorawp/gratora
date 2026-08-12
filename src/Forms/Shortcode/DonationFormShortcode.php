@@ -133,14 +133,14 @@ final class DonationFormShortcode extends HookProvider
         $atts = is_array($atts) ? $atts : [];
         $slug = trim((string) ($atts['slug'] ?? ''));
         if ($slug === '') {
-            return $this->renderError(__('Specify a form slug: [dono_donation_form slug="..."].', 'dono'));
+            return $this->renderError(__('Specify a form slug: [dono_donation_form slug="..."].', 'dono-fundraising-platform'));
         }
 
         $form = $this->forms->findBySlug($slug);
         if (! $form) {
             return $this->renderError(sprintf(
                 /* translators: %s: form slug */
-                __('No donation form found for slug "%s".', 'dono'),
+                __('No donation form found for slug "%s".', 'dono-fundraising-platform'),
                 $slug
             ));
         }
@@ -156,16 +156,16 @@ final class DonationFormShortcode extends HookProvider
             // its form does not depend on the admin thinking to check the
             // campaign screen. The equivalent block already explains itself.
             if ($form->status !== 'published') {
-                return $this->renderError(__('This form is not published, so it is hidden here.', 'dono'));
+                return $this->renderError(__('This form is not published, so it is hidden here.', 'dono-fundraising-platform'));
             }
             $campaign = $this->campaigns ? $this->campaigns->findById($form->campaign_id) : null;
             if (! $campaign) {
-                return $this->renderError(__('The campaign this form belongs to no longer exists, so the form is hidden.', 'dono'));
+                return $this->renderError(__('The campaign this form belongs to no longer exists, so the form is hidden.', 'dono-fundraising-platform'));
             }
             if (! $campaign->acceptsDonations()) {
                 return $this->renderError(
                     $campaign->notAcceptingReason()
-                    ?? __('This campaign is not accepting donations, so the form is hidden.', 'dono')
+                    ?? __('This campaign is not accepting donations, so the form is hidden.', 'dono-fundraising-platform')
                 );
             }
         }
@@ -238,7 +238,7 @@ final class DonationFormShortcode extends HookProvider
         // Only a no-JS visitor sees this: a dead form would GET their inputs
         // into the URL on submit.
         $noscript = '<noscript><div class="dono-donation-form__noscript">'
-            . esc_html__('This donation form needs JavaScript enabled. Please turn it on and reload the page to donate.', 'dono')
+            . esc_html__('This donation form needs JavaScript enabled. Please turn it on and reload the page to donate.', 'dono-fundraising-platform')
             . '</div></noscript>';
 
         return sprintf(
@@ -461,7 +461,7 @@ HTML;
 
         $thankYouMessage = trim((string) ($form->settings['thank_you_message'] ?? ''));
         if ($thankYouMessage === '') {
-            $thankYouMessage = __('Thanks for your donation. A receipt is on the way to your inbox.', 'dono');
+            $thankYouMessage = __('Thanks for your donation. A receipt is on the way to your inbox.', 'dono-fundraising-platform');
         }
         $redirectUrl = trim((string) ($form->settings['redirect_url'] ?? ''));
 
@@ -594,37 +594,37 @@ HTML;
             'pageNav'    => $pageNav,
             'preamble'   => $preamble,
             'i18n'     => [
-                'chooseAmount'   => __('Choose an amount', 'dono'),
-                'customAmount'   => __('Custom amount', 'dono'),
-                'yourDetails'    => __('Your details', 'dono'),
-                'firstName'      => __('First name', 'dono'),
-                'lastName'       => __('Last name', 'dono'),
-                'email'          => __('Email', 'dono'),
-                'country'        => __('Country', 'dono'),
-                'reviewDonation' => __('Review your donation', 'dono'),
-                'amount'         => __('Amount', 'dono'),
-                'frequency'      => __('Donation frequency', 'dono'),
-                'fees'           => __('Processing fee', 'dono'),
-                'total'          => __('Total', 'dono'),
-                'manageGiving'   => __('Manage your giving', 'dono'),
-                'portalLinkSent' => __('Check your email', 'dono'),
-                'donor'          => __('Donor', 'dono'),
-                'paymentMethod'  => __('Payment method', 'dono'),
+                'chooseAmount'   => __('Choose an amount', 'dono-fundraising-platform'),
+                'customAmount'   => __('Custom amount', 'dono-fundraising-platform'),
+                'yourDetails'    => __('Your details', 'dono-fundraising-platform'),
+                'firstName'      => __('First name', 'dono-fundraising-platform'),
+                'lastName'       => __('Last name', 'dono-fundraising-platform'),
+                'email'          => __('Email', 'dono-fundraising-platform'),
+                'country'        => __('Country', 'dono-fundraising-platform'),
+                'reviewDonation' => __('Review your donation', 'dono-fundraising-platform'),
+                'amount'         => __('Amount', 'dono-fundraising-platform'),
+                'frequency'      => __('Donation frequency', 'dono-fundraising-platform'),
+                'fees'           => __('Processing fee', 'dono-fundraising-platform'),
+                'total'          => __('Total', 'dono-fundraising-platform'),
+                'manageGiving'   => __('Manage your giving', 'dono-fundraising-platform'),
+                'portalLinkSent' => __('Check your email', 'dono-fundraising-platform'),
+                'donor'          => __('Donor', 'dono-fundraising-platform'),
+                'paymentMethod'  => __('Payment method', 'dono-fundraising-platform'),
                 /* translators: %s: the selected currency code, e.g. INR. */
-                'noGatewayForCurrency' => __('No payment method here accepts %s. Choose another currency to continue.', 'dono'),
-                'noGatewayForFrequency' => __('No payment method here can take a recurring donation. Choose a one-time donation to continue.', 'dono'),
+                'noGatewayForCurrency' => __('No payment method here accepts %s. Choose another currency to continue.', 'dono-fundraising-platform'),
+                'noGatewayForFrequency' => __('No payment method here can take a recurring donation. Choose a one-time donation to continue.', 'dono-fundraising-platform'),
                 // Not a currency problem: no allowed gateway is switched on.
                 // Naming the currency sends donors hunting for a fix that is not
                 // theirs to make.
-                'noGatewayAvailable' => __('Online donations are unavailable right now. Please try again later.', 'dono'),
-                'testModeNotice' => __('Test mode is on. No real payment is taken and this donation is excluded from reporting.', 'dono'),
-                'back'           => __('Back', 'dono'),
-                'next'           => __('Continue', 'dono'),
-                'donateNow'      => __('Donate now', 'dono'),
-                'processing'     => __('Processing…', 'dono'),
-                'thanks'         => __('Thank you for your donation!', 'dono'),
-                'pendingTitle'   => __('Your donation is pending', 'dono'),
-                'pendingMessage' => __('Thank you. We have emailed you instructions to complete your payment.', 'dono'),
+                'noGatewayAvailable' => __('Online donations are unavailable right now. Please try again later.', 'dono-fundraising-platform'),
+                'testModeNotice' => __('Test mode is on. No real payment is taken and this donation is excluded from reporting.', 'dono-fundraising-platform'),
+                'back'           => __('Back', 'dono-fundraising-platform'),
+                'next'           => __('Continue', 'dono-fundraising-platform'),
+                'donateNow'      => __('Donate now', 'dono-fundraising-platform'),
+                'processing'     => __('Processing…', 'dono-fundraising-platform'),
+                'thanks'         => __('Thank you for your donation!', 'dono-fundraising-platform'),
+                'pendingTitle'   => __('Your donation is pending', 'dono-fundraising-platform'),
+                'pendingMessage' => __('Thank you. We have emailed you instructions to complete your payment.', 'dono-fundraising-platform'),
                 // The donor has finished and nothing is expected of them. The
                 // pending copy would tell someone who has already paid that we
                 // are still waiting on them.
@@ -634,65 +634,65 @@ HTML;
                 // clearing, and by a card PayPal has held for review, and those
                 // owe the donor different explanations. Naming a bank told a
                 // card donor something untrue about their own payment.
-                'processingTitle'   => __('Thank you, your donation is on its way', 'dono'),
-                'processingMessage' => __('Your payment is being processed. This can take a few working days, and we will email you once it completes.', 'dono'),
-                'donateAgain'    => __('Donate again', 'dono'),
-                'error'          => __('Sorry, something went wrong. Please try again.', 'dono'),
-                'paymentTitle'   => __('Complete your donation', 'dono'),
-                'paymentLoading' => __('Loading secure payment…', 'dono'),
-                'payNow'         => __('Pay', 'dono'),
-                'confirming'     => __('Confirming your payment…', 'dono'),
-                'cancel'         => __('Cancel', 'dono'),
-                'comment'        => __('Add a message', 'dono'),
-                'notePublic'     => __('Show my message publicly on the supporter wall', 'dono'),
-                'anonymous'      => __('Make this donation anonymous', 'dono'),
-                'phone'          => __('Phone', 'dono'),
-                'addressLine1'   => __('Address line 1', 'dono'),
-                'addressLine2'   => __('Apartment, suite, etc.', 'dono'),
-                'addressCity'    => __('City', 'dono'),
-                'addressRegion'  => __('State / region', 'dono'),
-                'addressPostal'  => __('Postal code', 'dono'),
-                'addressCountry' => __('Country', 'dono'),
-                'noSpecificFund' => __('No specific fund', 'dono'),
-                'number'         => __('Number', 'dono'),
-                'impact'         => __('Provides', 'dono'),
-                'currency'       => __('Currency', 'dono'),
-                'coverFees'      => __('I\'d like to help cover the transaction fee', 'dono'),
-                'feesTotal'      => __('Total with fees:', 'dono'),
-                'formTitle'      => __('Donation form', 'dono'),
-                'close'          => __('Close', 'dono'),
-                'required'       => __('Required', 'dono'),
-                'freqOneTime'    => __('One-time', 'dono'),
-                'freqWeekly'     => __('Weekly', 'dono'),
-                'freqBiweekly'   => __('Every 2 weeks', 'dono'),
-                'freqMonthly'    => __('Monthly', 'dono'),
-                'freqQuarterly'  => __('Quarterly', 'dono'),
-                'freqYearly'     => __('Yearly', 'dono'),
-                'searchCountry'  => __('Search country…', 'dono'),
+                'processingTitle'   => __('Thank you, your donation is on its way', 'dono-fundraising-platform'),
+                'processingMessage' => __('Your payment is being processed. This can take a few working days, and we will email you once it completes.', 'dono-fundraising-platform'),
+                'donateAgain'    => __('Donate again', 'dono-fundraising-platform'),
+                'error'          => __('Sorry, something went wrong. Please try again.', 'dono-fundraising-platform'),
+                'paymentTitle'   => __('Complete your donation', 'dono-fundraising-platform'),
+                'paymentLoading' => __('Loading secure payment…', 'dono-fundraising-platform'),
+                'payNow'         => __('Pay', 'dono-fundraising-platform'),
+                'confirming'     => __('Confirming your payment…', 'dono-fundraising-platform'),
+                'cancel'         => __('Cancel', 'dono-fundraising-platform'),
+                'comment'        => __('Add a message', 'dono-fundraising-platform'),
+                'notePublic'     => __('Show my message publicly on the supporter wall', 'dono-fundraising-platform'),
+                'anonymous'      => __('Make this donation anonymous', 'dono-fundraising-platform'),
+                'phone'          => __('Phone', 'dono-fundraising-platform'),
+                'addressLine1'   => __('Address line 1', 'dono-fundraising-platform'),
+                'addressLine2'   => __('Apartment, suite, etc.', 'dono-fundraising-platform'),
+                'addressCity'    => __('City', 'dono-fundraising-platform'),
+                'addressRegion'  => __('State / region', 'dono-fundraising-platform'),
+                'addressPostal'  => __('Postal code', 'dono-fundraising-platform'),
+                'addressCountry' => __('Country', 'dono-fundraising-platform'),
+                'noSpecificFund' => __('No specific fund', 'dono-fundraising-platform'),
+                'number'         => __('Number', 'dono-fundraising-platform'),
+                'impact'         => __('Provides', 'dono-fundraising-platform'),
+                'currency'       => __('Currency', 'dono-fundraising-platform'),
+                'coverFees'      => __('I\'d like to help cover the transaction fee', 'dono-fundraising-platform'),
+                'feesTotal'      => __('Total with fees:', 'dono-fundraising-platform'),
+                'formTitle'      => __('Donation form', 'dono-fundraising-platform'),
+                'close'          => __('Close', 'dono-fundraising-platform'),
+                'required'       => __('Required', 'dono-fundraising-platform'),
+                'freqOneTime'    => __('One-time', 'dono-fundraising-platform'),
+                'freqWeekly'     => __('Weekly', 'dono-fundraising-platform'),
+                'freqBiweekly'   => __('Every 2 weeks', 'dono-fundraising-platform'),
+                'freqMonthly'    => __('Monthly', 'dono-fundraising-platform'),
+                'freqQuarterly'  => __('Quarterly', 'dono-fundraising-platform'),
+                'freqYearly'     => __('Yearly', 'dono-fundraising-platform'),
+                'searchCountry'  => __('Search country…', 'dono-fundraising-platform'),
                 'validation'     => [
-                    'required'       => __('Required.', 'dono'),
-                    'pickAmount'     => __('Pick or enter an amount.', 'dono'),
+                    'required'       => __('Required.', 'dono-fundraising-platform'),
+                    'pickAmount'     => __('Pick or enter an amount.', 'dono-fundraising-platform'),
                     /* translators: %s: minimum donation amount formatted */
-                    'minAmount'      => __('Minimum donation is %s.', 'dono'),
-                    'invalidEmail'   => __('Enter a valid email.', 'dono'),
-                    'enterName'      => __('Enter a name.', 'dono'),
-                    'invalidNumber'  => __('Enter a number.', 'dono'),
+                    'minAmount'      => __('Minimum donation is %s.', 'dono-fundraising-platform'),
+                    'invalidEmail'   => __('Enter a valid email.', 'dono-fundraising-platform'),
+                    'enterName'      => __('Enter a name.', 'dono-fundraising-platform'),
+                    'invalidNumber'  => __('Enter a number.', 'dono-fundraising-platform'),
                     /* translators: %s: minimum value */
-                    'minNumber'      => __('Must be at least %s.', 'dono'),
+                    'minNumber'      => __('Must be at least %s.', 'dono-fundraising-platform'),
                     /* translators: %s: maximum value */
-                    'maxNumber'      => __('Must be at most %s.', 'dono'),
+                    'maxNumber'      => __('Must be at most %s.', 'dono-fundraising-platform'),
                     /* translators: %s: earliest allowed date */
-                    'minDate'        => __('On or after %s.', 'dono'),
+                    'minDate'        => __('On or after %s.', 'dono-fundraising-platform'),
                     /* translators: %s: latest allowed date */
-                    'maxDate'        => __('On or before %s.', 'dono'),
+                    'maxDate'        => __('On or before %s.', 'dono-fundraising-platform'),
                     /* translators: %s: maximum length */
-                    'tooLong'        => __('Too long (max %s).', 'dono'),
-                    'invalidFormat'  => __('Invalid format.', 'dono'),
-                    'pickAtLeastOne' => __('Pick at least one.', 'dono'),
+                    'tooLong'        => __('Too long (max %s).', 'dono-fundraising-platform'),
+                    'invalidFormat'  => __('Invalid format.', 'dono-fundraising-platform'),
+                    'pickAtLeastOne' => __('Pick at least one.', 'dono-fundraising-platform'),
                     /* translators: %s: minimum number of selections */
-                    'pickAtLeast'    => __('Pick at least %s.', 'dono'),
+                    'pickAtLeast'    => __('Pick at least %s.', 'dono-fundraising-platform'),
                     /* translators: %s: maximum number of selections */
-                    'pickNoMoreThan' => __('Pick no more than %s.', 'dono'),
+                    'pickNoMoreThan' => __('Pick no more than %s.', 'dono-fundraising-platform'),
                 ],
             ],
         ];
@@ -1003,8 +1003,8 @@ HTML;
                 case 'dono/comment':
                     $items[] = $tagRow([
                         'kind'        => 'comment',
-                        'label'       => (string) ($attrs['label']       ?? __('Add a message', 'dono')),
-                        'placeholder' => (string) ($attrs['placeholder'] ?? __('Anything you want to share?', 'dono')),
+                        'label'       => (string) ($attrs['label']       ?? __('Add a message', 'dono-fundraising-platform')),
+                        'placeholder' => (string) ($attrs['placeholder'] ?? __('Anything you want to share?', 'dono-fundraising-platform')),
                         'required'    => (bool)   ($attrs['required']    ?? false),
                     ], $row, $attrs);
                     break;
@@ -1014,7 +1014,7 @@ HTML;
                     $globalDefault  = is_array($privacyCfg) && ! empty($privacyCfg['always_anonymous_default']);
                     $items[] = $tagRow([
                         'kind'      => 'anonymous',
-                        'label'     => (string) ($attrs['label']     ?? __('Make this donation anonymous', 'dono')),
+                        'label'     => (string) ($attrs['label']     ?? __('Make this donation anonymous', 'dono-fundraising-platform')),
                         'defaultOn' => (bool)   ($attrs['defaultOn'] ?? false) || $globalDefault,
                     ], $row, $attrs);
                     break;
@@ -1022,7 +1022,7 @@ HTML;
                 case 'dono/cover-fees':
                     $items[] = $tagRow([
                         'kind'      => 'cover_fees',
-                        'label'     => (string) ($attrs['label']     ?? __('Cover the processing fee so 100% of my donation reaches you', 'dono')),
+                        'label'     => (string) ($attrs['label']     ?? __('Cover the processing fee so 100% of my donation reaches you', 'dono-fundraising-platform')),
                         'percent'   => (float)  ($attrs['percent']   ?? 2.9),
                         'fixed'     => (int)    ($attrs['fixed']     ?? 30),
                         'defaultOn' => (bool)   ($attrs['defaultOn'] ?? false),
@@ -1199,7 +1199,7 @@ HTML;
                     $steps[] = [
                         'type'        => 'submit',
                         'page'        => $currentPage,
-                        'label'       => (string) ($attrs['label'] ?? __('Donate now', 'dono')),
+                        'label'       => (string) ($attrs['label'] ?? __('Donate now', 'dono-fundraising-platform')),
                         'align'       => $sbAlign,
                     ];
                     break;
@@ -1356,7 +1356,7 @@ HTML;
             if ($s['type'] === 'submit') { $hasSubmit = true; break; }
         }
         if (! $hasSubmit) {
-            $steps[] = ['type' => 'submit', 'page' => $currentPage, 'label' => __('Donate now', 'dono')];
+            $steps[] = ['type' => 'submit', 'page' => $currentPage, 'label' => __('Donate now', 'dono-fundraising-platform')];
         }
 
         // Walker pages are 1-indexed; runtime wants dense 0-indexed.

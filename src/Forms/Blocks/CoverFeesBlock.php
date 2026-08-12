@@ -36,7 +36,7 @@ final class CoverFeesBlock implements Block
         return View::loadRelative(__DIR__, 'views/cover-fees', [
             'percent'   => (float) ($attrs['percent'] ?? 2.9),
             'fixed'     => (int)   ($attrs['fixed']   ?? 30),
-            'label'     => (string) ($attrs['label']  ?? '') ?: __('I\'d like to help cover the transaction fee', 'dono'),
+            'label'     => (string) ($attrs['label']  ?? '') ?: __('I\'d like to help cover the transaction fee', 'dono-fundraising-platform'),
             'defaultOn' => (bool)   ($attrs['defaultOn'] ?? false),
         ]);
     }

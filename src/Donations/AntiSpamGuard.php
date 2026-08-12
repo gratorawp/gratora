@@ -104,7 +104,7 @@ final class AntiSpamGuard
     public function checkHoneypot(string $value): ?WP_Error
     {
         if ($value === '') return null;
-        return new WP_Error('dono_invalid_submission', __('Submission rejected.', 'dono'), ['status' => 400]);
+        return new WP_Error('dono_invalid_submission', __('Submission rejected.', 'dono-fundraising-platform'), ['status' => 400]);
     }
 
     /** @since 1.0.0 */
@@ -116,7 +116,7 @@ final class AntiSpamGuard
     /** @since 1.0.0 */
     private function check(string $token, string $scope): ?WP_Error
     {
-        $generic = new WP_Error('dono_invalid_submission', __('Please refresh the page and try again.', 'dono'), ['status' => 400]);
+        $generic = new WP_Error('dono_invalid_submission', __('Please refresh the page and try again.', 'dono-fundraising-platform'), ['status' => 400]);
 
         $parts = explode('.', $token, 2);
         if (count($parts) !== 2) return $generic;
@@ -156,7 +156,7 @@ final class AntiSpamGuard
 
         return new WP_Error(
             'dono_rate_limited',
-            __('Too many attempts. Please try again in a few minutes.', 'dono'),
+            __('Too many attempts. Please try again in a few minutes.', 'dono-fundraising-platform'),
             ['status' => 429]
         );
     }
@@ -175,7 +175,7 @@ final class AntiSpamGuard
 
         return new WP_Error(
             'dono_rate_limited',
-            __('Too many recent attempts for this email. Please try again later.', 'dono'),
+            __('Too many recent attempts for this email. Please try again later.', 'dono-fundraising-platform'),
             ['status' => 429]
         );
     }
@@ -231,7 +231,7 @@ final class AntiSpamGuard
             return new WP_Error(
                 'dono_amount_too_low',
                 /* translators: %s: minimum donation amount formatted */
-                sprintf(__('Minimum donation is %s.', 'dono'), Money::format($min)),
+                sprintf(__('Minimum donation is %s.', 'dono-fundraising-platform'), Money::format($min)),
                 ['status' => 400]
             );
         }

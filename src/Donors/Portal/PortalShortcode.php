@@ -92,7 +92,7 @@ final class PortalShortcode extends HookProvider
                 'avatarMaxBytes' => \Dono\Donors\DonorAvatarUploader::maxBytes(),
                 'avatarMaxLabel' => size_format(\Dono\Donors\DonorAvatarUploader::maxBytes()),
             ]);
-            wp_set_script_translations(self::HANDLE, 'dono', DONO_DIR . 'languages');
+            wp_set_script_translations(self::HANDLE, 'dono-fundraising-platform', DONO_DIR . 'languages');
         }
         $cssPath = DONO_DIR . 'build/donor-portal/index.css';
         if (file_exists($cssPath)) {

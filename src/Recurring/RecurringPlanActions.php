@@ -108,7 +108,7 @@ final class RecurringPlanActions
         $this->assertChangeable($plan);
 
         if (! $plan->next_payment_at) {
-            throw new InvalidArgumentException(__('This donation has no scheduled payment to skip.', 'dono'));
+            throw new InvalidArgumentException(__('This donation has no scheduled payment to skip.', 'dono-fundraising-platform'));
         }
 
         $unit   = in_array($plan->interval_unit, ['year', 'week'], true) ? $plan->interval_unit : 'month';
@@ -142,16 +142,16 @@ final class RecurringPlanActions
         $this->assertChangeable($plan);
 
         if ($amountCents < 50) {
-            throw new InvalidArgumentException(__('Amount is too low.', 'dono'));
+            throw new InvalidArgumentException(__('Amount is too low.', 'dono-fundraising-platform'));
         }
         if ($amountCents > 99999999) {
-            throw new InvalidArgumentException(__('Amount is too high.', 'dono'));
+            throw new InvalidArgumentException(__('Amount is too high.', 'dono-fundraising-platform'));
         }
         // Storage is major units x 100, so a fractional amount in a zero-decimal
         // currency rounds at the gateway and the row keeps a figure nobody is
         // charging, on every renewal.
         if (Currency::minorUnits((string) $plan->currency) === 0 && $amountCents % 100 !== 0) {
-            throw new InvalidArgumentException(__('This currency does not support fractional amounts.', 'dono'));
+            throw new InvalidArgumentException(__('This currency does not support fractional amounts.', 'dono-fundraising-platform'));
         }
 
         $was = (int) $plan->amount_cents;
@@ -193,7 +193,7 @@ final class RecurringPlanActions
         if (! $gateway instanceof SupportsPaymentRetry) {
             throw new InvalidArgumentException(sprintf(
                 /* translators: %s: the payment gateway name, e.g. PayPal. */
-                __('%s does not allow a renewal to be retried on demand. It retries on its own schedule; ask the donor to update their card from the donor portal.', 'dono'),
+                __('%s does not allow a renewal to be retried on demand. It retries on its own schedule; ask the donor to update their card from the donor portal.', 'dono-fundraising-platform'),
                 ucfirst((string) $plan->gateway)
             ));
         }
@@ -230,7 +230,7 @@ final class RecurringPlanActions
     private function assertChangeable(RecurringPlan $plan): void
     {
         if (in_array((string) $plan->status, self::TERMINAL, true)) {
-            throw new RuntimeException(__('This donation is no longer active.', 'dono'));
+            throw new RuntimeException(__('This donation is no longer active.', 'dono-fundraising-platform'));
         }
     }
 

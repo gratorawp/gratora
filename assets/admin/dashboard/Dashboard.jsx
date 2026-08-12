@@ -92,22 +92,22 @@ export default function Dashboard() {
 
     const registry = {
         today: {
-            title:  __( 'Activity (last 24h)', 'dono' ),
+            title:  __( 'Activity (last 24h)', 'dono-fundraising-platform' ),
             span:   'full',
             render: () => <TodayStrip today={ m.today } />,
         },
         kpis: {
-            title:  __( 'Key metrics', 'dono' ),
+            title:  __( 'Key metrics', 'dono-fundraising-platform' ),
             span:   'full',
             bare:   true,
             render: () => <KpiRow kpi={ m.kpi } compareOn={ compareOn } range={ range } loading={ metrics === null && loading } />,
         },
         attention: {
-            title:  __( 'Needs attention', 'dono' ),
+            title:  __( 'Needs attention', 'dono-fundraising-platform' ),
             render: () => <NeedsAttention items={ m.attention } />,
         },
         revenue: {
-            title:  __( 'Revenue', 'dono' ),
+            title:  __( 'Revenue', 'dono-fundraising-platform' ),
             span:   'full',
             render: () => (
                 <RevenueChart
@@ -119,27 +119,27 @@ export default function Dashboard() {
             ),
         },
         'active-campaigns': {
-            title:  __( 'Active campaigns', 'dono' ),
+            title:  __( 'Active campaigns', 'dono-fundraising-platform' ),
             render: () => <ActiveCampaigns rows={ m.active_campaigns } />,
         },
         recurring: {
-            title:  __( 'Recurring revenue', 'dono' ),
+            title:  __( 'Recurring revenue', 'dono-fundraising-platform' ),
             render: () => <RecurringForecast recurring={ m.recurring } />,
         },
         'top-campaigns': {
-            title:  __( 'Top campaigns', 'dono' ),
+            title:  __( 'Top campaigns', 'dono-fundraising-platform' ),
             render: () => <TopCampaigns rows={ m.top_campaigns } />,
         },
         channel: {
-            title:  __( 'Channels', 'dono' ),
+            title:  __( 'Channels', 'dono-fundraising-platform' ),
             render: () => <ChannelBreakdown rows={ m.by_channel } currency={ currency } />,
         },
         'recent-activity': {
-            title:  __( 'Recent donations', 'dono' ),
+            title:  __( 'Recent donations', 'dono-fundraising-platform' ),
             render: () => <RecentActivity rows={ m.recent_activity } />,
         },
         'quick-actions': {
-            title:  __( 'Quick actions', 'dono' ),
+            title:  __( 'Quick actions', 'dono-fundraising-platform' ),
             render: () => <QuickActions />,
         },
     };
@@ -148,7 +148,7 @@ export default function Dashboard() {
         <div className="dono-dashboard" data-loading={ loading ? 'true' : undefined }>
             <div className="dono-page-head">
                 <div className="dono-page-head__title-row">
-                    <h1>{ __( 'Dashboard', 'dono' ) }</h1>
+                    <h1>{ __( 'Dashboard', 'dono-fundraising-platform' ) }</h1>
                 </div>
                 <div className="dono-page-head__right">
                     <SectionBar
@@ -172,18 +172,18 @@ export default function Dashboard() {
                  the range now selected. */ }
             { metrics !== null && fetchError && (
                 <Notice status="error" onRemove={ () => setFetchError( false ) }>
-                    { __( 'These numbers are from the previous range. The one you picked could not be loaded.', 'dono' ) }
+                    { __( 'These numbers are from the previous range. The one you picked could not be loaded.', 'dono-fundraising-platform' ) }
                 </Notice>
             ) }
 
             { metrics === null && fetchError ? (
                 <EmptyState
                     icon={ <AlertTriangle size={ 24 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'Could not load your dashboard', 'dono' ) }
-                    body={ __( 'Something went wrong fetching your metrics. Check your connection and try again.', 'dono' ) }
+                    title={ __( 'Could not load your dashboard', 'dono-fundraising-platform' ) }
+                    body={ __( 'Something went wrong fetching your metrics. Check your connection and try again.', 'dono-fundraising-platform' ) }
                     action={
                         <Btn variant="primary" onClick={ () => setReloadKey( ( k ) => k + 1 ) }>
-                            { __( 'Retry', 'dono' ) }
+                            { __( 'Retry', 'dono-fundraising-platform' ) }
                         </Btn>
                     }
                 />

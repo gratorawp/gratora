@@ -68,13 +68,13 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('PayPal', 'dono');
+        return __('PayPal', 'dono-fundraising-platform');
     }
 
     /** @since 1.0.0 */
     public function description(): string
     {
-        return __('Pay with your PayPal balance, a bank account, or a card. No PayPal account required.', 'dono');
+        return __('Pay with your PayPal balance, a bank account, or a card. No PayPal account required.', 'dono-fundraising-platform');
     }
 
     /** @since 1.0.0 */
@@ -1050,7 +1050,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
 
         $subId = (string) $plan->gateway_subscription_id;
         if ($subId === '') {
-            throw new RuntimeException(__('This donation has no PayPal subscription.', 'dono'));
+            throw new RuntimeException(__('This donation has no PayPal subscription.', 'dono-fundraising-platform'));
         }
 
         // Same plan id, so nothing about the schedule or the amount changes:
@@ -1077,7 +1077,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
             }
         }
 
-        throw new RuntimeException(__('PayPal did not return a link for changing the payment method.', 'dono'));
+        throw new RuntimeException(__('PayPal did not return a link for changing the payment method.', 'dono-fundraising-platform'));
     }
 
     /**

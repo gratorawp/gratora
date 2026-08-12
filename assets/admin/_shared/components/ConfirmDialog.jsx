@@ -30,7 +30,7 @@ export default function ConfirmDialog( { confirm, onClose } ) {
             foot={
                 <>
                     <Btn variant="secondary" onClick={ onClose }>
-                        { __( 'Cancel', 'dono' ) }
+                        { __( 'Cancel', 'dono-fundraising-platform' ) }
                     </Btn>
                     <Btn
                         variant={ confirm.destructive ? 'danger' : 'primary' }
@@ -41,7 +41,7 @@ export default function ConfirmDialog( { confirm, onClose } ) {
                             if ( action ) await action();
                         } }
                     >
-                        { confirm.confirmLabel || __( 'Confirm', 'dono' ) }
+                        { confirm.confirmLabel || __( 'Confirm', 'dono-fundraising-platform' ) }
                     </Btn>
                 </>
             }
@@ -49,7 +49,7 @@ export default function ConfirmDialog( { confirm, onClose } ) {
             <p style={ { margin: 0 } }>{ confirm.message }</p>
             { required !== '' && (
                 <label className="dono-fld" style={ { marginTop: 16, display: 'block' } }>
-                    { sprintf( /* translators: %s: confirmation word */ __( 'Type %s to confirm', 'dono' ), required ) }
+                    { sprintf( /* translators: %s: confirmation word */ __( 'Type %s to confirm', 'dono-fundraising-platform' ), required ) }
                     <input
                         className="dono-input"
                         type="text"

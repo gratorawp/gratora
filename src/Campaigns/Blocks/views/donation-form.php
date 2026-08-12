@@ -21,7 +21,7 @@ defined('ABSPATH') || exit;
         <?php if (($previewDoc ?? '') !== ''): ?>
             <iframe
                 class="dono-donation-form__editor-preview"
-                title="<?php echo esc_attr($formTitle ?? __('Donation form', 'dono')); ?>"
+                title="<?php echo esc_attr($formTitle ?? __('Donation form', 'dono-fundraising-platform')); ?>"
                 loading="lazy"
                 style="width:100%;border:0;display:block;min-height:520px"
                 srcdoc="<?php echo esc_attr($previewDoc); ?>"
@@ -29,7 +29,7 @@ defined('ABSPATH') || exit;
         <?php else: ?>
             <div class="dono-donation-form__placeholder">
                 <strong><?php echo esc_html($formTitle ?? ''); ?></strong>
-                <span><?php esc_html_e('Donation form - shown to visitors here.', 'dono'); ?></span>
+                <span><?php esc_html_e('Donation form - shown to visitors here.', 'dono-fundraising-platform'); ?></span>
             </div>
         <?php endif; ?>
     <?php else: ?>

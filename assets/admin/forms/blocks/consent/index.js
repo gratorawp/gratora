@@ -46,31 +46,31 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Consent', 'dono' ) } initialOpen>
+                <PanelBody title={ __( 'Consent', 'dono-fundraising-platform' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Heading', 'dono' ) }
+                        label={ __( 'Heading', 'dono-fundraising-platform' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'How can we stay in touch?', 'dono' ) }
-                        help={ __( 'Click the heading on the form to edit it inline.', 'dono' ) }
+                        placeholder={ __( 'How can we stay in touch?', 'dono-fundraising-platform' ) }
+                        help={ __( 'Click the heading on the form to edit it inline.', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Help text', 'dono' ) }
+                        label={ __( 'Help text', 'dono-fundraising-platform' ) }
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
-                        placeholder={ __( 'Optional explanation shown below the heading.', 'dono' ) }
+                        placeholder={ __( 'Optional explanation shown below the heading.', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
 
                     { registry.length === 0 ? (
                         <Notice status="warning" isDismissible={ false }>
-                            { __( 'No consent purposes exist yet. A purpose names something your organization actually does, so you define it once and every form asks for it the same way.', 'dono' ) }
+                            { __( 'No consent purposes exist yet. A purpose names something your organization actually does, so you define it once and every form asks for it the same way.', 'dono-fundraising-platform' ) }
                             { settingsUrl() && (
                                 <>
                                     { ' ' }
                                     <ExternalLink href={ settingsUrl() }>
-                                        { __( 'Add one in Settings, Consents.', 'dono' ) }
+                                        { __( 'Add one in Settings, Consents.', 'dono-fundraising-platform' ) }
                                     </ExternalLink>
                                 </>
                             ) }
@@ -81,7 +81,7 @@ function Edit( { attributes, setAttributes } ) {
                                 <CheckboxControl
                                     key={ p.key }
                                     label={ p.required
-                                        ? `${ p.label } ${ __( '(required)', 'dono' ) }`
+                                        ? `${ p.label } ${ __( '(required)', 'dono-fundraising-platform' ) }`
                                         : p.label }
                                     help={ p.description || undefined }
                                     checked={ picked.includes( p.key ) }
@@ -92,7 +92,7 @@ function Edit( { attributes, setAttributes } ) {
                             { settingsUrl() && (
                                 <p style={ { marginTop: 12 } }>
                                     <ExternalLink href={ settingsUrl() }>
-                                        { __( 'Edit the wording in Settings, Consents.', 'dono' ) }
+                                        { __( 'Edit the wording in Settings, Consents.', 'dono-fundraising-platform' ) }
                                     </ExternalLink>
                                 </p>
                             ) }
@@ -110,7 +110,7 @@ function Edit( { attributes, setAttributes } ) {
                     className="dono-block-preview__label"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'How can we stay in touch?', 'dono' ) }
+                    placeholder={ __( 'How can we stay in touch?', 'dono-fundraising-platform' ) }
                     allowedFormats={ [] }
                 />
                 { helpText && <div className="dono-block-preview__hint">{ helpText }</div> }
@@ -118,13 +118,13 @@ function Edit( { attributes, setAttributes } ) {
                     ? (
                         <div className="dono-block-preview__field">
                             { registry.length === 0
-                                ? __( 'No consent purposes exist yet. Add one in Settings, Consents.', 'dono' )
-                                : __( 'Pick which purposes this form asks for.', 'dono' ) }
+                                ? __( 'No consent purposes exist yet. Add one in Settings, Consents.', 'dono-fundraising-platform' )
+                                : __( 'Pick which purposes this form asks for.', 'dono-fundraising-platform' ) }
                         </div>
                     )
                     : shown.map( ( p ) => (
                         <div key={ p.key } className="dono-block-preview__field">
-                            { p.required ? `${ p.label } (${ __( 'required', 'dono' ) })` : p.label }
+                            { p.required ? `${ p.label } (${ __( 'required', 'dono-fundraising-platform' ) })` : p.label }
                         </div>
                     ) ) }
             </div>
@@ -135,8 +135,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Consent', 'dono' ),
-        description: __( 'Asks the donor to opt in to purposes your organization has defined in Settings.', 'dono' ),
+        title:      __( 'Consent', 'dono-fundraising-platform' ),
+        description: __( 'Asks the donor to opt in to purposes your organization has defined in Settings.', 'dono-fundraising-platform' ),
         category:   'dono-extras',
         icon:       BlockIcons[ 'consent' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

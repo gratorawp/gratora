@@ -19,9 +19,9 @@ import GoalBar from '../_shared/components/GoalBar';
 import SearchableSelect from '../_shared/components/SearchableSelect';
 
 const STATUS_OPTIONS = [
-    { value: 'active',     label: __( 'Active', 'dono' ) },
-    { value: 'inactive',   label: __( 'Inactive', 'dono' ) },
-    { value: 'restricted', label: __( 'Restricted', 'dono' ) },
+    { value: 'active',     label: __( 'Active', 'dono-fundraising-platform' ) },
+    { value: 'inactive',   label: __( 'Inactive', 'dono-fundraising-platform' ) },
+    { value: 'restricted', label: __( 'Restricted', 'dono-fundraising-platform' ) },
 ];
 
 /**
@@ -52,23 +52,23 @@ function arrangeTree( items ) {
 function fundKpis( stats ) {
     return [
         {
-            label: __( 'Total raised', 'dono' ),
+            label: __( 'Total raised', 'dono-fundraising-platform' ),
             value: stats ? formatAmount( stats.raised_cents ) : '-',
-            sub:   __( 'all funds', 'dono' ),
+            sub:   __( 'all funds', 'dono-fundraising-platform' ),
         },
         {
-            label: __( 'Active funds', 'dono' ),
+            label: __( 'Active funds', 'dono-fundraising-platform' ),
             value: stats ? String( stats.active ) : '-',
-            sub:   stats ? `${ __( 'of', 'dono' ) } ${ stats.total }` : null,
+            sub:   stats ? `${ __( 'of', 'dono-fundraising-platform' ) } ${ stats.total }` : null,
         },
         {
-            label: __( 'Restricted', 'dono' ),
+            label: __( 'Restricted', 'dono-fundraising-platform' ),
             value: stats ? String( stats.restricted ) : '-',
-            sub:   __( 'donor-restricted', 'dono' ),
+            sub:   __( 'donor-restricted', 'dono-fundraising-platform' ),
         },
         {
-            label: __( 'Default fund', 'dono' ),
-            value: stats ? ( stats.default ? stats.default.name : __( 'None', 'dono' ) ) : '-',
+            label: __( 'Default fund', 'dono-fundraising-platform' ),
+            value: stats ? ( stats.default ? stats.default.name : __( 'None', 'dono-fundraising-platform' ) ) : '-',
         },
     ];
 }
@@ -121,7 +121,7 @@ export default function List() {
             } )
             .catch( ( err ) => {
                 if ( aborted ) return;
-                setError( err?.message || __( 'Failed to load funds.', 'dono' ) );
+                setError( err?.message || __( 'Failed to load funds.', 'dono-fundraising-platform' ) );
             } )
             .finally( () => ! aborted && setLoading( false ) );
 
@@ -177,7 +177,7 @@ export default function List() {
             await apiFetch( { path: `/dono/v1/admin/funds/${ id }`, method: 'POST', data: payload } );
             afterChange();
         } catch ( err ) {
-            setError( err?.message || __( 'Action failed.', 'dono' ) );
+            setError( err?.message || __( 'Action failed.', 'dono-fundraising-platform' ) );
         }
     }, [ afterChange ] );
 
@@ -197,7 +197,7 @@ export default function List() {
     const fields = useMemo( () => [
         {
             id:            'name',
-            label:         __( 'Fund', 'dono' ),
+            label:         __( 'Fund', 'dono-fundraising-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <div
@@ -215,7 +215,7 @@ export default function List() {
                         </button>
                         { item.is_default && (
                             <span className="dono-fund-badge dono-fund-badge--default">
-                                { __( 'Default', 'dono' ) }
+                                { __( 'Default', 'dono-fundraising-platform' ) }
                             </span>
                         ) }
                         <div className="dono-fund-code">{ item.code }</div>
@@ -225,18 +225,18 @@ export default function List() {
         },
         {
             id:       'type',
-            label:    __( 'Type', 'dono' ),
+            label:    __( 'Type', 'dono-fundraising-platform' ),
             render: ( { item } ) => (
                 <span className={ 'dono-fund-badge ' + ( item.is_restricted
                     ? 'dono-fund-badge--restricted'
                     : 'dono-fund-badge--unrestricted' ) }>
-                    { item.is_restricted ? __( 'Restricted', 'dono' ) : __( 'Unrestricted', 'dono' ) }
+                    { item.is_restricted ? __( 'Restricted', 'dono-fundraising-platform' ) : __( 'Unrestricted', 'dono-fundraising-platform' ) }
                 </span>
             ),
         },
         {
             id:    'raised',
-            label: __( 'Raised', 'dono' ),
+            label: __( 'Raised', 'dono-fundraising-platform' ),
             // Same reason the goal column is not sortable: a parent's raised is
             // rolled up in PHP after the query.
             enableSorting: false,
@@ -246,7 +246,7 @@ export default function List() {
         },
         {
             id:            'goal',
-            label:         __( 'Goal progress', 'dono' ),
+            label:         __( 'Goal progress', 'dono-fundraising-platform' ),
             // Not sortable: the column shows raised-vs-goal percentage, but a
             // parent's raised is rolled up in PHP after the query, so no DB
             // sort key reflects what's displayed.
@@ -254,14 +254,14 @@ export default function List() {
             render: ( { item } ) => {
                 if ( ! item.goal_cents ) {
                     return (
-                        <GoalBar left={ __( 'No goal set', 'dono' ) } pct={ 0 } muted />
+                        <GoalBar left={ __( 'No goal set', 'dono-fundraising-platform' ) } pct={ 0 } muted />
                     );
                 }
                 const pct = Math.min( 100, Math.round( ( item.raised_cents / item.goal_cents ) * 100 ) );
                 return (
                     <GoalBar
                         left={ formatAmount( item.raised_cents ) }
-                        right={ `${ __( 'of', 'dono' ) } ${ formatAmount( item.goal_cents ) }` }
+                        right={ `${ __( 'of', 'dono-fundraising-platform' ) } ${ formatAmount( item.goal_cents ) }` }
                         pct={ pct }
                     />
                 );
@@ -269,21 +269,21 @@ export default function List() {
         },
         {
             id:       'status',
-            label:    __( 'Status', 'dono' ),
+            label:    __( 'Status', 'dono-fundraising-platform' ),
             elements: STATUS_OPTIONS,
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => {
                 if ( item.reassign_pending ) {
                     return (
                         <span className="dono-fund-badge dono-fund-badge--pending">
-                            { __( 'Reassigning…', 'dono' ) }
+                            { __( 'Reassigning…', 'dono-fundraising-platform' ) }
                         </span>
                     );
                 }
                 return (
                     <span className="dono-fund-status">
                         <span className={ 'dono-fund-dot ' + ( item.is_active ? 'is-on' : 'is-off' ) } />
-                        { item.is_active ? __( 'Active', 'dono' ) : __( 'Inactive', 'dono' ) }
+                        { item.is_active ? __( 'Active', 'dono-fundraising-platform' ) : __( 'Inactive', 'dono-fundraising-platform' ) }
                     </span>
                 );
             },
@@ -300,35 +300,35 @@ export default function List() {
     const actions = useMemo( () => [
         {
             id:         'edit',
-            label:      __( 'Edit', 'dono' ),
+            label:      __( 'Edit', 'dono-fundraising-platform' ),
             icon:       () => <Pencil size={ 16 } strokeWidth={ 1.75 } />,
             isEligible: ( item ) => ! item.reassign_pending,
             callback:   ( [ item ] ) => setEditing( item ),
         },
         {
             id:         'set-default',
-            label:      __( 'Set as default', 'dono' ),
+            label:      __( 'Set as default', 'dono-fundraising-platform' ),
             icon:       () => <Star size={ 16 } strokeWidth={ 1.75 } />,
             isEligible: ( item ) => ! item.is_default && item.is_active && ! item.reassign_pending,
             callback:   ( [ item ] ) => mutate( item.id, { is_default: true } ),
         },
         {
             id:         'deactivate',
-            label:      __( 'Deactivate', 'dono' ),
+            label:      __( 'Deactivate', 'dono-fundraising-platform' ),
             icon:       () => <PowerOff size={ 16 } strokeWidth={ 1.75 } />,
             isEligible: ( item ) => ! item.is_default && item.is_active && ! item.reassign_pending,
             callback:   ( [ item ] ) => mutate( item.id, { is_active: false } ),
         },
         {
             id:         'activate',
-            label:      __( 'Activate', 'dono' ),
+            label:      __( 'Activate', 'dono-fundraising-platform' ),
             icon:       () => <Power size={ 16 } strokeWidth={ 1.75 } />,
             isEligible: ( item ) => ! item.is_default && ! item.is_active && ! item.reassign_pending,
             callback:   ( [ item ] ) => mutate( item.id, { is_active: true } ),
         },
         {
             id:            'delete',
-            label:         __( 'Delete', 'dono' ),
+            label:         __( 'Delete', 'dono-fundraising-platform' ),
             icon:          () => <TrashIcon size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             isEligible:    ( item ) => ! item.is_default && ! item.reassign_pending,
@@ -339,27 +339,27 @@ export default function List() {
     return (
         <div>
             <div className="dono-crumbs">
-                <a href={ addQueryArgs( window.location.pathname, { page: 'dono' } ) }>{ __( 'Dono', 'dono' ) }</a>
+                <a href={ addQueryArgs( window.location.pathname, { page: 'dono-fundraising-platform' } ) }>{ __( 'Dono', 'dono-fundraising-platform' ) }</a>
                 <span className="sep">›</span>
-                <span>{ __( 'Funds', 'dono' ) }</span>
+                <span>{ __( 'Funds', 'dono-fundraising-platform' ) }</span>
             </div>
             <div className="dono-page-head">
                 <div className="dono-page-head__title-row">
-                    <h1>{ __( 'Funds', 'dono' ) }</h1>
+                    <h1>{ __( 'Funds', 'dono-fundraising-platform' ) }</h1>
                 </div>
                 <div className="dono-page-head__right">
                     <span className="dono-page-head__meta">
-                        { sprintf( /* translators: %s: number of funds */ _n( '%s fund', '%s funds', total, 'dono' ), total.toLocaleString() ) }
+                        { sprintf( /* translators: %s: number of funds */ _n( '%s fund', '%s funds', total, 'dono-fundraising-platform' ), total.toLocaleString() ) }
                     </span>
                     <Btn variant="primary" onClick={ onCreate }>
                         <Plus size={ 16 } strokeWidth={ 1.75 } />
-                        { __( 'New fund', 'dono' ) }
+                        { __( 'New fund', 'dono-fundraising-platform' ) }
                     </Btn>
                 </div>
             </div>
 
             <p className="dono-funds-intro">
-                { __( 'Organization-wide designations donations are allocated to.', 'dono' ) }
+                { __( 'Organization-wide designations donations are allocated to.', 'dono-fundraising-platform' ) }
             </p>
 
             <KpiStrip items={ fundKpis( stats ) } loading={ statsLoading } />
@@ -371,11 +371,11 @@ export default function List() {
             { ! loading && total === 0 && ! view.search && ! statusFilter ? (
                 <EmptyState
                     icon={ <Wallet size={ 22 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'No funds yet', 'dono' ) }
-                    body={ __( 'Funds route donations to specific causes within your organization. Forms without a fund picker drop into the organization default.', 'dono' ) }
+                    title={ __( 'No funds yet', 'dono-fundraising-platform' ) }
+                    body={ __( 'Funds route donations to specific causes within your organization. Forms without a fund picker drop into the organization default.', 'dono-fundraising-platform' ) }
                     action={
                         <Btn variant="primary" onClick={ onCreate }>
-                            { __( 'Create your first fund', 'dono' ) }
+                            { __( 'Create your first fund', 'dono-fundraising-platform' ) }
                         </Btn>
                     }
                 />
@@ -464,7 +464,7 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
             } );
             onSaved();
         } catch ( err ) {
-            setSaveError( err?.message || __( 'Failed to save fund.', 'dono' ) );
+            setSaveError( err?.message || __( 'Failed to save fund.', 'dono-fundraising-platform' ) );
             setSaving( false );
         }
     };
@@ -473,13 +473,13 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
 
     return (
         <Dialog
-            title={ __( 'Edit fund', 'dono' ) }
+            title={ __( 'Edit fund', 'dono-fundraising-platform' ) }
             onClose={ onClose }
             foot={ (
                 <>
-                    <Btn onClick={ onClose }>{ __( 'Cancel', 'dono' ) }</Btn>
+                    <Btn onClick={ onClose }>{ __( 'Cancel', 'dono-fundraising-platform' ) }</Btn>
                     <Btn variant="primary" onClick={ save } isBusy={ saving } disabled={ saving }>
-                        { __( 'Save fund', 'dono' ) }
+                        { __( 'Save fund', 'dono-fundraising-platform' ) }
                     </Btn>
                 </>
             ) }
@@ -488,44 +488,44 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
                         <Notice status="error" onRemove={ () => setSaveError( null ) }>{ saveError }</Notice>
                     ) }
                     <fieldset className="dono-fset">
-                        <legend>{ __( 'Identity', 'dono' ) }</legend>
+                        <legend>{ __( 'Identity', 'dono-fundraising-platform' ) }</legend>
                         <div className="dono-fld">
-                            <label>{ __( 'Name', 'dono' ) }</label>
+                            <label>{ __( 'Name', 'dono-fundraising-platform' ) }</label>
                             <input className="dono-input" value={ form.name } onChange={ ( e ) => set( 'name', e.target.value ) } />
                         </div>
                         <div className="dono-fld">
-                            <label>{ __( 'Code', 'dono' ) }</label>
+                            <label>{ __( 'Code', 'dono-fundraising-platform' ) }</label>
                             <input className="dono-input dono-input--mono" value={ form.code } onChange={ ( e ) => set( 'code', e.target.value ) } />
-                            <p className="dono-fld__help">{ __( 'Stable identifier used in exports and accounting. Lowercase, no spaces. Avoid changing once donations exist.', 'dono' ) }</p>
+                            <p className="dono-fld__help">{ __( 'Stable identifier used in exports and accounting. Lowercase, no spaces. Avoid changing once donations exist.', 'dono-fundraising-platform' ) }</p>
                         </div>
                         <div className="dono-fld">
-                            <label>{ __( 'Description', 'dono' ) }</label>
+                            <label>{ __( 'Description', 'dono-fundraising-platform' ) }</label>
                             <textarea className="dono-textarea" rows="3" value={ form.description } onChange={ ( e ) => set( 'description', e.target.value ) } />
                         </div>
                     </fieldset>
 
                     <fieldset className="dono-fset">
-                        <legend>{ __( 'Classification', 'dono' ) }</legend>
+                        <legend>{ __( 'Classification', 'dono-fundraising-platform' ) }</legend>
                         <div className="dono-fld">
-                            <label>{ __( 'Type', 'dono' ) }</label>
+                            <label>{ __( 'Type', 'dono-fundraising-platform' ) }</label>
                             <div className="dono-seg2">
                                 <button type="button" className={ ! form.is_restricted ? 'is-active' : '' } onClick={ () => set( 'is_restricted', false ) }>
-                                    { __( 'Unrestricted', 'dono' ) }
+                                    { __( 'Unrestricted', 'dono-fundraising-platform' ) }
                                 </button>
                                 <button type="button" className={ form.is_restricted ? 'is-active' : '' } onClick={ () => set( 'is_restricted', true ) }>
-                                    { __( 'Restricted', 'dono' ) }
+                                    { __( 'Restricted', 'dono-fundraising-platform' ) }
                                 </button>
                             </div>
-                            <p className="dono-fld__help">{ __( 'Restricted funds are donor-designated and reported separately.', 'dono' ) }</p>
+                            <p className="dono-fld__help">{ __( 'Restricted funds are donor-designated and reported separately.', 'dono-fundraising-platform' ) }</p>
                         </div>
                         <div className="dono-fld">
-                            <label>{ __( 'Parent fund', 'dono' ) }</label>
+                            <label>{ __( 'Parent fund', 'dono-fundraising-platform' ) }</label>
                             <SearchableSelect
                                 value={ form.parent_fund_id ? String( form.parent_fund_id ) : '' }
                                 onChange={ ( v ) => set( 'parent_fund_id', v ) }
-                                placeholder={ __( 'None (top-level fund)', 'dono' ) }
+                                placeholder={ __( 'None (top-level fund)', 'dono-fundraising-platform' ) }
                                 options={ [
-                                    { value: '', label: __( 'None (top-level fund)', 'dono' ) },
+                                    { value: '', label: __( 'None (top-level fund)', 'dono-fundraising-platform' ) },
                                     ...parents.map( ( p ) => ( { value: String( p.id ), label: p.name } ) ),
                                 ] }
                             />
@@ -533,10 +533,10 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
                     </fieldset>
 
                     <fieldset className="dono-fset">
-                        <legend>{ __( 'Targets', 'dono' ) }</legend>
+                        <legend>{ __( 'Targets', 'dono-fundraising-platform' ) }</legend>
                         <div className="dono-fld">
-                            <label>{ __( 'Goal amount', 'dono' ) } <span className="dono-fld__opt">{ __( 'optional', 'dono' ) }</span></label>
-                            <input className="dono-input" type="number" min="0" step="0.01" placeholder={ __( 'No goal', 'dono' ) } value={ form.goal } onChange={ ( e ) => set( 'goal', e.target.value ) } />
+                            <label>{ __( 'Goal amount', 'dono-fundraising-platform' ) } <span className="dono-fld__opt">{ __( 'optional', 'dono-fundraising-platform' ) }</span></label>
+                            <input className="dono-input" type="number" min="0" step="0.01" placeholder={ __( 'No goal', 'dono-fundraising-platform' ) } value={ form.goal } onChange={ ( e ) => set( 'goal', e.target.value ) } />
                         </div>
                         <ScheduleFields
                             enabled={ scheduleOn }
@@ -549,25 +549,25 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
                     </fieldset>
 
                     <fieldset className="dono-fset">
-                        <legend>{ __( 'Accounting', 'dono' ) }</legend>
+                        <legend>{ __( 'Accounting', 'dono-fundraising-platform' ) }</legend>
                         <div className="dono-fld">
-                            <label>{ __( 'Accounting code', 'dono' ) } <span className="dono-fld__opt">{ __( 'optional', 'dono' ) }</span></label>
-                            <input className="dono-input dono-input--mono" placeholder={ __( 'Enter accounting code', 'dono' ) } value={ form.accounting_code } onChange={ ( e ) => set( 'accounting_code', e.target.value ) } />
-                            <p className="dono-fld__help">{ __( 'Maps this fund to a GL account in your bookkeeping. Included in exports.', 'dono' ) }</p>
+                            <label>{ __( 'Accounting code', 'dono-fundraising-platform' ) } <span className="dono-fld__opt">{ __( 'optional', 'dono-fundraising-platform' ) }</span></label>
+                            <input className="dono-input dono-input--mono" placeholder={ __( 'Enter accounting code', 'dono-fundraising-platform' ) } value={ form.accounting_code } onChange={ ( e ) => set( 'accounting_code', e.target.value ) } />
+                            <p className="dono-fld__help">{ __( 'Maps this fund to a GL account in your bookkeeping. Included in exports.', 'dono-fundraising-platform' ) }</p>
                         </div>
                     </fieldset>
 
                     <fieldset className="dono-fset">
-                        <legend>{ __( 'Behaviour', 'dono' ) }</legend>
+                        <legend>{ __( 'Behaviour', 'dono-fundraising-platform' ) }</legend>
                         <ToggleRow
-                            title={ __( 'Default fund', 'dono' ) }
-                            sub={ __( 'Donations with no chosen fund (and campaigns with no default) are allocated here.', 'dono' ) }
+                            title={ __( 'Default fund', 'dono-fundraising-platform' ) }
+                            sub={ __( 'Donations with no chosen fund (and campaigns with no default) are allocated here.', 'dono-fundraising-platform' ) }
                             checked={ form.is_default }
                             onChange={ ( v ) => set( 'is_default', v ) }
                         />
                         <ToggleRow
-                            title={ __( 'Active', 'dono' ) }
-                            sub={ __( 'Inactive funds stay in reports but cannot receive new donations.', 'dono' ) }
+                            title={ __( 'Active', 'dono-fundraising-platform' ) }
+                            sub={ __( 'Inactive funds stay in reports but cannot receive new donations.', 'dono-fundraising-platform' ) }
                             checked={ form.is_active }
                             onChange={ ( v ) => set( 'is_active', v ) }
                         />
@@ -595,19 +595,19 @@ function FundDeleteModal( { fund, funds, onClose, onError, onDone } ) {
             const res = await apiFetch( { path, method: 'DELETE' } );
             let msg;
             if ( res.action === 'deleted' ) {
-                msg = sprintf( /* translators: %s: fund name */ __( 'Fund “%s” was deleted.', 'dono' ), fund.name );
+                msg = sprintf( /* translators: %s: fund name */ __( 'Fund “%s” was deleted.', 'dono-fundraising-platform' ), fund.name );
             } else if ( res.action === 'reassign_queued' ) {
-                msg = sprintf( /* translators: %s: fund name */ __( 'Reassigning donations from “%s”. It will be removed once complete.', 'dono' ), fund.name );
+                msg = sprintf( /* translators: %s: fund name */ __( 'Reassigning donations from “%s”. It will be removed once complete.', 'dono-fundraising-platform' ), fund.name );
             } else {
                 msg = sprintf(
                     /* translators: %s: fund name */
-                    __( 'Fund “%s” was deactivated and kept for reporting.', 'dono' ),
+                    __( 'Fund “%s” was deactivated and kept for reporting.', 'dono-fundraising-platform' ),
                     fund.name
                 );
             }
             onDone( msg );
         } catch ( err ) {
-            onError( err?.message || __( 'Could not delete the fund.', 'dono' ) );
+            onError( err?.message || __( 'Could not delete the fund.', 'dono-fundraising-platform' ) );
             setBusy( false );
         }
     };
@@ -619,16 +619,16 @@ function FundDeleteModal( { fund, funds, onClose, onError, onDone } ) {
     const deletable = fund.deletable === true;
     const reassignBlocked = choice === 'reassign' && ! targetId;
     const primaryLabel = deletable
-        ? __( 'Delete fund', 'dono' )
-        : ( choice === 'reassign' ? __( 'Reassign and delete', 'dono' ) : __( 'Deactivate fund', 'dono' ) );
+        ? __( 'Delete fund', 'dono-fundraising-platform' )
+        : ( choice === 'reassign' ? __( 'Reassign and delete', 'dono-fundraising-platform' ) : __( 'Deactivate fund', 'dono-fundraising-platform' ) );
 
     return (
         <Dialog
-            title={ sprintf( /* translators: %s: fund name */ __( 'Delete fund: %s', 'dono' ), fund.name ) }
+            title={ sprintf( /* translators: %s: fund name */ __( 'Delete fund: %s', 'dono-fundraising-platform' ), fund.name ) }
             onClose={ onClose }
             foot={ (
                 <>
-                    <Btn onClick={ onClose } disabled={ busy }>{ __( 'Cancel', 'dono' ) }</Btn>
+                    <Btn onClick={ onClose } disabled={ busy }>{ __( 'Cancel', 'dono-fundraising-platform' ) }</Btn>
                     <Btn
                         variant="primary"
                         isBusy={ busy }
@@ -642,12 +642,12 @@ function FundDeleteModal( { fund, funds, onClose, onError, onDone } ) {
         >
             { deletable ? (
                 <p className="dono-dialog__help">
-                    { __( 'Nothing points to this fund, so deleting it removes it entirely.', 'dono' ) }
+                    { __( 'Nothing points to this fund, so deleting it removes it entirely.', 'dono-fundraising-platform' ) }
                 </p>
             ) : (
                 <>
                     <p className="dono-dialog__help">
-                        { __( 'This fund is still referenced, so it is never hard-deleted. Choose what to do:', 'dono' ) }
+                        { __( 'This fund is still referenced, so it is never hard-deleted. Choose what to do:', 'dono-fundraising-platform' ) }
                     </p>
 
                     <label className="dono-choice" htmlFor="dono-fund-delete-deactivate">
@@ -659,8 +659,8 @@ function FundDeleteModal( { fund, funds, onClose, onError, onDone } ) {
                             onChange={ () => setChoice( 'deactivate' ) }
                         />
                         <span>
-                            <strong>{ __( 'Deactivate', 'dono' ) }</strong>
-                            <span>{ __( 'Keep all donation records. Recommended.', 'dono' ) }</span>
+                            <strong>{ __( 'Deactivate', 'dono-fundraising-platform' ) }</strong>
+                            <span>{ __( 'Keep all donation records. Recommended.', 'dono-fundraising-platform' ) }</span>
                         </span>
                     </label>
 
@@ -673,18 +673,18 @@ function FundDeleteModal( { fund, funds, onClose, onError, onDone } ) {
                             onChange={ () => setChoice( 'reassign' ) }
                         />
                         <span>
-                            <strong>{ __( 'Reassign to another fund, then delete', 'dono' ) }</strong>
-                            <span>{ __( 'Moves every donation, campaign and form that points here onto the chosen fund, then removes this one.', 'dono' ) }</span>
+                            <strong>{ __( 'Reassign to another fund, then delete', 'dono-fundraising-platform' ) }</strong>
+                            <span>{ __( 'Moves every donation, campaign and form that points here onto the chosen fund, then removes this one.', 'dono-fundraising-platform' ) }</span>
                         </span>
                     </label>
 
                     { choice === 'reassign' && (
                         <div className="dono-fld" style={ { marginTop: 12 } }>
-                            <label className="dono-fld__label">{ __( 'Reassign donations to', 'dono' ) }</label>
+                            <label className="dono-fld__label">{ __( 'Reassign donations to', 'dono-fundraising-platform' ) }</label>
                             <SearchableSelect
                                 value={ targetId }
                                 onChange={ ( v ) => setTargetId( v ) }
-                                placeholder={ __( 'Select a fund', 'dono' ) }
+                                placeholder={ __( 'Select a fund', 'dono-fundraising-platform' ) }
                                 options={ candidates.map( ( f ) => ( { value: String( f.id ), label: f.name } ) ) }
                             />
                         </div>

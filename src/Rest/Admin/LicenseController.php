@@ -97,7 +97,7 @@ final class LicenseController
         if ($key === '') {
             return new WP_REST_Response([
                 'code'    => 'dono_license_empty',
-                'message' => __('Enter your license key.', 'dono'),
+                'message' => __('Enter your license key.', 'dono-fundraising-platform'),
             ], 400);
         }
 
@@ -110,7 +110,7 @@ final class LicenseController
         if ($payload['checked'] && ! $payload['any_entitled']) {
             return new WP_REST_Response($payload + [
                 'code'    => 'dono_license_rejected',
-                'message' => __('That key was not accepted for any installed add-on.', 'dono'),
+                'message' => __('That key was not accepted for any installed add-on.', 'dono-fundraising-platform'),
             ], 200);
         }
 

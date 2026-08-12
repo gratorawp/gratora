@@ -56,15 +56,15 @@ final class CampaignGridBlock extends CampaignBlock
                 'heading'   => '',
                 'cards'     => [],
                 'emptyText' => (string) ($attrs['emptyText'] ?? '')
-                    ?: __('This is the only campaign running right now.', 'dono'),
+                    ?: __('This is the only campaign running right now.', 'dono-fundraising-platform'),
                 // Unlike the donation and donor blocks, nothing a visitor does
                 // makes another campaign appear. So the invitation points at
                 // the one they are already reading, which is the only way to
                 // give that exists today.
-                'emptySubText' => __('Which makes it an easy choice.', 'dono'),
+                'emptySubText' => __('Which makes it an easy choice.', 'dono-fundraising-platform'),
                 'emptyIcon'    => 'campaigns',
                 'notice'    => (is_user_logged_in() && current_user_can('edit_posts'))
-                    ? __('Only this campaign is published, so there is nothing to list. Visitors see the message above; this line is editor-only.', 'dono')
+                    ? __('Only this campaign is published, so there is nothing to list. Visitors see the message above; this line is editor-only.', 'dono-fundraising-platform')
                     : '',
                 'styleVars' => $this->styleVars($current),
             ]);
@@ -86,7 +86,7 @@ final class CampaignGridBlock extends CampaignBlock
                 'raised'    => Money::compact((int) $c->raised_cents, $c->currency),
                 'goalLabel' => $goalCents > 0
                     /* translators: %s: formatted goal amount */
-                    ? sprintf(__('of %s', 'dono'), Money::compact($goalCents, $c->currency))
+                    ? sprintf(__('of %s', 'dono-fundraising-platform'), Money::compact($goalCents, $c->currency))
                     : '',
                 'percent'   => $percent,
                 'accent'    => $c->accentColor(),

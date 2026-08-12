@@ -46,7 +46,7 @@ function RateInput( { value, manual, onChange } ) {
             />
             { invalid && (
                 <div className="dono-fx__hint">
-                    <span>{ __( 'Not a rate. Enter a number like 1.09; the current rate stands until you do.', 'dono' ) }</span>
+                    <span>{ __( 'Not a rate. Enter a number like 1.09; the current rate stands until you do.', 'dono-fundraising-platform' ) }</span>
                 </div>
             ) }
         </>
@@ -55,23 +55,23 @@ function RateInput( { value, manual, onChange } ) {
 
 function freshnessPill( fx ) {
     if ( ! fx.auto ) {
-        return <span className="dono-pill dono-pill--amber">{ __( 'Manual updates only', 'dono' ) }</span>;
+        return <span className="dono-pill dono-pill--amber">{ __( 'Manual updates only', 'dono-fundraising-platform' ) }</span>;
     }
     if ( fx.stale ) {
-        return <span className="dono-pill dono-pill--amber">{ __( 'Rates are stale', 'dono' ) }</span>;
+        return <span className="dono-pill dono-pill--amber">{ __( 'Rates are stale', 'dono-fundraising-platform' ) }</span>;
     }
     return (
         <span className="dono-pill dono-pill--green">
             { fx.date
-                ? sprintf( /* translators: %s: date */ __( 'Updated %s', 'dono' ), fx.date )
-                : __( 'Up to date', 'dono' ) }
+                ? sprintf( /* translators: %s: date */ __( 'Updated %s', 'dono-fundraising-platform' ), fx.date )
+                : __( 'Up to date', 'dono-fundraising-platform' ) }
         </span>
     );
 }
 
 function ExchangeRatesCard( { fx, base } ) {
     if ( fx.loading ) {
-        return <Card title={ __( 'Exchange rates', 'dono' ) }><p className="dono-muted">{ __( 'Loading rates…', 'dono' ) }</p></Card>;
+        return <Card title={ __( 'Exchange rates', 'dono-fundraising-platform' ) }><p className="dono-muted">{ __( 'Loading rates…', 'dono-fundraising-platform' ) }</p></Card>;
     }
 
     const head = (
@@ -81,19 +81,19 @@ function ExchangeRatesCard( { fx, base } ) {
                 <svg viewBox="0 0 16 16" fill="none" width="13" height="13" aria-hidden="true">
                     <path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9M13.5 2v3h-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
-                { fx.fetching ? __( 'Fetching…', 'dono' ) : __( 'Fetch rates now', 'dono' ) }
+                { fx.fetching ? __( 'Fetching…', 'dono-fundraising-platform' ) : __( 'Fetch rates now', 'dono-fundraising-platform' ) }
             </Btn>
         </div>
     );
 
     const foot = fx.auto
-        ? __( 'Rates are snapshotted onto each donation when it is made. Editing a rate only affects donations created afterwards; existing donations and their totals never change.', 'dono' )
-        : __( 'Automatic updates are off. New donations use whatever rate is set here at the moment they are made.', 'dono' );
+        ? __( 'Rates are snapshotted onto each donation when it is made. Editing a rate only affects donations created afterwards; existing donations and their totals never change.', 'dono-fundraising-platform' )
+        : __( 'Automatic updates are off. New donations use whatever rate is set here at the moment they are made.', 'dono-fundraising-platform' );
 
     return (
         <Card
-            title={ __( 'Exchange rates', 'dono' ) }
-            sub={ sprintf( /* translators: %s: base currency code */ __( '1 %s equals the amounts below. Used to value non-base donations for reporting.', 'dono' ), base ) }
+            title={ __( 'Exchange rates', 'dono-fundraising-platform' ) }
+            sub={ sprintf( /* translators: %s: base currency code */ __( '1 %s equals the amounts below. Used to value non-base donations for reporting.', 'dono-fundraising-platform' ), base ) }
             meta={ head }
             foot={ foot }
             edited={ fx.isDirty }
@@ -105,11 +105,11 @@ function ExchangeRatesCard( { fx, base } ) {
                         <strong>
                             { sprintf(
                                 /* translators: %s: comma-separated currency codes */
-                                __( 'No exchange rate for %s.', 'dono' ),
+                                __( 'No exchange rate for %s.', 'dono-fundraising-platform' ),
                                 ( fx.unconvertible || [] ).join( ', ' )
                             ) }
                         </strong>{ ' ' }
-                        { __( 'Donations in these currencies are still accepted, but nothing about them converts. A donor who switches is offered your preset amounts at face value, so a preset authored as 100 asks for 100 of that currency however little that is worth, and the donation counts as zero in campaign, fund and donor totals. Add a rate below, or stop offering the currency.', 'dono' ) }
+                        { __( 'Donations in these currencies are still accepted, but nothing about them converts. A donor who switches is offered your preset amounts at face value, so a preset authored as 100 asks for 100 of that currency however little that is worth, and the donation counts as zero in campaign, fund and donor totals. Add a rate below, or stop offering the currency.', 'dono-fundraising-platform' ) }
                     </div>
                 </div>
             ) }
@@ -121,21 +121,21 @@ function ExchangeRatesCard( { fx, base } ) {
                         <strong>
                             { sprintf(
                                 /* translators: %s: comma-separated currency codes */
-                                __( 'No payment method accepts %s.', 'dono' ),
+                                __( 'No payment method accepts %s.', 'dono-fundraising-platform' ),
                                 ( fx.no_gateway || [] ).join( ', ' )
                             ) }
                         </strong>{ ' ' }
-                        { __( 'A donor who picks one of these gets as far as the payment step and can go no further. Enable a gateway that takes the currency, or stop offering it.', 'dono' ) }
+                        { __( 'A donor who picks one of these gets as far as the payment step and can go no further. Enable a gateway that takes the currency, or stop offering it.', 'dono-fundraising-platform' ) }
                     </div>
                 </div>
             ) }
 
             <ToggleRow
-                title={ __( 'Update rates automatically every day', 'dono' ) }
+                title={ __( 'Update rates automatically every day', 'dono-fundraising-platform' ) }
                 sub={ sprintf(
                     /* translators: %s: rate source */
-                    __( 'Pulled from %s (free, no key). When off, rates only change when you fetch or edit them here.', 'dono' ),
-                    fx.source || __( 'the European Central Bank', 'dono' )
+                    __( 'Pulled from %s (free, no key). When off, rates only change when you fetch or edit them here.', 'dono-fundraising-platform' ),
+                    fx.source || __( 'the European Central Bank', 'dono-fundraising-platform' )
                 ) }
                 checked={ fx.auto }
                 onChange={ fx.setAuto }
@@ -144,11 +144,11 @@ function ExchangeRatesCard( { fx, base } ) {
             <table className="dono-fx">
                 <thead>
                     <tr>
-                        <th>{ __( 'Currency', 'dono' ) }</th>
+                        <th>{ __( 'Currency', 'dono-fundraising-platform' ) }</th>
                         <th className="dono-fx__num">
-                            { sprintf( /* translators: %s: base currency code */ __( 'Rate (1 %s =)', 'dono' ), base ) }
+                            { sprintf( /* translators: %s: base currency code */ __( 'Rate (1 %s =)', 'dono-fundraising-platform' ), base ) }
                         </th>
-                        <th>{ __( 'Source', 'dono' ) }</th>
+                        <th>{ __( 'Source', 'dono-fundraising-platform' ) }</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -177,13 +177,13 @@ function ExchangeRatesCard( { fx, base } ) {
                                             />
                                             { row.is_manual && row.auto_rate != null && (
                                                 <div className="dono-fx__hint">
-                                                    <span>{ sprintf( /* translators: %s: rate */ __( 'auto: %s', 'dono' ), fmtRate( row.auto_rate ) ) }</span>
+                                                    <span>{ sprintf( /* translators: %s: rate */ __( 'auto: %s', 'dono-fundraising-platform' ), fmtRate( row.auto_rate ) ) }</span>
                                                     <a
                                                         href="#reset"
                                                         className="dono-fx__reset"
                                                         onClick={ ( e ) => { e.preventDefault(); fx.resetManual( row.code ); } }
                                                     >
-                                                        { __( 'Reset', 'dono' ) }
+                                                        { __( 'Reset', 'dono-fundraising-platform' ) }
                                                     </a>
                                                 </div>
                                             ) }
@@ -192,11 +192,11 @@ function ExchangeRatesCard( { fx, base } ) {
                                 </td>
                                 <td>
                                     { row.is_base ? (
-                                        <span className="dono-pill dono-pill--gray">{ __( 'Base currency', 'dono' ) }</span>
+                                        <span className="dono-pill dono-pill--gray">{ __( 'Base currency', 'dono-fundraising-platform' ) }</span>
                                     ) : row.is_manual ? (
-                                        <span className="dono-fx__src">{ __( 'Set by you', 'dono' ) }</span>
+                                        <span className="dono-fx__src">{ __( 'Set by you', 'dono-fundraising-platform' ) }</span>
                                     ) : (
-                                        <span className="dono-fx__src">{ __( 'Auto', 'dono' ) }</span>
+                                        <span className="dono-fx__src">{ __( 'Auto', 'dono-fundraising-platform' ) }</span>
                                     ) }
                                 </td>
                             </tr>
@@ -233,16 +233,16 @@ export default function CurrencyPanel( { s, fx } ) {
 
     return (
         <div className="dono-panel">
-            <Card title={ __( 'Currencies', 'dono' ) } edited={ s.isDirty }>
+            <Card title={ __( 'Currencies', 'dono-fundraising-platform' ) } edited={ s.isDirty }>
                 <FormRow
-                    label={ __( 'Base currency', 'dono' ) }
+                    label={ __( 'Base currency', 'dono-fundraising-platform' ) }
                     help={ baseLocked
                         ? sprintf(
                             /* translators: %s: base currency code */
-                            __( 'Locked to %s: donations are already recorded against it, and their stored totals would be reread as the new currency. Existing campaigns keep their own currency.', 'dono' ),
+                            __( 'Locked to %s: donations are already recorded against it, and their stored totals would be reread as the new currency. Existing campaigns keep their own currency.', 'dono-fundraising-platform' ),
                             defaultCurrency
                         )
-                        : __( 'All reporting and totals roll up to this, and it cannot be changed once donations come in. Existing campaigns keep their own currency.', 'dono' ) }
+                        : __( 'All reporting and totals roll up to this, and it cannot be changed once donations come in. Existing campaigns keep their own currency.', 'dono-fundraising-platform' ) }
                 >
                     <select
                         className="dono-select"
@@ -264,10 +264,10 @@ export default function CurrencyPanel( { s, fx } ) {
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Currencies donors can use', 'dono' ) }
+                    label={ __( 'Currencies donors can use', 'dono-fundraising-platform' ) }
                     help={ sprintf(
                         /* translators: %s: base currency code */
-                        __( '%s is always on as the base. Enable more to accept donations in other currencies.', 'dono' ),
+                        __( '%s is always on as the base. Enable more to accept donations in other currencies.', 'dono-fundraising-platform' ),
                         defaultCurrency
                     ) }
                     wide
@@ -292,7 +292,7 @@ export default function CurrencyPanel( { s, fx } ) {
                                         ) }
                                     </span>
                                     { c.code }
-                                    { locked && <span className="dono-cur-chip__tag">{ __( 'base', 'dono' ) }</span> }
+                                    { locked && <span className="dono-cur-chip__tag">{ __( 'base', 'dono-fundraising-platform' ) }</span> }
                                 </button>
                             );
                         } ) }
@@ -305,52 +305,52 @@ export default function CurrencyPanel( { s, fx } ) {
             ) }
 
             <Card
-                title={ __( 'Currency settings', 'dono' ) }
-                meta={ __( 'Receipts, exports, donation form', 'dono' ) }
+                title={ __( 'Currency settings', 'dono-fundraising-platform' ) }
+                meta={ __( 'Receipts, exports, donation form', 'dono-fundraising-platform' ) }
                 edited={ s.isDirty }
             >
                 <div className="dono-currency-preview">
-                    <span className="dono-currency-preview__label">{ __( 'Preview', 'dono' ) }</span>
+                    <span className="dono-currency-preview__label">{ __( 'Preview', 'dono-fundraising-platform' ) }</span>
                     <span className="dono-currency-preview__value num">{ preview }</span>
                 </div>
 
-                <FormRow label={ __( 'Decimal places', 'dono' ) }>
+                <FormRow label={ __( 'Decimal places', 'dono-fundraising-platform' ) }>
                     <select
                         className="dono-select"
                         value={ String( decimalPlaces ) }
                         onChange={ ( e ) => s.edit( { format: { decimal_places: Number( e.target.value ) } } ) }
                     >
-                        <option value="0">{ __( '0 (no cents)', 'dono' ) }</option>
-                        <option value="2">{ __( '2 (standard)', 'dono' ) }</option>
+                        <option value="0">{ __( '0 (no cents)', 'dono-fundraising-platform' ) }</option>
+                        <option value="2">{ __( '2 (standard)', 'dono-fundraising-platform' ) }</option>
                     </select>
                 </FormRow>
 
-                <FormRow label={ __( 'Decimal separator', 'dono' ) }>
+                <FormRow label={ __( 'Decimal separator', 'dono-fundraising-platform' ) }>
                     <select
                         className="dono-select"
                         value={ decimalSep }
                         onChange={ ( e ) => s.edit( { format: { decimal_sep: e.target.value } } ) }
                     >
-                        <option value=",">{ __( 'Comma (1.234,56)', 'dono' ) }</option>
-                        <option value=".">{ __( 'Period (1,234.56)', 'dono' ) }</option>
+                        <option value=",">{ __( 'Comma (1.234,56)', 'dono-fundraising-platform' ) }</option>
+                        <option value=".">{ __( 'Period (1,234.56)', 'dono-fundraising-platform' ) }</option>
                     </select>
                 </FormRow>
 
-                <FormRow label={ __( 'Thousands separator', 'dono' ) }>
+                <FormRow label={ __( 'Thousands separator', 'dono-fundraising-platform' ) }>
                     <select
                         className="dono-select"
                         value={ thousandSep }
                         onChange={ ( e ) => s.edit( { format: { thousand_sep: e.target.value } } ) }
                     >
-                        <option value=".">{ __( 'Period (1.234,56)', 'dono' ) }</option>
-                        <option value=",">{ __( 'Comma (1,234.56)', 'dono' ) }</option>
-                        <option value=" ">{ __( 'Space (1 234,56)', 'dono' ) }</option>
-                        <option value="'">{ __( "Apostrophe (1'234.56)", 'dono' ) }</option>
-                        <option value="">{ __( 'None (1234,56)', 'dono' ) }</option>
+                        <option value=".">{ __( 'Period (1.234,56)', 'dono-fundraising-platform' ) }</option>
+                        <option value=",">{ __( 'Comma (1,234.56)', 'dono-fundraising-platform' ) }</option>
+                        <option value=" ">{ __( 'Space (1 234,56)', 'dono-fundraising-platform' ) }</option>
+                        <option value="'">{ __( "Apostrophe (1'234.56)", 'dono-fundraising-platform' ) }</option>
+                        <option value="">{ __( 'None (1234,56)', 'dono-fundraising-platform' ) }</option>
                     </select>
                 </FormRow>
 
-                <FormRow label={ __( 'Symbol position', 'dono' ) }>
+                <FormRow label={ __( 'Symbol position', 'dono-fundraising-platform' ) }>
                     <select
                         className="dono-select"
                         value={ symbolPosition }
@@ -361,14 +361,14 @@ export default function CurrencyPanel( { s, fx } ) {
                         <option value="before">
                             { sprintf(
                                 /* translators: %s: an example amount, e.g. $10.00 */
-                                __( 'Before amount (%s)', 'dono' ),
+                                __( 'Before amount (%s)', 'dono-fundraising-platform' ),
                                 previewAmount( 10, { decimalPlaces, decimalSep, thousandSep, symbol, symbolPosition: 'before' } )
                             ) }
                         </option>
                         <option value="after">
                             { sprintf(
                                 /* translators: %s: an example amount, e.g. 10.00 $ */
-                                __( 'After amount (%s)', 'dono' ),
+                                __( 'After amount (%s)', 'dono-fundraising-platform' ),
                                 previewAmount( 10, { decimalPlaces, decimalSep, thousandSep, symbol, symbolPosition: 'after' } )
                             ) }
                         </option>
@@ -377,13 +377,13 @@ export default function CurrencyPanel( { s, fx } ) {
             </Card>
 
             <Card
-                title={ __( 'Locale', 'dono' ) }
-                meta={ __( 'Dates on receipts and exports', 'dono' ) }
+                title={ __( 'Locale', 'dono-fundraising-platform' ) }
+                meta={ __( 'Dates on receipts and exports', 'dono-fundraising-platform' ) }
                 edited={ s.isDirty }
             >
                 <FormRow
-                    label={ __( 'Locale', 'dono' ) }
-                    help={ __( 'Defaults to your WordPress site language.', 'dono' ) }
+                    label={ __( 'Locale', 'dono-fundraising-platform' ) }
+                    help={ __( 'Defaults to your WordPress site language.', 'dono-fundraising-platform' ) }
                 >
                     <select
                         className="dono-select"

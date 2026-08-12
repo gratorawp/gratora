@@ -62,7 +62,7 @@ final class TaxStatementBuilder
             'org_name'            => $orgName,
             'org_address_lines'   => $this->orgAddressLines($org),
             'org_tax_id'          => trim((string) ($org['tax_id'] ?? '')),
-            'donor_name'          => $donorName !== '' ? $donorName : __('Donor', 'dono'),
+            'donor_name'          => $donorName !== '' ? $donorName : __('Donor', 'dono-fundraising-platform'),
             'donor_address_lines' => $donorAddr !== null ? explode("\n", $donorAddr) : [],
             'lines'               => $itemized['lines'],
             'totals'              => $itemized['totals'],
@@ -72,9 +72,9 @@ final class TaxStatementBuilder
 
         return $this->pdf->fromHtml($html, [
             /* translators: %d: statement year. */
-            'title'   => sprintf(__('%d annual donation statement', 'dono'), $year),
+            'title'   => sprintf(__('%d annual donation statement', 'dono-fundraising-platform'), $year),
             'author'  => $orgName,
-            'subject' => __('Annual donation statement', 'dono'),
+            'subject' => __('Annual donation statement', 'dono-fundraising-platform'),
             'format'  => 'Letter',
         ]);
     }
@@ -148,7 +148,7 @@ final class TaxStatementBuilder
                 'amount'        => Money::format($net, $currency),
                 'refunded_note' => $refunded > 0
                     /* translators: %s: formatted refunded amount */
-                    ? sprintf(__('Net of %s refunded', 'dono'), Money::format($refunded, $currency))
+                    ? sprintf(__('Net of %s refunded', 'dono-fundraising-platform'), Money::format($refunded, $currency))
                     : '',
             ];
         }
@@ -159,8 +159,8 @@ final class TaxStatementBuilder
             $totals[] = [
                 'label'  => $multi
                     /* translators: %s: currency code */
-                    ? sprintf(__('Total contributions (%s)', 'dono'), $currency)
-                    : __('Total contributions', 'dono'),
+                    ? sprintf(__('Total contributions (%s)', 'dono-fundraising-platform'), $currency)
+                    : __('Total contributions', 'dono-fundraising-platform'),
                 'amount' => Money::format($cents, $currency),
             ];
         }

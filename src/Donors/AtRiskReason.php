@@ -114,15 +114,15 @@ final class AtRiskReason
     public static function labels(): array
     {
         return [
-            self::PLAN_FAILING    => __('Recurring payments failing', 'dono'),
-            self::PLAN_PAUSED     => __('Recurring gift paused', 'dono'),
-            self::PLAN_CANCELLED  => __('Recurring plan cancelled', 'dono'),
-            self::PLAN_ACTIVE     => __('Recurring plan still active', 'dono'),
-            self::FIRST_GIFT_ONLY => __('First gift, never repeated', 'dono'),
-            self::NO_GAP_YET      => __('Not enough giving history to compare', 'dono'),
-            self::WELL_PAST_GAP   => __('Well past their average gap', 'dono'),
-            self::PAST_GAP        => __('Past their average gap', 'dono'),
-            self::WITHIN_GAP      => __('Within their average gap', 'dono'),
+            self::PLAN_FAILING    => __('Recurring payments failing', 'dono-fundraising-platform'),
+            self::PLAN_PAUSED     => __('Recurring gift paused', 'dono-fundraising-platform'),
+            self::PLAN_CANCELLED  => __('Recurring plan cancelled', 'dono-fundraising-platform'),
+            self::PLAN_ACTIVE     => __('Recurring plan still active', 'dono-fundraising-platform'),
+            self::FIRST_GIFT_ONLY => __('First gift, never repeated', 'dono-fundraising-platform'),
+            self::NO_GAP_YET      => __('Not enough giving history to compare', 'dono-fundraising-platform'),
+            self::WELL_PAST_GAP   => __('Well past their average gap', 'dono-fundraising-platform'),
+            self::PAST_GAP        => __('Past their average gap', 'dono-fundraising-platform'),
+            self::WITHIN_GAP      => __('Within their average gap', 'dono-fundraising-platform'),
         ];
     }
 

@@ -25,7 +25,7 @@ function Edit( { attributes, setAttributes } ) {
     const blockProps = useBlockProps( { className: 'dono-block-preview dono-block-preview--dropdown' } );
 
     const selected = options.find( ( o ) => o.isDefault ) || options[ 0 ];
-    const previewText = placeholder || selected?.label || __( 'Select one…', 'dono' );
+    const previewText = placeholder || selected?.label || __( 'Select one…', 'dono-fundraising-platform' );
 
     const updateOptionLabel = ( i, v ) => {
         const row     = options[ i ];
@@ -43,31 +43,31 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Dropdown', 'dono' ) } initialOpen>
+                <PanelBody title={ __( 'Dropdown', 'dono-fundraising-platform' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'dono' ) }
+                        label={ __( 'Label', 'dono-fundraising-platform' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label or an option to edit inline.', 'dono' ) }
+                        help={ __( 'Click the label or an option to edit inline.', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Placeholder', 'dono' ) }
+                        label={ __( 'Placeholder', 'dono-fundraising-platform' ) }
                         value={ placeholder }
                         onChange={ ( v ) => setAttributes( { placeholder: v } ) }
-                        placeholder={ __( 'Select one…', 'dono' ) }
-                        help={ __( 'First option shown before a value is picked.', 'dono' ) }
+                        placeholder={ __( 'Select one…', 'dono-fundraising-platform' ) }
+                        help={ __( 'First option shown before a value is picked.', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Field name', 'dono' ) }
+                        label={ __( 'Field name', 'dono-fundraising-platform' ) }
                         value={ field }
                         onChange={ ( v ) => setAttributes( { field: slugifyField( v ) } ) }
-                        help={ __( 'Key the value is stored under. Auto-derived from label if empty.', 'dono' ) }
+                        help={ __( 'Key the value is stored under. Auto-derived from label if empty.', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'dono' ) }
+                        label={ __( 'Required', 'dono-fundraising-platform' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
                         __nextHasNoMarginBottom
@@ -89,7 +89,7 @@ function Edit( { attributes, setAttributes } ) {
                     className="dono-block-preview__label"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Question', 'dono' ) }
+                    placeholder={ __( 'Question', 'dono-fundraising-platform' ) }
                     allowedFormats={ [] }
                 />
                 { required && <em className="dono-block-preview__req" aria-hidden="true">*</em> }
@@ -124,7 +124,7 @@ function Edit( { attributes, setAttributes } ) {
                             tagName="span"
                             value={ o.label }
                             onChange={ ( v ) => updateOptionLabel( i, v ) }
-                            placeholder={ __( 'Option label', 'dono' ) }
+                            placeholder={ __( 'Option label', 'dono-fundraising-platform' ) }
                             allowedFormats={ [] }
                             style={ {
                                 fontSize:    12,
@@ -145,8 +145,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Dropdown', 'dono' ),
-        description: __( 'A select question where the donor picks one option from a dropdown list.', 'dono' ),
+        title:       __( 'Dropdown', 'dono-fundraising-platform' ),
+        description: __( 'A select question where the donor picks one option from a dropdown list.', 'dono-fundraising-platform' ),
         category:    'dono-fields',
         icon:        BlockIcons[ 'dropdown' ],
         supports: { html: false, anchor: false, inserter: true },

@@ -8,8 +8,8 @@ defined('ABSPATH') || exit;
  * @var bool   $requireFirst
  * @var bool   $requireLast
  */
-$firstLabelText = $firstLabel !== '' ? $firstLabel : __('First name', 'dono');
-$lastLabelText  = $lastLabel  !== '' ? $lastLabel  : __('Last name', 'dono');
+$firstLabelText = $firstLabel !== '' ? $firstLabel : __('First name', 'dono-fundraising-platform');
+$lastLabelText  = $lastLabel  !== '' ? $lastLabel  : __('Last name', 'dono-fundraising-platform');
 ?>
 <div class="dono-block dono-block--name dono-donor__name">
     <label class="dono-donor__field">

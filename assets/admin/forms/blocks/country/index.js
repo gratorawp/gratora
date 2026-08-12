@@ -17,23 +17,23 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Country', 'dono' ) } initialOpen>
+                <PanelBody title={ __( 'Country', 'dono-fundraising-platform' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'dono' ) }
+                        label={ __( 'Label', 'dono-fundraising-platform' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'Country', 'dono' ) }
+                        placeholder={ __( 'Country', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Placeholder', 'dono' ) }
+                        label={ __( 'Placeholder', 'dono-fundraising-platform' ) }
                         value={ placeholder }
                         onChange={ ( v ) => setAttributes( { placeholder: v } ) }
-                        placeholder={ __( 'Search country…', 'dono' ) }
+                        placeholder={ __( 'Search country…', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'dono' ) }
+                        label={ __( 'Required', 'dono-fundraising-platform' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
                         __nextHasNoMarginBottom
@@ -46,11 +46,11 @@ function Edit( { attributes, setAttributes } ) {
             </InspectorControls>
             <div { ...blockProps }>
                 <span className="dono-block-preview__label">
-                    { label || __( 'Country', 'dono' ) }
+                    { label || __( 'Country', 'dono-fundraising-platform' ) }
                     { required && <em className="dono-block-preview__req" aria-hidden="true">*</em> }
                 </span>
                 <div className="dono-block-preview__field">
-                    { placeholder || __( 'Search country…', 'dono' ) }
+                    { placeholder || __( 'Search country…', 'dono-fundraising-platform' ) }
                 </div>
             </div>
         </>
@@ -60,7 +60,7 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Country', 'dono' ),
+        title:      __( 'Country', 'dono-fundraising-platform' ),
         category:   'dono-donor',
         icon:       BlockIcons[ 'country' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

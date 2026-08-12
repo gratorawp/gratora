@@ -5,7 +5,7 @@ defined('ABSPATH') || exit;
  * @var string $placeholder
  * @var bool   $required
  */
-$labelText = $label !== '' ? $label : __('Phone', 'dono');
+$labelText = $label !== '' ? $label : __('Phone', 'dono-fundraising-platform');
 ?>
 <label class="dono-block dono-block--phone dono-donor__field">
     <span class="dono-donor__label"><?php echo esc_html($labelText); ?></span>

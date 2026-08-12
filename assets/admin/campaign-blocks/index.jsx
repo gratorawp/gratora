@@ -66,10 +66,10 @@ function CampaignPicker( { value, onChange, noneLabel } ) {
     const campaigns = Array.isArray( records ) ? records : [];
     return (
         <SelectControl
-            label={ __( 'Campaign', 'dono' ) }
+            label={ __( 'Campaign', 'dono-fundraising-platform' ) }
             value={ String( value || 0 ) }
             options={ [
-                { value: '0', label: noneLabel || __( 'Select a campaign', 'dono' ) },
+                { value: '0', label: noneLabel || __( 'Select a campaign', 'dono-fundraising-platform' ) },
                 ...campaigns.map( ( c ) => ( { value: String( c.id ), label: c.title } ) ),
             ] }
             onChange={ ( v ) => onChange( Number( v ) ) }
@@ -112,8 +112,8 @@ function CampaignCanvas( { block, attributes, setAttributes, onCampaignPage, res
             <div { ...blockProps }>
                 <Placeholder
                     icon={ icon }
-                    label={ __( 'Dono campaign block', 'dono' ) }
-                    instructions={ __( 'Choose which campaign this block should display.', 'dono' ) }
+                    label={ __( 'Dono campaign block', 'dono-fundraising-platform' ) }
+                    instructions={ __( 'Choose which campaign this block should display.', 'dono-fundraising-platform' ) }
                 >
                     <CampaignPicker
                         value={ attributes.campaignId }
@@ -146,9 +146,9 @@ function CampaignCanvas( { block, attributes, setAttributes, onCampaignPage, res
 
 registerBlockType( 'dono/campaign-image', {
     apiVersion: 3,
-    title:       __( 'Campaign image', 'dono' ),
-    description: __( "The campaign's cover photo. Follows the campaign, not the page it sits on.", 'dono' ),
-    category:    'dono',
+    title:       __( 'Campaign image', 'dono-fundraising-platform' ),
+    description: __( "The campaign's cover photo. Follows the campaign, not the page it sits on.", 'dono-fundraising-platform' ),
+    category:    'dono-fundraising-platform',
     icon:        'format-image',
     attributes: {
         campaignId:  { type: 'integer', default: 0 },
@@ -160,11 +160,11 @@ registerBlockType( 'dono/campaign-image', {
         const { campaign, onCampaignPage, resolvedId } = useBoundCampaign( attributes.campaignId );
         const issues = [];
         if ( campaign && ! campaign.image_attachment_id ) {
-            issues.push( __( 'This campaign has no cover image yet. Add one in the campaign settings.', 'dono' ) );
+            issues.push( __( 'This campaign has no cover image yet. Add one in the campaign settings.', 'dono-fundraising-platform' ) );
         }
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Image', 'dono' ) }>
+                <PanelBody title={ __( 'Image', 'dono-fundraising-platform' ) }>
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
@@ -172,27 +172,27 @@ registerBlockType( 'dono/campaign-image', {
                         issues={ issues }
                     />
                     <SelectControl
-                        label={ __( 'Aspect ratio', 'dono' ) }
+                        label={ __( 'Aspect ratio', 'dono-fundraising-platform' ) }
                         value={ attributes.aspectRatio }
                         options={ [
-                            { value: '16-9', label: __( 'Wide (16:9)',     'dono' ) },
-                            { value: '3-2',  label: __( 'Photo (3:2)',     'dono' ) },
-                            { value: '4-3',  label: __( 'Classic (4:3)',   'dono' ) },
-                            { value: '1-1',  label: __( 'Square (1:1)',    'dono' ) },
-                            { value: 'auto', label: __( "The image's own", 'dono' ) },
+                            { value: '16-9', label: __( 'Wide (16:9)',     'dono-fundraising-platform' ) },
+                            { value: '3-2',  label: __( 'Photo (3:2)',     'dono-fundraising-platform' ) },
+                            { value: '4-3',  label: __( 'Classic (4:3)',   'dono-fundraising-platform' ) },
+                            { value: '1-1',  label: __( 'Square (1:1)',    'dono-fundraising-platform' ) },
+                            { value: 'auto', label: __( "The image's own", 'dono-fundraising-platform' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { aspectRatio: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Rounded corners', 'dono' ) }
+                        label={ __( 'Rounded corners', 'dono-fundraising-platform' ) }
                         checked={ attributes.rounded }
                         onChange={ ( v ) => setAttributes( { rounded: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Load with priority', 'dono' ) }
-                        help={ __( 'Leave on when this is the first image a visitor sees. Turn it off further down the page so it loads only when needed.', 'dono' ) }
+                        label={ __( 'Load with priority', 'dono-fundraising-platform' ) }
+                        help={ __( 'Leave on when this is the first image a visitor sees. Turn it off further down the page so it loads only when needed.', 'dono-fundraising-platform' ) }
                         checked={ attributes.priority }
                         onChange={ ( v ) => setAttributes( { priority: v } ) }
                         __nextHasNoMarginBottom
@@ -215,15 +215,15 @@ registerBlockType( 'dono/campaign-image', {
 // Mirrors CampaignStatMetrics::labels() in PHP, which is what actually renders;
 // a key here that is not there falls back to raised.
 const STAT_METRICS = [
-    { value: 'raised',    label: __( 'Amount raised',    'dono' ) },
-    { value: 'goal',      label: __( 'Our goal',         'dono' ) },
-    { value: 'remaining', label: __( 'Still needed',     'dono' ) },
-    { value: 'percent',   label: __( 'Of goal reached',  'dono' ) },
-    { value: 'donations', label: __( 'Donations',        'dono' ) },
-    { value: 'donors',    label: __( 'Donors',           'dono' ) },
-    { value: 'average',   label: __( 'Average donation', 'dono' ) },
-    { value: 'top',       label: __( 'Top donation',     'dono' ) },
-    { value: 'days_left', label: __( 'Days left',        'dono' ) },
+    { value: 'raised',    label: __( 'Amount raised',    'dono-fundraising-platform' ) },
+    { value: 'goal',      label: __( 'Our goal',         'dono-fundraising-platform' ) },
+    { value: 'remaining', label: __( 'Still needed',     'dono-fundraising-platform' ) },
+    { value: 'percent',   label: __( 'Of goal reached',  'dono-fundraising-platform' ) },
+    { value: 'donations', label: __( 'Donations',        'dono-fundraising-platform' ) },
+    { value: 'donors',    label: __( 'Donors',           'dono-fundraising-platform' ) },
+    { value: 'average',   label: __( 'Average donation', 'dono-fundraising-platform' ) },
+    { value: 'top',       label: __( 'Top donation',     'dono-fundraising-platform' ) },
+    { value: 'days_left', label: __( 'Days left',        'dono-fundraising-platform' ) },
 ];
 
 // Metrics this campaign cannot answer, so the editor says so instead of leaving
@@ -232,13 +232,13 @@ function statIssue( campaign, metric ) {
     if ( ! campaign ) return null;
     const noGoal = ! Number( campaign.goal_cents );
     if ( noGoal && [ 'goal', 'remaining', 'percent' ].includes( metric ) ) {
-        return __( 'This campaign has no goal, so this stat will not render.', 'dono' );
+        return __( 'This campaign has no goal, so this stat will not render.', 'dono-fundraising-platform' );
     }
     if ( metric === 'days_left' && ! campaign.ends_at ) {
-        return __( 'This campaign has no end date, so this stat will not render.', 'dono' );
+        return __( 'This campaign has no end date, so this stat will not render.', 'dono-fundraising-platform' );
     }
     if ( [ 'average', 'top' ].includes( metric ) && ! Number( campaign.donations_count ) ) {
-        return __( 'No donations yet, so this stat will not render until the first one arrives.', 'dono' );
+        return __( 'No donations yet, so this stat will not render until the first one arrives.', 'dono-fundraising-platform' );
     }
     return null;
 }
@@ -263,9 +263,9 @@ function StatNotRendering( { label, issue } ) {
 
 registerBlockType( 'dono/campaign-stat', {
     apiVersion: 3,
-    title:       __( 'Campaign stat', 'dono' ),
-    description: __( 'A single campaign figure. Add one per number you want to show.', 'dono' ),
-    category:    'dono',
+    title:       __( 'Campaign stat', 'dono-fundraising-platform' ),
+    description: __( 'A single campaign figure. Add one per number you want to show.', 'dono-fundraising-platform' ),
+    category:    'dono-fundraising-platform',
     icon:        'chart-bar',
     attributes: {
         campaignId: { type: 'integer', default: 0 },
@@ -281,7 +281,7 @@ registerBlockType( 'dono/campaign-stat', {
         const fallbackLabel = ( STAT_METRICS.find( ( m ) => m.value === attributes.metric ) || {} ).label || '';
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Stat', 'dono' ) }>
+                <PanelBody title={ __( 'Stat', 'dono-fundraising-platform' ) }>
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
@@ -289,37 +289,37 @@ registerBlockType( 'dono/campaign-stat', {
                         issues={ issues }
                     />
                     <SelectControl
-                        label={ __( 'Figure', 'dono' ) }
+                        label={ __( 'Figure', 'dono-fundraising-platform' ) }
                         value={ attributes.metric }
                         options={ STAT_METRICS }
                         onChange={ ( v ) => setAttributes( { metric: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Label', 'dono' ) }
+                        label={ __( 'Label', 'dono-fundraising-platform' ) }
                         value={ attributes.label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
                         placeholder={ fallbackLabel }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Size', 'dono' ) }
+                        label={ __( 'Size', 'dono-fundraising-platform' ) }
                         value={ attributes.size }
                         options={ [
-                            { value: 'sm', label: __( 'Small',  'dono' ) },
-                            { value: 'md', label: __( 'Medium', 'dono' ) },
-                            { value: 'lg', label: __( 'Large',  'dono' ) },
+                            { value: 'sm', label: __( 'Small',  'dono-fundraising-platform' ) },
+                            { value: 'md', label: __( 'Medium', 'dono-fundraising-platform' ) },
+                            { value: 'lg', label: __( 'Large',  'dono-fundraising-platform' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { size: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Alignment', 'dono' ) }
+                        label={ __( 'Alignment', 'dono-fundraising-platform' ) }
                         value={ attributes.align }
                         options={ [
-                            { value: 'left',   label: __( 'Left',   'dono' ) },
-                            { value: 'center', label: __( 'Center', 'dono' ) },
-                            { value: 'right',  label: __( 'Right',  'dono' ) },
+                            { value: 'left',   label: __( 'Left',   'dono-fundraising-platform' ) },
+                            { value: 'center', label: __( 'Center', 'dono-fundraising-platform' ) },
+                            { value: 'right',  label: __( 'Right',  'dono-fundraising-platform' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { align: v } ) }
                         __nextHasNoMarginBottom
@@ -349,9 +349,9 @@ registerBlockType( 'dono/campaign-stat', {
 
 registerBlockType( 'dono/campaign-progress', {
     apiVersion: 3,
-    title:      __( 'Campaign progress', 'dono' ),
-    description: __( 'Progress bar toward the campaign goal.', 'dono' ),
-    category:   'dono',
+    title:      __( 'Campaign progress', 'dono-fundraising-platform' ),
+    description: __( 'Progress bar toward the campaign goal.', 'dono-fundraising-platform' ),
+    category:   'dono-fundraising-platform',
     icon:       'chart-line',
     attributes: {
         campaignId: { type: 'integer', default: 0 },
@@ -365,12 +365,12 @@ registerBlockType( 'dono/campaign-progress', {
             const goalType = campaign.goal_type || 'amount';
             const target = goalType === 'amount' ? ( campaign.goal_cents ?? 0 ) : ( campaign.goal_count ?? 0 );
             if ( ! target ) {
-                issues.push( __( 'No goal set on this campaign. Until you set one, the bar will sit at 0%.', 'dono' ) );
+                issues.push( __( 'No goal set on this campaign. Until you set one, the bar will sit at 0%.', 'dono-fundraising-platform' ) );
             }
         }
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Progress', 'dono' ) }>
+                <PanelBody title={ __( 'Progress', 'dono-fundraising-platform' ) }>
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
@@ -378,17 +378,17 @@ registerBlockType( 'dono/campaign-progress', {
                         issues={ issues }
                     />
                     <ToggleControl
-                        label={ __( 'Show labels', 'dono' ) }
+                        label={ __( 'Show labels', 'dono-fundraising-platform' ) }
                         checked={ attributes.showLabels }
                         onChange={ ( v ) => setAttributes( { showLabels: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Alignment', 'dono' ) }
+                        label={ __( 'Alignment', 'dono-fundraising-platform' ) }
                         value={ attributes.align }
                         options={ [
-                            { value: 'left',   label: __( 'Left',   'dono' ) },
-                            { value: 'center', label: __( 'Center', 'dono' ) },
+                            { value: 'left',   label: __( 'Left',   'dono-fundraising-platform' ) },
+                            { value: 'center', label: __( 'Center', 'dono-fundraising-platform' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { align: v } ) }
                         __nextHasNoMarginBottom
@@ -410,9 +410,9 @@ registerBlockType( 'dono/campaign-progress', {
 
 registerBlockType( 'dono/donate-button', {
     apiVersion: 3,
-    title:      __( 'Donate button', 'dono' ),
-    description: __( 'Button that opens the campaign\'s default donation form.', 'dono' ),
-    category:   'dono',
+    title:      __( 'Donate button', 'dono-fundraising-platform' ),
+    description: __( 'Button that opens the campaign\'s default donation form.', 'dono-fundraising-platform' ),
+    category:   'dono-fundraising-platform',
     icon:       'heart',
     attributes: {
         campaignId: { type: 'integer', default: 0 },
@@ -425,14 +425,14 @@ registerBlockType( 'dono/donate-button', {
         const { campaign, onCampaignPage, resolvedId } = useBoundCampaign( attributes.campaignId );
         const issues = [];
         if ( campaign && ! campaign.default_form_id ) {
-            issues.push( __( 'This campaign has no default form. The button will appear but clicking it won\'t open anything until a form is set.', 'dono' ) );
+            issues.push( __( 'This campaign has no default form. The button will appear but clicking it won\'t open anything until a form is set.', 'dono-fundraising-platform' ) );
         }
         if ( campaign?.status === 'archived' ) {
-            issues.push( __( 'This campaign is archived. The button will render but submissions will be rejected.', 'dono' ) );
+            issues.push( __( 'This campaign is archived. The button will render but submissions will be rejected.', 'dono-fundraising-platform' ) );
         }
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Donate button', 'dono' ) }>
+                <PanelBody title={ __( 'Donate button', 'dono-fundraising-platform' ) }>
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
@@ -440,36 +440,36 @@ registerBlockType( 'dono/donate-button', {
                         issues={ issues }
                     />
                     <TextControl
-                        label={ __( 'Label', 'dono' ) }
+                        label={ __( 'Label', 'dono-fundraising-platform' ) }
                         value={ attributes.label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'Donate now', 'dono' ) }
+                        placeholder={ __( 'Donate now', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Alignment', 'dono' ) }
+                        label={ __( 'Alignment', 'dono-fundraising-platform' ) }
                         value={ attributes.align }
                         options={ [
-                            { value: 'left',   label: __( 'Left',   'dono' ) },
-                            { value: 'center', label: __( 'Center', 'dono' ) },
-                            { value: 'right',  label: __( 'Right',  'dono' ) },
+                            { value: 'left',   label: __( 'Left',   'dono-fundraising-platform' ) },
+                            { value: 'center', label: __( 'Center', 'dono-fundraising-platform' ) },
+                            { value: 'right',  label: __( 'Right',  'dono-fundraising-platform' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { align: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Button size', 'dono' ) }
+                        label={ __( 'Button size', 'dono-fundraising-platform' ) }
                         value={ attributes.size }
                         options={ [
-                            { value: 'sm', label: __( 'Small',  'dono' ) },
-                            { value: 'md', label: __( 'Medium', 'dono' ) },
-                            { value: 'lg', label: __( 'Large',  'dono' ) },
+                            { value: 'sm', label: __( 'Small',  'dono-fundraising-platform' ) },
+                            { value: 'md', label: __( 'Medium', 'dono-fundraising-platform' ) },
+                            { value: 'lg', label: __( 'Large',  'dono-fundraising-platform' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { size: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Full width', 'dono' ) }
+                        label={ __( 'Full width', 'dono-fundraising-platform' ) }
                         checked={ attributes.fullWidth }
                         onChange={ ( v ) => setAttributes( { fullWidth: v } ) }
                         __nextHasNoMarginBottom
@@ -491,9 +491,9 @@ registerBlockType( 'dono/donate-button', {
 
 registerBlockType( 'dono/top-donors', {
     apiVersion: 3,
-    title:      __( 'Top donors', 'dono' ),
-    description: __( 'Leaderboard of the donors who gave the most to this campaign.', 'dono' ),
-    category:   'dono',
+    title:      __( 'Top donors', 'dono-fundraising-platform' ),
+    description: __( 'Leaderboard of the donors who gave the most to this campaign.', 'dono-fundraising-platform' ),
+    category:   'dono-fundraising-platform',
     icon:       'awards',
     attributes: {
         campaignId:     { type: 'integer', default: 0 },
@@ -509,11 +509,11 @@ registerBlockType( 'dono/top-donors', {
         const { campaign, onCampaignPage, resolvedId } = useBoundCampaign( attributes.campaignId );
         const issues = [];
         if ( campaign && Number( campaign.donations_count ) === 0 ) {
-            issues.push( __( 'No donations yet, so the leaderboard will be empty on the page.', 'dono' ) );
+            issues.push( __( 'No donations yet, so the leaderboard will be empty on the page.', 'dono-fundraising-platform' ) );
         }
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Top donors', 'dono' ) }>
+                <PanelBody title={ __( 'Top donors', 'dono-fundraising-platform' ) }>
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
@@ -521,32 +521,32 @@ registerBlockType( 'dono/top-donors', {
                         issues={ issues }
                     />
                     <TextControl
-                        label={ __( 'Title', 'dono' ) }
+                        label={ __( 'Title', 'dono-fundraising-platform' ) }
                         value={ attributes.title }
                         onChange={ ( v ) => setAttributes( { title: v } ) }
-                        placeholder={ __( 'Top supporters', 'dono' ) }
+                        placeholder={ __( 'Top supporters', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Empty state text', 'dono' ) }
+                        label={ __( 'Empty state text', 'dono-fundraising-platform' ) }
                         value={ attributes.emptyText }
                         onChange={ ( v ) => setAttributes( { emptyText: v } ) }
-                        placeholder={ __( 'No donations yet.', 'dono' ) }
-                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'dono' ) }
+                        placeholder={ __( 'No donations yet.', 'dono-fundraising-platform' ) }
+                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Layout', 'dono' ) }
+                        label={ __( 'Layout', 'dono-fundraising-platform' ) }
                         value={ attributes.layout }
                         options={ [
-                            { value: 'list',   label: __( 'List',   'dono' ) },
-                            { value: 'podium', label: __( 'Podium', 'dono' ) },
+                            { value: 'list',   label: __( 'List',   'dono-fundraising-platform' ) },
+                            { value: 'podium', label: __( 'Podium', 'dono-fundraising-platform' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { layout: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <RangeControl
-                        label={ __( 'Number of donors', 'dono' ) }
+                        label={ __( 'Number of donors', 'dono-fundraising-platform' ) }
                         value={ attributes.limit }
                         onChange={ ( v ) => setAttributes( { limit: Number( v ) || 10 } ) }
                         min={ 3 }
@@ -554,22 +554,22 @@ registerBlockType( 'dono/top-donors', {
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show donation amount', 'dono' ) }
+                        label={ __( 'Show donation amount', 'dono-fundraising-platform' ) }
                         checked={ attributes.showAmount }
                         onChange={ ( v ) => setAttributes( { showAmount: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show donation count per donor', 'dono' ) }
+                        label={ __( 'Show donation count per donor', 'dono-fundraising-platform' ) }
                         checked={ attributes.showDonorCount }
                         onChange={ ( v ) => setAttributes( { showDonorCount: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Hide anonymous donors', 'dono' ) }
+                        label={ __( 'Hide anonymous donors', 'dono-fundraising-platform' ) }
                         checked={ attributes.hideAnonymous }
                         onChange={ ( v ) => setAttributes( { hideAnonymous: v } ) }
-                        help={ __( 'When off, anonymous donors appear as "Anonymous".', 'dono' ) }
+                        help={ __( 'When off, anonymous donors appear as "Anonymous".', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -589,7 +589,7 @@ registerBlockType( 'dono/top-donors', {
                     className="dono-campaign-block-edit__title"
                     value={ attributes.title }
                     onChange={ ( v ) => setAttributes( { title: v } ) }
-                    placeholder={ __( 'Top supporters', 'dono' ) }
+                    placeholder={ __( 'Top supporters', 'dono-fundraising-platform' ) }
                     allowedFormats={ [] }
                 />
             </CampaignCanvas>
@@ -600,9 +600,9 @@ registerBlockType( 'dono/top-donors', {
 
 registerBlockType( 'dono/recent-donations', {
     apiVersion: 3,
-    title:      __( 'Recent donations', 'dono' ),
-    description: __( 'Live feed of the most recent paid donations for this campaign.', 'dono' ),
-    category:   'dono',
+    title:      __( 'Recent donations', 'dono-fundraising-platform' ),
+    description: __( 'Live feed of the most recent paid donations for this campaign.', 'dono-fundraising-platform' ),
+    category:   'dono-fundraising-platform',
     icon:       'list-view',
     attributes: {
         campaignId:    { type: 'integer', default: 0 },
@@ -618,11 +618,11 @@ registerBlockType( 'dono/recent-donations', {
         const { campaign, onCampaignPage, resolvedId } = useBoundCampaign( attributes.campaignId );
         const issues = [];
         if ( campaign && Number( campaign.donations_count ) === 0 ) {
-            issues.push( __( 'No donations yet, so the feed will be empty on the page.', 'dono' ) );
+            issues.push( __( 'No donations yet, so the feed will be empty on the page.', 'dono-fundraising-platform' ) );
         }
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Recent donations', 'dono' ) }>
+                <PanelBody title={ __( 'Recent donations', 'dono-fundraising-platform' ) }>
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
@@ -630,22 +630,22 @@ registerBlockType( 'dono/recent-donations', {
                         issues={ issues }
                     />
                     <TextControl
-                        label={ __( 'Title', 'dono' ) }
+                        label={ __( 'Title', 'dono-fundraising-platform' ) }
                         value={ attributes.title }
                         onChange={ ( v ) => setAttributes( { title: v } ) }
-                        placeholder={ __( 'Recent donations', 'dono' ) }
+                        placeholder={ __( 'Recent donations', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Empty state text', 'dono' ) }
+                        label={ __( 'Empty state text', 'dono-fundraising-platform' ) }
                         value={ attributes.emptyText }
                         onChange={ ( v ) => setAttributes( { emptyText: v } ) }
-                        placeholder={ __( 'No donations yet.', 'dono' ) }
-                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'dono' ) }
+                        placeholder={ __( 'No donations yet.', 'dono-fundraising-platform' ) }
+                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <RangeControl
-                        label={ __( 'Number of donations', 'dono' ) }
+                        label={ __( 'Number of donations', 'dono-fundraising-platform' ) }
                         value={ attributes.limit }
                         onChange={ ( v ) => setAttributes( { limit: Number( v ) || 10 } ) }
                         min={ 1 }
@@ -653,25 +653,25 @@ registerBlockType( 'dono/recent-donations', {
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show amount', 'dono' ) }
+                        label={ __( 'Show amount', 'dono-fundraising-platform' ) }
                         checked={ attributes.showAmount }
                         onChange={ ( v ) => setAttributes( { showAmount: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show time ago', 'dono' ) }
+                        label={ __( 'Show time ago', 'dono-fundraising-platform' ) }
                         checked={ attributes.showTime }
                         onChange={ ( v ) => setAttributes( { showTime: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show donor message', 'dono' ) }
+                        label={ __( 'Show donor message', 'dono-fundraising-platform' ) }
                         checked={ attributes.showMessage }
                         onChange={ ( v ) => setAttributes( { showMessage: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Include anonymous donations', 'dono' ) }
+                        label={ __( 'Include anonymous donations', 'dono-fundraising-platform' ) }
                         checked={ attributes.showAnonymous }
                         onChange={ ( v ) => setAttributes( { showAnonymous: v } ) }
                         __nextHasNoMarginBottom
@@ -693,7 +693,7 @@ registerBlockType( 'dono/recent-donations', {
                     className="dono-campaign-block-edit__title"
                     value={ attributes.title }
                     onChange={ ( v ) => setAttributes( { title: v } ) }
-                    placeholder={ __( 'Recent donations', 'dono' ) }
+                    placeholder={ __( 'Recent donations', 'dono-fundraising-platform' ) }
                     allowedFormats={ [] }
                 />
             </CampaignCanvas>
@@ -704,9 +704,9 @@ registerBlockType( 'dono/recent-donations', {
 
 registerBlockType( 'dono/supporter-wall', {
     apiVersion: 3,
-    title:      __( 'Supporter wall', 'dono' ),
-    description: __( 'A wall of campaign supporters with optional messages.', 'dono' ),
-    category:   'dono',
+    title:      __( 'Supporter wall', 'dono-fundraising-platform' ),
+    description: __( 'A wall of campaign supporters with optional messages.', 'dono-fundraising-platform' ),
+    category:   'dono-fundraising-platform',
     icon:       'groups',
     attributes: {
         campaignId:     { type: 'integer', default: 0 },
@@ -723,7 +723,7 @@ registerBlockType( 'dono/supporter-wall', {
         const { campaign, onCampaignPage, resolvedId } = useBoundCampaign( attributes.campaignId );
         const issues = [];
         if ( campaign && Number( campaign.donations_count ) === 0 ) {
-            issues.push( __( 'No donations yet, so the wall will be empty on the page.', 'dono' ) );
+            issues.push( __( 'No donations yet, so the wall will be empty on the page.', 'dono-fundraising-platform' ) );
         }
         // Displayed in major units, stored as cents. Entry decimals follow the
         // org currency (JPY none, BHD three) so the step matches what renders.
@@ -732,7 +732,7 @@ registerBlockType( 'dono/supporter-wall', {
         const minAmountStep  = minAmountDp > 0 ? '0.' + '0'.repeat( minAmountDp - 1 ) + '1' : '1';
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Supporter wall', 'dono' ) }>
+                <PanelBody title={ __( 'Supporter wall', 'dono-fundraising-platform' ) }>
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
@@ -740,32 +740,32 @@ registerBlockType( 'dono/supporter-wall', {
                         issues={ issues }
                     />
                     <TextControl
-                        label={ __( 'Title', 'dono' ) }
+                        label={ __( 'Title', 'dono-fundraising-platform' ) }
                         value={ attributes.title }
                         onChange={ ( v ) => setAttributes( { title: v } ) }
-                        placeholder={ __( 'Thank you to our supporters', 'dono' ) }
+                        placeholder={ __( 'Thank you to our supporters', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Empty state text', 'dono' ) }
+                        label={ __( 'Empty state text', 'dono-fundraising-platform' ) }
                         value={ attributes.emptyText }
                         onChange={ ( v ) => setAttributes( { emptyText: v } ) }
-                        placeholder={ __( 'No supporters to show yet.', 'dono' ) }
-                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'dono' ) }
+                        placeholder={ __( 'No supporters to show yet.', 'dono-fundraising-platform' ) }
+                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Sort by', 'dono' ) }
+                        label={ __( 'Sort by', 'dono-fundraising-platform' ) }
                         value={ attributes.sort }
                         options={ [
-                            { value: 'recent',       label: __( 'Most recent',  'dono' ) },
-                            { value: 'alphabetical', label: __( 'Alphabetical', 'dono' ) },
+                            { value: 'recent',       label: __( 'Most recent',  'dono-fundraising-platform' ) },
+                            { value: 'alphabetical', label: __( 'Alphabetical', 'dono-fundraising-platform' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { sort: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <RangeControl
-                        label={ __( 'Number of supporters', 'dono' ) }
+                        label={ __( 'Number of supporters', 'dono-fundraising-platform' ) }
                         value={ attributes.limit }
                         onChange={ ( v ) => setAttributes( { limit: Number( v ) || 50 } ) }
                         min={ 5 }
@@ -774,7 +774,7 @@ registerBlockType( 'dono/supporter-wall', {
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Minimum donation amount', 'dono' ) }
+                        label={ __( 'Minimum donation amount', 'dono-fundraising-platform' ) }
                         type="number"
                         min={ 0 }
                         step={ minAmountStep }
@@ -786,29 +786,29 @@ registerBlockType( 'dono/supporter-wall', {
                                 : 0;
                             setAttributes( { minAmountCents: cents } );
                         } }
-                        help={ __( 'Only show donors who gave at least this amount. 0 = no minimum.', 'dono' ) }
+                        help={ __( 'Only show donors who gave at least this amount. 0 = no minimum.', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show donor message', 'dono' ) }
+                        label={ __( 'Show donor message', 'dono-fundraising-platform' ) }
                         checked={ attributes.showMessage }
                         onChange={ ( v ) => setAttributes( { showMessage: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show donation amount', 'dono' ) }
+                        label={ __( 'Show donation amount', 'dono-fundraising-platform' ) }
                         checked={ attributes.showAmount }
                         onChange={ ( v ) => setAttributes( { showAmount: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Columns', 'dono' ) }
+                        label={ __( 'Columns', 'dono-fundraising-platform' ) }
                         value={ attributes.columns }
                         options={ [
-                            { value: 'auto', label: __( 'Auto', 'dono' ) },
-                            { value: '2',    label: __( '2', 'dono' ) },
-                            { value: '3',    label: __( '3', 'dono' ) },
-                            { value: '4',    label: __( '4', 'dono' ) },
+                            { value: 'auto', label: __( 'Auto', 'dono-fundraising-platform' ) },
+                            { value: '2',    label: __( '2', 'dono-fundraising-platform' ) },
+                            { value: '3',    label: __( '3', 'dono-fundraising-platform' ) },
+                            { value: '4',    label: __( '4', 'dono-fundraising-platform' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { columns: v } ) }
                         __nextHasNoMarginBottom
@@ -830,7 +830,7 @@ registerBlockType( 'dono/supporter-wall', {
                     className="dono-campaign-block-edit__title"
                     value={ attributes.title }
                     onChange={ ( v ) => setAttributes( { title: v } ) }
-                    placeholder={ __( 'Thank you to our supporters', 'dono' ) }
+                    placeholder={ __( 'Thank you to our supporters', 'dono-fundraising-platform' ) }
                     allowedFormats={ [] }
                 />
             </CampaignCanvas>
@@ -841,9 +841,9 @@ registerBlockType( 'dono/supporter-wall', {
 
 registerBlockType( 'dono/campaign-grid', {
     apiVersion: 3,
-    title:       __( 'Campaigns grid', 'dono' ),
-    description: __( 'A responsive grid of other published campaigns as cards.', 'dono' ),
-    category:   'dono',
+    title:       __( 'Campaigns grid', 'dono-fundraising-platform' ),
+    description: __( 'A responsive grid of other published campaigns as cards.', 'dono-fundraising-platform' ),
+    category:   'dono-fundraising-platform',
     icon:       'grid-view',
     attributes: {
         campaignId: { type: 'integer', default: 0 },
@@ -856,24 +856,24 @@ registerBlockType( 'dono/campaign-grid', {
         const { onCampaignPage, resolvedId } = useBoundCampaign( attributes.campaignId );
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Campaigns grid', 'dono' ) }>
+                <PanelBody title={ __( 'Campaigns grid', 'dono-fundraising-platform' ) }>
                     <TextControl
-                        label={ __( 'Heading', 'dono' ) }
+                        label={ __( 'Heading', 'dono-fundraising-platform' ) }
                         value={ attributes.heading }
                         onChange={ ( v ) => setAttributes( { heading: v } ) }
-                        help={ __( 'Leave empty when a Heading block above this one already names the section, as the seeded layout does.', 'dono' ) }
+                        help={ __( 'Leave empty when a Heading block above this one already names the section, as the seeded layout does.', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Empty state text', 'dono' ) }
+                        label={ __( 'Empty state text', 'dono-fundraising-platform' ) }
                         value={ attributes.emptyText }
                         onChange={ ( v ) => setAttributes( { emptyText: v } ) }
-                        placeholder={ __( 'More campaigns will appear here soon.', 'dono' ) }
-                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'dono' ) }
+                        placeholder={ __( 'More campaigns will appear here soon.', 'dono-fundraising-platform' ) }
+                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <RangeControl
-                        label={ __( 'How many', 'dono' ) }
+                        label={ __( 'How many', 'dono-fundraising-platform' ) }
                         value={ attributes.count }
                         min={ 1 }
                         max={ 12 }
@@ -881,12 +881,12 @@ registerBlockType( 'dono/campaign-grid', {
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Order by', 'dono' ) }
+                        label={ __( 'Order by', 'dono-fundraising-platform' ) }
                         value={ attributes.orderBy }
                         options={ [
-                            { value: 'recent',      label: __( 'Most recent', 'dono' ) },
-                            { value: 'most-funded', label: __( 'Most funded', 'dono' ) },
-                            { value: 'ending-soon', label: __( 'Ending soon', 'dono' ) },
+                            { value: 'recent',      label: __( 'Most recent', 'dono-fundraising-platform' ) },
+                            { value: 'most-funded', label: __( 'Most funded', 'dono-fundraising-platform' ) },
+                            { value: 'ending-soon', label: __( 'Ending soon', 'dono-fundraising-platform' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { orderBy: v } ) }
                         __nextHasNoMarginBottom
@@ -896,10 +896,10 @@ registerBlockType( 'dono/campaign-grid', {
                             <CampaignPicker
                                 value={ attributes.campaignId }
                                 onChange={ ( v ) => setAttributes( { campaignId: v } ) }
-                                noneLabel={ __( 'Exclude none', 'dono' ) }
+                                noneLabel={ __( 'Exclude none', 'dono-fundraising-platform' ) }
                             />
                             <p className="dono-block-note dono-block-note--muted">
-                                { __( 'The selected campaign (or this page\'s campaign) is excluded from the grid.', 'dono' ) }
+                                { __( 'The selected campaign (or this page\'s campaign) is excluded from the grid.', 'dono-fundraising-platform' ) }
                             </p>
                         </>
                     ) }
@@ -920,9 +920,9 @@ registerBlockType( 'dono/campaign-grid', {
 
 registerBlockType( 'dono/donation-form', {
     apiVersion: 3,
-    title:       __( 'Donation form', 'dono' ),
-    description: __( 'Renders the campaign donation form inline on the page.', 'dono' ),
-    category:   'dono',
+    title:       __( 'Donation form', 'dono-fundraising-platform' ),
+    description: __( 'Renders the campaign donation form inline on the page.', 'dono-fundraising-platform' ),
+    category:   'dono-fundraising-platform',
     icon:       'money-alt',
     attributes: {
         campaignId: { type: 'integer', default: 0 },
@@ -942,18 +942,18 @@ registerBlockType( 'dono/donation-form', {
         ).href;
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Donation form', 'dono' ) }>
+                <PanelBody title={ __( 'Donation form', 'dono-fundraising-platform' ) }>
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
                         onCampaignPage={ onCampaignPage }
                     />
                     <TextControl
-                        label={ __( 'Empty state text', 'dono' ) }
+                        label={ __( 'Empty state text', 'dono-fundraising-platform' ) }
                         value={ attributes.emptyText }
                         onChange={ ( v ) => setAttributes( { emptyText: v } ) }
-                        placeholder={ __( 'Donations are not open for this campaign yet.', 'dono' ) }
-                        help={ __( 'Shown when the campaign is not taking donations, so the heading above this block never captions an empty space.', 'dono' ) }
+                        placeholder={ __( 'Donations are not open for this campaign yet.', 'dono-fundraising-platform' ) }
+                        help={ __( 'Shown when the campaign is not taking donations, so the heading above this block never captions an empty space.', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     { campaign && (
@@ -965,8 +965,8 @@ registerBlockType( 'dono/donation-form', {
                                 __next40pxDefaultSize
                             >
                                 { formId
-                                    ? __( 'Edit donation form', 'dono' )
-                                    : __( 'Manage donation forms', 'dono' ) }
+                                    ? __( 'Edit donation form', 'dono-fundraising-platform' )
+                                    : __( 'Manage donation forms', 'dono-fundraising-platform' ) }
                             </Button>
                         </p>
                     ) }

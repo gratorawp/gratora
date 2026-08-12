@@ -5,7 +5,7 @@ defined('ABSPATH') || exit;
  * @var string                                                                            $helpText
  * @var list<array{key:string,label:string,description:string,required:bool,default:bool}> $purposes
  */
-$labelText = $label !== '' ? $label : __('How can we stay in touch?', 'dono');
+$labelText = $label !== '' ? $label : __('How can we stay in touch?', 'dono-fundraising-platform');
 ?>
 <fieldset class="dono-block dono-block--consent dono-consent">
     <legend class="dono-consent__legend"><?php echo esc_html($labelText); ?></legend>
@@ -35,7 +35,7 @@ $labelText = $label !== '' ? $label : __('How can we stay in touch?', 'dono');
                     <span class="dono-consent__purpose-label">
                         <?php echo esc_html($pLabel !== '' ? $pLabel : $id); ?>
                         <?php if ($required): ?>
-                            <span class="dono-consent__required-pill"><?php esc_html_e('Required', 'dono'); ?></span>
+                            <span class="dono-consent__required-pill"><?php esc_html_e('Required', 'dono-fundraising-platform'); ?></span>
                         <?php endif; ?>
                     </span>
                     <?php if ($desc !== ''): ?>

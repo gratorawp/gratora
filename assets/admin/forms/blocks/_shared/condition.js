@@ -4,13 +4,13 @@ import { applyFilters } from '@wordpress/hooks';
 import { __, sprintf } from '@wordpress/i18n';
 
 export const OP_OPTIONS = [
-    { value: '=', label: __( 'equals', 'dono' ) },
-    { value: '!=', label: __( 'does not equal', 'dono' ) },
-    { value: '>', label: __( 'greater than', 'dono' ) },
-    { value: '>=', label: __( 'greater than or equal', 'dono' ) },
-    { value: '<', label: __( 'less than', 'dono' ) },
-    { value: '<=', label: __( 'less than or equal', 'dono' ) },
-    { value: 'contains', label: __( 'contains', 'dono' ) },
+    { value: '=', label: __( 'equals', 'dono-fundraising-platform' ) },
+    { value: '!=', label: __( 'does not equal', 'dono-fundraising-platform' ) },
+    { value: '>', label: __( 'greater than', 'dono-fundraising-platform' ) },
+    { value: '>=', label: __( 'greater than or equal', 'dono-fundraising-platform' ) },
+    { value: '<', label: __( 'less than', 'dono-fundraising-platform' ) },
+    { value: '<=', label: __( 'less than or equal', 'dono-fundraising-platform' ) },
+    { value: 'contains', label: __( 'contains', 'dono-fundraising-platform' ) },
 ];
 
 export const DEFAULT_CONDITION = { field: '', op: '=', value: '' };
@@ -18,10 +18,10 @@ export const DEFAULT_CONDITION = { field: '', op: '=', value: '' };
 // Built-in donor inputs whose value the runtime exposes at a fixed key.
 // Offered as a condition source only when that block is in the form.
 const BUILTIN_SOURCES = {
-    'dono/donation-amount':  { value: 'amount_cents', label: __( 'Amount (cents)', 'dono' ) },
-    'dono/recurring-toggle': { value: 'frequency',    label: __( 'Frequency', 'dono' ) },
-    'dono/anonymous-toggle': { value: 'is_anonymous', label: __( 'Is anonymous', 'dono' ) },
-    'dono/cover-fees':       { value: 'cover_fees',   label: __( 'Cover fees', 'dono' ) },
+    'dono/donation-amount':  { value: 'amount_cents', label: __( 'Amount (cents)', 'dono-fundraising-platform' ) },
+    'dono/recurring-toggle': { value: 'frequency',    label: __( 'Frequency', 'dono-fundraising-platform' ) },
+    'dono/anonymous-toggle': { value: 'is_anonymous', label: __( 'Is anonymous', 'dono-fundraising-platform' ) },
+    'dono/cover-fees':       { value: 'cover_fees',   label: __( 'Cover fees', 'dono-fundraising-platform' ) },
 };
 
 // Custom-input blocks: the donor runtime stores their value at
@@ -39,7 +39,7 @@ const CUSTOM_FIELD_BLOCKS = new Set( [
 
 // Kept for backwards-compatible imports; the live list is computed per-render
 // in ConditionPanel from the blocks actually in the editor.
-export const FIELD_OPTIONS = [ { value: '', label: __( '(Always show)', 'dono' ) } ];
+export const FIELD_OPTIONS = [ { value: '', label: __( '(Always show)', 'dono-fundraising-platform' ) } ];
 
 function flatten( blocks, out ) {
     for ( const b of blocks || [] ) {
@@ -63,7 +63,7 @@ export function ConditionPanel( { condition, onChange, title } ) {
         // key too, so it can be a condition source like any built-in.
         const sources = applyFilters( 'dono.editor.conditionSources', BUILTIN_SOURCES );
 
-        const opts = [ { value: '', label: __( '(Always show)', 'dono' ) } ];
+        const opts = [ { value: '', label: __( '(Always show)', 'dono-fundraising-platform' ) } ];
         const seen = new Set( [ '' ] );
 
         for ( const b of all ) {
@@ -94,36 +94,36 @@ export function ConditionPanel( { condition, onChange, title } ) {
             opts.push( {
                 value: c.field,
                 /* translators: %s: stored condition field key that is no longer in the form. */
-                label: sprintf( __( '%s (not in form)', 'dono' ), c.field ),
+                label: sprintf( __( '%s (not in form)', 'dono-fundraising-platform' ), c.field ),
             } );
         }
         return opts;
     }, [ c.field ] );
 
     return (
-        <PanelBody title={ title || __( 'Conditional logic', 'dono' ) } initialOpen={ false }>
+        <PanelBody title={ title || __( 'Conditional logic', 'dono-fundraising-platform' ) } initialOpen={ false }>
             <SelectControl
-                label={ __( 'Show this when', 'dono' ) }
+                label={ __( 'Show this when', 'dono-fundraising-platform' ) }
                 value={ c.field }
                 options={ options }
                 onChange={ ( v ) => set( { field: v } ) }
-                help={ __( 'Only fields already added to this form can be used.', 'dono' ) }
+                help={ __( 'Only fields already added to this form can be used.', 'dono-fundraising-platform' ) }
                 __nextHasNoMarginBottom
             />
             { c.field && (
                 <>
                     <SelectControl
-                        label={ __( 'Operator', 'dono' ) }
+                        label={ __( 'Operator', 'dono-fundraising-platform' ) }
                         value={ c.op }
                         options={ OP_OPTIONS }
                         onChange={ ( v ) => set( { op: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Value', 'dono' ) }
+                        label={ __( 'Value', 'dono-fundraising-platform' ) }
                         value={ c.value }
                         onChange={ ( v ) => set( { value: v } ) }
-                        help={ __( 'For amount, use cents (e.g. 5000 = $50).', 'dono' ) }
+                        help={ __( 'For amount, use cents (e.g. 5000 = $50).', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                 </>

@@ -36,7 +36,7 @@ final class AnonymousToggleBlock implements Block
         $globalDefault = is_array($privacyCfg) && ! empty($privacyCfg['always_anonymous_default']);
 
         return View::loadRelative(__DIR__, 'views/anonymous-toggle', [
-            'label'     => (string) ($attrs['label']     ?? '') ?: __('Make this donation anonymous', 'dono'),
+            'label'     => (string) ($attrs['label']     ?? '') ?: __('Make this donation anonymous', 'dono-fundraising-platform'),
             'defaultOn' => (bool)   ($attrs['defaultOn'] ?? false) || $globalDefault,
         ]);
     }

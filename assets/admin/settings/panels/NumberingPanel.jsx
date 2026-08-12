@@ -10,9 +10,9 @@ import { ToggleRow } from '../../_shared/components/Switch';
 import { notify } from '../../_shared/notify';
 
 const SCOPES = [
-    { key: 'donation', label: __( 'Donation', 'dono' ) },
-    { key: 'receipt',  label: __( 'Receipt', 'dono' ) },
-    { key: 'refund',   label: __( 'Refund', 'dono' ) },
+    { key: 'donation', label: __( 'Donation', 'dono-fundraising-platform' ) },
+    { key: 'receipt',  label: __( 'Receipt', 'dono-fundraising-platform' ) },
+    { key: 'refund',   label: __( 'Refund', 'dono-fundraising-platform' ) },
 ];
 
 /**
@@ -106,9 +106,9 @@ export default function NumberingPanel( { s , active } ) {
             } );
             setCounters( ( prev ) => ( { ...prev, [ key ]: res.next } ) );
             setDrafts( ( prev ) => ( { ...prev, [ key ]: res.next } ) );
-            notify.success( __( 'Next number updated.', 'dono' ) );
+            notify.success( __( 'Next number updated.', 'dono-fundraising-platform' ) );
         } catch ( err ) {
-            notify.error( err?.message || __( 'Could not update the counter.', 'dono' ) );
+            notify.error( err?.message || __( 'Could not update the counter.', 'dono-fundraising-platform' ) );
             setDrafts( ( prev ) => ( { ...prev, [ key ]: counters[ key ] } ) );
         } finally {
             setBusy( '' );
@@ -118,14 +118,14 @@ export default function NumberingPanel( { s , active } ) {
     const confirmSet = ( key, label ) => {
         const next = Number( drafts[ key ] );
         setConfirm( {
-            title:        __( 'Set next number', 'dono' ),
+            title:        __( 'Set next number', 'dono-fundraising-platform' ),
             message:      sprintf(
                 /* translators: 1: reference type, 2: the formatted next reference */
-                __( 'The next %1$s reference will be %2$s. A counter can only move forward, so this cannot be lowered later. Continue?', 'dono' ),
+                __( 'The next %1$s reference will be %2$s. A counter can only move forward, so this cannot be lowered later. Continue?', 'dono-fundraising-platform' ),
                 label.toLowerCase(),
                 buildRef( savedFmt, savedPrefix[ key ], next, year ),
             ),
-            confirmLabel: __( 'Set number', 'dono' ),
+            confirmLabel: __( 'Set number', 'dono-fundraising-platform' ),
             destructive:  false,
             onConfirm:    () => doSet( key ),
         } );
@@ -134,8 +134,8 @@ export default function NumberingPanel( { s , active } ) {
     return (
         <div className="dono-panel">
             <Card
-                title={ __( 'Reference numbering', 'dono' ) }
-                sub={ __( 'How donations, receipts, and refunds are numbered. References are gap-free and increment automatically.', 'dono' ) }
+                title={ __( 'Reference numbering', 'dono-fundraising-platform' ) }
+                sub={ __( 'How donations, receipts, and refunds are numbered. References are gap-free and increment automatically.', 'dono-fundraising-platform' ) }
                 edited={ s.isDirty }
             >
                 <div className="dono-ref-previews">
@@ -154,8 +154,8 @@ export default function NumberingPanel( { s , active } ) {
                 </div>
 
                 <FormRow
-                    label={ __( 'Donation prefix', 'dono' ) }
-                    help={ __( 'Leads every donation reference.', 'dono' ) }
+                    label={ __( 'Donation prefix', 'dono-fundraising-platform' ) }
+                    help={ __( 'Leads every donation reference.', 'dono-fundraising-platform' ) }
                 >
                     <input
                         type="text"
@@ -167,8 +167,8 @@ export default function NumberingPanel( { s , active } ) {
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Receipt prefix', 'dono' ) }
-                    help={ __( 'Leads every receipt number.', 'dono' ) }
+                    label={ __( 'Receipt prefix', 'dono-fundraising-platform' ) }
+                    help={ __( 'Leads every receipt number.', 'dono-fundraising-platform' ) }
                 >
                     <input
                         type="text"
@@ -180,8 +180,8 @@ export default function NumberingPanel( { s , active } ) {
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Refund prefix', 'dono' ) }
-                    help={ __( 'Leads every refund reference.', 'dono' ) }
+                    label={ __( 'Refund prefix', 'dono-fundraising-platform' ) }
+                    help={ __( 'Leads every refund reference.', 'dono-fundraising-platform' ) }
                 >
                     <input
                         type="text"
@@ -193,8 +193,8 @@ export default function NumberingPanel( { s , active } ) {
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Separator', 'dono' ) }
-                    help={ __( 'Character between the prefix, year, and number.', 'dono' ) }
+                    label={ __( 'Separator', 'dono-fundraising-platform' ) }
+                    help={ __( 'Character between the prefix, year, and number.', 'dono-fundraising-platform' ) }
                 >
                     <input
                         type="text"
@@ -207,8 +207,8 @@ export default function NumberingPanel( { s , active } ) {
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Minimum digits', 'dono' ) }
-                    help={ __( 'Zero-padded width of the running number. 5 gives 00001.', 'dono' ) }
+                    label={ __( 'Minimum digits', 'dono-fundraising-platform' ) }
+                    help={ __( 'Zero-padded width of the running number. 5 gives 00001.', 'dono-fundraising-platform' ) }
                 >
                     <input
                         type="number"
@@ -221,38 +221,38 @@ export default function NumberingPanel( { s , active } ) {
                 </FormRow>
 
                 <ToggleRow
-                    title={ __( 'Include the year', 'dono' ) }
-                    sub={ __( 'Adds the current year, e.g. DONO-2026-00001 instead of DONO-00001.', 'dono' ) }
+                    title={ __( 'Include the year', 'dono-fundraising-platform' ) }
+                    sub={ __( 'Adds the current year, e.g. DONO-2026-00001 instead of DONO-00001.', 'dono-fundraising-platform' ) }
                     checked={ liveFmt.includeYear }
                     onChange={ s.setValue( 'include_year' ) }
                 />
 
                 <ToggleRow
-                    title={ __( 'Reset numbering each year', 'dono' ) }
-                    sub={ __( 'Start again at 1 every January. Turn off for one continuous sequence across years.', 'dono' ) }
+                    title={ __( 'Reset numbering each year', 'dono-fundraising-platform' ) }
+                    sub={ __( 'Start again at 1 every January. Turn off for one continuous sequence across years.', 'dono-fundraising-platform' ) }
                     checked={ !! s.value( 'reset_yearly', true ) }
                     onChange={ s.setValue( 'reset_yearly' ) }
                 />
             </Card>
 
             <Card
-                title={ __( 'Next numbers', 'dono' ) }
-                sub={ __( 'The number each type will use next. Jump a counter forward to continue an existing sequence; it can only increase, never go back.', 'dono' ) }
+                title={ __( 'Next numbers', 'dono-fundraising-platform' ) }
+                sub={ __( 'The number each type will use next. Jump a counter forward to continue an existing sequence; it can only increase, never go back.', 'dono-fundraising-platform' ) }
             >
                 { s.isDirty && (
                     <p style={ { margin: '0 0 14px', fontSize: 12.5, color: '#b54708' } }>
-                        { __( 'You have unsaved format changes above. Previews here use the saved format, so save first if you want new references to use the updated format.', 'dono' ) }
+                        { __( 'You have unsaved format changes above. Previews here use the saved format, so save first if you want new references to use the updated format.', 'dono-fundraising-platform' ) }
                     </p>
                 ) }
                 { loadError ? (
                     <div style={ { display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' } }>
                         <p style={ { color: '#b42318', margin: 0 } }>
-                            { __( 'Could not load the current counters.', 'dono' ) }
+                            { __( 'Could not load the current counters.', 'dono-fundraising-platform' ) }
                         </p>
-                        <Btn variant="secondary" onClick={ loadCounters }>{ __( 'Retry', 'dono' ) }</Btn>
+                        <Btn variant="secondary" onClick={ loadCounters }>{ __( 'Retry', 'dono-fundraising-platform' ) }</Btn>
                     </div>
                 ) : counters === null ? (
-                    <p style={ { color: '#6b7280' } }>{ __( 'Loading…', 'dono' ) }</p>
+                    <p style={ { color: '#6b7280' } }>{ __( 'Loading…', 'dono-fundraising-platform' ) }</p>
                 ) : (
                     SCOPES.map( ( p ) => {
                         const current = Number( counters[ p.key ] ?? 1 );
@@ -267,7 +267,7 @@ export default function NumberingPanel( { s , active } ) {
                                 label={ p.label }
                                 help={ sprintf(
                                     /* translators: %s: the formatted next reference */
-                                    __( 'Next reference: %s', 'dono' ),
+                                    __( 'Next reference: %s', 'dono-fundraising-platform' ),
                                     buildRef( savedFmt, savedPrefix[ p.key ], Number( draft ) || current, year ),
                                 ) }
                             >
@@ -286,7 +286,7 @@ export default function NumberingPanel( { s , active } ) {
                                         disabled={ ! changed || busy === p.key }
                                         isBusy={ busy === p.key }
                                     >
-                                        { __( 'Set', 'dono' ) }
+                                        { __( 'Set', 'dono-fundraising-platform' ) }
                                     </Btn>
                                 </div>
                             </FormRow>

@@ -223,12 +223,12 @@ final class DonationsController
         $reference = (string) $request['reference'];
         $donation = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('dono_not_found', __('Donation not found.', 'dono'), ['status' => 404]);
+            return new WP_Error('dono_not_found', __('Donation not found.', 'dono-fundraising-platform'), ['status' => 404]);
         }
         $params = $request->get_json_params() ?: $request->get_body_params();
         $body   = trim((string) ($params['body'] ?? ''));
         if ($body === '') {
-            return new WP_Error('dono_invalid', __('Note body is required.', 'dono'), ['status' => 400]);
+            return new WP_Error('dono_invalid', __('Note body is required.', 'dono-fundraising-platform'), ['status' => 400]);
         }
         $note = $this->notes->create($donation->id, $body, get_current_user_id() ?: null);
         return new WP_REST_Response($note, 201);
@@ -240,10 +240,10 @@ final class DonationsController
         $noteId = (int) $request['note_id'];
         $note = $this->notes->findById($noteId);
         if (! $note) {
-            return new WP_Error('dono_not_found', __('Note not found.', 'dono'), ['status' => 404]);
+            return new WP_Error('dono_not_found', __('Note not found.', 'dono-fundraising-platform'), ['status' => 404]);
         }
         if ($note->author_user_id && $note->author_user_id !== get_current_user_id() && ! current_user_can('manage_options')) {
-            return new WP_Error('dono_forbidden', __('You cannot delete this note.', 'dono'), ['status' => 403]);
+            return new WP_Error('dono_forbidden', __('You cannot delete this note.', 'dono-fundraising-platform'), ['status' => 403]);
         }
         $this->notes->delete($noteId);
         return new WP_REST_Response(['deleted' => true], 200);
@@ -340,14 +340,14 @@ final class DonationsController
     {
         $offline = $this->gateways->get('offline');
         if (! $offline) {
-            return new WP_Error('dono_offline_unavailable', __('The offline gateway is not available.', 'dono'), ['status' => 500]);
+            return new WP_Error('dono_offline_unavailable', __('The offline gateway is not available.', 'dono-fundraising-platform'), ['status' => 500]);
         }
 
         $method = (string) $request['payment_method'];
         if (! in_array($method, $offline->paymentMethods(), true)) {
             return new WP_Error(
                 'dono_invalid_payment_method',
-                __('That is not a way money can arrive offline.', 'dono'),
+                __('That is not a way money can arrive offline.', 'dono-fundraising-platform'),
                 ['status' => 400]
             );
         }
@@ -356,7 +356,7 @@ final class DonationsController
         if ($receivedAt === null) {
             return new WP_Error(
                 'dono_invalid_received_at',
-                __('Give the date the money arrived, and it cannot be in the future.', 'dono'),
+                __('Give the date the money arrived, and it cannot be in the future.', 'dono-fundraising-platform'),
                 ['status' => 400]
             );
         }
@@ -371,7 +371,7 @@ final class DonationsController
         if (Currency::minorUnits($currency) === 0 && ((int) $request['amount_cents']) % 100 !== 0) {
             return new WP_Error(
                 'dono_invalid_amount',
-                __('This currency does not support fractional amounts.', 'dono'),
+                __('This currency does not support fractional amounts.', 'dono-fundraising-platform'),
                 ['status' => 422]
             );
         }
@@ -381,7 +381,7 @@ final class DonationsController
                 'dono_unsupported_currency',
                 sprintf(
                     /* translators: 1: the currency code entered, 2: the accepted codes. */
-                    __('%1$s is not one of your accepted currencies (%2$s). Add it under Settings, Currency, so it can be converted into your reporting totals.', 'dono'),
+                    __('%1$s is not one of your accepted currencies (%2$s). Add it under Settings, Currency, so it can be converted into your reporting totals.', 'dono-fundraising-platform'),
                     $currency,
                     implode(', ', SupportedCurrencies::all())
                 ),
@@ -399,7 +399,7 @@ final class DonationsController
             if ($existing !== null) {
                 return new WP_Error(
                     'dono_duplicate_donation',
-                    __('This donor is already down for the same amount on that date.', 'dono'),
+                    __('This donor is already down for the same amount on that date.', 'dono-fundraising-platform'),
                     ['status' => 409, 'reference' => (string) $existing->reference]
                 );
             }
@@ -493,7 +493,7 @@ final class DonationsController
             if ($recorded !== null && (string) $recorded->status === 'pending') {
                 $this->donationService->markFailed(
                     $recorded,
-                    __('Recording this donation by hand did not finish.', 'dono')
+                    __('Recording this donation by hand did not finish.', 'dono-fundraising-platform')
                 );
             }
 
@@ -504,7 +504,7 @@ final class DonationsController
             (int) $donation->id,
             sprintf(
                 /* translators: %s: how the money arrived, e.g. check. */
-                __('Recorded by hand. Received as %s.', 'dono'),
+                __('Recorded by hand. Received as %s.', 'dono-fundraising-platform'),
                 $method
             ),
             get_current_user_id() ?: null
@@ -775,7 +775,7 @@ final class DonationsController
         $reference = (string) $request['reference'];
         $donation = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('dono_not_found', __('Donation not found.', 'dono'), ['status' => 404]);
+            return new WP_Error('dono_not_found', __('Donation not found.', 'dono-fundraising-platform'), ['status' => 404]);
         }
 
         $donor = $this->donors->findById($donation->donor_id);
@@ -930,7 +930,7 @@ final class DonationsController
         $reference = (string) $request['reference'];
         $donation = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('dono_not_found', __('Donation not found.', 'dono'), ['status' => 404]);
+            return new WP_Error('dono_not_found', __('Donation not found.', 'dono-fundraising-platform'), ['status' => 404]);
         }
         if ($donation->status === 'paid') {
             return new WP_REST_Response($this->show($request)->get_data(), 200);
@@ -943,7 +943,7 @@ final class DonationsController
                 'dono_invalid_transition',
                 sprintf(
                     /* translators: %s: current donation status. */
-                    __('Cannot mark a %s donation as paid.', 'dono'),
+                    __('Cannot mark a %s donation as paid.', 'dono-fundraising-platform'),
                     $donation->status
                 ),
                 ['status' => 422]
@@ -983,7 +983,7 @@ final class DonationsController
         $reference = (string) $request['reference'];
         $donation = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('dono_not_found', __('Donation not found.', 'dono'), ['status' => 404]);
+            return new WP_Error('dono_not_found', __('Donation not found.', 'dono-fundraising-platform'), ['status' => 404]);
         }
         if ($donation->status === 'failed') {
             return new WP_REST_Response($this->show($request)->get_data(), 200);
@@ -991,7 +991,7 @@ final class DonationsController
         if ($donation->status === 'paid') {
             return new WP_Error(
                 'dono_invalid_transition',
-                __('A paid donation cannot be marked as failed. Use refund instead.', 'dono'),
+                __('A paid donation cannot be marked as failed. Use refund instead.', 'dono-fundraising-platform'),
                 ['status' => 422]
             );
         }
@@ -1002,7 +1002,7 @@ final class DonationsController
                 'dono_invalid_transition',
                 sprintf(
                     /* translators: %s: current donation status. */
-                    __('Cannot mark a %s donation as failed.', 'dono'),
+                    __('Cannot mark a %s donation as failed.', 'dono-fundraising-platform'),
                     $donation->status
                 ),
                 ['status' => 422]
@@ -1028,7 +1028,7 @@ final class DonationsController
         $reference = (string) $request['reference'];
         $donation = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('dono_not_found', __('Donation not found.', 'dono'), ['status' => 404]);
+            return new WP_Error('dono_not_found', __('Donation not found.', 'dono-fundraising-platform'), ['status' => 404]);
         }
 
         $body = (array) ($request->get_json_params() ?? []);
@@ -1045,7 +1045,7 @@ final class DonationsController
         if ($cancelPlan && $planId === 0) {
             return new WP_Error(
                 'dono_no_plan',
-                __('This donation is not part of a recurring schedule, so there is nothing to cancel. No refund was issued.', 'dono'),
+                __('This donation is not part of a recurring schedule, so there is nothing to cancel. No refund was issued.', 'dono-fundraising-platform'),
                 ['status' => 422]
             );
         }
@@ -1109,7 +1109,7 @@ final class DonationsController
                 'id'      => $planId,
                 'status'  => null,
                 'stopped' => false,
-                'error'   => __('The recurring schedule could not be found, so it is still running.', 'dono'),
+                'error'   => __('The recurring schedule could not be found, so it is still running.', 'dono-fundraising-platform'),
             ];
         }
 
@@ -1142,7 +1142,7 @@ final class DonationsController
             'stopped' => $stopped,
             'error'   => $stopped ? null : ($response->is_error()
                 ? $response->as_error()->get_error_message()
-                : __('The recurring schedule is still running.', 'dono')),
+                : __('The recurring schedule is still running.', 'dono-fundraising-platform')),
         ];
     }
 
@@ -1152,7 +1152,7 @@ final class DonationsController
         $reference = (string) $request['reference'];
         $donation = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('dono_not_found', __('Donation not found.', 'dono'), ['status' => 404]);
+            return new WP_Error('dono_not_found', __('Donation not found.', 'dono-fundraising-platform'), ['status' => 404]);
         }
 
         // Erasure wiped the address, so the issuer would find nothing to send to
@@ -1163,7 +1163,7 @@ final class DonationsController
         if ($donor && $donor->redacted_at !== null) {
             return new WP_Error(
                 'dono_donor_redacted',
-                __('This donor has been erased, so there is no address to send a receipt to.', 'dono'),
+                __('This donor has been erased, so there is no address to send a receipt to.', 'dono-fundraising-platform'),
                 ['status' => 422],
             );
         }
@@ -1172,7 +1172,7 @@ final class DonationsController
         if (! $ok) {
             return new WP_Error(
                 'dono_resend_unavailable',
-                __('Receipts can only be resent for paid donations.', 'dono'),
+                __('Receipts can only be resent for paid donations.', 'dono-fundraising-platform'),
                 ['status' => 422],
             );
         }
@@ -1196,14 +1196,14 @@ final class DonationsController
         $reference = (string) $request['reference'];
         $donation  = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('dono_not_found', __('Donation not found.', 'dono'), ['status' => 404]);
+            return new WP_Error('dono_not_found', __('Donation not found.', 'dono-fundraising-platform'), ['status' => 404]);
         }
 
         $flags = (array) ($donation->flags ?? []);
         if (empty($flags['subscription_creation_failed'])) {
             return new WP_Error(
                 'dono_no_retry_needed',
-                __('No subscription-creation failure is recorded for this donation.', 'dono'),
+                __('No subscription-creation failure is recorded for this donation.', 'dono-fundraising-platform'),
                 ['status' => 422]
             );
         }
@@ -1214,7 +1214,7 @@ final class DonationsController
         if (! in_array((string) $donation->status, ['paid', 'partial_refund'], true)) {
             return new WP_Error(
                 'dono_retry_not_allowed',
-                __('A recurring plan can only be created from a donation the organisation was paid and still holds. This one was refunded, reversed, or never settled.', 'dono'),
+                __('A recurring plan can only be created from a donation the organisation was paid and still holds. This one was refunded, reversed, or never settled.', 'dono-fundraising-platform'),
                 ['status' => 422]
             );
         }
@@ -1223,7 +1223,7 @@ final class DonationsController
         if (! $gateway instanceof \Dono\Gateways\Stripe\StripeGateway) {
             return new WP_Error(
                 'dono_unsupported_gateway',
-                __('Only Stripe subscriptions can be retried.', 'dono'),
+                __('Only Stripe subscriptions can be retried.', 'dono-fundraising-platform'),
                 ['status' => 422]
             );
         }
@@ -1253,14 +1253,14 @@ final class DonationsController
 
         $receipt = $this->receipts->findById($receiptId);
         if (! $receipt) {
-            return new WP_Error('dono_not_found', __('Receipt not found.', 'dono'), ['status' => 404]);
+            return new WP_Error('dono_not_found', __('Receipt not found.', 'dono-fundraising-platform'), ['status' => 404]);
         }
 
         $pdf = $this->receiptIssuer->renderReceiptPdf($receiptId);
         if ($pdf === null || $pdf === '') {
             return new WP_Error(
                 'dono_render_failed',
-                __('Could not regenerate the receipt PDF. The original renderer may have been removed.', 'dono'),
+                __('Could not regenerate the receipt PDF. The original renderer may have been removed.', 'dono-fundraising-platform'),
                 ['status' => 500],
             );
         }
@@ -1441,29 +1441,29 @@ final class DonationsController
         fwrite($out, "\xEF\xBB\xBF");
 
         Csv::writeRow($out, array_merge([
-            __('Reference', 'dono'),
-            __('Status', 'dono'),
-            __('Amount', 'dono'),
-            __('Currency', 'dono'),
-            __('Base amount', 'dono'),
-            __('Base currency', 'dono'),
-            __('Fee', 'dono'),
-            __('Net', 'dono'),
+            __('Reference', 'dono-fundraising-platform'),
+            __('Status', 'dono-fundraising-platform'),
+            __('Amount', 'dono-fundraising-platform'),
+            __('Currency', 'dono-fundraising-platform'),
+            __('Base amount', 'dono-fundraising-platform'),
+            __('Base currency', 'dono-fundraising-platform'),
+            __('Fee', 'dono-fundraising-platform'),
+            __('Net', 'dono-fundraising-platform'),
             // Its own column rather than netted off Net: Net is the amount less
             // the processing fee, which is what the gateway settled, so a row
             // refunded afterwards has to carry both figures to reconcile.
-            __('Refunded', 'dono'),
-            __('Gateway', 'dono'),
-            __('Frequency', 'dono'),
-            __('Fund', 'dono'),
-            __('Country', 'dono'),
+            __('Refunded', 'dono-fundraising-platform'),
+            __('Gateway', 'dono-fundraising-platform'),
+            __('Frequency', 'dono-fundraising-platform'),
+            __('Fund', 'dono-fundraising-platform'),
+            __('Country', 'dono-fundraising-platform'),
         ], $withDonorPii ? [
-            __('Donor name', 'dono'),
-            __('Donor email', 'dono'),
+            __('Donor name', 'dono-fundraising-platform'),
+            __('Donor email', 'dono-fundraising-platform'),
         ] : [], [
-            __('Created at', 'dono'),
-            __('Paid at', 'dono'),
-            __('Refunded at', 'dono'),
+            __('Created at', 'dono-fundraising-platform'),
+            __('Paid at', 'dono-fundraising-platform'),
+            __('Refunded at', 'dono-fundraising-platform'),
         ]));
 
         $ids = $this->donations->listIdsForExport($filters + ['limit' => self::EXPORT_MAX_ROWS]);
@@ -1651,11 +1651,11 @@ final class DonationsController
     public static function gatewayLabel(string $slug): string
     {
         $known = [
-            'stripe'  => __('Stripe', 'dono'),
-            'paypal'  => __('PayPal', 'dono'),
-            'offline' => __('Offline', 'dono'),
-            'sandbox' => __('Test donation', 'dono'),
-            'manual'  => __('Manually entered', 'dono'),
+            'stripe'  => __('Stripe', 'dono-fundraising-platform'),
+            'paypal'  => __('PayPal', 'dono-fundraising-platform'),
+            'offline' => __('Offline', 'dono-fundraising-platform'),
+            'sandbox' => __('Test donation', 'dono-fundraising-platform'),
+            'manual'  => __('Manually entered', 'dono-fundraising-platform'),
         ];
 
         if (isset($known[$slug])) {

@@ -10,11 +10,11 @@ defined('ABSPATH') || exit;
      data-show-gateway="<?php echo $showGateway ? '1' : '0'; ?>">
     <dl class="dono-form__summary">
         <div class="dono-form__summary-row">
-            <dt><?php esc_html_e('Amount', 'dono'); ?></dt>
+            <dt><?php esc_html_e('Amount', 'dono-fundraising-platform'); ?></dt>
             <dd class="dono-form__summary-amount"></dd>
         </div>
         <div class="dono-form__summary-row dono-form__summary-row--total">
-            <dt><?php esc_html_e('Total', 'dono'); ?></dt>
+            <dt><?php esc_html_e('Total', 'dono-fundraising-platform'); ?></dt>
             <dd class="dono-form__summary-amount"></dd>
         </div>
     </dl>

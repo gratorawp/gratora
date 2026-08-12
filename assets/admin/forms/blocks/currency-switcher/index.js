@@ -45,7 +45,7 @@ function Edit( { attributes, setAttributes } ) {
     const manageLink = (
         <p style={ { margin: '10px 0 0' } }>
             <ExternalLink href={ SETTINGS_URL }>
-                { __( 'Manage enabled currencies', 'dono' ) }
+                { __( 'Manage enabled currencies', 'dono-fundraising-platform' ) }
             </ExternalLink>
         </p>
     );
@@ -56,20 +56,20 @@ function Edit( { attributes, setAttributes } ) {
     } else if ( available.length === 0 ) {
         panelBody = (
             <Notice status="warning" isDismissible={ false }>
-                { __( 'No currencies are enabled yet. Enable them under Settings → Currency.', 'dono' ) }
+                { __( 'No currencies are enabled yet. Enable them under Settings → Currency.', 'dono-fundraising-platform' ) }
             </Notice>
         );
     } else if ( available.length === 1 ) {
         panelBody = (
             <Notice status="warning" isDismissible={ false }>
-                { __( 'Only one currency is enabled, so there is nothing for donors to switch between. Enable more under Settings → Currency.', 'dono' ) }
+                { __( 'Only one currency is enabled, so there is nothing for donors to switch between. Enable more under Settings → Currency.', 'dono-fundraising-platform' ) }
             </Notice>
         );
     } else {
         panelBody = (
             <>
                 <p style={ { margin: '0 0 8px', fontSize: 12, color: '#6b7280' } }>
-                    { __( 'Choose which of your enabled currencies donors can switch between on this form.', 'dono' ) }
+                    { __( 'Choose which of your enabled currencies donors can switch between on this form.', 'dono-fundraising-platform' ) }
                 </p>
                 <div style={ { display: 'flex', flexWrap: 'wrap', gap: 8 } }>
                     { available.map( ( code ) => {
@@ -114,7 +114,7 @@ function Edit( { attributes, setAttributes } ) {
                                 { code }
                                 { locked && (
                                     <span style={ { fontSize: 10, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '.04em' } }>
-                                        { __( 'base', 'dono' ) }
+                                        { __( 'base', 'dono-fundraising-platform' ) }
                                     </span>
                                 ) }
                             </button>
@@ -131,30 +131,30 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Currency switcher', 'dono' ) } initialOpen>
+                <PanelBody title={ __( 'Currency switcher', 'dono-fundraising-platform' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'dono' ) }
+                        label={ __( 'Label', 'dono-fundraising-platform' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'Currency', 'dono' ) }
+                        placeholder={ __( 'Currency', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <Segmented
-                        label={ __( 'Style', 'dono' ) }
+                        label={ __( 'Style', 'dono-fundraising-platform' ) }
                         value={ style }
                         onChange={ ( v ) => setAttributes( { style: v } ) }
                         options={ [
-                            { value: 'dropdown', label: __( 'Dropdown', 'dono' ) },
-                            { value: 'pills',    label: __( 'Pills', 'dono' ) },
+                            { value: 'dropdown', label: __( 'Dropdown', 'dono-fundraising-platform' ) },
+                            { value: 'pills',    label: __( 'Pills', 'dono-fundraising-platform' ) },
                         ] }
                     />
                     <Segmented
-                        label={ __( 'Alignment', 'dono' ) }
+                        label={ __( 'Alignment', 'dono-fundraising-platform' ) }
                         value={ align }
                         onChange={ ( v ) => setAttributes( { align: v } ) }
                         options={ [
-                            { value: 'left',  label: __( 'Left', 'dono' ) },
-                            { value: 'right', label: __( 'Right', 'dono' ) },
+                            { value: 'left',  label: __( 'Left', 'dono-fundraising-platform' ) },
+                            { value: 'right', label: __( 'Right', 'dono-fundraising-platform' ) },
                         ] }
                     />
                     { panelBody }
@@ -229,8 +229,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Currency switcher', 'dono' ),
-        description: __( 'Lets the donor pick which currency to donate in.', 'dono' ),
+        title:      __( 'Currency switcher', 'dono-fundraising-platform' ),
+        description: __( 'Lets the donor pick which currency to donate in.', 'dono-fundraising-platform' ),
         category:   'dono-amount',
         icon:       BlockIcons[ 'currency-switcher' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

@@ -120,7 +120,7 @@ final class DonorService
     public function editProfile(Donor $donor, array $patch): Donor
     {
         if ($donor->redacted_at !== null) {
-            throw new InvalidArgumentException(__('This donor has been erased and can no longer be edited.', 'dono'));
+            throw new InvalidArgumentException(__('This donor has been erased and can no longer be edited.', 'dono-fundraising-platform'));
         }
         $changed = false;
         $textFields = ['first_name' => 100, 'last_name' => 100, 'company' => 150, 'locale' => 10];
@@ -189,7 +189,7 @@ final class DonorService
     public function refreshProfile(Donor $donor, array $profile): Donor
     {
         if ($donor->redacted_at !== null) {
-            throw new InvalidArgumentException(__('This donor has been erased and can no longer be edited.', 'dono'));
+            throw new InvalidArgumentException(__('This donor has been erased and can no longer be edited.', 'dono-fundraising-platform'));
         }
 
         $changed = false;
@@ -234,11 +234,11 @@ final class DonorService
     public function changeEmail(Donor $donor, string $newEmail): Donor
     {
         if ($donor->redacted_at !== null) {
-            throw new InvalidArgumentException(__('This donor has been erased and can no longer be edited.', 'dono'));
+            throw new InvalidArgumentException(__('This donor has been erased and can no longer be edited.', 'dono-fundraising-platform'));
         }
         $normalized = $this->hasher->normalizeEmail($newEmail);
         if ($normalized === '') {
-            throw new InvalidArgumentException(__('Email is required.', 'dono'));
+            throw new InvalidArgumentException(__('Email is required.', 'dono-fundraising-platform'));
         }
 
         $newHash = $this->hasher->emailHash($normalized);
@@ -280,11 +280,11 @@ final class DonorService
     public function undeletableReason(Donor $donor): ?string
     {
         if (Donation::query()->where('donor_id', (int) $donor->id)->exists()) {
-            return __('This donor has donations on record, which have to be kept. Erase them instead.', 'dono');
+            return __('This donor has donations on record, which have to be kept. Erase them instead.', 'dono-fundraising-platform');
         }
 
         if (RecurringPlan::query()->where('donor_id', (int) $donor->id)->exists()) {
-            return __('This donor has a recurring plan. Cancel it first.', 'dono');
+            return __('This donor has a recurring plan. Cancel it first.', 'dono-fundraising-platform');
         }
 
         $vetoed = apply_filters('dono.donor.undeletable_reason', null, $donor);
@@ -408,7 +408,7 @@ final class DonorService
 
         foreach ($plans as $plan) {
             try {
-                $canceller->cancel($plan, __('The donor asked for their data to be erased.', 'dono'));
+                $canceller->cancel($plan, __('The donor asked for their data to be erased.', 'dono-fundraising-platform'));
                 $cancelled[] = (int) $plan->id;
             } catch (Throwable $e) {
                 // The erasure stops here, so the caller has to be told which
@@ -589,7 +589,7 @@ final class DonorService
     public function setEncryptedField(Donor $donor, string $field, ?string $value): void
     {
         if ($donor->redacted_at !== null) {
-            throw new InvalidArgumentException(__('This donor has been erased and can no longer be edited.', 'dono'));
+            throw new InvalidArgumentException(__('This donor has been erased and can no longer be edited.', 'dono-fundraising-platform'));
         }
         if (! in_array($field, ['phone_encrypted', 'address_encrypted', 'notes_encrypted', 'tax_id_encrypted'], true)) {
             throw new InvalidArgumentException("Unsupported encrypted field: {$field}");

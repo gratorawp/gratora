@@ -55,26 +55,26 @@ const USER_TYPES = [
     {
         id:   'nonprofit',
         icon: 'building',
-        name: __( 'Nonprofit or charity', 'dono' ),
-        desc: __( 'Registered organization collecting tax-deductible donations.', 'dono' ),
+        name: __( 'Nonprofit or charity', 'dono-fundraising-platform' ),
+        desc: __( 'Registered organization collecting tax-deductible donations.', 'dono-fundraising-platform' ),
     },
     {
         id:   'community',
         icon: 'users',
-        name: __( 'Community or faith group', 'dono' ),
-        desc: __( 'Church, school, club, mutual-aid group.', 'dono' ),
+        name: __( 'Community or faith group', 'dono-fundraising-platform' ),
+        desc: __( 'Church, school, club, mutual-aid group.', 'dono-fundraising-platform' ),
     },
     {
         id:   'individual',
         icon: 'heart',
-        name: __( 'Individual fundraiser', 'dono' ),
-        desc: __( 'Personal cause, crowdfund, or memorial fund.', 'dono' ),
+        name: __( 'Individual fundraiser', 'dono-fundraising-platform' ),
+        desc: __( 'Personal cause, crowdfund, or memorial fund.', 'dono-fundraising-platform' ),
     },
     {
         id:   'exploring',
         icon: 'target',
-        name: __( 'Just exploring', 'dono' ),
-        desc: __( 'Trying Dono out before committing.', 'dono' ),
+        name: __( 'Just exploring', 'dono-fundraising-platform' ),
+        desc: __( 'Trying Dono out before committing.', 'dono-fundraising-platform' ),
     },
 ];
 
@@ -170,19 +170,19 @@ export default function Onboarding() {
         try {
             if ( step === 0 ) {
                 if ( ! who.user_type ) {
-                    throw new Error( __( 'Pick who is fundraising to continue.', 'dono' ) );
+                    throw new Error( __( 'Pick who is fundraising to continue.', 'dono-fundraising-platform' ) );
                 }
                 await persist( 'org-profile', { user_type: who.user_type } );
             } else if ( step === 1 ) {
                 if ( ! org.country ) {
-                    throw new Error( __( 'Pick a country to continue.', 'dono' ) );
+                    throw new Error( __( 'Pick a country to continue.', 'dono-fundraising-platform' ) );
                 }
                 // A country that subdivides still needs its state: it is part of
                 // where the organization is, and it is one click. The postal
                 // address is not asked for here -- it is optional in Settings,
                 // and the receipt renderer omits the block when it is unset.
                 if ( STATES_BY_COUNTRY[ org.country ] && ! ( org.state || '' ).trim() ) {
-                    throw new Error( __( 'Pick a state or province to continue.', 'dono' ) );
+                    throw new Error( __( 'Pick a state or province to continue.', 'dono-fundraising-platform' ) );
                 }
                 await persist( 'org-profile', {
                     name:           org.name,
@@ -216,17 +216,17 @@ export default function Onboarding() {
                     method: 'POST',
                     data:   {
                         campaign_title: org.name
-                            ? `${ org.name } - ${ __( 'General donations', 'dono' ) }`
-                            : __( 'General donations', 'dono' ),
+                            ? `${ org.name } - ${ __( 'General donations', 'dono-fundraising-platform' ) }`
+                            : __( 'General donations', 'dono-fundraising-platform' ),
                         user_type:      who.user_type,
                     },
                 } );
-                if ( ! r?.ok ) throw new Error( __( 'Could not finalize onboarding.', 'dono' ) );
+                if ( ! r?.ok ) throw new Error( __( 'Could not finalize onboarding.', 'dono-fundraising-platform' ) );
                 setFinalized( r );
             }
             setStep( ( s ) => Math.min( TOTAL - 1, s + 1 ) );
         } catch ( err ) {
-            setError( err?.message || __( 'Could not save. Please try again.', 'dono' ) );
+            setError( err?.message || __( 'Could not save. Please try again.', 'dono-fundraising-platform' ) );
         } finally {
             setBusy( false );
         }
@@ -245,7 +245,7 @@ export default function Onboarding() {
         } catch ( e ) {
             // A failed dismiss leaves onboarding 'pending', so admin_init would
             // bounce us straight back here; surface the error instead of looping.
-            setError( __( 'Could not skip setup. Please try again.', 'dono' ) );
+            setError( __( 'Could not skip setup. Please try again.', 'dono-fundraising-platform' ) );
             return;
         }
         window.location.assign( wp.settings_url || wp.dashboard_url || '' );
@@ -262,7 +262,7 @@ export default function Onboarding() {
                 </span>
                 { ! isChecklist && (
                     <button type="button" className="dono-onboarding__skip" onClick={ skip }>
-                        { __( 'Skip for now', 'dono' ) }
+                        { __( 'Skip for now', 'dono-fundraising-platform' ) }
                     </button>
                 ) }
             </div>
@@ -270,7 +270,7 @@ export default function Onboarding() {
             <section ref={ frameRef } className={ `dono-onboarding__frame${ step === 2 ? ' is-wide' : '' }` }>
                 <div className="dono-onboarding__meta">
                     <span className="dono-onboarding__caption">
-                        { sprintf( /* translators: %1$d: current step number. %2$d: total number of steps. */ __( 'Step %1$d of %2$d', 'dono' ), step + 1, TOTAL ) }
+                        { sprintf( /* translators: %1$d: current step number. %2$d: total number of steps. */ __( 'Step %1$d of %2$d', 'dono-fundraising-platform' ), step + 1, TOTAL ) }
                     </span>
                     <span className="dono-onboarding__dots" aria-hidden="true">
                         { Array.from( { length: TOTAL } ).map( ( _, i ) => (
@@ -307,7 +307,7 @@ export default function Onboarding() {
                                 onClick={ back }
                                 disabled={ busy }
                             >
-                                ← { __( 'Back', 'dono' ) }
+                                ← { __( 'Back', 'dono-fundraising-platform' ) }
                             </button>
                         ) }
 
@@ -327,10 +327,10 @@ export default function Onboarding() {
 }
 
 function ctaLabel( step, busy ) {
-    if ( busy ) return __( 'Saving…', 'dono' );
-    if ( step === 0 ) return __( 'Get started', 'dono' );
-    if ( step === 2 ) return __( 'Finish setup', 'dono' ) + ' →';
-    return __( 'Next', 'dono' ) + ' →';
+    if ( busy ) return __( 'Saving…', 'dono-fundraising-platform' );
+    if ( step === 0 ) return __( 'Get started', 'dono-fundraising-platform' );
+    if ( step === 2 ) return __( 'Finish setup', 'dono-fundraising-platform' ) + ' →';
+    return __( 'Next', 'dono-fundraising-platform' ) + ' →';
 }
 
 // Step 1: who is fundraising
@@ -339,10 +339,10 @@ function FundraiserTypeStep( { value, onChange } ) {
     return (
         <div>
             <h2 className="dono-onboarding__headline">
-                { __( "Who's fundraising?", 'dono' ) }
+                { __( "Who's fundraising?", 'dono-fundraising-platform' ) }
             </h2>
             <p className="dono-onboarding__subtitle">
-                { __( 'Pick the one that fits best.', 'dono' ) }
+                { __( 'Pick the one that fits best.', 'dono-fundraising-platform' ) }
             </p>
 
             <div className="dono-onboarding__section">
@@ -404,43 +404,43 @@ function LocationStep( { value, onChange, currency, onCurrencyChange, userType }
 
     return (
         <div>
-            <h2 className="dono-onboarding__headline">{ __( 'Where are you based?', 'dono' ) }</h2>
+            <h2 className="dono-onboarding__headline">{ __( 'Where are you based?', 'dono-fundraising-platform' ) }</h2>
             <p className="dono-onboarding__subtitle">
-                { __( "We use this for receipts and your default currency.", 'dono' ) }
+                { __( "We use this for receipts and your default currency.", 'dono-fundraising-platform' ) }
             </p>
 
             <div className="dono-onboarding__section">
                 <div className="dono-onboarding__section-label">
-                    { isIndividual ? __( 'About you', 'dono' ) : __( 'Organization', 'dono' ) }
+                    { isIndividual ? __( 'About you', 'dono-fundraising-platform' ) : __( 'Organization', 'dono-fundraising-platform' ) }
                 </div>
                 <div className="dono-onboarding__address">
                     <div className="span-2">
                         <label className="dono-onboarding__field-label">
-                            { isIndividual ? __( 'Your name', 'dono' ) : __( 'Organization name', 'dono' ) }
+                            { isIndividual ? __( 'Your name', 'dono-fundraising-platform' ) : __( 'Organization name', 'dono-fundraising-platform' ) }
                         </label>
                         <input
                             type="text"
                             className="dono-onboarding__input"
                             value={ value.name }
                             onChange={ ( e ) => set( { name: e.target.value } ) }
-                            placeholder={ __( 'Shown on receipts and your campaign', 'dono' ) }
+                            placeholder={ __( 'Shown on receipts and your campaign', 'dono-fundraising-platform' ) }
                         />
                     </div>
                     <div className="span-2">
-                        <label className="dono-onboarding__field-label">{ __( 'Contact email', 'dono' ) }</label>
+                        <label className="dono-onboarding__field-label">{ __( 'Contact email', 'dono-fundraising-platform' ) }</label>
                         <input
                             type="email"
                             className="dono-onboarding__input"
                             value={ value.email }
                             onChange={ ( e ) => set( { email: e.target.value } ) }
-                            placeholder={ __( 'Where donors reply and receipts come from', 'dono' ) }
+                            placeholder={ __( 'Where donors reply and receipts come from', 'dono-fundraising-platform' ) }
                         />
                     </div>
                 </div>
             </div>
 
             <div className="dono-onboarding__section">
-                <div className="dono-onboarding__section-label">{ __( 'Country', 'dono' ) }</div>
+                <div className="dono-onboarding__section-label">{ __( 'Country', 'dono-fundraising-platform' ) }</div>
                 <div className="dono-onboarding__country-row">
                     <CountrySelect
                         value={ value.country }
@@ -448,12 +448,12 @@ function LocationStep( { value, onChange, currency, onCurrencyChange, userType }
                     />
                     { states && (
                         <div>
-                            <label className="dono-onboarding__field-label">{ __( 'State', 'dono' ) }</label>
+                            <label className="dono-onboarding__field-label">{ __( 'State', 'dono-fundraising-platform' ) }</label>
                             <SearchableSelect
                                 value={ value.state }
                                 onChange={ ( v ) => set( { state: v } ) }
                                 options={ states.map( ( s ) => ( { value: s, label: s } ) ) }
-                                placeholder={ __( 'Select state', 'dono' ) }
+                                placeholder={ __( 'Select state', 'dono-fundraising-platform' ) }
                             />
                         </div>
                     ) }
@@ -462,12 +462,12 @@ function LocationStep( { value, onChange, currency, onCurrencyChange, userType }
 
 
             <div className="dono-onboarding__section">
-                <div className="dono-onboarding__section-label">{ __( 'Currency', 'dono' ) }</div>
+                <div className="dono-onboarding__section-label">{ __( 'Currency', 'dono-fundraising-platform' ) }</div>
                 <SearchableSelect
                     value={ currency.default_currency }
                     onChange={ ( code ) => onCurrencyChange( ( prev ) => ( { ...prev, default_currency: code } ) ) }
                     options={ currencyOptions }
-                    placeholder={ __( 'Pick a currency', 'dono' ) }
+                    placeholder={ __( 'Pick a currency', 'dono-fundraising-platform' ) }
                 />
             </div>
         </div>
@@ -481,25 +481,25 @@ const PRESET_CARDS = [
     {
         id:     'classic',
         thumb:  'classic',
-        name:   __( 'Classic', 'dono' ),
-        desc:   __( 'Friendly, rounded, green. The safe choice.', 'dono' ),
+        name:   __( 'Classic', 'dono-fundraising-platform' ),
+        desc:   __( 'Friendly, rounded, green. The safe choice.', 'dono-fundraising-platform' ),
     },
     {
         id:     'bold',
         thumb:  'bold',
-        name:   __( 'Bold', 'dono' ),
-        desc:   __( 'Deep navy, strong type, dramatic shadow.', 'dono' ),
+        name:   __( 'Bold', 'dono-fundraising-platform' ),
+        desc:   __( 'Deep navy, strong type, dramatic shadow.', 'dono-fundraising-platform' ),
     },
     {
         id:     'quiet',
         thumb:  'quiet',
-        name:   __( 'Quiet', 'dono' ),
-        desc:   __( 'Minimal lines, lots of white space.', 'dono' ),
+        name:   __( 'Quiet', 'dono-fundraising-platform' ),
+        desc:   __( 'Minimal lines, lots of white space.', 'dono-fundraising-platform' ),
     },
     {
         id:     'theme',
         thumb:  'theme',
-        name:   __( 'Use my theme', 'dono' ),
+        name:   __( 'Use my theme', 'dono-fundraising-platform' ),
         // desc filled at runtime from theme detection.
     },
 ];
@@ -569,9 +569,9 @@ function BrandStep( { value, onChange, presets, currency = 'USD' } ) {
 
     return (
         <div>
-            <h2 className="dono-onboarding__headline">{ __( 'Pick a starting look', 'dono' ) }</h2>
+            <h2 className="dono-onboarding__headline">{ __( 'Pick a starting look', 'dono-fundraising-platform' ) }</h2>
             <p className="dono-onboarding__subtitle">
-                { __( 'You can edit colors and typography anytime.', 'dono' ) }
+                { __( 'You can edit colors and typography anytime.', 'dono-fundraising-platform' ) }
             </p>
             <div className="dono-onboarding__presets">
                 { PRESET_CARDS.map( ( card ) => {
@@ -580,8 +580,8 @@ function BrandStep( { value, onChange, presets, currency = 'USD' } ) {
                     const isSel     = value.preset_id === card.id;
                     const desc      = isTheme
                         ? ( themePreset
-                            ? __( 'Inherits styles from your site theme.', 'dono' )
-                            : __( 'No theme palette detected.', 'dono' ) )
+                            ? __( 'Inherits styles from your site theme.', 'dono-fundraising-platform' )
+                            : __( 'No theme palette detected.', 'dono-fundraising-platform' ) )
                         : card.desc;
                     return (
                         <button
@@ -600,7 +600,7 @@ function BrandStep( { value, onChange, presets, currency = 'USD' } ) {
                                 </span>
                             ) }
                             <div className={ `dono-onboarding__preset-thumb dono-onboarding__preset-thumb--${ card.thumb }` }>
-                                <span className="dono-onboarding__preset-btn">{ __( 'Donate', 'dono' ) }</span>
+                                <span className="dono-onboarding__preset-btn">{ __( 'Donate', 'dono-fundraising-platform' ) }</span>
                             </div>
                             <strong className="dono-onboarding__preset-name">{ card.name }</strong>
                             <span className="dono-onboarding__preset-desc">{ desc }</span>
@@ -610,16 +610,16 @@ function BrandStep( { value, onChange, presets, currency = 'USD' } ) {
             </div>
 
             <div className="dono-onboarding__preview">
-                <div className="dono-onboarding__preview-label">{ __( 'Live preview', 'dono' ) }</div>
+                <div className="dono-onboarding__preview-label">{ __( 'Live preview', 'dono-fundraising-platform' ) }</div>
                 { loadState === 'error' ? (
                     <div className="dono-onboarding__preview-fallback">
-                        <p>{ __( 'Preview unavailable. Your choice is still saved.', 'dono' ) }</p>
+                        <p>{ __( 'Preview unavailable. Your choice is still saved.', 'dono-fundraising-platform' ) }</p>
                         <button
                             type="button"
                             className="dono-btn dono-btn--ghost"
                             onClick={ () => setReloadKey( ( k ) => k + 1 ) }
                         >
-                            { __( 'Retry', 'dono' ) }
+                            { __( 'Retry', 'dono-fundraising-platform' ) }
                         </button>
                     </div>
                 ) : (
@@ -630,7 +630,7 @@ function BrandStep( { value, onChange, presets, currency = 'USD' } ) {
                         <iframe
                             ref={ frameRef }
                             className="dono-onboarding__preview-frame"
-                            title={ __( 'Donation form preview', 'dono' ) }
+                            title={ __( 'Donation form preview', 'dono-fundraising-platform' ) }
                             srcDoc={ previewHtml }
                             style={ loadState === 'loaded' ? undefined : { visibility: 'hidden' } }
                         />
@@ -654,31 +654,31 @@ function ChecklistStep( { finalized, settingsUrl, dashboardUrl, campaignsUrl } )
 
     return (
         <div>
-            <h1 className="dono-onboarding__headline">{ __( "You're set up", 'dono' ) }</h1>
+            <h1 className="dono-onboarding__headline">{ __( "You're set up", 'dono-fundraising-platform' ) }</h1>
             <p className="dono-onboarding__subtitle">
-                { __( 'Your organization details are saved. Here is what is left before you can take a donation.', 'dono' ) }
+                { __( 'Your organization details are saved. Here is what is left before you can take a donation.', 'dono-fundraising-platform' ) }
             </p>
 
             <ul className="dono-onboarding__checklist">
                 <ChecklistItem
-                    title={ __( 'Connect a payment gateway', 'dono' ) }
-                    description={ __( 'Stripe, PayPal, or a manual bank-transfer flow. You can change this any time.', 'dono' ) }
+                    title={ __( 'Connect a payment gateway', 'dono-fundraising-platform' ) }
+                    description={ __( 'Stripe, PayPal, or a manual bank-transfer flow. You can change this any time.', 'dono-fundraising-platform' ) }
                     href={ gatewayUrl }
-                    cta={ __( 'Connect', 'dono' ) }
+                    cta={ __( 'Connect', 'dono-fundraising-platform' ) }
                 />
                 { campaignId ? (
                     <ChecklistItem
-                        title={ __( 'Build your first form', 'dono' ) }
-                        description={ __( 'Pick a layout, set amounts, brand it. Donors can give as soon as a gateway is live.', 'dono' ) }
+                        title={ __( 'Build your first form', 'dono-fundraising-platform' ) }
+                        description={ __( 'Pick a layout, set amounts, brand it. Donors can give as soon as a gateway is live.', 'dono-fundraising-platform' ) }
                         href={ finalized?.form_edit_url || finalized?.campaign_page || dashboardUrl || '#' }
-                        cta={ __( 'Build', 'dono' ) }
+                        cta={ __( 'Build', 'dono-fundraising-platform' ) }
                     />
                 ) : (
                     <ChecklistItem
-                        title={ __( 'Create your first campaign', 'dono' ) }
-                        description={ __( 'A campaign holds your donation forms and totals. We can start one from your answers, or you can build your own later.', 'dono' ) }
+                        title={ __( 'Create your first campaign', 'dono-fundraising-platform' ) }
+                        description={ __( 'A campaign holds your donation forms and totals. We can start one from your answers, or you can build your own later.', 'dono-fundraising-platform' ) }
                         href={ newCampaignUrl }
-                        cta={ __( 'Create', 'dono' ) }
+                        cta={ __( 'Create', 'dono-fundraising-platform' ) }
                     />
                 ) }
             </ul>
@@ -686,7 +686,7 @@ function ChecklistStep( { finalized, settingsUrl, dashboardUrl, campaignsUrl } )
 
             <p className="dono-onboarding__checklist-foot">
                 <a className="dono-onboarding__checklist-skip" href={ dashboardUrl || '#' }>
-                    { __( 'Skip for now', 'dono' ) }
+                    { __( 'Skip for now', 'dono-fundraising-platform' ) }
                 </a>
             </p>
         </div>

@@ -52,7 +52,7 @@ final class ConsentBlock implements Block
             }
 
             return '<div class="dono-block-notice">'
-                . esc_html__('Pick which consent purposes this form asks for, or add one in Settings, Consents.', 'dono')
+                . esc_html__('Pick which consent purposes this form asks for, or add one in Settings, Consents.', 'dono-fundraising-platform')
                 . '</div>';
         }
 

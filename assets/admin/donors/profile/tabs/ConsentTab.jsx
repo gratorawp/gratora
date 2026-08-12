@@ -30,20 +30,20 @@ function RedactDialog( { donor, onClose, onDone } ) {
             } );
             onDone();
         } catch ( err ) {
-            setError( err?.message || __( 'Redact failed', 'dono' ) );
+            setError( err?.message || __( 'Redact failed', 'dono-fundraising-platform' ) );
         } finally {
             setSaving( false );
         }
     };
 
     return (
-        <Modal title={ __( 'Redact this donor', 'dono' ) } onRequestClose={ onClose } className="dp-modal">
+        <Modal title={ __( 'Redact this donor', 'dono-fundraising-platform' ) } onRequestClose={ onClose } className="dp-modal">
             <form onSubmit={ submit } className="dp-edit-form">
                 <p style={ { gridColumn: '1 / -1', color: '#6b7280', fontSize: 13, marginTop: 0 } }>
-                    { __( 'PII (name, email, phone, address, tax id, notes) will be permanently removed. Lifetime totals, donations, and receipts are retained for accounting. This cannot be undone.', 'dono' ) }
+                    { __( 'PII (name, email, phone, address, tax id, notes) will be permanently removed. Lifetime totals, donations, and receipts are retained for accounting. This cannot be undone.', 'dono-fundraising-platform' ) }
                 </p>
                 <label style={ { gridColumn: '1 / -1' } }>
-                    { sprintf( /* translators: %s: confirmation word */ __( 'Type %s to confirm', 'dono' ), expected ) }
+                    { sprintf( /* translators: %s: confirmation word */ __( 'Type %s to confirm', 'dono-fundraising-platform' ), expected ) }
                     <input className="dono-input"
                         type="text"
                         value={ typed }
@@ -56,10 +56,10 @@ function RedactDialog( { donor, onClose, onDone } ) {
                 { error && <div className="dp-edit-form__error">{ error }</div> }
                 <div className="dp-edit-form__actions">
                     <button type="button" className="btn" onClick={ onClose } disabled={ saving }>
-                        { __( 'Cancel', 'dono' ) }
+                        { __( 'Cancel', 'dono-fundraising-platform' ) }
                     </button>
                     <button type="submit" className="btn btn--danger" disabled={ saving || ! matches }>
-                        { saving ? __( 'Redacting…', 'dono' ) : __( 'Redact donor', 'dono' ) }
+                        { saving ? __( 'Redacting…', 'dono-fundraising-platform' ) : __( 'Redact donor', 'dono-fundraising-platform' ) }
                     </button>
                 </div>
             </form>
@@ -83,7 +83,7 @@ export default function ConsentTab( { consents, donor, onChanged } ) {
             } );
             onChanged && onChanged();
         } catch ( err ) {
-            notify.error( err?.message || __( 'Could not change this.', 'dono' ) );
+            notify.error( err?.message || __( 'Could not change this.', 'dono-fundraising-platform' ) );
         } finally {
             setHiding( false );
         }
@@ -97,8 +97,8 @@ export default function ConsentTab( { consents, donor, onChanged } ) {
                         <EmptyState
                             compact
                             icon={ <ShieldCheck size={ 22 } strokeWidth={ 1.75 } /> }
-                            title={ __( 'No consent records yet', 'dono' ) }
-                            body={ __( 'Each donation captures opt-ins for the purposes you configure. They land here for audit and right-to-withdraw requests.', 'dono' ) }
+                            title={ __( 'No consent records yet', 'dono-fundraising-platform' ) }
+                            body={ __( 'Each donation captures opt-ins for the purposes you configure. They land here for audit and right-to-withdraw requests.', 'dono-fundraising-platform' ) }
                         />
                     )
                     : (
@@ -106,10 +106,10 @@ export default function ConsentTab( { consents, donor, onChanged } ) {
                             <table className="dp-table">
                                 <thead>
                                     <tr>
-                                        <th>{ __( 'Purpose',     'dono' ) }</th>
-                                        <th>{ __( 'Status',      'dono' ) }</th>
-                                        <th>{ __( 'Granted at',  'dono' ) }</th>
-                                        <th>{ __( 'Source',      'dono' ) }</th>
+                                        <th>{ __( 'Purpose',     'dono-fundraising-platform' ) }</th>
+                                        <th>{ __( 'Status',      'dono-fundraising-platform' ) }</th>
+                                        <th>{ __( 'Granted at',  'dono-fundraising-platform' ) }</th>
+                                        <th>{ __( 'Source',      'dono-fundraising-platform' ) }</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -118,10 +118,10 @@ export default function ConsentTab( { consents, donor, onChanged } ) {
                                             <td>{ c.purpose }</td>
                                             <td>
                                                 { ! c.occurred_at
-                                                    ? <span className="dp-pill is-muted">{ __( 'No response', 'dono' ) }</span>
+                                                    ? <span className="dp-pill is-muted">{ __( 'No response', 'dono-fundraising-platform' ) }</span>
                                                     : c.granted
-                                                        ? <span className="dp-pill is-ok">{ __( 'Granted', 'dono' ) }</span>
-                                                        : <span className="dp-pill is-muted">{ __( 'Revoked', 'dono' ) }</span> }
+                                                        ? <span className="dp-pill is-ok">{ __( 'Granted', 'dono-fundraising-platform' ) }</span>
+                                                        : <span className="dp-pill is-muted">{ __( 'Revoked', 'dono-fundraising-platform' ) }</span> }
                                             </td>
                                             <td>{ c.occurred_at ? formatDateTime( c.occurred_at ) : '-' }</td>
                                             <td className="consent-source">{ c.source || '-' }</td>
@@ -137,11 +137,11 @@ export default function ConsentTab( { consents, donor, onChanged } ) {
                 <div className="dp-card__body">
                     <div className="dp-data-action">
                         <div className="dp-data-action__body">
-                            <div className="dp-data-action__title">{ __( 'Public visibility', 'dono' ) }</div>
+                            <div className="dp-data-action__title">{ __( 'Public visibility', 'dono-fundraising-platform' ) }</div>
                             <div className="dp-data-action__sub">
                                 { donor?.public_hidden
-                                    ? __( 'Hidden. This donor does not appear in supporter walls, recent donations or top donor lists, and their picture and message are not shown. Their donations still count toward campaign totals.', 'dono' )
-                                    : __( 'Visible. This donor can appear by name in supporter walls, recent donations and top donor lists, with their picture and any public message.', 'dono' ) }
+                                    ? __( 'Hidden. This donor does not appear in supporter walls, recent donations or top donor lists, and their picture and message are not shown. Their donations still count toward campaign totals.', 'dono-fundraising-platform' )
+                                    : __( 'Visible. This donor can appear by name in supporter walls, recent donations and top donor lists, with their picture and any public message.', 'dono-fundraising-platform' ) }
                             </div>
                         </div>
                         { donor && ! donor.redacted_at && (
@@ -151,26 +151,26 @@ export default function ConsentTab( { consents, donor, onChanged } ) {
                                 disabled={ hiding }
                                 onClick={ () => setPublicHidden( ! donor.public_hidden ) }
                             >
-                                { donor.public_hidden ? __( 'Show publicly', 'dono' ) : __( 'Hide from public pages', 'dono' ) }
+                                { donor.public_hidden ? __( 'Show publicly', 'dono-fundraising-platform' ) : __( 'Hide from public pages', 'dono-fundraising-platform' ) }
                             </button>
                         ) }
                     </div>
 
                     <div className="dp-data-action">
                         <div className="dp-data-action__body">
-                            <div className="dp-data-action__title">{ __( 'Data export', 'dono' ) }</div>
+                            <div className="dp-data-action__title">{ __( 'Data export', 'dono-fundraising-platform' ) }</div>
                             <div className="dp-data-action__sub">
-                                { __( 'Bundles donor record, donations, receipts, consents, and event log into a single JSON file.', 'dono' ) }
+                                { __( 'Bundles donor record, donations, receipts, consents, and event log into a single JSON file.', 'dono-fundraising-platform' ) }
                             </div>
                         </div>
                         { donor && (
                             <button
                                 type="button"
                                 className="btn"
-                                onClick={ () => downloadFile( `/dono/v1/admin/donors/${ donor.id }/export`, `dono-donor-${ donor.id }.json` ).catch( ( e ) => notify.error( e?.message || __( 'Could not export personal data.', 'dono' ) ) ) }
+                                onClick={ () => downloadFile( `/dono/v1/admin/donors/${ donor.id }/export`, `dono-donor-${ donor.id }.json` ).catch( ( e ) => notify.error( e?.message || __( 'Could not export personal data.', 'dono-fundraising-platform' ) ) ) }
                             >
                                 <IconDownload className="ic" />
-                                { __( 'Export personal data', 'dono' ) }
+                                { __( 'Export personal data', 'dono-fundraising-platform' ) }
                             </button>
                         ) }
                     </div>
@@ -179,10 +179,10 @@ export default function ConsentTab( { consents, donor, onChanged } ) {
                     <div className="dp-danger-foot__body">
                         <div className="dp-danger-foot__title">
                             <IconAlert width="14" height="14" />
-                            { __( 'Redact donor', 'dono' ) }
+                            { __( 'Redact donor', 'dono-fundraising-platform' ) }
                         </div>
                         <div className="dp-danger-foot__sub">
-                            { __( 'Drops PII (name, email, phone, address, tax id) and sets redacted_at. Lifetime totals and donation records are kept for accounting. This cannot be undone.', 'dono' ) }
+                            { __( 'Drops PII (name, email, phone, address, tax id) and sets redacted_at. Lifetime totals and donation records are kept for accounting. This cannot be undone.', 'dono-fundraising-platform' ) }
                         </div>
                     </div>
                     <div className="dp-danger-foot__actions">
@@ -193,7 +193,7 @@ export default function ConsentTab( { consents, donor, onChanged } ) {
                             disabled={ ! donor || !! donor?.redacted_at }
                         >
                             <IconTrash className="ic" />
-                            { donor?.redacted_at ? __( 'Already redacted', 'dono' ) : __( 'Redact donor', 'dono' ) }
+                            { donor?.redacted_at ? __( 'Already redacted', 'dono-fundraising-platform' ) : __( 'Redact donor', 'dono-fundraising-platform' ) }
                         </button>
                     </div>
                 </div>
@@ -213,7 +213,7 @@ export default function ConsentTab( { consents, donor, onChanged } ) {
                             { history.map( ( h ) => (
                                 <li key={ h.id }>
                                     <span className={ `dp-pill ${ h.granted ? 'is-ok' : 'is-muted' }` }>
-                                        { h.granted ? __( 'Granted', 'dono' ) : __( 'Revoked', 'dono' ) }
+                                        { h.granted ? __( 'Granted', 'dono-fundraising-platform' ) : __( 'Revoked', 'dono-fundraising-platform' ) }
                                     </span>
                                     <span style={ { fontWeight: 500 } }>{ h.purpose }</span>
                                     <span className="dp-consent-log__src">{ h.source }</span>

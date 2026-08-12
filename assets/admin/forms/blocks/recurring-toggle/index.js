@@ -9,12 +9,12 @@ import { BlockIcons } from '../_shared/block-icons';
 const NAME = 'dono/recurring-toggle';
 
 const FREQ_OPTIONS = [
-    { value: 'one-time',  label: __( 'One-time', 'dono' ) },
-    { value: 'weekly',    label: __( 'Weekly', 'dono' ) },
-    { value: 'biweekly',  label: __( 'Every 2 weeks', 'dono' ) },
-    { value: 'monthly',   label: __( 'Monthly', 'dono' ) },
-    { value: 'quarterly', label: __( 'Quarterly', 'dono' ) },
-    { value: 'yearly',    label: __( 'Yearly', 'dono' ) },
+    { value: 'one-time',  label: __( 'One-time', 'dono-fundraising-platform' ) },
+    { value: 'weekly',    label: __( 'Weekly', 'dono-fundraising-platform' ) },
+    { value: 'biweekly',  label: __( 'Every 2 weeks', 'dono-fundraising-platform' ) },
+    { value: 'monthly',   label: __( 'Monthly', 'dono-fundraising-platform' ) },
+    { value: 'quarterly', label: __( 'Quarterly', 'dono-fundraising-platform' ) },
+    { value: 'yearly',    label: __( 'Yearly', 'dono-fundraising-platform' ) },
 ];
 
 // One-time is not listed: every form accepts a single gift, so the server
@@ -61,32 +61,32 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Recurring toggle', 'dono' ) } initialOpen>
+                <PanelBody title={ __( 'Recurring toggle', 'dono-fundraising-platform' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'dono' ) }
+                        label={ __( 'Label', 'dono-fundraising-platform' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label in the canvas to edit it inline.', 'dono' ) }
+                        help={ __( 'Click the label in the canvas to edit it inline.', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Help text', 'dono' ) }
+                        label={ __( 'Help text', 'dono-fundraising-platform' ) }
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <Segmented
-                        label={ __( 'Style', 'dono' ) }
+                        label={ __( 'Style', 'dono-fundraising-platform' ) }
                         value={ style }
                         onChange={ ( v ) => setAttributes( { style: v } ) }
                         options={ [
-                            { value: 'pills', label: __( 'Pills', 'dono' ) },
-                            { value: 'tabs',  label: __( 'Tabs',  'dono' ) },
+                            { value: 'pills', label: __( 'Pills', 'dono-fundraising-platform' ) },
+                            { value: 'tabs',  label: __( 'Tabs',  'dono-fundraising-platform' ) },
                         ] }
                     />
                     <Field
-                        label={ __( 'Recurring options', 'dono' ) }
-                        help={ __( 'Donors can always give once. Pick the recurring options to offer alongside it.', 'dono' ) }
+                        label={ __( 'Recurring options', 'dono-fundraising-platform' ) }
+                        help={ __( 'Donors can always give once. Pick the recurring options to offer alongside it.', 'dono-fundraising-platform' ) }
                     >
                         <div className="dono-sidebar-list">
                             { RECURRING_OPTIONS.map( ( f ) => (
@@ -103,11 +103,11 @@ function Edit( { attributes, setAttributes } ) {
                     </Field>
                     { willHide && (
                         <Notice status="warning" isDismissible={ false }>
-                            { __( 'Pick at least one recurring option, or this block will not appear on the form.', 'dono' ) }
+                            { __( 'Pick at least one recurring option, or this block will not appear on the form.', 'dono-fundraising-platform' ) }
                         </Notice>
                     ) }
                     <SelectControl
-                        label={ __( 'Default selection', 'dono' ) }
+                        label={ __( 'Default selection', 'dono-fundraising-platform' ) }
                         value={ defaultFrequency }
                         options={ FREQ_OPTIONS.filter( ( f ) => effectiveFreqs.includes( f.value ) ) }
                         onChange={ ( v ) => setAttributes( { defaultFrequency: v } ) }
@@ -125,7 +125,7 @@ function Edit( { attributes, setAttributes } ) {
                     className="dono-block-preview__title"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Make this recurring', 'dono' ) }
+                    placeholder={ __( 'Make this recurring', 'dono-fundraising-platform' ) }
                     allowedFormats={ [] }
                     style={ { fontSize: 13, fontWeight: 500, marginBottom: 6 } }
                 />
@@ -180,7 +180,7 @@ function Edit( { attributes, setAttributes } ) {
                         tagName="p"
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
-                        placeholder={ __( 'Help text', 'dono' ) }
+                        placeholder={ __( 'Help text', 'dono-fundraising-platform' ) }
                         allowedFormats={ [] }
                         style={ { fontSize: 11, color: '#6b7280', margin: '6px 0 0', lineHeight: 1.4 } }
                     />
@@ -193,8 +193,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Recurring toggle', 'dono' ),
-        description: __( 'Frequency selector (one-time / monthly / yearly / etc).', 'dono' ),
+        title:      __( 'Recurring toggle', 'dono-fundraising-platform' ),
+        description: __( 'Frequency selector (one-time / monthly / yearly / etc).', 'dono-fundraising-platform' ),
         category:   'dono-amount',
         icon:       BlockIcons[ 'recurring-toggle' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

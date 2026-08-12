@@ -15,13 +15,13 @@ export default function KpiRow( { kpi, compareOn, range, loading = false } ) {
     const currency = kpi.currency || 'USD';
     const periodSub = rangeLabel( range );
     const donationsSub = periodSub
-        ? `${ periodSub } · ${ __( 'paid only', 'dono' ) }`
-        : __( 'paid only', 'dono' );
+        ? `${ periodSub } · ${ __( 'paid only', 'dono-fundraising-platform' ) }`
+        : __( 'paid only', 'dono-fundraising-platform' );
 
     return (
         <div className="dono-overview__metrics">
             <MetricCard
-                label={ __( 'Amount raised', 'dono' ) }
+                label={ __( 'Amount raised', 'dono-fundraising-platform' ) }
                 value={ formatAmount( kpi.amount_raised_cents, currency ) }
                 changePct={ cmp?.amount_raised_cents }
                 sub={ periodSub }
@@ -29,7 +29,7 @@ export default function KpiRow( { kpi, compareOn, range, loading = false } ) {
                 skeleton={ loading }
             />
             <MetricCard
-                label={ __( 'Donations', 'dono' ) }
+                label={ __( 'Donations', 'dono-fundraising-platform' ) }
                 value={ String( kpi.donations_count ) }
                 changePct={ cmp?.donations_count }
                 sub={ donationsSub }
@@ -37,7 +37,7 @@ export default function KpiRow( { kpi, compareOn, range, loading = false } ) {
                 skeleton={ loading }
             />
             <MetricCard
-                label={ __( 'Donors', 'dono' ) }
+                label={ __( 'Donors', 'dono-fundraising-platform' ) }
                 value={ String( kpi.donors_count ) }
                 changePct={ cmp?.donors_count }
                 sub={ periodSub }
@@ -45,7 +45,7 @@ export default function KpiRow( { kpi, compareOn, range, loading = false } ) {
                 skeleton={ loading }
             />
             <MetricCard
-                label={ __( 'Average donation', 'dono' ) }
+                label={ __( 'Average donation', 'dono-fundraising-platform' ) }
                 value={ formatAmount( kpi.avg_donation_cents, currency ) }
                 changePct={ cmp?.avg_donation_cents }
                 sub={ periodSub }

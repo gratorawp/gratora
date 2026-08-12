@@ -13,11 +13,11 @@ export default function SystemInfoTab( { info, infoError, loadInfo, setNotice } 
     const [ copied, setCopied ] = useState( false );
 
     const rows = info ? [
-        [ __( 'Dono version', 'dono' ), info.version ],
-        [ __( 'PHP version', 'dono' ), info.php ],
-        [ __( 'WordPress', 'dono' ), info.wp ],
-        [ __( 'Site URL', 'dono' ), info.site_url ],
-        [ __( 'REST namespace', 'dono' ), info.rest_root ],
+        [ __( 'Dono version', 'dono-fundraising-platform' ), info.version ],
+        [ __( 'PHP version', 'dono-fundraising-platform' ), info.php ],
+        [ __( 'WordPress', 'dono-fundraising-platform' ), info.wp ],
+        [ __( 'Site URL', 'dono-fundraising-platform' ), info.site_url ],
+        [ __( 'REST namespace', 'dono-fundraising-platform' ), info.rest_root ],
     ] : [];
 
     const copy = async () => {
@@ -28,23 +28,23 @@ export default function SystemInfoTab( { info, infoError, loadInfo, setNotice } 
             setCopied( true );
             setTimeout( () => setCopied( false ), 2000 );
         } catch ( err ) {
-            setNotice( { type: 'error', text: __( 'Could not copy. Select the values instead.', 'dono' ) } );
+            setNotice( { type: 'error', text: __( 'Could not copy. Select the values instead.', 'dono-fundraising-platform' ) } );
         }
     };
 
     return (
         <div className="dono-panel">
             <Card
-                title={ __( 'System info', 'dono' ) }
-                sub={ __( 'Worth pasting into a support request.', 'dono' ) }
+                title={ __( 'System info', 'dono-fundraising-platform' ) }
+                sub={ __( 'Worth pasting into a support request.', 'dono-fundraising-platform' ) }
             >
                 { infoError ? (
                     <div className="dono-advanced-actions">
-                        <p style={ { color: '#b42318', margin: 0 } }>{ __( 'Could not load system info.', 'dono' ) }</p>
-                        <Btn variant="secondary" onClick={ loadInfo }>{ __( 'Retry', 'dono' ) }</Btn>
+                        <p style={ { color: '#b42318', margin: 0 } }>{ __( 'Could not load system info.', 'dono-fundraising-platform' ) }</p>
+                        <Btn variant="secondary" onClick={ loadInfo }>{ __( 'Retry', 'dono-fundraising-platform' ) }</Btn>
                     </div>
                 ) : ! info ? (
-                    <p className="dono-tools-empty">{ __( 'Loading…', 'dono' ) }</p>
+                    <p className="dono-tools-empty">{ __( 'Loading…', 'dono-fundraising-platform' ) }</p>
                 ) : (
                     <>
                         <div className="dono-advanced-info">
@@ -57,7 +57,7 @@ export default function SystemInfoTab( { info, infoError, loadInfo, setNotice } 
                         </div>
                         <div className="dono-advanced-actions" style={ { marginTop: 12 } }>
                             <Btn variant="secondary" onClick={ copy }>
-                                { copied ? __( 'Copied', 'dono' ) : __( 'Copy to clipboard', 'dono' ) }
+                                { copied ? __( 'Copied', 'dono-fundraising-platform' ) : __( 'Copy to clipboard', 'dono-fundraising-platform' ) }
                             </Btn>
                         </div>
                     </>
@@ -65,8 +65,8 @@ export default function SystemInfoTab( { info, infoError, loadInfo, setNotice } 
             </Card>
 
             <Card
-                title={ __( 'Scheduled tasks', 'dono' ) }
-                sub={ __( 'Dono jobs queued with WP-Cron, and when each is due.', 'dono' ) }
+                title={ __( 'Scheduled tasks', 'dono-fundraising-platform' ) }
+                sub={ __( 'Dono jobs queued with WP-Cron, and when each is due.', 'dono-fundraising-platform' ) }
             >
                 { info?.cron?.length ? (
                     <ul className="dono-advanced-cron">
@@ -78,7 +78,7 @@ export default function SystemInfoTab( { info, infoError, loadInfo, setNotice } 
                         ) ) }
                     </ul>
                 ) : (
-                    <p className="dono-tools-empty">{ __( 'Nothing queued right now.', 'dono' ) }</p>
+                    <p className="dono-tools-empty">{ __( 'Nothing queued right now.', 'dono-fundraising-platform' ) }</p>
                 ) }
             </Card>
         </div>

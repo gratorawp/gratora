@@ -35,12 +35,12 @@ final class ManagedPageStates extends HookProvider
         }
 
         if (in_array((int) $post->ID, $this->campaignPageIds(), true)) {
-            $states['dono_campaign'] = __('Dono Campaign', 'dono');
+            $states['dono_campaign'] = __('Dono Campaign', 'dono-fundraising-platform');
             return $states;
         }
 
         if ((int) get_option(PortalPage::OPTION_PAGE_ID, 0) === (int) $post->ID) {
-            $states['dono_portal'] = __('Dono Donor Portal', 'dono');
+            $states['dono_portal'] = __('Dono Donor Portal', 'dono-fundraising-platform');
         }
 
         return $states;

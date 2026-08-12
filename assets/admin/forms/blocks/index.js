@@ -40,17 +40,17 @@ import registerHtmlBlock            from './html';
 import registerPrivacyNoticeBlock   from './privacy-notice';
 
 const DONO_CATEGORIES = [
-    { slug: 'dono-amount',  title: __( 'Donation amount',   'dono' ) },
-    { slug: 'dono-donor',   title: __( 'Donor information', 'dono' ) },
-    { slug: 'dono-fields',  title: __( 'Custom fields',     'dono' ) },
-    { slug: 'dono-content', title: __( 'Content & layout',  'dono' ) },
-    { slug: 'dono-extras',  title: __( 'Extras',            'dono' ) },
+    { slug: 'dono-amount',  title: __( 'Donation amount',   'dono-fundraising-platform' ) },
+    { slug: 'dono-donor',   title: __( 'Donor information', 'dono-fundraising-platform' ) },
+    { slug: 'dono-fields',  title: __( 'Custom fields',     'dono-fundraising-platform' ) },
+    { slug: 'dono-content', title: __( 'Content & layout',  'dono-fundraising-platform' ) },
+    { slug: 'dono-extras',  title: __( 'Extras',            'dono-fundraising-platform' ) },
 ];
 
 function ensureCategories() {
     try {
         const existing = select( 'core/blocks' ).getCategories();
-        const keep = existing.filter( ( c ) => ! String( c.slug ).startsWith( 'dono' ) );
+        const keep = existing.filter( ( c ) => ! String( c.slug ).startsWith( 'dono-fundraising-platform' ) );
         dispatch( 'core/blocks' ).setCategories( [ ...DONO_CATEGORIES, ...keep ] );
     } catch ( err ) {
         // setCategories not available on this version; harmless.

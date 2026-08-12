@@ -31,7 +31,7 @@ final class OnboardingPage extends HookProvider
     {
         $pages[] = [
             'id'         => self::PAGE_ID,
-            'title'      => __('Onboarding', 'dono'),
+            'title'      => __('Onboarding', 'dono-fundraising-platform'),
             'capability' => 'manage_options',
             'position'   => 999,
             'hidden'     => true,
@@ -79,7 +79,7 @@ final class OnboardingPage extends HookProvider
             $asset['version']      ?? DONO_VERSION,
             true
         );
-        wp_set_script_translations(self::HANDLE, 'dono', DONO_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE, 'dono-fundraising-platform', DONO_DIR . 'languages');
 
         wp_enqueue_style('wp-components');
         wp_enqueue_style(

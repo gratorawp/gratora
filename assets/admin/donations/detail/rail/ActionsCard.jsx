@@ -23,7 +23,7 @@ export default function ActionsCard( {
     return (
         <div className="dd-rail-card">
             <div className="dd-rail-card__head">
-                <span className="dd-rail-card__title">{ __( 'Actions', 'dono' ) }</span>
+                <span className="dd-rail-card__title">{ __( 'Actions', 'dono-fundraising-platform' ) }</span>
             </div>
             <div className="dd-rail-card__body">
                 <div className="dd-rail-actions">
@@ -34,7 +34,7 @@ export default function ActionsCard( {
                             onClick={ onMarkPaid }
                         >
                             <IconCheck className="ic" />
-                            { __( 'Mark as paid', 'dono' ) }
+                            { __( 'Mark as paid', 'dono-fundraising-platform' ) }
                         </button>
                     ) }
                     { canMarkFailed && (
@@ -44,7 +44,7 @@ export default function ActionsCard( {
                             onClick={ onMarkFailed }
                         >
                             <IconAlert className="ic" />
-                            { __( 'Mark as failed', 'dono' ) }
+                            { __( 'Mark as failed', 'dono-fundraising-platform' ) }
                         </button>
                     ) }
                     <button
@@ -54,7 +54,7 @@ export default function ActionsCard( {
                         onClick={ onRefund }
                     >
                         <IconRefund className="ic" />
-                        { __( 'Refund donation', 'dono' ) }
+                        { __( 'Refund donation', 'dono-fundraising-platform' ) }
                     </button>
                     <button
                         type="button"
@@ -64,24 +64,24 @@ export default function ActionsCard( {
                     >
                         <IconMail className="ic" />
                         { isRedacted
-                            ? __( 'Donor erased, cannot email', 'dono' )
-                            : __( 'Resend receipt', 'dono' ) }
+                            ? __( 'Donor erased, cannot email', 'dono-fundraising-platform' )
+                            : __( 'Resend receipt', 'dono-fundraising-platform' ) }
                     </button>
                     { primaryReceipt
                         ? (
                             <button
                                 type="button"
                                 className="btn btn--block"
-                                onClick={ () => downloadFile( `/dono/v1/admin/receipts/${ primaryReceipt.id }/pdf`, `${ primaryReceipt.receipt_number }.pdf` ).catch( ( e ) => notify.error( e?.message || __( 'Could not download the receipt.', 'dono' ) ) ) }
+                                onClick={ () => downloadFile( `/dono/v1/admin/receipts/${ primaryReceipt.id }/pdf`, `${ primaryReceipt.receipt_number }.pdf` ).catch( ( e ) => notify.error( e?.message || __( 'Could not download the receipt.', 'dono-fundraising-platform' ) ) ) }
                             >
                                 <IconDownload className="ic" />
-                                { __( 'Download receipt PDF', 'dono' ) }
+                                { __( 'Download receipt PDF', 'dono-fundraising-platform' ) }
                             </button>
                         )
                         : (
                             <button type="button" className="btn btn--block" disabled>
                                 <IconDownload className="ic" />
-                                { __( 'No receipt yet', 'dono' ) }
+                                { __( 'No receipt yet', 'dono-fundraising-platform' ) }
                             </button>
                         ) }
                     <button
@@ -90,13 +90,13 @@ export default function ActionsCard( {
                         onClick={ onAddNote }
                     >
                         <IconNote className="ic" />
-                        { __( 'Add note', 'dono' ) }
+                        { __( 'Add note', 'dono-fundraising-platform' ) }
                     </button>
                 </div>
                 { canRefund && (
                     <div className="dd-rail-actions__hint">
                         { /* translators: %s: max refund amount */ }
-                        { __( 'Refunds capped at', 'dono' ) }{ ' ' }
+                        { __( 'Refunds capped at', 'dono-fundraising-platform' ) }{ ' ' }
                         <strong>{ formatAmount( donation.refundable_cents, donation.currency ) }</strong>.
                     </div>
                 ) }

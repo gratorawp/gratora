@@ -63,13 +63,13 @@ export default function Detail( { reference } ) {
         setLoading( true );
         return apiFetch( { path: `/dono/v1/admin/donations/${ reference }` } )
             .then( ( d ) => { setPayload( d ); setError( null ); } )
-            .catch( ( e ) => setError( e?.message || __( 'Could not load donation.', 'dono' ) ) )
+            .catch( ( e ) => setError( e?.message || __( 'Could not load donation.', 'dono-fundraising-platform' ) ) )
             .finally( () => setLoading( false ) );
     }, [ reference ] );
 
     useEffect( () => { load(); }, [ load ] );
 
-    if ( loading && ! payload ) return <p className="dd-loading">{ __( 'Loading donation…', 'dono' ) }</p>;
+    if ( loading && ! payload ) return <p className="dd-loading">{ __( 'Loading donation…', 'dono-fundraising-platform' ) }</p>;
     if ( error )                return <Notice status="error">{ error }</Notice>;
     if ( ! payload )            return null;
 
@@ -82,28 +82,28 @@ export default function Detail( { reference } ) {
                 path:   `/dono/v1/admin/donations/${ donation.reference }/resend-receipt`,
                 method: 'POST',
             } );
-            notify.success( __( 'Receipt re-queued.', 'dono' ) );
+            notify.success( __( 'Receipt re-queued.', 'dono-fundraising-platform' ) );
             load();
         } catch ( err ) {
-            notify.error( err?.message || __( 'Could not resend receipt.', 'dono' ) );
+            notify.error( err?.message || __( 'Could not resend receipt.', 'dono-fundraising-platform' ) );
         }
     };
 
     const markPaid = () => {
         setConfirm( {
-            title:        __( 'Mark donation as paid', 'dono' ),
-            message:      __( 'Mark this donation as paid? This issues the receipt and updates donor totals.', 'dono' ),
-            confirmLabel: __( 'Mark as paid', 'dono' ),
+            title:        __( 'Mark donation as paid', 'dono-fundraising-platform' ),
+            message:      __( 'Mark this donation as paid? This issues the receipt and updates donor totals.', 'dono-fundraising-platform' ),
+            confirmLabel: __( 'Mark as paid', 'dono-fundraising-platform' ),
             onConfirm: async () => {
                 try {
                     await apiFetch( {
                         path:   `/dono/v1/admin/donations/${ donation.reference }/mark-paid`,
                         method: 'POST',
                     } );
-                    notify.success( __( 'Donation marked as paid.', 'dono' ) );
+                    notify.success( __( 'Donation marked as paid.', 'dono-fundraising-platform' ) );
                     load();
                 } catch ( err ) {
-                    notify.error( err?.message || __( 'Could not mark donation as paid.', 'dono' ) );
+                    notify.error( err?.message || __( 'Could not mark donation as paid.', 'dono-fundraising-platform' ) );
                 }
             },
         } );
@@ -111,9 +111,9 @@ export default function Detail( { reference } ) {
 
     const retrySubscription = () => {
         setConfirm( {
-            title:        __( 'Create the recurring plan', 'dono' ),
-            message:      __( 'Create the recurring plan at the gateway from this donation? The donor is not charged again today. The schedule restarts from now, so any renewal that fell due since this donation was made is not collected.', 'dono' ),
-            confirmLabel: __( 'Create plan', 'dono' ),
+            title:        __( 'Create the recurring plan', 'dono-fundraising-platform' ),
+            message:      __( 'Create the recurring plan at the gateway from this donation? The donor is not charged again today. The schedule restarts from now, so any renewal that fell due since this donation was made is not collected.', 'dono-fundraising-platform' ),
+            confirmLabel: __( 'Create plan', 'dono-fundraising-platform' ),
             onConfirm: async () => {
                 setRetryBusy( true );
                 setRetryError( null );
@@ -122,11 +122,11 @@ export default function Detail( { reference } ) {
                         path:   `/dono/v1/admin/donations/${ donation.reference }/retry-subscription`,
                         method: 'POST',
                     } );
-                    notify.success( __( 'Recurring plan created.', 'dono' ) );
+                    notify.success( __( 'Recurring plan created.', 'dono-fundraising-platform' ) );
                     await load();
                 } catch ( err ) {
                     // The gateway message is the diagnostic, so it goes through unedited.
-                    const reason = err?.message || __( 'Could not create the recurring plan.', 'dono' );
+                    const reason = err?.message || __( 'Could not create the recurring plan.', 'dono-fundraising-platform' );
                     setRetryError( reason );
                     notify.error( reason );
                 } finally {
@@ -151,10 +151,10 @@ export default function Detail( { reference } ) {
                 data:   reason ? { reason } : {},
             } );
             setFailOpen( false );
-            notify.success( __( 'Donation marked as failed.', 'dono' ) );
+            notify.success( __( 'Donation marked as failed.', 'dono-fundraising-platform' ) );
             load();
         } catch ( err ) {
-            notify.error( err?.message || __( 'Could not update donation.', 'dono' ) );
+            notify.error( err?.message || __( 'Could not update donation.', 'dono-fundraising-platform' ) );
         } finally {
             setFailBusy( false );
         }
@@ -166,8 +166,8 @@ export default function Detail( { reference } ) {
         setShowRefund( false );
         notify.success(
                 result?.plan?.stopped
-                    ? __( 'Refund issued, and the recurring schedule is stopped.', 'dono' )
-                    : __( 'Refund issued.', 'dono' )
+                    ? __( 'Refund issued, and the recurring schedule is stopped.', 'dono-fundraising-platform' )
+                    : __( 'Refund issued.', 'dono-fundraising-platform' )
             );
         // Sticky: the money moved and the schedule did not stop, so this has to
         // survive long enough to be acted on.
@@ -176,10 +176,10 @@ export default function Detail( { reference } ) {
                 result.plan.error
                     ? sprintf(
                         /* translators: %s: why the schedule could not be cancelled */
-                        __( 'The refund went through, but the recurring schedule was not cancelled. Cancel it from the Subscriptions screen. Reason: %s', 'dono' ),
+                        __( 'The refund went through, but the recurring schedule was not cancelled. Cancel it from the Subscriptions screen. Reason: %s', 'dono-fundraising-platform' ),
                         result.plan.error
                     )
-                    : __( 'The refund went through, but the recurring schedule was not cancelled. Cancel it from the Subscriptions screen.', 'dono' ),
+                    : __( 'The refund went through, but the recurring schedule was not cancelled. Cancel it from the Subscriptions screen.', 'dono-fundraising-platform' ),
                 { duration: 0 }
             );
         }
@@ -262,27 +262,27 @@ export default function Detail( { reference } ) {
 
             { failOpen && (
                 <Dialog
-                    title={ __( 'Mark donation as failed', 'dono' ) }
+                    title={ __( 'Mark donation as failed', 'dono-fundraising-platform' ) }
                     onClose={ () => setFailOpen( false ) }
                     foot={
                         <>
                             <Btn variant="secondary" onClick={ () => setFailOpen( false ) } disabled={ failBusy }>
-                                { __( 'Cancel', 'dono' ) }
+                                { __( 'Cancel', 'dono-fundraising-platform' ) }
                             </Btn>
                             <Btn variant="danger" onClick={ submitFailed } isBusy={ failBusy }>
-                                { __( 'Mark as failed', 'dono' ) }
+                                { __( 'Mark as failed', 'dono-fundraising-platform' ) }
                             </Btn>
                         </>
                     }
                 >
                     <p style={ { marginTop: 0 } }>
-                        { __( 'Mark this donation as failed? Optionally add a reason (shown in the donation timeline). It will be excluded from totals.', 'dono' ) }
+                        { __( 'Mark this donation as failed? Optionally add a reason (shown in the donation timeline). It will be excluded from totals.', 'dono-fundraising-platform' ) }
                     </p>
                     <textarea
                         className="dono-textarea"
                         value={ failReason }
                         onChange={ ( e ) => setFailReason( e.target.value ) }
-                        placeholder={ __( 'Reason (optional)', 'dono' ) }
+                        placeholder={ __( 'Reason (optional)', 'dono-fundraising-platform' ) }
                         rows={ 3 }
                         style={ { width: '100%' } }
                     />

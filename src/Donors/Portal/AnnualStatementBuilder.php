@@ -94,7 +94,7 @@ final class AnnualStatementBuilder
         $org      = get_option('dono_org_profile', []);
         $orgName  = (string) ($org['name'] ?? get_bloginfo('name'));
         $donorName = trim(($donor->first_name ?? '') . ' ' . ($donor->last_name ?? ''));
-        if ($donorName === '') $donorName = __('Friend', 'dono');
+        if ($donorName === '') $donorName = __('Friend', 'dono-fundraising-platform');
 
         $html = View::loadRelative(__DIR__, 'views/annual-statement', [
             'year'       => $year,
@@ -105,9 +105,9 @@ final class AnnualStatementBuilder
         ]);
 
         return $this->pdf->fromHtml($html, [
-            'title'   => sprintf(/* translators: %d: year */ __('Annual statement %d', 'dono'), $year),
+            'title'   => sprintf(/* translators: %d: year */ __('Annual statement %d', 'dono-fundraising-platform'), $year),
             'author'  => $orgName,
-            'subject' => __('Annual donation statement', 'dono'),
+            'subject' => __('Annual donation statement', 'dono-fundraising-platform'),
         ]);
     }
 }

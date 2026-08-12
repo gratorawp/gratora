@@ -115,14 +115,14 @@ final class CoreCommandProvider
                 if (! SupportedCurrencies::accepts($currency)) {
                     throw new CommandError(sprintf(
                         /* translators: 1: currency code, 2: the accepted codes. */
-                        __('%1$s is not one of your accepted currencies (%2$s).', 'dono'),
+                        __('%1$s is not one of your accepted currencies (%2$s).', 'dono-fundraising-platform'),
                         $currency,
                         implode(', ', SupportedCurrencies::all())
                     ));
                 }
                 if (Currency::minorUnits($currency) === 0 && ((int) $in['amount_cents']) % 100 !== 0) {
                     throw new CommandError(
-                        __('This currency does not support fractional amounts.', 'dono')
+                        __('This currency does not support fractional amounts.', 'dono-fundraising-platform')
                     );
                 }
 
@@ -1773,7 +1773,7 @@ final class CoreCommandProvider
         $life = (int) apply_filters('nonce_life', DAY_IN_SECONDS);
         return sprintf(
             /* translators: %s: human-readable duration, e.g. "1 day". */
-            __('Link is time-limited to your login session (about %s); regenerate it if it stops working.', 'dono'),
+            __('Link is time-limited to your login session (about %s); regenerate it if it stops working.', 'dono-fundraising-platform'),
             human_time_diff(0, $life),
         );
     }

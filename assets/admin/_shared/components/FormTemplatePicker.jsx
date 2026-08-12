@@ -13,14 +13,14 @@ import Icon from './Icon';
 
 // Category values are stable grouping keys; translate only for display.
 const CATEGORY_LABELS = {
-    All:       __( 'All', 'dono' ),
-    Blank:     __( 'Blank', 'dono' ),
-    Starter:   __( 'Starter', 'dono' ),
-    Standard:  __( 'Standard', 'dono' ),
-    Recurring: __( 'Recurring', 'dono' ),
-    Wizard:    __( 'Wizard', 'dono' ),
-    Formal:    __( 'Formal', 'dono' ),
-    Other:     __( 'Other', 'dono' ),
+    All:       __( 'All', 'dono-fundraising-platform' ),
+    Blank:     __( 'Blank', 'dono-fundraising-platform' ),
+    Starter:   __( 'Starter', 'dono-fundraising-platform' ),
+    Standard:  __( 'Standard', 'dono-fundraising-platform' ),
+    Recurring: __( 'Recurring', 'dono-fundraising-platform' ),
+    Wizard:    __( 'Wizard', 'dono-fundraising-platform' ),
+    Formal:    __( 'Formal', 'dono-fundraising-platform' ),
+    Other:     __( 'Other', 'dono-fundraising-platform' ),
 };
 
 export default function FormTemplatePicker( { onPick, onClose, creating = false, intro } ) {
@@ -50,7 +50,7 @@ export default function FormTemplatePicker( { onPick, onClose, creating = false,
 
     return (
         <Modal
-            title={ __( 'Choose a starter template', 'dono' ) }
+            title={ __( 'Choose a starter template', 'dono-fundraising-platform' ) }
             onRequestClose={ onClose }
             className="dono-form-template-picker"
             size="large"

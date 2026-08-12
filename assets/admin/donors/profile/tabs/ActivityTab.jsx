@@ -48,7 +48,7 @@ export function eventTitle( event, campaignTitle ) {
         : null;
 
     const toCampaign = campaignTitle
-        ? <> { __( 'to', 'dono' ) } <span className="dp-tl-camp">{ campaignTitle }</span></>
+        ? <> { __( 'to', 'dono-fundraising-platform' ) } <span className="dp-tl-camp">{ campaignTitle }</span></>
         : null;
 
     let title = <>{ meta.label }</>;
@@ -56,32 +56,32 @@ export function eventTitle( event, campaignTitle ) {
     switch ( event.type ) {
         case 'donation.completed':
             title = amount
-                ? <>{ __( 'Donated', 'dono' ) } <strong>{ amount }</strong>{ toCampaign }</>
+                ? <>{ __( 'Donated', 'dono-fundraising-platform' ) } <strong>{ amount }</strong>{ toCampaign }</>
                 : title;
             break;
         case 'donation.intent_created':
             title = amount
-                ? <>{ __( 'Started a donation of', 'dono' ) } <strong>{ amount }</strong>{ toCampaign }</>
+                ? <>{ __( 'Started a donation of', 'dono-fundraising-platform' ) } <strong>{ amount }</strong>{ toCampaign }</>
                 : title;
             break;
         case 'donation.failed':
             title = amount
-                ? <>{ __( 'Payment of', 'dono' ) } <strong>{ amount }</strong> { __( 'failed', 'dono' ) }</>
+                ? <>{ __( 'Payment of', 'dono-fundraising-platform' ) } <strong>{ amount }</strong> { __( 'failed', 'dono-fundraising-platform' ) }</>
                 : title;
             break;
         case 'donation.refunded':
             title = amount
-                ? <>{ __( 'Refund of', 'dono' ) } <strong>{ amount }</strong> { __( 'issued', 'dono' ) }</>
+                ? <>{ __( 'Refund of', 'dono-fundraising-platform' ) } <strong>{ amount }</strong> { __( 'issued', 'dono-fundraising-platform' ) }</>
                 : title;
             break;
         case 'recurring.renewed':
             title = amount
-                ? <>{ __( 'Recurring renewal of', 'dono' ) } <strong>{ amount }</strong>{ toCampaign }</>
+                ? <>{ __( 'Recurring renewal of', 'dono-fundraising-platform' ) } <strong>{ amount }</strong>{ toCampaign }</>
                 : title;
             break;
         case 'recurring.failed':
             title = amount
-                ? <>{ __( 'Renewal of', 'dono' ) } <strong>{ amount }</strong> { __( 'was declined', 'dono' ) }</>
+                ? <>{ __( 'Renewal of', 'dono-fundraising-platform' ) } <strong>{ amount }</strong> { __( 'was declined', 'dono-fundraising-platform' ) }</>
                 : title;
             break;
         case 'recurring.amount_changed': {
@@ -90,8 +90,8 @@ export function eventTitle( event, campaignTitle ) {
             title = ( from !== undefined && to !== undefined )
                 ? (
                     <>
-                        { __( 'Recurring amount changed from', 'dono' ) } <strong>{ formatAmount( from, event.currency ) }</strong>
-                        { ' ' }{ __( 'to', 'dono' ) } <strong>{ formatAmount( to, event.currency ) }</strong>
+                        { __( 'Recurring amount changed from', 'dono-fundraising-platform' ) } <strong>{ formatAmount( from, event.currency ) }</strong>
+                        { ' ' }{ __( 'to', 'dono-fundraising-platform' ) } <strong>{ formatAmount( to, event.currency ) }</strong>
                     </>
                 )
                 : title;
@@ -123,7 +123,7 @@ function TimelineRow( { event, campaigns } ) {
         facts.push( <span key="rec" className="dp-tl-ref">{ event.receipt_number }</span> );
     }
     if ( event.payload?.by === 'admin' ) {
-        facts.push( <span key="by">{ __( 'by an admin', 'dono' ) }</span> );
+        facts.push( <span key="by">{ __( 'by an admin', 'dono-fundraising-platform' ) }</span> );
     }
 
     // A note the donor left with the gift, in the same row as the rest so the
@@ -160,8 +160,8 @@ function RecentDonationsCard( { donations, campaigns, lifetime, onAllDonations }
                         <EmptyState
                             compact
                             icon={ <Coins size={ 22 } strokeWidth={ 1.75 } /> }
-                            title={ __( 'No donations yet', 'dono' ) }
-                            body={ __( 'This donor’s donations will appear here as they come in.', 'dono' ) }
+                            title={ __( 'No donations yet', 'dono-fundraising-platform' ) }
+                            body={ __( 'This donor’s donations will appear here as they come in.', 'dono-fundraising-platform' ) }
                         />
                     )
                     : (
@@ -189,12 +189,12 @@ function RecentDonationsCard( { donations, campaigns, lifetime, onAllDonations }
                     ) }
             </div>
             <div className="dp-card__foot">
-                <span className="num">{ sprintf( /* translators: %d: lifetime donation count */ __( '%d lifetime', 'dono' ), lifetime.count ) }</span>
+                <span className="num">{ sprintf( /* translators: %d: lifetime donation count */ __( '%d lifetime', 'dono-fundraising-platform' ), lifetime.count ) }</span>
                 <a
                     href="#donations"
                     onClick={ ( e ) => { e.preventDefault(); onAllDonations?.(); } }
                 >
-                    { __( 'All donations →', 'dono' ) }
+                    { __( 'All donations →', 'dono-fundraising-platform' ) }
                 </a>
             </div>
         </div>
@@ -207,14 +207,14 @@ function ActivePlanCard( { plans } ) {
         return (
             <div className="dp-card">
                 <div className="dp-card__body" style={ { padding: '14px 18px' } }>
-                    <p className="dp-empty" style={ { padding: '8px 0' } }>{ __( 'No active recurring plan.', 'dono' ) }</p>
+                    <p className="dp-empty" style={ { padding: '8px 0' } }>{ __( 'No active recurring plan.', 'dono-fundraising-platform' ) }</p>
                 </div>
             </div>
         );
     }
     const pill = active.status === 'past_due'
-        ? { cls: 'is-warn', label: __( 'Past due', 'dono' ) }
-        : { cls: 'is-ok',   label: __( 'Active', 'dono' ) };
+        ? { cls: 'is-warn', label: __( 'Past due', 'dono-fundraising-platform' ) }
+        : { cls: 'is-ok',   label: __( 'Active', 'dono-fundraising-platform' ) };
     return (
         <div className="dp-card">
             <div className="dp-card__body" style={ { padding: '14px 18px' } }>
@@ -224,9 +224,9 @@ function ActivePlanCard( { plans } ) {
                     </strong>
                     <span className={ `dp-pill ${ pill.cls }` }>{ pill.label }</span>
                 </div>
-                <Row label={ __( 'Next attempt', 'dono' ) }       value={ formatDate( active.next_payment_at ) } />
-                <Row label={ __( 'Last successful', 'dono' ) }    value={ active.last_payment_at ? formatDate( active.last_payment_at ) : '-' } />
-                <Row label={ __( 'Lifetime on plan', 'dono' ) }   value={ formatAmount( active.total_paid_cents, active.currency ) } strong />
+                <Row label={ __( 'Next attempt', 'dono-fundraising-platform' ) }       value={ formatDate( active.next_payment_at ) } />
+                <Row label={ __( 'Last successful', 'dono-fundraising-platform' ) }    value={ active.last_payment_at ? formatDate( active.last_payment_at ) : '-' } />
+                <Row label={ __( 'Lifetime on plan', 'dono-fundraising-platform' ) }   value={ formatAmount( active.total_paid_cents, active.currency ) } strong />
             </div>
         </div>
     );
@@ -266,8 +266,8 @@ export default function ActivityTab( { donations, events, eventsTotal, campaigns
                                     <EmptyState
                                         compact
                                         icon={ <History size={ 22 } strokeWidth={ 1.75 } /> }
-                                        title={ __( 'No events yet', 'dono' ) }
-                                        body={ __( 'Status changes, refunds, and admin notes show up here over time.', 'dono' ) }
+                                        title={ __( 'No events yet', 'dono-fundraising-platform' ) }
+                                        body={ __( 'Status changes, refunds, and admin notes show up here over time.', 'dono-fundraising-platform' ) }
                                     />
                                 )
                                 : (
@@ -285,7 +285,7 @@ export default function ActivityTab( { donations, events, eventsTotal, campaigns
                                 <span className="num">
                                     { sprintf(
                                         /* translators: %d: total number of recorded events for this donor. */
-                                        _n( '%d event', '%d events', eventsTotal, 'dono' ),
+                                        _n( '%d event', '%d events', eventsTotal, 'dono-fundraising-platform' ),
                                         eventsTotal
                                     ) }
                                 </span>
@@ -294,7 +294,7 @@ export default function ActivityTab( { donations, events, eventsTotal, campaigns
                                         href="#activity"
                                         onClick={ ( e ) => { e.preventDefault(); onSeeAllActivity(); } }
                                     >
-                                        { __( 'All activity →', 'dono' ) }
+                                        { __( 'All activity →', 'dono-fundraising-platform' ) }
                                     </a>
                                 ) }
                             </div>

@@ -42,13 +42,13 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'HTML', 'dono' ) } initialOpen>
+                <PanelBody title={ __( 'HTML', 'dono-fundraising-platform' ) } initialOpen>
                     <TextareaControl
-                        label={ __( 'HTML markup', 'dono' ) }
+                        label={ __( 'HTML markup', 'dono-fundraising-platform' ) }
                         value={ content }
                         onChange={ ( v ) => setAttributes( { content: v } ) }
                         rows={ 8 }
-                        help={ __( 'Sanitised on save: scripts, iframes and embeds, event handlers, and JavaScript URLs are stripped.', 'dono' ) }
+                        help={ __( 'Sanitised on save: scripts, iframes and embeds, event handlers, and JavaScript URLs are stripped.', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -60,7 +60,7 @@ function Edit( { attributes, setAttributes } ) {
             <div { ...blockProps }>
                 { ! content ? (
                     <div className="dono-block-preview__html-empty">
-                        { __( 'Add HTML in the block settings panel.', 'dono' ) }
+                        { __( 'Add HTML in the block settings panel.', 'dono-fundraising-platform' ) }
                     </div>
                 ) : preview.trim() ? (
                     <Disabled>
@@ -68,7 +68,7 @@ function Edit( { attributes, setAttributes } ) {
                     </Disabled>
                 ) : (
                     <div className="dono-block-preview__html-empty">
-                        { __( 'Nothing to preview: scripts and embeds are removed when the form is saved.', 'dono' ) }
+                        { __( 'Nothing to preview: scripts and embeds are removed when the form is saved.', 'dono-fundraising-platform' ) }
                     </div>
                 ) }
             </div>
@@ -79,8 +79,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'HTML', 'dono' ),
-        description: __( 'Add a sponsor strip, formatted text, or other safe HTML. Scripts and embeds are stripped.', 'dono' ),
+        title:       __( 'HTML', 'dono-fundraising-platform' ),
+        description: __( 'Add a sponsor strip, formatted text, or other safe HTML. Scripts and embeds are stripped.', 'dono-fundraising-platform' ),
         category:    'dono-content',
         icon:        BlockIcons[ 'html' ],
         supports:    { html: false, anchor: false, inserter: true },

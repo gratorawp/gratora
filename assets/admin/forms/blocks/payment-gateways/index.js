@@ -17,7 +17,7 @@ function settingsReason( offInSettings ) {
         '%s is allowed here but switched off in Settings.',
         '%s are allowed here but switched off in Settings.',
         offInSettings.length,
-        'dono'
+        'dono-fundraising-platform'
     );
 
     return sprintf( template, names );
@@ -60,17 +60,17 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Payment gateways', 'dono' ) } initialOpen>
+                <PanelBody title={ __( 'Payment gateways', 'dono-fundraising-platform' ) } initialOpen>
                     { gateways.length === 0 && (
                         <Notice status="warning" isDismissible={ false }>
-                            { __( 'No gateways are connected yet. Set one up in Settings, Payment gateways.', 'dono' ) }
+                            { __( 'No gateways are connected yet. Set one up in Settings, Payment gateways.', 'dono-fundraising-platform' ) }
                         </Notice>
                     ) }
                     { gateways.map( ( g ) => (
                         <div key={ g.id } style={ { marginBottom: 12 } }>
                             <ToggleControl
                                 label={ g.enabled === false
-                                    ? `${ g.label } ${ __( '(off in Settings)', 'dono' ) }`
+                                    ? `${ g.label } ${ __( '(off in Settings)', 'dono-fundraising-platform' ) }`
                                     : g.label }
                                 checked={ isOn( g.id ) }
                                 onChange={ () => toggle( g.id ) }
@@ -78,7 +78,7 @@ function Edit( { attributes, setAttributes } ) {
                             />
                             { isOn( g.id ) && (
                                 <TextControl
-                                    label={ __( 'Description (optional)', 'dono' ) }
+                                    label={ __( 'Description (optional)', 'dono-fundraising-platform' ) }
                                     value={ descriptions[ g.id ] || '' }
                                     onChange={ ( v ) => setDesc( g.id, v ) }
                                     __nextHasNoMarginBottom
@@ -87,22 +87,22 @@ function Edit( { attributes, setAttributes } ) {
                         </div>
                     ) ) }
                     <SelectControl
-                        label={ __( 'Preselected', 'dono' ) }
-                        help={ __( 'Skipped for a donor whose currency or frequency it cannot take, who then gets the first one that works.', 'dono' ) }
+                        label={ __( 'Preselected', 'dono-fundraising-platform' ) }
+                        help={ __( 'Skipped for a donor whose currency or frequency it cannot take, who then gets the first one that works.', 'dono-fundraising-platform' ) }
                         value={ shown.some( ( g ) => g.id === preselected ) ? preselected : '' }
                         options={ [
-                            { value: '', label: __( 'First one that applies', 'dono' ) },
+                            { value: '', label: __( 'First one that applies', 'dono-fundraising-platform' ) },
                             ...shown.map( ( g ) => ( { value: g.id, label: g.label } ) ),
                         ] }
                         onChange={ ( v ) => setAttributes( { preselected: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Style', 'dono' ) }
+                        label={ __( 'Style', 'dono-fundraising-platform' ) }
                         value={ style }
                         options={ [
-                            { value: 'cards', label: __( 'Cards', 'dono' ) },
-                            { value: 'list',  label: __( 'Compact list', 'dono' ) },
+                            { value: 'cards', label: __( 'Cards', 'dono-fundraising-platform' ) },
+                            { value: 'list',  label: __( 'Compact list', 'dono-fundraising-platform' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { style: v } ) }
                         __nextHasNoMarginBottom
@@ -110,9 +110,9 @@ function Edit( { attributes, setAttributes } ) {
                 </PanelBody>
             </InspectorControls>
             <div { ...blockProps }>
-                <span className="dono-block-preview__label">{ __( 'Payment method', 'dono' ) }</span>
+                <span className="dono-block-preview__label">{ __( 'Payment method', 'dono-fundraising-platform' ) }</span>
                 { shown.length === 0
-                    ? <div className="dono-block-preview__field">{ __( 'Gateways appear here for the donor.', 'dono' ) }</div>
+                    ? <div className="dono-block-preview__field">{ __( 'Gateways appear here for the donor.', 'dono-fundraising-platform' ) }</div>
                     : shown.map( ( g ) => (
                         <div key={ g.id } className="dono-block-preview__field">
                             { g.label }
@@ -122,8 +122,8 @@ function Edit( { attributes, setAttributes } ) {
                 { shown.length <= 1 && (
                     <em className="dono-block-preview__hint">
                         { shown.length === 1
-                            ? __( 'One gateway is live, so the selector is hidden for donors.', 'dono' )
-                            : __( 'No gateway is live, so donors see nothing here.', 'dono' ) }
+                            ? __( 'One gateway is live, so the selector is hidden for donors.', 'dono-fundraising-platform' )
+                            : __( 'No gateway is live, so donors see nothing here.', 'dono-fundraising-platform' ) }
                         { offInSettings.length > 0 && ' ' + settingsReason( offInSettings ) }
                     </em>
                 ) }
@@ -135,8 +135,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Payment gateways', 'dono' ),
-        description: __( 'Lets the donor choose how to pay. Hidden automatically when only one applies.', 'dono' ),
+        title:      __( 'Payment gateways', 'dono-fundraising-platform' ),
+        description: __( 'Lets the donor choose how to pay. Hidden automatically when only one applies.', 'dono-fundraising-platform' ),
         category:   'dono-amount',
         icon:       BlockIcons[ 'payment-gateways' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

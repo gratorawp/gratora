@@ -8,11 +8,11 @@ import PlanActionDialog, { actionsFor, dueIn, isTerminal, retryActionFor } from 
 import { formatAmount, formatDateTime, planStatusPill } from '../helpers';
 
 const STATUS_OPTIONS = [
-    { value: 'active',    label: __( 'Active', 'dono' ) },
-    { value: 'past_due',  label: __( 'Past due', 'dono' ) },
-    { value: 'paused',    label: __( 'Paused', 'dono' ) },
-    { value: 'cancelled', label: __( 'Cancelled', 'dono' ) },
-    { value: 'expired',   label: __( 'Expired', 'dono' ) },
+    { value: 'active',    label: __( 'Active', 'dono-fundraising-platform' ) },
+    { value: 'past_due',  label: __( 'Past due', 'dono-fundraising-platform' ) },
+    { value: 'paused',    label: __( 'Paused', 'dono-fundraising-platform' ) },
+    { value: 'cancelled', label: __( 'Cancelled', 'dono-fundraising-platform' ) },
+    { value: 'expired',   label: __( 'Expired', 'dono-fundraising-platform' ) },
 ];
 
 /**
@@ -25,16 +25,16 @@ function intervalLabel( unit, count ) {
     switch ( unit ) {
         case 'day':
             /* translators: %d: number of days between charges. */
-            return sprintf( _n( '%d day', '%d days', n, 'dono' ), n );
+            return sprintf( _n( '%d day', '%d days', n, 'dono-fundraising-platform' ), n );
         case 'week':
             /* translators: %d: number of weeks between charges. */
-            return sprintf( _n( '%d week', '%d weeks', n, 'dono' ), n );
+            return sprintf( _n( '%d week', '%d weeks', n, 'dono-fundraising-platform' ), n );
         case 'month':
             /* translators: %d: number of months */
-            return sprintf( _n( '%d month', '%d months', n, 'dono' ), n );
+            return sprintf( _n( '%d month', '%d months', n, 'dono-fundraising-platform' ), n );
         case 'year':
             /* translators: %d: number of years between charges. */
-            return sprintf( _n( '%d year', '%d years', n, 'dono' ), n );
+            return sprintf( _n( '%d year', '%d years', n, 'dono-fundraising-platform' ), n );
         default:
             return n > 1 ? `${ n } ${ unit }` : String( unit );
     }
@@ -60,7 +60,7 @@ export default function RecurringTab( { recurring, onChange } ) {
     const fields = useMemo( () => [
         {
             id:    'plan',
-            label: __( 'Plan', 'dono' ),
+            label: __( 'Plan', 'dono-fundraising-platform' ),
             enableSorting: true,
             enableGlobalSearch: true,
             getValue: ( { item } ) => [ item.gateway, item.gateway_subscription_id ].filter( Boolean ).join( ' ' ),
@@ -73,7 +73,7 @@ export default function RecurringTab( { recurring, onChange } ) {
                                  leaves it out of the totals. */ }
                             { item.is_test && (
                                 <span className="dp-pill is-muted" style={ { marginLeft: 6 } }>
-                                    { __( 'Test', 'dono' ) }
+                                    { __( 'Test', 'dono-fundraising-platform' ) }
                                 </span>
                             ) }
                         </div>
@@ -84,7 +84,7 @@ export default function RecurringTab( { recurring, onChange } ) {
         },
         {
             id:    'amount',
-            label: __( 'Amount / interval', 'dono' ),
+            label: __( 'Amount / interval', 'dono-fundraising-platform' ),
             enableSorting: true,
             getValue: ( { item } ) => item.amount_cents,
             render: ( { item } ) => (
@@ -96,7 +96,7 @@ export default function RecurringTab( { recurring, onChange } ) {
         },
         {
             id:       'status',
-            label:    __( 'Status', 'dono' ),
+            label:    __( 'Status', 'dono-fundraising-platform' ),
             elements: STATUS_OPTIONS,
             filterBy: { operators: [ 'is' ] },
             enableSorting: true,
@@ -107,7 +107,7 @@ export default function RecurringTab( { recurring, onChange } ) {
         },
         {
             id:    'next_payment_at',
-            label: __( 'Next charge', 'dono' ),
+            label: __( 'Next charge', 'dono-fundraising-platform' ),
             enableSorting: true,
             render: ( { item } ) => ( isTerminal( item.status ) || ! item.next_payment_at )
                 ? <span className="dono-row__sub">-</span>
@@ -122,7 +122,7 @@ export default function RecurringTab( { recurring, onChange } ) {
         },
         {
             id:    'failed',
-            label: __( 'Renewal health', 'dono' ),
+            label: __( 'Renewal health', 'dono-fundraising-platform' ),
             enableSorting: true,
             getValue: ( { item } ) => item.failed_renewals_count || 0,
             render: ( { item } ) => item.failed_renewals_count > 0
@@ -130,16 +130,16 @@ export default function RecurringTab( { recurring, onChange } ) {
                     <span className="dono-pill is-warn">
                         { sprintf(
                             /* translators: %d: consecutive failed renewals. */
-                            _n( '%d failure', '%d failures', item.failed_renewals_count, 'dono' ),
+                            _n( '%d failure', '%d failures', item.failed_renewals_count, 'dono-fundraising-platform' ),
                             item.failed_renewals_count
                         ) }
                     </span>
                 )
-                : <span className="dono-row__sub">{ __( 'OK', 'dono' ) }</span>,
+                : <span className="dono-row__sub">{ __( 'OK', 'dono-fundraising-platform' ) }</span>,
         },
         {
             id:    'lifetime',
-            label: __( 'Lifetime', 'dono' ),
+            label: __( 'Lifetime', 'dono-fundraising-platform' ),
             enableSorting: true,
             getValue: ( { item } ) => item.total_paid_cents,
             render: ( { item } ) => (
@@ -149,7 +149,7 @@ export default function RecurringTab( { recurring, onChange } ) {
                         <div className="dono-row__sub">
                             { sprintf(
                                 /* translators: %d: number of donations */
-                                _n( '%d donation', '%d donations', item.payments_count, 'dono' ),
+                                _n( '%d donation', '%d donations', item.payments_count, 'dono-fundraising-platform' ),
                                 item.payments_count
                             ) }
                         </div>
@@ -169,7 +169,7 @@ export default function RecurringTab( { recurring, onChange } ) {
     const actions = useMemo( () => [
         {
             id:    'retry',
-            label: __( 'Retry payment', 'dono' ),
+            label: __( 'Retry payment', 'dono-fundraising-platform' ),
             // Outside the menu on purpose: collecting a failed renewal is the
             // reason this row is being looked at. The icon is not decoration --
             // DataViews draws a primary action as an icon button, and one
@@ -182,31 +182,31 @@ export default function RecurringTab( { recurring, onChange } ) {
         },
         {
             id:         'pause',
-            label:      __( 'Pause', 'dono' ),
+            label:      __( 'Pause', 'dono-fundraising-platform' ),
             isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'pause' ),
             callback:   ( items ) => setDialog( { plan: items[ 0 ], action: 'pause' } ),
         },
         {
             id:         'resume',
-            label:      __( 'Resume', 'dono' ),
+            label:      __( 'Resume', 'dono-fundraising-platform' ),
             isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'resume' ),
             callback:   ( items ) => setDialog( { plan: items[ 0 ], action: 'resume' } ),
         },
         {
             id:         'skip_next',
-            label:      __( 'Skip next', 'dono' ),
+            label:      __( 'Skip next', 'dono-fundraising-platform' ),
             isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'skip_next' ),
             callback:   ( items ) => setDialog( { plan: items[ 0 ], action: 'skip_next' } ),
         },
         {
             id:         'change_amount',
-            label:      __( 'Change amount', 'dono' ),
+            label:      __( 'Change amount', 'dono-fundraising-platform' ),
             isEligible: ( item ) => ! isTerminal( item.status ),
             callback:   ( items ) => setDialog( { plan: items[ 0 ], action: 'change_amount' } ),
         },
         {
             id:            'cancel',
-            label:         __( 'Cancel', 'dono' ),
+            label:         __( 'Cancel', 'dono-fundraising-platform' ),
             isDestructive: true,
             isEligible:    ( item ) => ! isTerminal( item.status ),
             callback:      ( items ) => setDialog( { plan: items[ 0 ], action: 'cancel' } ),
@@ -218,8 +218,8 @@ export default function RecurringTab( { recurring, onChange } ) {
             <div className="dp-card">
                 <EmptyState
                     compact
-                    title={ __( 'No subscriptions on file', 'dono' ) }
-                    body={ __( 'Recurring plans appear here once this donor sets one up on a form that offers it.', 'dono' ) }
+                    title={ __( 'No subscriptions on file', 'dono-fundraising-platform' ) }
+                    body={ __( 'Recurring plans appear here once this donor sets one up on a form that offers it.', 'dono-fundraising-platform' ) }
                 />
             </div>
         );
@@ -237,7 +237,7 @@ export default function RecurringTab( { recurring, onChange } ) {
                 paginationInfo={ paginationInfo }
                 defaultLayouts={ { table: {} } }
                 getItemId={ ( item ) => String( item.id ) }
-                searchLabel={ __( 'Search by subscription ID', 'dono' ) }
+                searchLabel={ __( 'Search by subscription ID', 'dono-fundraising-platform' ) }
             />
 
             { dialog && (

@@ -362,7 +362,7 @@ final class ReceiptIssuer
         $subject = strtr($subject, $tags);
         if (trim($subject) === '') {
             /* translators: %s: donation reference number */
-            $subject = sprintf(__('Your donation receipt - %s', 'dono'), $ctx->donation->reference);
+            $subject = sprintf(__('Your donation receipt - %s', 'dono-fundraising-platform'), $ctx->donation->reference);
         }
 
         // Honor the user-edited body when non-empty; otherwise fall back to
@@ -376,7 +376,7 @@ final class ReceiptIssuer
             // donations whatever the body content is.
             if (! empty($ctx->donation->is_test)) {
                 $body = '<p style="background:#fef2f2;border:1px solid #b91c1c;color:#b91c1c;font-weight:700;text-align:center;padding:10px;border-radius:6px;margin:0 0 20px;">'
-                      . esc_html__('Test donation. No real payment was made.', 'dono')
+                      . esc_html__('Test donation. No real payment was made.', 'dono-fundraising-platform')
                       . '</p>'
                       . $body;
             }
@@ -386,7 +386,7 @@ final class ReceiptIssuer
             $body .= sprintf(
                 '<p><a href="%s">%s</a></p>',
                 esc_url($downloadUrl),
-                esc_html__('Download receipt', 'dono')
+                esc_html__('Download receipt', 'dono-fundraising-platform')
             );
         } else {
             $body = View::load('Receipts.email', [

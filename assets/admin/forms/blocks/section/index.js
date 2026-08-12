@@ -25,11 +25,11 @@ const ALLOWED = [ 'dono/heading', 'dono/paragraph', 'dono/section' ];
 const BORDER_STYLES = [ 'none', 'solid', 'dashed', 'dotted' ];
 
 const SHADOW_PRESETS = [
-    { value: '',                                                                       label: __( 'None',       'dono' ) },
-    { value: '0 1px 2px rgba(15,23,42,.06)',                                           label: __( 'Subtle',     'dono' ) },
-    { value: '0 1px 3px rgba(15,23,42,.08), 0 1px 2px rgba(15,23,42,.04)',             label: __( 'Soft',       'dono' ) },
-    { value: '0 4px 14px rgba(15,23,42,.10)',                                          label: __( 'Medium',     'dono' ) },
-    { value: '0 12px 32px rgba(15,23,42,.14)',                                         label: __( 'Pronounced', 'dono' ) },
+    { value: '',                                                                       label: __( 'None',       'dono-fundraising-platform' ) },
+    { value: '0 1px 2px rgba(15,23,42,.06)',                                           label: __( 'Subtle',     'dono-fundraising-platform' ) },
+    { value: '0 1px 3px rgba(15,23,42,.08), 0 1px 2px rgba(15,23,42,.04)',             label: __( 'Soft',       'dono-fundraising-platform' ) },
+    { value: '0 4px 14px rgba(15,23,42,.10)',                                          label: __( 'Medium',     'dono-fundraising-platform' ) },
+    { value: '0 12px 32px rgba(15,23,42,.14)',                                         label: __( 'Pronounced', 'dono-fundraising-platform' ) },
 ];
 
 /**
@@ -88,38 +88,38 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Section', 'dono' ) } initialOpen>
-                    <Field label={ __( 'Background color', 'dono' ) }>
+                <PanelBody title={ __( 'Section', 'dono-fundraising-platform' ) } initialOpen>
+                    <Field label={ __( 'Background color', 'dono-fundraising-platform' ) }>
                         <ColorInput value={ background } onChange={ ( v ) => setAttributes( { background: v } ) } />
                     </Field>
 
-                    <Field label={ __( 'Text color', 'dono' ) }>
+                    <Field label={ __( 'Text color', 'dono-fundraising-platform' ) }>
                         <ColorInput value={ textColor } onChange={ ( v ) => setAttributes( { textColor: v } ) } />
                     </Field>
 
-                    <Field label={ __( 'Border color', 'dono' ) }>
+                    <Field label={ __( 'Border color', 'dono-fundraising-platform' ) }>
                         <ColorInput value={ border.color } onChange={ ( v ) => setBorder( { color: v } ) } />
                     </Field>
                     <Slider
-                        label={ __( 'Border width', 'dono' ) }
+                        label={ __( 'Border width', 'dono-fundraising-platform' ) }
                         value={ border.width || 0 }
                         onChange={ ( v ) => setBorder( { width: v } ) }
                         min={ 0 } max={ 20 } unit="px"
                     />
                     <Segmented
-                        label={ __( 'Border style', 'dono' ) }
+                        label={ __( 'Border style', 'dono-fundraising-platform' ) }
                         value={ border.style || 'solid' }
                         onChange={ ( v ) => setBorder( { style: v } ) }
                         options={ BORDER_STYLES }
                     />
                     <Slider
-                        label={ __( 'Border radius', 'dono' ) }
+                        label={ __( 'Border radius', 'dono-fundraising-platform' ) }
                         value={ border.radius || 0 }
                         onChange={ ( v ) => setBorder( { radius: v } ) }
                         min={ 0 } max={ 60 } unit="px"
                     />
 
-                    <Field label={ __( 'Shadow', 'dono' ) }>
+                    <Field label={ __( 'Shadow', 'dono-fundraising-platform' ) }>
                         <div className="dono-shadow-grid">
                             { SHADOW_PRESETS.map( ( p ) => {
                                 const isOn = ! showCustomShadow && shadow === p.value;
@@ -138,7 +138,7 @@ function Edit( { attributes, setAttributes } ) {
                                     >
                                         { p.value === '' ? (
                                             <span className="dono-shadow-grid__tile__none">
-                                                { __( 'None', 'dono' ) }
+                                                { __( 'None', 'dono-fundraising-platform' ) }
                                             </span>
                                         ) : (
                                             <span
@@ -158,11 +158,11 @@ function Edit( { attributes, setAttributes } ) {
                                 checked={ showCustomShadow }
                                 onChange={ ( e ) => setShowCustomShadow( e.target.checked ) }
                             />
-                            <span>{ __( 'Use custom shadow value', 'dono' ) }</span>
+                            <span>{ __( 'Use custom shadow value', 'dono-fundraising-platform' ) }</span>
                         </label>
                     </Field>
                     { showCustomShadow && (
-                        <Field label={ __( 'Custom shadow CSS', 'dono' ) } help={ __( 'Any valid box-shadow value.', 'dono' ) }>
+                        <Field label={ __( 'Custom shadow CSS', 'dono-fundraising-platform' ) } help={ __( 'Any valid box-shadow value.', 'dono-fundraising-platform' ) }>
                             <input
                                 type="text"
                                 className="dono-input"
@@ -174,7 +174,7 @@ function Edit( { attributes, setAttributes } ) {
                     ) }
 
                     <BoxControl
-                        title={ __( 'Padding', 'dono' ) }
+                        title={ __( 'Padding', 'dono-fundraising-platform' ) }
                         value={ padding }
                         onChange={ ( next ) => setAttributes( { padding: { ...padding, ...next } } ) }
                         sides="four"
@@ -182,7 +182,7 @@ function Edit( { attributes, setAttributes } ) {
                         linkable
                     />
                     <BoxControl
-                        title={ __( 'Margin', 'dono' ) }
+                        title={ __( 'Margin', 'dono-fundraising-platform' ) }
                         value={ margin }
                         onChange={ ( next ) => setAttributes( { margin: { ...margin, ...next } } ) }
                         sides="four"
@@ -190,7 +190,7 @@ function Edit( { attributes, setAttributes } ) {
                         linkable
                     />
                     <Slider
-                        label={ __( 'Minimum height', 'dono' ) }
+                        label={ __( 'Minimum height', 'dono-fundraising-platform' ) }
                         value={ minHeight || 0 }
                         onChange={ ( v ) => setAttributes( { minHeight: v } ) }
                         min={ 0 } max={ 800 } unit="px"
@@ -214,8 +214,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Section', 'dono' ),
-        description: __( 'A styled container for headings and copy. Use it for hero areas, impact statements, or intro blurbs.', 'dono' ),
+        title:       __( 'Section', 'dono-fundraising-platform' ),
+        description: __( 'A styled container for headings and copy. Use it for hero areas, impact statements, or intro blurbs.', 'dono-fundraising-platform' ),
         category:    'dono-content',
         icon:        BlockIcons[ 'section' ],
         supports:    { html: false, anchor: false, inserter: true },

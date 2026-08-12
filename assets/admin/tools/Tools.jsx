@@ -10,11 +10,11 @@ import MaintenanceTab from './tabs/MaintenanceTab';
 import SystemInfoTab from './tabs/SystemInfoTab';
 
 const TABS = [
-    { key: 'maintenance', label: __( 'Maintenance', 'dono' ) },
-    { key: 'logs',        label: __( 'Logs', 'dono' ) },
-    { key: 'system',      label: __( 'System info', 'dono' ) },
-    { key: 'export',      label: __( 'Export', 'dono' ) },
-    { key: 'import',      label: __( 'Import', 'dono' ) },
+    { key: 'maintenance', label: __( 'Maintenance', 'dono-fundraising-platform' ) },
+    { key: 'logs',        label: __( 'Logs', 'dono-fundraising-platform' ) },
+    { key: 'system',      label: __( 'System info', 'dono-fundraising-platform' ) },
+    { key: 'export',      label: __( 'Export', 'dono-fundraising-platform' ) },
+    { key: 'import',      label: __( 'Import', 'dono-fundraising-platform' ) },
 ];
 
 const fromHash = () => {
@@ -53,20 +53,20 @@ export default function Tools() {
     return (
         <div className="dono-settings-page">
             <div className="dono-crumbs">
-                <a href="admin.php?page=dono">{ __( 'Dono', 'dono' ) }</a>
+                <a href="admin.php?page=dono">{ __( 'Dono', 'dono-fundraising-platform' ) }</a>
                 <span className="sep">›</span>
-                <span>{ __( 'Tools', 'dono' ) }</span>
+                <span>{ __( 'Tools', 'dono-fundraising-platform' ) }</span>
                 <span className="sep">›</span>
                 <span>{ TABS.find( ( t ) => t.key === tab )?.label || '' }</span>
             </div>
 
             <div className="dono-page-head">
                 <div className="dono-page-head__title-row">
-                    <h1>{ __( 'Tools', 'dono' ) }</h1>
+                    <h1>{ __( 'Tools', 'dono-fundraising-platform' ) }</h1>
                 </div>
             </div>
 
-            <div className="dono-tabs" role="tablist" aria-label={ __( 'Tools sections', 'dono' ) }>
+            <div className="dono-tabs" role="tablist" aria-label={ __( 'Tools sections', 'dono-fundraising-platform' ) }>
                 <div className="dono-tabs__scroll">
                     { TABS.map( ( t ) => (
                         <a

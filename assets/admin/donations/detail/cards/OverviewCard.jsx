@@ -12,82 +12,82 @@ function KvRow( { label, children, strike = false } ) {
 }
 
 export default function OverviewCard( { donation } ) {
-    const channelLabel = CHANNEL_LABEL[ donation.channel ] || donation.channel || __( 'Direct', 'dono' );
+    const channelLabel = CHANNEL_LABEL[ donation.channel ] || donation.channel || __( 'Direct', 'dono-fundraising-platform' );
 
     return (
         <div className="dd-card">
             <div className="dd-card__body">
                 <div className="dd-kv">
-                    <KvRow label={ __( 'Amount', 'dono' ) }>
+                    <KvRow label={ __( 'Amount', 'dono-fundraising-platform' ) }>
                         <span className="dd-kv__val--big num">{ formatAmount( donation.amount_cents, donation.currency ) }</span>
                     </KvRow>
 
-                    <KvRow label={ __( 'Fee & net', 'dono' ) }>
+                    <KvRow label={ __( 'Fee & net', 'dono-fundraising-platform' ) }>
                         <span className="mono">
-                            { formatAmount( donation.fee_cents, donation.currency ) } { __( 'fee', 'dono' ) }
+                            { formatAmount( donation.fee_cents, donation.currency ) } { __( 'fee', 'dono-fundraising-platform' ) }
                             { ' · ' }
                             <strong style={ { color: 'var(--dd-accent-dark, #14693a)' } }>
-                                { formatAmount( donation.net_cents, donation.currency ) } { __( 'net', 'dono' ) }
+                                { formatAmount( donation.net_cents, donation.currency ) } { __( 'net', 'dono-fundraising-platform' ) }
                             </strong>
                         </span>
                     </KvRow>
 
-                    <KvRow label={ __( 'Gateway', 'dono' ) }>
+                    <KvRow label={ __( 'Gateway', 'dono-fundraising-platform' ) }>
                         <span style={ { textTransform: 'capitalize' } }>{ donation.gateway }</span>
                     </KvRow>
 
                     { donation.payment_method_brand && donation.payment_method_last4 && (
-                        <KvRow label={ __( 'Payment method', 'dono' ) }>
+                        <KvRow label={ __( 'Payment method', 'dono-fundraising-platform' ) }>
                             <span style={ { textTransform: 'capitalize' } }>{ donation.payment_method_brand }</span>
-                            { ' ' }{ __( 'ending', 'dono' ) }{ ' ' }
+                            { ' ' }{ __( 'ending', 'dono-fundraising-platform' ) }{ ' ' }
                             <span className="mono">{ donation.payment_method_last4 }</span>
                         </KvRow>
                     ) }
 
                     { donation.campaign && (
-                        <KvRow label={ __( 'Campaign', 'dono' ) }>
+                        <KvRow label={ __( 'Campaign', 'dono-fundraising-platform' ) }>
                             <a href={ campaignHref( donation.campaign.id ) }>{ donation.campaign.title }</a>
                         </KvRow>
                     ) }
 
                     { donation.fund && (
-                        <KvRow label={ __( 'Fund', 'dono' ) }>
+                        <KvRow label={ __( 'Fund', 'dono-fundraising-platform' ) }>
                             { donation.fund.name }
                         </KvRow>
                     ) }
 
                     { donation.form && (
-                        <KvRow label={ __( 'Form', 'dono' ) }>
+                        <KvRow label={ __( 'Form', 'dono-fundraising-platform' ) }>
                             <a href={ formEditorHref( donation.form.id ) }>{ donation.form.title }</a>
                         </KvRow>
                     ) }
 
-                    <KvRow label={ __( 'Channel', 'dono' ) }>
+                    <KvRow label={ __( 'Channel', 'dono-fundraising-platform' ) }>
                         <span className="dd-channel-chip">{ channelLabel }</span>
                     </KvRow>
 
-                    <KvRow label={ __( 'Donated', 'dono' ) }>
-                        { donation.paid_at ? timeAgo( donation.paid_at ) : __( 'not paid', 'dono' ) }
+                    <KvRow label={ __( 'Donated', 'dono-fundraising-platform' ) }>
+                        { donation.paid_at ? timeAgo( donation.paid_at ) : __( 'not paid', 'dono-fundraising-platform' ) }
                         <span className="dd-kv__sub">{ formatDateTime( donation.paid_at || donation.created_at ) }</span>
                     </KvRow>
 
                     { donation.frequency && donation.frequency !== 'one_time' && (
-                        <KvRow label={ __( 'Frequency', 'dono' ) }>
+                        <KvRow label={ __( 'Frequency', 'dono-fundraising-platform' ) }>
                             <span style={ { textTransform: 'capitalize' } }>{ donation.frequency }</span>
                             { donation.recurring_plan_id && (
-                                <span className="dd-kv__sub">{ __( 'Part of a recurring plan', 'dono' ) }</span>
+                                <span className="dd-kv__sub">{ __( 'Part of a recurring plan', 'dono-fundraising-platform' ) }</span>
                             ) }
                         </KvRow>
                     ) }
 
                     { donation.note_to_org && (
-                        <KvRow label={ __( 'Donor note', 'dono' ) }>
+                        <KvRow label={ __( 'Donor note', 'dono-fundraising-platform' ) }>
                             <em>&quot;{ donation.note_to_org }&quot;</em>
                         </KvRow>
                     ) }
 
                     { donation.custom_data && Object.keys( donation.custom_data ).length > 0 && (
-                        <KvRow label={ __( 'Form fields', 'dono' ) }>
+                        <KvRow label={ __( 'Form fields', 'dono-fundraising-platform' ) }>
                             <div className="dd-kv__customs">
                                 { Object.entries( donation.custom_data ).map( ( [ k, val ] ) => (
                                     <div key={ k } className="dd-kv__custom">

@@ -69,11 +69,11 @@ async function campaignDeleteMessage( campaignId ) {
                 'Permanently delete this campaign? Its %d form will also be deleted. This cannot be undone.',
                 'Permanently delete this campaign? Its %d forms will also be deleted. This cannot be undone.',
                 count,
-                'dono'
+                'dono-fundraising-platform'
             ),
             count,
         )
-        : __( 'Permanently delete this campaign? This cannot be undone.', 'dono' );
+        : __( 'Permanently delete this campaign? This cannot be undone.', 'dono-fundraising-platform' );
 }
 
 // The reason comes from the server, which reads it off the same rule the
@@ -84,10 +84,10 @@ function NotAcceptingNotice( { campaign, onPublish } ) {
     if ( ! reason ) return null;
 
     const COPY = {
-        draft:     __( 'This campaign is a draft, so it is not taking donations yet. Anyone who opens its form is turned away.', 'dono' ),
-        archived:  __( 'This campaign is archived and is not taking donations.', 'dono' ),
-        scheduled: __( 'This campaign has not started yet, so it is not taking donations until its start date.', 'dono' ),
-        ended:     __( 'This campaign has ended and is no longer taking donations.', 'dono' ),
+        draft:     __( 'This campaign is a draft, so it is not taking donations yet. Anyone who opens its form is turned away.', 'dono-fundraising-platform' ),
+        archived:  __( 'This campaign is archived and is not taking donations.', 'dono-fundraising-platform' ),
+        scheduled: __( 'This campaign has not started yet, so it is not taking donations until its start date.', 'dono-fundraising-platform' ),
+        ended:     __( 'This campaign has ended and is no longer taking donations.', 'dono-fundraising-platform' ),
     };
 
     return (
@@ -97,7 +97,7 @@ function NotAcceptingNotice( { campaign, onPublish } ) {
                 <>
                     { ' ' }
                     <Button variant="link" onClick={ onPublish }>
-                        { __( 'Publish it now', 'dono' ) }
+                        { __( 'Publish it now', 'dono-fundraising-platform' ) }
                     </Button>
                 </>
             ) }
@@ -121,7 +121,7 @@ export default function Detail( { id, tab } ) {
         if ( ! from ) return;
         notify.success( sprintf(
             /* translators: %s: source campaign title */
-            __( 'Duplicated from "%s". Review and rename before publishing.', 'dono' ),
+            __( 'Duplicated from "%s". Review and rename before publishing.', 'dono-fundraising-platform' ),
             from,
         ) );
         params.delete( 'duplicated_from' );
@@ -136,7 +136,7 @@ export default function Detail( { id, tab } ) {
     if ( c.notFound ) {
         return (
             <Notice status="error" isDismissible={ false }>
-                { __( 'Campaign not found.', 'dono' ) }
+                { __( 'Campaign not found.', 'dono-fundraising-platform' ) }
             </Notice>
         );
     }
@@ -166,7 +166,7 @@ export default function Detail( { id, tab } ) {
                         'Campaign archived. Cancelling %d subscription in the background.',
                         'Campaign archived. Cancelling %d subscriptions in the background.',
                         queued,
-                        'dono'
+                        'dono-fundraising-platform'
                     ),
                     queued
                 ) );
@@ -174,11 +174,11 @@ export default function Detail( { id, tab } ) {
                 return;
             }
             notify.success( nextStatus === 'archived'
-                ? __( 'Campaign archived.', 'dono' )
-                : __( 'Campaign restored to draft.', 'dono' ) );
+                ? __( 'Campaign archived.', 'dono-fundraising-platform' )
+                : __( 'Campaign restored to draft.', 'dono-fundraising-platform' ) );
             window.location.reload();
         } catch ( err ) {
-            setError( err?.message || __( 'Update failed.', 'dono' ) );
+            setError( err?.message || __( 'Update failed.', 'dono-fundraising-platform' ) );
         }
     };
 
@@ -196,7 +196,7 @@ export default function Detail( { id, tab } ) {
                     window.location.href = url;
                 }
             } catch ( err ) {
-                setError( err?.message || __( 'Duplicate failed.', 'dono' ) );
+                setError( err?.message || __( 'Duplicate failed.', 'dono-fundraising-platform' ) );
             }
             return;
         }
@@ -229,11 +229,11 @@ export default function Detail( { id, tab } ) {
                     data: { status: nextStatus },
                 } );
                 notify.success( name === 'publish'
-                    ? __( 'Campaign published.', 'dono' )
-                    : __( 'Campaign moved to draft.', 'dono' ) );
+                    ? __( 'Campaign published.', 'dono-fundraising-platform' )
+                    : __( 'Campaign moved to draft.', 'dono-fundraising-platform' ) );
                 window.location.reload();
             } catch ( err ) {
-                setError( err?.message || __( 'Update failed.', 'dono' ) );
+                setError( err?.message || __( 'Update failed.', 'dono-fundraising-platform' ) );
             }
             return;
         }
@@ -243,9 +243,9 @@ export default function Detail( { id, tab } ) {
             // and ticket rows, every one of which still blocks a delete.
             if ( campaign.delete_blocked ) {
                 setConfirm( {
-                    title:        __( 'This campaign cannot be deleted', 'dono' ),
+                    title:        __( 'This campaign cannot be deleted', 'dono-fundraising-platform' ),
                     message:      campaign.delete_blocked,
-                    confirmLabel: __( 'Archive instead', 'dono' ),
+                    confirmLabel: __( 'Archive instead', 'dono-fundraising-platform' ),
                     onConfirm:    () => onHeaderAction( 'archive' ),
                 } );
                 return;
@@ -253,9 +253,9 @@ export default function Detail( { id, tab } ) {
 
             const message = await campaignDeleteMessage( campaign.id );
             setConfirm( {
-                title:        __( 'Delete campaign', 'dono' ),
+                title:        __( 'Delete campaign', 'dono-fundraising-platform' ),
                 message,
-                confirmLabel: __( 'Delete', 'dono' ),
+                confirmLabel: __( 'Delete', 'dono-fundraising-platform' ),
                 destructive:  true,
                 onConfirm: async () => {
                     try {
@@ -265,7 +265,7 @@ export default function Detail( { id, tab } ) {
                         } );
                         window.location.href = listHref();
                     } catch ( err ) {
-                        setError( err?.message || __( 'Delete failed.', 'dono' ) );
+                        setError( err?.message || __( 'Delete failed.', 'dono-fundraising-platform' ) );
                     }
                 },
             } );
@@ -319,7 +319,7 @@ export default function Detail( { id, tab } ) {
 
             { archivePrompt && (
                 <Modal
-                    title={ __( 'Archive campaign', 'dono' ) }
+                    title={ __( 'Archive campaign', 'dono-fundraising-platform' ) }
                     onRequestClose={ () => setArchivePrompt( null ) }
                 >
                     <p style={ { marginTop: 0 } }>
@@ -329,28 +329,28 @@ export default function Detail( { id, tab } ) {
                                 'This campaign has %d active recurring donation.',
                                 'This campaign has %d active recurring donations.',
                                 archivePrompt.count,
-                                'dono'
+                                'dono-fundraising-platform'
                             ),
                             archivePrompt.count
                         ) }
                         { archivePrompt.mrr_cents > 0 && ' ' + sprintf(
                             /* translators: %s: formatted monthly amount */
-                            __( 'They renew for about %s per month.', 'dono' ),
+                            __( 'They renew for about %s per month.', 'dono-fundraising-platform' ),
                             formatAmount( archivePrompt.mrr_cents, archivePrompt.currency )
                         ) }
                     </p>
                     <p>
-                        { __( 'Archiving stops new donations. These subscriptions keep renewing and stay credited to this campaign unless you cancel them.', 'dono' ) }
+                        { __( 'Archiving stops new donations. These subscriptions keep renewing and stay credited to this campaign unless you cancel them.', 'dono-fundraising-platform' ) }
                     </p>
                     <CheckboxControl
-                        label={ __( 'Also cancel these subscriptions (donors will be emailed)', 'dono' ) }
+                        label={ __( 'Also cancel these subscriptions (donors will be emailed)', 'dono-fundraising-platform' ) }
                         checked={ cancelSubs }
                         onChange={ setCancelSubs }
                         __nextHasNoMarginBottom
                     />
                     <div style={ { display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 20 } }>
                         <Button variant="tertiary" onClick={ () => setArchivePrompt( null ) }>
-                            { __( 'Cancel', 'dono' ) }
+                            { __( 'Cancel', 'dono-fundraising-platform' ) }
                         </Button>
                         <Button
                             variant="primary"
@@ -360,7 +360,7 @@ export default function Detail( { id, tab } ) {
                                 runArchive( 'archived', cancelSubs );
                             } }
                         >
-                            { __( 'Archive campaign', 'dono' ) }
+                            { __( 'Archive campaign', 'dono-fundraising-platform' ) }
                         </Button>
                     </div>
                 </Modal>
@@ -375,7 +375,7 @@ function Header( { campaign } ) {
     return (
         <>
             <div className="dono-crumbs">
-                <a href={ listHref() }>{ __( 'Campaigns', 'dono' ) }</a>
+                <a href={ listHref() }>{ __( 'Campaigns', 'dono-fundraising-platform' ) }</a>
                 <span className="sep">›</span>
                 <span>{ campaign.title }</span>
             </div>
@@ -424,15 +424,15 @@ function IconSettingsTab( props ) {
 }
 
 const VIEW_TOGGLE_DEFS = [
-    { id: 'overview', label: __( 'Overview', 'dono' ), Icon: IconOverview },
-    { id: 'forms',    label: __( 'Forms',    'dono' ), Icon: IconFormsTab },
-    { id: 'settings', label: __( 'Settings', 'dono' ), Icon: IconSettingsTab },
+    { id: 'overview', label: __( 'Overview', 'dono-fundraising-platform' ), Icon: IconOverview },
+    { id: 'forms',    label: __( 'Forms',    'dono-fundraising-platform' ), Icon: IconFormsTab },
+    { id: 'settings', label: __( 'Settings', 'dono-fundraising-platform' ), Icon: IconSettingsTab },
 ];
 
 function ViewToggle( { active, campaignId, extra = [] } ) {
     const views = [ ...VIEW_TOGGLE_DEFS, ...extra ];
     return (
-        <div className="dono-view-toggle" role="tablist" aria-label={ __( 'Campaign sections', 'dono' ) }>
+        <div className="dono-view-toggle" role="tablist" aria-label={ __( 'Campaign sections', 'dono-fundraising-platform' ) }>
             { views.map( ( t ) => (
                 <a
                     key={ t.id }
@@ -457,11 +457,11 @@ function DetailNav( { campaign, activeTab, onAction, extraTabs = [] } ) {
             { campaign.page_edit_url && ( ! campaign.campaign_type || campaign.campaign_type === 'standard' ) && (
                 // Non-standard types (e.g. peer-to-peer) manage their pages from
                 // their own admin tab, so the single-page edit link is redundant.
-                <Btn href={ campaign.page_edit_url }>{ __( 'Edit campaign page', 'dono' ) }</Btn>
+                <Btn href={ campaign.page_edit_url }>{ __( 'Edit campaign page', 'dono-fundraising-platform' ) }</Btn>
             ) }
             { campaign.page_url && (
                 <Btn variant="ghost" href={ campaign.page_url } target="_blank" rel="noreferrer">
-                    { __( 'View page ↗', 'dono' ) }
+                    { __( 'View page ↗', 'dono-fundraising-platform' ) }
                 </Btn>
             ) }
             <HeaderMenu campaign={ campaign } onAction={ onAction } />
@@ -520,7 +520,7 @@ function HeaderMenu( { campaign, onAction } ) {
                 type="button"
                 ref={ triggerRef }
                 className="dono-menu__trigger"
-                aria-label={ __( 'Campaign actions', 'dono' ) }
+                aria-label={ __( 'Campaign actions', 'dono-fundraising-platform' ) }
                 aria-haspopup="menu"
                 aria-expanded={ open }
                 onClick={ () => setOpen( ( v ) => ! v ) }
@@ -531,22 +531,22 @@ function HeaderMenu( { campaign, onAction } ) {
                 <div className="dono-menu__list" role="menu">
                     { isDraft && (
                         <button type="button" role="menuitem" className="dono-menu__item is-primary" onClick={ () => fire( 'publish' ) }>
-                            { __( 'Publish campaign', 'dono' ) }
+                            { __( 'Publish campaign', 'dono-fundraising-platform' ) }
                         </button>
                     ) }
                     { isPublished && (
                         <button type="button" role="menuitem" className="dono-menu__item" onClick={ () => fire( 'unpublish' ) }>
-                            { __( 'Move to draft', 'dono' ) }
+                            { __( 'Move to draft', 'dono-fundraising-platform' ) }
                         </button>
                     ) }
                     <button type="button" role="menuitem" className="dono-menu__item" onClick={ () => fire( 'duplicate' ) }>
-                        { __( 'Duplicate campaign', 'dono' ) }
+                        { __( 'Duplicate campaign', 'dono-fundraising-platform' ) }
                     </button>
                     <button type="button" role="menuitem" className="dono-menu__item" onClick={ () => fire( isArchived ? 'unarchive' : 'archive' ) }>
-                        { isArchived ? __( 'Restore to draft', 'dono' ) : __( 'Archive campaign', 'dono' ) }
+                        { isArchived ? __( 'Restore to draft', 'dono-fundraising-platform' ) : __( 'Archive campaign', 'dono-fundraising-platform' ) }
                     </button>
                     <button type="button" role="menuitem" className="dono-menu__item is-danger" onClick={ () => fire( 'delete' ) }>
-                        { __( 'Delete…', 'dono' ) }
+                        { __( 'Delete…', 'dono-fundraising-platform' ) }
                     </button>
                 </div>
             ) }
@@ -569,7 +569,7 @@ function formatCardNames( names ) {
     if ( names.length <= 3 ) return names.join( ', ' );
     return sprintf(
         /* translators: 1: first three section names, 2: count of remaining */
-        __( '%1$s, and %2$d more', 'dono' ),
+        __( '%1$s, and %2$d more', 'dono-fundraising-platform' ),
         names.slice( 0, 3 ).join( ', ' ),
         names.length - 3,
     );
@@ -585,7 +585,7 @@ function useLastSavedLabel( updatedAt ) {
     if ( ! updatedAt ) return null;
     return sprintf(
         /* translators: %s: relative time ago, e.g. "4m ago" */
-        __( 'Last saved %s', 'dono' ),
+        __( 'Last saved %s', 'dono-fundraising-platform' ),
         timeAgo( updatedAt ),
     );
 }
@@ -627,7 +627,7 @@ function OverviewTab( { campaign, nav, onError } ) {
             .then( ( m ) => { if ( ! aborted ) setMetrics( ( prev ) => ( { ...( prev || {} ), ...m } ) ); } )
             // Surface the failure instead of leaving the zero-fallback metrics
             // on screen as if they were real data.
-            .catch( ( e ) => { if ( ! aborted ) onError?.( e?.message || __( 'Could not load campaign metrics.', 'dono' ) ); } )
+            .catch( ( e ) => { if ( ! aborted ) onError?.( e?.message || __( 'Could not load campaign metrics.', 'dono-fundraising-platform' ) ); } )
             .finally( () => { if ( ! aborted ) setLoading( false ); } );
         return () => { aborted = true; };
     }, [ range, compareMode, campaign.id, includeKey ] );
@@ -661,25 +661,25 @@ function OverviewTab( { campaign, nav, onError } ) {
 
     const registry = {
         kpis: {
-            title: __( 'Key metrics', 'dono' ),
+            title: __( 'Key metrics', 'dono-fundraising-platform' ),
             span:  'full',
             bare:  true,
             render: () => (
                 <div className="dono-overview__metrics">
                     <GoalProgressCard campaign={ campaign } metrics={ m } />
-                    <MetricCard label={ __( 'Amount raised', 'dono' ) }
+                    <MetricCard label={ __( 'Amount raised', 'dono-fundraising-platform' ) }
                                 value={ formatAmount( m.amount_raised_cents ) }
                                 changePct={ cmp?.amount_raised_cents }
                                 icon={ <IconCoins /> } />
-                    <MetricCard label={ __( 'Donations', 'dono' ) }
+                    <MetricCard label={ __( 'Donations', 'dono-fundraising-platform' ) }
                                 value={ String( m.donations_count ) }
                                 changePct={ cmp?.donations_count }
                                 icon={ <IconHeart /> } />
-                    <MetricCard label={ __( 'Donors', 'dono' ) }
+                    <MetricCard label={ __( 'Donors', 'dono-fundraising-platform' ) }
                                 value={ String( m.donors_count ) }
                                 changePct={ cmp?.donors_count }
                                 icon={ <IconUsers /> } />
-                    <MetricCard label={ __( 'Average donation', 'dono' ) }
+                    <MetricCard label={ __( 'Average donation', 'dono-fundraising-platform' ) }
                                 value={ formatAmount( m.avg_donation_cents ) }
                                 changePct={ cmp?.avg_donation_cents }
                                 icon={ <IconActivity /> } />
@@ -687,7 +687,7 @@ function OverviewTab( { campaign, nav, onError } ) {
             ),
         },
         revenue: {
-            title: __( 'Revenue', 'dono' ),
+            title: __( 'Revenue', 'dono-fundraising-platform' ),
             span:  'full',
             render: () => (
                 <RevenueChart
@@ -699,44 +699,44 @@ function OverviewTab( { campaign, nav, onError } ) {
             ),
         },
         cohort: {
-            title: __( 'Donor cohort', 'dono' ),
+            title: __( 'Donor cohort', 'dono-fundraising-platform' ),
             render: () => <DonorCohort cohort={ m.cohort } />,
         },
         distribution: {
-            title: __( 'Donation shape', 'dono' ),
+            title: __( 'Donation shape', 'dono-fundraising-platform' ),
             render: () => <DistributionHistogram distribution={ m.distribution } currency={ defaultCurrency() } />,
         },
         heatmap: {
-            title: __( 'When donors give', 'dono' ),
+            title: __( 'When donors give', 'dono-fundraising-platform' ),
             span:  'full',
             render: () => <DowHourHeatmap data={ m.dow_hour } />,
         },
         timeline: {
-            title: __( 'Timeline', 'dono' ),
+            title: __( 'Timeline', 'dono-fundraising-platform' ),
             render: () => <TimelineCard timeline={ m.timeline } />,
         },
         stories: {
-            title: __( 'Stories', 'dono' ),
+            title: __( 'Stories', 'dono-fundraising-platform' ),
             render: () => <Stories rows={ m.notes || [] } />,
         },
         recent: {
-            title: __( 'Recent donations', 'dono' ),
+            title: __( 'Recent donations', 'dono-fundraising-platform' ),
             render: () => <RecentDonations rows={ m.recent_donations } />,
         },
         'top-donors': {
-            title: __( 'Top donors', 'dono' ),
+            title: __( 'Top donors', 'dono-fundraising-platform' ),
             render: () => <TopDonors rows={ m.top_donors } currency={ defaultCurrency() } />,
         },
         'top-forms': {
-            title: __( 'Top forms', 'dono' ),
+            title: __( 'Top forms', 'dono-fundraising-platform' ),
             render: () => <TopForms rows={ m.top_forms } currency={ defaultCurrency() } donationsCount={ m.donations_count } />,
         },
         channel: {
-            title: __( 'By channel', 'dono' ),
+            title: __( 'By channel', 'dono-fundraising-platform' ),
             render: () => <ChannelBreakdown rows={ m.by_channel } currency={ defaultCurrency() } />,
         },
         gateway: {
-            title: __( 'By payment method', 'dono' ),
+            title: __( 'By payment method', 'dono-fundraising-platform' ),
             render: () => <GatewayBreakdown rows={ m.by_gateway } currency={ defaultCurrency() } />,
         },
     };
@@ -760,13 +760,13 @@ function CampaignReportButton( { campaignId, reportRange } ) {
                         `campaign-${ campaignId }.pdf`
                     );
                 } catch ( err ) {
-                    notify.error( err?.message || __( 'Could not build the report.', 'dono' ) );
+                    notify.error( err?.message || __( 'Could not build the report.', 'dono-fundraising-platform' ) );
                 } finally {
                     setBusy( false );
                 }
             } }
         >
-            { __( 'Download report', 'dono' ) }
+            { __( 'Download report', 'dono-fundraising-platform' ) }
         </Btn>
     );
 }
@@ -810,10 +810,10 @@ function TimelineCard( { timeline } ) {
 
     const { kind, days, total_days } = timeline;
     const label = kind === 'remaining'
-        ? __( 'Days remaining', 'dono' )
+        ? __( 'Days remaining', 'dono-fundraising-platform' )
         : kind === 'ended'
-            ? __( 'Days since ended', 'dono' )
-            : __( 'Days running', 'dono' );
+            ? __( 'Days since ended', 'dono-fundraising-platform' )
+            : __( 'Days running', 'dono-fundraising-platform' );
 
     const pct = total_days
         ? Math.min( 100, Math.round( ( ( total_days - days ) / total_days ) * 100 ) )
@@ -825,7 +825,7 @@ function TimelineCard( { timeline } ) {
             <div className="dono-timeline__value">{ days }</div>
             <div className="dono-timeline__sub">
                 { kind === 'remaining' && total_days &&
-                    sprintf( /* translators: %d: total days */ __( 'of %d total', 'dono' ), total_days ) }
+                    sprintf( /* translators: %d: total days */ __( 'of %d total', 'dono-fundraising-platform' ), total_days ) }
             </div>
             { pct !== null && (
                 <div className="dono-timeline__bar">
@@ -842,8 +842,8 @@ function RecentDonations( { rows } ) {
             <EmptyState
                 compact
                 icon={ <Coins size={ 22 } strokeWidth={ 1.75 } /> }
-                title={ __( 'No donations yet', 'dono' ) }
-                body={ __( 'Recent donor activity will appear here once your form is live and the first donation lands.', 'dono' ) }
+                title={ __( 'No donations yet', 'dono-fundraising-platform' ) }
+                body={ __( 'Recent donor activity will appear here once your form is live and the first donation lands.', 'dono-fundraising-platform' ) }
             />
         );
     }
@@ -878,11 +878,11 @@ function TopForms( { rows, currency, donationsCount = 0 } ) {
                 compact
                 icon={ <ListChecks size={ 22 } strokeWidth={ 1.75 } /> }
                 title={ gotDonations
-                    ? __( 'No donations through a form yet', 'dono' )
-                    : __( 'No form data yet', 'dono' ) }
+                    ? __( 'No donations through a form yet', 'dono-fundraising-platform' )
+                    : __( 'No form data yet', 'dono-fundraising-platform' ) }
                 body={ gotDonations
-                    ? __( 'This campaign\'s donations were recorded without a form, so there is nothing to rank. Donations made through a donation form appear here.', 'dono' )
-                    : __( 'Once donations come in, this card ranks your forms by total raised.', 'dono' ) }
+                    ? __( 'This campaign\'s donations were recorded without a form, so there is nothing to rank. Donations made through a donation form appear here.', 'dono-fundraising-platform' )
+                    : __( 'Once donations come in, this card ranks your forms by total raised.', 'dono-fundraising-platform' ) }
             />
         );
     }
@@ -904,7 +904,7 @@ function TopForms( { rows, currency, donationsCount = 0 } ) {
                             <td className="dono-table__right">
                                 <div className="dono-table__primary">{ formatAmount( r.amount_cents, currency ) }</div>
                                 <div className="dono-table__sub">
-                                    { sprintf( /* translators: %d: number of donations */ _n( '%d donation', '%d donations', r.donations_count, 'dono' ), r.donations_count ) }
+                                    { sprintf( /* translators: %d: number of donations */ _n( '%d donation', '%d donations', r.donations_count, 'dono-fundraising-platform' ), r.donations_count ) }
                                 </div>
                             </td>
                         </tr>
@@ -930,8 +930,8 @@ function GatewayBreakdown( { rows, currency } ) {
             <EmptyState
                 compact
                 icon={ <HandHeart size={ 22 } strokeWidth={ 1.75 } /> }
-                title={ __( 'No payments yet', 'dono' ) }
-                body={ __( 'Gateway breakdown shows up after the first paid donation.', 'dono' ) }
+                title={ __( 'No payments yet', 'dono-fundraising-platform' ) }
+                body={ __( 'Gateway breakdown shows up after the first paid donation.', 'dono-fundraising-platform' ) }
             />
         );
     }
@@ -979,8 +979,8 @@ function TopDonors( { rows, currency } ) {
             <EmptyState
                 compact
                 icon={ <UsersIcon size={ 22 } strokeWidth={ 1.75 } /> }
-                title={ __( 'No donors yet', 'dono' ) }
-                body={ __( 'Top supporters appear here after the first donation completes.', 'dono' ) }
+                title={ __( 'No donors yet', 'dono-fundraising-platform' ) }
+                body={ __( 'Top supporters appear here after the first donation completes.', 'dono-fundraising-platform' ) }
             />
         );
     }
@@ -994,7 +994,7 @@ function TopDonors( { rows, currency } ) {
                             <div className="dono-table__sub">
                                 { sprintf(
                                     /* translators: %d: number of donations */
-                                    _n( '%d donation', '%d donations', r.donations_count, 'dono' ),
+                                    _n( '%d donation', '%d donations', r.donations_count, 'dono-fundraising-platform' ),
                                     r.donations_count
                                 ) }
                             </div>
@@ -1041,14 +1041,14 @@ function GoalProgressCard( { campaign } ) {
                     </svg>
                 </span>
             </div>
-            <div className="dono-metric__label">{ __( 'Goal progress', 'dono' ) }</div>
+            <div className="dono-metric__label">{ __( 'Goal progress', 'dono-fundraising-platform' ) }</div>
             <div className="dono-metric__row">
                 <div className="dono-metric__value">{ pct === null ? '-' : `${ pct }%` }</div>
             </div>
             <div className="dono-metric__sub">
                 { target > 0
                     ? `${ fmt( current ) } / ${ fmt( target ) }`
-                    : __( 'No goal set', 'dono' ) }
+                    : __( 'No goal set', 'dono-fundraising-platform' ) }
             </div>
             { target > 0 && (
                 <div className="dono-metric__bar" aria-hidden="true">
@@ -1087,13 +1087,13 @@ function ShortcodeCell( { slug } ) {
             className="dono-shortcode-copy"
             onMouseDown={ stopRowSelect }
             onClick={ copy }
-            title={ __( 'Copy shortcode', 'dono' ) }
-            aria-label={ __( 'Copy shortcode', 'dono' ) }
+            title={ __( 'Copy shortcode', 'dono-fundraising-platform' ) }
+            aria-label={ __( 'Copy shortcode', 'dono-fundraising-platform' ) }
         >
             <code className="dono-shortcode-copy__code">{ code }</code>
             <span className="dono-shortcode-copy__hint">
                 { copied
-                    ? __( 'Copied', 'dono' )
+                    ? __( 'Copied', 'dono-fundraising-platform' )
                     : <CopyIcon size={ 14 } strokeWidth={ 1.75 } /> }
             </span>
         </button>
@@ -1149,7 +1149,7 @@ function FormsTab( { campaign } ) {
             } )
             .catch( ( err ) => {
                 if ( aborted ) return;
-                setError( err?.message || __( 'Failed to load forms.', 'dono' ) );
+                setError( err?.message || __( 'Failed to load forms.', 'dono-fundraising-platform' ) );
             } )
             .finally( () => ! aborted && setLoading( false ) );
 
@@ -1165,7 +1165,7 @@ function FormsTab( { campaign } ) {
             const payload = {
                 title:       template?.name
                     ? `${ template.name } form`
-                    : __( 'Untitled donation form', 'dono' ),
+                    : __( 'Untitled donation form', 'dono-fundraising-platform' ),
                 campaign_id: campaign.id,
                 blocks:      template?.blocks || '',
             };
@@ -1179,7 +1179,7 @@ function FormsTab( { campaign } ) {
             } );
             window.location.href = formEditorHref( f.id );
         } catch ( err ) {
-            setError( err?.message || __( 'Could not create form.', 'dono' ) );
+            setError( err?.message || __( 'Could not create form.', 'dono-fundraising-platform' ) );
             setCreating( false );
             setPickerOpen( false );
         }
@@ -1188,7 +1188,7 @@ function FormsTab( { campaign } ) {
     const fields = useMemo( () => [
         {
             id:            'title',
-            label:         __( 'Title', 'dono' ),
+            label:         __( 'Title', 'dono-fundraising-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <div style={ { lineHeight: 1.3 } }>
@@ -1197,7 +1197,7 @@ function FormsTab( { campaign } ) {
                     </a>
                     { item.id === defaultFormId && (
                         <span className="dono-default-pill">
-                            { __( 'Default', 'dono' ) }
+                            { __( 'Default', 'dono-fundraising-platform' ) }
                         </span>
                     ) }
                     <div className="dono-row__sub dono-row__sub--mono">
@@ -1208,14 +1208,14 @@ function FormsTab( { campaign } ) {
         },
         {
             id:       'status',
-            label:    __( 'Status', 'dono' ),
+            label:    __( 'Status', 'dono-fundraising-platform' ),
             elements: FORM_STATUS_OPTIONS,
             filterBy: { operators: [ 'is' ] },
             render:   ( { item } ) => <StatusBadge status={ item.status } />,
         },
         {
             id:            'updated_at',
-            label:         __( 'Updated', 'dono' ),
+            label:         __( 'Updated', 'dono-fundraising-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <span className="dono-row__sub">
@@ -1225,12 +1225,12 @@ function FormsTab( { campaign } ) {
         },
         {
             id:    'goal',
-            label: __( 'Goal', 'dono' ),
+            label: __( 'Goal', 'dono-fundraising-platform' ),
             render: ( { item } ) => <GoalCell item={ item } />,
         },
         {
             id:     'shortcode',
-            label:  __( 'Shortcode', 'dono' ),
+            label:  __( 'Shortcode', 'dono-fundraising-platform' ),
             render: ( { item } ) => <ShortcodeCell slug={ item.slug } />,
         },
     ], [ defaultFormId ] );
@@ -1244,14 +1244,14 @@ function FormsTab( { campaign } ) {
             } );
             setDefaultFormId( formId );
         } catch ( err ) {
-            setError( err?.message || __( 'Could not set default form.', 'dono' ) );
+            setError( err?.message || __( 'Could not set default form.', 'dono-fundraising-platform' ) );
         }
     }, [ campaign.id ] );
 
     const actions = useMemo( () => [
         {
             id:       'edit',
-            label:    __( 'Edit', 'dono' ),
+            label:    __( 'Edit', 'dono-fundraising-platform' ),
             isPrimary: true,
             callback: ( items ) => {
                 if ( items[ 0 ] ) window.location.href = formEditorHref( items[ 0 ].id );
@@ -1259,7 +1259,7 @@ function FormsTab( { campaign } ) {
         },
         {
             id:       'set-default',
-            label:    __( 'Set as default', 'dono' ),
+            label:    __( 'Set as default', 'dono-fundraising-platform' ),
             isEligible: ( item ) =>
                 item.id !== defaultFormId && item.status === 'published',
             callback: ( items ) => {
@@ -1268,7 +1268,7 @@ function FormsTab( { campaign } ) {
         },
         {
             id:    'duplicate',
-            label: __( 'Duplicate', 'dono' ),
+            label: __( 'Duplicate', 'dono-fundraising-platform' ),
             // WP `<Icon>` cloneElements an icon-as-element with its own
             // size={24}. A render function takes the `typeof === 'function'`
             // branch instead, where the size sticks.
@@ -1291,13 +1291,13 @@ function FormsTab( { campaign } ) {
                     } ) ) );
                     load();
                 } catch ( err ) {
-                    setError( err?.message || __( 'Could not duplicate one or more forms.', 'dono' ) );
+                    setError( err?.message || __( 'Could not duplicate one or more forms.', 'dono-fundraising-platform' ) );
                 }
             },
         },
         {
             id:     'delete',
-            label:  __( 'Delete', 'dono' ),
+            label:  __( 'Delete', 'dono-fundraising-platform' ),
             icon:   () => <TrashIcon size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             supportsBulk: true,
@@ -1308,21 +1308,21 @@ function FormsTab( { campaign } ) {
                 const targets = items.filter( ( i ) => i.id !== defaultFormId );
                 if ( ! targets.length ) return;
                 const message = targets.length === 1
-                    ? __( 'Permanently delete this form? This cannot be undone.', 'dono' )
+                    ? __( 'Permanently delete this form? This cannot be undone.', 'dono-fundraising-platform' )
                     : sprintf(
                         /* translators: %d: number of forms to delete */
                         _n(
                             'Permanently delete %d form? This cannot be undone.',
                             'Permanently delete %d forms? This cannot be undone.',
                             targets.length,
-                            'dono'
+                            'dono-fundraising-platform'
                         ),
                         targets.length
                     );
                 setConfirm( {
-                    title:        _n( 'Delete form', 'Delete forms', targets.length, 'dono' ),
+                    title:        _n( 'Delete form', 'Delete forms', targets.length, 'dono-fundraising-platform' ),
                     message,
-                    confirmLabel: __( 'Delete', 'dono' ),
+                    confirmLabel: __( 'Delete', 'dono-fundraising-platform' ),
                     destructive:  true,
                     onConfirm: async () => {
                         try {
@@ -1332,7 +1332,7 @@ function FormsTab( { campaign } ) {
                             } ) ) );
                             load();
                         } catch ( err ) {
-                            setError( err?.message || __( 'Could not delete one or more forms.', 'dono' ) );
+                            setError( err?.message || __( 'Could not delete one or more forms.', 'dono-fundraising-platform' ) );
                         }
                     },
                 } );
@@ -1349,12 +1349,12 @@ function FormsTab( { campaign } ) {
         <div>
             <div style={ { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 } }>
                 <h2 style={ { margin: 0, fontSize: 16 } }>
-                    { __( 'Forms', 'dono' ) }
+                    { __( 'Forms', 'dono-fundraising-platform' ) }
                     <span style={ { color: '#666', fontWeight: 400, marginLeft: 8 } }>({ total })</span>
                 </h2>
                 <Btn variant="primary" onClick={ () => setPickerOpen( true ) } disabled={ creating }>
                     <Plus size={ 16 } strokeWidth={ 1.75 } />
-                    { __( 'Add new form', 'dono' ) }
+                    { __( 'Add new form', 'dono-fundraising-platform' ) }
                 </Btn>
             </div>
 
@@ -1365,11 +1365,11 @@ function FormsTab( { campaign } ) {
             { ! loading && total === 0 && ! view.search && ! statusFilter ? (
                 <EmptyState
                     icon={ <ListChecks size={ 22 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'No forms yet', 'dono' ) }
-                    body={ __( 'Donation forms collect the actual donations for this campaign. Pick a template to get started, then customize everything inside.', 'dono' ) }
+                    title={ __( 'No forms yet', 'dono-fundraising-platform' ) }
+                    body={ __( 'Donation forms collect the actual donations for this campaign. Pick a template to get started, then customize everything inside.', 'dono-fundraising-platform' ) }
                     action={
                         <Btn variant="primary" onClick={ () => setPickerOpen( true ) } disabled={ creating }>
-                            { __( 'Add your first form', 'dono' ) }
+                            { __( 'Add your first form', 'dono-fundraising-platform' ) }
                         </Btn>
                     }
                 />
@@ -1404,17 +1404,17 @@ function FormsTab( { campaign } ) {
 
 
 const GOAL_TYPES = [
-    { value: 'amount',    label: __( 'Amount raised', 'dono' ) },
-    { value: 'donations', label: __( 'Number of donations', 'dono' ) },
-    { value: 'donors',    label: __( 'Number of donors', 'dono' ) },
+    { value: 'amount',    label: __( 'Amount raised', 'dono-fundraising-platform' ) },
+    { value: 'donations', label: __( 'Number of donations', 'dono-fundraising-platform' ) },
+    { value: 'donors',    label: __( 'Number of donors', 'dono-fundraising-platform' ) },
 ];
 
 const SUB_TABS = [
-    { key: 'general',    label: __( 'General', 'dono' ),    Icon: IconGeneral },
-    { key: 'goal',       label: __( 'Goal', 'dono' ),       Icon: IconGoal },
-    { key: 'appearance', label: __( 'Appearance', 'dono' ), Icon: IconAppearance },
-    { key: 'defaults',   label: __( 'Defaults', 'dono' ),   Icon: IconDefaults },
-    { key: 'advanced',   label: __( 'Advanced', 'dono' ),   Icon: IconAdvanced },
+    { key: 'general',    label: __( 'General', 'dono-fundraising-platform' ),    Icon: IconGeneral },
+    { key: 'goal',       label: __( 'Goal', 'dono-fundraising-platform' ),       Icon: IconGoal },
+    { key: 'appearance', label: __( 'Appearance', 'dono-fundraising-platform' ), Icon: IconAppearance },
+    { key: 'defaults',   label: __( 'Defaults', 'dono-fundraising-platform' ),   Icon: IconDefaults },
+    { key: 'advanced',   label: __( 'Advanced', 'dono-fundraising-platform' ),   Icon: IconAdvanced },
 ];
 
 const FIELD_TO_SUBTAB = {
@@ -1427,22 +1427,22 @@ const FIELD_TO_SUBTAB = {
 };
 
 const fieldToCard = () => ( {
-    title:                __( 'Identity', 'dono' ),
-    description:          __( 'Identity', 'dono' ),
-    slug:                 __( 'Public address', 'dono' ),
-    image_attachment_id:  __( 'Cover image', 'dono' ),
-    image_url:            __( 'Cover image', 'dono' ),
-    status:               __( 'Status & schedule', 'dono' ),
-    starts_at:            __( 'Status & schedule', 'dono' ),
-    ends_at:              __( 'Status & schedule', 'dono' ),
-    goal_type:            __( 'Goal', 'dono' ),
-    goal_cents:           __( 'Goal', 'dono' ),
-    goal_count:           __( 'Goal', 'dono' ),
-    style:                __( 'Appearance', 'dono' ),
-    hide_header:          __( 'Page header & footer', 'dono' ),
-    hide_footer:          __( 'Page header & footer', 'dono' ),
-    default_form_id:      __( 'Default form', 'dono' ),
-    default_fund_id:      __( 'Default fund', 'dono' ),
+    title:                __( 'Identity', 'dono-fundraising-platform' ),
+    description:          __( 'Identity', 'dono-fundraising-platform' ),
+    slug:                 __( 'Public address', 'dono-fundraising-platform' ),
+    image_attachment_id:  __( 'Cover image', 'dono-fundraising-platform' ),
+    image_url:            __( 'Cover image', 'dono-fundraising-platform' ),
+    status:               __( 'Status & schedule', 'dono-fundraising-platform' ),
+    starts_at:            __( 'Status & schedule', 'dono-fundraising-platform' ),
+    ends_at:              __( 'Status & schedule', 'dono-fundraising-platform' ),
+    goal_type:            __( 'Goal', 'dono-fundraising-platform' ),
+    goal_cents:           __( 'Goal', 'dono-fundraising-platform' ),
+    goal_count:           __( 'Goal', 'dono-fundraising-platform' ),
+    style:                __( 'Appearance', 'dono-fundraising-platform' ),
+    hide_header:          __( 'Page header & footer', 'dono-fundraising-platform' ),
+    hide_footer:          __( 'Page header & footer', 'dono-fundraising-platform' ),
+    default_form_id:      __( 'Default form', 'dono-fundraising-platform' ),
+    default_fund_id:      __( 'Default fund', 'dono-fundraising-platform' ),
 } );
 
 function SettingsTab( { campaign, onError } ) {
@@ -1458,10 +1458,10 @@ function SettingsTab( { campaign, onError } ) {
             include: campaign?.default_fund_id || undefined,
         } ) } )
             .then( setFunds )
-            .catch( () => onError?.( __( 'Could not load funds.', 'dono' ) ) );
+            .catch( () => onError?.( __( 'Could not load funds.', 'dono-fundraising-platform' ) ) );
         apiFetch( { path: `/dono/v1/admin/forms?campaign_id=${ campaign.id }&per_page=100` } )
             .then( ( res ) => setForms( Array.isArray( res ) ? res : ( res?.items || [] ) ) )
-            .catch( () => onError?.( __( 'Could not load forms.', 'dono' ) ) );
+            .catch( () => onError?.( __( 'Could not load forms.', 'dono-fundraising-platform' ) ) );
     }, [ campaign.id ] );
 
     useEffect( () => {
@@ -1496,9 +1496,9 @@ function SettingsTab( { campaign, onError } ) {
     const onSave = async () => {
         try {
             await c.save();
-            notify.success( __( 'Campaign saved.', 'dono' ) );
+            notify.success( __( 'Campaign saved.', 'dono-fundraising-platform' ) );
         } catch ( err ) {
-            onError( err?.message || __( 'Save failed.', 'dono' ) );
+            onError( err?.message || __( 'Save failed.', 'dono-fundraising-platform' ) );
         }
     };
 
@@ -1525,7 +1525,7 @@ function SettingsTab( { campaign, onError } ) {
                         >
                             <Icon />
                             { t.label }
-                            { isDirty && <span className="dono-subtabs__dot" title={ __( 'Unsaved changes', 'dono' ) } /> }
+                            { isDirty && <span className="dono-subtabs__dot" title={ __( 'Unsaved changes', 'dono-fundraising-platform' ) } /> }
                         </a>
                     );
                 } ) }
@@ -1585,9 +1585,9 @@ function SettingsTab( { campaign, onError } ) {
                     <span className="dono-save-bar__dot" aria-hidden="true" />
                     <span className="dono-save-bar__count">
                         <strong>{ editsCount }</strong>{ ' ' }
-                        { _n( 'unsaved change', 'unsaved changes', editsCount, 'dono' ) }
+                        { _n( 'unsaved change', 'unsaved changes', editsCount, 'dono-fundraising-platform' ) }
                         { dirtyCardNames.length > 0 && (
-                            <em>{ ' ' }{ __( 'in', 'dono' ) } { formatCardNames( dirtyCardNames ) }</em>
+                            <em>{ ' ' }{ __( 'in', 'dono-fundraising-platform' ) } { formatCardNames( dirtyCardNames ) }</em>
                         ) }
                     </span>
                     <button
@@ -1596,7 +1596,7 @@ function SettingsTab( { campaign, onError } ) {
                         onClick={ onDiscard }
                         disabled={ c.isSaving }
                     >
-                        { __( 'Discard', 'dono' ) }
+                        { __( 'Discard', 'dono-fundraising-platform' ) }
                     </button>
                     <button
                         type="button"
@@ -1604,7 +1604,7 @@ function SettingsTab( { campaign, onError } ) {
                         onClick={ onSave }
                         disabled={ c.isSaving }
                     >
-                        { __( 'Save changes', 'dono' ) }
+                        { __( 'Save changes', 'dono-fundraising-platform' ) }
                     </button>
                 </div>
             ) }
@@ -1637,21 +1637,21 @@ function CampaignTypeCard( { campaign } ) {
         } catch ( err ) {
             setBusy( false );
             setTarget( null );
-            notify.error( err?.message || __( 'Conversion failed.', 'dono' ) );
+            notify.error( err?.message || __( 'Conversion failed.', 'dono-fundraising-platform' ) );
         }
     };
 
     return (
         <Card
-            title={ __( 'Campaign type', 'dono' ) }
-            sub={ __( 'Set when the campaign is created. A standard campaign can be converted to a richer type, but not back.', 'dono' ) }
+            title={ __( 'Campaign type', 'dono-fundraising-platform' ) }
+            sub={ __( 'Set when the campaign is created. A standard campaign can be converted to a richer type, but not back.', 'dono-fundraising-platform' ) }
         >
-            <FormRow label={ __( 'Type', 'dono' ) }>
+            <FormRow label={ __( 'Type', 'dono-fundraising-platform' ) }>
                 <div style={ { display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' } }>
-                    <strong>{ types[ current ] || __( 'Standard', 'dono' ) }</strong>
+                    <strong>{ types[ current ] || __( 'Standard', 'dono-fundraising-platform' ) }</strong>
                     { convertible.map( ( t ) => (
                         <Btn key={ t } variant="secondary" onClick={ () => setTarget( t ) }>
-                            { sprintf( /* translators: %s: campaign type label */ __( 'Convert to %s', 'dono' ), types[ t ] ) }
+                            { sprintf( /* translators: %s: campaign type label */ __( 'Convert to %s', 'dono-fundraising-platform' ), types[ t ] ) }
                         </Btn>
                     ) ) }
                 </div>
@@ -1659,17 +1659,17 @@ function CampaignTypeCard( { campaign } ) {
 
             { target && (
                 <Modal
-                    title={ sprintf( /* translators: %s: campaign type label */ __( 'Convert to %s', 'dono' ), types[ target ] ) }
+                    title={ sprintf( /* translators: %s: campaign type label */ __( 'Convert to %s', 'dono-fundraising-platform' ), types[ target ] ) }
                     onRequestClose={ () => ! busy && setTarget( null ) }
                 >
                     { notices[ target ] && <p>{ notices[ target ] }</p> }
-                    <p style={ { fontWeight: 600 } }>{ __( "This can't be undone.", 'dono' ) }</p>
+                    <p style={ { fontWeight: 600 } }>{ __( "This can't be undone.", 'dono-fundraising-platform' ) }</p>
                     <div style={ { display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 } }>
                         <Btn variant="tertiary" onClick={ () => setTarget( null ) } disabled={ busy }>
-                            { __( 'Cancel', 'dono' ) }
+                            { __( 'Cancel', 'dono-fundraising-platform' ) }
                         </Btn>
                         <Btn variant="primary" onClick={ convert } disabled={ busy }>
-                            { busy ? __( 'Converting…', 'dono' ) : __( 'Convert', 'dono' ) }
+                            { busy ? __( 'Converting…', 'dono-fundraising-platform' ) : __( 'Convert', 'dono-fundraising-platform' ) }
                         </Btn>
                     </div>
                 </Modal>
@@ -1694,21 +1694,21 @@ function GeneralPanel( { c, campaign } ) {
     return (
         <div className="dono-section-block">
             <Card
-                title={ __( 'Identity', 'dono' ) }
-                sub={ __( 'Title and short description, used everywhere this campaign appears.', 'dono' ) }
+                title={ __( 'Identity', 'dono-fundraising-platform' ) }
+                sub={ __( 'Title and short description, used everywhere this campaign appears.', 'dono-fundraising-platform' ) }
                 edited={ editedCount( [ 'title', 'description' ] ) }
             >
                 <FormRow
-                    label={ __( 'Campaign title', 'dono' ) }
-                    help={ __( 'Donor-facing. Appears in the page header, on cards, in receipts.', 'dono' ) }
-                    fieldHelp={ __( 'Try to keep it under 6 words.', 'dono' ) }
+                    label={ __( 'Campaign title', 'dono-fundraising-platform' ) }
+                    help={ __( 'Donor-facing. Appears in the page header, on cards, in receipts.', 'dono-fundraising-platform' ) }
+                    fieldHelp={ __( 'Try to keep it under 6 words.', 'dono-fundraising-platform' ) }
                 >
                     <input type="text" className={ inputCls( c, 'title' ) } { ...c.bind( 'title' ) } />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Short description', 'dono' ) }
-                    help={ __( 'One or two sentences. Shows on campaign cards and the page hero.', 'dono' ) }
+                    label={ __( 'Short description', 'dono-fundraising-platform' ) }
+                    help={ __( 'One or two sentences. Shows on campaign cards and the page hero.', 'dono-fundraising-platform' ) }
                 >
                     <div className="dono-input-counter">
                         <textarea
@@ -1723,7 +1723,7 @@ function GeneralPanel( { c, campaign } ) {
                     </div>
                     { teaserSrc && (
                         <div className="dono-form-row__field-help">
-                            <strong style={ { color: '#111827', fontWeight: 500 } }>{ __( 'How donors will see this:', 'dono' ) }</strong>{ ' ' }
+                            <strong style={ { color: '#111827', fontWeight: 500 } }>{ __( 'How donors will see this:', 'dono-fundraising-platform' ) }</strong>{ ' ' }
                             { teaserSrc }
                         </div>
                     ) }
@@ -1733,13 +1733,13 @@ function GeneralPanel( { c, campaign } ) {
             <CampaignTypeCard campaign={ campaign } />
 
             <Card
-                title={ __( 'Public address', 'dono' ) }
-                sub={ __( 'The URL donors land on. Changing this may break inbound links.', 'dono' ) }
+                title={ __( 'Public address', 'dono-fundraising-platform' ) }
+                sub={ __( 'The URL donors land on. Changing this may break inbound links.', 'dono-fundraising-platform' ) }
                 edited={ editedCount( [ 'slug' ] ) }
             >
                 <FormRow
-                    label={ __( 'Slug', 'dono' ) }
-                    help={ __( 'Letters, numbers, and hyphens only.', 'dono' ) }
+                    label={ __( 'Slug', 'dono-fundraising-platform' ) }
+                    help={ __( 'Letters, numbers, and hyphens only.', 'dono-fundraising-platform' ) }
                 >
                     <div className={ `dono-input-prefixed${ c.isEdited( 'slug' ) ? ' is-edited' : '' }` }>
                         <span className="dono-input-prefixed__prefix">{ origin }/campaigns/</span>
@@ -1747,17 +1747,17 @@ function GeneralPanel( { c, campaign } ) {
                     </div>
                     { slug && (
                         <div className="dono-url-preview">
-                            <span className="lbl">{ __( 'Public URL', 'dono' ) }</span>
+                            <span className="lbl">{ __( 'Public URL', 'dono-fundraising-platform' ) }</span>
                             <span className="url">{ origin }/campaigns/<em>{ slug }</em></span>
-                            <a href={ `${ window.location.origin }/campaigns/${ slug }` } target="_blank" rel="noreferrer">{ __( 'Visit page ↗', 'dono' ) }</a>
+                            <a href={ `${ window.location.origin }/campaigns/${ slug }` } target="_blank" rel="noreferrer">{ __( 'Visit page ↗', 'dono-fundraising-platform' ) }</a>
                         </div>
                     ) }
                 </FormRow>
             </Card>
 
             <Card
-                title={ __( 'Cover image', 'dono' ) }
-                sub={ __( 'Recommended 1600 × 900 (16:9). Shows on the page hero and campaign grid.', 'dono' ) }
+                title={ __( 'Cover image', 'dono-fundraising-platform' ) }
+                sub={ __( 'Recommended 1600 × 900 (16:9). Shows on the page hero and campaign grid.', 'dono-fundraising-platform' ) }
                 edited={ editedCount( [ 'image_attachment_id', 'image_url' ] ) }
             >
                 <CoverImageCard
@@ -1771,19 +1771,19 @@ function GeneralPanel( { c, campaign } ) {
             </Card>
 
             <Card
-                title={ __( 'Status & schedule', 'dono' ) }
-                sub={ __( "Whether donors can give right now, and when the campaign runs.", 'dono' ) }
+                title={ __( 'Status & schedule', 'dono-fundraising-platform' ) }
+                sub={ __( "Whether donors can give right now, and when the campaign runs.", 'dono-fundraising-platform' ) }
                 edited={ editedCount( [ 'status', 'starts_at', 'ends_at' ] ) }
             >
                 <FormRow
-                    label={ __( 'Status', 'dono' ) }
-                    help={ __( "Active campaigns accept donations. Drafts and archived campaigns don't.", 'dono' ) }
+                    label={ __( 'Status', 'dono-fundraising-platform' ) }
+                    help={ __( "Active campaigns accept donations. Drafts and archived campaigns don't.", 'dono-fundraising-platform' ) }
                 >
                     <StatusPillGroup value={ c.value( 'status', 'draft' ) } onChange={ c.setValue( 'status' ) } />
                 </FormRow>
                 <FormRow
-                    label={ __( 'Schedule', 'dono' ) }
-                    help={ __( 'Optional. Leave blank for an open-ended campaign.', 'dono' ) }
+                    label={ __( 'Schedule', 'dono-fundraising-platform' ) }
+                    help={ __( 'Optional. Leave blank for an open-ended campaign.', 'dono-fundraising-platform' ) }
                     wide
                 >
                     <ScheduleTimeline
@@ -1806,11 +1806,11 @@ function GoalPanel( { c } ) {
     return (
         <div className="dono-section-block">
             <Card
-                title={ __( 'Campaign goal', 'dono' ) }
-                sub={ __( 'Drives the progress widget on the campaign page and the goal donut on the overview.', 'dono' ) }
+                title={ __( 'Campaign goal', 'dono-fundraising-platform' ) }
+                sub={ __( 'Drives the progress widget on the campaign page and the goal donut on the overview.', 'dono-fundraising-platform' ) }
                 edited={ editedCount }
             >
-                <FormRow label={ __( 'Goal type', 'dono' ) }>
+                <FormRow label={ __( 'Goal type', 'dono-fundraising-platform' ) }>
                     <select className={ selectCls( c, 'goal_type' ) } { ...c.bind( 'goal_type', 'amount' ) }>
                         { GOAL_TYPES.map( ( t ) => (
                             <option key={ t.value } value={ t.value }>{ t.label }</option>
@@ -1820,8 +1820,8 @@ function GoalPanel( { c } ) {
 
                 { r.goal_type === 'amount' && (
                     <FormRow
-                        label={ __( 'Target amount', 'dono' ) }
-                        help={ __( 'Leave empty for no goal.', 'dono' ) }
+                        label={ __( 'Target amount', 'dono-fundraising-platform' ) }
+                        help={ __( 'Leave empty for no goal.', 'dono-fundraising-platform' ) }
                     >
                         <AmountInput
                             currency={ defaultCurrency() }
@@ -1833,13 +1833,13 @@ function GoalPanel( { c } ) {
                 ) }
 
                 { r.goal_type === 'donations' && (
-                    <FormRow label={ __( 'Target donations', 'dono' ) }>
+                    <FormRow label={ __( 'Target donations', 'dono-fundraising-platform' ) }>
                         <input type="number" className={ inputCls( c, 'goal_count' ) } min="0" { ...c.bindNumber( 'goal_count' ) } />
                     </FormRow>
                 ) }
 
                 { r.goal_type === 'donors' && (
-                    <FormRow label={ __( 'Target donors', 'dono' ) }>
+                    <FormRow label={ __( 'Target donors', 'dono-fundraising-platform' ) }>
                         <input type="number" className={ inputCls( c, 'goal_count' ) } min="0" { ...c.bindNumber( 'goal_count' ) } />
                     </FormRow>
                 ) }
@@ -1908,18 +1908,18 @@ function AppearancePanel( { c } ) {
     return (
         <div className="dono-section-block">
             <Card
-                title={ __( 'Campaign appearance', 'dono' ) }
-                sub={ __( "Pick which brand preset this campaign uses. Optionally tweak individual tokens for a one-off look.", 'dono' ) }
+                title={ __( 'Campaign appearance', 'dono-fundraising-platform' ) }
+                sub={ __( "Pick which brand preset this campaign uses. Optionally tweak individual tokens for a one-off look.", 'dono-fundraising-platform' ) }
                 edited={ editedCount }
             >
-                <FormRow label={ __( 'Style preset', 'dono' ) }>
+                <FormRow label={ __( 'Style preset', 'dono-fundraising-platform' ) }>
                     <select
                         className="dono-select"
                         value={ presetId }
                         onChange={ ( e ) => selectPreset( e.target.value ) }
                     >
                         <option value="">
-                            { __( 'Use org default', 'dono' ) +
+                            { __( 'Use org default', 'dono-fundraising-platform' ) +
                                 ( defaultId ? ` (${ presets.find( ( p ) => p.id === defaultId )?.name || defaultId })` : '' ) }
                         </option>
                         { presets.map( ( p ) => (
@@ -1930,10 +1930,10 @@ function AppearancePanel( { c } ) {
 
                 <div className="dono-custom-style-toggle" style={ { marginTop: 16 } }>
                     <ToggleRow
-                        title={ __( 'Customize tokens for this campaign', 'dono' ) }
+                        title={ __( 'Customize tokens for this campaign', 'dono-fundraising-platform' ) }
                         sub={ isCustomizing
-                            ? __( 'Inline overrides applied on top of the chosen preset.', 'dono' )
-                            : __( 'Toggle on to tweak individual tokens without creating a new brand preset.', 'dono' )
+                            ? __( 'Inline overrides applied on top of the chosen preset.', 'dono-fundraising-platform' )
+                            : __( 'Toggle on to tweak individual tokens without creating a new brand preset.', 'dono-fundraising-platform' )
                         }
                         checked={ isCustomizing }
                         onChange={ toggleCustomizing }
@@ -1954,18 +1954,18 @@ function AppearancePanel( { c } ) {
             </Card>
 
             <Card
-                title={ __( 'Page header & footer', 'dono' ) }
-                sub={ __( "Hide the theme's header or footer on every page this campaign renders on.", 'dono' ) }
+                title={ __( 'Page header & footer', 'dono-fundraising-platform' ) }
+                sub={ __( "Hide the theme's header or footer on every page this campaign renders on.", 'dono-fundraising-platform' ) }
                 edited={ ( c.edits?.hide_header !== undefined ? 1 : 0 ) + ( c.edits?.hide_footer !== undefined ? 1 : 0 ) }
             >
                 <ToggleRow
-                    title={ __( 'Hide theme header', 'dono' ) }
+                    title={ __( 'Hide theme header', 'dono-fundraising-platform' ) }
                     checked={ !! c.value( 'hide_header', false ) }
                     onChange={ ( v ) => c.edit( { hide_header: v } ) }
                 />
                 <div style={ { marginTop: 16 } }>
                     <ToggleRow
-                        title={ __( 'Hide theme footer', 'dono' ) }
+                        title={ __( 'Hide theme footer', 'dono-fundraising-platform' ) }
                         checked={ !! c.value( 'hide_footer', false ) }
                         onChange={ ( v ) => c.edit( { hide_footer: v } ) }
                     />
@@ -1982,24 +1982,24 @@ function DefaultsPanel( { c, forms, funds } ) {
     return (
         <div className="dono-section-block">
             <Card
-                title={ __( 'Default form', 'dono' ) }
-                sub={ __( 'The form the campaign page and donate-button block submit to by default.', 'dono' ) }
+                title={ __( 'Default form', 'dono-fundraising-platform' ) }
+                sub={ __( 'The form the campaign page and donate-button block submit to by default.', 'dono-fundraising-platform' ) }
                 edited={ hasFormEdit ? 1 : 0 }
             >
                 <FormRow
-                    label={ __( 'Form', 'dono' ) }
-                    help={ __( 'Only forms that belong to this campaign appear here.', 'dono' ) }
+                    label={ __( 'Form', 'dono-fundraising-platform' ) }
+                    help={ __( 'Only forms that belong to this campaign appear here.', 'dono-fundraising-platform' ) }
                 >
                     <div className="dono-grid-2-eq" style={ { gridTemplateColumns: '1fr auto', alignItems: 'center' } }>
                         <select className={ selectCls( c, 'default_form_id' ) } { ...c.bindNumber( 'default_form_id' ) }>
-                            <option value="">{ __( '( None )', 'dono' ) }</option>
+                            <option value="">{ __( '( None )', 'dono-fundraising-platform' ) }</option>
                             { forms.map( ( f ) => (
                                 <option key={ f.id } value={ f.id }>{ f.title }</option>
                             ) ) }
                         </select>
                         { r.default_form_id && (
                             <Btn variant="ghost" size="sm" href={ formEditorHref( Number( r.default_form_id ) ) }>
-                                { __( 'Edit form', 'dono' ) } →
+                                { __( 'Edit form', 'dono-fundraising-platform' ) } →
                             </Btn>
                         ) }
                     </div>
@@ -2007,19 +2007,19 @@ function DefaultsPanel( { c, forms, funds } ) {
             </Card>
 
             <Card
-                title={ __( 'Default fund', 'dono' ) }
-                sub={ __( 'Where donations from this campaign are routed. Useful when separating restricted donations from general operations.', 'dono' ) }
+                title={ __( 'Default fund', 'dono-fundraising-platform' ) }
+                sub={ __( 'Where donations from this campaign are routed. Useful when separating restricted donations from general operations.', 'dono-fundraising-platform' ) }
                 edited={ hasFundEdit ? 1 : 0 }
             >
-                <FormRow label={ __( 'Fund', 'dono' ) }>
+                <FormRow label={ __( 'Fund', 'dono-fundraising-platform' ) }>
                     <select className={ selectCls( c, 'default_fund_id' ) } { ...c.bindNumber( 'default_fund_id' ) }>
-                        <option value="">{ __( '( Unassigned )', 'dono' ) }</option>
+                        <option value="">{ __( '( Unassigned )', 'dono-fundraising-platform' ) }</option>
                         { funds.map( ( f ) => (
                             <option key={ f.id } value={ f.id }>
                                 { f.is_active === false
                                     ? sprintf(
                                         /* translators: %s: fund name */
-                                        __( '%s (inactive)', 'dono' ),
+                                        __( '%s (inactive)', 'dono-fundraising-platform' ),
                                         f.name
                                     )
                                     : f.name }
@@ -2039,9 +2039,9 @@ function AdvancedPanel( { campaign, onError } ) {
     const onDelete = async () => {
         const message = await campaignDeleteMessage( campaign.id );
         setConfirm( {
-            title:        __( 'Delete campaign', 'dono' ),
+            title:        __( 'Delete campaign', 'dono-fundraising-platform' ),
             message,
-            confirmLabel: __( 'Delete', 'dono' ),
+            confirmLabel: __( 'Delete', 'dono-fundraising-platform' ),
             destructive:  true,
             onConfirm: async () => {
                 setDeleting( true );
@@ -2052,7 +2052,7 @@ function AdvancedPanel( { campaign, onError } ) {
                     } );
                     window.location.href = listHref();
                 } catch ( err ) {
-                    onError( err?.message || __( 'Delete failed.', 'dono' ) );
+                    onError( err?.message || __( 'Delete failed.', 'dono-fundraising-platform' ) );
                     setDeleting( false );
                 }
             },
@@ -2062,21 +2062,21 @@ function AdvancedPanel( { campaign, onError } ) {
     return (
         <div className="dono-section-block">
             <Card
-                title={ __( 'Danger zone', 'dono' ) }
-                sub={ __( 'Irreversible actions. Use with care.', 'dono' ) }
+                title={ __( 'Danger zone', 'dono-fundraising-platform' ) }
+                sub={ __( 'Irreversible actions. Use with care.', 'dono-fundraising-platform' ) }
             >
                 <div className="dono-danger">
                     <div className="dono-danger__copy">
-                        <div className="dono-danger__title">{ __( 'Delete this campaign', 'dono' ) }</div>
+                        <div className="dono-danger__title">{ __( 'Delete this campaign', 'dono-fundraising-platform' ) }</div>
                         <div className="dono-danger__help">
                             { __(
                                 'Removes the campaign, its forms, and the WordPress page it created. Donations stay in your database for reporting but lose their campaign link.',
-                                'dono'
+                                'dono-fundraising-platform'
                             ) }
                         </div>
                     </div>
                     <Btn variant="danger" onClick={ onDelete } isBusy={ deleting } disabled={ deleting }>
-                        { __( 'Delete campaign', 'dono' ) }
+                        { __( 'Delete campaign', 'dono-fundraising-platform' ) }
                     </Btn>
                 </div>
             </Card>

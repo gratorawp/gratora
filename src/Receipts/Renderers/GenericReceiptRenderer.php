@@ -36,7 +36,7 @@ final class GenericReceiptRenderer implements ReceiptRenderer
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('Generic Receipt', 'dono');
+        return __('Generic Receipt', 'dono-fundraising-platform');
     }
 
     /** @since 1.0.0 */
@@ -93,9 +93,9 @@ final class GenericReceiptRenderer implements ReceiptRenderer
 
         return $this->pdf->fromHtml($html, [
             /* translators: %s: human-readable donation reference. */
-            'title'  => sprintf(__('Donation receipt %s', 'dono'), $ctx->donation->reference),
+            'title'  => sprintf(__('Donation receipt %s', 'dono-fundraising-platform'), $ctx->donation->reference),
             'author' => $ctx->org['name'] ?? 'Dono',
-            'subject' => __('Donation receipt', 'dono'),
+            'subject' => __('Donation receipt', 'dono-fundraising-platform'),
         ]);
     }
 
@@ -113,12 +113,12 @@ final class GenericReceiptRenderer implements ReceiptRenderer
         if (! is_array($stored)) $stored = [];
 
         $defaults = [
-            'header_title'       => __('Donation receipt', 'dono'),
+            'header_title'       => __('Donation receipt', 'dono-fundraising-platform'),
             'intro'              => '',
-            'signoff'            => __('Thank you for your support.', 'dono'),
+            'signoff'            => __('Thank you for your support.', 'dono-fundraising-platform'),
             'footer_note'        => __(
                 "This is a non-fiscal acknowledgement of receipt. Whether your donation is tax-deductible depends on your local jurisdiction and the recipient organization's status. Keep this receipt for your records.",
-                'dono'
+                'dono-fundraising-platform'
             ),
             'show_tax_id'        => true,
             'show_donor_address' => false,
@@ -154,7 +154,7 @@ final class GenericReceiptRenderer implements ReceiptRenderer
     {
         $donation = $ctx->donation;
         $donorName = trim((string) ($ctx->donor_name ?? ''));
-        if ($donorName === '') $donorName = __('Friend', 'dono');
+        if ($donorName === '') $donorName = __('Friend', 'dono-fundraising-platform');
 
         $replacements = [
             '{donor_name}'        => $donorName,

@@ -119,14 +119,14 @@ export default function ScheduleTimeline( { startsAt, endsAt, onChange, startEdi
                             style={ { left: markerLeft( startPct ), cursor: 'ew-resize' } }
                             onPointerDown={ beginDrag( 'start' ) }
                             role="slider"
-                            aria-label={ __( 'Drag to change start date', 'dono' ) }
+                            aria-label={ __( 'Drag to change start date', 'dono-fundraising-platform' ) }
                             aria-valuenow={ Math.round( startPct ) }
                             aria-valuemin={ 0 }
                             aria-valuemax={ 100 }
                         />
                         <div className="dono-schedule__label" style={ { left: markerLeft( startPct ) } }>
                             { shortDate( start ) }
-                            <small>{ __( 'Start', 'dono' ) }</small>
+                            <small>{ __( 'Start', 'dono-fundraising-platform' ) }</small>
                         </div>
                     </>
                 ) }
@@ -138,14 +138,14 @@ export default function ScheduleTimeline( { startsAt, endsAt, onChange, startEdi
                             style={ { left: markerLeft( endPct ), cursor: 'ew-resize' } }
                             onPointerDown={ beginDrag( 'end' ) }
                             role="slider"
-                            aria-label={ __( 'Drag to change end date', 'dono' ) }
+                            aria-label={ __( 'Drag to change end date', 'dono-fundraising-platform' ) }
                             aria-valuenow={ Math.round( endPct ) }
                             aria-valuemin={ 0 }
                             aria-valuemax={ 100 }
                         />
                         <div className="dono-schedule__label" style={ { left: markerLeft( endPct ) } }>
                             { shortDate( end ) }
-                            <small>{ __( 'End', 'dono' ) }</small>
+                            <small>{ __( 'End', 'dono-fundraising-platform' ) }</small>
                         </div>
                     </>
                 ) }
@@ -157,25 +157,25 @@ export default function ScheduleTimeline( { startsAt, endsAt, onChange, startEdi
 
             <div className="dono-schedule__dates">
                 <label>
-                    <span>{ __( 'Starts at', 'dono' ) }</span>
+                    <span>{ __( 'Starts at', 'dono-fundraising-platform' ) }</span>
                     <DateField
                         withTime
                         value={ startsAt || '' }
                         onChange={ setStart }
                         edited={ startEdited }
-                        placeholder={ __( 'No start scheduled', 'dono' ) }
-                        ariaLabel={ __( 'Pick a start date and time', 'dono' ) }
+                        placeholder={ __( 'No start scheduled', 'dono-fundraising-platform' ) }
+                        ariaLabel={ __( 'Pick a start date and time', 'dono-fundraising-platform' ) }
                     />
                 </label>
                 <label>
-                    <span>{ __( 'Ends at', 'dono' ) }</span>
+                    <span>{ __( 'Ends at', 'dono-fundraising-platform' ) }</span>
                     <DateField
                         withTime
                         value={ endsAt || '' }
                         onChange={ setEnd }
                         edited={ endEdited }
-                        placeholder={ __( 'No end scheduled', 'dono' ) }
-                        ariaLabel={ __( 'Pick an end date and time', 'dono' ) }
+                        placeholder={ __( 'No end scheduled', 'dono-fundraising-platform' ) }
+                        ariaLabel={ __( 'Pick an end date and time', 'dono-fundraising-platform' ) }
                     />
                 </label>
             </div>

@@ -27,7 +27,7 @@ $sizeClass  = 'is-size-' . (in_array($size, ['sm', 'md', 'lg'], true) ? $size : 
             <div class="dono-donate-modal" data-form-slug="<?php echo esc_attr($formSlug); ?>" hidden>
                 <div class="dono-donate-modal__backdrop" data-dono-modal-close></div>
                 <div class="dono-donate-modal__panel" role="dialog" aria-modal="true" aria-label="<?php echo esc_attr($label); ?>">
-                    <button type="button" class="dono-donate-modal__close" aria-label="<?php esc_attr_e('Close', 'dono'); ?>" data-dono-modal-close>
+                    <button type="button" class="dono-donate-modal__close" aria-label="<?php esc_attr_e('Close', 'dono-fundraising-platform'); ?>" data-dono-modal-close>
                         <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
                             <path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
                         </svg>

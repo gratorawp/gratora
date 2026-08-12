@@ -20,13 +20,13 @@ defined('ABSPATH') || exit;
  * @var string $postalLabel
  * @var string $countryLabel
  */
-$labelText   = $label !== ''        ? $label        : __('Mailing address', 'dono');
-$line1Text   = $line1Label !== ''   ? $line1Label   : __('Address line 1', 'dono');
-$line2Text   = $line2Label !== ''   ? $line2Label   : __('Apartment, suite, etc.', 'dono');
-$cityText    = $cityLabel !== ''    ? $cityLabel    : __('City', 'dono');
-$regionText  = $regionLabel !== ''  ? $regionLabel  : __('State / region', 'dono');
-$postalText  = $postalLabel !== ''  ? $postalLabel  : __('Postal code', 'dono');
-$countryText = $countryLabel !== '' ? $countryLabel : __('Country', 'dono');
+$labelText   = $label !== ''        ? $label        : __('Mailing address', 'dono-fundraising-platform');
+$line1Text   = $line1Label !== ''   ? $line1Label   : __('Address line 1', 'dono-fundraising-platform');
+$line2Text   = $line2Label !== ''   ? $line2Label   : __('Apartment, suite, etc.', 'dono-fundraising-platform');
+$cityText    = $cityLabel !== ''    ? $cityLabel    : __('City', 'dono-fundraising-platform');
+$regionText  = $regionLabel !== ''  ? $regionLabel  : __('State / region', 'dono-fundraising-platform');
+$postalText  = $postalLabel !== ''  ? $postalLabel  : __('Postal code', 'dono-fundraising-platform');
+$countryText = $countryLabel !== '' ? $countryLabel : __('Country', 'dono-fundraising-platform');
 ?>
 <fieldset class="dono-block dono-block--address dono-address">
     <legend class="dono-address__legend"><?php echo esc_html($labelText); ?></legend>

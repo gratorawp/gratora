@@ -82,7 +82,7 @@ final class PayPalController
 
         $gateway = $this->gateways->get('paypal');
         if (! $gateway instanceof PayPalGateway) {
-            return $this->error('dono_paypal_unavailable', __('PayPal is not available.', 'dono'), 400);
+            return $this->error('dono_paypal_unavailable', __('PayPal is not available.', 'dono-fundraising-platform'), 400);
         }
 
         // confirm() reads the stored gateway_intent_id: the client cannot
@@ -114,7 +114,7 @@ final class PayPalController
         if (! $result->success) {
             return $this->error(
                 'dono_paypal_capture_failed',
-                $result->error ?: __('PayPal could not complete this payment.', 'dono'),
+                $result->error ?: __('PayPal could not complete this payment.', 'dono-fundraising-platform'),
                 400
             );
         }
@@ -143,11 +143,11 @@ final class PayPalController
         }
 
         if (! FrequencyMap::isRecurring((string) $donation->frequency)) {
-            return $this->error('dono_paypal_not_recurring', __('That donation is not recurring.', 'dono'), 400);
+            return $this->error('dono_paypal_not_recurring', __('That donation is not recurring.', 'dono-fundraising-platform'), 400);
         }
         $subId = trim((string) $request->get_param('subscription_id'));
         if ($subId === '') {
-            return $this->error('dono_paypal_bad_subscription', __('Missing subscription id.', 'dono'), 400);
+            return $this->error('dono_paypal_bad_subscription', __('Missing subscription id.', 'dono-fundraising-platform'), 400);
         }
 
         $this->account->useTestMode((bool) $donation->is_test);
@@ -181,7 +181,7 @@ final class PayPalController
         $donation  = $reference !== '' ? $this->donations->findByReference($reference) : null;
 
         if (! $donation || $donation->gateway !== 'paypal') {
-            return $this->error('dono_paypal_no_donation', __('We could not find that donation.', 'dono'), 404);
+            return $this->error('dono_paypal_no_donation', __('We could not find that donation.', 'dono-fundraising-platform'), 404);
         }
         return $donation;
     }

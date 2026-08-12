@@ -16,31 +16,31 @@ function Edit( { attributes, setAttributes } ) {
 
     // Attributes default to '' and the walker injects these when empty; mirror
     // that in the preview so the canvas is never a nameless field.
-    const labelText       = label || __( 'Add a message', 'dono' );
-    const placeholderText = placeholder || __( 'Anything you want to share?', 'dono' );
+    const labelText       = label || __( 'Add a message', 'dono-fundraising-platform' );
+    const placeholderText = placeholder || __( 'Anything you want to share?', 'dono-fundraising-platform' );
 
     const blockProps = useBlockProps( { className: 'dono-block-preview' } );
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Comment', 'dono' ) } initialOpen>
+                <PanelBody title={ __( 'Comment', 'dono-fundraising-platform' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'dono' ) }
+                        label={ __( 'Label', 'dono-fundraising-platform' ) }
                         value={ label }
-                        placeholder={ __( 'Add a message', 'dono' ) }
+                        placeholder={ __( 'Add a message', 'dono-fundraising-platform' ) }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Placeholder', 'dono' ) }
+                        label={ __( 'Placeholder', 'dono-fundraising-platform' ) }
                         value={ placeholder }
-                        placeholder={ __( 'Anything you want to share?', 'dono' ) }
+                        placeholder={ __( 'Anything you want to share?', 'dono-fundraising-platform' ) }
                         onChange={ ( v ) => setAttributes( { placeholder: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'dono' ) }
+                        label={ __( 'Required', 'dono-fundraising-platform' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
                         __nextHasNoMarginBottom
@@ -65,8 +65,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Comment', 'dono' ),
-        description: __( 'Optional message from the donor to the organization.', 'dono' ),
+        title:      __( 'Comment', 'dono-fundraising-platform' ),
+        description: __( 'Optional message from the donor to the organization.', 'dono-fundraising-platform' ),
         category:   'dono-fields',
         icon:       BlockIcons[ 'comment' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

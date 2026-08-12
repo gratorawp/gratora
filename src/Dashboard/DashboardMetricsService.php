@@ -191,7 +191,7 @@ final class DashboardMetricsService
 
             $out[] = [
                 'id'             => (int) $d->id,
-                'donor_name'     => $name !== '' ? $name : __('Anonymous', 'dono'),
+                'donor_name'     => $name !== '' ? $name : __('Anonymous', 'dono-fundraising-platform'),
                 'amount_cents'   => (int) $d->amount_cents,
                 'currency'       => (string) $d->currency,
                 'paid_at'        => $d->paid_at,
@@ -316,10 +316,10 @@ final class DashboardMetricsService
                 'tone'  => 'error',
                 'title' => sprintf(
                     /* translators: %d: failed donations count */
-                    _n('%d donation failed in the last 24 hours.', '%d donations failed in the last 24 hours.', $failed, 'dono'),
+                    _n('%d donation failed in the last 24 hours.', '%d donations failed in the last 24 hours.', $failed, 'dono-fundraising-platform'),
                     $failed
                 ),
-                'action_label' => __('Review', 'dono'),
+                'action_label' => __('Review', 'dono-fundraising-platform'),
                 'action_href'  => admin_url('admin.php?page=dono-donations&status=failed'),
                 'count'        => $failed,
             ];
@@ -343,11 +343,11 @@ final class DashboardMetricsService
                 'tone'  => 'warn',
                 'title' => sprintf(
                     /* translators: 1: campaign title, 2: days remaining */
-                    _n('"%1$s" ends in %2$d day.', '"%1$s" ends in %2$d days.', $daysLeft, 'dono'),
+                    _n('"%1$s" ends in %2$d day.', '"%1$s" ends in %2$d days.', $daysLeft, 'dono-fundraising-platform'),
                     $c->title,
                     $daysLeft
                 ),
-                'action_label' => __('Open', 'dono'),
+                'action_label' => __('Open', 'dono-fundraising-platform'),
                 'action_href'  => admin_url('admin.php?page=dono-campaigns&view=detail&id=' . $c->id . '&tab=overview'),
             ];
         }
@@ -367,10 +367,10 @@ final class DashboardMetricsService
                 'tone'  => 'warn',
                 'title' => sprintf(
                     /* translators: %s: campaign title */
-                    __('"%s" has no default form. The donate button on its page does nothing.', 'dono'),
+                    __('"%s" has no default form. The donate button on its page does nothing.', 'dono-fundraising-platform'),
                     $c->title
                 ),
-                'action_label' => __('Set form', 'dono'),
+                'action_label' => __('Set form', 'dono-fundraising-platform'),
                 'action_href'  => admin_url('admin.php?page=dono-campaigns&view=detail&id=' . $c->id . '&tab=settings'),
             ];
         }
@@ -421,11 +421,11 @@ final class DashboardMetricsService
                         '%d donor left a note in the last 7 days.',
                         '%d donors left notes in the last 7 days.',
                         $donorCount,
-                        'dono'
+                        'dono-fundraising-platform'
                     ),
                     $donorCount
                 ),
-                'action_label' => __('Read', 'dono'),
+                'action_label' => __('Read', 'dono-fundraising-platform'),
                 'action_href'  => $href,
                 'count'        => $noteCount,
             ];
@@ -437,8 +437,8 @@ final class DashboardMetricsService
             $items[] = [
                 'key'          => 'no-campaigns',
                 'tone'         => 'info',
-                'title'        => __('No published campaigns yet. Start one to begin collecting donations.', 'dono'),
-                'action_label' => __('Create campaign', 'dono'),
+                'title'        => __('No published campaigns yet. Start one to begin collecting donations.', 'dono-fundraising-platform'),
+                'action_label' => __('Create campaign', 'dono-fundraising-platform'),
                 'action_href'  => admin_url('admin.php?page=dono-campaigns'),
             ];
         }

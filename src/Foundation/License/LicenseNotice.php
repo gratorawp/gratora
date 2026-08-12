@@ -48,7 +48,7 @@ final class LicenseNotice
             $this->notice(
                 sprintf(
                     /* translators: %s: comma-separated add-on names */
-                    __('Your license does not cover %s. They keep running for now, but they will not receive updates or security fixes.', 'dono'),
+                    __('Your license does not cover %s. They keep running for now, but they will not receive updates or security fixes.', 'dono-fundraising-platform'),
                     $this->names($refused)
                 )
             );
@@ -61,7 +61,7 @@ final class LicenseNotice
             $this->notice(
                 sprintf(
                     /* translators: %s: comma-separated add-on names */
-                    __('The license for %s has lapsed. Renew to keep receiving updates and security fixes.', 'dono'),
+                    __('The license for %s has lapsed. Renew to keep receiving updates and security fixes.', 'dono-fundraising-platform'),
                     $this->names($lapsing)
                 )
             );
@@ -71,7 +71,7 @@ final class LicenseNotice
 
         if ((string) get_option(self::OPTION_KEY, '') === '') {
             $this->notice(
-                __('Your Dono add-ons are not linked to a license key, so they will not receive updates or security fixes.', 'dono')
+                __('Your Dono add-ons are not linked to a license key, so they will not receive updates or security fixes.', 'dono-fundraising-platform')
             );
         }
     }
@@ -101,10 +101,10 @@ final class LicenseNotice
                 . "font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;"
                 . 'font-size:13px;line-height:1.45;'
             ),
-            esc_html__('Dono:', 'dono'),
+            esc_html__('Dono:', 'dono-fundraising-platform'),
             esc_html($message),
             esc_url(admin_url('admin.php?page=dono-settings#licenses')),
-            esc_html__('Manage licenses', 'dono')
+            esc_html__('Manage licenses', 'dono-fundraising-platform')
         );
     }
 }

@@ -16,13 +16,13 @@ export function registerDonoEntities() {
             kind:    'dono/v1',
             name:    'campaign',
             baseURL: '/dono/v1/admin/campaigns',
-            label:   __( 'Campaign', 'dono' ),
+            label:   __( 'Campaign', 'dono-fundraising-platform' ),
         },
         {
             kind:    'dono/v1',
             name:    'form',
             baseURL: '/dono/v1/admin/forms',
-            label:   __( 'Donation form', 'dono' ),
+            label:   __( 'Donation form', 'dono-fundraising-platform' ),
         },
     ] );
 }

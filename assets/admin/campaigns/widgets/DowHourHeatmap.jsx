@@ -20,7 +20,7 @@ export default function DowHourHeatmap( { data } ) {
     if ( ! data || ( data.total ?? 0 ) === 0 ) {
         return (
             <p className="dono-panel__empty">
-                { __( 'No donation activity yet to plot timing.', 'dono' ) }
+                { __( 'No donation activity yet to plot timing.', 'dono-fundraising-platform' ) }
             </p>
         );
     }
@@ -75,7 +75,7 @@ export default function DowHourHeatmap( { data } ) {
                                         '%1$s at %2$d:00, %3$d donation',
                                         '%1$s at %2$d:00, %3$d donations',
                                         count,
-                                        'dono'
+                                        'dono-fundraising-platform'
                                     ),
                                     DAYS[ day ].long,
                                     hour,
@@ -88,7 +88,7 @@ export default function DowHourHeatmap( { data } ) {
             ) ) }
 
             <div className="dono-heatmap__legend">
-                <span className="dono-heatmap__legend-label">{ __( 'Fewer', 'dono' ) }</span>
+                <span className="dono-heatmap__legend-label">{ __( 'Fewer', 'dono-fundraising-platform' ) }</span>
                 { [ 0.15, 0.35, 0.55, 0.75, 0.9 ].map( ( a ) => (
                     <span
                         key={ a }
@@ -96,7 +96,7 @@ export default function DowHourHeatmap( { data } ) {
                         style={ { background: `rgba(30, 138, 78, ${ a })` } }
                     />
                 ) ) }
-                <span className="dono-heatmap__legend-label">{ __( 'More', 'dono' ) }</span>
+                <span className="dono-heatmap__legend-label">{ __( 'More', 'dono-fundraising-platform' ) }</span>
             </div>
 
             { hovered && (
@@ -107,7 +107,7 @@ export default function DowHourHeatmap( { data } ) {
                     { ' - ' }
                     { sprintf(
                         /* translators: %d: number of donations */
-                        _n( '%d donation', '%d donations', hovered.count, 'dono' ),
+                        _n( '%d donation', '%d donations', hovered.count, 'dono-fundraising-platform' ),
                         hovered.count
                     ) }
                 </div>

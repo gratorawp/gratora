@@ -28,8 +28,8 @@ export default function TopCampaigns( { rows = [] } ) {
             <EmptyState
                 compact
                 icon={ <TrendingUp size={ 22 } strokeWidth={ 1.75 } /> }
-                title={ __( 'No donations in this range', 'dono' ) }
-                body={ __( 'Pick a wider date range or wait for new donations to come in.', 'dono' ) }
+                title={ __( 'No donations in this range', 'dono-fundraising-platform' ) }
+                body={ __( 'Pick a wider date range or wait for new donations to come in.', 'dono-fundraising-platform' ) }
             />
         );
     }
@@ -60,7 +60,7 @@ export default function TopCampaigns( { rows = [] } ) {
                                 </div>
                                 <div className="dono-table__sub">
                                     { sprintf(
-                                        /* translators: %d: number of donations */ _n( '%d donation', '%d donations', c.donations_count, 'dono' ),
+                                        /* translators: %d: number of donations */ _n( '%d donation', '%d donations', c.donations_count, 'dono-fundraising-platform' ),
                                         c.donations_count
                                     ) }
                                 </div>

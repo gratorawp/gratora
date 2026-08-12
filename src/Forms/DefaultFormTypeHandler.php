@@ -23,7 +23,7 @@ final class DefaultFormTypeHandler implements FormTypeHandler
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('Donation', 'dono');
+        return __('Donation', 'dono-fundraising-platform');
     }
 
     /**

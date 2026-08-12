@@ -15,9 +15,9 @@ const LEVEL_OPTIONS = [
 ];
 
 const ALIGN_OPTIONS = [
-    { value: 'left',   label: __( 'Left',   'dono' ) },
-    { value: 'center', label: __( 'Center', 'dono' ) },
-    { value: 'right',  label: __( 'Right',  'dono' ) },
+    { value: 'left',   label: __( 'Left',   'dono-fundraising-platform' ) },
+    { value: 'center', label: __( 'Center', 'dono-fundraising-platform' ) },
+    { value: 'right',  label: __( 'Right',  'dono-fundraising-platform' ) },
 ];
 
 function Edit( { attributes, setAttributes } ) {
@@ -32,15 +32,15 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Heading', 'dono' ) } initialOpen>
+                <PanelBody title={ __( 'Heading', 'dono-fundraising-platform' ) } initialOpen>
                     <Segmented
-                        label={ __( 'Level', 'dono' ) }
+                        label={ __( 'Level', 'dono-fundraising-platform' ) }
                         value={ level }
                         onChange={ ( v ) => setAttributes( { level: Number( v ) } ) }
                         options={ LEVEL_OPTIONS }
                     />
                     <Segmented
-                        label={ __( 'Alignment', 'dono' ) }
+                        label={ __( 'Alignment', 'dono-fundraising-platform' ) }
                         value={ align }
                         onChange={ ( v ) => setAttributes( { align: v } ) }
                         options={ ALIGN_OPTIONS }
@@ -56,7 +56,7 @@ function Edit( { attributes, setAttributes } ) {
                     tagName={ `h${ level }` }
                     value={ text }
                     onChange={ ( v ) => setAttributes( { text: v } ) }
-                    placeholder={ __( 'Section heading', 'dono' ) }
+                    placeholder={ __( 'Section heading', 'dono-fundraising-platform' ) }
                     allowedFormats={ [] }
                     style={ { margin: 0, fontWeight: 600 } }
                 />
@@ -68,8 +68,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Heading', 'dono' ),
-        description: __( 'Section heading shown above the next field step.', 'dono' ),
+        title:      __( 'Heading', 'dono-fundraising-platform' ),
+        description: __( 'Section heading shown above the next field step.', 'dono-fundraising-platform' ),
         category:   'dono-content',
         icon:       BlockIcons[ 'heading' ],
         supports: { html: false, anchor: false, inserter: true },

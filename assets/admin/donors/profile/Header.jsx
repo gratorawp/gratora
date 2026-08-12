@@ -26,7 +26,7 @@ function Banner( { kind, message, onAction } ) {
             { onAction && (
                 <div className="banner__actions">
                     <button type="button" className="btn btn--sm" onClick={ onAction }>
-                        { __( 'Open Recurring →', 'dono' ) }
+                        { __( 'Open Recurring →', 'dono-fundraising-platform' ) }
                     </button>
                 </div>
             ) }
@@ -43,9 +43,9 @@ export default function Header( { donor, banners, recurring, onBack, onEdit, onT
     return (
         <header className="dp-head">
             <div className="dp-crumbs">
-                <button type="button" onClick={ onBack }>{ __( 'Dono', 'dono' ) }</button>
+                <button type="button" onClick={ onBack }>{ __( 'Dono', 'dono-fundraising-platform' ) }</button>
                 <span className="sep">›</span>
-                <button type="button" onClick={ onBack }>{ __( 'Donors', 'dono' ) }</button>
+                <button type="button" onClick={ onBack }>{ __( 'Donors', 'dono-fundraising-platform' ) }</button>
                 <span className="sep">›</span>
                 <span>{ donor.name }</span>
             </div>
@@ -58,24 +58,24 @@ export default function Header( { donor, banners, recurring, onBack, onEdit, onT
                     <div className="dp-page-head__chips">
                         { donor.first_donation_at && (
                             <HeadChip>
-                                { sprintf( /* translators: %s: month */ __( 'Donor since %s', 'dono' ), formatMonth( donor.first_donation_at ) ) }
+                                { sprintf( /* translators: %s: month */ __( 'Donor since %s', 'dono-fundraising-platform' ), formatMonth( donor.first_donation_at ) ) }
                             </HeadChip>
                         ) }
                         { activeCount > 0 && (
                             <HeadChip tone="violet">
                                 <IconRotate className="ic" width="11" height="11" />
                                 { activeCount === 1
-                                    ? __( '1 active plan', 'dono' )
-                                    : sprintf( /* translators: %d: count */ __( '%d active plans', 'dono' ), activeCount ) }
+                                    ? __( '1 active plan', 'dono-fundraising-platform' )
+                                    : sprintf( /* translators: %d: count */ __( '%d active plans', 'dono-fundraising-platform' ), activeCount ) }
                             </HeadChip>
                         ) }
                         <HeadChip tone="gray" mono>{ donor.reference }</HeadChip>
-                        { isRedacted && <HeadChip tone="gray">{ __( 'Redacted', 'dono' ) }</HeadChip> }
+                        { isRedacted && <HeadChip tone="gray">{ __( 'Redacted', 'dono-fundraising-platform' ) }</HeadChip> }
                     </div>
                 </div>
                 <div className="dp-page-head__actions">
                     <button type="button" className="btn" onClick={ onEdit }>
-                        { __( 'Edit details', 'dono' ) }
+                        { __( 'Edit details', 'dono-fundraising-platform' ) }
                     </button>
                 </div>
             </div>

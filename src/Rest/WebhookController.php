@@ -75,7 +75,7 @@ final class WebhookController
 
         if (! $gateway) {
             /* translators: %s: gateway identifier */
-            return new WP_Error('dono_unknown_gateway', sprintf(__('Unknown gateway: %s', 'dono'), $gatewayId), ['status' => 404]);
+            return new WP_Error('dono_unknown_gateway', sprintf(__('Unknown gateway: %s', 'dono-fundraising-platform'), $gatewayId), ['status' => 404]);
         }
 
         try {
@@ -105,14 +105,14 @@ final class WebhookController
                 set_transient(self::REJECT_NOTICE_KEY . $gatewayId, 1, self::REJECT_NOTICE_TTL);
                 ErrorLog::record(
                     'webhook.' . $gatewayId,
-                    $outcome->error ?? __('Signature verification failed. The webhook will keep being rejected until the gateway credentials and webhook id match this site.', 'dono'),
+                    $outcome->error ?? __('Signature verification failed. The webhook will keep being rejected until the gateway credentials and webhook id match this site.', 'dono-fundraising-platform'),
                     ['gateway' => $gatewayId, 'event_type' => $outcome->event_type ?? 'unknown']
                 );
             }
 
             return new WP_Error(
                 'dono_webhook_rejected',
-                $outcome->error ?? __('Webhook rejected.', 'dono'),
+                $outcome->error ?? __('Webhook rejected.', 'dono-fundraising-platform'),
                 ['status' => $outcome->http_status]
             );
         }

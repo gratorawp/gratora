@@ -15,15 +15,15 @@ import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 const NAME = 'dono/hidden';
 
 const SOURCES = [
-    { value: 'fixed',        label: __( 'Fixed value',                    'dono' ) },
-    { value: 'query',        label: __( 'URL query string',               'dono' ) },
-    { value: 'utm_source',   label: __( 'UTM: Source',                    'dono' ) },
-    { value: 'utm_medium',   label: __( 'UTM: Medium',                    'dono' ) },
-    { value: 'utm_campaign', label: __( 'UTM: Campaign',                  'dono' ) },
-    { value: 'utm_term',     label: __( 'UTM: Term',                      'dono' ) },
-    { value: 'utm_content',  label: __( 'UTM: Content',                   'dono' ) },
-    { value: 'referrer',     label: __( 'Referrer URL',                   'dono' ) },
-    { value: 'landing',      label: __( 'Landing page URL',               'dono' ) },
+    { value: 'fixed',        label: __( 'Fixed value',                    'dono-fundraising-platform' ) },
+    { value: 'query',        label: __( 'URL query string',               'dono-fundraising-platform' ) },
+    { value: 'utm_source',   label: __( 'UTM: Source',                    'dono-fundraising-platform' ) },
+    { value: 'utm_medium',   label: __( 'UTM: Medium',                    'dono-fundraising-platform' ) },
+    { value: 'utm_campaign', label: __( 'UTM: Campaign',                  'dono-fundraising-platform' ) },
+    { value: 'utm_term',     label: __( 'UTM: Term',                      'dono-fundraising-platform' ) },
+    { value: 'utm_content',  label: __( 'UTM: Content',                   'dono-fundraising-platform' ) },
+    { value: 'referrer',     label: __( 'Referrer URL',                   'dono-fundraising-platform' ) },
+    { value: 'landing',      label: __( 'Landing page URL',               'dono-fundraising-platform' ) },
 ];
 
 function Edit( { attributes, setAttributes } ) {
@@ -33,16 +33,16 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Hidden field', 'dono' ) } initialOpen>
+                <PanelBody title={ __( 'Hidden field', 'dono-fundraising-platform' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Field key', 'dono' ) }
+                        label={ __( 'Field key', 'dono-fundraising-platform' ) }
                         value={ field }
                         onChange={ ( v ) => setAttributes( { field: v.replace( /[^a-z0-9_]/gi, '_' ).toLowerCase() } ) }
-                        help={ __( 'Lowercase, underscores. This is the column name in donation reports.', 'dono' ) }
+                        help={ __( 'Lowercase, underscores. This is the column name in donation reports.', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Source', 'dono' ) }
+                        label={ __( 'Source', 'dono-fundraising-platform' ) }
                         value={ source }
                         options={ SOURCES }
                         onChange={ ( v ) => setAttributes( { source: v } ) }
@@ -50,7 +50,7 @@ function Edit( { attributes, setAttributes } ) {
                     />
                     { source === 'query' && (
                         <TextControl
-                            label={ __( 'Query parameter name', 'dono' ) }
+                            label={ __( 'Query parameter name', 'dono-fundraising-platform' ) }
                             value={ queryParam }
                             onChange={ ( v ) => setAttributes( { queryParam: v } ) }
                             placeholder="appeal_code"
@@ -58,10 +58,10 @@ function Edit( { attributes, setAttributes } ) {
                         />
                     ) }
                     <TextControl
-                        label={ __( 'Fallback value', 'dono' ) }
+                        label={ __( 'Fallback value', 'dono-fundraising-platform' ) }
                         value={ defaultValue }
                         onChange={ ( v ) => setAttributes( { defaultValue: v } ) }
-                        help={ __( 'Used when the source above resolves to empty (e.g. donor arrived directly).', 'dono' ) }
+                        help={ __( 'Used when the source above resolves to empty (e.g. donor arrived directly).', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -71,9 +71,9 @@ function Edit( { attributes, setAttributes } ) {
                 />
             </InspectorControls>
             <div { ...blockProps }>
-                <span className="dono-block-preview__hidden-tag">{ __( 'Hidden', 'dono' ) }</span>
+                <span className="dono-block-preview__hidden-tag">{ __( 'Hidden', 'dono-fundraising-platform' ) }</span>
                 <span className="dono-block-preview__hidden-meta">
-                    { field ? `${ field } ← ${ source }` : __( '(no field key set)', 'dono' ) }
+                    { field ? `${ field } ← ${ source }` : __( '(no field key set)', 'dono-fundraising-platform' ) }
                 </span>
             </div>
         </>
@@ -83,8 +83,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Hidden field', 'dono' ),
-        description: __( 'Invisible value captured with the donation. Use it for UTM tags, referrer URL, or any appeal code.', 'dono' ),
+        title:       __( 'Hidden field', 'dono-fundraising-platform' ),
+        description: __( 'Invisible value captured with the donation. Use it for UTM tags, referrer URL, or any appeal code.', 'dono-fundraising-platform' ),
         category:    'dono-fields',
         icon:        BlockIcons[ 'hidden' ],
         supports:    { html: false, anchor: false, inserter: true },

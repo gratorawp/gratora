@@ -73,8 +73,8 @@ function defaultFormSettings() {
 // Multi-page navigation is driven by the Steps block inside the form, not a
 // form-level toggle. Layout is just the embed style.
 const LAYOUT_OPTIONS = [
-    { value: 'inline', label: __( 'Inline (in-page)', 'dono' ) },
-    { value: 'modal',  label: __( 'Modal (button opens form)', 'dono' ) },
+    { value: 'inline', label: __( 'Inline (in-page)', 'dono-fundraising-platform' ) },
+    { value: 'modal',  label: __( 'Modal (button opens form)', 'dono-fundraising-platform' ) },
 ];
 
 function mergeFormSettings( stored ) {
@@ -191,13 +191,13 @@ export default function Editor( { formId } ) {
     useEffect( () => {
         apiFetch( { path: '/dono/v1/admin/forms/campaigns' } )
             .then( setCampaigns )
-            .catch( ( err ) => setError( err?.message || __( 'Could not load campaigns.', 'dono' ) ) );
+            .catch( ( err ) => setError( err?.message || __( 'Could not load campaigns.', 'dono-fundraising-platform' ) ) );
         apiFetch( { path: '/dono/v1/admin/forms/gateways' } )
             .then( setGateways )
-            .catch( ( err ) => setError( err?.message || __( 'Could not load payment gateways.', 'dono' ) ) );
+            .catch( ( err ) => setError( err?.message || __( 'Could not load payment gateways.', 'dono-fundraising-platform' ) ) );
         apiFetch( { path: '/dono/v1/admin/forms/funds' } )
             .then( setFunds )
-            .catch( ( err ) => setError( err?.message || __( 'Could not load funds.', 'dono' ) ) );
+            .catch( ( err ) => setError( err?.message || __( 'Could not load funds.', 'dono-fundraising-platform' ) ) );
     }, [] );
 
     // Expose form context to block edit components (Goal needs campaign progress).
@@ -272,7 +272,7 @@ export default function Editor( { formId } ) {
             } );
             setPreviewHtml( res.html || '' );
         } catch ( err ) {
-            setError( err?.message || __( 'Preview failed.', 'dono' ) );
+            setError( err?.message || __( 'Preview failed.', 'dono-fundraising-platform' ) );
         } finally {
             setPreviewLoading( false );
         }
@@ -297,7 +297,7 @@ export default function Editor( { formId } ) {
             setLastSavedSerialized( serialized );
             return true;
         } catch ( err ) {
-            setError( err?.message || __( 'Save failed.', 'dono' ) );
+            setError( err?.message || __( 'Save failed.', 'dono-fundraising-platform' ) );
             return false;
         }
     }, [ c, blocks ] );
@@ -309,8 +309,8 @@ export default function Editor( { formId } ) {
         if ( ok ) {
             notify.success(
                 c.record.status === 'published'
-                    ? __( 'Form saved.', 'dono' )
-                    : __( 'Draft saved.', 'dono' )
+                    ? __( 'Form saved.', 'dono-fundraising-platform' )
+                    : __( 'Draft saved.', 'dono-fundraising-platform' )
             );
         }
     }, [ persist, c.record.status ] );
@@ -391,14 +391,14 @@ export default function Editor( { formId } ) {
         setSavingAction( 'publish' );
         const ok = await persist( { status: 'published' } );
         setSavingAction( null );
-        if ( ok ) notify.success( __( 'Form published.', 'dono' ) );
+        if ( ok ) notify.success( __( 'Form published.', 'dono-fundraising-platform' ) );
     }, [ persist, missingRequired ] );
 
     const onUnpublish = useCallback( async () => {
         setSavingAction( 'unpublish' );
         const ok = await persist( { status: 'draft' } );
         setSavingAction( null );
-        if ( ok ) notify.success( __( 'Form moved to draft.', 'dono' ) );
+        if ( ok ) notify.success( __( 'Form moved to draft.', 'dono-fundraising-platform' ) );
     }, [ persist ] );
 
     const dirtyForUnload = c.isDirty || serialize( blocks ) !== lastSavedSerialized;
@@ -441,7 +441,7 @@ export default function Editor( { formId } ) {
     if ( c.notFound ) {
         return (
             <Notice status="error" isDismissible={ false }>
-                { __( 'Form not found.', 'dono' ) }
+                { __( 'Form not found.', 'dono-fundraising-platform' ) }
             </Notice>
         );
     }
@@ -482,7 +482,7 @@ export default function Editor( { formId } ) {
                 <Notice status="warning" isDismissible={ false }>
                     { sprintf(
                         /* translators: %s: comma-separated list of missing block labels (Name, Email). */
-                        __( 'Add these blocks before publishing: %s.', 'dono' ),
+                        __( 'Add these blocks before publishing: %s.', 'dono-fundraising-platform' ),
                         missingRequired.map( ( r ) => r.label ).join( ', ' )
                     ) }
                 </Notice>
@@ -629,7 +629,7 @@ export default function Editor( { formId } ) {
                                 ) : secondaryView === 'listview' ? (
                                     <div className="dono-form-editor__secondary dono-form-editor__secondary--listview">
                                         <div className="dono-form-editor__secondary-title">
-                                            { __( 'Form structure', 'dono' ) }
+                                            { __( 'Form structure', 'dono-fundraising-platform' ) }
                                         </div>
                                         <BlockListView />
                                     </div>
@@ -643,7 +643,7 @@ export default function Editor( { formId } ) {
 
             { templatePickerOpen && (
                 <FormTemplatePicker
-                    intro={ __( "We didn't pre-build this form so you can pick a shape that fits. You can change it later.", 'dono' ) }
+                    intro={ __( "We didn't pre-build this form so you can pick a shape that fits. You can change it later.", 'dono-fundraising-platform' ) }
                     onPick={ applyTemplate }
                     onClose={ () => setTemplatePickerOpen( false ) }
                 />
@@ -651,17 +651,17 @@ export default function Editor( { formId } ) {
 
             { pendingTemplate && (
                 <Modal
-                    title={ __( 'Apply template', 'dono' ) }
+                    title={ __( 'Apply template', 'dono-fundraising-platform' ) }
                     onRequestClose={ () => setPendingTemplate( null ) }
                     size="small"
                 >
                     <p style={ { marginTop: 0 } }>
-                        { __( 'Replace the current form with this template? You can undo this afterwards.', 'dono' ) }
+                        { __( 'Replace the current form with this template? You can undo this afterwards.', 'dono-fundraising-platform' ) }
                     </p>
                     <div style={ { display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 } }>
-                        <Btn onClick={ () => setPendingTemplate( null ) }>{ __( 'Cancel', 'dono' ) }</Btn>
+                        <Btn onClick={ () => setPendingTemplate( null ) }>{ __( 'Cancel', 'dono-fundraising-platform' ) }</Btn>
                         <Btn variant="primary" onClick={ () => performApplyTemplate( pendingTemplate, true ) }>
-                            { __( 'Replace form', 'dono' ) }
+                            { __( 'Replace form', 'dono-fundraising-platform' ) }
                         </Btn>
                     </div>
                 </Modal>
@@ -744,14 +744,14 @@ function AssistantBridge() {
 function CanvasEmpty() {
     return (
         <div className="dono-form-editor__empty">
-            <h3>{ __( 'Start building your donation form', 'dono' ) }</h3>
-            <p>{ __( 'Add a heading, an amount block, and a submit button to take your first donation.', 'dono' ) }</p>
+            <h3>{ __( 'Start building your donation form', 'dono-fundraising-platform' ) }</h3>
+            <p>{ __( 'Add a heading, an amount block, and a submit button to take your first donation.', 'dono-fundraising-platform' ) }</p>
             <Inserter
                 position="bottom center"
                 rootClientId=""
                 renderToggle={ ( { onToggle, isOpen } ) => (
                     <button type="button" onClick={ onToggle } aria-expanded={ isOpen }>
-                        + { __( 'Add your first block', 'dono' ) }
+                        + { __( 'Add your first block', 'dono-fundraising-platform' ) }
                     </button>
                 ) }
             />
@@ -760,12 +760,12 @@ function CanvasEmpty() {
 }
 
 const VIEW_TABS = [
-    { id: 'develop',  label: __( 'Build', 'dono' ),    icon: <LocalIcon name="edit"     size={ 15 } /> },
-    { id: 'preview',  label: __( 'Preview', 'dono' ),  icon: <LocalIcon name="eye"      size={ 15 } /> },
+    { id: 'develop',  label: __( 'Build', 'dono-fundraising-platform' ),    icon: <LocalIcon name="edit"     size={ 15 } /> },
+    { id: 'preview',  label: __( 'Preview', 'dono-fundraising-platform' ),  icon: <LocalIcon name="eye"      size={ 15 } /> },
     // Settings is a third view of the same form, so it sits with the other two
     // rather than behind a cog, which reads as a tool acting on the current
     // view.
-    { id: 'settings', label: __( 'Settings', 'dono' ), icon: <LocalIcon name="settings" size={ 15 } /> },
+    { id: 'settings', label: __( 'Settings', 'dono-fundraising-platform' ), icon: <LocalIcon name="settings" size={ 15 } /> },
 ];
 
 function EditorHeader( {
@@ -784,7 +784,7 @@ function EditorHeader( {
     const publishDisabledReason = missing.length > 0
         ? sprintf(
             /* translators: %s: comma-separated list of missing block labels. */
-            __( 'Add these blocks first: %s.', 'dono' ),
+            __( 'Add these blocks first: %s.', 'dono-fundraising-platform' ),
             missing.join( ', ' )
         )
         : '';
@@ -797,30 +797,30 @@ function EditorHeader( {
             <div className="dono-editor-header__left">
                 <a className="dono-editor-header__back" href={ backHref }>
                     <LocalIcon name="chevron-left" size={ 20 } />
-                    <span>{ __( 'Campaign overview', 'dono' ) }</span>
+                    <span>{ __( 'Campaign overview', 'dono-fundraising-platform' ) }</span>
                 </a>
                 { showAuthoringTools && (
                     <>
                         <span className="dono-editor-header__divider" aria-hidden="true" />
                         <Button
                             icon={ inserterOpen ? CloseIcon : PlusIcon }
-                            label={ inserterOpen ? __( 'Close block inserter', 'dono' ) : __( 'Toggle block inserter', 'dono' ) }
+                            label={ inserterOpen ? __( 'Close block inserter', 'dono-fundraising-platform' ) : __( 'Toggle block inserter', 'dono-fundraising-platform' ) }
                             onClick={ () => onToggleSecondaryView( 'inserter' ) }
                             isPressed={ inserterOpen }
                             showTooltip
                         />
                         <Button
                             icon={ ListViewIcon }
-                            label={ __( 'Toggle block outline', 'dono' ) }
+                            label={ __( 'Toggle block outline', 'dono-fundraising-platform' ) }
                             onClick={ () => onToggleSecondaryView( 'listview' ) }
                             isPressed={ listViewOpen }
                             showTooltip
                         />
-                        <Button icon={ UndoIcon } label={ __( 'Undo', 'dono' ) } onClick={ onUndo } disabled={ ! canUndo } />
-                        <Button icon={ RedoIcon } label={ __( 'Redo', 'dono' ) } onClick={ onRedo } disabled={ ! canRedo } />
+                        <Button icon={ UndoIcon } label={ __( 'Undo', 'dono-fundraising-platform' ) } onClick={ onUndo } disabled={ ! canUndo } />
+                        <Button icon={ RedoIcon } label={ __( 'Redo', 'dono-fundraising-platform' ) } onClick={ onRedo } disabled={ ! canRedo } />
                         <Button
                             icon={ <LocalIcon name="layout-grid" size={ 20 } /> }
-                            label={ __( 'Start from a template', 'dono' ) }
+                            label={ __( 'Start from a template', 'dono-fundraising-platform' ) }
                             onClick={ onOpenTemplates }
                             showTooltip
                         />
@@ -834,7 +834,7 @@ function EditorHeader( {
                     type="text"
                     value={ title }
                     onChange={ ( e ) => onTitleChange( e.target.value ) }
-                    placeholder={ __( 'Untitled donation form', 'dono' ) }
+                    placeholder={ __( 'Untitled donation form', 'dono-fundraising-platform' ) }
                 />
             </div>
 
@@ -860,7 +860,7 @@ function EditorHeader( {
                     disabled={ saving || ! isDirty }
                     isBusy={ saving && savingAction === 'save' }
                 >
-                    { isDirty ? __( 'Save', 'dono' ) : __( 'Saved', 'dono' ) }
+                    { isDirty ? __( 'Save', 'dono-fundraising-platform' ) : __( 'Saved', 'dono-fundraising-platform' ) }
                 </Button>
                 { isPublished ? (
                     <Button
@@ -869,7 +869,7 @@ function EditorHeader( {
                         disabled={ saving }
                         isBusy={ saving && savingAction === 'unpublish' }
                     >
-                        { __( 'Unpublish', 'dono' ) }
+                        { __( 'Unpublish', 'dono-fundraising-platform' ) }
                     </Button>
                 ) : (
                     <Button
@@ -880,12 +880,12 @@ function EditorHeader( {
                         label={ publishDisabledReason || undefined }
                         showTooltip={ !! publishDisabledReason }
                     >
-                        { __( 'Publish', 'dono' ) }
+                        { __( 'Publish', 'dono-fundraising-platform' ) }
                     </Button>
                 ) }
                 <Button
                     icon={ PanelRightIcon }
-                    label={ __( 'Toggle side panel', 'dono' ) }
+                    label={ __( 'Toggle side panel', 'dono-fundraising-platform' ) }
                     onClick={ onToggleSidebar }
                     isPressed={ sidebarOpen }
                     showTooltip
@@ -896,9 +896,9 @@ function EditorHeader( {
 }
 
 const DEVICES = [
-    { id: 'desktop', label: __( 'Desktop', 'dono' ), icon: DesktopIcon, width: '100%'  },
-    { id: 'tablet',  label: __( 'Tablet', 'dono' ),  icon: TabletIcon,  width: '768px' },
-    { id: 'phone',   label: __( 'Phone', 'dono' ),   icon: MobileIcon,  width: '390px' },
+    { id: 'desktop', label: __( 'Desktop', 'dono-fundraising-platform' ), icon: DesktopIcon, width: '100%'  },
+    { id: 'tablet',  label: __( 'Tablet', 'dono-fundraising-platform' ),  icon: TabletIcon,  width: '768px' },
+    { id: 'phone',   label: __( 'Phone', 'dono-fundraising-platform' ),   icon: MobileIcon,  width: '390px' },
 ];
 
 function PreviewPane( { loading, html, device, onDeviceChange } ) {
@@ -931,7 +931,7 @@ function PreviewPane( { loading, html, device, onDeviceChange } ) {
                     >
                         <iframe
                             className="dono-form-editor__preview-frame"
-                            title={ __( 'Form preview', 'dono' ) }
+                            title={ __( 'Form preview', 'dono-fundraising-platform' ) }
                             srcDoc={ html }
                         />
                         { loading && (
@@ -966,7 +966,7 @@ function FormSidebar( { hasSelection } ) {
     return (
         <div className="dono-form-sidebar">
             <div className="dono-form-sidebar__header">
-                <h2 className="dono-form-sidebar__title">{ __( 'Block', 'dono' ) }</h2>
+                <h2 className="dono-form-sidebar__title">{ __( 'Block', 'dono-fundraising-platform' ) }</h2>
             </div>
             <div className="dono-form-sidebar__body">
                 { hasSelection ? (
@@ -974,8 +974,8 @@ function FormSidebar( { hasSelection } ) {
                 ) : (
                     <SidebarIntro
                         iconName="edit"
-                        title={ __( 'Block settings', 'dono' ) }
-                        description={ __( 'Select a block on the canvas to see its settings here. Form-wide settings live in the Settings tab.', 'dono' ) }
+                        title={ __( 'Block settings', 'dono-fundraising-platform' ) }
+                        description={ __( 'Select a block on the canvas to see its settings here. Form-wide settings live in the Settings tab.', 'dono-fundraising-platform' ) }
                     />
                 ) }
             </div>
@@ -1003,7 +1003,7 @@ function PreviewSidebar( { formId, blocks, missingRequired } ) {
             data:   { blocks: serialize( blocks ) },
         } )
             .then( ( res ) => { if ( ! cancelled ) setServerChecks( res.checks || [] ); } )
-            .catch( ( err ) => { if ( ! cancelled ) setError( err?.message || __( 'Could not load readiness checks.', 'dono' ) ); } );
+            .catch( ( err ) => { if ( ! cancelled ) setError( err?.message || __( 'Could not load readiness checks.', 'dono-fundraising-platform' ) ); } );
         return () => { cancelled = true; };
     }, [ formId, blocks ] );
 
@@ -1015,16 +1015,16 @@ function PreviewSidebar( { formId, blocks, missingRequired } ) {
                 status: 'fail',
                 label:  sprintf(
                     /* translators: %s: comma-separated list of missing block labels. */
-                    __( 'Missing required fields: %s', 'dono' ),
+                    __( 'Missing required fields: %s', 'dono-fundraising-platform' ),
                     missingRequired.map( ( r ) => r.label ).join( ', ' )
                 ),
-                detail: __( 'Donors need these to complete a donation.', 'dono' ),
+                detail: __( 'Donors need these to complete a donation.', 'dono-fundraising-platform' ),
             } );
         } else {
             out.push( {
                 id:     'required-blocks',
                 status: 'pass',
-                label:  __( 'Required fields present', 'dono' ),
+                label:  __( 'Required fields present', 'dono-fundraising-platform' ),
             } );
         }
         return out;
@@ -1059,23 +1059,23 @@ function PreviewSidebar( { formId, blocks, missingRequired } ) {
     const serverFail = useMemo( () => ( serverChecks || [] ).filter( ( c ) => c.status === 'fail' ).length, [ serverChecks ] );
 
     const summaryText = ( () => {
-        if ( ! serverChecks && ! error ) return __( 'Running checks…', 'dono' );
+        if ( ! serverChecks && ! error ) return __( 'Running checks…', 'dono-fundraising-platform' );
         if ( blockFail > 0 ) return sprintf(
             /* translators: %d: number of failing required-field checks that block publishing. */
-            _n( '%d issue blocks publishing', '%d issues block publishing', blockFail, 'dono' ),
+            _n( '%d issue blocks publishing', '%d issues block publishing', blockFail, 'dono-fundraising-platform' ),
             blockFail
         );
         if ( serverFail > 0 ) return sprintf(
             /* translators: %d: number of readiness issues to fix before the form can take donations. */
-            _n( '%d issue to fix before donors can give', '%d issues to fix before donors can give', serverFail, 'dono' ),
+            _n( '%d issue to fix before donors can give', '%d issues to fix before donors can give', serverFail, 'dono-fundraising-platform' ),
             serverFail
         );
         if ( counts.warn > 0 ) return sprintf(
             /* translators: %d: number of warning readiness checks. */
-            _n( '%d thing to review', '%d things to review', counts.warn, 'dono' ),
+            _n( '%d thing to review', '%d things to review', counts.warn, 'dono-fundraising-platform' ),
             counts.warn
         );
-        return __( 'Form is ready to publish', 'dono' );
+        return __( 'Form is ready to publish', 'dono-fundraising-platform' );
     } )();
 
     const summaryStatus = counts.fail > 0 ? 'fail' : counts.warn > 0 ? 'warn' : 'pass';
@@ -1083,7 +1083,7 @@ function PreviewSidebar( { formId, blocks, missingRequired } ) {
     return (
         <div className="dono-form-sidebar">
             <div className="dono-form-sidebar__header">
-                <h2 className="dono-form-sidebar__title">{ __( 'Pre-launch checks', 'dono' ) }</h2>
+                <h2 className="dono-form-sidebar__title">{ __( 'Pre-launch checks', 'dono-fundraising-platform' ) }</h2>
                 <p className={ `dono-readiness__summary is-${ summaryStatus }` }>
                     <ReadinessStatusIcon status={ summaryStatus } />
                     <span>{ summaryText }</span>
@@ -1101,7 +1101,7 @@ function PreviewSidebar( { formId, blocks, missingRequired } ) {
                     </ul>
                 ) : ( serverChecks && ! error && (
                     <p className="dono-readiness__empty">
-                        { __( 'Everything looks good. This form is safe to publish.', 'dono' ) }
+                        { __( 'Everything looks good. This form is safe to publish.', 'dono-fundraising-platform' ) }
                     </p>
                 ) ) }
             </div>
@@ -1154,11 +1154,11 @@ function SidebarIntro( { iconName, title, description } ) {
 }
 
 const SETTINGS_TABS = [
-    { id: 'general',   label: __( 'General', 'dono' ) },
-    { id: 'goal',      label: __( 'Goal', 'dono' ) },
-    { id: 'gateways',  label: __( 'Gateways', 'dono' ) },
-    { id: 'after',     label: __( 'After donation', 'dono' ) },
-    { id: 'embed',     label: __( 'Embed', 'dono' ) },
+    { id: 'general',   label: __( 'General', 'dono-fundraising-platform' ) },
+    { id: 'goal',      label: __( 'Goal', 'dono-fundraising-platform' ) },
+    { id: 'gateways',  label: __( 'Gateways', 'dono-fundraising-platform' ) },
+    { id: 'after',     label: __( 'After donation', 'dono-fundraising-platform' ) },
+    { id: 'embed',     label: __( 'Embed', 'dono-fundraising-platform' ) },
 ];
 
 function FormSettingsPanel( { c, campaigns, gateways, funds } ) {
@@ -1174,7 +1174,7 @@ function FormSettingsPanel( { c, campaigns, gateways, funds } ) {
 
     return (
         <div className="dono-form-settings">
-            <div className="dono-form-settings__nav" role="tablist" aria-label={ __( 'Settings sections', 'dono' ) }>
+            <div className="dono-form-settings__nav" role="tablist" aria-label={ __( 'Settings sections', 'dono-fundraising-platform' ) }>
                 { SETTINGS_TABS.map( ( t ) => (
                     <button
                         key={ t.id }
@@ -1212,7 +1212,7 @@ function SettingsRow( { title, description, children } ) {
 }
 
 function fundSelectOptions( funds ) {
-    const out = [ { value: '0', label: __( '(Use campaign or org default)', 'dono' ) } ];
+    const out = [ { value: '0', label: __( '(Use campaign or org default)', 'dono-fundraising-platform' ) } ];
     for ( const f of Array.isArray( funds ) ? funds : [] ) {
         if ( ! f.selectable ) {
             out.push( { value: `g:${ f.id }`, label: f.label, disabled: true } );
@@ -1230,27 +1230,27 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
     return (
         <>
             <SettingsRow
-                title={ __( 'Identity', 'dono' ) }
-                description={ __( 'The form name and the slug used in the URL and shortcode.', 'dono' ) }
+                title={ __( 'Identity', 'dono-fundraising-platform' ) }
+                description={ __( 'The form name and the slug used in the URL and shortcode.', 'dono-fundraising-platform' ) }
             >
                 <TextControl
-                    label={ __( 'Title', 'dono' ) }
+                    label={ __( 'Title', 'dono-fundraising-platform' ) }
                     value={ c.value( 'title' ) }
                     onChange={ c.setValue( 'title' ) }
                     __nextHasNoMarginBottom
                 />
                 <TextControl
-                    label={ __( 'Slug', 'dono' ) }
+                    label={ __( 'Slug', 'dono-fundraising-platform' ) }
                     value={ c.value( 'slug' ) }
                     onChange={ c.setValue( 'slug' ) }
-                    help={ __( 'Used in the shortcode and the form URL.', 'dono' ) }
+                    help={ __( 'Used in the shortcode and the form URL.', 'dono-fundraising-platform' ) }
                     __nextHasNoMarginBottom
                 />
             </SettingsRow>
 
             <SettingsRow
-                title={ __( 'Status', 'dono' ) }
-                description={ __( 'Use the Publish button in the header to go live. Archived forms stay in the system but stop accepting donations.', 'dono' ) }
+                title={ __( 'Status', 'dono-fundraising-platform' ) }
+                description={ __( 'Use the Publish button in the header to go live. Archived forms stay in the system but stop accepting donations.', 'dono-fundraising-platform' ) }
             >
                 <SelectControl
                     value={ c.value( 'status', 'draft' ) }
@@ -1275,8 +1275,8 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
             </SettingsRow>
 
             <SettingsRow
-                title={ __( 'Campaign', 'dono' ) }
-                description={ __( 'Every form lives under a campaign. Move this form to a different one here.', 'dono' ) }
+                title={ __( 'Campaign', 'dono-fundraising-platform' ) }
+                description={ __( 'Every form lives under a campaign. Move this form to a different one here.', 'dono-fundraising-platform' ) }
             >
                 <SelectControl
                     value={ String( c.value( 'campaign_id', 0 ) || 0 ) }
@@ -1293,24 +1293,24 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
             </SettingsRow>
 
             <SettingsRow
-                title={ __( 'Default fund', 'dono' ) }
-                description={ __( 'Where donations land when this form has no fund picker, or the donor does not choose one.', 'dono' ) }
+                title={ __( 'Default fund', 'dono-fundraising-platform' ) }
+                description={ __( 'Where donations land when this form has no fund picker, or the donor does not choose one.', 'dono-fundraising-platform' ) }
             >
                 <SelectControl
                     value={ String( c.value( 'default_fund_id', 0 ) || 0 ) }
                     options={ fundSelectOptions( funds ) }
                     onChange={ ( v ) => c.edit( { default_fund_id: Number( v ) || null } ) }
-                    help={ __( 'Leave on the default to fall back to the campaign fund, then the organization default.', 'dono' ) }
+                    help={ __( 'Leave on the default to fall back to the campaign fund, then the organization default.', 'dono-fundraising-platform' ) }
                     __nextHasNoMarginBottom
                 />
             </SettingsRow>
 
             <SettingsRow
-                title={ __( 'Layout & style', 'dono' ) }
-                description={ __( 'How the form is presented: its layout, style preset, width, and whether it sits in a card.', 'dono' ) }
+                title={ __( 'Layout & style', 'dono-fundraising-platform' ) }
+                description={ __( 'How the form is presented: its layout, style preset, width, and whether it sits in a card.', 'dono-fundraising-platform' ) }
             >
                 <SelectControl
-                    label={ __( 'Layout', 'dono' ) }
+                    label={ __( 'Layout', 'dono-fundraising-platform' ) }
                     value={ settings.layout }
                     options={ LAYOUT_OPTIONS }
                     onChange={ ( v ) => setSettings( { layout: v } ) }
@@ -1321,7 +1321,7 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
                     onChange={ ( v ) => setSettings( { style: { ...settings.style, preset_id: v } } ) }
                 />
                 <Slider
-                    label={ __( 'Maximum width', 'dono' ) }
+                    label={ __( 'Maximum width', 'dono-fundraising-platform' ) }
                     value={ settings.container?.width ?? 540 }
                     onChange={ ( v ) => setSettings( { container: { ...settings.container, width: v } } ) }
                     min={ 320 }
@@ -1329,14 +1329,14 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
                     unit="px"
                 />
                 <Segmented
-                    label={ __( 'Container', 'dono' ) }
+                    label={ __( 'Container', 'dono-fundraising-platform' ) }
                     value={ settings.container?.style ?? 'plain' }
                     onChange={ ( v ) => setSettings( { container: { ...settings.container, style: v } } ) }
                     options={ [
-                        { value: 'frame', label: __( 'Frame', 'dono' ) },
-                        { value: 'plain', label: __( 'Plain', 'dono' ) },
+                        { value: 'frame', label: __( 'Frame', 'dono-fundraising-platform' ) },
+                        { value: 'plain', label: __( 'Plain', 'dono-fundraising-platform' ) },
                     ] }
-                    help={ __( '"Frame" wraps the form in a card with a shadow; "Plain" renders it flush with the page.', 'dono' ) }
+                    help={ __( '"Frame" wraps the form in a card with a shadow; "Plain" renders it flush with the page.', 'dono-fundraising-platform' ) }
                 />
             </SettingsRow>
         </>
@@ -1344,17 +1344,17 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
 }
 
 const GOAL_TYPE_OPTIONS = [
-    { value: 'none',      label: __( 'No goal', 'dono' ) },
-    { value: 'amount',    label: __( 'Amount', 'dono' ) },
-    { value: 'donations', label: __( 'Donations', 'dono' ) },
-    { value: 'donors',    label: __( 'Donors', 'dono' ) },
+    { value: 'none',      label: __( 'No goal', 'dono-fundraising-platform' ) },
+    { value: 'amount',    label: __( 'Amount', 'dono-fundraising-platform' ) },
+    { value: 'donations', label: __( 'Donations', 'dono-fundraising-platform' ) },
+    { value: 'donors',    label: __( 'Donors', 'dono-fundraising-platform' ) },
 ];
 
 const GOAL_TYPE_DESC = {
-    none:      __( 'No progress bar or target on this form.', 'dono' ),
-    amount:    __( 'Track progress toward a fundraising total.', 'dono' ),
-    donations: __( 'Track the number of completed donations to this form.', 'dono' ),
-    donors:    __( 'Track the number of unique donors who give through this form.', 'dono' ),
+    none:      __( 'No progress bar or target on this form.', 'dono-fundraising-platform' ),
+    amount:    __( 'Track progress toward a fundraising total.', 'dono-fundraising-platform' ),
+    donations: __( 'Track the number of completed donations to this form.', 'dono-fundraising-platform' ),
+    donors:    __( 'Track the number of unique donors who give through this form.', 'dono-fundraising-platform' ),
 };
 
 function GoalSection( { settings, setSettings } ) {
@@ -1362,11 +1362,11 @@ function GoalSection( { settings, setSettings } ) {
 
     return (
         <SettingsRow
-            title={ __( 'Form goal', 'dono' ) }
-            description={ __( 'An optional goal tracked for this form alone. The Goal block can show this or the parent campaign goal.', 'dono' ) }
+            title={ __( 'Form goal', 'dono-fundraising-platform' ) }
+            description={ __( 'An optional goal tracked for this form alone. The Goal block can show this or the parent campaign goal.', 'dono-fundraising-platform' ) }
         >
             <SelectControl
-                label={ __( 'Goal type', 'dono' ) }
+                label={ __( 'Goal type', 'dono-fundraising-platform' ) }
                 value={ goal.type }
                 options={ GOAL_TYPE_OPTIONS }
                 onChange={ ( type ) => setSettings( { goal: { type, amount_cents: 0, count: 0 } } ) }
@@ -1376,8 +1376,8 @@ function GoalSection( { settings, setSettings } ) {
             { goal.type === 'amount' && (
                 <BaseControl
                     id="dono-form-goal-amount"
-                    label={ __( 'Target amount', 'dono' ) }
-                    help={ __( 'In the currency this form uses.', 'dono' ) }
+                    label={ __( 'Target amount', 'dono-fundraising-platform' ) }
+                    help={ __( 'In the currency this form uses.', 'dono-fundraising-platform' ) }
                     __nextHasNoMarginBottom
                 >
                     <AmountInput
@@ -1397,7 +1397,7 @@ function GoalSection( { settings, setSettings } ) {
             ) }
             { ( goal.type === 'donations' || goal.type === 'donors' ) && (
                 <TextControl
-                    label={ __( 'Target count', 'dono' ) }
+                    label={ __( 'Target count', 'dono-fundraising-platform' ) }
                     type="number"
                     min={ 0 }
                     step="1"
@@ -1419,7 +1419,7 @@ function gatewayLabel( g ) {
     if ( g.enabled !== false ) return g.label;
 
     /* translators: %s: payment gateway name. */
-    return sprintf( __( '%s (off in Settings)', 'dono' ), g.label );
+    return sprintf( __( '%s (off in Settings)', 'dono-fundraising-platform' ), g.label );
 }
 
 function GatewaysSection( { gateways, settings, setSettings } ) {
@@ -1452,8 +1452,8 @@ function GatewaysSection( { gateways, settings, setSettings } ) {
     };
     return (
         <SettingsRow
-            title={ __( 'Allowed gateways', 'dono' ) }
-            description={ __( 'Pick which payment gateways are offered on this form. Leave empty to allow every gateway configured in Settings.', 'dono' ) }
+            title={ __( 'Allowed gateways', 'dono-fundraising-platform' ) }
+            description={ __( 'Pick which payment gateways are offered on this form. Leave empty to allow every gateway configured in Settings.', 'dono-fundraising-platform' ) }
         >
             <div className="dono-sidebar-list">
                 { gateways.map( ( g ) => (
@@ -1473,7 +1473,7 @@ function GatewaysSection( { gateways, settings, setSettings } ) {
                     checked={ !! settings.test_mode }
                     onChange={ () => setSettings( { test_mode: ! settings.test_mode } ) }
                 />
-                <span>{ __( 'Test mode (no real payment, excluded from reporting)', 'dono' ) }</span>
+                <span>{ __( 'Test mode (no real payment, excluded from reporting)', 'dono-fundraising-platform' ) }</span>
             </label>
         </SettingsRow>
     );
@@ -1483,8 +1483,8 @@ function AfterSection( { settings, setSettings } ) {
     return (
         <>
             <SettingsRow
-                title={ __( 'Thank-you message', 'dono' ) }
-                description={ __( 'Shown to the donor after a successful donation, unless a redirect URL is set.', 'dono' ) }
+                title={ __( 'Thank-you message', 'dono-fundraising-platform' ) }
+                description={ __( 'Shown to the donor after a successful donation, unless a redirect URL is set.', 'dono-fundraising-platform' ) }
             >
                 <TextareaControl
                     value={ settings.thank_you_message }
@@ -1494,8 +1494,8 @@ function AfterSection( { settings, setSettings } ) {
                 />
             </SettingsRow>
             <SettingsRow
-                title={ __( 'Redirect URL', 'dono' ) }
-                description={ __( 'If set, donors are sent here instead of seeing the thank-you message.', 'dono' ) }
+                title={ __( 'Redirect URL', 'dono-fundraising-platform' ) }
+                description={ __( 'If set, donors are sent here instead of seeing the thank-you message.', 'dono-fundraising-platform' ) }
             >
                 <TextControl
                     type="url"
@@ -1504,7 +1504,7 @@ function AfterSection( { settings, setSettings } ) {
                     placeholder="https://"
                     help={
                         settings.redirect_url && ! /^https?:\/\//i.test( settings.redirect_url.trim() )
-                            ? __( 'Use a full URL starting with http:// or https://', 'dono' )
+                            ? __( 'Use a full URL starting with http:// or https://', 'dono-fundraising-platform' )
                             : undefined
                     }
                     __nextHasNoMarginBottom
@@ -1518,8 +1518,8 @@ function EmbedSection( { slug } ) {
     const shortcode = `[dono_donation_form slug="${ slug }"]`;
     return (
         <SettingsRow
-            title={ __( 'Embed', 'dono' ) }
-            description={ __( 'Paste this shortcode into any post or page to render the form.', 'dono' ) }
+            title={ __( 'Embed', 'dono-fundraising-platform' ) }
+            description={ __( 'Paste this shortcode into any post or page to render the form.', 'dono-fundraising-platform' ) }
         >
             <ShortcodeField value={ shortcode } />
         </SettingsRow>
@@ -1532,18 +1532,18 @@ function StylePresetField( { value, onChange } ) {
     const defaultName = presets.find( ( p ) => p.id === defaultId )?.name || defaultId;
     return (
         <SelectControl
-            label={ __( 'Style preset', 'dono' ) }
+            label={ __( 'Style preset', 'dono-fundraising-platform' ) }
             value={ value }
             options={ [
                 {
                     value: '',
-                    label: __( 'Inherit (campaign or org default)', 'dono' ) +
+                    label: __( 'Inherit (campaign or org default)', 'dono-fundraising-platform' ) +
                         ( defaultName ? ` (${ defaultName })` : '' ),
                 },
                 ...presets.map( ( p ) => ( { value: p.id, label: p.name } ) ),
             ] }
             onChange={ onChange }
-            help={ __( 'Picks one of the presets defined in Settings → Brand. Leave on Inherit to follow the campaign\'s choice.', 'dono' ) }
+            help={ __( 'Picks one of the presets defined in Settings → Brand. Leave on Inherit to follow the campaign\'s choice.', 'dono-fundraising-platform' ) }
             __nextHasNoMarginBottom
             __next40pxDefaultSize
         />
@@ -1576,7 +1576,7 @@ function ShortcodeField( { value } ) {
                 onClick={ onCopy }
                 className="dono-shortcode__copy"
             >
-                { copied ? __( 'Copied', 'dono' ) : __( 'Copy', 'dono' ) }
+                { copied ? __( 'Copied', 'dono-fundraising-platform' ) : __( 'Copy', 'dono-fundraising-platform' ) }
             </Button>
         </div>
     );

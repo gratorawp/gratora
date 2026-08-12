@@ -43,7 +43,7 @@ final class AdminGlobals extends HookProvider
             'rest'             => esc_url_raw(rest_url('dono/v1/')),
             'nonce'            => wp_create_nonce('wp_rest'),
             'pro'              => $this->license->snapshot(),
-            'campaign_types'   => apply_filters('dono.campaign.types', ['standard' => __('Standard', 'dono')]),
+            'campaign_types'   => apply_filters('dono.campaign.types', ['standard' => __('Standard', 'dono-fundraising-platform')]),
             'campaign_type_notices' => apply_filters('dono.campaign.type_notices', []),
             'default_currency' => $defaultCurrency,
             'supported_currencies' => is_array($currencyLocale['supported_currencies'] ?? null)

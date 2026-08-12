@@ -83,7 +83,7 @@ final class TopDonorsBlock extends CampaignBlock
             if ($hideAnonymous && $isAnonymousAggregate) continue;
 
             $entries[] = [
-                'name'            => $name !== '' ? $name : __('Anonymous', 'dono'),
+                'name'            => $name !== '' ? $name : __('Anonymous', 'dono-fundraising-platform'),
                 'amount_cents'    => (int) $row['amount_cents'],
                 'donations_count' => (int) $row['donations_count'],
                 'is_anonymous'    => $isAnonymousAggregate,
@@ -95,7 +95,7 @@ final class TopDonorsBlock extends CampaignBlock
             $anon = $this->donations->anonymousPaidTotal(null, null, (int) $campaign->id);
             if ($anon['donations_count'] > 0) {
                 $entries[] = [
-                    'name'            => __('Anonymous', 'dono'),
+                    'name'            => __('Anonymous', 'dono-fundraising-platform'),
                     'amount_cents'    => $anon['amount_cents'],
                     'donations_count' => $anon['donations_count'],
                     'is_anonymous'    => true,
@@ -108,10 +108,10 @@ final class TopDonorsBlock extends CampaignBlock
 
         return View::loadRelative(__DIR__, 'views/top-donors', [
             'title'          => (string) ($attrs['title'] ?? ''),
-            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('No donors to rank yet.', 'dono'),
+            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('No donors to rank yet.', 'dono-fundraising-platform'),
             // No button when the campaign cannot take the money: a
             // draft or finished campaign has nothing to offer.
-            'emptySubText' => __('The first donation starts the list.', 'dono'),
+            'emptySubText' => __('The first donation starts the list.', 'dono-fundraising-platform'),
             'emptyIcon'    => 'donor',
             'entries'        => $entries,
             'currency'       => $campaign->currency,

@@ -67,7 +67,7 @@ export default function List() {
             } )
             .catch( ( err ) => {
                 if ( aborted ) return;
-                setError( err?.message || __( 'Failed to load campaigns.', 'dono' ) );
+                setError( err?.message || __( 'Failed to load campaigns.', 'dono-fundraising-platform' ) );
             } )
             .finally( () => ! aborted && setLoading( false ) );
 
@@ -91,7 +91,7 @@ export default function List() {
     const fields = useMemo( () => [
         {
             id:            'title',
-            label:         __( 'Title', 'dono' ),
+            label:         __( 'Title', 'dono-fundraising-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <div className="dono-row__body">
@@ -115,14 +115,14 @@ export default function List() {
         },
         {
             id:       'status',
-            label:    __( 'Status', 'dono' ),
+            label:    __( 'Status', 'dono-fundraising-platform' ),
             elements: STATUS_OPTIONS,
             filterBy: { operators: [ 'is' ] },
             render:   ( { item } ) => <StatusBadge status={ item.status } />,
         },
         {
             id:            'raised',
-            label:         __( 'Raised', 'dono' ),
+            label:         __( 'Raised', 'dono-fundraising-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <span style={ { fontVariantNumeric: 'tabular-nums' } }>
@@ -132,12 +132,12 @@ export default function List() {
         },
         {
             id:    'goal',
-            label: __( 'Goal', 'dono' ),
+            label: __( 'Goal', 'dono-fundraising-platform' ),
             render: ( { item } ) => <GoalCell item={ item } />,
         },
         {
             id:            'donations_count',
-            label:         __( 'Donations', 'dono' ),
+            label:         __( 'Donations', 'dono-fundraising-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <span style={ { fontVariantNumeric: 'tabular-nums', fontSize: '13px' } }>
@@ -147,7 +147,7 @@ export default function List() {
         },
         {
             id:            'donors_count',
-            label:         __( 'Donors', 'dono' ),
+            label:         __( 'Donors', 'dono-fundraising-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <span style={ { fontVariantNumeric: 'tabular-nums', fontSize: '13px' } }>
@@ -157,7 +157,7 @@ export default function List() {
         },
         {
             id:    'forms_count',
-            label: __( 'Forms', 'dono' ),
+            label: __( 'Forms', 'dono-fundraising-platform' ),
             render: ( { item } ) => (
                 <span style={ { fontVariantNumeric: 'tabular-nums', fontSize: '13px' } }>
                     { item.forms_count }
@@ -166,7 +166,7 @@ export default function List() {
         },
         {
             id:            'updated_at',
-            label:         __( 'Updated', 'dono' ),
+            label:         __( 'Updated', 'dono-fundraising-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <span className="dono-time" title={ formatDate( item.updated_at ) }>
@@ -185,7 +185,7 @@ export default function List() {
     const actions = useMemo( () => [
         {
             id:           'duplicate',
-            label:        __( 'Duplicate', 'dono' ),
+            label:        __( 'Duplicate', 'dono-fundraising-platform' ),
             icon:         () => <CopyIcon size={ 16 } strokeWidth={ 1.75 } />,
             supportsBulk: true,
             callback: async ( items ) => {
@@ -197,13 +197,13 @@ export default function List() {
                     } ) ) );
                     load();
                 } catch ( err ) {
-                    setError( err?.message || __( 'Could not duplicate one or more campaigns.', 'dono' ) );
+                    setError( err?.message || __( 'Could not duplicate one or more campaigns.', 'dono-fundraising-platform' ) );
                 }
             },
         },
         {
             id:            'delete',
-            label:         __( 'Delete', 'dono' ),
+            label:         __( 'Delete', 'dono-fundraising-platform' ),
             icon:          () => <TrashIcon size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             supportsBulk:  true,
@@ -216,21 +216,21 @@ export default function List() {
                 if ( ! items.length ) return;
                 const n = items.length;
                 const message = n === 1
-                    ? __( 'Permanently delete this campaign? Its forms will be deleted too. A campaign that has donations cannot be deleted. This cannot be undone.', 'dono' )
+                    ? __( 'Permanently delete this campaign? Its forms will be deleted too. A campaign that has donations cannot be deleted. This cannot be undone.', 'dono-fundraising-platform' )
                     : sprintf(
                         /* translators: %d: number of campaigns to delete */
                         _n(
                             'Permanently delete %d campaign? Forms attached to it will be deleted too. Any campaign that has donations cannot be deleted. This cannot be undone.',
                             'Permanently delete %d campaigns? Forms attached to them will be deleted too. Any campaign that has donations cannot be deleted. This cannot be undone.',
                             n,
-                            'dono'
+                            'dono-fundraising-platform'
                         ),
                         n
                     );
                 setConfirm( {
-                    title:        _n( 'Delete campaign', 'Delete campaigns', n, 'dono' ),
+                    title:        _n( 'Delete campaign', 'Delete campaigns', n, 'dono-fundraising-platform' ),
                     message,
-                    confirmLabel: __( 'Delete', 'dono' ),
+                    confirmLabel: __( 'Delete', 'dono-fundraising-platform' ),
                     destructive:  true,
                     onConfirm: async () => {
                         // allSettled, not all: one refusal used to reject the
@@ -248,14 +248,14 @@ export default function List() {
                         if ( deleted > 0 ) {
                             notify.success( sprintf(
                                 /* translators: %d: number of campaigns deleted */
-                                _n( '%d campaign deleted.', '%d campaigns deleted.', deleted, 'dono' ),
+                                _n( '%d campaign deleted.', '%d campaigns deleted.', deleted, 'dono-fundraising-platform' ),
                                 deleted
                             ) );
                         }
                         if ( refused.length > 0 ) {
                             setError( sprintf(
                                 /* translators: %s: comma separated campaign titles */
-                                __( 'These campaigns were not deleted, because they have donations: %s', 'dono' ),
+                                __( 'These campaigns were not deleted, because they have donations: %s', 'dono-fundraising-platform' ),
                                 refused.map( ( c ) => c.title || `#${ c.id }` ).join( ', ' )
                             ) );
                         }
@@ -270,21 +270,21 @@ export default function List() {
     return (
         <div>
             <div className="dono-crumbs">
-                <a href={ addQueryArgs( window.location.pathname, { page: 'dono' } ) }>{ __( 'Dono', 'dono' ) }</a>
+                <a href={ addQueryArgs( window.location.pathname, { page: 'dono-fundraising-platform' } ) }>{ __( 'Dono', 'dono-fundraising-platform' ) }</a>
                 <span className="sep">›</span>
-                <span>{ __( 'Campaigns', 'dono' ) }</span>
+                <span>{ __( 'Campaigns', 'dono-fundraising-platform' ) }</span>
             </div>
             <div className="dono-page-head">
                 <div className="dono-page-head__title-row">
-                    <h1>{ __( 'Campaigns', 'dono' ) }</h1>
+                    <h1>{ __( 'Campaigns', 'dono-fundraising-platform' ) }</h1>
                 </div>
                 <div className="dono-page-head__right">
                     <span className="dono-page-head__meta">
-                        { sprintf( /* translators: %s: number of campaigns */ _n( '%s campaign', '%s campaigns', total, 'dono' ), total.toLocaleString() ) }
+                        { sprintf( /* translators: %s: number of campaigns */ _n( '%s campaign', '%s campaigns', total, 'dono-fundraising-platform' ), total.toLocaleString() ) }
                     </span>
                     <Btn variant="primary" onClick={ () => setDrawerOpen( true ) }>
                         <Plus size={ 16 } strokeWidth={ 1.75 } />
-                        { __( 'Add new campaign', 'dono' ) }
+                        { __( 'Add new campaign', 'dono-fundraising-platform' ) }
                     </Btn>
                 </div>
             </div>
@@ -298,11 +298,11 @@ export default function List() {
             { ! loading && total === 0 && ! view.search && ! statusFilter ? (
                 <EmptyState
                     icon={ <Target size={ 22 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'No campaigns yet', 'dono' ) }
-                    body={ __( 'A campaign groups one or more donation forms around a single fundraising goal. Create one to get started.', 'dono' ) }
+                    title={ __( 'No campaigns yet', 'dono-fundraising-platform' ) }
+                    body={ __( 'A campaign groups one or more donation forms around a single fundraising goal. Create one to get started.', 'dono-fundraising-platform' ) }
                     action={
                         <Btn variant="primary" onClick={ () => setDrawerOpen( true ) }>
-                            { __( 'Create your first campaign', 'dono' ) }
+                            { __( 'Create your first campaign', 'dono-fundraising-platform' ) }
                         </Btn>
                     }
                 />
@@ -334,24 +334,24 @@ export default function List() {
 function campaignKpis( stats ) {
     return [
         {
-            label: __( 'Total', 'dono' ),
+            label: __( 'Total', 'dono-fundraising-platform' ),
             value: stats ? stats.total_count.toLocaleString() : '-',
         },
         {
-            label: __( 'Active', 'dono' ),
+            label: __( 'Active', 'dono-fundraising-platform' ),
             value: stats ? stats.active_count.toLocaleString() : '-',
         },
         {
-            label: __( 'Raised', 'dono' ),
+            label: __( 'Raised', 'dono-fundraising-platform' ),
             value: stats && stats.raised_cents > 0
                 ? formatAmount( stats.raised_cents, stats.currency || undefined )
                 : '-',
             sub: stats?.currency
-                ? sprintf( /* translators: %s: currency code */ __( 'in %s', 'dono' ), stats.currency )
+                ? sprintf( /* translators: %s: currency code */ __( 'in %s', 'dono-fundraising-platform' ), stats.currency )
                 : null,
         },
         {
-            label: __( 'Donations', 'dono' ),
+            label: __( 'Donations', 'dono-fundraising-platform' ),
             value: stats ? stats.donations_count.toLocaleString() : '-',
         },
     ];

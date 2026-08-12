@@ -20,9 +20,9 @@ export { default as StatusBadge } from './components/StatusBadge';
 // list + the detail header). The shared StatusBadge owns its own render map;
 // this is just the campaign-scoped label set for filter dropdowns.
 export const STATUS_LABEL = {
-    draft:     __( 'Draft', 'dono' ),
-    published: __( 'Active', 'dono' ),
-    archived:  __( 'Archived', 'dono' ),
+    draft:     __( 'Draft', 'dono-fundraising-platform' ),
+    published: __( 'Active', 'dono-fundraising-platform' ),
+    archived:  __( 'Archived', 'dono-fundraising-platform' ),
 };
 
 export function listHref() {

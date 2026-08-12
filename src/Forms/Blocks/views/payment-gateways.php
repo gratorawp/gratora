@@ -6,7 +6,7 @@ defined('ABSPATH') || exit;
 ?>
 <div class="dono-block dono-block--gateways" data-block="dono/payment-gateways">
     <fieldset class="dono-gateways">
-        <legend class="dono-gateways__legend"><?php esc_html_e('Payment method', 'dono'); ?></legend>
+        <legend class="dono-gateways__legend"><?php esc_html_e('Payment method', 'dono-fundraising-platform'); ?></legend>
         <?php foreach ($options as $i => $o):
             $id    = (string) ($o['id'] ?? '');
             if ($id === '') continue;

@@ -20,27 +20,27 @@ import { rowLinkProps } from '../_shared/rowLink';
 import { formatAmount, formatDate } from '../donations/format';
 
 const STATUS_OPTIONS = [
-    { value: 'active',    label: __( 'Active', 'dono' ) },
-    { value: 'past_due',  label: __( 'Past due', 'dono' ) },
-    { value: 'paused',    label: __( 'Paused', 'dono' ) },
-    { value: 'cancelled', label: __( 'Cancelled', 'dono' ) },
-    { value: 'expired',   label: __( 'Expired', 'dono' ) },
+    { value: 'active',    label: __( 'Active', 'dono-fundraising-platform' ) },
+    { value: 'past_due',  label: __( 'Past due', 'dono-fundraising-platform' ) },
+    { value: 'paused',    label: __( 'Paused', 'dono-fundraising-platform' ) },
+    { value: 'cancelled', label: __( 'Cancelled', 'dono-fundraising-platform' ) },
+    { value: 'expired',   label: __( 'Expired', 'dono-fundraising-platform' ) },
 ];
 
 const INTERVAL_OPTIONS = [
-    { value: 'month', label: __( 'Monthly', 'dono' ) },
-    { value: 'year',  label: __( 'Yearly', 'dono' ) },
-    { value: 'week',  label: __( 'Weekly', 'dono' ) },
+    { value: 'month', label: __( 'Monthly', 'dono-fundraising-platform' ) },
+    { value: 'year',  label: __( 'Yearly', 'dono-fundraising-platform' ) },
+    { value: 'week',  label: __( 'Weekly', 'dono-fundraising-platform' ) },
 ];
 
 // A donation carries the cadence the donor chose on the form, not the plan's
 // interval pair, so it reads from its own labels.
 const FREQUENCY_LABEL = {
-    weekly:    __( 'Weekly', 'dono' ),
-    biweekly:  __( 'Every 2 weeks', 'dono' ),
-    monthly:   __( 'Monthly', 'dono' ),
-    quarterly: __( 'Quarterly', 'dono' ),
-    yearly:    __( 'Yearly', 'dono' ),
+    weekly:    __( 'Weekly', 'dono-fundraising-platform' ),
+    biweekly:  __( 'Every 2 weeks', 'dono-fundraising-platform' ),
+    monthly:   __( 'Monthly', 'dono-fundraising-platform' ),
+    quarterly: __( 'Quarterly', 'dono-fundraising-platform' ),
+    yearly:    __( 'Yearly', 'dono-fundraising-platform' ),
 };
 
 // A view preference, not a setting: it belongs to the person looking at the
@@ -63,13 +63,13 @@ function intervalLabel( unit, count ) {
     switch ( unit ) {
         case 'week':
             /* translators: %d: number of weeks between charges. */
-            return sprintf( _n( '%d week', '%d weeks', n, 'dono' ), n );
+            return sprintf( _n( '%d week', '%d weeks', n, 'dono-fundraising-platform' ), n );
         case 'year':
             /* translators: %d: number of years between charges. */
-            return sprintf( _n( '%d year', '%d years', n, 'dono' ), n );
+            return sprintf( _n( '%d year', '%d years', n, 'dono-fundraising-platform' ), n );
         case 'month':
             /* translators: %d: number of months */
-            return sprintf( _n( '%d month', '%d months', n, 'dono' ), n );
+            return sprintf( _n( '%d month', '%d months', n, 'dono-fundraising-platform' ), n );
         default:
             return n > 1 ? `${ n } ${ unit }` : String( unit );
     }
@@ -106,7 +106,7 @@ function attentionSub( failing, unlinked ) {
             '%d plan the gateway could not collect from',
             '%d plans the gateway could not collect from',
             failing,
-            'dono'
+            'dono-fundraising-platform'
         ),
         failing
     );
@@ -117,7 +117,7 @@ function attentionSub( failing, unlinked ) {
             '%d paid recurring donation has no plan and is listed above',
             '%d paid recurring donations have no plan and are listed above',
             unlinked.total,
-            'dono'
+            'dono-fundraising-platform'
         ),
         unlinked.total
     );
@@ -126,13 +126,13 @@ function attentionSub( failing, unlinked ) {
     // resolving the unknown half in the org's favour.
     let second = null;
     if ( unlinked.error ) {
-        second = __( 'Donations charged with no plan could not be checked', 'dono' );
+        second = __( 'Donations charged with no plan could not be checked', 'dono-fundraising-platform' );
     } else if ( unlinked.total > 0 ) {
         second = noPlan;
     }
 
     if ( second === null ) {
-        return failing > 0 ? declined : __( 'Nothing to chase', 'dono' );
+        return failing > 0 ? declined : __( 'Nothing to chase', 'dono-fundraising-platform' );
     }
 
     return failing === 0 ? second : (
@@ -148,7 +148,7 @@ function attentionSub( failing, unlinked ) {
 function withTestNote( sub, includeTest ) {
     if ( ! includeTest ) return sub;
 
-    const note = __( 'Includes test subscriptions', 'dono' );
+    const note = __( 'Includes test subscriptions', 'dono-fundraising-platform' );
     if ( ! sub ) return note;
 
     return (
@@ -165,7 +165,7 @@ function subscriptionKpis( stats, unlinked, includeTest ) {
     return [
         {
             id:    'mrr',
-            label: __( 'Monthly recurring revenue', 'dono' ),
+            label: __( 'Monthly recurring revenue', 'dono-fundraising-platform' ),
             value: formatAmount( stats.mrr_cents ),
             sub:   withTestNote(
                 stats.unconverted > 0
@@ -175,34 +175,34 @@ function subscriptionKpis( stats, unlinked, includeTest ) {
                             '%d plan could not be converted and is not counted',
                             '%d plans could not be converted and are not counted',
                             stats.unconverted,
-                            'dono'
+                            'dono-fundraising-platform'
                         ),
                         stats.unconverted
                     )
-                    : __( 'Active plans, normalised', 'dono' ),
+                    : __( 'Active plans, normalised', 'dono-fundraising-platform' ),
                 includeTest
             ),
         },
         {
             id:    'active',
-            label: __( 'Active plans', 'dono' ),
+            label: __( 'Active plans', 'dono-fundraising-platform' ),
             value: String( stats.active_count ),
             sub:   withTestNote( null, includeTest ),
         },
         {
             id:    'failing',
-            label: __( 'Needs attention', 'dono' ),
+            label: __( 'Needs attention', 'dono-fundraising-platform' ),
             value: String( failing ),
             sub:   withTestNote( attentionSub( failing, unlinked ), includeTest ),
         },
         {
             id:    'churn',
-            label: __( 'Churn this month', 'dono' ),
+            label: __( 'Churn this month', 'dono-fundraising-platform' ),
             value: `${ stats.churn_pct }%`,
             sub:   withTestNote(
                 sprintf(
                     /* translators: %d: number of plans cancelled this month. */
-                    _n( '%d cancelled', '%d cancelled', stats.churned_this_month, 'dono' ),
+                    _n( '%d cancelled', '%d cancelled', stats.churned_this_month, 'dono-fundraising-platform' ),
                     stats.churned_this_month
                 ),
                 includeTest
@@ -222,12 +222,12 @@ function UnlinkedNotice( { unlinked, showAll, onShowAll, onReload } ) {
                 <div>
                     { __(
                         'Recurring donations charged with no plan behind them could not be checked, so nothing on this screen rules them out.',
-                        'dono'
+                        'dono-fundraising-platform'
                     ) }
                 </div>
                 <div className="dono-row__sub">{ error }</div>
                 <Btn variant="ghost" size="sm" onClick={ onReload }>
-                    { __( 'Check again', 'dono' ) }
+                    { __( 'Check again', 'dono-fundraising-platform' ) }
                 </Btn>
             </Notice>
         );
@@ -250,7 +250,7 @@ function UnlinkedNotice( { unlinked, showAll, onShowAll, onReload } ) {
                         '%d recurring donation was charged, but no plan was created for it. Nothing will collect the next payment.',
                         '%d recurring donations were charged, but no plans were created for them. Nothing will collect their next payments.',
                         total,
-                        'dono'
+                        'dono-fundraising-platform'
                     ),
                     total
                 ) }
@@ -263,7 +263,7 @@ function UnlinkedNotice( { unlinked, showAll, onShowAll, onReload } ) {
                             'Covers donations paid in the last %d day.',
                             'Covers donations paid in the last %d days.',
                             windowDays,
-                            'dono'
+                            'dono-fundraising-platform'
                         ),
                         windowDays
                     ) }
@@ -279,8 +279,8 @@ function UnlinkedNotice( { unlinked, showAll, onShowAll, onReload } ) {
                     { ' ' }
                     <span className="dono-row__sub">
                         { it.failure_recorded
-                            ? __( 'failure recorded', 'dono' )
-                            : __( 'no failure recorded', 'dono' ) }
+                            ? __( 'failure recorded', 'dono-fundraising-platform' )
+                            : __( 'no failure recorded', 'dono-fundraising-platform' ) }
                     </span>
                 </div>
             ) ) }
@@ -288,7 +288,7 @@ function UnlinkedNotice( { unlinked, showAll, onShowAll, onReload } ) {
                 <Btn variant="ghost" size="sm" onClick={ onShowAll }>
                     { sprintf(
                         /* translators: %d: number of donations not yet listed. */
-                        _n( 'Show %d more', 'Show %d more', hidden, 'dono' ),
+                        _n( 'Show %d more', 'Show %d more', hidden, 'dono-fundraising-platform' ),
                         hidden
                     ) }
                 </Btn>
@@ -301,20 +301,20 @@ function UnlinkedNotice( { unlinked, showAll, onShowAll, onReload } ) {
                             '%d more is not listed here.',
                             '%d more are not listed here.',
                             beyond,
-                            'dono'
+                            'dono-fundraising-platform'
                         ),
                         beyond
                     ) }
                 </div>
             ) }
             { canRetry && anyRecorded && (
-                <div>{ __( 'Open a donation with a recorded failure to create its plan.', 'dono' ) }</div>
+                <div>{ __( 'Open a donation with a recorded failure to create its plan.', 'dono-fundraising-platform' ) }</div>
             ) }
             { ! canRetry && (
                 <div>
                     { __(
                         'Creating a plan needs permission to issue refunds, so pass these references to someone who has it.',
-                        'dono'
+                        'dono-fundraising-platform'
                     ) }
                 </div>
             ) }
@@ -322,7 +322,7 @@ function UnlinkedNotice( { unlinked, showAll, onShowAll, onReload } ) {
                 <div>
                     { __(
                         'Where no failure was recorded, check the payment provider for a subscription before asking the donor to set one up again.',
-                        'dono'
+                        'dono-fundraising-platform'
                     ) }
                 </div>
             ) }
@@ -336,35 +336,35 @@ function emptyStateCopy( unlinked, testHidden ) {
     // debug an integration that worked.
     if ( testHidden > 0 ) {
         return {
-            title: __( 'No live subscriptions', 'dono' ),
+            title: __( 'No live subscriptions', 'dono-fundraising-platform' ),
             // The count and the way to reveal them are in the notice above, so
             // this says what the empty table means rather than repeating them.
-            body:  __( 'Nothing here is charging real money yet.', 'dono' ),
+            body:  __( 'Nothing here is charging real money yet.', 'dono-fundraising-platform' ),
         };
     }
 
     if ( unlinked.error ) {
         return {
-            title: __( 'No subscriptions to show', 'dono' ),
+            title: __( 'No subscriptions to show', 'dono-fundraising-platform' ),
             body:  __(
                 'Whether a recurring donation was charged with no plan behind it is unknown, so this is not the whole picture.',
-                'dono'
+                'dono-fundraising-platform'
             ),
         };
     }
 
     if ( unlinked.total > 0 ) {
         return {
-            title: __( 'No subscriptions were created', 'dono' ),
+            title: __( 'No subscriptions were created', 'dono-fundraising-platform' ),
             body:  unlinked.canRetry
-                ? __( 'The recurring donations above were charged, but no plan was ever created for them. Open one with a recorded failure to create its plan.', 'dono' )
-                : __( 'The recurring donations above were charged, but no plan was ever created for them. Creating a plan needs permission to issue refunds.', 'dono' ),
+                ? __( 'The recurring donations above were charged, but no plan was ever created for them. Open one with a recorded failure to create its plan.', 'dono-fundraising-platform' )
+                : __( 'The recurring donations above were charged, but no plan was ever created for them. Creating a plan needs permission to issue refunds.', 'dono-fundraising-platform' ),
         };
     }
 
     return {
-        title: __( 'No subscriptions yet', 'dono' ),
-        body:  __( 'Recurring plans appear here once a donor sets one up on a form that offers it.', 'dono' ),
+        title: __( 'No subscriptions yet', 'dono-fundraising-platform' ),
+        body:  __( 'Recurring plans appear here once a donor sets one up on a form that offers it.', 'dono-fundraising-platform' ),
     };
 }
 
@@ -450,7 +450,7 @@ export default function List() {
                 setError( null );
             } )
             .catch( ( err ) => {
-                setError( err?.message || __( 'Failed to load subscriptions.', 'dono' ) );
+                setError( err?.message || __( 'Failed to load subscriptions.', 'dono-fundraising-platform' ) );
                 setData( [] );
                 setTotal( 0 );
                 setTestHidden( 0 );
@@ -472,7 +472,7 @@ export default function List() {
             } )
             .catch( ( err ) => {
                 if ( aborted ) return;
-                setError( err?.message || __( 'Failed to load subscriptions.', 'dono' ) );
+                setError( err?.message || __( 'Failed to load subscriptions.', 'dono-fundraising-platform' ) );
                 setData( [] );
                 setTotal( 0 );
                 setTestHidden( 0 );
@@ -489,7 +489,7 @@ export default function List() {
         path: addQueryArgs( '/dono/v1/admin/recurring/stats', { include_test: test || undefined } ),
     } );
 
-    const statsError = () => notify.error( __( 'The recurring totals could not be loaded.', 'dono' ) );
+    const statsError = () => notify.error( __( 'The recurring totals could not be loaded.', 'dono-fundraising-platform' ) );
 
     const loadStats = () => fetchStats( includeTest ).then( setStats ).catch( statsError );
 
@@ -511,7 +511,7 @@ export default function List() {
             items:      [],
             windowDays: 0,
             canRetry:   false,
-            error:      err?.message || __( 'The check could not be run.', 'dono' ),
+            error:      err?.message || __( 'The check could not be run.', 'dono-fundraising-platform' ),
         } ) );
 
     // Two flips of the toggle land in whatever order the network decides, and
@@ -529,7 +529,7 @@ export default function List() {
     const fields = useMemo( () => [
         {
             id:    'donor',
-            label: __( 'Donor', 'dono' ),
+            label: __( 'Donor', 'dono-fundraising-platform' ),
             render: ( { item } ) => {
                 const d = item.donor;
                 if ( ! d ) return <span className="dono-row__sub">-</span>;
@@ -537,7 +537,7 @@ export default function List() {
                     <div className="dono-row">
                         <div className="dono-row__body">
                             <a className="dono-row__link dono-row__link--strong" href={ donorHref( d.id ) } { ...rowLinkProps }>
-                                { d.name || __( '(no name)', 'dono' ) }
+                                { d.name || __( '(no name)', 'dono-fundraising-platform' ) }
                             </a>
                             { d.email && <div className="dono-row__sub dono-row__sub--mono">{ d.email }</div> }
                         </div>
@@ -547,7 +547,7 @@ export default function List() {
         },
         {
             id:            'amount',
-            label:         __( 'Amount', 'dono' ),
+            label:         __( 'Amount', 'dono-fundraising-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
                 // Muted once the plan has ended: it describes a charge that will
@@ -560,7 +560,7 @@ export default function List() {
         },
         {
             id:       'status',
-            label:    __( 'Status', 'dono' ),
+            label:    __( 'Status', 'dono-fundraising-platform' ),
             elements: STATUS_OPTIONS,
             filterBy: { operators: [ 'is' ] },
             enableSorting: true,
@@ -571,7 +571,7 @@ export default function List() {
                         <span className="dono-row__sub" style={ { marginLeft: 6 } }>
                             { sprintf(
                                 /* translators: %d: consecutive failed renewals. */
-                                _n( '%d failure', '%d failures', item.failed_renewals_count, 'dono' ),
+                                _n( '%d failure', '%d failures', item.failed_renewals_count, 'dono-fundraising-platform' ),
                                 item.failed_renewals_count
                             ) }
                         </span>
@@ -581,7 +581,7 @@ export default function List() {
         },
         {
             id:            'next_payment_at',
-            label:         __( 'Next charge', 'dono' ),
+            label:         __( 'Next charge', 'dono-fundraising-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
                 isTerminal( item.status )
@@ -590,17 +590,17 @@ export default function List() {
                             { item.cancelled_at
                                 ? sprintf(
                                     /* translators: %s: date the plan ended. */
-                                    __( 'Ended %s', 'dono' ),
+                                    __( 'Ended %s', 'dono-fundraising-platform' ),
                                     formatDate( item.cancelled_at )
                                 )
-                                : __( 'Ended', 'dono' ) }
+                                : __( 'Ended', 'dono-fundraising-platform' ) }
                         </span>
                     )
                     : item.status === 'paused' && item.resume_at
                         ? (
                             <div className="dono-row">
                                 <div className="dono-row__name">{ formatDate( item.resume_at ) }</div>
-                                <div className="dono-row__sub">{ __( 'when it resumes', 'dono' ) }</div>
+                                <div className="dono-row__sub">{ __( 'when it resumes', 'dono-fundraising-platform' ) }</div>
                             </div>
                         )
                     : (
@@ -613,7 +613,7 @@ export default function List() {
         },
         {
             id:            'started_at',
-            label:         __( 'Giving since', 'dono' ),
+            label:         __( 'Giving since', 'dono-fundraising-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
                 item.started_at
@@ -622,7 +622,7 @@ export default function List() {
             ),
         },
         {            id:       'campaign',
-            label:    __( 'Campaign', 'dono' ),
+            label:    __( 'Campaign', 'dono-fundraising-platform' ),
             elements: campaigns.map( ( c ) => ( { value: String( c.id ), label: c.title || `#${ c.id }` } ) ),
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => (
@@ -633,7 +633,7 @@ export default function List() {
         },
         {
             id:       'gateway',
-            label:    __( 'Gateway', 'dono' ),
+            label:    __( 'Gateway', 'dono-fundraising-platform' ),
             elements: gateways,
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => (
@@ -642,31 +642,31 @@ export default function List() {
         },
         {
             id:       'failing',
-            label:    __( 'Renewal health', 'dono' ),
+            label:    __( 'Renewal health', 'dono-fundraising-platform' ),
             elements: [
-                { value: 'yes', label: __( 'Has failed renewals', 'dono' ) },
+                { value: 'yes', label: __( 'Has failed renewals', 'dono-fundraising-platform' ) },
             ],
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => (
                 item.failed_renewals_count > 0
                     ? <span className="dono-pill is-warn">{ sprintf(
                         /* translators: %d: consecutive failed renewals. */
-                        _n( '%d failure', '%d failures', item.failed_renewals_count, 'dono' ),
+                        _n( '%d failure', '%d failures', item.failed_renewals_count, 'dono-fundraising-platform' ),
                         item.failed_renewals_count
                     ) }</span>
-                    : <span className="dono-row__sub">{ __( 'OK', 'dono' ) }</span>
+                    : <span className="dono-row__sub">{ __( 'OK', 'dono-fundraising-platform' ) }</span>
             ),
         },
         {
             id:       'interval',
-            label:    __( 'Interval', 'dono' ),
+            label:    __( 'Interval', 'dono-fundraising-platform' ),
             elements: INTERVAL_OPTIONS,
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => <span>{ intervalLabel( item.interval_unit, item.interval_count ) }</span>,
         },
         {
             id:            'lifetime',
-            label:         __( 'Lifetime', 'dono' ),
+            label:         __( 'Lifetime', 'dono-fundraising-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <div className="dono-row">
@@ -674,7 +674,7 @@ export default function List() {
                     <div className="dono-row__sub">
                         { sprintf(
                             /* translators: %d: number of payments taken so far. */
-                            _n( '%d payment', '%d payments', item.payments_count, 'dono' ),
+                            _n( '%d payment', '%d payments', item.payments_count, 'dono-fundraising-platform' ),
                             item.payments_count
                         ) }
                     </div>
@@ -686,13 +686,13 @@ export default function List() {
     const actions = useMemo( () => [
         {
             id:          'copy_subscription_id',
-            label:       __( 'Copy subscription id', 'dono' ),
+            label:       __( 'Copy subscription id', 'dono-fundraising-platform' ),
             isPrimary:   false,
             isEligible:  ( item ) => !! item.gateway_subscription_id,
             callback:    async ( [ item ] ) => {
                 try {
                     await window.navigator?.clipboard?.writeText( item.gateway_subscription_id );
-                    notify.success( __( 'Subscription id copied.', 'dono' ) );
+                    notify.success( __( 'Subscription id copied.', 'dono-fundraising-platform' ) );
                 } catch ( e ) {
                     // No clipboard permission, so show it instead of failing
                     // silently: it is a lookup key and reading it is the point.
@@ -702,7 +702,7 @@ export default function List() {
         },
         {
             id:    'retry',
-            label: __( 'Retry payment', 'dono' ),
+            label: __( 'Retry payment', 'dono-fundraising-platform' ),
             // DataViews draws a primary action as an icon button, so one with
             // no icon renders as nothing at all -- and being primary, it is
             // left out of the row menu too, taking the action out of reach.
@@ -713,31 +713,31 @@ export default function List() {
         },
         {
             id:       'pause',
-            label:    __( 'Pause', 'dono' ),
+            label:    __( 'Pause', 'dono-fundraising-platform' ),
             isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'pause' ),
             callback: ( items ) => setDialog( { plan: items[ 0 ], action: 'pause' } ),
         },
         {
             id:       'resume',
-            label:    __( 'Resume', 'dono' ),
+            label:    __( 'Resume', 'dono-fundraising-platform' ),
             isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'resume' ),
             callback: ( items ) => setDialog( { plan: items[ 0 ], action: 'resume' } ),
         },
         {
             id:       'skip_next',
-            label:    __( 'Skip next', 'dono' ),
+            label:    __( 'Skip next', 'dono-fundraising-platform' ),
             isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'skip_next' ),
             callback: ( items ) => setDialog( { plan: items[ 0 ], action: 'skip_next' } ),
         },
         {
             id:       'change_amount',
-            label:    __( 'Change amount', 'dono' ),
+            label:    __( 'Change amount', 'dono-fundraising-platform' ),
             isEligible: ( item ) => ! isTerminal( item.status ),
             callback: ( items ) => setDialog( { plan: items[ 0 ], action: 'change_amount' } ),
         },
         {
             id:            'cancel',
-            label:         __( 'Cancel', 'dono' ),
+            label:         __( 'Cancel', 'dono-fundraising-platform' ),
             isDestructive: true,
             isEligible: ( item ) => ! isTerminal( item.status ),
             callback: ( items ) => setDialog( { plan: items[ 0 ], action: 'cancel' } ),
@@ -752,13 +752,13 @@ export default function List() {
     return (
         <div className="dono-admin">
             <div className="dono-crumbs">
-                <a href={ addQueryArgs( window.location.pathname, { page: 'dono' } ) }>{ __( 'Dono', 'dono' ) }</a>
+                <a href={ addQueryArgs( window.location.pathname, { page: 'dono-fundraising-platform' } ) }>{ __( 'Dono', 'dono-fundraising-platform' ) }</a>
                 <span className="sep">›</span>
-                <span>{ __( 'Subscriptions', 'dono' ) }</span>
+                <span>{ __( 'Subscriptions', 'dono-fundraising-platform' ) }</span>
             </div>
             <div className="dono-page-head">
                 <div className="dono-page-head__title-row">
-                    <h1>{ __( 'Subscriptions', 'dono' ) }</h1>
+                    <h1>{ __( 'Subscriptions', 'dono-fundraising-platform' ) }</h1>
                 </div>
                 <div className="dono-page-head__right">
                     { /* Offered once there is something to reveal, or while it
@@ -770,15 +770,15 @@ export default function List() {
                             <Switch
                                 checked={ includeTest }
                                 onChange={ () => toggleTest( ! includeTest ) }
-                                label={ __( 'Show test subscriptions', 'dono' ) }
+                                label={ __( 'Show test subscriptions', 'dono-fundraising-platform' ) }
                             />
-                            <span>{ __( 'Show test subscriptions', 'dono' ) }</span>
+                            <span>{ __( 'Show test subscriptions', 'dono-fundraising-platform' ) }</span>
                         </label>
                     ) }
                     <span className="dono-page-head__meta">
                         { sprintf(
                             /* translators: %s: number of recurring plans. */
-                            _n( '%s plan', '%s plans', total, 'dono' ),
+                            _n( '%s plan', '%s plans', total, 'dono-fundraising-platform' ),
                             total.toLocaleString()
                         ) }
                     </span>
@@ -793,13 +793,13 @@ export default function List() {
                             '%d test subscription is hidden.',
                             '%d test subscriptions are hidden.',
                             testHidden,
-                            'dono'
+                            'dono-fundraising-platform'
                         ),
                         testHidden
                     ) }
                     { ' ' }
                     <Btn variant="link" onClick={ () => toggleTest( true ) }>
-                        { __( 'Show them', 'dono' ) }
+                        { __( 'Show them', 'dono-fundraising-platform' ) }
                     </Btn>
                 </div>
             ) }

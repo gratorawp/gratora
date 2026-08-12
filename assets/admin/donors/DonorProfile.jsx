@@ -87,18 +87,18 @@ function EditPanel( { donor, onCancel, onSaved } ) {
         // The footer lives outside the form element, so it calls this directly.
         if ( e ) e.preventDefault();
         if ( phoneInvalid ) {
-            setError( __( 'Phone number looks malformed. Use digits, +, spaces, parentheses, or dashes.', 'dono' ) );
+            setError( __( 'Phone number looks malformed. Use digits, +, spaces, parentheses, or dashes.', 'dono-fundraising-platform' ) );
             return;
         }
         if ( emailInvalid ) {
-            setError( __( 'Email address looks malformed.', 'dono' ) );
+            setError( __( 'Email address looks malformed.', 'dono-fundraising-platform' ) );
             return;
         }
         if ( emailChanged ) {
             setConfirm( {
-                title:        __( 'Change donor email', 'dono' ),
-                message:      __( 'Change this donor\'s email? Future donations from the new address will link to this record.', 'dono' ),
-                confirmLabel: __( 'Change email', 'dono' ),
+                title:        __( 'Change donor email', 'dono-fundraising-platform' ),
+                message:      __( 'Change this donor\'s email? Future donations from the new address will link to this record.', 'dono-fundraising-platform' ),
+                confirmLabel: __( 'Change email', 'dono-fundraising-platform' ),
                 onConfirm:    doSave,
             } );
             return;
@@ -120,13 +120,13 @@ function EditPanel( { donor, onCancel, onSaved } ) {
     return (
         <>
             <Dialog
-                title={ __( 'Edit donor details', 'dono' ) }
+                title={ __( 'Edit donor details', 'dono-fundraising-platform' ) }
                 onClose={ () => ( saving ? null : onCancel() ) }
                 size="wide"
                 foot={
                     <>
                         <Btn variant="secondary" onClick={ onCancel } disabled={ saving }>
-                            { __( 'Cancel', 'dono' ) }
+                            { __( 'Cancel', 'dono-fundraising-platform' ) }
                         </Btn>
                         <Btn
                             variant="primary"
@@ -134,14 +134,14 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                             isBusy={ saving }
                             disabled={ saving || phoneInvalid }
                         >
-                            { saving ? __( 'Saving…', 'dono' ) : __( 'Save', 'dono' ) }
+                            { saving ? __( 'Saving…', 'dono-fundraising-platform' ) : __( 'Save', 'dono-fundraising-platform' ) }
                         </Btn>
                     </>
                 }
             >
                 <form className="dp-edit-form" onSubmit={ submit }>
                     <label style={ { gridColumn: '1 / -1' } }>
-                        { __( 'Email', 'dono' ) }
+                        { __( 'Email', 'dono-fundraising-platform' ) }
                         <input className="dono-input"
                             type="email"
                             value={ form.email }
@@ -152,25 +152,25 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                         />
                         { emailChanged && (
                             <span className="dp-field__hint">
-                                { __( 'Saving rehashes the donor identity. Future donations from this address will link to this record.', 'dono' ) }
+                                { __( 'Saving rehashes the donor identity. Future donations from this address will link to this record.', 'dono-fundraising-platform' ) }
                             </span>
                         ) }
                     </label>
                     <label>
-                        { __( 'First name', 'dono' ) }
+                        { __( 'First name', 'dono-fundraising-platform' ) }
                         <input className="dono-input" type="text" value={ form.first_name } onChange={ set( 'first_name' ) } maxLength={ 100 } />
                     </label>
                     <label>
-                        { __( 'Last name', 'dono' ) }
+                        { __( 'Last name', 'dono-fundraising-platform' ) }
                         <input className="dono-input" type="text" value={ form.last_name } onChange={ set( 'last_name' ) } maxLength={ 100 } />
                     </label>
                     <label className="dp-edit-form__country">
-                        { __( 'Country', 'dono' ) }
+                        { __( 'Country', 'dono-fundraising-platform' ) }
                         <div className="dp-edit-form__country-wrap">
                             <input className="dono-input"
                                 type="text"
                                 value={ countryQuery }
-                                placeholder={ __( 'Search country…', 'dono' ) }
+                                placeholder={ __( 'Search country…', 'dono-fundraising-platform' ) }
                                 onFocus={ () => setCountryOpen( true ) }
                                 onBlur={ () => setTimeout( () => setCountryOpen( false ), 150 ) }
                                 onChange={ ( e ) => { setCountryQuery( e.target.value ); setCountryOpen( true ); } }
@@ -190,19 +190,19 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                         </div>
                     </label>
                     <label>
-                        { __( 'Type', 'dono' ) }
+                        { __( 'Type', 'dono-fundraising-platform' ) }
                         <select className="dono-select" value={ form.donor_type } onChange={ set( 'donor_type' ) }>
-                            <option value="individual">{ __( 'Individual', 'dono' ) }</option>
-                            <option value="organization">{ __( 'Organization', 'dono' ) }</option>
-                            <option value="household">{ __( 'Household', 'dono' ) }</option>
+                            <option value="individual">{ __( 'Individual', 'dono-fundraising-platform' ) }</option>
+                            <option value="organization">{ __( 'Organization', 'dono-fundraising-platform' ) }</option>
+                            <option value="household">{ __( 'Household', 'dono-fundraising-platform' ) }</option>
                         </select>
                     </label>
                     <label style={ { gridColumn: '1 / -1' } }>
-                        { __( 'Company', 'dono' ) }
+                        { __( 'Company', 'dono-fundraising-platform' ) }
                         <input className="dono-input" type="text" value={ form.company } onChange={ set( 'company' ) } maxLength={ 150 } />
                     </label>
                     <label style={ { gridColumn: '1 / -1' } }>
-                        { __( 'Phone', 'dono' ) }
+                        { __( 'Phone', 'dono-fundraising-platform' ) }
                         <input className="dono-input"
                             type="tel"
                             value={ form.phone }
@@ -213,32 +213,32 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                         />
                         { phoneInvalid && (
                             <span className="dp-field__hint dp-field__hint--err">
-                                { __( 'Use digits, +, spaces, parentheses, or dashes.', 'dono' ) }
+                                { __( 'Use digits, +, spaces, parentheses, or dashes.', 'dono-fundraising-platform' ) }
                             </span>
                         ) }
                     </label>
                     <label style={ { gridColumn: '1 / -1' } }>
-                        { __( 'Address line 1', 'dono' ) }
+                        { __( 'Address line 1', 'dono-fundraising-platform' ) }
                         <input className="dono-input"
                             type="text"
                             value={ form.address.line1 }
                             onChange={ setAddr( 'line1' ) }
-                            placeholder={ __( 'Street and number', 'dono' ) }
+                            placeholder={ __( 'Street and number', 'dono-fundraising-platform' ) }
                             maxLength={ 200 }
                         />
                     </label>
                     <label style={ { gridColumn: '1 / -1' } }>
-                        { __( 'Address line 2', 'dono' ) }
+                        { __( 'Address line 2', 'dono-fundraising-platform' ) }
                         <input className="dono-input"
                             type="text"
                             value={ form.address.line2 }
                             onChange={ setAddr( 'line2' ) }
-                            placeholder={ __( 'Apartment, suite, etc. (optional)', 'dono' ) }
+                            placeholder={ __( 'Apartment, suite, etc. (optional)', 'dono-fundraising-platform' ) }
                             maxLength={ 200 }
                         />
                     </label>
                     <label>
-                        { __( 'City', 'dono' ) }
+                        { __( 'City', 'dono-fundraising-platform' ) }
                         <input className="dono-input"
                             type="text"
                             value={ form.address.city }
@@ -247,7 +247,7 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                         />
                     </label>
                     <label>
-                        { __( 'Region', 'dono' ) }
+                        { __( 'Region', 'dono-fundraising-platform' ) }
                         <input className="dono-input"
                             type="text"
                             value={ form.address.region }
@@ -256,7 +256,7 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                         />
                     </label>
                     <label>
-                        { __( 'Postal code', 'dono' ) }
+                        { __( 'Postal code', 'dono-fundraising-platform' ) }
                         <input className="dono-input"
                             type="text"
                             value={ form.address.postal }
@@ -305,7 +305,7 @@ export default function DonorProfile( { id, onBack } ) {
         return () => { aborted = true; };
     }, [ id ] );
 
-    if ( loading && ! data ) return <p className="dp-loading">{ __( 'Loading donor…', 'dono' ) }</p>;
+    if ( loading && ! data ) return <p className="dp-loading">{ __( 'Loading donor…', 'dono-fundraising-platform' ) }</p>;
     if ( error )              return <p className="dp-error">{ error }</p>;
     if ( ! data )             return null;
 

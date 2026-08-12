@@ -82,7 +82,7 @@ function api( path, init = {} ) {
             if ( ( r.status === 401 || r.status === 403 ) && typeof onSessionExpired === 'function' ) {
                 onSessionExpired();
             }
-            throw Object.assign( new Error( data.message || __( 'Request failed', 'dono' ) ), { status: r.status, data } );
+            throw Object.assign( new Error( data.message || __( 'Request failed', 'dono-fundraising-platform' ) ), { status: r.status, data } );
         }
         const ct = r.headers.get( 'content-type' ) || '';
         if ( ct.includes( 'application/pdf' ) ) return r.blob();
@@ -170,7 +170,7 @@ function completeCardReturn( { clientSecret, planId, publishableKey } ) {
         .then( ( res ) => {
             const intent = res && res.setupIntent;
             const token  = intent && intent.status === 'succeeded' ? intent.payment_method : '';
-            if ( ! token ) throw new Error( __( 'That payment method was not saved.', 'dono' ) );
+            if ( ! token ) throw new Error( __( 'That payment method was not saved.', 'dono-fundraising-platform' ) );
             return api( `recurring/${ planId }/payment-method/complete`, {
                 method: 'POST',
                 body:   JSON.stringify( { token } ),
@@ -266,7 +266,7 @@ function App() {
                 if ( err && ( err.status === 401 || err.status === 403 ) ) {
                     setMe( null );
                 } else {
-                    setLoadError( err?.message || __( 'Could not load your account.', 'dono' ) );
+                    setLoadError( err?.message || __( 'Could not load your account.', 'dono-fundraising-platform' ) );
                 }
             } )
             .finally( () => setLoading( false ) );
@@ -278,7 +278,7 @@ function App() {
         if ( ! me ) return undefined;
         onSessionExpired = () => {
             setMe( null );
-            setError( __( 'Your session expired. Please sign in again.', 'dono' ) );
+            setError( __( 'Your session expired. Please sign in again.', 'dono-fundraising-platform' ) );
         };
         return () => { onSessionExpired = null; };
     }, [ me ] );
@@ -343,20 +343,20 @@ function App() {
         if ( ! me || ! pending ) return;
         pendingCardReturn.current = null;
         completeCardReturn( pending )
-            .then( () => setCardNotice( { ok: true, text: __( 'Your new payment method is saved. Future donations will use it.', 'dono' ) } ) )
+            .then( () => setCardNotice( { ok: true, text: __( 'Your new payment method is saved. Future donations will use it.', 'dono-fundraising-platform' ) } ) )
             .catch( ( e ) => setCardNotice( {
                 ok:   false,
-                text: e.message || __( 'That payment method was not saved, so your donation still uses the old one.', 'dono' ),
+                text: e.message || __( 'That payment method was not saved, so your donation still uses the old one.', 'dono-fundraising-platform' ),
             } ) );
     }, [ me ] );
 
-    if ( loading ) return <div class="dp-loading">{ __( 'Loading…', 'dono' ) }</div>;
+    if ( loading ) return <div class="dp-loading">{ __( 'Loading…', 'dono-fundraising-platform' ) }</div>;
     if ( ! me && loadError ) {
         return (
             <div class="dp-loading">
                 <p class="dp-signin__error">{ loadError }</p>
                 <button type="button" class="dp-link" onClick={ () => { setLoading( true ); loadMe(); } }>
-                    { __( 'Try again', 'dono' ) }
+                    { __( 'Try again', 'dono-fundraising-platform' ) }
                 </button>
             </div>
         );
@@ -372,10 +372,10 @@ function App() {
     return (
         <div class="dp">
             <header class="dp__head">
-                <h1>{ sprintf( /* translators: %s: donor's first name or full name */ __( 'Hi, %s.', 'dono' ), me.first_name || me.name ) }</h1>
+                <h1>{ sprintf( /* translators: %s: donor's first name or full name */ __( 'Hi, %s.', 'dono-fundraising-platform' ), me.first_name || me.name ) }</h1>
                 <button class="dp__signout" onClick={ () => {
                     api( 'logout', { method: 'POST' } ).finally( () => window.location.reload() );
-                } }>{ __( 'Sign out', 'dono' ) }</button>
+                } }>{ __( 'Sign out', 'dono-fundraising-platform' ) }</button>
             </header>
 
             { cardNotice && (
@@ -386,7 +386,7 @@ function App() {
                         class="dp-banner__action"
                         onClick={ () => { setCardNotice( null ); if ( ! cardNotice.ok ) setTab( 'recurring' ); } }
                     >
-                        { cardNotice.ok ? __( 'Dismiss', 'dono' ) : __( 'Try again', 'dono' ) }
+                        { cardNotice.ok ? __( 'Dismiss', 'dono-fundraising-platform' ) : __( 'Try again', 'dono-fundraising-platform' ) }
                     </button>
                 </div>
             ) }
@@ -394,15 +394,15 @@ function App() {
             { consentsPending > 0 && tab !== 'consents' && (
                 <div class="dp-banner" role="status">
                     <div class="dp-banner__text">
-                        <strong>{ __( 'Your privacy preferences need an update.', 'dono' ) }</strong>{ ' ' }
-                        { __( "We've revised the terms for some of the things you previously agreed to. Take a moment to review.", 'dono' ) }
+                        <strong>{ __( 'Your privacy preferences need an update.', 'dono-fundraising-platform' ) }</strong>{ ' ' }
+                        { __( "We've revised the terms for some of the things you previously agreed to. Take a moment to review.", 'dono-fundraising-platform' ) }
                     </div>
                     <button
                         type="button"
                         class="dp-banner__action"
                         onClick={ () => setTab( 'consents' ) }
                     >
-                        { __( 'Review now', 'dono' ) }
+                        { __( 'Review now', 'dono-fundraising-platform' ) }
                     </button>
                 </div>
             ) }
@@ -419,7 +419,7 @@ function App() {
                             onClick={ () => setTab( t.id ) }
                         >
                             { t.label }
-                            { showDot && <span class="dp__tab-dot" aria-label={ __( 'needs attention', 'dono' ) } /> }
+                            { showDot && <span class="dp__tab-dot" aria-label={ __( 'needs attention', 'dono-fundraising-platform' ) } /> }
                         </button>
                     );
                 } ) }
@@ -449,13 +449,13 @@ function App() {
 }
 
 const TABS = [
-    { id: 'overview',    label: __( 'Overview', 'dono' ) },
-    { id: 'donations',   label: __( 'Donations', 'dono' ) },
-    { id: 'recurring',   label: __( 'Recurring', 'dono' ) },
-    { id: 'receipts',    label: __( 'Receipts & tax', 'dono' ) },
-    { id: 'preferences', label: __( 'Preferences', 'dono' ) },
-    { id: 'profile',     label: __( 'Profile', 'dono' ) },
-    { id: 'consents',    label: __( 'Consents', 'dono' ) },
+    { id: 'overview',    label: __( 'Overview', 'dono-fundraising-platform' ) },
+    { id: 'donations',   label: __( 'Donations', 'dono-fundraising-platform' ) },
+    { id: 'recurring',   label: __( 'Recurring', 'dono-fundraising-platform' ) },
+    { id: 'receipts',    label: __( 'Receipts & tax', 'dono-fundraising-platform' ) },
+    { id: 'preferences', label: __( 'Preferences', 'dono-fundraising-platform' ) },
+    { id: 'profile',     label: __( 'Profile', 'dono-fundraising-platform' ) },
+    { id: 'consents',    label: __( 'Consents', 'dono-fundraising-platform' ) },
 ];
 
 function SignInPrompt( { initialError } ) {
@@ -500,18 +500,18 @@ function SignInPrompt( { initialError } ) {
     if ( sent ) {
         return (
             <div class="dp-signin">
-                <h2>{ __( 'Check your email', 'dono' ) }</h2>
+                <h2>{ __( 'Check your email', 'dono-fundraising-platform' ) }</h2>
                 <p>{ sprintf(
                     /* translators: %s: action the link performs, either "finish setting up your account" or "sign in" */
-                    __( 'If that address is valid, a link to %s is on its way. Open it on any device.', 'dono' ),
-                    isRegister ? __( 'finish setting up your account', 'dono' ) : __( 'sign in', 'dono' )
+                    __( 'If that address is valid, a link to %s is on its way. Open it on any device.', 'dono-fundraising-platform' ),
+                    isRegister ? __( 'finish setting up your account', 'dono-fundraising-platform' ) : __( 'sign in', 'dono-fundraising-platform' )
                 ) }</p>
                 { /* The server quietly refuses a second request inside its send
                      window, so this copy promises nothing about timing. */ }
-                <p class="dp-hint">{ __( 'Only one link goes out every few minutes. If nothing arrives shortly, wait a moment before asking for another.', 'dono' ) }</p>
+                <p class="dp-hint">{ __( 'Only one link goes out every few minutes. If nothing arrives shortly, wait a moment before asking for another.', 'dono-fundraising-platform' ) }</p>
                 <p class="dp-signin__alt">
                     <button type="button" class="dp-link" onClick={ () => { setSent( false ); setError( null ); } }>
-                        { __( 'Use a different email address', 'dono' ) }
+                        { __( 'Use a different email address', 'dono-fundraising-platform' ) }
                     </button>
                 </p>
             </div>
@@ -520,11 +520,11 @@ function SignInPrompt( { initialError } ) {
 
     return (
         <div class="dp-signin">
-            <h2>{ isRegister ? __( 'Create your account', 'dono' ) : __( 'Donor portal', 'dono' ) }</h2>
+            <h2>{ isRegister ? __( 'Create your account', 'dono-fundraising-platform' ) : __( 'Donor portal', 'dono-fundraising-platform' ) }</h2>
             <p>
                 { isRegister
-                    ? __( "Set up an account to start fundraising. We'll email you a link to confirm.", 'dono' )
-                    : __( "Enter the email you donated with and we'll send a sign-in link.", 'dono' ) }
+                    ? __( "Set up an account to start fundraising. We'll email you a link to confirm.", 'dono-fundraising-platform' )
+                    : __( "Enter the email you donated with and we'll send a sign-in link.", 'dono-fundraising-platform' ) }
             </p>
             <form class={ isRegister ? 'is-stacked' : null } onSubmit={ submit }>
                 { isRegister && (
@@ -534,8 +534,8 @@ function SignInPrompt( { initialError } ) {
                             required
                             autocomplete="given-name"
                             value={ firstName }
-                            aria-label={ __( 'First name', 'dono' ) }
-                            placeholder={ __( 'First name', 'dono' ) }
+                            aria-label={ __( 'First name', 'dono-fundraising-platform' ) }
+                            placeholder={ __( 'First name', 'dono-fundraising-platform' ) }
                             onInput={ ( e ) => setFirstName( e.target.value ) }
                         />
                         { /* Not required: plenty of people go by one name, and a
@@ -544,8 +544,8 @@ function SignInPrompt( { initialError } ) {
                             type="text"
                             autocomplete="family-name"
                             value={ lastName }
-                            aria-label={ __( 'Last name', 'dono' ) }
-                            placeholder={ __( 'Last name', 'dono' ) }
+                            aria-label={ __( 'Last name', 'dono-fundraising-platform' ) }
+                            placeholder={ __( 'Last name', 'dono-fundraising-platform' ) }
                             onInput={ ( e ) => setLastName( e.target.value ) }
                         />
                     </div>
@@ -555,19 +555,19 @@ function SignInPrompt( { initialError } ) {
                     required
                     autocomplete="email"
                     value={ email }
-                    aria-label={ __( 'Email address', 'dono' ) }
-                    placeholder={ __( 'Enter your email address', 'dono' ) }
+                    aria-label={ __( 'Email address', 'dono-fundraising-platform' ) }
+                    placeholder={ __( 'Enter your email address', 'dono-fundraising-platform' ) }
                     onInput={ ( e ) => setEmail( e.target.value ) }
                 />
                 <button type="submit" disabled={ sending }>
-                    { sending ? __( 'Sending…', 'dono' ) : ( isRegister ? __( 'Create account', 'dono' ) : __( 'Send sign-in link', 'dono' ) ) }
+                    { sending ? __( 'Sending…', 'dono-fundraising-platform' ) : ( isRegister ? __( 'Create account', 'dono-fundraising-platform' ) : __( 'Send sign-in link', 'dono-fundraising-platform' ) ) }
                 </button>
             </form>
             { error && <p class="dp-signin__error">{ error }</p> }
             <p class="dp-signin__alt">
-                { isRegister ? __( 'Already have an account or donated before?', 'dono' ) : __( 'New here and want to fundraise?', 'dono' ) }{ ' ' }
+                { isRegister ? __( 'Already have an account or donated before?', 'dono-fundraising-platform' ) : __( 'New here and want to fundraise?', 'dono-fundraising-platform' ) }{ ' ' }
                 <button type="button" class="dp-link" onClick={ () => { setError( null ); setMode( isRegister ? 'signin' : 'register' ); } }>
-                    { isRegister ? __( 'Sign in', 'dono' ) : __( 'Create an account', 'dono' ) }
+                    { isRegister ? __( 'Sign in', 'dono-fundraising-platform' ) : __( 'Create an account', 'dono-fundraising-platform' ) }
                 </button>
             </p>
         </div>
@@ -578,9 +578,9 @@ function Overview( { me } ) {
     return (
         <div class="dp-overview">
             <div class="dp-kpis">
-                <Kpi label={ __( 'Lifetime giving', 'dono' ) } value={ formatAmount( me.total_donated_cents, me.primary_currency || 'USD' ) } />
-                <Kpi label={ __( 'Donations', 'dono' ) } value={ String( me.donations_count ) } />
-                <Kpi label={ __( 'Donor since', 'dono' ) } value={ me.first_donation_at ? formatDate( me.first_donation_at ) : '-' } />
+                <Kpi label={ __( 'Lifetime giving', 'dono-fundraising-platform' ) } value={ formatAmount( me.total_donated_cents, me.primary_currency || 'USD' ) } />
+                <Kpi label={ __( 'Donations', 'dono-fundraising-platform' ) } value={ String( me.donations_count ) } />
+                <Kpi label={ __( 'Donor since', 'dono-fundraising-platform' ) } value={ me.first_donation_at ? formatDate( me.first_donation_at ) : '-' } />
             </div>
             { me.unconverted_count > 0 && (
                 <p class="dp-hint">
@@ -590,25 +590,25 @@ function Overview( { me } ) {
                             'Lifetime giving does not include %d donation you gave in another currency.',
                             'Lifetime giving does not include %d donations you gave in other currencies.',
                             me.unconverted_count,
-                            'dono'
+                            'dono-fundraising-platform'
                         ),
                         me.unconverted_count
                     ) }
                 </p>
             ) }
-            <p class="dp-hint">{ __( 'Manage recurring donations, download receipts, and update preferences from the tabs above.', 'dono' ) }</p>
+            <p class="dp-hint">{ __( 'Manage recurring donations, download receipts, and update preferences from the tabs above.', 'dono-fundraising-platform' ) }</p>
         </div>
     );
 }
 
 function freqLabel( f ) {
     const map = {
-        one_time:  __( 'one time', 'dono' ),
-        weekly:    __( 'weekly', 'dono' ),
-        biweekly:  __( 'biweekly', 'dono' ),
-        monthly:   __( 'monthly', 'dono' ),
-        quarterly: __( 'quarterly', 'dono' ),
-        yearly:    __( 'yearly', 'dono' ),
+        one_time:  __( 'one time', 'dono-fundraising-platform' ),
+        weekly:    __( 'weekly', 'dono-fundraising-platform' ),
+        biweekly:  __( 'biweekly', 'dono-fundraising-platform' ),
+        monthly:   __( 'monthly', 'dono-fundraising-platform' ),
+        quarterly: __( 'quarterly', 'dono-fundraising-platform' ),
+        yearly:    __( 'yearly', 'dono-fundraising-platform' ),
     };
     return map[ f ] || String( f || '' ).replace( '_', ' ' );
 }
@@ -619,8 +619,8 @@ function Donations( { onOpen } ) {
     useEffect( () => { api( 'donations' ).then( setList ).catch( ( e ) => setError( e.message ) ); }, [] );
 
     if ( error )    return <p class="dp-error">{ error }</p>;
-    if ( ! list )   return <p>{ __( 'Loading donations…', 'dono' ) }</p>;
-    if ( ! list.length ) return <p>{ __( 'No donations yet.', 'dono' ) }</p>;
+    if ( ! list )   return <p>{ __( 'Loading donations…', 'dono-fundraising-platform' ) }</p>;
+    if ( ! list.length ) return <p>{ __( 'No donations yet.', 'dono-fundraising-platform' ) }</p>;
 
     return (
         <div class="dp-list">
@@ -632,14 +632,14 @@ function Donations( { onOpen } ) {
                     tabIndex={ 0 }
                     onClick={ () => onOpen( d.reference ) }
                     onKeyDown={ ( e ) => { if ( e.key === 'Enter' || e.key === ' ' ) { e.preventDefault(); onOpen( d.reference ); } } }
-                    aria-label={ sprintf( /* translators: %s: donation reference */ __( 'View donation %s', 'dono' ), d.reference ) }
+                    aria-label={ sprintf( /* translators: %s: donation reference */ __( 'View donation %s', 'dono-fundraising-platform' ), d.reference ) }
                 >
                     <div>
                         <strong>{ formatAmount( d.amount_cents, d.currency ) }</strong>
                         { d.fee_covered_cents > 0 && (
-                            <span class="dp-list__pill">{ sprintf( /* translators: %s: formatted fee amount */ __( 'incl. %s fees', 'dono' ), formatAmount( d.fee_covered_cents, d.currency ) ) }</span>
+                            <span class="dp-list__pill">{ sprintf( /* translators: %s: formatted fee amount */ __( 'incl. %s fees', 'dono-fundraising-platform' ), formatAmount( d.fee_covered_cents, d.currency ) ) }</span>
                         ) }
-                        { d.is_anonymous && <span class="dp-list__pill">{ __( 'anonymous', 'dono' ) }</span> }
+                        { d.is_anonymous && <span class="dp-list__pill">{ __( 'anonymous', 'dono-fundraising-platform' ) }</span> }
                         <div class="dp-list__sub">{ formatDate( d.paid_at ) } · { d.reference }</div>
                     </div>
                     <span class={ `dp-pill dp-pill--${ d.frequency }` }>{ freqLabel( d.frequency ) }</span>
@@ -670,11 +670,11 @@ function DonationDetail( { reference, onClose } ) {
 
     return (
         // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events -- click-outside-to-close is a mouse convenience; Escape (focus trap) and the close button provide keyboard dismissal
-        <div class="dp-modal" role="dialog" aria-modal="true" aria-label={ __( 'Donation details', 'dono' ) } onClick={ ( e ) => { if ( e.target === e.currentTarget ) onClose(); } } ref={ panelRef }>
+        <div class="dp-modal" role="dialog" aria-modal="true" aria-label={ __( 'Donation details', 'dono-fundraising-platform' ) } onClick={ ( e ) => { if ( e.target === e.currentTarget ) onClose(); } } ref={ panelRef }>
             <div class="dp-modal__panel">
-                <button class="dp-modal__close" onClick={ onClose } aria-label={ __( 'Close', 'dono' ) }>×</button>
+                <button class="dp-modal__close" onClick={ onClose } aria-label={ __( 'Close', 'dono-fundraising-platform' ) }>×</button>
                 { error && <p class="dp-error">{ error }</p> }
-                { ! d ? <p>{ __( 'Loading…', 'dono' ) }</p> : (
+                { ! d ? <p>{ __( 'Loading…', 'dono-fundraising-platform' ) }</p> : (
                     <>
                         <div class="dp-detail__head">
                             <div class="dp-detail__amount">{ formatAmount( d.amount_cents, d.currency ) }</div>
@@ -684,7 +684,7 @@ function DonationDetail( { reference, onClose } ) {
                         { d.give_again_url && (
                             <div class="dp-detail__section">
                                 <a class="dp-action is-primary" href={ d.give_again_url }>
-                                    { sprintf( /* translators: %s: formatted donation amount */ __( 'Give again (%s)', 'dono' ), formatAmount( d.amount_cents, d.currency ) ) }
+                                    { sprintf( /* translators: %s: formatted donation amount */ __( 'Give again (%s)', 'dono-fundraising-platform' ), formatAmount( d.amount_cents, d.currency ) ) }
                                 </a>
                             </div>
                         ) }
@@ -696,7 +696,7 @@ function DonationDetail( { reference, onClose } ) {
                                     checked={ d.is_anonymous }
                                     onChange={ ( e ) => toggleAnonymity( e.target.checked ) }
                                 />
-                                <span>{ __( 'Show as anonymous on public displays', 'dono' ) }</span>
+                                <span>{ __( 'Show as anonymous on public displays', 'dono-fundraising-platform' ) }</span>
                             </label>
                         </div>
 
@@ -727,8 +727,8 @@ function Recurring() {
     useEffect( () => { load(); }, [ load ] );
 
     if ( error )    return <p class="dp-error">{ error }</p>;
-    if ( ! list )   return <p>{ __( 'Loading…', 'dono' ) }</p>;
-    if ( ! list.length ) return <p>{ __( 'No recurring donations.', 'dono' ) }</p>;
+    if ( ! list )   return <p>{ __( 'Loading…', 'dono-fundraising-platform' ) }</p>;
+    if ( ! list.length ) return <p>{ __( 'No recurring donations.', 'dono-fundraising-platform' ) }</p>;
 
     return (
         <>
@@ -739,20 +739,20 @@ function Recurring() {
                             <strong>{ formatAmount( p.amount_cents, p.currency ) }</strong>
                             <span class="dp-list__pill">{ intervalLabel( p.interval_count, p.interval_unit ) }</span>
                             <div class="dp-list__sub">
-                                { sprintf( /* translators: %s: date of the next scheduled payment */ __( 'Next: %s', 'dono' ), p.next_payment_at ? formatDate( p.next_payment_at ) : '-' ) }
+                                { sprintf( /* translators: %s: date of the next scheduled payment */ __( 'Next: %s', 'dono-fundraising-platform' ), p.next_payment_at ? formatDate( p.next_payment_at ) : '-' ) }
                             </div>
                         </div>
                         <div class="dp-list__actions">
                             <span class={ `dp-pill dp-pill--${ p.status }` }>{ recurringStatusLabel( p.status ) }</span>
                             { ( p.status === 'active' || p.status === 'past_due' ) && (
-                                <button class="dp-link" onClick={ () => setAction( p ) }>{ __( 'Manage', 'dono' ) }</button>
+                                <button class="dp-link" onClick={ () => setAction( p ) }>{ __( 'Manage', 'dono-fundraising-platform' ) }</button>
                             ) }
                             { p.status === 'paused' && (
                                 <button class="dp-link" onClick={ () => {
                                     api( `recurring/${ p.id }/action`, { method: 'POST', body: JSON.stringify( { action: 'resume' } ) } )
                                         .then( load )
                                         .catch( ( e ) => setError( e.message ) );
-                                } }>{ __( 'Resume', 'dono' ) }</button>
+                                } }>{ __( 'Resume', 'dono-fundraising-platform' ) }</button>
                             ) }
                         </div>
                     </li>
@@ -778,34 +778,34 @@ function RecurringActionSheet( { plan, onClose, onDone } ) {
 
     const call = ( body ) => api( `recurring/${ plan.id }/action`, { method: 'POST', body: JSON.stringify( body ) } )
         .then( onDone )
-        .catch( ( e ) => setErr( e.message || __( 'Something went wrong.', 'dono' ) ) );
+        .catch( ( e ) => setErr( e.message || __( 'Something went wrong.', 'dono-fundraising-platform' ) ) );
 
     return (
         // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events -- click-outside-to-close is a mouse convenience; Escape (focus trap) and the close button provide keyboard dismissal
-        <div class="dp-modal" role="dialog" aria-modal="true" aria-label={ __( 'Manage donation', 'dono' ) } onClick={ ( e ) => { if ( e.target === e.currentTarget ) onClose(); } } ref={ panelRef }>
+        <div class="dp-modal" role="dialog" aria-modal="true" aria-label={ __( 'Manage donation', 'dono-fundraising-platform' ) } onClick={ ( e ) => { if ( e.target === e.currentTarget ) onClose(); } } ref={ panelRef }>
             <div class="dp-modal__panel">
-                <button class="dp-modal__close" onClick={ onClose } aria-label={ __( 'Close', 'dono' ) }>×</button>
+                <button class="dp-modal__close" onClick={ onClose } aria-label={ __( 'Close', 'dono-fundraising-platform' ) }>×</button>
                 { err && <p class="dp-error">{ err }</p> }
 
                 { stage === 'menu' && (
                     <>
-                        <h3>{ __( 'Manage donation', 'dono' ) }</h3>
-                        <button class="dp-action" onClick={ () => setStage( 'pause' ) }>{ __( 'Pause', 'dono' ) }</button>
-                        <button class="dp-action" onClick={ () => call( { action: 'skip_next' } ) }>{ __( 'Skip next charge', 'dono' ) }</button>
-                        <button class="dp-action" onClick={ () => setStage( 'amount' ) }>{ __( 'Change amount', 'dono' ) }</button>
+                        <h3>{ __( 'Manage donation', 'dono-fundraising-platform' ) }</h3>
+                        <button class="dp-action" onClick={ () => setStage( 'pause' ) }>{ __( 'Pause', 'dono-fundraising-platform' ) }</button>
+                        <button class="dp-action" onClick={ () => call( { action: 'skip_next' } ) }>{ __( 'Skip next charge', 'dono-fundraising-platform' ) }</button>
+                        <button class="dp-action" onClick={ () => setStage( 'amount' ) }>{ __( 'Change amount', 'dono-fundraising-platform' ) }</button>
                         { plan.can_update_payment_method && (
-                            <button class="dp-action" onClick={ () => setStage( 'payment' ) }>{ __( 'Update payment method', 'dono' ) }</button>
+                            <button class="dp-action" onClick={ () => setStage( 'payment' ) }>{ __( 'Update payment method', 'dono-fundraising-platform' ) }</button>
                         ) }
-                        <button class="dp-action dp-action--danger" onClick={ () => setStage( 'cancel' ) }>{ __( 'Cancel donation', 'dono' ) }</button>
+                        <button class="dp-action dp-action--danger" onClick={ () => setStage( 'cancel' ) }>{ __( 'Cancel donation', 'dono-fundraising-platform' ) }</button>
                     </>
                 ) }
 
                 { stage === 'pause' && (
                     <>
-                        <h3>{ __( 'Pause for how long?', 'dono' ) }</h3>
+                        <h3>{ __( 'Pause for how long?', 'dono-fundraising-platform' ) }</h3>
                         { [ 1, 3, 6, 12 ].map( ( m ) => (
                             <button key={ m } class="dp-action" onClick={ () => call( { action: 'pause', months: m } ) }>
-                                { sprintf( /* translators: %d: number of months */ _n( '%d month', '%d months', m, 'dono' ), m ) }
+                                { sprintf( /* translators: %d: number of months */ _n( '%d month', '%d months', m, 'dono-fundraising-platform' ), m ) }
                             </button>
                         ) ) }
                     </>
@@ -873,7 +873,7 @@ function UpdatePaymentMethod( { plan, onDone, onError } ) {
                     el.mount( mountRef.current );
                 } );
             } )
-            .catch( ( e ) => { if ( ! cancelled ) onError( e.message || __( 'Something went wrong.', 'dono' ) ); } );
+            .catch( ( e ) => { if ( ! cancelled ) onError( e.message || __( 'Something went wrong.', 'dono-fundraising-platform' ) ); } );
 
         return () => { cancelled = true; };
     }, [ plan.id ] );
@@ -900,14 +900,14 @@ function UpdatePaymentMethod( { plan, onDone, onError } ) {
         clearCardReturn();
 
         if ( error ) {
-            onError( error.message || __( 'That card could not be saved.', 'dono' ) );
+            onError( error.message || __( 'That card could not be saved.', 'dono-fundraising-platform' ) );
             setSaving( false );
             return;
         }
 
         const token = setupIntent && setupIntent.payment_method;
         if ( ! token ) {
-            onError( __( 'That card could not be saved.', 'dono' ) );
+            onError( __( 'That card could not be saved.', 'dono-fundraising-platform' ) );
             setSaving( false );
             return;
         }
@@ -917,28 +917,28 @@ function UpdatePaymentMethod( { plan, onDone, onError } ) {
             body: JSON.stringify( { token } ),
         } )
             .then( onDone )
-            .catch( ( e ) => { onError( e.message || __( 'That card could not be saved.', 'dono' ) ); setSaving( false ); } );
+            .catch( ( e ) => { onError( e.message || __( 'That card could not be saved.', 'dono-fundraising-platform' ) ); setSaving( false ); } );
     };
 
     if ( mode === 'redirect' ) {
         return (
             <>
-                <h3>{ __( 'Update payment method', 'dono' ) }</h3>
+                <h3>{ __( 'Update payment method', 'dono-fundraising-platform' ) }</h3>
                 <p>
                     { sprintf(
                         /* translators: %s: the payment provider's name, e.g. PayPal. */
-                        __( '%s handles this on their own site. You will be taken there to choose how you pay, and your donation carries on unchanged.', 'dono' ),
-                        label || __( 'Your payment provider', 'dono' )
+                        __( '%s handles this on their own site. You will be taken there to choose how you pay, and your donation carries on unchanged.', 'dono-fundraising-platform' ),
+                        label || __( 'Your payment provider', 'dono-fundraising-platform' )
                     ) }
                 </p>
                 <a class="dp-action" href={ redirect } rel="noopener">
                     { label
                         ? sprintf(
                             /* translators: %s: the payment provider's name, e.g. PayPal. */
-                            __( 'Continue to %s', 'dono' ),
+                            __( 'Continue to %s', 'dono-fundraising-platform' ),
                             label
                         )
-                        : __( 'Continue', 'dono' ) }
+                        : __( 'Continue', 'dono-fundraising-platform' ) }
                 </a>
             </>
         );
@@ -946,12 +946,12 @@ function UpdatePaymentMethod( { plan, onDone, onError } ) {
 
     return (
         <>
-            <h3>{ __( 'Update payment method', 'dono' ) }</h3>
-            <p>{ __( 'Enter the card you would like future donations charged to.', 'dono' ) }</p>
+            <h3>{ __( 'Update payment method', 'dono-fundraising-platform' ) }</h3>
+            <p>{ __( 'Enter the card you would like future donations charged to.', 'dono-fundraising-platform' ) }</p>
             <div ref={ mountRef } />
-            { ! ready && <p class="dp-hint">{ __( 'Loading secure card form…', 'dono' ) }</p> }
+            { ! ready && <p class="dp-hint">{ __( 'Loading secure card form…', 'dono-fundraising-platform' ) }</p> }
             <button class="dp-action" disabled={ ! ready || saving } onClick={ save }>
-                { saving ? __( 'Saving…', 'dono' ) : __( 'Save card', 'dono' ) }
+                { saving ? __( 'Saving…', 'dono-fundraising-platform' ) : __( 'Save card', 'dono-fundraising-platform' ) }
             </button>
         </>
     );
@@ -964,17 +964,17 @@ function ChangeAmountForm( { plan, onSubmit } ) {
     const valid = Number.isFinite( cents ) && cents >= 50;
     return (
         <>
-            <h3>{ __( 'Change amount', 'dono' ) }</h3>
-            <p class="dp-hint">{ __( 'Current:', 'dono' ) } { formatAmount( plan.amount_cents, plan.currency ) }</p>
+            <h3>{ __( 'Change amount', 'dono-fundraising-platform' ) }</h3>
+            <p class="dp-hint">{ __( 'Current:', 'dono-fundraising-platform' ) } { formatAmount( plan.amount_cents, plan.currency ) }</p>
             <input
                 type="number"
                 step="0.01"
                 min="0.5"
                 value={ value }
-                aria-label={ __( 'New donation amount', 'dono' ) }
+                aria-label={ __( 'New donation amount', 'dono-fundraising-platform' ) }
                 onInput={ ( e ) => setValue( e.target.value ) }
             />
-            <button class="dp-action is-primary" disabled={ ! valid } onClick={ () => valid && onSubmit( cents ) }>{ __( 'Save new amount', 'dono' ) }</button>
+            <button class="dp-action is-primary" disabled={ ! valid } onClick={ () => valid && onSubmit( cents ) }>{ __( 'Save new amount', 'dono-fundraising-platform' ) }</button>
         </>
     );
 }
@@ -986,27 +986,27 @@ function CancelDeflection( { onPause, onSkip, onReduce, onCancel } ) {
     if ( confirmed ) {
         return (
             <>
-                <h3>{ __( 'Cancel donation?', 'dono' ) }</h3>
-                <p>{ __( "You'll keep all donations you've made so far. The recurring schedule will stop after today.", 'dono' ) }</p>
+                <h3>{ __( 'Cancel donation?', 'dono-fundraising-platform' ) }</h3>
+                <p>{ __( "You'll keep all donations you've made so far. The recurring schedule will stop after today.", 'dono-fundraising-platform' ) }</p>
                 <textarea
-                    placeholder={ __( 'Tell us why (optional, helps the org)', 'dono' ) }
+                    placeholder={ __( 'Tell us why (optional, helps the org)', 'dono-fundraising-platform' ) }
                     rows={ 3 }
                     value={ reason }
                     onInput={ ( e ) => setReason( e.target.value ) }
                 />
-                <button class="dp-action dp-action--danger" onClick={ () => onCancel( reason ) }>{ __( 'Cancel donation', 'dono' ) }</button>
+                <button class="dp-action dp-action--danger" onClick={ () => onCancel( reason ) }>{ __( 'Cancel donation', 'dono-fundraising-platform' ) }</button>
             </>
         );
     }
 
     return (
         <>
-            <h3>{ __( 'Before you cancel…', 'dono' ) }</h3>
-            <p class="dp-hint">{ __( 'A few alternatives that might work better:', 'dono' ) }</p>
-            <button class="dp-action" onClick={ onPause }>{ __( 'Pause for 1-12 months', 'dono' ) }</button>
-            <button class="dp-action" onClick={ onSkip }>{ __( 'Skip just the next charge', 'dono' ) }</button>
-            <button class="dp-action" onClick={ onReduce }>{ __( 'Lower the amount', 'dono' ) }</button>
-            <button class="dp-action dp-action--danger" onClick={ () => setConfirmed( true ) }>{ __( 'Continue to cancel', 'dono' ) }</button>
+            <h3>{ __( 'Before you cancel…', 'dono-fundraising-platform' ) }</h3>
+            <p class="dp-hint">{ __( 'A few alternatives that might work better:', 'dono-fundraising-platform' ) }</p>
+            <button class="dp-action" onClick={ onPause }>{ __( 'Pause for 1-12 months', 'dono-fundraising-platform' ) }</button>
+            <button class="dp-action" onClick={ onSkip }>{ __( 'Skip just the next charge', 'dono-fundraising-platform' ) }</button>
+            <button class="dp-action" onClick={ onReduce }>{ __( 'Lower the amount', 'dono-fundraising-platform' ) }</button>
+            <button class="dp-action dp-action--danger" onClick={ () => setConfirmed( true ) }>{ __( 'Continue to cancel', 'dono-fundraising-platform' ) }</button>
         </>
     );
 }
@@ -1050,7 +1050,7 @@ function Receipts() {
             a.remove();
             setTimeout( () => URL.revokeObjectURL( url ), 10000 );
         } catch ( err ) {
-            setDlError( err.message || __( 'Could not generate statement.', 'dono' ) );
+            setDlError( err.message || __( 'Could not generate statement.', 'dono-fundraising-platform' ) );
         }
     };
 
@@ -1061,30 +1061,30 @@ function Receipts() {
             const res = await api( `receipts/${ id }/download-url` );
             if ( res?.url ) window.open( res.url, '_blank', 'noopener' );
         } catch ( err ) {
-            setDlError( err.message || __( 'Could not open the receipt. Please try again.', 'dono' ) );
+            setDlError( err.message || __( 'Could not open the receipt. Please try again.', 'dono-fundraising-platform' ) );
         }
     };
 
     return (
         <>
             <div class="dp-card">
-                <h3>{ __( 'Annual statement', 'dono' ) }</h3>
-                <p class="dp-hint">{ __( 'One consolidated PDF covering all your donations in a given year.', 'dono' ) }</p>
+                <h3>{ __( 'Annual statement', 'dono-fundraising-platform' ) }</h3>
+                <p class="dp-hint">{ __( 'One consolidated PDF covering all your donations in a given year.', 'dono-fundraising-platform' ) }</p>
                 <div class="dp-card__row">
-                    <select value={ year } aria-label={ __( 'Statement year', 'dono' ) } onChange={ ( e ) => setYear( e.target.value ) }>
+                    <select value={ year } aria-label={ __( 'Statement year', 'dono-fundraising-platform' ) } onChange={ ( e ) => setYear( e.target.value ) }>
                         { years.map( ( y ) => (
                             <option key={ y } value={ y }>{ y }</option>
                         ) ) }
                     </select>
-                    <button class="dp-action is-primary" onClick={ downloadAnnual }>{ __( 'Download statement', 'dono' ) }</button>
+                    <button class="dp-action is-primary" onClick={ downloadAnnual }>{ __( 'Download statement', 'dono-fundraising-platform' ) }</button>
                 </div>
                 { dlError && <p class="dp-error">{ dlError }</p> }
             </div>
 
-            <h3>{ __( 'Individual receipts', 'dono' ) }</h3>
+            <h3>{ __( 'Individual receipts', 'dono-fundraising-platform' ) }</h3>
             { error    && <p class="dp-error">{ error }</p> }
-            { ! list   && <p>{ __( 'Loading…', 'dono' ) }</p> }
-            { list && list.length === 0 && <p>{ __( 'No receipts yet.', 'dono' ) }</p> }
+            { ! list   && <p>{ __( 'Loading…', 'dono-fundraising-platform' ) }</p> }
+            { list && list.length === 0 && <p>{ __( 'No receipts yet.', 'dono-fundraising-platform' ) }</p> }
             { list && list.length > 0 && (
                 <ul class="dp-list">
                     { list.map( ( r ) => (
@@ -1093,7 +1093,7 @@ function Receipts() {
                                 <strong>{ r.receipt_number }</strong>
                                 <div class="dp-list__sub">{ formatDate( r.issued_at ) }</div>
                             </div>
-                            <button type="button" class="dp-link" onClick={ () => downloadReceipt( r.id ) }>{ __( 'Download', 'dono' ) }</button>
+                            <button type="button" class="dp-link" onClick={ () => downloadReceipt( r.id ) }>{ __( 'Download', 'dono-fundraising-platform' ) }</button>
                         </li>
                     ) ) }
                 </ul>
@@ -1112,9 +1112,9 @@ function Profile( { onSaved } ) {
     const [ uploading, setUploading ] = useState( false );
     const [ picErr,    setPicErr    ] = useState( '' );
 
-    useEffect( () => { api( 'profile' ).then( ( v ) => setForm( withDefaults( v ) ) ).catch( ( e ) => setErr( e.message || __( 'Could not load your profile.', 'dono' ) ) ); }, [] );
+    useEffect( () => { api( 'profile' ).then( ( v ) => setForm( withDefaults( v ) ) ).catch( ( e ) => setErr( e.message || __( 'Could not load your profile.', 'dono-fundraising-platform' ) ) ); }, [] );
 
-    if ( ! form ) return <p>{ err || __( 'Loading…', 'dono' ) }</p>;
+    if ( ! form ) return <p>{ err || __( 'Loading…', 'dono-fundraising-platform' ) }</p>;
 
     const set = ( k ) => ( e ) => setForm( { ...form, [ k ]: e.target.value } );
 
@@ -1130,7 +1130,7 @@ function Profile( { onSaved } ) {
                 onSaved && onSaved();
                 setTimeout( () => setSaved( false ), 2500 );
             } )
-            .catch( ( e ) => setErr( e.message || __( 'Could not save.', 'dono' ) ) )
+            .catch( ( e ) => setErr( e.message || __( 'Could not save.', 'dono-fundraising-platform' ) ) )
             .finally( () => setSaving( false ) );
     };
 
@@ -1146,7 +1146,7 @@ function Profile( { onSaved } ) {
         if ( max > 0 && file.size > max ) {
             setPicErr( sprintf(
                 /* translators: %s: file size, e.g. "2 MB". */
-                __( 'That picture is too large. The most this site takes is %s.', 'dono' ),
+                __( 'That picture is too large. The most this site takes is %s.', 'dono-fundraising-platform' ),
                 cfg.avatarMaxLabel || `${ Math.floor( max / 1048576 ) } MB`
             ) );
             return;
@@ -1161,7 +1161,7 @@ function Profile( { onSaved } ) {
                 setForm( withDefaults( next ) );
                 onSaved && onSaved();
             } )
-            .catch( ( e2 ) => setPicErr( e2.message || __( 'Could not upload that picture.', 'dono' ) ) )
+            .catch( ( e2 ) => setPicErr( e2.message || __( 'Could not upload that picture.', 'dono-fundraising-platform' ) ) )
             .finally( () => setUploading( false ) );
     };
 
@@ -1173,7 +1173,7 @@ function Profile( { onSaved } ) {
                 setForm( withDefaults( next ) );
                 onSaved && onSaved();
             } )
-            .catch( ( e2 ) => setPicErr( e2.message || __( 'Could not remove that picture.', 'dono' ) ) )
+            .catch( ( e2 ) => setPicErr( e2.message || __( 'Could not remove that picture.', 'dono-fundraising-platform' ) ) )
             .finally( () => setUploading( false ) );
     };
 
@@ -1187,19 +1187,19 @@ function Profile( { onSaved } ) {
                     { uploading && <span class="dp-avatar-field__spinner" aria-hidden="true" /> }
                 </span>
                 <div class="dp-avatar-field__controls">
-                    <span class="dp-avatar-field__label">{ __( 'Profile picture', 'dono' ) }</span>
+                    <span class="dp-avatar-field__label">{ __( 'Profile picture', 'dono-fundraising-platform' ) }</span>
                     <small>
                         { sprintf(
                             /* translators: %s: file size, e.g. "2 MB". */
-                            __( 'Shown next to your name where the organization lists supporters. JPEG, PNG, GIF or WebP, up to %s.', 'dono' ),
-                            cfg.avatarMaxLabel || __( '2 MB', 'dono' )
+                            __( 'Shown next to your name where the organization lists supporters. JPEG, PNG, GIF or WebP, up to %s.', 'dono-fundraising-platform' ),
+                            cfg.avatarMaxLabel || __( '2 MB', 'dono-fundraising-platform' )
                         ) }
                     </small>
                     <div class="dp-avatar-field__buttons">
                         <label class={ `dp-btn dp-btn--ghost${ uploading ? ' is-disabled' : '' }` }>
                             { uploading
-                                ? __( 'Uploading…', 'dono' )
-                                : form.avatar_url ? __( 'Replace', 'dono' ) : __( 'Upload', 'dono' ) }
+                                ? __( 'Uploading…', 'dono-fundraising-platform' )
+                                : form.avatar_url ? __( 'Replace', 'dono-fundraising-platform' ) : __( 'Upload', 'dono-fundraising-platform' ) }
                             <input
                                 type="file"
                                 accept="image/jpeg,image/png,image/gif,image/webp"
@@ -1210,29 +1210,29 @@ function Profile( { onSaved } ) {
                         </label>
                         { form.avatar_url && ! uploading && (
                             <button type="button" class="dp-btn dp-btn--ghost" onClick={ removePicture }>
-                                { __( 'Remove', 'dono' ) }
+                                { __( 'Remove', 'dono-fundraising-platform' ) }
                             </button>
                         ) }
                     </div>
                     { picErr && <span class="dp-error dp-avatar-field__error" role="alert">{ picErr }</span> }
                 </div>
             </div>
-            <label>{ __( 'Email', 'dono' ) }
+            <label>{ __( 'Email', 'dono-fundraising-platform' ) }
                 <input type="email" value={ form.email } disabled readOnly />
-                <small>{ __( 'To change your email, contact the organization.', 'dono' ) }</small>
+                <small>{ __( 'To change your email, contact the organization.', 'dono-fundraising-platform' ) }</small>
             </label>
             <div class="dp-form__row">
-                <label>{ __( 'First name', 'dono' ) } <input type="text" value={ form.first_name } onInput={ set( 'first_name' ) } /></label>
-                <label>{ __( 'Last name', 'dono' ) }  <input type="text" value={ form.last_name }  onInput={ set( 'last_name' ) } /></label>
+                <label>{ __( 'First name', 'dono-fundraising-platform' ) } <input type="text" value={ form.first_name } onInput={ set( 'first_name' ) } /></label>
+                <label>{ __( 'Last name', 'dono-fundraising-platform' ) }  <input type="text" value={ form.last_name }  onInput={ set( 'last_name' ) } /></label>
             </div>
-            <label>{ __( 'Phone', 'dono' ) }   <input type="tel" autocomplete="tel" value={ form.phone } onInput={ set( 'phone' ) } /></label>
+            <label>{ __( 'Phone', 'dono-fundraising-platform' ) }   <input type="tel" autocomplete="tel" value={ form.phone } onInput={ set( 'phone' ) } /></label>
             <CountryPicker value={ form.country } onChange={ ( code ) => setForm( { ...form, country: code } ) } />
-            <label>{ __( 'Company', 'dono' ) } <input type="text" value={ form.company } onInput={ set( 'company' ) } /></label>
+            <label>{ __( 'Company', 'dono-fundraising-platform' ) } <input type="text" value={ form.company } onInput={ set( 'company' ) } /></label>
             <div class="dp-form__actions">
                 <button class="dp-action is-primary" disabled={ saving } onClick={ save }>
-                    { saving ? __( 'Saving…', 'dono' ) : __( 'Save', 'dono' ) }
+                    { saving ? __( 'Saving…', 'dono-fundraising-platform' ) : __( 'Save', 'dono-fundraising-platform' ) }
                 </button>
-                { saved && <span class="dp-form__saved">{ __( 'Saved.', 'dono' ) }</span> }
+                { saved && <span class="dp-form__saved">{ __( 'Saved.', 'dono-fundraising-platform' ) }</span> }
                 { err && <span class="dp-error">{ err }</span> }
             </div>
             <PrivacyActions />
@@ -1264,7 +1264,7 @@ function PrivacyActions() {
             } );
             if ( ! r.ok ) {
                 const data = await r.json().catch( () => ({}) );
-                throw new Error( data.message || __( 'Export failed.', 'dono' ) );
+                throw new Error( data.message || __( 'Export failed.', 'dono-fundraising-platform' ) );
             }
             const blob = await r.blob();
             const url  = URL.createObjectURL( blob );
@@ -1276,7 +1276,7 @@ function PrivacyActions() {
             a.remove();
             URL.revokeObjectURL( url );
         } catch ( e ) {
-            setError( e.message || __( 'Export failed.', 'dono' ) );
+            setError( e.message || __( 'Export failed.', 'dono-fundraising-platform' ) );
         } finally {
             setExporting( false );
         }
@@ -1289,25 +1289,25 @@ function PrivacyActions() {
             await api( 'forget', { method: 'POST', body: JSON.stringify( { confirm: 'DELETE' } ) } );
             window.location.reload();
         } catch ( e ) {
-            setError( e.message || __( 'Deletion failed.', 'dono' ) );
+            setError( e.message || __( 'Deletion failed.', 'dono-fundraising-platform' ) );
             setDeleting( false );
         }
     };
 
     return (
         <div class="dp-privacy">
-            <h4>{ __( 'Your data', 'dono' ) }</h4>
+            <h4>{ __( 'Your data', 'dono-fundraising-platform' ) }</h4>
             { error && <p class="dp-error">{ error }</p> }
             <div class="dp-privacy__actions">
                 <button class="dp-action" disabled={ exporting } onClick={ downloadData }>
-                    { exporting ? __( 'Preparing…', 'dono' ) : __( 'Download my data', 'dono' ) }
+                    { exporting ? __( 'Preparing…', 'dono-fundraising-platform' ) : __( 'Download my data', 'dono-fundraising-platform' ) }
                 </button>
                 <button class="dp-action is-destructive" disabled={ deleting } onClick={ () => { setError( null ); setConfirmOpen( true ); } }>
-                    { deleting ? __( 'Deleting…', 'dono' ) : __( 'Delete my account', 'dono' ) }
+                    { deleting ? __( 'Deleting…', 'dono-fundraising-platform' ) : __( 'Delete my account', 'dono-fundraising-platform' ) }
                 </button>
             </div>
             <p class="dp-privacy__note">
-                { __( "Download returns a JSON copy of everything we hold on you. Deletion anonymizes your record; donation totals stay for the organization's tax records.", 'dono' ) }
+                { __( "Download returns a JSON copy of everything we hold on you. Deletion anonymizes your record; donation totals stay for the organization's tax records.", 'dono-fundraising-platform' ) }
             </p>
             { confirmOpen && (
                 <DeleteAccountModal
@@ -1334,15 +1334,15 @@ function DeleteAccountModal( { deleting, error, onConfirm, onClose } ) {
 
     return (
         // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events -- click-outside-to-close is a mouse convenience; Escape (focus trap) and the close button provide keyboard dismissal
-        <div class="dp-modal" role="dialog" aria-modal="true" aria-label={ __( 'Delete my account', 'dono' ) } onClick={ ( e ) => { if ( e.target === e.currentTarget ) onClose(); } } ref={ panelRef }>
+        <div class="dp-modal" role="dialog" aria-modal="true" aria-label={ __( 'Delete my account', 'dono-fundraising-platform' ) } onClick={ ( e ) => { if ( e.target === e.currentTarget ) onClose(); } } ref={ panelRef }>
             <div class="dp-modal__panel">
-                <button class="dp-modal__close" onClick={ onClose } aria-label={ __( 'Close', 'dono' ) }>×</button>
-                <h3>{ __( 'Delete my account', 'dono' ) }</h3>
+                <button class="dp-modal__close" onClick={ onClose } aria-label={ __( 'Close', 'dono-fundraising-platform' ) }>×</button>
+                <h3>{ __( 'Delete my account', 'dono-fundraising-platform' ) }</h3>
                 { error && <p class="dp-error">{ error }</p> }
-                <p>{ __( 'Permanently anonymize your account? Past donations stay attached for tax/audit but every other detail is wiped. This cannot be undone.', 'dono' ) }</p>
+                <p>{ __( 'Permanently anonymize your account? Past donations stay attached for tax/audit but every other detail is wiped. This cannot be undone.', 'dono-fundraising-platform' ) }</p>
                 <div class="dp-form">
                     <label>
-                        { sprintf( /* translators: %s: the literal confirmation keyword to type (DELETE) */ __( 'Type %s to confirm.', 'dono' ), 'DELETE' ) }
+                        { sprintf( /* translators: %s: the literal confirmation keyword to type (DELETE) */ __( 'Type %s to confirm.', 'dono-fundraising-platform' ), 'DELETE' ) }
                         <input
                             ref={ inputRef }
                             type="text"
@@ -1355,9 +1355,9 @@ function DeleteAccountModal( { deleting, error, onConfirm, onClose } ) {
                     </label>
                 </div>
                 <button class="dp-action dp-action--danger" disabled={ deleting || ! matches } onClick={ onConfirm }>
-                    { deleting ? __( 'Deleting…', 'dono' ) : __( 'Delete my account', 'dono' ) }
+                    { deleting ? __( 'Deleting…', 'dono-fundraising-platform' ) : __( 'Delete my account', 'dono-fundraising-platform' ) }
                 </button>
-                <button class="dp-action" disabled={ deleting } onClick={ onClose }>{ __( 'Cancel', 'dono' ) }</button>
+                <button class="dp-action" disabled={ deleting } onClick={ onClose }>{ __( 'Cancel', 'dono-fundraising-platform' ) }</button>
             </div>
         </div>
     );
@@ -1399,12 +1399,12 @@ function CountryPicker( { value, onChange } ) {
 
     return (
         <label class="dp-country">
-            { __( 'Country', 'dono' ) }
+            { __( 'Country', 'dono-fundraising-platform' ) }
             <div class="dp-country__wrap">
                 <input
                     type="text"
                     value={ query }
-                    placeholder={ __( 'Search country…', 'dono' ) }
+                    placeholder={ __( 'Search country…', 'dono-fundraising-platform' ) }
                     onFocus={ () => setOpen( true ) }
                     onBlur={ () => setTimeout( () => setOpen( false ), 150 ) }
                     onInput={ ( e ) => { setQuery( e.target.value ); setOpen( true ); } }
@@ -1433,7 +1433,7 @@ function Consents() {
     const [ savedAt, setSavedAt ] = useState( null );
     const [ err, setErr ] = useState( '' );
 
-    const load = useCallback( () => api( 'consents' ).then( setList ).catch( ( e ) => setErr( e.message || __( 'Could not load your consents.', 'dono' ) ) ), [] );
+    const load = useCallback( () => api( 'consents' ).then( setList ).catch( ( e ) => setErr( e.message || __( 'Could not load your consents.', 'dono-fundraising-platform' ) ) ), [] );
     useEffect( () => { load(); }, [ load ] );
     useEffect( () => {
         if ( ! savedAt ) return undefined;
@@ -1447,12 +1447,12 @@ function Consents() {
         <ExtensionSection key={ panel.id } panel={ panel } context={ { api } } className="dp-ext-section" />
     ) );
 
-    if ( ! list ) return <p>{ err || __( 'Loading…', 'dono' ) }</p>;
+    if ( ! list ) return <p>{ err || __( 'Loading…', 'dono-fundraising-platform' ) }</p>;
     if ( ! list.length ) return (
         <div class="dp-consents">
             <div class="dp-empty">
-                <p>{ __( 'No consent purposes are defined yet.', 'dono' ) }</p>
-                <p class="dp-hint">{ __( 'The organization has not configured any subscriptions or consents.', 'dono' ) }</p>
+                <p>{ __( 'No consent purposes are defined yet.', 'dono-fundraising-platform' ) }</p>
+                <p class="dp-hint">{ __( 'The organization has not configured any subscriptions or consents.', 'dono-fundraising-platform' ) }</p>
             </div>
             { sections }
         </div>
@@ -1465,7 +1465,7 @@ function Consents() {
         setErr( '' );
         api( 'consents', { method: 'POST', body: JSON.stringify( { items } ) } )
             .then( ( fresh ) => { setList( fresh ); setSavedAt( Date.now() ); } )
-            .catch( ( e ) => { setErr( e.message || __( 'Could not save your choice.', 'dono' ) ); load(); } )
+            .catch( ( e ) => { setErr( e.message || __( 'Could not save your choice.', 'dono-fundraising-platform' ) ); load(); } )
             .finally( () => setSaving( false ) );
     };
 
@@ -1480,7 +1480,7 @@ function Consents() {
         setErr( '' );
         api( 'consents', { method: 'POST', body: JSON.stringify( { items } ) } )
             .then( ( fresh ) => { setList( fresh ); setSavedAt( Date.now() ); } )
-            .catch( ( e ) => { setErr( e.message || __( 'Could not save your choice.', 'dono' ) ); load(); } )
+            .catch( ( e ) => { setErr( e.message || __( 'Could not save your choice.', 'dono-fundraising-platform' ) ); load(); } )
             .finally( () => setSaving( false ) );
     };
 
@@ -1491,12 +1491,12 @@ function Consents() {
             { err && <p class="dp-error">{ err }</p> }
             { staleCount > 0 && (
                 <div class="dp-consents__notice" role="status">
-                    <strong>{ sprintf( /* translators: %d: number of consent items that were updated */ _n( '%d updated.', '%d updated.', staleCount, 'dono' ), staleCount ) }</strong>{ ' ' }
-                    { __( 'The items marked below have new terms since you last reviewed them. Confirm or change each one.', 'dono' ) }
+                    <strong>{ sprintf( /* translators: %d: number of consent items that were updated */ _n( '%d updated.', '%d updated.', staleCount, 'dono-fundraising-platform' ), staleCount ) }</strong>{ ' ' }
+                    { __( 'The items marked below have new terms since you last reviewed them. Confirm or change each one.', 'dono-fundraising-platform' ) }
                 </div>
             ) }
             { staleCount === 0 && (
-                <p class="dp-hint">{ __( 'Toggle each subscription below. Every change is logged for your records.', 'dono' ) }</p>
+                <p class="dp-hint">{ __( 'Toggle each subscription below. Every change is logged for your records.', 'dono-fundraising-platform' ) }</p>
             ) }
             { list.map( ( p ) => (
                 <label
@@ -1511,11 +1511,11 @@ function Consents() {
                     />
                     <div>
                         <strong>{ p.label }</strong>
-                        { p.required && <span class="dp-consent__required">{ __( 'required', 'dono' ) }</span> }
-                        { p.stale && <span class="dp-consent__stale">{ __( 'Updated', 'dono' ) }</span> }
+                        { p.required && <span class="dp-consent__required">{ __( 'required', 'dono-fundraising-platform' ) }</span> }
+                        { p.stale && <span class="dp-consent__stale">{ __( 'Updated', 'dono-fundraising-platform' ) }</span> }
                         { p.description && <p class="dp-consent__desc">{ p.description }</p> }
                         { p.has_record && p.occurred_at && (
-                            <p class="dp-consent__meta">{ sprintf( /* translators: %s: date the consent was last confirmed */ __( 'Last confirmed %s', 'dono' ), formatDate( p.occurred_at ) ) }</p>
+                            <p class="dp-consent__meta">{ sprintf( /* translators: %s: date the consent was last confirmed */ __( 'Last confirmed %s', 'dono-fundraising-platform' ), formatDate( p.occurred_at ) ) }</p>
                         ) }
                         { p.stale && (
                             <button
@@ -1523,14 +1523,14 @@ function Consents() {
                                 class="dp-consent__confirm"
                                 onClick={ () => confirmStale( p.key ) }
                             >
-                                { __( 'Keep as is', 'dono' ) }
+                                { __( 'Keep as is', 'dono-fundraising-platform' ) }
                             </button>
                         ) }
                     </div>
                 </label>
             ) ) }
-            { saving && <p class="dp-consent__saving">{ __( 'Saving…', 'dono' ) }</p> }
-            { ! saving && savedAt && <p class="dp-consent__saving dp-form__saved" role="status">{ __( 'Saved.', 'dono' ) }</p> }
+            { saving && <p class="dp-consent__saving">{ __( 'Saving…', 'dono-fundraising-platform' ) }</p> }
+            { ! saving && savedAt && <p class="dp-consent__saving dp-form__saved" role="status">{ __( 'Saved.', 'dono-fundraising-platform' ) }</p> }
             { sections }
         </div>
     );
@@ -1542,14 +1542,14 @@ function Preferences() {
     const [ saved, setSaved ] = useState( false );
     const [ err, setErr ] = useState( '' );
 
-    useEffect( () => { api( 'preferences' ).then( setP ).catch( ( e ) => setErr( e.message || __( 'Could not load your preferences.', 'dono' ) ) ); }, [] );
+    useEffect( () => { api( 'preferences' ).then( setP ).catch( ( e ) => setErr( e.message || __( 'Could not load your preferences.', 'dono-fundraising-platform' ) ) ); }, [] );
     useEffect( () => {
         if ( ! saved ) return undefined;
         const t = setTimeout( () => setSaved( false ), 2500 );
         return () => clearTimeout( t );
     }, [ saved ] );
 
-    if ( ! p ) return <p>{ err || __( 'Loading…', 'dono' ) }</p>;
+    if ( ! p ) return <p>{ err || __( 'Loading…', 'dono-fundraising-platform' ) }</p>;
 
     const save = () => {
         setSaving( true );
@@ -1557,21 +1557,21 @@ function Preferences() {
         setSaved( false );
         api( 'preferences', { method: 'POST', body: JSON.stringify( p ) } )
             .then( ( fresh ) => { setP( fresh ); setSaved( true ); } )
-            .catch( ( e ) => setErr( e.message || __( 'Could not save.', 'dono' ) ) )
+            .catch( ( e ) => setErr( e.message || __( 'Could not save.', 'dono-fundraising-platform' ) ) )
             .finally( () => setSaving( false ) );
     };
 
     return (
         <div class="dp-prefs">
             <div class="dp-prefs__col">
-                <h4>{ __( 'Privacy', 'dono' ) }</h4>
+                <h4>{ __( 'Privacy', 'dono-fundraising-platform' ) }</h4>
                 <label>
                     <input type="checkbox" checked={ p.always_anonymous } onChange={ ( e ) => setP( { ...p, always_anonymous: e.target.checked } ) } />
-                    { __( 'Make all future donations anonymous', 'dono' ) }
+                    { __( 'Make all future donations anonymous', 'dono-fundraising-platform' ) }
                 </label>
             </div>
-            <button class="dp-action is-primary" disabled={ saving } onClick={ save }>{ saving ? __( 'Saving…', 'dono' ) : __( 'Save preferences', 'dono' ) }</button>
-            { ! saving && saved && <span class="dp-form__saved" role="status">{ __( 'Saved.', 'dono' ) }</span> }
+            <button class="dp-action is-primary" disabled={ saving } onClick={ save }>{ saving ? __( 'Saving…', 'dono-fundraising-platform' ) : __( 'Save preferences', 'dono-fundraising-platform' ) }</button>
+            { ! saving && saved && <span class="dp-form__saved" role="status">{ __( 'Saved.', 'dono-fundraising-platform' ) }</span> }
             { err && <p class="dp-error">{ err }</p> }
         </div>
     );
@@ -1596,21 +1596,21 @@ function formatDate( iso ) {
 
 function recurringStatusLabel( s ) {
     switch ( s ) {
-        case 'active':    return __( 'Active', 'dono' );
-        case 'paused':    return __( 'Paused', 'dono' );
-        case 'cancelled': return __( 'Cancelled', 'dono' );
-        case 'expired':   return __( 'Expired', 'dono' );
+        case 'active':    return __( 'Active', 'dono-fundraising-platform' );
+        case 'paused':    return __( 'Paused', 'dono-fundraising-platform' );
+        case 'cancelled': return __( 'Cancelled', 'dono-fundraising-platform' );
+        case 'expired':   return __( 'Expired', 'dono-fundraising-platform' );
         default:          return s;
     }
 }
 
 function intervalLabel( count, unit ) {
     const n = Number( count ) || 1;
-    const u = unit === 'year' ? _n( 'year', 'years', n, 'dono' )
-        : unit === 'week'     ? _n( 'week', 'weeks', n, 'dono' )
-        :                       _n( 'month', 'months', n, 'dono' );
+    const u = unit === 'year' ? _n( 'year', 'years', n, 'dono-fundraising-platform' )
+        : unit === 'week'     ? _n( 'week', 'weeks', n, 'dono-fundraising-platform' )
+        :                       _n( 'month', 'months', n, 'dono-fundraising-platform' );
     /* translators: 1: count, 2: interval unit (e.g. months) */
-    return sprintf( __( 'Every %1$d %2$s', 'dono' ), n, u );
+    return sprintf( __( 'Every %1$d %2$s', 'dono-fundraising-platform' ), n, u );
 }
 
 const mount = document.getElementById( 'dono-donor-portal' );

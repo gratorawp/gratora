@@ -80,26 +80,26 @@ function Edit( { attributes, setAttributes, clientId } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Amounts', 'dono' ) } initialOpen>
+                <PanelBody title={ __( 'Amounts', 'dono-fundraising-platform' ) } initialOpen>
                     <Segmented
-                        label={ __( 'Donation type', 'dono' ) }
+                        label={ __( 'Donation type', 'dono-fundraising-platform' ) }
                         value={ donationType }
                         onChange={ ( v ) => setAttributes( { donationType: v } ) }
                         options={ [
-                            { value: 'multi', label: __( 'Multi-level', 'dono' ) },
-                            { value: 'fixed', label: __( 'Open amount', 'dono' ) },
+                            { value: 'multi', label: __( 'Multi-level', 'dono-fundraising-platform' ) },
+                            { value: 'fixed', label: __( 'Open amount', 'dono-fundraising-platform' ) },
                         ] }
                     />
                     <p style={ { margin: '6px 0 12px', fontSize: 11, color: '#6b7280' } }>
                         { donationType === 'fixed'
-                            ? __( 'Donors enter any amount. No preset tiles.', 'dono' )
-                            : __( 'Show preset amounts donors can pick from.', 'dono' ) }
+                            ? __( 'Donors enter any amount. No preset tiles.', 'dono-fundraising-platform' )
+                            : __( 'Show preset amounts donors can pick from.', 'dono-fundraising-platform' ) }
                     </p>
 
                     { donationType === 'multi' && (
                     <>
                     <ToggleControl
-                        label={ __( 'Allow custom amount', 'dono' ) }
+                        label={ __( 'Allow custom amount', 'dono-fundraising-platform' ) }
                         checked={ allowCustom }
                         onChange={ ( v ) => setAttributes( { allowCustom: v } ) }
                         __nextHasNoMarginBottom
@@ -110,8 +110,8 @@ function Edit( { attributes, setAttributes, clientId } ) {
                             type="number"
                             min="0"
                             step="0.01"
-                            label={ __( 'Minimum amount', 'dono' ) }
-                            help={ __( 'Leave empty for no minimum beyond the site default.', 'dono' ) }
+                            label={ __( 'Minimum amount', 'dono-fundraising-platform' ) }
+                            help={ __( 'Leave empty for no minimum beyond the site default.', 'dono-fundraising-platform' ) }
                             value={ minCents ? String( minCents / 100 ) : '' }
                             onChange={ ( v ) => setAttributes( {
                                 minCents: v === '' ? 0 : Math.max( 0, Math.round( parseFloat( v ) * 100 ) || 0 ),
@@ -121,13 +121,13 @@ function Edit( { attributes, setAttributes, clientId } ) {
                         />
                     ) }
                     <div className="dono-amounts-head">
-                        <span className="dono-amounts-head__label">{ __( 'Options', 'dono' ) }</span>
+                        <span className="dono-amounts-head__label">{ __( 'Options', 'dono-fundraising-platform' ) }</span>
                         <button
                             type="button"
                             className="dono-amounts-add"
                             onClick={ addPreset }
-                            aria-label={ __( 'Add amount', 'dono' ) }
-                            title={ __( 'Add amount', 'dono' ) }
+                            aria-label={ __( 'Add amount', 'dono-fundraising-platform' ) }
+                            title={ __( 'Add amount', 'dono-fundraising-platform' ) }
                         >
                             +
                         </button>
@@ -155,8 +155,8 @@ function Edit( { attributes, setAttributes, clientId } ) {
                                     if ( e.key === 'ArrowDown' ) { e.preventDefault(); reorder( i, i + 1 ); }
                                 } }
                                 role="button"
-                                aria-label={ __( 'Drag to reorder, or use the arrow keys', 'dono' ) }
-                                title={ __( 'Drag to reorder', 'dono' ) }
+                                aria-label={ __( 'Drag to reorder, or use the arrow keys', 'dono-fundraising-platform' ) }
+                                title={ __( 'Drag to reorder', 'dono-fundraising-platform' ) }
                             >
                                 ⠿
                             </span>
@@ -167,8 +167,8 @@ function Edit( { attributes, setAttributes, clientId } ) {
                                 checked={ !! p.preselected }
                                 onChange={ () => setPreselected( i ) }
                                 onClick={ () => { if ( p.preselected ) setPreselected( i ); } }
-                                aria-label={ __( 'Preselect this amount', 'dono' ) }
-                                title={ __( 'Preselect this amount', 'dono' ) }
+                                aria-label={ __( 'Preselect this amount', 'dono-fundraising-platform' ) }
+                                title={ __( 'Preselect this amount', 'dono-fundraising-platform' ) }
                             />
                             <span className="dono-preset-row__amt">
                                 <AmountInput
@@ -184,15 +184,15 @@ function Edit( { attributes, setAttributes, clientId } ) {
                                 className="dono-preset-row__remove"
                                 onClick={ () => removePreset( i ) }
                                 disabled={ presets.length <= 1 }
-                                aria-label={ __( 'Remove amount', 'dono' ) }
-                                title={ __( 'Remove amount', 'dono' ) }
+                                aria-label={ __( 'Remove amount', 'dono-fundraising-platform' ) }
+                                title={ __( 'Remove amount', 'dono-fundraising-platform' ) }
                             >
                                 −
                             </button>
                         </div>
                     ) ) }
                     <p style={ { margin: '6px 0 0', fontSize: 11, color: '#6b7280' } }>
-                        { __( 'Select a radio to preselect an amount.', 'dono' ) }
+                        { __( 'Select a radio to preselect an amount.', 'dono-fundraising-platform' ) }
                     </p>
                     </>
                     ) }
@@ -200,7 +200,7 @@ function Edit( { attributes, setAttributes, clientId } ) {
             </InspectorControls>
             <div { ...blockProps }>
                 <div style={ { fontSize: 12, color: '#666', marginBottom: 8 } }>
-                    { __( 'Donation amount', 'dono' ) }
+                    { __( 'Donation amount', 'dono-fundraising-platform' ) }
                 </div>
                 { donationType === 'multi' && (
                 <div style={ { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 8 } }>
@@ -232,7 +232,7 @@ function Edit( { attributes, setAttributes, clientId } ) {
                                 tagName="div"
                                 value={ p.impact }
                                 onChange={ ( v ) => updatePreset( i, { impact: v } ) }
-                                placeholder={ __( 'Add a caption', 'dono' ) }
+                                placeholder={ __( 'Add a caption', 'dono-fundraising-platform' ) }
                                 allowedFormats={ [] }
                                 style={ {
                                     fontSize: 11,
@@ -258,7 +258,7 @@ function Edit( { attributes, setAttributes, clientId } ) {
                             textAlign:    'left',
                         } }
                     >
-                        { __( 'Custom amount', 'dono' ) }
+                        { __( 'Custom amount', 'dono-fundraising-platform' ) }
                     </div>
                 ) }
             </div>
@@ -269,8 +269,8 @@ function Edit( { attributes, setAttributes, clientId } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Donation amount', 'dono' ),
-        description: __( 'Amount picker with preset buttons and an optional custom-amount input.', 'dono' ),
+        title:      __( 'Donation amount', 'dono-fundraising-platform' ),
+        description: __( 'Amount picker with preset buttons and an optional custom-amount input.', 'dono-fundraising-platform' ),
         category:   'dono-amount',
         icon:       BlockIcons[ 'donation-amount' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

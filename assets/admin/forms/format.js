@@ -4,9 +4,9 @@ import { __ } from '@wordpress/i18n';
 import { parseTimestamp } from '@dono/ui/utils/format';
 
 export const STATUS_LABEL = {
-    draft:     __( 'Draft', 'dono' ),
-    published: __( 'Published', 'dono' ),
-    archived:  __( 'Archived', 'dono' ),
+    draft:     __( 'Draft', 'dono-fundraising-platform' ),
+    published: __( 'Published', 'dono-fundraising-platform' ),
+    archived:  __( 'Archived', 'dono-fundraising-platform' ),
 };
 
 export function formatDate( iso, opts = {} ) {

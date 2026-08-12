@@ -27,9 +27,9 @@ $formatValue = static function (int $value, string $type, string $currency): str
                 <span class="dono-progress__value"><?php echo esc_html($formatValue($current, $goalType, $currency)); ?></span>
                 <span class="dono-progress__caption">
                     <?php echo esc_html(match ($goalType) {
-                        'donations' => __('donations', 'dono'),
-                        'donors'    => __('donors', 'dono'),
-                        default     => __('raised', 'dono'),
+                        'donations' => __('donations', 'dono-fundraising-platform'),
+                        'donors'    => __('donors', 'dono-fundraising-platform'),
+                        default     => __('raised', 'dono-fundraising-platform'),
                     }); ?>
                 </span>
             </div>
@@ -37,7 +37,7 @@ $formatValue = static function (int $value, string $type, string $currency): str
                 <div class="dono-progress__target">
                     <?php echo esc_html(sprintf(
                         /* translators: %1$s: percent, %2$s: target value */
-                        __('%1$d%% of %2$s goal', 'dono'),
+                        __('%1$d%% of %2$s goal', 'dono-fundraising-platform'),
                         $pct,
                         $formatValue($target, $goalType, $currency)
                     )); ?>

@@ -43,32 +43,32 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Radio group', 'dono' ) } initialOpen>
+                <PanelBody title={ __( 'Radio group', 'dono-fundraising-platform' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'dono' ) }
+                        label={ __( 'Label', 'dono-fundraising-platform' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label or any option to edit inline.', 'dono' ) }
+                        help={ __( 'Click the label or any option to edit inline.', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Field name', 'dono' ) }
+                        label={ __( 'Field name', 'dono-fundraising-platform' ) }
                         value={ field }
                         onChange={ ( v ) => setAttributes( { field: slugifyField( v ) } ) }
-                        help={ __( 'Key the value is stored under. Auto-derived from label if empty.', 'dono' ) }
+                        help={ __( 'Key the value is stored under. Auto-derived from label if empty.', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <Segmented
-                        label={ __( 'Layout', 'dono' ) }
+                        label={ __( 'Layout', 'dono-fundraising-platform' ) }
                         value={ layout }
                         onChange={ ( v ) => setAttributes( { layout: v } ) }
                         options={ [
-                            { value: 'vertical',   label: __( 'Vertical',   'dono' ) },
-                            { value: 'horizontal', label: __( 'Horizontal', 'dono' ) },
+                            { value: 'vertical',   label: __( 'Vertical',   'dono-fundraising-platform' ) },
+                            { value: 'horizontal', label: __( 'Horizontal', 'dono-fundraising-platform' ) },
                         ] }
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'dono' ) }
+                        label={ __( 'Required', 'dono-fundraising-platform' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
                         __nextHasNoMarginBottom
@@ -90,7 +90,7 @@ function Edit( { attributes, setAttributes } ) {
                     className="dono-block-preview__label"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Question', 'dono' ) }
+                    placeholder={ __( 'Question', 'dono-fundraising-platform' ) }
                     allowedFormats={ [] }
                 />
                 { required && <em className="dono-block-preview__req" aria-hidden="true">*</em> }
@@ -126,7 +126,7 @@ function Edit( { attributes, setAttributes } ) {
                                 tagName="span"
                                 value={ o.label }
                                 onChange={ ( v ) => updateOptionLabel( i, v ) }
-                                placeholder={ __( 'Option label', 'dono' ) }
+                                placeholder={ __( 'Option label', 'dono-fundraising-platform' ) }
                                 allowedFormats={ [] }
                                 style={ { fontSize: 13, color: '#111827' } }
                             />
@@ -141,8 +141,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Radio group', 'dono' ),
-        description: __( 'Single-choice radio buttons. Donor picks one option from the list.', 'dono' ),
+        title:       __( 'Radio group', 'dono-fundraising-platform' ),
+        description: __( 'Single-choice radio buttons. Donor picks one option from the list.', 'dono-fundraising-platform' ),
         category:    'dono-fields',
         icon:        BlockIcons[ 'radio' ],
         supports: { html: false, anchor: false, inserter: true },

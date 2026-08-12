@@ -239,7 +239,7 @@ final class CoreModule implements DonoModule
     /** @since 1.0.0 */
     public function name(): string
     {
-        return __('Dono Core', 'dono');
+        return __('Dono Core', 'dono-fundraising-platform');
     }
 
     /** @since 1.0.0 */
@@ -1169,7 +1169,7 @@ final class CoreModule implements DonoModule
                     . '<strong>Dono:</strong> '
                     . esc_html(sprintf(
                         /* translators: %s: timestamp the key loss was detected */
-                        __('Encryption key missing since %s. Donor PII written before this point cannot be decrypted. Restore dono_system_settings from a backup, or accept that historical PII is gone. New donations are encrypting against a freshly generated key.', 'dono'),
+                        __('Encryption key missing since %s. Donor PII written before this point cannot be decrypted. Restore dono_system_settings from a backup, or accept that historical PII is gone. New donations are encrypting against a freshly generated key.', 'dono-fundraising-platform'),
                         $lostAt
                     ))
                     . '</div>';

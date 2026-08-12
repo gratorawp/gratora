@@ -28,7 +28,7 @@ final class ToolsPage extends HookProvider
     {
         $pages[] = [
             'id'         => self::PAGE_ID,
-            'title'      => __('Tools', 'dono'),
+            'title'      => __('Tools', 'dono-fundraising-platform'),
             'capability' => 'manage_dono',
             // After Settings: this is where someone goes once they already know
             // what they are looking for.
@@ -68,7 +68,7 @@ final class ToolsPage extends HookProvider
             true
         );
 
-        wp_set_script_translations(self::HANDLE, 'dono', DONO_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE, 'dono-fundraising-platform', DONO_DIR . 'languages');
 
         wp_enqueue_style('wp-components');
         // The list is a DataViews table, and its own layout CSS is a vendor file

@@ -32,25 +32,25 @@ function Notice( { tone, icon, children } ) {
 
 function AccountFoot( { account, onRemove, removing } ) {
     const tail = account?.account_id ? account.account_id.slice( -4 ) : '';
-    const yes = <span style={ { color: 'var(--dono-color-accent)' } }>{ __( 'Enabled', 'dono' ) }</span>;
-    const no  = <span style={ { color: 'var(--dono-color-red)' } }>{ __( 'Disabled', 'dono' ) }</span>;
+    const yes = <span style={ { color: 'var(--dono-color-accent)' } }>{ __( 'Enabled', 'dono-fundraising-platform' ) }</span>;
+    const no  = <span style={ { color: 'var(--dono-color-red)' } }>{ __( 'Disabled', 'dono-fundraising-platform' ) }</span>;
     return (
         <div className="dono-gateway-foot">
             <div className="dono-gateway-foot__cell">
-                <div className="lbl">{ __( 'Account', 'dono' ) }</div>
+                <div className="lbl">{ __( 'Account', 'dono-fundraising-platform' ) }</div>
                 <div className="val is-muted is-mono">{ tail ? `acct_…${ tail }` : '...' }</div>
             </div>
             <div className="dono-gateway-foot__cell">
-                <div className="lbl">{ __( 'Charges', 'dono' ) }</div>
+                <div className="lbl">{ __( 'Charges', 'dono-fundraising-platform' ) }</div>
                 <div className="val">{ account?.charges_enabled ? yes : no }</div>
             </div>
             <div className="dono-gateway-foot__cell">
-                <div className="lbl">{ __( 'Payouts', 'dono' ) }</div>
+                <div className="lbl">{ __( 'Payouts', 'dono-fundraising-platform' ) }</div>
                 <div className="val">{ account?.payouts_enabled ? yes : no }</div>
             </div>
             <div style={ { flex: 1 } } />
             <Btn variant="danger" size="sm" onClick={ onRemove } isBusy={ removing } disabled={ removing }>
-                { __( 'Remove keys', 'dono' ) }
+                { __( 'Remove keys', 'dono-fundraising-platform' ) }
             </Btn>
         </div>
     );
@@ -67,12 +67,12 @@ function ModeKeys( { mode, saved, publishable, onSaved, onRemove } ) {
     const [ pk, setPk ]     = useState( '' );
     const [ busy, setBusy ] = useState( false );
 
-    const label = isTest ? __( 'Test keys', 'dono' ) : __( 'Live keys', 'dono' );
+    const label = isTest ? __( 'Test keys', 'dono-fundraising-platform' ) : __( 'Live keys', 'dono-fundraising-platform' );
     const prefix = isTest ? 'test' : 'live';
 
     const save = () => {
         if ( ! sk.trim() || ! pk.trim() ) {
-            notify.error( __( 'Enter both the publishable key and the secret key.', 'dono' ) );
+            notify.error( __( 'Enter both the publishable key and the secret key.', 'dono-fundraising-platform' ) );
             return;
         }
         setBusy( true );
@@ -87,12 +87,12 @@ function ModeKeys( { mode, saved, publishable, onSaved, onRemove } ) {
                 setOpen( false );
                 notify.success(
                     isTest
-                        ? __( 'Test keys verified and saved.', 'dono' )
-                        : __( 'Live keys verified and saved.', 'dono' )
+                        ? __( 'Test keys verified and saved.', 'dono-fundraising-platform' )
+                        : __( 'Live keys verified and saved.', 'dono-fundraising-platform' )
                 );
                 onSaved( res );
             } )
-            .catch( ( err ) => notify.error( err?.message || __( 'Could not verify those keys.', 'dono' ) ) )
+            .catch( ( err ) => notify.error( err?.message || __( 'Could not verify those keys.', 'dono-fundraising-platform' ) ) )
             .finally( () => setBusy( false ) );
     };
 
@@ -101,8 +101,8 @@ function ModeKeys( { mode, saved, publishable, onSaved, onRemove } ) {
             <div className="dono-stripe-mode__head">
                 <strong>{ label }</strong>
                 { saved
-                    ? <Pill tone="green">{ __( 'Saved', 'dono' ) }</Pill>
-                    : <Pill tone="gray">{ __( 'Not set', 'dono' ) }</Pill> }
+                    ? <Pill tone="green">{ __( 'Saved', 'dono-fundraising-platform' ) }</Pill>
+                    : <Pill tone="gray">{ __( 'Not set', 'dono-fundraising-platform' ) }</Pill> }
             </div>
 
             { saved && ! open && (
@@ -110,10 +110,10 @@ function ModeKeys( { mode, saved, publishable, onSaved, onRemove } ) {
                     <span className="is-mono is-muted">{ publishable || '' }</span>
                     <div className="dono-stripe-mode__actions">
                         <Btn variant="secondary" size="sm" onClick={ () => setOpen( true ) }>
-                            { __( 'Replace', 'dono' ) }
+                            { __( 'Replace', 'dono-fundraising-platform' ) }
                         </Btn>
                         <Btn variant="ghost" size="sm" onClick={ () => onRemove( mode ) }>
-                            { __( 'Remove', 'dono' ) }
+                            { __( 'Remove', 'dono-fundraising-platform' ) }
                         </Btn>
                     </div>
                 </div>
@@ -122,24 +122,24 @@ function ModeKeys( { mode, saved, publishable, onSaved, onRemove } ) {
             { open && (
                 <>
                     <FormRow
-                        label={ __( 'Publishable key', 'dono' ) }
-                        help={ __( 'Safe to expose. Used in the browser to show the payment fields.', 'dono' ) }
+                        label={ __( 'Publishable key', 'dono-fundraising-platform' ) }
+                        help={ __( 'Safe to expose. Used in the browser to show the payment fields.', 'dono-fundraising-platform' ) }
                     >
                         <KeyField value={ pk } onChange={ setPk } placeholder={ `pk_${ prefix }_…` } />
                     </FormRow>
                     <FormRow
-                        label={ __( 'Secret key', 'dono' ) }
-                        help={ __( 'Stored encrypted and never shown again. Dono verifies it with Stripe before saving.', 'dono' ) }
+                        label={ __( 'Secret key', 'dono-fundraising-platform' ) }
+                        help={ __( 'Stored encrypted and never shown again. Dono verifies it with Stripe before saving.', 'dono-fundraising-platform' ) }
                     >
                         <KeyField value={ sk } onChange={ setSk } placeholder={ `sk_${ prefix }_…` } secret />
                     </FormRow>
                     <div className="dono-stripe-mode__actions">
                         <Btn variant="primary" size="sm" onClick={ save } isBusy={ busy } disabled={ busy }>
-                            { __( 'Save and verify', 'dono' ) }
+                            { __( 'Save and verify', 'dono-fundraising-platform' ) }
                         </Btn>
                         { saved && (
                             <Btn variant="ghost" size="sm" onClick={ () => { setOpen( false ); setSk( '' ); setPk( '' ); } }>
-                                { __( 'Cancel', 'dono' ) }
+                                { __( 'Cancel', 'dono-fundraising-platform' ) }
                             </Btn>
                         ) }
                     </div>
@@ -170,11 +170,11 @@ function ApplePaySection( { status, onDone } ) {
     const enable = () => {
         const pasted = file.trim();
         if ( ! hasFile && ! pasted ) {
-            notify.error( __( 'Paste the domain association file from Stripe first.', 'dono' ) );
+            notify.error( __( 'Paste the domain association file from Stripe first.', 'dono-fundraising-platform' ) );
             return;
         }
         if ( ! modes.length ) {
-            notify.error( __( 'Save your Stripe keys first.', 'dono' ) );
+            notify.error( __( 'Save your Stripe keys first.', 'dono-fundraising-platform' ) );
             return;
         }
 
@@ -194,12 +194,12 @@ function ApplePaySection( { status, onDone } ) {
                 if ( bad ) {
                     notify.error(
                         bad.message ||
-                        __( 'Stripe could not verify this domain yet. Check the file is reachable, then try again.', 'dono' )
+                        __( 'Stripe could not verify this domain yet. Check the file is reachable, then try again.', 'dono-fundraising-platform' )
                     );
                 } else {
                     setFile( '' );
                     setOpen( false );
-                    notify.success( __( 'Apple Pay is verified for this domain.', 'dono' ) );
+                    notify.success( __( 'Apple Pay is verified for this domain.', 'dono-fundraising-platform' ) );
                 }
                 onDone();
             } )
@@ -208,14 +208,14 @@ function ApplePaySection( { status, onDone } ) {
 
     const stateLabel = ( mode ) => {
         const st = apple?.[ mode ]?.status;
-        if ( st === 'active' )   return __( 'verified', 'dono' );
-        if ( st === 'inactive' ) return __( 'not verified', 'dono' );
-        return __( 'not checked yet', 'dono' );
+        if ( st === 'active' )   return __( 'verified', 'dono-fundraising-platform' );
+        if ( st === 'inactive' ) return __( 'not verified', 'dono-fundraising-platform' );
+        return __( 'not checked yet', 'dono-fundraising-platform' );
     };
 
-    let pill = <Pill tone="gray">{ __( 'Not set up', 'dono' ) }</Pill>;
-    if ( hasFile && active )      pill = <Pill tone="green">{ __( 'Verified', 'dono' ) }</Pill>;
-    else if ( hasFile )           pill = <Pill tone="amber">{ __( 'Not verified', 'dono' ) }</Pill>;
+    let pill = <Pill tone="gray">{ __( 'Not set up', 'dono-fundraising-platform' ) }</Pill>;
+    if ( hasFile && active )      pill = <Pill tone="green">{ __( 'Verified', 'dono-fundraising-platform' ) }</Pill>;
+    else if ( hasFile )           pill = <Pill tone="amber">{ __( 'Not verified', 'dono-fundraising-platform' ) }</Pill>;
 
     const firstMessage = modes.map( ( m ) => apple?.[ m ]?.message ).find( Boolean );
 
@@ -223,15 +223,15 @@ function ApplePaySection( { status, onDone } ) {
         <div className="dono-connect-options">
             <div className="dono-stripe-mode">
                 <div className="dono-stripe-mode__head">
-                    <strong>{ __( 'Apple Pay', 'dono' ) }</strong>
+                    <strong>{ __( 'Apple Pay', 'dono-fundraising-platform' ) }</strong>
                     { pill }
                 </div>
 
                 <p className="dono-connect-p">
-                    { __( 'Google Pay needs nothing here, it appears as soon as your Stripe account supports it. Apple checks that you own this domain first, and until it verifies, the Apple Pay button just never shows.', 'dono' ) }
+                    { __( 'Google Pay needs nothing here, it appears as soon as your Stripe account supports it. Apple checks that you own this domain first, and until it verifies, the Apple Pay button just never shows.', 'dono-fundraising-platform' ) }
                 </p>
 
-                <FormRow label={ __( 'Domain', 'dono' ) }>
+                <FormRow label={ __( 'Domain', 'dono-fundraising-platform' ) }>
                     { /* No onChange: KeyField renders read-only with a Copy button. */ }
                     <KeyField value={ apple.domain || '' } />
                 </FormRow>
@@ -239,8 +239,8 @@ function ApplePaySection( { status, onDone } ) {
                 { open ? (
                     <>
                         <FormRow
-                            label={ __( 'Domain association file', 'dono' ) }
-                            help={ __( 'In Stripe, go to Settings, Payment method domains, and add the domain above. Stripe links a file to download, paste its whole contents here.', 'dono' ) }
+                            label={ __( 'Domain association file', 'dono-fundraising-platform' ) }
+                            help={ __( 'In Stripe, go to Settings, Payment method domains, and add the domain above. Stripe links a file to download, paste its whole contents here.', 'dono-fundraising-platform' ) }
                             wide
                         >
                             <textarea
@@ -253,11 +253,11 @@ function ApplePaySection( { status, onDone } ) {
                         </FormRow>
                         <div className="dono-stripe-mode__actions">
                             <Btn variant="primary" size="sm" onClick={ enable } isBusy={ busy } disabled={ busy }>
-                                { __( 'Enable Apple Pay', 'dono' ) }
+                                { __( 'Enable Apple Pay', 'dono-fundraising-platform' ) }
                             </Btn>
                             { hasFile && (
                                 <Btn variant="ghost" size="sm" onClick={ () => { setOpen( false ); setFile( '' ); } }>
-                                    { __( 'Cancel', 'dono' ) }
+                                    { __( 'Cancel', 'dono-fundraising-platform' ) }
                                 </Btn>
                             ) }
                         </div>
@@ -267,17 +267,17 @@ function ApplePaySection( { status, onDone } ) {
                         <span className="is-muted">
                             { modes.map( ( m ) => sprintf(
                                 /* translators: 1: Stripe mode, test or live. 2: verification state. */
-                                __( '%1$s: %2$s', 'dono' ),
-                                m === 'test' ? __( 'Test', 'dono' ) : __( 'Live', 'dono' ),
+                                __( '%1$s: %2$s', 'dono-fundraising-platform' ),
+                                m === 'test' ? __( 'Test', 'dono-fundraising-platform' ) : __( 'Live', 'dono-fundraising-platform' ),
                                 stateLabel( m )
                             ) ).join( '  ·  ' ) }
                         </span>
                         <div className="dono-stripe-mode__actions">
                             <Btn variant="secondary" size="sm" onClick={ enable } isBusy={ busy } disabled={ busy }>
-                                { __( 'Check again', 'dono' ) }
+                                { __( 'Check again', 'dono-fundraising-platform' ) }
                             </Btn>
                             <Btn variant="ghost" size="sm" onClick={ () => setOpen( true ) }>
-                                { __( 'Replace file', 'dono' ) }
+                                { __( 'Replace file', 'dono-fundraising-platform' ) }
                             </Btn>
                         </div>
                     </div>
@@ -312,17 +312,17 @@ export default function StripeKeysCard( { s } ) {
     const removeKeys = useCallback( ( mode ) => {
         const all = mode === 'all';
         setConfirm( {
-            title: all ? __( 'Remove Stripe keys', 'dono' ) : __( 'Remove these keys', 'dono' ),
+            title: all ? __( 'Remove Stripe keys', 'dono-fundraising-platform' ) : __( 'Remove these keys', 'dono-fundraising-platform' ),
             message: all
-                ? __( 'Remove both key pairs? Card donations will stop until you add keys again.', 'dono' )
-                : __( 'Remove this key pair? Donations in this mode will stop until you add keys again.', 'dono' ),
-            confirmLabel: __( 'Remove', 'dono' ),
+                ? __( 'Remove both key pairs? Card donations will stop until you add keys again.', 'dono-fundraising-platform' )
+                : __( 'Remove this key pair? Donations in this mode will stop until you add keys again.', 'dono-fundraising-platform' ),
+            confirmLabel: __( 'Remove', 'dono-fundraising-platform' ),
             destructive: true,
             onConfirm: async () => {
                 setRemoving( true );
                 apiFetch( { path: `/dono/v1/gateways/stripe/keys?mode=${ mode }`, method: 'DELETE' } )
                     .then( ( res ) => setStatus( res ) )
-                    .catch( ( err ) => notify.error( err?.message || __( 'Could not remove the keys.', 'dono' ) ) )
+                    .catch( ( err ) => notify.error( err?.message || __( 'Could not remove the keys.', 'dono-fundraising-platform' ) ) )
                     .finally( () => setRemoving( false ) );
             },
         } );
@@ -336,17 +336,17 @@ export default function StripeKeysCard( { s } ) {
 
     const head = {
         leading:     <BrandMark letter="S" variant="stripe" />,
-        title:       __( 'Stripe', 'dono' ),
+        title:       __( 'Stripe', 'dono-fundraising-platform' ),
         collapsible: true,
         open,
         onToggle:    setOpen,
     };
-    const sub = __( 'Cards, SEPA, Apple Pay, Google Pay', 'dono' );
+    const sub = __( 'Cards, SEPA, Apple Pay, Google Pay', 'dono-fundraising-platform' );
 
     if ( loading ) {
         return (
-            <Card { ...head } sub={ sub } meta={ <Pill tone="gray">{ __( 'Checking…', 'dono' ) }</Pill> }>
-                <p className="dono-connect-p">{ __( 'Loading Stripe status…', 'dono' ) }</p>
+            <Card { ...head } sub={ sub } meta={ <Pill tone="gray">{ __( 'Checking…', 'dono-fundraising-platform' ) }</Pill> }>
+                <p className="dono-connect-p">{ __( 'Loading Stripe status…', 'dono-fundraising-platform' ) }</p>
             </Card>
         );
     }
@@ -355,21 +355,21 @@ export default function StripeKeysCard( { s } ) {
     // through to a state that misreports the real setup.
     if ( loadError ) {
         return (
-            <Card { ...head } sub={ sub } meta={ <Pill tone="amber">{ __( 'Unavailable', 'dono' ) }</Pill> }>
+            <Card { ...head } sub={ sub } meta={ <Pill tone="amber">{ __( 'Unavailable', 'dono-fundraising-platform' ) }</Pill> }>
                 <Notice tone="amber" icon="!">
-                    <strong>{ __( 'Could not check your Stripe setup.', 'dono' ) }</strong>{ ' ' }
-                    { __( 'Something went wrong loading the status. Please try again.', 'dono' ) }
+                    <strong>{ __( 'Could not check your Stripe setup.', 'dono-fundraising-platform' ) }</strong>{ ' ' }
+                    { __( 'Something went wrong loading the status. Please try again.', 'dono-fundraising-platform' ) }
                 </Notice>
                 <div style={ { marginTop: 18 } }>
-                    <Btn variant="primary" onClick={ load }>{ __( 'Retry', 'dono' ) }</Btn>
+                    <Btn variant="primary" onClick={ load }>{ __( 'Retry', 'dono-fundraising-platform' ) }</Btn>
                 </div>
             </Card>
         );
     }
 
-    let meta = <Pill tone="gray">{ __( 'Not set up', 'dono' ) }</Pill>;
-    if ( connected && canCharge ) meta = <Pill tone="green">{ __( 'Ready', 'dono' ) }</Pill>;
-    else if ( connected ) meta = <Pill tone="amber">{ __( 'Action needed', 'dono' ) }</Pill>;
+    let meta = <Pill tone="gray">{ __( 'Not set up', 'dono-fundraising-platform' ) }</Pill>;
+    if ( connected && canCharge ) meta = <Pill tone="green">{ __( 'Ready', 'dono-fundraising-platform' ) }</Pill>;
+    else if ( connected ) meta = <Pill tone="amber">{ __( 'Action needed', 'dono-fundraising-platform' ) }</Pill>;
 
     const bizName = account?.business_name || account?.email || '';
 
@@ -386,19 +386,19 @@ export default function StripeKeysCard( { s } ) {
             { ! connected && (
                 <>
                     <p className="dono-connect-p">
-                        { __( 'Add the API keys from your own Stripe account. Donations are charged directly on your account and pay out to your bank, and Dono never takes a cut.', 'dono' ) }
+                        { __( 'Add the API keys from your own Stripe account. Donations are charged directly on your account and pay out to your bank, and Dono never takes a cut.', 'dono-fundraising-platform' ) }
                     </p>
                     <p className="dono-connect-p">
-                        { __( 'Find them in the Stripe dashboard under Developers, API keys. Add your test keys first to try a donation safely.', 'dono' ) }
+                        { __( 'Find them in the Stripe dashboard under Developers, API keys. Add your test keys first to try a donation safely.', 'dono-fundraising-platform' ) }
                     </p>
                 </>
             ) }
 
             <ToggleRow
-                title={ __( 'Enable the Stripe gateway', 'dono' ) }
+                title={ __( 'Enable the Stripe gateway', 'dono-fundraising-platform' ) }
                 sub={ connected
-                    ? __( 'Your keys stay on file while it is off.', 'dono' )
-                    : __( 'Available once your keys are saved.', 'dono' ) }
+                    ? __( 'Your keys stay on file while it is off.', 'dono-fundraising-platform' )
+                    : __( 'Available once your keys are saved.', 'dono-fundraising-platform' ) }
                 checked={ connected && !! s.value( 'stripe.enabled', true ) }
                 onChange={ s.setValue( 'stripe.enabled' ) }
                 disabled={ ! connected }
@@ -406,15 +406,15 @@ export default function StripeKeysCard( { s } ) {
 
             { connected && ! canCharge && (
                 <Notice tone="amber" icon="⚠">
-                    <strong>{ __( 'Your Stripe account cannot take payments yet.', 'dono' ) }</strong>{ ' ' }
-                    { __( 'Stripe still needs some verification details (ID, bank account, business info). Finish that in your Stripe dashboard; live donations will fail until you do.', 'dono' ) }
+                    <strong>{ __( 'Your Stripe account cannot take payments yet.', 'dono-fundraising-platform' ) }</strong>{ ' ' }
+                    { __( 'Stripe still needs some verification details (ID, bank account, business info). Finish that in your Stripe dashboard; live donations will fail until you do.', 'dono-fundraising-platform' ) }
                 </Notice>
             ) }
 
             { connected && canCharge && (
                 <Notice tone="accent" icon="✓">
-                    <strong>{ __( 'You are all set.', 'dono' ) }</strong>{ ' ' }
-                    { __( 'Donations are charged on your Stripe account and paid out to your bank.', 'dono' ) }
+                    <strong>{ __( 'You are all set.', 'dono-fundraising-platform' ) }</strong>{ ' ' }
+                    { __( 'Donations are charged on your Stripe account and paid out to your bank.', 'dono-fundraising-platform' ) }
                 </Notice>
             ) }
 
@@ -439,17 +439,17 @@ export default function StripeKeysCard( { s } ) {
 
             <div className="dono-connect-options">
                 <p className="dono-connect-p">
-                    { __( 'Webhooks tell Dono when a payment succeeds, fails or is refunded. Dono registers this endpoint on your account automatically when you save keys. On a local site Stripe cannot reach it, so add the endpoint yourself and paste its signing secret below.', 'dono' ) }
+                    { __( 'Webhooks tell Dono when a payment succeeds, fails or is refunded. Dono registers this endpoint on your account automatically when you save keys. On a local site Stripe cannot reach it, so add the endpoint yourself and paste its signing secret below.', 'dono-fundraising-platform' ) }
                 </p>
-                <FormRow label={ __( 'Webhook endpoint', 'dono' ) }>
+                <FormRow label={ __( 'Webhook endpoint', 'dono-fundraising-platform' ) }>
                     { /* No onChange: KeyField renders read-only with a Copy button. */ }
                     <KeyField value={ status?.webhook_url || '' } />
                 </FormRow>
                 { s && (
                     <>
                         <FormRow
-                            label={ __( 'Webhook signing secret (test)', 'dono' ) }
-                            help={ __( 'From the test-mode Stripe webhook endpoint. Needed for paid, refund and dispute updates on test donations. Once saved it is hidden, so the dots mean it is set: type a new one to replace it, or clear the field to remove it.', 'dono' ) }
+                            label={ __( 'Webhook signing secret (test)', 'dono-fundraising-platform' ) }
+                            help={ __( 'From the test-mode Stripe webhook endpoint. Needed for paid, refund and dispute updates on test donations. Once saved it is hidden, so the dots mean it is set: type a new one to replace it, or clear the field to remove it.', 'dono-fundraising-platform' ) }
                         >
                             <KeyField
                                 value={ s.value( 'stripe.webhook_secret_test', '' ) }
@@ -459,8 +459,8 @@ export default function StripeKeysCard( { s } ) {
                             />
                         </FormRow>
                         <FormRow
-                            label={ __( 'Webhook signing secret (live)', 'dono' ) }
-                            help={ __( 'From the live-mode Stripe webhook endpoint. Stripe issues a separate secret for live; without it, live webhooks are rejected. Once saved it is hidden, same as the test one.', 'dono' ) }
+                            label={ __( 'Webhook signing secret (live)', 'dono-fundraising-platform' ) }
+                            help={ __( 'From the live-mode Stripe webhook endpoint. Stripe issues a separate secret for live; without it, live webhooks are rejected. Once saved it is hidden, same as the test one.', 'dono-fundraising-platform' ) }
                         >
                             <KeyField
                                 value={ s.value( 'stripe.webhook_secret_live', '' ) }

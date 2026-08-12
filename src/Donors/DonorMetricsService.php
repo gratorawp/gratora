@@ -99,7 +99,7 @@ final class DonorMetricsService
             $reason = AtRiskReason::classify($r, $plans[(int) $r['id']] ?? null, $today);
             return [
                 'id'                  => $r['id'],
-                'name'                => $name !== '' ? $name : __('Donor', 'dono') . ' #' . $r['id'],
+                'name'                => $name !== '' ? $name : __('Donor', 'dono-fundraising-platform') . ' #' . $r['id'],
                 'email'               => $email,
                 'country'             => $r['country'],
                 'donations_count'     => $r['donations_count'],
@@ -324,7 +324,7 @@ final class DonorMetricsService
         // Contextual banners.
         $banners = [];
         if ($donor->redacted_at !== null) {
-            $banners[] = ['kind' => 'redacted', 'message' => __('This donor has been redacted under GDPR. PII has been removed; lifetime totals are kept for accounting.', 'dono')];
+            $banners[] = ['kind' => 'redacted', 'message' => __('This donor has been redacted under GDPR. PII has been removed; lifetime totals are kept for accounting.', 'dono-fundraising-platform')];
         }
         $pastDuePlan = null;
         foreach ($recurringPlans as $p) {
@@ -339,17 +339,17 @@ final class DonorMetricsService
             $name     = ucfirst((string) $pastDuePlan->gateway);
 
             if ($gateway instanceof \Dono\Gateways\SupportsPaymentRetry) {
-                $message = __('A renewal was declined. Open the Recurring tab to collect it again.', 'dono');
+                $message = __('A renewal was declined. Open the Recurring tab to collect it again.', 'dono-fundraising-platform');
             } elseif ($gateway === null) {
                 $message = sprintf(
                     /* translators: %s: the payment gateway name, e.g. Stripe. */
-                    __('A renewal was declined, but the %s connection is not active, so nothing can be collected from here. Reconnect it in Settings, Payment gateways.', 'dono'),
+                    __('A renewal was declined, but the %s connection is not active, so nothing can be collected from here. Reconnect it in Settings, Payment gateways.', 'dono-fundraising-platform'),
                     $name
                 );
             } else {
                 $message = sprintf(
                     /* translators: %s: the payment gateway name, e.g. PayPal. */
-                    __('A renewal was declined. %s retries on its own schedule; to fix it sooner, ask the donor to update their card in the donor portal.', 'dono'),
+                    __('A renewal was declined. %s retries on its own schedule; to fix it sooner, ask the donor to update their card in the donor portal.', 'dono-fundraising-platform'),
                     $name
                 );
             }
@@ -538,7 +538,7 @@ final class DonorMetricsService
     private function donorName(Donor $d): string
     {
         $name = trim(($d->first_name ?? '') . ' ' . ($d->last_name ?? ''));
-        return $name !== '' ? $name : __('Donor', 'dono') . ' #' . $d->id;
+        return $name !== '' ? $name : __('Donor', 'dono-fundraising-platform') . ' #' . $d->id;
     }
 
     /**
@@ -579,7 +579,7 @@ final class DonorMetricsService
             $name = trim(($r['first_name'] ?? '') . ' ' . ($r['last_name'] ?? ''));
             return [
                 'id'                  => $r['id'],
-                'name'                => $name !== '' ? $name : __('Donor', 'dono') . ' #' . $r['id'],
+                'name'                => $name !== '' ? $name : __('Donor', 'dono-fundraising-platform') . ' #' . $r['id'],
                 'email'               => $this->donorService->decryptEmail($donor),
                 'country'             => $r['country'],
                 'total_donated_cents' => $r['total_donated_cents'],

@@ -15,13 +15,13 @@ import Btn from '../../_shared/components/Btn';
 
 // Why a row did not make it, in the admin's words rather than a code.
 const SKIP_LABELS = {
-    no_email:          __( 'no email address', 'dono' ),
-    invalid_email:     __( 'the email address is not one', 'dono' ),
-    invalid_amount:    __( 'the amount is missing, zero or unreadable', 'dono' ),
-    duplicate_in_file: __( 'the same row appears earlier in this file', 'dono' ),
-    already_imported:  __( 'already imported by an earlier run', 'dono' ),
-    donor_erased:      __( 'the donor was erased on this site', 'dono' ),
-    error:             __( 'the row could not be read', 'dono' ),
+    no_email:          __( 'no email address', 'dono-fundraising-platform' ),
+    invalid_email:     __( 'the email address is not one', 'dono-fundraising-platform' ),
+    invalid_amount:    __( 'the amount is missing, zero or unreadable', 'dono-fundraising-platform' ),
+    duplicate_in_file: __( 'the same row appears earlier in this file', 'dono-fundraising-platform' ),
+    already_imported:  __( 'already imported by an earlier run', 'dono-fundraising-platform' ),
+    donor_erased:      __( 'the donor was erased on this site', 'dono-fundraising-platform' ),
+    error:             __( 'the row could not be read', 'dono-fundraising-platform' ),
 };
 
 // Two groups, because the second one decides what the import does at all.
@@ -65,7 +65,7 @@ export default function CsvImportCard( { setNotice } ) {
             // a control the admin can change.
             setMapping( res.mapping || {} );
         } catch ( err ) {
-            setNotice( { type: 'error', text: err?.message || __( 'That file could not be read as a CSV.', 'dono' ) } );
+            setNotice( { type: 'error', text: err?.message || __( 'That file could not be read as a CSV.', 'dono-fundraising-platform' ) } );
         } finally {
             setBusy( '' );
         }
@@ -92,11 +92,11 @@ export default function CsvImportCard( { setNotice } ) {
 
             setNotice( {
                 type: landed > 0 ? 'success' : 'error',
-                text: landed > 0 ? summarise( res ) : __( 'Nothing was imported. The preview above says why.', 'dono' ),
+                text: landed > 0 ? summarise( res ) : __( 'Nothing was imported. The preview above says why.', 'dono-fundraising-platform' ),
             } );
             if ( landed > 0 ) reset();
         } catch ( err ) {
-            setNotice( { type: 'error', text: err?.message || __( 'The import failed.', 'dono' ) } );
+            setNotice( { type: 'error', text: err?.message || __( 'The import failed.', 'dono-fundraising-platform' ) } );
         } finally {
             setBusy( '' );
         }
@@ -131,7 +131,7 @@ export default function CsvImportCard( { setNotice } ) {
                 </th>
                 <td>
                     <select className="dono-input" value={ chosen } onChange={ setField( field ) }>
-                        <option value="">{ __( 'Not imported', 'dono' ) }</option>
+                        <option value="">{ __( 'Not imported', 'dono-fundraising-platform' ) }</option>
                         { headers.map( ( h ) => (
                             <option key={ h } value={ h }>{ h }</option>
                         ) ) }
@@ -144,8 +144,8 @@ export default function CsvImportCard( { setNotice } ) {
 
     return (
         <Card
-            title={ __( 'Import from a CSV', 'dono' ) }
-            sub={ __( 'A file from another platform or a spreadsheet. Donors are matched on their email address, so a donor who is already here gains the donations rather than a second record. A file with no amounts imports the people on their own.', 'dono' ) }
+            title={ __( 'Import from a CSV', 'dono-fundraising-platform' ) }
+            sub={ __( 'A file from another platform or a spreadsheet. Donors are matched on their email address, so a donor who is already here gains the donations rather than a second record. A file with no amounts imports the people on their own.', 'dono-fundraising-platform' ) }
         >
             <div className="dono-advanced-actions">
                 <Btn
@@ -154,11 +154,11 @@ export default function CsvImportCard( { setNotice } ) {
                     disabled={ busy !== '' }
                     isBusy={ busy === 'inspect' }
                 >
-                    { inspected ? __( 'Choose a different file', 'dono' ) : __( 'Choose a CSV file', 'dono' ) }
+                    { inspected ? __( 'Choose a different file', 'dono-fundraising-platform' ) : __( 'Choose a CSV file', 'dono-fundraising-platform' ) }
                 </Btn>
                 { inspected && (
                     <Btn variant="tertiary" onClick={ reset } disabled={ busy !== '' }>
-                        { __( 'Cancel', 'dono' ) }
+                        { __( 'Cancel', 'dono-fundraising-platform' ) }
                     </Btn>
                 ) }
                 <input
@@ -175,29 +175,29 @@ export default function CsvImportCard( { setNotice } ) {
                     <p className="dono-tools-note">
                         { sprintf(
                             /* translators: 1: number of rows, 2: number of columns. */
-                            _n( '%1$d row, %2$d columns.', '%1$d rows, %2$d columns.', inspected.rows, 'dono' ),
+                            _n( '%1$d row, %2$d columns.', '%1$d rows, %2$d columns.', inspected.rows, 'dono-fundraising-platform' ),
                             inspected.rows,
                             headers.length
                         ) }
                     </p>
 
-                    <h4 className="dono-csv-map__heading">{ __( 'The donor', 'dono' ) }</h4>
+                    <h4 className="dono-csv-map__heading">{ __( 'The donor', 'dono-fundraising-platform' ) }</h4>
                     <table className="dono-csv-map">
                         <thead>
                             <tr>
-                                <th scope="col">{ __( 'Dono field', 'dono' ) }</th>
-                                <th scope="col">{ __( 'Column in your file', 'dono' ) }</th>
-                                <th scope="col">{ __( 'First value', 'dono' ) }</th>
+                                <th scope="col">{ __( 'Dono field', 'dono-fundraising-platform' ) }</th>
+                                <th scope="col">{ __( 'Column in your file', 'dono-fundraising-platform' ) }</th>
+                                <th scope="col">{ __( 'First value', 'dono-fundraising-platform' ) }</th>
                             </tr>
                         </thead>
                         <tbody>{ DONOR_FIELDS.map( rowFor ) }</tbody>
                     </table>
 
-                    <h4 className="dono-csv-map__heading">{ __( 'The donation', 'dono' ) }</h4>
+                    <h4 className="dono-csv-map__heading">{ __( 'The donation', 'dono-fundraising-platform' ) }</h4>
                     <p className="dono-tools-note">
                         { withAmount
-                            ? __( 'Each row will be imported as a donation.', 'dono' )
-                            : __( 'No amount column is mapped, so this file will import donors only. Map Amount to bring their donations in as well.', 'dono' ) }
+                            ? __( 'Each row will be imported as a donation.', 'dono-fundraising-platform' )
+                            : __( 'No amount column is mapped, so this file will import donors only. Map Amount to bring their donations in as well.', 'dono-fundraising-platform' ) }
                     </p>
                     <table className="dono-csv-map">
                         <tbody>{ DONATION_FIELDS.map( rowFor ) }</tbody>
@@ -210,7 +210,7 @@ export default function CsvImportCard( { setNotice } ) {
                             disabled={ ! ready || busy !== '' }
                             isBusy={ busy === 'preview' }
                         >
-                            { __( 'Preview', 'dono' ) }
+                            { __( 'Preview', 'dono-fundraising-platform' ) }
                         </Btn>
                         { preview && hasWork( preview ) && (
                             <Btn
@@ -219,14 +219,14 @@ export default function CsvImportCard( { setNotice } ) {
                                 disabled={ busy !== '' }
                                 isBusy={ busy === 'import' }
                             >
-                                { __( 'Import', 'dono' ) }
+                                { __( 'Import', 'dono-fundraising-platform' ) }
                             </Btn>
                         ) }
                     </div>
 
                     { ! ready && (
                         <p className="dono-tools-note">
-                            { __( 'Email has to be mapped. Everything else is optional.', 'dono' ) }
+                            { __( 'Email has to be mapped. Everything else is optional.', 'dono-fundraising-platform' ) }
                         </p>
                     ) }
 
@@ -239,7 +239,7 @@ export default function CsvImportCard( { setNotice } ) {
                                         <li key={ reason }>
                                             { sprintf(
                                                 /* translators: 1: number of rows, 2: the reason. */
-                                                _n( '%1$d row skipped: %2$s', '%1$d rows skipped: %2$s', n, 'dono' ),
+                                                _n( '%1$d row skipped: %2$s', '%1$d rows skipped: %2$s', n, 'dono-fundraising-platform' ),
                                                 n,
                                                 SKIP_LABELS[ reason ] || reason
                                             ) }
@@ -255,8 +255,8 @@ export default function CsvImportCard( { setNotice } ) {
                             { preview.dry_run && (
                                 <p className="dono-tools-note">
                                     { preview.mode === 'donors'
-                                        ? __( 'Nothing has been written yet.', 'dono' )
-                                        : __( 'Nothing has been written yet. Imported donations are marked as coming from a CSV and can be told apart from donations this site took.', 'dono' ) }
+                                        ? __( 'Nothing has been written yet.', 'dono-fundraising-platform' )
+                                        : __( 'Nothing has been written yet. Imported donations are marked as coming from a CSV and can be told apart from donations this site took.', 'dono-fundraising-platform' ) }
                                 </p>
                             ) }
                         </div>
@@ -276,13 +276,13 @@ function summarise( res ) {
     const people = res.dry_run
         ? sprintf(
             /* translators: 1: donors to create, 2: donors already here. */
-            __( '%1$d donors would be created and %2$d matched to donors already here.', 'dono' ),
+            __( '%1$d donors would be created and %2$d matched to donors already here.', 'dono-fundraising-platform' ),
             res.donors_created,
             res.donors_matched
         )
         : sprintf(
             /* translators: 1: donors created, 2: donors already here. */
-            __( 'Created %1$d donors and matched %2$d to donors already here.', 'dono' ),
+            __( 'Created %1$d donors and matched %2$d to donors already here.', 'dono-fundraising-platform' ),
             res.donors_created,
             res.donors_matched
         );
@@ -294,12 +294,12 @@ function summarise( res ) {
     const gifts = res.dry_run
         ? sprintf(
             /* translators: %d: number of donations. */
-            _n( '%d donation would be imported.', '%d donations would be imported.', res.donations_imported, 'dono' ),
+            _n( '%d donation would be imported.', '%d donations would be imported.', res.donations_imported, 'dono-fundraising-platform' ),
             res.donations_imported
         )
         : sprintf(
             /* translators: %d: number of donations. */
-            _n( 'Imported %d donation.', 'Imported %d donations.', res.donations_imported, 'dono' ),
+            _n( 'Imported %d donation.', 'Imported %d donations.', res.donations_imported, 'dono-fundraising-platform' ),
             res.donations_imported
         );
 

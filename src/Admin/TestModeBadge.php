@@ -51,10 +51,10 @@ final class TestModeBadge extends HookProvider
         // Both name Dono: other plugins put their own test badge in this bar,
         // and a bare "test mode" leaves the operator guessing whose till is open.
         $title = $orgWide
-            ? __('Dono is in test mode', 'dono')
+            ? __('Dono is in test mode', 'dono-fundraising-platform')
             : sprintf(
                 /* translators: %d: how many published forms are in test mode. */
-                _n('%d Dono form in test mode', '%d Dono forms in test mode', $forms, 'dono'),
+                _n('%d Dono form in test mode', '%d Dono forms in test mode', $forms, 'dono-fundraising-platform'),
                 $forms
             );
 
@@ -68,8 +68,8 @@ final class TestModeBadge extends HookProvider
             'href'   => esc_url(admin_url('admin.php?page=dono-settings&tab=gateways')),
             'meta'  => [
                 'title' => $orgWide
-                    ? __('No card is charged and these donations stay out of your reporting. Turn this off before you go live.', 'dono')
-                    : __('These forms take no real money. Every other form on the site does.', 'dono'),
+                    ? __('No card is charged and these donations stay out of your reporting. Turn this off before you go live.', 'dono-fundraising-platform')
+                    : __('These forms take no real money. Every other form on the site does.', 'dono-fundraising-platform'),
             ],
         ]);
     }

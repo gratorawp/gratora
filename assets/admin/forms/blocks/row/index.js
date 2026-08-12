@@ -43,16 +43,16 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Row', 'dono' ) } initialOpen>
+                <PanelBody title={ __( 'Row', 'dono-fundraising-platform' ) } initialOpen>
                     <Slider
-                        label={ __( 'Columns', 'dono' ) }
+                        label={ __( 'Columns', 'dono-fundraising-platform' ) }
                         value={ columns }
                         onChange={ ( v ) => setAttributes( { columns: v } ) }
                         min={ 1 }
                         max={ 4 }
                     />
                     <Slider
-                        label={ __( 'Gap', 'dono' ) }
+                        label={ __( 'Gap', 'dono-fundraising-platform' ) }
                         value={ gap }
                         onChange={ ( v ) => setAttributes( { gap: v } ) }
                         min={ 0 }
@@ -76,8 +76,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Row', 'dono' ),
-        description: __( 'Lay out fields side by side in columns.', 'dono' ),
+        title:      __( 'Row', 'dono-fundraising-platform' ),
+        description: __( 'Lay out fields side by side in columns.', 'dono-fundraising-platform' ),
         category:   'dono-content',
         icon:       BlockIcons[ 'row' ],
         supports: { html: false, anchor: false, inserter: true },

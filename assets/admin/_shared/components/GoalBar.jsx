@@ -18,10 +18,10 @@ export function GoalCell( { item } ) {
     const pct      = hasGoal ? Math.min( 100, Math.max( 0, Math.round( ( current / target ) * 100 ) ) ) : 0;
 
     const template = type === 'donors'
-        ? /* translators: %s: number of donors */ _n( '%s donor', '%s donors', target, 'dono' )
-        : /* translators: %s: number of donations */ _n( '%s donation', '%s donations', target, 'dono' );
+        ? /* translators: %s: number of donors */ _n( '%s donor', '%s donors', target, 'dono-fundraising-platform' )
+        : /* translators: %s: number of donations */ _n( '%s donation', '%s donations', target, 'dono-fundraising-platform' );
     const label = ! hasGoal
-        ? __( 'No goal', 'dono' )
+        ? __( 'No goal', 'dono-fundraising-platform' )
         : isAmount
             ? formatAmount( target, item.currency )
             : sprintf( template, target.toLocaleString() );

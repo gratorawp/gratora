@@ -32,14 +32,14 @@ export default function EmailPanel( { s } ) {
                 type: 'success',
                 text: sprintf(
                     /* translators: %s: recipient address */
-                    __( 'Test email sent to %s. Check the inbox + spam folder.', 'dono' ),
-                    res?.to || __( 'the recipient', 'dono' )
+                    __( 'Test email sent to %s. Check the inbox + spam folder.', 'dono-fundraising-platform' ),
+                    res?.to || __( 'the recipient', 'dono-fundraising-platform' )
                 ),
             } );
         } catch ( err ) {
             setTestNotice( {
                 type: 'error',
-                text: err?.message || __( 'Send failed.', 'dono' ),
+                text: err?.message || __( 'Send failed.', 'dono-fundraising-platform' ),
             } );
         } finally {
             setTesting( false );
@@ -49,51 +49,51 @@ export default function EmailPanel( { s } ) {
     return (
         <div className="dono-panel">
             <Card
-                title={ __( 'Sender identity', 'dono' ) }
+                title={ __( 'Sender identity', 'dono-fundraising-platform' ) }
                 edited={ s.isDirty }
             >
                 <FormRow
-                    label={ __( 'From name', 'dono' ) }
-                    help={ __( 'Shown as the sender in the donor inbox.', 'dono' ) }
+                    label={ __( 'From name', 'dono-fundraising-platform' ) }
+                    help={ __( 'Shown as the sender in the donor inbox.', 'dono-fundraising-platform' ) }
                 >
                     <input type="text" className="dono-input" { ...s.bind( 'from_name' ) } />
                 </FormRow>
                 <FormRow
-                    label={ __( 'From email', 'dono' ) }
-                    help={ __( 'Use an address on a domain you control.', 'dono' ) }
+                    label={ __( 'From email', 'dono-fundraising-platform' ) }
+                    help={ __( 'Use an address on a domain you control.', 'dono-fundraising-platform' ) }
                 >
                     <input type="email" className="dono-input" { ...s.bind( 'from_email' ) } />
                 </FormRow>
                 <FormRow
-                    label={ __( 'Reply-to', 'dono' ) }
-                    help={ __( 'Where donor replies arrive. Defaults to From email.', 'dono' ) }
+                    label={ __( 'Reply-to', 'dono-fundraising-platform' ) }
+                    help={ __( 'Where donor replies arrive. Defaults to From email.', 'dono-fundraising-platform' ) }
                 >
                     <input type="email" className="dono-input" { ...s.bind( 'reply_to' ) } />
                 </FormRow>
                 <ToggleRow
-                    title={ __( 'BCC me on every donation receipt', 'dono' ) }
-                    sub={ __( 'Sends a copy to the admin email.', 'dono' ) }
+                    title={ __( 'BCC me on every donation receipt', 'dono-fundraising-platform' ) }
+                    sub={ __( 'Sends a copy to the admin email.', 'dono-fundraising-platform' ) }
                     checked={ !! s.value( 'bcc_admin', false ) }
                     onChange={ s.setValue( 'bcc_admin' ) }
                 />
             </Card>
 
             <Card
-                title={ __( 'Send a test email', 'dono' ) }
-                sub={ __( 'Confirms your sender + SMTP transport are working before real receipts go out. Uses your current user email if you leave the recipient blank.', 'dono' ) }
+                title={ __( 'Send a test email', 'dono-fundraising-platform' ) }
+                sub={ __( 'Confirms your sender + SMTP transport are working before real receipts go out. Uses your current user email if you leave the recipient blank.', 'dono-fundraising-platform' ) }
             >
-                <FormRow label={ __( 'Recipient', 'dono' ) }>
+                <FormRow label={ __( 'Recipient', 'dono-fundraising-platform' ) }>
                     <input
                         type="email"
                         className="dono-input"
                         value={ testTo }
                         onChange={ ( e ) => setTestTo( e.target.value ) }
-                        placeholder={ __( 'Leave blank to send to your WP user email', 'dono' ) }
+                        placeholder={ __( 'Leave blank to send to your WP user email', 'dono-fundraising-platform' ) }
                     />
                 </FormRow>
                 <div style={ { display: 'flex', justifyContent: 'flex-end' } }>
                     <Btn variant="secondary" onClick={ sendTest } disabled={ testing } isBusy={ testing }>
-                        { testing ? __( 'Sending…', 'dono' ) : __( 'Send test email', 'dono' ) }
+                        { testing ? __( 'Sending…', 'dono-fundraising-platform' ) : __( 'Send test email', 'dono-fundraising-platform' ) }
                     </Btn>
                 </div>
                 { testNotice && (
@@ -107,9 +107,9 @@ export default function EmailPanel( { s } ) {
             </Card>
 
             <Card
-                title={ __( 'Donor emails', 'dono' ) }
-                sub={ __( 'Sent to donors automatically by Dono', 'dono' ) }
-                meta={ __( 'Click a row to edit', 'dono' ) }
+                title={ __( 'Donor emails', 'dono-fundraising-platform' ) }
+                sub={ __( 'Sent to donors automatically by Dono', 'dono-fundraising-platform' ) }
+                meta={ __( 'Click a row to edit', 'dono-fundraising-platform' ) }
             >
                 <div className="dono-email-list">
                     { templates.map( ( t ) => {
@@ -129,13 +129,13 @@ export default function EmailPanel( { s } ) {
                                     <span className="dono-email-row__title">
                                         { t.label }
                                         <span className="screen-reader-text">
-                                            { enabled ? __( '(enabled)', 'dono' ) : __( '(disabled)', 'dono' ) }
+                                            { enabled ? __( '(enabled)', 'dono-fundraising-platform' ) : __( '(disabled)', 'dono-fundraising-platform' ) }
                                         </span>
                                     </span>
                                     <span className="dono-email-row__desc">{ t.desc }</span>
                                 </span>
                                 <span className="dono-email-row__recipient">{ t.recipient }</span>
-                                <span className="dono-email-row__edit">{ __( 'Edit', 'dono' ) }</span>
+                                <span className="dono-email-row__edit">{ __( 'Edit', 'dono-fundraising-platform' ) }</span>
                             </button>
                         );
                     } ) }
@@ -228,8 +228,8 @@ function TemplateDialog( { t, s, onClose } ) {
             onClose={ onClose }
             foot={ (
                 <>
-                    <Btn onClick={ onClose }>{ __( 'Cancel', 'dono' ) }</Btn>
-                    <Btn variant="primary" onClick={ done }>{ __( 'Done', 'dono' ) }</Btn>
+                    <Btn onClick={ onClose }>{ __( 'Cancel', 'dono-fundraising-platform' ) }</Btn>
+                    <Btn variant="primary" onClick={ done }>{ __( 'Done', 'dono-fundraising-platform' ) }</Btn>
                 </>
             ) }
         >
@@ -249,7 +249,7 @@ function TemplateDialog( { t, s, onClose } ) {
                     className={ `dono-email-editor-tab${ view === 'edit' ? ' is-active' : '' }` }
                     onClick={ () => setView( 'edit' ) }
                 >
-                    { __( 'Edit', 'dono' ) }
+                    { __( 'Edit', 'dono-fundraising-platform' ) }
                 </button>
                 <button
                     type="button"
@@ -259,7 +259,7 @@ function TemplateDialog( { t, s, onClose } ) {
                     className={ `dono-email-editor-tab${ view === 'preview' ? ' is-active' : '' }` }
                     onClick={ () => setView( 'preview' ) }
                 >
-                    { __( 'Preview', 'dono' ) }
+                    { __( 'Preview', 'dono-fundraising-platform' ) }
                 </button>
             </div>
 
@@ -267,25 +267,25 @@ function TemplateDialog( { t, s, onClose } ) {
                 <div className="dono-email-preview">
                     <div className="dono-email-preview__head">
                         <div>
-                            <strong>{ __( 'Subject:', 'dono' ) }</strong>{ ' ' }
+                            <strong>{ __( 'Subject:', 'dono-fundraising-platform' ) }</strong>{ ' ' }
                             { draft.subject.trim()
                                 ? expandTags( draft.subject )
-                                : <em>{ __( '(no subject)', 'dono' ) }</em> }
+                                : <em>{ __( '(no subject)', 'dono-fundraising-platform' ) }</em> }
                         </div>
-                        <div><strong>{ __( 'To:', 'dono' ) }</strong> Jane Doe &lt;jane@example.com&gt;</div>
+                        <div><strong>{ __( 'To:', 'dono-fundraising-platform' ) }</strong> Jane Doe &lt;jane@example.com&gt;</div>
                     </div>
                     <pre className="dono-email-preview__body">{ expandTags( draft.body ) }</pre>
                 </div>
             ) : (
                 <>
                     <ToggleRow
-                        title={ __( 'Send this email', 'dono' ) }
-                        sub={ __( 'Disable to skip this notification entirely.', 'dono' ) }
+                        title={ __( 'Send this email', 'dono-fundraising-platform' ) }
+                        sub={ __( 'Disable to skip this notification entirely.', 'dono-fundraising-platform' ) }
                         checked={ draft.enabled }
                         onChange={ ( v ) => set( { enabled: v } ) }
                     />
 
-                    <FormRow label={ __( 'Subject', 'dono' ) } wide>
+                    <FormRow label={ __( 'Subject', 'dono-fundraising-platform' ) } wide>
                         <input
                             type="text"
                             className="dono-input"
@@ -295,8 +295,8 @@ function TemplateDialog( { t, s, onClose } ) {
                     </FormRow>
 
                     <FormRow
-                        label={ __( 'Body', 'dono' ) }
-                        help={ __( 'Plain text. Merge tags expand at send time.', 'dono' ) }
+                        label={ __( 'Body', 'dono-fundraising-platform' ) }
+                        help={ __( 'Plain text. Merge tags expand at send time.', 'dono-fundraising-platform' ) }
                         wide
                     >
                         { !! t.tags.length && (

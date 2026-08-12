@@ -37,15 +37,15 @@ function hasContext( row ) {
  */
 function deliveryOutcome( row ) {
     if ( ! row.verified ) {
-        return { tone: 'red', label: __( 'Not verified', 'dono' ) };
+        return { tone: 'red', label: __( 'Not verified', 'dono-fundraising-platform' ) };
     }
     if ( row.error ) {
-        return { tone: 'red', label: __( 'Handling failed', 'dono' ) };
+        return { tone: 'red', label: __( 'Handling failed', 'dono-fundraising-platform' ) };
     }
     if ( row.processed ) {
-        return { tone: 'green', label: __( 'Processed', 'dono' ) };
+        return { tone: 'green', label: __( 'Processed', 'dono-fundraising-platform' ) };
     }
-    return { tone: 'gray', label: __( 'No action needed', 'dono' ) };
+    return { tone: 'gray', label: __( 'No action needed', 'dono-fundraising-platform' ) };
 }
 
 function Pill( { tone, label } ) {
@@ -119,7 +119,7 @@ export default function LogsTab( { active, setNotice } ) {
                 // Deliberately not an empty result: "nothing has happened" and
                 // "we could not find out" are opposite answers, and this screen
                 // is read precisely when someone suspects the second.
-                setError( err?.message || __( 'The log could not be read.', 'dono' ) );
+                setError( err?.message || __( 'The log could not be read.', 'dono-fundraising-platform' ) );
             } )
             .finally( () => {
                 if ( mine === generation.current ) setLoading( false );
@@ -143,12 +143,12 @@ export default function LogsTab( { active, setNotice } ) {
                 type: 'success',
                 text: sprintf(
                     /* translators: %d: number of log entries deleted. */
-                    _n( '%d entry cleared.', '%d entries cleared.', Number( res?.deleted ) || 0, 'dono' ),
+                    _n( '%d entry cleared.', '%d entries cleared.', Number( res?.deleted ) || 0, 'dono-fundraising-platform' ),
                     Number( res?.deleted ) || 0
                 ),
             } );
         } catch ( err ) {
-            setNotice( { type: 'error', text: err?.message || __( 'Could not clear the log.', 'dono' ) } );
+            setNotice( { type: 'error', text: err?.message || __( 'Could not clear the log.', 'dono-fundraising-platform' ) } );
         } finally {
             setClearing( false );
         }
@@ -160,16 +160,16 @@ export default function LogsTab( { active, setNotice } ) {
     // alone, and the delivery history goes with the failures otherwise.
     const askClear = () => setConfirm( {
         title: source
-            ? __( 'Clear this source', 'dono' )
-            : __( 'Clear the log', 'dono' ),
+            ? __( 'Clear this source', 'dono-fundraising-platform' )
+            : __( 'Clear the log', 'dono-fundraising-platform' ),
         message: source
             ? sprintf(
                 /* translators: %s: the log source being cleared, e.g. webhook.stripe */
-                __( 'Deletes every entry recorded under %s. Nothing else is touched.', 'dono' ),
+                __( 'Deletes every entry recorded under %s. Nothing else is touched.', 'dono-fundraising-platform' ),
                 source
             )
-            : __( 'Deletes every entry: the failures Dono recorded and the history of what your gateways sent. The log fills again as things happen.', 'dono' ),
-        confirmLabel: __( 'Clear log', 'dono' ),
+            : __( 'Deletes every entry: the failures Dono recorded and the history of what your gateways sent. The log fills again as things happen.', 'dono-fundraising-platform' ),
+        confirmLabel: __( 'Clear log', 'dono-fundraising-platform' ),
         destructive:  true,
         onConfirm:    doClear,
     } );
@@ -183,7 +183,7 @@ export default function LogsTab( { active, setNotice } ) {
     const fields = useMemo( () => [
         {
             id:            'occurred_at',
-            label:         __( 'When', 'dono' ),
+            label:         __( 'When', 'dono-fundraising-platform' ),
             enableSorting: true,
             enableHiding:  false,
             getValue:      ( { item } ) => item.occurred_at || '',
@@ -191,7 +191,7 @@ export default function LogsTab( { active, setNotice } ) {
         },
         {
             id:            'source',
-            label:         __( 'Source', 'dono' ),
+            label:         __( 'Source', 'dono-fundraising-platform' ),
             enableSorting: true,
             elements:      sources.map( ( s ) => ( { value: s, label: s } ) ),
             filterBy:      { operators: [ 'is' ] },
@@ -200,7 +200,7 @@ export default function LogsTab( { active, setNotice } ) {
         },
         {
             id:            'message',
-            label:         __( 'What it says', 'dono' ),
+            label:         __( 'What it says', 'dono-fundraising-platform' ),
             enableSorting: false,
             getValue:      ( { item } ) => item.message || '',
             render: ( { item } ) => (
@@ -214,11 +214,11 @@ export default function LogsTab( { active, setNotice } ) {
         },
         {
             id:            'outcome',
-            label:         __( 'Outcome', 'dono' ),
+            label:         __( 'Outcome', 'dono-fundraising-platform' ),
             enableSorting: false,
             // The one narrowing worth offering: everything else on this screen
             // is ordinary traffic an org reads by scanning, not by filtering.
-            elements:      [ { value: 'failed', label: __( 'Problems only', 'dono' ) } ],
+            elements:      [ { value: 'failed', label: __( 'Problems only', 'dono-fundraising-platform' ) } ],
             filterBy:      { operators: [ 'is' ] },
             render: ( { item } ) => {
                 if ( item.kind === 'webhook' ) {
@@ -234,7 +234,7 @@ export default function LogsTab( { active, setNotice } ) {
     const actions = useMemo( () => [
         {
             id:         'detail',
-            label:      __( 'View detail', 'dono' ),
+            label:      __( 'View detail', 'dono-fundraising-platform' ),
             isEligible: hasContext,
             callback:   ( [ item ] ) => setDetail( item ),
         },
@@ -254,7 +254,7 @@ export default function LogsTab( { active, setNotice } ) {
         <div className="dono-panel">
             <div className="dono-tools-logbar">
                 <Btn variant="secondary" onClick={ load } disabled={ loading }>
-                    { __( 'Refresh', 'dono' ) }
+                    { __( 'Refresh', 'dono-fundraising-platform' ) }
                 </Btn>
                 <Btn
                     variant="secondary"
@@ -262,18 +262,18 @@ export default function LogsTab( { active, setNotice } ) {
                     disabled={ clearing || total === 0 }
                     isBusy={ clearing }
                 >
-                    { __( 'Clear log', 'dono' ) }
+                    { __( 'Clear log', 'dono-fundraising-platform' ) }
                 </Btn>
             </div>
 
             { error ? (
                 <p className="dono-tools-empty">
-                    { __( 'The log could not be read, so this screen cannot say what has happened. Check that you are still signed in, then try Refresh.', 'dono' ) }
+                    { __( 'The log could not be read, so this screen cannot say what has happened. Check that you are still signed in, then try Refresh.', 'dono-fundraising-platform' ) }
                     { ' ' }
                     <code>{ error }</code>
                 </p>
             ) : emptyAndUnfiltered ? (
-                <p className="dono-tools-empty">{ __( 'Nothing recorded yet.', 'dono' ) }</p>
+                <p className="dono-tools-empty">{ __( 'Nothing recorded yet.', 'dono-fundraising-platform' ) }</p>
             ) : (
                 // Carries the shared table styling every other list screen uses.
                 <div className="dono-dataviews">
@@ -294,12 +294,12 @@ export default function LogsTab( { active, setNotice } ) {
 
             { detail && (
                 <Dialog
-                    title={ __( 'Entry detail', 'dono' ) }
+                    title={ __( 'Entry detail', 'dono-fundraising-platform' ) }
                     size="wide"
                     onClose={ () => setDetail( null ) }
                     foot={ (
                         <Btn variant="secondary" onClick={ () => setDetail( null ) }>
-                            { __( 'Close', 'dono' ) }
+                            { __( 'Close', 'dono-fundraising-platform' ) }
                         </Btn>
                     ) }
                 >

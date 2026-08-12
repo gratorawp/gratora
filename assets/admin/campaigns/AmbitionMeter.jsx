@@ -22,9 +22,9 @@ export default function AmbitionMeter( { campaignId, goalType, goalCents, curren
     if ( ctx.historical_count === 0 ) {
         return (
             <div className="dono-ambition dono-ambition--info">
-                <div className="dono-ambition__title">{ __( 'Your first campaign', 'dono' ) }</div>
+                <div className="dono-ambition__title">{ __( 'Your first campaign', 'dono-fundraising-platform' ) }</div>
                 <div className="dono-ambition__desc">
-                    { __( "We'll show you how this target compares to your other campaigns once you have a few finished ones.", 'dono' ) }
+                    { __( "We'll show you how this target compares to your other campaigns once you have a few finished ones.", 'dono-fundraising-platform' ) }
                 </div>
             </div>
         );
@@ -52,7 +52,7 @@ export default function AmbitionMeter( { campaignId, goalType, goalCents, curren
                 <div className="dono-ambition__ratio num">
                     { avg > 0 && cur > 0 && sprintf(
                         /* translators: %s: multiplier of historical average, e.g. "1.4×" */
-                        __( '%s× avg', 'dono' ),
+                        __( '%s× avg', 'dono-fundraising-platform' ),
                         ( cur / avg ).toFixed( cur / avg < 10 ? 1 : 0 ),
                     ) }
                 </div>
@@ -71,16 +71,16 @@ export default function AmbitionMeter( { campaignId, goalType, goalCents, curren
             <div className="dono-ambition__legend">
                 <span>
                     <span className="dono-ambition__legend-dot dono-ambition__legend-dot--current" />
-                    { __( 'Your target', 'dono' ) }: <strong>{ formatAmount( cur, cy ) }</strong>
+                    { __( 'Your target', 'dono-fundraising-platform' ) }: <strong>{ formatAmount( cur, cy ) }</strong>
                 </span>
                 <span>
                     <span className="dono-ambition__legend-dot dono-ambition__legend-dot--avg" />
-                    { __( 'Past average', 'dono' ) }: <strong>{ formatAmount( avg, cy ) }</strong>
+                    { __( 'Past average', 'dono-fundraising-platform' ) }: <strong>{ formatAmount( avg, cy ) }</strong>
                 </span>
                 { max > 0 && max !== avg && (
                     <span>
                         <span className="dono-ambition__legend-dot dono-ambition__legend-dot--max" />
-                        { __( 'Past best', 'dono' ) }: <strong>{ formatAmount( max, cy ) }</strong>
+                        { __( 'Past best', 'dono-fundraising-platform' ) }: <strong>{ formatAmount( max, cy ) }</strong>
                     </span>
                 ) }
             </div>
@@ -89,15 +89,15 @@ export default function AmbitionMeter( { campaignId, goalType, goalCents, curren
 }
 
 function localVerdict( cur, avg, count ) {
-    if ( count === 0 ) return { tone: 'info', title: __( 'No historical data', 'dono' ), desc: '' };
-    if ( cur <= 0 )    return { tone: 'info', title: __( 'No target set', 'dono' ), desc: __( 'Add a target above to see how it compares.', 'dono' ) };
-    if ( avg <= 0 )    return { tone: 'info', title: __( 'Limited history', 'dono' ), desc: '' };
+    if ( count === 0 ) return { tone: 'info', title: __( 'No historical data', 'dono-fundraising-platform' ), desc: '' };
+    if ( cur <= 0 )    return { tone: 'info', title: __( 'No target set', 'dono-fundraising-platform' ), desc: __( 'Add a target above to see how it compares.', 'dono-fundraising-platform' ) };
+    if ( avg <= 0 )    return { tone: 'info', title: __( 'Limited history', 'dono-fundraising-platform' ), desc: '' };
 
     const r = cur / avg;
-    if ( r < 0.5 )  return { tone: 'modest',         title: __( 'Modest target', 'dono' ),         desc: __( "You've raised more than this in past campaigns. Consider aiming higher.", 'dono' ) };
-    if ( r < 1.5 )  return { tone: 'in-line',        title: __( 'In line with past campaigns', 'dono' ), desc: __( 'Right around your historical average.', 'dono' ) };
-    if ( r < 3.0 )  return { tone: 'ambitious',      title: __( 'Ambitious target', 'dono' ),       desc: __( 'About double your average. Realistic for a strong campaign.', 'dono' ) };
-    return                  { tone: 'very-ambitious', title: __( 'Very ambitious', 'dono' ),         desc: __( "Substantially above what you've raised before. Make sure outreach plans match.", 'dono' ) };
+    if ( r < 0.5 )  return { tone: 'modest',         title: __( 'Modest target', 'dono-fundraising-platform' ),         desc: __( "You've raised more than this in past campaigns. Consider aiming higher.", 'dono-fundraising-platform' ) };
+    if ( r < 1.5 )  return { tone: 'in-line',        title: __( 'In line with past campaigns', 'dono-fundraising-platform' ), desc: __( 'Right around your historical average.', 'dono-fundraising-platform' ) };
+    if ( r < 3.0 )  return { tone: 'ambitious',      title: __( 'Ambitious target', 'dono-fundraising-platform' ),       desc: __( 'About double your average. Realistic for a strong campaign.', 'dono-fundraising-platform' ) };
+    return                  { tone: 'very-ambitious', title: __( 'Very ambitious', 'dono-fundraising-platform' ),         desc: __( "Substantially above what you've raised before. Make sure outreach plans match.", 'dono-fundraising-platform' ) };
 }
 
 function clamp( n, lo = 0, hi = 100 ) {

@@ -99,7 +99,7 @@ final class CampaignMetricsService
             $form = $forms[(int) $row['form_id']] ?? null;
             $out[] = [
                 'form_id'         => $row['form_id'],
-                'form_title'      => $form ? $form->title : __('Removed form', 'dono'),
+                'form_title'      => $form ? $form->title : __('Removed form', 'dono-fundraising-platform'),
                 'amount_cents'    => $row['amount_cents'],
                 'donations_count' => $row['donations_count'],
             ];
@@ -269,7 +269,7 @@ final class CampaignMetricsService
 
             $out[] = [
                 'id'           => $d->id,
-                'donor_name'   => $name !== '' ? $name : __('Anonymous', 'dono'),
+                'donor_name'   => $name !== '' ? $name : __('Anonymous', 'dono-fundraising-platform'),
                 'amount_cents' => (int) $d->amount_cents,
                 'currency'     => (string) $d->currency,
                 'paid_at'      => $d->paid_at,
@@ -306,7 +306,7 @@ final class CampaignMetricsService
                 : '';
             $out[] = [
                 'donor_id'        => $row['donor_id'],
-                'name'            => $name !== '' ? $name : __('Donor', 'dono') . ' #' . $row['donor_id'],
+                'name'            => $name !== '' ? $name : __('Donor', 'dono-fundraising-platform') . ' #' . $row['donor_id'],
                 'total_cents'     => $row['amount_cents'],
                 'donations_count' => $row['donations_count'],
             ];
@@ -417,7 +417,7 @@ final class CampaignMetricsService
                 : '';
             $out[] = [
                 'id'           => (int) $d->id,
-                'donor_name'   => $name !== '' ? $name : __('A donor', 'dono'),
+                'donor_name'   => $name !== '' ? $name : __('A donor', 'dono-fundraising-platform'),
                 'amount_cents' => (int) $d->amount_cents,
                 'currency'     => (string) $d->currency,
                 'paid_at'      => $d->paid_at,

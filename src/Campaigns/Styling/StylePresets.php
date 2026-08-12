@@ -31,8 +31,8 @@ final class StylePresets
         return [
             [
                 'id'          => 'classic',
-                'name'        => __('Classic', 'dono'),
-                'description' => __('Balanced, friendly, accent green. The Dono default.', 'dono'),
+                'name'        => __('Classic', 'dono-fundraising-platform'),
+                'description' => __('Balanced, friendly, accent green. The Dono default.', 'dono-fundraising-platform'),
                 'tokens'      => [
                     // Signature Dono pill donate button. Other presets fall
                     // back to --dono-radius-sm; the Theme preset inherits the
@@ -43,8 +43,8 @@ final class StylePresets
             ],
             [
                 'id'          => 'bold',
-                'name'        => __('Bold', 'dono'),
-                'description' => __('Deep navy with strong typography and a dramatic shadow.', 'dono'),
+                'name'        => __('Bold', 'dono-fundraising-platform'),
+                'description' => __('Deep navy with strong typography and a dramatic shadow.', 'dono-fundraising-platform'),
                 'tokens'      => [
                     'dono-accent'         => '#0F3D5C',
                     'dono-accent-soft'    => '#dde6ed',
@@ -60,8 +60,8 @@ final class StylePresets
             ],
             [
                 'id'          => 'quiet',
-                'name'        => __('Quiet', 'dono'),
-                'description' => __('Minimal lines and lots of white space. Outlined button, no color, no shadows.', 'dono'),
+                'name'        => __('Quiet', 'dono-fundraising-platform'),
+                'description' => __('Minimal lines and lots of white space. Outlined button, no color, no shadows.', 'dono-fundraising-platform'),
                 'tokens'      => [
                     'dono-accent'          => '#111827',
                     'dono-accent-soft'     => '#f3f4f6',
@@ -191,8 +191,8 @@ final class StylePresets
 
         return [
             'id'          => 'theme',
-            'name'        => __('Site theme', 'dono'),
-            'description' => __('Picks up accent, background, and button styles from the active WordPress theme (theme.json).', 'dono'),
+            'name'        => __('Site theme', 'dono-fundraising-platform'),
+            'description' => __('Picks up accent, background, and button styles from the active WordPress theme (theme.json).', 'dono-fundraising-platform'),
             'tokens'      => $tokens,
             'builtin'     => true,
             'source'      => 'theme',

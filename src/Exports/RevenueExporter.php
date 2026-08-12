@@ -78,12 +78,12 @@ final class RevenueExporter
 
         fwrite($out, "\xEF\xBB\xBF");
         Csv::writeRow($out, [
-            __('Month', 'dono'),
-            __('Donations', 'dono'),
+            __('Month', 'dono-fundraising-platform'),
+            __('Donations', 'dono-fundraising-platform'),
             /* translators: %s: currency code, e.g. EUR. */
-            sprintf(__('Revenue (%s)', 'dono'), $currency),
+            sprintf(__('Revenue (%s)', 'dono-fundraising-platform'), $currency),
             /* translators: %s: currency code, e.g. EUR. */
-            sprintf(__('Average donation (%s)', 'dono'), $currency),
+            sprintf(__('Average donation (%s)', 'dono-fundraising-platform'), $currency),
         ]);
 
         foreach ($this->series($fromMonth, $toMonth) as $row) {

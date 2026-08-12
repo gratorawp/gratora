@@ -102,7 +102,7 @@ final class RolesController
             $ungrouped[] = ['cap' => $cap, 'label' => (string) ($labels[$cap] ?? $cap)];
         }
         if ($ungrouped !== []) {
-            $out[] = ['label' => __('Other', 'dono'), 'caps' => $ungrouped];
+            $out[] = ['label' => __('Other', 'dono-fundraising-platform'), 'caps' => $ungrouped];
         }
 
         return $out;

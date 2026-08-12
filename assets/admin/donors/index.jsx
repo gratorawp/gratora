@@ -32,21 +32,21 @@ function initials( name ) {
 function donorKpis( stats ) {
     return [
         {
-            label: __( 'Total donors', 'dono' ),
+            label: __( 'Total donors', 'dono-fundraising-platform' ),
             value: stats ? stats.total_count.toLocaleString() : '-',
         },
         {
-            label: __( 'With donations', 'dono' ),
+            label: __( 'With donations', 'dono-fundraising-platform' ),
             value: stats ? stats.with_donations.toLocaleString() : '-',
         },
         {
-            label: __( 'Lifetime given', 'dono' ),
+            label: __( 'Lifetime given', 'dono-fundraising-platform' ),
             value: stats && stats.total_donated_cents > 0
                 ? formatAmount( stats.total_donated_cents )
                 : '-',
         },
         {
-            label: __( 'Avg lifetime value', 'dono' ),
+            label: __( 'Avg lifetime value', 'dono-fundraising-platform' ),
             value: stats && stats.avg_ltv_cents > 0
                 ? formatAmount( stats.avg_ltv_cents )
                 : '-',
@@ -103,7 +103,7 @@ function DonorsApp( { toggleSlot } ) {
                 if ( aborted ) return;
                 setData( [] );
                 setTotal( 0 );
-                setError( err?.message || __( 'Failed to load donors.', 'dono' ) );
+                setError( err?.message || __( 'Failed to load donors.', 'dono-fundraising-platform' ) );
             } )
             .finally( () => ! aborted && setLoading( false ) );
 
@@ -127,9 +127,9 @@ function DonorsApp( { toggleSlot } ) {
     const fields = useMemo( () => [
         {
             id:    'name',
-            label: __( 'Name', 'dono' ),
+            label: __( 'Name', 'dono-fundraising-platform' ),
             render: ( { item } ) => {
-                const name = item.name || __( '(no name)', 'dono' );
+                const name = item.name || __( '(no name)', 'dono-fundraising-platform' );
                 return (
                     <div className="dono-row">
                         <span className="dono-row__avatar" aria-hidden="true">
@@ -154,7 +154,7 @@ function DonorsApp( { toggleSlot } ) {
         },
         {
             id:    'email',
-            label: __( 'Email', 'dono' ),
+            label: __( 'Email', 'dono-fundraising-platform' ),
             render: ( { item } ) => (
                 item.email
                     ? <span className="dono-mono">{ item.email }</span>
@@ -163,7 +163,7 @@ function DonorsApp( { toggleSlot } ) {
         },
         {
             id:    'country',
-            label: __( 'Country', 'dono' ),
+            label: __( 'Country', 'dono-fundraising-platform' ),
             elements: COUNTRIES.map( ( c ) => ( { value: c.code, label: `${ c.code } - ${ c.name }` } ) ),
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => (
@@ -178,11 +178,11 @@ function DonorsApp( { toggleSlot } ) {
         },
         {
             id:    'donor_type',
-            label: __( 'Donor type', 'dono' ),
+            label: __( 'Donor type', 'dono-fundraising-platform' ),
             elements: [
-                { value: 'individual',   label: __( 'Individual', 'dono' ) },
-                { value: 'organization', label: __( 'Organization', 'dono' ) },
-                { value: 'household',    label: __( 'Household', 'dono' ) },
+                { value: 'individual',   label: __( 'Individual', 'dono-fundraising-platform' ) },
+                { value: 'organization', label: __( 'Organization', 'dono-fundraising-platform' ) },
+                { value: 'household',    label: __( 'Household', 'dono-fundraising-platform' ) },
             ],
             filterBy: { operators: [ 'is' ] },
             getValue: ( { item } ) => item.donor_type || 'individual',
@@ -194,7 +194,7 @@ function DonorsApp( { toggleSlot } ) {
         },
         {
             id:            'donations_count',
-            label:         __( '#', 'dono' ),
+            label:         __( '#', 'dono-fundraising-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <span className="dono-amount dono-amount--num">{ item.donations_count }</span>
@@ -202,7 +202,7 @@ function DonorsApp( { toggleSlot } ) {
         },
         {
             id:            'total_donated',
-            label:         __( 'Total', 'dono' ),
+            label:         __( 'Total', 'dono-fundraising-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <span className="dono-amount">
@@ -212,7 +212,7 @@ function DonorsApp( { toggleSlot } ) {
         },
         {
             id:            'last_donation_at',
-            label:         __( 'Last donation', 'dono' ),
+            label:         __( 'Last donation', 'dono-fundraising-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
                 item.last_donation_at
@@ -238,7 +238,7 @@ function DonorsApp( { toggleSlot } ) {
     const actions = useMemo( () => [
         {
             id:            'delete',
-            label:         __( 'Delete', 'dono' ),
+            label:         __( 'Delete', 'dono-fundraising-platform' ),
             icon:          () => <DeleteIcon size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             supportsBulk:  true,
@@ -250,20 +250,20 @@ function DonorsApp( { toggleSlot } ) {
                 if ( ! items.length ) return;
                 const n = items.length;
                 setConfirm( {
-                    title:        _n( 'Delete donor', 'Delete donors', n, 'dono' ),
+                    title:        _n( 'Delete donor', 'Delete donors', n, 'dono-fundraising-platform' ),
                     message: n === 1
-                        ? __( 'Delete this donor? They have no donations, so nothing is kept: the record and anything describing it go for good.', 'dono' )
+                        ? __( 'Delete this donor? They have no donations, so nothing is kept: the record and anything describing it go for good.', 'dono-fundraising-platform' )
                         : sprintf(
                             /* translators: %d: number of donors to delete */
                             _n(
                                 'Delete %d donor? They have no donations, so nothing is kept.',
                                 'Delete %d donors? They have no donations, so nothing is kept.',
                                 n,
-                                'dono'
+                                'dono-fundraising-platform'
                             ),
                             n
                         ),
-                    confirmLabel: __( 'Delete', 'dono' ),
+                    confirmLabel: __( 'Delete', 'dono-fundraising-platform' ),
                     destructive:  true,
                     onConfirm: async () => {
                         try {
@@ -272,7 +272,7 @@ function DonorsApp( { toggleSlot } ) {
                                 method: 'DELETE',
                             } ) ) );
                         } catch ( err ) {
-                            setError( err?.message || __( 'Could not delete one or more donors.', 'dono' ) );
+                            setError( err?.message || __( 'Could not delete one or more donors.', 'dono-fundraising-platform' ) );
                         } finally {
                             load();
                         }
@@ -282,7 +282,7 @@ function DonorsApp( { toggleSlot } ) {
         },
         {
             id:            'redact',
-            label:         __( 'Redact (anonymize)', 'dono' ),
+            label:         __( 'Redact (anonymize)', 'dono-fundraising-platform' ),
             icon:          () => <RedactIcon size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             supportsBulk:  true,
@@ -291,26 +291,26 @@ function DonorsApp( { toggleSlot } ) {
                 if ( ! items.length ) return;
                 const n = items.length;
                 const message = n === 1
-                    ? __( 'Redact this donor? Their PII (name, email, address, phone) is wiped from the donor row but their donations stay attached and counted. This cannot be undone.', 'dono' )
+                    ? __( 'Redact this donor? Their PII (name, email, address, phone) is wiped from the donor row but their donations stay attached and counted. This cannot be undone.', 'dono-fundraising-platform' )
                     : sprintf(
                         /* translators: %d: number of donors to redact */
                         _n(
                             'Redact %d donor? Their PII is wiped from the donor rows but donations stay attached and counted. This cannot be undone.',
                             'Redact %d donors? Their PII is wiped from the donor rows but donations stay attached and counted. This cannot be undone.',
                             n,
-                            'dono'
+                            'dono-fundraising-platform'
                         ),
                         n
                     );
                 setConfirm( {
-                    title:        _n( 'Redact donor', 'Redact donors', n, 'dono' ),
+                    title:        _n( 'Redact donor', 'Redact donors', n, 'dono-fundraising-platform' ),
                     message,
-                    confirmLabel: __( 'Redact', 'dono' ),
+                    confirmLabel: __( 'Redact', 'dono-fundraising-platform' ),
                     destructive:  true,
                     // The callback fills the server's confirmation from each
                     // row, so nothing else stands between one click and erased
                     // PII here.
-                    requireText:  __( 'REDACT', 'dono' ),
+                    requireText:  __( 'REDACT', 'dono-fundraising-platform' ),
                     onConfirm: async () => {
                         try {
                             await Promise.all( items.map( ( i ) => apiFetch( {
@@ -319,7 +319,7 @@ function DonorsApp( { toggleSlot } ) {
                                 data:   { confirmation: i.email || `DONOR_${ i.id }` },
                             } ) ) );
                         } catch ( err ) {
-                            setError( err?.message || __( 'Could not redact one or more donors.', 'dono' ) );
+                            setError( err?.message || __( 'Could not redact one or more donors.', 'dono-fundraising-platform' ) );
                         } finally {
                             load();
                         }
@@ -332,17 +332,17 @@ function DonorsApp( { toggleSlot } ) {
     return (
         <div>
             <div className="dono-crumbs">
-                <a href={ addQueryArgs( window.location.pathname, { page: 'dono' } ) }>{ __( 'Dono', 'dono' ) }</a>
+                <a href={ addQueryArgs( window.location.pathname, { page: 'dono-fundraising-platform' } ) }>{ __( 'Dono', 'dono-fundraising-platform' ) }</a>
                 <span className="sep">›</span>
-                <span>{ __( 'Donors', 'dono' ) }</span>
+                <span>{ __( 'Donors', 'dono-fundraising-platform' ) }</span>
             </div>
             <div className="dono-page-head">
                 <div className="dono-page-head__title-row">
-                    <h1>{ __( 'Donors', 'dono' ) }</h1>
+                    <h1>{ __( 'Donors', 'dono-fundraising-platform' ) }</h1>
                 </div>
                 <div className="dono-page-head__right">
                     <span className="dono-page-head__meta">
-                        { sprintf( /* translators: %s: number of donors */ _n( '%s donor', '%s donors', total, 'dono' ), total.toLocaleString() ) }
+                        { sprintf( /* translators: %s: number of donors */ _n( '%s donor', '%s donors', total, 'dono-fundraising-platform' ), total.toLocaleString() ) }
                     </span>
                     { toggleSlot }
                 </div>
@@ -357,8 +357,8 @@ function DonorsApp( { toggleSlot } ) {
             { ! loading && ! error && total === 0 && ! view.search && ! view.filters?.length ? (
                 <EmptyState
                     icon={ <UsersIcon size={ 22 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'No donors yet', 'dono' ) }
-                    body={ __( 'Donor records are created automatically from completed donations. Publish a form to start collecting them.', 'dono' ) }
+                    title={ __( 'No donors yet', 'dono-fundraising-platform' ) }
+                    body={ __( 'Donor records are created automatically from completed donations. Publish a form to start collecting them.', 'dono-fundraising-platform' ) }
                 />
             ) : (
                 <div className="dono-dataviews">
@@ -411,7 +411,7 @@ function ViewToggle( { active, onChange } ) {
             className="dono-view-toggle"
             role="tablist"
             tabIndex={ -1 }
-            aria-label={ __( 'Donor sections', 'dono' ) }
+            aria-label={ __( 'Donor sections', 'dono-fundraising-platform' ) }
             onKeyDown={ ( e ) => tablistKeyDown( e, [ 'list', 'insights' ], active, onChange ) }
         >
             <button
@@ -423,7 +423,7 @@ function ViewToggle( { active, onChange } ) {
                 onClick={ () => onChange( 'list' ) }
             >
                 <IconList />
-                { __( 'List', 'dono' ) }
+                { __( 'List', 'dono-fundraising-platform' ) }
             </button>
             <button
                 type="button"
@@ -434,7 +434,7 @@ function ViewToggle( { active, onChange } ) {
                 onClick={ () => onChange( 'insights' ) }
             >
                 <IconInsights />
-                { __( 'Insights', 'dono' ) }
+                { __( 'Insights', 'dono-fundraising-platform' ) }
             </button>
         </div>
     );

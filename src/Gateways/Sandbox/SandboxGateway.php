@@ -36,13 +36,13 @@ final class SandboxGateway implements PaymentGateway
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('Test donation', 'dono');
+        return __('Test donation', 'dono-fundraising-platform');
     }
 
     /** @since 1.0.0 */
     public function description(): string
     {
-        return __('Simulated payment for testing. No real money moves and the form is in test mode.', 'dono');
+        return __('Simulated payment for testing. No real money moves and the form is in test mode.', 'dono-fundraising-platform');
     }
 
     /** @since 1.0.0 */

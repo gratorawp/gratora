@@ -609,7 +609,7 @@ final class DonationService
             'recurring.' . $donation->gateway,
             sprintf(
                 /* translators: 1: donation reference, 2: the gateway's own message */
-                __('No recurring plan was created for %1$s, so nothing will renew: %2$s', 'dono'),
+                __('No recurring plan was created for %1$s, so nothing will renew: %2$s', 'dono-fundraising-platform'),
                 (string) $donation->reference,
                 $e->getMessage()
             ),

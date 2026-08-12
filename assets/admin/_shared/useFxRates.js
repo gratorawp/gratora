@@ -86,13 +86,13 @@ export function useFxRates() {
             // A 200 can still report a failed provider fetch in the body; don't
             // claim success when the rates did not actually refresh.
             if ( updated?.fetch_ok === false ) {
-                notify.error( __( 'Could not fetch exchange rates. Please try again.', 'dono' ) );
+                notify.error( __( 'Could not fetch exchange rates. Please try again.', 'dono-fundraising-platform' ) );
             } else {
-                notify.success( __( 'Exchange rates updated.', 'dono' ) );
+                notify.success( __( 'Exchange rates updated.', 'dono-fundraising-platform' ) );
             }
             return updated;
         } catch ( err ) {
-            notify.error( err?.message || __( 'Could not fetch exchange rates. Please try again.', 'dono' ) );
+            notify.error( err?.message || __( 'Could not fetch exchange rates. Please try again.', 'dono-fundraising-platform' ) );
             return null;
         } finally {
             setFetching( false );

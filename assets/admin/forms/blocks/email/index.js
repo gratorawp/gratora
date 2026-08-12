@@ -14,16 +14,16 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Email', 'dono' ) } initialOpen>
+                <PanelBody title={ __( 'Email', 'dono-fundraising-platform' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'dono' ) }
+                        label={ __( 'Label', 'dono-fundraising-platform' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'Email', 'dono' ) }
+                        placeholder={ __( 'Email', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Placeholder', 'dono' ) }
+                        label={ __( 'Placeholder', 'dono-fundraising-platform' ) }
                         value={ placeholder }
                         onChange={ ( v ) => setAttributes( { placeholder: v } ) }
                         placeholder="you@example.com"
@@ -35,7 +35,7 @@ function Edit( { attributes, setAttributes } ) {
             </InspectorControls>
             <div { ...blockProps }>
                 <span className="dono-block-preview__label">
-                    { label || __( 'Email', 'dono' ) }
+                    { label || __( 'Email', 'dono-fundraising-platform' ) }
                     <em className="dono-block-preview__req" aria-hidden="true">*</em>
                 </span>
                 <div className="dono-block-preview__field">
@@ -49,7 +49,7 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Email', 'dono' ),
+        title:      __( 'Email', 'dono-fundraising-platform' ),
         category:   'dono-donor',
         icon:       BlockIcons[ 'email' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

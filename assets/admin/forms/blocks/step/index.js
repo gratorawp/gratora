@@ -29,19 +29,19 @@ function Edit( { attributes, setAttributes, clientId } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Step', 'dono' ) } initialOpen>
+                <PanelBody title={ __( 'Step', 'dono-fundraising-platform' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'dono' ) }
+                        label={ __( 'Label', 'dono-fundraising-platform' ) }
                         value={ title }
                         onChange={ ( v ) => setAttributes( { title: v } ) }
-                        help={ __( 'Shown as the page title and on the progress indicator.', 'dono' ) }
+                        help={ __( 'Shown as the page title and on the progress indicator.', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show label', 'dono' ) }
+                        label={ __( 'Show label', 'dono-fundraising-platform' ) }
                         checked={ showTitle }
                         onChange={ ( v ) => setAttributes( { showTitle: v } ) }
-                        help={ __( 'Off hides the label on the donor form. The progress indicator still uses it for screen-reader names.', 'dono' ) }
+                        help={ __( 'Off hides the label on the donor form. The progress indicator still uses it for screen-reader names.', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -50,7 +50,7 @@ function Edit( { attributes, setAttributes, clientId } ) {
                 <div className="dono-block-preview__step-meta">
                     { sprintf(
                         /* translators: %1$d: current step number. %2$d: total number of steps. */
-                        __( 'Step %1$d of %2$d', 'dono' ),
+                        __( 'Step %1$d of %2$d', 'dono-fundraising-platform' ),
                         index + 1,
                         total
                     ) }
@@ -61,13 +61,13 @@ function Edit( { attributes, setAttributes, clientId } ) {
                         className="dono-block-preview__step-title"
                         value={ title }
                         onChange={ ( v ) => setAttributes( { title: v } ) }
-                        placeholder={ __( 'Untitled step', 'dono' ) }
+                        placeholder={ __( 'Untitled step', 'dono-fundraising-platform' ) }
                         allowedFormats={ [] }
                     />
                 ) }
                 { childCount === 0 && (
                     <Notice status="warning" isDismissible={ false }>
-                        { __( 'This step is empty. Add fields or content, or remove the step, so donors do not land on a blank page.', 'dono' ) }
+                        { __( 'This step is empty. Add fields or content, or remove the step, so donors do not land on a blank page.', 'dono-fundraising-platform' ) }
                     </Notice>
                 ) }
                 <InnerBlocks
@@ -81,8 +81,8 @@ function Edit( { attributes, setAttributes, clientId } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Step', 'dono' ),
-        description: __( 'One page inside a Steps wizard.', 'dono' ),
+        title:       __( 'Step', 'dono-fundraising-platform' ),
+        description: __( 'One page inside a Steps wizard.', 'dono-fundraising-platform' ),
         category:    'dono-content',
         icon:        BlockIcons[ 'step' ],
         parent:      [ 'dono/steps' ],

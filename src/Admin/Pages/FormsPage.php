@@ -66,7 +66,7 @@ final class FormsPage extends HookProvider
     {
         $pages[] = [
             'id'         => self::PAGE_ID,
-            'title'      => __('Forms', 'dono'),
+            'title'      => __('Forms', 'dono-fundraising-platform'),
             'capability' => 'dono_access_forms',
             'position'   => 15,
             'hidden'     => true,
@@ -143,7 +143,7 @@ final class FormsPage extends HookProvider
             true
         );
 
-        wp_set_script_translations(self::HANDLE, 'dono', DONO_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE, 'dono-fundraising-platform', DONO_DIR . 'languages');
 
         // Registered gateways so the payment-gateways block can list them,
         // each carrying whether the org is currently offering it: a gateway

@@ -50,21 +50,21 @@ export default function GatewaysPanel( { s } ) {
     const [ offlineOpen, setOfflineOpen ] = useCardOpen( offlineEnabled && ! offlineConfigured, 'payments', 'offline' );
 
     const offlinePill = ! offlineEnabled
-        ? <span className="dono-pill dono-pill--gray"><span className="dono-pill__dot dono-pill__dot--soft" />{ __( 'Disabled', 'dono' ) }</span>
+        ? <span className="dono-pill dono-pill--gray"><span className="dono-pill__dot dono-pill__dot--soft" />{ __( 'Disabled', 'dono-fundraising-platform' ) }</span>
         : offlineConfigured
-            ? <span className="dono-pill dono-pill--green"><span className="dono-pill__dot" />{ __( 'Configured', 'dono' ) }</span>
-            : <span className="dono-pill dono-pill--amber"><span className="dono-pill__dot" />{ __( 'Enabled, no instructions', 'dono' ) }</span>;
+            ? <span className="dono-pill dono-pill--green"><span className="dono-pill__dot" />{ __( 'Configured', 'dono-fundraising-platform' ) }</span>
+            : <span className="dono-pill dono-pill--amber"><span className="dono-pill__dot" />{ __( 'Enabled, no instructions', 'dono-fundraising-platform' ) }</span>;
 
     return (
         <div className="dono-panel">
             <Card
-                title={ __( 'Test mode', 'dono' ) }
-                sub={ __( 'Org-wide rehearsal switch, also settable per form', 'dono' ) }
+                title={ __( 'Test mode', 'dono-fundraising-platform' ) }
+                sub={ __( 'Org-wide rehearsal switch, also settable per form', 'dono-fundraising-platform' ) }
                 edited={ s.isDirty }
             >
                 <ToggleRow
-                    title={ __( 'Enable test mode for all forms', 'dono' ) }
-                    sub={ __( 'No real payment is taken and these donations are excluded from reporting.', 'dono' ) }
+                    title={ __( 'Enable test mode for all forms', 'dono-fundraising-platform' ) }
+                    sub={ __( 'No real payment is taken and these donations are excluded from reporting.', 'dono-fundraising-platform' ) }
                     checked={ !! s.value( 'test_mode', false ) }
                     onChange={ s.setValue( 'test_mode' ) }
                 />
@@ -80,8 +80,8 @@ export default function GatewaysPanel( { s } ) {
 
             <Card
                 leading={ <BrandMark letter="O" variant="offline" /> }
-                title={ __( 'Offline donations', 'dono' ) }
-                sub={ __( 'Donor sees your bank details and pays offline', 'dono' ) }
+                title={ __( 'Offline donations', 'dono-fundraising-platform' ) }
+                sub={ __( 'Donor sees your bank details and pays offline', 'dono-fundraising-platform' ) }
                 meta={ offlinePill }
                 edited={ s.isDirty }
                 collapsible
@@ -89,28 +89,28 @@ export default function GatewaysPanel( { s } ) {
                 onToggle={ setOfflineOpen }
             >
                 <ToggleRow
-                    title={ __( 'Enable offline donations', 'dono' ) }
-                    sub={ __( 'For cash, check, or bank transfer donations marked paid by admin.', 'dono' ) }
+                    title={ __( 'Enable offline donations', 'dono-fundraising-platform' ) }
+                    sub={ __( 'For cash, check, or bank transfer donations marked paid by admin.', 'dono-fundraising-platform' ) }
                     checked={ offlineEnabled }
                     onChange={ s.setValue( 'offline.enabled' ) }
                 />
 
                 <FormRow
-                    label={ __( 'Instructions', 'dono' ) }
-                    help={ __( 'Shown to donors after they pick bank transfer.', 'dono' ) }
+                    label={ __( 'Instructions', 'dono-fundraising-platform' ) }
+                    help={ __( 'Shown to donors after they pick bank transfer.', 'dono-fundraising-platform' ) }
                     wide
                 >
                     <textarea
                         className="dono-textarea"
                         rows={ 4 }
-                        placeholder={ __( 'Please transfer the donation amount within 7 days. Use the reference number so we can match your donation to your receipt.', 'dono' ) }
+                        placeholder={ __( 'Please transfer the donation amount within 7 days. Use the reference number so we can match your donation to your receipt.', 'dono-fundraising-platform' ) }
                         { ...s.bind( 'offline.instructions' ) }
                     />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Bank details template', 'dono' ) }
-                    help={ __( 'Click a placeholder to drop it in. They expand when the donor is shown their transfer details.', 'dono' ) }
+                    label={ __( 'Bank details template', 'dono-fundraising-platform' ) }
+                    help={ __( 'Click a placeholder to drop it in. They expand when the donor is shown their transfer details.', 'dono-fundraising-platform' ) }
                     wide
                 >
                     <div className="dono-merge-tags">

@@ -134,20 +134,20 @@ final class DonorExporter
     public static function labels(): array
     {
         return [
-            'first_name'      => __('First name', 'dono'),
-            'last_name'       => __('Last name', 'dono'),
-            'email'           => __('Email', 'dono'),
-            'phone'           => __('Phone', 'dono'),
-            'address'         => __('Address', 'dono'),
-            'company'         => __('Company', 'dono'),
-            'country'         => __('Country', 'dono'),
-            'donor_type'      => __('Type', 'dono'),
-            'donations_count' => __('Donations', 'dono'),
-            'total_donated'   => __('Total donated', 'dono'),
-            'first_donation'  => __('First donation', 'dono'),
-            'last_donation'   => __('Last donation', 'dono'),
-            'created_at'      => __('Donor since', 'dono'),
-            'donor_id'        => __('Donor ID', 'dono'),
+            'first_name'      => __('First name', 'dono-fundraising-platform'),
+            'last_name'       => __('Last name', 'dono-fundraising-platform'),
+            'email'           => __('Email', 'dono-fundraising-platform'),
+            'phone'           => __('Phone', 'dono-fundraising-platform'),
+            'address'         => __('Address', 'dono-fundraising-platform'),
+            'company'         => __('Company', 'dono-fundraising-platform'),
+            'country'         => __('Country', 'dono-fundraising-platform'),
+            'donor_type'      => __('Type', 'dono-fundraising-platform'),
+            'donations_count' => __('Donations', 'dono-fundraising-platform'),
+            'total_donated'   => __('Total donated', 'dono-fundraising-platform'),
+            'first_donation'  => __('First donation', 'dono-fundraising-platform'),
+            'last_donation'   => __('Last donation', 'dono-fundraising-platform'),
+            'created_at'      => __('Donor since', 'dono-fundraising-platform'),
+            'donor_id'        => __('Donor ID', 'dono-fundraising-platform'),
         ];
     }
 

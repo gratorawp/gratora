@@ -153,7 +153,7 @@ final class CampaignsController
     {
         $campaign = $this->campaigns->findById((int) $request['id']);
         if (! $campaign) {
-            return new WP_Error('dono_not_found', __('Campaign not found.', 'dono'), ['status' => 404]);
+            return new WP_Error('dono_not_found', __('Campaign not found.', 'dono-fundraising-platform'), ['status' => 404]);
         }
         $summary = $this->plans->activeForCampaign((int) $campaign->id);
         return new WP_REST_Response([
@@ -201,7 +201,7 @@ final class CampaignsController
     {
         $campaign = $this->campaigns->findById((int) $request['id']);
         if (! $campaign) {
-            return new WP_Error('dono_not_found', __('Campaign not found.', 'dono'), ['status' => 404]);
+            return new WP_Error('dono_not_found', __('Campaign not found.', 'dono-fundraising-platform'), ['status' => 404]);
         }
         return new WP_REST_Response($this->shapeFull($campaign, (string) ($request['range'] ?? 'all-time')), 200);
     }
@@ -225,7 +225,7 @@ final class CampaignsController
     {
         $campaign = $this->campaigns->findById((int) $request['id']);
         if (! $campaign) {
-            return new WP_Error('dono_not_found', __('Campaign not found.', 'dono'), ['status' => 404]);
+            return new WP_Error('dono_not_found', __('Campaign not found.', 'dono-fundraising-platform'), ['status' => 404]);
         }
         $body      = (array) ($request->get_json_params() ?? []);
         $wasActive = $campaign->status !== 'archived';
@@ -247,7 +247,7 @@ final class CampaignsController
                 ->where('is_test', false)
                 ->count();
 
-            $this->cancelJob->start((int) $campaign->id, __('Campaign archived', 'dono'));
+            $this->cancelJob->start((int) $campaign->id, __('Campaign archived', 'dono-fundraising-platform'));
 
             $recurringCancel = ['queued' => $queued];
         }
@@ -265,7 +265,7 @@ final class CampaignsController
     {
         $current = $this->campaigns->findById((int) $request['id']);
         if (! $current) {
-            return new WP_Error('dono_not_found', __('Campaign not found.', 'dono'), ['status' => 404]);
+            return new WP_Error('dono_not_found', __('Campaign not found.', 'dono-fundraising-platform'), ['status' => 404]);
         }
 
         $others = Campaign::query()
@@ -313,7 +313,7 @@ final class CampaignsController
     {
         $source = $this->campaigns->findById((int) $request['id']);
         if (! $source) {
-            return new WP_Error('dono_not_found', __('Campaign not found.', 'dono'), ['status' => 404]);
+            return new WP_Error('dono_not_found', __('Campaign not found.', 'dono-fundraising-platform'), ['status' => 404]);
         }
         try {
             $copy = $this->campaignService->duplicate($source);
@@ -328,7 +328,7 @@ final class CampaignsController
     {
         $campaign = $this->campaigns->findById((int) $request['id']);
         if (! $campaign) {
-            return new WP_Error('dono_not_found', __('Campaign not found.', 'dono'), ['status' => 404]);
+            return new WP_Error('dono_not_found', __('Campaign not found.', 'dono-fundraising-platform'), ['status' => 404]);
         }
         try {
             $this->campaignService->delete($campaign);
@@ -343,7 +343,7 @@ final class CampaignsController
     {
         $campaign = $this->campaigns->findById((int) $request['id']);
         if (! $campaign) {
-            return new WP_Error('dono_not_found', __('Campaign not found.', 'dono'), ['status' => 404]);
+            return new WP_Error('dono_not_found', __('Campaign not found.', 'dono-fundraising-platform'), ['status' => 404]);
         }
         $range   = (string) ($request['range']   ?? 'all-time');
         $compare = (string) ($request['compare'] ?? 'none');

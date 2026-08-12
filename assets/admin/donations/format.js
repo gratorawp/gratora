@@ -22,11 +22,11 @@ export function formatDate( iso, opts = {} ) {
 }
 
 export const STATUS_LABEL = {
-    pending:        __( 'Pending', 'dono' ),
-    processing:     __( 'Processing', 'dono' ),
-    paid:           __( 'Paid', 'dono' ),
-    failed:         __( 'Failed', 'dono' ),
-    refunded:       __( 'Refunded', 'dono' ),
-    partial_refund: __( 'Partially refunded', 'dono' ),
-    disputed:       __( 'Disputed', 'dono' ),
+    pending:        __( 'Pending', 'dono-fundraising-platform' ),
+    processing:     __( 'Processing', 'dono-fundraising-platform' ),
+    paid:           __( 'Paid', 'dono-fundraising-platform' ),
+    failed:         __( 'Failed', 'dono-fundraising-platform' ),
+    refunded:       __( 'Refunded', 'dono-fundraising-platform' ),
+    partial_refund: __( 'Partially refunded', 'dono-fundraising-platform' ),
+    disputed:       __( 'Disputed', 'dono-fundraising-platform' ),
 };

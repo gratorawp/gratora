@@ -29,7 +29,7 @@ final class DonationsPage extends HookProvider
     {
         $pages[] = [
             'id'         => self::PAGE_ID,
-            'title'      => __('Donations', 'dono'),
+            'title'      => __('Donations', 'dono-fundraising-platform'),
             'capability' => 'dono_access_donations',
             'position'   => 10,
             'render'     => [$this, 'render'],
@@ -68,7 +68,7 @@ final class DonationsPage extends HookProvider
             true
         );
 
-        wp_set_script_translations(self::HANDLE, 'dono', DONO_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE, 'dono-fundraising-platform', DONO_DIR . 'languages');
 
         wp_enqueue_style('wp-components');
         wp_enqueue_style(

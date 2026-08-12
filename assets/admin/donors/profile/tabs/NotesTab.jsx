@@ -38,9 +38,9 @@ export default function NotesTab( { donorId, notes: initialNotes, onChanged } ) 
 
     const remove = ( noteId ) => {
         setConfirm( {
-            title:        __( 'Delete note', 'dono' ),
-            message:      __( 'Delete this note?', 'dono' ),
-            confirmLabel: __( 'Delete', 'dono' ),
+            title:        __( 'Delete note', 'dono-fundraising-platform' ),
+            message:      __( 'Delete this note?', 'dono-fundraising-platform' ),
+            confirmLabel: __( 'Delete', 'dono-fundraising-platform' ),
             destructive:  true,
             onConfirm: async () => {
                 try {
@@ -66,14 +66,14 @@ export default function NotesTab( { donorId, notes: initialNotes, onChanged } ) 
                             <EmptyState
                                 compact
                                 icon={ <StickyNote size={ 22 } strokeWidth={ 1.75 } /> }
-                                title={ __( 'No notes yet', 'dono' ) }
-                                body={ __( 'Add a note to capture context about this donor (preferred contact, stewardship plan, etc.).', 'dono' ) }
+                                title={ __( 'No notes yet', 'dono-fundraising-platform' ) }
+                                body={ __( 'Add a note to capture context about this donor (preferred contact, stewardship plan, etc.).', 'dono-fundraising-platform' ) }
                             />
                         )
                         : (
                             <div className="dp-notes-list">
                                 { notes.map( ( n ) => {
-                                    const author = n.author_display_name || ( n.author_user_id ? __( 'Unknown user', 'dono' ) : __( 'System', 'dono' ) );
+                                    const author = n.author_display_name || ( n.author_user_id ? __( 'Unknown user', 'dono-fundraising-platform' ) : __( 'System', 'dono-fundraising-platform' ) );
                                     return (
                                         <div key={ n.id } className="dp-note">
                                             <span className="dp-note__avatar" aria-hidden="true">{ initials( author ) }</span>
@@ -90,7 +90,7 @@ export default function NotesTab( { donorId, notes: initialNotes, onChanged } ) 
                                             <button
                                                 type="button"
                                                 className="dp-note__delete"
-                                                aria-label={ __( 'Delete note', 'dono' ) }
+                                                aria-label={ __( 'Delete note', 'dono-fundraising-platform' ) }
                                                 onClick={ () => remove( n.id ) }
                                             >
                                                 <IconTrash width="14" height="14" />
@@ -105,7 +105,7 @@ export default function NotesTab( { donorId, notes: initialNotes, onChanged } ) 
                         <textarea className="dono-textarea"
                             value={ body }
                             onChange={ ( e ) => setBody( e.target.value ) }
-                            placeholder={ __( 'Add a note about this donor…', 'dono' ) }
+                            placeholder={ __( 'Add a note about this donor…', 'dono-fundraising-platform' ) }
                             rows={ 3 }
                         />
                         { error && <div className="dp-note-form__error">{ error }</div> }
@@ -115,7 +115,7 @@ export default function NotesTab( { donorId, notes: initialNotes, onChanged } ) 
                                 className="btn btn--primary"
                                 disabled={ saving || ! body.trim() }
                             >
-                                { saving ? __( 'Saving…', 'dono' ) : __( 'Add note', 'dono' ) }
+                                { saving ? __( 'Saving…', 'dono-fundraising-platform' ) : __( 'Add note', 'dono-fundraising-platform' ) }
                             </button>
                         </div>
                     </form>

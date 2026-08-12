@@ -29,16 +29,16 @@ import {
 // Ordered by how often an operator opens it, money first. Add-on tabs land
 // after these, ahead of Licenses.
 const TABS = [
-    { key: 'setup',        label: __( 'Setup', 'dono' ),                Icon: IconSetup },
-    { key: 'gateways',     label: __( 'Payment gateways', 'dono' ),     Icon: IconGateways },
-    { key: 'organization', label: __( 'Organization', 'dono' ),         Icon: IconOrganization },
-    { key: 'brand',        label: __( 'Brand', 'dono' ),                Icon: IconBrand },
-    { key: 'email',        label: __( 'Emails', 'dono' ),               Icon: IconEmail },
-    { key: 'receipts',     label: __( 'Receipts', 'dono' ),             Icon: IconReceipt },
-    { key: 'currency',     label: __( 'Currency', 'dono' ),             Icon: IconCurrency },
-    { key: 'numbering',    label: __( 'Numbering', 'dono' ),            Icon: IconNumbering },
-    { key: 'privacy',      label: __( 'Privacy', 'dono' ),              Icon: IconPrivacy },
-    { key: 'roles',        label: __( 'Roles', 'dono' ),                Icon: IconRoles, adminOnly: true },
+    { key: 'setup',        label: __( 'Setup', 'dono-fundraising-platform' ),                Icon: IconSetup },
+    { key: 'gateways',     label: __( 'Payment gateways', 'dono-fundraising-platform' ),     Icon: IconGateways },
+    { key: 'organization', label: __( 'Organization', 'dono-fundraising-platform' ),         Icon: IconOrganization },
+    { key: 'brand',        label: __( 'Brand', 'dono-fundraising-platform' ),                Icon: IconBrand },
+    { key: 'email',        label: __( 'Emails', 'dono-fundraising-platform' ),               Icon: IconEmail },
+    { key: 'receipts',     label: __( 'Receipts', 'dono-fundraising-platform' ),             Icon: IconReceipt },
+    { key: 'currency',     label: __( 'Currency', 'dono-fundraising-platform' ),             Icon: IconCurrency },
+    { key: 'numbering',    label: __( 'Numbering', 'dono-fundraising-platform' ),            Icon: IconNumbering },
+    { key: 'privacy',      label: __( 'Privacy', 'dono-fundraising-platform' ),              Icon: IconPrivacy },
+    { key: 'roles',        label: __( 'Roles', 'dono-fundraising-platform' ),                Icon: IconRoles, adminOnly: true },
 ];
 
 // Always last, whatever add-ons register in between.
@@ -56,23 +56,23 @@ const visibleTabs = () =>
 
 const TAIL_TABS = [
     ...( window.dono?.pro?.active ? [
-        { key: 'licenses', label: __( 'Licenses', 'dono' ),             Icon: IconLicense },
+        { key: 'licenses', label: __( 'Licenses', 'dono-fundraising-platform' ),             Icon: IconLicense },
     ] : [] ),
 ];
 
 // Save-job slug -> human label, for failure messages (job slugs are not tab keys).
 const SECTION_LABELS = {
-    'org-profile':     __( 'Organization', 'dono' ),
-    'org-brand':       __( 'Brand', 'dono' ),
-    'currency-locale': __( 'Currency & locale', 'dono' ),
-    'exchange-rates':  __( 'Exchange rates', 'dono' ),
-    'gateways':        __( 'Payment gateways', 'dono' ),
-    'email':           __( 'Emails', 'dono' ),
-    'receipts':        __( 'Receipts', 'dono' ),
-    'numbering':       __( 'Numbering', 'dono' ),
-    'consents':        __( 'Consents', 'dono' ),
-    'privacy':         __( 'Data & privacy', 'dono' ),
-    'roles':           __( 'Roles & permissions', 'dono' ),
+    'org-profile':     __( 'Organization', 'dono-fundraising-platform' ),
+    'org-brand':       __( 'Brand', 'dono-fundraising-platform' ),
+    'currency-locale': __( 'Currency & locale', 'dono-fundraising-platform' ),
+    'exchange-rates':  __( 'Exchange rates', 'dono-fundraising-platform' ),
+    'gateways':        __( 'Payment gateways', 'dono-fundraising-platform' ),
+    'email':           __( 'Emails', 'dono-fundraising-platform' ),
+    'receipts':        __( 'Receipts', 'dono-fundraising-platform' ),
+    'numbering':       __( 'Numbering', 'dono-fundraising-platform' ),
+    'consents':        __( 'Consents', 'dono-fundraising-platform' ),
+    'privacy':         __( 'Data & privacy', 'dono-fundraising-platform' ),
+    'roles':           __( 'Roles & permissions', 'dono-fundraising-platform' ),
 };
 
 function initialTab() {
@@ -196,7 +196,7 @@ export default function Settings() {
             .filter( Boolean );
 
         if ( failed.length === 0 ) {
-            notify.success( __( 'All changes saved.', 'dono' ) );
+            notify.success( __( 'All changes saved.', 'dono-fundraising-platform' ) );
             return;
         }
 
@@ -207,10 +207,10 @@ export default function Settings() {
         const base = failed.length < jobs.length
             ? sprintf(
                 /* translators: %s: comma-separated section names that failed */
-                __( 'Could not save: %s.', 'dono' ),
+                __( 'Could not save: %s.', 'dono-fundraising-platform' ),
                 labels.join( ', ' ),
             )
-            : __( 'Save failed.', 'dono' );
+            : __( 'Save failed.', 'dono-fundraising-platform' );
         notify.error( reason ? `${ base } ${ reason }` : base );
     };
 
@@ -233,20 +233,20 @@ export default function Settings() {
     return (
         <div className="dono-settings-page">
             <div className="dono-crumbs">
-                <a href="admin.php?page=dono">{ __( 'Dono', 'dono' ) }</a>
+                <a href="admin.php?page=dono">{ __( 'Dono', 'dono-fundraising-platform' ) }</a>
                 <span className="sep">›</span>
-                <span>{ __( 'Settings', 'dono' ) }</span>
+                <span>{ __( 'Settings', 'dono-fundraising-platform' ) }</span>
                 <span className="sep">›</span>
                 <span>{ allTabs.find( ( t ) => t.key === tab )?.label || '' }</span>
             </div>
 
             <div className="dono-page-head">
                 <div className="dono-page-head__title-row">
-                    <h1>{ __( 'Settings', 'dono' ) }</h1>
+                    <h1>{ __( 'Settings', 'dono-fundraising-platform' ) }</h1>
                 </div>
                 <div className="dono-page-head__right">
                     <span className="dono-page-head__meta">
-                        { __( 'Changes save when you click Save changes', 'dono' ) }
+                        { __( 'Changes save when you click Save changes', 'dono-fundraising-platform' ) }
                     </span>
                 </div>
             </div>
@@ -255,7 +255,7 @@ export default function Settings() {
                 className="dono-tabs"
                 role="tablist"
                 tabIndex={ -1 }
-                aria-label={ __( 'Settings sections', 'dono' ) }
+                aria-label={ __( 'Settings sections', 'dono-fundraising-platform' ) }
                 onKeyDown={ ( e ) => tablistKeyDown( e, allTabs.map( ( t ) => t.key ), tab, jumpTo ) }
             >
                 <div className="dono-tabs__scroll">
@@ -275,7 +275,7 @@ export default function Settings() {
                             >
                                 <Icon className="dono-tab__icon" />
                                 { t.label }
-                                { isDirty && <span className="dono-tab__dot" title={ __( 'Unsaved changes', 'dono' ) } /> }
+                                { isDirty && <span className="dono-tab__dot" title={ __( 'Unsaved changes', 'dono-fundraising-platform' ) } /> }
                             </a>
                         );
                     } ) }
@@ -333,10 +333,10 @@ export default function Settings() {
                     <span className="dono-save-bar__dot" aria-hidden="true" />
                     <span className="dono-save-bar__count">
                         { dirtySections === 1
-                            ? __( 'Unsaved changes in 1 section', 'dono' )
+                            ? __( 'Unsaved changes in 1 section', 'dono-fundraising-platform' )
                             : sprintf(
                                 /* translators: %d: number of sections with unsaved changes */
-                                _n( 'Unsaved changes across %d section', 'Unsaved changes across %d sections', dirtySections, 'dono' ),
+                                _n( 'Unsaved changes across %d section', 'Unsaved changes across %d sections', dirtySections, 'dono-fundraising-platform' ),
                                 dirtySections,
                             ) }
                     </span>
@@ -346,7 +346,7 @@ export default function Settings() {
                         onClick={ discardAll }
                         disabled={ anySaving }
                     >
-                        { __( 'Discard', 'dono' ) }
+                        { __( 'Discard', 'dono-fundraising-platform' ) }
                     </button>
                     <button
                         type="button"
@@ -354,7 +354,7 @@ export default function Settings() {
                         onClick={ saveAll }
                         disabled={ anySaving }
                     >
-                        { __( 'Save changes', 'dono' ) }
+                        { __( 'Save changes', 'dono-fundraising-platform' ) }
                     </button>
                 </div>
             ) }

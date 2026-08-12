@@ -9,10 +9,10 @@ import Segmented from '../../../_shared/components/Segmented';
 const NAME = 'dono/submit-button';
 
 const ALIGN_OPTIONS = [
-    { value: 'left',   label: __( 'Left',   'dono' ) },
-    { value: 'center', label: __( 'Center', 'dono' ) },
-    { value: 'right',  label: __( 'Right',  'dono' ) },
-    { value: 'full',   label: __( 'Full width', 'dono' ) },
+    { value: 'left',   label: __( 'Left',   'dono-fundraising-platform' ) },
+    { value: 'center', label: __( 'Center', 'dono-fundraising-platform' ) },
+    { value: 'right',  label: __( 'Right',  'dono-fundraising-platform' ) },
+    { value: 'full',   label: __( 'Full width', 'dono-fundraising-platform' ) },
 ];
 
 function Edit( { attributes, setAttributes } ) {
@@ -36,15 +36,15 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Button', 'dono' ) } initialOpen>
+                <PanelBody title={ __( 'Button', 'dono-fundraising-platform' ) } initialOpen>
                     <Segmented
-                        label={ __( 'Alignment', 'dono' ) }
+                        label={ __( 'Alignment', 'dono-fundraising-platform' ) }
                         value={ align }
                         onChange={ ( v ) => setAttributes( { align: v } ) }
                         options={ ALIGN_OPTIONS }
                     />
                     <p style={ { fontSize: 12, color: '#6b7280', margin: '12px 0 0' } }>
-                        { __( 'Use {amount} and {frequency} in the label to insert the live values at runtime, e.g. "Donate {amount} {frequency}".', 'dono' ) }
+                        { __( 'Use {amount} and {frequency} in the label to insert the live values at runtime, e.g. "Donate {amount} {frequency}".', 'dono-fundraising-platform' ) }
                     </p>
                 </PanelBody>
             </InspectorControls>
@@ -53,7 +53,7 @@ function Edit( { attributes, setAttributes } ) {
                     tagName="span"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Donate now', 'dono' ) }
+                    placeholder={ __( 'Donate now', 'dono-fundraising-platform' ) }
                     allowedFormats={ [] }
                     style={ {
                         display:       'inline-block',
@@ -75,8 +75,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Donate button', 'dono' ),
-        description: __( 'The button that completes the donation.', 'dono' ),
+        title:      __( 'Donate button', 'dono-fundraising-platform' ),
+        description: __( 'The button that completes the donation.', 'dono-fundraising-platform' ),
         category:   'dono-extras',
         icon:       BlockIcons[ 'submit-button' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

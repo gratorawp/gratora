@@ -20,7 +20,7 @@ final class DefaultCampaignTypeHandler implements CampaignTypeHandler
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('Standard', 'dono');
+        return __('Standard', 'dono-fundraising-platform');
     }
 
     /** @since 1.0.0 */

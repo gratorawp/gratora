@@ -14,9 +14,9 @@ export default function CoverImageCard( { id, url, onChange } ) {
         return (
             <div className="dono-cover-card" style={ { gridTemplateColumns: '1fr' } }>
                 <div>
-                    <Btn variant="primary" onClick={ pick }>{ __( 'Select an image', 'dono' ) }</Btn>
+                    <Btn variant="primary" onClick={ pick }>{ __( 'Select an image', 'dono-fundraising-platform' ) }</Btn>
                     <div style={ { marginTop: 8, fontSize: 12, color: '#6b7280' } }>
-                        { __( '1600 × 900 (16:9) recommended.', 'dono' ) }
+                        { __( '1600 × 900 (16:9) recommended.', 'dono-fundraising-platform' ) }
                     </div>
                 </div>
             </div>
@@ -29,10 +29,10 @@ export default function CoverImageCard( { id, url, onChange } ) {
             <div className="dono-cover-card__meta">
                 <AttachmentMeta id={ id } url={ url } />
                 <div className="dono-cover-card__actions">
-                    <Btn variant="secondary" size="sm" onClick={ pick }>{ __( 'Replace', 'dono' ) }</Btn>
-                    <Btn variant="ghost" size="sm" onClick={ remove }>{ __( 'Remove', 'dono' ) }</Btn>
+                    <Btn variant="secondary" size="sm" onClick={ pick }>{ __( 'Replace', 'dono-fundraising-platform' ) }</Btn>
+                    <Btn variant="ghost" size="sm" onClick={ remove }>{ __( 'Remove', 'dono-fundraising-platform' ) }</Btn>
                 </div>
-                <span className="dono-cover-card__chip">{ __( 'Cropped on cards · 16:9 expected', 'dono' ) }</span>
+                <span className="dono-cover-card__chip">{ __( 'Cropped on cards · 16:9 expected', 'dono-fundraising-platform' ) }</span>
             </div>
         </div>
     );
@@ -73,11 +73,11 @@ function AttachmentMeta( { id, url } ) {
 
     return (
         <>
-            <strong>{ meta.filename || __( 'Cover image', 'dono' ) }</strong>
+            <strong>{ meta.filename || __( 'Cover image', 'dono-fundraising-platform' ) }</strong>
             { parts && <>{ parts }<br /></> }
             { meta.uploaded && sprintf(
                 /* translators: %s: relative time, e.g. "12d ago" */
-                __( 'Uploaded %s', 'dono' ),
+                __( 'Uploaded %s', 'dono-fundraising-platform' ),
                 timeAgo( meta.uploaded ),
             ) }
         </>
@@ -93,12 +93,12 @@ function formatBytes( bytes ) {
 
 function openMediaFrame( { onSelect, currentId } ) {
     if ( ! window.wp?.media ) {
-        notify.error( __( 'Media library not loaded.', 'dono' ) );
+        notify.error( __( 'Media library not loaded.', 'dono-fundraising-platform' ) );
         return;
     }
     const frame = window.wp.media( {
-        title:    __( 'Select campaign cover image', 'dono' ),
-        button:   { text: __( 'Use this image', 'dono' ) },
+        title:    __( 'Select campaign cover image', 'dono-fundraising-platform' ),
+        button:   { text: __( 'Use this image', 'dono-fundraising-platform' ) },
         library:  { type: 'image' },
         multiple: false,
     } );

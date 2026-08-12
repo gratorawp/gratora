@@ -5,7 +5,7 @@ defined('ABSPATH') || exit;
  * @var string $placeholder
  * @var bool   $required
  */
-$labelText = $label !== '' ? $label : __('Country', 'dono');
+$labelText = $label !== '' ? $label : __('Country', 'dono-fundraising-platform');
 $placeholderText = $placeholder !== '' ? $placeholder : 'DE';
 ?>
 <label class="dono-block dono-block--country dono-donor__field">

@@ -22,38 +22,38 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Checkbox', 'dono' ) } initialOpen>
+                <PanelBody title={ __( 'Checkbox', 'dono-fundraising-platform' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'dono' ) }
+                        label={ __( 'Label', 'dono-fundraising-platform' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label or help text to edit inline.', 'dono' ) }
+                        help={ __( 'Click the label or help text to edit inline.', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Help text', 'dono' ) }
+                        label={ __( 'Help text', 'dono-fundraising-platform' ) }
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Field name', 'dono' ) }
+                        label={ __( 'Field name', 'dono-fundraising-platform' ) }
                         value={ field }
                         onChange={ ( v ) => setAttributes( { field: slugifyField( v ) } ) }
-                        help={ __( 'Key the value is stored under. Auto-derived from label if empty.', 'dono' ) }
+                        help={ __( 'Key the value is stored under. Auto-derived from label if empty.', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Default on', 'dono' ) }
+                        label={ __( 'Default on', 'dono-fundraising-platform' ) }
                         checked={ defaultOn }
                         onChange={ ( v ) => setAttributes( { defaultOn: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'dono' ) }
+                        label={ __( 'Required', 'dono-fundraising-platform' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
-                        help={ __( 'Donor must tick this to submit.', 'dono' ) }
+                        help={ __( 'Donor must tick this to submit.', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -79,7 +79,7 @@ function Edit( { attributes, setAttributes } ) {
                         tagName="span"
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'I agree to…', 'dono' ) }
+                        placeholder={ __( 'I agree to…', 'dono-fundraising-platform' ) }
                         allowedFormats={ [] }
                         style={ { fontSize: 13, color: '#111827' } }
                     />
@@ -88,7 +88,7 @@ function Edit( { attributes, setAttributes } ) {
                         tagName="span"
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
-                        placeholder={ __( 'Optional help text', 'dono' ) }
+                        placeholder={ __( 'Optional help text', 'dono-fundraising-platform' ) }
                         allowedFormats={ [] }
                         style={ { fontSize: 11, color: '#6b7280', lineHeight: 1.3 } }
                     />
@@ -101,8 +101,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Checkbox', 'dono' ),
-        description: __( 'Single yes/no checkbox for agreements, opt-ins, or any boolean.', 'dono' ),
+        title:       __( 'Checkbox', 'dono-fundraising-platform' ),
+        description: __( 'Single yes/no checkbox for agreements, opt-ins, or any boolean.', 'dono-fundraising-platform' ),
         category:    'dono-fields',
         icon:        BlockIcons[ 'checkbox' ],
         supports: { html: false, anchor: false, inserter: true },

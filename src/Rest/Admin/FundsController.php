@@ -139,7 +139,7 @@ final class FundsController
     {
         $fund = $this->funds->findById((int) $request['id']);
         if (! $fund) {
-            return new WP_Error('dono_not_found', __('Fund not found.', 'dono'), ['status' => 404]);
+            return new WP_Error('dono_not_found', __('Fund not found.', 'dono-fundraising-platform'), ['status' => 404]);
         }
         return new WP_REST_Response($this->shapeOne($fund), 200);
     }
@@ -163,7 +163,7 @@ final class FundsController
     {
         $fund = $this->funds->findById((int) $request['id']);
         if (! $fund) {
-            return new WP_Error('dono_not_found', __('Fund not found.', 'dono'), ['status' => 404]);
+            return new WP_Error('dono_not_found', __('Fund not found.', 'dono-fundraising-platform'), ['status' => 404]);
         }
         $body = (array) ($request->get_json_params() ?? []);
         try {
@@ -179,7 +179,7 @@ final class FundsController
     {
         $fund = $this->funds->findById((int) $request['id']);
         if (! $fund) {
-            return new WP_Error('dono_not_found', __('Fund not found.', 'dono'), ['status' => 404]);
+            return new WP_Error('dono_not_found', __('Fund not found.', 'dono-fundraising-platform'), ['status' => 404]);
         }
         $reassignTo = $request['reassign_to'] !== null ? (int) $request['reassign_to'] : null;
 

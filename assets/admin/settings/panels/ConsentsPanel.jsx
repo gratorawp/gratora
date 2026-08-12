@@ -50,9 +50,9 @@ export default function ConsentsPanel( { s } ) {
 
     const remove = ( i ) => {
         setConfirm( {
-            title:        __( 'Delete consent purpose', 'dono' ),
-            message:      __( 'Delete this consent purpose? Donor consent history stays in the audit log.', 'dono' ),
-            confirmLabel: __( 'Delete', 'dono' ),
+            title:        __( 'Delete consent purpose', 'dono-fundraising-platform' ),
+            message:      __( 'Delete this consent purpose? Donor consent history stays in the audit log.', 'dono-fundraising-platform' ),
+            confirmLabel: __( 'Delete', 'dono-fundraising-platform' ),
             destructive:  true,
             onConfirm: async () => {
                 setList( list.filter( ( _, idx ) => idx !== i ) );
@@ -68,8 +68,8 @@ export default function ConsentsPanel( { s } ) {
     return (
         <>
         <Card
-            title={ __( 'Consent purposes', 'dono' ) }
-            sub={ __( 'What donors can opt into. Each toggle is logged in an append-only audit trail. Bump the version when you change a description so existing donors are prompted to re-consent.', 'dono' ) }
+            title={ __( 'Consent purposes', 'dono-fundraising-platform' ) }
+            sub={ __( 'What donors can opt into. Each toggle is logged in an append-only audit trail. Bump the version when you change a description so existing donors are prompted to re-consent.', 'dono-fundraising-platform' ) }
             edited={ s.isDirty }
         >
             <div className="dono-consents">
@@ -77,11 +77,11 @@ export default function ConsentsPanel( { s } ) {
                     <EmptyState
                         compact
                         icon={ <ShieldCheck size={ 22 } strokeWidth={ 1.75 } /> }
-                        title={ __( 'No consent purposes yet', 'dono' ) }
-                        body={ __( 'Add the first purpose below. Each toggle becomes an opt-in on every donation form.', 'dono' ) }
+                        title={ __( 'No consent purposes yet', 'dono-fundraising-platform' ) }
+                        body={ __( 'Add the first purpose below. Each toggle becomes an opt-in on every donation form.', 'dono-fundraising-platform' ) }
                         action={
                             <Btn variant="secondary" onClick={ add }>
-                                { __( 'Add a purpose', 'dono' ) }
+                                { __( 'Add a purpose', 'dono-fundraising-platform' ) }
                             </Btn>
                         }
                     />
@@ -94,7 +94,7 @@ export default function ConsentsPanel( { s } ) {
                                 className="dono-input dono-consent-card__label"
                                 type="text"
                                 value={ p.label }
-                                placeholder={ __( 'Purpose name', 'dono' ) }
+                                placeholder={ __( 'Purpose name', 'dono-fundraising-platform' ) }
                                 onChange={ ( e ) => update( i, {
                                     label: e.target.value,
                                     key:   p.key || slugify( e.target.value ),
@@ -104,9 +104,9 @@ export default function ConsentsPanel( { s } ) {
                                 type="button"
                                 className="dono-consent-card__delete"
                                 onClick={ () => remove( i ) }
-                                aria-label={ __( 'Delete purpose', 'dono' ) }
+                                aria-label={ __( 'Delete purpose', 'dono-fundraising-platform' ) }
                             >
-                                { __( 'Delete', 'dono' ) }
+                                { __( 'Delete', 'dono-fundraising-platform' ) }
                             </button>
                         </header>
 
@@ -114,13 +114,13 @@ export default function ConsentsPanel( { s } ) {
                             className="dono-textarea dono-consent-card__desc"
                             rows={ 3 }
                             value={ p.description }
-                            placeholder={ __( 'Enter a donor-facing description', 'dono' ) }
+                            placeholder={ __( 'Enter a donor-facing description', 'dono-fundraising-platform' ) }
                             onChange={ ( e ) => update( i, { description: e.target.value } ) }
                         />
 
                         <footer className="dono-consent-card__foot">
                             <label className="dono-consent-card__meta-field">
-                                <span>{ __( 'Key', 'dono' ) }</span>
+                                <span>{ __( 'Key', 'dono-fundraising-platform' ) }</span>
                                 <input
                                     className="dono-input dono-input--mono"
                                     type="text"
@@ -130,7 +130,7 @@ export default function ConsentsPanel( { s } ) {
                                 />
                             </label>
                             <label className="dono-consent-card__meta-field dono-consent-card__meta-field--narrow">
-                                <span>{ __( 'Version', 'dono' ) }</span>
+                                <span>{ __( 'Version', 'dono-fundraising-platform' ) }</span>
                                 <input
                                     className="dono-input"
                                     type="number"
@@ -142,12 +142,12 @@ export default function ConsentsPanel( { s } ) {
 
                             <div className="dono-consent-card__toggles">
                                 <SwitchChip
-                                    label={ __( 'Required to donate', 'dono' ) }
+                                    label={ __( 'Required to donate', 'dono-fundraising-platform' ) }
                                     checked={ !! p.required }
                                     onChange={ ( v ) => update( i, { required: v } ) }
                                 />
                                 <SwitchChip
-                                    label={ __( 'Pre-selected', 'dono' ) }
+                                    label={ __( 'Pre-selected', 'dono-fundraising-platform' ) }
                                     checked={ !! p.default }
                                     onChange={ ( v ) => update( i, { default: v } ) }
                                 />
@@ -157,7 +157,7 @@ export default function ConsentsPanel( { s } ) {
                 ) ) }
 
                 <Btn variant="ghost" onClick={ add } className="dono-consents__add">
-                    + { __( 'Add consent purpose', 'dono' ) }
+                    + { __( 'Add consent purpose', 'dono-fundraising-platform' ) }
                 </Btn>
             </div>
         </Card>

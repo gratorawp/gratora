@@ -9,12 +9,12 @@ import useCardOpen from '../../_shared/useCardOpen';
 // Order: money first, then whether a donor can reach you, then whether they
 // hear back, then the machinery underneath.
 const GROUPS = [
-    { id: 'money',    title: __( 'Taking money', 'dono' ),          sub: __( 'What has to be true before a card is charged', 'dono' ) },
-    { id: 'page',     title: __( 'A live donation page', 'dono' ),  sub: __( 'Somewhere for a donor to land', 'dono' ) },
-    { id: 'receipts', title: __( 'Receipts and email', 'dono' ),    sub: __( 'What the donor gets back', 'dono' ) },
-    { id: 'jobs',     title: __( 'Background jobs', 'dono' ),       sub: __( 'Receipts and emails are queued, not sent inline', 'dono' ) },
-    { id: 'portal',   title: __( 'Donor portal', 'dono' ),          sub: __( 'Where sign-in and receipt links point', 'dono' ) },
-    { id: 'licenses', title: __( 'Add-ons and licenses', 'dono' ),  sub: __( 'Updates and security fixes for what you installed', 'dono' ) },
+    { id: 'money',    title: __( 'Taking money', 'dono-fundraising-platform' ),          sub: __( 'What has to be true before a card is charged', 'dono-fundraising-platform' ) },
+    { id: 'page',     title: __( 'A live donation page', 'dono-fundraising-platform' ),  sub: __( 'Somewhere for a donor to land', 'dono-fundraising-platform' ) },
+    { id: 'receipts', title: __( 'Receipts and email', 'dono-fundraising-platform' ),    sub: __( 'What the donor gets back', 'dono-fundraising-platform' ) },
+    { id: 'jobs',     title: __( 'Background jobs', 'dono-fundraising-platform' ),       sub: __( 'Receipts and emails are queued, not sent inline', 'dono-fundraising-platform' ) },
+    { id: 'portal',   title: __( 'Donor portal', 'dono-fundraising-platform' ),          sub: __( 'Where sign-in and receipt links point', 'dono-fundraising-platform' ) },
+    { id: 'licenses', title: __( 'Add-ons and licenses', 'dono-fundraising-platform' ),  sub: __( 'Updates and security fixes for what you installed', 'dono-fundraising-platform' ) },
 ];
 
 export default function SetupPanel( { onJumpTo, active } ) {
@@ -37,11 +37,11 @@ export default function SetupPanel( { onJumpTo, active } ) {
     if ( error ) {
         return (
             <div className="dono-panel">
-                <Card title={ __( 'Could not check your setup', 'dono' ) }>
+                <Card title={ __( 'Could not check your setup', 'dono-fundraising-platform' ) }>
                     <p className="dono-connect-p">
-                        { __( 'Something went wrong reading the readiness report. Nothing is broken by this on its own.', 'dono' ) }
+                        { __( 'Something went wrong reading the readiness report. Nothing is broken by this on its own.', 'dono-fundraising-platform' ) }
                     </p>
-                    <Btn variant="primary" onClick={ load }>{ __( 'Try again', 'dono' ) }</Btn>
+                    <Btn variant="primary" onClick={ load }>{ __( 'Try again', 'dono-fundraising-platform' ) }</Btn>
                 </Card>
             </div>
         );
@@ -51,7 +51,7 @@ export default function SetupPanel( { onJumpTo, active } ) {
         return (
             <div className="dono-panel">
                 <div className="dono-readiness__head">
-                    <div className="dono-readiness__title">{ __( 'Checking your setup…', 'dono' ) }</div>
+                    <div className="dono-readiness__title">{ __( 'Checking your setup…', 'dono-fundraising-platform' ) }</div>
                 </div>
             </div>
         );
@@ -79,23 +79,23 @@ function Summary( { report } ) {
     const blockers = report.blockers || 0;
     const warnings = report.warnings || 0;
 
-    let title = __( 'Ready to accept donations', 'dono' );
-    let sub   = __( 'Nothing on this page is standing in a donor’s way.', 'dono' );
+    let title = __( 'Ready to accept donations', 'dono-fundraising-platform' );
+    let sub   = __( 'Nothing on this page is standing in a donor’s way.', 'dono-fundraising-platform' );
     let tone  = 'green';
 
     if ( blockers > 0 ) {
         tone  = 'red';
         title = sprintf(
             /* translators: %d: number of things preventing donations. */
-            _n( '%d thing is stopping donations', '%d things are stopping donations', blockers, 'dono' ),
+            _n( '%d thing is stopping donations', '%d things are stopping donations', blockers, 'dono-fundraising-platform' ),
             blockers
         );
-        sub = __( 'Until these are fixed, a donor cannot complete a donation.', 'dono' );
+        sub = __( 'Until these are fixed, a donor cannot complete a donation.', 'dono-fundraising-platform' );
     } else if ( warnings > 0 ) {
         tone = 'amber';
         sub  = sprintf(
             /* translators: %d: number of non-blocking issues. */
-            _n( '%d thing is worth a look, but donations work.', '%d things are worth a look, but donations work.', warnings, 'dono' ),
+            _n( '%d thing is worth a look, but donations work.', '%d things are worth a look, but donations work.', warnings, 'dono-fundraising-platform' ),
             warnings
         );
     }
@@ -118,13 +118,13 @@ function Group( { group, rows, onJumpTo } ) {
     const [ open, setOpen ] = useCardOpen( trouble > 0 );
 
     const pill = trouble === 0
-        ? <span className="dono-pill dono-pill--green"><span className="dono-pill__dot" />{ __( 'All good', 'dono' ) }</span>
+        ? <span className="dono-pill dono-pill--green"><span className="dono-pill__dot" />{ __( 'All good', 'dono-fundraising-platform' ) }</span>
         : (
             <span className="dono-pill dono-pill--amber">
                 <span className="dono-pill__dot" />
                 { sprintf(
                     /* translators: %d: number of checks in this group needing attention. */
-                    _n( '%d needs attention', '%d need attention', trouble, 'dono' ),
+                    _n( '%d needs attention', '%d need attention', trouble, 'dono-fundraising-platform' ),
                     trouble
                 ) }
             </span>
@@ -167,7 +167,7 @@ function Row( { row, onJumpTo } ) {
             </div>
             { row.action_url && (
                 <a className="dono-readiness-row__action" href={ row.action_url } onClick={ jump }>
-                    { row.action_label || __( 'Fix', 'dono' ) } →
+                    { row.action_label || __( 'Fix', 'dono-fundraising-platform' ) } →
                 </a>
             ) }
         </li>

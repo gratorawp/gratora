@@ -18,43 +18,43 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Name', 'dono' ) } initialOpen>
+                <PanelBody title={ __( 'Name', 'dono-fundraising-platform' ) } initialOpen>
                     <TextControl
-                        label={ __( 'First name label', 'dono' ) }
+                        label={ __( 'First name label', 'dono-fundraising-platform' ) }
                         value={ firstLabel }
                         onChange={ ( v ) => setAttributes( { firstLabel: v } ) }
-                        placeholder={ __( 'First name', 'dono' ) }
+                        placeholder={ __( 'First name', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'First name placeholder', 'dono' ) }
+                        label={ __( 'First name placeholder', 'dono-fundraising-platform' ) }
                         value={ firstPlaceholder }
                         onChange={ ( v ) => setAttributes( { firstPlaceholder: v } ) }
                         placeholder="Jane"
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'First name required', 'dono' ) }
+                        label={ __( 'First name required', 'dono-fundraising-platform' ) }
                         checked={ requireFirst }
                         onChange={ ( v ) => setAttributes( { requireFirst: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Last name label', 'dono' ) }
+                        label={ __( 'Last name label', 'dono-fundraising-platform' ) }
                         value={ lastLabel }
                         onChange={ ( v ) => setAttributes( { lastLabel: v } ) }
-                        placeholder={ __( 'Last name', 'dono' ) }
+                        placeholder={ __( 'Last name', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Last name placeholder', 'dono' ) }
+                        label={ __( 'Last name placeholder', 'dono-fundraising-platform' ) }
                         value={ lastPlaceholder }
                         onChange={ ( v ) => setAttributes( { lastPlaceholder: v } ) }
                         placeholder="Doe"
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Last name required', 'dono' ) }
+                        label={ __( 'Last name required', 'dono-fundraising-platform' ) }
                         checked={ requireLast }
                         onChange={ ( v ) => setAttributes( { requireLast: v } ) }
                         __nextHasNoMarginBottom
@@ -65,7 +65,7 @@ function Edit( { attributes, setAttributes } ) {
                 <div className="dono-block-preview__grid-2">
                     <div>
                         <span className="dono-block-preview__label">
-                            { firstLabel || __( 'First name', 'dono' ) }
+                            { firstLabel || __( 'First name', 'dono-fundraising-platform' ) }
                             { requireFirst && <em className="dono-block-preview__req" aria-hidden="true">*</em> }
                         </span>
                         <div className="dono-block-preview__field">
@@ -74,7 +74,7 @@ function Edit( { attributes, setAttributes } ) {
                     </div>
                     <div>
                         <span className="dono-block-preview__label">
-                            { lastLabel || __( 'Last name', 'dono' ) }
+                            { lastLabel || __( 'Last name', 'dono-fundraising-platform' ) }
                             { requireLast && <em className="dono-block-preview__req" aria-hidden="true">*</em> }
                         </span>
                         <div className="dono-block-preview__field">
@@ -90,7 +90,7 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Name', 'dono' ),
+        title:      __( 'Name', 'dono-fundraising-platform' ),
         category:   'dono-donor',
         icon:       BlockIcons[ 'name' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

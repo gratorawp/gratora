@@ -31,23 +31,23 @@ const STATUS_OPTIONS = Object.entries( STATUS_LABEL ).map( ( [ value, label ] ) 
  */
 function frequencyLabel( frequency ) {
     switch ( frequency ) {
-        case 'monthly':   return __( 'Monthly', 'dono' );
-        case 'yearly':    return __( 'Yearly', 'dono' );
-        case 'weekly':    return __( 'Weekly', 'dono' );
-        case 'quarterly': return __( 'Quarterly', 'dono' );
-        default:          return __( 'Recurring', 'dono' );
+        case 'monthly':   return __( 'Monthly', 'dono-fundraising-platform' );
+        case 'yearly':    return __( 'Yearly', 'dono-fundraising-platform' );
+        case 'weekly':    return __( 'Weekly', 'dono-fundraising-platform' );
+        case 'quarterly': return __( 'Quarterly', 'dono-fundraising-platform' );
+        default:          return __( 'Recurring', 'dono-fundraising-platform' );
     }
 }
 
 // 'recurring' is the useful default question ("which of these repeat?");
 // the individual cadences are there for orgs that run more than one.
 const FREQUENCY_OPTIONS = [
-    { value: 'recurring', label: __( 'Recurring (any)', 'dono' ) },
-    { value: 'one_time',  label: __( 'One time', 'dono' ) },
-    { value: 'monthly',   label: __( 'Monthly', 'dono' ) },
-    { value: 'yearly',    label: __( 'Yearly', 'dono' ) },
-    { value: 'weekly',    label: __( 'Weekly', 'dono' ) },
-    { value: 'quarterly', label: __( 'Quarterly', 'dono' ) },
+    { value: 'recurring', label: __( 'Recurring (any)', 'dono-fundraising-platform' ) },
+    { value: 'one_time',  label: __( 'One time', 'dono-fundraising-platform' ) },
+    { value: 'monthly',   label: __( 'Monthly', 'dono-fundraising-platform' ) },
+    { value: 'yearly',    label: __( 'Yearly', 'dono-fundraising-platform' ) },
+    { value: 'weekly',    label: __( 'Weekly', 'dono-fundraising-platform' ) },
+    { value: 'quarterly', label: __( 'Quarterly', 'dono-fundraising-platform' ) },
 ];
 
 function detailHref( reference ) {
@@ -148,7 +148,7 @@ export default function List() {
             .catch( ( err ) => {
                 if ( aborted ) return;
                 setCampaigns( [] );
-                notify.error( err?.message || __( 'The campaign filter could not be loaded.', 'dono' ) );
+                notify.error( err?.message || __( 'The campaign filter could not be loaded.', 'dono-fundraising-platform' ) );
             } );
         return () => { aborted = true; };
     }, [] );
@@ -208,7 +208,7 @@ export default function List() {
             } )
             .catch( ( err ) => {
                 if ( aborted ) return;
-                setFetchError( err?.message || __( 'Failed to load donations.', 'dono' ) );
+                setFetchError( err?.message || __( 'Failed to load donations.', 'dono-fundraising-platform' ) );
                 setData( [] );
                 setTotal( 0 );
                 setTestHidden( 0 );
@@ -233,7 +233,7 @@ export default function List() {
     const fields = useMemo( () => [
         {
             id:            'reference',
-            label:         __( 'Reference', 'dono' ),
+            label:         __( 'Reference', 'dono-fundraising-platform' ),
             enableSorting: true,
             // The badge rides the reference rather than occupying a column of
             // its own: on a live-only list that column is the same value on
@@ -245,14 +245,14 @@ export default function List() {
                         { item.reference }
                     </a>
                     { item.is_test && (
-                        <span className="dono-pill dono-pill--test">{ __( 'Test', 'dono' ) }</span>
+                        <span className="dono-pill dono-pill--test">{ __( 'Test', 'dono-fundraising-platform' ) }</span>
                     ) }
                 </span>
             ),
         },
         {
             id:    'frequency',
-            label: __( 'Frequency', 'dono' ),
+            label: __( 'Frequency', 'dono-fundraising-platform' ),
             // Nothing on the row said whether the money came from a standing
             // gift or a one-off, which is the first thing asked of it.
             elements: FREQUENCY_OPTIONS,
@@ -262,16 +262,16 @@ export default function List() {
             render: ( { item } ) => (
                 item.frequency && item.frequency !== 'one_time'
                     ? <span className="dono-pill dono-pill--blue">{ frequencyLabel( item.frequency ) }</span>
-                    : <span className="dono-pill dono-pill--gray">{ __( 'One time', 'dono' ) }</span>
+                    : <span className="dono-pill dono-pill--gray">{ __( 'One time', 'dono-fundraising-platform' ) }</span>
             ),
         },
         {
             id:    'donor',
-            label: __( 'Donor', 'dono' ),
+            label: __( 'Donor', 'dono-fundraising-platform' ),
             render: ( { item } ) => {
                 const d = item.donor;
                 if ( ! d ) return <span className="dono-row__sub">-</span>;
-                const name = d.name || __( '(no name)', 'dono' );
+                const name = d.name || __( '(no name)', 'dono-fundraising-platform' );
                 return (
                     <div className="dono-row">
                         <div className="dono-row__body">
@@ -284,7 +284,7 @@ export default function List() {
         },
         {
             id:            'amount',
-            label:         __( 'Amount', 'dono' ),
+            label:         __( 'Amount', 'dono-fundraising-platform' ),
             enableSorting: true,
             render: ( { item } ) => {
                 const showBase =
@@ -305,7 +305,7 @@ export default function List() {
         },
         {
             id:            'status',
-            label:         __( 'Status', 'dono' ),
+            label:         __( 'Status', 'dono-fundraising-platform' ),
             elements:      STATUS_OPTIONS,
             filterBy:      { operators: [ 'is' ] },
             enableSorting: true,
@@ -313,7 +313,7 @@ export default function List() {
         },
         {
             id:       'gateway',
-            label:    __( 'Gateway', 'dono' ),
+            label:    __( 'Gateway', 'dono-fundraising-platform' ),
             elements: gatewayOptions,
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => {
@@ -326,7 +326,7 @@ export default function List() {
         },
         {
             id:       'campaign',
-            label:    __( 'Campaign', 'dono' ),
+            label:    __( 'Campaign', 'dono-fundraising-platform' ),
             elements: campaigns.map( ( c ) => ( { value: String( c.id ), label: c.title || `#${ c.id }` } ) ),
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => (
@@ -337,20 +337,20 @@ export default function List() {
         },
         {
             id:       'is_test',
-            label:    __( 'Test mode', 'dono' ),
+            label:    __( 'Test mode', 'dono-fundraising-platform' ),
             elements: [
-                { value: 'yes', label: __( 'Test only', 'dono' ) },
-                { value: 'no',  label: __( 'Live only', 'dono' ) },
+                { value: 'yes', label: __( 'Test only', 'dono-fundraising-platform' ) },
+                { value: 'no',  label: __( 'Live only', 'dono-fundraising-platform' ) },
             ],
             filterBy:    { operators: [ 'is' ] },
             getValue:    ( { item } ) => ( item.is_test ? 'yes' : 'no' ),
             render:      ( { item } ) => item.is_test
-                ? <span className="dono-pill dono-pill--test">{ __( 'Test', 'dono' ) }</span>
+                ? <span className="dono-pill dono-pill--test">{ __( 'Test', 'dono-fundraising-platform' ) }</span>
                 : <span className="dono-row__sub">-</span>,
         },
         {
             id:     'form',
-            label:  __( 'Form', 'dono' ),
+            label:  __( 'Form', 'dono-fundraising-platform' ),
             render: ( { item } ) => (
                 item.form?.title
                     ? <a className="dono-row__link" href={ formEditorHref( item.form.id ) } { ...rowLinkProps }>{ item.form.title }</a>
@@ -359,7 +359,7 @@ export default function List() {
         },
         {
             id:            'created_at',
-            label:         __( 'Created', 'dono' ),
+            label:         __( 'Created', 'dono-fundraising-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <span className="dono-time" title={ formatDate( item.created_at ) }>
@@ -383,7 +383,7 @@ export default function List() {
     const actions = useMemo( () => [
         {
             id:           'mark-paid',
-            label:        __( 'Mark as paid', 'dono' ),
+            label:        __( 'Mark as paid', 'dono-fundraising-platform' ),
             icon:         () => <CheckIcon size={ 16 } strokeWidth={ 1.75 } />,
             supportsBulk: true,
             // Pending and still-settling donations can be flipped to paid;
@@ -396,21 +396,21 @@ export default function List() {
                 if ( ! targets.length ) return;
                 const n = targets.length;
                 const message = n === 1
-                    ? __( 'Mark this donation as paid? A receipt will be sent.', 'dono' )
+                    ? __( 'Mark this donation as paid? A receipt will be sent.', 'dono-fundraising-platform' )
                     : sprintf(
                         /* translators: %d: number of donations */
                         _n(
                             'Mark %d donation as paid? Receipts will be sent to each donor.',
                             'Mark %d donations as paid? Receipts will be sent to each donor.',
                             n,
-                            'dono'
+                            'dono-fundraising-platform'
                         ),
                         n
                     );
                 setConfirm( {
-                    title:        __( 'Mark donations as paid', 'dono' ),
+                    title:        __( 'Mark donations as paid', 'dono-fundraising-platform' ),
                     message,
-                    confirmLabel: __( 'Mark as paid', 'dono' ),
+                    confirmLabel: __( 'Mark as paid', 'dono-fundraising-platform' ),
                     onConfirm: async () => {
                         try {
                             await Promise.all( targets.map( ( i ) => apiFetch( {
@@ -419,11 +419,11 @@ export default function List() {
                             } ) ) );
                             notify.success( sprintf(
                                 /* translators: %d: number of donations */
-                                _n( '%d donation marked paid.', '%d donations marked paid.', n, 'dono' ),
+                                _n( '%d donation marked paid.', '%d donations marked paid.', n, 'dono-fundraising-platform' ),
                                 n
                             ) );
                         } catch ( err ) {
-                            setActionError( err?.message || __( 'Could not mark one or more donations paid.', 'dono' ) );
+                            setActionError( err?.message || __( 'Could not mark one or more donations paid.', 'dono-fundraising-platform' ) );
                         } finally {
                             // In the finally, not the try: a partial failure
                             // still paid some of them and emailed their donors
@@ -437,7 +437,7 @@ export default function List() {
         },
         {
             id:           'resend-receipt',
-            label:        __( 'Resend receipt', 'dono' ),
+            label:        __( 'Resend receipt', 'dono-fundraising-platform' ),
             icon:         () => <MailIcon size={ 16 } strokeWidth={ 1.75 } />,
             supportsBulk: true,
             // Only paid donations have a receipt to resend, and an erased donor
@@ -448,16 +448,16 @@ export default function List() {
                 if ( ! targets.length ) return;
                 const n = targets.length;
                 const message = n === 1
-                    ? __( 'Resend the receipt for this donation?', 'dono' )
+                    ? __( 'Resend the receipt for this donation?', 'dono-fundraising-platform' )
                     : sprintf(
                         /* translators: %d: number of donations */
-                        _n( 'Resend receipts for %d donation?', 'Resend receipts for %d donations?', n, 'dono' ),
+                        _n( 'Resend receipts for %d donation?', 'Resend receipts for %d donations?', n, 'dono-fundraising-platform' ),
                         n
                     );
                 setConfirm( {
-                    title:        __( 'Resend receipts', 'dono' ),
+                    title:        __( 'Resend receipts', 'dono-fundraising-platform' ),
                     message,
-                    confirmLabel: __( 'Resend', 'dono' ),
+                    confirmLabel: __( 'Resend', 'dono-fundraising-platform' ),
                     onConfirm: async () => {
                         try {
                             await Promise.all( targets.map( ( i ) => apiFetch( {
@@ -469,11 +469,11 @@ export default function List() {
                             // receipt twice.
                             notify.success( sprintf(
                                 /* translators: %d: receipt count */
-                                _n( '%d receipt resent.', '%d receipts resent.', n, 'dono' ),
+                                _n( '%d receipt resent.', '%d receipts resent.', n, 'dono-fundraising-platform' ),
                                 n
                             ) );
                         } catch ( err ) {
-                            setActionError( err?.message || __( 'Could not resend one or more receipts.', 'dono' ) );
+                            setActionError( err?.message || __( 'Could not resend one or more receipts.', 'dono-fundraising-platform' ) );
                         }
                     },
                 } );
@@ -484,29 +484,29 @@ export default function List() {
     return (
         <div>
             <div className="dono-crumbs">
-                <a href={ addQueryArgs( window.location.pathname, { page: 'dono' } ) }>{ __( 'Dono', 'dono' ) }</a>
+                <a href={ addQueryArgs( window.location.pathname, { page: 'dono-fundraising-platform' } ) }>{ __( 'Dono', 'dono-fundraising-platform' ) }</a>
                 <span className="sep">›</span>
-                <span>{ __( 'Donations', 'dono' ) }</span>
+                <span>{ __( 'Donations', 'dono-fundraising-platform' ) }</span>
             </div>
             <div className="dono-page-head">
                 <div className="dono-page-head__title-row">
-                    <h1>{ __( 'Donations', 'dono' ) }</h1>
+                    <h1>{ __( 'Donations', 'dono-fundraising-platform' ) }</h1>
                 </div>
                 <div className="dono-page-head__right">
                     <div className="dono-page-head__date-filters">
-                        <span className="dono-page-head__date-filters-label">{ __( 'From', 'dono' ) }</span>
+                        <span className="dono-page-head__date-filters-label">{ __( 'From', 'dono-fundraising-platform' ) }</span>
                         <DateField
                             value={ createdFrom }
                             onChange={ ( v ) => setCreatedFrom( v || '' ) }
-                            ariaLabel={ __( 'Filter donations from', 'dono' ) }
-                            placeholder={ __( 'Any', 'dono' ) }
+                            ariaLabel={ __( 'Filter donations from', 'dono-fundraising-platform' ) }
+                            placeholder={ __( 'Any', 'dono-fundraising-platform' ) }
                         />
-                        <span className="dono-page-head__date-filters-label">{ __( 'To', 'dono' ) }</span>
+                        <span className="dono-page-head__date-filters-label">{ __( 'To', 'dono-fundraising-platform' ) }</span>
                         <DateField
                             value={ createdTo }
                             onChange={ ( v ) => setCreatedTo( v || '' ) }
-                            ariaLabel={ __( 'Filter donations to', 'dono' ) }
-                            placeholder={ __( 'Any', 'dono' ) }
+                            ariaLabel={ __( 'Filter donations to', 'dono-fundraising-platform' ) }
+                            placeholder={ __( 'Any', 'dono-fundraising-platform' ) }
                         />
                         { ( createdFrom || createdTo ) && (
                             <button
@@ -514,12 +514,12 @@ export default function List() {
                                 className="dono-page-head__date-filters-clear"
                                 onClick={ () => { setCreatedFrom( '' ); setCreatedTo( '' ); } }
                             >
-                                { __( 'Clear', 'dono' ) }
+                                { __( 'Clear', 'dono-fundraising-platform' ) }
                             </button>
                         ) }
                     </div>
                     <span className="dono-page-head__meta">
-                        { sprintf( /* translators: %s: number of donations */ _n( '%s donation', '%s donations', total, 'dono' ), total.toLocaleString() ) }
+                        { sprintf( /* translators: %s: number of donations */ _n( '%s donation', '%s donations', total, 'dono-fundraising-platform' ), total.toLocaleString() ) }
                     </span>
                     { /* Nothing to reveal on a site that has never taken a test
                          donation, so the control is only offered once some
@@ -529,14 +529,14 @@ export default function List() {
                             <Switch
                                 checked={ includeTest }
                                 onChange={ toggleTest }
-                                label={ __( 'Show test donations', 'dono' ) }
+                                label={ __( 'Show test donations', 'dono-fundraising-platform' ) }
                             />
-                            <span>{ __( 'Show test donations', 'dono' ) }</span>
+                            <span>{ __( 'Show test donations', 'dono-fundraising-platform' ) }</span>
                         </label>
                     ) }
                     <Btn variant="primary" onClick={ () => setRecording( true ) }>
                         <Plus size={ 16 } strokeWidth={ 1.75 } />
-                        { __( 'Record a donation', 'dono' ) }
+                        { __( 'Record a donation', 'dono-fundraising-platform' ) }
                     </Btn>
                 </div>
             </div>
@@ -554,7 +554,7 @@ export default function List() {
                         // they get, so it names the row.
                         notify.success( sprintf(
                             /* translators: %s: the new donation's reference. */
-                            __( 'Recorded as %s.', 'dono' ),
+                            __( 'Recorded as %s.', 'dono-fundraising-platform' ),
                             created?.reference || ''
                         ) );
                     } }
@@ -574,13 +574,13 @@ export default function List() {
                             '%d test donation is hidden.',
                             '%d test donations are hidden.',
                             testHidden,
-                            'dono'
+                            'dono-fundraising-platform'
                         ),
                         testHidden
                     ) }
                     { ' ' }
                     <Btn variant="link" onClick={ () => toggleTest( true ) }>
-                        { __( 'Show them', 'dono' ) }
+                        { __( 'Show them', 'dono-fundraising-platform' ) }
                     </Btn>
                 </div>
             ) }
@@ -593,15 +593,15 @@ export default function List() {
                  test donations. */ }
             { stats?.includes_test && (
                 <p className="dono-list-note">
-                    { __( 'Test donations are counted in the figures above and shown in the list below. These totals include money that was never actually taken, so they cannot be quoted as income.', 'dono' ) }
+                    { __( 'Test donations are counted in the figures above and shown in the list below. These totals include money that was never actually taken, so they cannot be quoted as income.', 'dono-fundraising-platform' ) }
                 </p>
             ) }
 
             { ! loading && total === 0 && ! view.search && ! statusFilter && ! createdFrom && ! createdTo && ! view.filters?.length ? (
                 <EmptyState
                     icon={ <Coins size={ 22 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'No donations yet', 'dono' ) }
-                    body={ __( 'Donations made through your published forms will appear here. Donors are created automatically from each completed donation.', 'dono' ) }
+                    title={ __( 'No donations yet', 'dono-fundraising-platform' ) }
+                    body={ __( 'Donations made through your published forms will appear here. Donors are created automatically from each completed donation.', 'dono-fundraising-platform' ) }
                 />
             ) : (
                 <div className="dono-dataviews">
@@ -628,39 +628,39 @@ function donationKpis( stats ) {
     // Per card, not once above the strip: a single figure gets read out, quoted
     // and screenshotted on its own, and it has to carry its own disclaimer.
     const includesTest = !! stats?.includes_test;
-    const testSub = includesTest ? __( 'Includes test donations', 'dono' ) : null;
+    const testSub = includesTest ? __( 'Includes test donations', 'dono-fundraising-platform' ) : null;
 
     let raisedSub = testSub;
     if ( stats?.currency ) {
         raisedSub = includesTest
             ? sprintf(
                 /* translators: %s: currency code */
-                __( 'in %s, includes test donations', 'dono' ),
+                __( 'in %s, includes test donations', 'dono-fundraising-platform' ),
                 stats.currency
             )
-            : sprintf( /* translators: %s: currency code */ __( 'in %s', 'dono' ), stats.currency );
+            : sprintf( /* translators: %s: currency code */ __( 'in %s', 'dono-fundraising-platform' ), stats.currency );
     }
 
     return [
         {
-            label: __( 'Total donations', 'dono' ),
+            label: __( 'Total donations', 'dono-fundraising-platform' ),
             value: stats ? stats.total_count.toLocaleString() : '-',
             sub:   testSub,
         },
         {
-            label: __( 'Paid', 'dono' ),
+            label: __( 'Paid', 'dono-fundraising-platform' ),
             value: stats ? stats.paid_count.toLocaleString() : '-',
             sub:   testSub,
         },
         {
-            label: __( 'Raised', 'dono' ),
+            label: __( 'Raised', 'dono-fundraising-platform' ),
             value: stats
                 ? formatAmount( stats.raised_cents, stats.currency || undefined )
                 : '-',
             sub: raisedSub,
         },
         {
-            label: __( 'Unique donors', 'dono' ),
+            label: __( 'Unique donors', 'dono-fundraising-platform' ),
             value: stats ? stats.donors_count.toLocaleString() : '-',
             sub:   testSub,
         },

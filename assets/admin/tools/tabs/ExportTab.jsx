@@ -15,7 +15,7 @@ async function download( path, setNotice, setBusy, fallbackName ) {
         const blob = await res.blob();
 
         if ( blob.size === 0 ) {
-            setNotice( { type: 'error', text: __( 'That export came back empty.', 'dono' ) } );
+            setNotice( { type: 'error', text: __( 'That export came back empty.', 'dono-fundraising-platform' ) } );
             return;
         }
 
@@ -29,7 +29,7 @@ async function download( path, setNotice, setBusy, fallbackName ) {
         a.remove();
         URL.revokeObjectURL( url );
     } catch ( err ) {
-        setNotice( { type: 'error', text: err?.message || __( 'That export could not be generated.', 'dono' ) } );
+        setNotice( { type: 'error', text: err?.message || __( 'That export could not be generated.', 'dono-fundraising-platform' ) } );
     } finally {
         setBusy( false );
     }
@@ -126,7 +126,7 @@ export default function ExportTab( { setNotice } ) {
             a.remove();
             URL.revokeObjectURL( url );
         } catch ( err ) {
-            setNotice( { type: 'error', text: err?.message || __( 'Export failed.', 'dono' ) } );
+            setNotice( { type: 'error', text: err?.message || __( 'Export failed.', 'dono-fundraising-platform' ) } );
         } finally {
             setBusy( '' );
         }
@@ -137,32 +137,32 @@ export default function ExportTab( { setNotice } ) {
             <table className="dono-exports">
                 <thead>
                     <tr>
-                        <th scope="col">{ __( 'Export type', 'dono' ) }</th>
-                        <th scope="col">{ __( 'Options', 'dono' ) }</th>
+                        <th scope="col">{ __( 'Export type', 'dono-fundraising-platform' ) }</th>
+                        <th scope="col">{ __( 'Options', 'dono-fundraising-platform' ) }</th>
                     </tr>
                 </thead>
                 <tbody>
                     <Row
-                        title={ __( 'Donations', 'dono' ) }
-                        description={ __( 'Every donation as a CSV: reference, donor, amount, status, campaign and gateway.', 'dono' ) }
+                        title={ __( 'Donations', 'dono-fundraising-platform' ) }
+                        description={ __( 'Every donation as a CSV: reference, donor, amount, status, campaign and gateway.', 'dono-fundraising-platform' ) }
                     >
                         <div className="dono-exports__controls">
                             <span className="dono-tools-field">
-                                { __( 'From', 'dono' ) }
+                                { __( 'From', 'dono-fundraising-platform' ) }
                                 <DateField
                                     value={ donationsFrom }
                                     onChange={ ( v ) => setDonationsFrom( v || '' ) }
-                                    ariaLabel={ __( 'Export donations from', 'dono' ) }
-                                    placeholder={ __( 'Any', 'dono' ) }
+                                    ariaLabel={ __( 'Export donations from', 'dono-fundraising-platform' ) }
+                                    placeholder={ __( 'Any', 'dono-fundraising-platform' ) }
                                 />
                             </span>
                             <span className="dono-tools-field">
-                                { __( 'To', 'dono' ) }
+                                { __( 'To', 'dono-fundraising-platform' ) }
                                 <DateField
                                     value={ donationsTo }
                                     onChange={ ( v ) => setDonationsTo( v || '' ) }
-                                    ariaLabel={ __( 'Export donations to', 'dono' ) }
-                                    placeholder={ __( 'Any', 'dono' ) }
+                                    ariaLabel={ __( 'Export donations to', 'dono-fundraising-platform' ) }
+                                    placeholder={ __( 'Any', 'dono-fundraising-platform' ) }
                                 />
                             </span>
                             <Btn
@@ -171,23 +171,23 @@ export default function ExportTab( { setNotice } ) {
                                 isBusy={ busy === 'donations' }
                                 onClick={ () => download( donationsPath, setNotice, ( b ) => setBusy( b ? 'donations' : '' ), 'donations.csv' ) }
                             >
-                                { __( 'Generate CSV', 'dono' ) }
+                                { __( 'Generate CSV', 'dono-fundraising-platform' ) }
                             </Btn>
                         </div>
                         <label className="dono-exports__check">
                             <input type="checkbox" checked={ includeTest } onChange={ ( e ) => setIncludeTest( e.target.checked ) } />
-                            { __( 'Include test donations', 'dono' ) }
+                            { __( 'Include test donations', 'dono-fundraising-platform' ) }
                         </label>
                     </Row>
 
                     { canReports && (
                         <Row
-                            title={ __( 'Revenue report (PDF)', 'dono' ) }
-                            description={ __( 'A one-page summary of a year: total raised, month by month, and the best month. No donor details, so it can go straight to a board.', 'dono' ) }
+                            title={ __( 'Revenue report (PDF)', 'dono-fundraising-platform' ) }
+                            description={ __( 'A one-page summary of a year: total raised, month by month, and the best month. No donor details, so it can go straight to a board.', 'dono-fundraising-platform' ) }
                         >
                             <div className="dono-exports__controls">
                                 <label className="dono-tools-field">
-                                    { __( 'Year', 'dono' ) }
+                                    { __( 'Year', 'dono-fundraising-platform' ) }
                                     <select className="dono-select" value={ pdfYear } onChange={ ( e ) => setPdfYear( Number( e.target.value ) ) }>
                                         { years.map( ( y ) => <option key={ y } value={ y }>{ y }</option> ) }
                                     </select>
@@ -198,7 +198,7 @@ export default function ExportTab( { setNotice } ) {
                                     isBusy={ busy === 'pdf' }
                                     onClick={ () => download( `/dono/v1/admin/exports/revenue.pdf?year=${ pdfYear }`, setNotice, ( b ) => setBusy( b ? 'pdf' : '' ), 'revenue.pdf' ) }
                                 >
-                                    { __( 'Generate PDF', 'dono' ) }
+                                    { __( 'Generate PDF', 'dono-fundraising-platform' ) }
                                 </Btn>
                             </div>
                         </Row>
@@ -206,28 +206,28 @@ export default function ExportTab( { setNotice } ) {
 
                     { canReports && (
                         <Row
-                            title={ __( 'Revenue by month', 'dono' ) }
-                            description={ __( 'Revenue, donation count and average gift for every month in the range. Quiet months are written as zero rows, so the file charts as a continuous series.', 'dono' ) }
+                            title={ __( 'Revenue by month', 'dono-fundraising-platform' ) }
+                            description={ __( 'Revenue, donation count and average gift for every month in the range. Quiet months are written as zero rows, so the file charts as a continuous series.', 'dono-fundraising-platform' ) }
                         >
                             <div className="dono-exports__controls">
                                 <span className="dono-tools-field">
-                                    { __( 'From', 'dono' ) }
+                                    { __( 'From', 'dono-fundraising-platform' ) }
                                     <MonthField
                                         value={ statsFrom }
                                         onChange={ setStatsFrom }
                                         min={ opts?.first_month }
                                         max={ opts?.current_month }
-                                        ariaLabel={ __( 'Revenue from month', 'dono' ) }
+                                        ariaLabel={ __( 'Revenue from month', 'dono-fundraising-platform' ) }
                                     />
                                 </span>
                                 <span className="dono-tools-field">
-                                    { __( 'To', 'dono' ) }
+                                    { __( 'To', 'dono-fundraising-platform' ) }
                                     <MonthField
                                         value={ statsTo }
                                         onChange={ setStatsTo }
                                         min={ opts?.first_month }
                                         max={ opts?.current_month }
-                                        ariaLabel={ __( 'Revenue to month', 'dono' ) }
+                                        ariaLabel={ __( 'Revenue to month', 'dono-fundraising-platform' ) }
                                     />
                                 </span>
                                 <Btn
@@ -236,7 +236,7 @@ export default function ExportTab( { setNotice } ) {
                                     isBusy={ busy === 'stats' }
                                     onClick={ () => download( statsPath, setNotice, ( b ) => setBusy( b ? 'stats' : '' ), 'revenue.csv' ) }
                                 >
-                                    { __( 'Generate CSV', 'dono' ) }
+                                    { __( 'Generate CSV', 'dono-fundraising-platform' ) }
                                 </Btn>
                             </div>
                         </Row>
@@ -244,32 +244,32 @@ export default function ExportTab( { setNotice } ) {
 
                     { canDonors && (
                         <Row
-                            title={ __( 'Donors', 'dono' ) }
-                            description={ __( 'The donor list as a CSV, by when each donor record was created. Take only the columns you need: names, emails, phone numbers and addresses are personal data, and this file is not encrypted once it leaves the site.', 'dono' ) }
+                            title={ __( 'Donors', 'dono-fundraising-platform' ) }
+                            description={ __( 'The donor list as a CSV, by when each donor record was created. Take only the columns you need: names, emails, phone numbers and addresses are personal data, and this file is not encrypted once it leaves the site.', 'dono-fundraising-platform' ) }
                         >
                             <div className="dono-exports__controls">
                                 <span className="dono-tools-field">
-                                    { __( 'From', 'dono' ) }
+                                    { __( 'From', 'dono-fundraising-platform' ) }
                                     <DateField
                                         value={ donorsFrom }
                                         onChange={ ( v ) => setDonorsFrom( v || '' ) }
-                                        ariaLabel={ __( 'Export donors from', 'dono' ) }
-                                        placeholder={ __( 'Any', 'dono' ) }
+                                        ariaLabel={ __( 'Export donors from', 'dono-fundraising-platform' ) }
+                                        placeholder={ __( 'Any', 'dono-fundraising-platform' ) }
                                     />
                                 </span>
                                 <span className="dono-tools-field">
-                                    { __( 'To', 'dono' ) }
+                                    { __( 'To', 'dono-fundraising-platform' ) }
                                     <DateField
                                         value={ donorsTo }
                                         onChange={ ( v ) => setDonorsTo( v || '' ) }
-                                        ariaLabel={ __( 'Export donors to', 'dono' ) }
-                                        placeholder={ __( 'Any', 'dono' ) }
+                                        ariaLabel={ __( 'Export donors to', 'dono-fundraising-platform' ) }
+                                        placeholder={ __( 'Any', 'dono-fundraising-platform' ) }
                                     />
                                 </span>
                                 <label className="dono-tools-field">
-                                    { __( 'Campaign', 'dono' ) }
+                                    { __( 'Campaign', 'dono-fundraising-platform' ) }
                                     <select className="dono-select" value={ donorsCampaign } onChange={ ( e ) => setDonorsCampaign( Number( e.target.value ) ) }>
-                                        <option value={ 0 }>{ __( 'All campaigns', 'dono' ) }</option>
+                                        <option value={ 0 }>{ __( 'All campaigns', 'dono-fundraising-platform' ) }</option>
                                         { ( opts?.campaigns || [] ).map( ( c ) => (
                                             <option key={ c.id } value={ c.id }>{ c.title || `#${ c.id }` }</option>
                                         ) ) }
@@ -281,12 +281,12 @@ export default function ExportTab( { setNotice } ) {
                                     isBusy={ busy === 'donors' }
                                     onClick={ () => download( donorsPath, setNotice, ( b ) => setBusy( b ? 'donors' : '' ), 'donors.csv' ) }
                                 >
-                                    { __( 'Generate CSV', 'dono' ) }
+                                    { __( 'Generate CSV', 'dono-fundraising-platform' ) }
                                 </Btn>
                             </div>
 
                             <div className="dono-exports__columns">
-                                <p className="dono-exports__columns-head">{ __( 'Columns', 'dono' ) }</p>
+                                <p className="dono-exports__columns-head">{ __( 'Columns', 'dono-fundraising-platform' ) }</p>
                                 <div className="dono-exports__grid">
                                     { ( opts?.donor_columns || [] ).map( ( c ) => (
                                         <label key={ c.key }>
@@ -304,8 +304,8 @@ export default function ExportTab( { setNotice } ) {
                     ) }
 
                     <Row
-                        title={ __( 'Everything', 'dono' ) }
-                        description={ __( 'Campaigns, funds, forms, donors, donations, recurring plans and receipts as one JSON file, which the Import tab can restore onto another Dono site.', 'dono' ) }
+                        title={ __( 'Everything', 'dono-fundraising-platform' ) }
+                        description={ __( 'Campaigns, funds, forms, donors, donations, recurring plans and receipts as one JSON file, which the Import tab can restore onto another Dono site.', 'dono-fundraising-platform' ) }
                     >
                         <div className="dono-exports__controls">
                             <Btn
@@ -314,17 +314,17 @@ export default function ExportTab( { setNotice } ) {
                                 isBusy={ busy === 'everything' }
                                 onClick={ () => download( '/dono/v1/admin/tools/export-all', setNotice, ( b ) => setBusy( b ? 'everything' : '' ), 'dono-export.json' ) }
                             >
-                                { __( 'Export JSON', 'dono' ) }
+                                { __( 'Export JSON', 'dono-fundraising-platform' ) }
                             </Btn>
                         </div>
                         <p className="dono-tools-note">
-                            { __( 'Donor names, email addresses and postal addresses are readable in this file. They have to be, or it could only ever be restored onto the site it came from. Treat it like the donor database it is.', 'dono' ) }
+                            { __( 'Donor names, email addresses and postal addresses are readable in this file. They have to be, or it could only ever be restored onto the site it came from. Treat it like the donor database it is.', 'dono-fundraising-platform' ) }
                         </p>
                     </Row>
 
                     <Row
-                        title={ __( 'Settings', 'dono' ) }
-                        description={ __( 'Every Dono setting as JSON, to lift a configured site onto another install. Donations, donors and campaigns are not included.', 'dono' ) }
+                        title={ __( 'Settings', 'dono-fundraising-platform' ) }
+                        description={ __( 'Every Dono setting as JSON, to lift a configured site onto another install. Donations, donors and campaigns are not included.', 'dono-fundraising-platform' ) }
                     >
                         <div className="dono-exports__controls">
                             <Btn
@@ -333,11 +333,11 @@ export default function ExportTab( { setNotice } ) {
                                 isBusy={ busy === 'settings' }
                                 onClick={ exportSettings }
                             >
-                                { __( 'Export JSON', 'dono' ) }
+                                { __( 'Export JSON', 'dono-fundraising-platform' ) }
                             </Btn>
                         </div>
                         <p className="dono-tools-note">
-                            { __( 'Secrets are masked. A gateway key never leaves the site in an export, so an imported file cannot restore one.', 'dono' ) }
+                            { __( 'Secrets are masked. A gateway key never leaves the site in an export, so an imported file cannot restore one.', 'dono-fundraising-platform' ) }
                         </p>
                     </Row>
                 </tbody>

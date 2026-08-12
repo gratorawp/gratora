@@ -36,13 +36,13 @@ final class OfflineGateway implements PaymentGateway
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('Offline donations', 'dono');
+        return __('Offline donations', 'dono-fundraising-platform');
     }
 
     /** @since 1.0.0 */
     public function description(): string
     {
-        return __('Pay by bank transfer, check or cash. We confirm it manually.', 'dono');
+        return __('Pay by bank transfer, check or cash. We confirm it manually.', 'dono-fundraising-platform');
     }
 
     /** @since 1.0.0 */

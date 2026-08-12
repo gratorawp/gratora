@@ -27,9 +27,9 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Divider', 'dono' ) } initialOpen>
+                <PanelBody title={ __( 'Divider', 'dono-fundraising-platform' ) } initialOpen>
                     <Slider
-                        label={ __( 'Space above', 'dono' ) }
+                        label={ __( 'Space above', 'dono-fundraising-platform' ) }
                         value={ marginTop }
                         onChange={ ( v ) => setAttributes( { marginTop: Number( v ) } ) }
                         min={ 0 }
@@ -37,7 +37,7 @@ function Edit( { attributes, setAttributes } ) {
                         unit="px"
                     />
                     <Slider
-                        label={ __( 'Space below', 'dono' ) }
+                        label={ __( 'Space below', 'dono-fundraising-platform' ) }
                         value={ marginBottom }
                         onChange={ ( v ) => setAttributes( { marginBottom: Number( v ) } ) }
                         min={ 0 }
@@ -45,7 +45,7 @@ function Edit( { attributes, setAttributes } ) {
                         unit="px"
                     />
                     <Slider
-                        label={ __( 'Line thickness', 'dono' ) }
+                        label={ __( 'Line thickness', 'dono-fundraising-platform' ) }
                         value={ thickness }
                         onChange={ ( v ) => setAttributes( { thickness: Number( v ) } ) }
                         min={ 1 }
@@ -53,12 +53,12 @@ function Edit( { attributes, setAttributes } ) {
                         unit="px"
                     />
                     <ColorInput
-                        label={ __( 'Line colour', 'dono' ) }
+                        label={ __( 'Line colour', 'dono-fundraising-platform' ) }
                         value={ color }
                         onChange={ ( v ) => setAttributes( { color: v || '' } ) }
                     />
                     <p style={ { fontSize: 12, color: '#6b7280', margin: '8px 0 0' } }>
-                        { __( 'Leave the colour empty to follow the form border colour.', 'dono' ) }
+                        { __( 'Leave the colour empty to follow the form border colour.', 'dono-fundraising-platform' ) }
                     </p>
                 </PanelBody>
                 <ConditionPanel
@@ -83,8 +83,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Divider', 'dono' ),
-        description: __( 'A horizontal line with adjustable spacing and colour.', 'dono' ),
+        title:      __( 'Divider', 'dono-fundraising-platform' ),
+        description: __( 'A horizontal line with adjustable spacing and colour.', 'dono-fundraising-platform' ),
         category:   'dono-content',
         icon:       BlockIcons.divider,
         supports: { html: false, anchor: false, inserter: true },

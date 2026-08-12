@@ -140,7 +140,7 @@ final class ReadinessService
                 $ready[] = $gateway->label();
             }
         }
-        if ($this->offlineReady()) $ready[] = __('offline donations', 'dono');
+        if ($this->offlineReady()) $ready[] = __('offline donations', 'dono-fundraising-platform');
 
         $ready = array_values(array_unique($ready));
 
@@ -148,10 +148,10 @@ final class ReadinessService
             return $this->fail(
                 'gateway',
                 'money',
-                __('No way to take a donation', 'dono'),
-                __('Add keys for a payment gateway, or switch on offline donations and write the instructions donors will follow.', 'dono'),
+                __('No way to take a donation', 'dono-fundraising-platform'),
+                __('Add keys for a payment gateway, or switch on offline donations and write the instructions donors will follow.', 'dono-fundraising-platform'),
                 'gateways',
-                __('Set up payments', 'dono'),
+                __('Set up payments', 'dono-fundraising-platform'),
                 true
             );
         }
@@ -162,10 +162,10 @@ final class ReadinessService
             return $this->warn(
                 'gateway',
                 'money',
-                __('Stripe has keys but cannot charge yet', 'dono'),
-                __('Stripe has not enabled charges on this account. Finish the remaining verification steps in your Stripe dashboard.', 'dono'),
+                __('Stripe has keys but cannot charge yet', 'dono-fundraising-platform'),
+                __('Stripe has not enabled charges on this account. Finish the remaining verification steps in your Stripe dashboard.', 'dono-fundraising-platform'),
                 'gateways',
-                __('Open payments', 'dono')
+                __('Open payments', 'dono-fundraising-platform')
             );
         }
 
@@ -174,7 +174,7 @@ final class ReadinessService
             'money',
             sprintf(
                 /* translators: %s: comma-separated list of payment methods that can take a donation. */
-                __('Donations can be taken through %s', 'dono'),
+                __('Donations can be taken through %s', 'dono-fundraising-platform'),
                 implode(', ', $ready)
             )
         );
@@ -191,18 +191,18 @@ final class ReadinessService
             return $this->warn(
                 'mode',
                 'money',
-                __('Test mode is on for every form', 'dono'),
-                __('No real payment is taken and these donations are excluded from reporting. Turn it off when you are ready to go live.', 'dono'),
+                __('Test mode is on for every form', 'dono-fundraising-platform'),
+                __('No real payment is taken and these donations are excluded from reporting. Turn it off when you are ready to go live.', 'dono-fundraising-platform'),
                 'gateways',
-                __('Open payments', 'dono')
+                __('Open payments', 'dono-fundraising-platform')
             );
         }
 
         // Live mode reading a test key charges nobody, and the donor sees a
         // success page for a payment that never happened.
         $missing = [];
-        if ($this->switchedOn('stripe') && $this->stripe->isConnected() && ! $this->stripe->hasKeysFor(false)) $missing[] = __('Stripe', 'dono');
-        if ($this->switchedOn('paypal') && $this->payPal->isConnected() && ! $this->payPal->hasKeysFor(false)) $missing[] = __('PayPal', 'dono');
+        if ($this->switchedOn('stripe') && $this->stripe->isConnected() && ! $this->stripe->hasKeysFor(false)) $missing[] = __('Stripe', 'dono-fundraising-platform');
+        if ($this->switchedOn('paypal') && $this->payPal->isConnected() && ! $this->payPal->hasKeysFor(false)) $missing[] = __('PayPal', 'dono-fundraising-platform');
 
         /**
          * A gateway that ships in an add-on owns its own credentials, so it
@@ -221,17 +221,17 @@ final class ReadinessService
                 'money',
                 sprintf(
                     /* translators: %s: comma-separated list of gateway names holding only test keys. */
-                    __('Live mode, but %s only has test keys', 'dono'),
+                    __('Live mode, but %s only has test keys', 'dono-fundraising-platform'),
                     implode(', ', $missing)
                 ),
-                __('Donations through it will fail. Add the live key pair, or turn test mode back on.', 'dono'),
+                __('Donations through it will fail. Add the live key pair, or turn test mode back on.', 'dono-fundraising-platform'),
                 'gateways',
-                __('Add live keys', 'dono'),
+                __('Add live keys', 'dono-fundraising-platform'),
                 true
             );
         }
 
-        return $this->pass('mode', 'money', __('Live mode, with live keys on file', 'dono'));
+        return $this->pass('mode', 'money', __('Live mode, with live keys on file', 'dono-fundraising-platform'));
     }
 
     /**
@@ -242,23 +242,23 @@ final class ReadinessService
     private function httpsCheck(): array
     {
         if (is_ssl()) {
-            return $this->pass('https', 'money', __('The site is served over HTTPS', 'dono'));
+            return $this->pass('https', 'money', __('The site is served over HTTPS', 'dono-fundraising-platform'));
         }
 
         if ($this->testMode()) {
             return $this->warn(
                 'https',
                 'money',
-                __('The site is not on HTTPS', 'dono'),
-                __('Fine while you are rehearsing, but live card charges are rejected without it.', 'dono')
+                __('The site is not on HTTPS', 'dono-fundraising-platform'),
+                __('Fine while you are rehearsing, but live card charges are rejected without it.', 'dono-fundraising-platform')
             );
         }
 
         return $this->fail(
             'https',
             'money',
-            __('The site is not on HTTPS', 'dono'),
-            __('Card gateways reject live charges on plain HTTP. Install a certificate before taking donations.', 'dono'),
+            __('The site is not on HTTPS', 'dono-fundraising-platform'),
+            __('Card gateways reject live charges on plain HTTP. Install a certificate before taking donations.', 'dono-fundraising-platform'),
             null,
             null,
             true
@@ -276,16 +276,16 @@ final class ReadinessService
             return null;
         }
         if ($this->stripeApi->hasWebhookSecret()) {
-            return $this->pass('stripe-webhook', 'money', __('Stripe webhooks are signed', 'dono'));
+            return $this->pass('stripe-webhook', 'money', __('Stripe webhooks are signed', 'dono-fundraising-platform'));
         }
 
         return $this->warn(
             'stripe-webhook',
             'money',
-            __('Stripe has no webhook signing secret', 'dono'),
-            __('Without it Dono cannot trust what Stripe reports, so renewals, refunds and cancellations made in Stripe never reach this site.', 'dono'),
+            __('Stripe has no webhook signing secret', 'dono-fundraising-platform'),
+            __('Without it Dono cannot trust what Stripe reports, so renewals, refunds and cancellations made in Stripe never reach this site.', 'dono-fundraising-platform'),
             'gateways',
-            __('Add the secret', 'dono')
+            __('Add the secret', 'dono-fundraising-platform')
         );
     }
 
@@ -300,16 +300,16 @@ final class ReadinessService
             return null;
         }
         if ($this->payPal->webhookId($this->testMode()) !== '') {
-            return $this->pass('paypal-webhook', 'money', __('PayPal webhooks are registered', 'dono'));
+            return $this->pass('paypal-webhook', 'money', __('PayPal webhooks are registered', 'dono-fundraising-platform'));
         }
 
         return $this->warn(
             'paypal-webhook',
             'money',
-            __('PayPal has no webhook registered', 'dono'),
-            __('Every PayPal notification will be rejected. Donations PayPal settles after checkout will stay unpaid, and refunds, disputes and renewals will not reach this site.', 'dono'),
+            __('PayPal has no webhook registered', 'dono-fundraising-platform'),
+            __('Every PayPal notification will be rejected. Donations PayPal settles after checkout will stay unpaid, and refunds, disputes and renewals will not reach this site.', 'dono-fundraising-platform'),
             'gateways',
-            __('Register the webhook', 'dono')
+            __('Register the webhook', 'dono-fundraising-platform')
         );
     }
 
@@ -324,16 +324,16 @@ final class ReadinessService
             return null;
         }
         if ($this->applePay->isFileReady()) {
-            return $this->pass('apple-pay', 'money', __('Apple Pay is verified for this domain', 'dono'));
+            return $this->pass('apple-pay', 'money', __('Apple Pay is verified for this domain', 'dono-fundraising-platform'));
         }
 
         return $this->warn(
             'apple-pay',
             'money',
-            __('Apple Pay is not verified for this domain', 'dono'),
-            __('The Apple Pay button simply does not appear until the domain association file is in place. Everything else keeps working.', 'dono'),
+            __('Apple Pay is not verified for this domain', 'dono-fundraising-platform'),
+            __('The Apple Pay button simply does not appear until the domain association file is in place. Everything else keeps working.', 'dono-fundraising-platform'),
             'gateways',
-            __('Verify the domain', 'dono')
+            __('Verify the domain', 'dono-fundraising-platform')
         );
     }
 
@@ -366,7 +366,7 @@ final class ReadinessService
                 'page',
                 sprintf(
                     /* translators: %d: number of campaigns with a published donation form. */
-                    _n('%d campaign is live and can take donations', '%d campaigns are live and can take donations', count($live), 'dono'),
+                    _n('%d campaign is live and can take donations', '%d campaigns are live and can take donations', count($live), 'dono-fundraising-platform'),
                     count($live)
                 )
             );
@@ -375,17 +375,17 @@ final class ReadinessService
         // Publishing a campaign whose form is still a draft leaves its page as a
         // draft too, so the operator sees "published" and the public sees a 404.
         $detail = $campaigns === []
-            ? __('Create a campaign, then publish it together with its donation form.', 'dono')
-            : __('Your published campaigns have no published donation form, so their pages stay drafts and donors see nothing.', 'dono');
+            ? __('Create a campaign, then publish it together with its donation form.', 'dono-fundraising-platform')
+            : __('Your published campaigns have no published donation form, so their pages stay drafts and donors see nothing.', 'dono-fundraising-platform');
 
         return [
             'id'           => 'donation-page',
             'group'        => 'page',
             'status'       => self::FAIL,
-            'label'        => __('No campaign a donor can reach', 'dono'),
+            'label'        => __('No campaign a donor can reach', 'dono-fundraising-platform'),
             'detail'       => $detail,
             'action_url'   => admin_url('admin.php?page=dono-campaigns'),
-            'action_label' => __('Open campaigns', 'dono'),
+            'action_label' => __('Open campaigns', 'dono-fundraising-platform'),
             'blocker'      => true,
         ];
     }
@@ -423,15 +423,15 @@ final class ReadinessService
             : trim((string) ($org['name'] ?? ''));
 
         $missing = [];
-        if ($name === '')  $missing[] = __('a name', 'dono');
-        if ($lines === []) $missing[] = __('a postal address', 'dono');
+        if ($name === '')  $missing[] = __('a name', 'dono-fundraising-platform');
+        if ($lines === []) $missing[] = __('a postal address', 'dono-fundraising-platform');
 
         if ($this->showTaxId() && trim((string) ($org['tax_id'] ?? '')) === '') {
-            $missing[] = __('a tax number', 'dono');
+            $missing[] = __('a tax number', 'dono-fundraising-platform');
         }
 
         if ($missing === []) {
-            return $this->pass('org-identity', 'receipts', __('Receipts carry your name and address', 'dono'));
+            return $this->pass('org-identity', 'receipts', __('Receipts carry your name and address', 'dono-fundraising-platform'));
         }
 
         return $this->warn(
@@ -439,12 +439,12 @@ final class ReadinessService
             'receipts',
             sprintf(
                 /* translators: %s: comma-separated list of missing organization details. */
-                __('Receipts are missing %s', 'dono'),
+                __('Receipts are missing %s', 'dono-fundraising-platform'),
                 $this->join($missing)
             ),
-            __('Receipts print your organization details at the top. Donors claiming tax relief usually need them.', 'dono'),
+            __('Receipts print your organization details at the top. Donors claiming tax relief usually need them.', 'dono-fundraising-platform'),
             'organization',
-            __('Add the details', 'dono')
+            __('Add the details', 'dono-fundraising-platform')
         );
     }
 
@@ -464,14 +464,14 @@ final class ReadinessService
             return $this->warn(
                 'background-jobs',
                 'jobs',
-                __('Cannot tell whether background jobs are running', 'dono'),
-                __('Action Scheduler is not available, so receipts and other queued work cannot be checked from here.', 'dono')
+                __('Cannot tell whether background jobs are running', 'dono-fundraising-platform'),
+                __('Action Scheduler is not available, so receipts and other queued work cannot be checked from here.', 'dono-fundraising-platform')
             );
         }
 
         $oldest = $this->oldestPendingJob();
         if ($oldest === null) {
-            return $this->pass('background-jobs', 'jobs', __('No background work is waiting', 'dono'));
+            return $this->pass('background-jobs', 'jobs', __('No background work is waiting', 'dono-fundraising-platform'));
         }
 
         [$count, $ageSeconds] = $oldest;
@@ -481,7 +481,7 @@ final class ReadinessService
                 'jobs',
                 sprintf(
                     /* translators: %d: number of queued background jobs. */
-                    _n('%d job is queued and moving', '%d jobs are queued and moving', $count, 'dono'),
+                    _n('%d job is queued and moving', '%d jobs are queued and moving', $count, 'dono-fundraising-platform'),
                     $count
                 )
             );
@@ -492,10 +492,10 @@ final class ReadinessService
             'jobs',
             sprintf(
                 /* translators: %s: human-readable duration, e.g. "3 hours". */
-                __('Background jobs have been waiting %s', 'dono'),
+                __('Background jobs have been waiting %s', 'dono-fundraising-platform'),
                 human_time_diff(time() - $ageSeconds)
             ),
-            __('Queued receipts and emails are not going out. WP-Cron is usually the cause: check that it is not disabled, or run it from a real cron job.', 'dono'),
+            __('Queued receipts and emails are not going out. WP-Cron is usually the cause: check that it is not disabled, or run it from a real cron job.', 'dono-fundraising-platform'),
             null,
             null
         );
@@ -546,17 +546,17 @@ final class ReadinessService
     private function donorPortalCheck(): array
     {
         if ($this->portal->resolve() !== 0) {
-            return $this->pass('donor-portal', 'portal', __('The donor portal page is published', 'dono'));
+            return $this->pass('donor-portal', 'portal', __('The donor portal page is published', 'dono-fundraising-platform'));
         }
 
         return [
             'id'           => 'donor-portal',
             'group'        => 'portal',
             'status'       => self::FAIL,
-            'label'        => __('The donor portal page is missing', 'dono'),
-            'detail'       => __('Receipt and sign-in emails link to it. Until it is published, every one of those links leads to a 404.', 'dono'),
+            'label'        => __('The donor portal page is missing', 'dono-fundraising-platform'),
+            'detail'       => __('Receipt and sign-in emails link to it. Until it is published, every one of those links leads to a 404.', 'dono-fundraising-platform'),
             'action_url'   => admin_url('edit.php?post_type=page'),
-            'action_label' => __('Open pages', 'dono'),
+            'action_label' => __('Open pages', 'dono-fundraising-platform'),
             'blocker'      => true,
         ];
     }
@@ -582,12 +582,12 @@ final class ReadinessService
                 'licenses',
                 sprintf(
                     /* translators: %s: comma-separated add-on names. */
-                    __('Your license does not cover %s', 'dono'),
+                    __('Your license does not cover %s', 'dono-fundraising-platform'),
                     $this->names($refused)
                 ),
-                __('They keep running, but they will not receive updates or security fixes.', 'dono'),
+                __('They keep running, but they will not receive updates or security fixes.', 'dono-fundraising-platform'),
                 'licenses',
-                __('Manage licenses', 'dono')
+                __('Manage licenses', 'dono-fundraising-platform')
             )];
         }
 
@@ -598,12 +598,12 @@ final class ReadinessService
                 'licenses',
                 sprintf(
                     /* translators: %s: comma-separated add-on names. */
-                    __('The license for %s has lapsed', 'dono'),
+                    __('The license for %s has lapsed', 'dono-fundraising-platform'),
                     $this->names($lapsing)
                 ),
-                __('Renew to keep receiving updates and security fixes.', 'dono'),
+                __('Renew to keep receiving updates and security fixes.', 'dono-fundraising-platform'),
                 'licenses',
-                __('Manage licenses', 'dono')
+                __('Manage licenses', 'dono-fundraising-platform')
             )];
         }
 
@@ -614,10 +614,10 @@ final class ReadinessService
             return [$this->warn(
                 'licenses',
                 'licenses',
-                __('Your add-ons are not linked to a license key', 'dono'),
-                __('They keep running, but they will not receive updates or security fixes.', 'dono'),
+                __('Your add-ons are not linked to a license key', 'dono-fundraising-platform'),
+                __('They keep running, but they will not receive updates or security fixes.', 'dono-fundraising-platform'),
                 'licenses',
-                __('Add a key', 'dono')
+                __('Add a key', 'dono-fundraising-platform')
             )];
         }
 
@@ -626,7 +626,7 @@ final class ReadinessService
             'licenses',
             sprintf(
                 /* translators: %d: number of licensed add-ons. */
-                _n('%d add-on is licensed', '%d add-ons are licensed', count($addons), 'dono'),
+                _n('%d add-on is licensed', '%d add-ons are licensed', count($addons), 'dono-fundraising-platform'),
                 count($addons)
             )
         )];
@@ -702,7 +702,7 @@ final class ReadinessService
         }
         $last = array_pop($items);
 
-        return implode(', ', $items) . ' ' . __('and', 'dono') . ' ' . $last;
+        return implode(', ', $items) . ' ' . __('and', 'dono-fundraising-platform') . ' ' . $last;
     }
 
     /**
@@ -748,7 +748,7 @@ final class ReadinessService
         }
         if ($tab !== null) {
             $row['action_url']   = admin_url('admin.php?page=dono-settings#' . $tab);
-            $row['action_label'] = $actionLabel ?? __('Open settings', 'dono');
+            $row['action_label'] = $actionLabel ?? __('Open settings', 'dono-fundraising-platform');
         }
         if ($blocker) {
             $row['blocker'] = true;

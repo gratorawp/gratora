@@ -100,7 +100,7 @@ final class StripeKeysController
         if (! $this->applePay->isFileReady()) {
             return new WP_Error(
                 'dono_apple_pay_no_file',
-                __('Paste the domain association file from Stripe first. Apple checks for it before the button can appear.', 'dono'),
+                __('Paste the domain association file from Stripe first. Apple checks for it before the button can appear.', 'dono-fundraising-platform'),
                 ['status' => 400]
             );
         }
@@ -185,7 +185,7 @@ final class StripeKeysController
                 'dono_stripe_unreachable',
                 sprintf(
                     /* translators: %s: transport error, e.g. a DNS failure */
-                    __('This site could not reach Stripe, so the key has not been checked or saved: %s. That is a problem with this server rather than with the key. Payments will not work until it is resolved.', 'dono'),
+                    __('This site could not reach Stripe, so the key has not been checked or saved: %s. That is a problem with this server rather than with the key. Payments will not work until it is resolved.', 'dono-fundraising-platform'),
                     $e->getMessage()
                 ),
                 ['status' => 503]
@@ -196,7 +196,7 @@ final class StripeKeysController
                 'dono_stripe_key_rejected',
                 sprintf(
                     /* translators: %s: error message from Stripe */
-                    __('Stripe rejected that secret key: %s', 'dono'),
+                    __('Stripe rejected that secret key: %s', 'dono-fundraising-platform'),
                     $e->getMessage()
                 ),
                 ['status' => 400]
@@ -232,23 +232,23 @@ final class StripeKeysController
         $bad = static fn (string $msg): WP_Error => new WP_Error('dono_stripe_bad_key', $msg, ['status' => 400]);
 
         if (! preg_match('/^(sk|rk)_(test|live)_/', $secret)) {
-            return $bad(__('That does not look like a Stripe secret key. It starts with sk_test_ or sk_live_.', 'dono'));
+            return $bad(__('That does not look like a Stripe secret key. It starts with sk_test_ or sk_live_.', 'dono-fundraising-platform'));
         }
         if (! str_starts_with($publishable, 'pk_')) {
-            return $bad(__('That does not look like a Stripe publishable key. It starts with pk_test_ or pk_live_.', 'dono'));
+            return $bad(__('That does not look like a Stripe publishable key. It starts with pk_test_ or pk_live_.', 'dono-fundraising-platform'));
         }
 
         $secretIsTest      = str_contains($secret, '_test_');
         $publishableIsTest = str_starts_with($publishable, 'pk_test_');
 
         if ($secretIsTest !== $publishableIsTest) {
-            return $bad(__('The secret and publishable keys are from different modes. Use the pair from the same Stripe mode.', 'dono'));
+            return $bad(__('The secret and publishable keys are from different modes. Use the pair from the same Stripe mode.', 'dono-fundraising-platform'));
         }
         if ($secretIsTest !== $test) {
             return $bad(
                 $test
-                    ? __('Those are live keys. Paste your test keys here, or save them under Live.', 'dono')
-                    : __('Those are test keys. Paste your live keys here, or save them under Test.', 'dono')
+                    ? __('Those are live keys. Paste your test keys here, or save them under Live.', 'dono-fundraising-platform')
+                    : __('Those are test keys. Paste your live keys here, or save them under Test.', 'dono-fundraising-platform')
             );
         }
         return null;

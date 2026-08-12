@@ -97,43 +97,43 @@ function Edit( { attributes, setAttributes } ) {
         isAmount ? formatAmount( v, currency, { compact: true } ) : String( v.toLocaleString() );
 
     const missingHint = isFormSource
-        ? __( 'No goal set for this form. Set one in Settings, Goal.', 'dono' )
+        ? __( 'No goal set for this form. Set one in Settings, Goal.', 'dono-fundraising-platform' )
         : ( campaign
-            ? __( 'The parent campaign has no goal set.', 'dono' )
-            : __( 'Link this form to a campaign to show its goal.', 'dono' ) );
+            ? __( 'The parent campaign has no goal set.', 'dono-fundraising-platform' )
+            : __( 'Link this form to a campaign to show its goal.', 'dono-fundraising-platform' ) );
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Goal', 'dono' ) } initialOpen>
+                <PanelBody title={ __( 'Goal', 'dono-fundraising-platform' ) } initialOpen>
                     <Segmented
-                        label={ __( 'Show', 'dono' ) }
+                        label={ __( 'Show', 'dono-fundraising-platform' ) }
                         value={ source }
                         onChange={ ( v ) => setAttributes( { source: v } ) }
                         options={ [
-                            { value: 'campaign', label: __( 'Campaign goal', 'dono' ) },
-                            { value: 'form',     label: __( 'Form goal', 'dono' ) },
+                            { value: 'campaign', label: __( 'Campaign goal', 'dono-fundraising-platform' ) },
+                            { value: 'form',     label: __( 'Form goal', 'dono-fundraising-platform' ) },
                         ] }
                         help={ isFormSource
-                            ? __( 'Tracks this form’s own donations against the form goal set in Settings, Goal.', 'dono' )
-                            : __( 'Tracks the parent campaign total against the campaign goal.', 'dono' ) }
+                            ? __( 'Tracks this form’s own donations against the form goal set in Settings, Goal.', 'dono-fundraising-platform' )
+                            : __( 'Tracks the parent campaign total against the campaign goal.', 'dono-fundraising-platform' ) }
                     />
 
                     <ToggleControl
-                        label={ __( 'Show amount raised vs goal', 'dono' ) }
+                        label={ __( 'Show amount raised vs goal', 'dono-fundraising-platform' ) }
                         checked={ showAmount }
                         onChange={ ( v ) => setAttributes( { showAmount: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show donor count', 'dono' ) }
+                        label={ __( 'Show donor count', 'dono-fundraising-platform' ) }
                         checked={ showDonors }
                         onChange={ ( v ) => setAttributes( { showDonors: v } ) }
                         __nextHasNoMarginBottom
                     />
                     { ! isFormSource && (
                         <ToggleControl
-                            label={ __( 'Show deadline', 'dono' ) }
+                            label={ __( 'Show deadline', 'dono-fundraising-platform' ) }
                             checked={ showDeadline }
                             onChange={ ( v ) => setAttributes( { showDeadline: v } ) }
                             __nextHasNoMarginBottom
@@ -153,7 +153,7 @@ function Edit( { attributes, setAttributes } ) {
                         { showAmount && (
                             <div className="dono-block-preview__goal-top">
                                 <strong>{ fmtValue( current ) }</strong>
-                                <span>{ __( 'of', 'dono' ) } { fmtValue( target ) }</span>
+                                <span>{ __( 'of', 'dono-fundraising-platform' ) } { fmtValue( target ) }</span>
                             </div>
                         ) }
                         <div className="dono-block-preview__goal-bar">
@@ -167,23 +167,23 @@ function Edit( { attributes, setAttributes } ) {
                             { showDonors && ! isFormSource && (
                                 <span>
                                     { donors === 1
-                                        ? __( '1 donor', 'dono' )
-                                        : `${ donors.toLocaleString() } ${ __( 'donors', 'dono' ) }` }
+                                        ? __( '1 donor', 'dono-fundraising-platform' )
+                                        : `${ donors.toLocaleString() } ${ __( 'donors', 'dono-fundraising-platform' ) }` }
                                 </span>
                             ) }
                             { showDeadline && ! isFormSource && days !== null && (
                                 <span>
                                     { days === 0
-                                        ? __( 'Last day', 'dono' )
+                                        ? __( 'Last day', 'dono-fundraising-platform' )
                                         : days === 1
-                                            ? __( '1 day left', 'dono' )
-                                            : `${ days } ${ __( 'days left', 'dono' ) }` }
+                                            ? __( '1 day left', 'dono-fundraising-platform' )
+                                            : `${ days } ${ __( 'days left', 'dono-fundraising-platform' ) }` }
                                 </span>
                             ) }
                         </div>
                         { isFormSource && (
                             <p className="dono-block-preview__note">
-                                { __( 'Live progress appears on the published form.', 'dono' ) }
+                                { __( 'Live progress appears on the published form.', 'dono-fundraising-platform' ) }
                             </p>
                         ) }
                     </>
@@ -196,8 +196,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Goal', 'dono' ),
-        description: __( 'Progress bar for this form’s goal or its parent campaign’s goal.', 'dono' ),
+        title:      __( 'Goal', 'dono-fundraising-platform' ),
+        description: __( 'Progress bar for this form’s goal or its parent campaign’s goal.', 'dono-fundraising-platform' ),
         category:   'dono-extras',
         icon:       BlockIcons[ 'goal' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

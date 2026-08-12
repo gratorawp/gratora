@@ -8,7 +8,7 @@ const NAME = 'dono/anonymous-toggle';
 
 function Edit( { attributes, setAttributes } ) {
     const {
-        label     = __( 'Make this donation anonymous', 'dono' ),
+        label     = __( 'Make this donation anonymous', 'dono-fundraising-platform' ),
         defaultOn = false,
         condition = DEFAULT_CONDITION,
     } = attributes;
@@ -18,12 +18,12 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Anonymous toggle', 'dono' ) } initialOpen>
+                <PanelBody title={ __( 'Anonymous toggle', 'dono-fundraising-platform' ) } initialOpen>
                     <ToggleControl
-                        label={ __( 'Default on', 'dono' ) }
+                        label={ __( 'Default on', 'dono-fundraising-platform' ) }
                         checked={ defaultOn }
                         onChange={ ( v ) => setAttributes( { defaultOn: v } ) }
-                        help={ __( 'Click the label to edit it inline.', 'dono' ) }
+                        help={ __( 'Click the label to edit it inline.', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -47,7 +47,7 @@ function Edit( { attributes, setAttributes } ) {
                     tagName="span"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Make this donation anonymous', 'dono' ) }
+                    placeholder={ __( 'Make this donation anonymous', 'dono-fundraising-platform' ) }
                     allowedFormats={ [] }
                     style={ { fontSize: 13, flex: 1 } }
                 />
@@ -59,8 +59,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Anonymous toggle', 'dono' ),
-        description: __( 'Lets the donor hide their identity on public displays.', 'dono' ),
+        title:      __( 'Anonymous toggle', 'dono-fundraising-platform' ),
+        description: __( 'Lets the donor hide their identity on public displays.', 'dono-fundraising-platform' ),
         category:   'dono-extras',
         icon:       BlockIcons[ 'anonymous-toggle' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

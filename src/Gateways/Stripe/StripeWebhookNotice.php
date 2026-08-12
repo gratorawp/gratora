@@ -89,7 +89,7 @@ final class StripeWebhookNotice
             . 'font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Oxygen,Ubuntu,sans-serif;'
             . 'font-size:13px;line-height:1.45;">'
             . '<strong>Dono:</strong> '
-            . esc_html__('Stripe is connected but its webhook signing secret is missing. Recurring renewals, payment confirmations, and account updates will not process until you add it under Dono, Settings, Payment gateways.', 'dono')
+            . esc_html__('Stripe is connected but its webhook signing secret is missing. Recurring renewals, payment confirmations, and account updates will not process until you add it under Dono, Settings, Payment gateways.', 'dono-fundraising-platform')
             . '</div>';
     }
 }

@@ -8,9 +8,9 @@ import Segmented from '../../../_shared/components/Segmented';
 const NAME = 'dono/privacy-notice';
 
 const ALIGN_OPTIONS = [
-    { value: 'left',   label: __( 'Left',   'dono' ) },
-    { value: 'center', label: __( 'Center', 'dono' ) },
-    { value: 'right',  label: __( 'Right',  'dono' ) },
+    { value: 'left',   label: __( 'Left',   'dono-fundraising-platform' ) },
+    { value: 'center', label: __( 'Center', 'dono-fundraising-platform' ) },
+    { value: 'right',  label: __( 'Right',  'dono-fundraising-platform' ) },
 ];
 
 function readPrivacyUrl() {
@@ -28,8 +28,8 @@ function Edit( { attributes, setAttributes } ) {
 
     // Fall back to the translated strings for the preview; the saved attrs stay
     // empty so the PHP render emits the localized default.
-    const text     = textAttr     || __( 'By donating you agree to our', 'dono' );
-    const linkText = linkTextAttr || __( 'Privacy Policy', 'dono' );
+    const text     = textAttr     || __( 'By donating you agree to our', 'dono-fundraising-platform' );
+    const linkText = linkTextAttr || __( 'Privacy Policy', 'dono-fundraising-platform' );
 
     const settingsUrl = readPrivacyUrl();
     const hasUrl      = settingsUrl !== '';
@@ -45,36 +45,36 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Privacy notice', 'dono' ) } initialOpen>
+                <PanelBody title={ __( 'Privacy notice', 'dono-fundraising-platform' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Leading text', 'dono' ) }
+                        label={ __( 'Leading text', 'dono-fundraising-platform' ) }
                         value={ textAttr }
-                        placeholder={ __( 'By donating you agree to our', 'dono' ) }
+                        placeholder={ __( 'By donating you agree to our', 'dono-fundraising-platform' ) }
                         onChange={ ( v ) => setAttributes( { text: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Link label', 'dono' ) }
+                        label={ __( 'Link label', 'dono-fundraising-platform' ) }
                         value={ linkTextAttr }
-                        placeholder={ __( 'Privacy Policy', 'dono' ) }
+                        placeholder={ __( 'Privacy Policy', 'dono-fundraising-platform' ) }
                         onChange={ ( v ) => setAttributes( { linkText: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <Segmented
-                        label={ __( 'Alignment', 'dono' ) }
+                        label={ __( 'Alignment', 'dono-fundraising-platform' ) }
                         value={ align }
                         onChange={ ( v ) => setAttributes( { align: v } ) }
                         options={ ALIGN_OPTIONS }
                     />
                     { hasUrl ? (
                         <p style={ { fontSize: 12, color: '#6b7280', margin: '12px 0 0' } }>
-                            { __( 'Linking to:', 'dono' ) }{ ' ' }
+                            { __( 'Linking to:', 'dono-fundraising-platform' ) }{ ' ' }
                             <ExternalLink href={ settingsUrl }>{ settingsUrl }</ExternalLink>
                         </p>
                     ) : (
                         <Notice status="warning" isDismissible={ false } style={ { marginTop: 12 } }>
-                            { __( 'No privacy policy URL is set. Donors will see the text but no link until you add one in', 'dono' ) }{ ' ' }
-                            <ExternalLink href={ settingsHref }>{ __( 'Settings → Privacy', 'dono' ) }</ExternalLink>.
+                            { __( 'No privacy policy URL is set. Donors will see the text but no link until you add one in', 'dono-fundraising-platform' ) }{ ' ' }
+                            <ExternalLink href={ settingsHref }>{ __( 'Settings → Privacy', 'dono-fundraising-platform' ) }</ExternalLink>.
                         </Notice>
                     ) }
                 </PanelBody>
@@ -105,8 +105,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Privacy notice', 'dono' ),
-        description: __( 'A short line of text plus a link to your privacy policy. Pair with the URL set in Settings → Privacy.', 'dono' ),
+        title:      __( 'Privacy notice', 'dono-fundraising-platform' ),
+        description: __( 'A short line of text plus a link to your privacy policy. Pair with the URL set in Settings → Privacy.', 'dono-fundraising-platform' ),
         category:   'dono-content',
         icon:       BlockIcons[ 'privacy-notice' ] || BlockIcons[ 'paragraph' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

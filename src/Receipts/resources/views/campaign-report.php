@@ -37,17 +37,17 @@ table.stats td{padding:14px 6px;border-bottom:1px solid #eee;vertical-align:top;
 <h1><?php echo esc_html($campaign_title); ?></h1>
 <p class="range"><?php echo esc_html($range_label); ?></p>
 
-<p class="raised"><?php echo esc_html(sprintf(/* translators: %s: formatted amount raised */ __('%s raised', 'dono'), $raised)); ?></p>
+<p class="raised"><?php echo esc_html(sprintf(/* translators: %s: formatted amount raised */ __('%s raised', 'dono-fundraising-platform'), $raised)); ?></p>
 <?php if ($has_goal): ?>
     <p class="goal"><?php echo esc_html(sprintf(
         /* translators: 1: formatted goal, 2: percent complete */
-        __('of %1$s goal (%2$d%% complete)', 'dono'),
+        __('of %1$s goal (%2$d%% complete)', 'dono-fundraising-platform'),
         $goal_display,
         $percent
     )); ?></p>
     <div class="bar"><span style="width:<?php echo (int) $bar_width; ?>%"></span></div>
 <?php else: ?>
-    <p class="goal"><?php esc_html_e('No goal set for this campaign.', 'dono'); ?></p>
+    <p class="goal"><?php esc_html_e('No goal set for this campaign.', 'dono-fundraising-platform'); ?></p>
 <?php endif; ?>
 
 <table class="stats"><tr>
@@ -61,7 +61,7 @@ table.stats td{padding:14px 6px;border-bottom:1px solid #eee;vertical-align:top;
 
 <p class="footer"><?php echo esc_html(sprintf(
     /* translators: 1: generation date, 2: organization name */
-    __('Generated %1$s, %2$s', 'dono'),
+    __('Generated %1$s, %2$s', 'dono-fundraising-platform'),
     $generated_date,
     $org_name
 )); ?></p>

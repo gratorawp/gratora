@@ -44,17 +44,17 @@ final class CampaignBindings extends HookProvider
     public static function fields(): array
     {
         return [
-            'title'           => __('Title', 'dono'),
-            'description'     => __('Short description', 'dono'),
-            'image'           => __('Cover image', 'dono'),
-            'image_alt'       => __('Cover image description', 'dono'),
-            'url'             => __('Page link', 'dono'),
-            'raised'          => __('Raised', 'dono'),
-            'goal'            => __('Goal', 'dono'),
-            'percent_label'   => __('Percent of goal', 'dono'),
-            'donors_count'    => __('Donors', 'dono'),
-            'donations_count' => __('Donations', 'dono'),
-            'days_left'       => __('Days left', 'dono'),
+            'title'           => __('Title', 'dono-fundraising-platform'),
+            'description'     => __('Short description', 'dono-fundraising-platform'),
+            'image'           => __('Cover image', 'dono-fundraising-platform'),
+            'image_alt'       => __('Cover image description', 'dono-fundraising-platform'),
+            'url'             => __('Page link', 'dono-fundraising-platform'),
+            'raised'          => __('Raised', 'dono-fundraising-platform'),
+            'goal'            => __('Goal', 'dono-fundraising-platform'),
+            'percent_label'   => __('Percent of goal', 'dono-fundraising-platform'),
+            'donors_count'    => __('Donors', 'dono-fundraising-platform'),
+            'donations_count' => __('Donations', 'dono-fundraising-platform'),
+            'days_left'       => __('Days left', 'dono-fundraising-platform'),
         ];
     }
 
@@ -82,7 +82,7 @@ final class CampaignBindings extends HookProvider
         if (! function_exists('register_block_bindings_source')) return;
 
         register_block_bindings_source('dono/campaign', [
-            'label'              => __('Dono campaign', 'dono'),
+            'label'              => __('Dono campaign', 'dono-fundraising-platform'),
             'get_value_callback' => [$this, 'resolve'],
             'uses_context'       => ['postId'],
         ]);

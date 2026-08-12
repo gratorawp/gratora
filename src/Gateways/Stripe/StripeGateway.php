@@ -68,7 +68,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('Stripe', 'dono');
+        return __('Stripe', 'dono-fundraising-platform');
     }
 
     /**
@@ -80,7 +80,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
      */
     public function description(): string
     {
-        return __('Pay securely by card, or another method offered at checkout.', 'dono');
+        return __('Pay securely by card, or another method offered at checkout.', 'dono-fundraising-platform');
     }
 
     /** @since 1.0.0 */
@@ -433,7 +433,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             return $this->refused($eventId, $type, $reason);
         }
 
-        $reason = $intent['last_payment_error']['message'] ?? __('Payment declined.', 'dono');
+        $reason = $intent['last_payment_error']['message'] ?? __('Payment declined.', 'dono-fundraising-platform');
         $this->donationService->markFailed($donation, $reason);
 
         return new WebhookOutcome(
@@ -1193,13 +1193,13 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     public function refund(Donation $donation, int $amountCents, ?string $reason = null): RefundResult
     {
         if (! $donation->gateway_intent_id) {
-            return RefundResult::failure(__('No gateway intent on donation; cannot refund via Stripe.', 'dono'));
+            return RefundResult::failure(__('No gateway intent on donation; cannot refund via Stripe.', 'dono-fundraising-platform'));
         }
 
         $this->account->useTestMode((bool) $donation->is_test);
 
         if (! $this->api->isConfigured()) {
-            return RefundResult::failure(__('Stripe is not configured.', 'dono'));
+            return RefundResult::failure(__('Stripe is not configured.', 'dono-fundraising-platform'));
         }
 
         $params = [
@@ -1295,7 +1295,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             }
         }
         if ($customerId === '') {
-            throw new RuntimeException(__('This donation has no Stripe customer to attach a card to.', 'dono'));
+            throw new RuntimeException(__('This donation has no Stripe customer to attach a card to.', 'dono-fundraising-platform'));
         }
 
         $intent = $this->api->post('/setup_intents', [
@@ -1306,7 +1306,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
 
         $secret = (string) ($intent['client_secret'] ?? '');
         if ($secret === '') {
-            throw new RuntimeException(__('Stripe did not return a setup secret.', 'dono'));
+            throw new RuntimeException(__('Stripe did not return a setup secret.', 'dono-fundraising-platform'));
         }
 
         return PaymentMethodUpdate::inline(
@@ -1329,12 +1329,12 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
 
         $token = trim($token);
         if ($token === '') {
-            throw new RuntimeException(__('No payment method was supplied.', 'dono'));
+            throw new RuntimeException(__('No payment method was supplied.', 'dono-fundraising-platform'));
         }
 
         $subId = (string) $plan->gateway_subscription_id;
         if ($subId === '') {
-            throw new RuntimeException(__('This plan has no Stripe subscription.', 'dono'));
+            throw new RuntimeException(__('This plan has no Stripe subscription.', 'dono-fundraising-platform'));
         }
 
         $sub = $this->api->get('/subscriptions/' . rawurlencode($subId));
@@ -1366,7 +1366,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         $this->account->useTestMode((bool) $plan->is_test);
         $subId = (string) $plan->gateway_subscription_id;
         if ($subId === '') {
-            throw new PaymentRetryUnavailable(__('This plan never reached Stripe, so there is nothing to collect.', 'dono'));
+            throw new PaymentRetryUnavailable(__('This plan never reached Stripe, so there is nothing to collect.', 'dono-fundraising-platform'));
         }
 
         $sub = $this->api->get('/subscriptions/' . rawurlencode($subId));
@@ -1376,7 +1376,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             ? (string) ($sub['latest_invoice']['id'] ?? '')
             : (string) ($sub['latest_invoice'] ?? '');
         if ($invoiceId === '') {
-            throw new PaymentRetryUnavailable(__('Stripe has no invoice outstanding on this subscription.', 'dono'));
+            throw new PaymentRetryUnavailable(__('Stripe has no invoice outstanding on this subscription.', 'dono-fundraising-platform'));
         }
 
         $invoice = $this->api->get('/invoices/' . rawurlencode($invoiceId));
@@ -1388,8 +1388,8 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         if ($status !== 'open') {
             throw new PaymentRetryUnavailable(sprintf(
                 /* translators: %s: the Stripe invoice status, e.g. paid. */
-                __('Nothing to collect: the latest invoice is %s.', 'dono'),
-                $status !== '' ? $status : __('unavailable', 'dono')
+                __('Nothing to collect: the latest invoice is %s.', 'dono-fundraising-platform'),
+                $status !== '' ? $status : __('unavailable', 'dono-fundraising-platform')
             ));
         }
 

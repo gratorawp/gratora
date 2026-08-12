@@ -101,21 +101,21 @@ export function OptionsEditor( {
                     } }
                 >
                     <TextControl
-                        label={ __( 'Label', 'dono' ) }
+                        label={ __( 'Label', 'dono-fundraising-platform' ) }
                         value={ o.label }
                         onChange={ ( v ) => updateLabel( i, v ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Value', 'dono' ) }
+                        label={ __( 'Value', 'dono-fundraising-platform' ) }
                         value={ o.value }
                         onChange={ ( v ) => update( i, { value: slugify( v ) || `option-${ i + 1 }` } ) }
-                        help={ __( 'Stored when this option is picked. Auto-derived from the label.', 'dono' ) }
+                        help={ __( 'Stored when this option is picked. Auto-derived from the label.', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     { allowDefault && (
                         <ToggleControl
-                            label={ __( 'Default', 'dono' ) }
+                            label={ __( 'Default', 'dono-fundraising-platform' ) }
                             checked={ !! o.isDefault }
                             onChange={ ( v ) => update( i, { isDefault: v } ) }
                             __nextHasNoMarginBottom
@@ -128,12 +128,12 @@ export function OptionsEditor( {
                         disabled={ rows.length <= 1 }
                         style={ { marginTop: 4 } }
                     >
-                        { __( 'Remove option', 'dono' ) }
+                        { __( 'Remove option', 'dono-fundraising-platform' ) }
                     </Button>
                 </div>
             ) ) }
             <Button variant="secondary" onClick={ add }>
-                { addLabel || __( 'Add option', 'dono' ) }
+                { addLabel || __( 'Add option', 'dono-fundraising-platform' ) }
             </Button>
         </div>
     );

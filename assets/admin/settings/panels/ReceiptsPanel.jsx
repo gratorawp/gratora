@@ -51,7 +51,7 @@ export default function ReceiptsPanel( { s } ) {
 
     const pickLogo = () => {
         const frame = window.wp.media( {
-            title:    __( 'Choose receipt logo', 'dono' ),
+            title:    __( 'Choose receipt logo', 'dono-fundraising-platform' ),
             multiple: false,
             library:  { type: 'image' },
         } );
@@ -77,9 +77,9 @@ export default function ReceiptsPanel( { s } ) {
         // confusing them with a stale PDF.
         if ( s.isDirty ) {
             setConfirm( {
-                title:        __( 'Unsaved changes', 'dono' ),
-                message:      __( 'You have unsaved changes that won\'t show in the preview. Continue anyway?', 'dono' ),
-                confirmLabel: __( 'Continue', 'dono' ),
+                title:        __( 'Unsaved changes', 'dono-fundraising-platform' ),
+                message:      __( 'You have unsaved changes that won\'t show in the preview. Continue anyway?', 'dono-fundraising-platform' ),
+                confirmLabel: __( 'Continue', 'dono-fundraising-platform' ),
                 destructive:  false,
                 onConfirm: async () => {
                     openPreview();
@@ -93,18 +93,18 @@ export default function ReceiptsPanel( { s } ) {
     return (
         <div className="dono-panel">
             <Card
-                title={ __( 'Generic receipt template', 'dono' ) }
-                sub={ __( 'Applies to the GenericReceiptRenderer output, not country-specific renderers.', 'dono' ) }
+                title={ __( 'Generic receipt template', 'dono-fundraising-platform' ) }
+                sub={ __( 'Applies to the GenericReceiptRenderer output, not country-specific renderers.', 'dono-fundraising-platform' ) }
                 edited={ s.isDirty }
             >
                 <div style={ { marginBottom: 16, display: 'flex', justifyContent: 'flex-end' } }>
                     <Btn variant="secondary" onClick={ previewReceipt }>
-                        { __( 'Preview receipt', 'dono' ) }
+                        { __( 'Preview receipt', 'dono-fundraising-platform' ) }
                     </Btn>
                 </div>
                 <FormRow
-                    label={ __( 'Logo', 'dono' ) }
-                    help={ __( 'Shown above the header. PNG or JPG recommended.', 'dono' ) }
+                    label={ __( 'Logo', 'dono-fundraising-platform' ) }
+                    help={ __( 'Shown above the header. PNG or JPG recommended.', 'dono-fundraising-platform' ) }
                 >
                     <div style={ { display: 'flex', alignItems: 'center', gap: 12 } }>
                         { logoId > 0 && logoUrl && (
@@ -115,33 +115,33 @@ export default function ReceiptsPanel( { s } ) {
                             />
                         ) }
                         <Btn variant="secondary" onClick={ pickLogo }>
-                            { logoId > 0 ? __( 'Replace logo', 'dono' ) : __( 'Select logo', 'dono' ) }
+                            { logoId > 0 ? __( 'Replace logo', 'dono-fundraising-platform' ) : __( 'Select logo', 'dono-fundraising-platform' ) }
                         </Btn>
                         { logoId > 0 && (
                             <Btn variant="ghost" onClick={ () => setLogoId( 0 ) }>
-                                { __( 'Remove', 'dono' ) }
+                                { __( 'Remove', 'dono-fundraising-platform' ) }
                             </Btn>
                         ) }
                     </div>
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Header title', 'dono' ) }
-                    help={ __( 'Big heading at the top of the receipt. Leave blank for the default "Donation receipt".', 'dono' ) }
+                    label={ __( 'Header title', 'dono-fundraising-platform' ) }
+                    help={ __( 'Big heading at the top of the receipt. Leave blank for the default "Donation receipt".', 'dono-fundraising-platform' ) }
                 >
                     <input
                         type="text"
                         className="dono-input"
                         value={ headerTitle }
                         onChange={ ( e ) => setHeader( e.target.value ) }
-                        placeholder={ __( 'Donation receipt', 'dono' ) }
+                        placeholder={ __( 'Donation receipt', 'dono-fundraising-platform' ) }
                         maxLength={ 80 }
                     />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Intro paragraph', 'dono' ) }
-                    help={ __( 'Optional paragraph between the header and the donation details.', 'dono' ) }
+                    label={ __( 'Intro paragraph', 'dono-fundraising-platform' ) }
+                    help={ __( 'Optional paragraph between the header and the donation details.', 'dono-fundraising-platform' ) }
                     wide
                 >
                     <MergeTagInserter onInsert={ ( t ) => setIntro( `${ intro }${ t }` ) } />
@@ -150,13 +150,13 @@ export default function ReceiptsPanel( { s } ) {
                         rows={ 3 }
                         value={ intro }
                         onChange={ ( e ) => setIntro( e.target.value ) }
-                        placeholder={ __( 'Enter a sign-off line', 'dono' ) }
+                        placeholder={ __( 'Enter a sign-off line', 'dono-fundraising-platform' ) }
                     />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Signoff', 'dono' ) }
-                    help={ __( 'Short thank-you line near the bottom of the receipt.', 'dono' ) }
+                    label={ __( 'Signoff', 'dono-fundraising-platform' ) }
+                    help={ __( 'Short thank-you line near the bottom of the receipt.', 'dono-fundraising-platform' ) }
                     wide
                 >
                     <MergeTagInserter onInsert={ ( t ) => setSignoff( `${ signoff }${ t }` ) } />
@@ -165,13 +165,13 @@ export default function ReceiptsPanel( { s } ) {
                         rows={ 2 }
                         value={ signoff }
                         onChange={ ( e ) => setSignoff( e.target.value ) }
-                        placeholder={ __( 'Thank you for your support, {donor_name}.', 'dono' ) }
+                        placeholder={ __( 'Thank you for your support, {donor_name}.', 'dono-fundraising-platform' ) }
                     />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Footer note', 'dono' ) }
-                    help={ __( 'Small print at the bottom. Use this for the tax-deduction disclaimer, contact info, or organization registration details.', 'dono' ) }
+                    label={ __( 'Footer note', 'dono-fundraising-platform' ) }
+                    help={ __( 'Small print at the bottom. Use this for the tax-deduction disclaimer, contact info, or organization registration details.', 'dono-fundraising-platform' ) }
                     wide
                 >
                     <MergeTagInserter onInsert={ ( t ) => setFooter( `${ footerNote }${ t }` ) } />
@@ -184,15 +184,15 @@ export default function ReceiptsPanel( { s } ) {
                 </FormRow>
 
                 <ToggleRow
-                    title={ __( 'Show organization tax ID', 'dono' ) }
-                    sub={ __( 'Includes the tax ID from your Organization settings in the reference block.', 'dono' ) }
+                    title={ __( 'Show organization tax ID', 'dono-fundraising-platform' ) }
+                    sub={ __( 'Includes the tax ID from your Organization settings in the reference block.', 'dono-fundraising-platform' ) }
                     checked={ showTaxId }
                     onChange={ setShowTax }
                 />
 
                 <ToggleRow
-                    title={ __( 'Show donor address', 'dono' ) }
-                    sub={ __( 'Prints the donor billing address on the receipt (recommended for jurisdictions that require it).', 'dono' ) }
+                    title={ __( 'Show donor address', 'dono-fundraising-platform' ) }
+                    sub={ __( 'Prints the donor billing address on the receipt (recommended for jurisdictions that require it).', 'dono-fundraising-platform' ) }
                     checked={ showAddress }
                     onChange={ setShowAddr }
                 />
@@ -212,7 +212,7 @@ function MergeTagInserter( { onInsert } ) {
                     type="button"
                     className="dono-merge-tag"
                     onClick={ () => onInsert( t ) }
-                    title={ __( 'Insert merge tag', 'dono' ) }
+                    title={ __( 'Insert merge tag', 'dono-fundraising-platform' ) }
                 >
                     { t }
                 </button>

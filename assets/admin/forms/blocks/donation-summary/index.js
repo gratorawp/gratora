@@ -16,25 +16,25 @@ function Edit( { attributes, setAttributes } ) {
     const blockProps = useBlockProps( { className: 'dono-block-preview dono-block-preview--summary' } );
 
     const rows = [
-        [ __( 'Amount', 'dono' ), '-' ],
-        ...( showDonor   ? [ [ __( 'Donor', 'dono' ), '-' ], [ __( 'Email', 'dono' ), '-' ] ] : [] ),
-        ...( showGateway ? [ [ __( 'Payment method', 'dono' ), '-' ] ] : [] ),
-        [ __( 'Total', 'dono' ), '-' ],
+        [ __( 'Amount', 'dono-fundraising-platform' ), '-' ],
+        ...( showDonor   ? [ [ __( 'Donor', 'dono-fundraising-platform' ), '-' ], [ __( 'Email', 'dono-fundraising-platform' ), '-' ] ] : [] ),
+        ...( showGateway ? [ [ __( 'Payment method', 'dono-fundraising-platform' ), '-' ] ] : [] ),
+        [ __( 'Total', 'dono-fundraising-platform' ), '-' ],
     ];
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Summary', 'dono' ) } initialOpen>
+                <PanelBody title={ __( 'Summary', 'dono-fundraising-platform' ) } initialOpen>
                     <ToggleControl
-                        label={ __( 'Show who is giving', 'dono' ) }
-                        help={ __( 'Name, email and country, when the form collects them.', 'dono' ) }
+                        label={ __( 'Show who is giving', 'dono-fundraising-platform' ) }
+                        help={ __( 'Name, email and country, when the form collects them.', 'dono-fundraising-platform' ) }
                         checked={ showDonor }
                         onChange={ ( v ) => setAttributes( { showDonor: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show payment method', 'dono' ) }
+                        label={ __( 'Show payment method', 'dono-fundraising-platform' ) }
                         checked={ showGateway }
                         onChange={ ( v ) => setAttributes( { showGateway: v } ) }
                         __nextHasNoMarginBottom
@@ -63,8 +63,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Donation summary', 'dono' ),
-        description: __( 'Reads back what the donor is about to give. Put it wherever the recap belongs.', 'dono' ),
+        title:       __( 'Donation summary', 'dono-fundraising-platform' ),
+        description: __( 'Reads back what the donor is about to give. Put it wherever the recap belongs.', 'dono-fundraising-platform' ),
         category:    'dono-extras',
         icon:        BlockIcons[ 'donation-summary' ],
         // One recap per form. Two would disagree the moment a condition hid a

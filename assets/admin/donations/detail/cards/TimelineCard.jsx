@@ -30,9 +30,9 @@ function buildEvents( { donation, receipts, refunds, notes } ) {
             id:    'created',
             time:  donation.created_at,
             dot:   'is-info',
-            title: __( 'Donation created', 'dono' ),
+            title: __( 'Donation created', 'dono-fundraising-platform' ),
             sub:   donation.form?.title
-                ? <>{ __( 'Through', 'dono' ) } <strong>{ donation.form.title }</strong></>
+                ? <>{ __( 'Through', 'dono-fundraising-platform' ) } <strong>{ donation.form.title }</strong></>
                 : null,
         } );
     }
@@ -41,7 +41,7 @@ function buildEvents( { donation, receipts, refunds, notes } ) {
             id:    'paid',
             time:  donation.paid_at,
             dot:   'is-ok',
-            title: __( 'Payment captured', 'dono' ),
+            title: __( 'Payment captured', 'dono-fundraising-platform' ),
             sub:   donation.gateway_intent_id
                 ? <><span style={ { textTransform: 'capitalize' } }>{ donation.gateway }</span>{ ' · ' }<span className="mono">{ donation.gateway_intent_id }</span></>
                 : <span style={ { textTransform: 'capitalize' } }>{ donation.gateway }</span>,
@@ -52,15 +52,15 @@ function buildEvents( { donation, receipts, refunds, notes } ) {
             id:    `receipt-${ ri }`,
             time:  r.issued_at,
             dot:   'is-info',
-            title: __( 'Receipt issued', 'dono' ),
-            sub:   <><span className="mono">{ r.receipt_number }</span>{ r.sent_to_email_at && <> · { __( 'emailed', 'dono' ) } { formatDateTime( r.sent_to_email_at ) }</> }</>,
+            title: __( 'Receipt issued', 'dono-fundraising-platform' ),
+            sub:   <><span className="mono">{ r.receipt_number }</span>{ r.sent_to_email_at && <> · { __( 'emailed', 'dono-fundraising-platform' ) } { formatDateTime( r.sent_to_email_at ) }</> }</>,
         } );
         if ( r.voided && r.voided_at ) {
             events.push( {
                 id:    `receipt-void-${ ri }`,
                 time:  r.voided_at,
                 dot:   'is-muted',
-                title: __( 'Receipt voided', 'dono' ),
+                title: __( 'Receipt voided', 'dono-fundraising-platform' ),
                 sub:   <span className="mono">{ r.receipt_number }</span>,
             } );
         }
@@ -70,7 +70,7 @@ function buildEvents( { donation, receipts, refunds, notes } ) {
             id:    `refund-${ ri }`,
             time:  r.occurred_at,
             dot:   r.status === 'succeeded' ? 'is-warn' : 'is-error',
-            title: <>{ __( 'Refund', 'dono' ) } <strong>{ formatAmount( r.amount_cents, r.currency ) }</strong></>,
+            title: <>{ __( 'Refund', 'dono-fundraising-platform' ) } <strong>{ formatAmount( r.amount_cents, r.currency ) }</strong></>,
             sub:   r.reason ? <em>&quot;{ r.reason }&quot;</em> : null,
         } );
     } );
@@ -79,7 +79,7 @@ function buildEvents( { donation, receipts, refunds, notes } ) {
             id:    `note-${ ni }`,
             time:  n.created_at,
             dot:   'is-muted',
-            title: __( 'Note added', 'dono' ),
+            title: __( 'Note added', 'dono-fundraising-platform' ),
             sub:   <em>&quot;{ n.body.length > 120 ? n.body.slice( 0, 117 ) + '…' : n.body }&quot;</em>,
         } );
     } );

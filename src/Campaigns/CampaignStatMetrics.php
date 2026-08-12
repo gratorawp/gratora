@@ -31,15 +31,15 @@ final class CampaignStatMetrics
     public static function labels(): array
     {
         return [
-            'raised'    => __('Amount raised', 'dono'),
-            'goal'      => __('Our goal', 'dono'),
-            'remaining' => __('Still needed', 'dono'),
-            'percent'   => __('Of goal reached', 'dono'),
-            'donations' => __('Donations', 'dono'),
-            'donors'    => __('Donors', 'dono'),
-            'average'   => __('Average donation', 'dono'),
-            'top'       => __('Top donation', 'dono'),
-            'days_left' => __('Days left', 'dono'),
+            'raised'    => __('Amount raised', 'dono-fundraising-platform'),
+            'goal'      => __('Our goal', 'dono-fundraising-platform'),
+            'remaining' => __('Still needed', 'dono-fundraising-platform'),
+            'percent'   => __('Of goal reached', 'dono-fundraising-platform'),
+            'donations' => __('Donations', 'dono-fundraising-platform'),
+            'donors'    => __('Donors', 'dono-fundraising-platform'),
+            'average'   => __('Average donation', 'dono-fundraising-platform'),
+            'top'       => __('Top donation', 'dono-fundraising-platform'),
+            'days_left' => __('Days left', 'dono-fundraising-platform'),
         ];
     }
 

@@ -222,71 +222,71 @@ final class SettingsService
         return [
             'donation_receipt' => [
                 'enabled' => true,
-                'subject' => __('Thank you for your donation to {organisation_name}', 'dono'),
-                'body'    => __("Hi {donor_first_name},\n\nThank you for your donation of {amount} to {organisation_name}.\n\nReference: {reference}\nReceipt number: {receipt_number}\n\nYour receipt is attached as a PDF. Keep it for your records.\n\nWith gratitude,\n{organisation_name}", 'dono'),
+                'subject' => __('Thank you for your donation to {organisation_name}', 'dono-fundraising-platform'),
+                'body'    => __("Hi {donor_first_name},\n\nThank you for your donation of {amount} to {organisation_name}.\n\nReference: {reference}\nReceipt number: {receipt_number}\n\nYour receipt is attached as a PDF. Keep it for your records.\n\nWith gratitude,\n{organisation_name}", 'dono-fundraising-platform'),
             ],
             'donation_first' => [
                 'enabled' => true,
-                'subject' => __('Thank you for your first donation to {organisation_name}', 'dono'),
-                'body'    => __("Hi {donor_first_name},\n\nThank you for making your first donation to {organisation_name}. Your support means a great deal, and we are grateful to have you with us.\n\nWe will keep you posted on the difference it makes.\n\nWith gratitude,\n{organisation_name}", 'dono'),
+                'subject' => __('Thank you for your first donation to {organisation_name}', 'dono-fundraising-platform'),
+                'body'    => __("Hi {donor_first_name},\n\nThank you for making your first donation to {organisation_name}. Your support means a great deal, and we are grateful to have you with us.\n\nWe will keep you posted on the difference it makes.\n\nWith gratitude,\n{organisation_name}", 'dono-fundraising-platform'),
             ],
             'offline_instructions' => [
                 'enabled' => true,
-                'subject' => __('Payment instructions for your donation to {organisation_name}', 'dono'),
-                'body'    => __("Hi {donor_name},\n\nThank you for choosing to support {campaign_title} with a donation of {amount}.\n\n{instructions}\n\nPlease transfer the amount using the reference {reference}. We will email your receipt as soon as the payment arrives.\n\n{bank_details}\n\nThanks,\n{organisation_name}", 'dono'),
+                'subject' => __('Payment instructions for your donation to {organisation_name}', 'dono-fundraising-platform'),
+                'body'    => __("Hi {donor_name},\n\nThank you for choosing to support {campaign_title} with a donation of {amount}.\n\n{instructions}\n\nPlease transfer the amount using the reference {reference}. We will email your receipt as soon as the payment arrives.\n\n{bank_details}\n\nThanks,\n{organisation_name}", 'dono-fundraising-platform'),
             ],
             'donation_pending' => [
                 'enabled' => true,
-                'subject' => __('Your donation is processing', 'dono'),
-                'body'    => __("Hi {donor_first_name},\n\nWe have received your donation of {amount}.\n\nReference: {reference}\n\nYour payment is being processed. Bank settlement can take a few business days; we will email your receipt the moment it clears.\n\nThanks,\n{organisation_name}", 'dono'),
+                'subject' => __('Your donation is processing', 'dono-fundraising-platform'),
+                'body'    => __("Hi {donor_first_name},\n\nWe have received your donation of {amount}.\n\nReference: {reference}\n\nYour payment is being processed. Bank settlement can take a few business days; we will email your receipt the moment it clears.\n\nThanks,\n{organisation_name}", 'dono-fundraising-platform'),
             ],
             'donation_refunded' => [
                 'enabled' => true,
-                'subject' => __('Your donation has been refunded', 'dono'),
-                'body'    => __("Hi {donor_name},\n\nWe have refunded your donation of {amount} to {campaign_title}. Funds should return to your card within 5 to 10 business days.\n\nIf this was a mistake or you have any questions, just reply to this email.\n\nThanks,\n{organisation_name}", 'dono'),
+                'subject' => __('Your donation has been refunded', 'dono-fundraising-platform'),
+                'body'    => __("Hi {donor_name},\n\nWe have refunded your donation of {amount} to {campaign_title}. Funds should return to your card within 5 to 10 business days.\n\nIf this was a mistake or you have any questions, just reply to this email.\n\nThanks,\n{organisation_name}", 'dono-fundraising-platform'),
             ],
             'recurring_renewal' => [
                 'enabled' => true,
-                'subject' => __('Your recurring donation renewed', 'dono'),
-                'body'    => __("Hi {donor_name},\n\nYour recurring donation of {amount} to {campaign_title} was renewed today.\n\nReference: {reference}\n\nThank you for your continued support.\n\nThanks,\n{organisation_name}", 'dono'),
+                'subject' => __('Your recurring donation renewed', 'dono-fundraising-platform'),
+                'body'    => __("Hi {donor_name},\n\nYour recurring donation of {amount} to {campaign_title} was renewed today.\n\nReference: {reference}\n\nThank you for your continued support.\n\nThanks,\n{organisation_name}", 'dono-fundraising-platform'),
             ],
             'subscription_payment_failed' => [
                 'enabled' => true,
-                'subject' => __("Your donation couldn't be taken this month", 'dono'),
-                'body'    => __("Hi {donor_first_name},\n\nWe tried to collect your recurring donation of {amount} to {campaign_title} today and your bank declined it. This usually means a card has expired or been replaced.\n\nNothing has been charged and your donation is still set up. You can update your card here:\n{portal_url}\n\nIf you would rather stop the donation, that is completely fine, and you can do that from the same page.\n\nThanks,\n{organisation_name}", 'dono'),
+                'subject' => __("Your donation couldn't be taken this month", 'dono-fundraising-platform'),
+                'body'    => __("Hi {donor_first_name},\n\nWe tried to collect your recurring donation of {amount} to {campaign_title} today and your bank declined it. This usually means a card has expired or been replaced.\n\nNothing has been charged and your donation is still set up. You can update your card here:\n{portal_url}\n\nIf you would rather stop the donation, that is completely fine, and you can do that from the same page.\n\nThanks,\n{organisation_name}", 'dono-fundraising-platform'),
             ],
             'subscription_cancelled' => [
                 'enabled' => true,
-                'subject' => __('Your recurring donation has been cancelled', 'dono'),
-                'body'    => __("Hi {donor_name},\n\nYour recurring donation of {amount} to {campaign_title} has been cancelled. No further charges will be made.\n\nThank you for the donations you made along the way.\n\nThanks,\n{organisation_name}", 'dono'),
+                'subject' => __('Your recurring donation has been cancelled', 'dono-fundraising-platform'),
+                'body'    => __("Hi {donor_name},\n\nYour recurring donation of {amount} to {campaign_title} has been cancelled. No further charges will be made.\n\nThank you for the donations you made along the way.\n\nThanks,\n{organisation_name}", 'dono-fundraising-platform'),
             ],
             // Sent only when someone at the organization changes a plan on the
             // donor's behalf. A donor changing their own donation is looking at
             // the screen that did it and gets nothing.
             'recurring_amount_changed' => [
                 'enabled' => true,
-                'subject' => __('Your recurring donation amount has changed', 'dono'),
-                'body'    => __("Hi {donor_first_name},\n\nYour recurring donation to {campaign_title} has been changed from {old_amount} to {amount}, starting with your next payment.\n\nIf that is not what you expected, you can change it back or stop the donation here:\n{portal_url}\n\nThanks,\n{organisation_name}", 'dono'),
+                'subject' => __('Your recurring donation amount has changed', 'dono-fundraising-platform'),
+                'body'    => __("Hi {donor_first_name},\n\nYour recurring donation to {campaign_title} has been changed from {old_amount} to {amount}, starting with your next payment.\n\nIf that is not what you expected, you can change it back or stop the donation here:\n{portal_url}\n\nThanks,\n{organisation_name}", 'dono-fundraising-platform'),
             ],
             'recurring_paused' => [
                 'enabled' => true,
-                'subject' => __('Your recurring donation is paused', 'dono'),
-                'body'    => __("Hi {donor_first_name},\n\nYour recurring donation of {amount} to {campaign_title} has been paused. Nothing will be charged until it restarts on {resumes_at}.\n\nYou can restart it sooner, or stop it altogether, here:\n{portal_url}\n\nThanks,\n{organisation_name}", 'dono'),
+                'subject' => __('Your recurring donation is paused', 'dono-fundraising-platform'),
+                'body'    => __("Hi {donor_first_name},\n\nYour recurring donation of {amount} to {campaign_title} has been paused. Nothing will be charged until it restarts on {resumes_at}.\n\nYou can restart it sooner, or stop it altogether, here:\n{portal_url}\n\nThanks,\n{organisation_name}", 'dono-fundraising-platform'),
             ],
             'recurring_resumed' => [
                 'enabled' => true,
-                'subject' => __('Your recurring donation has restarted', 'dono'),
-                'body'    => __("Hi {donor_first_name},\n\nYour recurring donation of {amount} to {campaign_title} has restarted. Your next payment is due on {next_payment_at}.\n\nYou can manage it any time here:\n{portal_url}\n\nThanks,\n{organisation_name}", 'dono'),
+                'subject' => __('Your recurring donation has restarted', 'dono-fundraising-platform'),
+                'body'    => __("Hi {donor_first_name},\n\nYour recurring donation of {amount} to {campaign_title} has restarted. Your next payment is due on {next_payment_at}.\n\nYou can manage it any time here:\n{portal_url}\n\nThanks,\n{organisation_name}", 'dono-fundraising-platform'),
             ],
             'recurring_skipped' => [
                 'enabled' => true,
-                'subject' => __('Your next donation has been skipped', 'dono'),
-                'body'    => __("Hi {donor_first_name},\n\nYour next recurring donation of {amount} to {campaign_title} has been skipped. Nothing will be charged this time, and the donation continues on {next_payment_at}.\n\nYou can manage it any time here:\n{portal_url}\n\nThanks,\n{organisation_name}", 'dono'),
+                'subject' => __('Your next donation has been skipped', 'dono-fundraising-platform'),
+                'body'    => __("Hi {donor_first_name},\n\nYour next recurring donation of {amount} to {campaign_title} has been skipped. Nothing will be charged this time, and the donation continues on {next_payment_at}.\n\nYou can manage it any time here:\n{portal_url}\n\nThanks,\n{organisation_name}", 'dono-fundraising-platform'),
             ],
             'magic_link' => [
                 'enabled' => true,
-                'subject' => __('Your sign-in link for {organisation_name}', 'dono'),
-                'body'    => __("Hi {donor_name},\n\nOpen your donor portal:\n{portal_url}\n\nThis link works for 30 days. If you didn't request it, you can ignore this email.\n\nThanks,\n{organisation_name}", 'dono'),
+                'subject' => __('Your sign-in link for {organisation_name}', 'dono-fundraising-platform'),
+                'body'    => __("Hi {donor_name},\n\nOpen your donor portal:\n{portal_url}\n\nThis link works for 30 days. If you didn't request it, you can ignore this email.\n\nThanks,\n{organisation_name}", 'dono-fundraising-platform'),
             ],
         ];
     }

@@ -34,41 +34,41 @@ export default function Banners( { donation, onRetrySubscription, retryBusy, ret
         <>
             { isTest && (
                 <Banner variant="warn">
-                    <strong>{ __( 'Test-mode donation.', 'dono' ) }</strong>{ ' ' }
-                    { __( 'No real money changed hands.', 'dono' ) }
+                    <strong>{ __( 'Test-mode donation.', 'dono-fundraising-platform' ) }</strong>{ ' ' }
+                    { __( 'No real money changed hands.', 'dono-fundraising-platform' ) }
                 </Banner>
             ) }
             { isDisputed && (
                 <Banner variant="danger">
-                    <strong>{ __( 'Chargeback in progress.', 'dono' ) }</strong>{ ' ' }
-                    { __( 'Review the dispute in your gateway dashboard before refunding.', 'dono' ) }
+                    <strong>{ __( 'Chargeback in progress.', 'dono-fundraising-platform' ) }</strong>{ ' ' }
+                    { __( 'Review the dispute in your gateway dashboard before refunding.', 'dono-fundraising-platform' ) }
                 </Banner>
             ) }
             { isProcessing && (
                 <Banner variant="warn">
-                    <strong>{ __( 'Payment not settled yet.', 'dono' ) }</strong>{ ' ' }
+                    <strong>{ __( 'Payment not settled yet.', 'dono-fundraising-platform' ) }</strong>{ ' ' }
                     { donation.processing_reason }
                 </Banner>
             ) }
             { isFailed && donation.failure_reason && (
                 <Banner variant="danger">
-                    <strong>{ __( 'Payment failed.', 'dono' ) }</strong>{ ' ' }
+                    <strong>{ __( 'Payment failed.', 'dono-fundraising-platform' ) }</strong>{ ' ' }
                     { donation.failure_reason }
                 </Banner>
             ) }
             { subFailed && (
                 <Banner variant="danger">
-                    <strong>{ __( 'Recurring plan was not created.', 'dono' ) }</strong>{ ' ' }
-                    { __( 'The donor was charged for this donation, but no recurring plan exists at the gateway. Nothing will renew until this is fixed.', 'dono' ) }
+                    <strong>{ __( 'Recurring plan was not created.', 'dono-fundraising-platform' ) }</strong>{ ' ' }
+                    { __( 'The donor was charged for this donation, but no recurring plan exists at the gateway. Nothing will renew until this is fixed.', 'dono-fundraising-platform' ) }
                     { subFailReason && (
                         <div style={ { marginTop: 6 } }>
-                            <strong>{ __( 'Gateway reason:', 'dono' ) }</strong>{ ' ' }
+                            <strong>{ __( 'Gateway reason:', 'dono-fundraising-platform' ) }</strong>{ ' ' }
                             { subFailReason }
                         </div>
                     ) }
                     { retryError && (
                         <div style={ { marginTop: 6 } }>
-                            <strong>{ __( 'Last attempt failed:', 'dono' ) }</strong>{ ' ' }
+                            <strong>{ __( 'Last attempt failed:', 'dono-fundraising-platform' ) }</strong>{ ' ' }
                             { retryError }
                         </div>
                     ) }
@@ -81,8 +81,8 @@ export default function Banners( { donation, onRetrySubscription, retryBusy, ret
                                 disabled={ retryBusy }
                             >
                                 { retryBusy
-                                    ? __( 'Creating plan…', 'dono' )
-                                    : __( 'Create the recurring plan', 'dono' ) }
+                                    ? __( 'Creating plan…', 'dono-fundraising-platform' )
+                                    : __( 'Create the recurring plan', 'dono-fundraising-platform' ) }
                             </button>
                         </div>
                     ) }

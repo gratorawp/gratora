@@ -11,7 +11,7 @@ $wrapClasses = 'dono-block dono-block--currency-switcher dono-currency'
     . ' dono-currency--' . esc_attr($align);
 ?>
 <?php
-$ariaName = $label !== '' ? $label : __('Currency', 'dono');
+$ariaName = $label !== '' ? $label : __('Currency', 'dono-fundraising-platform');
 ?>
 <div class="<?php echo $wrapClasses; ?>">
     <?php if ($label !== ''): ?>

@@ -31,52 +31,52 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Text input', 'dono' ) } initialOpen>
+                <PanelBody title={ __( 'Text input', 'dono-fundraising-platform' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'dono' ) }
+                        label={ __( 'Label', 'dono-fundraising-platform' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label in the canvas to edit it inline.', 'dono' ) }
+                        help={ __( 'Click the label in the canvas to edit it inline.', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Placeholder', 'dono' ) }
+                        label={ __( 'Placeholder', 'dono-fundraising-platform' ) }
                         value={ placeholder }
                         onChange={ ( v ) => setAttributes( { placeholder: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Help text', 'dono' ) }
+                        label={ __( 'Help text', 'dono-fundraising-platform' ) }
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Field name', 'dono' ) }
+                        label={ __( 'Field name', 'dono-fundraising-platform' ) }
                         value={ field }
                         onChange={ ( v ) => setAttributes( { field: slugify( v ) } ) }
-                        help={ __( 'Stored under values.custom[field]. Lowercase, snake_case.', 'dono' ) }
+                        help={ __( 'Stored under values.custom[field]. Lowercase, snake_case.', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'dono' ) }
+                        label={ __( 'Required', 'dono-fundraising-platform' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <Slider
-                        label={ __( 'Maximum length', 'dono' ) }
+                        label={ __( 'Maximum length', 'dono-fundraising-platform' ) }
                         value={ maxLength }
                         onChange={ ( v ) => setAttributes( { maxLength: Math.max( 0, v ) } ) }
                         min={ 0 }
                         max={ 500 }
-                        help={ __( '0 = no limit.', 'dono' ) }
+                        help={ __( '0 = no limit.', 'dono-fundraising-platform' ) }
                     />
                     <TextControl
-                        label={ __( 'Pattern (regex)', 'dono' ) }
+                        label={ __( 'Pattern (regex)', 'dono-fundraising-platform' ) }
                         value={ pattern }
                         onChange={ ( v ) => setAttributes( { pattern: v } ) }
-                        help={ __( 'HTML5 pattern attribute. Leave empty to skip.', 'dono' ) }
+                        help={ __( 'HTML5 pattern attribute. Leave empty to skip.', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -91,7 +91,7 @@ function Edit( { attributes, setAttributes } ) {
                     className="dono-block-preview__label"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Label', 'dono' ) }
+                    placeholder={ __( 'Label', 'dono-fundraising-platform' ) }
                     allowedFormats={ [] }
                 />
                 { required && <em className="dono-block-preview__req" aria-hidden="true">*</em> }
@@ -100,12 +100,12 @@ function Edit( { attributes, setAttributes } ) {
                         tagName="span"
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
-                        placeholder={ __( 'Help text', 'dono' ) }
+                        placeholder={ __( 'Help text', 'dono-fundraising-platform' ) }
                         allowedFormats={ [] }
                         style={ { fontSize: 11, color: '#6b7280', display: 'block', marginTop: 2 } }
                     />
                 ) }
-                <div className="dono-block-preview__field">{ placeholder || __( 'Text', 'dono' ) }</div>
+                <div className="dono-block-preview__field">{ placeholder || __( 'Text', 'dono-fundraising-platform' ) }</div>
             </div>
         </>
     );
@@ -114,8 +114,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Text input', 'dono' ),
-        description: __( 'Single-line free text. For employer, dedication name, custom questions, etc.', 'dono' ),
+        title:      __( 'Text input', 'dono-fundraising-platform' ),
+        description: __( 'Single-line free text. For employer, dedication name, custom questions, etc.', 'dono-fundraising-platform' ),
         category:   'dono-fields',
         icon:       BlockIcons[ 'text-input' ],
         supports: { html: false, anchor: false, inserter: true },

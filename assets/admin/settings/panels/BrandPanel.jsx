@@ -68,7 +68,7 @@ export default function BrandPanel( { s } ) {
         const source = presets.find( ( p ) => p.id === id );
         if ( ! source ) return;
         const newId   = generateId( source.name, presets );
-        const newName = `${ source.name } ${ __( '(copy)', 'dono' ) }`;
+        const newName = `${ source.name } ${ __( '(copy)', 'dono-fundraising-platform' ) }`;
         const next    = [ ...presets, {
             id:      newId,
             name:    newName,
@@ -80,10 +80,10 @@ export default function BrandPanel( { s } ) {
     };
 
     const addPreset = () => {
-        const newId = generateId( __( 'Custom', 'dono' ), presets );
+        const newId = generateId( __( 'Custom', 'dono-fundraising-platform' ), presets );
         const next  = [ ...presets, {
             id:      newId,
-            name:    __( 'New preset', 'dono' ),
+            name:    __( 'New preset', 'dono-fundraising-platform' ),
             tokens:  {},
             builtin: false,
         } ];
@@ -95,8 +95,8 @@ export default function BrandPanel( { s } ) {
         const p = presets.find( ( x ) => x.id === id );
         if ( ! p || p.builtin ) return;
         setConfirm( {
-            title:       __( 'Delete preset', 'dono' ),
-            message:     __( 'Delete this brand preset? This cannot be undone.', 'dono' ),
+            title:       __( 'Delete preset', 'dono-fundraising-platform' ),
+            message:     __( 'Delete this brand preset? This cannot be undone.', 'dono-fundraising-platform' ),
             destructive: true,
             onConfirm:   () => {
                 const next = presets.filter( ( x ) => x.id !== id );
@@ -113,8 +113,8 @@ export default function BrandPanel( { s } ) {
             <div className="dono-brand-layout">
                 <div className="dono-brand-layout__main">
                     <Card
-                        title={ __( 'Brand presets', 'dono' ) }
-                        sub={ __( 'Named style presets. Campaigns and forms pick one as their look.', 'dono' ) }
+                        title={ __( 'Brand presets', 'dono-fundraising-platform' ) }
+                        sub={ __( 'Named style presets. Campaigns and forms pick one as their look.', 'dono-fundraising-platform' ) }
                         edited={ s.isDirty }
                     >
                         <div className="dono-preset-mgr">
@@ -144,7 +144,7 @@ export default function BrandPanel( { s } ) {
                                                 { isDefault && (
                                                     <span className="dono-preset-mgr__default">
                                                         <Icon name="check" size={ 12 } />
-                                                        { __( 'Default', 'dono' ) }
+                                                        { __( 'Default', 'dono-fundraising-platform' ) }
                                                     </span>
                                                 ) }
                                             </span>
@@ -157,7 +157,7 @@ export default function BrandPanel( { s } ) {
                                     onClick={ addPreset }
                                     icon={ PlusIcon }
                                 >
-                                    { __( 'Add preset', 'dono' ) }
+                                    { __( 'Add preset', 'dono-fundraising-platform' ) }
                                 </Button>
                             </div>
 
@@ -177,11 +177,11 @@ export default function BrandPanel( { s } ) {
                                     <EmptyState
                                         compact
                                         icon={ <Palette size={ 22 } strokeWidth={ 1.75 } /> }
-                                        title={ __( 'No presets yet', 'dono' ) }
-                                        body={ __( 'Brand presets give every campaign a consistent look. Create one to get started.', 'dono' ) }
+                                        title={ __( 'No presets yet', 'dono-fundraising-platform' ) }
+                                        body={ __( 'Brand presets give every campaign a consistent look. Create one to get started.', 'dono-fundraising-platform' ) }
                                         action={
                                             <Btn variant="secondary" onClick={ addPreset }>
-                                                { __( 'Add preset', 'dono' ) }
+                                                { __( 'Add preset', 'dono-fundraising-platform' ) }
                                             </Btn>
                                         }
                                     />
@@ -192,7 +192,7 @@ export default function BrandPanel( { s } ) {
                 </div>
 
                 <aside className="dono-brand-layout__rail">
-                    <Card title={ __( 'Live preview', 'dono' ) }>
+                    <Card title={ __( 'Live preview', 'dono-fundraising-platform' ) }>
                         { active && (
                             <StylePreview
                                 // Floor the preview with the built-in baseline so a
@@ -222,16 +222,16 @@ function PresetEditor( { preset, resetDefaults, isDefault, onRename, onTokens, o
                     className="dono-input dono-preset-editor__name"
                     value={ preset.name }
                     onChange={ ( e ) => onRename( e.target.value ) }
-                    placeholder={ __( 'Preset name', 'dono' ) }
+                    placeholder={ __( 'Preset name', 'dono-fundraising-platform' ) }
                 />
                 <div className="dono-preset-editor__actions">
                     { ! isDefault && (
                         <Button variant="secondary" size="small" onClick={ onMakeDefault }>
-                            { __( 'Make default', 'dono' ) }
+                            { __( 'Make default', 'dono-fundraising-platform' ) }
                         </Button>
                     ) }
                     <Button variant="tertiary" size="small" icon={ CloneIcon } onClick={ onClone }>
-                        { __( 'Clone', 'dono' ) }
+                        { __( 'Clone', 'dono-fundraising-platform' ) }
                     </Button>
                     { ! preset.builtin && (
                         <Button
@@ -241,7 +241,7 @@ function PresetEditor( { preset, resetDefaults, isDefault, onRename, onTokens, o
                             isDestructive
                             onClick={ onDelete }
                         >
-                            { __( 'Delete', 'dono' ) }
+                            { __( 'Delete', 'dono-fundraising-platform' ) }
                         </Button>
                     ) }
                 </div>

@@ -63,7 +63,7 @@ final class BlockEditorIntegration
         }
         array_unshift($categories, [
             'slug'  => 'dono',
-            'title' => __('Dono', 'dono'),
+            'title' => __('Dono', 'dono-fundraising-platform'),
             'icon'  => 'heart',
         ]);
         return $categories;
@@ -83,7 +83,7 @@ final class BlockEditorIntegration
             $asset['version']      ?? DONO_VERSION,
             true
         );
-        wp_set_script_translations(self::HANDLE_EDITOR, 'dono', DONO_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE_EDITOR, 'dono-fundraising-platform', DONO_DIR . 'languages');
 
         // The binding picker's field list is handed over rather than repeated in
         // JS, so the labels are translated once and the two halves cannot

@@ -60,9 +60,9 @@ final class FormService
     private static function requiredLabel(string $label): string
     {
         return match ($label) {
-            'Amount' => __('Amount', 'dono'),
-            'Name'   => __('Name', 'dono'),
-            'Email'  => __('Email', 'dono'),
+            'Amount' => __('Amount', 'dono-fundraising-platform'),
+            'Name'   => __('Name', 'dono-fundraising-platform'),
+            'Email'  => __('Email', 'dono-fundraising-platform'),
             default  => $label,
         };
     }
@@ -98,7 +98,7 @@ final class FormService
 
         $title = trim((string) ($input['title'] ?? ''));
         if ($title === '') {
-            $title = __('Untitled donation form', 'dono');
+            $title = __('Untitled donation form', 'dono-fundraising-platform');
         }
 
         $campaign = $this->resolveCampaign($input['campaign_id'] ?? null);
@@ -228,10 +228,10 @@ final class FormService
             if ($raw !== '') {
                 $next = sanitize_title($raw);
                 if ($next === '') {
-                    throw new InvalidArgumentException(__('Invalid slug.', 'dono'));
+                    throw new InvalidArgumentException(__('Invalid slug.', 'dono-fundraising-platform'));
                 }
                 if ($next !== $form->slug && $this->forms->slugExists($next, $form->id)) {
-                    throw new InvalidArgumentException(__('Slug is already in use.', 'dono'));
+                    throw new InvalidArgumentException(__('Slug is already in use.', 'dono-fundraising-platform'));
                 }
                 $form->slug = $next;
             }
@@ -302,7 +302,7 @@ final class FormService
 
         if ($defaultFormId === (int) $form->id) {
             throw new InvalidArgumentException(
-                __('This form is the campaign default. Pick a different default form before deleting it.', 'dono')
+                __('This form is the campaign default. Pick a different default form before deleting it.', 'dono-fundraising-platform')
             );
         }
 
@@ -321,7 +321,7 @@ final class FormService
         $now = $this->clock->now()->format('Y-m-d H:i:s');
 
         /* translators: %s: original form title */
-        $title = sprintf(__('%s (copy)', 'dono'), $source->title);
+        $title = sprintf(__('%s (copy)', 'dono-fundraising-platform'), $source->title);
 
         $copy = Form::make();
         $copy->title        = $title;
@@ -368,7 +368,7 @@ final class FormService
         throw new InvalidArgumentException(
             sprintf(
                 /* translators: %s: comma-separated list of missing block labels (Amount, Name, Email). */
-                __('A published donation form needs these blocks: %s.', 'dono'),
+                __('A published donation form needs these blocks: %s.', 'dono-fundraising-platform'),
                 implode(', ', $labels)
             )
         );
@@ -383,11 +383,11 @@ final class FormService
     {
         $id = (int) ($idOrNull ?? 0);
         if ($id <= 0) {
-            throw new InvalidArgumentException(__('A campaign is required.', 'dono'));
+            throw new InvalidArgumentException(__('A campaign is required.', 'dono-fundraising-platform'));
         }
         $campaign = $this->campaigns->findById($id);
         if (! $campaign) {
-            throw new InvalidArgumentException(__('Campaign not found.', 'dono'));
+            throw new InvalidArgumentException(__('Campaign not found.', 'dono-fundraising-platform'));
         }
         return $campaign;
     }
@@ -463,7 +463,7 @@ final class FormService
 
         throw new InvalidArgumentException(sprintf(
             /* translators: %s: campaign title. */
-            __('This is the default donation form for %s, so it cannot be moved. Make another form the default first.', 'dono'),
+            __('This is the default donation form for %s, so it cannot be moved. Make another form the default first.', 'dono-fundraising-platform'),
             $campaign->title
         ));
     }

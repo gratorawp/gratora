@@ -52,7 +52,7 @@ final class PayPalPlans
             'product_id' => $this->resolveProduct($test),
             'name'       => sprintf(
                 /* translators: 1: amount, 2: currency, 3: interval */
-                __('Donation %1$s %2$s / %3$s', 'dono'),
+                __('Donation %1$s %2$s / %3$s', 'dono-fundraising-platform'),
                 PayPalMoney::toValue($amountCents, $currency),
                 $currency,
                 $this->intervalLabel($intervalUnit, $intervalCount)
@@ -109,8 +109,8 @@ final class PayPalPlans
         }
 
         $product = $this->api->post('/v1/catalogs/products', [
-            'name'        => __('Donation', 'dono'),
-            'description' => __('Recurring donation', 'dono'),
+            'name'        => __('Donation', 'dono-fundraising-platform'),
+            'description' => __('Recurring donation', 'dono-fundraising-platform'),
             'type'        => 'SERVICE',
             'category'    => 'NONPROFIT',
         ], ['PayPal-Request-Id' => 'dono_product_' . $key]);

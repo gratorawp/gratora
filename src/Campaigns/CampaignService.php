@@ -49,7 +49,7 @@ final class CampaignService
 
         $title = trim((string) ($input['title'] ?? ''));
         if ($title === '') {
-            $title = __('Untitled campaign', 'dono');
+            $title = __('Untitled campaign', 'dono-fundraising-platform');
         }
 
         $campaign = Campaign::make();
@@ -114,10 +114,10 @@ final class CampaignService
             if ($raw !== '') {
                 $next = sanitize_title($raw);
                 if ($next === '') {
-                    throw new InvalidArgumentException(__('Invalid slug.', 'dono'));
+                    throw new InvalidArgumentException(__('Invalid slug.', 'dono-fundraising-platform'));
                 }
                 if ($next !== $campaign->slug && $this->campaigns->slugExists($next, $campaign->id)) {
-                    throw new InvalidArgumentException(__('Slug is already in use.', 'dono'));
+                    throw new InvalidArgumentException(__('Slug is already in use.', 'dono-fundraising-platform'));
                 }
                 $campaign->slug = $next;
             }
@@ -178,7 +178,7 @@ final class CampaignService
                 $formId = (int) $value;
                 $form = Form::query()->find('id', $formId);
                 if (! $form || $form->campaign_id !== $campaign->id) {
-                    throw new InvalidArgumentException(__('Selected form is not part of this campaign.', 'dono'));
+                    throw new InvalidArgumentException(__('Selected form is not part of this campaign.', 'dono-fundraising-platform'));
                 }
                 $campaign->default_form_id = $formId;
             }
@@ -241,7 +241,7 @@ final class CampaignService
         $plans     = (int) RecurringPlan::query()->where('campaign_id', $campaign->id)->count();
 
         if ($donations > 0 || $plans > 0) {
-            return __('This campaign has donations and cannot be deleted. Archive it instead to keep its records.', 'dono');
+            return __('This campaign has donations and cannot be deleted. Archive it instead to keep its records.', 'dono-fundraising-platform');
         }
 
         return null;
@@ -299,7 +299,7 @@ final class CampaignService
         }
         $attachmentId = (int) $value;
         if (! wp_attachment_is_image($attachmentId)) {
-            throw new InvalidArgumentException(__('Selected file is not an image.', 'dono'));
+            throw new InvalidArgumentException(__('Selected file is not an image.', 'dono-fundraising-platform'));
         }
         return $attachmentId;
     }
@@ -337,7 +337,7 @@ final class CampaignService
         $now = $this->clock->now()->format('Y-m-d H:i:s');
 
         /* translators: %s: original campaign title */
-        $newTitle = sprintf(__('Copy of %s', 'dono'), $source->title);
+        $newTitle = sprintf(__('Copy of %s', 'dono-fundraising-platform'), $source->title);
 
         $copy = Campaign::make();
         $copy->title       = $newTitle;
@@ -557,13 +557,13 @@ final class CampaignService
         // so the editor rewrites dp-band--tight on its first save and the
         // revision shows a change nobody made. Cosmetic, and P2P's LayoutBlocks
         // writes it the same way.
-        $t0 = __('Campaign name', 'dono');
+        $t0 = __('Campaign name', 'dono-fundraising-platform');
         // Bound, so this is only what an organizer who has written no
         // description sees in the editor. Nothing else is seeded as prose:
         // seeded words read to a donor as the campaign's own.
-        $t2 = __('What this campaign is raising for.', 'dono');
-        $t5 = __('Recent donations', 'dono');
-        $t6 = __('Top donors', 'dono');
+        $t2 = __('What this campaign is raising for.', 'dono-fundraising-platform');
+        $t5 = __('Recent donations', 'dono-fundraising-platform');
+        $t6 = __('Top donors', 'dono-fundraising-platform');
 
         // These two sections are titled by the block itself rather than a
         // Heading above it, which would render the words twice. json_encode so
@@ -650,7 +650,7 @@ BLOCKS;
     {
         $form = $this->forms->create([
             /* translators: %s: campaign title */
-            'title'       => sprintf(__('%s donation form', 'dono'), $campaign->title),
+            'title'       => sprintf(__('%s donation form', 'dono-fundraising-platform'), $campaign->title),
             // Without a template the form lacks Name + Email and fails publish
             // readiness checks; keep it as draft until the user picks a template.
             'status'      => $skipTemplate ? 'draft' : 'published',

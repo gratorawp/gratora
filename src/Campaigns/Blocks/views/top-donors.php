@@ -48,7 +48,7 @@ defined('ABSPATH') || exit;
                         <div class="dono-top-donors__podium-count">
                             <?php echo esc_html(sprintf(
                                 /* translators: %s: number of donations */
-                                _n('%s donation', '%s donations', $entry['donations_count'], 'dono'),
+                                _n('%s donation', '%s donations', $entry['donations_count'], 'dono-fundraising-platform'),
                                 number_format_i18n($entry['donations_count'])
                             )); ?>
                         </div>
@@ -69,7 +69,7 @@ defined('ABSPATH') || exit;
                             <span class="dono-top-donors__count">
                                 <?php echo esc_html(sprintf(
                                     /* translators: %s: count */
-                                    _n('(%s donation)', '(%s donations)', $entry['donations_count'], 'dono'),
+                                    _n('(%s donation)', '(%s donations)', $entry['donations_count'], 'dono-fundraising-platform'),
                                     number_format_i18n($entry['donations_count'])
                                 )); ?>
                             </span>
@@ -95,7 +95,7 @@ defined('ABSPATH') || exit;
                         <span class="dono-top-donors__count">
                             <?php echo esc_html(sprintf(
                                 /* translators: %s: count */
-                                _n('(%s donation)', '(%s donations)', $entry['donations_count'], 'dono'),
+                                _n('(%s donation)', '(%s donations)', $entry['donations_count'], 'dono-fundraising-platform'),
                                 number_format_i18n($entry['donations_count'])
                             )); ?>
                         </span>

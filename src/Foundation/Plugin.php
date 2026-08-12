@@ -64,7 +64,7 @@ final class Plugin
 
         $self = self::instance();
 
-        load_plugin_textdomain('dono', false, dirname(plugin_basename(DONO_FILE)) . '/languages');
+        load_plugin_textdomain('dono-fundraising-platform', false, dirname(plugin_basename(DONO_FILE)) . '/languages');
 
         // Guarded so boot() is safe even when modules were already registered
         // earlier in the same request - e.g. the integration test bootstrap

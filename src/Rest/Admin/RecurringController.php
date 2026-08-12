@@ -408,7 +408,7 @@ final class RecurringController
     {
         $plan = RecurringPlan::query()->find('id', (int) $request['id']);
         if (! $plan) {
-            return new WP_Error('dono_not_found', __('Recurring plan not found.', 'dono'), ['status' => 404]);
+            return new WP_Error('dono_not_found', __('Recurring plan not found.', 'dono-fundraising-platform'), ['status' => 404]);
         }
 
         $action = (string) $request['action'];
@@ -444,7 +444,7 @@ final class RecurringController
                     break;
 
                 default:
-                    return new WP_Error('dono_invalid_action', __('Unknown action.', 'dono'), ['status' => 422]);
+                    return new WP_Error('dono_invalid_action', __('Unknown action.', 'dono-fundraising-platform'), ['status' => 422]);
             }
         } catch (SubscriptionChangeNeedsApproval $e) {
             // Ahead of RuntimeException, which is its parent. Nothing was
@@ -453,7 +453,7 @@ final class RecurringController
             // what the card is actually charged.
             return new WP_Error(
                 'dono_change_needs_approval',
-                __('The payment provider needs the donor to approve this change before it takes effect. Nothing has changed yet.', 'dono'),
+                __('The payment provider needs the donor to approve this change before it takes effect. Nothing has changed yet.', 'dono-fundraising-platform'),
                 ['status' => 409, 'approve_url' => $e->approveUrl]
             );
         } catch (GatewayTransportException $e) {
@@ -465,7 +465,7 @@ final class RecurringController
                 'dono_gateway_unreachable',
                 sprintf(
                     /* translators: %s: transport error, e.g. a DNS failure */
-                    __('This site could not reach the payment provider, so nothing has changed: %s. That is a problem with this server rather than with the plan. Try again in a moment.', 'dono'),
+                    __('This site could not reach the payment provider, so nothing has changed: %s. That is a problem with this server rather than with the plan. Try again in a moment.', 'dono-fundraising-platform'),
                     $e->getMessage()
                 ),
                 ['status' => 503]
@@ -480,7 +480,7 @@ final class RecurringController
             \Dono\Analytics\ErrorLog::record('admin.recurring', $e->getMessage());
             return new WP_Error(
                 'dono_gateway_error',
-                __('The payment provider would not accept that change. Nothing has been altered.', 'dono'),
+                __('The payment provider would not accept that change. Nothing has been altered.', 'dono-fundraising-platform'),
                 ['status' => 502]
             );
         }

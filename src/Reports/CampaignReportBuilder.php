@@ -48,18 +48,18 @@ final class CampaignReportBuilder
             'percent'        => $percent,
             'bar_width'      => $barWidth,
             'stats'          => [
-                ['label' => __('Donations', 'dono'),        'value' => number_format_i18n((int) $summary['donations_count'])],
-                ['label' => __('Unique donors', 'dono'),    'value' => number_format_i18n((int) $summary['donors_count'])],
-                ['label' => __('Average donation', 'dono'), 'value' => Money::format((int) $summary['avg_donation_cents'], $currency)],
+                ['label' => __('Donations', 'dono-fundraising-platform'),        'value' => number_format_i18n((int) $summary['donations_count'])],
+                ['label' => __('Unique donors', 'dono-fundraising-platform'),    'value' => number_format_i18n((int) $summary['donors_count'])],
+                ['label' => __('Average donation', 'dono-fundraising-platform'), 'value' => Money::format((int) $summary['avg_donation_cents'], $currency)],
             ],
             'generated_date' => (string) wp_date(get_option('date_format')),
         ]);
 
         return $this->pdf->fromHtml($html, [
             /* translators: %s: campaign title. */
-            'title'   => sprintf(__('Campaign report: %s', 'dono'), (string) $campaign->title),
+            'title'   => sprintf(__('Campaign report: %s', 'dono-fundraising-platform'), (string) $campaign->title),
             'author'  => $orgName,
-            'subject' => __('Campaign performance report', 'dono'),
+            'subject' => __('Campaign performance report', 'dono-fundraising-platform'),
         ]);
     }
 
@@ -99,11 +99,11 @@ final class CampaignReportBuilder
         if ($type === 'donors') {
             $current = (int) $summary['donors_count'];
             /* translators: %s: donor goal count */
-            $display = sprintf(__('%s donors', 'dono'), number_format_i18n($goalCount));
+            $display = sprintf(__('%s donors', 'dono-fundraising-platform'), number_format_i18n($goalCount));
         } else {
             $current = (int) $summary['donations_count'];
             /* translators: %s: donation goal count */
-            $display = sprintf(__('%s donations', 'dono'), number_format_i18n($goalCount));
+            $display = sprintf(__('%s donations', 'dono-fundraising-platform'), number_format_i18n($goalCount));
         }
 
         $percent = (int) round(($current / $goalCount) * 100);
@@ -120,11 +120,11 @@ final class CampaignReportBuilder
     private function rangeLabel(string $range): string
     {
         return match ($range) {
-            'today'    => __('Today', 'dono'),
-            'last-7'   => __('Last 7 days', 'dono'),
-            'last-30'  => __('Last 30 days', 'dono'),
-            'last-90'  => __('Last 90 days', 'dono'),
-            'all-time' => __('All time', 'dono'),
+            'today'    => __('Today', 'dono-fundraising-platform'),
+            'last-7'   => __('Last 7 days', 'dono-fundraising-platform'),
+            'last-30'  => __('Last 30 days', 'dono-fundraising-platform'),
+            'last-90'  => __('Last 90 days', 'dono-fundraising-platform'),
+            'all-time' => __('All time', 'dono-fundraising-platform'),
             default    => $range,
         };
     }

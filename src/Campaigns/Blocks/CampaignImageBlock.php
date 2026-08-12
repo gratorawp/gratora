@@ -67,7 +67,7 @@ final class CampaignImageBlock extends CampaignBlock
         }
 
         return '<div class="dono-block-notice">'
-            . esc_html__('This campaign has no cover image yet. Add one in the campaign settings.', 'dono')
+            . esc_html__('This campaign has no cover image yet. Add one in the campaign settings.', 'dono-fundraising-platform')
             . '</div>';
     }
 }

@@ -28,7 +28,7 @@ function ensureEntity() {
             kind: ENTITY_KIND,
             name: ENTITY_NAME,
             baseURL: '/dono/v1/campaign-binding-preview',
-            label: __( 'Dono campaign binding preview', 'dono' ),
+            label: __( 'Dono campaign binding preview', 'dono-fundraising-platform' ),
         },
     ] );
 }
@@ -51,7 +51,7 @@ export function registerCampaignBindingSource( fields ) {
 
     registerBlockBindingsSource( {
         name: 'dono/campaign',
-        label: __( 'Dono campaign', 'dono' ),
+        label: __( 'Dono campaign', 'dono-fundraising-platform' ),
         usesContext: [ 'postId' ],
         getValues: ( { select, context, bindings } ) => {
             const record = preview( select, context );
