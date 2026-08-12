@@ -403,12 +403,17 @@ final class ReceiptIssuer
 
         // Mailer::sendRaw already applies email.bcc_admin from settings when
         // no explicit bcc is passed - no extra handling needed here.
-        $sent = $this->mailer->sendRaw($ctx->donor_email, $subject, $body, [
-            'html'        => true,
-            'attachments' => [$tmpPath],
-        ]);
-
-        @unlink($tmpPath);
+        try {
+            $sent = $this->mailer->sendRaw($ctx->donor_email, $subject, $body, [
+                'html'        => true,
+                'attachments' => [$tmpPath],
+            ]);
+        } finally {
+            // finally, not after the call: the file holds the donor's name,
+            // address and what they gave, and a mailer that throws would
+            // otherwise leave it sitting in the system temp directory.
+            @unlink($tmpPath);
+        }
 
         return $sent;
     }
