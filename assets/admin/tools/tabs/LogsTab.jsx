@@ -4,7 +4,6 @@ import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { __, _n, sprintf } from '@wordpress/i18n';
 
-import Card from '../../_shared/components/Card';
 import Btn from '../../_shared/components/Btn';
 import ConfirmDialog from '../../_shared/components/ConfirmDialog';
 import Dialog from '../../_shared/components/Dialog';
@@ -40,13 +39,6 @@ function hasContext( row ) {
  * Dono has no handler for is ordinary traffic: gateways send everything they
  * have, and most of it is none of our business.
  */
-/**
- * What a clear can actually delete. Everything else in the log is a record.
- */
-function isDiagnosticSource( source ) {
-    return source.startsWith( 'error.' ) || source.startsWith( 'webhook.' );
-}
-
 function deliveryOutcome( row ) {
     if ( ! row.verified ) {
         return { tone: 'red', label: __( 'Not verified', 'dono' ) };
@@ -154,29 +146,19 @@ export default function LogsTab( { active, setNotice } ) {
 
     // Named for what it removes: filtered to a source it clears that source
     // only, and the delivery history goes with the failures either way.
-    // Only failures and deliveries can be cleared. Everything else is the
-    // record the donor timelines and the dashboard read from, so a source
-    // filtered to one of those types clears the diagnostics around it rather
-    // than the rows it names, and the confirmation has to say which.
-    const clearsTheFilteredSource = !! source && isDiagnosticSource( source );
-
+    // Named for what it removes: filtered to a source it clears that source
+    // alone, and the delivery history goes with the failures otherwise.
     const askClear = () => setConfirm( {
-        title: clearsTheFilteredSource
+        title: source
             ? __( 'Clear this source', 'dono' )
             : __( 'Clear the log', 'dono' ),
-        message: clearsTheFilteredSource
+        message: source
             ? sprintf(
                 /* translators: %s: the log source being cleared, e.g. webhook.stripe */
                 __( 'Deletes every entry recorded under %s. Nothing else is touched.', 'dono' ),
                 source
             )
-            : source
-                ? sprintf(
-                    /* translators: %s: the log source currently filtered to, e.g. donation.completed */
-                    __( 'Entries under %s are the record of what happened and are kept, along with the donor timelines and the dashboard figures that read from them. This deletes the failures Dono recorded and the history of what your gateways sent.', 'dono' ),
-                    source
-                )
-                : __( 'Deletes the failures Dono recorded and the history of what your gateways sent. What happened to donations, donors and subscriptions is kept: those entries are the record the donor timelines and the dashboard read from.', 'dono' ),
+            : __( 'Deletes every entry: the failures Dono recorded and the history of what your gateways sent. The log fills again as things happen.', 'dono' ),
         confirmLabel: __( 'Clear log', 'dono' ),
         destructive:  true,
         onConfirm:    doClear,
@@ -261,14 +243,14 @@ export default function LogsTab( { active, setNotice } ) {
         ? sprintf(
             /* translators: %d: number of days entries are kept. */
             _n(
-                'Everything Dono recorded: what happened, what your gateways sent, and what it could not finish. Entries are removed after %d day.',
-                'Everything Dono recorded: what happened, what your gateways sent, and what it could not finish. Entries are removed after %d days.',
+                'What Dono could not finish and what your gateways sent this site. Entries are removed after %d day.',
+                'What Dono could not finish and what your gateways sent this site. Entries are removed after %d days.',
                 retention,
                 'dono'
             ),
             retention
         )
-        : __( 'Everything Dono recorded: what happened, what your gateways sent, and what it could not finish.', 'dono' );
+        : __( 'What Dono could not finish and what your gateways sent this site.', 'dono' );
 
     // Nothing at all has no filter to widen and no source to pick, so the table
     // has nothing to offer. A filtered miss keeps it: the chips are the only way
@@ -277,7 +259,8 @@ export default function LogsTab( { active, setNotice } ) {
 
     return (
         <div className="dono-panel">
-            <Card title={ __( 'Log', 'dono' ) } sub={ sub }>
+            <div className="dono-tools-loghead">
+                <p className="dono-tools-note" style={ { margin: 0 } }>{ sub }</p>
                 <div className="dono-tools-logbar">
                     <Btn variant="secondary" onClick={ load } disabled={ loading }>
                         { __( 'Refresh', 'dono' ) }
@@ -291,40 +274,39 @@ export default function LogsTab( { active, setNotice } ) {
                         { __( 'Clear log', 'dono' ) }
                     </Btn>
                 </div>
+            </div>
 
-                { error ? (
-                    <p className="dono-tools-empty">
-                        { __( 'The log could not be read, so this screen cannot say what has happened. Check that you are still signed in, then try Refresh.', 'dono' ) }
-                        { ' ' }
-                        <code>{ error }</code>
-                    </p>
-                ) : emptyAndUnfiltered ? (
-                    <p className="dono-tools-empty">{ __( 'Nothing recorded yet.', 'dono' ) }</p>
-                ) : (
-                    // The card chrome the other list screens sit in lives on this
-                    // wrapper, so without it the table renders bare on the page.
-                    <div className="dono-dataviews">
-                        <DataViews
-                            data={ items }
-                            fields={ fields }
-                            view={ view }
-                            onChangeView={ setView }
-                            actions={ actions }
-                            isLoading={ loading }
-                            paginationInfo={ paginationInfo }
-                            defaultLayouts={ { table: {} } }
-                            search={ false }
-                            getItemId={ ( item ) => String( item.id ) }
-                        />
-                    </div>
-                ) }
+            { error ? (
+                <p className="dono-tools-empty">
+                    { __( 'The log could not be read, so this screen cannot say what has happened. Check that you are still signed in, then try Refresh.', 'dono' ) }
+                    { ' ' }
+                    <code>{ error }</code>
+                </p>
+            ) : emptyAndUnfiltered ? (
+                <p className="dono-tools-empty">{ __( 'Nothing recorded yet.', 'dono' ) }</p>
+            ) : (
+                // Carries the shared table styling every other list screen uses.
+                <div className="dono-dataviews">
+                    <DataViews
+                        data={ items }
+                        fields={ fields }
+                        view={ view }
+                        onChangeView={ setView }
+                        actions={ actions }
+                        isLoading={ loading }
+                        paginationInfo={ paginationInfo }
+                        defaultLayouts={ { table: {} } }
+                        search={ false }
+                        getItemId={ ( item ) => String( item.id ) }
+                    />
+                </div>
+            ) }
 
-                { ! error && !! items.length && (
-                    <p className="dono-tools-note">
-                        { __( 'A delivery marked as needing no action is normal: gateways send every event they have, and Dono acts only on the ones it needs. Request bodies are not kept, because they carry the donor details the gateway sent. Clearing the log removes failures and deliveries, not what happened to a donation.', 'dono' ) }
-                    </p>
-                ) }
-            </Card>
+            { ! error && !! items.length && (
+                <p className="dono-tools-note">
+                    { __( 'A delivery marked as needing no action is normal: gateways send every event they have, and Dono acts only on the ones it needs. Request bodies are not kept, because they carry the donor details the gateway sent.', 'dono' ) }
+                </p>
+            ) }
 
             { detail && (
                 <Dialog

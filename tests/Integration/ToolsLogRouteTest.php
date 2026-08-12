@@ -122,29 +122,32 @@ final class ToolsLogRouteTest extends IntegrationTestCase
         return (int) $e->id;
     }
 
-    public function test_what_happened_is_listed_alongside_failures_and_deliveries(): void
+    public function test_a_record_of_what_happened_is_not_listed(): void
     {
         ErrorLog::record('gateway.intent', 'Something broke.');
         $this->deliver();
         $this->activity('recurring.amount_changed');
 
-        $items = (array) $this->fetch()['items'];
-        $kinds = array_column($items, 'kind');
+        $data = $this->fetch();
 
+        // Counted, not classified: a record that reached the list would be
+        // shaped as an error row and pass any assertion made on kind alone.
+        $this->assertSame(2, (int) $data['total'], (string) wp_json_encode($data['items']));
+
+        $kinds = array_column((array) $data['items'], 'kind');
         $this->assertContains('error', $kinds);
         $this->assertContains('webhook', $kinds);
-        $this->assertContains('activity', $kinds);
     }
 
-    public function test_an_activity_row_reads_as_words_and_names_its_donation(): void
+    public function test_a_record_type_is_not_offered_as_a_filter(): void
     {
-        $this->activity('recurring.amount_changed');
+        ErrorLog::record('gateway.intent', 'Something broke.');
+        $this->activity('donation.completed');
 
-        $row = (array) ((array) $this->fetch()['items'])[0];
+        $sources = (array) $this->fetch()['sources'];
 
-        // A machine key an org has to decode is barely better than no entry.
-        $this->assertSame('Recurring amount changed', $row['message']);
-        $this->assertSame(4242, (int) ($row['context']['donation_id'] ?? 0));
+        $this->assertContains('error.gateway.intent', $sources);
+        $this->assertNotContains('donation.completed', $sources);
     }
 
     public function test_clearing_the_log_keeps_what_happened_to_donations(): void

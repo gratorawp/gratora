@@ -273,7 +273,7 @@ final class ToolsController
     {
         $source = preg_replace('/[^a-z0-9_.\-]/', '', strtolower(trim($raw))) ?: '';
 
-        return $source;
+        return self::isDiagnostic($source) ? $source : '';
     }
 
     /** @since 1.0.0 */
@@ -283,6 +283,11 @@ final class ToolsController
 
         if ($source !== '') {
             $query->whereLike('type', $source . '%');
+        } else {
+            $query->where(static function ($q): void {
+                $q->whereLike('type', ErrorLog::PREFIX . '%')
+                    ->orWhereLike('type', self::WEBHOOK_PREFIX . '%');
+            });
         }
 
         // Every recorded error is a failure; a delivery has to be read for it.
@@ -312,54 +317,9 @@ final class ToolsController
             return self::deliveryRow($e);
         }
 
-        return str_starts_with((string) $e->type, ErrorLog::PREFIX)
-            ? self::errorRow($e)
-            : self::activityRow($e);
+        return self::errorRow($e);
     }
 
-    /**
-     * Everything that is neither a failure nor a delivery: what was done, and
-     * to which record. These rows are history rather than diagnostics, so the
-     * clear control leaves them alone.
-     *
-     * @return array<string,mixed>
-     *
-     * @since 1.0.0
-     */
-    private static function activityRow(Event $e): array
-    {
-        $payload = is_array($e->payload) ? $e->payload : [];
-
-        // The ids are columns of their own, so they are folded back in or the
-        // one thing that says which donation this was about is missing.
-        foreach (['donation_id', 'donor_id', 'recurring_plan_id', 'campaign_id', 'user_id'] as $key) {
-            if (! empty($e->{$key})) {
-                $payload[$key] = (int) $e->{$key};
-            }
-        }
-
-        return [
-            'id'          => (int) $e->id,
-            'kind'        => 'activity',
-            'source'      => (string) $e->type,
-            'message'     => self::readableType((string) $e->type),
-            'context'     => $payload,
-            'occurred_at' => (string) $e->occurred_at,
-        ];
-    }
-
-    /**
-     * "recurring.amount_changed" reads as "Recurring amount changed", so an
-     * add-on's own event type is words rather than a machine key.
-     *
-     * @since 1.0.0
-     */
-    private static function readableType(string $type): string
-    {
-        $words = trim(str_replace(['.', '_'], ' ', $type));
-
-        return $words === '' ? $type : ucfirst($words);
-    }
     /**
      * @return array<string,mixed>
      *
@@ -432,6 +392,10 @@ final class ToolsController
         $rows = Event::query()
             ->select('type')
             ->distinct()
+            ->where(static function ($q): void {
+                $q->whereLike('type', ErrorLog::PREFIX . '%')
+                    ->orWhereLike('type', self::WEBHOOK_PREFIX . '%');
+            })
             ->orderBy('type', 'ASC')
             ->getAll();
 
