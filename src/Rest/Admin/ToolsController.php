@@ -665,8 +665,13 @@ final class ToolsController
         $result = $this->csv->import($csv, $mapping, $dryRun);
 
         // A real run brings in years of history, so the retention sweep waits
-        // rather than acting on it that night.
-        if (! $dryRun && ($result['imported'] ?? 0) > 0) {
+        // rather than acting on it that night. Keyed on what the importer
+        // actually returns: donors arrive without a donation between them, and
+        // they are the rows the sweep reads.
+        $landed = ((int) ($result['donations_imported'] ?? 0))
+            + ((int) ($result['donors_created'] ?? 0));
+
+        if (! $dryRun && $landed > 0) {
             DonorRetention::deferBy();
         }
 

@@ -62,6 +62,10 @@
 
 /README.md
 /ROADMAP.md
+# Screenshots and banners for the directory listing. The deploy action reads
+# them from the checkout and publishes them to SVN assets/; copying them into
+# the payload ships 740 KB of marketing art to every install, and into trunk.
+/.wordpress-org
 # .gitignore keeps these out of the repo; this keeps them out of the zip.
 # They live on disk, so being untracked hides them from git and from nothing
 # else: without these lines the build would ship the QA findings and the

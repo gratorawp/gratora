@@ -38,7 +38,7 @@ done
 # are invisible to git and present on disk, which is how a customer zip came to
 # carry 19 MB of generated notes about our own source.
 for leak in tests tests-e2e node_modules .git .npmrc graphify-out qa \
-    phpunit.xml.dist phpunit-integration.xml.dist
+    phpunit.xml.dist phpunit-integration.xml.dist .wordpress-org
 do
     test ! -e "$OUT/$leak" || fail "$leak is in the zip"
 done
