@@ -82,57 +82,32 @@ Create beautiful, fully customizable donation forms in the WordPress editor.
 
 == External services ==
 
-Dono contacts the following third-party services. Nothing below runs unless the
-feature that needs it is configured and in use.
+Nothing here is contacted until you configure the feature that needs it. A fresh
+install talks to no one.
 
-**Stripe** (api.stripe.com, and js.stripe.com in the donor's browser)
+**Stripe** (api.stripe.com, plus js.stripe.com in the donor's browser)
+Only with Stripe connected. Sends the amount, currency, donor name and email, and
+the order or subscription id when a donation is made or a plan is managed. Card
+details go straight to Stripe and never reach this site. Their script must be
+loaded from their domain to keep your site out of PCI scope.
+Terms: https://stripe.com/legal/ssa | Privacy: https://stripe.com/privacy
 
-Used only when Stripe is connected as a payment gateway. When a donor submits a
-donation, or an administrator manages a recurring plan or issues a refund, Dono
-sends the donation amount, currency, the donor's email address and name, and the
-related order and subscription identifiers to Stripe's API. Card details are
-entered into Stripe's own payment fields and never reach this site or its
-database.
-
-The js.stripe.com script is loaded into the donor's browser at the payment step,
-on return from a redirect, and when a donor changes a saved card in the donor
-portal. Stripe requires that this script be served from their domain rather than
-bundled, because doing so keeps the site out of PCI scope.
-
-Terms: https://stripe.com/legal/ssa
-Privacy: https://stripe.com/privacy
-
-**PayPal** (api-m.paypal.com, api-m.sandbox.paypal.com, and www.paypal.com in the
+**PayPal** (api-m.paypal.com, api-m.sandbox.paypal.com, plus www.paypal.com in the
 donor's browser)
-
-Used only when PayPal is connected as a payment gateway. When a donor pays with
-PayPal, Dono sends the donation amount, currency, the donor's email address and
-name, and the related order and subscription identifiers to PayPal's API. The
-sandbox host is contacted instead when the gateway is in test mode. PayPal's
-checkout script is loaded into the donor's browser when the PayPal payment
-option is shown, and carries the organisation's PayPal client id.
-
-Terms: https://www.paypal.com/legalhub/useragreement-full
-Privacy: https://www.paypal.com/legalhub/privacy-full
+Only with PayPal connected. Sends the same donation details; the sandbox host is
+used in test mode. Their checkout script carries your PayPal client id.
+Terms: https://www.paypal.com/legalhub/useragreement-full | Privacy: https://www.paypal.com/legalhub/privacy-full
 
 **Frankfurter** (api.frankfurter.app)
-
-Used only when the site accepts a currency other than its own, which is what the
-currency switcher and multi-currency reporting need. Once a day Dono requests
-European Central Bank reference rates. The request contains a three-letter
-currency code and nothing else: no donor, donation or site data is sent.
-
+Only when you accept a currency other than your own. Requests European Central
+Bank rates once a day, sending a three-letter currency code and nothing else.
 Terms and privacy: https://frankfurter.dev
 
 **Gravatar** (gravatar.com)
-
-Off by default. When "Show Gravatar profile pictures" is enabled under Settings,
-Privacy, donor lists request avatars through WordPress's own avatar functions,
-which sends a hash of the donor's email address to Gravatar from the browser of
-whoever is viewing the page. Anonymous donors are never shown one.
-
-Terms: https://automattic.com/terms/
-Privacy: https://automattic.com/privacy/
+Off by default. When enabled, donor lists request avatars through WordPress's own
+avatar functions, sending a hash of the donor's email from the visitor's browser.
+Anonymous donors are never shown one.
+Terms: https://automattic.com/terms/ | Privacy: https://automattic.com/privacy/
 
 == Installation ==
 
