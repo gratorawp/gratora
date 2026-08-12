@@ -40,34 +40,4 @@ final class AdminListHardeningTest extends IntegrationTestCase
             $this->assertLessThan(500, $status, "{$route} survived the overflow");
         }
     }
-
-    public function test_a_readonly_donor_viewer_cannot_delete_the_site_licence(): void
-    {
-        $viewer = self::factory()->user->create(['role' => 'subscriber']);
-        $user   = get_user_by('id', $viewer);
-        $user->add_cap('dono_view_donors');
-        wp_set_current_user($viewer);
-
-        update_option('dono_pro_license_key', 'VICTIM-REAL-KEY');
-
-        $this->assertSame(403, rest_do_request(new WP_REST_Request('DELETE', '/dono/v1/admin/license'))->get_status());
-
-        $plant = new WP_REST_Request('POST', '/dono/v1/admin/license');
-        $plant->set_header('content-type', 'application/json');
-        $plant->set_body((string) wp_json_encode(['key' => 'ATTACKER-KEY']));
-        $this->assertSame(403, rest_do_request($plant)->get_status());
-
-        $this->assertSame('VICTIM-REAL-KEY', get_option('dono_pro_license_key'), 'the real key is untouched');
-
-        delete_option('dono_pro_license_key');
-    }
-
-    public function test_settings_managers_keep_their_licence_access(): void
-    {
-        $manager = self::factory()->user->create(['role' => 'subscriber']);
-        get_user_by('id', $manager)->add_cap('dono_manage_settings');
-        wp_set_current_user($manager);
-
-        $this->assertSame(200, rest_do_request(new WP_REST_Request('GET', '/dono/v1/admin/license'))->get_status());
-    }
 }

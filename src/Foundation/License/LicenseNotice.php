@@ -14,7 +14,6 @@ namespace Dono\Foundation\License;
  */
 final class LicenseNotice
 {
-    private const OPTION_KEY = 'dono_pro_license_key';
 
     /** @since 1.0.0 */
     public function __construct(private readonly LicenseService $license)
@@ -69,11 +68,6 @@ final class LicenseNotice
             return;
         }
 
-        if ((string) get_option(self::OPTION_KEY, '') === '') {
-            $this->notice(
-                __('Your Dono add-ons are not linked to a license key, so they will not receive updates or security fixes.', 'dono-fundraising-platform')
-            );
-        }
     }
 
     /**

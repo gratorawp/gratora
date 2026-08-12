@@ -200,7 +200,6 @@ use Dono\Rest\Admin\DonationsController as AdminDonationsController;
 use Dono\Rest\Admin\DonorsController as AdminDonorsController;
 use Dono\Rest\Admin\FormsController as AdminFormsController;
 use Dono\Rest\Admin\FxController;
-use Dono\Rest\Admin\LicenseController as AdminLicenseController;
 use Dono\Rest\Admin\OnboardingController;
 use Dono\Rest\Admin\ReadinessController;
 use Dono\Rest\Admin\ReportsController;
@@ -921,7 +920,6 @@ final class CoreModule implements DonoModule
                 )
             ),
             new SettingsController(new SettingsService(), $c->get(DonorRetention::class)),
-            new AdminLicenseController($c->get(LicenseService::class)),
             $c->get(PortalController::class),
             new RecurringController(
                 $c->get(RecurringPlanActions::class),

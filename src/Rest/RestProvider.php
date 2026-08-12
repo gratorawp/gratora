@@ -15,7 +15,6 @@ use Dono\Rest\Admin\DonorsController as AdminDonorsController;
 use Dono\Rest\Admin\FormsController as AdminFormsController;
 use Dono\Rest\Admin\FundsController as AdminFundsController;
 use Dono\Rest\Admin\FxController;
-use Dono\Rest\Admin\LicenseController as AdminLicenseController;
 use Dono\Rest\Admin\NumberingController as AdminNumberingController;
 use Dono\Rest\Admin\OnboardingController as AdminOnboardingController;
 use Dono\Rest\Admin\RecurringController as AdminRecurringController;
@@ -48,7 +47,6 @@ final class RestProvider extends HookProvider
         private AdminUserPrefsController $adminUserPrefs,
         private AdminDashboardController $adminDashboard,
         private AdminSettingsController $adminSettings,
-        private AdminLicenseController $adminLicense,
         private PortalController $portal,
         private AdminRecurringController $adminRecurring,
         private AdminRolesController $adminRoles,
@@ -86,7 +84,6 @@ final class RestProvider extends HookProvider
         $this->adminUserPrefs->registerRoutes();
         $this->adminDashboard->registerRoutes();
         $this->adminSettings->registerRoutes();
-        $this->adminLicense->registerRoutes();
         $this->portal->registerRoutes();
         $this->adminRecurring->registerRoutes();
         $this->adminRoles->registerRoutes();
