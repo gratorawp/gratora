@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-12T14:40:31+00:00\n"
+"POT-Creation-Date: 2026-08-12T14:49:35+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: dono\n"
@@ -11677,7 +11677,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: assets/admin/settings/panels/PrivacyPanel.jsx:92
-msgid "No donor is past this window, or reaches it in the next 30 days."
+msgid "No donor is due for erasure in the next 30 days."
 msgstr ""
 
 #: assets/admin/settings/panels/PrivacyPanel.jsx:94
@@ -11689,100 +11689,100 @@ msgid "They are erased on the next nightly run."
 msgstr ""
 
 #. translators: %s: a date.
-#: assets/admin/settings/panels/PrivacyPanel.jsx:102
+#: assets/admin/settings/panels/PrivacyPanel.jsx:105
 #, js-format
-msgid "Nothing is erased before %s. Dono waits after erasure is switched on, and after an import, so you can check this window first."
+msgid "Nothing is erased before %s."
 msgstr ""
 
-#: assets/admin/settings/panels/PrivacyPanel.jsx:127
+#: assets/admin/settings/panels/PrivacyPanel.jsx:130
 msgid "Donor data handling"
 msgstr ""
 
-#: assets/admin/settings/panels/PrivacyPanel.jsx:128
+#: assets/admin/settings/panels/PrivacyPanel.jsx:131
 msgid "Controls applied to the donor record, IP logs, and what donors can do from their portal."
 msgstr ""
 
-#: assets/admin/settings/panels/PrivacyPanel.jsx:132
+#: assets/admin/settings/panels/PrivacyPanel.jsx:135
 msgid "Privacy policy URL"
 msgstr ""
 
-#: assets/admin/settings/panels/PrivacyPanel.jsx:133
+#: assets/admin/settings/panels/PrivacyPanel.jsx:136
 msgid "Linked from the donation form, receipts, and the donor portal footer."
 msgstr ""
 
-#: assets/admin/settings/panels/PrivacyPanel.jsx:140
+#: assets/admin/settings/panels/PrivacyPanel.jsx:143
 msgid "Enter your privacy policy URL"
 msgstr ""
 
-#: assets/admin/settings/panels/PrivacyPanel.jsx:145
+#: assets/admin/settings/panels/PrivacyPanel.jsx:148
 msgid "Reunite window after redaction (days)"
 msgstr ""
 
-#: assets/admin/settings/panels/PrivacyPanel.jsx:146
+#: assets/admin/settings/panels/PrivacyPanel.jsx:149
 msgid "An erased donor who gives again within this window keeps their giving history. After it, they start over as a new donor. Past donations stay counted either way. 0 severs the link at once; it does not mean off."
 msgstr ""
 
-#: assets/admin/settings/panels/PrivacyPanel.jsx:160
+#: assets/admin/settings/panels/PrivacyPanel.jsx:163
 msgid "Erase inactive donors automatically"
 msgstr ""
 
-#: assets/admin/settings/panels/PrivacyPanel.jsx:161
+#: assets/admin/settings/panels/PrivacyPanel.jsx:164
 msgid "While this is off, a donor is only ever erased because they asked or because an admin erased them. Turning it on lets a nightly run erase donors who have gone years without giving."
 msgstr ""
 
-#: assets/admin/settings/panels/PrivacyPanel.jsx:169
+#: assets/admin/settings/panels/PrivacyPanel.jsx:172
 msgid "Erase donors inactive for (years)"
 msgstr ""
 
-#: assets/admin/settings/panels/PrivacyPanel.jsx:170
+#: assets/admin/settings/panels/PrivacyPanel.jsx:173
 msgid "Donors with no donation for this long are erased on the nightly run, as if they had asked. Anyone on a recurring plan is skipped. Their donations stay counted."
 msgstr ""
 
-#: assets/admin/settings/panels/PrivacyPanel.jsx:187
+#: assets/admin/settings/panels/PrivacyPanel.jsx:190
 msgid "Keep the activity log for (days)"
 msgstr ""
 
-#: assets/admin/settings/panels/PrivacyPanel.jsx:188
+#: assets/admin/settings/panels/PrivacyPanel.jsx:191
 msgid "Older entries are deleted. Only the log is affected; donations, donors and receipts are kept. 0 turns this off."
 msgstr ""
 
-#: assets/admin/settings/panels/PrivacyPanel.jsx:202
+#: assets/admin/settings/panels/PrivacyPanel.jsx:205
 msgid "Anonymize IPs in event logs"
 msgstr ""
 
-#: assets/admin/settings/panels/PrivacyPanel.jsx:203
+#: assets/admin/settings/panels/PrivacyPanel.jsx:206
 msgid "IPs are hashed (SHA-256) before storage. Only the country is kept in clear text."
 msgstr ""
 
-#: assets/admin/settings/panels/PrivacyPanel.jsx:209
+#: assets/admin/settings/panels/PrivacyPanel.jsx:212
 msgid "Show Gravatar profile pictures"
 msgstr ""
 
-#: assets/admin/settings/panels/PrivacyPanel.jsx:210
+#: assets/admin/settings/panels/PrivacyPanel.jsx:213
 msgid "Donor lists show Gravatars instead of initials. Each one sends a hash of the donor's email to gravatar.com from the visitor's browser. Anonymous donors are never shown one."
 msgstr ""
 
-#: assets/admin/settings/panels/PrivacyPanel.jsx:216
+#: assets/admin/settings/panels/PrivacyPanel.jsx:219
 msgid "Default new donations to anonymous"
 msgstr ""
 
-#: assets/admin/settings/panels/PrivacyPanel.jsx:217
+#: assets/admin/settings/panels/PrivacyPanel.jsx:220
 msgid "Pre-check the anonymous toggle on every donation form. Donors can opt out."
 msgstr ""
 
-#: assets/admin/settings/panels/PrivacyPanel.jsx:223
+#: assets/admin/settings/panels/PrivacyPanel.jsx:226
 msgid "Allow data export from portal"
 msgstr ""
 
-#: assets/admin/settings/panels/PrivacyPanel.jsx:224
+#: assets/admin/settings/panels/PrivacyPanel.jsx:227
 msgid "Donors can download a JSON archive of their data from the portal."
 msgstr ""
 
-#: assets/admin/settings/panels/PrivacyPanel.jsx:230
+#: assets/admin/settings/panels/PrivacyPanel.jsx:233
 msgid "Allow account delete from portal"
 msgstr ""
 
-#: assets/admin/settings/panels/PrivacyPanel.jsx:231
+#: assets/admin/settings/panels/PrivacyPanel.jsx:234
 msgid "Donors can request redaction directly. Donations and receipts are kept either way, for tax and accounting; only the personal details are erased."
 msgstr ""
 

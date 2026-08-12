@@ -89,17 +89,20 @@ function RetentionPreview( { years, inForce } ) {
     }
 
     if ( lines.length === 0 ) {
-        lines.push( __( 'No donor is past this window, or reaches it in the next 30 days.', 'dono' ) );
+        lines.push( __( 'No donor is due for erasure in the next 30 days.', 'dono' ) );
     } else if ( ! inForce ) {
         lines.push( __( 'Nothing is erased until this is saved.', 'dono' ) );
     } else if ( ! pending ) {
         lines.push( __( 'They are erased on the next nightly run.', 'dono' ) );
     }
 
-    if ( pending ) {
+    // Only once the window is the saved one. While it is still being chosen the
+    // line above already says nothing happens, and two sentences about nothing
+    // being erased read as a contradiction rather than as two facts.
+    if ( pending && inForce ) {
         lines.push( sprintf(
             /* translators: %s: a date. */
-            __( 'Nothing is erased before %s. Dono waits after erasure is switched on, and after an import, so you can check this window first.', 'dono' ),
+            __( 'Nothing is erased before %s.', 'dono' ),
             formatDate( new Date( startsAt ).toISOString() )
         ) );
     }
