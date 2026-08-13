@@ -444,8 +444,14 @@ final class DonorRepository
             END
         ";
 
+        // The same population the Total donors figure above this table counts.
+        // Counting every donor here instead filed the never-gave ones under
+        // 'other', so the table summed higher than the headline it sits under
+        // and a segment share was a share of a different denominator.
+        //
+        // One whereRaw: it emits no AND connector, so a second runs into it.
         $rows = DB::table('dono_donors')
-            ->whereRaw('redacted_at IS NULL')
+            ->whereRaw($this->givingDonorPredicate() . ' AND redacted_at IS NULL')
             ->selectRaw("
                 {$segmentCase} AS segment,
                 COUNT(*) AS donor_count,

@@ -6,6 +6,13 @@
 .dono-form-template-picker {
     .components-modal__content { padding-top: 12px; }
 
+    &__intro {
+        margin: 0 0 18px;
+        color: $text-muted;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
     &__filters {
         display: flex;
         flex-wrap: wrap;

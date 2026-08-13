@@ -77,6 +77,33 @@ final class DonorVisibilityTest extends IntegrationTestCase
         $this->assertArrayHasKey($id, DonorRepository::testOnlyIdsAmong([$id]));
     }
 
+    public function test_the_insights_segments_sum_to_the_figure_above_them(): void
+    {
+        $gave = $this->donor('seg-gave@example.com');
+        $this->seedDonation($gave, false);
+        $this->donor('seg-never-gave@example.com');
+        $testOnly = $this->donor('seg-test-only@example.com');
+        $this->seedDonation($testOnly, true);
+
+        $insights = Plugin::instance()->container
+            ->get(\Dono\Donors\DonorMetricsService::class)
+            ->insights();
+
+        $segmentTotal = 0;
+        foreach ($insights['segments'] as $row) {
+            $segmentTotal += (int) $row['donor_count'];
+        }
+
+        // A share of a different denominator is not a share. The table counted
+        // every donor and filed the never-gave ones under 'other', so it summed
+        // higher than the headline it sits beneath.
+        $this->assertSame(
+            (int) $insights['kpi']['total'],
+            $segmentTotal,
+            'the segment table and the Total donors figure count the same people'
+        );
+    }
+
     public function test_the_lifetime_split_counts_every_donation_not_a_page_of_them(): void
     {
         // The profile caps its donations list at 25. Deriving the one-time and
