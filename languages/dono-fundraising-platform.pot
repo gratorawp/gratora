@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-13T06:36:52+00:00\n"
+"POT-Creation-Date: 2026-08-13T06:46:50+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: dono-fundraising-platform\n"
@@ -167,7 +167,7 @@ msgid "Draft"
 msgstr ""
 
 #: components/StatusBadge.js:5
-#: assets/admin/campaigns/List.jsx:341
+#: assets/admin/campaigns/List.jsx:357
 #: assets/admin/donors/Insights.jsx:38
 #: assets/admin/donors/profile/helpers.js:72
 #: assets/admin/donors/profile/tabs/ActivityTab.jsx:220
@@ -478,7 +478,7 @@ msgstr ""
 #: src/Admin/AdminMenu.php:34
 #: src/Admin/AdminMenu.php:35
 #: src/Campaigns/Blocks/BlockEditorIntegration.php:66
-#: assets/admin/campaigns/List.jsx:273
+#: assets/admin/campaigns/List.jsx:289
 #: assets/admin/donations/detail/Header.jsx:23
 #: assets/admin/donations/List.jsx:487
 #: assets/admin/donors/index.jsx:342
@@ -508,8 +508,8 @@ msgstr ""
 #: src/Admin/Pages/CampaignsPage.php:32
 #: src/Rest/Admin/ToolsController.php:806
 #: assets/admin/campaigns/Detail.jsx:378
-#: assets/admin/campaigns/List.jsx:275
-#: assets/admin/campaigns/List.jsx:279
+#: assets/admin/campaigns/List.jsx:291
+#: assets/admin/campaigns/List.jsx:295
 msgid "Campaigns"
 msgstr ""
 
@@ -525,7 +525,7 @@ msgstr ""
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:20
 #: assets/admin/campaigns/Detail.jsx:674
 #: assets/admin/campaigns/List.jsx:140
-#: assets/admin/campaigns/List.jsx:354
+#: assets/admin/campaigns/List.jsx:370
 #: assets/admin/campaigns/widgets/DistributionHistogram.jsx:105
 #: assets/admin/dashboard/widgets/KpiRow.jsx:32
 #: assets/admin/dashboard/widgets/QuickActions.jsx:63
@@ -727,7 +727,7 @@ msgstr ""
 
 #: src/Campaigns/Blocks/CampaignBindings.php:52
 #: assets/admin/campaigns/List.jsx:125
-#: assets/admin/campaigns/List.jsx:345
+#: assets/admin/campaigns/List.jsx:361
 #: assets/admin/donations/List.jsx:656
 #: assets/admin/funds/List.jsx:239
 msgid "Raised"
@@ -1655,7 +1655,7 @@ msgstr ""
 #: src/Donors/Portal/views/annual-statement.php:48
 #: src/Forms/Blocks/views/donation-summary.php:17
 #: src/Forms/Shortcode/DonationFormShortcode.php:608
-#: assets/admin/campaigns/List.jsx:337
+#: assets/admin/campaigns/List.jsx:353
 #: assets/admin/donors/index.jsx:210
 #: assets/admin/donors/Insights.jsx:197
 #: assets/admin/forms/blocks/donation-summary/index.js:22
@@ -5458,7 +5458,7 @@ msgstr ""
 #: assets/admin/campaigns/Detail.jsx:256
 #: assets/admin/campaigns/Detail.jsx:2042
 #: assets/admin/campaigns/Detail.jsx:2079
-#: assets/admin/campaigns/List.jsx:231
+#: assets/admin/campaigns/List.jsx:247
 msgid "Delete campaign"
 msgid_plural "Delete campaigns"
 msgstr[0] ""
@@ -5468,8 +5468,8 @@ msgstr[1] ""
 #: assets/admin/campaigns/Detail.jsx:1300
 #: assets/admin/campaigns/Detail.jsx:1325
 #: assets/admin/campaigns/Detail.jsx:2044
-#: assets/admin/campaigns/List.jsx:206
-#: assets/admin/campaigns/List.jsx:233
+#: assets/admin/campaigns/List.jsx:222
+#: assets/admin/campaigns/List.jsx:249
 #: assets/admin/donations/detail/cards/NotesCard.jsx:43
 #: assets/admin/donors/index.jsx:246
 #: assets/admin/donors/index.jsx:273
@@ -5747,7 +5747,7 @@ msgid "Set as default"
 msgstr ""
 
 #: assets/admin/campaigns/Detail.jsx:1271
-#: assets/admin/campaigns/List.jsx:188
+#: assets/admin/campaigns/List.jsx:204
 msgid "Duplicate"
 msgstr ""
 
@@ -6095,16 +6095,20 @@ msgstr ""
 msgid "Failed to load campaigns."
 msgstr ""
 
-#: assets/admin/campaigns/List.jsx:200
+#: assets/admin/campaigns/List.jsx:188
+msgid "View campaign"
+msgstr ""
+
+#: assets/admin/campaigns/List.jsx:216
 msgid "Could not duplicate one or more campaigns."
 msgstr ""
 
-#: assets/admin/campaigns/List.jsx:219
+#: assets/admin/campaigns/List.jsx:235
 msgid "Permanently delete this campaign? Its forms will be deleted too. A campaign that has donations cannot be deleted. This cannot be undone."
 msgstr ""
 
 #. translators: %d: number of campaigns to delete
-#: assets/admin/campaigns/List.jsx:222
+#: assets/admin/campaigns/List.jsx:238
 #, js-format
 msgid "Permanently delete %d campaign? Forms attached to it will be deleted too. Any campaign that has donations cannot be deleted. This cannot be undone."
 msgid_plural "Permanently delete %d campaigns? Forms attached to them will be deleted too. Any campaign that has donations cannot be deleted. This cannot be undone."
@@ -6112,7 +6116,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of campaigns deleted
-#: assets/admin/campaigns/List.jsx:251
+#: assets/admin/campaigns/List.jsx:267
 #, js-format
 msgid "%d campaign deleted."
 msgid_plural "%d campaigns deleted."
@@ -6120,38 +6124,38 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: comma separated campaign titles
-#: assets/admin/campaigns/List.jsx:258
+#: assets/admin/campaigns/List.jsx:274
 #, js-format
 msgid "These campaigns were not deleted, because they have donations: %s"
 msgstr ""
 
 #. translators: %s: number of campaigns
-#: assets/admin/campaigns/List.jsx:283
+#: assets/admin/campaigns/List.jsx:299
 #, js-format
 msgid "%s campaign"
 msgid_plural "%s campaigns"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/campaigns/List.jsx:287
+#: assets/admin/campaigns/List.jsx:303
 msgid "Add new campaign"
 msgstr ""
 
-#: assets/admin/campaigns/List.jsx:301
+#: assets/admin/campaigns/List.jsx:317
 msgid "No campaigns yet"
 msgstr ""
 
-#: assets/admin/campaigns/List.jsx:302
+#: assets/admin/campaigns/List.jsx:318
 msgid "A campaign groups one or more donation forms around a single fundraising goal. Create one to get started."
 msgstr ""
 
-#: assets/admin/campaigns/List.jsx:305
+#: assets/admin/campaigns/List.jsx:321
 #: assets/admin/onboarding/Onboarding.jsx:678
 msgid "Create your first campaign"
 msgstr ""
 
 #. translators: %s: currency code
-#: assets/admin/campaigns/List.jsx:350
+#: assets/admin/campaigns/List.jsx:366
 #: assets/admin/donations/List.jsx:641
 #, js-format
 msgid "in %s"

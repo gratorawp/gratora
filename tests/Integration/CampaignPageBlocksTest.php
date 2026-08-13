@@ -64,6 +64,28 @@ final class CampaignPageBlocksTest extends IntegrationTestCase
         $this->assertStringNotContainsString('wp:dono/donate-button', $page->post_content);
     }
 
+    public function test_the_campaign_list_carries_a_link_to_the_page(): void
+    {
+        $campaign = $this->createCampaign(['title' => 'Viewable campaign']);
+
+        $req = new WP_REST_Request('GET', '/dono/v1/admin/campaigns');
+        $rows = (array) rest_do_request($req)->get_data();
+
+        $row = null;
+        foreach ((array) ($rows['items'] ?? $rows) as $item) {
+            if ((int) ($item['id'] ?? 0) === (int) $campaign['id']) {
+                $row = $item;
+            }
+        }
+
+        // The View action opens this. Only the server can turn a page id into a
+        // URL, so if the field stops being sent the action quietly disappears
+        // from every row rather than failing.
+        $this->assertNotNull($row, (string) wp_json_encode($rows));
+        $this->assertNotEmpty($row['permalink'] ?? null);
+        $this->assertSame(get_permalink((int) $campaign['page_id']), $row['permalink']);
+    }
+
     public function test_every_empty_list_on_a_page_renders_its_own_full_card(): void
     {
         $campaign = $this->createCampaign(['title' => 'Nobody has given yet']);

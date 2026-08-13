@@ -4,7 +4,7 @@ import Notice from '../_shared/components/Notice';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { Copy as CopyIcon, Trash2 as TrashIcon, Target, Plus } from 'lucide-react';
+import { Copy as CopyIcon, Trash2 as TrashIcon, ExternalLink as ViewIcon, Target, Plus } from 'lucide-react';
 
 import { StatusBadge, STATUS_LABEL, formatAmount, formatDate, timeAgo, detailHref } from '../_shared/format';
 import Btn from '../_shared/components/Btn';
@@ -183,6 +183,22 @@ export default function List() {
     } ), [ total, view.perPage ] );
 
     const actions = useMemo( () => [
+        {
+            id:    'view',
+            label: __( 'View campaign', 'dono-fundraising-platform' ),
+            icon:  () => <ViewIcon size={ 16 } strokeWidth={ 1.75 } />,
+            // One page per invocation, so no bulk: opening six tabs at once is
+            // not what anyone meant by selecting six campaigns.
+            supportsBulk: false,
+            // A campaign whose page has been deleted has nothing to open, and
+            // an action that goes nowhere is worse than one that is absent.
+            isEligible: ( item ) => !! item.permalink,
+            callback: ( items ) => {
+                const target = items[ 0 ];
+                if ( ! target?.permalink ) return;
+                window.open( target.permalink, '_blank', 'noopener,noreferrer' );
+            },
+        },
         {
             id:           'duplicate',
             label:        __( 'Duplicate', 'dono-fundraising-platform' ),

@@ -424,6 +424,10 @@ final class CampaignsController
             'donors_count'        => $c->donors_count,
             'forms_count'         => $formsCount,
             'page_id'             => $c->page_id,
+            // The list offers a View action, and only the server can turn a
+            // page id into a URL. Null when the campaign has no page, which is
+            // what hides the action rather than offering a dead link.
+            'permalink'           => $c->page_id ? get_permalink((int) $c->page_id) ?: null : null,
             'default_form_id'     => $c->default_form_id,
             'default_fund_id'     => $c->default_fund_id,
             'style'               => is_array($c->style) ? $c->style : null,
