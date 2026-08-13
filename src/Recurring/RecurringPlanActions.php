@@ -52,6 +52,7 @@ final class RecurringPlanActions
     public function pause(RecurringPlan $plan, string $resumesAt, RecurringPlanChange $change): void
     {
         $this->assertChangeable($plan);
+        $this->assertGatewayReachable($plan, 'pause');
 
         $this->subscription($plan)?->pauseSubscription($plan, $resumesAt);
 
@@ -82,6 +83,7 @@ final class RecurringPlanActions
     public function resume(RecurringPlan $plan, RecurringPlanChange $change): void
     {
         $this->assertChangeable($plan);
+        $this->assertGatewayReachable($plan, 'resume');
 
         $this->subscription($plan)?->resumeSubscription($plan);
 
@@ -106,6 +108,7 @@ final class RecurringPlanActions
     public function skipNext(RecurringPlan $plan, RecurringPlanChange $change): void
     {
         $this->assertChangeable($plan);
+        $this->assertGatewayReachable($plan, 'skip a payment on');
 
         if (! $plan->next_payment_at) {
             throw new InvalidArgumentException(esc_html__('This donation has no scheduled payment to skip.', 'dono-fundraising-platform'));
@@ -140,6 +143,7 @@ final class RecurringPlanActions
     public function changeAmount(RecurringPlan $plan, int $amountCents, RecurringPlanChange $change): void
     {
         $this->assertChangeable($plan);
+        $this->assertGatewayReachable($plan, 'change the amount of');
 
         if ($amountCents < 50) {
             throw new InvalidArgumentException(esc_html__('Amount is too low.', 'dono-fundraising-platform'));
@@ -244,6 +248,37 @@ final class RecurringPlanActions
         $gateway = $this->gateways->get((string) $plan->gateway);
 
         return $gateway instanceof SubscriptionAware ? $gateway : null;
+    }
+
+    /**
+     * Refuse to change a plan whose processor is not there to be told.
+     *
+     * Offline is registered and simply has no subscriptions, so a local write
+     * is the whole of it. A gateway that is absent entirely is a different
+     * answer: Stripe and PayPal register only while their credentials are
+     * stored, so a disconnected one means "cannot reach the processor", not
+     * "this plan has no processor". Writing the row on that reading tells the
+     * donor their donation is paused while the card keeps being charged.
+     *
+     * RecurringCanceller has guarded cancel this way from the start; these
+     * three moved money the same way and did not.
+     *
+     * @throws GatewayUnreachable
+     *
+     * @since 1.0.0
+     */
+    private function assertGatewayReachable(RecurringPlan $plan, string $verb): void
+    {
+        if ($this->gateways->get((string) $plan->gateway) !== null) {
+            return;
+        }
+
+        throw new GatewayUnreachable(esc_html(sprintf(
+            'Cannot %1$s plan %2$d: the %3$s gateway is not available, so its subscription would keep billing.',
+            $verb,
+            (int) $plan->id,
+            (string) $plan->gateway
+        )));
     }
 
     /**
