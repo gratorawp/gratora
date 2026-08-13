@@ -156,6 +156,38 @@ The goldens assume the seeded e2e site state, including test mode being ON
 (the form renders the test-mode banner). If a golden fails after reseeding,
 check the site state before re-blessing.
 
+## Admin screenshots
+
+`specs/screenshots/admin.spec.ts` walks every Dono wp-admin screen and writes a
+PNG per screen, for docs, design review and the wp.org listing. It asserts
+nothing: the goldens in `specs/visual/` are the regression suite, this one is a
+camera. Donor-facing surfaces are out of scope.
+
+```sh
+npm run test:shots
+```
+
+Its own opt-in project (`DONO_E2E_SHOTS=1`), fixed at 1440x900 and 2x device
+scale so a set is comparable run to run and survives being scaled down.
+Captures land in `tests-e2e/screenshots/` (gitignored), or
+`DONO_E2E_SHOTS_DIR`. Nothing is copied into `.wordpress-org/` automatically:
+pick the winners by hand, and keep `readme.txt`'s captions in step.
+
+Covered: dashboard; campaigns list and campaign detail (overview / forms /
+settings); the form builder (build + settings views); donations list and a
+donation detail; donors list, Donor Insights, and a donor profile with each of
+its tabs; subscriptions; funds; every Settings tab; every Tools tab. There is
+no top-level Forms screen: a campaign's Forms tab is the list, and the builder
+opens from there.
+
+Needs `DONO_E2E_URL` plus admin credentials (`DONO_E2E_ADMIN_USER` /
+`DONO_E2E_ADMIN_PASS`), nothing else. Screens whose record does not exist yet
+skip themselves by name, so a half-seeded site still yields everything it can.
+
+Waiting is `helpers/capture.ts`: network idle, then DOM quiescence. Recharts
+animates its paths from JS, so disabling CSS animation would still let a
+dashboard chart be caught mid-sweep.
+
 ## Hermetic (wp-env) and CI
 
 The committed `.wp-env.json` loads core only, so a standalone checkout boots.

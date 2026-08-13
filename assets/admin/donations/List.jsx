@@ -14,6 +14,7 @@ import DateField from '../_shared/components/DateField';
 import EmptyState from '../_shared/components/EmptyState';
 import ConfirmDialog from '../_shared/components/ConfirmDialog';
 import { rowLinkProps } from '../_shared/rowLink';
+import { dashboardHref } from '../_shared/adminPages';
 import notify from '../_shared/notify';
 import KpiStrip from '../_shared/components/KpiStrip';
 import { Switch } from '../_shared/components/Switch';
@@ -485,7 +486,7 @@ export default function List() {
     return (
         <div>
             <div className="dono-crumbs">
-                <a href={ addQueryArgs( window.location.pathname, { page: 'dono-fundraising-platform' } ) }>{ __( 'Dono', 'dono-fundraising-platform' ) }</a>
+                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'Dono', 'dono-fundraising-platform' ) }</a>
                 <span className="sep">›</span>
                 <span>{ __( 'Donations', 'dono-fundraising-platform' ) }</span>
             </div>

@@ -7,6 +7,7 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { Copy as CopyIcon, Trash2 as TrashIcon, ExternalLink as ViewIcon, Target, Plus } from 'lucide-react';
 
 import { StatusBadge, STATUS_LABEL, formatAmount, formatDate, timeAgo, detailHref } from '../_shared/format';
+import { dashboardHref } from '../_shared/adminPages';
 import Btn from '../_shared/components/Btn';
 import EmptyState from '../_shared/components/EmptyState';
 import { rowLinkProps } from '../_shared/rowLink';
@@ -286,7 +287,7 @@ export default function List() {
     return (
         <div>
             <div className="dono-crumbs">
-                <a href={ addQueryArgs( window.location.pathname, { page: 'dono-fundraising-platform' } ) }>{ __( 'Dono', 'dono-fundraising-platform' ) }</a>
+                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'Dono', 'dono-fundraising-platform' ) }</a>
                 <span className="sep">›</span>
                 <span>{ __( 'Campaigns', 'dono-fundraising-platform' ) }</span>
             </div>

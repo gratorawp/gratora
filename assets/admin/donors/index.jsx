@@ -14,6 +14,7 @@ import Toaster from '../_shared/components/Toaster';
 import EmptyState from '../_shared/components/EmptyState';
 import ConfirmDialog from '../_shared/components/ConfirmDialog';
 import { rowLinkProps } from '../_shared/rowLink';
+import { dashboardHref } from '../_shared/adminPages';
 import { tablistKeyDown } from '../_shared/tablistKeys';
 import KpiStrip from '../_shared/components/KpiStrip';
 import { formatAmount, formatDate, timeAgo } from '../_shared/format';
@@ -339,7 +340,7 @@ function DonorsApp( { toggleSlot } ) {
     return (
         <div>
             <div className="dono-crumbs">
-                <a href={ addQueryArgs( window.location.pathname, { page: 'dono-fundraising-platform' } ) }>{ __( 'Dono', 'dono-fundraising-platform' ) }</a>
+                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'Dono', 'dono-fundraising-platform' ) }</a>
                 <span className="sep">›</span>
                 <span>{ __( 'Donors', 'dono-fundraising-platform' ) }</span>
             </div>

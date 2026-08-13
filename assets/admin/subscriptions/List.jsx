@@ -16,6 +16,7 @@ import StatusBadge from '../_shared/components/StatusBadge';
 import { Switch } from '../_shared/components/Switch';
 import PlanActionDialog, { actionsFor, dueIn, isTerminal, retryActionFor } from '../_shared/recurring/PlanActions';
 import notify from '../_shared/notify';
+import { dashboardHref } from '../_shared/adminPages';
 import { rowLinkProps } from '../_shared/rowLink';
 import { formatAmount, formatDate } from '../donations/format';
 
@@ -766,7 +767,7 @@ export default function List() {
     return (
         <div className="dono-admin">
             <div className="dono-crumbs">
-                <a href={ addQueryArgs( window.location.pathname, { page: 'dono-fundraising-platform' } ) }>{ __( 'Dono', 'dono-fundraising-platform' ) }</a>
+                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'Dono', 'dono-fundraising-platform' ) }</a>
                 <span className="sep">›</span>
                 <span>{ __( 'Subscriptions', 'dono-fundraising-platform' ) }</span>
             </div>

@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from '@wordpress/element';
 import { DataViews } from '@wordpress/dataviews';
 import Notice from '../_shared/components/Notice';
 import { notify } from '../_shared/notify';
+import { dashboardHref } from '../_shared/adminPages';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { __, _n, sprintf } from '@wordpress/i18n';
@@ -339,7 +340,7 @@ export default function List() {
     return (
         <div>
             <div className="dono-crumbs">
-                <a href={ addQueryArgs( window.location.pathname, { page: 'dono-fundraising-platform' } ) }>{ __( 'Dono', 'dono-fundraising-platform' ) }</a>
+                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'Dono', 'dono-fundraising-platform' ) }</a>
                 <span className="sep">›</span>
                 <span>{ __( 'Funds', 'dono-fundraising-platform' ) }</span>
             </div>

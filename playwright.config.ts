@@ -14,11 +14,16 @@ const runP2p = !! process.env.DONO_E2E_P2P_START_PATH;
 // test:visual / test:visual:update.
 const runVisual = !! process.env.DONO_E2E_VISUAL;
 
+// wp-admin screenshot capture (specs/screenshots). Writes PNGs instead of
+// asserting, so it is opt-in too: nothing in a normal run wants the minutes it
+// spends walking every admin screen. Run via npm run test:shots.
+const runShots = !! process.env.DONO_E2E_SHOTS;
+
 const projects: Project[] = [
     {
         name: 'core',
         use: { ...devices['Desktop Chrome'] },
-        testIgnore: ['**/specs/p2p/**', '**/specs/visual/**'],
+        testIgnore: ['**/specs/p2p/**', '**/specs/visual/**', '**/specs/screenshots/**'],
     },
 ];
 
@@ -27,7 +32,7 @@ if (runP2p) {
         name: 'p2p',
         use: { ...devices['Desktop Chrome'] },
         testMatch: '**/specs/p2p/**',
-        testIgnore: '**/specs/visual/**',
+        testIgnore: ['**/specs/visual/**', '**/specs/screenshots/**'],
     });
 }
 
@@ -36,6 +41,20 @@ if (runVisual) {
         name: 'visual',
         use: { ...devices['Desktop Chrome'] },
         testMatch: '**/specs/visual/**',
+    });
+}
+
+if (runShots) {
+    projects.push({
+        name: 'screenshots',
+        // Fixed viewport so a capture set is comparable run to run, and 2x so
+        // the images survive being scaled down for a listing or a doc.
+        use: {
+            ...devices['Desktop Chrome'],
+            viewport:           { width: 1440, height: 900 },
+            deviceScaleFactor:  2,
+        },
+        testMatch: '**/specs/screenshots/**',
     });
 }
 
