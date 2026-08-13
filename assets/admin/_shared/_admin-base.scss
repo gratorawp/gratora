@@ -39,3 +39,16 @@
         text-overflow: ellipsis;
     }
 }
+
+// Links inside admin copy. WordPress paints every unstyled anchor its own blue,
+// which reads as WordPress chrome sitting in a Dono sentence. accent-dark
+// rather than accent: this is body-weight text, and the lighter green does not
+// carry enough contrast against a white card.
+.dono-muted a {
+    color: $accent-dark;
+
+    &:hover,
+    &:focus {
+        color: $accent;
+    }
+}
