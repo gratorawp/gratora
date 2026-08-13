@@ -284,7 +284,7 @@ body.dono-modal-open { overflow: hidden; }
     align-items: center;
     text-align: center;
     gap: 8px;
-    padding: 40px 24px;
+    padding: 28px 24px;
     border-style: solid;
     background: var(--dono-bg, #fff);
     color: var(--dono-text, #{$text-fallback});
@@ -307,28 +307,6 @@ body.dono-modal-open { overflow: hidden; }
     margin: 0;
     font-size: 14px;
     color: var(--dono-text-muted, #{$text-muted-fallback});
-}
-
-// Outlined, not filled: the page already carries a primary Donate in the hero
-// and another on the form, and a third solid button competes with both.
-.dono-empty__btn {
-    margin-top: 12px;
-    display: inline-block;
-    padding: 10px 22px;
-    border: 1px solid var(--dono-accent, #{$accent-fallback});
-    border-radius: var(--dono-radius-sm, #{$radius-sm-fallback});
-    background: transparent;
-    color: var(--dono-accent, #{$accent-fallback});
-    font-weight: var(--dono-button-weight, 600);
-    font-size: 14px;
-    line-height: 1.2;
-    text-decoration: none;
-
-    &:hover,
-    &:focus {
-        background: var(--dono-accent, #{$accent-fallback});
-        color: var(--dono-button-fg, #fff);
-    }
 }
 
 // ServerSideRender suppresses its own <h3> (REST_REQUEST) so the editor's

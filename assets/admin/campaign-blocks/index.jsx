@@ -620,7 +620,7 @@ registerBlockType( 'dono/top-donors', {
                         label={ __( 'Empty state text', 'dono-fundraising-platform' ) }
                         value={ attributes.emptyText }
                         onChange={ ( v ) => setAttributes( { emptyText: v } ) }
-                        placeholder={ __( 'No donations yet.', 'dono-fundraising-platform' ) }
+                        placeholder={ __( 'No donors to rank yet.', 'dono-fundraising-platform' ) }
                         help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
@@ -729,7 +729,7 @@ registerBlockType( 'dono/recent-donations', {
                         label={ __( 'Empty state text', 'dono-fundraising-platform' ) }
                         value={ attributes.emptyText }
                         onChange={ ( v ) => setAttributes( { emptyText: v } ) }
-                        placeholder={ __( 'No donations yet.', 'dono-fundraising-platform' ) }
+                        placeholder={ __( 'No donations to show yet.', 'dono-fundraising-platform' ) }
                         help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
@@ -839,7 +839,7 @@ registerBlockType( 'dono/supporter-wall', {
                         label={ __( 'Empty state text', 'dono-fundraising-platform' ) }
                         value={ attributes.emptyText }
                         onChange={ ( v ) => setAttributes( { emptyText: v } ) }
-                        placeholder={ __( 'No supporters to show yet.', 'dono-fundraising-platform' ) }
+                        placeholder={ __( 'The supporter wall is empty.', 'dono-fundraising-platform' ) }
                         help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />
@@ -957,7 +957,7 @@ registerBlockType( 'dono/campaign-grid', {
                         label={ __( 'Empty state text', 'dono-fundraising-platform' ) }
                         value={ attributes.emptyText }
                         onChange={ ( v ) => setAttributes( { emptyText: v } ) }
-                        placeholder={ __( 'More campaigns will appear here soon.', 'dono-fundraising-platform' ) }
+                        placeholder={ __( 'This is the only campaign running right now.', 'dono-fundraising-platform' ) }
                         help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'dono-fundraising-platform' ) }
                         __nextHasNoMarginBottom
                     />

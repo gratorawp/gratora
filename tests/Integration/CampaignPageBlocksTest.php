@@ -64,6 +64,27 @@ final class CampaignPageBlocksTest extends IntegrationTestCase
         $this->assertStringNotContainsString('wp:dono/donate-button', $page->post_content);
     }
 
+    public function test_every_empty_list_on_a_page_renders_its_own_full_card(): void
+    {
+        $campaign = $this->createCampaign(['title' => 'Nobody has given yet']);
+        $html     = $this->renderPage((int) $campaign['page_id']);
+
+        // Both lists are empty on a new campaign and the starter layout places
+        // them together, so one render pass draws both. They must not compete:
+        // a page-scoped rule that let the first one win would render the second
+        // as a bare line, which the editor cannot reproduce because it previews
+        // each block in its own request.
+        $this->assertSame(2, substr_count($html, 'dono-empty__title'), 'both lists draw a full card');
+        $this->assertStringContainsString('No donations to show yet.', $html);
+        $this->assertStringContainsString('No donors to rank yet.', $html);
+
+        // Each says its own thing under its own icon.
+        $this->assertStringContainsString('Donations tend to follow the first one.', $html);
+        $this->assertStringContainsString('The first donation starts the list.', $html);
+
+        $this->assertStringNotContainsString('dono-empty--quiet', $html);
+    }
+
     public function test_top_level_blocks_are_aligned_wide(): void
     {
         $campaign = $this->createCampaign(['title' => 'Alignment test']);
