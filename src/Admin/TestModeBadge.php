@@ -51,10 +51,10 @@ final class TestModeBadge extends HookProvider
         // Both name Dono: other plugins put their own test badge in this bar,
         // and a bare "test mode" leaves the operator guessing whose till is open.
         $title = $orgWide
-            ? __('Dono is in test mode', 'dono-fundraising-platform')
+            ? __('Dono Test Mode Active', 'dono-fundraising-platform')
             : sprintf(
                 /* translators: %d: how many published forms are in test mode. */
-                _n('%d Dono form in test mode', '%d Dono forms in test mode', $forms, 'dono-fundraising-platform'),
+                _n('%d Dono Form in Test Mode', '%d Dono Forms in Test Mode', $forms, 'dono-fundraising-platform'),
                 $forms
             );
 
@@ -102,22 +102,29 @@ final class TestModeBadge extends HookProvider
         }
         ?>
         <style>
+            /* Sized and coloured to sit alongside the other fundraising
+               plugins' test badges rather than compete with them: a chip inset
+               from the bar, not a full-height block. */
             #wpadminbar #wp-admin-bar-dono-test-mode .dono-test-mode-badge {
                 display: inline-flex;
                 align-items: center;
-                gap: 6px;
-                padding: 0 10px;
-                background: #b97a05;
+                gap: 4px;
+                margin: 0 4px;
+                padding: 0 8px;
+                border-radius: 4px;
+                background: #e89940;
                 color: #fff;
                 font-weight: 600;
-                line-height: 32px;
+                font-size: 12px;
+                line-height: 25px;
+                white-space: nowrap;
             }
             #wpadminbar #wp-admin-bar-dono-test-mode .dono-test-mode-badge__icon {
-                width: 15px;
-                height: 15px;
+                width: 13px;
+                height: 13px;
                 flex: none;
             }
-            #wpadminbar #wp-admin-bar-dono-test-mode:hover .dono-test-mode-badge { background: #a06a04; }
+            #wpadminbar #wp-admin-bar-dono-test-mode:hover .dono-test-mode-badge { background: #d68a37; }
             #wpadminbar #wp-admin-bar-dono-test-mode > .ab-item { padding: 0; }
         </style>
         <?php

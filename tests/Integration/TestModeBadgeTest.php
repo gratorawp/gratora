@@ -68,7 +68,7 @@ final class TestModeBadgeTest extends IntegrationTestCase
     {
         $this->orgWide(true);
 
-        $this->assertSame('Dono is in test mode', $this->title());
+        $this->assertSame('Dono Test Mode Active', $this->title());
     }
 
     public function test_a_single_form_left_in_test_mode_is_called_out_on_its_own(): void
@@ -78,7 +78,7 @@ final class TestModeBadgeTest extends IntegrationTestCase
         $this->orgWide(false);
         $this->publishedForm(true);
 
-        $this->assertSame('1 Dono form in test mode', $this->title());
+        $this->assertSame('1 Dono Form in Test Mode', $this->title());
     }
 
     /**
@@ -116,7 +116,7 @@ final class TestModeBadgeTest extends IntegrationTestCase
         $this->publishedForm(true);
         $this->publishedForm(false);
 
-        $this->assertSame('2 Dono forms in test mode', $this->title());
+        $this->assertSame('2 Dono Forms in Test Mode', $this->title());
     }
 
     public function test_a_draft_form_in_test_mode_is_not_worth_warning_about(): void
@@ -135,7 +135,7 @@ final class TestModeBadgeTest extends IntegrationTestCase
         $this->publishedForm(true);
 
         // Both are true, but "some forms" understates a site where nothing is real.
-        $this->assertSame('Dono is in test mode', $this->title());
+        $this->assertSame('Dono Test Mode Active', $this->title());
     }
 
     /** The badge is the shortest route to the switch, so it has to land on it. */
