@@ -365,7 +365,7 @@ function DonorsApp( { toggleSlot } ) {
                 <EmptyState
                     icon={ <UsersIcon size={ 22 } strokeWidth={ 1.75 } /> }
                     title={ __( 'No donors yet', 'dono-fundraising-platform' ) }
-                    body={ __( 'Donor records are created automatically from completed donations. Publish a form to start collecting them.', 'dono-fundraising-platform' ) }
+                    body={ __( 'Anyone who donates is added here. Publish a form to take the first one.', 'dono-fundraising-platform' ) }
                 />
             ) : (
                 <div className="dono-dataviews">
