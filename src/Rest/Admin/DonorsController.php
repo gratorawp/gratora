@@ -637,9 +637,18 @@ final class DonorsController
             'matching_ids' => $matchingIds,
         ]);
 
+        // Asked once for the page rather than once per row: a donor with no
+        // live donation is one the operator made while testing, and the list
+        // says so rather than showing them as an ordinary donor who gave
+        // nothing.
+        $testOnly = DonorRepository::testOnlyIdsAmong(
+            array_map(static fn (Donor $d): int => (int) $d->id, $result['items'])
+        );
+
         $shaped = array_map(
             fn (Donor $d): array => [
                 'id'                  => $d->id,
+                'is_test_only'        => isset($testOnly[(int) $d->id]),
                 'name'                => $this->donorName($d),
                 'email'               => $this->donorService->decryptEmail($d),
                 'country'             => $d->country,

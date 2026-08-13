@@ -49,6 +49,10 @@ export default function DonationsTab( { donorId, redacted } ) {
 
     const apiParams = useMemo( () => ( {
         donor_id: donorId,
+        // This is one donor's own history, not the org's ledger. Hiding their
+        // test donations here leaves the tab empty while the Overview card
+        // above it lists them, and every row is badged either way.
+        include_test: true,
         page:     view.page,
         per_page: view.perPage,
         orderby:  view.sort?.field === 'amount' ? 'amount_cents' : ( view.sort?.field || 'created_at' ),
@@ -78,12 +82,17 @@ export default function DonationsTab( { donorId, redacted } ) {
             id:    'reference',
             label: __( 'Reference', 'dono-fundraising-platform' ),
             render: ( { item } ) => (
-                <a
-                    href={ donationHref( item.reference ) }
-                    style={ { fontFamily: 'ui-monospace, monospace', fontSize: 12.5, color: '#14693a', textDecoration: 'none' } }
-                >
-                    { item.reference }
-                </a>
+                <span className="dono-ref-cell">
+                    <a
+                        href={ donationHref( item.reference ) }
+                        style={ { fontFamily: 'ui-monospace, monospace', fontSize: 12.5, color: '#14693a', textDecoration: 'none' } }
+                    >
+                        { item.reference }
+                    </a>
+                    { item.is_test && (
+                        <span className="dono-pill dono-pill--test">{ __( 'Test', 'dono-fundraising-platform' ) }</span>
+                    ) }
+                </span>
             ),
         },
         {

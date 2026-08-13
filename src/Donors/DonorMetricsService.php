@@ -605,6 +605,10 @@ final class DonorMetricsService
             'status'         => (string) $d->status,
             'gateway'        => (string) $d->gateway,
             'campaign_id'    => $d->campaign_id !== null ? (int) $d->campaign_id : null,
+            // The profile lists a donor's own history, test rows included, so
+            // each row has to be able to say which it is. Without this the card
+            // shows a rehearsal as an ordinary donation.
+            'is_test'        => (bool) $d->is_test,
             'paid_at'        => $d->paid_at,
             'created_at'     => (string) $d->created_at,
         ];

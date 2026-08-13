@@ -11,11 +11,15 @@ use Dono\Foundation\Plugin;
 use Dono\Vendor\Queryable\DB;
 
 /**
- * The donors list hides a donor whose donations are all test-mode, and shows
- * one who has never given. The predicate leads with donations_count because the
- * count companion has no LIMIT and paid a correlated lookup per donor; that is
- * only sound while the shortcut and the subqueries agree, which is what these
- * assert.
+ * Which donors are test-only, and which may leave the site in a CSV.
+ *
+ * The distinction is not "donations_count is zero". That counter is synced
+ * through donationsOnly(), so a donor whose only live donation is a ticket
+ * order reads zero as well, and so does one who has never given. The question
+ * is whether any row against them is real, so it is asked of the rows.
+ *
+ * The lifecycle KPI still takes the donations_count shortcut, and the ticket
+ * order is what proves the shortcut cannot replace the subquery.
  */
 final class DonorVisibilityPredicateTest extends IntegrationTestCase
 {
@@ -45,90 +49,80 @@ final class DonorVisibilityPredicateTest extends IntegrationTestCase
     }
 
     /** @return list<int> */
-    private function visibleIds(): array
+    private function idsMatching(string $predicate): array
     {
         $rows = DB::table('dono_donors')
             ->selectRaw('id')
-            ->whereRaw(DonorRepository::visibleDonorPredicate())
+            ->whereRaw($predicate)
             ->getAll();
 
         return array_map(static fn ($r): int => (int) (is_array($r) ? $r['id'] : $r->id), $rows);
     }
 
-    /** The original predicate, kept here so the shortcut has something to agree with. */
-    private function visibleIdsTheSlowWay(): array
-    {
-        $prefix = DB::getPrefix();
-        $any    = "SELECT 1 FROM {$prefix}dono_donations d WHERE d.donor_id = {$prefix}dono_donors.id";
-
-        $rows = DB::table('dono_donors')
-            ->selectRaw('id')
-            ->whereRaw("(EXISTS ({$any} AND d.is_test = 0) OR NOT EXISTS ({$any}))")
-            ->getAll();
-
-        return array_map(static fn ($r): int => (int) (is_array($r) ? $r['id'] : $r->id), $rows);
-    }
-
-    public function test_a_donor_whose_donations_are_all_test_is_hidden(): void
+    public function test_a_donor_whose_donations_are_all_test_is_test_only(): void
     {
         $id = $this->donorId('test-only');
         $this->donation($id, true);
         $this->donation($id, true);
 
-        $this->assertNotContains($id, $this->visibleIds());
+        $this->assertContains($id, $this->idsMatching(DonorRepository::testOnlyDonorPredicate()));
     }
 
-    public function test_a_donor_who_has_never_given_is_shown(): void
+    public function test_a_donor_who_has_never_given_is_not_test_only(): void
     {
-        $this->assertContains($this->donorId('never'), $this->visibleIds());
+        // No rows at all is a real person who has not given yet.
+        $id = $this->donorId('never');
+
+        $this->assertNotContains($id, $this->idsMatching(DonorRepository::testOnlyDonorPredicate()));
     }
 
-    public function test_one_live_donation_among_test_ones_is_enough(): void
+    public function test_one_live_donation_among_test_ones_clears_the_badge(): void
     {
         $id = $this->donorId('mixed');
         $this->donation($id, true);
         $this->donation($id, false);
-        Plugin::instance()->container->get(\Dono\Donations\AggregateSyncer::class)->syncDonor($id);
 
-        $this->assertContains($id, $this->visibleIds());
+        $this->assertNotContains($id, $this->idsMatching(DonorRepository::testOnlyDonorPredicate()));
     }
 
     /**
-     * The shortcut is only a shortcut. A ticket order is live but does not
-     * count toward donations_count, so it has to fall through to the subquery
-     * rather than vanish from the list.
+     * A ticket order is live money that donations_count never counts, so a
+     * badge built on that counter would call this buyer a rehearsal.
      */
-    public function test_a_live_ticket_order_still_makes_a_donor_visible(): void
+    public function test_a_live_ticket_order_is_not_a_rehearsal(): void
     {
         $id = $this->donorId('order-only');
         $this->donation($id, false, 'order');
 
-        $this->assertContains($id, $this->visibleIds());
+        $this->assertNotContains($id, $this->idsMatching(DonorRepository::testOnlyDonorPredicate()));
     }
 
-    public function test_the_shortcut_agrees_with_the_predicate_it_replaced(): void
+    public function test_the_two_predicates_partition_the_table(): void
     {
-        $live = $this->donorId('agree-live');
+        $live = $this->donorId('part-live');
         $this->donation($live, false);
-        Plugin::instance()->container->get(\Dono\Donations\AggregateSyncer::class)->syncDonor($live);
-
-        $testOnly = $this->donorId('agree-test');
+        $testOnly = $this->donorId('part-test');
         $this->donation($testOnly, true);
+        $this->donorId('part-none');
 
-        $this->donorId('agree-none');
+        $testIds = $this->idsMatching(DonorRepository::testOnlyDonorPredicate());
+        $mailIds = $this->idsMatching(DonorRepository::mailableDonorPredicate());
 
-        $fast = $this->visibleIds();
-        $slow = $this->visibleIdsTheSlowWay();
-        sort($fast);
-        sort($slow);
-
-        $this->assertSame($slow, $fast);
+        // Every donor is in exactly one, which is what lets the list drop its
+        // predicate entirely while the export keeps one.
+        $this->assertSame([], array_intersect($testIds, $mailIds));
+        $this->assertSame(
+            (int) DB::table('dono_donors')->count(),
+            count($testIds) + count($mailIds)
+        );
+        $this->assertContains($testOnly, $testIds);
+        $this->assertContains($live, $mailIds);
     }
 
     /**
-     * The lifecycle KPI counts donors who have given, and takes the same
-     * shortcut. A ticket order is a live donation the counter does not count,
-     * so the buyer has to survive the fall-through here too.
+     * The lifecycle KPI still takes the donations_count shortcut. A ticket
+     * order is a live donation the counter does not count, so the buyer has to
+     * survive the fall-through to the subquery.
      */
     public function test_the_kpi_counts_a_ticket_only_buyer_as_having_given(): void
     {

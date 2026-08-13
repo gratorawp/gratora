@@ -11,3 +11,31 @@
     color: var(--dono-color-text-muted, #6b7280);
     white-space: nowrap;
 }
+
+// Test badge and the reference cell that carries it. Shared: the donations
+// list, the donors list and the donor profile all mark a rehearsal the same
+// way, and a screen that renders the class without the rule shows a bare word.
+//
+// Doubled class on purpose: a later .dono-pill rule (the pill-group button)
+// sets a transparent background, and the extra class outranks it wherever the
+// two land in source order.
+.dono-pill.dono-pill--test {
+    background: $amber-soft;
+    color: $amber;
+    font-weight: 600;
+}
+
+// Reference plus its test badge. Inline-flex so the badge sits on the
+// reference's baseline rather than wrapping under it in a narrow column.
+.dono-ref-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+
+    .dono-mono-link {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}

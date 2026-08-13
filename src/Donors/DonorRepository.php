@@ -57,9 +57,12 @@ final class DonorRepository
     }
 
     /**
-     * Who belongs in the admin donor list. A donor row is written for every
-     * donation, so the only ones held back are those whose entire footprint is
-     * test-mode; somebody who signed up and has not given yet is a real person.
+     * A donor whose entire footprint is test-mode.
+     *
+     * Not the same as donations_count = 0: a donor whose only live donation is
+     * a ticket order counts zero too, because the counter is synced through
+     * donationsOnly(). The question is whether any row is real, so it is asked
+     * of the donation rows themselves.
      *
      * Parenthesized because it is an OR, and it must be the FIRST
      * where-condition on a query: whereRaw adds no AND connector, but a where()
@@ -67,19 +70,56 @@ final class DonorRepository
      *
      * @since 1.0.0
      */
-    public static function visibleDonorPredicate(): string
+    public static function testOnlyDonorPredicate(): string
     {
         $prefix = DB::getPrefix();
         $any    = "SELECT 1 FROM {$prefix}dono_donations d WHERE d.donor_id = {$prefix}dono_donors.id";
 
-        // donations_count first, and it decides for almost every donor. It is
-        // synced from donationsOnly(), so a donor whose donations are all
-        // test-mode counts zero: a count above zero cannot be true unless the
-        // subqueries would have said yes anyway. Leading with it keeps the
-        // list's count companion, which has no LIMIT, off one correlated
-        // lookup per donor.
-        return "({$prefix}dono_donors.donations_count > 0"
-            . " OR EXISTS ({$any} AND d.is_test = 0) OR NOT EXISTS ({$any}))";
+        return "(EXISTS ({$any}) AND NOT EXISTS ({$any} AND d.is_test = 0))";
+    }
+
+    /**
+     * Who may leave the site in a list. The donor CSV is an admin export that
+     * goes to a fulfillment house, and the test badge cannot travel with it:
+     * the columns are opt-in and none of them says "not a real person". So the
+     * file keeps the narrower population the screen used to have, and the
+     * screen's own definition no longer decides it.
+     *
+     * @since 1.0.0
+     */
+    public static function mailableDonorPredicate(): string
+    {
+        return 'NOT ' . self::testOnlyDonorPredicate();
+    }
+
+    /**
+     * Which of these donors are test-only, asked once for a page of rows
+     * rather than once per row.
+     *
+     * @param list<int> $donorIds
+     * @return array<int,true>
+     *
+     * @since 1.0.0
+     */
+    public static function testOnlyIdsAmong(array $donorIds): array
+    {
+        $ids = array_values(array_filter(array_map('intval', $donorIds)));
+        if ($ids === []) {
+            return [];
+        }
+
+        $rows = Donor::query()
+            ->whereRaw(self::testOnlyDonorPredicate())
+            ->whereIn('id', $ids)
+            ->select('id')
+            ->getAll();
+
+        $out = [];
+        foreach ($rows as $row) {
+            $out[(int) $row->id] = true;
+        }
+
+        return $out;
     }
 
     /**
@@ -92,9 +132,9 @@ final class DonorRepository
     {
         $prefix = DB::getPrefix();
 
-        // Same shortcut as visibleDonorPredicate, and the same reason it leads
-        // rather than replaces: a live donation the counter does not count, a
-        // ticket order, still has to satisfy this.
+        // donations_count leads because it decides for almost every donor, but
+        // it cannot replace the subquery: a live donation the counter does not
+        // count, a ticket order, still has to satisfy this.
         return "({$prefix}dono_donors.donations_count > 0 OR EXISTS (SELECT 1 FROM {$prefix}dono_donations d "
             . "WHERE d.donor_id = {$prefix}dono_donors.id AND d.is_test = 0))";
     }
@@ -133,8 +173,12 @@ final class DonorRepository
             return $q;
         };
 
-        $total = (int) $applyFilters(Donor::query()->whereRaw(self::visibleDonorPredicate()))->count();
-        $items = $applyFilters(Donor::query()->whereRaw(self::visibleDonorPredicate()))
+        // Every donor row belongs here: one with no donations is a real person
+        // who has not given yet, and one with only test donations is a person
+        // the operator created and needs to find. The union is the whole table,
+        // so there is nothing left to filter.
+        $total = (int) $applyFilters(Donor::query())->count();
+        $items = $applyFilters(Donor::query())
             ->orderBy($orderBy, $order)
             ->limit($perPage)
             ->offset($offset)
@@ -167,7 +211,12 @@ final class DonorRepository
             return $q;
         };
 
-        $base = fn () => DB::table('dono_donors')->whereRaw(self::visibleDonorPredicate());
+        // Same population as the list above it: a total that disagrees with the
+        // rows underneath reads as a broken screen. Only this headcount widens.
+        // with_donations gates on donations_count, which is live-only by
+        // construction, and a test-only donor carries total_donated_cents 0, so
+        // the money cards cannot move.
+        $base = fn () => DB::table('dono_donors');
 
         $totalCount    = (int) $applyFilters($base())->count();
         $withDonations = (int) $applyFilters($base())->where('donations_count', 0, '>')->count();

@@ -14,12 +14,14 @@ use Dono\Foundation\Plugin;
 /**
  * Who counts as a donor on the Donors screen.
  *
- * A donor row is written for every donation, so rehearsing in test mode mints
- * donor records nobody ever gave to, and those stay out of the list and its
- * totals. Signing up in the portal writes a donor row too, and that one is a
- * real person who handed over a real address: they belong on the screen, with
- * nothing against their name, or the only way to find out they exist is to
- * read the database.
+ * Every donor row belongs on the screen, and the screen says which is which. A
+ * rehearsal in test mode mints a donor nobody gave to, and hiding them meant
+ * the operator who made them could not open, check or erase them. They are
+ * listed and badged instead, and they reach no money figure: the counters that
+ * feed those are live-only by construction.
+ *
+ * The CSV is the exception. A badge cannot travel in a file mailed to a
+ * fulfillment house, so that keeps the narrower population.
  */
 final class DonorVisibilityTest extends IntegrationTestCase
 {
@@ -66,12 +68,32 @@ final class DonorVisibilityTest extends IntegrationTestCase
         $this->assertContains($id, $this->listedIds());
     }
 
-    public function test_a_donor_minted_by_a_test_donation_is_not_listed(): void
+    public function test_a_donor_minted_by_a_test_donation_is_listed_and_badged(): void
     {
         $id = $this->donor('test-mode-only@example.com');
         $this->seedDonation($id, true);
 
-        $this->assertNotContains($id, $this->listedIds());
+        $this->assertContains($id, $this->listedIds());
+        $this->assertArrayHasKey($id, DonorRepository::testOnlyIdsAmong([$id]));
+    }
+
+    public function test_a_donor_who_gave_for_real_is_not_badged_as_test(): void
+    {
+        $id = $this->donor('badge-real@example.com');
+        $this->seedDonation($id, true);
+        $this->seedDonation($id, false);
+
+        $this->assertSame([], DonorRepository::testOnlyIdsAmong([$id]));
+    }
+
+    public function test_a_donor_who_never_gave_is_not_badged_as_test(): void
+    {
+        // No donations at all is a real person who has not given yet, not a
+        // rehearsal. The badge asks whether any row is real, not whether the
+        // live counter is zero.
+        $id = $this->donor('badge-never-gave@example.com');
+
+        $this->assertSame([], DonorRepository::testOnlyIdsAmong([$id]));
     }
 
     public function test_a_real_donation_puts_a_test_minted_donor_back_on_the_list(): void
@@ -100,14 +122,17 @@ final class DonorVisibilityTest extends IntegrationTestCase
 
         $this->assertSame(count($this->listedIds()), (int) $stats['total_count']);
         $this->assertContains($signedUp, $this->listedIds());
-        $this->assertNotContains($testOnly, $this->listedIds());
+        $this->assertContains($testOnly, $this->listedIds());
         // Counted as a person, not as money: averages divide by this, and a
         // signup with nothing against their name would drag every one to zero.
         $this->assertSame(1, (int) $stats['with_donations']);
     }
 
-    /** The export is started from the screen, so it carries the screen's rows. */
-    public function test_the_export_carries_the_same_people(): void
+    /**
+     * The CSV is narrower than the screen on purpose: its columns are opt-in
+     * and none of them can say "not a real person".
+     */
+    public function test_the_export_leaves_out_test_only_donors(): void
     {
         $signedUp = $this->donor('export-signed-up@example.com');
         $testOnly = $this->donor('export-test-only@example.com');

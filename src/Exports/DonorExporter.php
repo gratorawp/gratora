@@ -222,14 +222,15 @@ final class DonorExporter
     }
 
     /**
-     * The screen's own definition rather than a restatement of it, so the file
-     * cannot disagree with the count it was started from.
+     * Deliberately narrower than the screen this export is started from. The
+     * screen can badge a test-only donor; a CSV mailed to a fulfillment house
+     * cannot, so they do not travel in it.
      *
      * @since 1.0.0
      */
     private function livePredicate(): string
     {
-        return 'redacted_at IS NULL AND ' . DonorRepository::visibleDonorPredicate();
+        return 'redacted_at IS NULL AND ' . DonorRepository::mailableDonorPredicate();
     }
 
     /** @since 1.0.0 */

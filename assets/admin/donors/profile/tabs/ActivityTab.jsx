@@ -178,6 +178,9 @@ function RecentDonationsCard( { donations, campaigns, lifetime, onAllDonations }
                                             </span>
                                             <span className="dp-recent-row__sub">
                                                 <a href={ donationHref( d.reference ) }>{ d.reference }</a>
+                                                { d.is_test && (
+                                                    <span className="dono-pill dono-pill--test">{ __( 'Test', 'dono-fundraising-platform' ) }</span>
+                                                ) }
                                                 <span>{ timeAgo( d.paid_at || d.created_at ) }</span>
                                             </span>
                                         </div>

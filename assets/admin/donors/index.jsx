@@ -139,9 +139,14 @@ function DonorsApp( { toggleSlot } ) {
                             ) }
                         </span>
                         <div className="dono-row__body">
-                            <a className="dono-row__link dono-row__link--strong" href={ `#donor/${ item.id }` } { ...rowLinkProps }>
-                                { name }
-                            </a>
+                            <span className="dono-ref-cell">
+                                <a className="dono-row__link dono-row__link--strong" href={ `#donor/${ item.id }` } { ...rowLinkProps }>
+                                    { name }
+                                </a>
+                                { item.is_test_only && (
+                                    <span className="dono-pill dono-pill--test">{ __( 'Test', 'dono-fundraising-platform' ) }</span>
+                                ) }
+                            </span>
                             { item.donor_type && item.donor_type !== 'individual' && (
                                 <div className="dono-row__sub" style={ { textTransform: 'capitalize' } }>
                                     { item.donor_type }
@@ -242,10 +247,12 @@ function DonorsApp( { toggleSlot } ) {
             icon:          () => <DeleteIcon size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             supportsBulk:  true,
-            // A donor who gave has a financial record attached and is redacted
-            // instead. The server refuses either way; this keeps the menu from
-            // offering something that can only fail.
-            isEligible:    ( item ) => ! item.donations_count,
+            // A donor with any donation row has a financial record attached and
+            // is redacted instead. The server refuses on the existence of a
+            // row, test rows included, so the menu has to ask the same question
+            // or it offers a Delete that can only 409. donations_count is
+            // live-only and would say yes to a donor who has only rehearsals.
+            isEligible:    ( item ) => ! item.donations_count && ! item.is_test_only,
             callback: ( items ) => {
                 if ( ! items.length ) return;
                 const n = items.length;
