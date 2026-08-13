@@ -572,12 +572,12 @@ final class CampaignService
         $t6j = json_encode($t6, JSON_UNESCAPED_UNICODE);
 
         $default = <<<BLOCKS
-<!-- wp:heading {"level":1,"metadata":{"bindings":{"content":{"source":"dono/campaign","args":{"key":"title","campaign_id":{$id}}}}},"className":"dp-display dp-rail dp-top"} -->
-<h1 class="wp-block-heading dp-display dp-rail dp-top">{$t0}</h1>
+<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"dono/campaign","args":{"key":"title","campaign_id":{$id}}}}},"className":"dp-display dp-rail dp-top"} -->
+<h1 class="wp-block-heading alignwide dp-display dp-rail dp-top">{$t0}</h1>
 <!-- /wp:heading -->
 
-<!-- wp:columns {"className":"dp-layout"} -->
-<div class="wp-block-columns dp-layout">
+<!-- wp:columns {"align":"wide","className":"dp-layout"} -->
+<div class="wp-block-columns alignwide dp-layout">
 <!-- wp:column {"width":"62%","className":"dp-layout__main"} -->
 <div class="wp-block-column dp-layout__main" style="flex-basis:62%">
 <!-- wp:dono/campaign-image {"campaignId":{$id}} /-->

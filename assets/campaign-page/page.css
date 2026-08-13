@@ -28,6 +28,10 @@ body,
 .dono-p2p-sponsors,
 .dono-p2p-welcome,
 .dp-layout{
+    /* How wide the page reads. Every rule that needs it reads this, so the
+       measure moves in one place and the editor canvas follows the front end. */
+    --dp-measure: 1200px;
+
     /* Block wrappers carry the campaign's resolved style as core's own custom
        properties (see Styling\CampaignStyleVars). */
     --dp-accent:      var(--dono-accent, #1e8a4e);
@@ -77,12 +81,12 @@ body,
 .dono-p2p-layout,
 .dp-layout{
     box-sizing: border-box;
-    max-width: 1080px;
+    max-width: var(--dp-measure, 1200px);
     margin-inline: auto;
     /* The page gutter lives here, not inside each band, or between the stacking
-       breakpoint and 1080px the columns carry no inset and sit glued to the
-       window edge. Bands and rails inside the columns give theirs up so both
-       columns start on the same line; at 1080 the measure is still 1032. */
+       breakpoint and the measure the columns carry no inset and sit glued to
+       the window edge. Bands and rails inside the columns give theirs up so both
+       columns start on the same line; the gutter comes off the measure. */
     padding-inline: 24px;
 }
 
@@ -169,7 +173,7 @@ body,
    present at the same width. Inside a layout column the column constrains this
    anyway. */
 
-.dp-band{ max-width: 1080px; margin: 0 auto; padding: 0 24px 72px; }
+.dp-band{ max-width: var(--dp-measure, 1200px); margin: 0 auto; padding: 0 24px 72px; }
 
 .dp-band--wide { max-width: 1060px; }
 
@@ -195,7 +199,7 @@ body,
 
 .dp-rail {
     box-sizing: border-box;
-    max-width: 1080px;
+    max-width: var(--dp-measure, 1200px);
     margin-inline: auto;
     padding-inline: 24px;
 }
@@ -268,7 +272,7 @@ body,
 .dp-avatar--photo { object-fit: cover; background: var(--dp-rule); }
 
 .dp-profile {
-    max-width: 1080px;
+    max-width: var(--dp-measure, 1200px);
     margin-inline: auto;
     background: var(--dp-card);
     border: 1px solid var(--dp-border);
@@ -529,8 +533,8 @@ body,
 
 .dp-hero .dp-figure { margin-bottom: 0; }
 
-/* At 16:9 across the 1080px measure the photo is 581px tall, which puts the
-   readout about 790px down, below the fold on a laptop. Cap the height once
+/* At 16:9 across the page measure the photo is taller than half a laptop
+   screen, which puts the readout below the fold. Cap the height once
    there is a wide viewport to cap and let object-fit crop; the phone layout
    needs no cap. */
 @media (min-width: 782px) {
@@ -625,7 +629,7 @@ body,
 
 .dono-p2p-form-band,
 .dono-form-band{
-    max-width: 1080px;
+    max-width: var(--dp-measure, 1200px);
     margin: 0 auto;
     padding: 0 24px 72px;
 }

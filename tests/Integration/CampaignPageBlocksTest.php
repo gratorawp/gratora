@@ -64,6 +64,23 @@ final class CampaignPageBlocksTest extends IntegrationTestCase
         $this->assertStringNotContainsString('wp:dono/donate-button', $page->post_content);
     }
 
+    public function test_top_level_blocks_are_aligned_wide(): void
+    {
+        $campaign = $this->createCampaign(['title' => 'Alignment test']);
+        $content  = get_post((int) $campaign['page_id'])->post_content;
+
+        // The editor canvas is a constrained layout, so core caps an unaligned
+        // top-level block at the theme's contentSize: 645px under Twenty
+        // Twenty-Five, whatever the page measure says. Wide alignment is what
+        // hands the width back to the stylesheet, and without it the editor
+        // shows a narrow column of a page that is wide on the front end.
+        $this->assertStringContainsString('"align":"wide","className":"dp-layout"', $content);
+        $this->assertStringContainsString('wp-block-columns alignwide dp-layout', $content);
+
+        $this->assertStringContainsString('"level":1,"align":"wide"', $content);
+        $this->assertStringContainsString('wp-block-heading alignwide', $content);
+    }
+
     public function test_page_renders_the_campaign_title(): void
     {
         $campaign = $this->createCampaign(['title' => 'Save the bees']);
