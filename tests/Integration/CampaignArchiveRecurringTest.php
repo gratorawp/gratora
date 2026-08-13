@@ -67,6 +67,38 @@ final class CampaignArchiveRecurringTest extends IntegrationTestCase
         return rest_do_request($req)->get_status();
     }
 
+    public function test_a_plan_the_gateway_refused_is_reported_not_swallowed(): void
+    {
+        $campaign = $this->makeCampaign();
+        $plan     = $this->seedActivePlan((int) $campaign->id);
+
+        // A plan on a gateway this site cannot reach. The cursor steps past it
+        // on purpose, so that it can finish, but the org must not be told every
+        // donor was stopped while this one is still being billed.
+        RecurringPlan::query()->where('id', (int) $plan->id)->update(['gateway' => 'stripe']);
+
+        $reported = null;
+        add_action('dono.campaign.recurring_cancelled', static function ($id, $failed = []) use (&$reported): void {
+            $reported = $failed;
+        }, 10, 2);
+
+        $this->archive((int) $campaign->id, ['cancel_recurring' => true]);
+        $this->runPendingAsyncJobs();
+
+        $this->assertSame(
+            [(int) $plan->id],
+            CampaignCancelRecurringJob::failedFor((int) $campaign->id),
+            'the plan that is still billing is on the record'
+        );
+        $this->assertSame([(int) $plan->id], $reported, 'and the completion event carries it');
+
+        $this->assertSame(
+            'active',
+            RecurringPlan::query()->find('id', (int) $plan->id)->status,
+            'and it is honestly still active, not marked cancelled'
+        );
+    }
+
     public function test_archive_leaves_subscriptions_active_by_default(): void
     {
         $c    = $this->makeCampaign();

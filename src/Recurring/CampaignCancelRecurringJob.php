@@ -59,6 +59,7 @@ final class CampaignCancelRecurringJob
         }
 
         self::setCursor($campaignId, 0);
+        self::clearFailures($campaignId);
         $this->reason($campaignId, $reason);
         $this->async->enqueue(self::HOOK, ['campaign_id' => $campaignId]);
     }
@@ -92,8 +93,9 @@ final class CampaignCancelRecurringJob
             ->getAll();
 
         if ($plans === []) {
+            $failed = self::failedFor($campaignId);
             self::clear($campaignId);
-            do_action('dono.campaign.recurring_cancelled', $campaignId);
+            do_action('dono.campaign.recurring_cancelled', $campaignId, $failed);
             return;
         }
 
@@ -102,7 +104,12 @@ final class CampaignCancelRecurringJob
             try {
                 $this->canceller->cancel($plan, $reason);
             } catch (\Throwable $e) {
-                // One donor's gateway failure must not strand the rest.
+                // One donor's gateway failure must not strand the rest, but it
+                // must not vanish either: the cursor steps past this plan, so
+                // without counting it here the archive reports every donor
+                // stopped while this one is still being billed.
+                self::recordFailure($campaignId, (int) $plan->id);
+
                 ErrorLog::record(
                     'recurring.cancel',
                     'Could not cancel this plan at the gateway: ' . $e->getMessage(),
@@ -146,6 +153,55 @@ final class CampaignCancelRecurringJob
         $map = get_option(self::OPTION, []);
 
         return is_array($map) ? array_map('intval', $map) : [];
+    }
+
+    /**
+     * Plans this run could not cancel at the gateway.
+     *
+     * They are still live and still billing. The cursor steps past them so the
+     * run can finish, which is right, but it also takes them out of
+     * remainingFor(), so this is the only record that they were left behind.
+     *
+     * @return list<int> plan ids
+     *
+     * @since 1.0.0
+     */
+    public static function failedFor(int $campaignId): array
+    {
+        $map = get_option(self::OPTION . '_failed', []);
+
+        return is_array($map) && isset($map[$campaignId]) && is_array($map[$campaignId])
+            ? array_values(array_map('intval', $map[$campaignId]))
+            : [];
+    }
+
+    /**
+     * Cleared when a run starts, never when one finishes.
+     *
+     * The record is what the archive screen reads to say how many donors are
+     * still being billed, so erasing it on completion would leave the org
+     * exactly as misinformed as before.
+     *
+     * @since 1.0.0
+     */
+    private static function clearFailures(int $campaignId): void
+    {
+        $map = get_option(self::OPTION . '_failed', []);
+        if (is_array($map) && array_key_exists($campaignId, $map)) {
+            unset($map[$campaignId]);
+            update_option(self::OPTION . '_failed', $map, false);
+        }
+    }
+
+    /** @since 1.0.0 */
+    private static function recordFailure(int $campaignId, int $planId): void
+    {
+        $map = get_option(self::OPTION . '_failed', []);
+        $map = is_array($map) ? $map : [];
+        $map[$campaignId] = array_values(array_unique(
+            array_merge(self::failedFor($campaignId), [$planId])
+        ));
+        update_option(self::OPTION . '_failed', $map, false);
     }
 
     /** @since 1.0.0 */
