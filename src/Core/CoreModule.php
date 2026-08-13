@@ -733,7 +733,7 @@ final class CoreModule implements DonoModule
         // Sandbox gateway only available when org-wide test mode is on.
         $gwCfg = get_option('dono_gateway_config', []);
         if (is_array($gwCfg) && ! empty($gwCfg['test_mode'])) {
-            $gateways->register(new SandboxGateway($c->get(Clock::class)));
+            $gateways->register(new SandboxGateway($c->get(Clock::class), $c->get(RecurringPlanRepository::class)));
         }
 
         do_action('dono.gateways.register', $gateways, $c);

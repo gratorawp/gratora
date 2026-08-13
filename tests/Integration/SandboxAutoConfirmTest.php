@@ -30,7 +30,7 @@ final class SandboxAutoConfirmTest extends IntegrationTestCase
         $clock  = \Dono\Foundation\Plugin::instance()->container->get(\Dono\Foundation\Time\Clock::class);
         $donation = \Dono\Donations\Donation::make();
         $donation->reference = 'SANDBOX-TEST';
-        $intent = (new SandboxGateway($clock))->createIntent($donation);
+        $intent = (new SandboxGateway($clock, new \Dono\Recurring\RecurringPlanRepository()))->createIntent($donation);
         $this->assertTrue(
             $intent->auto_confirm,
             'sandbox createIntent must set auto_confirm=true so the controller fires confirm in the same request'
@@ -51,7 +51,10 @@ final class SandboxAutoConfirmTest extends IntegrationTestCase
         $container = \Dono\Foundation\Plugin::instance()->container;
         $manager   = $container->get(\Dono\Gateways\GatewayManager::class);
         if (! $manager->get('sandbox')) {
-            $manager->register(new SandboxGateway($container->get(\Dono\Foundation\Time\Clock::class)));
+            $manager->register(new SandboxGateway(
+                $container->get(\Dono\Foundation\Time\Clock::class),
+                $container->get(\Dono\Recurring\RecurringPlanRepository::class)
+            ));
         }
 
         $campaignId = $this->seedCampaign();

@@ -15,6 +15,7 @@ use Dono\Foundation\References\ReferenceGenerator;
 use Dono\Foundation\Time\Clock;
 use Dono\Funds\FundResolver;
 use Dono\Gateways\GatewayManager;
+use Dono\Recurring\FrequencyMap;
 use Dono\Gateways\RefundResult;
 use Dono\Gateways\TestMode;
 use Dono\Receipts\Receipt;
@@ -60,6 +61,21 @@ final class DonationService
      */
     public function createPending(DonationIntent $intent): array
     {
+        // A gateway that creates no schedule cannot take a recurring donation:
+        // the card is charged once and the donor is promised a plan nobody will
+        // ever collect. The public route checks this against the form's own
+        // options, but every other caller reaches this method directly.
+        if (FrequencyMap::isRecurring($intent->frequency)) {
+            $gateway = $this->gateways->get($intent->gateway);
+            if ($gateway === null || ! in_array('recurring', $gateway->frequencies(), true)) {
+                throw new RuntimeException(esc_html(sprintf(
+                    'Refusing a %s donation on gateway "%s": it creates no recurring schedule.',
+                    $intent->frequency,
+                    $intent->gateway
+                )));
+            }
+        }
+
         $intent = apply_filters('dono.donation.intent_creating', $intent);
 
         $typeHandler = $this->formTypes->handlerFor($intent);

@@ -22,6 +22,8 @@ use Dono\Gateways\BrowserAware;
 use Dono\Gateways\GatewayIntentResult;
 use Dono\Gateways\GatewayManager;
 use Dono\Gateways\PaymentGateway;
+use Dono\Gateways\SubscriptionCreator;
+use Dono\Recurring\FrequencyMap;
 use Dono\Rest\Schemas\DonationSchemas;
 use Dono\Settings\SettingsService;
 use Throwable;
@@ -368,6 +370,20 @@ final class DonationsController
                 $confirmResult = $gateway->confirm($donation, []);
                 if ($confirmResult->success) {
                     $donation = $this->donations->confirm($donation, $confirmResult->toArray());
+
+                    // Same guard and same position as Stripe's post-confirm
+                    // branch. A synchronous gateway has no webhook to build the
+                    // plan in, and a paid recurring donation with no plan is a
+                    // donor promised a schedule nobody will ever collect.
+                    if ($gateway instanceof SubscriptionCreator
+                        && FrequencyMap::isRecurring((string) $donation->frequency)
+                        && ! $donation->recurring_plan_id) {
+                        try {
+                            $gateway->createSubscription($donation);
+                        } catch (Throwable $e) {
+                            $this->donations->recordSubscriptionCreationFailure($donation, $e);
+                        }
+                    }
                 } else {
                     $this->donations->markFailed($donation, 'Sync gateway confirm returned !success.');
                 }

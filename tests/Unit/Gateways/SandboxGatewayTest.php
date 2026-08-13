@@ -8,6 +8,7 @@ use DateTimeImmutable;
 use Dono\Donations\Donation;
 use Dono\Foundation\Time\FrozenClock;
 use Dono\Gateways\Sandbox\SandboxGateway;
+use Dono\Recurring\RecurringPlanRepository;
 use PHPUnit\Framework\TestCase;
 
 final class SandboxGatewayTest extends TestCase
@@ -16,7 +17,10 @@ final class SandboxGatewayTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->gateway = new SandboxGateway(new FrozenClock(new DateTimeImmutable('2026-05-13 09:00:00')));
+        $this->gateway = new SandboxGateway(
+            new FrozenClock(new DateTimeImmutable('2026-05-13 09:00:00')),
+            new RecurringPlanRepository()
+        );
     }
 
     public function test_identity_and_support_metadata(): void
