@@ -28,7 +28,7 @@ const commands = [
         name:     'dono/dashboard',
         label:    __( 'Dono: Open dashboard', 'dono-fundraising-platform' ),
         icon:     chartBar,
-        callback: goTo( 'dono-fundraising-platform' ),
+        callback: goTo( 'dono' ),
     },
     {
         name:     'dono/donations',

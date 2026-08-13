@@ -50,7 +50,7 @@ const DONO_CATEGORIES = [
 function ensureCategories() {
     try {
         const existing = select( 'core/blocks' ).getCategories();
-        const keep = existing.filter( ( c ) => ! String( c.slug ).startsWith( 'dono-fundraising-platform' ) );
+        const keep = existing.filter( ( c ) => ! String( c.slug ).startsWith( 'dono-' ) );
         dispatch( 'core/blocks' ).setCategories( [ ...DONO_CATEGORIES, ...keep ] );
     } catch ( err ) {
         // setCategories not available on this version; harmless.

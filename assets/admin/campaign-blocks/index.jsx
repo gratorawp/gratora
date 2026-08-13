@@ -148,7 +148,7 @@ registerBlockType( 'dono/campaign-image', {
     apiVersion: 3,
     title:       __( 'Campaign image', 'dono-fundraising-platform' ),
     description: __( "The campaign's cover photo. Follows the campaign, not the page it sits on.", 'dono-fundraising-platform' ),
-    category:    'dono-fundraising-platform',
+    category:    'dono',
     icon:        'format-image',
     attributes: {
         campaignId:  { type: 'integer', default: 0 },
@@ -265,7 +265,7 @@ registerBlockType( 'dono/campaign-stat', {
     apiVersion: 3,
     title:       __( 'Campaign stat', 'dono-fundraising-platform' ),
     description: __( 'A single campaign figure. Add one per number you want to show.', 'dono-fundraising-platform' ),
-    category:    'dono-fundraising-platform',
+    category:    'dono',
     icon:        'chart-bar',
     attributes: {
         campaignId: { type: 'integer', default: 0 },
@@ -351,7 +351,7 @@ registerBlockType( 'dono/campaign-progress', {
     apiVersion: 3,
     title:      __( 'Campaign progress', 'dono-fundraising-platform' ),
     description: __( 'Progress bar toward the campaign goal.', 'dono-fundraising-platform' ),
-    category:   'dono-fundraising-platform',
+    category:   'dono',
     icon:       'chart-line',
     attributes: {
         campaignId: { type: 'integer', default: 0 },
@@ -412,7 +412,7 @@ registerBlockType( 'dono/donate-button', {
     apiVersion: 3,
     title:      __( 'Donate button', 'dono-fundraising-platform' ),
     description: __( 'Button that opens the campaign\'s default donation form.', 'dono-fundraising-platform' ),
-    category:   'dono-fundraising-platform',
+    category:   'dono',
     icon:       'heart',
     attributes: {
         campaignId: { type: 'integer', default: 0 },
@@ -493,7 +493,7 @@ registerBlockType( 'dono/top-donors', {
     apiVersion: 3,
     title:      __( 'Top donors', 'dono-fundraising-platform' ),
     description: __( 'Leaderboard of the donors who gave the most to this campaign.', 'dono-fundraising-platform' ),
-    category:   'dono-fundraising-platform',
+    category:   'dono',
     icon:       'awards',
     attributes: {
         campaignId:     { type: 'integer', default: 0 },
@@ -602,7 +602,7 @@ registerBlockType( 'dono/recent-donations', {
     apiVersion: 3,
     title:      __( 'Recent donations', 'dono-fundraising-platform' ),
     description: __( 'Live feed of the most recent paid donations for this campaign.', 'dono-fundraising-platform' ),
-    category:   'dono-fundraising-platform',
+    category:   'dono',
     icon:       'list-view',
     attributes: {
         campaignId:    { type: 'integer', default: 0 },
@@ -706,7 +706,7 @@ registerBlockType( 'dono/supporter-wall', {
     apiVersion: 3,
     title:      __( 'Supporter wall', 'dono-fundraising-platform' ),
     description: __( 'A wall of campaign supporters with optional messages.', 'dono-fundraising-platform' ),
-    category:   'dono-fundraising-platform',
+    category:   'dono',
     icon:       'groups',
     attributes: {
         campaignId:     { type: 'integer', default: 0 },
@@ -843,7 +843,7 @@ registerBlockType( 'dono/campaign-grid', {
     apiVersion: 3,
     title:       __( 'Campaigns grid', 'dono-fundraising-platform' ),
     description: __( 'A responsive grid of other published campaigns as cards.', 'dono-fundraising-platform' ),
-    category:   'dono-fundraising-platform',
+    category:   'dono',
     icon:       'grid-view',
     attributes: {
         campaignId: { type: 'integer', default: 0 },
@@ -922,7 +922,7 @@ registerBlockType( 'dono/donation-form', {
     apiVersion: 3,
     title:       __( 'Donation form', 'dono-fundraising-platform' ),
     description: __( 'Renders the campaign donation form inline on the page.', 'dono-fundraising-platform' ),
-    category:   'dono-fundraising-platform',
+    category:   'dono',
     icon:       'money-alt',
     attributes: {
         campaignId: { type: 'integer', default: 0 },
