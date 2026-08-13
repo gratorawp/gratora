@@ -97,10 +97,10 @@ test.describe('admin screenshots', () => {
         await openAdmin(page, screen('dono-forms', `&form=${formId}`), '.dono-form-editor__canvas');
         // The editor is a fixed-height app filling the viewport, so a full-page
         // capture would only add empty page below it.
-        await shoot(page, 'admin-form-builder', false);
+        await shoot(page, 'admin-form-builder');
 
         await openTab(page, '.dono-editor-header__tab:has-text("Settings")');
-        await shoot(page, 'admin-form-builder-settings', false);
+        await shoot(page, 'admin-form-builder-settings');
     });
 
     test('donations', async ({ page }) => {

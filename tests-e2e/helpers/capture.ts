@@ -86,7 +86,9 @@ export async function firstHref(page: Page, selector: string): Promise<string | 
 }
 
 /** Write a capture. Returns the absolute path so a run can report what it made. */
-export async function shoot(page: Page, name: string, fullPage = true): Promise<string> {
+// Viewport by default. A full-page dashboard runs past 5000px, which is no use
+// as a screenshot: it is read as a strip rather than looked at as a screen.
+export async function shoot(page: Page, name: string, fullPage = false): Promise<string> {
     await settle(page);
     const file = path.join(SHOTS_DIR, `${name}.png`);
     await page.screenshot({ path: file, fullPage, animations: 'disabled', caret: 'hide' });
