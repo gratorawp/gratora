@@ -387,6 +387,9 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
             'BILLING.SUBSCRIPTION.CANCELLED',
             'BILLING.SUBSCRIPTION.EXPIRED'   => $this->handleSubscriptionEnded($eventId, $type, $resource),
             'PAYMENT.SALE.COMPLETED'    => $this->handleRenewalPaid($eventId, $type, $resource),
+            'PAYMENT.SALE.DENIED',
+            'BILLING.SUBSCRIPTION.PAYMENT.FAILED' => $this->handleRenewalFailed($eventId, $type, $resource),
+            'BILLING.SUBSCRIPTION.SUSPENDED'      => $this->handleSubscriptionSuspended($eventId, $type, $resource),
             default => new WebhookOutcome(
                 signature_ok: true,
                 external_id: $eventId,
@@ -709,6 +712,82 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
      *
      * @since 1.0.0
      */
+    /**
+     * A renewal PayPal could not collect.
+     *
+     * Without this a donor whose card dies is invisible: PayPal retries on its
+     * own schedule and gives up, while the plan still reads active, still
+     * counts toward MRR, and nobody is emailed. Stripe has recorded these since
+     * the beginning; PayPal simply had no route for the events.
+     *
+     * @param array<string,mixed> $resource
+     *
+     * @since 1.0.0
+     */
+    private function handleRenewalFailed(string $eventId, string $type, array $resource): WebhookOutcome
+    {
+        // PAYMENT.SALE.DENIED names the subscription on billing_agreement_id;
+        // BILLING.SUBSCRIPTION.PAYMENT.FAILED is the subscription itself.
+        $subId = (string) ($resource['billing_agreement_id'] ?? $resource['id'] ?? '');
+        $plan  = $subId !== '' ? $this->planRepo->findBySubscriptionId($this->id(), $subId) : null;
+        if (! $plan) {
+            return $this->unmatched($eventId, $type, 'subscription');
+        }
+
+        if ($reason = WebhookPaymentGuard::refuseToTouchPlan($plan, $this->id(), $this->verifiedIsTest)) {
+            return $this->refused($eventId, $type, $reason);
+        }
+
+        $this->planRepo->recordFailedRenewal($plan, $this->now());
+
+        // PayPal does not give a decline reason on these events, and inventing
+        // one reads to the donor as though we know something we do not.
+        $this->donationService->recordRecurringFailure($plan, null);
+
+        return new WebhookOutcome(
+            signature_ok: true,
+            external_id: $eventId,
+            event_type: $type,
+            handled: true,
+        );
+    }
+
+    /**
+     * PayPal suspended the subscription itself, which is where its dunning ends.
+     *
+     * Not a cancellation: PayPal can suspend and the donor can still fix their
+     * card, so the plan is marked past_due rather than closed. Left unhandled
+     * this was the quietest of the three, because nothing about the row changed
+     * while the money had already stopped.
+     *
+     * @param array<string,mixed> $sub
+     *
+     * @since 1.0.0
+     */
+    private function handleSubscriptionSuspended(string $eventId, string $type, array $sub): WebhookOutcome
+    {
+        $plan = $this->planRepo->findBySubscriptionId($this->id(), (string) ($sub['id'] ?? ''));
+        if (! $plan) {
+            return $this->unmatched($eventId, $type, 'subscription');
+        }
+
+        if ($reason = WebhookPaymentGuard::refuseToTouchPlan($plan, $this->id(), $this->verifiedIsTest)) {
+            return $this->refused($eventId, $type, $reason);
+        }
+
+        RecurringPlan::query()
+            ->where('id', (int) $plan->id)
+            ->where('status', 'cancelled', '<>')
+            ->update(['status' => 'past_due', 'updated_at' => $this->now()]);
+
+        return new WebhookOutcome(
+            signature_ok: true,
+            external_id: $eventId,
+            event_type: $type,
+            handled: true,
+        );
+    }
+
     private function handleRenewalPaid(string $eventId, string $type, array $sale): WebhookOutcome
     {
         $subId = (string) ($sale['billing_agreement_id'] ?? '');

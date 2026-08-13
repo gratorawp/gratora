@@ -550,6 +550,56 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
         $this->assertCount(1, $cancels, 'the gateway was actually asked to cancel');
     }
 
+    public function test_a_failed_renewal_is_recorded_and_announced(): void
+    {
+        $reference = $this->createRecurringDonation();
+        $this->recordSubscription($reference);
+
+        $failures = 0;
+        add_action('dono.recurring.renewal_failed', static function () use (&$failures): void { $failures++; });
+
+        $res = $this->postWebhook('PAYMENT.SALE.DENIED', [
+            'id'                   => 'SALE-DENIED-1',
+            'billing_agreement_id' => 'I-SUB-1',
+            'amount'               => ['total' => '25.00', 'currency' => 'USD'],
+        ]);
+
+        $this->assertSame(200, $res->get_status(), wp_json_encode($res->get_data()));
+
+        $plan = $this->plans()->findBySubscriptionId('paypal', 'I-SUB-1');
+        $this->assertSame(1, (int) $plan->failed_renewals_count, 'the failure is counted for dunning');
+        $this->assertSame(1, $failures, 'and announced, so the donor is emailed');
+    }
+
+    public function test_paypal_suspending_a_subscription_marks_it_past_due(): void
+    {
+        $reference = $this->createRecurringDonation();
+        $this->recordSubscription($reference);
+
+        // Where PayPal's own dunning ends. Not a cancellation: the donor can
+        // still fix their card, but the money has already stopped, so a row
+        // still reading active overstates MRR.
+        $res = $this->postWebhook('BILLING.SUBSCRIPTION.SUSPENDED', ['id' => 'I-SUB-1']);
+        $this->assertSame(200, $res->get_status(), wp_json_encode($res->get_data()));
+
+        $this->assertSame('past_due', $this->plans()->findBySubscriptionId('paypal', 'I-SUB-1')->status);
+    }
+
+    public function test_a_suspension_does_not_reopen_a_cancelled_plan(): void
+    {
+        $reference = $this->createRecurringDonation();
+        $this->recordSubscription($reference);
+
+        $this->postWebhook('BILLING.SUBSCRIPTION.CANCELLED', ['id' => 'I-SUB-1']);
+        $this->postWebhook('BILLING.SUBSCRIPTION.SUSPENDED', ['id' => 'I-SUB-1']);
+
+        $this->assertSame(
+            'cancelled',
+            $this->plans()->findBySubscriptionId('paypal', 'I-SUB-1')->status,
+            'cancelled is terminal; a late suspension must not walk it back'
+        );
+    }
+
     public function test_resuming_a_cancelled_subscription_is_not_reported_as_success(): void
     {
         $reference = $this->createRecurringDonation();
