@@ -39,6 +39,9 @@ final class DashboardController
                     'default' => 'none',
                 ],
                 'include' => ['type' => 'string'],
+                // Off by default, as on every other screen: the figures here
+                // are the ones an operator quotes, so test money is opt-in.
+                'include_test' => ['type' => 'boolean', 'default' => false],
             ],
         ]);
     }
@@ -69,17 +72,27 @@ final class DashboardController
             return false;
         };
 
-        $payload = ['range' => $range];
+        $includeTest = (bool) $request['include_test'];
 
-        if ($want('kpis'))             $payload['kpi']              = $this->metrics->kpi($range, $compare);
-        if ($want('revenue'))          $payload['revenue']          = $this->metrics->revenueSeries($range, $compare);
-        if ($want('active-campaigns')) $payload['active_campaigns'] = $this->metrics->activeCampaigns(6);
-        if ($want('top-campaigns'))    $payload['top_campaigns']    = $this->metrics->topCampaigns($range, 5);
-        if ($want('channel'))          $payload['by_channel']       = $this->metrics->byChannel($range);
-        if ($want('recurring'))        $payload['recurring']        = $this->metrics->recurring();
-        if ($want('today'))            $payload['today']            = $this->metrics->today();
-        if ($want('recent-activity'))  $payload['recent_activity']  = $this->metrics->recentActivity(8);
-        if ($want('attention'))        $payload['attention']        = $this->metrics->attention();
+        // Outside the $want() gates: a widget filter must never be able to drop
+        // the thing that explains why the numbers look the way they do.
+        $payload = [
+            'range' => $range,
+            'test'  => [
+                'includes_test' => $includeTest,
+                'hidden'        => $this->metrics->hiddenTestCount(),
+            ],
+        ];
+
+        if ($want('kpis'))             $payload['kpi']              = $this->metrics->kpi($range, $compare, $includeTest);
+        if ($want('revenue'))          $payload['revenue']          = $this->metrics->revenueSeries($range, $compare, $includeTest);
+        if ($want('active-campaigns')) $payload['active_campaigns'] = $this->metrics->activeCampaigns(6, $includeTest);
+        if ($want('top-campaigns'))    $payload['top_campaigns']    = $this->metrics->topCampaigns($range, 5, $includeTest);
+        if ($want('channel'))          $payload['by_channel']       = $this->metrics->byChannel($range, $includeTest);
+        if ($want('recurring'))        $payload['recurring']        = $this->metrics->recurring($includeTest);
+        if ($want('today'))            $payload['today']            = $this->metrics->today($includeTest);
+        if ($want('recent-activity'))  $payload['recent_activity']  = $this->metrics->recentActivity(8, $includeTest);
+        if ($want('attention'))        $payload['attention']        = $this->metrics->attention($includeTest);
 
         return new WP_REST_Response($payload, 200);
     }

@@ -50,6 +50,26 @@ final class DonationQueries
     }
 
     /**
+     * Donation history, with test rows admitted only when the operator asked.
+     *
+     * The kind filter stays on both branches: "show me the test data" must
+     * never quietly also mean "show me ticket orders", which are a purchase
+     * rather than a gift and belong out of donation reporting either way.
+     *
+     * @template T
+     * @param  T $q
+     * @return T
+     *
+     * @since 1.0.0
+     */
+    public static function donationRows($q, bool $includeTest)
+    {
+        return $includeTest
+            ? $q->where('kind', 'donation')
+            : self::donationsOnly($q);
+    }
+
+    /**
      * Rows whose base-currency value is unknown, so a total built on
      * netBaseExpr() is missing them.
      *

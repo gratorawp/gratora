@@ -261,10 +261,10 @@ final class DonationRepository
      *
      * @since 1.0.0
      */
-    public function aggregatePaidBetween(?string $from = null, ?string $to = null, ?int $campaignId = null): array
+    public function aggregatePaidBetween(?string $from = null, ?string $to = null, ?int $campaignId = null, bool $includeTest = false): array
     {
         $prefix = DB::getPrefix();
-        $row = $this->netPaidQuery($from, $to, $campaignId)
+        $row = $this->netPaidQuery($from, $to, $campaignId, $includeTest)
             ->selectRaw(
                 "COALESCE(SUM(COALESCE({$prefix}dono_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount,
                  COUNT(*) AS cnt,
@@ -284,10 +284,10 @@ final class DonationRepository
      *
      * @since 1.0.0
      */
-    public function dailyPaidBetween(string $from, string $to, ?int $campaignId = null): array
+    public function dailyPaidBetween(string $from, string $to, ?int $campaignId = null, bool $includeTest = false): array
     {
         $prefix = DB::getPrefix();
-        $rows = $this->netPaidQuery($from, $to, $campaignId)
+        $rows = $this->netPaidQuery($from, $to, $campaignId, $includeTest)
             ->selectRaw("DATE({$prefix}dono_donations.paid_at) AS day, COALESCE(SUM(COALESCE({$prefix}dono_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount, COUNT(*) AS cnt")
             ->groupByRaw("DATE({$prefix}dono_donations.paid_at)")
             ->getAll();
@@ -357,10 +357,10 @@ final class DonationRepository
      *
      * @since 1.0.0
      */
-    public function aggregatePaidByAttribution(?string $from = null, ?string $to = null, ?int $campaignId = null): array
+    public function aggregatePaidByAttribution(?string $from = null, ?string $to = null, ?int $campaignId = null, bool $includeTest = false): array
     {
         $prefix = DB::getPrefix();
-        $rows = $this->netPaidQuery($from, $to, $campaignId)
+        $rows = $this->netPaidQuery($from, $to, $campaignId, $includeTest)
             ->selectRaw("
                 JSON_UNQUOTE(JSON_EXTRACT(IF(JSON_VALID({$prefix}dono_donations.source_attribution), {$prefix}dono_donations.source_attribution, NULL), '$.utm_source')) AS utm_source,
                 JSON_UNQUOTE(JSON_EXTRACT(IF(JSON_VALID({$prefix}dono_donations.source_attribution), {$prefix}dono_donations.source_attribution, NULL), '$.utm_medium')) AS utm_medium,
@@ -386,10 +386,10 @@ final class DonationRepository
      *
      * @since 1.0.0
      */
-    public function topPaidCampaigns(?string $from = null, ?string $to = null, int $limit = 5): array
+    public function topPaidCampaigns(?string $from = null, ?string $to = null, int $limit = 5, bool $includeTest = false): array
     {
         $prefix = DB::getPrefix();
-        $rows = $this->netPaidQuery($from, $to, null)
+        $rows = $this->netPaidQuery($from, $to, null, $includeTest)
             ->selectRaw("{$prefix}dono_donations.campaign_id AS campaign_id, COALESCE(SUM(COALESCE({$prefix}dono_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount, COUNT(*) AS cnt")
             ->groupByRaw("{$prefix}dono_donations.campaign_id")
             ->orderByRaw('amount DESC')
@@ -430,11 +430,11 @@ final class DonationRepository
      *
      * @since 1.0.0
      */
-    public function dailyPaidByCampaignsBetween(array $campaignIds, string $from, string $to): array
+    public function dailyPaidByCampaignsBetween(array $campaignIds, string $from, string $to, bool $includeTest = false): array
     {
         if ($campaignIds === []) return [];
         $prefix = DB::getPrefix();
-        $rows = $this->netPaidQuery($from, $to, null)
+        $rows = $this->netPaidQuery($from, $to, null, $includeTest)
             ->whereIn('campaign_id', $campaignIds)
             ->selectRaw("{$prefix}dono_donations.campaign_id AS campaign_id, DATE({$prefix}dono_donations.paid_at) AS day, COALESCE(SUM(COALESCE({$prefix}dono_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount")
             ->groupByRaw("{$prefix}dono_donations.campaign_id, DATE({$prefix}dono_donations.paid_at)")
@@ -769,11 +769,15 @@ final class DonationRepository
      *
      * @since 1.0.0
      */
-    private function netPaidQuery(?string $from, ?string $to, ?int $campaignId): QueryBuilder
+    private function netPaidQuery(?string $from, ?string $to, ?int $campaignId, bool $includeTest = false): QueryBuilder
     {
-        // donationsOnly, not live: every caller below is donation reporting,
-        // and a ticket order is a purchase riding the same table.
-        $q = DonationQueries::donationsOnly(DB::table('dono_donations')->whereIn('status', ['paid', 'partial_refund']));
+        // donationRows, not live: every caller below is donation reporting,
+        // and a ticket order is a purchase riding the same table. The flag
+        // only ever admits test rows; it never admits orders.
+        $q = DonationQueries::donationRows(
+            DB::table('dono_donations')->whereIn('status', ['paid', 'partial_refund']),
+            $includeTest
+        );
         if ($from !== null)       $q = $q->where('paid_at', $from . ' 00:00:00', '>=');
         if ($to   !== null)       $q = $q->where('paid_at', $to   . ' 23:59:59', '<=');
         if ($campaignId !== null) $q = $q->where('campaign_id', $campaignId);

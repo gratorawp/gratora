@@ -14,6 +14,7 @@ use Dono\Donations\Refund;
 use Dono\Donors\Donor;
 use Dono\Foundation\Helpers\Money;
 use Dono\Foundation\Time\Clock;
+use Dono\Recurring\RecurringPlan;
 use Dono\Recurring\RecurringPlanRepository;
 use Dono\Vendor\Queryable\DB;
 
@@ -36,17 +37,17 @@ final class DashboardMetricsService
      * @return array<string,mixed>
      * @since 1.0.0
      */
-    public function kpi(string $range = 'last-30', string $compare = 'none'): array
+    public function kpi(string $range = 'last-30', string $compare = 'none', bool $includeTest = false): array
     {
-        $bounds = $this->rangeBounds($range);
-        $current = $this->aggregateInSql($bounds, $range === 'all-time');
+        $bounds = $this->rangeBounds($range, $includeTest);
+        $current = $this->aggregateInSql($bounds, $range === 'all-time', $includeTest);
 
         if ($range === 'all-time' || $compare === 'none') {
             return $current + ['comparison' => null];
         }
 
         $prev = $this->previousRangeBounds($range, $compare);
-        $previous = $this->aggregateInSql($prev, false);
+        $previous = $this->aggregateInSql($prev, false, $includeTest);
 
         $changes = [];
         foreach (['amount_raised_cents', 'donations_count', 'donors_count', 'avg_donation_cents'] as $key) {
@@ -72,16 +73,17 @@ final class DashboardMetricsService
      * }
      * @since 1.0.0
      */
-    public function revenueSeries(string $range = 'last-30', string $compare = 'none'): array
+    public function revenueSeries(string $range = 'last-30', string $compare = 'none', bool $includeTest = false): array
     {
-        $bounds = $this->rangeBounds($range);
-        $series = $this->seriesBetween($bounds, $range === 'all-time');
+        $bounds = $this->rangeBounds($range, $includeTest);
+        $series = $this->seriesBetween($bounds, $range === 'all-time', $includeTest);
 
         $previous = null;
         if ($range !== 'all-time' && $compare !== 'none') {
             $previous = $this->seriesBetween(
                 $this->previousRangeBounds($range, $compare),
-                false
+                false,
+                $includeTest
             );
         }
 
@@ -94,11 +96,11 @@ final class DashboardMetricsService
      * @return array{donations_count:int,amount_raised_cents:int,refunds_count:int,notes_count:int,currency:string}
      * @since 1.0.0
      */
-    public function today(): array
+    public function today(bool $includeTest = false): array
     {
         $since = $this->clock->now()->modify('-24 hours')->format('Y-m-d H:i:s');
 
-        $rows = DonationQueries::live(Donation::query())
+        $rows = DonationQueries::donationRows(Donation::query(), $includeTest)
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('paid_at', $since, '>=')
             ->getAll();
@@ -132,7 +134,7 @@ final class DashboardMetricsService
 
         // Both full and partial refunds stamp refunded_at; counting only
         // 'refunded' misses partial refunds issued in the window.
-        $refunds = DonationQueries::live(Donation::query())
+        $refunds = DonationQueries::donationRows(Donation::query(), $includeTest)
             ->whereIn('status', ['refunded', 'partial_refund'])
             ->where('refunded_at', $since, '>=')
             ->count();
@@ -156,9 +158,9 @@ final class DashboardMetricsService
      * }>
      * @since 1.0.0
      */
-    public function recentActivity(int $limit = 8): array
+    public function recentActivity(int $limit = 8, bool $includeTest = false): array
     {
-        $rows = DonationQueries::live(Donation::query())
+        $rows = DonationQueries::donationRows(Donation::query(), $includeTest)
             ->whereIn('status', ['paid', 'partial_refund'])
             ->orderBy('paid_at', 'DESC')
             ->limit($limit)
@@ -213,9 +215,9 @@ final class DashboardMetricsService
      * @param array{0:string,1:string} $bounds
      * @since 1.0.0
      */
-    private function seriesBetween(array $bounds, bool $unbounded): array
+    private function seriesBetween(array $bounds, bool $unbounded, bool $includeTest = false): array
     {
-        $rows = $this->donations->dailyPaidBetween($bounds[0], $bounds[1]);
+        $rows = $this->donations->dailyPaidBetween($bounds[0], $bounds[1], null, $includeTest);
 
         $byDate = [];
         foreach ($rows as $r) {
@@ -298,7 +300,7 @@ final class DashboardMetricsService
      * }>
      * @since 1.0.0
      */
-    public function attention(): array
+    public function attention(bool $includeTest = false): array
     {
         $items = [];
 
@@ -306,7 +308,7 @@ final class DashboardMetricsService
         $since7d  = $this->clock->now()->modify('-7 days')->format('Y-m-d H:i:s');
 
         // 1. Failed donations in last 24h.
-        $failed = (int) DonationQueries::live(Donation::query())
+        $failed = (int) DonationQueries::donationRows(Donation::query(), false)
             ->where('status', 'failed')
             ->where('updated_at', $since24h, '>=')
             ->count();
@@ -322,6 +324,34 @@ final class DashboardMetricsService
                 'action_label' => __('Review', 'dono-fundraising-platform'),
                 'action_href'  => admin_url('admin.php?page=dono-donations&status=failed'),
                 'count'        => $failed,
+            ];
+        }
+
+        // Test failures get their own item and ignore the toggle. A gateway
+        // misconfigured during a rehearsal is exactly what a rehearsal is for
+        // finding, and it would go unseen behind a switch that is off by
+        // default. Separate key because dismissal is keyed: one must not
+        // silence the other, and the live count has to stay quotable.
+        $failedTest = (int) Donation::query()
+            ->where('is_test', 1)
+            ->where('kind', 'donation')
+            ->where('status', 'failed')
+            ->where('updated_at', $since24h, '>=')
+            ->count();
+        if ($failedTest > 0) {
+            $items[] = [
+                'key'   => 'failed-test-donations',
+                'tone'  => 'error',
+                'title' => sprintf(
+                    /* translators: %d: failed test donations count */
+                    _n('%d test donation failed in the last 24 hours.', '%d test donations failed in the last 24 hours.', $failedTest, 'dono-fundraising-platform'),
+                    $failedTest
+                ),
+                'action_label' => __('Review', 'dono-fundraising-platform'),
+                // The live link hides test rows, so it would land on an empty
+                // screen.
+                'action_href'  => admin_url('admin.php?page=dono-donations&status=failed&include_test=1'),
+                'count'        => $failedTest,
             ];
         }
 
@@ -379,8 +409,9 @@ final class DashboardMetricsService
         // Counted in SQL over the whole window. The title counts distinct
         // donors, so one donor leaving three notes is one donor.
         // whereRaw emits no AND connector, so it has to open the chain.
-        $noteRows = DonationQueries::live(
-            DB::table('dono_donations')->whereRaw("TRIM(COALESCE(note_to_org, '')) <> ''")
+        $noteRows = DonationQueries::donationRows(
+            DB::table('dono_donations')->whereRaw("TRIM(COALESCE(note_to_org, '')) <> ''"),
+            $includeTest
         )
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('paid_at', $since7d, '>=')
@@ -394,8 +425,9 @@ final class DashboardMetricsService
         // several mean the donor list.
         $noteDonors = [];
         if ($noteCount > 0 && $donorCount === 1) {
-            $one = DonationQueries::live(
-                DB::table('dono_donations')->whereRaw("TRIM(COALESCE(note_to_org, '')) <> ''")
+            $one = DonationQueries::donationRows(
+                DB::table('dono_donations')->whereRaw("TRIM(COALESCE(note_to_org, '')) <> ''"),
+                $includeTest
             )
                 ->whereIn('status', ['paid', 'partial_refund'])
                 ->where('paid_at', $since7d, '>=')
@@ -463,14 +495,16 @@ final class DashboardMetricsService
      * @return array<array{channel:string,amount_cents:int,donations_count:int}>
      * @since 1.0.0
      */
-    public function byChannel(string $range = 'last-30'): array
+    public function byChannel(string $range = 'last-30', bool $includeTest = false): array
     {
-        $bounds = $this->rangeBounds($range);
+        $bounds = $this->rangeBounds($range, $includeTest);
         $unbounded = $range === 'all-time';
 
         $tuples = $this->donations->aggregatePaidByAttribution(
             $unbounded ? null : $bounds[0],
             $unbounded ? null : $bounds[1],
+            null,
+            $includeTest,
         );
 
         $byChannel = [];
@@ -506,15 +540,16 @@ final class DashboardMetricsService
      * @return array<array<string,mixed>>
      * @since 1.0.0
      */
-    public function topCampaigns(string $range = 'last-30', int $limit = 5): array
+    public function topCampaigns(string $range = 'last-30', int $limit = 5, bool $includeTest = false): array
     {
-        $bounds    = $this->rangeBounds($range);
+        $bounds    = $this->rangeBounds($range, $includeTest);
         $unbounded = $range === 'all-time';
 
         $tops = $this->donations->topPaidCampaigns(
             $unbounded ? null : $bounds[0],
             $unbounded ? null : $bounds[1],
             $limit,
+            $includeTest,
         );
         if (! $tops) return [];
 
@@ -529,6 +564,7 @@ final class DashboardMetricsService
             $campaignIds,
             $bounds[0],
             $bounds[1],
+            $includeTest,
         );
 
         $cursorStart = new DateTimeImmutable($bounds[0]);
@@ -574,11 +610,11 @@ final class DashboardMetricsService
      * }
      * @since 1.0.0
      */
-    public function recurring(): array
+    public function recurring(bool $includeTest = false): array
     {
         // Single SQL roll-up over dono_recurring_plans: monthly-normalized
         // amounts, bounded memory, currency-correct via the base column.
-        $stats = $this->recurringPlans->recurringStats($this->clock->now()->format('Y-m-d'));
+        $stats = $this->recurringPlans->recurringStats($this->clock->now()->format('Y-m-d'), $includeTest);
         $currency = strtoupper(Money::defaultCurrency());
 
         return [
@@ -591,12 +627,35 @@ final class DashboardMetricsService
     }
 
     /**
+     * How much is being held back while the toggle is off.
+     *
+     * A dashboard that shows zero without saying why is indistinguishable from
+     * a broken one, which is the whole complaint this answers.
+     *
+     * @return array{donations:int,plans:int}
+     *
+     * @since 1.0.0
+     */
+    public function hiddenTestCount(): array
+    {
+        $donations = (int) Donation::query()
+            ->where('is_test', 1)
+            ->where('kind', 'donation')
+            ->whereIn('status', ['paid', 'partial_refund'])
+            ->count();
+
+        $plans = (int) RecurringPlan::query()->where('is_test', 1)->count();
+
+        return ['donations' => $donations, 'plans' => $plans];
+    }
+
+    /**
      * Published campaigns ordered by raised, newest tiebreaker.
      *
      * @return array<int, array<string,mixed>>
      * @since 1.0.0
      */
-    public function activeCampaigns(int $limit = 6): array
+    public function activeCampaigns(int $limit = 6, bool $includeTest = false): array
     {
         $rows = Campaign::query()
             ->where('status', 'published')
@@ -609,9 +668,12 @@ final class DashboardMetricsService
         // query so the widget does not make N round-trips per render.
         $campaignIds = array_map(static fn ($c) => (int) $c->id, $rows);
         $lastByCampaign = [];
-        $lastRows = DonationQueries::live(DB::table('dono_donations')
-            ->whereIn('status', ['paid', 'partial_refund'])
-            ->whereIn('campaign_id', $campaignIds))
+        $lastRows = DonationQueries::donationRows(
+            DB::table('dono_donations')
+                ->whereIn('status', ['paid', 'partial_refund'])
+                ->whereIn('campaign_id', $campaignIds),
+            $includeTest
+        )
             ->selectRaw('campaign_id, MAX(paid_at) AS last_paid')
             ->groupBy('campaign_id')
             ->getAll();
@@ -619,8 +681,32 @@ final class DashboardMetricsService
             $lastByCampaign[(int) ($r['campaign_id'] ?? 0)] = $r['last_paid'] ?? null;
         }
 
+        // The stored rollup is live-only and is read by the public progress bar,
+        // the campaign grid and the bindings, so it is never widened. When the
+        // operator asks to see test data the figures are recomputed here, at
+        // read time, and overridden in the emitted rows only.
+        $testTotals = [];
+        if ($includeTest) {
+            $totalRows = DonationQueries::donationRows(
+                DB::table('dono_donations')
+                    ->whereIn('status', ['paid', 'partial_refund'])
+                    ->whereIn('campaign_id', $campaignIds),
+                true
+            )
+                ->selectRaw(
+                    'campaign_id, COALESCE(SUM(' . DonationQueries::netBaseExpr() . '),0) AS raised, '
+                    . 'COUNT(*) AS cnt, COUNT(DISTINCT donor_id) AS donors'
+                )
+                ->groupBy('campaign_id')
+                ->getAll();
+            foreach ($totalRows as $r) {
+                $testTotals[(int) ($r['campaign_id'] ?? 0)] = $r;
+            }
+        }
+
         $out = [];
         foreach ($rows as $c) {
+            $totals = $testTotals[(int) $c->id] ?? null;
             $out[] = [
                 'id'                 => (int) $c->id,
                 'title'              => (string) $c->title,
@@ -630,12 +716,19 @@ final class DashboardMetricsService
                 'goal_type'          => $c->goal_type ?: 'amount',
                 'goal_cents'         => $c->goal_cents,
                 'goal_count'         => $c->goal_count,
-                'raised_cents'       => (int) $c->raised_cents,
-                'donations_count'    => (int) $c->donations_count,
-                'donors_count'       => (int) $c->donors_count,
+                'raised_cents'       => (int) ($totals['raised'] ?? $c->raised_cents),
+                'donations_count'    => (int) ($totals['cnt']    ?? $c->donations_count),
+                'donors_count'       => (int) ($totals['donors'] ?? $c->donors_count),
                 'last_donation_at'   => $lastByCampaign[(int) $c->id] ?? null,
             ];
         }
+
+        // Row selection stayed on the indexed stored column, so the recomputed
+        // figures have to be re-ordered here.
+        if ($includeTest) {
+            usort($out, static fn (array $a, array $b): int => $b['raised_cents'] <=> $a['raised_cents']);
+        }
+
         return $out;
     }
 
@@ -647,12 +740,12 @@ final class DashboardMetricsService
      * @param array{0:string,1:string} $bounds
      * @since 1.0.0
      */
-    private function aggregateInSql(array $bounds, bool $unbounded): array
+    private function aggregateInSql(array $bounds, bool $unbounded, bool $includeTest = false): array
     {
         $from = $unbounded ? null : $bounds[0];
         $to   = $unbounded ? null : $bounds[1];
 
-        $agg = $this->donations->aggregatePaidBetween($from, $to);
+        $agg = $this->donations->aggregatePaidBetween($from, $to, null, $includeTest);
         $count = $agg['donations_count'];
         $amount = $agg['amount_cents'];
 
@@ -687,7 +780,7 @@ final class DashboardMetricsService
      *
      * @since 1.0.0
      */
-    private function rangeBounds(string $range): array
+    private function rangeBounds(string $range, bool $includeTest = false): array
     {
         $today = $this->clock->now()->format('Y-m-d');
         return match ($range) {
@@ -695,17 +788,21 @@ final class DashboardMetricsService
             'last-7'   => [$this->daysAgo(6),  $today],
             'last-30'  => [$this->daysAgo(29), $today],
             'last-90'  => [$this->daysAgo(89), $today],
-            'all-time' => [$this->earliestPaidDate() ?? $this->daysAgo(365), $today],
+            'all-time' => [$this->earliestPaidDate($includeTest) ?? $this->daysAgo(365), $today],
             default    => [$this->daysAgo(29), $today],
         };
     }
 
     /** @since 1.0.0 */
-    private function earliestPaidDate(): ?string
+    private function earliestPaidDate(bool $includeTest = false): ?string
     {
-        $row = DB::table('dono_donations')
-            ->whereIn('status', ['paid', 'partial_refund'])
-            ->where('is_test', 0)
+        // Delegated, not restated: an inline predicate here drifted from the
+        // consumers, which all apply the kind filter too, so a live ticket
+        // order could start an all-time chart before the first donation.
+        $row = DonationQueries::donationRows(
+            DB::table('dono_donations')->whereIn('status', ['paid', 'partial_refund']),
+            $includeTest
+        )
             ->selectRaw('MIN(paid_at) AS first_paid')
             ->get();
         $val = $row['first_paid'] ?? null;
