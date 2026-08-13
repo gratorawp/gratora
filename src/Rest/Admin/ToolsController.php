@@ -464,10 +464,23 @@ final class ToolsController
         };
         add_action('wp_mail_failed', $capture);
 
+        // Which transport actually carried it. "Sent" is not the useful answer:
+        // a message handed to unauthenticated PHP mail is accepted here and
+        // rejected later by any mailbox that checks SPF or DKIM, which is the
+        // usual shape of "the test worked but no donor got a receipt".
+        $transport = '';
+        $host      = '';
+        $inspect   = static function ($phpmailer) use (&$transport, &$host): void {
+            $transport = (string) ($phpmailer->Mailer ?? '');
+            $host      = (string) ($phpmailer->Host ?? '');
+        };
+        add_action('phpmailer_init', $inspect, PHP_INT_MAX);
+
         try {
             $ok = $this->mailer->sendRaw($to, $subject, $body, ['html' => true]);
         } finally {
             remove_action('wp_mail_failed', $capture);
+            remove_action('phpmailer_init', $inspect, PHP_INT_MAX);
         }
 
         if (! $ok) {
@@ -484,7 +497,17 @@ final class ToolsController
             );
         }
 
-        return new WP_REST_Response(['ok' => true, 'to' => $to], 200);
+        return new WP_REST_Response([
+            'ok'        => true,
+            'to'        => $to,
+            'transport' => $transport,
+            'host'      => $host,
+            // Three states, not two. A mail plugin can short-circuit wp_mail
+            // before PHPMailer is built, leaving the transport unknown, and
+            // reporting unknown as unauthenticated would be the same false
+            // claim in the other direction.
+            'authenticated' => $transport === '' ? null : $transport !== 'mail',
+        ], 200);
     }
 
     /**

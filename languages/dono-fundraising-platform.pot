@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-13T10:49:44+00:00\n"
+"POT-Creation-Date: 2026-08-13T11:04:32+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: dono-fundraising-platform\n"
@@ -506,7 +506,7 @@ msgid "Dono Donor Portal"
 msgstr ""
 
 #: src/Admin/Pages/CampaignsPage.php:32
-#: src/Rest/Admin/ToolsController.php:829
+#: src/Rest/Admin/ToolsController.php:852
 #: assets/admin/campaigns/Detail.jsx:378
 #: assets/admin/campaigns/List.jsx:291
 #: assets/admin/campaigns/List.jsx:295
@@ -545,7 +545,7 @@ msgstr ""
 #: src/Admin/Pages/DonorsPage.php:32
 #: src/Campaigns/Blocks/CampaignBindings.php:55
 #: src/Campaigns/CampaignStatMetrics.php:39
-#: src/Rest/Admin/ToolsController.php:827
+#: src/Rest/Admin/ToolsController.php:850
 #: assets/admin/campaign-blocks/index.jsx:329
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:21
 #: assets/admin/campaigns/Detail.jsx:678
@@ -563,7 +563,7 @@ msgid "Donors"
 msgstr ""
 
 #: src/Admin/Pages/FormsPage.php:69
-#: src/Rest/Admin/ToolsController.php:830
+#: src/Rest/Admin/ToolsController.php:853
 #: assets/admin/campaigns/Detail.jsx:428
 #: assets/admin/campaigns/Detail.jsx:1352
 #: assets/admin/campaigns/List.jsx:160
@@ -571,7 +571,7 @@ msgid "Forms"
 msgstr ""
 
 #: src/Admin/Pages/FundsPage.php:31
-#: src/Rest/Admin/ToolsController.php:828
+#: src/Rest/Admin/ToolsController.php:851
 #: assets/admin/funds/List.jsx:344
 #: assets/admin/funds/List.jsx:348
 msgid "Funds"
@@ -669,7 +669,7 @@ msgstr ""
 #: assets/admin/forms/Editor.jsx:662
 #: assets/admin/funds/List.jsx:480
 #: assets/admin/funds/List.jsx:631
-#: assets/admin/settings/panels/EmailPanel.jsx:242
+#: assets/admin/settings/panels/EmailPanel.jsx:248
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:178
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:231
 #: assets/admin/settings/panels/StripeKeysCard.jsx:142
@@ -3990,36 +3990,36 @@ msgid "Sent at %1$s from %2$s"
 msgstr ""
 
 #. translators: %s: the mail server's own error message.
-#: src/Rest/Admin/ToolsController.php:479
+#: src/Rest/Admin/ToolsController.php:492
 #, php-format
 msgid "The mail server refused it: %s"
 msgstr ""
 
-#: src/Rest/Admin/ToolsController.php:482
+#: src/Rest/Admin/ToolsController.php:495
 msgid "wp_mail() returned false and reported no reason. The site most likely has no mail transport configured: install an SMTP plugin or check your host's mail logs."
 msgstr ""
 
-#: src/Rest/Admin/ToolsController.php:670
-#: src/Rest/Admin/ToolsController.php:685
+#: src/Rest/Admin/ToolsController.php:693
+#: src/Rest/Admin/ToolsController.php:708
 msgid "That file is empty."
 msgstr ""
 
-#: src/Rest/Admin/ToolsController.php:724
+#: src/Rest/Admin/ToolsController.php:747
 msgid "No settings payload found."
 msgstr ""
 
-#: src/Rest/Admin/ToolsController.php:790
+#: src/Rest/Admin/ToolsController.php:813
 #: src/Rest/Portal/PortalController.php:1407
 msgid "Type DELETE to confirm."
 msgstr ""
 
-#: src/Rest/Admin/ToolsController.php:825
+#: src/Rest/Admin/ToolsController.php:848
 #: assets/admin/tools/tabs/ExportTab.jsx:307
 #: assets/admin/tools/tabs/MaintenanceTab.jsx:19
 msgid "Everything"
 msgstr ""
 
-#: src/Rest/Admin/ToolsController.php:826
+#: src/Rest/Admin/ToolsController.php:849
 msgid "Currency conversions"
 msgstr ""
 
@@ -5390,8 +5390,8 @@ msgstr ""
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:358
 #: assets/admin/campaigns/Detail.jsx:1254
 #: assets/admin/funds/List.jsx:303
-#: assets/admin/settings/panels/EmailPanel.jsx:149
-#: assets/admin/settings/panels/EmailPanel.jsx:263
+#: assets/admin/settings/panels/EmailPanel.jsx:155
+#: assets/admin/settings/panels/EmailPanel.jsx:269
 msgid "Edit"
 msgstr ""
 
@@ -9963,7 +9963,7 @@ msgstr ""
 
 #: assets/admin/forms/Editor.jsx:764
 #: assets/admin/settings/panels/CurrencyPanel.jsx:313
-#: assets/admin/settings/panels/EmailPanel.jsx:273
+#: assets/admin/settings/panels/EmailPanel.jsx:279
 #: assets/admin/tools/tabs/CsvImportCard.jsx:213
 msgid "Preview"
 msgstr ""
@@ -10999,141 +10999,145 @@ msgid "Defaults to your WordPress site language."
 msgstr ""
 
 #. translators: %s: recipient address
-#: assets/admin/settings/panels/EmailPanel.jsx:35
+#: assets/admin/settings/panels/EmailPanel.jsx:40
 #, js-format
-msgid "Test email sent to %s. Check the inbox + spam folder."
+msgid "Test email sent to %s. Check the inbox and the spam folder."
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:36
+#: assets/admin/settings/panels/EmailPanel.jsx:41
 msgid "the recipient"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:42
+#: assets/admin/settings/panels/EmailPanel.jsx:43
+msgid "It went out over PHP mail, which does not authenticate your domain. Gmail and Outlook reject unauthenticated mail outright, so this can be accepted here and still never arrive."
+msgstr ""
+
+#: assets/admin/settings/panels/EmailPanel.jsx:49
 msgid "Send failed."
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:52
+#: assets/admin/settings/panels/EmailPanel.jsx:59
 msgid "Sender identity"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:56
+#: assets/admin/settings/panels/EmailPanel.jsx:63
 msgid "From name"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:57
+#: assets/admin/settings/panels/EmailPanel.jsx:64
 msgid "Shown as the sender in the donor inbox."
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:62
+#: assets/admin/settings/panels/EmailPanel.jsx:69
 msgid "From email"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:63
+#: assets/admin/settings/panels/EmailPanel.jsx:70
 msgid "Use an address on a domain you control."
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:68
+#: assets/admin/settings/panels/EmailPanel.jsx:75
 msgid "Reply-to"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:69
+#: assets/admin/settings/panels/EmailPanel.jsx:76
 msgid "Where donor replies arrive. Defaults to From email."
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:74
+#: assets/admin/settings/panels/EmailPanel.jsx:81
 msgid "BCC me on every donation receipt"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:75
+#: assets/admin/settings/panels/EmailPanel.jsx:82
 msgid "Sends a copy to the admin email."
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:82
+#: assets/admin/settings/panels/EmailPanel.jsx:89
 msgid "Send a test email"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:83
+#: assets/admin/settings/panels/EmailPanel.jsx:90
 msgid "Checks that your site can hand a message to its mail server. Arriving is a separate question: a message accepted here can still be rejected later by the recipient. Uses your current user email if you leave the recipient blank."
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:85
+#: assets/admin/settings/panels/EmailPanel.jsx:92
 msgid "Recipient"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:91
+#: assets/admin/settings/panels/EmailPanel.jsx:98
 msgid "Leave blank to send to your WP user email"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:96
+#: assets/admin/settings/panels/EmailPanel.jsx:103
 #: assets/donor-portal/index.jsx:563
 msgid "Sending…"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:96
+#: assets/admin/settings/panels/EmailPanel.jsx:103
 msgid "Send test email"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:112
+#: assets/admin/settings/panels/EmailPanel.jsx:118
 msgid "If test emails arrive but donors report nothing, the cause is almost always authentication rather than Dono. Mailboxes such as Gmail reject mail that is not signed for your domain, and PHP mail on shared hosting is not. An SMTP plugin pointed at an authenticated provider fixes it for every email your site sends."
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:115
+#: assets/admin/settings/panels/EmailPanel.jsx:121
 msgid "SMTP plugins on WordPress.org"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:121
+#: assets/admin/settings/panels/EmailPanel.jsx:127
 msgid "Donor emails"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:122
+#: assets/admin/settings/panels/EmailPanel.jsx:128
 msgid "Sent to donors automatically by Dono"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:123
+#: assets/admin/settings/panels/EmailPanel.jsx:129
 msgid "Click a row to edit"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:143
+#: assets/admin/settings/panels/EmailPanel.jsx:149
 msgid "(enabled)"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:143
+#: assets/admin/settings/panels/EmailPanel.jsx:149
 msgid "(disabled)"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:243
+#: assets/admin/settings/panels/EmailPanel.jsx:249
 msgid "Done"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:281
+#: assets/admin/settings/panels/EmailPanel.jsx:287
 msgid "Subject:"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:284
+#: assets/admin/settings/panels/EmailPanel.jsx:290
 msgid "(no subject)"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:286
+#: assets/admin/settings/panels/EmailPanel.jsx:292
 msgid "To:"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:293
+#: assets/admin/settings/panels/EmailPanel.jsx:299
 msgid "Send this email"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:294
+#: assets/admin/settings/panels/EmailPanel.jsx:300
 msgid "Disable to skip this notification entirely."
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:299
+#: assets/admin/settings/panels/EmailPanel.jsx:305
 msgid "Subject"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:309
+#: assets/admin/settings/panels/EmailPanel.jsx:315
 msgid "Body"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:310
+#: assets/admin/settings/panels/EmailPanel.jsx:316
 msgid "Plain text. Merge tags expand at send time."
 msgstr ""
 

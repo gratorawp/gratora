@@ -3,6 +3,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { __, sprintf } from '@wordpress/i18n';
 
 import Card from '../../_shared/components/Card';
+import Notice from '../../_shared/components/Notice';
 import Dialog from '../../_shared/components/Dialog';
 import FormRow from '../../_shared/components/FormRow';
 import Btn from '../../_shared/components/Btn';
@@ -28,13 +29,19 @@ export default function EmailPanel( { s } ) {
                 method: 'POST',
                 data,
             } );
+            // Handing off is not arriving, and the difference is the transport.
+            // Saying only "sent" is what let a green result sit over receipts
+            // that every mailbox was rejecting.
+            const unauthenticated = res?.authenticated === false;
             setTestNotice( {
-                type: 'success',
+                type: unauthenticated ? 'warning' : 'success',
                 text: sprintf(
                     /* translators: %s: recipient address */
-                    __( 'Test email sent to %s. Check the inbox + spam folder.', 'dono-fundraising-platform' ),
+                    __( 'Test email sent to %s. Check the inbox and the spam folder.', 'dono-fundraising-platform' ),
                     res?.to || __( 'the recipient', 'dono-fundraising-platform' )
-                ),
+                ) + ( unauthenticated
+                    ? ' ' + __( 'It went out over PHP mail, which does not authenticate your domain. Gmail and Outlook reject unauthenticated mail outright, so this can be accepted here and still never arrive.', 'dono-fundraising-platform' )
+                    : '' ),
             } );
         } catch ( err ) {
             setTestNotice( {
@@ -97,11 +104,10 @@ export default function EmailPanel( { s } ) {
                     </Btn>
                 </div>
                 { testNotice && (
-                    <div
-                        className={ `dono-advanced-notice dono-advanced-notice--${ testNotice.type }` }
-                        style={ { marginTop: 12 } }
-                    >
-                        { testNotice.text }
+                    <div style={ { marginTop: 12 } }>
+                        <Notice status={ testNotice.type } isDismissible={ false }>
+                            { testNotice.text }
+                        </Notice>
                     </div>
                 ) }
                 { /* Every self-hosted site on shared hosting meets this wall, and

@@ -60,6 +60,33 @@ final class TestEmailDiagnosticTest extends IntegrationTestCase
         $this->assertStringContainsString('no mail transport', (string) ($data['message'] ?? ''));
     }
 
+    public function test_the_result_names_the_transport_that_carried_it(): void
+    {
+        // "Sent" is the answer that misled: PHP mail() accepts a message that
+        // any SPF-checking mailbox will reject later. The operator has to be
+        // able to see, before a donor complains, that nothing authenticated it.
+        $res = $this->send();
+
+        $this->assertSame(200, $res->get_status());
+        $data = (array) $res->get_data();
+
+        $this->assertSame('mail', $data['transport'], 'a stock site sends over PHP mail()');
+        $this->assertFalse($data['authenticated']);
+    }
+
+    public function test_an_unknown_transport_is_not_called_unauthenticated(): void
+    {
+        // A mail plugin that short-circuits wp_mail never builds PHPMailer, so
+        // there is nothing to inspect. Saying "unauthenticated" there would be
+        // a false alarm on a correctly configured site.
+        add_filter('pre_wp_mail', static fn () => true);
+
+        $data = (array) $this->send()->get_data();
+
+        $this->assertSame('', $data['transport']);
+        $this->assertNull($data['authenticated'], 'unknown is its own answer');
+    }
+
     public function test_a_working_transport_reports_success(): void
     {
         add_filter('pre_wp_mail', static fn () => true);
