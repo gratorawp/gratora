@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-13T07:32:38+00:00\n"
+"POT-Creation-Date: 2026-08-13T07:48:12+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: dono-fundraising-platform\n"
@@ -1005,7 +1005,7 @@ msgstr ""
 #: assets/admin/campaign-blocks/index.jsx:742
 #: assets/admin/campaign-blocks/index.jsx:802
 #: assets/admin/campaigns/Detail.jsx:723
-#: assets/admin/dashboard/Dashboard.jsx:142
+#: assets/admin/dashboard/Dashboard.jsx:143
 msgid "Recent donations"
 msgstr ""
 
@@ -3461,7 +3461,7 @@ msgstr ""
 
 #: src/Receipts/resources/views/revenue-report.php:53
 #: assets/admin/campaigns/Detail.jsx:690
-#: assets/admin/dashboard/Dashboard.jsx:114
+#: assets/admin/dashboard/Dashboard.jsx:115
 msgid "Revenue"
 msgstr ""
 
@@ -5582,7 +5582,7 @@ msgid "Could not load campaign metrics."
 msgstr ""
 
 #: assets/admin/campaigns/Detail.jsx:664
-#: assets/admin/dashboard/Dashboard.jsx:104
+#: assets/admin/dashboard/Dashboard.jsx:105
 msgid "Key metrics"
 msgstr ""
 
@@ -6343,75 +6343,75 @@ msgstr ""
 msgid "Dono: New campaign"
 msgstr ""
 
-#: assets/admin/dashboard/Dashboard.jsx:99
+#: assets/admin/dashboard/Dashboard.jsx:100
 msgid "Activity (last 24h)"
 msgstr ""
 
-#: assets/admin/dashboard/Dashboard.jsx:110
+#: assets/admin/dashboard/Dashboard.jsx:111
 #: assets/admin/subscriptions/List.jsx:194
 msgid "Needs attention"
 msgstr ""
 
-#: assets/admin/dashboard/Dashboard.jsx:126
+#: assets/admin/dashboard/Dashboard.jsx:127
 msgid "Active campaigns"
 msgstr ""
 
-#: assets/admin/dashboard/Dashboard.jsx:130
+#: assets/admin/dashboard/Dashboard.jsx:131
 #: assets/admin/donors/Insights.jsx:441
 msgid "Recurring revenue"
 msgstr ""
 
-#: assets/admin/dashboard/Dashboard.jsx:134
+#: assets/admin/dashboard/Dashboard.jsx:135
 msgid "Top campaigns"
 msgstr ""
 
-#: assets/admin/dashboard/Dashboard.jsx:138
+#: assets/admin/dashboard/Dashboard.jsx:139
 msgid "Channels"
 msgstr ""
 
-#: assets/admin/dashboard/Dashboard.jsx:146
+#: assets/admin/dashboard/Dashboard.jsx:147
 msgid "Quick actions"
 msgstr ""
 
-#: assets/admin/dashboard/Dashboard.jsx:155
+#: assets/admin/dashboard/Dashboard.jsx:156
 msgid "Dashboard"
 msgstr ""
 
 #. translators: %d: number of test records not counted.
-#: assets/admin/dashboard/Dashboard.jsx:181
+#: assets/admin/dashboard/Dashboard.jsx:182
 #, js-format
 msgid "%d test record is not counted here."
 msgid_plural "%d test records are not counted here."
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/dashboard/Dashboard.jsx:191
+#: assets/admin/dashboard/Dashboard.jsx:192
 #: assets/admin/donations/List.jsx:583
 #: assets/admin/subscriptions/List.jsx:816
 msgid "Show them"
 msgstr ""
 
-#: assets/admin/dashboard/Dashboard.jsx:198
+#: assets/admin/dashboard/Dashboard.jsx:199
 msgid "These figures include test records. They contain money that was never actually taken, so they cannot be quoted as income."
 msgstr ""
 
-#: assets/admin/dashboard/Dashboard.jsx:201
+#: assets/admin/dashboard/Dashboard.jsx:202
 msgid "Hide them"
 msgstr ""
 
-#: assets/admin/dashboard/Dashboard.jsx:211
+#: assets/admin/dashboard/Dashboard.jsx:212
 msgid "These numbers are from the previous range. The one you picked could not be loaded."
 msgstr ""
 
-#: assets/admin/dashboard/Dashboard.jsx:218
+#: assets/admin/dashboard/Dashboard.jsx:219
 msgid "Could not load your dashboard"
 msgstr ""
 
-#: assets/admin/dashboard/Dashboard.jsx:219
+#: assets/admin/dashboard/Dashboard.jsx:220
 msgid "Something went wrong fetching your metrics. Check your connection and try again."
 msgstr ""
 
-#: assets/admin/dashboard/Dashboard.jsx:222
+#: assets/admin/dashboard/Dashboard.jsx:223
 #: assets/admin/onboarding/Onboarding.jsx:622
 #: assets/admin/settings/panels/NumberingPanel.jsx:252
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:302
@@ -10475,7 +10475,7 @@ msgid "Just exploring"
 msgstr ""
 
 #: assets/admin/onboarding/Onboarding.jsx:77
-msgid "Trying Dono out before committing."
+msgid "Trying Dono out. Starts in test mode, so nothing takes real money until you switch it off."
 msgstr ""
 
 #: assets/admin/onboarding/Onboarding.jsx:173

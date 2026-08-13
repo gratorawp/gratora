@@ -74,7 +74,7 @@ const USER_TYPES = [
         id:   'exploring',
         icon: 'target',
         name: __( 'Just exploring', 'dono-fundraising-platform' ),
-        desc: __( 'Trying Dono out before committing.', 'dono-fundraising-platform' ),
+        desc: __( 'Trying Dono out. Starts in test mode, so nothing takes real money until you switch it off.', 'dono-fundraising-platform' ),
     },
 ];
 

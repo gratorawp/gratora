@@ -5,6 +5,7 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { AlertTriangle } from 'lucide-react';
 
 import EmptyState from '../_shared/components/EmptyState';
+import Notice from '../_shared/components/Notice';
 import Btn from '../_shared/components/Btn';
 import WidgetGrid from '../_shared/widgets/WidgetGrid';
 import LayoutControls from '../_shared/widgets/LayoutControls';
@@ -22,7 +23,7 @@ import RecentActivity from './widgets/RecentActivity';
 import TopCampaigns from './widgets/TopCampaigns';
 import RecurringForecast from './widgets/RecurringForecast';
 import NeedsAttention from './widgets/NeedsAttention';
-import { Button, Notice } from '@wordpress/components';
+import { Button } from '@wordpress/components';
 
 const SCOPE = 'dashboard';
 
