@@ -450,7 +450,7 @@ export default function Insights( { toggleSlot } ) {
                         data.test.test_only_donors
                     ) }
                     { ' ' }
-                    { __( 'Lifetime value, segments and retention are built from money actually taken, so there is no test version of them. The donors themselves are on the Donors tab, badged.', 'dono-fundraising-platform' ) }
+                    { __( 'Lifetime value, segments and retention are built from money actually taken, so there is no test version of them.', 'dono-fundraising-platform' ) }
                 </Notice>
             ) }
 
