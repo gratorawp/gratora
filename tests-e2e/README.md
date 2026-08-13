@@ -156,6 +156,52 @@ The goldens assume the seeded e2e site state, including test mode being ON
 (the form renders the test-mode banner). If a golden fails after reseeding,
 check the site state before re-blessing.
 
+## Demo data for screenshots
+
+The admin screens are only worth photographing against a site that has a year
+of history behind it. `wp dono demo-seed` builds one:
+
+```sh
+wp dono demo-seed          # prompts first
+wp dono demo-seed --yes    # unattended
+```
+
+Not a test fixture, and nothing in the suites depends on it. It is also
+distinct from `wp dono seed`, which writes **test-mode** donations: those are
+excluded from money reporting by design, so a dashboard seeded with them shows
+zeros. Demo rows are written **live** (`is_test = 0`), which is what makes the
+KPIs, charts and reports render at all, and what makes this unsafe next to real
+money. The command refuses when it finds live paid donations it did not write
+itself; `--force` overrides that, and is only for an install you can throw away.
+
+What it creates, on an install using EUR as its org currency:
+
+| | |
+|---|---|
+| Campaigns | 7: published, archived and draft; goals at ~76%, 88%, 50%, 116%, 89% and 3%; one goal counted in donors rather than money; one ending in 5 days so the dashboard's attention list has a row |
+| Funds | 5, restricted and unrestricted, two with their own goals |
+| Donors | 140 (invented names, `example.org` / `example.com` addresses), a mix of individuals, households and organisations across 10 countries, with a long-tail giving distribution so retention and repeat-donor views have shape |
+| Donations | ~810 across 12 months: paid, pending, failed, refunded, partially refunded and disputed; one-time and recurring; Stripe, PayPal and offline; spread across the utm channels the dashboard buckets by |
+| Recurring plans | 44 across active, paused, past_due and cancelled, weekly through yearly, with their renewal donations |
+
+Amounts, dates and donor picks come from one fixed seed, so two machines
+running it on the same day get the same site. The dates are relative to the run
+date: donations follow a seasonal curve with a December peak, quieter summers,
+lighter weekends and a growth trend, so the revenue chart has a shape rather
+than noise.
+
+Idempotent. Every donation carries a stable `gateway_intent_id` (`demo-...`)
+and every plan a stable subscription id, so a second run writes nothing and
+converges. That prefix is also how the rows are identified: to start over,
+delete the donations whose `gateway_intent_id` starts with `demo-`, the plans
+whose `gateway_subscription_id` does, and the `demo-` campaigns and funds.
+
+Two side effects are suppressed for the duration: outbound mail, and receipt
+issuance (which would otherwise queue an Action Scheduler job and an email per
+donation). Rollups are recomputed at the end, the same way
+`wp dono recompute-aggregates` does, because the rows are backdated behind the
+listeners that normally keep those columns current.
+
 ## Admin screenshots
 
 `specs/screenshots/admin.spec.ts` walks every Dono wp-admin screen and writes a

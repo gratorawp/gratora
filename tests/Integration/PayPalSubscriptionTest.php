@@ -30,6 +30,9 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
     /** @var array<int,array{method:string,url:string,body:array<string,mixed>}> */
     private array $calls = [];
 
+    /** @var array<string,array{status:int,body:array<string,mixed>}> */
+    private array $failures = [];
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -65,6 +68,20 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
         }
     }
 
+    /**
+     * Make the next call whose path contains $needle fail.
+     *
+     * Injecting a second pre_http_request filter cannot work: this mock answers
+     * every paypal.com URL unconditionally, so whichever filter runs last wins
+     * and a test that registers earlier is silently overruled.
+     *
+     * @param array<string,mixed> $body
+     */
+    private function failNext(string $needle, int $status, array $body): void
+    {
+        $this->failures[$needle] = ['status' => $status, 'body' => $body];
+    }
+
     private function mockPayPal(): void
     {
         add_filter('pre_http_request', function ($pre, $args, $url) {
@@ -77,6 +94,18 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
                 $body = is_array($decoded) ? $decoded : [];
             }
             $this->calls[] = ['method' => (string) ($args['method'] ?? 'POST'), 'url' => $url, 'body' => $body];
+
+            foreach ($this->failures as $needle => $failure) {
+                if (str_contains($path, (string) $needle)) {
+                    unset($this->failures[$needle]);
+                    return [
+                        'headers'  => [],
+                        'body'     => (string) wp_json_encode($failure['body']),
+                        'response' => ['code' => $failure['status'], 'message' => 'Injected'],
+                        'cookies'  => [], 'filename' => null,
+                    ];
+                }
+            }
 
             return [
                 'headers'  => [],
@@ -500,20 +529,18 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
 
         $gateway = Plugin::instance()->container->get(GatewayManager::class)->require('paypal');
 
-        add_filter('pre_http_request', static function ($pre, $args, $url) {
-            if (is_string($url) && str_contains($url, '/cancel')) {
-                return [
-                    'headers'  => [],
-                    'body'     => (string) wp_json_encode(['name' => 'SUBSCRIPTION_STATUS_INVALID']),
-                    'response' => ['code' => 422, 'message' => 'Unprocessable'],
-                    'cookies'  => [], 'filename' => null,
-                ];
-            }
-            return $pre;
-        }, 5, 3);
+        // PayPal's real shape. PayPalApiException::issuesFrom reads
+        // details[].issue and nothing else, so a body carrying only `name`
+        // produces no issues and the matcher never fires.
+        $this->failNext('/cancel', 422, [
+            'name'    => 'UNPROCESSABLE_ENTITY',
+            'details' => [['issue' => 'SUBSCRIPTION_STATUS_INVALID']],
+        ]);
 
         $gateway->cancelSubscription($plan, 'donor asked');
-        $this->assertTrue(true, 'cancelling an already-ended subscription does not throw');
+
+        $cancels = array_filter($this->calls, fn ($c) => str_contains($c['url'], '/cancel'));
+        $this->assertCount(1, $cancels, 'the gateway was actually asked to cancel');
     }
 
     /**

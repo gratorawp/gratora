@@ -11,12 +11,15 @@ use Dono\Donations\AggregateSyncer;
 use Dono\Donations\DonationIntent;
 use Dono\Donations\DonationService;
 use Dono\Donors\Donor;
+use Dono\Donors\DonorService;
 use Dono\Forms\Form;
 use Dono\Forms\FormService;
 use Dono\Foundation\Plugin;
+use Dono\Foundation\Time\Clock;
 use Dono\Funds\Fund;
 use Dono\Funds\FundService;
 use Dono\Onboarding\Onboarding;
+use Dono\Recurring\RecurringPlanRepository;
 use Dono\Settings\SettingsService;
 use WP_CLI;
 
@@ -202,6 +205,91 @@ final class CliCommands
         }
 
         WP_CLI::success("Seeded {$n} test donations on \"{$campaign->title}\".");
+    }
+
+    /**
+     * Seed a year of plausible fundraising history so the admin screens can be
+     * screenshotted against something that looks like a real organisation.
+     *
+     * Unlike `wp dono seed`, the rows are live (is_test = 0): test-mode rows
+     * are excluded from money reporting by design, so a dashboard seeded with
+     * them renders empty. That makes this unsafe anywhere real money is
+     * recorded, and it refuses when it finds any.
+     *
+     * Idempotent: every row carries a stable key, and a second run converges
+     * instead of duplicating.
+     *
+     * Creates 7 campaigns at different progress levels and statuses, 5 funds,
+     * 140 donors, ~620 one-time donations spread over the last 12 months
+     * (paid, pending, failed, refunded, partially refunded, disputed), and 44
+     * recurring plans (active, paused, past_due, cancelled) with their renewal
+     * donations.
+     *
+     * ## OPTIONS
+     *
+     * [--force]
+     * : Seed even though the install already holds live donations this command
+     * did not write. Only for a throwaway install.
+     *
+     * [--yes]
+     * : Skip the confirmation prompt.
+     *
+     * ## EXAMPLES
+     *
+     *     wp dono demo-seed
+     *     wp dono demo-seed --yes
+     *
+     * @when after_wp_load
+     * @since 1.0.0
+     */
+    public function demo_seed(array $args, array $assoc): void
+    {
+        $foreign = DemoSeeder::foreignLiveDonations();
+        if ($foreign > 0 && empty($assoc['force'])) {
+            WP_CLI::error(sprintf(
+                'Refusing to seed: this install already holds %d live donations that this '
+                . 'command did not write. Demo data is written live, so it would mix into '
+                . 'the org\'s own reporting. Pass --force only on a throwaway install.',
+                $foreign
+            ));
+        }
+
+        WP_CLI::confirm(
+            'Write ~1,000 live demo donations, 140 donors, 7 campaigns and 44 recurring '
+            . 'plans into this install?',
+            $assoc
+        );
+
+        // Onboarding gates every Dono admin screen while it is pending, and a
+        // screenshot run needs the screens, not the wizard.
+        update_option(Onboarding::OPTION, 'completed', false);
+
+        $c      = $this->container();
+        $seeder = new DemoSeeder(
+            $c->get(DonationService::class),
+            $c->get(DonorService::class),
+            $c->get(CampaignService::class),
+            $c->get(FundService::class),
+            $c->get(AggregateSyncer::class),
+            $c->get(RecurringPlanRepository::class),
+            $c->get(Clock::class),
+        );
+
+        $t0     = microtime(true);
+        $counts = $seeder->run(static fn (string $line) => WP_CLI::log('  ' . $line));
+
+        WP_CLI::success(sprintf(
+            'Demo data ready in %.1fs: %d campaigns, %d funds, %d donors, %d donations '
+            . '(%d recurring renewals), %d recurring plans, %d rows already present.',
+            microtime(true) - $t0,
+            $counts['campaigns'],
+            $counts['funds'],
+            $counts['donors'],
+            $counts['donations'],
+            $counts['renewals'],
+            $counts['recurring_plans'],
+            $counts['skipped'],
+        ));
     }
 
     /**

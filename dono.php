@@ -45,6 +45,7 @@ add_action('plugins_loaded', static function (): void {
         WP_CLI::add_command('dono migrate', [$cli, 'migrate']);
         WP_CLI::add_command('dono recompute-aggregates', [$cli, 'recompute_aggregates']);
         WP_CLI::add_command('dono seed', [$cli, 'seed']);
+        WP_CLI::add_command('dono demo-seed', [$cli, 'demo_seed']);
         WP_CLI::add_command('dono e2e-seed', [$cli, 'e2e_seed']);
     }
 });

@@ -201,7 +201,7 @@ final class DemoSeeder
             [
                 'slug' => 'demo-school-meals', 'title' => 'School Meals Programme',
                 'status' => 'published', 'fund' => 'demo-education',
-                'share' => 14, 'progress' => 0.47, 'window' => [300, 0],
+                'share' => 14, 'progress' => 0.47, 'window' => [300, 0], 'ends_in' => 5,
                 'description' => 'A hot meal every school day for 1,200 children.',
             ],
             [
@@ -259,11 +259,17 @@ final class DemoSeeder
                 $attrs['goal_count'] = (int) $spec['goal_count'];
             }
 
-            // Only a campaign that closed gets an end date; an open one with a
-            // past end reads as ended everywhere it is shown.
-            $attrs['ends_at'] = $spec['window'][1] > 0
-                ? $now->modify('-' . $spec['window'][1] . ' days')->format('Y-m-d 23:59:59')
-                : null;
+            // Only a campaign that closed gets a past end date; an open one
+            // with one reads as ended everywhere it is shown. `ends_in` is the
+            // live appeal with a deadline, which is what puts a row in the
+            // dashboard's attention list. The key is left out entirely when
+            // there is no end date, because CampaignService writes an empty
+            // string into the datetime column for an explicit null.
+            if (isset($spec['ends_in'])) {
+                $attrs['ends_at'] = $now->modify('+' . $spec['ends_in'] . ' days')->format('Y-m-d 23:59:59');
+            } elseif ($spec['window'][1] > 0) {
+                $attrs['ends_at'] = $now->modify('-' . $spec['window'][1] . ' days')->format('Y-m-d 23:59:59');
+            }
 
             $campaign = Campaign::query()->where('slug', $spec['slug'])->get();
             if (! $campaign) {
@@ -488,7 +494,7 @@ final class DemoSeeder
             $gateway        = $gateways[$this->next(count($gateways))];
             $amount         = $amounts[$this->next(count($amounts))];
             [$unit, $count] = $this->pickInterval();
-            $startedDaysAgo = 30 + $this->next(self::DAYS_OF_DATA - 40);
+            $startedDaysAgo = 5 + $this->next(self::DAYS_OF_DATA - 15);
             $status         = $this->pickPlanStatus();
             $stepDays       = $this->intervalDays($unit, $count);
 
@@ -504,12 +510,14 @@ final class DemoSeeder
                 if ($dayAgo < $stopAfter || $dayAgo < 0) {
                     break;
                 }
-                // A past_due plan is one whose newest attempt failed, so it
-                // stops one cycle short of today.
-                if ($status === 'past_due' && $dayAgo < $stepDays) {
-                    break;
-                }
                 $payments[] = ['index' => $k, 'when' => $this->stamp($dayAgo)];
+            }
+
+            // past_due means the newest attempt failed, so the plan is a cycle
+            // behind. A plan whose only charge is the one that declined keeps
+            // it: that is a first-renewal decline, not an empty plan.
+            if ($status === 'past_due' && count($payments) > 1) {
+                array_pop($payments);
             }
 
             $out[] = [
@@ -667,7 +675,11 @@ final class DemoSeeder
         $now      = $this->clock->now()->format('Y-m-d H:i:s');
 
         foreach ($schedule as $spec) {
-            if ($this->plans->findBySubscriptionId((string) $spec['gateway'], (string) $spec['subscription_id'])) {
+            // Keyed on the subscription id alone, not the (gateway, id) pair
+            // the gateways dedup on: the gateway is one of the generated
+            // values, so pairing them would let a re-run miss a plan it had
+            // already written and add a second copy beside it.
+            if (RecurringPlan::query()->where('gateway_subscription_id', (string) $spec['subscription_id'])->get()) {
                 $this->counts['skipped']++;
                 continue;
             }
@@ -903,7 +915,9 @@ final class DemoSeeder
         $key = $fromDaysAgo . ':' . $toDaysAgo;
 
         if (! isset($this->dayWeights[$key])) {
-            $monthly = [1 => 0.80, 0.70, 0.85, 0.95, 0.85, 0.70, 0.55, 0.55, 0.95, 1.05, 1.35, 2.30];
+            // No month is dead, because the seeder is run in an arbitrary one
+            // and the last-30 view is the first screen anyone screenshots.
+            $monthly = [1 => 0.85, 0.80, 0.90, 0.95, 0.90, 0.80, 0.72, 0.72, 0.95, 1.05, 1.30, 2.10];
             $days    = [];
             $weights = [];
 
@@ -951,7 +965,7 @@ final class DemoSeeder
     {
         $roll = $this->next(1000);
 
-        if ($daysAgo <= 6 && $roll < 320) return 'pending';
+        if ($daysAgo <= 12 && $roll < 300) return 'pending';
         if ($roll < 90)  return 'failed';
         if ($roll < 118) return 'refunded';
         if ($roll < 132) return 'partial_refund';
