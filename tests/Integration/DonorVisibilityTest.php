@@ -77,6 +77,22 @@ final class DonorVisibilityTest extends IntegrationTestCase
         $this->assertArrayHasKey($id, DonorRepository::testOnlyIdsAmong([$id]));
     }
 
+    public function test_the_donations_tab_badge_counts_test_donations_too(): void
+    {
+        $id = $this->donor('tab-count-test-only@example.com');
+        $this->seedDonation($id, true);
+        $this->seedDonation($id, true);
+
+        $profile = Plugin::instance()->container
+            ->get(\Dono\Donors\DonorMetricsService::class)
+            ->profile($id);
+
+        // The tab lists these rows, so the badge above it has to agree.
+        // donations_count is live-only and reads zero here.
+        $this->assertSame(2, (int) $profile['donations_total']);
+        $this->assertSame(0, (int) $profile['lifetime']['count'], 'and the money figure stays clean');
+    }
+
     public function test_a_donor_who_gave_for_real_is_not_badged_as_test(): void
     {
         $id = $this->donor('badge-real@example.com');

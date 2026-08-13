@@ -195,6 +195,11 @@ final class DonorMetricsService
         // The overview footer states the real figure.
         $eventsTotal = Event::query()->where('donor_id', $donorId)->count();
 
+        // Same reason, and the tab badge reads it. donations_count cannot: it
+        // is synced live-only, so a donor who has only rehearsed reads zero
+        // while the tab beside it lists their donations.
+        $donationsTotal = Donation::query()->where('donor_id', $donorId)->count();
+
         $consents = Consent::query()
             ->where('donor_id', $donorId)
             ->orderBy('occurred_at', 'DESC')
@@ -421,6 +426,7 @@ final class DonorMetricsService
                 return $row;
             }, $events),
             'events_total' => (int) $eventsTotal,
+            'donations_total' => (int) $donationsTotal,
             'consents' => [
                 'current' => array_values($consentCurrent),
                 'history' => array_map(fn (Consent $c) => $this->mapConsentRow($c), $consents),

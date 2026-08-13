@@ -313,11 +313,15 @@ export default function DonorProfile( { id, onBack } ) {
         donor, lifetime, donations, recurring, receipts, notes, consents,
         events, campaigns, banners,
         events_total: eventsTotal,
+        donations_total: donationsTotal,
     } = data;
 
     const tabCounts = {
         activity:  null,
-        donations: donor.donations_count || lifetime.count || null,
+        // Counts what the tab lists, which includes test donations.
+        // donations_count is live-only, so it read zero for a donor who has
+        // only rehearsed while the tab under it showed their rows.
+        donations: donationsTotal || null,
         recurring: recurring.plans.length || null,
         receipts:  receipts.length || null,
         notes:     notes.length || null,
