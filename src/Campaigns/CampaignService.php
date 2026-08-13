@@ -123,9 +123,14 @@ final class CampaignService
             }
         }
 
+        // null and '' both mean "clear it". Testing only against '' let a null
+        // through to (string) null, which is '', and a DATETIME column stores
+        // that as 0000-00-00: a campaign whose dates could be set once and
+        // never removed.
         foreach (['description', 'starts_at', 'ends_at'] as $field) {
             if (array_key_exists($field, $input)) {
-                $campaign->$field = $input[$field] !== '' ? (string) $input[$field] : null;
+                $value = $input[$field];
+                $campaign->$field = ($value === null || $value === '') ? null : (string) $value;
             }
         }
 

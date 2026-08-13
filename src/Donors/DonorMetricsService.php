@@ -223,6 +223,11 @@ final class DonorMetricsService
         // while the tab beside it lists their donations.
         $donationsTotal = Donation::query()->where('donor_id', $donorId)->count();
 
+        // Same reason again: the list above is capped at 25, so its length is
+        // not how many receipts this donor has. The Donations and Activity tabs
+        // each got a real total; the Receipts badge was still counting the slice.
+        $receiptsTotal = Receipt::query()->where('donor_id', $donorId)->count();
+
         $consents = Consent::query()
             ->where('donor_id', $donorId)
             ->orderBy('occurred_at', 'DESC')
@@ -257,17 +262,34 @@ final class DonorMetricsService
 
         $sparkline = $this->buildSparkline($timeline, 30);
         $netExpr = DonationQueries::netBaseExpr();
-        $largestDonation = (int) (DonationQueries::live(DB::table('dono_donations')
+        // donationsOnly, not live: the total, count and average beside this are
+        // donation-only, so a ticket order here made the largest gift exceed a
+        // lifetime that does not contain it.
+        $largestDonation = (int) (DonationQueries::donationsOnly(DB::table('dono_donations')
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('donor_id', $donorId))
             ->selectRaw("COALESCE(MAX({$netExpr}), 0) AS m")
             ->get()['m'] ?? 0);
 
+        // Counted in SQL over the population the headline counts. Iterating the
+        // donations array split a capped 25 rows, so past 25 donations the two
+        // halves of the same card disagreed.
+        $splitRows = DonationQueries::donationsOnly(DB::table('dono_donations')
+            ->whereIn('status', ['paid', 'partial_refund'])
+            ->where('donor_id', $donorId))
+            ->selectRaw("CASE WHEN frequency = 'one_time' THEN 1 ELSE 0 END AS is_one_time, COUNT(*) AS n")
+            ->groupByRaw("CASE WHEN frequency = 'one_time' THEN 1 ELSE 0 END")
+            ->getAll();
+
         $oneTimeCount = 0;
         $recurringCount = 0;
-        foreach ($donations as $d) {
-            if (($d->frequency ?? 'one_time') === 'one_time') $oneTimeCount++;
-            else $recurringCount++;
+        foreach ($splitRows as $row) {
+            $n = (int) ($row['n'] ?? 0);
+            if ((int) ($row['is_one_time'] ?? 0) === 1) {
+                $oneTimeCount = $n;
+            } else {
+                $recurringCount = $n;
+            }
         }
 
         // MRR from active plans (cadence-normalized monthly equivalent).
@@ -450,6 +472,7 @@ final class DonorMetricsService
             }, $events),
             'events_total' => (int) $eventsTotal,
             'donations_total' => (int) $donationsTotal,
+            'receipts_total' => (int) $receiptsTotal,
             'consents' => [
                 'current' => array_values($consentCurrent),
                 'history' => array_map(fn (Consent $c) => $this->mapConsentRow($c), $consents),

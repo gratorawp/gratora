@@ -314,6 +314,7 @@ export default function DonorProfile( { id, onBack } ) {
         events, campaigns, banners,
         events_total: eventsTotal,
         donations_total: donationsTotal,
+        receipts_total: receiptsTotal,
     } = data;
 
     const tabCounts = {
@@ -323,7 +324,7 @@ export default function DonorProfile( { id, onBack } ) {
         // only rehearsed while the tab under it showed their rows.
         donations: donationsTotal || null,
         recurring: recurring.plans.length || null,
-        receipts:  receipts.length || null,
+        receipts:  receiptsTotal || null,
         notes:     notes.length || null,
         consent:   null,
     };

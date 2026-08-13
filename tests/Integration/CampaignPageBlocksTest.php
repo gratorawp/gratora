@@ -64,6 +64,31 @@ final class CampaignPageBlocksTest extends IntegrationTestCase
         $this->assertStringNotContainsString('wp:dono/donate-button', $page->post_content);
     }
 
+    public function test_a_campaign_date_can_be_cleared_once_it_is_set(): void
+    {
+        $campaign = $this->createCampaign(['title' => 'Dated campaign']);
+        $service  = \Dono\Foundation\Plugin::instance()->container->get(\Dono\Campaigns\CampaignService::class);
+        $model    = \Dono\Campaigns\Campaign::query()->find('id', (int) $campaign['id']);
+
+        $service->update($model, ['ends_at' => '2026-12-31 23:59:59']);
+        $this->assertSame(
+            '2026-12-31 23:59:59',
+            (string) \Dono\Campaigns\Campaign::query()->find('id', (int) $campaign['id'])->ends_at
+        );
+
+        // null and '' both mean clear. Testing only against '' let null reach
+        // (string) null, and a DATETIME column stores that as a zero date.
+        $service->update(
+            \Dono\Campaigns\Campaign::query()->find('id', (int) $campaign['id']),
+            ['ends_at' => null]
+        );
+
+        $this->assertNull(
+            \Dono\Campaigns\Campaign::query()->find('id', (int) $campaign['id'])->ends_at,
+            'a campaign date must be removable once set'
+        );
+    }
+
     public function test_the_campaign_list_carries_a_link_to_the_page(): void
     {
         $campaign = $this->createCampaign(['title' => 'Viewable campaign']);

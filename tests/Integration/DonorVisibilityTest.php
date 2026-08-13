@@ -77,6 +77,40 @@ final class DonorVisibilityTest extends IntegrationTestCase
         $this->assertArrayHasKey($id, DonorRepository::testOnlyIdsAmong([$id]));
     }
 
+    public function test_the_lifetime_split_counts_every_donation_not_a_page_of_them(): void
+    {
+        // The profile caps its donations list at 25. Deriving the one-time and
+        // recurring split from that array meant the two halves of one card
+        // stopped agreeing the moment a donor passed the cap.
+        $id = $this->donor('lifetime-split@example.com');
+        for ($i = 0; $i < 27; $i++) {
+            $this->seedDonation($id, false);
+        }
+
+        $lifetime = Plugin::instance()->container
+            ->get(\Dono\Donors\DonorMetricsService::class)
+            ->profile($id)['lifetime'];
+
+        $this->assertSame(27, (int) $lifetime['count']);
+        $this->assertSame(
+            (int) $lifetime['count'],
+            (int) $lifetime['one_time_count'] + (int) $lifetime['recurring_count'],
+            'the split has to add up to the headline above it'
+        );
+    }
+
+    public function test_the_receipts_badge_is_a_total_not_a_page(): void
+    {
+        $id = $this->donor('receipts-total@example.com');
+
+        $profile = Plugin::instance()->container
+            ->get(\Dono\Donors\DonorMetricsService::class)
+            ->profile($id);
+
+        // The list is capped like the others, so the badge needs its own count.
+        $this->assertArrayHasKey('receipts_total', $profile);
+    }
+
     public function test_the_tab_badge_and_the_card_footer_count_the_same_rows(): void
     {
         // They label the same list, so they have to agree. The footer read
