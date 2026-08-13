@@ -241,8 +241,9 @@ $bar-radius:    6px;
     --text-muted: #{$text-muted};
     --amber:      #{$amber};
 
-    max-width: 1480px;
-    margin: 0 auto;
+    // No max-width or centring: every other admin screen runs the full width
+    // of the content area, and a profile floating in the middle reads as a
+    // different product from the list that opened it.
     color: $text;
     font-variant-numeric: tabular-nums;
 }
