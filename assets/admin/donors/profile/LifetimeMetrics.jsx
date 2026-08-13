@@ -94,10 +94,10 @@ export default function LifetimeMetrics( { lifetime } ) {
                 icon={ <IconHeart width="16" height="16" /> }
                 // Named apart from the Donations tab on purpose. This is the
                 // money count: it divides into Lifetime given to make the
-                // average beside it, so it counts paid gifts only. The tab
+                // average beside it, so it counts paid ones only. The tab
                 // counts every row the donor has, pending and failed included.
                 // Sharing one name made a pending donation look like a bug.
-                label={ __( 'Gifts received', 'dono-fundraising-platform' ) }
+                label={ __( 'Donations received', 'dono-fundraising-platform' ) }
                 value={ <span className="num">{ count }</span> }
                 sub={ count > 0
                     ? sprintf( /* translators: 1: one-time donation count, 2: recurring donation count */ __( '%1$d one-time, %2$d recurring', 'dono-fundraising-platform' ), one_time_count, recurring_count )

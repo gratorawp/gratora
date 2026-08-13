@@ -207,7 +207,7 @@ export default function ExportTab( { setNotice } ) {
                     { canReports && (
                         <Row
                             title={ __( 'Revenue by month', 'dono-fundraising-platform' ) }
-                            description={ __( 'Revenue, donation count and average gift for every month in the range. Quiet months are written as zero rows, so the file charts as a continuous series.', 'dono-fundraising-platform' ) }
+                            description={ __( 'Revenue, donation count and average donation for every month in the range. Quiet months are written as zero rows, so the file charts as a continuous series.', 'dono-fundraising-platform' ) }
                         >
                             <div className="dono-exports__controls">
                                 <span className="dono-tools-field">
