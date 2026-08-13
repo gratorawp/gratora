@@ -8,6 +8,7 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { Mail as MailIcon, Check as CheckIcon, Coins, Plus } from 'lucide-react';
 
 import Btn from '../_shared/components/Btn';
+import Notice from '../_shared/components/Notice';
 import RecordDonationDrawer from './RecordDonationDrawer';
 import DateField from '../_shared/components/DateField';
 import EmptyState from '../_shared/components/EmptyState';
@@ -561,13 +562,13 @@ export default function List() {
                 />
             ) }
             { ( actionError || fetchError ) && (
-                <div className="dono-advanced-notice dono-advanced-notice--error" style={ { marginBottom: 12 } }>
+                <Notice status="error" isDismissible={ false }>
                     { actionError || fetchError }
-                </div>
+                </Notice>
             ) }
 
             { testHidden > 0 && ! includeTest && (
-                <div className="dono-advanced-notice" style={ { marginBottom: 12 } }>
+                <Notice status="info" isDismissible={ false }>
                     { sprintf(
                         /* translators: %d: number of test donations hidden. */
                         _n(
@@ -582,7 +583,7 @@ export default function List() {
                     <Btn variant="link" onClick={ () => toggleTest( true ) }>
                         { __( 'Show them', 'dono-fundraising-platform' ) }
                     </Btn>
-                </div>
+                </Notice>
             ) }
 
             <KpiStrip items={ donationKpis( stats ) } loading={ loading && ! stats } />

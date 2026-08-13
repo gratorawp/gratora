@@ -800,7 +800,7 @@ export default function List() {
             </div>
 
             { testHidden > 0 && ! includeTest && (
-                <div className="dono-advanced-notice" style={ { marginBottom: 12 } }>
+                <Notice status="info" isDismissible={ false }>
                     { sprintf(
                         /* translators: %d: number of test subscriptions hidden. */
                         _n(
@@ -815,7 +815,7 @@ export default function List() {
                     <Btn variant="link" onClick={ () => toggleTest( true ) }>
                         { __( 'Show them', 'dono-fundraising-platform' ) }
                     </Btn>
-                </div>
+                </Notice>
             ) }
             <UnlinkedNotice
                 unlinked={ unlinked }
@@ -826,7 +826,9 @@ export default function List() {
 
             <KpiStrip items={ subscriptionKpis( stats, unlinked, includeTest ) } loading={ ! stats } />
 
-            { fetchError && <div className="dono-error-notice">{ fetchError }</div> }
+            { fetchError && (
+                <Notice status="error" isDismissible={ false }>{ fetchError }</Notice>
+            ) }
 
             { ! loading && total === 0 && ! fetchError ? (
                 <EmptyState { ...emptyStateCopy( unlinked, testHidden ) } />
