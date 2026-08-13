@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Recurring;
 
+use Dono\Analytics\ErrorLog;
 use Dono\Async\AsyncDispatcher;
 use Dono\Foundation\Batch\BatchProcessor;
 use Dono\Foundation\Time\Clock;
@@ -92,6 +93,26 @@ final class RecurringResumer
     {
         $gateway = $this->gateways->get((string) $plan->gateway);
 
+        // Absent is not the same as "has no subscriptions". Stripe and PayPal
+        // register only while their credentials are stored, so a missing one
+        // means the subscription is still suspended at the processor. Falling
+        // through would mark the plan active, put it back in MRR, and clear the
+        // marker that is the only record it was ever owed a resume.
+        if ($gateway === null) {
+            $now = $this->clock->now();
+            $this->writeColumns($plan, [
+                'resume_at'  => $now->modify('+1 day')->format('Y-m-d H:i:s'),
+                'updated_at' => $now->format('Y-m-d H:i:s'),
+            ]);
+            ErrorLog::record('recurring', sprintf(
+                'Cannot resume plan %1$d: the %2$s gateway is not available, so it is still paused at the processor.',
+                (int) $plan->id,
+                (string) $plan->gateway
+            ), ['plan_id' => (int) $plan->id, 'gateway' => (string) $plan->gateway]);
+
+            return;
+        }
+
         if ($gateway instanceof SubscriptionAware) {
             try {
                 $gateway->resumeSubscription($plan);
@@ -107,6 +128,13 @@ final class RecurringResumer
                     'resume_at'  => $now->modify('+1 day')->format('Y-m-d H:i:s'),
                     'updated_at' => $now->format('Y-m-d H:i:s'),
                 ]);
+                ErrorLog::record('recurring', sprintf(
+                    'Resuming plan %1$d at %2$s failed, so it is still paused at the processor: %3$s',
+                    (int) $plan->id,
+                    (string) $plan->gateway,
+                    $e->getMessage()
+                ), ['plan_id' => (int) $plan->id, 'gateway' => (string) $plan->gateway]);
+
                 do_action('dono.recurring.resume_failed', $plan, $e);
                 return;
             }

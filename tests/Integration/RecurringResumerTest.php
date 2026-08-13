@@ -159,4 +159,23 @@ final class RecurringResumerTest extends IntegrationTestCase
         $this->assertNotNull($fresh->resume_at, 'still owed a resume');
         $this->assertGreaterThan($due, (string) $fresh->resume_at, 'pushed out, so the batch drains');
     }
+    public function test_a_plan_whose_gateway_is_gone_is_not_marked_active(): void
+    {
+        // Stripe registers only while its credentials are stored, so an absent
+        // gateway means the subscription is still suspended at the processor.
+        // Marking the row active would put it back in MRR behind a next payment
+        // that never comes.
+        $plan = $this->plan([
+            'gateway'   => 'stripe',
+            'status'    => 'paused',
+            'resume_at' => gmdate('Y-m-d H:i:s', time() - 3600),
+        ]);
+
+        $this->resumer()->run();
+
+        $after = $this->reload($plan);
+        $this->assertSame('paused', $after->status, 'it stays paused');
+        $this->assertNotNull($after->resume_at, 'and keeps the marker that it is owed a resume');
+        $this->assertGreaterThan(gmdate('Y-m-d H:i:s'), (string) $after->resume_at, 'backed off rather than retried in a spin');
+    }
 }
