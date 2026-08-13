@@ -70,6 +70,25 @@ final class DonationQueries
     }
 
     /**
+     * How many real-looking donations the live figures are leaving out.
+     *
+     * Campaign and fund rollups are synced through donationsOnly(), so there is
+     * no test-inclusive version of raised_cents to offer. What a screen can do
+     * is say how much it is not counting, which is the difference between a
+     * figure that reads zero and a screen that looks broken.
+     *
+     * @since 1.0.0
+     */
+    public static function hiddenTestCount(): int
+    {
+        return (int) DB::table('dono_donations')
+            ->where('is_test', 1)
+            ->where('kind', 'donation')
+            ->whereIn('status', ['paid', 'partial_refund'])
+            ->count();
+    }
+
+    /**
      * Rows whose base-currency value is unknown, so a total built on
      * netBaseExpr() is missing them.
      *

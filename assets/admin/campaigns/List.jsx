@@ -32,6 +32,7 @@ export default function List() {
 
     const [ data, setData ]       = useState( [] );
     const [ total, setTotal ]     = useState( 0 );
+    const [ testHidden, setTestHidden ] = useState( 0 );
     const [ loading, setLoading ] = useState( false );
     const [ error, setError ]     = useState( null );
     const [ stats, setStats ]     = useState( null );
@@ -65,6 +66,7 @@ export default function List() {
                 const items = await res.json();
                 setData( Array.isArray( items ) ? items : [] );
                 setTotal( parseInt( res.headers.get( 'X-WP-Total' ) || '0', 10 ) );
+                setTestHidden( parseInt( res.headers.get( 'X-Dono-Test-Hidden' ) || '0', 10 ) );
             } )
             .catch( ( err ) => {
                 if ( aborted ) return;
@@ -311,6 +313,25 @@ export default function List() {
             ) }
 
             <KpiStrip items={ campaignKpis( stats ) } loading={ loading && ! stats } />
+
+            { /* These figures read stored rollups, which never contain test
+                 money, so there is nothing to switch on. Saying what is missing
+                 is the difference between a zero and a broken screen. */ }
+            { testHidden > 0 && (
+                <Notice status="info" isDismissible={ false }>
+                    { sprintf(
+                        /* translators: %d: test donations not counted. */
+                        _n(
+                            '%d test donation is not counted in these figures.',
+                            '%d test donations are not counted in these figures.',
+                            testHidden,
+                            'dono-fundraising-platform'
+                        ),
+                        testHidden
+                    ) }
+                </Notice>
+            ) }
+
 
             { ! loading && total === 0 && ! view.search && ! statusFilter ? (
                 <EmptyState

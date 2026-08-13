@@ -3,7 +3,8 @@
 declare(strict_types=1);
 
 namespace Dono\Rest\Admin;
-use Dono\Rest\Paging;
+
+use Dono\Donations\DonationQueries;use Dono\Rest\Paging;
 use Dono\Foundation\Auth\Capabilities;
 
 use Dono\Funds\Fund;
@@ -124,6 +125,10 @@ final class FundsController
 
         $response = new WP_REST_Response($shaped, 200);
         $response->header('X-WP-Total', (string) $result['total']);
+        // These figures read stored rollups, which are live-only by
+        // construction, so there is nothing to toggle to. Saying how many test
+        // donations are not in them is what stops a zero reading as broken.
+        $response->header('X-Dono-Test-Hidden', (string) DonationQueries::hiddenTestCount());
         $response->header('X-WP-TotalPages', (string) max(1, (int) ceil($result['total'] / max(1, $perPage))));
         return $response;
     }
