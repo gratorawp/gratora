@@ -997,8 +997,9 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
                 ['reason' => $reason !== null ? substr($reason, 0, 127) : 'Cancelled by donor']
             );
         } catch (RuntimeException $e) {
-            // Idempotent: cancelling an already-cancelled subscription is fine.
-            if (! $this->isAlreadyInThatState($e)) {
+            // Idempotent per the interface: a subscription already finished is
+            // nothing left to cancel. EXPIRED counts, it is equally terminal.
+            if (! $this->isAlreadyInThatState($e, $plan, ['CANCELLED', 'EXPIRED'])) {
                 throw $e;
             }
         }
@@ -1014,7 +1015,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
                 ['reason' => 'Paused by donor']
             );
         } catch (RuntimeException $e) {
-            if (! $this->isAlreadyInThatState($e)) {
+            if (! $this->isAlreadyInThatState($e, $plan, ['SUSPENDED'])) {
                 throw $e;
             }
         }
@@ -1030,7 +1031,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
                 ['reason' => 'Resumed by donor']
             );
         } catch (RuntimeException $e) {
-            if (! $this->isAlreadyInThatState($e)) {
+            if (! $this->isAlreadyInThatState($e, $plan, ['ACTIVE'])) {
                 throw $e;
             }
         }
@@ -1172,9 +1173,40 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
      *
      * @since 1.0.0
      */
-    private function isAlreadyInThatState(RuntimeException $e): bool
-    {
-        return $e instanceof PayPalApiException
-            && $e->hasIssue('SUBSCRIPTION_STATUS_INVALID', 'INVALID_STATE', 'INVALID_RESOURCE_STATE');
+    /**
+     * Whether the subscription is already where the caller was trying to put it.
+     *
+     * PayPal answers every wrong-state transition with the same issue code, so
+     * the code alone cannot tell "already cancelled, nothing to do" from
+     * "cancelled, and activating it will never work". Matching on the code
+     * alone reported a resume of a dead subscription as success. The state has
+     * to be read, which costs one extra call on the error path only.
+     *
+     * @param list<string> $targetStatuses states in which the operation had
+     *                                     nothing left to do
+     *
+     * @since 1.0.0
+     */
+    private function isAlreadyInThatState(
+        RuntimeException $e,
+        RecurringPlan $plan,
+        array $targetStatuses
+    ): bool {
+        if (! $e instanceof PayPalApiException
+            || ! $e->hasIssue('SUBSCRIPTION_STATUS_INVALID', 'INVALID_STATE', 'INVALID_RESOURCE_STATE')) {
+            return false;
+        }
+
+        try {
+            $sub = $this->api->get(
+                '/v1/billing/subscriptions/' . rawurlencode((string) $plan->gateway_subscription_id)
+            );
+        } catch (RuntimeException) {
+            // Cannot confirm, so do not swallow: reporting success for a change
+            // that may not have happened is the failure being fixed.
+            return false;
+        }
+
+        return in_array(strtoupper((string) ($sub['status'] ?? '')), $targetStatuses, true);
     }
 }

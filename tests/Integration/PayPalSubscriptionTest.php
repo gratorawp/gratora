@@ -33,6 +33,8 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
     /** @var array<string,array{status:int,body:array<string,mixed>}> */
     private array $failures = [];
 
+    private string $subscriptionStatus = 'ACTIVE';
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -130,7 +132,7 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
             $asked = rawurldecode(basename($path));
             return [
                 'id'         => $asked !== '' ? $asked : 'I-SUB-1',
-                'status'     => 'ACTIVE',
+                'status'     => $this->subscriptionStatus,
                 'custom_id'  => $this->currentReference,
                 // A real subscription always names the plan it bills on, which
                 // is what fixes the amount.
@@ -532,6 +534,11 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
         // PayPal's real shape. PayPalApiException::issuesFrom reads
         // details[].issue and nothing else, so a body carrying only `name`
         // produces no issues and the matcher never fires.
+        //
+        // The subscription reports CANCELLED too: PayPal cannot refuse a cancel
+        // as wrong-state while still calling itself active, and the gateway
+        // reads the state rather than trusting the issue code.
+        $this->subscriptionStatus = 'CANCELLED';
         $this->failNext('/cancel', 422, [
             'name'    => 'UNPROCESSABLE_ENTITY',
             'details' => [['issue' => 'SUBSCRIPTION_STATUS_INVALID']],
@@ -541,6 +548,48 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
 
         $cancels = array_filter($this->calls, fn ($c) => str_contains($c['url'], '/cancel'));
         $this->assertCount(1, $cancels, 'the gateway was actually asked to cancel');
+    }
+
+    public function test_resuming_a_cancelled_subscription_is_not_reported_as_success(): void
+    {
+        $reference = $this->createRecurringDonation();
+        $this->recordSubscription($reference);
+        $plan = $this->plans()->findBySubscriptionId('paypal', 'I-SUB-1');
+
+        $gateway = Plugin::instance()->container->get(GatewayManager::class)->require('paypal');
+
+        // PayPal answers every wrong-state transition with this one issue code,
+        // so matching on the code alone cannot tell "already active, nothing to
+        // do" from "cancelled, and it will never activate again".
+        $this->subscriptionStatus = 'CANCELLED';
+        $this->failNext('/activate', 422, [
+            'name'    => 'UNPROCESSABLE_ENTITY',
+            'details' => [['issue' => 'SUBSCRIPTION_STATUS_INVALID']],
+        ]);
+
+        $this->expectException(\RuntimeException::class);
+        $gateway->resumeSubscription($plan);
+    }
+
+    public function test_resuming_an_already_active_subscription_stays_idempotent(): void
+    {
+        $reference = $this->createRecurringDonation();
+        $this->recordSubscription($reference);
+        $plan = $this->plans()->findBySubscriptionId('paypal', 'I-SUB-1');
+
+        $gateway = Plugin::instance()->container->get(GatewayManager::class)->require('paypal');
+
+        // Same error, but the subscription really is where the caller wanted
+        // it, so the contract says swallow.
+        $this->failNext('/activate', 422, [
+            'name'    => 'UNPROCESSABLE_ENTITY',
+            'details' => [['issue' => 'SUBSCRIPTION_STATUS_INVALID']],
+        ]);
+
+        $gateway->resumeSubscription($plan);
+
+        $activates = array_filter($this->calls, fn ($c) => str_contains($c['url'], '/activate'));
+        $this->assertCount(1, $activates);
     }
 
     /**
