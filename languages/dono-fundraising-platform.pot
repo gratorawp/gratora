@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-13T13:32:46+00:00\n"
+"POT-Creation-Date: 2026-08-13T13:46:11+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: dono-fundraising-platform\n"
@@ -31,7 +31,7 @@ msgstr ""
 #: assets/admin/donors/DonorProfile.jsx:173
 #: assets/admin/forms/blocks/country/index.js:32
 #: assets/admin/forms/blocks/country/index.js:53
-#: assets/donor-portal/index.jsx:1407
+#: assets/donor-portal/index.jsx:1421
 msgid "Search country…"
 msgstr ""
 
@@ -55,7 +55,7 @@ msgstr ""
 #: assets/admin/campaigns/CoverImageCard.jsx:32
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:157
 #: assets/admin/settings/panels/StripeKeysCard.jsx:113
-#: assets/donor-portal/index.jsx:1202
+#: assets/donor-portal/index.jsx:1216
 msgid "Replace"
 msgstr ""
 
@@ -70,7 +70,7 @@ msgstr ""
 #: assets/admin/settings/panels/ReceiptsPanel.jsx:122
 #: assets/admin/settings/panels/StripeKeysCard.jsx:116
 #: assets/admin/settings/panels/StripeKeysCard.jsx:319
-#: assets/donor-portal/index.jsx:1213
+#: assets/donor-portal/index.jsx:1227
 msgid "Remove"
 msgstr ""
 
@@ -104,10 +104,10 @@ msgstr ""
 #: src/Campaigns/Blocks/views/donate-button.php:45
 #: src/Forms/Shortcode/DonationFormShortcode.php:663
 #: assets/admin/tools/tabs/LogsTab.jsx:302
-#: assets/admin/_shared/recurring/PlanActions.jsx:117
+#: assets/admin/_shared/recurring/PlanActions.jsx:125
 #: assets/donor-portal/index.jsx:675
-#: assets/donor-portal/index.jsx:787
-#: assets/donor-portal/index.jsx:1339
+#: assets/donor-portal/index.jsx:794
+#: assets/donor-portal/index.jsx:1353
 msgid "Close"
 msgstr ""
 
@@ -179,7 +179,7 @@ msgstr ""
 #: assets/admin/_shared/components/StatusBadge.jsx:11
 #: assets/admin/_shared/components/StatusBadge.jsx:26
 #: assets/admin/_shared/format.js:24
-#: assets/donor-portal/index.jsx:1599
+#: assets/donor-portal/index.jsx:1613
 msgid "Active"
 msgstr ""
 
@@ -294,7 +294,7 @@ msgstr ""
 #: assets/admin/forms/blocks/email/index.js:22
 #: assets/admin/forms/blocks/email/index.js:38
 #: assets/admin/forms/blocks/email/index.js:52
-#: assets/donor-portal/index.jsx:1220
+#: assets/donor-portal/index.jsx:1234
 msgid "Email"
 msgstr ""
 
@@ -482,7 +482,7 @@ msgstr ""
 #: assets/admin/donations/detail/Header.jsx:23
 #: assets/admin/donations/List.jsx:489
 #: assets/admin/donors/index.jsx:343
-#: assets/admin/donors/profile/Header.jsx:46
+#: assets/admin/donors/profile/Header.jsx:45
 #: assets/admin/funds/List.jsx:343
 #: assets/admin/settings/Settings.jsx:226
 #: assets/admin/subscriptions/List.jsx:770
@@ -556,7 +556,7 @@ msgstr ""
 #: assets/admin/donors/index.jsx:349
 #: assets/admin/donors/Insights.jsx:95
 #: assets/admin/donors/Insights.jsx:435
-#: assets/admin/donors/profile/Header.jsx:48
+#: assets/admin/donors/profile/Header.jsx:47
 #: assets/admin/forms/Editor.jsx:1350
 #: assets/admin/tools/tabs/ExportTab.jsx:247
 msgid "Donors"
@@ -678,7 +678,7 @@ msgstr ""
 #: assets/admin/tools/tabs/CsvImportCard.jsx:161
 #: assets/admin/_shared/components/ConfirmDialog.jsx:33
 #: assets/admin/_shared/recurring/PlanActions.jsx:66
-#: assets/donor-portal/index.jsx:1360
+#: assets/donor-portal/index.jsx:1374
 msgid "Cancel"
 msgstr ""
 
@@ -1515,7 +1515,7 @@ msgstr ""
 #. translators: %s: file size, e.g. "2 MB".
 #: src/Donors/DonorAvatarUploader.php:135
 #: src/Rest/Portal/PortalController.php:1031
-#: assets/donor-portal/index.jsx:1149
+#: assets/donor-portal/index.jsx:1163
 #, php-format,js-format
 msgid "That picture is too large. The most this site takes is %s."
 msgstr ""
@@ -1681,7 +1681,7 @@ msgstr ""
 #: assets/admin/forms/blocks/name/index.js:68
 #: assets/donor-portal/index.jsx:537
 #: assets/donor-portal/index.jsx:538
-#: assets/donor-portal/index.jsx:1225
+#: assets/donor-portal/index.jsx:1239
 msgid "First name"
 msgstr ""
 
@@ -1695,7 +1695,7 @@ msgstr ""
 #: assets/admin/forms/blocks/name/index.js:77
 #: assets/donor-portal/index.jsx:547
 #: assets/donor-portal/index.jsx:548
-#: assets/donor-portal/index.jsx:1226
+#: assets/donor-portal/index.jsx:1240
 msgid "Last name"
 msgstr ""
 
@@ -1709,7 +1709,7 @@ msgstr ""
 #: assets/admin/forms/blocks/phone/index.js:49
 #: assets/admin/forms/blocks/phone/index.js:63
 #: assets/admin/forms/Editor.jsx:901
-#: assets/donor-portal/index.jsx:1228
+#: assets/donor-portal/index.jsx:1242
 msgid "Phone"
 msgstr ""
 
@@ -1723,7 +1723,7 @@ msgstr ""
 
 #: src/Exports/DonorExporter.php:142
 #: assets/admin/donors/DonorProfile.jsx:201
-#: assets/donor-portal/index.jsx:1230
+#: assets/donor-portal/index.jsx:1244
 msgid "Company"
 msgstr ""
 
@@ -1746,7 +1746,7 @@ msgstr ""
 #: assets/admin/forms/blocks/country/index.js:63
 #: assets/admin/onboarding/Onboarding.jsx:443
 #: assets/admin/settings/panels/OrganizationPanel.jsx:99
-#: assets/donor-portal/index.jsx:1402
+#: assets/donor-portal/index.jsx:1416
 msgid "Country"
 msgstr ""
 
@@ -2734,7 +2734,7 @@ msgstr ""
 #: src/Forms/Shortcode/DonationFormShortcode.php:622
 #: assets/admin/forms/blocks/steps/index.js:84
 #: assets/admin/settings/panels/ReceiptsPanel.jsx:82
-#: assets/donor-portal/index.jsx:941
+#: assets/donor-portal/index.jsx:955
 msgid "Continue"
 msgstr ""
 
@@ -5748,7 +5748,7 @@ msgstr ""
 
 #: assets/admin/campaigns/Detail.jsx:1218
 #: assets/admin/campaigns/List.jsx:170
-#: assets/donor-portal/index.jsx:1515
+#: assets/donor-portal/index.jsx:1529
 msgid "Updated"
 msgstr ""
 
@@ -6679,7 +6679,7 @@ msgid "Mark this donation as failed? Optionally add a reason (shown in the donat
 msgstr ""
 
 #: assets/admin/donations/Detail.jsx:285
-#: assets/admin/_shared/recurring/PlanActions.jsx:180
+#: assets/admin/_shared/recurring/PlanActions.jsx:188
 msgid "Reason (optional)"
 msgstr ""
 
@@ -6798,10 +6798,10 @@ msgstr ""
 #: assets/admin/donors/DonorProfile.jsx:137
 #: assets/admin/donors/profile/tabs/NotesTab.jsx:118
 #: assets/admin/onboarding/Onboarding.jsx:330
-#: assets/donor-portal/index.jsx:954
-#: assets/donor-portal/index.jsx:1233
-#: assets/donor-portal/index.jsx:1532
-#: assets/donor-portal/index.jsx:1573
+#: assets/donor-portal/index.jsx:968
+#: assets/donor-portal/index.jsx:1247
+#: assets/donor-portal/index.jsx:1546
+#: assets/donor-portal/index.jsx:1587
 msgid "Saving…"
 msgstr ""
 
@@ -7490,7 +7490,7 @@ msgstr ""
 
 #: assets/admin/donors/DonorProfile.jsx:137
 #: assets/admin/forms/Editor.jsx:863
-#: assets/donor-portal/index.jsx:1233
+#: assets/donor-portal/index.jsx:1247
 msgid "Save"
 msgstr ""
 
@@ -7853,10 +7853,10 @@ msgstr ""
 #: assets/donor-portal/index.jsx:353
 #: assets/donor-portal/index.jsx:677
 #: assets/donor-portal/index.jsx:730
-#: assets/donor-portal/index.jsx:1086
-#: assets/donor-portal/index.jsx:1117
-#: assets/donor-portal/index.jsx:1450
-#: assets/donor-portal/index.jsx:1552
+#: assets/donor-portal/index.jsx:1100
+#: assets/donor-portal/index.jsx:1131
+#: assets/donor-portal/index.jsx:1464
+#: assets/donor-portal/index.jsx:1566
 msgid "Loading…"
 msgstr ""
 
@@ -7919,34 +7919,34 @@ msgstr ""
 msgid "Top donors by lifetime value"
 msgstr ""
 
-#: assets/admin/donors/profile/Header.jsx:29
+#: assets/admin/donors/profile/Header.jsx:28
 msgid "Open Recurring →"
 msgstr ""
 
 #. translators: %s: month
-#: assets/admin/donors/profile/Header.jsx:61
+#: assets/admin/donors/profile/Header.jsx:60
 #: assets/admin/donors/profile/IdentityCard.jsx:162
 #, js-format
 msgid "Donor since %s"
 msgstr ""
 
-#: assets/admin/donors/profile/Header.jsx:68
+#: assets/admin/donors/profile/Header.jsx:67
 msgid "1 active plan"
 msgstr ""
 
 #. translators: %d: count
-#: assets/admin/donors/profile/Header.jsx:69
+#: assets/admin/donors/profile/Header.jsx:68
 #, js-format
 msgid "%d active plans"
 msgstr ""
 
-#: assets/admin/donors/profile/Header.jsx:73
+#: assets/admin/donors/profile/Header.jsx:72
 #: assets/admin/donors/profile/IdentityCard.jsx:58
 #: assets/admin/donors/profile/IdentityCard.jsx:134
 msgid "Redacted"
 msgstr ""
 
-#: assets/admin/donors/profile/Header.jsx:78
+#: assets/admin/donors/profile/Header.jsx:77
 msgid "Edit details"
 msgstr ""
 
@@ -7962,7 +7962,7 @@ msgstr ""
 #: assets/admin/donors/profile/tabs/RecurringTab.jsx:13
 #: assets/admin/subscriptions/List.jsx:26
 #: assets/admin/_shared/components/StatusBadge.jsx:28
-#: assets/donor-portal/index.jsx:1600
+#: assets/donor-portal/index.jsx:1614
 msgid "Paused"
 msgstr ""
 
@@ -7970,7 +7970,7 @@ msgstr ""
 #: assets/admin/donors/profile/tabs/RecurringTab.jsx:14
 #: assets/admin/subscriptions/List.jsx:27
 #: assets/admin/_shared/components/StatusBadge.jsx:23
-#: assets/donor-portal/index.jsx:1601
+#: assets/donor-portal/index.jsx:1615
 msgid "Cancelled"
 msgstr ""
 
@@ -8409,7 +8409,7 @@ msgid "Every paid donation for the year on one document, net of refunds."
 msgstr ""
 
 #: assets/admin/donors/profile/tabs/ReceiptsTab.jsx:85
-#: assets/donor-portal/index.jsx:1074
+#: assets/donor-portal/index.jsx:1088
 msgid "Statement year"
 msgstr ""
 
@@ -8418,7 +8418,7 @@ msgid "Could not build the statement."
 msgstr ""
 
 #: assets/admin/donors/profile/tabs/ReceiptsTab.jsx:108
-#: assets/donor-portal/index.jsx:1079
+#: assets/donor-portal/index.jsx:1093
 msgid "Download statement"
 msgstr ""
 
@@ -8466,7 +8466,7 @@ msgstr ""
 #: assets/admin/donors/profile/tabs/RecurringTab.jsx:15
 #: assets/admin/subscriptions/List.jsx:28
 #: assets/admin/_shared/components/StatusBadge.jsx:29
-#: assets/donor-portal/index.jsx:1602
+#: assets/donor-portal/index.jsx:1616
 msgid "Expired"
 msgstr ""
 
@@ -8490,8 +8490,8 @@ msgstr[1] ""
 #. translators: %d: number of months
 #: assets/admin/donors/profile/tabs/RecurringTab.jsx:34
 #: assets/admin/subscriptions/List.jsx:73
-#: assets/admin/_shared/recurring/PlanActions.jsx:167
-#: assets/donor-portal/index.jsx:808
+#: assets/admin/_shared/recurring/PlanActions.jsx:175
+#: assets/donor-portal/index.jsx:822
 #, js-format
 msgid "%d month"
 msgid_plural "%d months"
@@ -8554,7 +8554,7 @@ msgstr ""
 #: assets/admin/donors/profile/tabs/RecurringTab.jsx:185
 #: assets/admin/subscriptions/List.jsx:731
 #: assets/admin/_shared/recurring/PlanActions.jsx:62
-#: assets/donor-portal/index.jsx:793
+#: assets/donor-portal/index.jsx:807
 msgid "Pause"
 msgstr ""
 
@@ -8574,8 +8574,8 @@ msgstr ""
 #: assets/admin/donors/profile/tabs/RecurringTab.jsx:203
 #: assets/admin/subscriptions/List.jsx:749
 #: assets/admin/_shared/recurring/PlanActions.jsx:65
-#: assets/donor-portal/index.jsx:795
-#: assets/donor-portal/index.jsx:967
+#: assets/donor-portal/index.jsx:809
+#: assets/donor-portal/index.jsx:981
 msgid "Change amount"
 msgstr ""
 
@@ -8795,7 +8795,7 @@ msgid "Pick which purposes this form asks for."
 msgstr ""
 
 #: assets/admin/forms/blocks/consent/index.js:127
-#: assets/donor-portal/index.jsx:1514
+#: assets/donor-portal/index.jsx:1528
 msgid "required"
 msgstr ""
 
@@ -12169,7 +12169,7 @@ msgid "Numbering"
 msgstr ""
 
 #: assets/admin/settings/Settings.jsx:39
-#: assets/donor-portal/index.jsx:1567
+#: assets/donor-portal/index.jsx:1581
 msgid "Privacy"
 msgstr ""
 
@@ -12612,8 +12612,8 @@ msgid "That export could not be generated."
 msgstr ""
 
 #: assets/admin/tools/tabs/ExportTab.jsx:129
-#: assets/donor-portal/index.jsx:1267
-#: assets/donor-portal/index.jsx:1279
+#: assets/donor-portal/index.jsx:1281
+#: assets/donor-portal/index.jsx:1293
 msgid "Export failed."
 msgstr ""
 
@@ -12938,7 +12938,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: assets/admin/tools/tabs/MaintenanceTab.jsx:127
-#: assets/admin/_shared/recurring/PlanActions.jsx:127
+#: assets/admin/_shared/recurring/PlanActions.jsx:135
 msgid "Working…"
 msgstr ""
 
@@ -13285,54 +13285,62 @@ msgstr ""
 msgid "Cancel this donation"
 msgstr ""
 
-#: assets/admin/_shared/recurring/PlanActions.jsx:96
+#: assets/admin/_shared/recurring/PlanActions.jsx:97
 msgid "Enter an amount."
 msgstr ""
 
-#: assets/admin/_shared/recurring/PlanActions.jsx:106
+#: assets/admin/_shared/recurring/PlanActions.jsx:109
 msgid "That change could not be made."
 msgstr ""
 
-#: assets/admin/_shared/recurring/PlanActions.jsx:112
+#: assets/admin/_shared/recurring/PlanActions.jsx:120
 msgid "Change this donation"
 msgstr ""
 
-#: assets/admin/_shared/recurring/PlanActions.jsx:128
+#: assets/admin/_shared/recurring/PlanActions.jsx:136
 msgid "Retry now"
 msgstr ""
 
-#: assets/admin/_shared/recurring/PlanActions.jsx:128
+#: assets/admin/_shared/recurring/PlanActions.jsx:136
 msgid "Apply change"
 msgstr ""
 
 #. translators: %s: currency code, e.g. USD
-#: assets/admin/_shared/recurring/PlanActions.jsx:139
+#: assets/admin/_shared/recurring/PlanActions.jsx:147
 #, js-format
 msgid "New amount (%s)"
 msgstr ""
 
-#: assets/admin/_shared/recurring/PlanActions.jsx:157
+#: assets/admin/_shared/recurring/PlanActions.jsx:165
 msgid "Pause for"
 msgstr ""
 
-#: assets/admin/_shared/recurring/PlanActions.jsx:193
+#: assets/admin/_shared/recurring/PlanActions.jsx:201
 msgid "The gateway will try to collect the outstanding renewal again now. If it succeeds the donation appears within a few moments, once the gateway confirms it."
 msgstr ""
 
-#: assets/admin/_shared/recurring/PlanActions.jsx:198
+#: assets/admin/_shared/recurring/PlanActions.jsx:206
 msgid "The next payment is skipped and the donation carries on one cycle later. Nothing is charged in between."
 msgstr ""
 
-#: assets/admin/_shared/recurring/PlanActions.jsx:202
+#: assets/admin/_shared/recurring/PlanActions.jsx:210
 msgid "Charging restarts on the plan’s normal schedule."
 msgstr ""
 
-#: assets/admin/_shared/recurring/PlanActions.jsx:212
+#: assets/admin/_shared/recurring/PlanActions.jsx:220
 msgid "Notify donor"
 msgstr ""
 
-#: assets/admin/_shared/recurring/PlanActions.jsx:214
+#: assets/admin/_shared/recurring/PlanActions.jsx:222
 msgid "Email the donor about this change"
+msgstr ""
+
+#: assets/admin/_shared/recurring/PlanActions.jsx:230
+msgid "Open the approval page"
+msgstr ""
+
+#: assets/admin/_shared/recurring/PlanActions.jsx:234
+msgid "The donor has to approve it while signed in to their own account."
 msgstr ""
 
 #: assets/admin/_shared/useDonoSettings.js:32
@@ -13572,311 +13580,315 @@ msgstr ""
 msgid "Manage"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:781
-#: assets/donor-portal/index.jsx:876
+#: assets/donor-portal/index.jsx:783
+#: assets/donor-portal/index.jsx:890
 msgid "Something went wrong."
 msgstr ""
 
-#: assets/donor-portal/index.jsx:785
 #: assets/donor-portal/index.jsx:792
+#: assets/donor-portal/index.jsx:806
 msgid "Manage donation"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:794
+#: assets/donor-portal/index.jsx:799
+msgid "Approve the change"
+msgstr ""
+
+#: assets/donor-portal/index.jsx:808
 msgid "Skip next charge"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:797
-#: assets/donor-portal/index.jsx:926
-#: assets/donor-portal/index.jsx:949
+#: assets/donor-portal/index.jsx:811
+#: assets/donor-portal/index.jsx:940
+#: assets/donor-portal/index.jsx:963
 msgid "Update payment method"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:799
-#: assets/donor-portal/index.jsx:997
+#: assets/donor-portal/index.jsx:813
+#: assets/donor-portal/index.jsx:1011
 msgid "Cancel donation"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:805
+#: assets/donor-portal/index.jsx:819
 msgid "Pause for how long?"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:903
-#: assets/donor-portal/index.jsx:910
-#: assets/donor-portal/index.jsx:920
+#: assets/donor-portal/index.jsx:917
+#: assets/donor-portal/index.jsx:924
+#: assets/donor-portal/index.jsx:934
 msgid "That card could not be saved."
 msgstr ""
 
 #. translators: %s: the payment provider's name, e.g. PayPal.
-#: assets/donor-portal/index.jsx:930
+#: assets/donor-portal/index.jsx:944
 #, js-format
 msgid "%s handles this on their own site. You will be taken there to choose how you pay, and your donation carries on unchanged."
 msgstr ""
 
-#: assets/donor-portal/index.jsx:931
+#: assets/donor-portal/index.jsx:945
 msgid "Your payment provider"
 msgstr ""
 
 #. translators: %s: the payment provider's name, e.g. PayPal.
-#: assets/donor-portal/index.jsx:938
+#: assets/donor-portal/index.jsx:952
 #, js-format
 msgid "Continue to %s"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:950
+#: assets/donor-portal/index.jsx:964
 msgid "Enter the card you would like future donations charged to."
 msgstr ""
 
-#: assets/donor-portal/index.jsx:952
+#: assets/donor-portal/index.jsx:966
 msgid "Loading secure card form…"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:954
+#: assets/donor-portal/index.jsx:968
 msgid "Save card"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:968
+#: assets/donor-portal/index.jsx:982
 msgid "Current:"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:974
+#: assets/donor-portal/index.jsx:988
 msgid "New donation amount"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:977
+#: assets/donor-portal/index.jsx:991
 msgid "Save new amount"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:989
+#: assets/donor-portal/index.jsx:1003
 msgid "Cancel donation?"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:990
+#: assets/donor-portal/index.jsx:1004
 msgid "You'll keep all donations you've made so far. The recurring schedule will stop after today."
 msgstr ""
 
-#: assets/donor-portal/index.jsx:992
+#: assets/donor-portal/index.jsx:1006
 msgid "Tell us why (optional, helps the org)"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1004
+#: assets/donor-portal/index.jsx:1018
 msgid "Before you cancel…"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1005
+#: assets/donor-portal/index.jsx:1019
 msgid "A few alternatives that might work better:"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1006
+#: assets/donor-portal/index.jsx:1020
 msgid "Pause for 1-12 months"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1007
+#: assets/donor-portal/index.jsx:1021
 msgid "Skip just the next charge"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1008
+#: assets/donor-portal/index.jsx:1022
 msgid "Lower the amount"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1009
+#: assets/donor-portal/index.jsx:1023
 msgid "Continue to cancel"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1053
+#: assets/donor-portal/index.jsx:1067
 msgid "Could not generate statement."
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1064
+#: assets/donor-portal/index.jsx:1078
 msgid "Could not open the receipt. Please try again."
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1071
+#: assets/donor-portal/index.jsx:1085
 msgid "Annual statement"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1072
+#: assets/donor-portal/index.jsx:1086
 msgid "One consolidated PDF covering all your donations in a given year."
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1084
+#: assets/donor-portal/index.jsx:1098
 msgid "Individual receipts"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1087
+#: assets/donor-portal/index.jsx:1101
 msgid "No receipts yet."
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1096
+#: assets/donor-portal/index.jsx:1110
 msgid "Download"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1115
+#: assets/donor-portal/index.jsx:1129
 msgid "Could not load your profile."
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1133
-#: assets/donor-portal/index.jsx:1560
+#: assets/donor-portal/index.jsx:1147
+#: assets/donor-portal/index.jsx:1574
 msgid "Could not save."
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1164
+#: assets/donor-portal/index.jsx:1178
 msgid "Could not upload that picture."
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1176
+#: assets/donor-portal/index.jsx:1190
 msgid "Could not remove that picture."
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1190
+#: assets/donor-portal/index.jsx:1204
 msgid "Profile picture"
 msgstr ""
 
 #. translators: %s: file size, e.g. "2 MB".
-#: assets/donor-portal/index.jsx:1194
+#: assets/donor-portal/index.jsx:1208
 #, js-format
 msgid "Shown next to your name where the organization lists supporters. JPEG, PNG, GIF or WebP, up to %s."
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1195
+#: assets/donor-portal/index.jsx:1209
 msgid "2 MB"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1201
+#: assets/donor-portal/index.jsx:1215
 msgid "Uploading…"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1202
+#: assets/donor-portal/index.jsx:1216
 msgid "Upload"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1222
+#: assets/donor-portal/index.jsx:1236
 msgid "To change your email, contact the organization."
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1235
-#: assets/donor-portal/index.jsx:1533
-#: assets/donor-portal/index.jsx:1574
+#: assets/donor-portal/index.jsx:1249
+#: assets/donor-portal/index.jsx:1547
+#: assets/donor-portal/index.jsx:1588
 msgid "Saved."
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1292
+#: assets/donor-portal/index.jsx:1306
 msgid "Deletion failed."
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1299
+#: assets/donor-portal/index.jsx:1313
 msgid "Your data"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1303
+#: assets/donor-portal/index.jsx:1317
 msgid "Preparing…"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1303
+#: assets/donor-portal/index.jsx:1317
 msgid "Download my data"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1306
-#: assets/donor-portal/index.jsx:1358
+#: assets/donor-portal/index.jsx:1320
+#: assets/donor-portal/index.jsx:1372
 msgid "Deleting…"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1306
-#: assets/donor-portal/index.jsx:1337
-#: assets/donor-portal/index.jsx:1340
-#: assets/donor-portal/index.jsx:1358
+#: assets/donor-portal/index.jsx:1320
+#: assets/donor-portal/index.jsx:1351
+#: assets/donor-portal/index.jsx:1354
+#: assets/donor-portal/index.jsx:1372
 msgid "Delete my account"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1310
+#: assets/donor-portal/index.jsx:1324
 msgid "Download returns a JSON copy of everything we hold on you. Deletion anonymizes your record; donation totals stay for the organization's tax records."
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1342
+#: assets/donor-portal/index.jsx:1356
 msgid "Permanently anonymize your account? Past donations stay attached for tax/audit but every other detail is wiped. This cannot be undone."
 msgstr ""
 
 #. translators: %s: the literal confirmation keyword to type (DELETE)
-#: assets/donor-portal/index.jsx:1345
+#: assets/donor-portal/index.jsx:1359
 #, js-format
 msgid "Type %s to confirm."
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1436
+#: assets/donor-portal/index.jsx:1450
 msgid "Could not load your consents."
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1454
+#: assets/donor-portal/index.jsx:1468
 msgid "No consent purposes are defined yet."
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1455
+#: assets/donor-portal/index.jsx:1469
 msgid "The organization has not configured any subscriptions or consents."
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1468
-#: assets/donor-portal/index.jsx:1483
+#: assets/donor-portal/index.jsx:1482
+#: assets/donor-portal/index.jsx:1497
 msgid "Could not save your choice."
 msgstr ""
 
 #. translators: %d: number of consent items that were updated
-#: assets/donor-portal/index.jsx:1494
+#: assets/donor-portal/index.jsx:1508
 #, js-format
 msgid "%d updated."
 msgid_plural "%d updated."
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/donor-portal/index.jsx:1495
+#: assets/donor-portal/index.jsx:1509
 msgid "The items marked below have new terms since you last reviewed them. Confirm or change each one."
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1499
+#: assets/donor-portal/index.jsx:1513
 msgid "Toggle each subscription below. Every change is logged for your records."
 msgstr ""
 
 #. translators: %s: date the consent was last confirmed
-#: assets/donor-portal/index.jsx:1518
+#: assets/donor-portal/index.jsx:1532
 #, js-format
 msgid "Last confirmed %s"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1526
+#: assets/donor-portal/index.jsx:1540
 msgid "Keep as is"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1545
+#: assets/donor-portal/index.jsx:1559
 msgid "Could not load your preferences."
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1570
+#: assets/donor-portal/index.jsx:1584
 msgid "Make all future donations anonymous"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1573
+#: assets/donor-portal/index.jsx:1587
 msgid "Save preferences"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1609
+#: assets/donor-portal/index.jsx:1623
 msgid "year"
 msgid_plural "years"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/donor-portal/index.jsx:1610
+#: assets/donor-portal/index.jsx:1624
 msgid "week"
 msgid_plural "weeks"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/donor-portal/index.jsx:1611
+#: assets/donor-portal/index.jsx:1625
 msgid "month"
 msgid_plural "months"
 msgstr[0] ""
 msgstr[1] ""
 
 #. translators: 1: count, 2: interval unit (e.g. months)
-#: assets/donor-portal/index.jsx:1613
+#: assets/donor-portal/index.jsx:1627
 #, js-format
 msgid "Every %1$d %2$s"
 msgstr ""

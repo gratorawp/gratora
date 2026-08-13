@@ -80,6 +80,7 @@ const TITLES = {
 export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
     const [ busy, setBusy ]     = useState( false );
     const [ error, setError ]   = useState( null );
+    const [ approveUrl, setApproveUrl ] = useState( null );
     // Telling the donor is the default: the change was not theirs.
     const [ notify, setNotify ] = useState( true );
     const [ months, setMonths ] = useState( 1 );
@@ -101,9 +102,16 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
 
         setBusy( true );
         setError( null );
+        setApproveUrl( null );
         apiFetch( { path: `/dono/v1/admin/recurring/${ plan.id }/action`, method: 'POST', data: body } )
             .then( () => { onClose(); if ( onDone ) onDone(); } )
-            .catch( ( e ) => setError( e?.message || __( 'That change could not be made.', 'dono-fundraising-platform' ) ) )
+            .catch( ( e ) => {
+                setError( e?.message || __( 'That change could not be made.', 'dono-fundraising-platform' ) );
+                // PayPal answers a revision with a link the donor has to open.
+                // The API has always returned it and nothing rendered it, so
+                // the message said "approve this change" and gave no way to.
+                if ( e?.data?.approve_url ) setApproveUrl( e.data.approve_url );
+            } )
             .finally( () => setBusy( false ) );
     };
 
@@ -216,6 +224,17 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
             ) }
 
             { error && <p className="dp-error" style={ { marginTop: 12 } }>{ error }</p> }
+            { approveUrl && (
+                <p style={ { marginTop: 8 } }>
+                    <a href={ approveUrl } target="_blank" rel="noreferrer noopener">
+                        { __( 'Open the approval page', 'dono-fundraising-platform' ) }
+                    </a>
+                    { ' ' }
+                    <span className="dono-muted">
+                        { __( 'The donor has to approve it while signed in to their own account.', 'dono-fundraising-platform' ) }
+                    </span>
+                </p>
+            ) }
         </Dialog>
     );
 }

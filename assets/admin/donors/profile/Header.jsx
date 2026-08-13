@@ -1,5 +1,4 @@
 import { __, sprintf } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
 
 import { formatMonth } from './helpers';
 import { IconRotate, IconAlert } from './icons';

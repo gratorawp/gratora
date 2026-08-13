@@ -168,6 +168,14 @@
 
 .dp-error { color: #b91c1c; }
 
+// The link that completes a change PayPal is waiting on. Sits under the error
+// that explains why nothing happened yet, so it reads as the way out of it.
+.dp-approve {
+    margin-top: 8px;
+
+    a { font-weight: 600; }
+}
+
 .dp-signin form {
     display: flex;
     gap: 8px;

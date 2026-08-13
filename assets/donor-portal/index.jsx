@@ -773,12 +773,19 @@ function Recurring() {
 function RecurringActionSheet( { plan, onClose, onDone } ) {
     const [ stage, setStage ] = useState( 'menu' );
     const [ err, setErr ] = useState( '' );
+    const [ approveUrl, setApproveUrl ] = useState( null );
     const panelRef = useRef( null );
     useFocusTrap( panelRef, true, onClose );
 
     const call = ( body ) => api( `recurring/${ plan.id }/action`, { method: 'POST', body: JSON.stringify( body ) } )
         .then( onDone )
-        .catch( ( e ) => setErr( e.message || __( 'Something went wrong.', 'dono-fundraising-platform' ) ) );
+        .catch( ( e ) => {
+            setErr( e.message || __( 'Something went wrong.', 'dono-fundraising-platform' ) );
+            // PayPal answers a revision with a link the donor must open. The
+            // API returned it all along and nothing showed it, so the message
+            // asked them to approve the change and gave them no way to.
+            setApproveUrl( e?.data?.approve_url || null );
+        } );
 
     return (
         // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events -- click-outside-to-close is a mouse convenience; Escape (focus trap) and the close button provide keyboard dismissal
@@ -786,6 +793,13 @@ function RecurringActionSheet( { plan, onClose, onDone } ) {
             <div class="dp-modal__panel">
                 <button class="dp-modal__close" onClick={ onClose } aria-label={ __( 'Close', 'dono-fundraising-platform' ) }>×</button>
                 { err && <p class="dp-error">{ err }</p> }
+                { approveUrl && (
+                    <p class="dp-approve">
+                        <a href={ approveUrl } target="_blank" rel="noreferrer noopener">
+                            { __( 'Approve the change', 'dono-fundraising-platform' ) }
+                        </a>
+                    </p>
+                ) }
 
                 { stage === 'menu' && (
                     <>
