@@ -452,11 +452,34 @@ final class ToolsController
                  ))
                  . '</p>';
 
-        $ok = $this->mailer->sendRaw($to, $subject, $body, ['html' => true]);
+        // wp_mail swallows the PHPMailer exception and returns a bare false, so
+        // the reason only ever reaches this action. Without capturing it the
+        // admin is told the send failed and nothing about why, which is the one
+        // thing they need.
+        $reason = '';
+        $capture = static function ($error) use (&$reason): void {
+            if ($error instanceof \WP_Error) {
+                $reason = (string) $error->get_error_message();
+            }
+        };
+        add_action('wp_mail_failed', $capture);
+
+        try {
+            $ok = $this->mailer->sendRaw($to, $subject, $body, ['html' => true]);
+        } finally {
+            remove_action('wp_mail_failed', $capture);
+        }
+
         if (! $ok) {
             return new \WP_Error(
                 'dono_test_send_failed',
-                __('wp_mail() returned false. Check your SMTP plugin / server mail logs.', 'dono-fundraising-platform'),
+                $reason !== ''
+                    ? sprintf(
+                        /* translators: %s: the mail server's own error message. */
+                        __('The mail server refused it: %s', 'dono-fundraising-platform'),
+                        $reason
+                    )
+                    : __('wp_mail() returned false and reported no reason. The site most likely has no mail transport configured: install an SMTP plugin or check your host\'s mail logs.', 'dono-fundraising-platform'),
                 ['status' => 500]
             );
         }
