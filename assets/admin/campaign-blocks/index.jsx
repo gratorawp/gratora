@@ -163,6 +163,23 @@ function CampaignCanvas( { block, attributes, setAttributes, onCampaignPage, res
     );
 }
 
+// The grid draws campaigns other than the one it is bound to, so the record
+// that changes is rarely the one CampaignCanvas watches: a goal edited on any
+// published campaign changes what this block shows. The collection's own shape
+// is the key. Its length catches a campaign published or deleted, the latest
+// timestamp catches an edit to any of them, and the picker already holds this
+// query so watching it costs no extra request.
+function useCampaignsRevision() {
+    const { records } = useEntityRecords( 'dono/v1', 'campaign', { per_page: 100 } );
+    if ( ! Array.isArray( records ) ) return undefined;
+
+    const latest = records.reduce(
+        ( max, c ) => ( c.updated_at && c.updated_at > max ? c.updated_at : max ),
+        ''
+    );
+    return `${ records.length }:${ latest }`;
+}
+
 /**
  * Picks the campaign's cover photo from inside the block.
  *
@@ -943,6 +960,7 @@ registerBlockType( 'dono/campaign-grid', {
     },
     edit: function GridEdit( { attributes, setAttributes } ) {
         const { onCampaignPage, resolvedId } = useBoundCampaign( attributes.campaignId );
+        const revision = useCampaignsRevision();
         return <>
             <InspectorControls>
                 <PanelBody title={ __( 'Campaigns grid', 'dono-fundraising-platform' ) }>
@@ -994,11 +1012,15 @@ registerBlockType( 'dono/campaign-grid', {
                     ) }
                 </PanelBody>
             </InspectorControls>
+            { /* Not CampaignCanvas: campaignId here is the campaign to leave
+                 out, so the canvas's "choose a campaign" placeholder would
+                 block the grid's own default of excluding nothing. */ }
             <div { ...useBlockProps() }>
                 <Disabled>
                     <ServerSideRender
                         block="dono/campaign-grid"
                         attributes={ { ...attributes, campaignId: attributes.campaignId || resolvedId } }
+                        urlQueryArgs={ revision ? { dono_rev: revision } : undefined }
                     />
                 </Disabled>
             </div>
