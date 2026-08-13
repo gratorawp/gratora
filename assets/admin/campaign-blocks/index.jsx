@@ -114,6 +114,17 @@ function CampaignField( { attributes, setAttributes, onCampaignPage, issues = []
 function CampaignCanvas( { block, attributes, setAttributes, onCampaignPage, resolvedId, icon = 'megaphone', className, children, isSelected = false, interactive = false, editableTitle = false } ) {
     const blockProps = useBlockProps( className ? { className } : {} );
 
+    // These previews are rendered by the server, so they only change when the
+    // request does. Block attributes are the usual trigger, but the campaign is
+    // a separate record: edit its image or its goal and the attributes are
+    // untouched, so the canvas keeps showing the answer from before the edit.
+    // Carrying the campaign's own timestamp in the query makes every campaign
+    // change refresh every block bound to it, not just the one that made it.
+    const { record: boundCampaign } = useEntityRecord( 'dono/v1', 'campaign', resolvedId, {
+        enabled: resolvedId > 0,
+    } );
+    const revision = boundCampaign?.updated_at;
+
     if ( ! onCampaignPage && ! attributes.campaignId ) {
         return (
             <div { ...blockProps }>
@@ -145,6 +156,7 @@ function CampaignCanvas( { block, attributes, setAttributes, onCampaignPage, res
                     attributes={ editableTitle
                         ? { ...attributes, campaignId: resolvedId, title: '' }
                         : { ...attributes, campaignId: resolvedId } }
+                    urlQueryArgs={ revision ? { dono_rev: revision } : undefined }
                 />
             </Disabled>
         </div>
