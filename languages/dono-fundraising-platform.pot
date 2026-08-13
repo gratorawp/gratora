@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-13T07:48:12+00:00\n"
+"POT-Creation-Date: 2026-08-13T07:59:27+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: dono-fundraising-platform\n"
@@ -168,7 +168,7 @@ msgstr ""
 
 #: components/StatusBadge.js:5
 #: assets/admin/campaigns/List.jsx:357
-#: assets/admin/donors/Insights.jsx:38
+#: assets/admin/donors/Insights.jsx:39
 #: assets/admin/donors/profile/helpers.js:72
 #: assets/admin/donors/profile/tabs/ActivityTab.jsx:220
 #: assets/admin/donors/profile/tabs/RecurringTab.jsx:11
@@ -225,7 +225,7 @@ msgstr[1] ""
 
 #: styling/StylePreview.js:109
 #: src/Campaigns/Blocks/views/campaign-progress.php:38
-#: assets/admin/donors/Insights.jsx:131
+#: assets/admin/donors/Insights.jsx:132
 #: assets/admin/forms/blocks/goal/index.js:171
 msgid "donors"
 msgstr ""
@@ -233,7 +233,7 @@ msgstr ""
 #: styling/StylePreview.js:109
 #: assets/admin/campaigns/Detail.jsx:982
 #: assets/admin/donors/index.jsx:367
-#: assets/admin/donors/Insights.jsx:229
+#: assets/admin/donors/Insights.jsx:230
 msgid "No donors yet"
 msgstr ""
 
@@ -288,7 +288,7 @@ msgstr ""
 #: assets/admin/donations/detail/helpers.js:66
 #: assets/admin/donors/DonorProfile.jsx:144
 #: assets/admin/donors/index.jsx:162
-#: assets/admin/donors/Insights.jsx:194
+#: assets/admin/donors/Insights.jsx:195
 #: assets/admin/forms/blocks/donation-summary/index.js:20
 #: assets/admin/forms/blocks/email/index.js:17
 #: assets/admin/forms/blocks/email/index.js:22
@@ -532,7 +532,7 @@ msgstr ""
 #: assets/admin/donations/detail/Header.jsx:25
 #: assets/admin/donations/List.jsx:489
 #: assets/admin/donations/List.jsx:493
-#: assets/admin/donors/Insights.jsx:196
+#: assets/admin/donors/Insights.jsx:197
 #: assets/admin/donors/profile/LifetimeMetrics.jsx:95
 #: assets/admin/donors/profile/Tabs.jsx:8
 #: assets/admin/forms/Editor.jsx:1349
@@ -554,8 +554,8 @@ msgstr ""
 #: assets/admin/dashboard/widgets/QuickActions.jsx:66
 #: assets/admin/donors/index.jsx:344
 #: assets/admin/donors/index.jsx:348
-#: assets/admin/donors/Insights.jsx:94
-#: assets/admin/donors/Insights.jsx:434
+#: assets/admin/donors/Insights.jsx:95
+#: assets/admin/donors/Insights.jsx:435
 #: assets/admin/donors/profile/Header.jsx:48
 #: assets/admin/forms/Editor.jsx:1350
 #: assets/admin/tools/tabs/ExportTab.jsx:247
@@ -919,15 +919,15 @@ msgid "Removed form"
 msgstr ""
 
 #: src/Campaigns/CampaignMetricsService.php:309
-#: src/Donors/DonorMetricsService.php:102
-#: src/Donors/DonorMetricsService.php:547
-#: src/Donors/DonorMetricsService.php:588
+#: src/Donors/DonorMetricsService.php:125
+#: src/Donors/DonorMetricsService.php:570
+#: src/Donors/DonorMetricsService.php:611
 #: src/Forms/Shortcode/DonationFormShortcode.php:611
 #: src/Receipts/resources/views/generic.php:182
 #: src/Reports/TaxStatementBuilder.php:65
 #: assets/admin/donations/detail/Header.jsx:18
 #: assets/admin/donations/List.jsx:270
-#: assets/admin/donors/Insights.jsx:193
+#: assets/admin/donors/Insights.jsx:194
 #: assets/admin/forms/blocks/donation-summary/index.js:20
 #: assets/admin/subscriptions/List.jsx:532
 #: assets/admin/_shared/emailTemplates.js:67
@@ -1520,22 +1520,22 @@ msgstr ""
 msgid "That picture is too large. The most this site takes is %s."
 msgstr ""
 
-#: src/Donors/DonorMetricsService.php:332
+#: src/Donors/DonorMetricsService.php:355
 msgid "This donor has been redacted under GDPR. PII has been removed; lifetime totals are kept for accounting."
 msgstr ""
 
-#: src/Donors/DonorMetricsService.php:347
+#: src/Donors/DonorMetricsService.php:370
 msgid "A renewal was declined. Open the Recurring tab to collect it again."
 msgstr ""
 
 #. translators: %s: the payment gateway name, e.g. Stripe.
-#: src/Donors/DonorMetricsService.php:351
+#: src/Donors/DonorMetricsService.php:374
 #, php-format
 msgid "A renewal was declined, but the %s connection is not active, so nothing can be collected from here. Reconnect it in Settings, Payment gateways."
 msgstr ""
 
 #. translators: %s: the payment gateway name, e.g. PayPal.
-#: src/Donors/DonorMetricsService.php:357
+#: src/Donors/DonorMetricsService.php:380
 #, php-format
 msgid "A renewal was declined. %s retries on its own schedule; to fix it sooner, ask the donor to update their card in the donor portal."
 msgstr ""
@@ -1666,7 +1666,7 @@ msgstr ""
 #: src/Forms/Shortcode/DonationFormShortcode.php:608
 #: assets/admin/campaigns/List.jsx:353
 #: assets/admin/donors/index.jsx:210
-#: assets/admin/donors/Insights.jsx:197
+#: assets/admin/donors/Insights.jsx:198
 #: assets/admin/forms/blocks/donation-summary/index.js:22
 msgid "Total"
 msgstr ""
@@ -1737,7 +1737,7 @@ msgstr ""
 #: src/Rest/Admin/DonationsController.php:1462
 #: assets/admin/donors/DonorProfile.jsx:168
 #: assets/admin/donors/index.jsx:171
-#: assets/admin/donors/Insights.jsx:195
+#: assets/admin/donors/Insights.jsx:196
 #: assets/admin/forms/blocks/address/index.js:191
 #: assets/admin/forms/blocks/address/index.js:229
 #: assets/admin/forms/blocks/country/index.js:20
@@ -1768,7 +1768,7 @@ msgstr ""
 
 #: src/Exports/DonorExporter.php:148
 #: assets/admin/donors/index.jsx:220
-#: assets/admin/donors/Insights.jsx:198
+#: assets/admin/donors/Insights.jsx:199
 msgid "Last donation"
 msgstr ""
 
@@ -3898,7 +3898,7 @@ msgstr ""
 #: src/Rest/Admin/RolesController.php:105
 #: assets/admin/donations/detail/helpers.js:74
 #: assets/admin/donations/RecordDonationDrawer.jsx:19
-#: assets/admin/donors/Insights.jsx:19
+#: assets/admin/donors/Insights.jsx:20
 #: assets/admin/donors/profile/helpers.js:147
 #: assets/admin/_shared/components/FormTemplatePicker.jsx:23
 msgid "Other"
@@ -4811,7 +4811,7 @@ msgid "Label"
 msgstr ""
 
 #: assets/admin/campaign-blocks/index.jsx:412
-#: assets/admin/donors/Insights.jsx:268
+#: assets/admin/donors/Insights.jsx:269
 msgid "Size"
 msgstr ""
 
@@ -6357,7 +6357,7 @@ msgid "Active campaigns"
 msgstr ""
 
 #: assets/admin/dashboard/Dashboard.jsx:131
-#: assets/admin/donors/Insights.jsx:441
+#: assets/admin/donors/Insights.jsx:459
 msgid "Recurring revenue"
 msgstr ""
 
@@ -7530,7 +7530,7 @@ msgid "Loading donor…"
 msgstr ""
 
 #: assets/admin/donors/index.jsx:35
-#: assets/admin/donors/Insights.jsx:32
+#: assets/admin/donors/Insights.jsx:33
 msgid "Total donors"
 msgstr ""
 
@@ -7640,203 +7640,203 @@ msgstr ""
 msgid "Insights"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:13
+#: assets/admin/donors/Insights.jsx:14
 msgid "Champions"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:13
+#: assets/admin/donors/Insights.jsx:14
 msgid "Active, frequent, high LTV"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:14
+#: assets/admin/donors/Insights.jsx:15
 #: assets/admin/donors/profile/helpers.js:142
 msgid "Loyal"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:14
+#: assets/admin/donors/Insights.jsx:15
 msgid "Active, 2+ donations"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:15
+#: assets/admin/donors/Insights.jsx:16
 #: assets/admin/donors/profile/helpers.js:143
 msgid "New"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:15
+#: assets/admin/donors/Insights.jsx:16
 msgid "Joined recently"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:16
-#: assets/admin/donors/Insights.jsx:44
+#: assets/admin/donors/Insights.jsx:17
+#: assets/admin/donors/Insights.jsx:45
 #: assets/admin/donors/profile/helpers.js:144
 msgid "At risk"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:16
+#: assets/admin/donors/Insights.jsx:17
 msgid "Was active, slowing down"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:17
+#: assets/admin/donors/Insights.jsx:18
 #: assets/admin/donors/profile/helpers.js:145
 msgid "Hibernating"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:17
+#: assets/admin/donors/Insights.jsx:18
 msgid "Long lapsed, low LTV"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:18
-#: assets/admin/donors/Insights.jsx:56
+#: assets/admin/donors/Insights.jsx:19
+#: assets/admin/donors/Insights.jsx:57
 #: assets/admin/donors/profile/helpers.js:146
 msgid "Lost"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:18
+#: assets/admin/donors/Insights.jsx:19
 msgid "> 12 months silent"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:19
+#: assets/admin/donors/Insights.jsx:20
 msgid "Uncategorised"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:34
+#: assets/admin/donors/Insights.jsx:35
 msgid "new (30d)"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:34
+#: assets/admin/donors/Insights.jsx:35
 msgid "no new donors"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:40
+#: assets/admin/donors/Insights.jsx:41
 msgid "of base · gave in 90d"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:46
+#: assets/admin/donors/Insights.jsx:47
 msgid "silent 90-180d"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:50
+#: assets/admin/donors/Insights.jsx:51
 msgid "Lapsed"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:52
+#: assets/admin/donors/Insights.jsx:53
 msgid "silent 180-365d"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:58
+#: assets/admin/donors/Insights.jsx:59
 msgid "> 365d silent"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:62
+#: assets/admin/donors/Insights.jsx:63
 msgid "Median LTV"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:64
+#: assets/admin/donors/Insights.jsx:65
 msgid "avg"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:75
+#: assets/admin/donors/Insights.jsx:76
 msgid "Donor segment distribution"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:93
+#: assets/admin/donors/Insights.jsx:94
 msgid "Segment"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:95
+#: assets/admin/donors/Insights.jsx:96
 msgid "% of base"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:96
+#: assets/admin/donors/Insights.jsx:97
 msgid "Avg LTV"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:97
+#: assets/admin/donors/Insights.jsx:98
 msgid "Total LTV"
 msgstr ""
 
 #. translators: %d: number of days
-#: assets/admin/donors/Insights.jsx:168
+#: assets/admin/donors/Insights.jsx:169
 #, js-format
 msgid "About %d day between gifts, on average."
 msgid_plural "About %d days between gifts, on average."
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/donors/Insights.jsx:199
+#: assets/admin/donors/Insights.jsx:200
 msgid "Why"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:230
+#: assets/admin/donors/Insights.jsx:231
 msgid "The top donor leaderboard fills in as your first completed donations roll in."
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:244
+#: assets/admin/donors/Insights.jsx:245
 msgid "Not enough history yet"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:245
+#: assets/admin/donors/Insights.jsx:246
 msgid "Cohort retention needs at least one donation in a cohort month before the heatmap can render."
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:267
+#: assets/admin/donors/Insights.jsx:268
 msgid "Cohort"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:270
+#: assets/admin/donors/Insights.jsx:271
 msgid "M0"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:304
+#: assets/admin/donors/Insights.jsx:305
 msgid "Active recurring"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:306
+#: assets/admin/donors/Insights.jsx:307
 msgid "plans currently billing"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:310
+#: assets/admin/donors/Insights.jsx:311
 msgid "MRR"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:312
+#: assets/admin/donors/Insights.jsx:313
 msgid "monthly-equivalent revenue"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:316
+#: assets/admin/donors/Insights.jsx:317
 msgid "New this month"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:318
+#: assets/admin/donors/Insights.jsx:319
 msgid "plans started"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:322
+#: assets/admin/donors/Insights.jsx:323
 #: assets/admin/subscriptions/List.jsx:200
 msgid "Churn this month"
 msgstr ""
 
 #. translators: %d: count
-#: assets/admin/donors/Insights.jsx:324
+#: assets/admin/donors/Insights.jsx:325
 #, js-format
 msgid "%d cancellations"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:356
+#: assets/admin/donors/Insights.jsx:357
 msgid "Could not load at-risk donors."
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:369
+#: assets/admin/donors/Insights.jsx:370
 msgid "1 at-risk donor"
 msgstr ""
 
 #. translators: %s: count
-#: assets/admin/donors/Insights.jsx:370
+#: assets/admin/donors/Insights.jsx:371
 #, js-format
 msgid "%s at-risk donors"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:374
+#: assets/admin/donors/Insights.jsx:375
 #: assets/admin/settings/panels/NumberingPanel.jsx:255
 #: assets/admin/settings/panels/RolesPanel.jsx:38
 #: assets/admin/tools/tabs/SystemInfoTab.jsx:47
@@ -7850,50 +7850,62 @@ msgstr ""
 msgid "Loading…"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:380
+#: assets/admin/donors/Insights.jsx:381
 msgid "No donors are slipping"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:381
+#: assets/admin/donors/Insights.jsx:382
 msgid "Donors appear here when they have gone quiet for longer than usual, so you can reach them before they lapse."
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:392
+#: assets/admin/donors/Insights.jsx:393
 msgid "Prev"
 msgstr ""
 
 #. translators: 1: current page, 2: total pages
-#: assets/admin/donors/Insights.jsx:394
+#: assets/admin/donors/Insights.jsx:395
 #, js-format
 msgid "Page %1$d of %2$d"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:396
+#: assets/admin/donors/Insights.jsx:397
 #: assets/admin/onboarding/Onboarding.jsx:333
 msgid "Next"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:422
+#: assets/admin/donors/Insights.jsx:423
 msgid "Loading insights…"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:446
+#. translators: %d: donors whose donations are all test-mode.
+#: assets/admin/donors/Insights.jsx:444
+#, js-format
+msgid "%d donor has only test donations, so they are not in this analysis."
+msgid_plural "%d donors have only test donations, so they are not in this analysis."
+msgstr[0] ""
+msgstr[1] ""
+
+#: assets/admin/donors/Insights.jsx:453
+msgid "Lifetime value, segments and retention are built from money actually taken, so there is no test version of them. The donors themselves are on the Donors tab, badged."
+msgstr ""
+
+#: assets/admin/donors/Insights.jsx:464
 msgid "Donor segments"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:449
+#: assets/admin/donors/Insights.jsx:467
 msgid "Lifetime value distribution"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:454
+#: assets/admin/donors/Insights.jsx:472
 msgid "Cohort retention"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:458
+#: assets/admin/donors/Insights.jsx:476
 msgid "Needs attention: at-risk donors"
 msgstr ""
 
-#: assets/admin/donors/Insights.jsx:462
+#: assets/admin/donors/Insights.jsx:480
 msgid "Top donors by lifetime value"
 msgstr ""
 

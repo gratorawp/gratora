@@ -93,6 +93,22 @@ final class DonorVisibilityTest extends IntegrationTestCase
         $this->assertSame(0, (int) $profile['lifetime']['count'], 'and the money figure stays clean');
     }
 
+    public function test_insights_says_how_many_donors_it_left_out(): void
+    {
+        $id = $this->donor('insights-test-only@example.com');
+        $this->seedDonation($id, true);
+
+        $insights = Plugin::instance()->container
+            ->get(\Dono\Donors\DonorMetricsService::class)
+            ->insights();
+
+        // Insights reads the donor rollup columns, which are live-only by
+        // construction, so there is no test-inclusive version of lifetime
+        // value or retention to offer. Naming the gap is the whole fix.
+        $this->assertSame(1, (int) $insights['test']['test_only_donors']);
+        $this->assertSame(0, (int) $insights['kpi']['total'], 'and the analysis itself does not move');
+    }
+
     public function test_a_donor_who_gave_for_real_is_not_badged_as_test(): void
     {
         $id = $this->donor('badge-real@example.com');

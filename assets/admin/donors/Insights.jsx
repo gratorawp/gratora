@@ -4,6 +4,7 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { Users as UsersIcon, History } from 'lucide-react';
 
 import EmptyState from '../_shared/components/EmptyState';
+import Notice from '../_shared/components/Notice';
 import MetricCard from '../_shared/widgets/MetricCard';
 import { WidgetCard } from '../_shared/widgets/Widget';
 import { formatAmount, formatAmountCompact, formatDate } from '../_shared/format';
@@ -436,6 +437,23 @@ export default function Insights( { toggleSlot } ) {
                     <div className="dono-page-head__right">{ toggleSlot }</div>
                 </div>
             ) }
+            { ( data.test?.test_only_donors || 0 ) > 0 && (
+                <Notice status="info" isDismissible={ false }>
+                    { sprintf(
+                        /* translators: %d: donors whose donations are all test-mode. */
+                        _n(
+                            '%d donor has only test donations, so they are not in this analysis.',
+                            '%d donors have only test donations, so they are not in this analysis.',
+                            data.test.test_only_donors,
+                            'dono-fundraising-platform'
+                        ),
+                        data.test.test_only_donors
+                    ) }
+                    { ' ' }
+                    { __( 'Lifetime value, segments and retention are built from money actually taken, so there is no test version of them. The donors themselves are on the Donors tab, badged.', 'dono-fundraising-platform' ) }
+                </Notice>
+            ) }
+
             <LifecycleKpis kpi={ data.kpi } />
 
             <WidgetCard title={ __( 'Recurring revenue', 'dono-fundraising-platform' ) }>

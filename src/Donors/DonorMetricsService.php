@@ -46,6 +46,21 @@ final class DonorMetricsService
      *
      * @since 1.0.0
      */
+    /**
+     * Donors whose whole footprint is test-mode, so the operator can tell an
+     * empty analysis from a broken one.
+     *
+     * @since 1.0.0
+     */
+    private function testOnlyDonorCount(): int
+    {
+        // One whereRaw, not two: it emits no AND connector, so a second one
+        // runs straight into the first and the SQL will not parse.
+        return (int) Donor::query()
+            ->whereRaw(DonorRepository::testOnlyDonorPredicate() . ' AND redacted_at IS NULL')
+            ->count();
+    }
+
     public function insights(): array
     {
         $today = $this->clock->now()->format('Y-m-d');
@@ -64,6 +79,14 @@ final class DonorMetricsService
         $kpi['lost_pct']    = (int) round(($kpi['lost']    / $total) * 100);
 
         return [
+            // Insights cannot be made test-inclusive the way the dashboard can.
+            // Every figure here reads the donor rollup columns, and those are
+            // synced through donationsOnly(), so a rehearsal contributes
+            // nothing to total_donated_cents, donations_count or the donation
+            // dates every segment and cohort is cut on. There is no
+            // test-inclusive version of these numbers to offer, so the screen
+            // says what it is missing instead of pretending to be empty.
+            'test'         => ['test_only_donors' => $this->testOnlyDonorCount()],
             'kpi'          => $kpi,
             'segments'     => $segments,
             'ltv_buckets'  => $ltv,
