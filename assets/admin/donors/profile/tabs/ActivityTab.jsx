@@ -150,7 +150,7 @@ function TimelineRow( { event, campaigns } ) {
     );
 }
 
-function RecentDonationsCard( { donations, campaigns, lifetime, onAllDonations } ) {
+function RecentDonationsCard( { donations, campaigns, donationsTotal, onAllDonations } ) {
     const top5 = donations.slice( 0, 5 );
     return (
         <div className="dp-card">
@@ -192,7 +192,11 @@ function RecentDonationsCard( { donations, campaigns, lifetime, onAllDonations }
                     ) }
             </div>
             <div className="dp-card__foot">
-                <span className="num">{ sprintf( /* translators: %d: lifetime donation count */ __( '%d lifetime', 'dono-fundraising-platform' ), lifetime.count ) }</span>
+                { /* Counts the rows this card lists, which include test,
+                     pending and failed ones. lifetime.count is live paid
+                     donations only, so it disagreed with both the list above it
+                     and the tab badge that opens the same list. */ }
+                <span className="num">{ sprintf( /* translators: %d: how many donations this donor has */ __( '%d in total', 'dono-fundraising-platform' ), donationsTotal ) }</span>
                 <a
                     href="#donations"
                     onClick={ ( e ) => { e.preventDefault(); onAllDonations?.(); } }
@@ -248,7 +252,7 @@ function Row( { label, value, strong = false } ) {
 
 const OVERVIEW_EVENTS = 10;
 
-export default function ActivityTab( { donations, events, eventsTotal, campaigns, recurring, lifetime, onAllDonations, onSeeAllActivity } ) {
+export default function ActivityTab( { donations, events, eventsTotal, campaigns, recurring, donationsTotal, onAllDonations, onSeeAllActivity } ) {
     // The overview is a preview; the Activity tab holds the full, paged log.
     const recentEvents = events.slice( 0, OVERVIEW_EVENTS );
     return (
@@ -258,7 +262,7 @@ export default function ActivityTab( { donations, events, eventsTotal, campaigns
                     <RecentDonationsCard
                         donations={ donations }
                         campaigns={ campaigns }
-                        lifetime={ lifetime }
+                        donationsTotal={ donationsTotal }
                         onAllDonations={ onAllDonations }
                     />
 

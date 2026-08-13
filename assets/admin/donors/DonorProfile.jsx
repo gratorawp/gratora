@@ -371,11 +371,11 @@ export default function DonorProfile( { id, onBack } ) {
                     { tab === 'overview' && (
                         <ActivityTab
                             donations={ donations }
+                            donationsTotal={ donationsTotal }
                             events={ events }
                             eventsTotal={ eventsTotal }
                             campaigns={ campaigns }
                             recurring={ recurring }
-                            lifetime={ lifetime }
                             onAllDonations={ () => setTab( 'donations' ) }
                             onSeeAllActivity={ () => setTab( 'activity' ) }
                         />

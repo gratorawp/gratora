@@ -77,6 +77,27 @@ final class DonorVisibilityTest extends IntegrationTestCase
         $this->assertArrayHasKey($id, DonorRepository::testOnlyIdsAmong([$id]));
     }
 
+    public function test_the_tab_badge_and_the_card_footer_count_the_same_rows(): void
+    {
+        // They label the same list, so they have to agree. The footer read
+        // lifetime.count (live paid only) while the badge counts every row, so
+        // one donation that was pending or failed split them by one.
+        $id = $this->donor('tab-vs-footer@example.com');
+        $this->seedDonation($id, false);
+        $this->seedDonation($id, true);
+
+        $profile = Plugin::instance()->container
+            ->get(\Dono\Donors\DonorMetricsService::class)
+            ->profile($id);
+
+        $this->assertSame(2, (int) $profile['donations_total'], 'both read this');
+        $this->assertNotSame(
+            (int) $profile['lifetime']['count'],
+            (int) $profile['donations_total'],
+            'and it is deliberately not the money count'
+        );
+    }
+
     public function test_the_donations_tab_badge_counts_test_donations_too(): void
     {
         $id = $this->donor('tab-count-test-only@example.com');
