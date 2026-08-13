@@ -160,6 +160,7 @@ use Dono\Gateways\GatewayManager;
 use Dono\Gateways\GatewayReconciler;
 use Dono\Gateways\Offline\OfflineGateway;
 use Dono\Gateways\Sandbox\SandboxGateway;
+use Dono\Gateways\Sandbox\SandboxRenewer;
 use Dono\Gateways\Stripe\StripeApi;
 use Dono\Gateways\PayPal\PayPalAccount;
 use Dono\Gateways\PayPal\PayPalApi;
@@ -856,6 +857,18 @@ final class CoreModule implements DonoModule
             $c->get(AsyncDispatcher::class)
         ));
         $c->get(RecurringResumer::class)->register();
+
+        // Registered whatever test mode says: this sweep is also what ends a
+        // sandbox rehearsal once test mode goes off, and the gateway that
+        // could cancel those plans deregisters itself at that point.
+        $c->bind(SandboxRenewer::class, fn (Container $c) => new SandboxRenewer(
+            $c->get(RecurringPlanRepository::class),
+            $c->get(DonationService::class),
+            $c->get(TestMode::class),
+            $c->get(Clock::class),
+            $c->get(AsyncDispatcher::class)
+        ));
+        $c->get(SandboxRenewer::class)->register();
 
         // Data migrations. dbDelta reconciles shape and nothing else, so
         // anything that has to touch contents lives here.

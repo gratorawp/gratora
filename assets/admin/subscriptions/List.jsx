@@ -536,9 +536,23 @@ export default function List() {
                 return (
                     <div className="dono-row">
                         <div className="dono-row__body">
-                            <a className="dono-row__link dono-row__link--strong" href={ donorHref( d.id ) } { ...rowLinkProps }>
-                                { d.name || __( '(no name)', 'dono-fundraising-platform' ) }
-                            </a>
+                            <span className="dono-ref-cell">
+                                <a className="dono-row__link dono-row__link--strong" href={ donorHref( d.id ) } { ...rowLinkProps }>
+                                    { d.name || __( '(no name)', 'dono-fundraising-platform' ) }
+                                </a>
+                                { item.simulated && (
+                                    <span
+                                        className="dono-pill dono-pill--test"
+                                        title={ sprintf(
+                                            /* translators: %d: minutes between simulated renewals. */
+                                            __( 'Test plan. It renews every %d minutes so a full cycle can be watched, and no money moves.', 'dono-fundraising-platform' ),
+                                            item.simulated_cycle_minutes || 0
+                                        ) }
+                                    >
+                                        { __( 'Simulated', 'dono-fundraising-platform' ) }
+                                    </span>
+                                ) }
+                            </span>
                             { d.email && <div className="dono-row__sub dono-row__sub--mono">{ d.email }</div> }
                         </div>
                     </div>

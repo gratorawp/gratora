@@ -15,6 +15,7 @@ use Dono\Gateways\GatewayTransportException;
 use Dono\Gateways\PaymentRetryUnavailable;
 use Dono\Gateways\SubscriptionAware;
 use Dono\Gateways\SubscriptionChangeNeedsApproval;
+use Dono\Gateways\Sandbox\SandboxGateway;
 use Dono\Gateways\SupportsPaymentRetry;
 use Dono\Recurring\RecurringPlan;
 use Dono\Recurring\RecurringPlanActions;
@@ -380,6 +381,13 @@ final class RecurringController
             // so the action is offered per gateway rather than per status.
             'can_retry'               => $this->gateways->get((string) $p->gateway) instanceof SupportsPaymentRetry,
             'is_test'                 => (bool) $p->is_test,
+            // A sandbox cycle is minutes, not the donor's cadence, so the row
+            // has to say so: a weekly plan whose next payment is five minutes
+            // away otherwise reads as a bug rather than as a rehearsal.
+            'simulated'               => $this->gateways->get((string) $p->gateway) instanceof SandboxGateway,
+            'simulated_cycle_minutes' => $this->gateways->get((string) $p->gateway) instanceof SandboxGateway
+                ? SandboxGateway::CYCLE_MINUTES
+                : null,
             'donor'                   => $donor ? [
                 'id'   => (int) $donor->id,
                 'name' => $this->donorName($donor),
