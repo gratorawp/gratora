@@ -80,7 +80,7 @@ export default function EmailPanel( { s } ) {
 
             <Card
                 title={ __( 'Send a test email', 'dono-fundraising-platform' ) }
-                sub={ __( 'Confirms your sender + SMTP transport are working before real receipts go out. Uses your current user email if you leave the recipient blank.', 'dono-fundraising-platform' ) }
+                sub={ __( 'Checks that your site can hand a message to its mail server. Arriving is a separate question: a message accepted here can still be rejected later by the recipient. Uses your current user email if you leave the recipient blank.', 'dono-fundraising-platform' ) }
             >
                 <FormRow label={ __( 'Recipient', 'dono-fundraising-platform' ) }>
                     <input
@@ -104,6 +104,17 @@ export default function EmailPanel( { s } ) {
                         { testNotice.text }
                     </div>
                 ) }
+                { /* Every self-hosted site on shared hosting meets this wall, and
+                     the first symptom is a donor who never got a receipt for
+                     money they gave. Named as a category with a link to the
+                     directory, not a recommendation of one vendor. */ }
+                <p className="dono-muted" style={ { marginTop: 12 } }>
+                    { __( 'If test emails arrive but donors report nothing, the cause is almost always authentication rather than Dono. Mailboxes such as Gmail reject mail that is not signed for your domain, and PHP mail on shared hosting is not. An SMTP plugin pointed at an authenticated provider fixes it for every email your site sends.', 'dono-fundraising-platform' ) }
+                    { ' ' }
+                    <a href="https://wordpress.org/plugins/tags/smtp/" target="_blank" rel="noreferrer noopener">
+                        { __( 'SMTP plugins on WordPress.org', 'dono-fundraising-platform' ) }
+                    </a>
+                </p>
             </Card>
 
             <Card

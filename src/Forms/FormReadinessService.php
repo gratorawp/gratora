@@ -232,12 +232,16 @@ final class FormReadinessService
         $email = $this->settings->get('email');
         $from  = trim((string) ($email['from_email'] ?? ''));
         if ($from === '' || ! is_email($from)) {
-            // Without a valid sender WP falls back to wordpress@<host> and fails SPF/DKIM.
+            // A sender address is a From header, and no header decides
+            // deliverability: SPF is evaluated against the envelope sender the
+            // host stamps, and DKIM needs a signature the site cannot produce
+            // through PHP mail(). Setting this makes receipts identifiable, not
+            // deliverable, and the copy must not promise otherwise.
             return [
                 'id'           => 'receipt-sender',
                 'status'       => 'warn',
                 'label'        => __('Receipt sender uses WordPress fallback', 'dono-fundraising-platform'),
-                'detail'       => __('Set a sender on your site domain (e.g. donations@yoursite.org) so receipts pass SPF and DKIM instead of being marked as spam.', 'dono-fundraising-platform'),
+                'detail'       => __('Set a sender on your site domain, for example donations@yoursite.org, so receipts are recognisable. Delivery itself depends on your mail transport: see Settings, Email.', 'dono-fundraising-platform'),
                 'action_url'   => admin_url('admin.php?page=dono-settings#email'),
                 'action_label' => __('Set sender', 'dono-fundraising-platform'),
             ];
@@ -247,6 +251,11 @@ final class FormReadinessService
             'status' => 'pass',
             /* translators: %s: from-email address used for donation receipts. */
             'label'  => sprintf(__('Receipts sent from %s', 'dono-fundraising-platform'), $from),
+            // Deliberately not a clean bill of health. This check can only see
+            // the address; a receipt sent from a perfectly valid one still
+            // bounces when the host has no authenticated transport, which is
+            // the usual shape of "no donor ever got a receipt".
+            'detail' => __('This confirms the address only. Whether receipts arrive depends on your mail transport.', 'dono-fundraising-platform'),
         ];
     }
 

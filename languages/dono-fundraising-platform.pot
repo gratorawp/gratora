@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-13T10:26:08+00:00\n"
+"POT-Creation-Date: 2026-08-13T10:49:44+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: dono-fundraising-platform\n"
@@ -480,7 +480,7 @@ msgstr ""
 #: src/Campaigns/Blocks/BlockEditorIntegration.php:66
 #: assets/admin/campaigns/List.jsx:289
 #: assets/admin/donations/detail/Header.jsx:23
-#: assets/admin/donations/List.jsx:487
+#: assets/admin/donations/List.jsx:488
 #: assets/admin/donors/index.jsx:342
 #: assets/admin/donors/profile/Header.jsx:46
 #: assets/admin/funds/List.jsx:342
@@ -530,8 +530,8 @@ msgstr ""
 #: assets/admin/dashboard/widgets/KpiRow.jsx:39
 #: assets/admin/dashboard/widgets/QuickActions.jsx:63
 #: assets/admin/donations/detail/Header.jsx:25
-#: assets/admin/donations/List.jsx:489
-#: assets/admin/donations/List.jsx:493
+#: assets/admin/donations/List.jsx:490
+#: assets/admin/donations/List.jsx:494
 #: assets/admin/donors/Insights.jsx:197
 #: assets/admin/donors/profile/LifetimeMetrics.jsx:95
 #: assets/admin/donors/profile/Tabs.jsx:8
@@ -669,7 +669,7 @@ msgstr ""
 #: assets/admin/forms/Editor.jsx:662
 #: assets/admin/funds/List.jsx:480
 #: assets/admin/funds/List.jsx:631
-#: assets/admin/settings/panels/EmailPanel.jsx:231
+#: assets/admin/settings/panels/EmailPanel.jsx:242
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:178
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:231
 #: assets/admin/settings/panels/StripeKeysCard.jsx:142
@@ -728,7 +728,7 @@ msgstr ""
 #: src/Campaigns/Blocks/CampaignBindings.php:52
 #: assets/admin/campaigns/List.jsx:125
 #: assets/admin/campaigns/List.jsx:361
-#: assets/admin/donations/List.jsx:656
+#: assets/admin/donations/List.jsx:657
 #: assets/admin/funds/List.jsx:239
 msgid "Raised"
 msgstr ""
@@ -897,7 +897,7 @@ msgstr ""
 
 #. translators: %s: number of donations
 #: src/Campaigns/Blocks/views/top-donors.php:66
-#: assets/admin/donations/List.jsx:522
+#: assets/admin/donations/List.jsx:523
 #: assets/admin/_shared/components/GoalBar.jsx:22
 #, php-format,js-format
 msgid "%s donation"
@@ -926,7 +926,7 @@ msgstr ""
 #: src/Receipts/resources/views/generic.php:182
 #: src/Reports/TaxStatementBuilder.php:65
 #: assets/admin/donations/detail/Header.jsx:18
-#: assets/admin/donations/List.jsx:270
+#: assets/admin/donations/List.jsx:271
 #: assets/admin/donors/Insights.jsx:194
 #: assets/admin/forms/blocks/donation-summary/index.js:20
 #: assets/admin/subscriptions/List.jsx:532
@@ -1615,7 +1615,7 @@ msgstr ""
 #: src/Receipts/resources/views/generic.php:176
 #: src/Rest/Admin/DonationsController.php:1447
 #: assets/admin/donations/detail/cards/RelatedDonationsCard.jsx:23
-#: assets/admin/donations/List.jsx:236
+#: assets/admin/donations/List.jsx:237
 #: assets/admin/donors/profile/tabs/ActivityLogTab.jsx:84
 #: assets/admin/donors/profile/tabs/DonationsTab.jsx:83
 msgid "Reference"
@@ -1644,7 +1644,7 @@ msgstr ""
 #: assets/admin/donations/detail/cards/RefundsCard.jsx:28
 #: assets/admin/donations/detail/cards/RelatedDonationsCard.jsx:25
 #: assets/admin/donations/detail/RefundDialog.jsx:67
-#: assets/admin/donations/List.jsx:287
+#: assets/admin/donations/List.jsx:288
 #: assets/admin/donations/RecordDonationDrawer.jsx:199
 #: assets/admin/donors/profile/tabs/ActivityLogTab.jsx:113
 #: assets/admin/donors/profile/tabs/DonationsTab.jsx:100
@@ -2112,84 +2112,88 @@ msgstr ""
 msgid "Donations will not be charged and are excluded from reporting. Turn test mode off before going live."
 msgstr ""
 
-#: src/Forms/FormReadinessService.php:239
+#: src/Forms/FormReadinessService.php:243
 msgid "Receipt sender uses WordPress fallback"
 msgstr ""
 
-#: src/Forms/FormReadinessService.php:240
-msgid "Set a sender on your site domain (e.g. donations@yoursite.org) so receipts pass SPF and DKIM instead of being marked as spam."
+#: src/Forms/FormReadinessService.php:244
+msgid "Set a sender on your site domain, for example donations@yoursite.org, so receipts are recognisable. Delivery itself depends on your mail transport: see Settings, Email."
 msgstr ""
 
-#: src/Forms/FormReadinessService.php:242
+#: src/Forms/FormReadinessService.php:246
 msgid "Set sender"
 msgstr ""
 
 #. translators: %s: from-email address used for donation receipts.
-#: src/Forms/FormReadinessService.php:249
+#: src/Forms/FormReadinessService.php:253
 #, php-format
 msgid "Receipts sent from %s"
 msgstr ""
 
-#: src/Forms/FormReadinessService.php:264
-msgid "Donation receipt email is disabled"
-msgstr ""
-
-#: src/Forms/FormReadinessService.php:265
-msgid "Donors will not receive a confirmation after paying."
-msgstr ""
-
-#: src/Forms/FormReadinessService.php:267
-msgid "Enable template"
+#: src/Forms/FormReadinessService.php:258
+msgid "This confirms the address only. Whether receipts arrive depends on your mail transport."
 msgstr ""
 
 #: src/Forms/FormReadinessService.php:273
+msgid "Donation receipt email is disabled"
+msgstr ""
+
+#: src/Forms/FormReadinessService.php:274
+msgid "Donors will not receive a confirmation after paying."
+msgstr ""
+
+#: src/Forms/FormReadinessService.php:276
+msgid "Enable template"
+msgstr ""
+
+#: src/Forms/FormReadinessService.php:282
 msgid "Donation receipt email is enabled"
 msgstr ""
 
-#: src/Forms/FormReadinessService.php:284
+#: src/Forms/FormReadinessService.php:293
 msgid "Site is served over HTTPS"
 msgstr ""
 
-#: src/Forms/FormReadinessService.php:293
-#: src/Forms/FormReadinessService.php:300
+#: src/Forms/FormReadinessService.php:302
+#: src/Forms/FormReadinessService.php:309
 msgid "Site is not on HTTPS"
 msgstr ""
 
-#: src/Forms/FormReadinessService.php:294
+#: src/Forms/FormReadinessService.php:303
 msgid "Fine for test mode, but live Stripe charges will be rejected. Install an SSL certificate before turning test mode off."
 msgstr ""
 
-#: src/Forms/FormReadinessService.php:301
+#: src/Forms/FormReadinessService.php:310
 msgid "Stripe rejects live charges on non-HTTPS sites. Install an SSL certificate before publishing."
 msgstr ""
 
-#: src/Forms/FormReadinessService.php:312
+#: src/Forms/FormReadinessService.php:321
 msgid "Form is one-time only"
 msgstr ""
 
-#: src/Forms/FormReadinessService.php:335
+#: src/Forms/FormReadinessService.php:344
 msgid "Recurring donations are supported"
 msgstr ""
 
-#: src/Forms/FormReadinessService.php:343
+#: src/Forms/FormReadinessService.php:352
 msgid "No gateway supports recurring donations"
 msgstr ""
 
-#: src/Forms/FormReadinessService.php:344
+#: src/Forms/FormReadinessService.php:353
 msgid "None of the installed gateways can charge recurring donations. Remove the recurring-toggle block from this form, or install a gateway that supports recurring."
 msgstr ""
 
-#: src/Forms/FormReadinessService.php:346
-#: src/Forms/FormReadinessService.php:362
+#: src/Forms/FormReadinessService.php:355
+#: src/Forms/FormReadinessService.php:371
 msgid "Open gateways"
 msgstr ""
 
-#: src/Forms/FormReadinessService.php:355
+#: src/Forms/FormReadinessService.php:364
 msgid "None of your enabled gateways supports recurring"
 msgstr ""
 
 #. translators: %s: comma-separated list of recurring-capable gateway names.
-#: src/Forms/FormReadinessService.php:358
+#: src/Forms/FormReadinessService.php:367
 #, php-format
 msgid "Enable one of %s in Settings → Payment gateways, or remove the recurring-toggle block from this form."
 msgstr ""
@@ -2803,8 +2807,8 @@ msgstr ""
 
 #: src/Forms/Shortcode/DonationFormShortcode.php:666
 #: src/Receipts/resources/views/generic.php:47
-#: assets/admin/donations/List.jsx:36
-#: assets/admin/donations/List.jsx:49
+#: assets/admin/donations/List.jsx:37
+#: assets/admin/donations/List.jsx:50
 #: assets/admin/forms/blocks/recurring-toggle/index.js:13
 #: assets/admin/subscriptions/List.jsx:33
 #: assets/admin/subscriptions/List.jsx:39
@@ -2820,8 +2824,8 @@ msgstr ""
 
 #: src/Forms/Shortcode/DonationFormShortcode.php:668
 #: src/Receipts/resources/views/generic.php:49
-#: assets/admin/donations/List.jsx:34
-#: assets/admin/donations/List.jsx:47
+#: assets/admin/donations/List.jsx:35
+#: assets/admin/donations/List.jsx:48
 #: assets/admin/forms/blocks/recurring-toggle/index.js:15
 #: assets/admin/subscriptions/List.jsx:31
 #: assets/admin/subscriptions/List.jsx:41
@@ -2830,8 +2834,8 @@ msgstr ""
 
 #: src/Forms/Shortcode/DonationFormShortcode.php:669
 #: src/Receipts/resources/views/generic.php:50
-#: assets/admin/donations/List.jsx:37
-#: assets/admin/donations/List.jsx:50
+#: assets/admin/donations/List.jsx:38
+#: assets/admin/donations/List.jsx:51
 #: assets/admin/forms/blocks/recurring-toggle/index.js:16
 #: assets/admin/subscriptions/List.jsx:42
 msgid "Quarterly"
@@ -2839,8 +2843,8 @@ msgstr ""
 
 #: src/Forms/Shortcode/DonationFormShortcode.php:670
 #: src/Receipts/resources/views/generic.php:51
-#: assets/admin/donations/List.jsx:35
-#: assets/admin/donations/List.jsx:48
+#: assets/admin/donations/List.jsx:36
+#: assets/admin/donations/List.jsx:49
 #: assets/admin/forms/blocks/recurring-toggle/index.js:17
 #: assets/admin/subscriptions/List.jsx:32
 #: assets/admin/subscriptions/List.jsx:43
@@ -3494,7 +3498,7 @@ msgid "This donation is no longer active."
 msgstr ""
 
 #: src/Reports/CampaignReportBuilder.php:52
-#: assets/admin/donations/List.jsx:663
+#: assets/admin/donations/List.jsx:664
 msgid "Unique donors"
 msgstr ""
 
@@ -3688,7 +3692,7 @@ msgstr ""
 #: assets/admin/campaigns/List.jsx:118
 #: assets/admin/donations/detail/cards/RefundsCard.jsx:31
 #: assets/admin/donations/detail/cards/RelatedDonationsCard.jsx:26
-#: assets/admin/donations/List.jsx:308
+#: assets/admin/donations/List.jsx:309
 #: assets/admin/donors/profile/tabs/ConsentTab.jsx:110
 #: assets/admin/donors/profile/tabs/DonationsTab.jsx:110
 #: assets/admin/donors/profile/tabs/ReceiptsTab.jsx:163
@@ -3720,7 +3724,7 @@ msgstr ""
 
 #: src/Rest/Admin/DonationsController.php:1459
 #: assets/admin/donations/detail/cards/OverviewCard.jsx:35
-#: assets/admin/donations/List.jsx:316
+#: assets/admin/donations/List.jsx:317
 #: assets/admin/subscriptions/List.jsx:650
 msgid "Gateway"
 msgstr ""
@@ -3728,7 +3732,7 @@ msgstr ""
 #: src/Rest/Admin/DonationsController.php:1460
 #: assets/admin/donations/detail/cards/OverviewCard.jsx:75
 #: assets/admin/donations/detail/rail/MetadataCard.jsx:19
-#: assets/admin/donations/List.jsx:255
+#: assets/admin/donations/List.jsx:256
 #: assets/admin/donors/profile/tabs/DonationsTab.jsx:121
 #: assets/admin/forms/blocks/_shared/condition.js:22
 msgid "Frequency"
@@ -4678,7 +4682,7 @@ msgstr ""
 #: assets/admin/campaign-blocks/index.jsx:76
 #: assets/admin/donations/detail/cards/OverviewCard.jsx:48
 #: assets/admin/donations/detail/rail/QuickStatsCard.jsx:33
-#: assets/admin/donations/List.jsx:329
+#: assets/admin/donations/List.jsx:330
 #: assets/admin/donations/RecordDonationDrawer.jsx:223
 #: assets/admin/donors/profile/tabs/ActivityLogTab.jsx:107
 #: assets/admin/donors/profile/tabs/DonationsTab.jsx:128
@@ -5386,8 +5390,8 @@ msgstr ""
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:358
 #: assets/admin/campaigns/Detail.jsx:1254
 #: assets/admin/funds/List.jsx:303
-#: assets/admin/settings/panels/EmailPanel.jsx:138
-#: assets/admin/settings/panels/EmailPanel.jsx:252
+#: assets/admin/settings/panels/EmailPanel.jsx:149
+#: assets/admin/settings/panels/EmailPanel.jsx:263
 msgid "Edit"
 msgstr ""
 
@@ -5652,7 +5656,7 @@ msgstr ""
 
 #: assets/admin/campaigns/Detail.jsx:845
 #: assets/admin/dashboard/widgets/RecentActivity.jsx:21
-#: assets/admin/donations/List.jsx:603
+#: assets/admin/donations/List.jsx:604
 #: assets/admin/donors/profile/LifetimeMetrics.jsx:99
 #: assets/admin/donors/profile/tabs/ActivityTab.jsx:163
 msgid "No donations yet"
@@ -6060,7 +6064,7 @@ msgstr ""
 
 #: assets/admin/campaigns/Detail.jsx:1990
 #: assets/admin/donations/detail/cards/OverviewCard.jsx:60
-#: assets/admin/donations/List.jsx:353
+#: assets/admin/donations/List.jsx:354
 msgid "Form"
 msgstr ""
 
@@ -6171,7 +6175,7 @@ msgstr ""
 
 #. translators: %s: currency code
 #: assets/admin/campaigns/List.jsx:366
-#: assets/admin/donations/List.jsx:641
+#: assets/admin/donations/List.jsx:642
 #, js-format
 msgid "in %s"
 msgstr ""
@@ -6392,7 +6396,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: assets/admin/dashboard/Dashboard.jsx:192
-#: assets/admin/donations/List.jsx:583
+#: assets/admin/donations/List.jsx:584
 #: assets/admin/subscriptions/List.jsx:816
 msgid "Show them"
 msgstr ""
@@ -6486,7 +6490,7 @@ msgid "Donor activity rolls in here as soon as your first donation is received."
 msgstr ""
 
 #: assets/admin/dashboard/widgets/RecentActivity.jsx:34
-#: assets/admin/donations/List.jsx:38
+#: assets/admin/donations/List.jsx:39
 #: assets/admin/donors/profile/Tabs.jsx:9
 #: assets/admin/_shared/components/FormTemplatePicker.jsx:20
 #: assets/donor-portal/index.jsx:454
@@ -6494,8 +6498,8 @@ msgid "Recurring"
 msgstr ""
 
 #: assets/admin/dashboard/widgets/RecentActivity.jsx:41
-#: assets/admin/donations/List.jsx:248
-#: assets/admin/donations/List.jsx:348
+#: assets/admin/donations/List.jsx:249
+#: assets/admin/donations/List.jsx:349
 #: assets/admin/donors/index.jsx:147
 #: assets/admin/donors/profile/tabs/ActivityTab.jsx:182
 #: assets/admin/donors/profile/tabs/DonationsTab.jsx:93
@@ -6599,8 +6603,8 @@ msgstr ""
 
 #: assets/admin/donations/Detail.jsx:96
 #: assets/admin/donations/detail/rail/ActionsCard.jsx:37
-#: assets/admin/donations/List.jsx:386
-#: assets/admin/donations/List.jsx:413
+#: assets/admin/donations/List.jsx:387
+#: assets/admin/donations/List.jsx:414
 #: assets/admin/donors/profile/tabs/DonationsTab.jsx:159
 #: assets/admin/donors/profile/tabs/DonationsTab.jsx:182
 msgid "Mark as paid"
@@ -6902,7 +6906,7 @@ msgid "Voided"
 msgstr ""
 
 #: assets/admin/donations/detail/cards/ReceiptCard.jsx:55
-#: assets/admin/donations/List.jsx:460
+#: assets/admin/donations/List.jsx:461
 #: assets/admin/donors/profile/tabs/DonationsTab.jsx:241
 #: assets/admin/donors/profile/tabs/ReceiptsTab.jsx:214
 msgid "Resend"
@@ -6982,7 +6986,7 @@ msgstr ""
 
 #: assets/admin/donations/detail/Header.jsx:69
 #: assets/admin/donations/detail/rail/ActionsCard.jsx:68
-#: assets/admin/donations/List.jsx:440
+#: assets/admin/donations/List.jsx:441
 #: assets/admin/donors/profile/tabs/DonationsTab.jsx:218
 #: assets/admin/donors/profile/tabs/ReceiptsTab.jsx:191
 msgid "Resend receipt"
@@ -7001,7 +7005,7 @@ msgstr ""
 
 #: assets/admin/donations/detail/helpers.js:53
 #: assets/admin/donations/format.js:27
-#: assets/admin/donations/List.jsx:651
+#: assets/admin/donations/List.jsx:652
 #: assets/admin/donors/profile/helpers.js:56
 #: assets/admin/donors/profile/tabs/DonationsTab.jsx:14
 #: assets/admin/_shared/components/StatusBadge.jsx:14
@@ -7079,7 +7083,7 @@ msgid "Metadata"
 msgstr ""
 
 #: assets/admin/donations/detail/rail/MetadataCard.jsx:14
-#: assets/admin/donations/List.jsx:362
+#: assets/admin/donations/List.jsx:363
 msgid "Created"
 msgstr ""
 
@@ -7165,62 +7169,62 @@ msgstr ""
 msgid "Partially refunded"
 msgstr ""
 
-#: assets/admin/donations/List.jsx:45
+#: assets/admin/donations/List.jsx:46
 msgid "Recurring (any)"
 msgstr ""
 
-#: assets/admin/donations/List.jsx:46
-#: assets/admin/donations/List.jsx:265
+#: assets/admin/donations/List.jsx:47
+#: assets/admin/donations/List.jsx:266
 msgid "One time"
 msgstr ""
 
-#: assets/admin/donations/List.jsx:151
+#: assets/admin/donations/List.jsx:152
 msgid "The campaign filter could not be loaded."
 msgstr ""
 
-#: assets/admin/donations/List.jsx:211
+#: assets/admin/donations/List.jsx:212
 msgid "Failed to load donations."
 msgstr ""
 
-#: assets/admin/donations/List.jsx:274
+#: assets/admin/donations/List.jsx:275
 #: assets/admin/donors/index.jsx:132
 #: assets/admin/subscriptions/List.jsx:541
 msgid "(no name)"
 msgstr ""
 
-#: assets/admin/donations/List.jsx:340
+#: assets/admin/donations/List.jsx:341
 #: assets/admin/settings/panels/GatewaysPanel.jsx:61
 msgid "Test mode"
 msgstr ""
 
-#: assets/admin/donations/List.jsx:342
+#: assets/admin/donations/List.jsx:343
 msgid "Test only"
 msgstr ""
 
-#: assets/admin/donations/List.jsx:343
+#: assets/admin/donations/List.jsx:344
 msgid "Live only"
 msgstr ""
 
-#: assets/admin/donations/List.jsx:399
+#: assets/admin/donations/List.jsx:400
 #: assets/admin/donors/profile/tabs/DonationsTab.jsx:168
 msgid "Mark this donation as paid? A receipt will be sent."
 msgstr ""
 
 #. translators: %d: number of donations
-#: assets/admin/donations/List.jsx:402
+#: assets/admin/donations/List.jsx:403
 #, js-format
 msgid "Mark %d donation as paid? Receipts will be sent to each donor."
 msgid_plural "Mark %d donations as paid? Receipts will be sent to each donor."
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/donations/List.jsx:411
+#: assets/admin/donations/List.jsx:412
 #: assets/admin/donors/profile/tabs/DonationsTab.jsx:180
 msgid "Mark donations as paid"
 msgstr ""
 
 #. translators: %d: number of donations
-#: assets/admin/donations/List.jsx:422
+#: assets/admin/donations/List.jsx:423
 #: assets/admin/donors/profile/tabs/DonationsTab.jsx:199
 #, js-format
 msgid "%d donation marked paid."
@@ -7228,17 +7232,17 @@ msgid_plural "%d donations marked paid."
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/donations/List.jsx:426
+#: assets/admin/donations/List.jsx:427
 msgid "Could not mark one or more donations paid."
 msgstr ""
 
-#: assets/admin/donations/List.jsx:451
+#: assets/admin/donations/List.jsx:452
 #: assets/admin/donors/profile/tabs/DonationsTab.jsx:232
 msgid "Resend the receipt for this donation?"
 msgstr ""
 
 #. translators: %d: number of donations
-#: assets/admin/donations/List.jsx:454
+#: assets/admin/donations/List.jsx:455
 #: assets/admin/donors/profile/tabs/DonationsTab.jsx:235
 #, js-format
 msgid "Resend receipts for %d donation?"
@@ -7246,14 +7250,14 @@ msgid_plural "Resend receipts for %d donations?"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/donations/List.jsx:458
+#: assets/admin/donations/List.jsx:459
 #: assets/admin/donors/profile/tabs/DonationsTab.jsx:239
 #: assets/admin/donors/profile/tabs/ReceiptsTab.jsx:212
 msgid "Resend receipts"
 msgstr ""
 
 #. translators: %d: receipt count
-#: assets/admin/donations/List.jsx:472
+#: assets/admin/donations/List.jsx:473
 #: assets/admin/donors/profile/tabs/DonationsTab.jsx:256
 #: assets/admin/donors/profile/tabs/ReceiptsTab.jsx:229
 #, js-format
@@ -7262,23 +7266,23 @@ msgid_plural "%d receipts resent."
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/donations/List.jsx:476
+#: assets/admin/donations/List.jsx:477
 msgid "Could not resend one or more receipts."
 msgstr ""
 
-#: assets/admin/donations/List.jsx:497
+#: assets/admin/donations/List.jsx:498
 #: assets/admin/tools/tabs/ExportTab.jsx:151
 #: assets/admin/tools/tabs/ExportTab.jsx:214
 #: assets/admin/tools/tabs/ExportTab.jsx:252
 msgid "From"
 msgstr ""
 
-#: assets/admin/donations/List.jsx:501
+#: assets/admin/donations/List.jsx:502
 msgid "Filter donations from"
 msgstr ""
 
-#: assets/admin/donations/List.jsx:502
-#: assets/admin/donations/List.jsx:509
+#: assets/admin/donations/List.jsx:503
+#: assets/admin/donations/List.jsx:510
 #: assets/admin/tools/tabs/ExportTab.jsx:156
 #: assets/admin/tools/tabs/ExportTab.jsx:165
 #: assets/admin/tools/tabs/ExportTab.jsx:257
@@ -7286,64 +7290,64 @@ msgstr ""
 msgid "Any"
 msgstr ""
 
-#: assets/admin/donations/List.jsx:504
+#: assets/admin/donations/List.jsx:505
 #: assets/admin/tools/tabs/ExportTab.jsx:160
 #: assets/admin/tools/tabs/ExportTab.jsx:224
 #: assets/admin/tools/tabs/ExportTab.jsx:261
 msgid "To"
 msgstr ""
 
-#: assets/admin/donations/List.jsx:508
+#: assets/admin/donations/List.jsx:509
 msgid "Filter donations to"
 msgstr ""
 
-#: assets/admin/donations/List.jsx:517
+#: assets/admin/donations/List.jsx:518
 msgid "Clear"
 msgstr ""
 
-#: assets/admin/donations/List.jsx:532
-#: assets/admin/donations/List.jsx:534
+#: assets/admin/donations/List.jsx:533
+#: assets/admin/donations/List.jsx:535
 msgid "Show test donations"
 msgstr ""
 
-#: assets/admin/donations/List.jsx:539
+#: assets/admin/donations/List.jsx:540
 #: assets/admin/donations/RecordDonationDrawer.jsx:158
 msgid "Record a donation"
 msgstr ""
 
 #. translators: %s: the new donation's reference.
-#: assets/admin/donations/List.jsx:557
+#: assets/admin/donations/List.jsx:558
 #, js-format
 msgid "Recorded as %s."
 msgstr ""
 
 #. translators: %d: number of test donations hidden.
-#: assets/admin/donations/List.jsx:573
+#: assets/admin/donations/List.jsx:574
 #, js-format
 msgid "%d test donation is hidden."
 msgid_plural "%d test donations are hidden."
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/donations/List.jsx:596
+#: assets/admin/donations/List.jsx:597
 msgid "Test donations are counted in the figures above and shown in the list below. These totals include money that was never actually taken, so they cannot be quoted as income."
 msgstr ""
 
-#: assets/admin/donations/List.jsx:604
+#: assets/admin/donations/List.jsx:605
 msgid "Donations made through your published forms will appear here. Donors are created automatically from each completed donation."
 msgstr ""
 
-#: assets/admin/donations/List.jsx:631
+#: assets/admin/donations/List.jsx:632
 msgid "Includes test donations"
 msgstr ""
 
 #. translators: %s: currency code
-#: assets/admin/donations/List.jsx:638
+#: assets/admin/donations/List.jsx:639
 #, js-format
 msgid "in %s, includes test donations"
 msgstr ""
 
-#: assets/admin/donations/List.jsx:646
+#: assets/admin/donations/List.jsx:647
 msgid "Total donations"
 msgstr ""
 
@@ -9959,7 +9963,7 @@ msgstr ""
 
 #: assets/admin/forms/Editor.jsx:764
 #: assets/admin/settings/panels/CurrencyPanel.jsx:313
-#: assets/admin/settings/panels/EmailPanel.jsx:262
+#: assets/admin/settings/panels/EmailPanel.jsx:273
 #: assets/admin/tools/tabs/CsvImportCard.jsx:213
 msgid "Preview"
 msgstr ""
@@ -11049,7 +11053,7 @@ msgid "Send a test email"
 msgstr ""
 
 #: assets/admin/settings/panels/EmailPanel.jsx:83
-msgid "Confirms your sender + SMTP transport are working before real receipts go out. Uses your current user email if you leave the recipient blank."
+msgid "Checks that your site can hand a message to its mail server. Arriving is a separate question: a message accepted here can still be rejected later by the recipient. Uses your current user email if you leave the recipient blank."
 msgstr ""
 
 #: assets/admin/settings/panels/EmailPanel.jsx:85
@@ -11069,59 +11073,67 @@ msgstr ""
 msgid "Send test email"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:110
+#: assets/admin/settings/panels/EmailPanel.jsx:112
+msgid "If test emails arrive but donors report nothing, the cause is almost always authentication rather than Dono. Mailboxes such as Gmail reject mail that is not signed for your domain, and PHP mail on shared hosting is not. An SMTP plugin pointed at an authenticated provider fixes it for every email your site sends."
+msgstr ""
+
+#: assets/admin/settings/panels/EmailPanel.jsx:115
+msgid "SMTP plugins on WordPress.org"
+msgstr ""
+
+#: assets/admin/settings/panels/EmailPanel.jsx:121
 msgid "Donor emails"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:111
+#: assets/admin/settings/panels/EmailPanel.jsx:122
 msgid "Sent to donors automatically by Dono"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:112
+#: assets/admin/settings/panels/EmailPanel.jsx:123
 msgid "Click a row to edit"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:132
+#: assets/admin/settings/panels/EmailPanel.jsx:143
 msgid "(enabled)"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:132
+#: assets/admin/settings/panels/EmailPanel.jsx:143
 msgid "(disabled)"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:232
+#: assets/admin/settings/panels/EmailPanel.jsx:243
 msgid "Done"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:270
+#: assets/admin/settings/panels/EmailPanel.jsx:281
 msgid "Subject:"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:273
+#: assets/admin/settings/panels/EmailPanel.jsx:284
 msgid "(no subject)"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:275
+#: assets/admin/settings/panels/EmailPanel.jsx:286
 msgid "To:"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:282
+#: assets/admin/settings/panels/EmailPanel.jsx:293
 msgid "Send this email"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:283
+#: assets/admin/settings/panels/EmailPanel.jsx:294
 msgid "Disable to skip this notification entirely."
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:288
+#: assets/admin/settings/panels/EmailPanel.jsx:299
 msgid "Subject"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:298
+#: assets/admin/settings/panels/EmailPanel.jsx:309
 msgid "Body"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:299
+#: assets/admin/settings/panels/EmailPanel.jsx:310
 msgid "Plain text. Merge tags expand at send time."
 msgstr ""
 
