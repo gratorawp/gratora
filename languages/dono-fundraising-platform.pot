@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-13T16:07:03+00:00\n"
+"POT-Creation-Date: 2026-08-13T16:09:05+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: dono-fundraising-platform\n"
@@ -533,7 +533,6 @@ msgstr ""
 #: assets/admin/donations/List.jsx:491
 #: assets/admin/donations/List.jsx:495
 #: assets/admin/donors/Insights.jsx:197
-#: assets/admin/donors/profile/LifetimeMetrics.jsx:95
 #: assets/admin/donors/profile/Tabs.jsx:8
 #: assets/admin/forms/Editor.jsx:1349
 #: assets/admin/tools/tabs/ExportTab.jsx:146
@@ -5657,7 +5656,7 @@ msgstr ""
 #: assets/admin/campaigns/Detail.jsx:845
 #: assets/admin/dashboard/widgets/RecentActivity.jsx:21
 #: assets/admin/donations/List.jsx:605
-#: assets/admin/donors/profile/LifetimeMetrics.jsx:103
+#: assets/admin/donors/profile/LifetimeMetrics.jsx:104
 #: assets/admin/donors/profile/tabs/ActivityTab.jsx:163
 msgid "No donations yet"
 msgstr ""
@@ -8114,21 +8113,25 @@ msgstr[1] ""
 msgid "Largest donation %s"
 msgstr ""
 
-#. translators: 1: one-time donation count, 2: recurring donation count
-#: assets/admin/donors/profile/LifetimeMetrics.jsx:102
-#, js-format
-msgid "%1$d one-time, %2$d recurring · paid"
+#: assets/admin/donors/profile/LifetimeMetrics.jsx:100
+msgid "Gifts received"
 msgstr ""
 
-#: assets/admin/donors/profile/LifetimeMetrics.jsx:107
+#. translators: 1: one-time donation count, 2: recurring donation count
+#: assets/admin/donors/profile/LifetimeMetrics.jsx:103
+#, js-format
+msgid "%1$d one-time, %2$d recurring"
+msgstr ""
+
+#: assets/admin/donors/profile/LifetimeMetrics.jsx:108
 msgid "Avg. donation"
 msgstr ""
 
-#: assets/admin/donors/profile/LifetimeMetrics.jsx:109
+#: assets/admin/donors/profile/LifetimeMetrics.jsx:110
 msgid "Per donation"
 msgstr ""
 
-#: assets/admin/donors/profile/LifetimeMetrics.jsx:113
+#: assets/admin/donors/profile/LifetimeMetrics.jsx:114
 msgid "Recurring MRR"
 msgstr ""
 

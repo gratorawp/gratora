@@ -92,14 +92,15 @@ export default function LifetimeMetrics( { lifetime } ) {
             />
             <Card
                 icon={ <IconHeart width="16" height="16" /> }
-                label={ __( 'Donations', 'dono-fundraising-platform' ) }
+                // Named apart from the Donations tab on purpose. This is the
+                // money count: it divides into Lifetime given to make the
+                // average beside it, so it counts paid gifts only. The tab
+                // counts every row the donor has, pending and failed included.
+                // Sharing one name made a pending donation look like a bug.
+                label={ __( 'Gifts received', 'dono-fundraising-platform' ) }
                 value={ <span className="num">{ count }</span> }
-                // Says "paid" because it is the money count: it divides into
-                // Lifetime given to make the average beside it. The tab badge
-                // counts every row a donor has, so without this the two numbers
-                // differ by a pending donation and read as a bug.
                 sub={ count > 0
-                    ? sprintf( /* translators: 1: one-time donation count, 2: recurring donation count */ __( '%1$d one-time, %2$d recurring · paid', 'dono-fundraising-platform' ), one_time_count, recurring_count )
+                    ? sprintf( /* translators: 1: one-time donation count, 2: recurring donation count */ __( '%1$d one-time, %2$d recurring', 'dono-fundraising-platform' ), one_time_count, recurring_count )
                     : __( 'No donations yet', 'dono-fundraising-platform' ) }
             />
             <Card
