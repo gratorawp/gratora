@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-12T19:44:17+00:00\n"
+"POT-Creation-Date: 2026-08-13T04:33:21+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: dono-fundraising-platform\n"
@@ -60,6 +60,7 @@ msgid "Replace"
 msgstr ""
 
 #: components/CoverImagePicker.js:71
+#: assets/admin/campaign-blocks/index.jsx:208
 #: assets/admin/campaigns/CoverImageCard.jsx:33
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:303
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:118
@@ -520,7 +521,7 @@ msgstr ""
 #: src/Receipts/resources/views/revenue-report.php:52
 #: src/Reports/CampaignReportBuilder.php:51
 #: src/Reports/RevenueReportBuilder.php:63
-#: assets/admin/campaign-blocks/index.jsx:222
+#: assets/admin/campaign-blocks/index.jsx:299
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:20
 #: assets/admin/campaigns/Detail.jsx:674
 #: assets/admin/campaigns/List.jsx:140
@@ -545,7 +546,7 @@ msgstr ""
 #: src/Campaigns/Blocks/CampaignBindings.php:55
 #: src/Campaigns/CampaignStatMetrics.php:39
 #: src/Rest/Admin/ToolsController.php:804
-#: assets/admin/campaign-blocks/index.jsx:223
+#: assets/admin/campaign-blocks/index.jsx:300
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:21
 #: assets/admin/campaigns/Detail.jsx:678
 #: assets/admin/campaigns/List.jsx:150
@@ -693,9 +694,9 @@ msgid "Delete everything and deactivate"
 msgstr ""
 
 #: src/Campaigns/Blocks/CampaignBindings.php:47
-#: assets/admin/campaign-blocks/index.jsx:524
-#: assets/admin/campaign-blocks/index.jsx:633
-#: assets/admin/campaign-blocks/index.jsx:743
+#: assets/admin/campaign-blocks/index.jsx:601
+#: assets/admin/campaign-blocks/index.jsx:710
+#: assets/admin/campaign-blocks/index.jsx:820
 #: assets/admin/campaigns/Detail.jsx:1191
 #: assets/admin/campaigns/List.jsx:94
 #: assets/admin/forms/Editor.jsx:1237
@@ -752,7 +753,7 @@ msgstr ""
 
 #: src/Campaigns/Blocks/CampaignBindings.php:57
 #: src/Campaigns/CampaignStatMetrics.php:42
-#: assets/admin/campaign-blocks/index.jsx:226
+#: assets/admin/campaign-blocks/index.jsx:303
 msgid "Days left"
 msgstr ""
 
@@ -790,7 +791,6 @@ msgid "of %s"
 msgstr ""
 
 #: src/Campaigns/Blocks/CampaignImageBlock.php:70
-#: assets/admin/campaign-blocks/index.jsx:163
 msgid "This campaign has no cover image yet. Add one in the campaign settings."
 msgstr ""
 
@@ -806,7 +806,7 @@ msgstr ""
 #: src/Campaigns/Blocks/DonateButtonBlock.php:84
 #: src/Campaigns/Blocks/DonationFormBlock.php:60
 #: src/Campaigns/Blocks/DonationFormBlock.php:102
-#: assets/admin/campaign-blocks/index.jsx:955
+#: assets/admin/campaign-blocks/index.jsx:1032
 msgid "Donations are not open for this campaign yet."
 msgstr ""
 
@@ -819,7 +819,7 @@ msgstr ""
 #: src/Forms/Shortcode/DonationFormShortcode.php:623
 #: src/Forms/Shortcode/DonationFormShortcode.php:1202
 #: src/Forms/Shortcode/DonationFormShortcode.php:1359
-#: assets/admin/campaign-blocks/index.jsx:446
+#: assets/admin/campaign-blocks/index.jsx:523
 #: assets/admin/forms/blocks/submit-button/index.js:56
 msgid "Donate now"
 msgstr ""
@@ -881,8 +881,8 @@ msgstr ""
 
 #: src/Campaigns/Blocks/views/donation-form.php:33
 #: src/Forms/Shortcode/DonationFormShortcode.php:662
-#: assets/admin/campaign-blocks/index.jsx:923
-#: assets/admin/campaign-blocks/index.jsx:945
+#: assets/admin/campaign-blocks/index.jsx:1000
+#: assets/admin/campaign-blocks/index.jsx:1022
 #: assets/admin/_shared/entities.js:25
 msgid "Donation form"
 msgstr ""
@@ -996,18 +996,18 @@ msgid "What this campaign is raising for."
 msgstr ""
 
 #: src/Campaigns/CampaignService.php:565
-#: assets/admin/campaign-blocks/index.jsx:603
-#: assets/admin/campaign-blocks/index.jsx:625
-#: assets/admin/campaign-blocks/index.jsx:636
-#: assets/admin/campaign-blocks/index.jsx:696
+#: assets/admin/campaign-blocks/index.jsx:680
+#: assets/admin/campaign-blocks/index.jsx:702
+#: assets/admin/campaign-blocks/index.jsx:713
+#: assets/admin/campaign-blocks/index.jsx:773
 #: assets/admin/campaigns/Detail.jsx:723
 #: assets/admin/dashboard/Dashboard.jsx:138
 msgid "Recent donations"
 msgstr ""
 
 #: src/Campaigns/CampaignService.php:566
-#: assets/admin/campaign-blocks/index.jsx:494
-#: assets/admin/campaign-blocks/index.jsx:516
+#: assets/admin/campaign-blocks/index.jsx:571
+#: assets/admin/campaign-blocks/index.jsx:593
 #: assets/admin/campaigns/Detail.jsx:727
 msgid "Top donors"
 msgstr ""
@@ -1019,7 +1019,7 @@ msgid "%s donation form"
 msgstr ""
 
 #: src/Campaigns/CampaignStatMetrics.php:34
-#: assets/admin/campaign-blocks/index.jsx:218
+#: assets/admin/campaign-blocks/index.jsx:295
 #: assets/admin/campaigns/Detail.jsx:670
 #: assets/admin/campaigns/Detail.jsx:1407
 #: assets/admin/dashboard/widgets/KpiRow.jsx:24
@@ -1027,31 +1027,31 @@ msgid "Amount raised"
 msgstr ""
 
 #: src/Campaigns/CampaignStatMetrics.php:35
-#: assets/admin/campaign-blocks/index.jsx:219
+#: assets/admin/campaign-blocks/index.jsx:296
 msgid "Our goal"
 msgstr ""
 
 #: src/Campaigns/CampaignStatMetrics.php:36
-#: assets/admin/campaign-blocks/index.jsx:220
+#: assets/admin/campaign-blocks/index.jsx:297
 msgid "Still needed"
 msgstr ""
 
 #: src/Campaigns/CampaignStatMetrics.php:37
-#: assets/admin/campaign-blocks/index.jsx:221
+#: assets/admin/campaign-blocks/index.jsx:298
 msgid "Of goal reached"
 msgstr ""
 
 #: src/Campaigns/CampaignStatMetrics.php:40
 #: src/Reports/CampaignReportBuilder.php:53
 #: src/Reports/RevenueReportBuilder.php:64
-#: assets/admin/campaign-blocks/index.jsx:224
+#: assets/admin/campaign-blocks/index.jsx:301
 #: assets/admin/campaigns/Detail.jsx:682
 #: assets/admin/dashboard/widgets/KpiRow.jsx:48
 msgid "Average donation"
 msgstr ""
 
 #: src/Campaigns/CampaignStatMetrics.php:41
-#: assets/admin/campaign-blocks/index.jsx:225
+#: assets/admin/campaign-blocks/index.jsx:302
 msgid "Top donation"
 msgstr ""
 
@@ -1147,8 +1147,8 @@ msgstr ""
 #: src/Campaigns/Styling/Tokens.php:102
 #: src/Campaigns/Styling/Tokens.php:114
 #: src/Campaigns/Styling/Tokens.php:190
-#: assets/admin/campaign-blocks/index.jsx:310
-#: assets/admin/campaign-blocks/index.jsx:465
+#: assets/admin/campaign-blocks/index.jsx:387
+#: assets/admin/campaign-blocks/index.jsx:542
 #: assets/admin/forms/blocks/section/index.js:31
 msgid "Medium"
 msgstr ""
@@ -4646,7 +4646,7 @@ msgstr ""
 msgid "Dono campaign binding preview"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:69
+#: assets/admin/campaign-blocks/index.jsx:76
 #: assets/admin/donations/detail/cards/OverviewCard.jsx:48
 #: assets/admin/donations/detail/rail/QuickStatsCard.jsx:33
 #: assets/admin/donations/List.jsx:329
@@ -4660,96 +4660,112 @@ msgstr ""
 msgid "Campaign"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:72
+#: assets/admin/campaign-blocks/index.jsx:79
 msgid "Select a campaign"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:115
+#: assets/admin/campaign-blocks/index.jsx:122
 msgid "Dono campaign block"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:116
+#: assets/admin/campaign-blocks/index.jsx:123
 msgid "Choose which campaign this block should display."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:149
+#: assets/admin/campaign-blocks/index.jsx:178
+msgid "That image could not be saved to the campaign."
+msgstr ""
+
+#: assets/admin/campaign-blocks/index.jsx:203
+msgid "Replace image"
+msgstr ""
+
+#: assets/admin/campaign-blocks/index.jsx:204
+msgid "Choose image"
+msgstr ""
+
+#: assets/admin/campaign-blocks/index.jsx:217
+msgid "Saved to the campaign as soon as you choose, and used everywhere the campaign appears."
+msgstr ""
+
+#: assets/admin/campaign-blocks/index.jsx:227
 msgid "Campaign image"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:150
+#: assets/admin/campaign-blocks/index.jsx:228
 msgid "The campaign's cover photo. Follows the campaign, not the page it sits on."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:167
+#: assets/admin/campaign-blocks/index.jsx:243
 msgid "Image"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:175
+#: assets/admin/campaign-blocks/index.jsx:252
 msgid "Aspect ratio"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:178
+#: assets/admin/campaign-blocks/index.jsx:255
 msgid "Wide (16:9)"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:179
+#: assets/admin/campaign-blocks/index.jsx:256
 msgid "Photo (3:2)"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:180
+#: assets/admin/campaign-blocks/index.jsx:257
 msgid "Classic (4:3)"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:181
+#: assets/admin/campaign-blocks/index.jsx:258
 msgid "Square (1:1)"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:182
+#: assets/admin/campaign-blocks/index.jsx:259
 msgid "The image's own"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:188
+#: assets/admin/campaign-blocks/index.jsx:265
 msgid "Rounded corners"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:194
+#: assets/admin/campaign-blocks/index.jsx:271
 msgid "Load with priority"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:195
+#: assets/admin/campaign-blocks/index.jsx:272
 msgid "Leave on when this is the first image a visitor sees. Turn it off further down the page so it loads only when needed."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:235
+#: assets/admin/campaign-blocks/index.jsx:312
 msgid "This campaign has no goal, so this stat will not render."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:238
+#: assets/admin/campaign-blocks/index.jsx:315
 msgid "This campaign has no end date, so this stat will not render."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:241
+#: assets/admin/campaign-blocks/index.jsx:318
 msgid "No donations yet, so this stat will not render until the first one arrives."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:266
+#: assets/admin/campaign-blocks/index.jsx:343
 msgid "Campaign stat"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:267
+#: assets/admin/campaign-blocks/index.jsx:344
 msgid "A single campaign figure. Add one per number you want to show."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:284
+#: assets/admin/campaign-blocks/index.jsx:361
 msgid "Stat"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:292
+#: assets/admin/campaign-blocks/index.jsx:369
 msgid "Figure"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:299
-#: assets/admin/campaign-blocks/index.jsx:443
+#: assets/admin/campaign-blocks/index.jsx:376
+#: assets/admin/campaign-blocks/index.jsx:520
 #: assets/admin/forms/blocks/checkbox/index.js:27
 #: assets/admin/forms/blocks/comment/index.js:29
 #: assets/admin/forms/blocks/country/index.js:22
@@ -4771,24 +4787,24 @@ msgstr ""
 msgid "Label"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:306
+#: assets/admin/campaign-blocks/index.jsx:383
 #: assets/admin/donors/Insights.jsx:268
 msgid "Size"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:309
-#: assets/admin/campaign-blocks/index.jsx:464
+#: assets/admin/campaign-blocks/index.jsx:386
+#: assets/admin/campaign-blocks/index.jsx:541
 msgid "Small"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:311
-#: assets/admin/campaign-blocks/index.jsx:466
+#: assets/admin/campaign-blocks/index.jsx:388
+#: assets/admin/campaign-blocks/index.jsx:543
 msgid "Large"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:317
-#: assets/admin/campaign-blocks/index.jsx:387
-#: assets/admin/campaign-blocks/index.jsx:450
+#: assets/admin/campaign-blocks/index.jsx:394
+#: assets/admin/campaign-blocks/index.jsx:464
+#: assets/admin/campaign-blocks/index.jsx:527
 #: assets/admin/forms/blocks/currency-switcher/index.js:152
 #: assets/admin/forms/blocks/heading/index.js:43
 #: assets/admin/forms/blocks/paragraph/index.js:30
@@ -4797,9 +4813,9 @@ msgstr ""
 msgid "Alignment"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:320
-#: assets/admin/campaign-blocks/index.jsx:390
-#: assets/admin/campaign-blocks/index.jsx:453
+#: assets/admin/campaign-blocks/index.jsx:397
+#: assets/admin/campaign-blocks/index.jsx:467
+#: assets/admin/campaign-blocks/index.jsx:530
 #: assets/admin/forms/blocks/currency-switcher/index.js:156
 #: assets/admin/forms/blocks/heading/index.js:18
 #: assets/admin/forms/blocks/paragraph/index.js:11
@@ -4808,9 +4824,9 @@ msgstr ""
 msgid "Left"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:321
-#: assets/admin/campaign-blocks/index.jsx:391
-#: assets/admin/campaign-blocks/index.jsx:454
+#: assets/admin/campaign-blocks/index.jsx:398
+#: assets/admin/campaign-blocks/index.jsx:468
+#: assets/admin/campaign-blocks/index.jsx:531
 #: assets/admin/forms/blocks/heading/index.js:19
 #: assets/admin/forms/blocks/paragraph/index.js:12
 #: assets/admin/forms/blocks/privacy-notice/index.js:12
@@ -4818,8 +4834,8 @@ msgstr ""
 msgid "Center"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:322
-#: assets/admin/campaign-blocks/index.jsx:455
+#: assets/admin/campaign-blocks/index.jsx:399
+#: assets/admin/campaign-blocks/index.jsx:532
 #: assets/admin/forms/blocks/currency-switcher/index.js:157
 #: assets/admin/forms/blocks/heading/index.js:20
 #: assets/admin/forms/blocks/paragraph/index.js:13
@@ -4828,202 +4844,202 @@ msgstr ""
 msgid "Right"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:352
+#: assets/admin/campaign-blocks/index.jsx:429
 msgid "Campaign progress"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:353
+#: assets/admin/campaign-blocks/index.jsx:430
 msgid "Progress bar toward the campaign goal."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:368
+#: assets/admin/campaign-blocks/index.jsx:445
 msgid "No goal set on this campaign. Until you set one, the bar will sit at 0%."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:373
+#: assets/admin/campaign-blocks/index.jsx:450
 msgid "Progress"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:381
+#: assets/admin/campaign-blocks/index.jsx:458
 msgid "Show labels"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:413
-#: assets/admin/campaign-blocks/index.jsx:435
+#: assets/admin/campaign-blocks/index.jsx:490
+#: assets/admin/campaign-blocks/index.jsx:512
 #: assets/admin/forms/blocks/submit-button/index.js:78
 msgid "Donate button"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:414
+#: assets/admin/campaign-blocks/index.jsx:491
 msgid "Button that opens the campaign's default donation form."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:428
+#: assets/admin/campaign-blocks/index.jsx:505
 msgid "This campaign has no default form. The button will appear but clicking it won't open anything until a form is set."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:431
+#: assets/admin/campaign-blocks/index.jsx:508
 msgid "This campaign is archived. The button will render but submissions will be rejected."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:461
+#: assets/admin/campaign-blocks/index.jsx:538
 msgid "Button size"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:472
+#: assets/admin/campaign-blocks/index.jsx:549
 #: assets/admin/forms/blocks/submit-button/index.js:15
 msgid "Full width"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:495
+#: assets/admin/campaign-blocks/index.jsx:572
 msgid "Leaderboard of the donors who gave the most to this campaign."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:512
+#: assets/admin/campaign-blocks/index.jsx:589
 msgid "No donations yet, so the leaderboard will be empty on the page."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:527
-#: assets/admin/campaign-blocks/index.jsx:592
+#: assets/admin/campaign-blocks/index.jsx:604
+#: assets/admin/campaign-blocks/index.jsx:669
 msgid "Top supporters"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:531
-#: assets/admin/campaign-blocks/index.jsx:640
-#: assets/admin/campaign-blocks/index.jsx:750
-#: assets/admin/campaign-blocks/index.jsx:868
-#: assets/admin/campaign-blocks/index.jsx:952
+#: assets/admin/campaign-blocks/index.jsx:608
+#: assets/admin/campaign-blocks/index.jsx:717
+#: assets/admin/campaign-blocks/index.jsx:827
+#: assets/admin/campaign-blocks/index.jsx:945
+#: assets/admin/campaign-blocks/index.jsx:1029
 msgid "Empty state text"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:534
-#: assets/admin/campaign-blocks/index.jsx:643
+#: assets/admin/campaign-blocks/index.jsx:611
+#: assets/admin/campaign-blocks/index.jsx:720
 #: assets/donor-portal/index.jsx:623
 msgid "No donations yet."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:535
-#: assets/admin/campaign-blocks/index.jsx:644
-#: assets/admin/campaign-blocks/index.jsx:754
-#: assets/admin/campaign-blocks/index.jsx:872
+#: assets/admin/campaign-blocks/index.jsx:612
+#: assets/admin/campaign-blocks/index.jsx:721
+#: assets/admin/campaign-blocks/index.jsx:831
+#: assets/admin/campaign-blocks/index.jsx:949
 msgid "Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:539
+#: assets/admin/campaign-blocks/index.jsx:616
 #: assets/admin/forms/blocks/radio/index.js:62
 #: assets/admin/forms/Editor.jsx:1313
 msgid "Layout"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:542
+#: assets/admin/campaign-blocks/index.jsx:619
 #: assets/admin/donors/index.jsx:426
 msgid "List"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:543
+#: assets/admin/campaign-blocks/index.jsx:620
 msgid "Podium"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:549
+#: assets/admin/campaign-blocks/index.jsx:626
 #: assets/admin/campaigns/Detail.jsx:1409
 msgid "Number of donors"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:557
-#: assets/admin/campaign-blocks/index.jsx:799
+#: assets/admin/campaign-blocks/index.jsx:634
+#: assets/admin/campaign-blocks/index.jsx:876
 msgid "Show donation amount"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:563
+#: assets/admin/campaign-blocks/index.jsx:640
 msgid "Show donation count per donor"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:569
+#: assets/admin/campaign-blocks/index.jsx:646
 msgid "Hide anonymous donors"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:572
+#: assets/admin/campaign-blocks/index.jsx:649
 msgid "When off, anonymous donors appear as \"Anonymous\"."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:604
+#: assets/admin/campaign-blocks/index.jsx:681
 msgid "Live feed of the most recent paid donations for this campaign."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:621
+#: assets/admin/campaign-blocks/index.jsx:698
 msgid "No donations yet, so the feed will be empty on the page."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:648
+#: assets/admin/campaign-blocks/index.jsx:725
 #: assets/admin/campaigns/Detail.jsx:1408
 msgid "Number of donations"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:656
+#: assets/admin/campaign-blocks/index.jsx:733
 msgid "Show amount"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:662
+#: assets/admin/campaign-blocks/index.jsx:739
 msgid "Show time ago"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:668
-#: assets/admin/campaign-blocks/index.jsx:793
+#: assets/admin/campaign-blocks/index.jsx:745
+#: assets/admin/campaign-blocks/index.jsx:870
 msgid "Show donor message"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:674
+#: assets/admin/campaign-blocks/index.jsx:751
 msgid "Include anonymous donations"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:707
-#: assets/admin/campaign-blocks/index.jsx:735
+#: assets/admin/campaign-blocks/index.jsx:784
+#: assets/admin/campaign-blocks/index.jsx:812
 msgid "Supporter wall"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:708
+#: assets/admin/campaign-blocks/index.jsx:785
 msgid "A wall of campaign supporters with optional messages."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:726
+#: assets/admin/campaign-blocks/index.jsx:803
 msgid "No donations yet, so the wall will be empty on the page."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:746
-#: assets/admin/campaign-blocks/index.jsx:833
+#: assets/admin/campaign-blocks/index.jsx:823
+#: assets/admin/campaign-blocks/index.jsx:910
 msgid "Thank you to our supporters"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:753
+#: assets/admin/campaign-blocks/index.jsx:830
 msgid "No supporters to show yet."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:758
+#: assets/admin/campaign-blocks/index.jsx:835
 msgid "Sort by"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:761
-#: assets/admin/campaign-blocks/index.jsx:887
+#: assets/admin/campaign-blocks/index.jsx:838
+#: assets/admin/campaign-blocks/index.jsx:964
 msgid "Most recent"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:762
+#: assets/admin/campaign-blocks/index.jsx:839
 msgid "Alphabetical"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:768
+#: assets/admin/campaign-blocks/index.jsx:845
 msgid "Number of supporters"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:777
+#: assets/admin/campaign-blocks/index.jsx:854
 msgid "Minimum donation amount"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:789
+#: assets/admin/campaign-blocks/index.jsx:866
 msgid "Only show donors who gave at least this amount. 0 = no minimum."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:805
+#: assets/admin/campaign-blocks/index.jsx:882
 #: assets/admin/forms/blocks/columns/index.js:51
 #: assets/admin/forms/blocks/columns/index.js:53
 #: assets/admin/forms/blocks/columns/index.js:88
@@ -5032,33 +5048,33 @@ msgstr ""
 msgid "Columns"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:808
+#: assets/admin/campaign-blocks/index.jsx:885
 #: assets/admin/settings/panels/CurrencyPanel.jsx:199
 msgid "Auto"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:809
+#: assets/admin/campaign-blocks/index.jsx:886
 msgid "2"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:810
+#: assets/admin/campaign-blocks/index.jsx:887
 msgid "3"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:811
+#: assets/admin/campaign-blocks/index.jsx:888
 msgid "4"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:844
-#: assets/admin/campaign-blocks/index.jsx:859
+#: assets/admin/campaign-blocks/index.jsx:921
+#: assets/admin/campaign-blocks/index.jsx:936
 msgid "Campaigns grid"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:845
+#: assets/admin/campaign-blocks/index.jsx:922
 msgid "A responsive grid of other published campaigns as cards."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:861
+#: assets/admin/campaign-blocks/index.jsx:938
 #: assets/admin/forms/blocks/address/index.js:59
 #: assets/admin/forms/blocks/consent/index.js:51
 #: assets/admin/forms/blocks/heading/index.js:35
@@ -5066,51 +5082,51 @@ msgstr ""
 msgid "Heading"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:864
+#: assets/admin/campaign-blocks/index.jsx:941
 msgid "Leave empty when a Heading block above this one already names the section, as the seeded layout does."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:871
+#: assets/admin/campaign-blocks/index.jsx:948
 msgid "More campaigns will appear here soon."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:876
+#: assets/admin/campaign-blocks/index.jsx:953
 msgid "How many"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:884
+#: assets/admin/campaign-blocks/index.jsx:961
 msgid "Order by"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:888
+#: assets/admin/campaign-blocks/index.jsx:965
 msgid "Most funded"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:889
+#: assets/admin/campaign-blocks/index.jsx:966
 msgid "Ending soon"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:899
+#: assets/admin/campaign-blocks/index.jsx:976
 msgid "Exclude none"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:902
+#: assets/admin/campaign-blocks/index.jsx:979
 msgid "The selected campaign (or this page's campaign) is excluded from the grid."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:924
+#: assets/admin/campaign-blocks/index.jsx:1001
 msgid "Renders the campaign donation form inline on the page."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:956
+#: assets/admin/campaign-blocks/index.jsx:1033
 msgid "Shown when the campaign is not taking donations, so the heading above this block never captions an empty space."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:968
+#: assets/admin/campaign-blocks/index.jsx:1045
 msgid "Edit donation form"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:969
+#: assets/admin/campaign-blocks/index.jsx:1046
 msgid "Manage donation forms"
 msgstr ""
 

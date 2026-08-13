@@ -874,3 +874,32 @@ body.dono-modal-open { overflow: hidden; }
     margin-left: auto;
     margin-right: auto;
 }
+
+/* The campaign's cover photo, edited from the block that shows it. */
+.dono-block-image-picker {
+    margin: 0 0 16px;
+
+    &__preview {
+        display: block;
+        width: 100%;
+        height: auto;
+        max-height: 150px;
+        object-fit: cover;
+        margin: 0 0 8px;
+        border-radius: 3px;
+        background: #f0f0f1;
+    }
+
+    &__actions {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    &__note {
+        margin: 8px 0 0;
+        font-size: 12px;
+        line-height: 1.5;
+        color: #757575;
+    }
+}

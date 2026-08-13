@@ -2,10 +2,17 @@
 // ServerSideRender. campaignId=0 falls back to the page's _dono_campaign_id
 // post meta.
 
-import { useSelect } from '@wordpress/data';
-import { useEntityRecord, useEntityRecords } from '@wordpress/core-data';
+import { useSelect, useDispatch } from '@wordpress/data';
+import { useEntityRecord, useEntityRecords, store as coreStore } from '@wordpress/core-data';
+import { useState } from '@wordpress/element';
 import { registerBlockType } from '@wordpress/blocks';
-import { InspectorControls, RichText, useBlockProps } from '@wordpress/block-editor';
+import {
+    InspectorControls,
+    MediaUpload,
+    MediaUploadCheck,
+    RichText,
+    useBlockProps,
+} from '@wordpress/block-editor';
 import {
     Button,
     Disabled,
@@ -144,6 +151,77 @@ function CampaignCanvas( { block, attributes, setAttributes, onCampaignPage, res
     );
 }
 
+/**
+ * Picks the campaign's cover photo from inside the block.
+ *
+ * The image belongs to the campaign, not to this block or this page, so the
+ * control edits the campaign record and says so: the change lands everywhere
+ * that campaign appears, and it lands when you choose, not when the page is
+ * saved. Sending people to the campaign screen for it was a dead end in an
+ * inspector that had room for the control.
+ */
+function CampaignImagePicker( { campaign, campaignId } ) {
+    const { saveEntityRecord } = useDispatch( coreStore );
+    const [ busy, setBusy ] = useState( false );
+    const [ error, setError ] = useState( null );
+
+    if ( ! campaignId || ! campaign ) return null;
+
+    const apply = ( attachmentId ) => {
+        setBusy( true );
+        setError( null );
+        saveEntityRecord( 'dono/v1', 'campaign', {
+            id: campaignId,
+            // null clears it; the schema refuses 0.
+            image_attachment_id: attachmentId,
+        } )
+            .catch( () => setError( __( 'That image could not be saved to the campaign.', 'dono-fundraising-platform' ) ) )
+            .finally( () => setBusy( false ) );
+    };
+
+    const current = Number( campaign.image_attachment_id || 0 );
+
+    return (
+        <div className="dono-block-image-picker">
+            { !! campaign.image_url && (
+                <img
+                    className="dono-block-image-picker__preview"
+                    src={ campaign.image_url }
+                    alt=""
+                />
+            ) }
+
+            <MediaUploadCheck>
+                <MediaUpload
+                    allowedTypes={ [ 'image' ] }
+                    value={ current }
+                    onSelect={ ( media ) => apply( Number( media.id ) ) }
+                    render={ ( { open } ) => (
+                        <div className="dono-block-image-picker__actions">
+                            <Button variant="secondary" onClick={ open } disabled={ busy }>
+                                { current
+                                    ? __( 'Replace image', 'dono-fundraising-platform' )
+                                    : __( 'Choose image', 'dono-fundraising-platform' ) }
+                            </Button>
+                            { !! current && (
+                                <Button variant="tertiary" isDestructive onClick={ () => apply( null ) } disabled={ busy }>
+                                    { __( 'Remove', 'dono-fundraising-platform' ) }
+                                </Button>
+                            ) }
+                        </div>
+                    ) }
+                />
+            </MediaUploadCheck>
+
+            <p className="dono-block-image-picker__note">
+                { __( 'Saved to the campaign as soon as you choose, and used everywhere the campaign appears.', 'dono-fundraising-platform' ) }
+            </p>
+
+            { error && <Notice status="error">{ error }</Notice> }
+        </div>
+    );
+}
+
 registerBlockType( 'dono/campaign-image', {
     apiVersion: 3,
     title:       __( 'Campaign image', 'dono-fundraising-platform' ),
@@ -158,10 +236,8 @@ registerBlockType( 'dono/campaign-image', {
     },
     edit: function CampaignImageEdit( { attributes, setAttributes } ) {
         const { campaign, onCampaignPage, resolvedId } = useBoundCampaign( attributes.campaignId );
+        // No "add one elsewhere" note: the picker below is where you add one.
         const issues = [];
-        if ( campaign && ! campaign.image_attachment_id ) {
-            issues.push( __( 'This campaign has no cover image yet. Add one in the campaign settings.', 'dono-fundraising-platform' ) );
-        }
         return <>
             <InspectorControls>
                 <PanelBody title={ __( 'Image', 'dono-fundraising-platform' ) }>
@@ -171,6 +247,7 @@ registerBlockType( 'dono/campaign-image', {
                         onCampaignPage={ onCampaignPage }
                         issues={ issues }
                     />
+                    <CampaignImagePicker campaign={ campaign } campaignId={ resolvedId } />
                     <SelectControl
                         label={ __( 'Aspect ratio', 'dono-fundraising-platform' ) }
                         value={ attributes.aspectRatio }
