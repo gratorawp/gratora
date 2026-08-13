@@ -200,6 +200,9 @@ final class DashboardMetricsService
                 'campaign_id'    => $d->campaign_id ? (int) $d->campaign_id : null,
                 'campaign_title' => $campaign?->title,
                 'is_anonymous'   => (bool) $d->is_anonymous,
+                // The row has to be able to say it is a rehearsal once the
+                // toggle lets it through.
+                'is_test'        => (bool) $d->is_test,
                 'frequency'      => (string) $d->frequency,
             ];
         }

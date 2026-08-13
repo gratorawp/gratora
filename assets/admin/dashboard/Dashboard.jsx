@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
-import { __ } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { AlertTriangle } from 'lucide-react';
 
 import EmptyState from '../_shared/components/EmptyState';
@@ -22,7 +22,7 @@ import RecentActivity from './widgets/RecentActivity';
 import TopCampaigns from './widgets/TopCampaigns';
 import RecurringForecast from './widgets/RecurringForecast';
 import NeedsAttention from './widgets/NeedsAttention';
-import { Notice } from '@wordpress/components';
+import { Button, Notice } from '@wordpress/components';
 
 const SCOPE = 'dashboard';
 
@@ -60,6 +60,7 @@ const EMPTY_METRICS = {
 
 export default function Dashboard() {
     const [ range, setRange ]               = useState( 'last-30' );
+    const [ includeTest, setIncludeTest ]   = useState( false );
     const [ compareMode, setCompareMode ]   = useState( 'none' );
     const [ metrics, setMetrics ]           = useState( null );
     const [ loading, setLoading ]           = useState( true );
@@ -76,15 +77,18 @@ export default function Dashboard() {
         setLoading( true );
         setFetchError( false );
         apiFetch( {
-            path: addQueryArgs( '/dono/v1/admin/dashboard', { range, compare: compareMode, include: includeKey } ),
+            path: addQueryArgs( '/dono/v1/admin/dashboard', { range, compare: compareMode, include: includeKey, include_test: includeTest } ),
         } )
             .then( ( m ) => { if ( ! aborted ) setMetrics( ( prev ) => ( { ...( prev || {} ), ...m } ) ); } )
             .catch( () => { if ( ! aborted ) setFetchError( true ); } )
             .finally( () => { if ( ! aborted ) setLoading( false ); } );
         return () => { aborted = true; };
-    }, [ range, compareMode, includeKey, reloadKey ] );
+    }, [ range, compareMode, includeKey, includeTest, reloadKey ] );
 
     const m = metrics || EMPTY_METRICS;
+    const hiddenTotal = ( metrics?.test?.hidden?.donations || 0 )
+        + ( metrics?.test?.hidden?.plans || 0 );
+
     const rangeIsComparable = range !== 'all-time' && range !== 'today';
 
     const compareOn = compareMode !== 'none' && rangeIsComparable;
@@ -100,7 +104,7 @@ export default function Dashboard() {
             title:  __( 'Key metrics', 'dono-fundraising-platform' ),
             span:   'full',
             bare:   true,
-            render: () => <KpiRow kpi={ m.kpi } compareOn={ compareOn } range={ range } loading={ metrics === null && loading } />,
+            render: () => <KpiRow kpi={ m.kpi } compareOn={ compareOn } range={ range } includesTest={ !! m.test?.includes_test } loading={ metrics === null && loading } />,
         },
         attention: {
             title:  __( 'Needs attention', 'dono-fundraising-platform' ),
@@ -166,6 +170,38 @@ export default function Dashboard() {
                     />
                 </div>
             </div>
+
+            { /* A dashboard of zeroes on a site that has been rehearsing looks
+                 broken. Say what is being held back, and offer the way to see
+                 it, rather than letting the operator guess. */ }
+            { metrics?.test && ! metrics.test.includes_test && hiddenTotal > 0 && (
+                <Notice status="info" isDismissible={ false }>
+                    { sprintf(
+                        /* translators: %d: number of test records not counted. */
+                        _n(
+                            '%d test record is not counted here.',
+                            '%d test records are not counted here.',
+                            hiddenTotal,
+                            'dono-fundraising-platform'
+                        ),
+                        hiddenTotal
+                    ) }
+                    { ' ' }
+                    <Button variant="link" onClick={ () => setIncludeTest( true ) }>
+                        { __( 'Show them', 'dono-fundraising-platform' ) }
+                    </Button>
+                </Notice>
+            ) }
+
+            { metrics?.test?.includes_test && (
+                <Notice status="warning" isDismissible={ false }>
+                    { __( 'These figures include test records. They contain money that was never actually taken, so they cannot be quoted as income.', 'dono-fundraising-platform' ) }
+                    { ' ' }
+                    <Button variant="link" onClick={ () => setIncludeTest( false ) }>
+                        { __( 'Hide them', 'dono-fundraising-platform' ) }
+                    </Button>
+                </Notice>
+            ) }
 
             { /* A range change that fails leaves the previous range's numbers on
                  screen with nothing marking them, so they read as belonging to

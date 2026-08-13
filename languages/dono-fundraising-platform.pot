@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-13T06:49:18+00:00\n"
+"POT-Creation-Date: 2026-08-13T07:32:38+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: dono-fundraising-platform\n"
@@ -527,7 +527,7 @@ msgstr ""
 #: assets/admin/campaigns/List.jsx:140
 #: assets/admin/campaigns/List.jsx:370
 #: assets/admin/campaigns/widgets/DistributionHistogram.jsx:105
-#: assets/admin/dashboard/widgets/KpiRow.jsx:32
+#: assets/admin/dashboard/widgets/KpiRow.jsx:39
 #: assets/admin/dashboard/widgets/QuickActions.jsx:63
 #: assets/admin/donations/detail/Header.jsx:25
 #: assets/admin/donations/List.jsx:489
@@ -550,7 +550,7 @@ msgstr ""
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:21
 #: assets/admin/campaigns/Detail.jsx:678
 #: assets/admin/campaigns/List.jsx:150
-#: assets/admin/dashboard/widgets/KpiRow.jsx:40
+#: assets/admin/dashboard/widgets/KpiRow.jsx:47
 #: assets/admin/dashboard/widgets/QuickActions.jsx:66
 #: assets/admin/donors/index.jsx:344
 #: assets/admin/donors/index.jsx:348
@@ -833,7 +833,7 @@ msgstr ""
 #: src/Campaigns/Blocks/TopDonorsBlock.php:86
 #: src/Campaigns/Blocks/TopDonorsBlock.php:98
 #: src/Campaigns/CampaignMetricsService.php:272
-#: src/Dashboard/DashboardMetricsService.php:194
+#: src/Dashboard/DashboardMetricsService.php:196
 #: assets/admin/donors/profile/IdentityCard.jsx:60
 msgid "Anonymous"
 msgstr ""
@@ -920,8 +920,8 @@ msgstr ""
 
 #: src/Campaigns/CampaignMetricsService.php:309
 #: src/Donors/DonorMetricsService.php:102
-#: src/Donors/DonorMetricsService.php:541
-#: src/Donors/DonorMetricsService.php:582
+#: src/Donors/DonorMetricsService.php:547
+#: src/Donors/DonorMetricsService.php:588
 #: src/Forms/Shortcode/DonationFormShortcode.php:611
 #: src/Receipts/resources/views/generic.php:182
 #: src/Reports/TaxStatementBuilder.php:65
@@ -1005,7 +1005,7 @@ msgstr ""
 #: assets/admin/campaign-blocks/index.jsx:742
 #: assets/admin/campaign-blocks/index.jsx:802
 #: assets/admin/campaigns/Detail.jsx:723
-#: assets/admin/dashboard/Dashboard.jsx:138
+#: assets/admin/dashboard/Dashboard.jsx:142
 msgid "Recent donations"
 msgstr ""
 
@@ -1026,7 +1026,7 @@ msgstr ""
 #: assets/admin/campaign-blocks/index.jsx:324
 #: assets/admin/campaigns/Detail.jsx:670
 #: assets/admin/campaigns/Detail.jsx:1407
-#: assets/admin/dashboard/widgets/KpiRow.jsx:24
+#: assets/admin/dashboard/widgets/KpiRow.jsx:31
 msgid "Amount raised"
 msgstr ""
 
@@ -1050,7 +1050,7 @@ msgstr ""
 #: src/Reports/RevenueReportBuilder.php:64
 #: assets/admin/campaign-blocks/index.jsx:330
 #: assets/admin/campaigns/Detail.jsx:682
-#: assets/admin/dashboard/widgets/KpiRow.jsx:48
+#: assets/admin/dashboard/widgets/KpiRow.jsx:55
 msgid "Average donation"
 msgstr ""
 
@@ -1360,57 +1360,66 @@ msgid "Encryption key missing since %s. Donor PII written before this point cann
 msgstr ""
 
 #. translators: %d: failed donations count
-#: src/Dashboard/DashboardMetricsService.php:319
+#: src/Dashboard/DashboardMetricsService.php:324
 #, php-format
 msgid "%d donation failed in the last 24 hours."
 msgid_plural "%d donations failed in the last 24 hours."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Dashboard/DashboardMetricsService.php:322
+#: src/Dashboard/DashboardMetricsService.php:327
+#: src/Dashboard/DashboardMetricsService.php:353
 msgid "Review"
 msgstr ""
 
+#. translators: %d: failed test donations count
+#: src/Dashboard/DashboardMetricsService.php:350
+#, php-format
+msgid "%d test donation failed in the last 24 hours."
+msgid_plural "%d test donations failed in the last 24 hours."
+msgstr[0] ""
+msgstr[1] ""
+
 #. translators: 1: campaign title, 2: days remaining
-#: src/Dashboard/DashboardMetricsService.php:346
+#: src/Dashboard/DashboardMetricsService.php:379
 #, php-format
 msgid "\"%1$s\" ends in %2$d day."
 msgid_plural "\"%1$s\" ends in %2$d days."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Dashboard/DashboardMetricsService.php:350
+#: src/Dashboard/DashboardMetricsService.php:383
 #: assets/admin/dashboard/widgets/NeedsAttention.jsx:66
 msgid "Open"
 msgstr ""
 
 #. translators: %s: campaign title
-#: src/Dashboard/DashboardMetricsService.php:370
+#: src/Dashboard/DashboardMetricsService.php:403
 #, php-format
 msgid "\"%s\" has no default form. The donate button on its page does nothing."
 msgstr ""
 
-#: src/Dashboard/DashboardMetricsService.php:373
+#: src/Dashboard/DashboardMetricsService.php:406
 msgid "Set form"
 msgstr ""
 
 #. translators: %d: number of donors who left a note
-#: src/Dashboard/DashboardMetricsService.php:420
+#: src/Dashboard/DashboardMetricsService.php:455
 #, php-format
 msgid "%d donor left a note in the last 7 days."
 msgid_plural "%d donors left notes in the last 7 days."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Dashboard/DashboardMetricsService.php:428
+#: src/Dashboard/DashboardMetricsService.php:463
 msgid "Read"
 msgstr ""
 
-#: src/Dashboard/DashboardMetricsService.php:440
+#: src/Dashboard/DashboardMetricsService.php:475
 msgid "No published campaigns yet. Start one to begin collecting donations."
 msgstr ""
 
-#: src/Dashboard/DashboardMetricsService.php:441
+#: src/Dashboard/DashboardMetricsService.php:476
 msgid "Create campaign"
 msgstr ""
 
@@ -1511,22 +1520,22 @@ msgstr ""
 msgid "That picture is too large. The most this site takes is %s."
 msgstr ""
 
-#: src/Donors/DonorMetricsService.php:327
+#: src/Donors/DonorMetricsService.php:332
 msgid "This donor has been redacted under GDPR. PII has been removed; lifetime totals are kept for accounting."
 msgstr ""
 
-#: src/Donors/DonorMetricsService.php:342
+#: src/Donors/DonorMetricsService.php:347
 msgid "A renewal was declined. Open the Recurring tab to collect it again."
 msgstr ""
 
 #. translators: %s: the payment gateway name, e.g. Stripe.
-#: src/Donors/DonorMetricsService.php:346
+#: src/Donors/DonorMetricsService.php:351
 #, php-format
 msgid "A renewal was declined, but the %s connection is not active, so nothing can be collected from here. Reconnect it in Settings, Payment gateways."
 msgstr ""
 
 #. translators: %s: the payment gateway name, e.g. PayPal.
-#: src/Donors/DonorMetricsService.php:352
+#: src/Donors/DonorMetricsService.php:357
 #, php-format
 msgid "A renewal was declined. %s retries on its own schedule; to fix it sooner, ask the donor to update their card in the donor portal."
 msgstr ""
@@ -3452,7 +3461,7 @@ msgstr ""
 
 #: src/Receipts/resources/views/revenue-report.php:53
 #: assets/admin/campaigns/Detail.jsx:690
-#: assets/admin/dashboard/Dashboard.jsx:110
+#: assets/admin/dashboard/Dashboard.jsx:114
 msgid "Revenue"
 msgstr ""
 
@@ -5573,7 +5582,7 @@ msgid "Could not load campaign metrics."
 msgstr ""
 
 #: assets/admin/campaigns/Detail.jsx:664
-#: assets/admin/dashboard/Dashboard.jsx:100
+#: assets/admin/dashboard/Dashboard.jsx:104
 msgid "Key metrics"
 msgstr ""
 
@@ -6334,53 +6343,75 @@ msgstr ""
 msgid "Dono: New campaign"
 msgstr ""
 
-#: assets/admin/dashboard/Dashboard.jsx:95
+#: assets/admin/dashboard/Dashboard.jsx:99
 msgid "Activity (last 24h)"
 msgstr ""
 
-#: assets/admin/dashboard/Dashboard.jsx:106
+#: assets/admin/dashboard/Dashboard.jsx:110
 #: assets/admin/subscriptions/List.jsx:194
 msgid "Needs attention"
 msgstr ""
 
-#: assets/admin/dashboard/Dashboard.jsx:122
+#: assets/admin/dashboard/Dashboard.jsx:126
 msgid "Active campaigns"
 msgstr ""
 
-#: assets/admin/dashboard/Dashboard.jsx:126
+#: assets/admin/dashboard/Dashboard.jsx:130
 #: assets/admin/donors/Insights.jsx:441
 msgid "Recurring revenue"
 msgstr ""
 
-#: assets/admin/dashboard/Dashboard.jsx:130
+#: assets/admin/dashboard/Dashboard.jsx:134
 msgid "Top campaigns"
 msgstr ""
 
-#: assets/admin/dashboard/Dashboard.jsx:134
+#: assets/admin/dashboard/Dashboard.jsx:138
 msgid "Channels"
 msgstr ""
 
-#: assets/admin/dashboard/Dashboard.jsx:142
+#: assets/admin/dashboard/Dashboard.jsx:146
 msgid "Quick actions"
 msgstr ""
 
-#: assets/admin/dashboard/Dashboard.jsx:151
+#: assets/admin/dashboard/Dashboard.jsx:155
 msgid "Dashboard"
 msgstr ""
 
-#: assets/admin/dashboard/Dashboard.jsx:175
+#. translators: %d: number of test records not counted.
+#: assets/admin/dashboard/Dashboard.jsx:181
+#, js-format
+msgid "%d test record is not counted here."
+msgid_plural "%d test records are not counted here."
+msgstr[0] ""
+msgstr[1] ""
+
+#: assets/admin/dashboard/Dashboard.jsx:191
+#: assets/admin/donations/List.jsx:583
+#: assets/admin/subscriptions/List.jsx:816
+msgid "Show them"
+msgstr ""
+
+#: assets/admin/dashboard/Dashboard.jsx:198
+msgid "These figures include test records. They contain money that was never actually taken, so they cannot be quoted as income."
+msgstr ""
+
+#: assets/admin/dashboard/Dashboard.jsx:201
+msgid "Hide them"
+msgstr ""
+
+#: assets/admin/dashboard/Dashboard.jsx:211
 msgid "These numbers are from the previous range. The one you picked could not be loaded."
 msgstr ""
 
-#: assets/admin/dashboard/Dashboard.jsx:182
+#: assets/admin/dashboard/Dashboard.jsx:218
 msgid "Could not load your dashboard"
 msgstr ""
 
-#: assets/admin/dashboard/Dashboard.jsx:183
+#: assets/admin/dashboard/Dashboard.jsx:219
 msgid "Something went wrong fetching your metrics. Check your connection and try again."
 msgstr ""
 
-#: assets/admin/dashboard/Dashboard.jsx:186
+#: assets/admin/dashboard/Dashboard.jsx:222
 #: assets/admin/onboarding/Onboarding.jsx:622
 #: assets/admin/settings/panels/NumberingPanel.jsx:252
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:302
@@ -6411,7 +6442,11 @@ msgid "Last: %s"
 msgstr ""
 
 #: assets/admin/dashboard/widgets/KpiRow.jsx:18
-#: assets/admin/dashboard/widgets/KpiRow.jsx:19
+msgid "incl. test"
+msgstr ""
+
+#: assets/admin/dashboard/widgets/KpiRow.jsx:24
+#: assets/admin/dashboard/widgets/KpiRow.jsx:25
 msgid "paid only"
 msgstr ""
 
@@ -6452,7 +6487,18 @@ msgstr ""
 msgid "Recurring"
 msgstr ""
 
-#: assets/admin/dashboard/widgets/RecentActivity.jsx:49
+#: assets/admin/dashboard/widgets/RecentActivity.jsx:41
+#: assets/admin/donations/List.jsx:248
+#: assets/admin/donations/List.jsx:348
+#: assets/admin/donors/index.jsx:147
+#: assets/admin/donors/profile/tabs/ActivityTab.jsx:182
+#: assets/admin/donors/profile/tabs/DonationsTab.jsx:93
+#: assets/admin/donors/profile/tabs/RecurringTab.jsx:76
+#: assets/admin/settings/panels/StripeKeysCard.jsx:271
+msgid "Test"
+msgstr ""
+
+#: assets/admin/dashboard/widgets/RecentActivity.jsx:54
 #: assets/admin/donations/RecordDonationDrawer.jsx:234
 msgid "No campaign"
 msgstr ""
@@ -7130,16 +7176,6 @@ msgstr ""
 msgid "Failed to load donations."
 msgstr ""
 
-#: assets/admin/donations/List.jsx:248
-#: assets/admin/donations/List.jsx:348
-#: assets/admin/donors/index.jsx:147
-#: assets/admin/donors/profile/tabs/ActivityTab.jsx:182
-#: assets/admin/donors/profile/tabs/DonationsTab.jsx:93
-#: assets/admin/donors/profile/tabs/RecurringTab.jsx:76
-#: assets/admin/settings/panels/StripeKeysCard.jsx:271
-msgid "Test"
-msgstr ""
-
 #: assets/admin/donations/List.jsx:274
 #: assets/admin/donors/index.jsx:132
 #: assets/admin/subscriptions/List.jsx:541
@@ -7282,11 +7318,6 @@ msgid "%d test donation is hidden."
 msgid_plural "%d test donations are hidden."
 msgstr[0] ""
 msgstr[1] ""
-
-#: assets/admin/donations/List.jsx:583
-#: assets/admin/subscriptions/List.jsx:816
-msgid "Show them"
-msgstr ""
 
 #: assets/admin/donations/List.jsx:596
 msgid "Test donations are counted in the figures above and shown in the list below. These totals include money that was never actually taken, so they cannot be quoted as income."
@@ -12928,7 +12959,7 @@ msgid "Test data"
 msgstr ""
 
 #: assets/admin/tools/tabs/MaintenanceTab.jsx:198
-msgid "Everything a gateway in test mode left behind: donations, the recurring plans set up against them, and donors who would have nothing left on record. Test rows are already left out of every total, so this changes nothing you have reported: it clears the ledger you read by eye before going live. There is no undo."
+msgid "Everything a gateway in test mode left behind: donations, the recurring plans set up against them, and donors who would have nothing left on record. Test rows are left out of your reported totals unless you ask to see them, so this changes nothing you have quoted: it clears the ledger you read by eye before going live. There is no undo."
 msgstr ""
 
 #. translators: %d: number of test donations

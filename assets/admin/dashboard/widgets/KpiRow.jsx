@@ -10,13 +10,20 @@ function rangeLabel( range ) {
     return opt ? opt.label : '';
 }
 
-export default function KpiRow( { kpi, compareOn, range, loading = false } ) {
+export default function KpiRow( { kpi, compareOn, range, includesTest = false, loading = false } ) {
     const cmp = compareOn ? ( kpi.comparison?.change_percent ?? null ) : null;
     const currency = kpi.currency || 'USD';
-    const periodSub = rangeLabel( range );
-    const donationsSub = periodSub
-        ? `${ periodSub } · ${ __( 'paid only', 'dono-fundraising-platform' ) }`
-        : __( 'paid only', 'dono-fundraising-platform' );
+    // The page banner explains the toggle, but these four cards are what gets
+    // screenshotted, and a figure that leaves the page loses the caveat with it.
+    const testSub  = includesTest ? __( 'incl. test', 'dono-fundraising-platform' ) : '';
+    const withTest = ( base ) => [ base, testSub ].filter( Boolean ).join( ' · ' );
+
+    const periodSub = withTest( rangeLabel( range ) );
+    const donationsSub = withTest(
+        rangeLabel( range )
+            ? `${ rangeLabel( range ) } · ${ __( 'paid only', 'dono-fundraising-platform' ) }`
+            : __( 'paid only', 'dono-fundraising-platform' )
+    );
 
     return (
         <div className="dono-overview__metrics">

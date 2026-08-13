@@ -195,7 +195,7 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
             { testTotal > 0 && (
                 <Card
                     title={ __( 'Test data', 'dono-fundraising-platform' ) }
-                    sub={ __( 'Everything a gateway in test mode left behind: donations, the recurring plans set up against them, and donors who would have nothing left on record. Test rows are already left out of every total, so this changes nothing you have reported: it clears the ledger you read by eye before going live. There is no undo.', 'dono-fundraising-platform' ) }
+                    sub={ __( 'Everything a gateway in test mode left behind: donations, the recurring plans set up against them, and donors who would have nothing left on record. Test rows are left out of your reported totals unless you ask to see them, so this changes nothing you have quoted: it clears the ledger you read by eye before going live. There is no undo.', 'dono-fundraising-platform' ) }
                 >
                     <ul className="dono-advanced-cron">
                         { testData.donations > 0 && (

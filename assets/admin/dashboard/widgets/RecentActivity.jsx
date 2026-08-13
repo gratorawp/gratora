@@ -35,7 +35,12 @@ export default function RecentActivity( { rows = [] } ) {
                           aria-hidden="true" />
                     <div className="dono-activity__body">
                         <div className="dono-activity__top">
-                            <span className="dono-activity__donor">{ r.donor_name }</span>
+                            <span className="dono-activity__donor">
+                                { r.donor_name }
+                                { r.is_test && (
+                                    <span className="dono-pill dono-pill--test">{ __( 'Test', 'dono-fundraising-platform' ) }</span>
+                                ) }
+                            </span>
                             <span className="dono-activity__amount">
                                 { formatAmount( r.amount_cents, r.currency ) }
                             </span>
