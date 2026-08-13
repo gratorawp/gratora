@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Dono\Foundation\Transfer;
 
+use Dono\Currency\FxRates;
+use Dono\Donations\AggregateSyncer;
 use Dono\Donations\Donation;
 use Dono\Donors\Donor;
 use Dono\Donors\DonorService;
@@ -102,6 +104,8 @@ final class CsvImporter
     public function __construct(
         private DonorService $donors,
         private IdentityHasher $hasher,
+        private FxRates $fx = new FxRates(),
+        private AggregateSyncer $aggregates = new AggregateSyncer(),
     ) {
     }
 
@@ -162,6 +166,7 @@ final class CsvImporter
         // donor on two rows would promise two donors and then create one.
         $seen      = [];
         $seenEmail = [];
+        $touched   = [];
 
         foreach ($rows as $i => $row) {
             try {
@@ -185,6 +190,17 @@ final class CsvImporter
             if ($outcome['donation']) $donations++;
             if ($outcome['donor_created']) $created++;
             if ($outcome['donor_matched']) $matched++;
+            if ($outcome['donor_id'] > 0) $touched[$outcome['donor_id']] = true;
+        }
+
+        // A donation written straight to the table fires none of the lifecycle
+        // hooks the rollups hang off, so without this an imported history
+        // leaves every one of those donors at 0 donations and 0 lifetime, and
+        // leaves last_donation_at null for the retention sweep to read. Once
+        // per donor, not per row: syncForDonor recomputes the whole donor and
+        // there is no bulk form of it.
+        foreach (array_keys($touched) as $donorId) {
+            $this->aggregates->syncDonor((int) $donorId);
         }
 
         return [
@@ -203,13 +219,13 @@ final class CsvImporter
      * @param  array<string,string> $mapping
      * @param  array<string,bool|int> $seen  donor emails seen, or repeat counts per donation row
      * @param  array<string,bool>   $seenEmail
-     * @return array{skip:?string, donation:bool, donor_created:bool, donor_matched:bool}
+     * @return array{skip:?string, donation:bool, donor_created:bool, donor_matched:bool, donor_id:int}
      * @since 1.0.0
      */
     private function row(array $row, array $mapping, string $mode, bool $dryRun, array &$seen, array &$seenEmail): array
     {
-        $nothing = ['skip' => null, 'donation' => false, 'donor_created' => false, 'donor_matched' => false];
-        $skip    = static fn (string $why): array => ['skip' => $why, 'donation' => false, 'donor_created' => false, 'donor_matched' => false];
+        $nothing = ['skip' => null, 'donation' => false, 'donor_created' => false, 'donor_matched' => false, 'donor_id' => 0];
+        $skip    = static fn (string $why): array => ['skip' => $why, 'donation' => false, 'donor_created' => false, 'donor_matched' => false, 'donor_id' => 0];
 
         $get = static fn (string $field): string => trim((string) ($row[$mapping[$field] ?? ''] ?? ''));
 
@@ -277,7 +293,7 @@ final class CsvImporter
         $donorMatched = $firstSighting && $existing !== null;
 
         if ($dryRun) {
-            return ['skip' => null, 'donation' => $mode === 'donations', 'donor_created' => $donorCreated, 'donor_matched' => $donorMatched];
+            return ['skip' => null, 'donation' => $mode === 'donations', 'donor_created' => $donorCreated, 'donor_matched' => $donorMatched, 'donor_id' => 0];
         }
 
         [$first, $last] = $this->names($get('first_name'), $get('last_name'), $get('full_name'));
@@ -309,10 +325,10 @@ final class CsvImporter
         $donor = $this->donors->findOrCreate($email, $profile);
 
         if ($mode !== 'donations') {
-            return ['skip' => null, 'donation' => false, 'donor_created' => $donorCreated, 'donor_matched' => $donorMatched];
+            return ['skip' => null, 'donation' => false, 'donor_created' => $donorCreated, 'donor_matched' => $donorMatched, 'donor_id' => 0];
         }
 
-        $currency = strtoupper($get('currency')) ?: Money::defaultCurrency();
+        $currency = strtoupper($get('currency')) ?: strtoupper(Money::defaultCurrency());
         $status   = strtolower($get('status'));
         if (! in_array($status, self::STATUSES, true)) $status = 'paid';
 
@@ -331,9 +347,40 @@ final class CsvImporter
         // So a row can be traced back to the file it came from, and told apart
         // from a donation this site actually took.
         $donation->source_attribution = ['source' => 'csv_import'];
+        $this->valueInBase($donation);
         $donation->save();
 
-        return ['skip' => null, 'donation' => true, 'donor_created' => $donorCreated, 'donor_matched' => $donorMatched];
+        return ['skip' => null, 'donation' => true, 'donor_created' => $donorCreated, 'donor_matched' => $donorMatched, 'donor_id' => (int) $donor->id];
+    }
+
+    /**
+     * The base-currency snapshot every total is summed from. Without it the
+     * aggregates score the row as zero, so an imported history reads as the
+     * right number of donations raising nothing.
+     *
+     * Same three cases as the live path in DonationService, so import and till
+     * cannot disagree: the base currency converts at 1, a foreign currency
+     * converts at today's rate, and a currency the site has no rate for keeps
+     * its face value with no base amount. That last one is not a reason to
+     * refuse the row - the donation happened, and FX is a reporting concern -
+     * and Tools > Maintenance already lists exactly those rows, names the
+     * currency and converts them once a rate exists.
+     *
+     * @since 1.0.0
+     */
+    private function valueInBase(Donation $donation): void
+    {
+        $base     = strtoupper(Money::defaultCurrency());
+        $currency = strtoupper((string) $donation->currency);
+
+        $rate = $currency === $base ? 1.0 : $this->fx->rate($currency, $base);
+        if ($rate === null) {
+            return;
+        }
+
+        $donation->base_currency     = $base;
+        $donation->fx_rate           = sprintf('%.8F', $rate);
+        $donation->base_amount_cents = (int) round((int) $donation->amount_cents * $rate);
     }
 
     /**

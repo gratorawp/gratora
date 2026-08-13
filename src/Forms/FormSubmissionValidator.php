@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Dono\Forms;
 
 use Dono\Campaigns\Campaign;
+use Dono\Currency\Currency;
+use Dono\Currency\FxRates;
 use Dono\Donors\ConsentService;
 use Dono\Forms\Blocks\ConsentBlock;
 use Dono\Forms\Blocks\TermsBlock;
@@ -218,12 +220,15 @@ final class FormSubmissionValidator
                 // more, so it must not lift them over the bar.
                 $minCents = (int) ($attrs['minCents'] ?? 0);
                 if ($minCents > 0) {
-                    $net = (int) ($body['amount_cents'] ?? 0) - (int) ($body['fee_covered_cents'] ?? 0);
-                    if ($net < $minCents) {
+                    $net      = (int) ($body['amount_cents'] ?? 0) - (int) ($body['fee_covered_cents'] ?? 0);
+                    $authored = self::authoredCurrency($attrs);
+                    $paying   = $this->payingCurrency($authored, $body);
+                    $bar      = $this->minimumIn($minCents, $authored, $paying);
+                    if ($bar !== null && $net < $bar) {
                         return $this->reject(sprintf(
                             /* translators: %s: minimum donation amount, formatted. */
                             __('The smallest donation this form accepts is %s.', 'dono-fundraising-platform'),
-                            Money::format($minCents)
+                            Money::format($bar, $paying)
                         ));
                     }
                 }
@@ -425,6 +430,62 @@ final class FormSubmissionValidator
         }
 
         return null;
+    }
+
+    /**
+     * The currency the block's amounts are written in: its own attribute, or
+     * the org default. Presets, and the minimum beside them, are authored here.
+     *
+     * @since 1.0.0
+     */
+    private static function authoredCurrency(array $attrs): string
+    {
+        $code = strtoupper(trim((string) ($attrs['currency'] ?? '')));
+        return $code !== '' ? $code : strtoupper(Money::defaultCurrency());
+    }
+
+    /**
+     * A form with no switcher can only be paid in the currency it authored, so
+     * naming another one in the JSON must not move the bar.
+     *
+     * @since 1.0.0
+     */
+    private function payingCurrency(string $authored, array $body): string
+    {
+        $submitted = strtoupper(trim((string) ($body['currency'] ?? '')));
+        if ($submitted === '' || ! $this->offersCurrencyChoice) {
+            return $authored;
+        }
+        return $submitted;
+    }
+
+    /**
+     * The minimum expressed in the currency the donor is paying in. Comparing
+     * the authored figure against another currency's minor units enforces a
+     * different bar than the one the author set, in both directions.
+     *
+     * Null when no rate makes the comparison meaningful: the org enabled a
+     * currency it cannot convert (the settings screen warns about that), and a
+     * floor nobody can state in the donor's currency is not one to enforce.
+     *
+     * @since 1.0.0
+     */
+    private function minimumIn(int $minCents, string $authored, string $paying): ?int
+    {
+        if ($paying === $authored) {
+            return $minCents;
+        }
+
+        $converted = (new FxRates())->convertCents($minCents, $authored, $paying);
+        if ($converted === null) {
+            return null;
+        }
+
+        // Zero-decimal amounts land on whole major units, so a bar between two
+        // of them would refuse the figure the message quotes.
+        return Currency::minorUnits($paying) === 0
+            ? (int) (ceil($converted / 100) * 100)
+            : $converted;
     }
 
     /** @since 1.0.0 */

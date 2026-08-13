@@ -94,6 +94,10 @@ final class DonorExporter
             return (string) stream_get_contents($out);
         }
 
+        // The picker asks for the org's calendar days and created_at is stored
+        // UTC, so the window is converted rather than compared as written.
+        [$fromUtc, $toUtc] = DonationQueries::dayBoundsUtc($from, $to);
+
         $afterId = 0;
         while (true) {
             $q = Donor::query()
@@ -105,8 +109,8 @@ final class DonorExporter
             }
             if ($country   !== '') $q = $q->where('country', $country);
             if ($donorType !== '') $q = $q->where('donor_type', $donorType);
-            if ($from !== null) $q = $q->where('created_at', $from . ' 00:00:00', '>=');
-            if ($to   !== null) $q = $q->where('created_at', $to   . ' 23:59:59', '<=');
+            if ($fromUtc !== null) $q = $q->where('created_at', $fromUtc, '>=');
+            if ($toUtc   !== null) $q = $q->where('created_at', $toUtc, '<=');
 
             $batch = $q->orderBy('id', 'ASC')->limit(self::CHUNK)->getAll();
             if ($batch === []) {
@@ -196,9 +200,9 @@ final class DonorExporter
                 // The raw major-unit number, not a formatted one: a currency
                 // symbol makes the column text in every spreadsheet.
                 'total_donated'   => number_format((int) $donor->total_donated_cents / 100, 2, '.', ''),
-                'first_donation'  => (string) ($donor->first_donation_at ?? ''),
-                'last_donation'   => (string) ($donor->last_donation_at ?? ''),
-                'created_at'      => (string) $donor->created_at,
+                'first_donation'  => $this->localStamp($donor->first_donation_at),
+                'last_donation'   => $this->localStamp($donor->last_donation_at),
+                'created_at'      => $this->localStamp($donor->created_at),
                 'donor_id'        => (string) (int) $donor->id,
                 default           => '',
             };
@@ -231,6 +235,24 @@ final class DonorExporter
     private function livePredicate(): string
     {
         return 'redacted_at IS NULL AND ' . DonorRepository::mailableDonorPredicate();
+    }
+
+    /**
+     * Stored UTC, written in the org's timezone, so a row sits inside the date
+     * range the file was asked for instead of a day past the end of it.
+     *
+     * @since 1.0.0
+     */
+    private function localStamp(?string $utc): string
+    {
+        $utc = trim((string) $utc);
+        if ($utc === '') {
+            return '';
+        }
+
+        $ts = strtotime($utc . ' UTC');
+
+        return $ts === false ? $utc : (string) wp_date('Y-m-d H:i:s', $ts);
     }
 
     /** @since 1.0.0 */

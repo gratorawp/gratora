@@ -5,11 +5,13 @@
 # opening the plugin folder should find the plugin.
 #
 # Plugin Guideline 4 wants the source behind minified build/ output to be
-# reachable. The public repository is what satisfies it, so readme.txt needs a
-# link to the repository before the plugin goes to the directory.
+# reachable. readme.txt's "Source code" section names the public repository
+# holding assets/ and the build configuration, which is what satisfies it.
 #
-# Note: run `composer install --no-dev` before packaging so vendor/ ships
-# without development dependencies. .distignore cannot strip those itself.
+# vendor/ has to come from `composer install --no-dev`. .distignore cannot strip
+# development dependencies itself: they are transitive, so the names nobody
+# lists by hand outnumber the ones anybody would. bin/package.mjs refuses to
+# build without it, reading composer's own record of what it installed.
 
 /.git
 /.github
@@ -80,12 +82,15 @@
 # Our own build and release scripts. They run from a checkout, never from an
 # install, and package.mjs shipping inside its own output is just odd.
 /bin
-# Dependency manifests and build configuration. Runtime loads
-# vendor/autoload.php and the compiled build/ directly, so none of this is
-# read once the plugin is installed.
-/composer.json
+# Build configuration. Runtime loads the compiled build/ directly, so neither is
+# read once the plugin is installed, and the repository readme.txt names is
+# where anyone rebuilding it should be looking anyway.
 /package.json
 /webpack.config.js
+
+# composer.json is deliberately absent from this list. A payload carrying a
+# vendor/ and no manifest is the one thing in it that cannot say where those
+# six packages came from, and Plugin Check calls that out by name.
 
 # Strauss copies these into vendor-prefixed/ and the plugin loads only that copy.
 # The originals stay behind in vendor/ because they are direct requirements, so

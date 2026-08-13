@@ -1,7 +1,7 @@
 /** @jsxImportSource preact */
 import { evaluateCondition } from './conditions';
 import { mergePayload, registeredErrors, registeredValues } from './fields';
-import { convertCents, displayPreset, isZeroDecimal, roundToCurrency } from '../util/fx';
+import { convertCents, convertMinimum, displayPreset, isZeroDecimal, roundToCurrency } from '../util/fx';
 import { formatAmount } from '../util/format';
 
 // Fields authored above a wizard live in `preamble`, outside any step, so they
@@ -422,7 +422,14 @@ export function validateStep( step, state ) {
     switch ( step.type ) {
         case 'amount': {
             const amt = state.values.amount_cents;
-            const min = Number( state.minAmountCents ) || 0;
+            // The minimum is authored in presetCurrency, like the presets and
+            // the fee's fixed part, so it converts before it is compared.
+            const min = convertMinimum(
+                state.fx,
+                Number( state.minAmountCents ) || 0,
+                state.presetCurrency,
+                state.currency
+            );
             if ( ! amt || amt <= 0 ) {
                 e[ 'amount_cents' ] = msg( 'pickAmount', 'Pick or enter an amount.' );
             } else if ( min > 0 && amt < min ) {

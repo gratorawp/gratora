@@ -254,6 +254,10 @@ final class DataExporter
      * know that tributes or Gift Aid declarations exist, and an export that
      * silently left them behind would be the wrong kind of complete.
      *
+     * Contributing a table gets it into the file, not back out of one. The
+     * importer restores what it has a natural key and a reference map for, and
+     * names the rest to the operator; see DataImporter::recordUnknownTables().
+     *
      * @return list<string>
      * @since 1.0.0
      */

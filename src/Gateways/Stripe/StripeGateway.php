@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Gateways\Stripe;
 
+use Dono\Analytics\ErrorLog;
 use Dono\Currency\Currency;
 use Dono\Donations\Donation;
 use Dono\Donations\DonationRepository;
@@ -251,6 +252,9 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
 
             case 'invoice.payment_failed':
                 return $this->handleInvoicePaymentFailed($eventId, $type, $object);
+
+            case 'customer.subscription.updated':
+                return $this->handleSubscriptionUpdated($eventId, $type, $object);
 
             case 'customer.subscription.deleted':
                 return $this->handleSubscriptionDeleted($eventId, $type, $object);
@@ -511,15 +515,23 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
                 ? $r['reason']
                 : null;
 
-            // Idempotent: service no-ops if we already have this refund row.
-            $this->donationService->recordExternalRefund(
-                $donation,
-                $amount,
-                $refundId,
-                $reason,
-                'gateway',
-                is_array($r) ? $r : null
-            );
+            try {
+                // Idempotent: service no-ops if we already have this refund row.
+                $this->donationService->recordExternalRefund(
+                    $donation,
+                    $amount,
+                    $refundId,
+                    $reason,
+                    'gateway',
+                    is_array($r) ? $r : null
+                );
+            } catch (RuntimeException $e) {
+                if ($this->refundable($donation)) {
+                    throw $e;
+                }
+
+                return $this->unrefundable($eventId, $type, $donation, $e);
+            }
         }
 
         return new WebhookOutcome(
@@ -581,14 +593,22 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             ? 'dispute: ' . $dispute['reason']
             : 'dispute';
 
-        $this->donationService->recordExternalRefund(
-            $donation,
-            $amount,
-            $disputeId,
-            $reason,
-            'dispute',
-            $dispute
-        );
+        try {
+            $this->donationService->recordExternalRefund(
+                $donation,
+                $amount,
+                $disputeId,
+                $reason,
+                'dispute',
+                $dispute
+            );
+        } catch (RuntimeException $e) {
+            if ($this->refundable($donation)) {
+                throw $e;
+            }
+
+            return $this->unrefundable($eventId, $type, $donation, $e);
+        }
 
         return new WebhookOutcome(
             signature_ok: true,
@@ -669,15 +689,24 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
      * Local state is dropped so we stop charging an account we can no longer
      * touch. The account id is on the envelope, not the data object.
      *
+     * Only the keys of the mode whose secret signed this are dropped. The
+     * account id is the same string in test and live, so the id check alone
+     * lets a test signing secret, a much softer credential, erase the live
+     * keys through a public unauthenticated route.
+     *
      * @since 1.0.0
      */
     private function handleAccountDeauthorized(string $eventId, string $type, array $event): WebhookOutcome
     {
+        if ($this->verifiedIsTest === null) {
+            return $this->refused($eventId, $type, 'the mode of the verifying secret is unknown');
+        }
+
         $acctId  = (string) ($event['account'] ?? '');
         $current = $this->account->accountId();
 
         if ($acctId !== '' && $current !== null && hash_equals($current, $acctId)) {
-            $this->account->forget();
+            $this->account->forgetMode($this->verifiedIsTest);
         }
 
         return new WebhookOutcome(
@@ -1148,6 +1177,81 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         );
     }
 
+    /**
+     * Stripe moving the subscription on its own: dunning giving up, or
+     * collection starting again after it.
+     *
+     * Without this a subscription Stripe has stopped collecting stays active
+     * here for good, keeps counting toward the active plan count and MRR, and
+     * never raises the past-due state a PayPal donor in the same position gets.
+     *
+     * Only the active <-> past_due pair moves, and only in the direction the
+     * event states. A local pause is deliberately not mirrored: skipping one
+     * payment pauses collection at Stripe while staying active here on purpose,
+     * so reading pause_collection back would turn every skip into a pause.
+     *
+     * @since 1.0.0
+     */
+    private function handleSubscriptionUpdated(string $eventId, string $type, array $sub): WebhookOutcome
+    {
+        $subscriptionId = (string) ($sub['id'] ?? '');
+        $status         = (string) ($sub['status'] ?? '');
+
+        // Terminal at Stripe, so it is a cancellation however it got there.
+        // markCancelled gates the side effects on the winning transition, so the
+        // subscription.deleted that follows cannot email the donor a second time.
+        if ($status === 'canceled' || $status === 'incomplete_expired') {
+            return $this->handleSubscriptionDeleted($eventId, $type, $sub);
+        }
+
+        $plan = $this->plans->findBySubscriptionId($this->id(), $subscriptionId);
+        if (! $plan) {
+            return new WebhookOutcome(
+                signature_ok: true,
+                external_id:  $eventId,
+                event_type:   $type,
+                handled:      false,
+                error:        "No local plan for subscription {$subscriptionId}",
+                http_status:  200,
+            );
+        }
+
+        // A signature only proves Stripe sent it, not which mode signed it. A
+        // test-mode secret is a much softer credential (staging env files, CI,
+        // contractors) and must not move a live plan.
+        if ($reason = WebhookPaymentGuard::refuseToTouchPlan($plan, $this->id(), $this->verifiedIsTest)) {
+            return $this->refused($eventId, $type, $reason);
+        }
+
+        // `unpaid` is where Stripe's dunning ends when the account is set to
+        // leave the subscription open rather than cancel it: it has given up
+        // collecting, but the donor can still fix their card.
+        [$to, $from] = match ($status) {
+            'past_due', 'unpaid' => ['past_due', 'active'],
+            'active'             => ['active', 'past_due'],
+            default              => [null, null],
+        };
+
+        if ($to !== null) {
+            // Conditional on the status it is moving from, so a redelivery or a
+            // racing event cannot walk a cancelled or paused plan back to life.
+            RecurringPlan::query()
+                ->where('id', (int) $plan->id)
+                ->where('status', $from)
+                ->update([
+                    'status'     => $to,
+                    'updated_at' => $this->clock->now()->format('Y-m-d H:i:s'),
+                ]);
+        }
+
+        return new WebhookOutcome(
+            signature_ok: true,
+            external_id:  $eventId,
+            event_type:   $type,
+            handled:      true,
+        );
+    }
+
     /** @since 1.0.0 */
     private function handleSubscriptionDeleted(string $eventId, string $type, array $sub): WebhookOutcome
     {
@@ -1410,9 +1514,11 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         try {
             $this->api->delete('/subscriptions/' . rawurlencode($subId));
         } catch (RuntimeException $e) {
-            // Swallowed so the local cancel does not bounce when the gateway is
-            // already in the desired state.
-            if (! $this->isAlreadyHandled($e)) {
+            // Only Stripe's own reading of the subscription may excuse the
+            // failure. The caller marks the plan cancelled and emails the donor
+            // on the strength of this returning, so a failure it cannot account
+            // for has to reach the caller.
+            if (! $this->confirmedTerminal($subId)) {
                 throw $e;
             }
         }
@@ -1513,16 +1619,28 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     }
 
     /**
-     * True when Stripe's error means the subscription is already gone.
+     * Whether Stripe itself reports the subscription as done billing.
+     *
+     * Stripe keeps a cancelled subscription retrievable, so a retrieve is what
+     * separates "already cancelled, nothing left to do" from "this key cannot
+     * see it". The error text cannot: `No such subscription` is also what a key
+     * rotated to a different Stripe account gets for a subscription that is
+     * still charging the donor every month. One extra call, on the error path
+     * only.
      *
      * @since 1.0.0
      */
-    private function isAlreadyHandled(RuntimeException $e): bool
+    private function confirmedTerminal(string $subId): bool
     {
-        $msg = strtolower($e->getMessage());
-        return str_contains($msg, 'no such subscription')
-            || str_contains($msg, 'already canceled')
-            || str_contains($msg, 'already cancelled');
+        try {
+            $sub = $this->api->get('/subscriptions/' . rawurlencode($subId));
+        } catch (RuntimeException) {
+            // Cannot confirm, so do not swallow: reporting a cancellation that
+            // may not have happened is the failure being avoided.
+            return false;
+        }
+
+        return in_array((string) ($sub['status'] ?? ''), ['canceled', 'incomplete_expired'], true);
     }
 
     /**
@@ -1545,6 +1663,48 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             );
         }
         return null;
+    }
+
+    /**
+     * Whether the local row is in a state a refund can still be recorded
+     * against. Mirrors DonationService::recordExternalRefund's own precondition,
+     * so a failure on a row outside it can be told apart from a database or
+     * balance failure on a row inside it.
+     *
+     * @since 1.0.0
+     */
+    private function refundable(Donation $donation): bool
+    {
+        return in_array((string) $donation->status, ['paid', 'partial_refund'], true);
+    }
+
+    /**
+     * Money moved at Stripe against a donation that was never banked here.
+     *
+     * Answered rather than retried: no redelivery makes a failed or already
+     * reversed donation refundable, and a 5xx would have Stripe redeliver for
+     * three days and write an error row per attempt. Recorded as an error
+     * because the balance moved whatever the local row says.
+     *
+     * @since 1.0.0
+     */
+    private function unrefundable(string $eventId, string $type, Donation $donation, RuntimeException $e): WebhookOutcome
+    {
+        ErrorLog::record('gateway.stripe', $e->getMessage(), [
+            'donation_id' => (int) $donation->id,
+            'event_type'  => $type,
+            'reference'   => (string) $donation->reference,
+            'status'      => (string) $donation->status,
+        ]);
+
+        return new WebhookOutcome(
+            signature_ok: true,
+            external_id:  $eventId,
+            event_type:   $type,
+            handled:      false,
+            error:        $e->getMessage(),
+            http_status:  200,
+        );
     }
 
     /**

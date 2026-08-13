@@ -36,9 +36,12 @@ final class RevenueExporter
     {
         [$start, $end] = $this->bounds($fromMonth, $toMonth);
 
+        // Plain dates: the repository reads them as the org's calendar days and
+        // buckets by the same, so a December donation given in the evening is
+        // in the December row here and on the donor's statement both.
         $rows = $this->donations->dailyPaidBetween(
-            $start->format('Y-m-d') . ' 00:00:00',
-            $end->format('Y-m-t') . ' 23:59:59'
+            $start->format('Y-m-d'),
+            $end->format('Y-m-t')
         );
 
         $byMonth = [];
@@ -117,8 +120,8 @@ final class RevenueExporter
      */
     private function bounds(string $fromMonth, string $toMonth): array
     {
-        $start = $this->month($fromMonth) ?? $this->month(gmdate('Y-01'));
-        $end   = $this->month($toMonth)   ?? $this->month(gmdate('Y-m'));
+        $start = $this->month($fromMonth) ?? $this->month((string) wp_date('Y-01'));
+        $end   = $this->month($toMonth)   ?? $this->month((string) wp_date('Y-m'));
 
         return $start <= $end ? [$start, $end] : [$end, $start];
     }

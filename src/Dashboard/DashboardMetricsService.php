@@ -753,8 +753,8 @@ final class DashboardMetricsService
         $amount = $agg['amount_cents'];
 
         // Totals come back already converted to base currency via
-        // COALESCE(base_amount_cents, amount_cents), so the KPI label must be
-        // the base currency, not the most-common per-donation currency.
+        // COALESCE(base_amount_cents, 0), so the KPI label must be the base
+        // currency, not the most-common per-donation currency.
         $currency = strtoupper( Money::defaultCurrency());
 
         return [
@@ -785,7 +785,7 @@ final class DashboardMetricsService
      */
     private function rangeBounds(string $range, bool $includeTest = false): array
     {
-        $today = $this->clock->now()->format('Y-m-d');
+        $today = $this->localNow()->format('Y-m-d');
         return match ($range) {
             'today'    => [$today, $today],
             'last-7'   => [$this->daysAgo(6),  $today],
@@ -810,7 +810,10 @@ final class DashboardMetricsService
             ->get();
         $val = $row['first_paid'] ?? null;
         if (! is_string($val) || $val === '') return null;
-        return substr($val, 0, 10);
+        // A range bound, so it has to be the org's calendar date: a donation
+        // taken in the evening carries the next UTC date, and an all-time chart
+        // anchored on that one skips the donation that set it.
+        return (string) wp_date('Y-m-d', (int) strtotime($val . ' UTC'));
     }
 
     /**
@@ -819,7 +822,7 @@ final class DashboardMetricsService
      */
     private function previousRangeBounds(string $range, string $mode): array
     {
-        $today = $this->clock->now();
+        $today = $this->localNow();
         if ($mode === 'year') {
             [$from, $to] = $this->rangeBounds($range);
             return [
@@ -839,6 +842,18 @@ final class DashboardMetricsService
     /** @since 1.0.0 */
     private function daysAgo(int $n): string
     {
-        return $this->clock->now()->modify("-{$n} days")->format('Y-m-d');
+        return $this->localNow()->modify("-{$n} days")->format('Y-m-d');
+    }
+
+    /**
+     * Ranges are named in the org's days ("today", "last 7"), so they are
+     * resolved in the org's timezone and the repository converts them back to
+     * the UTC instants paid_at is stored in.
+     *
+     * @since 1.0.0
+     */
+    private function localNow(): DateTimeImmutable
+    {
+        return $this->clock->now()->setTimezone(DonationQueries::siteTimezone());
     }
 }

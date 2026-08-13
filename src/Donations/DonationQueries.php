@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Dono\Donations;
 
+use DateTimeImmutable;
+use DateTimeZone;
 use Dono\Vendor\Queryable\DB;
 
 /**
@@ -160,7 +162,7 @@ final class DonationQueries
      * paid_at is stored UTC, but every date printed on a statement or receipt
      * goes through wp_date() into the site's timezone. Filtering on a bare
      * "{year}-01-01 00:00:00" compares a local year against UTC timestamps, so
-     * on any site west of UTC a late-December gift lands on the following
+     * on any site west of UTC a late-December donation lands on the following
      * year's statement while its own line prints the December date, and the
      * donor's records disagree with the one the tax office sees.
      *
@@ -170,15 +172,102 @@ final class DonationQueries
      */
     public static function yearBoundsUtc(int $year): array
     {
-        $site = function_exists('wp_timezone') ? wp_timezone() : new \DateTimeZone('UTC');
-        $utc  = new \DateTimeZone('UTC');
+        [$start, $end] = self::dayBoundsUtc(
+            sprintf('%04d-01-01', $year),
+            sprintf('%04d-12-31', $year)
+        );
 
-        $start = new \DateTimeImmutable(sprintf('%04d-01-01 00:00:00', $year), $site);
-        $end   = new \DateTimeImmutable(sprintf('%04d-12-31 23:59:59', $year), $site);
+        return [(string) $start, (string) $end];
+    }
 
+    /**
+     * A range of calendar days in the org's timezone, expressed as the UTC
+     * window to compare paid_at against. Null passes through as "unbounded".
+     *
+     * Every reporting period is bounded through here so the revenue report,
+     * its CSV, the dashboard ranges and the year-end statement all cut the
+     * year in the same place. A period bounded in UTC instead puts a donation
+     * taken at 23:30 on 31 December in one year on the org's books and in the
+     * other on the donor's tax statement.
+     *
+     * @return array{0:?string,1:?string} inclusive UTC start and end
+     *
+     * @since 1.0.0
+     */
+    public static function dayBoundsUtc(?string $from, ?string $to): array
+    {
         return [
-            $start->setTimezone($utc)->format('Y-m-d H:i:s'),
-            $end->setTimezone($utc)->format('Y-m-d H:i:s'),
+            $from === null ? null : self::boundUtc($from, false),
+            $to   === null ? null : self::boundUtc($to, true),
         ];
+    }
+
+    /**
+     * SQL reading a UTC datetime column as the calendar date the org gave it
+     * on, for the window between two UTC datetimes.
+     *
+     * CONVERT_TZ needs the server's named-timezone tables loaded, which no
+     * install can be assumed to have, so the offset is resolved in PHP and
+     * folded in as seconds. One branch per DST transition inside the window
+     * keeps a spring-forward exact instead of shifting the days after it.
+     *
+     * @since 1.0.0
+     */
+    public static function localDateExpr(string $column, ?string $fromUtc, ?string $toUtc): string
+    {
+        $utcDate = "DATE({$column})";
+
+        $start = $fromUtc === null ? null : strtotime($fromUtc . ' UTC');
+        $end   = $toUtc   === null ? null : strtotime($toUtc . ' UTC');
+        if (! is_int($start) || ! is_int($end) || $end < $start) {
+            return $utcDate;
+        }
+
+        $transitions = self::siteTimezone()->getTransitions($start, $end);
+        if ($transitions === false || $transitions === []) {
+            return $utcDate;
+        }
+
+        $offset = (int) $transitions[0]['offset'];
+        if (count($transitions) === 1) {
+            return $offset === 0 ? $utcDate : "DATE(DATE_ADD({$column}, INTERVAL {$offset} SECOND))";
+        }
+
+        $case = '(CASE';
+        foreach (array_slice($transitions, 1) as $t) {
+            $case  .= sprintf(" WHEN {$column} < '%s' THEN %d", gmdate('Y-m-d H:i:s', (int) $t['ts']), $offset);
+            $offset = (int) $t['offset'];
+        }
+        $case .= sprintf(' ELSE %d END)', $offset);
+
+        return "DATE(DATE_ADD({$column}, INTERVAL {$case} SECOND))";
+    }
+
+    /** @since 1.0.0 */
+    public static function siteTimezone(): DateTimeZone
+    {
+        return function_exists('wp_timezone') ? wp_timezone() : new DateTimeZone('UTC');
+    }
+
+    /**
+     * One end of a local calendar day as UTC. Anything that is not a plain
+     * date is left for the database to reject rather than throwing part-way
+     * through a report.
+     *
+     * @since 1.0.0
+     */
+    private static function boundUtc(string $value, bool $endOfDay): string
+    {
+        $value = trim($value);
+        $day   = substr($value, 0, 10);
+        $time  = $endOfDay ? ' 23:59:59' : ' 00:00:00';
+
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $day) !== 1) {
+            return $value . $time;
+        }
+
+        return (new DateTimeImmutable($day . $time, self::siteTimezone()))
+            ->setTimezone(new DateTimeZone('UTC'))
+            ->format('Y-m-d H:i:s');
     }
 }

@@ -73,4 +73,13 @@ OUT="$OUT" php -r '
 test -f "$OUT/vendor/vendor-prefixed/dompdf/dompdf/lib/fonts/DejaVuSans.ttf" \
     || fail "DejaVu is missing, so non-Latin donor names would not render"
 
+# The Bitstream Vera terms those fonts carry require the notice to travel with
+# every copy, and dompdf ships the files without it.
+test -f "$OUT/licenses/DejaVu-Fonts-License.txt" \
+    || fail "the DejaVu licence is missing, so the fonts ship without their notice"
+
+# A vendor/ with no manifest is what Plugin Check flags, and the only thing in
+# the payload that says where those packages came from.
+test -f "$OUT/composer.json" || fail "composer.json is missing next to vendor/"
+
 echo "zip verified"

@@ -307,6 +307,11 @@ final class DonorService
         $id   = (int) $donor->id;
         $hash = (string) $donor->email_hash;
 
+        // Read before the row goes, because the column is the only pointer to
+        // the file: a picture the donor uploaded sits on a public URL, and
+        // nothing else in the site knows it belonged to them.
+        $avatarAttachmentId = (int) ($donor->avatar_attachment_id ?? 0);
+
         DB::transaction(function () use ($donor, $id, $hash): void {
             Consent::query()->where('donor_id', $id)->delete();
             DonorNote::query()->where('donor_id', $id)->delete();
@@ -324,6 +329,12 @@ final class DonorService
             // writing something that references a donor which no longer exists.
             do_action('dono.donor.deleted', $id, $hash);
         });
+
+        // After the commit: file deletion cannot be rolled back, so a delete
+        // that fails must not have already destroyed the picture.
+        if ($avatarAttachmentId > 0) {
+            wp_delete_attachment($avatarAttachmentId, true);
+        }
     }
 
     /** @since 1.0.0 */

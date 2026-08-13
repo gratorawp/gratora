@@ -280,6 +280,11 @@ final class DonationRepository
     }
 
     /**
+     * Days are the org's calendar days, matching the bounds and the dates the
+     * screens print, so an evening donation is not charted on tomorrow.
+     *
+     * @param string $from Local calendar date, Y-m-d.
+     * @param string $to   Local calendar date, Y-m-d, inclusive.
      * @return array<array{day:string, amount_cents:int, donations_count:int}>
      *
      * @since 1.0.0
@@ -287,9 +292,12 @@ final class DonationRepository
     public function dailyPaidBetween(string $from, string $to, ?int $campaignId = null, bool $includeTest = false): array
     {
         $prefix = DB::getPrefix();
+        [$startUtc, $endUtc] = DonationQueries::dayBoundsUtc($from, $to);
+        $day = DonationQueries::localDateExpr("{$prefix}dono_donations.paid_at", $startUtc, $endUtc);
+
         $rows = $this->netPaidQuery($from, $to, $campaignId, $includeTest)
-            ->selectRaw("DATE({$prefix}dono_donations.paid_at) AS day, COALESCE(SUM(COALESCE({$prefix}dono_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount, COUNT(*) AS cnt")
-            ->groupByRaw("DATE({$prefix}dono_donations.paid_at)")
+            ->selectRaw("{$day} AS day, COALESCE(SUM(COALESCE({$prefix}dono_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount, COUNT(*) AS cnt")
+            ->groupByRaw($day)
             ->getAll();
 
         return array_map(static fn ($r) => [
@@ -317,7 +325,13 @@ final class DonationRepository
         return max(0, (int) ($row['top'] ?? 0));
     }
 
-    /** @since 1.0.0 */
+    /**
+     * The org's calendar date, since it is read as one: the export picker
+     * compares it against wp_date('Y-m') and the all-time chart uses it as a
+     * lower bound that is itself resolved in the org's timezone.
+     *
+     * @since 1.0.0
+     */
     public function firstPaidDate(?int $campaignId = null): ?string
     {
         $q = DonationQueries::donationsOnly(DB::table('dono_donations')
@@ -329,8 +343,11 @@ final class DonationRepository
         }
 
         $val = $q->get()['first_paid'] ?? null;
+        if (! is_string($val) || $val === '') {
+            return null;
+        }
 
-        return $val ? substr((string) $val, 0, 10) : null;
+        return (string) wp_date('Y-m-d', (int) strtotime($val . ' UTC'));
     }
 
     /**
@@ -345,8 +362,9 @@ final class DonationRepository
             ->selectRaw('currency, COUNT(*) AS c')
             ->whereIn('status', ['paid', 'partial_refund']));
 
-        if ($from !== null) $q = $q->where('paid_at', $from . ' 00:00:00', '>=');
-        if ($to   !== null) $q = $q->where('paid_at', $to   . ' 23:59:59', '<=');
+        [$start, $end] = DonationQueries::dayBoundsUtc($from, $to);
+        if ($start !== null) $q = $q->where('paid_at', $start, '>=');
+        if ($end   !== null) $q = $q->where('paid_at', $end, '<=');
 
         $row = $q->groupBy('currency')->orderBy('c', 'DESC')->get();
         return $row['currency'] ?? null;
@@ -669,8 +687,9 @@ final class DonationRepository
         $q = DonationQueries::live(
             DB::table('dono_donations')->whereIn('status', ['paid', 'partial_refund'])
         );
-        if ($from !== null)       $q = $q->where('paid_at', $from . ' 00:00:00', '>=');
-        if ($to   !== null)       $q = $q->where('paid_at', $to   . ' 23:59:59', '<=');
+        [$start, $end] = DonationQueries::dayBoundsUtc($from, $to);
+        if ($start !== null)      $q = $q->where('paid_at', $start, '>=');
+        if ($end   !== null)      $q = $q->where('paid_at', $end, '<=');
         if ($campaignId !== null) $q = $q->where('campaign_id', $campaignId);
 
         $row = $q->selectRaw('COALESCE(base_amount_cents, 0) AS amount_cents')
@@ -698,8 +717,9 @@ final class DonationRepository
     {
         $rangePredicate = '1';
         if ($from !== null && $to !== null) {
-            $fromQ = esc_sql($from . ' 00:00:00');
-            $toQ   = esc_sql($to   . ' 23:59:59');
+            [$start, $end] = DonationQueries::dayBoundsUtc($from, $to);
+            $fromQ = esc_sql((string) $start);
+            $toQ   = esc_sql((string) $end);
             $rangePredicate = "paid_at >= '{$fromQ}' AND paid_at <= '{$toQ}'";
         }
 
@@ -778,8 +798,14 @@ final class DonationRepository
             DB::table('dono_donations')->whereIn('status', ['paid', 'partial_refund']),
             $includeTest
         );
-        if ($from !== null)       $q = $q->where('paid_at', $from . ' 00:00:00', '>=');
-        if ($to   !== null)       $q = $q->where('paid_at', $to   . ' 23:59:59', '<=');
+
+        // The window is the org's calendar days, converted to the UTC instants
+        // paid_at is stored in. Comparing local dates against UTC timestamps is
+        // what makes a 31 December donation land on a different year here than
+        // on the donor's tax statement.
+        [$start, $end] = DonationQueries::dayBoundsUtc($from, $to);
+        if ($start !== null)      $q = $q->where('paid_at', $start, '>=');
+        if ($end   !== null)      $q = $q->where('paid_at', $end, '<=');
         if ($campaignId !== null) $q = $q->where('campaign_id', $campaignId);
 
         $prefix = DB::getPrefix();

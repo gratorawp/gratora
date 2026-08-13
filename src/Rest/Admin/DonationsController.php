@@ -186,7 +186,7 @@ final class DonationsController
         register_rest_route(self::NAMESPACE, '/admin/receipts/(?P<receipt_id>\d+)/pdf', [
             'methods'             => WP_REST_Server::READABLE,
             'callback'            => [$this, 'downloadReceipt'],
-            'permission_callback' => [$this, 'canAccess'],
+            'permission_callback' => [$this, 'canDownloadReceipt'],
             'args'                => [
                 'receipt_id' => ['type' => 'integer', 'required' => true],
             ],
@@ -253,6 +253,18 @@ final class DonationsController
     public function canAccess(): bool
     {
         return Capabilities::userCan('dono_view_donations');
+    }
+
+    /**
+     * A receipt carries the donor's address, and their email wherever the org
+     * put the merge tag, so downloading one reads the donor record however the
+     * donations screen offers the button.
+     *
+     * @since 1.0.0
+     */
+    public function canDownloadReceipt(): bool
+    {
+        return $this->canAccess() && $this->canReadDonorPii();
     }
 
     /** @since 1.0.0 */

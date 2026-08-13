@@ -30,6 +30,9 @@ final class StripeWebhookProvisioner
         'charge.dispute.funds_reinstated',
         'invoice.payment_succeeded',
         'invoice.payment_failed',
+        // Where Stripe's own dunning ends: without it a subscription Stripe has
+        // stopped collecting stays active here and in MRR for good.
+        'customer.subscription.updated',
         'customer.subscription.deleted',
         'account.updated',
     ];

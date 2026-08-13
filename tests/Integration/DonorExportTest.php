@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dono\Tests\Integration;
 
 use Dono\Donations\Donation;
+use Dono\Donors\Donor;
 use Dono\Donors\DonorService;
 use Dono\Exports\DonorExporter;
 use Dono\Foundation\Plugin;
@@ -12,9 +13,27 @@ use Dono\Foundation\Plugin;
 /**
  * The donor CSV carries decrypted PII, so what it contains has to be exactly
  * what was asked for and nothing else.
+ *
+ * Its date range is the org's calendar days while created_at is stored UTC, so
+ * the window is converted and the stamps in the file are written in the same
+ * timezone the window was cut in.
  */
 final class DonorExportTest extends IntegrationTestCase
 {
+    private ?string $originalTz = null;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->originalTz = get_option('timezone_string');
+    }
+
+    protected function tearDown(): void
+    {
+        update_option('timezone_string', $this->originalTz);
+        parent::tearDown();
+    }
+
     private function exporter(): DonorExporter
     {
         return Plugin::instance()->container->get(DonorExporter::class);
@@ -177,6 +196,26 @@ final class DonorExportTest extends IntegrationTestCase
 
         $this->assertStringContainsString('brand-new@example.test', $csv);
         $this->assertStringNotContainsString('long-standing@example.test', $csv);
+    }
+
+    public function test_a_donor_who_signed_up_on_new_year_s_eve_is_in_that_year_s_file(): void
+    {
+        update_option('timezone_string', 'America/New_York');
+
+        // 23:30 on 31 December 2026 in New York, stored as 04:30 on 1 January
+        // 2027 UTC.
+        $donor = $this->makeDonor('new-years-eve@example.test');
+        Donor::query()->where('id', (int) $donor->id)
+            ->update(['created_at' => '2027-01-01 04:30:00']);
+
+        $csv = $this->exporter()->toCsv([
+            'columns' => ['email', 'created_at'],
+            'from'    => '2026-12-01',
+            'to'      => '2026-12-31',
+        ]);
+
+        $this->assertStringContainsString('new-years-eve@example.test', $csv);
+        $this->assertStringContainsString('2026-12-31 23:30:00', $csv, 'the stamp is the org day the window was cut in');
     }
 
     public function test_a_window_with_no_donors_yields_a_header_and_nothing_else(): void

@@ -177,11 +177,13 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
             return (
                 <Field
                     key={ key }
+                    htmlFor={ `dono-comment-${ key }` }
                     label={ f.label || config.i18n.comment }
                     required={ f.required }
                     error={ err[ 'note_to_org' ] }
                 >
                     <textarea
+                        id={ `dono-comment-${ key }` }
                         rows={ 3 }
                         maxLength={ 5000 }
                         placeholder={ decodeEntities( f.placeholder || '' ) }
@@ -778,15 +780,23 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
     }
 }
 
-function Field( { label, required, error, children } ) {
+/**
+ * `htmlFor` is for a field that carries a second control of its own, such as the
+ * message field's public-message checkbox. A label names exactly one control, so
+ * the wrapper stops being one and the caption points at the control by id.
+ */
+function Field( { label, required, error, htmlFor, children } ) {
+    const Wrapper = htmlFor ? 'div' : 'label';
+    const Caption = htmlFor ? 'label' : 'span';
+
     return (
-        <label class="dono-form__field">
-            <span class="dono-form__label">
+        <Wrapper class="dono-form__field">
+            <Caption class="dono-form__label" for={ htmlFor }>
                 { decodeEntities( label ) }
                 { required && <span class="dono-form__required" aria-hidden="true">*</span> }
-            </span>
+            </Caption>
             { children }
             { error && <span class="dono-form__field-error" role="alert">{ error }</span> }
-        </label>
+        </Wrapper>
     );
 }

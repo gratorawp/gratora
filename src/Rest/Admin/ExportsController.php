@@ -148,8 +148,8 @@ final class ExportsController
     /** @since 1.0.0 */
     public function revenueCsv(WP_REST_Request $request): WP_REST_Response
     {
-        $from = (string) $request['from'] ?: gmdate('Y-01');
-        $to   = (string) $request['to']   ?: gmdate('Y-m');
+        $from = (string) $request['from'] ?: (string) wp_date('Y-01');
+        $to   = (string) $request['to']   ?: (string) wp_date('Y-m');
 
         return $this->streamCsv(
             $request,

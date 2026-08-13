@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Dono\Donors;
 
+use Dono\Analytics\ErrorLog;
 use Dono\Async\AsyncDispatcher;
 use Dono\Foundation\Batch\BatchProcessor;
 use Dono\Vendor\Queryable\DB;
+use Throwable;
 
 /**
  * Daily GDPR retention runner. Soft-redacts donors whose last activity
@@ -31,6 +33,15 @@ final class DonorRetention
     /** Stamped forward on activation, and by anything that bulk-loads donors. */
     public const STARTS_AT_OPTION = 'dono_retention_starts_at';
     public const GRACE_DAYS = 30;
+
+    /**
+     * How far the current pass has walked. `dono.donor.erasure_handlers` runs
+     * third-party code inside the loop, so a donor whose erasure throws stays
+     * unredacted and would be first in the same window every night, taking
+     * everyone behind them with it. The cursor steps past that donor, the
+     * failure is logged, and the pass still finishes.
+     */
+    private const CURSOR_OPTION = 'dono_retention_cursor';
 
     private const DAILY = 86400;
     private const BATCH = 100;
@@ -72,6 +83,7 @@ final class DonorRetention
 
         $prefix = DB::getPrefix();
         $cutoff = self::cutoff($years);
+        $cursor = self::cursor();
 
         $more = BatchProcessor::step(
             fn (int $n) => array_map(
@@ -79,6 +91,7 @@ final class DonorRetention
                 DB::raw(
                     "SELECT id FROM {$prefix}dono_donors d
                      WHERE d.redacted_at IS NULL
+                       AND d.id > %d
                        AND COALESCE(d.last_donation_at, d.created_at) < %s
                        AND NOT EXISTS (
                            SELECT 1 FROM {$prefix}dono_recurring_plans p
@@ -87,13 +100,34 @@ final class DonorRetention
                        )
                      ORDER BY id ASC
                      LIMIT %d",
-                    [$cutoff, $n]
+                    [$cursor, $cutoff, $n]
                 )['rows'] ?? []
             ),
             function (array $ids): void {
                 foreach ($ids as $id) {
+                    // Stamped before the attempt, so a donor who kills the
+                    // process outright is stepped past as well.
+                    self::setCursor($id);
+
                     $donor = Donor::query()->where('id', $id)->get();
-                    if ($donor) $this->donorService->redact($donor);
+                    if (! $donor) continue;
+
+                    try {
+                        $this->donorService->redact($donor);
+                    } catch (Throwable $e) {
+                        // The donor is left whole and the pass carries on, but
+                        // somebody has to know the erasure they asked for did
+                        // not happen to this person.
+                        ErrorLog::record(
+                            'donor.retention',
+                            sprintf(
+                                'Donor %d could not be erased, so the sweep stepped past them: %s',
+                                $id,
+                                $e->getMessage()
+                            ),
+                            ['donor_id' => $id]
+                        );
+                    }
                 }
             },
             self::BATCH,
@@ -102,7 +136,24 @@ final class DonorRetention
 
         if ($more) {
             $this->async->enqueue(self::HOOK);
+            return;
         }
+
+        // Drained: the next pass starts at the top and retries whatever it
+        // stepped past, in case whatever broke has since been fixed.
+        delete_option(self::CURSOR_OPTION);
+    }
+
+    /** @since 1.0.0 */
+    private static function cursor(): int
+    {
+        return (int) get_option(self::CURSOR_OPTION, 0);
+    }
+
+    /** @since 1.0.0 */
+    private static function setCursor(int $donorId): void
+    {
+        update_option(self::CURSOR_OPTION, $donorId, false);
     }
 
     /**

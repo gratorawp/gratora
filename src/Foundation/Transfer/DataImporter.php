@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Dono\Foundation\Transfer;
 
+use Dono\Analytics\ErrorLog;
+use Dono\Donations\AggregateSyncer;
 use Dono\Foundation\Crypto\Crypto;
 use Dono\Foundation\Identity\IdentityHasher;
 use Dono\Vendor\Queryable\DB;
@@ -11,7 +13,7 @@ use Dono\Vendor\Queryable\DB;
 /**
  * Restores a Dono export onto this site.
  *
- * Three things make this harder than inserting rows.
+ * Four things make this harder than inserting rows.
  *
  * Ids do not survive. Donor 12 on the source is not donor 12 here, so every row
  * is matched on something real (a slug, a reference, an address) and the source
@@ -22,9 +24,13 @@ use Dono\Vendor\Queryable\DB;
  * yet. Those columns are left null on the way in and filled once every id is
  * known. See DEFERRED.
  *
- * And it has to be safe to run twice. Anything already here is left exactly as
- * it is rather than duplicated or overwritten, which is also what makes a
+ * It has to be safe to run twice. Anything already here is left exactly as it
+ * is rather than duplicated or overwritten, which is also what makes a
  * half-finished import safe to resume.
+ *
+ * And a row it cannot place has to be said out loud. Money records hang off
+ * donors and off each other, so one row that does not land takes everything
+ * behind it; an operator reading "restored" has to be told what did not.
  *
  * @since 1.0.0
  */
@@ -114,6 +120,15 @@ final class DataImporter
     /** @var array<string,int> */
     private array $skipped = [];
 
+    /** @var array<string, array<string,int>> table => why it did not land => rows */
+    private array $dropped = [];
+
+    /** @var array<int,string> source donor id => the reference of a donation of theirs */
+    private array $shellAnchor = [];
+
+    /** Which site the file came from, so two files cannot name the same shell. */
+    private string $origin = '';
+
     /** @since 1.0.0 */
     public function __construct(
         private Crypto $crypto,
@@ -123,12 +138,15 @@ final class DataImporter
 
     /**
      * @param  array<string,mixed> $export
-     * @return array{created:array<string,int>, existing:array<string,int>, skipped:array<string,int>}
+     * @return array{created:array<string,int>, existing:array<string,int>, skipped:array<string,int>, dropped:array<string, array<string,int>>}
      * @since 1.0.0
      */
     public function import(array $export): array
     {
         $tables = is_array($export['tables'] ?? null) ? $export['tables'] : [];
+
+        $this->origin = (string) ($export['site_url'] ?? '');
+        $this->indexShellDonors($tables);
 
         foreach (self::ORDER as $table) {
             foreach (($tables[$table] ?? []) as $row) {
@@ -137,11 +155,15 @@ final class DataImporter
         }
 
         $this->resolveDeferred($tables);
+        $this->syncFormStats();
+        $this->recordUnknownTables($tables);
+        $this->reportDropped();
 
         return [
             'created'  => $this->created,
             'existing' => $this->existing,
             'skipped'  => $this->skipped,
+            'dropped'  => $this->dropped,
         ];
     }
 
@@ -215,7 +237,7 @@ final class DataImporter
                     $row[$column] = null;
                     continue;
                 }
-                return null;
+                return $this->drop($table, 'missing_' . $column);
             }
 
             $row[$column] = $mapped;
@@ -238,14 +260,147 @@ final class DataImporter
         $email = trim((string) ($row['email'] ?? ''));
 
         if ($email === '') {
-            // Nothing to match them on here or later, and no way to reach them.
-            return null;
+            return $this->prepareShellDonor($row);
         }
 
         $row['email']      = $email;
         $row['email_hash'] = $this->hasher->emailHash($email);
 
         return $this->reseal('dono_donors', $row);
+    }
+
+    /**
+     * An erased donor, whose row the export carries without an address because
+     * there is none left to carry.
+     *
+     * Erasure keeps the donations, refunds, receipts and consents on purpose
+     * and clears only the PII on them, and every one of those rows resolves
+     * through this donor. Skipping it would make the restore destroy exactly
+     * the records the erasure preserved, so it lands as the shell it already
+     * is: no address, no name, and an identity that names a row rather than a
+     * person.
+     *
+     * @param  array<string,mixed> $row
+     * @return array<string,mixed>|null
+     * @since 1.0.0
+     */
+    private function prepareShellDonor(array $row): ?array
+    {
+        if (! self::isShell($row)) {
+            // Not erased, so the address was sealed with a key that did not
+            // travel. Nothing identifies them and nothing could reach them,
+            // and a donor row with an empty address would read as a live
+            // supporter for the rest of its life.
+            return $this->drop('dono_donors', 'unreadable_email');
+        }
+
+        $sourceId = (int) ($row['id'] ?? 0);
+        if ($sourceId <= 0) {
+            // Every shell would answer to the same identity, which would
+            // gather unrelated donors into one row.
+            return $this->drop('dono_donors', 'no_source_id');
+        }
+
+        foreach (['email', 'first_name', 'last_name', 'company', 'address', 'phone', 'tax_id', 'notes'] as $pii) {
+            unset($row[$pii]);
+        }
+
+        $row = $this->reseal('dono_donors', $row);
+        $row['email_hash'] = $this->shellHash($sourceId);
+        // The literal empty string is the marker redaction itself writes, and
+        // what DonorService reads to mean this row has no address.
+        $row['email_encrypted'] = '';
+
+        return $row;
+    }
+
+    /**
+     * A donor the export could not carry an address for, because erasure had
+     * already taken it. `redacted_at` is what separates that from a key this
+     * site cannot open.
+     *
+     * @param  array<string,mixed> $row
+     * @since 1.0.0
+     */
+    private static function isShell(array $row): bool
+    {
+        return trim((string) ($row['email'] ?? '')) === ''
+            && trim((string) ($row['redacted_at'] ?? '')) !== '';
+    }
+
+    /**
+     * What an erased donor is matched on here.
+     *
+     * A donation of theirs is the strongest handle available: references are
+     * unique, and erasure keeps them. So a file restored onto the site it came
+     * from, or onto one already holding part of it, finds the row it belongs
+     * to rather than adding a second anonymous donor beside it.
+     *
+     * Failing that, a value derived from the file's origin and the row it held
+     * there: unique per source row, identical on every run of the same file,
+     * and derived from nothing about a person. It cannot be the address hash,
+     * which is peppered per install and deliberately does not travel.
+     *
+     * @since 1.0.0
+     */
+    private function shellHash(int $sourceId): string
+    {
+        $reference = $this->shellAnchor[$sourceId] ?? '';
+        if ($reference !== '') {
+            $hash = $this->hashOfDonorBehind($reference);
+            if ($hash !== '') return $hash;
+        }
+
+        return hash('sha256', 'dono-restored-shell:' . $this->origin . ':' . $sourceId);
+    }
+
+    /**
+     * The address hash of whoever owns the donation with this reference here,
+     * or an empty string when this site does not have that donation.
+     *
+     * @since 1.0.0
+     */
+    private function hashOfDonorBehind(string $reference): string
+    {
+        $donation = DB::table('dono_donations')->where('reference', $reference)->get();
+        $donorId  = (int) self::field($donation, 'donor_id');
+        if ($donorId <= 0) return '';
+
+        return (string) self::field(DB::table('dono_donors')->where('id', $donorId)->get(), 'email_hash');
+    }
+
+    /**
+     * Erased donors land before their donations do, so the reference that
+     * identifies them has to be found before the walk starts. Only the rows
+     * that need one are indexed: a decade of donations is not held in memory
+     * to place a handful of shells.
+     *
+     * @param array<string,mixed> $tables
+     * @since 1.0.0
+     */
+    private function indexShellDonors(array $tables): void
+    {
+        $wanted = [];
+        foreach (($tables['dono_donors'] ?? []) as $row) {
+            if (! is_array($row) || ! self::isShell($row)) continue;
+
+            $id = (int) ($row['id'] ?? 0);
+            if ($id > 0) $wanted[$id] = true;
+        }
+
+        if ($wanted === []) return;
+
+        foreach (($tables['dono_donations'] ?? []) as $row) {
+            if (! is_array($row)) continue;
+
+            $donorId   = (int) ($row['donor_id'] ?? 0);
+            $reference = trim((string) ($row['reference'] ?? ''));
+
+            if ($reference === '' || ! isset($wanted[$donorId])) continue;
+            if (isset($this->shellAnchor[$donorId])) continue;
+
+            $this->shellAnchor[$donorId] = $reference;
+        }
     }
 
     /**
@@ -296,13 +451,21 @@ final class DataImporter
             $query->where($column, $value);
         }
 
-        // DB::table()->get() hands back an array while DB::raw() hands back
-        // objects, and reading only one of them silently finds nothing.
-        $found = $query->get();
-        if (is_array($found))  return (int) ($found['id'] ?? 0);
-        if (is_object($found)) return (int) ($found->id ?? 0);
+        return (int) self::field($query->get(), 'id');
+    }
 
-        return 0;
+    /**
+     * DB::table()->get() hands back an array while DB::raw() hands back
+     * objects, and reading only one of them silently finds nothing.
+     *
+     * @since 1.0.0
+     */
+    private static function field(mixed $row, string $column): mixed
+    {
+        if (is_array($row))  return $row[$column] ?? null;
+        if (is_object($row)) return $row->$column ?? null;
+
+        return null;
     }
 
     /**
@@ -338,11 +501,103 @@ final class DataImporter
     }
 
     /**
+     * The export leaves form statistics behind as derived data the restore
+     * recomputes, so the restore has to recompute them. Nothing else will:
+     * rows are inserted straight, firing none of the donation hooks that keep
+     * that table current, and until something does every restored form reads
+     * as nothing raised.
+     *
+     * Bounded by the forms in the file, and each call is one aggregate query.
+     * Donor, campaign and fund rollups travel as columns on their own rows and
+     * are not rebuilt here.
+     *
+     * @since 1.0.0
+     */
+    private function syncFormStats(): void
+    {
+        $syncer = new AggregateSyncer();
+
+        foreach ($this->map['dono_forms'] ?? [] as $formId) {
+            $syncer->syncForm((int) $formId);
+        }
+    }
+
+    /**
+     * Tables the file carries that this importer has no contract for, which is
+     * how an add-on's tables arrive: dono.export.tables puts them in the file,
+     * and restoring one needs a natural key, a reference map and a deferred
+     * map it has not declared. Without a natural key a second run would
+     * duplicate every row of it, so they are named to the operator rather than
+     * written wrongly or passed over in silence.
+     *
+     * @param array<string,mixed> $tables
+     * @since 1.0.0
+     */
+    private function recordUnknownTables(array $tables): void
+    {
+        foreach ($tables as $table => $rows) {
+            $table = (string) $table;
+            if (in_array($table, self::ORDER, true) || ! is_array($rows) || $rows === []) {
+                continue;
+            }
+
+            $count = count($rows);
+            $this->dropped[$table]['unsupported_table'] = $count;
+            $this->skipped[$table] = ($this->skipped[$table] ?? 0) + $count;
+        }
+    }
+
+    /**
+     * A restore that quietly loses a donation is worse than one that fails, so
+     * whatever did not land is written where the site owner reads failures,
+     * not only handed back to the screen that started it.
+     *
+     * @since 1.0.0
+     */
+    private function reportDropped(): void
+    {
+        if ($this->dropped === []) return;
+
+        $total = 0;
+        $parts = [];
+        foreach ($this->dropped as $table => $reasons) {
+            foreach ($reasons as $why => $count) {
+                $total  += $count;
+                $parts[] = sprintf('%s %s (%s)', $count, $table, $why);
+            }
+        }
+
+        ErrorLog::record(
+            'transfer.import',
+            sprintf(
+                'Restore could not place %d rows: %s. They are still in the file, and re-running it once the cause is fixed brings them in.',
+                $total,
+                implode(', ', $parts)
+            ),
+            ['dropped' => $this->dropped]
+        );
+    }
+
+    /**
      * @param array<string,int> $bucket
      * @since 1.0.0
      */
     private function bump(array &$bucket, string $table): void
     {
         $bucket[$table] = ($bucket[$table] ?? 0) + 1;
+    }
+
+    /**
+     * Records why a row is not landing, and hands back the null its callers
+     * return.
+     *
+     * @return array<string,mixed>|null
+     * @since 1.0.0
+     */
+    private function drop(string $table, string $why): ?array
+    {
+        $this->dropped[$table][$why] = ($this->dropped[$table][$why] ?? 0) + 1;
+
+        return null;
     }
 }

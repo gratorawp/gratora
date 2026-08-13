@@ -970,7 +970,18 @@ final class CoreCommandProvider
             'dono_resend_receipt',
             true,
             true,
-            function (array $in) use ($c): array {
+            function (array $in, CommandContext $ctx) use ($c): array {
+                // The PDF carries the donor's address, and their email wherever
+                // the org put the merge tag, so rendering one reads the donor
+                // record. A command declares a single capability and this one
+                // has to hold two, resolved the way dispatch resolves its own.
+                $mayReadDonors = in_array($ctx->source, ['rest', 'cli'], true)
+                    ? current_user_can('dono_view_donors')
+                    : ($ctx->user_id !== null && user_can($ctx->user_id, 'dono_view_donors'));
+                if (! $mayReadDonors) {
+                    throw new CommandError(esc_html('Not permitted: dono_view_donors.'));
+                }
+
                 $path = $c->get(ReceiptIssuer::class)->renderReceiptPdf((int) $in['receipt_id']);
                 if ($path === null) {
                     throw new CommandError(esc_html('Receipt or renderer not found.'));

@@ -77,22 +77,46 @@ function toMatcher( rule ) {
 
 /**
  * .distignore cannot strip development dependencies: they are scattered across
- * vendor/ under names nobody lists by hand, and the first attempt at this
- * produced a 3 GB zip because two thirds of it was PHPUnit and its tooling.
- * Composer already knows which packages are dev-only, so ask it.
+ * vendor/ under names nobody lists by hand. `require-dev` is not that list
+ * either, since it names only what we asked for, and strauss and phpunit pull
+ * in seventy packages between them. Composer keeps both answers: installed.json
+ * records whether the tree it wrote included require-dev, and composer.lock
+ * names every dev package transitively.
  */
-function devPackagesPresent() {
-    const composer = path.join( root, 'composer.json' );
-    if ( ! existsSync( composer ) ) return [];
+function devInstall() {
+    const manifest = path.join( root, 'vendor', 'composer', 'installed.json' );
+    if ( ! existsSync( manifest ) ) {
+        return { installed: false, withDev: false, present: [] };
+    }
 
-    const dev = Object.keys( JSON.parse( readFileSync( composer, 'utf8' ) )[ 'require-dev' ] || {} );
+    const installed = JSON.parse( readFileSync( manifest, 'utf8' ) );
+    const lock      = path.join( root, 'composer.lock' );
+    const names     = existsSync( lock )
+        ? ( JSON.parse( readFileSync( lock, 'utf8' ) )[ 'packages-dev' ] || [] ).map( ( p ) => p.name )
+        : ( installed[ 'dev-package-names' ] || [] );
 
-    return dev.filter( ( name ) => existsSync( path.join( root, 'vendor', ...name.split( '/' ) ) ) );
+    return {
+        installed: true,
+        // Composer writes false only for an install that excluded require-dev.
+        withDev: installed.dev !== false,
+        present: names.filter( ( name ) => existsSync( path.join( root, 'vendor', ...name.split( '/' ) ) ) ),
+    };
 }
 
-const stragglers = devPackagesPresent();
-if ( stragglers.length > 0 ) {
-    console.error( `vendor/ still has development dependencies: ${ stragglers.join( ', ' ) }` );
+const vendor = devInstall();
+if ( ! vendor.installed ) {
+    console.error( 'vendor/ carries no composer manifest, so there is no telling what is in it.' );
+    console.error( 'Run `composer install --no-dev` first, then package.' );
+    process.exit( 1 );
+}
+if ( vendor.withDev || vendor.present.length > 0 ) {
+    // A full dev install is eighty-odd packages, so name a handful and count the rest.
+    const named = vendor.present.slice( 0, 5 ).join( ', ' );
+    const rest  = vendor.present.length - 5;
+
+    console.error( vendor.present.length > 0
+        ? `vendor/ still has development dependencies: ${ named }${ rest > 0 ? `, and ${ rest } more` : '' }`
+        : 'vendor/ was installed with development dependencies.' );
     console.error( 'Run `composer install --no-dev` first, then package.' );
     console.error( '(`composer install` afterwards puts your test suite back.)' );
     process.exit( 1 );

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Campaigns;
 
+use DateTimeImmutable;
 use Dono\Donations\ChannelClassifier;
 use Dono\Donations\Donation;
 use Dono\Donations\DonationQueries;
@@ -611,7 +612,7 @@ final class CampaignMetricsService
      */
     private function previousRangeBounds(string $range, int $campaignId, string $mode = 'period'): array
     {
-        $today = $this->clock->now();
+        $today = $this->localNow();
 
         if ($mode === 'year') {
             // Shift both ends of the current range back by one year.
@@ -640,7 +641,7 @@ final class CampaignMetricsService
      */
     private function rangeBounds(string $range, int $campaignId): array
     {
-        $today = $this->clock->now()->format('Y-m-d');
+        $today = $this->localNow()->format('Y-m-d');
         return match ($range) {
             'today'    => [$today, $today],
             'last-7'   => [$this->daysAgo(6),  $today],
@@ -653,7 +654,19 @@ final class CampaignMetricsService
     /** @since 1.0.0 */
     private function daysAgo(int $n): string
     {
-        return $this->clock->now()->modify("-{$n} days")->format('Y-m-d');
+        return $this->localNow()->modify("-{$n} days")->format('Y-m-d');
+    }
+
+    /**
+     * Ranges are named in the org's days ("today", "last 7"), so they are
+     * resolved in the org's timezone and the repository converts them back to
+     * the UTC instants paid_at is stored in.
+     *
+     * @since 1.0.0
+     */
+    private function localNow(): DateTimeImmutable
+    {
+        return $this->clock->now()->setTimezone(DonationQueries::siteTimezone());
     }
 
     /**

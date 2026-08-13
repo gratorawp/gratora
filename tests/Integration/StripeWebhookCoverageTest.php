@@ -91,16 +91,18 @@ final class StripeWebhookCoverageTest extends IntegrationTestCase
         );
     }
 
-    public function test_account_deauthorized_forgets_the_account(): void
+    public function test_account_deauthorized_forgets_the_keys_of_the_mode_that_signed_it(): void
     {
         $this->assertNotNull((new StripeAccount(new Crypto()))->accountId(), 'account is connected');
 
+        // Signed with the live secret, so the live connection is the one that
+        // was withdrawn. Per-mode scoping is pinned by
+        // StripeDeauthorizationModeTest.
         $this->postWebhook('account.application.deauthorized', [], ['account' => 'acct_test_123']);
 
-        $this->assertNull(
-            (new StripeAccount(new Crypto()))->accountId(),
-            'deauthorization drops the local Connect account',
-        );
+        $acct = new StripeAccount(new Crypto());
+        $this->assertFalse($acct->hasKeysFor(false), 'deauthorization drops that mode');
+        $this->assertTrue($acct->hasKeysFor(true), 'the other mode is a separate connection');
     }
 
     private function pendingStripeDonation(): Donation

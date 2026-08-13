@@ -206,6 +206,16 @@ final class DonationsController
             }
         }
 
+        // A submission that names no form was offered nothing, so the two
+        // fields a form has to grant are not the caller's to send: fund_id
+        // would book money against a fund nothing listed, and note_public is
+        // the unmoderated publish route onto the campaign's supporter wall.
+        // Every gate above hangs off the form, so without this the form-less
+        // path is strictly more permissive than any real form.
+        if ($form === null) {
+            unset($body['fund_id'], $body['note_to_org'], $body['note_public']);
+        }
+
         // The gateway must be one the form actually offers in this context, not
         // just any registered one.
         $formAllowed = ($form && is_array($form->settings['gateways']['allowed'] ?? null))

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dono\Tests\Integration;
 
 use Dono\Campaigns\Campaign;
+use Dono\Forms\Form;
 use Dono\Funds\Fund;
 use WP_REST_Request;
 
@@ -217,11 +218,15 @@ final class DonationFlowTest extends IntegrationTestCase
         // note_to_org is a note to the organization; it only appears on the
         // public supporter wall / recent donations when the donor ticks the
         // opt-in, so the stored note_public flag must reflect that choice.
+        // Only a form carrying a comment block offers the message at all.
+        $form = $this->publishedFormOffering('<!-- wp:dono/comment /-->');
+
         $public = $this->postDonation([
             'email'        => 'wall@example.com',
             'amount_cents' => 5000,
             'currency'     => 'EUR',
             'gateway'      => 'offline',
+            'form_id'      => (int) $form->id,
             'note_to_org'  => 'Proud to support this!',
             'note_public'  => true,
         ])->get_data()['reference'];
@@ -232,6 +237,7 @@ final class DonationFlowTest extends IntegrationTestCase
             'amount_cents' => 5000,
             'currency'     => 'EUR',
             'gateway'      => 'offline',
+            'form_id'      => (int) $form->id,
             'note_to_org'  => 'In memory of my father - please keep private',
         ])->get_data()['reference'];
         $this->assertSame(0, $this->columnOf($private, 'note_public'), 'note stays private by default');
@@ -370,10 +376,16 @@ final class DonationFlowTest extends IntegrationTestCase
 
     public function test_explicit_active_fund_is_attributed(): void
     {
+        // A default fund the donor did not pick, so attributing the picked one
+        // is the choice being honoured rather than the fallback chain landing
+        // on the only active fund there is.
+        $this->makeFund('general', 'General', true, true);
         $fund = $this->makeFund('arts', 'Arts', true);
-        $ref  = $this->postDonation([
+        $form = $this->publishedFormOffering('<!-- wp:dono/fund-picker /-->');
+
+        $ref = $this->postDonation([
             'email' => 'a@x.com', 'amount_cents' => 1000, 'currency' => 'EUR',
-            'gateway' => 'offline', 'fund_id' => $fund->id,
+            'gateway' => 'offline', 'fund_id' => $fund->id, 'form_id' => (int) $form->id,
         ])->get_data()['reference'];
         $this->assertSame((int) $fund->id, $this->fundIdOf($ref));
     }
@@ -498,6 +510,26 @@ final class DonationFlowTest extends IntegrationTestCase
         $f->created_at = gmdate('Y-m-d H:i:s');
         $f->updated_at = $f->created_at;
         $f->save();
+        return $f;
+    }
+
+    /**
+     * fund_id and note_to_org are only honoured when the form offered them, so
+     * a submission exercising either has to name a form that carries the block.
+     */
+    private function publishedFormOffering(string $block): Form
+    {
+        $f = Form::make();
+        $f->title      = 'Flow form';
+        $f->slug       = 'flow-' . uniqid();
+        $f->status     = 'published';
+        $f->blocks     = '<!-- wp:dono/donation-amount /--><!-- wp:dono/email /-->'
+            . $block
+            . '<!-- wp:dono/submit-button /-->';
+        $f->created_at = gmdate('Y-m-d H:i:s');
+        $f->updated_at = $f->created_at;
+        $f->save();
+
         return $f;
     }
 

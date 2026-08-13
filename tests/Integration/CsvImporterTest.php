@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 namespace Dono\Tests\Integration;
 
+use Dono\Currency\FxBackfill;
+use Dono\Currency\FxRates;
+use Dono\Donations\AggregateSyncer;
 use Dono\Donations\Donation;
+use Dono\Donations\DonationRepository;
 use Dono\Donors\Donor;
 use Dono\Donors\DonorService;
 use Dono\Foundation\Crypto\Crypto;
+use Dono\Foundation\Helpers\Money;
 use Dono\Foundation\Plugin;
 use Dono\Foundation\Transfer\CsvImporter;
 
@@ -17,6 +22,12 @@ use Dono\Foundation\Transfer\CsvImporter;
  * The promise the dry run makes is that its numbers are the numbers: an admin
  * who is told 3 will be imported and 1 skipped has to get exactly that, or the
  * preview is worse than no preview.
+ *
+ * The second promise is about the money. An import has to leave the same state
+ * a real donation would: a base-currency snapshot, because every total sums
+ * COALESCE(base_amount_cents, 0) and scores a row without one as nothing, and
+ * synced donor rollups, because the columns the donor screens read are written
+ * by lifecycle hooks that a direct save never fires.
  */
 final class CsvImporterTest extends IntegrationTestCase
 {
@@ -408,6 +419,181 @@ final class CsvImporterTest extends IntegrationTestCase
         $donor = Donor::query()->find('id', $this->donorId('keepme@example.test'));
 
         $this->assertSame('Original Ltd', (string) $donor->company);
+    }
+
+    /**
+     * The headline. An org arrives by importing its history, and the first
+     * screen it looks at is the one that adds the history up.
+     */
+    public function test_an_imported_history_is_worth_its_own_money_in_the_totals(): void
+    {
+        $result = $this->importer()->import(
+            $this->csv(
+                'total1@example.test,Total,One,100.00,2026-01-01',
+                'total2@example.test,Total,Two,250.00,2026-01-02'
+            ),
+            self::MAPPING,
+            false
+        );
+
+        $this->assertSame(2, $result['donations_imported']);
+
+        $agg = Plugin::instance()->container->get(DonationRepository::class)->aggregatePaidBetween();
+
+        $this->assertSame(2, $agg['donations_count']);
+        $this->assertSame(35000, $agg['amount_cents'], 'the dashboard has to see the 350.00 it was handed');
+    }
+
+    /** The org's own currency needs no rate, and converts at one. */
+    public function test_a_row_in_the_base_currency_is_snapshotted_at_a_rate_of_one(): void
+    {
+        $this->importer()->import(
+            $this->csv('base@example.test,Base,Row,42.00,2026-01-05'),
+            self::MAPPING,
+            false
+        );
+
+        $donation = Donation::query()->where('donor_id', $this->donorId('base@example.test'))->get();
+
+        $this->assertSame(strtoupper(Money::defaultCurrency()), (string) $donation->base_currency);
+        $this->assertSame('1.00000000', (string) $donation->fx_rate);
+        $this->assertSame(4200, (int) $donation->base_amount_cents);
+    }
+
+    public function test_a_foreign_row_is_converted_at_the_rate_the_site_holds(): void
+    {
+        $foreign = $this->seedForeignRate(0.5);
+
+        $this->importer()->import(
+            "Email,Amount,Currency,Date\nfx@example.test,100.00,{$foreign},2026-01-06\n",
+            ['email' => 'Email', 'amount' => 'Amount', 'currency' => 'Currency', 'date' => 'Date'],
+            false
+        );
+
+        $donation = Donation::query()->where('donor_id', $this->donorId('fx@example.test'))->get();
+
+        $this->assertSame(10000, (int) $donation->amount_cents, 'the file amount is kept as written');
+        $this->assertSame(20000, (int) $donation->base_amount_cents, 'two base units to one foreign unit');
+        $this->assertSame('2.00000000', (string) $donation->fx_rate);
+    }
+
+    /**
+     * A currency the site has no rate for is imported anyway. The donation
+     * happened, and refusing the row to protect a report would lose it; the
+     * maintenance backfill is what brings it into the totals later, and it can
+     * only find rows that were written.
+     */
+    public function test_a_currency_with_no_rate_is_imported_and_left_for_the_backfill(): void
+    {
+        $foreign = $this->seedForeignRate(null);
+
+        $this->importer()->import(
+            "Email,Amount,Currency,Date\nnorate@example.test,100.00,{$foreign},2026-01-07\n",
+            ['email' => 'Email', 'amount' => 'Amount', 'currency' => 'Currency', 'date' => 'Date'],
+            false
+        );
+
+        $donation = Donation::query()->where('donor_id', $this->donorId('norate@example.test'))->get();
+
+        $this->assertSame(10000, (int) $donation->amount_cents);
+        $this->assertNull($donation->base_amount_cents, 'nothing is invented at a rate nobody has');
+
+        $waiting = array_values(array_filter(
+            FxBackfill::pending(),
+            static fn (array $row): bool => $row['currency'] === $foreign
+        ));
+
+        $this->assertSame(1, $waiting[0]['count'] ?? 0, 'and the maintenance screen names it');
+    }
+
+    /**
+     * The donor columns are written by the donation lifecycle hooks, which a
+     * straight save does not fire. last_donation_at matters twice: the donor
+     * screens read it, and so does the sweep that erases inactive donors.
+     */
+    public function test_an_imported_history_lands_on_the_donor_lifetime_total(): void
+    {
+        $this->importer()->import(
+            $this->csv(
+                'life@example.test,Life,Time,10.00,2026-01-01',
+                'life@example.test,Life,Time,20.00,2026-02-01',
+                'life@example.test,Life,Time,30.00,2026-03-01'
+            ),
+            self::MAPPING,
+            false
+        );
+
+        $donor = Donor::query()->find('id', $this->donorId('life@example.test'));
+
+        $this->assertSame(6000, (int) $donor->total_donated_cents);
+        $this->assertSame(3, (int) $donor->donations_count);
+        $this->assertSame('2026-01-01 00:00:00', (string) $donor->first_donation_at);
+        $this->assertSame('2026-03-01 00:00:00', (string) $donor->last_donation_at);
+    }
+
+    /** A donor who was already here keeps what they gave here. */
+    public function test_importing_history_for_a_known_donor_adds_to_what_they_already_gave(): void
+    {
+        $donor = Plugin::instance()->container->get(DonorService::class)
+            ->findOrCreate('mixed@example.test', ['first_name' => 'Mixed']);
+
+        $this->paidDonation((int) $donor->id, 5000, '2026-05-01 00:00:00');
+        Plugin::instance()->container->get(AggregateSyncer::class)->syncDonor((int) $donor->id);
+
+        $this->importer()->import(
+            $this->csv('mixed@example.test,Mixed,Donor,15.00,2026-01-01'),
+            self::MAPPING,
+            false
+        );
+
+        $fresh = Donor::query()->find('id', (int) $donor->id);
+
+        $this->assertSame(6500, (int) $fresh->total_donated_cents, 'the history joins the donation this site took');
+        $this->assertSame(2, (int) $fresh->donations_count);
+        $this->assertSame('2026-01-01 00:00:00', (string) $fresh->first_donation_at, 'the imported one came first');
+    }
+
+    /**
+     * Seeds an FX snapshot the base currency is in and the returned currency is
+     * not, unless a rate is asked for. Returns the currency to write in the file.
+     */
+    private function seedForeignRate(?float $perBase): string
+    {
+        $base    = strtoupper(Money::defaultCurrency());
+        $foreign = $base === 'JPY' ? 'KRW' : 'JPY';
+        $rates   = [$base => 1.0];
+        if ($perBase !== null) {
+            $rates[$foreign] = $perBase;
+        }
+
+        update_option(FxRates::OPTION, [
+            'base'       => $base,
+            'date'       => gmdate('Y-m-d'),
+            'fetched_at' => gmdate('c'),
+            'rates'      => $rates,
+        ], false);
+
+        return $foreign;
+    }
+
+    private function paidDonation(int $donorId, int $cents, string $paidAt): void
+    {
+        $donation = Donation::make();
+        $donation->reference         = 'SITE-' . bin2hex(random_bytes(4));
+        $donation->donor_id          = $donorId;
+        $donation->amount_cents      = $cents;
+        $donation->net_cents         = $cents;
+        $donation->currency          = strtoupper(Money::defaultCurrency());
+        $donation->base_currency     = strtoupper(Money::defaultCurrency());
+        $donation->fx_rate           = '1.00000000';
+        $donation->base_amount_cents = $cents;
+        $donation->status            = 'paid';
+        $donation->gateway           = 'manual';
+        $donation->frequency         = 'one_time';
+        $donation->paid_at           = $paidAt;
+        $donation->created_at        = $paidAt;
+        $donation->updated_at        = $paidAt;
+        $donation->save();
     }
 
     private function donorId(string $email): int

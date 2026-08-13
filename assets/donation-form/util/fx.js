@@ -52,6 +52,24 @@ export function nicePreset( cents ) {
 }
 
 /**
+ * A minimum authored in `from`, expressed in the currency the donor is paying
+ * in. Null when no rate makes that meaningful: comparing the authored figure
+ * against another currency's minor units enforces a bar nobody set, so the
+ * check yields rather than guessing. Mirrors FormSubmissionValidator.
+ */
+export function convertMinimum( fx, cents, from, to ) {
+    const n = Number( cents ) || 0;
+    if ( n <= 0 || ! from || ! to || from === to ) return n;
+    const rf = Number( fx?.rates?.[ from ] );
+    const rt = Number( fx?.rates?.[ to ] );
+    if ( ! ( rf > 0 ) || ! ( rt > 0 ) ) return null;
+    const converted = Math.round( ( n * rt ) / rf );
+    // Zero-decimal amounts land on whole major units, so a bar between two of
+    // them would refuse the figure the message quotes.
+    return isZeroDecimal( to ) ? Math.ceil( converted / 100 ) * 100 : converted;
+}
+
+/**
  * Preset value to show/charge in `currency`. Identity (authored value) when
  * it equals the preset's own currency; otherwise convert + nice-round.
  */

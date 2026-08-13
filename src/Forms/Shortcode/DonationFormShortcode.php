@@ -578,7 +578,11 @@ HTML;
             ],
             // HMAC token (tied to render timestamp) echoed back on submit.
             'spam'        => [
-                'formToken'   => $this->spam ? $this->spam->mintFormToken((int) $form->id) : '',
+                // A preview stub has no row, so its id is 0, which is also the
+                // scope the donations endpoint verifies when a submission names
+                // no form. Minting there would hand out a token that unlocks the
+                // form-less path, so a preview carries none and stays unsubmittable.
+                'formToken'   => ($this->spam && (int) $form->id > 0) ? $this->spam->mintFormToken((int) $form->id) : '',
                 'honeypotName' => $honeypotName,
                 // Same filter as AntiSpamGuard, so the donor sees the minimum at
                 // the amount field rather than only after submitting. A minimum
