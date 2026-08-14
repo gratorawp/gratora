@@ -1,7 +1,7 @@
 # Dono
 
-[![PHPUnit](https://github.com/getdono/dono/actions/workflows/phpunit.yml/badge.svg)](https://github.com/getdono/dono/actions/workflows/phpunit.yml)
-[![e2e](https://github.com/getdono/dono/actions/workflows/e2e.yml/badge.svg)](https://github.com/getdono/dono/actions/workflows/e2e.yml)
+[![PHPUnit](https://github.com/dono-platform/dono/actions/workflows/phpunit.yml/badge.svg)](https://github.com/dono-platform/dono/actions/workflows/phpunit.yml)
+[![e2e](https://github.com/dono-platform/dono/actions/workflows/e2e.yml/badge.svg)](https://github.com/dono-platform/dono/actions/workflows/e2e.yml)
 [![License: GPL v2 or later](https://img.shields.io/badge/license-GPL--2.0--or--later-blue.svg)](LICENSE)
 [![PHP 8.1+](https://img.shields.io/badge/php-8.1%2B-777bb4.svg)](https://www.php.net/)
 [![WordPress 7.0+](https://img.shields.io/badge/wordpress-7.0%2B-21759b.svg)](https://wordpress.org/)
@@ -25,7 +25,7 @@ advanced reporting.
 ## Getting started
 
 ```bash
-git clone https://github.com/getdono/dono.git
+git clone https://github.com/dono-platform/dono.git
 cd dono
 composer install
 npm install
@@ -63,7 +63,7 @@ Dono is built to be extended by other plugins, and uses its own seams to do it:
 - **Commands.** `dono.commands.register` adds a capability-gated, schema-checked
   action, which also becomes available to anything driving Dono programmatically.
 
-Persistence goes through [Queryable](https://github.com/getdono/queryable), a
+Persistence goes through [Queryable](https://github.com/dono-platform/queryable), a
 small first-party query builder and schema tool. Models declare their own schema
 and migrate themselves.
 

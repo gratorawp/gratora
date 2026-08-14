@@ -2,12 +2,6 @@ import { defineConfig, devices, type Project } from '@playwright/test';
 
 const baseURL = process.env.DONO_E2E_URL ?? 'http://localhost:10075';
 
-// The peer-to-peer specs need the dono-p2p plugin active and the campaign
-// seeded (wp dono-p2p e2e-seed, which sets DONO_E2E_P2P_*). Gate them behind a
-// dedicated project so a core-only run (or CI without the add-on) never runs
-// them unseeded. The core project always runs and ignores specs/p2p.
-const runP2p = !! process.env.DONO_E2E_P2P_START_PATH;
-
 // Visual regression project. Opt-in (DONO_E2E_VISUAL=1) because screenshot
 // goldens are rendered on macOS; a default run on another platform would fail
 // on missing snapshots rather than catch regressions. Run via npm run
@@ -23,18 +17,9 @@ const projects: Project[] = [
     {
         name: 'core',
         use: { ...devices['Desktop Chrome'] },
-        testIgnore: ['**/specs/p2p/**', '**/specs/visual/**', '**/specs/screenshots/**'],
+        testIgnore: ['**/specs/visual/**', '**/specs/screenshots/**'],
     },
 ];
-
-if (runP2p) {
-    projects.push({
-        name: 'p2p',
-        use: { ...devices['Desktop Chrome'] },
-        testMatch: '**/specs/p2p/**',
-        testIgnore: ['**/specs/visual/**', '**/specs/screenshots/**'],
-    });
-}
 
 if (runVisual) {
     projects.push({

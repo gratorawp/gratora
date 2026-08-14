@@ -4,16 +4,26 @@ Browser-driven end-to-end tests. Specs live in `tests-e2e/specs/`, helpers in
 `tests-e2e/helpers/`, fixtures in `tests-e2e/fixtures/`. Config:
 `playwright.config.ts` at the plugin root.
 
-Two suites, split into Playwright projects:
+Three Playwright projects:
 
 - **core** (`specs/*.spec.ts`) - the donor form. Always runs.
-- **p2p** (`specs/p2p/*.spec.ts`) - the peer-to-peer campaign: start page,
-  fundraiser/team/campaign public pages, a sandbox donation on a fundraiser page,
-  the hide-header/footer chrome toggle, wp-admin (View page, appearance,
-  fundraisers/teams lists, pause/resume, approval queue), and the donor portal
-  (magic-link sign-in + manage). Requires the `dono-p2p` add-on active. The
-  project only registers when `DONO_E2E_P2P_START_PATH` is set, so a core-only
-  run never runs it unseeded.
+- **visual** (`specs/visual/`) - screenshot goldens. Opt-in (`DONO_E2E_VISUAL=1`).
+- **screenshots** (`specs/screenshots/`) - wp-admin capture, asserts nothing.
+  Opt-in (`DONO_E2E_SHOTS=1`).
+
+### Add-on suites live in their add-ons
+
+A feature's specs belong to the plugin that ships the feature, so a checkout of
+core is self-contained and an add-on can be tested without it:
+
+- **Peer-to-peer** (start page, fundraiser/team/campaign pages, sandbox
+  donation, hide-chrome, wp-admin, donor portal) - `dono-p2p/tests-e2e/`, with
+  its own `playwright.config.ts` and `wp dono-p2p e2e-seed`.
+- **Tributes** (the tribute field, functional + visual) -
+  `dono-tributes/tests-e2e/`.
+
+Both still run against the form this plugin's seeder builds, so keep the
+kitchen-sink block set below in step with them.
 
 ## One-time setup
 
@@ -57,47 +67,21 @@ Two suites, split into Playwright projects:
 If you'd rather build the canonical form by hand instead of running the CLI,
 the kitchen-sink block set is documented at the bottom of this file.
 
-### Peer-to-peer suite (dono-p2p)
+Two specs need env the seeder cannot mint for you, and skip themselves by name
+without it:
 
-The P2P specs need the `dono-p2p` add-on active and its own fixture campaign:
-
-```sh
-wp dono-p2p e2e-seed
-```
-
-Idempotent. It creates the published `p2p-e2e` peer-to-peer campaign (with its
-fundraiser/team/start layout pages), a solo fundraiser (`solo-sam`), a team
-(`trailblazers`) of two, a `dono-e2e-admin` administrator for the wp-admin
-specs, and a single-use donor-portal magic link. Distinct slugs from the core
-`dono-e2e` campaign, so the two seeders never clobber each other.
-
-It prints the env to export; the portal link is single-use, so re-run the
-command before each session that exercises the portal spec:
-
-```sh
-export DONO_E2E_P2P_CAMPAIGN_ID='20'
-export DONO_E2E_P2P_CAMPAIGN_PATH='/campaigns/p2p-e2e/'
-export DONO_E2E_P2P_START_PATH='/campaigns/p2p-e2e/start/'
-export DONO_E2E_P2P_FUNDRAISER_PATH='/campaigns/p2p-e2e/fundraiser/solo-sam/'
-export DONO_E2E_P2P_TEAM_PATH='/campaigns/p2p-e2e/team/trailblazers/'
-export DONO_E2E_ADMIN_USER='dono-e2e-admin'
-export DONO_E2E_ADMIN_PASS='dono-e2e-pass'
-export DONO_E2E_PORTAL_URL='http://localhost:10075/donor-portal/?token=...'
-```
-
-Two specs are gated behind extra env so they stay off a shared site:
-`DONO_E2E_P2P_SUBMIT=1` runs the start-page happy-path submit (creates a real
-fundraiser + sends a welcome email); the portal spec runs only when
-`DONO_E2E_PORTAL_URL` is set.
+- `specs/portal-magic-link.spec.ts` wants a fresh single-use portal link in
+  `DONO_E2E_PORTAL_REOPEN_URL`; a donor's admin profile shows one.
+- the `screenshots` project wants `DONO_E2E_ADMIN_USER` / `DONO_E2E_ADMIN_PASS`
+  (the defaults match wp-env, so a hermetic run needs nothing).
 
 ## Run
 
 ```sh
-npm run test:e2e               # headless (core; + p2p when its env is set)
+npm run test:e2e               # headless
 npm run test:e2e -- --ui       # Playwright UI mode
 npm run test:e2e -- --headed   # see the browser
 npm run test:e2e -- specs/amount.spec.ts   # one spec
-npm run test:e2e -- --project=p2p          # just the peer-to-peer suite
 ```
 
 Reports / traces / screenshots on failure land in `test-results/` (gitignored).
@@ -236,8 +220,15 @@ dashboard chart be caught mid-sweep.
 
 ## Hermetic (wp-env) and CI
 
-The committed `.wp-env.json` loads core only, so a standalone checkout boots.
-For local both-plugin runs, add an override (gitignored):
+The committed `.wp-env.json` loads core only, so a standalone checkout boots:
+
+```sh
+npx wp-env start
+npx wp-env run cli wp dono e2e-seed
+```
+
+An add-on suite needs its plugin mounted too. Add an override (gitignored) and
+run that suite from the add-on's own directory:
 
 ```sh
 echo '{ "plugins": [ ".", "../dono-p2p" ] }' > .wp-env.override.json
@@ -250,10 +241,10 @@ npx wp-env run cli wp dono-p2p e2e-seed
 > dir empty when the path contains spaces (e.g. `~/Local Sites/`). It does not
 > affect the Linux CI runners.
 
-`.github/workflows/e2e.yml` runs the suite hermetically on every push/PR. It
-covers core out of the box; the P2P job activates when the repo variable
-`DONO_P2P_REPO` (and secret `DONO_P2P_TOKEN`) point at the add-on repo, since
-`dono-p2p` ships from its own private repository.
+`.github/workflows/e2e.yml` runs this suite hermetically on every push/PR. Its
+optional `dono-p2p` checkout and seed steps (repo variable `DONO_P2P_REPO` +
+secret `DONO_P2P_TOKEN`) now only provision site state; the p2p specs run from
+the add-on's own repository.
 
 ## Conventions
 
@@ -296,6 +287,9 @@ comment, phone, consent, cover-fees, custom-fields):
 - phone
 - consent (one optional + one required-by-law purpose)
 - cover-fees
-- tribute, when the dono-tributes add-on is installed (with at least "In honor of" enabled)
 - custom date field
 - custom dropdown
+
+The `dono-tributes` suite runs against this same form, so keep a tribute block
+on it (with at least "In honor of" enabled) when that add-on is installed; its
+specs skip themselves when the block is absent.

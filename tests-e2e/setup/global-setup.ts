@@ -13,10 +13,10 @@ function requireEnv(name: string): string {
 
 /**
  * Reachability-only setup. The donor-form suite needs a kitchen-sink form
- * (DONO_E2E_FORM_PATH); the P2P suite needs the seeded campaign
- * (DONO_E2E_P2P_*). Each check runs only when its env is present, so you can
- * run either suite (or both) without seeding the other. Specs whose fixture is
- * missing skip themselves with a clear reason rather than fail the run.
+ * (DONO_E2E_FORM_PATH), and the variant forms their own paths. Each check runs
+ * only when its env is present, so a partially seeded site still runs what it
+ * can. Specs whose fixture is missing skip themselves with a clear reason
+ * rather than fail the run.
  */
 export default async function globalSetup(_config: FullConfig): Promise<void> {
     const baseURL = requireEnv('DONO_E2E_URL');
@@ -75,24 +75,6 @@ export default async function globalSetup(_config: FullConfig): Promise<void> {
                 throw new Error(
                     `Layout form page not reachable: GET ${baseURL}${layoutPath} -> ${res.status()}. ` +
                     `Run \`wp dono e2e-seed\`. See tests-e2e/README.md.`,
-                );
-            }
-        }
-
-        const startPath = process.env.DONO_E2E_P2P_START_PATH;
-        if (startPath && startPath.trim() !== '') {
-            const res = await ctx.get(startPath);
-            if (! res.ok()) {
-                throw new Error(
-                    `P2P start page not reachable: GET ${baseURL}${startPath} -> ${res.status()}. ` +
-                    `Run \`wp dono-p2p e2e-seed\`. See tests-e2e/README.md.`,
-                );
-            }
-            const html = await res.text();
-            if (! /data-dono-start/.test(html)) {
-                throw new Error(
-                    `Page ${startPath} did not render the P2P start form. ` +
-                    `Run \`wp dono-p2p e2e-seed\` and ensure the campaign is published.`,
                 );
             }
         }
