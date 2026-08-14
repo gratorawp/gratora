@@ -86,7 +86,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/getdono/queryable.git"
+            "url": "https://github.com/dono-platform/queryable.git"
         }
     ]
 }
