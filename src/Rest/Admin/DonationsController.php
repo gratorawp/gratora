@@ -375,11 +375,11 @@ final class DonationsController
 
         $currency = strtoupper((string) ($request['currency'] ?: Money::defaultCurrency()));
 
-        // An offline gift in a currency with no configured rate is recorded and
-        // then sits outside every total, which is not something to accept by
-        // typo. Storage is always major x 100, so an amount that does not land
-        // on a whole major unit in a zero-decimal currency rounds at the gateway
-        // and mischarges.
+        // An offline donation in a currency with no configured rate is
+        // recorded and then sits outside every total, which is not something
+        // to accept by typo. Storage is always major x 100, so an amount that
+        // does not land on a whole major unit in a zero-decimal currency rounds
+        // at the gateway and mischarges.
         if (Currency::minorUnits($currency) === 0 && ((int) $request['amount_cents']) % 100 !== 0) {
             return new WP_Error(
                 'dono_invalid_amount',
@@ -534,7 +534,7 @@ final class DonationsController
      *
      * Two checks for the same amount from the same donor on the same day are
      * genuinely possible, so this cannot silently dedupe: swallowing a real
-     * second gift is worse than the double-entry it would prevent. It warns,
+     * second donation is worse than the double-entry it would prevent. It warns,
      * and the admin decides. What it catches is the timed-out request retried,
      * the second admin working the same envelope, and the check recorded by
      * hand that the donor had in fact already paid online.
@@ -1368,6 +1368,10 @@ final class DonationsController
             $server->send_header('Content-Disposition', 'inline; filename="receipt-preview.pdf"');
             $server->send_header('Content-Length', (string) strlen($pdf));
             $server->send_header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+
+            // Bytes of a PDF sent under their own Content-Type header. Escaping
+            // them would corrupt the document.
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
             echo $pdf;
             return true;
         }, 10, 4);

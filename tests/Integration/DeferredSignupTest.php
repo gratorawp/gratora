@@ -160,7 +160,12 @@ final class DeferredSignupTest extends IntegrationTestCase
         $this->assertNull($this->donor($email)->last_name);
     }
 
-    /** Signing up twice is one person who lost the first email. */
+    /**
+     * Signing up twice is one person who lost the first email, so it refreshes
+     * the one row rather than opening a second claim on the address. The name
+     * is the exception: the endpoint proves nothing about who is calling, so a
+     * second caller cannot take a name the first wrote.
+     */
     public function test_a_second_signup_replaces_the_claim_rather_than_adding_one(): void
     {
         $email = 'again-' . uniqid() . '@example.test';
@@ -170,11 +175,12 @@ final class DeferredSignupTest extends IntegrationTestCase
         // The per-mailbox send limit is the thing being stepped over here, not
         // the behaviour under test.
         delete_transient('dono_send_link_mailbox_' . substr($this->hash($email), 0, 32));
-        $this->signUp($email, ['first_name' => 'Second']);
+        $this->signUp($email, ['first_name' => 'Second', 'last_name' => 'Surname']);
 
         $this->assertSame(1, PendingSignup::query()->where('email_hash', $this->hash($email))->count());
         $this->assertSame($firstId, (int) $this->claim($email)->id, 'the same row is updated');
-        $this->assertSame('Second', (string) $this->claim($email)->first_name);
+        $this->assertNull($this->claim($email)->first_name, 'a disputed name reaches nobody');
+        $this->assertSame('Surname', (string) $this->claim($email)->last_name, 'a name filling a blank is an addition');
     }
 
     /** An address nobody proved is not kept past its window. */

@@ -45,6 +45,7 @@ jobs:
       # offers itself or offers the wrong thing, so stop here rather than
       # publish a mismatch.
       - name: Version matches the tag
+        id: version
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
           TAG="${GITHUB_REF_NAME#v}"
@@ -53,6 +54,7 @@ jobs:
           echo "tag=$TAG header=$HEADER stable=$STABLE"
           test "$TAG" = "$HEADER" || { echo "::error::dono.php Version ($HEADER) does not match tag ($TAG)"; exit 1; }
           test "$TAG" = "$STABLE" || { echo "::error::readme.txt Stable tag ($STABLE) does not match tag ($TAG)"; exit 1; }
+          echo "version=$TAG" >> "$GITHUB_OUTPUT"
 
       # Strauss is a development dependency, and `strauss:auto` exits 0 when its
       # binary is absent. Installing --no-dev straight onto a fresh checkout
@@ -87,17 +89,28 @@ jobs:
       # Reading the artefact rather than trusting that it built. Each of these
       # has already been wrong once. Shared with build-zip.yml and runnable by
       # hand, so the release path is checked by the same code every other build
-      # is checked by. It leaves the extracted tree at dist/dono, which the
-      # publish step below uploads: the thing verified and the thing shipped are
-      # the same bytes.
+      # is checked by. It extracts to dist/ under the Text Domain, which is the
+      # BUILD_DIR the publish step below uploads: the thing verified and the
+      # thing shipped are the same bytes.
       - name: Verify the artefact
         run: bash bin/verify-zip.sh
+
+      # ASSETS_DIR below publishes whatever is here. Nothing can invent the
+      # artwork, and a missing banner is a placeholder rather than a failure,
+      # so say so loudly and carry on.
+      - name: Listing artwork present
+        run: |
+          for f in icon-256x256.png banner-772x250.png banner-1544x500.png; do
+            test -f ".wordpress-org/$f" \
+              || echo "::warning::.wordpress-org/$f is missing, so the directory listing falls back to a placeholder"
+          done
 
       - name: Upload the artefact
         uses: actions/upload-artifact@v4
         with:
           name: dono-plugin
           path: dist/dono-fundraising-platform.zip
+          if-no-files-found: error
 
       # Only after everything above passed, and never on a dry run.
       - name: Publish to WordPress.org
@@ -108,7 +121,12 @@ jobs:
           SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
           SLUG: dono-fundraising-platform
           BUILD_DIR: dist/dono-fundraising-platform
-          VERSION: ${{ github.ref_name }}
+          # The SVN tag directory is named after this, and Stable tag has to
+          # resolve to it. The git tag carries a leading v and Stable tag does
+          # not, so publish the stripped value the version gate already checked:
+          # tags/v1.0.0 with Stable tag 1.0.0 leaves the directory serving trunk
+          # with no tagged release behind it.
+          VERSION: ${{ steps.version.outputs.version }}
           # The banner, icon and screenshots the plugin directory shows. These
           # live in SVN's assets/ rather than in the plugin, so without this
           # they are never published and the listing renders with a placeholder

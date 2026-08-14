@@ -667,13 +667,44 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         );
     }
 
-    /** @since 1.0.0 */
+    /**
+     * charges_enabled is one shared flag for both modes, and GatewayManager::isOn()
+     * resolves the donor form's gateway list through it, so an account update
+     * that clears it removes Stripe from every form in both modes. The account
+     * id is the same string in test and live, so without a mode rule a leaked
+     * test signing secret, a much softer credential, can do that through the
+     * public unauthenticated route.
+     *
+     * A live connection therefore takes that one downgrade only from its own
+     * mode. A test-only connection has no live keys, so its legitimate
+     * test-signed updates are untouched, and an upgrade is never an outage.
+     *
+     * @since 1.0.0
+     */
     private function handleAccountUpdated(string $eventId, string $type, array $account): WebhookOutcome
     {
         $acctId  = (string) ($account['id'] ?? '');
         $current = $this->account->accountId();
 
         if ($acctId !== '' && $current !== null && hash_equals($current, $acctId)) {
+            // refresh() coalesces an absent or null flag to the stored value, so
+            // only an explicit false is a downgrade worth refusing.
+            $disablesCharges = ($account['charges_enabled'] ?? null) !== null
+                && ! (bool) $account['charges_enabled'];
+
+            if (
+                $disablesCharges
+                && $this->verifiedIsTest !== false
+                && $this->account->hasKeysFor(false)
+                && $this->account->canCharge()
+            ) {
+                return $this->refused(
+                    $eventId,
+                    $type,
+                    'a test-signed account update cannot stop a live connection charging'
+                );
+            }
+
             $this->account->refresh($account);
         }
 

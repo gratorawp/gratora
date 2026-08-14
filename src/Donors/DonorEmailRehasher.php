@@ -33,6 +33,17 @@ final class DonorEmailRehasher
      */
     public const PENDING_OPTION = 'dono_donor_rehash_pending';
 
+    /**
+     * How far the walk has got.
+     *
+     * Held here rather than in the job arguments so every tick is enqueued
+     * with the arguments reconcile() guards on. Action Scheduler matches
+     * arguments exactly, so a cursor carried in them makes the guard miss the
+     * tick already in flight and fork a second walk from the top of the table
+     * on the next request, and the one after that.
+     */
+    private const CURSOR_OPTION = 'dono_donor_rehash_after_id';
+
     private const BATCH = 200;
 
     /** @since 1.0.0 */
@@ -60,6 +71,9 @@ final class DonorEmailRehasher
      */
     public static function markPending(): void
     {
+        // A new pepper invalidates every hash, including the ones an unfinished
+        // walk already rewrote, so the next tick starts from the top again.
+        delete_option(self::CURSOR_OPTION);
         update_option(self::PENDING_OPTION, '1', false);
     }
 
@@ -81,14 +95,10 @@ final class DonorEmailRehasher
         $this->async->enqueue(self::HOOK, []);
     }
 
-    /**
-     * @param array{after_id?:int}|int $args
-     *
-     * @since 1.0.0
-     */
-    public function run(mixed $args = []): void
+    /** @since 1.0.0 */
+    public function run(): void
     {
-        $afterId = is_array($args) ? (int) ($args['after_id'] ?? 0) : (int) $args;
+        $afterId = (int) get_option(self::CURSOR_OPTION, 0);
 
         $rows = DB::table('dono_donors')
             ->where('id', $afterId, '>')
@@ -100,7 +110,7 @@ final class DonorEmailRehasher
 
         if (empty($rows)) {
             // Walked the whole table, so nothing is owed any more.
-            delete_option(self::PENDING_OPTION);
+            $this->finish();
             return;
         }
 
@@ -121,10 +131,18 @@ final class DonorEmailRehasher
         }
 
         if (count($rows) === self::BATCH) {
-            $this->async->enqueue(self::HOOK, ['after_id' => $lastId]);
+            update_option(self::CURSOR_OPTION, (string) $lastId, false);
+            $this->async->enqueue(self::HOOK, []);
             return;
         }
 
+        $this->finish();
+    }
+
+    /** @since 1.0.0 */
+    private function finish(): void
+    {
+        delete_option(self::CURSOR_OPTION);
         delete_option(self::PENDING_OPTION);
     }
 }

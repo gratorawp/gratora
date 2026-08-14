@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Rest;
 
+use Dono\Analytics\ErrorLog;
 use Dono\Donations\Donation;
 use Dono\Donations\DonationRepository;
 use Dono\Donations\DonationService;
@@ -114,9 +115,20 @@ final class PayPalController
         }
 
         if (! $result->success) {
+            // The reason is PayPal's own wording about an API call, written for
+            // whoever integrated it. The donor needs the one thing it never
+            // says: whether their money moved. A failed capture usually means
+            // it did not, but a capture PayPal took and we failed to read looks
+            // the same from here, so the copy points at the receipt instead of
+            // promising either way.
+            ErrorLog::record('gateway.paypal.capture', (string) $result->error, [
+                'donation_id' => (int) $donation->id,
+                'reference'   => (string) $donation->reference,
+            ]);
+
             return $this->error(
                 'dono_paypal_capture_failed',
-                $result->error ?: __('PayPal could not complete this payment.', 'dono-fundraising-platform'),
+                __('PayPal could not complete this donation. If any money has left your account we will email your receipt, so please check before donating again.', 'dono-fundraising-platform'),
                 400
             );
         }
@@ -157,7 +169,21 @@ final class PayPalController
         try {
             $sub = $this->api->get('/v1/billing/subscriptions/' . rawurlencode($subId));
         } catch (RuntimeException $e) {
-            return $this->error('dono_paypal_subscription_lookup', $e->getMessage(), 400);
+            // PayPal has the donor's approval and their first payment by now,
+            // so the copy must not read as a failed donation and must not send
+            // them round again: BILLING.SUBSCRIPTION.ACTIVATED records the plan
+            // without this route.
+            ErrorLog::record('gateway.paypal.subscription', $e->getMessage(), [
+                'donation_id'     => (int) $donation->id,
+                'reference'       => (string) $donation->reference,
+                'subscription_id' => $subId,
+            ]);
+
+            return $this->error(
+                'dono_paypal_subscription_lookup',
+                __('PayPal has your donation, but we could not finish setting up the repeat schedule here. There is no need to donate again: we will email you once it is confirmed.', 'dono-fundraising-platform'),
+                400
+            );
         }
 
         // Every check and the write itself live in the recorder, because the

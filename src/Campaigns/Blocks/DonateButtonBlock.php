@@ -62,9 +62,8 @@ final class DonateButtonBlock extends CampaignBlock
 
         // do_shortcode renders the form HTML inline so the modal can show it
         // without an extra network roundtrip. Skipped in the block-editor
-        // preview (the block renderer is a REST request, where is_admin() is
-        // false) to avoid booting the form runtime inside the editor frame.
-        $editorPreview = defined('REST_REQUEST') && REST_REQUEST;
+        // preview to avoid booting the form runtime inside the editor frame.
+        $editorPreview = $this->isBlockRendererRequest();
         $formHtml      = '';
         if (! $editorPreview) {
             $formHtml = do_shortcode('[dono_donation_form slug="' . esc_attr($form->slug) . '"]');
@@ -104,5 +103,37 @@ final class DonateButtonBlock extends CampaignBlock
             'formHtml'     => $formHtml,
             'styleVars' => $this->styleVars($campaign),
         ]);
+    }
+
+    /**
+     * Whether this render is the block editor asking for its own preview.
+     *
+     * REST_REQUEST alone cannot answer that: WP defines it for every /wp-json
+     * call, and a public read of a published page runs the_content ->
+     * do_blocks, so an anonymous reader would be served a button with no modal
+     * behind it and no closed-campaign explanation. ServerSideRender always
+     * calls /wp/v2/block-renderer/, whose core permission check requires edit
+     * access; the capability is re-checked here so nothing but an editor can
+     * reach it.
+     *
+     * Re-checked the way the route itself checks, against the post being
+     * edited when ServerSideRender names one. A stricter test would fail for
+     * someone core already let through, an editor of pages but not of posts,
+     * and drop the live front-end form into their editor canvas.
+     *
+     * @since 1.0.0
+     */
+    private function isBlockRendererRequest(): bool
+    {
+        $route = $GLOBALS['wp']->query_vars['rest_route'] ?? null;
+        if (! is_string($route) || ! str_starts_with(ltrim($route, '/'), 'wp/v2/block-renderer/')) {
+            return false;
+        }
+
+        $postId = isset($_GET['post_id']) ? (int) $_GET['post_id'] : 0;
+
+        return $postId > 0
+            ? current_user_can('edit_post', $postId)
+            : current_user_can('edit_posts');
     }
 }

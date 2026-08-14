@@ -6,6 +6,7 @@ namespace Dono\Tests\Integration;
 
 use Dono\Campaigns\Campaign;
 use Dono\Donations\Donation;
+use Dono\Donations\DonationNote;
 use Dono\Donations\Refund;
 use Dono\Donors\Consent;
 use Dono\Donors\Donor;
@@ -255,9 +256,9 @@ final class DataRoundTripTest extends IntegrationTestCase
     }
 
     /**
-     * The records erasure deliberately keeps are the ones the restore used to
-     * destroy: no address means no donor, and no donor meant no donation,
-     * refund, receipt or consent behind them.
+     * The records erasure deliberately keeps are the ones a restore is most
+     * likely to lose: no address means no donor, and no donor means no
+     * donation, refund, receipt or consent behind them.
      */
     public function test_an_erased_donors_donations_refunds_receipts_and_consents_all_come_back(): void
     {
@@ -358,6 +359,11 @@ final class DataRoundTripTest extends IntegrationTestCase
         $this->assertSame(1, Donor::query()->count(), 'one donor, not two');
         $this->assertSame(0, $second['created']['dono_donors'] ?? 0, 'the second run created none');
         $this->assertSame(1, $second['existing']['dono_donors'] ?? 0, 'and reported them as already here');
+        $this->assertSame(
+            1,
+            Consent::query()->count(),
+            'and the lawful basis for mailing them is one record, not the same one twice'
+        );
     }
 
     /**
@@ -377,7 +383,371 @@ final class DataRoundTripTest extends IntegrationTestCase
         $this->assertSame(1, Donor::query()->count(), 'no second anonymous donor beside them');
         $this->assertSame((int) $donor->id, (int) Donor::query()->get()->id, 'and it is the row already here');
         $this->assertSame(1, $result['existing']['dono_donors'] ?? 0, 'reported as already here, not created');
+        $this->assertSame(0, $result['skipped']['dono_donors'] ?? 0, 'matched, not passed over');
         $this->assertSame([], $result['dropped'], 'and nothing was dropped');
+    }
+
+    /**
+     * The handle that finds an erased donor again is a donation of theirs, and
+     * a donation number only means anything on the site that issued it. The
+     * counter behind it starts at one on every install and the default prefix
+     * is the same everywhere, so the same number is held by a different person
+     * on nearly every other site.
+     *
+     * Resolving a nameless erased donor onto whoever holds that number here is
+     * worse than the loss it was meant to prevent: their consents, receipts and
+     * plans would attach to a named, mailable supporter.
+     */
+    public function test_a_donation_number_that_belongs_to_someone_else_here_is_not_taken_as_the_erased_donor(): void
+    {
+        $reference = 'DONO-2026-00001';
+
+        $jane = $this->seedDonor('jane@example.test', 'Jane', 'Regular');
+        $this->seedDonation((int) $jane->id, $reference);
+
+        $now = gmdate('Y-m-d H:i:s');
+
+        // A file from another organization, whose donor 5 was erased there and
+        // whose first-ever donation carries the same number as Jane's.
+        $result = $this->import([
+            'site_url' => 'https://another-charity.example',
+            'tables'   => [
+                'dono_donors' => [[
+                    'id'          => 5,
+                    'redacted_at' => $now,
+                    'created_at'  => $now,
+                    'updated_at'  => $now,
+                ]],
+                'dono_donations' => [[
+                    'id'           => 9,
+                    'donor_id'     => 5,
+                    'reference'    => $reference,
+                    'amount_cents' => 9900,
+                    'net_cents'    => 9900,
+                    'currency'     => 'USD',
+                    'gateway'      => 'manual',
+                    'status'       => 'paid',
+                    'created_at'   => '2026-01-02 03:04:05',
+                    'updated_at'   => '2026-01-02 03:04:05',
+                ]],
+                'dono_consents' => [[
+                    'id'          => 3,
+                    'donor_id'    => 5,
+                    'purpose'     => 'marketing',
+                    'granted'     => 1,
+                    'source'      => 'form',
+                    'occurred_at' => $now,
+                ]],
+            ],
+        ]);
+
+        $this->assertSame(2, Donor::query()->count(), 'the stranger landed beside Jane, not on top of her');
+
+        $shell = Donor::query()->whereIsNotNull('redacted_at')->get();
+        $this->assertNotNull($shell, 'the erased donor is here as their own row');
+        $this->assertNotSame((int) $jane->id, (int) $shell->id, 'and it is not Jane');
+
+        $this->assertSame(
+            0,
+            Consent::query()->where('donor_id', (int) $jane->id)->count(),
+            'none of the erased person records attached to Jane'
+        );
+        $this->assertSame(
+            1,
+            Consent::query()->where('donor_id', (int) $shell->id)->count(),
+            'they stayed with the row they belong to'
+        );
+
+        $fresh = Donor::query()->where('id', (int) $jane->id)->get();
+        $this->assertSame('Jane', $fresh->first_name, 'and Jane is untouched');
+        $this->assertSame(
+            'jane@example.test',
+            Plugin::instance()->container->get(DonorService::class)->decryptEmail($fresh),
+            'address and all'
+        );
+
+        // Known and unresolved, pinned so it cannot change unnoticed: a
+        // donation is still matched on its reference alone, so the stranger's
+        // money is read as Jane's and does not land. The donor merge is what
+        // this guard closes; the donation merge under it needs the natural key
+        // widened, which is a separate decision.
+        $this->assertSame(1, $result['existing']['dono_donations'] ?? 0, 'the stranger donation matched the one here');
+        $this->assertSame(1, Donation::query()->count(), 'so it did not land as its own row');
+        $this->assertSame(
+            (int) $jane->id,
+            (int) Donation::query()->where('reference', $reference)->get()->donor_id,
+            'and the only donation on this site still belongs to Jane'
+        );
+    }
+
+    /**
+     * A note on a donation is what a fundraiser wrote about the money, and no
+     * unique index stops a second copy of it. Nothing else in the suite reaches
+     * the donation-scoped key, so a typo in it would ship silently.
+     */
+    public function test_a_note_on_a_donation_does_not_arrive_twice(): void
+    {
+        $donor = $this->seedDonorWithHistory('noted@example.test', 'RT-NOTE-' . uniqid());
+
+        $note = DonationNote::make();
+        $note->donation_id    = (int) Donation::query()->where('donor_id', (int) $donor->id)->get()->id;
+        $note->body_encrypted = Plugin::instance()->container
+            ->get(\Dono\Foundation\Crypto\Crypto::class)
+            ->encrypt('Rang to say the address on the receipt is wrong.');
+        $note->created_at     = gmdate('Y-m-d H:i:s');
+        $note->updated_at     = $note->created_at;
+        $note->save();
+
+        $export = $this->export();
+        $this->wipeEverything();
+
+        $this->import($export);
+        $second = $this->import($export);
+
+        $this->assertSame(1, DonationNote::query()->count(), 'one note, not the same one twice');
+        $this->assertSame(0, $second['created']['dono_donation_notes'] ?? 0, 'the second run created none');
+        $this->assertSame(1, $second['existing']['dono_donation_notes'] ?? 0, 'it recognised the one it wrote');
+    }
+
+    /**
+     * Withdrawing consent and giving it are the same row but for one column, and
+     * a form submitted twice puts both in the same second. Restoring only one of
+     * them would leave the site mailing someone who said stop.
+     */
+    public function test_a_grant_and_a_revoke_in_the_same_second_stay_two_records(): void
+    {
+        $donor    = $this->seedDonor('twominds@example.test', 'Two', 'Minds');
+        $occurred = gmdate('Y-m-d H:i:s');
+
+        foreach ([true, false] as $granted) {
+            $consent = Consent::make();
+            $consent->donor_id    = (int) $donor->id;
+            $consent->purpose     = 'marketing';
+            $consent->granted     = $granted;
+            $consent->source      = 'form';
+            $consent->occurred_at = $occurred;
+            $consent->save();
+        }
+
+        $export = $this->export();
+        $this->wipeEverything();
+
+        $this->import($export);
+        $this->import($export);
+
+        $this->assertSame(2, Consent::query()->count(), 'both survived, and neither arrived twice');
+        $this->assertSame(1, Consent::query()->where('granted', 1)->count(), 'the grant');
+        $this->assertSame(1, Consent::query()->where('granted', 0)->count(), 'and the withdrawal');
+    }
+
+    /**
+     * A receipt number is per site and the two counters have drifted, so a
+     * receipt can be new by number and still be the second one for a donation
+     * this site already has. The database refuses that pair, and the restore
+     * runs in no transaction and catches nothing: the throw would end the REST
+     * call half done, with no report of what landed and every re-run dying on
+     * the same row.
+     */
+    public function test_a_receipt_for_a_donation_already_here_is_matched_not_inserted(): void
+    {
+        $reference = 'DONO-2026-00002';
+
+        $jane     = $this->seedDonor('janereceipt@example.test', 'Jane', 'Regular');
+        $donation = $this->seedDonation((int) $jane->id, $reference);
+
+        $mine                 = Receipt::make();
+        $mine->donation_id    = (int) $donation->id;
+        $mine->donor_id       = (int) $jane->id;
+        $mine->renderer_id    = 'default';
+        $mine->locale         = 'en_US';
+        $mine->receipt_number = 'RCPT-MINE-0001';
+        $mine->issued_at      = gmdate('Y-m-d H:i:s');
+        $mine->save();
+
+        $result = $this->import([
+            'site_url' => 'https://another-charity.example',
+            'tables'   => [
+                'dono_donors' => [[
+                    'id'         => 5,
+                    'email'      => 'stranger@example.test',
+                    'first_name' => 'Stranger',
+                    'created_at' => gmdate('Y-m-d H:i:s'),
+                    'updated_at' => gmdate('Y-m-d H:i:s'),
+                ]],
+                'dono_donations' => [[
+                    'id'           => 9,
+                    'donor_id'     => 5,
+                    'reference'    => $reference,
+                    'amount_cents' => 9900,
+                    'net_cents'    => 9900,
+                    'currency'     => 'USD',
+                    'gateway'      => 'manual',
+                    'status'       => 'paid',
+                    'created_at'   => '2026-01-02 03:04:05',
+                    'updated_at'   => '2026-01-02 03:04:05',
+                ]],
+                'dono_receipts' => [[
+                    'id'             => 4,
+                    'donation_id'    => 9,
+                    'donor_id'       => 5,
+                    'renderer_id'    => 'default',
+                    'locale'         => 'en_US',
+                    'receipt_number' => 'RCPT-THEIRS-0417',
+                    'issued_at'      => '2026-01-02 03:04:05',
+                ]],
+            ],
+        ]);
+
+        $this->assertSame(1, Receipt::query()->count(), 'the donation keeps the one receipt it is allowed');
+        $this->assertSame(1, $result['existing']['dono_receipts'] ?? 0, 'the incoming one was matched onto it');
+        $this->assertSame(0, $result['created']['dono_receipts'] ?? 0, 'and none was inserted');
+    }
+
+    /**
+     * A refund taken by hand carries no gateway id, and the unique index that
+     * stops one being recorded twice is nullable for exactly that reason. So a
+     * repeated or resumed run is held off by nothing but the import, and every
+     * copy it inserts comes off the org's totals again.
+     */
+    public function test_a_refund_with_no_gateway_id_does_not_arrive_twice(): void
+    {
+        $donor    = $this->seedDonor('offline@example.test', 'Offline', 'Supporter');
+        $donation = $this->seedDonation((int) $donor->id, 'RT-OFFLINE-' . uniqid());
+
+        $refund = Refund::make();
+        $refund->donation_id  = (int) $donation->id;
+        $refund->amount_cents = 1000;
+        $refund->currency     = 'USD';
+        $refund->initiated_by = 'admin';
+        $refund->reason       = 'Paid back at the counter.';
+        $refund->occurred_at  = gmdate('Y-m-d H:i:s');
+        $refund->save();
+
+        $this->assertNull(
+            Refund::query()->get()->gateway_refund_id,
+            'precondition: nothing outside this site names this refund'
+        );
+
+        $export = $this->export();
+        $this->wipeEverything();
+
+        $this->import($export);
+        $second = $this->import($export);
+
+        $this->assertSame(1, Refund::query()->count(), 'one refund, not the same money given back twice');
+        $this->assertSame(0, $second['created']['dono_refunds'] ?? 0, 'the second run created none');
+        $this->assertSame(1, $second['existing']['dono_refunds'] ?? 0, 'it recognised the one it wrote');
+    }
+
+    /**
+     * A shell with no donation left to it is matched on the file it came from
+     * and the row it held there, and source ids start at 1 in every file. So
+     * what names the file has to be part of it, or two unrelated erased people
+     * become one row.
+     */
+    public function test_two_files_that_do_not_name_their_origin_do_not_merge_their_erased_donors(): void
+    {
+        $erasedDonorFile = static function (string $exportedAt): array {
+            $now = gmdate('Y-m-d H:i:s');
+
+            return [
+                'exported_at' => $exportedAt,
+                'tables'      => [
+                    'dono_donors' => [[
+                        'id'          => 5,
+                        'redacted_at' => $now,
+                        'created_at'  => $now,
+                        'updated_at'  => $now,
+                    ]],
+                ],
+            ];
+        };
+
+        $this->import($erasedDonorFile('2026-01-02T03:04:05+00:00'));
+        $this->import($erasedDonorFile('2026-06-07T08:09:10+00:00'));
+
+        $this->assertSame(2, Donor::query()->count(), 'two erased people, two rows');
+    }
+
+    /**
+     * The other way a file arrives with no address for a donor: the key that
+     * sealed it did not travel. Crypto::decrypt hands back null and the
+     * exporter drops the column, so nothing in the file says who they are.
+     *
+     * They land anyway, marked erased, because that is what the row is:
+     * unidentifiable and unreachable. Dropping them would take every donation,
+     * refund, receipt and consent behind them with it, and the money is what
+     * the organization still has to account for.
+     */
+    public function test_a_donor_whose_address_this_site_cannot_read_still_brings_their_donations(): void
+    {
+        $reference = 'RT-KEYLOSS-' . uniqid();
+        $result    = $this->restoreWithAnUnreadableAddress('keylost@example.test', $reference);
+
+        $shell = Donor::query()->get();
+        $this->assertNotNull($shell, 'the donor came back');
+        $this->assertNotNull($shell->redacted_at, 'marked erased, so nothing treats them as reachable');
+        $this->assertSame('', $shell->email_encrypted, 'with no address');
+        $this->assertSame([], $result['dropped'], 'and nothing was dropped on the way');
+
+        $donation = Donation::query()->where('reference', $reference)->get();
+        $this->assertNotNull($donation, 'their donation came back');
+        $this->assertSame((int) $shell->id, (int) $donation->donor_id, 'and still belongs to them');
+
+        $receipt = Receipt::query()->where('receipt_number', 'RCPT-' . $reference)->get();
+        $this->assertNotNull($receipt, 'so did the receipt issued for it');
+    }
+
+    /**
+     * The mark is what the mailing surfaces read. Asserted through the donor
+     * CSV, which is the file that goes to a fulfillment house, and with nothing
+     * about the mark asserted first: whether the row is excluded is the claim,
+     * and it has to fail on its own.
+     */
+    public function test_a_donor_whose_address_this_site_cannot_read_is_kept_out_of_the_donor_csv(): void
+    {
+        $this->restoreWithAnUnreadableAddress('keylostcsv@example.test', 'RT-KEYLOSS-CSV-' . uniqid());
+
+        $shell = Donor::query()->get();
+        $this->assertNotNull($shell, 'precondition: the restored donor is here');
+
+        $live = $this->seedDonor('readable@example.test', 'Readable', 'Donor');
+        $csv  = Plugin::instance()->container->get(DonorExporter::class)->toCsv(['columns' => ['donor_id']]);
+
+        $this->assertMatchesRegularExpression(
+            '/^' . (int) $live->id . '\b/m',
+            $csv,
+            'precondition: a live donor is in the file'
+        );
+        $this->assertDoesNotMatchRegularExpression(
+            '/^' . (int) $shell->id . '\b/m',
+            $csv,
+            'the unreadable one is not, because nothing could reach them'
+        );
+    }
+
+    /**
+     * @return array{created:array<string,int>, existing:array<string,int>, skipped:array<string,int>, dropped:array<string, array<string,int>>}
+     */
+    private function restoreWithAnUnreadableAddress(string $email, string $reference): array
+    {
+        $donor = $this->seedDonorWithHistory($email, $reference);
+
+        // What key loss leaves behind: ciphertext the current key cannot open.
+        DB::table('dono_donors')
+            ->where('id', (int) $donor->id)
+            ->update(['email_encrypted' => base64_encode(random_bytes(64))]);
+
+        $export = $this->export();
+        $this->assertArrayNotHasKey(
+            'email',
+            $export['tables']['dono_donors'][0],
+            'precondition: no address travelled in the file'
+        );
+
+        $this->wipeEverything();
+
+        return $this->import($export);
     }
 
     /**

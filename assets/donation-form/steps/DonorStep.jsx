@@ -653,7 +653,16 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                             { f.required && <span class="dono-form__required" aria-hidden="true">*</span> }
                         </legend>
                     ) }
-                    <div class="dono-form__radio-options" role="radiogroup" aria-label={ decodeEntities( f.label || '' ) }>
+                    {/* aria-invalid belongs to the group, not to a radio, and
+                        the submit button scrolls to the first field carrying
+                        it, so the group has to be able to take focus. */}
+                    <div
+                        class="dono-form__radio-options"
+                        role="radiogroup"
+                        aria-label={ decodeEntities( f.label || '' ) }
+                        aria-invalid={ !! err[ errKey ] }
+                        tabIndex={ -1 }
+                    >
                         { options.map( ( o ) => {
                             const checked = cur === String( o.value );
                             return (
@@ -749,6 +758,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                                         type="checkbox"
                                         checked={ checked }
                                         onChange={ () => toggle( val ) }
+                                        aria-invalid={ !! err[ errKey ] }
                                     />
                                     <span class="dono-form__multi-select-option-label">
                                         { decodeEntities( o.label || '' ) || o.value }

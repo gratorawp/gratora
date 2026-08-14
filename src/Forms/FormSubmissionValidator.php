@@ -483,9 +483,33 @@ final class FormSubmissionValidator
 
         // Zero-decimal amounts land on whole major units, so a bar between two
         // of them would refuse the figure the message quotes.
-        return Currency::minorUnits($paying) === 0
+        $bar = Currency::minorUnits($paying) === 0
             ? (int) (ceil($converted / 100) * 100)
             : $converted;
+
+        // The form renders converted presets nice-rounded, which can land below
+        // the exact conversion, and a form must accept the amount it offers.
+        // niceAmount never decreases as its input grows, so every preset at or
+        // above the authored minimum still clears this bar.
+        return min($bar, self::niceAmount($converted));
+    }
+
+    /**
+     * The rounding the rendered amount tiles get: assets/donation-form/util/fx.js
+     * nicePreset, in whole major units with a step that scales with magnitude.
+     *
+     * @since 1.0.0
+     */
+    private static function niceAmount(int $cents): int
+    {
+        if ($cents <= 0) {
+            return $cents;
+        }
+
+        $units = $cents / 100;
+        $step  = $units >= 100 ? 10 : ($units >= 20 ? 5 : 1);
+
+        return (int) (max($step, round($units / $step) * $step) * 100);
     }
 
     /** @since 1.0.0 */

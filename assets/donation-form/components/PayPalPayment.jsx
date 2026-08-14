@@ -41,10 +41,14 @@ export default function PayPalPayment( { config, payment, dispatch } ) {
         const post = async ( path, body ) => {
             const headers = { 'Content-Type': 'application/json' };
             if ( config.nonce ) headers[ 'X-WP-Nonce' ] = config.nonce;
+            // A dropped connection rejects with the engine's own untranslated
+            // wording, and the callers show err.message to the donor.
             const res = await fetch( restBase + path, {
                 method: 'POST',
                 headers,
                 body: JSON.stringify( body ),
+            } ).catch( () => {
+                throw new Error( i18n.error );
             } );
             const data = await res.json().catch( () => ( {} ) );
             if ( ! res.ok ) {

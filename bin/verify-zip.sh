@@ -39,10 +39,10 @@ for f in dono.php vendor/autoload.php vendor/woocommerce/action-scheduler/action
 done
 
 # .distignore is the only thing keeping these out: they are gitignored, so they
-# are invisible to git and present on disk, which is how a customer zip came to
-# carry 19 MB of generated notes about our own source.
+# are invisible to git and present on disk, and nothing else looks at them
+# before the packager copies the tree.
 for leak in tests tests-e2e node_modules .git .npmrc graphify-out qa \
-    phpunit.xml.dist phpunit-integration.xml.dist .wordpress-org
+    phpunit.xml.dist phpunit-integration.xml.dist .wordpress-org languages/README.md
 do
     test ! -e "$OUT/$leak" || fail "$leak is in the zip"
 done
@@ -81,5 +81,22 @@ test -f "$OUT/licenses/DejaVu-Fonts-License.txt" \
 # A vendor/ with no manifest is what Plugin Check flags, and the only thing in
 # the payload that says where those packages came from.
 test -f "$OUT/composer.json" || fail "composer.json is missing next to vendor/"
+
+# Guideline 4: build/ is compiled, so the source it came from and the two files
+# that rebuild it have to be in the same zip. There is no public repository to
+# send a reviewer to instead.
+for src in assets package.json webpack.config.js; do
+    test -e "$OUT/$src" || fail "$src is missing, so nothing in the zip says where build/ came from"
+done
+
+# Plugin Check calls a stray .DS_Store an error. This pins the .distignore rule
+# rather than junk in general: it looks for the same two basenames that rule
+# names, so any other stray (._foo, desktop.ini) passes both.
+#
+# -print -quit rather than `| head -1`: under pipefail, find losing the pipe once
+# head has its line exits 141, which set -e turns into a silent abort before the
+# ::error:: below can name the file.
+JUNK=$(find "$OUT" \( -name '.DS_Store' -o -name 'Thumbs.db' \) -print -quit)
+test -z "$JUNK" || fail "${JUNK#"$OUT"/} is in the zip; hidden files are not permitted"
 
 echo "zip verified"

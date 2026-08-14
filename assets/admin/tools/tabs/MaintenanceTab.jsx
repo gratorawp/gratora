@@ -133,7 +133,11 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
             { info?.unconverted_donations?.length > 0 && (
                 <Card
                     title={ __( 'Donations missing from your totals', 'dono-fundraising-platform' ) }
-                    sub={ __( 'A donation is never refused for want of an exchange rate, so these were recorded in their own currency and left out of every total. Add a rate for the currency, then recalculate to bring them in.', 'dono-fundraising-platform' ) }
+                    sub={
+                        info.unconverted_donations.some( ( row ) => row.needs_rate )
+                            ? __( 'A donation is never refused for want of an exchange rate, so these completed donations were recorded in their own currency and left out of every total. Add a rate for the currency on Settings > Currency, then recalculate to bring them in.', 'dono-fundraising-platform' )
+                            : __( 'These completed donations were recorded without a value in your base currency, so every total leaves them out. Recalculate to bring them in; no exchange rate is needed.', 'dono-fundraising-platform' )
+                    }
                 >
                     <ul className="dono-advanced-cron">
                         { info.unconverted_donations.map( ( row ) => (
@@ -145,6 +149,12 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
                                     _n( '%1$s donation, %2$s', '%1$s donations, %2$s', row.count, 'dono-fundraising-platform' ),
                                     row.count,
                                     formatAmount( row.amount_cents, row.currency )
+                                ) }
+                                { ! row.needs_rate && (
+                                    <>
+                                        { ' ' }
+                                        <em>{ __( '(your base currency: recalculate is all this needs)', 'dono-fundraising-platform' ) }</em>
+                                    </>
                                 ) }
                             </li>
                         ) ) }

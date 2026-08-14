@@ -149,7 +149,7 @@ final class DataEraser
         foreach ($plan['options'] as $option) {
             delete_option($option);
         }
-        $this->removeRoles();
+        $this->removeCapabilities();
     }
 
     /**
@@ -299,20 +299,25 @@ final class DataEraser
      * that is still installed keeps its caps: dono_manage_fundraisers belongs
      * to the peer-to-peer plugin and taking it would break a live site.
      *
+     * Every registered role, because the roles screen grants these to editor
+     * and below as readily as to the administrator, and what is not taken back
+     * outlives the plugin in wp_user_roles. The roles themselves are left
+     * alone: core creates none, so anything this removed would be somebody
+     * else's.
+     *
+     * Public for the same reason as coreTables(): a test cannot call erase()
+     * without taking the shared test database with it.
+     *
      * @since 1.0.0
      */
-    private function removeRoles(): void
+    public function removeCapabilities(): void
     {
-        foreach (array_keys((array) get_option('dono_roles', [])) as $role) {
-            remove_role((string) $role);
-        }
+        $caps = [...Capabilities::ALL, Capabilities::MANAGE];
 
-        $admin = get_role('administrator');
-        if (! $admin) {
-            return;
-        }
-        foreach ([...Capabilities::ALL, Capabilities::MANAGE] as $cap) {
-            $admin->remove_cap($cap);
+        foreach (wp_roles()->role_objects as $role) {
+            foreach ($caps as $cap) {
+                $role->remove_cap($cap);
+            }
         }
     }
 }

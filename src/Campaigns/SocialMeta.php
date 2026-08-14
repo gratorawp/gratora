@@ -55,9 +55,14 @@ final class SocialMeta extends HookProvider
             if ($value === '') {
                 continue;
             }
-            $content = in_array($key, ['og:url', 'og:image'], true) ? esc_url($value) : esc_attr($value);
-            $attr    = str_starts_with((string) $key, 'og:') ? 'property' : 'name';
-            echo '<meta ' . $attr . '="' . esc_attr((string) $key) . '" content="' . $content . '">' . "\n";
+            $isUrl = in_array($key, ['og:url', 'og:image'], true);
+
+            printf(
+                '<meta %1$s="%2$s" content="%3$s">' . "\n",
+                esc_attr(str_starts_with((string) $key, 'og:') ? 'property' : 'name'),
+                esc_attr((string) $key),
+                $isUrl ? esc_url($value) : esc_attr($value)
+            );
         }
     }
 

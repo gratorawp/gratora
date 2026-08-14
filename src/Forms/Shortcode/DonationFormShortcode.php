@@ -188,6 +188,10 @@ final class DonationFormShortcode extends HookProvider
             $this->cssLinkInlined = true;
             wp_dequeue_style(self::HANDLE);
             $href = DONO_URL . 'build/donation-form/' . $this->cssFileName() . '?ver=' . rawurlencode($this->cssVersion());
+            // The enqueued route is the one dequeued two lines up, for the
+            // reason above; the handle stays registered so the version and the
+            // filename still come from wp_styles.
+            // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
             $html = '<link rel="stylesheet" id="dono-runtime-css" href="' . esc_url($href) . '">' . $html;
         }
 
@@ -365,6 +369,9 @@ final class DonationFormShortcode extends HookProvider
             $src = $reg ? (string) $reg->src : '';
             if ($src !== '') {
                 $url = strpos($src, 'http') === 0 ? $src : site_url($src);
+                // srcdoc, so there is no wp_scripts queue on the far side to
+                // enqueue into: the tag is the only way the dependency arrives.
+                // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
                 $depScripts .= '<script src="' . esc_url($url) . '"></script>' . "\n";
             }
         }
@@ -380,6 +387,9 @@ final class DonationFormShortcode extends HookProvider
             ? '<script>(function(){var l=0;function s(){try{if(!window.frameElement)return;var h=Math.min(document.documentElement.scrollHeight,4000);if(Math.abs(h-l)>2){l=h;window.frameElement.style.height=h+"px"}}catch(e){}}addEventListener("load",s);if(window.ResizeObserver){new ResizeObserver(s).observe(document.documentElement)}setTimeout(s,300);setTimeout(s,1200)})();</script>'
             : '';
 
+        // Same reason as the dependency tags above: this is the whole document
+        // the iframe gets, head included, and nothing in it is enqueueable.
+        // phpcs:disable WordPress.WP.EnqueuedResources
         return <<<HTML
 <!DOCTYPE html>
 <html lang="en">
@@ -400,6 +410,7 @@ final class DonationFormShortcode extends HookProvider
 </body>
 </html>
 HTML;
+        // phpcs:enable WordPress.WP.EnqueuedResources
     }
 
     /** @since 1.0.0 */
@@ -642,6 +653,12 @@ HTML;
                 'processingMessage' => __('Your payment is being processed. This can take a few working days, and we will email you once it completes.', 'dono-fundraising-platform'),
                 'donateAgain'    => __('Donate again', 'dono-fundraising-platform'),
                 'error'          => __('Sorry, something went wrong. Please try again.', 'dono-fundraising-platform'),
+                // A donor who cancelled at their bank, or whose bank refused
+                // the debit, comes back to the same page as a donor whose
+                // payment broke. Only this one can promise the money stayed
+                // where it was, and the generic copy sends them to check a
+                // statement with nothing on it.
+                'notCompleted'   => __('Your payment was not completed, so nothing has been charged. Please try again when you are ready.', 'dono-fundraising-platform'),
                 'paymentTitle'   => __('Complete your donation', 'dono-fundraising-platform'),
                 'paymentLoading' => __('Loading secure payment…', 'dono-fundraising-platform'),
                 'payNow'         => __('Pay', 'dono-fundraising-platform'),

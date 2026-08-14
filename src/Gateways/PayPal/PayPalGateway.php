@@ -84,7 +84,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         // opening sale webhook is the only thing that records it: createPlan
         // leaves the signup donation pending on purpose. With no webhook id the
         // signature has nothing to verify against and every delivery is
-        // refused, so a recurring gift would be charged and banked nowhere.
+        // refused, so a recurring donation would be charged and banked nowhere.
         // One-time survives that, because the browser confirms its capture.
         if ($this->account->webhookId($this->siteTestMode()) === '') {
             return ['one_time'];

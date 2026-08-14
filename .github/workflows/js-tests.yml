@@ -1,0 +1,35 @@
+name: JS unit tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    name: tests/js
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # @dono/ui is a public git dependency, but npm normalises a github:
+      # spec to ssh://git@github.com, which a runner has no key for: the
+      # install then dies on "Permission denied (publickey)" before anything
+      # runs. Rewrite it to https, which needs no credentials.
+      - name: Fetch git dependencies over https
+        run: git config --global url."https://github.com/".insteadOf ssh://git@github.com/
+
+      - name: Install dependencies
+        run: npm ci
+
+      # What a donor sees after a gateway sends their browser away and back.
+      # No PHP suite can reach it, so without this the only coverage of the
+      # redirect return is a local-machine artifact.
+      - name: Front-end unit suite
+        run: npm run test:js

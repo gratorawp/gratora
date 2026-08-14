@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Tests\Unit;
 
+use Dono\Tests\Unit\Support\DistPayload;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -161,6 +162,11 @@ final class DistPackagingTest extends TestCase
         $this->assertStringContainsString('vendor-prefixed', $result['output']);
     }
 
+    /**
+     * Three separate branches end in `composer install --no-dev`, so that string
+     * alone cannot tell a missing manifest from a dev install. The refusal has to
+     * name the thing that is actually absent.
+     */
     public function test_a_vendor_with_no_composer_manifest_stops_the_build(): void
     {
         $root = $this->pluginRoot(false);
@@ -169,6 +175,104 @@ final class DistPackagingTest extends TestCase
         $result = $this->package($root);
 
         $this->assertSame(1, $result['status'], "the packager built anyway:\n" . $result['output']);
+        $this->assertStringContainsString('no composer manifest', $result['output']);
         $this->assertStringContainsString('composer install --no-dev', $result['output']);
+        $this->assertStringNotContainsString(
+            'development dependencies',
+            $result['output'],
+            'the refusal blames dev dependencies for a manifest that is simply not there.'
+        );
+    }
+
+    /**
+     * A manifest with no `dev` key is one composer 1 wrote, and it answers
+     * nothing. Refusing is right; saying the tree has development dependencies
+     * in it is a claim nothing here can make.
+     */
+    public function test_a_manifest_that_cannot_answer_the_question_says_so(): void
+    {
+        $root = $this->pluginRoot(false);
+        file_put_contents($root . '/vendor/composer/installed.json', '[]');
+
+        $result = $this->package($root);
+
+        $this->assertSame(1, $result['status'], "the packager built anyway:\n" . $result['output']);
+        $this->assertStringContainsString('installed.json', $result['output']);
+        $this->assertStringNotContainsString(
+            'was installed with development dependencies',
+            $result['output'],
+            'the refusal states as fact something the manifest does not say.'
+        );
+    }
+
+    /**
+     * Notes for whoever regenerates the POT, sitting one directory down where
+     * the root-anchored /README.md rule cannot reach them. Nothing in the zip
+     * should be addressed to us.
+     */
+    public function test_the_translator_notes_stay_out_of_the_zip(): void
+    {
+        $this->assertFileExists(self::root() . '/languages/README.md');
+
+        $this->assertTrue(
+            DistPayload::excluded(self::root(), 'languages/README.md'),
+            'languages/README.md ships to every install.'
+        );
+    }
+
+    /**
+     * DistPayload answers one path at a time, which the packager cannot do, so
+     * it is a second implementation of the same rules. This is the only thing
+     * keeping the two honest: the real script, the real .distignore, and a tree
+     * with one file per rule shape.
+     */
+    public function test_the_per_path_matcher_agrees_with_the_packager(): void
+    {
+        $root = $this->pluginRoot(false);
+        foreach (['dono/queryable', 'dompdf/dompdf'] as $prefixed) {
+            mkdir($root . '/vendor/vendor-prefixed/' . $prefixed, 0777, true);
+        }
+
+        $samples = [
+            'languages/README.md',
+            'package.json',
+            'webpack.config.js',
+            'README.md',
+            'tests',
+            'assets',
+            'build',
+            'src',
+        ];
+
+        foreach ($samples as $rel) {
+            $path = $root . '/' . $rel;
+            if (str_contains($rel, '.')) {
+                is_dir(dirname($path)) || mkdir(dirname($path), 0777, true);
+                file_put_contents($path, "x\n");
+                continue;
+            }
+            mkdir($path . '/nested', 0777, true);
+            file_put_contents($path . '/nested/file.php', "<?php\n");
+        }
+
+        $result = $this->package($root);
+        $this->assertSame(0, $result['status'], "the packager refused the fixture:\n" . $result['output']);
+
+        preg_match_all('/^  (\S+)$/m', $result['output'], $m);
+        $excluded = $m[1];
+
+        $disagreed = [];
+        foreach ($samples as $rel) {
+            $packager = in_array($rel, $excluded, true);
+            if (DistPayload::excluded(self::root(), $rel) !== $packager) {
+                $disagreed[] = $rel . ($packager ? ' (packager strips it)' : ' (packager ships it)');
+            }
+        }
+
+        $this->assertSame(
+            [],
+            $disagreed,
+            "the matcher and bin/package.mjs disagree about what ships:\n" . implode("\n", $disagreed)
+        );
     }
 }

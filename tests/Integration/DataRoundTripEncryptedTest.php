@@ -113,6 +113,28 @@ final class DataRoundTripEncryptedTest extends IntegrationTestCase
         );
     }
 
+    /**
+     * A note has no unique index and no gateway id to be recognised by, so
+     * without a rule of its own a resumed or repeated restore writes the same
+     * internal note again every time it runs.
+     */
+    public function test_running_the_restore_twice_does_not_write_a_staff_note_twice(): void
+    {
+        $donor = $this->seedDonor('twicenoted@example.test', 'Twice', 'Noted');
+        $notes = Plugin::instance()->container->get(DonorNoteRepository::class);
+        $notes->create((int) $donor->id, 'Do not call before ten.', null);
+
+        $export = $this->export();
+        $this->wipe();
+
+        $this->import($export);
+        $this->import($export);
+
+        $restored = Donor::query()->where('first_name', 'Twice')->get();
+        $this->assertNotNull($restored, 'precondition: the donor came back');
+        $this->assertCount(1, $notes->listForDonor((int) $restored->id), 'one note, not the same one twice');
+    }
+
     public function test_a_note_on_a_donation_survives_the_round_trip(): void
     {
         $donor     = $this->seedDonor('donationnote@example.test', 'Donation', 'Noted');

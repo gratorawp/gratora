@@ -772,6 +772,16 @@
         gap: 6px;
     }
 
+    // The group is what carries the error and what the donate button scrolls
+    // to, and a programmatic focus on a tabindex="-1" div draws nothing: no
+    // :focus-visible, no element default. Without this the donor lands on a
+    // group that looks like every valid one on the form.
+    &__radio-options[aria-invalid="true"] {
+        outline: 2px solid var(--dono-error-fg);
+        outline-offset: 4px;
+        border-radius: var(--dono-radius-sm, 8px);
+    }
+
     &__radio--horizontal &__radio-options {
         flex-direction: row;
         flex-wrap: wrap;

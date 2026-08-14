@@ -4,25 +4,32 @@ declare(strict_types=1);
 
 namespace Dono\Tests\Unit;
 
+use Dono\Tests\Unit\Support\DistPayload;
 use PHPUnit\Framework\TestCase;
 
 /**
  * readme.txt is the submission. Everything the WordPress.org directory decides
  * about this plugin before a human opens a PHP file comes from its header and
- * its prose, and two claims in it are ones a checkout can verify.
- *
- * The first is Plugin Guideline 4: the zip carries compiled JavaScript and CSS
- * in build/, which is only allowed when the readable source is reachable, and
- * the only thing in the payload that can point at it is readme.txt. The second
- * is the bundled fonts. Dompdf ships DejaVu without its notice, and the
- * Bitstream Vera terms require the notice to travel with every copy, so the
- * file readme.txt names has to be a file that exists.
+ * its prose, and most of what it claims is checkable from a checkout.
  *
  * The header fields are pinned against the plugin header and composer.json
  * because a disagreement between them is a rejection, not a bug report.
+ *
+ * Plugin Guideline 4 is answered by the payload rather than by prose: the zip
+ * carries compiled JavaScript in build/, and assets/, package.json and
+ * webpack.config.js ship beside it so a reviewer holding only the zip can turn
+ * one back into the other. The two facts that arrangement rests on are pinned
+ * here, because nothing in the readme names them.
  */
 final class ReadmeDirectorySubmissionTest extends TestCase
 {
+    /**
+     * The one bundled asset whose licence is neither GPL nor carried by the
+     * package that ships it. Dompdf brings DejaVu without its notice, and the
+     * Bitstream Vera terms require the notice to travel with every copy.
+     */
+    private const FONT_LICENCE = 'licenses/DejaVu-Fonts-License.txt';
+
     private function root(): string
     {
         return dirname(__DIR__, 2);
@@ -52,63 +59,13 @@ final class ReadmeDirectorySubmissionTest extends TestCase
         return $headers;
     }
 
-    private function sourceSection(): string
-    {
-        $matched = preg_match('/^== Source code ==$(.*?)^== /ms', $this->readme(), $m);
-        $this->assertSame(
-            1,
-            $matched,
-            'readme.txt has no Source code section, so nothing in the zip says where build/ came from.'
-        );
-
-        return (string) $m[1];
-    }
-
-    public function test_the_zip_ships_compiled_assets_so_the_readme_has_to_name_their_repository(): void
-    {
-        $compiled = glob($this->root() . '/build/*/*/*.js') ?: [];
-        $this->assertNotSame(
-            [],
-            $compiled,
-            'No compiled assets ship, so this test is measuring a rule that no longer applies.'
-        );
-
-        $this->assertMatchesRegularExpression(
-            '#https://github\.com/[A-Za-z0-9._-]+/[A-Za-z0-9._-]+#',
-            $this->sourceSection(),
-            'The Source code section names no repository, which is what Guideline 4 asks for.'
-        );
-    }
-
     /**
-     * A build instruction nobody can run is worse than none: it reads as
-     * compliance and sends a reviewer somewhere that does not exist.
+     * The one build dependency that is not on npm, as `owner/repo#ref`.
+     *
+     * @return array{owner: string, repo: string, ref: string}|null
      */
-    public function test_every_path_the_source_section_names_is_a_path_that_exists(): void
+    private function gitDependency(): ?array
     {
-        preg_match_all('/`([^`]+)`/', $this->sourceSection(), $m);
-        $quoted = array_filter(
-            $m[1],
-            static fn (string $q): bool => ! str_contains($q, ' ') && ! str_starts_with($q, 'npm')
-        );
-
-        $this->assertNotSame([], $quoted, 'The Source code section names no paths at all.');
-
-        $missing = [];
-        foreach ($quoted as $rel) {
-            if (! file_exists($this->root() . '/' . rtrim($rel, '/'))) {
-                $missing[] = $rel;
-            }
-        }
-
-        $this->assertSame([], $missing, "readme.txt points at paths the plugin does not have:\n" . implode("\n", $missing));
-    }
-
-    public function test_the_build_command_the_source_section_gives_is_a_real_npm_script(): void
-    {
-        $matched = preg_match('/npm run ([a-z:-]+)/', $this->sourceSection(), $m);
-        $this->assertSame(1, $matched, 'The Source code section gives no build command.');
-
         $package = json_decode(
             (string) file_get_contents($this->root() . '/package.json'),
             true,
@@ -116,24 +73,73 @@ final class ReadmeDirectorySubmissionTest extends TestCase
             JSON_THROW_ON_ERROR
         );
 
-        $this->assertArrayHasKey(
-            $m[1],
-            $package['scripts'] ?? [],
-            "readme.txt tells a reviewer to run `npm run {$m[1]}`, which package.json does not define."
-        );
+        foreach ($package['dependencies'] ?? [] as $spec) {
+            if (preg_match('~^github:([^/]+)/([^#]+)#(.+)$~', (string) $spec, $m) === 1) {
+                return ['owner' => $m[1], 'repo' => $m[2], 'ref' => $m[3]];
+            }
+        }
+
+        return null;
     }
 
     /**
-     * The fonts are the one bundled asset whose licence is not GPL and not
-     * carried by the package that ships it.
+     * package.json ships inside the zip, and one of the dependencies it pins is
+     * fetched from GitHub at a tag rather than from the registry. That makes the
+     * tag part of the payload's build instruction: delete it and `npm install`
+     * inside the zip fails on the one line nobody reads, with no lock shipped to
+     * fall back on.
+     *
+     * Opt-in because it needs the network and says nothing without it. Run with
+     * DONO_NETWORK_TESTS=1 before submitting.
      */
-    public function test_the_bundled_font_licence_is_reproduced_where_the_readme_says_it_is(): void
+    public function test_the_tag_the_build_depends_on_is_still_published(): void
     {
-        $matched = preg_match('/`(licenses\/[^`]+)`/', $this->sourceSection(), $m);
-        $this->assertSame(1, $matched, 'readme.txt does not say where the font licence is reproduced.');
+        if (getenv('DONO_NETWORK_TESTS') !== '1') {
+            $this->markTestSkipped('set DONO_NETWORK_TESTS=1 to check the build dependency against the network');
+        }
 
-        $notice = (string) file_get_contents($this->root() . '/' . $m[1]);
+        if (! extension_loaded('curl')) {
+            $this->markTestSkipped('no curl extension to ask with');
+        }
 
+        $git = $this->gitDependency();
+        if ($git === null) {
+            $this->markTestSkipped('package.json pins nothing outside the npm registry, so no tag has to stay published');
+        }
+
+        $url = "https://github.com/{$git['owner']}/{$git['repo']}/tree/{$git['ref']}";
+
+        $handle = curl_init($url);
+        curl_setopt_array($handle, [
+            CURLOPT_NOBODY         => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_TIMEOUT        => 15,
+            CURLOPT_RETURNTRANSFER => true,
+        ]);
+        curl_exec($handle);
+        $status = (int) curl_getinfo($handle, CURLINFO_RESPONSE_CODE);
+        curl_close($handle);
+
+        $this->assertSame(200, $status, "$url does not resolve, so `npm install` cannot fetch the build dependency.");
+    }
+
+    /**
+     * The notice has to reach the customer, so both halves matter: the file has
+     * to survive .distignore into the zip, and it has to still be the notice.
+     * An empty or truncated file passes a `test -f` in the release script and
+     * satisfies nothing the fonts are licensed under.
+     */
+    public function test_the_bundled_font_licence_travels_with_the_fonts(): void
+    {
+        $path = $this->root() . '/' . self::FONT_LICENCE;
+        $this->assertFileExists($path, 'The DejaVu fonts ship in vendor/ with no notice of their own.');
+
+        $this->assertFalse(
+            DistPayload::excluded($this->root(), self::FONT_LICENCE),
+            '.distignore keeps the font licence out of the zip the fonts ship in.'
+        );
+
+        $notice = (string) file_get_contents($path);
         $this->assertStringContainsString('Bitstream Vera Fonts Copyright', $notice);
         $this->assertStringContainsString('Arev Fonts Copyright', $notice);
     }
@@ -149,31 +155,41 @@ final class ReadmeDirectorySubmissionTest extends TestCase
             JSON_THROW_ON_ERROR
         );
 
+        // Every pair below is asserted with assertSame, which is happiest when
+        // both sides are missing. A deleted header is the failure this is for.
+        foreach (['Stable tag', 'Requires PHP', 'Requires at least', 'License'] as $field) {
+            $this->assertArrayHasKey($field, $headers, "readme.txt has no $field header.");
+        }
+
         preg_match('/^\s*\*\s*Version:\s*(\S+)$/m', $plugin, $version);
+        $this->assertNotEmpty($version, 'dono.php has no Version header.');
         $this->assertSame(
-            $version[1] ?? null,
-            $headers['Stable tag'] ?? null,
+            $version[1],
+            $headers['Stable tag'],
             'Stable tag and the plugin Version have to be the same release.'
         );
 
         preg_match('/^\s*\*\s*Requires PHP:\s*(\S+)$/m', $plugin, $php);
-        $this->assertSame($php[1] ?? null, $headers['Requires PHP'] ?? null);
+        $this->assertNotEmpty($php, 'dono.php has no Requires PHP header.');
+        $this->assertSame($php[1], $headers['Requires PHP']);
         $this->assertStringContainsString(
-            (string) ($headers['Requires PHP'] ?? ''),
+            $headers['Requires PHP'],
             (string) ($composer['require']['php'] ?? ''),
             'composer.json and readme.txt disagree about the oldest PHP this runs on.'
         );
 
         preg_match('/^\s*\*\s*Requires at least:\s*(\S+)$/m', $plugin, $wp);
-        $this->assertSame($wp[1] ?? null, $headers['Requires at least'] ?? null);
+        $this->assertNotEmpty($wp, 'dono.php has no Requires at least header.');
+        $this->assertSame($wp[1], $headers['Requires at least']);
 
-        $this->assertSame($composer['license'] ?? null, $headers['License'] ?? null);
+        $this->assertSame($composer['license'] ?? null, $headers['License']);
     }
 
     /** The directory keeps five tags and truncates a short description at 150 characters. */
     public function test_the_tags_and_short_description_fit_what_the_directory_shows(): void
     {
         $tags = array_filter(array_map('trim', explode(',', $this->headers()['Tags'] ?? '')));
+        $this->assertGreaterThan(0, count($tags), 'readme.txt has no Tags header, so the listing has no tags.');
         $this->assertLessThanOrEqual(5, count($tags), 'Tags past the fifth are dropped.');
 
         $matched = preg_match('/^\s*$\n(.+)$/m', explode('== Description ==', $this->readme())[0], $m);

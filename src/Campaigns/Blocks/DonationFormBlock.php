@@ -122,6 +122,12 @@ final class DonationFormBlock extends CampaignBlock
      * /wp/v2/block-renderer/, whose core permission check requires edit access;
      * the capability is re-checked here so nothing but an editor can reach it.
      *
+     * Re-checked the way the route itself checks, against the post being
+     * edited when ServerSideRender names one. A stricter test would fail for
+     * someone core already let through, an editor of pages but not of posts,
+     * and drop the live front-end form, form token and all, into their editor
+     * canvas with none of its scripts.
+     *
      * @since 1.0.0
      */
     private function isBlockRendererRequest(): bool
@@ -131,6 +137,10 @@ final class DonationFormBlock extends CampaignBlock
             return false;
         }
 
-        return current_user_can('edit_posts');
+        $postId = isset($_GET['post_id']) ? (int) $_GET['post_id'] : 0;
+
+        return $postId > 0
+            ? current_user_can('edit_post', $postId)
+            : current_user_can('edit_posts');
     }
 }

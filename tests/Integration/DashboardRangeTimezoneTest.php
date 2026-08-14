@@ -12,6 +12,7 @@ use Dono\Dashboard\DashboardMetricsService;
 use Dono\Donations\Donation;
 use Dono\Donations\DonationRepository;
 use Dono\Donors\DonorRepository;
+use Dono\Donors\DonorService;
 use Dono\Foundation\Plugin;
 use Dono\Foundation\Time\FrozenClock;
 use Dono\Recurring\RecurringPlanRepository;
@@ -133,18 +134,52 @@ final class DashboardRangeTimezoneTest extends IntegrationTestCase
         $campaign = $this->campaign();
         $this->paid('2026-01-14 21:00:00', 5000, (int) $campaign->id);
 
-        $c       = Plugin::instance()->container;
-        $metrics = new CampaignMetricsService(
-            new FrozenClock(new DateTimeImmutable('2026-01-14 22:00:00', new DateTimeZone('UTC'))),
+        $this->assertSame(
+            1,
+            (int) $this->campaignMetricsAt('2026-01-14 22:00:00')
+                ->summary((int) $campaign->id, 'today')['donations_count'],
+            'the campaign gave this one today, same as the dashboard says'
+        );
+    }
+
+    /**
+     * The cohort widget splits the window's donors into first-time and
+     * returning by comparing each donor's earliest donation against the start
+     * of the window. The earliest donation is the stored UTC stamp and the
+     * window is the org's day, so a comparison that leaves one of the two on
+     * the wrong clock calls a brand-new donor a returning one, and the
+     * conversion figure beside it is wrong with them.
+     */
+    public function test_a_first_ever_donation_this_morning_is_a_first_time_donor(): void
+    {
+        update_option('timezone_string', 'Pacific/Auckland');
+
+        $campaign = $this->campaign();
+        // 10:00 on 15 January in Auckland: inside the org's today, and stamped
+        // 21:00 on the 14th in UTC, which is before the naive '2026-01-15'.
+        $this->paid('2026-01-14 21:00:00', 5000, (int) $campaign->id, $this->donor());
+
+        $cohort = $this->campaignMetricsAt('2026-01-14 22:00:00')->cohort((int) $campaign->id, 'today');
+
+        $this->assertSame(1, $cohort['first_time'], 'the only donation they have ever given is their first');
+        $this->assertSame(0, $cohort['returning'], 'nobody came back to a campaign they had never given to');
+    }
+
+    private function campaignMetricsAt(string $utc): CampaignMetricsService
+    {
+        $c = Plugin::instance()->container;
+
+        return new CampaignMetricsService(
+            new FrozenClock(new DateTimeImmutable($utc, new DateTimeZone('UTC'))),
             $c->get(DonationRepository::class),
             $c->get(DonorRepository::class),
         );
+    }
 
-        $this->assertSame(
-            1,
-            (int) $metrics->summary((int) $campaign->id, 'today')['donations_count'],
-            'the campaign gave this one today, same as the dashboard says'
-        );
+    private function donor(): int
+    {
+        return (int) Plugin::instance()->container->get(DonorService::class)
+            ->findOrCreate('range-' . uniqid() . '@example.test')->id;
     }
 
     private function campaign(): Campaign
@@ -156,12 +191,15 @@ final class DashboardRangeTimezoneTest extends IntegrationTestCase
         return Campaign::query()->find('id', (int) rest_do_request($req)->get_data()['id']);
     }
 
-    private function paid(string $utc, int $cents, ?int $campaignId = null): Donation
+    private function paid(string $utc, int $cents, ?int $campaignId = null, ?int $donorId = null): Donation
     {
         $d = Donation::make();
         $d->reference         = 'DONO-TZ-' . uniqid();
         if ($campaignId !== null) {
             $d->campaign_id = $campaignId;
+        }
+        if ($donorId !== null) {
+            $d->donor_id = $donorId;
         }
         $d->status            = 'paid';
         $d->gateway           = 'offline';

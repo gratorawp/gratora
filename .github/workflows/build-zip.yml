@@ -66,9 +66,14 @@ jobs:
       - name: Verify the artefact
         run: bash bin/verify-zip.sh
 
+      # The packager names the zip after the Text Domain, so this is
+      # dist/dono-fundraising-platform.zip and not the folder name.
       - name: Upload the artefact
         uses: actions/upload-artifact@v4
         with:
           name: dono-plugin-${{ github.sha }}
-          path: dist/dono.zip
+          path: dist/dono-fundraising-platform.zip
+          # Default is a warning, so a run that uploads nothing still reports
+          # success.
+          if-no-files-found: error
           retention-days: 14

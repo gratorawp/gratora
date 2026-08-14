@@ -401,11 +401,16 @@ final class DonationFlowTest extends IntegrationTestCase
 
     public function test_inactive_submitted_fund_falls_through_to_default(): void
     {
+        // Through a form that offers the picker, so the choice reaches the
+        // resolver and it is the closed fund being refused that decides where
+        // the money lands, not the choice being dropped before it gets there.
         $inactive = $this->makeFund('old', 'Old', false);
         $def      = $this->makeFund('general', 'General', true, true);
+        $form     = $this->publishedFormOffering('<!-- wp:dono/fund-picker /-->');
+
         $ref = $this->postDonation([
             'email' => 'c@x.com', 'amount_cents' => 1000, 'currency' => 'EUR',
-            'gateway' => 'offline', 'fund_id' => $inactive->id,
+            'gateway' => 'offline', 'fund_id' => $inactive->id, 'form_id' => (int) $form->id,
         ])->get_data()['reference'];
         $this->assertSame((int) $def->id, $this->fundIdOf($ref));
     }

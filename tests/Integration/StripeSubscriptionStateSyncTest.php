@@ -71,11 +71,12 @@ final class StripeSubscriptionStateSyncTest extends IntegrationTestCase
     {
         $plan = $this->seedPlan();
 
-        $this->postWebhook('customer.subscription.updated', [
+        $status = $this->postWebhook('customer.subscription.updated', [
             'id'     => (string) $plan->gateway_subscription_id,
             'status' => 'unpaid',
         ]);
 
+        $this->assertSame(200, $status, 'the event reached the handler');
         $fresh = RecurringPlan::query()->find('id', (int) $plan->id);
         $this->assertSame('past_due', (string) $fresh->status, 'a plan Stripe stopped collecting is past due, not active');
     }
@@ -86,11 +87,12 @@ final class StripeSubscriptionStateSyncTest extends IntegrationTestCase
         $plan->status = 'past_due';
         $plan->save();
 
-        $this->postWebhook('customer.subscription.updated', [
+        $status = $this->postWebhook('customer.subscription.updated', [
             'id'     => (string) $plan->gateway_subscription_id,
             'status' => 'active',
         ]);
 
+        $this->assertSame(200, $status, 'the event reached the handler');
         $fresh = RecurringPlan::query()->find('id', (int) $plan->id);
         $this->assertSame('active', (string) $fresh->status, 'collection resuming puts the plan back');
     }
@@ -101,11 +103,12 @@ final class StripeSubscriptionStateSyncTest extends IntegrationTestCase
         $plan->status = 'cancelled';
         $plan->save();
 
-        $this->postWebhook('customer.subscription.updated', [
+        $status = $this->postWebhook('customer.subscription.updated', [
             'id'     => (string) $plan->gateway_subscription_id,
             'status' => 'active',
         ]);
 
+        $this->assertSame(200, $status, 'the event reached the handler');
         $fresh = RecurringPlan::query()->find('id', (int) $plan->id);
         $this->assertSame('cancelled', (string) $fresh->status, 'a cancelled plan stays cancelled');
     }
@@ -117,12 +120,13 @@ final class StripeSubscriptionStateSyncTest extends IntegrationTestCase
         // not flip the row.
         $plan = $this->seedPlan();
 
-        $this->postWebhook('customer.subscription.updated', [
+        $status = $this->postWebhook('customer.subscription.updated', [
             'id'               => (string) $plan->gateway_subscription_id,
             'status'           => 'active',
             'pause_collection' => ['behavior' => 'mark_uncollectible', 'resumes_at' => 1740787200],
         ]);
 
+        $this->assertSame(200, $status, 'the event reached the handler');
         $fresh = RecurringPlan::query()->find('id', (int) $plan->id);
         $this->assertSame('active', (string) $fresh->status);
     }
@@ -133,11 +137,12 @@ final class StripeSubscriptionStateSyncTest extends IntegrationTestCase
         $plan->is_test = false;
         $plan->save();
 
-        $this->postWebhook('customer.subscription.updated', [
+        $status = $this->postWebhook('customer.subscription.updated', [
             'id'     => (string) $plan->gateway_subscription_id,
             'status' => 'unpaid',
         ]);
 
+        $this->assertSame(200, $status, 'the event reached the handler');
         $fresh = RecurringPlan::query()->find('id', (int) $plan->id);
         $this->assertSame('active', (string) $fresh->status, 'a test secret cannot move a live plan');
     }
@@ -147,21 +152,53 @@ final class StripeSubscriptionStateSyncTest extends IntegrationTestCase
         $plan  = $this->seedPlan();
         $mails = $this->captureMails();
 
-        $this->postWebhook('customer.subscription.updated', [
+        $status = $this->postWebhook('customer.subscription.updated', [
             'id'                   => (string) $plan->gateway_subscription_id,
             'status'               => 'canceled',
             'cancellation_details' => ['reason' => 'payment_failed'],
         ]);
 
+        $this->assertSame(200, $status, 'the event reached the handler');
         $fresh = RecurringPlan::query()->find('id', (int) $plan->id);
         $this->assertSame('cancelled', (string) $fresh->status);
         $this->assertSame('payment_failed', (string) $fresh->cancellation_reason);
 
-        $cancellationMails = array_filter(
+        $this->assertCount(1, $this->cancellationMails($mails), 'the donor is told once');
+    }
+
+    public function test_the_deleted_event_that_follows_does_not_email_the_donor_again(): void
+    {
+        // Stripe sends both for the same cancellation, and routing the update
+        // into the delete handler is only safe because the second one loses the
+        // DB transition that gates the email.
+        $plan  = $this->seedPlan();
+        $mails = $this->captureMails();
+
+        $this->postWebhook('customer.subscription.updated', [
+            'id'                   => (string) $plan->gateway_subscription_id,
+            'status'               => 'canceled',
+            'cancellation_details' => ['reason' => 'payment_failed'],
+        ]);
+        $status = $this->postWebhook('customer.subscription.deleted', [
+            'id'                   => (string) $plan->gateway_subscription_id,
+            'status'               => 'canceled',
+            'cancellation_details' => ['reason' => 'payment_failed'],
+        ]);
+
+        $this->assertSame(200, $status, 'the event reached the handler');
+        $this->assertCount(1, $this->cancellationMails($mails), 'the donor is told once, not once per event');
+    }
+
+    /**
+     * @param  iterable<array<string,mixed>> $mails
+     * @return list<array<string,mixed>>
+     */
+    private function cancellationMails(iterable $mails): array
+    {
+        return array_values(array_filter(
             iterator_to_array($mails),
             static fn ($m) => stripos((string) ($m['subject'] ?? ''), 'cancel') !== false,
-        );
-        $this->assertCount(1, $cancellationMails, 'the donor is told once');
+        ));
     }
 
     private function seedPlan(): RecurringPlan
@@ -197,8 +234,14 @@ final class StripeSubscriptionStateSyncTest extends IntegrationTestCase
         return $plan;
     }
 
-    /** @param array<string,mixed> $object */
-    private function postWebhook(string $type, array $object): void
+    /**
+     * The status is returned and asserted because most of these tests assert
+     * that nothing moved: a 404 from an unregistered gateway or a renamed route
+     * would satisfy them forever.
+     *
+     * @param array<string,mixed> $object
+     */
+    private function postWebhook(string $type, array $object): int
     {
         $event = [
             'id'   => 'evt_' . bin2hex(random_bytes(6)),
@@ -214,6 +257,7 @@ final class StripeSubscriptionStateSyncTest extends IntegrationTestCase
         $req->set_header('content-type', 'application/json');
         $req->set_header('stripe_signature', "t={$timestamp},v1={$sig}");
         $req->set_body($payload);
-        rest_do_request($req);
+
+        return rest_do_request($req)->get_status();
     }
 }

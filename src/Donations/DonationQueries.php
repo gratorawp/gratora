@@ -34,7 +34,7 @@ final class DonationQueries
     }
 
     /**
-     * Rows that are donation history: real money, given as a gift.
+     * Rows that are donation history: real money, given rather than exchanged.
      *
      * Event ticket orders ride the same table with kind='order'. They are a
      * purchase, not a donation, so they must stay out of donor lifetime totals,
@@ -56,7 +56,7 @@ final class DonationQueries
      *
      * The kind filter stays on both branches: "show me the test data" must
      * never quietly also mean "show me ticket orders", which are a purchase
-     * rather than a gift and belong out of donation reporting either way.
+     * rather than a donation and belong out of donation reporting either way.
      *
      * @template T
      * @param  T $q
@@ -206,31 +206,48 @@ final class DonationQueries
      * SQL reading a UTC datetime column as the calendar date the org gave it
      * on, for the window between two UTC datetimes.
      *
+     * @since 1.0.0
+     */
+    public static function localDateExpr(string $column, string $fromUtc, string $toUtc): string
+    {
+        return 'DATE(' . self::localStampExpr($column, $fromUtc, $toUtc) . ')';
+    }
+
+    /**
+     * SQL reading a UTC datetime column as the org's wall clock, for the window
+     * between two UTC datetimes. Day, weekday and hour bucketings all group by
+     * this, so one donation cannot land on different days on two screens.
+     *
      * CONVERT_TZ needs the server's named-timezone tables loaded, which no
      * install can be assumed to have, so the offset is resolved in PHP and
      * folded in as seconds. One branch per DST transition inside the window
      * keeps a spring-forward exact instead of shifting the days after it.
      *
+     * Both bounds are required, and not as nullable strings: the window is what
+     * carries the offset, and a caller allowed to omit it gets the column back
+     * unconverted and reads UTC believing it is local. A caller with no window
+     * of its own resolves one (see DonationRepository::paidSpanUtc) or leaves
+     * the column alone deliberately, in its own code, where that reads as the
+     * decision it is.
+     *
      * @since 1.0.0
      */
-    public static function localDateExpr(string $column, ?string $fromUtc, ?string $toUtc): string
+    public static function localStampExpr(string $column, string $fromUtc, string $toUtc): string
     {
-        $utcDate = "DATE({$column})";
-
-        $start = $fromUtc === null ? null : strtotime($fromUtc . ' UTC');
-        $end   = $toUtc   === null ? null : strtotime($toUtc . ' UTC');
+        $start = strtotime($fromUtc . ' UTC');
+        $end   = strtotime($toUtc . ' UTC');
         if (! is_int($start) || ! is_int($end) || $end < $start) {
-            return $utcDate;
+            return $column;
         }
 
         $transitions = self::siteTimezone()->getTransitions($start, $end);
         if ($transitions === false || $transitions === []) {
-            return $utcDate;
+            return $column;
         }
 
         $offset = (int) $transitions[0]['offset'];
         if (count($transitions) === 1) {
-            return $offset === 0 ? $utcDate : "DATE(DATE_ADD({$column}, INTERVAL {$offset} SECOND))";
+            return $offset === 0 ? $column : "DATE_ADD({$column}, INTERVAL {$offset} SECOND)";
         }
 
         $case = '(CASE';
@@ -240,7 +257,7 @@ final class DonationQueries
         }
         $case .= sprintf(' ELSE %d END)', $offset);
 
-        return "DATE(DATE_ADD({$column}, INTERVAL {$case} SECOND))";
+        return "DATE_ADD({$column}, INTERVAL {$case} SECOND)";
     }
 
     /** @since 1.0.0 */

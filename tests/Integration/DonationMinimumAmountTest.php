@@ -21,7 +21,9 @@ final class DonationMinimumAmountTest extends IntegrationTestCase
 {
     private function formWithMinimum(int $minCents, bool $withSwitcher = false): Form
     {
-        $blocks = '<!-- wp:dono/donation-amount {"allowCustom":true,"minCents":' . $minCents . '} /-->'
+        // The currency the figure is authored in is stated, not inherited from
+        // whatever another test left in Money::defaultCurrency()'s cache.
+        $blocks = '<!-- wp:dono/donation-amount {"allowCustom":true,"currency":"USD","minCents":' . $minCents . '} /-->'
             . ($withSwitcher ? '<!-- wp:dono/currency-switcher {"currencies":["GBP","JPY"]} /-->' : '')
             . '<!-- wp:dono/submit-button {"label":"Give"} /-->';
 
@@ -48,7 +50,7 @@ final class DonationMinimumAmountTest extends IntegrationTestCase
 
         $err = $this->validate($form, ['amount_cents' => 1000]);
 
-        $this->assertNotNull($err, 'a gift below the form minimum should not pass');
+        $this->assertNotNull($err, 'a donation below the form minimum should not pass');
     }
 
     public function test_a_donation_on_the_minimum_passes(): void
@@ -90,6 +92,12 @@ final class DonationMinimumAmountTest extends IntegrationTestCase
             'fetched_at' => gmdate('c'),
             'rates'      => ['USD' => 1.0, 'GBP' => 0.79, 'JPY' => 149.93],
         ], false);
+        // The switcher only offers currencies the org accepts, so a JPY donor
+        // is only reachable on an org that has enabled it.
+        update_option('dono_currency_locale', [
+            'default_currency'     => 'USD',
+            'supported_currencies' => ['USD', 'EUR', 'GBP', 'JPY'],
+        ]);
     }
 
     public function test_a_donor_paying_a_stronger_currency_is_measured_against_the_converted_minimum(): void
@@ -97,8 +105,9 @@ final class DonationMinimumAmountTest extends IntegrationTestCase
         $this->seedRates();
         $form = $this->formWithMinimum(2500, true);
 
-        // GBP 19.75 is the $25 minimum, and it is what the form's own tile
-        // converts to, so refusing it refuses the amount the donor was shown.
+        // GBP 19.75 is the $25 minimum converted. The form's own tile rounds up
+        // to 20.00 at this rate, so both are above the bar; the rates where the
+        // tile rounds down are covered in DonationMinimumTileParityTest.
         $this->assertNull($this->validate($form, ['amount_cents' => 1975, 'currency' => 'GBP']));
     }
 

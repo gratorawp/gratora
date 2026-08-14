@@ -1,7 +1,7 @@
 /** @jsxImportSource preact */
 import { evaluateCondition } from './conditions';
 import { mergePayload, registeredErrors, registeredValues } from './fields';
-import { convertCents, convertMinimum, displayPreset, isZeroDecimal, roundToCurrency } from '../util/fx';
+import { convertCents, convertMinimum, displayPreset, isZeroDecimal, maxAmountFor, roundToCurrency } from '../util/fx';
 import { formatAmount } from '../util/format';
 
 // Fields authored above a wizard live in `preamble`, outside any step, so they
@@ -430,6 +430,9 @@ export function validateStep( step, state ) {
                 state.presetCurrency,
                 state.currency
             );
+            // The payload charges the covered fee on top, and the schema caps
+            // that total, so the ceiling is measured on what will be sent.
+            const cap = maxAmountFor( state.currency );
             if ( ! amt || amt <= 0 ) {
                 e[ 'amount_cents' ] = msg( 'pickAmount', 'Pick or enter an amount.' );
             } else if ( min > 0 && amt < min ) {
@@ -438,6 +441,12 @@ export function validateStep( step, state ) {
                 // submit.
                 const fmt = formatAmount( min, state.currency );
                 e[ 'amount_cents' ] = msg( 'minAmount', `Minimum donation is ${ fmt }.`, fmt );
+            } else if ( amt + coveredFeeCents( state ) > cap ) {
+                // Above the cap the REST schema refuses the request before the
+                // callback runs, and its message names the parameter instead of
+                // telling the donor anything.
+                const fmt = formatAmount( cap - coveredFeeCents( state ), state.currency );
+                e[ 'amount_cents' ] = msg( 'maxNumber', `Must be at most ${ fmt }.`, fmt );
             }
             break;
         }

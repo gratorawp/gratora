@@ -70,7 +70,8 @@ final class FxAutoFetchGateTest extends IntegrationTestCase
         update_option(FxRates::OPTION, $opt, false);
     }
 
-    private function strandedDonation(string $currency): void
+    /** @param array<string,mixed> $attrs overrides, for rows no total counts */
+    private function strandedDonation(string $currency, array $attrs = []): void
     {
         $d = Donation::make();
         $d->reference         = 'REF-' . uniqid();
@@ -82,6 +83,9 @@ final class FxAutoFetchGateTest extends IntegrationTestCase
         $d->base_amount_cents = null;
         $d->created_at        = gmdate('Y-m-d H:i:s');
         $d->paid_at           = gmdate('Y-m-d H:i:s');
+        foreach ($attrs as $key => $value) {
+            $d->{$key} = $value;
+        }
         $d->save();
     }
 
@@ -124,6 +128,23 @@ final class FxAutoFetchGateTest extends IntegrationTestCase
         $this->updater()->run();
 
         $this->assertCount(1, $this->calls, 'a stranded donation is a reason to fetch');
+    }
+
+    public function test_a_stranded_row_no_total_counts_is_still_a_reason(): void
+    {
+        // What the Tools screen reports as missing money is a narrower set than
+        // what a rate is worth fetching for: it drops test-mode rows and
+        // unpaid ones because no total was ever going to include them. A
+        // donation is stamped with a rate when it is created and nothing
+        // restates it when it is paid, so gating the fetch on that narrower
+        // question strands the pending row the moment it completes.
+        $this->auto(true);
+        $this->accepts([$this->base()]);
+        $this->strandedDonation('NOK', ['status' => 'pending', 'is_test' => true, 'paid_at' => null]);
+
+        $this->updater()->run();
+
+        $this->assertCount(1, $this->calls, 'a row waiting to be paid is still a reason to fetch');
     }
 
     public function test_a_stranded_donation_in_the_base_currency_is_not_a_reason(): void

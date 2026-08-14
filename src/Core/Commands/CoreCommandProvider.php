@@ -8,6 +8,7 @@ use Dono\Analytics\Event;
 use Dono\Campaigns\CampaignMetricsService;
 use Dono\Campaigns\CampaignRepository;
 use Dono\Campaigns\CampaignService;
+use Dono\Currency\BaseCurrencyLocked;
 use Dono\Currency\Currency;
 use Dono\Currency\SupportedCurrencies;
 use Dono\Dashboard\DashboardMetricsService;
@@ -1863,7 +1864,13 @@ final class CoreCommandProvider
                     $validated[$key] = $value;
                 }
 
-                $updated = $settings->update($group, $validated);
+                try {
+                    $updated = $settings->update($group, $validated);
+                } catch (BaseCurrencyLocked $e) {
+                    // A refusal the caller can act on, not a fault to log.
+                    throw new CommandError(esc_html($e->getMessage()));
+                }
+
                 return ['group' => $group, 'values' => $this->redactSecrets($updated)];
             },
             $this->meta(['agent_hint' => 'Call settings.get first to learn the exact key names for the group; only existing, non-secret keys can be set. This command never reaches roles or gateways.']),

@@ -8,6 +8,7 @@
         "start": "wp-scripts start",
         "lint:js": "wp-scripts lint-js",
         "format": "wp-scripts format",
+        "test:js": "jest -c tests/js/jest.config.js",
         "test:e2e": "playwright test",
         "test:visual": "DONO_E2E_VISUAL=1 playwright test --project=visual",
         "test:visual:update": "DONO_E2E_VISUAL=1 playwright test --project=visual --update-snapshots",

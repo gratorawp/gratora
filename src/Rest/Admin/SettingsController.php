@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Dono\Rest\Admin;
 use Dono\Foundation\Auth\Capabilities;
 
-use Dono\Donations\Donation;
-use Dono\Donations\DonationQueries;
+use Dono\Currency\BaseCurrencyLock;
+use Dono\Currency\BaseCurrencyLocked;
 use Dono\Donors\DonorRetention;
 use Dono\Settings\SettingsService;
 use WP_Error;
@@ -93,7 +93,7 @@ final class SettingsController
         // way back in. The screen needs it to disable the picker rather than
         // let someone choose a currency the save will refuse.
         if ($group === 'currency-locale') {
-            $data['base_currency_locked'] = DonationQueries::live(Donation::query())->count() > 0;
+            $data['base_currency_locked'] = BaseCurrencyLock::isLocked();
         }
 
         return new WP_REST_Response($data, 200);
@@ -126,55 +126,15 @@ final class SettingsController
         // any unrelated field would wipe the signing secret.
         $body  = SecretRedactor::restore($body, $this->settings->get($group));
 
-        if ($group === 'currency-locale') {
-            $guard = $this->guardBaseCurrency($body);
-            if ($guard instanceof WP_Error) {
-                return $guard;
-            }
+        // The invariant lives in SettingsService so every writer inherits it;
+        // the controller's job is only to give the refusal an HTTP shape.
+        try {
+            $saved = $this->settings->update($group, $body);
+        } catch (BaseCurrencyLocked $e) {
+            return new WP_Error('dono_base_currency_locked', $e->getMessage(), ['status' => 409]);
         }
 
-        $saved = $this->settings->update($group, $body);
         return new WP_REST_Response(SecretRedactor::redact($saved), 200);
-    }
-
-    /**
-     * The base currency is the unit every stored base_amount_cents is already
-     * denominated in, and nothing restates them. Changing it after money has
-     * come in silently reinterprets every historical total, every report and
-     * every year-end statement at the new currency's face value.
-     *
-     * Refused rather than rebased: rebasing needs a rate per donation as of the
-     * day it was taken, which an install that has not been reporting in the new
-     * currency does not have.
-     *
-     * @param array<string,mixed> $body
-     *
-     * @since 1.0.0
-     */
-    private function guardBaseCurrency(array $body): ?WP_Error
-    {
-        $incoming = strtoupper(trim((string) ($body['default_currency'] ?? '')));
-        $current  = strtoupper(trim((string) ($this->settings->get('currency-locale')['default_currency'] ?? '')));
-
-        if ($incoming === '' || $incoming === $current) {
-            return null;
-        }
-
-        $taken = (int) DonationQueries::live(Donation::query())->count();
-        if ($taken === 0) {
-            return null;
-        }
-
-        return new WP_Error(
-            'dono_base_currency_locked',
-            sprintf(
-                /* translators: 1: current base currency, 2: number of donations. */
-                __('The base currency stays %1$s: %2$d donations are already recorded against it, and their stored totals would be reread as the new currency. Test-mode donations do not count - clear live donations first, or keep reporting in %1$s.', 'dono-fundraising-platform'),
-                $current,
-                $taken
-            ),
-            ['status' => 409]
-        );
     }
 
     /**

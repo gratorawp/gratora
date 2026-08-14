@@ -74,11 +74,15 @@ final class DeactivationDialog
             return;
         }
 
-        // Markup from a template that escapes its own values as it prints them.
-        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-        echo View::loadRelative(__DIR__, 'views/deactivation-dialog', [
+        $markup = View::loadRelative(__DIR__, 'views/deactivation-dialog', [
             'wipeOptIn' => DataEraser::requested(),
         ]);
+
+        // Markup from a template that escapes its own values as it prints them.
+        // The echo is its own statement so the annotation covers the line the
+        // sniff reports, which is the argument rather than the echo.
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+        echo $markup;
     }
 
     /** @since 1.0.0 */

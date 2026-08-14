@@ -37,7 +37,7 @@ final class DonationRepository
     {
         [$start, $end] = DonationQueries::yearBoundsUtc($year);
 
-        // donationsOnly: a ticket purchase is goods received, not a gift, and
+        // donationsOnly: a ticket purchase is goods received, not a donation,
         // must never appear on a tax-deductible year-end statement.
         $rows = DonationQueries::donationsOnly(Donation::query())
             ->whereIn('status', ['paid', 'partial_refund'])
@@ -292,8 +292,7 @@ final class DonationRepository
     public function dailyPaidBetween(string $from, string $to, ?int $campaignId = null, bool $includeTest = false): array
     {
         $prefix = DB::getPrefix();
-        [$startUtc, $endUtc] = DonationQueries::dayBoundsUtc($from, $to);
-        $day = DonationQueries::localDateExpr("{$prefix}dono_donations.paid_at", $startUtc, $endUtc);
+        $day    = $this->localPaidDayExpr($from, $to);
 
         $rows = $this->netPaidQuery($from, $to, $campaignId, $includeTest)
             ->selectRaw("{$day} AS day, COALESCE(SUM(COALESCE({$prefix}dono_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount, COUNT(*) AS cnt")
@@ -309,7 +308,7 @@ final class DonationRepository
 
     /**
      * Net of refunds so it agrees with the raised total shown beside it: a
-     * headline gift that was half refunded is not still the biggest one.
+     * headline donation that was half refunded is not still the biggest one.
      *
      * @since 1.0.0
      */
@@ -347,7 +346,36 @@ final class DonationRepository
             return null;
         }
 
-        return (string) wp_date('Y-m-d', (int) strtotime($val . ' UTC'));
+        return self::localDateOf($val);
+    }
+
+    /**
+     * A stored UTC stamp as the org's calendar date, or null when the stamp is
+     * not an instant.
+     *
+     * A row carrying '0000-00-00 00:00:00' (an import, a hand-edited table, a
+     * server whose sql_mode allows zero dates) parses two millennia back, and
+     * it is read as the lower bound of the all-time chart and of the export
+     * month picker. Neither survives it: the chart is asked for a range whose
+     * start the database rejects, and the picker offers a month from year zero.
+     * The empty string is not an instant either, however willing strtotime is
+     * to read it as now.
+     *
+     * @since 1.0.0
+     */
+    public static function localDateOf(string $stamp): ?string
+    {
+        $stamp = trim($stamp);
+        if ($stamp === '') {
+            return null;
+        }
+
+        $ts = strtotime($stamp . ' UTC');
+        if ($ts === false || $ts <= 0) {
+            return null;
+        }
+
+        return (string) wp_date('Y-m-d', $ts);
     }
 
     /**
@@ -422,6 +450,8 @@ final class DonationRepository
     }
 
     /**
+     * Days are the org's, on the same bucket every other daily series uses.
+     *
      * @return array<array{day:string, amount_cents:int}>
      *
      * @since 1.0.0
@@ -429,9 +459,11 @@ final class DonationRepository
     public function dailyPaidForCampaignBetween(int $campaignId, string $from, string $to): array
     {
         $prefix = DB::getPrefix();
+        $day    = $this->localPaidDayExpr($from, $to);
+
         $rows = $this->netPaidQuery($from, $to, $campaignId)
-            ->selectRaw("DATE({$prefix}dono_donations.paid_at) AS day, COALESCE(SUM(COALESCE({$prefix}dono_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount")
-            ->groupByRaw("DATE({$prefix}dono_donations.paid_at)")
+            ->selectRaw("{$day} AS day, COALESCE(SUM(COALESCE({$prefix}dono_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount")
+            ->groupByRaw($day)
             ->getAll();
 
         return array_map(static fn ($r) => [
@@ -442,7 +474,8 @@ final class DonationRepository
 
     /**
      * Batched so the top-campaigns sparkline does not fire one daily query per
-     * row.
+     * row. Days are the org's, matching both the bounds and the local cursor
+     * the sparkline is drawn against.
      *
      * @return array<int, array<string, int>> map of campaign_id => [day => amount_cents]
      *
@@ -452,10 +485,12 @@ final class DonationRepository
     {
         if ($campaignIds === []) return [];
         $prefix = DB::getPrefix();
+        $day    = $this->localPaidDayExpr($from, $to);
+
         $rows = $this->netPaidQuery($from, $to, null, $includeTest)
             ->whereIn('campaign_id', $campaignIds)
-            ->selectRaw("{$prefix}dono_donations.campaign_id AS campaign_id, DATE({$prefix}dono_donations.paid_at) AS day, COALESCE(SUM(COALESCE({$prefix}dono_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount")
-            ->groupByRaw("{$prefix}dono_donations.campaign_id, DATE({$prefix}dono_donations.paid_at)")
+            ->selectRaw("{$prefix}dono_donations.campaign_id AS campaign_id, {$day} AS day, COALESCE(SUM(COALESCE({$prefix}dono_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount")
+            ->groupByRaw("{$prefix}dono_donations.campaign_id, {$day}")
             ->getAll();
 
         $out = [];
@@ -607,7 +642,8 @@ final class DonationRepository
         // Bucket on base_amount_cents (org currency), not the donor-currency
         // amount_cents. Donations can be taken in different currencies, so
         // bucketing by face value would compare foreign amounts against
-        // one-currency thresholds and land near-boundary gifts in the wrong bar.
+        // one-currency thresholds and land near-boundary donations in the
+        // wrong bar.
         $cases = [];
         foreach ($thresholdsCents as $t) {
             $cases[] = "WHEN COALESCE({$prefix}dono_donations.base_amount_cents, 0) <= {$t} THEN {$t}";
@@ -649,6 +685,10 @@ final class DonationRepository
     }
 
     /**
+     * Weekdays and hours are the org's, since the screen reads them as "when
+     * people give": a UTC hour presented as a local one is off by the whole
+     * offset, and thirteen hours out puts half the week on the wrong day.
+     *
      * @return array<array{dow:int, hour:int, donations_count:int, amount_cents:int}>
      *
      * @since 1.0.0
@@ -656,9 +696,11 @@ final class DonationRepository
     public function dowHourGridForPaid(?string $from = null, ?string $to = null, ?int $campaignId = null): array
     {
         $prefix = DB::getPrefix();
+        $stamp  = $this->localPaidStampExpr($from, $to, $campaignId);
+
         $rows = $this->netPaidQuery($from, $to, $campaignId)
-            ->selectRaw("DAYOFWEEK({$prefix}dono_donations.paid_at) AS dow_mysql, HOUR({$prefix}dono_donations.paid_at) AS hour, COALESCE(SUM(COALESCE({$prefix}dono_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount, COUNT(*) AS cnt")
-            ->groupByRaw("DAYOFWEEK({$prefix}dono_donations.paid_at), HOUR({$prefix}dono_donations.paid_at)")
+            ->selectRaw("DAYOFWEEK({$stamp}) AS dow_mysql, HOUR({$stamp}) AS hour, COALESCE(SUM(COALESCE({$prefix}dono_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount, COUNT(*) AS cnt")
+            ->groupByRaw("DAYOFWEEK({$stamp}), HOUR({$stamp})")
             ->getAll();
 
         return array_map(static function ($r) {
@@ -682,7 +724,7 @@ final class DonationRepository
 
         // Ordered over the same set the histogram counts and in the same
         // currency it buckets by: an offset from a paid-only total would
-        // overshoot, and donor-currency amount_cents would rank foreign gifts
+        // overshoot, and donor-currency amount_cents would rank foreign donations
         // against org-currency ones.
         $q = DonationQueries::live(
             DB::table('dono_donations')->whereIn('status', ['paid', 'partial_refund'])
@@ -772,14 +814,89 @@ final class DonationRepository
         return (int) ($row['c'] ?? 0);
     }
 
-    /** @since 1.0.0 */
-    private function paidQuery(?string $from, ?string $to, ?int $campaignId): QueryBuilder
+    /**
+     * The org's calendar day for paid_at, over the window the caller reads.
+     *
+     * Single owner of the day bucket: the windows are already the org's days,
+     * so a bucket left in UTC drops a late donation off the end of the series
+     * its own money is counted in.
+     *
+     * @since 1.0.0
+     */
+    private function localPaidDayExpr(string $from, string $to): string
     {
-        $q = DonationQueries::live(DB::table('dono_donations')->where('status', 'paid'));
-        if ($from !== null)       $q = $q->where('paid_at', $from . ' 00:00:00', '>=');
-        if ($to   !== null)       $q = $q->where('paid_at', $to   . ' 23:59:59', '<=');
-        if ($campaignId !== null) $q = $q->where('campaign_id', $campaignId);
-        return $q;
+        [$startUtc, $endUtc] = DonationQueries::dayBoundsUtc($from, $to);
+
+        return DonationQueries::localDateExpr(DB::getPrefix() . 'dono_donations.paid_at', $startUtc, $endUtc);
+    }
+
+    /**
+     * The org's wall clock for paid_at, for bucketings finer than a day.
+     *
+     * The offset is folded in per DST period, so it needs a window. An
+     * unbounded report has none, and the span of the rows it can return stands
+     * in for one: a window that covers every row it groups is all the
+     * expression needs.
+     *
+     * @since 1.0.0
+     */
+    private function localPaidStampExpr(?string $from, ?string $to, ?int $campaignId): string
+    {
+        [$startUtc, $endUtc] = DonationQueries::dayBoundsUtc($from, $to);
+
+        if ($startUtc === null || $endUtc === null) {
+            [$firstUtc, $lastUtc] = $this->paidSpanUtc($campaignId);
+            $startUtc ??= $firstUtc;
+            $endUtc   ??= $lastUtc;
+        }
+
+        // A span of null means the report can see no paid row at all, so the
+        // window only has to be a window: the expression groups nothing. Now,
+        // rather than the column unconverted, because a row arriving between
+        // the two queries then gets today's offset instead of UTC.
+        $now = gmdate('Y-m-d H:i:s');
+
+        return DonationQueries::localStampExpr(
+            DB::getPrefix() . 'dono_donations.paid_at',
+            $startUtc ?? $now,
+            $endUtc   ?? $now
+        );
+    }
+
+    /**
+     * Earliest and latest paid_at a report can see, as stored UTC stamps.
+     *
+     * The filters must stay identical to netPaidQuery's, because the span is
+     * used as the window the offset is resolved over: a span narrower than the
+     * rows being grouped gives the rows outside it the offset in force at the
+     * nearest edge, which is a wrong hour on a screen that looks right.
+     *
+     * Zero dates are out of the span: they are not instants, and one of them
+     * would stretch the window back to the first transition the timezone
+     * database knows, for a row whose hour means nothing anyway.
+     *
+     * @return array{0:?string,1:?string}
+     *
+     * @since 1.0.0
+     */
+    private function paidSpanUtc(?int $campaignId): array
+    {
+        $q = DonationQueries::donationsOnly(
+            DB::table('dono_donations')->whereIn('status', ['paid', 'partial_refund'])
+        )->where('paid_at', '1970-01-02 00:00:00', '>=');
+
+        if ($campaignId !== null) {
+            $q = $q->where('campaign_id', $campaignId);
+        }
+
+        $row   = $q->selectRaw('MIN(paid_at) AS first_paid, MAX(paid_at) AS last_paid')->get();
+        $first = $row['first_paid'] ?? null;
+        $last  = $row['last_paid']  ?? null;
+
+        return [
+            is_string($first) && $first !== '' ? $first : null,
+            is_string($last)  && $last  !== '' ? $last  : null,
+        ];
     }
 
     /**

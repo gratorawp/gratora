@@ -172,4 +172,9 @@ Donation::schema(function (Table $t): void {
     // unfiltered list, which is the sort a user reaches for first. Measured,
     // (is_test, status, amount_cents) still filesorts that view.
     $t->index(['is_test', 'amount_cents']);
+
+    // FxBackfill reads "base_amount_cents IS NULL" on every Tools screen load
+    // and on the daily rate job, and no composite above starts with it, so the
+    // healthy case - nothing stranded - cost a full table scan to prove.
+    $t->index(['base_amount_cents']);
 });

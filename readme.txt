@@ -103,38 +103,6 @@ Only when you accept a currency other than your own. Requests European Central
 Bank rates once a day, sending a three-letter currency code and nothing else.
 Terms and privacy: https://frankfurter.dev
 
-**Gravatar** (secure.gravatar.com, in the browser)
-Only with "Show Gravatar profile pictures" turned on under Dono > Settings >
-Privacy, which is off by default. Donor lists on a campaign page, and the donors
-screen in the admin, then load each picture from Gravatar with a SHA-256 hash of
-that donor's email address in the image URL. Anonymous donors, hidden donors and
-erased donors are never sent, and a donor who uploaded their own picture is
-shown that instead. WordPress builds these URLs itself, through get_avatar_url().
-Terms: https://automattic.com/terms/ | Privacy: https://automattic.com/privacy/
-
-== Source code ==
-
-Dono is developed in the open at https://github.com/getdono/dono.
-
-The plugin ships compiled JavaScript and CSS in `build/`. The readable sources
-are `assets/` in that repository, and `npm install && npm run build` turns one
-into the other using the `package.json` and `webpack.config.js` kept alongside
-them. Issues and pull requests are welcome there.
-
-= Bundled libraries =
-
-`vendor/` carries third-party PHP, every piece of it GPL-compatible:
-
-* Dompdf and php-font-lib (LGPL-2.1), and php-svg-lib (LGPL-3.0), for PDF receipts and statements
-* Masterminds HTML5 (MIT) and Sabberworm PHP CSS Parser (MIT), which Dompdf parses HTML and CSS with
-* Action Scheduler (GPL-3.0), which runs the background queue
-* Dono Queryable (MIT), the query builder behind every database call
-
-Dompdf brings the DejaVu fonts with it, so a donor whose name is Cyrillic or
-Greek reads correctly on their own receipt. They carry the Bitstream Vera Fonts
-Copyright and the Arev Fonts Copyright, both reproduced in
-`licenses/DejaVu-Fonts-License.txt`.
-
 == Installation ==
 
 1. Install Dono from Plugins > Add New, or upload the plugin folder to `/wp-content/plugins/` and activate it.
@@ -177,5 +145,3 @@ Yes. Import a CSV of donors, or donors and donations together, mapping your colu
 
 = 1.0.0 =
 * Initial release.
-
-The full history lives in changelog.txt.

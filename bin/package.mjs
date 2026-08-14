@@ -86,10 +86,18 @@ function toMatcher( rule ) {
 function devInstall() {
     const manifest = path.join( root, 'vendor', 'composer', 'installed.json' );
     if ( ! existsSync( manifest ) ) {
-        return { installed: false, withDev: false, present: [] };
+        return { installed: false, readable: false, withDev: false, present: [] };
     }
 
     const installed = JSON.parse( readFileSync( manifest, 'utf8' ) );
+
+    // Composer 1 wrote a bare array with no record of the kind of install it
+    // performed. Refusing is right, but not while claiming the tree has
+    // development dependencies in it: nothing here knows that either way.
+    if ( typeof installed !== 'object' || installed === null || typeof installed.dev !== 'boolean' ) {
+        return { installed: true, readable: false, withDev: false, present: [] };
+    }
+
     const lock      = path.join( root, 'composer.lock' );
     const names     = existsSync( lock )
         ? ( JSON.parse( readFileSync( lock, 'utf8' ) )[ 'packages-dev' ] || [] ).map( ( p ) => p.name )
@@ -97,6 +105,7 @@ function devInstall() {
 
     return {
         installed: true,
+        readable: true,
         // Composer writes false only for an install that excluded require-dev.
         withDev: installed.dev !== false,
         present: names.filter( ( name ) => existsSync( path.join( root, 'vendor', ...name.split( '/' ) ) ) ),
@@ -107,6 +116,11 @@ const vendor = devInstall();
 if ( ! vendor.installed ) {
     console.error( 'vendor/ carries no composer manifest, so there is no telling what is in it.' );
     console.error( 'Run `composer install --no-dev` first, then package.' );
+    process.exit( 1 );
+}
+if ( ! vendor.readable ) {
+    console.error( 'vendor/composer/installed.json says nothing about how vendor/ was installed.' );
+    console.error( 'Reinstall with composer 2: `composer install --no-dev`, then package.' );
     process.exit( 1 );
 }
 if ( vendor.withDev || vendor.present.length > 0 ) {

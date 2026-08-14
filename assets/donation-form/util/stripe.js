@@ -49,6 +49,22 @@ export function detectStripeReturn( ownReference = null ) {
     };
 }
 
+// What to tell a donor who has come back from their bank, from the status the
+// intent is left in. Stripe parks an intent the donor abandoned, or the bank
+// refused, back on requires_payment_method, and cancels one the donor
+// dismissed; no money moved in either case, and saying "something went wrong"
+// sends them to check a statement that has nothing on it.
+export function returnOutcome( status ) {
+    if ( status === 'succeeded' )  return 'succeeded';
+    if ( status === 'processing' ) return 'processing';
+    if ( status === 'requires_payment_method' || status === 'canceled' ) return 'not_completed';
+
+    // requires_action, requires_confirmation, an intent Stripe would not hand
+    // back at all: nothing here proves the money stayed put, so the donor is
+    // not told that it did.
+    return 'unknown';
+}
+
 export async function resolveStripeReturn( publishableKey, clientSecret ) {
     const Stripe = await loadStripeJs();
     const stripe = Stripe( publishableKey );

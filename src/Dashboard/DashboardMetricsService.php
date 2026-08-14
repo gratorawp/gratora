@@ -812,8 +812,9 @@ final class DashboardMetricsService
         if (! is_string($val) || $val === '') return null;
         // A range bound, so it has to be the org's calendar date: a donation
         // taken in the evening carries the next UTC date, and an all-time chart
-        // anchored on that one skips the donation that set it.
-        return (string) wp_date('Y-m-d', (int) strtotime($val . ' UTC'));
+        // anchored on that one skips the donation that set it. A stamp that is
+        // not an instant at all yields null, and the 365-day fallback stands.
+        return DonationRepository::localDateOf($val);
     }
 
     /**

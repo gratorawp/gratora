@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Dono\Settings;
 
 use Dono\Analytics\ErrorLog;
+use Dono\Currency\BaseCurrencyLock;
+use Dono\Currency\BaseCurrencyLocked;
 use Dono\Foundation\References\ReferenceGenerator;
 
 /**
@@ -286,7 +288,7 @@ final class SettingsService
             'magic_link' => [
                 'enabled' => true,
                 'subject' => __('Your sign-in link for {organisation_name}', 'dono-fundraising-platform'),
-                'body'    => __("Hi {donor_name},\n\nOpen your donor portal:\n{portal_url}\n\nThis link works for 30 days. If you didn't request it, you can ignore this email.\n\nThanks,\n{organisation_name}", 'dono-fundraising-platform'),
+                'body'    => __("Hi {donor_name},\n\nOpen your donor portal:\n{portal_url}\n\nThis link works for {link_expiry} and can only be used once. If you didn't request it, you can ignore this email.\n\nThanks,\n{organisation_name}", 'dono-fundraising-platform'),
             ],
         ];
     }
@@ -324,7 +326,7 @@ final class SettingsService
             'recurring_paused'            => array_merge($donation, ['resumes_at', 'portal_url']),
             'recurring_resumed'           => array_merge($donation, ['next_payment_at', 'portal_url']),
             'recurring_skipped'           => array_merge($donation, ['next_payment_at', 'portal_url']),
-            'magic_link'                  => ['donor_name', 'organisation_name', 'portal_url'],
+            'magic_link'                  => ['donor_name', 'organisation_name', 'portal_url', 'link_expiry'],
         ]);
     }
 
@@ -398,6 +400,8 @@ final class SettingsService
      * @param array<string,mixed> $input
      * @return array<string,mixed>
      *
+     * @throws BaseCurrencyLocked when the write would re-denominate recorded money
+     *
      * @since 1.0.0
      */
     public function update(string $group, array $input): array
@@ -406,6 +410,14 @@ final class SettingsService
         if (! $cfg) return [];
 
         $current = $this->get($group);
+
+        // Here rather than in the REST controller: the settings.update command,
+        // the CLI and any add-on writer all land on this method, and an
+        // invariant about recorded money cannot depend on which door was used.
+        if ($group === 'currency-locale') {
+            BaseCurrencyLock::assert($input, $current);
+        }
+
         $next    = $this->merge($current, $this->accept($group, $cfg, $input));
 
         // Replace mapping wholesale; deep-merge would prevent removing roles.

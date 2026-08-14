@@ -209,8 +209,8 @@ final class CampaignMetricsService
         }
 
         $series = [];
-        $cursor = new \DateTimeImmutable($from);
-        $endDt  = new \DateTimeImmutable($to);
+        $cursor = new DateTimeImmutable($from);
+        $endDt  = new DateTimeImmutable($to);
         while ($cursor <= $endDt) {
             $day = $cursor->format('Y-m-d');
             $series[] = [
@@ -333,7 +333,14 @@ final class CampaignMetricsService
     {
         $bounds    = $this->rangeBounds($range, $campaignId);
         $unbounded = $range === 'all-time';
-        $rangeStart = $bounds[0] . ' 00:00:00';
+
+        // first_paid_at comes back as the stored UTC stamp while the range is
+        // the org's calendar day, so the window's start is converted the same
+        // way the SQL predicate is. Compared naively, every first-time donor in
+        // the opening hours of the org's day reads as returning east of UTC,
+        // and a donor whose first donation predates the window reads as new
+        // west of it.
+        $rangeStart = $unbounded ? null : DonationQueries::dayBoundsUtc($bounds[0], null)[0];
 
         // One SQL aggregate per donor: scales by donor count, not donation count.
         $rows = $this->donations->donorCohortRowsForCampaign(
@@ -360,8 +367,8 @@ final class CampaignMetricsService
             } else {
                 // Bounded: "returning" = earliest paid donation for the campaign
                 // is before the window started.
-                if ($r['first_paid_at'] < $rangeStart) $returning++;
-                else                                   $firstTime++;
+                if ($rangeStart !== null && $r['first_paid_at'] < $rangeStart) $returning++;
+                else                                                          $firstTime++;
             }
         }
 
@@ -578,10 +585,10 @@ final class CampaignMetricsService
     public function timeline(Campaign $c): array
     {
         $now = $this->clock->now();
-        $start = $c->starts_at ? new \DateTimeImmutable($c->starts_at) : new \DateTimeImmutable($c->created_at);
+        $start = $c->starts_at ? new DateTimeImmutable($c->starts_at) : new DateTimeImmutable($c->created_at);
 
         if ($c->ends_at) {
-            $end = new \DateTimeImmutable($c->ends_at);
+            $end = new DateTimeImmutable($c->ends_at);
             $totalDays = max(1, (int) $start->diff($end)->format('%a'));
             if ($end < $now) {
                 return ['kind' => 'ended', 'days' => (int) $end->diff($now)->format('%a'), 'total_days' => $totalDays];
@@ -617,8 +624,8 @@ final class CampaignMetricsService
         if ($mode === 'year') {
             // Shift both ends of the current range back by one year.
             [$from, $to] = $this->rangeBounds($range, $campaignId);
-            $fromDt = new \DateTimeImmutable($from);
-            $toDt   = new \DateTimeImmutable($to);
+            $fromDt = new DateTimeImmutable($from);
+            $toDt   = new DateTimeImmutable($to);
             return [
                 $fromDt->modify('-1 year')->format('Y-m-d'),
                 $toDt->modify('-1 year')->format('Y-m-d'),
@@ -692,11 +699,23 @@ final class CampaignMetricsService
     /** @since 1.0.0 */
     private function resolveCampaignStartDate(int $campaignId): string
     {
-        $c = Campaign::query()->find('id', $campaignId);
-        $start = $c ? substr((string) ($c->starts_at ?? $c->created_at), 0, 10) : $this->daysAgo(30);
+        $c     = Campaign::query()->find('id', $campaignId);
+        $stamp = $c ? trim((string) ($c->starts_at ?? $c->created_at)) : '';
+
+        // The bound is read as one of the org's calendar days, and starts_at /
+        // created_at are stored UTC, so a full stamp is read on the same clock
+        // as the first donation below. A bare date carries no instant to
+        // convert and is taken as typed: reading it as UTC midnight and shifting
+        // it would start the chart the day before the one the org typed.
+        $start = strlen($stamp) > 10
+            ? DonationRepository::localDateOf($stamp)
+            : substr($stamp, 0, 10);
+        if ($start === null || $start === '') {
+            $start = $this->daysAgo(30);
+        }
 
         // Donations can predate the campaign's start date (a start set after
-        // early gifts, imports, backfills), so anchor the all-time series at the
+        // early donations, imports, backfills), so anchor the all-time series at the
         // earliest paid donation when it is older; otherwise the chart cuts off
         // that revenue and reads as a flat zero line.
         $firstPaid = $this->donations->firstPaidDate($campaignId);

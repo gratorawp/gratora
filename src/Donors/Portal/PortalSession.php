@@ -6,6 +6,7 @@ namespace Dono\Donors\Portal;
 
 use Dono\Donors\DonorRepository;
 use Dono\Donors\MagicLinkService;
+use Dono\Donors\MagicLinkToken;
 use Dono\Donors\SignupRedemption;
 
 /**
@@ -16,6 +17,9 @@ use Dono\Donors\SignupRedemption;
 final class PortalSession
 {
     private const COOKIE = 'dono_donor_session';
+
+    /** Purpose of the magic link that opens a session for an existing donor. */
+    public const PORTAL_PURPOSE = 'donor_portal';
 
     /** Idle window. Sliding: the clock that kills a session left open on a borrowed device. */
     private const IDLE_SECONDS = 1_800;
@@ -46,7 +50,7 @@ final class PortalSession
      */
     public function startFromToken(string $rawToken): ?array
     {
-        $token = $this->magicLinks->consumeAndValidate($rawToken, 'donor_portal');
+        $token = $this->magicLinks->consumeAndValidate($rawToken, self::PORTAL_PURPOSE);
         if ($token) {
             return $this->open((int) $token->donor_id);
         }
@@ -121,12 +125,20 @@ final class PortalSession
     }
 
     /**
-     * Every device. The cookie elsewhere survives but resolves to nothing.
+     * Every device, and every way back in. A sign-in link that was never
+     * clicked opens a session of its own, so ending the sessions without taking
+     * the unredeemed links leaves the door the donor came here to shut.
      *
      * @since 1.0.0
      */
     public function destroyAllFor(int $donorId): int
     {
+        MagicLinkToken::query()
+            ->where('donor_id', $donorId)
+            ->where('purpose', self::PORTAL_PURPOSE)
+            ->whereIsNull('used_at')
+            ->delete();
+
         $index = $this->index($donorId);
         foreach ($index as $hash) {
             delete_transient('dono_portal_' . $hash);

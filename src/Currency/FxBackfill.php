@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dono\Currency;
 
 use Dono\Donations\Donation;
+use Dono\Donations\DonationQueries;
 use Dono\Recurring\RecurringPlan;
 use Dono\Foundation\Helpers\Money;
 
@@ -20,7 +21,7 @@ use Dono\Foundation\Helpers\Money;
  * The rate is captured per donation at write time, so configuring the missing
  * currency later leaves the existing rows untouched.
  *
- * Today's rate, not the rate on the day of the gift, which nobody recorded.
+ * Today's rate, not the rate on the day of the donation, which nobody recorded.
  * That is an approximation, and it is the same one the live path makes for
  * every donation it converts.
  *
@@ -153,7 +154,20 @@ final class FxBackfill
      * What is sitting outside the totals right now, for a screen that wants to
      * say so. Grouped by currency because that is the thing an admin fixes.
      *
-     * @return array<int,array{currency:string, count:int, amount_cents:int}>
+     * Scoped to exactly what the totals count, which is what the screen claims
+     * is missing from them: donationsOnly() drops test-mode rows and ticket
+     * orders, and the status filter drops abandoned checkouts and failed
+     * attempts. Those rows have no base amount either, but no total was ever
+     * going to include them, so naming them turns a healthy site into an alarm
+     * and sends an admin looking for money that was never taken. A pending row
+     * that does complete is counted from the moment it does.
+     *
+     * needs_rate separates the two repairs. A row in the org's own base
+     * currency converts at unity and wants nothing configured, so telling its
+     * owner to add an exchange rate for their own currency is advice that
+     * cannot be followed.
+     *
+     * @return array<int,array{currency:string, count:int, amount_cents:int, needs_rate:bool}>
      *
      * @since 1.0.0
      */
@@ -163,17 +177,54 @@ final class FxBackfill
         // hydrating a model per stranded donation to add up two numbers is the
         // one shape guaranteed to be slowest exactly where the backlog is
         // largest.
-        $rows = Donation::query()
+        $rows = DonationQueries::donationsOnly(Donation::query())
             ->selectRaw('UPPER(currency) AS currency, COUNT(*) AS cnt, COALESCE(SUM(amount_cents), 0) AS total')
             ->whereNull('base_amount_cents')
+            ->whereIn('status', ['paid', 'partial_refund'])
             ->groupByRaw('UPPER(currency)')
             ->orderByRaw('total DESC')
             ->getAll();
+
+        $base = strtoupper(Money::defaultCurrency());
 
         return array_map(static fn ($r): array => [
             'currency'     => (string) $r['currency'],
             'count'        => (int) $r['cnt'],
             'amount_cents' => (int) $r['total'],
+            'needs_rate'   => strtoupper((string) $r['currency']) !== $base,
         ], $rows);
+    }
+
+    /**
+     * Currencies of every donation still without a base amount, in any state.
+     *
+     * Not pending(): that answers what the totals are short by, and no total
+     * counts a pending row, a test row or a ticket order. This answers whether
+     * a rate is still worth fetching, and the answer covers everything run()
+     * repairs. A pending donation is stamped with a rate when it is created and
+     * nothing restates it when it is paid, so a site that stops fetching while
+     * one is outstanding strands it for good.
+     *
+     * @return list<string>
+     *
+     * @since 1.0.0
+     */
+    public static function strandedCurrencies(): array
+    {
+        $rows = Donation::query()
+            ->selectRaw('UPPER(currency) AS currency')
+            ->whereNull('base_amount_cents')
+            ->groupByRaw('UPPER(currency)')
+            ->getAll();
+
+        $out = [];
+        foreach ($rows as $r) {
+            $code = strtoupper((string) ($r['currency'] ?? ''));
+            if ($code !== '') {
+                $out[] = $code;
+            }
+        }
+
+        return $out;
     }
 }

@@ -12,7 +12,7 @@ use Dono\Settings\SettingsService;
  *
  * Every entry point goes through this gate, public route and admin
  * "record a donation" alike. A currency is not a free text field in one place
- * and a closed list in another: a code with no rate lands the gift outside
+ * and a closed list in another: a code with no rate lands the donation outside
  * every total with nothing saying so.
  *
  * Gateways declare currencies() too, but that answers a different question:

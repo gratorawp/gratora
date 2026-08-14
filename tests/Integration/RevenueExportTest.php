@@ -114,7 +114,7 @@ final class RevenueExportTest extends IntegrationTestCase
 
         $series = $this->exporter()->series('2026-05', '2026-05');
 
-        $this->assertSame(5000, $series[0]['amount_cents'], 'a ticket purchase is not a gift');
+        $this->assertSame(5000, $series[0]['amount_cents'], 'a ticket purchase is not a donation');
         $this->assertSame(1, $series[0]['donations_count']);
     }
 
@@ -211,5 +211,28 @@ final class RevenueExportTest extends IntegrationTestCase
 
         $this->assertStringContainsString('2026-06,1,40.00,40.00', $csv);
         $this->assertStringContainsString('2026-07,0,0.00,0.00', $csv);
+    }
+
+    /**
+     * A year-long report spans both transitions, and the offset in force is not
+     * the same on either side of them. One offset applied to the whole window
+     * moves every donation on the other side of the transition by an hour,
+     * which is a different month for anything given near midnight.
+     */
+    public function test_each_donation_is_counted_under_the_offset_in_force_when_it_was_given(): void
+    {
+        update_option('timezone_string', 'America/New_York');
+
+        // 23:30 on 28 February, on standard time.
+        $this->paid('2026-03-01 04:30:00', 1000);
+        // 00:30 on 1 November, on the last night of daylight saving.
+        $this->paid('2026-11-01 04:30:00', 2000);
+
+        $series = array_column($this->exporter()->series('2026-01', '2026-12'), 'amount_cents', 'month');
+
+        $this->assertSame(1000, $series['2026-02'], 'February, since New York was five hours back that night');
+        $this->assertSame(0,    $series['2026-03']);
+        $this->assertSame(2000, $series['2026-11'], 'November, since it was four hours back on that one');
+        $this->assertSame(0,    $series['2026-10']);
     }
 }

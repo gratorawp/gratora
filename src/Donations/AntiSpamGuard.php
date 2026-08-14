@@ -193,9 +193,12 @@ final class AntiSpamGuard
      * caller who keeps trying holds their own lockout open forever, and the
      * person it strands is the donor whose card was declined twice.
      *
+     * Public because every unauthenticated surface needs these two properties,
+     * not only the donation endpoint. $base carries the caller's own namespace.
+     *
      * @since 1.0.0
      */
-    private function hit(string $base, int $window): int
+    public function hit(string $base, int $window): int
     {
         global $wpdb;
 

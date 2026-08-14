@@ -25,6 +25,19 @@ export function roundToCurrency( cents, currency ) {
     return Math.round( n / 100 ) * 100;
 }
 
+// The REST schema caps amount_cents (DonationSchemas::create), and WordPress
+// checks registered args before the callback runs, so anything the form lets
+// through above this comes back as a schema error naming a parameter rather
+// than something a donor can act on.
+export const MAX_AMOUNT_CENTS = 99999999;
+
+/** Largest amount chargeable in `currency`, in minor units. */
+export function maxAmountFor( currency ) {
+    return isZeroDecimal( currency )
+        ? Math.floor( MAX_AMOUNT_CENTS / 100 ) * 100
+        : MAX_AMOUNT_CENTS;
+}
+
 /** Convert integer minor units between currencies. Safe no-op when unknown. */
 export function convertCents( fx, cents, from, to ) {
     const n = Number( cents ) || 0;
@@ -66,7 +79,12 @@ export function convertMinimum( fx, cents, from, to ) {
     const converted = Math.round( ( n * rt ) / rf );
     // Zero-decimal amounts land on whole major units, so a bar between two of
     // them would refuse the figure the message quotes.
-    return isZeroDecimal( to ) ? Math.ceil( converted / 100 ) * 100 : converted;
+    const bar = isZeroDecimal( to ) ? Math.ceil( converted / 100 ) * 100 : converted;
+    // Tiles are nice-rounded and nicePreset can land below the exact
+    // conversion, so the bar follows them down: a form that renders an amount
+    // must accept it. nicePreset never decreases as its input grows, so every
+    // preset at or above the authored minimum still clears this.
+    return Math.min( bar, nicePreset( converted ) );
 }
 
 /**

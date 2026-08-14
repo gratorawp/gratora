@@ -196,6 +196,9 @@ final class PayPalApi
             // nothing about which of them it is refusing.
             throw new PayPalApiException(
                 esc_html(sprintf('PayPal API (%s %s): %s', $method, $path, $this->errorMessage($decoded, $code))),
+                // A list of PayPal issue codes the caller branches on. It is
+                // never printed, and esc_html cannot take an array.
+                // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
                 PayPalApiException::issuesFrom($decoded)
             );
         }

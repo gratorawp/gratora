@@ -22,7 +22,7 @@ use Throwable;
  * until they have seen what that mapping would do.
  *
  * A file without amounts is a donor list, and importing one is the normal way
- * an org arrives: the mailing list and the gift history are usually separate
+ * an org arrives: the mailing list and the donation history are usually separate
  * exports, and the list comes first. So the amount column is optional, and
  * leaving it unmapped imports people rather than refusing the file.
  *

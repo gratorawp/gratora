@@ -231,6 +231,10 @@ final class CliCommands
      * : Seed even though the install already holds live donations this command
      * did not write. Only for a throwaway install.
      *
+     * [--purge]
+     * : Remove the rows this command wrote instead of writing more. Matched on
+     * the demo key, so nothing the org recorded itself is in range.
+     *
      * [--yes]
      * : Skip the confirmation prompt.
      *
@@ -238,12 +242,18 @@ final class CliCommands
      *
      *     wp dono demo-seed
      *     wp dono demo-seed --yes
+     *     wp dono demo-seed --purge
      *
      * @when after_wp_load
      * @since 1.0.0
      */
     public function demo_seed(array $args, array $assoc): void
     {
+        if (! empty($assoc['purge'])) {
+            $this->demo_purge($assoc);
+            return;
+        }
+
         $foreign = DemoSeeder::foreignLiveDonations();
         if ($foreign > 0 && empty($assoc['force'])) {
             WP_CLI::error(sprintf(
@@ -264,19 +274,8 @@ final class CliCommands
         // screenshot run needs the screens, not the wizard.
         update_option(Onboarding::OPTION, 'completed', false);
 
-        $c      = $this->container();
-        $seeder = new DemoSeeder(
-            $c->get(DonationService::class),
-            $c->get(DonorService::class),
-            $c->get(CampaignService::class),
-            $c->get(FundService::class),
-            $c->get(AggregateSyncer::class),
-            $c->get(RecurringPlanRepository::class),
-            $c->get(Clock::class),
-        );
-
         $t0     = microtime(true);
-        $counts = $seeder->run(static fn (string $line) => WP_CLI::log('  ' . $line));
+        $counts = $this->demoSeeder()->run(static fn (string $line) => WP_CLI::log('  ' . $line));
 
         WP_CLI::success(sprintf(
             'Demo data ready in %.1fs: %d campaigns, %d funds, %d donors, %d donations '
@@ -293,6 +292,64 @@ final class CliCommands
     }
 
     /**
+     * The `--purge` half of demo-seed: take back exactly what it wrote.
+     *
+     * Demo rows are live by design, so the maintenance purge (which reads
+     * is_test) cannot see them and the admin has no way to delete a donation.
+     * Without this the only route back is hand-written SQL.
+     *
+     * @param array<string,mixed> $assoc
+     *
+     * @since 1.0.0
+     */
+    private function demo_purge(array $assoc): void
+    {
+        $seeder  = $this->demoSeeder();
+        $planned = $seeder->purgePreview();
+
+        if (array_sum($planned) === 0) {
+            WP_CLI::success('Nothing to remove: this install holds no demo rows.');
+            return;
+        }
+
+        WP_CLI::confirm(sprintf(
+            'Remove %d demo donations, %d demo recurring plans and %d demo donors from '
+            . 'this install? Demo campaigns, funds and their pages are left for you to '
+            . 'delete in the admin.',
+            $planned['donations'],
+            $planned['recurring_plans'],
+            $planned['donors'],
+        ), $assoc);
+
+        $t0      = microtime(true);
+        $removed = $seeder->purge(static fn (string $line) => WP_CLI::log('  ' . $line));
+
+        WP_CLI::success(sprintf(
+            'Demo data removed in %.1fs: %d donations, %d recurring plans, %d donors.',
+            microtime(true) - $t0,
+            $removed['donations'],
+            $removed['recurring_plans'],
+            $removed['donors'],
+        ));
+    }
+
+    /** @since 1.0.0 */
+    private function demoSeeder(): DemoSeeder
+    {
+        $c = $this->container();
+
+        return new DemoSeeder(
+            $c->get(DonationService::class),
+            $c->get(DonorService::class),
+            $c->get(CampaignService::class),
+            $c->get(FundService::class),
+            $c->get(AggregateSyncer::class),
+            $c->get(RecurringPlanRepository::class),
+            $c->get(Clock::class),
+        );
+    }
+
+    /**
      * Create / refresh a canonical "kitchen sink" donation form for the
      * Playwright e2e suite. Idempotent: re-running keeps the same slugs and
      * just updates the form blocks + page so the canonical form converges to
@@ -303,6 +360,18 @@ final class CliCommands
      *   - Form "Dono E2E Form" (status=published) with every donor block the
      *     spec suite asserts against
      *   - WP page "Dono E2E" containing [dono_donation_form slug="..."]
+     *
+     * Rewrites org-wide money settings, so it refuses on an install that
+     * reports itself as production.
+     *
+     * ## OPTIONS
+     *
+     * [--force]
+     * : Seed even though this install reports itself as production. Only for a
+     * throwaway install.
+     *
+     * [--yes]
+     * : Skip the confirmation prompt.
      *
      * ## EXAMPLES
      *
@@ -317,6 +386,28 @@ final class CliCommands
      */
     public function e2e_seed(array $args, array $assoc): void
     {
+        // WordPress answers production for anything that has not said
+        // otherwise, which is the direction this has to fail in: the fixture
+        // is worth nothing on a live site and costs it every donation taken
+        // while test mode is on.
+        if (wp_get_environment_type() === 'production' && empty($assoc['force'])) {
+            WP_CLI::error(
+                'Refusing to seed: this install reports itself as production. The '
+                . 'fixture overwrites the org currency and number format, pins '
+                . 'invented FX rates, turns org-wide test mode on and publishes '
+                . 'five public pages. Set WP_ENVIRONMENT_TYPE to local, '
+                . 'development or staging in wp-config.php, or pass --force on a '
+                . 'throwaway install.'
+            );
+        }
+
+        WP_CLI::confirm(
+            'Overwrite the org currency with EUR and its number format, pin '
+            . 'invented FX rates, turn org-wide test mode on and publish five '
+            . 'e2e pages on this install?',
+            $assoc
+        );
+
         $forms      = $this->container()->get(FormService::class);
         $campaigns  = $this->container()->get(CampaignService::class);
         $settings   = $this->container()->get(SettingsService::class);
@@ -427,11 +518,11 @@ final class CliCommands
 
         WP_CLI::success("Canonical forms ready.");
         WP_CLI::log('  export DONO_E2E_URL="' . untrailingslashit(home_url()) . '"');
-        WP_CLI::log('  export DONO_E2E_FORM_PATH="' . parse_url($singleUrl, PHP_URL_PATH) . '"');
-        WP_CLI::log('  export DONO_E2E_MULTI_STEP_FORM_PATH="' . parse_url($multiUrl, PHP_URL_PATH) . '"');
-        WP_CLI::log('  export DONO_E2E_CONDITIONAL_FORM_PATH="' . parse_url($condUrl, PHP_URL_PATH) . '"');
-        WP_CLI::log('  export DONO_E2E_CUSTOM_FIELDS_FORM_PATH="' . parse_url($customUrl, PHP_URL_PATH) . '"');
-        WP_CLI::log('  export DONO_E2E_LAYOUT_FORM_PATH="' . parse_url($layoutUrl, PHP_URL_PATH) . '"');
+        WP_CLI::log('  export DONO_E2E_FORM_PATH="' . wp_parse_url($singleUrl, PHP_URL_PATH) . '"');
+        WP_CLI::log('  export DONO_E2E_MULTI_STEP_FORM_PATH="' . wp_parse_url($multiUrl, PHP_URL_PATH) . '"');
+        WP_CLI::log('  export DONO_E2E_CONDITIONAL_FORM_PATH="' . wp_parse_url($condUrl, PHP_URL_PATH) . '"');
+        WP_CLI::log('  export DONO_E2E_CUSTOM_FIELDS_FORM_PATH="' . wp_parse_url($customUrl, PHP_URL_PATH) . '"');
+        WP_CLI::log('  export DONO_E2E_LAYOUT_FORM_PATH="' . wp_parse_url($layoutUrl, PHP_URL_PATH) . '"');
     }
 
     /**

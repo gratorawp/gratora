@@ -14,7 +14,8 @@ use WP_REST_Request;
 /**
  * Coverage for the remaining Stripe webhook branches that had no test:
  * a failed PaymentIntent (donation → failed), and the two Connect account
- * lifecycle events (account.updated refreshes status; deauthorized forgets it).
+ * lifecycle events (account.updated refreshes status; deauthorized forgets the
+ * keys of the mode that signed it).
  */
 final class StripeWebhookCoverageTest extends IntegrationTestCase
 {
@@ -23,7 +24,7 @@ final class StripeWebhookCoverageTest extends IntegrationTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->secret = 'whsec_test_' . bin2hex(random_bytes(8));
+        $this->secret = 'whsec_live_' . bin2hex(random_bytes(8));
         update_option('dono_gateway_config', [
             'stripe' => ['webhook_secret_live' => $this->secret, 'test_mode' => true],
         ]);
@@ -95,9 +96,8 @@ final class StripeWebhookCoverageTest extends IntegrationTestCase
     {
         $this->assertNotNull((new StripeAccount(new Crypto()))->accountId(), 'account is connected');
 
-        // Signed with the live secret, so the live connection is the one that
-        // was withdrawn. Per-mode scoping is pinned by
-        // StripeDeauthorizationModeTest.
+        // The harness signs with the live secret, so the live connection is the
+        // one that was withdrawn.
         $this->postWebhook('account.application.deauthorized', [], ['account' => 'acct_test_123']);
 
         $acct = new StripeAccount(new Crypto());
@@ -130,7 +130,7 @@ final class StripeWebhookCoverageTest extends IntegrationTestCase
     }
 
     /** @param array<string,mixed> $envelopeExtra extra top-level event fields (e.g. account) */
-    private function postWebhook(string $type, array $object, array $envelopeExtra = []): void
+    private function postWebhook(string $type, array $object, array $envelopeExtra = []): int
     {
         $event = array_merge([
             'id'   => 'evt_' . bin2hex(random_bytes(6)),
@@ -146,6 +146,10 @@ final class StripeWebhookCoverageTest extends IntegrationTestCase
         $req->set_header('content-type', 'application/json');
         $req->set_header('stripe_signature', "t={$timestamp},v1={$sig}");
         $req->set_body($payload);
-        rest_do_request($req);
+
+        $status = rest_do_request($req)->get_status();
+        $this->assertSame(200, $status, 'the route accepted and verified the delivery');
+
+        return $status;
     }
 }

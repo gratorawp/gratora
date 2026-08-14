@@ -6,6 +6,7 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { formatAmount, parseTimestamp } from '@dono/ui/utils/format';
 import { COUNTRIES } from '../_shared/countries';
 import { loadStripeJs } from '../donation-form/util/stripe';
+import { recurringStatusLabel } from './statusLabels';
 import './portal.scss';
 
 const cfg = window.donoPortal || { rest: '/wp-json/dono/v1/portal/', nonce: '' };
@@ -373,9 +374,21 @@ function App() {
         <div class="dp">
             <header class="dp__head">
                 <h1>{ sprintf( /* translators: %s: donor's first name or full name */ __( 'Hi, %s.', 'dono-fundraising-platform' ), me.first_name || me.name ) }</h1>
-                <button class="dp__signout" onClick={ () => {
-                    api( 'logout', { method: 'POST' } ).finally( () => window.location.reload() );
-                } }>{ __( 'Sign out', 'dono-fundraising-platform' ) }</button>
+                <div class="dp__signout-group">
+                    <button class="dp__signout" onClick={ () => {
+                        api( 'logout', { method: 'POST' } ).finally( () => window.location.reload() );
+                    } }>{ __( 'Sign out', 'dono-fundraising-platform' ) }</button>
+                    { /* The only control that reaches a sign-in link nobody
+                         opened, including one support issued. */ }
+                    <button
+                        type="button"
+                        class="dp__signout"
+                        title={ __( 'Ends every session and cancels any sign-in link that was never opened.', 'dono-fundraising-platform' ) }
+                        onClick={ () => {
+                            api( 'logout-everywhere', { method: 'POST' } ).finally( () => window.location.reload() );
+                        } }
+                    >{ __( 'Sign out everywhere', 'dono-fundraising-platform' ) }</button>
+                </div>
             </header>
 
             { cardNotice && (
@@ -1606,16 +1619,6 @@ function formatDate( iso ) {
     // conversion doesn't skew a day near midnight.
     const d = new Date( iso.replace( ' ', 'T' ) + 'Z' );
     return d.toLocaleDateString();
-}
-
-function recurringStatusLabel( s ) {
-    switch ( s ) {
-        case 'active':    return __( 'Active', 'dono-fundraising-platform' );
-        case 'paused':    return __( 'Paused', 'dono-fundraising-platform' );
-        case 'cancelled': return __( 'Cancelled', 'dono-fundraising-platform' );
-        case 'expired':   return __( 'Expired', 'dono-fundraising-platform' );
-        default:          return s;
-    }
 }
 
 function intervalLabel( count, unit ) {

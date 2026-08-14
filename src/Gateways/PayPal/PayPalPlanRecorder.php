@@ -97,11 +97,11 @@ final class PayPalPlanRecorder
         $status = (string) ($sub['status'] ?? '');
         if (! in_array($status, ['ACTIVE', 'APPROVED', 'APPROVAL_PENDING'], true)) {
             throw new PayPalPlanRefused('dono_paypal_subscription_status',
-                sprintf(
+                esc_html(sprintf(
                     /* translators: %s: PayPal subscription status */
                     __('PayPal reports this subscription as %s.', 'dono-fundraising-platform'),
                     $status
-                )
+                ))
             );
         }
 

@@ -16,6 +16,7 @@ use Dono\Donors\Donor;
 use Dono\Donors\DonorRepository;
 use Dono\Donors\DonorService;
 use Dono\Donors\MagicLinkService;
+use Dono\Donors\PendingSignup;
 use Dono\Donors\PendingSignupRepository;
 use Dono\Donors\SignupRedemption;
 use Dono\Donors\Portal\AnnualStatementBuilder;
@@ -50,7 +51,23 @@ final class PortalController
     public const SEND_LINK_HOOK          = 'dono.async.send_portal_link';
     private const SEND_LINK_IP_MAX       = 10;
     private const SEND_LINK_IP_WINDOW    = 15 * MINUTE_IN_SECONDS;
+    private const SEND_LINK_EMAIL_MAX    = 3;
     private const SEND_LINK_EMAIL_WINDOW = 5 * MINUTE_IN_SECONDS;
+
+    /**
+     * The inbox limit, spent at the moment a link is mailed rather than when it
+     * is asked for. An address that reaches a mailbox but resolves to no donor
+     * mails nothing, so it must cost that mailbox nothing.
+     */
+    private const SEND_LINK_MAILBOX_MAX    = 5;
+    private const SEND_LINK_MAILBOX_WINDOW = 15 * MINUTE_IN_SECONDS;
+
+    /**
+     * An emailed sign-in link is a bearer credential: whoever reads the mailbox
+     * later reads the portal. Long enough for a donor to open their mail, not
+     * long enough to sit in an archive as a live key.
+     */
+    private const PORTAL_LINK_TTL = HOUR_IN_SECONDS;
 
     /** @since 1.0.0 */
     public function __construct(
@@ -89,14 +106,17 @@ final class PortalController
         register_rest_route(self::NAMESPACE, '/portal/exchange', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'exchange'],
-            'permission_callback' => '__return_true',
+            'permission_callback' => [$this, 'sameSiteOnly'],
             'args'                => ['token' => ['type' => 'string', 'required' => true]],
         ]);
 
+        // Same guard as the exchange: these two write and mail without a
+        // session, and a POST-only route is otherwise reachable by a plain
+        // link, which is the cheapest way to deliver either of them.
         register_rest_route(self::NAMESPACE, '/portal/send-link', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'sendLink'],
-            'permission_callback' => '__return_true',
+            'permission_callback' => [$this, 'sameSiteOnly'],
             'args'                => [
                 'email' => ['type' => 'string', 'required' => true],
                 'token' => ['type' => 'string'],
@@ -106,7 +126,7 @@ final class PortalController
         register_rest_route(self::NAMESPACE, '/portal/register', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'registerDonor'],
-            'permission_callback' => '__return_true',
+            'permission_callback' => [$this, 'sameSiteOnly'],
             'args'                => [
                 'email'      => ['type' => 'string', 'required' => true],
                 'first_name' => ['type' => 'string'],
@@ -292,6 +312,82 @@ final class PortalController
         return hash_equals($expected, $provided);
     }
 
+    /**
+     * Redeeming a link sets the session cookie, so a forged cross-site POST
+     * would sign a visitor into whichever account the attacker's token names,
+     * and every write endpoint then works inside it: /portal/me hands the
+     * caller the CSRF token that guards the rest.
+     *
+     * A nonce cannot be the guard here. The portal page is served from a page
+     * cache, so its markup carries no per-visitor value (PortalShortcode mints
+     * an empty nonce for logged-out visitors for exactly that reason). What the
+     * browser labels the request with survives caching, so that is what is
+     * read. A request with neither header is not a browser and is left alone,
+     * because internal dispatch has no cross-site meaning.
+     *
+     * @since 1.0.0
+     */
+    public function sameSiteOnly(WP_REST_Request $request): bool|WP_Error
+    {
+        $refused = new WP_Error(
+            'dono_cross_site',
+            __('Sign-in must start from this site.', 'dono-fundraising-platform'),
+            ['status' => 403]
+        );
+
+        $fetchSite = strtolower(trim((string) $request->get_header('Sec-Fetch-Site')));
+        if ($fetchSite !== '' && ! in_array($fetchSite, ['same-origin', 'same-site', 'none'], true)) {
+            return $refused;
+        }
+
+        $origin = trim((string) $request->get_header('Origin'));
+        if ($origin !== '' && ! $this->originIsOurs($origin)) {
+            return $refused;
+        }
+
+        // WP honours _method and X-HTTP-Method-Override, so a plain link can
+        // otherwise reach a route registered POST-only, and a top-level
+        // navigation carries no Origin at all.
+        $override = (string) ($request->get_query_params()['_method'] ?? '')
+            . (string) $request->get_header('X-HTTP-Method-Override');
+        if ($override !== '' && strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? '')) === 'GET') {
+            return $refused;
+        }
+
+        return true;
+    }
+
+    /** @since 1.0.0 */
+    private function originIsOurs(string $origin): bool
+    {
+        $host = strtolower((string) wp_parse_url($origin, PHP_URL_HOST));
+        if ($host === '') return false;
+
+        // Every host WordPress itself answers on: site_url can differ from
+        // home_url on a subdirectory install, and behind a proxy or a mapped
+        // domain the browser's own host is the one it puts in Origin.
+        $ours = array_filter([
+            strtolower((string) wp_parse_url(home_url(), PHP_URL_HOST)),
+            strtolower((string) wp_parse_url(site_url(), PHP_URL_HOST)),
+            strtolower((string) preg_replace('/:\d+$/', '', (string) ($_SERVER['HTTP_HOST'] ?? ''))),
+        ]);
+
+        foreach ($ours as $ourHost) {
+            // www and the apex are one site on a very common hosting setup, and
+            // rest_url() resolves to home_url's host whichever of the two the
+            // page was served from, so the portal's own fetch is the request
+            // this pairing lets through. Only that one label is paired: a
+            // sibling subdomain is a different site and stays refused.
+            if ($host === $ourHost
+                || $host === 'www.' . $ourHost
+                || $ourHost === 'www.' . $host) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /** @since 1.0.0 */
     public function exchange(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
@@ -347,9 +443,10 @@ final class PortalController
      * so the claim waits in dono_pending_signups until the emailed link comes
      * back, and redeeming it is what creates the donor.
      *
-     * No lookup happens here either, for the same reason sendLink() has none:
-     * the two branches must not do visibly different amounts of work, or the
-     * identical 200 is undone by the clock.
+     * The donor table is not read here, for the same reason sendLink() does not
+     * read it: the two branches must not do visibly different amounts of work,
+     * or the identical 200 is undone by the clock. The claim lookup below says
+     * nothing about whether the address belongs to a donor.
      *
      * @since 1.0.0
      */
@@ -376,11 +473,73 @@ final class PortalController
             $names[$field] = $value !== '' ? mb_substr($value, 0, 100) : null;
         }
 
+        // A standing claim is an identity somebody is about to redeem, and
+        // redemption prints its names on the donor row, the receipts and the
+        // year-end statement. Nobody who calls this endpoint has proved the
+        // mailbox, so no caller may take a name another caller wrote.
+        $standing = $this->liveClaim($email);
+        if ($standing !== null) {
+            $names = $this->reconcileNames($standing, $names);
+        }
+
         $this->pending->put($email, $names['first_name'], $names['last_name']);
 
         $this->async->enqueue(self::SEND_LINK_HOOK, ['email' => $email]);
 
         return $ok;
+    }
+
+    /**
+     * The claim standing on this address, or null. Not conditioned on a link
+     * being out: the mail is enqueued, so between the request and the job there
+     * is a window in which a claim nobody has proved is unguarded, and it is
+     * the window an attacker picks.
+     *
+     * @since 1.0.0
+     */
+    private function liveClaim(string $email): ?PendingSignup
+    {
+        $claim = $this->pending->findByEmailHash(
+            $this->hasher->emailHash($this->hasher->normalizeEmail($email))
+        );
+
+        return $claim !== null && $this->pending->isLive($claim) ? $claim : null;
+    }
+
+    /**
+     * What this submission may leave on a standing claim, field by field. A
+     * field it does not carry asserts nothing; one that agrees changes nothing;
+     * one filling a blank is an addition, which is the donor coming back to add
+     * the surname the signup form did not require. Anything else is two callers
+     * naming one identity: that field is cleared rather than awarded, because
+     * neither the older nor the newer name is an outcome an attacker cannot
+     * steer, and the person who proves the mailbox names themselves in the
+     * portal. Only the disputed field goes, so a contested first name does not
+     * take a surname nobody argued about with it.
+     *
+     * @param array{first_name:?string, last_name:?string} $names
+     *
+     * @return array{first_name:?string, last_name:?string}
+     *
+     * @since 1.0.0
+     */
+    private function reconcileNames(PendingSignup $claim, array $names): array
+    {
+        $out = [];
+        foreach (['first_name', 'last_name'] as $field) {
+            $standing  = ($claim->$field ?? '') !== '' ? (string) $claim->$field : null;
+            $submitted = $names[$field];
+
+            if ($submitted === null || $submitted === $standing) {
+                $out[$field] = $standing;
+            } elseif ($standing === null) {
+                $out[$field] = $submitted;
+            } else {
+                $out[$field] = null;
+            }
+        }
+
+        return $out;
     }
 
     /**
@@ -419,10 +578,19 @@ final class PortalController
             // Already a donor, so any claim standing against this address is
             // moot: signing up for an address that has an account is a sign-in.
             $this->pending->deleteByEmailHash($hash);
+            if (! $this->consumeMailboxQuota($email)) return;
+
+            // Earlier links are left alone. This request proves nothing about
+            // who made it, so it must not be able to destroy a credential it
+            // did not create: support issues portal links too, and a donor who
+            // clicks resend before opening the first mail is not attacking
+            // anyone. What bounds an unclicked link is its hour, and a donor
+            // who wants them all gone has sign out everywhere.
             $this->mailLink(
                 $email,
-                $this->magicLinks->issue((int) $donor->id, 'donor_portal'),
-                trim(($donor->first_name ?? '') . ' ' . ($donor->last_name ?? ''))
+                $this->magicLinks->issue((int) $donor->id, PortalSession::PORTAL_PURPOSE, null, self::PORTAL_LINK_TTL),
+                trim(($donor->first_name ?? '') . ' ' . ($donor->last_name ?? '')),
+                self::PORTAL_LINK_TTL
             );
             return;
         }
@@ -432,6 +600,8 @@ final class PortalController
         $claim = $this->pending->findByEmailHash($hash);
         if (! $claim || ! $this->pending->isLive($claim)) return;
 
+        if (! $this->consumeMailboxQuota($email)) return;
+
         $this->mailLink(
             $email,
             $this->magicLinks->issue(
@@ -440,47 +610,90 @@ final class PortalController
                 (int) $claim->id,
                 PendingSignupRepository::TTL_SECONDS
             ),
-            trim(($claim->first_name ?? '') . ' ' . ($claim->last_name ?? ''))
+            trim(($claim->first_name ?? '') . ' ' . ($claim->last_name ?? '')),
+            PendingSignupRepository::TTL_SECONDS
         );
     }
 
-    /** @since 1.0.0 */
-    private function mailLink(string $email, string $rawToken, string $name): void
+    /**
+     * One template serves two links with different lifetimes, so the lifetime
+     * is a token rather than a sentence: a mail that names the wrong one tells
+     * the donor to take their time with a key that is already dead.
+     *
+     * @since 1.0.0
+     */
+    private function mailLink(string $email, string $rawToken, string $name, int $ttlSeconds): void
     {
         $this->mailer->sendTemplate('magic_link', $email, [
             'donor_name'        => $name !== '' ? $name : $email,
             'organisation_name' => (string) get_bloginfo('name'),
             'portal_url'        => add_query_arg('token', $rawToken, $this->portalUrl()),
+            'link_expiry'       => human_time_diff(0, $ttlSeconds),
         ]);
     }
 
-    /** @since 1.0.0 */
+    /**
+     * Counted through the guard's atomic hit(), because get_transient followed
+     * by set_transient lets concurrent callers all read the last allowed value
+     * and all write it back.
+     *
+     * @since 1.0.0
+     */
     private function consumeIpQuota(): bool
     {
-        $ip  = (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
-        $key = 'dono_send_link_ip_' . hash('sha256', $ip);
-        $cnt = (int) get_transient($key);
-        if ($cnt >= self::SEND_LINK_IP_MAX) return false;
-        set_transient($key, $cnt + 1, self::SEND_LINK_IP_WINDOW);
-        return true;
+        $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+
+        return $this->spam->hit('dono_send_link_ip_' . hash('sha256', $ip), self::SEND_LINK_IP_WINDOW)
+            <= self::SEND_LINK_IP_MAX;
     }
 
     /**
-     * Keyed by the mailbox the address reaches, not the address: the limit
-     * exists to stop this endpoint mailing a person on demand, and one inbox
-     * answers to unlimited addresses. Hashed only to keep a plaintext address
-     * out of the options table.
+     * Keyed by the address, which is the key the job resolves the donor by. A
+     * key that collapses aliases where the lookup does not lets a stranger
+     * spend a donor's allowance with an address that mails nobody, and the
+     * donor is told their link is on its way. Hashed only to keep a plaintext
+     * address out of the options table.
+     *
+     * A small counter rather than one flag: a single request must not be able
+     * to close the window on the person the window is for.
      *
      * @since 1.0.0
      */
     private function consumeEmailQuota(string $email): bool
     {
+        $key = 'dono_send_link_addr_'
+            . substr($this->hasher->emailHash($this->hasher->normalizeEmail($email)), 0, 32);
+
+        return $this->spam->hit($key, self::SEND_LINK_EMAIL_WINDOW) <= self::SEND_LINK_EMAIL_MAX;
+    }
+
+    /**
+     * What stops this endpoint mailing a person on demand: one inbox answers to
+     * unlimited addresses, so the flood limit belongs on the mailbox. Spent
+     * here, in the job, at the moment a mail is actually issued, so aliases
+     * that resolve to nobody cost the mailbox nothing.
+     *
+     * @since 1.0.0
+     */
+    private function consumeMailboxQuota(string $email): bool
+    {
         $key = 'dono_send_link_mailbox_'
             . substr($this->hasher->emailHash($this->hasher->rateLimitMailbox($email)), 0, 32);
 
-        if (get_transient($key) !== false) return false;
-        set_transient($key, 1, self::SEND_LINK_EMAIL_WINDOW);
-        return true;
+        $count = $this->spam->hit($key, self::SEND_LINK_MAILBOX_WINDOW);
+        if ($count <= self::SEND_LINK_MAILBOX_MAX) return true;
+
+        // Once per window per mailbox: a suppressed sign-in link is silent to
+        // the donor asking for it, so the org needs somewhere to see it.
+        if ($count === self::SEND_LINK_MAILBOX_MAX + 1) {
+            ErrorLog::record(
+                'portal.send_link',
+                'Sign-in links to one mailbox hit the send limit; further links are suppressed for now.',
+                ['mailbox' => substr($key, -32)]
+            );
+        }
+
+        return false;
     }
 
     /** @since 1.0.0 */

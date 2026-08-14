@@ -68,6 +68,34 @@ final class DataImporter
         'dono_recurring_plans' => ['gateway', 'gateway_subscription_id'],
         'dono_refunds'         => ['gateway_refund_id'],
         'dono_receipts'        => ['renderer_id', 'receipt_number'],
+        // No unique index backs these three, so the columns below are the only
+        // thing standing between a second run and a doubled audit trail. A
+        // consent is the lawful basis for having mailed someone and a note is
+        // what a fundraiser wrote about them; neither may arrive twice. The
+        // trade is second-resolution: two rows alike in every column named
+        // here, written within the same second, restore as one.
+        'dono_consents'        => ['donor_id', 'purpose', 'granted', 'occurred_at'],
+        'dono_donor_notes'     => ['donor_id', 'created_at'],
+        'dono_donation_notes'  => ['donation_id', 'created_at'],
+    ];
+
+    /**
+     * A second lookup, for a table whose natural key cannot settle it alone.
+     *
+     * Receipt numbers are per site and the two counters drift, so a receipt can
+     * be new by number and still be the second one for a donation this site
+     * already holds. The import runs in no transaction and catches nothing, so
+     * that refused insert would end the restore half done.
+     *
+     * A refund taken by hand or through a gateway that does not name its
+     * refunds carries no gateway id at all, and the unique index that stops one
+     * being recorded twice is nullable for exactly that reason. Nothing else
+     * recognises it on a second run, and refunds are subtracted from the org's
+     * totals as they stand.
+     */
+    private const ALSO_UNIQUE = [
+        'dono_receipts' => ['donation_id', 'renderer_id'],
+        'dono_refunds'  => ['donation_id', 'amount_cents', 'occurred_at'],
     ];
 
     /** Columns holding an id from another exported table, by the table it points at. */
@@ -123,10 +151,17 @@ final class DataImporter
     /** @var array<string, array<string,int>> table => why it did not land => rows */
     private array $dropped = [];
 
-    /** @var array<int,string> source donor id => the reference of a donation of theirs */
+    /** @var array<int, array<string,mixed>> source donor id => a donation of theirs, as the file holds it */
     private array $shellAnchor = [];
 
-    /** Which site the file came from, so two files cannot name the same shell. */
+    /** Donors whose address this site's key could not open. */
+    private int $unreadable = 0;
+
+    /**
+     * What separates this file from another one, so two of them cannot name the
+     * same shell. The site it came from, or failing that when it was written:
+     * source ids alone start at 1 in every file.
+     */
     private string $origin = '';
 
     /** @since 1.0.0 */
@@ -145,7 +180,11 @@ final class DataImporter
     {
         $tables = is_array($export['tables'] ?? null) ? $export['tables'] : [];
 
-        $this->origin = (string) ($export['site_url'] ?? '');
+        $this->origin = trim((string) ($export['site_url'] ?? ''));
+        if ($this->origin === '') {
+            $this->origin = trim((string) ($export['exported_at'] ?? ''));
+        }
+
         $this->indexShellDonors($tables);
 
         foreach (self::ORDER as $table) {
@@ -158,6 +197,7 @@ final class DataImporter
         $this->syncFormStats();
         $this->recordUnknownTables($tables);
         $this->reportDropped();
+        $this->reportUnreadable();
 
         return [
             'created'  => $this->created,
@@ -257,12 +297,11 @@ final class DataImporter
      */
     private function prepareDonor(array $row): ?array
     {
-        $email = trim((string) ($row['email'] ?? ''));
-
-        if ($email === '') {
+        if (self::hasNoAddress($row)) {
             return $this->prepareShellDonor($row);
         }
 
+        $email             = trim((string) ($row['email'] ?? ''));
         $row['email']      = $email;
         $row['email_hash'] = $this->hasher->emailHash($email);
 
@@ -270,15 +309,14 @@ final class DataImporter
     }
 
     /**
-     * An erased donor, whose row the export carries without an address because
-     * there is none left to carry.
+     * A donor the file carries no address for, because there is none left to
+     * carry: erasure took it, or the key that sealed it did not travel.
      *
-     * Erasure keeps the donations, refunds, receipts and consents on purpose
-     * and clears only the PII on them, and every one of those rows resolves
-     * through this donor. Skipping it would make the restore destroy exactly
-     * the records the erasure preserved, so it lands as the shell it already
-     * is: no address, no name, and an identity that names a row rather than a
-     * person.
+     * Both keep the donations, refunds, receipts and consents, and every one of
+     * those rows resolves through this donor. Skipping it would make the
+     * restore destroy exactly the records that survived, so it lands as the
+     * shell it already is: no address, no name, and an identity that names a
+     * row rather than a person.
      *
      * @param  array<string,mixed> $row
      * @return array<string,mixed>|null
@@ -286,14 +324,6 @@ final class DataImporter
      */
     private function prepareShellDonor(array $row): ?array
     {
-        if (! self::isShell($row)) {
-            // Not erased, so the address was sealed with a key that did not
-            // travel. Nothing identifies them and nothing could reach them,
-            // and a donor row with an empty address would read as a live
-            // supporter for the rest of its life.
-            return $this->drop('dono_donors', 'unreadable_email');
-        }
-
         $sourceId = (int) ($row['id'] ?? 0);
         if ($sourceId <= 0) {
             // Every shell would answer to the same identity, which would
@@ -311,30 +341,48 @@ final class DataImporter
         // what DonorService reads to mean this row has no address.
         $row['email_encrypted'] = '';
 
+        if (! self::wasErased($row)) {
+            // Nothing erased them, so their address was sealed with a key this
+            // site cannot open. Marked erased because that is what the row now
+            // is: unidentifiable and unreachable. Without the mark it would
+            // read as a live supporter on every mailing surface for the rest of
+            // its life, and with it the money behind it is still kept.
+            $row['redacted_at'] = gmdate('Y-m-d H:i:s');
+            $this->unreadable++;
+        }
+
         return $row;
     }
 
     /**
-     * A donor the export could not carry an address for, because erasure had
-     * already taken it. `redacted_at` is what separates that from a key this
-     * site cannot open.
+     * @param  array<string,mixed> $row
+     * @since 1.0.0
+     */
+    private static function hasNoAddress(array $row): bool
+    {
+        return trim((string) ($row['email'] ?? '')) === '';
+    }
+
+    /**
+     * Erasure had already taken the address before the export ran, which is
+     * what separates it from a key this site cannot open.
      *
      * @param  array<string,mixed> $row
      * @since 1.0.0
      */
-    private static function isShell(array $row): bool
+    private static function wasErased(array $row): bool
     {
-        return trim((string) ($row['email'] ?? '')) === ''
-            && trim((string) ($row['redacted_at'] ?? '')) !== '';
+        return trim((string) ($row['redacted_at'] ?? '')) !== '';
     }
 
     /**
-     * What an erased donor is matched on here.
+     * What a shell is matched on here.
      *
-     * A donation of theirs is the strongest handle available: references are
-     * unique, and erasure keeps them. So a file restored onto the site it came
-     * from, or onto one already holding part of it, finds the row it belongs
-     * to rather than adding a second anonymous donor beside it.
+     * A donation of theirs is the strongest handle available: it survives
+     * erasure, and finding it means the file is being restored onto a site that
+     * already holds part of it, so the shell belongs to a row that is already
+     * here rather than beside it. That is what makes a resumed or repeated run
+     * leave one anonymous donor instead of one per run.
      *
      * Failing that, a value derived from the file's origin and the row it held
      * there: unique per source row, identical on every run of the same file,
@@ -345,9 +393,9 @@ final class DataImporter
      */
     private function shellHash(int $sourceId): string
     {
-        $reference = $this->shellAnchor[$sourceId] ?? '';
-        if ($reference !== '') {
-            $hash = $this->hashOfDonorBehind($reference);
+        $anchor = $this->shellAnchor[$sourceId] ?? null;
+        if ($anchor !== null) {
+            $hash = $this->hashOfDonorBehind($anchor);
             if ($hash !== '') return $hash;
         }
 
@@ -355,25 +403,65 @@ final class DataImporter
     }
 
     /**
-     * The address hash of whoever owns the donation with this reference here,
-     * or an empty string when this site does not have that donation.
+     * The address hash of whoever owns this donation here, or an empty string
+     * when this site does not have it.
      *
+     * A reference only identifies a donation within one site. The counter
+     * behind it starts at one on every install and the default prefix is the
+     * same everywhere, so DONO-2026-00001 exists on most of them and belongs to
+     * a different person on each. Matching on the reference alone would resolve
+     * a nameless erased donor onto whichever live supporter happens to hold
+     * that number here, and hand them the erased person's consents, receipts
+     * and recurring plans. So the donation itself has to be the same donation,
+     * not merely the same number.
+     *
+     * @param  array<string,mixed> $anchor the donation as the file holds it
      * @since 1.0.0
      */
-    private function hashOfDonorBehind(string $reference): string
+    private function hashOfDonorBehind(array $anchor): string
     {
+        $reference = trim((string) ($anchor['reference'] ?? ''));
+        if ($reference === '') return '';
+
         $donation = DB::table('dono_donations')->where('reference', $reference)->get();
-        $donorId  = (int) self::field($donation, 'donor_id');
+        if (! self::sameDonation($anchor, $donation)) return '';
+
+        $donorId = (int) self::field($donation, 'donor_id');
         if ($donorId <= 0) return '';
 
         return (string) self::field(DB::table('dono_donors')->where('id', $donorId)->get(), 'email_hash');
     }
 
     /**
-     * Erased donors land before their donations do, so the reference that
-     * identifies them has to be found before the walk starts. Only the rows
-     * that need one are indexed: a decade of donations is not held in memory
-     * to place a handful of shells.
+     * Whether the donation standing here is the one the file is describing.
+     *
+     * What was charged, in what currency, at what second. None of the three is
+     * rewritten by anything that happens to a donation afterwards, and two
+     * unrelated sites agreeing on all three as well as the reference is not a
+     * case worth trading a donor merge for.
+     *
+     * @param  array<string,mixed> $fromFile
+     * @since 1.0.0
+     */
+    private static function sameDonation(array $fromFile, mixed $here): bool
+    {
+        if ($here === null) return false;
+
+        foreach (['amount_cents', 'currency', 'created_at'] as $column) {
+            $there = trim((string) ($fromFile[$column] ?? ''));
+            if ($there === '' || $there !== trim((string) self::field($here, $column))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Shells land before their donations do, so the donation that identifies
+     * them has to be found before the walk starts. Only the rows that need one
+     * are indexed: a decade of donations is not retained to place a handful of
+     * shells.
      *
      * @param array<string,mixed> $tables
      * @since 1.0.0
@@ -382,7 +470,7 @@ final class DataImporter
     {
         $wanted = [];
         foreach (($tables['dono_donors'] ?? []) as $row) {
-            if (! is_array($row) || ! self::isShell($row)) continue;
+            if (! is_array($row) || ! self::hasNoAddress($row)) continue;
 
             $id = (int) ($row['id'] ?? 0);
             if ($id > 0) $wanted[$id] = true;
@@ -399,7 +487,7 @@ final class DataImporter
             if ($reference === '' || ! isset($wanted[$donorId])) continue;
             if (isset($this->shellAnchor[$donorId])) continue;
 
-            $this->shellAnchor[$donorId] = $reference;
+            $this->shellAnchor[$donorId] = $row;
         }
     }
 
@@ -439,11 +527,26 @@ final class DataImporter
     {
         $key = self::NATURAL_KEY[$table] ?? null;
         if ($key === null) {
-            // Consents and notes have none. They belong to a parent, and a
-            // parent that already existed keeps the entries it already has.
+            // Every table in ORDER declares one. Reachable only if the two
+            // lists drift apart, and then the table duplicates on a second run.
             return 0;
         }
 
+        $id = self::lookup($table, $row, $key);
+        if ($id > 0) return $id;
+
+        $alsoUnique = self::ALSO_UNIQUE[$table] ?? null;
+
+        return $alsoUnique === null ? 0 : self::lookup($table, $row, $alsoUnique);
+    }
+
+    /**
+     * @param  array<string,mixed> $row
+     * @param  list<string>        $key
+     * @since 1.0.0
+     */
+    private static function lookup(string $table, array $row, array $key): int
+    {
         $query = DB::table($table);
         foreach ($key as $column) {
             $value = $row[$column] ?? null;
@@ -575,6 +678,28 @@ final class DataImporter
                 implode(', ', $parts)
             ),
             ['dropped' => $this->dropped]
+        );
+    }
+
+    /**
+     * A donor arriving with no address is normally an erasure, which needs no
+     * telling. One arriving because the key stayed behind is a different thing
+     * and the operator has to hear it: the money is intact but the person
+     * behind it is gone for good, and no later import brings them back.
+     *
+     * @since 1.0.0
+     */
+    private function reportUnreadable(): void
+    {
+        if ($this->unreadable === 0) return;
+
+        ErrorLog::record(
+            'transfer.import',
+            sprintf(
+                'Restore kept %d donors whose address this site cannot read, and marked them erased so nothing mails them. Their donations, refunds, receipts and consents came with them; their names and addresses did not, and re-running the file will not recover them.',
+                $this->unreadable
+            ),
+            ['unreadable_donors' => $this->unreadable]
         );
     }
 

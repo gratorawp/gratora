@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Dono\Currency;
 
+use Dono\Foundation\Helpers\Money;
+
 /**
  * Read access to the daily FX snapshot stored in the dono_fx_rates option.
  *
@@ -15,6 +17,25 @@ namespace Dono\Currency;
 final class FxRates
 {
     public const OPTION = 'dono_fx_rates';
+
+    /**
+     * Past this age a snapshot is unfit to be stamped onto money.
+     *
+     * The rate a donation converts at is written into fx_rate and
+     * base_amount_cents and never revisited, so an old rate is not a stale
+     * screen, it is a wrong figure in the books for good. The donation is still
+     * never refused for it: money is not gated on reporting being configured,
+     * and declining to convert would leave base_amount_cents null, which every
+     * rollup scores as zero and so understates by the whole donation rather
+     * than by the drift. What the bound buys is that the site says so, in the
+     * log an owner can actually reach, every day it keeps happening.
+     *
+     * Seven days: the ECB publishes on TARGET business days, so a snapshot
+     * legitimately sits out a weekend, and a weekend either side of a holiday
+     * closure reaches four. Seven clears every ordinary gap and still catches a
+     * fetch that has genuinely stopped within a week of it stopping.
+     */
+    public const STAMP_MAX_AGE_DAYS = 7;
 
     /**
      * @return array{base:string,date:string,rates:array<string,mixed>,manual?:array<string,mixed>,auto?:bool}|null
@@ -90,7 +111,7 @@ final class FxRates
     }
 
     /**
-     * Of the currencies given, the ones with no usable rate to the base.
+     * Of the currencies given, the ones with no usable rate to the org's base.
      *
      * A donation in such a currency is still accepted (money is never gated on
      * reporting being configured), but it stores no base_amount_cents and so
@@ -99,6 +120,14 @@ final class FxRates
      * before an admin offers the currency, and the reports say how many rows
      * are missing.
      *
+     * Asked the way the money path asks it - rate(code, org base), the same
+     * call DonationService converts with - rather than whether the snapshot
+     * carries a row for the code. The two answers only part when the snapshot
+     * is denominated in some other base, which is where the warning matters
+     * most: every rate in it is then unreachable from the org's own currency,
+     * so every foreign donation records nothing, and reading the snapshot's own
+     * table would report the whole set as healthy.
+     *
      * @param list<string> $codes
      * @return list<string> upper-cased, in the order given
      *
@@ -106,11 +135,13 @@ final class FxRates
      */
     public function unconvertible(array $codes): array
     {
+        $base = strtoupper(Money::defaultCurrency());
+
         $out = [];
         foreach ($codes as $code) {
             $code = strtoupper(trim((string) $code));
             if ($code === '') continue;
-            if ($this->effectiveRate($code) === null) {
+            if ($this->rate($code, $base) === null) {
                 $out[] = $code;
             }
         }
@@ -155,7 +186,32 @@ final class FxRates
     }
 
     /**
+     * The whole conversion table as it stands: fetched rates, overrides on
+     * top, the snapshot base at unity. Denominated in the snapshot base.
+     *
+     * @return array<string,float>
+     *
+     * @since 1.0.0
+     */
+    public function effectiveRates(): array
+    {
+        $d = $this->data();
+
+        return $d ? $this->effectiveMap($d) : [];
+    }
+
+    /**
      * Fetched rates + manual overrides (manual wins) + base at unity.
+     *
+     * Every value here is denominated in the snapshot's base, an override
+     * included. An override is typed against the org's base, on a screen
+     * labelled with it, and the two are the same currency because the base
+     * only moves through FxRatesUpdater::rebase(), which restates the whole
+     * snapshot in one step. Restating an override here instead would not
+     * survive the round trip: the settings screen posts back the number it was
+     * shown, so the correction lands again on the value it produced at the
+     * next save, and each step is stamped into the fx_rate of every donation
+     * taken in between.
      *
      * @param array<string,mixed> $d
      * @return array<string,float>
@@ -168,7 +224,10 @@ final class FxRates
         foreach ($this->cleanMap($d['manual'] ?? []) as $ccy => $r) {
             $map[$ccy] = $r;
         }
+        // Last, so an override cannot displace unity: a currency is worth one
+        // of itself.
         $map[strtoupper((string) $d['base'])] = 1.0;
+
         return $map;
     }
 
@@ -220,20 +279,54 @@ final class FxRates
     }
 
     /**
+     * How old the snapshot the site is converting with is, in whole days. Null
+     * when there is no snapshot or its date is unreadable.
+     *
+     * @since 1.0.0
+     */
+    public function ageDays(): ?int
+    {
+        $ts = $this->dateTimestamp();
+        if ($ts === null) {
+            return null;
+        }
+        return (int) floor(max(0, time() - $ts) / DAY_IN_SECONDS);
+    }
+
+    /**
      * True when there is no snapshot or it is older than $maxAgeDays.
      *
      * @since 1.0.0
      */
     public function isStale(int $maxAgeDays = 2): bool
     {
-        $d = $this->data();
-        if (! $d || empty($d['date'])) {
-            return true;
-        }
-        $ts = strtotime((string) $d['date'] . ' 00:00:00 UTC');
-        if ($ts === false) {
+        $ts = $this->dateTimestamp();
+        if ($ts === null) {
             return true;
         }
         return (time() - $ts) > $maxAgeDays * DAY_IN_SECONDS;
+    }
+
+    /**
+     * True once the snapshot is too old to keep stamping onto money. See
+     * STAMP_MAX_AGE_DAYS.
+     *
+     * @since 1.0.0
+     */
+    public function isUnfitToStamp(): bool
+    {
+        return $this->isStale(self::STAMP_MAX_AGE_DAYS);
+    }
+
+    /** @since 1.0.0 */
+    private function dateTimestamp(): ?int
+    {
+        $d = $this->data();
+        if (! $d || empty($d['date'])) {
+            return null;
+        }
+        $ts = strtotime((string) $d['date'] . ' 00:00:00 UTC');
+
+        return $ts === false ? null : $ts;
     }
 }

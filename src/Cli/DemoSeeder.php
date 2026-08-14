@@ -45,6 +45,9 @@ final class DemoSeeder
 
     private const SEED = 0x0D0A0;
 
+    /** Bounds each statement in the undo; a re-run leaves thousands of rows. */
+    private const CHUNK = 500;
+
     private const DONORS       = 140;
     private const ONE_TIME     = 620;
     private const PLANS        = 44;
@@ -85,8 +88,13 @@ final class DemoSeeder
     }
 
     /**
-     * Live paid donations this seeder did not write. Any at all means the
-     * install is somebody's real book of record.
+     * Live donations this seeder did not write. Any at all means the install is
+     * somebody's real book of record.
+     *
+     * Every status, not only the settled ones. A donation taken by bank
+     * transfer sits pending until an admin reconciles it, so an org that has
+     * taken nothing but offline donations is exactly the org that would sail
+     * past a settled-only count.
      *
      * @since 1.0.0
      */
@@ -94,12 +102,25 @@ final class DemoSeeder
     {
         return (int) Donation::query()
             ->where('is_test', 0)
-            ->whereIn('status', ['paid', 'partial_refund', 'refunded'])
-            ->where(static function ($q): void {
-                $q->whereNull('gateway_intent_id')
-                  ->orWhereNotLike('gateway_intent_id', self::KEY_PREFIX . '%');
-            })
+            ->where(self::notDemo())
             ->count();
+    }
+
+    /**
+     * Donations this seeder did not write. A NULL key is one of them: NOT LIKE
+     * never matches a NULL, so leaving it out would count a hand-recorded
+     * donation as the seeder's own and delete it.
+     *
+     * @return Closure(mixed):void
+     *
+     * @since 1.0.0
+     */
+    private static function notDemo(): Closure
+    {
+        return static function ($q): void {
+            $q->whereNull('gateway_intent_id')
+              ->orWhereNotLike('gateway_intent_id', self::KEY_PREFIX . '%');
+        };
     }
 
     /**
@@ -140,6 +161,191 @@ final class DemoSeeder
         }
 
         return $this->counts;
+    }
+
+    // ----------------------------------------------------------------- undo
+
+    /**
+     * What purge() would remove, without removing it.
+     *
+     * @return array{donations:int, recurring_plans:int, donors:int}
+     *
+     * @since 1.0.0
+     */
+    public function purgePreview(): array
+    {
+        $donationIds = $this->demoDonationIds();
+
+        return [
+            'donations'       => count($donationIds),
+            'recurring_plans' => count($this->demoPlanIds()),
+            'donors'          => count($this->demoOnlyDonors($this->donorIdsBehind($donationIds))),
+        ];
+    }
+
+    /**
+     * Remove exactly the rows this seeder wrote.
+     *
+     * The rows are live by design, so nothing else in the plugin can find
+     * them: the maintenance purge reads is_test and the admin cannot delete a
+     * donation at all. They are matched on the demo key rather than on a date
+     * or a donor, so a donation the org recorded itself is never in range.
+     *
+     * Campaigns, funds and the pages behind them are left where they are. Each
+     * is one click away in the admin, and a slug is a weaker claim of
+     * ownership than a gateway key.
+     *
+     * @param Closure(string):void $log
+     * @return array{donations:int, recurring_plans:int, donors:int}
+     *
+     * @since 1.0.0
+     */
+    public function purge(Closure $log): array
+    {
+        $this->log = $log;
+
+        $donationIds = $this->demoDonationIds();
+        $planIds     = $this->demoPlanIds();
+        $donorIds    = $this->demoOnlyDonors($this->donorIdsBehind($donationIds));
+
+        $removed = ['donations' => 0, 'recurring_plans' => 0, 'donors' => 0];
+
+        foreach (array_chunk($donationIds, self::CHUNK) as $chunk) {
+            // Add-ons hang their own rows off a donation. Core cannot know
+            // them, and orphaning them would be worse than leaving them.
+            do_action('dono.test_data.purge_donations', $chunk);
+
+            DB::table('dono_receipts')->whereIn('donation_id', $chunk)->delete();
+            DB::table('dono_refunds')->whereIn('donation_id', $chunk)->delete();
+            DB::table('dono_donation_notes')->whereIn('donation_id', $chunk)->delete();
+            DB::table('dono_events')->whereIn('donation_id', $chunk)->delete();
+
+            $removed['donations'] += (int) Donation::query()->whereIn('id', $chunk)->delete()->affectedRows;
+        }
+        $this->say("demo donations removed: {$removed['donations']}");
+
+        foreach (array_chunk($planIds, self::CHUNK) as $chunk) {
+            do_action('dono.test_data.purge_plans', $chunk);
+
+            DB::table('dono_events')->whereIn('recurring_plan_id', $chunk)->delete();
+            $removed['recurring_plans'] += (int) RecurringPlan::query()->whereIn('id', $chunk)->delete()->affectedRows;
+        }
+        $this->say("demo recurring plans removed: {$removed['recurring_plans']}");
+
+        foreach ($donorIds as $donorId) {
+            $donor = Donor::query()->where('id', $donorId)->get();
+            if (! $donor instanceof Donor) {
+                continue;
+            }
+
+            try {
+                $this->donorService->delete($donor);
+                $removed['donors']++;
+            } catch (\Throwable $e) {
+                // Something still refers to them, an add-on veto most likely.
+                // Their row is harmless; losing the rest of the purge is not.
+                continue;
+            }
+        }
+        $this->say("demo donors removed: {$removed['donors']}");
+
+        $this->recompute();
+
+        return $removed;
+    }
+
+    /**
+     * @return array<int>
+     *
+     * @since 1.0.0
+     */
+    private function demoDonationIds(): array
+    {
+        return array_map('intval', array_column(
+            Donation::query()
+                ->whereLike('gateway_intent_id', self::KEY_PREFIX . '%')
+                ->selectRaw('id')
+                ->getAll(),
+            'id'
+        ));
+    }
+
+    /**
+     * @return array<int>
+     *
+     * @since 1.0.0
+     */
+    private function demoPlanIds(): array
+    {
+        return array_map('intval', array_column(
+            RecurringPlan::query()
+                ->whereLike('gateway_subscription_id', self::KEY_PREFIX . '%')
+                ->selectRaw('id')
+                ->getAll(),
+            'id'
+        ));
+    }
+
+    /**
+     * @param  array<int> $donationIds
+     * @return array<int>
+     *
+     * @since 1.0.0
+     */
+    private function donorIdsBehind(array $donationIds): array
+    {
+        $ids = [];
+        foreach (array_chunk($donationIds, self::CHUNK) as $chunk) {
+            $rows = Donation::query()
+                ->whereIn('id', $chunk)
+                ->selectRaw('DISTINCT donor_id')
+                ->getAll();
+            foreach ($rows as $row) {
+                $id = (int) ($row['donor_id'] ?? 0);
+                if ($id > 0) $ids[$id] = true;
+            }
+        }
+
+        return array_keys($ids);
+    }
+
+    /**
+     * Donors with nothing behind them but demo rows. Asked as "is any of this
+     * theirs", so the answer is the same before the deletion and after it, and
+     * a donor who gave for real keeps their row whatever else they did.
+     *
+     * @param  array<int> $donorIds
+     * @return array<int>
+     *
+     * @since 1.0.0
+     */
+    private function demoOnlyDonors(array $donorIds): array
+    {
+        $out = [];
+        foreach ($donorIds as $donorId) {
+            $ownDonation = Donation::query()
+                ->where('donor_id', $donorId)
+                ->where(self::notDemo())
+                ->exists();
+            if ($ownDonation) {
+                continue;
+            }
+
+            $ownPlan = RecurringPlan::query()
+                ->where('donor_id', $donorId)
+                ->where(static function ($q): void {
+                    $q->whereNull('gateway_subscription_id')
+                      ->orWhereNotLike('gateway_subscription_id', self::KEY_PREFIX . '%');
+                })
+                ->exists();
+            if ($ownPlan) {
+                continue;
+            }
+
+            $out[] = $donorId;
+        }
+
+        return $out;
     }
 
     // ---------------------------------------------------------------- funds

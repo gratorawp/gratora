@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Dono\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 
 /**
  * readme.txt's External services section is what a reviewer, and any admin
@@ -13,13 +15,20 @@ use PHPUnit\Framework\TestCase;
  * while every service the plugin can reach is listed with the switch that turns
  * it on.
  *
- * Gravatar was missed because no gravatar.com literal exists in the source: the
- * URL is built by WordPress, from a hash of the donor's email, and requested by
- * the visitor's browser on a public campaign page. So the plugin's use of
- * get_avatar_url is what this test reads, not a string it could grep for.
+ * Gravatar is the one host the plugin can cause a request to without owning the
+ * request: avatars go through core's get_avatar_url, so WordPress decides
+ * whether anything leaves and under whose settings. That is why the section has
+ * no Gravatar entry, and why the check below is inverted.
  */
 final class ExternalServicesDisclosureTest extends TestCase
 {
+    /**
+     * A gravatar.com host with a scheme or a protocol-relative prefix, which is
+     * what a URL somebody assembled looks like. Prose that merely names the
+     * service, in a comment or in admin copy, does not match.
+     */
+    private const GRAVATAR_URL = '#(?:https?:)?//[A-Za-z0-9.-]*gravatar\.com#i';
+
     private function root(): string
     {
         return dirname(__DIR__, 2);
@@ -60,35 +69,79 @@ final class ExternalServicesDisclosureTest extends TestCase
         return $blocks;
     }
 
-    public function test_gravatar_is_disclosed_because_the_plugin_asks_for_avatar_urls(): void
+    /**
+     * The section lists services this plugin decides to contact. Avatars are
+     * not one: the plugin hands an address to get_avatar_url and core builds
+     * whatever URL the site's own avatar settings and filters call for, which
+     * a privacy plugin or a host theme may already have replaced.
+     *
+     * Assemble a gravatar.com URL by hand and that stops being true. The
+     * request becomes this plugin's, it outlives the site's avatar settings,
+     * and the disclosure the section no longer carries is owed again. So
+     * nothing here asserts the section mentions Gravatar; this asserts that
+     * nobody wrote the line that would put the obligation back.
+     */
+    public function test_no_gravatar_url_is_assembled_outside_core(): void
     {
         $avatars = (string) file_get_contents($this->root() . '/src/Donors/DonorAvatars.php');
-
         $this->assertStringContainsString(
             'get_avatar_url(',
             $avatars,
-            'Donor avatars no longer reach Gravatar, so this test is measuring nothing.'
+            'Donor avatars no longer go through core, so the section owes Gravatar an entry of its own.'
         );
 
-        $this->assertStringContainsStringIgnoringCase(
-            'gravatar',
-            $this->section(),
-            'Donor pictures can be loaded from Gravatar, which the section has to say.'
+        $offenders = [];
+
+        // String literals only. The reasoning above is written in comments that
+        // name the host, and a comment sends no request.
+        foreach ($this->sources($this->root() . '/src', ['php']) as $path) {
+            foreach (token_get_all((string) file_get_contents($path)) as $token) {
+                if (! is_array($token)) {
+                    continue;
+                }
+                if (! in_array($token[0], [T_CONSTANT_ENCAPSED_STRING, T_ENCAPSED_AND_WHITESPACE, T_INLINE_HTML], true)) {
+                    continue;
+                }
+                if (preg_match(self::GRAVATAR_URL, (string) $token[1]) === 1) {
+                    $offenders[] = $path . ':' . $token[2];
+                }
+            }
+        }
+
+        // The browser can reach the host directly too, and no PHP would show it.
+        foreach ($this->sources($this->root() . '/assets', ['js', 'jsx']) as $path) {
+            foreach (preg_split('/\R/', (string) file_get_contents($path)) ?: [] as $i => $line) {
+                if (preg_match(self::GRAVATAR_URL, $line) === 1) {
+                    $offenders[] = $path . ':' . ($i + 1);
+                }
+            }
+        }
+
+        $this->assertSame(
+            [],
+            $offenders,
+            "These build a Gravatar URL instead of asking core for one, so the request is ours to disclose:\n"
+                . implode("\n", $offenders)
         );
     }
 
-    /** What is sent, and the fact that the donor's browser is what sends it. */
-    public function test_the_gravatar_entry_says_what_leaves_the_page(): void
+    /**
+     * @param  list<string> $extensions
+     * @return list<string>
+     */
+    private function sources(string $dir, array $extensions): array
     {
-        $matched = preg_match('/\*\*Gravatar\*\*.*?(?=\n\*\*|\z)/s', $this->section(), $m);
-        $this->assertSame(1, $matched, 'the Gravatar entry is not a service entry of its own.');
+        $out = [];
+        $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir));
+        foreach ($files as $file) {
+            if ($file->isFile() && in_array($file->getExtension(), $extensions, true)) {
+                $out[] = $file->getPathname();
+            }
+        }
 
-        $entry = (string) $m[0];
+        $this->assertNotSame([], $out, "$dir holds no source, so this test is reading nothing.");
 
-        $this->assertStringContainsString('secure.gravatar.com', $entry, 'the host is named');
-        $this->assertStringContainsStringIgnoringCase('hash', $entry, 'and that a hash is what is sent');
-        $this->assertStringContainsStringIgnoringCase('email', $entry, 'of the donor email');
-        $this->assertStringContainsStringIgnoringCase('browser', $entry, 'from the visitor browser');
+        return $out;
     }
 
     /**

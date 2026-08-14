@@ -14,7 +14,8 @@ import GatewaySelect from './components/GatewaySelect';
 import CurrencySwitcher from './components/CurrencySwitcher';
 import StripePayment from './components/StripePayment';
 import PayPalPayment from './components/PayPalPayment';
-import { detectStripeReturn, resolveStripeReturn, clearStripeReturnParams } from './util/stripe';
+import { detectStripeReturn, resolveStripeReturn, clearStripeReturnParams, returnOutcome } from './util/stripe';
+import { rememberPending, readPending, ownsPendingReturn } from './util/pending';
 import { interpolateLabel } from './util/interpolate';
 import { decodeEntities } from './util/entities';
 import { setActiveNumberFormat, formatAmount, frequencyLabel } from './util/format';
@@ -31,43 +32,11 @@ const STEP_RENDERERS = {
     submit: () => null,
 };
 
-// Where a redirect gateway picks the donation back up. Session-scoped, so it
-// dies with the tab rather than following the donor around.
-export const PENDING_KEY = 'dono:pending-donation';
-
 // Fired on window once per donation, the moment this browser learns the money
 // moved. It carries the reference and its status token and nothing else: a
 // listener that needs the amount reads it back from the status endpoint, which
 // is server-authoritative and returns no donor data.
 export const COMPLETED_EVENT = 'dono:donation:completed';
-
-function rememberPending( data, values ) {
-    try {
-        window.sessionStorage.setItem( PENDING_KEY, JSON.stringify( {
-            reference:   data.reference,
-            statusToken: data.status_token,
-            gateway:     data.gateway || '',
-            // Enough to tell the donor what they gave when they land back here
-            // from their bank on a fresh page, where nothing else survives.
-            amountCents: data.amount_cents,
-            currency:    data.currency,
-            frequency:   values?.frequency || '',
-            email:       values?.email || '',
-        } ) );
-    } catch ( e ) {
-        // Private browsing can refuse storage. The donation is still made and
-        // the webhook still settles it; only the return screen is lost.
-    }
-}
-
-function readPending() {
-    try {
-        const raw = window.sessionStorage.getItem( PENDING_KEY );
-        return raw ? JSON.parse( raw ) : {};
-    } catch ( e ) {
-        return {};
-    }
-}
 
 // The token lands in a different place on each payment path: the submit
 // response for auto-confirmed gateways, the payment step for the ones that
@@ -355,19 +324,22 @@ function FormBody( { state, dispatch, config } ) {
                     _hp: honeypot,
                 } ),
             } );
-            const data = await res.json();
-            if ( ! res.ok ) {
+            // A proxy or security plugin can answer with an HTML block page,
+            // which parses to nothing. Reading it before the status is checked
+            // would throw past every curated message below.
+            const data = await res.json().catch( () => null );
+            if ( ! res.ok || ! data ) {
                 // The trap is invisible, so a donor who somehow has a value in it
                 // cannot clear it and every retry would be refused the same way.
                 // A bot that refills it on retry is refused again.
                 setHoneypot( '' );
-                dispatch( { type: 'SUBMIT_ERROR', message: data.message || config.i18n.error } );
+                dispatch( { type: 'SUBMIT_ERROR', message: ( data && data.message ) || config.i18n.error } );
                 return;
             }
             // Stashed on every path, not just the redirecting one: the status
             // token is deliberately kept out of the return URL, so anything
             // outliving this closure has no other source for it.
-            rememberPending( data, state.values );
+            rememberPending( data, state.values, config.hostId );
 
             if ( data.redirect_url ) {
                 window.location.assign( data.redirect_url );
@@ -458,8 +430,10 @@ function FormBody( { state, dispatch, config } ) {
                 type: data.status === 'paid' ? 'SUBMIT_SUCCESS' : 'SUBMIT_PENDING',
                 data,
             } );
-        } catch ( err ) {
-            dispatch( { type: 'SUBMIT_ERROR', message: err?.message || config.i18n.error } );
+        } catch {
+            // The engine's own wording ("Failed to fetch") is untranslated and
+            // tells a donor nothing, so the banner keeps the curated copy.
+            dispatch( { type: 'SUBMIT_ERROR', message: config.i18n.error } );
         } finally {
             inFlight.current = false;
         }
@@ -932,25 +906,38 @@ function ModalShell( { children, openLabel, config, initiallyOpen = false } ) {
 function App( { config } ) {
     const [ state, dispatch ] = useReducer( reducer, config, initialState );
 
+    // Scoped to the submission this form made: two forms on a page both read
+    // the same URL, and the first to run strips the params from under the
+    // other. readPending() is what the page stashed when it submitted, and the
+    // ownership check is what says whether that was this form.
+    const claimReturn = () => (
+        ownsPendingReturn( config.hostId )
+            ? detectStripeReturn( readPending().reference || null )
+            : null
+    );
+
     // Redirect-based methods such as iDEAL and Bancontact bounce back to
     // return_url carrying Stripe's markers.
     useEffect( () => {
-        // Scoped to this form's own submission: two forms on a page both read
-        // the same URL, and the first to run strips the params from under the
-        // other. readPending() is what this form stashed when it submitted.
-        const ret = detectStripeReturn( readPending().reference || null );
+        const ret = claimReturn();
         if ( ! ret || ! config.stripe?.publishableKey ) return;
         dispatch( { type: 'CONFIRMING' } );
         clearStripeReturnParams();
         resolveStripeReturn( config.stripe.publishableKey, ret.clientSecret )
             .then( ( status ) => {
-                if ( status === 'processing' ) {
+                const outcome = returnOutcome( status );
+                if ( outcome === 'processing' ) {
                     dispatch( {
                         type: 'SUBMIT_PENDING',
                         data: { reference: ret.reference, status: 'processing' },
                     } );
-                } else if ( status === 'succeeded' ) {
+                } else if ( outcome === 'succeeded' ) {
                     dispatch( { type: 'SUBMIT_SUCCESS', data: { reference: ret.reference } } );
+                } else if ( outcome === 'not_completed' ) {
+                    dispatch( {
+                        type: 'SUBMIT_ERROR',
+                        message: config.i18n.notCompleted || config.i18n.error,
+                    } );
                 } else {
                     dispatch( { type: 'SUBMIT_ERROR', message: config.i18n.error } );
                 }
@@ -962,10 +949,28 @@ function App( { config } ) {
 
     // Computed during the first render, before the effect above strips the
     // params, so a modal form can open itself on a return that is its own.
-    const returningHere = useMemo(
-        () => detectStripeReturn( readPending().reference || null ) !== null,
-        []
-    );
+    //
+    // The claim is the marker, not the return: ownsPendingReturn falls through
+    // to every form when the stash names none that is on the page, so two
+    // modal-layout forms would otherwise both open, one of them onto a blank
+    // form the effect above is never going to fill.
+    const returningHere = useMemo( () => {
+        const ret = claimReturn();
+        if ( ! ret || ! config.stripe?.publishableKey ) return false;
+
+        // The donate-button block keeps its form inside a modal that has no way
+        // to see the claim, so the claimant says so on itself. During render,
+        // because preact defers effects past the point that script looks.
+        const host = config.hostId ? document.getElementById( config.hostId ) : null;
+        if ( ! host ) return false;
+
+        const marked = document.querySelector( '.dono-donation-form[data-dono-returning]' );
+        if ( marked && marked !== host ) return false;
+
+        host.dataset.donoReturning = '1';
+
+        return true;
+    }, [] );
 
     if ( config.layout === 'modal' ) {
         return (
@@ -1166,11 +1171,17 @@ function mount( form ) {
         return;
     }
 
+    // Which element this instance is, so a submission can be traced back to it
+    // after a redirect gateway reloads the page.
+    config.hostId = form.id || '';
+
     applyUrlPrefills( config );
 
     // Seeded from the server so amounts honour the org's choices rather than
     // the visitor's browser locale.
-    setActiveNumberFormat( config.numberFormat );
+    // With the currency those choices describe: everything else on the form is
+    // the donor's own selection and borrows none of it.
+    setActiveNumberFormat( config.numberFormat, config.currency );
 
     const snapshot = form.innerHTML;
     form.innerHTML = '';

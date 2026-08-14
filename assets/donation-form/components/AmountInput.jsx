@@ -8,10 +8,10 @@ import { isZeroDecimal } from '../util/fx';
  * A typed amount, read the way the donor meant it.
  *
  * The box accepts both separators because donors type whichever one they are
- * used to. parseAmount then removed whichever one the org had configured as
- * its thousands separator, so a site formatting in en-US read "25,50" as 2550
- * and charged a hundred times the intended gift, and a site formatting in
- * de-DE did exactly the same to "25.50".
+ * used to, so the separator alone cannot say which one is the decimal point.
+ * Stripping whichever the org configured for grouping reads "25,50" as 2550 on
+ * an en-US site, and "25.50" the same way on a de-DE one: a hundred times the
+ * intended donation, charged without anything looking wrong.
  *
  * Read positionally instead, which holds in both conventions: the last
  * separator is a decimal point when one or two digits follow it, and grouping
@@ -48,7 +48,6 @@ export default function AmountInput( {
     currency       = 'USD',
     decimalPlaces,
     min,
-    max,
     placeholder    = '0',
     autoFocus      = false,
     ariaInvalid    = false,
@@ -72,10 +71,12 @@ export default function AmountInput( {
         if ( ! focused ) setText( format( value ) );
     }, [ value, focused, dp, fmt.thousandSep, fmt.decimalSep ] );
 
+    // Only the lower bound is enforced here. An upper one would rewrite a
+    // typed figure to the ceiling while the box still showed what the donor
+    // entered, and the amount step has a message for that.
     const emit = ( raw ) => {
         let n = typedAmountToNumber( raw, dp );
         if ( typeof min === 'number' && n < min ) n = min;
-        if ( typeof max === 'number' && n > max ) n = max;
         onChange && onChange( n );
     };
 
