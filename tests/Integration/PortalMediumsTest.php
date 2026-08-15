@@ -52,7 +52,7 @@ final class PortalMediumsTest extends IntegrationTestCase
 
     public function test_a_ticket_order_is_not_listed_to_the_donor_as_a_donation(): void
     {
-        $gift  = $this->row('donation', 'GIFT-' . uniqid());
+        $given = $this->row('donation', 'GAVE-' . uniqid());
         $order = $this->row('order', 'ORDER-' . uniqid());
 
         $refs = array_column(
@@ -60,11 +60,11 @@ final class PortalMediumsTest extends IntegrationTestCase
             'reference'
         );
 
-        $this->assertContains((string) $gift->reference, $refs);
+        $this->assertContains((string) $given->reference, $refs);
         $this->assertNotContains(
             (string) $order->reference,
             $refs,
-            'a ticket purchase is not a gift the donor made'
+            'a ticket purchase is not a donation the donor made'
         );
     }
 

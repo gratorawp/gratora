@@ -67,7 +67,7 @@ final class DonorAvatarsTest extends IntegrationTestCase
     }
 
     /**
-     * The gift is already hidden; a picture would put a face on it, and the
+     * The donation is already hidden; a picture would put a face on it, and
      * request itself would leak the address hash of someone who opted out.
      */
     public function test_an_anonymous_donor_never_gets_one(): void

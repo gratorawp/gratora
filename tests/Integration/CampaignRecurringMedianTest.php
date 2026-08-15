@@ -21,8 +21,8 @@ final class CampaignRecurringMedianTest extends IntegrationTestCase
 
     public function test_recurring_donors_counts_distinct_donors_not_rows(): void
     {
-        // Donor 101: three monthly renewals + a one-time gift. Donor 202: one
-        // monthly gift. Recurring donors = 2 (101, 202), not 4 rows.
+        // Donor 101: three monthly renewals + a one-time donation. Donor 202:
+        // one monthly donation. Recurring donors = 2 (101, 202), not 4 rows.
         $this->seed(101, 'monthly',  2000, 'r1a');
         $this->seed(101, 'monthly',  2000, 'r1b');
         $this->seed(101, 'monthly',  2000, 'r1c');
@@ -49,7 +49,7 @@ final class CampaignRecurringMedianTest extends IntegrationTestCase
     public function test_median_uses_base_currency_not_donor_currency(): void
     {
         // Donor-currency amounts and org-base amounts diverge sharply. The
-        // median must describe the base values so foreign gifts rank against
+        // median must describe the base values so foreign donations rank against
         // org-currency ones consistently.
         $this->seed(101, 'one_time', 30000, 'fx1', 'paid', 3000);
         $this->seed(102, 'one_time', 20000, 'fx2', 'paid', 2000);

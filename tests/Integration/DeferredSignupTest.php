@@ -180,7 +180,7 @@ final class DeferredSignupTest extends IntegrationTestCase
         $this->assertSame(1, PendingSignup::query()->where('email_hash', $this->hash($email))->count());
         $this->assertSame($firstId, (int) $this->claim($email)->id, 'the same row is updated');
         $this->assertNull($this->claim($email)->first_name, 'a disputed name reaches nobody');
-        $this->assertSame('Surname', (string) $this->claim($email)->last_name, 'a name filling a blank is an addition');
+        $this->assertNull($this->claim($email)->last_name, 'and a second caller does not get to write one either');
     }
 
     /** An address nobody proved is not kept past its window. */

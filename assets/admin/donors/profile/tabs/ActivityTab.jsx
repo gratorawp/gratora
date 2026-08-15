@@ -126,7 +126,7 @@ function TimelineRow( { event, campaigns } ) {
         facts.push( <span key="by">{ __( 'by an admin', 'dono-fundraising-platform' ) }</span> );
     }
 
-    // A note the donor left with the gift, in the same row as the rest so the
+    // A note the donor left with the donation, in the same row as the rest so
     // container's gap separates it. In its own block it butted against the
     // reference with no space.
     if ( event.note ) {

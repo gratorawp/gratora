@@ -291,7 +291,7 @@ function summarise( res ) {
         return people;
     }
 
-    const gifts = res.dry_run
+    const donations = res.dry_run
         ? sprintf(
             /* translators: %d: number of donations. */
             _n( '%d donation would be imported.', '%d donations would be imported.', res.donations_imported, 'dono-fundraising-platform' ),
@@ -303,5 +303,5 @@ function summarise( res ) {
             res.donations_imported
         );
 
-    return `${ gifts } ${ people }`;
+    return `${ donations } ${ people }`;
 }

@@ -68,8 +68,8 @@ final class ReceiptIssuer
     public function onDonationCompleted(Donation $donation): void
     {
         // Ticket orders ride the donations table but are a purchase, not a
-        // gift. Issuing a donation receipt for one misstates what the payer
-        // received, and that receipt feeds the tax-deductible statement.
+        // donation. Issuing a donation receipt for one misstates what the
+        // payer received, and that receipt feeds the tax-deductible statement.
         // Add-ons that sell things issue their own confirmation.
         //
         // The filter exists because "no receipt" is the safe answer, not the

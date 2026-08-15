@@ -700,25 +700,25 @@ final class CliCommands
             ],
         ]);
 
-        return <<<BLOCKS
-<!-- wp:dono/heading {"text":"Support our work","level":2} /-->
-<!-- wp:dono/currency-switcher {"currencies":["EUR","USD","GBP"]} /-->
-<!-- wp:dono/donation-amount {"presets":[1000,2500,5000,10000],"allowCustom":true,"currency":"EUR"} /-->
-<!-- wp:dono/name {"requireFirst":true,"requireLast":true} /-->
-<!-- wp:dono/email {"required":true} /-->
-<!-- wp:dono/country /-->
-<!-- wp:dono/address {"requireLine1":false,"requireCity":false,"requireRegion":false,"requirePostal":false,"requireCountry":false} /-->
-<!-- wp:dono/phone /-->
-<!-- wp:dono/comment {"label":"Add a message"} /-->
-<!-- wp:dono/anonymous-toggle /-->
-<!-- wp:dono/cover-fees /-->
-<!-- wp:dono/date {"label":"Preferred call date","field":"call_date"} /-->
-<!-- wp:dono/dropdown {$dropdown} /-->
-<!-- wp:dono/consent {$consent} /-->
-<!-- wp:dono/payment-gateways {"style":"radio","allowed":["offline","sandbox"]} /-->
-<!-- wp:dono/donation-summary /-->
-<!-- wp:dono/submit-button {"label":"Donate now"} /-->
-BLOCKS;
+        return implode("\n", [
+            '<!-- wp:dono/heading {"text":"Support our work","level":2} /-->',
+            '<!-- wp:dono/currency-switcher {"currencies":["EUR","USD","GBP"]} /-->',
+            '<!-- wp:dono/donation-amount {"presets":[1000,2500,5000,10000],"allowCustom":true,"currency":"EUR"} /-->',
+            '<!-- wp:dono/name {"requireFirst":true,"requireLast":true} /-->',
+            '<!-- wp:dono/email {"required":true} /-->',
+            '<!-- wp:dono/country /-->',
+            '<!-- wp:dono/address {"requireLine1":false,"requireCity":false,"requireRegion":false,"requirePostal":false,"requireCountry":false} /-->',
+            '<!-- wp:dono/phone /-->',
+            '<!-- wp:dono/comment {"label":"Add a message"} /-->',
+            '<!-- wp:dono/anonymous-toggle /-->',
+            '<!-- wp:dono/cover-fees /-->',
+            '<!-- wp:dono/date {"label":"Preferred call date","field":"call_date"} /-->',
+            '<!-- wp:dono/dropdown ' . $dropdown . ' /-->',
+            '<!-- wp:dono/consent ' . $consent . ' /-->',
+            '<!-- wp:dono/payment-gateways {"style":"radio","allowed":["offline","sandbox"]} /-->',
+            '<!-- wp:dono/donation-summary /-->',
+            '<!-- wp:dono/submit-button {"label":"Donate now"} /-->',
+        ]);
     }
 
     /**
@@ -812,21 +812,21 @@ BLOCKS;
             ],
         ]);
 
-        return <<<BLOCKS
-<!-- wp:dono/heading {"text":"Custom Fields Form","level":2} /-->
-<!-- wp:dono/donation-amount {"presets":[1000,2500,5000,10000],"allowCustom":true,"currency":"EUR"} /-->
-<!-- wp:dono/name {"requireFirst":true,"requireLast":true} /-->
-<!-- wp:dono/email {"required":true} /-->
-<!-- wp:dono/text-input {"label":"CUSTOM_TEXT_LABEL","field":"cf_text","placeholder":"Type something"} /-->
-<!-- wp:dono/number-input {"label":"CUSTOM_NUMBER_LABEL","field":"cf_number","min":1,"max":100} /-->
-<!-- wp:dono/radio {$radio} /-->
-<!-- wp:dono/checkbox {"label":"CUSTOM_CHECKBOX_LABEL","field":"cf_check"} /-->
-<!-- wp:dono/multi-select {$multi} /-->
-<!-- wp:dono/hidden {"field":"cf_hidden","defaultValue":"hidden-default"} /-->
-<!-- wp:dono/payment-gateways {"style":"radio","allowed":["offline","sandbox"]} /-->
-<!-- wp:dono/donation-summary /-->
-<!-- wp:dono/submit-button {"label":"Donate now"} /-->
-BLOCKS;
+        return implode("\n", [
+            '<!-- wp:dono/heading {"text":"Custom Fields Form","level":2} /-->',
+            '<!-- wp:dono/donation-amount {"presets":[1000,2500,5000,10000],"allowCustom":true,"currency":"EUR"} /-->',
+            '<!-- wp:dono/name {"requireFirst":true,"requireLast":true} /-->',
+            '<!-- wp:dono/email {"required":true} /-->',
+            '<!-- wp:dono/text-input {"label":"CUSTOM_TEXT_LABEL","field":"cf_text","placeholder":"Type something"} /-->',
+            '<!-- wp:dono/number-input {"label":"CUSTOM_NUMBER_LABEL","field":"cf_number","min":1,"max":100} /-->',
+            '<!-- wp:dono/radio ' . $radio . ' /-->',
+            '<!-- wp:dono/checkbox {"label":"CUSTOM_CHECKBOX_LABEL","field":"cf_check"} /-->',
+            '<!-- wp:dono/multi-select ' . $multi . ' /-->',
+            '<!-- wp:dono/hidden {"field":"cf_hidden","defaultValue":"hidden-default"} /-->',
+            '<!-- wp:dono/payment-gateways {"style":"radio","allowed":["offline","sandbox"]} /-->',
+            '<!-- wp:dono/donation-summary /-->',
+            '<!-- wp:dono/submit-button {"label":"Donate now"} /-->',
+        ]);
     }
 
     /** @since 1.0.0 */
@@ -857,19 +857,19 @@ BLOCKS;
             'condition' => ['field' => 'custom.cond_trigger', 'op' => '!=', 'value' => ''],
         ]);
 
-        return <<<BLOCKS
-<!-- wp:dono/heading {"text":"Support our work","level":2} /-->
-<!-- wp:dono/donation-amount {"presets":[1000,2500,5000,10000],"allowCustom":true,"currency":"EUR"} /-->
-<!-- wp:dono/name {"requireFirst":true,"requireLast":true} /-->
-<!-- wp:dono/email {"required":true} /-->
-<!-- wp:dono/dropdown {$dropdown} /-->
-<!-- wp:dono/heading {$headingShownForSocial} /-->
-<!-- wp:dono/text-input {$hiddenRequiredTextInput} /-->
-<!-- wp:dono/comment {$commentVisibleWhenAnyValue} /-->
-<!-- wp:dono/payment-gateways {"style":"radio","allowed":["offline","sandbox"]} /-->
-<!-- wp:dono/donation-summary /-->
-<!-- wp:dono/submit-button {"label":"Donate now"} /-->
-BLOCKS;
+        return implode("\n", [
+            '<!-- wp:dono/heading {"text":"Support our work","level":2} /-->',
+            '<!-- wp:dono/donation-amount {"presets":[1000,2500,5000,10000],"allowCustom":true,"currency":"EUR"} /-->',
+            '<!-- wp:dono/name {"requireFirst":true,"requireLast":true} /-->',
+            '<!-- wp:dono/email {"required":true} /-->',
+            '<!-- wp:dono/dropdown ' . $dropdown . ' /-->',
+            '<!-- wp:dono/heading ' . $headingShownForSocial . ' /-->',
+            '<!-- wp:dono/text-input ' . $hiddenRequiredTextInput . ' /-->',
+            '<!-- wp:dono/comment ' . $commentVisibleWhenAnyValue . ' /-->',
+            '<!-- wp:dono/payment-gateways {"style":"radio","allowed":["offline","sandbox"]} /-->',
+            '<!-- wp:dono/donation-summary /-->',
+            '<!-- wp:dono/submit-button {"label":"Donate now"} /-->',
+        ]);
     }
 
     /**

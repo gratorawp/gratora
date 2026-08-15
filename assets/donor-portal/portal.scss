@@ -38,7 +38,13 @@
     &__signout-group {
         display: flex;
         flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-end;
         gap: 8px;
+
+        // The confirmation sits on its own line above the two buttons, and is
+        // bounded so a sentence cannot squeeze the greeting next to it.
+        .dp-hint { flex-basis: 100%; max-width: 320px; text-align: right; }
     }
 
     &__signout {

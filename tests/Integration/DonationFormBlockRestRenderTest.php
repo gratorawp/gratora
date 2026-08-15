@@ -139,7 +139,10 @@ final class DonationFormBlockRestRenderTest extends IntegrationTestCase
 
             $html = $this->renderFormOn($route);
 
-            $this->assertStringContainsString('data-form-slug=', $html, 'a page read is not the block editor');
+            // Quoted on purpose: the preview carries a form of its own, so
+            // data-form-slug= is on both branches, and only the srcdoc escaping
+            // of the quotes tells them apart.
+            $this->assertStringContainsString('data-block="dono/submit-button"', $html, 'a page read is not the block editor');
             $this->assertStringNotContainsString('dono-donation-form__editor-preview', $html);
         }
     }
@@ -150,7 +153,7 @@ final class DonationFormBlockRestRenderTest extends IntegrationTestCase
 
         $html = $this->renderFormOn(self::BLOCK_RENDERER_ROUTE);
 
-        $this->assertStringContainsString('data-form-slug=', $html, 'the real form renders instead');
+        $this->assertStringContainsString('data-block="dono/submit-button"', $html, 'the real form renders instead');
         $this->assertStringNotContainsString('dono-donation-form__editor-preview', $html);
     }
 }

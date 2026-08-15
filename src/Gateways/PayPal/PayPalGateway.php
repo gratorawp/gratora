@@ -1210,7 +1210,10 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         if ($approveUrl !== '') {
             throw new SubscriptionChangeNeedsApproval(
                 esc_html('PayPal needs the donor to approve this change before it takes effect.'),
-                $approveUrl
+                // Sanitised here rather than above, because a link this rejects
+                // must still stop the change: emptying $approveUrl before the
+                // test would let the revise be written off as applied.
+                esc_url_raw($approveUrl)
             );
         }
     }

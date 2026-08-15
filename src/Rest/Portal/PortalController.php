@@ -507,15 +507,22 @@ final class PortalController
     }
 
     /**
-     * What this submission may leave on a standing claim, field by field. A
-     * field it does not carry asserts nothing; one that agrees changes nothing;
-     * one filling a blank is an addition, which is the donor coming back to add
-     * the surname the signup form did not require. Anything else is two callers
-     * naming one identity: that field is cleared rather than awarded, because
-     * neither the older nor the newer name is an outcome an attacker cannot
-     * steer, and the person who proves the mailbox names themselves in the
-     * portal. Only the disputed field goes, so a contested first name does not
-     * take a surname nobody argued about with it.
+     * What this submission may leave on a standing claim. Redemption prints the
+     * claim's names on the donor row, and from there on the receipts and the
+     * year-end statement, where nothing later corrects them: refreshProfile
+     * only back-fills. Nobody reaching this endpoint has proved the mailbox, so
+     * the claim is an identity somebody else may be holding and a second caller
+     * never writes on it. The only outcomes are the name that is standing and
+     * no name at all.
+     *
+     * A submission carrying no name at all is somebody asking for another mail
+     * and asserts nothing. Any other submission asserts a whole identity, so a
+     * field it leaves blank contests a standing one exactly as a different
+     * value does: without that, a stranger who types only a surname leaves it
+     * on the row and the owner's own signup, which sends that field empty,
+     * cannot take it off. A contested field is cleared rather than awarded,
+     * because whoever holds the mailbox names themselves in the portal once
+     * they are in, and clearing writes nothing an attacker chose.
      *
      * @param array{first_name:?string, last_name:?string} $names
      *
@@ -525,21 +532,38 @@ final class PortalController
      */
     private function reconcileNames(PendingSignup $claim, array $names): array
     {
+        $standing = [];
+        foreach (['first_name', 'last_name'] as $field) {
+            $standing[$field] = ($claim->$field ?? '') !== '' ? (string) $claim->$field : null;
+        }
+
+        if ($names['first_name'] === null && $names['last_name'] === null) {
+            return $standing;
+        }
+
         $out = [];
         foreach (['first_name', 'last_name'] as $field) {
-            $standing  = ($claim->$field ?? '') !== '' ? (string) $claim->$field : null;
-            $submitted = $names[$field];
-
-            if ($submitted === null || $submitted === $standing) {
-                $out[$field] = $standing;
-            } elseif ($standing === null) {
-                $out[$field] = $submitted;
-            } else {
-                $out[$field] = null;
-            }
+            $out[$field] = $this->nameKey($names[$field]) === $this->nameKey($standing[$field])
+                ? $standing[$field]
+                : null;
         }
 
         return $out;
+    }
+
+    /**
+     * Comparison key for two typed names. Case and spacing are how one person
+     * retypes their own name, not how two people disagree about it. Folding
+     * them concedes nothing, because agreement keeps the standing value and
+     * never the submitted one.
+     *
+     * @since 1.0.0
+     */
+    private function nameKey(?string $name): ?string
+    {
+        return $name === null
+            ? null
+            : mb_strtolower((string) preg_replace('/\s+/u', ' ', $name));
     }
 
     /**
@@ -708,7 +732,7 @@ final class PortalController
     {
         $donorId = $this->session->currentDonorId();
         if ($donorId === null) {
-            return new WP_Error('dono_unauthorized', '', ['status' => 401]);
+            return new WP_Error('dono_unauthorized', __('Session expired.', 'dono-fundraising-platform'), ['status' => 401]);
         }
 
         return new WP_REST_Response(['ok' => true, 'ended' => $this->session->destroyAllFor($donorId)], 200);
@@ -775,8 +799,8 @@ final class PortalController
         $donorId = (int) $donor->id;
 
         // donationsOnly, not live: a ticket order rides the same table with
-        // kind='order' and would read to the donor as a gift they made, which
-        // the lifetime figure above it excludes.
+        // kind='order' and would read to the donor as a donation they made,
+        // which the lifetime figure above it excludes.
         $rows = DonationQueries::donationsOnly(Donation::query())
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('donor_id', $donorId)
@@ -1189,7 +1213,7 @@ final class PortalController
     {
         $donorId = $this->session->currentDonorId();
         $donor   = $donorId ? $this->donors->findById($donorId) : null;
-        if (! $donor || $donor->redacted_at !== null) return new WP_Error('dono_unauthorized', '', ['status' => 401]);
+        if (! $donor || $donor->redacted_at !== null) return new WP_Error('dono_unauthorized', __('Session expired.', 'dono-fundraising-platform'), ['status' => 401]);
 
         return new WP_REST_Response([
             'email'      => (string) ($this->donorService->decryptEmail($donor) ?? ''),
@@ -1207,7 +1231,7 @@ final class PortalController
     {
         $donorId = $this->session->currentDonorId();
         $donor   = $donorId ? $this->donors->findById($donorId) : null;
-        if (! $donor || $donor->redacted_at !== null) return new WP_Error('dono_unauthorized', '', ['status' => 401]);
+        if (! $donor || $donor->redacted_at !== null) return new WP_Error('dono_unauthorized', __('Session expired.', 'dono-fundraising-platform'), ['status' => 401]);
 
         $body  = (array) ($request->get_json_params() ?? []);
         $patch = [];
@@ -1448,7 +1472,7 @@ final class PortalController
     {
         $donorId = $this->session->currentDonorId();
         $donor   = $donorId ? $this->donors->findById($donorId) : null;
-        if (! $donor || $donor->redacted_at !== null) return new WP_Error('dono_unauthorized', '', ['status' => 401]);
+        if (! $donor || $donor->redacted_at !== null) return new WP_Error('dono_unauthorized', __('Session expired.', 'dono-fundraising-platform'), ['status' => 401]);
         return $donor;
     }
 

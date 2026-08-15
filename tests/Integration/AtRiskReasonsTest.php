@@ -12,9 +12,9 @@ use Dono\Recurring\RecurringPlan;
 
 /**
  * The at-risk rows carry why each donor is there. The load fixture has no
- * recurring plans and no single-gift donors at all, so every case here seeds
- * its own rows: a green run against seeded data would prove nothing about the
- * branches that matter.
+ * recurring plans and no single-donation donors at all, so every case here
+ * seeds its own rows: a green run against seeded data would prove nothing
+ * about the branches that matter.
  */
 final class AtRiskReasonsTest extends IntegrationTestCase
 {
@@ -119,7 +119,7 @@ final class AtRiskReasonsTest extends IntegrationTestCase
 
     public function test_a_donor_with_no_plan_is_measured_against_their_own_gap(): void
     {
-        // 6 gifts over 360 days = a 72-day average; silent 120 days.
+        // 6 donations over 360 days = a 72-day average; silent 120 days.
         $donor = $this->atRiskDonor(count: 6, silentDays: 120, spanDays: 360);
 
         $row = $this->rowFor((int) $donor->id);

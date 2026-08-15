@@ -302,7 +302,7 @@ final class DonationEmails extends HookProvider
     /**
      * How many donations this donor has made themselves, counting the one that
      * just completed. Scoped exactly as DonorAggregateSyncer scopes its counter
-     * (real money, given as a gift), minus the hand-recorded ones.
+     * (real money, given rather than exchanged), minus the hand-recorded ones.
      *
      * @since 1.0.0
      */

@@ -12,6 +12,8 @@ use Dono\Gateways\PayPal\PayPalAccount;
 use Dono\Gateways\PayPal\PayPalApi;
 use Dono\Gateways\PayPal\PayPalGateway;
 use Dono\Gateways\PayPal\PayPalPlans;
+use Dono\Gateways\SubscriptionChangeNeedsApproval;
+use Dono\Recurring\RecurringPlan;
 use WP_REST_Request;
 
 /**
@@ -28,6 +30,9 @@ final class PayPalGatewayTest extends IntegrationTestCase
 
     /** Canned capture comes back PENDING (eCheck / review hold) when set. */
     private bool $pendingCapture = false;
+
+    /** href on the approve link a canned /revise hands back. */
+    private string $reviseApproveHref = '';
 
     protected function setUp(): void
     {
@@ -125,6 +130,9 @@ final class PayPalGatewayTest extends IntegrationTestCase
                     'currency_code' => (string) ($body['amount']['currency_code'] ?? 'USD'),
                 ],
             ];
+        }
+        if (str_contains($path, '/revise')) {
+            return ['links' => [['rel' => 'approve', 'href' => $this->reviseApproveHref]]];
         }
         if (str_contains($path, '/v2/checkout/orders')) {
             return ['id' => 'ORDER-1', 'status' => 'CREATED'];
@@ -406,5 +414,53 @@ final class PayPalGatewayTest extends IntegrationTestCase
 
         $donation = (new DonationRepository())->findByReference($reference);
         $this->assertSame('paid', $donation->status, 'the hold clears to paid');
+    }
+
+    private function revisePlan(): RecurringPlan
+    {
+        $plan = RecurringPlan::make();
+        $plan->donor_id                = 1;
+        $plan->gateway                 = 'paypal';
+        $plan->gateway_subscription_id = 'I-REVISE-1';
+        $plan->amount_cents            = 2500;
+        $plan->currency                = 'USD';
+        $plan->interval_unit           = 'month';
+        $plan->interval_count          = 1;
+        $plan->is_test                 = true;
+
+        return $plan;
+    }
+
+    private function gateway(): PayPalGateway
+    {
+        return Plugin::instance()->container->get(GatewayManager::class)->get('paypal');
+    }
+
+    /**
+     * The approve link comes from PayPal's response and is handed to the donor
+     * and the admin as `approve_url`, so it is not ours to trust.
+     */
+    public function test_the_approve_link_a_revise_returns_is_sanitised_before_it_travels(): void
+    {
+        $this->reviseApproveHref = 'javascript:alert(document.cookie)';
+
+        try {
+            $this->gateway()->updateSubscriptionAmount($this->revisePlan(), 5000);
+            $this->fail('a revise PayPal has not applied must still refuse the change');
+        } catch (SubscriptionChangeNeedsApproval $e) {
+            $this->assertSame('', $e->approveUrl, 'a scheme no browser should follow does not travel');
+        }
+    }
+
+    public function test_a_real_approve_link_reaches_the_donor_intact(): void
+    {
+        $this->reviseApproveHref = 'https://www.sandbox.paypal.com/webapps/billing/subscriptions?ba_token=BA-1';
+
+        try {
+            $this->gateway()->updateSubscriptionAmount($this->revisePlan(), 5000);
+            $this->fail('the change is not applied until the donor approves');
+        } catch (SubscriptionChangeNeedsApproval $e) {
+            $this->assertSame($this->reviseApproveHref, $e->approveUrl);
+        }
     }
 }

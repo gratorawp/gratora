@@ -91,11 +91,27 @@ final class DataImporter
      * refunds carries no gateway id at all, and the unique index that stops one
      * being recorded twice is nullable for exactly that reason. Nothing else
      * recognises it on a second run, and refunds are subtracted from the org's
-     * totals as they stand.
+     * totals as they stand. That is the only case it may answer: see
+     * ALSO_UNIQUE_WHEN_EMPTY.
      */
     private const ALSO_UNIQUE = [
         'dono_receipts' => ['donation_id', 'renderer_id'],
         'dono_refunds'  => ['donation_id', 'amount_cents', 'occurred_at'],
+    ];
+
+    /**
+     * Tables whose ALSO_UNIQUE lookup applies only to rows missing this column.
+     *
+     * Two gateway refunds of one donation can agree on amount and second: a
+     * charge.refunded array is recorded in one pass and each is stamped with
+     * the processing time, not the gateway's. No index separates that triple,
+     * so consulting it for a refund the gateway already named merges two real
+     * rows and gives the org back money it paid out. The receipts entry needs
+     * no such gate, since UNIQUE(donation_id, renderer_id) means it can only
+     * ever match a row the insert would be refused against anyway.
+     */
+    private const ALSO_UNIQUE_WHEN_EMPTY = [
+        'dono_refunds' => 'gateway_refund_id',
     ];
 
     /** Columns holding an id from another exported table, by the table it points at. */
@@ -536,8 +552,12 @@ final class DataImporter
         if ($id > 0) return $id;
 
         $alsoUnique = self::ALSO_UNIQUE[$table] ?? null;
+        if ($alsoUnique === null) return 0;
 
-        return $alsoUnique === null ? 0 : self::lookup($table, $row, $alsoUnique);
+        $onlyWhenEmpty = self::ALSO_UNIQUE_WHEN_EMPTY[$table] ?? null;
+        if ($onlyWhenEmpty !== null && (string) ($row[$onlyWhenEmpty] ?? '') !== '') return 0;
+
+        return self::lookup($table, $row, $alsoUnique);
     }
 
     /**

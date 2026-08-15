@@ -33,7 +33,7 @@ final class DonorRetentionGraceTest extends IntegrationTestCase
             ]);
     }
 
-    /** A donor whose last gift is far enough back to be past any window. */
+    /** A donor whose last donation is far enough back to be past any window. */
     private function ancientDonor(): Donor
     {
         $d = Donor::make();

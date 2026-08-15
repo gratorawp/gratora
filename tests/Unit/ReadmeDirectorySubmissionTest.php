@@ -18,8 +18,8 @@ use PHPUnit\Framework\TestCase;
  * Plugin Guideline 4 is answered by the payload rather than by prose: the zip
  * carries compiled JavaScript in build/, and assets/, package.json and
  * webpack.config.js ship beside it so a reviewer holding only the zip can turn
- * one back into the other. The two facts that arrangement rests on are pinned
- * here, because nothing in the readme names them.
+ * one back into the other. That arrangement is pinned here rather than in the
+ * readme, which names none of it.
  */
 final class ReadmeDirectorySubmissionTest extends TestCase
 {
@@ -29,6 +29,15 @@ final class ReadmeDirectorySubmissionTest extends TestCase
      * Bitstream Vera terms require the notice to travel with every copy.
      */
     private const FONT_LICENCE = 'licenses/DejaVu-Fonts-License.txt';
+
+    /**
+     * build/ is compiled, so Guideline 4 is answered by shipping the source it
+     * came from and the two files that turn one back into the other. Named here
+     * rather than taken from prose because the readme does not mention them.
+     *
+     * @var list<string>
+     */
+    private const GUIDELINE_4_PAYLOAD = ['build', 'assets', 'package.json', 'webpack.config.js'];
 
     private function root(): string
     {
@@ -142,6 +151,38 @@ final class ReadmeDirectorySubmissionTest extends TestCase
         $notice = (string) file_get_contents($path);
         $this->assertStringContainsString('Bitstream Vera Fonts Copyright', $notice);
         $this->assertStringContainsString('Arev Fonts Copyright', $notice);
+    }
+
+    /**
+     * A reviewer holding the zip has to be able to rebuild build/ from what is
+     * inside it, and there is no public repository to send them to instead.
+     *
+     * bin/verify-zip.sh gates the same list, but only on a tag build, so a
+     * .distignore rule that strips one of these reaches a reviewer before it
+     * reaches a release. DistPackagingTest does not cover it either: that test
+     * asserts the packager and the matcher agree, and both would agree about a
+     * new rule.
+     */
+    public function test_the_sources_that_rebuild_the_compiled_javascript_ship_with_it(): void
+    {
+        $stripped = [];
+        foreach (self::GUIDELINE_4_PAYLOAD as $rel) {
+            $this->assertFileExists(
+                $this->root() . '/' . $rel,
+                "$rel is not in the checkout, so it cannot be in the zip."
+            );
+
+            if (DistPayload::excluded($this->root(), $rel)) {
+                $stripped[] = $rel;
+            }
+        }
+
+        $this->assertSame(
+            [],
+            $stripped,
+            ".distignore keeps these out of the zip, so nothing in it says where build/ came from:\n"
+                . implode("\n", $stripped)
+        );
     }
 
     public function test_the_header_agrees_with_the_plugin_file_and_composer(): void

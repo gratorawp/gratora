@@ -79,7 +79,7 @@ final class PortalShortcode extends HookProvider
                 true
             );
             wp_localize_script(self::HANDLE, 'donoPortal', [
-                'rest'  => esc_url_raw(rest_url('dono/v1/portal/')),
+                'rest'  => esc_url_raw($this->restBase(rest_url('dono/v1/portal/'))),
                 // Only logged-in users get a REST nonce, so a page-cached
                 // portal never carries a stale one that WP's cookie check
                 // would 403. Portal auth is the session cookie + X-Dono-Csrf.
@@ -102,6 +102,35 @@ final class PortalShortcode extends HookProvider
             wp_style_add_data(self::HANDLE, 'rtl', 'replace');
             wp_add_inline_style(self::HANDLE, $this->brandCss());
         }
+    }
+
+    /**
+     * The base the portal's own fetch talks to. rest_url() answers with
+     * home_url's host, so on an install that serves this page on both the apex
+     * and www, the fetch from whichever one home_url is not is cross-origin:
+     * the browser drops the session cookie /portal/exchange sets, and the
+     * donor's single-use link is spent on a session that never holds. Asking
+     * the host the page was actually served from keeps it same-origin.
+     *
+     * Host is a header the caller writes, and this page is cached, so only the
+     * www label is ever swapped. Anything wider would let one poisoned request
+     * leave a foreign REST base in the cache for everybody after it.
+     *
+     * @since 1.0.0
+     */
+    private function restBase(string $restUrl): string
+    {
+        $parts  = (array) wp_parse_url($restUrl);
+        $host   = strtolower((string) ($parts['host'] ?? ''));
+        $served = strtolower((string) preg_replace('/:\d+$/', '', (string) ($_SERVER['HTTP_HOST'] ?? '')));
+
+        if ($host === '' || $served === '' || $served === $host) return $restUrl;
+        if ($served !== 'www.' . $host && $host !== 'www.' . $served) return $restUrl;
+
+        return ($parts['scheme'] ?? 'https') . '://' . $served
+            . (isset($parts['port']) ? ':' . $parts['port'] : '')
+            . (string) ($parts['path'] ?? '')
+            . (isset($parts['query']) && $parts['query'] !== '' ? '?' . $parts['query'] : '');
     }
 
     /** @since 1.0.0 */

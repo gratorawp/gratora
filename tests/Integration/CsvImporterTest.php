@@ -302,8 +302,8 @@ final class CsvImporterTest extends IntegrationTestCase
     }
 
     /**
-     * The mailing list and the gift history are usually separate exports and
-     * the list arrives first, so a file with no amounts has to import the
+     * The mailing list and the donation history are usually separate exports
+     * and the list arrives first, so a file with no amounts has to import the
      * people rather than be refused.
      */
     public function test_a_file_with_no_amount_column_imports_the_donors_alone(): void

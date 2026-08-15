@@ -21,7 +21,7 @@ final class DsarExportCompletenessTest extends IntegrationTestCase
     {
         $container = Plugin::instance()->container;
         $donor = $container->get(DonorService::class)
-            ->findOrCreate('many@example.com', ['first_name' => 'Many', 'last_name' => 'Gifts']);
+            ->findOrCreate('many@example.com', ['first_name' => 'Many', 'last_name' => 'Donations']);
 
         $now = gmdate('Y-m-d H:i:s');
         for ($i = 0; $i < 30; $i++) {
@@ -53,7 +53,7 @@ final class DsarExportCompletenessTest extends IntegrationTestCase
         $this->assertArrayHasKey('consents', $export);
         $this->assertArrayHasKey('events', $export);
         $this->assertArrayHasKey('notes', $export);
-        $this->assertSame('Many Gifts', $export['donor']['name']);
+        $this->assertSame('Many Donations', $export['donor']['name']);
     }
 
     public function test_profile_timeline_carries_the_note_left_with_a_gift(): void

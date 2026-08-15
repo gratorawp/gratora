@@ -84,7 +84,17 @@ final class FxController
             }
         }
 
-        $this->updater->saveSettings((bool) ($body['auto'] ?? true), $manual);
+        // The base the client read its rates in. A base change saved from this
+        // same screen restates the whole snapshot, and the rates below it were
+        // rendered before that happened.
+        $frame = (string) ($body['frame'] ?? '');
+
+        if (! $this->updater->saveSettings((bool) ($body['auto'] ?? true), $manual, $frame)) {
+            return new WP_REST_Response([
+                'code'    => 'dono_fx_frame_moved',
+                'message' => __('The base currency changed while this screen was open, so the rates shown are no longer in the currency they were entered against. Reload the page and set them again.', 'dono-fundraising-platform'),
+            ], 409);
+        }
 
         return new WP_REST_Response($this->state(), 200);
     }
@@ -130,6 +140,11 @@ final class FxController
 
         return [
             'base'       => $base,
+            // What the rate column is actually denominated in, which is the org
+            // base in every healthy state and the one the client has to declare
+            // back on a write. Not merged into 'base': that one labels the
+            // column and is the org's own currency whatever the snapshot holds.
+            'frame'      => $this->fx->base() ?? $base,
             'auto'       => $this->fx->auto(),
             'stale'      => $this->fx->isStale(),
             'date'       => $this->fx->date(),

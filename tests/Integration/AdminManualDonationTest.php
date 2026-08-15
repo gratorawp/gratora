@@ -225,8 +225,8 @@ final class AdminManualDonationTest extends IntegrationTestCase
     /**
      * M4. Two checks for the same amount from the same donor on the same day
      * are genuinely possible, so this cannot dedupe silently: swallowing a real
-     * second gift is worse than the double entry it would prevent. It warns,
-     * and names the donation it thinks this is a copy of.
+     * second donation is worse than the double entry it would prevent. It
+     * warns, and names the donation it thinks this is a copy of.
      */
     public function test_it_warns_before_recording_the_same_donation_twice(): void
     {
@@ -459,9 +459,9 @@ final class AdminManualDonationTest extends IntegrationTestCase
 
     /**
      * The public route has always checked the accepted list; this one validated
-     * the code as three letters and took whatever it was given. A gift recorded
-     * in a currency with no configured rate has no base amount, so it sits
-     * outside every total with nothing on any screen saying so.
+     * the code as three letters and took whatever it was given. A donation
+     * recorded in a currency with no configured rate has no base amount, so it
+     * sits outside every total with nothing on any screen saying so.
      */
     public function test_a_currency_the_org_does_not_accept_is_refused(): void
     {

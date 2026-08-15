@@ -1456,7 +1456,7 @@ msgid "Recurring payments failing"
 msgstr ""
 
 #: src/Donors/AtRiskReason.php:118
-msgid "Recurring gift paused"
+msgid "Recurring donation paused"
 msgstr ""
 
 #: src/Donors/AtRiskReason.php:119
@@ -1470,7 +1470,7 @@ msgid "Recurring plan still active"
 msgstr ""
 
 #: src/Donors/AtRiskReason.php:121
-msgid "First gift, never repeated"
+msgid "First donation, never repeated"
 msgstr ""
 
 #: src/Donors/AtRiskReason.php:122
@@ -2477,7 +2477,7 @@ msgstr ""
 
 #: src/Forms/FormTemplates.php:243
 #: src/Forms/FormTemplates.php:279
-msgid "Make this a repeating gift"
+msgid "Make this a recurring donation"
 msgstr ""
 
 #: src/Forms/FormTemplates.php:252
@@ -2528,7 +2528,7 @@ msgid "Become a monthly supporter"
 msgstr ""
 
 #: src/Forms/FormTemplates.php:319
-msgid "A gift that arrives every month lets us plan further ahead than any single donation can."
+msgid "A donation that arrives every month lets us plan further ahead than any single one can."
 msgstr ""
 
 #: src/Forms/FormTemplates.php:323
@@ -2561,7 +2561,7 @@ msgid "Your first payment is taken today. If you chose a repeating frequency, th
 msgstr ""
 
 #: src/Forms/FormTemplates.php:347
-msgid "Start my monthly gift"
+msgid "Start my monthly donation"
 msgstr ""
 
 #: src/Forms/FormTemplates.php:351
@@ -7776,8 +7776,8 @@ msgstr ""
 #. translators: %d: number of days
 #: assets/admin/donors/Insights.jsx:169
 #, js-format
-msgid "About %d day between gifts, on average."
-msgid_plural "About %d days between gifts, on average."
+msgid "About %d day between donations, on average."
+msgid_plural "About %d days between donations, on average."
 msgstr[0] ""
 msgstr[1] ""
 

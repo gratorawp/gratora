@@ -64,10 +64,10 @@ final class TestDataPurger
         $removed = ['donations' => 0, 'recurring_plans' => 0, 'donors' => 0];
 
         foreach (array_chunk($donationIds, self::CHUNK) as $chunk) {
-            // Add-ons hang their own rows off a donation (ticket orders, gift
-            // aid claims, tributes). Core cannot know them, and orphaning them
-            // would be worse than leaving them, so they are told before the
-            // rows they point at disappear.
+            // Add-ons hang their own rows off a donation (ticket orders,
+            // Gift Aid claims, tributes). Core cannot know them, and orphaning
+            // them would be worse than leaving them, so they are told before
+            // the rows they point at disappear.
             do_action('dono.test_data.purge_donations', $chunk);
 
             DB::table('dono_receipts')->whereIn('donation_id', $chunk)->delete();

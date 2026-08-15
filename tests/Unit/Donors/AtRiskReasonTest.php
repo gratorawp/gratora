@@ -63,13 +63,13 @@ final class AtRiskReasonTest extends TestCase
             'last_donation_at'  => '2026-05-01',
         ]);
 
-        $this->assertSame(AtRiskReason::FIRST_GIFT_ONLY, $out['key']);
+        $this->assertSame(AtRiskReason::FIRST_DONATION_ONLY, $out['key']);
         $this->assertNull($out['avg_gap_days']);
     }
 
     public function test_two_widely_spaced_donations_do_give_an_average(): void
     {
-        // Nearly half of a real at-risk list has exactly two gifts. With a wide
+        // Nearly half of a real at-risk list has exactly two donations. With a wide
         // span the mean of one interval is literally their average gap.
         $out = $this->classify([
             'donations_count'   => 2,
@@ -98,7 +98,7 @@ final class AtRiskReasonTest extends TestCase
      */
     public function test_the_bands_sit_where_they_claim(int $silentDays, string $expected): void
     {
-        // 7 gifts over 360 days = a 60-day average gap.
+        // 7 donations over 360 days = a 60-day average gap.
         $last = date('Y-m-d', strtotime(self::TODAY . " -{$silentDays} days"));
         $first = date('Y-m-d', strtotime($last . ' -360 days'));
 
@@ -156,7 +156,7 @@ final class AtRiskReasonTest extends TestCase
 
         foreach ([
             AtRiskReason::PLAN_FAILING, AtRiskReason::PLAN_PAUSED, AtRiskReason::PLAN_CANCELLED,
-            AtRiskReason::PLAN_ACTIVE, AtRiskReason::FIRST_GIFT_ONLY, AtRiskReason::NO_GAP_YET,
+            AtRiskReason::PLAN_ACTIVE, AtRiskReason::FIRST_DONATION_ONLY, AtRiskReason::NO_GAP_YET,
             AtRiskReason::WELL_PAST_GAP, AtRiskReason::PAST_GAP, AtRiskReason::WITHIN_GAP,
         ] as $key) {
             $this->assertArrayHasKey($key, $labels);

@@ -64,7 +64,7 @@ final class DonorErasureCompletenessTest extends IntegrationTestCase
 
         $n = DonationNote::make();
         $n->donation_id = $this->donationId;
-        $n->body_encrypted = 'Spoke to ' . self::NEEDLE . ' about the gift';
+        $n->body_encrypted = 'Spoke to ' . self::NEEDLE . ' about the donation';
         $n->created_at  = $now;
         $n->updated_at  = $now;
         $n->save();

@@ -17,7 +17,7 @@ const FREQ_OPTIONS = [
     { value: 'yearly',    label: __( 'Yearly', 'dono-fundraising-platform' ) },
 ];
 
-// One-time is not listed: every form accepts a single gift, so the server
+// One-time is not listed: every form accepts a single donation, so the server
 // prepends it and a checkbox for it would never turn off.
 const RECURRING_OPTIONS = FREQ_OPTIONS.filter( ( f ) => f.value !== 'one-time' );
 

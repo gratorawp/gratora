@@ -494,11 +494,11 @@ final class DonorRepository
 
         // Anchor each donor's cohort on their own earliest live donation, over
         // the SAME status set the offsets count, not the denormalized
-        // first_donation_at: otherwise a donor whose first gift is not a plain
+        // first_donation_at: otherwise a donor whose first donation is not a
         // 'paid' row misses offset 0, so the cohort size undercounts while
         // later offsets still populate (>100% retention). The MIN spans all of
         // the donor's donations, then cohorts are trimmed to the window, so a
-        // pre-window first gift cannot mis-anchor a donor.
+        // pre-window first donation cannot mis-anchor a donor.
         $sql = "
             SELECT
                 DATE_FORMAT(fd.first_paid, '%Y-%m') AS cohort,

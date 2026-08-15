@@ -83,7 +83,7 @@ final class ReceiptSeamsTest extends IntegrationTestCase
     // -- dono.receipt.should_issue -------------------------------------------
 
     /**
-     * The default is unchanged: a gift is receipted, a ticket order is not.
+     * The default is unchanged: a donation is receipted, a ticket order is not.
      * "No receipt" is the safe answer rather than the right one, which is why
      * the filter exists.
      */

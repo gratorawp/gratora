@@ -237,7 +237,7 @@ final class DonorMetricsService
         $timeline   = $this->donors->monthlyTimelineForDonor($donorId);
         $attribution = $this->donors->attributionMixForDonor($donorId);
 
-        // The note a donor left with a gift lives on the donation, not the event.
+        // The note a donor left lives on the donation, not the event.
         // Pull the notes for the events' donations in one query so the timeline
         // can show the message inline instead of leaving it a click away.
         $eventNotes    = $this->noteMapForEvents($events);
@@ -263,7 +263,7 @@ final class DonorMetricsService
         $sparkline = $this->buildSparkline($timeline, 30);
         $netExpr = DonationQueries::netBaseExpr();
         // donationsOnly, not live: the total, count and average beside this are
-        // donation-only, so a ticket order here made the largest gift exceed a
+        // donation-only, so a ticket order here made the largest donation exceed a
         // lifetime that does not contain it.
         $largestDonation = (int) (DonationQueries::donationsOnly(DB::table('dono_donations')
             ->whereIn('status', ['paid', 'partial_refund'])
@@ -717,8 +717,8 @@ final class DonorMetricsService
     }
 
     /**
-     * A receipt number identifies the document, not the gift it covers, so the
-     * reference is resolved for the whole page in one query rather than per row.
+     * A receipt number identifies the document, not the donation it covers, so
+     * the reference is resolved for the whole page in one query, not per row.
      *
      * @param array<int,Receipt> $receipts
      * @return array<int,array<string,mixed>>
@@ -879,9 +879,9 @@ final class DonorMetricsService
     }
 
     /**
-     * The note belongs to the gift, and one donation spawns several events
-     * (intent, completed, receipt), so surface it only on the gift event, not
-     * on every row that shares the donation id.
+     * The note belongs to the donation, and one donation spawns several
+     * events (intent, completed, receipt), so surface it only on the donation
+     * event, not on every row that shares the donation id.
      *
      * @param array<int,string> $noteMap
      *

@@ -74,7 +74,7 @@ final class Donation extends Model
      * What the money is: 'donation', or a non-donation kind an add-on moves
      * through the rails (e.g. 'order' for event ticket orders).
      *
-     * One rule, at every level: raised means gifts. A ticket buyer received
+     * One rule, at every level: raised means donations. A ticket buyer got
      * something of value, so their order is an exchange rather than a
      * contribution, and it stays out of donor lifetime totals, campaign, fund
      * and form rollups, receipts and the year-end statement alike.

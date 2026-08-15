@@ -6,7 +6,9 @@
     let lastFocused  = null;
 
     function open( modal ) {
-        if ( ! modal ) return;
+        // Already open: re-entering would record a focus target from inside the
+        // modal as the element to restore on close.
+        if ( ! modal || modal.classList.contains( OPEN_CLASS ) ) return;
         lastFocused = modal.ownerDocument.activeElement;
         modal.hidden = false;
         // Forced reflow so the CSS transition picks up the class toggle.
@@ -56,68 +58,41 @@
         }
     } );
 
-    // The form this browser last submitted, when the URL says the donor is
-    // coming back from a redirect gateway.
-    //
-    // Returns null when this is not a return, '' when it is one whose form
-    // cannot be named.
-    function returningFormId() {
-        const params = new URLSearchParams( window.location.search );
-        if ( params.get( 'dono_return' ) !== '1' ) return null;
-        if ( ! params.get( 'payment_intent_client_secret' ) ) return null;
-
-        let pending;
-        try {
-            const raw = window.sessionStorage.getItem( 'dono:pending-donation' );
-            pending = raw ? JSON.parse( raw ) : {};
-        } catch ( e ) {
-            // Storage refused or unreadable: nothing names a form, and a single
-            // form on the page is still unambiguous.
-            return '';
-        }
-
-        // The same rule detectStripeReturn() abstains on, because the two have
-        // to agree: a reference this tab did not stash belongs to some other
-        // submission, no form will claim it, and revealing it would open a
-        // modal holding an empty form and no outcome.
-        const own = String( pending.reference || '' );
-        const ref = params.get( 'dono_ref' ) || '';
-        if ( own && ref && own !== ref ) return null;
-
-        return String( pending.formKey || '' );
-    }
-
-    // Read now rather than when the modal is revealed: this script evaluates in
-    // the footer, before the form runtime boots on DOMContentLoaded and strips
-    // the markers off the URL.
-    const returningForm = returningFormId();
-
     // A donor coming back from their bank never pressed the trigger, and a shut
     // modal hides the only account of a payment they have already made.
-    function revealReturn() {
-        // The form runtime marks the form it claimed the return for. Trusted
-        // above everything else: it names the element the outcome is rendering
-        // into, and it is still there when this script runs late enough to have
-        // missed the markers on the URL.
-        const claimed = document.querySelector( '.dono-donation-form[data-dono-returning]' );
-        if ( ! claimed && returningForm === null ) return;
-
-        // No marker, so decide it the way the runtime does. It falls through to
-        // every form when the stash names none that is on the page, and mounts
-        // in document order, so the first form is the one that claims. Picking
-        // any other leaves the outcome rendered inside a modal nobody opens.
-        const host = claimed
-            || ( returningForm && document.getElementById( returningForm ) )
-            || document.querySelector( '.dono-donation-form' );
-
+    //
+    // Which form that is belongs to the form runtime alone: it holds the stash,
+    // the reference and the gateway key, and only it knows which form is
+    // rendering the outcome. Reaching the same verdict a second time from here
+    // is what let the two disagree, in both directions: a modal opened over a
+    // form that abstained shows a donor a blank form and no outcome, markers
+    // still on the URL for a reload to do it again. So this reveals the claim
+    // and never makes one. No claim means no outcome is being rendered
+    // anywhere, and the page as it stands beats a modal that cannot say what
+    // happened.
+    function revealFor( host ) {
         const modal = host && host.closest( '.dono-donate-modal' );
         if ( modal ) open( modal );
     }
 
-    // Deferred a task so the runtime has mounted and marked its claim; reading
-    // the URL already happened above, where the markers still exist.
+    // The claimant marks itself and announces it. Both are read, because the
+    // claim can land either side of this script: the runtime boots on
+    // DOMContentLoaded and the announcement reaches a listener already
+    // registered here, while a script an optimizer held back to the first
+    // interaction arrives to find the mark on the page and nothing to hear.
+    // RETURN_CLAIMED_EVENT in assets/donation-form/runtime.jsx.
+    window.addEventListener( 'dono:donation:return-claimed', ( e ) => {
+        revealFor( e.detail && e.detail.host );
+    } );
+
+    function revealClaimed() {
+        revealFor( document.querySelector( '.dono-donation-form[data-dono-returning]' ) );
+    }
+
+    // Deferred a task so a runtime booting on this same event has mounted and
+    // marked its claim first.
     function scheduleReveal() {
-        window.setTimeout( revealReturn, 0 );
+        window.setTimeout( revealClaimed, 0 );
     }
 
     if ( document.readyState === 'loading' ) {

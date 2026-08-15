@@ -640,6 +640,40 @@ final class DataRoundTripTest extends IntegrationTestCase
     }
 
     /**
+     * A charge.refunded array is recorded in one pass and every refund in it is
+     * stamped with the processing time, so two equal partial refunds of one
+     * donation are byte-identical on donation, amount and second. They are
+     * still two refunds, each named by the gateway, and a restore that folds
+     * them into one hands the org back money it gave away.
+     */
+    public function test_two_gateway_refunds_of_the_same_amount_in_the_same_second_both_come_back(): void
+    {
+        $donor    = $this->seedDonor('twice@example.test', 'Twice', 'Refunded');
+        $donation = $this->seedDonation((int) $donor->id, 'RT-TWICE-' . uniqid());
+        $at       = gmdate('Y-m-d H:i:s');
+
+        foreach (['re_first_half', 're_second_half'] as $gatewayId) {
+            $refund = Refund::make();
+            $refund->donation_id       = (int) $donation->id;
+            $refund->gateway_refund_id = $gatewayId;
+            $refund->amount_cents      = 2100;
+            $refund->currency          = 'USD';
+            $refund->initiated_by      = 'gateway';
+            $refund->occurred_at       = $at;
+            $refund->save();
+        }
+
+        $export = $this->export();
+        $this->wipeEverything();
+
+        $result = $this->import($export);
+
+        $this->assertSame(2, Refund::query()->count(), 'both halves of the refund came back');
+        $this->assertSame(2, $result['created']['dono_refunds'] ?? 0, 'and both were inserted');
+        $this->assertSame(0, $result['existing']['dono_refunds'] ?? 0, 'neither was read as the other');
+    }
+
+    /**
      * A shell with no donation left to it is matched on the file it came from
      * and the row it held there, and source ids start at 1 in every file. So
      * what names the file has to be part of it, or two unrelated erased people

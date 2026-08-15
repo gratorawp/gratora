@@ -51,7 +51,7 @@ final class DonorAggregateSyncer
             $netExpr = DonationQueries::netBaseExpr();
 
             // donationsOnly, not live: a ticket order is a purchase, not a
-            // gift, and counting it would inflate the buyer's lifetime total.
+            // donation, and counting it would inflate the buyer's lifetime total.
             $row = DonationQueries::donationsOnly(DB::table('dono_donations')
                 ->whereIn('status', ['paid', 'partial_refund'])
                 ->where('donor_id', $donorId))

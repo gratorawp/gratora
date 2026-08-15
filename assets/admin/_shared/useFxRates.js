@@ -51,21 +51,41 @@ export function useFxRates() {
     const resetManual = useCallback( ( code ) => setManualEdits( ( m ) => ( { ...m, [ code ]: null } ) ), [] );
     const discard     = useCallback( () => { setAutoEdit( null ); setManualEdits( {} ); }, [] );
 
-    const composeManual = useCallback( () => {
+    // Every untouched override is re-sent on every save, so what they are
+    // denominated in matters even when nobody has been near the rate column.
+    const composeManual = useCallback( ( rows_ ) => {
         const manual = {};
-        ( server?.rows || [] ).forEach( ( r ) => { if ( r.is_manual ) manual[ r.code ] = r.rate; } );
+        ( rows_ || [] ).forEach( ( r ) => { if ( r.is_manual ) manual[ r.code ] = r.rate; } );
         Object.entries( manualEdits ).forEach( ( [ code, v ] ) => {
             if ( v === null ) { delete manual[ code ]; } else { manual[ code ] = v; }
         } );
         return manual;
-    }, [ server, manualEdits ] );
+    }, [ manualEdits ] );
 
     const save = useCallback( async () => {
         setSaving( true );
         try {
+            // A rate is units per 1 base, and the shared Save bar can carry a
+            // base change in the same click. That restates the whole table, so
+            // re-read rather than posting the pre-change numbers back over it.
+            const current = await apiFetch( { path: PATH } );
+            const moved   = !! server?.frame && !! current?.frame && server.frame !== current.frame;
+
+            // A restated row can be re-sent as read. A number the admin typed
+            // is in the base they typed it under, and there is no honest way to
+            // carry that across: they meant one of the two currencies and the
+            // form does not know which.
+            if ( moved && Object.values( manualEdits ).some( ( v ) => v !== null ) ) {
+                throw new Error( __( 'The base currency changed in this save, so the exchange rates you entered are in the currency you left. Reload the page and set them again.', 'dono-fundraising-platform' ) );
+            }
+
             const updated = await apiFetch( {
                 path: PATH, method: 'PUT',
-                data: { auto, manual: composeManual() },
+                data: {
+                    auto,
+                    manual: composeManual( current?.rows ),
+                    frame: current?.frame || '',
+                },
             } );
             setServer( updated );
             setAutoEdit( null );
@@ -74,7 +94,7 @@ export function useFxRates() {
         } finally {
             setSaving( false );
         }
-    }, [ auto, composeManual ] );
+    }, [ auto, composeManual, manualEdits, server ] );
 
     const fetchNow = useCallback( async () => {
         setFetching( true );

@@ -1015,7 +1015,7 @@ function GoalProgressCard( { campaign } ) {
         ? ( campaign.goal_cents ?? 0 )
         : ( campaign.goal_count ?? 0 );
     // Goal progress is cumulative: campaign-lifetime totals, never the
-    // range-scoped metrics, or a range with no gifts reads 0% on an
+    // range-scoped metrics, or a range with no donations reads 0% on an
     // already-funded campaign.
     const current = goalType === 'amount'
         ? ( campaign.raised_cents ?? 0 )

@@ -44,10 +44,10 @@ final class DonationAmountCeilingTest extends IntegrationTestCase
         );
     }
 
-    /** A large but real gift must still go through. */
+    /** A large but real donation must still go through. */
     public function test_a_genuinely_large_gift_is_accepted(): void
     {
-        $this->assertSame(201, $this->post(5000000)->get_status(), '50,000.00 is a normal major gift');
+        $this->assertSame(201, $this->post(5000000)->get_status(), '50,000.00 is a normal major donation');
     }
 
     public function test_the_floor_still_applies(): void

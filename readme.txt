@@ -98,9 +98,14 @@ Only with PayPal connected. Sends the same donation details; the sandbox host is
 used in test mode. Their checkout script carries your PayPal client id.
 Terms: https://www.paypal.com/legalhub/useragreement-full | Privacy: https://www.paypal.com/legalhub/privacy-full
 
-**Frankfurter** (api.frankfurter.app)
+**Frankfurter** (api.frankfurter.app, which redirects to api.frankfurter.dev, so
+allowlist both)
 Only when you accept a currency other than your own. Requests European Central
-Bank rates once a day, sending a three-letter currency code and nothing else.
+Bank rates once a day, and again whenever you press "Fetch rates now" on
+Settings > Currency. Sends a three-letter currency code, along with the site
+address and WordPress version that WordPress itself puts in the user agent of
+every outbound request. The service is served through Cloudflare, which sees the
+request in transit.
 Terms and privacy: https://frankfurter.dev
 
 == Installation ==

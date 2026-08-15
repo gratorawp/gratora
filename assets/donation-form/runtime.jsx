@@ -38,6 +38,14 @@ const STEP_RENDERERS = {
 // is server-authoritative and returns no donor data.
 export const COMPLETED_EVENT = 'dono:donation:completed';
 
+// Fired on window by the one form that claims a redirect return, carrying the
+// element it is rendering the outcome into. The donate-button block keeps its
+// form inside a modal that has to be opened for that outcome to be visible at
+// all, and its script cannot see the claim: deciding it a second time over
+// there is how the two came to disagree. So the claim is announced, and the
+// modal script follows it rather than reasoning about references itself.
+export const RETURN_CLAIMED_EVENT = 'dono:donation:return-claimed';
+
 // The token lands in a different place on each payment path: the submit
 // response for auto-confirmed gateways, the payment step for the ones that
 // mount a component, and only session storage for a gateway that navigated away
@@ -903,16 +911,20 @@ function ModalShell( { children, openLabel, config, initiallyOpen = false } ) {
     );
 }
 
-function App( { config } ) {
+function App( { config, host } ) {
     const [ state, dispatch ] = useReducer( reducer, config, initialState );
 
     // Scoped to the submission this form made: two forms on a page both read
     // the same URL, and the first to run strips the params from under the
     // other. readPending() is what the page stashed when it submitted, and the
     // ownership check is what says whether that was this form.
+    //
+    // String on both sides: a reference is a string everywhere it is generated,
+    // and comparing one against a URL param with !== would abstain on a stashed
+    // number that spells the same thing.
     const claimReturn = () => (
         ownsPendingReturn( config.hostId )
-            ? detectStripeReturn( readPending().reference || null )
+            ? detectStripeReturn( String( readPending().reference || '' ) || null )
             : null
     );
 
@@ -954,20 +966,23 @@ function App( { config } ) {
     // to every form when the stash names none that is on the page, so two
     // modal-layout forms would otherwise both open, one of them onto a blank
     // form the effect above is never going to fill.
+    //
+    // Every gate the effect applies is applied here first, in the same order,
+    // so this cannot say a return is being rendered when it is not: it is the
+    // one decision, and the marker and the announcement below carry it to the
+    // donate-button script whole.
     const returningHere = useMemo( () => {
         const ret = claimReturn();
         if ( ! ret || ! config.stripe?.publishableKey ) return false;
 
-        // The donate-button block keeps its form inside a modal that has no way
-        // to see the claim, so the claimant says so on itself. During render,
-        // because preact defers effects past the point that script looks.
-        const host = config.hostId ? document.getElementById( config.hostId ) : null;
-        if ( ! host ) return false;
-
         const marked = document.querySelector( '.dono-donation-form[data-dono-returning]' );
         if ( marked && marked !== host ) return false;
 
+        // The element this instance rendered into, never a lookup by id: a form
+        // the shortcode gave no id still shows its donor an outcome, and the
+        // modal around it still has to open.
         host.dataset.donoReturning = '1';
+        window.dispatchEvent( new CustomEvent( RETURN_CLAIMED_EVENT, { detail: { host } } ) );
 
         return true;
     }, [] );
@@ -1194,7 +1209,7 @@ function mount( form ) {
     applyThemeTokens( form, config.theme );
 
     try {
-        render( <App config={ config } />, form );
+        render( <App config={ config } host={ form } />, form );
     } catch ( err ) {
         // Restore the static HTML so the form is at least visible.
         // eslint-disable-next-line no-console

@@ -35,9 +35,9 @@ final class ReferenceGeneratorFormatTest extends TestCase
     public function test_custom_prefix_per_scope(): void
     {
         update_option(ReferenceGenerator::OPTION_SETTINGS, [
-            'prefixes' => ['donation' => 'GIFT', 'receipt' => 'TAX'],
+            'prefixes' => ['donation' => 'DONA', 'receipt' => 'TAX'],
         ]);
-        $this->assertSame('GIFT-2026-00001', $this->gen->format('donation', 2026, 1));
+        $this->assertSame('DONA-2026-00001', $this->gen->format('donation', 2026, 1));
         $this->assertSame('TAX-2026-00001',  $this->gen->format('receipt', 2026, 1));
     }
 

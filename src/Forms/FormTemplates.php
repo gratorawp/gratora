@@ -240,7 +240,7 @@ final class FormTemplates
                     'allowCustom' => true,
                 ])
                 . self::block('dono/recurring-toggle', [
-                    'label'            => __('Make this a repeating gift', 'dono-fundraising-platform'),
+                    'label'            => __('Make this a recurring donation', 'dono-fundraising-platform'),
                     'defaultFrequency' => 'one-time',
                     'frequencies'      => ['one-time', 'monthly'],
                     'style'            => 'pills',
@@ -276,7 +276,7 @@ final class FormTemplates
                 'allowCustom' => true,
             ])
             . self::block('dono/recurring-toggle', [
-                'label'            => __('Make this a repeating gift', 'dono-fundraising-platform'),
+                'label'            => __('Make this a recurring donation', 'dono-fundraising-platform'),
                 'defaultFrequency' => 'one-time',
                 'frequencies'      => ['one-time', 'monthly'],
                 'style'            => 'pills',
@@ -316,7 +316,7 @@ final class FormTemplates
     private static function monthlySustainer(): array
     {
         $blocks = self::block('dono/heading', ['text' => __('Become a monthly supporter', 'dono-fundraising-platform'), 'level' => 1])
-                . self::block('dono/paragraph', ['text' => __('A gift that arrives every month lets us plan further ahead than any single donation can.', 'dono-fundraising-platform')])
+                . self::block('dono/paragraph', ['text' => __('A donation that arrives every month lets us plan further ahead than any single one can.', 'dono-fundraising-platform')])
                 // Preselected monthly, and no one-time option: a form that offers
                 // both is the everyday one. Add one-time here if you want both.
                 . self::block('dono/recurring-toggle', [
@@ -344,7 +344,7 @@ final class FormTemplates
                 // Next to the button, not on a screen already passed: this is the
                 // last moment the donor can act on what they are agreeing to.
                 . self::block('dono/paragraph', ['text' => __('Your first payment is taken today. If you chose a repeating frequency, the same amount is taken on this date at that frequency, and you can change or stop it any time from your donor portal.', 'dono-fundraising-platform')])
-                . self::block('dono/submit-button', ['label' => __('Start my monthly gift', 'dono-fundraising-platform')]);
+                . self::block('dono/submit-button', ['label' => __('Start my monthly donation', 'dono-fundraising-platform')]);
 
         return [
             'id'             => 'monthly-sustainer',
@@ -377,7 +377,7 @@ final class FormTemplates
                     'allowCustom' => true,
                 ])
                 // No fund picker: the appeal is the designation. Nothing optional
-                // either, because every extra field costs gifts while it matters.
+                // either, because every extra field costs donations while it matters.
                 . self::block('dono/name', ['requireFirst' => true, 'requireLast' => true])
                 . self::block('dono/email', ['required' => true])
                 . self::checkout(

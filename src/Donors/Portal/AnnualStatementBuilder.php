@@ -42,7 +42,7 @@ final class AnnualStatementBuilder
         [$start, $end] = DonationQueries::yearBoundsUtc($year);
 
         // donationsOnly, matching the admin-side statement: a ticket purchase
-        // is goods received, not a gift, and must never be itemized on a
+        // is goods received, not a donation, and must never be itemized on a
         // document the donor files as deductible.
         $rows = DonationQueries::donationsOnly(Donation::query())
             ->whereIn('status', ['paid', 'partial_refund'])

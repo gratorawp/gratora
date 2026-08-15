@@ -256,7 +256,7 @@ export default function List() {
             id:    'frequency',
             label: __( 'Frequency', 'dono-fundraising-platform' ),
             // Nothing on the row said whether the money came from a standing
-            // gift or a one-off, which is the first thing asked of it.
+            // recurring or a one-off, which is the first thing asked of it.
             elements: FREQUENCY_OPTIONS,
             filterBy: { operators: [ 'is' ] },
             // Not StatusBadge: "monthly" is a cadence, not a lifecycle status,

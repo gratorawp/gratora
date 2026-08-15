@@ -183,7 +183,7 @@ final class StripeSubscriptionRenewalTest extends IntegrationTestCase
     }
 
     /**
-     * A failed renewal is the start of losing the gift, so it has to be
+     * A failed renewal is the start of losing the donation, so it has to be
      * announceable. Without this signal nothing downstream can tell anyone.
      */
     public function test_invoice_payment_failed_fires_the_renewal_failed_action(): void

@@ -23,7 +23,7 @@ use WP_REST_Request;
  * whose donor is missing is a broken one, so erasure wipes the person and
  * deliberately leaves the row behind. Deletion is for the other case, the one
  * the admin could previously do nothing about: an address that never became a
- * gift, sitting in the list with no way to get rid of it.
+ * donation, sitting in the list with no way to get rid of it.
  */
 final class DonorDeleteTest extends IntegrationTestCase
 {

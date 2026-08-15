@@ -12,9 +12,10 @@ use Dono\Foundation\Plugin;
 /**
  * The cohort-retention matrix used to anchor cohorts on the denormalized
  * first_donation_at while counting only status='paid'. A donor whose first
- * gift wasn't a plain paid row missed offset 0, so the cohort size undercounted
- * and later offsets could exceed 100%. Cohorts now anchor on each donor's own
- * MIN(paid_at) over the same status set, so everyone lands at offset 0.
+ * donation wasn't a plain paid row missed offset 0, so the cohort size
+ * undercounted and later offsets could exceed 100%. Cohorts now anchor on each
+ * donor's own MIN(paid_at) over the same status set, so everyone lands at
+ * offset 0.
  */
 final class DonorCohortRetentionTest extends IntegrationTestCase
 {
@@ -26,7 +27,7 @@ final class DonorCohortRetentionTest extends IntegrationTestCase
         $a = $this->donor('a@example.com');
         $b = $this->donor('b@example.com');
 
-        // Donor A's first gift is partially refunded, then gives again two
+        // Donor A's first donation is partially refunded, then gives again two
         // months on. Donor B gives once in the same cohort month.
         $this->donation($a, 5000, $m0, 'partial_refund');
         $this->donation($a, 5000, $m2, 'paid');
@@ -43,7 +44,7 @@ final class DonorCohortRetentionTest extends IntegrationTestCase
 
         $this->assertNotNull($cohort, 'the -3mo cohort exists');
         $this->assertSame(2, $cohort['size'],
-            'both donors anchor at offset 0, even the partial_refund first gift');
+            'both donors anchor at offset 0, even the partial_refund first donation');
         $this->assertSame(100.0, $cohort['retention'][0]['pct']);
         $this->assertSame(1, $cohort['retention'][2]['count'], 'only donor A returns at +2 months');
         $this->assertSame(50.0, $cohort['retention'][2]['pct'], 'retention never exceeds 100%');

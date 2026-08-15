@@ -180,9 +180,20 @@ export default function Settings() {
         if ( privacy.isDirty )  jobs.push( { name: 'privacy',         run: privacy.save } );
         if ( roles.isDirty )    jobs.push( { name: 'roles',           run: roles.save } );
 
-        const results = await Promise.allSettled( jobs.map( ( j ) => j.run() ) );
+        // A base-currency change restates the whole exchange-rate snapshot into
+        // the new base. The rates panel composed its numbers in the old one, so
+        // the two writes cannot be in flight together: run the currency save
+        // first and let the rates save re-read what it landed on.
+        const lead = jobs.filter( ( j ) => j.name === 'currency-locale' );
+        const rest = jobs.filter( ( j ) => j.name !== 'currency-locale' );
+        const ordered = [ ...lead, ...rest ];
+
+        const results = [
+            ...( await Promise.allSettled( lead.map( ( j ) => j.run() ) ) ),
+            ...( await Promise.allSettled( rest.map( ( j ) => j.run() ) ) ),
+        ];
         const failed = results
-            .map( ( r, i ) => ( r.status === 'rejected' ? { name: jobs[ i ].name, reason: r.reason } : null ) )
+            .map( ( r, i ) => ( r.status === 'rejected' ? { name: ordered[ i ].name, reason: r.reason } : null ) )
             .filter( Boolean );
 
         if ( failed.length === 0 ) {

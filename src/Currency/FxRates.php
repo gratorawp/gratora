@@ -10,7 +10,8 @@ use Dono\Foundation\Helpers\Money;
  * Read access to the daily FX snapshot stored in the dono_fx_rates option.
  *
  * Option shape: { base, date, fetched_at, rates } - units of CCY per 1 base.
- * Conversion is read-only; FxRatesUpdater is the only writer.
+ * Conversion is read-only. FxRatesUpdater owns the writes in product code; the
+ * e2e fixture builder writes the option directly too.
  *
  * @since 1.0.0
  */
@@ -205,13 +206,15 @@ final class FxRates
      *
      * Every value here is denominated in the snapshot's base, an override
      * included. An override is typed against the org's base, on a screen
-     * labelled with it, and the two are the same currency because the base
-     * only moves through FxRatesUpdater::rebase(), which restates the whole
-     * snapshot in one step. Restating an override here instead would not
-     * survive the round trip: the settings screen posts back the number it was
-     * shown, so the correction lands again on the value it produced at the
-     * next save, and each step is stamped into the fx_rate of every donation
-     * taken in between.
+     * labelled with it, so the two have to be the same currency, and that is
+     * kept true at each of the three points the base can move rather than
+     * assumed: FxRatesUpdater::rebase() restates the whole snapshot in one
+     * step, fetchAndStore() refuses to carry overrides into a base they were
+     * not typed against, and saveSettings() refuses a write that declares an
+     * older frame. Restating an override here instead would not survive the
+     * round trip: the settings screen posts back the number it was shown, so
+     * the correction lands again on the value it produced at the next save, and
+     * each step is stamped into the fx_rate of every donation taken in between.
      *
      * @param array<string,mixed> $d
      * @return array<string,float>

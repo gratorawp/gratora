@@ -256,10 +256,13 @@ function App() {
     const [ cardNotice, setCardNotice ] = useState( null );
     const pendingCardReturn = useRef( null );
 
+    // Resolves with the donor, or null when there is no session to load: the
+    // magic-link path has to be able to tell "signed in" from "the exchange
+    // succeeded and the session did not survive it".
     const loadMe = useCallback( () => {
         setLoadError( null );
         return api( 'me' )
-            .then( setMe )
+            .then( ( who ) => { setMe( who ); return who; } )
             .catch( ( err ) => {
                 // 401/403 means the session is gone. A transient failure
                 // (network blip, 5xx) must not bounce a signed-in donor to
@@ -269,6 +272,7 @@ function App() {
                 } else {
                     setLoadError( err?.message || __( 'Could not load your account.', 'dono-fundraising-platform' ) );
                 }
+                return null;
             } )
             .finally( () => setLoading( false ) );
     }, [] );
@@ -322,7 +326,16 @@ function App() {
                         url.search = ret;
                         window.history.replaceState( {}, '', url.toString() );
                     }
-                    return loadMe();
+                    // The token is spent by now. If the cookie the exchange set
+                    // did not come back, the donor is looking at a blank
+                    // sign-in form with their link already burnt, so the reason
+                    // has to be on the screen: silently asking for another one
+                    // burns the next link the same way.
+                    return loadMe().then( ( who ) => {
+                        if ( ! who ) {
+                            setError( __( 'Your sign-in link worked, but this browser did not keep you signed in. Check that the web address here matches the one in your email, and that cookies are allowed for this site, then ask for a new link.', 'dono-fundraising-platform' ) );
+                        }
+                    } );
                 } )
                 .catch( ( err ) => {
                     // The token is single use, so re-opening the link from the
@@ -374,21 +387,7 @@ function App() {
         <div class="dp">
             <header class="dp__head">
                 <h1>{ sprintf( /* translators: %s: donor's first name or full name */ __( 'Hi, %s.', 'dono-fundraising-platform' ), me.first_name || me.name ) }</h1>
-                <div class="dp__signout-group">
-                    <button class="dp__signout" onClick={ () => {
-                        api( 'logout', { method: 'POST' } ).finally( () => window.location.reload() );
-                    } }>{ __( 'Sign out', 'dono-fundraising-platform' ) }</button>
-                    { /* The only control that reaches a sign-in link nobody
-                         opened, including one support issued. */ }
-                    <button
-                        type="button"
-                        class="dp__signout"
-                        title={ __( 'Ends every session and cancels any sign-in link that was never opened.', 'dono-fundraising-platform' ) }
-                        onClick={ () => {
-                            api( 'logout-everywhere', { method: 'POST' } ).finally( () => window.location.reload() );
-                        } }
-                    >{ __( 'Sign out everywhere', 'dono-fundraising-platform' ) }</button>
-                </div>
+                <SignOutControls />
             </header>
 
             { cardNotice && (
@@ -471,6 +470,47 @@ const TABS = [
     { id: 'consents',    label: __( 'Consents', 'dono-fundraising-platform' ) },
 ];
 
+/**
+ * Two ways out, one of them irreversible: signing out everywhere also cancels
+ * every sign-in link nobody has opened, including one support just read down
+ * the phone. It sits a few pixels from ordinary sign-out, so it asks first, the
+ * way cancelling a donation and deleting an account do.
+ */
+function SignOutControls() {
+    const [ confirming, setConfirming ] = useState( false );
+
+    if ( confirming ) {
+        return (
+            <div class="dp__signout-group">
+                <span class="dp-hint" role="status">
+                    { __( 'This ends every signed-in device and cancels any sign-in link that was never opened, including one the team sent you.', 'dono-fundraising-platform' ) }
+                </span>
+                <button
+                    type="button"
+                    class="dp__signout"
+                    onClick={ () => {
+                        api( 'logout-everywhere', { method: 'POST' } ).finally( () => window.location.reload() );
+                    } }
+                >{ __( 'Yes, sign out everywhere', 'dono-fundraising-platform' ) }</button>
+                <button type="button" class="dp__signout" onClick={ () => setConfirming( false ) }>
+                    { __( 'Keep me signed in', 'dono-fundraising-platform' ) }
+                </button>
+            </div>
+        );
+    }
+
+    return (
+        <div class="dp__signout-group">
+            <button type="button" class="dp__signout" onClick={ () => {
+                api( 'logout', { method: 'POST' } ).finally( () => window.location.reload() );
+            } }>{ __( 'Sign out', 'dono-fundraising-platform' ) }</button>
+            <button type="button" class="dp__signout" onClick={ () => setConfirming( true ) }>
+                { __( 'Sign out everywhere', 'dono-fundraising-platform' ) }
+            </button>
+        </div>
+    );
+}
+
 function SignInPrompt( { initialError } ) {
     const [ mode, setMode ]           = useState( 'signin' ); // 'signin' | 'register'
     const [ email, setEmail ]         = useState( '' );
@@ -479,6 +519,14 @@ function SignInPrompt( { initialError } ) {
     const [ sent, setSent ]           = useState( false );
     const [ sending, setSending ]     = useState( false );
     const [ error, setError ]         = useState( initialError || null );
+
+    // The magic-link path decides there is no session before it knows why, so
+    // the reason can arrive after this form is already on screen. Initial state
+    // alone would drop it, and that message is the only account the donor gets
+    // of a link that has already been spent.
+    useEffect( () => {
+        if ( initialError ) setError( initialError );
+    }, [ initialError ] );
 
     const isRegister = mode === 'register';
 
@@ -522,6 +570,14 @@ function SignInPrompt( { initialError } ) {
                 { /* The server quietly refuses a second request inside its send
                      window, so this copy promises nothing about timing. */ }
                 <p class="dp-hint">{ __( 'Only one link goes out every few minutes. If nothing arrives shortly, wait a moment before asking for another.', 'dono-fundraising-platform' ) }</p>
+                { /* Anyone can type anyone's address here, so a name typed
+                     against an address that is already waiting for a link is
+                     dropped rather than believed. Said to everyone, because
+                     saying it only when it happened would answer whether that
+                     address has a signup waiting. */ }
+                { isRegister && (
+                    <p class="dp-hint">{ __( 'Your name is taken from your first signup for an address. If you have signed up before, you may need to set it again in the portal once you are signed in.', 'dono-fundraising-platform' ) }</p>
+                ) }
                 <p class="dp-signin__alt">
                     <button type="button" class="dp-link" onClick={ () => { setSent( false ); setError( null ); } }>
                         { __( 'Use a different email address', 'dono-fundraising-platform' ) }

@@ -243,8 +243,8 @@ final class DonorExportTest extends IntegrationTestCase
         $campaign->save();
 
         $backer = $this->makeDonor('backer@example.test');
-        $gift   = $this->gave((int) $backer->id, gmdate('Y-m-d H:i:s'));
-        \Dono\Donations\Donation::query()->where('id', (int) $gift->id)
+        $given  = $this->gave((int) $backer->id, gmdate('Y-m-d H:i:s'));
+        \Dono\Donations\Donation::query()->where('id', (int) $given->id)
             ->update(['campaign_id' => (int) $campaign->id]);
 
         $stranger = $this->makeDonor('stranger@example.test');

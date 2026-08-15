@@ -22,7 +22,7 @@ use WP_REST_Request;
  */
 final class TermsAgreementTest extends IntegrationTestCase
 {
-    private const TERMS = 'Gifts are accepted at the discretion of the trustees.';
+    private const TERMS = 'Donations are accepted at the discretion of the trustees.';
 
     private function campaignId(): int
     {
@@ -135,8 +135,8 @@ final class TermsAgreementTest extends IntegrationTestCase
     public function test_whitespace_alone_is_not_a_new_revision(): void
     {
         $this->assertSame(
-            TermsBlock::revisionOf("Gifts are accepted\nat the discretion of the trustees."),
-            TermsBlock::revisionOf('Gifts   are accepted at the   discretion of the trustees.')
+            TermsBlock::revisionOf("Donations are accepted\nat the discretion of the trustees."),
+            TermsBlock::revisionOf('Donations   are accepted at the   discretion of the trustees.')
         );
     }
 

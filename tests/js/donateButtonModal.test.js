@@ -6,7 +6,10 @@
  *
  * The reveal has to agree with the runtime about which form claimed the
  * return, or the outcome lands in one form while the modal around another
- * stays shut. Both halves run here, real, for that reason.
+ * stays shut. There is one rule for that now and the runtime owns it, so what
+ * these cases check is that the reveal follows it in both directions: the modal
+ * opens whenever the claimant is inside it, and never when no form claimed.
+ * Both halves run here, real, for that reason.
  */
 
 import { PENDING_KEY } from '../../assets/donation-form/util/pending';
@@ -26,7 +29,7 @@ jest.mock( '../../assets/donation-form/util/stripe', () => {
     };
 } );
 
-function formConfig() {
+function formConfig( overrides = {} ) {
     return {
         slug:     'probe',
         form_id:  7,
@@ -46,34 +49,43 @@ function formConfig() {
             confirming:   'Confirming your payment…',
             donateAgain:  'Donate again',
         },
+        ...overrides,
     };
 }
 
-// `hydrate` stages the config the runtime needs; the modal-only tests leave it
-// off so nothing mounts.
-function formMarkup( id, hydrate ) {
+// `hydrate` stages the config the runtime needs; leaving it off is a page whose
+// runtime never boots.
+function formMarkup( id, hydrate, overrides = {} ) {
     const json = hydrate
-        ? `<script type="application/json" data-dono-form-config>${ JSON.stringify( formConfig() ) }</script>`
+        ? `<script type="application/json" data-dono-form-config>${ JSON.stringify( formConfig( overrides ) ) }</script>`
         : '';
 
-    return `<form class="dono-donation-form" id="${ id }">${ json }</form>`;
+    return `<form class="dono-donation-form"${ id ? ` id="${ id }"` : '' }>${ json }</form>`;
 }
 
-function page( { modalFormId = 'dono-form-1', extraFormId = null, hydrate = false } = {} ) {
-    document.body.innerHTML = `
+function page( {
+    modalFormId = 'dono-form-1',
+    extraFormId = null,
+    hydrate = false,
+    modalOverrides = {},
+    extraFirst = false,
+} = {} ) {
+    const block = `
         <div class="dono-block dono-block--donate-button">
             <button type="button" class="dono-donate-button" data-form-slug="probe"></button>
             <div class="dono-donate-modal" data-form-slug="probe" hidden>
                 <div class="dono-donate-modal__panel">
                     <button type="button" class="dono-donate-modal__close" data-dono-modal-close></button>
                     <div class="dono-donate-modal__body">
-                        ${ formMarkup( modalFormId, hydrate ) }
+                        ${ formMarkup( modalFormId, hydrate, modalOverrides ) }
                     </div>
                 </div>
             </div>
         </div>
-        ${ extraFormId ? formMarkup( extraFormId, hydrate ) : '' }
     `;
+    const extra = extraFormId ? formMarkup( extraFormId, hydrate ) : '';
+
+    document.body.innerHTML = extraFirst ? extra + block : block + extra;
 
     return document.querySelector( '.dono-donate-modal' );
 }
@@ -95,8 +107,6 @@ function returning( formKey, reference = 'DONO-2026-00050', urlReference = refer
     }
 }
 
-// The script reads the URL as it evaluates, before the form runtime strips the
-// markers, so it has to be loaded after the page is staged.
 async function loadModalScript() {
     jest.isolateModules( () => {
         require( '../../assets/donate-button/modal.js' );
@@ -117,26 +127,57 @@ async function bootRuntime() {
     await new Promise( ( r ) => setTimeout( r, 50 ) );
 }
 
+const text = ( id ) => document.getElementById( id ).textContent;
+
+// A page loads each of these scripts once. Here every case requires its own
+// copy, and each copy registers listeners on the same window that outlive it,
+// so a modal script from an earlier case can answer the announcement made in
+// this one. That hid a real gap: a case meant to prove the mark on the page is
+// read still passed with the reading deleted, because a stale listener opened
+// the modal. Recording is scoped to the test body, or this would strip
+// listeners the environment itself installed.
+const listeners = [];
+let recording = false;
+
+[ window, document ].forEach( ( target ) => {
+    const add = target.addEventListener.bind( target );
+    target.addEventListener = ( type, fn, opts ) => {
+        if ( recording ) listeners.push( [ target, type, fn, opts ] );
+        add( type, fn, opts );
+    };
+} );
+
 beforeEach( () => {
     document.body.innerHTML = '';
     window.sessionStorage.clear();
     window.history.replaceState( {}, '', '/campaign/' );
+    recording = true;
+} );
+
+afterEach( () => {
+    recording = false;
+    listeners.splice( 0 ).forEach( ( [ target, type, fn, opts ] ) => {
+        target.removeEventListener( type, fn, opts );
+    } );
 } );
 
 test( 'a donor returning from their bank is shown the modal holding the outcome', async () => {
-    const modal = page();
+    const modal = page( { hydrate: true } );
     returning( 'dono-form-1' );
 
     await loadModalScript();
+    await bootRuntime();
 
+    expect( text( 'dono-form-1' ) ).toContain( THANKS );
     expect( modal.hidden ).toBe( false );
     expect( modal.classList.contains( 'is-open' ) ).toBe( true );
 } );
 
 test( 'an ordinary page load leaves the modal shut', async () => {
-    const modal = page();
+    const modal = page( { hydrate: true } );
 
     await loadModalScript();
+    await bootRuntime();
 
     expect( modal.hidden ).toBe( true );
 } );
@@ -161,17 +202,19 @@ test( 'a return belonging to an inline form elsewhere on the page does not open 
     // reached the form that claimed it. The two halves disagreeing in this
     // direction is the modal claiming a return the runtime gave to somebody
     // else.
-    expect( document.getElementById( 'dono-form-2' ).textContent ).toContain( THANKS );
-    expect( document.getElementById( 'dono-form-1' ).textContent ).not.toContain( THANKS );
+    expect( text( 'dono-form-2' ) ).toContain( THANKS );
+    expect( text( 'dono-form-1' ) ).not.toContain( THANKS );
     expect( modal.hidden ).toBe( true );
 } );
 
 test( 'a browser that refused storage still gets the modal when it holds the only form', async () => {
-    const modal = page();
+    const modal = page( { hydrate: true } );
     returning( null );
 
     await loadModalScript();
+    await bootRuntime();
 
+    expect( text( 'dono-form-1' ) ).toContain( THANKS );
     expect( modal.hidden ).toBe( false );
 } );
 
@@ -186,9 +229,24 @@ test( 'a stash naming no form opens the modal that holds the first form on the p
     // leave nothing unambiguous. The runtime does not abstain: it falls through
     // to the first in document order. Both halves are asserted because refusing
     // to reveal here is refusing to reveal an outcome already rendered.
-    expect( document.getElementById( 'dono-form-1' ).textContent ).toContain( THANKS );
-    expect( document.getElementById( 'dono-form-2' ).textContent ).not.toContain( THANKS );
+    expect( text( 'dono-form-1' ) ).toContain( THANKS );
+    expect( text( 'dono-form-2' ) ).not.toContain( THANKS );
     expect( modal.hidden ).toBe( false );
+} );
+
+test( 'the same page with the inline form first leaves the modal shut', async () => {
+    const modal = page( { extraFormId: 'dono-form-2', hydrate: true, extraFirst: true } );
+    returning( null );
+
+    await loadModalScript();
+    await bootRuntime();
+
+    // Same page, same empty stash, opposite document order: the claim moves and
+    // the reveal has to move with it. Nothing here reads the order itself, which
+    // is the point of following the claim rather than re-deriving it.
+    expect( text( 'dono-form-2' ) ).toContain( THANKS );
+    expect( text( 'dono-form-1' ) ).not.toContain( THANKS );
+    expect( modal.hidden ).toBe( true );
 } );
 
 describe( 'the reveal agrees with the form that actually claimed the return', () => {
@@ -202,8 +260,8 @@ describe( 'the reveal agrees with the form that actually claimed the return', ()
         await loadModalScript();
         await bootRuntime();
 
-        expect( document.getElementById( 'dono-form-1' ).textContent ).toContain( THANKS );
-        expect( document.getElementById( 'dono-form-2' ).textContent ).not.toContain( THANKS );
+        expect( text( 'dono-form-1' ) ).toContain( THANKS );
+        expect( text( 'dono-form-2' ) ).not.toContain( THANKS );
         expect( modal.hidden ).toBe( false );
     } );
 
@@ -219,7 +277,7 @@ describe( 'the reveal agrees with the form that actually claimed the return', ()
         await loadModalScript();
         await bootRuntime();
 
-        expect( document.getElementById( 'dono-form-1' ).textContent ).not.toContain( THANKS );
+        expect( text( 'dono-form-1' ) ).not.toContain( THANKS );
         expect( modal.hidden ).toBe( true );
     } );
 
@@ -236,5 +294,65 @@ describe( 'the reveal agrees with the form that actually claimed the return', ()
         await loadModalScript();
 
         expect( modal.hidden ).toBe( false );
+    } );
+
+    test( 'the form the stash names cannot resolve the payment, so nothing opens', async () => {
+        // An org that cleared its keys, or switched test/live mode, while this
+        // donor was at their bank. The named form abstains for want of a
+        // publishable key and the other is blocked from claiming a return that
+        // names a form still on the page, so no outcome renders anywhere. The
+        // modal has no key of its own to check, which is why it must not be
+        // deciding this.
+        const modal = page( {
+            extraFormId: 'dono-form-2',
+            hydrate: true,
+            modalOverrides: { stripe: {} },
+        } );
+        returning( 'dono-form-1' );
+
+        await loadModalScript();
+        await bootRuntime();
+
+        expect( text( 'dono-form-1' ) ).not.toContain( THANKS );
+        expect( text( 'dono-form-2' ) ).not.toContain( THANKS );
+        expect( modal.hidden ).toBe( true );
+    } );
+
+    test( 'a stashed reference that came back as a number still matches the URL', async () => {
+        // JSON.parse gives back whatever was stored, and a reference compared
+        // with !== against a string param abstains on a value that spells the
+        // same thing. One side coercing and the other not is two rules again.
+        const modal = page( { hydrate: true } );
+        returning( 'dono-form-1', 20260050, '20260050' );
+
+        await loadModalScript();
+        await bootRuntime();
+
+        expect( text( 'dono-form-1' ) ).toContain( THANKS );
+        expect( modal.hidden ).toBe( false );
+    } );
+
+    test( 'a form the shortcode gave no id still opens the modal around it', async () => {
+        const modal = page( { modalFormId: null, hydrate: true } );
+        returning( null );
+
+        await loadModalScript();
+        await bootRuntime();
+
+        expect( document.querySelector( '.dono-donation-form' ).textContent ).toContain( THANKS );
+        expect( modal.hidden ).toBe( false );
+    } );
+
+    test( 'a runtime that never boots leaves the modal shut', async () => {
+        // A bundle that 404s or throws on load. Nothing claims, so nothing is
+        // going to say what happened to the money, and a modal opened over a
+        // form that never mounted shows the donor an empty form and invites a
+        // second donation.
+        const modal = page();
+        returning( 'dono-form-1' );
+
+        await loadModalScript();
+
+        expect( modal.hidden ).toBe( true );
     } );
 } );

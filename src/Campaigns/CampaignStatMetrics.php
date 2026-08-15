@@ -17,7 +17,7 @@ use Dono\Foundation\Time\Clock;
  */
 final class CampaignStatMetrics
 {
-    /** @var array<int,int> campaign id => largest net paid gift, in cents */
+    /** @var array<int,int> campaign id => largest net paid donation, in cents */
     private array $topCache = [];
 
     /** @since 1.0.0 */

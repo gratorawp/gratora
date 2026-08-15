@@ -154,7 +154,7 @@ const REASON_TONE = {
     plan_paused:     'is-info',
     plan_cancelled:  'is-warn',
     plan_active:     'is-ok',
-    first_gift_only: 'is-violet',
+    first_donation_only: 'is-violet',
     no_gap_yet:      'is-muted',
     well_past_gap:   'is-warn',
     past_gap:        'is-info',
@@ -167,8 +167,8 @@ function ReasonPill( { row } ) {
         ? sprintf(
             /* translators: %d: number of days */
             _n(
-                'About %d day between gifts, on average.',
-                'About %d days between gifts, on average.',
+                'About %d day between donations, on average.',
+                'About %d days between donations, on average.',
                 row.avg_gap_days,
                 'dono-fundraising-platform'
             ),

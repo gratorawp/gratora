@@ -390,26 +390,26 @@ final class DonationFormShortcode extends HookProvider
         // Same reason as the dependency tags above: this is the whole document
         // the iframe gets, head included, and nothing in it is enqueueable.
         // phpcs:disable WordPress.WP.EnqueuedResources
-        return <<<HTML
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="{$cssUrl}">
-    <style>
-        html, body { margin: 0; padding: 0; background: {$background}; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif; }
-        body { padding: 32px 16px; min-height: {$bodyMinHeight}; }
-    </style>
-</head>
-<body>
-    {$formHtml}
-    {$depScripts}
-    <script src="{$jsUrl}"></script>
-    {$resize}
-</body>
-</html>
-HTML;
+        return implode("\n", [
+            '<!DOCTYPE html>',
+            '<html lang="en">',
+            '<head>',
+            '    <meta charset="utf-8">',
+            '    <meta name="viewport" content="width=device-width, initial-scale=1">',
+            '    <link rel="stylesheet" href="' . $cssUrl . '">',
+            '    <style>',
+            '        html, body { margin: 0; padding: 0; background: ' . $background . '; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif; }',
+            '        body { padding: 32px 16px; min-height: ' . $bodyMinHeight . '; }',
+            '    </style>',
+            '</head>',
+            '<body>',
+            '    ' . $formHtml,
+            '    ' . $depScripts,
+            '    <script src="' . $jsUrl . '"></script>',
+            '    ' . $resize,
+            '</body>',
+            '</html>',
+        ]);
         // phpcs:enable WordPress.WP.EnqueuedResources
     }
 

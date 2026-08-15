@@ -149,11 +149,21 @@ final class FxRatesUpdater
     /**
      * Persist the auto toggle + manual overrides without refetching.
      *
+     * $frame is the base the overrides were composed against - the currency the
+     * screen posting them was showing rates in. An override is units per 1 of
+     * that currency and nothing on the way in says so, so a write composed
+     * before a base change and landing after one reprices every row it carries
+     * by the whole bridge, silently and for good. Declared, it can be refused
+     * instead. Empty skips the check: with no overrides in the payload there is
+     * no number whose frame could be wrong.
+     *
      * @param array<string,mixed> $manual
+     * @return bool false when the write was refused because $frame is not the
+     *              base the snapshot is denominated in now
      *
      * @since 1.0.0
      */
-    public function saveSettings(bool $auto, array $manual): void
+    public function saveSettings(bool $auto, array $manual, string $frame = ''): bool
     {
         $opt = get_option(FxRates::OPTION);
         $opt = is_array($opt) ? $opt : [];
@@ -165,9 +175,27 @@ final class FxRatesUpdater
             $opt['base']  = strtoupper(Money::defaultCurrency());
             $opt['rates'] = is_array($opt['rates'] ?? null) ? $opt['rates'] : [];
         }
+
+        $manual = $this->cleanRates($manual);
+        $frame  = strtoupper(trim($frame));
+        if ($manual !== []
+            && preg_match('/^[A-Z]{3}$/', $frame)
+            && $frame !== strtoupper((string) $opt['base'])
+        ) {
+            ErrorLog::record('currency.fx', sprintf(
+                'Hand-set exchange rates entered against %1$s were not saved: the rates on file are denominated in %2$s now. Reload Settings > Currency and enter them again.',
+                $frame,
+                strtoupper((string) $opt['base'])
+            ), ['from' => $frame, 'to' => strtoupper((string) $opt['base'])]);
+
+            return false;
+        }
+
         $opt['auto']   = $auto;
-        $opt['manual'] = $this->cleanRates($manual);
+        $opt['manual'] = $manual;
         update_option(FxRates::OPTION, $opt, false);
+
+        return true;
     }
 
     /**
@@ -223,9 +251,15 @@ final class FxRatesUpdater
         // The base being left is a rate like any other once it stops being one.
         $rates[$from] = 1.0;
 
+        $manual = $this->cleanRates($opt['manual'] ?? []);
+        // An override on the base itself is masked by unity while it is the
+        // base, so nobody has seen it and it means nothing. Carried across, it
+        // goes live and beats the one rate here that is not a guess.
+        unset($manual[$from]);
+
         $opt['base']   = $to;
         $opt['rates']  = $this->restate($rates, $bridge, $to);
-        $opt['manual'] = $this->restate($this->cleanRates($opt['manual'] ?? []), $bridge, $to);
+        $opt['manual'] = $this->restate($manual, $bridge, $to);
 
         update_option(FxRates::OPTION, $opt, false);
     }
@@ -260,8 +294,26 @@ final class FxRatesUpdater
         $prev = get_option(FxRates::OPTION);
         $prev = is_array($prev) ? $prev : [];
         // Preserve sibling settings the fetch does not own.
-        $snapshot['manual'] = $this->cleanRates($prev['manual'] ?? []);
-        $snapshot['auto']   = array_key_exists('auto', $prev) ? (bool) $prev['auto'] : true;
+        $snapshot['auto'] = array_key_exists('auto', $prev) ? (bool) $prev['auto'] : true;
+
+        $manual   = $this->cleanRates($prev['manual'] ?? []);
+        $prevBase = strtoupper(trim((string) ($prev['base'] ?? '')));
+        if ($manual !== [] && $prevBase !== '' && $prevBase !== $snapshot['base']) {
+            // A fetch sets the base as well as the rates, so carrying overrides
+            // across one is a second way into the frame mismatch rebase() exists
+            // to prevent - and this one restates nothing, it just relabels. The
+            // bases only differ when a restatement already failed, so there is
+            // nothing here to convert with: drop them and say which ones.
+            ErrorLog::record('currency.fx', sprintf(
+                'Exchange rates were refreshed in %1$s, but the hand-set rates on file were entered against %2$s and nothing relates the two, so they have been cleared: %3$s. Set them again on Settings > Currency if you still need them.',
+                $snapshot['base'],
+                $prevBase,
+                implode(', ', array_keys($manual))
+            ), ['from' => $prevBase, 'to' => $snapshot['base'], 'cleared' => array_keys($manual)]);
+            $manual = [];
+        }
+        $snapshot['manual'] = $manual;
+
         update_option(FxRates::OPTION, $snapshot, false);
         return true;
     }

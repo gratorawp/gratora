@@ -125,7 +125,7 @@ final class DashboardTestScopeTest extends IntegrationTestCase
         $this->donation(false, 5000);
         $this->donation(false, 7000, 'order');
 
-        // A ticket sale is a purchase, not a gift. "Show me test data" must not
+        // A ticket sale is a purchase, not a donation. "Show me test data" must
         // quietly also mean "show me orders".
         $this->assertSame(5000, (int) $this->dashboard(true)['kpi']['amount_raised_cents']);
         $this->assertSame(5000, (int) $this->dashboard(false)['kpi']['amount_raised_cents']);

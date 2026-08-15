@@ -455,12 +455,12 @@ final class PortalUnauthenticatedWritesTest extends IntegrationTestCase
     /**
      * The donor path, which is the common one: the signup form requires a first
      * name and does not require a surname, so coming back to add one is the
-     * ordinary reason to register twice. An addition is nobody's dispute, and
-     * the name has to survive it all the way onto the donor row, because the
-     * next mail greets them by whatever is there and the year-end statement
-     * prints it.
+     * ordinary reason to register twice. The surname is not taken, because this
+     * endpoint cannot tell that donor from a stranger typing the same shape,
+     * but the name they already proved has to survive it all the way onto the
+     * donor row rather than being destroyed on the way.
      */
-    public function test_a_donor_coming_back_to_add_their_surname_keeps_their_name(): void
+    public function test_a_donor_coming_back_to_add_a_surname_keeps_the_name_on_the_claim(): void
     {
         $email = 'surname-' . uniqid() . '@example.test';
         $sent  = $this->captureLinkMails();
@@ -472,22 +472,41 @@ final class PortalUnauthenticatedWritesTest extends IntegrationTestCase
         $this->post('register', ['email' => $email, 'first_name' => 'Alice', 'last_name' => 'Okafor']);
 
         $claim = $this->claim($email);
-        $this->assertSame('Alice', (string) $claim->first_name);
-        $this->assertSame('Okafor', (string) $claim->last_name, 'the surname they came back to add');
+        $this->assertSame('Alice', (string) $claim->first_name, 'the name they agree with stands');
+        $this->assertNull($claim->last_name, 'and the one a second caller supplies is not written');
 
         $donorId = $this->container()->get(SignupRedemption::class)->redeem($this->tokenFromMail((string) $sent[0]['body']));
         $donor   = Donor::query()->where('id', $donorId)->get();
 
         $this->assertNotNull($donor);
         $this->assertSame('Alice', (string) $donor->first_name, 'and the donor is not created nameless');
-        $this->assertSame('Okafor', (string) $donor->last_name);
+        $this->assertSame('', (string) $donor->last_name);
     }
 
     /**
-     * Clearing is per field, so a stranger contesting the first name does not
-     * take a surname nobody argued about with it.
+     * Retyping one's own name with different capitalisation is one person, not
+     * two, so it is not a dispute. The stored value is what stands either way:
+     * agreeing with a name can never be a way of rewriting it.
      */
-    public function test_a_contested_first_name_does_not_take_the_surname_with_it(): void
+    public function test_retyping_the_same_name_in_a_different_case_is_not_a_dispute(): void
+    {
+        $email = 'case-' . uniqid() . '@example.test';
+        $this->claimWithLinkOut($email, 'alice', 'okafor');
+
+        $this->post('register', ['email' => $email, 'first_name' => 'Alice', 'last_name' => ' Okafor ']);
+
+        $claim = $this->claim($email);
+        $this->assertSame('alice', (string) $claim->first_name, 'what they proved is what stands');
+        $this->assertSame('okafor', (string) $claim->last_name);
+    }
+
+    /**
+     * A submission that types any name at all is naming a whole identity, so a
+     * field it leaves blank contests a standing one just as a different value
+     * does. Anything less leaves a stranger's surname sitting on the claim that
+     * the owner's own signup, which sends that field empty, cannot remove.
+     */
+    public function test_a_submission_that_types_one_name_asserts_the_whole_of_it(): void
     {
         $email = 'partial-' . uniqid() . '@example.test';
         $this->claimWithLinkOut($email, 'Alice', 'Okafor');
@@ -495,8 +514,88 @@ final class PortalUnauthenticatedWritesTest extends IntegrationTestCase
         $this->post('register', ['email' => $email, 'first_name' => 'Mallory']);
 
         $claim = $this->claim($email);
-        $this->assertNull($claim->first_name, 'the disputed name reaches nobody');
-        $this->assertSame('Okafor', (string) $claim->last_name, 'the undisputed one is still theirs');
+        $this->assertNull($claim->first_name, 'the name they contradicted reaches nobody');
+        $this->assertNull($claim->last_name, 'nor the one they left blank while naming themselves');
+    }
+
+    /**
+     * The one-request shape the shipped form makes ordinary: it requires a
+     * first name and not a surname, so a live claim commonly carries a blank
+     * one. Filling that blank is a stranger writing on an identity somebody
+     * else is holding, and the surname lands on the receipts and the year-end
+     * statement with nothing to correct it, because refreshProfile only ever
+     * back-fills an empty field.
+     */
+    public function test_a_stranger_cannot_add_a_surname_to_a_claim_that_has_none(): void
+    {
+        $email = 'inject-' . uniqid() . '@example.test';
+        $raw   = $this->claimWithLinkOut($email, 'Alice');
+
+        $this->post('register', ['email' => $email, 'last_name' => 'Attacker']);
+
+        $this->assertNull($this->claim($email)->last_name, 'the surname is not the stranger to give');
+
+        $donorId = $this->container()->get(SignupRedemption::class)->redeem($raw);
+        $donor   = Donor::query()->where('id', $donorId)->get();
+
+        $this->assertNotNull($donor);
+        $this->assertSame('', (string) $donor->last_name, 'and it does not reach the donor row');
+    }
+
+    /**
+     * The other order, and the one the owner cannot see coming: a stranger
+     * types a surname onto an address before its owner signs up at all. The
+     * owner's own registration has to be able to take it off, or a name nobody
+     * proved is on their account for good.
+     */
+    public function test_a_strangers_surname_does_not_survive_the_owners_own_signup(): void
+    {
+        $email = 'preempt-' . uniqid() . '@example.test';
+        $sent  = $this->captureLinkMails();
+
+        $this->post('register', ['email' => $email, 'last_name' => 'Mallory']);
+        $this->runPendingAsyncJobs();
+
+        // Exactly what the shipped form sends when the surname box is empty.
+        $this->post('register', ['email' => $email, 'first_name' => 'Alice', 'last_name' => '']);
+        $this->runPendingAsyncJobs();
+
+        $this->assertNull($this->claim($email)->last_name, 'the owner can take a stranger off their own claim');
+
+        $donorId = $this->container()->get(SignupRedemption::class)->redeem(
+            $this->tokenFromMail((string) $sent[count($sent) - 1]['body'])
+        );
+        $donor = Donor::query()->where('id', $donorId)->get();
+
+        $this->assertNotNull($donor);
+        $this->assertSame('', (string) $donor->last_name, "and the stranger's name is on nobody's statement");
+    }
+
+    /**
+     * Clearing a contested field must not become a way of writing one. If a
+     * cleared field could be filled by whoever asks next, then two identical
+     * anonymous posts are all it takes: the first empties the claim, the second
+     * fills the blank it made, and the owner redeems their own link into a
+     * donor row that carries the attacker's name.
+     */
+    public function test_two_anonymous_posts_cannot_wipe_a_name_and_then_write_one(): void
+    {
+        $email = 'wipefill-' . uniqid() . '@example.test';
+        $raw   = $this->claimWithLinkOut($email, 'Alice', 'Okafor');
+
+        $this->post('register', ['email' => $email, 'first_name' => 'Mallory', 'last_name' => 'Attacker']);
+        $this->post('register', ['email' => $email, 'first_name' => 'Mallory', 'last_name' => 'Attacker']);
+
+        $claim = $this->claim($email);
+        $this->assertNull($claim->first_name, 'the blank a dispute makes is not a blank to fill');
+        $this->assertNull($claim->last_name);
+
+        $donorId = $this->container()->get(SignupRedemption::class)->redeem($raw);
+        $donor   = Donor::query()->where('id', $donorId)->get();
+
+        $this->assertNotNull($donor);
+        $this->assertSame('', (string) $donor->first_name, 'the owner redeems their own link into their own row');
+        $this->assertSame('', (string) $donor->last_name);
     }
 
     /**
@@ -700,6 +799,123 @@ final class PortalUnauthenticatedWritesTest extends IntegrationTestCase
         $email = 'aliased-signup-' . uniqid() . '@example.test';
         $this->assertSame(200, $this->post('register', ['email' => $email, 'first_name' => 'Alice'], $partner)->get_status());
         $this->assertNotNull($this->claim($email), 'and can still sign up');
+    }
+
+    /**
+     * The other half of that install, which the fixture host cannot show: an
+     * org whose canonical address is www, serving the page from the apex. It is
+     * the same outage in the opposite direction, and it needs the opposite arm
+     * of the pairing.
+     */
+    public function test_the_pair_holds_when_the_canonical_host_is_www(): void
+    {
+        $host = strtolower((string) wp_parse_url(home_url(), PHP_URL_HOST));
+        $home = get_option('home');
+        $site = get_option('siteurl');
+        $sent = $_SERVER['HTTP_HOST'] ?? null;
+
+        // Every host this WordPress knows is the www one, which is what the
+        // portal's own fetch reaches: it goes to rest_url, and only the page it
+        // was fired from sits on the apex.
+        update_option('home', 'https://www.' . $host);
+        update_option('siteurl', 'https://www.' . $host);
+        $_SERVER['HTTP_HOST'] = 'www.' . $host;
+
+        try {
+            $raw = $this->portalLinkFor('www-canonical-' . uniqid() . '@example.test');
+            $res = $this->exchange($raw, ['Sec-Fetch-Site' => 'same-site', 'Origin' => 'https://' . $host]);
+
+            $this->assertSame(200, $res->get_status(), 'the apex is not a stranger to a www install');
+        } finally {
+            update_option('home', $home);
+            update_option('siteurl', $site);
+            if ($sent === null) {
+                unset($_SERVER['HTTP_HOST']);
+            } else {
+                $_SERVER['HTTP_HOST'] = $sent;
+            }
+        }
+    }
+
+    /**
+     * WordPress answers on site_url too, and it is a different host from
+     * home_url on more installs than the docs suggest. A portal page reached
+     * through it posts with that Origin.
+     */
+    public function test_the_host_wordpress_itself_runs_on_is_this_site(): void
+    {
+        $siteUrl = get_option('siteurl');
+        update_option('siteurl', 'https://cms.example.org');
+
+        try {
+            $raw = $this->portalLinkFor('siteurl-' . uniqid() . '@example.test');
+            $res = $this->exchange($raw, ['Sec-Fetch-Site' => 'same-site', 'Origin' => 'https://cms.example.org']);
+
+            $this->assertSame(200, $res->get_status());
+        } finally {
+            update_option('siteurl', $siteUrl);
+        }
+    }
+
+    /**
+     * The third host in the list, and the one neither option can name: behind a
+     * reverse proxy or on a mapped domain, WordPress stores one address and the
+     * browser reaches it on another, so the Origin on the portal's own fetch
+     * matches neither home_url nor site_url. Refusing it takes sign-in, signup
+     * and resend down together on exactly those installs.
+     */
+    public function test_the_host_the_request_arrived_on_is_this_site(): void
+    {
+        $mapped = 'portal.mapped.test';
+        $sent   = $_SERVER['HTTP_HOST'] ?? null;
+
+        foreach ([home_url(), site_url()] as $known) {
+            $this->assertNotSame(
+                $mapped,
+                strtolower((string) wp_parse_url($known, PHP_URL_HOST)),
+                'the mapped host has to be one WordPress does not already know'
+            );
+        }
+
+        $_SERVER['HTTP_HOST'] = $mapped;
+
+        try {
+            $raw = $this->portalLinkFor('mapped-' . uniqid() . '@example.test');
+            $res = $this->exchange($raw, ['Sec-Fetch-Site' => 'same-site', 'Origin' => 'https://' . $mapped]);
+
+            $this->assertSame(200, $res->get_status(), 'the host the browser reached is not a stranger');
+        } finally {
+            if ($sent === null) {
+                unset($_SERVER['HTTP_HOST']);
+            } else {
+                $_SERVER['HTTP_HOST'] = $sent;
+            }
+        }
+    }
+
+    /**
+     * The port is the browser's to vary and not part of the site's identity, so
+     * a request that arrives on one is still the host it names.
+     */
+    public function test_a_port_on_the_arriving_host_is_not_a_different_site(): void
+    {
+        $mapped = 'portal.mapped.test';
+        $sent   = $_SERVER['HTTP_HOST'] ?? null;
+
+        $_SERVER['HTTP_HOST'] = $mapped . ':8443';
+
+        try {
+            $raw = $this->portalLinkFor('mapped-port-' . uniqid() . '@example.test');
+            $res = $this->exchange($raw, ['Sec-Fetch-Site' => 'same-site', 'Origin' => 'https://' . $mapped . ':8443']);
+
+            $this->assertSame(200, $res->get_status());
+        } finally {
+            if ($sent === null) {
+                unset($_SERVER['HTTP_HOST']);
+            } else {
+                $_SERVER['HTTP_HOST'] = $sent;
+            }
+        }
     }
 
     /**

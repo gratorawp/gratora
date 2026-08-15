@@ -16,7 +16,7 @@ use Dono\Foundation\Plugin;
  *
  * paid_at is stored UTC and every printed date goes through wp_date() into the
  * site's timezone. Filtering a local year against UTC timestamps puts a late
- * December gift on the next year's statement while its own line prints the
+ * December donation on the next year's statement while its own line prints
  * December date.
  */
 final class StatementYearBoundaryTest extends IntegrationTestCase
@@ -82,7 +82,7 @@ final class StatementYearBoundaryTest extends IntegrationTestCase
         $rows = Plugin::instance()->container->get(DonationRepository::class)
             ->paidForDonorInYear($donorId, 2025);
 
-        $this->assertCount(1, $rows, 'the gift belongs to the year the donor gave it in');
+        $this->assertCount(1, $rows, 'the donation belongs to the year the donor gave it in');
     }
 
     public function test_that_gift_is_not_also_on_the_following_year(): void
@@ -121,6 +121,6 @@ final class StatementYearBoundaryTest extends IntegrationTestCase
         $rows = Plugin::instance()->container->get(DonationRepository::class)
             ->paidForDonorInYear($donorId, 2025);
 
-        $this->assertCount(1, $rows, 'a gala ticket is goods received, not a gift');
+        $this->assertCount(1, $rows, 'a gala ticket is goods received, not a donation');
     }
 }
