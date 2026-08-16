@@ -61,7 +61,9 @@ final class DataExporter
      * dono_magic_link_tokens are live credentials. Anyone holding the file
      * could sign in as any donor until they expired.
      *
-     * dono_pending_signups are half-finished donations nobody has confirmed.
+     * dono_pending_signups are addresses somebody typed that nobody has
+     * proven, and they expire in a week. Carrying them to another site would
+     * import strangers' claims as if the organization had collected them.
      *
      * dono_form_donation_stats and dono_events are derived or observational.
      * The stats are recomputed on import; the log describes what happened on

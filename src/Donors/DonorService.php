@@ -45,10 +45,21 @@ final class DonorService
      *     donor_type?: 'individual'|'organization'|'household',
      * } $profile
      *
+     * @param bool $profileOnlyOnCreate Apply $profile to a donor this call
+     *     creates and to no other. A caller that decided the profile was safe
+     *     by looking the address up first is deciding on a read that this
+     *     method repeats: between the two, a donation can create the donor, and
+     *     back-filling then writes a name onto somebody the caller never meant
+     *     to touch.
+     *
      * @since 1.0.0
      */
-    public function findOrCreate(string $email, array $profile = [], bool $reactivateIfRedacted = false): Donor
-    {
+    public function findOrCreate(
+        string $email,
+        array $profile = [],
+        bool $reactivateIfRedacted = false,
+        bool $profileOnlyOnCreate = false,
+    ): Donor {
         $email = $this->hasher->normalizeEmail($email);
         $hash  = $this->hasher->emailHash($email);
 
@@ -67,7 +78,7 @@ final class DonorService
                 $existing->updated_at      = $this->clock->now()->format('Y-m-d H:i:s');
                 $existing->save();
             }
-            return $this->refreshProfile($existing, $profile);
+            return $this->refreshProfile($existing, $profileOnlyOnCreate ? [] : $profile);
         }
 
         $now = $this->clock->now()->format('Y-m-d H:i:s');

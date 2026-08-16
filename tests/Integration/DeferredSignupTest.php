@@ -411,4 +411,43 @@ final class DeferredSignupTest extends IntegrationTestCase
                 ->count()
         );
     }
+
+    /**
+     * Anyone can type anyone's address, so a claim can be standing on an
+     * address whose owner becomes a donor another way before the link is ever
+     * clicked. The name on that link belongs to whoever typed it, and it must
+     * not land on the donor who arrived in the meantime: it would show on their
+     * receipts, their year-end statement and the Donors screen.
+     *
+     * Built by hand because the portal will not mail a link for an address it
+     * can already find a donor for. That refusal is the first lock; this is the
+     * one behind it.
+     */
+    public function test_a_link_cannot_name_a_donor_who_arrived_after_it_was_sent(): void
+    {
+        $email = 'arrived-' . uniqid() . '@example.test';
+
+        $claim = $this->container()->get(PendingSignupRepository::class)->put($email);
+        $raw   = $this->container()->get(MagicLinkService::class)->issue(
+            0,
+            SignupRedemption::PURPOSE,
+            (int) $claim->id,
+            PendingSignupRepository::TTL_SECONDS,
+            ['first_name' => 'Mallory', 'last_name' => 'Stranger']
+        );
+
+        // The owner donates, which creates them with no name on file.
+        $donor = $this->container()->get(DonorService::class)->findOrCreate($email);
+        $this->assertNull($donor->first_name, 'nameless, so a back-fill would take');
+
+        $this->assertSame(
+            (int) $donor->id,
+            $this->container()->get(SignupRedemption::class)->redeem($raw),
+            'the link still signs its owner in'
+        );
+
+        $after = $this->donor($email);
+        $this->assertNull($after->first_name, 'but it did not name them');
+        $this->assertNull($after->last_name);
+    }
 }
