@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1f77c13a4966948822df0e3471c881aa",
+    "content-hash": "ffaf5d2077ee0ac0c6d4794e7ec123d8",
     "packages": [
         {
             "name": "dompdf/dompdf",
@@ -1229,12 +1229,12 @@
             "version": "v1.0.3",
             "source": {
                 "type": "git",
-                "url": "git@github.com:getdono/queryable.git",
+                "url": "https://github.com/dono-platform/queryable.git",
                 "reference": "a67b266d56d419476d90e3d19aa365f70a5046be"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/getdono/queryable/zipball/a67b266d56d419476d90e3d19aa365f70a5046be",
+                "url": "https://api.github.com/repos/dono-platform/queryable/zipball/a67b266d56d419476d90e3d19aa365f70a5046be",
                 "reference": "a67b266d56d419476d90e3d19aa365f70a5046be",
                 "shasum": ""
             },
@@ -1270,8 +1270,8 @@
             ],
             "description": "A fluent SQL query builder for WordPress",
             "support": {
-                "source": "https://github.com/getdono/queryable/tree/v1.0.3",
-                "issues": "https://github.com/getdono/queryable/issues"
+                "source": "https://github.com/dono-platform/queryable/tree/v1.0.3",
+                "issues": "https://github.com/dono-platform/queryable/issues"
             },
             "time": "2026-08-10T16:53:10+00:00"
         },
