@@ -145,8 +145,8 @@ final class DonorsController
         ]);
 
         // Minting a portal login is an action the admin takes, never something
-        // a page load does on their behalf: the token impersonates the donor
-        // for thirty days and cannot be revoked.
+        // a page load does on their behalf: whoever opens the link is signed in
+        // as the donor. The donor can take it back with sign out everywhere.
         register_rest_route(self::NAMESPACE, '/admin/donors/(?P<id>\d+)/portal-link', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'issuePortalLink'],
@@ -404,8 +404,8 @@ final class DonorsController
             return new WP_Error('dono_donor_not_found', __('Donor not found.', 'dono-fundraising-platform'), ['status' => 404]);
         }
 
-        $url = $this->metrics->issuePortalLink($donor);
-        if ($url === null) {
+        $link = $this->metrics->issuePortalLink($donor);
+        if ($link === null) {
             return new WP_Error(
                 'dono_portal_link_unavailable',
                 __('A sign-in link cannot be issued for an erased donor.', 'dono-fundraising-platform'),
@@ -413,7 +413,12 @@ final class DonorsController
             );
         }
 
-        return new WP_REST_Response(['magic_link_url' => $url], 201);
+        // The expiry travels with the link so the screen states the deadline
+        // this token actually carries instead of repeating a number.
+        return new WP_REST_Response([
+            'magic_link_url' => $link['url'],
+            'expires_at'     => $link['expires_at'],
+        ], 201);
     }
     public function createNote(WP_REST_Request $request): WP_REST_Response|WP_Error
     {

@@ -10,6 +10,7 @@ use Dono\Donors\Consent;
 use Dono\Donors\DonorNote;
 use Dono\Donors\MagicLinkToken;
 use Dono\Donors\PendingSignup;
+use Dono\Donors\PendingSignupRepository;
 use Dono\Recurring\RecurringPlan;
 use Dono\Donations\Refund;
 
@@ -85,8 +86,12 @@ final class CoreDonorDataHandler implements ErasureHandler
 
         // An unproven signup has no donor id to be found by, so it is reached
         // by hash or not at all. Left behind, its link stays live and would
-        // rebuild the donor on redemption.
+        // rebuild the donor on redemption, and the link carries the name the
+        // signup typed.
         if ($request->emailHash !== '') {
+            foreach (PendingSignup::query()->where('email_hash', $request->emailHash)->getAll() as $claim) {
+                PendingSignupRepository::deleteSignupTokensFor((int) $claim->id);
+            }
             PendingSignup::query()->where('email_hash', $request->emailHash)->delete();
         }
 

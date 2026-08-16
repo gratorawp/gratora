@@ -31,11 +31,14 @@ final class PendingSignupRepository
 
     /**
      * Signing up twice is a person who lost the first email, not a second
-     * person, so the newer names and the fresher expiry win.
+     * person, so it refreshes the one row rather than opening a second claim on
+     * the mailbox. Nothing here is contestable: the row says an address was
+     * typed and when the claim on it dies, and each signup's own name rides the
+     * token that signup mints.
      *
      * @since 1.0.0
      */
-    public function put(string $email, ?string $firstName, ?string $lastName): PendingSignup
+    public function put(string $email): PendingSignup
     {
         $normalized = $this->hasher->normalizeEmail($email);
         $hash       = $this->hasher->emailHash($normalized);
@@ -46,8 +49,6 @@ final class PendingSignupRepository
 
         $row->email_hash      = $hash;
         $row->email_encrypted = $this->crypto->encrypt($normalized);
-        $row->first_name      = $firstName !== '' ? $firstName : null;
-        $row->last_name       = $lastName  !== '' ? $lastName  : null;
         $row->expires_at      = $now->modify('+' . self::TTL_SECONDS . ' seconds')->format('Y-m-d H:i:s');
         if ($existing === null) {
             $row->created_at = $now->format('Y-m-d H:i:s');
@@ -79,8 +80,27 @@ final class PendingSignupRepository
     public function delete(int $id): void
     {
         if ($id > 0) {
+            self::deleteSignupTokensFor($id);
             PendingSignup::query()->where('id', $id)->delete();
         }
+    }
+
+    /**
+     * A signup token holds the name its registration typed, so a claim that
+     * goes has to take its tokens with it or the name outlives the row that
+     * erasure deleted. They are dead links either way once the claim is gone:
+     * redemption reloads the claim by target_id and refuses without it.
+     *
+     * @since 1.0.0
+     */
+    public static function deleteSignupTokensFor(int $claimId): void
+    {
+        if ($claimId <= 0) return;
+
+        MagicLinkToken::query()
+            ->where('purpose', SignupRedemption::PURPOSE)
+            ->where('target_id', $claimId)
+            ->delete();
     }
 
     /**
@@ -91,9 +111,14 @@ final class PendingSignupRepository
      */
     public function deleteByEmailHash(string $hash): void
     {
-        if ($hash !== '') {
-            PendingSignup::query()->where('email_hash', $hash)->delete();
+        if ($hash === '') return;
+
+        $claim = $this->findByEmailHash($hash);
+        if ($claim !== null) {
+            self::deleteSignupTokensFor((int) $claim->id);
         }
+
+        PendingSignup::query()->where('email_hash', $hash)->delete();
     }
 
     /** @since 1.0.0 */

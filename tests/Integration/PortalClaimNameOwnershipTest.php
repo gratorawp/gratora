@@ -6,22 +6,21 @@ namespace Dono\Tests\Integration;
 
 use Dono\Donations\AntiSpamGuard;
 use Dono\Donors\Donor;
-use Dono\Donors\PendingSignupRepository;
+use Dono\Donors\MagicLinkToken;
 use Dono\Donors\SignupRedemption;
-use Dono\Foundation\Identity\IdentityHasher;
 use Dono\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
- * Who gets to name the donor a claim becomes. Nobody calling /portal/register
- * has proved the mailbox, and redemption prints the claim's names onto the
- * donor row, the receipts and the year-end statement, where refreshProfile only
- * back-fills and so never corrects them.
+ * What a link does is decided by the registration that minted it, and by
+ * nothing else. /portal/register takes no session and proves nothing about who
+ * is calling, so anyone can post any address; the one property that has to
+ * hold is that they cannot change what somebody else's link does.
  *
- * Driven end to end rather than against the claim row: register, run the job so
- * the mail actually goes, attack, then redeem the token parsed out of the mail
- * the victim received. A rule that holds on the claim and not on the donor row
- * is not the property anyone cares about.
+ * Driven end to end rather than against a row: register, run the job so the
+ * mail actually goes, attack, then redeem the token parsed out of the mail the
+ * victim received. A rule that holds on a row and not on the donor the link
+ * creates is not the property anyone cares about.
  */
 final class PortalClaimNameOwnershipTest extends IntegrationTestCase
 {
@@ -42,14 +41,6 @@ final class PortalClaimNameOwnershipTest extends IntegrationTestCase
         return rest_do_request($req);
     }
 
-    private function claimRow(string $email)
-    {
-        $hasher = $this->c()->get(IdentityHasher::class);
-
-        return $this->c()->get(PendingSignupRepository::class)
-            ->findByEmailHash($hasher->emailHash($hasher->normalizeEmail($email)));
-    }
-
     private function mailbox(): \ArrayObject
     {
         $sent = new \ArrayObject();
@@ -68,15 +59,22 @@ final class PortalClaimNameOwnershipTest extends IntegrationTestCase
         return $m[1];
     }
 
-    /**
-     * The blocker the wave-four review reproduced: an address with a claim
-     * already mailed, then two identical anonymous posts. The first was said
-     * to clear the contested fields and the second to fill the blanks it made,
-     * so the owner redeemed their own link into the attacker's name.
-     */
-    public function test_two_anonymous_posts_do_not_put_the_attackers_name_on_the_donor_row(): void
+    private function redeem(string $rawToken): ?Donor
     {
-        $email = 'claim-victim-' . uniqid() . '@example.test';
+        $id = $this->c()->get(SignupRedemption::class)->redeem($rawToken);
+
+        return Donor::query()->where('id', $id)->get();
+    }
+
+    /**
+     * The property, and the reason the name rides the token: the victim's link
+     * carries what the victim typed, whatever anyone else posts to the same
+     * address afterwards. Ordering decides nothing, because there is nothing
+     * shared left to reorder.
+     */
+    public function test_an_attacker_cannot_change_what_the_victims_own_link_does(): void
+    {
+        $email = 'own-link-' . uniqid() . '@example.test';
         $sent  = $this->mailbox();
 
         $this->register(['email' => $email, 'first_name' => 'Alice', 'last_name' => 'Okafor']);
@@ -86,89 +84,158 @@ final class PortalClaimNameOwnershipTest extends IntegrationTestCase
 
         $this->register(['email' => $email, 'first_name' => 'Mallory', 'last_name' => 'Attacker']);
         $this->register(['email' => $email, 'first_name' => 'Mallory', 'last_name' => 'Attacker']);
+        $this->runPendingAsyncJobs();
 
-        $claim = $this->claimRow($email);
-        $this->assertNotNull($claim);
-        $this->assertNotSame('Mallory', (string) $claim->first_name, 'no attacker first name on the claim');
-        $this->assertNotSame('Attacker', (string) $claim->last_name, 'no attacker surname on the claim');
-
-        $donorId = $this->c()->get(SignupRedemption::class)->redeem($victimLink);
-        $donor   = Donor::query()->where('id', $donorId)->get();
+        $donor = $this->redeem($victimLink);
 
         $this->assertNotNull($donor, 'the victim link still redeems');
-        $this->assertNotSame('Mallory', (string) $donor->first_name, "the attacker's name is not on the donor row");
-        $this->assertNotSame('Attacker', (string) $donor->last_name);
-    }
-
-    /**
-     * The one-request variant: the shipped form requires a first name and not
-     * a surname, so the common claim shape has a blank surname for a stranger
-     * to fill.
-     */
-    public function test_a_lone_surname_from_a_stranger_never_reaches_the_donor_row(): void
-    {
-        $email = 'claim-inject-' . uniqid() . '@example.test';
-        $sent  = $this->mailbox();
-
-        $this->register(['email' => $email, 'first_name' => 'Alice']);
-        $this->runPendingAsyncJobs();
-        $victimLink = $this->tokenIn((string) $sent[0]);
-
-        $this->register(['email' => $email, 'last_name' => 'Attacker']);
-
-        $donorId = $this->c()->get(SignupRedemption::class)->redeem($victimLink);
-        $donor   = Donor::query()->where('id', $donorId)->get();
-
-        $this->assertNotNull($donor);
-        $this->assertSame('', (string) $donor->last_name, "the stranger's surname reaches nobody");
-    }
-
-    /**
-     * The honest donor whose second registration retypes the name they already
-     * proved: the name has to survive onto the donor row rather than being
-     * destroyed as a dispute.
-     */
-    public function test_an_honest_donor_retyping_their_own_name_keeps_it_on_the_donor_row(): void
-    {
-        $email = 'claim-honest-' . uniqid() . '@example.test';
-        $sent  = $this->mailbox();
-
-        $this->register(['email' => $email, 'first_name' => 'Alice', 'last_name' => 'Okafor']);
-        $this->runPendingAsyncJobs();
-        $link = $this->tokenIn((string) $sent[0]);
-
-        // Same person, same name, typed the way a phone keyboard offers it.
-        $this->register(['email' => $email, 'first_name' => 'alice', 'last_name' => ' okafor ']);
-
-        $donorId = $this->c()->get(SignupRedemption::class)->redeem($link);
-        $donor   = Donor::query()->where('id', $donorId)->get();
-
-        $this->assertNotNull($donor);
-        $this->assertSame('Alice', (string) $donor->first_name, 'the name they proved is the name they get');
+        $this->assertSame('Alice', (string) $donor->first_name, 'the name the victim typed is the name they get');
         $this->assertSame('Okafor', (string) $donor->last_name);
     }
 
     /**
-     * Records what a second submission can and cannot do to a claim, so the
-     * trade the fix makes is written down rather than inferred: an addition is
-     * refused along with a contradiction.
+     * The same, with the attacker first. A stranger who claims an address
+     * before its owner ever visits cannot decide what the owner's own link
+     * writes either.
      */
-    public function test_a_second_submission_adding_a_surname_is_refused_not_taken(): void
+    public function test_a_stranger_who_registers_first_does_not_own_the_name(): void
     {
-        $email = 'claim-add-' . uniqid() . '@example.test';
+        $email = 'first-mover-' . uniqid() . '@example.test';
+        $sent  = $this->mailbox();
+
+        $this->register(['email' => $email, 'first_name' => 'Mallory', 'last_name' => 'Attacker']);
+        $this->runPendingAsyncJobs();
+
+        $this->register(['email' => $email, 'first_name' => 'Alice', 'last_name' => 'Okafor']);
+        $this->runPendingAsyncJobs();
+        $this->assertCount(2, $sent, 'both attempts mailed the mailbox');
+
+        $donor = $this->redeem($this->tokenIn((string) $sent[1]));
+
+        $this->assertNotNull($donor);
+        $this->assertSame('Alice', (string) $donor->first_name);
+        $this->assertSame('Okafor', (string) $donor->last_name);
+    }
+
+    /**
+     * The first cost the shared row charged: a stranger could contest a name
+     * into nothing, and the owner was created nameless off their own link.
+     */
+    public function test_a_stranger_cannot_blank_the_name_the_donor_typed(): void
+    {
+        $email = 'no-wipe-' . uniqid() . '@example.test';
+        $sent  = $this->mailbox();
+
+        $this->register(['email' => $email, 'first_name' => 'Alice', 'last_name' => 'Okafor']);
+        $this->runPendingAsyncJobs();
+        $victimLink = $this->tokenIn((string) $sent[0]);
+
+        // Both shapes the old rule cleared a standing name on: a name that
+        // disagrees, and a submission that names one field and leaves the
+        // other blank.
+        $this->register(['email' => $email, 'first_name' => 'Mallory']);
+        $this->register(['email' => $email, 'last_name' => 'Attacker']);
+        $this->runPendingAsyncJobs();
+
+        $donor = $this->redeem($victimLink);
+
+        $this->assertNotNull($donor);
+        $this->assertSame('Alice', (string) $donor->first_name, 'no stranger blanks a name they cannot read');
+        $this->assertSame('Okafor', (string) $donor->last_name);
+    }
+
+    /**
+     * The second cost: the donor who registers with a first name, the only
+     * field the form requires, and comes back to add a surname. They get what
+     * they typed on the link they then click.
+     */
+    public function test_a_donor_adding_a_surname_gets_it_from_the_link_they_click(): void
+    {
+        $email = 'surname-' . uniqid() . '@example.test';
         $sent  = $this->mailbox();
 
         $this->register(['email' => $email, 'first_name' => 'Alice']);
         $this->runPendingAsyncJobs();
-        $link = $this->tokenIn((string) $sent[0]);
 
         $this->register(['email' => $email, 'first_name' => 'Alice', 'last_name' => 'Okafor']);
+        $this->runPendingAsyncJobs();
+        $this->assertCount(2, $sent);
 
-        $donorId = $this->c()->get(SignupRedemption::class)->redeem($link);
-        $donor   = Donor::query()->where('id', $donorId)->get();
+        $donor = $this->redeem($this->tokenIn((string) $sent[1]));
 
         $this->assertNotNull($donor);
-        $this->assertSame('Alice', (string) $donor->first_name, 'the agreed name stands');
-        $this->assertSame('', (string) $donor->last_name, 'and the addition is not taken from an unproven caller');
+        $this->assertSame('Alice', (string) $donor->first_name);
+        $this->assertSame('Okafor', (string) $donor->last_name, 'the surname they added is theirs to add');
+    }
+
+    /**
+     * And the first link still says what it said when it was sent. Two live
+     * links for one address are two separate answers, not one row read twice.
+     */
+    public function test_the_earlier_link_still_carries_what_it_was_minted_with(): void
+    {
+        $email = 'earlier-' . uniqid() . '@example.test';
+        $sent  = $this->mailbox();
+
+        $this->register(['email' => $email, 'first_name' => 'Alice']);
+        $this->runPendingAsyncJobs();
+        $firstLink = $this->tokenIn((string) $sent[0]);
+
+        $this->register(['email' => $email, 'first_name' => 'Alice', 'last_name' => 'Okafor']);
+        $this->runPendingAsyncJobs();
+
+        $donor = $this->redeem($firstLink);
+
+        $this->assertNotNull($donor);
+        $this->assertSame('Alice', (string) $donor->first_name);
+        $this->assertSame('', (string) $donor->last_name, 'the earlier link never carried a surname');
+    }
+
+    /**
+     * What an attacker still gets, written down rather than discovered: a
+     * second mail in somebody else's inbox, which no design can prevent. It
+     * names the attacker only if the victim opens the attacker's mail instead
+     * of their own, and it can still only create the account the victim was
+     * signing up for.
+     */
+    public function test_the_attackers_own_link_is_all_their_registration_steers(): void
+    {
+        $email = 'attacker-link-' . uniqid() . '@example.test';
+        $sent  = $this->mailbox();
+
+        $this->register(['email' => $email, 'first_name' => 'Alice', 'last_name' => 'Okafor']);
+        $this->runPendingAsyncJobs();
+
+        $this->register(['email' => $email, 'first_name' => 'Mallory', 'last_name' => 'Attacker']);
+        $this->runPendingAsyncJobs();
+        $this->assertCount(2, $sent, 'both mails went to the address, which is the mailbox owner to read');
+
+        $donor = $this->redeem($this->tokenIn((string) $sent[1]));
+
+        $this->assertNotNull($donor);
+        $this->assertSame('Mallory', (string) $donor->first_name, 'the attacker steers their own link and no other');
+    }
+
+    /**
+     * The name is on the token because the claim is one row per address that
+     * every registration shares. Nothing may put it back on the shared row.
+     */
+    public function test_each_registration_mints_its_own_token_carrying_its_own_name(): void
+    {
+        $email = 'per-token-' . uniqid() . '@example.test';
+        $this->mailbox();
+
+        $this->register(['email' => $email, 'first_name' => 'Alice', 'last_name' => 'Okafor']);
+        $this->runPendingAsyncJobs();
+        $this->register(['email' => $email, 'first_name' => 'Mallory', 'last_name' => 'Attacker']);
+        $this->runPendingAsyncJobs();
+
+        $names = array_map(
+            static fn (MagicLinkToken $t): string => trim(($t->first_name ?? '') . ' ' . ($t->last_name ?? '')),
+            MagicLinkToken::query()->where('purpose', SignupRedemption::PURPOSE)->getAll()
+        );
+        sort($names);
+
+        $this->assertSame(['Alice Okafor', 'Mallory Attacker'], $names, 'one token per registration, one name each');
     }
 }

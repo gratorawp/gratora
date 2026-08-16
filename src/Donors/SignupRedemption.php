@@ -57,16 +57,22 @@ final class SignupRedemption
                 return 0;
             }
 
-            // The names on the claim reach a donor this call is creating, and
-            // no other. Anyone can type anyone's address, so a claim can still
-            // be standing when its owner becomes a donor by donating, and
-            // back-filling then would print a stranger's name on that person's
-            // receipts and year-end statement.
+            // The name comes from the token, which carries what the one
+            // registration that minted it typed. The claim is a single row per
+            // address that every registration for that address shares, so a
+            // name read from there is a name anyone who knows the address can
+            // steer, whatever order they submit in.
+            //
+            // It reaches a donor this call is creating, and no other. Anyone
+            // can type anyone's address, so a claim can still be standing when
+            // its owner becomes a donor by donating, and back-filling then
+            // would print a stranger's name on that person's receipts and
+            // year-end statement.
             $profile = [];
             if ($existing === null) {
                 foreach (['first_name', 'last_name'] as $field) {
-                    if (($claim->$field ?? null) !== null && $claim->$field !== '') {
-                        $profile[$field] = $claim->$field;
+                    if (($token->$field ?? null) !== null && $token->$field !== '') {
+                        $profile[$field] = $token->$field;
                     }
                 }
             }

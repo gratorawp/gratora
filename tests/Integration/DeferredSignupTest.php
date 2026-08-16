@@ -8,6 +8,7 @@ use Dono\Donations\AntiSpamGuard;
 use Dono\Donors\Donor;
 use Dono\Donors\DonorService;
 use Dono\Donors\MagicLinkService;
+use Dono\Donors\MagicLinkToken;
 use Dono\Donors\PendingSignup;
 use Dono\Donors\PendingSignupRepository;
 use Dono\Donors\Portal\PortalSession;
@@ -62,7 +63,10 @@ final class DeferredSignupTest extends IntegrationTestCase
         return rest_do_request($req);
     }
 
-    /** The link the job would email, minted the same way. */
+    /**
+     * A link with no name on it, minted the way the job mints one for a signup
+     * that typed no name. Used where the name is beside the point.
+     */
     private function linkFor(PendingSignup $claim): string
     {
         return $this->container()->get(MagicLinkService::class)->issue(
@@ -71,6 +75,35 @@ final class DeferredSignupTest extends IntegrationTestCase
             (int) $claim->id,
             PendingSignupRepository::TTL_SECONDS
         );
+    }
+
+    /**
+     * The link the donor actually receives. The name a redemption applies
+     * rides the token the job minted, so a test about names that mints its own
+     * token is testing its own fixture.
+     *
+     * @param array<string,mixed> $extra
+     */
+    private function mailedLink(string $email, array $extra = []): string
+    {
+        $sent    = new \ArrayObject();
+        $capture = function ($null, $atts) use ($sent) {
+            $sent[] = (string) ($atts['message'] ?? '');
+            return false;
+        };
+        add_filter('pre_wp_mail', $capture, 10, 2);
+
+        try {
+            $this->signUp($email, $extra);
+            $this->runPendingAsyncJobs();
+        } finally {
+            remove_filter('pre_wp_mail', $capture, 10);
+        }
+
+        $this->assertCount(1, $sent, 'the signup mailed a link');
+        $this->assertSame(1, preg_match('/[?&]token=([A-Za-z0-9_\-]+)/', html_entity_decode((string) $sent[0]), $m));
+
+        return $m[1];
     }
 
     public function test_signing_up_creates_no_donor(): void
@@ -86,9 +119,9 @@ final class DeferredSignupTest extends IntegrationTestCase
     public function test_redeeming_the_link_creates_the_donor_and_clears_the_claim(): void
     {
         $email = 'proven-' . uniqid() . '@example.test';
-        $this->signUp($email, ['first_name' => 'Ada', 'last_name' => 'Lovelace']);
+        $raw   = $this->mailedLink($email, ['first_name' => 'Ada', 'last_name' => 'Lovelace']);
 
-        $donorId = $this->container()->get(SignupRedemption::class)->redeem($this->linkFor($this->claim($email)));
+        $donorId = $this->container()->get(SignupRedemption::class)->redeem($raw);
 
         $this->assertGreaterThan(0, $donorId);
         $donor = $this->donor($email);
@@ -122,6 +155,11 @@ final class DeferredSignupTest extends IntegrationTestCase
         $this->assertGreaterThan(0, $first);
         $this->assertSame(0, $second, 'a spent link creates nothing');
         $this->assertSame(1, Donor::query()->where('email_hash', $this->hash($email))->count());
+        $this->assertSame(
+            0,
+            MagicLinkToken::query()->where('purpose', SignupRedemption::PURPOSE)->count(),
+            'and the spent link is not left on file to be tried again'
+        );
     }
 
     public function test_an_expired_claim_cannot_be_redeemed(): void
@@ -147,8 +185,7 @@ final class DeferredSignupTest extends IntegrationTestCase
     public function test_a_claim_cannot_name_a_donor_it_did_not_create(): void
     {
         $email = 'claimed-' . uniqid() . '@example.test';
-        $this->signUp($email, ['first_name' => 'Rude', 'last_name' => 'Word']);
-        $raw = $this->linkFor($this->claim($email));
+        $raw   = $this->mailedLink($email, ['first_name' => 'Rude', 'last_name' => 'Word']);
 
         // The real owner becomes a donor by giving, with no name on file.
         $this->container()->get(DonorService::class)->findOrCreate($email);
@@ -162,9 +199,9 @@ final class DeferredSignupTest extends IntegrationTestCase
 
     /**
      * Signing up twice is one person who lost the first email, so it refreshes
-     * the one row rather than opening a second claim on the address. The name
-     * is the exception: the endpoint proves nothing about who is calling, so a
-     * second caller cannot take a name the first wrote.
+     * the one row rather than opening a second claim on the address. The row
+     * holds nothing contestable, so sharing it costs nothing: what each signup
+     * typed rides the token that signup mints.
      */
     public function test_a_second_signup_replaces_the_claim_rather_than_adding_one(): void
     {
@@ -179,8 +216,6 @@ final class DeferredSignupTest extends IntegrationTestCase
 
         $this->assertSame(1, PendingSignup::query()->where('email_hash', $this->hash($email))->count());
         $this->assertSame($firstId, (int) $this->claim($email)->id, 'the same row is updated');
-        $this->assertNull($this->claim($email)->first_name, 'a disputed name reaches nobody');
-        $this->assertNull($this->claim($email)->last_name, 'and a second caller does not get to write one either');
     }
 
     /** An address nobody proved is not kept past its window. */
@@ -213,17 +248,56 @@ final class DeferredSignupTest extends IntegrationTestCase
         $this->assertNull($this->claim($email), 'erasure took the claim too');
     }
 
-    /** Erasure is a decision, not a lapsed state; signing up must not undo it. */
+    /**
+     * The link carries the name the registration typed, so erasure has to take
+     * the tokens with the claim. Left behind, the name is still readable in a
+     * table the erasure was supposed to have emptied.
+     */
+    public function test_erasure_takes_the_name_off_the_link_as_well_as_the_claim(): void
+    {
+        $email = 'erased-link-' . uniqid() . '@example.test';
+        $this->mailedLink($email, ['first_name' => 'Ada', 'last_name' => 'Lovelace']);
+
+        $signupTokens = static fn (): int => MagicLinkToken::query()
+            ->where('purpose', SignupRedemption::PURPOSE)
+            ->count();
+
+        $this->assertSame(1, $signupTokens(), 'the mailed link is on file');
+
+        $donor = $this->container()->get(DonorService::class)->findOrCreate($email);
+        $this->container()->get(DonorService::class)->redact($donor);
+
+        $this->assertNull($this->claim($email), 'the claim is gone');
+        $this->assertSame(0, $signupTokens(), 'and the name it was mailed with went with it');
+    }
+
+    /**
+     * Erasure is a decision, not a lapsed state; signing up must not undo it.
+     *
+     * Built by hand rather than through the portal, because erasure takes the
+     * claim and its links with it and the portal will not hand out a link for
+     * an address it can already find a donor for. The refusal is the second
+     * lock, and a test that let erasure delete the evidence would pass with
+     * that lock removed.
+     */
     public function test_a_claim_cannot_rebuild_an_erased_donor(): void
     {
         $email = 'gone-' . uniqid() . '@example.test';
         $donor = $this->container()->get(DonorService::class)->findOrCreate($email, ['first_name' => 'Ada']);
-        $this->signUp($email);
-        $raw = $this->linkFor($this->claim($email));
         $this->container()->get(DonorService::class)->redact($donor);
+
+        $claim = $this->container()->get(PendingSignupRepository::class)->put($email);
+        $raw   = $this->container()->get(MagicLinkService::class)->issue(
+            0,
+            SignupRedemption::PURPOSE,
+            (int) $claim->id,
+            PendingSignupRepository::TTL_SECONDS,
+            ['first_name' => 'Ada', 'last_name' => 'Lovelace']
+        );
 
         $this->assertSame(0, $this->container()->get(SignupRedemption::class)->redeem($raw));
         $this->assertNotNull($this->donor($email)->redacted_at, 'still erased');
+        $this->assertNull($this->donor($email)->first_name, 'and still nameless');
     }
 
     /**
@@ -266,7 +340,7 @@ final class DeferredSignupTest extends IntegrationTestCase
 
         $this->assertSame(
             1,
-            \Dono\Donors\MagicLinkToken::query()
+            MagicLinkToken::query()
                 ->where('donor_id', (int) $donor->id)
                 ->where('purpose', 'donor_portal')
                 ->count(),
@@ -282,7 +356,7 @@ final class DeferredSignupTest extends IntegrationTestCase
 
         $this->runPendingAsyncJobs();
 
-        $token = \Dono\Donors\MagicLinkToken::query()
+        $token = MagicLinkToken::query()
             ->where('purpose', SignupRedemption::PURPOSE)
             ->get();
 
@@ -303,7 +377,7 @@ final class DeferredSignupTest extends IntegrationTestCase
         $this->assertNull($this->claim($email), 'the moot claim is cleared');
         $this->assertSame(
             1,
-            \Dono\Donors\MagicLinkToken::query()
+            MagicLinkToken::query()
                 ->where('donor_id', (int) $donor->id)
                 ->where('purpose', 'donor_portal')
                 ->count()

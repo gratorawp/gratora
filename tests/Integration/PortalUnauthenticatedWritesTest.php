@@ -297,9 +297,9 @@ final class PortalUnauthenticatedWritesTest extends IntegrationTestCase
         $email = 'fallback-' . uniqid() . '@example.test';
         $donor = $this->donor($email);
 
-        $url = $this->container()->get(DonorMetricsService::class)->issuePortalLink($donor);
-        $this->assertIsString($url);
-        parse_str((string) wp_parse_url($url, PHP_URL_QUERY), $query);
+        $link = $this->container()->get(DonorMetricsService::class)->issuePortalLink($donor);
+        $this->assertIsArray($link);
+        parse_str((string) wp_parse_url((string) $link['url'], PHP_URL_QUERY), $query);
         $staffToken = (string) ($query['token'] ?? '');
         $this->assertNotSame('', $staffToken);
 
@@ -369,253 +369,6 @@ final class PortalUnauthenticatedWritesTest extends IntegrationTestCase
         $this->assertNull($session->startFromToken($raw), 'the unclicked link is dead too');
     }
 
-    /** The claim id for an address whose signup link is already in a mailbox. */
-    private function claimWithLinkOut(string $email, string $first, string $last = ''): string
-    {
-        $this->post('register', ['email' => $email, 'first_name' => $first, 'last_name' => $last]);
-        $claim = $this->claim($email);
-        $this->assertNotNull($claim);
-
-        return $this->container()->get(MagicLinkService::class)->issue(
-            0,
-            SignupRedemption::PURPOSE,
-            (int) $claim->id,
-            PendingSignupRepository::TTL_SECONDS
-        );
-    }
-
-    /**
-     * A claim with a link already out is an identity somebody is about to
-     * redeem. This endpoint proves nothing about who is calling, so the name
-     * the redemption writes onto the donor row, and onto their tax statement
-     * and the supporter wall, must not be a stranger's to choose.
-     */
-    public function test_a_stranger_writing_last_cannot_name_the_donor(): void
-    {
-        $email = 'rename-late-' . uniqid() . '@example.test';
-        $raw   = $this->claimWithLinkOut($email, 'Alice', 'Okafor');
-
-        $this->post('register', ['email' => $email, 'first_name' => 'Mallory', 'last_name' => 'Attacker']);
-
-        $this->container()->get(SignupRedemption::class)->redeem($raw);
-        $donor = Donor::query()->where('email_hash', $this->hash($email))->get();
-
-        $this->assertNotNull($donor);
-        $this->assertSame('', (string) $donor->first_name, 'a disputed name reaches nobody');
-        $this->assertSame('', (string) $donor->last_name);
-    }
-
-    /**
-     * And writing first is no better a claim on the name than writing last: a
-     * stranger who registers a victim's address before the victim does must not
-     * end up owning what the redemption prints, which is permanent because
-     * refreshProfile only ever back-fills an empty field.
-     */
-    public function test_a_stranger_writing_first_cannot_name_the_donor_either(): void
-    {
-        $email = 'rename-early-' . uniqid() . '@example.test';
-        $this->claimWithLinkOut($email, 'Mallory', 'Attacker');
-
-        // The owner of the mailbox registers themselves and redeems the link
-        // that arrives from their own attempt.
-        $this->post('register', ['email' => $email, 'first_name' => 'Alice', 'last_name' => 'Okafor']);
-
-        $claim = $this->claim($email);
-        $this->assertNotNull($claim);
-        $this->assertNull($claim->first_name, 'the stranger does not keep the claim by getting there first');
-
-        $raw = $this->container()->get(MagicLinkService::class)->issue(
-            0,
-            SignupRedemption::PURPOSE,
-            (int) $claim->id,
-            PendingSignupRepository::TTL_SECONDS
-        );
-        $this->container()->get(SignupRedemption::class)->redeem($raw);
-
-        $donor = Donor::query()->where('email_hash', $this->hash($email))->get();
-        $this->assertNotNull($donor);
-        $this->assertSame('', (string) $donor->first_name, "and the stranger's name is not the donor's");
-    }
-
-    /**
-     * Asking for a second mail without retyping a name says nothing about the
-     * name, so it is not a dispute and the claim keeps what it has.
-     */
-    public function test_a_resend_that_types_no_name_leaves_the_claim_alone(): void
-    {
-        $email = 'resend-name-' . uniqid() . '@example.test';
-        $this->claimWithLinkOut($email, 'Alice', 'Okafor');
-
-        $this->post('register', ['email' => $email]);
-
-        $this->assertSame('Alice', (string) $this->claim($email)->first_name);
-        $this->assertSame('Okafor', (string) $this->claim($email)->last_name);
-    }
-
-    /**
-     * The donor path, which is the common one: the signup form requires a first
-     * name and does not require a surname, so coming back to add one is the
-     * ordinary reason to register twice. The surname is not taken, because this
-     * endpoint cannot tell that donor from a stranger typing the same shape,
-     * but the name they already proved has to survive it all the way onto the
-     * donor row rather than being destroyed on the way.
-     */
-    public function test_a_donor_coming_back_to_add_a_surname_keeps_the_name_on_the_claim(): void
-    {
-        $email = 'surname-' . uniqid() . '@example.test';
-        $sent  = $this->captureLinkMails();
-
-        $this->post('register', ['email' => $email, 'first_name' => 'Alice']);
-        $this->runPendingAsyncJobs();
-        $this->assertCount(1, $sent, 'the first link is in the mailbox');
-
-        $this->post('register', ['email' => $email, 'first_name' => 'Alice', 'last_name' => 'Okafor']);
-
-        $claim = $this->claim($email);
-        $this->assertSame('Alice', (string) $claim->first_name, 'the name they agree with stands');
-        $this->assertNull($claim->last_name, 'and the one a second caller supplies is not written');
-
-        $donorId = $this->container()->get(SignupRedemption::class)->redeem($this->tokenFromMail((string) $sent[0]['body']));
-        $donor   = Donor::query()->where('id', $donorId)->get();
-
-        $this->assertNotNull($donor);
-        $this->assertSame('Alice', (string) $donor->first_name, 'and the donor is not created nameless');
-        $this->assertSame('', (string) $donor->last_name);
-    }
-
-    /**
-     * Retyping one's own name with different capitalisation is one person, not
-     * two, so it is not a dispute. The stored value is what stands either way:
-     * agreeing with a name can never be a way of rewriting it.
-     */
-    public function test_retyping_the_same_name_in_a_different_case_is_not_a_dispute(): void
-    {
-        $email = 'case-' . uniqid() . '@example.test';
-        $this->claimWithLinkOut($email, 'alice', 'okafor');
-
-        $this->post('register', ['email' => $email, 'first_name' => 'Alice', 'last_name' => ' Okafor ']);
-
-        $claim = $this->claim($email);
-        $this->assertSame('alice', (string) $claim->first_name, 'what they proved is what stands');
-        $this->assertSame('okafor', (string) $claim->last_name);
-    }
-
-    /**
-     * A submission that types any name at all is naming a whole identity, so a
-     * field it leaves blank contests a standing one just as a different value
-     * does. Anything less leaves a stranger's surname sitting on the claim that
-     * the owner's own signup, which sends that field empty, cannot remove.
-     */
-    public function test_a_submission_that_types_one_name_asserts_the_whole_of_it(): void
-    {
-        $email = 'partial-' . uniqid() . '@example.test';
-        $this->claimWithLinkOut($email, 'Alice', 'Okafor');
-
-        $this->post('register', ['email' => $email, 'first_name' => 'Mallory']);
-
-        $claim = $this->claim($email);
-        $this->assertNull($claim->first_name, 'the name they contradicted reaches nobody');
-        $this->assertNull($claim->last_name, 'nor the one they left blank while naming themselves');
-    }
-
-    /**
-     * The one-request shape the shipped form makes ordinary: it requires a
-     * first name and not a surname, so a live claim commonly carries a blank
-     * one. Filling that blank is a stranger writing on an identity somebody
-     * else is holding, and the surname lands on the receipts and the year-end
-     * statement with nothing to correct it, because refreshProfile only ever
-     * back-fills an empty field.
-     */
-    public function test_a_stranger_cannot_add_a_surname_to_a_claim_that_has_none(): void
-    {
-        $email = 'inject-' . uniqid() . '@example.test';
-        $raw   = $this->claimWithLinkOut($email, 'Alice');
-
-        $this->post('register', ['email' => $email, 'last_name' => 'Attacker']);
-
-        $this->assertNull($this->claim($email)->last_name, 'the surname is not the stranger to give');
-
-        $donorId = $this->container()->get(SignupRedemption::class)->redeem($raw);
-        $donor   = Donor::query()->where('id', $donorId)->get();
-
-        $this->assertNotNull($donor);
-        $this->assertSame('', (string) $donor->last_name, 'and it does not reach the donor row');
-    }
-
-    /**
-     * The other order, and the one the owner cannot see coming: a stranger
-     * types a surname onto an address before its owner signs up at all. The
-     * owner's own registration has to be able to take it off, or a name nobody
-     * proved is on their account for good.
-     */
-    public function test_a_strangers_surname_does_not_survive_the_owners_own_signup(): void
-    {
-        $email = 'preempt-' . uniqid() . '@example.test';
-        $sent  = $this->captureLinkMails();
-
-        $this->post('register', ['email' => $email, 'last_name' => 'Mallory']);
-        $this->runPendingAsyncJobs();
-
-        // Exactly what the shipped form sends when the surname box is empty.
-        $this->post('register', ['email' => $email, 'first_name' => 'Alice', 'last_name' => '']);
-        $this->runPendingAsyncJobs();
-
-        $this->assertNull($this->claim($email)->last_name, 'the owner can take a stranger off their own claim');
-
-        $donorId = $this->container()->get(SignupRedemption::class)->redeem(
-            $this->tokenFromMail((string) $sent[count($sent) - 1]['body'])
-        );
-        $donor = Donor::query()->where('id', $donorId)->get();
-
-        $this->assertNotNull($donor);
-        $this->assertSame('', (string) $donor->last_name, "and the stranger's name is on nobody's statement");
-    }
-
-    /**
-     * Clearing a contested field must not become a way of writing one. If a
-     * cleared field could be filled by whoever asks next, then two identical
-     * anonymous posts are all it takes: the first empties the claim, the second
-     * fills the blank it made, and the owner redeems their own link into a
-     * donor row that carries the attacker's name.
-     */
-    public function test_two_anonymous_posts_cannot_wipe_a_name_and_then_write_one(): void
-    {
-        $email = 'wipefill-' . uniqid() . '@example.test';
-        $raw   = $this->claimWithLinkOut($email, 'Alice', 'Okafor');
-
-        $this->post('register', ['email' => $email, 'first_name' => 'Mallory', 'last_name' => 'Attacker']);
-        $this->post('register', ['email' => $email, 'first_name' => 'Mallory', 'last_name' => 'Attacker']);
-
-        $claim = $this->claim($email);
-        $this->assertNull($claim->first_name, 'the blank a dispute makes is not a blank to fill');
-        $this->assertNull($claim->last_name);
-
-        $donorId = $this->container()->get(SignupRedemption::class)->redeem($raw);
-        $donor   = Donor::query()->where('id', $donorId)->get();
-
-        $this->assertNotNull($donor);
-        $this->assertSame('', (string) $donor->first_name, 'the owner redeems their own link into their own row');
-        $this->assertSame('', (string) $donor->last_name);
-    }
-
-    /**
-     * The mail is enqueued, so a claim spends a window with no link out. A
-     * guard conditioned on the link having gone is not armed inside it, which
-     * is where an attacker aims.
-     */
-    public function test_a_stranger_writing_before_the_mail_goes_out_cannot_name_the_donor(): void
-    {
-        $email = 'window-' . uniqid() . '@example.test';
-
-        $this->post('register', ['email' => $email, 'first_name' => 'Alice', 'last_name' => 'Okafor']);
-        $this->post('register', ['email' => $email, 'first_name' => 'Mallory', 'last_name' => 'Attacker']);
-        $this->runPendingAsyncJobs();
-
-        $claim = $this->claim($email);
-        $this->assertNull($claim->first_name, 'the stranger does not own the name by beating the job runner');
-        $this->assertNull($claim->last_name);
-    }
-
     /**
      * WP honours _method on a GET, so an unguarded write route is reachable by
      * a plain link in an email or a forum post: no form, no fetch, no CORS.
@@ -670,20 +423,22 @@ final class PortalUnauthenticatedWritesTest extends IntegrationTestCase
     }
 
     /**
-     * Clearing a disputed name is only tolerable because the person who proves
-     * the mailbox can then name themselves, so that path is asserted rather
-     * than assumed: a claim whose name a stranger contested still redeems, and
-     * the donor behind it owns the record from there.
+     * A stranger can put a second mail in somebody's inbox, and a donor who
+     * opens that one instead of their own is created under the name it carried.
+     * The way back is the portal itself, so that path is asserted rather than
+     * assumed: whoever proves the mailbox owns the record from there.
      */
     public function test_the_donor_who_proves_the_mailbox_names_themselves(): void
     {
         $email = 'recover-' . uniqid() . '@example.test';
-        $raw   = $this->claimWithLinkOut($email, 'Alice', 'Okafor');
+        $sent  = $this->captureLinkMails();
 
         $this->post('register', ['email' => $email, 'first_name' => 'Mallory', 'last_name' => 'Attacker']);
+        $this->runPendingAsyncJobs();
 
-        $donorId = $this->container()->get(SignupRedemption::class)->redeem($raw);
-        $this->assertGreaterThan(0, $donorId, 'a contested claim still redeems');
+        $donorId = $this->container()->get(SignupRedemption::class)
+            ->redeem($this->tokenFromMail((string) $sent[0]['body']));
+        $this->assertGreaterThan(0, $donorId, 'the link redeems');
 
         $csrf = bin2hex(random_bytes(8));
         $_COOKIE['dono_donor_session'] = $this->portalSession($donorId, $csrf);

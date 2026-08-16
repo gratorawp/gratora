@@ -20,11 +20,18 @@ final class MagicLinkService
 
     /**
      * @param int $ttlSeconds default 30 days
+     * @param array{first_name?:?string, last_name?:?string} $profile names this
+     *        one link may apply, and no other link and no shared row can change
      *
      * @since 1.0.0
      */
-    public function issue(int $donorId, string $purpose, ?int $targetId = null, int $ttlSeconds = 2_592_000): string
-    {
+    public function issue(
+        int $donorId,
+        string $purpose,
+        ?int $targetId = null,
+        int $ttlSeconds = 2_592_000,
+        array $profile = []
+    ): string {
         $raw  = bin2hex(random_bytes(24)); // 48-char hex, ~192 bits
         $hash = hash('sha256', $raw);
 
@@ -38,11 +45,27 @@ final class MagicLinkService
         $token->token_hash = $hash;
         $token->purpose    = $purpose;
         $token->target_id  = $targetId;
+        $token->first_name = $this->name($profile['first_name'] ?? null);
+        $token->last_name  = $this->name($profile['last_name'] ?? null);
         $token->expires_at = $expires->format('Y-m-d H:i:s');
         $token->created_at = $now->format('Y-m-d H:i:s');
         $token->save();
 
         return $raw;
+    }
+
+    /**
+     * Clamped to the column width rather than refused: on a strict server an
+     * over-long surname would throw and lose the whole signup, and a signup
+     * that fails over a long name is worse than a name that is short.
+     *
+     * @since 1.0.0
+     */
+    private function name(?string $value): ?string
+    {
+        $value = trim((string) $value);
+
+        return $value !== '' ? mb_substr($value, 0, 100) : null;
     }
 
     /** @since 1.0.0 */

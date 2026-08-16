@@ -318,8 +318,12 @@ final class DonorService
             MagicLinkToken::query()->where('donor_id', $id)->delete();
 
             // Keyed by address, not by donor, so it is reached by hash or not
-            // at all. A claim left behind would still carry a live link.
+            // at all. A claim left behind would still carry a live link, and
+            // its tokens carry the name the signup typed.
             if ($hash !== '') {
+                foreach (PendingSignup::query()->where('email_hash', $hash)->getAll() as $claim) {
+                    PendingSignupRepository::deleteSignupTokensFor((int) $claim->id);
+                }
                 PendingSignup::query()->where('email_hash', $hash)->delete();
             }
 

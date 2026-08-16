@@ -6,6 +6,7 @@ namespace Dono\Tests\Integration;
 
 use Dono\Donors\DonorService;
 use Dono\Donors\MagicLinkService;
+use Dono\Donors\MagicLinkToken;
 use Dono\Donors\Portal\PortalSession;
 use Dono\Foundation\Plugin;
 
@@ -40,6 +41,37 @@ final class MagicLinkRedemptionTest extends IntegrationTestCase
 
         $second = $svc->consumeAndValidate($raw, 'donor_portal');
         $this->assertNull($second, 'second consume of the same token returns null - single-use enforced');
+    }
+
+    /**
+     * The single-use guard is the WHERE half of a compare-and-swap, so a test
+     * that consumes twice in one second cannot see it: the second UPDATE writes
+     * the same timestamp, MySQL reports no affected row, and the reject looks
+     * enforced whether or not the guard is there. Stamping an older used_at
+     * makes the second write a real change, so only the guard refuses it.
+     */
+    public function test_a_link_used_earlier_is_refused_rather_than_restamped(): void
+    {
+        $svc   = $this->magicLinks();
+        $donor = $this->makeDonor();
+        $raw   = $svc->issue((int) $donor->id, 'donor_portal');
+
+        $this->assertNotNull($svc->consumeAndValidate($raw, 'donor_portal'));
+
+        $spent = gmdate('Y-m-d H:i:s', time() - 3600);
+        MagicLinkToken::query()
+            ->where('token_hash', hash('sha256', $raw))
+            ->update(['used_at' => $spent]);
+
+        $this->assertNull(
+            $svc->consumeAndValidate($raw, 'donor_portal'),
+            'a spent link stays spent however long ago it was used'
+        );
+        $this->assertSame(
+            $spent,
+            (string) MagicLinkToken::query()->where('token_hash', hash('sha256', $raw))->get()->used_at,
+            'and the refusal does not quietly restamp it'
+        );
     }
 
     public function test_consume_rejects_token_minted_for_a_different_purpose(): void

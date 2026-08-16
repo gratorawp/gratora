@@ -16,6 +16,10 @@ use Dono\Vendor\Queryable\Schema\Table;
  * or mailed as one; redeeming the emailed link is what creates the donor. Same
  * crypto split as Donor: address encrypted, peppered hash as the lookup key.
  *
+ * The address is all this row holds. One address is one row here, shared by
+ * everyone who types it, so anything held here is something a stranger can
+ * steer: the name a signup submitted rides its own token instead.
+ *
  * @since 1.0.0
  */
 final class PendingSignup extends Model
@@ -26,8 +30,6 @@ final class PendingSignup extends Model
     public int $id;
     public string $email_hash;
     public string $email_encrypted;
-    public ?string $first_name = null;
-    public ?string $last_name = null;
     public string $expires_at;
     public string $created_at;
 }
@@ -38,8 +40,6 @@ PendingSignup::schema(function (Table $t): void {
     // already has rather than leaving two live claims on one mailbox.
     $t->string('email_hash', 64);
     $t->text('email_encrypted');
-    $t->string('first_name', 100)->nullable();
-    $t->string('last_name', 100)->nullable();
     $t->datetime('expires_at')->index();
     $t->datetime('created_at');
 

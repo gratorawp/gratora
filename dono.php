@@ -29,7 +29,7 @@ require __DIR__ . '/vendor/vendor-prefixed/autoload.php';
 require_once __DIR__ . '/vendor/woocommerce/action-scheduler/action-scheduler.php';
 
 define('DONO_VERSION', '1.0.0');
-define('DONO_DB_VERSION', '1.0.1');
+define('DONO_DB_VERSION', '1.0.2');
 define('DONO_FILE', __FILE__);
 define('DONO_DIR', plugin_dir_path(__FILE__));
 define('DONO_URL', plugin_dir_url(__FILE__));

@@ -12,6 +12,11 @@ use Dono\Vendor\Queryable\Schema\Table;
 /**
  * One-time token for donor self-service.
  *
+ * A signup token also carries the name the registration that minted it typed.
+ * The claim it points at is one row per address, shared by everyone who ever
+ * types that address, so a name held there is a name a stranger can steer; a
+ * name held here reaches nobody but whoever redeems this one link.
+ *
  * @since 1.0.0
  */
 final class MagicLinkToken extends Model
@@ -24,6 +29,8 @@ final class MagicLinkToken extends Model
     public string $token_hash;
     public string $purpose;
     public ?int $target_id = null;
+    public ?string $first_name = null;
+    public ?string $last_name = null;
     public ?string $used_at = null;
     public string $expires_at;
     public string $created_at;
@@ -35,6 +42,8 @@ MagicLinkToken::schema(function (Table $t): void {
     $t->string('token_hash', 64);
     $t->string('purpose', 64);
     $t->bigInteger('target_id')->unsigned()->nullable();
+    $t->string('first_name', 100)->nullable();
+    $t->string('last_name', 100)->nullable();
     $t->datetime('used_at')->nullable();
     $t->datetime('expires_at')->index();
     $t->datetime('created_at');

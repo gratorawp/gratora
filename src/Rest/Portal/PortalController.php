@@ -16,7 +16,6 @@ use Dono\Donors\Donor;
 use Dono\Donors\DonorRepository;
 use Dono\Donors\DonorService;
 use Dono\Donors\MagicLinkService;
-use Dono\Donors\PendingSignup;
 use Dono\Donors\PendingSignupRepository;
 use Dono\Donors\SignupRedemption;
 use Dono\Donors\Portal\AnnualStatementBuilder;
@@ -96,8 +95,8 @@ final class PortalController
     /** @since 1.0.0 */
     public function registerHooks(): void
     {
-        // Action Scheduler spreads the enqueued args positionally, so accept 2.
-        add_action(self::SEND_LINK_HOOK, [$this, 'handleSendLinkAsync'], 10, 2);
+        // Action Scheduler spreads the enqueued args positionally, so accept 3.
+        add_action(self::SEND_LINK_HOOK, [$this, 'handleSendLinkAsync'], 10, 3);
     }
 
     /** @since 1.0.0 */
@@ -445,8 +444,9 @@ final class PortalController
      *
      * The donor table is not read here, for the same reason sendLink() does not
      * read it: the two branches must not do visibly different amounts of work,
-     * or the identical 200 is undone by the clock. The claim lookup below says
-     * nothing about whether the address belongs to a donor.
+     * or the identical 200 is undone by the clock. Recording the claim is the
+     * same work either way and says nothing about whether the address belongs
+     * to a donor.
      *
      * @since 1.0.0
      */
@@ -464,139 +464,51 @@ final class PortalController
         if (! $this->consumeIpQuota()) return $ok;
         if (! $this->consumeEmailQuota($email)) return $ok;
 
-        // Held against the claim, not a donor. Truncated to the column width
-        // rather than rejected: a signup that fails because a surname is long
-        // is worse than a surname that is short.
+        // Carried to the job, which mints this registration's own link and
+        // hangs them on it. They are never written anywhere a second caller can
+        // reach: the claim is one row per address and a name held there is a
+        // name whoever posts next can steer.
         $names = [];
         foreach (['first_name', 'last_name'] as $field) {
             $value = trim(sanitize_text_field((string) ($request[$field] ?? '')));
-            $names[$field] = $value !== '' ? mb_substr($value, 0, 100) : null;
+            $names[$field] = $value !== '' ? $value : null;
         }
 
-        // A standing claim is an identity somebody is about to redeem, and
-        // redemption prints its names on the donor row, the receipts and the
-        // year-end statement. Nobody who calls this endpoint has proved the
-        // mailbox, so no caller may take a name another caller wrote.
-        $standing = $this->liveClaim($email);
-        if ($standing !== null) {
-            $names = $this->reconcileNames($standing, $names);
-        }
+        $this->pending->put($email);
 
-        $this->pending->put($email, $names['first_name'], $names['last_name']);
-
-        $this->async->enqueue(self::SEND_LINK_HOOK, ['email' => $email]);
+        $this->async->enqueue(self::SEND_LINK_HOOK, [
+            'email'      => $email,
+            'first_name' => $names['first_name'],
+            'last_name'  => $names['last_name'],
+        ]);
 
         return $ok;
     }
 
     /**
-     * The claim standing on this address, or null. Not conditioned on a link
-     * being out: the mail is enqueued, so between the request and the job there
-     * is a window in which a claim nobody has proved is unguarded, and it is
-     * the window an attacker picks.
-     *
-     * @since 1.0.0
-     */
-    private function liveClaim(string $email): ?PendingSignup
-    {
-        $claim = $this->pending->findByEmailHash(
-            $this->hasher->emailHash($this->hasher->normalizeEmail($email))
-        );
-
-        return $claim !== null && $this->pending->isLive($claim) ? $claim : null;
-    }
-
-    /**
-     * What this submission may leave on a standing claim. Redemption prints the
-     * claim's names on the donor row, and from there on the receipts and the
-     * year-end statement, where nothing later corrects them: refreshProfile
-     * only back-fills. Nobody reaching this endpoint has proved the mailbox, so
-     * the claim is an identity somebody else may be holding and a second caller
-     * never writes on it. The only outcomes are the name that is standing and
-     * no name at all.
-     *
-     * A submission carrying no name at all is somebody asking for another mail
-     * and asserts nothing. Any other submission asserts a whole identity, so a
-     * field it leaves blank contests a standing one exactly as a different
-     * value does: without that, a stranger who types only a surname leaves it
-     * on the row and the owner's own signup, which sends that field empty,
-     * cannot take it off. A contested field is cleared rather than awarded,
-     * because whoever holds the mailbox names themselves in the portal once
-     * they are in, and clearing writes nothing an attacker chose.
-     *
-     * @param array{first_name:?string, last_name:?string} $names
-     *
-     * @return array{first_name:?string, last_name:?string}
-     *
-     * @since 1.0.0
-     */
-    private function reconcileNames(PendingSignup $claim, array $names): array
-    {
-        $standing = [];
-        foreach (['first_name', 'last_name'] as $field) {
-            $standing[$field] = ($claim->$field ?? '') !== '' ? (string) $claim->$field : null;
-        }
-
-        if ($names['first_name'] === null && $names['last_name'] === null) {
-            return $standing;
-        }
-
-        $out = [];
-        foreach (['first_name', 'last_name'] as $field) {
-            $out[$field] = $this->nameKey($names[$field]) === $this->nameKey($standing[$field])
-                ? $standing[$field]
-                : null;
-        }
-
-        return $out;
-    }
-
-    /**
-     * Comparison key for two typed names. Case and spacing are how one person
-     * retypes their own name, not how two people disagree about it. Folding
-     * them concedes nothing, because agreement keeps the standing value and
-     * never the submitted one.
-     *
-     * @since 1.0.0
-     */
-    private function nameKey(?string $name): ?string
-    {
-        return $name === null
-            ? null
-            : mb_strtolower((string) preg_replace('/\s+/u', ' ', $name));
-    }
-
-    /**
      * Action Scheduler executes do_action_ref_array($hook, array_values($args)),
-     * so the enqueued ['donor_id'=>.., 'email'=>..] arrives as two positional
-     * params, not one array. Accept both shapes.
+     * so the enqueued ['email'=>.., 'first_name'=>.., 'last_name'=>..] arrives
+     * as three positional params, not one array. Accept both shapes.
      *
-     * @param array{donor_id?:int, email?:string}|int $args
+     * @param array{email?:string, first_name?:?string, last_name?:?string}|string $args
      *
      * @since 1.0.0
      */
-    public function handleSendLinkAsync(mixed $args = 0, string $email = ''): void
+    public function handleSendLinkAsync(mixed $args = '', ?string $firstName = null, ?string $lastName = null): void
     {
         if (is_array($args)) {
-            $email   = (string) ($args['email'] ?? '');
-            $donorId = (int) ($args['donor_id'] ?? 0);
-        } elseif (is_string($args)) {
-            // Action Scheduler spreads with array_values, so a job enqueued as
-            // ['email' => ...] arrives as one string in the first parameter and
-            // nothing in the second.
-            $email   = $args;
-            $donorId = 0;
+            $firstName = $args['first_name'] ?? null;
+            $lastName  = $args['last_name'] ?? null;
+            $email     = (string) ($args['email'] ?? '');
         } else {
-            $donorId = (int) $args;
+            $email = (string) $args;
         }
         if ($email === '' || ! is_email($email)) return;
 
         // Resolved here rather than in the request, so the request does the
         // same work for an address that is a donor and one that is not.
         $hash  = $this->hasher->emailHash($this->hasher->normalizeEmail($email));
-        $donor = $donorId > 0
-            ? $this->donors->findById($donorId)
-            : $this->donors->findByEmailHash($hash);
+        $donor = $this->donors->findByEmailHash($hash);
 
         if ($donor) {
             // Already a donor, so any claim standing against this address is
@@ -620,7 +532,10 @@ final class PortalController
         }
 
         // Not a donor, so the link carries the claim instead. No donor id
-        // exists yet, so the token points at the claim through target_id.
+        // exists yet, so the token points at the claim through target_id, and
+        // it carries the name this registration typed. Redemption applies the
+        // name off the token it redeemed, so the only submission that can
+        // decide what a link does is the one that minted it.
         $claim = $this->pending->findByEmailHash($hash);
         if (! $claim || ! $this->pending->isLive($claim)) return;
 
@@ -632,9 +547,10 @@ final class PortalController
                 0,
                 SignupRedemption::PURPOSE,
                 (int) $claim->id,
-                PendingSignupRepository::TTL_SECONDS
+                PendingSignupRepository::TTL_SECONDS,
+                ['first_name' => $firstName, 'last_name' => $lastName]
             ),
-            trim(($claim->first_name ?? '') . ' ' . ($claim->last_name ?? '')),
+            trim((string) $firstName . ' ' . (string) $lastName),
             PendingSignupRepository::TTL_SECONDS
         );
     }

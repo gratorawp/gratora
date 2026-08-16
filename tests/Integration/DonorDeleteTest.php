@@ -155,7 +155,7 @@ final class DonorDeleteTest extends IntegrationTestCase
         Plugin::instance()->container->get(\Dono\Donors\MagicLinkService::class)
             ->issue($id, 'donor_portal');
         Plugin::instance()->container->get(\Dono\Donors\PendingSignupRepository::class)
-            ->put($email, 'Tidy', 'Probe');
+            ->put($email);
 
         $this->deleteViaRest($id);
 

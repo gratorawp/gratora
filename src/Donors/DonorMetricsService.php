@@ -11,6 +11,8 @@ use Dono\Donations\ChannelClassifier;
 use Dono\Donations\Donation;
 use Dono\Donations\DonationQueries;
 use Dono\Donors\DonorNoteRepository;
+use Dono\Donors\Portal\PortalPage;
+use Dono\Donors\Portal\PortalSession;
 use Dono\Foundation\Helpers\Csv;
 use Dono\Foundation\Helpers\Money;
 use Dono\Foundation\Time\Clock;
@@ -28,6 +30,17 @@ use Throwable;
  */
 final class DonorMetricsService
 {
+    /**
+     * How long a staff-issued sign-in link stays usable. Wider than the hour a
+     * link the donor requested gets, because this one is read out or pasted into
+     * a reply rather than clicked from an inbox the donor is already holding.
+     * Named apart from the portal's own TTL so neither can be edited in the
+     * belief it moves both.
+     *
+     * @since 1.0.0
+     */
+    public const STAFF_LINK_TTL = 30 * DAY_IN_SECONDS;
+
     /** @since 1.0.0 */
     public function __construct(
         private DonorRepository $donors,
@@ -557,33 +570,47 @@ final class DonorMetricsService
     }
 
     /**
-     * Issues a self-service magic link. Raw token returned once; never stored cleartext.
-     * Profile responses are admin-only.
+     * Mint a portal login for this donor. The raw token is returned once and
+     * never stored cleartext, and the response is admin-only.
+     *
+     * Only ever from an explicit request: whoever opens the link is signed in
+     * as the donor, so nothing should create one as a side effect of looking at
+     * a record. The donor is not stuck with it, though. Sign out everywhere
+     * deletes every unredeemed portal link along with the live sessions.
+     *
+     * @return array{url: string, expires_at: string}|null
      *
      * @since 1.0.0
      */
-    /**
-     * Mint a portal login for this donor.
-     *
-     * Only ever from an explicit request. It impersonates the donor for thirty
-     * days and cannot be revoked, so nothing should create one as a side effect
-     * of looking at a record.
-     *
-     * @since 1.0.0
-     */
-    public function issuePortalLink(Donor $donor): ?string
+    public function issuePortalLink(Donor $donor): ?array
     {
         return $donor->redacted_at === null ? $this->magicLinkUrl($donor) : null;
     }
 
-    private function magicLinkUrl(Donor $donor): ?string
+    /**
+     * @return array{url: string, expires_at: string}|null
+     *
+     * @since 1.0.0
+     */
+    private function magicLinkUrl(Donor $donor): ?array
     {
+        $now = $this->clock->now();
+
         try {
-            $token = $this->magicLinks->issue((int) $donor->id, 'donor_portal', null, 2_592_000);
-        } catch ( Throwable $e) {
+            $token = $this->magicLinks->issue(
+                (int) $donor->id,
+                PortalSession::PORTAL_PURPOSE,
+                null,
+                self::STAFF_LINK_TTL
+            );
+        } catch (Throwable $e) {
             return null;
         }
-        return add_query_arg('token', $token, (new \Dono\Donors\Portal\PortalPage())->url());
+
+        return [
+            'url'        => add_query_arg('token', $token, (new PortalPage())->url()),
+            'expires_at' => $now->modify(self::STAFF_LINK_TTL . ' seconds')->format('Y-m-d H:i:s'),
+        ];
     }
 
     /** @since 1.0.0 */

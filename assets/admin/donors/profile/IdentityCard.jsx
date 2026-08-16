@@ -2,7 +2,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
-import { initials, formatMonth, formatDate, SEGMENT_LABELS } from './helpers';
+import { initials, formatMonth, formatDate, formatDateTime, SEGMENT_LABELS } from './helpers';
 import { countryName } from '../../../_shared/countries';
 import { IconMail, IconMapPin, IconCalendar, IconCopy, IconPhone } from './icons';
 
@@ -40,11 +40,12 @@ function IdentityRow( { icon, value, copyable, sub, valClass = '' } ) {
 
 export default function IdentityCard( { donor } ) {
     const [ copiedMagic, setCopiedMagic ] = useState( false );
-    // Asked for, never arrived with: issuing one signs somebody in as this
-    // donor for thirty days and there is no way to take it back.
-    const [ magicLinkUrl, setMagicLinkUrl ] = useState( '' );
-    const [ issuing, setIssuing ]           = useState( false );
-    const [ issueError, setIssueError ]     = useState( '' );
+    // Asked for, never arrived with: issuing one signs whoever opens it in as
+    // this donor.
+    const [ magicLinkUrl, setMagicLinkUrl ]         = useState( '' );
+    const [ magicLinkExpires, setMagicLinkExpires ] = useState( '' );
+    const [ issuing, setIssuing ]                   = useState( false );
+    const [ issueError, setIssueError ]             = useState( '' );
     const isAnon     = donor.is_anonymous;
     const isRedacted = !! donor.redacted_at;
 
@@ -76,6 +77,7 @@ export default function IdentityCard( { donor } ) {
                 method: 'POST',
             } );
             setMagicLinkUrl( res.magic_link_url || '' );
+            setMagicLinkExpires( res.expires_at || '' );
         } catch ( e ) {
             setIssueError( e?.message || __( 'The link could not be created.', 'dono-fundraising-platform' ) );
         } finally {
@@ -176,7 +178,7 @@ export default function IdentityCard( { donor } ) {
                             { issuing ? __( 'Creating…', 'dono-fundraising-platform' ) : __( 'Create a sign-in link', 'dono-fundraising-platform' ) }
                         </button>
                         <div className="dp-id-magic__help">
-                            { issueError || __( 'Signs this donor in for 30 days. Create one only when they have asked.', 'dono-fundraising-platform' ) }
+                            { issueError || __( 'Signs whoever opens it in as this donor, once. Create one only when they have asked.', 'dono-fundraising-platform' ) }
                         </div>
                     </div>
                 ) }
@@ -190,7 +192,13 @@ export default function IdentityCard( { donor } ) {
                             </button>
                         </div>
                         <div className="dp-id-magic__help">
-                            { __( 'Donor self-service link. Reset history is not exposed.', 'dono-fundraising-platform' ) }
+                            { magicLinkExpires
+                                ? sprintf(
+                                    /* translators: %s: date and time the link stops working */
+                                    __( 'Works once, until %s. The donor can revoke it with sign out everywhere.', 'dono-fundraising-platform' ),
+                                    formatDateTime( magicLinkExpires )
+                                )
+                                : __( 'Works once. The donor can revoke it with sign out everywhere.', 'dono-fundraising-platform' ) }
                         </div>
                     </div>
                 ) }

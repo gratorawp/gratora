@@ -7,6 +7,7 @@ namespace Dono\Tests\Integration;
 use Dono\Donations\Donation;
 use Dono\Donors\Donor;
 use Dono\Donors\DonorService;
+use Dono\Donors\SignupRedemption;
 use Dono\Foundation\Identity\IdentityHasher;
 use Dono\Foundation\Plugin;
 use Dono\Gateways\WebhookPaymentGuard;
@@ -35,31 +36,46 @@ final class WebhookAndPortalHardeningTest extends IntegrationTestCase
 
     /**
      * Signing up records a claim; the donor appears when the emailed link comes
-     * back. These tests are about what the claim is allowed to write, so they
-     * redeem it rather than stopping at the 200.
+     * back. These tests are about what a signup is allowed to write, so they
+     * redeem the link the job actually mailed rather than stopping at the 200.
+     * A test that mints its own token would be reading back its own fixture:
+     * the name a redemption applies rides the token the job minted.
      *
      * @param array<string,mixed> $body
      */
     private function signUpAndRedeem(array $body): int
     {
+        $sent = $this->captureLinkMail();
+
         $req = new WP_REST_Request('POST', '/dono/v1/portal/register');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($body + ['token' => $this->portalToken()]));
         rest_do_request($req);
 
-        $c     = Plugin::instance()->container;
-        $claim = $c->get(\Dono\Donors\PendingSignupRepository::class)->findByEmailHash(
-            $c->get(IdentityHasher::class)->emailHash((string) $body['email'])
-        );
-        if ($claim === null) return 0;
+        $this->runPendingAsyncJobs();
+        $this->assertCount(1, $sent, 'the signup mailed a link');
 
-        $raw = $c->get(\Dono\Donors\MagicLinkService::class)->issue(
-            0,
-            \Dono\Donors\SignupRedemption::PURPOSE,
-            (int) $claim->id
-        );
+        return Plugin::instance()->container->get(SignupRedemption::class)
+            ->redeem($this->tokenIn((string) $sent[0]));
+    }
 
-        return $c->get(\Dono\Donors\SignupRedemption::class)->redeem($raw);
+    /** Message bodies as the job sends them. */
+    private function captureLinkMail(): \ArrayObject
+    {
+        $sent = new \ArrayObject();
+        add_filter('pre_wp_mail', function ($null, $atts) use ($sent) {
+            $sent[] = (string) ($atts['message'] ?? '');
+            return false;
+        }, 10, 2);
+
+        return $sent;
+    }
+
+    private function tokenIn(string $body): string
+    {
+        $this->assertSame(1, preg_match('/[?&]token=([A-Za-z0-9_\-]+)/', html_entity_decode($body), $m));
+
+        return $m[1];
     }
 
     private function paidDonation(bool $isTest, string $gateway = 'paypal'): Donation
@@ -109,17 +125,35 @@ final class WebhookAndPortalHardeningTest extends IntegrationTestCase
         );
     }
 
-    /** Anyone knowing an address could have written a name onto that donor. */
+    /**
+     * Anyone knowing an address could have written a name onto that donor.
+     * Signing up first and donating second is the order that reaches it: a
+     * signup for an address that is already a donor is answered with a sign-in
+     * link and no claim at all.
+     */
     public function test_register_does_not_write_a_name_onto_an_existing_donor(): void
     {
         $email = 'existing-' . uniqid() . '@example.test';
+        $sent  = $this->captureLinkMail();
 
-        // A donor who gave without supplying a name, which is what a form with
-        // no name block produces.
+        $req = new WP_REST_Request('POST', '/dono/v1/portal/register');
+        $req->set_header('content-type', 'application/json');
+        $req->set_body((string) wp_json_encode([
+            'email'      => $email,
+            'first_name' => 'Rude',
+            'last_name'  => 'Word',
+            'token'      => $this->portalToken(),
+        ]));
+        rest_do_request($req);
+        $this->runPendingAsyncJobs();
+
+        // The real owner gives without supplying a name, which is what a form
+        // with no name block produces, and only then opens the link.
         $donor = Plugin::instance()->container->get(DonorService::class)->findOrCreate($email);
         $this->assertNull($donor->first_name, 'seeded with no name');
 
-        $this->signUpAndRedeem(['email' => $email, 'first_name' => 'Rude', 'last_name' => 'Word']);
+        Plugin::instance()->container->get(SignupRedemption::class)
+            ->redeem($this->tokenIn((string) $sent[0]));
 
         $fresh = Donor::query()
             ->where('email_hash', Plugin::instance()->container->get(IdentityHasher::class)->emailHash($email))
