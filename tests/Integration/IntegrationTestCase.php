@@ -129,8 +129,14 @@ abstract class IntegrationTestCase extends WP_UnitTestCase
         $as = $wpdb->prefix . 'actionscheduler_actions';
 
         for ($i = 0; $i < $maxIterations; $i++) {
+            // Past 191 characters ActionScheduler_DBStore keeps an md5 of the
+            // payload in args and the payload itself in extended_args. Reading
+            // args alone decodes that hash to null and runs the handler on its
+            // defaults, so a job with a long argument passes while doing
+            // nothing. Any fixture with a realistic name crosses that line.
             $pending = $wpdb->get_results(
-                "SELECT action_id, hook, args FROM {$as} WHERE hook LIKE 'dono.async.%' AND status = 'pending' ORDER BY action_id"
+                "SELECT action_id, hook, COALESCE(extended_args, args) AS args FROM {$as}
+                 WHERE hook LIKE 'dono.async.%' AND status = 'pending' ORDER BY action_id"
             );
             if (! $pending) return;
             foreach ($pending as $p) {

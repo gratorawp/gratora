@@ -365,6 +365,34 @@ final class DeferredSignupTest extends IntegrationTestCase
         $this->assertSame((int) $this->claim($email)->id, (int) $token->target_id, 'it points at the claim');
     }
 
+    /**
+     * A name long enough to push the job's arguments past 191 characters, which
+     * is where ActionScheduler stops storing them inline. The fixtures are all
+     * short enough to stay inline, so nothing else here notices whether the
+     * runner reads the overflow column, and a job that silently ran on its
+     * defaults would look like a passing test.
+     */
+    public function test_a_long_name_still_reaches_the_link_it_was_typed_on(): void
+    {
+        $email = 'overflow-' . uniqid() . '@example.test';
+        $first = str_repeat('Maximiliana', 8);
+        $last  = str_repeat('Featherstonehaugh', 8);
+
+        $this->signUp($email, ['first_name' => $first, 'last_name' => $last]);
+        $this->runPendingAsyncJobs();
+
+        $token = MagicLinkToken::query()
+            ->where('purpose', SignupRedemption::PURPOSE)
+            ->get();
+
+        $this->assertNotNull($token, 'the job ran with the arguments it was enqueued with');
+        $this->assertSame(
+            substr($first, 0, 100),
+            (string) $token->first_name,
+            'the name rides the link, clamped to the column rather than dropped'
+        );
+    }
+
     /** An address that is already a donor gets signed in, not claimed. */
     public function test_signing_up_with_a_known_address_sends_a_sign_in_link(): void
     {

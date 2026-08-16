@@ -124,8 +124,18 @@ final class PendingSignupRepository
     /** @since 1.0.0 */
     public function purgeExpired(): int
     {
+        $now = $this->clock->now()->format('Y-m-d H:i:s');
+
+        // The same rule the single deletes follow: a token outlives its claim
+        // otherwise, still carrying the name its registration typed. The daily
+        // sweep runs the token purge before this one, so anything left here
+        // waits a full day for the next pass.
+        foreach (PendingSignup::query()->where('expires_at', $now, '<')->getAll() as $claim) {
+            self::deleteSignupTokensFor((int) $claim->id);
+        }
+
         return PendingSignup::query()
-            ->where('expires_at', $this->clock->now()->format('Y-m-d H:i:s'), '<')
+            ->where('expires_at', $now, '<')
             ->delete()
             ->affectedRows;
     }

@@ -550,6 +550,7 @@ final class CoreModule implements DonoModule
             $c->get(MagicLinkService::class),
             $c->get(DonorRepository::class),
             $c->get(SignupRedemption::class),
+            $c->get(PendingSignupRepository::class),
         ));
 
         $c->bind(AnnualStatementBuilder::class, fn (Container $c) => new AnnualStatementBuilder(

@@ -370,6 +370,35 @@ final class PortalUnauthenticatedWritesTest extends IntegrationTestCase
     }
 
     /**
+     * A signup link names no donor and points at a claim, so a sweep keyed on
+     * donor_id never sees it. Anyone can mint one against an address before it
+     * is a donor, and it opens a full session once the address becomes one, so
+     * the door this button exists to shut stays open unless the claim is swept
+     * too.
+     */
+    public function test_signing_out_everywhere_kills_a_signup_link_minted_before_the_donor_existed(): void
+    {
+        $email = 'presignup-' . uniqid() . '@example.test';
+
+        // A stranger claims the address while it belongs to nobody.
+        $this->post('register', ['email' => $email, 'first_name' => 'Mallory']);
+        $this->runPendingAsyncJobs();
+        $stranger = MagicLinkToken::query()->where('purpose', SignupRedemption::PURPOSE)->get();
+        $this->assertNotNull($stranger, 'the stranger holds a signup link');
+
+        // The real owner becomes a donor by giving, never having signed up.
+        $donor   = $this->donor($email);
+        $session = $this->container()->get(PortalSession::class);
+
+        $session->destroyAllFor((int) $donor->id);
+
+        $this->assertNull(
+            MagicLinkToken::query()->where('id', (int) $stranger->id)->get(),
+            'the signup link against this address goes with the sessions'
+        );
+    }
+
+    /**
      * WP honours _method on a GET, so an unguarded write route is reachable by
      * a plain link in an email or a forum post: no form, no fetch, no CORS.
      * Planting a name on a stranger's pending signup is exactly what that

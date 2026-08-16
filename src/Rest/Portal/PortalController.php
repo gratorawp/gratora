@@ -468,9 +468,14 @@ final class PortalController
         // hangs them on it. They are never written anywhere a second caller can
         // reach: the claim is one row per address and a name held there is a
         // name whoever posts next can steer.
+        // Clamped here rather than where it is stored, because between the two
+        // is the job queue: Action Scheduler refuses arguments over 8000
+        // characters, and it refuses them by throwing inside the enqueue, which
+        // is caught and logged. The registration would answer 200 having spent
+        // the caller's quota and mailed nothing.
         $names = [];
         foreach (['first_name', 'last_name'] as $field) {
-            $value = trim(sanitize_text_field((string) ($request[$field] ?? '')));
+            $value = mb_substr(trim(sanitize_text_field((string) ($request[$field] ?? ''))), 0, 100);
             $names[$field] = $value !== '' ? $value : null;
         }
 

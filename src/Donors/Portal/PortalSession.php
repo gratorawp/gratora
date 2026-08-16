@@ -7,6 +7,7 @@ namespace Dono\Donors\Portal;
 use Dono\Donors\DonorRepository;
 use Dono\Donors\MagicLinkService;
 use Dono\Donors\MagicLinkToken;
+use Dono\Donors\PendingSignupRepository;
 use Dono\Donors\SignupRedemption;
 
 /**
@@ -38,6 +39,7 @@ final class PortalSession
         private MagicLinkService $magicLinks,
         private DonorRepository $donors,
         private SignupRedemption $signups,
+        private PendingSignupRepository $pending,
     ) {
     }
 
@@ -138,6 +140,22 @@ final class PortalSession
             ->where('purpose', self::PORTAL_PURPOSE)
             ->whereIsNull('used_at')
             ->delete();
+
+        // A signup link names no donor and points at a claim, so donor_id does
+        // not reach it. Anyone may have minted one against this address before
+        // it was a donor, and it still opens a full session, which is the one
+        // door this method exists to shut.
+        $donor = $this->donors->findById($donorId);
+        $claim = $donor !== null
+            ? $this->pending->findByEmailHash((string) $donor->email_hash)
+            : null;
+        if ($claim !== null) {
+            MagicLinkToken::query()
+                ->where('target_id', (int) $claim->id)
+                ->where('purpose', SignupRedemption::PURPOSE)
+                ->whereIsNull('used_at')
+                ->delete();
+        }
 
         $index = $this->index($donorId);
         foreach ($index as $hash) {
