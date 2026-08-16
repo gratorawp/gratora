@@ -516,6 +516,13 @@ final class PortalController
         $donor = $this->donors->findByEmailHash($hash);
 
         if ($donor) {
+            // Erasure is a decision, not a lapsed state: the same position
+            // SignupRedemption takes below and issuePortalLink takes for staff.
+            // An address the org was told to forget is not one to mail, and a
+            // fresh token against an erased record is a credential for a person
+            // who asked to stop existing here.
+            if (($donor->redacted_at ?? null) !== null) return;
+
             // Already a donor, so any claim standing against this address is
             // moot: signing up for an address that has an account is a sign-in.
             $this->pending->deleteByEmailHash($hash);

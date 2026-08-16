@@ -370,6 +370,32 @@ final class PortalUnauthenticatedWritesTest extends IntegrationTestCase
     }
 
     /**
+     * Erasure is a decision, not a lapsed state. Staff are refused a link for
+     * an erased donor and a signup redemption refuses to rebuild one, so the
+     * anonymous route cannot be the one path that still mails them. Every
+     * portal route rejects the session it would open, so this is about the
+     * mail leaving at all, not about what it reaches.
+     */
+    public function test_an_erased_donor_is_not_mailed_a_sign_in_link(): void
+    {
+        $email = 'erased-' . uniqid() . '@example.test';
+        $donor = $this->donor($email);
+        $this->container()->get(DonorService::class)->redact($donor);
+
+        $sent = $this->captureLinkMails();
+
+        $this->assertSame(200, $this->post('send-link', ['email' => $email])->get_status(), 'and the caller learns nothing');
+        $this->runPendingAsyncJobs();
+
+        $this->assertCount(0, $sent, 'an address the org was told to forget is not mailed');
+        $this->assertSame(
+            0,
+            count($this->livePortalTokens((int) $donor->id)),
+            'and no fresh credential is minted against the erased record'
+        );
+    }
+
+    /**
      * A signup link names no donor and points at a claim, so a sweep keyed on
      * donor_id never sees it. Anyone can mint one against an address before it
      * is a donor, and it opens a full session once the address becomes one, so
