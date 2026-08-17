@@ -1,53 +1,20 @@
-# Files and directories excluded from the published WordPress.org package.
-#
-# The zip carries what runs and nothing else. Build tooling, manifests and
-# configuration stay behind: none of it is read at runtime, and a customer
-# opening the plugin folder should find the plugin.
-#
-# Plugin Guideline 4 wants the source behind minified build/ output to be
-# reachable. There is no public repository to point a reviewer at, so the zip
-# has to answer for itself: assets/, package.json and webpack.config.js all
-# ship, and `npm install && npm run build` inside the zip turns one into the
-# other.
-#
-# vendor/ has to come from `composer install --no-dev`. .distignore cannot strip
-# development dependencies itself: they are transitive, so the names nobody
-# lists by hand outnumber the ones anybody would. bin/package.mjs refuses to
-# build without it, reading composer's own record of what it installed.
-
 /.git
 /.github
 /.claude
 /.gitignore
 /.distignore
-/.editorconfig
-/.eslintignore
-/.eslintrc
 /.eslintrc.js
-/.eslintrc.json
-/.prettierrc
 /.prettierrc.js
-/.stylelintrc
-/.stylelintrc.json
 
 /node_modules
 /tests
-/docs
-/coverage
 
-/phpunit.xml
-/phpunit.xml.dist
-# Glob what belongs to the suite rather than listing variants: naming one config
-# by hand leaves the next one to ship the integration credentials to a customer.
-/phpunit-integration.xml.dist
 /phpunit*.xml
 /phpunit*.xml.dist
-/.phpunit.result.cache
 /.phpunit.cache
 /composer.lock
 /package-lock.json
 
-# End-to-end suite and everything that drives it.
 /tests-e2e
 /test-results
 /playwright.config.ts
@@ -55,51 +22,25 @@
 /TESTING.md
 /bin/install-wp-tests.sh
 
-# Local development environment, not the plugin.
 /.idea
 /.vscode
 /.wp-env.json
 /.wp-env.override.json
-# Tracked and currently clean, but a tracked .npmrc is usually a registry
-# credential and this is the wrong place to find out.
 /.npmrc
 
 /README.md
 /ROADMAP.md
-# Notes for whoever regenerates the POT. Needs its own path because an anchored
-# rule at the root cannot reach into languages/.
 /languages/README.md
-# Screenshots and banners for the directory listing. The deploy action reads
-# them from the checkout and publishes them to SVN assets/; copying them into
-# the payload ships 740 KB of marketing art to every install, and into trunk.
 /.wordpress-org
-# .gitignore keeps these out of the repo; this keeps them out of the zip.
-# They live on disk, so being untracked hides them from git and from nothing
-# else: without these lines the build would ship the QA findings and the
-# internal working notes to every customer.
 /CLAUDE.md
 /qa
-# Generated codebase analysis, 19 MB of internal notes about our own source.
-# Gitignored, so git never sees it and this list is the only thing that stops it.
 /graphify-out
 
-# Our own build and release scripts. They run from a checkout, never from an
-# install, and package.mjs shipping inside its own output is just odd.
 /bin
 
-# package.json, webpack.config.js and composer.json are deliberately absent from
-# this list. Nothing reads them once the plugin is installed, but they are what
-# turns assets/ back into build/ and what says where vendor/ came from, and a
-# reviewer holding only the zip has nowhere else to look.
-
-# Strauss copies these into vendor-prefixed/ and the plugin loads only that copy.
-# The originals stay behind in vendor/ because they are direct requirements, so
-# without this the zip carries two of every PDF library: dead weight, and a
-# second unprefixed copy an add-on could autoload by accident.
 /vendor/dompdf
 /vendor/masterminds
 /vendor/sabberworm
-
 /vendor/phpunit
 /vendor/bin
 
@@ -109,15 +50,11 @@ Thumbs.db
 *.log
 *.map
 
-# Vendor test suites. Strauss copies dependencies whole, so their own tests and
-# fixtures come with them, and none of it runs.
 /vendor/vendor-prefixed/dompdf/dompdf/tests
 /vendor/vendor-prefixed/dompdf/php-font-lib/tests
 /vendor/vendor-prefixed/dompdf/php-svg-lib/tests
 /vendor/vendor-prefixed/masterminds/html5/test
 /vendor/vendor-prefixed/sabberworm/php-css-parser/tests
-# Queryable is ours, so it was easy to miss: Strauss copies it whole like any
-# other dependency, tests and lockfile included.
 /vendor/vendor-prefixed/dono/queryable/tests
 /vendor/vendor-prefixed/dono/queryable/composer.lock
 /vendor/vendor-prefixed/dono/queryable/phpunit.xml.dist
