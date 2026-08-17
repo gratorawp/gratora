@@ -832,7 +832,8 @@ final class DonorMetricsService
     {
         return DonationQueries::notSupersededDonation(
             Event::query()->where('donor_id', $donorId),
-            DB::getPrefix() . 'dono_events.donation_id'
+            DB::getPrefix() . 'dono_events.donation_id',
+            $donorId
         );
     }
 

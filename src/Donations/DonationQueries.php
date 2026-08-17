@@ -102,9 +102,16 @@ final class DonationQueries
      *
      * @since 1.0.0
      */
-    private static function supersededIds(): string
+    private static function supersededIds(?int $donorId = null): string
     {
         $donations = DB::getPrefix() . 'dono_donations';
+
+        // Correlating to one donor turns a set the planner builds from every
+        // pending row into one bounded by that donor's own attempts, which
+        // idx_donor_id_status_paid_at can serve. A donor-scoped caller reads
+        // this per row otherwise, and a long timeline pays the JSON check on
+        // every one of them.
+        $scope = $donorId !== null ? ' AND sup.donor_id = ' . $donorId : '';
 
         // Tested against 'NULL' rather than for a particular type name. That
         // is the one JSON_TYPE answer both engines are known to agree on, and
@@ -113,7 +120,7 @@ final class DonationQueries
         return "SELECT sup.id FROM {$donations} sup WHERE sup.status = 'pending' "
             . "AND COALESCE(JSON_TYPE(JSON_EXTRACT("
             . "IF(JSON_VALID(sup.flags), sup.flags, NULL), "
-            . "'\$.retried_by')), 'NULL') <> 'NULL'";
+            . "'\$.retried_by')), 'NULL') <> 'NULL'" . $scope;
     }
 
     /**
@@ -138,11 +145,11 @@ final class DonationQueries
      *
      * @since 1.0.0
      */
-    public static function notSupersededPredicate(?string $donationIdColumn = null): string
+    public static function notSupersededPredicate(?string $donationIdColumn = null, ?int $donorId = null): string
     {
         $column = $donationIdColumn ?? DB::getPrefix() . 'dono_donations.id';
 
-        return "({$column} IS NULL OR {$column} NOT IN (" . self::supersededIds() . '))';
+        return "({$column} IS NULL OR {$column} NOT IN (" . self::supersededIds($donorId) . '))';
     }
 
     /**
@@ -177,10 +184,10 @@ final class DonationQueries
      *
      * @since 1.0.0
      */
-    public static function notSupersededDonation($q, string $donationIdColumn)
+    public static function notSupersededDonation($q, string $donationIdColumn, ?int $donorId = null)
     {
-        return $q->where(static function ($g) use ($donationIdColumn): void {
-            $g->whereRaw(self::notSupersededPredicate($donationIdColumn));
+        return $q->where(static function ($g) use ($donationIdColumn, $donorId): void {
+            $g->whereRaw(self::notSupersededPredicate($donationIdColumn, $donorId));
         });
     }
 
