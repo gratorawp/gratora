@@ -72,6 +72,138 @@ final class DonationQueries
     }
 
     /**
+     * The ids of pending attempts that a later attempt replaced.
+     *
+     * A donor who reaches the payment step, backs out and picks another gateway
+     * leaves the first row behind, and DonationService::recordRetriedBy stamps
+     * the replacement's reference on it. Counting it shows one donor decision
+     * as several donations, and nothing the donor does can ever collect the
+     * earlier ones.
+     *
+     * The status term is what makes hiding one safe. Cancel is reachable while
+     * an approval is genuinely in flight, so a replaced row can still settle;
+     * the moment it leaves pending it stops matching here and every screen
+     * counts it again. Nothing about this changes a status.
+     *
+     * A standalone id set rather than a predicate on the outer row, because
+     * flags is unindexed LONGTEXT. Inline, it costs a clustered-index lookup
+     * per candidate row, which takes the covering (is_test) scan away from the
+     * donations-list count: at 200k rows that count is 20ms as an index scan
+     * and 205ms with the row reads. Driven from (status, paid_at), only pending
+     * rows have their flags read, so the work is the size of the problem rather
+     * than the size of the table, and the count lands at 41ms.
+     *
+     * flags is LONGTEXT, so a non-JSON value can reach it: MySQL raises on one
+     * and MariaDB returns NULL, and the JSON_VALID guard makes both answer
+     * NULL. An absent key makes JSON_EXTRACT itself SQL NULL while a JSON null
+     * makes JSON_TYPE report the string 'NULL', so COALESCE folds the two into
+     * one comparison. CAST(x AS JSON) is not available: MariaDB has no JSON
+     * type and rejects it as a syntax error.
+     *
+     * @since 1.0.0
+     */
+    private static function supersededIds(): string
+    {
+        $donations = DB::getPrefix() . 'dono_donations';
+
+        // Tested against 'NULL' rather than for a particular type name. That
+        // is the one JSON_TYPE answer both engines are known to agree on, and
+        // WEBHOOK_FAILED_SQL already rests on it; matching a type name instead
+        // would rest on the rest of the vocabulary agreeing too.
+        return "SELECT sup.id FROM {$donations} sup WHERE sup.status = 'pending' "
+            . "AND COALESCE(JSON_TYPE(JSON_EXTRACT("
+            . "IF(JSON_VALID(sup.flags), sup.flags, NULL), "
+            . "'\$.retried_by')), 'NULL') <> 'NULL'";
+    }
+
+    /**
+     * Rows that are a replaced attempt. Pass a column to test something that
+     * points at a donation rather than being one.
+     *
+     * @since 1.0.0
+     */
+    public static function supersededPredicate(?string $donationIdColumn = null): string
+    {
+        $column = $donationIdColumn ?? DB::getPrefix() . 'dono_donations.id';
+
+        return "{$column} IN (" . self::supersededIds() . ')';
+    }
+
+    /**
+     * The complement, and not simply NOT of the above: `NULL NOT IN (...)`
+     * evaluates to NULL rather than true, so an unguarded negation drops every
+     * row whose column is NULL. dono_events.donation_id is nullable and carries
+     * the donor's magic links, consents and portal sign-ins, so the guard is
+     * what keeps their timeline from emptying itself.
+     *
+     * @since 1.0.0
+     */
+    public static function notSupersededPredicate(?string $donationIdColumn = null): string
+    {
+        $column = $donationIdColumn ?? DB::getPrefix() . 'dono_donations.id';
+
+        return "({$column} IS NULL OR {$column} NOT IN (" . self::supersededIds() . '))';
+    }
+
+    /**
+     * Keep replaced attempts out of a query on the donations table.
+     *
+     * Grouped because whereRaw carries no logical connector, so a bare raw
+     * predicate has to be the first condition on its query. Inside a group of
+     * its own it always is, and the group itself joins with AND, which makes
+     * this safe to reach for at any point in a chain.
+     *
+     * @template T
+     * @param  T $q
+     * @return T
+     *
+     * @since 1.0.0
+     */
+    public static function notSuperseded($q)
+    {
+        return $q->where(static function ($g): void {
+            $g->whereRaw(self::notSupersededPredicate());
+        });
+    }
+
+    /**
+     * The same rule for a table that points at a donation rather than being
+     * one, dono_events.donation_id among them. Pass the column qualified with
+     * its table. A row pointing at nothing is left alone.
+     *
+     * @template T
+     * @param  T $q
+     * @return T
+     *
+     * @since 1.0.0
+     */
+    public static function notSupersededDonation($q, string $donationIdColumn)
+    {
+        return $q->where(static function ($g) use ($donationIdColumn): void {
+            $g->whereRaw(self::notSupersededPredicate($donationIdColumn));
+        });
+    }
+
+    /**
+     * supersededPredicate() read off a hydrated row, for a screen that has to
+     * label one rather than filter on it. Kept beside the SQL so the two
+     * cannot come to disagree about what "replaced" means.
+     *
+     * @since 1.0.0
+     */
+    public static function isSuperseded(Donation $donation): bool
+    {
+        $flags = is_array($donation->flags) ? $donation->flags : [];
+
+        // Present and not null, the same test the SQL makes. A narrower one
+        // here would report a row live that every count has already hidden,
+        // leaving nowhere that explains where it went.
+        return (string) $donation->status === 'pending'
+            && array_key_exists('retried_by', $flags)
+            && $flags['retried_by'] !== null;
+    }
+
+    /**
      * How many real-looking donations the live figures are leaving out.
      *
      * Campaign and fund rollups are synced through donationsOnly(), so there is

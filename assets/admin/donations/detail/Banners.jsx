@@ -1,4 +1,5 @@
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
+import { addQueryArgs } from '@wordpress/url';
 
 import { IconAlert } from './icons';
 
@@ -28,7 +29,11 @@ export default function Banners( { donation, onRetrySubscription, retryBusy, ret
         && !! donation.flags?.subscription_creation_failed;
     const subFailReason = donation.flags?.subscription_creation_failed_reason;
 
-    if ( ! isTest && ! isDisputed && ! isFailed && ! isProcessing && ! subFailed ) return null;
+    // Straight from the payload, not inferred: the server owns what "replaced"
+    // means, and this screen is the one place a hidden row is reachable.
+    const replacedBy = donation.superseded ? donation.flags?.retried_by : null;
+
+    if ( ! isTest && ! isDisputed && ! isFailed && ! isProcessing && ! subFailed && ! replacedBy ) return null;
 
     return (
         <>
@@ -36,6 +41,27 @@ export default function Banners( { donation, onRetrySubscription, retryBusy, ret
                 <Banner variant="warn">
                     <strong>{ __( 'Test-mode donation.', 'dono-fundraising-platform' ) }</strong>{ ' ' }
                     { __( 'No real money changed hands.', 'dono-fundraising-platform' ) }
+                </Banner>
+            ) }
+            { replacedBy && (
+                <Banner variant="warn">
+                    <strong>{ __( 'Replaced by a later attempt.', 'dono-fundraising-platform' ) }</strong>{ ' ' }
+                    { __( 'The donor backed out here and started again, so this attempt is left out of the donations list, its counts and the CSV export.', 'dono-fundraising-platform' ) }
+                    { ' ' }
+                    { __( 'It is still pending, and it can still settle if the payment it is waiting on goes through.', 'dono-fundraising-platform' ) }
+                    <div style={ { marginTop: 6 } }>
+                        <a href={ addQueryArgs( window.location.pathname, {
+                            page:      'dono-donations',
+                            view:      'detail',
+                            reference: replacedBy,
+                        } ) }>
+                            { sprintf(
+                                /* translators: %s: the replacement donation's reference. */
+                                __( 'Open %s', 'dono-fundraising-platform' ),
+                                replacedBy
+                            ) }
+                        </a>
+                    </div>
                 </Banner>
             ) }
             { isDisputed && (

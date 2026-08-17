@@ -1067,6 +1067,25 @@ final class DonationRepository
         // all: the two exclusive filters each show one kind only, so neither
         // can show a run of donations as it actually happened.
 
+        if (self::hasExplicitSupersededFilter($args)) {
+            $q = (bool) $args['superseded']
+                ? $q->where(static function ($g): void {
+                    $g->whereRaw(DonationQueries::supersededPredicate());
+                })
+                : DonationQueries::notSuperseded($q);
+        } elseif (empty($args['include_superseded']) && ! self::isTargetedLookup($args)) {
+            // An attempt a later one replaced is one donor decision counted
+            // twice, so browsing the list, the CSV and the KPI figures leave
+            // it out until an admin asks for it.
+            //
+            // A search is not browsing. The term matches reference,
+            // gateway_intent_id and gateway_txn_id, so it is how somebody
+            // walks in from a gateway dashboard or from the reference a donor
+            // was emailed, about money that can still settle. Hiding the row
+            // from that answers a question about real money with nothing.
+            $q = DonationQueries::notSuperseded($q);
+        }
+
         if ($createdFrom !== null) {
             $q = $q->where('created_at', $createdFrom, '>=');
         }
@@ -1107,6 +1126,24 @@ final class DonationRepository
     private static function hasExplicitTestFilter(array $args): bool
     {
         return array_key_exists('is_test', $args) && $args['is_test'] !== '' && $args['is_test'] !== null;
+    }
+
+    /** @since 1.0.0 */
+    private static function hasExplicitSupersededFilter(array $args): bool
+    {
+        return array_key_exists('superseded', $args) && $args['superseded'] !== '' && $args['superseded'] !== null;
+    }
+
+    /**
+     * Somebody naming one row, rather than reading a list. The term matches a
+     * reference or a gateway id, which is how a support question arrives, so
+     * the answer has to include rows a browse would leave out.
+     *
+     * @since 1.0.0
+     */
+    private static function isTargetedLookup(array $args): bool
+    {
+        return trim((string) ($args['search'] ?? '')) !== '';
     }
 
     /**

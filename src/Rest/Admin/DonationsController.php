@@ -677,6 +677,8 @@ final class DonationsController
             'frequency'          => $request['frequency']   !== null ? (string) $request['frequency'] : null,
             'is_test'            => $request['is_test']     !== null ? (bool) $request['is_test']    : null,
             'include_test'       => (bool) $request['include_test'],
+            'superseded'         => $request['superseded'] !== null ? (bool) $request['superseded'] : null,
+            'include_superseded' => (bool) $request['include_superseded'],
             'created_from'       => $request['created_from'] !== null ? (string) $request['created_from'] : null,
             'created_to'         => $request['created_to']   !== null ? (string) $request['created_to']   : null,
         ]);
@@ -738,6 +740,10 @@ final class DonationsController
                 'form_id'            => $request['form_id']     !== null ? (int) $request['form_id']     : null,
                 'gateway'            => $request['gateway']     !== null ? (string) $request['gateway'] : null,
                 'frequency'          => $request['frequency']   !== null ? (string) $request['frequency'] : null,
+                // So the notice counts what this view would show, not rows it
+                // is leaving out for the other reason as well.
+                'superseded'         => $request['superseded'] !== null ? (bool) $request['superseded'] : null,
+                'include_superseded' => (bool) $request['include_superseded'],
                 'created_from'       => $request['created_from'] !== null ? (string) $request['created_from'] : null,
                 'created_to'         => $request['created_to']   !== null ? (string) $request['created_to']   : null,
             ]));
@@ -774,6 +780,8 @@ final class DonationsController
             'frequency'          => $request['frequency']   !== null ? (string) $request['frequency'] : null,
             'is_test'            => $request['is_test']     !== null ? (bool) $request['is_test']    : null,
             'include_test'       => (bool) $request['include_test'],
+            'superseded'         => $request['superseded'] !== null ? (bool) $request['superseded'] : null,
+            'include_superseded' => (bool) $request['include_superseded'],
             'created_from'       => $request['created_from'] !== null ? (string) $request['created_from'] : null,
             'created_to'         => $request['created_to']   !== null ? (string) $request['created_to']   : null,
         ]);
@@ -856,6 +864,16 @@ final class DonationsController
                 ],
                 Donation::query()
                     ->where('donor_id', $donor->id)
+                    ->where(static function ($g) use ($donation): void {
+                        // First condition of the group: whereRaw carries no AND.
+                        //
+                        // A replaced attempt is not context, it is the same
+                        // donation again, and at five rows it crowds out the
+                        // giving history this rail exists to show. The row being
+                        // looked at stays in its own list either way.
+                        $g->whereRaw(DonationQueries::notSupersededPredicate())
+                          ->orWhere('id', (int) $donation->id);
+                    })
                     ->orderBy('created_at', 'DESC')
                     ->limit(5)
                     ->getAll(),
@@ -1444,6 +1462,8 @@ final class DonationsController
             'frequency'          => $request['frequency']   !== null ? (string) $request['frequency'] : null,
             'is_test'            => $request['is_test']     !== null ? (bool) $request['is_test']    : null,
             'include_test'       => (bool) $request['include_test'],
+            'superseded'         => $request['superseded'] !== null ? (bool) $request['superseded'] : null,
+            'include_superseded' => (bool) $request['include_superseded'],
             'created_from'       => $request['created_from'] !== null ? (string) $request['created_from'] : null,
             'created_to'         => $request['created_to']   !== null ? (string) $request['created_to']   : null,
         ];
@@ -1561,6 +1581,9 @@ final class DonationsController
             'gateway'      => $d->gateway,
             'frequency'    => $d->frequency,
             'is_test'      => (bool) $d->is_test,
+            // Left out of the list by default, so a row that does appear needs
+            // to say why it is there and why nothing will collect it.
+            'superseded'   => DonationQueries::isSuperseded($d),
             'country'      => $d->country,
             'paid_at'      => $d->paid_at,
             'created_at'   => $d->created_at,
@@ -1708,6 +1731,11 @@ final class DonationsController
             // Widens the scope to both kinds. is_test filters to one of them,
             // so the two are different questions and the explicit filter wins.
             'include_test' => ['type' => 'boolean', 'default' => false],
+            // An attempt a later one replaced is left out by default. The pair
+            // works the way is_test/include_test does: the explicit filter
+            // shows one kind only, the scope widens to both.
+            'superseded'         => ['type' => 'boolean'],
+            'include_superseded' => ['type' => 'boolean', 'default' => false],
             'created_from' => ['type' => 'string'],
             'created_to'   => ['type' => 'string'],
         ];

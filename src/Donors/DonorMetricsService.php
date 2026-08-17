@@ -205,8 +205,12 @@ final class DonorMetricsService
         $today   = $this->clock->now()->format('Y-m-d');
         $segment = $this->classifySegment($donor, $today);
 
-        $donations = Donation::query()
-            ->where('donor_id', $donorId)
+        // notSuperseded, and it matters more here than on the list: this slice
+        // is 25 rows newest-first, so replaced attempts push a donor's real
+        // giving off their own profile card.
+        $donations = DonationQueries::notSuperseded(
+            Donation::query()->where('donor_id', $donorId)
+        )
             ->orderBy('created_at', 'DESC')
             ->limit(25)
             ->getAll();
@@ -223,20 +227,21 @@ final class DonorMetricsService
             ->limit(25)
             ->getAll();
 
-        $events = Event::query()
-            ->where('donor_id', $donorId)
+        $events = $this->donorEvents($donorId)
             ->orderBy('occurred_at', 'DESC')
             ->limit(100)
             ->getAll();
 
         // The list above is capped, so its length is not the donor's history.
         // The overview footer states the real figure.
-        $eventsTotal = Event::query()->where('donor_id', $donorId)->count();
+        $eventsTotal = $this->donorEvents($donorId)->count();
 
         // Same reason, and the tab badge reads it. donations_count cannot: it
         // is synced live-only, so a donor who has only rehearsed reads zero
         // while the tab beside it lists their donations.
-        $donationsTotal = Donation::query()->where('donor_id', $donorId)->count();
+        $donationsTotal = DonationQueries::notSuperseded(
+            Donation::query()->where('donor_id', $donorId)
+        )->count();
 
         // Same reason again: the list above is capped at 25, so its length is
         // not how many receipts this donor has. The Donations and Activity tabs
@@ -810,6 +815,28 @@ final class DonorMetricsService
     }
 
     /**
+     * A donor's timeline, minus anything recorded against an attempt a later
+     * one replaced.
+     *
+     * Every submission records donation.intent_created, so three "Started a
+     * donation of $50" lines in a row describe one donor decision and read as a
+     * donor who tried and gave up twice. The rule is the same one the donations
+     * list applies, and it is reversible for the same reason: a row that
+     * settles leaves pending, and its events come back.
+     *
+     * Both the page and its total go through here so they cannot disagree.
+     *
+     * @since 1.0.0
+     */
+    private function donorEvents(int $donorId)
+    {
+        return DonationQueries::notSupersededDonation(
+            Event::query()->where('donor_id', $donorId),
+            DB::getPrefix() . 'dono_events.donation_id'
+        );
+    }
+
+    /**
      * One page of a donor's activity for the full log table. Same rows as the
      * overview timeline, but paged, and with the note and campaign title inlined
      * so the table needs no side lookups.
@@ -824,13 +851,12 @@ final class DonorMetricsService
         $perPage = max(1, min(100, $perPage));
         $page    = max(1, $page);
 
-        $total = Event::query()->where('donor_id', $donorId)->count();
+        $total = $this->donorEvents($donorId)->count();
         if ($total === 0) {
             return ['items' => [], 'total' => 0];
         }
 
-        $events = Event::query()
-            ->where('donor_id', $donorId)
+        $events = $this->donorEvents($donorId)
             ->orderBy('occurred_at', $order)
             ->limit($perPage)
             ->offset(($page - 1) * $perPage)

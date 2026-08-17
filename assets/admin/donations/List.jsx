@@ -175,6 +175,7 @@ export default function List() {
     const frequencyFilter = filterValue( 'frequency' );
     const campaignFilter = filterValue( 'campaign' );
     const testFilter     = filterValue( 'is_test' );
+    const supersededFilter = filterValue( 'superseded' );
 
     const apiParams = useMemo( () => ( {
         page:         view.page,
@@ -188,9 +189,10 @@ export default function List() {
         campaign_id:  campaignFilter || undefined,
         is_test:      testFilter === 'yes' ? true : ( testFilter === 'no' ? false : undefined ),
         include_test: includeTest || undefined,
+        superseded:   supersededFilter === 'yes' ? true : ( supersededFilter === 'no' ? false : undefined ),
         created_from: createdFrom || undefined,
         created_to:   createdTo   || undefined,
-    } ), [ view, statusFilter, gatewayFilter, frequencyFilter, campaignFilter, testFilter, includeTest, createdFrom, createdTo ] );
+    } ), [ view, statusFilter, gatewayFilter, frequencyFilter, campaignFilter, testFilter, supersededFilter, includeTest, createdFrom, createdTo ] );
 
     useEffect( () => {
         let aborted = false;
@@ -248,6 +250,11 @@ export default function List() {
                     </a>
                     { item.is_test && (
                         <span className="dono-pill dono-pill--test">{ __( 'Test', 'dono-fundraising-platform' ) }</span>
+                    ) }
+                    { item.superseded && (
+                        <span className="dono-pill dono-pill--gray" title={ __( 'The donor started again on another gateway. Nothing they do now can collect this attempt.', 'dono-fundraising-platform' ) }>
+                            { __( 'Replaced', 'dono-fundraising-platform' ) }
+                        </span>
                     ) }
                 </span>
             ),
@@ -348,6 +355,23 @@ export default function List() {
             getValue:    ( { item } ) => ( item.is_test ? 'yes' : 'no' ),
             render:      ( { item } ) => item.is_test
                 ? <span className="dono-pill dono-pill--test">{ __( 'Test', 'dono-fundraising-platform' ) }</span>
+                : <span className="dono-row__sub">-</span>,
+        },
+        {
+            id:    'superseded',
+            label: __( 'Replaced attempt', 'dono-fundraising-platform' ),
+            // Out of the columns and out of the default view, for the reason
+            // the reference badge exists: on a list that hides them the column
+            // reads the same on every row. It is here so an admin who needs one
+            // of these can ask for it by name.
+            elements: [
+                { value: 'yes', label: __( 'Replaced only', 'dono-fundraising-platform' ) },
+                { value: 'no',  label: __( 'Live attempts only', 'dono-fundraising-platform' ) },
+            ],
+            filterBy: { operators: [ 'is' ] },
+            getValue: ( { item } ) => ( item.superseded ? 'yes' : 'no' ),
+            render:   ( { item } ) => item.superseded
+                ? <span className="dono-pill dono-pill--gray">{ __( 'Replaced', 'dono-fundraising-platform' ) }</span>
                 : <span className="dono-row__sub">-</span>,
         },
         {
