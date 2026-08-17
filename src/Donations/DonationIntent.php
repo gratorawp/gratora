@@ -67,6 +67,15 @@ final class DonationIntent
          * come back.
          */
         public readonly bool $reactivate_redacted_donor = true,
+        /**
+         * The attempt tree this submission continues, minted by
+         * AntiSpamGuard::claimRetry. Null opens a new tree. Kept out of $extra
+         * because $extra is caller-supplied and this is not the caller's to
+         * write.
+         *
+         * @var array{group: string, born: int, parent: string}|null
+         */
+        public readonly ?array $retry = null,
     ) {
     }
 }

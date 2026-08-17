@@ -30,6 +30,13 @@ final class AntiSpamGuard
     private const TOKEN_WINDOW_DAYS  = 30;
     private const MIN_AMOUNT_CENTS   = 100;
 
+    // A donor who backs out of one gateway and picks another is still making
+    // one donation, so the attempts that follow spend the first attempt's own
+    // budget rather than a fresh slot of the email quota. Half of EMAIL_WINDOW,
+    // so a tree can never outlive the slot that bought it.
+    private const RETRY_MAX          = 2;
+    private const RETRY_TTL          = 1800;
+
     /** @since 1.0.0 */
     public function __construct(private IdentityHasher $hasher, private ?TestMode $testMode = null)
     {
@@ -181,6 +188,86 @@ final class AntiSpamGuard
     }
 
     /**
+     * Proof that this submission continues one specific never-funded donation,
+     * which spends that attempt tree's own budget instead of the email quota.
+     *
+     * The relief hangs off a server-minted per-donation secret, never off a
+     * property of the email address: an attacker cannot mint one, and a row
+     * that has seen money can never buy one.
+     *
+     * Returns null on any refusal, and the caller falls back to the email
+     * quota, so a refusal here is never itself an error the donor sees.
+     *
+     * @return array{group: string, born: int, parent: string}|null
+     *
+     * @since 1.0.0
+     */
+    public function claimRetry(
+        Donation $parent,
+        string $parentEmailHash,
+        string $rawStatusToken,
+        string $email,
+        ?int $formId
+    ): ?array {
+        $storedToken = (string) $parent->status_token_hash;
+        if ($rawStatusToken === '' || $storedToken === '') {
+            return null;
+        }
+        if (! hash_equals($storedToken, hash('sha256', $rawStatusToken))) {
+            return null;
+        }
+
+        if ($parent->status !== 'pending'
+            || $parent->paid_at !== null
+            || (int) $parent->refunded_cents !== 0) {
+            return null;
+        }
+
+        if ((int) ($parent->form_id ?? 0) !== (int) ($formId ?? 0)) {
+            return null;
+        }
+
+        // Without this one root would buy free rows for unlimited addresses.
+        if ($parentEmailHash === '') {
+            return null;
+        }
+        if (! hash_equals($parentEmailHash, $this->hasher->emailHash($this->hasher->normalizeEmail($email)))) {
+            return null;
+        }
+
+        $retry = is_array($parent->flags ?? null) ? ($parent->flags['retry'] ?? null) : null;
+        if (! is_array($retry)) {
+            return null;
+        }
+        $group = is_string($retry['group'] ?? null) ? $retry['group'] : '';
+        $born  = is_numeric($retry['born'] ?? null) ? (int) $retry['born'] : 0;
+        if ($group === '' || $born <= 0) {
+            return null;
+        }
+
+        // Measured from the root's birth, which every descendant inherits
+        // verbatim, so a chain of individually recent hops cannot walk a tree
+        // forward indefinitely.
+        if (time() - $born > self::RETRY_TTL) {
+            return null;
+        }
+
+        // Spent last, so a refusal above costs nothing. The bucket is the root's
+        // birth, so every member of the tree at any depth and on any branch
+        // names one counter that no wall-clock boundary can reset.
+        $key = 'dono_donate_retry_' . substr(hash('sha256', $group), 0, 32);
+        if ($this->hit($key, self::RETRY_TTL * 2, $born) > self::RETRY_MAX) {
+            return null;
+        }
+
+        return [
+            'group'  => $group,
+            'born'   => $born,
+            'parent' => (string) $parent->reference,
+        ];
+    }
+
+    /**
      * Count this attempt and answer how many the window has now seen.
      *
      * Incremented before it is judged, and incremented atomically, because
@@ -196,13 +283,19 @@ final class AntiSpamGuard
      * Public because every unauthenticated surface needs these two properties,
      * not only the donation endpoint. $base carries the caller's own namespace.
      *
+     * $bucket names the bucket outright for a counter whose lifetime is a
+     * server-minted moment rather than the wall clock. A wall-clock bucket
+     * rolls underneath such a counter and hands its subject a fresh allowance
+     * part way through. The value is written by the server and never moves, so
+     * a caller still cannot push their own expiry out.
+     *
      * @since 1.0.0
      */
-    public function hit(string $base, int $window): int
+    public function hit(string $base, int $window, ?int $bucket = null): int
     {
         global $wpdb;
 
-        $key  = $base . '_' . (int) floor(time() / $window);
+        $key  = $base . '_' . ($bucket ?? (int) floor(time() / $window));
         $name = '_transient_' . $key;
 
         // add_option is an INSERT against option_name's unique index, so of any

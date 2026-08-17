@@ -15,6 +15,7 @@ use Dono\Donations\DonationIntent;
 use Dono\Donations\DonationRepository;
 use Dono\Donations\DonationService;
 use Dono\Donors\ConsentService;
+use Dono\Donors\Donor;
 use Dono\Forms\Form;
 use Dono\Forms\Blocks\TermsBlock;
 use Dono\Forms\FormSubmissionValidator;
@@ -139,7 +140,29 @@ final class DonationsController
                 ['status' => 400]
             );
         }
-        if ($err = $this->spam->consumeEmailQuota($email)) return $err;
+        // A submission carrying the status token of a named, never-funded
+        // pending donation is not a new attempt against the email quota, it is
+        // the same donation being tried a second way, and it spends that
+        // attempt tree's own budget.
+        $retry    = null;
+        $parent   = null;
+        $claim    = is_array($body['_retry'] ?? null) ? $body['_retry'] : [];
+        $claimRef = trim((string) ($claim['reference'] ?? ''));
+        if ($claimRef !== '') {
+            $parent = $this->repository->findByReference($claimRef);
+            if ($parent !== null) {
+                $retry = $this->spam->claimRetry(
+                    $parent,
+                    $this->donorEmailHash($parent),
+                    (string) ($claim['status_token'] ?? ''),
+                    $email,
+                    isset($body['form_id']) ? (int) $body['form_id'] : null
+                );
+            }
+        }
+        if ($retry === null && ($err = $this->spam->consumeEmailQuota($email))) {
+            return $err;
+        }
 
         $profile = (array) ($body['profile'] ?? []);
         $country = $body['country'] ?? ($profile['country'] ?? null);
@@ -281,6 +304,7 @@ final class DonationsController
             fee_covered_cents:  min($amount, max(0, (int) ($body['fee_covered_cents'] ?? 0))),
             extra:              $extra,
             custom:             $custom,
+            retry:              $retry,
         );
 
         try {
@@ -301,6 +325,10 @@ final class DonationsController
 
         $donation       = $created['donation'];
         $rawStatusToken = $created['status_token'];
+
+        if ($retry !== null && $parent !== null) {
+            $this->donations->recordRetriedBy($parent, (string) $donation->reference);
+        }
 
         // Append-only audit rows tied to this donation. Only known purposes are
         // recorded, and a consent write must never break the donation.
@@ -416,6 +444,19 @@ final class DonationsController
             'paypal'          => $this->payPalPayload($gatewayResult),
             ...$this->browserAwarePayload($gateway, $gatewayResult),
         ], 201);
+    }
+
+    /**
+     * An absent donor leaves an empty string, which can never hash_equals a
+     * real hash, so the parent is simply unclaimable.
+     *
+     * @since 1.0.0
+     */
+    private function donorEmailHash(Donation $parent): string
+    {
+        $donor = Donor::query()->where('id', (int) $parent->donor_id)->get();
+
+        return $donor instanceof Donor ? (string) $donor->email_hash : '';
     }
 
     /** Longest single attribution value kept. A landing URL is the one that grows. */

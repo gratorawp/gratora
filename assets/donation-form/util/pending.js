@@ -26,6 +26,14 @@ export function rememberPending( data, values, hostId = '' ) {
     }
 }
 
+export function clearPending() {
+    try {
+        window.sessionStorage.removeItem( PENDING_KEY );
+    } catch ( e ) {
+        // Private browsing can refuse storage.
+    }
+}
+
 export function readPending() {
     try {
         const raw = window.sessionStorage.getItem( PENDING_KEY );

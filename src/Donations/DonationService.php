@@ -76,6 +76,14 @@ final class DonationService
             }
         }
 
+        // Read before anything can hand back a different intent. The tree
+        // descriptor is what bounds how many submissions one email can make,
+        // and DonationIntent is readonly, so a filter or a type handler
+        // returning a rebuilt instance drops it: the retry the controller has
+        // already charged then writes itself as a fresh root with a full
+        // budget, and every hop after it mints another.
+        $retry = $intent->retry;
+
         $intent = apply_filters('dono.donation.intent_creating', $intent);
 
         $typeHandler = $this->formTypes->handlerFor($intent);
@@ -87,7 +95,7 @@ final class DonationService
         $rawStatusToken = bin2hex(random_bytes(16));
         $statusTokenHash = hash('sha256', $rawStatusToken);
 
-        DB::transaction(function () use ($intent, $now, $statusTokenHash, &$donation) {
+        DB::transaction(function () use ($intent, $retry, $now, $statusTokenHash, &$donation) {
             // A genuine paid donation re-engages a previously-erased donor, so
             // this is the one path allowed to reactivate a redacted row. The
             // intent can decline it: see DonationIntent::$reactivate_redacted_donor.
@@ -162,6 +170,14 @@ final class DonationService
                 $donation->fundraiser_team_id = (int) $intent->extra['fundraiser_team_id'];
             }
 
+            // A root is its own group and carries its own birth; a retry
+            // inherits the descriptor verbatim, so group and born are the
+            // root's at every depth and on every branch.
+            $donation->flags = ['retry' => $retry ?? [
+                'group' => $donation->reference,
+                'born'  => time(),
+            ]] + (array) ($donation->flags ?? []);
+
             $donation->custom_data_encrypted = $this->encodeCustom($intent->custom);
 
             $givenFirst = trim((string) ($intent->profile['first_name'] ?? ''));
@@ -201,6 +217,32 @@ final class DonationService
         $typeHandler->onDonationCreated($donation, $intent->extra);
 
         return ['donation' => $donation, 'status_token' => $rawStatusToken];
+    }
+
+    /**
+     * Point an abandoned attempt at the donation that replaced it.
+     *
+     * A named-column conditional update rather than save(), which writes the
+     * whole pre-call snapshot and would undo a webhook that settled this row
+     * mid-request. The pending term is what leaves a row that just went paid
+     * alone; a no-op is the right outcome there.
+     *
+     * flags is encoded here because the query builder writes what it is given
+     * and only save() encodes json columns.
+     *
+     * @since 1.0.0
+     */
+    public function recordRetriedBy(Donation $parent, string $childReference): void
+    {
+        $flags = ['retried_by' => $childReference] + (array) ($parent->flags ?? []);
+
+        Donation::query()
+            ->where('id', (int) $parent->id)
+            ->where('status', 'pending')
+            ->update([
+                'flags'      => (string) wp_json_encode($flags),
+                'updated_at' => $this->clock->now()->format('Y-m-d H:i:s'),
+            ]);
     }
 
     /**

@@ -15,7 +15,7 @@ import CurrencySwitcher from './components/CurrencySwitcher';
 import StripePayment from './components/StripePayment';
 import PayPalPayment from './components/PayPalPayment';
 import { detectStripeReturn, resolveStripeReturn, clearStripeReturnParams, returnOutcome } from './util/stripe';
-import { rememberPending, readPending, ownsPendingReturn } from './util/pending';
+import { rememberPending, readPending, clearPending, ownsPendingReturn } from './util/pending';
 import { interpolateLabel } from './util/interpolate';
 import { decodeEntities } from './util/entities';
 import { setActiveNumberFormat, formatAmount, frequencyLabel } from './util/format';
@@ -318,6 +318,23 @@ function FormBody( { state, dispatch, config } ) {
                 }
             }
             dispatch( { type: 'SUBMIT_START' } );
+            // Backing out of one gateway and picking another is one donation,
+            // so this submission names the attempt it continues and the server
+            // charges that attempt's own budget instead of a fresh slot of the
+            // per-email quota. The stash is the fallback for a donor returning
+            // from a redirect, where the closure holding `submission` is gone.
+            // Gated the same way the redirect return is. The stash is one key
+            // for the whole page and survives a reload, so ungated it lets a
+            // second form on the page claim the first form's live checkout,
+            // and lets a reloaded tab claim an offline donation that is
+            // pending because it is awaiting a transfer, not because anyone
+            // abandoned it.
+            const prior  = state.submission
+                || ( ownsPendingReturn( config.hostId ) ? readPending() : {} );
+            const priorT = prior?.status_token || prior?.statusToken || '';
+            const retry  = ( prior?.reference && priorT )
+                ? { reference: prior.reference, status_token: priorT }
+                : null;
             // X-WP-Nonce only when present (logged-in users), so a page-cached
             // form never sends a stale nonce the REST layer would 403.
             const headers = { 'Content-Type': 'application/json' };
@@ -328,6 +345,7 @@ function FormBody( { state, dispatch, config } ) {
                 body:    JSON.stringify( {
                     ...buildPayload( state ),
                     ...( config.extra ? { extra: config.extra } : {} ),
+                    ...( retry ? { _retry: retry } : {} ),
                     _ft: formToken,
                     _hp: honeypot,
                 } ),
@@ -514,7 +532,7 @@ function FormBody( { state, dispatch, config } ) {
                     <button
                         type="button"
                         class="dono-form__button dono-form__button--secondary"
-                        onClick={ () => dispatch( { type: 'RESET' } ) }
+                        onClick={ () => { clearPending(); dispatch( { type: 'RESET' } ); } }
                     >
                         { config.i18n.donateAgain }
                     </button>
@@ -541,7 +559,7 @@ function FormBody( { state, dispatch, config } ) {
                     <button
                         type="button"
                         class="dono-form__button dono-form__button--secondary"
-                        onClick={ () => dispatch( { type: 'RESET' } ) }
+                        onClick={ () => { clearPending(); dispatch( { type: 'RESET' } ); } }
                     >
                         { config.i18n.donateAgain }
                     </button>
@@ -571,7 +589,7 @@ function FormBody( { state, dispatch, config } ) {
                     <button
                         type="button"
                         class="dono-form__button dono-form__button--secondary"
-                        onClick={ () => dispatch( { type: 'RESET' } ) }
+                        onClick={ () => { clearPending(); dispatch( { type: 'RESET' } ); } }
                     >
                         { config.i18n.donateAgain }
                     </button>

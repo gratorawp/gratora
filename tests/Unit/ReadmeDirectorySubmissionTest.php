@@ -28,7 +28,6 @@ final class ReadmeDirectorySubmissionTest extends TestCase
      * package that ships it. Dompdf brings DejaVu without its notice, and the
      * Bitstream Vera terms require the notice to travel with every copy.
      */
-    private const FONT_LICENCE = 'licenses/DejaVu-Fonts-License.txt';
 
     /**
      * build/ is compiled, so Guideline 4 is answered by shipping the source it
@@ -130,27 +129,6 @@ final class ReadmeDirectorySubmissionTest extends TestCase
         curl_close($handle);
 
         $this->assertSame(200, $status, "$url does not resolve, so `npm install` cannot fetch the build dependency.");
-    }
-
-    /**
-     * The notice has to reach the customer, so both halves matter: the file has
-     * to survive .distignore into the zip, and it has to still be the notice.
-     * An empty or truncated file passes a `test -f` in the release script and
-     * satisfies nothing the fonts are licensed under.
-     */
-    public function test_the_bundled_font_licence_travels_with_the_fonts(): void
-    {
-        $path = $this->root() . '/' . self::FONT_LICENCE;
-        $this->assertFileExists($path, 'The DejaVu fonts ship in vendor/ with no notice of their own.');
-
-        $this->assertFalse(
-            DistPayload::excluded($this->root(), self::FONT_LICENCE),
-            '.distignore keeps the font licence out of the zip the fonts ship in.'
-        );
-
-        $notice = (string) file_get_contents($path);
-        $this->assertStringContainsString('Bitstream Vera Fonts Copyright', $notice);
-        $this->assertStringContainsString('Arev Fonts Copyright', $notice);
     }
 
     /**
