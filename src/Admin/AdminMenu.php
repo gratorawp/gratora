@@ -59,8 +59,10 @@ final class AdminMenu extends HookProvider
     /** @since 1.0.0 */
     private static function menuIcon(): string
     {
+        // One path, because evenodd cuts the D out of the disc only while both
+        // subpaths belong to the same path element.
         $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="black" fill-rule="evenodd">'
-            . '<path d="M5 1 H15 A4 4 0 0 1 19 5 V15 A4 4 0 0 1 15 19 H5 A4 4 0 0 1 1 15 V5 A4 4 0 0 1 5 1 Z'
+            . '<path d="M10 1 A9 9 0 1 1 10 19 A9 9 0 1 1 10 1 Z'
             . ' M5 4 H10 A6 6 0 0 1 16 10 A6 6 0 0 1 10 16 H5 Z" />'
             . '</svg>';
         return 'data:image/svg+xml;base64,' . base64_encode($svg);
