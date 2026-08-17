@@ -16,6 +16,7 @@ use Dono\Foundation\Container\Container;
 use Dono\Foundation\Modules\ModuleManager;
 use Dono\Foundation\Uninstall\DataEraser;
 use Dono\Async\AsyncDispatcher;
+use Dono\Foundation\Upgrade\SchemaGuard;
 use Dono\Foundation\Upgrade\UpgradeJob;
 use Dono\Foundation\Upgrade\UpgradeRunner;
 use Dono\Foundation\Time\SystemClock;
@@ -52,7 +53,7 @@ final class Plugin
     }
 
     /**
-     * Load text domain, register and boot all modules. Idempotent.
+     * Register and boot all modules. Idempotent.
      *
      * @since 1.0.0
      */
@@ -63,8 +64,6 @@ final class Plugin
         self::$booted = true;
 
         $self = self::instance();
-
-        load_plugin_textdomain('dono-fundraising-platform', false, dirname(plugin_basename(DONO_FILE)) . '/languages');
 
         // Guarded so boot() is safe even when modules were already registered
         // earlier in the same request - e.g. the integration test bootstrap
@@ -78,17 +77,31 @@ final class Plugin
 
         $self->modules->bootAll();
 
-        // Broadcast the command registry now that every module has booted, so
-        // add-on command packs registered via add_action('dono.commands.register')
-        // in their boot() are honored (core's own commands are registered
-        // directly in CoreModule::boot, independent of this hook).
-        if ($self->container->has(CommandRegistry::class)) {
+        // Command metadata carries translated summaries and schema labels, so
+        // no pack may be built before init: WordPress resolves the catalogue
+        // against the site locale while the current user is still unknown, and
+        // logs _doing_it_wrong for the domain on every request.
+        //
+        // Priority 5 puts this one step behind core's own pack, which
+        // CoreModule registers at 4, and leaves the registry complete for
+        // default-priority init handlers. Add-ons attach their listener during
+        // their boot(), on this request's plugins_loaded, so the broadcast
+        // reaches every pack.
+        add_action('init', static function () use ($self): void {
+            // Broadcast once. init can fire again, and a pack offering names
+            // the registry already holds is refused by throwing.
+            static $broadcast = false;
+            if ($broadcast || ! $self->container->has(CommandRegistry::class)) {
+                return;
+            }
+            $broadcast = true;
+
             do_action(
                 'dono.commands.register',
                 $self->container->get(CommandRegistry::class),
                 $self->container
             );
-        }
+        }, 5);
 
         // Virtual `dono_access` cap for admin-menu visibility (super-admins,
         // the manage_dono umbrella, or any granular dono_* cap holder). REST
@@ -101,19 +114,41 @@ final class Plugin
         // migration once per DONO_DB_VERSION bump (cheap on steady state: one
         // option read). Priority 99 so tables exist before the portal heal.
         add_action('wp_loaded', static function (): void {
-            if (get_option('dono_db_version') === DONO_DB_VERSION) {
-                return;
-            }
-            self::migrateSchema();
-            update_option('dono_db_version', DONO_DB_VERSION, false);
+            // Anything thrown here reaches no handler and takes the front end
+            // with it, on every request, including the admin screen somebody
+            // would use to switch the plugin off.
+            try {
+                $fresh = get_option(SchemaGuard::OPTION, null) === null;
 
-            // Schema first, then data. A routine that backfills a column the
-            // same release added would otherwise run against a table without
-            // it. Queued rather than run here: a backfill over a few hundred
-            // thousand donations does not belong in the request that noticed
-            // the plugin had been updated.
-            self::instance()->container->get(UpgradeJob::class)->start();
+                if (get_option(SchemaGuard::OPTION) !== DONO_DB_VERSION) {
+                    self::migrateSchema();
+
+                    // Nothing below is safe against tables that are not there,
+                    // and the stamp is what brings this gate back next request.
+                    if (! SchemaGuard::stampWhenComplete()) {
+                        return;
+                    }
+
+                    self::finishActivation($fresh);
+
+                    // Schema first, then data. A routine that backfills a
+                    // column the same release added would otherwise run
+                    // against a table without it. Queued rather than run here:
+                    // a backfill over a few hundred thousand donations does
+                    // not belong in the request that noticed the plugin had
+                    // been updated.
+                    self::instance()->container->get(UpgradeJob::class)->start();
+
+                    return;
+                }
+
+                self::finishActivation($fresh);
+            } catch (\Throwable $e) {
+                ErrorLog::record('schema_guard', $e->getMessage());
+            }
         }, 99);
+
+        SchemaGuard::registerNotice();
 
         // The bump above is the only thing that queues a drain, so a release
         // adding a routine and no schema change would never run it, and a queue
@@ -161,12 +196,72 @@ final class Plugin
         }
     }
 
-    /** @since 1.0.0 */
-    public static function onActivation(): void
+    /**
+     * Runs the activation work on the first request that can, whatever stopped
+     * the activation hook from finishing it.
+     *
+     * Keyed off the activation record and not the schema stamp. Those are
+     * written at different points, and anything thrown between them leaves a
+     * site with tables but no default fund, capabilities or portal page, on
+     * which activation hooks never fire again. activate() is idempotent, so
+     * asking every request costs one option read once it has run.
+     *
+     * @param ?bool $fresh Whether the schema had never been stamped, read
+     *     before the stamp this request may already have written.
+     * @since 1.0.0
+     */
+    private static function finishActivation(?bool $fresh = null): void
     {
-        $fresh = get_option('dono_db_version', null) === null;
+        if (get_option(Activator::OPT_ACTIVATED_AT, false) !== false) {
+            return;
+        }
+
+        if (SchemaGuard::missingTables() !== []) {
+            return;
+        }
+
+        self::onActivation($fresh);
+    }
+
+    /** @since 1.0.0 */
+    public static function onActivation(?bool $fresh = null): void
+    {
+        try {
+            self::activate($fresh);
+        } catch (\Throwable $e) {
+            // WordPress renders anything thrown out of an activation hook as
+            // "Plugin could not be activated because it triggered a fatal
+            // error" and nothing else, on a screen with no way to read more.
+            // Recorded rather than only logged: toDebugLog no-ops unless
+            // WP_DEBUG is on, which is the case on the sites this happens to.
+            ErrorLog::record('activation', $e->getMessage());
+        }
+    }
+
+    /**
+     * @param ?bool $fresh Null to read it from the schema stamp, which is only
+     *     correct before anything has written one this request.
+     * @since 1.0.0
+     */
+    private static function activate(?bool $fresh = null): void
+    {
+        $fresh ??= get_option(SchemaGuard::OPTION, null) === null;
 
         self::migrateSchema();
+
+        // Before the schema check, because it needs no tables and it is what
+        // lets whoever switched the plugin on read the notice that follows.
+        Capabilities::applyMapping(
+            Capabilities::currentMapping()
+        );
+
+        // Stamping a version the tables do not match disarms the wp_loaded gate
+        // that would otherwise migrate again, so a host that refuses CREATE
+        // gets a site that never recovers. Everything below writes to those
+        // tables in any case.
+        if (! SchemaGuard::stampWhenComplete()) {
+            return;
+        }
 
         // A new site has nothing to migrate. Stamping the routines instead of
         // running them keeps a backfill from walking an empty table, and stops
@@ -175,13 +270,6 @@ final class Plugin
         if ($fresh) {
             UpgradeRunner::markAllDone(new UpgradeRunner(CoreModule::upgradeRoutines()));
         }
-        // Stamp the schema version so the boot-time gate doesn't re-migrate on
-        // the first request after activation.
-        update_option('dono_db_version', DONO_DB_VERSION, false);
-
-        Capabilities::applyMapping(
-            Capabilities::currentMapping()
-        );
 
         // The sweep needs a start date to exist before anything can read one.
         // It is pushed forward again wherever erasure gets switched on, which

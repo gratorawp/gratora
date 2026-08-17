@@ -379,8 +379,7 @@ final class DonorsController
             $server->send_header('Content-Type', 'text/csv; charset=utf-8');
             $server->send_header('Content-Disposition', 'attachment; filename="' . $filename . '"');
             $server->send_header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
-            // The body of a file being downloaded, sent under its own Content-Type. Escaping it would corrupt the document.
-            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $csv comes from DonorMetricsService::atRiskCsv(), whose cells go through Csv::writeRow() (fputcsv quoting plus formula-injection prefixing), and is sent under its own text/csv header; escaping it would corrupt the file.
             echo $csv;
             return true;
         }, 10, 4);
@@ -488,8 +487,7 @@ final class DonorsController
             $server->send_header('Content-Disposition', 'attachment; filename="' . $filename . '"');
             $server->send_header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
 
-            // The body of a file being downloaded, sent under its own Content-Type. Escaping it would corrupt the document.
-            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $json is wp_json_encode() output, already escaped for the JSON grammar, sent under its own application/json header; escaping it again would corrupt the file.
             echo $json;
             return true;
         }, 10, 4);

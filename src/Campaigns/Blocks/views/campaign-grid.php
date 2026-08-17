@@ -11,8 +11,7 @@ defined('ABSPATH') || exit;
  */
 ?>
 <section <?php
-// Core escapes these attributes; its own blocks print them the same way.
-// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes what it returns; core's own blocks print it the same way.
 echo get_block_wrapper_attributes(array_filter([
     'class' => 'dono-block dono-block--grid',
     'style' => $styleVars,
@@ -22,7 +21,6 @@ echo get_block_wrapper_attributes(array_filter([
     <?php if ($heading !== ''): ?>
         <div class="dono-grid__head">
             <h2 class="dono-grid__title"><?php echo esc_html($heading);
-// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 ?></h2>
         </div>
     <?php endif; ?>
@@ -30,7 +28,6 @@ echo get_block_wrapper_attributes(array_filter([
         <?php require __DIR__ . '/empty-cta.php'; ?>
         <?php if (($notice ?? '') !== ''): ?>
             <div class="dono-block-notice"><?php echo esc_html($notice);
-// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 ?></div>
         <?php endif; ?>
     <?php else: ?>
@@ -39,24 +36,19 @@ echo get_block_wrapper_attributes(array_filter([
             <a class="dono-campaign-card<?php echo $card['url'] === '' ? ' is-inert' : ''; ?>"
                <?php echo $card['url'] !== '' ? 'href="' . esc_url($card['url']) . '"' : ''; ?>
                style="--dono-accent: <?php echo esc_attr($card['accent']);
-// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 ?>;">
                 <span class="dono-campaign-card__cover<?php echo $card['imageUrl'] ? '' : ' is-placeholder'; ?>">
                     <?php if ($card['imageUrl']): ?>
                         <img src="<?php echo esc_url($card['imageUrl']);
-// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 ?>" alt="<?php echo esc_attr($card['title']);
-// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 ?>" loading="lazy" />
                     <?php endif; ?>
                 </span>
                 <span class="dono-campaign-card__body">
                     <span class="dono-campaign-card__title"><?php echo esc_html($card['title']);
-// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 ?></span>
                     <?php if ($card['blurb'] !== ''): ?>
                         <span class="dono-campaign-card__blurb"><?php echo esc_html(wp_strip_all_tags($card['blurb']));
-// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 ?></span>
                     <?php endif; ?>
                     <span class="dono-campaign-card__progress">
@@ -65,11 +57,9 @@ echo get_block_wrapper_attributes(array_filter([
                         </span>
                         <span class="dono-campaign-card__meta">
                             <span class="dono-campaign-card__raised"><?php echo esc_html($card['raised']);
-// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 ?></span>
                             <?php if ($card['goalLabel'] !== ''): ?>
                                 <span class="dono-campaign-card__goal"><?php echo esc_html($card['goalLabel']);
-// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 ?></span>
                             <?php endif; ?>
                         </span>
@@ -82,7 +72,6 @@ echo get_block_wrapper_attributes(array_filter([
                         <?php endif; ?>
                         <span class="dono-campaign-card__link">
                             <?php esc_html_e('Donate', 'dono-fundraising-platform');
-// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 ?>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
                         </span>

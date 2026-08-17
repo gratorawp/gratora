@@ -195,9 +195,7 @@ final class ExportsController
             $server->send_header('Content-Type', $type);
             $server->send_header('Content-Disposition', 'attachment; filename="' . $filename . '"');
             $server->send_header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
-            // Bytes of a file being downloaded, sent under their own Content-Type
-            // header. Escaping them would corrupt the document.
-            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $body is either CSV whose cells went through Csv::writeRow() (fputcsv quoting plus formula-injection prefixing) in DonorExporter/RevenueExporter, or the binary PDF from RevenueReportBuilder::build(); both are sent under their own Content-Type and escaping would corrupt the file.
             echo $body;
             return true;
         }, 10, 4);

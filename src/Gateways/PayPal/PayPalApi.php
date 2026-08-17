@@ -198,7 +198,7 @@ final class PayPalApi
                 esc_html(sprintf('PayPal API (%s %s): %s', $method, $path, $this->errorMessage($decoded, $code))),
                 // A list of PayPal issue codes the caller branches on. It is
                 // never printed, and esc_html cannot take an array.
-                // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+                // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- issuesFrom() returns upper-case codes into $issues, never the message; callers read them through hasIssue() only.
                 PayPalApiException::issuesFrom($decoded)
             );
         }

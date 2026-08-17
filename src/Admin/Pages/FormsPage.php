@@ -90,7 +90,7 @@ final class FormsPage extends HookProvider
     /** @since 1.0.0 */
     private function bootBlockEditorContext(): void
     {
-        // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+        // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- WP_Screen::get() reads $hook_suffix as the screen id, so blanking it gives set_current_screen() below a neutral screen instead of this page's.
         $GLOBALS['hook_suffix'] = '';
 
         require_once ABSPATH . 'wp-admin/includes/class-wp-screen.php';

@@ -44,7 +44,7 @@ final class ErrorLog
             return;
         }
 
-        // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+        // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- the WP_DEBUG guard above is the developer opt-in, and this is the only error_log() call in the plugin.
         error_log('[dono] ' . $message);
     }
 

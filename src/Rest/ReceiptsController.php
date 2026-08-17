@@ -140,9 +140,7 @@ final class ReceiptsController
         header('Content-Type: application/pdf');
         header('Content-Length: ' . strlen($bytes));
         header('Content-Disposition: attachment; filename="receipt-' . $filename . '.pdf"');
-        // Bytes of a file being downloaded, sent under their own Content-Type
-        // header. Escaping them would corrupt the document.
-        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $bytes is the binary PDF returned by ReceiptRenderer::render(), sent under its own application/pdf header; escaping it would corrupt the document.
         echo $bytes;
         exit;
     }

@@ -18,8 +18,7 @@ $formatValue = static function (int $value, string $type, string $currency): str
 };
 ?>
 <section <?php
-// Core escapes these attributes; its own blocks print them the same way.
-// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes what it returns; core's own blocks print it the same way.
 echo get_block_wrapper_attributes(array_filter([
     'class' => 'dono-block dono-block--progress is-align-' . $align,
     'style' => $styleVars,
@@ -30,7 +29,6 @@ echo get_block_wrapper_attributes(array_filter([
         <div class="dono-progress__labels">
             <div class="dono-progress__current">
                 <span class="dono-progress__value"><?php echo esc_html($formatValue($current, $goalType, $currency));
-// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 ?></span>
                 <span class="dono-progress__caption">
                     <?php echo esc_html(match ($goalType) {
@@ -38,7 +36,6 @@ echo get_block_wrapper_attributes(array_filter([
                         'donors'    => __('donors', 'dono-fundraising-platform'),
                         default     => __('raised', 'dono-fundraising-platform'),
                     });
-// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 ?>
                 </span>
             </div>
@@ -50,7 +47,6 @@ echo get_block_wrapper_attributes(array_filter([
                         $pct,
                         $formatValue($target, $goalType, $currency)
                     ));
-// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 ?>
                 </div>
             <?php endif; ?>
@@ -58,11 +54,9 @@ echo get_block_wrapper_attributes(array_filter([
     <?php endif; ?>
     <div class="dono-progress__bar" role="progressbar"
          aria-valuenow="<?php echo esc_attr((string) $pct);
-// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 ?>"
          aria-valuemin="0" aria-valuemax="100">
         <div class="dono-progress__bar-fill" style="width: <?php echo esc_attr((string) $pct);
-// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 ?>%;"></div>
     </div>
 </section>

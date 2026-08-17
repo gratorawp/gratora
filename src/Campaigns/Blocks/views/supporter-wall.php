@@ -11,8 +11,7 @@ defined('ABSPATH') || exit;
  */
 ?>
 <section <?php
-// Core escapes these attributes; its own blocks print them the same way.
-// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes what it returns; core's own blocks print it the same way.
 echo get_block_wrapper_attributes(array_filter([
     'class' => 'dono-block dono-block--supporter-wall',
     'style' => $styleVars,
@@ -22,7 +21,6 @@ echo get_block_wrapper_attributes(array_filter([
          data-block="dono/supporter-wall">
     <?php if ($title !== ''): ?>
         <h3 class="dono-block__title"><?php echo esc_html($title);
-// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 ?></h3>
     <?php endif; ?>
 
@@ -30,27 +28,23 @@ echo get_block_wrapper_attributes(array_filter([
         <?php require __DIR__ . '/empty-cta.php'; ?>
     <?php else: ?>
         <ul class="dono-supporter-wall is-cols-<?php echo esc_attr($columns);
-// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 ?>">
             <?php foreach ($entries as $entry): ?>
                 <li class="dono-supporter-wall__card<?php echo $entry['message'] !== '' && $showMessage ? ' has-message' : ''; ?>">
                     <div class="dono-supporter-wall__top">
-                        <?php echo \Dono\Campaigns\Blocks\BlockAvatar::markup($entry['name'], false, (string) ($entry['avatar_url'] ?? '')); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                        <?php echo \Dono\Campaigns\Blocks\BlockAvatar::markup($entry['name'], false, (string) ($entry['avatar_url'] ?? '')); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- BlockAvatar::markup esc_html()s the initial and esc_url()s the image; its only other interpolation is an integer hue. ?>
                         <div class="dono-supporter-wall__name"><?php echo esc_html($entry['name']);
-// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 ?></div>
                     </div>
                     <?php if ($showAmount && $entry['amount_cents'] > 0): ?>
                         <div class="dono-supporter-wall__amount">
                             <?php echo esc_html(\Dono\Foundation\Helpers\Money::format($entry['amount_cents'], $entry['currency'], true));
-// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 ?>
                         </div>
                     <?php endif; ?>
                     <?php if ($showMessage && $entry['message'] !== ''): ?>
                         <blockquote class="dono-supporter-wall__message">
                             <?php echo esc_html($entry['message']);
-// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 ?>
                         </blockquote>
                     <?php endif; ?>

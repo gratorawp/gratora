@@ -64,12 +64,14 @@ final class DonorExporter
         $donorType  = trim((string) ($args['donor_type'] ?? ''));
         $search     = trim((string) ($args['search'] ?? ''));
 
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- php://temp stream, not a filesystem path; WP_Filesystem has no streaming equivalent.
         $out = fopen('php://temp', 'r+');
         if ($out === false) {
             return '';
         }
 
         // UTF-8 BOM so Excel reads accented names as text rather than mojibake.
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- php://temp stream, not a filesystem path; WP_Filesystem has no streaming equivalent.
         fwrite($out, "\xEF\xBB\xBF");
         $labels = self::labels();
         Csv::writeRow($out, array_map(

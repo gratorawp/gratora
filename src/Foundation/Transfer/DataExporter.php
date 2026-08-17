@@ -131,6 +131,7 @@ final class DataExporter
      */
     public function writeJson($out): array
     {
+        // phpcs:disable WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- $out is a php://temp stream, not a filesystem path; WP_Filesystem has no streaming equivalent.
         $counts = [];
 
         fwrite($out, '{');
@@ -152,6 +153,7 @@ final class DataExporter
         }
 
         fwrite($out, '}}');
+        // phpcs:enable WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
 
         return $counts;
     }
@@ -163,6 +165,7 @@ final class DataExporter
      */
     private function writeTable($out, string $table): int
     {
+        // phpcs:disable WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- $out is a php://temp stream, not a filesystem path; WP_Filesystem has no streaming equivalent.
         $prefix = DB::getPrefix();
         $lastId = 0;
         $total  = 0;
@@ -191,6 +194,7 @@ final class DataExporter
 
             if (count($rows) < self::PAGE) break;
         }
+        // phpcs:enable WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
 
         return $total;
     }

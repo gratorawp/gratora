@@ -1122,8 +1122,7 @@ final class PortalController
             $server->send_header('Content-Type', 'application/pdf');
             $server->send_header('Content-Disposition', 'inline; filename="' . $filename . '"');
             $server->send_header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
-            // The body of a file being downloaded, sent under its own Content-Type. Escaping it would corrupt the document.
-            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $pdf is the binary PDF from AnnualStatementBuilder::build(), sent under its own application/pdf header; escaping it would corrupt the document.
             echo $pdf;
             return true;
         }, 10, 4);
@@ -1513,8 +1512,7 @@ final class PortalController
             $server->send_header('Content-Type', 'application/json; charset=utf-8');
             $server->send_header('Content-Disposition', 'attachment; filename="' . $filename . '"');
             $server->send_header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
-            // The body of a file being downloaded, sent under its own Content-Type. Escaping it would corrupt the document.
-            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $json is wp_json_encode() output, already escaped for the JSON grammar, sent under its own application/json header; escaping it again would corrupt the file.
             echo $json;
             return true;
         }, 10, 4);

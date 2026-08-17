@@ -74,11 +74,13 @@ final class RevenueExporter
     {
         $currency = Money::defaultCurrency();
 
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- php://temp stream, not a filesystem path; WP_Filesystem has no streaming equivalent.
         $out = fopen('php://temp', 'r+');
         if ($out === false) {
             return '';
         }
 
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- php://temp stream, not a filesystem path; WP_Filesystem has no streaming equivalent.
         fwrite($out, "\xEF\xBB\xBF");
         Csv::writeRow($out, [
             __('Month', 'dono-fundraising-platform'),

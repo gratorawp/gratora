@@ -398,7 +398,7 @@ final class ReceiptIssuer
             ]);
         }
 
-        // Temp file for wp_mail attachment API, unlinked after send.
+        // Temp file for wp_mail attachment API, deleted after send.
         $tmpPath = $this->writeTempPdf($pdfBytes, $ctx->donation->reference);
 
         // Mailer::sendRaw already applies email.bcc_admin from settings when
@@ -412,7 +412,7 @@ final class ReceiptIssuer
             // finally, not after the call: the file holds the donor's name,
             // address and what they gave, and a mailer that throws would
             // otherwise leave it sitting in the system temp directory.
-            @unlink($tmpPath);
+            wp_delete_file($tmpPath);
         }
 
         return $sent;
@@ -439,6 +439,7 @@ final class ReceiptIssuer
     private function writeTempPdf(string $bytes, string $reference): string
     {
         $tmp = get_temp_dir() . 'dono-receipt-' . $reference . '-' . bin2hex(random_bytes(4)) . '.pdf';
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- get_temp_dir() scratch file that lives only for the wp_mail call that attaches it; WP_Filesystem needs credentials this path has no way to ask for.
         file_put_contents($tmp, $bytes);
         return $tmp;
     }

@@ -25,8 +25,7 @@ final class View
     /** @since 1.0.0 */
     public static function render(string $path, array $args = []): void
     {
-        // Markup from a template that escapes its own values as it prints them.
-        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- self::load returns a whole rendered template, which escaping would mangle; each template escapes its own values with esc_html()/esc_attr() as it prints them.
         echo self::load($path, $args);
     }
 

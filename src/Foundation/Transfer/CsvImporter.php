@@ -511,7 +511,9 @@ final class CsvImporter
      */
     private function parse(string $csv): array
     {
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- php://temp stream, not a filesystem path; WP_Filesystem has no streaming equivalent.
         $handle = fopen('php://temp', 'r+');
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- php://temp stream, not a filesystem path; WP_Filesystem has no streaming equivalent.
         fwrite($handle, $csv);
         rewind($handle);
 
@@ -532,6 +534,7 @@ final class CsvImporter
             }
             $rows[] = $row;
         }
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- php://temp stream, not a filesystem path; WP_Filesystem has no streaming equivalent.
         fclose($handle);
 
         return [$headers, $rows];

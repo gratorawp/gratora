@@ -1289,9 +1289,7 @@ final class DonationsController
             $server->send_header('Content-Length', (string) strlen($pdf));
             $server->send_header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
 
-            // Bytes of a file being downloaded, sent under their own Content-Type
-            // header. Escaping them would corrupt the document.
-            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $pdf is the binary PDF from ReceiptIssuer::renderReceiptPdf(), sent under its own application/pdf header; escaping it would corrupt the document.
             echo $pdf;
             return true;
         }, 10, 4);
@@ -1369,9 +1367,7 @@ final class DonationsController
             $server->send_header('Content-Length', (string) strlen($pdf));
             $server->send_header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
 
-            // Bytes of a PDF sent under their own Content-Type header. Escaping
-            // them would corrupt the document.
-            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $pdf is the binary PDF from GenericReceiptRenderer::render(), sent under its own application/pdf header; escaping it would corrupt the document.
             echo $pdf;
             return true;
         }, 10, 4);
@@ -1405,9 +1401,11 @@ final class DonationsController
             $server->send_header('Pragma', 'no-cache');
             $server->send_header('Expires', '0');
 
+            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- php://output is the response body, not a filesystem path; WP_Filesystem has no streaming equivalent.
             $out = fopen('php://output', 'w');
             if ($out !== false) {
                 $this->writeCsv($out, $request);
+                // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- php://output is the response body, not a filesystem path; WP_Filesystem has no streaming equivalent.
                 fclose($out);
             }
 
@@ -1457,6 +1455,7 @@ final class DonationsController
         $withDonorPii = Capabilities::userCan('dono_export_donors');
 
         // UTF-8 BOM so Excel auto-detects the encoding for accented donor names.
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- $out is a php:// stream, not a filesystem path; WP_Filesystem has no streaming equivalent.
         fwrite($out, "\xEF\xBB\xBF");
 
         Csv::writeRow($out, array_merge([

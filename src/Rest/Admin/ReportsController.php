@@ -134,8 +134,7 @@ final class ReportsController
             $server->send_header('Content-Type', 'application/pdf');
             $server->send_header('Content-Disposition', 'attachment; filename="' . $filename . '"');
             $server->send_header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
-            // The body of a file being downloaded, sent under its own Content-Type. Escaping it would corrupt the document.
-            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $pdf is the binary PDF from CampaignReportBuilder::build() or TaxStatementBuilder::build(), sent under its own application/pdf header; escaping it would corrupt the document.
             echo $pdf;
             return true;
         }, 10, 4);

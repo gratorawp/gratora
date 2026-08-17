@@ -191,7 +191,7 @@ final class DonationFormShortcode extends HookProvider
             // The enqueued route is the one dequeued two lines up, for the
             // reason above; the handle stays registered so the version and the
             // filename still come from wp_styles.
-            // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+            // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet -- wp_dequeue_style() drops this same handle just above; href is esc_url()d and its version comes from wp_styles.
             $html = '<link rel="stylesheet" id="dono-runtime-css" href="' . esc_url($href) . '">' . $html;
         }
 
@@ -371,7 +371,7 @@ final class DonationFormShortcode extends HookProvider
                 $url = strpos($src, 'http') === 0 ? $src : site_url($src);
                 // srcdoc, so there is no wp_scripts queue on the far side to
                 // enqueue into: the tag is the only way the dependency arrives.
-                // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+                // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript -- srcdoc document has no wp_scripts queue to enqueue into; src is esc_url()d and taken from the registered handle.
                 $depScripts .= '<script src="' . esc_url($url) . '"></script>' . "\n";
             }
         }
@@ -387,9 +387,7 @@ final class DonationFormShortcode extends HookProvider
             ? '<script>(function(){var l=0;function s(){try{if(!window.frameElement)return;var h=Math.min(document.documentElement.scrollHeight,4000);if(Math.abs(h-l)>2){l=h;window.frameElement.style.height=h+"px"}}catch(e){}}addEventListener("load",s);if(window.ResizeObserver){new ResizeObserver(s).observe(document.documentElement)}setTimeout(s,300);setTimeout(s,1200)})();</script>'
             : '';
 
-        // Same reason as the dependency tags above: this is the whole document
-        // the iframe gets, head included, and nothing in it is enqueueable.
-        // phpcs:disable WordPress.WP.EnqueuedResources
+        // phpcs:disable WordPress.WP.EnqueuedResources -- same reason as the dependency tags above: this is the whole document the iframe gets, head included, and nothing in it is enqueueable.
         return implode("\n", [
             '<!DOCTYPE html>',
             '<html lang="en">',

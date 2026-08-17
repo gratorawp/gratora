@@ -646,6 +646,7 @@ final class ToolsController
      */
     public function exportAll(): void
     {
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- php://temp stream, not a filesystem path; WP_Filesystem has no streaming equivalent.
         $out = fopen('php://temp/maxmemory:8388608', 'r+');
         $this->exporter->writeJson($out);
         rewind($out);
@@ -654,6 +655,7 @@ final class ToolsController
         header('Content-Type: application/json; charset=utf-8');
         header('Content-Disposition: attachment; filename="dono-export-' . gmdate('Y-m-d') . '.json"');
         fpassthru($out);
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- php://temp stream, not a filesystem path; WP_Filesystem has no streaming equivalent.
         fclose($out);
         exit;
     }

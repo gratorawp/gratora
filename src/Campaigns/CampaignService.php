@@ -576,64 +576,64 @@ final class CampaignService
         $t5j = json_encode($t5, JSON_UNESCAPED_UNICODE);
         $t6j = json_encode($t6, JSON_UNESCAPED_UNICODE);
 
-        $default = <<<BLOCKS
-<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"dono/campaign","args":{"key":"title","campaign_id":{$id}}}}},"className":"dp-display dp-rail dp-top"} -->
-<h1 class="wp-block-heading alignwide dp-display dp-rail dp-top">{$t0}</h1>
+        $blocks = <<<'BLOCKS'
+<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"dono/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
+<h1 class="wp-block-heading alignwide dp-display dp-rail dp-top">%%TITLE%%</h1>
 <!-- /wp:heading -->
 
 <!-- wp:columns {"align":"wide","className":"dp-layout"} -->
 <div class="wp-block-columns alignwide dp-layout">
 <!-- wp:column {"width":"62%","className":"dp-layout__main"} -->
 <div class="wp-block-column dp-layout__main" style="flex-basis:62%">
-<!-- wp:dono/campaign-image {"campaignId":{$id}} /-->
+<!-- wp:dono/campaign-image {"campaignId":%%CAMPAIGN_ID%%} /-->
 
 <!-- wp:columns {"className":"dp-figures"} -->
 <div class="wp-block-columns dp-figures">
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:dono/campaign-stat {"campaignId":{$id},"metric":"raised","size":"lg"} /-->
+<!-- wp:dono/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:dono/campaign-stat {"campaignId":{$id},"metric":"goal","size":"lg"} /-->
+<!-- wp:dono/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"goal","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 </div>
 <!-- /wp:columns -->
 
-<!-- wp:dono/campaign-progress {"campaignId":{$id}} /-->
+<!-- wp:dono/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
 
 <!-- wp:group {"className":"dp-band dp-band--tight"} -->
 <div class="wp-block-group dp-band dp-band--tight">
-<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"dono/campaign","args":{"key":"description","campaign_id":{$id}}}}},"className":"dp-body"} -->
-<p class="dp-body">{$t2}</p>
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"dono/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
+<p class="dp-body">%%DESCRIPTION%%</p>
 <!-- /wp:paragraph -->
 </div>
 <!-- /wp:group -->
 
-<!-- wp:dono/recent-donations {"campaignId":{$id},"title":{$t5j},"limit":5} /-->
+<!-- wp:dono/recent-donations {"campaignId":%%CAMPAIGN_ID%%,"title":%%RECENT_TITLE%%,"limit":5} /-->
 
-<!-- wp:dono/top-donors {"campaignId":{$id},"title":{$t6j},"limit":5,"layout":"list"} /-->
+<!-- wp:dono/top-donors {"campaignId":%%CAMPAIGN_ID%%,"title":%%TOP_TITLE%%,"limit":5,"layout":"list"} /-->
 </div>
 <!-- /wp:column -->
 
 <!-- wp:column {"width":"38%","className":"dp-layout__side"} -->
 <div class="wp-block-column dp-layout__side" style="flex-basis:38%">
-<!-- wp:dono/donation-form {"campaignId":{$id}} /-->
+<!-- wp:dono/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
 
 <!-- wp:columns {"className":"dp-figures"} -->
 <div class="wp-block-columns dp-figures">
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:dono/campaign-stat {"campaignId":{$id},"metric":"donors","size":"sm"} /-->
+<!-- wp:dono/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"donors","size":"sm"} /-->
 </div>
 <!-- /wp:column -->
 
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:dono/campaign-stat {"campaignId":{$id},"metric":"average","size":"sm"} /-->
+<!-- wp:dono/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"average","size":"sm"} /-->
 </div>
 <!-- /wp:column -->
 </div>
@@ -644,6 +644,14 @@ final class CampaignService
 <!-- /wp:columns -->
 
 BLOCKS;
+
+        $default = strtr($blocks, [
+            '%%CAMPAIGN_ID%%'  => (string) $id,
+            '%%TITLE%%'        => $t0,
+            '%%DESCRIPTION%%'  => $t2,
+            '%%RECENT_TITLE%%' => (string) $t5j,
+            '%%TOP_TITLE%%'    => (string) $t6j,
+        ]);
 
         // Add-ons can seed a richer starter layout per campaign type (e.g. the
         // peer-to-peer add-on lays out its thermometer, leaderboard and grids).
@@ -669,8 +677,8 @@ BLOCKS;
     private function starterBlocks(string $currency): string
     {
         $currency = esc_attr(strtoupper($currency));
-        return <<<BLOCKS
-<!-- wp:dono/donation-amount {"presets":[1000,2500,5000,10000],"allowCustom":true,"currency":"{$currency}"} /-->
+        $blocks = <<<'BLOCKS'
+<!-- wp:dono/donation-amount {"presets":[1000,2500,5000,10000],"allowCustom":true,"currency":"%%CURRENCY%%"} /-->
 
 <!-- wp:dono/name {"requireFirst":true,"requireLast":true} /-->
 
@@ -682,6 +690,8 @@ BLOCKS;
 
 <!-- wp:dono/submit-button {"label":"Donate","align":"left"} /-->
 BLOCKS;
+
+        return strtr($blocks, ['%%CURRENCY%%' => $currency]);
     }
 
     /**

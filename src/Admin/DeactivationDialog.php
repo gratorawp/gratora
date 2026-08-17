@@ -78,10 +78,9 @@ final class DeactivationDialog
             'wipeOptIn' => DataEraser::requested(),
         ]);
 
-        // Markup from a template that escapes its own values as it prints them.
         // The echo is its own statement so the annotation covers the line the
         // sniff reports, which is the argument rather than the echo.
-        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- views/deactivation-dialog.php prints only esc_html_e(), esc_attr_e() and checked() output.
         echo $markup;
     }
 

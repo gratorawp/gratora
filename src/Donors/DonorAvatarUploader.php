@@ -108,7 +108,7 @@ final class DonorAvatarUploader
         ], (string) $moved['file']);
 
         if (is_wp_error($attachmentId) || (int) $attachmentId <= 0) {
-            @unlink((string) $moved['file']);
+            wp_delete_file((string) $moved['file']);
             return new WP_Error('dono_upload_failed', __('That file could not be saved.', 'dono-fundraising-platform'), ['status' => 500]);
         }
 

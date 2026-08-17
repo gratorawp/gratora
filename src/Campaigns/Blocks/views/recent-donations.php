@@ -11,8 +11,7 @@ defined('ABSPATH') || exit;
  */
 ?>
 <section <?php
-// Core escapes these attributes; its own blocks print them the same way.
-// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes what it returns; core's own blocks print it the same way.
 echo get_block_wrapper_attributes(array_filter([
     'class' => 'dono-block dono-block--recent-donations',
     'style' => $styleVars,
@@ -22,7 +21,6 @@ echo get_block_wrapper_attributes(array_filter([
          data-block="dono/recent-donations">
     <?php if ($title !== ''): ?>
         <h3 class="dono-block__title"><?php echo esc_html($title);
-// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 ?></h3>
     <?php endif; ?>
 
@@ -32,18 +30,16 @@ echo get_block_wrapper_attributes(array_filter([
         <ul class="dono-recent-donations__list">
             <?php foreach ($entries as $entry): ?>
                 <li class="dono-recent-donations__item">
-                    <?php echo \Dono\Campaigns\Blocks\BlockAvatar::markup($entry['name'], $entry['is_anonymous'], (string) ($entry['avatar_url'] ?? '')); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                    <?php echo \Dono\Campaigns\Blocks\BlockAvatar::markup($entry['name'], $entry['is_anonymous'], (string) ($entry['avatar_url'] ?? '')); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- BlockAvatar::markup esc_html()s the initial and esc_url()s the image; its only other interpolation is an integer hue. ?>
                     <div class="dono-recent-donations__content">
                         <div class="dono-recent-donations__header">
                             <span class="dono-recent-donations__name<?php echo $entry['is_anonymous'] ? ' is-anonymous' : ''; ?>">
                                 <?php echo esc_html($entry['name']);
-// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 ?>
                             </span>
                             <?php if ($showAmount): ?>
                                 <span class="dono-recent-donations__amount">
                                     <?php echo esc_html(\Dono\Foundation\Helpers\Money::format($entry['amount_cents'], $entry['currency'], true));
-// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 ?>
                                 </span>
                             <?php endif; ?>
@@ -53,17 +49,14 @@ echo get_block_wrapper_attributes(array_filter([
                                 <?php if ($showTime): ?>
                                     <time class="dono-recent-donations__time"
                                           datetime="<?php echo esc_attr($entry['paid_at_iso']);
-// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 ?>">
                                         <?php echo esc_html($entry['time_ago']);
-// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 ?>
                                     </time>
                                 <?php endif; ?>
                                 <?php if ($showMessage && $entry['message'] !== ''): ?>
                                     <blockquote class="dono-recent-donations__message">
                                         <?php echo esc_html($entry['message']);
-// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 ?>
                                     </blockquote>
                                 <?php endif; ?>

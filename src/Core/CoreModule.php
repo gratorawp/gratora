@@ -910,11 +910,25 @@ final class CoreModule implements DonoModule
         $c->bind(CommandRegistry::class, fn (Container $c) => new CommandRegistry(
             $c->get(EventRecorder::class)
         ));
-        (new CoreCommandProvider())->register($c->get(CommandRegistry::class), $c);
-        // The dono.commands.register broadcast fires from Plugin::boot AFTER
-        // every module has booted, so an add-on's boot-time add_action handler
-        // is honored. Firing it here (during core's own boot) would run before
-        // add-on modules exist, silently dropping their command packs.
+        // Built on init, not here: every command summary and field label goes
+        // through __(), and translating before init asks WordPress for a
+        // catalogue in the site locale rather than the reader's, on top of the
+        // _doing_it_wrong it logs for the domain on every request.
+        //
+        // Priority 4 keeps core ahead of the dono.commands.register broadcast
+        // Plugin::boot fires at 5, which is where add-on packs land.
+        add_action('init', static function () use ($c): void {
+            // init can fire more than once, and the registry refuses a name it
+            // already holds, which is what catches two packs claiming one
+            // command. Core's own pack must not trip that guard against itself.
+            static $registered = false;
+            if ($registered) {
+                return;
+            }
+            $registered = true;
+
+            (new CoreCommandProvider())->register($c->get(CommandRegistry::class), $c);
+        }, 4);
 
         (new RestProvider(
             $c->get(DonationsController::class),

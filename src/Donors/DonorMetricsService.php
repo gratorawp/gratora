@@ -160,6 +160,7 @@ final class DonorMetricsService
     {
         $result = $this->atRisk(1, 10000);
 
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- php://temp stream, not a filesystem path; WP_Filesystem has no streaming equivalent.
         $out = fopen('php://temp', 'r+');
         // Appended, never inserted: every existing column index stays put for
         // anyone with a saved import mapping.
@@ -184,6 +185,7 @@ final class DonorMetricsService
         }
         rewind($out);
         $csv = (string) stream_get_contents($out);
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- php://temp stream, not a filesystem path; WP_Filesystem has no streaming equivalent.
         fclose($out);
         return $csv;
     }
