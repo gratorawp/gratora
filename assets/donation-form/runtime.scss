@@ -976,11 +976,16 @@
 
     &__payment-mount {
         margin-top: 4px;
+    }
 
-        // Gateways render their card fields in an iframe, and a browser's
-        // default for one is a 2px inset border in currentColor. On a theme
-        // that resets nothing, PayPal and Stripe both arrive wearing a heavy
-        // box in the form's text color.
+    // Gateways render their fields and buttons in an iframe, and a browser's
+    // default for one is a 2px inset border in currentColor. On a theme that
+    // resets nothing, PayPal and Stripe both arrive wearing a heavy box in the
+    // form's text color. Listed per mount rather than on the wrapper, because a
+    // form with no gateway block renders the payment component without one.
+    &__payment-mount,
+    &__payment-element,
+    &__paypal-buttons {
         iframe {
             border: 0;
         }
@@ -1412,6 +1417,12 @@
         color: var(--dono-accent);
     }
     &__payment-element {
+        min-height: 44px;
+        margin-bottom: 16px;
+    }
+    // Sized and spaced only. PayPal's branding rules forbid restyling the
+    // buttons themselves, so nothing here reaches inside the mount.
+    &__paypal-buttons {
         min-height: 44px;
         margin-bottom: 16px;
     }

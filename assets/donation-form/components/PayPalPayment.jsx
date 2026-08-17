@@ -19,8 +19,16 @@ import { formatAmount } from '../util/format';
 export default function PayPalPayment( { config, payment, dispatch } ) {
     const mountRef = useRef( null );
     const renderedRef = useRef( false );
+    const buttonsRef = useRef( null );
     const [ ready, setReady ] = useState( false );
     const [ error, setError ] = useState( '' );
+    // Cancel is safe only while nothing is approved. popupOpen covers the
+    // seconds PayPal's window sits over ours; approved is terminal, because
+    // past that point the capture or the subscription completes server-side
+    // whether or not this browser is still here, and a second submission would
+    // be a second charge.
+    const [ popupOpen, setPopupOpen ] = useState( false );
+    const [ approved, setApproved ] = useState( false );
 
     const i18n = config.i18n || {};
     const clientId = config.paypal?.clientId || '';
@@ -63,11 +71,18 @@ export default function PayPalPayment( { config, payment, dispatch } ) {
 
                 const common = {
                     style: { layout: 'vertical', shape: 'rect', label: 'donate' },
-                    onError: () => { if ( ! cancelled ) setError( i18n.error ); },
+                    onClick: () => { if ( ! cancelled ) setPopupOpen( true ); },
+                    onError: () => {
+                        if ( cancelled ) return;
+                        setPopupOpen( false );
+                        setError( i18n.error );
+                    },
                     onCancel: () => {
                         // Not a failure: the donation stays pending and the
                         // donor can try again with the same buttons.
-                        if ( ! cancelled ) setError( '' );
+                        if ( cancelled ) return;
+                        setPopupOpen( false );
+                        setError( '' );
                     },
                 };
 
@@ -81,6 +96,7 @@ export default function PayPalPayment( { config, payment, dispatch } ) {
                             custom_id: payment.reference,
                         } ),
                         onApprove: async ( data ) => {
+                            setApproved( true );
                             try {
                                 const out = await post( 'gateways/paypal/subscription', {
                                     reference: payment.reference,
@@ -106,6 +122,7 @@ export default function PayPalPayment( { config, payment, dispatch } ) {
                         // all the browser is trusted to do.
                         createOrder: () => payment.paypal.order_id,
                         onApprove: async () => {
+                            setApproved( true );
                             try {
                                 const out = await post( 'gateways/paypal/capture', {
                                     // Proves this browser is the one that
@@ -133,6 +150,7 @@ export default function PayPalPayment( { config, payment, dispatch } ) {
                 }
 
                 renderedRef.current = true;
+                buttonsRef.current = buttons;
                 buttons.render( mountRef.current ).then( () => {
                     if ( ! cancelled ) setReady( true );
                 } ).catch( () => {
@@ -141,7 +159,18 @@ export default function PayPalPayment( { config, payment, dispatch } ) {
             } )
             .catch( () => { if ( ! cancelled ) setError( i18n.error ); } );
 
-        return () => { cancelled = true; };
+        return () => {
+            cancelled = true;
+            // Cancel takes this component off screen while the SDK is live, and
+            // zoid outlives the container Preact removes: its iframe and its
+            // window listeners stay behind unless it is told to close.
+            try {
+                buttonsRef.current?.close();
+            } catch ( e ) {
+                // Already torn down, which is the outcome either way.
+            }
+            buttonsRef.current = null;
+        };
         // Deliberately keyed on the payment identity only. config, dispatch and
         // i18n are recreated on most renders, and re-running would tear down
         // and re-render PayPal's iframe mid-approval.
@@ -149,9 +178,12 @@ export default function PayPalPayment( { config, payment, dispatch } ) {
     }, [ clientId, currency, isSubscription, payment?.reference ] );
 
     return (
-        <div className="dono-form__paypal">
+        // The form's own shell, the same one StripePayment declares, so the
+        // reset and the themed typography reach this component on the path
+        // where a form has no gateway block and nothing else supplies them.
+        <div className="dono-form dono-form--payment">
             { payment?.amountCents ? (
-                <p className="dono-form__paypal-amount">
+                <p className="dono-form__payment-amount">
                     { formatAmount( payment.amountCents, payment.currency, config ) }
                 </p>
             ) : null }
@@ -161,10 +193,40 @@ export default function PayPalPayment( { config, payment, dispatch } ) {
             ) : null }
 
             { ! ready && ! error ? (
-                <p className="dono-form__paypal-loading">{ i18n.paymentLoading || 'Loading secure payment…' }</p>
+                <p className="dono-form__payment-loading">{ i18n.paymentLoading || 'Loading secure payment…' }</p>
             ) : null }
 
-            <div ref={ mountRef } className="dono-form__paypal-buttons" />
+            { /* Approving is not the end of the work: the capture or the plan
+               record still has to come back. PayPal's buttons stay mounted and
+               live through that, and on the recurring path a second press mints
+               a second subscription and takes a second first payment, which the
+               recorder then refuses as belonging to another plan. Hidden rather
+               than unmounted, because tearing the SDK down mid-round-trip loses
+               the callbacks that finish it. */ }
+            <div
+                ref={ mountRef }
+                className="dono-form__paypal-buttons"
+                hidden={ approved }
+            />
+
+            { approved ? (
+                <p className="dono-form__payment-loading" role="status">
+                    { i18n.processing || i18n.paymentLoading }
+                </p>
+            ) : null }
+
+            { ! approved ? (
+                <div className="dono-form__nav dono-form__nav--align-left">
+                    <button
+                        type="button"
+                        className="dono-form__button dono-form__button--secondary"
+                        disabled={ popupOpen }
+                        onClick={ () => dispatch( { type: 'CANCEL_PAYMENT' } ) }
+                    >
+                        { i18n.cancel || 'Cancel' }
+                    </button>
+                </div>
+            ) : null }
         </div>
     );
 }
