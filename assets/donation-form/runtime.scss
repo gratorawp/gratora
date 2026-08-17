@@ -674,13 +674,19 @@
         font-size: 13px;
     }
 
-    &__gateways--list &__gateways-list { gap: 4px; }
-    &__gateways--list &__gateway {
-        padding: 6px 0;
-        border: 0;
-        border-radius: 0;
+    // Descendants written out rather than nested with &, which expands to the
+    // whole parent compound and would put .dono-donation-form in the selector
+    // twice, matching nothing.
+    &__gateways--list {
+        .dono-form__gateways-list { gap: 4px; }
 
-        &.is-selected { box-shadow: none; }
+        .dono-form__gateway {
+            padding: 6px 0;
+            border: 0;
+            border-radius: 0;
+
+            &.is-selected { box-shadow: none; }
+        }
     }
 
     &__grid {
