@@ -120,7 +120,6 @@ export default function List() {
     const [ data, setData ]       = useState( [] );
     const [ total, setTotal ]     = useState( 0 );
     const [ loading, setLoading ] = useState( false );
-    const [ actionError, setActionError ] = useState( null );
     const [ recording, setRecording ] = useState( false );
     const [ fetchError, setFetchError ]   = useState( null );
     // Test donations are excluded unless asked for. Saying how many were left
@@ -438,25 +437,34 @@ export default function List() {
                     message,
                     confirmLabel: __( 'Mark as paid', 'dono-fundraising-platform' ),
                     onConfirm: async () => {
-                        try {
-                            await Promise.all( targets.map( ( i ) => apiFetch( {
-                                path:   `/dono/v1/admin/donations/${ encodeURIComponent( i.reference ) }/mark-paid`,
-                                method: 'POST',
-                            } ) ) );
+                        // allSettled, and the refetch outside the counts: a
+                        // partial failure still paid some of them and emailed
+                        // their donors a receipt, and a batch reported as a
+                        // single failure leaves those rows reading Pending.
+                        const results = await Promise.allSettled( targets.map( ( i ) => apiFetch( {
+                            path:   `/dono/v1/admin/donations/${ encodeURIComponent( i.reference ) }/mark-paid`,
+                            method: 'POST',
+                        } ) ) );
+
+                        const done   = results.filter( ( r ) => r.status === 'fulfilled' ).length;
+                        const failed = results.length - done;
+
+                        if ( done > 0 ) {
                             notify.success( sprintf(
                                 /* translators: %d: number of donations */
-                                _n( '%d donation marked paid.', '%d donations marked paid.', n, 'dono-fundraising-platform' ),
-                                n
+                                _n( '%d donation marked paid.', '%d donations marked paid.', done, 'dono-fundraising-platform' ),
+                                done
                             ) );
-                        } catch ( err ) {
-                            setActionError( err?.message || __( 'Could not mark one or more donations paid.', 'dono-fundraising-platform' ) );
-                        } finally {
-                            // In the finally, not the try: a partial failure
-                            // still paid some of them and emailed their donors
-                            // a receipt, and skipping the refetch left those
-                            // rows reading Pending on screen.
-                            refetch();
                         }
+                        if ( failed > 0 ) {
+                            notify.error( sprintf(
+                                /* translators: %d: number of donations */
+                                _n( '%d donation could not be marked paid.', '%d donations could not be marked paid.', failed, 'dono-fundraising-platform' ),
+                                failed
+                            ) );
+                        }
+
+                        refetch();
                     },
                 } );
             },
@@ -485,21 +493,31 @@ export default function List() {
                     message,
                     confirmLabel: __( 'Resend', 'dono-fundraising-platform' ),
                     onConfirm: async () => {
-                        try {
-                            await Promise.all( targets.map( ( i ) => apiFetch( {
-                                path:   `/dono/v1/admin/donations/${ encodeURIComponent( i.reference ) }/resend-receipt`,
-                                method: 'POST',
-                            } ) ) );
-                            // Silence read as "nothing happened", so admins
-                            // clicked again and donors received the same
-                            // receipt twice.
+                        // Counted separately: a batch reported as a single
+                        // failure reads as nothing having happened, so admins
+                        // press it again and every donor whose receipt did go
+                        // out receives it twice.
+                        const results = await Promise.allSettled( targets.map( ( i ) => apiFetch( {
+                            path:   `/dono/v1/admin/donations/${ encodeURIComponent( i.reference ) }/resend-receipt`,
+                            method: 'POST',
+                        } ) ) );
+
+                        const sent   = results.filter( ( r ) => r.status === 'fulfilled' ).length;
+                        const failed = results.length - sent;
+
+                        if ( sent > 0 ) {
                             notify.success( sprintf(
                                 /* translators: %d: receipt count */
-                                _n( '%d receipt resent.', '%d receipts resent.', n, 'dono-fundraising-platform' ),
-                                n
+                                _n( '%d receipt resent.', '%d receipts resent.', sent, 'dono-fundraising-platform' ),
+                                sent
                             ) );
-                        } catch ( err ) {
-                            setActionError( err?.message || __( 'Could not resend one or more receipts.', 'dono-fundraising-platform' ) );
+                        }
+                        if ( failed > 0 ) {
+                            notify.error( sprintf(
+                                /* translators: %d: receipt count */
+                                _n( '%d receipt could not be resent.', '%d receipts could not be resent.', failed, 'dono-fundraising-platform' ),
+                                failed
+                            ) );
                         }
                     },
                 } );
@@ -586,9 +604,9 @@ export default function List() {
                     } }
                 />
             ) }
-            { ( actionError || fetchError ) && (
+            { fetchError && (
                 <Notice status="error" isDismissible={ false }>
-                    { actionError || fetchError }
+                    { fetchError }
                 </Notice>
             ) }
 

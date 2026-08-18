@@ -27,26 +27,42 @@ final class DataEraser
      * Options core writes. Listed rather than matched on a prefix for the same
      * reason as the tables: dono_gift_aid_db_version and its siblings belong to
      * other plugins.
+     *
+     * The queued-work maps and cursors belong here as much as the settings do.
+     * They are keyed by row id, and a reinstall hands those ids back out, so
+     * one left behind is an instruction aimed at whatever now holds the id.
      */
     private const OPTIONS = [
         'dono_activated_at',
+        'dono_campaign_cancel_recurring',
+        'dono_consents',
         'dono_currency_locale',
         'dono_db_version',
         'dono_delete_data',
+        'dono_donor_rehash_after_id',
+        'dono_donor_rehash_pending',
+        'dono_email_settings',
+        'dono_fund_reassignments',
         'dono_fx_rates',
         'dono_gateway_config',
+        'dono_gateway_reconcile_cursor',
         'dono_licensing_status',
         'dono_onboarding_campaign_id',
         'dono_onboarding_status',
         'dono_org_brand',
         'dono_org_profile',
+        'dono_paypal_plans',
+        'dono_paypal_product',
         'dono_portal_page_id',
         'dono_portal_page_version',
         'dono_privacy',
         'dono_receipt_settings',
         'dono_reference_settings',
+        'dono_retention_cursor',
+        'dono_retention_starts_at',
         'dono_roles',
         'dono_upgrade_routines_done',
+        'dono_upgrade_routines_failed',
     ];
 
     /** Reference counters carry the year, so they are the one keyspace to match. */

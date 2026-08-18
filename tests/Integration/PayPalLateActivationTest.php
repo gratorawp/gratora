@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Tests\Integration;
 
+use Dono\Analytics\Event;
 use Dono\Campaigns\Campaign;
 use Dono\Donations\DonationRepository;
 use Dono\Foundation\Plugin;
@@ -293,6 +294,37 @@ final class PayPalLateActivationTest extends IntegrationTestCase
         $this->assertSame(200, $res->get_status());
 
         $this->assertSame('active', $this->plan('I-SUB-FIXED')->status, 'a fixed card resumes the plan');
+    }
+
+    /**
+     * A subscription the recorder refuses gets no plan row, and every cancel
+     * path in the product reads gateway_subscription_id off such a row. PayPal
+     * keeps billing the donor, so the refusal has to reach the screen someone
+     * opens when a recurring donation did not behave.
+     */
+    public function test_a_refused_recovery_is_reported_where_the_site_owner_looks(): void
+    {
+        $reference = $this->createRecurringDonation();
+        $this->recordSubscription($reference, 'I-SUB-FIRST');
+
+        // A second subscription naming the same donation: binding it would
+        // leave the first one billing unrecorded, so the recorder refuses.
+        $res = $this->postWebhook('BILLING.SUBSCRIPTION.ACTIVATED', $this->activation('I-SUB-SECOND'));
+        $this->assertSame(200, $res->get_status(), (string) wp_json_encode($res->get_data()));
+
+        $repo = Plugin::instance()->container->get(RecurringPlanRepository::class);
+        $this->assertNull(
+            $repo->findBySubscriptionId('paypal', 'I-SUB-SECOND'),
+            'the refusal stands: no plan row is written'
+        );
+
+        $errors = Event::query()->where('type', 'error.recurring.paypal')->getAll();
+        $this->assertCount(1, $errors, 'and the refusal is reported rather than swallowed');
+        $this->assertStringContainsString(
+            'I-SUB-SECOND',
+            (string) ($errors[0]->payload['message'] ?? ''),
+            'naming the subscription that is still billing the donor'
+        );
     }
 
     /**

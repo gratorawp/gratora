@@ -132,6 +132,39 @@ final class UninstallDataEraserTest extends IntegrationTestCase
         delete_option('dono_p2p_rules_version');
     }
 
+    /**
+     * Settings a site can see it saved are the obvious half. The other half is
+     * the work core queued for itself: those maps are keyed by row id, so one
+     * surviving the wipe is an instruction a reinstall will carry out against
+     * whichever campaign or fund inherits the id. Opening Campaigns would
+     * cancel live recurring plans at the gateway.
+     */
+    public function test_every_option_core_writes_is_planned(): void
+    {
+        $options = (new DataEraser())->plan()['options'];
+
+        foreach ([
+            'dono_campaign_cancel_recurring',
+            'dono_fund_reassignments',
+            'dono_donor_rehash_pending',
+            'dono_donor_rehash_after_id',
+            'dono_retention_starts_at',
+            'dono_retention_cursor',
+            'dono_gateway_reconcile_cursor',
+            'dono_upgrade_routines_failed',
+            'dono_consents',
+            'dono_email_settings',
+            'dono_paypal_product',
+            'dono_paypal_plans',
+        ] as $option) {
+            $this->assertContains(
+                $option,
+                $options,
+                "{$option} is written by core and must not outlive an opt-in wipe"
+            );
+        }
+    }
+
     /** Reference counters carry the year, so they are matched rather than listed. */
     public function test_reference_counters_are_planned_whatever_year_they_name(): void
     {

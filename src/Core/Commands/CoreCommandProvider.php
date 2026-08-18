@@ -492,7 +492,9 @@ final class CoreCommandProvider
                     (int) $in['donor_id'],
                     (string) $in['purpose'],
                     isset($in['target_id']) ? (int) $in['target_id'] : null,
-                    isset($in['ttl_seconds']) ? (int) $in['ttl_seconds'] : 2_592_000,
+                    // The token opens a full donor session, so no caller may ask
+                    // for a lifetime beyond the staff-issued link.
+                    min(isset($in['ttl_seconds']) ? (int) $in['ttl_seconds'] : 2_592_000, DonorMetricsService::STAFF_LINK_TTL),
                 );
                 return ['token' => $token];
             },

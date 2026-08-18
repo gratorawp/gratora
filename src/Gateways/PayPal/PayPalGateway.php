@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Gateways\PayPal;
 
+use Dono\Analytics\ErrorLog;
 use Dono\Donations\Donation;
 use Dono\Donations\DonationRepository;
 use Dono\Donations\DonationService;
@@ -670,6 +671,26 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         try {
             return $this->planRecorder->record($sub);
         } catch (PayPalPlanRefused $e) {
+            // Without a plan row nothing in the product can show or cancel this
+            // subscription, while PayPal goes on charging for it. The log is
+            // the screen someone opens when a recurring donation did not
+            // behave, so that is where the refusal has to land.
+            $subId = (string) ($sub['id'] ?? '');
+            ErrorLog::record(
+                'recurring.paypal',
+                sprintf(
+                    /* translators: 1: PayPal subscription id, 2: the reason it was refused */
+                    __('PayPal subscription %1$s has no recurring plan here, so it cannot be cancelled from this site: %2$s', 'dono-fundraising-platform'),
+                    $subId,
+                    $e->getMessage()
+                ),
+                [
+                    'subscription_id' => $subId,
+                    'reference'       => trim((string) ($sub['custom_id'] ?? '')),
+                    'error_code'      => $e->errorCode,
+                ]
+            );
+
             return null;
         }
     }

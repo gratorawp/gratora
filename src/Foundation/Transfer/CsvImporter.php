@@ -272,9 +272,15 @@ final class CsvImporter
             }
             $seen[$key] = true;
         } else {
-            $base = $email . '|' . (int) $amountCents . '|' . (string) $paidAt;
+            // The local calendar day, rendered back from the parsed stamp.
+            // The raw cell moves the key when the same day is spelled another
+            // way, and the UTC stamp moves it when the org corrects its
+            // timezone; a day round-tripped through the site's own zone is the
+            // one form that survives both, so a file always matches itself.
+            $day = $this->localDay($paidAt) ?? $get('date');
+            $base = $email . '|' . (int) $amountCents . '|' . $day;
             $seen[$base] = ($seen[$base] ?? 0) + 1;
-            $key = $this->reference($email, (int) $amountCents, (string) $paidAt, $get('reference'), (int) $seen[$base]);
+            $key = $this->reference($email, (int) $amountCents, $day, $get('reference'), (int) $seen[$base]);
         }
 
         if ($mode === 'donations' && Donation::query()->where('reference', $key)->get() !== null) {
@@ -503,6 +509,26 @@ final class CsvImporter
         }
 
         return $parsed->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s');
+    }
+
+    /**
+     * The calendar day a stored stamp falls on for this site.
+     *
+     * @since 1.0.0
+     */
+    private function localDay(?string $utc): ?string
+    {
+        if ($utc === null || $utc === '') {
+            return null;
+        }
+
+        try {
+            return (new DateTimeImmutable($utc, new DateTimeZone('UTC')))
+                ->setTimezone(DonationQueries::siteTimezone())
+                ->format('Y-m-d');
+        } catch (Exception $e) {
+            return null;
+        }
     }
 
     /**

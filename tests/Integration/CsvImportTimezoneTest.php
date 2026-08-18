@@ -100,6 +100,80 @@ final class CsvImportTimezoneTest extends IntegrationTestCase
         $this->assertSame('2024-03-15 21:30', wp_date('Y-m-d H:i', strtotime((string) $donation->paid_at)));
     }
 
+    /**
+     * Correcting the site timezone must not re-open a history that is already
+     * in. The row key is derived from the date cell when the file carries no
+     * transaction id, so a key seeded from the resolved UTC stamp moves the
+     * moment the org fixes their timezone, already_imported then matches
+     * nothing, and the second run writes the whole history again with every
+     * total doubled behind it.
+     */
+    public function test_the_same_file_is_still_recognised_after_the_org_corrects_its_timezone(): void
+    {
+        $csv = "Email,Amount,Date\nrerun@example.test,50,2024-06-01\n";
+
+        update_option('timezone_string', 'America/New_York');
+        $first = $this->import($csv);
+
+        update_option('timezone_string', 'UTC');
+        $second = $this->import($csv);
+
+        $this->assertSame(1, $first['donations_imported']);
+        $this->assertSame(0, $second['donations_imported'], 'nothing new to import');
+        $this->assertSame(1, $second['skipped']['already_imported'] ?? 0);
+        $this->assertSame(
+            1,
+            Donation::query()->where('donor_id', $this->donorId('rerun@example.test'))->count(),
+            'one donation, not the same money twice'
+        );
+    }
+
+    /**
+     * The same guarantee for a cell that carries a time, which is what a gateway
+     * export gives. A date alone is anchored at noon, far enough from either
+     * edge that no offset moves it, so it cannot tell a key seeded from the UTC
+     * stamp apart from one seeded from the local day. An evening stamp can: it
+     * crosses midnight UTC in New York and not in UTC.
+     */
+    public function test_a_file_carrying_times_is_still_recognised_after_the_org_corrects_its_timezone(): void
+    {
+        $csv = "Email,Amount,Date\nrerunevening@example.test,50,2024-06-01 20:00:00\n";
+
+        update_option('timezone_string', 'America/New_York');
+        $this->import($csv);
+
+        update_option('timezone_string', 'UTC');
+        $second = $this->import($csv);
+
+        $this->assertSame(0, $second['donations_imported'], 'nothing new to import');
+        $this->assertSame(
+            1,
+            Donation::query()->where('donor_id', $this->donorId('rerunevening@example.test'))->count(),
+            'one donation, not the same money twice'
+        );
+    }
+
+    /**
+     * And the other direction. Seeding the key from the raw cell instead would
+     * survive the timezone correction above but not this: the importer's own
+     * parsing already resolves both spellings to the same instant, so keying on
+     * the text writes a second copy of a donation it has read once.
+     */
+    public function test_the_same_day_spelled_another_way_is_the_same_donation(): void
+    {
+        update_option('timezone_string', 'America/New_York');
+
+        $this->import("Email,Amount,Date\nrespelled@example.test,50,2024-06-01\n");
+        $second = $this->import("Email,Amount,Date\nrespelled@example.test,50,1 June 2024\n");
+
+        $this->assertSame(0, $second['donations_imported'], 'nothing new to import');
+        $this->assertSame(
+            1,
+            Donation::query()->where('donor_id', $this->donorId('respelled@example.test'))->count(),
+            'one donation, not the same money twice'
+        );
+    }
+
     public function test_an_unreadable_cell_is_still_refused(): void
     {
         update_option('timezone_string', 'America/New_York');
