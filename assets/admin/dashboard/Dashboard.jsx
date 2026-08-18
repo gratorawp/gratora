@@ -29,8 +29,8 @@ const SCOPE = 'dashboard';
 
 const WIDGET_KEYS = [
     'today',
-    'kpis',
     'attention',
+    'kpis',
     'revenue',
     'active-campaigns',
     'recurring',
@@ -98,7 +98,6 @@ export default function Dashboard() {
     const registry = {
         today: {
             title:  __( 'Activity (last 24h)', 'dono-fundraising-platform' ),
-            span:   'full',
             render: () => <TodayStrip today={ m.today } />,
         },
         kpis: {
