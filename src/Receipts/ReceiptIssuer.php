@@ -302,12 +302,13 @@ final class ReceiptIssuer
         $receipt->locale         = $ctx->locale;
         $receipt->voided         = false;
         $receipt->issued_at      = $this->clock->now()->format('Y-m-d H:i:s');
+        $scope = $this->numberingScope($renderer, $ctx->donation);
         try {
             // Allocate the gap-free number and insert in one transaction: if the
             // insert loses the UNIQUE(donation_id, renderer_id) race, the counter
             // increment rolls back too, so the tax sequence never skips a number.
-            DB::transaction(function () use ($receipt, $renderer): void {
-                $receipt->receipt_number = $this->references->next($renderer->referenceScope());
+            DB::transaction(function () use ($receipt, $scope): void {
+                $receipt->receipt_number = $this->references->next($scope);
                 $receipt->save();
             });
         } catch (\Throwable $e) {
@@ -319,6 +320,25 @@ final class ReceiptIssuer
             throw $e;
         }
         return [$receipt, true];
+    }
+
+    /**
+     * Which counter a receipt draws its number from.
+     *
+     * A rehearsal must not draw from the live sequence. That sequence is
+     * gap-free because a tax authority reads it that way, and the test-data
+     * purge deletes the donation a test receipt describes, which would leave a
+     * number the org can neither produce nor explain. Test donations number
+     * from a counter of their own, under a prefix of their own, so a rehearsal
+     * still produces a complete receipt while the live sequence never moves.
+     *
+     * @since 1.0.0
+     */
+    private function numberingScope(ReceiptRenderer $renderer, Donation $donation): string
+    {
+        $scope = $renderer->referenceScope();
+
+        return empty($donation->is_test) ? $scope : 'test_' . $scope;
     }
 
     /** @since 1.0.0 */

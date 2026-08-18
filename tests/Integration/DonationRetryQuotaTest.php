@@ -10,6 +10,8 @@ use Dono\Donations\DonationService;
 use Dono\Foundation\Plugin;
 use Dono\Foundation\Time\Clock;
 use Dono\Forms\Form;
+use Dono\Gateways\GatewayConfirmResult;
+use Dono\Gateways\GatewayIntentResult;
 use Dono\Gateways\GatewayManager;
 use Dono\Gateways\GatewayReconciler;
 use Dono\Gateways\PayPal\PayPalAccount;
@@ -17,6 +19,10 @@ use Dono\Gateways\PayPal\PayPalApi;
 use Dono\Gateways\PayPal\PayPalGateway;
 use Dono\Gateways\PayPal\PayPalPlanRecorder;
 use Dono\Gateways\PayPal\PayPalPlans;
+use Dono\Gateways\PaymentGateway;
+use Dono\Gateways\RefundResult;
+use Dono\Gateways\SettlesOutOfBand;
+use Dono\Gateways\WebhookOutcome;
 use Dono\Recurring\RecurringPlanRepository;
 use WP_REST_Request;
 
@@ -36,6 +42,8 @@ use WP_REST_Request;
 final class DonationRetryQuotaTest extends IntegrationTestCase
 {
     private const RETRY_TTL = 1800;
+
+    private const OUT_OF_BAND_ADDON = 'acme-transfer';
 
     protected function setUp(): void
     {
@@ -77,23 +85,44 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
         ], $overrides, $retry === null ? [] : ['_retry' => $retry]));
     }
 
-    /** @return array{reference:string,status_token:string} */
+    /**
+     * The claim the browser holds, on a row wearing a gateway with a checkout.
+     *
+     * These tests are about a checkout the donor could back out of, and offline
+     * is the only gateway registered with the org-wide test switch off, which
+     * every quota here needs. So the rows are posted through offline and then
+     * wear a card gateway, the way the scenarios read. A pending offline row is
+     * a transfer the org is waiting for and is never claimable, which
+     * OfflineRetryParentTest covers.
+     *
+     * The rewrite is unconditional, so a caller naming a gateway of its own
+     * would be describing a row this leaves behind on a different one. A test
+     * that means the gateway it posted to calls claimAsPosted.
+     *
+     * @return array{reference:string,status_token:string}
+     */
     private function claimOf(\WP_REST_Response $res): array
     {
-        $data = $res->get_data();
-        $this->assertSame(201, $res->get_status(), (string) wp_json_encode($data));
+        $claim = $this->claimAsPosted($res);
 
-        // These tests are about a checkout the donor could back out of, and
-        // offline is the only gateway registered with the org-wide test switch
-        // off, which every quota here needs. So the rows are posted through
-        // offline and then wear a card gateway, the way the scenarios read.
-        // A pending offline row is a transfer the org is waiting for and is
-        // never claimable: OfflineRetryParentTest covers that.
         self::$wpdb->query(self::$wpdb->prepare(
             'UPDATE ' . self::$prefix . 'dono_donations SET gateway = %s WHERE reference = %s',
             'stripe',
-            (string) $data['reference']
+            $claim['reference']
         ));
+
+        return $claim;
+    }
+
+    /**
+     * The same claim with the row left on the gateway it was posted to.
+     *
+     * @return array{reference:string,status_token:string}
+     */
+    private function claimAsPosted(\WP_REST_Response $res): array
+    {
+        $data = $res->get_data();
+        $this->assertSame(201, $res->get_status(), (string) wp_json_encode($data));
 
         return [
             'reference'    => (string) $data['reference'],
@@ -192,9 +221,9 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
     {
         $email = 'switcher@example.test';
 
-        $root  = $this->claimOf($this->submit($email, null, ['gateway' => 'offline']));
-        $again = $this->claimOf($this->submit($email, $root,  ['gateway' => 'offline']));
-        $third = $this->claimOf($this->submit($email, $again, ['gateway' => 'offline']));
+        $root  = $this->claimOf($this->submit($email));
+        $again = $this->claimOf($this->submit($email, $root));
+        $third = $this->claimOf($this->submit($email, $again));
 
         $this->assertNotSame($root['reference'], $again['reference']);
         $this->assertNotSame($again['reference'], $third['reference']);
@@ -453,6 +482,36 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
     }
 
     /**
+     * A bank transfer taken by a gateway shipped outside core is the same
+     * awaited transfer as one taken by the core offline gateway, and its
+     * pending row is the same queue entry. The gateway says so by implementing
+     * SettlesOutOfBand: a list of ids inside the guard could only ever name the
+     * gateways core happens to ship.
+     */
+    public function test_an_add_on_gateway_that_settles_out_of_band_is_never_adopted(): void
+    {
+        $this->registerOutOfBandGateway();
+
+        $email = 'addonwire@example.test';
+        $on    = ['gateway' => self::OUT_OF_BAND_ADDON];
+
+        $parent = $this->claimAsPosted($this->submit($email, null, $on));
+        $second = $this->claimAsPosted($this->submit($email, $parent, $on));
+
+        $this->assertArrayNotHasKey(
+            'retried_by',
+            $this->flagsOf($parent['reference']),
+            'an awaited transfer must not be marked replaced'
+        );
+        $this->assertSame(
+            $second['reference'],
+            $this->groupOf($second['reference']),
+            'the refused claim opens its own attempt tree'
+        );
+        $this->assertSame(2, $this->emailCounter(), 'the second submission pays the ordinary email quota');
+    }
+
+    /**
      * The cap that actually bounds a single-source attacker is untouched: every
      * submission is charged, retries included.
      */
@@ -589,6 +648,49 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
     }
 
     // ------------------------------------------------------------- fixtures
+
+    /** A gateway of the shape an add-on registers: cheques, banked by hand. */
+    private function registerOutOfBandGateway(): void
+    {
+        // The registry is process-wide and has no unregister. Naming the id
+        // here first is what snapshots it, so tearDown puts the registry back
+        // without this gateway and no later test in the process sees it.
+        $this->deregisterGateway(self::OUT_OF_BAND_ADDON);
+
+        Plugin::instance()->container->get(GatewayManager::class)->register(
+            // The id rides the constructor: an anonymous class is its own
+            // class and cannot read a private constant of this one.
+            new class (self::OUT_OF_BAND_ADDON) implements PaymentGateway, SettlesOutOfBand {
+                public function __construct(private string $gatewayId)
+                {
+                }
+                public function id(): string { return $this->gatewayId; }
+                public function label(): string { return 'Acme Transfer'; }
+                public function description(): string { return ''; }
+                public function frequencies(): array { return ['one_time']; }
+                public function paymentMethods(): array { return ['bank_transfer']; }
+                public function countries(): array { return ['*']; }
+                public function currencies(): array { return ['*']; }
+                public function canCharge(): bool { return true; }
+                public function createIntent(Donation $d): GatewayIntentResult
+                {
+                    return new GatewayIntentResult(intent_id: 'acme_' . $d->reference);
+                }
+                public function confirm(Donation $d, array $p = []): GatewayConfirmResult
+                {
+                    return new GatewayConfirmResult(success: true);
+                }
+                public function handleWebhook(WP_REST_Request $r): WebhookOutcome
+                {
+                    return WebhookOutcome::notSupported($this->gatewayId);
+                }
+                public function refund(Donation $d, int $amountCents, ?string $reason = null): RefundResult
+                {
+                    return RefundResult::failure('not supported');
+                }
+            }
+        );
+    }
 
     private function publishedForm(): Form
     {

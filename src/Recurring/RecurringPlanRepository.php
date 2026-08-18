@@ -224,7 +224,7 @@ final class RecurringPlanRepository
      *
      * @since 1.0.0
      */
-    public function activeForCampaign(int $campaignId): array
+    public function liveForCampaign(int $campaignId): array
     {
         $mrrExpr = self::mrrExpr();
 

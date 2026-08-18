@@ -191,7 +191,7 @@ final class CampaignArchiveRecurringTest extends IntegrationTestCase
         $this->seedPlan((int) $c->id, 'cancelled');
 
         $dialog = Plugin::instance()->container->get(RecurringPlanRepository::class)
-            ->activeForCampaign((int) $c->id);
+            ->liveForCampaign((int) $c->id);
 
         $req = new WP_REST_Request('PUT', "/dono/v1/admin/campaigns/{$c->id}");
         $req->set_header('content-type', 'application/json');

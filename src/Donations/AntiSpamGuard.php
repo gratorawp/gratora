@@ -7,6 +7,9 @@ namespace Dono\Donations;
 use Dono\Foundation\Config\SystemSetting;
 use Dono\Foundation\Helpers\Money;
 use Dono\Foundation\Identity\IdentityHasher;
+use Dono\Foundation\Plugin;
+use Dono\Gateways\GatewayManager;
+use Dono\Gateways\SettlesOutOfBand;
 use Dono\Gateways\TestMode;
 use WP_Error;
 
@@ -41,12 +44,6 @@ final class AntiSpamGuard
     // so a tree can never outlive the slot that bought it.
     private const RETRY_MAX          = 2;
     private const RETRY_TTL          = 1800;
-
-    // Gateways that take the money out of band. They have no checkout to back
-    // out of: the donor leaves with bank details and a reference to quote, so
-    // the pending row is a transfer the org is still waiting for rather than an
-    // abandoned attempt. See claimRetry.
-    private const OUT_OF_BAND_GATEWAYS = ['offline'];
 
     /** @since 1.0.0 */
     public function __construct(private IdentityHasher $hasher, private ?TestMode $testMode = null)
@@ -244,7 +241,7 @@ final class AntiSpamGuard
         // donation list. For an out-of-band gateway that row is the queue entry
         // the incoming transfer has to be matched against, and the donor is
         // quoting its reference.
-        if (in_array((string) $parent->gateway, self::OUT_OF_BAND_GATEWAYS, true)) {
+        if ($this->settlesOutOfBand((string) $parent->gateway)) {
             return null;
         }
 
@@ -304,6 +301,25 @@ final class AntiSpamGuard
             'born'   => $born,
             'parent' => (string) $parent->reference,
         ];
+    }
+
+    /**
+     * Whether the gateway a row was created on takes the money out of band.
+     *
+     * Asked of the registry rather than of a list kept here, so a gateway
+     * registered through `dono.gateways.register` closes the same hole by
+     * implementing SettlesOutOfBand. A gateway that is no longer registered
+     * cannot answer and its rows keep the ordinary relief: it can take no
+     * further submission either way, and refusing on silence would spend a
+     * donor's email quota over a gateway the org has since put away.
+     *
+     * @since 1.0.0
+     */
+    private function settlesOutOfBand(string $gatewayId): bool
+    {
+        $gateways = Plugin::instance()->container->get(GatewayManager::class);
+
+        return $gateways->get($gatewayId) instanceof SettlesOutOfBand;
     }
 
     /**

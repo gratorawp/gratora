@@ -46,13 +46,13 @@ const DESCRIPTION_MAX = 120;
 
 const TABS = [ 'overview', 'forms', 'settings' ];
 
-// Names the number of forms that will be cascade-deleted, so the blast radius
-// is on screen before the admin confirms.
-async function campaignDeleteMessage( campaignId ) {
+// Names everything the cascade destroys, so the blast radius is on screen
+// before the admin confirms.
+export async function campaignDeleteMessage( campaign ) {
     let count = 0;
     try {
         const res = await apiFetch( {
-            path:  `/dono/v1/admin/forms?campaign_id=${ campaignId }&per_page=1`,
+            path:  `/dono/v1/admin/forms?campaign_id=${ campaign?.id }&per_page=1`,
             parse: false,
         } );
         count = Number( res.headers.get( 'x-wp-total' ) ) || 0;
@@ -60,20 +60,31 @@ async function campaignDeleteMessage( campaignId ) {
         // A failed probe falls back to the generic message rather than blocking
         // the delete.
     }
+
     // No line about donations: a campaign that has any is refused outright, so
     // by the time this message is shown there are none to keep or to unlink.
-    return count > 0
+    const parts = [ count > 0
         ? sprintf(
             /* translators: %d: number of forms attached to the campaign. */
             _n(
-                'Permanently delete this campaign? Its %d form will also be deleted. This cannot be undone.',
-                'Permanently delete this campaign? Its %d forms will also be deleted. This cannot be undone.',
+                'Permanently delete this campaign? Its %d form will also be deleted.',
+                'Permanently delete this campaign? Its %d forms will also be deleted.',
                 count,
                 'dono-fundraising-platform'
             ),
             count,
         )
-        : __( 'Permanently delete this campaign? This cannot be undone.', 'dono-fundraising-platform' );
+        : __( 'Permanently delete this campaign?', 'dono-fundraising-platform' ) ];
+
+    // The page is deleted outright rather than trashed, so an admin who has
+    // built it out in the block editor has nothing left to restore from.
+    if ( campaign?.page_id ) {
+        parts.push( __( 'The WordPress page it created is deleted with it, and it does not go to the trash, so any content you built on that page is gone for good.', 'dono-fundraising-platform' ) );
+    }
+
+    parts.push( __( 'This cannot be undone.', 'dono-fundraising-platform' ) );
+
+    return parts.join( ' ' );
 }
 
 // The reason comes from the server, which reads it off the same rule the
@@ -251,7 +262,7 @@ export default function Detail( { id, tab } ) {
                 return;
             }
 
-            const message = await campaignDeleteMessage( campaign.id );
+            const message = await campaignDeleteMessage( campaign );
             setConfirm( {
                 title:        __( 'Delete campaign', 'dono-fundraising-platform' ),
                 message,
@@ -2039,7 +2050,7 @@ function AdvancedPanel( { campaign, onError } ) {
     const [ confirm, setConfirm ] = useState( null );
 
     const onDelete = async () => {
-        const message = await campaignDeleteMessage( campaign.id );
+        const message = await campaignDeleteMessage( campaign );
         setConfirm( {
             title:        __( 'Delete campaign', 'dono-fundraising-platform' ),
             message,

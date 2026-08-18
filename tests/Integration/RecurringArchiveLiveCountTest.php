@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Dono\Tests\Integration;
 
+use Dono\Campaigns\Campaign;
+use Dono\Donors\DonorService;
 use Dono\Foundation\Plugin;
 use Dono\Recurring\CampaignCancelRecurringJob;
 use Dono\Recurring\RecurringPlan;
 use Dono\Recurring\RecurringPlanRepository;
-use ReflectionClass;
+use WP_REST_Request;
 
 /**
  * The archive dialog's number is the consent the admin gives to the archive
@@ -20,15 +22,37 @@ use ReflectionClass;
  */
 final class RecurringArchiveLiveCountTest extends IntegrationTestCase
 {
-    private int $campaignId = 90210;
+    private int $campaignId;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $now = gmdate('Y-m-d H:i:s');
+        $campaign = Campaign::make();
+        $campaign->title      = 'Archive live count';
+        $campaign->slug       = 'archive-live-count-' . uniqid();
+        $campaign->status     = 'published';
+        $campaign->currency   = 'USD';
+        $campaign->created_at = $now;
+        $campaign->updated_at = $now;
+        $campaign->save();
+
+        $this->campaignId = (int) $campaign->id;
+    }
 
     private function plan(string $status, array $overrides = []): RecurringPlan
     {
+        $donor = Plugin::instance()->container->get(DonorService::class)
+            ->findOrCreate('live-' . uniqid() . '@example.com', ['first_name' => 'Live']);
+
         $now = gmdate('Y-m-d H:i:s');
         $p = RecurringPlan::make();
-        $p->donor_id          = 1;
+        $p->donor_id          = (int) $donor->id;
         $p->campaign_id       = $overrides['campaign_id'] ?? $this->campaignId;
-        $p->gateway           = 'stripe';
+        // Offline is not SubscriptionAware, so cancelling is a local flip and
+        // this file can run the real sweep without touching the network.
+        $p->gateway           = 'offline';
         $p->gateway_subscription_id = 'sub_' . bin2hex(random_bytes(6));
         $p->amount_cents      = $overrides['amount_cents'] ?? 2500;
         $p->currency          = 'USD';
@@ -44,8 +68,8 @@ final class RecurringArchiveLiveCountTest extends IntegrationTestCase
         return $p;
     }
 
-    /** The number shown and the number cancelled are one set. */
-    public function test_the_count_covers_every_status_the_sweep_cancels(): void
+    /** Every status the count has to decide about, plus the two exclusions. */
+    private function seedMixedStatuses(): void
     {
         $this->plan('active');
         $this->plan('paused');
@@ -53,12 +77,38 @@ final class RecurringArchiveLiveCountTest extends IntegrationTestCase
         $this->plan('cancelled');
         $this->plan('active', ['is_test' => true]);
         $this->plan('active', ['campaign_id' => $this->campaignId + 1]);
+    }
 
-        $summary = $this->repo()->activeForCampaign($this->campaignId);
+    /** The number shown and the number cancelled are one set. */
+    public function test_the_count_covers_every_status_the_sweep_cancels(): void
+    {
+        $this->seedMixedStatuses();
+
+        $summary = $this->repo()->liveForCampaign($this->campaignId);
 
         $this->assertSame(3, $summary['count'], 'active, paused and past_due all get cancelled, so all three are counted');
-        $this->assertSame($this->sweepWouldCancel(), $summary['count']);
         $this->assertSame(7500, $summary['mrr_cents'], 'the monthly value at stake is the whole live set');
+        $this->assertSame($summary['count'], $this->sweepWouldCancel());
+    }
+
+    /**
+     * The dialog reads this route, never the repository, so only a call across
+     * the REST boundary pins the number an admin is actually shown.
+     */
+    public function test_the_recurring_summary_route_reports_the_number_the_sweep_cancels(): void
+    {
+        $this->seedMixedStatuses();
+
+        $response = rest_do_request(
+            new WP_REST_Request('GET', "/dono/v1/admin/campaigns/{$this->campaignId}/recurring-summary")
+        );
+        $data = $response->get_data();
+
+        $this->assertSame(200, $response->get_status(), (string) wp_json_encode($data));
+        $this->assertSame(3, $data['count'], 'the dialog is told about every live plan, not only the active ones');
+        $this->assertSame(7500, $data['mrr_cents']);
+        $this->assertSame('USD', $data['currency']);
+        $this->assertSame($data['count'], $this->sweepWouldCancel());
     }
 
     /** The gate on the prompt appearing is count > 0. */
@@ -67,10 +117,10 @@ final class RecurringArchiveLiveCountTest extends IntegrationTestCase
         $this->plan('paused');
         $this->plan('paused');
 
-        $summary = $this->repo()->activeForCampaign($this->campaignId);
+        $summary = $this->repo()->liveForCampaign($this->campaignId);
 
         $this->assertSame(2, $summary['count'], 'paused plans resume and keep billing, so the admin must be offered the choice');
-        $this->assertSame($this->sweepWouldCancel(), $summary['count']);
+        $this->assertSame($summary['count'], $this->sweepWouldCancel());
     }
 
     /** A cancelled-only campaign has nothing to offer and must not prompt. */
@@ -79,7 +129,8 @@ final class RecurringArchiveLiveCountTest extends IntegrationTestCase
         $this->plan('cancelled');
         $this->plan('expired');
 
-        $this->assertSame(0, $this->repo()->activeForCampaign($this->campaignId)['count']);
+        $this->assertSame(0, $this->repo()->liveForCampaign($this->campaignId)['count']);
+        $this->assertSame(0, $this->sweepWouldCancel());
     }
 
     /**
@@ -90,35 +141,44 @@ final class RecurringArchiveLiveCountTest extends IntegrationTestCase
     {
         $this->plan('active', ['interval_count' => 0]);
 
-        $summary = $this->repo()->activeForCampaign($this->campaignId);
+        $summary = $this->repo()->liveForCampaign($this->campaignId);
 
         $this->assertSame(1, $summary['count']);
-        $this->assertSame($this->sweepWouldCancel(), $summary['count']);
         $this->assertSame(0, $summary['mrr_cents']);
+        $this->assertSame($summary['count'], $this->sweepWouldCancel());
     }
 
-    /** Drift guard: two definitions of "live" would reopen the whole finding. */
-    public function test_the_repository_and_the_sweep_define_live_identically(): void
-    {
-        $sweep = (new ReflectionClass(CampaignCancelRecurringJob::class))->getConstant('LIVE_STATUSES');
-
-        $expected = RecurringPlanRepository::LIVE_STATUSES;
-        sort($expected);
-        sort($sweep);
-
-        $this->assertSame($expected, $sweep);
-    }
-
-    /** The sweep's own selection, minus its resumable cursor. */
+    /**
+     * Runs the sweep and reports what it actually cancelled instead of
+     * restating its selection here. A filter the sweep loses (the campaign, the
+     * statuses, is_test) then changes this number, where a restated copy would
+     * agree with the mistake and keep every case green.
+     *
+     * It cancels the plans, so a case calls it last.
+     */
     private function sweepWouldCancel(): int
     {
-        $statuses = (new ReflectionClass(CampaignCancelRecurringJob::class))->getConstant('LIVE_STATUSES');
+        $before = $this->cancelledPlanIds();
 
-        return (int) RecurringPlan::query()
-            ->where('campaign_id', $this->campaignId)
-            ->whereIn('status', $statuses)
-            ->where('is_test', false)
-            ->count();
+        Plugin::instance()->container->get(CampaignCancelRecurringJob::class)
+            ->start($this->campaignId);
+        $this->runPendingAsyncJobs(10);
+
+        return count(array_diff($this->cancelledPlanIds(), $before));
+    }
+
+    /**
+     * Deliberately unscoped: a sweep that stopped filtering by campaign shows
+     * up here as a larger number rather than going unnoticed.
+     *
+     * @return list<int>
+     */
+    private function cancelledPlanIds(): array
+    {
+        return array_map(
+            static fn ($plan): int => (int) $plan->id,
+            RecurringPlan::query()->where('status', 'cancelled')->getAll()
+        );
     }
 
     private function repo(): RecurringPlanRepository

@@ -1143,7 +1143,7 @@ final class CoreCommandProvider
                 if (! $campaign) {
                     return [];
                 }
-                $live = (int) ($c->get(RecurringPlanRepository::class)->activeForCampaign((int) $campaign->id)['count'] ?? 0);
+                $live = (int) ($c->get(RecurringPlanRepository::class)->liveForCampaign((int) $campaign->id)['count'] ?? 0);
                 return [[
                     'label' => sprintf('Cancel all live recurring plans on %s', (string) $campaign->title),
                     'to'    => $live === 1 ? '1 live plan' : sprintf('%d live plans', $live),

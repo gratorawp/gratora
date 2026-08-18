@@ -200,6 +200,46 @@ function DonationReceipt( { receipt, config } ) {
     );
 }
 
+// Instructions for a donation that will be settled away from the browser, by
+// bank transfer or cheque.
+//
+// The stash exists so a gateway that navigated the donor away can pick the
+// donation up when they come back, and it outlives a reload. Nothing is coming
+// back here, so it goes now: kept, a donor who reloads this screen and submits
+// again sends the reference and status token of a transfer the org is still
+// waiting for, and asks the server to treat that awaited row as an abandoned
+// attempt. The receipt is read before the stash goes, because a donor who
+// landed here from a redirect has no other source for it.
+function PendingScreen( { state, dispatch, config } ) {
+    const [ receipt ] = useState( () => receiptOf( state ) );
+
+    useEffect( () => {
+        clearPending();
+    }, [] );
+
+    return (
+        <div class="dono-form__success dono-form__success--pending" role="status">
+            <div class="dono-form__success-icon dono-form__success-icon--pending" aria-hidden="true">⏳</div>
+            <h3>{ config.i18n.pendingTitle }</h3>
+            <p class="dono-form__thank-you">{ config.i18n.pendingMessage }</p>
+            <DonationReceipt receipt={ receipt } config={ config } />
+            { state.submission?.reference && (
+                <p class="dono-form__reference">{ state.submission.reference }</p>
+            ) }
+            <div class="dono-form__success-actions">
+                <button
+                    type="button"
+                    class="dono-form__button dono-form__button--secondary"
+                    onClick={ () => { clearPending(); dispatch( { type: 'RESET' } ); } }
+                >
+                    { config.i18n.donateAgain }
+                </button>
+                <PortalLink email={ receipt.email } config={ config } />
+            </div>
+        </div>
+    );
+}
+
 // A gateway shipped outside core registers with
 // window.dono.formGateways.register( id, { component, ready } ) before the
 // runtime mounts; `ready` gets that gateway's slice of the form config and
@@ -546,27 +586,7 @@ function FormBody( { state, dispatch, config } ) {
         // Recorded but not paid, as with an offline or bank transfer: no
         // completed-donation redirect and no paid thank-you. Instructions go out
         // by email on submit.
-        return (
-            <div class="dono-form__success dono-form__success--pending" role="status">
-                <div class="dono-form__success-icon dono-form__success-icon--pending" aria-hidden="true">⏳</div>
-                <h3>{ config.i18n.pendingTitle }</h3>
-                <p class="dono-form__thank-you">{ config.i18n.pendingMessage }</p>
-                <DonationReceipt receipt={ receiptOf( state ) } config={ config } />
-                { state.submission?.reference && (
-                    <p class="dono-form__reference">{ state.submission.reference }</p>
-                ) }
-                <div class="dono-form__success-actions">
-                    <button
-                        type="button"
-                        class="dono-form__button dono-form__button--secondary"
-                        onClick={ () => { clearPending(); dispatch( { type: 'RESET' } ); } }
-                    >
-                        { config.i18n.donateAgain }
-                    </button>
-                    <PortalLink email={ receiptOf( state ).email } config={ config } />
-                </div>
-            </div>
-        );
+        return <PendingScreen state={ state } dispatch={ dispatch } config={ config } />;
     }
 
     if ( state.status === 'success' ) {

@@ -11,6 +11,7 @@ use Dono\Foundation\Identity\IdentityHasher;
 use Dono\Foundation\References\ReferenceGenerator;
 use Dono\Foundation\Time\SystemClock;
 use Dono\Vendor\Queryable\DB;
+use Throwable;
 
 /**
  * Restores a Dono export onto this site.
@@ -171,6 +172,14 @@ final class DataImporter
     private const REFERENCE_SCOPES = [
         'donation' => ['dono_donations', 'reference'],
         'receipt'  => ['dono_receipts', 'receipt_number'],
+        // Rehearsal receipts number from a counter of their own so the live
+        // sequence stays gap-free, and the export carries them like any other
+        // row. Left out, the counter stays at zero after a restore and the next
+        // rehearsal mints a number the file already brought in, which the unique
+        // index refuses: the org can no longer test a form at all. Same table as
+        // the live scope, which is safe because a row only counts toward a scope
+        // whose own format reproduces the number printed on it.
+        'test_receipt' => ['dono_receipts', 'receipt_number'],
     ];
 
     /** @var array<string, array<int,int>> source id => id here, per table */
@@ -216,6 +225,19 @@ final class DataImporter
     public function import(array $export): array
     {
         $tables = is_array($export['tables'] ?? null) ? $export['tables'] : [];
+
+        // The container hands out one of these, so a second file in the same
+        // process would otherwise be read through the first one's state: the
+        // counts come back cumulative, and the id map resolves this file's rows
+        // onto rows the previous file created, because source ids start at 1 in
+        // every export. A CLI or batch restore is where two land in one process.
+        $this->map         = [];
+        $this->created     = [];
+        $this->existing    = [];
+        $this->skipped     = [];
+        $this->dropped     = [];
+        $this->shellAnchor = [];
+        $this->unreadable  = 0;
 
         $this->origin = trim((string) ($export['site_url'] ?? ''));
         if ($this->origin === '') {
@@ -739,11 +761,57 @@ final class DataImporter
                 $high = $counter;
             }
 
-            // peekNext() is the last used value plus one, so the counter has
-            // already cleared $high when they are equal.
-            if ($high > 0 && $high >= $references->peekNext($scope)) {
-                $references->nextNumber($scope, $high + 1);
+            if ($high === 0) {
+                continue;
             }
+
+            // Reading the counter and raising it are one step behind one guard,
+            // because they fail the same way: both go to the same option on the
+            // same connection. Every row is in by now, so anything that leaves
+            // here costs the caller the report of what landed and the erasure
+            // deferral behind it, whichever of the two calls threw.
+            try {
+                // peekNext() is the last used value plus one, so the counter
+                // has cleared $high only when peekNext() is greater than $high.
+                if ($high < $references->peekNext($scope)) {
+                    continue;
+                }
+
+                // The site keeps taking donations while this runs, and one
+                // taken between that read and this raise moves the counter
+                // itself, which nextNumber() then refuses to walk backwards.
+                $references->nextNumber($scope, $high + 1);
+            } catch (Throwable $e) {
+                if ($this->counterClears($references, $scope, $high)) continue;
+
+                ErrorLog::record(
+                    'transfer.import',
+                    sprintf(
+                        'Restore could not raise the %s reference counter past %d, so the next one minted can repeat a number the file brought in and the unique index will refuse it. Set the next number on the numbering screen before another donation is taken. The raise failed with: %s',
+                        $scope,
+                        $high,
+                        $e->getMessage()
+                    ),
+                    ['scope' => $scope, 'high_water_mark' => $high]
+                );
+            }
+        }
+    }
+
+    /**
+     * Whether the counter is past what the file printed, however it got there.
+     *
+     * Behind its own guard because whatever refused the raise can refuse this
+     * read too, and the question here is only whether to report a failure.
+     *
+     * @since 1.0.0
+     */
+    private function counterClears(ReferenceGenerator $references, string $scope, int $high): bool
+    {
+        try {
+            return $references->peekNext($scope) > $high;
+        } catch (Throwable $e) {
+            return false;
         }
     }
 

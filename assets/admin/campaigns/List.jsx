@@ -19,6 +19,54 @@ import notify from '../_shared/notify';
 
 const STATUS_OPTIONS = Object.entries( STATUS_LABEL ).map( ( [ value, label ] ) => ( { value, label } ) );
 
+/**
+ * What deleting this selection destroys, said before the admin agrees to it.
+ *
+ * Assembled from whole sentences rather than written out per combination: the
+ * page warning applies to a subset of a selection, and the pages are what an
+ * admin is most likely to have built on. wp_delete_post takes them past the
+ * trash, so nothing is left to restore from.
+ */
+export function campaignsDeleteMessage( items ) {
+    const n         = items.length;
+    const withPages = items.filter( ( i ) => i.page_id ).length;
+
+    const parts = [ n === 1
+        ? __( 'Permanently delete this campaign? Its forms will be deleted too. A campaign that has donations cannot be deleted.', 'dono-fundraising-platform' )
+        : sprintf(
+            /* translators: %d: number of campaigns to delete */
+            _n(
+                'Permanently delete %d campaign? Forms attached to it will be deleted too. Any campaign that has donations cannot be deleted.',
+                'Permanently delete %d campaigns? Forms attached to them will be deleted too. Any campaign that has donations cannot be deleted.',
+                n,
+                'dono-fundraising-platform'
+            ),
+            n
+        ) ];
+
+    // Phrased on the size of the selection, not on the number of pages: with
+    // several campaigns selected and one page between them, "the page it
+    // created" leaves the admin guessing which campaign "it" is.
+    if ( withPages > 0 && n === 1 ) {
+        parts.push( __( 'The WordPress page it created is deleted with it, and it does not go to the trash, so any content you built on that page is gone for good.', 'dono-fundraising-platform' ) );
+    } else if ( withPages > 0 ) {
+        parts.push( sprintf(
+            /* translators: %d: how many of the selected campaigns have a WordPress page */
+            _n(
+                '%d of them has a WordPress page, which is deleted with it rather than sent to the trash, so any content you built on it is gone for good.',
+                '%d of them have WordPress pages, which are deleted with them rather than sent to the trash, so any content you built on those pages is gone for good.',
+                withPages,
+                'dono-fundraising-platform'
+            ),
+            withPages
+        ) );
+    }
+
+    parts.push( __( 'This cannot be undone.', 'dono-fundraising-platform' ) );
+
+    return parts.join( ' ' );
+}
+
 export default function List() {
     const [ view, setView ] = useState( {
         type:    'table',
@@ -234,18 +282,7 @@ export default function List() {
             callback: ( items ) => {
                 if ( ! items.length ) return;
                 const n = items.length;
-                const message = n === 1
-                    ? __( 'Permanently delete this campaign? Its forms will be deleted too. A campaign that has donations cannot be deleted. This cannot be undone.', 'dono-fundraising-platform' )
-                    : sprintf(
-                        /* translators: %d: number of campaigns to delete */
-                        _n(
-                            'Permanently delete %d campaign? Forms attached to it will be deleted too. Any campaign that has donations cannot be deleted. This cannot be undone.',
-                            'Permanently delete %d campaigns? Forms attached to them will be deleted too. Any campaign that has donations cannot be deleted. This cannot be undone.',
-                            n,
-                            'dono-fundraising-platform'
-                        ),
-                        n
-                    );
+                const message = campaignsDeleteMessage( items );
                 setConfirm( {
                     title:        _n( 'Delete campaign', 'Delete campaigns', n, 'dono-fundraising-platform' ),
                     message,

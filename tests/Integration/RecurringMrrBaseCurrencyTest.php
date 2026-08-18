@@ -69,7 +69,7 @@ final class RecurringMrrBaseCurrencyTest extends IntegrationTestCase
         // JPY 10,000/mo stored as 1000000, never converted to the base currency.
         $this->plan(['amount_cents' => 1000000, 'currency' => $this->foreignCurrency(), 'base_amount_cents' => null]);
 
-        $result = $this->repo()->activeForCampaign($this->campaignId);
+        $result = $this->repo()->liveForCampaign($this->campaignId);
 
         $this->assertSame(1, $result['count']);
         $this->assertSame(0, $result['mrr_cents'], 'an unknown base value counts as zero, not as raw yen');
@@ -80,7 +80,7 @@ final class RecurringMrrBaseCurrencyTest extends IntegrationTestCase
     {
         $this->plan(['amount_cents' => 2000, 'currency' => $this->baseCurrency(), 'base_amount_cents' => null]);
 
-        $result = $this->repo()->activeForCampaign($this->campaignId);
+        $result = $this->repo()->liveForCampaign($this->campaignId);
 
         $this->assertSame(2000, $result['mrr_cents'], 'its own amount is the base amount');
         $this->assertSame(0, $result['unconverted'], 'nothing is missing');
@@ -92,7 +92,7 @@ final class RecurringMrrBaseCurrencyTest extends IntegrationTestCase
         $this->plan(['amount_cents' => 1000000, 'currency' => $this->foreignCurrency(), 'base_amount_cents' => null]);
         $this->plan(['amount_cents' => 2000, 'base_amount_cents' => 2000]);
 
-        $result = $this->repo()->activeForCampaign($this->campaignId);
+        $result = $this->repo()->liveForCampaign($this->campaignId);
 
         $this->assertSame(2, $result['count']);
         $this->assertSame(2000, $result['mrr_cents'], 'only the converted plan contributes');
@@ -105,7 +105,7 @@ final class RecurringMrrBaseCurrencyTest extends IntegrationTestCase
         $this->plan(['amount_cents' => 5000, 'currency' => $this->foreignCurrency(), 'base_amount_cents' => 4000]);
         $this->plan(['amount_cents' => 1000, 'base_amount_cents' => 1000]);
 
-        $result = $this->repo()->activeForCampaign($this->campaignId);
+        $result = $this->repo()->liveForCampaign($this->campaignId);
 
         $this->assertSame(5000, $result['mrr_cents'], 'base values, not the raw foreign amounts');
         $this->assertSame(0, $result['unconverted']);
@@ -116,7 +116,7 @@ final class RecurringMrrBaseCurrencyTest extends IntegrationTestCase
     {
         $this->plan(['amount_cents' => 120000, 'base_amount_cents' => 120000, 'interval_unit' => 'year']);
 
-        $this->assertSame(10000, $this->repo()->activeForCampaign($this->campaignId)['mrr_cents']);
+        $this->assertSame(10000, $this->repo()->liveForCampaign($this->campaignId)['mrr_cents']);
     }
 
     /** recurringStats shares the expression, so it must agree. */

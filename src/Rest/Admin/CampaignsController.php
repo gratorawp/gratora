@@ -156,7 +156,7 @@ final class CampaignsController
         if (! $campaign) {
             return new WP_Error('dono_not_found', __('Campaign not found.', 'dono-fundraising-platform'), ['status' => 404]);
         }
-        $summary = $this->plans->activeForCampaign((int) $campaign->id);
+        $summary = $this->plans->liveForCampaign((int) $campaign->id);
         return new WP_REST_Response([
             'count'     => $summary['count'],
             'mrr_cents' => $summary['mrr_cents'],

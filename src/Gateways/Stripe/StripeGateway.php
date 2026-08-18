@@ -1664,26 +1664,16 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     }
 
     /**
-     * How much of this intent's charge has gone back to the donor, in minor
-     * units: refunds plus a dispute whose money Stripe has taken off the
-     * balance. Zero when the intent carries no charge to ask about.
+     * How much of a charge has gone back to the donor, in minor units: refunds
+     * plus a dispute whose money Stripe has taken off the balance. Zero when
+     * the intent carried no charge to ask about.
+     *
+     * Takes the charge rather than the intent, so a caller that needs it for
+     * anything else does not fetch it twice.
      *
      * A gateway read that fails is deliberately left to throw: the webhook
      * router turns it into a 5xx and Stripe redelivers, which is the right
      * answer when the alternative is banking money nobody can account for.
-     *
-     * @param array<string,mixed> $intent
-     *
-     * @since 1.0.0
-     */
-    private function reversedMinorUnits(array $intent): int
-    {
-        return $this->reversedFrom($this->latestCharge($intent));
-    }
-
-    /**
-     * The same answer from a charge already in hand, so a caller that needs the
-     * charge for anything else does not fetch it twice.
      *
      * @param array<string,mixed>|null $charge
      *

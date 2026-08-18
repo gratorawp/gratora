@@ -88,9 +88,11 @@ final class StripeWebhookProvisioner
         // An endpoint that already delivers what the handlers read, and whose
         // secret is on file, is what provisioning is for. Recreating it would
         // mint a new signing secret, and every event Stripe is mid-retry on was
-        // signed with the old one. Two usable ones are a different matter: the
-        // stored secret verifies exactly one and nothing says which, so both go.
-        if (count($usable) === 1 && $this->hasSecret($isTest)) {
+        // signed with the old one. Two usable ones are a different matter even
+        // when the secret names one of them: the account is delivering every
+        // event twice, so leaving one standing leaves the duplicate deliveries
+        // in place, and one endpoint is the state this exists to reach.
+        if (count($usable) === 1 && $this->secretBelongsTo($isTest, $usable[0])) {
             $this->deleteEndpoints(array_diff($matched, $usable));
 
             return;
@@ -109,9 +111,9 @@ final class StripeWebhookProvisioner
             'api_version'    => StripeApi::API_VERSION,
         ]);
 
+        $newId  = (string) ($created['id'] ?? '');
         $secret = (string) ($created['secret'] ?? '');
         if ($secret === '') {
-            $newId = (string) ($created['id'] ?? '');
             if ($newId !== '') {
                 try {
                     $this->api->delete('/webhook_endpoints/' . rawurlencode($newId));
@@ -123,7 +125,7 @@ final class StripeWebhookProvisioner
             throw new RuntimeException(esc_html('Stripe returned a webhook endpoint with no signing secret.'));
         }
 
-        $this->storeSecret($isTest, $secret);
+        $this->storeSecret($isTest, $secret, $newId);
 
         $this->deleteEndpoints($matched);
     }
@@ -169,13 +171,55 @@ final class StripeWebhookProvisioner
         return array_diff(self::EVENTS, $enabled) === [];
     }
 
-    /** @since 1.0.0 */
-    private function hasSecret(bool $isTest): bool
+    /**
+     * Whether the stored signing secret is the one Stripe issued for this
+     * endpoint.
+     *
+     * A secret being present proves nothing about the endpoint being kept. An
+     * endpoint deleted and recreated in the dashboard, or a secret typed in
+     * against the wrong one, still matches on api_version and events, so the
+     * skip would be taken for an endpoint whose deliveries can never verify,
+     * and re-saving keys would stop being a way out of it.
+     *
+     * @since 1.0.0
+     */
+    private function secretBelongsTo(bool $isTest, string $endpointId): bool
     {
         $opt    = get_option('dono_gateway_config', []);
         $stripe = is_array($opt) && is_array($opt['stripe'] ?? null) ? $opt['stripe'] : [];
 
-        return (string) ($stripe[$isTest ? 'webhook_secret_test' : 'webhook_secret_live'] ?? '') !== '';
+        $secret = (string) ($stripe[self::secretKey($isTest)] ?? '');
+        $bond   = (string) ($stripe[self::endpointKey($isTest)] ?? '');
+        if ($secret === '' || $bond === '') {
+            return false;
+        }
+
+        return hash_equals($bond, self::bond($endpointId, $secret));
+    }
+
+    /**
+     * Ties a stored secret to the endpoint it was issued for. The secret is
+     * hashed in rather than the id kept on its own, because a hand-entered
+     * secret replacing the provisioned one leaves the id matching an endpoint
+     * that secret no longer verifies.
+     *
+     * @since 1.0.0
+     */
+    private static function bond(string $endpointId, string $secret): string
+    {
+        return $endpointId . ':' . hash('sha256', $secret);
+    }
+
+    /** @since 1.0.0 */
+    private static function secretKey(bool $isTest): string
+    {
+        return $isTest ? 'webhook_secret_test' : 'webhook_secret_live';
+    }
+
+    /** @since 1.0.0 */
+    private static function endpointKey(bool $isTest): string
+    {
+        return $isTest ? 'webhook_endpoint_test' : 'webhook_endpoint_live';
     }
 
     /**
@@ -211,7 +255,7 @@ final class StripeWebhookProvisioner
     }
 
     /** @since 1.0.0 */
-    private function storeSecret(bool $isTest, string $secret): void
+    private function storeSecret(bool $isTest, string $secret, string $endpointId): void
     {
         $opt = get_option('dono_gateway_config', []);
         if (! is_array($opt)) {
@@ -220,7 +264,12 @@ final class StripeWebhookProvisioner
         if (! is_array($opt['stripe'] ?? null)) {
             $opt['stripe'] = [];
         }
-        $opt['stripe'][$isTest ? 'webhook_secret_test' : 'webhook_secret_live'] = $secret;
+        $opt['stripe'][self::secretKey($isTest)] = $secret;
+        // An endpoint Stripe returned without an id cannot be recognized on the
+        // next run, so it is left unbonded and gets replaced rather than kept.
+        $opt['stripe'][self::endpointKey($isTest)] = $endpointId === ''
+            ? ''
+            : self::bond($endpointId, $secret);
         update_option('dono_gateway_config', $opt);
     }
 }

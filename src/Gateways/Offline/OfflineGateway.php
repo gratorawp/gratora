@@ -10,6 +10,7 @@ use Dono\Gateways\GatewayConfirmResult;
 use Dono\Gateways\GatewayIntentResult;
 use Dono\Gateways\PaymentGateway;
 use Dono\Gateways\RefundResult;
+use Dono\Gateways\SettlesOutOfBand;
 use Dono\Gateways\WebhookOutcome;
 use WP_REST_Request;
 
@@ -20,7 +21,7 @@ use WP_REST_Request;
  *
  * @since 1.0.0
  */
-final class OfflineGateway implements PaymentGateway
+final class OfflineGateway implements PaymentGateway, SettlesOutOfBand
 {
     /** @since 1.0.0 */
     public function __construct(private Clock $clock)

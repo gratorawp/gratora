@@ -15,6 +15,11 @@ use WP_REST_Request;
  * Lifecycle: createIntent, then either handleWebhook (typical) or confirm
  * (synchronous, Offline only); refund and the subscription methods as needed.
  *
+ * Anything beyond that lifecycle is a separate interface in this namespace that
+ * a gateway opts into by implementing it, SettlesOutOfBand among them, so a
+ * gateway registered from outside core can answer the same questions the core
+ * ones do.
+ *
  * @since 1.0.0
  */
 interface PaymentGateway

@@ -10,6 +10,7 @@ use Dono\Donors\Erasure\ErasureRegistry;
 use Dono\Donors\Erasure\ErasureRequest;
 use Dono\Recurring\RecurringCanceller;
 use Dono\Recurring\RecurringPlan;
+use Dono\Recurring\RecurringPlanRepository;
 use Dono\Foundation\Crypto\Crypto;
 use Dono\Foundation\Identity\IdentityHasher;
 use Dono\Foundation\Time\Clock;
@@ -24,13 +25,6 @@ use Dono\Vendor\Queryable\DB;
  */
 final class DonorService
 {
-    /**
-     * Plans that can still take money. A paused plan resumes on its resume_at
-     * date, and a past_due one is recovered by the gateway's own dunning, which
-     * walks it back to active.
-     */
-    private const LIVE_STATUSES = ['active', 'paused', 'past_due'];
-
     /** @since 1.0.0 */
     public function __construct(
         private DonorRepository $donors,
@@ -428,7 +422,7 @@ final class DonorService
     {
         $plans = RecurringPlan::query()
             ->where('donor_id', (int) $donor->id)
-            ->whereIn('status', self::LIVE_STATUSES)
+            ->whereIn('status', RecurringPlanRepository::LIVE_STATUSES)
             ->getAll();
 
         if ($plans === []) {

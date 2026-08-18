@@ -28,13 +28,36 @@ final class StripeWebhookProvisionOrderTest extends IntegrationTestCase
         $this->calls = [];
         $this->url   = rest_url('dono/v1/webhooks/stripe');
 
-        update_option('dono_gateway_config', [
-            'stripe' => ['webhook_secret_live' => 'whsec_old'],
-        ]);
+        update_option('dono_gateway_config', ['stripe' => []]);
 
         $account = Plugin::instance()->container->get(StripeAccount::class);
         $account->saveKeys(false, 'sk_live_connected', 'pk_live_seed');
         $account->refresh(['id' => 'acct_live_org', 'charges_enabled' => true]);
+
+        $this->seedProvisioned('we_old', 'whsec_old');
+    }
+
+    /**
+     * The state a successful provision leaves behind: the endpoint on the
+     * account, its secret on file, and whatever the provisioner records to
+     * recognize the pair later. Driven through provision() rather than written
+     * by hand so the tests below never assert against their own idea of it.
+     */
+    private function seedProvisioned(string $id, string $secret): void
+    {
+        $mock = function ($pre, $args, $url) use ($id, $secret) {
+            if (! is_string($url) || ! str_starts_with($url, 'https://api.stripe.com/')) {
+                return $pre;
+            }
+
+            return $this->response(strtoupper((string) ($args['method'] ?? 'GET')) === 'GET'
+                ? ['object' => 'list', 'data' => []]
+                : ['id' => $id, 'secret' => $secret]);
+        };
+
+        add_filter('pre_http_request', $mock, 10, 3);
+        $this->provision();
+        remove_filter('pre_http_request', $mock, 10);
     }
 
     /**
@@ -185,6 +208,36 @@ final class StripeWebhookProvisionOrderTest extends IntegrationTestCase
             $this->storedSecret(),
             'a re-save must not rotate the secret Stripe is still signing retries with'
         );
+    }
+
+    public function test_an_endpoint_recreated_in_the_dashboard_is_replaced(): void
+    {
+        // Deleting and recreating the endpoint in Stripe mints a new signing
+        // secret. The one on file verifies nothing, and every field this checks
+        // still matches, so keeping it fails every delivery for good.
+        $this->mockStripe([$this->endpoint(['id' => 'we_recreated'])], true);
+
+        $this->provision();
+
+        $this->assertSame(['GET', 'POST', 'DELETE'], $this->methods(), 'an endpoint we cannot verify is replaced');
+        $this->assertSame('whsec_new', $this->storedSecret());
+    }
+
+    public function test_a_secret_replaced_by_hand_no_longer_keeps_the_endpoint(): void
+    {
+        // Someone pasting a secret into the gateway settings can paste the
+        // wrong one. The endpoint is still ours, but the secret on file is not
+        // its secret, and re-saving keys is the only recovery there is.
+        $opt = get_option('dono_gateway_config', []);
+        $opt['stripe']['webhook_secret_live'] = 'whsec_typo';
+        update_option('dono_gateway_config', $opt);
+
+        $this->mockStripe([$this->endpoint()], true);
+
+        $this->provision();
+
+        $this->assertSame(['GET', 'POST', 'DELETE'], $this->methods());
+        $this->assertSame('whsec_new', $this->storedSecret(), 're-saving keys heals a mistyped secret');
     }
 
     public function test_a_matching_endpoint_whose_secret_is_unknown_is_replaced(): void

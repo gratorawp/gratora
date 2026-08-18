@@ -226,7 +226,7 @@ final class PayPalLateActivationTest extends IntegrationTestCase
     }
 
     /**
-     * The money-visible half: activeForCampaign feeds the dashboard's MRR and
+     * The money-visible half: liveForCampaign feeds the dashboard's MRR and
      * the archive dialog, and both read status alone.
      */
     public function test_a_reopened_plan_does_not_come_back_into_the_active_recurring_figures(): void
@@ -259,16 +259,16 @@ final class PayPalLateActivationTest extends IntegrationTestCase
             ->update(['campaign_id' => (int) $campaign->id]);
 
         $repo   = Plugin::instance()->container->get(RecurringPlanRepository::class);
-        $active = $repo->activeForCampaign((int) $campaign->id);
+        $active = $repo->liveForCampaign((int) $campaign->id);
         $this->assertSame(1, $active['count'], 'the live plan is counted while it renews');
         $this->assertSame(2500, $active['mrr_cents'], 'and its monthly value is the figure shown');
 
         $this->postWebhook('BILLING.SUBSCRIPTION.CANCELLED', ['id' => 'I-SUB-MRR']);
-        $this->assertSame(0, $repo->activeForCampaign((int) $campaign->id)['count']);
+        $this->assertSame(0, $repo->liveForCampaign((int) $campaign->id)['count']);
 
         $this->postWebhook('BILLING.SUBSCRIPTION.ACTIVATED', $this->activation('I-SUB-MRR'));
 
-        $after = $repo->activeForCampaign((int) $campaign->id);
+        $after = $repo->liveForCampaign((int) $campaign->id);
         $this->assertSame(
             0,
             $after['count'],

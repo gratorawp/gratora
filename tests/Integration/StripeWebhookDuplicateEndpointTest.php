@@ -31,13 +31,44 @@ final class StripeWebhookDuplicateEndpointTest extends IntegrationTestCase
         $this->calls = [];
         $this->url   = rest_url('dono/v1/webhooks/stripe');
 
-        update_option('dono_gateway_config', [
-            'stripe' => ['webhook_secret_live' => 'whsec_old'],
-        ]);
+        update_option('dono_gateway_config', ['stripe' => []]);
 
         $account = Plugin::instance()->container->get(StripeAccount::class);
         $account->saveKeys(false, 'sk_live_connected', 'pk_live_seed');
         $account->refresh(['id' => 'acct_live_org', 'charges_enabled' => true]);
+
+        $this->seedProvisioned('we_good', 'whsec_old');
+    }
+
+    /**
+     * The state a successful provision leaves behind: the endpoint on the
+     * account, its secret on file, and whatever the provisioner records to
+     * recognize the pair later. Driven through provision() rather than written
+     * by hand so the tests below never assert against their own idea of it.
+     */
+    private function seedProvisioned(string $id, string $secret): void
+    {
+        $mock = function ($pre, $args, $url) use ($id, $secret) {
+            if (! is_string($url) || ! str_starts_with($url, 'https://api.stripe.com/')) {
+                return $pre;
+            }
+
+            $body = strtoupper((string) ($args['method'] ?? 'GET')) === 'GET'
+                ? ['object' => 'list', 'data' => []]
+                : ['id' => $id, 'secret' => $secret];
+
+            return [
+                'headers'  => [],
+                'body'     => (string) wp_json_encode($body),
+                'response' => ['code' => 200, 'message' => 'OK'],
+                'cookies'  => [],
+                'filename' => null,
+            ];
+        };
+
+        add_filter('pre_http_request', $mock, 10, 3);
+        $this->provision();
+        remove_filter('pre_http_request', $mock, 10);
     }
 
     /** @param array<int,array<string,mixed>> $endpoints */
@@ -181,8 +212,12 @@ final class StripeWebhookDuplicateEndpointTest extends IntegrationTestCase
 
     public function test_two_usable_endpoints_are_both_replaced(): void
     {
-        // The stored secret verifies exactly one of them and nothing says which,
-        // so keeping either risks keeping the one the site cannot verify.
+        // Bonded to we_one, so the secret is no reason to replace it and the
+        // count of usable endpoints is the only rule left that can. Seeded to
+        // we_good instead, both would be replaced because neither is bonded,
+        // and the rule under test would never be reached.
+        $this->seedProvisioned('we_one', 'whsec_old');
+
         $this->mockStripe([
             $this->endpoint(['id' => 'we_one']),
             $this->endpoint(['id' => 'we_two']),
