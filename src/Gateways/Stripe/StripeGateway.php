@@ -424,10 +424,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             }
         }
 
-        $dispute = $charge['dispute'] ?? null;
-        if (is_string($dispute) && $dispute !== '') {
-            $dispute = $this->api->get('/disputes/' . rawurlencode($dispute));
-        }
+        $dispute = ($charge['disputed'] ?? false) === true ? $this->disputeFor($chargeId) : null;
 
         if (is_array($dispute)
             && ! in_array((string) ($dispute['status'] ?? ''), self::DISPUTE_FUNDS_HELD_BY_ORG, true)) {

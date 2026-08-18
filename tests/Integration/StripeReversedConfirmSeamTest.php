@@ -145,6 +145,40 @@ final class StripeReversedConfirmSeamTest extends IntegrationTestCase
         $this->assertSame('paid', $this->reload($donation)->status, 'and the donation still banked');
     }
 
+    /**
+     * A dispute raised before there was a banked donation to take it off. Those
+     * deliveries were answered 200 against a row nothing could be recorded on,
+     * and a 200 tells Stripe to stop sending them, so the confirm that makes the
+     * row refundable is the last chance to replay the loss onto it.
+     *
+     * The charge is where that replay starts, and it carries only the flag, so
+     * a lost dispute is only found by asking for it. Read off the charge, this
+     * branch can never fire and the money stays banked as raised.
+     */
+    public function test_a_dispute_lost_before_the_donation_was_banked_is_replayed_onto_it(): void
+    {
+        // Part of the charge, not all of it: a full reversal stops the banking
+        // outright and never reaches the replay, so only a partial one puts a
+        // banked row on the table for the loss to be recorded against.
+        $donation = $this->stripeDonation('pending');
+        $chargeId = $this->charge($donation, ['disputed' => true]);
+        $this->disputes[$chargeId] = ['id' => 'dp_lost_early', 'amount' => 2000, 'status' => 'lost'];
+
+        $this->postWebhook('payment_intent.succeeded', $this->succeededIntent($donation, $chargeId));
+
+        $fresh = $this->reload($donation);
+        $this->assertSame(
+            'partial_refund',
+            $fresh->status,
+            'the disputed part is off the books and the rest is still real money'
+        );
+        $this->assertSame(
+            2000,
+            (int) $fresh->refunded_cents,
+            'the disputed part was lost, and only a live read of the dispute can say so'
+        );
+    }
+
     public function test_the_admin_re_poll_never_fails_a_donation_the_donor_was_charged_for(): void
     {
         $donation = $this->stripeDonation('pending');
