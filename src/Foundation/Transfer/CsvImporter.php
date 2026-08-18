@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 namespace Dono\Foundation\Transfer;
 
+use DateTimeImmutable;
+use DateTimeZone;
 use Dono\Currency\FxRates;
 use Dono\Donations\AggregateSyncer;
 use Dono\Donations\Donation;
+use Dono\Donations\DonationQueries;
 use Dono\Donors\Donor;
 use Dono\Donors\DonorService;
 use Dono\Foundation\Helpers\Money;
 use Dono\Foundation\Identity\IdentityHasher;
+use Exception;
 use Throwable;
 
 /**
@@ -465,13 +469,40 @@ final class CsvImporter
         return $cents > 0 ? $cents : null;
     }
 
-    /** Null when the row does not carry a date this can read. @since 1.0.0 */
+    /**
+     * The cell is the org's calendar, not UTC: paid_at is stored UTC and every
+     * screen, receipt and year-end statement reads it back through the site
+     * timezone, so a cell read as a UTC instant dates the whole imported history
+     * a day early anywhere west of UTC and files a 1 January donation on the
+     * previous year's tax statement.
+     *
+     * A date with no time is that day at noon local, which is far enough from
+     * either edge that no offset in use can slide it onto a neighbouring day.
+     * A cell that carries a time is that wall clock in the org's timezone unless
+     * it names its own offset.
+     *
+     * Null when the row does not carry a date this can read.
+     *
+     * @since 1.0.0
+     */
     private function date(string $raw): ?string
     {
         $raw = trim($raw);
-        $ts  = $raw !== '' ? strtotime($raw) : false;
+        if ($raw === '') {
+            return null;
+        }
 
-        return $ts !== false ? gmdate('Y-m-d H:i:s', $ts) : null;
+        try {
+            $parsed = new DateTimeImmutable($raw, DonationQueries::siteTimezone());
+        } catch (Exception $e) {
+            return null;
+        }
+
+        if (preg_match('/\d{1,2}:\d{2}/', $raw) !== 1) {
+            $parsed = $parsed->setTime(12, 0);
+        }
+
+        return $parsed->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s');
     }
 
     /**

@@ -6,9 +6,13 @@ namespace Dono\Campaigns;
 
 defined('ABSPATH') || exit;
 
+use DateTimeImmutable;
+use DateTimeZone;
 use Dono\Campaigns\Styling\CampaignStyleResolver;
+use Dono\Donations\DonationQueries;
 use Dono\Vendor\Queryable\Model;
 use Dono\Vendor\Queryable\Schema\Table;
+use Exception;
 
 /**
  * Owns one public-facing WP page (via `page_id`) and zero or more donation forms.
@@ -61,7 +65,7 @@ final class Campaign extends Model
     }
 
     /**
-     * $now is UTC, matching how starts_at / ends_at are stored.
+     * $now is a UTC stamp.
      *
      * @since 1.0.0
      */
@@ -82,13 +86,36 @@ final class Campaign extends Model
 
         $now ??= gmdate('Y-m-d H:i:s');
 
-        $starts = self::startBoundary($this->starts_at);
+        $starts = $this->startsAtUtc();
         if ($starts !== null && $starts > $now) return 'scheduled';
 
-        $ends = self::endBoundary($this->ends_at);
+        $ends = $this->endsAtUtc();
         if ($ends !== null && $ends < $now) return 'ended';
 
         return null;
+    }
+
+    /**
+     * The first instant the campaign is open, as UTC, or null when it has no
+     * start date.
+     *
+     * @since 1.0.0
+     */
+    public function startsAtUtc(): ?string
+    {
+        return self::localToUtc(self::startBoundary($this->starts_at));
+    }
+
+    /**
+     * The last instant the campaign is open, as UTC, or null when it has no end
+     * date. Anything measuring "days left" against the clock belongs here too,
+     * or it counts the remaining days of a different timezone's calendar.
+     *
+     * @since 1.0.0
+     */
+    public function endsAtUtc(): ?string
+    {
+        return self::localToUtc(self::endBoundary($this->ends_at));
     }
 
     /** @since 1.0.0 */
@@ -115,6 +142,31 @@ final class Campaign extends Model
         return substr($stamp, 11) === '00:00:00'
             ? substr($stamp, 0, 10) . ' 23:59:59'
             : $stamp;
+    }
+
+    /**
+     * The schedule is a local calendar: the admin picks dates in the org's
+     * timezone and the campaign screen reads them back the same way, so a
+     * boundary compared as a UTC instant closes a campaign ending 31 December at
+     * 19:00 in New York, losing the heaviest giving window of the year, and
+     * keeps a Sydney campaign open into 1 January.
+     *
+     * A stamp too malformed to resolve is compared as written, which is the
+     * database's problem to reject rather than a reason to shut the form.
+     *
+     * @since 1.0.0
+     */
+    private static function localToUtc(?string $stamp): ?string
+    {
+        if ($stamp === null) return null;
+
+        try {
+            return (new DateTimeImmutable($stamp, DonationQueries::siteTimezone()))
+                ->setTimezone(new DateTimeZone('UTC'))
+                ->format('Y-m-d H:i:s');
+        } catch (Exception $e) {
+            return $stamp;
+        }
     }
 
     /** @since 1.0.0 */

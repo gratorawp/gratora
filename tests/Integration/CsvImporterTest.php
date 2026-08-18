@@ -527,8 +527,8 @@ final class CsvImporterTest extends IntegrationTestCase
 
         $this->assertSame(6000, (int) $donor->total_donated_cents);
         $this->assertSame(3, (int) $donor->donations_count);
-        $this->assertSame('2026-01-01 00:00:00', (string) $donor->first_donation_at);
-        $this->assertSame('2026-03-01 00:00:00', (string) $donor->last_donation_at);
+        $this->assertSame('2026-01-01 12:00:00', (string) $donor->first_donation_at);
+        $this->assertSame('2026-03-01 12:00:00', (string) $donor->last_donation_at);
     }
 
     /** A donor who was already here keeps what they gave here. */
@@ -550,7 +550,7 @@ final class CsvImporterTest extends IntegrationTestCase
 
         $this->assertSame(6500, (int) $fresh->total_donated_cents, 'the history joins the donation this site took');
         $this->assertSame(2, (int) $fresh->donations_count);
-        $this->assertSame('2026-01-01 00:00:00', (string) $fresh->first_donation_at, 'the imported one came first');
+        $this->assertSame('2026-01-01 12:00:00', (string) $fresh->first_donation_at, 'the imported one came first');
     }
 
     /**

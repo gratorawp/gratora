@@ -582,17 +582,45 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
             $plan = $this->recoverPlan($sub);
         }
 
-        if ($plan && $plan->status !== 'active') {
-            $plan->status     = 'active';
-            $plan->updated_at = $this->now();
-            $plan->save();
+        if ($plan === null) {
+            return new WebhookOutcome(
+                signature_ok: true,
+                external_id: $eventId,
+                event_type: $type,
+                handled: false,
+            );
+        }
+
+        if ($reason = WebhookPaymentGuard::refuseToTouchPlan($plan, $this->id(), $this->verifiedIsTest)) {
+            return $this->refused($eventId, $type, $reason);
+        }
+
+        if ($plan->status !== 'active') {
+            $now = $this->now();
+
+            // Conditional, because a cancellation is terminal at PayPal: an
+            // activation behind one is a redelivery or an out-of-order
+            // delivery, never a fact about the subscription. Reopening the row
+            // would count money that will never arrive toward MRR and let the
+            // next cancellation win the transition a second time, emailing the
+            // donor twice for one cancellation. A suspension is not terminal,
+            // so past_due still resumes here.
+            $result = RecurringPlan::query()
+                ->where('id', (int) $plan->id)
+                ->where('status', 'cancelled', '<>')
+                ->update(['status' => 'active', 'updated_at' => $now]);
+
+            if (($result->affectedRows ?? 0) > 0) {
+                $plan->status     = 'active';
+                $plan->updated_at = $now;
+            }
         }
 
         return new WebhookOutcome(
             signature_ok: true,
             external_id: $eventId,
             event_type: $type,
-            handled: $plan !== null,
+            handled: true,
         );
     }
 
@@ -676,6 +704,12 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         $plan = $this->planRepo->findBySubscriptionId($this->id(), (string) ($sub['id'] ?? ''));
         if (! $plan) {
             return $this->unmatched($eventId, $type, 'subscription');
+        }
+
+        // A test-mode secret closing a live plan drops it out of MRR, emails
+        // the donor that their donation has ended, and leaves PayPal billing.
+        if ($refusal = WebhookPaymentGuard::refuseToTouchPlan($plan, $this->id(), $this->verifiedIsTest)) {
+            return $this->refused($eventId, $type, $refusal);
         }
 
         $reason = $type === 'BILLING.SUBSCRIPTION.EXPIRED'

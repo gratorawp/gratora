@@ -16,6 +16,16 @@ use Dono\Foundation\Helpers\Money;
 final class RecurringPlanRepository
 {
     /**
+     * Every status a plan can still take money in, and therefore the set the
+     * campaign archive sweep cancels. A paused plan resumes on its resume_at
+     * date and a past_due one is recovered by the gateway's own dunning, so any
+     * figure an admin authorises a cancellation from has to cover all three.
+     *
+     * @var list<string>
+     */
+    public const LIVE_STATUSES = ['active', 'paused', 'past_due'];
+
+    /**
      * Base-currency amount of a plan.
      *
      * A plan with a snapshot uses it. A plan already IN the base currency needs
@@ -162,9 +172,18 @@ final class RecurringPlanRepository
     }
 
     /**
-     * Active recurring plans attributed to a campaign, plus their base-currency
-     * monthly-equivalent total. Drives the archive dialog's "N active recurring
-     * donations (~$X/mo)" and matches what the archive cancel run would cancel.
+     * Live recurring plans attributed to a campaign, plus their base-currency
+     * monthly-equivalent total. This is the number the archive dialog shows next
+     * to "also cancel these subscriptions", so it counts exactly the rows the
+     * archive sweep cancels: every LIVE_STATUSES plan, test plans excluded. A
+     * count narrowed to status = active would have an admin authorise one
+     * cancellation and get every paused and past_due donor cancelled and emailed
+     * too, and a campaign whose live plans are all paused would report zero and
+     * never offer the choice at all.
+     *
+     * A malformed interval_count of 0 still counts, because the sweep still
+     * cancels it. It contributes nothing to mrr_cents, which is why that figure
+     * is presented as approximate.
      *
      * @return array{count:int, mrr_cents:int, unconverted:int}
      *
@@ -174,14 +193,10 @@ final class RecurringPlanRepository
     {
         $mrrExpr = self::mrrExpr();
 
-        // Live plans only, matching recurringStats and the archive-cancel
-        // loop: test-mode plans are not real money and a malformed
-        // interval_count of 0 would count without contributing MRR.
         $row = DB::table('dono_recurring_plans')
             ->where('campaign_id', $campaignId)
-            ->where('status', 'active')
+            ->whereIn('status', self::LIVE_STATUSES)
             ->where('is_test', 0)
-            ->where('interval_count', 0, '>')
             ->selectRaw("COUNT(*) AS cnt, COALESCE({$mrrExpr}, 0) AS mrr, " . self::unconvertedExpr() . " AS unconverted")
             ->get();
 
@@ -432,7 +447,7 @@ final class RecurringPlanRepository
         // gives up on it.
         $failingCount = (int) self::statsQuery($includeTest)
             ->where('failed_renewals_count', 0, '>')
-            ->whereIn('status', ['active', 'past_due', 'paused'])
+            ->whereIn('status', self::LIVE_STATUSES)
             ->count();
 
         $activeCount = (int) ($active['cnt'] ?? 0);

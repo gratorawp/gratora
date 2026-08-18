@@ -83,6 +83,18 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
         $data = $res->get_data();
         $this->assertSame(201, $res->get_status(), (string) wp_json_encode($data));
 
+        // These tests are about a checkout the donor could back out of, and
+        // offline is the only gateway registered with the org-wide test switch
+        // off, which every quota here needs. So the rows are posted through
+        // offline and then wear a card gateway, the way the scenarios read.
+        // A pending offline row is a transfer the org is waiting for and is
+        // never claimable: OfflineRetryParentTest covers that.
+        self::$wpdb->query(self::$wpdb->prepare(
+            'UPDATE ' . self::$prefix . 'dono_donations SET gateway = %s WHERE reference = %s',
+            'stripe',
+            (string) $data['reference']
+        ));
+
         return [
             'reference'    => (string) $data['reference'],
             'status_token' => (string) $data['status_token'],

@@ -8,12 +8,14 @@ use Dono\Analytics\ErrorLog;
 use Dono\Donations\AggregateSyncer;
 use Dono\Foundation\Crypto\Crypto;
 use Dono\Foundation\Identity\IdentityHasher;
+use Dono\Foundation\References\ReferenceGenerator;
+use Dono\Foundation\Time\SystemClock;
 use Dono\Vendor\Queryable\DB;
 
 /**
  * Restores a Dono export onto this site.
  *
- * Four things make this harder than inserting rows.
+ * Five things make this harder than inserting rows.
  *
  * Ids do not survive. Donor 12 on the source is not donor 12 here, so every row
  * is matched on something real (a slug, a reference, an address) and the source
@@ -27,6 +29,11 @@ use Dono\Vendor\Queryable\DB;
  * It has to be safe to run twice. Anything already here is left exactly as it
  * is rather than duplicated or overwritten, which is also what makes a
  * half-finished import safe to resume.
+ *
+ * Some of what it has to get right is not in the file. Reference counters are
+ * per install, and the money totals are columns on rows a restore matches
+ * rather than writes, so both are rebuilt once every row has landed. See
+ * raiseReferenceCounters() and syncAggregates().
  *
  * And a row it cannot place has to be said out loud. Money records hang off
  * donors and off each other, so one row that does not land takes everything
@@ -152,6 +159,20 @@ final class DataImporter
         'fundraiser_team_id',
     ];
 
+    /**
+     * Where a minted reference lands, by the counter scope that mints it.
+     *
+     * dono_refunds carries no reference column, so no scope reads from it: the
+     * refund prefix in the numbering settings is configuration for a sequence
+     * nothing issues yet. A renderer numbering its receipts in a scope of its
+     * own prints a prefix of its own with them, so its numbers do not answer to
+     * the scopes named here and its counter is the add-on's to raise.
+     */
+    private const REFERENCE_SCOPES = [
+        'donation' => ['dono_donations', 'reference'],
+        'receipt'  => ['dono_receipts', 'receipt_number'],
+    ];
+
     /** @var array<string, array<int,int>> source id => id here, per table */
     private array $map = [];
 
@@ -210,7 +231,8 @@ final class DataImporter
         }
 
         $this->resolveDeferred($tables);
-        $this->syncFormStats();
+        $this->raiseReferenceCounters($export);
+        $this->syncAggregates();
         $this->recordUnknownTables($tables);
         $this->reportDropped();
         $this->reportUnreadable();
@@ -624,24 +646,104 @@ final class DataImporter
     }
 
     /**
-     * The export leaves form statistics behind as derived data the restore
-     * recomputes, so the restore has to recompute them. Nothing else will:
-     * rows are inserted straight, firing none of the donation hooks that keep
-     * that table current, and until something does every restored form reads
-     * as nothing raised.
+     * Rebuilds every total the restored donations belong to.
      *
-     * Bounded by the forms in the file, and each call is one aggregate query.
-     * Donor, campaign and fund rollups travel as columns on their own rows and
-     * are not rebuilt here.
+     * Nothing else will. Rows are inserted straight, firing none of the
+     * donation hooks that keep these current, and each total is read from a
+     * stored column rather than summed on demand: the funds screen, the
+     * campaign progress bar on the public page and a donor's lifetime giving
+     * all show what the column says.
+     *
+     * A fund, campaign or donor already on this site is matched rather than
+     * written, and keeps the figure it held before the restore, so matching one
+     * is precisely the case that has to be rebuilt rather than trusted. The
+     * default fund makes that the ordinary case, not the exotic one: activation
+     * creates 'general' on every install and it is where donations land when no
+     * fund is chosen.
+     *
+     * Bounded by what the file carried, and each call is one aggregate query.
      *
      * @since 1.0.0
      */
-    private function syncFormStats(): void
+    private function syncAggregates(): void
     {
         $syncer = new AggregateSyncer();
 
-        foreach ($this->map['dono_forms'] ?? [] as $formId) {
-            $syncer->syncForm((int) $formId);
+        foreach ($this->map['dono_funds'] ?? [] as $id) {
+            $syncer->syncFund((int) $id);
+        }
+
+        foreach ($this->map['dono_campaigns'] ?? [] as $id) {
+            $syncer->syncCampaign((int) $id);
+        }
+
+        foreach ($this->map['dono_donors'] ?? [] as $id) {
+            $syncer->syncDonor((int) $id);
+        }
+
+        foreach ($this->map['dono_forms'] ?? [] as $id) {
+            $syncer->syncForm((int) $id);
+        }
+    }
+
+    /**
+     * Raises each reference counter past the numbers the file brought in.
+     *
+     * The counters are per install and no export carries them, so a restore
+     * onto a fresh site leaves them at zero while the donations that just
+     * landed already hold DONO-2026-00001. next() then mints a reference
+     * UNIQUE(reference) refuses, and because it runs inside the donation's own
+     * transaction the increment rolls back with the failed insert, so every
+     * later donor mints the same colliding number and no donation can be taken
+     * again. Receipts are numbered from the same counters under
+     * UNIQUE(renderer_id, receipt_number) and stop issuing the same way.
+     *
+     * A candidate is accepted only when the generator's own format() reproduces
+     * the stored string exactly, which is the only way one can collide.
+     * format() is injective, so the trailing digits are the only counter value
+     * that can produce a given reference, and a reference from another year,
+     * another prefix or another org's numbering settings is left alone instead
+     * of dragging the counter up behind it. Reading the printed form is
+     * otherwise not something to reverse-engineer: prefix, separator, padding
+     * and whether the year appears at all are configurable.
+     *
+     * Which numbering is in force therefore decides which references count, and
+     * a file carries its org's numbering with it. Run this again once that has
+     * landed and it reads the file's references in the numbering the next one
+     * will be minted under; a counter already past the file's high-water mark
+     * is left where it is, so running it twice raises nothing twice.
+     *
+     * @param array<string,mixed> $export
+     * @since 1.0.0
+     */
+    public function raiseReferenceCounters(array $export): void
+    {
+        $tables     = is_array($export['tables'] ?? null) ? $export['tables'] : [];
+        $clock      = new SystemClock();
+        $references = new ReferenceGenerator($clock);
+        $year       = (int) $clock->now()->format('Y');
+
+        foreach (self::REFERENCE_SCOPES as $scope => [$table, $column]) {
+            $high = 0;
+
+            foreach (($tables[$table] ?? []) as $row) {
+                if (! is_array($row)) continue;
+
+                $printed = trim((string) ($row[$column] ?? ''));
+                if ($printed === '' || ! preg_match('/(\d+)$/', $printed, $match)) continue;
+
+                $counter = (int) $match[1];
+                if ($counter <= $high) continue;
+                if ($references->format($scope, $year, $counter) !== $printed) continue;
+
+                $high = $counter;
+            }
+
+            // peekNext() is the last used value plus one, so the counter has
+            // already cleared $high when they are equal.
+            if ($high > 0 && $high >= $references->peekNext($scope)) {
+                $references->nextNumber($scope, $high + 1);
+            }
         }
     }
 

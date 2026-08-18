@@ -22,11 +22,10 @@ export default function PayPalPayment( { config, payment, dispatch } ) {
     const buttonsRef = useRef( null );
     const [ ready, setReady ] = useState( false );
     const [ error, setError ] = useState( '' );
-    // Cancel is safe only while nothing is approved. popupOpen covers the
-    // seconds PayPal's window sits over ours; approved is terminal, because
-    // past that point the capture or the subscription completes server-side
-    // whether or not this browser is still here, and a second submission would
-    // be a second charge.
+    // Cancel is safe only while nothing is approved and no round trip is in
+    // flight. popupOpen covers the seconds PayPal's window sits over ours;
+    // approved covers the wait for the capture or the plan record, which
+    // completes server-side whether or not this browser is still here.
     const [ popupOpen, setPopupOpen ] = useState( false );
     const [ approved, setApproved ] = useState( false );
 
@@ -96,6 +95,11 @@ export default function PayPalPayment( { config, payment, dispatch } ) {
                             custom_id: payment.reference,
                         } ),
                         onApprove: async ( data ) => {
+                            // PayPal's window is gone by the time it approves.
+                            setPopupOpen( false );
+                            // A refusal is not true of the attempt that follows
+                            // it, and a screen that says both stalls the donor.
+                            setError( '' );
                             setApproved( true );
                             try {
                                 const out = await post( 'gateways/paypal/subscription', {
@@ -112,7 +116,12 @@ export default function PayPalPayment( { config, payment, dispatch } ) {
                                         : { type: 'SUBMIT_PENDING', data: out, processing: true } );
                                 }
                             } catch ( err ) {
-                                if ( ! cancelled ) setError( err.message || i18n.error );
+                                if ( cancelled ) return;
+                                // The subscription exists at PayPal and its
+                                // first payment is taken, so approving again
+                                // would mint a second one: the buttons stay
+                                // down and Cancel is the way out.
+                                setError( err.message || i18n.error );
                             }
                         },
                     } )
@@ -122,6 +131,8 @@ export default function PayPalPayment( { config, payment, dispatch } ) {
                         // all the browser is trusted to do.
                         createOrder: () => payment.paypal.order_id,
                         onApprove: async () => {
+                            setPopupOpen( false );
+                            setError( '' );
                             setApproved( true );
                             try {
                                 const out = await post( 'gateways/paypal/capture', {
@@ -139,7 +150,13 @@ export default function PayPalPayment( { config, payment, dispatch } ) {
                                     } );
                                 }
                             } catch ( err ) {
-                                if ( ! cancelled ) setError( err.message || i18n.error );
+                                if ( cancelled ) return;
+                                setError( err.message || i18n.error );
+                                // A capture PayPal refused took no money, and
+                                // INSTRUMENT_DECLINED is the common refusal, so
+                                // the buttons come back for another funding
+                                // source. The order is still the same one.
+                                setApproved( false );
                             }
                         },
                     } );
@@ -209,13 +226,15 @@ export default function PayPalPayment( { config, payment, dispatch } ) {
                 hidden={ approved }
             />
 
-            { approved ? (
+            { approved && ! error ? (
                 <p className="dono-form__payment-loading" role="status">
                     { i18n.processing || i18n.paymentLoading }
                 </p>
             ) : null }
 
-            { ! approved ? (
+            { /* An approval whose round trip failed is not progress, so the way
+               out is offered again even though the approval stands. */ }
+            { ! approved || error ? (
                 <div className="dono-form__nav dono-form__nav--align-left">
                     <button
                         type="button"

@@ -41,6 +41,17 @@ use Throwable;
 final class StripeGateway implements PaymentGateway, SubscriptionAware, SupportsPaymentRetry, SupportsPaymentMethodUpdate
 {
     /**
+     * Dispute statuses for which the money is on the org's balance: settled in
+     * the org's favour, or an inquiry Stripe has withdrawn nothing for yet.
+     */
+    private const DISPUTE_FUNDS_HELD_BY_ORG = [
+        'won',
+        'warning_closed',
+        'warning_needs_response',
+        'warning_under_review',
+    ];
+
+    /**
      * Mode of the signing secret that verified the current webhook. Set once
      * per delivery in handleWebhook; null outside a webhook request.
      */
@@ -240,6 +251,11 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
 
             case 'charge.refunded':
                 return $this->handleChargeRefunded($eventId, $type, $object);
+
+            case 'charge.refund.updated':
+            case 'refund.updated':
+            case 'refund.failed':
+                return $this->handleRefundUpdated($eventId, $type, $object);
 
             case 'charge.dispute.funds_withdrawn':
                 return $this->handleDisputeFundsWithdrawn($eventId, $type, $object);
@@ -507,30 +523,16 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             }
         }
         foreach ($refunds as $r) {
-            $refundId = (string) ($r['id'] ?? '');
-            $amount   = Currency::fromMinorUnits((int) ($r['amount'] ?? 0), $donation->currency);
-            if ($refundId === '' || $amount <= 0) continue;
+            if (! is_array($r) || ! self::refundSettled($r)) {
+                // A bank refund is created pending and can still fail, which
+                // leaves the money with the org. charge.refund.updated is what
+                // says which way it went.
+                continue;
+            }
 
-            $reason = isset($r['reason']) && is_string($r['reason']) && $r['reason'] !== ''
-                ? $r['reason']
-                : null;
-
-            try {
-                // Idempotent: service no-ops if we already have this refund row.
-                $this->donationService->recordExternalRefund(
-                    $donation,
-                    $amount,
-                    $refundId,
-                    $reason,
-                    'gateway',
-                    is_array($r) ? $r : null
-                );
-            } catch (RuntimeException $e) {
-                if ($this->refundable($donation)) {
-                    throw $e;
-                }
-
-                return $this->unrefundable($eventId, $type, $donation, $e);
+            $stop = $this->applyRefund($eventId, $type, $donation, $r);
+            if ($stop !== null) {
+                return $stop;
             }
         }
 
@@ -540,6 +542,122 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             event_type:   $type,
             handled:      true,
         );
+    }
+
+    /**
+     * A refund changing state after it was created: a submitted bank refund
+     * settling, or being rejected and the money staying with the org.
+     *
+     * @since 1.0.0
+     */
+    private function handleRefundUpdated(string $eventId, string $type, array $refund): WebhookOutcome
+    {
+        $refundId = (string) ($refund['id'] ?? '');
+        $intentId = (string) ($refund['payment_intent'] ?? '');
+
+        if ($refundId === '' || $intentId === '') {
+            return new WebhookOutcome(
+                signature_ok: true,
+                external_id:  $eventId,
+                event_type:   $type,
+                handled:      false,
+                error:        'refund event missing id or payment_intent.',
+            );
+        }
+
+        $donation = $this->donations->findByGatewayIntent($this->id(), $intentId);
+        if (! $donation) {
+            return new WebhookOutcome(
+                signature_ok: true,
+                external_id:  $eventId,
+                event_type:   $type,
+                handled:      false,
+                error:        "No donation found for PaymentIntent {$intentId}",
+                http_status:  200,
+            );
+        }
+
+        if ($reason = $this->wrongMode((bool) $donation->is_test)) {
+            return $this->refused($eventId, $type, $reason);
+        }
+
+        $status = (string) ($refund['status'] ?? '');
+
+        if (self::refundSettled($refund)) {
+            $stop = $this->applyRefund($eventId, $type, $donation, $refund);
+            if ($stop !== null) {
+                return $stop;
+            }
+        } elseif (in_array($status, ['failed', 'canceled'], true)) {
+            // The donor was never repaid, so a refund recorded here has to come
+            // back off. Null when there is nothing standing, which is what a
+            // redelivery and a never-recorded pending refund both look like.
+            $this->donationService->reverseExternalRefund($donation, $refundId);
+        }
+
+        return new WebhookOutcome(
+            signature_ok: true,
+            external_id:  $eventId,
+            event_type:   $type,
+            handled:      true,
+        );
+    }
+
+    /**
+     * Record one Stripe refund against the donation. Returns an outcome only
+     * when the delivery has to stop there; null means carry on.
+     *
+     * @param array<string,mixed> $refund
+     *
+     * @since 1.0.0
+     */
+    private function applyRefund(string $eventId, string $type, Donation $donation, array $refund): ?WebhookOutcome
+    {
+        $refundId = (string) ($refund['id'] ?? '');
+        $amount   = Currency::fromMinorUnits((int) ($refund['amount'] ?? 0), $donation->currency);
+        if ($refundId === '' || $amount <= 0) {
+            return null;
+        }
+
+        $reason = isset($refund['reason']) && is_string($refund['reason']) && $refund['reason'] !== ''
+            ? $refund['reason']
+            : null;
+
+        try {
+            // Idempotent: service no-ops if we already have this refund row.
+            $this->donationService->recordExternalRefund(
+                $donation,
+                $amount,
+                $refundId,
+                $reason,
+                'gateway',
+                $refund
+            );
+        } catch (RuntimeException $e) {
+            if ($this->refundable($donation)) {
+                throw $e;
+            }
+
+            return $this->unrefundable($eventId, $type, $donation, $e);
+        }
+
+        return null;
+    }
+
+    /**
+     * Whether Stripe reports this refund as money the donor actually has back.
+     * An absent status is a payload that does not carry one (a dispute-driven
+     * refund, an older API version), which is only ever reported once settled.
+     *
+     * @param array<string,mixed> $refund
+     *
+     * @since 1.0.0
+     */
+    private static function refundSettled(array $refund): bool
+    {
+        $status = (string) ($refund['status'] ?? 'succeeded');
+
+        return $status === '' || $status === 'succeeded';
     }
 
     /**
@@ -1131,6 +1249,10 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             ],
         ];
 
+        // Read before the renewal call, so a row that was left pending by a
+        // delivery that died mid-way can be told from one already settled.
+        $prior = $this->donations->findByGatewayIntent($this->id(), $piId);
+
         $renewal = $this->donationService->createRenewal(
             $plan,
             $amountCents,
@@ -1140,11 +1262,17 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             $confirmResult,
         );
 
-        // Only a genuinely new renewal bumps the plan counters: a redelivered
-        // invoice.payment_succeeded returns created=false, and recordPayment's
-        // unconditional increments would permanently inflate payments_count and
-        // total_paid_cents.
-        if ($renewal['created']) {
+        // The plan is credited for the payment landing, not for the row being
+        // inserted: a redelivery that finishes a half-written renewal is the
+        // money arriving as much as the first delivery would have been. Gated on
+        // the donation this call moved to paid, which confirm() only does for
+        // the caller that won the transition, so two racing deliveries credit
+        // once between them and a plain redelivery credits not at all.
+        $credited = $renewal['created']
+            || ((string) ($prior->status ?? '') !== 'paid'
+                && (string) $renewal['donation']->status === 'paid');
+
+        if ($credited) {
             $now    = $this->clock->now()->format('Y-m-d H:i:s');
             $nextAt = isset($invoice['lines']['data'][0]['period']['end'])
                 // gmdate, not date: the column is UTC everywhere else, including
@@ -1378,13 +1506,42 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         );
     }
 
-    /** @since 1.0.0 */
+    /**
+     * A PaymentIntent whose money has gone back still reports `succeeded`, so
+     * the status alone would bank a payment the org no longer holds: counted as
+     * raised, receipted, added to the donor's total. The charge is what knows,
+     * and it is read live rather than from the event payload, because the
+     * payload is a snapshot taken before the reversal.
+     *
+     * Only a reversal covering the whole payment stops the banking. A slice
+     * going back leaves a donation the org did receive, and refusing it would
+     * lose all of it: the rest is banked and the refund events record what came
+     * back. `reversed`, not a plain failure: nothing here is a decline, and a
+     * caller that reads it as one tells a donor who was charged otherwise.
+     *
+     * @since 1.0.0
+     */
     private function buildConfirmResultFromIntent(array $intent): GatewayConfirmResult
     {
         if (($intent['status'] ?? '') !== 'succeeded') {
             return new GatewayConfirmResult(
                 success: false,
                 error:   'PaymentIntent status is ' . ($intent['status'] ?? 'unknown'),
+            );
+        }
+
+        $received = (int) ($intent['amount_received'] ?? $intent['amount'] ?? 0);
+        $reversed = $this->reversedMinorUnits($intent);
+        if ($reversed > 0 && $reversed >= $received) {
+            return new GatewayConfirmResult(
+                success:  false,
+                error:    sprintf(
+                    'PaymentIntent %s has %d of %d refunded or disputed; not banking it as paid.',
+                    (string) ($intent['id'] ?? 'unknown'),
+                    $reversed,
+                    $received
+                ),
+                reversed: true,
             );
         }
 
@@ -1406,6 +1563,89 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
                 'livemode'         => $intent['livemode'] ?? null,
             ],
         );
+    }
+
+    /**
+     * How much of this intent's charge has gone back to the donor, in minor
+     * units: refunds plus a dispute whose money Stripe has taken off the
+     * balance. Zero when the intent carries no charge to ask about.
+     *
+     * A gateway read that fails is deliberately left to throw: the webhook
+     * router turns it into a 5xx and Stripe redelivers, which is the right
+     * answer when the alternative is banking money nobody can account for.
+     *
+     * @param array<string,mixed> $intent
+     *
+     * @since 1.0.0
+     */
+    private function reversedMinorUnits(array $intent): int
+    {
+        $charge = $this->latestCharge($intent);
+        if ($charge === null) {
+            return 0;
+        }
+
+        return max(0, (int) ($charge['amount_refunded'] ?? 0)) + $this->disputeHold($charge);
+    }
+
+    /**
+     * The intent's charge as an object. Expanded when the payload carries it,
+     * fetched when the payload carries only the id, which is what the webhook
+     * event and a plain retrieve both do.
+     *
+     * @param array<string,mixed> $intent
+     *
+     * @return array<string,mixed>|null
+     *
+     * @since 1.0.0
+     */
+    private function latestCharge(array $intent): ?array
+    {
+        $charge = $intent['latest_charge'] ?? ($intent['charges']['data'][0] ?? null);
+
+        if (is_array($charge)) {
+            return $charge;
+        }
+
+        $chargeId = is_string($charge) ? $charge : '';
+        if ($chargeId === '') {
+            return null;
+        }
+
+        return $this->api->get('/charges/' . rawurlencode($chargeId) . '?expand[]=dispute');
+    }
+
+    /**
+     * Disputed money Stripe is holding off the balance. An open chargeback is a
+     * hold, because the funds were withdrawn when it was raised. An inquiry or
+     * retrieval is not: the money stays with the org while the org answers it,
+     * which is why Stripe sends no charge.dispute.funds_withdrawn for one.
+     *
+     * @param array<string,mixed> $charge
+     *
+     * @since 1.0.0
+     */
+    private function disputeHold(array $charge): int
+    {
+        $dispute = $charge['dispute'] ?? null;
+
+        if (is_string($dispute) && $dispute !== '') {
+            $dispute = $this->api->get('/disputes/' . rawurlencode($dispute));
+        }
+
+        if (! is_array($dispute)) {
+            // Disputed with nothing readable saying otherwise: the whole charge
+            // is at risk.
+            return ($charge['disputed'] ?? false) === true
+                ? max(0, (int) ($charge['amount'] ?? 0))
+                : 0;
+        }
+
+        if (in_array((string) ($dispute['status'] ?? ''), self::DISPUTE_FUNDS_HELD_BY_ORG, true)) {
+            return 0;
+        }
+
+        return max(0, (int) ($dispute['amount'] ?? 0));
     }
 
     /**

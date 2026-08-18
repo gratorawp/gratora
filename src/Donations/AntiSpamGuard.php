@@ -37,6 +37,12 @@ final class AntiSpamGuard
     private const RETRY_MAX          = 2;
     private const RETRY_TTL          = 1800;
 
+    // Gateways that take the money out of band. They have no checkout to back
+    // out of: the donor leaves with bank details and a reference to quote, so
+    // the pending row is a transfer the org is still waiting for rather than an
+    // abandoned attempt. See claimRetry.
+    private const OUT_OF_BAND_GATEWAYS = ['offline'];
+
     /** @since 1.0.0 */
     public function __construct(private IdentityHasher $hasher, private ?TestMode $testMode = null)
     {
@@ -220,6 +226,16 @@ final class AntiSpamGuard
         if ($parent->status !== 'pending'
             || $parent->paid_at !== null
             || (int) $parent->refunded_cents !== 0) {
+            return null;
+        }
+
+        // An accepted claim is stamped on the parent as retried_by, and a
+        // pending row carrying that is read as a replaced attempt: it leaves the
+        // admin list, the CSV export, the KPI counts and the donor's own
+        // donation list. For an out-of-band gateway that row is the queue entry
+        // the incoming transfer has to be matched against, and the donor is
+        // quoting its reference.
+        if (in_array((string) $parent->gateway, self::OUT_OF_BAND_GATEWAYS, true)) {
             return null;
         }
 

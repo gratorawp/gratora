@@ -8,8 +8,10 @@ use Dono\Campaigns\Campaign;
 use Dono\Analytics\ErrorLog;
 use Dono\Async\AsyncDispatcher;
 use Dono\Analytics\Event;
+use Dono\Currency\BaseCurrencyLocked;
 use Dono\Currency\FxBackfill;
 use Dono\Settings\SecretRedactor;
+use Dono\Settings\SettingsService;
 use Dono\Foundation\Maintenance\TestDataPurger;
 use Dono\Foundation\Transfer\CsvImporter;
 use Dono\Foundation\Transfer\DataExporter;
@@ -751,7 +753,13 @@ final class ToolsController
 
         $erasureWasOn = self::erasureIsOn();
 
+        $writer = new SettingsService();
+
         $applied = 0;
+        /** @var array<string,string> $refused */
+        $refused = [];
+        $locked  = false;
+
         foreach (self::SETTINGS_OPTIONS as $opt) {
             if (! array_key_exists($opt, $settings)) {
                 continue;
@@ -759,16 +767,58 @@ final class ToolsController
 
             $incoming = $settings[$opt];
 
+            // Every one of these options holds a group of keys. A scalar landing
+            // in one is not a partial restore: each reader merges what it finds
+            // over the group defaults, so the option reads as the defaults, and
+            // for the currency group that means the base silently becomes USD.
+            if (! is_array($incoming)) {
+                $refused[$opt] = __('That entry is not a settings group.', 'dono-fundraising-platform');
+                continue;
+            }
+
+            $stored = get_option($opt, []);
+            $stored = is_array($stored) ? $stored : [];
+
             // A masked value in the file means "whatever is already stored",
             // so importing an export cannot wipe the secrets it could not
             // carry.
-            if (is_array($incoming)) {
-                $stored   = get_option($opt, []);
-                $incoming = SecretRedactor::restore($incoming, is_array($stored) ? $stored : []);
+            $incoming = SecretRedactor::restore($incoming, $stored);
+
+            $group = self::groupFor($writer, $opt);
+
+            // Nothing on this install declares it, so there is no shape to check
+            // it against and nothing that would read it back. Writing the option
+            // anyway would restore a setting nobody honours, past every guard.
+            if ($group === null) {
+                $refused[$opt] = __('This site has no settings group by that name.', 'dono-fundraising-platform');
+                continue;
             }
 
-            update_option($opt, $incoming);
+            // Through the settings writer, so a restore inherits what every
+            // other writer does: the base-currency lock, the per-group type
+            // whitelist, and the dono.settings.updated broadcast that the FX
+            // snapshot, the campaign currency sync and the role capabilities
+            // hang off.
+            try {
+                $writer->update($group, $incoming);
+            } catch (BaseCurrencyLocked $e) {
+                $refused[$opt] = $e->getMessage();
+                $locked        = true;
+                continue;
+            }
+
             $applied++;
+        }
+
+        // The file's references are printed in the file's own numbering, which
+        // has only just landed. Raised here, the counter is read in the
+        // numbering the next reference is minted under, a refused numbering
+        // group included. A file from an org that sets its own prefix, padding,
+        // separator or year otherwise clears nothing, and the first donation
+        // after the restore reprints a reference the file brought in, into
+        // UNIQUE(reference).
+        if ($records !== null) {
+            $this->importer->raiseReferenceCounters($body);
         }
 
         // A file can carry automatic erasure switched on, and it lands by
@@ -779,8 +829,25 @@ final class ToolsController
             DonorRetention::deferBy();
         }
 
-        if (isset($settings['dono_roles']['mapping']) && is_array($settings['dono_roles']['mapping'])) {
-            Capabilities::applyMapping($settings['dono_roles']['mapping']);
+        // A refusal reaches the admin as a refusal. Reported inside a 200 it
+        // reads as "settings restored", and the one group that did not land is
+        // the one holding the unit every recorded total is denominated in.
+        if ($refused !== []) {
+            return new \WP_Error(
+                $locked ? 'dono_base_currency_locked' : 'dono_invalid_import',
+                sprintf(
+                    /* translators: %s: one or more refusal messages, already sentences. */
+                    __('Part of that file was not restored. %s', 'dono-fundraising-platform'),
+                    implode(' ', $refused)
+                ),
+                [
+                    'status'   => $locked ? 409 : 422,
+                    'applied'  => $applied,
+                    'refused'  => $refused,
+                    'imported' => $records !== null,
+                    'records'  => $records,
+                ]
+            );
         }
 
         return new WP_REST_Response([
@@ -789,6 +856,26 @@ final class ToolsController
             'imported' => $records !== null,
             'records'  => $records,
         ], 200);
+    }
+
+    /**
+     * The settings group that owns an option, or null when nothing declares it.
+     *
+     * Read off the group map rather than a second list here, so a group an
+     * add-on registers through `dono.settings.groups` is written the same way as
+     * a core one.
+     *
+     * @since 1.0.0
+     */
+    private static function groupFor(SettingsService $settings, string $option): ?string
+    {
+        foreach ($settings->groups() as $group => $cfg) {
+            if (is_array($cfg) && ($cfg['option'] ?? null) === $option) {
+                return (string) $group;
+            }
+        }
+
+        return null;
     }
 
     /**

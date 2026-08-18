@@ -657,6 +657,18 @@ final class DonationsController
             ], 200);
         }
 
+        // Money that reached the gateway and went back is not a decline. Failing
+        // the donation here would write 'failed' over a donor who was charged,
+        // fire dono.donation.failed with it, and send the payment-failed notice.
+        // The row is left where it stands for the refund path to reconcile.
+        if (! $result->success && $result->reversed) {
+            return new WP_Error(
+                'dono_confirm_reversed',
+                __('This payment has been returned to the donor, so it cannot be confirmed as paid.', 'dono-fundraising-platform'),
+                ['status' => 409]
+            );
+        }
+
         if (! $result->success) {
             $this->donations->markFailed($donation, $result->error ?? __('Gateway returned failure.', 'dono-fundraising-platform'));
             return new WP_Error('dono_confirm_failed', $result->error ?? __('Confirmation failed.', 'dono-fundraising-platform'), ['status' => 402]);

@@ -25,6 +25,10 @@ final class GatewayConfirmResult
         // is holding it. A caller that treats this as failure tells the donor
         // their payment did not go through while it is still going through.
         public readonly bool $pending = false,
+        // Also not failure: the payment went through and the money has since
+        // gone back. The donation cannot be banked, but it was never declined,
+        // so a caller must not fail it and must not notify the donor of one.
+        public readonly bool $reversed = false,
     ) {
     }
 

@@ -1101,7 +1101,7 @@ final class CoreCommandProvider
 
         $r->register(new Command(
             'recurring.cancel_for_campaign',
-            'Cancel every active recurring plan attributed to a campaign.',
+            'Cancel every live recurring plan attributed to a campaign.',
             $this->schema([
                 'campaign_id' => ['type' => 'integer', 'minimum' => 1],
                 'reason'      => ['type' => ['string', 'null']],
@@ -1117,9 +1117,11 @@ final class CoreCommandProvider
                 }
                 // Queued, for the reason on CampaignCancelRecurringJob: one
                 // blocking gateway call per plan does not fit in a request.
+                // The same count the confirmation preview showed, and the same
+                // set the sweep takes: paused and past_due plans still bill.
                 $queued = (int) RecurringPlan::query()
                     ->where('campaign_id', $campaignId)
-                    ->where('status', 'active')
+                    ->whereIn('status', RecurringPlanRepository::LIVE_STATUSES)
                     ->where('is_test', false)
                     ->count();
 
@@ -1133,16 +1135,16 @@ final class CoreCommandProvider
                     'queued'      => $queued,
                 ];
             },
-            $this->meta(['destructive' => true, 'agent_hint' => 'Cancels ALL active recurring donations on the campaign at once and cannot be undone. To cancel a single plan use recurring.cancel instead.']),
+            $this->meta(['destructive' => true, 'agent_hint' => 'Cancels ALL live recurring donations on the campaign at once, including paused and past-due ones, and cannot be undone. To cancel a single plan use recurring.cancel instead.']),
             function (array $in) use ($c): array {
                 $campaign = $c->get(CampaignRepository::class)->findById((int) ($in['campaign_id'] ?? 0));
                 if (! $campaign) {
                     return [];
                 }
-                $active = (int) ($c->get(RecurringPlanRepository::class)->activeForCampaign((int) $campaign->id)['count'] ?? 0);
+                $live = (int) ($c->get(RecurringPlanRepository::class)->activeForCampaign((int) $campaign->id)['count'] ?? 0);
                 return [[
-                    'label' => sprintf('Cancel all active recurring plans on %s', (string) $campaign->title),
-                    'to'    => $active === 1 ? '1 active plan' : sprintf('%d active plans', $active),
+                    'label' => sprintf('Cancel all live recurring plans on %s', (string) $campaign->title),
+                    'to'    => $live === 1 ? '1 live plan' : sprintf('%d live plans', $live),
                 ]];
             },
         ));

@@ -25,6 +25,9 @@ final class StripeWebhookProvisioner
         'payment_intent.processing',
         'payment_intent.payment_failed',
         'charge.refunded',
+        // A bank refund is created pending and can still fail, which returns
+        // the money to the org while the donor keeps waiting for it.
+        'charge.refund.updated',
         'charge.dispute.funds_withdrawn',
         // Won on appeal: Stripe puts the money back, so Dono has to as well.
         'charge.dispute.funds_reinstated',
@@ -64,20 +67,38 @@ final class StripeWebhookProvisioner
             return;
         }
 
-        // Drop any prior Dono endpoint at this URL first: avoids duplicates and
-        // yields a fresh secret (Stripe returns the signing secret only on create).
         $existing = $this->api->get('/webhook_endpoints?limit=100');
+
+        // The whole list first: an endpoint kept without dropping its duplicates
+        // leaves them delivering at their own api_version, signed with a secret
+        // the site does not hold, until Stripe disables them for failing.
+        $matched = [];
+        $usable  = [];
         foreach ((array) ($existing['data'] ?? []) as $ep) {
             if (! is_array($ep) || ($ep['url'] ?? '') !== $url || ($ep['id'] ?? '') === '') {
                 continue;
             }
-            try {
-                $this->api->delete('/webhook_endpoints/' . rawurlencode((string) $ep['id']));
-            } catch (RuntimeException $e) {
-                // Non-fatal: a leftover endpoint just means a stale duplicate.
+            $id        = (string) $ep['id'];
+            $matched[] = $id;
+            if ($this->isUsable($ep)) {
+                $usable[] = $id;
             }
         }
 
+        // An endpoint that already delivers what the handlers read, and whose
+        // secret is on file, is what provisioning is for. Recreating it would
+        // mint a new signing secret, and every event Stripe is mid-retry on was
+        // signed with the old one. Two usable ones are a different matter: the
+        // stored secret verifies exactly one and nothing says which, so both go.
+        if (count($usable) === 1 && $this->hasSecret($isTest)) {
+            $this->deleteEndpoints(array_diff($matched, $usable));
+
+            return;
+        }
+
+        // Created before anything is dropped: a create that fails must leave the
+        // account with the endpoint and the secret it had, or every donation
+        // from that moment is charged with no event to bank it.
         $created = $this->api->post('/webhook_endpoints', [
             'url'            => $url,
             'enabled_events' => self::EVENTS,
@@ -89,9 +110,72 @@ final class StripeWebhookProvisioner
         ]);
 
         $secret = (string) ($created['secret'] ?? '');
-        if ($secret !== '') {
-            $this->storeSecret($isTest, $secret);
+        if ($secret === '') {
+            $newId = (string) ($created['id'] ?? '');
+            if ($newId !== '') {
+                try {
+                    $this->api->delete('/webhook_endpoints/' . rawurlencode($newId));
+                } catch (RuntimeException $e) {
+                    // Best effort: a duplicate endpoint whose secret is unknown
+                    // is the state the throw below reports.
+                }
+            }
+            throw new RuntimeException(esc_html('Stripe returned a webhook endpoint with no signing secret.'));
         }
+
+        $this->storeSecret($isTest, $secret);
+
+        $this->deleteEndpoints($matched);
+    }
+
+    /**
+     * @param iterable<int,string> $ids
+     *
+     * @since 1.0.0
+     */
+    private function deleteEndpoints(iterable $ids): void
+    {
+        foreach ($ids as $id) {
+            try {
+                $this->api->delete('/webhook_endpoints/' . rawurlencode($id));
+            } catch (RuntimeException $e) {
+                // Non-fatal: a leftover endpoint just means a stale duplicate.
+            }
+        }
+    }
+
+    /**
+     * Whether an endpoint Stripe already has would deliver every event the
+     * handlers act on, rendered at the version they read.
+     *
+     * @param array<string,mixed> $endpoint
+     *
+     * @since 1.0.0
+     */
+    private function isUsable(array $endpoint): bool
+    {
+        if ((string) ($endpoint['status'] ?? '') !== 'enabled') {
+            return false;
+        }
+        if ((string) ($endpoint['api_version'] ?? '') !== StripeApi::API_VERSION) {
+            return false;
+        }
+
+        $enabled = array_map('strval', (array) ($endpoint['enabled_events'] ?? []));
+        if (in_array('*', $enabled, true)) {
+            return true;
+        }
+
+        return array_diff(self::EVENTS, $enabled) === [];
+    }
+
+    /** @since 1.0.0 */
+    private function hasSecret(bool $isTest): bool
+    {
+        $opt    = get_option('dono_gateway_config', []);
+        $stripe = is_array($opt) && is_array($opt['stripe'] ?? null) ? $opt['stripe'] : [];
+
+        return (string) ($stripe[$isTest ? 'webhook_secret_test' : 'webhook_secret_live'] ?? '') !== '';
     }
 
     /**
