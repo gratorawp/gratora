@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Dono\Tests\Integration;
 
+use Dono\Foundation\Plugin;
+use Dono\Gateways\GatewayManager;
 use Dono\Vendor\Queryable\DB;
 use ReflectionProperty;
 use WP_UnitTestCase;
@@ -71,8 +73,46 @@ abstract class IntegrationTestCase extends WP_UnitTestCase
 
     protected function tearDown(): void
     {
+        $this->restoreGateways();
         $this->setQueryableTransactionDepth(0);
         parent::tearDown();
+    }
+
+    /** @var array<string,object>|null The registry as it stood before a test took a gateway out. */
+    private ?array $gatewaysBefore = null;
+
+    /**
+     * Take a gateway out of the registry for one test.
+     *
+     * The registry is process-wide and the container memoises it, so a test
+     * that unregisters and walks away leaves every later test in the process
+     * running against a site missing a payment method. Restored in tearDown
+     * rather than left to the next suite's setUp to register its own.
+     */
+    protected function deregisterGateway(string $id): void
+    {
+        $manager = Plugin::instance()->container->get(GatewayManager::class);
+        $prop    = new ReflectionProperty($manager, 'gateways');
+        $prop->setAccessible(true);
+
+        $all = (array) $prop->getValue($manager);
+        $this->gatewaysBefore ??= $all;
+        unset($all[$id]);
+        $prop->setValue($manager, $all);
+    }
+
+    private function restoreGateways(): void
+    {
+        if ($this->gatewaysBefore === null) {
+            return;
+        }
+
+        $manager = Plugin::instance()->container->get(GatewayManager::class);
+        $prop    = new ReflectionProperty($manager, 'gateways');
+        $prop->setAccessible(true);
+        $prop->setValue($manager, $this->gatewaysBefore);
+
+        $this->gatewaysBefore = null;
     }
 
     /**

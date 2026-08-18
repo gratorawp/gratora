@@ -174,6 +174,60 @@ final class CsvImportTimezoneTest extends IntegrationTestCase
         );
     }
 
+    /**
+     * "Carries a time" is a question about the parsed value, not about whether
+     * the text has a colon in it. A gateway export writes 12-hour times and ISO
+     * basic stamps, and reading those as date-only overwrote the recorded time
+     * with noon: the day survived at every offset in real use, but the time of
+     * day was wrong and the order donations arrived in within a day was lost.
+     *
+     * @dataProvider timeBearingCells
+     */
+    public function test_a_cell_carrying_a_time_in_any_form_keeps_it(string $cell, string $expectedLocal): void
+    {
+        update_option('timezone_string', 'America/New_York');
+
+        $email = 'timeform' . md5($cell) . '@example.test';
+        $this->import("Email,Amount,Date\n{$email},50,{$cell}\n");
+
+        $this->assertSame(
+            $expectedLocal,
+            wp_date('Y-m-d H:i', strtotime((string) $this->donationFor($email)->paid_at)),
+            "the time {$cell} gave"
+        );
+    }
+
+    /** @return array<string,array{0:string,1:string}> */
+    public function timeBearingCells(): array
+    {
+        return [
+            'colon'      => ['2024-03-15 21:30', '2024-03-15 21:30'],
+            '12 hour'    => ['2024-03-15 9pm', '2024-03-15 21:00'],
+            'no colon'   => ['2024-03-15 2130', '2024-03-15 21:30'],
+            // Names its own zone, so it is that instant, read back in New York.
+            'iso basic'  => ['20240315T093000Z', '2024-03-15 05:30'],
+        ];
+    }
+
+    /** And a date with no time is still anchored at noon, away from either edge. */
+    public function test_a_date_only_cell_in_any_form_is_still_noon(): void
+    {
+        update_option('timezone_string', 'America/New_York');
+
+        // The third is quoted, as a cell carrying a comma has to be in a real
+        // file, so the parser is exercised on it rather than around it.
+        foreach (['2024-03-15', '20240315', '"March 15, 2024"', '15 March 2024'] as $i => $cell) {
+            $email = "dateonly{$i}@example.test";
+            $this->import("Email,Amount,Date\n{$email},50,{$cell}\n");
+
+            $this->assertSame(
+                '2024-03-15 12:00',
+                wp_date('Y-m-d H:i', strtotime((string) $this->donationFor($email)->paid_at)),
+                "{$cell} carries no time"
+            );
+        }
+    }
+
     public function test_an_unreadable_cell_is_still_refused(): void
     {
         update_option('timezone_string', 'America/New_York');

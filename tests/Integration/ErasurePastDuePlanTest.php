@@ -48,16 +48,6 @@ final class ErasurePastDuePlanTest extends IntegrationTestCase
         return [$donor, $plan];
     }
 
-    private function deregister(string $id): void
-    {
-        $manager = Plugin::instance()->container->get(GatewayManager::class);
-        $prop = new \ReflectionProperty($manager, 'gateways');
-        $prop->setAccessible(true);
-        $all = $prop->getValue($manager);
-        unset($all[$id]);
-        $prop->setValue($manager, $all);
-    }
-
     public function test_a_past_due_plan_is_ended_by_erasure(): void
     {
         [$donor, $plan] = $this->donorWithPlan('offline', '', 'past_due');
@@ -72,7 +62,7 @@ final class ErasurePastDuePlanTest extends IntegrationTestCase
     public function test_erasure_aborts_when_a_past_due_plan_cannot_be_stopped(): void
     {
         [$donor, $plan] = $this->donorWithPlan('stripe', 'sub_pastdue_123', 'past_due');
-        $this->deregister('stripe');
+        $this->deregisterGateway('stripe');
 
         try {
             $this->donors()->redact($donor);

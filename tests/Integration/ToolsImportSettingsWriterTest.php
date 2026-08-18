@@ -194,6 +194,43 @@ final class ToolsImportSettingsWriterTest extends IntegrationTestCase
         $res = $this->post(['settings' => ['dono_consents' => ['purposes' => [['key' => 'planted']]]]]);
 
         $this->assertSame(422, $res->get_status());
-        $this->assertFalse(get_option('dono_consents'), 'nothing is written past the writer');
+        // The planted value, not the option's existence: the integration
+        // database is shared, so asserting the option was never created only
+        // holds until something else in the suite writes one.
+        $stored = get_option('dono_consents');
+        $keys   = array_column((array) (is_array($stored) ? ($stored['purposes'] ?? []) : []), 'key');
+        $this->assertNotContains('planted', $keys, 'nothing is written past the writer');
+    }
+
+    /**
+     * PayPal registers only once keys are connected and sandbox only while
+     * org-wide test mode is on, so on the site a backup is restored onto,
+     * neither need be registered. A key nothing declares is dropped, and
+     * GatewayManager::isOn() reads a missing enabled flag as on, so an org's
+     * decision to switch PayPal off came back switched on the moment they
+     * re-entered their credentials. Credentials live in an encrypted setting
+     * the export does not carry, so re-entry is the ordinary restore path.
+     */
+    public function test_a_restore_keeps_the_settings_of_a_gateway_this_site_has_not_registered(): void
+    {
+        // The registry is process-wide, and a PayPal suite earlier in the run
+        // leaves it registered, which would hide the very drop under test.
+        $this->deregisterGateway('paypal');
+        $manager = Plugin::instance()->container->get(\Dono\Gateways\GatewayManager::class);
+        $this->assertNull($manager->get('paypal'), 'unregistered here, as on a fresh restore target');
+
+        $res = $this->post(['settings' => ['dono_gateway_config' => [
+            'test_mode' => false,
+            'paypal'    => ['enabled' => false],
+            'offline'   => ['enabled' => true],
+        ]]]);
+        $this->assertSame(200, $res->get_status(), (string) wp_json_encode($res->get_data()));
+
+        $stored = (array) get_option('dono_gateway_config', []);
+        $this->assertSame(
+            ['enabled' => false],
+            $stored['paypal'] ?? null,
+            'the org decided PayPal was off, and a restore has to say so'
+        );
     }
 }

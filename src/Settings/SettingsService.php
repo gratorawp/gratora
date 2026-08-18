@@ -82,6 +82,15 @@ final class SettingsService
                     'instructions' => '',
                     'bank_details' => '',
                 ],
+                // Declared here rather than left to the runtime declaration,
+                // because both register conditionally: PayPal only once keys
+                // are connected, sandbox only while org-wide test mode is on.
+                // A key nothing declares is dropped, so a restore onto a site
+                // that has not re-entered its PayPal credentials yet lost the
+                // org's "PayPal off" decision, and isOn() defaults a missing
+                // flag to on, so the method came back switched on.
+                'paypal'  => [],
+                'sandbox' => [],
             ],
         ],
         'privacy' => [

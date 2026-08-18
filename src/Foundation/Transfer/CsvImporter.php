@@ -504,7 +504,13 @@ final class CsvImporter
             return null;
         }
 
-        if (preg_match('/\d{1,2}:\d{2}/', $raw) !== 1) {
+        // Ask the parsed value, not the text. Matching a colon misses every
+        // other time form a real export writes: "9pm", "2130", the ISO basic
+        // "20240315T093000Z" and a bare unix stamp all carry a time this then
+        // overwrote with noon, losing the recorded time of day and the order
+        // donations arrived in within a day.
+        $fields = date_parse($raw);
+        if (($fields['hour'] ?? false) === false) {
             $parsed = $parsed->setTime(12, 0);
         }
 
