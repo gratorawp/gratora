@@ -23,7 +23,12 @@ final class AntiSpamGuard
     private const IP_MAX             = 10;
     private const IP_WINDOW          = 900;
     private const EMAIL_MAX          = 3;
-    private const EMAIL_WINDOW       = 3600;
+    // Anyone can type anyone's address, so this counter is addressable by a
+    // stranger and spending it refuses the person who owns it. The window is
+    // what bounds that: it decides how long an outsider can hold a named donor
+    // out of donating, and five minutes is short enough that a donor who tries
+    // again gets through. The per-IP cap is what actually bounds volume.
+    private const EMAIL_WINDOW       = 300;
     // The token is a coarse day bucket, not a per-render timestamp, so a form
     // served from a page cache still validates. Replay inside the window is
     // bounded by the IP/email rate limits.
@@ -314,25 +319,52 @@ final class AntiSpamGuard
         $key  = $base . '_' . ($bucket ?? (int) floor(time() / $window));
         $name = '_transient_' . $key;
 
-        // add_option is an INSERT against option_name's unique index, so of any
-        // number of concurrent first attempts exactly one creates the row and
-        // the rest fall through to the UPDATE, which MySQL serialises.
-        if (! add_option($name, '1', '', false)) {
-            $wpdb->query($wpdb->prepare(
+        // INSERT IGNORE rather than add_option, which consults the notoptions
+        // cache and, when that cache says a row is absent, writes through
+        // ON DUPLICATE KEY UPDATE and sets a live counter back to 1. With a
+        // persistent object cache a losing concurrent first insert leaves
+        // exactly that entry behind, which hands every cap here a free reset.
+        // IGNORE is the one form that cannot overwrite: of any number of
+        // concurrent first attempts one creates the row, the rest do nothing
+        // and fall through to the UPDATE, which MySQL serialises.
+        $created = $wpdb->query($wpdb->prepare(
+            "INSERT IGNORE INTO {$wpdb->options} (option_name, option_value, autoload) VALUES (%s, '1', 'off')",
+            $name
+        ));
+
+        if ($created === false) {
+            return PHP_INT_MAX;
+        }
+
+        if ($created === 0) {
+            if (false === $wpdb->query($wpdb->prepare(
                 "UPDATE {$wpdb->options} SET option_value = option_value + 1 WHERE option_name = %s",
                 $name
-            ));
-            wp_cache_delete($name, 'options');
+            ))) {
+                return PHP_INT_MAX;
+            }
         }
+
+        wp_cache_delete($name, 'options');
+        wp_cache_delete('notoptions', 'options');
 
         // Only so the existing transient GC reclaims the bucket; expiry itself
         // is structural, an old bucket is simply never named again.
-        add_option('_transient_timeout_' . $key, (string) (time() + $window * 2), '', false);
+        $wpdb->query($wpdb->prepare(
+            "INSERT IGNORE INTO {$wpdb->options} (option_name, option_value, autoload) VALUES (%s, %s, 'off')",
+            '_transient_timeout_' . $key,
+            (string) (time() + $window * 2)
+        ));
 
-        return (int) $wpdb->get_var($wpdb->prepare(
+        $count = $wpdb->get_var($wpdb->prepare(
             "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s",
             $name
         ));
+
+        // A counter this cannot read is a limit it cannot enforce, and every
+        // caller reads a low number as room to spare. Refusing is the only
+        // answer that does not turn a database in trouble into an open door.
+        return $count === null ? PHP_INT_MAX : (int) $count;
     }
 
     /** @since 1.0.0 */

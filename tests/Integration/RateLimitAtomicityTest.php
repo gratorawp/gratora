@@ -27,6 +27,51 @@ final class RateLimitAtomicityTest extends IntegrationTestCase
         return 'limiter-' . uniqid() . '@example.test';
     }
 
+    /**
+     * WP's add_option consults the notoptions cache and writes through
+     * ON DUPLICATE KEY UPDATE, so on a site with a persistent object cache a
+     * live counter can be set back to 1. A losing concurrent first insert is
+     * what leaves that entry behind, and every cap routed through hit() takes
+     * the reset with it, including the portal mailbox cap that exists to stop
+     * a donor being email bombed.
+     */
+    public function test_a_counter_survives_a_cache_that_says_its_row_is_absent(): void
+    {
+        $base = 'ratelimit-probe-' . uniqid();
+
+        $this->assertSame(1, $this->guard()->hit($base, 900));
+        $this->assertSame(2, $this->guard()->hit($base, 900));
+        $this->assertSame(3, $this->guard()->hit($base, 900));
+
+        $name       = '_transient_' . $base . '_' . (int) floor(time() / 900);
+        $notoptions = wp_cache_get('notoptions', 'options');
+        $notoptions = is_array($notoptions) ? $notoptions : [];
+        $notoptions[$name] = true;
+        wp_cache_set('notoptions', $notoptions, 'options');
+
+        $this->assertSame(
+            4,
+            $this->guard()->hit($base, 900),
+            'a poisoned notoptions entry must not hand the caller a fresh allowance'
+        );
+    }
+
+    /**
+     * The counter is addressable by anyone who knows an email address, so
+     * spending it refuses the person who owns it. The window is what bounds how
+     * long an outsider can hold a named donor out of donating.
+     */
+    public function test_the_email_lockout_cannot_be_held_for_an_hour(): void
+    {
+        $window = (new \ReflectionClass(AntiSpamGuard::class))->getConstant('EMAIL_WINDOW');
+
+        $this->assertLessThanOrEqual(
+            300,
+            $window,
+            'a stranger can spend this counter, so its window is the length of the lockout they can impose'
+        );
+    }
+
     /** EMAIL_MAX is 3, so the fourth attempt is the one that must be refused. */
     public function test_the_email_quota_refuses_the_attempt_past_the_limit(): void
     {
