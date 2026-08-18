@@ -209,6 +209,9 @@ final class AntiSpamGuard
      * Returns null on any refusal, and the caller falls back to the email
      * quota, so a refusal here is never itself an error the donor sees.
      *
+     * @param array{amount_cents:int,currency:string,frequency:string} $describes
+     *   what this submission is for, which has to be the parent's own donation
+     *
      * @return array{group: string, born: int, parent: string}|null
      *
      * @since 1.0.0
@@ -218,7 +221,8 @@ final class AntiSpamGuard
         string $parentEmailHash,
         string $rawStatusToken,
         string $email,
-        ?int $formId
+        ?int $formId,
+        array $describes
     ): ?array {
         $storedToken = (string) $parent->status_token_hash;
         if ($rawStatusToken === '' || $storedToken === '') {
@@ -245,6 +249,20 @@ final class AntiSpamGuard
         }
 
         if ((int) ($parent->form_id ?? 0) !== (int) ($formId ?? 0)) {
+            return null;
+        }
+
+        // The relief is for one donation tried a second way, so the child has
+        // to be that donation. An accepted claim stamps retried_by on the
+        // parent, and the parent's own detail page renders it as the donation
+        // that replaced this one: without this, a EUR 1.00 submission can carry
+        // a $1000 attempt's token and the admin is given a false account of one
+        // donor's decision, which is also what lets an unrelated donation hide
+        // an earlier one. A donor who changes their mind about the amount is
+        // making a new decision and falls back to the ordinary email quota.
+        if ((int) ($describes['amount_cents'] ?? 0) !== (int) $parent->amount_cents
+            || strtoupper((string) ($describes['currency'] ?? '')) !== strtoupper((string) $parent->currency)
+            || (string) ($describes['frequency'] ?? '') !== (string) $parent->frequency) {
             return null;
         }
 

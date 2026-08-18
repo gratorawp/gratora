@@ -53,6 +53,16 @@ final class RecurringPlan extends Model
     public int $payments_count = 0;
     public int $total_paid_cents = 0;
     public int $failed_renewals_count = 0;
+    /**
+     * The delivery that last counted a failed renewal.
+     *
+     * A gateway redelivers anything it did not get a 2xx for, including a
+     * delivery whose handler finished and whose response was lost, so without a
+     * marker one card decline counts as three: the plan and the donor's own
+     * screen report attempts that never happened, and the decline notice is
+     * suppressed because it only goes out on the first.
+     */
+    public string $last_failed_event_id = '';
     public bool $is_test = false;
     public string $created_at;
     public string $updated_at;
@@ -87,6 +97,10 @@ RecurringPlan::schema(function (Table $t): void {
     $t->integer('payments_count')->unsigned()->default(0);
     $t->bigInteger('total_paid_cents')->unsigned()->default(0);
     $t->integer('failed_renewals_count')->unsigned()->default(0);
+    // Empty rather than nullable: the claim is a conditional update comparing
+    // against this column, and every comparison with NULL is false, so a
+    // nullable column would let the first delivery for a plan through twice.
+    $t->string('last_failed_event_id', 191)->default('');
     // Mode is fixed at creation from the originating donation; renewal and
     // cancel resolve the Stripe account from this, never the mutable setting.
     $t->boolean('is_test')->default(false);

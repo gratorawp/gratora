@@ -207,7 +207,7 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
     }
 
     /** @param array<string,mixed> $resource */
-    private function postWebhook(string $type, array $resource): \WP_REST_Response
+    private function postWebhook(string $type, array $resource, ?string $eventId = null): \WP_REST_Response
     {
         $req = new WP_REST_Request('POST', '/dono/v1/webhooks/paypal');
         $req->set_header('content-type', 'application/json');
@@ -221,7 +221,7 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
             $req->set_header($k, $v);
         }
         $req->set_body((string) wp_json_encode([
-            'id'         => 'WH-EVT-' . bin2hex(random_bytes(4)),
+            'id'         => $eventId ?? 'WH-EVT-' . bin2hex(random_bytes(4)),
             'event_type' => $type,
             'resource'   => $resource,
         ]));
@@ -569,6 +569,32 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
         $plan = $this->plans()->findBySubscriptionId('paypal', 'I-SUB-1');
         $this->assertSame(1, (int) $plan->failed_renewals_count, 'the failure is counted for dunning');
         $this->assertSame(1, $failures, 'and announced, so the donor is emailed');
+    }
+
+    /**
+     * PayPal retries for three days whenever it did not get a 2xx, including a
+     * handler that finished and whose response was lost. A decline counted per
+     * delivery reads on the plan as attempts the donor's card never made.
+     */
+    public function test_a_redelivered_denial_counts_once(): void
+    {
+        $reference = $this->createRecurringDonation();
+        $this->recordSubscription($reference);
+
+        $failures = 0;
+        add_action('dono.recurring.renewal_failed', static function () use (&$failures): void { $failures++; });
+
+        $sale = [
+            'id'                   => 'SALE-DENIED-DUP',
+            'billing_agreement_id' => 'I-SUB-1',
+            'amount'               => ['total' => '25.00', 'currency' => 'USD'],
+        ];
+        $this->postWebhook('PAYMENT.SALE.DENIED', $sale, 'WH-EVT-SAME');
+        $this->postWebhook('PAYMENT.SALE.DENIED', $sale, 'WH-EVT-SAME');
+
+        $plan = $this->plans()->findBySubscriptionId('paypal', 'I-SUB-1');
+        $this->assertSame(1, (int) $plan->failed_renewals_count, 'one denial is one attempt');
+        $this->assertSame(1, $failures, 'and the donor is told once');
     }
 
     public function test_paypal_suspending_a_subscription_marks_it_past_due(): void

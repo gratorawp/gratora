@@ -127,14 +127,49 @@ final class RecurringPlanRepository
         $plan->updated_at = $occurredAt;
     }
 
-    /** @since 1.0.0 */
-    public function recordFailedRenewal(RecurringPlan $plan, string $occurredAt): void
+    /**
+     * Count one failed renewal, at most once per gateway delivery.
+     *
+     * @param  string $eventId the gateway's own id for this delivery, which it
+     *   reuses on every redelivery of the same event. Empty means the caller
+     *   cannot name the delivery, and every call counts.
+     * @return bool whether this call was the one that counted it, so the caller
+     *   fires the notice and the log line exactly once for one decline.
+     *
+     * @since 1.0.0
+     */
+    public function recordFailedRenewal(RecurringPlan $plan, string $occurredAt, string $eventId = ''): bool
     {
-        DB::table('dono_recurring_plans')->where('id', $plan->id)->update(['updated_at' => $occurredAt]);
+        // Claim and count are separate statements, so the claim carries the
+        // condition: the winner is whoever moves the marker, and a redelivery
+        // or a second concurrent delivery of the same event matches nothing.
+        if ($eventId !== '') {
+            $claim = DB::table('dono_recurring_plans')
+                ->where('id', $plan->id)
+                ->where('last_failed_event_id', $eventId, '<>')
+                ->update(['last_failed_event_id' => $eventId, 'updated_at' => $occurredAt]);
+
+            if ((int) ($claim->affectedRows ?? 0) === 0) {
+                return false;
+            }
+        } else {
+            DB::table('dono_recurring_plans')->where('id', $plan->id)->update(['updated_at' => $occurredAt]);
+        }
+
         DB::table('dono_recurring_plans')->where('id', $plan->id)->increment('failed_renewals_count');
 
-        $plan->failed_renewals_count = (int) $plan->failed_renewals_count + 1;
+        // Read back rather than adding one to what was read before the
+        // increment: the attempt number rides on this into the donor's notice,
+        // and two deliveries racing would otherwise both call themselves the
+        // first attempt and both send it.
+        $fresh = RecurringPlan::query()->where('id', (int) $plan->id)->get();
+        $plan->failed_renewals_count = $fresh instanceof RecurringPlan
+            ? (int) $fresh->failed_renewals_count
+            : (int) $plan->failed_renewals_count + 1;
+        $plan->last_failed_event_id = $eventId;
         $plan->updated_at = $occurredAt;
+
+        return true;
     }
 
     /**

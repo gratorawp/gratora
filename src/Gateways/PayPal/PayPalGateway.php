@@ -668,6 +668,18 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
             return null;
         }
 
+        // Recovery is the one plan path that writes before there is a row to
+        // check, so the mode question is asked of the donation the resource
+        // names instead. Asking it afterwards refuses a delivery that has
+        // already created and activated the plan, which is the whole of what
+        // the guard exists to prevent.
+        $reference = trim((string) ($sub['custom_id'] ?? ''));
+        $donation  = $reference !== '' ? $this->donations->findByReference($reference) : null;
+        if ($donation instanceof Donation
+            && WebhookPaymentGuard::refuseToTouch($donation, $this->id(), $this->verifiedIsTest) !== null) {
+            return null;
+        }
+
         try {
             return $this->planRecorder->record($sub);
         } catch (PayPalPlanRefused $e) {
@@ -793,11 +805,15 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
             return $this->refused($eventId, $type, $reason);
         }
 
-        $this->planRepo->recordFailedRenewal($plan, $this->now());
-
-        // PayPal does not give a decline reason on these events, and inventing
-        // one reads to the donor as though we know something we do not.
-        $this->donationService->recordRecurringFailure($plan, null);
+        // Keyed on the delivery, because PayPal redelivers for three days
+        // whenever it did not get a 2xx, and a decline counted twice reads on
+        // the plan as two attempts the donor's card never made.
+        if ($this->planRepo->recordFailedRenewal($plan, $this->now(), $eventId)) {
+            // PayPal does not give a decline reason on these events, and
+            // inventing one reads to the donor as though we know something we
+            // do not.
+            $this->donationService->recordRecurringFailure($plan, null);
+        }
 
         return new WebhookOutcome(
             signature_ok: true,

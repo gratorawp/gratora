@@ -1401,13 +1401,19 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         }
 
         $now = $this->clock->now()->format('Y-m-d H:i:s');
-        $this->plans->recordFailedRenewal($plan, $now);
 
-        // Stripe puts the decline text on the finalization error when it has
-        // one; a plain card decline arrives with nothing useful at invoice
-        // level, and inventing a reason is worse than giving none.
-        $reason = $invoice['last_finalization_error']['message'] ?? null;
-        $this->donationService->recordRecurringFailure($plan, $reason !== null ? (string) $reason : null);
+        // Only a delivery that has not already been counted moves the plan or
+        // tells the donor. Stripe retries until it gets a 2xx, which includes a
+        // handler that finished and whose response was lost, and the notice
+        // goes out on the first attempt alone: counted twice, one decline
+        // silently becomes attempt two and the donor is never told at all.
+        if ($this->plans->recordFailedRenewal($plan, $now, $eventId)) {
+            // Stripe puts the decline text on the finalization error when it
+            // has one; a plain card decline arrives with nothing useful at
+            // invoice level, and inventing a reason is worse than giving none.
+            $reason = $invoice['last_finalization_error']['message'] ?? null;
+            $this->donationService->recordRecurringFailure($plan, $reason !== null ? (string) $reason : null);
+        }
 
         return new WebhookOutcome(
             signature_ok: true,
@@ -1613,7 +1619,8 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         }
 
         $received = (int) ($intent['amount_received'] ?? $intent['amount'] ?? 0);
-        $reversed = $this->reversedMinorUnits($intent);
+        $charge   = $this->latestCharge($intent);
+        $reversed = $this->reversedFrom($charge);
         if ($reversed > 0 && $reversed >= $received) {
             return new GatewayConfirmResult(
                 success:  false,
@@ -1627,17 +1634,25 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             );
         }
 
-        $charge = $intent['latest_charge'] ?? null;
-        $method = $intent['payment_method'] ?? null;
+        $chargeRef = $intent['latest_charge'] ?? null;
 
-        // Brand and last4 need payment_method_details expanded, which is not
-        // requested here, so they stay null until a later Charge lookup.
+        // The charge says what the donor actually paid with. The intent's
+        // payment_method_types is the list of every type eligible for it, in
+        // Stripe's own order, so reading its first entry stamps "card" on every
+        // SEPA, iDEAL and Bacs donation: an admin reconciling settlement timing
+        // is then reading a column that is wrong for the whole non-card set.
+        $details = is_array($charge['payment_method_details'] ?? null)
+            ? $charge['payment_method_details']
+            : [];
+        $type = (string) ($details['type'] ?? '');
+        $card = is_array($details[$type] ?? null) ? $details[$type] : [];
+
         return new GatewayConfirmResult(
             success:               true,
-            gateway_txn_id:        is_string($charge) ? $charge : (string) ($intent['id'] ?? ''),
-            payment_method:        $intent['payment_method_types'][0] ?? 'card',
-            payment_method_brand:  null,
-            payment_method_last4:  null,
+            gateway_txn_id:        is_string($chargeRef) ? $chargeRef : (string) ($intent['id'] ?? ''),
+            payment_method:        $type !== '' ? $type : ($intent['payment_method_types'][0] ?? 'card'),
+            payment_method_brand:  isset($card['brand']) ? (string) $card['brand'] : null,
+            payment_method_last4:  isset($card['last4']) ? (string) $card['last4'] : null,
             fee_cents:             null,  // requires Charge or Balance Transaction lookup
             metadata: [
                 'stripe_intent_id' => $intent['id'] ?? null,
@@ -1663,7 +1678,19 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
      */
     private function reversedMinorUnits(array $intent): int
     {
-        $charge = $this->latestCharge($intent);
+        return $this->reversedFrom($this->latestCharge($intent));
+    }
+
+    /**
+     * The same answer from a charge already in hand, so a caller that needs the
+     * charge for anything else does not fetch it twice.
+     *
+     * @param array<string,mixed>|null $charge
+     *
+     * @since 1.0.0
+     */
+    private function reversedFrom(?array $charge): int
+    {
         if ($charge === null) {
             return 0;
         }

@@ -183,6 +183,44 @@ final class StripeSubscriptionRenewalTest extends IntegrationTestCase
     }
 
     /**
+     * Stripe redelivers anything it did not get a 2xx for, which includes a
+     * handler that finished and whose response was lost, so the same event id
+     * arrives twice for one decline. Counted twice, the plan and the donor's
+     * own screen report an attempt the card never made, and the decline notice
+     * goes out on the first attempt alone, so the donor is told nothing at all.
+     */
+    public function test_a_redelivered_failure_counts_once_and_notifies_once(): void
+    {
+        $plan    = $this->seedPlan();
+        $invoice = $this->buildInvoice($plan, 2500, 'subscription_cycle');
+
+        $notified = [];
+        add_action('dono.recurring.renewal_failed', static function ($p, $ctx) use (&$notified): void {
+            $notified[] = (int) ($ctx['attempt'] ?? 0);
+        }, 10, 2);
+
+        $this->postWebhook('invoice.payment_failed', $invoice, 'evt_same_delivery');
+        $this->postWebhook('invoice.payment_failed', $invoice, 'evt_same_delivery');
+
+        $fresh = RecurringPlan::query()->find('id', (int) $plan->id);
+        $this->assertSame(1, (int) $fresh->failed_renewals_count, 'one decline is one attempt');
+        $this->assertSame([1], $notified, 'and the donor is told once, as the first attempt');
+    }
+
+    /** A second genuine attempt is a different delivery, and still counts. */
+    public function test_a_second_decline_still_counts(): void
+    {
+        $plan    = $this->seedPlan();
+        $invoice = $this->buildInvoice($plan, 2500, 'subscription_cycle');
+
+        $this->postWebhook('invoice.payment_failed', $invoice, 'evt_attempt_one');
+        $this->postWebhook('invoice.payment_failed', $invoice, 'evt_attempt_two');
+
+        $fresh = RecurringPlan::query()->find('id', (int) $plan->id);
+        $this->assertSame(2, (int) $fresh->failed_renewals_count);
+    }
+
+    /**
      * A failed renewal is the start of losing the donation, so it has to be
      * announceable. Without this signal nothing downstream can tell anyone.
      */
@@ -442,10 +480,10 @@ final class StripeSubscriptionRenewalTest extends IntegrationTestCase
         $this->assertSame(1, (int) $fresh->failed_renewals_count, 'dunning is not silent either');
     }
 
-    private function postWebhook(string $type, array $object): void
+    private function postWebhook(string $type, array $object, ?string $eventId = null): void
     {
         $event = [
-            'id'   => 'evt_' . bin2hex(random_bytes(6)),
+            'id'   => $eventId ?? 'evt_' . bin2hex(random_bytes(6)),
             'type' => $type,
             'data' => ['object' => $object],
         ];

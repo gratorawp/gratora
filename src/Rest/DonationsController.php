@@ -156,7 +156,12 @@ final class DonationsController
                     $this->donorEmailHash($parent),
                     (string) ($claim['status_token'] ?? ''),
                     $email,
-                    isset($body['form_id']) ? (int) $body['form_id'] : null
+                    isset($body['form_id']) ? (int) $body['form_id'] : null,
+                    [
+                        'amount_cents' => $amount,
+                        'currency'     => $currency,
+                        'frequency'    => (string) ($body['frequency'] ?? 'one_time'),
+                    ]
                 );
             }
         }

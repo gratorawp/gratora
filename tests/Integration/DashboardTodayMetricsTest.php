@@ -57,6 +57,51 @@ final class DashboardTodayMetricsTest extends IntegrationTestCase
         $this->assertSame(2, (int) $today['donations_count']);
     }
 
+    /**
+     * The ribbon is the one money surface that nets refunds itself; the campaign
+     * counter, the donor total, the admin aggregate and the revenue export all
+     * go through DonationQueries::refundedBaseExpr(), which rounds the summed
+     * refund once. Rounding each instalment on its own agrees with that on a
+     * single refund and drifts a cent per extra one, so an admin reconciling the
+     * headline against the counter beside it finds a difference with nothing
+     * explaining it.
+     */
+    public function test_a_refund_paid_in_instalments_nets_the_same_as_every_other_surface(): void
+    {
+        $donor = Plugin::instance()->container->get(DonorService::class)
+            ->findOrCreate('instalments@example.com', ['first_name' => 'Ivy', 'last_name' => 'Nett']);
+        $now = gmdate('Y-m-d H:i:s');
+
+        // 200.00 USD at 0.5107, so 102.14 base, rounded once from the whole.
+        $usd = $this->seedPaid((int) $donor->id, 'DONO-TODAY-SPLIT', 20000, 'USD', 10214, '0.51070000', $now);
+
+        // Refunded in two halves. 10000 * 0.5107 = 5107 exactly; each 5000 half
+        // is 2553.5, which rounds up twice to 5108.
+        foreach ([5000, 5000] as $i => $cents) {
+            $r = Refund::make();
+            $r->donation_id  = (int) $usd->id;
+            $r->amount_cents = $cents;
+            $r->currency     = 'USD';
+            $r->initiated_by = 'admin';
+            $r->status       = 'succeeded';
+            $r->occurred_at  = $now;
+            $r->save();
+        }
+
+        $c       = Plugin::instance()->container;
+        $service = new DashboardMetricsService(
+            $c->get(Clock::class),
+            $c->get(DonationRepository::class),
+            $c->get(RecurringPlanRepository::class),
+        );
+
+        $this->assertSame(
+            5107,
+            (int) $service->today()['amount_raised_cents'],
+            'one rounding on one product, as refundedBaseExpr does it'
+        );
+    }
+
     private function seedPaid(int $donorId, string $ref, int $cents, string $cur, int $baseCents, string $fx, string $now): Donation
     {
         $d = Donation::make();

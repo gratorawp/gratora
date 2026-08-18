@@ -483,6 +483,51 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
      * writes the literal string "Array" and destroys the column, so the shape
      * of the value is the assertion.
      */
+    /**
+     * The relief is for one donation tried a second way, so a submission that
+     * describes a different donation is not that. An accepted claim stamps
+     * retried_by on the parent, and the parent's detail page renders it as the
+     * donation that replaced this one, so a $1000 attempt could otherwise be
+     * reported as replaced by a EUR 1.00 one: a false account of one donor's
+     * decision, and what lets an unrelated donation hide an earlier one.
+     */
+    public function test_a_submission_for_a_different_donation_does_not_replace_the_parent(): void
+    {
+        $email = 'drifted@example.test';
+
+        $parent = $this->claimOf($this->submit($email, null, ['amount_cents' => 100000, 'currency' => 'USD']));
+
+        $res = $this->submit($email, $parent, ['amount_cents' => 100, 'currency' => 'EUR']);
+        $this->assertSame(201, $res->get_status(), 'the donation itself is still taken');
+
+        $flags = $this->flagsOf($parent['reference']);
+        $this->assertArrayNotHasKey(
+            'retried_by',
+            $flags,
+            'the $1000 attempt is not reported as replaced by a EUR 1.00 one'
+        );
+        $this->assertSame(
+            $res->get_data()['reference'],
+            $this->groupOf((string) $res->get_data()['reference']),
+            'and it opens a tree of its own rather than spending the parent\'s'
+        );
+    }
+
+    /** A donor who changes only the gateway is still the same donation. */
+    public function test_the_same_donation_by_another_gateway_still_claims_the_tree(): void
+    {
+        $email = 'samedonation@example.test';
+
+        $parent = $this->claimOf($this->submit($email, null, ['amount_cents' => 100000, 'currency' => 'USD']));
+        $child  = $this->submit($email, $parent, ['amount_cents' => 100000, 'currency' => 'USD']);
+
+        $this->assertSame(201, $child->get_status());
+        $this->assertSame(
+            $child->get_data()['reference'],
+            $this->flagsOf($parent['reference'])['retried_by'] ?? null
+        );
+    }
+
     public function test_every_row_names_its_root_and_the_parent_names_its_replacement(): void
     {
         $email = 'breadcrumb@example.test';

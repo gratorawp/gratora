@@ -126,9 +126,19 @@ final class DashboardMetricsService
                 ->whereIn('donation_id', array_keys($fxByDonation))
                 ->where('status', 'succeeded')
                 ->getAll();
+            // Summed per donation before scaling, not scaled and then summed.
+            // base_amount_cents was rounded once from the whole amount, so
+            // rounding each instalment separately and adding them up need not
+            // come back to the same figure, and this is the only surface that
+            // does its own netting: the campaign counter, the donor total, the
+            // admin aggregate and the revenue export all read
+            // DonationQueries::refundedBaseExpr(), which rounds once at the end.
+            $byDonation = [];
             foreach ($refunds as $r) {
-                $rate = $fxByDonation[(int) $r->donation_id] ?? 1.0;
-                $amount -= (int) round(((int) $r->amount_cents) * $rate);
+                $byDonation[(int) $r->donation_id] = ($byDonation[(int) $r->donation_id] ?? 0) + (int) $r->amount_cents;
+            }
+            foreach ($byDonation as $donationId => $refundedCents) {
+                $amount -= (int) round($refundedCents * ($fxByDonation[$donationId] ?? 1.0));
             }
         }
 

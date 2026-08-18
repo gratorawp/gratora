@@ -69,27 +69,43 @@ final class PayPalLateActivationTest extends IntegrationTestCase
         }
     }
 
+    /** When set, only a delivery naming this webhook id verifies. */
+    private ?string $onlyWebhookIdVerifies = null;
+
     private function mockPayPal(): void
     {
         add_filter('pre_http_request', function ($pre, $args, $url) {
             if (! is_string($url) || ! str_contains($url, 'paypal.com')) return $pre;
 
             $path = (string) (parse_url($url, PHP_URL_PATH) ?? '');
+            $sent = (array) json_decode((string) ($args['body'] ?? ''), true);
 
             return [
                 'headers'  => [],
-                'body'     => (string) wp_json_encode($this->cannedResponse($path)),
+                'body'     => (string) wp_json_encode($this->cannedResponse($path, $sent)),
                 'response' => ['code' => 200, 'message' => 'OK'],
                 'cookies'  => [], 'filename' => null,
             ];
         }, 10, 3);
     }
 
-    /** @return array<string,mixed> */
-    private function cannedResponse(string $path): array
+    /**
+     * @param  array<string,mixed> $sent the request body PayPal was called with
+     * @return array<string,mixed>
+     */
+    private function cannedResponse(string $path, array $sent = []): array
     {
         if (str_contains($path, '/v1/oauth2/token'))          return ['access_token' => 'A21AAF_test', 'expires_in' => 32400];
-        if (str_contains($path, '/verify-webhook-signature')) return ['verification_status' => 'SUCCESS'];
+        if (str_contains($path, '/verify-webhook-signature')) {
+            // A real signature verifies against one endpoint's id, so a
+            // sandbox-signed delivery fails the live check and passes the test
+            // one. Unconditional SUCCESS makes live always win, which is the
+            // one state the mixed-mode question cannot be asked in.
+            $ok = $this->onlyWebhookIdVerifies === null
+                || (string) ($sent['webhook_id'] ?? '') === $this->onlyWebhookIdVerifies;
+
+            return ['verification_status' => $ok ? 'SUCCESS' : 'FAILURE'];
+        }
         if (str_contains($path, '/v1/catalogs/products'))     return ['id' => 'PROD-1'];
         if (str_contains($path, '/v1/billing/plans'))         return ['id' => 'P-PLAN-1'];
         if (str_contains($path, '/v1/billing/subscriptions/')) {
@@ -360,5 +376,41 @@ final class PayPalLateActivationTest extends IntegrationTestCase
             'nor cancels a live plan whose money is still flowing'
         );
         $this->assertSame(0, $announced, 'and the donor is not emailed about it');
+    }
+
+    /**
+     * Recovery is the one plan path with no row to ask about yet, so a guard
+     * placed after it refuses a delivery that has already written and activated
+     * the plan. The donation the resource names carries the same two facts and
+     * exists before the write, so it is what the question has to be put to.
+     */
+    public function test_a_test_mode_secret_cannot_recover_a_plan_for_a_live_donation(): void
+    {
+        // A live org: live keys, the global switch off, and a live webhook id,
+        // without which the gateway declines to offer recurring at all. The
+        // sandbox endpoint stays configured alongside it, as it does on any
+        // site that ever rehearsed, and only its id verifies this delivery.
+        $account = Plugin::instance()->container->get(PayPalAccount::class);
+        $account->saveKeys(false, 'AeA1QIZ_live', 'EO422dn3_live');
+        $account->saveWebhookId(false, 'WH-LIVE-1');
+        update_option('dono_gateway_config', ['test_mode' => false]);
+
+        $reference = $this->createRecurringDonation();
+        $donation  = Plugin::instance()->container->get(DonationRepository::class)->findByReference($reference);
+        $this->assertFalse((bool) $donation->is_test, 'the donation is live money');
+
+        $this->onlyWebhookIdVerifies = 'WH-TEST-1';
+
+        // No recordSubscription: the browser POST is what never landed, which
+        // is the only reason recovery runs at all.
+        $res = $this->postWebhook('BILLING.SUBSCRIPTION.ACTIVATED', $this->activation('I-SUB-RECOVER'));
+
+        $this->assertSame(200, $res->get_status(), (string) wp_json_encode($res->get_data()));
+        $this->assertNull(
+            Plugin::instance()->container
+                ->get(RecurringPlanRepository::class)
+                ->findBySubscriptionId('paypal', 'I-SUB-RECOVER'),
+            'no live plan is written on the authority of a sandbox credential'
+        );
     }
 }

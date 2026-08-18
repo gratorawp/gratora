@@ -173,6 +173,54 @@ final class StripeReversedConfirmSeamTest extends IntegrationTestCase
     }
 
     /** @param array<string,mixed> $extra */
+    /**
+     * With automatic_payment_methods on, payment_method_types is every type
+     * eligible for the intent in Stripe's own order, not the one used. Reading
+     * its first entry stamps card on every SEPA, iDEAL and Bacs donation, and
+     * the admin list, the CSV export and any method breakdown then report card
+     * for the whole non-card set, which settles on a different timeline and can
+     * still bounce.
+     */
+    public function test_the_method_recorded_is_the_one_the_donor_paid_with(): void
+    {
+        $donation = $this->stripeDonation('pending');
+        $chargeId = $this->charge($donation, [
+            'payment_method_details' => [
+                'type'       => 'sepa_debit',
+                'sepa_debit' => ['last4' => '3000'],
+            ],
+        ]);
+
+        $intent = $this->succeededIntent($donation, $chargeId);
+        // Stripe lists card first for this intent; the donor paid by SEPA.
+        $intent['payment_method_types'] = ['card', 'sepa_debit', 'link'];
+        $this->postWebhook('payment_intent.succeeded', $intent);
+
+        $fresh = $this->reload($donation);
+        $this->assertSame('paid', $fresh->status);
+        $this->assertSame('sepa_debit', (string) $fresh->payment_method);
+        $this->assertSame('3000', (string) $fresh->payment_method_last4);
+    }
+
+    /** A card donation still reports its brand and last4 from the same place. */
+    public function test_a_card_donation_carries_its_brand_and_last_four(): void
+    {
+        $donation = $this->stripeDonation('pending');
+        $chargeId = $this->charge($donation, [
+            'payment_method_details' => [
+                'type' => 'card',
+                'card' => ['brand' => 'visa', 'last4' => '4242'],
+            ],
+        ]);
+
+        $this->postWebhook('payment_intent.succeeded', $this->succeededIntent($donation, $chargeId));
+
+        $fresh = $this->reload($donation);
+        $this->assertSame('card', (string) $fresh->payment_method);
+        $this->assertSame('visa', (string) $fresh->payment_method_brand);
+        $this->assertSame('4242', (string) $fresh->payment_method_last4);
+    }
+
     private function charge(Donation $donation, array $extra): string
     {
         $chargeId = 'ch_' . bin2hex(random_bytes(4));
