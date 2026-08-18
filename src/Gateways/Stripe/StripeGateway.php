@@ -1712,7 +1712,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             return null;
         }
 
-        return $this->api->get('/charges/' . rawurlencode($chargeId) . '?expand[]=dispute');
+        return $this->api->get('/charges/' . rawurlencode($chargeId));
     }
 
     /**
@@ -1727,18 +1727,18 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
      */
     private function disputeHold(array $charge): int
     {
-        $dispute = $charge['dispute'] ?? null;
-
-        if (is_string($dispute) && $dispute !== '') {
-            $dispute = $this->api->get('/disputes/' . rawurlencode($dispute));
+        // The flag first, so the undisputed charge every donation is costs no
+        // call at all.
+        if (($charge['disputed'] ?? false) !== true) {
+            return 0;
         }
+
+        $dispute = $this->disputeFor((string) ($charge['id'] ?? ''));
 
         if (! is_array($dispute)) {
             // Disputed with nothing readable saying otherwise: the whole charge
             // is at risk.
-            return ($charge['disputed'] ?? false) === true
-                ? max(0, (int) ($charge['amount'] ?? 0))
-                : 0;
+            return max(0, (int) ($charge['amount'] ?? 0));
         }
 
         if (in_array((string) ($dispute['status'] ?? ''), self::DISPUTE_FUNDS_HELD_BY_ORG, true)) {
@@ -1746,6 +1746,34 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         }
 
         return max(0, (int) ($dispute['amount'] ?? 0));
+    }
+
+    /**
+     * The dispute raised against a charge.
+     *
+     * Listed rather than read off the charge, because a Charge carries only the
+     * `disputed` flag: there is no dispute field on it to read and none to ask
+     * Stripe to expand, and asking is not harmless, since an expand naming a
+     * property the object does not have is a 400 on the whole request.
+     *
+     * A read that fails is left to throw, as the others here are: the router
+     * turns it into a 5xx and Stripe redelivers, which is the right answer when
+     * the alternative is banking money that may already have been taken back.
+     *
+     * @return array<string,mixed>|null
+     *
+     * @since 1.0.0
+     */
+    private function disputeFor(string $chargeId): ?array
+    {
+        if ($chargeId === '') {
+            return null;
+        }
+
+        $list  = $this->api->get('/disputes?charge=' . rawurlencode($chargeId) . '&limit=1');
+        $first = $list['data'][0] ?? null;
+
+        return is_array($first) ? $first : null;
     }
 
     /**

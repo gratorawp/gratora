@@ -72,6 +72,30 @@ final class StripeReversedChargeTest extends IntegrationTestCase
 
             $path = (string) (parse_url($url, PHP_URL_PATH) ?? '');
             $body = ['id' => 'unknown'];
+
+            // A Charge carries only the `disputed` flag, so the dispute is
+            // reached by listing disputes for the charge. Built from whatever
+            // the charge fixture named as its dispute, so a test still says
+            // what it means while the request matches the real API.
+            if ($path === '/v1/disputes') {
+                parse_str((string) (parse_url($url, PHP_URL_QUERY) ?? ''), $q);
+                $named = $this->charges[(string) ($q['charge'] ?? '')]['dispute'] ?? null;
+                if (is_string($named)) {
+                    $named = $this->disputes[$named] ?? null;
+                }
+
+                return [
+                    'headers'  => [],
+                    'body'     => (string) wp_json_encode([
+                        'object' => 'list',
+                        'data'   => is_array($named) ? [$named] : [],
+                    ]),
+                    'response' => ['code' => 200, 'message' => 'OK'],
+                    'cookies'  => [],
+                    'filename' => null,
+                ];
+            }
+
             foreach ($this->charges as $id => $charge) {
                 if ($path === '/v1/charges/' . $id) {
                     $body = $charge;

@@ -28,12 +28,16 @@ final class StripeReversedConfirmSeamTest extends IntegrationTestCase
     /** @var array<string,array<string,mixed>> Intent id => intent object the API answers with. */
     private array $intents = [];
 
+    /** @var array<string,array<string,mixed>> Charge id => the dispute raised against it. */
+    private array $disputes = [];
+
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->charges = [];
-        $this->intents = [];
+        $this->charges  = [];
+        $this->intents  = [];
+        $this->disputes = [];
         $this->secret  = 'whsec_live_' . bin2hex(random_bytes(8));
         update_option('dono_gateway_config', [
             'stripe' => ['webhook_secret_live' => $this->secret],
@@ -65,6 +69,27 @@ final class StripeReversedConfirmSeamTest extends IntegrationTestCase
 
             $path = (string) (parse_url($url, PHP_URL_PATH) ?? '');
             $body = ['id' => 'unknown'];
+
+            // A Charge carries only the `disputed` flag, so the dispute itself
+            // is reached by listing disputes for the charge. Answered here the
+            // way Stripe answers it, or the fixtures agree with a shape the API
+            // never returns and the tests hold whatever the code does.
+            if ($path === '/v1/disputes') {
+                parse_str((string) (parse_url($url, PHP_URL_QUERY) ?? ''), $q);
+                $for  = (string) ($q['charge'] ?? '');
+                $body = ['object' => 'list', 'data' => array_values(array_filter(
+                    [$this->disputes[$for] ?? null]
+                ))];
+
+                return [
+                    'headers'  => [],
+                    'body'     => (string) wp_json_encode($body),
+                    'response' => ['code' => 200, 'message' => 'OK'],
+                    'cookies'  => [],
+                    'filename' => null,
+                ];
+            }
+
             foreach ($this->charges as $id => $charge) {
                 if ($path === '/v1/charges/' . $id) {
                     $body = $charge;
@@ -84,6 +109,40 @@ final class StripeReversedConfirmSeamTest extends IntegrationTestCase
                 'filename' => null,
             ];
         }, 10, 3);
+    }
+
+    /**
+     * Every suite here answers Stripe from a fixture, so a request Stripe would
+     * refuse still gets a 200 and nothing notices. An expand naming a property
+     * the object does not carry is refused, on the whole request, so one wrong
+     * expand is a 400 on every confirm and no donation is ever banked.
+     *
+     * Charge has `disputed` and no `dispute`, at the pinned API version and at
+     * the current one, which is why this reads the flag and lists the dispute
+     * separately. The rule is asserted rather than the field, so any expand
+     * added here later has to be one the object actually answers to.
+     */
+    public function test_no_request_asks_stripe_to_expand_a_property_it_refuses(): void
+    {
+        // Charge carries no expandable property this gateway needs, so any
+        // expand on a charge request is one Stripe would refuse.
+        $refused = [];
+        add_filter('pre_http_request', static function ($pre, $args, $url) use ( &$refused ) {
+            if (is_string($url) && str_contains($url, '/v1/charges/') && str_contains($url, 'expand')) {
+                $refused[] = $url;
+            }
+
+            return $pre;
+        }, 5, 3);
+
+        $donation = $this->stripeDonation('pending');
+        $chargeId = $this->charge($donation, ['disputed' => true]);
+        $this->disputes[$chargeId] = ['id' => 'dp_x', 'amount' => 5000, 'status' => 'warning_under_review'];
+
+        $this->postWebhook('payment_intent.succeeded', $this->succeededIntent($donation, $chargeId));
+
+        $this->assertSame([], $refused, 'a charge was fetched with an expand Stripe would refuse');
+        $this->assertSame('paid', $this->reload($donation)->status, 'and the donation still banked');
     }
 
     public function test_the_admin_re_poll_never_fails_a_donation_the_donor_was_charged_for(): void
@@ -224,6 +283,11 @@ final class StripeReversedConfirmSeamTest extends IntegrationTestCase
     private function charge(Donation $donation, array $extra): string
     {
         $chargeId = 'ch_' . bin2hex(random_bytes(4));
+
+        if (isset($extra['dispute'])) {
+            $this->disputes[$chargeId] = (array) $extra['dispute'];
+            unset($extra['dispute']);
+        }
 
         $this->charges[$chargeId] = array_merge([
             'id'              => $chargeId,
