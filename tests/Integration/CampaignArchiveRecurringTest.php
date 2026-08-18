@@ -9,6 +9,7 @@ use Dono\Donors\DonorService;
 use Dono\Foundation\Plugin;
 use Dono\Recurring\CampaignCancelRecurringJob;
 use Dono\Recurring\RecurringPlan;
+use Dono\Recurring\RecurringPlanRepository;
 use WP_REST_Request;
 
 /**
@@ -34,6 +35,11 @@ final class CampaignArchiveRecurringTest extends IntegrationTestCase
 
     private function seedActivePlan(int $campaignId): RecurringPlan
     {
+        return $this->seedPlan($campaignId, 'active');
+    }
+
+    private function seedPlan(int $campaignId, string $status): RecurringPlan
+    {
         $donor = Plugin::instance()->container->get(DonorService::class)
             ->findOrCreate('arch-' . uniqid() . '@example.com', ['first_name' => 'Arch']);
 
@@ -49,7 +55,7 @@ final class CampaignArchiveRecurringTest extends IntegrationTestCase
         $plan->currency         = 'USD';
         $plan->interval_unit    = 'month';
         $plan->interval_count   = 1;
-        $plan->status           = 'active';
+        $plan->status           = $status;
         $plan->payments_count   = 1;
         $plan->total_paid_cents = 2000;
         $plan->started_at       = $now;
@@ -168,5 +174,53 @@ final class CampaignArchiveRecurringTest extends IntegrationTestCase
 
         $this->assertSame(2, $data['count']);
         $this->assertSame(4000, $data['mrr_cents'], 'two $20/mo plans is $40/mo');
+    }
+
+    /**
+     * The dialog states a number, the admin ticks the box on the strength of
+     * it, and the toast reports back what was started. A narrower figure at any
+     * one of the three has the admin authorise one set of donors and be told
+     * about another.
+     */
+    public function test_the_archive_reports_back_the_number_the_dialog_authorised(): void
+    {
+        $c = $this->makeCampaign();
+        $this->seedPlan((int) $c->id, 'active');
+        $this->seedPlan((int) $c->id, 'paused');
+        $this->seedPlan((int) $c->id, 'past_due');
+        $this->seedPlan((int) $c->id, 'cancelled');
+
+        $dialog = Plugin::instance()->container->get(RecurringPlanRepository::class)
+            ->activeForCampaign((int) $c->id);
+
+        $req = new WP_REST_Request('PUT', "/dono/v1/admin/campaigns/{$c->id}");
+        $req->set_header('content-type', 'application/json');
+        $req->set_body((string) wp_json_encode(['status' => 'archived', 'cancel_recurring' => true]));
+        $queued = (int) (rest_do_request($req)->get_data()['recurring_cancel']['queued'] ?? -1);
+
+        $this->assertSame(3, $dialog['count']);
+        $this->assertSame($dialog['count'], $queued, 'the toast repeats the dialog figure');
+        $this->assertSame(
+            CampaignCancelRecurringJob::remainingFor((int) $c->id),
+            $queued,
+            'and that figure is the work the sweep actually took on'
+        );
+    }
+
+    /**
+     * A campaign whose live plans are all paused still bills donors when they
+     * resume, so the archive must not report nothing to do.
+     */
+    public function test_a_paused_only_campaign_does_not_report_zero_queued(): void
+    {
+        $c = $this->makeCampaign();
+        $this->seedPlan((int) $c->id, 'paused');
+        $this->seedPlan((int) $c->id, 'past_due');
+
+        $req = new WP_REST_Request('PUT', "/dono/v1/admin/campaigns/{$c->id}");
+        $req->set_header('content-type', 'application/json');
+        $req->set_body((string) wp_json_encode(['status' => 'archived', 'cancel_recurring' => true]));
+
+        $this->assertSame(2, (int) (rest_do_request($req)->get_data()['recurring_cancel']['queued'] ?? -1));
     }
 }

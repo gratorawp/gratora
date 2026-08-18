@@ -733,24 +733,29 @@ final class ToolsController
     {
         $body = (array) $request->get_json_params();
 
-        // A file carrying tables is a full export. Data first, so a settings
-        // import cannot be mistaken for a restore that quietly dropped
-        // everything except the settings.
-        $records = null;
-        if (is_array($body['tables'] ?? null)) {
-            $records = $this->importer->import($body);
-            DonorRetention::deferBy();
-        }
+        // A file carrying tables is a full export.
+        $hasRecords = is_array($body['tables'] ?? null);
 
         $settings = is_array($body['settings'] ?? null) ? $body['settings'] : null;
         if ($settings === null) {
-            if ($records !== null) {
+            if ($hasRecords) {
+                $records = $this->importer->import($body);
+                DonorRetention::deferBy();
+
                 return new WP_REST_Response(['imported' => true, 'records' => $records, 'settings_applied' => 0], 200);
             }
 
             return new \WP_Error('dono_invalid_import', __('No settings payload found.', 'dono-fundraising-platform'), ['status' => 422]);
         }
 
+        // Settings first, so every guard on the write reads the site as it
+        // stands rather than as the file has just made it. The base-currency
+        // lock counts the money already recorded here, which is what it is
+        // protecting; run after the restore it counts the file's own donations
+        // and refuses the org its own base. The numbering the file's references
+        // were printed in is in force by the time the importer reads them, and
+        // a group the site refuses stops the money landing under a unit nobody
+        // agreed to.
         $erasureWasOn = self::erasureIsOn();
 
         $writer = new SettingsService();
@@ -810,28 +815,11 @@ final class ToolsController
             $applied++;
         }
 
-        // The file's references are printed in the file's own numbering, which
-        // has only just landed. Raised here, the counter is read in the
-        // numbering the next reference is minted under, a refused numbering
-        // group included. A file from an org that sets its own prefix, padding,
-        // separator or year otherwise clears nothing, and the first donation
-        // after the restore reprints a reference the file brought in, into
-        // UNIQUE(reference).
-        if ($records !== null) {
-            $this->importer->raiseReferenceCounters($body);
-        }
-
-        // A file can carry automatic erasure switched on, and it lands by
-        // option write rather than through the settings screen, so the screen's
-        // own re-arm never sees it. Without this, restoring a backup onto a
-        // site whose activation stamp is months past sweeps that same night.
-        if (! $erasureWasOn && self::erasureIsOn()) {
-            DonorRetention::deferBy();
-        }
-
-        // A refusal reaches the admin as a refusal. Reported inside a 200 it
-        // reads as "settings restored", and the one group that did not land is
-        // the one holding the unit every recorded total is denominated in.
+        // A refusal reaches the admin as a refusal, and the records stay out.
+        // Reported inside a 200 it reads as "settings restored", and the one
+        // group that did not land is the one holding the unit every recorded
+        // total is denominated in; restoring the money behind that refusal
+        // denominates it in whatever the site already had.
         if ($refused !== []) {
             return new \WP_Error(
                 $locked ? 'dono_base_currency_locked' : 'dono_invalid_import',
@@ -844,10 +832,24 @@ final class ToolsController
                     'status'   => $locked ? 409 : 422,
                     'applied'  => $applied,
                     'refused'  => $refused,
-                    'imported' => $records !== null,
-                    'records'  => $records,
+                    'imported' => false,
+                    'records'  => null,
                 ]
             );
+        }
+
+        $records = null;
+        if ($hasRecords) {
+            $records = $this->importer->import($body);
+            DonorRetention::deferBy();
+        }
+
+        // A file can carry automatic erasure switched on, and it lands by
+        // option write rather than through the settings screen, so the screen's
+        // own re-arm never sees it. Without this, restoring a backup onto a
+        // site whose activation stamp is months past sweeps that same night.
+        if (! $erasureWasOn && self::erasureIsOn()) {
+            DonorRetention::deferBy();
         }
 
         return new WP_REST_Response([

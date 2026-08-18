@@ -324,23 +324,25 @@ export default function Detail( { id, tab } ) {
                 >
                     <p style={ { marginTop: 0 } }>
                         { sprintf(
-                            /* translators: %d: number of active recurring donations */
+                            /* translators: %d: number of live recurring donations */
                             _n(
-                                'This campaign has %d active recurring donation.',
-                                'This campaign has %d active recurring donations.',
+                                'This campaign has %d live recurring donation.',
+                                'This campaign has %d live recurring donations.',
                                 archivePrompt.count,
                                 'dono-fundraising-platform'
                             ),
                             archivePrompt.count
                         ) }
+                        { ' ' }
+                        { __( 'Live counts active, paused and past-due donations: a paused one resumes and a past-due one is still being retried.', 'dono-fundraising-platform' ) }
                         { archivePrompt.mrr_cents > 0 && ' ' + sprintf(
                             /* translators: %s: formatted monthly amount */
-                            __( 'They renew for about %s per month.', 'dono-fundraising-platform' ),
+                            __( 'About %s a month is at stake.', 'dono-fundraising-platform' ),
                             formatAmount( archivePrompt.mrr_cents, archivePrompt.currency )
                         ) }
                     </p>
                     <p>
-                        { __( 'Archiving stops new donations. These subscriptions keep renewing and stay credited to this campaign unless you cancel them.', 'dono-fundraising-platform' ) }
+                        { __( 'Archiving stops new donations. These subscriptions are left as they are and stay credited to this campaign unless you cancel them.', 'dono-fundraising-platform' ) }
                     </p>
                     <CheckboxControl
                         label={ __( 'Also cancel these subscriptions (donors will be emailed)', 'dono-fundraising-platform' ) }

@@ -29,6 +29,10 @@ final class GatewayConfirmResult
         // gone back. The donation cannot be banked, but it was never declined,
         // so a caller must not fail it and must not notify the donor of one.
         public readonly bool $reversed = false,
+        // How much of the payment has gone back, in minor units. Above zero on
+        // a successful confirm means a slice left the balance before the row
+        // was bankable, and the caller owes it a refund record.
+        public readonly int $reversed_minor_units = 0,
     ) {
     }
 

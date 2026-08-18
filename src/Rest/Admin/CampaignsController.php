@@ -246,9 +246,13 @@ final class CampaignsController
         // monthly donors needs more wall time than this request has.
         $recurringCancel = null;
         if ($wasActive && $campaign->status === 'archived' && ! empty($body['cancel_recurring'])) {
+            // The count the dialog showed and the set the sweep takes, so the
+            // admin is told back the number they authorised: a paused plan
+            // resumes and a past_due one is recovered by the gateway's dunning,
+            // and the sweep cancels and emails both.
             $queued = (int) RecurringPlan::query()
                 ->where('campaign_id', (int) $campaign->id)
-                ->where('status', 'active')
+                ->whereIn('status', RecurringPlanRepository::LIVE_STATUSES)
                 ->where('is_test', false)
                 ->count();
 

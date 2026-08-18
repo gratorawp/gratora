@@ -112,6 +112,46 @@ function devInstall() {
     };
 }
 
+/**
+ * build/ ships as-is and nothing here compiles it, so a stale bundle is a
+ * release that behaves like an older checkout while every test agrees with the
+ * source it was never built from.
+ *
+ * Compared by mtime rather than by a hash of the inputs: webpack output is not
+ * reproducible byte for byte, so a content check would either be wrong or would
+ * mean running the build to answer the question.
+ */
+function newestMtime( dir ) {
+    if ( ! existsSync( dir ) ) return null;
+
+    let newest = 0;
+    const walk = ( at ) => {
+        for ( const entry of readdirSync( at ) ) {
+            const full = path.join( at, entry );
+            const stat = statSync( full );
+            if ( stat.isDirectory() ) walk( full );
+            else newest = Math.max( newest, stat.mtimeMs );
+        }
+    };
+    walk( dir );
+
+    return newest || null;
+}
+
+const builtAt  = newestMtime( path.join( root, 'build' ) );
+const sourceAt = newestMtime( path.join( root, 'assets' ) );
+
+if ( builtAt === null ) {
+    console.error( 'No build/ directory, so the zip would carry no compiled assets at all.' );
+    console.error( 'Run `npm run build` first, then package.' );
+    process.exit( 1 );
+}
+if ( sourceAt !== null && sourceAt > builtAt ) {
+    console.error( 'assets/ is newer than build/, so the zip would ship a bundle that predates the source.' );
+    console.error( 'Run `npm run build` first, then package.' );
+    process.exit( 1 );
+}
+
 const vendor = devInstall();
 if ( ! vendor.installed ) {
     console.error( 'vendor/ carries no composer manifest, so there is no telling what is in it.' );

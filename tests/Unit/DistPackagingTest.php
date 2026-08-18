@@ -61,6 +61,16 @@ final class DistPackagingTest extends TestCase
         mkdir($dir . '/bin', 0777, true);
         mkdir($dir . '/vendor/composer', 0777, true);
 
+        // A real plugin root always carries both, and the packager refuses a
+        // build older than the source it was compiled from, so a fixture
+        // without them answers the freshness gate instead of the one under
+        // test. Written source-first so the build reads as the newer.
+        mkdir($dir . '/assets', 0777, true);
+        mkdir($dir . '/build', 0777, true);
+        file_put_contents($dir . '/assets/entry.js', '');
+        touch($dir . '/assets/entry.js', time() - 60);
+        file_put_contents($dir . '/build/entry.js', '');
+
         foreach (['bin/package.mjs', '.distignore', 'composer.json', 'composer.lock'] as $rel) {
             copy(self::root() . '/' . $rel, $dir . '/' . $rel);
         }
@@ -160,6 +170,33 @@ final class DistPackagingTest extends TestCase
         $this->assertStringNotContainsString('development dependencies', $result['output']);
         // The fixture has no Strauss output, which is the next gate along.
         $this->assertStringContainsString('vendor-prefixed', $result['output']);
+    }
+
+    /**
+     * build/ ships as-is and nothing in the release path compiles it, so a
+     * bundle older than the source is a zip that behaves like an earlier
+     * checkout while every test agrees with the source it was never built from.
+     */
+    public function test_a_build_older_than_the_source_stops_the_build(): void
+    {
+        $root = $this->pluginRoot(false);
+        touch($root . '/build/entry.js', time() - 120);
+
+        $result = $this->package($root);
+
+        $this->assertStringContainsString('assets/ is newer than build/', $result['output']);
+        $this->assertStringContainsString('npm run build', $result['output']);
+    }
+
+    public function test_a_missing_build_directory_stops_the_build(): void
+    {
+        $root = $this->pluginRoot(false);
+        unlink($root . '/build/entry.js');
+        rmdir($root . '/build');
+
+        $result = $this->package($root);
+
+        $this->assertStringContainsString('no compiled assets', $result['output']);
     }
 
     /**

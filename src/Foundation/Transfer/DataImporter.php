@@ -708,15 +708,15 @@ final class DataImporter
      * and whether the year appears at all are configurable.
      *
      * Which numbering is in force therefore decides which references count, and
-     * a file carries its org's numbering with it. Run this again once that has
-     * landed and it reads the file's references in the numbering the next one
-     * will be minted under; a counter already past the file's high-water mark
-     * is left where it is, so running it twice raises nothing twice.
+     * a file carries its org's numbering with it, so a restore writes the
+     * settings before the rows and this reads the file's references in the
+     * numbering the next one will be minted under. A counter already past the
+     * file's high-water mark is left where it is.
      *
      * @param array<string,mixed> $export
      * @since 1.0.0
      */
-    public function raiseReferenceCounters(array $export): void
+    private function raiseReferenceCounters(array $export): void
     {
         $tables     = is_array($export['tables'] ?? null) ? $export['tables'] : [];
         $clock      = new SystemClock();

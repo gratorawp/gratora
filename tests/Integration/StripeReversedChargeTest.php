@@ -24,12 +24,24 @@ final class StripeReversedChargeTest extends IntegrationTestCase
     /** @var array<string,array<string,mixed>> Charge id => charge object the API answers with. */
     private array $charges = [];
 
+    /** @var array<string,array<int,array<string,mixed>>> Charge id => the refunds listed against it. */
+    private array $chargeRefunds = [];
+
+    /** @var array<string,array<string,mixed>> Dispute id => dispute object the API answers with. */
+    private array $disputes = [];
+
+    /** @var array<string,array<string,mixed>> Intent id => intent object the API answers with. */
+    private array $intents = [];
+
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->charges = [];
-        $this->secret  = 'whsec_live_' . bin2hex(random_bytes(8));
+        $this->charges       = [];
+        $this->chargeRefunds = [];
+        $this->disputes      = [];
+        $this->intents       = [];
+        $this->secret        = 'whsec_live_' . bin2hex(random_bytes(8));
         update_option('dono_gateway_config', [
             'stripe' => ['webhook_secret_live' => $this->secret],
         ]);
@@ -63,6 +75,21 @@ final class StripeReversedChargeTest extends IntegrationTestCase
             foreach ($this->charges as $id => $charge) {
                 if ($path === '/v1/charges/' . $id) {
                     $body = $charge;
+                }
+            }
+            foreach ($this->chargeRefunds as $id => $list) {
+                if ($path === '/v1/charges/' . $id . '/refunds') {
+                    $body = ['object' => 'list', 'data' => $list];
+                }
+            }
+            foreach ($this->disputes as $id => $dispute) {
+                if ($path === '/v1/disputes/' . $id) {
+                    $body = $dispute;
+                }
+            }
+            foreach ($this->intents as $id => $intent) {
+                if ($path === '/v1/payment_intents/' . $id) {
+                    $body = $intent;
                 }
             }
 
@@ -135,6 +162,181 @@ final class StripeReversedChargeTest extends IntegrationTestCase
         $this->assertNotSame('paid', $this->reload($donation)->status, 'a charged-back donation was banked as completed');
     }
 
+    public function test_a_partial_refund_that_landed_first_is_recorded_when_the_confirm_banks_the_rest(): void
+    {
+        $donation = $this->stripeDonation('pending');
+        $chargeId = 'ch_' . bin2hex(random_bytes(4));
+        $refundId = 're_' . bin2hex(random_bytes(4));
+        $refund   = [
+            'id'     => $refundId,
+            'amount' => 500,
+            'status' => 'succeeded',
+            'reason' => 'requested_by_customer',
+        ];
+
+        $early = [
+            'id'              => $chargeId,
+            'payment_intent'  => (string) $donation->gateway_intent_id,
+            'amount'          => 5000,
+            'amount_refunded' => 500,
+            'refunds'         => ['data' => [$refund]],
+        ];
+        $this->postWebhook('charge.refunded', $early);
+        $this->assertSame('pending', $this->reload($donation)->status, 'precondition: the refund found nothing to reduce');
+
+        $this->charges[$chargeId] = [
+            'id'              => $chargeId,
+            'amount'          => 5000,
+            'amount_refunded' => 500,
+            'refunded'        => false,
+        ];
+        $this->chargeRefunds[$chargeId] = [$refund];
+
+        $this->postWebhook('payment_intent.succeeded', $this->succeededIntent($donation, $chargeId));
+
+        $fresh = $this->reload($donation);
+        $this->assertSame('partial_refund', (string) $fresh->status, 'the slice that went back was banked as raised');
+        $this->assertSame(500, (int) $fresh->refunded_cents);
+        $this->assertNotNull($fresh->paid_at, 'the rest of the donation still counts');
+        $this->assertSame(1, (int) Refund::query()->where('donation_id', $donation->id)->count());
+        $this->assertSame(500, (int) Refund::query()->where('gateway_refund_id', $refundId)->get()->amount_cents);
+
+        // Stripe sending the refund again must not take the money off twice.
+        $this->postWebhook('charge.refunded', $early);
+
+        $fresh = $this->reload($donation);
+        $this->assertSame(500, (int) $fresh->refunded_cents, 'a redelivered refund was counted a second time');
+        $this->assertSame(1, (int) Refund::query()->where('donation_id', $donation->id)->count());
+    }
+
+    public function test_a_partial_lost_dispute_that_landed_first_is_recorded_when_the_confirm_banks_the_rest(): void
+    {
+        $donation  = $this->stripeDonation('pending');
+        $chargeId  = 'ch_' . bin2hex(random_bytes(4));
+        $disputeId = 'dp_' . bin2hex(random_bytes(4));
+        $early     = [
+            'id'             => $disputeId,
+            'payment_intent' => (string) $donation->gateway_intent_id,
+            'amount'         => 2000,
+            'status'         => 'lost',
+            'reason'         => 'fraudulent',
+        ];
+
+        $this->postWebhook('charge.dispute.funds_withdrawn', $early);
+        $this->assertSame('pending', $this->reload($donation)->status, 'precondition: the dispute found nothing to reduce');
+
+        $this->charges[$chargeId] = [
+            'id'              => $chargeId,
+            'amount'          => 5000,
+            'amount_refunded' => 0,
+            'disputed'        => true,
+            'dispute'         => $disputeId,
+        ];
+        $this->disputes[$disputeId] = $early;
+
+        $this->postWebhook('payment_intent.succeeded', $this->succeededIntent($donation, $chargeId));
+
+        $fresh = $this->reload($donation);
+        $this->assertSame('partial_refund', (string) $fresh->status, 'the charged-back slice was banked as raised');
+        $this->assertSame(2000, (int) $fresh->refunded_cents);
+
+        $recorded = Refund::query()->where('gateway_refund_id', $disputeId)->get();
+        $this->assertNotNull($recorded);
+        $this->assertSame('dispute', (string) $recorded->initiated_by);
+
+        $this->postWebhook('charge.dispute.funds_withdrawn', $early);
+
+        $this->assertSame(2000, (int) $this->reload($donation)->refunded_cents, 'a redelivered dispute was counted twice');
+        $this->assertSame(1, (int) Refund::query()->where('donation_id', $donation->id)->count());
+    }
+
+    public function test_the_slice_reaches_a_row_the_admin_re_poll_banked_first(): void
+    {
+        $donation = $this->stripeDonation('pending');
+        $chargeId = 'ch_' . bin2hex(random_bytes(4));
+        $refundId = 're_' . bin2hex(random_bytes(4));
+        $refund   = ['id' => $refundId, 'amount' => 500, 'status' => 'succeeded'];
+
+        $this->postWebhook('charge.refunded', [
+            'id'              => $chargeId,
+            'payment_intent'  => (string) $donation->gateway_intent_id,
+            'amount'          => 5000,
+            'amount_refunded' => 500,
+            'refunds'         => ['data' => [$refund]],
+        ]);
+
+        $this->charges[$chargeId] = [
+            'id'              => $chargeId,
+            'amount'          => 5000,
+            'amount_refunded' => 500,
+        ];
+        $this->chargeRefunds[$chargeId] = [$refund];
+        $this->intents[(string) $donation->gateway_intent_id] = $this->succeededIntent($donation, $chargeId);
+
+        $req = new WP_REST_Request('POST', "/dono/v1/donations/{$donation->reference}/confirm");
+        $req->set_header('content-type', 'application/json');
+        $req->set_body('{}');
+        $this->assertSame(200, rest_do_request($req)->get_status());
+        $this->assertSame('paid', (string) $this->reload($donation)->status, 'precondition: the re-poll banked the row');
+
+        // The settling webhook still lands, and it is what puts the slice back.
+        $this->postWebhook('payment_intent.succeeded', $this->succeededIntent($donation, $chargeId));
+
+        $fresh = $this->reload($donation);
+        $this->assertSame('partial_refund', (string) $fresh->status);
+        $this->assertSame(500, (int) $fresh->refunded_cents);
+        $this->assertSame(1, (int) Refund::query()->where('donation_id', $donation->id)->count());
+    }
+
+    public function test_a_dispute_the_org_is_still_answering_is_not_taken_off_the_confirmed_donation(): void
+    {
+        $donation = $this->stripeDonation('pending');
+        $chargeId = 'ch_' . bin2hex(random_bytes(4));
+        $refundId = 're_' . bin2hex(random_bytes(4));
+        $refund   = ['id' => $refundId, 'amount' => 500, 'status' => 'succeeded'];
+
+        $this->charges[$chargeId] = [
+            'id'              => $chargeId,
+            'amount'          => 5000,
+            'amount_refunded' => 500,
+            'disputed'        => true,
+            'dispute'         => ['id' => 'dp_inquiry', 'amount' => 5000, 'status' => 'warning_under_review'],
+        ];
+        $this->chargeRefunds[$chargeId] = [$refund];
+
+        $this->postWebhook('payment_intent.succeeded', $this->succeededIntent($donation, $chargeId));
+
+        $fresh = $this->reload($donation);
+        $this->assertSame('partial_refund', (string) $fresh->status);
+        $this->assertSame(500, (int) $fresh->refunded_cents, 'an inquiry Stripe has taken no money for was refunded');
+        $this->assertSame(1, (int) Refund::query()->where('donation_id', $donation->id)->count());
+    }
+
+    public function test_a_refund_still_on_its_way_is_not_taken_off_the_confirmed_donation(): void
+    {
+        $donation = $this->stripeDonation('pending');
+        $chargeId = 'ch_' . bin2hex(random_bytes(4));
+
+        $this->charges[$chargeId] = [
+            'id'              => $chargeId,
+            'amount'          => 5000,
+            'amount_refunded' => 500,
+            'refunded'        => false,
+        ];
+        $this->chargeRefunds[$chargeId] = [[
+            'id'     => 're_' . bin2hex(random_bytes(4)),
+            'amount' => 500,
+            'status' => 'pending',
+        ]];
+
+        $this->postWebhook('payment_intent.succeeded', $this->succeededIntent($donation, $chargeId));
+
+        $fresh = $this->reload($donation);
+        $this->assertSame('paid', (string) $fresh->status, 'a submitted bank refund is not money the donor has back');
+        $this->assertSame(0, (int) $fresh->refunded_cents);
+        $this->assertSame(0, (int) Refund::query()->where('donation_id', $donation->id)->count());
+    }
+
     public function test_an_untouched_charge_still_confirms(): void
     {
         $donation = $this->stripeDonation('pending');
@@ -150,6 +352,7 @@ final class StripeReversedChargeTest extends IntegrationTestCase
         $this->postWebhook('payment_intent.succeeded', $this->succeededIntent($donation, $chargeId));
 
         $this->assertSame('paid', $this->reload($donation)->status, 'an ordinary donation must still be banked');
+        $this->assertSame(0, (int) Refund::query()->where('donation_id', $donation->id)->count());
     }
 
     public function test_a_dispute_that_was_won_does_not_block_the_confirm(): void

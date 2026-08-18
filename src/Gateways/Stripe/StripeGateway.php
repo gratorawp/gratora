@@ -372,12 +372,69 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             }
         }
 
+        if ($confirm->reversed_minor_units > 0) {
+            $stop = $this->replayReversals($eventId, $type, $donation, $intent);
+            if ($stop !== null) {
+                return $stop;
+            }
+        }
+
         return new WebhookOutcome(
             signature_ok: true,
             external_id:  $eventId,
             event_type:   $type,
             handled:      true,
         );
+    }
+
+    /**
+     * Money that went back before there was a banked donation to take it off.
+     * The refund and dispute deliveries that carried it were answered 200
+     * against a row nothing could be recorded on, and a 200 is Stripe's cue to
+     * stop sending them, so the reversal is replayed against the row confirm()
+     * has just made refundable. Returns an outcome only when the delivery has
+     * to stop there; null means carry on.
+     *
+     * recordExternalRefund dedupes on the gateway refund id, so a real
+     * charge.refunded or funds_withdrawn landing afterwards is a no-op.
+     *
+     * @param array<string,mixed> $intent
+     *
+     * @since 1.0.0
+     */
+    private function replayReversals(string $eventId, string $type, Donation $donation, array $intent): ?WebhookOutcome
+    {
+        $charge = $this->latestCharge($intent);
+        if ($charge === null) {
+            return null;
+        }
+
+        $chargeId = (string) ($charge['id'] ?? '');
+        if ($chargeId !== '' && (int) ($charge['amount_refunded'] ?? 0) > 0) {
+            $refunds = (array) ($this->api->get('/charges/' . rawurlencode($chargeId) . '/refunds')['data'] ?? []);
+            foreach ($refunds as $refund) {
+                if (! is_array($refund) || ! self::refundSettled($refund)) {
+                    continue;
+                }
+
+                $stop = $this->applyRefund($eventId, $type, $donation, $refund);
+                if ($stop !== null) {
+                    return $stop;
+                }
+            }
+        }
+
+        $dispute = $charge['dispute'] ?? null;
+        if (is_string($dispute) && $dispute !== '') {
+            $dispute = $this->api->get('/disputes/' . rawurlencode($dispute));
+        }
+
+        if (is_array($dispute)
+            && ! in_array((string) ($dispute['status'] ?? ''), self::DISPUTE_FUNDS_HELD_BY_ORG, true)) {
+            return $this->applyDisputeLoss($eventId, $type, $donation, $dispute);
+        }
+
+        return null;
     }
 
     /**
@@ -707,6 +764,35 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             );
         }
 
+        $stop = $this->applyDisputeLoss($eventId, $type, $donation, $dispute);
+        if ($stop !== null) {
+            return $stop;
+        }
+
+        return new WebhookOutcome(
+            signature_ok: true,
+            external_id:  $eventId,
+            event_type:   $type,
+            handled:      true,
+        );
+    }
+
+    /**
+     * Record one lost dispute against the donation. Returns an outcome only
+     * when the delivery has to stop there; null means carry on.
+     *
+     * @param array<string,mixed> $dispute
+     *
+     * @since 1.0.0
+     */
+    private function applyDisputeLoss(string $eventId, string $type, Donation $donation, array $dispute): ?WebhookOutcome
+    {
+        $disputeId = (string) ($dispute['id'] ?? '');
+        $amount    = Currency::fromMinorUnits((int) ($dispute['amount'] ?? 0), $donation->currency);
+        if ($disputeId === '' || $amount <= 0) {
+            return null;
+        }
+
         $reason = isset($dispute['reason']) && is_string($dispute['reason']) && $dispute['reason'] !== ''
             ? 'dispute: ' . $dispute['reason']
             : 'dispute';
@@ -728,12 +814,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             return $this->unrefundable($eventId, $type, $donation, $e);
         }
 
-        return new WebhookOutcome(
-            signature_ok: true,
-            external_id:  $eventId,
-            event_type:   $type,
-            handled:      true,
-        );
+        return null;
     }
 
     /**
@@ -1515,9 +1596,10 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
      *
      * Only a reversal covering the whole payment stops the banking. A slice
      * going back leaves a donation the org did receive, and refusing it would
-     * lose all of it: the rest is banked and the refund events record what came
-     * back. `reversed`, not a plain failure: nothing here is a decline, and a
-     * caller that reads it as one tells a donor who was charged otherwise.
+     * lose all of it, so the rest is banked and `reversed_minor_units` tells the
+     * caller to reconcile the slice. `reversed`, not a plain failure: nothing
+     * here is a decline, and a caller that reads it as one tells a donor who was
+     * charged otherwise.
      *
      * @since 1.0.0
      */
@@ -1562,6 +1644,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
                 'stripe_status'    => $intent['status'] ?? null,
                 'livemode'         => $intent['livemode'] ?? null,
             ],
+            reversed_minor_units:  $reversed,
         );
     }
 
