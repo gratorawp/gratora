@@ -52,7 +52,7 @@ final class CampaignChrome extends HookProvider
         if ($campaign === null) {
             return $template;
         }
-        $GLOBALS['_dono_chrome_flags'] = [
+        $GLOBALS['dono_chrome_flags'] = [
             'header' => (bool) $campaign->hide_header,
             'footer' => (bool) $campaign->hide_footer,
         ];
