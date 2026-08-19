@@ -9,6 +9,7 @@ use Dono\Currency\Currency;
 use Dono\Donations\Donation;
 use Dono\Donations\DonationRepository;
 use Dono\Donations\DonationService;
+use Dono\Donations\Refund;
 use Dono\Donors\DonorRepository;
 use Dono\Donors\DonorService;
 use Dono\Foundation\Time\Clock;
@@ -1581,8 +1582,17 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             // the original on retry instead of issuing a second one. Stable per
             // attempt, because refunded_cents only advances once the local
             // write commits, yet distinct across separate partial refunds.
+            // Counting the refunds already on this donation as well as the
+            // refunded total, because a reversal puts that total back where it
+            // was: without the count, re-issuing a refund the bank failed
+            // rebuilds the key the first one used, Stripe answers with the
+            // original refund, and the insert then collides on its id.
+            $priorRefunds = (int) Refund::query()->where('donation_id', (int) $donation->id)->count();
             $headers = [
-                'Idempotency-Key' => 'dono_refund_' . $donation->id . '_' . (int) $donation->refunded_cents . '_' . $amountCents,
+                'Idempotency-Key' => 'dono_refund_' . $donation->id
+                    . '_' . (int) $donation->refunded_cents
+                    . '_' . $priorRefunds
+                    . '_' . $amountCents,
             ];
             $stripeRefund = $this->api->post('/refunds', $params, $headers);
         } catch (\Throwable $e) {

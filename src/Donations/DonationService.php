@@ -983,7 +983,13 @@ final class DonationService
             ->where('gateway_refund_id', $gatewayRefundId)
             ->get();
         if ($existing) {
-            if ((string) $existing->status !== 'pending' || ! $settled) {
+            // A reversed row is spent in the same way an awaited one is: the
+            // money it described came back, so the id names nothing standing,
+            // and reporting it as already handled means a gateway that takes
+            // the money a second time can never take it off the books again.
+            $spent = in_array((string) $existing->status, ['pending', 'reversed'], true);
+
+            if (! $spent || ! $settled) {
                 return $existing;
             }
 
@@ -1212,6 +1218,17 @@ final class DonationService
             $donation->updated_at     = $now;
             $donation->save();
 
+            // The receipt was voided because money had gone back. None has, so
+            // it stands again: the donor's tax document is the thing this
+            // reversal is for, and nothing else can restore it. A voided
+            // receipt is filtered out of the portal, the receipts route and
+            // the admin donation, and the re-issue path skips voided rows
+            // while still reporting that it queued one, so left voided it is
+            // gone with a route that says otherwise.
+            if ($newTotal === 0) {
+                $this->unvoidReceiptsFor($donation);
+            }
+
             $this->events->record('donation.refund_reversed', [
                 'donor_id'     => $donation->donor_id,
                 'donation_id'  => $donation->id,
@@ -1398,6 +1415,28 @@ final class DonationService
      *
      * @since 1.0.0
      */
+    /**
+     * Put back the receipts a refund voided, when the refund itself is undone.
+     *
+     * Only on a donation that is whole again: a partial refund still standing
+     * means the issued figure is still wrong, which is what voiding says.
+     *
+     * @since 1.0.0
+     */
+    private function unvoidReceiptsFor(Donation $donation): void
+    {
+        $receipts = Receipt::query()
+            ->where('donation_id', $donation->id)
+            ->where('voided', 1)
+            ->getAll();
+
+        foreach ($receipts as $receipt) {
+            $receipt->voided    = false;
+            $receipt->voided_at = null;
+            $receipt->save();
+        }
+    }
+
     private function voidReceiptsFor(Donation $donation, string $now): void
     {
         $receipts = Receipt::query()

@@ -37,6 +37,15 @@ final class DonorAggregateSyncer
         add_action('dono.donation.reversal_reinstated', function (Donation $d): void {
             $this->syncForDonor((int) $d->donor_id);
         });
+
+        // And the other direction. Winning a chargeback, or a bank refund that
+        // failed, puts the money back on the books everywhere else inline, so a
+        // donor left out of this keeps a lifetime total and a donation count
+        // that are short by the amount they were never actually refunded, and
+        // the segment that total buys them is wrong until they give again.
+        add_action('dono.donation.refund_reversed', function (Donation $d): void {
+            $this->syncForDonor((int) $d->donor_id);
+        });
     }
 
     /** @since 1.0.0 */
