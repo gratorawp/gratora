@@ -26,6 +26,20 @@ final class RecurringPlanRepository
     public const LIVE_STATUSES = ['active', 'paused', 'past_due'];
 
     /**
+     * Every status a cancellation has to reach.
+     *
+     * The live set plus pending, which is a plan PayPal has approved and is
+     * already billing while its activation event is still in flight. Reporting
+     * leaves it out, correctly, because it is not yet collecting on this site's
+     * account of things. A cancellation cannot: a sweep that skips it leaves a
+     * subscription billing a donor for a campaign the org has archived, and no
+     * later event brings it back into scope.
+     *
+     * @var list<string>
+     */
+    public const CANCELLABLE_STATUSES = ['active', 'paused', 'past_due', 'pending'];
+
+    /**
      * Base-currency amount of a plan.
      *
      * A plan with a snapshot uses it. A plan already IN the base currency needs
@@ -130,30 +144,38 @@ final class RecurringPlanRepository
     /**
      * Count one failed renewal, at most once per gateway delivery.
      *
-     * @param  string $eventId the gateway's own id for this delivery, which it
-     *   reuses on every redelivery of the same event. Empty means the caller
-     *   cannot name the delivery, and every call counts.
+     * @param  string $marker what names this decline. The gateway's id for the
+     *   thing that declined where it has one, because two event types can
+     *   report the same decline under two delivery ids; the delivery id
+     *   otherwise. Empty means the caller cannot name it, and every call counts.
      * @return bool whether this call was the one that counted it, so the caller
      *   fires the notice and the log line exactly once for one decline.
      *
      * @since 1.0.0
      */
-    public function recordFailedRenewal(RecurringPlan $plan, string $occurredAt, string $eventId = ''): bool
+    public function recordFailedRenewal(RecurringPlan $plan, string $occurredAt, string $marker = ''): bool
     {
-        // Claim and count are separate statements, so the claim carries the
-        // condition: the winner is whoever moves the marker, and a redelivery
-        // or a second concurrent delivery of the same event matches nothing.
-        if ($eventId !== '') {
+        if ($marker === '') {
+            DB::table('dono_recurring_plans')->where('id', $plan->id)->update(['updated_at' => $occurredAt]);
+        } else {
+            $seen = $this->recentFailureMarkers($plan);
+            if (in_array($marker, $seen, true)) {
+                return false;
+            }
+
+            // Compare and swap on the whole list, so two deliveries racing each
+            // other cannot both read the same list and both write over it.
             $claim = DB::table('dono_recurring_plans')
                 ->where('id', $plan->id)
-                ->where('last_failed_event_id', $eventId, '<>')
-                ->update(['last_failed_event_id' => $eventId, 'updated_at' => $occurredAt]);
+                ->where('last_failed_event_id', implode(' ', $seen))
+                ->update([
+                    'last_failed_event_id' => $this->withMarker($seen, $marker),
+                    'updated_at'           => $occurredAt,
+                ]);
 
             if ((int) ($claim->affectedRows ?? 0) === 0) {
                 return false;
             }
-        } else {
-            DB::table('dono_recurring_plans')->where('id', $plan->id)->update(['updated_at' => $occurredAt]);
         }
 
         DB::table('dono_recurring_plans')->where('id', $plan->id)->increment('failed_renewals_count');
@@ -166,10 +188,55 @@ final class RecurringPlanRepository
         $plan->failed_renewals_count = $fresh instanceof RecurringPlan
             ? (int) $fresh->failed_renewals_count
             : (int) $plan->failed_renewals_count + 1;
-        $plan->last_failed_event_id = $eventId;
+        $plan->last_failed_event_id = $fresh instanceof RecurringPlan
+            ? (string) $fresh->last_failed_event_id
+            : $marker;
         $plan->updated_at = $occurredAt;
 
         return true;
+    }
+
+    /**
+     * The deliveries this plan has already counted a failure for.
+     *
+     * A list rather than one slot, because a gateway that did not get a 2xx
+     * retries for days: a redelivery of an earlier decline can land after a
+     * later one has moved a single marker, and then counts again. Held in the
+     * one column, oldest dropped, because what has to be remembered is only as
+     * long as the gateway's own retry window.
+     *
+     * @return list<string>
+     *
+     * @since 1.0.0
+     */
+    private function recentFailureMarkers(RecurringPlan $plan): array
+    {
+        $fresh = RecurringPlan::query()->where('id', (int) $plan->id)->get();
+        $raw   = $fresh instanceof RecurringPlan ? (string) $fresh->last_failed_event_id : '';
+
+        return $raw === '' ? [] : array_values(array_filter(explode(' ', $raw)));
+    }
+
+    /**
+     * @param  list<string> $seen
+     * @since 1.0.0
+     */
+    private function withMarker(array $seen, string $marker): string
+    {
+        array_unshift($seen, $marker);
+
+        // Trimmed to the column, newest kept: a marker that no longer fits is
+        // older than anything a gateway is still retrying.
+        $out = '';
+        foreach ($seen as $one) {
+            $next = $out === '' ? $one : $out . ' ' . $one;
+            if (strlen($next) > 191) {
+                break;
+            }
+            $out = $next;
+        }
+
+        return $out;
     }
 
     /**
@@ -210,7 +277,8 @@ final class RecurringPlanRepository
      * Live recurring plans attributed to a campaign, plus their base-currency
      * monthly-equivalent total. This is the number the archive dialog shows next
      * to "also cancel these subscriptions", so it counts exactly the rows the
-     * archive sweep cancels: every LIVE_STATUSES plan, test plans excluded. A
+     * archive sweep cancels: every CANCELLABLE_STATUSES plan, test plans
+     * excluded. A
      * count narrowed to status = active would have an admin authorise one
      * cancellation and get every paused and past_due donor cancelled and emailed
      * too, and a campaign whose live plans are all paused would report zero and
@@ -230,7 +298,7 @@ final class RecurringPlanRepository
 
         $row = DB::table('dono_recurring_plans')
             ->where('campaign_id', $campaignId)
-            ->whereIn('status', self::LIVE_STATUSES)
+            ->whereIn('status', self::CANCELLABLE_STATUSES)
             ->where('is_test', 0)
             ->selectRaw("COUNT(*) AS cnt, COALESCE({$mrrExpr}, 0) AS mrr, " . self::unconvertedExpr() . " AS unconverted")
             ->get();

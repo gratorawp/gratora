@@ -214,6 +214,37 @@ final class PayPalAmountChangeTest extends IntegrationTestCase
         );
     }
 
+    /**
+     * A donor who paused is why PayPal suspends, so the suspension is this
+     * site's own instruction coming back. Written over the pause the plan reads
+     * as a payment problem the donor never had, and the portal offers no way
+     * back from past_due; resume_at is what actually brings it back, and only
+     * the pause carries one.
+     */
+    public function test_a_suspension_does_not_overwrite_a_donor_s_own_pause(): void
+    {
+        $plan = $this->plan();
+        RecurringPlan::query()
+            ->where('id', (int) $plan->id)
+            ->update(['status' => 'paused', 'resume_at' => gmdate('Y-m-d H:i:s', time() + 2592000)]);
+
+        $this->postWebhook('BILLING.SUBSCRIPTION.SUSPENDED', ['id' => 'I-AMT-1']);
+
+        $fresh = RecurringPlan::query()->find('id', (int) $plan->id);
+        $this->assertSame('paused', (string) $fresh->status, 'the donor paused, and that is still why');
+        $this->assertNotNull($fresh->resume_at, 'and the date that brings it back is intact');
+    }
+
+    /** A suspension nobody here asked for is the gateway's own dunning. */
+    public function test_a_suspension_of_an_active_plan_still_marks_it_past_due(): void
+    {
+        $plan = $this->plan();
+
+        $this->postWebhook('BILLING.SUBSCRIPTION.SUSPENDED', ['id' => 'I-AMT-1']);
+
+        $this->assertSame('past_due', (string) RecurringPlan::query()->find('id', (int) $plan->id)->status);
+    }
+
     /** A plan id this site never minted says nothing, so nothing is guessed. */
     public function test_an_unknown_plan_leaves_the_amount_alone(): void
     {

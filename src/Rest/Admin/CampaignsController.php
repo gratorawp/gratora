@@ -252,7 +252,7 @@ final class CampaignsController
             // and the sweep cancels and emails both.
             $queued = (int) RecurringPlan::query()
                 ->where('campaign_id', (int) $campaign->id)
-                ->whereIn('status', RecurringPlanRepository::LIVE_STATUSES)
+                ->whereIn('status', RecurringPlanRepository::CANCELLABLE_STATUSES)
                 ->where('is_test', false)
                 ->count();
 

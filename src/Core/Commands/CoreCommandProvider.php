@@ -1123,7 +1123,7 @@ final class CoreCommandProvider
                 // set the sweep takes: paused and past_due plans still bill.
                 $queued = (int) RecurringPlan::query()
                     ->where('campaign_id', $campaignId)
-                    ->whereIn('status', RecurringPlanRepository::LIVE_STATUSES)
+                    ->whereIn('status', RecurringPlanRepository::CANCELLABLE_STATUSES)
                     ->where('is_test', false)
                     ->count();
 

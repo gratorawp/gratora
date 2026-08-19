@@ -815,10 +815,13 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
             return $this->refused($eventId, $type, $reason);
         }
 
-        // Keyed on the delivery, because PayPal redelivers for three days
-        // whenever it did not get a 2xx, and a decline counted twice reads on
-        // the plan as two attempts the donor's card never made.
-        if ($this->planRepo->recordFailedRenewal($plan, $this->now(), $eventId)) {
+        // Keyed on the sale rather than the delivery. PayPal redelivers for
+        // three days whenever it did not get a 2xx, and it reports one decline
+        // under two event types: an org subscribed to both gets two deliveries,
+        // two ids and, keyed on those, two attempts the donor's card never
+        // made. The sale is the thing that declined, so both name it.
+        $declined = (string) ($resource['id'] ?? '');
+        if ($this->planRepo->recordFailedRenewal($plan, $this->now(), $declined !== '' ? $declined : $eventId)) {
             // PayPal does not give a decline reason on these events, and
             // inventing one reads to the donor as though we know something we
             // do not.
@@ -912,10 +915,20 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
             return $this->refused($eventId, $type, $reason);
         }
 
-        RecurringPlan::query()
-            ->where('id', (int) $plan->id)
-            ->where('status', 'cancelled', '<>')
-            ->update(['status' => 'past_due', 'updated_at' => $this->now()]);
+        // A donor who paused or skipped is why PayPal is suspending, so the
+        // suspension is this site's own instruction coming back and must not
+        // overwrite the state that sent it. Written as past_due the plan reads
+        // as a payment problem the donor did not have, and the portal offers no
+        // way back from it, while resume_at is what actually brings it back.
+        // Only a suspension nobody here asked for is PayPal's dunning.
+        $donorPaused = (string) $plan->status === 'paused' || $plan->resume_at !== null;
+
+        if (! $donorPaused) {
+            RecurringPlan::query()
+                ->where('id', (int) $plan->id)
+                ->where('status', 'cancelled', '<>')
+                ->update(['status' => 'past_due', 'updated_at' => $this->now()]);
+        }
 
         return new WebhookOutcome(
             signature_ok: true,

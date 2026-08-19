@@ -78,7 +78,7 @@ final class CampaignCancelRecurringJob
 
         $plans = RecurringPlan::query()
             ->where('campaign_id', $campaignId)
-            ->whereIn('status', RecurringPlanRepository::LIVE_STATUSES)
+            ->whereIn('status', RecurringPlanRepository::CANCELLABLE_STATUSES)
             ->where('is_test', false)
             ->where('id', $after, '>')
             ->orderBy('id', 'ASC')
@@ -124,7 +124,7 @@ final class CampaignCancelRecurringJob
 
         return (int) RecurringPlan::query()
             ->where('campaign_id', $campaignId)
-            ->whereIn('status', RecurringPlanRepository::LIVE_STATUSES)
+            ->whereIn('status', RecurringPlanRepository::CANCELLABLE_STATUSES)
             ->where('is_test', false)
             ->where('id', self::cursor($campaignId), '>')
             ->count();

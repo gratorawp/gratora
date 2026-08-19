@@ -422,7 +422,7 @@ final class DonorService
     {
         $plans = RecurringPlan::query()
             ->where('donor_id', (int) $donor->id)
-            ->whereIn('status', RecurringPlanRepository::LIVE_STATUSES)
+            ->whereIn('status', RecurringPlanRepository::CANCELLABLE_STATUSES)
             ->getAll();
 
         if ($plans === []) {
