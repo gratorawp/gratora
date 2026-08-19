@@ -984,6 +984,7 @@ final class DonationService
         $existing = Refund::query()
             ->where('gateway_refund_id', $gatewayRefundId)
             ->get();
+        $replacing = null;
         if ($existing) {
             // A reversed row is spent in the same way an awaited one is: the
             // money it described came back, so the id names nothing standing,
@@ -995,7 +996,7 @@ final class DonationService
                 return $existing;
             }
 
-            Refund::query()->where('id', (int) $existing->id)->delete();
+            $replacing = (int) $existing->id;
         }
 
         if (! $settled) {
@@ -1040,7 +1041,7 @@ final class DonationService
         try {
         DB::transaction(function () use (
             $donation, $amountCents, $reason, $initiatedBy, $metadata,
-            $gatewayRefundId, $now, $refund
+            $gatewayRefundId, $now, $refund, $replacing
         ) {
             // Atomic over-refund guard: bump the cumulative counter only while
             // the new total still fits the principal. A concurrent refund that
@@ -1061,6 +1062,14 @@ final class DonationService
                 ->get()['total'] ?? 0);
             $isFullRefund = $newTotal >= $donation->amount_cents;
             $donation->refunded_cents = $newTotal;
+
+            // The row being replaced goes only once the refund that replaces it
+            // is certain to be written. Every refusal above stands before this
+            // point, so a delivery this donation can no longer take cannot erase
+            // the record of money the gateway says it moved.
+            if ($replacing !== null) {
+                Refund::query()->where('id', $replacing)->delete();
+            }
 
             $refund->donation_id       = $donation->id;
             $refund->amount_cents      = $amountCents;
