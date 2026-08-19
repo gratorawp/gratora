@@ -108,6 +108,15 @@ every outbound request. The service is served through Cloudflare, which sees the
 request in transit.
 Terms and privacy: https://frankfurter.dev
 
+== Source code ==
+
+The JavaScript and CSS in `build/` are compiled. The sources they are built
+from, and the tooling that builds them, are in the public repository:
+
+https://github.com/dono-platform/dono
+
+Run `npm install && npm run build` there to turn one into the other.
+
 == Installation ==
 
 1. Install Dono from Plugins > Add New, or upload the plugin folder to `/wp-content/plugins/` and activate it.

@@ -15,11 +15,9 @@ use PHPUnit\Framework\TestCase;
  * The header fields are pinned against the plugin header and composer.json
  * because a disagreement between them is a rejection, not a bug report.
  *
- * Plugin Guideline 4 is answered by the payload rather than by prose: the zip
- * carries compiled JavaScript in build/, and assets/, package.json and
- * webpack.config.js ship beside it so a reviewer holding only the zip can turn
- * one back into the other. That arrangement is pinned here rather than in the
- * readme, which names none of it.
+ * Plugin Guideline 4 is answered by prose: the zip carries compiled JavaScript
+ * in build/, and readme.txt names the public repository holding the sources it
+ * was built from. That sentence is payload, so it is pinned like payload.
  */
 final class ReadmeDirectorySubmissionTest extends TestCase
 {
@@ -30,13 +28,23 @@ final class ReadmeDirectorySubmissionTest extends TestCase
      */
 
     /**
-     * build/ is compiled, so Guideline 4 is answered by shipping the source it
-     * came from and the two files that turn one back into the other. Named here
-     * rather than taken from prose because the readme does not mention them.
+     * The compiled output, and the four files enqueued straight from assets/
+     * without passing through the build. A .distignore rule taking assets/
+     * wholesale strips the campaign page's styling and two dialogs, and every
+     * other test still passes.
      *
      * @var list<string>
      */
-    private const GUIDELINE_4_PAYLOAD = ['build', 'assets', 'package.json', 'webpack.config.js'];
+    private const RUNTIME_PAYLOAD = [
+        'build',
+        'assets/deactivation/dialog.css',
+        'assets/deactivation/dialog.js',
+        'assets/donate-button/modal.js',
+        'assets/campaign-page/page.css',
+    ];
+
+    /** Where readme.txt sends a reviewer for the sources behind build/. */
+    private const REPOSITORY = 'https://github.com/dono-platform/dono';
 
     private function root(): string
     {
@@ -90,12 +98,55 @@ final class ReadmeDirectorySubmissionTest extends TestCase
         return null;
     }
 
+    /** @return int the status a HEAD request to $url answers with */
+    private function statusOf(string $url): int
+    {
+        $handle = curl_init($url);
+        curl_setopt_array($handle, [
+            CURLOPT_NOBODY         => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_TIMEOUT        => 15,
+            CURLOPT_RETURNTRANSFER => true,
+        ]);
+        curl_exec($handle);
+        $status = (int) curl_getinfo($handle, CURLINFO_RESPONSE_CODE);
+        curl_close($handle);
+
+        return $status;
+    }
+
     /**
-     * package.json ships inside the zip, and one of the dependencies it pins is
-     * fetched from GitHub at a tag rather than from the registry. That makes the
-     * tag part of the payload's build instruction: delete it and `npm install`
-     * inside the zip fails on the one line nobody reads, with no lock shipped to
-     * fall back on.
+     * A private repository answers 404 to the reviewer exactly as a deleted one
+     * does, and the readme reads the same either way. Naming the URL is half the
+     * obligation; the other half is only observable from outside.
+     *
+     * Opt-in because it needs the network and says nothing without it. Run with
+     * DONO_NETWORK_TESTS=1 before submitting.
+     */
+    public function test_the_repository_the_readme_names_is_reachable_to_a_stranger(): void
+    {
+        if (getenv('DONO_NETWORK_TESTS') !== '1') {
+            $this->markTestSkipped('set DONO_NETWORK_TESTS=1 to check the repository against the network');
+        }
+
+        if (! extension_loaded('curl')) {
+            $this->markTestSkipped('no curl extension to ask with');
+        }
+
+        $this->assertSame(
+            200,
+            $this->statusOf(self::REPOSITORY),
+            self::REPOSITORY . ' does not resolve for a logged-out visitor, so readme.txt sends a'
+                . ' reviewer nowhere and nothing says where build/ came from.'
+        );
+    }
+
+    /**
+     * readme.txt sends a reviewer to the repository to rebuild build/, and one
+     * of the dependencies package.json pins is fetched from GitHub at a tag
+     * rather than from the registry. That makes the tag part of the build
+     * instruction: delete it and `npm install` fails on the one line nobody
+     * reads.
      *
      * Opt-in because it needs the network and says nothing without it. Run with
      * DONO_NETWORK_TESTS=1 before submitting.
@@ -117,34 +168,38 @@ final class ReadmeDirectorySubmissionTest extends TestCase
 
         $url = "https://github.com/{$git['owner']}/{$git['repo']}/tree/{$git['ref']}";
 
-        $handle = curl_init($url);
-        curl_setopt_array($handle, [
-            CURLOPT_NOBODY         => true,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_TIMEOUT        => 15,
-            CURLOPT_RETURNTRANSFER => true,
-        ]);
-        curl_exec($handle);
-        $status = (int) curl_getinfo($handle, CURLINFO_RESPONSE_CODE);
-        curl_close($handle);
-
-        $this->assertSame(200, $status, "$url does not resolve, so `npm install` cannot fetch the build dependency.");
+        $this->assertSame(
+            200,
+            $this->statusOf($url),
+            "$url does not resolve, so `npm install` cannot fetch the build dependency."
+        );
     }
 
     /**
-     * A reviewer holding the zip has to be able to rebuild build/ from what is
-     * inside it, and there is no public repository to send them to instead.
-     *
+     * Guideline 4 asks where the compiled JavaScript came from, and readme.txt
+     * answering it is the whole reason the webpack input does not have to ship.
+     * A copy edit that drops the URL takes the answer with it.
+     */
+    public function test_the_readme_names_the_repository_build_came_from(): void
+    {
+        $this->assertStringContainsString(
+            self::REPOSITORY,
+            $this->readme(),
+            'readme.txt does not name the repository, so nothing says where build/ came from.'
+        );
+    }
+
+    /**
      * bin/verify-zip.sh gates the same list, but only on a tag build, so a
      * .distignore rule that strips one of these reaches a reviewer before it
      * reaches a release. DistPackagingTest does not cover it either: that test
      * asserts the packager and the matcher agree, and both would agree about a
      * new rule.
      */
-    public function test_the_sources_that_rebuild_the_compiled_javascript_ship_with_it(): void
+    public function test_the_files_the_plugin_loads_at_runtime_are_not_stripped(): void
     {
         $stripped = [];
-        foreach (self::GUIDELINE_4_PAYLOAD as $rel) {
+        foreach (self::RUNTIME_PAYLOAD as $rel) {
             $this->assertFileExists(
                 $this->root() . '/' . $rel,
                 "$rel is not in the checkout, so it cannot be in the zip."
@@ -158,7 +213,7 @@ final class ReadmeDirectorySubmissionTest extends TestCase
         $this->assertSame(
             [],
             $stripped,
-            ".distignore keeps these out of the zip, so nothing in it says where build/ came from:\n"
+            ".distignore keeps these out of the zip, so the plugin ships without them:\n"
                 . implode("\n", $stripped)
         );
     }

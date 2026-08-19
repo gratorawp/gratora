@@ -277,6 +277,8 @@ final class DistPackagingTest extends TestCase
             'README.md',
             'tests',
             'assets',
+            'assets/admin',
+            'assets/deactivation',
             'build',
             'src',
         ];

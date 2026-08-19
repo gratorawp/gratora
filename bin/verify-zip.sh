@@ -77,11 +77,27 @@ test -f "$OUT/vendor/vendor-prefixed/dompdf/dompdf/lib/fonts/DejaVuSans.ttf" \
 # the payload that says where those packages came from.
 test -f "$OUT/composer.json" || fail "composer.json is missing next to vendor/"
 
-# Guideline 4: build/ is compiled, so the source it came from and the two files
-# that rebuild it have to be in the same zip. There is no public repository to
-# send a reviewer to instead.
-for src in assets package.json webpack.config.js; do
-    test -e "$OUT/$src" || fail "$src is missing, so nothing in the zip says where build/ came from"
+# assets/ is not all webpack input. These four are enqueued straight from it and
+# never reach build/, so a rule taking the directory wholesale would strip the
+# campaign page's styling and two dialogs without failing anything else here.
+for runtime in assets/deactivation/dialog.css assets/deactivation/dialog.js \
+    assets/donate-button/modal.js assets/campaign-page/page.css
+do
+    test -f "$OUT/$runtime" || fail "$runtime is enqueued at runtime and is not in the zip"
+done
+
+# Guideline 4: build/ is compiled, and the repository readme.txt names is where a
+# reviewer is sent for the sources. That link is load-bearing rather than prose,
+# so losing it is a build failure and not a copy edit.
+grep -q 'github.com/dono-platform/dono' "$OUT/readme.txt" \
+    || fail "readme.txt does not name the repository, so nothing says where build/ came from"
+
+# The other side of the same bargain: the repository answers for these, so
+# shipping them again is 2.4 MB every install pays for nothing.
+for src in assets/admin assets/_shared assets/donation-form assets/donor-portal \
+    package.json webpack.config.js
+do
+    test ! -e "$OUT/$src" || fail "$src is in the zip; the repository is what answers for it"
 done
 
 # Plugin Check calls a stray .DS_Store an error. This pins the .distignore rule
