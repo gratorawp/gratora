@@ -391,6 +391,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
             'PAYMENT.SALE.DENIED',
             'BILLING.SUBSCRIPTION.PAYMENT.FAILED' => $this->handleRenewalFailed($eventId, $type, $resource),
             'BILLING.SUBSCRIPTION.SUSPENDED'      => $this->handleSubscriptionSuspended($eventId, $type, $resource),
+            'BILLING.SUBSCRIPTION.UPDATED'        => $this->handleSubscriptionUpdated($eventId, $type, $resource),
             default => new WebhookOutcome(
                 signature_ok: true,
                 external_id: $eventId,
@@ -833,6 +834,62 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
     }
 
     /**
+     * The donor approved a change to their subscription.
+     *
+     * A revise takes effect at PayPal only once the donor approves it, and
+     * PayPal reports that here rather than through the call that asked for it.
+     * Without this the plan row keeps the amount it was created with while
+     * PayPal collects the new one, so the portal, the receipts, the recurring
+     * revenue figure and the donor's own record all describe a donation nobody
+     * is making, and the next thing to read the local amount writes it back to
+     * PayPal as though the change had never happened.
+     *
+     * @param array<string,mixed> $sub
+     *
+     * @since 1.0.0
+     */
+    private function handleSubscriptionUpdated(string $eventId, string $type, array $sub): WebhookOutcome
+    {
+        $plan = $this->planRepo->findBySubscriptionId($this->id(), (string) ($sub['id'] ?? ''));
+        if (! $plan) {
+            return $this->unmatched($eventId, $type, 'subscription');
+        }
+
+        if ($reason = WebhookPaymentGuard::refuseToTouchPlan($plan, $this->id(), $this->verifiedIsTest)) {
+            return $this->refused($eventId, $type, $reason);
+        }
+
+        $amount = $this->plans->amountForPlan((string) ($sub['plan_id'] ?? ''));
+
+        // A plan this site did not mint says nothing about the amount, and
+        // guessing would be worse than leaving the row as it stands.
+        if ($amount !== null && $amount > 0 && $amount !== (int) $plan->amount_cents) {
+            RecurringPlan::query()
+                ->where('id', (int) $plan->id)
+                ->update([
+                    'amount_cents' => $amount,
+                    // Every base-currency rollup reads this ahead of
+                    // amount_cents, so leaving it pins the recurring revenue
+                    // figure to an amount nobody is charging.
+                    'base_amount_cents' => $plan->fx_rate !== null
+                        ? (int) round($amount * (float) $plan->fx_rate)
+                        : null,
+                    'updated_at' => $this->now(),
+                ]);
+
+            $plan->amount_cents = $amount;
+            do_action('dono.recurring.plan_amount_changed', $plan);
+        }
+
+        return new WebhookOutcome(
+            signature_ok: true,
+            external_id: $eventId,
+            event_type: $type,
+            handled: true,
+        );
+    }
+
+    /**
      * PayPal suspended the subscription itself, which is where its dunning ends.
      *
      * Not a cancellation: PayPal can suspend and the donor can still fix their
@@ -1227,15 +1284,20 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
             throw new RuntimeException(esc_html__('This donation has no PayPal subscription.', 'dono-fundraising-platform'));
         }
 
-        // Same plan id, so nothing about the schedule or the amount changes:
-        // the revise exists purely to get an approval link.
-        $planId = $this->plans->resolvePlan(
-            (bool) $plan->is_test,
-            (int) $plan->amount_cents,
-            strtoupper((string) $plan->currency),
-            (string) $plan->interval_unit,
-            (int) $plan->interval_count
-        );
+        // The subscription's own current plan, read back from PayPal, so this
+        // changes nothing but the funding source. Derived from the local amount
+        // instead, it names whatever plan this row last knew about, and a donor
+        // who raised their donation and then updated their card would be quietly
+        // revised back down to the old amount: the local row is only as current
+        // as the last thing that told it, and a revise the donor approves at
+        // PayPal is not one of those things.
+        $planId = (string) ($this->api->get(
+            '/v1/billing/subscriptions/' . rawurlencode($subId)
+        )['plan_id'] ?? '');
+
+        if ($planId === '') {
+            throw new RuntimeException(esc_html__('PayPal did not say which plan this subscription is on.', 'dono-fundraising-platform'));
+        }
 
         $revised = $this->api->post(
             '/v1/billing/subscriptions/' . rawurlencode($subId) . '/revise',

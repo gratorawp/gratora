@@ -138,6 +138,44 @@ final class PayPalPlans
     }
 
     /** @since 1.0.0 */
+    /**
+     * The amount a plan id was minted for, from the cache that minted it.
+     *
+     * PayPal applies a revise only once the donor approves it, and says so on
+     * its own event rather than back through the call that asked. The plan id
+     * the subscription then carries is the only thing naming the new amount,
+     * and every id here was created against a key that records one.
+     *
+     * Null when the id is not one of ours, which a plan built in PayPal's own
+     * dashboard would be.
+     *
+     * @since 1.0.0
+     */
+    public function amountForPlan(string $planId): ?int
+    {
+        if ($planId === '') {
+            return null;
+        }
+
+        foreach ($this->plans() as $key => $id) {
+            if ((string) $id !== $planId) {
+                continue;
+            }
+
+            // live_<fingerprint>_<currency>_<amount>_<unit>_<count>
+            $parts = explode('_', (string) $key);
+            if (count($parts) < 6) {
+                continue;
+            }
+            $amount = $parts[count($parts) - 3];
+
+            return ctype_digit($amount) ? (int) $amount : null;
+        }
+
+        return null;
+    }
+
+    /** @since 1.0.0 */
     private function planKey(bool $test, int $amountCents, string $currency, string $unit, int $count): string
     {
         return implode('_', [
