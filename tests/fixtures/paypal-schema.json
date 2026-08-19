@@ -1,0 +1,936 @@
+{
+ "source": "https://github.com/paypal/paypal-rest-api-specifications",
+ "specs": {
+  "orders": "2.32",
+  "subs": "1.8",
+  "pay": "2.12"
+ },
+ "objects": {
+  "order": {
+   "tree": {
+    "create_time": true,
+    "update_time": true,
+    "id": true,
+    "payment_source": {
+     "card": {
+      "name": true,
+      "last_digits": true,
+      "brand": true,
+      "available_networks": {
+       "[]": true
+      },
+      "type": true,
+      "authentication_result": {
+       "liability_shift": true,
+       "three_d_secure": {
+        "authentication_status": true,
+        "enrollment_status": true
+       }
+      },
+      "attributes": {
+       "vault": {
+        "id": true,
+        "status": true,
+        "customer": true,
+        "links": true
+       }
+      },
+      "from_request": {
+       "expiry": true,
+       "last_digits": true
+      },
+      "expiry": true,
+      "bin_details": {
+       "bin": true,
+       "issuing_bank": true,
+       "bin_country_code": true,
+       "products": {
+        "[]": true
+       }
+      },
+      "stored_credential": {
+       "payment_initiator": true,
+       "payment_type": true,
+       "usage": true,
+       "previous_network_transaction_reference": {
+        "id": true,
+        "date": true,
+        "network": true,
+        "acquirer_reference_number": true
+       }
+      }
+     },
+     "paypal": {
+      "email_address": true,
+      "account_id": true,
+      "account_status": true,
+      "name": {
+       "prefix": true,
+       "given_name": true,
+       "surname": true,
+       "middle_name": true,
+       "suffix": true,
+       "full_name": true
+      },
+      "phone_type": true,
+      "phone_number": {
+       "national_number": true
+      },
+      "birth_date": true,
+      "business_name": true,
+      "tax_info": {
+       "tax_id": true,
+       "tax_id_type": true
+      },
+      "address": {
+       "address_line_1": true,
+       "address_line_2": true,
+       "address_line_3": true,
+       "admin_area_4": true,
+       "admin_area_3": true,
+       "admin_area_2": true,
+       "admin_area_1": true,
+       "postal_code": true,
+       "country_code": true,
+       "address_details": {
+        "street_number": true,
+        "street_name": true,
+        "street_type": true,
+        "delivery_service": true,
+        "building_name": true,
+        "sub_building": true
+       }
+      },
+      "attributes": {
+       "vault": {
+        "id": true,
+        "status": true,
+        "customer": true,
+        "links": true
+       },
+       "cobranded_cards": {
+        "[]": true
+       }
+      },
+      "stored_credential": {
+       "payment_initiator": true,
+       "charge_pattern": true,
+       "usage_pattern": true,
+       "usage": true
+      },
+      "experience_status": true
+     },
+     "bancontact": {
+      "name": true,
+      "country_code": true,
+      "bic": true,
+      "iban_last_chars": true,
+      "card_last_digits": true
+     },
+     "blik": {
+      "name": true,
+      "country_code": true,
+      "email": true,
+      "one_click": {
+       "consumer_reference": true
+      }
+     },
+     "eps": {
+      "name": true,
+      "country_code": true,
+      "bic": true
+     },
+     "giropay": {
+      "name": true,
+      "country_code": true,
+      "bic": true
+     },
+     "ideal": {
+      "name": true,
+      "country_code": true,
+      "bic": true,
+      "iban_last_chars": true
+     },
+     "mybank": {
+      "name": true,
+      "country_code": true,
+      "bic": true,
+      "iban_last_chars": true
+     },
+     "p24": {
+      "name": true,
+      "email": true,
+      "country_code": true,
+      "payment_descriptor": true,
+      "method_id": true,
+      "method_description": true
+     },
+     "sofort": {
+      "name": true,
+      "country_code": true,
+      "bic": true,
+      "iban_last_chars": true
+     },
+     "trustly": {
+      "name": true,
+      "country_code": true,
+      "email": true,
+      "bic": true,
+      "iban_last_chars": true
+     },
+     "apple_pay": {
+      "id": true,
+      "token": true,
+      "name": true,
+      "email_address": true,
+      "phone_number": {
+       "country_code": true,
+       "national_number": true,
+       "extension_number": true
+      },
+      "card": {
+       "name": true,
+       "last_digits": true,
+       "brand": true,
+       "available_networks": {
+        "[]": true
+       },
+       "type": true,
+       "authentication_result": {
+        "liability_shift": true,
+        "three_d_secure": true
+       },
+       "attributes": {
+        "vault": true
+       },
+       "from_request": {
+        "expiry": true,
+        "last_digits": true
+       },
+       "expiry": true,
+       "bin_details": {
+        "bin": true,
+        "issuing_bank": true,
+        "bin_country_code": true,
+        "products": true
+       },
+       "stored_credential": {
+        "payment_initiator": true,
+        "payment_type": true,
+        "usage": true,
+        "previous_network_transaction_reference": true
+       },
+       "billing_address": {
+        "address_line_1": true,
+        "address_line_2": true,
+        "address_line_3": true,
+        "admin_area_4": true,
+        "admin_area_3": true,
+        "admin_area_2": true,
+        "admin_area_1": true,
+        "postal_code": true,
+        "country_code": true,
+        "address_details": true
+       },
+       "country_code": true
+      },
+      "attributes": {
+       "vault": {
+        "id": true,
+        "status": true,
+        "customer": true,
+        "links": true
+       }
+      },
+      "stored_credential": {
+       "payment_initiator": true,
+       "payment_type": true,
+       "usage": true,
+       "previous_network_transaction_reference": {
+        "id": true,
+        "date": true,
+        "network": true,
+        "acquirer_reference_number": true
+       }
+      }
+     },
+     "google_pay": {
+      "name": true,
+      "email_address": true,
+      "phone_number": {
+       "country_code": true,
+       "national_number": true
+      },
+      "card": {
+       "name": true,
+       "last_digits": true,
+       "type": true,
+       "brand": true,
+       "billing_address": {
+        "address_line_1": true,
+        "address_line_2": true,
+        "address_line_3": true,
+        "admin_area_4": true,
+        "admin_area_3": true,
+        "admin_area_2": true,
+        "admin_area_1": true,
+        "postal_code": true,
+        "country_code": true,
+        "address_details": true
+       },
+       "authentication_result": {
+        "liability_shift": true,
+        "three_d_secure": true
+       }
+      }
+     },
+     "venmo": {
+      "email_address": true,
+      "account_id": true,
+      "user_name": true,
+      "name": {
+       "prefix": true,
+       "given_name": true,
+       "surname": true,
+       "middle_name": true,
+       "suffix": true,
+       "full_name": true
+      },
+      "phone_number": {
+       "national_number": true
+      },
+      "address": {
+       "address_line_1": true,
+       "address_line_2": true,
+       "address_line_3": true,
+       "admin_area_4": true,
+       "admin_area_3": true,
+       "admin_area_2": true,
+       "admin_area_1": true,
+       "postal_code": true,
+       "country_code": true,
+       "address_details": {
+        "street_number": true,
+        "street_name": true,
+        "street_type": true,
+        "delivery_service": true,
+        "building_name": true,
+        "sub_building": true
+       }
+      },
+      "return_flow": true,
+      "attributes": {
+       "vault": {
+        "id": true,
+        "status": true,
+        "customer": true,
+        "links": true
+       }
+      }
+     },
+     "crypto": {
+      "country_code": true,
+      "name": {
+       "prefix": true,
+       "given_name": true,
+       "surname": true,
+       "middle_name": true
+      },
+      "experience_context": {
+       "brand_name": true,
+       "locale": true,
+       "shipping_preference": true,
+       "return_url": true,
+       "cancel_url": true
+      }
+     }
+    },
+    "intent": true,
+    "payer": {
+     "email_address": true,
+     "payer_id": true,
+     "name": {
+      "prefix": true,
+      "given_name": true,
+      "surname": true,
+      "middle_name": true,
+      "suffix": true,
+      "full_name": true
+     },
+     "phone": {
+      "phone_type": true,
+      "phone_number": {
+       "national_number": true
+      }
+     },
+     "birth_date": true,
+     "tax_info": {
+      "tax_id": true,
+      "tax_id_type": true
+     },
+     "address": {
+      "address_line_1": true,
+      "address_line_2": true,
+      "address_line_3": true,
+      "admin_area_4": true,
+      "admin_area_3": true,
+      "admin_area_2": true,
+      "admin_area_1": true,
+      "postal_code": true,
+      "country_code": true,
+      "address_details": {
+       "street_number": true,
+       "street_name": true,
+       "street_type": true,
+       "delivery_service": true,
+       "building_name": true,
+       "sub_building": true
+      }
+     }
+    },
+    "purchase_units": {
+     "[]": {
+      "reference_id": true,
+      "amount": {
+       "currency_code": true,
+       "value": true,
+       "breakdown": {
+        "item_total": true,
+        "shipping": true,
+        "handling": true,
+        "tax_total": true,
+        "insurance": true,
+        "shipping_discount": true,
+        "discount": true
+       }
+      },
+      "payee": {
+       "email_address": true,
+       "merchant_id": true
+      },
+      "payment_instruction": {
+       "platform_fees": {
+        "[]": true
+       },
+       "disbursement_mode": true,
+       "payee_pricing_tier_id": true,
+       "payee_receivable_fx_rate_id": true
+      },
+      "description": true,
+      "custom_id": true,
+      "invoice_id": true,
+      "id": true,
+      "soft_descriptor": true,
+      "items": {
+       "[]": {
+        "name": true,
+        "unit_amount": true,
+        "tax": true,
+        "quantity": true,
+        "description": true,
+        "sku": true,
+        "url": true,
+        "category": true,
+        "image_url": true,
+        "upc": true,
+        "billing_plan": true
+       }
+      },
+      "shipping": {
+       "name": {
+        "prefix": true,
+        "given_name": true,
+        "surname": true,
+        "middle_name": true,
+        "suffix": true,
+        "full_name": true
+       },
+       "email_address": true,
+       "phone_number": {
+        "country_code": true,
+        "national_number": true
+       },
+       "type": true,
+       "options": {
+        "[]": true
+       },
+       "address": {
+        "address_line_1": true,
+        "address_line_2": true,
+        "address_line_3": true,
+        "admin_area_4": true,
+        "admin_area_3": true,
+        "admin_area_2": true,
+        "admin_area_1": true,
+        "postal_code": true,
+        "country_code": true,
+        "address_details": true
+       },
+       "trackers": {
+        "[]": true
+       }
+      },
+      "supplementary_data": {
+       "card": {
+        "level_2": true,
+        "level_3": true
+       },
+       "risk": {
+        "customer": true
+       }
+      },
+      "payments": {
+       "authorizations": {
+        "[]": true
+       },
+       "captures": {
+        "[]": true
+       },
+       "refunds": {
+        "[]": true
+       }
+      }
+     }
+    },
+    "status": true,
+    "links": {
+     "[]": {
+      "href": true,
+      "rel": true,
+      "method": true,
+      "title": true,
+      "mediaType": true,
+      "encType": true,
+      "schema": {
+       "additionalItems": true,
+       "dependencies": true,
+       "items": true,
+       "definitions": true,
+       "patternProperties": true,
+       "properties": true,
+       "allOf": {
+        "[]": true
+       },
+       "anyOf": {
+        "[]": true
+       },
+       "oneOf": {
+        "[]": true
+       },
+       "not": true,
+       "links": {
+        "[]": true
+       },
+       "fragmentResolution": true,
+       "media": {
+        "type": true,
+        "binaryEncoding": true
+       },
+       "pathStart": true
+      },
+      "targetSchema": {
+       "additionalItems": true,
+       "dependencies": true,
+       "items": true,
+       "definitions": true,
+       "patternProperties": true,
+       "properties": true,
+       "allOf": {
+        "[]": true
+       },
+       "anyOf": {
+        "[]": true
+       },
+       "oneOf": {
+        "[]": true
+       },
+       "not": true,
+       "links": {
+        "[]": true
+       },
+       "fragmentResolution": true,
+       "media": {
+        "type": true,
+        "binaryEncoding": true
+       },
+       "pathStart": true
+      }
+     }
+    }
+   },
+   "status": [
+    "CREATED",
+    "SAVED",
+    "APPROVED",
+    "VOIDED",
+    "COMPLETED",
+    "PAYER_ACTION_REQUIRED"
+   ]
+  },
+  "capture": {
+   "tree": {
+    "status": true,
+    "status_details": {
+     "reason": true
+    },
+    "id": true,
+    "amount": {
+     "currency_code": true,
+     "value": true,
+     "breakdown": {
+      "item_total": {
+       "currency_code": true,
+       "value": true
+      },
+      "shipping": {
+       "currency_code": true,
+       "value": true
+      },
+      "handling": {
+       "currency_code": true,
+       "value": true
+      },
+      "tax_total": {
+       "currency_code": true,
+       "value": true
+      },
+      "insurance": {
+       "currency_code": true,
+       "value": true
+      },
+      "shipping_discount": {
+       "currency_code": true,
+       "value": true
+      },
+      "discount": {
+       "currency_code": true,
+       "value": true
+      }
+     }
+    },
+    "invoice_id": true,
+    "custom_id": true,
+    "network_transaction_reference": {
+     "id": true,
+     "date": true,
+     "network": true,
+     "acquirer_reference_number": true
+    },
+    "seller_protection": {
+     "status": true,
+     "dispute_categories": {
+      "[]": true
+     }
+    },
+    "final_capture": true,
+    "seller_receivable_breakdown": {
+     "gross_amount": {
+      "currency_code": true,
+      "value": true
+     },
+     "paypal_fee": {
+      "currency_code": true,
+      "value": true
+     },
+     "paypal_fee_in_receivable_currency": {
+      "currency_code": true,
+      "value": true
+     },
+     "net_amount": {
+      "currency_code": true,
+      "value": true
+     },
+     "receivable_amount": {
+      "currency_code": true,
+      "value": true
+     },
+     "exchange_rate": {
+      "source_currency": true,
+      "target_currency": true,
+      "value": true
+     },
+     "platform_fees": {
+      "[]": {
+       "amount": {
+        "currency_code": true,
+        "value": true
+       },
+       "payee": {
+        "email_address": true,
+        "merchant_id": true
+       }
+      }
+     }
+    },
+    "disbursement_mode": true,
+    "links": {
+     "[]": {
+      "href": true,
+      "rel": true,
+      "method": true,
+      "title": true,
+      "mediaType": true,
+      "encType": true,
+      "schema": {
+       "additionalItems": true,
+       "dependencies": true,
+       "items": true,
+       "definitions": true,
+       "patternProperties": true,
+       "properties": true,
+       "allOf": {
+        "[]": true
+       },
+       "anyOf": {
+        "[]": true
+       },
+       "oneOf": {
+        "[]": true
+       },
+       "not": true,
+       "links": {
+        "[]": true
+       },
+       "fragmentResolution": true,
+       "media": {
+        "type": true,
+        "binaryEncoding": true
+       },
+       "pathStart": true
+      },
+      "targetSchema": {
+       "additionalItems": true,
+       "dependencies": true,
+       "items": true,
+       "definitions": true,
+       "patternProperties": true,
+       "properties": true,
+       "allOf": {
+        "[]": true
+       },
+       "anyOf": {
+        "[]": true
+       },
+       "oneOf": {
+        "[]": true
+       },
+       "not": true,
+       "links": {
+        "[]": true
+       },
+       "fragmentResolution": true,
+       "media": {
+        "type": true,
+        "binaryEncoding": true
+       },
+       "pathStart": true
+      }
+     }
+    },
+    "processor_response": {
+     "avs_code": true,
+     "cvv_code": true,
+     "response_code": true,
+     "payment_advice_code": true
+    },
+    "create_time": true,
+    "update_time": true,
+    "supplementary_data": {
+     "related_ids": {
+      "order_id": true
+     }
+    }
+   },
+   "status": [
+    "COMPLETED",
+    "DECLINED",
+    "PARTIALLY_REFUNDED",
+    "PENDING",
+    "REFUNDED",
+    "FAILED"
+   ]
+  },
+  "subscription": {
+   "tree": {
+    "status": true,
+    "status_change_note": true,
+    "status_update_time": true,
+    "id": true,
+    "plan_id": true,
+    "start_time": true,
+    "quantity": true,
+    "shipping_amount": {
+     "currency_code": true,
+     "value": true
+    },
+    "subscriber": {
+     "email_address": true,
+     "payer_id": true,
+     "name": {
+      "given_name": true,
+      "surname": true
+     },
+     "phone": {
+      "phone_type": true,
+      "phone_number": {
+       "national_number": true
+      }
+     },
+     "shipping_address": {
+      "name": {
+       "full_name": true
+      },
+      "type": true,
+      "options": {
+       "[]": {
+        "id": true,
+        "label": true,
+        "type": true,
+        "amount": true,
+        "selected": true
+       }
+      },
+      "address": {
+       "address_line_1": true,
+       "address_line_2": true,
+       "admin_area_2": true,
+       "admin_area_1": true,
+       "postal_code": true,
+       "country_code": true
+      }
+     },
+     "payment_source": {
+      "card": {
+       "name": true,
+       "last_digits": true,
+       "brand": true,
+       "available_networks": {
+        "[]": true
+       },
+       "type": true,
+       "authentication_result": {
+        "liability_shift": true,
+        "three_d_secure": true
+       },
+       "attributes": {
+        "vault": true
+       },
+       "from_request": {
+        "expiry": true,
+        "last_digits": true
+       },
+       "expiry": true,
+       "bin_details": {
+        "bin": true,
+        "issuing_bank": true,
+        "bin_country_code": true,
+        "products": true
+       },
+       "billing_address": {
+        "address_line_1": true,
+        "address_line_2": true,
+        "admin_area_2": true,
+        "admin_area_1": true,
+        "postal_code": true,
+        "country_code": true
+       },
+       "currency_code": true
+      }
+     }
+    },
+    "billing_info": {
+     "outstanding_balance": {
+      "currency_code": true,
+      "value": true
+     },
+     "cycle_executions": {
+      "[]": {
+       "tenure_type": true,
+       "sequence": true,
+       "cycles_completed": true,
+       "cycles_remaining": true,
+       "current_pricing_scheme_version": true,
+       "total_cycles": true
+      }
+     },
+     "last_payment": {
+      "amount": {
+       "currency_code": true,
+       "value": true
+      },
+      "time": true
+     },
+     "next_billing_time": true,
+     "final_payment_time": true,
+     "failed_payments_count": true,
+     "last_failed_payment": {
+      "amount": {
+       "currency_code": true,
+       "value": true
+      },
+      "time": true,
+      "reason_code": true,
+      "next_payment_retry_time": true
+     }
+    },
+    "create_time": true,
+    "update_time": true,
+    "custom_id": true,
+    "plan_overridden": true,
+    "plan": {
+     "product_id": true,
+     "name": true,
+     "description": true,
+     "billing_cycles": {
+      "[]": {
+       "pricing_scheme": {
+        "version": true,
+        "fixed_price": true,
+        "pricing_model": true,
+        "tiers": true,
+        "create_time": true,
+        "update_time": true
+       },
+       "frequency": {
+        "interval_unit": true,
+        "interval_count": true
+       },
+       "tenure_type": true,
+       "sequence": true,
+       "total_cycles": true
+      }
+     },
+     "payment_preferences": {
+      "auto_bill_outstanding": true,
+      "setup_fee": {
+       "currency_code": true,
+       "value": true
+      },
+      "setup_fee_failure_action": true,
+      "payment_failure_threshold": true
+     },
+     "taxes": {
+      "percentage": true,
+      "inclusive": true
+     },
+     "quantity_supported": true
+    },
+    "links": {
+     "[]": {
+      "href": true,
+      "rel": true,
+      "method": true
+     }
+    }
+   },
+   "status": [
+    "APPROVAL_PENDING",
+    "APPROVED",
+    "ACTIVE",
+    "SUSPENDED",
+    "CANCELLED",
+    "EXPIRED"
+   ]
+  }
+ }
+}
