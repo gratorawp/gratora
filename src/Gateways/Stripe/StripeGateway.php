@@ -1336,7 +1336,12 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
 
         $confirmResult = [
             'gateway_txn_id' => $piId,
-            'payment_method' => 'card',
+            // What this subscription was set up with, which is what renews it.
+            // This handler makes no API call at all, so it cannot ask, and
+            // asserting card stamps every SEPA, iDEAL and Bacs renewal wrong.
+            // Null where nothing on file says, because an empty column is
+            // honest and a wrong one is not.
+            'payment_method' => $this->methodBehind($plan),
             'metadata' => [
                 'stripe_invoice_id'      => $invoice['id']      ?? null,
                 'stripe_subscription_id' => $subscriptionId,
@@ -1389,6 +1394,27 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             event_type:   $type,
             handled:      true,
         );
+    }
+
+    /**
+     * The payment method a plan's donations were charged on.
+     *
+     * Read from the donation that opened the subscription, which is the one
+     * confirmed from a charge and so the only one that ever knew.
+     *
+     * @since 1.0.0
+     */
+    private function methodBehind(RecurringPlan $plan): ?string
+    {
+        $signup = Donation::query()
+            ->where('recurring_plan_id', (int) $plan->id)
+            ->whereIsNotNull('payment_method')
+            ->orderBy('id', 'ASC')
+            ->get();
+
+        $method = $signup instanceof Donation ? trim((string) $signup->payment_method) : '';
+
+        return $method !== '' ? $method : null;
     }
 
     /** @since 1.0.0 */

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Dono\Tests\Integration;
 
+use Dono\Analytics\ErrorLog;
+use Dono\Analytics\Event;
 use Dono\Foundation\Plugin;
 use Dono\Gateways\PayPal\PayPalAccount;
 use WP_REST_Request;
@@ -276,5 +278,62 @@ final class PayPalKeysControllerTest extends IntegrationTestCase
 
         $this->assertContains('JPY', $gateway->currencies(), 'JPY is genuinely zero-decimal and works');
         $this->assertSame('1000', \Dono\Gateways\PayPal\PayPalMoney::toValue(100000, 'JPY'));
+    }
+
+    /**
+     * A webhook that exists is not a webhook that delivers anything this reads.
+     * Reported as checked, an org can save an id subscribed to nothing Dono
+     * handles and be told it is fine, and then every recurring donation is
+     * charged with no event to bank it.
+     */
+    public function test_a_webhook_missing_the_events_dono_reads_is_saved_and_reported(): void
+    {
+        add_filter('pre_http_request', static function ($pre, $args, $url) {
+            if (! is_string($url) || ! str_contains($url, 'paypal.com')) return $pre;
+
+            if (str_contains($url, 'oauth2/token')) {
+                $body = ['access_token' => 'A21AAF_test_token', 'expires_in' => 32400, 'token_type' => 'Bearer'];
+            } elseif (str_contains($url, '/notifications/webhooks/')) {
+                $body = [
+                    'id'          => 'WH-PARTIAL',
+                    'url'         => 'https://example.test/webhook',
+                    // Captures only: nothing here reports a subscription at all.
+                    'event_types' => [
+                        ['name' => 'PAYMENT.CAPTURE.COMPLETED'],
+                        ['name' => 'PAYMENT.CAPTURE.REFUNDED'],
+                    ],
+                ];
+            } else {
+                $body = ['id' => 'OBJ-1'];
+            }
+
+            return [
+                'headers'  => [],
+                'body'     => (string) wp_json_encode($body),
+                'response' => ['code' => 200, 'message' => 'OK'],
+                'cookies'  => [], 'filename' => null,
+            ];
+        }, 1, 3);
+
+        $res = $this->save('test', 'AeA1QIZ_client', 'EO422dn3_secret', 'WH-PARTIAL');
+
+        $this->assertSame(200, $res->get_status(), (string) wp_json_encode($res->get_data()));
+        $this->assertSame(
+            'WH-PARTIAL',
+            $this->account()->webhookId(true),
+            'a setup that is otherwise right is not blocked over the events it does not need'
+        );
+
+        $errors = Event::query()
+            ->where('type', ErrorLog::PREFIX . 'gateway.paypal')
+            ->orderBy('id', 'DESC')
+            ->getAll();
+
+        $this->assertNotSame([], $errors, 'the gap is written where the org reads about problems');
+        $this->assertStringContainsString(
+            'BILLING.SUBSCRIPTION.ACTIVATED',
+            (string) ($errors[0]->payload['message'] ?? ''),
+            'and it names what is missing'
+        );
     }
 }

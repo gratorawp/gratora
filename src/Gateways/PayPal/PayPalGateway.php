@@ -290,6 +290,20 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         }
 
         $captureStatus = (string) ($capture['status'] ?? '');
+
+        // Money PayPal took and has since given back. Reported as a plain
+        // failure the caller cannot tell it from a decline, and writes the
+        // donation to failed: a donor who was charged and refunded is then
+        // recorded as never having paid, and the refund has nothing to be
+        // recorded against.
+        if (in_array($captureStatus, ['REFUNDED', 'PARTIALLY_REFUNDED'], true)) {
+            return new GatewayConfirmResult(
+                success:  false,
+                error:    "PayPal capture status is {$captureStatus}.",
+                reversed: true,
+            );
+        }
+
         if (! in_array($captureStatus, ['COMPLETED', 'PENDING'], true)) {
             return new GatewayConfirmResult(
                 success: false,
@@ -1023,7 +1037,20 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         $signup = Donation::query()
             ->where('recurring_plan_id', (int) $plan->id)
             ->where('status', 'pending')
+            ->orderBy('id', 'ASC')
             ->get();
+
+        // A renewal left pending by a delivery that died before it confirmed is
+        // also a pending row on this plan, and adopting it as the signup writes
+        // this month's sale over last month's: that collection is confirmed
+        // under the wrong month, the stranded one loses the only id it could be
+        // found by, and two collections are recorded as one donation. The
+        // signup is the row that names the subscription, because that is what
+        // opened it; a renewal names the sale that created it.
+        $namedOnRow = $signup instanceof Donation ? (string) ($signup->gateway_intent_id ?? '') : '';
+        if ($namedOnRow !== '' && $namedOnRow !== $subId && $namedOnRow !== $saleId) {
+            $signup = null;
+        }
 
         if ($signup instanceof Donation) {
             // The same reasoning as handleCaptureCompleted, by a different door:

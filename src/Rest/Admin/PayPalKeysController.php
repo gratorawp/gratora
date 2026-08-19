@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dono\Rest\Admin;
 
+use Dono\Analytics\ErrorLog;
 use Dono\Foundation\Auth\Capabilities;
 use Dono\Gateways\PayPal\PayPalAccount;
 use Dono\Gateways\PayPal\PayPalApi;
@@ -38,6 +39,30 @@ final class PayPalKeysController
     private const HOOK_FOUND   = 'found';
     private const HOOK_MISSING = 'missing';
     private const HOOK_UNKNOWN = 'unknown';
+
+    /** The webhook exists but does not deliver everything this reads. */
+    private const HOOK_INCOMPLETE = 'incomplete';
+
+    /**
+     * Events this plugin acts on. A webhook missing any of them leaves the
+     * matching money movement unrecorded, and the donor's own screens saying so.
+     *
+     * @var list<string>
+     */
+    private const REQUIRED_EVENTS = [
+        'PAYMENT.CAPTURE.COMPLETED',
+        'PAYMENT.CAPTURE.DENIED',
+        'PAYMENT.CAPTURE.PENDING',
+        'PAYMENT.CAPTURE.REFUNDED',
+        'PAYMENT.SALE.COMPLETED',
+        'PAYMENT.SALE.DENIED',
+        'BILLING.SUBSCRIPTION.ACTIVATED',
+        'BILLING.SUBSCRIPTION.CANCELLED',
+        'BILLING.SUBSCRIPTION.EXPIRED',
+        'BILLING.SUBSCRIPTION.SUSPENDED',
+        'BILLING.SUBSCRIPTION.PAYMENT.FAILED',
+        'BILLING.SUBSCRIPTION.UPDATED',
+    ];
 
     /** When the save that is running now began, for the outbound time budget. */
     private ?float $startedAt = null;
@@ -182,8 +207,10 @@ final class PayPalKeysController
 
         $check = $this->checkWebhookId($webhookId);
 
-        if ($check['status'] === self::HOOK_FOUND) {
+        if ($check['status'] === self::HOOK_FOUND || $check['status'] === self::HOOK_INCOMPLETE) {
             $this->account->saveWebhookId($test, $webhookId);
+            $this->noteIncompleteWebhook($check);
+
             return $this->status();
         }
 
@@ -220,8 +247,10 @@ final class PayPalKeysController
 
         $check = $this->checkWebhookId($webhookId);
 
-        if ($check['status'] === self::HOOK_FOUND) {
+        if ($check['status'] === self::HOOK_FOUND || $check['status'] === self::HOOK_INCOMPLETE) {
             $this->account->saveWebhookId($test, $webhookId);
+            $this->noteIncompleteWebhook($check);
+
             return $this->status();
         }
 
@@ -274,6 +303,55 @@ final class PayPalKeysController
      *
      * @since 1.0.0
      */
+    /**
+     * Say so where the org reads about problems, and save the id anyway.
+     *
+     * Refusing would block a setup that is otherwise right: an org taking only
+     * one-time donations needs none of the subscription events, and this cannot
+     * tell that from a webhook built wrong. What it can do is stop reporting an
+     * unchecked id as checked.
+     *
+     * @param array{status:string,message:string} $check
+     *
+     * @since 1.0.0
+     */
+    private function noteIncompleteWebhook(array $check): void
+    {
+        if ($check['status'] !== self::HOOK_INCOMPLETE) {
+            return;
+        }
+
+        ErrorLog::record('gateway.paypal', $check['message']);
+    }
+
+    /**
+     * Which of the events this reads the webhook does not send.
+     *
+     * A subscription to every event PayPal has is expressed as a single `*`,
+     * which covers everything.
+     *
+     * @param  array<string,mixed> $webhook as PayPal returns it
+     * @return list<string>
+     *
+     * @since 1.0.0
+     */
+    private function eventsNotSubscribed(array $webhook): array
+    {
+        $names = [];
+        foreach ((array) ($webhook['event_types'] ?? []) as $type) {
+            $name = is_array($type) ? (string) ($type['name'] ?? '') : (string) $type;
+            if ($name !== '') {
+                $names[] = strtoupper(trim($name));
+            }
+        }
+
+        if ($names === [] || in_array('*', $names, true)) {
+            return [];
+        }
+
+        return array_values(array_diff(self::REQUIRED_EVENTS, $names));
+    }
+
     private function checkWebhookId(string $webhookId): array
     {
         try {
@@ -299,6 +377,24 @@ final class PayPalKeysController
 
         $code = (int) wp_remote_retrieve_response_code($response);
         if ($code >= 200 && $code < 300) {
+            $found = json_decode((string) wp_remote_retrieve_body($response), true);
+            $missing = $this->eventsNotSubscribed(is_array($found) ? $found : []);
+
+            // A webhook that exists is not a webhook that delivers anything
+            // this reads. Reported as checked, an org can save an id subscribed
+            // to nothing Dono handles and be told it is fine, and then every
+            // recurring donation is charged with no event to bank it.
+            if ($missing !== []) {
+                return [
+                    'status'  => self::HOOK_INCOMPLETE,
+                    'message' => sprintf(
+                        /* translators: %s: comma-separated PayPal event names */
+                        __('That webhook does not send: %s', 'dono-fundraising-platform'),
+                        implode(', ', $missing)
+                    ),
+                ];
+            }
+
             return ['status' => self::HOOK_FOUND, 'message' => ''];
         }
 

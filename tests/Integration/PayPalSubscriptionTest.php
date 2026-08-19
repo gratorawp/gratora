@@ -826,4 +826,43 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
         $plan = RecurringPlan::query()->where('id', (int) $donation->recurring_plan_id)->get();
         $this->assertSame('I-SUB-1', $plan->gateway_subscription_id, 'the first one still stands');
     }
+
+    /**
+     * A renewal left pending by a delivery that died before it confirmed is
+     * also a pending row on the plan. Adopted as the signup, this month's sale
+     * is written over last month's: the collection is confirmed under the wrong
+     * month, the stranded row loses the only id it could be found by, and two
+     * collections are recorded as one donation.
+     */
+    public function test_a_stranded_renewal_is_not_mistaken_for_the_signup(): void
+    {
+        $reference = $this->createRecurringDonation();
+        $this->recordSubscription($reference);
+
+        // March: a sale that created its row and never confirmed it.
+        $this->postWebhook('PAYMENT.SALE.COMPLETED', [
+            'id'                   => 'SALE-MARCH',
+            'billing_agreement_id' => 'I-SUB-1',
+            'amount'               => ['total' => '25.00', 'currency' => 'USD'],
+        ]);
+        $march = Donation::query()->where('gateway_intent_id', 'SALE-MARCH')->get();
+        $this->assertNotNull($march, 'precondition: March has a row of its own');
+        Donation::query()->where('id', (int) $march->id)->update(['status' => 'pending']);
+
+        // April.
+        $this->postWebhook('PAYMENT.SALE.COMPLETED', [
+            'id'                   => 'SALE-APRIL',
+            'billing_agreement_id' => 'I-SUB-1',
+            'amount'               => ['total' => '25.00', 'currency' => 'USD'],
+        ]);
+
+        $this->assertNotNull(
+            Donation::query()->where('gateway_intent_id', 'SALE-MARCH')->get(),
+            'March keeps the id it can be found by'
+        );
+        $this->assertNotNull(
+            Donation::query()->where('gateway_intent_id', 'SALE-APRIL')->get(),
+            'and April is a collection of its own, not a relabelling of March'
+        );
+    }
 }
