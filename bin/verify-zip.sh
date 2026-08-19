@@ -119,6 +119,19 @@ do
     test ! -e "$OUT/$src" || fail "$src is in the zip; the repository is what answers for it"
 done
 
+# The directory's upload form rejects a shell script anywhere in the payload,
+# by name, before a human ever sees the plugin. Named by extension rather than
+# by path because the one that reached it came from a vendored package's own
+# bin/, which no rule about this plugin's tree would have covered.
+SH=$(find "$OUT" -name '*.sh' -print -quit)
+test -z "$SH" || fail "${SH#"$OUT"/} is a shell script; the directory refuses the upload"
+
+# A package's bin/ is its CLI tooling: a test installer, a code generator that
+# fetches a URL when run. None of it is reachable from the plugin, and shipping
+# it puts scripts in front of a reviewer that the plugin cannot explain.
+BIN=$(find "$OUT/vendor" -type d -name bin -print -quit 2>/dev/null)
+test -z "$BIN" || fail "${BIN#"$OUT"/} ships a package's own tooling"
+
 # Plugin Check calls a stray .DS_Store an error. This pins the .distignore rule
 # rather than junk in general: it looks for the same two basenames that rule
 # names, so any other stray (._foo, desktop.ini) passes both.

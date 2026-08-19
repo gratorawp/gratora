@@ -71,5 +71,7 @@ Thumbs.db
 /vendor/vendor-prefixed/dono/queryable/phpunit.xml.dist
 /vendor/vendor-prefixed/dono/queryable/.github
 /vendor/vendor-prefixed/dono/queryable/.gitignore
+/vendor/vendor-prefixed/dono/queryable/bin
+/vendor/vendor-prefixed/masterminds/html5/bin
 
 /.cache
