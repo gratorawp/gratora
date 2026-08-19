@@ -916,6 +916,16 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
             );
         }
 
+        // Every other plan-touching handler in this file asks this, and this one
+        // is where the money is: a sale signed with the softer sandbox
+        // credential would otherwise mint a live paid donation against a live
+        // plan, for whatever amount the event named. The signup branch below
+        // guards the donation it confirms; this guards the plan, which is what
+        // the renewal branch writes against.
+        if ($reason = WebhookPaymentGuard::refuseToTouchPlan($plan, $this->id(), $this->verifiedIsTest)) {
+            return $this->refused($eventId, $type, $reason);
+        }
+
         $saleId   = (string) ($sale['id'] ?? '');
         $currency = strtoupper((string) ($sale['amount']['currency'] ?? $plan->currency));
         $amount   = PayPalMoney::toStoredCents((string) ($sale['amount']['total'] ?? '0'), $currency);

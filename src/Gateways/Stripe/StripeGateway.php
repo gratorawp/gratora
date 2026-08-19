@@ -303,16 +303,14 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         // being written here. Without it the miss below is terminal: the 200
         // stops Stripe retrying, and money is taken against a donation that
         // stays pending for good, with no receipt and no campaign total.
+        $healable = false;
         if (! $donation) {
             $reference = (string) ($intent['metadata']['dono_reference'] ?? '');
             if ($reference !== '') {
                 $donation = $this->donations->findByReference($reference);
-                if ($donation && $intentId !== '' && (string) ($donation->gateway_intent_id ?? '') === '') {
-                    // Healed, so every later event for this intent resolves the
-                    // direct way.
-                    $donation->gateway_intent_id = $intentId;
-                    $donation->save();
-                }
+                $healable = $donation !== null
+                    && $intentId !== ''
+                    && (string) ($donation->gateway_intent_id ?? '') === '';
             }
         }
 
@@ -340,6 +338,18 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         );
         if ($refusal !== null) {
             return $this->refused($eventId, $type, $refusal);
+        }
+
+        // Written only now the delivery has proved it is about this donation,
+        // in this mode. The reference the metadata carries is not a secret, so
+        // a delivery signed with the softer test secret can name a live
+        // donation, and healing before the guard stamped an id of the sender's
+        // choosing onto it. The guard refused the confirm, but the id stayed,
+        // survived the genuine live event, and a later refund was sent against
+        // it with the live key.
+        if ($healable) {
+            $donation->gateway_intent_id = $intentId;
+            $donation->save();
         }
 
         $confirm = $this->buildConfirmResultFromIntent($intent);
