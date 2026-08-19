@@ -6,6 +6,7 @@ namespace Dono\Foundation\Transfer;
 
 use DateTimeImmutable;
 use DateTimeZone;
+use Dono\Currency\Currency;
 use Dono\Currency\FxRates;
 use Dono\Donations\AggregateSyncer;
 use Dono\Donations\Donation;
@@ -244,7 +245,7 @@ final class CsvImporter
         $amountCents = null;
         $paidAt      = null;
         if ($mode === 'donations') {
-            $amountCents = $this->cents($get('amount'));
+            $amountCents = $this->cents($get('amount'), $get('currency'));
             if ($amountCents === null) {
                 return $skip('invalid_amount');
             }
@@ -450,7 +451,7 @@ final class CsvImporter
      *
      * @since 1.0.0
      */
-    private function cents(string $raw): ?int
+    private function cents(string $raw, string $currency = ''): ?int
     {
         $raw = trim($raw);
         if ($raw === '') return null;
@@ -458,21 +459,76 @@ final class CsvImporter
         $clean = preg_replace('/[^0-9,.\-]/', '', $raw) ?? '';
         if ($clean === '' || $clean === '-') return null;
 
-        // 1.234,56 and 1,234.56 both occur; the last separator is the decimal.
-        $lastDot   = strrpos($clean, '.');
-        $lastComma = strrpos($clean, ',');
-        if ($lastComma !== false && ($lastDot === false || $lastComma > $lastDot)) {
-            $clean = str_replace('.', '', $clean);
-            $clean = str_replace(',', '.', $clean);
-        } else {
-            $clean = str_replace(',', '', $clean);
+        $decimal = $this->decimalSeparator($clean, $currency);
+
+        foreach (['.', ','] as $char) {
+            if ($char !== $decimal) {
+                $clean = str_replace($char, '', $clean);
+            }
+        }
+        if ($decimal !== null) {
+            $clean = str_replace($decimal, '.', $clean);
         }
 
         if (! is_numeric($clean)) return null;
 
+        // Times one hundred whatever the currency: every amount is stored as
+        // the major unit scaled by 100, and the currency's own minor units are
+        // applied at the gateway boundary rather than here.
         $cents = (int) round(((float) $clean) * 100);
 
         return $cents > 0 ? $cents : null;
+    }
+
+    /**
+     * Which of `.` and `,` is the decimal point in a written amount, if either.
+     *
+     * "The last separator is the decimal" is right for 1,234.56 and 1.234,56
+     * and wrong for every grouped whole amount: it reads 1,000 as one, losing
+     * three orders of magnitude silently, and a spreadsheet inserts those
+     * separators from a thousand upward, so the small rows of a file import
+     * correctly and the large ones do not.
+     *
+     * A separator is grouping when it appears more than once, and when it is
+     * followed by exactly three digits that the currency has no room for. What
+     * the currency does have room for decides the rest, which is the only way
+     * 1.234 can be read as one and a bit in Kuwaiti dinar and as one thousand
+     * two hundred and thirty four in dollars.
+     *
+     * @since 1.0.0
+     */
+    private function decimalSeparator(string $clean, string $currency): ?string
+    {
+        $decimals = Currency::minorUnits($currency !== '' ? $currency : Money::defaultCurrency());
+
+        $lastDot   = strrpos($clean, '.');
+        $lastComma = strrpos($clean, ',');
+        if ($lastDot === false && $lastComma === false) {
+            return null;
+        }
+
+        $char = $lastComma !== false && ($lastDot === false || $lastComma > $lastDot) ? ',' : '.';
+        $at   = $char === ',' ? $lastComma : $lastDot;
+
+        // Two of the same character cannot both be a decimal point, so both are
+        // grouping, and so is every other separator in the string.
+        if (substr_count($clean, $char) > 1) {
+            return null;
+        }
+
+        $tail = strlen($clean) - $at - 1;
+
+        // Grouping always puts exactly three digits after the separator, so
+        // that is the only length the two readings compete for, and what the
+        // currency has room for settles it. Any other length is a decimal
+        // point: an export writing 100.00 in a currency with no minor unit is
+        // writing one hundred, and reading it as grouping would multiply it by
+        // a hundred, which is the same failure this exists to stop.
+        if ($tail === 3) {
+            return $decimals === 3 ? $char : null;
+        }
+
+        return $char;
     }
 
     /**
