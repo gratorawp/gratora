@@ -22,13 +22,16 @@ if (! is_multisite()) {
     return;
 }
 
-foreach (get_sites(['fields' => 'ids', 'number' => 0]) as $siteId) {
-    switch_to_blog((int) $siteId);
-    try {
-        (new DataEraser())->erase();
-    } finally {
-        // Without this the switch outlives a failure and every site after it
-        // is erased against the wrong blog's tables.
-        restore_current_blog();
+// Scoped so the loop variable cannot leak when this file is read at global scope.
+(static function (): void {
+    foreach (get_sites(['fields' => 'ids', 'number' => 0]) as $siteId) {
+        switch_to_blog((int) $siteId);
+        try {
+            (new DataEraser())->erase();
+        } finally {
+            // Without this the switch outlives a failure and every site after it
+            // is erased against the wrong blog's tables.
+            restore_current_blog();
+        }
     }
-}
+})();

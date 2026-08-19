@@ -94,7 +94,7 @@ final class ApplePayDomain extends HookProvider
      */
     public function maybeServeAssociationFile(): void
     {
-        $body = $this->bodyForRequest((string) ($_SERVER['REQUEST_URI'] ?? ''));
+        $body = $this->bodyForRequest(sanitize_url(wp_unslash($_SERVER['REQUEST_URI'] ?? '')));
         if ($body === null) {
             return;
         }

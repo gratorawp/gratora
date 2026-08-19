@@ -52,7 +52,7 @@ final class Onboarding extends HookProvider
 
         // A redirect answers a GET. Anything else is carrying a body that only
         // its own handler knows how to finish, including other plugins'.
-        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') return false;
+        if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] !== 'GET') return false;
 
         // pagenow is set in wp-includes/vars.php, long before admin_init.
         // get_current_screen() is not: core calls set_current_screen() after

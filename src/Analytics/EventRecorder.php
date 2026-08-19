@@ -62,9 +62,13 @@ final class EventRecorder
         $event->payload           = $ctx['payload'] ?? null;
         $privacy = $this->settings->get('privacy');
         $event->ip_hash           = ! empty($privacy['anonymize_ips'])
-            ? $this->hasher->ipHash($_SERVER['REMOTE_ADDR'] ?? null)
+            ? $this->hasher->ipHash(
+                filter_var(wp_unslash($_SERVER['REMOTE_ADDR'] ?? ''), FILTER_VALIDATE_IP) ?: null
+            )
             : null;
-        $event->user_agent_hash   = $this->hasher->userAgentHash($_SERVER['HTTP_USER_AGENT'] ?? null);
+        $event->user_agent_hash   = $this->hasher->userAgentHash(
+            wp_strip_all_tags(wp_unslash($_SERVER['HTTP_USER_AGENT'] ?? ''))
+        );
         $event->occurred_at       = $this->clock->now()->format('Y-m-d H:i:s');
 
         $event->save();

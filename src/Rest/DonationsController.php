@@ -339,8 +339,8 @@ final class DonationsController
         // recorded, and a consent write must never break the donation.
         $consents = is_array($body['consents'] ?? null) ? $body['consents'] : [];
         if ($consents && $donation->donor_id) {
-            $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? '');
-            $ua = (string) ($_SERVER['HTTP_USER_AGENT'] ?? '');
+            $ip = (string) (filter_var(wp_unslash($_SERVER['REMOTE_ADDR'] ?? ''), FILTER_VALIDATE_IP) ?: '');
+            $ua = wp_strip_all_tags(wp_unslash($_SERVER['HTTP_USER_AGENT'] ?? ''));
             // The form's own consent-block purposes as well as the org settings
             // registry, or form-defined consents drop.
             $formConsentIds = $form ? FormSubmissionValidator::consentPurposeIds((string) $form->blocks) : [];

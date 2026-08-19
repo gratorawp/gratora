@@ -122,7 +122,7 @@ final class PortalShortcode extends HookProvider
     {
         $parts  = (array) wp_parse_url($restUrl);
         $host   = strtolower((string) ($parts['host'] ?? ''));
-        $served = strtolower((string) preg_replace('/:\d+$/', '', (string) ($_SERVER['HTTP_HOST'] ?? '')));
+        $served = strtolower((string) preg_replace('/:\d+$/', '', sanitize_text_field(wp_unslash($_SERVER['HTTP_HOST'] ?? ''))));
 
         if ($host === '' || $served === '' || $served === $host) return $restUrl;
         if ($served !== 'www.' . $host && $host !== 'www.' . $served) return $restUrl;

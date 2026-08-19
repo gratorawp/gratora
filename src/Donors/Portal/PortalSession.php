@@ -238,7 +238,7 @@ final class PortalSession
     /** @since 1.0.0 */
     private function cookieSid(): string
     {
-        $sid = isset($_COOKIE[self::COOKIE]) ? (string) $_COOKIE[self::COOKIE] : '';
+        $sid = isset($_COOKIE[self::COOKIE]) ? sanitize_key($_COOKIE[self::COOKIE]) : '';
 
         return $sid !== '' && ctype_xdigit($sid) ? $sid : '';
     }

@@ -164,7 +164,7 @@ final class AntiSpamGuard
     {
         if ($this->inGlobalTestMode()) return null;
 
-        $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+        $ip = filter_var(wp_unslash($_SERVER['REMOTE_ADDR'] ?? ''), FILTER_VALIDATE_IP) ?: 'unknown';
         if ($this->hit('dono_donate_ip_' . hash('sha256', $ip), self::IP_WINDOW) <= self::IP_MAX) {
             return null;
         }

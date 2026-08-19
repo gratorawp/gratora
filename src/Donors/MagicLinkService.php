@@ -163,7 +163,7 @@ final class MagicLinkService
     /** @since 1.0.0 */
     private function rateKey(string $purpose): string
     {
-        $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+        $ip = filter_var(wp_unslash($_SERVER['REMOTE_ADDR'] ?? ''), FILTER_VALIDATE_IP) ?: 'unknown';
 
         return 'dono_ml_val_' . hash('sha256', $purpose . '|' . $ip);
     }

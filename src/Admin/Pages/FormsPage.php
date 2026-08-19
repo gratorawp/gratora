@@ -44,7 +44,7 @@ final class FormsPage extends HookProvider
     {
         return is_admin()
             && (isset($_GET['page']) ? sanitize_key(wp_unslash($_GET['page'])) : '') === self::PAGE_ID
-            && (int) ($_GET['form'] ?? 0) > 0;
+            && intval($_GET['form'] ?? 0) > 0;
     }
 
     /** @since 1.0.0 */

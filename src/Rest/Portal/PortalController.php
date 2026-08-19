@@ -349,7 +349,7 @@ final class PortalController
         // navigation carries no Origin at all.
         $override = (string) ($request->get_query_params()['_method'] ?? '')
             . (string) $request->get_header('X-HTTP-Method-Override');
-        if ($override !== '' && strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? '')) === 'GET') {
+        if ($override !== '' && strtoupper(sanitize_text_field(wp_unslash($_SERVER['REQUEST_METHOD'] ?? ''))) === 'GET') {
             return $refused;
         }
 
@@ -368,7 +368,7 @@ final class PortalController
         $ours = array_filter([
             strtolower((string) wp_parse_url(home_url(), PHP_URL_HOST)),
             strtolower((string) wp_parse_url(site_url(), PHP_URL_HOST)),
-            strtolower((string) preg_replace('/:\d+$/', '', (string) ($_SERVER['HTTP_HOST'] ?? ''))),
+            strtolower((string) preg_replace('/:\d+$/', '', sanitize_text_field(wp_unslash($_SERVER['HTTP_HOST'] ?? '')))),
         ]);
 
         foreach ($ours as $ourHost) {
@@ -593,7 +593,7 @@ final class PortalController
      */
     private function consumeIpQuota(): bool
     {
-        $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+        $ip = filter_var(wp_unslash($_SERVER['REMOTE_ADDR'] ?? ''), FILTER_VALIDATE_IP) ?: 'unknown';
 
         return $this->spam->hit('dono_send_link_ip_' . hash('sha256', $ip), self::SEND_LINK_IP_WINDOW)
             <= self::SEND_LINK_IP_MAX;
@@ -1193,7 +1193,7 @@ final class PortalController
             // runs: no file, no fields, no error code. The only trace is a
             // content length larger than the server would accept, so without
             // this the donor is told nothing was sent when in fact too much was.
-            $sent = (int) ($_SERVER['CONTENT_LENGTH'] ?? 0);
+            $sent = isset($_SERVER['CONTENT_LENGTH']) ? (int) $_SERVER['CONTENT_LENGTH'] : 0;
             $max  = wp_convert_hr_to_bytes((string) ini_get('post_max_size'));
             if ($max > 0 && $sent > $max) {
                 return new WP_Error(
@@ -1353,8 +1353,8 @@ final class PortalController
 
         $body  = (array) ($request->get_json_params() ?? []);
         $items = is_array($body['items'] ?? null) ? $body['items'] : [];
-        $ip    = (string) ($_SERVER['REMOTE_ADDR'] ?? '');
-        $ua    = (string) ($_SERVER['HTTP_USER_AGENT'] ?? '');
+        $ip    = (string) (filter_var(wp_unslash($_SERVER['REMOTE_ADDR'] ?? ''), FILTER_VALIDATE_IP) ?: '');
+        $ua    = wp_strip_all_tags(wp_unslash($_SERVER['HTTP_USER_AGENT'] ?? ''));
 
         $byKey   = [];
         foreach ($this->consents->purposes() as $p) $byKey[$p['key']] = $p;
