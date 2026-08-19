@@ -23,7 +23,8 @@ use RuntimeException;
 final class PayPalApiException extends RuntimeException
 {
     /**
-     * @param list<string> $issues PayPal's `details[].issue` codes, upper-case.
+     * @param list<string> $issues PayPal's error name and its `details[].issue`
+     *   codes, upper-case.
      *
      * @since 1.0.0
      */
@@ -59,15 +60,24 @@ final class PayPalApiException extends RuntimeException
      */
     public static function issuesFrom(array $body): array
     {
-        $details = $body['details'] ?? null;
-        if (! is_array($details)) return [];
-
         $issues = [];
-        foreach ($details as $detail) {
+
+        // The error name as well as the per-detail issues. PayPal's shared
+        // error model requires `name` and leaves `details` optional, so an
+        // error can arrive naming itself and nothing else: read from details
+        // alone that error carries nothing to match, every issue check answers
+        // false, and a guard written to recognise it never fires.
+        $name = strtoupper(trim((string) ($body['name'] ?? '')));
+        if ($name !== '') {
+            $issues[] = $name;
+        }
+
+        foreach ((array) ($body['details'] ?? []) as $detail) {
             if (! is_array($detail)) continue;
             $issue = strtoupper(trim((string) ($detail['issue'] ?? '')));
             if ($issue !== '') $issues[] = $issue;
         }
+
         return array_values(array_unique($issues));
     }
 }

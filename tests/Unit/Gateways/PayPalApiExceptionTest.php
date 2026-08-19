@@ -78,6 +78,51 @@ final class PayPalApiExceptionTest extends TestCase
         $this->assertFalse((new PayPalApiException('x'))->hasIssue('ANYTHING'));
     }
 
+    /**
+     * PayPal's shared error model requires `name` and leaves `details`
+     * optional, so an error can arrive naming itself and carrying nothing else.
+     * Read from details alone there is nothing to match, every issue check
+     * answers false, and the guard written to recognise that error never fires:
+     * a re-capture fails the donor on money PayPal already took, and an action
+     * on a subscription already in the asked-for state is reported as an error.
+     */
+    public function test_an_error_that_names_itself_and_nothing_else_is_still_matchable(): void
+    {
+        $e = new PayPalApiException('x', PayPalApiException::issuesFrom([
+            'name'     => 'INVALID_RESOURCE_STATE',
+            'message'  => 'The requested action could not be performed.',
+            'debug_id' => 'b7a1c9f3',
+        ]));
+
+        $this->assertTrue($e->hasIssue('INVALID_STATE', 'INVALID_RESOURCE_STATE'));
+    }
+
+    /** The name is read as well as the details, not instead of them. */
+    public function test_the_name_does_not_hide_the_detail_issues(): void
+    {
+        $issues = PayPalApiException::issuesFrom([
+            'name'    => 'UNPROCESSABLE_ENTITY',
+            'details' => [['issue' => 'SUBSCRIPTION_STATUS_INVALID']],
+        ]);
+
+        $this->assertSame(['UNPROCESSABLE_ENTITY', 'SUBSCRIPTION_STATUS_INVALID'], $issues);
+    }
+
+    /**
+     * The name PayPal puts on most 4xx is generic, so it must not answer for a
+     * specific code the caller is asking about.
+     */
+    public function test_a_generic_name_does_not_answer_for_a_specific_code(): void
+    {
+        $e = new PayPalApiException('x', PayPalApiException::issuesFrom([
+            'name'    => 'UNPROCESSABLE_ENTITY',
+            'details' => [['issue' => 'PERMISSION_DENIED']],
+        ]));
+
+        $this->assertFalse($e->hasIssue('ORDER_ALREADY_CAPTURED'));
+        $this->assertFalse($e->hasIssue('SUBSCRIPTION_STATUS_INVALID'));
+    }
+
     public function test_duplicate_codes_collapse(): void
     {
         $issues = PayPalApiException::issuesFrom([
