@@ -963,7 +963,8 @@ final class DonationService
         string $gatewayRefundId,
         ?string $reason = null,
         string $initiatedBy = 'gateway',
-        ?array $metadata = null
+        ?array $metadata = null,
+        bool $settled = true
     ): Refund {
         if ($amountCents <= 0) {
             throw new RuntimeException(esc_html("Invalid external refund amount: {$amountCents}."));
@@ -972,12 +973,25 @@ final class DonationService
             throw new RuntimeException(esc_html('External refund missing gateway_refund_id; cannot dedup.'));
         }
 
-        // Redelivered webhook: idempotent return.
+        // Redelivered webhook: idempotent return. A row still awaiting the
+        // gateway is the exception, because the call that says the money has
+        // actually gone is the one this was waiting for: that row is cleared
+        // out of the way so the settled path below runs whole, rather than
+        // being reported as already handled and never taking the money off the
+        // books at all.
         $existing = Refund::query()
             ->where('gateway_refund_id', $gatewayRefundId)
             ->get();
         if ($existing) {
-            return $existing;
+            if ((string) $existing->status !== 'pending' || ! $settled) {
+                return $existing;
+            }
+
+            Refund::query()->where('id', (int) $existing->id)->delete();
+        }
+
+        if (! $settled) {
+            return $this->recordAwaitedRefund($donation, $amountCents, $gatewayRefundId, $reason, $initiatedBy, $metadata);
         }
 
         if ($donation->status !== 'paid' && $donation->status !== 'partial_refund') {
@@ -1098,6 +1112,44 @@ final class DonationService
         }
 
         do_action('dono.donation.refunded', $donation, $refund);
+
+        return $refund;
+    }
+
+    /**
+     * A refund the gateway has taken on but not completed.
+     *
+     * Recorded so the admin can see it was asked for, and deliberately nothing
+     * else: the money is still with the org, so the donation stays paid, its
+     * receipt stays valid, the totals stay whole and the donor is not told they
+     * have been repaid. What settles it is the gateway saying so, which comes
+     * back through recordExternalRefund and replaces this row.
+     *
+     * @param array<string,mixed>|null $metadata
+     *
+     * @since 1.0.0
+     */
+    private function recordAwaitedRefund(
+        Donation $donation,
+        int $amountCents,
+        string $gatewayRefundId,
+        ?string $reason,
+        string $initiatedBy,
+        ?array $metadata
+    ): Refund {
+        $refund = Refund::make();
+
+        $refund->donation_id       = $donation->id;
+        $refund->amount_cents      = $amountCents;
+        $refund->currency          = $donation->currency;
+        $refund->reason            = $reason;
+        $refund->initiated_by      = $initiatedBy;
+        $refund->initiated_user_id = null;
+        $refund->gateway_refund_id = $gatewayRefundId;
+        $refund->status            = 'pending';
+        $refund->metadata          = $metadata;
+        $refund->occurred_at       = $this->clock->now()->format('Y-m-d H:i:s');
+        $refund->save();
 
         return $refund;
     }
@@ -1247,9 +1299,26 @@ final class DonationService
             }
         }
 
+        $recordedCents = (int) ($result->amount_cents ?? $amountCents);
+
+        // The gateway took the instruction but has not returned the money, so
+        // nothing comes off the books yet: a bank refund created pending can
+        // still fail, and until it does the org holds the funds. What settles
+        // it is the gateway saying so on its own event, which arrives at
+        // recordExternalRefund and replaces this row.
+        if (! $result->settled) {
+            return $this->recordAwaitedRefund(
+                $donation,
+                $recordedCents,
+                (string) $result->gateway_refund_id,
+                $reason,
+                $initiatedBy,
+                $result->metadata
+            );
+        }
+
         $now = $this->clock->now()->format('Y-m-d H:i:s');
         $refund = Refund::make();
-        $recordedCents = (int) ($result->amount_cents ?? $amountCents);
 
         DB::transaction(function () use (
             $donation, $result, $reason, $initiatedBy, $initiatedUserId,

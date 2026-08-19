@@ -551,11 +551,20 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         $currency = strtoupper((string) ($refund['amount']['currency_code'] ?? $donation->currency));
         $amount   = PayPalMoney::toStoredCents((string) ($refund['amount']['value'] ?? '0'), $currency);
 
+        // The event fires when the refund is created, so its status is the
+        // difference between money returned and money promised. Banked early,
+        // the donation leaves every total, its receipt is voided and the donor
+        // is emailed about a repayment that has not happened.
+        $status = strtoupper(trim((string) ($refund['status'] ?? 'COMPLETED')));
+
         $this->donationService->recordExternalRefund(
             $donation,
             $amount,
             (string) ($refund['id'] ?? ''),
-            'PayPal dashboard refund'
+            'PayPal dashboard refund',
+            'gateway',
+            ['paypal_refund_status' => $status],
+            $status === 'COMPLETED'
         );
 
         return new WebhookOutcome(
@@ -1134,6 +1143,10 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
             gateway_refund_id: (string) ($refund['id'] ?? ''),
             amount_cents: $echoed !== '' ? PayPalMoney::toStoredCents($echoed, $echoedCurrency) : $amountCents,
             metadata: ['paypal_refund_status' => $status],
+            // PENDING is PayPal taking the instruction, not returning the
+            // money: an eCheck refund sits there and can still fail, and until
+            // it clears the org holds the funds.
+            settled: $status === 'COMPLETED',
         );
     }
 

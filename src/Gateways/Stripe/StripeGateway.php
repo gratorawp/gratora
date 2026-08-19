@@ -1587,6 +1587,10 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
                 'stripe_status' => $stripeRefund['status'] ?? null,
                 'livemode'      => $stripeRefund['livemode'] ?? null,
             ],
+            // A bank refund is created pending and can still fail, which leaves
+            // the money with the org. refund.updated is what settles or
+            // reverses it, and it reaches the same recorder this does.
+            settled:           self::refundSettled($stripeRefund),
         );
     }
 
