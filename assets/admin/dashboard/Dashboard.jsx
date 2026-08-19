@@ -28,10 +28,10 @@ import { Button } from '@wordpress/components';
 const SCOPE = 'dashboard';
 
 const WIDGET_KEYS = [
-    'attention',
-    'today',
     'kpis',
     'revenue',
+    'attention',
+    'today',
     'active-campaigns',
     'recurring',
     'top-campaigns',
