@@ -12,7 +12,7 @@ Donation forms, campaigns, recurring giving, donor management, receipts and repo
 
 == Description ==
 
-**Dono is a complete fundraising platform for WordPress.**
+**Dono is a fundraising platform for WordPress.**
 
 Build a campaign, add a donation form, and start taking one-time and recurring donations today.
 

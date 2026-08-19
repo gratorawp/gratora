@@ -58,5 +58,7 @@ Thumbs.db
 /vendor/vendor-prefixed/dono/queryable/tests
 /vendor/vendor-prefixed/dono/queryable/composer.lock
 /vendor/vendor-prefixed/dono/queryable/phpunit.xml.dist
+/vendor/vendor-prefixed/dono/queryable/.github
+/vendor/vendor-prefixed/dono/queryable/.gitignore
 
 /.cache
