@@ -19,6 +19,7 @@ import { rememberPending, readPending, clearPending, ownsPendingReturn } from '.
 import { interpolateLabel } from './util/interpolate';
 import { decodeEntities } from './util/entities';
 import { setActiveNumberFormat, formatAmount, frequencyLabel } from './util/format';
+import { maxAmountFor, roundToCurrency } from './util/fx';
 import { evaluateCondition } from './state/conditions';
 import './runtime.scss';
 
@@ -1174,21 +1175,37 @@ function Decorations( { items, values, ctx } ) {
 
 function applyUrlPrefills( config ) {
     const params = new URLSearchParams( window.location.search );
-    const cents  = parseInt( params.get( 'dono_amount' ) || '', 10 );
+    const raw    = parseInt( params.get( 'dono_amount' ) || '', 10 );
     const freq   = params.get( 'dono_frequency' );
+    const asked  = String( params.get( 'dono_currency' ) || '' ).trim().toUpperCase();
 
-    if ( cents > 0 ) {
+    const formCurrency = String( config.currency || '' ).toUpperCase();
+    const offered      = Array.isArray( config.currencies ) ? config.currencies : [];
+    // Minor units mean nothing without a currency, and a link that named one
+    // this form cannot open in carries no figure this form can use. Dropping
+    // the amount costs the donor a tap; preselecting the wrong one is money
+    // they never decided to give, on a screen they followed the link to skip.
+    // A link that names no currency is one written against this form.
+    const currency = asked || formCurrency;
+    const openable = currency === formCurrency || offered.includes( currency );
+    const cents    = openable ? roundToCurrency( raw, currency ) : 0;
+
+    if ( cents > 0 && cents <= maxAmountFor( currency ) ) {
         const amount = config.steps.find( ( s ) => s.type === 'amount' );
         if ( amount ) {
+            const own  = currency === formCurrency;
             const list = amount.presets || [];
-            const isPreset = !! list.find( ( p ) => ( typeof p === 'number' ? p : p?.cents ) === cents );
+            // Presets are authored in the form's own currency, so only a
+            // prefill in that currency can be one of them.
+            const isPreset = own && !! list.find( ( p ) => ( typeof p === 'number' ? p : p?.cents ) === cents );
             // Presets-only forms reject non-preset amounts server-side, so a
             // non-preset prefill would preselect a tile that can never submit.
             if ( isPreset || amount.allowCustom !== false ) {
-                if ( ! isPreset ) {
+                if ( ! isPreset && own ) {
                     amount.presets = [ ...list, { cents, impact: '' } ];
                 }
                 config.__prefillAmount = cents;
+                if ( ! own ) config.__prefillCurrency = currency;
             }
         }
     }

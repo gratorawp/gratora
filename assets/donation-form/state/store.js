@@ -36,7 +36,10 @@ export function initialState( config ) {
         preamble:    Array.isArray( config.preamble ) ? config.preamble : [],
         pages:       Array.isArray( config.pages )   ? config.pages   : [],
         pageNav:     ( config.pageNav && typeof config.pageNav === 'object' ) ? config.pageNav : {},
-        currency:    config.currency,
+        // A give-again link carries the currency its amount is in, and the form
+        // opens in it: the prefilled figure is minor units of that currency and
+        // is not the same money in any other.
+        currency:    config.__prefillCurrency || config.currency,
         // Presets are authored in config.currency; fx converts from it when the
         // donor switches.
         presetCurrency: config.currency,

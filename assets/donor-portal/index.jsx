@@ -3,7 +3,8 @@
 import { render } from 'preact';
 import { useEffect, useState, useCallback, useRef } from 'preact/hooks';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { formatAmount, parseTimestamp } from '@dono/ui/utils/format';
+import { parseTimestamp } from '@dono/ui/utils/format';
+import { formatAmount } from '../_shared/money';
 import { COUNTRIES } from '../_shared/countries';
 import { loadStripeJs } from '../donation-form/util/stripe';
 import { recurringStatusLabel } from './statusLabels';
@@ -708,6 +709,9 @@ function Donations( { onOpen } ) {
                         { d.fee_covered_cents > 0 && (
                             <span class="dp-list__pill">{ sprintf( /* translators: %s: formatted fee amount */ __( 'incl. %s fees', 'dono-fundraising-platform' ), formatAmount( d.fee_covered_cents, d.currency ) ) }</span>
                         ) }
+                        { d.refunded_cents > 0 && (
+                            <span class="dp-list__pill">{ sprintf( /* translators: %s: formatted refunded amount */ __( '%s refunded', 'dono-fundraising-platform' ), formatAmount( d.refunded_cents, d.currency ) ) }</span>
+                        ) }
                         { d.is_anonymous && <span class="dp-list__pill">{ __( 'anonymous', 'dono-fundraising-platform' ) }</span> }
                         <div class="dp-list__sub">{ formatDate( d.paid_at ) } · { d.reference }</div>
                     </div>
@@ -748,6 +752,12 @@ function DonationDetail( { reference, onClose } ) {
                         <div class="dp-detail__head">
                             <div class="dp-detail__amount">{ formatAmount( d.amount_cents, d.currency ) }</div>
                             <div class="dp-detail__meta">{ formatDate( d.paid_at ) } · { d.reference }</div>
+                            { d.refunded_cents > 0 && (
+                                <div class="dp-detail__refund">
+                                    <span>{ sprintf( /* translators: %s: formatted refunded amount */ __( '%s was refunded to you', 'dono-fundraising-platform' ), formatAmount( d.refunded_cents, d.currency ) ) }</span>
+                                    <strong>{ sprintf( /* translators: %s: formatted amount the organization kept */ __( 'Net %s', 'dono-fundraising-platform' ), formatAmount( d.amount_cents - d.refunded_cents, d.currency ) ) }</strong>
+                                </div>
+                            ) }
                         </div>
 
                         { d.give_again_url && (

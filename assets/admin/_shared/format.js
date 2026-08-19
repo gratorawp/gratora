@@ -7,13 +7,15 @@ import { __ } from '@wordpress/i18n';
 export {
     defaultCurrency,
     numberFormat,
-    formatAmount,
-    formatAmountCompact,
     currencyDecimals,
     groupDigits,
     formatDate,
     timeAgo,
 } from '@dono/ui/utils/format';
+// Amounts come from the local formatter: the org's "decimal places" preference
+// belongs to the base currency and may only drop places an amount does not use,
+// which is the rule Money::format applies to the same figure server-side.
+export { formatAmount, formatAmountCompact } from '../../_shared/money';
 export { default as StatusBadge } from './components/StatusBadge';
 
 // Campaign lifecycle labels (drive the status-filter options on the campaigns

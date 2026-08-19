@@ -1,10 +1,10 @@
 import {
     setActiveNumberFormat as setNumberFormat,
     getActiveNumberFormat,
-    currencyDecimals,
     defaultCurrency,
     groupDigits,
 } from '@dono/ui/utils/format';
+import { minorUnitsFor } from '../../_shared/money';
 
 // parseAmount is deliberately not re-exported: it reads a typed figure by
 // stripping the org's configured thousands separator, which is what
@@ -66,19 +66,22 @@ export function formatAmount( cents, currency = '', opts = {} ) {
 
     // "Decimal places" is a display preference, and it may only drop minor
     // units an amount does not have: rendering $26 for the $26.54 about to be
-    // charged asks the donor to agree to a figure nobody takes. It describes
-    // the currency this form was authored in, the one fmt was resolved for,
-    // where Money::decimalsFor scopes the same rule to the org base currency.
+    // charged asks the donor to agree to a figure nobody takes. Nor may it add
+    // places the currency lacks, or a yen form prints hundredths of a yen. It
+    // describes the currency this form was authored in, the one fmt was
+    // resolved for, where Money::decimalsFor scopes the same rule to the org
+    // base currency.
     const places = ( own && whole )
-        ? Math.max( 0, Number( fmt.decimalPlaces ) || 0 )
-        : currencyDecimals( code );
+        ? Math.min( minorUnitsFor( code ), Math.max( 0, Number( fmt.decimalPlaces ) || 0 ) )
+        : minorUnitsFor( code );
 
-    const number = groupDigits(
-        n / 100,
-        fmt.thousandSep,
-        fmt.decimalSep,
-        ( opts.compact && whole ) ? 0 : places
-    );
+    const dp = ( opts.compact && whole ) ? 0 : places;
+    // Rounded here, half away from zero, because groupDigits truncates at zero
+    // places where PHP's number_format rounds. The confirm step's total is the
+    // figure the donor agrees to, so it has to be the one the gateway takes.
+    const scale  = 10 ** dp;
+    const major  = ( n < 0 ? -1 : 1 ) * Math.round( ( Math.abs( n ) * scale ) / 100 ) / scale;
+    const number = groupDigits( major, fmt.thousandSep, fmt.decimalSep, dp );
     // The injected symbol belongs to the form's own currency alone. Letting
     // any other code inherit it prints a currency the donor is not paying in.
     const symbol = SYMBOLS[ code ] || ( own ? fmt.symbol : '' ) || code;

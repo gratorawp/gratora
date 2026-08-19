@@ -277,6 +277,18 @@
     &__head { margin-bottom: 12px; }
     &__amount { font-size: 26px; font-weight: 600; font-variant-numeric: tabular-nums; }
     &__meta { color: var(--dp-muted); font-size: 13px; }
+    // The heading states what was given; this states what came back, so the
+    // donor can reconcile the row against a lifetime total that is net.
+    &__refund {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 8px;
+        font-size: 13px;
+        color: var(--dp-muted);
+
+        strong { color: var(--dp-text); font-variant-numeric: tabular-nums; }
+    }
     &__section {
         padding: 14px 0;
         border-top: 1px solid var(--dp-border);

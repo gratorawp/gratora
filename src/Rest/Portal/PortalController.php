@@ -743,6 +743,9 @@ final class PortalController
                 'reference'         => (string) $d->reference,
                 'amount_cents'      => (int) $d->amount_cents,
                 'fee_covered_cents' => (int) ($d->fee_covered_cents ?? 0),
+                // What came back, so a row can say why it counts for less than
+                // it reads towards the lifetime total above it, which is net.
+                'refunded_cents'    => (int) ($d->refunded_cents ?? 0),
                 'currency'          => (string) $d->currency,
                 'frequency'         => (string) $d->frequency,
                 'campaign_id'       => $d->campaign_id ? (int) $d->campaign_id : null,
@@ -777,8 +780,12 @@ final class PortalController
                     // the form re-adds the fee on top of the prefill, so gross
                     // would double-count last time's fee.
                     $net = (int) $d->amount_cents - min((int) $d->amount_cents, max(0, (int) ($d->fee_covered_cents ?? 0)));
+                    // The currency travels with the figure. Minor units are not
+                    // comparable across currencies, so a bare 500000 read as the
+                    // form's own currency turns 5,000 yen into 5,000 dollars.
                     $giveAgainUrl = add_query_arg([
                         'dono_amount'    => $net,
+                        'dono_currency'  => (string) $d->currency,
                         'dono_frequency' => $d->frequency,
                     ], $perma);
                 }
@@ -792,6 +799,7 @@ final class PortalController
             'reference'         => (string) $d->reference,
             'amount_cents'      => (int) $d->amount_cents,
             'fee_covered_cents' => (int) ($d->fee_covered_cents ?? 0),
+            'refunded_cents'    => (int) ($d->refunded_cents ?? 0),
             'currency'          => (string) $d->currency,
             'frequency'         => (string) $d->frequency,
             'gateway'           => (string) $d->gateway,

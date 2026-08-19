@@ -41,16 +41,29 @@ trait RunsFormModule
         }
 
         try {
-            $this->copyModules($src, $dir);
+            // The real directory layout, not a flattened copy: a form module
+            // importing ../../_shared reaches outside donation-form, and a copy
+            // that loses that shape resolves it to somewhere with nothing in it.
+            @mkdir($dir . '/donation-form', 0777, true);
+            $this->copyModules($src, $dir . '/donation-form');
+
+            $shared = $root . '/assets/_shared';
+            if (is_dir($shared)) {
+                @mkdir($dir . '/_shared', 0777, true);
+                $this->copyModules($shared, $dir . '/_shared');
+            }
+
+            // run.mjs sits inside the copied form tree, so a snippet importing
+            // ./util/format.mjs means the same thing it does in the real one.
             $entryPath = './' . preg_replace('/\.js$/', '.mjs', $entry);
             file_put_contents(
-                $dir . '/run.mjs',
+                $dir . '/donation-form/run.mjs',
                 "import * as mod from '" . $entryPath . "';\n"
                 . "const emit = ( value ) => console.log( JSON.stringify( value ) );\n"
                 . $snippet . "\n"
             );
             $raw = (string) shell_exec(
-                escapeshellarg($node) . ' ' . escapeshellarg($dir . '/run.mjs') . ' 2>&1'
+                escapeshellarg($node) . ' ' . escapeshellarg($dir . '/donation-form/run.mjs') . ' 2>&1'
             );
         } finally {
             $this->removeTree($dir);

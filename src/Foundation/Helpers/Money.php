@@ -75,14 +75,19 @@ final class Money
      * charged. Amounts are stored as major x 100 regardless, so only rendering
      * changes.
      *
+     * The preference is a ceiling on places, never a floor: an org whose base is
+     * yen has no hundredths to show, so asking for two would print a precision
+     * the currency does not have.
+     *
      * @since 1.0.0
      */
     private static function decimalsFor(string $code, int $cents): int
     {
+        $units = Currency::minorUnits($code);
         if ($code === self::defaultCurrency() && ($cents % 100) === 0) {
-            return (int) self::numberFormat()['decimal_places'];
+            return min($units, (int) self::numberFormat()['decimal_places']);
         }
-        return Currency::minorUnits($code);
+        return $units;
     }
 
     /**

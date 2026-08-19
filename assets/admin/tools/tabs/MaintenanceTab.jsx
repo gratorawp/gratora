@@ -2,7 +2,7 @@ import { useEffect, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { __, _n, sprintf } from '@wordpress/i18n';
 
-import { formatAmount } from '@dono/ui/utils/format';
+import { formatAmount } from '../../_shared/format';
 import Card from '../../_shared/components/Card';
 import Btn from '../../_shared/components/Btn';
 

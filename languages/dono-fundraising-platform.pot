@@ -13904,3 +13904,19 @@ msgstr[1] ""
 #, js-format
 msgid "Every %1$d %2$s"
 msgstr ""
+
+#. translators: %s: formatted refunded amount
+#: assets/donor-portal/index.jsx:713
+msgid "%s refunded"
+msgstr ""
+
+#. translators: %s: formatted refunded amount
+#: assets/donor-portal/index.jsx:757
+msgid "%s was refunded to you"
+msgstr ""
+
+#. translators: %s: formatted amount the organization kept
+#: assets/donor-portal/index.jsx:758
+msgid "Net %s"
+msgstr ""
+
