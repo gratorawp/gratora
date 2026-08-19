@@ -28,8 +28,8 @@ import { Button } from '@wordpress/components';
 const SCOPE = 'dashboard';
 
 const WIDGET_KEYS = [
-    'today',
     'attention',
+    'today',
     'kpis',
     'revenue',
     'active-campaigns',
