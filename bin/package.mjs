@@ -236,6 +236,20 @@ const payload = path.join( staging, slug );
 
 copyTree( root, payload );
 
+/**
+ * The autoloader is generated while vendor/dompdf and its siblings are on disk,
+ * and .distignore then keeps those directories out of the payload: 210 classmap
+ * entries and five psr-4 roots are left pointing at paths the zip does not
+ * carry. Composer registers its loader with prepend, so on a site whose other
+ * plugin names an unprefixed Dompdf\ or Masterminds\ class, ours answers first
+ * with two include warnings before that plugin's own loader gets to it.
+ *
+ * Regenerating inside the payload is what makes the map describe the tree it
+ * ships in. Run here rather than before copying because only the payload has
+ * had the exclusions applied.
+ */
+execFileSync( 'composer', [ 'dump-autoload', '--no-dev', '--no-interaction', '--quiet' ], { cwd: payload } );
+
 const distDir = path.join( root, 'dist' );
 mkdirSync( distDir, { recursive: true } );
 const zip = path.join( distDir, `${ slug }.zip` );

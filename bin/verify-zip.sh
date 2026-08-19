@@ -77,6 +77,25 @@ test -f "$OUT/vendor/vendor-prefixed/dompdf/dompdf/lib/fonts/DejaVuSans.ttf" \
 # the payload that says where those packages came from.
 test -f "$OUT/composer.json" || fail "composer.json is missing next to vendor/"
 
+# An autoloader describing directories the zip does not carry still answers for
+# their class names, and it answers first: composer registers with prepend, so
+# the warnings land on sites whose other plugin owns the unprefixed namespace.
+OUT="$OUT" php -r '
+    $out = getenv("OUT");
+    $orphans = 0;
+    foreach (require "$out/vendor/composer/autoload_classmap.php" as $path) {
+        if (! file_exists($path)) { $orphans++; }
+    }
+    foreach (require "$out/vendor/composer/autoload_psr4.php" as $dirs) {
+        foreach ($dirs as $dir) { if (! is_dir($dir)) { $orphans++; } }
+    }
+    if ($orphans > 0) {
+        fwrite(STDERR, "::error::the packaged autoloader maps $orphans paths the zip does not carry\n");
+        exit(1);
+    }
+    echo "autoloader describes the packaged tree\n";
+'
+
 # assets/ is not all webpack input. These four are enqueued straight from it and
 # never reach build/, so a rule taking the directory wholesale would strip the
 # campaign page's styling and two dialogs without failing anything else here.
