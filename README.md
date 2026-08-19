@@ -6,7 +6,7 @@
 [![PHP 8.1+](https://img.shields.io/badge/php-8.1%2B-777bb4.svg)](https://www.php.net/)
 [![WordPress 7.0+](https://img.shields.io/badge/wordpress-7.0%2B-21759b.svg)](https://wordpress.org/)
 
-### A complete fundraising platform for WordPress
+### A fundraising platform for WordPress
 
 Dono gives an organization the whole fundraising stack in one plugin: a
 block-based donation form builder, one-time and recurring giving, campaigns and
