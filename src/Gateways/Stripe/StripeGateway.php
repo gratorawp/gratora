@@ -899,17 +899,24 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             $disablesCharges = ($account['charges_enabled'] ?? null) !== null
                 && ! (bool) $account['charges_enabled'];
 
-            if (
-                $disablesCharges
-                && $this->verifiedIsTest !== false
-                && $this->account->hasKeysFor(false)
-                && $this->account->canCharge()
-            ) {
+            $liveIsAtStake = $this->verifiedIsTest !== false && $this->account->hasKeysFor(false);
+
+            if ($disablesCharges && $liveIsAtStake && $this->account->canCharge()) {
                 return $this->refused(
                     $eventId,
                     $type,
                     'a test-signed account update cannot stop a live connection charging'
                 );
+            }
+
+            // One charges_enabled is stored for both modes, so the flag on a
+            // test-signed event speaks for the live connection whichever way it
+            // points: an upgrade puts a live account Stripe has restricted back
+            // in front of donors, where every donation fails at the gateway.
+            // Dropped rather than refused, so the name and address on the same
+            // event still reach the connection screen.
+            if ($liveIsAtStake) {
+                unset($account['charges_enabled'], $account['payouts_enabled']);
             }
 
             $this->account->refresh($account);

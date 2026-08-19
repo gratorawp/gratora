@@ -172,6 +172,9 @@ final class DataImporter
     private const REFERENCE_SCOPES = [
         'donation' => ['dono_donations', 'reference'],
         'receipt'  => ['dono_receipts', 'receipt_number'],
+        // Rehearsal donations number from their own counter, for the same
+        // reason receipts do, and a restore has to raise that one too.
+        'test_donation' => ['dono_donations', 'reference'],
         // Rehearsal receipts number from a counter of their own so the live
         // sequence stays gap-free, and the export carries them like any other
         // row. Left out, the counter stays at zero after a restore and the next

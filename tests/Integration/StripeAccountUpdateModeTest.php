@@ -132,6 +132,29 @@ final class StripeAccountUpdateModeTest extends IntegrationTestCase
         $this->assertSame('Sea Turtle Rescue', (string) $acct['business_name']);
     }
 
+    /**
+     * The upgrade direction. One charges_enabled is stored for both modes, so a
+     * test-signed event saying charging works speaks for the live connection
+     * too: a live account Stripe has restricted goes back in front of donors,
+     * and every donation then fails at the gateway with nothing on screen
+     * saying why.
+     */
+    public function test_a_test_signed_update_cannot_start_a_restricted_live_connection_charging(): void
+    {
+        $this->connect(live: true);
+
+        // Stripe restricted the live account, said so with the live secret.
+        $this->postAccountUpdated($this->liveSecret, true, ['charges_enabled' => false]);
+        $this->assertFalse((new StripeAccount(new Crypto()))->canCharge(), 'precondition: restricted');
+
+        $this->postAccountUpdated($this->testSecret, false, ['charges_enabled' => true]);
+
+        $this->assertFalse(
+            (new StripeAccount(new Crypto()))->canCharge(),
+            'the sandbox does not get to say the live account is in good standing'
+        );
+    }
+
     public function test_a_null_capability_flag_is_not_a_downgrade(): void
     {
         $this->connect(live: true);

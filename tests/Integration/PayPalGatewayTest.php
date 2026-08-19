@@ -97,6 +97,9 @@ final class PayPalGatewayTest extends IntegrationTestCase
     }
 
     /** @param array<string,mixed> $body @return array<string,mixed> */
+    /** When set, what PayPal answers refunded, whatever was asked for. */
+    private ?string $refundEchoesValue = null;
+
     private function cannedResponse(string $path, array $body): array
     {
         if (str_contains($path, '/v1/oauth2/token')) {
@@ -104,6 +107,22 @@ final class PayPalGatewayTest extends IntegrationTestCase
         }
         if (str_contains($path, '/verify-webhook-signature')) {
             return ['verification_status' => 'SUCCESS'];
+        }
+        // Before the capture branch, not after it: the refund endpoint is
+        // /v2/payments/captures/{id}/refund, so a capture check placed first
+        // matches on the `captures` segment and answers every refund with the
+        // capture body. That body has no `amount`, which is exactly what the
+        // refund code falls back from, so the branch a test names is never the
+        // branch it runs.
+        if (str_contains($path, '/refund')) {
+            return [
+                'id'     => 'REFUND-1',
+                'status' => 'COMPLETED',
+                'amount' => [
+                    'value'         => $this->refundEchoesValue ?? (string) ($body['amount']['value'] ?? '0'),
+                    'currency_code' => (string) ($body['amount']['currency_code'] ?? 'USD'),
+                ],
+            ];
         }
         if (str_contains($path, '/capture')) {
             return [
@@ -119,16 +138,6 @@ final class PayPalGatewayTest extends IntegrationTestCase
                     ]]],
                 ]],
                 'payer' => ['email_address' => 'donor@example.test'],
-            ];
-        }
-        if (str_contains($path, '/refund')) {
-            return [
-                'id'     => 'REFUND-1',
-                'status' => 'COMPLETED',
-                'amount' => [
-                    'value'         => (string) ($body['amount']['value'] ?? '0'),
-                    'currency_code' => (string) ($body['amount']['currency_code'] ?? 'USD'),
-                ],
             ];
         }
         if (str_contains($path, '/revise')) {
@@ -286,6 +295,38 @@ final class PayPalGatewayTest extends IntegrationTestCase
         // 100000 stored yen -> "1000", not "1000.00".
         $this->assertSame('1000', $refund['body']['amount']['value'] ?? null);
         $this->assertSame(100000, $result->amount_cents, 'the echoed amount rescales to internal cents');
+    }
+
+    /**
+     * PayPal answers with what it actually refunded, which is not always what
+     * was asked for: a capture already partly refunded returns the remainder.
+     * Recorded from the request instead, the books claim money the donor never
+     * got back, and the rest of the donation is written off with it.
+     */
+    public function test_the_refund_records_what_paypal_says_it_returned(): void
+    {
+        $reference = $this->createDonation('JPY', 100000, 'jpy-partial@example.test');
+
+        $req = new WP_REST_Request('POST', '/dono/v1/gateways/paypal/capture');
+        $req->set_header('content-type', 'application/json');
+        $req->set_body((string) wp_json_encode([
+            'reference'    => $reference,
+            'status_token' => $this->stampStatusToken($reference),
+        ]));
+        rest_do_request($req);
+
+        $donation = $this->donations()->findByReference($reference);
+        $gateway  = Plugin::instance()->container->get(GatewayManager::class)->require('paypal');
+
+        // Asked for 1000 yen, PayPal returned 600.
+        $this->refundEchoesValue = '600';
+        $result = $gateway->refund($donation, 100000, 'donor requested');
+
+        $this->assertSame(
+            60000,
+            $result->amount_cents,
+            'the refund is what PayPal returned, not what was asked for'
+        );
     }
 
     /** @param array<string,mixed> $resource */

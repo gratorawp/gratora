@@ -105,8 +105,10 @@ final class DonationService
                 $intent->reactivate_redacted_donor
             );
 
+            $isTest = $intent->is_test ?? $this->testMode->forFormId($intent->form_id);
+
             $donation = Donation::make();
-            $donation->reference          = $this->references->next('donation');
+            $donation->reference          = $this->references->next($this->numberingScope($isTest));
             $donation->status_token_hash  = $statusTokenHash;
             $donation->donor_id           = $donor->id;
             $donation->form_id            = $intent->form_id;
@@ -159,7 +161,7 @@ final class DonationService
                 && is_array($donor->flags['prefs'] ?? null)
                 && ! empty($donor->flags['prefs']['always_anonymous']);
             $donation->is_anonymous       = $intent->is_anonymous || $donorAlwaysAnon;
-            $donation->is_test            = $intent->is_test ?? $this->testMode->forFormId($intent->form_id);
+            $donation->is_test            = $isTest;
             $donation->created_at         = $now;
             $donation->updated_at         = $now;
 
@@ -538,7 +540,7 @@ final class DonationService
         $now = $this->clock->now()->format('Y-m-d H:i:s');
 
         $donation = Donation::make();
-        $donation->reference         = $this->references->next('donation');
+        $donation->reference         = $this->references->next($this->numberingScope((bool) $plan->is_test));
         $donation->status_token_hash = '';
         $donation->donor_id          = $plan->donor_id;
         $donation->form_id           = $plan->form_id;
@@ -1435,6 +1437,21 @@ final class DonationService
             $receipt->voided_at = null;
             $receipt->save();
         }
+    }
+
+    /**
+     * Which counter a donation's reference comes from.
+     *
+     * A rehearsal must not spend numbers from the sequence the org's real
+     * donations are numbered in: the test-data purge deletes the rows holding
+     * whatever it spent, and what is left is a ledger with holes nobody can
+     * account for. Receipts already number this way, for the same reason.
+     *
+     * @since 1.0.0
+     */
+    private function numberingScope(bool $isTest): string
+    {
+        return $isTest ? 'test_donation' : 'donation';
     }
 
     private function voidReceiptsFor(Donation $donation, string $now): void

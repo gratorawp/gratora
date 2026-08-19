@@ -75,7 +75,11 @@ final class SandboxAutoConfirmTest extends IntegrationTestCase
             $body['status'] ?? '',
             "sandbox donation should auto-confirm to 'paid' in the same request, got '" . ($body['status'] ?? 'null') . "'"
         );
-        $this->assertMatchesRegularExpression('/^DONO-/', (string) ($body['reference'] ?? ''));
+        // A rehearsal numbers from its own counter, so the reference says on
+        // its face that it is one and the live sequence is left whole: the
+        // test-data purge deletes these rows, and a number it took from the
+        // live ledger would leave a hole nobody could account for.
+        $this->assertMatchesRegularExpression('/^TEST_DONATION-/', (string) ($body['reference'] ?? ''));
 
         // DB row reflects the same.
         $row = Donation::query()->where('reference', $body['reference'])->get();
