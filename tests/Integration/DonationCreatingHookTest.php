@@ -7,9 +7,11 @@ namespace Dono\Tests\Integration;
 use Dono\Donations\Donation;
 use Dono\Donations\DonationIntent;
 use Dono\Donations\DonationService;
+use Dono\Donors\Donor;
 use Dono\Foundation\Plugin;
 use Dono\Vendor\Queryable\DB;
 use ReflectionProperty;
+use RuntimeException;
 
 /**
  * The seam an add-on needs to write a row that belongs to a donation.
@@ -53,6 +55,31 @@ final class DonationCreatingHookTest extends IntegrationTestCase
         $this->assertNotNull($depthInside);
         $this->assertSame($before + 1, $depthInside, 'the subscriber is one transaction deeper than the caller');
         $this->assertSame($before, self::transactionDepth(), 'the transaction is closed again afterwards');
+    }
+
+    /**
+     * The other half of running inside the transaction: a subscriber that
+     * throws takes the donation and the donor it was about to belong to down
+     * with it, rather than leaving a half-made donation nothing will finish.
+     */
+    public function test_a_throw_from_the_seam_undoes_the_whole_creation(): void
+    {
+        $donationsBefore = (int) Donation::query()->count();
+        $donorsBefore    = (int) Donor::query()->count();
+
+        add_action('dono.donation.creating', static function (): void {
+            throw new RuntimeException('the add-on could not write its row');
+        });
+
+        try {
+            $this->service()->createPending($this->intent());
+            $this->fail('the subscriber exception should reach the caller');
+        } catch (RuntimeException $e) {
+            $this->assertSame('the add-on could not write its row', $e->getMessage());
+        }
+
+        $this->assertSame($donationsBefore, (int) Donation::query()->count(), 'the donation outlived the failure');
+        $this->assertSame($donorsBefore, (int) Donor::query()->count(), 'the donor outlived the failure');
     }
 
     /** Ordering matters: the row exists by the time observers of the committed donation run. */

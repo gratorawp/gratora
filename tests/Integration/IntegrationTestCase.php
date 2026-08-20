@@ -26,8 +26,9 @@ use wpdb;
  * discards nothing: dono_* rows AND WP transients (the AntiSpamGuard rate-limit
  * counters) leak across the whole suite. Pinning Queryable's nesting depth to
  * 1 for the duration of each test makes every `DB::transaction()` run as a
- * (real) nested call - it executes its callback but issues no START/COMMIT/
- * ROLLBACK - so all writes stay inside WP's transaction and roll back per test.
+ * nested call: it takes a SAVEPOINT rather than starting a transaction, so all
+ * writes stay inside WP's transaction and roll back per test, while a throw
+ * still undoes that block's own writes and can be asserted on.
  *
  * Plugin migrations run once at bootstrap (`tests/integration-bootstrap.php`),
  * so the dono_* tables exist for every test.

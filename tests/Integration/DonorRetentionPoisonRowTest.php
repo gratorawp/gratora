@@ -68,12 +68,11 @@ final class DonorRetentionPoisonRowTest extends IntegrationTestCase
      * An add-on that cannot finish its part, for the given donors or for
      * everyone when the list is empty.
      *
-     * The handler undoes the redaction stamp before throwing, which is what
-     * production gets for free: redact() runs the handlers inside
-     * DB::transaction, so the throw rolls the stamp back and the donor stays
-     * in the sweep's set. This harness pins Queryable's transaction depth to 1
-     * (see IntegrationTestCase), so without this the stamp would survive and
-     * the donor would drop out of the set on their own.
+     * The handler undoes the redaction stamp before throwing, which is also
+     * what production gets for free: redact() runs the handlers inside
+     * DB::transaction, so the throw rolls the stamp back and the donor stays in
+     * the sweep's set. Undoing it in the handler keeps this test about the
+     * sweep set rather than about transaction mechanics.
      *
      * @param list<int> $donorIds
      */

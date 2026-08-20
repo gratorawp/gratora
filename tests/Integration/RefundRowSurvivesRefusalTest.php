@@ -21,9 +21,8 @@ use RuntimeException;
  * other trace of it, and the gateway redelivers into the same refusal forever.
  * So every refusal has to stand before anything is written.
  *
- * Asserted on the rows rather than on a rollback. The integration harness pins
- * the queryable transaction depth, so DB::transaction issues no ROLLBACK here
- * and a test that leaned on one would pass without proving anything.
+ * Asserted on the rows rather than on the rollback: what protects the org is
+ * the awaited row still being there, whichever mechanism leaves it standing.
  */
 final class RefundRowSurvivesRefusalTest extends IntegrationTestCase
 {

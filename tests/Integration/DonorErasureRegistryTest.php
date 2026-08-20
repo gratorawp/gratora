@@ -183,11 +183,8 @@ final class DonorErasureRegistryTest extends IntegrationTestCase
      * add-on that cannot finish its part must not be swallowed: the caller has
      * to hear about it.
      *
-     * Only the propagation is asserted. redact() wraps the handlers in
-     * DB::transaction() so the failure also rolls back, but this harness pins
-     * Queryable's transaction depth to 1 (see IntegrationTestCase) to keep
-     * product transactions inside WP_UnitTestCase's wrapper, which makes a real
-     * rollback unobservable from here.
+     * Only the propagation is asserted here; redact() wraps the handlers in
+     * DB::transaction(), so what the failure leaves behind is a separate claim.
      */
     public function test_a_failing_handler_is_not_swallowed(): void
     {
