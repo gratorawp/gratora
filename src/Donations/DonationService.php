@@ -966,7 +966,8 @@ final class DonationService
         ?string $reason = null,
         string $initiatedBy = 'gateway',
         ?array $metadata = null,
-        bool $settled = true
+        bool $settled = true,
+        ?int $initiatedUserId = null
     ): Refund {
         if ($amountCents <= 0) {
             throw new RuntimeException(esc_html("Invalid external refund amount: {$amountCents}."));
@@ -1041,7 +1042,7 @@ final class DonationService
         try {
         DB::transaction(function () use (
             $donation, $amountCents, $reason, $initiatedBy, $metadata,
-            $gatewayRefundId, $now, $refund, $replacing
+            $gatewayRefundId, $now, $refund, $replacing, $initiatedUserId
         ) {
             // Atomic over-refund guard: bump the cumulative counter only while
             // the new total still fits the principal. A concurrent refund that
@@ -1076,7 +1077,7 @@ final class DonationService
             $refund->currency          = $donation->currency;
             $refund->reason            = $reason;
             $refund->initiated_by      = $initiatedBy;
-            $refund->initiated_user_id = null;
+            $refund->initiated_user_id = $initiatedUserId;
             $refund->gateway_refund_id = $gatewayRefundId;
             $refund->status            = 'succeeded';
             $refund->metadata          = $metadata;
@@ -1319,22 +1320,45 @@ final class DonationService
             throw new RuntimeException(esc_html($result->error ?? 'Gateway refund failed.'));
         }
 
-        // The charge.refunded webhook records the same gateway refund and can win
-        // the race between this call returning and the transaction below. If it
-        // already recorded this exact refund, return that row idempotently rather
-        // than letting the over-refund guard throw a spurious "exceeds refundable"
-        // error for a refund that in fact succeeded.
+        $recordedCents = (int) ($result->amount_cents ?? $amountCents);
+
+        // The gateway's own event for this refund can beat this call to the
+        // record, and the id is unique, so a row already standing for it is
+        // this refund and not another. What to do with it is what the row
+        // says:
+        //
+        // Unsettled, with a row already standing: that row says exactly what
+        // this call knows, so it is the answer.
+        //
+        // Settled: the row goes through the same door the webhook uses, which
+        // answers with an already recorded refund and replaces one that is
+        // still awaiting settlement or was spent by a reversal. Left to the
+        // insert below instead, an awaited row collides on the unique id and
+        // the admin is told the refund failed while the gateway has already
+        // paid it. Read as a failure and clicked again, that passes the guard,
+        // which counts only recorded refunds, and pays the donor twice.
         if ($result->gateway_refund_id) {
             $existing = Refund::query()
                 ->where('gateway_refund_id', $result->gateway_refund_id)
-                ->where('status', 'succeeded')
                 ->get();
-            if ($existing) {
+
+            if ($existing && ! $result->settled) {
                 return $existing;
             }
-        }
 
-        $recordedCents = (int) ($result->amount_cents ?? $amountCents);
+            if ($existing) {
+                return $this->recordExternalRefund(
+                    $donation,
+                    $recordedCents,
+                    (string) $result->gateway_refund_id,
+                    $reason,
+                    $initiatedBy,
+                    $result->metadata,
+                    true,
+                    $initiatedUserId
+                );
+            }
+        }
 
         // The gateway took the instruction but has not returned the money, so
         // nothing comes off the books yet: a bank refund created pending can

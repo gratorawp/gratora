@@ -64,19 +64,20 @@ final class DonationTransactionRollbackTest extends IntegrationTestCase
     {
         $donation = $this->seedPaidDonation(10000);
 
-        // The gateway's unsettled charge.refunded landed first and left an
-        // awaited row holding this refund id. The dedup ahead of the block
-        // looks only at succeeded rows, so it misses this one and the INSERT
-        // below collides on UNIQUE(gateway_refund_id) after the reservation.
-        $this->seedRefundRow($donation, self::REFUND_ID, 'pending', 4000);
-
         $before = $this->refundRowCount();
+
+        // The row refuses after the reservation has already been taken, which
+        // is what a lock-wait timeout or a lost connection produces on a write
+        // this path has locked.
+        $stop = $this->breakFirstQueryMatching('INSERT INTO ' . self::$prefix . 'dono_refunds');
 
         try {
             Plugin::instance()->container->get(DonationService::class)->refund($donation, 4000, 'donor asked');
-            $this->fail('the duplicate gateway refund id should have failed the insert');
-        } catch (QueryException $e) {
+            $this->fail('the refused refund row should have reached the caller');
+        } catch (Throwable $e) {
             // expected: the row the reservation was made for cannot be written
+        } finally {
+            $this->assertTrue($stop(), 'the refund row insert was never reached');
         }
 
         $row = $this->donationRow((int) $donation->id);
@@ -290,6 +291,70 @@ final class DonationTransactionRollbackTest extends IntegrationTestCase
         $this->assertSame(
             'reversed',
             (string) Refund::query()->where('gateway_refund_id', 'disputed_1')->get()->status
+        );
+    }
+
+    /**
+     * A bank refund the gateway reports before this call returns. Its event
+     * writes the awaited row first, under the same id, and refund() then has to
+     * settle that row rather than insert beside it.
+     *
+     * The id is unique, so the insert would collide and the admin would be told
+     * the refund failed while the gateway had already paid it. Reading that as a
+     * failure and clicking refund again passes the over-refund guard, which
+     * counts only recorded refunds, and pays the donor a second time.
+     */
+    public function test_a_settled_refund_settles_the_awaited_row_its_own_gateway_event_wrote(): void
+    {
+        $donation = $this->seedPaidDonation(5000);
+        $this->seedRefundRow($donation, self::REFUND_ID, 'pending', 4000);
+
+        $refund = Plugin::instance()->container->get(DonationService::class)
+            ->refund($donation, 4000, 'donor asked', 7);
+
+        $this->assertSame('succeeded', (string) $refund->status);
+
+        $rows = Refund::query()->where('gateway_refund_id', self::REFUND_ID)->getAll();
+        $this->assertCount(1, $rows, 'the settlement wrote a second row beside the one already standing');
+        $this->assertSame('succeeded', (string) $rows[0]->status);
+        $this->assertSame(4000, (int) $rows[0]->amount_cents);
+        $this->assertSame(7, (int) $rows[0]->initiated_user_id, 'the admin who asked for the refund is not on the record');
+
+        $after = $this->donationRow((int) $donation->id);
+        $this->assertSame(4000, (int) $after['refunded_cents']);
+        $this->assertSame('partial_refund', (string) $after['status']);
+    }
+
+    /**
+     * The same id already recorded as a refund. Nothing is left to do, and
+     * taking the balance a second time would refund money that never moved.
+     */
+    public function test_a_refund_already_recorded_under_this_id_is_not_taken_twice(): void
+    {
+        $donation = $this->seedPaidDonation(5000);
+        $this->seedRefundRow($donation, self::REFUND_ID, 'succeeded', 1000);
+        DB::table('dono_donations')->where('id', (int) $donation->id)->update([
+            'refunded_cents' => 1000,
+            'status'         => 'partial_refund',
+        ]);
+        $donation = Donation::query()->find('id', (int) $donation->id);
+
+        // Small enough that the balance guard passes and the dedup below is the
+        // thing that decides, which is the order the race produces: the event
+        // lands after this call has already read the balance.
+        $refund = Plugin::instance()->container->get(DonationService::class)
+            ->refund($donation, 1000, 'donor asked');
+
+        $this->assertSame('succeeded', (string) $refund->status);
+        $this->assertCount(
+            1,
+            Refund::query()->where('gateway_refund_id', self::REFUND_ID)->getAll(),
+            'the recorded refund was written a second time'
+        );
+        $this->assertSame(
+            1000,
+            (int) $this->donationRow((int) $donation->id)['refunded_cents'],
+            'the balance was taken twice for one refund'
         );
     }
 
