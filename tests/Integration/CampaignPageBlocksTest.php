@@ -37,11 +37,19 @@ final class CampaignPageBlocksTest extends IntegrationTestCase
         $this->assertStringContainsString('wp:dono/recent-donations',  $page->post_content);
 
         // Each figure is its own block, so the seed places several rather than
-        // one block that draws them all.
-        $this->assertGreaterThanOrEqual(
-            3,
+        // one block that draws them all. They sit with the campaign, above the
+        // fold: the column beside the form carries the form and nothing else,
+        // because a figure under the button competes with it for the donor's
+        // attention at the moment they are deciding.
+        $this->assertSame(
+            2,
             substr_count($page->post_content, 'wp:dono/campaign-stat '),
-            'the starter layout places individual stat blocks'
+            'the starter layout places the raised and goal figures and no others'
+        );
+        $this->assertStringNotContainsString(
+            '"metric":"donors"',
+            $page->post_content,
+            'a figure sits beside the donation form, where nothing should compete with it'
         );
 
         // The grid sends a visitor away from the page they were asked to give

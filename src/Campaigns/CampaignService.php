@@ -622,22 +622,6 @@ final class CampaignService
 <!-- wp:column {"width":"38%","className":"dp-layout__side"} -->
 <div class="wp-block-column dp-layout__side" style="flex-basis:38%">
 <!-- wp:dono/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
-
-<!-- wp:columns {"className":"dp-figures"} -->
-<div class="wp-block-columns dp-figures">
-<!-- wp:column -->
-<div class="wp-block-column">
-<!-- wp:dono/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"donors","size":"sm"} /-->
-</div>
-<!-- /wp:column -->
-
-<!-- wp:column -->
-<div class="wp-block-column">
-<!-- wp:dono/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"average","size":"sm"} /-->
-</div>
-<!-- /wp:column -->
-</div>
-<!-- /wp:columns -->
 </div>
 <!-- /wp:column -->
 </div>
