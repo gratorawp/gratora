@@ -260,7 +260,7 @@ final class DonorService
 
         $clash = $this->donors->findByEmailHash($newHash);
         if ($clash !== null && (int) $clash->id !== (int) $donor->id) {
-            throw new EmailAlreadyAssignedException(esc_html((int) $clash->id));
+            throw new EmailAlreadyAssignedException((int) $clash->id);
         }
 
         $oldHash = $donor->email_hash;

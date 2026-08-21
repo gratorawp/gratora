@@ -321,6 +321,14 @@ final class DonorsController
                     $update['updated_at'] = gmdate('Y-m-d H:i:s');
                     DB::table('dono_donors')->where('id', $donor->id)->update($update);
                     $plainFieldsUpdated = true;
+
+                    // The email write below saves the whole model, so the model
+                    // has to be carrying what this just wrote. Left stale, its
+                    // save puts the old name back and the admin is told the
+                    // edit worked.
+                    foreach ($update as $field => $value) {
+                        $donor->$field = $value;
+                    }
                 }
 
                 if (array_key_exists('phone', $params)) {

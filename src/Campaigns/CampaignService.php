@@ -76,9 +76,10 @@ final class CampaignService
 
         $skipTemplate = ! empty($input['skip_template']);
 
-        // Campaign row, default form, and page commit together. wp_delete_post()
-        // is not transactional, so a thrown error mid-create may leave an orphan
-        // page recoverable from the admin pages list.
+        // Campaign row, default form, and page commit together. wp_insert_post()
+        // writes through the same connection, so the page row rolls back with
+        // the rest; what does not is anything a save_post listener does outside
+        // the database, and the object cache entries for the discarded page.
         DB::transaction(function () use ($campaign, $skipTemplate) {
             $campaign->save();
             $campaign->default_form_id = $this->createDefaultFormFor($campaign, $skipTemplate);
@@ -260,20 +261,6 @@ final class CampaignService
             throw new RuntimeException(esc_html($blocked));
         }
 
-        // WP post deletion is not transactional; done first so the
-        // `before_delete_post` hook can re-sync if the campaign-row delete fails.
-        if ($campaign->page_id) {
-            $pageId = (int) $campaign->page_id;
-            // Suppress onPageDeleted's page_lost: this is a full delete, not a
-            // page going missing under a surviving campaign.
-            $this->deletingPageIds[$pageId] = true;
-            try {
-                wp_delete_post($pageId, true);
-            } finally {
-                unset($this->deletingPageIds[$pageId]);
-            }
-        }
-
         // Form delete and campaign delete must commit together. Forms live
         // under a campaign; there is no orphan state.
         DB::transaction(function () use ($campaign) {
@@ -286,6 +273,22 @@ final class CampaignService
             Form::query()->where('campaign_id', $campaign->id)->delete();
             Campaign::query()->where('id', $campaign->id)->delete();
         });
+
+        // Force-deleting the page bypasses the trash and takes its content with
+        // it, so it waits until the campaign it belongs to is actually gone. A
+        // failure inside the block above would otherwise leave a live campaign
+        // serving a page that no longer exists.
+        if ($campaign->page_id) {
+            $pageId = (int) $campaign->page_id;
+            // Suppress onPageDeleted's page_lost: this is a full delete, not a
+            // page going missing under a surviving campaign.
+            $this->deletingPageIds[$pageId] = true;
+            try {
+                wp_delete_post($pageId, true);
+            } finally {
+                unset($this->deletingPageIds[$pageId]);
+            }
+        }
 
         do_action('dono.campaign.deleted', $campaign);
     }
@@ -369,8 +372,9 @@ final class CampaignService
         $copy->created_at = $now;
         $copy->updated_at = $now;
 
-        // wp_delete_post() isn't transactional; an error after the page is
-        // inserted may leave an orphan page recoverable from the admin pages list.
+        // Copy row, page, and default form commit together, on the same terms
+        // as create(): the page row rolls back, non-database work done by a
+        // save_post listener does not.
         DB::transaction(function () use ($copy) {
             $copy->save();
             $copy->page_id         = $this->createPageFor($copy);

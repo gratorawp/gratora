@@ -1121,8 +1121,15 @@ final class DonationService
             // redelivered webhook already recorded this exact refund. Return it
             // idempotently - the winner fired the side effects (status flip,
             // receipt void, refund email, aggregate resync).
+            //
+            // Only a row that stands as a recorded refund answers for this
+            // call. A row still awaiting settlement, or one a reversal spent,
+            // is what this call was replacing: the same reason the dedup above
+            // refuses to treat it as already handled. Returning it would report
+            // a settlement that did not happen, the webhook would be
+            // acknowledged, and the money would never come off the books.
             $dup = Refund::query()->where('gateway_refund_id', $gatewayRefundId)->get();
-            if ($dup) {
+            if ($dup && ! in_array((string) $dup->status, ['pending', 'reversed'], true)) {
                 return $dup;
             }
             throw $e;
