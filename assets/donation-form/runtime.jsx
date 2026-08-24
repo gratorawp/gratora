@@ -39,6 +39,12 @@ const STEP_RENDERERS = {
 // is server-authoritative and returns no donor data.
 export const COMPLETED_EVENT = 'dono:donation:completed';
 
+// How long a thank-you redirect waits for listeners that asked to be waited
+// for. Long enough for a same-origin round trip to the status endpoint, short
+// enough that a listener which never settles cannot strand the donor on the
+// form.
+export const COMPLETED_HOLD_MS = 2000;
+
 // Fired on window by the one form that claims a redirect return, carrying the
 // element it is rendering the outcome into. The donate-button block keeps its
 // form inside a modal that has to be opened for that outcome to be visible at
@@ -518,11 +524,20 @@ function FormBody( { state, dispatch, config } ) {
         if ( ! reference || announced.current === reference ) return;
         announced.current = reference;
 
+        const holds = [];
+
         window.dispatchEvent( new CustomEvent( COMPLETED_EVENT, {
             detail: {
                 reference,
                 statusToken: statusTokenFor( reference, state ),
                 status:      state.status,
+                // A listener whose work outlives the dispatch, anything that
+                // has to reach the server, hands its promise here. Without it
+                // a thank-you redirect replaces the page mid-flight and the
+                // work is discarded with the document.
+                waitUntil: ( promise ) => {
+                    if ( promise && typeof promise.then === 'function' ) holds.push( promise );
+                },
             },
         } ) );
 
@@ -530,7 +545,16 @@ function FormBody( { state, dispatch, config } ) {
         // page, and a listener that has not run by then never will. Keeping it
         // in the effect also fires it once rather than on every render pass.
         if ( state.status === 'success' && config.thanks?.redirect ) {
-            window.location.assign( config.thanks.redirect );
+            const go = () => window.location.assign( config.thanks.redirect );
+
+            if ( holds.length === 0 ) {
+                go();
+            } else {
+                Promise.race( [
+                    Promise.allSettled( holds ),
+                    new Promise( ( resolve ) => setTimeout( resolve, COMPLETED_HOLD_MS ) ),
+                ] ).then( go, go );
+            }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ state.status, state.submission, state.payment, config.thanks?.redirect ] );
