@@ -11,6 +11,7 @@ use Dono\Campaigns\Campaign;
 use Dono\Donors\Portal\PortalPage;
 use Dono\Forms\Form;
 use Dono\Forms\FormReadinessService;
+use Dono\Foundation\License\LicenseRefusals;
 use Dono\Foundation\License\LicenseService;
 use Dono\Gateways\GatewayManager;
 use Dono\Gateways\PayPal\PayPalAccount;
@@ -577,18 +578,19 @@ final class ReadinessService
 
         $refused = $this->license->unlicensed();
         if ($refused !== []) {
-            return [$this->warn(
-                'licenses',
-                'licenses',
-                sprintf(
-                    /* translators: %s: comma-separated add-on names. */
-                    __('Your license does not cover %s', 'dono-fundraising-platform'),
-                    $this->names($refused)
-                ),
-                __('They keep running, but they will not receive updates or security fixes.', 'dono-fundraising-platform'),
-                'licenses',
-                __('Manage licenses', 'dono-fundraising-platform')
-            )];
+            $rows = [];
+            foreach (LicenseRefusals::group($refused) as $i => $group) {
+                $rows[] = $this->warn(
+                    $i === 0 ? 'licenses' : 'licenses-' . $group['status'],
+                    'licenses',
+                    $group['headline'],
+                    $group['detail'],
+                    'licenses',
+                    __('Manage licenses', 'dono-fundraising-platform')
+                );
+            }
+
+            return $rows;
         }
 
         $lapsing = $this->license->lapsing();

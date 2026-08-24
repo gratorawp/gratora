@@ -44,13 +44,9 @@ final class LicenseNotice
 
         $refused = $this->license->unlicensed();
         if ($refused !== []) {
-            $this->notice(
-                sprintf(
-                    /* translators: %s: comma-separated add-on names */
-                    __('Your license does not cover %s. They keep running for now, but they will not receive updates or security fixes.', 'dono-fundraising-platform'),
-                    $this->names($refused)
-                )
-            );
+            foreach (LicenseRefusals::group($refused) as $group) {
+                $this->notice($group['headline'] . '. ' . $group['detail']);
+            }
 
             return;
         }
