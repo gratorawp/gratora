@@ -27,7 +27,14 @@ final class StepsBlock implements Block
         ];
     }
 
-    /** @since 1.0.0 */
+    /**
+     * $content is the inner blocks' markup, rendered by WordPress before this
+     * callback runs, exactly as core's own container blocks receive it.
+     * Escaping it here would double-escape every child; each child escapes its
+     * own values at their interpolation points.
+     *
+     * @since 1.0.0
+     */
     public function render(array $attrs, string $content): string
     {
         return sprintf('<div class="dono-block dono-block--steps">%s</div>', $content);

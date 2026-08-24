@@ -50,11 +50,14 @@ final class EmailTemplateMetaTest extends IntegrationTestCase
         set_current_screen('dono_page_dono-settings');
         wp_set_current_user(1);
 
-        ob_start();
+        // The payload rides an enqueued src-less handle, so it is observed
+        // where WordPress serves it: the inline script attached to the handle.
+        wp_deregister_script('dono-admin-globals');
         (new \Dono\Admin\AdminGlobals(
             \Dono\Foundation\Plugin::instance()->container->get(\Dono\Foundation\License\LicenseService::class)
         ))->inject();
-        $printed = (string) ob_get_clean();
+        $data    = wp_scripts()->get_data('dono-admin-globals', 'after');
+        $printed = is_array($data) ? implode('', array_filter($data)) : '';
 
         unset($_GET['page']);
 

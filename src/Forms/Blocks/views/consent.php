@@ -26,8 +26,8 @@ $labelText = $label !== '' ? $label : __('How can we stay in touch?', 'dono-fund
                 <input type="checkbox"
                        name="consents[<?php echo esc_attr($id); ?>]"
                        value="1"
-                       <?php echo $checked ? 'checked' : ''; ?>
-                       <?php echo $required ? 'required disabled' : ''; ?>>
+                       <?php echo esc_attr($checked ? 'checked' : ''); ?>
+                       <?php echo esc_attr($required ? 'required disabled' : ''); ?>>
                 <?php if ($required): ?>
                     <input type="hidden" name="consents[<?php echo esc_attr($id); ?>]" value="1">
                 <?php endif; ?>

@@ -25,5 +25,5 @@ $fieldName = $field !== '' ? $field : 'number';
         <?php if ($min !== null): ?>min="<?php echo esc_attr((string) $min); ?>"<?php endif; ?>
         <?php if ($max !== null): ?>max="<?php echo esc_attr((string) $max); ?>"<?php endif; ?>
         step="<?php echo esc_attr((string) $step); ?>"
-        <?php echo $required ? 'required' : ''; ?>>
+        <?php echo esc_attr($required ? 'required' : ''); ?>>
 </label>

@@ -200,6 +200,11 @@ final class DonationFormShortcode extends HookProvider
         // class is only added when JS runs, so no-JS visitors keep the visible
         // fallback, and the timeout failsafe reveals the form if the runtime
         // never loads. Once per request.
+        //
+        // Inline by necessity, not oversight: the cloak has to apply before
+        // first paint of the markup it precedes, and an enqueued asset prints
+        // in the head or footer, after the flash it exists to prevent.
+        // phpcs:ignore WordPress.WP.EnqueuedResources -- see above.
         if (! $this->cloakEmitted) {
             $this->cloakEmitted = true;
             $html = "<style>.dono-js .dono-donation-form:not([data-dono-ready]){visibility:hidden}</style>"

@@ -11,5 +11,5 @@ $labelText = $label !== '' ? $label : __('Email', 'dono-fundraising-platform');
     <span class="dono-donor__label"><?php echo esc_html($labelText); ?></span>
     <input type="email" name="email" autocomplete="email"
            placeholder="<?php echo esc_attr($placeholder); ?>"
-           <?php echo $required ? 'required' : ''; ?>>
+           <?php echo esc_attr($required ? 'required' : ''); ?>>
 </label>

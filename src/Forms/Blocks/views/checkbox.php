@@ -13,8 +13,8 @@ defined('ABSPATH') || exit;
         type="checkbox"
         name="custom[<?php echo esc_attr($field); ?>]"
         value="1"
-        <?php echo $defaultOn ? 'checked' : ''; ?>
-        <?php echo $required ? 'required' : ''; ?>
+        <?php echo esc_attr($defaultOn ? 'checked' : ''); ?>
+        <?php echo esc_attr($required ? 'required' : ''); ?>
     >
     <span class="dono-checkbox__body">
         <span class="dono-checkbox__label"><?php echo esc_html($label); ?></span>

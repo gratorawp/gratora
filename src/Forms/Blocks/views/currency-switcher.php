@@ -25,7 +25,7 @@ $ariaName = $label !== '' ? $label : __('Currency', 'dono-fundraising-platform')
                         type="radio"
                         name="currency"
                         value="<?php echo esc_attr($code); ?>"
-                        <?php echo $i === 0 ? 'checked' : ''; ?>
+                        <?php echo esc_attr($i === 0 ? 'checked' : ''); ?>
                     >
                     <span><?php echo esc_html($code); ?></span>
                 </label>

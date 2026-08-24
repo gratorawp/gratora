@@ -28,7 +28,7 @@ final class AdminGlobals extends HookProvider
     /** @since 1.0.0 */
     protected function actions(): array
     {
-        return ['admin_print_scripts' => 'inject'];
+        return ['admin_enqueue_scripts' => 'inject'];
     }
 
     /** @since 1.0.0 */
@@ -98,17 +98,22 @@ final class AdminGlobals extends HookProvider
             ],
         ];
 
-        printf(
-            '<script id="dono-admin-globals">window.dono = window.dono || {}; Object.assign(window.dono, %s);</script>',
-            // All four HEX flags: TAG and AMP escape < > & so a value holding
-            // </script> (the site name, say) cannot break out of the inline
-            // tag, and APOS and QUOT leave nothing quote-shaped for a reader to
-            // have to reason about.
-            wp_json_encode(
-                $payload,
-                JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
-                    | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
-            )
+        // A src-less handle in the head, so every screen bundle that reads
+        // window.dono finds it populated before it runs. All four HEX flags:
+        // TAG and AMP escape < > & so a value holding a closing script tag
+        // (the site name, say) cannot break out of the inline tag, and APOS
+        // and QUOT leave nothing quote-shaped for a reader to reason about.
+        $json = wp_json_encode(
+            $payload,
+            JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+                | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+        );
+
+        wp_register_script('dono-admin-globals', false, [], DONO_VERSION, false);
+        wp_enqueue_script('dono-admin-globals');
+        wp_add_inline_script(
+            'dono-admin-globals',
+            'window.dono = window.dono || {}; Object.assign(window.dono, ' . $json . ');'
         );
     }
 

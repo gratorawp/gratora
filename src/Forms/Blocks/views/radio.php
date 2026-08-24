@@ -19,13 +19,13 @@ defined('ABSPATH') || exit;
             $optValue = (string) $o['value'];
             $checked  = ($optValue === $defaultValue);
             ?>
-            <label class="dono-radio__option<?php echo $checked ? ' is-selected' : ''; ?>">
+            <label class="dono-radio__option<?php echo esc_attr($checked ? ' is-selected' : ''); ?>">
                 <input
                     type="radio"
                     name="custom[<?php echo esc_attr($field); ?>]"
                     value="<?php echo esc_attr($optValue); ?>"
-                    <?php echo $checked ? 'checked' : ''; ?>
-                    <?php echo $required ? 'required' : ''; ?>
+                    <?php echo esc_attr($checked ? 'checked' : ''); ?>
+                    <?php echo esc_attr($required ? 'required' : ''); ?>
                 >
                 <span class="dono-radio__option-label"><?php echo esc_html($optLabel !== '' ? $optLabel : $optValue); ?></span>
             </label>

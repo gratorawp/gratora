@@ -33,7 +33,7 @@ echo get_block_wrapper_attributes(array_filter([
                     <?php echo \Dono\Campaigns\Blocks\BlockAvatar::markup($entry['name'], $entry['is_anonymous'], (string) ($entry['avatar_url'] ?? '')); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- BlockAvatar::markup esc_html()s the initial and esc_url()s the image; its only other interpolation is an integer hue. ?>
                     <div class="dono-recent-donations__content">
                         <div class="dono-recent-donations__header">
-                            <span class="dono-recent-donations__name<?php echo $entry['is_anonymous'] ? ' is-anonymous' : ''; ?>">
+                            <span class="dono-recent-donations__name<?php echo esc_attr($entry['is_anonymous'] ? ' is-anonymous' : ''); ?>">
                                 <?php echo esc_html($entry['name']);
 ?>
                             </span>

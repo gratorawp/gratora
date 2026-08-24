@@ -30,7 +30,7 @@ echo get_block_wrapper_attributes(array_filter([
         <ul class="dono-supporter-wall is-cols-<?php echo esc_attr($columns);
 ?>">
             <?php foreach ($entries as $entry): ?>
-                <li class="dono-supporter-wall__card<?php echo $entry['message'] !== '' && $showMessage ? ' has-message' : ''; ?>">
+                <li class="dono-supporter-wall__card<?php echo esc_attr($entry['message'] !== '' && $showMessage ? ' has-message' : ''); ?>">
                     <div class="dono-supporter-wall__top">
                         <?php echo \Dono\Campaigns\Blocks\BlockAvatar::markup($entry['name'], false, (string) ($entry['avatar_url'] ?? '')); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- BlockAvatar::markup esc_html()s the initial and esc_url()s the image; its only other interpolation is an integer hue. ?>
                         <div class="dono-supporter-wall__name"><?php echo esc_html($entry['name']);

@@ -23,5 +23,5 @@ $fieldName = $field !== '' ? $field : 'text';
         placeholder="<?php echo esc_attr($placeholder); ?>"
         <?php if ($maxLength > 0): ?>maxlength="<?php echo esc_attr((string) $maxLength); ?>"<?php endif; ?>
         <?php if ($pattern !== ''): ?>pattern="<?php echo esc_attr($pattern); ?>"<?php endif; ?>
-        <?php echo $required ? 'required' : ''; ?>>
+        <?php echo esc_attr($required ? 'required' : ''); ?>>
 </label>

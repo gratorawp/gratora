@@ -33,11 +33,11 @@ echo get_block_wrapper_attributes(array_filter([
     <?php else: ?>
     <div class="dono-campaign-grid">
         <?php foreach ($cards as $card): ?>
-            <a class="dono-campaign-card<?php echo $card['url'] === '' ? ' is-inert' : ''; ?>"
+            <a class="dono-campaign-card<?php echo esc_attr($card['url'] === '' ? ' is-inert' : ''); ?>"
                <?php echo $card['url'] !== '' ? 'href="' . esc_url($card['url']) . '"' : ''; ?>
                style="--dono-accent: <?php echo esc_attr($card['accent']);
 ?>;">
-                <span class="dono-campaign-card__cover<?php echo $card['imageUrl'] ? '' : ' is-placeholder'; ?>">
+                <span class="dono-campaign-card__cover<?php echo esc_attr($card['imageUrl'] ? '' : ' is-placeholder'); ?>">
                     <?php if ($card['imageUrl']): ?>
                         <img src="<?php echo esc_url($card['imageUrl']);
 ?>" alt="<?php echo esc_attr($card['title']);

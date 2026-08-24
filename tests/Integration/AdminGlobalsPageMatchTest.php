@@ -15,7 +15,12 @@ use Dono\Foundation\Plugin;
  */
 final class AdminGlobalsPageMatchTest extends IntegrationTestCase
 {
-    private function emitsOn(?string $page): bool
+    /**
+     * The payload rides an enqueued src-less handle now, so what a screen
+     * receives is observed the way WordPress serves it: the inline script
+     * attached to the handle, printed by wp_scripts.
+     */
+    private function payloadOn(?string $page): string
     {
         if ($page === null) {
             unset($_GET['page']);
@@ -23,13 +28,18 @@ final class AdminGlobalsPageMatchTest extends IntegrationTestCase
             $_GET['page'] = $page;
         }
 
-        ob_start();
+        wp_deregister_script('dono-admin-globals');
         (new AdminGlobals(Plugin::instance()->container->get(LicenseService::class)))->inject();
-        $out = (string) ob_get_clean();
 
         unset($_GET['page']);
 
-        return str_contains($out, 'dono-admin-globals');
+        $data = wp_scripts()->get_data('dono-admin-globals', 'after');
+        return is_array($data) ? implode('', array_filter($data)) : '';
+    }
+
+    private function emitsOn(?string $page): bool
+    {
+        return str_contains($this->payloadOn($page), 'window.dono');
     }
 
     public function test_the_dashboard_gets_the_config_object(): void
@@ -61,14 +71,6 @@ final class AdminGlobalsPageMatchTest extends IntegrationTestCase
 
     public function test_the_payload_carries_the_org_number_format(): void
     {
-        $_GET['page'] = 'dono';
-
-        ob_start();
-        (new AdminGlobals(Plugin::instance()->container->get(LicenseService::class)))->inject();
-        $out = (string) ob_get_clean();
-
-        unset($_GET['page']);
-
-        $this->assertStringContainsString('number_format', $out);
+        $this->assertStringContainsString('number_format', $this->payloadOn('dono'));
     }
 }

@@ -35,7 +35,7 @@ $countryText = $countryLabel !== '' ? $countryLabel : __('Country', 'dono-fundra
             <label class="dono-address__field dono-address__field--full">
                 <span class="dono-address__label"><?php echo esc_html($line1Text); ?></span>
                 <input type="text" name="profile[address][line1]" autocomplete="address-line1"
-                       <?php echo $requireLine1 ? 'required' : ''; ?>>
+                       <?php echo esc_attr($requireLine1 ? 'required' : ''); ?>>
             </label>
         <?php endif; ?>
 
@@ -50,7 +50,7 @@ $countryText = $countryLabel !== '' ? $countryLabel : __('Country', 'dono-fundra
             <label class="dono-address__field">
                 <span class="dono-address__label"><?php echo esc_html($cityText); ?></span>
                 <input type="text" name="profile[address][city]" autocomplete="address-level2"
-                       <?php echo $requireCity ? 'required' : ''; ?>>
+                       <?php echo esc_attr($requireCity ? 'required' : ''); ?>>
             </label>
         <?php endif; ?>
 
@@ -58,7 +58,7 @@ $countryText = $countryLabel !== '' ? $countryLabel : __('Country', 'dono-fundra
             <label class="dono-address__field">
                 <span class="dono-address__label"><?php echo esc_html($regionText); ?></span>
                 <input type="text" name="profile[address][region]" autocomplete="address-level1"
-                       <?php echo $requireRegion ? 'required' : ''; ?>>
+                       <?php echo esc_attr($requireRegion ? 'required' : ''); ?>>
             </label>
         <?php endif; ?>
 
@@ -66,7 +66,7 @@ $countryText = $countryLabel !== '' ? $countryLabel : __('Country', 'dono-fundra
             <label class="dono-address__field">
                 <span class="dono-address__label"><?php echo esc_html($postalText); ?></span>
                 <input type="text" name="profile[address][postal]" autocomplete="postal-code"
-                       <?php echo $requirePostal ? 'required' : ''; ?>>
+                       <?php echo esc_attr($requirePostal ? 'required' : ''); ?>>
             </label>
         <?php endif; ?>
 
@@ -74,7 +74,7 @@ $countryText = $countryLabel !== '' ? $countryLabel : __('Country', 'dono-fundra
             <label class="dono-address__field">
                 <span class="dono-address__label"><?php echo esc_html($countryText); ?></span>
                 <input type="text" name="profile[address][country]" autocomplete="country-name"
-                       <?php echo $requireCountry ? 'required' : ''; ?>>
+                       <?php echo esc_attr($requireCountry ? 'required' : ''); ?>>
             </label>
         <?php endif; ?>
     </div>

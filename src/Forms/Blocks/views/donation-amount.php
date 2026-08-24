@@ -26,7 +26,7 @@ defined('ABSPATH') || exit;
                         class="<?php echo esc_attr($classes); ?>"
                         data-cents="<?php echo esc_attr((string) $cents); ?>"
                         role="radio"
-                        aria-checked="<?php echo $selected ? 'true' : 'false'; ?>">
+                        aria-checked="<?php echo esc_attr($selected ? 'true' : 'false'); ?>">
                     <span class="dono-amount__preset-value"><?php echo esc_html($label); ?></span>
                     <?php if ($impact !== ''): ?>
                         <span class="dono-amount__preset-impact"><?php echo esc_html($impact); ?></span>

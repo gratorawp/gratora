@@ -43,7 +43,7 @@ echo get_block_wrapper_attributes(array_filter([
                     <div class="dono-top-donors__podium-rank"><?php echo esc_html((string) $rank);
 ?></div>
                     <?php echo \Dono\Campaigns\Blocks\BlockAvatar::markup($entry['name'], $entry['is_anonymous'], (string) ($entry['avatar_url'] ?? '')); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- BlockAvatar::markup esc_html()s the initial and esc_url()s the image; its only other interpolation is an integer hue. ?>
-                    <div class="dono-top-donors__podium-name<?php echo $entry['is_anonymous'] ? ' is-anonymous' : ''; ?>">
+                    <div class="dono-top-donors__podium-name<?php echo esc_attr($entry['is_anonymous'] ? ' is-anonymous' : ''); ?>">
                         <?php echo esc_html($entry['name']);
 ?>
                     </div>
@@ -72,7 +72,7 @@ echo get_block_wrapper_attributes(array_filter([
                 <?php foreach ($rest as $i => $entry): ?>
                     <li class="dono-top-donors__row">
                         <?php echo \Dono\Campaigns\Blocks\BlockAvatar::markup($entry['name'], $entry['is_anonymous'], (string) ($entry['avatar_url'] ?? '')); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- BlockAvatar::markup esc_html()s the initial and esc_url()s the image; its only other interpolation is an integer hue. ?>
-                        <span class="dono-top-donors__name<?php echo $entry['is_anonymous'] ? ' is-anonymous' : ''; ?>">
+                        <span class="dono-top-donors__name<?php echo esc_attr($entry['is_anonymous'] ? ' is-anonymous' : ''); ?>">
                             <?php echo esc_html($entry['name']);
 ?>
                         </span>
@@ -101,7 +101,7 @@ echo get_block_wrapper_attributes(array_filter([
             <?php foreach ($entries as $i => $entry): ?>
                 <li class="dono-top-donors__row">
                     <?php echo \Dono\Campaigns\Blocks\BlockAvatar::markup($entry['name'], $entry['is_anonymous'], (string) ($entry['avatar_url'] ?? '')); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- BlockAvatar::markup esc_html()s the initial and esc_url()s the image; its only other interpolation is an integer hue. ?>
-                    <span class="dono-top-donors__name<?php echo $entry['is_anonymous'] ? ' is-anonymous' : ''; ?>">
+                    <span class="dono-top-donors__name<?php echo esc_attr($entry['is_anonymous'] ? ' is-anonymous' : ''); ?>">
                         <?php echo esc_html($entry['name']);
 ?>
                     </span>

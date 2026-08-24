@@ -29,8 +29,10 @@ final class TestModeBadge extends HookProvider
     {
         return [
             'admin_bar_menu'      => ['addNode', 90, 1],
-            'admin_head'          => 'styles',
-            'wp_head'             => 'styles',
+            // The badge lives on the admin bar, which renders on the front end
+            // too, so both enqueue hooks carry it.
+            'admin_enqueue_scripts' => 'styles',
+            'wp_enqueue_scripts'    => 'styles',
         ];
     }
 
@@ -91,6 +93,34 @@ final class TestModeBadge extends HookProvider
             . '</svg>';
     }
 
+    /** What the admin bar badge looks like; served through its handle above. */
+    private const BADGE_CSS = <<<'CSS'
+    /* Sized and coloured to sit alongside the other fundraising
+       plugins' test badges rather than compete with them: a chip inset
+       from the bar, not a full-height block. */
+    #wpadminbar #wp-admin-bar-dono-test-mode .dono-test-mode-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin: 0 4px;
+        padding: 0 8px;
+        border-radius: 4px;
+        background: #e89940;
+        color: #fff;
+        font-weight: 600;
+        font-size: 12px;
+        line-height: 25px;
+        white-space: nowrap;
+    }
+    #wpadminbar #wp-admin-bar-dono-test-mode .dono-test-mode-badge__icon {
+        width: 13px;
+        height: 13px;
+        flex: none;
+    }
+    #wpadminbar #wp-admin-bar-dono-test-mode:hover .dono-test-mode-badge { background: #d68a37; }
+    #wpadminbar #wp-admin-bar-dono-test-mode > .ab-item { padding: 0; }
+CSS;
+
     /** @since 1.0.0 */
     public function styles(): void
     {
@@ -100,34 +130,12 @@ final class TestModeBadge extends HookProvider
         if (! $this->orgWide() && $this->formsInTestMode() === 0) {
             return;
         }
-        ?>
-        <style>
-            /* Sized and coloured to sit alongside the other fundraising
-               plugins' test badges rather than compete with them: a chip inset
-               from the bar, not a full-height block. */
-            #wpadminbar #wp-admin-bar-dono-test-mode .dono-test-mode-badge {
-                display: inline-flex;
-                align-items: center;
-                gap: 4px;
-                margin: 0 4px;
-                padding: 0 8px;
-                border-radius: 4px;
-                background: #e89940;
-                color: #fff;
-                font-weight: 600;
-                font-size: 12px;
-                line-height: 25px;
-                white-space: nowrap;
-            }
-            #wpadminbar #wp-admin-bar-dono-test-mode .dono-test-mode-badge__icon {
-                width: 13px;
-                height: 13px;
-                flex: none;
-            }
-            #wpadminbar #wp-admin-bar-dono-test-mode:hover .dono-test-mode-badge { background: #d68a37; }
-            #wpadminbar #wp-admin-bar-dono-test-mode > .ab-item { padding: 0; }
-        </style>
-        <?php
+
+        // A src-less handle, because the badge has no stylesheet of its own and
+        // a printed style tag is not enqueueable.
+        wp_register_style('dono-test-mode-badge', false, [], DONO_VERSION);
+        wp_enqueue_style('dono-test-mode-badge');
+        wp_add_inline_style('dono-test-mode-badge', self::BADGE_CSS);
     }
 
     /** @since 1.0.0 */

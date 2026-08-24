@@ -17,7 +17,7 @@ defined('ABSPATH') || exit;
                 <input type="radio"
                        name="gateway"
                        value="<?php echo esc_attr($id); ?>"
-                       <?php echo $i === 0 ? 'checked' : ''; ?>>
+                       <?php echo esc_attr($i === 0 ? 'checked' : ''); ?>>
                 <span class="dono-gateways__body">
                     <span class="dono-gateways__label"><?php echo esc_html($label); ?></span>
                     <?php if ($desc !== ''): ?>

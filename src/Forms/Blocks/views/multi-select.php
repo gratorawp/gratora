@@ -23,13 +23,13 @@ defined('ABSPATH') || exit;
             $optValue = (string) $o['value'];
             $checked  = ! empty($o['isDefault']);
             ?>
-            <label class="dono-multi-select__option<?php echo $checked ? ' is-selected' : ''; ?>">
+            <label class="dono-multi-select__option<?php echo esc_attr($checked ? ' is-selected' : ''); ?>">
                 <input
                     type="checkbox"
                     name="custom[<?php echo esc_attr($field); ?>][]"
                     value="<?php echo esc_attr($optValue); ?>"
-                    <?php echo $checked ? 'checked' : ''; ?>
-                    <?php echo ($required && $i === 0) ? 'required' : ''; ?>
+                    <?php echo esc_attr($checked ? 'checked' : ''); ?>
+                    <?php echo esc_attr(($required && $i === 0) ? 'required' : ''); ?>
                 >
                 <span class="dono-multi-select__option-label"><?php echo esc_html($optLabel !== '' ? $optLabel : $optValue); ?></span>
             </label>

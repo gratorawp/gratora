@@ -13,6 +13,6 @@ defined('ABSPATH') || exit;
         placeholder="<?php echo esc_attr((string) $placeholder); ?>"
         rows="3"
         maxlength="5000"
-        <?php echo $required ? 'required' : ''; ?>
+        <?php echo esc_attr($required ? 'required' : ''); ?>
     ></textarea>
 </label>

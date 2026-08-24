@@ -15,7 +15,7 @@ defined('ABSPATH') || exit;
     <?php endif; ?>
     <select
         name="custom[<?php echo esc_attr($field); ?>]"
-        <?php echo $required ? 'required' : ''; ?>
+        <?php echo esc_attr($required ? 'required' : ''); ?>
     >
         <?php if ($placeholder !== ''): ?>
             <option value=""><?php echo esc_html($placeholder); ?></option>
@@ -25,7 +25,7 @@ defined('ABSPATH') || exit;
             $optValue = (string) $o['value'];
             $selected = ($optValue === $defaultValue);
             ?>
-            <option value="<?php echo esc_attr($optValue); ?>" <?php echo $selected ? 'selected' : ''; ?>>
+            <option value="<?php echo esc_attr($optValue); ?>" <?php echo esc_attr($selected ? 'selected' : ''); ?>>
                 <?php echo esc_html($optLabel !== '' ? $optLabel : $optValue); ?>
             </option>
         <?php endforeach; ?>

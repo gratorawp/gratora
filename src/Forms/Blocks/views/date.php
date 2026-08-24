@@ -21,5 +21,5 @@ $fieldName = $field !== '' ? $field : 'date';
         name="custom[<?php echo esc_attr($fieldName); ?>]"
         <?php if ($minDate !== ''): ?>min="<?php echo esc_attr($minDate); ?>"<?php endif; ?>
         <?php if ($maxDate !== ''): ?>max="<?php echo esc_attr($maxDate); ?>"<?php endif; ?>
-        <?php echo $required ? 'required' : ''; ?>>
+        <?php echo esc_attr($required ? 'required' : ''); ?>>
 </label>
