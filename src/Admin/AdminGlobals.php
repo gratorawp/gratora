@@ -100,9 +100,15 @@ final class AdminGlobals extends HookProvider
 
         printf(
             '<script id="dono-admin-globals">window.dono = window.dono || {}; Object.assign(window.dono, %s);</script>',
-            // JSON_HEX_TAG|JSON_HEX_AMP escape < > &, so a value containing
-            // </script> (e.g. the site name) can't break out of the inline tag.
-            wp_json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP)
+            // All four HEX flags: TAG and AMP escape < > & so a value holding
+            // </script> (the site name, say) cannot break out of the inline
+            // tag, and APOS and QUOT leave nothing quote-shaped for a reader to
+            // have to reason about.
+            wp_json_encode(
+                $payload,
+                JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+                    | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+            )
         );
     }
 

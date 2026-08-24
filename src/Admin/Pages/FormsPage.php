@@ -29,7 +29,7 @@ final class FormsPage extends HookProvider
     /** @since 1.0.0 */
     protected function actions(): array
     {
-        return ['admin_head' => 'maybePrintFullscreenStyles'];
+        return [];
     }
 
     /**
@@ -47,19 +47,18 @@ final class FormsPage extends HookProvider
             && intval($_GET['form'] ?? 0) > 0;
     }
 
-    /** @since 1.0.0 */
-    public function maybePrintFullscreenStyles(): void
-    {
-        if (! self::isFormEditView()) return;
-        echo '<style id="dono-fullscreen-editor">'
-            . '#wpadminbar,#adminmenumain,#adminmenuwrap,#adminmenuback,#wpfooter,.notice,.update-nag,h1.wp-heading-inline,.wp-header-end{display:none!important}'
-            . 'html.wp-toolbar{padding-top:0!important}'
-            . 'html,body{height:100%;margin:0;padding:0;background:#fff}'
-            . '#wpwrap,#wpcontent,#wpbody,#wpbody-content{margin-left:0!important;padding:0!important;float:none!important;width:100%!important;background:#fff}'
-            . '.wrap,.dono-forms-wrap{margin:0!important;padding:0!important}'
-            . '#dono-admin-forms{height:100vh;overflow:hidden;background:#fff}'
-            . '</style>';
-    }
+    /**
+     * The chrome the editor hides. Attached to the screen's own stylesheet
+     * rather than printed, because a <style> tag in admin_head is not
+     * enqueueable and the handle below is already on this screen.
+     */
+    private const FULLSCREEN_CSS =
+        '#wpadminbar,#adminmenumain,#adminmenuwrap,#adminmenuback,#wpfooter,.notice,.update-nag,h1.wp-heading-inline,.wp-header-end{display:none!important}'
+        . 'html.wp-toolbar{padding-top:0!important}'
+        . 'html,body{height:100%;margin:0;padding:0;background:#fff}'
+        . '#wpwrap,#wpcontent,#wpbody,#wpbody-content{margin-left:0!important;padding:0!important;float:none!important;width:100%!important;background:#fff}'
+        . '.wrap,.dono-forms-wrap{margin:0!important;padding:0!important}'
+        . '#dono-admin-forms{height:100vh;overflow:hidden;background:#fff}';
 
     /** @since 1.0.0 */
     public function registerPage(array $pages): array
@@ -93,11 +92,9 @@ final class FormsPage extends HookProvider
         // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- WP_Screen::get() reads $hook_suffix as the screen id, so blanking it gives set_current_screen() below a neutral screen instead of this page's.
         $GLOBALS['hook_suffix'] = '';
 
-        require_once ABSPATH . 'wp-admin/includes/class-wp-screen.php';
-        require_once ABSPATH . 'wp-admin/includes/screen.php';
-        require_once ABSPATH . 'wp-admin/includes/post.php';
-        require_once ABSPATH . 'wp-admin/includes/media.php';
-
+        // render() is a menu page callback, so wp-admin/admin.php has already
+        // loaded screen, post and media through includes/admin.php by the time
+        // this runs. Requiring them again was redundant.
         set_current_screen();
         $screen = get_current_screen();
         if ($screen && method_exists($screen, 'is_block_editor')) {
@@ -191,5 +188,9 @@ final class FormsPage extends HookProvider
             ['wp-edit-post', 'wp-block-editor', 'wp-components'],
             $asset['version'] ?? DONO_VERSION
         );
+
+        if (self::isFormEditView()) {
+            wp_add_inline_style('dono-admin-forms', self::FULLSCREEN_CSS);
+        }
     }
 }

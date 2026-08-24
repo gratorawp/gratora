@@ -61,6 +61,17 @@ Thumbs.db
 *.log
 *.map
 
+# Named per package, this list only ever covers the dependency that already
+# bit us: the upload form refused this plugin twice, once for a shell script a
+# vendored package brought in its own bin/. These two rules are by shape, so a
+# new dependency's tooling never reaches a reviewer.
+*.sh
+tests
+.phpunit.result.cache
+.php-cs-fixer.cache
+*.cache
+*.dist
+
 /vendor/vendor-prefixed/dompdf/dompdf/tests
 /vendor/vendor-prefixed/dompdf/php-font-lib/tests
 /vendor/vendor-prefixed/dompdf/php-svg-lib/tests
