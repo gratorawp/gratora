@@ -212,14 +212,16 @@ final class FormSubmissionValidator
                 // A presets-only form (custom amounts disabled) must only accept
                 // a listed preset; a crafted POST can otherwise send any amount.
                 // 'fixed' donation type is a single custom input, so it's exempt.
-                $amountType = (string) ($attrs['donationType'] ?? 'multi');
-                $allowCustom = $amountType === 'fixed' ? true : (bool) ($attrs['allowCustom'] ?? true);
+                $allowCustom = DonationAmountBlock::acceptsTypedAmount($attrs);
 
                 // A minimum set on the block. Checked against the net, like the
                 // preset check below: covering the fee is not the donor giving
-                // more, so it must not lift them over the bar.
+                // more, so it must not lift them over the bar. It bounds what a
+                // donor types, so a presets-only block does not carry one: the
+                // listed amounts are the whole menu, and the editor offers no
+                // minimum there to see or clear.
                 $minCents = (int) ($attrs['minCents'] ?? 0);
-                if ($minCents > 0) {
+                if ($allowCustom && $minCents > 0) {
                     $net      = (int) ($body['amount_cents'] ?? 0) - (int) ($body['fee_covered_cents'] ?? 0);
                     $authored = self::authoredCurrency($attrs);
                     $paying   = $this->payingCurrency($authored, $body);

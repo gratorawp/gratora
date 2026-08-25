@@ -55,10 +55,24 @@ final class DonationAmountBlock implements Block
 
         return View::loadRelative(__DIR__, 'views/donation-amount', [
             'presets'     => $presets,
-            'allowCustom' => $fixed ? true : (bool) ($attrs['allowCustom'] ?? true),
+            'allowCustom' => self::acceptsTypedAmount($attrs),
             'currency'    => strtoupper(trim((string) ($attrs['currency'] ?? ''))) ?: Money::defaultCurrency(),
             'default'     => $default,
         ]);
+    }
+
+    /**
+     * Whether the donor can type an amount into this block: an open-amount
+     * block always, a multi-level block only while custom amounts are on.
+     *
+     * @param array<string,mixed> $attrs
+     *
+     * @since 1.0.0
+     */
+    public static function acceptsTypedAmount(array $attrs): bool
+    {
+        return (string) ($attrs['donationType'] ?? 'multi') === 'fixed'
+            || (bool) ($attrs['allowCustom'] ?? true);
     }
 
     /**

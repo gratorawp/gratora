@@ -1643,6 +1643,10 @@ final class DonationFormShortcode extends HookProvider
     /**
      * The minimum an admin set on this form's amount block, or 0 for none.
      *
+     * A minimum bounds what a donor types, so a block that lists preset amounts
+     * and nothing else is not carrying one: the presets are the whole menu, and
+     * the editor shows no minimum to see or clear there either.
+     *
      * @since 1.0.0
      */
     private static function amountBlockMinCents($form): int
@@ -1654,9 +1658,13 @@ final class DonationFormShortcode extends HookProvider
         $min = 0;
         foreach ($m[1] as $json) {
             $attrs = json_decode($json, true);
-            if (is_array($attrs)) {
-                $min = max($min, (int) ($attrs['minCents'] ?? 0));
+            if (! is_array($attrs)) {
+                continue;
             }
+            if (! DonationAmountBlock::acceptsTypedAmount($attrs)) {
+                continue;
+            }
+            $min = max($min, (int) ($attrs['minCents'] ?? 0));
         }
 
         return $min;

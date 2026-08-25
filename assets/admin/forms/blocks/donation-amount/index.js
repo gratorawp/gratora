@@ -20,6 +20,12 @@ const DEFAULT_PRESETS = [
     { id: 'preset-4', cents: 10000, impact: '', preselected: false },
 ];
 
+// The minimum bounds what a donor types, so it belongs wherever a donor can
+// type: an open-amount block always, a multi-level one while custom amounts
+// are on. The server asks the same question before it enforces one.
+export const acceptsTypedAmount = ( donationType, allowCustom ) =>
+    donationType === 'fixed' || !! allowCustom;
+
 function normalizePresets( presets ) {
     if ( ! Array.isArray( presets ) ) return DEFAULT_PRESETS;
     return presets.map( ( p ) => {
@@ -97,15 +103,15 @@ function Edit( { attributes, setAttributes, clientId } ) {
                     </p>
 
                     { donationType === 'multi' && (
-                    <>
-                    <ToggleControl
-                        label={ __( 'Allow custom amount', 'dono-fundraising-platform' ) }
-                        checked={ allowCustom }
-                        onChange={ ( v ) => setAttributes( { allowCustom: v } ) }
-                        __nextHasNoMarginBottom
-                    />
+                        <ToggleControl
+                            label={ __( 'Allow custom amount', 'dono-fundraising-platform' ) }
+                            checked={ allowCustom }
+                            onChange={ ( v ) => setAttributes( { allowCustom: v } ) }
+                            __nextHasNoMarginBottom
+                        />
+                    ) }
 
-                    { allowCustom && (
+                    { acceptsTypedAmount( donationType, allowCustom ) && (
                         <TextControl
                             type="number"
                             min="0"
@@ -120,6 +126,9 @@ function Edit( { attributes, setAttributes, clientId } ) {
                             __next40pxDefaultSize
                         />
                     ) }
+
+                    { donationType === 'multi' && (
+                    <>
                     <div className="dono-amounts-head">
                         <span className="dono-amounts-head__label">{ __( 'Options', 'dono-fundraising-platform' ) }</span>
                         <button
