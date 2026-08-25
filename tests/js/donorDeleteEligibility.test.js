@@ -10,6 +10,7 @@ import { render } from 'preact';
 import apiFetch from '@wordpress/api-fetch';
 
 import { DonorsApp } from '../../assets/admin/donors/index';
+const { settle, waitFor } = require( './support/waitFor' );
 
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
 jest.mock( 'react', () => require( 'preact/compat' ) );
@@ -31,7 +32,6 @@ jest.mock( '@wordpress/dataviews', () => ( {
 jest.mock( '../../assets/admin/donors/DonorProfile', () => ( { __esModule: true, default: () => null } ) );
 jest.mock( '../../assets/admin/donors/Insights', () => ( { __esModule: true, default: () => null } ) );
 
-const settle = () => new Promise( ( r ) => setTimeout( r, 20 ) );
 
 const rows = [
     // Left behind by an attempt that never completed: no paid donation, not a
@@ -56,8 +56,7 @@ beforeEach( () => {
 async function mountList() {
     document.body.innerHTML = '<div id="root"></div>';
     render( <DonorsApp />, document.getElementById( 'root' ) );
-    await settle();
-    expect( captured.actions ).toBeTruthy();
+    await waitFor( () => !! captured.actions, { what: 'the list to register its actions' } );
 }
 
 test( 'a donor the server keeps is not offered Delete', async () => {

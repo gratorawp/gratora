@@ -130,7 +130,7 @@ describe( 'a redirect that did not end in a payment', () => {
 } );
 
 describe( 'a return the browser could not resolve', () => {
-    const settle = () => new Promise( ( r ) => setTimeout( r, 50 ) );
+    const { settle } = require( './support/waitFor' );
 
     test( 'an intent parked mid-authentication is not answered with try again', async () => {
         returningFrom( 'DONO-2026-00043', 'dono-form-1' );

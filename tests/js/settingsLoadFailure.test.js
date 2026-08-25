@@ -10,6 +10,8 @@ import { render } from 'preact';
 import apiFetch from '@wordpress/api-fetch';
 
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
+
+const { settle, waitForCallsAfter } = require( './support/waitFor' );
 jest.mock( 'react', () => require( 'preact/compat' ) );
 jest.mock( 'react-dom', () => require( 'preact/compat' ) );
 jest.mock( 'react/jsx-runtime', () => require( 'preact/compat/jsx-runtime' ) );
@@ -17,7 +19,6 @@ jest.mock( 'react/jsx-dev-runtime', () => require( 'preact/compat/jsx-dev-runtim
 
 import Settings from '../../assets/admin/settings/Settings';
 
-const settle = () => new Promise( ( r ) => setTimeout( r, 20 ) );
 
 let settingsFail = true;
 
@@ -102,7 +103,6 @@ test( 'Retry works on a tab whose group has more than one source', async () => {
     // The second source exposes no reload, so an unguarded call throws here and
     // the only way out of a failed Currency tab is a full page reload.
     expect( () => retry.click() ).not.toThrow();
-    await settle();
 
-    expect( apiFetch.mock.calls.length ).toBeGreaterThan( before );
+    await waitForCallsAfter( apiFetch, before, 'the group to be asked for again' );
 } );

@@ -75,10 +75,7 @@ async function boot() {
     await settle();
 }
 
-async function settle() {
-    await new Promise( ( r ) => setTimeout( r, 20 ) );
-    await new Promise( ( r ) => setTimeout( r, 20 ) );
-}
+const { settle } = require( './support/waitFor' );
 
 async function donate( form ) {
     form.querySelector( '.dono-form__button--primary' ).click();

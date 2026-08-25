@@ -6,6 +6,8 @@
  * test can read it.
  */
 
+const { settle } = require( './support/waitFor' );
+
 import { render } from 'preact';
 
 import apiFetch from '@wordpress/api-fetch';
@@ -52,7 +54,7 @@ function clickButton( label ) {
     expect( button ).toBeTruthy();
     button.click();
 
-    return new Promise( ( r ) => setTimeout( r, 20 ) );
+    return settle();
 }
 
 // UTC so the assertion does not depend on the box the suite runs on.

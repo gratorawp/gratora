@@ -17,7 +17,7 @@ jest.mock( 'react-dom', () => require( 'preact/compat' ) );
 jest.mock( 'react/jsx-runtime', () => require( 'preact/compat/jsx-runtime' ) );
 jest.mock( 'react/jsx-dev-runtime', () => require( 'preact/compat/jsx-dev-runtime' ) );
 
-const settle = () => new Promise( ( r ) => setTimeout( r, 20 ) );
+const { settle } = require( './support/waitFor' );
 
 // What csv-inspect answers for a file whose columns it recognised, minus the
 // date: a real export writing "Donated On" is not guessed.

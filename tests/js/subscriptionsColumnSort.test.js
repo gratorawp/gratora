@@ -33,7 +33,7 @@ jest.mock( '@wordpress/dataviews', () => ( {
     },
 } ) );
 
-const settle = () => new Promise( ( r ) => setTimeout( r, 20 ) );
+const { settle } = require( './support/waitFor' );
 
 const plans = [
     {
@@ -74,10 +74,23 @@ async function mountList() {
     expect( captured.onChangeView ).toBeTruthy();
 }
 
-/** Clicks a column header: DataViews reports the new sort back through the view. */
+/**
+ * Clicks a column header: DataViews reports the new sort back through the view.
+ *
+ * Waits for the request the change causes rather than for a fixed moment: a
+ * sleep long enough on an idle machine is not long enough under parallel
+ * workers, and the test then reads the request from before the change.
+ */
 async function sortBy( field ) {
+    const before = listPaths.length;
     captured.onChangeView( { ...captured.view, page: 1, sort: { field, direction: 'desc' } } );
-    await settle();
+
+    for ( let i = 0; i < 100 && listPaths.length === before; i++ ) {
+        await new Promise( ( r ) => setTimeout( r, 10 ) );
+    }
+
+    expect( listPaths.length ).toBeGreaterThan( before );
+
     return listPaths[ listPaths.length - 1 ];
 }
 

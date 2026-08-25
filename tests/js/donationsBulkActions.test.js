@@ -11,6 +11,7 @@ import apiFetch from '@wordpress/api-fetch';
 
 import notify from '../../assets/admin/_shared/notify';
 import List from '../../assets/admin/donations/List';
+const { settle, waitFor } = require( './support/waitFor' );
 
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
 // Webpack aliases react to preact/compat for the admin bundles, and this screen
@@ -73,7 +74,6 @@ const unpaid = [
     { id: 6, reference: 'DON-6', status: 'pending',    donor: { name: 'F' } },
 ];
 
-const settle = () => new Promise( ( r ) => setTimeout( r, 20 ) );
 
 /**
  * Answers the list's own load requests, and hands the bulk endpoint under test
@@ -101,8 +101,7 @@ function seedApi( onAction ) {
 async function mountList() {
     document.body.innerHTML = '<div id="root"></div>';
     render( <List />, document.getElementById( 'root' ) );
-    await settle();
-    expect( captured.actions ).toBeTruthy();
+    await waitFor( () => !! captured.actions, { what: 'the list to register its actions' } );
 }
 
 /** Runs a bulk action over `items` and resolves once its confirmed work is done. */

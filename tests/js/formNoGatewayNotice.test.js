@@ -59,10 +59,7 @@ async function boot( cfg ) {
     await settle();
 }
 
-async function settle() {
-    await new Promise( ( r ) => setTimeout( r, 20 ) );
-    await new Promise( ( r ) => setTimeout( r, 20 ) );
-}
+const { settle } = require( './support/waitFor' );
 
 const button = () => document.querySelector( '.dono-form__button--primary' );
 const notices = () => [ ...document.querySelectorAll( '.dono-form__gateways-empty' ) ]

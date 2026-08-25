@@ -37,7 +37,7 @@ jest.mock( '../../assets/admin/tools/tabs/CsvImportCard', () => ( {
 
 import ImportTab from '../../assets/admin/tools/tabs/ImportTab';
 
-const settle = () => new Promise( ( r ) => setTimeout( r, 20 ) );
+const { settle } = require( './support/waitFor' );
 
 const notices = [];
 

@@ -7,6 +7,8 @@
  * session that held from one that did not. This mounts the real client.
  */
 
+const { settle } = require( './support/waitFor' );
+
 const NO_SESSION = 'this browser did not keep you signed in';
 
 let routes = {};
@@ -48,9 +50,7 @@ async function boot() {
     } );
 
     // preact defers effects behind a frame; exchange and me resolve after that.
-    for ( let i = 0; i < 4; i++ ) {
-        await new Promise( ( r ) => setTimeout( r, 20 ) );
-    }
+    await settle();
 }
 
 function text() {
@@ -65,7 +65,7 @@ function type( selector, value ) {
     field.value = value;
     field.dispatchEvent( new window.Event( 'input', { bubbles: true } ) );
 
-    return new Promise( ( r ) => setTimeout( r, 20 ) );
+    return settle();
 }
 
 // jsdom does not run the form-submission algorithm behind a submit button.
@@ -74,7 +74,7 @@ function submitForm() {
     expect( form ).toBeTruthy();
     form.dispatchEvent( new window.Event( 'submit', { bubbles: true, cancelable: true } ) );
 
-    return new Promise( ( r ) => setTimeout( r, 20 ) );
+    return settle();
 }
 
 function clickButton( label ) {
@@ -83,7 +83,7 @@ function clickButton( label ) {
     expect( button ).toBeTruthy();
     button.click();
 
-    return new Promise( ( r ) => setTimeout( r, 20 ) );
+    return settle();
 }
 
 beforeEach( () => {
