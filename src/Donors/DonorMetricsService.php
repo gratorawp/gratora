@@ -416,10 +416,22 @@ final class DonorMetricsService
                     __('A renewal was declined, but the %s connection is not active, so nothing can be collected from here. Reconnect it in Settings, Payment gateways.', 'dono-fundraising-platform'),
                     $name
                 );
-            } else {
+            } elseif ($gateway instanceof \Dono\Gateways\SupportsPaymentMethodUpdate) {
                 $message = sprintf(
                     /* translators: %s: the payment gateway name, e.g. PayPal. */
                     __('A renewal was declined. %s retries on its own schedule; to fix it sooner, ask the donor to update their card in the donor portal.', 'dono-fundraising-platform'),
+                    $name
+                );
+            } else {
+                // The fourth outcome, and the one the comment above was already
+                // describing without covering: a gateway that can neither retry
+                // nor take a new card. Sending the admin to ask the donor to
+                // update it in the portal was the same dead end, one step
+                // removed. The portal does not render that button for these
+                // gateways, and the route answers 422.
+                $message = sprintf(
+                    /* translators: %s: the payment gateway name, e.g. GoCardless. */
+                    __('A renewal was declined. %s retries on its own schedule, and neither you nor the donor can change the payment details from here. If it keeps failing, ask the donor to set the donation up again.', 'dono-fundraising-platform'),
                     $name
                 );
             }
