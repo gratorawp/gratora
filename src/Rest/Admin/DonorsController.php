@@ -119,7 +119,10 @@ final class DonorsController
                         'city'    => ['type' => 'string', 'maxLength' => 100],
                         'region'  => ['type' => 'string', 'maxLength' => 100],
                         'postal'  => ['type' => 'string', 'maxLength' => 20],
-                        'country' => ['type' => 'string', 'pattern' => '^[A-Za-z]{2}$'],
+                        // Optional, so the empty string has to pass: most
+                        // donors have no address country, and the edit dialog
+                        // sends the whole address back whatever it holds.
+                        'country' => ['type' => 'string', 'pattern' => '^([A-Za-z]{2})?$'],
                     ],
                 ],
                 'donor_type' => ['type' => 'string', 'enum' => ['individual', 'organization', 'household']],
