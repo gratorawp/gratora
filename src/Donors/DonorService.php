@@ -291,17 +291,53 @@ final class DonorService
      */
     public function undeletableReason(Donor $donor): ?string
     {
-        if (Donation::query()->where('donor_id', (int) $donor->id)->exists()) {
-            return __('This donor has donations on record, which have to be kept. Erase them instead.', 'dono-fundraising-platform');
+        return $this->undeletableReasons([$donor])[(int) $donor->id] ?? null;
+    }
+
+    /**
+     * The same answer for a whole page of donors, in two queries rather than
+     * two per row, so a list can offer Delete only where it would be allowed.
+     *
+     * @param list<Donor> $donors
+     * @return array<int,?string> donor id => reason, null when deletable
+     *
+     * @since 1.0.0
+     */
+    public function undeletableReasons(array $donors): array
+    {
+        $ids = array_values(array_unique(array_filter(
+            array_map(static fn (Donor $d): int => (int) $d->id, $donors),
+        )));
+
+        $withDonations = $ids === [] ? [] : array_flip(array_map(
+            'intval',
+            Donation::query()->whereIn('donor_id', $ids)->distinct()->pluck('donor_id'),
+        ));
+
+        $withPlans = $ids === [] ? [] : array_flip(array_map(
+            'intval',
+            RecurringPlan::query()->whereIn('donor_id', $ids)->distinct()->pluck('donor_id'),
+        ));
+
+        $out = [];
+        foreach ($donors as $donor) {
+            $id = (int) $donor->id;
+
+            if (isset($withDonations[$id])) {
+                $out[$id] = __('This donor has donations on record, which have to be kept. Erase them instead.', 'dono-fundraising-platform');
+                continue;
+            }
+
+            if (isset($withPlans[$id])) {
+                $out[$id] = __('This donor has a recurring plan. Cancel it first.', 'dono-fundraising-platform');
+                continue;
+            }
+
+            $vetoed  = apply_filters('dono.donor.undeletable_reason', null, $donor);
+            $out[$id] = is_string($vetoed) && $vetoed !== '' ? $vetoed : null;
         }
 
-        if (RecurringPlan::query()->where('donor_id', (int) $donor->id)->exists()) {
-            return __('This donor has a recurring plan. Cancel it first.', 'dono-fundraising-platform');
-        }
-
-        $vetoed = apply_filters('dono.donor.undeletable_reason', null, $donor);
-
-        return is_string($vetoed) && $vetoed !== '' ? $vetoed : null;
+        return $out;
     }
 
     /**

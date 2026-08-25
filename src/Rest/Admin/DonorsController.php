@@ -659,6 +659,11 @@ final class DonorsController
             array_map(static fn (Donor $d): int => (int) $d->id, $result['items'])
         );
 
+        // The delete gate's own answer, asked once for the page. The screen
+        // cannot work it out: a donation the counters ignore, a refunded one or
+        // an abandoned attempt, still keeps the donor.
+        $undeletable = $this->donorService->undeletableReasons($result['items']);
+
         $shaped = array_map(
             fn (Donor $d): array => [
                 'id'                  => $d->id,
@@ -673,6 +678,7 @@ final class DonorsController
                 'last_donation_at'    => $d->last_donation_at,
                 'created_at'          => $d->created_at,
                 'redacted'            => $d->redacted_at !== null,
+                'deletable'           => ($undeletable[(int) $d->id] ?? null) === null,
                 'avatar_url'          => $this->avatars->adminUrl($d),
             ],
             $result['items'],

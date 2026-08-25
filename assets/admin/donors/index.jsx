@@ -55,7 +55,7 @@ function donorKpis( stats ) {
     ];
 }
 
-function DonorsApp( { toggleSlot } ) {
+export function DonorsApp( { toggleSlot } ) {
     const [ view, setView ] = useState( {
         type:    'table',
         perPage: 25,
@@ -249,11 +249,11 @@ function DonorsApp( { toggleSlot } ) {
             isDestructive: true,
             supportsBulk:  true,
             // A donor with any donation row has a financial record attached and
-            // is redacted instead. The server refuses on the existence of a
-            // row, test rows included, so the menu has to ask the same question
-            // or it offers a Delete that can only 409. donations_count is
-            // live-only and would say yes to a donor who has only rehearsals.
-            isEligible:    ( item ) => ! item.donations_count && ! item.is_test_only,
+            // is redacted instead. The row carries the delete gate's own
+            // answer: the counters here are live and paid only, so they say yes
+            // to a donor whose only donation is a rehearsal, a refund or an
+            // attempt that never completed, and the server would 409.
+            isEligible:    ( item ) => !! item.deletable,
             callback: ( items ) => {
                 if ( ! items.length ) return;
                 const n = items.length;
