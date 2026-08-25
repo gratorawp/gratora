@@ -22,7 +22,7 @@ final class BaseCurrencyLocked extends RuntimeException
     ) {
         parent::__construct(sprintf(
             /* translators: 1: current base currency, 2: number of donations. */
-            __('The base currency stays %1$s: %2$d donations are already recorded against it, and their stored totals would be reread as the new currency. Test-mode donations do not count - clear live donations first, or keep reporting in %1$s.', 'dono-fundraising-platform'),
+            __('The base currency stays %1$s: %2$d donations have taken money against it, and their stored totals would be reread as the new currency. Test-mode donations do not count, and neither do checkouts that were abandoned or refused.', 'dono-fundraising-platform'),
             $current,
             $donations
         ));

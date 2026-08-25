@@ -34,6 +34,33 @@ final class DonationQueries
     }
 
     /**
+     * Statuses where money has moved, or is moving.
+     *
+     * `pending` is a checkout nobody finished and `failed` is one the processor
+     * refused: neither ever took anything, so neither is history worth
+     * protecting. `processing` is a bank debit still settling, which becomes
+     * money, so it counts. `disputed` and the two refund states are money that
+     * moved and was taken back, which is history either way.
+     *
+     * @var list<string>
+     */
+    public const MONEY_MOVED = ['paid', 'partial_refund', 'refunded', 'disputed', 'processing'];
+
+    /**
+     * Narrow to rows whose money has moved. Returns the same query for chaining.
+     *
+     * @template T
+     * @param  T $q
+     * @return T
+     *
+     * @since 1.0.0
+     */
+    public static function moneyMoved($q)
+    {
+        return $q->whereIn('status', self::MONEY_MOVED);
+    }
+
+    /**
      * Rows that are donation history: real money, given rather than exchanged.
      *
      * Event ticket orders ride the same table with kind='order'. They are a

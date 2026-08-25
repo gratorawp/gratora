@@ -23,11 +23,11 @@ final class BaseCurrencyLockTest extends IntegrationTestCase
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
     }
 
-    private function donation(bool $isTest): void
+    private function donation(bool $isTest, string $status = 'paid'): void
     {
         $d = Donation::make();
         $d->reference         = 'REF-' . uniqid();
-        $d->status            = 'paid';
+        $d->status            = $status;
         $d->gateway           = 'offline';
         $d->kind              = 'donation';
         $d->amount_cents      = 5000;
@@ -55,6 +55,49 @@ final class BaseCurrencyLockTest extends IntegrationTestCase
         $opt = get_option('dono_currency_locale');
 
         return (string) ($opt['default_currency'] ?? '');
+    }
+
+    /**
+     * A checkout nobody finished never took anything, so it is not history to
+     * protect. This counted every live row whatever its status, so one
+     * abandoned checkout, or one refused card, pinned the base currency
+     * permanently: the select went disabled, every report was denominated in a
+     * currency the charity does not use, and the remedy the error named,
+     * clearing live donations, has no route, admin action or CLI command behind
+     * it. It landed on day one, before a penny had been taken.
+     */
+    public function test_an_abandoned_checkout_does_not_pin_the_base_currency(): void
+    {
+        $this->donation(false, 'pending');
+
+        $this->assertSame(200, $this->save(['default_currency' => 'GBP'])->get_status());
+        $this->assertSame('GBP', $this->stored());
+    }
+
+    public function test_a_refused_card_does_not_pin_it_either(): void
+    {
+        $this->donation(false, 'failed');
+
+        $this->assertSame(200, $this->save(['default_currency' => 'GBP'])->get_status());
+        $this->assertSame('GBP', $this->stored());
+    }
+
+    /** Money still settling becomes money, so it counts. */
+    public function test_a_bank_debit_still_settling_does_pin_it(): void
+    {
+        $this->donation(false, 'processing');
+
+        $this->assertSame(409, $this->save(['default_currency' => 'GBP'])->get_status());
+        $this->assertSame('EUR', $this->stored());
+    }
+
+    /** Money that moved and was taken back is still history. */
+    public function test_a_refunded_donation_still_pins_it(): void
+    {
+        $this->donation(false, 'refunded');
+
+        $this->assertSame(409, $this->save(['default_currency' => 'GBP'])->get_status());
+        $this->assertSame('EUR', $this->stored());
     }
 
     public function test_the_base_can_be_set_before_any_donation(): void

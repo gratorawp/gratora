@@ -36,11 +36,21 @@ final class BaseCurrencyLock
      * this currency like anything else, and rereading it as a different one is
      * the harm being refused.
      *
+     * moneyMoved() because the harm needs money to exist. This counted every
+     * live row whatever its status, so one abandoned checkout, or a single
+     * refused card, pinned the base currency for good: the select was disabled
+     * from then on, every report was denominated in a currency the charity does
+     * not use, and the remedy the error names, clearing live donations, has no
+     * route, admin action or CLI command behind it. On day one, before a penny
+     * had been taken.
+     *
      * @since 1.0.0
      */
     public static function liveDonations(): int
     {
-        return (int) DonationQueries::live(Donation::query())->count();
+        return (int) DonationQueries::moneyMoved(
+            DonationQueries::live(Donation::query())
+        )->count();
     }
 
     /** @since 1.0.0 */
