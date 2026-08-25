@@ -1691,12 +1691,76 @@ function CampaignTypeCard( { campaign } ) {
     );
 }
 
+/**
+ * The address donors land on, taken apart for display. WordPress owns the page
+ * slug: it appends a suffix when another page already holds the campaign's one,
+ * and the campaign row is never told, so only the permalink the server built
+ * describes where the page actually is.
+ *
+ * @since 1.0.0
+ */
+export function publicAddress( pageUrl ) {
+    if ( ! pageUrl ) {
+        return { url: null, prefix: null, display: null, segment: null };
+    }
+    const trimmed = String( pageUrl ).replace( /\/+$/, '' );
+    const cut     = trimmed.lastIndexOf( '/' );
+
+    return {
+        url:     pageUrl,
+        prefix:  trimmed.slice( 0, cut + 1 ).replace( /^https?:\/\//, '' ),
+        display: trimmed.replace( /^https?:\/\//, '' ),
+        segment: trimmed.slice( cut + 1 ),
+    };
+}
+
+/** @since 1.0.0 */
+export function PublicAddressCard( { c, pageUrl } ) {
+    const slug   = c.value( 'slug', '' );
+    const edited = c.isEdited( 'slug' );
+    const addr   = publicAddress( pageUrl );
+    const origin = window.location.host || '';
+
+    return (
+        <Card
+            title={ __( 'Public address', 'dono-fundraising-platform' ) }
+            sub={ __( 'The URL donors land on. Changing this may break inbound links.', 'dono-fundraising-platform' ) }
+            edited={ edited ? 1 : 0 }
+        >
+            <FormRow
+                label={ __( 'Slug', 'dono-fundraising-platform' ) }
+                help={ __( 'Letters, numbers, and hyphens only.', 'dono-fundraising-platform' ) }
+            >
+                <div className={ `dono-input-prefixed${ edited ? ' is-edited' : '' }` }>
+                    <span className="dono-input-prefixed__prefix">{ addr.prefix || `${ origin }/campaigns/` }</span>
+                    <input type="text" className="dono-input" { ...c.bind( 'slug' ) } />
+                </div>
+                { addr.url && (
+                    <div className="dono-url-preview">
+                        <span className="lbl">{ __( 'Public URL', 'dono-fundraising-platform' ) }</span>
+                        <span className="url">{ addr.prefix }<em>{ addr.segment }</em></span>
+                        <a href={ addr.url } target="_blank" rel="noreferrer">{ __( 'Visit page ↗', 'dono-fundraising-platform' ) }</a>
+                    </div>
+                ) }
+                { addr.url && edited && (
+                    <div className="dono-form-row__field-help">
+                        { __( 'Saving moves the page. WordPress adds a suffix if another page already holds the slug, so check this address again afterwards.', 'dono-fundraising-platform' ) }
+                    </div>
+                ) }
+                { ! addr.url && !! slug && (
+                    <div className="dono-form-row__field-help">
+                        { __( 'This campaign has no page yet, so it has no public address. One is created when the campaign is published.', 'dono-fundraising-platform' ) }
+                    </div>
+                ) }
+            </FormRow>
+        </Card>
+    );
+}
+
 function GeneralPanel( { c, campaign } ) {
     const r = c.record;
     const desc = c.value( 'description', '' );
-    const slug = c.value( 'slug', '' );
     const title = c.value( 'title', '' );
-    const origin = window.location.host || '';
 
     const overLimit = desc.length > DESCRIPTION_MAX;
     const nearLimit = ! overLimit && desc.length >= DESCRIPTION_MAX - 10;
@@ -1745,28 +1809,7 @@ function GeneralPanel( { c, campaign } ) {
 
             <CampaignTypeCard campaign={ campaign } />
 
-            <Card
-                title={ __( 'Public address', 'dono-fundraising-platform' ) }
-                sub={ __( 'The URL donors land on. Changing this may break inbound links.', 'dono-fundraising-platform' ) }
-                edited={ editedCount( [ 'slug' ] ) }
-            >
-                <FormRow
-                    label={ __( 'Slug', 'dono-fundraising-platform' ) }
-                    help={ __( 'Letters, numbers, and hyphens only.', 'dono-fundraising-platform' ) }
-                >
-                    <div className={ `dono-input-prefixed${ c.isEdited( 'slug' ) ? ' is-edited' : '' }` }>
-                        <span className="dono-input-prefixed__prefix">{ origin }/campaigns/</span>
-                        <input type="text" className="dono-input" { ...c.bind( 'slug' ) } />
-                    </div>
-                    { slug && (
-                        <div className="dono-url-preview">
-                            <span className="lbl">{ __( 'Public URL', 'dono-fundraising-platform' ) }</span>
-                            <span className="url">{ origin }/campaigns/<em>{ slug }</em></span>
-                            <a href={ `${ window.location.origin }/campaigns/${ slug }` } target="_blank" rel="noreferrer">{ __( 'Visit page ↗', 'dono-fundraising-platform' ) }</a>
-                        </div>
-                    ) }
-                </FormRow>
-            </Card>
+            <PublicAddressCard c={ c } pageUrl={ campaign?.page_url || r.page_url || null } />
 
             <Card
                 title={ __( 'Cover image', 'dono-fundraising-platform' ) }
