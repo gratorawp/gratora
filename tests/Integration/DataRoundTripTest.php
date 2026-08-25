@@ -864,6 +864,95 @@ final class DataRoundTripTest extends IntegrationTestCase
 
     /** A campaign keeps its slug, which is what the import matches it by. */
     /**
+     * A campaign already here is matched on its slug and left exactly as it is,
+     * which is what makes running an import twice safe. The deferred pass wrote
+     * through the same id map without asking how the id got there, so it
+     * repointed a live campaign at a form out of the file. A same-site round
+     * trip cannot show it: the form is matched back onto the local one, so the
+     * write lands on the value already there.
+     */
+    public function test_a_campaign_already_here_keeps_its_own_default_form(): void
+    {
+        [$campaign, $form] = $this->seedCampaignWithDefaultForm();
+        $localFormId = (int) $form->id;
+
+        $export = $this->export();
+
+        // The file's form arrives as a stranger rather than as this one, which
+        // is what a merge from another site looks like.
+        foreach ($export['tables']['dono_forms'] as $i => $row) {
+            if ((int) ($row['id'] ?? 0) === $localFormId) {
+                $export['tables']['dono_forms'][$i]['slug'] = 'incoming-form-' . uniqid();
+            }
+        }
+
+        $result = $this->import($export);
+
+        $this->assertGreaterThan(
+            0,
+            $result['existing']['dono_campaigns'] ?? 0,
+            'precondition: the campaign was matched rather than created'
+        );
+        $this->assertSame(
+            $localFormId,
+            (int) Campaign::query()->where('id', (int) $campaign->id)->get()->default_form_id,
+            'a campaign that was never written to now opens a form out of the file'
+        );
+    }
+
+    /**
+     * The guard cannot be provenance. An import runs in no transaction, so a
+     * run that inserted campaigns and stopped before the deferred pass leaves
+     * rows whose pointer is still empty, and the next run matches those same
+     * rows as existing. Those are exactly the rows the pass has to finish.
+     */
+    public function test_a_pointer_left_empty_by_a_stopped_run_is_still_filled(): void
+    {
+        [$campaign, $form] = $this->seedCampaignWithDefaultForm();
+
+        $export = $this->export();
+
+        Campaign::query()->where('id', (int) $campaign->id)->update(['default_form_id' => null]);
+
+        $this->import($export);
+
+        $this->assertSame(
+            (int) $form->id,
+            (int) Campaign::query()->where('id', (int) $campaign->id)->get()->default_form_id,
+            'a half-finished import cannot be finished by running it again'
+        );
+    }
+
+    /** @return array{0:Campaign,1:Form} */
+    private function seedCampaignWithDefaultForm(): array
+    {
+        $now = gmdate('Y-m-d H:i:s');
+
+        $campaign = Campaign::make();
+        $campaign->title      = 'Deferred Campaign';
+        $campaign->slug       = 'deferred-campaign-' . uniqid();
+        $campaign->status     = 'published';
+        $campaign->currency   = 'USD';
+        $campaign->created_at = $now;
+        $campaign->updated_at = $now;
+        $campaign->save();
+
+        $form = Form::make();
+        $form->title       = 'Deferred Form';
+        $form->slug        = 'deferred-form-' . uniqid();
+        $form->status      = 'published';
+        $form->blocks      = '';
+        $form->campaign_id = (int) $campaign->id;
+        $form->created_at  = $now;
+        $form->updated_at  = $now;
+        $form->save();
+
+        Campaign::query()->where('id', (int) $campaign->id)->update(['default_form_id' => (int) $form->id]);
+
+        return [$campaign, $form];
+    }
+
+    /**
      * The fund picker keeps its allowlist and its preselection inside the block
      * markup, so the column remapping cannot reach them. Every install seeds a
      * 'general' fund, so a restored file's funds land on shifted ids and a

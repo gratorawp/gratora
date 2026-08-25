@@ -786,18 +786,27 @@ final class DataImporter
                 $here = $this->map[$table][(int) ($row['id'] ?? 0)] ?? null;
                 if ($here === null) continue;
 
-                $patch = [];
                 foreach ($columns as $column) {
                     $source = (int) ($row[$column] ?? 0);
                     if ($source <= 0) continue;
 
                     $points = self::REFERENCES[$column] ?? null;
                     $mapped = $points ? ($this->map[$points][$source] ?? null) : null;
-                    if ($mapped !== null) $patch[$column] = $mapped;
-                }
+                    if ($mapped === null) continue;
 
-                if ($patch) {
-                    DB::table($table)->where('id', $here)->update($patch);
+                    // The map holds rows this run matched as well as rows it
+                    // created, and a matched row is one left exactly as it is:
+                    // writing through the map would point a campaign already
+                    // here at a form out of the file. Filling only a column
+                    // still standing empty leaves that campaign alone and still
+                    // reaches the row an earlier run inserted before it
+                    // stopped, which is the row this pass has to finish.
+                    // Every deferred column is nullable with no default and no
+                    // writer sets 0, so NULL is the whole of empty here.
+                    DB::table($table)
+                        ->where('id', $here)
+                        ->whereIsNull($column)
+                        ->update([$column => $mapped]);
                 }
             }
         }
