@@ -394,7 +394,11 @@ final class RecurringController
                 // Erasure took the address; the row must not hand one back, and
                 // its actions need to see there is nobody left to email.
                 'redacted' => $donor->redacted_at !== null,
-                'email'    => $donor->redacted_at === null ? $this->donorService->decryptEmail($donor) : null,
+                // Contact details are the donor record, not the plan record, so
+                // they follow dono_view_donors the way the donations list does.
+                'email'    => $donor->redacted_at === null && Capabilities::userCan('dono_view_donors')
+                    ? $this->donorService->decryptEmail($donor)
+                    : null,
             ] : null,
             'campaign' => $campaign ? [
                 'id'    => (int) $campaign->id,
