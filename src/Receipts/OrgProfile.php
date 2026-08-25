@@ -17,7 +17,7 @@ namespace Dono\Receipts;
 final class OrgProfile
 {
     /**
-     * @return array{name:string, address_lines:array<int,string>, tax_id:string, email:string}
+     * @return array{name:string, address_lines:array<int,string>, tax_id:string, vat_id:string, email:string}
      * @since 1.0.0
      */
     public static function load(): array
@@ -26,6 +26,7 @@ final class OrgProfile
             'name'          => (string) get_bloginfo('name'),
             'address_lines' => [],
             'tax_id'        => '',
+            'vat_id'        => '',
             'email'         => (string) get_option('admin_email'),
         ];
 

@@ -10,7 +10,7 @@ use Dono\Donors\Donor;
  * @var Donor    $donor
  * @var string   $donor_name      name given for this donation (resolved)
  * @var string   $donor_address   formatted multi-line address, empty when missing
- * @var array    $org             keys: name, address_lines (array), tax_id, email
+ * @var array    $org             keys: name, address_lines (array), tax_id, vat_id, email
  * @var string   $locale
  * @var array    $extras
  * @var string   $amount_display  e.g. "50,00 EUR"
@@ -26,6 +26,7 @@ use Dono\Donors\Donor;
 $orgName = (string) ($org['name'] ?? __('Your Organization', 'dono-fundraising-platform'));
 $orgAddressLines = (array) ($org['address_lines'] ?? []);
 $orgTaxId  = (string) ($org['tax_id'] ?? '');
+$orgVatId  = (string) ($org['vat_id'] ?? '');
 $orgEmail  = (string) ($org['email'] ?? '');
 
 $tpl = is_array($receipt_template ?? null) ? $receipt_template : [];
@@ -207,6 +208,11 @@ $fullyRefunded   = $refundedCents > 0 && $refundedCents >= (int) $donation->amou
     <?php if ($showTaxId && $orgTaxId !== ''): ?>
         <dt><?php esc_html_e('Organization tax ID', 'dono-fundraising-platform'); ?></dt>
         <dd><?php echo esc_html($orgTaxId); ?></dd>
+    <?php endif; ?>
+
+    <?php if ($showTaxId && $orgVatId !== ''): ?>
+        <dt><?php esc_html_e('VAT ID', 'dono-fundraising-platform'); ?></dt>
+        <dd><?php echo esc_html($orgVatId); ?></dd>
     <?php endif; ?>
 </dl>
 

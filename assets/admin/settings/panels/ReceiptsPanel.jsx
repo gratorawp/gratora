@@ -150,7 +150,7 @@ export default function ReceiptsPanel( { s } ) {
                         rows={ 3 }
                         value={ intro }
                         onChange={ ( e ) => setIntro( e.target.value ) }
-                        placeholder={ __( 'Enter a sign-off line', 'dono-fundraising-platform' ) }
+                        placeholder={ __( 'Enter an opening paragraph', 'dono-fundraising-platform' ) }
                     />
                 </FormRow>
 

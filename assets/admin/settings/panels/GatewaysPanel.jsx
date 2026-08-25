@@ -97,7 +97,7 @@ export default function GatewaysPanel( { s } ) {
 
                 <FormRow
                     label={ __( 'Instructions', 'dono-fundraising-platform' ) }
-                    help={ __( 'Shown to donors after they pick bank transfer.', 'dono-fundraising-platform' ) }
+                    help={ __( 'Emailed to donors who choose bank transfer, with their donation reference.', 'dono-fundraising-platform' ) }
                     wide
                 >
                     <textarea

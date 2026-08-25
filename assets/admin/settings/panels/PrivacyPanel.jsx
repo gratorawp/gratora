@@ -133,7 +133,7 @@ export default function PrivacyPanel( { s } ) {
             >
                 <FormRow
                     label={ __( 'Privacy policy URL', 'dono-fundraising-platform' ) }
-                    help={ __( 'Linked from the donation form, receipts, and the donor portal footer.', 'dono-fundraising-platform' ) }
+                    help={ __( 'Linked from the donation form, wherever a privacy notice block is placed.', 'dono-fundraising-platform' ) }
                 >
                     <input
                         type="url"

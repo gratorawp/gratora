@@ -59,7 +59,7 @@ export default function OrganizationPanel( { s } ) {
 
                 <FormRow
                     label={ __( 'Contact email', 'dono-fundraising-platform' ) }
-                    help={ __( 'Public, shown in the donation page footer.', 'dono-fundraising-platform' ) }
+                    help={ __( 'Printed on receipts, so donors know where to reply.', 'dono-fundraising-platform' ) }
                 >
                     <input type="email" className="dono-input" { ...s.bind( 'email' ) } />
                 </FormRow>
