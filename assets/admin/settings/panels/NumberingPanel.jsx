@@ -52,6 +52,13 @@ function clampPad( v ) {
  */
 export const isRefToken = ( raw ) => /^[A-Za-z0-9_-]+$/.test( String( raw ) );
 
+// What the generator will actually mint from this value. It strips what it
+// cannot use and keeps the rest, so a preview that substitutes the fallback
+// instead shows a reference that will never exist: a prefix stored as AC/DC
+// mints ACDC, not DONATION.
+export const asRefToken = ( raw, fallback ) =>
+    String( raw ?? '' ).replace( /[^A-Za-z0-9_-]/g, '' ) || fallback;
+
 const tokenHelp = __( 'Letters, numbers, hyphens and underscores only.', 'dono-fundraising-platform' );
 
 /** @since 1.0.0 */
@@ -88,14 +95,14 @@ export default function NumberingPanel( { s , active } ) {
     // The preview shows what would be minted, so a value the generator would
     // not accept falls back to the one it does rather than being drawn.
     const liveFmt = {
-        sep:         isRefToken( rawSep ) ? rawSep : '-',
+        sep:         asRefToken( rawSep, '-' ),
         padding:     clampPad( s.value( 'padding', 5 ) ),
         includeYear: !! s.value( 'include_year', true ),
     };
     const livePrefix = {
-        donation: isRefToken( rawPrefix.donation ) ? rawPrefix.donation : 'DONATION',
-        receipt:  isRefToken( rawPrefix.receipt )  ? rawPrefix.receipt  : 'RECEIPT',
-        refund:   isRefToken( rawPrefix.refund )   ? rawPrefix.refund   : 'REFUND',
+        donation: asRefToken( rawPrefix.donation, 'DONATION' ),
+        receipt:  asRefToken( rawPrefix.receipt,  'RECEIPT' ),
+        refund:   asRefToken( rawPrefix.refund,   'REFUND' ),
     };
 
     // Saved format drives the counter card: setting a counter is an immediate

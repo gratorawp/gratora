@@ -58,6 +58,8 @@ test( 'a separator the generator would strip is not previewed as one', () => {
 
     expect( previews( root ) ).toContain( 'DONO-2026-00001'.replace( '2026', String( new Date().getFullYear() ) ) );
     expect( previews( root ).join( ' ' ) ).not.toContain( 'DONO.' );
+    // A separator of '.' strips to nothing, so both sides agree on the
+    // fallback here. The prefix case above is where they used to diverge.
     expect( root.textContent ).toContain( 'Letters, numbers, hyphens and underscores only.' );
 } );
 
@@ -67,7 +69,11 @@ test( 'a prefix the generator would strip is not previewed as one', () => {
         prefixes: { donation: 'AC/DC', receipt: 'REC', refund: 'REF' },
     } );
 
-    expect( previews( root ).join( ' ' ) ).not.toContain( 'AC/DC' );
+    // Asserting only that AC/DC is absent passes whether the preview shows the
+    // reference the generator mints or a fallback it never would. The generator
+    // strips what it cannot use and keeps the rest, so ACDC is the truth here.
+    expect( previews( root ) ).toContain( 'ACDC-' + new Date().getFullYear() + '-00001' );
+    expect( previews( root ).join( ' ' ) ).not.toContain( 'DONATION' );
     expect( root.textContent ).toContain( 'Letters, numbers, hyphens and underscores only.' );
 } );
 
