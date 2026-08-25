@@ -156,6 +156,15 @@ final class DonationsController
             ],
         ]);
 
+        register_rest_route(self::NAMESPACE, '/admin/donations/(?P<reference>[A-Za-z0-9_\-]+)/release-refund', [
+            'methods'             => WP_REST_Server::CREATABLE,
+            'callback'            => [$this, 'releaseRefund'],
+            'permission_callback' => static fn () => Capabilities::userCan('dono_refund_donations'),
+            'args'                => [
+                'gateway_refund_id' => ['type' => 'string', 'required' => true],
+            ],
+        ]);
+
         register_rest_route(self::NAMESPACE, '/admin/donations/(?P<reference>[A-Za-z0-9_\-]+)/mark-paid', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'markPaid'],
@@ -960,6 +969,33 @@ final class DonationsController
     }
 
     /** @since 1.0.0 */
+    /**
+     * Let go of a refund the gateway accepted and then never settled.
+     *
+     * A pending refund holds back the refundable balance so the donor cannot
+     * be paid twice, and only Stripe tells us when one is abandoned. Without
+     * a way to say so by hand, a PayPal eCheck the bank turned down would
+     * leave the donation permanently unrefundable.
+     */
+    public function releaseRefund(WP_REST_Request $request): WP_REST_Response|WP_Error
+    {
+        $donation = $this->donations->findByReference((string) $request['reference']);
+        if (! $donation) {
+            return new WP_Error('dono_not_found', __('Donation not found.', 'dono-fundraising-platform'), ['status' => 404]);
+        }
+
+        $released = $this->donationService->failAwaitedRefund($donation, (string) $request['gateway_refund_id']);
+        if (! $released) {
+            return new WP_Error(
+                'dono_refund_not_awaiting',
+                __('That refund is not waiting to settle, so there is nothing to release.', 'dono-fundraising-platform'),
+                ['status' => 422]
+            );
+        }
+
+        return new WP_REST_Response($this->show($request)->get_data(), 200);
+    }
+
     public function markPaid(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $reference = (string) $request['reference'];

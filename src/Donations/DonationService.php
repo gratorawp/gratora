@@ -991,7 +991,12 @@ final class DonationService
             // money it described came back, so the id names nothing standing,
             // and reporting it as already handled means a gateway that takes
             // the money a second time can never take it off the books again.
-            $spent = in_array((string) $existing->status, ['pending', 'reversed'], true);
+            //
+            // A failed row is spent too. It was let go because the gateway
+            // seemed to have abandoned it, so a settlement arriving afterwards
+            // is the money genuinely leaving and has to be booked, not dropped
+            // as a duplicate of a refund that never happened.
+            $spent = in_array((string) $existing->status, ['pending', 'reversed', 'failed'], true);
 
             if (! $spent || ! $settled) {
                 return $existing;

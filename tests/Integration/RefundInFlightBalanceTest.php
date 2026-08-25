@@ -138,6 +138,64 @@ final class RefundInFlightBalanceTest extends IntegrationTestCase
         );
     }
 
+    /**
+     * Only Stripe tells us a refund was abandoned. On every other gateway the
+     * hold would stand for good, and a donation nobody can refund is a worse
+     * place to leave an operator than the double payment the hold prevents.
+     */
+    public function test_an_operator_can_let_go_of_a_refund_that_never_settled(): void
+    {
+        $donation = $this->paidDonation('echeckprobe', 10000);
+        $refundId = (string) ($this->refund($donation, 6000)->get_data()['refund']['gateway_refund_id'] ?? '');
+        $this->assertNotSame('', $refundId, 'the fixture needs a refund to release');
+
+        $res = $this->releaseRefund($donation, $refundId);
+
+        $this->assertSame(200, $res->get_status());
+        $shown = $this->show($donation)['donation'];
+        $this->assertSame(0, (int) $shown['refund_pending_cents'], 'the hold is still standing');
+        $this->assertSame(10000, (int) $shown['refundable_cents'], 'the donation is refundable again');
+    }
+
+    /** Releasing something that is not waiting must not quietly report success. */
+    public function test_releasing_a_refund_that_is_not_waiting_is_refused(): void
+    {
+        $donation = $this->paidDonation('echeckprobe', 10000);
+
+        $res = $this->releaseRefund($donation, 'no-such-refund');
+
+        $this->assertSame(422, $res->get_status());
+    }
+
+    /**
+     * Letting go says the money never moved. If the gateway then settles it
+     * after all, that is the money genuinely leaving and it has to be booked.
+     */
+    public function test_a_settlement_after_a_release_is_still_recorded(): void
+    {
+        $donation = $this->paidDonation('echeckprobe', 10000);
+        $refundId = (string) ($this->refund($donation, 6000)->get_data()['refund']['gateway_refund_id'] ?? '');
+        $this->releaseRefund($donation, $refundId);
+
+        $this->donationService()->recordExternalRefund($donation, 6000, $refundId, 'settled late', 'gateway', [], true);
+
+        $shown = $this->show($donation)['donation'];
+        $this->assertSame(6000, (int) $shown['refunded_cents'], 'a late settlement was dropped as a duplicate');
+    }
+
+    private function donationService(): DonationService
+    {
+        return \Dono\Foundation\Plugin::instance()->container->get(DonationService::class);
+    }
+
+    private function releaseRefund(Donation $donation, string $refundId): \WP_REST_Response
+    {
+        $req = new \WP_REST_Request('POST', "/dono/v1/admin/donations/{$donation->reference}/release-refund");
+        $req->set_body_params(['gateway_refund_id' => $refundId]);
+
+        return rest_do_request($req);
+    }
+
     private function paidDonation(string $gateway, int $cents): Donation
     {
         $donor = Plugin::instance()->container->get(DonorService::class)

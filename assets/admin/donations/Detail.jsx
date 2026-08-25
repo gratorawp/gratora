@@ -109,6 +109,29 @@ export default function Detail( { reference } ) {
         } );
     };
 
+    // Only Stripe reports a refund the gateway gave up on. Everywhere else the
+    // held balance would stand for good, so the operator says so by hand.
+    const releaseRefund = ( refund ) => {
+        setConfirm( {
+            title:        __( 'Release the held amount', 'dono-fundraising-platform' ),
+            message:      __( 'Say this refund never reached the donor? The amount goes back to what can be refunded. Do this only once the gateway shows it did not go through, or the donor could be repaid twice.', 'dono-fundraising-platform' ),
+            confirmLabel: __( 'It never arrived', 'dono-fundraising-platform' ),
+            onConfirm: async () => {
+                try {
+                    await apiFetch( {
+                        path:   `/dono/v1/admin/donations/${ donation.reference }/release-refund`,
+                        method: 'POST',
+                        data:   { gateway_refund_id: refund.gateway_refund_id },
+                    } );
+                    notify.success( __( 'The held amount is refundable again.', 'dono-fundraising-platform' ) );
+                    load();
+                } catch ( err ) {
+                    notify.error( err?.message || __( 'Could not release the held amount.', 'dono-fundraising-platform' ) );
+                }
+            },
+        } );
+    };
+
     const retrySubscription = () => {
         setConfirm( {
             title:        __( 'Create the recurring plan', 'dono-fundraising-platform' ),
@@ -233,7 +256,7 @@ export default function Detail( { reference } ) {
                     />
                     <ReceiptCard donation={ donation } receipts={ receipts } onResend={ resendReceipt } />
                     <PaymentDetailsCard donation={ donation } />
-                    <RefundsCard donation={ donation } refunds={ refunds } onIssue={ openRefund } />
+                    <RefundsCard donation={ donation } refunds={ refunds } onIssue={ openRefund } onRelease={ releaseRefund } />
                     <TimelineCard donation={ donation } receipts={ receipts } refunds={ refunds } notes={ notes } />
                     <div data-dd-notes>
                         <NotesCard donationRef={ donation.reference } notes={ notes } onChanged={ load } />

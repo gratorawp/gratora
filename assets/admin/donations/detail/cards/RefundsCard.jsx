@@ -2,7 +2,7 @@ import { __ } from '@wordpress/i18n';
 
 import { formatAmount, formatDateTime, timeAgo } from '../helpers';
 
-export default function RefundsCard( { donation, refunds, onIssue } ) {
+export default function RefundsCard( { donation, refunds, onIssue, onRelease } ) {
     if ( ! refunds || refunds.length === 0 ) {
         return null;
     }
@@ -52,6 +52,16 @@ export default function RefundsCard( { donation, refunds, onIssue } ) {
                                         <span className={ `dd-pill ${ r.status === 'succeeded' ? 'is-ok' : 'is-warn' }` }>
                                             { r.status }
                                         </span>
+                                        { r.status === 'pending' && onRelease && r.gateway_refund_id && (
+                                            <button
+                                                type="button"
+                                                className="btn--link"
+                                                style={ { marginLeft: 8 } }
+                                                onClick={ () => onRelease( r ) }
+                                            >
+                                                { __( 'Never arrived', 'dono-fundraising-platform' ) }
+                                            </button>
+                                        ) }
                                     </td>
                                 </tr>
                             ) ) }
