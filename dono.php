@@ -33,7 +33,7 @@ define('DONO_FILE', __FILE__);
 define('DONO_DIR', plugin_dir_path(__FILE__));
 define('DONO_URL', plugin_dir_url(__FILE__));
 
-register_activation_hook(__FILE__, [ Plugin::class, 'onActivation']);
+register_activation_hook(__FILE__, [ Plugin::class, 'onPluginActivated']);
 register_deactivation_hook(__FILE__, [ Plugin::class, 'onDeactivation']);
 
 add_action('plugins_loaded', static function (): void {

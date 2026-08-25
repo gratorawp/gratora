@@ -223,6 +223,28 @@ final class Plugin
         self::onActivation($fresh);
     }
 
+    /**
+     * The entry point WordPress calls, whose signature is not ours to choose.
+     *
+     * register_activation_hook passes $network_wide as the first argument, and
+     * pointing it straight at onActivation() read that as $fresh. Since it is
+     * always a bool, the `$fresh ??= ...` auto-detect in activate() never ran,
+     * and the answer was wrong in both directions: an ordinary single-site
+     * activation arrived as false, so a genuinely fresh install never stamped
+     * its upgrade routines done and left them to run later against tables no
+     * earlier release ever wrote; a network activation arrived as true, so an
+     * existing install stamped migrations it still needed as already applied.
+     *
+     * Every test bootstrap calls onActivation() with no arguments, which is the
+     * auto-detect path, so no suite could observe either.
+     *
+     * @since 1.0.0
+     */
+    public static function onPluginActivated(bool $networkWide = false): void
+    {
+        self::onActivation(null);
+    }
+
     /** @since 1.0.0 */
     public static function onActivation(?bool $fresh = null): void
     {

@@ -7,8 +7,8 @@ namespace Dono\Foundation\Upgrade;
 /**
  * Says so while a data migration is outstanding.
  *
- * The Advanced screen carries the detail and the button, and nobody opens the
- * Advanced screen. That is fine while the routines are draining normally, which
+ * Tools > Maintenance carries the detail and the button, and nobody opens Tools
+ * > Maintenance. That is fine while the routines are draining normally, which
  * takes a minute or two. It is not fine when they are not draining at all:
  * Action Scheduler rides WP-cron, plenty of hosts disable or throttle it, and
  * the result is a site sitting half-migrated indefinitely while its totals read
@@ -44,12 +44,21 @@ final class UpgradeNotice
         }
 
         // Already on the screen that says all of this, with the button.
+        //
+        // That screen is Tools > Maintenance, which lists every pending routine
+        // with what it stopped on and how many times, and offers the retry.
+        // This suppressed itself on dono-settings and linked there too, to a
+        // tab=advanced that does not exist: Settings has no such tab, so the
+        // link fell back to Setup and the notice hid itself on arrival. An
+        // operator following the only warning about a half-finished data
+        // migration landed on a page with nothing about it at all.
         $screen = function_exists('get_current_screen') ? get_current_screen() : null;
-        if ($screen && str_contains((string) $screen->id, 'dono-settings')) {
+        if ($screen && str_contains((string) $screen->id, 'dono-tools')) {
             return;
         }
 
-        $url = admin_url('admin.php?page=dono-settings&tab=advanced');
+        // Tools reads its tab from the fragment, not a query argument.
+        $url = admin_url('admin.php?page=dono-tools#maintenance');
 
         // A routine that keeps failing reads exactly like one working through a
         // large table, and the difference is the whole point of saying anything.
