@@ -3,6 +3,7 @@
  * stay stable; the Dono-specific admin routing helpers stay local.
  */
 import { __ } from '@wordpress/i18n';
+import { currencyDecimals } from '@dono/ui/utils/format';
 
 export {
     defaultCurrency,
@@ -45,4 +46,18 @@ export function formEditorHref( formId ) {
     p.set( 'page', 'dono-forms' );
     p.set( 'form', String( formId ) );
     return `${ window.location.pathname }?${ p.toString() }`;
+}
+
+/**
+ * How finely an operator may type an amount in a given currency.
+ *
+ * Display decimals follow the currency (JPY none, BHD three), but storage is
+ * major x 100 for every one of them, so anything past the second decimal is
+ * rounded away before it reaches a gateway. An input that offers a third would
+ * let someone type 50.125 and move 50.13 without saying so.
+ */
+export function amountEntry( currency ) {
+    const dp = Math.min( currencyDecimals( currency ), 2 );
+
+    return { dp, step: dp > 0 ? '0.' + '0'.repeat( dp - 1 ) + '1' : '1' };
 }

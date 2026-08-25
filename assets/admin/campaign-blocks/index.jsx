@@ -29,7 +29,7 @@ import { __ } from '@wordpress/i18n';
 
 import { registerDonoEntities } from '../_shared/entities';
 import { registerCampaignBindingSource } from './bindings.js';
-import { defaultCurrency, currencyDecimals } from '../_shared/format';
+import { defaultCurrency, amountEntry } from '../_shared/format';
 import './blocks.scss';
 
 registerDonoEntities();
@@ -832,11 +832,9 @@ registerBlockType( 'dono/supporter-wall', {
         if ( campaign && Number( campaign.donations_count ) === 0 ) {
             issues.push( __( 'No donations yet, so the wall will be empty on the page.', 'dono-fundraising-platform' ) );
         }
-        // Displayed in major units, stored as cents. Entry decimals follow the
-        // org currency (JPY none, BHD three) so the step matches what renders.
+        // Displayed in major units, stored as cents.
         const minAmountMajor = ( Number( attributes.minAmountCents ) || 0 ) / 100;
-        const minAmountDp    = currencyDecimals( defaultCurrency() );
-        const minAmountStep  = minAmountDp > 0 ? '0.' + '0'.repeat( minAmountDp - 1 ) + '1' : '1';
+        const { dp: minAmountDp, step: minAmountStep } = amountEntry( defaultCurrency() );
         return <>
             <InspectorControls>
                 <PanelBody title={ __( 'Supporter wall', 'dono-fundraising-platform' ) }>

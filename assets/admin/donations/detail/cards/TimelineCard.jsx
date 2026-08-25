@@ -47,6 +47,21 @@ function buildEvents( { donation, receipts, refunds, notes } ) {
                 : <span style={ { textTransform: 'capitalize' } }>{ donation.gateway }</span>,
         } );
     }
+    if ( donation.status === 'failed' ) {
+        // There is no failed_at column, and there does not need to be: failing
+        // is the last transition a row makes, and the only way back out
+        // (markPaid) clears failure_reason, so updated_at is the moment it
+        // failed for as long as the reason exists to show.
+        events.push( {
+            id:    'failed',
+            time:  donation.updated_at,
+            dot:   'is-error',
+            title: __( 'Marked as failed', 'dono-fundraising-platform' ),
+            sub:   donation.failure_reason
+                ? <em>&quot;{ donation.failure_reason }&quot;</em>
+                : null,
+        } );
+    }
     ( receipts || [] ).forEach( ( r, ri ) => {
         events.push( {
             id:    `receipt-${ ri }`,

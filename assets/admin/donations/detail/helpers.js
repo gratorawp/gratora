@@ -3,7 +3,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { parseTimestamp } from '@dono/ui/utils/format';
 
-export { formatAmount, formatAmountCompact, currencyDecimals } from '../../_shared/format';
+export { formatAmount, formatAmountCompact, currencyDecimals, amountEntry } from '../../_shared/format';
 
 export function formatDateTime( iso ) {
     if ( ! iso ) return '-';
@@ -73,3 +73,23 @@ export const CHANNEL_LABEL = {
     peer:          __( 'Peer-to-peer',   'dono-fundraising-platform' ),
     other:         __( 'Other',          'dono-fundraising-platform' ),
 };
+
+/**
+ * A donation that settled, whether or not part of it has since gone back.
+ *
+ * DonationService::refund accepts partial_refund as readily as paid, and the
+ * receipt for a partly refunded donation is still the donor's, so a control
+ * that tests for 'paid' alone goes dead the moment the first refund lands.
+ */
+export const isSettled = ( donation ) =>
+    donation?.status === 'paid' || donation?.status === 'partial_refund';
+
+export const canRefundDonation = ( donation ) =>
+    ( donation?.refundable_cents ?? 0 ) > 0 && isSettled( donation );
+
+/** An erased donor has no address left, so there is nowhere to send. */
+export const isDonorRedacted = ( donation, donor ) =>
+    !! ( donor?.redacted ?? donation?.donor?.redacted );
+
+export const canResendReceipt = ( donation, donor ) =>
+    isSettled( donation ) && ! isDonorRedacted( donation, donor );

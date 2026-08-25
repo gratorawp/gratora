@@ -1,6 +1,6 @@
 import { __ } from '@wordpress/i18n';
 
-import { formatAmount, formatDateTime, donationStatusPill } from './helpers';
+import { formatAmount, formatDateTime, donationStatusPill, canRefundDonation, canResendReceipt } from './helpers';
 import { IconMail, IconRefund } from './icons';
 import { detailHref as campaignHref } from '../../_shared/format';
 
@@ -8,10 +8,8 @@ export default function Header( { donation, donor, onResendReceipt, onRefund, on
     const pill = donationStatusPill( donation.status );
     const isFullRefund    = donation.status === 'refunded';
     const isPartialRefund = donation.refunded_cents > 0 && donation.status !== 'refunded';
-    const isRefundable    = donation.refundable_cents > 0 && donation.status === 'paid';
-    // An erased donor has no address left, so there is nowhere to send.
-    const isRedacted      = !! ( donor?.redacted ?? donation.donor?.redacted );
-    const canResend       = donation.status === 'paid' && ! isRedacted;
+    const isRefundable    = canRefundDonation( donation );
+    const canResend       = canResendReceipt( donation, donor );
 
     const name = donation.is_anonymous
         ? __( 'Anonymous donor', 'dono-fundraising-platform' )

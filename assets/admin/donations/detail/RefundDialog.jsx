@@ -3,7 +3,7 @@ import { useState } from '@wordpress/element';
 import { Modal } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
 
-import { formatAmount, currencyDecimals, formatDate } from './helpers';
+import { formatAmount, amountEntry, formatDate } from './helpers';
 import { IconAlert } from './icons';
 
 // A schedule in one of these will not charge again, so it needs no warning.
@@ -13,10 +13,7 @@ export default function RefundDialog( { donation, onClose, onSuccess, plan = nul
     const planLive = !! plan && ! PLAN_ENDED.includes( plan.status );
     const maxCents = donation.refundable_cents;
     const pendingCents = donation.refund_pending_cents || 0;
-    // Entry decimals follow the currency (JPY none, BHD three); the stored value
-    // stays minor units (major x 100), so /100 and *100 are unchanged.
-    const dp   = currencyDecimals( donation.currency );
-    const step = dp > 0 ? '0.' + '0'.repeat( dp - 1 ) + '1' : '1';
+    const { dp, step } = amountEntry( donation.currency );
     const [ amount, setAmount ] = useState( ( maxCents / 100 ).toFixed( dp ) );
     const [ reason, setReason ] = useState( '' );
     const [ saving, setSaving ] = useState( false );

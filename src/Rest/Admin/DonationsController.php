@@ -940,6 +940,10 @@ final class DonationsController
                 'donor_name_given'     => trim((string) $donation->donor_first_name . ' ' . (string) $donation->donor_last_name) ?: null,
                 'is_anonymous'         => $donation->is_anonymous,
                 'failure_reason'       => $donation->failure_reason,
+                // The timeline dates the failure by this: there is no
+                // failed_at, and markPaid clears failure_reason on the way
+                // back out, so the last write is the one that failed it.
+                'updated_at'           => $donation->updated_at,
                 'processing_reason'    => self::processingReason($donation),
                 'source_attribution'   => $donation->source_attribution,
                 'channel'              => $channel,
