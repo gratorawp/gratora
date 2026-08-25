@@ -11,8 +11,15 @@ export default function RefundsCard( { donation, refunds, onIssue } ) {
         <div className="dd-card">
             <div className="dd-card__body" style={ { padding: '14px 0' } }>
                 <div style={ { padding: '0 18px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' } }>
-                    <span className="dd-pill is-info">
-                        { formatAmount( donation.refunded_cents, donation.currency ) } { __( 'refunded', 'dono-fundraising-platform' ) }
+                    <span style={ { display: 'flex', gap: 8, alignItems: 'center' } }>
+                        <span className="dd-pill is-info">
+                            { formatAmount( donation.refunded_cents, donation.currency ) } { __( 'refunded', 'dono-fundraising-platform' ) }
+                        </span>
+                        { donation.refund_pending_cents > 0 && (
+                            <span className="dd-pill is-warn">
+                                { formatAmount( donation.refund_pending_cents, donation.currency ) } { __( 'awaiting settlement', 'dono-fundraising-platform' ) }
+                            </span>
+                        ) }
                     </span>
                     { donation.refundable_cents > 0 && (
                         <button type="button" className="btn--link" onClick={ onIssue }>

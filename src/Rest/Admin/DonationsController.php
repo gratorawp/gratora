@@ -839,6 +839,10 @@ final class DonationsController
             $refunds,
         ));
 
+        // Accepted by the gateway, not settled: the donor does not have it yet,
+        // so it is not refunded, but it is spent and cannot be offered again.
+        $refundPending = DonationService::inFlightRefundCents($donation);
+
         // Channel classification from the donation's UTM attribution.
         $attr = is_array($donation->source_attribution) ? $donation->source_attribution : [];
         $channel = ChannelClassifier::classify($attr);
@@ -933,7 +937,8 @@ final class DonationsController
                 'flags'                => $donation->flags,
                 'refunded_at'          => $donation->refunded_at,
                 'refunded_cents'       => $refundedTotal,
-                'refundable_cents'     => max(0, $donation->amount_cents - $refundedTotal),
+                'refund_pending_cents' => $refundPending,
+                'refundable_cents'     => max(0, $donation->amount_cents - $refundedTotal - $refundPending),
                 'recurring_plan_id'    => $donation->recurring_plan_id,
                 'frequency'            => $donation->frequency,
                 // Slugs only. shapeDonation already carries id and title for

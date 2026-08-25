@@ -164,11 +164,25 @@ export default function Detail( { reference } ) {
     const closeRefund = () => setShowRefund( false );
     const refundDone  = ( result ) => {
         setShowRefund( false );
+        // The gateway can accept a refund without settling it (a bank refund,
+        // a PayPal eCheck). Calling that "issued" reads as money the donor has
+        // back, and the donation stays paid until the gateway says otherwise.
+        const settled = result?.refund?.status !== 'pending';
         notify.success(
                 result?.plan?.stopped
-                    ? __( 'Refund issued, and the recurring schedule is stopped.', 'dono-fundraising-platform' )
-                    : __( 'Refund issued.', 'dono-fundraising-platform' )
+                    ? ( settled
+                        ? __( 'Refund issued, and the recurring schedule is stopped.', 'dono-fundraising-platform' )
+                        : __( 'Refund accepted by the gateway, and the recurring schedule is stopped.', 'dono-fundraising-platform' ) )
+                    : ( settled
+                        ? __( 'Refund issued.', 'dono-fundraising-platform' )
+                        : __( 'Refund accepted by the gateway.', 'dono-fundraising-platform' ) )
             );
+        if ( ! settled ) {
+            notify.info(
+                __( 'It has not settled yet, so the donor does not have the money back and the donation stays paid. This amount is already off the refundable balance.', 'dono-fundraising-platform' ),
+                { duration: 0 }
+            );
+        }
         // Sticky: the money moved and the schedule did not stop, so this has to
         // survive long enough to be acted on.
         if ( result?.plan && ! result.plan.stopped ) {

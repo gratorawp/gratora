@@ -656,8 +656,12 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         } elseif (in_array($status, ['failed', 'canceled'], true)) {
             // The donor was never repaid, so a refund recorded here has to come
             // back off. Null when there is nothing standing, which is what a
-            // redelivery and a never-recorded pending refund both look like.
+            // redelivery looks like.
             $this->donationService->reverseExternalRefund($donation, $refundId);
+            // An awaited row holds the balance it asked for against further
+            // refunds. Left standing on a refund the bank rejected, the money
+            // could never be returned to the donor by any other route.
+            $this->donationService->failAwaitedRefund($donation, $refundId);
         }
 
         return new WebhookOutcome(

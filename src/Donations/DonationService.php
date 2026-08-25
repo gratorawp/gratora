@@ -1182,6 +1182,51 @@ final class DonationService
     }
 
     /**
+     * Refunds the gateway has accepted and not settled, in cents.
+     *
+     * The money is out of the org's hands and not yet in the donor's, so it
+     * belongs to neither balance: it is off the refundable amount without being
+     * counted as refunded.
+     *
+     * @since 1.0.0
+     */
+    public static function inFlightRefundCents(Donation $donation): int
+    {
+        return (int) Refund::query()
+            ->where('donation_id', $donation->id)
+            ->where('status', 'pending')
+            ->sum('amount_cents');
+    }
+
+    /**
+     * The gateway gave up on a refund it had taken on, so the awaited row stops
+     * holding the balance it was reserving. Nothing else moves: an awaited
+     * refund never came off any total in the first place.
+     *
+     * @since 1.0.0
+     */
+    public function failAwaitedRefund(Donation $donation, string $gatewayRefundId): ?Refund
+    {
+        if ($gatewayRefundId === '') {
+            return null;
+        }
+
+        $refund = Refund::query()
+            ->where('gateway_refund_id', $gatewayRefundId)
+            ->where('status', 'pending')
+            ->get();
+
+        if (! $refund || (int) $refund->donation_id !== (int) $donation->id) {
+            return null;
+        }
+
+        $refund->status = 'failed';
+        $refund->save();
+
+        return $refund;
+    }
+
+    /**
      * Undo an external refund the gateway has reversed.
      *
      * A dispute Dono lost is recorded as a refund, which drops the money out of
@@ -1303,8 +1348,23 @@ final class DonationService
             ->where('status', 'succeeded')
             ->sum('amount_cents');
 
-        $maxRefundable = max(0, $donation->amount_cents - $alreadyRefunded);
+        // A refund the gateway took on but has not settled is money already on
+        // its way to the donor. Left out of the balance, the same money is
+        // offered again and the second refund pays it twice.
+        $inFlight = self::inFlightRefundCents($donation);
+
+        $maxRefundable = max(0, $donation->amount_cents - $alreadyRefunded - $inFlight);
         if ($amountCents <= 0 || $amountCents > $maxRefundable) {
+            if ($inFlight > 0) {
+                $currency = (string) $donation->currency;
+                throw new RuntimeException(esc_html(sprintf(
+                    'Invalid refund amount: %s. %s has already been sent to the gateway and has not settled yet, which leaves %s refundable.',
+                    Money::format($amountCents, $currency),
+                    Money::format($inFlight, $currency),
+                    Money::format($maxRefundable, $currency)
+                )));
+            }
+
             throw new RuntimeException(
                 esc_html("Invalid refund amount: {$amountCents}. Available to refund: {$maxRefundable} cents.")
             );

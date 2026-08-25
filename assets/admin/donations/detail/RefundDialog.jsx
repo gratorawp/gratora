@@ -12,6 +12,7 @@ const PLAN_ENDED = [ 'cancelled', 'expired' ];
 export default function RefundDialog( { donation, onClose, onSuccess, plan = null } ) {
     const planLive = !! plan && ! PLAN_ENDED.includes( plan.status );
     const maxCents = donation.refundable_cents;
+    const pendingCents = donation.refund_pending_cents || 0;
     // Entry decimals follow the currency (JPY none, BHD three); the stored value
     // stays minor units (major x 100), so /100 and *100 are unchanged.
     const dp   = currencyDecimals( donation.currency );
@@ -61,6 +62,11 @@ export default function RefundDialog( { donation, onClose, onSuccess, plan = nul
                     { sprintf(
                         /* translators: %s: amount */ __( 'Up to %s can be refunded back to the donor. Stripe refunds typically settle in 5-10 business days.', 'dono-fundraising-platform' ),
                         formatAmount( maxCents, donation.currency )
+                    ) }
+                    { pendingCents > 0 && ' ' + sprintf(
+                        /* translators: %s: amount already sent to the gateway */
+                        __( '%s is already on its way back to the donor and has not settled yet, so it is not offered here.', 'dono-fundraising-platform' ),
+                        formatAmount( pendingCents, donation.currency )
                     ) }
                 </p>
                 <label>

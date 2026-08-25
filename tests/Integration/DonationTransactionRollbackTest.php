@@ -51,6 +51,8 @@ final class DonationTransactionRollbackTest extends IntegrationTestCase
         if (! $manager->get('refundprobe')) {
             $manager->register(new FixedRefundGateway());
         }
+
+        FixedRefundGateway::$duringRefund = null;
     }
 
     /**
@@ -307,7 +309,13 @@ final class DonationTransactionRollbackTest extends IntegrationTestCase
     public function test_a_settled_refund_settles_the_awaited_row_its_own_gateway_event_wrote(): void
     {
         $donation = $this->seedPaidDonation(5000);
-        $this->seedRefundRow($donation, self::REFUND_ID, 'pending', 4000);
+
+        // Written while the gateway call is open, which is the only moment this
+        // row can appear: a pending refund standing before the call is money
+        // already on its way, and the balance guard refuses to send it twice.
+        FixedRefundGateway::$duringRefund = function () use ($donation): void {
+            $this->seedRefundRow($donation, self::REFUND_ID, 'pending', 4000);
+        };
 
         $refund = Plugin::instance()->container->get(DonationService::class)
             ->refund($donation, 4000, 'donor asked', 7);
@@ -461,6 +469,9 @@ final class DonationTransactionRollbackTest extends IntegrationTestCase
 /** A gateway whose refund id never varies, so a collision can be arranged. */
 final class FixedRefundGateway implements PaymentGateway
 {
+    /** @var (callable():void)|null Runs inside refund(), standing in for an event that lands mid-call. */
+    public static $duringRefund = null;
+
     public function id(): string { return 'refundprobe'; }
     public function label(): string { return 'Refund Probe'; }
     public function description(): string { return 'Refunds with a fixed id.'; }
@@ -487,6 +498,10 @@ final class FixedRefundGateway implements PaymentGateway
 
     public function refund(Donation $donation, int $amountCents, ?string $reason = null): RefundResult
     {
+        if (self::$duringRefund !== null) {
+            (self::$duringRefund)();
+        }
+
         return new RefundResult(
             success:           true,
             gateway_refund_id: DonationTransactionRollbackTest::REFUND_ID,
