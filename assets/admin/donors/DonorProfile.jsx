@@ -315,6 +315,7 @@ export default function DonorProfile( { id, onBack } ) {
         events_total: eventsTotal,
         donations_total: donationsTotal,
         receipts_total: receiptsTotal,
+        notes_total: notesTotal,
     } = data;
 
     const tabCounts = {
@@ -325,7 +326,7 @@ export default function DonorProfile( { id, onBack } ) {
         donations: donationsTotal || null,
         recurring: recurring.plans.length || null,
         receipts:  receiptsTotal || null,
-        notes:     notes.length || null,
+        notes:     notesTotal || notes.length || null,
         consent:   null,
     };
 
@@ -384,8 +385,8 @@ export default function DonorProfile( { id, onBack } ) {
                     { tab === 'activity'  && <ActivityLogTab donorId={ donor.id } /> }
                     { tab === 'donations' && <DonationsTab donorId={ donor.id } redacted={ !! donor.redacted_at } /> }
                     { tab === 'recurring' && <RecurringTab recurring={ recurring } onChange={ load } /> }
-                    { tab === 'receipts'  && <ReceiptsTab receipts={ receipts } donations={ donations } donor={ donor } redacted={ !! donor.redacted_at } /> }
-                    { tab === 'notes'     && <NotesTab donorId={ donor.id } notes={ notes } onChanged={ load } /> }
+                    { tab === 'receipts'  && <ReceiptsTab receipts={ receipts } total={ receiptsTotal } donations={ donations } donor={ donor } redacted={ !! donor.redacted_at } /> }
+                    { tab === 'notes'     && <NotesTab donorId={ donor.id } notes={ notes } total={ notesTotal } onChanged={ load } /> }
                     { tab === 'consent'   && <ConsentTab consents={ consents } donor={ donor } onChanged={ load } /> }
                 </main>
             </div>

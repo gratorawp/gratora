@@ -299,12 +299,12 @@ export function DonorsApp( { toggleSlot } ) {
                 if ( ! items.length ) return;
                 const n = items.length;
                 const message = n === 1
-                    ? __( 'Redact this donor? Their PII (name, email, address, phone) is wiped from the donor row but their donations stay attached and counted. This cannot be undone.', 'dono-fundraising-platform' )
+                    ? __( 'Redact this donor? Their PII (name, email, address, phone) is wiped from the donor row and any active recurring plan is cancelled at the gateway, but their donations stay attached and counted. This cannot be undone.', 'dono-fundraising-platform' )
                     : sprintf(
                         /* translators: %d: number of donors to redact */
                         _n(
-                            'Redact %d donor? Their PII is wiped from the donor rows but donations stay attached and counted. This cannot be undone.',
-                            'Redact %d donors? Their PII is wiped from the donor rows but donations stay attached and counted. This cannot be undone.',
+                            'Redact %d donor? Their PII is wiped from the donor rows and any active recurring plan is cancelled at the gateway, but donations stay attached and counted. This cannot be undone.',
+                            'Redact %d donors? Their PII is wiped from the donor rows and any active recurring plan is cancelled at the gateway, but donations stay attached and counted. This cannot be undone.',
                             n,
                             'dono-fundraising-platform'
                         ),

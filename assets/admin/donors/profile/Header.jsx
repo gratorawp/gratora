@@ -73,9 +73,14 @@ export default function Header( { donor, banners, recurring, onBack, onEdit, onT
                     </div>
                 </div>
                 <div className="dp-page-head__actions">
-                    <button type="button" className="btn" onClick={ onEdit }>
-                        { __( 'Edit details', 'dono-fundraising-platform' ) }
-                    </button>
+                    { /* Erasure took the email with it, so the panel opens empty
+                         and Save blames the field for a record that cannot be
+                         edited at all. */ }
+                    { ! isRedacted && (
+                        <button type="button" className="btn" onClick={ onEdit }>
+                            { __( 'Edit details', 'dono-fundraising-platform' ) }
+                        </button>
+                    ) }
                 </div>
             </div>
 

@@ -32,6 +32,20 @@ final class DonorNoteRepository
      *
      * @since 1.0.0
      */
+    /**
+     * How many notes the donor actually has.
+     *
+     * listForDonor is capped, and the screen used the capped array's length as
+     * the tab badge, so a donor with more notes than the cap was shown a number
+     * that agreed with the list and with nothing else.
+     *
+     * @since 1.0.0
+     */
+    public function countForDonor(int $donorId): int
+    {
+        return DonorNote::query()->where('donor_id', $donorId)->count();
+    }
+
     public function listForDonor(int $donorId, int $limit = 50): array
     {
         $rows = DonorNote::query()
@@ -73,7 +87,7 @@ final class DonorNoteRepository
     }
 
     /**
-     * @return array{id:int,donor_id:int,author_user_id:?int,author_display_name:?string,author_role:?string,body:string,created_at:string,updated_at:string}
+     * @return array{id:int,donor_id:int,author_user_id:?int,author_display_name:?string,author_role:?string,body:string,can_delete:bool,created_at:string,updated_at:string}
      *
      * @since 1.0.0
      */
@@ -87,9 +101,25 @@ final class DonorNoteRepository
             'author_display_name' => $displayName,
             'author_role'         => $role,
             'body'                => $this->crypto->decrypt((string) $n->body_encrypted),
+            // Stated per note rather than re-derived in the browser, which has
+            // no idea who is looking: the screen and DonorsController::deleteNote
+            // have to agree, or a confirmed delete comes back as a 403.
+            'can_delete'          => self::deletableBy($n, get_current_user_id()),
             'created_at'          => (string) $n->created_at,
             'updated_at'          => (string) $n->updated_at,
         ];
+    }
+
+    /**
+     * A note nobody is recorded as writing belongs to whoever can edit donors.
+     *
+     * @since 1.0.0
+     */
+    public static function deletableBy(DonorNote $n, int $userId): bool
+    {
+        return ! $n->author_user_id
+            || (int) $n->author_user_id === $userId
+            || current_user_can('manage_options');
     }
 
     /**

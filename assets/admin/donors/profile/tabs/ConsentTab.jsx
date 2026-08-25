@@ -40,7 +40,7 @@ function RedactDialog( { donor, onClose, onDone } ) {
         <Modal title={ __( 'Redact this donor', 'dono-fundraising-platform' ) } onRequestClose={ onClose } className="dp-modal">
             <form onSubmit={ submit } className="dp-edit-form">
                 <p style={ { gridColumn: '1 / -1', color: '#6b7280', fontSize: 13, marginTop: 0 } }>
-                    { __( 'PII (name, email, phone, address, tax id, notes) will be permanently removed. Lifetime totals, donations, and receipts are retained for accounting. This cannot be undone.', 'dono-fundraising-platform' ) }
+                    { __( 'PII (name, email, phone, address, tax id, notes) will be permanently removed, and any active recurring plan is cancelled at the gateway. Lifetime totals, donations, and receipts are retained for accounting. This cannot be undone.', 'dono-fundraising-platform' ) }
                 </p>
                 <label style={ { gridColumn: '1 / -1' } }>
                     { sprintf( /* translators: %s: confirmation word */ __( 'Type %s to confirm', 'dono-fundraising-platform' ), expected ) }
@@ -182,7 +182,7 @@ export default function ConsentTab( { consents, donor, onChanged } ) {
                             { __( 'Redact donor', 'dono-fundraising-platform' ) }
                         </div>
                         <div className="dp-danger-foot__sub">
-                            { __( 'Drops PII (name, email, phone, address, tax id) and sets redacted_at. Lifetime totals and donation records are kept for accounting. This cannot be undone.', 'dono-fundraising-platform' ) }
+                            { __( 'Drops PII (name, email, phone, address, tax id), cancels any active recurring plan at the gateway, and sets redacted_at. Lifetime totals and donation records are kept for accounting. This cannot be undone.', 'dono-fundraising-platform' ) }
                         </div>
                     </div>
                     <div className="dp-danger-foot__actions">

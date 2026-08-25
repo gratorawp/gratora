@@ -1,4 +1,4 @@
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { StickyNote } from 'lucide-react';
@@ -8,7 +8,7 @@ import ConfirmDialog from '../../../_shared/components/ConfirmDialog';
 import { formatDateTime, timeAgo, initials } from '../helpers';
 import { IconTrash } from '../icons';
 
-export default function NotesTab( { donorId, notes: initialNotes, onChanged } ) {
+export default function NotesTab( { donorId, notes: initialNotes, total, onChanged } ) {
     const [ notes, setNotes ] = useState( initialNotes || [] );
     const [ body, setBody ]   = useState( '' );
     const [ saving, setSaving ] = useState( false );
@@ -57,8 +57,22 @@ export default function NotesTab( { donorId, notes: initialNotes, onChanged } ) 
         } );
     };
 
+    // listForDonor is capped. Without this the list simply ends, and the older
+    // notes are reachable only through the donor data export.
+    const withheld = Math.max( 0, ( total ?? notes.length ) - notes.length );
+
     return (
         <div>
+            { withheld > 0 && (
+                <p className="dp-tab-note">
+                    { sprintf(
+                        /* translators: 1: notes shown, 2: notes in total */
+                        __( 'Showing the %1$d most recent of %2$d notes.', 'dono-fundraising-platform' ),
+                        notes.length,
+                        total
+                    ) }
+                </p>
+            ) }
             <div className="dp-card">
                 <div className="dp-card__body">
                     { notes.length === 0
@@ -87,14 +101,16 @@ export default function NotesTab( { donorId, notes: initialNotes, onChanged } ) 
                                                 </div>
                                                 <div className="dp-note__text">{ n.body }</div>
                                             </div>
-                                            <button
-                                                type="button"
-                                                className="dp-note__delete"
-                                                aria-label={ __( 'Delete note', 'dono-fundraising-platform' ) }
-                                                onClick={ () => remove( n.id ) }
-                                            >
-                                                <IconTrash width="14" height="14" />
-                                            </button>
+                                            { n.can_delete && (
+                                                <button
+                                                    type="button"
+                                                    className="dp-note__delete"
+                                                    aria-label={ __( 'Delete note', 'dono-fundraising-platform' ) }
+                                                    onClick={ () => remove( n.id ) }
+                                                >
+                                                    <IconTrash width="14" height="14" />
+                                                </button>
+                                            ) }
                                         </div>
                                     );
                                 } ) }

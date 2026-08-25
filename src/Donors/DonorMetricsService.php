@@ -498,6 +498,7 @@ final class DonorMetricsService
                 'history' => array_map(fn (Consent $c) => $this->mapConsentRow($c), $consents),
             ],
             'notes'           => $notes,
+            'notes_total'     => $this->notes->countForDonor($donorId),
             'campaigns'       => $campaigns,
             'by_channel'      => $channels,
             'monthly_timeline'=> $timeline,

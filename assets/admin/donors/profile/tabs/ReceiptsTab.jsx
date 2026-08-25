@@ -111,7 +111,7 @@ function TaxStatement( { donor, donations } ) {
     );
 }
 
-export default function ReceiptsTab( { receipts, donations, donor, redacted } ) {
+export default function ReceiptsTab( { receipts, total, donations, donor, redacted } ) {
     const [ confirm, setConfirm ] = useState( null );
     const [ view, setView ] = useState( {
         type:    'table',
@@ -263,9 +263,24 @@ export default function ReceiptsTab( { receipts, donations, donor, redacted } ) 
         );
     }
 
+    // The profile loads the newest slice, not the lot. Without this the tab
+    // badge counts every receipt over a table that quietly stops, and an
+    // operator looking for an older one concludes it was never issued.
+    const withheld = Math.max( 0, ( total ?? receipts.length ) - receipts.length );
+
     return (
         <div className="dono-dataviews dp-receipts-dv">
             { statement }
+            { withheld > 0 && (
+                <p className="dp-tab-note">
+                    { sprintf(
+                        /* translators: 1: receipts shown, 2: receipts in total */
+                        __( 'Showing the %1$d most recent of %2$d receipts.', 'dono-fundraising-platform' ),
+                        receipts.length,
+                        total
+                    ) }
+                </p>
+            ) }
             <DataViews
                 data={ rows }
                 isLoading={ false }

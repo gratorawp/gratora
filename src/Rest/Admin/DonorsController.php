@@ -414,12 +414,24 @@ final class DonorsController
             return new WP_Error('dono_donor_not_found', __('Donor not found.', 'dono-fundraising-platform'), ['status' => 404]);
         }
 
-        $link = $this->metrics->issuePortalLink($donor);
-        if ($link === null) {
+        // Asked here rather than read off a null, because issuePortalLink also
+        // returns null when minting throws. Collapsing the two told an operator
+        // the donor was erased whenever the write failed, and the button is not
+        // even rendered for an erased donor, so the message was always wrong.
+        if ($donor->redacted_at !== null) {
             return new WP_Error(
                 'dono_portal_link_unavailable',
                 __('A sign-in link cannot be issued for an erased donor.', 'dono-fundraising-platform'),
                 ['status' => 409]
+            );
+        }
+
+        $link = $this->metrics->issuePortalLink($donor);
+        if ($link === null) {
+            return new WP_Error(
+                'dono_portal_link_failed',
+                __('The sign-in link could not be created. Please try again.', 'dono-fundraising-platform'),
+                ['status' => 500]
             );
         }
 
@@ -453,7 +465,7 @@ final class DonorsController
         if (! $note) {
             return new WP_Error('dono_not_found', __('Note not found.', 'dono-fundraising-platform'), ['status' => 404]);
         }
-        if ($note->author_user_id && $note->author_user_id !== get_current_user_id() && ! current_user_can('manage_options')) {
+        if (! DonorNoteRepository::deletableBy($note, get_current_user_id())) {
             return new WP_Error('dono_forbidden', __('You cannot delete this note.', 'dono-fundraising-platform'), ['status' => 403]);
         }
         $this->notes->delete($noteId);
