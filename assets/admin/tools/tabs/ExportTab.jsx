@@ -79,7 +79,17 @@ export default function ExportTab( { setNotice } ) {
                 // is worse than one carrying a column nobody wanted.
                 setColumns( ( o.donor_columns || [] ).map( ( c ) => c.key ) );
             } )
-            .catch( () => setOpts( { donor_columns: [], campaigns: [], years: [ new Date().getFullYear() ] } ) );
+            .catch( () => {
+                // Without this the tab renders as a normal working screen on a
+                // failed load: an empty Columns grid, a campaign select holding
+                // only "All campaigns", and Generate CSV quietly exporting the
+                // fallback columns instead of the ones the operator chose.
+                setOpts( { donor_columns: [], campaigns: [], years: [ new Date().getFullYear() ] } );
+                setNotice( {
+                    type: 'error',
+                    text: __( 'The export options could not be loaded, so the choices below are incomplete. Reload the page to try again.', 'dono-fundraising-platform' ),
+                } );
+            } );
     }, [] );
 
     const years = opts?.years || [];

@@ -66,7 +66,7 @@ export default function SystemInfoTab( { info, infoError, loadInfo, setNotice } 
 
             <Card
                 title={ __( 'Scheduled tasks', 'dono-fundraising-platform' ) }
-                sub={ __( 'Dono jobs queued with WP-Cron, and when each is due.', 'dono-fundraising-platform' ) }
+                sub={ __( 'Dono jobs queued with Action Scheduler, and when each is due.', 'dono-fundraising-platform' ) }
             >
                 { info?.cron?.length ? (
                     <ul className="dono-advanced-cron">

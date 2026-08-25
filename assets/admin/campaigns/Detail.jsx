@@ -1305,6 +1305,10 @@ function FormsTab( { campaign } ) {
                     load();
                 } catch ( err ) {
                     setError( err?.message || __( 'Could not duplicate one or more forms.', 'dono-fundraising-platform' ) );
+                    // Some of the batch may have gone through. Leaving the
+                    // table as it was makes the author reload to find out
+                    // which.
+                    load();
                 }
             },
         },
@@ -1346,6 +1350,10 @@ function FormsTab( { campaign } ) {
                             load();
                         } catch ( err ) {
                             setError( err?.message || __( 'Could not delete one or more forms.', 'dono-fundraising-platform' ) );
+                            // Rows already deleted are still on screen
+                            // otherwise, so the error reads as nothing having
+                            // happened at all.
+                            load();
                         }
                     },
                 } );

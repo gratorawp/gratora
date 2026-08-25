@@ -507,13 +507,17 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
 
     return (
         <Dialog
-            title={ __( 'Edit fund', 'dono-fundraising-platform' ) }
+            title={ fund.id
+                ? __( 'Edit fund', 'dono-fundraising-platform' )
+                : __( 'New fund', 'dono-fundraising-platform' ) }
             onClose={ onClose }
             foot={ (
                 <>
                     <Btn onClick={ onClose }>{ __( 'Cancel', 'dono-fundraising-platform' ) }</Btn>
                     <Btn variant="primary" onClick={ save } isBusy={ saving } disabled={ saving }>
-                        { __( 'Save fund', 'dono-fundraising-platform' ) }
+                        { fund.id
+                            ? __( 'Save fund', 'dono-fundraising-platform' )
+                            : __( 'Create fund', 'dono-fundraising-platform' ) }
                     </Btn>
                 </>
             ) }
@@ -698,21 +702,33 @@ function FundDeleteModal( { fund, funds, onClose, onError, onDone } ) {
                         </span>
                     </label>
 
-                    <label className="dono-choice" htmlFor="dono-fund-delete-reassign">
-                        <input
-                            id="dono-fund-delete-reassign"
-                            type="radio"
-                            name="dono-fund-delete"
-                            checked={ choice === 'reassign' }
-                            onChange={ () => setChoice( 'reassign' ) }
-                        />
-                        <span>
-                            <strong>{ __( 'Reassign to another fund, then delete', 'dono-fundraising-platform' ) }</strong>
-                            <span>{ __( 'Moves every donation, campaign and form that points here onto the chosen fund, then removes this one.', 'dono-fundraising-platform' ) }</span>
-                        </span>
-                    </label>
+                    { /* Offering this with nothing to reassign to left the
+                         author on an empty picker and a permanently disabled
+                         button, with nothing saying Deactivate was the only
+                         route. A site with one fund is the common shape here,
+                         since a fund only reaches this dialog once it has
+                         donations. */ }
+                    { candidates.length > 0 ? (
+                        <label className="dono-choice" htmlFor="dono-fund-delete-reassign">
+                            <input
+                                id="dono-fund-delete-reassign"
+                                type="radio"
+                                name="dono-fund-delete"
+                                checked={ choice === 'reassign' }
+                                onChange={ () => setChoice( 'reassign' ) }
+                            />
+                            <span>
+                                <strong>{ __( 'Reassign to another fund, then delete', 'dono-fundraising-platform' ) }</strong>
+                                <span>{ __( 'Moves every donation, campaign and form that points here onto the chosen fund, then removes this one.', 'dono-fundraising-platform' ) }</span>
+                            </span>
+                        </label>
+                    ) : (
+                        <p className="dono-dialog__help">
+                            { __( 'There is no other active fund to reassign to, so deactivating is the only option here. Create another fund first if you want to move these donations.', 'dono-fundraising-platform' ) }
+                        </p>
+                    ) }
 
-                    { choice === 'reassign' && (
+                    { choice === 'reassign' && candidates.length > 0 && (
                         <div className="dono-fld" style={ { marginTop: 12 } }>
                             <label className="dono-fld__label">{ __( 'Reassign donations to', 'dono-fundraising-platform' ) }</label>
                             <SearchableSelect
