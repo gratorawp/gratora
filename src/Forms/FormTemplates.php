@@ -77,7 +77,6 @@ final class FormTemplates
             'gateways'          => ['allowed' => []],
             'anonymous_allowed' => true,
             'thank_you_message' => '',
-            'redirect_url'      => '',
         ];
     }
 
@@ -136,7 +135,6 @@ final class FormTemplates
                 'gateways'          => ['allowed' => []],
                 'anonymous_allowed' => true,
                 'thank_you_message' => __("You're amazing. Share to multiply your impact.", 'dono-fundraising-platform'),
-                'redirect_url'      => '',
             ],
             'blocks'         => $blocks,
         ];
@@ -196,7 +194,6 @@ final class FormTemplates
                 'gateways'          => ['allowed' => []],
                 'anonymous_allowed' => true,
                 'thank_you_message' => __("Thank you. Your donation is already at work. Here's what happens next, and how to tell a friend.", 'dono-fundraising-platform'),
-                'redirect_url'      => '',
             ],
             'blocks'         => $blocks,
         ];
@@ -360,7 +357,6 @@ final class FormTemplates
                 'gateways'          => ['allowed' => []],
                 'anonymous_allowed' => true,
                 'thank_you_message' => __('Thank you. Your first payment is on its way, and we will email you before anything changes.', 'dono-fundraising-platform'),
-                'redirect_url'      => '',
             ],
             'blocks'         => $blocks,
         ];
@@ -399,7 +395,6 @@ final class FormTemplates
                 'gateways'          => ['allowed' => []],
                 'anonymous_allowed' => true,
                 'thank_you_message' => __('Thank you. Your donation is already part of the response.', 'dono-fundraising-platform'),
-                'redirect_url'      => '',
             ],
             'blocks'         => $blocks,
         ];

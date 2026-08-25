@@ -101,6 +101,24 @@ export function settingsAfterTemplate( current, templateSettings ) {
     return mergeFormSettings( templateSettings, mergeFormSettings( current ) );
 }
 
+/**
+ * What picking a template does to a form: the blocks it brings, and the
+ * settings the form is left with.
+ *
+ * The settings half lives here rather than in the component so it can be
+ * driven by a test. Handing the template's settings straight to the form is
+ * the mistake this exists to make hard: it discards everything the author
+ * configured that the template never named.
+ */
+export function templateApplication( currentSettings, template ) {
+    const markup = ( template?.blocks ?? '' ).trim();
+    const settings = template?.settings && typeof template.settings === 'object'
+        ? settingsAfterTemplate( currentSettings, template.settings )
+        : null;
+
+    return { markup, settings };
+}
+
 let blocksReady = false;
 function ensureBlocksRegistered() {
     if ( blocksReady ) return;
@@ -241,13 +259,13 @@ export default function Editor( { formId } ) {
     }, [ c.savedRecord ] );
 
     const performApplyTemplate = useCallback( ( template, hasContent ) => {
-        const blocksMarkup = ( template?.blocks ?? '' ).trim();
-        const parsed = blocksMarkup ? parse( blocksMarkup ) : [];
+        const { markup, settings } = templateApplication( c.record.settings, template );
+        const parsed = markup ? parse( markup ) : [];
         // CHANGE keeps it in history (undoable) when replacing existing content;
         // RESET sets a fresh baseline for the first-open empty-form seeding.
         dispatchHistory( { type: hasContent ? 'CHANGE' : 'RESET', blocks: parsed } );
-        if ( template?.settings && typeof template.settings === 'object' ) {
-            c.edit( { settings: settingsAfterTemplate( c.record.settings, template.settings ) } );
+        if ( settings ) {
+            c.edit( { settings } );
         }
         setPendingTemplate( null );
         setTemplatePickerOpen( false );

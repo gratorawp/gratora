@@ -18,7 +18,7 @@ window.matchMedia = () => ( {
     addEventListener: () => {}, removeEventListener: () => {},
 } );
 
-const { settingsAfterTemplate } = require( '../../assets/admin/forms/Editor' );
+const { settingsAfterTemplate, templateApplication } = require( '../../assets/admin/forms/Editor' );
 
 // What the shipped templates carry (FormTemplates::defaultSettings plus the
 // copy some of them override). Nothing here names a goal, a container or test
@@ -30,7 +30,6 @@ const template = {
     gateways:          { allowed: [] },
     anonymous_allowed: true,
     thank_you_message: 'You are amazing.',
-    redirect_url:      '',
 };
 
 // An onboarding form the author has already configured.
@@ -72,4 +71,35 @@ test( 'a form with no settings yet still gets the whole default shape', () => {
     expect( next.goal ).toEqual( { type: 'none', amount_cents: 0, count: 0 } );
     expect( next.container ).toEqual( { width: 540, style: 'plain' } );
     expect( next.layout ).toBe( 'inline' );
+} );
+
+/**
+ * The merge being right is not the same as the editor using it. This drives
+ * what the template picker actually hands the form, which is where handing
+ * over the template's settings raw would discard the author's configuration.
+ */
+test( 'applying a template keeps what the author configured', () => {
+    const { settings } = templateApplication( current, { blocks: '', settings: template } );
+
+    expect( settings.goal.amount_cents ).toBe( 500000 );
+    expect( settings.container.width ).toBe( 720 );
+    expect( settings.test_mode ).toBe( true );
+    expect( settings.layout ).toBe( 'inline' );
+} );
+
+/** A template that names no settings must leave them alone entirely. */
+test( 'a template with no settings changes none', () => {
+    const { settings } = templateApplication( current, { blocks: '<!-- wp:paragraph /-->' } );
+
+    expect( settings ).toBeNull();
+} );
+
+/**
+ * No shipped template has an opinion about where a particular organisation
+ * sends its donors afterwards, and undo restores blocks, not settings.
+ */
+test( 'a template does not clear the thank-you redirect the author set', () => {
+    const { settings } = templateApplication( current, { blocks: '', settings: template } );
+
+    expect( settings.redirect_url ).toBe( 'https://example.test/thanks' );
 } );
