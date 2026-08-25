@@ -92,7 +92,7 @@ final class ReceiptIssuer
     public function requeueForDonation(int $donationId): bool
     {
         $donation = $this->donations->findById($donationId);
-        if (! $donation || $donation->status !== 'paid') {
+        if (! $donation || ! self::isReceiptable($donation)) {
             return false;
         }
 
@@ -118,7 +118,7 @@ final class ReceiptIssuer
         if ($donationId <= 0) return;
 
         $donation = $this->donations->findById($donationId);
-        if (! $donation || $donation->status !== 'paid') return;
+        if (! $donation || ! self::isReceiptable($donation)) return;
 
         $donor = $this->donors->findById($donation->donor_id);
         if (! $donor) return;
@@ -142,6 +142,18 @@ final class ReceiptIssuer
             if (! $renderer->appliesTo($ctx)) continue;
             $this->processRenderer($renderer, $ctx);
         }
+    }
+
+    /**
+     * A donation the org has money from, so a document can state what it kept.
+     * A partial refund qualifies: the renderer prints the refunded line and the
+     * net total, which is exactly what the donor needs a copy of.
+     *
+     * @since 1.0.0
+     */
+    private static function isReceiptable(Donation $donation): bool
+    {
+        return in_array((string) $donation->status, ['paid', 'partial_refund'], true);
     }
 
     /** @since 1.0.0 */

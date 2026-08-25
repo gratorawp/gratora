@@ -91,6 +91,7 @@ $netDisplay      = $refundedCents > 0
         (string) $donation->currency
     )
     : $amount_display;
+$fullyRefunded   = $refundedCents > 0 && $refundedCents >= (int) $donation->amount_cents;
 ?>
 <!doctype html>
 <html lang="<?php echo esc_attr($locale ?: 'en'); ?>">
@@ -135,6 +136,7 @@ $netDisplay      = $refundedCents > 0
 
 <?php if ($refundedDisplay !== ''): ?>
 <div style="border:2pt solid #b91c1c; color:#b91c1c; font-weight:600; padding:8pt 10pt; margin:0 0 18pt;">
+    <?php if ($fullyRefunded): ?>
     <?php
     printf(
         /* translators: %s: refunded amount. */
@@ -142,6 +144,16 @@ $netDisplay      = $refundedCents > 0
         esc_html($refundedDisplay)
     );
     ?>
+    <?php else: ?>
+    <?php
+    printf(
+        /* translators: 1: refunded amount, 2: amount retained after the refund. */
+        esc_html__('Part of this donation has been refunded (%1$s). The amount retained is %2$s.', 'dono-fundraising-platform'),
+        esc_html($refundedDisplay),
+        esc_html($netDisplay)
+    );
+    ?>
+    <?php endif; ?>
 </div>
 <?php endif; ?>
 

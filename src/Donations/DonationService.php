@@ -1089,7 +1089,9 @@ final class DonationService
             $donation->updated_at  = $now;
             $donation->save();
 
-            $this->voidReceiptsFor($donation, $now);
+            if ($isFullRefund) {
+                $this->voidReceiptsFor($donation, $now);
+            }
 
             $this->events->record('donation.refunded', [
                 'donor_id'     => $donation->donor_id,
@@ -1237,14 +1239,14 @@ final class DonationService
             $donation->updated_at     = $now;
             $donation->save();
 
-            // The receipt was voided because money had gone back. None has, so
-            // it stands again: the donor's tax document is the thing this
-            // reversal is for, and nothing else can restore it. A voided
-            // receipt is filtered out of the portal, the receipts route and
-            // the admin donation, and the re-issue path skips voided rows
-            // while still reporting that it queued one, so left voided it is
-            // gone with a route that says otherwise.
-            if ($newTotal === 0) {
+            // A receipt is void only while the donation retains nothing, so a
+            // reversal that leaves any money with the org puts it back. The
+            // donor's tax document is the thing this reversal is for, and
+            // nothing else can restore it: a voided receipt is filtered out of
+            // the portal, the receipts route and the admin donation, and the
+            // re-issue path skips voided rows while still reporting that it
+            // queued one.
+            if ($newTotal < (int) $donation->amount_cents) {
                 $this->unvoidReceiptsFor($donation);
             }
 
@@ -1418,7 +1420,9 @@ final class DonationService
             $donation->updated_at  = $now;
             $donation->save();
 
-            $this->voidReceiptsFor($donation, $now);
+            if ($isFullRefund) {
+                $this->voidReceiptsFor($donation, $now);
+            }
 
             $this->events->record('donation.refunded', [
                 'donor_id'     => $donation->donor_id,
@@ -1453,15 +1457,7 @@ final class DonationService
     }
 
     /**
-     * Void non-voided receipts for a refunded donation (legal retention).
-     *
-     * @since 1.0.0
-     */
-    /**
      * Put back the receipts a refund voided, when the refund itself is undone.
-     *
-     * Only on a donation that is whole again: a partial refund still standing
-     * means the issued figure is still wrong, which is what voiding says.
      *
      * @since 1.0.0
      */
@@ -1494,6 +1490,15 @@ final class DonationService
         return $isTest ? 'test_donation' : 'donation';
     }
 
+    /**
+     * Void a fully refunded donation's receipts (never delete them: legal
+     * retention). Only when nothing is retained. The document is rendered from
+     * live data on every download, so a partial refund still produces a true
+     * receipt - it prints the refunded line and the net total - and voiding it
+     * would take the donor's only working copy of a figure they really gave.
+     *
+     * @since 1.0.0
+     */
     private function voidReceiptsFor(Donation $donation, string $now): void
     {
         $receipts = Receipt::query()

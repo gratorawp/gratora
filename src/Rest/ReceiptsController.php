@@ -64,8 +64,19 @@ final class ReceiptsController
         }
 
         $receipt = $this->receipts->findById($receiptId);
-        if (! $receipt || $receipt->voided) {
+        if (! $receipt) {
             return new WP_Error('dono_receipt_not_found', __('Receipt not found.', 'dono-fundraising-platform'), ['status' => 404]);
+        }
+
+        if ($receipt->voided) {
+            // 410, not 404: the donor is holding a link that worked, and
+            // "not found" reads as a broken one. A voided receipt means the
+            // donation was refunded in full, so say that instead.
+            return new WP_Error(
+                'dono_receipt_voided',
+                __('This receipt was withdrawn because the donation it covers was refunded in full. If that is not what you expected, please contact the organization.', 'dono-fundraising-platform'),
+                ['status' => 410]
+            );
         }
 
         // Defense-in-depth: token must belong to the same donor as the receipt.

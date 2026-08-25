@@ -315,6 +315,17 @@ export function reducer( state, action ) {
                 message:    '',
             };
 
+        // A return that resolved to nothing terminal. The donor is not told the
+        // money stayed put, because nothing here proves it did, and the screen
+        // keeps a way to run the check again.
+        case 'RETURN_UNRESOLVED':
+            return {
+                ...state,
+                status:     'unresolved',
+                submission: action.data || null,
+                message:    action.message || '',
+            };
+
         case 'SUBMIT_ERROR':
             return {
                 ...state,

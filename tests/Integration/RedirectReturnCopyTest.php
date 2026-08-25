@@ -82,4 +82,29 @@ final class RedirectReturnCopyTest extends IntegrationTestCase
         // donor wondering whether they paid twice.
         $this->assertStringContainsString('nothing has been charged', (string) $i18n['notCompleted']);
     }
+
+    public function test_the_form_carries_a_sentence_for_a_return_it_could_not_resolve(): void
+    {
+        $i18n = $this->renderedI18n();
+
+        // The third place a redirect ends: the browser could not find out what
+        // happened, which is neither of the other two.
+        $this->assertArrayHasKey('returnUnresolved', $i18n);
+        $this->assertNotSame($i18n['error'] ?? '', $i18n['returnUnresolved']);
+        $this->assertNotSame($i18n['notCompleted'] ?? '', $i18n['returnUnresolved']);
+    }
+
+    public function test_that_sentence_does_not_ask_for_a_second_payment(): void
+    {
+        $i18n = $this->renderedI18n();
+        $copy = (string) ($i18n['returnUnresolved'] ?? '');
+
+        $this->assertStringNotContainsString('try again', $copy);
+        $this->assertStringContainsString('do not pay again', $copy);
+
+        // A screen with nothing to press is a dead end, and the check is the
+        // one thing left that can still settle this donation in the browser.
+        $this->assertArrayHasKey('checkAgain', $i18n);
+        $this->assertNotSame('', (string) $i18n['checkAgain']);
+    }
 }

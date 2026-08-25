@@ -48,7 +48,9 @@ final class GenericReceiptRenderer implements ReceiptRenderer
     /** @since 1.0.0 */
     public function appliesTo(ReceiptContext $ctx): bool
     {
-        return $ctx->donation->status === 'paid';
+        // A partial refund included: the document prints the refunded line and
+        // the net total, so it still states what the org kept.
+        return in_array((string) $ctx->donation->status, ['paid', 'partial_refund'], true);
     }
 
     /** @since 1.0.0 */

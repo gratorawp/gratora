@@ -8,12 +8,18 @@
  * the donor is shown for a payment that did not complete.
  */
 
-const CANCELLED = 'Your payment was not completed, so nothing has been charged. Please try again when you are ready.';
-const GENERIC   = 'Sorry, something went wrong. Please try again.';
-const THANKS    = 'Thank you for your donation!';
+const CANCELLED  = 'Your payment was not completed, so nothing has been charged. Please try again when you are ready.';
+const GENERIC    = 'Sorry, something went wrong. Please try again.';
+const THANKS     = 'Thank you for your donation!';
+const UNRESOLVED = 'We could not check on your payment, and your bank may still have taken it. Please do not pay again yet.';
+const CHECK      = 'Check again';
 
 // Prefixed so the jest.mock factory below may close over it.
 let mockStatus = 'succeeded';
+
+// The load failure the donor hits when js.stripe.com is blocked on the way
+// back, which is a different thing from an intent parked mid-authentication.
+const UNREACHABLE = '__stripe_unreachable__';
 
 jest.mock( '../../assets/donation-form/util/stripe', () => {
     const actual = jest.requireActual( '../../assets/donation-form/util/stripe' );
@@ -22,7 +28,9 @@ jest.mock( '../../assets/donation-form/util/stripe', () => {
         ...actual,
         // The only part of the return that talks to Stripe. Everything else,
         // including the ownership test and the status mapping, stays real.
-        resolveStripeReturn: () => Promise.resolve( mockStatus ),
+        resolveStripeReturn: () => ( mockStatus === UNREACHABLE
+            ? Promise.reject( new Error( 'stripe-load-failed' ) )
+            : Promise.resolve( mockStatus ) ),
         loadStripeJs:        () => Promise.resolve( () => ( {} ) ),
     };
 } );
@@ -41,8 +49,10 @@ function config( overrides = {} ) {
             items: [ { kind: 'amount', presets: [ 1000 ] } ],
         } ],
         i18n: {
-            error:        GENERIC,
-            notCompleted: CANCELLED,
+            error:            GENERIC,
+            notCompleted:     CANCELLED,
+            returnUnresolved: UNRESOLVED,
+            checkAgain:       CHECK,
             thanks:       THANKS,
             confirming:   'Confirming your payment…',
             donateAgain:  'Donate again',
@@ -109,15 +119,79 @@ describe( 'a redirect that did not end in a payment', () => {
         expect( form.textContent ).not.toContain( GENERIC );
     } );
 
-    test( 'an intent Stripe left in a state we cannot read keeps the generic wording', async () => {
+    test( 'a completed payment clears the markers behind it', async () => {
+        returningFrom( 'DONO-2026-00047', 'dono-form-1' );
+        addForm( 'dono-form-1', config() );
+
+        await boot();
+
+        expect( window.location.search ).not.toContain( 'payment_intent_client_secret' );
+    } );
+} );
+
+describe( 'a return the browser could not resolve', () => {
+    const settle = () => new Promise( ( r ) => setTimeout( r, 50 ) );
+
+    test( 'an intent parked mid-authentication is not answered with try again', async () => {
         returningFrom( 'DONO-2026-00043', 'dono-form-1' );
         const form = addForm( 'dono-form-1', config() );
 
         mockStatus = 'requires_action';
         await boot();
 
-        expect( form.textContent ).toContain( GENERIC );
+        expect( form.textContent ).toContain( UNRESOLVED );
+        expect( form.textContent ).not.toContain( GENERIC );
         expect( form.textContent ).not.toContain( CANCELLED );
+    } );
+
+    test( 'Stripe being unreachable on the way back is not answered with try again', async () => {
+        returningFrom( 'DONO-2026-00048', 'dono-form-1' );
+        const form = addForm( 'dono-form-1', config() );
+
+        mockStatus = UNREACHABLE;
+        await boot();
+
+        expect( form.textContent ).toContain( UNRESOLVED );
+        expect( form.textContent ).not.toContain( GENERIC );
+    } );
+
+    test( 'the markers survive, so reloading the page runs the check again', async () => {
+        returningFrom( 'DONO-2026-00049', 'dono-form-1' );
+        addForm( 'dono-form-1', config() );
+
+        mockStatus = UNREACHABLE;
+        await boot();
+
+        expect( window.location.search ).toContain( 'payment_intent_client_secret=pi_probe_secret' );
+        expect( window.location.search ).toContain( 'dono_return=1' );
+
+        // The reload a donor would do, on the same URL they were left with.
+        document.body.innerHTML = '';
+        const reloaded = addForm( 'dono-form-1', config() );
+        mockStatus = 'succeeded';
+        await boot();
+
+        expect( reloaded.textContent ).toContain( THANKS );
+    } );
+
+    test( 'checking again from the screen settles a payment that has since gone through', async () => {
+        returningFrom( 'DONO-2026-00050', 'dono-form-1' );
+        const form = addForm( 'dono-form-1', config() );
+
+        mockStatus = 'requires_action';
+        await boot();
+
+        const retry = [ ...form.querySelectorAll( 'button' ) ]
+            .find( ( b ) => b.textContent.trim() === CHECK );
+        expect( retry ).toBeDefined();
+
+        mockStatus = 'succeeded';
+        retry.click();
+        await settle();
+        await settle();
+
+        expect( form.textContent ).toContain( THANKS );
+        expect( window.location.search ).not.toContain( 'payment_intent_client_secret' );
     } );
 } );
 

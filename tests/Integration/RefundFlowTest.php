@@ -78,11 +78,12 @@ final class RefundFlowTest extends IntegrationTestCase
         $this->assertSame('partial_refund', $reloaded->status,
             'Sub-total refund leaves the donation in partial_refund, not refunded');
 
-        // Receipts are still voided - once any money goes back, the receipt is
-        // no longer a valid deductibility statement.
+        // The receipt stands: the org kept 3000 of the 5000, and the document
+        // renders from live data, so it states the refund and the net total.
         $receipts = Receipt::query()->where('donation_id', $donation->id)->getAll();
+        $this->assertNotEmpty($receipts);
         foreach ($receipts as $r) {
-            $this->assertTrue((bool) $r->voided);
+            $this->assertFalse((bool) $r->voided);
         }
     }
 

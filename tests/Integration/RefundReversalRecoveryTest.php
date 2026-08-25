@@ -76,8 +76,8 @@ final class RefundReversalRecoveryTest extends IntegrationTestCase
         $this->assertNull($after->voided_at);
     }
 
-    /** A refund still standing means the issued figure is still wrong. */
-    public function test_a_partial_refund_still_standing_keeps_the_receipt_void(): void
+    /** A refund still standing leaves money with the org, and a document for it. */
+    public function test_a_partial_refund_still_standing_leaves_the_receipt_usable(): void
     {
         $donation = $this->paidDonation('still-refunded@example.test');
         do_action('dono.async.issue_receipt', ['donation_id' => (int) $donation->id]);
@@ -88,9 +88,31 @@ final class RefundReversalRecoveryTest extends IntegrationTestCase
 
         $this->service()->reverseExternalRefund($donation, 're_part_a');
 
+        $this->assertFalse(
+            (bool) Receipt::query()->where('id', (int) $receipt->id)->get()->voided,
+            'the org kept 4000 of the 5000, and the receipt renders that'
+        );
+    }
+
+    /** A full refund voids it; giving any of it back is what puts it right. */
+    public function test_reversing_part_of_a_full_refund_puts_the_receipt_back(): void
+    {
+        $donation = $this->paidDonation('part-reversed@example.test');
+        do_action('dono.async.issue_receipt', ['donation_id' => (int) $donation->id]);
+        $receipt = Receipt::query()->where('donation_id', (int) $donation->id)->get();
+
+        $this->service()->recordExternalRefund($donation, 3000, 're_whole_a', null, 'gateway');
+        $this->service()->recordExternalRefund($donation, 2000, 're_whole_b', null, 'gateway');
         $this->assertTrue(
             (bool) Receipt::query()->where('id', (int) $receipt->id)->get()->voided,
-            'one refund is still standing, so the figure on the receipt is still wrong'
+            'precondition: nothing was retained, so the receipt was withdrawn'
+        );
+
+        $this->service()->reverseExternalRefund($donation, 're_whole_b');
+
+        $this->assertFalse(
+            (bool) Receipt::query()->where('id', (int) $receipt->id)->get()->voided,
+            '2000 is back with the org, so the donor has a document again'
         );
     }
 

@@ -665,6 +665,13 @@ final class DonationFormShortcode extends HookProvider
                 // where it was, and the generic copy sends them to check a
                 // statement with nothing on it.
                 'notCompleted'   => __('Your payment was not completed, so nothing has been charged. Please try again when you are ready.', 'dono-fundraising-platform'),
+                // The other half of that pair: the browser could not find out
+                // what happened, which is not the same as knowing nothing
+                // happened. A donor whose bank has taken the money must not be
+                // sent back to the form to pay a second time.
+                'unresolvedTitle'  => __('We could not confirm your payment', 'dono-fundraising-platform'),
+                'returnUnresolved' => __('We could not check on your payment, and your bank may still have taken it. Please do not pay again yet. Check again in a moment, or contact us with your reference and we will look it up.', 'dono-fundraising-platform'),
+                'checkAgain'       => __('Check again', 'dono-fundraising-platform'),
                 'paymentTitle'   => __('Complete your donation', 'dono-fundraising-platform'),
                 'paymentLoading' => __('Loading secure payment…', 'dono-fundraising-platform'),
                 'payNow'         => __('Pay', 'dono-fundraising-platform'),

@@ -247,6 +247,41 @@ function PendingScreen( { state, dispatch, config } ) {
     );
 }
 
+/**
+ * A donor is back from their bank and the browser could not find out what
+ * happened. The pending stash is deliberately kept: it is what a retried check
+ * reads, and the donation may yet turn out to be paid.
+ *
+ * No Donate again button. The one thing this screen knows is that a second
+ * payment might be a second charge.
+ */
+function UnresolvedScreen( { state, dispatch, config } ) {
+    const reference = String( state.submission?.reference || '' );
+    const ret       = detectStripeReturn( reference || null );
+
+    return (
+        <div class="dono-form__success dono-form__success--pending" role="alert">
+            <div class="dono-form__success-icon dono-form__success-icon--pending" aria-hidden="true">⏳</div>
+            <h3>{ config.i18n.unresolvedTitle || config.i18n.pendingTitle }</h3>
+            <p class="dono-form__thank-you">{ state.message || config.i18n.returnUnresolved || config.i18n.error }</p>
+            { reference && (
+                <p class="dono-form__reference">{ reference }</p>
+            ) }
+            { ret && config.stripe?.publishableKey && (
+                <div class="dono-form__success-actions">
+                    <button
+                        type="button"
+                        class="dono-form__button dono-form__button--primary"
+                        onClick={ () => resolveReturn( config, ret, dispatch ) }
+                    >
+                        { config.i18n.checkAgain }
+                    </button>
+                </div>
+            ) }
+        </div>
+    );
+}
+
 // A gateway shipped outside core registers with
 // window.dono.formGateways.register( id, { component, ready } ) before the
 // runtime mounts; `ready` gets that gateway's slice of the form config and
@@ -605,6 +640,10 @@ function FormBody( { state, dispatch, config } ) {
                 </div>
             </div>
         );
+    }
+
+    if ( state.status === 'unresolved' ) {
+        return <UnresolvedScreen state={ state } dispatch={ dispatch } config={ config } />;
     }
 
     if ( state.status === 'pending' ) {
@@ -974,6 +1013,51 @@ function ModalShell( { children, openLabel, config, initiallyOpen = false } ) {
     );
 }
 
+/**
+ * Ask Stripe how the intent the donor was redirected back with ended, and put
+ * the answer on screen.
+ *
+ * The markers are cleared only once the answer is terminal. On anything else
+ * they are the sole record the page holds of the payment, and dropping them
+ * leaves a donor whose bank has taken the money with no way to run the check
+ * again, on a screen inviting them to pay a second time.
+ */
+function resolveReturn( config, ret, dispatch ) {
+    const unresolved = () => dispatch( {
+        type:    'RETURN_UNRESOLVED',
+        data:    { reference: ret.reference },
+        message: config.i18n.returnUnresolved || config.i18n.error,
+    } );
+
+    dispatch( { type: 'CONFIRMING' } );
+
+    return resolveStripeReturn( config.stripe.publishableKey, ret.clientSecret )
+        .then( ( status ) => {
+            const outcome = returnOutcome( status );
+            if ( outcome === 'unknown' ) {
+                unresolved();
+                return;
+            }
+
+            clearStripeReturnParams();
+
+            if ( outcome === 'processing' ) {
+                dispatch( {
+                    type: 'SUBMIT_PENDING',
+                    data: { reference: ret.reference, status: 'processing' },
+                } );
+            } else if ( outcome === 'succeeded' ) {
+                dispatch( { type: 'SUBMIT_SUCCESS', data: { reference: ret.reference } } );
+            } else {
+                dispatch( {
+                    type:    'SUBMIT_ERROR',
+                    message: config.i18n.notCompleted || config.i18n.error,
+                } );
+            }
+        } )
+        .catch( unresolved );
+}
+
 function App( { config, host } ) {
     const [ state, dispatch ] = useReducer( reducer, config, initialState );
 
@@ -991,49 +1075,17 @@ function App( { config, host } ) {
             : null
     );
 
-    // Redirect-based methods such as iDEAL and Bancontact bounce back to
-    // return_url carrying Stripe's markers.
-    useEffect( () => {
-        const ret = claimReturn();
-        if ( ! ret || ! config.stripe?.publishableKey ) return;
-        dispatch( { type: 'CONFIRMING' } );
-        clearStripeReturnParams();
-        resolveStripeReturn( config.stripe.publishableKey, ret.clientSecret )
-            .then( ( status ) => {
-                const outcome = returnOutcome( status );
-                if ( outcome === 'processing' ) {
-                    dispatch( {
-                        type: 'SUBMIT_PENDING',
-                        data: { reference: ret.reference, status: 'processing' },
-                    } );
-                } else if ( outcome === 'succeeded' ) {
-                    dispatch( { type: 'SUBMIT_SUCCESS', data: { reference: ret.reference } } );
-                } else if ( outcome === 'not_completed' ) {
-                    dispatch( {
-                        type: 'SUBMIT_ERROR',
-                        message: config.i18n.notCompleted || config.i18n.error,
-                    } );
-                } else {
-                    dispatch( { type: 'SUBMIT_ERROR', message: config.i18n.error } );
-                }
-            } )
-            .catch( () => dispatch( { type: 'SUBMIT_ERROR', message: config.i18n.error } ) );
-    }, [] );
-
-    const body = <FormBody state={ state } dispatch={ dispatch } config={ config } />;
-
-    // Computed during the first render, before the effect above strips the
-    // params, so a modal form can open itself on a return that is its own.
+    // Which form on the page owns this return, decided once during the first
+    // render so a modal form can open itself on one that is its own.
     //
     // The claim is the marker, not the return: ownsPendingReturn falls through
-    // to every form when the stash names none that is on the page, so two
-    // modal-layout forms would otherwise both open, one of them onto a blank
-    // form the effect above is never going to fill.
+    // to every form when the stash names none that is on the page, so two forms
+    // would otherwise both resolve the same intent, one of them announcing a
+    // donation to a donor who never submitted it and a modal springing open
+    // beside the form that did.
     //
-    // Every gate the effect applies is applied here first, in the same order,
-    // so this cannot say a return is being rendered when it is not: it is the
-    // one decision, and the marker and the announcement below carry it to the
-    // donate-button script whole.
+    // It is the one decision: the effect below follows it, and the marker and
+    // the announcement carry it to the donate-button script whole.
     const returningHere = useMemo( () => {
         const ret = claimReturn();
         if ( ! ret || ! config.stripe?.publishableKey ) return false;
@@ -1049,6 +1101,16 @@ function App( { config, host } ) {
 
         return true;
     }, [] );
+
+    // Redirect-based methods such as iDEAL and Bancontact bounce back to
+    // return_url carrying Stripe's markers.
+    useEffect( () => {
+        if ( ! returningHere ) return;
+        const ret = claimReturn();
+        if ( ret ) resolveReturn( config, ret, dispatch );
+    }, [] );
+
+    const body = <FormBody state={ state } dispatch={ dispatch } config={ config } />;
 
     if ( config.layout === 'modal' ) {
         return (

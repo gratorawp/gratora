@@ -63,6 +63,7 @@ use Dono\Donors\Erasure\AnalyticsEventHandler;
 use Dono\Foundation\Transfer\CsvImporter;
 use Dono\Foundation\Transfer\DataExporter;
 use Dono\Foundation\Transfer\DataImporter;
+use Dono\Foundation\Upgrade\RestoreReceiptsRetainingMoney;
 use Dono\Foundation\Upgrade\UpgradeRunner;
 use Dono\Foundation\Upgrade\UpgradeJob;
 use Dono\Foundation\Upgrade\UpgradeNotice;
@@ -280,6 +281,7 @@ final class CoreModule implements DonoModule
     public static function upgradeRoutines(): array
     {
         return [
+            new RestoreReceiptsRetainingMoney(),
         ];
     }
 
