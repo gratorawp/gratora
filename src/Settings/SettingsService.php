@@ -256,6 +256,25 @@ final class SettingsService
                 'subject' => __('Your donation has been refunded', 'dono-fundraising-platform'),
                 'body'    => __("Hi {donor_name},\n\nWe have refunded your donation of {amount} to {campaign_title}. Funds should return to your card within 5 to 10 business days.\n\nIf this was a mistake or you have any questions, just reply to this email.\n\nThanks,\n{organisation_name}", 'dono-fundraising-platform'),
             ],
+            // The neutral set. An add-on can move something through the
+            // donation rails that is not a donation (a ticket order, say), and
+            // the wording above would tell that payer their purchase was a
+            // contribution. Same facts, no claim about what the money was.
+            'payment_instructions' => [
+                'enabled' => true,
+                'subject' => __('Payment instructions for {organisation_name}', 'dono-fundraising-platform'),
+                'body'    => __("Hi {donor_name},\n\nThank you. Your payment of {amount} is not complete yet.\n\n{instructions}\n\nPlease transfer the amount using the reference {reference}. We will confirm as soon as the payment arrives.\n\n{bank_details}\n\nThanks,\n{organisation_name}", 'dono-fundraising-platform'),
+            ],
+            'payment_pending' => [
+                'enabled' => true,
+                'subject' => __('Your payment is processing', 'dono-fundraising-platform'),
+                'body'    => __("Hi {donor_first_name},\n\nWe have received your payment of {amount}.\n\nReference: {reference}\n\nYour payment is being processed. Bank settlement can take a few business days; we will confirm as soon as it clears.\n\nThanks,\n{organisation_name}", 'dono-fundraising-platform'),
+            ],
+            'payment_refunded' => [
+                'enabled' => true,
+                'subject' => __('Your payment has been refunded', 'dono-fundraising-platform'),
+                'body'    => __("Hi {donor_name},\n\nWe have refunded your payment of {amount}. Funds should return to your card within 5 to 10 business days.\n\nReference: {reference}\n\nIf this was a mistake or you have any questions, just reply to this email.\n\nThanks,\n{organisation_name}", 'dono-fundraising-platform'),
+            ],
             'recurring_renewal' => [
                 'enabled' => true,
                 'subject' => __('Your recurring donation renewed', 'dono-fundraising-platform'),
@@ -326,6 +345,9 @@ final class SettingsService
             'donation_pending'            => array_merge($donation, ['reference']),
             'donation_refunded'           => array_merge($donation, ['reference']),
             'offline_instructions'        => array_merge($donation, ['reference', 'bank_details', 'instructions']),
+            'payment_pending'             => array_merge($donation, ['reference']),
+            'payment_refunded'            => array_merge($donation, ['reference']),
+            'payment_instructions'        => array_merge($donation, ['reference', 'bank_details', 'instructions']),
             // No receipt_number: the renewal notice goes out before the receipt
             // row is issued, so the tag could only ever resolve to nothing.
             'recurring_renewal'           => array_merge($donation, ['reference']),

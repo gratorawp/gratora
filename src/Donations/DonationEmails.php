@@ -80,7 +80,7 @@ final class DonationEmails extends HookProvider
             '{donor_name}' => $donorName,
         ]);
 
-        $this->mailer->sendTemplate('offline_instructions', $email, [
+        $this->mailer->sendTemplate($this->templateFor('offline_instructions', $donation), $email, [
             'donor_name'        => $donorName,
             'organisation_name' => (string) get_bloginfo('name'),
             'campaign_title'    => $this->campaignTitle($donation),
@@ -97,7 +97,7 @@ final class DonationEmails extends HookProvider
         $email = $this->resolveDonorEmail($donation);
         if ($email === null) return;
 
-        $this->mailer->sendTemplate('donation_pending', $email, [
+        $this->mailer->sendTemplate($this->templateFor('donation_pending', $donation), $email, [
             'donor_first_name'  => $this->donorFirstName($donation),
             'donor_name'        => $this->donorName($donation),
             'organisation_name' => (string) get_bloginfo('name'),
@@ -253,7 +253,7 @@ final class DonationEmails extends HookProvider
         $email = $this->resolveDonorEmail($donation);
         if ($email === null) return;
 
-        $this->mailer->sendTemplate('donation_refunded', $email, [
+        $this->mailer->sendTemplate($this->templateFor('donation_refunded', $donation), $email, [
             'donor_first_name'  => $this->donorFirstName($donation),
             'donor_name'        => $this->donorName($donation),
             'organisation_name' => (string) get_bloginfo('name'),
@@ -327,6 +327,34 @@ final class DonationEmails extends HookProvider
         return (string) $donation->kind === 'donation'
             && ! (bool) $donation->is_test
             && ChannelClassifier::classify((array) ($donation->source_attribution ?? [])) !== 'manual';
+    }
+
+    /**
+     * Which template tells this donor what happened to their money.
+     *
+     * Core's donation wording is a claim about what the money was, and an
+     * add-on can move something through these rails that is not a donation:
+     * a ticket buyer told "we have refunded your donation" is being told the
+     * wrong thing about their own purchase, and unlike the receipt this is a
+     * notice they still have to get. The neutral set states the same facts
+     * without the claim, and the filter lets whoever owns the kind answer in
+     * its own words, naming the event or the order.
+     *
+     * @since 1.0.0
+     */
+    private function templateFor(string $donationTemplate, Donation $donation): string
+    {
+        $neutral = [
+            'offline_instructions' => 'payment_instructions',
+            'donation_pending'     => 'payment_pending',
+            'donation_refunded'    => 'payment_refunded',
+        ];
+
+        $template = (string) $donation->kind === 'donation'
+            ? $donationTemplate
+            : ($neutral[$donationTemplate] ?? $donationTemplate);
+
+        return (string) apply_filters('dono.email.donation_template', $template, $donationTemplate, $donation);
     }
 
     /** @since 1.0.0 */

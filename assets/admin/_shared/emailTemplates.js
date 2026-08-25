@@ -96,6 +96,27 @@ function coreTemplates() {
             tags:      tagsFor( 'donation_refunded', [ '{donor_first_name}', '{donor_name}', '{organisation_name}', '{amount}', '{campaign_title}', '{reference}' ] ),
         },
         {
+            id:        'payment_instructions',
+            label:     __( 'Offline payment instructions', 'dono-fundraising-platform' ),
+            desc:      __( 'The bank-transfer instructions for a payment that is not a donation, such as an order an add-on takes through the same rails.', 'dono-fundraising-platform' ),
+            recipient: __( 'Payer', 'dono-fundraising-platform' ),
+            tags:      tagsFor( 'payment_instructions', [ '{donor_first_name}', '{donor_name}', '{organisation_name}', '{amount}', '{campaign_title}', '{reference}', '{bank_details}', '{instructions}' ] ),
+        },
+        {
+            id:        'payment_pending',
+            label:     __( 'Pending payment', 'dono-fundraising-platform' ),
+            desc:      __( 'The processing notice for a payment that is not a donation, so the payer is not told their purchase was a contribution.', 'dono-fundraising-platform' ),
+            recipient: __( 'Payer', 'dono-fundraising-platform' ),
+            tags:      tagsFor( 'payment_pending', [ '{donor_first_name}', '{donor_name}', '{organisation_name}', '{amount}', '{campaign_title}', '{reference}' ] ),
+        },
+        {
+            id:        'payment_refunded',
+            label:     __( 'Payment refunded', 'dono-fundraising-platform' ),
+            desc:      __( 'The refund notice for a payment that is not a donation. Same facts as the donation one, without calling the money a donation.', 'dono-fundraising-platform' ),
+            recipient: __( 'Payer', 'dono-fundraising-platform' ),
+            tags:      tagsFor( 'payment_refunded', [ '{donor_first_name}', '{donor_name}', '{organisation_name}', '{amount}', '{campaign_title}', '{reference}' ] ),
+        },
+        {
             id:        'recurring_renewal',
             label:     __( 'Recurring renewal', 'dono-fundraising-platform' ),
             desc:      __( 'Sent for each successful renewal of a recurring donation.', 'dono-fundraising-platform' ),
