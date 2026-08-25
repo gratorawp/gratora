@@ -17,7 +17,7 @@ const cases = [
     [ 'HOPE 2026',    'DONATION' ],
     [ '.',            '-' ],
     [ '',             'DONATION' ],
-    [ 'GIFT',         'DONATION' ],
+    [ 'APPEAL',       'DONATION' ],
     [ 'a-b_c',        'DONATION' ],
     [ 'Ünïcode',      'DONATION' ],
 ];
