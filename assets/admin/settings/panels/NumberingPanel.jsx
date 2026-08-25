@@ -35,23 +35,67 @@ function buildRef( fmt, prefix, counter, year ) {
     return head + seq;
 }
 
+// The server clamps padding to at least one digit, and an empty box is sent as
+// null and stored as 0, so a preview that reads an empty box as five promises a
+// width nothing will mint.
 function clampPad( v ) {
-    return Math.max( 1, Math.min( 12, Number( v ) || 5 ) );
+    return Math.max( 1, Math.min( 12, Number( v ) || 0 ) );
+}
+
+/**
+ * The alphabet ReferenceGenerator accepts. A reference outside it cannot be
+ * matched by the admin or donor routes, so the generator strips it, and the
+ * settings route now refuses it rather than letting the screen promise a
+ * numbering scheme nobody would ever be given.
+ *
+ * @since 1.0.0
+ */
+export const isRefToken = ( raw ) => /^[A-Za-z0-9_-]+$/.test( String( raw ) );
+
+const tokenHelp = __( 'Letters, numbers, hyphens and underscores only.', 'dono-fundraising-platform' );
+
+/** @since 1.0.0 */
+function TokenInput( { value, bind, maxLength, placeholder, style } ) {
+    const invalid = ! isRefToken( value );
+    return (
+        <>
+            <input
+                type="text"
+                className={ `dono-input${ invalid ? ' is-invalid' : '' }` }
+                aria-invalid={ invalid || undefined }
+                maxLength={ maxLength }
+                placeholder={ placeholder }
+                style={ style }
+                { ...bind }
+            />
+            { invalid && (
+                <p className="dono-form-row__field-help" style={ { color: '#b42318' } }>{ tokenHelp }</p>
+            ) }
+        </>
+    );
 }
 
 export default function NumberingPanel( { s , active } ) {
     const year = new Date().getFullYear();
 
     // Live (possibly unsaved) format drives the format-card preview.
+    const rawSep    = String( s.value( 'separator', '-' ) );
+    const rawPrefix = {
+        donation: String( s.value( 'prefixes.donation', 'DONO' ) ),
+        receipt:  String( s.value( 'prefixes.receipt', 'REC' ) ),
+        refund:   String( s.value( 'prefixes.refund', 'REF' ) ),
+    };
+    // The preview shows what would be minted, so a value the generator would
+    // not accept falls back to the one it does rather than being drawn.
     const liveFmt = {
-        sep:         String( s.value( 'separator', '-' ) ),
+        sep:         isRefToken( rawSep ) ? rawSep : '-',
         padding:     clampPad( s.value( 'padding', 5 ) ),
         includeYear: !! s.value( 'include_year', true ),
     };
     const livePrefix = {
-        donation: String( s.value( 'prefixes.donation', 'DONO' ) ),
-        receipt:  String( s.value( 'prefixes.receipt', 'REC' ) ),
-        refund:   String( s.value( 'prefixes.refund', 'REF' ) ),
+        donation: isRefToken( rawPrefix.donation ) ? rawPrefix.donation : 'DONATION',
+        receipt:  isRefToken( rawPrefix.receipt )  ? rawPrefix.receipt  : 'RECEIPT',
+        refund:   isRefToken( rawPrefix.refund )   ? rawPrefix.refund   : 'REFUND',
     };
 
     // Saved format drives the counter card: setting a counter is an immediate
@@ -157,12 +201,11 @@ export default function NumberingPanel( { s , active } ) {
                     label={ __( 'Donation prefix', 'dono-fundraising-platform' ) }
                     help={ __( 'Leads every donation reference.', 'dono-fundraising-platform' ) }
                 >
-                    <input
-                        type="text"
-                        className="dono-input"
+                    <TokenInput
+                        value={ rawPrefix.donation }
                         maxLength={ 8 }
                         placeholder="DONO"
-                        { ...s.bind( 'prefixes.donation', 'DONO' ) }
+                        bind={ s.bind( 'prefixes.donation', 'DONO' ) }
                     />
                 </FormRow>
 
@@ -170,12 +213,11 @@ export default function NumberingPanel( { s , active } ) {
                     label={ __( 'Receipt prefix', 'dono-fundraising-platform' ) }
                     help={ __( 'Leads every receipt number.', 'dono-fundraising-platform' ) }
                 >
-                    <input
-                        type="text"
-                        className="dono-input"
+                    <TokenInput
+                        value={ rawPrefix.receipt }
                         maxLength={ 8 }
                         placeholder="REC"
-                        { ...s.bind( 'prefixes.receipt', 'REC' ) }
+                        bind={ s.bind( 'prefixes.receipt', 'REC' ) }
                     />
                 </FormRow>
 
@@ -183,12 +225,11 @@ export default function NumberingPanel( { s , active } ) {
                     label={ __( 'Refund prefix', 'dono-fundraising-platform' ) }
                     help={ __( 'Leads every refund reference.', 'dono-fundraising-platform' ) }
                 >
-                    <input
-                        type="text"
-                        className="dono-input"
+                    <TokenInput
+                        value={ rawPrefix.refund }
                         maxLength={ 8 }
                         placeholder="REF"
-                        { ...s.bind( 'prefixes.refund', 'REF' ) }
+                        bind={ s.bind( 'prefixes.refund', 'REF' ) }
                     />
                 </FormRow>
 
@@ -196,13 +237,12 @@ export default function NumberingPanel( { s , active } ) {
                     label={ __( 'Separator', 'dono-fundraising-platform' ) }
                     help={ __( 'Character between the prefix, year, and number.', 'dono-fundraising-platform' ) }
                 >
-                    <input
-                        type="text"
-                        className="dono-input"
+                    <TokenInput
+                        value={ rawSep }
                         maxLength={ 3 }
                         placeholder="-"
                         style={ { maxWidth: 90 } }
-                        { ...s.bind( 'separator', '-' ) }
+                        bind={ s.bind( 'separator', '-' ) }
                     />
                 </FormRow>
 

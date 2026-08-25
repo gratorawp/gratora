@@ -139,6 +139,51 @@ final class ReferenceGenerator
         return implode($sep, $parts);
     }
 
+    /**
+     * The alphabet a reference may carry: the admin and donor routes match on
+     * it, so a '.', '/' or '#' would mint references those routes cannot find.
+     *
+     * @since 1.0.0
+     */
+    public static function isToken(string $raw): bool
+    {
+        return $raw !== '' && preg_match('/^[A-Za-z0-9_-]+$/', $raw) === 1;
+    }
+
+    /**
+     * Refuse a numbering payload that would be coerced on the way out. The
+     * generator has always stripped these, silently, so the screen showed a
+     * scheme that was never minted.
+     *
+     * @param array<string,mixed> $input
+     *
+     * @throws InvalidReferenceToken
+     *
+     * @since 1.0.0
+     */
+    public static function assertTokens(array $input): void
+    {
+        $labels = [
+            'donation' => __('Donation prefix', 'dono-fundraising-platform'),
+            'receipt'  => __('Receipt prefix', 'dono-fundraising-platform'),
+            'refund'   => __('Refund prefix', 'dono-fundraising-platform'),
+        ];
+
+        if (array_key_exists('separator', $input) && ! self::isToken((string) $input['separator'])) {
+            throw new InvalidReferenceToken(
+                __('Separator', 'dono-fundraising-platform'),
+                (string) $input['separator'],
+            );
+        }
+
+        $prefixes = is_array($input['prefixes'] ?? null) ? $input['prefixes'] : [];
+        foreach ($labels as $scope => $label) {
+            if (array_key_exists($scope, $prefixes) && ! self::isToken((string) $prefixes[$scope])) {
+                throw new InvalidReferenceToken($label, (string) $prefixes[$scope]);
+            }
+        }
+    }
+
     /** @since 1.0.0 */
     private function sanitizeToken(string $raw, string $fallback): string
     {

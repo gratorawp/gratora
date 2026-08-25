@@ -448,6 +448,10 @@ final class SettingsService
             BaseCurrencyLock::assert($input, $current);
         }
 
+        if ($group === 'numbering') {
+            ReferenceGenerator::assertTokens($input);
+        }
+
         $next    = $this->merge($current, $this->accept($group, $cfg, $input));
 
         // Replace mapping wholesale; deep-merge would prevent removing roles.

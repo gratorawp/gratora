@@ -7,6 +7,7 @@ use Dono\Foundation\Auth\Capabilities;
 
 use Dono\Currency\BaseCurrencyLock;
 use Dono\Currency\BaseCurrencyLocked;
+use Dono\Foundation\References\InvalidReferenceToken;
 use Dono\Donors\DonorRetention;
 use Dono\Settings\SettingsService;
 use WP_Error;
@@ -132,6 +133,8 @@ final class SettingsController
             $saved = $this->settings->update($group, $body);
         } catch (BaseCurrencyLocked $e) {
             return new WP_Error('dono_base_currency_locked', $e->getMessage(), ['status' => 409]);
+        } catch (InvalidReferenceToken $e) {
+            return new WP_Error('dono_invalid_reference_token', $e->getMessage(), ['status' => 400]);
         }
 
         return new WP_REST_Response(SecretRedactor::redact($saved), 200);
