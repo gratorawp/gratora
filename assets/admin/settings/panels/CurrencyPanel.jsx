@@ -5,7 +5,7 @@ import Card from '../../_shared/components/Card';
 import FormRow from '../../_shared/components/FormRow';
 import Btn from '../../_shared/components/Btn';
 import { ToggleRow } from '../../_shared/components/Switch';
-import { CURRENCIES, LOCALES, currencyByCode, previewAmount } from '../../_shared/currency';
+import { CURRENCIES, currencyByCode, previewAmount } from '../../_shared/currency';
 
 function fmtRate( n ) {
     const v = Number( n );
@@ -372,27 +372,6 @@ export default function CurrencyPanel( { s, fx } ) {
                                 previewAmount( 10, { decimalPlaces, decimalSep, thousandSep, symbol, symbolPosition: 'after' } )
                             ) }
                         </option>
-                    </select>
-                </FormRow>
-            </Card>
-
-            <Card
-                title={ __( 'Locale', 'dono-fundraising-platform' ) }
-                meta={ __( 'Dates on receipts and exports', 'dono-fundraising-platform' ) }
-                edited={ s.isDirty }
-            >
-                <FormRow
-                    label={ __( 'Locale', 'dono-fundraising-platform' ) }
-                    help={ __( 'Defaults to your WordPress site language.', 'dono-fundraising-platform' ) }
-                >
-                    <select
-                        className="dono-select"
-                        value={ s.value( 'locale', '' ) }
-                        onChange={ ( e ) => s.setValue( 'locale' )( e.target.value ) }
-                    >
-                        { LOCALES.map( ( l ) => (
-                            <option key={ l.code } value={ l.code }>{ l.label }</option>
-                        ) ) }
                     </select>
                 </FormRow>
             </Card>

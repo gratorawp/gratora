@@ -45,7 +45,6 @@ final class SettingsService
             'defaults' => [
                 'default_currency'     => 'USD',
                 'supported_currencies' => ['USD'],
-                'locale'               => '',
                 'format' => [
                     'decimal_places'  => 2,
                     'decimal_sep'     => '.',
