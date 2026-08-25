@@ -113,6 +113,32 @@ final class ReadinessServiceTest extends IntegrationTestCase
     }
 
     /**
+     * The gaps list asks whether a gateway holding credentials is missing its
+     * live pair, so a site with no credentials at all comes back empty and the
+     * row went green saying live keys were on file. An offline-only charity
+     * reads a whole green money group built on that sentence. The status is
+     * deliberate and stays a pass; only the claim was untrue.
+     */
+    public function test_live_mode_does_not_claim_keys_nobody_looked_for(): void
+    {
+        $this->enableOffline();
+
+        $check = $this->checks()['mode'];
+
+        $this->assertSame(ReadinessService::PASS, $check['status']);
+        $this->assertStringNotContainsString('live keys on file', (string) $check['label']);
+    }
+
+    /** And the stronger sentence is still earned once a live key is stored. */
+    public function test_live_mode_says_keys_are_on_file_once_they_are(): void
+    {
+        update_option('dono_gateway_config', ['stripe' => ['enabled' => true]]);
+        (new StripeAccount(new Crypto()))->saveKeys(false, 'sk_live_x', 'pk_live_x');
+
+        $this->assertStringContainsString('live keys on file', (string) $this->checks()['mode']['label']);
+    }
+
+    /**
      * The failure the old screen could not see: live mode reading a test key
      * charges nobody while the donor sees a success page.
      */

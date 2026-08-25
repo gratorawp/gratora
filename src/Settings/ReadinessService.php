@@ -232,6 +232,20 @@ final class ReadinessService
             );
         }
 
+        // Nothing above establishes that any live key exists: $missing only asks
+        // whether a gateway that already holds credentials is missing its live
+        // pair, so a site with none at all reaches here with an empty list. An
+        // offline-only charity would read a green "live keys on file" with not
+        // one key stored. Same rule the licence block states above: say what is
+        // there rather than claiming what nobody looked for.
+        $live = [];
+        if ($this->switchedOn('stripe') && $this->stripe->hasKeysFor(false)) $live[] = 'stripe';
+        if ($this->switchedOn('paypal') && $this->payPal->hasKeysFor(false)) $live[] = 'paypal';
+
+        if ($live === []) {
+            return $this->pass('mode', 'money', __('Live mode is on', 'dono-fundraising-platform'));
+        }
+
         return $this->pass('mode', 'money', __('Live mode, with live keys on file', 'dono-fundraising-platform'));
     }
 
