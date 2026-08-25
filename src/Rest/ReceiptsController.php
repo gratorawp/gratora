@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Dono\Rest;
 
+use Dono\Receipts\OrgProfile;
+
 use Dono\Campaigns\Campaign;
 use Dono\Donations\Donation;
 use Dono\Donations\DonationRepository;
@@ -163,14 +165,7 @@ final class ReceiptsController
      */
     private function loadOrgProfile(): array
     {
-        $defaults = [
-            'name'          => get_bloginfo('name'),
-            'address_lines' => [],
-            'tax_id'        => '',
-            'email'         => get_option('admin_email'),
-        ];
-        $stored = get_option('dono_org_profile', []);
-        return is_array($stored) ? array_merge($defaults, $stored) : $defaults;
+        return OrgProfile::load();
     }
 
     /** @since 1.0.0 */

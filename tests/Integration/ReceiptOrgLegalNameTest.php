@@ -61,6 +61,40 @@ final class ReceiptOrgLegalNameTest extends IntegrationTestCase
         $this->assertSame(get_bloginfo('name'), $this->orgOnTheReceipt()['name']);
     }
 
+    /**
+     * The receipt in the donor's inbox links to the download route, which
+     * re-renders from its own copy of the organisation. That copy is the one
+     * the donor opens, so the name has to resolve there too.
+     */
+    public function test_the_receipt_the_donor_downloads_carries_the_legal_name(): void
+    {
+        update_option('dono_org_profile', [
+            'name'          => '',
+            'legal_name'    => 'Helping Hands Foundation e.V.',
+            'address_lines' => ['1 Market Street'],
+            'email'         => 'hello@example.org',
+        ], false);
+
+        $ref = new \ReflectionMethod(\Dono\Rest\ReceiptsController::class, 'loadOrgProfile');
+        $ref->setAccessible(true);
+        $org = $ref->invoke(
+            \Dono\Foundation\Plugin::instance()->container->get(\Dono\Rest\ReceiptsController::class)
+        );
+
+        $this->assertSame('Helping Hands Foundation e.V.', $org['name'], 'the downloaded receipt is headed by nobody');
+    }
+
+    /** The yearly summary a donor keeps for tax is the same promise. */
+    public function test_the_annual_statement_carries_the_legal_name(): void
+    {
+        update_option('dono_org_profile', [
+            'name'       => '',
+            'legal_name' => 'Helping Hands Foundation e.V.',
+        ], false);
+
+        $this->assertSame('Helping Hands Foundation e.V.', \Dono\Receipts\OrgProfile::load()['name']);
+    }
+
     private function driveDonationToPaid(): string
     {
         $create = new WP_REST_Request('POST', '/dono/v1/donations');

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Dono\Donors\Portal;
 
+use Dono\Receipts\OrgProfile;
+
 use Dono\Donations\Donation;
 use Dono\Donations\DonationQueries;
 use Dono\Donations\Refund;
@@ -91,8 +93,8 @@ final class AnnualStatementBuilder
             $totals[] = ['currency' => $cur, 'amount' => Money::format($cents, $cur)];
         }
 
-        $org      = get_option('dono_org_profile', []);
-        $orgName  = (string) ($org['name'] ?? get_bloginfo('name'));
+        $org      = OrgProfile::load();
+        $orgName  = (string) $org['name'];
         $donorName = trim(($donor->first_name ?? '') . ' ' . ($donor->last_name ?? ''));
         if ($donorName === '') $donorName = __('Friend', 'dono-fundraising-platform');
 

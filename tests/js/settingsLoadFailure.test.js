@@ -82,3 +82,27 @@ test( 'Retry asks for the group again', async () => {
     expect( after ).toBeGreaterThan( before );
     expect( shownPanels( root ).map( ( d ) => d.textContent ).join( ' ' ) ).not.toContain( 'Could not load these settings.' );
 } );
+
+/**
+ * Currency is the one tab whose group is two sources, and the second exposes
+ * no reload. Retry has to work there rather than throwing on the click.
+ */
+test( 'Retry works on a tab whose group has more than one source', async () => {
+    const root = await mountOn( 'currency' );
+
+    // Every tab is rendered and the others are only hidden, so the button has
+    // to be found inside the visible panel or this reaches another tab's.
+    const panel = shownPanels( root )[ 0 ];
+    const retry = [ ...panel.querySelectorAll( 'button' ) ].find( ( b ) => b.textContent.trim() === 'Retry' );
+    expect( retry ).toBeTruthy();
+
+    settingsFail = false;
+    const before = apiFetch.mock.calls.length;
+
+    // The second source exposes no reload, so an unguarded call throws here and
+    // the only way out of a failed Currency tab is a full page reload.
+    expect( () => retry.click() ).not.toThrow();
+    await settle();
+
+    expect( apiFetch.mock.calls.length ).toBeGreaterThan( before );
+} );

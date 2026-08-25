@@ -92,7 +92,7 @@ export function SettingsGroup( { of, children } ) {
             <div className="dono-panel">
                 <Card>
                     <p style={ { color: '#b42318', margin: '0 0 12px' } }>{ failed.loadError }</p>
-                    <Btn variant="secondary" onClick={ () => groups.forEach( ( g ) => g.reload() ) }>
+                    <Btn variant="secondary" onClick={ () => groups.forEach( ( g ) => g.reload?.() ) }>
                         { __( 'Retry', 'dono-fundraising-platform' ) }
                     </Btn>
                 </Card>

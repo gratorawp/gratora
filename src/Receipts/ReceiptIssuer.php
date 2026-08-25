@@ -544,25 +544,6 @@ final class ReceiptIssuer
      */
     private function loadOrgProfile(): array
     {
-        $defaults = [
-            'name'          => get_bloginfo('name'),
-            'address_lines' => [],
-            'tax_id'        => '',
-            'email'         => get_option('admin_email'),
-        ];
-        $stored = get_option('dono_org_profile', []);
-        $org    = is_array($stored) ? array_merge($defaults, $stored) : $defaults;
-
-        // Legal name is the required field, and the settings screen calls it
-        // the entity that legally receives donations. Display name is optional,
-        // so an org that filled in the one it was asked for must not get a
-        // receipt from nobody.
-        $name = trim((string) ($org['name'] ?? ''));
-        if ($name === '') {
-            $name = trim((string) ($org['legal_name'] ?? '')) ?: (string) get_bloginfo('name');
-        }
-        $org['name'] = $name;
-
-        return $org;
+        return OrgProfile::load();
     }
 }
