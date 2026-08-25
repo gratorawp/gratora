@@ -7,6 +7,7 @@ namespace Dono\Donations;
 use Dono\Analytics\ErrorLog;
 use Dono\Analytics\EventRecorder;
 use Dono\Currency\FxRates;
+use Dono\Donors\Donor;
 use Dono\Donors\DonorService;
 use Dono\Forms\FormTypeRegistry;
 use Dono\Foundation\Crypto\Crypto;
@@ -615,6 +616,29 @@ final class DonationService
             }
             return ['donation' => $winner, 'created' => false];
         }
+
+        // The renewal's own creation seam, fired before confirm() so an add-on
+        // row exists by the time the donation counts.
+        //
+        // create() fires dono.donation.creating, which is where every add-on
+        // writes the rows that belong to a donation, and createRenewal() fired
+        // nothing at all. Gift Aid is the one that costs money: its stamper is
+        // the only writer of claim rows, so month one of a monthly donation was
+        // claimable and every renewal after it silently was not, with no screen
+        // or log saying so. On a 20 GBP monthly donor that is 55 GBP of
+        // unclaimed relief in the first year, across the whole regular-giving
+        // base, which is the segment Gift Aid is worth most on.
+        //
+        // A separate hook rather than dono.donation.creating: a renewal has no
+        // DonationIntent and no form submission behind it, so the listeners
+        // that read those would be handed a lie. What carries over is the
+        // plan and the donor's standing record.
+        do_action(
+            'dono.donation.renewal_creating',
+            $donation,
+            $plan,
+            Donor::query()->where('id', (int) $plan->donor_id)->get()
+        );
 
         // Confirm immediately (caller has already established that the gateway
         // charge succeeded; we just mirror that locally).
