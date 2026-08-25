@@ -18,6 +18,7 @@ const SKIP_LABELS = {
     no_email:          __( 'no email address', 'dono-fundraising-platform' ),
     invalid_email:     __( 'the email address is not one', 'dono-fundraising-platform' ),
     invalid_amount:    __( 'the amount is missing, zero or unreadable', 'dono-fundraising-platform' ),
+    invalid_date:      __( 'the date is missing or unreadable', 'dono-fundraising-platform' ),
     duplicate_in_file: __( 'the same row appears earlier in this file', 'dono-fundraising-platform' ),
     already_imported:  __( 'already imported by an earlier run', 'dono-fundraising-platform' ),
     donor_erased:      __( 'the donor was erased on this site', 'dono-fundraising-platform' ),
@@ -117,8 +118,11 @@ export default function CsvImportCard( { setNotice } ) {
 
     const fields     = inspected?.fields || {};
     const headers    = inspected?.headers || [];
-    const ready      = !! mapping.email;
     const withAmount = !! mapping.amount;
+    // A donation has to say when the money arrived: the importer refuses every
+    // row without one, so a file mapped this far would import nothing at all.
+    const needsDate  = withAmount && ! mapping.date;
+    const ready      = !! mapping.email && ! needsDate;
 
     const rowFor = ( field ) => {
         const chosen = mapping[ field ] || '';
@@ -127,7 +131,9 @@ export default function CsvImportCard( { setNotice } ) {
             <tr key={ field }>
                 <th scope="row">
                     { fields[ field ] || field }
-                    { field === 'email' && <span className="dono-csv-map__req"> *</span> }
+                    { ( field === 'email' || ( field === 'date' && withAmount ) ) && (
+                        <span className="dono-csv-map__req"> *</span>
+                    ) }
                 </th>
                 <td>
                     <select className="dono-input" value={ chosen } onChange={ setField( field ) }>
@@ -195,9 +201,9 @@ export default function CsvImportCard( { setNotice } ) {
 
                     <h4 className="dono-csv-map__heading">{ __( 'The donation', 'dono-fundraising-platform' ) }</h4>
                     <p className="dono-tools-note">
-                        { withAmount
-                            ? __( 'Each row will be imported as a donation.', 'dono-fundraising-platform' )
-                            : __( 'No amount column is mapped, so this file will import donors only. Map Amount to bring their donations in as well.', 'dono-fundraising-platform' ) }
+                        { ! withAmount && __( 'No amount column is mapped, so this file will import donors only. Map Amount to bring their donations in as well.', 'dono-fundraising-platform' ) }
+                        { withAmount && ! needsDate && __( 'Each row will be imported as a donation.', 'dono-fundraising-platform' ) }
+                        { needsDate && __( 'Map the Date column as well. A donation has to say when the money arrived, and every row without a date is skipped.', 'dono-fundraising-platform' ) }
                     </p>
                     <table className="dono-csv-map">
                         <tbody>{ DONATION_FIELDS.map( rowFor ) }</tbody>
@@ -226,7 +232,9 @@ export default function CsvImportCard( { setNotice } ) {
 
                     { ! ready && (
                         <p className="dono-tools-note">
-                            { __( 'Email has to be mapped. Everything else is optional.', 'dono-fundraising-platform' ) }
+                            { ! mapping.email
+                                ? __( 'Email has to be mapped before this file can be previewed.', 'dono-fundraising-platform' )
+                                : __( 'Date has to be mapped as well, or every row is skipped for want of one.', 'dono-fundraising-platform' ) }
                         </p>
                     ) }
 
