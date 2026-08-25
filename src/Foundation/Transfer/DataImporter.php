@@ -296,6 +296,33 @@ final class DataImporter
         }
 
         $existingId = $this->findExisting($table, $row);
+
+        // A reference only identifies a donation within one site. The counter
+        // behind it starts at one on every install and the default prefix is
+        // the same everywhere, so DONO-2026-00007 exists on most of them and
+        // belongs to a different person on each. hashOfDonorBehind() already
+        // refuses to trust one on its own, for exactly this reason, and says so
+        // at length; findExisting() matched on it alone.
+        //
+        // So any target that had taken donations of its own counted the file's
+        // donation as already present and never inserted it, reporting it under
+        // `existing` as though it were already there. Then it mapped the source
+        // id onto the stranger's row, and every child resolved through that: a
+        // private staff note about one donor filed under another, refunds and
+        // receipts reattached to a donation that never had them.
+        //
+        // Reported rather than merged. Renumbering the incoming donation would
+        // keep it, but its reference is printed on the donor's receipt and
+        // quoted in their email, so that is a decision for the operator rather
+        // than a silent repair.
+        if ($existingId > 0
+            && $table === 'dono_donations'
+            && ! self::sameDonation($row, DB::table($table)->where('id', $existingId)->get())
+        ) {
+            $this->drop($table, 'reference_collision');
+            return;
+        }
+
         if ($existingId > 0) {
             // Left exactly as it is. An import that overwrote would make
             // running it twice destructive, and this is the shape that lets a

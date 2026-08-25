@@ -466,12 +466,17 @@ final class DataRoundTripTest extends IntegrationTestCase
             'address and all'
         );
 
-        // Known and unresolved, pinned so it cannot change unnoticed: a
-        // donation is still matched on its reference alone, so the stranger's
-        // money is read as Jane's and does not land. The donor merge is what
-        // this guard closes; the donation merge under it needs the natural key
-        // widened, which is a separate decision.
-        $this->assertSame(1, $result['existing']['dono_donations'] ?? 0, 'the stranger donation matched the one here');
+        // That separate decision has since been taken. A reference identifies
+        // a donation within one site only, so the stranger's number matching
+        // Jane's is not the same donation: it is reported to the operator
+        // rather than folded into hers, which is what used to make her row
+        // absorb their refunds, receipts and staff notes.
+        $this->assertSame(0, $result['existing']['dono_donations'] ?? 0, 'not read as the donation already here');
+        $this->assertSame(
+            1,
+            $result['dropped']['dono_donations']['reference_collision'] ?? 0,
+            'the operator is told, instead of it vanishing into the existing count'
+        );
         $this->assertSame(1, Donation::query()->count(), 'so it did not land as its own row');
         $this->assertSame(
             (int) $jane->id,
@@ -574,17 +579,21 @@ final class DataRoundTripTest extends IntegrationTestCase
                     'created_at' => gmdate('Y-m-d H:i:s'),
                     'updated_at' => gmdate('Y-m-d H:i:s'),
                 ]],
+                // The SAME donation, not merely the same number: amount,
+                // currency and created_at all match the row seeded above. A
+                // colliding reference on a DIFFERENT donation is now reported
+                // rather than matched, and that is not what this test is about.
                 'dono_donations' => [[
                     'id'           => 9,
                     'donor_id'     => 5,
                     'reference'    => $reference,
-                    'amount_cents' => 9900,
-                    'net_cents'    => 9900,
+                    'amount_cents' => 4200,
+                    'net_cents'    => 4200,
                     'currency'     => 'USD',
                     'gateway'      => 'manual',
                     'status'       => 'paid',
-                    'created_at'   => '2026-01-02 03:04:05',
-                    'updated_at'   => '2026-01-02 03:04:05',
+                    'created_at'   => (string) $donation->created_at,
+                    'updated_at'   => (string) $donation->updated_at,
                 ]],
                 'dono_receipts' => [[
                     'id'             => 4,
