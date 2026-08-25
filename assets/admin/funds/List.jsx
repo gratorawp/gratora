@@ -50,6 +50,18 @@ function arrangeTree( items ) {
     return out;
 }
 
+// An active fund outside its own schedule takes no donations, so the row says
+// which of the two it is rather than calling it Active.
+export const fundIsOpen = ( item ) => !! item.is_active && ! item.schedule_state;
+
+/** @since 1.0.0 */
+export function fundStatusLabel( item ) {
+    if ( ! item.is_active ) return __( 'Inactive', 'dono-fundraising-platform' );
+    if ( item.schedule_state === 'scheduled' ) return __( 'Scheduled', 'dono-fundraising-platform' );
+    if ( item.schedule_state === 'ended' ) return __( 'Ended', 'dono-fundraising-platform' );
+    return __( 'Active', 'dono-fundraising-platform' );
+}
+
 function fundKpis( stats ) {
     return [
         {
@@ -285,8 +297,8 @@ export default function List() {
                 }
                 return (
                     <span className="dono-fund-status">
-                        <span className={ 'dono-fund-dot ' + ( item.is_active ? 'is-on' : 'is-off' ) } />
-                        { item.is_active ? __( 'Active', 'dono-fundraising-platform' ) : __( 'Inactive', 'dono-fundraising-platform' ) }
+                        <span className={ 'dono-fund-dot ' + ( fundIsOpen( item ) ? 'is-on' : 'is-off' ) } />
+                        { fundStatusLabel( item ) }
                     </span>
                 );
             },

@@ -1067,7 +1067,7 @@ final class DonationFormShortcode extends HookProvider
                     $fpAllow      = (bool) ($attrs['allowEmpty'] ?? false);
                     $fpRepo       = new \Dono\Funds\FundRepository();
                     $fpAllowedIds = array_values(array_filter(array_map('intval', (array) ($attrs['fundIds'] ?? []))));
-                    $fpOptions    = $fpRepo->pickerOptions($fpAllowedIds !== [] ? $fpAllowedIds : null);
+                    $fpOptions    = $fpRepo->pickerOptions($fpAllowedIds !== [] ? $fpAllowedIds : null, true);
 
                     $fpSelectable = array_values(array_map(
                         static fn ($o) => $o['id'],

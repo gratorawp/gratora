@@ -6,6 +6,7 @@ namespace Dono\Funds;
 
 defined('ABSPATH') || exit;
 
+use Dono\Foundation\Time\ScheduleWindow;
 use Dono\Vendor\Queryable\Model;
 use Dono\Vendor\Queryable\Schema\Table;
 
@@ -38,6 +39,27 @@ final class Fund extends Model
     public ?string $accounting_code = null;
     public string $created_at;
     public string $updated_at;
+
+    /**
+     * Whether this fund can take a donation right now: active, and inside its
+     * schedule if it has one. $now is a UTC stamp.
+     *
+     * @since 1.0.0
+     */
+    public function isOpen(?string $now = null): bool
+    {
+        return (bool) $this->is_active && $this->scheduleState($now) === null;
+    }
+
+    /**
+     * @return null|'scheduled'|'ended'
+     *
+     * @since 1.0.0
+     */
+    public function scheduleState(?string $now = null): ?string
+    {
+        return ScheduleWindow::state($this->starts_at, $this->ends_at, $now);
+    }
 }
 
 Fund::schema(function (Table $t): void {

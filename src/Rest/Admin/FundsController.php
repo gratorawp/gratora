@@ -230,6 +230,9 @@ final class FundsController
             'last_paid_at'    => $f->last_paid_at,
             'starts_at'       => $f->starts_at,
             'ends_at'         => $f->ends_at,
+            // An active fund outside its own schedule is not taking donations,
+            // and the list has to say which of the two it is.
+            'schedule_state'  => $f->scheduleState(),
             'accounting_code' => $f->accounting_code,
             'created_at'      => $f->created_at,
             'updated_at'      => $f->updated_at,

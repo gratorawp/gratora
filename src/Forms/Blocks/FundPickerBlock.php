@@ -42,7 +42,7 @@ final class FundPickerBlock implements Block
     {
         $funds      = new FundRepository();
         $allowedIds = array_values(array_filter(array_map('intval', (array) ($attrs['fundIds'] ?? []))));
-        $options    = $funds->pickerOptions($allowedIds !== [] ? $allowedIds : null);
+        $options    = $funds->pickerOptions($allowedIds !== [] ? $allowedIds : null, true);
 
         $selectable = array_values(array_map(
             static fn (array $o): string => $o['id'],

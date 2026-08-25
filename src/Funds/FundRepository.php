@@ -75,18 +75,37 @@ final class FundRepository
     }
 
     /**
-     * Active funds shaped for donor-facing pickers: one-level hierarchy where a parent
+     * Active funds inside their schedule, in the same order.
+     *
+     * @return array<Fund>
+     *
+     * @since 1.0.0
+     */
+    public function listOpen(?string $now = null): array
+    {
+        return array_values(array_filter(
+            $this->listActive(),
+            static fn (Fund $f): bool => $f->isOpen($now),
+        ));
+    }
+
+    /**
+     * Active funds shaped for a picker: one-level hierarchy where a parent
      * with active children is a non-selectable header. $allowedIds, when non-null,
      * filters to those ids but keeps parent headers whose children survive.
+     *
+     * $openOnly is what a donor sees: a fund scheduled to open next month is
+     * still one an author picks as a default today, so the editor's own lists
+     * do not apply the window.
      *
      * @param list<int>|null $allowedIds
      * @return list<array{id:string,label:string,description:string,depth:int,selectable:bool}>
      *
      * @since 1.0.0
      */
-    public function pickerOptions(?array $allowedIds = null): array
+    public function pickerOptions(?array $allowedIds = null, bool $openOnly = false): array
     {
-        $active = $this->listActive();
+        $active = $openOnly ? $this->listOpen() : $this->listActive();
 
         if ($allowedIds !== null) {
             $allow = array_flip(array_map('intval', $allowedIds));

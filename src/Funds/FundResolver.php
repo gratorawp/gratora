@@ -10,8 +10,9 @@ use Dono\Forms\Form;
 /**
  * Resolves which fund a donation belongs to.
  *
- * Precedence (first active wins): donor choice, form default, campaign
- * default, org default, any active fund.
+ * Precedence (first open wins): donor choice, form default, campaign
+ * default, org default, any open fund. A fund outside its schedule is closed:
+ * an admin who gave it an end date meant it to stop taking money then.
  *
  * @since 1.0.0
  */
@@ -44,12 +45,12 @@ final class FundResolver
         }
 
         $default = $this->funds->default();
-        if ($default && $default->is_active) {
+        if ($default && $default->isOpen()) {
             return (int) $default->id;
         }
 
-        $anyActive = Fund::query()->where('is_active', 1)->orderBy('sort_order', 'ASC')->get();
-        return $anyActive ? (int) $anyActive->id : null;
+        $open = $this->funds->listOpen();
+        return $open === [] ? null : (int) $open[0]->id;
     }
 
     /** @since 1.0.0 */
@@ -60,7 +61,7 @@ final class FundResolver
             return null;
         }
         $fund = Fund::query()->where('id', $fundId)->get();
-        return $fund && $fund->is_active ? (int) $fund->id : null;
+        return $fund && $fund->isOpen() ? (int) $fund->id : null;
     }
 
     /**
@@ -76,10 +77,12 @@ final class FundResolver
         if ($id === null) {
             return null;
         }
-        $hasActiveChild = Fund::query()
-            ->where('parent_fund_id', $id)
-            ->where('is_active', 1)
-            ->get();
-        return $hasActiveChild ? null : $id;
+        foreach (Fund::query()->where('parent_fund_id', $id)->where('is_active', 1)->getAll() as $child) {
+            if ($child->isOpen()) {
+                return null;
+            }
+        }
+
+        return $id;
     }
 }
