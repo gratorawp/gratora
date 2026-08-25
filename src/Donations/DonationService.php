@@ -198,13 +198,17 @@ final class DonationService
             $donation->donor_first_name = $givenFirst !== '' ? $givenFirst : null;
             $donation->donor_last_name  = $givenLast  !== '' ? $givenLast  : null;
 
-            // A donor who stayed erased through the lookup above keeps no name
-            // on a fresh row either. Erasure cleared this exact field on every
-            // donation they had; writing it back here would restore, one row at
-            // a time, what the erasure took.
+            // A donor who stayed erased through the lookup above keeps nothing
+            // of themselves on a fresh row either. Erasure cleared these exact
+            // fields on every donation they had; writing them back here would
+            // restore, one row at a time, what the erasure took. The list to
+            // track is CoreDonorDataHandler's, which also names the note as
+            // donor-authored and able to carry PII.
             if ($donor->redacted_at !== null) {
                 $donation->donor_first_name = null;
                 $donation->donor_last_name  = null;
+                $donation->note_to_org      = null;
+                $donation->note_public      = false;
             }
 
             $donation->save();

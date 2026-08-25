@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Dono\Tests\Integration;
 
+use Dono\Donations\DonationIntent;
+use Dono\Donations\DonationService;
 use Dono\Donors\Donor;
 use Dono\Donors\DonorRepository;
 use Dono\Donors\DonorService;
@@ -81,6 +83,43 @@ final class ErasedDonorStaysErasedTest extends IntegrationTestCase
         // identify anyone and the totals stay reportable by geography.
         $this->assertSame('DE', $reloaded->country);
         $this->assertNotNull($reloaded->redacted_at, 'and it is still marked erased');
+    }
+
+    /**
+     * The note is donor-authored prose, which is why erasure clears it on every
+     * donation they had. A later row recording money that arrived for them puts
+     * it back unless this says otherwise, and nothing removes it afterwards:
+     * redact() early-returns on an already-redacted donor, and the purge sweep
+     * never touches the donations table. Reachable on any migration still
+     * running alongside the old system, or an admin recording a cheque.
+     */
+    public function test_an_erased_donor_keeps_no_note_on_a_new_donation(): void
+    {
+        // Redaction keeps email_hash for the retention window, which is how a
+        // later donation reaches the erased row at all.
+        $email = 'erased-note-' . uniqid() . '@example.com';
+        $donor = $this->service()->findOrCreate($email, ['first_name' => 'Anna', 'last_name' => 'Bell']);
+        $this->service()->redact($donor);
+
+        ['donation' => $donation] = Plugin::instance()->container
+            ->get(DonationService::class)
+            ->createPending(new DonationIntent(
+                email:                     $email,
+                amount_cents:              5000,
+                currency:                  'EUR',
+                gateway:                   'offline',
+                note_to_org:               'For the hospice where my mother was cared for.',
+                note_public:               true,
+                reactivate_redacted_donor: false,
+            ));
+
+        $this->assertSame(
+            (int) $donor->id,
+            (int) $donation->donor_id,
+            'precondition: the donation landed on the erased row, not a new one'
+        );
+        $this->assertNull($donation->note_to_org, 'a donor-authored message came back for an erased donor');
+        $this->assertSame(0, (int) $donation->note_public);
     }
 
     public function test_a_genuine_new_donation_still_reactivates_and_back_fills(): void
