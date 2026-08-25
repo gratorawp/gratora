@@ -1962,11 +1962,36 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     }
 
     /** @since 1.0.0 */
+    /**
+     * Whether Stripe could have issued this id.
+     *
+     * The empty-string guard this replaces was a check for a state the column
+     * cannot hold: gateway_subscription_id is NOT NULL under
+     * unique(gateway, gateway_subscription_id), so a plan that never reached
+     * Stripe cannot record that absence as ''. The Give importer mints
+     * 'give-import-<id>' and DemoSeeder 'demo-subNNN' for exactly that reason,
+     * and both land here on the Stripe gateway.
+     *
+     * Sending one to Stripe answers resource_missing, which confirmedTerminal()
+     * cannot tell apart from a key rotated to a different account, so the throw
+     * stands: the donor's cancel fails, the plan stays active, and every retry
+     * fails identically. Donor erasure cancels plans first, so it takes that
+     * down with it.
+     *
+     * @since 1.0.0
+     */
+    private static function couldBeStripeSubscription(string $subId): bool
+    {
+        return str_starts_with($subId, 'sub_');
+    }
+
     public function cancelSubscription(RecurringPlan $plan, ?string $reason = null): void
     {
         $this->account->useTestMode((bool) $plan->is_test);
         $subId = (string) $plan->gateway_subscription_id;
-        if ($subId === '') {
+        if (! self::couldBeStripeSubscription($subId)) {
+            // Nothing is billing at Stripe under an id Stripe never issued, so
+            // the local cancel is the whole of it.
             return;
         }
         try {

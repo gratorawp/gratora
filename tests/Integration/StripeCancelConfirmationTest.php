@@ -88,6 +88,47 @@ final class StripeCancelConfirmationTest extends IntegrationTestCase
         $this->assertSame([], $cancellationMails, 'no donor is told a subscription stopped that did not');
     }
 
+    /**
+     * A plan that never reached Stripe at all.
+     *
+     * gateway_subscription_id is NOT NULL under unique(gateway,
+     * gateway_subscription_id), so a plan Stripe never issued an id for cannot
+     * record that absence as an empty string: the Give importer mints
+     * 'give-import-<id>' and DemoSeeder 'demo-subNNN' for exactly that reason.
+     * The only escape hatch here was a check for '', which that column cannot
+     * hold, so the placeholder went to Stripe as though it were real.
+     *
+     * Stripe answers resource_missing, which confirmedTerminal() cannot tell
+     * apart from a key rotated to a different account, so the throw stood: the
+     * donor's cancel failed, the plan stayed active, and every retry failed the
+     * same way. Donor erasure cancels plans first, so it took that with it.
+     */
+    public function test_an_id_stripe_never_issued_cancels_locally(): void
+    {
+        $plan = $this->seedPlan('give-import-42');
+
+        // Stripe would answer resource_missing, as it does for any unknown id.
+        $this->remoteStatus = null;
+
+        $won = Plugin::instance()->container->get(RecurringCanceller::class)->cancel($plan, 'donor asked');
+
+        $this->assertTrue($won, 'nothing is billing at Stripe, so the local cancel is the whole of it');
+        $this->assertSame('cancelled', (string) RecurringPlan::query()->find('id', (int) $plan->id)->status);
+        $this->assertSame([], $this->calls, 'and Stripe was never asked about an id it never issued');
+    }
+
+    /** The demo seeder's placeholder is the same shape and the same answer. */
+    public function test_a_seeded_placeholder_cancels_locally_too(): void
+    {
+        $plan = $this->seedPlan('demo-sub001');
+        $this->remoteStatus = null;
+
+        $this->assertTrue(
+            Plugin::instance()->container->get(RecurringCanceller::class)->cancel($plan, 'tidying up'),
+            'a demo plan is cancellable like any other'
+        );
+    }
+
     public function test_a_subscription_stripe_reports_cancelled_is_accepted(): void
     {
         $plan = $this->seedPlan();
@@ -125,7 +166,7 @@ final class StripeCancelConfirmationTest extends IntegrationTestCase
         }
     }
 
-    private function seedPlan(): RecurringPlan
+    private function seedPlan(?string $subscriptionId = null): RecurringPlan
     {
         $donor = Plugin::instance()->container
             ->get(\Dono\Donors\DonorService::class)
@@ -138,7 +179,7 @@ final class StripeCancelConfirmationTest extends IntegrationTestCase
         $plan->donor_id                = (int) $donor->id;
         $plan->gateway                 = 'stripe';
         $plan->is_test                 = true;
-        $plan->gateway_subscription_id = 'sub_test_cancel_' . bin2hex(random_bytes(4));
+        $plan->gateway_subscription_id = $subscriptionId ?? 'sub_test_cancel_' . bin2hex(random_bytes(4));
         $plan->gateway_customer_id     = 'cus_test_cancel';
         $plan->amount_cents            = 2500;
         $plan->currency                = 'USD';
