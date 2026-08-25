@@ -369,7 +369,7 @@ final class DonationFormShortcode extends HookProvider
         // Inline script-handle deps; the preview iframe is a standalone document.
         $depScripts = '';
         $scripts    = wp_scripts();
-        foreach ($preview['jsDeps'] as $handle) {
+        foreach (self::withDependencies($preview['jsDeps']) as $handle) {
             $reg = $scripts->registered[$handle] ?? null;
             $src = $reg ? (string) $reg->src : '';
             if ($src !== '') {
@@ -414,6 +414,53 @@ final class DonationFormShortcode extends HookProvider
             '</html>',
         ]);
         // phpcs:enable WordPress.WP.EnqueuedResources
+    }
+
+    /**
+     * Every handle the document needs, dependencies before dependents.
+     *
+     * wp_enqueue_script resolves a handle's own dependencies; a srcdoc document
+     * has no queue to resolve them in, so this walks them itself. Emitting only
+     * the declared list shipped wp-i18n without wp-hooks, which wp-i18n depends
+     * on and reads at module scope: it threw, wp.i18n was never defined, the
+     * runtime threw on top of that, and the preview never hydrated. What was
+     * left on screen was the server-rendered fallback markup, which carries
+     * almost none of the classes runtime.css is scoped to, so the form read as
+     * completely unstyled while the stylesheet was loading perfectly well.
+     *
+     * @param list<string> $handles
+     * @return list<string>
+     *
+     * @since 1.0.0
+     */
+    private static function withDependencies(array $handles): array
+    {
+        $scripts = wp_scripts();
+        $seen    = [];
+        $ordered = [];
+
+        // Post-order: a handle is appended only after everything it needs.
+        // $seen is set on entry, so a dependency cycle terminates instead of
+        // recursing until the stack gives out.
+        $walk = static function (string $handle) use (&$walk, $scripts, &$seen, &$ordered): void {
+            if (isset($seen[$handle])) {
+                return;
+            }
+            $seen[$handle] = true;
+
+            $registered = $scripts->registered[$handle] ?? null;
+            foreach ((array) ($registered->deps ?? []) as $dep) {
+                $walk((string) $dep);
+            }
+
+            $ordered[] = $handle;
+        };
+
+        foreach ($handles as $handle) {
+            $walk((string) $handle);
+        }
+
+        return $ordered;
     }
 
     /** @since 1.0.0 */
