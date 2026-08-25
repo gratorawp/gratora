@@ -13,6 +13,7 @@ use Dono\Donors\Donor;
 use Dono\Donors\DonorService;
 use Dono\Exports\DonorExporter;
 use Dono\Forms\Form;
+use Dono\Funds\Fund;
 use Dono\Foundation\Plugin;
 use Dono\Foundation\Transfer\DataExporter;
 use Dono\Foundation\Transfer\DataImporter;
@@ -862,6 +863,152 @@ final class DataRoundTripTest extends IntegrationTestCase
     }
 
     /** A campaign keeps its slug, which is what the import matches it by. */
+    /**
+     * The fund picker keeps its allowlist and its preselection inside the block
+     * markup, so the column remapping cannot reach them. Every install seeds a
+     * 'general' fund, so a restored file's funds land on shifted ids and a
+     * stale allowlist names funds that exist and are the wrong ones: the picker
+     * offers them and FormSubmissionValidator accepts a posted fund against the
+     * same wrong list.
+     *
+     * The source ids are rewritten in the file rather than staged by shuffling
+     * rows here, so the id the form must end up with is a number this test
+     * knows rather than one it recomputes the way the importer does.
+     */
+    public function test_a_restored_form_picker_names_the_funds_here_not_the_ones_it_left(): void
+    {
+        $fund = $this->seedFund('rt-picker-' . uniqid());
+
+        $form = $this->seedPickerForm([9001], '9001');
+
+        $export = $this->export();
+        $this->retargetFundInExport($export, (int) $fund->id, 9001);
+
+        // The form has to arrive as new: a form already here is matched on its
+        // slug, and a restore that matched everything would rewrite nothing.
+        // The fund stays, which is the point, and its id here is not 9001.
+        $this->wipeForms();
+        $this->import($export);
+
+        $attrs = $this->pickerAttrs((string) Form::query()->where('slug', $form->slug)->get()->blocks);
+
+        $this->assertSame(
+            [(int) $fund->id],
+            array_map('intval', (array) $attrs['fundIds']),
+            'the picker still offers whichever fund happens to hold the id it left behind'
+        );
+        $this->assertSame(
+            (string) $fund->id,
+            (string) $attrs['defaultId'],
+            'the preselected fund is whichever fund happens to hold that id here'
+        );
+    }
+
+    /**
+     * A restriction whose funds did not survive must stay a restriction. An
+     * empty fundIds means "every active fund" to FundPickerBlock and to
+     * FormSubmissionValidator alike, so dropping the unmatched ids would turn a
+     * form that offered one fund into one that offers all of them and switch
+     * off the check that stops a crafted POST routing anywhere in the org.
+     */
+    public function test_a_picker_whose_funds_did_not_survive_offers_nothing_rather_than_everything(): void
+    {
+        $this->seedFund('rt-orphan-' . uniqid());
+        $form = $this->seedPickerForm([9002], '9002');
+
+        $export = $this->export();
+        $this->wipeForms();
+        $this->import($export);
+
+        $attrs = $this->pickerAttrs((string) Form::query()->where('slug', $form->slug)->get()->blocks);
+
+        $this->assertNotSame([], $attrs['fundIds'], 'a closed picker was reopened onto every fund in the org');
+        $this->assertSame(
+            [],
+            array_filter(array_map('intval', (array) $attrs['fundIds']), static fn (int $id): bool => $id > 0),
+            'an id that mapped to nothing was kept and now names a stranger fund'
+        );
+        $this->assertSame('', (string) $attrs['defaultId'], 'a preselection that mapped to nothing was kept');
+    }
+
+    private function wipeForms(): void
+    {
+        $prefix = DB::getPrefix();
+        DB::raw("DELETE FROM {$prefix}dono_form_donation_stats");
+        DB::raw("DELETE FROM {$prefix}dono_forms");
+    }
+
+    private function seedFund(string $code): Fund
+    {
+        $fund = Fund::make();
+        $fund->code       = $code;
+        $fund->name       = 'Round Trip Fund';
+        $fund->is_active  = true;
+        $fund->created_at = gmdate('Y-m-d H:i:s');
+        $fund->updated_at = $fund->created_at;
+        $fund->save();
+
+        return $fund;
+    }
+
+    /** @param list<int> $fundIds */
+    private function seedPickerForm(array $fundIds, string $defaultId): Form
+    {
+        $attrs = wp_json_encode(['fundIds' => $fundIds, 'defaultId' => $defaultId]);
+
+        $campaign = Campaign::make();
+        $campaign->title      = 'Picker Campaign';
+        $campaign->slug       = 'picker-campaign-' . uniqid();
+        $campaign->status     = 'published';
+        $campaign->currency   = 'USD';
+        $campaign->created_at = gmdate('Y-m-d H:i:s');
+        $campaign->updated_at = $campaign->created_at;
+        $campaign->save();
+
+        $form = Form::make();
+        $form->title       = 'Picker Form';
+        $form->slug        = 'picker-form-' . uniqid();
+        $form->status      = 'published';
+        $form->campaign_id = (int) $campaign->id;
+        $form->blocks     = '<!-- wp:dono/columns -->'
+            . '<!-- wp:dono/fund-picker ' . $attrs . ' /-->'
+            . '<!-- /wp:dono/columns -->';
+        $form->created_at = gmdate('Y-m-d H:i:s');
+        $form->updated_at = $form->created_at;
+        $form->save();
+
+        return $form;
+    }
+
+    /**
+     * Give the fund a source id the picker names, so the file reads as one
+     * written on another site where that fund held that number.
+     *
+     * @param array<string,mixed> $export
+     */
+    private function retargetFundInExport(array &$export, int $realId, int $sourceId): void
+    {
+        foreach ($export['tables']['dono_funds'] as $i => $row) {
+            if ((int) ($row['id'] ?? 0) === $realId) {
+                $export['tables']['dono_funds'][$i]['id'] = $sourceId;
+            }
+        }
+    }
+
+    /** @return array<string,mixed> */
+    private function pickerAttrs(string $markup): array
+    {
+        foreach (parse_blocks($markup) as $block) {
+            foreach ($block['innerBlocks'] ?? [] as $inner) {
+                if (($inner['blockName'] ?? '') === 'dono/fund-picker') {
+                    return (array) ($inner['attrs'] ?? []);
+                }
+            }
+        }
+
+        $this->fail('the restored form has no fund picker at all');
+    }
+
     public function test_a_campaign_is_matched_by_slug_not_by_id(): void
     {
         $c = Campaign::make();

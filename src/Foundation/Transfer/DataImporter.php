@@ -123,6 +123,9 @@ final class DataImporter
     ];
 
     /** Columns holding an id from another exported table, by the table it points at. */
+    /** An id no fund row can hold, so a restriction that lost every id stays closed. */
+    private const NO_FUND = -1;
+
     private const REFERENCES = [
         'donor_id'           => 'dono_donors',
         'household_id'       => 'dono_donors',
@@ -384,11 +387,103 @@ final class DataImporter
             $row[$column] = $mapped;
         }
 
+        if ($table === 'dono_forms' && isset($row['blocks'])) {
+            $row['blocks'] = $this->remapFundIdsInBlocks((string) $row['blocks']);
+        }
+
         if ($table === 'dono_donors') {
             return $this->prepareDonor($row);
         }
 
         return $this->reseal($table, $row);
+    }
+
+    /**
+     * Fund ids the editor stored inside the block markup rather than in a column.
+     *
+     * REFERENCES rewrites columns and these are not columns: dono/fund-picker
+     * keeps its allowlist and its preselection in the block's attributes, so
+     * the loop above cannot reach them. Left alone they name whichever funds
+     * hold those numbers here, and activation seeds 'general' on every install,
+     * so the ids are shifted rather than absent: the picker offers real funds
+     * that are the wrong ones, and FormSubmissionValidator checks a posted fund
+     * against the same wrong list. The form's own default_fund_id is corrected
+     * beside it.
+     *
+     * ORDER puts dono_funds before dono_forms, so the map is complete by the
+     * time a form is prepared.
+     *
+     * @since 1.0.0
+     */
+    private function remapFundIdsInBlocks(string $markup): string
+    {
+        if (trim($markup) === '') return $markup;
+
+        $blocks = parse_blocks($markup);
+        $this->remapFundPickers($blocks);
+
+        return serialize_blocks($blocks);
+    }
+
+    /**
+     * @param array<int, array<string,mixed>> $blocks
+     * @since 1.0.0
+     */
+    private function remapFundPickers(array &$blocks): void
+    {
+        foreach ($blocks as &$block) {
+            if (($block['blockName'] ?? '') === 'dono/fund-picker') {
+                $attrs = is_array($block['attrs'] ?? null) ? $block['attrs'] : [];
+
+                if (is_array($attrs['fundIds'] ?? null)) {
+                    $attrs['fundIds'] = $this->mappedFundIds($attrs['fundIds']);
+                }
+
+                // '__none__' preselects the no-specific-fund tile and '' is the
+                // block's own fallback chain, so neither is an id to rewrite.
+                $default = (string) ($attrs['defaultId'] ?? '');
+                if ($default !== '' && $default !== '__none__') {
+                    $mapped = $this->map['dono_funds'][(int) $default] ?? null;
+                    $attrs['defaultId'] = $mapped === null ? '' : (string) $mapped;
+                }
+
+                $block['attrs'] = $attrs;
+            }
+
+            if (! empty($block['innerBlocks']) && is_array($block['innerBlocks'])) {
+                $this->remapFundPickers($block['innerBlocks']);
+            }
+        }
+        unset($block);
+    }
+
+    /**
+     * An id with nowhere to go was already dead on the source, since the export
+     * carries every fund the org has. It has to stay dead: kept, it names a
+     * stranger's fund here.
+     *
+     * The restriction cannot be dropped along with it. An empty fundIds is not
+     * 'no allowlist left' but 'every active fund', in FundPickerBlock and in
+     * FormSubmissionValidator alike, so emptying it turns a form that offered
+     * one fund into one that offers all of them and switches off the check that
+     * stops a crafted POST routing to any fund in the org. One unmatchable
+     * entry keeps it closed instead.
+     *
+     * @param  array<int,mixed> $sourceIds
+     * @return list<int>
+     * @since 1.0.0
+     */
+    private function mappedFundIds(array $sourceIds): array
+    {
+        $mapped = [];
+        foreach ($sourceIds as $sourceId) {
+            $here = $this->map['dono_funds'][(int) $sourceId] ?? null;
+            if ($here !== null) $mapped[(int) $here] = true;
+        }
+
+        if ($mapped === [] && $sourceIds !== []) return [self::NO_FUND];
+
+        return array_keys($mapped);
     }
 
     /**
