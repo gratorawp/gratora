@@ -83,18 +83,28 @@ final class LicenseNotice
      */
     private function notice(string $message): void
     {
+        $style = 'border:1px solid #e5e7eb;border-left:3px solid #b54708;border-radius:8px;'
+            . 'background:#fffaf5;color:#b54708;padding:11px 14px;'
+            . "font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;"
+            . 'font-size:13px;line-height:1.45;';
+
+        // The licence UI belongs to the licensing client vendored into each Pro
+        // add-on. Core has no page of its own to send anyone to.
+        $url = apply_filters('dono.license.manage_url', '');
+        $link = is_string($url) && $url !== ''
+            ? sprintf(
+                ' <a href="%s">%s</a>',
+                esc_url($url),
+                esc_html__('Manage licenses', 'dono-fundraising-platform')
+            )
+            : '';
+
         printf(
-            '<div class="notice dono-admin-notice" role="alert" style="%s"><strong>%s</strong> %s <a href="%s">%s</a></div>',
-            esc_attr(
-                'border:1px solid #e5e7eb;border-left:3px solid #b54708;border-radius:8px;'
-                . 'background:#fffaf5;color:#b54708;padding:11px 14px;'
-                . "font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;"
-                . 'font-size:13px;line-height:1.45;'
-            ),
+            '<div class="notice dono-admin-notice" role="alert" style="%s"><strong>%s</strong> %s%s</div>',
+            esc_attr($style),
             esc_html__('Dono:', 'dono-fundraising-platform'),
             esc_html($message),
-            esc_url(admin_url('admin.php?page=dono-settings#licenses')),
-            esc_html__('Manage licenses', 'dono-fundraising-platform')
+            wp_kses_post($link)
         );
     }
 }

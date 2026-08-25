@@ -173,6 +173,11 @@ export default function Settings() {
     }, [ anyDirty ] );
 
     const jumpTo = ( next ) => {
+        // A row can name a tab this install does not have: an add-on's own tab
+        // before its plugin is active, or one nothing in core supplies. Every
+        // panel is hidden by tab key, so selecting an unknown one empties the
+        // page instead of going anywhere.
+        if ( ! allTabs.some( ( t ) => t.key === next ) ) return;
         setTab( next );
         // A jump from a row halfway down Setup would otherwise land mid-panel.
         window.scrollTo( { top: 0 } );

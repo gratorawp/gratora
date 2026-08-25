@@ -580,12 +580,13 @@ final class ReadinessService
         if ($refused !== []) {
             $rows = [];
             foreach (LicenseRefusals::group($refused) as $i => $group) {
-                $rows[] = $this->warn(
-                    $i === 0 ? 'licenses' : 'licenses-' . $group['status'],
-                    'licenses',
-                    $group['headline'],
-                    $group['detail'],
-                    'licenses',
+                $rows[] = $this->licenseAction(
+                    $this->warn(
+                        $i === 0 ? 'licenses' : 'licenses-' . $group['status'],
+                        'licenses',
+                        $group['headline'],
+                        $group['detail']
+                    ),
                     __('Manage licenses', 'dono-fundraising-platform')
                 );
             }
@@ -595,16 +596,17 @@ final class ReadinessService
 
         $lapsing = $this->license->lapsing();
         if ($lapsing !== []) {
-            return [$this->warn(
-                'licenses',
-                'licenses',
-                sprintf(
-                    /* translators: %s: comma-separated add-on names. */
-                    __('The license for %s has lapsed', 'dono-fundraising-platform'),
-                    $this->names($lapsing)
+            return [$this->licenseAction(
+                $this->warn(
+                    'licenses',
+                    'licenses',
+                    sprintf(
+                        /* translators: %s: comma-separated add-on names. */
+                        __('The license for %s has lapsed', 'dono-fundraising-platform'),
+                        $this->names($lapsing)
+                    ),
+                    __('Renew to keep receiving updates and security fixes.', 'dono-fundraising-platform')
                 ),
-                __('Renew to keep receiving updates and security fixes.', 'dono-fundraising-platform'),
-                'licenses',
                 __('Manage licenses', 'dono-fundraising-platform')
             )];
         }
@@ -613,12 +615,13 @@ final class ReadinessService
         // pass, so say what is installed rather than claiming it is licensed.
         $unchecked = array_filter($addons, static fn (array $a): bool => $a['status'] === 'unknown');
         if (count($unchecked) === count($addons)) {
-            return [$this->warn(
-                'licenses',
-                'licenses',
-                __('Your add-ons are not linked to a license key', 'dono-fundraising-platform'),
-                __('They keep running, but they will not receive updates or security fixes.', 'dono-fundraising-platform'),
-                'licenses',
+            return [$this->licenseAction(
+                $this->warn(
+                    'licenses',
+                    'licenses',
+                    __('Your add-ons are not linked to a license key', 'dono-fundraising-platform'),
+                    __('They keep running, but they will not receive updates or security fixes.', 'dono-fundraising-platform')
+                ),
                 __('Add a key', 'dono-fundraising-platform')
             )];
         }
@@ -632,6 +635,30 @@ final class ReadinessService
                 count($addons)
             )
         )];
+    }
+
+    /**
+     * Licence keys are held by the licensing client, which is vendored into
+     * each Pro add-on and registers its own admin page. Core has no settings
+     * tab for them, so the row links where the client says and carries no
+     * action at all when nothing answers.
+     *
+     * @param array<string,mixed> $row
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
+    private function licenseAction(array $row, string $label): array
+    {
+        $url = apply_filters('dono.license.manage_url', '');
+        if (! is_string($url) || $url === '') {
+            return $row;
+        }
+
+        $row['action_url']   = $url;
+        $row['action_label'] = $label;
+
+        return $row;
     }
 
     // -- helpers -------------------------------------------------------------
