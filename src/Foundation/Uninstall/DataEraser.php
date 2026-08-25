@@ -47,6 +47,12 @@ final class DataEraser
         'dono_gateway_config',
         'dono_gateway_reconcile_cursor',
         'dono_licensing_status',
+        // The key itself, not just the status cache beside it. It is a bearer
+        // credential for the charity's paid entitlement, and it outlived every
+        // Dono file on the site: through a handover, a database export, a
+        // backup handed to a contractor. Written by the licensing client
+        // vendored into each paid add-on, which has no uninstall of its own.
+        'dono_pro_license_key',
         'dono_onboarding_campaign_id',
         'dono_onboarding_status',
         'dono_org_brand',
