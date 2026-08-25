@@ -83,13 +83,6 @@ const hasGatewayItem = ( items ) => ( Array.isArray( items ) ? items : [] ).some
 const gatewaysIn = ( steps ) => ( Array.isArray( steps ) ? steps : [] )
     .some( ( step ) => hasGatewayItem( step?.items ) || hasGatewayItem( step?.decorations ) );
 
-// Read from the same config the form renders from rather than a separate server
-// flag, so the two cannot disagree about a form edited between render and
-// submit.
-function hasGatewayBlock( config ) {
-    return gatewaysIn( config?.steps );
-}
-
 // The gateway section is the only thing on the form that says why it cannot
 // take money. Where it is not on screen beside the submit, whether the author
 // removed the block or put it on another page, the submit says so itself.
@@ -428,19 +421,40 @@ function FormBody( { state, dispatch, config } ) {
                 : null;
             // X-WP-Nonce only when present (logged-in users), so a page-cached
             // form never sends a stale nonce the REST layer would 403.
-            const headers = { 'Content-Type': 'application/json' };
-            if ( config.nonce ) headers[ 'X-WP-Nonce' ] = config.nonce;
-            const res = await fetch( config.rest, {
-                method:  'POST',
-                headers,
-                body:    JSON.stringify( {
-                    ...buildPayload( state ),
-                    ...( config.extra ? { extra: config.extra } : {} ),
-                    ...( retry ? { _retry: retry } : {} ),
-                    _ft: formToken,
-                    _hp: honeypot,
-                } ),
+            const body = JSON.stringify( {
+                ...buildPayload( state ),
+                ...( config.extra ? { extra: config.extra } : {} ),
+                ...( retry ? { _retry: retry } : {} ),
+                _ft: formToken,
+                _hp: honeypot,
             } );
+
+            const post = ( nonce ) => fetch( config.rest, {
+                method:  'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...( nonce ? { 'X-WP-Nonce': nonce } : {} ),
+                },
+                body,
+            } );
+
+            let res = await post( config.nonce );
+
+            // Donating needs no nonce: the route is public, and the nonce only
+            // rides along so a logged-in donor is recognised. But WordPress
+            // rejects a PRESENT-and-stale one at the authentication layer,
+            // before any permission callback, so a member who left the form
+            // open overnight got a bare "Cookie check failed" 403 under an
+            // intact form, and every retry sent the same dead nonce. The nonce
+            // is baked into the config at render and cannot be refreshed here,
+            // so the donation goes through unauthenticated rather than not at
+            // all.
+            if ( res.status === 403 ) {
+                const why = await res.clone().json().catch( () => null );
+                if ( why?.code === 'rest_cookie_invalid_nonce' ) {
+                    res = await post( '' );
+                }
+            }
             // A proxy or security plugin can answer with an HTML block page,
             // which parses to nothing. Reading it before the status is checked
             // would throw past every curated message below.
@@ -604,9 +618,21 @@ function FormBody( { state, dispatch, config } ) {
     }, [ state.status, state.submission, state.payment, config.thanks?.redirect ] );
 
     // The payment UI belongs where the author put the gateway block, so the form
-    // stays on screen behind it. Replacing the whole body is the fallback for a
-    // form with no block, which readiness already warns about.
-    if ( state.status === 'payment' && ! hasGatewayBlock( config ) ) {
+    // stays on screen behind it. Replacing the whole body is the fallback for
+    // when that block is not on screen to host it.
+    //
+    // Asking only whether the form HAS a block was not the same question. On a
+    // multi-page form the block lives on one page, and a donor who moved to
+    // another page while the submit was in flight arrived in `payment` status
+    // with the block rendered nowhere: PagedView draws only the current page's
+    // steps, and this fallback stood down because the block existed somewhere.
+    // The form went blank and the donation, already created, could never be
+    // paid.
+    const gatewayOnScreen = gatewaysIn(
+        ( state.steps || [] ).filter( ( step ) => ( step.page || 0 ) === state.step )
+    );
+
+    if ( state.status === 'payment' && ! gatewayOnScreen ) {
         const PaymentStep = paymentComponentFor( state.payment );
         return (
             <ErrorBoundary>
@@ -886,6 +912,10 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
                             type="button"
                             class="dono-form__bar-back"
                             aria-label={ prevLabel }
+                            // The primary button is disabled while a submit is
+                            // in flight; leaving Back live let a donor walk off
+                            // the page the payment step is on.
+                            disabled={ state.status === 'submitting' }
                             onClick={ onPrev }
                         >
                             <span aria-hidden="true">←</span>
@@ -934,6 +964,7 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
                     <button
                         type="button"
                         class="dono-form__button dono-form__button--secondary"
+                        disabled={ state.status === 'submitting' }
                         onClick={ onPrev }
                     >
                         { prevLabel }
