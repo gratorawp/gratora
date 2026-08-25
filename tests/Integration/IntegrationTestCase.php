@@ -69,6 +69,7 @@ abstract class IntegrationTestCase extends WP_UnitTestCase
             'fetched_at' => gmdate('c'),
             'rates'      => ['USD' => 1.0, 'EUR' => 1.0, 'GBP' => 1.0],
         ], false);
+        $this->makeOfflinePayable();
         $this->injectDonationFormToken();
     }
 
@@ -77,6 +78,22 @@ abstract class IntegrationTestCase extends WP_UnitTestCase
         $this->restoreGateways();
         $this->setQueryableTransactionDepth(0);
         parent::tearDown();
+    }
+
+    /**
+     * Offline is the suite's workhorse gateway and it settles by the donor
+     * following written instructions, so an org that can take money by it has
+     * written some. The written config carries no `test_mode`, which is what a
+     * test clearing this option is usually after.
+     *
+     * No `enabled` key: that flag defaults to on and the gateway tests assert
+     * exactly that.
+     */
+    protected function makeOfflinePayable(): void
+    {
+        update_option('dono_gateway_config', [
+            'offline' => ['instructions' => 'Transfer the amount quoting your reference.'],
+        ]);
     }
 
     /** @var array<string,object>|null The registry as it stood before a test took a gateway out. */

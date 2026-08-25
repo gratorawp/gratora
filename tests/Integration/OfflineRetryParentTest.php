@@ -26,7 +26,7 @@ final class OfflineRetryParentTest extends IntegrationTestCase
 
         // Every quota short-circuits under the org-wide test switch, and the
         // admin list is live-only, so both halves of this file need it off.
-        delete_option('dono_gateway_config');
+        $this->makeOfflinePayable();
         $_SERVER['REMOTE_ADDR'] = '203.0.113.44';
     }
 

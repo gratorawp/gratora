@@ -73,10 +73,20 @@ final class OfflineGateway implements PaymentGateway, SettlesOutOfBand
         return ['*'];
     }
 
-    /** @since 1.0.0 */
+    /**
+     * The written instructions are the whole payment rail: there is no API to
+     * call, so a donor who is told nothing has nothing to pay to and no way to
+     * complete. With neither field written this method must not be offered.
+     *
+     * @since 1.0.0
+     */
     public function canCharge(): bool
     {
-        return true;
+        $cfg = get_option('dono_gateway_config', []);
+        $cfg = is_array($cfg) ? $cfg : [];
+
+        return trim((string) ($cfg['offline']['instructions'] ?? '')) !== ''
+            || trim((string) ($cfg['offline']['bank_details'] ?? '')) !== '';
     }
 
     /** @since 1.0.0 */

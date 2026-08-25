@@ -51,7 +51,7 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
 
         // Every quota short-circuits under the org-wide test switch, so the
         // caps this file is about only exist with it off.
-        delete_option('dono_gateway_config');
+        $this->makeOfflinePayable();
         $_SERVER['REMOTE_ADDR'] = '203.0.113.10';
     }
 

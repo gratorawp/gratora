@@ -446,7 +446,10 @@ final class DonationFormShortcode extends HookProvider
             }
         }
 
-        // Offline is always registered, so it is the safe last resort.
+        // Nothing this form can take. The config still needs a named gateway to
+        // be shaped, and the runtime refuses to submit against an empty option
+        // list, so this names the one gateway that is always registered rather
+        // than claiming a processor the org has not connected.
         return 'offline';
     }
 

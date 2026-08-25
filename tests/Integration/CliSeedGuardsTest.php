@@ -64,7 +64,8 @@ final class CliSeedGuardsTest extends IntegrationTestCase
         }
 
         $this->assertSame($before, get_option('dono_currency_locale'), 'the org currency is untouched');
-        $this->assertEmpty(
+        $this->assertArrayNotHasKey(
+            'test_mode',
             (array) get_option('dono_gateway_config', []),
             'org-wide test mode is not switched on by a refused command'
         );
