@@ -184,6 +184,10 @@ export default function List() {
         {
             id:    'goal',
             label: __( 'Goal', 'dono-fundraising-platform' ),
+            // DataViews offers sorting on every field that does not opt out,
+            // and the server has no orderby for these, so the indicator moved
+            // and the rows came back in the same order.
+            enableSorting: false,
             render: ( { item } ) => <GoalCell item={ item } />,
         },
         {
@@ -209,6 +213,7 @@ export default function List() {
         {
             id:    'forms_count',
             label: __( 'Forms', 'dono-fundraising-platform' ),
+            enableSorting: false,
             render: ( { item } ) => (
                 <span style={ { fontVariantNumeric: 'tabular-nums', fontSize: '13px' } }>
                     { item.forms_count }

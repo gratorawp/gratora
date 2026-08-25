@@ -136,6 +136,21 @@ final class CampaignService
             }
         }
 
+        // A campaign whose end precedes its start refuses every donation and
+        // says only "has not started yet" or "has ended", never that the two
+        // dates contradict each other. The timeline's drag handles already
+        // refuse the crossing; the date pickers wrote it straight through.
+        if ($campaign->starts_at !== null && $campaign->ends_at !== null) {
+            $start = strtotime((string) $campaign->starts_at);
+            $end   = strtotime((string) $campaign->ends_at);
+
+            if ($start !== false && $end !== false && $end < $start) {
+                throw new InvalidArgumentException(
+                    esc_html__('The campaign end date cannot be before its start date.', 'dono-fundraising-platform')
+                );
+            }
+        }
+
         // Currency is not editable: campaigns always report in the org currency.
 
         if (array_key_exists('goal_type', $input)) {

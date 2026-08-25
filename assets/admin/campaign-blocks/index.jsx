@@ -71,17 +71,29 @@ function CampaignPicker( { value, onChange, noneLabel } ) {
     // destructuring default only replaces `undefined`, so this guard is what
     // keeps the inspector from throwing on selection.
     const campaigns = Array.isArray( records ) ? records : [];
+    // The blocks are registered for every block-editor user, but the campaign
+    // list is gated on a Dono capability. Without this an Editor gets a picker
+    // whose only option is "Select a campaign" and no idea why.
+    const empty = Array.isArray( records ) && records.length === 0;
+
     return (
-        <SelectControl
-            label={ __( 'Campaign', 'dono-fundraising-platform' ) }
-            value={ String( value || 0 ) }
-            options={ [
-                { value: '0', label: noneLabel || __( 'Select a campaign', 'dono-fundraising-platform' ) },
-                ...campaigns.map( ( c ) => ( { value: String( c.id ), label: c.title } ) ),
-            ] }
-            onChange={ ( v ) => onChange( Number( v ) ) }
-            __nextHasNoMarginBottom
-        />
+        <>
+            <SelectControl
+                label={ __( 'Campaign', 'dono-fundraising-platform' ) }
+                value={ String( value || 0 ) }
+                options={ [
+                    { value: '0', label: noneLabel || __( 'Select a campaign', 'dono-fundraising-platform' ) },
+                    ...campaigns.map( ( c ) => ( { value: String( c.id ), label: c.title } ) ),
+                ] }
+                onChange={ ( v ) => onChange( Number( v ) ) }
+                __nextHasNoMarginBottom
+            />
+            { empty && (
+                <Notice status="warning" isDismissible={ false }>
+                    { __( 'No campaigns are available to you. You may not have permission to view them, or none have been created yet.', 'dono-fundraising-platform' ) }
+                </Notice>
+            ) }
+        </>
     );
 }
 

@@ -1239,11 +1239,15 @@ function FormsTab( { campaign } ) {
         {
             id:    'goal',
             label: __( 'Goal', 'dono-fundraising-platform' ),
+            // No orderby for these on the server, and DataViews offers sorting
+            // on anything that does not opt out.
+            enableSorting: false,
             render: ( { item } ) => <GoalCell item={ item } />,
         },
         {
             id:     'shortcode',
             label:  __( 'Shortcode', 'dono-fundraising-platform' ),
+            enableSorting: false,
             render: ( { item } ) => <ShortcodeCell slug={ item.slug } />,
         },
     ], [ defaultFormId ] );
@@ -1841,7 +1845,7 @@ function GeneralPanel( { c, campaign } ) {
             >
                 <FormRow
                     label={ __( 'Status', 'dono-fundraising-platform' ) }
-                    help={ __( "Active campaigns accept donations. Drafts and archived campaigns don't.", 'dono-fundraising-platform' ) }
+                    help={ __( "Active campaigns accept donations. Drafts and archived campaigns don't. Archive from the campaign menu, which handles any recurring donations first.", 'dono-fundraising-platform' ) }
                 >
                     <StatusPillGroup value={ c.value( 'status', 'draft' ) } onChange={ c.setValue( 'status' ) } />
                 </FormRow>
@@ -2052,14 +2056,33 @@ function DefaultsPanel( { c, forms, funds } ) {
             >
                 <FormRow
                     label={ __( 'Form', 'dono-fundraising-platform' ) }
-                    help={ __( 'Only forms that belong to this campaign appear here.', 'dono-fundraising-platform' ) }
+                    help={ __( 'Only published forms that belong to this campaign appear here. A draft cannot be the default: the page would fall back to a different form without saying so.', 'dono-fundraising-platform' ) }
                 >
                     <div className="dono-grid-2-eq" style={ { gridTemplateColumns: '1fr auto', alignItems: 'center' } }>
                         <select className={ selectCls( c, 'default_form_id' ) } { ...c.bindNumber( 'default_form_id' ) }>
                             <option value="">{ __( '( None )', 'dono-fundraising-platform' ) }</option>
-                            { forms.map( ( f ) => (
-                                <option key={ f.id } value={ f.id }>{ f.title }</option>
-                            ) ) }
+                            { /* The Forms tab's own "Set as default" already
+                                 guards on published, and every runtime reader
+                                 takes this id only when the form is published.
+                                 A draft here reads as set and does nothing. */ }
+                            { forms
+                                .filter( ( f ) => f.status === 'published'
+                                    // A default set before this rule, kept
+                                    // visible and labelled, so the select does
+                                    // not quietly show a different form as this
+                                    // campaign's default.
+                                    || Number( f.id ) === Number( c.value( 'default_form_id', 0 ) ) )
+                                .map( ( f ) => (
+                                    <option key={ f.id } value={ f.id }>
+                                        { f.status === 'published'
+                                            ? f.title
+                                            : sprintf(
+                                                /* translators: %s: form title */
+                                                __( '%s (not published)', 'dono-fundraising-platform' ),
+                                                f.title
+                                            ) }
+                                    </option>
+                                ) ) }
                         </select>
                         { r.default_form_id && (
                             <Btn variant="ghost" size="sm" href={ formEditorHref( Number( r.default_form_id ) ) }>
@@ -2134,7 +2157,7 @@ function AdvancedPanel( { campaign, onError } ) {
                         <div className="dono-danger__title">{ __( 'Delete this campaign', 'dono-fundraising-platform' ) }</div>
                         <div className="dono-danger__help">
                             { __(
-                                'Removes the campaign, its forms, and the WordPress page it created. Donations stay in your database for reporting but lose their campaign link.',
+                                'Removes the campaign, its forms, and the WordPress page it created. A campaign that has any donations or recurring plans is never deleted: archive it instead to keep its records.',
                                 'dono-fundraising-platform'
                             ) }
                         </div>
@@ -2151,9 +2174,18 @@ function AdvancedPanel( { campaign, onError } ) {
 }
 
 function StatusPillGroup( { value, onChange } ) {
+    // Archiving runs its own flow from the menu: it asks the server how many
+    // live recurring donations the campaign carries and, when there are any,
+    // names the count and the amount at stake and offers to cancel them. This
+    // pill wrote the same state change with none of that, so it is offered
+    // only when the campaign already is archived, to keep the state visible.
+    const options = Object.entries( STATUS_LABEL ).filter(
+        ( [ key ] ) => key !== 'archived' || value === 'archived'
+    );
+
     return (
         <div className="dono-status-pills" role="radiogroup">
-            { Object.entries( STATUS_LABEL ).map( ( [ key, label ] ) => (
+            { options.map( ( [ key, label ] ) => (
                 <button
                     key={ key }
                     type="button"
