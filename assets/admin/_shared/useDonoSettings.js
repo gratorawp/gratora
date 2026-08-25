@@ -29,7 +29,7 @@ export function useDonoSettings( group ) {
             // Surface the failure instead of swallowing it: a swallowed load left
             // isLoading stuck forever, and (worse) saving from the unloaded state
             // PUT a partial record that wiped keys like the whole roles mapping.
-            .catch( () => { if ( ! aborted ) setError( __( 'Could not load these settings. Refresh to try again.', 'dono-fundraising-platform' ) ); } );
+            .catch( () => { if ( ! aborted ) setError( __( 'Could not load these settings.', 'dono-fundraising-platform' ) ); } );
         return () => { aborted = true; };
     }, [ group, reloadKey ] );
 

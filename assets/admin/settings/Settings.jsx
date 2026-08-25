@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from '@wordpress/element';
 import { __, sprintf, _n } from '@wordpress/i18n';
 
+import Btn from '../_shared/components/Btn';
+import Card from '../_shared/components/Card';
 import Toaster from '../_shared/components/Toaster';
 import { notify } from '../_shared/notify';
 import { tablistKeyDown } from '../_shared/tablistKeys';
@@ -71,6 +73,38 @@ function initialTab() {
     const params = new URLSearchParams( window.location.search );
     const q = params.get( 'tab' );
     return [ ...visibleTabs(), ...TAIL_TABS ].some( ( t ) => t.key === q ) ? q : 'setup';
+}
+
+/**
+ * A panel reads its group through fallbacks, so a group that failed to load
+ * draws a complete, ordinary looking form of literal defaults: Anonymize IPs
+ * on, prefix DONO, an empty legal name. None of it is this site's settings, and
+ * nothing on the screen said so.
+ *
+ * @since 1.0.0
+ */
+export function SettingsGroup( { of, children } ) {
+    const groups = Array.isArray( of ) ? of : [ of ];
+    const failed = groups.find( ( g ) => g.loadError );
+
+    if ( failed ) {
+        return (
+            <div className="dono-panel">
+                <Card>
+                    <p style={ { color: '#b42318', margin: '0 0 12px' } }>{ failed.loadError }</p>
+                    <Btn variant="secondary" onClick={ () => groups.forEach( ( g ) => g.reload() ) }>
+                        { __( 'Retry', 'dono-fundraising-platform' ) }
+                    </Btn>
+                </Card>
+            </div>
+        );
+    }
+
+    if ( groups.some( ( g ) => g.isLoading ) ) {
+        return <p>{ __( 'Loading…', 'dono-fundraising-platform' ) }</p>;
+    }
+
+    return children;
 }
 
 export default function Settings() {
@@ -290,32 +324,36 @@ export default function Settings() {
                     <SetupPanel onJumpTo={ jumpTo } active={ tab === 'setup' } />
                 </div>
                 <div hidden={ tab !== 'organization' }>
-                    <OrganizationPanel s={ org } />
+                    <SettingsGroup of={ org }><OrganizationPanel s={ org } /></SettingsGroup>
                 </div>
                 <div hidden={ tab !== 'brand' }>
-                    <BrandPanel s={ brand } />
+                    <SettingsGroup of={ brand }><BrandPanel s={ brand } /></SettingsGroup>
                 </div>
                 <div hidden={ tab !== 'currency' }>
-                    <CurrencyPanel s={ currency } fx={ fx } />
+                    <SettingsGroup of={ [ currency, fx ] }><CurrencyPanel s={ currency } fx={ fx } /></SettingsGroup>
                 </div>
                 <div hidden={ tab !== 'gateways' }>
-                    <GatewaysPanel s={ gateways } />
+                    <SettingsGroup of={ gateways }><GatewaysPanel s={ gateways } /></SettingsGroup>
                 </div>
                 <div hidden={ tab !== 'email' }>
-                    <EmailPanel s={ email } />
+                    <SettingsGroup of={ email }><EmailPanel s={ email } /></SettingsGroup>
                 </div>
                 <div hidden={ tab !== 'receipts' }>
-                    <ReceiptsPanel s={ receipts } />
+                    <SettingsGroup of={ receipts }><ReceiptsPanel s={ receipts } /></SettingsGroup>
                 </div>
                 <div hidden={ tab !== 'numbering' }>
-                    <NumberingPanel s={ numbering } active={ tab === 'numbering' } />
+                    <SettingsGroup of={ numbering }><NumberingPanel s={ numbering } active={ tab === 'numbering' } /></SettingsGroup>
                 </div>
                 <div hidden={ tab !== 'privacy' }>
-                    <PrivacyPanel s={ privacy } />
-                    <ConsentsPanel s={ consents } />
+                    <SettingsGroup of={ [ privacy, consents ] }>
+                        <div>
+                            <PrivacyPanel s={ privacy } />
+                            <ConsentsPanel s={ consents } />
+                        </div>
+                    </SettingsGroup>
                 </div>
                 <div hidden={ tab !== 'roles' }>
-                    <RolesPanel s={ roles } />
+                    <SettingsGroup of={ roles }><RolesPanel s={ roles } /></SettingsGroup>
                 </div>
                 { extTabs.map( ( t ) => (
                     <div key={ t.id } hidden={ tab !== t.id }>
