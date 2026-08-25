@@ -128,13 +128,45 @@ final class GatewayReconcilerTest extends IntegrationTestCase
         $donation = $this->find((string) $data['reference']);
         $donation->status            = $status;
         $donation->gateway_intent_id = self::ORDER;
-        $donation->created_at        = '2026-08-11 00:00:00';
+        $donation->created_at        = self::insideTheWindow();
         foreach ($overrides as $k => $v) {
             $donation->{$k} = $v;
         }
         $donation->save();
 
         return $this->find($donation->reference);
+    }
+
+    /**
+     * A moment the sweep still looks at.
+     *
+     * Its window is the last GatewayReconciler::MAX_AGE_DAYS counted from the
+     * run, so a calendar date written here stops being inside it once the
+     * clock walks past, and the test starts failing on a day nobody changed
+     * anything.
+     */
+    private static function insideTheWindow(): string
+    {
+        return gmdate('Y-m-d H:i:s', strtotime('-1 day'));
+    }
+
+    /**
+     * The sweep only looks back so far. Nothing asserted the edge of that
+     * window, so a fixture that drifted out of it read as the reconciler
+     * having stopped working.
+     */
+    public function test_a_donation_older_than_the_window_is_left_alone(): void
+    {
+        $donation = $this->donationAt('processing', [
+            'created_at' => gmdate('Y-m-d H:i:s', strtotime('-20 days')),
+        ]);
+
+        $this->calls = [];
+        $this->sweep();
+
+        $after = $this->find($donation->reference);
+        $this->assertSame('processing', $after->status, 'the sweep reached past its own window');
+        $this->assertSame([], $this->calls, 'PayPal was asked about a donation outside the window');
     }
 
     private function find(string $reference): Donation
@@ -225,7 +257,7 @@ final class GatewayReconcilerTest extends IntegrationTestCase
     {
         // The capture POST answers after the money moves, so a request that dies
         // in between leaves PayPal paid and nothing written down here.
-        $donation = $this->donationAt('pending', ['created_at' => '2026-08-11 00:00:00']);
+        $donation = $this->donationAt('pending', ['created_at' => self::insideTheWindow()]);
 
         $this->sweep();
 
@@ -235,7 +267,7 @@ final class GatewayReconcilerTest extends IntegrationTestCase
     public function test_a_pending_donation_whose_capture_did_not_complete_is_left_alone(): void
     {
         $this->capture['status'] = 'DECLINED';
-        $donation = $this->donationAt('pending', ['created_at' => '2026-08-11 00:00:00']);
+        $donation = $this->donationAt('pending', ['created_at' => self::insideTheWindow()]);
 
         $this->sweep();
 
