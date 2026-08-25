@@ -63,6 +63,7 @@ final class CampaignService
         $campaign->goal_type   = $this->coerceGoalType($input['goal_type'] ?? 'amount');
         $campaign->goal_cents  = isset($input['goal_cents']) ? (int) $input['goal_cents'] : null;
         $campaign->goal_count  = isset($input['goal_count']) ? (int) $input['goal_count'] : null;
+        $this->clearUnusedGoalTarget($campaign);
         $type = sanitize_key((string) ($input['campaign_type'] ?? 'standard'));
         $allowedTypes = array_keys((array) apply_filters('dono.campaign.types', ['standard' => '']));
         $campaign->campaign_type = in_array($type, $allowedTypes, true) ? $type : 'standard';
@@ -152,6 +153,11 @@ final class CampaignService
                 ? null
                 : (int) $input['goal_count'];
         }
+
+        // The target the goal type does not use is cleared, never carried. The
+        // goal panel renders only the active type's input, so a kept one is off
+        // screen with no way to review or correct it.
+        $this->clearUnusedGoalTarget($campaign);
 
         $prevType = $campaign->campaign_type;
         if (array_key_exists('campaign_type', $input)) {
@@ -720,6 +726,17 @@ BLOCKS;
     {
         $status = strtolower(trim($status));
         return in_array($status, ['draft', 'published', 'archived'], true) ? $status : 'draft';
+    }
+
+    /** @since 1.0.0 */
+    private function clearUnusedGoalTarget(Campaign $campaign): void
+    {
+        if ($campaign->goal_type === 'amount') {
+            $campaign->goal_count = null;
+            return;
+        }
+
+        $campaign->goal_cents = null;
     }
 
     /** @since 1.0.0 */

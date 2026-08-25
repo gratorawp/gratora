@@ -60,15 +60,29 @@ final class CampaignStatMetrics
     {
         $currency  = (string) $campaign->currency;
         $raised    = (int) $campaign->raised_cents;
-        $goal      = (int) $campaign->goal_cents;
         $donations = (int) $campaign->donations_count;
+
+        $type = (string) ($campaign->goal_type ?: 'amount');
+        if (! in_array($type, ['amount', 'donations', 'donors'], true)) {
+            $type = 'amount';
+        }
+
+        $target  = $type === 'amount' ? (int) $campaign->goal_cents : (int) $campaign->goal_count;
+        $towards = match ($type) {
+            'donations' => $donations,
+            'donors'    => (int) $campaign->donors_count,
+            default     => $raised,
+        };
+        $inGoalUnits = fn (int $value): string => $type === 'amount'
+            ? Money::format($value, $currency)
+            : number_format_i18n($value);
 
         return match ($metric) {
             'raised'    => Money::format($raised, $currency),
-            'goal'      => $goal > 0 ? Money::format($goal, $currency) : null,
-            'remaining' => $goal > 0 ? Money::format(max(0, $goal - $raised), $currency) : null,
-            'percent'   => $goal > 0
-                ? sprintf('%d%%', (int) min(100, floor(($raised / $goal) * 100)))
+            'goal'      => $target > 0 ? $inGoalUnits($target) : null,
+            'remaining' => $target > 0 ? $inGoalUnits(max(0, $target - $towards)) : null,
+            'percent'   => $target > 0
+                ? sprintf('%d%%', (int) min(100, floor(($towards / $target) * 100)))
                 : null,
             'donations' => number_format_i18n($donations),
             'donors'    => number_format_i18n((int) $campaign->donors_count),

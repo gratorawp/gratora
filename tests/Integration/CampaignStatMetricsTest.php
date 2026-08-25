@@ -79,6 +79,61 @@ final class CampaignStatMetricsTest extends IntegrationTestCase
         }
     }
 
+    /**
+     * The shape an installed site already has: the campaign was switched to a
+     * donor goal while its money target stayed on the row, and no screen shows
+     * that target any more. Written straight to the row, never through the
+     * service, so the read side has to answer for it on its own.
+     */
+    public function test_a_donor_goal_never_states_the_money_target_it_still_carries(): void
+    {
+        $c = $this->campaign(['goal_cents' => 1000000]);
+
+        $c->goal_type    = 'donors';
+        $c->goal_count   = 250;
+        $c->donors_count = 100;
+        $c->save();
+
+        $c = Campaign::query()->find('id', (int) $c->id);
+        $this->assertSame(1000000, (int) $c->goal_cents, 'the stale money target is the premise of this test');
+
+        $this->assertSame('250', $this->metrics()->value($c, 'goal'));
+        $this->assertSame('150', $this->metrics()->value($c, 'remaining'));
+        $this->assertSame('40%', $this->metrics()->value($c, 'percent'));
+    }
+
+    /** A count goal with no count set states nothing, whatever else is on the row. */
+    public function test_a_donations_goal_with_no_count_stays_silent(): void
+    {
+        $c = $this->campaign(['goal_cents' => 1000000]);
+
+        $c->goal_type  = 'donations';
+        $c->goal_count = null;
+        $c->save();
+
+        $c = Campaign::query()->find('id', (int) $c->id);
+
+        foreach (['goal', 'remaining', 'percent'] as $key) {
+            $this->assertNull($this->metrics()->value($c, $key), "{$key} should stay silent");
+        }
+    }
+
+    /** The panel only renders the active type's input, so the other one cannot be left behind. */
+    public function test_switching_the_goal_type_clears_the_target_it_no_longer_uses(): void
+    {
+        $c = $this->campaign(['goal_cents' => 1000000]);
+
+        $req = new WP_REST_Request('PATCH', '/dono/v1/admin/campaigns/' . (int) $c->id);
+        $req->set_header('content-type', 'application/json');
+        $req->set_body((string) wp_json_encode(['goal_type' => 'donors', 'goal_count' => 250]));
+        $this->assertSame(200, rest_do_request($req)->get_status());
+
+        $c = Campaign::query()->find('id', (int) $c->id);
+
+        $this->assertNull($c->goal_cents);
+        $this->assertSame(250, (int) $c->goal_count);
+    }
+
     public function test_a_campaign_with_no_end_date_has_no_days_left(): void
     {
         $this->assertNull($this->metrics()->value($this->campaign(), 'days_left'));

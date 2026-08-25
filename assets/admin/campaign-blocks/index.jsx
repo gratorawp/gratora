@@ -336,7 +336,8 @@ const STAT_METRICS = [
 // the author a block that renders nothing on the front end.
 function statIssue( campaign, metric ) {
     if ( ! campaign ) return null;
-    const noGoal = ! Number( campaign.goal_cents );
+    const goalType = campaign.goal_type || 'amount';
+    const noGoal = ! Number( goalType === 'amount' ? campaign.goal_cents : campaign.goal_count );
     if ( noGoal && [ 'goal', 'remaining', 'percent' ].includes( metric ) ) {
         return __( 'This campaign has no goal, so this stat will not render.', 'dono-fundraising-platform' );
     }
