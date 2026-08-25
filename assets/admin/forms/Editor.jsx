@@ -77,8 +77,8 @@ const LAYOUT_OPTIONS = [
     { value: 'modal',  label: __( 'Modal (button opens form)', 'dono-fundraising-platform' ) },
 ];
 
-function mergeFormSettings( stored ) {
-    const def = defaultFormSettings();
+function mergeFormSettings( stored, base = defaultFormSettings() ) {
+    const def = base;
     if ( ! stored || typeof stored !== 'object' ) return def;
     return {
         ...def,
@@ -88,6 +88,17 @@ function mergeFormSettings( stored ) {
         gateways:  { ...def.gateways,  ...( stored.gateways  || {} ) },
         goal:      { ...def.goal,      ...( stored.goal      || {} ) },
     };
+}
+
+/**
+ * A template carries a shape, not a whole configuration: it replaces the keys
+ * it names and leaves the rest of the author's form alone. Undo holds blocks
+ * only, so anything a template overwrites here is gone for good.
+ *
+ * @since 1.0.0
+ */
+export function settingsAfterTemplate( current, templateSettings ) {
+    return mergeFormSettings( templateSettings, mergeFormSettings( current ) );
 }
 
 let blocksReady = false;
@@ -235,10 +246,8 @@ export default function Editor( { formId } ) {
         // CHANGE keeps it in history (undoable) when replacing existing content;
         // RESET sets a fresh baseline for the first-open empty-form seeding.
         dispatchHistory( { type: hasContent ? 'CHANGE' : 'RESET', blocks: parsed } );
-        // Templates ship their own form settings (goal, recurring defaults), so
-        // the picked shape is more than blocks.
         if ( template?.settings && typeof template.settings === 'object' ) {
-            c.edit( { settings: mergeFormSettings( template.settings ) } );
+            c.edit( { settings: settingsAfterTemplate( c.record.settings, template.settings ) } );
         }
         setPendingTemplate( null );
         setTemplatePickerOpen( false );
@@ -656,7 +665,7 @@ export default function Editor( { formId } ) {
                     size="small"
                 >
                     <p style={ { marginTop: 0 } }>
-                        { __( 'Replace the current form with this template? You can undo this afterwards.', 'dono-fundraising-platform' ) }
+                        { __( 'Replace the current form with this template? Its blocks take over, and so do the settings it carries: layout, style, gateways, recurring and the thank-you message. Undo brings the blocks back, but not the settings.', 'dono-fundraising-platform' ) }
                     </p>
                     <div style={ { display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 } }>
                         <Btn onClick={ () => setPendingTemplate( null ) }>{ __( 'Cancel', 'dono-fundraising-platform' ) }</Btn>
