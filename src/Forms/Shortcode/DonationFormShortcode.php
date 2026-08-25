@@ -1158,7 +1158,10 @@ final class DonationFormShortcode extends HookProvider
                             'label'       => (string) $cp['label'],
                             'description' => (string) $cp['description'],
                             'required'    => (bool) $cp['required'],
-                            'checked'     => (bool) $cp['required'] || (bool) $cp['default'],
+                            // A required purpose never starts granted: the
+                            // consent row is evidence of something the donor
+                            // did, and a box they could not move is not it.
+                            'checked'     => ! (bool) $cp['required'] && (bool) $cp['default'],
                         ];
                     }
                     if ($cPurposes === []) break;

@@ -454,14 +454,14 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                         { purposes.map( ( p ) => {
                             const id       = String( p.id || '' );
                             const required = !! p.required;
-                            const checked  = required ? true : !! consents[ id ];
+                            const checked  = !! consents[ id ];
                             const errKey   = `consents.${ id }`;
                             return (
                                 <label key={ id } class="dono-form__consent-purpose">
                                     <input
                                         type="checkbox"
                                         checked={ checked }
-                                        disabled={ required }
+                                        aria-required={ required }
                                         onChange={ onCheck( `consents.${ id }` ) }
                                         aria-invalid={ !! err[ errKey ] }
                                     />

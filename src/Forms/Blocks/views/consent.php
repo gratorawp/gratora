@@ -18,19 +18,17 @@ $labelText = $label !== '' ? $label : __('How can we stay in touch?', 'dono-fund
             $pLabel      = (string) $p['label'];
             $desc        = (string) $p['description'];
             $required    = (bool)   $p['required'];
-            // Pre-ticked only where the registry says so, and the registry is
-            // the one place that decides it.
-            $checked     = $required || (bool) $p['default'];
+            // A required purpose never starts granted: the consent row is
+            // evidence of something the donor did, and a box they could not
+            // move is not it. The registry decides the rest.
+            $checked     = ! $required && (bool) $p['default'];
             ?>
             <label class="dono-consent__purpose">
                 <input type="checkbox"
                        name="consents[<?php echo esc_attr($id); ?>]"
                        value="1"
                        <?php echo esc_attr($checked ? 'checked' : ''); ?>
-                       <?php echo esc_attr($required ? 'required disabled' : ''); ?>>
-                <?php if ($required): ?>
-                    <input type="hidden" name="consents[<?php echo esc_attr($id); ?>]" value="1">
-                <?php endif; ?>
+                       <?php echo esc_attr($required ? 'required' : ''); ?>>
                 <span class="dono-consent__purpose-body">
                     <span class="dono-consent__purpose-label">
                         <?php echo esc_html($pLabel !== '' ? $pLabel : $id); ?>
