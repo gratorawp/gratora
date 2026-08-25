@@ -194,9 +194,7 @@ export default function Onboarding() {
                 const fmt = numberFormatPair( deriveNumberFormat( org.country ) );
                 await persist( 'currency-locale', {
                     default_currency:     currency.default_currency,
-                    supported_currencies: currency.supported_currencies?.length
-                        ? currency.supported_currencies
-                        : [ currency.default_currency ],
+                    supported_currencies: chosenCurrencies( currency ),
                     locale:               currency.locale || '',
                     format: {
                         decimal_places:  Number.isFinite( currency.format?.decimal_places )
@@ -746,6 +744,33 @@ const SHIPPED_FORMAT = {
     thousand_sep:    ',',
     symbol_position: 'before',
 };
+
+/** What ships when nobody has chosen: the currency-locale default in SettingsService. */
+const SHIPPED_CURRENCIES = [ 'USD' ];
+
+/**
+ * The currencies the operator enabled, with their base always among them.
+ *
+ * Same trap as the separators below: every settings read comes back with
+ * [ 'USD' ] merged in, so a length test can never see "unset". A lone USD is
+ * what ships rather than a choice, and keeping it beside a EUR base makes a
+ * single-currency charity look multi-currency to the rate fetcher, which then
+ * starts a daily third-party call it has no use for, and leaves USD
+ * unremovable on Settings > Currency.
+ */
+export function chosenCurrencies( currency ) {
+    const base = String( currency?.default_currency || 'USD' ).toUpperCase();
+    const list = ( Array.isArray( currency?.supported_currencies ) ? currency.supported_currencies : [] )
+        .map( ( c ) => String( c ).toUpperCase() );
+
+    const shipped = list.length === 1 && list[ 0 ] === SHIPPED_CURRENCIES[ 0 ];
+    if ( list.length === 0 || shipped ) return [ base ];
+
+    // Base is always accepted, so it belongs in the saved set: the panel shows
+    // it on either way, and a resumed wizard whose operator changes country
+    // would otherwise store a list its own base is missing from.
+    return list.includes( base ) ? list : [ base, ...list ];
+}
 
 /**
  * The operator's own value, or the one derived from their country.
