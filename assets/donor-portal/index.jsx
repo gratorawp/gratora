@@ -1157,6 +1157,10 @@ function Receipts() {
     const [ year, setYear ]   = useState( new Date().getFullYear() );
     const [ years, setYears ] = useState( [ new Date().getFullYear() ] );
     const [ dlError, setDlError ] = useState( '' );
+    // Kept apart from the statement's error, the way the profile picture keeps
+    // its own: the receipts list is a scroll below the statement card, and a
+    // donor who taps Download there is not looking at the top of the page.
+    const [ rowError, setRowError ] = useState( { id: 0, message: '' } );
 
     useEffect( () => {
         api( 'receipts' ).then( setList ).catch( ( e ) => setError( e.message ) );
@@ -1189,14 +1193,14 @@ function Receipts() {
     // outside the user gesture, and Safari refuses it without a word.
     const downloadReceipt = async ( id, receiptNumber ) => {
         const generic = __( 'Could not open the receipt. Please try again.', 'dono-fundraising-platform' );
-        setDlError( '' );
+        setRowError( { id: 0, message: '' } );
         try {
             const res = await api( `receipts/${ id }/download-url` );
             if ( ! res?.url ) throw new Error( generic );
             const doc = await fetchDocument( onPortalOrigin( res.url ), generic );
             saveBlob( doc, `receipt-${ String( receiptNumber || id ).replace( /[^A-Za-z0-9_-]/g, '' ) }.pdf` );
         } catch ( err ) {
-            setDlError( err.message || generic );
+            setRowError( { id, message: err.message || generic } );
         }
     };
 
@@ -1227,6 +1231,9 @@ function Receipts() {
                             <div>
                                 <strong>{ r.receipt_number }</strong>
                                 <div class="dp-list__sub">{ formatDate( r.issued_at ) }</div>
+                                { rowError.id === r.id && rowError.message && (
+                                    <p class="dp-error dp-list__error" role="alert">{ rowError.message }</p>
+                                ) }
                             </div>
                             <button type="button" class="dp-link" onClick={ () => downloadReceipt( r.id, r.receipt_number ) }>{ __( 'Download', 'dono-fundraising-platform' ) }</button>
                         </li>

@@ -261,3 +261,44 @@ test( 'a refused document does not sign the donor out', async () => {
     expect( text() ).toContain( 'Link is invalid or expired.' );
     expect( find( 'Download' ) ).toBeTruthy();
 } );
+
+/**
+ * The statement card is a scroll above the receipts list. A donor who taps
+ * Download on a receipt is looking at the row they tapped, so a message left up
+ * in that card is off the top of their screen and the tap reads as a no-op.
+ */
+test( 'a receipt that will not download says so on the receipt', async () => {
+    const written = 'This receipt was withdrawn because the donation it covers was refunded in full.';
+
+    routes[ 'receipts/9/download-url' ] = () => jsonResponse( 410, { code: 'dono_receipt_voided', message: written } );
+
+    await openReceipts();
+    await clickButton( 'Download' );
+    await settle();
+
+    const row = [ ...document.querySelectorAll( '.dp-list__row' ) ]
+        .find( ( li ) => li.textContent.includes( 'RCPT-0009' ) );
+
+    expect( row ).toBeTruthy();
+    expect( row.textContent ).toContain( written );
+
+    const card = [ ...document.querySelectorAll( '.dp-card' ) ]
+        .find( ( c ) => c.textContent.includes( 'Annual statement' ) );
+
+    expect( card.textContent ).not.toContain( written );
+} );
+
+// The two failures are independent, so neither may answer for the other.
+test( 'the statement keeps its own error', async () => {
+    routes[ `annual-statement/${ new Date().getFullYear() }` ] = () => jsonResponse( 500, { message: 'Nothing to report for that year.' } );
+
+    await openReceipts();
+    await clickButton( 'Download statement' );
+    await settle();
+
+    const card = [ ...document.querySelectorAll( '.dp-card' ) ]
+        .find( ( c ) => c.textContent.includes( 'Annual statement' ) );
+
+    expect( card.textContent ).toContain( 'Nothing to report for that year.' );
+    expect( document.querySelectorAll( '.dp-list__error' ) ).toHaveLength( 0 );
+} );
