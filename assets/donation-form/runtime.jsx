@@ -4,7 +4,7 @@ import { render } from 'preact';
 import { useCallback, useMemo, useReducer, useRef, useState, useEffect } from 'preact/hooks';
 
 import { reducer, initialState, validateStep, buildPayload, fieldSteps } from './state/store';
-import { visibleGateways } from './util/gateways';
+import { visibleGateways, emptyMessage } from './util/gateways';
 import AmountStep   from './steps/AmountStep';
 import DonorStep    from './steps/DonorStep';
 import ConfirmStep  from './steps/ConfirmStep';
@@ -74,18 +74,27 @@ function paymentComponentFor( payment ) {
     return StripePayment;
 }
 
+const hasGatewayItem = ( items ) => ( Array.isArray( items ) ? items : [] ).some( ( it ) => {
+    if ( ! it ) return false;
+    if ( it.kind === 'payment-gateways' ) return true;
+    return hasGatewayItem( it.children );
+} );
+
+const gatewaysIn = ( steps ) => ( Array.isArray( steps ) ? steps : [] )
+    .some( ( step ) => hasGatewayItem( step?.items ) || hasGatewayItem( step?.decorations ) );
+
 // Read from the same config the form renders from rather than a separate server
 // flag, so the two cannot disagree about a form edited between render and
 // submit.
 function hasGatewayBlock( config ) {
-    const seen = ( items ) => ( Array.isArray( items ) ? items : [] ).some( ( it ) => {
-        if ( ! it ) return false;
-        if ( it.kind === 'payment-gateways' ) return true;
-        return seen( it.children );
-    } );
+    return gatewaysIn( config?.steps );
+}
 
-    return ( Array.isArray( config?.steps ) ? config.steps : [] )
-        .some( ( step ) => seen( step?.items ) || seen( step?.decorations ) );
+// The gateway section is the only thing on the form that says why it cannot
+// take money. Where it is not on screen beside the submit, whether the author
+// removed the block or put it on another page, the submit says so itself.
+function gatewaysExplainedBeside( steps, config ) {
+    return gatewaysIn( steps ) || hasGatewayItem( config?.preamble );
 }
 
 // Server-first: the submit response is the only number that matches what was
@@ -738,6 +747,7 @@ function SinglePageView( { state, dispatch, config, onSubmit } ) {
     // Same rule as the paged view: without it a single-page form shows a live
     // Donate button under "No payment method accepts X".
     const noGateway  = visibleGateways( config, state ).length === 0;
+    const unexplained = noGateway && ! gatewaysExplainedBeside( state.steps, config );
     const submitStep = state.steps.find( ( s ) => s.type === 'submit' );
     const submitLabel = interpolateLabel(
         submitStep?.label || config.i18n.donateNow,
@@ -751,6 +761,9 @@ function SinglePageView( { state, dispatch, config, onSubmit } ) {
             ) ) }
             { state.status === 'error' && state.message && (
                 <div class="dono-form__error" role="alert">{ state.message }</div>
+            ) }
+            { unexplained && (
+                <div class="dono-form__gateways-empty" role="alert">{ emptyMessage( config, state ) }</div>
             ) }
             <div class={ `dono-form__nav dono-form__nav--align-${ submitStep?.align || 'left' }` }>
                 <button
@@ -810,6 +823,7 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
     // the choice is made; this stops the donor reaching a server refusal by
     // pressing the button anyway.
     const noGateway = visibleGateways( config, state ).length === 0;
+    const unexplained = isLast && noGateway && ! gatewaysExplainedBeside( pageSteps, config );
 
     const submit = useCallback( () => {
         if ( noGateway ) return;
@@ -852,10 +866,13 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
         <div class="dono-form__error" role="alert">{ state.message }</div>
     );
 
-    // No gateway section here on purpose: the payment-gateways block decides
-    // where the selector goes and whether there is one at all, and a fallback
-    // here would keep rendering one the author removed in the editor. A form
-    // offering a choice without the block is caught by the readiness check.
+    // Not a selector: the payment-gateways block owns where that goes and
+    // whether the form has one, and a fallback here would keep drawing one the
+    // author removed. This is only the reason the button below cannot work, on
+    // the pages where the section that would have said it is not on screen.
+    const emptyNotice = unexplained && (
+        <div class="dono-form__gateways-empty" role="alert">{ emptyMessage( config, state ) }</div>
+    );
 
     if ( progressStyle === 'bar' ) {
         const pct = pages.length > 1
@@ -895,6 +912,7 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
                         <StepView key={ i } step={ s } state={ state } dispatch={ dispatch } config={ config } />
                     ) ) }
                     { error }
+                    { emptyNotice }
                     <div class={ `dono-form__nav dono-form__nav--align-${ ( isLast ? submitStep?.align : null ) || 'end' }` }>{ primary }</div>
                 </div>
             </div>
@@ -910,6 +928,7 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
                 <StepView key={ i } step={ s } state={ state } dispatch={ dispatch } config={ config } />
             ) ) }
             { error }
+            { emptyNotice }
             <div class={ `dono-form__nav${ isLast && submitStep?.align ? ` dono-form__nav--align-${ submitStep.align }` : '' }` }>
                 { current > 0 ? (
                     <button

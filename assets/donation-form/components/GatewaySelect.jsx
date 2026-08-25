@@ -1,7 +1,7 @@
 /** @jsxImportSource preact */
 
 import { useEffect } from 'preact/hooks';
-import { visibleGateways, emptyReason } from '../util/gateways';
+import { visibleGateways, emptyMessage } from '../util/gateways';
 
 /**
  * Test-mode notice + payment-gateway selector. The selector hides when one
@@ -30,15 +30,9 @@ export default function GatewaySelect( { state, dispatch, config } ) {
     // the currency when every gateway is switched off sends the donor looking
     // for a fix that was never theirs to make.
     if ( ! opts.length ) {
-        const reason  = emptyReason( config, state );
-        const i18n    = config.i18n || {};
-        const template = reason === 'currency'  ? ( i18n.noGatewayForCurrency || '' )
-            : reason === 'frequency' ? ( i18n.noGatewayForFrequency || '' )
-            : ( i18n.noGatewayAvailable || '' );
-        const message = template.replace( '%s', String( state.currency || '' ).toUpperCase() );
         return (
             <div class="dono-form__payment">
-                <div class="dono-form__gateways-empty" role="alert">{ message }</div>
+                <div class="dono-form__gateways-empty" role="alert">{ emptyMessage( config, state ) }</div>
             </div>
         );
     }

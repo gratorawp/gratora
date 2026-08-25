@@ -64,3 +64,18 @@ export function emptyReason( config, state ) {
     // honest, where naming the currency would not be.
     return 'none';
 }
+
+/**
+ * The sentence for an empty option list. Shared by the gateway section and by
+ * the submit button, which has to say it for itself on a form whose author
+ * removed that section.
+ */
+export function emptyMessage( config, state ) {
+    const i18n   = ( config && config.i18n ) || {};
+    const reason = emptyReason( config, state );
+    const template = reason === 'currency'  ? ( i18n.noGatewayForCurrency || '' )
+        : reason === 'frequency' ? ( i18n.noGatewayForFrequency || '' )
+        : ( i18n.noGatewayAvailable || '' );
+
+    return template.replace( '%s', String( ( state && state.currency ) || '' ).toUpperCase() );
+}
