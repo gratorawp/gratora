@@ -158,6 +158,17 @@ final class DataImporter
         'initiated_user_id',
         'fundraiser_id',
         'fundraiser_team_id',
+        // WordPress attachment ids, and the sharpest case of the rule above:
+        // the export carries no media, so the number lands on whatever post
+        // happens to hold that id here. A donor arrives wearing the charity's
+        // logo as their avatar, and worse, redact() and delete() read this
+        // column and run wp_delete_attachment($id, true) after the commit: a
+        // force delete, no trash. Exercising one donor's erasure right would
+        // permanently destroy an unrelated file from the media library and
+        // every page using it.
+        'avatar_attachment_id',
+        'image_attachment_id',
+        'logo_attachment_id',
     ];
 
     /**
