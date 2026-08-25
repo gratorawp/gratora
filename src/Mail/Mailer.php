@@ -31,13 +31,32 @@ final class Mailer
      * @return bool false when the template is disabled or absent; otherwise wp_mail's result.
      * @since 1.0.0
      */
+    /**
+     * Whether the org has this template switched on in Settings -> Email.
+     *
+     * Public because sendTemplate() returning false is ambiguous: it means both
+     * "the org asked us not to send this" and "the send failed". A caller that
+     * has to tell those apart, because it releases a claim or queues a retry on
+     * failure, has to ask this first, and three copies of the same lookup had
+     * already been written by hand.
+     *
+     * @since 1.0.0
+     */
+    public function templateEnabled(string $key): bool
+    {
+        $template = $this->settings->get('email')['templates'][$key] ?? null;
+
+        return is_array($template) && ! empty($template['enabled']);
+    }
+
     public function sendTemplate(string $key, string $to, array $tokens, array $attachments = []): bool
     {
-        $cfg = $this->settings->get('email');
-        $template = $cfg['templates'][$key] ?? null;
-        if (! is_array($template) || empty($template['enabled'])) {
+        if (! $this->templateEnabled($key)) {
             return false;
         }
+
+        $cfg = $this->settings->get('email');
+        $template = $cfg['templates'][$key] ?? null;
 
         $subject = $this->interpolate((string) ($template['subject'] ?? ''), $tokens);
         $body    = $this->interpolate((string) ($template['body']    ?? ''), $tokens);
