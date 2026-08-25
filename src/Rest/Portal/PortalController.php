@@ -24,6 +24,7 @@ use Dono\Foundation\Identity\IdentityHasher;
 use Dono\Gateways\GatewayManager;
 use Dono\Gateways\SubscriptionChangeNeedsApproval;
 use Dono\Gateways\SupportsPaymentMethodUpdate;
+use Dono\Gateways\SupportsSubscriptionPause;
 use Dono\Mail\Mailer;
 use Dono\Receipts\Receipt;
 use Dono\Receipts\ReceiptRepository;
@@ -864,6 +865,15 @@ final class PortalController
                 // new one must not be offered the option.
                 'can_update_payment_method' => $this->gateways->get((string) $p->gateway)
                     instanceof SupportsPaymentMethodUpdate,
+                // Same rule for pausing. SubscriptionAware was being read as
+                // "this plan can be paused", and two shipped gateways declare
+                // it while refusing both pause and skip: a Direct Debit donor
+                // was shown both buttons and got a raw 422 from either. The
+                // cancel deflection sheet offers exactly those two as the
+                // alternatives to cancelling, so a donor trying not to cancel
+                // was handed two dead ends and then cancelled.
+                'can_pause' => $this->gateways->get((string) $p->gateway)
+                    instanceof SupportsSubscriptionPause,
             ];
         }
         return new WP_REST_Response($out, 200);

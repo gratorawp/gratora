@@ -20,6 +20,7 @@ use Dono\Gateways\PaymentGateway;
 use Dono\Gateways\RefundResult;
 use Dono\Gateways\PaymentRetryUnavailable;
 use Dono\Gateways\SubscriptionAware;
+use Dono\Gateways\SupportsSubscriptionPause;
 use Dono\Gateways\PaymentMethodUpdate;
 use Dono\Gateways\SupportsPaymentMethodUpdate;
 use Dono\Gateways\SupportsPaymentRetry;
@@ -39,7 +40,7 @@ use Throwable;
  *
  * @since 1.0.0
  */
-final class StripeGateway implements PaymentGateway, SubscriptionAware, SupportsPaymentRetry, SupportsPaymentMethodUpdate
+final class StripeGateway implements PaymentGateway, SubscriptionAware, SupportsPaymentRetry, SupportsPaymentMethodUpdate, SupportsSubscriptionPause
 {
     /**
      * Dispute statuses for which the money is on the org's balance: settled in

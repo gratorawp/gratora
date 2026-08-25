@@ -15,6 +15,7 @@ use Dono\Gateways\PaymentGateway;
 use Dono\Gateways\RefundResult;
 use Dono\Gateways\PaymentMethodUpdate;
 use Dono\Gateways\SubscriptionAware;
+use Dono\Gateways\SupportsSubscriptionPause;
 use Dono\Gateways\SupportsPaymentMethodUpdate;
 use Dono\Gateways\WebhookOutcome;
 use Dono\Gateways\SubscriptionChangeNeedsApproval;
@@ -39,7 +40,7 @@ use WP_REST_Request;
  *
  * @since 1.0.0
  */
-final class PayPalGateway implements PaymentGateway, SubscriptionAware, SupportsPaymentMethodUpdate
+final class PayPalGateway implements PaymentGateway, SubscriptionAware, SupportsPaymentMethodUpdate, SupportsSubscriptionPause
 {
     /**
      * Mode of the credentials that verified the current webhook. Set once per

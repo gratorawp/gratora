@@ -900,8 +900,17 @@ function RecurringActionSheet( { plan, onClose, onDone } ) {
                 { stage === 'menu' && (
                     <>
                         <h3>{ __( 'Manage donation', 'dono-fundraising-platform' ) }</h3>
-                        <button class="dp-action" onClick={ () => setStage( 'pause' ) }>{ __( 'Pause', 'dono-fundraising-platform' ) }</button>
-                        <button class="dp-action" onClick={ () => call( { action: 'skip_next' } ) }>{ __( 'Skip next charge', 'dono-fundraising-platform' ) }</button>
+                        { /* Two shipped gateways handle subscriptions and
+                             refuse both of these: a Direct Debit mandate has no
+                             pause, and stopping it means cancelling and asking
+                             the donor to sign a new one. Offering the buttons
+                             anyway got them a raw 422. */ }
+                        { plan.can_pause && (
+                            <>
+                                <button class="dp-action" onClick={ () => setStage( 'pause' ) }>{ __( 'Pause', 'dono-fundraising-platform' ) }</button>
+                                <button class="dp-action" onClick={ () => call( { action: 'skip_next' } ) }>{ __( 'Skip next charge', 'dono-fundraising-platform' ) }</button>
+                            </>
+                        ) }
                         <button class="dp-action" onClick={ () => setStage( 'amount' ) }>{ __( 'Change amount', 'dono-fundraising-platform' ) }</button>
                         { plan.can_update_payment_method && (
                             <button class="dp-action" onClick={ () => setStage( 'payment' ) }>{ __( 'Update payment method', 'dono-fundraising-platform' ) }</button>
@@ -931,8 +940,8 @@ function RecurringActionSheet( { plan, onClose, onDone } ) {
 
                 { stage === 'cancel' && (
                     <CancelDeflection plan={ plan }
-                        onPause={  () => setStage( 'pause' ) }
-                        onSkip={   () => call( { action: 'skip_next' } ) }
+                        onPause={  plan.can_pause ? () => setStage( 'pause' ) : null }
+                        onSkip={   plan.can_pause ? () => call( { action: 'skip_next' } ) : null }
                         onReduce={ () => setStage( 'amount' ) }
                         onCancel={ ( reason ) => call( { action: 'cancel', reason } ) }
                     />
@@ -1113,8 +1122,16 @@ function CancelDeflection( { onPause, onSkip, onReduce, onCancel } ) {
         <>
             <h3>{ __( 'Before you cancel…', 'dono-fundraising-platform' ) }</h3>
             <p class="dp-hint">{ __( 'A few alternatives that might work better:', 'dono-fundraising-platform' ) }</p>
-            <button class="dp-action" onClick={ onPause }>{ __( 'Pause for 1-12 months', 'dono-fundraising-platform' ) }</button>
-            <button class="dp-action" onClick={ onSkip }>{ __( 'Skip just the next charge', 'dono-fundraising-platform' ) }</button>
+            { /* Offered only where the rail can actually do it. A donor trying
+                 NOT to cancel was handed two buttons that both failed, and then
+                 cancelled: the deflection sheet was doing the opposite of its
+                 job. */ }
+            { onPause && (
+                <button class="dp-action" onClick={ onPause }>{ __( 'Pause for 1-12 months', 'dono-fundraising-platform' ) }</button>
+            ) }
+            { onSkip && (
+                <button class="dp-action" onClick={ onSkip }>{ __( 'Skip just the next charge', 'dono-fundraising-platform' ) }</button>
+            ) }
             <button class="dp-action" onClick={ onReduce }>{ __( 'Lower the amount', 'dono-fundraising-platform' ) }</button>
             <button class="dp-action dp-action--danger" onClick={ () => setConfirmed( true ) }>{ __( 'Continue to cancel', 'dono-fundraising-platform' ) }</button>
         </>
