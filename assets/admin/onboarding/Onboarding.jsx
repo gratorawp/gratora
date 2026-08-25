@@ -202,11 +202,25 @@ export default function Onboarding() {
                         decimal_places:  Number.isFinite( currency.format?.decimal_places )
                             ? currency.format.decimal_places
                             : 2,
-                        // Keep separators the user already saved; only derive
-                        // from country on a first run with no saved format.
-                        decimal_sep:     currency.format?.decimal_sep || fmt.decimal,
-                        thousand_sep:    currency.format?.thousand_sep || fmt.thousand,
-                        symbol_position: currency.format?.symbol_position || 'before',
+                        // Keep separators the operator already chose; derive
+                        // the rest from the country they just picked.
+                        //
+                        // This used to test for an EMPTY value, and there is no
+                        // such thing: the server merges its defaults into every
+                        // settings read, so decimal_sep always arrived as '.'
+                        // and the derivation right above could never fire. Every
+                        // German, French, Dutch, Spanish, Italian and Nordic
+                        // install finished the wizard with en-US separators and
+                        // printed 1,234.56 on its donation form, its receipts,
+                        // its tax statements and every admin screen, with
+                        // nothing saying so and four fields to hand-fix.
+                        //
+                        // A value counts as chosen when it differs from what
+                        // ships. The wizard has no separator field of its own,
+                        // so anything else here came from Settings > Currency.
+                        decimal_sep:     chosenFormat( currency, 'decimal_sep', fmt.decimal ),
+                        thousand_sep:    chosenFormat( currency, 'thousand_sep', fmt.thousand ),
+                        symbol_position: chosenFormat( currency, 'symbol_position', fmt.symbolPosition ),
                     },
                 } );
             } else if ( step === 2 ) {
@@ -719,7 +733,30 @@ function ChecklistItem( { title, description, href, cta, onClick, busy } ) {
 
 function numberFormatPair( fmt ) {
     return fmt === 'eu'
-        ? { decimal: ',', thousand: '.' }
-        : { decimal: '.', thousand: ',' };
+        ? { decimal: ',', thousand: '.', symbolPosition: 'after' }
+        : { decimal: '.', thousand: ',', symbolPosition: 'before' };
+}
+
+/**
+ * What ships when nobody has chosen anything, mirroring the currency-locale
+ * defaults in SettingsService.
+ */
+const SHIPPED_FORMAT = {
+    decimal_sep:     '.',
+    thousand_sep:    ',',
+    symbol_position: 'before',
+};
+
+/**
+ * The operator's own value, or the one derived from their country.
+ *
+ * Every settings read comes back with the shipped defaults merged in, so
+ * "unset" is indistinguishable from "set to the default" by emptiness alone.
+ * Differing from what ships is the only evidence of a choice there is.
+ */
+export function chosenFormat( currency, key, derived ) {
+    const value = currency?.format?.[ key ];
+
+    return value && value !== SHIPPED_FORMAT[ key ] ? value : derived;
 }
 
