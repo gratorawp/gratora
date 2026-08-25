@@ -211,3 +211,53 @@ test( 'the document is fetched on the origin the portal itself talks to', async 
     expect( global.fetch.mock.calls.map( ( c ) => String( c[ 0 ] ) ) ).toContain( RECEIPT_URL );
     expect( clickedAnchors ).toHaveLength( 1 );
 } );
+
+/**
+ * ReceiptsController refuses some downloads on purpose and writes the donor a
+ * reason: a receipt withdrawn by a full refund, or one produced by an extension
+ * the site no longer runs. "Please try again" is false for both, and the donor
+ * would try again forever.
+ */
+test( 'the reason the server wrote reaches the donor', async () => {
+    const written = 'This receipt was produced by an extension that is no longer active. Please contact the organization.';
+
+    routes[ 'receipts/9/download-url' ] = () => jsonResponse( 200, { url: RECEIPT_URL } );
+    global.fetch.mockImplementation( ( url ) => {
+        const raw = String( url );
+        if ( raw.startsWith( RECEIPT_URL ) ) {
+            return jsonResponse( 410, { code: 'dono_renderer_missing', message: written } );
+        }
+        const route = routes[ raw.replace( PORTAL_REST, '' ) ];
+        return typeof route === 'function' ? route() : jsonResponse( 200, {} );
+    } );
+
+    await openReceipts();
+    await clickButton( 'Download' );
+    await settle();
+
+    expect( text() ).toContain( written );
+    expect( text() ).not.toContain( 'Please try again' );
+    expect( clickedAnchors ).toHaveLength( 0 );
+} );
+
+// The document link carries its own single-purpose token. A refusal of it says
+// nothing about the portal session, so it must not throw the donor out of one
+// that is still good.
+test( 'a refused document does not sign the donor out', async () => {
+    routes[ 'receipts/9/download-url' ] = () => jsonResponse( 200, { url: RECEIPT_URL } );
+    global.fetch.mockImplementation( ( url ) => {
+        const raw = String( url );
+        if ( raw.startsWith( RECEIPT_URL ) ) {
+            return jsonResponse( 403, { code: 'dono_invalid_token', message: 'Link is invalid or expired.' } );
+        }
+        const route = routes[ raw.replace( PORTAL_REST, '' ) ];
+        return typeof route === 'function' ? route() : jsonResponse( 200, {} );
+    } );
+
+    await openReceipts();
+    await clickButton( 'Download' );
+    await settle();
+
+    expect( text() ).toContain( 'Link is invalid or expired.' );
+    expect( find( 'Download' ) ).toBeTruthy();
+} );

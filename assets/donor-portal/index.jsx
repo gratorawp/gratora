@@ -60,6 +60,14 @@ function setCsrfFromResponse( payload ) {
 // rather than leaving one tab stuck on a raw "Request failed".
 let onSessionExpired = null;
 
+// The server writes prose for the refusals it means (a withdrawn receipt, a
+// renderer whose extension is gone), and the donor is owed it rather than a
+// house sentence. Every path that can meet a refusal builds its error here.
+async function refusal( r, fallback ) {
+    const data = await r.json().catch( () => ({}) );
+    return Object.assign( new Error( data.message || fallback ), { status: r.status, data } );
+}
+
 function api( path, init = {} ) {
     // FormData sets its own content type, boundary and all. Declaring JSON over
     // it makes the body unparseable at the other end.
@@ -80,17 +88,26 @@ function api( path, init = {} ) {
         ...init,
     } ).then( async ( r ) => {
         if ( ! r.ok ) {
-            const data = await r.json().catch( () => ({}) );
+            const err = await refusal( r, __( 'Request failed', 'dono-fundraising-platform' ) );
             if ( ( r.status === 401 || r.status === 403 ) && typeof onSessionExpired === 'function' ) {
                 onSessionExpired();
             }
-            throw Object.assign( new Error( data.message || __( 'Request failed', 'dono-fundraising-platform' ) ), { status: r.status, data } );
+            throw err;
         }
         const ct = r.headers.get( 'content-type' ) || '';
         if ( ct.includes( 'application/pdf' ) ) return r.blob();
         const json = await r.json();
         setCsrfFromResponse( json );
         return json;
+    } );
+}
+
+// A document link carries its own single-purpose token, so a refusal here says
+// nothing about the portal session and must not sign the donor out of it.
+function fetchDocument( url, fallback ) {
+    return fetch( url, { credentials: 'same-origin' } ).then( async ( r ) => {
+        if ( ! r.ok ) throw await refusal( r, fallback );
+        return r.blob();
     } );
 }
 
@@ -1171,15 +1188,15 @@ function Receipts() {
     // hand the donor the bytes. A window.open one round trip after the tap is
     // outside the user gesture, and Safari refuses it without a word.
     const downloadReceipt = async ( id, receiptNumber ) => {
+        const generic = __( 'Could not open the receipt. Please try again.', 'dono-fundraising-platform' );
         setDlError( '' );
         try {
             const res = await api( `receipts/${ id }/download-url` );
-            if ( ! res?.url ) throw new Error( __( 'Could not open the receipt. Please try again.', 'dono-fundraising-platform' ) );
-            const doc = await fetch( onPortalOrigin( res.url ), { credentials: 'same-origin' } );
-            if ( ! doc.ok ) throw new Error( __( 'Could not open the receipt. Please try again.', 'dono-fundraising-platform' ) );
-            saveBlob( await doc.blob(), `receipt-${ String( receiptNumber || id ).replace( /[^A-Za-z0-9_-]/g, '' ) }.pdf` );
+            if ( ! res?.url ) throw new Error( generic );
+            const doc = await fetchDocument( onPortalOrigin( res.url ), generic );
+            saveBlob( doc, `receipt-${ String( receiptNumber || id ).replace( /[^A-Za-z0-9_-]/g, '' ) }.pdf` );
         } catch ( err ) {
-            setDlError( err.message || __( 'Could not open the receipt. Please try again.', 'dono-fundraising-platform' ) );
+            setDlError( err.message || generic );
         }
     };
 
