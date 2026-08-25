@@ -1104,6 +1104,36 @@ function CancelDeflection( { onPause, onSkip, onReduce, onCancel } ) {
     );
 }
 
+// The download link is minted with rest_url(), which on an install that serves
+// this page on both the apex and www names the other one of the pair. Fetching
+// it there is cross-origin; the base the portal already talks to is not.
+function onPortalOrigin( url ) {
+    try {
+        const target = new URL( url, window.location.href );
+        const base   = new URL( cfg.rest, window.location.href );
+        target.protocol = base.protocol;
+        target.host     = base.host;
+        return target.toString();
+    } catch ( e ) {
+        return url;
+    }
+}
+
+// A synthesized anchor, not window.open: a popup a gesture did not open is
+// blocked outright on iOS Safari, and blocked silently.
+function saveBlob( blob, filename ) {
+    const url = URL.createObjectURL( blob );
+    const a   = document.createElement( 'a' );
+    a.href     = url;
+    a.download = filename;
+    // Append before click and defer the revoke, or the browser cancels the
+    // download mid-flight.
+    document.body.appendChild( a );
+    a.click();
+    a.remove();
+    setTimeout( () => URL.revokeObjectURL( url ), 10000 );
+}
+
 function Receipts() {
     const [ list, setList ]   = useState( null );
     const [ error, setError ] = useState( null );
@@ -1131,28 +1161,23 @@ function Receipts() {
     const downloadAnnual = async () => {
         setDlError( '' );
         try {
-            const blob = await api( `annual-statement/${ year }` );
-            const url  = URL.createObjectURL( blob );
-            const a    = document.createElement( 'a' );
-            a.href     = url;
-            a.download = `dono-annual-${ year }.pdf`;
-            // Append before click and defer the revoke, or the browser cancels
-            // the download mid-flight.
-            document.body.appendChild( a );
-            a.click();
-            a.remove();
-            setTimeout( () => URL.revokeObjectURL( url ), 10000 );
+            saveBlob( await api( `annual-statement/${ year }` ), `dono-annual-${ year }.pdf` );
         } catch ( err ) {
             setDlError( err.message || __( 'Could not generate statement.', 'dono-fundraising-platform' ) );
         }
     };
 
-    // Fetch a fresh download link at click time so it never opens expired.
-    const downloadReceipt = async ( id ) => {
+    // Fetch a fresh download link at click time so it never opens expired, then
+    // hand the donor the bytes. A window.open one round trip after the tap is
+    // outside the user gesture, and Safari refuses it without a word.
+    const downloadReceipt = async ( id, receiptNumber ) => {
         setDlError( '' );
         try {
             const res = await api( `receipts/${ id }/download-url` );
-            if ( res?.url ) window.open( res.url, '_blank', 'noopener' );
+            if ( ! res?.url ) throw new Error( __( 'Could not open the receipt. Please try again.', 'dono-fundraising-platform' ) );
+            const doc = await fetch( onPortalOrigin( res.url ), { credentials: 'same-origin' } );
+            if ( ! doc.ok ) throw new Error( __( 'Could not open the receipt. Please try again.', 'dono-fundraising-platform' ) );
+            saveBlob( await doc.blob(), `receipt-${ String( receiptNumber || id ).replace( /[^A-Za-z0-9_-]/g, '' ) }.pdf` );
         } catch ( err ) {
             setDlError( err.message || __( 'Could not open the receipt. Please try again.', 'dono-fundraising-platform' ) );
         }
@@ -1186,7 +1211,7 @@ function Receipts() {
                                 <strong>{ r.receipt_number }</strong>
                                 <div class="dp-list__sub">{ formatDate( r.issued_at ) }</div>
                             </div>
-                            <button type="button" class="dp-link" onClick={ () => downloadReceipt( r.id ) }>{ __( 'Download', 'dono-fundraising-platform' ) }</button>
+                            <button type="button" class="dp-link" onClick={ () => downloadReceipt( r.id, r.receipt_number ) }>{ __( 'Download', 'dono-fundraising-platform' ) }</button>
                         </li>
                     ) ) }
                 </ul>
