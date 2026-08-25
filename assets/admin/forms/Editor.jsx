@@ -16,6 +16,7 @@ import {
 } from '@wordpress/components';
 import Notice from '../_shared/components/Notice';
 import { notify } from '../_shared/notify';
+import { gatewayIsOn, toggleGatewayAllowed } from '../_shared/gatewayAllowList';
 import {
     BlockEditorProvider,
     BlockInspector,
@@ -1307,10 +1308,25 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
             >
                 <SelectControl
                     value={ String( c.value( 'campaign_id', 0 ) || 0 ) }
-                    options={ campaigns.map( ( cmp ) => ( {
-                        value: String( cmp.id ),
-                        label: cmp.title,
-                    } ) ) }
+                    options={ ( () => {
+                        const opts = campaigns.map( ( cmp ) => ( {
+                            value: String( cmp.id ),
+                            label: cmp.title,
+                        } ) );
+                        // listForPicker is published/draft only and capped at
+                        // 200, so a form under an archived or older campaign
+                        // has no option of its own and the select would show
+                        // somebody else's campaign as this form's.
+                        const current = String( c.value( 'campaign_id', 0 ) || 0 );
+                        if ( current !== '0' && ! opts.some( ( o ) => o.value === current ) ) {
+                            opts.unshift( {
+                                value: current,
+                                label: c.value( 'campaign', null )?.title
+                                    || __( 'Current campaign', 'dono-fundraising-platform' ),
+                            } );
+                        }
+                        return opts;
+                    } )() }
                     onChange={ ( v ) => {
                         const next = Number( v );
                         if ( next > 0 ) c.edit( { campaign_id: next } );
@@ -1467,9 +1483,7 @@ function GatewaysSection( { gateways, settings, setSettings } ) {
     const allowed = block ? block.allowed : ( settings.gateways.allowed || [] );
 
     const toggleGateway = ( id ) => {
-        const next = allowed.includes( id )
-            ? allowed.filter( ( g ) => g !== id )
-            : [ ...allowed, id ];
+        const next = toggleGatewayAllowed( allowed, id, gateways.map( ( g ) => g.id ) );
 
         if ( block ) {
             updateBlockAttributes( block.clientId, { allowed: next } );
@@ -1487,7 +1501,7 @@ function GatewaysSection( { gateways, settings, setSettings } ) {
                     <label key={ g.id } className="dono-sidebar-check">
                         <input
                             type="checkbox"
-                            checked={ allowed.includes( g.id ) }
+                            checked={ gatewayIsOn( allowed, g.id ) }
                             onChange={ () => toggleGateway( g.id ) }
                         />
                         <span>{ gatewayLabel( g ) }</span>

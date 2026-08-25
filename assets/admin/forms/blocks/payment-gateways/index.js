@@ -2,6 +2,7 @@ import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import { PanelBody, ToggleControl, TextControl, SelectControl, Notice } from '@wordpress/components';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { BlockIcons } from '../_shared/block-icons';
+import { gatewayIsOn, toggleGatewayAllowed } from '../../../_shared/gatewayAllowList';
 
 const NAME = 'dono/payment-gateways';
 
@@ -33,17 +34,8 @@ function Edit( { attributes, setAttributes } ) {
     const gateways = registeredGateways();
     const allIds   = gateways.map( ( g ) => g.id );
 
-    // Empty allowed means "offer all" - the donor-facing resolver treats it
-    // the same. A gateway is on when the list is empty or names it.
-    const isOn = ( id ) => allowed.length === 0 || allowed.includes( id );
-
-    const toggle = ( id ) => {
-        const on   = new Set( allowed.length === 0 ? allIds : allowed );
-        if ( on.has( id ) ) on.delete( id ); else on.add( id );
-        const next = allIds.filter( ( x ) => on.has( x ) );
-        // All selected collapses back to [] (no restriction).
-        setAttributes( { allowed: next.length === allIds.length ? [] : next } );
-    };
+    const isOn   = ( id ) => gatewayIsOn( allowed, id );
+    const toggle = ( id ) => setAttributes( { allowed: toggleGatewayAllowed( allowed, id, allIds ) } );
 
     const setDesc = ( id, text ) =>
         setAttributes( { descriptions: { ...descriptions, [ id ]: text } } );

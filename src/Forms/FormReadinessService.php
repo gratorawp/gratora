@@ -212,13 +212,26 @@ final class FormReadinessService
             ];
         }
 
+        // Two different switches raise this warning, and only one of them is
+        // in Settings. Sending an author there for the form's own checkbox
+        // showed them an org switch already off, and nothing they touched
+        // cleared the warning.
+        $settings = is_array($form->settings ?? null) ? $form->settings : [];
+        $ownSwitch = ! empty($settings['test_mode']);
+
         return [
             'id'           => 'test-mode',
             'status'       => 'warn',
             'label'        => __('This form is in test mode', 'dono-fundraising-platform'),
-            'detail'       => __('Donations will not be charged and are excluded from reporting. Turn test mode off before going live.', 'dono-fundraising-platform'),
-            'action_url'   => admin_url('admin.php?page=dono-settings#gateways'),
-            'action_label' => __('Open settings', 'dono-fundraising-platform'),
+            'detail'       => $ownSwitch
+                ? __('Donations will not be charged and are excluded from reporting. Turn test mode off in this form\'s gateway settings before going live.', 'dono-fundraising-platform')
+                : __('Donations will not be charged and are excluded from reporting. The whole site is in test mode; turn it off before going live.', 'dono-fundraising-platform'),
+            'action_url'   => $ownSwitch
+                ? admin_url('admin.php?page=dono-forms&form=' . (int) $form->id)
+                : admin_url('admin.php?page=dono-settings#gateways'),
+            'action_label' => $ownSwitch
+                ? __('Open this form', 'dono-fundraising-platform')
+                : __('Open settings', 'dono-fundraising-platform'),
         ];
     }
 

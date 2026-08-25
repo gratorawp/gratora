@@ -27,13 +27,23 @@ export default function FormTemplatePicker( { onPick, onClose, creating = false,
     const [ templates, setTemplates ] = useState( [] );
     const [ loading, setLoading ]     = useState( true );
     const [ category, setCategory ]   = useState( 'All' );
+    const [ failed, setFailed ]       = useState( false );
 
-    useEffect( () => {
+    // This is the first screen a new form opens on, so an empty grid reads as
+    // "this install has no templates" rather than "the request failed".
+    const load = () => {
+        setLoading( true );
+        setFailed( false );
         apiFetch( { path: '/dono/v1/admin/forms/templates' } )
             .then( ( list ) => setTemplates( Array.isArray( list ) ? list : [] ) )
-            .catch( () => setTemplates( [] ) )
+            .catch( () => {
+                setTemplates( [] );
+                setFailed( true );
+            } )
             .finally( () => setLoading( false ) );
-    }, [] );
+    };
+
+    useEffect( load, [] );
 
     const categories = useMemo( () => {
         const seen  = new Set();
@@ -55,7 +65,14 @@ export default function FormTemplatePicker( { onPick, onClose, creating = false,
             className="dono-form-template-picker"
             size="large"
         >
-            { loading ? (
+            { failed ? (
+                <div style={ { padding: 40, textAlign: 'center' } }>
+                    <p>{ __( 'The starter templates could not be loaded.', 'dono-fundraising-platform' ) }</p>
+                    <button type="button" className="btn" onClick={ load }>
+                        { __( 'Try again', 'dono-fundraising-platform' ) }
+                    </button>
+                </div>
+            ) : loading ? (
                 <div style={ { padding: 40, textAlign: 'center' } }><Spinner /></div>
             ) : (
                 <>
