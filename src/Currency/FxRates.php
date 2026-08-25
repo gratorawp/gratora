@@ -39,6 +39,17 @@ final class FxRates
     public const STAMP_MAX_AGE_DAYS = 7;
 
     /**
+     * Past this long with no successful fetch, the daily refresh has stopped.
+     *
+     * Two days rather than seven: this is the fetch's own health, and the fetch
+     * runs every day including weekends, so a gap this size is already
+     * abnormal.
+     *
+     * @since 1.0.0
+     */
+    public const FETCH_MAX_AGE_DAYS = 2;
+
+    /**
      * @return array{base:string,date:string,rates:array<string,mixed>,manual?:array<string,mixed>,auto?:bool}|null
      *
      * @since 1.0.0
@@ -319,6 +330,38 @@ final class FxRates
     public function isUnfitToStamp(): bool
     {
         return $this->isStale(self::STAMP_MAX_AGE_DAYS);
+    }
+
+    /**
+     * True when the daily refresh has stopped, which is the thing an admin can
+     * actually act on.
+     *
+     * Measured on fetched_at, not date. `date` is the ECB publication day
+     * copied out of the response, and the ECB publishes only on TARGET
+     * business days, so a perfectly healthy snapshot carries Friday's date
+     * until Monday's publication, three days, every single week, and five over
+     * a holiday closure. Reporting that as stale meant the only in-admin FX
+     * health signal cried wolf every weekend, so nobody could use it to notice
+     * a refresh that had genuinely stopped.
+     *
+     * fetched_at moves every day the cron succeeds, weekend included, so it
+     * separates "our fetch has stopped" from "the ECB has not published".
+     *
+     * @since 1.0.0
+     */
+    public function fetchHasStopped(): bool
+    {
+        $at = $this->fetchedAt();
+        $ts = $at === null ? false : strtotime($at);
+
+        // Not a dead sentinel: saveSettings() deliberately mints a record with
+        // neither date nor fetched_at, because dating it today would report
+        // rates as current on a site that has none.
+        if ($ts === false) {
+            return true;
+        }
+
+        return (time() - $ts) > self::FETCH_MAX_AGE_DAYS * DAY_IN_SECONDS;
     }
 
     /** @since 1.0.0 */

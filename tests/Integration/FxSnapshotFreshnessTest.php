@@ -82,6 +82,111 @@ final class FxSnapshotFreshnessTest extends IntegrationTestCase
         $this->assertTrue($state['stale']);
     }
 
+    /**
+     * The ECB publishes only on TARGET business days, so a healthy snapshot
+     * carries Friday's date until Monday's publication: three days, every
+     * single week, and five over a holiday closure.
+     *
+     * The currency screen's pill was isStale(), which measures that publication
+     * date, so it went amber every weekend. The one FX health signal in the
+     * admin was noise, and a refresh that had genuinely stopped looked exactly
+     * like a Sunday.
+     */
+    public function test_a_healthy_weekend_snapshot_is_not_reported_stale(): void
+    {
+        update_option(FxRates::OPTION, [
+            'base'       => 'USD',
+            // Friday's publication, read on Sunday.
+            'date'       => gmdate('Y-m-d', time() - 3 * DAY_IN_SECONDS),
+            // The cron ran this morning, as it does every day.
+            'fetched_at' => gmdate('Y-m-d H:i:s', time() - HOUR_IN_SECONDS),
+            'auto'       => true,
+            'rates'      => ['EUR' => 0.9],
+        ], false);
+
+        $fx = \Dono\Foundation\Plugin::instance()->container->get(FxRates::class);
+
+        $this->assertFalse($fx->fetchHasStopped(), 'the fetch ran an hour ago');
+        $this->assertFalse(
+            $fx->fetchHasStopped() || $fx->isUnfitToStamp(),
+            'so the screen has nothing to tell the admin to act on'
+        );
+    }
+
+    /**
+     * The pill the admin actually sees, not just the predicate behind it.
+     *
+     * Pinning only fetchHasStopped() left the controller free to go on asking
+     * isStale(), which is the question that cried wolf: the fix would have
+     * looked done while the screen behaved exactly as before.
+     */
+    public function test_the_currency_screen_is_quiet_on_a_healthy_weekend(): void
+    {
+        update_option(FxRates::OPTION, [
+            'base'       => 'USD',
+            'date'       => gmdate('Y-m-d', time() - 3 * DAY_IN_SECONDS),
+            'fetched_at' => gmdate('Y-m-d H:i:s', time() - HOUR_IN_SECONDS),
+            'auto'       => true,
+            'rates'      => ['EUR' => 0.9],
+        ], false);
+
+        wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
+
+        $res = rest_do_request(new \WP_REST_Request('GET', '/dono/v1/admin/currency/fx'));
+        $this->assertSame(200, $res->get_status());
+
+        $this->assertFalse(
+            (bool) ((array) $res->get_data())['stale'],
+            'Friday\'s publication read on Sunday is a healthy site, not a warning'
+        );
+    }
+
+    /** And it does say so when the refresh has genuinely stopped. */
+    public function test_the_currency_screen_reports_a_stopped_refresh(): void
+    {
+        update_option(FxRates::OPTION, [
+            'base'       => 'USD',
+            'date'       => gmdate('Y-m-d', time() - 5 * DAY_IN_SECONDS),
+            'fetched_at' => gmdate('Y-m-d H:i:s', time() - 5 * DAY_IN_SECONDS),
+            'auto'       => true,
+            'rates'      => ['EUR' => 0.9],
+        ], false);
+
+        wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
+
+        $res = rest_do_request(new \WP_REST_Request('GET', '/dono/v1/admin/currency/fx'));
+
+        $this->assertTrue((bool) ((array) $res->get_data())['stale']);
+    }
+
+    /** And a refresh that really has stopped is still reported. */
+    public function test_a_refresh_that_stopped_is_reported(): void
+    {
+        update_option(FxRates::OPTION, [
+            'base'       => 'USD',
+            'date'       => gmdate('Y-m-d', time() - 4 * DAY_IN_SECONDS),
+            'fetched_at' => gmdate('Y-m-d H:i:s', time() - 4 * DAY_IN_SECONDS),
+            'auto'       => true,
+            'rates'      => ['EUR' => 0.9],
+        ], false);
+
+        $this->assertTrue(
+            \Dono\Foundation\Plugin::instance()->container->get(FxRates::class)->fetchHasStopped(),
+            'four days with no successful fetch is the thing worth saying'
+        );
+    }
+
+    /** A site that has never fetched has nothing on file at all. */
+    public function test_a_site_that_never_fetched_is_reported(): void
+    {
+        update_option(FxRates::OPTION, ['base' => 'USD', 'auto' => true, 'rates' => []], false);
+
+        $this->assertTrue(
+            \Dono\Foundation\Plugin::instance()->container->get(FxRates::class)->fetchHasStopped(),
+            'no fetched_at is not a fresh fetch'
+        );
+    }
+
     public function test_a_briefly_failing_fetch_logs_the_ordinary_line(): void
     {
         update_option(FxRates::OPTION, [

@@ -146,7 +146,16 @@ final class FxController
             // column and is the org's own currency whatever the snapshot holds.
             'frame'      => $this->fx->base() ?? $base,
             'auto'       => $this->fx->auto(),
-            'stale'      => $this->fx->isStale(),
+            // Two different failures behind one pill: the refresh has stopped,
+            // or it is still running and the rates on file are now too old to
+            // stamp onto money. Neither fires on an ordinary weekend.
+            //
+            // This was isStale(), which measures the ECB PUBLICATION date, and
+            // the ECB does not publish at weekends: a healthy site went amber
+            // every Saturday and Sunday, so the one FX health signal in the
+            // admin was noise and a refresh that had really stopped looked the
+            // same as a Sunday.
+            'stale'      => $this->fx->fetchHasStopped() || $this->fx->isUnfitToStamp(),
             'date'       => $this->fx->date(),
             'fetched_at' => $this->fx->fetchedAt(),
             'source'     => 'European Central Bank (Frankfurter)',
