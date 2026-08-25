@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dono\Rest\Admin;
 use Dono\Foundation\Auth\Capabilities;
 
+use Dono\Currency\FxBackfill;
 use Dono\Currency\FxRates;
 use Dono\Gateways\GatewayManager;
 use Dono\Currency\FxRatesUpdater;
@@ -122,7 +123,13 @@ final class FxController
             ? array_map('strtoupper', $cur['supported_currencies'])
             : [$base];
 
-        $codes    = array_values(array_unique(array_merge([$base], $supported)));
+        // Plus what donations were actually taken in. Tools sends the operator
+        // here to add a rate for a stranded currency, and that is not
+        // necessarily one the org still accepts: the same union
+        // FxRatesUpdater::needsRates() asks for the same reason.
+        $codes = array_values(array_unique(
+            array_merge([$base], $supported, FxBackfill::strandedCurrencies())
+        ));
         $manual   = $this->fx->manual();
         $fetched  = $this->fx->fetchedRates();
 

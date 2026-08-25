@@ -300,7 +300,12 @@ export default function CurrencyPanel( { s, fx } ) {
                 </FormRow>
             </Card>
 
-            { supported.length > 1 && fx && (
+            { /* On the rows the server built, not on the settings record: a
+                 currency donations were taken in without a rate needs an input
+                 here whether or not the org still accepts it. A genuinely
+                 single-currency site still gets no card, since rows is the base
+                 alone. */ }
+            { fx && ( ( fx.rows || [] ).length > 1 || ( fx.loading && supported.length > 1 ) ) && (
                 <ExchangeRatesCard fx={ fx } base={ defaultCurrency } />
             ) }
 
