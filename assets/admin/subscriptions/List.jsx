@@ -59,6 +59,17 @@ const readTestPref = () => {
 // How many the notice lists before it offers the rest behind a click.
 const UNLINKED_PREVIEW = 5;
 
+// A column header sorts by its field id; the server sorts by column name and
+// silently falls back to next_payment_at for a name it does not know, so an
+// unmapped id turns the arrow without turning the list.
+const ORDERBY_COLUMN = {
+    amount:   'amount_cents',
+    lifetime: 'total_paid_cents',
+};
+
+/** @since 1.0.0 */
+export const orderbyFor = ( field ) => ORDERBY_COLUMN[ field ] || field || 'next_payment_at';
+
 function intervalLabel( unit, count ) {
     const n = Number( count ) || 1;
     switch ( unit ) {
@@ -429,7 +440,7 @@ export default function List() {
     const apiParams = useMemo( () => ( {
         page:        view.page,
         per_page:    view.perPage,
-        orderby:     view.sort?.field || 'next_payment_at',
+        orderby:     orderbyFor( view.sort?.field ),
         order:       view.sort?.direction || 'asc',
         status:      statusFilter || undefined,
         gateway:     gatewayFilter || undefined,
