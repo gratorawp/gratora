@@ -63,16 +63,16 @@ final class NumberingTokenRefusalTest extends IntegrationTestCase
 
     public function test_a_scheme_the_generator_accepts_saves(): void
     {
-        $res = $this->put(['separator' => '_', 'prefixes' => ['donation' => 'GIFT_2026']]);
+        $res = $this->put(['separator' => '_', 'prefixes' => ['donation' => 'APPEAL_2026']]);
 
         $this->assertSame(200, $res->get_status());
 
         $stored = $this->settings()->get('numbering');
         $this->assertSame('_', $stored['separator']);
-        $this->assertSame('GIFT_2026', $stored['prefixes']['donation']);
+        $this->assertSame('APPEAL_2026', $stored['prefixes']['donation']);
 
         $minted = Plugin::instance()->container->get(ReferenceGenerator::class)->format('donation', 2026, 1);
-        $this->assertSame('GIFT_2026_2026_00001', $minted, 'what was saved is what is minted');
+        $this->assertSame('APPEAL_2026_2026_00001', $minted, 'what was saved is what is minted');
     }
 
     /** Every writer inherits the refusal, not just the REST route. */

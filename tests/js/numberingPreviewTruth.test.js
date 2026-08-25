@@ -83,9 +83,9 @@ test( 'an empty digit count previews the one digit the generator falls back to',
 test( 'a scheme the generator accepts is previewed as written', () => {
     const root = mount( {
         separator: '_', padding: 4, include_year: false,
-        prefixes: { donation: 'GIFT', receipt: 'REC', refund: 'REF' },
+        prefixes: { donation: 'APPEAL', receipt: 'REC', refund: 'REF' },
     } );
 
-    expect( previews( root ) ).toContain( 'GIFT_0001' );
+    expect( previews( root ) ).toContain( 'APPEAL_0001' );
     expect( root.textContent ).not.toContain( 'Letters, numbers, hyphens and underscores only.' );
 } );

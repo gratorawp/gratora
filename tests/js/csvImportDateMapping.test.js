@@ -20,13 +20,13 @@ jest.mock( 'react/jsx-dev-runtime', () => require( 'preact/compat/jsx-dev-runtim
 const settle = () => new Promise( ( r ) => setTimeout( r, 20 ) );
 
 // What csv-inspect answers for a file whose columns it recognised, minus the
-// date: a real export writing "Gift Date" is not guessed.
+// date: a real export writing "Donated On" is not guessed.
 const inspected = {
     rows:    1204,
-    headers: [ 'Email', 'Amount', 'Gift Date' ],
+    headers: [ 'Email', 'Amount', 'Donated On' ],
     fields:  { email: 'Email', amount: 'Amount', date: 'Date' },
     mapping: { email: 'Email', amount: 'Amount' },
-    sample:  [ { Email: 'a@example.test', Amount: '25.00', 'Gift Date': '2024-03-02' } ],
+    sample:  [ { Email: 'a@example.test', Amount: '25.00', 'Donated On': '2024-03-02' } ],
 };
 
 let previewResponse = null;
@@ -45,7 +45,7 @@ async function mountWithFile() {
 
     const input = document.querySelector( 'input[type="file"]' );
     Object.defineProperty( input, 'files', {
-        value:        [ { text: async () => 'Email,Amount,Gift Date\na@example.test,25.00,2024-03-02\n' } ],
+        value:        [ { text: async () => 'Email,Amount,Donated On\na@example.test,25.00,2024-03-02\n' } ],
         configurable: true,
     } );
     input.dispatchEvent( new Event( 'change', { bubbles: true } ) );
@@ -79,7 +79,7 @@ test( 'mapping the date column lets the dry run go ahead', async () => {
     const root = await mountWithFile();
 
     const select = mappingRow( root, 'Date' ).querySelector( 'select' );
-    select.value = 'Gift Date';
+    select.value = 'Donated On';
     select.dispatchEvent( new Event( 'change', { bubbles: true } ) );
     await settle();
 
@@ -91,7 +91,7 @@ test( 'a row skipped for its date says so in words', async () => {
     const root = await mountWithFile();
 
     const select = mappingRow( root, 'Date' ).querySelector( 'select' );
-    select.value = 'Gift Date';
+    select.value = 'Donated On';
     select.dispatchEvent( new Event( 'change', { bubbles: true } ) );
     await settle();
 
