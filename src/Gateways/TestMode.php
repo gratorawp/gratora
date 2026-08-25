@@ -32,6 +32,21 @@ final class TestMode
             }
         }
 
+        return self::siteWide();
+    }
+
+    /**
+     * The site-wide switch, for a question with no form and no donation in it.
+     *
+     * Static because the callers that need it are answering "what is this
+     * install doing right now" rather than working on a record: the donor
+     * picker asking a gateway which currencies it can settle is the one that
+     * matters, and it has nothing to resolve a form from.
+     *
+     * @since 1.0.0
+     */
+    public static function siteWide(): bool
+    {
         $cfg = get_option('dono_gateway_config', []);
 
         return is_array($cfg) && ! empty($cfg['test_mode']);
