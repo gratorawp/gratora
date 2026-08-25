@@ -62,11 +62,34 @@ final class DonationService
      */
     public function createPending(DonationIntent $intent): array
     {
+        // Read before anything can hand back a different intent. The tree
+        // descriptor is what bounds how many submissions one email can make,
+        // and DonationIntent is readonly, so a filter or a type handler
+        // returning a rebuilt instance drops it: the retry the controller has
+        // already charged then writes itself as a fresh root with a full
+        // budget, and every hop after it mints another.
+        $retry = $intent->retry;
+
+        // Read here for the same reason as $retry: an add-on must not be able
+        // to declare a live donor's submission already collected.
+        $alreadyCollected = $intent->already_collected;
+
+        $intent = apply_filters('dono.donation.intent_creating', $intent);
+
+        $typeHandler = $this->formTypes->handlerFor($intent);
+        $intent      = $typeHandler->prepareIntent($intent, $intent->extra);
+
         // A gateway that creates no schedule cannot take a recurring donation:
         // the card is charged once and the donor is promised a plan nobody will
         // ever collect. The public route checks this against the form's own
         // options, but every other caller reaches this method directly.
-        if (FrequencyMap::isRecurring($intent->frequency)) {
+        //
+        // Asked after prepareIntent, so a type handler that rebuilds the intent
+        // cannot carry a frequency past a check that ran before it existed. An
+        // import is exempt: it writes down money already taken on a schedule
+        // that already existed, and refusing it loses the donor's history while
+        // the plan it belongs to imports beside it.
+        if (! $alreadyCollected && FrequencyMap::isRecurring($intent->frequency)) {
             $gateway = $this->gateways->get($intent->gateway);
             if ($gateway === null || ! in_array('recurring', $gateway->frequencies(), true)) {
                 throw new RuntimeException(esc_html(sprintf(
@@ -76,19 +99,6 @@ final class DonationService
                 )));
             }
         }
-
-        // Read before anything can hand back a different intent. The tree
-        // descriptor is what bounds how many submissions one email can make,
-        // and DonationIntent is readonly, so a filter or a type handler
-        // returning a rebuilt instance drops it: the retry the controller has
-        // already charged then writes itself as a fresh root with a full
-        // budget, and every hop after it mints another.
-        $retry = $intent->retry;
-
-        $intent = apply_filters('dono.donation.intent_creating', $intent);
-
-        $typeHandler = $this->formTypes->handlerFor($intent);
-        $intent      = $typeHandler->prepareIntent($intent, $intent->extra);
 
         $now = $this->clock->now()->format('Y-m-d H:i:s');
         $donation = null;

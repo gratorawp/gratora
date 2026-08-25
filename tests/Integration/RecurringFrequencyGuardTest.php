@@ -37,6 +37,60 @@ final class RecurringFrequencyGuardTest extends IntegrationTestCase
         );
     }
 
+    /**
+     * An import writes down money already taken, on a schedule that already
+     * existed at the source. Refusing it loses the donor's payment history
+     * while the plan it belongs to imports beside it, leaving a plan whose
+     * every counter reads zero. The gateway question is about opening a new
+     * schedule, and a migrating charity has usually not connected its gateway
+     * yet, so this fired on every renewal it owned.
+     */
+    public function test_a_donation_already_collected_elsewhere_is_recorded_on_a_one_time_gateway(): void
+    {
+        $intent = new DonationIntent(
+            email:             'collected-' . uniqid() . '@dono.test',
+            amount_cents:      2500,
+            currency:          'EUR',
+            gateway:           'offline',
+            frequency:         'monthly',
+            already_collected: true,
+        );
+
+        ['donation' => $donation] = $this->donations()->createPending($intent);
+
+        $this->assertInstanceOf(Donation::class, $donation);
+        $this->assertSame('monthly', (string) $donation->frequency, 'the history says monthly and must keep saying so');
+    }
+
+    /**
+     * The flag is read before dono.donation.intent_creating, the same defence
+     * $retry has. An add-on that could set it would be able to walk a live
+     * donor's submission past the guard and promise them a plan nothing will
+     * ever collect.
+     */
+    public function test_a_filter_cannot_declare_a_live_donation_already_collected(): void
+    {
+        add_filter('dono.donation.intent_creating', static function (DonationIntent $intent): DonationIntent {
+            return new DonationIntent(
+                email:             $intent->email,
+                amount_cents:      $intent->amount_cents,
+                currency:          $intent->currency,
+                gateway:           $intent->gateway,
+                frequency:         $intent->frequency,
+                already_collected: true,
+            );
+        });
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('creates no recurring schedule');
+
+        try {
+            $this->donations()->createPending($this->intent('offline', 'monthly'));
+        } finally {
+            remove_all_filters('dono.donation.intent_creating');
+        }
+    }
+
     public function test_a_recurring_donation_on_a_one_time_gateway_is_refused(): void
     {
         $before = Donation::query()->count();

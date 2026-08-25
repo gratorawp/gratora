@@ -76,6 +76,18 @@ final class DonationIntent
          * @var array{group: string, born: int, parent: string}|null
          */
         public readonly ?array $retry = null,
+
+        /**
+         * The money named here was taken somewhere else and is being written
+         * down. An import carries a donor's history, so the rules about
+         * whether we may ask for money now do not apply to it: the schedule it
+         * belongs to was created, ran and possibly ended at the source.
+         *
+         * Not settable from a request. DonationsController builds its intent
+         * field by field and never names this, and DonationService reads it
+         * before any filter can hand back a rebuilt intent.
+         */
+        public readonly bool $already_collected = false,
     ) {
     }
 }
