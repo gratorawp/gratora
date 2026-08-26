@@ -84,7 +84,7 @@ export default function DistributionHistogram( { distribution, currency } ) {
                         allowDecimals={ false }
                     />
                     <Tooltip
-                        cursor={ { fill: 'rgba(30,138,78,.06)' } }
+                        cursor={ { fill: 'rgba(33,29,63,.06)' } }
                         contentStyle={ {
                             background:   '#111827',
                             border:       0,

@@ -124,7 +124,7 @@
         height: 8px;
         border-radius: 50%;
         background: $accent;
-        box-shadow: 0 0 0 4px rgba(30, 138, 78, .15);
+        box-shadow: 0 0 0 4px rgba(33, 29, 63, .15);
         animation: giveflow-today-pulse 2.4s ease-in-out infinite;
     }
 
@@ -168,8 +168,8 @@
 }
 
 @keyframes giveflow-today-pulse {
-    0%, 100% { box-shadow: 0 0 0 4px rgba(30, 138, 78, .15); }
-    50%      { box-shadow: 0 0 0 7px rgba(30, 138, 78, .08); }
+    0%, 100% { box-shadow: 0 0 0 4px rgba(33, 29, 63, .15); }
+    50%      { box-shadow: 0 0 0 7px rgba(33, 29, 63, .08); }
 }
 .giveflow-activity {
     list-style: none;

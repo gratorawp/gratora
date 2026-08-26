@@ -62,7 +62,7 @@ export default function DowHourHeatmap( { data } ) {
                                 className={ `giveflow-heatmap__cell${ isPeak ? ' is-peak' : '' }` }
                                 style={ {
                                     background: count > 0
-                                        ? `rgba(30, 138, 78, ${ 0.15 + intensity * 0.75 })`
+                                        ? `rgba(33, 29, 63, ${ 0.15 + intensity * 0.75 })`
                                         : '#f8fafb',
                                 } }
                                 onMouseEnter={ () => setHovered( { day, hour, count } ) }
@@ -93,7 +93,7 @@ export default function DowHourHeatmap( { data } ) {
                     <span
                         key={ a }
                         className="giveflow-heatmap__legend-cell"
-                        style={ { background: `rgba(30, 138, 78, ${ a })` } }
+                        style={ { background: `rgba(33, 29, 63, ${ a })` } }
                     />
                 ) ) }
                 <span className="giveflow-heatmap__legend-label">{ __( 'More', 'giveflow-fundraising-campaigns' ) }</span>

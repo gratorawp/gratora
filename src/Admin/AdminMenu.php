@@ -59,9 +59,9 @@ final class AdminMenu extends HookProvider
     /** @since 1.0.0 */
     private static function menuIcon(): string
     {
-        $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round">'
-            . '<path d="M3.2 6.9 C5.5 4.8 7.7 4.8 10 6.9 S14.5 9 16.8 6.9" />'
-            . '<path d="M3.2 13.9 C5.5 11.8 7.7 11.8 10 13.9 S14.5 16 16.8 13.9" />'
+        $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round">'
+            . '<path d="M3 6.8 C5.4 4.5 7.6 4.5 10 6.8 S14.6 9.1 17 6.8" />'
+            . '<path d="M3 13.8 C5.4 11.5 7.6 11.5 10 13.8 S14.6 16.1 17 13.8" />'
             . '</svg>';
         return 'data:image/svg+xml;base64,' . base64_encode($svg);
     }

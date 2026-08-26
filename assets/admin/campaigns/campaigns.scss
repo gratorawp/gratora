@@ -53,7 +53,7 @@ $card-radius:   $radius-lg;
     // editor, so toggles are consistent and not just inside the cards that set
     // this locally. WP reads --wp-admin-theme-color for all of them.
     --wp-admin-theme-color:           #{$accent};
-    --wp-admin-theme-color--rgb:      30, 138, 78;
+    --wp-admin-theme-color--rgb:      33, 29, 63;
     --wp-admin-theme-color-darker-10: #{$accent-dark};
     --wp-admin-theme-color-darker-20: #{$accent-dark};
 
@@ -1866,7 +1866,7 @@ $card-radius:   $radius-lg;
 
     &:focus-within {
         border-color: $accent;
-        box-shadow: 0 0 0 3px rgba(30, 138, 78, 0.12);
+        box-shadow: 0 0 0 3px rgba(33, 29, 63, 0.12);
     }
 
     &.is-edited {
@@ -1978,7 +1978,7 @@ $card-radius:   $radius-lg;
         color: $text;
         box-shadow: 0 1px 2px rgba(15, 23, 42, .08);
 
-        .giveflow-status-pill__dot { background: $accent; box-shadow: 0 0 0 3px rgba(30, 138, 78, .18); }
+        .giveflow-status-pill__dot { background: $accent; box-shadow: 0 0 0 3px rgba(33, 29, 63, .18); }
     }
 
     &[data-state="draft"].is-active   .giveflow-status-pill__dot { background: $text-soft; box-shadow: 0 0 0 3px rgba(156, 163, 175, .25); }
@@ -2443,7 +2443,7 @@ $card-radius:   $radius-lg;
         width: 8px; height: 8px;
         border-radius: 50%;
         background: $accent;
-        box-shadow: 0 0 0 3px rgba(30, 138, 78, .35);
+        box-shadow: 0 0 0 3px rgba(33, 29, 63, .35);
         flex-shrink: 0;
     }
 
@@ -2637,7 +2637,7 @@ $card-radius:   $radius-lg;
 
     &:focus-within {
         border-color: var(--giveflow-color-accent, $accent);
-        box-shadow: 0 0 0 3px rgba(30, 138, 78, .12);
+        box-shadow: 0 0 0 3px rgba(33, 29, 63, .12);
     }
 }
 .giveflow-cc__slug-prefix {

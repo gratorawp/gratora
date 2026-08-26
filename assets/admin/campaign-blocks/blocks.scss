@@ -2,7 +2,7 @@
 // `style="--giveflow-accent: ..."` recolours a block without recompiling.
 
 $accent-fallback:     #211d3f;
-$accent-soft-fallback: rgba(30, 138, 78, .12);
+$accent-soft-fallback: rgba(33, 29, 63, .12);
 // The resolver emits --giveflow-accent-soft only when a preset or the campaign
 // pairs one with the accent; deriving it otherwise keeps a purple campaign from
 // washing its own pages in green.
