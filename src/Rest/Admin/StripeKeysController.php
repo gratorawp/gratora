@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Dono\Rest\Admin;
+namespace GiveFlow\Rest\Admin;
 
-use Dono\Analytics\ErrorLog;
-use Dono\Foundation\Auth\Capabilities;
-use Dono\Gateways\Stripe\ApplePayDomain;
-use Dono\Gateways\Stripe\StripeAccount;
-use Dono\Gateways\Stripe\StripeApi;
-use Dono\Gateways\Stripe\StripeWebhookProvisioner;
-use Dono\Gateways\GatewayTransportException;
+use GiveFlow\Analytics\ErrorLog;
+use GiveFlow\Foundation\Auth\Capabilities;
+use GiveFlow\Gateways\Stripe\ApplePayDomain;
+use GiveFlow\Gateways\Stripe\StripeAccount;
+use GiveFlow\Gateways\Stripe\StripeApi;
+use GiveFlow\Gateways\Stripe\StripeWebhookProvisioner;
+use GiveFlow\Gateways\GatewayTransportException;
 use RuntimeException;
 use WP_Error;
 use WP_REST_Request;
@@ -27,7 +27,7 @@ use WP_REST_Server;
  */
 final class StripeKeysController
 {
-    private const NAMESPACE = 'dono/v1';
+    private const NAMESPACE = 'giveflow/v1';
 
     /** @since 1.0.0 */
     public function __construct(
@@ -99,8 +99,8 @@ final class StripeKeysController
 
         if (! $this->applePay->isFileReady()) {
             return new WP_Error(
-                'dono_apple_pay_no_file',
-                __('Paste the domain association file from Stripe first. Apple checks for it before the button can appear.', 'dono-fundraising-platform'),
+                'giveflow_apple_pay_no_file',
+                __('Paste the domain association file from Stripe first. Apple checks for it before the button can appear.', 'giveflow-fundraising-campaigns'),
                 ['status' => 400]
             );
         }
@@ -112,7 +112,7 @@ final class StripeKeysController
             try {
                 $result = $this->applePay->refresh($test);
             } catch (RuntimeException $inner) {
-                return new WP_Error('dono_apple_pay_failed', $inner->getMessage(), ['status' => 400]);
+                return new WP_Error('giveflow_apple_pay_failed', $inner->getMessage(), ['status' => 400]);
             }
         }
 
@@ -125,7 +125,7 @@ final class StripeKeysController
     /** @since 1.0.0 */
     public function canManage(): bool
     {
-        return Capabilities::userCan('dono_manage_settings');
+        return Capabilities::userCan('giveflow_manage_settings');
     }
 
     /** @since 1.0.0 */
@@ -135,7 +135,7 @@ final class StripeKeysController
             'connected'   => $this->account->isConnected(),
             'can_charge'  => $this->account->canCharge(),
             'account'     => $this->account->get(),
-            'webhook_url' => rest_url('dono/v1/webhooks/stripe'),
+            'webhook_url' => rest_url('giveflow/v1/webhooks/stripe'),
             'has_webhook_secret' => $this->api->hasWebhookSecret(),
             'apple_pay' => [
                 'domain'    => $this->applePay->domain(),
@@ -182,10 +182,10 @@ final class StripeKeysController
             // the internet.
             $this->account->restore($previous);
             return new WP_Error(
-                'dono_stripe_unreachable',
+                'giveflow_stripe_unreachable',
                 sprintf(
                     /* translators: %s: transport error, e.g. a DNS failure */
-                    __('This site could not reach Stripe, so the key has not been checked or saved: %s. That is a problem with this server rather than with the key. Payments will not work until it is resolved.', 'dono-fundraising-platform'),
+                    __('This site could not reach Stripe, so the key has not been checked or saved: %s. That is a problem with this server rather than with the key. Payments will not work until it is resolved.', 'giveflow-fundraising-campaigns'),
                     $e->getMessage()
                 ),
                 ['status' => 503]
@@ -193,10 +193,10 @@ final class StripeKeysController
         } catch (RuntimeException $e) {
             $this->account->restore($previous);
             return new WP_Error(
-                'dono_stripe_key_rejected',
+                'giveflow_stripe_key_rejected',
                 sprintf(
                     /* translators: %s: error message from Stripe */
-                    __('Stripe rejected that secret key: %s', 'dono-fundraising-platform'),
+                    __('Stripe rejected that secret key: %s', 'giveflow-fundraising-campaigns'),
                     $e->getMessage()
                 ),
                 ['status' => 400]
@@ -229,33 +229,33 @@ final class StripeKeysController
      */
     private function validateShape(bool $test, string $secret, string $publishable): ?WP_Error
     {
-        $bad = static fn (string $msg): WP_Error => new WP_Error('dono_stripe_bad_key', $msg, ['status' => 400]);
+        $bad = static fn (string $msg): WP_Error => new WP_Error('giveflow_stripe_bad_key', $msg, ['status' => 400]);
 
         if (! preg_match('/^(sk|rk)_(test|live)_/', $secret)) {
-            return $bad(__('That does not look like a Stripe secret key. It starts with sk_test_ or sk_live_.', 'dono-fundraising-platform'));
+            return $bad(__('That does not look like a Stripe secret key. It starts with sk_test_ or sk_live_.', 'giveflow-fundraising-campaigns'));
         }
         if (! str_starts_with($publishable, 'pk_')) {
-            return $bad(__('That does not look like a Stripe publishable key. It starts with pk_test_ or pk_live_.', 'dono-fundraising-platform'));
+            return $bad(__('That does not look like a Stripe publishable key. It starts with pk_test_ or pk_live_.', 'giveflow-fundraising-campaigns'));
         }
 
         $secretIsTest      = str_contains($secret, '_test_');
         $publishableIsTest = str_starts_with($publishable, 'pk_test_');
 
         if ($secretIsTest !== $publishableIsTest) {
-            return $bad(__('The secret and publishable keys are from different modes. Use the pair from the same Stripe mode.', 'dono-fundraising-platform'));
+            return $bad(__('The secret and publishable keys are from different modes. Use the pair from the same Stripe mode.', 'giveflow-fundraising-campaigns'));
         }
         if ($secretIsTest !== $test) {
             return $bad(
                 $test
-                    ? __('Those are live keys. Paste your test keys here, or save them under Live.', 'dono-fundraising-platform')
-                    : __('Those are test keys. Paste your live keys here, or save them under Test.', 'dono-fundraising-platform')
+                    ? __('Those are live keys. Paste your test keys here, or save them under Live.', 'giveflow-fundraising-campaigns')
+                    : __('Those are test keys. Paste your live keys here, or save them under Test.', 'giveflow-fundraising-campaigns')
             );
         }
         return null;
     }
 
     /**
-     * Register Dono's webhook endpoint on the org's own account so paid, refund
+     * Register GiveFlow's webhook endpoint on the org's own account so paid, refund
      * and renewal events flow without hand-building it in the Stripe dashboard.
      * Best effort: an unreachable (local) site keeps the manual signing-secret
      * path, and a failure must never block saving working keys.

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
-use Dono\Foundation\Plugin;
-use Dono\Gateways\Sandbox\SandboxRenewer;
-use Dono\Recurring\RecurringPlan;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Gateways\Sandbox\SandboxRenewer;
+use GiveFlow\Recurring\RecurringPlan;
 
 /**
  * A sandbox plan has to actually renew, and has to stop.
@@ -25,7 +25,7 @@ final class SandboxRenewalTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        update_option('dono_gateway_config', [
+        update_option('giveflow_gateway_config', [
             'test_mode' => true,
             'sandbox'   => ['enabled' => true],
         ]);
@@ -95,8 +95,8 @@ final class SandboxRenewalTest extends IntegrationTestCase
         // in the list and exercise nothing.
         $completed = 0;
         $renewed   = 0;
-        add_action('dono.donation.completed', static function () use (&$completed): void { $completed++; });
-        add_action('dono.recurring.renewed',  static function () use (&$renewed): void { $renewed++; });
+        add_action('giveflow.donation.completed', static function () use (&$completed): void { $completed++; });
+        add_action('giveflow.recurring.renewed',  static function () use (&$renewed): void { $renewed++; });
 
         $this->plan();
         $this->renewer()->run();
@@ -143,7 +143,7 @@ final class SandboxRenewalTest extends IntegrationTestCase
 
         // The sandbox gateway deregisters when test mode goes off, and a plan
         // whose gateway is gone cannot be cancelled through the normal path.
-        update_option('dono_gateway_config', ['test_mode' => false]);
+        update_option('giveflow_gateway_config', ['test_mode' => false]);
 
         $this->renewer()->run();
 

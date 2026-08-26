@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Donors\Erasure;
+namespace GiveFlow\Donors\Erasure;
 
 /**
  * One plugin's share of a donor erasure.

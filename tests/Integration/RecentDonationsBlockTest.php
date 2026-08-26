@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
-use Dono\Donors\Donor;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -25,7 +25,7 @@ final class RecentDonationsBlockTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        $req = new WP_REST_Request('POST', '/dono/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode(['title' => 'Recent donations campaign', 'status' => 'published']));
         $this->campaignId = (int) rest_do_request($req)->get_data()['id'];
@@ -128,10 +128,10 @@ final class RecentDonationsBlockTest extends IntegrationTestCase
             'post_status'  => 'publish',
             'post_type'    => 'page',
             'post_content' => sprintf(
-                '<!-- wp:dono/recent-donations {"campaignId":%d} /-->',
+                '<!-- wp:giveflow/recent-donations {"campaignId":%d} /-->',
                 $this->campaignId
             ),
-            'meta_input'   => ['_dono_campaign_id' => $this->campaignId],
+            'meta_input'   => ['_giveflow_campaign_id' => $this->campaignId],
         ]);
 
         global $post;

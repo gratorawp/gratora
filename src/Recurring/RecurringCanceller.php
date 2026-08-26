@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Recurring;
+namespace GiveFlow\Recurring;
 
-use Dono\Donations\DonationService;
-use Dono\Gateways\GatewayManager;
-use Dono\Gateways\SubscriptionAware;
+use GiveFlow\Donations\DonationService;
+use GiveFlow\Gateways\GatewayManager;
+use GiveFlow\Gateways\SubscriptionAware;
 
 /**
  * The one canonical way to cancel a recurring plan: tell the gateway, then run

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Campaigns\Blocks;
+namespace GiveFlow\Campaigns\Blocks;
 
-use Dono\Foundation\Helpers\View;
+use GiveFlow\Foundation\Helpers\View;
 
 /**
  * Core's featured-image block reads the post, which is only the page a campaign
@@ -17,7 +17,7 @@ final class CampaignImageBlock extends CampaignBlock
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'dono/campaign-image';
+        return 'giveflow/campaign-image';
     }
 
     /** @since 1.0.0 */
@@ -66,8 +66,8 @@ final class CampaignImageBlock extends CampaignBlock
             return '';
         }
 
-        return '<div class="dono-block-notice">'
-            . esc_html__('This campaign has no cover image yet. Add one in the campaign settings.', 'dono-fundraising-platform')
+        return '<div class="giveflow-block-notice">'
+            . esc_html__('This campaign has no cover image yet. Add one in the campaign settings.', 'giveflow-fundraising-campaigns')
             . '</div>';
     }
 }

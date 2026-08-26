@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Unit;
+namespace GiveFlow\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 

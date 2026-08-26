@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Forms\Shortcode;
+namespace GiveFlow\Forms\Shortcode;
 
 /**
  * Browser-side registry for gateways that ship outside core: defines
- * window.dono.formGateways inline and fires an action so an add-on can enqueue
+ * window.giveflow.formGateways inline and fires an action so an add-on can enqueue
  * its payment component on the same pages the form is on.
  *
  * The runtime reads the registry lazily, at submit and at render, so an add-on
@@ -17,16 +17,16 @@ namespace Dono\Forms\Shortcode;
  */
 final class FormGatewayAssets
 {
-    public const HANDLE = 'dono-form-gateways';
+    public const HANDLE = 'giveflow-form-gateways';
 
     /** Add-ons hook this to enqueue their payment components. */
-    public const ACTION = 'dono.form.enqueued';
+    public const ACTION = 'giveflow.form.enqueued';
 
     /** @since 1.0.0 */
     public static function enqueue(): void
     {
         if (! wp_script_is(self::HANDLE, 'registered')) {
-            wp_register_script(self::HANDLE, false, [], DONO_VERSION, true);
+            wp_register_script(self::HANDLE, false, [], GIVEFLOW_VERSION, true);
             wp_add_inline_script(self::HANDLE, self::registryJs());
         }
         wp_enqueue_script(self::HANDLE);
@@ -38,8 +38,8 @@ final class FormGatewayAssets
     private static function registryJs(): string
     {
         return <<<'JS'
-window.dono = window.dono || {};
-window.dono.formGateways = window.dono.formGateways || (function () {
+window.giveflow = window.giveflow || {};
+window.giveflow.formGateways = window.giveflow.formGateways || (function () {
     var items = {};
     return {
         register: function (id, entry) {

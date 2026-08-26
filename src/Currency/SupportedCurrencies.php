@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Currency;
+namespace GiveFlow\Currency;
 
-use Dono\Foundation\Helpers\Money;
-use Dono\Settings\SettingsService;
+use GiveFlow\Foundation\Helpers\Money;
+use GiveFlow\Settings\SettingsService;
 
 /**
  * The currencies an organization accepts.

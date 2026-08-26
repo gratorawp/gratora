@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Settings\SettingsService;
+use GiveFlow\Settings\SettingsService;
 
 /**
- * An add-on registers an email template through dono.settings.groups, and the
+ * An add-on registers an email template through giveflow.settings.groups, and the
  * admin then has to be able to find and edit it. The settings editor lists what
  * it is told about, so a template with no metadata is stored, sent, and
  * invisible to the person whose name is on it.
@@ -16,7 +16,7 @@ final class EmailTemplateMetaTest extends IntegrationTestCase
 {
     public function test_an_addon_describes_its_template_for_the_settings_editor(): void
     {
-        add_filter('dono.email.template_meta', static function (array $meta): array {
+        add_filter('giveflow.email.template_meta', static function (array $meta): array {
             $meta[] = [
                 'id'        => 'addon_thing',
                 'label'     => 'Addon thing',
@@ -40,23 +40,23 @@ final class EmailTemplateMetaTest extends IntegrationTestCase
 
     public function test_the_admin_bundle_is_handed_the_descriptions(): void
     {
-        add_filter('dono.email.template_meta', static function (array $meta): array {
+        add_filter('giveflow.email.template_meta', static function (array $meta): array {
             $meta[] = ['id' => 'addon_thing', 'label' => 'Addon thing'];
 
             return $meta;
         });
 
-        $_GET['page'] = 'dono-settings';
-        set_current_screen('dono_page_dono-settings');
+        $_GET['page'] = 'giveflow-settings';
+        set_current_screen('giveflow_page_giveflow-settings');
         wp_set_current_user(1);
 
         // The payload rides an enqueued src-less handle, so it is observed
         // where WordPress serves it: the inline script attached to the handle.
-        wp_deregister_script('dono-admin-globals');
-        (new \Dono\Admin\AdminGlobals(
-            \Dono\Foundation\Plugin::instance()->container->get(\Dono\Foundation\License\LicenseService::class)
+        wp_deregister_script('giveflow-admin-globals');
+        (new \GiveFlow\Admin\AdminGlobals(
+            \GiveFlow\Foundation\Plugin::instance()->container->get(\GiveFlow\Foundation\License\LicenseService::class)
         ))->inject();
-        $data    = wp_scripts()->get_data('dono-admin-globals', 'after');
+        $data    = wp_scripts()->get_data('giveflow-admin-globals', 'after');
         $printed = is_array($data) ? implode('', array_filter($data)) : '';
 
         unset($_GET['page']);

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Rest\Admin;
+namespace GiveFlow\Rest\Admin;
 
-use Dono\Foundation\Auth\Capabilities;
-use Dono\Settings\ReadinessService;
+use GiveFlow\Foundation\Auth\Capabilities;
+use GiveFlow\Settings\ReadinessService;
 use WP_REST_Response;
 use WP_REST_Server;
 
@@ -17,7 +17,7 @@ use WP_REST_Server;
  */
 final class ReadinessController
 {
-    private const NAMESPACE = 'dono/v1';
+    private const NAMESPACE = 'giveflow/v1';
 
     /** @since 1.0.0 */
     public function __construct(private ReadinessService $readiness)
@@ -37,7 +37,7 @@ final class ReadinessController
     /** @since 1.0.0 */
     public function canAccess(): bool
     {
-        return Capabilities::userCan('dono_manage_settings') || current_user_can('manage_options');
+        return Capabilities::userCan('giveflow_manage_settings') || current_user_can('manage_options');
     }
 
     /** @since 1.0.0 */

@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Campaigns\Campaign;
-use Dono\Donations\AggregateSyncer;
-use Dono\Donations\Donation;
-use Dono\Donations\DonationRepository;
-use Dono\Donations\Refund;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Donations\AggregateSyncer;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Donations\Refund;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
 
 /**
  * A foreign donation's base value is rounded once, from the whole amount. Its
@@ -29,12 +29,12 @@ final class RefundRoundingTest extends IntegrationTestCase
     {
         $campaign = $this->campaign();
 
-        $split = $this->paidDonation($campaign, 'DONO-RR-SPLIT', 20000);
+        $split = $this->paidDonation($campaign, 'GIVEFLOW-RR-SPLIT', 20000);
         $this->refund($split, 5000);
         $this->refund($split, 5000);
 
         $whole = $this->campaign();
-        $once  = $this->paidDonation($whole, 'DONO-RR-WHOLE', 20000);
+        $once  = $this->paidDonation($whole, 'GIVEFLOW-RR-WHOLE', 20000);
         $this->refund($once, 10000);
 
         $this->assertSame(
@@ -47,7 +47,7 @@ final class RefundRoundingTest extends IntegrationTestCase
     public function test_the_netted_refund_is_what_the_refunded_total_is_worth(): void
     {
         $campaign = $this->campaign();
-        $donation = $this->paidDonation($campaign, 'DONO-RR-EXACT', 20000);
+        $donation = $this->paidDonation($campaign, 'GIVEFLOW-RR-EXACT', 20000);
 
         $this->refund($donation, 5000);
         $this->refund($donation, 5000);
@@ -69,7 +69,7 @@ final class RefundRoundingTest extends IntegrationTestCase
 
         // No rate, so no known base value: the donation contributes nothing and
         // its refunds must not claw back anything either.
-        $donation = $this->paidDonation($campaign, 'DONO-RR-NORATE', 20000, null, null);
+        $donation = $this->paidDonation($campaign, 'GIVEFLOW-RR-NORATE', 20000, null, null);
         $this->refund($donation, 5000);
         $this->refund($donation, 5000);
 

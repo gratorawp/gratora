@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\AntiSpamGuard;
-use Dono\Donors\Donor;
-use Dono\Donors\MagicLinkToken;
-use Dono\Donors\SignupRedemption;
-use Dono\Foundation\Plugin;
+use GiveFlow\Donations\AntiSpamGuard;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\MagicLinkToken;
+use GiveFlow\Donors\SignupRedemption;
+use GiveFlow\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -32,7 +32,7 @@ final class PortalClaimNameOwnershipTest extends IntegrationTestCase
     /** @param array<string,mixed> $body */
     private function register(array $body): \WP_REST_Response|\WP_Error
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/portal/register');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/portal/register');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(
             $body + ['token' => $this->c()->get(AntiSpamGuard::class)->mintPortalToken()]

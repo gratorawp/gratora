@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donors\AtRiskReason;
-use Dono\Donors\Donor;
-use Dono\Donors\DonorMetricsService;
-use Dono\Foundation\Plugin;
-use Dono\Recurring\RecurringPlan;
+use GiveFlow\Donors\AtRiskReason;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\DonorMetricsService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Recurring\RecurringPlan;
 
 /**
  * The at-risk rows carry why each donor is there. The load fixture has no

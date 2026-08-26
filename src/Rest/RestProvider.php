@@ -2,30 +2,30 @@
 
 declare(strict_types=1);
 
-namespace Dono\Rest;
+namespace GiveFlow\Rest;
 
-use Dono\Foundation\Hooks\HookProvider;
-use Dono\Rest\Admin\ExportsController as AdminExportsController;
-use Dono\Rest\Admin\ToolsController as AdminToolsController;
-use Dono\Rest\Admin\CampaignsController as AdminCampaignsController;
-use Dono\Rest\Admin\CommandsController as AdminCommandsController;
-use Dono\Rest\Admin\DashboardController as AdminDashboardController;
-use Dono\Rest\Admin\DonationsController as AdminDonationsController;
-use Dono\Rest\Admin\DonorsController as AdminDonorsController;
-use Dono\Rest\Admin\FormsController as AdminFormsController;
-use Dono\Rest\Admin\FundsController as AdminFundsController;
-use Dono\Rest\Admin\FxController;
-use Dono\Rest\Admin\NumberingController as AdminNumberingController;
-use Dono\Rest\Admin\OnboardingController as AdminOnboardingController;
-use Dono\Rest\Admin\RecurringController as AdminRecurringController;
-use Dono\Rest\Admin\ReportsController as AdminReportsController;
-use Dono\Rest\Admin\RolesController as AdminRolesController;
-use Dono\Rest\Admin\SettingsController as AdminSettingsController;
-use Dono\Rest\Admin\PayPalKeysController;
-use Dono\Rest\Admin\ReadinessController as AdminReadinessController;
-use Dono\Rest\Admin\StripeKeysController;
-use Dono\Rest\Admin\UserPrefsController as AdminUserPrefsController;
-use Dono\Rest\Portal\PortalController;
+use GiveFlow\Foundation\Hooks\HookProvider;
+use GiveFlow\Rest\Admin\ExportsController as AdminExportsController;
+use GiveFlow\Rest\Admin\ToolsController as AdminToolsController;
+use GiveFlow\Rest\Admin\CampaignsController as AdminCampaignsController;
+use GiveFlow\Rest\Admin\CommandsController as AdminCommandsController;
+use GiveFlow\Rest\Admin\DashboardController as AdminDashboardController;
+use GiveFlow\Rest\Admin\DonationsController as AdminDonationsController;
+use GiveFlow\Rest\Admin\DonorsController as AdminDonorsController;
+use GiveFlow\Rest\Admin\FormsController as AdminFormsController;
+use GiveFlow\Rest\Admin\FundsController as AdminFundsController;
+use GiveFlow\Rest\Admin\FxController;
+use GiveFlow\Rest\Admin\NumberingController as AdminNumberingController;
+use GiveFlow\Rest\Admin\OnboardingController as AdminOnboardingController;
+use GiveFlow\Rest\Admin\RecurringController as AdminRecurringController;
+use GiveFlow\Rest\Admin\ReportsController as AdminReportsController;
+use GiveFlow\Rest\Admin\RolesController as AdminRolesController;
+use GiveFlow\Rest\Admin\SettingsController as AdminSettingsController;
+use GiveFlow\Rest\Admin\PayPalKeysController;
+use GiveFlow\Rest\Admin\ReadinessController as AdminReadinessController;
+use GiveFlow\Rest\Admin\StripeKeysController;
+use GiveFlow\Rest\Admin\UserPrefsController as AdminUserPrefsController;
+use GiveFlow\Rest\Portal\PortalController;
 
 /**
  * Registers all REST route groups on rest_api_init.
@@ -100,7 +100,7 @@ final class RestProvider extends HookProvider
         $this->readiness->registerRoutes();
 
         $registry = new ControllerRegistry();
-        do_action('dono.rest.register', $registry);
+        do_action('giveflow.rest.register', $registry);
         foreach ($registry->all() as $controller) {
             $controller->registerRoutes();
         }

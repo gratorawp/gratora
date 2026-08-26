@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3add73868ff6d072c77e5561e87e179a",
+    "content-hash": "70b3159780a773934658b9b25c8a9e08",
     "packages": [
         {
             "name": "dompdf/dompdf",
@@ -1233,12 +1233,12 @@
             "version": "v1.0.4",
             "source": {
                 "type": "git",
-                "url": "https://github.com/dono-platform/queryable.git",
+                "url": "https://github.com/givefloworg/queryable.git",
                 "reference": "4985fa790f075dbcfd2471f3202466d5097445f7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dono-platform/queryable/zipball/4985fa790f075dbcfd2471f3202466d5097445f7",
+                "url": "https://api.github.com/repos/givefloworg/queryable/zipball/4985fa790f075dbcfd2471f3202466d5097445f7",
                 "reference": "4985fa790f075dbcfd2471f3202466d5097445f7",
                 "shasum": ""
             },
@@ -1274,8 +1274,8 @@
             ],
             "description": "A fluent SQL query builder for WordPress",
             "support": {
-                "source": "https://github.com/dono-platform/queryable/tree/v1.0.4",
-                "issues": "https://github.com/dono-platform/queryable/issues"
+                "source": "https://github.com/givefloworg/queryable/tree/v1.0.4",
+                "issues": "https://github.com/givefloworg/queryable/issues"
             },
             "time": "2026-08-20T05:53:11+00:00"
         },

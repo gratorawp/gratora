@@ -1,5 +1,5 @@
 /**
- * `dono/anonymous-toggle` block - donor opts to publish anonymously.
+ * `giveflow/anonymous-toggle` block - donor opts to publish anonymously.
  * Skips itself when the test form lacks the block.
  */
 

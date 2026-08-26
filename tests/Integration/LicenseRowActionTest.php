@@ -2,24 +2,24 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donors\Portal\PortalPage;
-use Dono\Forms\FormReadinessService;
-use Dono\Forms\FormRepository;
-use Dono\Foundation\Container\Container;
-use Dono\Foundation\Crypto\Crypto;
-use Dono\Foundation\License\LicenseService;
-use Dono\Foundation\Modules\DonoModule;
-use Dono\Foundation\Modules\ModuleManager;
-use Dono\Gateways\GatewayManager;
-use Dono\Gateways\PayPal\PayPalAccount;
-use Dono\Gateways\Stripe\ApplePayDomain;
-use Dono\Gateways\Stripe\StripeAccount;
-use Dono\Gateways\Stripe\StripeApi;
-use Dono\Gateways\TestMode;
-use Dono\Settings\ReadinessService;
-use Dono\Settings\SettingsService;
+use GiveFlow\Donors\Portal\PortalPage;
+use GiveFlow\Forms\FormReadinessService;
+use GiveFlow\Forms\FormRepository;
+use GiveFlow\Foundation\Container\Container;
+use GiveFlow\Foundation\Crypto\Crypto;
+use GiveFlow\Foundation\License\LicenseService;
+use GiveFlow\Foundation\Modules\GiveFlowModule;
+use GiveFlow\Foundation\Modules\ModuleManager;
+use GiveFlow\Gateways\GatewayManager;
+use GiveFlow\Gateways\PayPal\PayPalAccount;
+use GiveFlow\Gateways\Stripe\ApplePayDomain;
+use GiveFlow\Gateways\Stripe\StripeAccount;
+use GiveFlow\Gateways\Stripe\StripeApi;
+use GiveFlow\Gateways\TestMode;
+use GiveFlow\Settings\ReadinessService;
+use GiveFlow\Settings\SettingsService;
 
 /**
  * The licences row on Setup sent the operator to a settings tab that does not
@@ -38,7 +38,7 @@ final class LicenseRowActionTest extends IntegrationTestCase
         $api      = new StripeApi($stripe);
 
         $modules = new ModuleManager(new Container());
-        $modules->register($this->proModule('dono-p2p', 'Peer to peer'));
+        $modules->register($this->proModule('giveflow-p2p', 'Peer to peer'));
         $modules->bootAll();
 
         return new ReadinessService(
@@ -77,17 +77,17 @@ final class LicenseRowActionTest extends IntegrationTestCase
 
     public function test_the_row_links_where_the_licensing_client_says(): void
     {
-        add_filter('dono.license.manage_url', static fn (): string => admin_url('admin.php?page=dono-licenses'));
+        add_filter('giveflow.license.manage_url', static fn (): string => admin_url('admin.php?page=giveflow-licenses'));
 
         $row = $this->licenseRow();
 
-        $this->assertSame(admin_url('admin.php?page=dono-licenses'), $row['action_url']);
+        $this->assertSame(admin_url('admin.php?page=giveflow-licenses'), $row['action_url']);
         $this->assertSame('Add a key', $row['action_label']);
     }
 
-    private function proModule(string $id, string $name): DonoModule
+    private function proModule(string $id, string $name): GiveFlowModule
     {
-        return new class($id, $name) implements DonoModule {
+        return new class($id, $name) implements GiveFlowModule {
             public function __construct(private string $id, private string $name)
             {
             }
@@ -119,7 +119,7 @@ final class LicenseRowActionTest extends IntegrationTestCase
 
             public function tier(): string
             {
-                return DonoModule::TIER_PRO;
+                return GiveFlowModule::TIER_PRO;
             }
 
             public function boot(Container $c): void

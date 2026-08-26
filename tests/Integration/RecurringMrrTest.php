@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Recurring\RecurringPlan;
-use Dono\Recurring\RecurringPlanRepository;
+use GiveFlow\Recurring\RecurringPlan;
+use GiveFlow\Recurring\RecurringPlanRepository;
 
 final class RecurringMrrTest extends IntegrationTestCase
 {

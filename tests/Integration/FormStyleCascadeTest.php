@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Campaigns\Campaign;
-use Dono\Campaigns\Styling\CampaignStyleResolver;
-use Dono\Forms\Form;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Campaigns\Styling\CampaignStyleResolver;
+use GiveFlow\Forms\Form;
 
 /**
  * The style cascade contract the form editor preview mirrors: campaign inline
@@ -18,7 +18,7 @@ final class FormStyleCascadeTest extends IntegrationTestCase
     private function campaignWithInlineAccent(string $hex): Campaign
     {
         $c = Campaign::make();
-        $c->style = ['preset_id' => 'classic', 'tokens' => ['dono-accent' => $hex]];
+        $c->style = ['preset_id' => 'classic', 'tokens' => ['giveflow-accent' => $hex]];
         return $c;
     }
 
@@ -30,7 +30,7 @@ final class FormStyleCascadeTest extends IntegrationTestCase
 
         $resolved = (new CampaignStyleResolver())->resolve($form, $campaign);
 
-        $this->assertSame('#ff0000', $resolved['tokens']['dono-accent']);
+        $this->assertSame('#ff0000', $resolved['tokens']['giveflow-accent']);
         $this->assertSame('#ff0000', $resolved['accent']);
         $this->assertSame('classic', $resolved['preset_id']);
     }
@@ -45,8 +45,8 @@ final class FormStyleCascadeTest extends IntegrationTestCase
 
         // Bold preset's own accent wins; the campaign inline override is gated
         // out because the form picked its own preset.
-        $this->assertSame('#0F3D5C', $resolved['tokens']['dono-accent']);
-        $this->assertNotSame('#ff0000', $resolved['tokens']['dono-accent']);
+        $this->assertSame('#0F3D5C', $resolved['tokens']['giveflow-accent']);
+        $this->assertNotSame('#ff0000', $resolved['tokens']['giveflow-accent']);
         $this->assertSame('bold', $resolved['preset_id']);
     }
 
@@ -54,14 +54,14 @@ final class FormStyleCascadeTest extends IntegrationTestCase
     {
         // Campaign customizes the accent but not the soft tint; nothing pairs
         // a soft with it, so the resolver must drop the catalogue-default soft
-        // and let the stylesheet color-mix derive it from --dono-accent.
+        // and let the stylesheet color-mix derive it from --giveflow-accent.
         $campaign = $this->campaignWithInlineAccent('#ff0000');
         $form = Form::make();
         $form->settings = [];
 
         $resolved = (new CampaignStyleResolver())->resolve($form, $campaign);
 
-        $this->assertArrayNotHasKey('dono-accent-soft', $resolved['tokens']);
+        $this->assertArrayNotHasKey('giveflow-accent-soft', $resolved['tokens']);
     }
 
     public function test_preset_paired_accent_soft_is_kept(): void
@@ -72,6 +72,6 @@ final class FormStyleCascadeTest extends IntegrationTestCase
 
         $resolved = (new CampaignStyleResolver())->resolve($form, null);
 
-        $this->assertSame('#dde6ed', $resolved['tokens']['dono-accent-soft']);
+        $this->assertSame('#dde6ed', $resolved['tokens']['giveflow-accent-soft']);
     }
 }

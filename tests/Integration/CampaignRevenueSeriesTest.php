@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Campaigns\Campaign;
-use Dono\Campaigns\CampaignMetricsService;
-use Dono\Donations\Donation;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Campaigns\CampaignMetricsService;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
 
 /**
  * The all-time revenue series must reach back to the earliest paid donation,
@@ -41,7 +41,7 @@ final class CampaignRevenueSeriesTest extends IntegrationTestCase
 
         // A paid donation 90 days ago, i.e. 60 days BEFORE the campaign existed.
         $d = Donation::make();
-        $d->reference         = 'DONO-BK-' . substr(md5(uniqid('', true)), 0, 8);
+        $d->reference         = 'GIVEFLOW-BK-' . substr(md5(uniqid('', true)), 0, 8);
         $d->donor_id          = (int) $donor->id;
         $d->campaign_id       = (int) $c->id;
         $d->amount_cents      = 5000;

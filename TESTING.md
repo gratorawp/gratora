@@ -4,11 +4,11 @@
 
 ```
 composer install
-composer test:setup dono_tests root '' 127.0.0.1 latest
+composer test:setup giveflow_tests root '' 127.0.0.1 latest
 ```
 
 `test:setup` downloads WordPress and its test library into
-`~/.dono-wp-tests`, then creates the test database. Every Dono repo on the
+`~/.giveflow-wp-tests`, then creates the test database. Every GiveFlow repo on the
 machine finds it there, so you only do this once.
 
 It needs a MySQL/MariaDB you can create databases on. The arguments are

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Campaigns\Campaign;
-use Dono\Campaigns\CampaignService;
-use Dono\Donations\Donation;
-use Dono\Foundation\Plugin;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Campaigns\CampaignService;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Foundation\Plugin;
 use RuntimeException;
 
 /**
@@ -52,7 +52,7 @@ final class CampaignDeleteGuardTest extends IntegrationTestCase
     {
         $now = gmdate('Y-m-d H:i:s');
         $d = Donation::make();
-        $d->reference         = 'DONO-CG-' . bin2hex(random_bytes(3));
+        $d->reference         = 'GIVEFLOW-CG-' . bin2hex(random_bytes(3));
         $d->donor_id          = 1;
         $d->campaign_id       = $campaignId;
         $d->amount_cents      = 5000;

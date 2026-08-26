@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Foundation\Plugin;
-use Dono\Gateways\Stripe\ApplePayDomain;
-use Dono\Gateways\Stripe\StripeAccount;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Gateways\Stripe\ApplePayDomain;
+use GiveFlow\Gateways\Stripe\StripeAccount;
 use WP_REST_Request;
 
 /**
@@ -69,7 +69,7 @@ final class ApplePayDomainTest extends IntegrationTestCase
 
     private function enable(string $file = '', string $mode = 'live'): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/gateways/stripe/apple-pay');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/gateways/stripe/apple-pay');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['mode' => $mode, 'association_file' => $file]));
         return rest_do_request($req);
@@ -103,7 +103,7 @@ final class ApplePayDomainTest extends IntegrationTestCase
         $res = $this->enable('');
 
         $this->assertSame(400, $res->get_status());
-        $this->assertSame('dono_apple_pay_no_file', $res->get_data()['code'] ?? null);
+        $this->assertSame('giveflow_apple_pay_no_file', $res->get_data()['code'] ?? null);
         $this->assertEmpty($this->calls, 'no Stripe call is spent when the precondition fails');
     }
 
@@ -123,7 +123,7 @@ final class ApplePayDomainTest extends IntegrationTestCase
         $this->mockStripe('active');
         $this->enable('7B227073704964223A2241424331', 'live');
 
-        $res = rest_do_request(new WP_REST_Request('GET', '/dono/v1/gateways/stripe/status'));
+        $res = rest_do_request(new WP_REST_Request('GET', '/giveflow/v1/gateways/stripe/status'));
         $apple = $res->get_data()['apple_pay'] ?? [];
 
         $this->assertTrue($apple['has_file'] ?? false);

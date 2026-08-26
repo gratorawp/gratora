@@ -3,27 +3,27 @@ import { PanelBody, TextControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { BlockIcons } from '../_shared/block-icons';
 
-const NAME = 'dono/email';
+const NAME = 'giveflow/email';
 
 function Edit( { attributes, setAttributes } ) {
     const {
         label = '',
         placeholder = '',
     } = attributes;
-    const blockProps = useBlockProps( { className: 'dono-block-preview dono-block-preview--field' } );
+    const blockProps = useBlockProps( { className: 'giveflow-block-preview giveflow-block-preview--field' } );
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Email', 'dono-fundraising-platform' ) } initialOpen>
+                <PanelBody title={ __( 'Email', 'giveflow-fundraising-campaigns' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'dono-fundraising-platform' ) }
+                        label={ __( 'Label', 'giveflow-fundraising-campaigns' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'Email', 'dono-fundraising-platform' ) }
+                        placeholder={ __( 'Email', 'giveflow-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Placeholder', 'dono-fundraising-platform' ) }
+                        label={ __( 'Placeholder', 'giveflow-fundraising-campaigns' ) }
                         value={ placeholder }
                         onChange={ ( v ) => setAttributes( { placeholder: v } ) }
                         placeholder="you@example.com"
@@ -34,11 +34,11 @@ function Edit( { attributes, setAttributes } ) {
                 </PanelBody>
             </InspectorControls>
             <div { ...blockProps }>
-                <span className="dono-block-preview__label">
-                    { label || __( 'Email', 'dono-fundraising-platform' ) }
-                    <em className="dono-block-preview__req" aria-hidden="true">*</em>
+                <span className="giveflow-block-preview__label">
+                    { label || __( 'Email', 'giveflow-fundraising-campaigns' ) }
+                    <em className="giveflow-block-preview__req" aria-hidden="true">*</em>
                 </span>
-                <div className="dono-block-preview__field">
+                <div className="giveflow-block-preview__field">
                     { placeholder || 'you@example.com' }
                 </div>
             </div>
@@ -49,8 +49,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Email', 'dono-fundraising-platform' ),
-        category:   'dono-donor',
+        title:      __( 'Email', 'giveflow-fundraising-campaigns' ),
+        category:   'giveflow-donor',
         icon:       BlockIcons[ 'email' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },
         attributes: {

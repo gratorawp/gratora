@@ -1,29 +1,29 @@
 /*
  * The dialog sits on wp-admin's own Plugins screen, so it reads as WordPress
- * rather than as Dono: core's button classes, core's type stack, core's red.
+ * rather than as GiveFlow: core's button classes, core's type stack, core's red.
  *
  * It is calm until someone asks for the destructive option. Deactivating on its
  * own changes nothing, and a warning shown before there is anything to warn
  * about is a warning nobody reads by the time it matters.
  */
 
-body.dono-deact-open { overflow: hidden; }
+body.giveflow-deact-open { overflow: hidden; }
 
-.dono-deact {
+.giveflow-deact {
     position: fixed;
     inset: 0;
     z-index: 100000;
 }
 
-.dono-deact[hidden] { display: none; }
+.giveflow-deact[hidden] { display: none; }
 
-.dono-deact__backdrop {
+.giveflow-deact__backdrop {
     position: absolute;
     inset: 0;
     background: rgba(15, 23, 42, .5);
 }
 
-.dono-deact__panel {
+.giveflow-deact__panel {
     position: relative;
     max-width: 480px;
     margin: 10vh auto 0;
@@ -38,7 +38,7 @@ body.dono-deact-open { overflow: hidden; }
     transition: border-color .15s ease;
 }
 
-.dono-deact__title {
+.giveflow-deact__title {
     margin: 0 0 8px;
     font-size: 18px;
     font-weight: 600;
@@ -46,7 +46,7 @@ body.dono-deact-open { overflow: hidden; }
     color: #1d2327;
 }
 
-.dono-deact__lede {
+.giveflow-deact__lede {
     margin: 0 0 18px;
     font-size: 13px;
     line-height: 1.6;
@@ -54,7 +54,7 @@ body.dono-deact-open { overflow: hidden; }
 }
 
 /* The choice, not a warning: quiet frame, normal weight, no colour shouting. */
-.dono-deact__choice {
+.giveflow-deact__choice {
     padding: 12px 14px;
     border: 1px solid #dcdcde;
     border-radius: 4px;
@@ -62,7 +62,7 @@ body.dono-deact-open { overflow: hidden; }
     transition: border-color .15s ease, background-color .15s ease;
 }
 
-.dono-deact__check {
+.giveflow-deact__check {
     display: flex;
     align-items: center;
     gap: 9px;
@@ -73,27 +73,27 @@ body.dono-deact-open { overflow: hidden; }
     cursor: pointer;
 }
 
-.dono-deact__check input { margin: 0; }
+.giveflow-deact__check input { margin: 0; }
 
-.dono-deact__consequence {
+.giveflow-deact__consequence {
     margin-top: 12px;
     padding-top: 12px;
     border-top: 1px solid #f0c9c9;
 }
 
-.dono-deact__consequence[hidden] { display: none; }
+.giveflow-deact__consequence[hidden] { display: none; }
 
-.dono-deact__consequence-lead,
-.dono-deact__consequence-foot {
+.giveflow-deact__consequence-lead,
+.giveflow-deact__consequence-foot {
     margin: 0;
     font-size: 12px;
     line-height: 1.55;
     color: #8a2424;
 }
 
-.dono-deact__consequence-foot { margin-top: 10px; }
+.giveflow-deact__consequence-foot { margin-top: 10px; }
 
-.dono-deact__list {
+.giveflow-deact__list {
     margin: 8px 0 0;
     padding-left: 18px;
     font-size: 12px;
@@ -103,18 +103,18 @@ body.dono-deact-open { overflow: hidden; }
 }
 
 /* Asked for. Now the dialog can shout. */
-.dono-deact.is-danger .dono-deact__panel { border-top-color: #b32d2e; }
+.giveflow-deact.is-danger .giveflow-deact__panel { border-top-color: #b32d2e; }
 
-.dono-deact.is-danger .dono-deact__choice {
+.giveflow-deact.is-danger .giveflow-deact__choice {
     border-color: #e6a2a2;
     background: #fcf0f0;
 }
 
-.dono-deact.is-danger .dono-deact__check { color: #8a2424; }
+.giveflow-deact.is-danger .giveflow-deact__check { color: #8a2424; }
 
-.dono-deact.is-danger .button-primary,
-.dono-deact.is-danger .button-primary:hover,
-.dono-deact.is-danger .button-primary:focus {
+.giveflow-deact.is-danger .button-primary,
+.giveflow-deact.is-danger .button-primary:hover,
+.giveflow-deact.is-danger .button-primary:focus {
     background: #b32d2e;
     border-color: #b32d2e;
     color: #fff;
@@ -122,9 +122,9 @@ body.dono-deact-open { overflow: hidden; }
     text-shadow: none;
 }
 
-.dono-deact.is-danger .button-primary:focus { box-shadow: 0 0 0 2px #fff, 0 0 0 4px #b32d2e; }
+.giveflow-deact.is-danger .button-primary:focus { box-shadow: 0 0 0 2px #fff, 0 0 0 4px #b32d2e; }
 
-.dono-deact__actions {
+.giveflow-deact__actions {
     display: flex;
     justify-content: flex-end;
     align-items: center;
@@ -133,6 +133,6 @@ body.dono-deact-open { overflow: hidden; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .dono-deact__panel,
-    .dono-deact__choice { transition: none; }
+    .giveflow-deact__panel,
+    .giveflow-deact__choice { transition: none; }
 }

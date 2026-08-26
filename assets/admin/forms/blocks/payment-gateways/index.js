@@ -4,7 +4,7 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { BlockIcons } from '../_shared/block-icons';
 import { gatewayIsOn, toggleGatewayAllowed } from '../../../_shared/gatewayAllowList';
 
-const NAME = 'dono/payment-gateways';
+const NAME = 'giveflow/payment-gateways';
 
 /**
  * Why the count is lower than the switches suggest. Without this the hint reads
@@ -18,14 +18,14 @@ function settingsReason( offInSettings ) {
         '%s is allowed here but switched off in Settings.',
         '%s are allowed here but switched off in Settings.',
         offInSettings.length,
-        'dono-fundraising-platform'
+        'giveflow-fundraising-campaigns'
     );
 
     return sprintf( template, names );
 }
 
 function registeredGateways() {
-    const g = typeof window !== 'undefined' && window.donoFormsEditor && window.donoFormsEditor.gateways;
+    const g = typeof window !== 'undefined' && window.giveflowFormsEditor && window.giveflowFormsEditor.gateways;
     return Array.isArray( g ) ? g : [];
 }
 
@@ -40,7 +40,7 @@ function Edit( { attributes, setAttributes } ) {
     const setDesc = ( id, text ) =>
         setAttributes( { descriptions: { ...descriptions, [ id ]: text } } );
 
-    const blockProps = useBlockProps( { className: 'dono-block-preview dono-block-preview--gateways' } );
+    const blockProps = useBlockProps( { className: 'giveflow-block-preview giveflow-block-preview--gateways' } );
     // Off in Settings means no donor sees it, whatever this form allows, so
     // it is left out of the preview and cannot be preselected.
     const live  = gateways.filter( ( g ) => g.enabled !== false );
@@ -52,17 +52,17 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Payment gateways', 'dono-fundraising-platform' ) } initialOpen>
+                <PanelBody title={ __( 'Payment gateways', 'giveflow-fundraising-campaigns' ) } initialOpen>
                     { gateways.length === 0 && (
                         <Notice status="warning" isDismissible={ false }>
-                            { __( 'No gateways are connected yet. Set one up in Settings, Payment gateways.', 'dono-fundraising-platform' ) }
+                            { __( 'No gateways are connected yet. Set one up in Settings, Payment gateways.', 'giveflow-fundraising-campaigns' ) }
                         </Notice>
                     ) }
                     { gateways.map( ( g ) => (
                         <div key={ g.id } style={ { marginBottom: 12 } }>
                             <ToggleControl
                                 label={ g.enabled === false
-                                    ? `${ g.label } ${ __( '(off in Settings)', 'dono-fundraising-platform' ) }`
+                                    ? `${ g.label } ${ __( '(off in Settings)', 'giveflow-fundraising-campaigns' ) }`
                                     : g.label }
                                 checked={ isOn( g.id ) }
                                 onChange={ () => toggle( g.id ) }
@@ -70,7 +70,7 @@ function Edit( { attributes, setAttributes } ) {
                             />
                             { isOn( g.id ) && (
                                 <TextControl
-                                    label={ __( 'Description (optional)', 'dono-fundraising-platform' ) }
+                                    label={ __( 'Description (optional)', 'giveflow-fundraising-campaigns' ) }
                                     value={ descriptions[ g.id ] || '' }
                                     onChange={ ( v ) => setDesc( g.id, v ) }
                                     __nextHasNoMarginBottom
@@ -79,22 +79,22 @@ function Edit( { attributes, setAttributes } ) {
                         </div>
                     ) ) }
                     <SelectControl
-                        label={ __( 'Preselected', 'dono-fundraising-platform' ) }
-                        help={ __( 'Skipped for a donor whose currency or frequency it cannot take, who then gets the first one that works.', 'dono-fundraising-platform' ) }
+                        label={ __( 'Preselected', 'giveflow-fundraising-campaigns' ) }
+                        help={ __( 'Skipped for a donor whose currency or frequency it cannot take, who then gets the first one that works.', 'giveflow-fundraising-campaigns' ) }
                         value={ shown.some( ( g ) => g.id === preselected ) ? preselected : '' }
                         options={ [
-                            { value: '', label: __( 'First one that applies', 'dono-fundraising-platform' ) },
+                            { value: '', label: __( 'First one that applies', 'giveflow-fundraising-campaigns' ) },
                             ...shown.map( ( g ) => ( { value: g.id, label: g.label } ) ),
                         ] }
                         onChange={ ( v ) => setAttributes( { preselected: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Style', 'dono-fundraising-platform' ) }
+                        label={ __( 'Style', 'giveflow-fundraising-campaigns' ) }
                         value={ style }
                         options={ [
-                            { value: 'cards', label: __( 'Cards', 'dono-fundraising-platform' ) },
-                            { value: 'list',  label: __( 'Compact list', 'dono-fundraising-platform' ) },
+                            { value: 'cards', label: __( 'Cards', 'giveflow-fundraising-campaigns' ) },
+                            { value: 'list',  label: __( 'Compact list', 'giveflow-fundraising-campaigns' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { style: v } ) }
                         __nextHasNoMarginBottom
@@ -102,20 +102,20 @@ function Edit( { attributes, setAttributes } ) {
                 </PanelBody>
             </InspectorControls>
             <div { ...blockProps }>
-                <span className="dono-block-preview__label">{ __( 'Payment method', 'dono-fundraising-platform' ) }</span>
+                <span className="giveflow-block-preview__label">{ __( 'Payment method', 'giveflow-fundraising-campaigns' ) }</span>
                 { shown.length === 0
-                    ? <div className="dono-block-preview__field">{ __( 'Gateways appear here for the donor.', 'dono-fundraising-platform' ) }</div>
+                    ? <div className="giveflow-block-preview__field">{ __( 'Gateways appear here for the donor.', 'giveflow-fundraising-campaigns' ) }</div>
                     : shown.map( ( g ) => (
-                        <div key={ g.id } className="dono-block-preview__field">
+                        <div key={ g.id } className="giveflow-block-preview__field">
                             { g.label }
                             { descriptions[ g.id ] ? ' - ' + descriptions[ g.id ] : '' }
                         </div>
                     ) ) }
                 { shown.length <= 1 && (
-                    <em className="dono-block-preview__hint">
+                    <em className="giveflow-block-preview__hint">
                         { shown.length === 1
-                            ? __( 'One gateway is live, so the selector is hidden for donors.', 'dono-fundraising-platform' )
-                            : __( 'No gateway is live, so donors see nothing here.', 'dono-fundraising-platform' ) }
+                            ? __( 'One gateway is live, so the selector is hidden for donors.', 'giveflow-fundraising-campaigns' )
+                            : __( 'No gateway is live, so donors see nothing here.', 'giveflow-fundraising-campaigns' ) }
                         { offInSettings.length > 0 && ' ' + settingsReason( offInSettings ) }
                     </em>
                 ) }
@@ -127,9 +127,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Payment gateways', 'dono-fundraising-platform' ),
-        description: __( 'Lets the donor choose how to pay. Hidden automatically when only one applies.', 'dono-fundraising-platform' ),
-        category:   'dono-amount',
+        title:      __( 'Payment gateways', 'giveflow-fundraising-campaigns' ),
+        description: __( 'Lets the donor choose how to pay. Hidden automatically when only one applies.', 'giveflow-fundraising-campaigns' ),
+        category:   'giveflow-amount',
         icon:       BlockIcons[ 'payment-gateways' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },
         attributes: {

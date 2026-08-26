@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Gateways;
+namespace GiveFlow\Gateways;
 
 /**
  * Result of `PaymentGateway::handleWebhook()`. The router uses it to set the

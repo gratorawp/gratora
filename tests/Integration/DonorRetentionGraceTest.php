@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donors\Donor;
-use Dono\Donors\DonorRetention;
-use Dono\Foundation\Plugin;
-use Dono\Settings\SettingsService;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\DonorRetention;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Settings\SettingsService;
 use WP_REST_Request;
 
 /**
- * Retention is the only thing in Dono that destroys data without being asked,
+ * Retention is the only thing in GiveFlow that destroys data without being asked,
  * so the three things that stop it surprising anyone are pinned here: it does
  * nothing until an org switches it on, it does not run the day it is switched
  * on, and it can be counted before it is let loose.
@@ -51,7 +51,7 @@ final class DonorRetentionGraceTest extends IntegrationTestCase
 
     protected function tearDown(): void
     {
-        delete_option('dono_privacy');
+        delete_option('giveflow_privacy');
         delete_option(DonorRetention::STARTS_AT_OPTION);
         parent::tearDown();
     }
@@ -59,7 +59,7 @@ final class DonorRetentionGraceTest extends IntegrationTestCase
     /** Nothing is swept out of the box, and seven years is the window offered. */
     public function test_a_fresh_site_erases_nobody_and_offers_a_seven_year_window(): void
     {
-        delete_option('dono_privacy');
+        delete_option('giveflow_privacy');
 
         $privacy = Plugin::instance()->container->get(SettingsService::class)->get('privacy');
 
@@ -95,13 +95,13 @@ final class DonorRetentionGraceTest extends IntegrationTestCase
         // Gift Aid: HMRC can ask about the donor's name and address for six
         // years after the tax year, and redaction takes exactly those.
         $floor = static fn (): int => 6;
-        add_filter('dono.donor.retention_years', $floor);
+        add_filter('giveflow.donor.retention_years', $floor);
 
         try {
             $this->retention()->run();
             $preview = $this->retention()->preview(30);
         } finally {
-            remove_filter('dono.donor.retention_years', $floor);
+            remove_filter('giveflow.donor.retention_years', $floor);
         }
 
         $this->assertNull(
@@ -119,12 +119,12 @@ final class DonorRetentionGraceTest extends IntegrationTestCase
         update_option(DonorRetention::STARTS_AT_OPTION, time() - 86400, false);
 
         $floor = static fn (): int => 30;
-        add_filter('dono.donor.retention_years', $floor);
+        add_filter('giveflow.donor.retention_years', $floor);
 
         try {
             $this->retention()->run();
         } finally {
-            remove_filter('dono.donor.retention_years', $floor);
+            remove_filter('giveflow.donor.retention_years', $floor);
         }
 
         $this->assertNull(
@@ -145,7 +145,7 @@ final class DonorRetentionGraceTest extends IntegrationTestCase
         update_option(DonorRetention::STARTS_AT_OPTION, time() - 86400, false);
 
         $data = (array) rest_do_request(
-            new WP_REST_Request('GET', '/dono/v1/admin/settings/retention-preview')
+            new WP_REST_Request('GET', '/giveflow/v1/admin/settings/retention-preview')
         )->get_data();
 
         $this->assertSame(0, $data['years'], 'zero years is what makes the panel hide the warning');
@@ -187,10 +187,10 @@ final class DonorRetentionGraceTest extends IntegrationTestCase
         update_option(DonorRetention::STARTS_AT_OPTION, time() - (365 * 86400), false);
         $donor = $this->ancientDonor();
 
-        $request = new WP_REST_Request('POST', '/dono/v1/admin/tools/import');
+        $request = new WP_REST_Request('POST', '/giveflow/v1/admin/tools/import');
         $request->set_header('content-type', 'application/json');
         $request->set_body((string) wp_json_encode(['settings' => [
-            'dono_privacy' => ['erase_inactive_donors' => true, 'donor_retention_years' => 1],
+            'giveflow_privacy' => ['erase_inactive_donors' => true, 'donor_retention_years' => 1],
         ]]));
 
         $this->assertSame(200, rest_do_request($request)->get_status());
@@ -213,10 +213,10 @@ final class DonorRetentionGraceTest extends IntegrationTestCase
         // An org that has been erasing for a while: the grace period is over.
         update_option(DonorRetention::STARTS_AT_OPTION, time() - 86400, false);
 
-        $request = new WP_REST_Request('POST', '/dono/v1/admin/tools/import');
+        $request = new WP_REST_Request('POST', '/giveflow/v1/admin/tools/import');
         $request->set_header('content-type', 'application/json');
         $request->set_body((string) wp_json_encode(['settings' => [
-            'dono_privacy' => ['erase_inactive_donors' => true, 'donor_retention_years' => 1],
+            'giveflow_privacy' => ['erase_inactive_donors' => true, 'donor_retention_years' => 1],
         ]]));
 
         $this->assertSame(200, rest_do_request($request)->get_status());
@@ -280,12 +280,12 @@ final class DonorRetentionGraceTest extends IntegrationTestCase
         $this->ancientDonor();
 
         $floor = static fn (): int => 30;
-        add_filter('dono.donor.retention_years', $floor);
+        add_filter('giveflow.donor.retention_years', $floor);
 
         try {
             $preview = $this->retention()->preview(30, 2);
         } finally {
-            remove_filter('dono.donor.retention_years', $floor);
+            remove_filter('giveflow.donor.retention_years', $floor);
         }
 
         $this->assertSame(30, $preview['years'], 'the floor is the window, not the number typed');
@@ -299,7 +299,7 @@ final class DonorRetentionGraceTest extends IntegrationTestCase
         $this->erasure(false, 7);
         $this->ancientDonor();
 
-        $request = new WP_REST_Request('GET', '/dono/v1/admin/settings/retention-preview');
+        $request = new WP_REST_Request('GET', '/giveflow/v1/admin/settings/retention-preview');
         $request->set_param('years', 5);
 
         $data = (array) rest_do_request($request)->get_data();

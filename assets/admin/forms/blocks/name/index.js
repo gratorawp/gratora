@@ -3,7 +3,7 @@ import { PanelBody, TextControl, ToggleControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { BlockIcons } from '../_shared/block-icons';
 
-const NAME = 'dono/name';
+const NAME = 'giveflow/name';
 
 function Edit( { attributes, setAttributes } ) {
     const {
@@ -14,47 +14,47 @@ function Edit( { attributes, setAttributes } ) {
         requireFirst = true,
         requireLast = true,
     } = attributes;
-    const blockProps = useBlockProps( { className: 'dono-block-preview' } );
+    const blockProps = useBlockProps( { className: 'giveflow-block-preview' } );
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Name', 'dono-fundraising-platform' ) } initialOpen>
+                <PanelBody title={ __( 'Name', 'giveflow-fundraising-campaigns' ) } initialOpen>
                     <TextControl
-                        label={ __( 'First name label', 'dono-fundraising-platform' ) }
+                        label={ __( 'First name label', 'giveflow-fundraising-campaigns' ) }
                         value={ firstLabel }
                         onChange={ ( v ) => setAttributes( { firstLabel: v } ) }
-                        placeholder={ __( 'First name', 'dono-fundraising-platform' ) }
+                        placeholder={ __( 'First name', 'giveflow-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'First name placeholder', 'dono-fundraising-platform' ) }
+                        label={ __( 'First name placeholder', 'giveflow-fundraising-campaigns' ) }
                         value={ firstPlaceholder }
                         onChange={ ( v ) => setAttributes( { firstPlaceholder: v } ) }
                         placeholder="Jane"
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'First name required', 'dono-fundraising-platform' ) }
+                        label={ __( 'First name required', 'giveflow-fundraising-campaigns' ) }
                         checked={ requireFirst }
                         onChange={ ( v ) => setAttributes( { requireFirst: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Last name label', 'dono-fundraising-platform' ) }
+                        label={ __( 'Last name label', 'giveflow-fundraising-campaigns' ) }
                         value={ lastLabel }
                         onChange={ ( v ) => setAttributes( { lastLabel: v } ) }
-                        placeholder={ __( 'Last name', 'dono-fundraising-platform' ) }
+                        placeholder={ __( 'Last name', 'giveflow-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Last name placeholder', 'dono-fundraising-platform' ) }
+                        label={ __( 'Last name placeholder', 'giveflow-fundraising-campaigns' ) }
                         value={ lastPlaceholder }
                         onChange={ ( v ) => setAttributes( { lastPlaceholder: v } ) }
                         placeholder="Doe"
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Last name required', 'dono-fundraising-platform' ) }
+                        label={ __( 'Last name required', 'giveflow-fundraising-campaigns' ) }
                         checked={ requireLast }
                         onChange={ ( v ) => setAttributes( { requireLast: v } ) }
                         __nextHasNoMarginBottom
@@ -62,22 +62,22 @@ function Edit( { attributes, setAttributes } ) {
                 </PanelBody>
             </InspectorControls>
             <div { ...blockProps }>
-                <div className="dono-block-preview__grid-2">
+                <div className="giveflow-block-preview__grid-2">
                     <div>
-                        <span className="dono-block-preview__label">
-                            { firstLabel || __( 'First name', 'dono-fundraising-platform' ) }
-                            { requireFirst && <em className="dono-block-preview__req" aria-hidden="true">*</em> }
+                        <span className="giveflow-block-preview__label">
+                            { firstLabel || __( 'First name', 'giveflow-fundraising-campaigns' ) }
+                            { requireFirst && <em className="giveflow-block-preview__req" aria-hidden="true">*</em> }
                         </span>
-                        <div className="dono-block-preview__field">
+                        <div className="giveflow-block-preview__field">
                             { firstPlaceholder || 'Jane' }
                         </div>
                     </div>
                     <div>
-                        <span className="dono-block-preview__label">
-                            { lastLabel || __( 'Last name', 'dono-fundraising-platform' ) }
-                            { requireLast && <em className="dono-block-preview__req" aria-hidden="true">*</em> }
+                        <span className="giveflow-block-preview__label">
+                            { lastLabel || __( 'Last name', 'giveflow-fundraising-campaigns' ) }
+                            { requireLast && <em className="giveflow-block-preview__req" aria-hidden="true">*</em> }
                         </span>
-                        <div className="dono-block-preview__field">
+                        <div className="giveflow-block-preview__field">
                             { lastPlaceholder || 'Doe' }
                         </div>
                     </div>
@@ -90,8 +90,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Name', 'dono-fundraising-platform' ),
-        category:   'dono-donor',
+        title:      __( 'Name', 'giveflow-fundraising-campaigns' ),
+        category:   'giveflow-donor',
         icon:       BlockIcons[ 'name' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },
         attributes: {

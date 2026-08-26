@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Foundation\Plugin;
+use GiveFlow\Foundation\Plugin;
 use ReflectionClass;
 use ReflectionProperty;
 
 /**
  * Guards the "model property with no backing column" class of bug: the
- * dono_funds.donations_count drift that made AggregateSyncer::syncFund() throw
+ * giveflow_funds.donations_count drift that made AggregateSyncer::syncFund() throw
  * "Unknown column" on every paid donation (silently swallowed by Queryable, so
  * fund aggregates never updated). Every registered model's public instance
  * properties must map to a real column after migration; this fails loudly if a

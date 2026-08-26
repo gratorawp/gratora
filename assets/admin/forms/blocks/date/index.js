@@ -4,7 +4,7 @@ import { __ } from '@wordpress/i18n';
 import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 import { BlockIcons } from '../_shared/block-icons';
 
-const NAME = 'dono/date';
+const NAME = 'giveflow/date';
 
 function slugify( s ) {
     return String( s || '' )
@@ -24,47 +24,47 @@ function Edit( { attributes, setAttributes } ) {
         condition = DEFAULT_CONDITION,
     } = attributes;
 
-    const blockProps = useBlockProps( { className: 'dono-block-preview dono-block-preview--field' } );
+    const blockProps = useBlockProps( { className: 'giveflow-block-preview giveflow-block-preview--field' } );
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Date', 'dono-fundraising-platform' ) } initialOpen>
+                <PanelBody title={ __( 'Date', 'giveflow-fundraising-campaigns' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'dono-fundraising-platform' ) }
+                        label={ __( 'Label', 'giveflow-fundraising-campaigns' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label in the canvas to edit it inline.', 'dono-fundraising-platform' ) }
+                        help={ __( 'Click the label in the canvas to edit it inline.', 'giveflow-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Help text', 'dono-fundraising-platform' ) }
+                        label={ __( 'Help text', 'giveflow-fundraising-campaigns' ) }
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Field name', 'dono-fundraising-platform' ) }
+                        label={ __( 'Field name', 'giveflow-fundraising-campaigns' ) }
                         value={ field }
                         onChange={ ( v ) => setAttributes( { field: slugify( v ) } ) }
-                        help={ __( 'Stored under values.custom[field]. Lowercase, snake_case.', 'dono-fundraising-platform' ) }
+                        help={ __( 'Stored under values.custom[field]. Lowercase, snake_case.', 'giveflow-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'dono-fundraising-platform' ) }
+                        label={ __( 'Required', 'giveflow-fundraising-campaigns' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Minimum date', 'dono-fundraising-platform' ) }
+                        label={ __( 'Minimum date', 'giveflow-fundraising-campaigns' ) }
                         value={ minDate }
                         onChange={ ( v ) => setAttributes( { minDate: v } ) }
                         placeholder="YYYY-MM-DD"
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Maximum date', 'dono-fundraising-platform' ) }
+                        label={ __( 'Maximum date', 'giveflow-fundraising-campaigns' ) }
                         value={ maxDate }
                         onChange={ ( v ) => setAttributes( { maxDate: v } ) }
                         placeholder="YYYY-MM-DD"
@@ -79,24 +79,24 @@ function Edit( { attributes, setAttributes } ) {
             <div { ...blockProps }>
                 <RichText
                     tagName="span"
-                    className="dono-block-preview__label"
+                    className="giveflow-block-preview__label"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Date', 'dono-fundraising-platform' ) }
+                    placeholder={ __( 'Date', 'giveflow-fundraising-campaigns' ) }
                     allowedFormats={ [] }
                 />
-                { required && <em className="dono-block-preview__req" aria-hidden="true">*</em> }
+                { required && <em className="giveflow-block-preview__req" aria-hidden="true">*</em> }
                 { helpText !== '' && (
                     <RichText
                         tagName="span"
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
-                        placeholder={ __( 'Help text', 'dono-fundraising-platform' ) }
+                        placeholder={ __( 'Help text', 'giveflow-fundraising-campaigns' ) }
                         allowedFormats={ [] }
                         style={ { fontSize: 11, color: '#6b7280', display: 'block', marginTop: 2 } }
                     />
                 ) }
-                <div className="dono-block-preview__field">YYYY-MM-DD</div>
+                <div className="giveflow-block-preview__field">YYYY-MM-DD</div>
             </div>
         </>
     );
@@ -105,9 +105,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Date', 'dono-fundraising-platform' ),
-        description: __( 'Date picker for birthdays, dedication dates, event dates, etc.', 'dono-fundraising-platform' ),
-        category:   'dono-fields',
+        title:      __( 'Date', 'giveflow-fundraising-campaigns' ),
+        description: __( 'Date picker for birthdays, dedication dates, event dates, etc.', 'giveflow-fundraising-campaigns' ),
+        category:   'giveflow-fields',
         icon:       BlockIcons[ 'date' ],
         supports: { html: false, anchor: false, inserter: true },
         attributes: {

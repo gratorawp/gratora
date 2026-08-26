@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
-use Dono\Donations\DonationRepository;
-use Dono\Donations\DonationService;
-use Dono\Donations\Refund;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
-use Dono\Vendor\Queryable\DB;
-use Dono\Vendor\Queryable\QueryException;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Donations\DonationService;
+use GiveFlow\Donations\Refund;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Vendor\Queryable\DB;
+use GiveFlow\Vendor\Queryable\QueryException;
 
 /**
  * A redelivered or concurrent gateway refund webhook must record the refund
@@ -94,7 +94,7 @@ final class RefundIdempotencyTest extends IntegrationTestCase
         // this caller still holds a copy that believes 3000 is refundable. The
         // SUM-of-refund-rows pre-clamp cannot see it, but the counter can.
         $stale = $repo->findByReference($donation->reference);
-        DB::table('dono_donations')
+        DB::table('giveflow_donations')
             ->whereRaw('id = ' . (int) $donation->id)
             ->update(['refunded_cents' => 5000, 'status' => 'refunded']);
 
@@ -141,7 +141,7 @@ final class RefundIdempotencyTest extends IntegrationTestCase
 
         $now = gmdate('Y-m-d H:i:s');
         $d = Donation::make();
-        $d->reference         = 'DONO-RF-' . substr(md5((string) $cents . uniqid()), 0, 8);
+        $d->reference         = 'GIVEFLOW-RF-' . substr(md5((string) $cents . uniqid()), 0, 8);
         $d->donor_id          = (int) $donor->id;
         $d->amount_cents      = $cents;
         $d->net_cents         = $cents;

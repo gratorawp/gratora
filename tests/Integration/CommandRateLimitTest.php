@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Analytics\Event;
-use Dono\Analytics\EventRecorder;
-use Dono\Foundation\Commands\Command;
-use Dono\Foundation\Commands\CommandContext;
-use Dono\Foundation\Commands\CommandRegistry;
-use Dono\Foundation\Plugin;
+use GiveFlow\Analytics\Event;
+use GiveFlow\Analytics\EventRecorder;
+use GiveFlow\Foundation\Commands\Command;
+use GiveFlow\Foundation\Commands\CommandContext;
+use GiveFlow\Foundation\Commands\CommandRegistry;
+use GiveFlow\Foundation\Plugin;
 
 final class CommandRateLimitTest extends IntegrationTestCase
 {

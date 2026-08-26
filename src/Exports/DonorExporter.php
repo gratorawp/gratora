@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Dono\Exports;
+namespace GiveFlow\Exports;
 
-use Dono\Donations\DonationQueries;
-use Dono\Donors\Donor;
-use Dono\Donors\DonorRepository;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Helpers\Csv;
-use Dono\Vendor\Queryable\DB;
+use GiveFlow\Donations\DonationQueries;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\DonorRepository;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Helpers\Csv;
+use GiveFlow\Vendor\Queryable\DB;
 
 /**
  * Streams the donor list as CSV. Columns are opt-in because most of them are
@@ -140,20 +140,20 @@ final class DonorExporter
     public static function labels(): array
     {
         return [
-            'first_name'      => __('First name', 'dono-fundraising-platform'),
-            'last_name'       => __('Last name', 'dono-fundraising-platform'),
-            'email'           => __('Email', 'dono-fundraising-platform'),
-            'phone'           => __('Phone', 'dono-fundraising-platform'),
-            'address'         => __('Address', 'dono-fundraising-platform'),
-            'company'         => __('Company', 'dono-fundraising-platform'),
-            'country'         => __('Country', 'dono-fundraising-platform'),
-            'donor_type'      => __('Type', 'dono-fundraising-platform'),
-            'donations_count' => __('Donations', 'dono-fundraising-platform'),
-            'total_donated'   => __('Total donated', 'dono-fundraising-platform'),
-            'first_donation'  => __('First donation', 'dono-fundraising-platform'),
-            'last_donation'   => __('Last donation', 'dono-fundraising-platform'),
-            'created_at'      => __('Donor since', 'dono-fundraising-platform'),
-            'donor_id'        => __('Donor ID', 'dono-fundraising-platform'),
+            'first_name'      => __('First name', 'giveflow-fundraising-campaigns'),
+            'last_name'       => __('Last name', 'giveflow-fundraising-campaigns'),
+            'email'           => __('Email', 'giveflow-fundraising-campaigns'),
+            'phone'           => __('Phone', 'giveflow-fundraising-campaigns'),
+            'address'         => __('Address', 'giveflow-fundraising-campaigns'),
+            'company'         => __('Company', 'giveflow-fundraising-campaigns'),
+            'country'         => __('Country', 'giveflow-fundraising-campaigns'),
+            'donor_type'      => __('Type', 'giveflow-fundraising-campaigns'),
+            'donations_count' => __('Donations', 'giveflow-fundraising-campaigns'),
+            'total_donated'   => __('Total donated', 'giveflow-fundraising-campaigns'),
+            'first_donation'  => __('First donation', 'giveflow-fundraising-campaigns'),
+            'last_donation'   => __('Last donation', 'giveflow-fundraising-campaigns'),
+            'created_at'      => __('Donor since', 'giveflow-fundraising-campaigns'),
+            'donor_id'        => __('Donor ID', 'giveflow-fundraising-campaigns'),
         ];
     }
 
@@ -215,7 +215,7 @@ final class DonorExporter
     /** @since 1.0.0 */
     private function donorIdsForCampaign(int $campaignId): array
     {
-        $q = DonationQueries::donationsOnly(DB::table('dono_donations'))
+        $q = DonationQueries::donationsOnly(DB::table('giveflow_donations'))
             ->select('donor_id')
             ->distinct()
             ->whereNotNull('donor_id')

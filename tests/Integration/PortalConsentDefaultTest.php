@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
-use Dono\Settings\SettingsService;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Settings\SettingsService;
 use WP_REST_Request;
 
 /**
@@ -22,7 +22,7 @@ final class PortalConsentDefaultTest extends IntegrationTestCase
 {
     protected function tearDown(): void
     {
-        delete_option('dono_consents');
+        delete_option('giveflow_consents');
         parent::tearDown();
     }
 
@@ -70,15 +70,15 @@ final class PortalConsentDefaultTest extends IntegrationTestCase
     private function portalConsents(int $donorId): array
     {
         $sid = $this->portalSession($donorId, bin2hex(random_bytes(8)));
-        $_COOKIE['dono_donor_session'] = $sid;
+        $_COOKIE['giveflow_donor_session'] = $sid;
 
         try {
-            $res = rest_do_request(new WP_REST_Request('GET', '/dono/v1/portal/consents'));
+            $res = rest_do_request(new WP_REST_Request('GET', '/giveflow/v1/portal/consents'));
             $this->assertSame(200, $res->get_status());
 
             return (array) $res->get_data();
         } finally {
-            unset($_COOKIE['dono_donor_session']);
+            unset($_COOKIE['giveflow_donor_session']);
         }
     }
 }

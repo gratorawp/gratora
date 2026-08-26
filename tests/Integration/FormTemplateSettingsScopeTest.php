@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Forms\FormTemplates;
+use GiveFlow\Forms\FormTemplates;
 
 /**
  * A template names the settings it has an opinion about, and applying one
@@ -12,7 +12,7 @@ use Dono\Forms\FormTemplates;
  * anything a template overwrites without naming is configuration the author
  * cannot get back.
  *
- * @covers \Dono\Forms\FormTemplates
+ * @covers \GiveFlow\Forms\FormTemplates
  */
 final class FormTemplateSettingsScopeTest extends IntegrationTestCase
 {

@@ -39,25 +39,25 @@ export default function Banners( { donation, onRetrySubscription, retryBusy, ret
         <>
             { isTest && (
                 <Banner variant="warn">
-                    <strong>{ __( 'Test-mode donation.', 'dono-fundraising-platform' ) }</strong>{ ' ' }
-                    { __( 'No real money changed hands.', 'dono-fundraising-platform' ) }
+                    <strong>{ __( 'Test-mode donation.', 'giveflow-fundraising-campaigns' ) }</strong>{ ' ' }
+                    { __( 'No real money changed hands.', 'giveflow-fundraising-campaigns' ) }
                 </Banner>
             ) }
             { replacedBy && (
                 <Banner variant="warn">
-                    <strong>{ __( 'Replaced by a later attempt.', 'dono-fundraising-platform' ) }</strong>{ ' ' }
-                    { __( 'The donor backed out here and started again, so this attempt is left out of the donations list, its counts and the CSV export.', 'dono-fundraising-platform' ) }
+                    <strong>{ __( 'Replaced by a later attempt.', 'giveflow-fundraising-campaigns' ) }</strong>{ ' ' }
+                    { __( 'The donor backed out here and started again, so this attempt is left out of the donations list, its counts and the CSV export.', 'giveflow-fundraising-campaigns' ) }
                     { ' ' }
-                    { __( 'It is still pending, and it can still settle if the payment it is waiting on goes through.', 'dono-fundraising-platform' ) }
+                    { __( 'It is still pending, and it can still settle if the payment it is waiting on goes through.', 'giveflow-fundraising-campaigns' ) }
                     <div style={ { marginTop: 6 } }>
                         <a href={ addQueryArgs( window.location.pathname, {
-                            page:      'dono-donations',
+                            page:      'giveflow-donations',
                             view:      'detail',
                             reference: replacedBy,
                         } ) }>
                             { sprintf(
                                 /* translators: %s: the replacement donation's reference. */
-                                __( 'Open %s', 'dono-fundraising-platform' ),
+                                __( 'Open %s', 'giveflow-fundraising-campaigns' ),
                                 replacedBy
                             ) }
                         </a>
@@ -66,35 +66,35 @@ export default function Banners( { donation, onRetrySubscription, retryBusy, ret
             ) }
             { isDisputed && (
                 <Banner variant="danger">
-                    <strong>{ __( 'Chargeback in progress.', 'dono-fundraising-platform' ) }</strong>{ ' ' }
-                    { __( 'Review the dispute in your gateway dashboard before refunding.', 'dono-fundraising-platform' ) }
+                    <strong>{ __( 'Chargeback in progress.', 'giveflow-fundraising-campaigns' ) }</strong>{ ' ' }
+                    { __( 'Review the dispute in your gateway dashboard before refunding.', 'giveflow-fundraising-campaigns' ) }
                 </Banner>
             ) }
             { isProcessing && (
                 <Banner variant="warn">
-                    <strong>{ __( 'Payment not settled yet.', 'dono-fundraising-platform' ) }</strong>{ ' ' }
+                    <strong>{ __( 'Payment not settled yet.', 'giveflow-fundraising-campaigns' ) }</strong>{ ' ' }
                     { donation.processing_reason }
                 </Banner>
             ) }
             { isFailed && donation.failure_reason && (
                 <Banner variant="danger">
-                    <strong>{ __( 'Payment failed.', 'dono-fundraising-platform' ) }</strong>{ ' ' }
+                    <strong>{ __( 'Payment failed.', 'giveflow-fundraising-campaigns' ) }</strong>{ ' ' }
                     { donation.failure_reason }
                 </Banner>
             ) }
             { subFailed && (
                 <Banner variant="danger">
-                    <strong>{ __( 'Recurring plan was not created.', 'dono-fundraising-platform' ) }</strong>{ ' ' }
-                    { __( 'The donor was charged for this donation, but no recurring plan exists at the gateway. Nothing will renew until this is fixed.', 'dono-fundraising-platform' ) }
+                    <strong>{ __( 'Recurring plan was not created.', 'giveflow-fundraising-campaigns' ) }</strong>{ ' ' }
+                    { __( 'The donor was charged for this donation, but no recurring plan exists at the gateway. Nothing will renew until this is fixed.', 'giveflow-fundraising-campaigns' ) }
                     { subFailReason && (
                         <div style={ { marginTop: 6 } }>
-                            <strong>{ __( 'Gateway reason:', 'dono-fundraising-platform' ) }</strong>{ ' ' }
+                            <strong>{ __( 'Gateway reason:', 'giveflow-fundraising-campaigns' ) }</strong>{ ' ' }
                             { subFailReason }
                         </div>
                     ) }
                     { retryError && (
                         <div style={ { marginTop: 6 } }>
-                            <strong>{ __( 'Last attempt failed:', 'dono-fundraising-platform' ) }</strong>{ ' ' }
+                            <strong>{ __( 'Last attempt failed:', 'giveflow-fundraising-campaigns' ) }</strong>{ ' ' }
                             { retryError }
                         </div>
                     ) }
@@ -107,8 +107,8 @@ export default function Banners( { donation, onRetrySubscription, retryBusy, ret
                                 disabled={ retryBusy }
                             >
                                 { retryBusy
-                                    ? __( 'Creating plan…', 'dono-fundraising-platform' )
-                                    : __( 'Create the recurring plan', 'dono-fundraising-platform' ) }
+                                    ? __( 'Creating plan…', 'giveflow-fundraising-campaigns' )
+                                    : __( 'Create the recurring plan', 'giveflow-fundraising-campaigns' ) }
                             </button>
                         </div>
                     ) }

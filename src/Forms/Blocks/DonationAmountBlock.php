@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Forms\Blocks;
+namespace GiveFlow\Forms\Blocks;
 
-use Dono\Foundation\Helpers\Money;
-use Dono\Foundation\Helpers\View;
+use GiveFlow\Foundation\Helpers\Money;
+use GiveFlow\Foundation\Helpers\View;
 
 /**
  * Donation amount block with preset tiers and optional custom input.
@@ -17,7 +17,7 @@ final class DonationAmountBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'dono/donation-amount';
+        return 'giveflow/donation-amount';
     }
 
     /** @since 1.0.0 */

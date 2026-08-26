@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Unit\Gateways;
+namespace GiveFlow\Tests\Unit\Gateways;
 
 use DateTimeImmutable;
-use Dono\Donations\Donation;
-use Dono\Foundation\Time\FrozenClock;
-use Dono\Gateways\Sandbox\SandboxGateway;
-use Dono\Recurring\RecurringPlanRepository;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Foundation\Time\FrozenClock;
+use GiveFlow\Gateways\Sandbox\SandboxGateway;
+use GiveFlow\Recurring\RecurringPlanRepository;
 use PHPUnit\Framework\TestCase;
 
 final class SandboxGatewayTest extends TestCase
@@ -35,14 +35,14 @@ final class SandboxGatewayTest extends TestCase
     public function test_confirm_succeeds_so_a_test_donation_completes(): void
     {
         $d = Donation::make();
-        $d->reference = 'DONO-2026-00777';
+        $d->reference = 'DON-2026-00777';
 
         $intent = $this->gateway->createIntent($d);
-        $this->assertSame('sandbox_DONO-2026-00777', $intent->intent_id);
+        $this->assertSame('sandbox_DON-2026-00777', $intent->intent_id);
 
         $result = $this->gateway->confirm($d);
         $this->assertTrue($result->success);
-        $this->assertSame('sandbox_txn_DONO-2026-00777', $result->gateway_txn_id);
+        $this->assertSame('sandbox_txn_DON-2026-00777', $result->gateway_txn_id);
         $this->assertSame('test', $result->payment_method);
     }
 }

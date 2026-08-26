@@ -1,1 +1,1 @@
-export { default } from '@dono/ui/widgets/RevenueChart';
+export { default } from '@giveflow/ui/widgets/RevenueChart';

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Forms\Blocks\Block;
-use Dono\Forms\Blocks\BlockRegistry;
-use Dono\Foundation\Plugin;
+use GiveFlow\Forms\Blocks\Block;
+use GiveFlow\Forms\Blocks\BlockRegistry;
+use GiveFlow\Foundation\Plugin;
 
 /**
  * Add-on modules boot after core, so a broadcast fired inside core's own boot
@@ -35,7 +35,7 @@ final class BlockRegisterHookTest extends IntegrationTestCase
             }
         };
 
-        add_action('dono.blocks.register_server', static function (BlockRegistry $blocks) use ($block): void {
+        add_action('giveflow.blocks.register_server', static function (BlockRegistry $blocks) use ($block): void {
             $blocks->add($block);
         });
 

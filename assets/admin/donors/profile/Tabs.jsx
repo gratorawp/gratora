@@ -4,13 +4,13 @@ import { tablistKeyDown } from '../../_shared/tablistKeys';
 import { IconBars, IconActivity, IconHeart, IconRotate, IconFile, IconNote, IconShield } from './icons';
 
 const TAB_DEFS = [
-    { id: 'overview',  label: __( 'Overview',  'dono-fundraising-platform' ), Icon: IconBars     },
-    { id: 'donations', label: __( 'Donations', 'dono-fundraising-platform' ), Icon: IconHeart    },
-    { id: 'recurring', label: __( 'Recurring', 'dono-fundraising-platform' ), Icon: IconRotate   },
-    { id: 'receipts',  label: __( 'Receipts',  'dono-fundraising-platform' ), Icon: IconFile     },
-    { id: 'notes',     label: __( 'Notes',     'dono-fundraising-platform' ), Icon: IconNote     },
-    { id: 'consent',   label: __( 'Consent',   'dono-fundraising-platform' ), Icon: IconShield   },
-    { id: 'activity',  label: __( 'Activity',  'dono-fundraising-platform' ), Icon: IconActivity },
+    { id: 'overview',  label: __( 'Overview',  'giveflow-fundraising-campaigns' ), Icon: IconBars     },
+    { id: 'donations', label: __( 'Donations', 'giveflow-fundraising-campaigns' ), Icon: IconHeart    },
+    { id: 'recurring', label: __( 'Recurring', 'giveflow-fundraising-campaigns' ), Icon: IconRotate   },
+    { id: 'receipts',  label: __( 'Receipts',  'giveflow-fundraising-campaigns' ), Icon: IconFile     },
+    { id: 'notes',     label: __( 'Notes',     'giveflow-fundraising-campaigns' ), Icon: IconNote     },
+    { id: 'consent',   label: __( 'Consent',   'giveflow-fundraising-campaigns' ), Icon: IconShield   },
+    { id: 'activity',  label: __( 'Activity',  'giveflow-fundraising-campaigns' ), Icon: IconActivity },
 ];
 
 export default function Tabs( { active, onChange, counts = {}, dots = {} } ) {
@@ -19,7 +19,7 @@ export default function Tabs( { active, onChange, counts = {}, dots = {} } ) {
             className="dp-tabs"
             role="tablist"
             tabIndex={ -1 }
-            aria-label={ __( 'Donor sections', 'dono-fundraising-platform' ) }
+            aria-label={ __( 'Donor sections', 'giveflow-fundraising-campaigns' ) }
             onKeyDown={ ( e ) => tablistKeyDown( e, TAB_DEFS.map( ( d ) => d.id ), active, onChange ) }
         >
             { TAB_DEFS.map( ( t ) => (

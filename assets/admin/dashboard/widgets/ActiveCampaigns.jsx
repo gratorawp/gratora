@@ -10,14 +10,14 @@ export default function ActiveCampaigns( { rows = [] } ) {
             <EmptyState
                 compact
                 icon={ <Target size={ 22 } strokeWidth={ 1.75 } /> }
-                title={ __( 'No active campaigns', 'dono-fundraising-platform' ) }
-                body={ __( 'Publish a campaign to see it appear here with goal progress.', 'dono-fundraising-platform' ) }
+                title={ __( 'No active campaigns', 'giveflow-fundraising-campaigns' ) }
+                body={ __( 'Publish a campaign to see it appear here with goal progress.', 'giveflow-fundraising-campaigns' ) }
             />
         );
     }
 
     return (
-        <div className="dono-active-campaigns">
+        <div className="giveflow-active-campaigns">
             { rows.map( ( c ) => {
                 const target  = c.goal_type === 'amount'
                     ? ( c.goal_cents ?? 0 )
@@ -32,27 +32,27 @@ export default function ActiveCampaigns( { rows = [] } ) {
                     : String( v );
 
                 return (
-                    <a key={ c.id } href={ detailHref( c.id ) } className="dono-active-campaigns__row">
-                        <div className="dono-active-campaigns__head">
-                            <span className="dono-active-campaigns__title">{ c.title }</span>
+                    <a key={ c.id } href={ detailHref( c.id ) } className="giveflow-active-campaigns__row">
+                        <div className="giveflow-active-campaigns__head">
+                            <span className="giveflow-active-campaigns__title">{ c.title }</span>
                             <StatusBadge status={ c.status } />
                         </div>
-                        <div className="dono-active-campaigns__bar">
-                            <div className="dono-active-campaigns__bar-fill" style={ { width: `${ pct }%` } } />
+                        <div className="giveflow-active-campaigns__bar">
+                            <div className="giveflow-active-campaigns__bar-fill" style={ { width: `${ pct }%` } } />
                         </div>
-                        <div className="dono-active-campaigns__meta">
+                        <div className="giveflow-active-campaigns__meta">
                             <span>
                                 { target > 0 ? (
                                     sprintf(
                                         /* translators: 1: raised value, 2: target value, 3: percent */
-                                        __( '%1$s of %2$s · %3$d%%', 'dono-fundraising-platform' ),
+                                        __( '%1$s of %2$s · %3$d%%', 'giveflow-fundraising-campaigns' ),
                                         fmt( current ), fmt( target ), pct
                                     )
                                 ) : fmt( current ) }
                             </span>
                             { c.last_donation_at && (
-                                <span className="dono-active-campaigns__when">
-                                    { sprintf( /* translators: %s: relative time */ __( 'Last: %s', 'dono-fundraising-platform' ), timeAgo( c.last_donation_at ) ) }
+                                <span className="giveflow-active-campaigns__when">
+                                    { sprintf( /* translators: %s: relative time */ __( 'Last: %s', 'giveflow-fundraising-campaigns' ), timeAgo( c.last_donation_at ) ) }
                                 </span>
                             ) }
                         </div>

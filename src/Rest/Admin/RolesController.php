@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Rest\Admin;
+namespace GiveFlow\Rest\Admin;
 
-use Dono\Foundation\Auth\Capabilities;
+use GiveFlow\Foundation\Auth\Capabilities;
 use WP_REST_Response;
 use WP_REST_Server;
 
@@ -12,16 +12,16 @@ use WP_REST_Server;
  * The roles available for capability mapping, and the capabilities to map.
  *
  * The capability list belongs here rather than in the panel's own source:
- * add-ons register their caps through the `dono.capabilities` filter, which
+ * add-ons register their caps through the `giveflow.capabilities` filter, which
  * `Capabilities::maps()` applies and `applyMapping()` honors. A hardcoded copy
  * in the screen would enforce an add-on's capability on every route while
- * leaving it ungrantable (dono-p2p's `dono_manage_fundraisers`).
+ * leaving it ungrantable (giveflow-p2p's `giveflow_manage_fundraisers`).
  *
  * @since 1.0.0
  */
 final class RolesController
 {
-    private const NAMESPACE = 'dono/v1';
+    private const NAMESPACE = 'giveflow/v1';
 
     /** @since 1.0.0 */
     public function registerRoutes(): void
@@ -102,7 +102,7 @@ final class RolesController
             $ungrouped[] = ['cap' => $cap, 'label' => (string) ($labels[$cap] ?? $cap)];
         }
         if ($ungrouped !== []) {
-            $out[] = ['label' => __('Other', 'dono-fundraising-platform'), 'caps' => $ungrouped];
+            $out[] = ['label' => __('Other', 'giveflow-fundraising-campaigns'), 'caps' => $ungrouped];
         }
 
         return $out;

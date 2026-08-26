@@ -10,20 +10,20 @@ defined('ABSPATH') || exit;
  */
 ?>
 <fieldset
-    class="dono-block dono-block--multi-select dono-multi-select"
+    class="giveflow-block giveflow-block--multi-select giveflow-multi-select"
     data-min="<?php echo esc_attr((string) $min); ?>"
     data-max="<?php echo esc_attr((string) $max); ?>"
 >
     <?php if ($label !== ''): ?>
-        <legend class="dono-multi-select__legend"><?php echo esc_html($label); ?></legend>
+        <legend class="giveflow-multi-select__legend"><?php echo esc_html($label); ?></legend>
     <?php endif; ?>
-    <div class="dono-multi-select__options">
+    <div class="giveflow-multi-select__options">
         <?php foreach ($options as $i => $o):
             $optLabel = (string) $o['label'];
             $optValue = (string) $o['value'];
             $checked  = ! empty($o['isDefault']);
             ?>
-            <label class="dono-multi-select__option<?php echo esc_attr($checked ? ' is-selected' : ''); ?>">
+            <label class="giveflow-multi-select__option<?php echo esc_attr($checked ? ' is-selected' : ''); ?>">
                 <input
                     type="checkbox"
                     name="custom[<?php echo esc_attr($field); ?>][]"
@@ -31,7 +31,7 @@ defined('ABSPATH') || exit;
                     <?php echo esc_attr($checked ? 'checked' : ''); ?>
                     <?php echo esc_attr(($required && $i === 0) ? 'required' : ''); ?>
                 >
-                <span class="dono-multi-select__option-label"><?php echo esc_html($optLabel !== '' ? $optLabel : $optValue); ?></span>
+                <span class="giveflow-multi-select__option-label"><?php echo esc_html($optLabel !== '' ? $optLabel : $optValue); ?></span>
             </label>
         <?php endforeach; ?>
     </div>

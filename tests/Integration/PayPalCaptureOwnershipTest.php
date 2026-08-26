@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\DonationRepository;
-use Dono\Foundation\Plugin;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -14,7 +14,7 @@ use WP_REST_Request;
  * the submit response handed to that browser, not the reference: references are
  * sequential, printed on receipts, and quoted in support email.
  *
- * Without the token, guessing DONO-2026-00007 is enough to make a stranger's
+ * Without the token, guessing GIVEFLOW-2026-00007 is enough to make a stranger's
  * approved order charge, and PayPal has no CHECKOUT.ORDER.APPROVED handler here
  * to do it later, so the charge is one that would not otherwise have happened.
  */
@@ -23,7 +23,7 @@ final class PayPalCaptureOwnershipTest extends IntegrationTestCase
     /** @return array{0:string,1:string} reference and raw status token */
     private function donation(): array
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/donations');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'email'        => 'paypal-owner@example.test',
@@ -49,7 +49,7 @@ final class PayPalCaptureOwnershipTest extends IntegrationTestCase
 
     private function capture(string $reference, string $token): \WP_REST_Response|\WP_Error
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/gateways/paypal/capture');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/gateways/paypal/capture');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'reference'    => $reference,
@@ -91,7 +91,7 @@ final class PayPalCaptureOwnershipTest extends IntegrationTestCase
         [$reference] = $this->donation();
 
         $wrongToken = (array) $this->capture($reference, 'not-the-token')->get_data();
-        $wrongRef   = (array) $this->capture('DONO-2026-09999', 'not-the-token')->get_data();
+        $wrongRef   = (array) $this->capture('GIVEFLOW-2026-09999', 'not-the-token')->get_data();
 
         // Answering differently would turn the route into an oracle for which
         // references exist, which is the thing the token is protecting.
@@ -108,6 +108,6 @@ final class PayPalCaptureOwnershipTest extends IntegrationTestCase
         // PayPal is not configured here, so this cannot reach a real capture.
         // What it must not be is the not-found the guard returns: that would
         // mean the donor's own token was rejected and nobody could ever pay.
-        $this->assertNotSame('dono_paypal_no_donation', $data['code'] ?? null);
+        $this->assertNotSame('giveflow_paypal_no_donation', $data['code'] ?? null);
     }
 }

@@ -1,1 +1,1 @@
-export { default } from '@dono/ui/components/SectionBar';
+export { default } from '@giveflow/ui/components/SectionBar';

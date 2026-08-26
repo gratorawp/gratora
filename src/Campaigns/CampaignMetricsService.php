@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Dono\Campaigns;
+namespace GiveFlow\Campaigns;
 
 use DateTimeImmutable;
-use Dono\Donations\ChannelClassifier;
-use Dono\Donations\Donation;
-use Dono\Donations\DonationQueries;
-use Dono\Donations\DonationRepository;
-use Dono\Donors\Donor;
-use Dono\Donors\DonorRepository;
-use Dono\Forms\Form;
-use Dono\Foundation\Time\Clock;
+use GiveFlow\Donations\ChannelClassifier;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationQueries;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\DonorRepository;
+use GiveFlow\Forms\Form;
+use GiveFlow\Foundation\Time\Clock;
 
 /**
  * Computes aggregate metrics and lists for campaign analytics.
@@ -100,7 +100,7 @@ final class CampaignMetricsService
             $form = $forms[(int) $row['form_id']] ?? null;
             $out[] = [
                 'form_id'         => $row['form_id'],
-                'form_title'      => $form ? $form->title : __('Removed form', 'dono-fundraising-platform'),
+                'form_title'      => $form ? $form->title : __('Removed form', 'giveflow-fundraising-campaigns'),
                 'amount_cents'    => $row['amount_cents'],
                 'donations_count' => $row['donations_count'],
             ];
@@ -270,7 +270,7 @@ final class CampaignMetricsService
 
             $out[] = [
                 'id'           => $d->id,
-                'donor_name'   => $name !== '' ? $name : __('Anonymous', 'dono-fundraising-platform'),
+                'donor_name'   => $name !== '' ? $name : __('Anonymous', 'giveflow-fundraising-campaigns'),
                 'amount_cents' => (int) $d->amount_cents,
                 'currency'     => (string) $d->currency,
                 'paid_at'      => $d->paid_at,
@@ -307,7 +307,7 @@ final class CampaignMetricsService
                 : '';
             $out[] = [
                 'donor_id'        => $row['donor_id'],
-                'name'            => $name !== '' ? $name : __('Donor', 'dono-fundraising-platform') . ' #' . $row['donor_id'],
+                'name'            => $name !== '' ? $name : __('Donor', 'giveflow-fundraising-campaigns') . ' #' . $row['donor_id'],
                 'total_cents'     => $row['amount_cents'],
                 'donations_count' => $row['donations_count'],
             ];
@@ -425,7 +425,7 @@ final class CampaignMetricsService
                 : '';
             $out[] = [
                 'id'           => (int) $d->id,
-                'donor_name'   => $name !== '' ? $name : __('A donor', 'dono-fundraising-platform'),
+                'donor_name'   => $name !== '' ? $name : __('A donor', 'giveflow-fundraising-campaigns'),
                 'amount_cents' => (int) $d->amount_cents,
                 'currency'     => (string) $d->currency,
                 'paid_at'      => $d->paid_at,

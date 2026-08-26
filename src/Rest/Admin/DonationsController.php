@@ -2,35 +2,35 @@
 
 declare(strict_types=1);
 
-namespace Dono\Rest\Admin;
-use Dono\Rest\Paging;
-use Dono\Foundation\Auth\Capabilities;
+namespace GiveFlow\Rest\Admin;
+use GiveFlow\Rest\Paging;
+use GiveFlow\Foundation\Auth\Capabilities;
 
-use Dono\Campaigns\Campaign;
-use Dono\Currency\Currency;
-use Dono\Donations\ChannelClassifier;
-use Dono\Donations\Donation;
-use Dono\Donations\DonationQueries;
-use Dono\Donations\DonationIntent;
-use Dono\Donations\DonationNoteRepository;
-use Dono\Donations\DonationRepository;
-use Dono\Donations\DonationService;
-use Dono\Donations\Refund;
-use Dono\Gateways\PayPal\PayPalHoldReason;
-use Dono\Donors\Donor;
-use Dono\Donors\DonorRepository;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Helpers\Csv;
-use Dono\Currency\SupportedCurrencies;
-use Dono\Foundation\Helpers\Money;
-use Dono\Forms\Blocks\CustomFieldLabels;
-use Dono\Forms\Form;
-use Dono\Funds\Fund;
-use Dono\Receipts\Receipt;
-use Dono\Receipts\ReceiptIssuer;
-use Dono\Receipts\ReceiptRepository;
-use Dono\Recurring\RecurringPlan;
-use Dono\Settings\SettingsService;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Currency\Currency;
+use GiveFlow\Donations\ChannelClassifier;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationQueries;
+use GiveFlow\Donations\DonationIntent;
+use GiveFlow\Donations\DonationNoteRepository;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Donations\DonationService;
+use GiveFlow\Donations\Refund;
+use GiveFlow\Gateways\PayPal\PayPalHoldReason;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\DonorRepository;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Helpers\Csv;
+use GiveFlow\Currency\SupportedCurrencies;
+use GiveFlow\Foundation\Helpers\Money;
+use GiveFlow\Forms\Blocks\CustomFieldLabels;
+use GiveFlow\Forms\Form;
+use GiveFlow\Funds\Fund;
+use GiveFlow\Receipts\Receipt;
+use GiveFlow\Receipts\ReceiptIssuer;
+use GiveFlow\Receipts\ReceiptRepository;
+use GiveFlow\Recurring\RecurringPlan;
+use GiveFlow\Settings\SettingsService;
 use RuntimeException;
 use WP_Error;
 use WP_REST_Request;
@@ -45,7 +45,7 @@ use WP_REST_Server;
  */
 final class DonationsController
 {
-    private const NAMESPACE = 'dono/v1';
+    private const NAMESPACE = 'giveflow/v1';
 
     private const EXPORT_PAGE     = 1000;
     private const EXPORT_MAX_ROWS = 50000;
@@ -62,8 +62,8 @@ final class DonationsController
         private ReceiptRepository $receipts,
         private ReceiptIssuer $receiptIssuer,
         private DonationNoteRepository $notes,
-        private \Dono\Receipts\Renderers\GenericReceiptRenderer $genericRenderer,
-        private \Dono\Gateways\GatewayManager $gateways,
+        private \GiveFlow\Receipts\Renderers\GenericReceiptRenderer $genericRenderer,
+        private \GiveFlow\Gateways\GatewayManager $gateways,
     ) {
     }
 
@@ -80,12 +80,12 @@ final class DonationsController
             [
                 'methods'             => WP_REST_Server::CREATABLE,
                 'callback'            => [$this, 'record'],
-                // Not dono_edit_donations: that cap is for notes, and this
+                // Not giveflow_edit_donations: that cap is for notes, and this
                 // creates confirmed money at a caller-chosen amount and date.
                 // Marking an existing pending donation paid already requires
                 // this one, and creating an already-paid donation cannot need
                 // less than that.
-                'permission_callback' => static fn () => Capabilities::userCan('dono_refund_donations'),
+                'permission_callback' => static fn () => Capabilities::userCan('giveflow_refund_donations'),
                 'args'                => $this->recordArgs(),
             ],
         ]);
@@ -99,7 +99,7 @@ final class DonationsController
 
         // Campaign names for the record-a-donation picker.
         //
-        // /admin/campaigns needs dono_manage_campaigns, which is exactly what a
+        // /admin/campaigns needs giveflow_manage_campaigns, which is exactly what a
         // bookkeeper role created to enter checks will not have. The donations
         // list already shows campaign titles to anyone who can read it, so
         // serving the names under the same capability discloses nothing new,
@@ -112,7 +112,7 @@ final class DonationsController
 
         // Fund names for the record-a-donation picker, under the donations
         // capability for the same reason campaign-options exists: /admin/funds
-        // needs dono_manage_campaigns, which the bookkeeper entering the
+        // needs giveflow_manage_campaigns, which the bookkeeper entering the
         // envelope does not have.
         register_rest_route(self::NAMESPACE, '/admin/donations/fund-options', [
             'methods'             => WP_REST_Server::READABLE,
@@ -146,7 +146,7 @@ final class DonationsController
         register_rest_route(self::NAMESPACE, '/admin/donations/(?P<reference>[A-Za-z0-9_\-]+)/refund', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'refund'],
-            'permission_callback' => static fn () => Capabilities::userCan('dono_refund_donations'),
+            'permission_callback' => static fn () => Capabilities::userCan('giveflow_refund_donations'),
             'args'                => [
                 'amount_cents' => ['type' => 'integer', 'minimum' => 1],
                 'reason'       => ['type' => 'string'],
@@ -159,7 +159,7 @@ final class DonationsController
         register_rest_route(self::NAMESPACE, '/admin/donations/(?P<reference>[A-Za-z0-9_\-]+)/release-refund', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'releaseRefund'],
-            'permission_callback' => static fn () => Capabilities::userCan('dono_refund_donations'),
+            'permission_callback' => static fn () => Capabilities::userCan('giveflow_refund_donations'),
             'args'                => [
                 'gateway_refund_id' => ['type' => 'string', 'required' => true],
             ],
@@ -168,13 +168,13 @@ final class DonationsController
         register_rest_route(self::NAMESPACE, '/admin/donations/(?P<reference>[A-Za-z0-9_\-]+)/mark-paid', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'markPaid'],
-            'permission_callback' => static fn () => Capabilities::userCan('dono_refund_donations'),
+            'permission_callback' => static fn () => Capabilities::userCan('giveflow_refund_donations'),
         ]);
 
         register_rest_route(self::NAMESPACE, '/admin/donations/(?P<reference>[A-Za-z0-9_\-]+)/mark-failed', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'markFailed'],
-            'permission_callback' => static fn () => Capabilities::userCan('dono_refund_donations'),
+            'permission_callback' => static fn () => Capabilities::userCan('giveflow_refund_donations'),
             'args'                => [
                 'reason' => ['type' => 'string'],
             ],
@@ -183,13 +183,13 @@ final class DonationsController
         register_rest_route(self::NAMESPACE, '/admin/donations/(?P<reference>[A-Za-z0-9_\-]+)/resend-receipt', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'resendReceipt'],
-            'permission_callback' => static fn () => Capabilities::userCan('dono_resend_receipt'),
+            'permission_callback' => static fn () => Capabilities::userCan('giveflow_resend_receipt'),
         ]);
 
         register_rest_route(self::NAMESPACE, '/admin/donations/(?P<reference>[A-Za-z0-9_\-]+)/retry-subscription', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'retrySubscription'],
-            'permission_callback' => static fn () => Capabilities::userCan('dono_refund_donations'),
+            'permission_callback' => static fn () => Capabilities::userCan('giveflow_refund_donations'),
         ]);
 
         register_rest_route(self::NAMESPACE, '/admin/receipts/(?P<receipt_id>\d+)/pdf', [
@@ -210,7 +210,7 @@ final class DonationsController
         register_rest_route(self::NAMESPACE, '/admin/donations/(?P<reference>[A-Za-z0-9_\-]+)/notes', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'createNote'],
-            'permission_callback' => static fn () => Capabilities::userCan('dono_edit_donations'),
+            'permission_callback' => static fn () => Capabilities::userCan('giveflow_edit_donations'),
             'args'                => [
                 'body' => ['type' => 'string', 'required' => true],
             ],
@@ -219,7 +219,7 @@ final class DonationsController
         register_rest_route(self::NAMESPACE, '/admin/donations/notes/(?P<note_id>\d+)', [
             'methods'             => 'DELETE',
             'callback'            => [$this, 'deleteNote'],
-            'permission_callback' => static fn () => Capabilities::userCan('dono_edit_donations'),
+            'permission_callback' => static fn () => Capabilities::userCan('giveflow_edit_donations'),
             'args'                => [
                 'note_id' => ['type' => 'integer', 'required' => true],
             ],
@@ -232,12 +232,12 @@ final class DonationsController
         $reference = (string) $request['reference'];
         $donation = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('dono_not_found', __('Donation not found.', 'dono-fundraising-platform'), ['status' => 404]);
+            return new WP_Error('giveflow_not_found', __('Donation not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
         }
         $params = $request->get_json_params() ?: $request->get_body_params();
         $body   = trim((string) ($params['body'] ?? ''));
         if ($body === '') {
-            return new WP_Error('dono_invalid', __('Note body is required.', 'dono-fundraising-platform'), ['status' => 400]);
+            return new WP_Error('giveflow_invalid', __('Note body is required.', 'giveflow-fundraising-campaigns'), ['status' => 400]);
         }
         $note = $this->notes->create($donation->id, $body, get_current_user_id() ?: null);
         return new WP_REST_Response($note, 201);
@@ -249,10 +249,10 @@ final class DonationsController
         $noteId = (int) $request['note_id'];
         $note = $this->notes->findById($noteId);
         if (! $note) {
-            return new WP_Error('dono_not_found', __('Note not found.', 'dono-fundraising-platform'), ['status' => 404]);
+            return new WP_Error('giveflow_not_found', __('Note not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
         }
         if ($note->author_user_id && $note->author_user_id !== get_current_user_id() && ! current_user_can('manage_options')) {
-            return new WP_Error('dono_forbidden', __('You cannot delete this note.', 'dono-fundraising-platform'), ['status' => 403]);
+            return new WP_Error('giveflow_forbidden', __('You cannot delete this note.', 'giveflow-fundraising-campaigns'), ['status' => 403]);
         }
         $this->notes->delete($noteId);
         return new WP_REST_Response(['deleted' => true], 200);
@@ -261,7 +261,7 @@ final class DonationsController
     /** @since 1.0.0 */
     public function canAccess(): bool
     {
-        return Capabilities::userCan('dono_view_donations');
+        return Capabilities::userCan('giveflow_view_donations');
     }
 
     /**
@@ -361,14 +361,14 @@ final class DonationsController
     {
         $offline = $this->gateways->get('offline');
         if (! $offline) {
-            return new WP_Error('dono_offline_unavailable', __('The offline gateway is not available.', 'dono-fundraising-platform'), ['status' => 500]);
+            return new WP_Error('giveflow_offline_unavailable', __('The offline gateway is not available.', 'giveflow-fundraising-campaigns'), ['status' => 500]);
         }
 
         $method = (string) $request['payment_method'];
         if (! in_array($method, $offline->paymentMethods(), true)) {
             return new WP_Error(
-                'dono_invalid_payment_method',
-                __('That is not a way money can arrive offline.', 'dono-fundraising-platform'),
+                'giveflow_invalid_payment_method',
+                __('That is not a way money can arrive offline.', 'giveflow-fundraising-campaigns'),
                 ['status' => 400]
             );
         }
@@ -376,8 +376,8 @@ final class DonationsController
         $receivedAt = $this->receivedAt((string) $request['received_at']);
         if ($receivedAt === null) {
             return new WP_Error(
-                'dono_invalid_received_at',
-                __('Give the date the money arrived, and it cannot be in the future.', 'dono-fundraising-platform'),
+                'giveflow_invalid_received_at',
+                __('Give the date the money arrived, and it cannot be in the future.', 'giveflow-fundraising-campaigns'),
                 ['status' => 400]
             );
         }
@@ -391,18 +391,18 @@ final class DonationsController
         // at the gateway and mischarges.
         if (Currency::minorUnits($currency) === 0 && ((int) $request['amount_cents']) % 100 !== 0) {
             return new WP_Error(
-                'dono_invalid_amount',
-                __('This currency does not support fractional amounts.', 'dono-fundraising-platform'),
+                'giveflow_invalid_amount',
+                __('This currency does not support fractional amounts.', 'giveflow-fundraising-campaigns'),
                 ['status' => 422]
             );
         }
 
         if (! SupportedCurrencies::accepts($currency)) {
             return new WP_Error(
-                'dono_unsupported_currency',
+                'giveflow_unsupported_currency',
                 sprintf(
                     /* translators: 1: the currency code entered, 2: the accepted codes. */
-                    __('%1$s is not one of your accepted currencies (%2$s). Add it under Settings, Currency, so it can be converted into your reporting totals.', 'dono-fundraising-platform'),
+                    __('%1$s is not one of your accepted currencies (%2$s). Add it under Settings, Currency, so it can be converted into your reporting totals.', 'giveflow-fundraising-campaigns'),
                     $currency,
                     implode(', ', SupportedCurrencies::all())
                 ),
@@ -419,8 +419,8 @@ final class DonationsController
             );
             if ($existing !== null) {
                 return new WP_Error(
-                    'dono_duplicate_donation',
-                    __('This donor is already down for the same amount on that date.', 'dono-fundraising-platform'),
+                    'giveflow_duplicate_donation',
+                    __('This donor is already down for the same amount on that date.', 'giveflow-fundraising-campaigns'),
                     ['status' => 409, 'reference' => (string) $existing->reference]
                 );
             }
@@ -444,7 +444,7 @@ final class DonationsController
             note_to_org: (string) $request['note_to_org'] ?: null,
             // A real check is real money even on a site left rehearsing. This
             // has to be settled before the insert rather than corrected after
-            // it: Gift Aid reads the flag on dono.donation.creating to decide
+            // it: Gift Aid reads the flag on giveflow.donation.creating to decide
             // whether to write a claim snapshot, and it never asks again, so a
             // donation corrected a moment later still loses the 25%.
             is_test: false,
@@ -471,7 +471,7 @@ final class DonationsController
             $filter   = static function (bool $should, Donation $candidate) use ($donation, $suppress): bool {
                 return (int) $candidate->id === (int) $donation->id ? ! $suppress && $should : $should;
             };
-            add_filter('dono.receipt.should_issue', $filter, 10, 2);
+            add_filter('giveflow.receipt.should_issue', $filter, 10, 2);
 
             try {
                 $donation = $this->donationService->confirm($donation, [
@@ -480,7 +480,7 @@ final class DonationsController
                     'paid_at'        => $receivedAt,
                 ]);
             } finally {
-                remove_filter('dono.receipt.should_issue', $filter, 10);
+                remove_filter('giveflow.receipt.should_issue', $filter, 10);
             }
         } catch (\Throwable $e) {
             // Throwable, not RuntimeException: anything else escapes as a PHP
@@ -510,22 +510,22 @@ final class DonationsController
             // the list as money the org is still waiting for and is never
             // reconciled because nobody knows it is there. Marked failed it says
             // what happened, and unlike deleting it does not orphan rows an
-            // add-on wrote against this donation on dono.donation.creating.
+            // add-on wrote against this donation on giveflow.donation.creating.
             if ($recorded !== null && (string) $recorded->status === 'pending') {
                 $this->donationService->markFailed(
                     $recorded,
-                    __('Recording this donation by hand did not finish.', 'dono-fundraising-platform')
+                    __('Recording this donation by hand did not finish.', 'giveflow-fundraising-campaigns')
                 );
             }
 
-            return new WP_Error('dono_record_failed', $e->getMessage(), ['status' => 500]);
+            return new WP_Error('giveflow_record_failed', $e->getMessage(), ['status' => 500]);
         }
 
         $this->notes->create(
             (int) $donation->id,
             sprintf(
                 /* translators: %s: how the money arrived, e.g. check. */
-                __('Recorded by hand. Received as %s.', 'dono-fundraising-platform'),
+                __('Recorded by hand. Received as %s.', 'giveflow-fundraising-campaigns'),
                 $method
             ),
             get_current_user_id() ?: null
@@ -651,7 +651,7 @@ final class DonationsController
             return null;
         }
 
-        // Nothing before Dono existed. Catches a mistyped year landing in the
+        // Nothing before GiveFlow existed. Catches a mistyped year landing in the
         // earliest bucket of every time series, where it is invisible.
         if ($date->format('Y') < '2000') {
             return null;
@@ -740,7 +740,7 @@ final class DonationsController
         // already looking at exactly what they chose. Nothing is hidden once
         // include_test is on either, so the count would just be noise.
         if ($request['is_test'] === null && ! $request['include_test']) {
-            $response->header('X-Dono-Test-Hidden', (string) $this->donations->countTestHidden([
+            $response->header('X-GiveFlow-Test-Hidden', (string) $this->donations->countTestHidden([
                 'status'             => $request['status'] !== null ? (string) $request['status'] : null,
                 'search'             => $search !== '' ? $search : null,
                 'matching_donor_ids' => $matchingDonorIds,
@@ -804,7 +804,7 @@ final class DonationsController
         $reference = (string) $request['reference'];
         $donation = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('dono_not_found', __('Donation not found.', 'dono-fundraising-platform'), ['status' => 404]);
+            return new WP_Error('giveflow_not_found', __('Donation not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
         }
 
         $donor = $this->donors->findById($donation->donor_id);
@@ -897,7 +897,7 @@ final class DonationsController
         $donorBlock = null;
         if ($donor) {
             // Contact details are the donor record, not the donation record, so
-            // they follow dono_view_donors the way the CSV columns do.
+            // they follow giveflow_view_donors the way the CSV columns do.
             $withDonorPii = $donor->redacted_at === null && $this->canReadDonorPii();
 
             $donorBlock = [
@@ -985,14 +985,14 @@ final class DonationsController
     {
         $donation = $this->donations->findByReference((string) $request['reference']);
         if (! $donation) {
-            return new WP_Error('dono_not_found', __('Donation not found.', 'dono-fundraising-platform'), ['status' => 404]);
+            return new WP_Error('giveflow_not_found', __('Donation not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
         }
 
         $released = $this->donationService->failAwaitedRefund($donation, (string) $request['gateway_refund_id']);
         if (! $released) {
             return new WP_Error(
-                'dono_refund_not_awaiting',
-                __('That refund is not waiting to settle, so there is nothing to release.', 'dono-fundraising-platform'),
+                'giveflow_refund_not_awaiting',
+                __('That refund is not waiting to settle, so there is nothing to release.', 'giveflow-fundraising-campaigns'),
                 ['status' => 422]
             );
         }
@@ -1005,7 +1005,7 @@ final class DonationsController
         $reference = (string) $request['reference'];
         $donation = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('dono_not_found', __('Donation not found.', 'dono-fundraising-platform'), ['status' => 404]);
+            return new WP_Error('giveflow_not_found', __('Donation not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
         }
         if ($donation->status === 'paid') {
             return new WP_REST_Response($this->show($request)->get_data(), 200);
@@ -1015,10 +1015,10 @@ final class DonationsController
         // first to know it landed.
         if (! in_array($donation->status, ['pending', 'processing', 'failed'], true)) {
             return new WP_Error(
-                'dono_invalid_transition',
+                'giveflow_invalid_transition',
                 sprintf(
                     /* translators: %s: current donation status. */
-                    __('Cannot mark a %s donation as paid.', 'dono-fundraising-platform'),
+                    __('Cannot mark a %s donation as paid.', 'giveflow-fundraising-campaigns'),
                     $donation->status
                 ),
                 ['status' => 422]
@@ -1047,7 +1047,7 @@ final class DonationsController
         try {
             $this->donationService->confirm($donation, $confirmation);
         } catch (RuntimeException $e) {
-            return new WP_Error('dono_confirm_failed', $e->getMessage(), ['status' => 500]);
+            return new WP_Error('giveflow_confirm_failed', $e->getMessage(), ['status' => 500]);
         }
         return $this->show($request);
     }
@@ -1058,15 +1058,15 @@ final class DonationsController
         $reference = (string) $request['reference'];
         $donation = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('dono_not_found', __('Donation not found.', 'dono-fundraising-platform'), ['status' => 404]);
+            return new WP_Error('giveflow_not_found', __('Donation not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
         }
         if ($donation->status === 'failed') {
             return new WP_REST_Response($this->show($request)->get_data(), 200);
         }
         if ($donation->status === 'paid') {
             return new WP_Error(
-                'dono_invalid_transition',
-                __('A paid donation cannot be marked as failed. Use refund instead.', 'dono-fundraising-platform'),
+                'giveflow_invalid_transition',
+                __('A paid donation cannot be marked as failed. Use refund instead.', 'giveflow-fundraising-campaigns'),
                 ['status' => 422]
             );
         }
@@ -1074,10 +1074,10 @@ final class DonationsController
         // from the bank before any webhook arrives.
         if (! in_array($donation->status, ['pending', 'processing'], true)) {
             return new WP_Error(
-                'dono_invalid_transition',
+                'giveflow_invalid_transition',
                 sprintf(
                     /* translators: %s: current donation status. */
-                    __('Cannot mark a %s donation as failed.', 'dono-fundraising-platform'),
+                    __('Cannot mark a %s donation as failed.', 'giveflow-fundraising-campaigns'),
                     $donation->status
                 ),
                 ['status' => 422]
@@ -1103,7 +1103,7 @@ final class DonationsController
         $reference = (string) $request['reference'];
         $donation = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('dono_not_found', __('Donation not found.', 'dono-fundraising-platform'), ['status' => 404]);
+            return new WP_Error('giveflow_not_found', __('Donation not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
         }
 
         $body = (array) ($request->get_json_params() ?? []);
@@ -1119,8 +1119,8 @@ final class DonationsController
         // "nothing happened".
         if ($cancelPlan && $planId === 0) {
             return new WP_Error(
-                'dono_no_plan',
-                __('This donation is not part of a recurring schedule, so there is nothing to cancel. No refund was issued.', 'dono-fundraising-platform'),
+                'giveflow_no_plan',
+                __('This donation is not part of a recurring schedule, so there is nothing to cancel. No refund was issued.', 'giveflow-fundraising-campaigns'),
                 ['status' => 422]
             );
         }
@@ -1134,7 +1134,7 @@ final class DonationsController
                 'admin',
             );
         } catch (RuntimeException $e) {
-            return new WP_Error('dono_refund_failed', $e->getMessage(), ['status' => 422]);
+            return new WP_Error('giveflow_refund_failed', $e->getMessage(), ['status' => 422]);
         }
 
         $reloaded = $this->donations->findByReference($reference);
@@ -1184,7 +1184,7 @@ final class DonationsController
                 'id'      => $planId,
                 'status'  => null,
                 'stopped' => false,
-                'error'   => __('The recurring schedule could not be found, so it is still running.', 'dono-fundraising-platform'),
+                'error'   => __('The recurring schedule could not be found, so it is still running.', 'giveflow-fundraising-campaigns'),
             ];
         }
 
@@ -1217,7 +1217,7 @@ final class DonationsController
             'stopped' => $stopped,
             'error'   => $stopped ? null : ($response->is_error()
                 ? $response->as_error()->get_error_message()
-                : __('The recurring schedule is still running.', 'dono-fundraising-platform')),
+                : __('The recurring schedule is still running.', 'giveflow-fundraising-campaigns')),
         ];
     }
 
@@ -1227,7 +1227,7 @@ final class DonationsController
         $reference = (string) $request['reference'];
         $donation = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('dono_not_found', __('Donation not found.', 'dono-fundraising-platform'), ['status' => 404]);
+            return new WP_Error('giveflow_not_found', __('Donation not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
         }
 
         // Erasure wiped the address, so the issuer would find nothing to send to
@@ -1237,8 +1237,8 @@ final class DonationsController
         $donor = $donation->donor_id ? $this->donors->findById((int) $donation->donor_id) : null;
         if ($donor && $donor->redacted_at !== null) {
             return new WP_Error(
-                'dono_donor_redacted',
-                __('This donor has been erased, so there is no address to send a receipt to.', 'dono-fundraising-platform'),
+                'giveflow_donor_redacted',
+                __('This donor has been erased, so there is no address to send a receipt to.', 'giveflow-fundraising-campaigns'),
                 ['status' => 422],
             );
         }
@@ -1246,8 +1246,8 @@ final class DonationsController
         $ok = $this->receiptIssuer->requeueForDonation($donation->id);
         if (! $ok) {
             return new WP_Error(
-                'dono_resend_unavailable',
-                __('Receipts can only be resent for paid donations.', 'dono-fundraising-platform'),
+                'giveflow_resend_unavailable',
+                __('Receipts can only be resent for paid donations.', 'giveflow-fundraising-campaigns'),
                 ['status' => 422],
             );
         }
@@ -1271,14 +1271,14 @@ final class DonationsController
         $reference = (string) $request['reference'];
         $donation  = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('dono_not_found', __('Donation not found.', 'dono-fundraising-platform'), ['status' => 404]);
+            return new WP_Error('giveflow_not_found', __('Donation not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
         }
 
         $flags = (array) ($donation->flags ?? []);
         if (empty($flags['subscription_creation_failed'])) {
             return new WP_Error(
-                'dono_no_retry_needed',
-                __('No subscription-creation failure is recorded for this donation.', 'dono-fundraising-platform'),
+                'giveflow_no_retry_needed',
+                __('No subscription-creation failure is recorded for this donation.', 'giveflow-fundraising-campaigns'),
                 ['status' => 422]
             );
         }
@@ -1288,17 +1288,17 @@ final class DonationsController
         // money that bought a first period and is owed the ones after it.
         if (! in_array((string) $donation->status, ['paid', 'partial_refund'], true)) {
             return new WP_Error(
-                'dono_retry_not_allowed',
-                __('A recurring plan can only be created from a donation the organisation was paid and still holds. This one was refunded, reversed, or never settled.', 'dono-fundraising-platform'),
+                'giveflow_retry_not_allowed',
+                __('A recurring plan can only be created from a donation the organisation was paid and still holds. This one was refunded, reversed, or never settled.', 'giveflow-fundraising-campaigns'),
                 ['status' => 422]
             );
         }
 
         $gateway = $this->gateways->get((string) $donation->gateway);
-        if (! $gateway instanceof \Dono\Gateways\Stripe\StripeGateway) {
+        if (! $gateway instanceof \GiveFlow\Gateways\Stripe\StripeGateway) {
             return new WP_Error(
-                'dono_unsupported_gateway',
-                __('Only Stripe subscriptions can be retried.', 'dono-fundraising-platform'),
+                'giveflow_unsupported_gateway',
+                __('Only Stripe subscriptions can be retried.', 'giveflow-fundraising-campaigns'),
                 ['status' => 422]
             );
         }
@@ -1307,7 +1307,7 @@ final class DonationsController
             $plan = $gateway->retrySubscriptionCreation($donation);
         } catch (RuntimeException $e) {
             return new WP_Error(
-                'dono_retry_failed',
+                'giveflow_retry_failed',
                 $e->getMessage(),
                 ['status' => 502]
             );
@@ -1328,14 +1328,14 @@ final class DonationsController
 
         $receipt = $this->receipts->findById($receiptId);
         if (! $receipt) {
-            return new WP_Error('dono_not_found', __('Receipt not found.', 'dono-fundraising-platform'), ['status' => 404]);
+            return new WP_Error('giveflow_not_found', __('Receipt not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
         }
 
         $pdf = $this->receiptIssuer->renderReceiptPdf($receiptId);
         if ($pdf === null || $pdf === '') {
             return new WP_Error(
-                'dono_render_failed',
-                __('Could not regenerate the receipt PDF. The original renderer may have been removed.', 'dono-fundraising-platform'),
+                'giveflow_render_failed',
+                __('Could not regenerate the receipt PDF. The original renderer may have been removed.', 'giveflow-fundraising-campaigns'),
                 ['status' => 500],
             );
         }
@@ -1375,10 +1375,10 @@ final class DonationsController
      */
     public function previewReceipt(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
-        $org = get_option('dono_org_profile', []);
+        $org = get_option('giveflow_org_profile', []);
         if (! is_array($org)) $org = [];
 
-        $donor                    = \Dono\Donors\Donor::make();
+        $donor                    = \GiveFlow\Donors\Donor::make();
         $donor->id                = 0;
         $donor->email_hash        = 'preview';
         $donor->email_encrypted   = '';
@@ -1391,13 +1391,13 @@ final class DonationsController
         $donor->created_at        = current_time('mysql');
         $donor->updated_at        = current_time('mysql');
 
-        $donation                 = \Dono\Donations\Donation::make();
+        $donation                 = \GiveFlow\Donations\Donation::make();
         $donation->id             = 0;
         $donation->reference      = 'PREVIEW-0000';
         $donation->donor_id       = 0;
         $donation->amount_cents   = 5000;
         $donation->net_cents      = 5000;
-        $donation->currency       = strtoupper((string) \Dono\Foundation\Helpers\Money::defaultCurrency());
+        $donation->currency       = strtoupper((string) \GiveFlow\Foundation\Helpers\Money::defaultCurrency());
         $donation->frequency      = 'one_time';
         $donation->status         = 'paid';
         $donation->gateway        = 'offline';
@@ -1405,7 +1405,7 @@ final class DonationsController
         $donation->updated_at     = current_time('mysql');
         $donation->paid_at        = current_time('mysql');
 
-        $ctx = new \Dono\Receipts\ReceiptContext(
+        $ctx = new \GiveFlow\Receipts\ReceiptContext(
             donation:      $donation,
             donor:         $donor,
             locale:        $donor->locale,
@@ -1418,7 +1418,7 @@ final class DonationsController
         try {
             $pdf = $this->genericRenderer->render($ctx);
         } catch (\Throwable $e) {
-            return new WP_Error('dono_render_failed', $e->getMessage(), ['status' => 500]);
+            return new WP_Error('giveflow_render_failed', $e->getMessage(), ['status' => 500]);
         }
 
         $route = $request->get_route();
@@ -1514,39 +1514,39 @@ final class DonationsController
         ];
 
         // Whether this caller may take donor identities away in bulk. The rest
-        // of the file is donation records, which dono_view_donations covers;
+        // of the file is donation records, which giveflow_view_donations covers;
         // the name and email columns are the donor list by another route, and
-        // that is what dono_export_donors exists to gate.
-        $withDonorPii = Capabilities::userCan('dono_export_donors');
+        // that is what giveflow_export_donors exists to gate.
+        $withDonorPii = Capabilities::userCan('giveflow_export_donors');
 
         // UTF-8 BOM so Excel auto-detects the encoding for accented donor names.
         // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- $out is a php:// stream, not a filesystem path; WP_Filesystem has no streaming equivalent.
         fwrite($out, "\xEF\xBB\xBF");
 
         Csv::writeRow($out, array_merge([
-            __('Reference', 'dono-fundraising-platform'),
-            __('Status', 'dono-fundraising-platform'),
-            __('Amount', 'dono-fundraising-platform'),
-            __('Currency', 'dono-fundraising-platform'),
-            __('Base amount', 'dono-fundraising-platform'),
-            __('Base currency', 'dono-fundraising-platform'),
-            __('Fee', 'dono-fundraising-platform'),
-            __('Net', 'dono-fundraising-platform'),
+            __('Reference', 'giveflow-fundraising-campaigns'),
+            __('Status', 'giveflow-fundraising-campaigns'),
+            __('Amount', 'giveflow-fundraising-campaigns'),
+            __('Currency', 'giveflow-fundraising-campaigns'),
+            __('Base amount', 'giveflow-fundraising-campaigns'),
+            __('Base currency', 'giveflow-fundraising-campaigns'),
+            __('Fee', 'giveflow-fundraising-campaigns'),
+            __('Net', 'giveflow-fundraising-campaigns'),
             // Its own column rather than netted off Net: Net is the amount less
             // the processing fee, which is what the gateway settled, so a row
             // refunded afterwards has to carry both figures to reconcile.
-            __('Refunded', 'dono-fundraising-platform'),
-            __('Gateway', 'dono-fundraising-platform'),
-            __('Frequency', 'dono-fundraising-platform'),
-            __('Fund', 'dono-fundraising-platform'),
-            __('Country', 'dono-fundraising-platform'),
+            __('Refunded', 'giveflow-fundraising-campaigns'),
+            __('Gateway', 'giveflow-fundraising-campaigns'),
+            __('Frequency', 'giveflow-fundraising-campaigns'),
+            __('Fund', 'giveflow-fundraising-campaigns'),
+            __('Country', 'giveflow-fundraising-campaigns'),
         ], $withDonorPii ? [
-            __('Donor name', 'dono-fundraising-platform'),
-            __('Donor email', 'dono-fundraising-platform'),
+            __('Donor name', 'giveflow-fundraising-campaigns'),
+            __('Donor email', 'giveflow-fundraising-campaigns'),
         ] : [], [
-            __('Created at', 'dono-fundraising-platform'),
-            __('Paid at', 'dono-fundraising-platform'),
-            __('Refunded at', 'dono-fundraising-platform'),
+            __('Created at', 'giveflow-fundraising-campaigns'),
+            __('Paid at', 'giveflow-fundraising-campaigns'),
+            __('Refunded at', 'giveflow-fundraising-campaigns'),
         ]));
 
         $ids = $this->donations->listIdsForExport($filters + ['limit' => self::EXPORT_MAX_ROWS]);
@@ -1664,14 +1664,14 @@ final class DonationsController
     /**
      * Whether the caller may read donor contact details. Paging the donations
      * list one email at a time is the donor list by another route, and that is
-     * what dono_view_donors gates; the donation record itself stays readable on
-     * dono_view_donations alone.
+     * what giveflow_view_donors gates; the donation record itself stays readable on
+     * giveflow_view_donations alone.
      *
      * @since 1.0.0
      */
     private function canReadDonorPii(): bool
     {
-        return Capabilities::userCan('dono_view_donors');
+        return Capabilities::userCan('giveflow_view_donors');
     }
 
     /** @since 1.0.0 */
@@ -1737,18 +1737,18 @@ final class DonationsController
     public static function gatewayLabel(string $slug): string
     {
         $known = [
-            'stripe'  => __('Stripe', 'dono-fundraising-platform'),
-            'paypal'  => __('PayPal', 'dono-fundraising-platform'),
-            'offline' => __('Offline', 'dono-fundraising-platform'),
-            'sandbox' => __('Test donation', 'dono-fundraising-platform'),
-            'manual'  => __('Manually entered', 'dono-fundraising-platform'),
+            'stripe'  => __('Stripe', 'giveflow-fundraising-campaigns'),
+            'paypal'  => __('PayPal', 'giveflow-fundraising-campaigns'),
+            'offline' => __('Offline', 'giveflow-fundraising-campaigns'),
+            'sandbox' => __('Test donation', 'giveflow-fundraising-campaigns'),
+            'manual'  => __('Manually entered', 'giveflow-fundraising-campaigns'),
         ];
 
         if (isset($known[$slug])) {
             return $known[$slug];
         }
 
-        $added = (array) apply_filters('dono.gateway_admin_labels', []);
+        $added = (array) apply_filters('giveflow.gateway_admin_labels', []);
         $label = $added[$slug] ?? null;
 
         return is_string($label) && $label !== ''

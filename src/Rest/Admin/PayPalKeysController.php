@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Dono\Rest\Admin;
+namespace GiveFlow\Rest\Admin;
 
-use Dono\Analytics\ErrorLog;
-use Dono\Foundation\Auth\Capabilities;
-use Dono\Gateways\PayPal\PayPalAccount;
-use Dono\Gateways\PayPal\PayPalApi;
-use Dono\Gateways\GatewayTransportException;
+use GiveFlow\Analytics\ErrorLog;
+use GiveFlow\Foundation\Auth\Capabilities;
+use GiveFlow\Gateways\PayPal\PayPalAccount;
+use GiveFlow\Gateways\PayPal\PayPalApi;
+use GiveFlow\Gateways\GatewayTransportException;
 use RuntimeException;
 use WP_Error;
 use WP_REST_Request;
@@ -30,7 +30,7 @@ use WP_REST_Server;
  */
 final class PayPalKeysController
 {
-    private const NAMESPACE = 'dono/v1';
+    private const NAMESPACE = 'giveflow/v1';
 
     private const TIMEOUT     = 8;
     private const MIN_TIMEOUT = 3;
@@ -120,7 +120,7 @@ final class PayPalKeysController
     /** @since 1.0.0 */
     public function canManage(): bool
     {
-        return Capabilities::userCan('dono_manage_settings');
+        return Capabilities::userCan('giveflow_manage_settings');
     }
 
     /** @since 1.0.0 */
@@ -130,7 +130,7 @@ final class PayPalKeysController
             'connected'   => $this->account->isConnected(),
             'can_charge'  => $this->account->isConnected(),
             'account'     => $this->account->get(),
-            'webhook_url' => rest_url('dono/v1/webhooks/paypal'),
+            'webhook_url' => rest_url('giveflow/v1/webhooks/paypal'),
         ], 200);
     }
 
@@ -152,8 +152,8 @@ final class PayPalKeysController
 
         if ($clientId === '' || $secret === '') {
             return new WP_Error(
-                'dono_paypal_bad_key',
-                __('Enter both the client id and the secret.', 'dono-fundraising-platform'),
+                'giveflow_paypal_bad_key',
+                __('Enter both the client id and the secret.', 'giveflow-fundraising-campaigns'),
                 ['status' => 400]
             );
         }
@@ -178,10 +178,10 @@ final class PayPalKeysController
             // never the problem.
             $this->account->restore($previous);
             return new WP_Error(
-                'dono_paypal_unreachable',
+                'giveflow_paypal_unreachable',
                 sprintf(
                     /* translators: 1: sandbox or live, 2: transport error, e.g. a DNS failure */
-                    __('This site could not reach PayPal, so the %1$s credentials have not been checked or saved: %2$s. That is a problem with this server rather than with the credentials.', 'dono-fundraising-platform'),
+                    __('This site could not reach PayPal, so the %1$s credentials have not been checked or saved: %2$s. That is a problem with this server rather than with the credentials.', 'giveflow-fundraising-campaigns'),
                     $this->modeLabel($test),
                     $e->getMessage()
                 ),
@@ -190,10 +190,10 @@ final class PayPalKeysController
         } catch (RuntimeException $e) {
             $this->account->restore($previous);
             return new WP_Error(
-                'dono_paypal_key_rejected',
+                'giveflow_paypal_key_rejected',
                 sprintf(
                     /* translators: 1: sandbox or live, 2: error from PayPal */
-                    __('PayPal rejected those %1$s credentials: %2$s', 'dono-fundraising-platform'),
+                    __('PayPal rejected those %1$s credentials: %2$s', 'giveflow-fundraising-campaigns'),
                     $this->modeLabel($test),
                     $e->getMessage()
                 ),
@@ -235,10 +235,10 @@ final class PayPalKeysController
     {
         if (! $this->account->hasKeysFor($test)) {
             return new WP_Error(
-                'dono_paypal_bad_key',
+                'giveflow_paypal_bad_key',
                 sprintf(
                     /* translators: %s: sandbox or live */
-                    __('Save the %s client id and secret first. A webhook id can only be checked against the app it belongs to.', 'dono-fundraising-platform'),
+                    __('Save the %s client id and secret first. A webhook id can only be checked against the app it belongs to.', 'giveflow-fundraising-campaigns'),
                     $this->modeLabel($test)
                 ),
                 ['status' => 400]
@@ -262,10 +262,10 @@ final class PayPalKeysController
         // outright rather than parked on file under a screen that would then
         // read as though the webhook were set up.
         return new WP_Error(
-            'dono_paypal_webhook_unchecked',
+            'giveflow_paypal_webhook_unchecked',
             sprintf(
                 /* translators: %s: reason PayPal could not be asked */
-                __('PayPal could not be asked whether that webhook id is right: %s. It has not been saved, because an id PayPal does not know rejects every notification. Try again in a moment.', 'dono-fundraising-platform'),
+                __('PayPal could not be asked whether that webhook id is right: %s. It has not been saved, because an id PayPal does not know rejects every notification. Try again in a moment.', 'giveflow-fundraising-campaigns'),
                 $check['message']
             ),
             ['status' => 503]
@@ -382,14 +382,14 @@ final class PayPalKeysController
 
             // A webhook that exists is not a webhook that delivers anything
             // this reads. Reported as checked, an org can save an id subscribed
-            // to nothing Dono handles and be told it is fine, and then every
+            // to nothing GiveFlow handles and be told it is fine, and then every
             // recurring donation is charged with no event to bank it.
             if ($missing !== []) {
                 return [
                     'status'  => self::HOOK_INCOMPLETE,
                     'message' => sprintf(
                         /* translators: %s: comma-separated PayPal event names */
-                        __('That webhook does not send: %s', 'dono-fundraising-platform'),
+                        __('That webhook does not send: %s', 'giveflow-fundraising-campaigns'),
                         implode(', ', $missing)
                     ),
                 ];
@@ -428,14 +428,14 @@ final class PayPalKeysController
         $warning = $check['status'] === self::HOOK_MISSING
             ? sprintf(
                 /* translators: 1: the webhook id that was entered, 2: sandbox or live, 3: error from PayPal */
-                __('The credentials are saved, but the webhook id %1$s is not: your %2$s PayPal app has no webhook with that id. Sandbox and live webhooks have separate ids, and the webhook id is not the WH- event id beside it in the dashboard. PayPal said: %3$s', 'dono-fundraising-platform'),
+                __('The credentials are saved, but the webhook id %1$s is not: your %2$s PayPal app has no webhook with that id. Sandbox and live webhooks have separate ids, and the webhook id is not the WH- event id beside it in the dashboard. PayPal said: %3$s', 'giveflow-fundraising-campaigns'),
                 $webhookId,
                 $this->modeLabel($test),
                 $check['message']
             )
             : sprintf(
                 /* translators: 1: the webhook id that was entered, 2: reason PayPal could not be asked */
-                __('The credentials are saved, but the webhook id %1$s is not: PayPal could not be asked whether it is right (%2$s). Add it again once PayPal answers.', 'dono-fundraising-platform'),
+                __('The credentials are saved, but the webhook id %1$s is not: PayPal could not be asked whether it is right (%2$s). Add it again once PayPal answers.', 'giveflow-fundraising-campaigns'),
                 $webhookId,
                 $check['message']
             );
@@ -451,10 +451,10 @@ final class PayPalKeysController
     private function missingWebhookError(bool $test, string $reason): WP_Error
     {
         return new WP_Error(
-            'dono_paypal_webhook_rejected',
+            'giveflow_paypal_webhook_rejected',
             sprintf(
                 /* translators: 1: sandbox or live, 2: error from PayPal */
-                __('Your %1$s PayPal app has no webhook with that id. Sandbox and live webhooks have separate ids, and the webhook id is not the WH- event id beside it in the dashboard. PayPal said: %2$s', 'dono-fundraising-platform'),
+                __('Your %1$s PayPal app has no webhook with that id. Sandbox and live webhooks have separate ids, and the webhook id is not the WH- event id beside it in the dashboard. PayPal said: %2$s', 'giveflow-fundraising-campaigns'),
                 $this->modeLabel($test),
                 $reason
             ),
@@ -484,7 +484,7 @@ final class PayPalKeysController
     /** @since 1.0.0 */
     private function modeLabel(bool $test): string
     {
-        return $test ? __('sandbox', 'dono-fundraising-platform') : __('live', 'dono-fundraising-platform');
+        return $test ? __('sandbox', 'giveflow-fundraising-campaigns') : __('live', 'giveflow-fundraising-campaigns');
     }
 
     /** @since 1.0.0 */

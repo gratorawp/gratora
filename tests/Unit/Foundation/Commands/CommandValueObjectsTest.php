@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Unit\Foundation\Commands;
+namespace GiveFlow\Tests\Unit\Foundation\Commands;
 
-use Dono\Foundation\Commands\Command;
-use Dono\Foundation\Commands\CommandContext;
-use Dono\Foundation\Commands\CommandError;
-use Dono\Foundation\Commands\CommandResult;
+use GiveFlow\Foundation\Commands\Command;
+use GiveFlow\Foundation\Commands\CommandContext;
+use GiveFlow\Foundation\Commands\CommandError;
+use GiveFlow\Foundation\Commands\CommandResult;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 

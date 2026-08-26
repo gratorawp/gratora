@@ -9,9 +9,9 @@ defined('ABSPATH') || exit;
  * @var string                                                          $defaultValue
  */
 ?>
-<label class="dono-block dono-block--dropdown dono-dropdown">
+<label class="giveflow-block giveflow-block--dropdown giveflow-dropdown">
     <?php if ($label !== ''): ?>
-        <span class="dono-dropdown__label"><?php echo esc_html($label); ?></span>
+        <span class="giveflow-dropdown__label"><?php echo esc_html($label); ?></span>
     <?php endif; ?>
     <select
         name="custom[<?php echo esc_attr($field); ?>]"

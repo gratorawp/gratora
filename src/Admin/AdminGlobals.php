@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Dono\Admin;
+namespace GiveFlow\Admin;
 
-use Dono\Settings\SettingsService;
-use Dono\Campaigns\Styling\StylePresets;
-use Dono\Campaigns\Styling\Tokens;
-use Dono\Forms\FormService;
-use Dono\Foundation\Auth\Capabilities;
-use Dono\Foundation\Hooks\HookProvider;
-use Dono\Foundation\Helpers\Money;
-use Dono\Foundation\License\LicenseService;
+use GiveFlow\Settings\SettingsService;
+use GiveFlow\Campaigns\Styling\StylePresets;
+use GiveFlow\Campaigns\Styling\Tokens;
+use GiveFlow\Forms\FormService;
+use GiveFlow\Foundation\Auth\Capabilities;
+use GiveFlow\Foundation\Hooks\HookProvider;
+use GiveFlow\Foundation\Helpers\Money;
+use GiveFlow\Foundation\License\LicenseService;
 
 /**
- * Injects global Dono JS config into admin pages.
+ * Injects global GiveFlow JS config into admin pages.
  *
  * @since 1.0.0
  */
@@ -34,17 +34,17 @@ final class AdminGlobals extends HookProvider
     /** @since 1.0.0 */
     public function inject(): void
     {
-        if (! $this->isDonoAdminPage()) return;
+        if (! $this->isGiveFlowAdminPage()) return;
 
-        $currencyLocale = get_option('dono_currency_locale', []);
+        $currencyLocale = get_option('giveflow_currency_locale', []);
         $defaultCurrency = Money::defaultCurrency();
 
         $payload = [
-            'rest'             => esc_url_raw(rest_url('dono/v1/')),
+            'rest'             => esc_url_raw(rest_url('giveflow/v1/')),
             'nonce'            => wp_create_nonce('wp_rest'),
             'pro'              => $this->license->snapshot(),
-            'campaign_types'   => apply_filters('dono.campaign.types', ['standard' => __('Standard', 'dono-fundraising-platform')]),
-            'campaign_type_notices' => apply_filters('dono.campaign.type_notices', []),
+            'campaign_types'   => apply_filters('giveflow.campaign.types', ['standard' => __('Standard', 'giveflow-fundraising-campaigns')]),
+            'campaign_type_notices' => apply_filters('giveflow.campaign.type_notices', []),
             'default_currency' => $defaultCurrency,
             'supported_currencies' => is_array($currencyLocale['supported_currencies'] ?? null)
                 ? array_values($currencyLocale['supported_currencies'])
@@ -55,12 +55,12 @@ final class AdminGlobals extends HookProvider
                 'site_name'    => (string) get_bloginfo('name'),
                 'admin_email'  => (string) get_option('admin_email', ''),
                 'home_url'     => esc_url_raw(home_url('/')),
-                'dashboard_url' => esc_url_raw(admin_url('admin.php?page=dono')),
-                'settings_url' => esc_url_raw(admin_url('admin.php?page=dono-settings')),
-                'campaigns_url' => esc_url_raw(admin_url('admin.php?page=dono-campaigns')),
+                'dashboard_url' => esc_url_raw(admin_url('admin.php?page=giveflow')),
+                'settings_url' => esc_url_raw(admin_url('admin.php?page=giveflow-settings')),
+                'campaigns_url' => esc_url_raw(admin_url('admin.php?page=giveflow-campaigns')),
             ],
             'privacy_policy_url' => (function () {
-                $opt = get_option('dono_privacy', []);
+                $opt = get_option('giveflow_privacy', []);
                 $url = is_array($opt) ? trim((string) ($opt['privacy_policy_url'] ?? '')) : '';
                 return $url !== '' ? esc_url_raw($url) : '';
             })(),
@@ -94,12 +94,12 @@ final class AdminGlobals extends HookProvider
             // edit the grid and only learns it is refused on save.
             'can' => [
                 'manage_options' => current_user_can('manage_options'),
-                'export_donors'  => Capabilities::userCan('dono_export_donors'),
+                'export_donors'  => Capabilities::userCan('giveflow_export_donors'),
             ],
         ];
 
         // A src-less handle in the head, so every screen bundle that reads
-        // window.dono finds it populated before it runs. All four HEX flags:
+        // window.giveflow finds it populated before it runs. All four HEX flags:
         // TAG and AMP escape < > & so a value holding a closing script tag
         // (the site name, say) cannot break out of the inline tag, and APOS
         // and QUOT leave nothing quote-shaped for a reader to reason about.
@@ -109,21 +109,21 @@ final class AdminGlobals extends HookProvider
                 | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
         );
 
-        wp_register_script('dono-admin-globals', false, [], DONO_VERSION, false);
-        wp_enqueue_script('dono-admin-globals');
+        wp_register_script('giveflow-admin-globals', false, [], GIVEFLOW_VERSION, false);
+        wp_enqueue_script('giveflow-admin-globals');
         wp_add_inline_script(
-            'dono-admin-globals',
-            'window.dono = window.dono || {}; Object.assign(window.dono, ' . $json . ');'
+            'giveflow-admin-globals',
+            'window.giveflow = window.giveflow || {}; Object.assign(window.giveflow, ' . $json . ');'
         );
     }
 
     /** @since 1.0.0 */
-    private function isDonoAdminPage(): bool
+    private function isGiveFlowAdminPage(): bool
     {
         $page = isset($_GET['page']) ? sanitize_key(wp_unslash($_GET['page'])) : '';
 
-        // The dashboard's slug is the bare "dono"; every other screen is
-        // "dono-something", so a prefix match alone would miss the dashboard.
-        return $page === 'dono' || strpos($page, 'dono-') === 0;
+        // The dashboard's slug is the bare "giveflow"; every other screen is
+        // "giveflow-something", so a prefix match alone would miss the dashboard.
+        return $page === 'giveflow' || strpos($page, 'giveflow-') === 0;
     }
 }

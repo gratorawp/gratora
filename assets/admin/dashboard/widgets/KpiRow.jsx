@@ -15,20 +15,20 @@ export default function KpiRow( { kpi, compareOn, range, includesTest = false, l
     const currency = kpi.currency || 'USD';
     // The page banner explains the toggle, but these four cards are what gets
     // screenshotted, and a figure that leaves the page loses the caveat with it.
-    const testSub  = includesTest ? __( 'incl. test', 'dono-fundraising-platform' ) : '';
+    const testSub  = includesTest ? __( 'incl. test', 'giveflow-fundraising-campaigns' ) : '';
     const withTest = ( base ) => [ base, testSub ].filter( Boolean ).join( ' · ' );
 
     const periodSub = withTest( rangeLabel( range ) );
     const donationsSub = withTest(
         rangeLabel( range )
-            ? `${ rangeLabel( range ) } · ${ __( 'paid only', 'dono-fundraising-platform' ) }`
-            : __( 'paid only', 'dono-fundraising-platform' )
+            ? `${ rangeLabel( range ) } · ${ __( 'paid only', 'giveflow-fundraising-campaigns' ) }`
+            : __( 'paid only', 'giveflow-fundraising-campaigns' )
     );
 
     return (
-        <div className="dono-overview__metrics">
+        <div className="giveflow-overview__metrics">
             <MetricCard
-                label={ __( 'Amount raised', 'dono-fundraising-platform' ) }
+                label={ __( 'Amount raised', 'giveflow-fundraising-campaigns' ) }
                 value={ formatAmount( kpi.amount_raised_cents, currency ) }
                 changePct={ cmp?.amount_raised_cents }
                 sub={ periodSub }
@@ -36,7 +36,7 @@ export default function KpiRow( { kpi, compareOn, range, includesTest = false, l
                 skeleton={ loading }
             />
             <MetricCard
-                label={ __( 'Donations', 'dono-fundraising-platform' ) }
+                label={ __( 'Donations', 'giveflow-fundraising-campaigns' ) }
                 value={ String( kpi.donations_count ) }
                 changePct={ cmp?.donations_count }
                 sub={ donationsSub }
@@ -44,7 +44,7 @@ export default function KpiRow( { kpi, compareOn, range, includesTest = false, l
                 skeleton={ loading }
             />
             <MetricCard
-                label={ __( 'Donors', 'dono-fundraising-platform' ) }
+                label={ __( 'Donors', 'giveflow-fundraising-campaigns' ) }
                 value={ String( kpi.donors_count ) }
                 changePct={ cmp?.donors_count }
                 sub={ periodSub }
@@ -52,7 +52,7 @@ export default function KpiRow( { kpi, compareOn, range, includesTest = false, l
                 skeleton={ loading }
             />
             <MetricCard
-                label={ __( 'Average donation', 'dono-fundraising-platform' ) }
+                label={ __( 'Average donation', 'giveflow-fundraising-campaigns' ) }
                 value={ formatAmount( kpi.avg_donation_cents, currency ) }
                 changePct={ cmp?.avg_donation_cents }
                 sub={ periodSub }

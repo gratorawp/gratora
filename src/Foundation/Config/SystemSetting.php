@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace Dono\Foundation\Config;
+namespace GiveFlow\Foundation\Config;
 
 defined('ABSPATH') || exit;
 
-use Dono\Vendor\Queryable\DB;
-use Dono\Vendor\Queryable\Model;
-use Dono\Vendor\Queryable\Schema\Table;
+use GiveFlow\Vendor\Queryable\DB;
+use GiveFlow\Vendor\Queryable\Model;
+use GiveFlow\Vendor\Queryable\Schema\Table;
 
 /**
- * Persistent install-level settings stored in dono_system_settings.
+ * Persistent install-level settings stored in giveflow_system_settings.
  *
  * @since 1.0.0
  */
 final class SystemSetting extends Model
 {
-    protected string $table = 'dono_system_settings';
+    protected string $table = 'giveflow_system_settings';
     protected string $version = '1.0.0';
     protected string $primaryKey = 'setting_key';
 
@@ -28,7 +28,7 @@ final class SystemSetting extends Model
     /** @since 1.0.0 */
     public static function read(string $key): ?string
     {
-        $row = DB::table('dono_system_settings')
+        $row = DB::table('giveflow_system_settings')
             ->where('setting_key', $key)
             ->select('setting_value')
             ->get();
@@ -41,7 +41,7 @@ final class SystemSetting extends Model
     public static function write(string $key, string $value): void
     {
         $now = gmdate('Y-m-d H:i:s');
-        DB::table('dono_system_settings')->upsert(
+        DB::table('giveflow_system_settings')->upsert(
             [
                 'setting_key'   => $key,
                 'setting_value' => $value,
@@ -55,7 +55,7 @@ final class SystemSetting extends Model
     /** @since 1.0.0 */
     public static function exists(string $key): bool
     {
-        return DB::table('dono_system_settings')
+        return DB::table('giveflow_system_settings')
             ->where('setting_key', $key)
             ->exists();
     }
@@ -63,7 +63,7 @@ final class SystemSetting extends Model
     /** @since 1.0.0 */
     public static function forget(string $key): void
     {
-        DB::table('dono_system_settings')
+        DB::table('giveflow_system_settings')
             ->where('setting_key', $key)
             ->delete();
     }

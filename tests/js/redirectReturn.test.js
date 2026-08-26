@@ -63,12 +63,12 @@ function config( overrides = {} ) {
 
 function addForm( id, cfg ) {
     const form = document.createElement( 'form' );
-    form.className = 'dono-donation-form';
+    form.className = 'giveflow-donation-form';
     form.id = id;
 
     const json = document.createElement( 'script' );
     json.type = 'application/json';
-    json.setAttribute( 'data-dono-form-config', '' );
+    json.setAttribute( 'data-giveflow-form-config', '' );
     json.textContent = JSON.stringify( cfg );
     form.appendChild( json );
 
@@ -78,9 +78,9 @@ function addForm( id, cfg ) {
 }
 
 function returningFrom( reference, formKey ) {
-    window.history.replaceState( {}, '', '/campaign/?dono_return=1&dono_ref=' + reference
+    window.history.replaceState( {}, '', '/campaign/?giveflow_return=1&giveflow_ref=' + reference
         + '&payment_intent_client_secret=pi_probe_secret' );
-    window.sessionStorage.setItem( 'dono:pending-donation', JSON.stringify( {
+    window.sessionStorage.setItem( 'giveflow:pending-donation', JSON.stringify( {
         reference,
         statusToken: 'tok',
         formKey,
@@ -109,8 +109,8 @@ beforeEach( () => {
 
 describe( 'a redirect that did not end in a payment', () => {
     test( 'a donor who cancelled at their bank is told nothing was charged', async () => {
-        returningFrom( 'DONO-2026-00042', 'dono-form-1' );
-        const form = addForm( 'dono-form-1', config() );
+        returningFrom( 'GIVEFLOW-2026-00042', 'giveflow-form-1' );
+        const form = addForm( 'giveflow-form-1', config() );
 
         mockStatus = 'requires_payment_method';
         await boot();
@@ -120,8 +120,8 @@ describe( 'a redirect that did not end in a payment', () => {
     } );
 
     test( 'a completed payment clears the markers behind it', async () => {
-        returningFrom( 'DONO-2026-00047', 'dono-form-1' );
-        addForm( 'dono-form-1', config() );
+        returningFrom( 'GIVEFLOW-2026-00047', 'giveflow-form-1' );
+        addForm( 'giveflow-form-1', config() );
 
         await boot();
 
@@ -133,8 +133,8 @@ describe( 'a return the browser could not resolve', () => {
     const { settle } = require( './support/waitFor' );
 
     test( 'an intent parked mid-authentication is not answered with try again', async () => {
-        returningFrom( 'DONO-2026-00043', 'dono-form-1' );
-        const form = addForm( 'dono-form-1', config() );
+        returningFrom( 'GIVEFLOW-2026-00043', 'giveflow-form-1' );
+        const form = addForm( 'giveflow-form-1', config() );
 
         mockStatus = 'requires_action';
         await boot();
@@ -145,8 +145,8 @@ describe( 'a return the browser could not resolve', () => {
     } );
 
     test( 'Stripe being unreachable on the way back is not answered with try again', async () => {
-        returningFrom( 'DONO-2026-00048', 'dono-form-1' );
-        const form = addForm( 'dono-form-1', config() );
+        returningFrom( 'GIVEFLOW-2026-00048', 'giveflow-form-1' );
+        const form = addForm( 'giveflow-form-1', config() );
 
         mockStatus = UNREACHABLE;
         await boot();
@@ -156,18 +156,18 @@ describe( 'a return the browser could not resolve', () => {
     } );
 
     test( 'the markers survive, so reloading the page runs the check again', async () => {
-        returningFrom( 'DONO-2026-00049', 'dono-form-1' );
-        addForm( 'dono-form-1', config() );
+        returningFrom( 'GIVEFLOW-2026-00049', 'giveflow-form-1' );
+        addForm( 'giveflow-form-1', config() );
 
         mockStatus = UNREACHABLE;
         await boot();
 
         expect( window.location.search ).toContain( 'payment_intent_client_secret=pi_probe_secret' );
-        expect( window.location.search ).toContain( 'dono_return=1' );
+        expect( window.location.search ).toContain( 'giveflow_return=1' );
 
         // The reload a donor would do, on the same URL they were left with.
         document.body.innerHTML = '';
-        const reloaded = addForm( 'dono-form-1', config() );
+        const reloaded = addForm( 'giveflow-form-1', config() );
         mockStatus = 'succeeded';
         await boot();
 
@@ -175,8 +175,8 @@ describe( 'a return the browser could not resolve', () => {
     } );
 
     test( 'checking again from the screen settles a payment that has since gone through', async () => {
-        returningFrom( 'DONO-2026-00050', 'dono-form-1' );
-        const form = addForm( 'dono-form-1', config() );
+        returningFrom( 'GIVEFLOW-2026-00050', 'giveflow-form-1' );
+        const form = addForm( 'giveflow-form-1', config() );
 
         mockStatus = 'requires_action';
         await boot();
@@ -197,9 +197,9 @@ describe( 'a return the browser could not resolve', () => {
 
 describe( 'two forms on one page', () => {
     test( 'the form the donor submitted from claims the return, not the first one', async () => {
-        returningFrom( 'DONO-2026-00044', 'dono-form-2' );
-        const first  = addForm( 'dono-form-1', config() );
-        const second = addForm( 'dono-form-2', config() );
+        returningFrom( 'GIVEFLOW-2026-00044', 'giveflow-form-2' );
+        const first  = addForm( 'giveflow-form-1', config() );
+        const second = addForm( 'giveflow-form-2', config() );
 
         await boot();
 
@@ -208,8 +208,8 @@ describe( 'two forms on one page', () => {
     } );
 
     test( 'a stash naming a form that is no longer on the page still reaches the donor', async () => {
-        returningFrom( 'DONO-2026-00045', 'dono-form-9' );
-        const only = addForm( 'dono-form-1', config() );
+        returningFrom( 'GIVEFLOW-2026-00045', 'giveflow-form-9' );
+        const only = addForm( 'giveflow-form-1', config() );
 
         await boot();
 
@@ -222,16 +222,16 @@ describe( 'two forms on one page', () => {
         // second modal springing open beside it holds a blank form and no
         // account of the payment, which reads as a second donation being asked
         // for.
-        window.history.replaceState( {}, '', '/campaign/?dono_return=1&dono_ref=DONO-2026-00046'
+        window.history.replaceState( {}, '', '/campaign/?giveflow_return=1&giveflow_ref=GIVEFLOW-2026-00046'
             + '&payment_intent_client_secret=pi_probe_secret' );
 
-        const first  = addForm( 'dono-form-1', config( { layout: 'modal' } ) );
-        const second = addForm( 'dono-form-2', config( { layout: 'modal' } ) );
+        const first  = addForm( 'giveflow-form-1', config( { layout: 'modal' } ) );
+        const second = addForm( 'giveflow-form-2', config( { layout: 'modal' } ) );
 
         await boot();
 
-        expect( first.querySelector( '.dono-modal' ) ).not.toBeNull();
+        expect( first.querySelector( '.giveflow-modal' ) ).not.toBeNull();
         expect( first.textContent ).toContain( THANKS );
-        expect( second.querySelector( '.dono-modal' ) ).toBeNull();
+        expect( second.querySelector( '.giveflow-modal' ) ).toBeNull();
     } );
 } );

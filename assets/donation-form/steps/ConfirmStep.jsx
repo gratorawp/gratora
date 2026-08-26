@@ -18,51 +18,51 @@ export default function ConfirmStep( { state, config, showDonor = true, showGate
     const total = formatAmount( cents + fee, state.currency );
 
     return (
-        <div class="dono-form__confirm">
-            <dl class="dono-form__summary">
-                <div class="dono-form__summary-row">
+        <div class="giveflow-form__confirm">
+            <dl class="giveflow-form__summary">
+                <div class="giveflow-form__summary-row">
                     <dt>{ config.i18n.amount }</dt>
-                    <dd class="dono-form__summary-amount">{ amount }</dd>
+                    <dd class="giveflow-form__summary-amount">{ amount }</dd>
                 </div>
                 { freqLabel && (
-                    <div class="dono-form__summary-row">
+                    <div class="giveflow-form__summary-row">
                         <dt>{ config.i18n.frequency }</dt>
                         <dd>{ freqLabel }</dd>
                     </div>
                 ) }
                 { fee > 0 && (
-                    <div class="dono-form__summary-row">
+                    <div class="giveflow-form__summary-row">
                         <dt>{ config.i18n.fees }</dt>
                         <dd>{ formatAmount( fee, state.currency ) }</dd>
                     </div>
                 ) }
                 { showDonor && fullName && (
-                    <div class="dono-form__summary-row">
+                    <div class="giveflow-form__summary-row">
                         <dt>{ config.i18n.donor }</dt>
                         <dd>{ fullName }</dd>
                     </div>
                 ) }
                 { showDonor && (
-                    <div class="dono-form__summary-row">
+                    <div class="giveflow-form__summary-row">
                         <dt>{ config.i18n.email }</dt>
                         <dd>{ v.email }</dd>
                     </div>
                 ) }
                 { showDonor && v.profile.country && (
-                    <div class="dono-form__summary-row">
+                    <div class="giveflow-form__summary-row">
                         <dt>{ config.i18n.country }</dt>
                         <dd>{ v.profile.country }</dd>
                     </div>
                 ) }
                 { showGateway && (
-                    <div class="dono-form__summary-row">
+                    <div class="giveflow-form__summary-row">
                         <dt>{ config.i18n.paymentMethod }</dt>
                         <dd>{ gatewayLabel( state.gateway, config ) }</dd>
                     </div>
                 ) }
-                <div class="dono-form__summary-row dono-form__summary-row--total">
+                <div class="giveflow-form__summary-row giveflow-form__summary-row--total">
                     <dt>{ config.i18n.total }</dt>
-                    <dd class="dono-form__summary-amount">{ total }</dd>
+                    <dd class="giveflow-form__summary-amount">{ total }</dd>
                 </div>
             </dl>
         </div>

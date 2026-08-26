@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Analytics\Event;
-use Dono\Donors\DonorService;
-use Dono\Donors\Erasure\ErasureRequest;
-use Dono\Foundation\Plugin;
+use GiveFlow\Analytics\Event;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Donors\Erasure\ErasureRequest;
+use GiveFlow\Foundation\Plugin;
 
 /**
  * Erasing one donor must not blank another donor's rows.
@@ -54,12 +54,12 @@ final class ErasureNeedleBlastRadiusTest extends IntegrationTestCase
         $request = ErasureRequest::make(
             1,
             [],
-            ['DONO-2026-00700', 'pi_3abc', 'sub_9xy'],
+            ['GIVEFLOW-2026-00700', 'pi_3abc', 'sub_9xy'],
             [],
             gmdate('Y-m-d H:i:s')
         );
 
-        $this->assertContains('DONO-2026-00700', $request->needles);
+        $this->assertContains('GIVEFLOW-2026-00700', $request->needles);
         $this->assertContains('pi_3abc', $request->needles);
         $this->assertContains('sub_9xy', $request->needles);
     }

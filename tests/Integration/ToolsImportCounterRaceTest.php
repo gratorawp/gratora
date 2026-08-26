@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Analytics\ErrorLog;
-use Dono\Analytics\Event;
-use Dono\Donations\Donation;
-use Dono\Donors\Donor;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
-use Dono\Foundation\References\ReferenceGenerator;
-use Dono\Foundation\Transfer\DataExporter;
-use Dono\Foundation\Transfer\DataImporter;
-use Dono\Settings\SettingsService;
-use Dono\Vendor\Queryable\DB;
+use GiveFlow\Analytics\ErrorLog;
+use GiveFlow\Analytics\Event;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Foundation\References\ReferenceGenerator;
+use GiveFlow\Foundation\Transfer\DataExporter;
+use GiveFlow\Foundation\Transfer\DataImporter;
+use GiveFlow\Settings\SettingsService;
+use GiveFlow\Vendor\Queryable\DB;
 use RuntimeException;
 use WP_REST_Request;
 
@@ -39,7 +39,7 @@ final class ToolsImportCounterRaceTest extends IntegrationTestCase
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
         $this->wipeRecords();
         $this->settings()->update('numbering', ReferenceGenerator::DEFAULT_SETTINGS);
-        $this->counterKey = 'dono_reference_counter_donation_' . $this->year();
+        $this->counterKey = 'giveflow_reference_counter_donation_' . $this->year();
     }
 
     protected function tearDown(): void
@@ -71,17 +71,17 @@ final class ToolsImportCounterRaceTest extends IntegrationTestCase
     {
         $prefix = DB::getPrefix();
         foreach ([
-            'dono_receipts',
-            'dono_refunds',
-            'dono_consents',
-            'dono_donation_notes',
-            'dono_donor_notes',
-            'dono_donations',
-            'dono_donors',
-            'dono_form_donation_stats',
-            'dono_forms',
-            'dono_campaigns',
-            'dono_funds',
+            'giveflow_receipts',
+            'giveflow_refunds',
+            'giveflow_consents',
+            'giveflow_donation_notes',
+            'giveflow_donor_notes',
+            'giveflow_donations',
+            'giveflow_donors',
+            'giveflow_form_donation_stats',
+            'giveflow_forms',
+            'giveflow_campaigns',
+            'giveflow_funds',
         ] as $table) {
             DB::raw("DELETE FROM {$prefix}{$table}");
         }
@@ -90,7 +90,7 @@ final class ToolsImportCounterRaceTest extends IntegrationTestCase
     private function forgetCounters(): void
     {
         $prefix = DB::getPrefix();
-        DB::raw("DELETE FROM {$prefix}options WHERE option_name LIKE 'dono_reference_counter%'");
+        DB::raw("DELETE FROM {$prefix}options WHERE option_name LIKE 'giveflow_reference_counter%'");
         wp_cache_delete('alloptions', 'options');
     }
 
@@ -142,7 +142,7 @@ final class ToolsImportCounterRaceTest extends IntegrationTestCase
         fclose($out);
 
         $this->assertIsArray($decoded);
-        $this->assertNotEmpty($decoded['tables']['dono_donations'] ?? [], 'precondition: the file carries the numbered donation');
+        $this->assertNotEmpty($decoded['tables']['giveflow_donations'] ?? [], 'precondition: the file carries the numbered donation');
 
         $this->wipeRecords();
         $this->forgetCounters();
@@ -170,7 +170,7 @@ final class ToolsImportCounterRaceTest extends IntegrationTestCase
     /** @param array<string,mixed> $body */
     private function post(array $body): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/admin/tools/import');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/tools/import');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($body));
 
@@ -314,7 +314,7 @@ final class ToolsImportCounterRaceTest extends IntegrationTestCase
         return [
             'site_url' => 'https://' . md5($email) . '.example',
             'tables'   => [
-                'dono_donors' => [[
+                'giveflow_donors' => [[
                     'id'         => 1,
                     'email'      => $email,
                     'created_at' => gmdate('Y-m-d H:i:s'),

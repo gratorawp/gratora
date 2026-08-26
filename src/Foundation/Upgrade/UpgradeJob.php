@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Foundation\Upgrade;
+namespace GiveFlow\Foundation\Upgrade;
 
-use Dono\Async\AsyncDispatcher;
+use GiveFlow\Async\AsyncDispatcher;
 
 /**
  * Drains the outstanding upgrade routines off the request.
@@ -22,7 +22,7 @@ use Dono\Async\AsyncDispatcher;
  */
 final class UpgradeJob
 {
-    public const HOOK = 'dono.async.run_upgrades';
+    public const HOOK = 'giveflow.async.run_upgrades';
 
     /** @since 1.0.0 */
     public function __construct(

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Forms\Form;
+use GiveFlow\Forms\Form;
 use WP_REST_Request;
 
 /**
@@ -24,19 +24,19 @@ final class RedirectReturnCopyTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        $req = new WP_REST_Request('POST', '/dono/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['title' => 'Return copy campaign', 'status' => 'published']));
         $campaignId = (int) rest_do_request($req)->get_data()['id'];
 
-        $req = new WP_REST_Request('POST', '/dono/v1/admin/forms');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/forms');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'title'       => 'Return copy form',
             'campaign_id' => $campaignId,
-            'blocks'      => '<!-- wp:dono/donation-amount {"presets":[1000],"currency":"EUR"} /-->'
-                . '<!-- wp:dono/email /-->'
-                . '<!-- wp:dono/submit-button /-->',
+            'blocks'      => '<!-- wp:giveflow/donation-amount {"presets":[1000],"currency":"EUR"} /-->'
+                . '<!-- wp:giveflow/email /-->'
+                . '<!-- wp:giveflow/submit-button /-->',
         ]));
         $form = Form::query()->find('id', (int) rest_do_request($req)->get_data()['id']);
         $form->status = 'published';
@@ -48,13 +48,13 @@ final class RedirectReturnCopyTest extends IntegrationTestCase
     /** @return array<string,mixed> */
     private function renderedI18n(): array
     {
-        $html = do_shortcode('[dono_donation_form slug="' . $this->slug . '"]');
+        $html = do_shortcode('[giveflow_donation_form slug="' . $this->slug . '"]');
 
         $this->assertMatchesRegularExpression(
-            '#<script type="application/json" data-dono-form-config>(.*?)</script>#s',
+            '#<script type="application/json" data-giveflow-form-config>(.*?)</script>#s',
             $html
         );
-        preg_match('#<script type="application/json" data-dono-form-config>(.*?)</script>#s', $html, $m);
+        preg_match('#<script type="application/json" data-giveflow-form-config>(.*?)</script>#s', $html, $m);
 
         $config = json_decode(html_entity_decode($m[1], ENT_QUOTES), true);
         $this->assertIsArray($config);

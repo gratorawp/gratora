@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace Dono\Rest\Admin;
-use Dono\Rest\Paging;
-use Dono\Foundation\Auth\Capabilities;
+namespace GiveFlow\Rest\Admin;
+use GiveFlow\Rest\Paging;
+use GiveFlow\Foundation\Auth\Capabilities;
 
-use Dono\Donations\Donation;
-use Dono\Donations\DonationService;
-use Dono\Donors\Donor;
-use Dono\Donors\DonorMetricsService;
-use Dono\Donors\DonorNoteRepository;
-use Dono\Donors\DonorRepository;
-use Dono\Donors\DonorService;
-use Dono\Donors\EmailAlreadyAssignedException;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationService;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\DonorMetricsService;
+use GiveFlow\Donors\DonorNoteRepository;
+use GiveFlow\Donors\DonorRepository;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Donors\EmailAlreadyAssignedException;
 use InvalidArgumentException;
-use Dono\Vendor\Queryable\DB;
+use GiveFlow\Vendor\Queryable\DB;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -29,7 +29,7 @@ use WP_REST_Server;
  */
 final class DonorsController
 {
-    private const NAMESPACE = 'dono/v1';
+    private const NAMESPACE = 'giveflow/v1';
 
     /** @since 1.0.0 */
     public function __construct(
@@ -38,7 +38,7 @@ final class DonorsController
         private DonorMetricsService $metrics,
         private DonorNoteRepository $notes,
         private DonationService $donationService,
-        private \Dono\Donors\DonorAvatars $avatars,
+        private \GiveFlow\Donors\DonorAvatars $avatars,
     ) {
     }
 
@@ -101,7 +101,7 @@ final class DonorsController
         register_rest_route(self::NAMESPACE, '/admin/donors/(?P<id>\d+)', [
             'methods'             => 'PATCH',
             'callback'            => [$this, 'update'],
-            'permission_callback' => static fn () => Capabilities::userCan('dono_edit_donors'),
+            'permission_callback' => static fn () => Capabilities::userCan('giveflow_edit_donors'),
             'args'                => [
                 'id'         => ['type' => 'integer', 'required' => true],
                 'email'      => ['type' => 'string', 'format' => 'email'],
@@ -144,7 +144,7 @@ final class DonorsController
             'methods'             => WP_REST_Server::READABLE,
             'callback'            => [$this, 'atRiskExport'],
             // Bulk PII (names + emails): gate on the export cap, not just view.
-            'permission_callback' => static fn () => Capabilities::userCan('dono_export_donors'),
+            'permission_callback' => static fn () => Capabilities::userCan('giveflow_export_donors'),
         ]);
 
         // Minting a portal login is an action the admin takes, never something
@@ -153,7 +153,7 @@ final class DonorsController
         register_rest_route(self::NAMESPACE, '/admin/donors/(?P<id>\d+)/portal-link', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'issuePortalLink'],
-            'permission_callback' => static fn () => Capabilities::userCan('dono_edit_donors'),
+            'permission_callback' => static fn () => Capabilities::userCan('giveflow_edit_donors'),
             'args'                => [
                 'id' => ['type' => 'integer', 'required' => true],
             ],
@@ -162,7 +162,7 @@ final class DonorsController
         register_rest_route(self::NAMESPACE, '/admin/donors/(?P<id>\d+)/notes', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'createNote'],
-            'permission_callback' => static fn () => Capabilities::userCan('dono_edit_donors'),
+            'permission_callback' => static fn () => Capabilities::userCan('giveflow_edit_donors'),
             'args'                => [
                 'id'   => ['type' => 'integer', 'required' => true],
                 'body' => ['type' => 'string',  'required' => true],
@@ -172,7 +172,7 @@ final class DonorsController
         register_rest_route(self::NAMESPACE, '/admin/donors/notes/(?P<note_id>\d+)', [
             'methods'             => 'DELETE',
             'callback'            => [$this, 'deleteNote'],
-            'permission_callback' => static fn () => Capabilities::userCan('dono_edit_donors'),
+            'permission_callback' => static fn () => Capabilities::userCan('giveflow_edit_donors'),
             'args'                => [
                 'note_id' => ['type' => 'integer', 'required' => true],
             ],
@@ -181,7 +181,7 @@ final class DonorsController
         register_rest_route(self::NAMESPACE, '/admin/donors/(?P<id>\d+)/export', [
             'methods'             => WP_REST_Server::READABLE,
             'callback'            => [$this, 'exportPersonalData'],
-            'permission_callback' => static fn () => Capabilities::userCan('dono_export_donors'),
+            'permission_callback' => static fn () => Capabilities::userCan('giveflow_export_donors'),
             'args'                => [
                 'id' => ['type' => 'integer', 'required' => true],
             ],
@@ -192,7 +192,7 @@ final class DonorsController
             'callback'            => [$this, 'delete'],
             // Erasing and deleting are both irreversible, so they answer to the
             // same capability.
-            'permission_callback' => static fn () => Capabilities::userCan('dono_redact_donors'),
+            'permission_callback' => static fn () => Capabilities::userCan('giveflow_redact_donors'),
             'args'                => [
                 'id' => ['type' => 'integer', 'required' => true],
             ],
@@ -201,7 +201,7 @@ final class DonorsController
         register_rest_route(self::NAMESPACE, '/admin/donors/(?P<id>\d+)/redact', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'redact'],
-            'permission_callback' => static fn () => Capabilities::userCan('dono_redact_donors'),
+            'permission_callback' => static fn () => Capabilities::userCan('giveflow_redact_donors'),
             'args'                => [
                 'id'           => ['type' => 'integer', 'required' => true],
                 'confirmation' => ['type' => 'string',  'required' => true],
@@ -218,9 +218,9 @@ final class DonorsController
     /** @since 1.0.0 */
     public function profile(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
-        $payload = $this->metrics->profile((int) $request['id'], Capabilities::userCan('dono_edit_donors'));
+        $payload = $this->metrics->profile((int) $request['id'], Capabilities::userCan('giveflow_edit_donors'));
         if (! $payload) {
-            return new WP_Error('dono_not_found', __('Donor not found.', 'dono-fundraising-platform'), ['status' => 404]);
+            return new WP_Error('giveflow_not_found', __('Donor not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
         }
         return new WP_REST_Response($payload, 200);
     }
@@ -230,7 +230,7 @@ final class DonorsController
     {
         $donor = $this->donors->findById((int) $request['id']);
         if (! $donor) {
-            return new WP_Error('dono_not_found', __('Donor not found.', 'dono-fundraising-platform'), ['status' => 404]);
+            return new WP_Error('giveflow_not_found', __('Donor not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
         }
 
         $perPage = (int) $request['per_page'];
@@ -252,14 +252,14 @@ final class DonorsController
     {
         $donor = $this->donors->findById((int) $request['id']);
         if (! $donor) {
-            return new WP_Error('dono_not_found', __('Donor not found.', 'dono-fundraising-platform'), ['status' => 404]);
+            return new WP_Error('giveflow_not_found', __('Donor not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
         }
         // This handler writes name/company/country via a direct UPDATE and
         // phone/address via setEncryptedField, neither of which passes through
         // DonorService::editProfile's guard, so the whole edit is blocked here
         // or those writes would re-populate an erased row.
         if ($donor->redacted_at !== null) {
-            return new WP_Error('dono_donor_redacted', __('This donor has been erased and can no longer be edited.', 'dono-fundraising-platform'), ['status' => 422]);
+            return new WP_Error('giveflow_donor_redacted', __('This donor has been erased and can no longer be edited.', 'giveflow-fundraising-campaigns'), ['status' => 422]);
         }
 
         // Present keys set the value, empty string clears to NULL. Direct
@@ -322,7 +322,7 @@ final class DonorsController
             DB::transaction(function () use ($donor, $params, $update, &$plainFieldsUpdated): void {
                 if ($update) {
                     $update['updated_at'] = gmdate('Y-m-d H:i:s');
-                    DB::table('dono_donors')->where('id', $donor->id)->update($update);
+                    DB::table('giveflow_donors')->where('id', $donor->id)->update($update);
                     $plainFieldsUpdated = true;
 
                     // The email write below saves the whole model, so the model
@@ -348,20 +348,20 @@ final class DonorsController
             });
         } catch (EmailAlreadyAssignedException $e) {
             return new WP_Error(
-                'dono_email_collision',
+                'giveflow_email_collision',
                 /* translators: %d: donor id that already owns the requested email */
-                sprintf(__('Another donor (#%d) already uses that email. Merge donors first if you want to consolidate them.', 'dono-fundraising-platform'), $e->existingDonorId),
+                sprintf(__('Another donor (#%d) already uses that email. Merge donors first if you want to consolidate them.', 'giveflow-fundraising-campaigns'), $e->existingDonorId),
                 ['status' => 409, 'existing_donor_id' => $e->existingDonorId]
             );
         } catch (InvalidArgumentException $e) {
-            return new WP_Error('dono_invalid_email', $e->getMessage(), ['status' => 422]);
+            return new WP_Error('giveflow_invalid_email', $e->getMessage(), ['status' => 422]);
         }
 
         if ($plainFieldsUpdated) {
-            do_action('dono.donor.updated', $this->donors->findById($donor->id));
+            do_action('giveflow.donor.updated', $this->donors->findById($donor->id));
         }
 
-        return new WP_REST_Response($this->metrics->profile($donor->id, Capabilities::userCan('dono_edit_donors')), 200);
+        return new WP_REST_Response($this->metrics->profile($donor->id, Capabilities::userCan('giveflow_edit_donors')), 200);
     }
 
     /** @since 1.0.0 */
@@ -382,7 +382,7 @@ final class DonorsController
     public function atRiskExport(WP_REST_Request $request): WP_REST_Response
     {
         $csv      = $this->metrics->atRiskCsv();
-        $filename = 'dono-at-risk-' . gmdate('Y-m-d') . '.csv';
+        $filename = 'giveflow-at-risk-' . gmdate('Y-m-d') . '.csv';
         $route    = $request->get_route();
 
         add_filter('rest_pre_serve_request', function (bool $served, $result, $req, $server) use ($route, $csv, $filename) {
@@ -411,7 +411,7 @@ final class DonorsController
     {
         $donor = $this->donors->findById((int) $request['id']);
         if (! $donor) {
-            return new WP_Error('dono_donor_not_found', __('Donor not found.', 'dono-fundraising-platform'), ['status' => 404]);
+            return new WP_Error('giveflow_donor_not_found', __('Donor not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
         }
 
         // Asked here rather than read off a null, because issuePortalLink also
@@ -420,8 +420,8 @@ final class DonorsController
         // even rendered for an erased donor, so the message was always wrong.
         if ($donor->redacted_at !== null) {
             return new WP_Error(
-                'dono_portal_link_unavailable',
-                __('A sign-in link cannot be issued for an erased donor.', 'dono-fundraising-platform'),
+                'giveflow_portal_link_unavailable',
+                __('A sign-in link cannot be issued for an erased donor.', 'giveflow-fundraising-campaigns'),
                 ['status' => 409]
             );
         }
@@ -429,8 +429,8 @@ final class DonorsController
         $link = $this->metrics->issuePortalLink($donor);
         if ($link === null) {
             return new WP_Error(
-                'dono_portal_link_failed',
-                __('The sign-in link could not be created. Please try again.', 'dono-fundraising-platform'),
+                'giveflow_portal_link_failed',
+                __('The sign-in link could not be created. Please try again.', 'giveflow-fundraising-campaigns'),
                 ['status' => 500]
             );
         }
@@ -446,12 +446,12 @@ final class DonorsController
     {
         $donorId = (int) $request['id'];
         if (! $this->donors->findById($donorId)) {
-            return new WP_Error('dono_not_found', __('Donor not found.', 'dono-fundraising-platform'), ['status' => 404]);
+            return new WP_Error('giveflow_not_found', __('Donor not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
         }
         $params = $request->get_json_params() ?: $request->get_body_params();
         $body   = trim((string) ($params['body'] ?? ''));
         if ($body === '') {
-            return new WP_Error('dono_invalid', __('Note body is required.', 'dono-fundraising-platform'), ['status' => 400]);
+            return new WP_Error('giveflow_invalid', __('Note body is required.', 'giveflow-fundraising-campaigns'), ['status' => 400]);
         }
         $note = $this->notes->create($donorId, $body, get_current_user_id() ?: null);
         return new WP_REST_Response($note, 201);
@@ -463,10 +463,10 @@ final class DonorsController
         $noteId = (int) $request['note_id'];
         $note = $this->notes->findById($noteId);
         if (! $note) {
-            return new WP_Error('dono_not_found', __('Note not found.', 'dono-fundraising-platform'), ['status' => 404]);
+            return new WP_Error('giveflow_not_found', __('Note not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
         }
         if (! DonorNoteRepository::deletableBy($note, get_current_user_id())) {
-            return new WP_Error('dono_forbidden', __('You cannot delete this note.', 'dono-fundraising-platform'), ['status' => 403]);
+            return new WP_Error('giveflow_forbidden', __('You cannot delete this note.', 'giveflow-fundraising-campaigns'), ['status' => 403]);
         }
         $this->notes->delete($noteId);
         return new WP_REST_Response(['deleted' => true], 200);
@@ -481,12 +481,12 @@ final class DonorsController
     {
         $donor = $this->donors->findById((int) $request['id']);
         if (! $donor) {
-            return new WP_Error('dono_not_found', __('Donor not found.', 'dono-fundraising-platform'), ['status' => 404]);
+            return new WP_Error('giveflow_not_found', __('Donor not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
         }
 
         $data = $this->metrics->exportData($donor->id);
         if ($data === null) {
-            return new WP_Error('dono_not_found', __('Donor not found.', 'dono-fundraising-platform'), ['status' => 404]);
+            return new WP_Error('giveflow_not_found', __('Donor not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
         }
         $bundle = [
             'exported_at' => gmdate('c'),
@@ -500,7 +500,7 @@ final class DonorsController
         ];
 
         $json     = wp_json_encode($bundle, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        $filename = sprintf('dono-donor-%d-%s.json', $donor->id, gmdate('Y-m-d'));
+        $filename = sprintf('giveflow-donor-%d-%s.json', $donor->id, gmdate('Y-m-d'));
         $route    = $request->get_route();
 
         add_filter('rest_pre_serve_request', function (bool $served, $result, $req, $server) use ($route, $json, $filename) {
@@ -567,12 +567,12 @@ final class DonorsController
     {
         $donor = $this->donors->findById((int) $request['id']);
         if (! $donor) {
-            return new WP_Error('dono_not_found', __('Donor not found.', 'dono-fundraising-platform'), ['status' => 404]);
+            return new WP_Error('giveflow_not_found', __('Donor not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
         }
 
         $reason = $this->donorService->undeletableReason($donor);
         if ($reason !== null) {
-            return new WP_Error('dono_donor_not_deletable', $reason, ['status' => 409]);
+            return new WP_Error('giveflow_donor_not_deletable', $reason, ['status' => 409]);
         }
 
         $this->donorService->delete($donor);
@@ -590,10 +590,10 @@ final class DonorsController
     {
         $donor = $this->donors->findById((int) $request['id']);
         if (! $donor) {
-            return new WP_Error('dono_not_found', __('Donor not found.', 'dono-fundraising-platform'), ['status' => 404]);
+            return new WP_Error('giveflow_not_found', __('Donor not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
         }
         if ($donor->redacted_at !== null) {
-            return new WP_Error('dono_already_redacted', __('This donor is already redacted.', 'dono-fundraising-platform'), ['status' => 409]);
+            return new WP_Error('giveflow_already_redacted', __('This donor is already redacted.', 'giveflow-fundraising-campaigns'), ['status' => 409]);
         }
 
         $params = $request->get_json_params() ?: $request->get_body_params() ?: [];
@@ -602,8 +602,8 @@ final class DonorsController
         $expected = $this->donorService->decryptEmail($donor) ?: sprintf('DONOR_%d', $donor->id);
         if ($confirmation === '' || strcasecmp($confirmation, $expected) !== 0) {
             return new WP_Error(
-                'dono_confirmation_mismatch',
-                __('Confirmation does not match the donor email. Redact cancelled.', 'dono-fundraising-platform'),
+                'giveflow_confirmation_mismatch',
+                __('Confirmation does not match the donor email. Redact cancelled.', 'giveflow-fundraising-campaigns'),
                 ['status' => 422],
             );
         }
@@ -621,7 +621,7 @@ final class DonorsController
     /** @since 1.0.0 */
     public function canAccess(): bool
     {
-        return Capabilities::userCan('dono_view_donors');
+        return Capabilities::userCan('giveflow_view_donors');
     }
 
     /** @since 1.0.0 */

@@ -13,16 +13,16 @@ import { downloadFile } from '../../../_shared/download';
 import { notify } from '../../../_shared/notify';
 
 function donationHref( reference ) {
-    return addQueryArgs( window.location.pathname, { page: 'dono-donations', view: 'detail', reference } );
+    return addQueryArgs( window.location.pathname, { page: 'giveflow-donations', view: 'detail', reference } );
 }
 
 function StackedDate( { iso } ) {
     if ( ! iso ) return '-';
     return (
-        <div className="dono-row">
-            <div className="dono-row__body">
-                <div className="dono-row__name">{ timeAgo( iso ) }</div>
-                <div className="dono-row__sub">{ formatDateTime( iso ) }</div>
+        <div className="giveflow-row">
+            <div className="giveflow-row__body">
+                <div className="giveflow-row__name">{ timeAgo( iso ) }</div>
+                <div className="giveflow-row__sub">{ formatDateTime( iso ) }</div>
             </div>
         </div>
     );
@@ -75,14 +75,14 @@ function TaxStatement( { donor, donations } ) {
     return (
         <div className="dp-tax-statement">
             <div className="dp-tax-statement__text">
-                <strong>{ __( 'Annual tax statement', 'dono-fundraising-platform' ) }</strong>
-                <span>{ __( 'Every paid donation for the year on one document, net of refunds.', 'dono-fundraising-platform' ) }</span>
+                <strong>{ __( 'Annual tax statement', 'giveflow-fundraising-campaigns' ) }</strong>
+                <span>{ __( 'Every paid donation for the year on one document, net of refunds.', 'giveflow-fundraising-campaigns' ) }</span>
             </div>
             <select
-                className="dono-input dp-tax-statement__year"
+                className="giveflow-input dp-tax-statement__year"
                 value={ chosen }
                 onChange={ ( e ) => setYear( Number( e.target.value ) ) }
-                aria-label={ __( 'Statement year', 'dono-fundraising-platform' ) }
+                aria-label={ __( 'Statement year', 'giveflow-fundraising-campaigns' ) }
             >
                 { years.map( ( y ) => <option key={ y } value={ y }>{ y }</option> ) }
             </select>
@@ -95,17 +95,17 @@ function TaxStatement( { donor, donations } ) {
                     setBusy( true );
                     try {
                         await downloadFile(
-                            `/dono/v1/reports/donor/${ donorId }/tax-statement/${ chosen }`,
+                            `/giveflow/v1/reports/donor/${ donorId }/tax-statement/${ chosen }`,
                             `tax-statement-${ chosen }.pdf`
                         );
                     } catch ( err ) {
-                        notify.error( err?.message || __( 'Could not build the statement.', 'dono-fundraising-platform' ) );
+                        notify.error( err?.message || __( 'Could not build the statement.', 'giveflow-fundraising-campaigns' ) );
                     } finally {
                         setBusy( false );
                     }
                 } }
             >
-                { __( 'Download statement', 'dono-fundraising-platform' ) }
+                { __( 'Download statement', 'giveflow-fundraising-campaigns' ) }
             </Btn>
         </div>
     );
@@ -126,21 +126,21 @@ export default function ReceiptsTab( { receipts, total, donations, donor, redact
     const fields = useMemo( () => [
         {
             id:    'receipt_number',
-            label: __( 'Receipt', 'dono-fundraising-platform' ),
+            label: __( 'Receipt', 'giveflow-fundraising-campaigns' ),
             enableSorting: true,
             enableGlobalSearch: true,
             // Plain mono, not a link: a receipt has no page of its own, and the
             // PDF is behind the row menu.
-            render: ( { item } ) => <span className="dono-mono">{ item.receipt_number }</span>,
+            render: ( { item } ) => <span className="giveflow-mono">{ item.receipt_number }</span>,
         },
         {
             id:    'donation_reference',
-            label: __( 'Donation', 'dono-fundraising-platform' ),
+            label: __( 'Donation', 'giveflow-fundraising-campaigns' ),
             enableSorting: true,
             enableGlobalSearch: true,
             render: ( { item } ) => item.donation_reference
                 ? (
-                    <a className="dono-mono-link" href={ donationHref( item.donation_reference ) }>
+                    <a className="giveflow-mono-link" href={ donationHref( item.donation_reference ) }>
                         { item.donation_reference }
                     </a>
                 )
@@ -148,24 +148,24 @@ export default function ReceiptsTab( { receipts, total, donations, donor, redact
         },
         {
             id:    'issued_at',
-            label: __( 'Issued', 'dono-fundraising-platform' ),
+            label: __( 'Issued', 'giveflow-fundraising-campaigns' ),
             enableSorting: true,
             render: ( { item } ) => <StackedDate iso={ item.issued_at } />,
         },
         {
             id:    'sent_to_email_at',
-            label: __( 'Sent', 'dono-fundraising-platform' ),
+            label: __( 'Sent', 'giveflow-fundraising-campaigns' ),
             enableSorting: true,
             render: ( { item } ) => <StackedDate iso={ item.sent_to_email_at } />,
         },
         {
             id:    'status',
-            label: __( 'Status', 'dono-fundraising-platform' ),
+            label: __( 'Status', 'giveflow-fundraising-campaigns' ),
             enableSorting: false,
             getValue: ( { item } ) => item.voided ? 'voided' : 'issued',
             render: ( { item } ) => item.voided
-                ? <span className="dp-pill is-muted">{ __( 'Voided', 'dono-fundraising-platform' ) }</span>
-                : <span className="dp-pill is-ok">{ __( 'Issued', 'dono-fundraising-platform' ) }</span>,
+                ? <span className="dp-pill is-muted">{ __( 'Voided', 'giveflow-fundraising-campaigns' ) }</span>
+                : <span className="dp-pill is-ok">{ __( 'Issued', 'giveflow-fundraising-campaigns' ) }</span>,
         },
     ], [] );
 
@@ -177,18 +177,18 @@ export default function ReceiptsTab( { receipts, total, donations, donor, redact
     const actions = useMemo( () => [
         {
             id:       'download-pdf',
-            label:    __( 'Download PDF', 'dono-fundraising-platform' ),
+            label:    __( 'Download PDF', 'giveflow-fundraising-campaigns' ),
             icon:     () => <DownloadIcon size={ 16 } strokeWidth={ 1.75 } />,
             callback: ( items ) => {
                 items.forEach( ( r ) => downloadFile(
-                    `/dono/v1/admin/receipts/${ r.id }/pdf`,
+                    `/giveflow/v1/admin/receipts/${ r.id }/pdf`,
                     `${ r.receipt_number }.pdf`
-                ).catch( ( e ) => notify.error( e?.message || __( 'Could not download a receipt.', 'dono-fundraising-platform' ) ) ) );
+                ).catch( ( e ) => notify.error( e?.message || __( 'Could not download a receipt.', 'giveflow-fundraising-campaigns' ) ) ) );
             },
         },
         {
             id:           'resend',
-            label:        __( 'Resend receipt', 'dono-fundraising-platform' ),
+            label:        __( 'Resend receipt', 'giveflow-fundraising-campaigns' ),
             icon:         () => <MailIcon size={ 16 } strokeWidth={ 1.75 } />,
             supportsBulk: true,
             // Resend goes out over the donation, so a receipt with no reference
@@ -202,21 +202,21 @@ export default function ReceiptsTab( { receipts, total, donations, donor, redact
                 if ( ! targets.length ) return;
                 const n = targets.length;
                 const message = n === 1
-                    ? __( 'Resend this receipt to the donor?', 'dono-fundraising-platform' )
+                    ? __( 'Resend this receipt to the donor?', 'giveflow-fundraising-campaigns' )
                     : sprintf(
                         /* translators: %d: receipt count */
-                        _n( 'Resend %d receipt to the donor?', 'Resend %d receipts to the donor?', n, 'dono-fundraising-platform' ),
+                        _n( 'Resend %d receipt to the donor?', 'Resend %d receipts to the donor?', n, 'giveflow-fundraising-campaigns' ),
                         n
                     );
                 setConfirm( {
-                    title:        __( 'Resend receipts', 'dono-fundraising-platform' ),
+                    title:        __( 'Resend receipts', 'giveflow-fundraising-campaigns' ),
                     message,
-                    confirmLabel: __( 'Resend', 'dono-fundraising-platform' ),
+                    confirmLabel: __( 'Resend', 'giveflow-fundraising-campaigns' ),
                     onConfirm: async () => {
                         // Silence reads as nothing happening, so admins press it
                         // again and the donor gets the receipt twice.
                         const results = await Promise.allSettled( targets.map( ( r ) => apiFetch( {
-                            path:   `/dono/v1/admin/donations/${ encodeURIComponent( r.donation_reference ) }/resend-receipt`,
+                            path:   `/giveflow/v1/admin/donations/${ encodeURIComponent( r.donation_reference ) }/resend-receipt`,
                             method: 'POST',
                         } ) ) );
 
@@ -226,14 +226,14 @@ export default function ReceiptsTab( { receipts, total, donations, donor, redact
                         if ( sent > 0 ) {
                             notify.success( sprintf(
                                 /* translators: %d: receipt count */
-                                _n( '%d receipt resent.', '%d receipts resent.', sent, 'dono-fundraising-platform' ),
+                                _n( '%d receipt resent.', '%d receipts resent.', sent, 'giveflow-fundraising-campaigns' ),
                                 sent
                             ) );
                         }
                         if ( failed > 0 ) {
                             notify.error( sprintf(
                                 /* translators: %d: receipt count */
-                                _n( '%d receipt could not be resent.', '%d receipts could not be resent.', failed, 'dono-fundraising-platform' ),
+                                _n( '%d receipt could not be resent.', '%d receipts could not be resent.', failed, 'giveflow-fundraising-campaigns' ),
                                 failed
                             ) );
                         }
@@ -255,8 +255,8 @@ export default function ReceiptsTab( { receipts, total, donations, donor, redact
                 <EmptyState
                     compact
                     icon={ <Receipt size={ 22 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'No receipts yet', 'dono-fundraising-platform' ) }
-                    body={ __( 'Receipts are issued automatically once a donation lands as paid.', 'dono-fundraising-platform' ) }
+                    title={ __( 'No receipts yet', 'giveflow-fundraising-campaigns' ) }
+                    body={ __( 'Receipts are issued automatically once a donation lands as paid.', 'giveflow-fundraising-campaigns' ) }
                     />
                 </div>
             </>
@@ -269,13 +269,13 @@ export default function ReceiptsTab( { receipts, total, donations, donor, redact
     const withheld = Math.max( 0, ( total ?? receipts.length ) - receipts.length );
 
     return (
-        <div className="dono-dataviews dp-receipts-dv">
+        <div className="giveflow-dataviews dp-receipts-dv">
             { statement }
             { withheld > 0 && (
                 <p className="dp-tab-note">
                     { sprintf(
                         /* translators: 1: receipts shown, 2: receipts in total */
-                        __( 'Showing the %1$d most recent of %2$d receipts.', 'dono-fundraising-platform' ),
+                        __( 'Showing the %1$d most recent of %2$d receipts.', 'giveflow-fundraising-campaigns' ),
                         receipts.length,
                         total
                     ) }
@@ -291,7 +291,7 @@ export default function ReceiptsTab( { receipts, total, donations, donor, redact
                 paginationInfo={ paginationInfo }
                 defaultLayouts={ { table: {} } }
                 getItemId={ ( item ) => String( item.id ) }
-                searchLabel={ __( 'Search receipts', 'dono-fundraising-platform' ) }
+                searchLabel={ __( 'Search receipts', 'giveflow-fundraising-campaigns' ) }
             />
             <ConfirmDialog confirm={ confirm } onClose={ () => setConfirm( null ) } />
         </div>

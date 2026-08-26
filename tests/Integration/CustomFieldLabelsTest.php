@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Forms\Blocks\CustomFieldLabels;
-use Dono\Forms\Blocks\DateBlock;
-use Dono\Forms\Blocks\DropdownBlock;
+use GiveFlow\Forms\Blocks\CustomFieldLabels;
+use GiveFlow\Forms\Blocks\DateBlock;
+use GiveFlow\Forms\Blocks\DropdownBlock;
 
 /**
  * Slug => label resolution must use the same slug derivation buildSteps
@@ -17,8 +17,8 @@ final class CustomFieldLabelsTest extends IntegrationTestCase
     public function test_resolves_text_and_choice_fields_with_canonical_slugs(): void
     {
         $blocks = <<<BLOCKS
-<!-- wp:dono/text-input {"field":"Donor Org","label":"Your organization"} /-->
-<!-- wp:dono/dropdown {"label":"How did you hear?"} /-->
+<!-- wp:giveflow/text-input {"field":"Donor Org","label":"Your organization"} /-->
+<!-- wp:giveflow/dropdown {"label":"How did you hear?"} /-->
 BLOCKS;
 
         $map = CustomFieldLabels::forBlocks($blocks);
@@ -34,10 +34,10 @@ BLOCKS;
     public function test_recurses_into_layout_containers(): void
     {
         $blocks = <<<BLOCKS
-<!-- wp:dono/row {"columns":2} -->
-<!-- wp:dono/text-input {"field":"city","label":"City"} /-->
-<!-- wp:dono/text-input {"field":"region","label":"Region"} /-->
-<!-- /wp:dono/row -->
+<!-- wp:giveflow/row {"columns":2} -->
+<!-- wp:giveflow/text-input {"field":"city","label":"City"} /-->
+<!-- wp:giveflow/text-input {"field":"region","label":"Region"} /-->
+<!-- /wp:giveflow/row -->
 BLOCKS;
 
         $map = CustomFieldLabels::forBlocks($blocks);
@@ -51,9 +51,9 @@ BLOCKS;
         // A blank field key derives from the label (like dropdown/radio), the
         // same key the runtime submits under, so the answer is labelled.
         $map = CustomFieldLabels::forBlocks(<<<BLOCKS
-<!-- wp:dono/text-input {"label":"Free text"} /-->
-<!-- wp:dono/number-input {"label":"A number"} /-->
-<!-- wp:dono/date {"label":"A date"} /-->
+<!-- wp:giveflow/text-input {"label":"Free text"} /-->
+<!-- wp:giveflow/number-input {"label":"A number"} /-->
+<!-- wp:giveflow/date {"label":"A date"} /-->
 BLOCKS);
 
         $this->assertSame('Free text', $map['free_text'] ?? null);
@@ -65,7 +65,7 @@ BLOCKS);
     {
         // Hidden field with no label contributes no display row.
         $map = CustomFieldLabels::forBlocks(
-            '<!-- wp:dono/hidden {"field":"utm_source"} /-->'
+            '<!-- wp:giveflow/hidden {"field":"utm_source"} /-->'
         );
         $this->assertArrayNotHasKey('utm_source', $map);
 

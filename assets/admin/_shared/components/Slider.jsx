@@ -1,1 +1,1 @@
-export { default } from '@dono/ui/components/Slider';
+export { default } from '@giveflow/ui/components/Slider';

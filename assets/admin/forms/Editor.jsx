@@ -35,7 +35,7 @@ import { useDispatch, useRegistry, useSelect } from '@wordpress/data';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 
-import { useDonoRecord } from '../_shared/useDonoRecord';
+import { useGiveFlowRecord } from '../_shared/useGiveFlowRecord';
 import Btn from '../_shared/components/Btn';
 import LocalIcon from '../_shared/components/Icon';
 import Slider    from '../_shared/components/Slider';
@@ -74,8 +74,8 @@ function defaultFormSettings() {
 // Multi-page navigation is driven by the Steps block inside the form, not a
 // form-level toggle. Layout is just the embed style.
 const LAYOUT_OPTIONS = [
-    { value: 'inline', label: __( 'Inline (in-page)', 'dono-fundraising-platform' ) },
-    { value: 'modal',  label: __( 'Modal (button opens form)', 'dono-fundraising-platform' ) },
+    { value: 'inline', label: __( 'Inline (in-page)', 'giveflow-fundraising-campaigns' ) },
+    { value: 'modal',  label: __( 'Modal (button opens form)', 'giveflow-fundraising-campaigns' ) },
 ];
 
 function mergeFormSettings( stored, base = defaultFormSettings() ) {
@@ -164,7 +164,7 @@ function historyReducer( state, action ) {
 }
 
 export default function Editor( { formId } ) {
-    const c = useDonoRecord( 'form', formId );
+    const c = useGiveFlowRecord( 'form', formId );
 
     const [ campaigns, setCampaigns ] = useState( [] );
     const [ gateways, setGateways ]   = useState( [] );
@@ -219,26 +219,26 @@ export default function Editor( { formId } ) {
     // Dropdown sources, not entities, so they are fetched once. A per-source
     // failure surfaces rather than leaving a select silently empty.
     useEffect( () => {
-        apiFetch( { path: '/dono/v1/admin/forms/campaigns' } )
+        apiFetch( { path: '/giveflow/v1/admin/forms/campaigns' } )
             .then( setCampaigns )
-            .catch( ( err ) => setError( err?.message || __( 'Could not load campaigns.', 'dono-fundraising-platform' ) ) );
-        apiFetch( { path: '/dono/v1/admin/forms/gateways' } )
+            .catch( ( err ) => setError( err?.message || __( 'Could not load campaigns.', 'giveflow-fundraising-campaigns' ) ) );
+        apiFetch( { path: '/giveflow/v1/admin/forms/gateways' } )
             .then( setGateways )
-            .catch( ( err ) => setError( err?.message || __( 'Could not load payment gateways.', 'dono-fundraising-platform' ) ) );
-        apiFetch( { path: '/dono/v1/admin/forms/funds' } )
+            .catch( ( err ) => setError( err?.message || __( 'Could not load payment gateways.', 'giveflow-fundraising-campaigns' ) ) );
+        apiFetch( { path: '/giveflow/v1/admin/forms/funds' } )
             .then( setFunds )
-            .catch( ( err ) => setError( err?.message || __( 'Could not load funds.', 'dono-fundraising-platform' ) ) );
+            .catch( ( err ) => setError( err?.message || __( 'Could not load funds.', 'giveflow-fundraising-campaigns' ) ) );
     }, [] );
 
     // Expose form context to block edit components (Goal needs campaign progress).
     useEffect( () => {
-        window.donoFormEditor = {
+        window.giveflowFormEditor = {
             formId,
             formCampaignId: Number( c.value( 'campaign_id', 0 ) ) || 0,
             formGoal: mergeFormSettings( c.record.settings ).goal,
             campaigns,
         };
-        return () => { delete window.donoFormEditor; };
+        return () => { delete window.giveflowFormEditor; };
     }, [ formId, c.record.campaign_id, c.record.settings, campaigns ] );
 
     // Seeds the block-history reducer once, when the entity first resolves. A
@@ -290,7 +290,7 @@ export default function Editor( { formId } ) {
         setPreviewLoading( true );
         try {
             const res = await apiFetch( {
-                path:   '/dono/v1/admin/forms/preview',
+                path:   '/giveflow/v1/admin/forms/preview',
                 method: 'POST',
                 data:   {
                     blocks:      serialize( blocks ),
@@ -300,7 +300,7 @@ export default function Editor( { formId } ) {
             } );
             setPreviewHtml( res.html || '' );
         } catch ( err ) {
-            setError( err?.message || __( 'Preview failed.', 'dono-fundraising-platform' ) );
+            setError( err?.message || __( 'Preview failed.', 'giveflow-fundraising-campaigns' ) );
         } finally {
             setPreviewLoading( false );
         }
@@ -325,7 +325,7 @@ export default function Editor( { formId } ) {
             setLastSavedSerialized( serialized );
             return true;
         } catch ( err ) {
-            setError( err?.message || __( 'Save failed.', 'dono-fundraising-platform' ) );
+            setError( err?.message || __( 'Save failed.', 'giveflow-fundraising-campaigns' ) );
             return false;
         }
     }, [ c, blocks ] );
@@ -337,8 +337,8 @@ export default function Editor( { formId } ) {
         if ( ok ) {
             notify.success(
                 c.record.status === 'published'
-                    ? __( 'Form saved.', 'dono-fundraising-platform' )
-                    : __( 'Draft saved.', 'dono-fundraising-platform' )
+                    ? __( 'Form saved.', 'giveflow-fundraising-campaigns' )
+                    : __( 'Draft saved.', 'giveflow-fundraising-campaigns' )
             );
         }
     }, [ persist, c.record.status ] );
@@ -401,7 +401,7 @@ export default function Editor( { formId } ) {
     } ), [] );
 
     const missingRequired = useMemo( () => {
-        const required = window.dono?.forms?.required_blocks || [];
+        const required = window.giveflow?.forms?.required_blocks || [];
         if ( ! required.length ) return [];
         const present = new Set();
         const walk = ( list ) => {
@@ -419,14 +419,14 @@ export default function Editor( { formId } ) {
         setSavingAction( 'publish' );
         const ok = await persist( { status: 'published' } );
         setSavingAction( null );
-        if ( ok ) notify.success( __( 'Form published.', 'dono-fundraising-platform' ) );
+        if ( ok ) notify.success( __( 'Form published.', 'giveflow-fundraising-campaigns' ) );
     }, [ persist, missingRequired ] );
 
     const onUnpublish = useCallback( async () => {
         setSavingAction( 'unpublish' );
         const ok = await persist( { status: 'draft' } );
         setSavingAction( null );
-        if ( ok ) notify.success( __( 'Form moved to draft.', 'dono-fundraising-platform' ) );
+        if ( ok ) notify.success( __( 'Form moved to draft.', 'giveflow-fundraising-campaigns' ) );
     }, [ persist ] );
 
     const dirtyForUnload = c.isDirty || serialize( blocks ) !== lastSavedSerialized;
@@ -464,12 +464,12 @@ export default function Editor( { formId } ) {
     }, [ dirtyForUnload, c.isSaving, onSave, undo, redo, history.past.length, history.future.length ] );
 
     if ( c.isLoading || ( ! c.savedRecord && ! c.notFound ) ) {
-        return <div className="dono-form-editor__loading"><Spinner /></div>;
+        return <div className="giveflow-form-editor__loading"><Spinner /></div>;
     }
     if ( c.notFound ) {
         return (
             <Notice status="error" isDismissible={ false }>
-                { __( 'Form not found.', 'dono-fundraising-platform' ) }
+                { __( 'Form not found.', 'giveflow-fundraising-campaigns' ) }
             </Notice>
         );
     }
@@ -505,12 +505,12 @@ export default function Editor( { formId } ) {
     );
 
     const notices = ( error || missingRequired.length > 0 ) && (
-        <div className="dono-form-editor__notices">
+        <div className="giveflow-form-editor__notices">
             { missingRequired.length > 0 && (
                 <Notice status="warning" isDismissible={ false }>
                     { sprintf(
                         /* translators: %s: comma-separated list of missing block labels (Name, Email). */
-                        __( 'Add these blocks before publishing: %s.', 'dono-fundraising-platform' ),
+                        __( 'Add these blocks before publishing: %s.', 'giveflow-fundraising-campaigns' ),
                         missingRequired.map( ( r ) => r.label ).join( ', ' )
                     ) }
                 </Notice>
@@ -536,9 +536,9 @@ export default function Editor( { formId } ) {
 
     const themeVars = ( () => {
         const merged    = mergeFormSettings( c.record.settings );
-        const presets   = Array.isArray( window.dono?.styling?.presets ) ? window.dono.styling.presets : [];
-        const defaults  = window.dono?.styling?.defaults || {};
-        const defaultId = String( window.dono?.styling?.default_id || '' );
+        const presets   = Array.isArray( window.giveflow?.styling?.presets ) ? window.giveflow.styling.presets : [];
+        const defaults  = window.giveflow?.styling?.defaults || {};
+        const defaultId = String( window.giveflow?.styling?.default_id || '' );
 
         // Cascade mirrors CampaignStyleResolver: form preset, else campaign
         // preset, else org default. Campaign inline overrides apply only when
@@ -570,13 +570,13 @@ export default function Editor( { formId } ) {
 
         // Mirrors CampaignStyleResolver: an accent-soft that is only the
         // catalogue default is dropped, so the stylesheet's color-mix derives it
-        // from --dono-accent as the published form does. An explicit one stays.
+        // from --giveflow-accent as the published form does. An explicit one stays.
         const explicitSoft =
-            ( chosenPreset?.tokens && 'dono-accent-soft' in chosenPreset.tokens ) ||
-            ( ! formPresetId && 'dono-accent-soft' in campaignInlineTokens ) ||
-            ( 'dono-accent-soft' in formInlineTokens );
-        if ( ! explicitSoft && tokens[ 'dono-accent-soft' ] === defaults[ 'dono-accent-soft' ] ) {
-            delete tokens[ 'dono-accent-soft' ];
+            ( chosenPreset?.tokens && 'giveflow-accent-soft' in chosenPreset.tokens ) ||
+            ( ! formPresetId && 'giveflow-accent-soft' in campaignInlineTokens ) ||
+            ( 'giveflow-accent-soft' in formInlineTokens );
+        if ( ! explicitSoft && tokens[ 'giveflow-accent-soft' ] === defaults[ 'giveflow-accent-soft' ] ) {
+            delete tokens[ 'giveflow-accent-soft' ];
         }
 
         const sx = {};
@@ -590,14 +590,14 @@ export default function Editor( { formId } ) {
         // runtime in PHP.
         const cw = Number( merged.container?.width );
         if ( cw >= 320 && cw <= 1600 ) {
-            sx[ '--dono-editor-sheet-width' ] = `${ cw }px`;
+            sx[ '--giveflow-editor-sheet-width' ] = `${ cw }px`;
         }
 
         return sx;
     } )();
 
     return (
-        <div className="dono-form-editor" style={ themeVars }>
+        <div className="giveflow-form-editor" style={ themeVars }>
             <ShortcutProvider>
                 <SlotFillProvider>
                     <BlockEditorProvider
@@ -628,8 +628,8 @@ export default function Editor( { formId } ) {
                                         funds={ funds }
                                     />
                                 ) : (
-                                    <div className="dono-form-editor__canvas">
-                                        <div className="dono-form-editor__sheet">
+                                    <div className="giveflow-form-editor__canvas">
+                                        <div className="giveflow-form-editor__sheet">
                                             <BlockTools>
                                                 <WritingFlow>
                                                     <ObserveTyping>
@@ -647,7 +647,7 @@ export default function Editor( { formId } ) {
                             sidebar={ sidebar }
                             secondarySidebar={
                                 secondaryView === 'inserter' ? (
-                                    <div className="dono-form-editor__secondary dono-form-editor__secondary--inserter">
+                                    <div className="giveflow-form-editor__secondary giveflow-form-editor__secondary--inserter">
                                         <BlockLibrary
                                             showInserterHelpPanel={ false }
                                             rootClientId=""
@@ -655,9 +655,9 @@ export default function Editor( { formId } ) {
                                         />
                                     </div>
                                 ) : secondaryView === 'listview' ? (
-                                    <div className="dono-form-editor__secondary dono-form-editor__secondary--listview">
-                                        <div className="dono-form-editor__secondary-title">
-                                            { __( 'Form structure', 'dono-fundraising-platform' ) }
+                                    <div className="giveflow-form-editor__secondary giveflow-form-editor__secondary--listview">
+                                        <div className="giveflow-form-editor__secondary-title">
+                                            { __( 'Form structure', 'giveflow-fundraising-campaigns' ) }
                                         </div>
                                         <BlockListView />
                                     </div>
@@ -671,7 +671,7 @@ export default function Editor( { formId } ) {
 
             { templatePickerOpen && (
                 <FormTemplatePicker
-                    intro={ __( "We didn't pre-build this form so you can pick a shape that fits. You can change it later.", 'dono-fundraising-platform' ) }
+                    intro={ __( "We didn't pre-build this form so you can pick a shape that fits. You can change it later.", 'giveflow-fundraising-campaigns' ) }
                     onPick={ applyTemplate }
                     onClose={ () => setTemplatePickerOpen( false ) }
                 />
@@ -679,17 +679,17 @@ export default function Editor( { formId } ) {
 
             { pendingTemplate && (
                 <Modal
-                    title={ __( 'Apply template', 'dono-fundraising-platform' ) }
+                    title={ __( 'Apply template', 'giveflow-fundraising-campaigns' ) }
                     onRequestClose={ () => setPendingTemplate( null ) }
                     size="small"
                 >
                     <p style={ { marginTop: 0 } }>
-                        { __( 'Replace the current form with this template? Its blocks take over, and so do the settings it carries: layout, style, gateways, recurring and the thank-you message. Undo brings the blocks back, but not the settings.', 'dono-fundraising-platform' ) }
+                        { __( 'Replace the current form with this template? Its blocks take over, and so do the settings it carries: layout, style, gateways, recurring and the thank-you message. Undo brings the blocks back, but not the settings.', 'giveflow-fundraising-campaigns' ) }
                     </p>
                     <div style={ { display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 } }>
-                        <Btn onClick={ () => setPendingTemplate( null ) }>{ __( 'Cancel', 'dono-fundraising-platform' ) }</Btn>
+                        <Btn onClick={ () => setPendingTemplate( null ) }>{ __( 'Cancel', 'giveflow-fundraising-campaigns' ) }</Btn>
                         <Btn variant="primary" onClick={ () => performApplyTemplate( pendingTemplate, true ) }>
-                            { __( 'Replace form', 'dono-fundraising-platform' ) }
+                            { __( 'Replace form', 'giveflow-fundraising-campaigns' ) }
                         </Btn>
                     </div>
                 </Modal>
@@ -720,8 +720,8 @@ function DeselectOnOutsideClick() {
             '.block-editor-block-toolbar, .block-editor-block-popover, ' +
             '.block-editor-block-contextual-toolbar, ' +
             '.components-popover, .components-dropdown, ' +
-            '.dono-form-editor__sidebar, ' +
-            '.dono-form-editor__secondary, ' +
+            '.giveflow-form-editor__sidebar, ' +
+            '.giveflow-form-editor__secondary, ' +
             '.interface-interface-skeleton__sidebar';
         const onDocMouseDown = ( e ) => {
             const t = e.target;
@@ -744,7 +744,7 @@ function AssistantBridge() {
     useEffect( () => {
         const store = () => registry.select( 'core/block-editor' );
         const act   = () => registry.dispatch( 'core/block-editor' );
-        window.donoFormBlocks = {
+        window.giveflowFormBlocks = {
             getBlocks: () =>
                 store().getBlocks().map( ( b ) => ( {
                     clientId: b.clientId,
@@ -764,22 +764,22 @@ function AssistantBridge() {
             moveBlock: ( clientId, toIndex ) =>
                 act().moveBlocksToPosition( [ clientId ], '', '', toIndex ),
         };
-        return () => { delete window.donoFormBlocks; };
+        return () => { delete window.giveflowFormBlocks; };
     }, [ registry ] );
     return null;
 }
 
 function CanvasEmpty() {
     return (
-        <div className="dono-form-editor__empty">
-            <h3>{ __( 'Start building your donation form', 'dono-fundraising-platform' ) }</h3>
-            <p>{ __( 'Add a heading, an amount block, and a submit button to take your first donation.', 'dono-fundraising-platform' ) }</p>
+        <div className="giveflow-form-editor__empty">
+            <h3>{ __( 'Start building your donation form', 'giveflow-fundraising-campaigns' ) }</h3>
+            <p>{ __( 'Add a heading, an amount block, and a submit button to take your first donation.', 'giveflow-fundraising-campaigns' ) }</p>
             <Inserter
                 position="bottom center"
                 rootClientId=""
                 renderToggle={ ( { onToggle, isOpen } ) => (
                     <button type="button" onClick={ onToggle } aria-expanded={ isOpen }>
-                        + { __( 'Add your first block', 'dono-fundraising-platform' ) }
+                        + { __( 'Add your first block', 'giveflow-fundraising-campaigns' ) }
                     </button>
                 ) }
             />
@@ -788,12 +788,12 @@ function CanvasEmpty() {
 }
 
 const VIEW_TABS = [
-    { id: 'develop',  label: __( 'Build', 'dono-fundraising-platform' ),    icon: <LocalIcon name="edit"     size={ 15 } /> },
-    { id: 'preview',  label: __( 'Preview', 'dono-fundraising-platform' ),  icon: <LocalIcon name="eye"      size={ 15 } /> },
+    { id: 'develop',  label: __( 'Build', 'giveflow-fundraising-campaigns' ),    icon: <LocalIcon name="edit"     size={ 15 } /> },
+    { id: 'preview',  label: __( 'Preview', 'giveflow-fundraising-campaigns' ),  icon: <LocalIcon name="eye"      size={ 15 } /> },
     // Settings is a third view of the same form, so it sits with the other two
     // rather than behind a cog, which reads as a tool acting on the current
     // view.
-    { id: 'settings', label: __( 'Settings', 'dono-fundraising-platform' ), icon: <LocalIcon name="settings" size={ 15 } /> },
+    { id: 'settings', label: __( 'Settings', 'giveflow-fundraising-campaigns' ), icon: <LocalIcon name="settings" size={ 15 } /> },
 ];
 
 function EditorHeader( {
@@ -812,7 +812,7 @@ function EditorHeader( {
     const publishDisabledReason = missing.length > 0
         ? sprintf(
             /* translators: %s: comma-separated list of missing block labels. */
-            __( 'Add these blocks first: %s.', 'dono-fundraising-platform' ),
+            __( 'Add these blocks first: %s.', 'giveflow-fundraising-campaigns' ),
             missing.join( ', ' )
         )
         : '';
@@ -821,34 +821,34 @@ function EditorHeader( {
     const showAuthoringTools = view === 'develop';
 
     return (
-        <div className="dono-editor-header">
-            <div className="dono-editor-header__left">
-                <a className="dono-editor-header__back" href={ backHref }>
+        <div className="giveflow-editor-header">
+            <div className="giveflow-editor-header__left">
+                <a className="giveflow-editor-header__back" href={ backHref }>
                     <LocalIcon name="chevron-left" size={ 20 } />
-                    <span>{ __( 'Campaign overview', 'dono-fundraising-platform' ) }</span>
+                    <span>{ __( 'Campaign overview', 'giveflow-fundraising-campaigns' ) }</span>
                 </a>
                 { showAuthoringTools && (
                     <>
-                        <span className="dono-editor-header__divider" aria-hidden="true" />
+                        <span className="giveflow-editor-header__divider" aria-hidden="true" />
                         <Button
                             icon={ inserterOpen ? CloseIcon : PlusIcon }
-                            label={ inserterOpen ? __( 'Close block inserter', 'dono-fundraising-platform' ) : __( 'Toggle block inserter', 'dono-fundraising-platform' ) }
+                            label={ inserterOpen ? __( 'Close block inserter', 'giveflow-fundraising-campaigns' ) : __( 'Toggle block inserter', 'giveflow-fundraising-campaigns' ) }
                             onClick={ () => onToggleSecondaryView( 'inserter' ) }
                             isPressed={ inserterOpen }
                             showTooltip
                         />
                         <Button
                             icon={ ListViewIcon }
-                            label={ __( 'Toggle block outline', 'dono-fundraising-platform' ) }
+                            label={ __( 'Toggle block outline', 'giveflow-fundraising-campaigns' ) }
                             onClick={ () => onToggleSecondaryView( 'listview' ) }
                             isPressed={ listViewOpen }
                             showTooltip
                         />
-                        <Button icon={ UndoIcon } label={ __( 'Undo', 'dono-fundraising-platform' ) } onClick={ onUndo } disabled={ ! canUndo } />
-                        <Button icon={ RedoIcon } label={ __( 'Redo', 'dono-fundraising-platform' ) } onClick={ onRedo } disabled={ ! canRedo } />
+                        <Button icon={ UndoIcon } label={ __( 'Undo', 'giveflow-fundraising-campaigns' ) } onClick={ onUndo } disabled={ ! canUndo } />
+                        <Button icon={ RedoIcon } label={ __( 'Redo', 'giveflow-fundraising-campaigns' ) } onClick={ onRedo } disabled={ ! canRedo } />
                         <Button
                             icon={ <LocalIcon name="layout-grid" size={ 20 } /> }
-                            label={ __( 'Start from a template', 'dono-fundraising-platform' ) }
+                            label={ __( 'Start from a template', 'giveflow-fundraising-campaigns' ) }
                             onClick={ onOpenTemplates }
                             showTooltip
                         />
@@ -856,25 +856,25 @@ function EditorHeader( {
                 ) }
             </div>
 
-            <div className="dono-editor-header__center">
+            <div className="giveflow-editor-header__center">
                 <input
-                    className="dono-editor-header__title"
+                    className="giveflow-editor-header__title"
                     type="text"
                     value={ title }
                     onChange={ ( e ) => onTitleChange( e.target.value ) }
-                    placeholder={ __( 'Untitled donation form', 'dono-fundraising-platform' ) }
+                    placeholder={ __( 'Untitled donation form', 'giveflow-fundraising-campaigns' ) }
                 />
             </div>
 
-            <div className="dono-editor-header__right">
-                <div className="dono-editor-header__tabs" role="tablist">
+            <div className="giveflow-editor-header__right">
+                <div className="giveflow-editor-header__tabs" role="tablist">
                     { VIEW_TABS.map( ( t ) => (
                         <button
                             key={ t.id }
                             type="button"
                             role="tab"
                             aria-selected={ view === t.id }
-                            className={ `dono-editor-header__tab${ view === t.id ? ' is-active' : '' }` }
+                            className={ `giveflow-editor-header__tab${ view === t.id ? ' is-active' : '' }` }
                             onClick={ () => onViewChange( t.id ) }
                         >
                             { t.icon }
@@ -888,7 +888,7 @@ function EditorHeader( {
                     disabled={ saving || ! isDirty }
                     isBusy={ saving && savingAction === 'save' }
                 >
-                    { isDirty ? __( 'Save', 'dono-fundraising-platform' ) : __( 'Saved', 'dono-fundraising-platform' ) }
+                    { isDirty ? __( 'Save', 'giveflow-fundraising-campaigns' ) : __( 'Saved', 'giveflow-fundraising-campaigns' ) }
                 </Button>
                 { isPublished ? (
                     <Button
@@ -897,7 +897,7 @@ function EditorHeader( {
                         disabled={ saving }
                         isBusy={ saving && savingAction === 'unpublish' }
                     >
-                        { __( 'Unpublish', 'dono-fundraising-platform' ) }
+                        { __( 'Unpublish', 'giveflow-fundraising-campaigns' ) }
                     </Button>
                 ) : (
                     <Button
@@ -908,12 +908,12 @@ function EditorHeader( {
                         label={ publishDisabledReason || undefined }
                         showTooltip={ !! publishDisabledReason }
                     >
-                        { __( 'Publish', 'dono-fundraising-platform' ) }
+                        { __( 'Publish', 'giveflow-fundraising-campaigns' ) }
                     </Button>
                 ) }
                 <Button
                     icon={ PanelRightIcon }
-                    label={ __( 'Toggle side panel', 'dono-fundraising-platform' ) }
+                    label={ __( 'Toggle side panel', 'giveflow-fundraising-campaigns' ) }
                     onClick={ onToggleSidebar }
                     isPressed={ sidebarOpen }
                     showTooltip
@@ -924,9 +924,9 @@ function EditorHeader( {
 }
 
 const DEVICES = [
-    { id: 'desktop', label: __( 'Desktop', 'dono-fundraising-platform' ), icon: DesktopIcon, width: '100%'  },
-    { id: 'tablet',  label: __( 'Tablet', 'dono-fundraising-platform' ),  icon: TabletIcon,  width: '768px' },
-    { id: 'phone',   label: __( 'Phone', 'dono-fundraising-platform' ),   icon: MobileIcon,  width: '390px' },
+    { id: 'desktop', label: __( 'Desktop', 'giveflow-fundraising-campaigns' ), icon: DesktopIcon, width: '100%'  },
+    { id: 'tablet',  label: __( 'Tablet', 'giveflow-fundraising-campaigns' ),  icon: TabletIcon,  width: '768px' },
+    { id: 'phone',   label: __( 'Phone', 'giveflow-fundraising-campaigns' ),   icon: MobileIcon,  width: '390px' },
 ];
 
 function PreviewPane( { loading, html, device, onDeviceChange } ) {
@@ -934,8 +934,8 @@ function PreviewPane( { loading, html, device, onDeviceChange } ) {
     const isPhone = active.id === 'phone';
 
     return (
-        <div className="dono-form-editor__preview">
-            <div className="dono-form-editor__preview-toolbar" role="tablist">
+        <div className="giveflow-form-editor__preview">
+            <div className="giveflow-form-editor__preview-toolbar" role="tablist">
                 { DEVICES.map( ( d ) => (
                     <Button
                         key={ d.id }
@@ -944,27 +944,27 @@ function PreviewPane( { loading, html, device, onDeviceChange } ) {
                         aria-selected={ device === d.id }
                         label={ d.label }
                         showTooltip
-                        className={ `dono-form-editor__device${ device === d.id ? ' is-active' : '' }` }
+                        className={ `giveflow-form-editor__device${ device === d.id ? ' is-active' : '' }` }
                         onClick={ () => onDeviceChange( d.id ) }
                     />
                 ) ) }
             </div>
             { loading && html === '' ? (
-                <div className="dono-form-editor__preview-spinner"><Spinner /></div>
+                <div className="giveflow-form-editor__preview-spinner"><Spinner /></div>
             ) : (
-                <div className="dono-form-editor__preview-stage">
+                <div className="giveflow-form-editor__preview-stage">
                     <div
-                        className={ `dono-form-editor__device-frame is-${ active.id }${ isPhone ? ' has-bezel' : '' }` }
+                        className={ `giveflow-form-editor__device-frame is-${ active.id }${ isPhone ? ' has-bezel' : '' }` }
                         style={ { width: active.width, position: 'relative' } }
                     >
                         <iframe
-                            className="dono-form-editor__preview-frame"
-                            title={ __( 'Form preview', 'dono-fundraising-platform' ) }
+                            className="giveflow-form-editor__preview-frame"
+                            title={ __( 'Form preview', 'giveflow-fundraising-campaigns' ) }
                             srcDoc={ html }
                         />
                         { loading && (
                             <div
-                                className="dono-form-editor__preview-spinner"
+                                className="giveflow-form-editor__preview-spinner"
                                 style={ { position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.6)' } }
                             >
                                 <Spinner />
@@ -979,7 +979,7 @@ function PreviewPane( { loading, html, device, onDeviceChange } ) {
 
 function SettingsView( { c, campaigns, gateways, funds } ) {
     return (
-        <div className="dono-form-editor__settings">
+        <div className="giveflow-form-editor__settings">
             <FormSettingsPanel
                 c={ c }
                 campaigns={ campaigns }
@@ -992,18 +992,18 @@ function SettingsView( { c, campaigns, gateways, funds } ) {
 
 function FormSidebar( { hasSelection } ) {
     return (
-        <div className="dono-form-sidebar">
-            <div className="dono-form-sidebar__header">
-                <h2 className="dono-form-sidebar__title">{ __( 'Block', 'dono-fundraising-platform' ) }</h2>
+        <div className="giveflow-form-sidebar">
+            <div className="giveflow-form-sidebar__header">
+                <h2 className="giveflow-form-sidebar__title">{ __( 'Block', 'giveflow-fundraising-campaigns' ) }</h2>
             </div>
-            <div className="dono-form-sidebar__body">
+            <div className="giveflow-form-sidebar__body">
                 { hasSelection ? (
                     <BlockInspector />
                 ) : (
                     <SidebarIntro
                         iconName="edit"
-                        title={ __( 'Block settings', 'dono-fundraising-platform' ) }
-                        description={ __( 'Select a block on the canvas to see its settings here. Form-wide settings live in the Settings tab.', 'dono-fundraising-platform' ) }
+                        title={ __( 'Block settings', 'giveflow-fundraising-campaigns' ) }
+                        description={ __( 'Select a block on the canvas to see its settings here. Form-wide settings live in the Settings tab.', 'giveflow-fundraising-campaigns' ) }
                     />
                 ) }
             </div>
@@ -1026,12 +1026,12 @@ function PreviewSidebar( { formId, blocks, missingRequired } ) {
         setError( null );
         // The live blocks are posted so the checks reflect unsaved edits.
         apiFetch( {
-            path:   `/dono/v1/admin/forms/${ formId }/readiness`,
+            path:   `/giveflow/v1/admin/forms/${ formId }/readiness`,
             method: 'POST',
             data:   { blocks: serialize( blocks ) },
         } )
             .then( ( res ) => { if ( ! cancelled ) setServerChecks( res.checks || [] ); } )
-            .catch( ( err ) => { if ( ! cancelled ) setError( err?.message || __( 'Could not load readiness checks.', 'dono-fundraising-platform' ) ); } );
+            .catch( ( err ) => { if ( ! cancelled ) setError( err?.message || __( 'Could not load readiness checks.', 'giveflow-fundraising-campaigns' ) ); } );
         return () => { cancelled = true; };
     }, [ formId, blocks ] );
 
@@ -1043,16 +1043,16 @@ function PreviewSidebar( { formId, blocks, missingRequired } ) {
                 status: 'fail',
                 label:  sprintf(
                     /* translators: %s: comma-separated list of missing block labels. */
-                    __( 'Missing required fields: %s', 'dono-fundraising-platform' ),
+                    __( 'Missing required fields: %s', 'giveflow-fundraising-campaigns' ),
                     missingRequired.map( ( r ) => r.label ).join( ', ' )
                 ),
-                detail: __( 'Donors need these to complete a donation.', 'dono-fundraising-platform' ),
+                detail: __( 'Donors need these to complete a donation.', 'giveflow-fundraising-campaigns' ),
             } );
         } else {
             out.push( {
                 id:     'required-blocks',
                 status: 'pass',
-                label:  __( 'Required fields present', 'dono-fundraising-platform' ),
+                label:  __( 'Required fields present', 'giveflow-fundraising-campaigns' ),
             } );
         }
         return out;
@@ -1087,49 +1087,49 @@ function PreviewSidebar( { formId, blocks, missingRequired } ) {
     const serverFail = useMemo( () => ( serverChecks || [] ).filter( ( c ) => c.status === 'fail' ).length, [ serverChecks ] );
 
     const summaryText = ( () => {
-        if ( ! serverChecks && ! error ) return __( 'Running checks…', 'dono-fundraising-platform' );
+        if ( ! serverChecks && ! error ) return __( 'Running checks…', 'giveflow-fundraising-campaigns' );
         if ( blockFail > 0 ) return sprintf(
             /* translators: %d: number of failing required-field checks that block publishing. */
-            _n( '%d issue blocks publishing', '%d issues block publishing', blockFail, 'dono-fundraising-platform' ),
+            _n( '%d issue blocks publishing', '%d issues block publishing', blockFail, 'giveflow-fundraising-campaigns' ),
             blockFail
         );
         if ( serverFail > 0 ) return sprintf(
             /* translators: %d: number of readiness issues to fix before the form can take donations. */
-            _n( '%d issue to fix before donors can give', '%d issues to fix before donors can give', serverFail, 'dono-fundraising-platform' ),
+            _n( '%d issue to fix before donors can give', '%d issues to fix before donors can give', serverFail, 'giveflow-fundraising-campaigns' ),
             serverFail
         );
         if ( counts.warn > 0 ) return sprintf(
             /* translators: %d: number of warning readiness checks. */
-            _n( '%d thing to review', '%d things to review', counts.warn, 'dono-fundraising-platform' ),
+            _n( '%d thing to review', '%d things to review', counts.warn, 'giveflow-fundraising-campaigns' ),
             counts.warn
         );
-        return __( 'Form is ready to publish', 'dono-fundraising-platform' );
+        return __( 'Form is ready to publish', 'giveflow-fundraising-campaigns' );
     } )();
 
     const summaryStatus = counts.fail > 0 ? 'fail' : counts.warn > 0 ? 'warn' : 'pass';
 
     return (
-        <div className="dono-form-sidebar">
-            <div className="dono-form-sidebar__header">
-                <h2 className="dono-form-sidebar__title">{ __( 'Pre-launch checks', 'dono-fundraising-platform' ) }</h2>
-                <p className={ `dono-readiness__summary is-${ summaryStatus }` }>
+        <div className="giveflow-form-sidebar">
+            <div className="giveflow-form-sidebar__header">
+                <h2 className="giveflow-form-sidebar__title">{ __( 'Pre-launch checks', 'giveflow-fundraising-campaigns' ) }</h2>
+                <p className={ `giveflow-readiness__summary is-${ summaryStatus }` }>
                     <ReadinessStatusIcon status={ summaryStatus } />
                     <span>{ summaryText }</span>
                 </p>
             </div>
-            <div className="dono-form-sidebar__body">
+            <div className="giveflow-form-sidebar__body">
                 { error && (
                     <Notice status="error" isDismissible={ false }>{ error }</Notice>
                 ) }
                 { visibleChecks.length > 0 ? (
-                    <ul className="dono-readiness__list">
+                    <ul className="giveflow-readiness__list">
                         { visibleChecks.map( ( c ) => (
                             <ReadinessRow key={ c.id } check={ c } />
                         ) ) }
                     </ul>
                 ) : ( serverChecks && ! error && (
-                    <p className="dono-readiness__empty">
-                        { __( 'Everything looks good. This form is safe to publish.', 'dono-fundraising-platform' ) }
+                    <p className="giveflow-readiness__empty">
+                        { __( 'Everything looks good. This form is safe to publish.', 'giveflow-fundraising-campaigns' ) }
                     </p>
                 ) ) }
             </div>
@@ -1139,16 +1139,16 @@ function PreviewSidebar( { formId, blocks, missingRequired } ) {
 
 function ReadinessRow( { check } ) {
     return (
-        <li className={ `dono-readiness__row is-${ check.status }` }>
+        <li className={ `giveflow-readiness__row is-${ check.status }` }>
             <ReadinessStatusIcon status={ check.status } />
-            <div className="dono-readiness__body">
-                <div className="dono-readiness__label">{ check.label }</div>
+            <div className="giveflow-readiness__body">
+                <div className="giveflow-readiness__label">{ check.label }</div>
                 { check.detail && (
-                    <div className="dono-readiness__detail">{ check.detail }</div>
+                    <div className="giveflow-readiness__detail">{ check.detail }</div>
                 ) }
                 { check.action_url && check.action_label && (
                     <a
-                        className="dono-readiness__action"
+                        className="giveflow-readiness__action"
                         href={ check.action_url }
                         target="_blank"
                         rel="noreferrer"
@@ -1162,31 +1162,31 @@ function ReadinessRow( { check } ) {
 }
 
 function ReadinessStatusIcon( { status } ) {
-    if ( status === 'pass' ) return <LocalIcon name="check" size={ 16 } className="dono-readiness__icon" aria-hidden="true" />;
-    if ( status === 'warn' ) return <LocalIcon name="alert" size={ 16 } className="dono-readiness__icon" aria-hidden="true" />;
-    return <LocalIcon name="close" size={ 16 } className="dono-readiness__icon" aria-hidden="true" />;
+    if ( status === 'pass' ) return <LocalIcon name="check" size={ 16 } className="giveflow-readiness__icon" aria-hidden="true" />;
+    if ( status === 'warn' ) return <LocalIcon name="alert" size={ 16 } className="giveflow-readiness__icon" aria-hidden="true" />;
+    return <LocalIcon name="close" size={ 16 } className="giveflow-readiness__icon" aria-hidden="true" />;
 }
 
 function SidebarIntro( { iconName, title, description } ) {
     return (
-        <div className="dono-sidebar-intro">
-            <span className="dono-sidebar-intro__icon" aria-hidden="true">
+        <div className="giveflow-sidebar-intro">
+            <span className="giveflow-sidebar-intro__icon" aria-hidden="true">
                 <LocalIcon name={ iconName } size={ 18 } />
             </span>
-            <div className="dono-sidebar-intro__text">
-                <h3 className="dono-sidebar-intro__title">{ title }</h3>
-                <p className="dono-sidebar-intro__desc">{ description }</p>
+            <div className="giveflow-sidebar-intro__text">
+                <h3 className="giveflow-sidebar-intro__title">{ title }</h3>
+                <p className="giveflow-sidebar-intro__desc">{ description }</p>
             </div>
         </div>
     );
 }
 
 const SETTINGS_TABS = [
-    { id: 'general',   label: __( 'General', 'dono-fundraising-platform' ) },
-    { id: 'goal',      label: __( 'Goal', 'dono-fundraising-platform' ) },
-    { id: 'gateways',  label: __( 'Gateways', 'dono-fundraising-platform' ) },
-    { id: 'after',     label: __( 'After donation', 'dono-fundraising-platform' ) },
-    { id: 'embed',     label: __( 'Embed', 'dono-fundraising-platform' ) },
+    { id: 'general',   label: __( 'General', 'giveflow-fundraising-campaigns' ) },
+    { id: 'goal',      label: __( 'Goal', 'giveflow-fundraising-campaigns' ) },
+    { id: 'gateways',  label: __( 'Gateways', 'giveflow-fundraising-campaigns' ) },
+    { id: 'after',     label: __( 'After donation', 'giveflow-fundraising-campaigns' ) },
+    { id: 'embed',     label: __( 'Embed', 'giveflow-fundraising-campaigns' ) },
 ];
 
 function FormSettingsPanel( { c, campaigns, gateways, funds } ) {
@@ -1201,22 +1201,22 @@ function FormSettingsPanel( { c, campaigns, gateways, funds } ) {
     const [ activeTab, setActiveTab ] = useState( 'general' );
 
     return (
-        <div className="dono-form-settings">
-            <div className="dono-form-settings__nav" role="tablist" aria-label={ __( 'Settings sections', 'dono-fundraising-platform' ) }>
+        <div className="giveflow-form-settings">
+            <div className="giveflow-form-settings__nav" role="tablist" aria-label={ __( 'Settings sections', 'giveflow-fundraising-campaigns' ) }>
                 { SETTINGS_TABS.map( ( t ) => (
                     <button
                         key={ t.id }
                         type="button"
                         role="tab"
                         aria-selected={ activeTab === t.id }
-                        className={ `dono-form-settings__nav-item ${ activeTab === t.id ? 'is-active' : '' }` }
+                        className={ `giveflow-form-settings__nav-item ${ activeTab === t.id ? 'is-active' : '' }` }
                         onClick={ () => setActiveTab( t.id ) }
                     >
                         { t.label }
                     </button>
                 ) ) }
             </div>
-            <main className="dono-form-settings__main">
+            <main className="giveflow-form-settings__main">
                 { activeTab === 'general'   && <GeneralSection   c={ c } campaigns={ campaigns } funds={ funds } settings={ settings } setSettings={ setSettings } /> }
                 { activeTab === 'goal'      && <GoalSection      settings={ settings } setSettings={ setSettings } /> }
                 { activeTab === 'gateways'  && <GatewaysSection  gateways={ gateways } settings={ settings } setSettings={ setSettings } /> }
@@ -1229,18 +1229,18 @@ function FormSettingsPanel( { c, campaigns, gateways, funds } ) {
 
 function SettingsRow( { title, description, children } ) {
     return (
-        <section className="dono-form-settings__row">
-            <header className="dono-form-settings__row-head">
-                <h3 className="dono-form-settings__row-title">{ title }</h3>
-                { description && <p className="dono-form-settings__row-desc">{ description }</p> }
+        <section className="giveflow-form-settings__row">
+            <header className="giveflow-form-settings__row-head">
+                <h3 className="giveflow-form-settings__row-title">{ title }</h3>
+                { description && <p className="giveflow-form-settings__row-desc">{ description }</p> }
             </header>
-            <div className="dono-form-settings__row-body">{ children }</div>
+            <div className="giveflow-form-settings__row-body">{ children }</div>
         </section>
     );
 }
 
 function fundSelectOptions( funds ) {
-    const out = [ { value: '0', label: __( '(Use campaign or org default)', 'dono-fundraising-platform' ) } ];
+    const out = [ { value: '0', label: __( '(Use campaign or org default)', 'giveflow-fundraising-campaigns' ) } ];
     for ( const f of Array.isArray( funds ) ? funds : [] ) {
         if ( ! f.selectable ) {
             out.push( { value: `g:${ f.id }`, label: f.label, disabled: true } );
@@ -1258,27 +1258,27 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
     return (
         <>
             <SettingsRow
-                title={ __( 'Identity', 'dono-fundraising-platform' ) }
-                description={ __( 'The form name and the slug used in the URL and shortcode.', 'dono-fundraising-platform' ) }
+                title={ __( 'Identity', 'giveflow-fundraising-campaigns' ) }
+                description={ __( 'The form name and the slug used in the URL and shortcode.', 'giveflow-fundraising-campaigns' ) }
             >
                 <TextControl
-                    label={ __( 'Title', 'dono-fundraising-platform' ) }
+                    label={ __( 'Title', 'giveflow-fundraising-campaigns' ) }
                     value={ c.value( 'title' ) }
                     onChange={ c.setValue( 'title' ) }
                     __nextHasNoMarginBottom
                 />
                 <TextControl
-                    label={ __( 'Slug', 'dono-fundraising-platform' ) }
+                    label={ __( 'Slug', 'giveflow-fundraising-campaigns' ) }
                     value={ c.value( 'slug' ) }
                     onChange={ c.setValue( 'slug' ) }
-                    help={ __( 'Used in the shortcode and the form URL.', 'dono-fundraising-platform' ) }
+                    help={ __( 'Used in the shortcode and the form URL.', 'giveflow-fundraising-campaigns' ) }
                     __nextHasNoMarginBottom
                 />
             </SettingsRow>
 
             <SettingsRow
-                title={ __( 'Status', 'dono-fundraising-platform' ) }
-                description={ __( 'Use the Publish button in the header to go live. Archived forms stay in the system but stop accepting donations.', 'dono-fundraising-platform' ) }
+                title={ __( 'Status', 'giveflow-fundraising-campaigns' ) }
+                description={ __( 'Use the Publish button in the header to go live. Archived forms stay in the system but stop accepting donations.', 'giveflow-fundraising-campaigns' ) }
             >
                 <SelectControl
                     value={ c.value( 'status', 'draft' ) }
@@ -1303,8 +1303,8 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
             </SettingsRow>
 
             <SettingsRow
-                title={ __( 'Campaign', 'dono-fundraising-platform' ) }
-                description={ __( 'Every form lives under a campaign. Move this form to a different one here.', 'dono-fundraising-platform' ) }
+                title={ __( 'Campaign', 'giveflow-fundraising-campaigns' ) }
+                description={ __( 'Every form lives under a campaign. Move this form to a different one here.', 'giveflow-fundraising-campaigns' ) }
             >
                 <SelectControl
                     value={ String( c.value( 'campaign_id', 0 ) || 0 ) }
@@ -1322,7 +1322,7 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
                             opts.unshift( {
                                 value: current,
                                 label: c.value( 'campaign', null )?.title
-                                    || __( 'Current campaign', 'dono-fundraising-platform' ),
+                                    || __( 'Current campaign', 'giveflow-fundraising-campaigns' ),
                             } );
                         }
                         return opts;
@@ -1336,24 +1336,24 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
             </SettingsRow>
 
             <SettingsRow
-                title={ __( 'Default fund', 'dono-fundraising-platform' ) }
-                description={ __( 'Where donations land when this form has no fund picker, or the donor does not choose one.', 'dono-fundraising-platform' ) }
+                title={ __( 'Default fund', 'giveflow-fundraising-campaigns' ) }
+                description={ __( 'Where donations land when this form has no fund picker, or the donor does not choose one.', 'giveflow-fundraising-campaigns' ) }
             >
                 <SelectControl
                     value={ String( c.value( 'default_fund_id', 0 ) || 0 ) }
                     options={ fundSelectOptions( funds ) }
                     onChange={ ( v ) => c.edit( { default_fund_id: Number( v ) || null } ) }
-                    help={ __( 'Leave on the default to fall back to the campaign fund, then the organization default.', 'dono-fundraising-platform' ) }
+                    help={ __( 'Leave on the default to fall back to the campaign fund, then the organization default.', 'giveflow-fundraising-campaigns' ) }
                     __nextHasNoMarginBottom
                 />
             </SettingsRow>
 
             <SettingsRow
-                title={ __( 'Layout & style', 'dono-fundraising-platform' ) }
-                description={ __( 'How the form is presented: its layout, style preset, width, and whether it sits in a card.', 'dono-fundraising-platform' ) }
+                title={ __( 'Layout & style', 'giveflow-fundraising-campaigns' ) }
+                description={ __( 'How the form is presented: its layout, style preset, width, and whether it sits in a card.', 'giveflow-fundraising-campaigns' ) }
             >
                 <SelectControl
-                    label={ __( 'Layout', 'dono-fundraising-platform' ) }
+                    label={ __( 'Layout', 'giveflow-fundraising-campaigns' ) }
                     value={ settings.layout }
                     options={ LAYOUT_OPTIONS }
                     onChange={ ( v ) => setSettings( { layout: v } ) }
@@ -1364,7 +1364,7 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
                     onChange={ ( v ) => setSettings( { style: { ...settings.style, preset_id: v } } ) }
                 />
                 <Slider
-                    label={ __( 'Maximum width', 'dono-fundraising-platform' ) }
+                    label={ __( 'Maximum width', 'giveflow-fundraising-campaigns' ) }
                     value={ settings.container?.width ?? 540 }
                     onChange={ ( v ) => setSettings( { container: { ...settings.container, width: v } } ) }
                     min={ 320 }
@@ -1372,14 +1372,14 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
                     unit="px"
                 />
                 <Segmented
-                    label={ __( 'Container', 'dono-fundraising-platform' ) }
+                    label={ __( 'Container', 'giveflow-fundraising-campaigns' ) }
                     value={ settings.container?.style ?? 'plain' }
                     onChange={ ( v ) => setSettings( { container: { ...settings.container, style: v } } ) }
                     options={ [
-                        { value: 'frame', label: __( 'Frame', 'dono-fundraising-platform' ) },
-                        { value: 'plain', label: __( 'Plain', 'dono-fundraising-platform' ) },
+                        { value: 'frame', label: __( 'Frame', 'giveflow-fundraising-campaigns' ) },
+                        { value: 'plain', label: __( 'Plain', 'giveflow-fundraising-campaigns' ) },
                     ] }
-                    help={ __( '"Frame" wraps the form in a card with a shadow; "Plain" renders it flush with the page.', 'dono-fundraising-platform' ) }
+                    help={ __( '"Frame" wraps the form in a card with a shadow; "Plain" renders it flush with the page.', 'giveflow-fundraising-campaigns' ) }
                 />
             </SettingsRow>
         </>
@@ -1387,17 +1387,17 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
 }
 
 const GOAL_TYPE_OPTIONS = [
-    { value: 'none',      label: __( 'No goal', 'dono-fundraising-platform' ) },
-    { value: 'amount',    label: __( 'Amount', 'dono-fundraising-platform' ) },
-    { value: 'donations', label: __( 'Donations', 'dono-fundraising-platform' ) },
-    { value: 'donors',    label: __( 'Donors', 'dono-fundraising-platform' ) },
+    { value: 'none',      label: __( 'No goal', 'giveflow-fundraising-campaigns' ) },
+    { value: 'amount',    label: __( 'Amount', 'giveflow-fundraising-campaigns' ) },
+    { value: 'donations', label: __( 'Donations', 'giveflow-fundraising-campaigns' ) },
+    { value: 'donors',    label: __( 'Donors', 'giveflow-fundraising-campaigns' ) },
 ];
 
 const GOAL_TYPE_DESC = {
-    none:      __( 'No progress bar or target on this form.', 'dono-fundraising-platform' ),
-    amount:    __( 'Track progress toward a fundraising total.', 'dono-fundraising-platform' ),
-    donations: __( 'Track the number of completed donations to this form.', 'dono-fundraising-platform' ),
-    donors:    __( 'Track the number of unique donors who give through this form.', 'dono-fundraising-platform' ),
+    none:      __( 'No progress bar or target on this form.', 'giveflow-fundraising-campaigns' ),
+    amount:    __( 'Track progress toward a fundraising total.', 'giveflow-fundraising-campaigns' ),
+    donations: __( 'Track the number of completed donations to this form.', 'giveflow-fundraising-campaigns' ),
+    donors:    __( 'Track the number of unique donors who give through this form.', 'giveflow-fundraising-campaigns' ),
 };
 
 function GoalSection( { settings, setSettings } ) {
@@ -1405,11 +1405,11 @@ function GoalSection( { settings, setSettings } ) {
 
     return (
         <SettingsRow
-            title={ __( 'Form goal', 'dono-fundraising-platform' ) }
-            description={ __( 'An optional goal tracked for this form alone. The Goal block can show this or the parent campaign goal.', 'dono-fundraising-platform' ) }
+            title={ __( 'Form goal', 'giveflow-fundraising-campaigns' ) }
+            description={ __( 'An optional goal tracked for this form alone. The Goal block can show this or the parent campaign goal.', 'giveflow-fundraising-campaigns' ) }
         >
             <SelectControl
-                label={ __( 'Goal type', 'dono-fundraising-platform' ) }
+                label={ __( 'Goal type', 'giveflow-fundraising-campaigns' ) }
                 value={ goal.type }
                 options={ GOAL_TYPE_OPTIONS }
                 onChange={ ( type ) => setSettings( { goal: { type, amount_cents: 0, count: 0 } } ) }
@@ -1418,9 +1418,9 @@ function GoalSection( { settings, setSettings } ) {
             />
             { goal.type === 'amount' && (
                 <BaseControl
-                    id="dono-form-goal-amount"
-                    label={ __( 'Target amount', 'dono-fundraising-platform' ) }
-                    help={ __( 'In the currency this form uses.', 'dono-fundraising-platform' ) }
+                    id="giveflow-form-goal-amount"
+                    label={ __( 'Target amount', 'giveflow-fundraising-campaigns' ) }
+                    help={ __( 'In the currency this form uses.', 'giveflow-fundraising-campaigns' ) }
                     __nextHasNoMarginBottom
                 >
                     <AmountInput
@@ -1434,13 +1434,13 @@ function GoalSection( { settings, setSettings } ) {
                         currency={ defaultCurrency() }
                         min={ 0 }
                         placeholder="0"
-                        inputProps={ { id: 'dono-form-goal-amount' } }
+                        inputProps={ { id: 'giveflow-form-goal-amount' } }
                     />
                 </BaseControl>
             ) }
             { ( goal.type === 'donations' || goal.type === 'donors' ) && (
                 <TextControl
-                    label={ __( 'Target count', 'dono-fundraising-platform' ) }
+                    label={ __( 'Target count', 'giveflow-fundraising-campaigns' ) }
                     type="number"
                     min={ 0 }
                     step="1"
@@ -1462,7 +1462,7 @@ function gatewayLabel( g ) {
     if ( g.enabled !== false ) return g.label;
 
     /* translators: %s: payment gateway name. */
-    return sprintf( __( '%s (off in Settings)', 'dono-fundraising-platform' ), g.label );
+    return sprintf( __( '%s (off in Settings)', 'giveflow-fundraising-campaigns' ), g.label );
 }
 
 function GatewaysSection( { gateways, settings, setSettings } ) {
@@ -1474,7 +1474,7 @@ function GatewaysSection( { gateways, settings, setSettings } ) {
         const store = s( 'core/block-editor' );
         const id = store
             .getClientIdsWithDescendants()
-            .find( ( cid ) => store.getBlockName( cid ) === 'dono/payment-gateways' );
+            .find( ( cid ) => store.getBlockName( cid ) === 'giveflow/payment-gateways' );
 
         return id ? { clientId: id, allowed: store.getBlockAttributes( id )?.allowed || [] } : null;
     }, [] );
@@ -1493,12 +1493,12 @@ function GatewaysSection( { gateways, settings, setSettings } ) {
     };
     return (
         <SettingsRow
-            title={ __( 'Allowed gateways', 'dono-fundraising-platform' ) }
-            description={ __( 'Pick which payment gateways are offered on this form. Leave empty to allow every gateway configured in Settings.', 'dono-fundraising-platform' ) }
+            title={ __( 'Allowed gateways', 'giveflow-fundraising-campaigns' ) }
+            description={ __( 'Pick which payment gateways are offered on this form. Leave empty to allow every gateway configured in Settings.', 'giveflow-fundraising-campaigns' ) }
         >
-            <div className="dono-sidebar-list">
+            <div className="giveflow-sidebar-list">
                 { gateways.map( ( g ) => (
-                    <label key={ g.id } className="dono-sidebar-check">
+                    <label key={ g.id } className="giveflow-sidebar-check">
                         <input
                             type="checkbox"
                             checked={ gatewayIsOn( allowed, g.id ) }
@@ -1508,13 +1508,13 @@ function GatewaysSection( { gateways, settings, setSettings } ) {
                     </label>
                 ) ) }
             </div>
-            <label className="dono-sidebar-check" style={ { marginTop: 14 } }>
+            <label className="giveflow-sidebar-check" style={ { marginTop: 14 } }>
                 <input
                     type="checkbox"
                     checked={ !! settings.test_mode }
                     onChange={ () => setSettings( { test_mode: ! settings.test_mode } ) }
                 />
-                <span>{ __( 'Test mode (no real payment, excluded from reporting)', 'dono-fundraising-platform' ) }</span>
+                <span>{ __( 'Test mode (no real payment, excluded from reporting)', 'giveflow-fundraising-campaigns' ) }</span>
             </label>
         </SettingsRow>
     );
@@ -1524,8 +1524,8 @@ function AfterSection( { settings, setSettings } ) {
     return (
         <>
             <SettingsRow
-                title={ __( 'Thank-you message', 'dono-fundraising-platform' ) }
-                description={ __( 'Shown to the donor after a successful donation, unless a redirect URL is set.', 'dono-fundraising-platform' ) }
+                title={ __( 'Thank-you message', 'giveflow-fundraising-campaigns' ) }
+                description={ __( 'Shown to the donor after a successful donation, unless a redirect URL is set.', 'giveflow-fundraising-campaigns' ) }
             >
                 <TextareaControl
                     value={ settings.thank_you_message }
@@ -1535,8 +1535,8 @@ function AfterSection( { settings, setSettings } ) {
                 />
             </SettingsRow>
             <SettingsRow
-                title={ __( 'Redirect URL', 'dono-fundraising-platform' ) }
-                description={ __( 'If set, donors are sent here instead of seeing the thank-you message.', 'dono-fundraising-platform' ) }
+                title={ __( 'Redirect URL', 'giveflow-fundraising-campaigns' ) }
+                description={ __( 'If set, donors are sent here instead of seeing the thank-you message.', 'giveflow-fundraising-campaigns' ) }
             >
                 <TextControl
                     type="url"
@@ -1545,7 +1545,7 @@ function AfterSection( { settings, setSettings } ) {
                     placeholder="https://"
                     help={
                         settings.redirect_url && ! /^https?:\/\//i.test( settings.redirect_url.trim() )
-                            ? __( 'Use a full URL starting with http:// or https://', 'dono-fundraising-platform' )
+                            ? __( 'Use a full URL starting with http:// or https://', 'giveflow-fundraising-campaigns' )
                             : undefined
                     }
                     __nextHasNoMarginBottom
@@ -1556,11 +1556,11 @@ function AfterSection( { settings, setSettings } ) {
 }
 
 function EmbedSection( { slug } ) {
-    const shortcode = `[dono_donation_form slug="${ slug }"]`;
+    const shortcode = `[giveflow_donation_form slug="${ slug }"]`;
     return (
         <SettingsRow
-            title={ __( 'Embed', 'dono-fundraising-platform' ) }
-            description={ __( 'Paste this shortcode into any post or page to render the form.', 'dono-fundraising-platform' ) }
+            title={ __( 'Embed', 'giveflow-fundraising-campaigns' ) }
+            description={ __( 'Paste this shortcode into any post or page to render the form.', 'giveflow-fundraising-campaigns' ) }
         >
             <ShortcodeField value={ shortcode } />
         </SettingsRow>
@@ -1568,23 +1568,23 @@ function EmbedSection( { slug } ) {
 }
 
 function StylePresetField( { value, onChange } ) {
-    const presets   = Array.isArray( window.dono?.styling?.presets ) ? window.dono.styling.presets : [];
-    const defaultId = String( window.dono?.styling?.default_id || '' );
+    const presets   = Array.isArray( window.giveflow?.styling?.presets ) ? window.giveflow.styling.presets : [];
+    const defaultId = String( window.giveflow?.styling?.default_id || '' );
     const defaultName = presets.find( ( p ) => p.id === defaultId )?.name || defaultId;
     return (
         <SelectControl
-            label={ __( 'Style preset', 'dono-fundraising-platform' ) }
+            label={ __( 'Style preset', 'giveflow-fundraising-campaigns' ) }
             value={ value }
             options={ [
                 {
                     value: '',
-                    label: __( 'Inherit (campaign or org default)', 'dono-fundraising-platform' ) +
+                    label: __( 'Inherit (campaign or org default)', 'giveflow-fundraising-campaigns' ) +
                         ( defaultName ? ` (${ defaultName })` : '' ),
                 },
                 ...presets.map( ( p ) => ( { value: p.id, label: p.name } ) ),
             ] }
             onChange={ onChange }
-            help={ __( 'Picks one of the presets defined in Settings → Brand. Leave on Inherit to follow the campaign\'s choice.', 'dono-fundraising-platform' ) }
+            help={ __( 'Picks one of the presets defined in Settings → Brand. Leave on Inherit to follow the campaign\'s choice.', 'giveflow-fundraising-campaigns' ) }
             __nextHasNoMarginBottom
             __next40pxDefaultSize
         />
@@ -1609,15 +1609,15 @@ function ShortcodeField( { value } ) {
     };
 
     return (
-        <div className="dono-shortcode">
-            <code className="dono-shortcode__code">{ value }</code>
+        <div className="giveflow-shortcode">
+            <code className="giveflow-shortcode__code">{ value }</code>
             <Button
                 variant="secondary"
                 size="small"
                 onClick={ onCopy }
-                className="dono-shortcode__copy"
+                className="giveflow-shortcode__copy"
             >
-                { copied ? __( 'Copied', 'dono-fundraising-platform' ) : __( 'Copy', 'dono-fundraising-platform' ) }
+                { copied ? __( 'Copied', 'giveflow-fundraising-campaigns' ) : __( 'Copy', 'giveflow-fundraising-campaigns' ) }
             </Button>
         </div>
     );

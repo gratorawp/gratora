@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
-use Dono\Donations\DonationRepository;
-use Dono\Donations\DonationService;
-use Dono\Donors\DonorRepository;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
-use Dono\Foundation\Time\Clock;
-use Dono\Gateways\GatewayManager;
-use Dono\Gateways\Stripe\StripeAccount;
-use Dono\Gateways\Stripe\StripeApi;
-use Dono\Gateways\Stripe\StripeGateway;
-use Dono\Recurring\RecurringPlanRepository;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Donations\DonationService;
+use GiveFlow\Donors\DonorRepository;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Foundation\Time\Clock;
+use GiveFlow\Gateways\GatewayManager;
+use GiveFlow\Gateways\Stripe\StripeAccount;
+use GiveFlow\Gateways\Stripe\StripeApi;
+use GiveFlow\Gateways\Stripe\StripeGateway;
+use GiveFlow\Recurring\RecurringPlanRepository;
 use WP_REST_Request;
 
 /**
@@ -58,7 +58,7 @@ final class UnlinkedRecurringTest extends IntegrationTestCase
     {
         $d = Donation::make();
         $d->kind              = 'donation';
-        $d->reference         = 'DONO-UNLINKED-' . wp_rand(100000, 999999);
+        $d->reference         = 'GIVEFLOW-UNLINKED-' . wp_rand(100000, 999999);
         $d->donor_id          = 1;
         $d->amount_cents      = 2500;
         $d->currency          = 'USD';
@@ -82,7 +82,7 @@ final class UnlinkedRecurringTest extends IntegrationTestCase
     /** @return array<string,mixed> */
     private function fetch(): array
     {
-        $res = rest_do_request(new WP_REST_Request('GET', '/dono/v1/admin/recurring/unlinked'));
+        $res = rest_do_request(new WP_REST_Request('GET', '/giveflow/v1/admin/recurring/unlinked'));
         $this->assertSame(200, $res->get_status(), (string) wp_json_encode($res->get_data()));
 
         return (array) $res->get_data();

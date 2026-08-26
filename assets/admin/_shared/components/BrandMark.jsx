@@ -3,6 +3,6 @@
  * branding (Stripe, Offline, ...).
  */
 export default function BrandMark( { letter, variant } ) {
-    const cls = `dono-brand-mark${ variant ? ` dono-brand-mark--${ variant }` : '' }`;
+    const cls = `giveflow-brand-mark${ variant ? ` giveflow-brand-mark--${ variant }` : '' }`;
     return <span className={ cls } aria-hidden="true">{ letter }</span>;
 }

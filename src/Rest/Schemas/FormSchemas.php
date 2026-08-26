@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Rest\Schemas;
+namespace GiveFlow\Rest\Schemas;
 
 /**
  * JSON-Schema arg specs for the admin forms endpoints. Settings is
@@ -74,7 +74,7 @@ final class FormSchemas
                 'additionalProperties' => true,
                 'properties'           => [
                     // Recurring frequencies and anonymity are per-block
-                    // (dono/recurring-toggle, dono/anonymous-toggle); settings
+                    // (giveflow/recurring-toggle, giveflow/anonymous-toggle); settings
                     // carries only top-level form options.
                     'gateways' => [
                         'type'       => 'object',

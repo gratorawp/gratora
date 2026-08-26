@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Foundation\Upgrade\UpgradeNotice;
-use Dono\Foundation\Upgrade\UpgradeRoutine;
-use Dono\Foundation\Upgrade\UpgradeRunner;
+use GiveFlow\Foundation\Upgrade\UpgradeNotice;
+use GiveFlow\Foundation\Upgrade\UpgradeRoutine;
+use GiveFlow\Foundation\Upgrade\UpgradeRunner;
 
 /**
  * A half-finished data migration leaves totals reading as though nothing were
  * wrong, and this notice is the only thing that reaches someone not looking for
  * it. It pointed at Settings `tab=advanced`, which does not exist: Settings
  * falls back to Setup for an unknown tab, and the notice suppressed itself on
- * every dono-settings screen, so following the warning landed the operator on a
+ * every giveflow-settings screen, so following the warning landed the operator on a
  * page saying nothing about it.
  *
  * The screen that does carry it is Tools > Maintenance, which lists each
@@ -53,7 +53,7 @@ final class UpgradeNoticeDestinationTest extends IntegrationTestCase
     {
         $html = $this->noticeHtml();
 
-        $this->assertStringContainsString('page=dono-tools', $html, 'Tools is where pending upgrades are listed');
+        $this->assertStringContainsString('page=giveflow-tools', $html, 'Tools is where pending upgrades are listed');
         $this->assertStringContainsString('#maintenance', $html, 'and Tools reads its tab from the fragment');
         $this->assertStringNotContainsString('tab=advanced', $html, 'Settings has no advanced tab');
     }
@@ -77,7 +77,7 @@ final class UpgradeNoticeDestinationTest extends IntegrationTestCase
             dirname(__DIR__, 2) . '/src/Foundation/Upgrade/UpgradeNotice.php'
         );
 
-        $this->assertStringContainsString("str_contains((string) \$screen->id, 'dono-tools')", $source);
-        $this->assertStringNotContainsString("str_contains((string) \$screen->id, 'dono-settings')", $source);
+        $this->assertStringContainsString("str_contains((string) \$screen->id, 'giveflow-tools')", $source);
+        $this->assertStringNotContainsString("str_contains((string) \$screen->id, 'giveflow-settings')", $source);
     }
 }

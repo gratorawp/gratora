@@ -2,26 +2,26 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
-use Dono\Donors\Consent;
-use Dono\Donors\Donor;
-use Dono\Donors\DonorNote;
-use Dono\Donors\DonorNoteRepository;
-use Dono\Donors\DonorService;
-use Dono\Donors\Erasure\ErasureHandler;
-use Dono\Donors\Erasure\ErasureRequest;
-use Dono\Recurring\RecurringPlan;
-use Dono\Donors\MagicLinkService;
-use Dono\Donors\MagicLinkToken;
-use Dono\Donors\PendingSignup;
-use Dono\Donors\PendingSignupRepository;
-use Dono\Donors\SignupRedemption;
-use Dono\Foundation\Identity\IdentityHasher;
-use Dono\Donors\DonorAggregateSyncer;
-use Dono\Foundation\Plugin;
-use Dono\Vendor\Queryable\DB;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donors\Consent;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\DonorNote;
+use GiveFlow\Donors\DonorNoteRepository;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Donors\Erasure\ErasureHandler;
+use GiveFlow\Donors\Erasure\ErasureRequest;
+use GiveFlow\Recurring\RecurringPlan;
+use GiveFlow\Donors\MagicLinkService;
+use GiveFlow\Donors\MagicLinkToken;
+use GiveFlow\Donors\PendingSignup;
+use GiveFlow\Donors\PendingSignupRepository;
+use GiveFlow\Donors\SignupRedemption;
+use GiveFlow\Foundation\Identity\IdentityHasher;
+use GiveFlow\Donors\DonorAggregateSyncer;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Vendor\Queryable\DB;
 use RuntimeException;
 use Throwable;
 use WP_REST_Request;
@@ -93,12 +93,12 @@ final class DonorTransactionRollbackTest extends IntegrationTestCase
         $throw = static function (): void {
             throw new RuntimeException(self::CREATE_FAILURE);
         };
-        add_action('dono.donor.created', $throw);
+        add_action('giveflow.donor.created', $throw);
 
         try {
             $body();
         } finally {
-            remove_action('dono.donor.created', $throw);
+            remove_action('giveflow.donor.created', $throw);
         }
     }
 
@@ -230,7 +230,7 @@ final class DonorTransactionRollbackTest extends IntegrationTestCase
         $throw = static function (): void {
             throw new RuntimeException(self::DELETE_FAILURE);
         };
-        add_action('dono.donor.deleted', $throw);
+        add_action('giveflow.donor.deleted', $throw);
 
         try {
             $this->container()->get(DonorService::class)->delete($rows['donor']);
@@ -238,7 +238,7 @@ final class DonorTransactionRollbackTest extends IntegrationTestCase
         } catch (Throwable $e) {
             $this->assertSame(self::DELETE_FAILURE, $e->getMessage());
         } finally {
-            remove_action('dono.donor.deleted', $throw);
+            remove_action('giveflow.donor.deleted', $throw);
         }
 
         $this->assertDeletionRowsPresent($rows, true);
@@ -271,7 +271,7 @@ final class DonorTransactionRollbackTest extends IntegrationTestCase
         $throw = static function (): void {
             throw new RuntimeException(self::DELETE_FAILURE);
         };
-        add_action('dono.donor.deleted', $throw);
+        add_action('giveflow.donor.deleted', $throw);
 
         try {
             $this->container()->get(DonorService::class)->delete($donor);
@@ -279,7 +279,7 @@ final class DonorTransactionRollbackTest extends IntegrationTestCase
         } catch (Throwable $e) {
             $this->assertSame(self::DELETE_FAILURE, $e->getMessage());
         } finally {
-            remove_action('dono.donor.deleted', $throw);
+            remove_action('giveflow.donor.deleted', $throw);
         }
 
         $this->assertNotNull(get_post($attachmentId), 'the failed deletion destroyed the picture');
@@ -297,7 +297,7 @@ final class DonorTransactionRollbackTest extends IntegrationTestCase
     /** PATCH the admin donor profile the way the Donors screen does. */
     private function patchDonor(int $donorId, array $body): \WP_REST_Response
     {
-        $req = new WP_REST_Request('PATCH', "/dono/v1/admin/donors/{$donorId}");
+        $req = new WP_REST_Request('PATCH', "/giveflow/v1/admin/donors/{$donorId}");
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($body));
 
@@ -332,7 +332,7 @@ final class DonorTransactionRollbackTest extends IntegrationTestCase
         ]);
 
         $this->assertSame(409, $refused->get_status(), 'the collision was not refused');
-        $this->assertSame('dono_email_collision', $refused->get_data()['code'] ?? null);
+        $this->assertSame('giveflow_email_collision', $refused->get_data()['code'] ?? null);
 
         $after = Donor::query()->where('id', (int) $donor->id)->get();
 
@@ -379,7 +379,7 @@ final class DonorTransactionRollbackTest extends IntegrationTestCase
     /** @return array<string,mixed> */
     private function donorRow(int $donorId): array
     {
-        return (array) DB::table('dono_donors')->where('id', $donorId)->get();
+        return (array) DB::table('giveflow_donors')->where('id', $donorId)->get();
     }
 
     /**
@@ -461,7 +461,7 @@ final class DonorTransactionRollbackTest extends IntegrationTestCase
             $handlers[] = $handler;
             return $handlers;
         };
-        add_filter('dono.donor.erasure_handlers', $add);
+        add_filter('giveflow.donor.erasure_handlers', $add);
 
         try {
             $this->container()->get(DonorService::class)->redact($donor);
@@ -469,7 +469,7 @@ final class DonorTransactionRollbackTest extends IntegrationTestCase
         } catch (Throwable $e) {
             $this->assertSame(self::ERASURE_FAILURE, $e->getMessage());
         } finally {
-            remove_filter('dono.donor.erasure_handlers', $add);
+            remove_filter('giveflow.donor.erasure_handlers', $add);
         }
 
         $after = Donor::query()->where('id', (int) $donor->id)->get();

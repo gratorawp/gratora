@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
-use Dono\Donations\DonationRepository;
-use Dono\Foundation\Plugin;
-use Dono\Gateways\GatewayManager;
-use Dono\Gateways\PayPal\PayPalAccount;
-use Dono\Gateways\PayPal\PayPalApi;
-use Dono\Gateways\PayPal\PayPalGateway;
-use Dono\Gateways\PayPal\PayPalPlans;
-use Dono\Recurring\RecurringPlan;
-use Dono\Recurring\RecurringPlanRepository;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Gateways\GatewayManager;
+use GiveFlow\Gateways\PayPal\PayPalAccount;
+use GiveFlow\Gateways\PayPal\PayPalApi;
+use GiveFlow\Gateways\PayPal\PayPalGateway;
+use GiveFlow\Gateways\PayPal\PayPalPlans;
+use GiveFlow\Recurring\RecurringPlan;
+use GiveFlow\Recurring\RecurringPlanRepository;
 use WP_REST_Request;
 
 /**
@@ -39,13 +39,13 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        update_option('dono_gateway_config', ['test_mode' => true]);
-        update_option('dono_currency_locale', [
+        update_option('giveflow_gateway_config', ['test_mode' => true]);
+        update_option('giveflow_currency_locale', [
             'default_currency'     => 'USD',
             'supported_currencies' => ['USD'],
         ]);
-        delete_option('dono_paypal_product');
-        delete_option('dono_paypal_plans');
+        delete_option('giveflow_paypal_product');
+        delete_option('giveflow_paypal_plans');
 
         $c = Plugin::instance()->container;
         $account = $c->get(PayPalAccount::class);
@@ -61,11 +61,11 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
                 $c->get(PayPalApi::class),
                 $account,
                 $c->get(DonationRepository::class),
-                $c->get(\Dono\Donations\DonationService::class),
+                $c->get(\GiveFlow\Donations\DonationService::class),
                 $c->get(PayPalPlans::class),
                 $c->get(RecurringPlanRepository::class),
-                $c->get(\Dono\Foundation\Time\Clock::class),
-                $c->get(\Dono\Gateways\PayPal\PayPalPlanRecorder::class),
+                $c->get(\GiveFlow\Foundation\Time\Clock::class),
+                $c->get(\GiveFlow\Gateways\PayPal\PayPalPlanRecorder::class),
             ));
         }
     }
@@ -158,7 +158,7 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
         // SDK runs in their browser, so choosing a cheaper plan costs nothing.
         $this->subscriptionPlanId = 'P-PLAN-CHEAP';
 
-        $req = new WP_REST_Request('POST', '/dono/v1/gateways/paypal/subscription');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/gateways/paypal/subscription');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'reference'       => $reference,
@@ -176,7 +176,7 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
 
     private function createRecurringDonation(int $amount = 2500, string $frequency = 'monthly'): string
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/donations');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'email'        => 'sub' . bin2hex(random_bytes(3)) . '@example.test',
@@ -197,7 +197,7 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
 
     private function recordSubscription(string $reference, string $subId = 'I-SUB-1'): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/gateways/paypal/subscription');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/gateways/paypal/subscription');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'reference' => $reference, 'subscription_id' => $subId,
@@ -209,7 +209,7 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
     /** @param array<string,mixed> $resource */
     private function postWebhook(string $type, array $resource, ?string $eventId = null): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/webhooks/paypal');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/webhooks/paypal');
         $req->set_header('content-type', 'application/json');
         foreach ([
             'paypal_transmission_id'   => 'tx-' . bin2hex(random_bytes(3)),
@@ -324,12 +324,12 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
     {
         $reference = $this->createRecurringDonation();
         // Point the canned subscription at a different donation's reference.
-        $this->currentReference = 'DONO-SOMEONE-ELSE';
+        $this->currentReference = 'GIVEFLOW-SOMEONE-ELSE';
 
         $res = $this->recordSubscription($reference);
 
         $this->assertSame(403, $res->get_status());
-        $this->assertSame('dono_paypal_subscription_mismatch', $res->get_data()['code'] ?? null);
+        $this->assertSame('giveflow_paypal_subscription_mismatch', $res->get_data()['code'] ?? null);
         $this->assertNull(
             $this->plans()->findBySubscriptionId('paypal', 'I-SUB-1'),
             'no plan is created for a subscription that is not ours'
@@ -378,7 +378,7 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
         // different donation - the delivery must not be accepted: a 200 tells
         // PayPal the payment was booked and it never comes back.
         $reference = $this->createRecurringDonation();
-        $this->currentReference = 'DONO-SOMEONE-ELSE';
+        $this->currentReference = 'GIVEFLOW-SOMEONE-ELSE';
 
         $res = $this->postWebhook('PAYMENT.SALE.COMPLETED', [
             'id'                   => 'SALE-EARLY',
@@ -522,7 +522,7 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
         $this->assertNotNull($plan->cancelled_at);
     }
 
-    /** Cancelling from Dono is idempotent: PayPal errors on an ended sub. */
+    /** Cancelling from GiveFlow is idempotent: PayPal errors on an ended sub. */
     public function test_cancel_is_idempotent(): void
     {
         $reference = $this->createRecurringDonation();
@@ -556,7 +556,7 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
         $this->recordSubscription($reference);
 
         $failures = 0;
-        add_action('dono.recurring.renewal_failed', static function () use (&$failures): void { $failures++; });
+        add_action('giveflow.recurring.renewal_failed', static function () use (&$failures): void { $failures++; });
 
         $res = $this->postWebhook('PAYMENT.SALE.DENIED', [
             'id'                   => 'SALE-DENIED-1',
@@ -582,7 +582,7 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
         $this->recordSubscription($reference);
 
         $failures = 0;
-        add_action('dono.recurring.renewal_failed', static function () use (&$failures): void { $failures++; });
+        add_action('giveflow.recurring.renewal_failed', static function () use (&$failures): void { $failures++; });
 
         $sale = [
             'id'                   => 'SALE-DENIED-DUP',
@@ -693,7 +693,7 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
         $this->assertSame(200, $res->get_status());
         $this->assertFalse($res->get_data()['handled']);
 
-        $rows = \Dono\Analytics\Event::query()->whereLike('type', 'webhook.%')->orderBy('id', 'DESC')->limit(1)->getAll();
+        $rows = \GiveFlow\Analytics\Event::query()->whereLike('type', 'webhook.%')->orderBy('id', 'DESC')->limit(1)->getAll();
         $this->assertNotEmpty($rows);
         $this->assertStringStartsWith(
             'Refused:',

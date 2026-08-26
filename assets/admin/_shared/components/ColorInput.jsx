@@ -1,1 +1,1 @@
-export { default } from '@dono/ui/components/ColorInput';
+export { default } from '@giveflow/ui/components/ColorInput';

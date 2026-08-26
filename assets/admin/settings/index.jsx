@@ -4,7 +4,7 @@ import Settings from './Settings';
 import './settings.scss';
 
 document.addEventListener( 'DOMContentLoaded', () => {
-    const root = document.getElementById( 'dono-admin-settings' );
+    const root = document.getElementById( 'giveflow-admin-settings' );
     if ( ! root ) return;
     createRoot( root ).render( <Settings /> );
 } );

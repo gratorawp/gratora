@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Donors;
+namespace GiveFlow\Donors;
 
 defined('ABSPATH') || exit;
 
-use Dono\Vendor\Queryable\Model;
-use Dono\Vendor\Queryable\Schema\Table;
+use GiveFlow\Vendor\Queryable\Model;
+use GiveFlow\Vendor\Queryable\Schema\Table;
 
 /**
  * An address somebody typed into the portal that nobody has proven yet.
@@ -24,7 +24,7 @@ use Dono\Vendor\Queryable\Schema\Table;
  */
 final class PendingSignup extends Model
 {
-    protected string $table = 'dono_pending_signups';
+    protected string $table = 'giveflow_pending_signups';
     protected string $version = '1.0.0';
 
     public int $id;

@@ -12,7 +12,7 @@ import LayoutControls from '../_shared/widgets/LayoutControls';
 import SectionBar from '../_shared/widgets/SectionBar';
 import RevenueChart from '../_shared/widgets/RevenueChart';
 import ChannelBreakdown from '../_shared/widgets/ChannelBreakdown';
-import { useDonoLayout } from '../_shared/widgets/useDonoLayout';
+import { useGiveFlowLayout } from '../_shared/widgets/useGiveFlowLayout';
 import { defaultCurrency } from '../_shared/format';
 
 import KpiRow from './widgets/KpiRow';
@@ -68,7 +68,7 @@ export default function Dashboard() {
     const [ fetchError, setFetchError ]     = useState( false );
     const [ reloadKey, setReloadKey ]       = useState( 0 );
 
-    const layout = useDonoLayout( SCOPE, WIDGET_KEYS );
+    const layout = useGiveFlowLayout( SCOPE, WIDGET_KEYS );
 
     // Only fetch sections for visible widgets; include= changes on hide/unhide.
     const includeKey = useMemo( () => layout.visibleOrder.join( ',' ), [ layout.visibleOrder ] );
@@ -78,7 +78,7 @@ export default function Dashboard() {
         setLoading( true );
         setFetchError( false );
         apiFetch( {
-            path: addQueryArgs( '/dono/v1/admin/dashboard', { range, compare: compareMode, include: includeKey, include_test: includeTest } ),
+            path: addQueryArgs( '/giveflow/v1/admin/dashboard', { range, compare: compareMode, include: includeKey, include_test: includeTest } ),
         } )
             .then( ( m ) => { if ( ! aborted ) setMetrics( ( prev ) => ( { ...( prev || {} ), ...m } ) ); } )
             .catch( () => { if ( ! aborted ) setFetchError( true ); } )
@@ -97,21 +97,21 @@ export default function Dashboard() {
 
     const registry = {
         today: {
-            title:  __( 'Activity (last 24h)', 'dono-fundraising-platform' ),
+            title:  __( 'Activity (last 24h)', 'giveflow-fundraising-campaigns' ),
             render: () => <TodayStrip today={ m.today } />,
         },
         kpis: {
-            title:  __( 'Key metrics', 'dono-fundraising-platform' ),
+            title:  __( 'Key metrics', 'giveflow-fundraising-campaigns' ),
             span:   'full',
             bare:   true,
             render: () => <KpiRow kpi={ m.kpi } compareOn={ compareOn } range={ range } includesTest={ !! m.test?.includes_test } loading={ metrics === null && loading } />,
         },
         attention: {
-            title:  __( 'Needs attention', 'dono-fundraising-platform' ),
+            title:  __( 'Needs attention', 'giveflow-fundraising-campaigns' ),
             render: () => <NeedsAttention items={ m.attention } />,
         },
         revenue: {
-            title:  __( 'Revenue', 'dono-fundraising-platform' ),
+            title:  __( 'Revenue', 'giveflow-fundraising-campaigns' ),
             span:   'full',
             render: () => (
                 <RevenueChart
@@ -123,38 +123,38 @@ export default function Dashboard() {
             ),
         },
         'active-campaigns': {
-            title:  __( 'Active campaigns', 'dono-fundraising-platform' ),
+            title:  __( 'Active campaigns', 'giveflow-fundraising-campaigns' ),
             render: () => <ActiveCampaigns rows={ m.active_campaigns } />,
         },
         recurring: {
-            title:  __( 'Recurring revenue', 'dono-fundraising-platform' ),
+            title:  __( 'Recurring revenue', 'giveflow-fundraising-campaigns' ),
             render: () => <RecurringForecast recurring={ m.recurring } />,
         },
         'top-campaigns': {
-            title:  __( 'Top campaigns', 'dono-fundraising-platform' ),
+            title:  __( 'Top campaigns', 'giveflow-fundraising-campaigns' ),
             render: () => <TopCampaigns rows={ m.top_campaigns } />,
         },
         channel: {
-            title:  __( 'Channels', 'dono-fundraising-platform' ),
+            title:  __( 'Channels', 'giveflow-fundraising-campaigns' ),
             render: () => <ChannelBreakdown rows={ m.by_channel } currency={ currency } />,
         },
         'recent-activity': {
-            title:  __( 'Recent donations', 'dono-fundraising-platform' ),
+            title:  __( 'Recent donations', 'giveflow-fundraising-campaigns' ),
             render: () => <RecentActivity rows={ m.recent_activity } />,
         },
         'quick-actions': {
-            title:  __( 'Quick actions', 'dono-fundraising-platform' ),
+            title:  __( 'Quick actions', 'giveflow-fundraising-campaigns' ),
             render: () => <QuickActions />,
         },
     };
 
     return (
-        <div className="dono-dashboard" data-loading={ loading ? 'true' : undefined }>
-            <div className="dono-page-head">
-                <div className="dono-page-head__title-row">
-                    <h1>{ __( 'Dashboard', 'dono-fundraising-platform' ) }</h1>
+        <div className="giveflow-dashboard" data-loading={ loading ? 'true' : undefined }>
+            <div className="giveflow-page-head">
+                <div className="giveflow-page-head__title-row">
+                    <h1>{ __( 'Dashboard', 'giveflow-fundraising-campaigns' ) }</h1>
                 </div>
-                <div className="dono-page-head__right">
+                <div className="giveflow-page-head__right">
                     <SectionBar
                         range={ range } onRangeChange={ setRange }
                         compareMode={ compareMode } onCompareModeChange={ setCompareMode }
@@ -182,23 +182,23 @@ export default function Dashboard() {
                             '%d test record is not counted here.',
                             '%d test records are not counted here.',
                             hiddenTotal,
-                            'dono-fundraising-platform'
+                            'giveflow-fundraising-campaigns'
                         ),
                         hiddenTotal
                     ) }
                     { ' ' }
                     <Button variant="link" onClick={ () => setIncludeTest( true ) }>
-                        { __( 'Show them', 'dono-fundraising-platform' ) }
+                        { __( 'Show them', 'giveflow-fundraising-campaigns' ) }
                     </Button>
                 </Notice>
             ) }
 
             { metrics?.test?.includes_test && (
                 <Notice status="warning" isDismissible={ false }>
-                    { __( 'These figures include test records. They contain money that was never actually taken, so they cannot be quoted as income.', 'dono-fundraising-platform' ) }
+                    { __( 'These figures include test records. They contain money that was never actually taken, so they cannot be quoted as income.', 'giveflow-fundraising-campaigns' ) }
                     { ' ' }
                     <Button variant="link" onClick={ () => setIncludeTest( false ) }>
-                        { __( 'Hide them', 'dono-fundraising-platform' ) }
+                        { __( 'Hide them', 'giveflow-fundraising-campaigns' ) }
                     </Button>
                 </Notice>
             ) }
@@ -208,18 +208,18 @@ export default function Dashboard() {
                  the range now selected. */ }
             { metrics !== null && fetchError && (
                 <Notice status="error" onRemove={ () => setFetchError( false ) }>
-                    { __( 'These numbers are from the previous range. The one you picked could not be loaded.', 'dono-fundraising-platform' ) }
+                    { __( 'These numbers are from the previous range. The one you picked could not be loaded.', 'giveflow-fundraising-campaigns' ) }
                 </Notice>
             ) }
 
             { metrics === null && fetchError ? (
                 <EmptyState
                     icon={ <AlertTriangle size={ 24 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'Could not load your dashboard', 'dono-fundraising-platform' ) }
-                    body={ __( 'Something went wrong fetching your metrics. Check your connection and try again.', 'dono-fundraising-platform' ) }
+                    title={ __( 'Could not load your dashboard', 'giveflow-fundraising-campaigns' ) }
+                    body={ __( 'Something went wrong fetching your metrics. Check your connection and try again.', 'giveflow-fundraising-campaigns' ) }
                     action={
                         <Btn variant="primary" onClick={ () => setReloadKey( ( k ) => k + 1 ) }>
-                            { __( 'Retry', 'dono-fundraising-platform' ) }
+                            { __( 'Retry', 'giveflow-fundraising-campaigns' ) }
                         </Btn>
                     }
                 />

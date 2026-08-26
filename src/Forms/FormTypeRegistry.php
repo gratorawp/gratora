@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Forms;
+namespace GiveFlow\Forms;
 
-use Dono\Donations\DonationIntent;
+use GiveFlow\Donations\DonationIntent;
 use RuntimeException;
 
 /**

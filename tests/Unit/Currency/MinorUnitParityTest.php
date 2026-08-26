@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Unit\Currency;
+namespace GiveFlow\Tests\Unit\Currency;
 
-use Dono\Currency\Currency;
+use GiveFlow\Currency\Currency;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 

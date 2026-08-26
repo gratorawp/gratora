@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donors\DonorMetricsService;
-use Dono\Foundation\Helpers\Money;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
-use Dono\Recurring\RecurringPlan;
+use GiveFlow\Donors\DonorMetricsService;
+use GiveFlow\Foundation\Helpers\Money;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Recurring\RecurringPlan;
 
 /**
  * The donor profile's "Recurring MRR" is rendered with the org's currency

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
 use WP_REST_Request;
 
 /**
  * The Stripe webhook signing secret is the ONLY authentication on
- * /dono/v1/webhooks/stripe. Handing it out over the settings read let a holder
- * of the delegatable dono_manage_settings cap forge a paid donation without any
+ * /giveflow/v1/webhooks/stripe. Handing it out over the settings read let a holder
+ * of the delegatable giveflow_manage_settings cap forge a paid donation without any
  * donations capability at all.
  */
 final class SettingsSecretExposureTest extends IntegrationTestCase
@@ -21,7 +21,7 @@ final class SettingsSecretExposureTest extends IntegrationTestCase
         parent::setUp();
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
 
-        update_option('dono_gateway_config', [
+        update_option('giveflow_gateway_config', [
             'test_mode' => true,
             'stripe'    => [
                 'webhook_secret_test' => self::SECRET,
@@ -35,13 +35,13 @@ final class SettingsSecretExposureTest extends IntegrationTestCase
     private function read(string $group = 'gateways'): array
     {
         return (array) rest_do_request(
-            new WP_REST_Request('GET', "/dono/v1/admin/settings/{$group}")
+            new WP_REST_Request('GET', "/giveflow/v1/admin/settings/{$group}")
         )->get_data();
     }
 
     private function write(array $body, string $group = 'gateways'): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', "/dono/v1/admin/settings/{$group}");
+        $req = new WP_REST_Request('POST', "/giveflow/v1/admin/settings/{$group}");
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($body));
         return rest_do_request($req);
@@ -49,7 +49,7 @@ final class SettingsSecretExposureTest extends IntegrationTestCase
 
     private function storedSecret(): string
     {
-        $opt = get_option('dono_gateway_config', []);
+        $opt = get_option('giveflow_gateway_config', []);
         return (string) ($opt['stripe']['webhook_secret_test'] ?? '');
     }
 
@@ -97,7 +97,7 @@ final class SettingsSecretExposureTest extends IntegrationTestCase
 
         $this->assertSame(200, $res->get_status(), wp_json_encode($res->get_data()));
         $this->assertSame(self::SECRET, $this->storedSecret(), 'the stored secret survived the round trip');
-        $this->assertSame('Updated instructions', get_option('dono_gateway_config')['offline']['instructions']);
+        $this->assertSame('Updated instructions', get_option('giveflow_gateway_config')['offline']['instructions']);
     }
 
     /** A genuine replacement must still get through. */

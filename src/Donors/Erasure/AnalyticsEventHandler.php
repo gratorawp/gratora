@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Donors\Erasure;
+namespace GiveFlow\Donors\Erasure;
 
-use Dono\Analytics\Event;
+use GiveFlow\Analytics\Event;
 
 /**
  * The analytics event log. Rows survive so campaign and form totals do not move
@@ -30,7 +30,7 @@ final class AnalyticsEventHandler implements ErasureHandler
     /** @since 1.0.0 */
     public function key(): string
     {
-        return 'dono.analytics_events';
+        return 'giveflow.analytics_events';
     }
 
     /** @since 1.0.0 */

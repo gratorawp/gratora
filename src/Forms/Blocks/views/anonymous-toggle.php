@@ -5,7 +5,7 @@ defined('ABSPATH') || exit;
  * @var bool   $defaultOn
  */
 ?>
-<label class="dono-block dono-block--anonymous dono-anonymous">
+<label class="giveflow-block giveflow-block--anonymous giveflow-anonymous">
     <input type="checkbox" name="is_anonymous" value="1" <?php echo esc_attr($defaultOn ? 'checked' : ''); ?>>
-    <span class="dono-anonymous__label"><?php echo esc_html((string) $label); ?></span>
+    <span class="giveflow-anonymous__label"><?php echo esc_html((string) $label); ?></span>
 </label>

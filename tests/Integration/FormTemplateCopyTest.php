@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Forms\FormTemplates;
+use GiveFlow\Forms\FormTemplates;
 
 /**
  * Shipped template copy is donor-facing verbatim, sitting next to amounts the

@@ -2,24 +2,24 @@
 
 declare(strict_types=1);
 
-namespace Dono\Donors\Portal;
+namespace GiveFlow\Donors\Portal;
 
 use WP_Post;
 
 /**
- * Guarantees the donor-portal WP page (hosts [dono_donor_portal]) exists and is
+ * Guarantees the donor-portal WP page (hosts [giveflow_donor_portal]) exists and is
  * published: magic-link emails point at its URL, so a missing page silently breaks
- * donor self-service. url() is the single source of truth unless dono.portal.url is set.
+ * donor self-service. url() is the single source of truth unless giveflow.portal.url is set.
  *
  * @since 1.0.0
  */
 final class PortalPage
 {
-    public const OPTION_PAGE_ID = 'dono_portal_page_id';
-    public const OPTION_VERSION = 'dono_portal_page_version';
+    public const OPTION_PAGE_ID = 'giveflow_portal_page_id';
+    public const OPTION_VERSION = 'giveflow_portal_page_version';
     public const SLUG           = 'donor-portal';
-    public const META_MANAGED   = '_dono_managed_portal';
-    public const SHORTCODE      = '[dono_donor_portal]';
+    public const META_MANAGED   = '_giveflow_managed_portal';
+    public const SHORTCODE      = '[giveflow_donor_portal]';
 
     /**
      * Idempotent: keeps a stored id that still resolves to a published page, else
@@ -42,7 +42,7 @@ final class PortalPage
 
         $id = wp_insert_post([
             'post_type'    => 'page',
-            'post_title'   => __('Donor portal', 'dono-fundraising-platform'),
+            'post_title'   => __('Donor portal', 'giveflow-fundraising-campaigns'),
             'post_name'    => self::SLUG,
             'post_status'  => 'publish',
             'post_content' => self::SHORTCODE,
@@ -82,7 +82,7 @@ final class PortalPage
     }
 
     /**
-     * Canonical portal URL. The `dono.portal.url` filter overrides; otherwise
+     * Canonical portal URL. The `giveflow.portal.url` filter overrides; otherwise
      * the URL is the permalink of the stored page, or the slug-based
      * home_url() fallback while the page is being provisioned.
      *
@@ -90,7 +90,7 @@ final class PortalPage
      */
     public function url(): string
     {
-        $filtered = (string) apply_filters('dono.portal.url', '');
+        $filtered = (string) apply_filters('giveflow.portal.url', '');
         if ($filtered !== '') {
             return $filtered;
         }
@@ -108,17 +108,17 @@ final class PortalPage
 
     /**
      * Heal pass for plugin updates: register_activation_hook does not fire
-     * on updates, so we re-run ensure() once per DONO_VERSION bump. Steady
+     * on updates, so we re-run ensure() once per GIVEFLOW_VERSION bump. Steady
      * state is a single option read.
      *
      * @since 1.0.0
      */
     public function maybeHeal(): void
     {
-        if (get_option(self::OPTION_VERSION) === DONO_VERSION) {
+        if (get_option(self::OPTION_VERSION) === GIVEFLOW_VERSION) {
             return;
         }
         $this->ensure();
-        update_option(self::OPTION_VERSION, DONO_VERSION, false);
+        update_option(self::OPTION_VERSION, GIVEFLOW_VERSION, false);
     }
 }

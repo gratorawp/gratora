@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Receipts;
+namespace GiveFlow\Receipts;
 
 /**
  * Receipt query helpers.

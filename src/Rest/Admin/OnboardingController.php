@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Rest\Admin;
+namespace GiveFlow\Rest\Admin;
 
-use Dono\Onboarding\Onboarding;
-use Dono\Settings\SettingsService;
+use GiveFlow\Onboarding\Onboarding;
+use GiveFlow\Settings\SettingsService;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -19,7 +19,7 @@ use WP_Error;
  */
 final class OnboardingController
 {
-    private const NAMESPACE = 'dono/v1';
+    private const NAMESPACE = 'giveflow/v1';
 
     /** @since 1.0.0 */
     public function __construct(

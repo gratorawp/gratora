@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Forms\Blocks;
+namespace GiveFlow\Forms\Blocks;
 
 /**
- * dono/columns: multi-column container for content blocks.
+ * giveflow/columns: multi-column container for content blocks.
  *
  * @since 1.0.0
  */
@@ -14,7 +14,7 @@ final class ColumnsBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'dono/columns';
+        return 'giveflow/columns';
     }
 
     /** @since 1.0.0 */
@@ -31,7 +31,7 @@ final class ColumnsBlock implements Block
     public function render(array $attrs, string $content): string
     {
         return sprintf(
-            '<div class="dono-block dono-block--columns" style="%s">%s</div>',
+            '<div class="giveflow-block giveflow-block--columns" style="%s">%s</div>',
             esc_attr(self::columnsStyle($attrs)),
             $content
         );

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Forms\Blocks;
+namespace GiveFlow\Forms\Blocks;
 
-use Dono\Donors\ConsentService;
-use Dono\Foundation\Helpers\View;
+use GiveFlow\Donors\ConsentService;
+use GiveFlow\Foundation\Helpers\View;
 
 /**
  * Consent / opt-in purposes block.
@@ -22,7 +22,7 @@ final class ConsentBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'dono/consent';
+        return 'giveflow/consent';
     }
 
     /** @since 1.0.0 */
@@ -51,8 +51,8 @@ final class ConsentBlock implements Block
                 return '';
             }
 
-            return '<div class="dono-block-notice">'
-                . esc_html__('Pick which consent purposes this form asks for, or add one in Settings, Consents.', 'dono-fundraising-platform')
+            return '<div class="giveflow-block-notice">'
+                . esc_html__('Pick which consent purposes this form asks for, or add one in Settings, Consents.', 'giveflow-fundraising-campaigns')
                 . '</div>';
         }
 

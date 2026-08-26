@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Campaigns\Styling;
+namespace GiveFlow\Campaigns\Styling;
 
-use Dono\Campaigns\Campaign;
+use GiveFlow\Campaigns\Campaign;
 use WP_Post;
 
 /**
@@ -22,7 +22,7 @@ use WP_Post;
  */
 final class PageStyle
 {
-    private const BODY_CLASS = 'dono-campaign-styled';
+    private const BODY_CLASS = 'giveflow-campaign-styled';
 
     /**
      * The campaign page foundation, and the campaign's own tokens inlined onto
@@ -33,7 +33,7 @@ final class PageStyle
      * when a campaign block is on the page, and a page holding nothing but an
      * organizer's own headings and paragraphs still belongs to its campaign.
      */
-    public const HANDLE = 'dono-campaign-page';
+    public const HANDLE = 'giveflow-campaign-page';
 
     private ?Campaign $campaign = null;
 
@@ -58,14 +58,14 @@ final class PageStyle
         if (wp_style_is(self::HANDLE, 'registered')) {
             return;
         }
-        $path = DONO_DIR . 'assets/campaign-page/page.css';
+        $path = GIVEFLOW_DIR . 'assets/campaign-page/page.css';
         wp_register_style(
             self::HANDLE,
-            DONO_URL . 'assets/campaign-page/page.css',
+            GIVEFLOW_URL . 'assets/campaign-page/page.css',
             [],
-            // mtime, not DONO_VERSION: the file changes without a release and a
+            // mtime, not GIVEFLOW_VERSION: the file changes without a release and a
             // stale cache means invisible restyles.
-            (string) (@filemtime($path) ?: DONO_VERSION)
+            (string) (@filemtime($path) ?: GIVEFLOW_VERSION)
         );
     }
 
@@ -105,7 +105,7 @@ final class PageStyle
             return $campaign;
         }
 
-        $campaignId = (int) get_post_meta($postId, '_dono_campaign_id', true);
+        $campaignId = (int) get_post_meta($postId, '_giveflow_campaign_id', true);
 
         return $campaignId > 0 ? Campaign::query()->find('id', $campaignId) : null;
     }

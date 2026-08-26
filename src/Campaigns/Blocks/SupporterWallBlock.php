@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Dono\Campaigns\Blocks;
+namespace GiveFlow\Campaigns\Blocks;
 
-use Dono\Campaigns\CampaignRepository;
-use Dono\Donations\Donation;
-use Dono\Donations\DonationQueries;
-use Dono\Donations\DonationRepository;
-use Dono\Donors\Donor;
-use Dono\Donors\DonorAvatars;
-use Dono\Foundation\Helpers\Money;
-use Dono\Foundation\Helpers\View;
+use GiveFlow\Campaigns\CampaignRepository;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationQueries;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\DonorAvatars;
+use GiveFlow\Foundation\Helpers\Money;
+use GiveFlow\Foundation\Helpers\View;
 
 /**
  * Renders a supporter wall: one card per non-anonymous donor, optionally
@@ -33,7 +33,7 @@ final class SupporterWallBlock extends CampaignBlock
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'dono/supporter-wall';
+        return 'giveflow/supporter-wall';
     }
 
     /** @since 1.0.0 */
@@ -139,8 +139,8 @@ final class SupporterWallBlock extends CampaignBlock
         if (! $byDonor) {
             return View::loadRelative(__DIR__, 'views/supporter-wall', [
                 'title'        => (string) ($attrs['title'] ?? ''),
-            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('The supporter wall is empty.', 'dono-fundraising-platform'),
-            'emptySubText' => __('Add the first name to it.', 'dono-fundraising-platform'),
+            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('The supporter wall is empty.', 'giveflow-fundraising-campaigns'),
+            'emptySubText' => __('Add the first name to it.', 'giveflow-fundraising-campaigns'),
             'emptyIcon'    => 'supporters',
                 'entries'      => [],
                 'showMessage'  => $showMessage,
@@ -189,8 +189,8 @@ final class SupporterWallBlock extends CampaignBlock
 
         return View::loadRelative(__DIR__, 'views/supporter-wall', [
             'title'        => (string) ($attrs['title'] ?? ''),
-            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('The supporter wall is empty.', 'dono-fundraising-platform'),
-            'emptySubText' => __('Add the first name to it.', 'dono-fundraising-platform'),
+            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('The supporter wall is empty.', 'giveflow-fundraising-campaigns'),
+            'emptySubText' => __('Add the first name to it.', 'giveflow-fundraising-campaigns'),
             'emptyIcon'    => 'supporters',
             'entries'      => $entries,
             'showMessage'  => $showMessage,

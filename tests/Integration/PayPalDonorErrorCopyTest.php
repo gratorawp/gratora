@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Analytics\Event;
-use Dono\Donations\DonationRepository;
-use Dono\Donations\DonationService;
-use Dono\Foundation\Plugin;
-use Dono\Foundation\Time\Clock;
-use Dono\Gateways\GatewayManager;
-use Dono\Gateways\PayPal\PayPalAccount;
-use Dono\Gateways\PayPal\PayPalApi;
-use Dono\Gateways\PayPal\PayPalGateway;
-use Dono\Gateways\PayPal\PayPalPlanRecorder;
-use Dono\Gateways\PayPal\PayPalPlans;
-use Dono\Recurring\RecurringPlanRepository;
+use GiveFlow\Analytics\Event;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Donations\DonationService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Foundation\Time\Clock;
+use GiveFlow\Gateways\GatewayManager;
+use GiveFlow\Gateways\PayPal\PayPalAccount;
+use GiveFlow\Gateways\PayPal\PayPalApi;
+use GiveFlow\Gateways\PayPal\PayPalGateway;
+use GiveFlow\Gateways\PayPal\PayPalPlanRecorder;
+use GiveFlow\Gateways\PayPal\PayPalPlans;
+use GiveFlow\Recurring\RecurringPlanRepository;
 use WP_REST_Request;
 
 /**
@@ -41,8 +41,8 @@ final class PayPalDonorErrorCopyTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        update_option('dono_gateway_config', ['test_mode' => true]);
-        update_option('dono_currency_locale', [
+        update_option('giveflow_gateway_config', ['test_mode' => true]);
+        update_option('giveflow_currency_locale', [
             'default_currency'     => 'USD',
             'supported_currencies' => ['USD'],
         ]);
@@ -108,7 +108,7 @@ final class PayPalDonorErrorCopyTest extends IntegrationTestCase
 
     private function newDonation(string $frequency = 'one_time'): string
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/donations');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'email'        => 'copy' . bin2hex(random_bytes(3)) . '@example.test',
@@ -134,7 +134,7 @@ final class PayPalDonorErrorCopyTest extends IntegrationTestCase
     /** @return array{0:int,1:string} */
     private function dispatchCapture(string $reference): array
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/gateways/paypal/capture');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/gateways/paypal/capture');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'reference'    => $reference,
@@ -148,7 +148,7 @@ final class PayPalDonorErrorCopyTest extends IntegrationTestCase
     /** @return array{0:int,1:string} */
     private function dispatchSubscription(string $reference): array
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/gateways/paypal/subscription');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/gateways/paypal/subscription');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'reference'       => $reference,

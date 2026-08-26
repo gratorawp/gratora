@@ -3,9 +3,9 @@ import { type Page } from '@playwright/test';
 
 import { settle } from './visual';
 
-/** Capture output root. Gitignored; override with DONO_E2E_SHOTS_DIR. */
-export const SHOTS_DIR = process.env.DONO_E2E_SHOTS_DIR
-    ? path.resolve(process.env.DONO_E2E_SHOTS_DIR)
+/** Capture output root. Gitignored; override with GIVEFLOW_E2E_SHOTS_DIR. */
+export const SHOTS_DIR = process.env.GIVEFLOW_E2E_SHOTS_DIR
+    ? path.resolve(process.env.GIVEFLOW_E2E_SHOTS_DIR)
     : path.resolve(__dirname, '..', 'screenshots');
 
 /**
@@ -53,7 +53,7 @@ function sameDocument(from: string, to: string): boolean {
 }
 
 /**
- * Open a wp-admin screen and wait until it is safe to capture. Dono routes
+ * Open a wp-admin screen and wait until it is safe to capture. GiveFlow routes
  * several screens by fragment, and a hash-only goto keeps the mounted React
  * tree, so the previous tab's scroll offset would ride into the shot: reload
  * in that case to get a first mount every time.

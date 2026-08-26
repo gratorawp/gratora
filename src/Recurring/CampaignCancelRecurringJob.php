@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Recurring;
+namespace GiveFlow\Recurring;
 
-use Dono\Analytics\ErrorLog;
-use Dono\Async\AsyncDispatcher;
+use GiveFlow\Analytics\ErrorLog;
+use GiveFlow\Async\AsyncDispatcher;
 
 /**
  * Cancels a campaign's live recurring plans in bounded, resumable batches.
@@ -24,9 +24,9 @@ use Dono\Async\AsyncDispatcher;
  */
 final class CampaignCancelRecurringJob
 {
-    public const HOOK = 'dono.async.cancel_campaign_recurring';
+    public const HOOK = 'giveflow.async.cancel_campaign_recurring';
 
-    private const OPTION = 'dono_campaign_cancel_recurring';
+    private const OPTION = 'giveflow_campaign_cancel_recurring';
 
     /** Gateway round trips per tick, not rows: each one is an HTTPS call. */
     private const BATCH = 25;
@@ -88,7 +88,7 @@ final class CampaignCancelRecurringJob
         if ($plans === []) {
             $failed = self::failedFor($campaignId);
             self::clear($campaignId);
-            do_action('dono.campaign.recurring_cancelled', $campaignId, $failed);
+            do_action('giveflow.campaign.recurring_cancelled', $campaignId, $failed);
             return;
         }
 

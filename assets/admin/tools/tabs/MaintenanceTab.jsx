@@ -16,7 +16,7 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
 
     const scopes = info?.recalc_scopes?.length
         ? info.recalc_scopes
-        : [ { value: 'all', label: __( 'Everything', 'dono-fundraising-platform' ) } ];
+        : [ { value: 'all', label: __( 'Everything', 'giveflow-fundraising-campaigns' ) } ];
 
     // Tabs are hidden rather than unmounted. Saving a currency on another
     // screen changes which donations are stranded, so refetch on each visit.
@@ -26,17 +26,17 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
         setUpgrading( true );
         setNotice( null );
         try {
-            const res  = await apiFetch( { path: '/dono/v1/admin/tools/run-upgrades', method: 'POST' } );
+            const res  = await apiFetch( { path: '/giveflow/v1/admin/tools/run-upgrades', method: 'POST' } );
             const left = res?.remaining?.length || 0;
             setNotice( {
                 type: 'success',
                 text: left > 0
-                    ? __( 'Progress made. There is more to do, run it again.', 'dono-fundraising-platform' )
-                    : __( 'Data updates finished.', 'dono-fundraising-platform' ),
+                    ? __( 'Progress made. There is more to do, run it again.', 'giveflow-fundraising-campaigns' )
+                    : __( 'Data updates finished.', 'giveflow-fundraising-campaigns' ),
             } );
             loadInfo();
         } catch ( err ) {
-            setNotice( { type: 'error', text: err?.message || __( 'Could not finish the data updates.', 'dono-fundraising-platform' ) } );
+            setNotice( { type: 'error', text: err?.message || __( 'Could not finish the data updates.', 'giveflow-fundraising-campaigns' ) } );
         } finally {
             setUpgrading( false );
         }
@@ -48,15 +48,15 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
         setNotice( null );
         try {
             const res = await apiFetch( {
-                path:   '/dono/v1/admin/tools/recalculate',
+                path:   '/giveflow/v1/admin/tools/recalculate',
                 method: 'POST',
                 data:   { scope: recalcScope },
             } );
             setRecalcResult( res?.counts || {} );
-            setNotice( { type: 'success', text: __( 'Aggregates recomputed.', 'dono-fundraising-platform' ) } );
+            setNotice( { type: 'success', text: __( 'Aggregates recomputed.', 'giveflow-fundraising-campaigns' ) } );
             loadInfo();
         } catch ( err ) {
-            setNotice( { type: 'error', text: err?.message || __( 'Recalculation failed.', 'dono-fundraising-platform' ) } );
+            setNotice( { type: 'error', text: err?.message || __( 'Recalculation failed.', 'giveflow-fundraising-campaigns' ) } );
         } finally {
             setRecalcRunning( false );
         }
@@ -67,7 +67,7 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
         setNotice( null );
         try {
             const res = await apiFetch( {
-                path:   '/dono/v1/admin/tools/purge-test-data',
+                path:   '/giveflow/v1/admin/tools/purge-test-data',
                 method: 'POST',
                 data:   { confirmation: purgeText },
             } );
@@ -76,7 +76,7 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
                 type: 'success',
                 text: sprintf(
                     /* translators: 1: donations removed, 2: recurring plans removed, 3: donors removed */
-                    __( 'Removed %1$d test donations, %2$d test recurring plans and %3$d donors left with nothing.', 'dono-fundraising-platform' ),
+                    __( 'Removed %1$d test donations, %2$d test recurring plans and %3$d donors left with nothing.', 'giveflow-fundraising-campaigns' ),
                     res?.donations || 0,
                     res?.recurring_plans || 0,
                     res?.donors || 0,
@@ -84,7 +84,7 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
             } );
             loadInfo();
         } catch ( err ) {
-            setNotice( { type: 'error', text: err?.message || __( 'Could not remove the test data.', 'dono-fundraising-platform' ) } );
+            setNotice( { type: 'error', text: err?.message || __( 'Could not remove the test data.', 'giveflow-fundraising-campaigns' ) } );
         } finally {
             setPurging( false );
         }
@@ -94,25 +94,25 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
     const testTotal = ( testData?.donations || 0 ) + ( testData?.recurring_plans || 0 );
 
     return (
-        <div className="dono-panel">
+        <div className="giveflow-panel">
             { info?.pending_upgrades?.length > 0 && (
                 <Card
-                    title={ __( 'Data updates are outstanding', 'dono-fundraising-platform' ) }
-                    sub={ __( 'These run by themselves in the background. If they are still here after a few minutes, this site\'s scheduled tasks are not running and you can finish them here.', 'dono-fundraising-platform' ) }
+                    title={ __( 'Data updates are outstanding', 'giveflow-fundraising-campaigns' ) }
+                    sub={ __( 'These run by themselves in the background. If they are still here after a few minutes, this site\'s scheduled tasks are not running and you can finish them here.', 'giveflow-fundraising-campaigns' ) }
                 >
-                    <ul className="dono-advanced-cron">
+                    <ul className="giveflow-advanced-cron">
                         { info.pending_upgrades.map( ( u ) => (
                             <li key={ u.id }>
                                 { u.description }
                                 { u.failure && (
-                                    <div className="dono-advanced-notice dono-advanced-notice--error" style={ { marginTop: 6 } }>
+                                    <div className="giveflow-advanced-notice giveflow-advanced-notice--error" style={ { marginTop: 6 } }>
                                         { sprintf(
                                             /* translators: 1: error message, 2: number of attempts */
                                             _n(
                                                 'Stopped with: %1$s (failed %2$d time)',
                                                 'Stopped with: %1$s (failed %2$d times)',
                                                 u.failure.attempts,
-                                                'dono-fundraising-platform'
+                                                'giveflow-fundraising-campaigns'
                                             ),
                                             u.failure.message,
                                             u.failure.attempts
@@ -122,9 +122,9 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
                             </li>
                         ) ) }
                     </ul>
-                    <div className="dono-advanced-actions" style={ { marginTop: 12 } }>
+                    <div className="giveflow-advanced-actions" style={ { marginTop: 12 } }>
                         <Btn variant="primary" onClick={ doRunUpgrades } disabled={ upgrading } isBusy={ upgrading }>
-                            { upgrading ? __( 'Working…', 'dono-fundraising-platform' ) : __( 'Run them now', 'dono-fundraising-platform' ) }
+                            { upgrading ? __( 'Working…', 'giveflow-fundraising-campaigns' ) : __( 'Run them now', 'giveflow-fundraising-campaigns' ) }
                         </Btn>
                     </div>
                 </Card>
@@ -132,28 +132,28 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
 
             { info?.unconverted_donations?.length > 0 && (
                 <Card
-                    title={ __( 'Donations missing from your totals', 'dono-fundraising-platform' ) }
+                    title={ __( 'Donations missing from your totals', 'giveflow-fundraising-campaigns' ) }
                     sub={
                         info.unconverted_donations.some( ( row ) => row.needs_rate )
-                            ? __( 'A donation is never refused for want of an exchange rate, so these completed donations were recorded in their own currency and left out of every total. Add a rate for the currency on Settings > Currency, then recalculate to bring them in.', 'dono-fundraising-platform' )
-                            : __( 'These completed donations were recorded without a value in your base currency, so every total leaves them out. Recalculate to bring them in; no exchange rate is needed.', 'dono-fundraising-platform' )
+                            ? __( 'A donation is never refused for want of an exchange rate, so these completed donations were recorded in their own currency and left out of every total. Add a rate for the currency on Settings > Currency, then recalculate to bring them in.', 'giveflow-fundraising-campaigns' )
+                            : __( 'These completed donations were recorded without a value in your base currency, so every total leaves them out. Recalculate to bring them in; no exchange rate is needed.', 'giveflow-fundraising-campaigns' )
                     }
                 >
-                    <ul className="dono-advanced-cron">
+                    <ul className="giveflow-advanced-cron">
                         { info.unconverted_donations.map( ( row ) => (
                             <li key={ row.currency }>
                                 <strong>{ row.currency }</strong>
                                 { ' ' }
                                 { sprintf(
                                     /* translators: 1: how many donations, 2: their total in that currency. */
-                                    _n( '%1$s donation, %2$s', '%1$s donations, %2$s', row.count, 'dono-fundraising-platform' ),
+                                    _n( '%1$s donation, %2$s', '%1$s donations, %2$s', row.count, 'giveflow-fundraising-campaigns' ),
                                     row.count,
                                     formatAmount( row.amount_cents, row.currency )
                                 ) }
                                 { ! row.needs_rate && (
                                     <>
                                         { ' ' }
-                                        <em>{ __( '(your base currency: recalculate is all this needs)', 'dono-fundraising-platform' ) }</em>
+                                        <em>{ __( '(your base currency: recalculate is all this needs)', 'giveflow-fundraising-campaigns' ) }</em>
                                     </>
                                 ) }
                             </li>
@@ -163,14 +163,14 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
             ) }
 
             <Card
-                title={ __( 'Recalculate aggregates', 'dono-fundraising-platform' ) }
-                sub={ __( 'Re-derive donor, fund, campaign and form counters from the donation rows. Safe to run any time; donations are only read.', 'dono-fundraising-platform' ) }
+                title={ __( 'Recalculate aggregates', 'giveflow-fundraising-campaigns' ) }
+                sub={ __( 'Re-derive donor, fund, campaign and form counters from the donation rows. Safe to run any time; donations are only read.', 'giveflow-fundraising-campaigns' ) }
             >
-                <div className="dono-advanced-actions">
-                    <label className="dono-tools-field">
-                        { __( 'Scope', 'dono-fundraising-platform' ) }
+                <div className="giveflow-advanced-actions">
+                    <label className="giveflow-tools-field">
+                        { __( 'Scope', 'giveflow-fundraising-campaigns' ) }
                         <select
-                            className="dono-select"
+                            className="giveflow-select"
                             value={ recalcScope }
                             onChange={ ( e ) => setRecalcScope( e.target.value ) }
                             disabled={ recalcRunning }
@@ -181,18 +181,18 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
                         </select>
                     </label>
                     <Btn variant="primary" onClick={ doRecalculate } disabled={ recalcRunning } isBusy={ recalcRunning }>
-                        { recalcRunning ? __( 'Recalculating…', 'dono-fundraising-platform' ) : __( 'Recalculate', 'dono-fundraising-platform' ) }
+                        { recalcRunning ? __( 'Recalculating…', 'giveflow-fundraising-campaigns' ) : __( 'Recalculate', 'giveflow-fundraising-campaigns' ) }
                     </Btn>
                 </div>
                 { recalcResult && (
-                    <ul className="dono-advanced-cron" style={ { marginTop: 12 } }>
+                    <ul className="giveflow-advanced-cron" style={ { marginTop: 12 } }>
                         { Object.entries( recalcResult )
                             .filter( ( [ , n ] ) => n > 0 )
                             .map( ( [ k, n ] ) => (
                                 <li key={ k }>
                                     { sprintf(
                                         /* translators: 1: scope label (Donors, Funds, ...), 2: count */
-                                        __( '%1$s: %2$d synced', 'dono-fundraising-platform' ),
+                                        __( '%1$s: %2$d synced', 'giveflow-fundraising-campaigns' ),
                                         k.charAt( 0 ).toUpperCase() + k.slice( 1 ),
                                         n
                                     ) }
@@ -204,15 +204,15 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
 
             { testTotal > 0 && (
                 <Card
-                    title={ __( 'Test data', 'dono-fundraising-platform' ) }
-                    sub={ __( 'Everything a gateway in test mode left behind: donations, the recurring plans set up against them, and donors who would have nothing left on record. Test rows are left out of your reported totals unless you ask to see them, so this changes nothing you have quoted: it clears the ledger you read by eye before going live. There is no undo.', 'dono-fundraising-platform' ) }
+                    title={ __( 'Test data', 'giveflow-fundraising-campaigns' ) }
+                    sub={ __( 'Everything a gateway in test mode left behind: donations, the recurring plans set up against them, and donors who would have nothing left on record. Test rows are left out of your reported totals unless you ask to see them, so this changes nothing you have quoted: it clears the ledger you read by eye before going live. There is no undo.', 'giveflow-fundraising-campaigns' ) }
                 >
-                    <ul className="dono-advanced-cron">
+                    <ul className="giveflow-advanced-cron">
                         { testData.donations > 0 && (
                             <li>
                                 { sprintf(
                                     /* translators: %d: number of test donations */
-                                    _n( '%d test donation', '%d test donations', testData.donations, 'dono-fundraising-platform' ),
+                                    _n( '%d test donation', '%d test donations', testData.donations, 'giveflow-fundraising-campaigns' ),
                                     testData.donations
                                 ) }
                             </li>
@@ -221,7 +221,7 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
                             <li>
                                 { sprintf(
                                     /* translators: %d: number of test recurring plans */
-                                    _n( '%d test recurring plan', '%d test recurring plans', testData.recurring_plans, 'dono-fundraising-platform' ),
+                                    _n( '%d test recurring plan', '%d test recurring plans', testData.recurring_plans, 'giveflow-fundraising-campaigns' ),
                                     testData.recurring_plans
                                 ) }
                             </li>
@@ -234,19 +234,19 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
                                         '%d donor, who would have nothing left on record',
                                         '%d donors, who would have nothing left on record',
                                         testData.donors,
-                                        'dono-fundraising-platform'
+                                        'giveflow-fundraising-campaigns'
                                     ),
                                     testData.donors
                                 ) }
                             </li>
                         ) }
                     </ul>
-                    <div className="dono-advanced-actions" style={ { marginTop: 12 } }>
-                        <label className="dono-tools-field">
-                            { __( 'Type DELETE to confirm', 'dono-fundraising-platform' ) }
+                    <div className="giveflow-advanced-actions" style={ { marginTop: 12 } }>
+                        <label className="giveflow-tools-field">
+                            { __( 'Type DELETE to confirm', 'giveflow-fundraising-campaigns' ) }
                             <input
                                 type="text"
-                                className="dono-input"
+                                className="giveflow-input"
                                 value={ purgeText }
                                 onChange={ ( e ) => setPurgeText( e.target.value ) }
                                 disabled={ purging }
@@ -258,19 +258,19 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
                             disabled={ purging || purgeText.trim().toUpperCase() !== 'DELETE' }
                             isBusy={ purging }
                         >
-                            { purging ? __( 'Removing…', 'dono-fundraising-platform' ) : __( 'Delete test data', 'dono-fundraising-platform' ) }
+                            { purging ? __( 'Removing…', 'giveflow-fundraising-campaigns' ) : __( 'Delete test data', 'giveflow-fundraising-campaigns' ) }
                         </Btn>
                     </div>
                 </Card>
             ) }
 
             <Card
-                title={ __( 'Setup wizard', 'dono-fundraising-platform' ) }
-                sub={ __( 'Walks through currency, the first campaign, and a payment gateway. Re-running it changes nothing you have already set unless you complete a step.', 'dono-fundraising-platform' ) }
+                title={ __( 'Setup wizard', 'giveflow-fundraising-campaigns' ) }
+                sub={ __( 'Walks through currency, the first campaign, and a payment gateway. Re-running it changes nothing you have already set unless you complete a step.', 'giveflow-fundraising-campaigns' ) }
             >
-                <div className="dono-advanced-actions">
-                    <Btn variant="secondary" href="admin.php?page=dono-onboarding">
-                        { __( 'Open setup wizard', 'dono-fundraising-platform' ) }
+                <div className="giveflow-advanced-actions">
+                    <Btn variant="secondary" href="admin.php?page=giveflow-onboarding">
+                        { __( 'Open setup wizard', 'giveflow-fundraising-campaigns' ) }
                     </Btn>
                 </div>
             </Card>

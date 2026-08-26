@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
 /**
  * Verifies each campaign block opts into the WP 7.0 responsive visibility
@@ -17,13 +17,13 @@ final class CampaignBlocksVisibilitySupportTest extends IntegrationTestCase
     public function campaignBlockNames(): array
     {
         return [
-            ['dono/campaign-image'],
-            ['dono/campaign-progress'],
-            ['dono/campaign-stat'],
-            ['dono/donate-button'],
-            ['dono/top-donors'],
-            ['dono/recent-donations'],
-            ['dono/supporter-wall'],
+            ['giveflow/campaign-image'],
+            ['giveflow/campaign-progress'],
+            ['giveflow/campaign-stat'],
+            ['giveflow/donate-button'],
+            ['giveflow/top-donors'],
+            ['giveflow/recent-donations'],
+            ['giveflow/supporter-wall'],
         ];
     }
 

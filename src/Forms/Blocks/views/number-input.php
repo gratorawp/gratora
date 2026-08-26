@@ -10,13 +10,13 @@ defined('ABSPATH') || exit;
  * @var float      $step
  * @var string     $field
  */
-$labelText = $label !== '' ? $label : __('Number', 'dono-fundraising-platform');
+$labelText = $label !== '' ? $label : __('Number', 'giveflow-fundraising-campaigns');
 $fieldName = $field !== '' ? $field : 'number';
 ?>
-<label class="dono-block dono-block--number-input dono-donor__field">
-    <span class="dono-donor__label"><?php echo esc_html($labelText); ?></span>
+<label class="giveflow-block giveflow-block--number-input giveflow-donor__field">
+    <span class="giveflow-donor__label"><?php echo esc_html($labelText); ?></span>
     <?php if ($helpText !== ''): ?>
-        <span class="dono-donor__help"><?php echo esc_html($helpText); ?></span>
+        <span class="giveflow-donor__help"><?php echo esc_html($helpText); ?></span>
     <?php endif; ?>
     <input
         type="number"

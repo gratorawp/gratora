@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 import { BlockIcons } from '../_shared/block-icons';
 
-const NAME = 'dono/text-input';
+const NAME = 'giveflow/text-input';
 
 function slugify( s ) {
     return String( s || '' )
@@ -26,57 +26,57 @@ function Edit( { attributes, setAttributes } ) {
         condition   = DEFAULT_CONDITION,
     } = attributes;
 
-    const blockProps = useBlockProps( { className: 'dono-block-preview dono-block-preview--field' } );
+    const blockProps = useBlockProps( { className: 'giveflow-block-preview giveflow-block-preview--field' } );
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Text input', 'dono-fundraising-platform' ) } initialOpen>
+                <PanelBody title={ __( 'Text input', 'giveflow-fundraising-campaigns' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'dono-fundraising-platform' ) }
+                        label={ __( 'Label', 'giveflow-fundraising-campaigns' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label in the canvas to edit it inline.', 'dono-fundraising-platform' ) }
+                        help={ __( 'Click the label in the canvas to edit it inline.', 'giveflow-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Placeholder', 'dono-fundraising-platform' ) }
+                        label={ __( 'Placeholder', 'giveflow-fundraising-campaigns' ) }
                         value={ placeholder }
                         onChange={ ( v ) => setAttributes( { placeholder: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Help text', 'dono-fundraising-platform' ) }
+                        label={ __( 'Help text', 'giveflow-fundraising-campaigns' ) }
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Field name', 'dono-fundraising-platform' ) }
+                        label={ __( 'Field name', 'giveflow-fundraising-campaigns' ) }
                         value={ field }
                         onChange={ ( v ) => setAttributes( { field: slugify( v ) } ) }
-                        help={ __( 'Stored under values.custom[field]. Lowercase, snake_case.', 'dono-fundraising-platform' ) }
+                        help={ __( 'Stored under values.custom[field]. Lowercase, snake_case.', 'giveflow-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'dono-fundraising-platform' ) }
+                        label={ __( 'Required', 'giveflow-fundraising-campaigns' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <Slider
-                        label={ __( 'Maximum length', 'dono-fundraising-platform' ) }
+                        label={ __( 'Maximum length', 'giveflow-fundraising-campaigns' ) }
                         value={ maxLength }
                         onChange={ ( v ) => setAttributes( { maxLength: Math.max( 0, v ) } ) }
                         min={ 0 }
                         max={ 500 }
-                        help={ __( '0 = no limit.', 'dono-fundraising-platform' ) }
+                        help={ __( '0 = no limit.', 'giveflow-fundraising-campaigns' ) }
                     />
                     <TextControl
-                        label={ __( 'Pattern (regex)', 'dono-fundraising-platform' ) }
+                        label={ __( 'Pattern (regex)', 'giveflow-fundraising-campaigns' ) }
                         value={ pattern }
                         onChange={ ( v ) => setAttributes( { pattern: v } ) }
-                        help={ __( 'HTML5 pattern attribute. Leave empty to skip.', 'dono-fundraising-platform' ) }
+                        help={ __( 'HTML5 pattern attribute. Leave empty to skip.', 'giveflow-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -88,24 +88,24 @@ function Edit( { attributes, setAttributes } ) {
             <div { ...blockProps }>
                 <RichText
                     tagName="span"
-                    className="dono-block-preview__label"
+                    className="giveflow-block-preview__label"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Label', 'dono-fundraising-platform' ) }
+                    placeholder={ __( 'Label', 'giveflow-fundraising-campaigns' ) }
                     allowedFormats={ [] }
                 />
-                { required && <em className="dono-block-preview__req" aria-hidden="true">*</em> }
+                { required && <em className="giveflow-block-preview__req" aria-hidden="true">*</em> }
                 { helpText !== '' && (
                     <RichText
                         tagName="span"
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
-                        placeholder={ __( 'Help text', 'dono-fundraising-platform' ) }
+                        placeholder={ __( 'Help text', 'giveflow-fundraising-campaigns' ) }
                         allowedFormats={ [] }
                         style={ { fontSize: 11, color: '#6b7280', display: 'block', marginTop: 2 } }
                     />
                 ) }
-                <div className="dono-block-preview__field">{ placeholder || __( 'Text', 'dono-fundraising-platform' ) }</div>
+                <div className="giveflow-block-preview__field">{ placeholder || __( 'Text', 'giveflow-fundraising-campaigns' ) }</div>
             </div>
         </>
     );
@@ -114,9 +114,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Text input', 'dono-fundraising-platform' ),
-        description: __( 'Single-line free text. For employer, dedication name, custom questions, etc.', 'dono-fundraising-platform' ),
-        category:   'dono-fields',
+        title:      __( 'Text input', 'giveflow-fundraising-campaigns' ),
+        description: __( 'Single-line free text. For employer, dedication name, custom questions, etc.', 'giveflow-fundraising-campaigns' ),
+        category:   'giveflow-fields',
         icon:       BlockIcons[ 'text-input' ],
         supports: { html: false, anchor: false, inserter: true },
         attributes: {

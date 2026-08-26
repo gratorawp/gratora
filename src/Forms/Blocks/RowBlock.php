@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Forms\Blocks;
+namespace GiveFlow\Forms\Blocks;
 
 /**
  * Multi-column grid layout block.
@@ -14,7 +14,7 @@ final class RowBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'dono/row';
+        return 'giveflow/row';
     }
 
     /** @since 1.0.0 */
@@ -41,7 +41,7 @@ final class RowBlock implements Block
         }
 
         return sprintf(
-            '<div class="dono-block dono-block--row" style="display:grid;grid-template-columns:repeat(%d,minmax(0,1fr));gap:%d%s">%s</div>',
+            '<div class="giveflow-block giveflow-block--row" style="display:grid;grid-template-columns:repeat(%d,minmax(0,1fr));gap:%d%s">%s</div>',
             $columns,
             $gap,
             $gapUnit,

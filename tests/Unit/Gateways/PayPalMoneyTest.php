@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Unit\Gateways;
+namespace GiveFlow\Tests\Unit\Gateways;
 
-use Dono\Gateways\PayPal\PayPalMoney;
+use GiveFlow\Gateways\PayPal\PayPalMoney;
 use PHPUnit\Framework\TestCase;
 
 /**
  * PayPal takes a decimal string carrying exactly the currency's own number of
- * decimal places, and rejects the amount otherwise. Dono stores major x 100 for
+ * decimal places, and rejects the amount otherwise. GiveFlow stores major x 100 for
  * every currency, so the conversion has to vary by currency, not by a constant.
  */
 final class PayPalMoneyTest extends TestCase

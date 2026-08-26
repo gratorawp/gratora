@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Analytics\EventRecorder;
-use Dono\Donations\Donation;
-use Dono\Donations\DonationRepository;
-use Dono\Donations\DonationService;
-use Dono\Donors\Donor;
-use Dono\Donors\DonorMetricsService;
-use Dono\Foundation\Plugin;
+use GiveFlow\Analytics\EventRecorder;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Donations\DonationService;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\DonorMetricsService;
+use GiveFlow\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -56,7 +56,7 @@ final class SupersededAttemptReadsTest extends IntegrationTestCase
         $now = gmdate('Y-m-d H:i:s');
 
         $d = Donation::make();
-        $d->reference    = 'DONO-SUP-' . strtoupper(substr(md5(uniqid('', true)), 0, 10));
+        $d->reference    = 'GIVEFLOW-SUP-' . strtoupper(substr(md5(uniqid('', true)), 0, 10));
         $d->donor_id     = $this->donorId;
         $d->status       = $status;
         $d->kind         = 'donation';
@@ -111,7 +111,7 @@ final class SupersededAttemptReadsTest extends IntegrationTestCase
 
     private function listRequest(array $params = []): \WP_REST_Response
     {
-        $req = new WP_REST_Request('GET', '/dono/v1/admin/donations');
+        $req = new WP_REST_Request('GET', '/giveflow/v1/admin/donations');
         $req->set_query_params(array_merge(['page' => 1, 'per_page' => 25], $params));
 
         return rest_do_request($req);
@@ -119,7 +119,7 @@ final class SupersededAttemptReadsTest extends IntegrationTestCase
 
     private function statsRequest(array $params = []): array
     {
-        $req = new WP_REST_Request('GET', '/dono/v1/admin/donations/stats');
+        $req = new WP_REST_Request('GET', '/giveflow/v1/admin/donations/stats');
         $req->set_query_params($params);
 
         return (array) rest_do_request($req)->get_data();
@@ -280,7 +280,7 @@ final class SupersededAttemptReadsTest extends IntegrationTestCase
     {
         [$first, $second, $third] = $this->tree();
 
-        $csv = $this->serveBody('/dono/v1/admin/donations/export.csv');
+        $csv = $this->serveBody('/giveflow/v1/admin/donations/export.csv');
 
         $this->assertStringContainsString((string) $third->reference, $csv);
         $this->assertStringNotContainsString((string) $first->reference, $csv);
@@ -336,7 +336,7 @@ final class SupersededAttemptReadsTest extends IntegrationTestCase
     {
         $this->tree();
 
-        $req = new WP_REST_Request('GET', '/dono/v1/admin/donors/' . $this->donorId . '/events');
+        $req = new WP_REST_Request('GET', '/giveflow/v1/admin/donors/' . $this->donorId . '/events');
         $req->set_query_params(['page' => 1, 'per_page' => 25, 'order' => 'desc']);
         $res = rest_do_request($req);
 
@@ -345,7 +345,7 @@ final class SupersededAttemptReadsTest extends IntegrationTestCase
     }
 
     /**
-     * dono_events.donation_id is nullable, and most of a donor's timeline is
+     * giveflow_events.donation_id is nullable, and most of a donor's timeline is
      * these: magic links, consents, portal sign-ins. They point at no donation
      * and cannot be a replaced attempt.
      */
@@ -382,7 +382,7 @@ final class SupersededAttemptReadsTest extends IntegrationTestCase
 
     private function detail(Donation $d): array
     {
-        $req = new WP_REST_Request('GET', '/dono/v1/admin/donations/' . $d->reference);
+        $req = new WP_REST_Request('GET', '/giveflow/v1/admin/donations/' . $d->reference);
         $req->set_url_params(['reference' => (string) $d->reference]);
 
         return (array) rest_do_request($req)->get_data();
@@ -472,6 +472,6 @@ final class SupersededAttemptReadsTest extends IntegrationTestCase
 
         $res = $this->listRequest();
 
-        $this->assertSame('1', $res->get_headers()['X-Dono-Test-Hidden'] ?? null);
+        $this->assertSame('1', $res->get_headers()['X-GiveFlow-Test-Hidden'] ?? null);
     }
 }

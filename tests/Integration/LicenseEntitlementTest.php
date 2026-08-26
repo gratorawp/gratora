@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Foundation\Container\Container;
-use Dono\Foundation\License\LicenseService;
-use Dono\Foundation\Modules\DonoModule;
-use Dono\Foundation\Modules\ModuleManager;
+use GiveFlow\Foundation\Container\Container;
+use GiveFlow\Foundation\License\LicenseService;
+use GiveFlow\Foundation\Modules\GiveFlowModule;
+use GiveFlow\Foundation\Modules\ModuleManager;
 
 /**
  * What entitlement means when nothing has checked.
@@ -26,19 +26,19 @@ final class LicenseEntitlementTest extends IntegrationTestCase
 {
     protected function tearDown(): void
     {
-        remove_all_filters('dono.pro.product_status');
+        remove_all_filters('giveflow.pro.product_status');
         parent::tearDown();
     }
 
     private function serviceWithAddon(): LicenseService
     {
-        $module = new class () implements DonoModule {
+        $module = new class () implements GiveFlowModule {
             public function id(): string { return 'fake'; }
             public function name(): string { return 'Fake Add-on'; }
             public function version(): string { return '1.0.0'; }
             public function requires(): array { return []; }
             public function isLicensed(): bool { return true; }
-            public function tier(): string { return DonoModule::TIER_PRO; }
+            public function tier(): string { return GiveFlowModule::TIER_PRO; }
             public function boot(Container $container): void {}
             public function migrations(): array { return []; }
         };
@@ -63,7 +63,7 @@ final class LicenseEntitlementTest extends IntegrationTestCase
 
     public function test_a_revoked_product_is_not_entitled(): void
     {
-        add_filter('dono.pro.product_status', static fn (): string => 'revoked');
+        add_filter('giveflow.pro.product_status', static fn (): string => 'revoked');
 
         $addons = $this->serviceWithAddon()->entitlements();
 
@@ -74,7 +74,7 @@ final class LicenseEntitlementTest extends IntegrationTestCase
     /** Expired and grace still run: only revoked drops entitlement. */
     public function test_an_expired_product_is_still_entitled(): void
     {
-        add_filter('dono.pro.product_status', static fn (): string => 'expired');
+        add_filter('giveflow.pro.product_status', static fn (): string => 'expired');
 
         $addons = $this->serviceWithAddon()->entitlements();
 
@@ -87,7 +87,7 @@ final class LicenseEntitlementTest extends IntegrationTestCase
 
     public function test_grace_is_entitled_too(): void
     {
-        add_filter('dono.pro.product_status', static fn (): string => 'grace');
+        add_filter('giveflow.pro.product_status', static fn (): string => 'grace');
 
         $this->assertTrue($this->serviceWithAddon()->entitlements()[0]['entitled']);
     }

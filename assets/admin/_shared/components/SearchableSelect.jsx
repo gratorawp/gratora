@@ -1,1 +1,1 @@
-export { default } from '@dono/ui/components/SearchableSelect';
+export { default } from '@giveflow/ui/components/SearchableSelect';

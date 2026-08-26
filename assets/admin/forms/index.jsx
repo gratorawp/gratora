@@ -1,10 +1,10 @@
 import { createRoot } from '@wordpress/element';
 
-import { registerDonoEntities } from '../_shared/entities';
+import { registerGiveFlowEntities } from '../_shared/entities';
 import Toaster from '../_shared/components/Toaster';
 import Editor from './Editor';
 
-registerDonoEntities();
+registerGiveFlowEntities();
 
 function App() {
     const params = new URLSearchParams( window.location.search );
@@ -13,7 +13,7 @@ function App() {
 }
 
 document.addEventListener( 'DOMContentLoaded', () => {
-    const root = document.getElementById( 'dono-admin-forms' );
+    const root = document.getElementById( 'giveflow-admin-forms' );
     if ( ! root ) return;
     createRoot( root ).render( <><App /><Toaster /></> );
 } );

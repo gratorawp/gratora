@@ -1,8 +1,8 @@
 /**
  * Donor fields that ship outside core.
  *
- * PHP puts the field in the runtime config (dono.form.block_field); an add-on
- * bundle registers the browser half against window.dono.formFields, which
+ * PHP puts the field in the runtime config (giveflow.form.block_field); an add-on
+ * bundle registers the browser half against window.giveflow.formFields, which
  * FormFieldAssets defines. An entry may supply any of:
  *
  *   component( { field, ctx } )   the rendered input
@@ -14,7 +14,7 @@
  */
 
 function registry() {
-    return ( typeof window !== 'undefined' && window.dono && window.dono.formFields ) || null;
+    return ( typeof window !== 'undefined' && window.giveflow && window.giveflow.formFields ) || null;
 }
 
 export function fieldEntry( kind ) {

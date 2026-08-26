@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
-use Dono\Donors\DonorService;
-use Dono\Donors\MagicLinkService;
-use Dono\Foundation\Plugin;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Donors\MagicLinkService;
+use GiveFlow\Foundation\Plugin;
 use WP_REST_Request;
 
 /** Portal surfaces that showed or spent the wrong thing. */
@@ -22,12 +22,12 @@ final class PortalMediumsTest extends IntegrationTestCase
             ->findOrCreate('portal-med-' . uniqid() . '@example.test');
 
         $sid = $this->portalSession((int) $this->donor->id, 'tok');
-        $_COOKIE['dono_donor_session'] = $sid;
+        $_COOKIE['giveflow_donor_session'] = $sid;
     }
 
     protected function tearDown(): void
     {
-        unset($_COOKIE['dono_donor_session']);
+        unset($_COOKIE['giveflow_donor_session']);
         parent::tearDown();
     }
 
@@ -56,7 +56,7 @@ final class PortalMediumsTest extends IntegrationTestCase
         $order = $this->row('order', 'ORDER-' . uniqid());
 
         $refs = array_column(
-            (array) rest_do_request(new WP_REST_Request('GET', '/dono/v1/portal/donations'))->get_data(),
+            (array) rest_do_request(new WP_REST_Request('GET', '/giveflow/v1/portal/donations'))->get_data(),
             'reference'
         );
 
@@ -72,7 +72,7 @@ final class PortalMediumsTest extends IntegrationTestCase
     {
         $order = $this->row('order', 'ORDER-' . uniqid());
 
-        $res = rest_do_request(new WP_REST_Request('GET', '/dono/v1/portal/donations/' . $order->reference));
+        $res = rest_do_request(new WP_REST_Request('GET', '/giveflow/v1/portal/donations/' . $order->reference));
 
         $this->assertSame(404, $res->get_status(), 'excluded from the list means excluded from the detail');
     }

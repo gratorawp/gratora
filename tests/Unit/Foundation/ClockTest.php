@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Unit\Foundation;
+namespace GiveFlow\Tests\Unit\Foundation;
 
 use DateTimeImmutable;
-use Dono\Foundation\Time\FrozenClock;
-use Dono\Foundation\Time\SystemClock;
+use GiveFlow\Foundation\Time\FrozenClock;
+use GiveFlow\Foundation\Time\SystemClock;
 use PHPUnit\Framework\TestCase;
 
 final class ClockTest extends TestCase

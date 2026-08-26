@@ -50,21 +50,21 @@ export default function GatewaysPanel( { s } ) {
     const [ offlineOpen, setOfflineOpen ] = useCardOpen( offlineEnabled && ! offlineConfigured, 'payments', 'offline' );
 
     const offlinePill = ! offlineEnabled
-        ? <span className="dono-pill dono-pill--gray"><span className="dono-pill__dot dono-pill__dot--soft" />{ __( 'Disabled', 'dono-fundraising-platform' ) }</span>
+        ? <span className="giveflow-pill giveflow-pill--gray"><span className="giveflow-pill__dot giveflow-pill__dot--soft" />{ __( 'Disabled', 'giveflow-fundraising-campaigns' ) }</span>
         : offlineConfigured
-            ? <span className="dono-pill dono-pill--green"><span className="dono-pill__dot" />{ __( 'Configured', 'dono-fundraising-platform' ) }</span>
-            : <span className="dono-pill dono-pill--amber"><span className="dono-pill__dot" />{ __( 'Enabled, no instructions', 'dono-fundraising-platform' ) }</span>;
+            ? <span className="giveflow-pill giveflow-pill--green"><span className="giveflow-pill__dot" />{ __( 'Configured', 'giveflow-fundraising-campaigns' ) }</span>
+            : <span className="giveflow-pill giveflow-pill--amber"><span className="giveflow-pill__dot" />{ __( 'Enabled, no instructions', 'giveflow-fundraising-campaigns' ) }</span>;
 
     return (
-        <div className="dono-panel">
+        <div className="giveflow-panel">
             <Card
-                title={ __( 'Test mode', 'dono-fundraising-platform' ) }
-                sub={ __( 'Org-wide rehearsal switch, also settable per form', 'dono-fundraising-platform' ) }
+                title={ __( 'Test mode', 'giveflow-fundraising-campaigns' ) }
+                sub={ __( 'Org-wide rehearsal switch, also settable per form', 'giveflow-fundraising-campaigns' ) }
                 edited={ s.isDirty }
             >
                 <ToggleRow
-                    title={ __( 'Enable test mode for all forms', 'dono-fundraising-platform' ) }
-                    sub={ __( 'No real payment is taken and these donations are excluded from reporting.', 'dono-fundraising-platform' ) }
+                    title={ __( 'Enable test mode for all forms', 'giveflow-fundraising-campaigns' ) }
+                    sub={ __( 'No real payment is taken and these donations are excluded from reporting.', 'giveflow-fundraising-campaigns' ) }
                     checked={ !! s.value( 'test_mode', false ) }
                     onChange={ s.setValue( 'test_mode' ) }
                 />
@@ -80,8 +80,8 @@ export default function GatewaysPanel( { s } ) {
 
             <Card
                 leading={ <BrandMark letter="O" variant="offline" /> }
-                title={ __( 'Offline donations', 'dono-fundraising-platform' ) }
-                sub={ __( 'Donor sees your bank details and pays offline', 'dono-fundraising-platform' ) }
+                title={ __( 'Offline donations', 'giveflow-fundraising-campaigns' ) }
+                sub={ __( 'Donor sees your bank details and pays offline', 'giveflow-fundraising-campaigns' ) }
                 meta={ offlinePill }
                 edited={ s.isDirty }
                 collapsible
@@ -89,36 +89,36 @@ export default function GatewaysPanel( { s } ) {
                 onToggle={ setOfflineOpen }
             >
                 <ToggleRow
-                    title={ __( 'Enable offline donations', 'dono-fundraising-platform' ) }
-                    sub={ __( 'For cash, check, or bank transfer donations marked paid by admin.', 'dono-fundraising-platform' ) }
+                    title={ __( 'Enable offline donations', 'giveflow-fundraising-campaigns' ) }
+                    sub={ __( 'For cash, check, or bank transfer donations marked paid by admin.', 'giveflow-fundraising-campaigns' ) }
                     checked={ offlineEnabled }
                     onChange={ s.setValue( 'offline.enabled' ) }
                 />
 
                 <FormRow
-                    label={ __( 'Instructions', 'dono-fundraising-platform' ) }
-                    help={ __( 'Emailed to donors who choose bank transfer, with their donation reference.', 'dono-fundraising-platform' ) }
+                    label={ __( 'Instructions', 'giveflow-fundraising-campaigns' ) }
+                    help={ __( 'Emailed to donors who choose bank transfer, with their donation reference.', 'giveflow-fundraising-campaigns' ) }
                     wide
                 >
                     <textarea
-                        className="dono-textarea"
+                        className="giveflow-textarea"
                         rows={ 4 }
-                        placeholder={ __( 'Please transfer the donation amount within 7 days. Use the reference number so we can match your donation to your receipt.', 'dono-fundraising-platform' ) }
+                        placeholder={ __( 'Please transfer the donation amount within 7 days. Use the reference number so we can match your donation to your receipt.', 'giveflow-fundraising-campaigns' ) }
                         { ...s.bind( 'offline.instructions' ) }
                     />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Bank details template', 'dono-fundraising-platform' ) }
-                    help={ __( 'Click a placeholder to drop it in. They expand when the donor is shown their transfer details.', 'dono-fundraising-platform' ) }
+                    label={ __( 'Bank details template', 'giveflow-fundraising-campaigns' ) }
+                    help={ __( 'Click a placeholder to drop it in. They expand when the donor is shown their transfer details.', 'giveflow-fundraising-campaigns' ) }
                     wide
                 >
-                    <div className="dono-merge-tags">
+                    <div className="giveflow-merge-tags">
                         { BANK_PLACEHOLDERS.map( ( tag ) => (
                             <button
                                 key={ tag }
                                 type="button"
-                                className="dono-merge-tag"
+                                className="giveflow-merge-tag"
                                 onClick={ () => insertPlaceholder( tag ) }
                             >
                                 { tag }
@@ -127,7 +127,7 @@ export default function GatewaysPanel( { s } ) {
                     </div>
                     <textarea
                         ref={ bankRef }
-                        className="dono-textarea dono-textarea--mono"
+                        className="giveflow-textarea giveflow-textarea--mono"
                         rows={ 5 }
                         placeholder={ 'Account holder: …\nIBAN: …\nBIC:  …\nReference: {reference}\nAmount:    {amount}' }
                         { ...s.bind( 'offline.bank_details' ) }

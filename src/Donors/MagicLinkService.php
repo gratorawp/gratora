@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Donors;
+namespace GiveFlow\Donors;
 
-use Dono\Foundation\Time\Clock;
+use GiveFlow\Foundation\Time\Clock;
 
 /**
  * Issues and validates magic-link tokens for donor self-service.
@@ -165,7 +165,7 @@ final class MagicLinkService
     {
         $ip = filter_var(wp_unslash($_SERVER['REMOTE_ADDR'] ?? ''), FILTER_VALIDATE_IP) ?: 'unknown';
 
-        return 'dono_ml_val_' . hash('sha256', $purpose . '|' . $ip);
+        return 'giveflow_ml_val_' . hash('sha256', $purpose . '|' . $ip);
     }
 
     /**

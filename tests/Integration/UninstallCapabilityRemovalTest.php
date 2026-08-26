@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Foundation\Auth\Capabilities;
-use Dono\Foundation\Uninstall\DataEraser;
+use GiveFlow\Foundation\Auth\Capabilities;
+use GiveFlow\Foundation\Uninstall\DataEraser;
 
 /**
- * "Delete all Dono data" has to take back what the plugin granted, and only
+ * "Delete all GiveFlow data" has to take back what the plugin granted, and only
  * that. The roles screen hands the same capabilities to editor and below as it
  * does to the administrator, and a capability nobody took back outlives the
  * plugin in wp_user_roles, on a site that has removed it.
@@ -33,18 +33,18 @@ final class UninstallCapabilityRemovalTest extends IntegrationTestCase
     public function test_capabilities_granted_to_a_non_administrator_are_taken_back(): void
     {
         Capabilities::applyMapping([
-            'editor' => ['dono_view_donors', 'dono_export_donors'],
+            'editor' => ['giveflow_view_donors', 'giveflow_export_donors'],
         ]);
 
         $editor = get_role('editor');
-        $this->assertTrue($editor->has_cap('dono_view_donors'), 'precondition: the grant happened');
+        $this->assertTrue($editor->has_cap('giveflow_view_donors'), 'precondition: the grant happened');
         $this->assertTrue($editor->has_cap(Capabilities::MANAGE), 'precondition: the umbrella came with it');
 
         (new DataEraser())->removeCapabilities();
 
         $editor = get_role('editor');
-        $this->assertFalse($editor->has_cap('dono_view_donors'));
-        $this->assertFalse($editor->has_cap('dono_export_donors'));
+        $this->assertFalse($editor->has_cap('giveflow_view_donors'));
+        $this->assertFalse($editor->has_cap('giveflow_export_donors'));
         $this->assertFalse($editor->has_cap(Capabilities::MANAGE));
     }
 
@@ -52,7 +52,7 @@ final class UninstallCapabilityRemovalTest extends IntegrationTestCase
     {
         Capabilities::applyMapping(['administrator' => Capabilities::ALL]);
 
-        $this->assertTrue(get_role('administrator')->has_cap('dono_refund_donations'), 'precondition');
+        $this->assertTrue(get_role('administrator')->has_cap('giveflow_refund_donations'), 'precondition');
 
         (new DataEraser())->removeCapabilities();
 
@@ -63,19 +63,19 @@ final class UninstallCapabilityRemovalTest extends IntegrationTestCase
     }
 
     /**
-     * dono_manage_fundraisers is registered by the peer-to-peer plugin. Taking
+     * giveflow_manage_fundraisers is registered by the peer-to-peer plugin. Taking
      * it here breaks a site that keeps that plugin, which is worse than any
      * capability left behind.
      */
     public function test_an_add_on_capability_survives(): void
     {
-        get_role('editor')->add_cap('dono_manage_fundraisers');
+        get_role('editor')->add_cap('giveflow_manage_fundraisers');
 
         (new DataEraser())->removeCapabilities();
 
-        $this->assertTrue(get_role('editor')->has_cap('dono_manage_fundraisers'));
+        $this->assertTrue(get_role('editor')->has_cap('giveflow_manage_fundraisers'));
 
-        get_role('editor')->remove_cap('dono_manage_fundraisers');
+        get_role('editor')->remove_cap('giveflow_manage_fundraisers');
     }
 
     /**

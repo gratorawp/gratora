@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Foundation\Plugin;
-use Dono\Forms\Blocks\BlockRegistry;
-use Dono\Forms\FormTemplates;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Forms\Blocks\BlockRegistry;
+use GiveFlow\Forms\FormTemplates;
 
 /**
  * A template is a claim about which fields suit a situation, and the claim is
@@ -15,13 +15,13 @@ use Dono\Forms\FormTemplates;
  */
 final class FormTemplateFieldsTest extends IntegrationTestCase
 {
-    /** @return list<string> every dono/* block name a template uses */
+    /** @return list<string> every giveflow/* block name a template uses */
     private function blocksIn(string $id): array
     {
         $t = FormTemplates::find($id);
         $this->assertNotNull($t, "template {$id} is not registered");
 
-        preg_match_all('#wp:(dono/[a-z-]+)#', (string) $t['blocks'], $m);
+        preg_match_all('#wp:(giveflow/[a-z-]+)#', (string) $t['blocks'], $m);
 
         return $m[1];
     }
@@ -77,23 +77,23 @@ final class FormTemplateFieldsTest extends IntegrationTestCase
             }
             $blocks = $this->blocksIn($id);
 
-            $this->assertCount(1, array_keys($blocks, 'dono/donation-amount', true), "{$id}: needs exactly one amount block");
-            $this->assertCount(1, array_keys($blocks, 'dono/payment-gateways', true), "{$id}: needs exactly one gateway block");
-            $this->assertCount(1, array_keys($blocks, 'dono/submit-button', true), "{$id}: needs exactly one submit button");
-            $this->assertContains('dono/email', $blocks, "{$id}: a receipt needs an email address");
+            $this->assertCount(1, array_keys($blocks, 'giveflow/donation-amount', true), "{$id}: needs exactly one amount block");
+            $this->assertCount(1, array_keys($blocks, 'giveflow/payment-gateways', true), "{$id}: needs exactly one gateway block");
+            $this->assertCount(1, array_keys($blocks, 'giveflow/submit-button', true), "{$id}: needs exactly one submit button");
+            $this->assertContains('giveflow/email', $blocks, "{$id}: a receipt needs an email address");
         }
     }
 
     /** The appeal is the designation; choosing a fund contradicts the ask. */
     public function test_the_emergency_appeal_offers_no_fund_choice(): void
     {
-        $this->assertNotContains('dono/fund-picker', $this->blocksIn('emergency-appeal'));
+        $this->assertNotContains('giveflow/fund-picker', $this->blocksIn('emergency-appeal'));
     }
 
     /** Without a fund picker it is just the everyday form with a longer name. */
     public function test_designated_giving_lets_the_donor_pick_a_fund(): void
     {
-        $this->assertContains('dono/fund-picker', $this->blocksIn('designated'));
+        $this->assertContains('giveflow/fund-picker', $this->blocksIn('designated'));
     }
 
     /**
@@ -117,15 +117,15 @@ final class FormTemplateFieldsTest extends IntegrationTestCase
     {
         foreach ($this->templateIds() as $id) {
             $blocks = $this->blocksIn($id);
-            $social = in_array('dono/comment', $blocks, true)
-                || in_array('dono/anonymous-toggle', $blocks, true);
+            $social = in_array('giveflow/comment', $blocks, true)
+                || in_array('giveflow/anonymous-toggle', $blocks, true);
 
             if (! $social) {
                 continue;
             }
 
             $this->assertContains(
-                'dono/goal',
+                'giveflow/goal',
                 $blocks,
                 "{$id}: carries a message or anonymity field but shows no public campaign progress"
             );
@@ -137,9 +137,9 @@ final class FormTemplateFieldsTest extends IntegrationTestCase
     {
         $blocks = $this->blocksIn('quick-give');
 
-        $this->assertNotContains('dono/phone', $blocks);
-        $this->assertNotContains('dono/address', $blocks);
-        $this->assertNotContains('dono/comment', $blocks);
+        $this->assertNotContains('giveflow/phone', $blocks);
+        $this->assertNotContains('giveflow/address', $blocks);
+        $this->assertNotContains('giveflow/comment', $blocks);
         $this->assertLessThan(
             count($this->blocksIn('everyday')) + 1,
             count($blocks),

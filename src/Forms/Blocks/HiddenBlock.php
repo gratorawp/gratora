@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Forms\Blocks;
+namespace GiveFlow\Forms\Blocks;
 
 /**
- * dono/hidden: invisible value captured with the donation.
+ * giveflow/hidden: invisible value captured with the donation.
  *
  * @since 1.0.0
  */
@@ -14,7 +14,7 @@ final class HiddenBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'dono/hidden';
+        return 'giveflow/hidden';
     }
 
     /** @since 1.0.0 */

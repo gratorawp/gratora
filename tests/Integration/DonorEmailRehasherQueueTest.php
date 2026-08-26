@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Async\AsyncDispatcher;
-use Dono\Donors\DonorEmailRehasher;
-use Dono\Foundation\Plugin;
-use Dono\Vendor\Queryable\DB;
+use GiveFlow\Async\AsyncDispatcher;
+use GiveFlow\Donors\DonorEmailRehasher;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Vendor\Queryable\DB;
 
 /**
  * The rehash walks the donor table a page at a time and reconcile() runs on
@@ -36,7 +36,7 @@ final class DonorEmailRehasherQueueTest extends IntegrationTestCase
     protected function tearDown(): void
     {
         delete_option(DonorEmailRehasher::PENDING_OPTION);
-        delete_option('dono_donor_rehash_after_id');
+        delete_option('giveflow_donor_rehash_after_id');
 
         parent::tearDown();
     }
@@ -66,7 +66,7 @@ final class DonorEmailRehasherQueueTest extends IntegrationTestCase
     private function seedDonors(int $count): void
     {
         for ($i = 0; $i < $count; $i++) {
-            DB::table('dono_donors')->insert([
+            DB::table('giveflow_donors')->insert([
                 'email_hash'      => str_pad((string) $i, 64, 'a', STR_PAD_LEFT),
                 'email_encrypted' => 'not-really-ciphertext-' . $i,
                 'created_at'      => '2026-01-01 00:00:00',
@@ -114,7 +114,7 @@ final class DonorEmailRehasherQueueTest extends IntegrationTestCase
 
         $this->assertGreaterThan(
             0,
-            (int) get_option('dono_donor_rehash_after_id', 0),
+            (int) get_option('giveflow_donor_rehash_after_id', 0),
             'the first batch records how far it got'
         );
 
@@ -122,7 +122,7 @@ final class DonorEmailRehasherQueueTest extends IntegrationTestCase
         $rehasher->run();
 
         $this->assertFalse(get_option(DonorEmailRehasher::PENDING_OPTION), 'nothing is owed any more');
-        $this->assertFalse(get_option('dono_donor_rehash_after_id'), 'and no cursor is left behind');
+        $this->assertFalse(get_option('giveflow_donor_rehash_after_id'), 'and no cursor is left behind');
     }
 
     /**
@@ -140,13 +140,13 @@ final class DonorEmailRehasherQueueTest extends IntegrationTestCase
         $rehasher = $this->rehasher();
         $rehasher->run();
 
-        $cursor = (int) get_option('dono_donor_rehash_after_id', 0);
+        $cursor = (int) get_option('giveflow_donor_rehash_after_id', 0);
         $this->assertGreaterThan(0, $cursor, 'precondition: the walk is part way down the table');
 
         DonorEmailRehasher::markPending();
 
         $this->assertFalse(
-            get_option('dono_donor_rehash_after_id'),
+            get_option('giveflow_donor_rehash_after_id'),
             'the rows already rewritten are stale too, so the walk starts again'
         );
     }

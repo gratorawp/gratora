@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Campaigns;
+namespace GiveFlow\Campaigns;
 
 /**
  * Behavior a non-default campaign_type handler provides.
@@ -19,7 +19,7 @@ interface CampaignTypeHandler
     public function label(): string;
 
     /**
-     * @return class-string<\Dono\Vendor\Queryable\Model>|null sidecar PK = parent id, or null
+     * @return class-string<\GiveFlow\Vendor\Queryable\Model>|null sidecar PK = parent id, or null
      *
      * @since 1.0.0
      */

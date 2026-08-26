@@ -71,7 +71,7 @@ function EditPanel( { donor, onCancel, onSaved } ) {
         setError( null );
         try {
             const updated = await apiFetch( {
-                path:   `/dono/v1/admin/donors/${ donor.id }`,
+                path:   `/giveflow/v1/admin/donors/${ donor.id }`,
                 method: 'PATCH',
                 data:   form,
             } );
@@ -87,18 +87,18 @@ function EditPanel( { donor, onCancel, onSaved } ) {
         // The footer lives outside the form element, so it calls this directly.
         if ( e ) e.preventDefault();
         if ( phoneInvalid ) {
-            setError( __( 'Phone number looks malformed. Use digits, +, spaces, parentheses, or dashes.', 'dono-fundraising-platform' ) );
+            setError( __( 'Phone number looks malformed. Use digits, +, spaces, parentheses, or dashes.', 'giveflow-fundraising-campaigns' ) );
             return;
         }
         if ( emailInvalid ) {
-            setError( __( 'Email address looks malformed.', 'dono-fundraising-platform' ) );
+            setError( __( 'Email address looks malformed.', 'giveflow-fundraising-campaigns' ) );
             return;
         }
         if ( emailChanged ) {
             setConfirm( {
-                title:        __( 'Change donor email', 'dono-fundraising-platform' ),
-                message:      __( 'Change this donor\'s email? Future donations from the new address will link to this record.', 'dono-fundraising-platform' ),
-                confirmLabel: __( 'Change email', 'dono-fundraising-platform' ),
+                title:        __( 'Change donor email', 'giveflow-fundraising-campaigns' ),
+                message:      __( 'Change this donor\'s email? Future donations from the new address will link to this record.', 'giveflow-fundraising-campaigns' ),
+                confirmLabel: __( 'Change email', 'giveflow-fundraising-campaigns' ),
                 onConfirm:    doSave,
             } );
             return;
@@ -120,13 +120,13 @@ function EditPanel( { donor, onCancel, onSaved } ) {
     return (
         <>
             <Dialog
-                title={ __( 'Edit donor details', 'dono-fundraising-platform' ) }
+                title={ __( 'Edit donor details', 'giveflow-fundraising-campaigns' ) }
                 onClose={ () => ( saving ? null : onCancel() ) }
                 size="wide"
                 foot={
                     <>
                         <Btn variant="secondary" onClick={ onCancel } disabled={ saving }>
-                            { __( 'Cancel', 'dono-fundraising-platform' ) }
+                            { __( 'Cancel', 'giveflow-fundraising-campaigns' ) }
                         </Btn>
                         <Btn
                             variant="primary"
@@ -134,15 +134,15 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                             isBusy={ saving }
                             disabled={ saving || phoneInvalid }
                         >
-                            { saving ? __( 'Saving…', 'dono-fundraising-platform' ) : __( 'Save', 'dono-fundraising-platform' ) }
+                            { saving ? __( 'Saving…', 'giveflow-fundraising-campaigns' ) : __( 'Save', 'giveflow-fundraising-campaigns' ) }
                         </Btn>
                     </>
                 }
             >
                 <form className="dp-edit-form" onSubmit={ submit }>
                     <label style={ { gridColumn: '1 / -1' } }>
-                        { __( 'Email', 'dono-fundraising-platform' ) }
-                        <input className="dono-input"
+                        { __( 'Email', 'giveflow-fundraising-campaigns' ) }
+                        <input className="giveflow-input"
                             type="email"
                             value={ form.email }
                             onChange={ set( 'email' ) }
@@ -152,25 +152,25 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                         />
                         { emailChanged && (
                             <span className="dp-field__hint">
-                                { __( 'Saving rehashes the donor identity. Future donations from this address will link to this record.', 'dono-fundraising-platform' ) }
+                                { __( 'Saving rehashes the donor identity. Future donations from this address will link to this record.', 'giveflow-fundraising-campaigns' ) }
                             </span>
                         ) }
                     </label>
                     <label>
-                        { __( 'First name', 'dono-fundraising-platform' ) }
-                        <input className="dono-input" type="text" value={ form.first_name } onChange={ set( 'first_name' ) } maxLength={ 100 } />
+                        { __( 'First name', 'giveflow-fundraising-campaigns' ) }
+                        <input className="giveflow-input" type="text" value={ form.first_name } onChange={ set( 'first_name' ) } maxLength={ 100 } />
                     </label>
                     <label>
-                        { __( 'Last name', 'dono-fundraising-platform' ) }
-                        <input className="dono-input" type="text" value={ form.last_name } onChange={ set( 'last_name' ) } maxLength={ 100 } />
+                        { __( 'Last name', 'giveflow-fundraising-campaigns' ) }
+                        <input className="giveflow-input" type="text" value={ form.last_name } onChange={ set( 'last_name' ) } maxLength={ 100 } />
                     </label>
                     <label className="dp-edit-form__country">
-                        { __( 'Country', 'dono-fundraising-platform' ) }
+                        { __( 'Country', 'giveflow-fundraising-campaigns' ) }
                         <div className="dp-edit-form__country-wrap">
-                            <input className="dono-input"
+                            <input className="giveflow-input"
                                 type="text"
                                 value={ countryQuery }
-                                placeholder={ __( 'Search country…', 'dono-fundraising-platform' ) }
+                                placeholder={ __( 'Search country…', 'giveflow-fundraising-campaigns' ) }
                                 onFocus={ () => setCountryOpen( true ) }
                                 onBlur={ () => setTimeout( () => setCountryOpen( false ), 150 ) }
                                 onChange={ ( e ) => { setCountryQuery( e.target.value ); setCountryOpen( true ); } }
@@ -190,20 +190,20 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                         </div>
                     </label>
                     <label>
-                        { __( 'Type', 'dono-fundraising-platform' ) }
-                        <select className="dono-select" value={ form.donor_type } onChange={ set( 'donor_type' ) }>
-                            <option value="individual">{ __( 'Individual', 'dono-fundraising-platform' ) }</option>
-                            <option value="organization">{ __( 'Organization', 'dono-fundraising-platform' ) }</option>
-                            <option value="household">{ __( 'Household', 'dono-fundraising-platform' ) }</option>
+                        { __( 'Type', 'giveflow-fundraising-campaigns' ) }
+                        <select className="giveflow-select" value={ form.donor_type } onChange={ set( 'donor_type' ) }>
+                            <option value="individual">{ __( 'Individual', 'giveflow-fundraising-campaigns' ) }</option>
+                            <option value="organization">{ __( 'Organization', 'giveflow-fundraising-campaigns' ) }</option>
+                            <option value="household">{ __( 'Household', 'giveflow-fundraising-campaigns' ) }</option>
                         </select>
                     </label>
                     <label style={ { gridColumn: '1 / -1' } }>
-                        { __( 'Company', 'dono-fundraising-platform' ) }
-                        <input className="dono-input" type="text" value={ form.company } onChange={ set( 'company' ) } maxLength={ 150 } />
+                        { __( 'Company', 'giveflow-fundraising-campaigns' ) }
+                        <input className="giveflow-input" type="text" value={ form.company } onChange={ set( 'company' ) } maxLength={ 150 } />
                     </label>
                     <label style={ { gridColumn: '1 / -1' } }>
-                        { __( 'Phone', 'dono-fundraising-platform' ) }
-                        <input className="dono-input"
+                        { __( 'Phone', 'giveflow-fundraising-campaigns' ) }
+                        <input className="giveflow-input"
                             type="tel"
                             value={ form.phone }
                             onChange={ set( 'phone' ) }
@@ -213,33 +213,33 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                         />
                         { phoneInvalid && (
                             <span className="dp-field__hint dp-field__hint--err">
-                                { __( 'Use digits, +, spaces, parentheses, or dashes.', 'dono-fundraising-platform' ) }
+                                { __( 'Use digits, +, spaces, parentheses, or dashes.', 'giveflow-fundraising-campaigns' ) }
                             </span>
                         ) }
                     </label>
                     <label style={ { gridColumn: '1 / -1' } }>
-                        { __( 'Address line 1', 'dono-fundraising-platform' ) }
-                        <input className="dono-input"
+                        { __( 'Address line 1', 'giveflow-fundraising-campaigns' ) }
+                        <input className="giveflow-input"
                             type="text"
                             value={ form.address.line1 }
                             onChange={ setAddr( 'line1' ) }
-                            placeholder={ __( 'Street and number', 'dono-fundraising-platform' ) }
+                            placeholder={ __( 'Street and number', 'giveflow-fundraising-campaigns' ) }
                             maxLength={ 200 }
                         />
                     </label>
                     <label style={ { gridColumn: '1 / -1' } }>
-                        { __( 'Address line 2', 'dono-fundraising-platform' ) }
-                        <input className="dono-input"
+                        { __( 'Address line 2', 'giveflow-fundraising-campaigns' ) }
+                        <input className="giveflow-input"
                             type="text"
                             value={ form.address.line2 }
                             onChange={ setAddr( 'line2' ) }
-                            placeholder={ __( 'Apartment, suite, etc. (optional)', 'dono-fundraising-platform' ) }
+                            placeholder={ __( 'Apartment, suite, etc. (optional)', 'giveflow-fundraising-campaigns' ) }
                             maxLength={ 200 }
                         />
                     </label>
                     <label>
-                        { __( 'City', 'dono-fundraising-platform' ) }
-                        <input className="dono-input"
+                        { __( 'City', 'giveflow-fundraising-campaigns' ) }
+                        <input className="giveflow-input"
                             type="text"
                             value={ form.address.city }
                             onChange={ setAddr( 'city' ) }
@@ -247,8 +247,8 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                         />
                     </label>
                     <label>
-                        { __( 'Region', 'dono-fundraising-platform' ) }
-                        <input className="dono-input"
+                        { __( 'Region', 'giveflow-fundraising-campaigns' ) }
+                        <input className="giveflow-input"
                             type="text"
                             value={ form.address.region }
                             onChange={ setAddr( 'region' ) }
@@ -256,8 +256,8 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                         />
                     </label>
                     <label>
-                        { __( 'Postal code', 'dono-fundraising-platform' ) }
-                        <input className="dono-input"
+                        { __( 'Postal code', 'giveflow-fundraising-campaigns' ) }
+                        <input className="giveflow-input"
                             type="text"
                             value={ form.address.postal }
                             onChange={ setAddr( 'postal' ) }
@@ -288,7 +288,7 @@ export default function DonorProfile( { id, onBack } ) {
 
     const load = () => {
         setLoading( true );
-        return apiFetch( { path: `/dono/v1/admin/donors/${ id }/profile` } )
+        return apiFetch( { path: `/giveflow/v1/admin/donors/${ id }/profile` } )
             .then( ( d ) => { setData( d ); setError( null ); } )
             .catch( ( e ) => setError( e?.message || 'Error' ) )
             .finally( () => setLoading( false ) );
@@ -298,14 +298,14 @@ export default function DonorProfile( { id, onBack } ) {
         let aborted = false;
         setLoading( true );
         setData( null );
-        apiFetch( { path: `/dono/v1/admin/donors/${ id }/profile` } )
+        apiFetch( { path: `/giveflow/v1/admin/donors/${ id }/profile` } )
             .then( ( d ) => { if ( ! aborted ) { setData( d ); setError( null ); } } )
             .catch( ( e ) => { if ( ! aborted ) setError( e?.message || 'Error' ); } )
             .finally( () => { if ( ! aborted ) setLoading( false ); } );
         return () => { aborted = true; };
     }, [ id ] );
 
-    if ( loading && ! data ) return <p className="dp-loading">{ __( 'Loading donor…', 'dono-fundraising-platform' ) }</p>;
+    if ( loading && ! data ) return <p className="dp-loading">{ __( 'Loading donor…', 'giveflow-fundraising-campaigns' ) }</p>;
     if ( error )              return <p className="dp-error">{ error }</p>;
     if ( ! data )             return null;
 

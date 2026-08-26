@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Onboarding;
+namespace GiveFlow\Onboarding;
 
-use Dono\Foundation\Hooks\HookProvider;
+use GiveFlow\Foundation\Hooks\HookProvider;
 
 /**
  * Full-screen first-run onboarding page (hidden submenu, no WP chrome).
@@ -13,15 +13,15 @@ use Dono\Foundation\Hooks\HookProvider;
  */
 final class OnboardingPage extends HookProvider
 {
-    public const PAGE_ID   = 'dono-onboarding';
-    private const HANDLE   = 'dono-admin-onboarding';
+    public const PAGE_ID   = 'giveflow-onboarding';
+    private const HANDLE   = 'giveflow-admin-onboarding';
     private const BUILD_DIR = 'build/admin/onboarding';
 
     /** @since 1.0.0 */
     protected function filters(): array
     {
         return [
-            'dono.admin.pages' => 'registerPage',
+            'giveflow.admin.pages' => 'registerPage',
             'admin_body_class' => 'maybeAddBodyClass',
         ];
     }
@@ -31,7 +31,7 @@ final class OnboardingPage extends HookProvider
     {
         $pages[] = [
             'id'         => self::PAGE_ID,
-            'title'      => __('Onboarding', 'dono-fundraising-platform'),
+            'title'      => __('Onboarding', 'giveflow-fundraising-campaigns'),
             'capability' => 'manage_options',
             'position'   => 999,
             'hidden'     => true,
@@ -44,7 +44,7 @@ final class OnboardingPage extends HookProvider
     public function maybeAddBodyClass(string $classes): string
     {
         if ($this->isCurrentPage()) {
-            $classes .= ' dono-onboarding-fullscreen';
+            $classes .= ' giveflow-onboarding-fullscreen';
         }
         return $classes;
     }
@@ -54,7 +54,7 @@ final class OnboardingPage extends HookProvider
     {
         $this->enqueueAssets();
         ?>
-        <div id="dono-admin-onboarding"></div>
+        <div id="giveflow-admin-onboarding"></div>
         <?php
     }
 
@@ -68,25 +68,25 @@ final class OnboardingPage extends HookProvider
     /** @since 1.0.0 */
     private function enqueueAssets(): void
     {
-        $assetPath = DONO_DIR . self::BUILD_DIR . '/index.asset.php';
+        $assetPath = GIVEFLOW_DIR . self::BUILD_DIR . '/index.asset.php';
         if (! file_exists($assetPath)) return;
         $asset = require $assetPath;
 
         wp_enqueue_script(
             self::HANDLE,
-            DONO_URL . self::BUILD_DIR . '/index.js',
+            GIVEFLOW_URL . self::BUILD_DIR . '/index.js',
             $asset['dependencies'] ?? [],
-            $asset['version']      ?? DONO_VERSION,
+            $asset['version']      ?? GIVEFLOW_VERSION,
             true
         );
-        wp_set_script_translations(self::HANDLE, 'dono-fundraising-platform', DONO_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE, 'giveflow-fundraising-campaigns', GIVEFLOW_DIR . 'languages');
 
         wp_enqueue_style('wp-components');
         wp_enqueue_style(
             self::HANDLE,
-            DONO_URL . 'build/admin/onboarding.css',
+            GIVEFLOW_URL . 'build/admin/onboarding.css',
             ['wp-components'],
-            $asset['version'] ?? DONO_VERSION
+            (string) (@filemtime(GIVEFLOW_DIR . 'build/admin/onboarding.css') ?: GIVEFLOW_VERSION)
         );
     }
 }

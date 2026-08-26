@@ -1,7 +1,7 @@
 // Inherit shared widget chrome (grid, cards, metric, section bar, etc.).
 @import '../campaigns/campaigns.scss';
 
-.dono-dashboard {
+.giveflow-dashboard {
     &__header {
         display: flex;
         align-items: center;
@@ -22,7 +22,7 @@
     &[data-loading="true"] { opacity: .6; transition: opacity .15s; }
 }
 
-.dono-active-campaigns {
+.giveflow-active-campaigns {
     display: flex;
     flex-direction: column;
     gap: 14px;
@@ -34,7 +34,7 @@
         padding: 8px 0;
         border-radius: 8px;
 
-        &:hover .dono-active-campaigns__title { color: $accent; }
+        &:hover .giveflow-active-campaigns__title { color: $accent; }
     }
 
     &__head {
@@ -82,7 +82,7 @@
     &__when { color: $text-soft; }
 }
 
-.dono-quick-actions {
+.giveflow-quick-actions {
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -112,7 +112,7 @@
     }
 }
 
-.dono-today {
+.giveflow-today {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -125,7 +125,7 @@
         border-radius: 50%;
         background: $accent;
         box-shadow: 0 0 0 4px rgba(30, 138, 78, .15);
-        animation: dono-today-pulse 2.4s ease-in-out infinite;
+        animation: giveflow-today-pulse 2.4s ease-in-out infinite;
     }
 
     &__label {
@@ -167,11 +167,11 @@
     }
 }
 
-@keyframes dono-today-pulse {
+@keyframes giveflow-today-pulse {
     0%, 100% { box-shadow: 0 0 0 4px rgba(30, 138, 78, .15); }
     50%      { box-shadow: 0 0 0 7px rgba(30, 138, 78, .08); }
 }
-.dono-activity {
+.giveflow-activity {
     list-style: none;
     margin: 0;
     padding: 0;
@@ -249,7 +249,7 @@
         white-space: nowrap;
     }
 }
-.dono-top-campaigns {
+.giveflow-top-campaigns {
     &__spark {
         width: 88px;
         padding: 0 8px;
@@ -259,9 +259,9 @@
 
     // The cell centers its contents, but a block-level SVG ignores text-align,
     // so it sat flush-left. margin-inline auto centers the fixed-width chart.
-    .dono-spark { display: block; margin: 0 auto; }
+    .giveflow-spark { display: block; margin: 0 auto; }
 }
-.dono-recurring {
+.giveflow-recurring {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
@@ -322,7 +322,7 @@
         font-variant-numeric: tabular-nums;
     }
 }
-.dono-attention {
+.giveflow-attention {
     list-style: none;
     margin: 0;
     padding: 0;
@@ -412,12 +412,12 @@
             outline-offset: 1px;
         }
 
-        .dono-attention__item:hover &,
-        .dono-attention__item:focus-within & { opacity: 1; }
+        .giveflow-attention__item:hover &,
+        .giveflow-attention__item:focus-within & { opacity: 1; }
     }
 }
 
 // Coarse pointers have no hover, so the control would never appear.
 @media (hover: none) {
-    .dono-attention__dismiss { opacity: 1; }
+    .giveflow-attention__dismiss { opacity: 1; }
 }

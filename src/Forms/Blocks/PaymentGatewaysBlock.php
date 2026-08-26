@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Forms\Blocks;
+namespace GiveFlow\Forms\Blocks;
 
-use Dono\Foundation\Helpers\View;
-use Dono\Gateways\GatewayManager;
+use GiveFlow\Foundation\Helpers\View;
+use GiveFlow\Gateways\GatewayManager;
 
 /**
  * Donor-facing gateway selector. The Preact runtime renders the interactive
@@ -25,7 +25,7 @@ final class PaymentGatewaysBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'dono/payment-gateways';
+        return 'giveflow/payment-gateways';
     }
 
     /** @since 1.0.0 */

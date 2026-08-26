@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Campaigns\Blocks\CampaignBindings;
-use Dono\Campaigns\Campaign;
-use Dono\Campaigns\CampaignRepository;
-use Dono\Foundation\Plugin;
+use GiveFlow\Campaigns\Blocks\CampaignBindings;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Campaigns\CampaignRepository;
+use GiveFlow\Foundation\Plugin;
 
 /**
- * Verifies the `dono/campaign` Block Bindings source resolves campaign stats
- * for keys the bindings docs cover, and falls back to `_dono_campaign_id`
+ * Verifies the `giveflow/campaign` Block Bindings source resolves campaign stats
+ * for keys the bindings docs cover, and falls back to `_giveflow_campaign_id`
  * post meta when no `campaign_id` arg is supplied.
  */
 final class CampaignBindingsTest extends IntegrationTestCase
@@ -65,7 +65,7 @@ final class CampaignBindingsTest extends IntegrationTestCase
     {
         $campaign = $this->seedCampaign();
         $postId   = self::factory()->post->create();
-        update_post_meta($postId, '_dono_campaign_id', $campaign->id);
+        update_post_meta($postId, '_giveflow_campaign_id', $campaign->id);
 
         // Fake block context with postId.
         $block = (object) ['context' => ['postId' => $postId]];

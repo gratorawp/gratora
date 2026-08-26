@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Foundation\Time;
+namespace GiveFlow\Foundation\Time;
 
 use DateTimeImmutable;
 

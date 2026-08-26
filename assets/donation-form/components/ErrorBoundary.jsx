@@ -13,7 +13,7 @@ export default class ErrorBoundary extends Component {
 
     componentDidCatch( error ) {
         // eslint-disable-next-line no-console
-        console.error( '[dono] render error contained by boundary', error );
+        console.error( '[giveflow] render error contained by boundary', error );
         this.setState( { failed: true } );
     }
 

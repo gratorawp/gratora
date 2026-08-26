@@ -9,18 +9,18 @@ export default function CurrencySwitcher( { currencies, currency, onChange, vari
     const aria      = swLabel || ariaLabel || 'Currency';
 
     return (
-        <div class={ `dono-form__currency-switcher dono-form__currency-switcher--${ swVariant } dono-form__currency-switcher--${ swAlign }` }>
+        <div class={ `giveflow-form__currency-switcher giveflow-form__currency-switcher--${ swVariant } giveflow-form__currency-switcher--${ swAlign }` }>
             { swLabel && (
-                <span class="dono-form__currency-switcher-label">{ swLabel }</span>
+                <span class="giveflow-form__currency-switcher-label">{ swLabel }</span>
             ) }
             { swVariant === 'pills' ? (
-                <div class="dono-form__currency-pills" role="radiogroup" aria-label={ aria }>
+                <div class="giveflow-form__currency-pills" role="radiogroup" aria-label={ aria }>
                     { currencies.map( ( c ) => (
                         <button
                             type="button"
                             key={ c }
                             role="radio"
-                            class={ `dono-form__currency-pill${ currency === c ? ' is-selected' : '' }` }
+                            class={ `giveflow-form__currency-pill${ currency === c ? ' is-selected' : '' }` }
                             aria-checked={ currency === c }
                             onClick={ () => onChange( c ) }
                         >

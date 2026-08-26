@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Campaigns\Blocks;
+namespace GiveFlow\Campaigns\Blocks;
 
 /**
  * Registers the campaign block category, editor assets and front-end enqueues.
@@ -11,21 +11,21 @@ namespace Dono\Campaigns\Blocks;
  */
 final class BlockEditorIntegration
 {
-    private const HANDLE_EDITOR   = 'dono-campaign-blocks-editor';
-    private const HANDLE_FRONTEND = 'dono-campaign-blocks';
+    private const HANDLE_EDITOR   = 'giveflow-campaign-blocks-editor';
+    private const HANDLE_FRONTEND = 'giveflow-campaign-blocks';
     private const BUILD_DIR       = 'build/admin/campaign-blocks';
 
     // Must list every registered campaign block: gates the front-end CSS enqueue.
     private const BLOCK_NAMES = [
-        'dono/campaign-image',
-        'dono/campaign-stat',
-        'dono/campaign-progress',
-        'dono/campaign-grid',
-        'dono/donate-button',
-        'dono/donation-form',
-        'dono/top-donors',
-        'dono/recent-donations',
-        'dono/supporter-wall',
+        'giveflow/campaign-image',
+        'giveflow/campaign-stat',
+        'giveflow/campaign-progress',
+        'giveflow/campaign-grid',
+        'giveflow/donate-button',
+        'giveflow/donation-form',
+        'giveflow/top-donors',
+        'giveflow/recent-donations',
+        'giveflow/supporter-wall',
     ];
 
     /** @since 1.0.0 */
@@ -47,7 +47,7 @@ final class BlockEditorIntegration
      */
     public function registerPageMeta(): void
     {
-        register_post_meta('page', '_dono_campaign_id', [
+        register_post_meta('page', '_giveflow_campaign_id', [
             'type'          => 'integer',
             'single'        => true,
             'show_in_rest'  => true,
@@ -59,11 +59,11 @@ final class BlockEditorIntegration
     public function registerCategory(array $categories): array
     {
         foreach ($categories as $category) {
-            if (($category['slug'] ?? '') === 'dono') return $categories;
+            if (($category['slug'] ?? '') === 'giveflow') return $categories;
         }
         array_unshift($categories, [
-            'slug'  => 'dono',
-            'title' => __('Dono', 'dono-fundraising-platform'),
+            'slug'  => 'giveflow',
+            'title' => __('GiveFlow', 'giveflow-fundraising-campaigns'),
             'icon'  => 'heart',
         ]);
         return $categories;
@@ -72,25 +72,25 @@ final class BlockEditorIntegration
     /** @since 1.0.0 */
     public function enqueueEditorAssets(): void
     {
-        $assetPath = DONO_DIR . self::BUILD_DIR . '/index.asset.php';
+        $assetPath = GIVEFLOW_DIR . self::BUILD_DIR . '/index.asset.php';
         if (! file_exists($assetPath)) return;
         $asset = require $assetPath;
 
         wp_enqueue_script(
             self::HANDLE_EDITOR,
-            DONO_URL . self::BUILD_DIR . '/index.js',
+            GIVEFLOW_URL . self::BUILD_DIR . '/index.js',
             $asset['dependencies'] ?? [],
-            $asset['version']      ?? DONO_VERSION,
+            $asset['version']      ?? GIVEFLOW_VERSION,
             true
         );
-        wp_set_script_translations(self::HANDLE_EDITOR, 'dono-fundraising-platform', DONO_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE_EDITOR, 'giveflow-fundraising-campaigns', GIVEFLOW_DIR . 'languages');
 
         // The binding picker's field list is handed over rather than repeated in
         // JS, so the labels are translated once and the two halves cannot
         // disagree about which values exist.
         wp_add_inline_script(
             self::HANDLE_EDITOR,
-            'window.donoCampaignBlocks = Object.assign( window.donoCampaignBlocks || {}, '
+            'window.giveflowCampaignBlocks = Object.assign( window.giveflowCampaignBlocks || {}, '
             . wp_json_encode(['bindingFields' => CampaignBindings::fields()]) . ' );',
             'before'
         );
@@ -107,15 +107,15 @@ final class BlockEditorIntegration
         if (! is_admin()) {
             return;
         }
-        $cssPath = DONO_DIR . 'build/admin/campaign-blocks.css';
+        $cssPath = GIVEFLOW_DIR . 'build/admin/campaign-blocks.css';
         if (file_exists($cssPath)) {
             wp_enqueue_style(
                 self::HANDLE_FRONTEND,
-                DONO_URL . 'build/admin/campaign-blocks.css',
+                GIVEFLOW_URL . 'build/admin/campaign-blocks.css',
                 [],
-                // mtime, not DONO_VERSION: the built css changes without a
+                // mtime, not GIVEFLOW_VERSION: the built css changes without a
                 // plugin release and a stale cache means invisible restyles.
-                (string) (@filemtime($cssPath) ?: DONO_VERSION)
+                (string) (@filemtime($cssPath) ?: GIVEFLOW_VERSION)
             );
             wp_style_add_data(self::HANDLE_FRONTEND, 'rtl', 'replace');
         }
@@ -137,7 +137,7 @@ final class BlockEditorIntegration
         foreach (self::BLOCK_NAMES as $name) {
             if (has_block($name, $post)) {
                 $hasAnyBlock = true;
-                if ($name === 'dono/donate-button') {
+                if ($name === 'giveflow/donate-button') {
                     $hasDonateButton = true;
                 }
             }
@@ -154,7 +154,7 @@ final class BlockEditorIntegration
     }
 
     /**
-     * has_block() only sees the post's own content, so a Dono block nested in a
+     * has_block() only sees the post's own content, so a GiveFlow block nested in a
      * synced pattern or template part would render unstyled. render_block fires
      * wherever the block lives, and a late enqueue still prints.
      *
@@ -167,7 +167,7 @@ final class BlockEditorIntegration
             return $content;
         }
         $this->enqueueBlockStyle();
-        if ($name === 'dono/donate-button') {
+        if ($name === 'giveflow/donate-button') {
             $this->enqueueDonateButtonModal();
         }
         return $content;
@@ -179,13 +179,13 @@ final class BlockEditorIntegration
         if (wp_style_is(self::HANDLE_FRONTEND, 'enqueued')) {
             return;
         }
-        $cssPath = DONO_DIR . 'build/admin/campaign-blocks.css';
+        $cssPath = GIVEFLOW_DIR . 'build/admin/campaign-blocks.css';
         if (file_exists($cssPath)) {
             wp_enqueue_style(
                 self::HANDLE_FRONTEND,
-                DONO_URL . 'build/admin/campaign-blocks.css',
+                GIVEFLOW_URL . 'build/admin/campaign-blocks.css',
                 [],
-                (string) (@filemtime($cssPath) ?: DONO_VERSION)
+                (string) (@filemtime($cssPath) ?: GIVEFLOW_VERSION)
             );
             wp_style_add_data(self::HANDLE_FRONTEND, 'rtl', 'replace');
         }
@@ -194,14 +194,14 @@ final class BlockEditorIntegration
     /** @since 1.0.0 */
     private function enqueueDonateButtonModal(): void
     {
-        if (wp_script_is('dono-donate-button-modal', 'enqueued')) {
+        if (wp_script_is('giveflow-donate-button-modal', 'enqueued')) {
             return;
         }
         wp_enqueue_script(
-            'dono-donate-button-modal',
-            DONO_URL . 'assets/donate-button/modal.js',
+            'giveflow-donate-button-modal',
+            GIVEFLOW_URL . 'assets/donate-button/modal.js',
             [],
-            DONO_VERSION,
+            GIVEFLOW_VERSION,
             true
         );
     }

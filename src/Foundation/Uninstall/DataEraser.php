@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Dono\Foundation\Uninstall;
+namespace GiveFlow\Foundation\Uninstall;
 
-use Dono\Campaigns\Campaign;
-use Dono\Core\CoreModule;
-use Dono\Donors\Donor;
-use Dono\Foundation\Auth\Capabilities;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Core\CoreModule;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Foundation\Auth\Capabilities;
 use ReflectionClass;
 
 /**
  * Removes everything core owns, when the site owner has asked for it.
  *
- * Tables come from CoreModule::migrations() rather than a `dono_%` glob. The
+ * Tables come from CoreModule::migrations() rather than a `giveflow_%` glob. The
  * add-ons share that prefix, so a glob run from core would drop the tickets,
  * gift aid and peer-to-peer tables of add-ons that are still installed.
  *
@@ -21,11 +21,11 @@ use ReflectionClass;
  */
 final class DataEraser
 {
-    public const OPT_IN = 'dono_delete_data';
+    public const OPT_IN = 'giveflow_delete_data';
 
     /**
      * Options core writes. Listed rather than matched on a prefix for the same
-     * reason as the tables: dono_gift_aid_db_version and its siblings belong to
+     * reason as the tables: giveflow_gift_aid_db_version and its siblings belong to
      * other plugins.
      *
      * The queued-work maps and cursors belong here as much as the settings do.
@@ -33,47 +33,47 @@ final class DataEraser
      * one left behind is an instruction aimed at whatever now holds the id.
      */
     private const OPTIONS = [
-        'dono_activated_at',
-        'dono_campaign_cancel_recurring',
-        'dono_consents',
-        'dono_currency_locale',
-        'dono_db_version',
-        'dono_delete_data',
-        'dono_donor_rehash_after_id',
-        'dono_donor_rehash_pending',
-        'dono_email_settings',
-        'dono_fund_reassignments',
-        'dono_fx_rates',
-        'dono_gateway_config',
-        'dono_gateway_reconcile_cursor',
-        'dono_licensing_status',
+        'giveflow_activated_at',
+        'giveflow_campaign_cancel_recurring',
+        'giveflow_consents',
+        'giveflow_currency_locale',
+        'giveflow_db_version',
+        'giveflow_delete_data',
+        'giveflow_donor_rehash_after_id',
+        'giveflow_donor_rehash_pending',
+        'giveflow_email_settings',
+        'giveflow_fund_reassignments',
+        'giveflow_fx_rates',
+        'giveflow_gateway_config',
+        'giveflow_gateway_reconcile_cursor',
+        'giveflow_licensing_status',
+        'giveflow_onboarding_campaign_id',
+        'giveflow_onboarding_status',
+        'giveflow_org_brand',
+        'giveflow_org_profile',
+        'giveflow_paypal_plans',
+        'giveflow_paypal_product',
+        'giveflow_portal_page_id',
+        'giveflow_portal_page_version',
+        'giveflow_privacy',
         // The key itself, not just the status cache beside it. It is a bearer
         // credential for the charity's paid entitlement, and it outlived every
-        // Dono file on the site: through a handover, a database export, a
+        // GiveFlow file on the site: through a handover, a database export, a
         // backup handed to a contractor. Written by the licensing client
         // vendored into each paid add-on, which has no uninstall of its own.
-        'dono_pro_license_key',
-        'dono_onboarding_campaign_id',
-        'dono_onboarding_status',
-        'dono_org_brand',
-        'dono_org_profile',
-        'dono_paypal_plans',
-        'dono_paypal_product',
-        'dono_portal_page_id',
-        'dono_portal_page_version',
-        'dono_privacy',
-        'dono_receipt_settings',
-        'dono_reference_settings',
-        'dono_retention_cursor',
-        'dono_retention_starts_at',
-        'dono_roles',
-        'dono_upgrade_routines_done',
-        'dono_upgrade_routines_failed',
+        'giveflow_pro_license_key',
+        'giveflow_receipt_settings',
+        'giveflow_reference_settings',
+        'giveflow_retention_cursor',
+        'giveflow_retention_starts_at',
+        'giveflow_roles',
+        'giveflow_upgrade_routines_done',
+        'giveflow_upgrade_routines_failed',
     ];
 
     /** Reference counters carry the year, so they are the one keyspace to match. */
     private const OPTION_PREFIXES = [
-        'dono_reference_counter_',
+        'giveflow_reference_counter_',
     ];
 
     /**
@@ -152,7 +152,7 @@ final class DataEraser
     {
         // Before the tables go, so an add-on can still read what it needs to
         // clean up rows of its own that point at core.
-        do_action('dono.uninstall');
+        do_action('giveflow.uninstall');
 
         $plan = $this->plan();
 
@@ -164,7 +164,7 @@ final class DataEraser
         $this->deletePages($this->pageIds());
 
         // Also while the tables are there: the only pointer to a donor's
-        // picture is a column of dono_donors, and the file outlives the row.
+        // picture is a column of giveflow_donors, and the file outlives the row.
         $this->deleteAttachments($this->avatarAttachmentIds());
 
         $this->dropTables($plan['tables']);
@@ -248,7 +248,7 @@ final class DataEraser
 
     /**
      * Pages core created and still names in a row of its own: the portal, and
-     * each campaign's own page. Not every page carrying _dono_campaign_id,
+     * each campaign's own page. Not every page carrying _giveflow_campaign_id,
      * because the peer-to-peer add-on puts that meta on its fundraiser and team
      * subpages too, and those are its to remove.
      *
@@ -257,7 +257,7 @@ final class DataEraser
      */
     public function pageIds(): array
     {
-        $ids = [(int) get_option('dono_portal_page_id', 0)];
+        $ids = [(int) get_option('giveflow_portal_page_id', 0)];
 
         foreach (Campaign::query()->getAll() as $campaign) {
             $ids[] = (int) ($campaign->page_id ?? 0);
@@ -314,8 +314,8 @@ final class DataEraser
     }
 
     /**
-     * Core's own capabilities by name, not everything matching dono_. An add-on
-     * that is still installed keeps its caps: dono_manage_fundraisers belongs
+     * Core's own capabilities by name, not everything matching giveflow_. An add-on
+     * that is still installed keeps its caps: giveflow_manage_fundraisers belongs
      * to the peer-to-peer plugin and taking it would break a live site.
      *
      * Every registered role, because the roles screen grants these to editor

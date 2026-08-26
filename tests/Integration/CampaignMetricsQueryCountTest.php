@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Campaigns\Campaign;
-use Dono\Campaigns\CampaignService;
-use Dono\Foundation\Plugin;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Campaigns\CampaignService;
+use GiveFlow\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -66,7 +66,7 @@ final class CampaignMetricsQueryCountTest extends IntegrationTestCase
     public function test_no_query_runs_twice_for_one_metrics_request(): void
     {
         $id     = $this->campaignId();
-        $shapes = $this->queryShapes("/dono/v1/admin/campaigns/{$id}/metrics");
+        $shapes = $this->queryShapes("/giveflow/v1/admin/campaigns/{$id}/metrics");
 
         $this->assertNotSame([], $shapes, 'the endpoint should issue queries at all');
 
@@ -90,12 +90,12 @@ final class CampaignMetricsQueryCountTest extends IntegrationTestCase
         for ($i = 0; $i < 25; $i++) {
             $this->seedDonation($id);
         }
-        $before = array_sum($this->queryShapes("/dono/v1/admin/campaigns/{$id}/metrics"));
+        $before = array_sum($this->queryShapes("/giveflow/v1/admin/campaigns/{$id}/metrics"));
 
         for ($i = 0; $i < 75; $i++) {
             $this->seedDonation($id);
         }
-        $after = array_sum($this->queryShapes("/dono/v1/admin/campaigns/{$id}/metrics"));
+        $after = array_sum($this->queryShapes("/giveflow/v1/admin/campaigns/{$id}/metrics"));
 
         $this->assertSame($before, $after, 'four times the donations, same number of queries');
     }
@@ -103,7 +103,7 @@ final class CampaignMetricsQueryCountTest extends IntegrationTestCase
     private function seedDonation(int $campaignId): void
     {
         $now = gmdate('Y-m-d H:i:s');
-        $d = \Dono\Donations\Donation::make();
+        $d = \GiveFlow\Donations\Donation::make();
         $d->reference         = 'MET-' . strtoupper(uniqid());
         $d->donor_id          = random_int(100000, 999999);
         $d->campaign_id       = $campaignId;

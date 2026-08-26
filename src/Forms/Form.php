@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Forms;
+namespace GiveFlow\Forms;
 
 defined('ABSPATH') || exit;
 
-use Dono\Vendor\Queryable\Model;
-use Dono\Vendor\Queryable\Schema\Table;
+use GiveFlow\Vendor\Queryable\Model;
+use GiveFlow\Vendor\Queryable\Schema\Table;
 
 /**
  * Donation form definition.
@@ -19,7 +19,7 @@ use Dono\Vendor\Queryable\Schema\Table;
  */
 final class Form extends Model
 {
-    protected string $table = 'dono_forms';
+    protected string $table = 'giveflow_forms';
     protected string $version = '1.0.0';
 
     /** @since 1.0.0 */
@@ -28,7 +28,7 @@ final class Form extends Model
         return [
             'donation_stats' => [
                 'type'       => 'hasOne',
-                'table'      => 'dono_form_donation_stats',
+                'table'      => 'giveflow_form_donation_stats',
                 'primaryKey' => 'id',
                 'foreignKey' => 'form_id',
             ],

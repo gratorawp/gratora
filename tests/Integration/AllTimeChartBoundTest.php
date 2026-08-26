@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
 use DateTimeImmutable;
 use DateTimeZone;
-use Dono\Campaigns\Campaign;
-use Dono\Campaigns\CampaignMetricsService;
-use Dono\Dashboard\DashboardMetricsService;
-use Dono\Donations\Donation;
-use Dono\Donations\DonationRepository;
-use Dono\Donors\DonorRepository;
-use Dono\Foundation\Plugin;
-use Dono\Foundation\Time\FrozenClock;
-use Dono\Recurring\RecurringPlanRepository;
-use Dono\Vendor\Queryable\DB;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Campaigns\CampaignMetricsService;
+use GiveFlow\Dashboard\DashboardMetricsService;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Donors\DonorRepository;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Foundation\Time\FrozenClock;
+use GiveFlow\Recurring\RecurringPlanRepository;
+use GiveFlow\Vendor\Queryable\DB;
 use WP_REST_Request;
 
 /**
@@ -87,7 +87,7 @@ final class AllTimeChartBoundTest extends IntegrationTestCase
     {
         $this->zeroDated($this->paid('2026-01-10 12:00:00', 100));
 
-        $req  = new WP_REST_Request('GET', '/dono/v1/admin/exports/options');
+        $req  = new WP_REST_Request('GET', '/giveflow/v1/admin/exports/options');
         $opts = rest_do_request($req)->get_data();
 
         $this->assertSame(
@@ -160,7 +160,7 @@ final class AllTimeChartBoundTest extends IntegrationTestCase
     {
         $prefix = DB::getPrefix();
         DB::raw(
-            "UPDATE {$prefix}dono_donations SET paid_at = '0000-00-00 00:00:00' WHERE id = %d",
+            "UPDATE {$prefix}giveflow_donations SET paid_at = '0000-00-00 00:00:00' WHERE id = %d",
             [(int) $d->id]
         );
     }
@@ -168,7 +168,7 @@ final class AllTimeChartBoundTest extends IntegrationTestCase
     private function paid(string $utc, int $cents, ?int $campaignId = null): Donation
     {
         $d = Donation::make();
-        $d->reference         = 'DONO-BOUND-' . uniqid();
+        $d->reference         = 'GIVEFLOW-BOUND-' . uniqid();
         if ($campaignId !== null) {
             $d->campaign_id = $campaignId;
         }

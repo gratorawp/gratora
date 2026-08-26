@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
+use GiveFlow\Donations\Donation;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -13,7 +13,7 @@ use WP_REST_Response;
  * request. It has a floor in AntiSpamGuard and a ceiling in the REST schema
  * (`DonationSchemas::create()`), and only the floor was covered by a test.
  *
- * Worth pinning: the sibling path in dono-events had no ceiling at all and the
+ * Worth pinning: the sibling path in giveflow-events had no ceiling at all and the
  * QA sweep used it to write a real ten-billion-euro pending order. Nothing
  * would have caught the same regression here.
  */
@@ -21,7 +21,7 @@ final class DonationAmountCeilingTest extends IntegrationTestCase
 {
     private function post(int $cents): WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/donations');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'email'        => 'whale@example.test',
@@ -55,6 +55,6 @@ final class DonationAmountCeilingTest extends IntegrationTestCase
         $res = $this->post(1);
 
         $this->assertSame(400, $res->get_status());
-        $this->assertSame('dono_amount_too_low', $res->get_data()['code'] ?? null);
+        $this->assertSame('giveflow_amount_too_low', $res->get_data()['code'] ?? null);
     }
 }

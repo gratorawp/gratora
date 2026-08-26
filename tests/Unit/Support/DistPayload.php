@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Unit\Support;
+namespace GiveFlow\Tests\Unit\Support;
 
 /**
  * Answers "does this path reach a customer?" from .distignore.

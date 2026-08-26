@@ -1,5 +1,5 @@
 /**
- * `dono/phone` block - optional donor phone input.
+ * `giveflow/phone` block - optional donor phone input.
  * Skips itself when the test form lacks the block.
  */
 

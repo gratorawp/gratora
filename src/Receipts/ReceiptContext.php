@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Dono\Receipts;
+namespace GiveFlow\Receipts;
 
-use Dono\Campaigns\Campaign;
-use Dono\Donations\Donation;
-use Dono\Donors\Donor;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donors\Donor;
 
 /**
  * Data bundle passed to a ReceiptRenderer.
  *
- * Modules extend context via `dono.receipt.context`. Keys in `extras` must
+ * Modules extend context via `giveflow.receipt.context`. Keys in `extras` must
  * be namespaced by the module to avoid collisions.
  *
  * @since 1.0.0

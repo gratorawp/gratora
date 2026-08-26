@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Foundation\Auth\Capabilities;
+use GiveFlow\Foundation\Auth\Capabilities;
 use WP_REST_Request;
 
 /**
@@ -12,8 +12,8 @@ use WP_REST_Request;
  * about all of them.
  *
  * It used to render from a list hardcoded in its own JSX while add-ons register
- * theirs through the `dono.capabilities` filter. `applyMapping()` honoured
- * those; the screen never showed them. dono-p2p's `dono_manage_fundraisers`
+ * theirs through the `giveflow.capabilities` filter. `applyMapping()` honoured
+ * those; the screen never showed them. giveflow-p2p's `giveflow_manage_fundraisers`
  * gated real routes and could not be granted to anyone through the UI.
  */
 final class RolesCapabilityListTest extends IntegrationTestCase
@@ -24,7 +24,7 @@ final class RolesCapabilityListTest extends IntegrationTestCase
         $admin = self::factory()->user->create(['role' => 'administrator']);
         wp_set_current_user($admin);
 
-        $res = rest_do_request(new WP_REST_Request('GET', '/dono/v1/admin/roles'));
+        $res = rest_do_request(new WP_REST_Request('GET', '/giveflow/v1/admin/roles'));
         $this->assertSame(200, $res->get_status());
 
         return (array) $res->get_data();
@@ -67,21 +67,21 @@ final class RolesCapabilityListTest extends IntegrationTestCase
     public function test_an_add_on_capability_reaches_the_screen(): void
     {
         $register = static function (array $maps): array {
-            $maps['all'][]                 = 'dono_manage_fundraisers';
-            $maps['groups']['Fundraising'] = ['dono_manage_fundraisers'];
-            $maps['labels']['dono_manage_fundraisers'] = 'Manage fundraisers';
+            $maps['all'][]                 = 'giveflow_manage_fundraisers';
+            $maps['groups']['Fundraising'] = ['giveflow_manage_fundraisers'];
+            $maps['labels']['giveflow_manage_fundraisers'] = 'Manage fundraisers';
             return $maps;
         };
-        add_filter('dono.capabilities', $register);
+        add_filter('giveflow.capabilities', $register);
 
         try {
             $data = $this->fetch();
-            $this->assertContains('dono_manage_fundraisers', $this->capsIn($data));
+            $this->assertContains('giveflow_manage_fundraisers', $this->capsIn($data));
 
             $labels = array_column((array) $data['capabilities'], 'label');
             $this->assertContains('Fundraising', $labels, 'and under its own heading');
         } finally {
-            remove_filter('dono.capabilities', $register);
+            remove_filter('giveflow.capabilities', $register);
         }
     }
 
@@ -92,24 +92,24 @@ final class RolesCapabilityListTest extends IntegrationTestCase
     public function test_an_ungrouped_capability_is_gathered_rather_than_dropped(): void
     {
         $register = static function (array $maps): array {
-            $maps['all'][] = 'dono_loose_cap';
+            $maps['all'][] = 'giveflow_loose_cap';
             return $maps;
         };
-        add_filter('dono.capabilities', $register);
+        add_filter('giveflow.capabilities', $register);
 
         try {
-            $this->assertContains('dono_loose_cap', $this->capsIn($this->fetch()));
+            $this->assertContains('giveflow_loose_cap', $this->capsIn($this->fetch()));
         } finally {
-            remove_filter('dono.capabilities', $register);
+            remove_filter('giveflow.capabilities', $register);
         }
     }
 
     public function test_a_non_admin_cannot_read_the_capability_map(): void
     {
         $viewer = self::factory()->user->create(['role' => 'subscriber']);
-        get_user_by('id', $viewer)->add_cap('dono_view_donors');
+        get_user_by('id', $viewer)->add_cap('giveflow_view_donors');
         wp_set_current_user($viewer);
 
-        $this->assertSame(403, rest_do_request(new WP_REST_Request('GET', '/dono/v1/admin/roles'))->get_status());
+        $this->assertSame(403, rest_do_request(new WP_REST_Request('GET', '/giveflow/v1/admin/roles'))->get_status());
     }
 }

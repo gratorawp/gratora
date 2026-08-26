@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Currency\FxRates;
-use Dono\Donations\DonationRepository;
-use Dono\Donations\Refund;
-use Dono\Foundation\Plugin;
-use Dono\Gateways\GatewayManager;
-use Dono\Gateways\Stripe\StripeAccount;
-use Dono\Gateways\Stripe\StripeGateway;
+use GiveFlow\Currency\FxRates;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Donations\Refund;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Gateways\GatewayManager;
+use GiveFlow\Gateways\Stripe\StripeAccount;
+use GiveFlow\Gateways\Stripe\StripeGateway;
 use WP_REST_Request;
 
 /**
@@ -35,14 +35,14 @@ final class StripeCurrencyAmountTest extends IntegrationTestCase
     {
         parent::setUp();
         $this->secret = 'whsec_test_' . bin2hex(random_bytes(8));
-        update_option('dono_gateway_config', [
+        update_option('giveflow_gateway_config', [
             'test_mode' => true,
             'stripe'    => ['webhook_secret_test' => $this->secret],
         ]);
 
         // This suite exercises zero-/three-decimal currencies, so the org must
         // accept them or the create-path supported-currency gate rejects them.
-        update_option('dono_currency_locale', [
+        update_option('giveflow_currency_locale', [
             'default_currency'     => 'USD',
             'supported_currencies' => ['USD', 'EUR', 'JPY', 'BHD'],
         ]);
@@ -64,14 +64,14 @@ final class StripeCurrencyAmountTest extends IntegrationTestCase
         $manager = $c->get(GatewayManager::class);
         if (! $manager->get('stripe')) {
             $manager->register(new StripeGateway(
-                $c->get(\Dono\Gateways\Stripe\StripeApi::class),
+                $c->get(\GiveFlow\Gateways\Stripe\StripeApi::class),
                 $c->get(DonationRepository::class),
-                $c->get(\Dono\Donations\DonationService::class),
+                $c->get(\GiveFlow\Donations\DonationService::class),
                 $c->get(StripeAccount::class),
-                $c->get(\Dono\Donors\DonorRepository::class),
-                $c->get(\Dono\Donors\DonorService::class),
-                $c->get(\Dono\Foundation\Time\Clock::class),
-                $c->get(\Dono\Recurring\RecurringPlanRepository::class),
+                $c->get(\GiveFlow\Donors\DonorRepository::class),
+                $c->get(\GiveFlow\Donors\DonorService::class),
+                $c->get(\GiveFlow\Foundation\Time\Clock::class),
+                $c->get(\GiveFlow\Recurring\RecurringPlanRepository::class),
             ));
         }
 
@@ -94,7 +94,7 @@ final class StripeCurrencyAmountTest extends IntegrationTestCase
             "{$code}: {$storedCents} stored cents must reach Stripe as {$expectedStripe}"
         );
 
-        // The full amount settles to the organization: Dono attaches no
+        // The full amount settles to the organization: GiveFlow attaches no
         // application fee of its own.
         $this->assertArrayNotHasKey('application_fee_amount', $pi, "{$code}: no platform fee is ever attached");
     }
@@ -176,7 +176,7 @@ final class StripeCurrencyAmountTest extends IntegrationTestCase
 
     private function createDonation(string $currency, int $amountCents, string $email): string
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/donations');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'email'        => $email,
@@ -225,7 +225,7 @@ final class StripeCurrencyAmountTest extends IntegrationTestCase
         $timestamp = (string) time();
         $sig       = hash_hmac('sha256', "{$timestamp}.{$payload}", $this->secret);
 
-        $req = new WP_REST_Request('POST', '/dono/v1/webhooks/stripe');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/webhooks/stripe');
         $req->set_header('content-type', 'application/json');
         $req->set_header('stripe_signature', "t={$timestamp},v1={$sig}");
         $req->set_body($payload);

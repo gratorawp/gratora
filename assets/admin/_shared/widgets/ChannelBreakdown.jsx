@@ -1,1 +1,1 @@
-export { default } from '@dono/ui/widgets/ChannelBreakdown';
+export { default } from '@giveflow/ui/widgets/ChannelBreakdown';

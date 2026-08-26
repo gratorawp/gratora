@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
 use WP_REST_Request;
 
@@ -10,8 +10,8 @@ use WP_REST_Request;
  * Two authenticated-surface P2s from the QA sweep.
  *
  * A huge `page` 500'd every admin list route through an uncaught TypeError, and
- * the licence routes were gated on "can this person see the Dono admin", which
- * is true for anyone holding any single dono_* cap.
+ * the licence routes were gated on "can this person see the GiveFlow admin", which
+ * is true for anyone holding any single giveflow_* cap.
  */
 final class AdminListHardeningTest extends IntegrationTestCase
 {
@@ -19,11 +19,11 @@ final class AdminListHardeningTest extends IntegrationTestCase
     private function listRoutes(): array
     {
         return [
-            '/dono/v1/admin/donations',
-            '/dono/v1/admin/donors',
-            '/dono/v1/admin/campaigns',
-            '/dono/v1/admin/forms',
-            '/dono/v1/admin/funds',
+            '/giveflow/v1/admin/donations',
+            '/giveflow/v1/admin/donors',
+            '/giveflow/v1/admin/campaigns',
+            '/giveflow/v1/admin/forms',
+            '/giveflow/v1/admin/funds',
         ];
     }
 

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Donations;
+namespace GiveFlow\Donations;
 
 defined('ABSPATH') || exit;
 
-use Dono\Vendor\Queryable\Model;
-use Dono\Vendor\Queryable\Schema\Table;
+use GiveFlow\Vendor\Queryable\Model;
+use GiveFlow\Vendor\Queryable\Schema\Table;
 
 /**
  * Internal note attached to a donation.
@@ -16,7 +16,7 @@ use Dono\Vendor\Queryable\Schema\Table;
  */
 final class DonationNote extends Model
 {
-    protected string $table = 'dono_donation_notes';
+    protected string $table = 'giveflow_donation_notes';
     protected string $version = '1.0.0';
 
     public int $id;

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
+use GiveFlow\Donations\Donation;
 use WP_REST_Request;
 
 /**
@@ -17,7 +17,7 @@ final class FxStateWarningsTest extends IntegrationTestCase
 {
     private function state(): array
     {
-        $res = rest_do_request(new WP_REST_Request('GET', '/dono/v1/admin/currency/fx'));
+        $res = rest_do_request(new WP_REST_Request('GET', '/giveflow/v1/admin/currency/fx'));
 
         return (array) $res->get_data();
     }
@@ -35,7 +35,7 @@ final class FxStateWarningsTest extends IntegrationTestCase
     public function test_a_currency_with_no_rate_is_named(): void
     {
         // The suite configures USD base with rates for EUR and GBP only.
-        update_option('dono_currency_locale', [
+        update_option('giveflow_currency_locale', [
             'default_currency'     => 'USD',
             'supported_currencies' => ['USD', 'EUR', 'BGN'],
         ]);
@@ -53,7 +53,7 @@ final class FxStateWarningsTest extends IntegrationTestCase
      */
     public function test_a_currency_donations_were_taken_in_gets_a_row_to_type_a_rate_into(): void
     {
-        update_option('dono_currency_locale', [
+        update_option('giveflow_currency_locale', [
             'default_currency'     => 'USD',
             'supported_currencies' => ['USD'],
         ]);
@@ -69,7 +69,7 @@ final class FxStateWarningsTest extends IntegrationTestCase
     /** A site that only ever took its own currency keeps its single-row table. */
     public function test_a_site_with_nothing_stranded_gains_no_rows(): void
     {
-        update_option('dono_currency_locale', [
+        update_option('giveflow_currency_locale', [
             'default_currency'     => 'USD',
             'supported_currencies' => ['USD'],
         ]);

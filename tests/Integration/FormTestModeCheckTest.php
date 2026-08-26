@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Forms\Form;
-use Dono\Forms\FormReadinessService;
-use Dono\Foundation\Plugin;
+use GiveFlow\Forms\Form;
+use GiveFlow\Forms\FormReadinessService;
+use GiveFlow\Foundation\Plugin;
 
 /**
  * Two different switches put a form in test mode: the form's own checkbox and
@@ -43,28 +43,28 @@ final class FormTestModeCheckTest extends IntegrationTestCase
 
     public function test_the_form_s_own_switch_sends_the_author_to_the_form(): void
     {
-        update_option('dono_gateway_config', ['test_mode' => false]);
+        update_option('giveflow_gateway_config', ['test_mode' => false]);
 
         $check = $this->check($this->form(['test_mode' => true]));
 
         $this->assertSame('warn', $check['status']);
-        $this->assertStringContainsString('page=dono-forms', $check['action_url']);
-        $this->assertStringNotContainsString('dono-settings', $check['action_url'], 'the org switch is already off');
+        $this->assertStringContainsString('page=giveflow-forms', $check['action_url']);
+        $this->assertStringNotContainsString('giveflow-settings', $check['action_url'], 'the org switch is already off');
     }
 
     public function test_the_site_wide_switch_still_sends_them_to_settings(): void
     {
-        update_option('dono_gateway_config', ['test_mode' => true]);
+        update_option('giveflow_gateway_config', ['test_mode' => true]);
 
         $check = $this->check($this->form([]));
 
         $this->assertSame('warn', $check['status']);
-        $this->assertStringContainsString('page=dono-settings', $check['action_url']);
+        $this->assertStringContainsString('page=giveflow-settings', $check['action_url']);
     }
 
     public function test_neither_switch_on_is_a_pass(): void
     {
-        update_option('dono_gateway_config', ['test_mode' => false]);
+        update_option('giveflow_gateway_config', ['test_mode' => false]);
 
         $this->assertSame('pass', $this->check($this->form([]))['status']);
     }

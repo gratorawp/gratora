@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Unit\Foundation;
+namespace GiveFlow\Tests\Unit\Foundation;
 
-use Dono\Foundation\Container\Container;
+use GiveFlow\Foundation\Container\Container;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use stdClass;

@@ -11,13 +11,13 @@ import { formatAmount, formatAmountCompact, formatDate } from '../_shared/format
 import { IconUsers, IconHeart, IconActivity, IconCoins } from '../_shared/widgets/icons';
 
 const SEGMENT_META = {
-    champions:   { label: __( 'Champions',    'dono-fundraising-platform' ), color: 'var(--dono-seg-champions, #16a34a)',   hint: __( 'Active, frequent, high LTV', 'dono-fundraising-platform' ) },
-    loyal:       { label: __( 'Loyal',        'dono-fundraising-platform' ), color: 'var(--dono-seg-loyal, #0891b2)',       hint: __( 'Active, 2+ donations',        'dono-fundraising-platform' ) },
-    new:         { label: __( 'New',          'dono-fundraising-platform' ), color: 'var(--dono-seg-new, #7c3aed)',         hint: __( 'Joined recently',             'dono-fundraising-platform' ) },
-    at_risk:     { label: __( 'At risk',      'dono-fundraising-platform' ), color: 'var(--dono-seg-at-risk, #f59e0b)',     hint: __( 'Was active, slowing down',    'dono-fundraising-platform' ) },
-    hibernating: { label: __( 'Hibernating',  'dono-fundraising-platform' ), color: 'var(--dono-seg-hibernating, #a16207)', hint: __( 'Long lapsed, low LTV',        'dono-fundraising-platform' ) },
-    lost:        { label: __( 'Lost',         'dono-fundraising-platform' ), color: 'var(--dono-seg-lost, #dc2626)',        hint: __( '> 12 months silent',           'dono-fundraising-platform' ) },
-    other:       { label: __( 'Other',        'dono-fundraising-platform' ), color: 'var(--dono-seg-other, #6b7280)',       hint: __( 'Uncategorised',               'dono-fundraising-platform' ) },
+    champions:   { label: __( 'Champions',    'giveflow-fundraising-campaigns' ), color: 'var(--giveflow-seg-champions, #16a34a)',   hint: __( 'Active, frequent, high LTV', 'giveflow-fundraising-campaigns' ) },
+    loyal:       { label: __( 'Loyal',        'giveflow-fundraising-campaigns' ), color: 'var(--giveflow-seg-loyal, #0891b2)',       hint: __( 'Active, 2+ donations',        'giveflow-fundraising-campaigns' ) },
+    new:         { label: __( 'New',          'giveflow-fundraising-campaigns' ), color: 'var(--giveflow-seg-new, #7c3aed)',         hint: __( 'Joined recently',             'giveflow-fundraising-campaigns' ) },
+    at_risk:     { label: __( 'At risk',      'giveflow-fundraising-campaigns' ), color: 'var(--giveflow-seg-at-risk, #f59e0b)',     hint: __( 'Was active, slowing down',    'giveflow-fundraising-campaigns' ) },
+    hibernating: { label: __( 'Hibernating',  'giveflow-fundraising-campaigns' ), color: 'var(--giveflow-seg-hibernating, #a16207)', hint: __( 'Long lapsed, low LTV',        'giveflow-fundraising-campaigns' ) },
+    lost:        { label: __( 'Lost',         'giveflow-fundraising-campaigns' ), color: 'var(--giveflow-seg-lost, #dc2626)',        hint: __( '> 12 months silent',           'giveflow-fundraising-campaigns' ) },
+    other:       { label: __( 'Other',        'giveflow-fundraising-campaigns' ), color: 'var(--giveflow-seg-other, #6b7280)',       hint: __( 'Uncategorised',               'giveflow-fundraising-campaigns' ) },
 };
 
 function formatBucketLabel( min, max ) {
@@ -28,41 +28,41 @@ function formatBucketLabel( min, max ) {
 
 function LifecycleKpis( { kpi } ) {
     return (
-        <div className="dono-overview__metrics">
+        <div className="giveflow-overview__metrics">
             <MetricCard
-                label={ __( 'Total donors', 'dono-fundraising-platform' ) }
+                label={ __( 'Total donors', 'giveflow-fundraising-campaigns' ) }
                 value={ String( kpi.total ) }
-                sub={ kpi.new ? `+${ kpi.new } ${ __( 'new (30d)', 'dono-fundraising-platform' ) }` : __( 'no new donors', 'dono-fundraising-platform' ) }
+                sub={ kpi.new ? `+${ kpi.new } ${ __( 'new (30d)', 'giveflow-fundraising-campaigns' ) }` : __( 'no new donors', 'giveflow-fundraising-campaigns' ) }
                 icon={ <IconUsers /> }
             />
             <MetricCard
-                label={ __( 'Active', 'dono-fundraising-platform' ) }
+                label={ __( 'Active', 'giveflow-fundraising-campaigns' ) }
                 value={ String( kpi.active ) }
-                sub={ `${ kpi.active_pct }% ${ __( 'of base · gave in 90d', 'dono-fundraising-platform' ) }` }
+                sub={ `${ kpi.active_pct }% ${ __( 'of base · gave in 90d', 'giveflow-fundraising-campaigns' ) }` }
                 icon={ <IconHeart /> }
             />
             <MetricCard
-                label={ __( 'At risk', 'dono-fundraising-platform' ) }
+                label={ __( 'At risk', 'giveflow-fundraising-campaigns' ) }
                 value={ String( kpi.at_risk ) }
-                sub={ `${ kpi.at_risk_pct }% ${ __( 'silent 90-180d', 'dono-fundraising-platform' ) }` }
+                sub={ `${ kpi.at_risk_pct }% ${ __( 'silent 90-180d', 'giveflow-fundraising-campaigns' ) }` }
                 icon={ <IconActivity /> }
             />
             <MetricCard
-                label={ __( 'Lapsed', 'dono-fundraising-platform' ) }
+                label={ __( 'Lapsed', 'giveflow-fundraising-campaigns' ) }
                 value={ String( kpi.lapsed ) }
-                sub={ `${ kpi.lapsed_pct }% ${ __( 'silent 180-365d', 'dono-fundraising-platform' ) }` }
+                sub={ `${ kpi.lapsed_pct }% ${ __( 'silent 180-365d', 'giveflow-fundraising-campaigns' ) }` }
                 icon={ <IconActivity /> }
             />
             <MetricCard
-                label={ __( 'Lost', 'dono-fundraising-platform' ) }
+                label={ __( 'Lost', 'giveflow-fundraising-campaigns' ) }
                 value={ String( kpi.lost ) }
-                sub={ `${ kpi.lost_pct }% ${ __( '> 365d silent', 'dono-fundraising-platform' ) }` }
+                sub={ `${ kpi.lost_pct }% ${ __( '> 365d silent', 'giveflow-fundraising-campaigns' ) }` }
                 icon={ <IconActivity /> }
             />
             <MetricCard
-                label={ __( 'Median LTV', 'dono-fundraising-platform' ) }
+                label={ __( 'Median LTV', 'giveflow-fundraising-campaigns' ) }
                 value={ formatAmount( kpi.median_ltv_cents ) }
-                sub={ `${ __( 'avg', 'dono-fundraising-platform' ) } ${ formatAmount( kpi.avg_ltv_cents ) }` }
+                sub={ `${ __( 'avg', 'giveflow-fundraising-campaigns' ) } ${ formatAmount( kpi.avg_ltv_cents ) }` }
                 icon={ <IconCoins /> }
             />
         </div>
@@ -72,8 +72,8 @@ function LifecycleKpis( { kpi } ) {
 function SegmentBreakdown( { segments } ) {
     const total = segments.reduce( ( s, r ) => s + r.donor_count, 0 ) || 1;
     return (
-        <div className="dono-segments">
-            <div className="dono-segments__bar" role="img" aria-label={ __( 'Donor segment distribution', 'dono-fundraising-platform' ) }>
+        <div className="giveflow-segments">
+            <div className="giveflow-segments__bar" role="img" aria-label={ __( 'Donor segment distribution', 'giveflow-fundraising-campaigns' ) }>
                 { segments.map( ( s ) => {
                     const meta = SEGMENT_META[ s.segment ] || SEGMENT_META.other;
                     const pct  = ( s.donor_count / total ) * 100;
@@ -81,21 +81,21 @@ function SegmentBreakdown( { segments } ) {
                     return (
                         <span
                             key={ s.segment }
-                            className="dono-segments__bar-slice"
+                            className="giveflow-segments__bar-slice"
                             style={ { width: `${ pct }%`, background: meta.color } }
                             title={ `${ meta.label }: ${ s.donor_count } (${ pct.toFixed( 1 ) }%)` }
                         />
                     );
                 } ) }
             </div>
-            <table className="dono-segments__table">
+            <table className="giveflow-segments__table">
                 <thead>
                     <tr>
-                        <th>{ __( 'Segment', 'dono-fundraising-platform' ) }</th>
-                        <th className="dono-num">{ __( 'Donors', 'dono-fundraising-platform' ) }</th>
-                        <th className="dono-num">{ __( '% of base', 'dono-fundraising-platform' ) }</th>
-                        <th className="dono-num">{ __( 'Avg LTV', 'dono-fundraising-platform' ) }</th>
-                        <th className="dono-num">{ __( 'Total LTV', 'dono-fundraising-platform' ) }</th>
+                        <th>{ __( 'Segment', 'giveflow-fundraising-campaigns' ) }</th>
+                        <th className="giveflow-num">{ __( 'Donors', 'giveflow-fundraising-campaigns' ) }</th>
+                        <th className="giveflow-num">{ __( '% of base', 'giveflow-fundraising-campaigns' ) }</th>
+                        <th className="giveflow-num">{ __( 'Avg LTV', 'giveflow-fundraising-campaigns' ) }</th>
+                        <th className="giveflow-num">{ __( 'Total LTV', 'giveflow-fundraising-campaigns' ) }</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -105,14 +105,14 @@ function SegmentBreakdown( { segments } ) {
                         return (
                             <tr key={ s.segment }>
                                 <td>
-                                    <span className="dono-seg-chip" style={ { background: meta.color } } />
+                                    <span className="giveflow-seg-chip" style={ { background: meta.color } } />
                                     { meta.label }
-                                    <span className="dono-seg-hint"> · { meta.hint }</span>
+                                    <span className="giveflow-seg-hint"> · { meta.hint }</span>
                                 </td>
-                                <td className="dono-num">{ s.donor_count }</td>
-                                <td className="dono-num">{ pct.toFixed( 1 ) }%</td>
-                                <td className="dono-num">{ formatAmount( s.avg_ltv_cents ) }</td>
-                                <td className="dono-num">{ formatAmount( s.total_ltv_cents ) }</td>
+                                <td className="giveflow-num">{ s.donor_count }</td>
+                                <td className="giveflow-num">{ pct.toFixed( 1 ) }%</td>
+                                <td className="giveflow-num">{ formatAmount( s.avg_ltv_cents ) }</td>
+                                <td className="giveflow-num">{ formatAmount( s.total_ltv_cents ) }</td>
                             </tr>
                         );
                     } ) }
@@ -125,16 +125,16 @@ function SegmentBreakdown( { segments } ) {
 function LtvHistogram( { buckets } ) {
     const max = buckets.reduce( ( m, b ) => Math.max( m, b.donor_count ), 0 ) || 1;
     return (
-        <div className="dono-ltv-hist">
+        <div className="giveflow-ltv-hist">
             { buckets.map( ( b ) => {
                 const h = ( b.donor_count / max ) * 100;
                 return (
-                    <div key={ b.min_cents } className="dono-ltv-hist__col" title={ `${ b.donor_count } ${ __( 'donors', 'dono-fundraising-platform' ) }` }>
-                        <div className="dono-ltv-hist__bar-wrap">
-                            <div className="dono-ltv-hist__bar" style={ { height: `${ Math.max( h, 2 ) }%` } } />
+                    <div key={ b.min_cents } className="giveflow-ltv-hist__col" title={ `${ b.donor_count } ${ __( 'donors', 'giveflow-fundraising-campaigns' ) }` }>
+                        <div className="giveflow-ltv-hist__bar-wrap">
+                            <div className="giveflow-ltv-hist__bar" style={ { height: `${ Math.max( h, 2 ) }%` } } />
                         </div>
-                        <div className="dono-ltv-hist__count">{ b.donor_count }</div>
-                        <div className="dono-ltv-hist__label">{ formatBucketLabel( b.min_cents, b.max_cents ) }</div>
+                        <div className="giveflow-ltv-hist__count">{ b.donor_count }</div>
+                        <div className="giveflow-ltv-hist__label">{ formatBucketLabel( b.min_cents, b.max_cents ) }</div>
                     </div>
                 );
             } ) }
@@ -170,7 +170,7 @@ function ReasonPill( { row } ) {
                 'About %d day between donations, on average.',
                 'About %d days between donations, on average.',
                 row.avg_gap_days,
-                'dono-fundraising-platform'
+                'giveflow-fundraising-campaigns'
             ),
             row.avg_gap_days
         )
@@ -188,32 +188,32 @@ function ReasonPill( { row } ) {
 // shares this table and has no reason to carry.
 function DonorTable( { rows, showReason } ) {
     return (
-        <table className="dono-table">
+        <table className="giveflow-table">
             <thead>
                 <tr>
-                    <th>{ __( 'Donor', 'dono-fundraising-platform' ) }</th>
-                    <th>{ __( 'Email', 'dono-fundraising-platform' ) }</th>
-                    <th>{ __( 'Country', 'dono-fundraising-platform' ) }</th>
-                    <th className="dono-num">{ __( 'Donations', 'dono-fundraising-platform' ) }</th>
-                    <th className="dono-num">{ __( 'Total', 'dono-fundraising-platform' ) }</th>
-                    <th className="dono-date">{ __( 'Last donation', 'dono-fundraising-platform' ) }</th>
-                    { showReason && <th className="dono-why">{ __( 'Why', 'dono-fundraising-platform' ) }</th> }
+                    <th>{ __( 'Donor', 'giveflow-fundraising-campaigns' ) }</th>
+                    <th>{ __( 'Email', 'giveflow-fundraising-campaigns' ) }</th>
+                    <th>{ __( 'Country', 'giveflow-fundraising-campaigns' ) }</th>
+                    <th className="giveflow-num">{ __( 'Donations', 'giveflow-fundraising-campaigns' ) }</th>
+                    <th className="giveflow-num">{ __( 'Total', 'giveflow-fundraising-campaigns' ) }</th>
+                    <th className="giveflow-date">{ __( 'Last donation', 'giveflow-fundraising-campaigns' ) }</th>
+                    { showReason && <th className="giveflow-why">{ __( 'Why', 'giveflow-fundraising-campaigns' ) }</th> }
                 </tr>
             </thead>
             <tbody>
                 { rows.map( ( r ) => (
                     <tr key={ r.id }>
                         <td>
-                            <a className="dono-row__link dono-row__link--strong" href={ donorHref( r.id ) }>
+                            <a className="giveflow-row__link giveflow-row__link--strong" href={ donorHref( r.id ) }>
                                 { r.name }
                             </a>
                         </td>
                         <td>{ r.email || '-' }</td>
                         <td>{ r.country || '-' }</td>
-                        <td className="dono-num">{ r.donations_count ?? '-' }</td>
-                        <td className="dono-num">{ formatAmount( r.total_donated_cents ) }</td>
-                        <td className="dono-date">{ formatDate( r.last_donation_at ) }</td>
-                        { showReason && <td className="dono-why"><ReasonPill row={ r } /></td> }
+                        <td className="giveflow-num">{ r.donations_count ?? '-' }</td>
+                        <td className="giveflow-num">{ formatAmount( r.total_donated_cents ) }</td>
+                        <td className="giveflow-date">{ formatDate( r.last_donation_at ) }</td>
+                        { showReason && <td className="giveflow-why"><ReasonPill row={ r } /></td> }
                     </tr>
                 ) ) }
             </tbody>
@@ -227,8 +227,8 @@ function TopDonorsLeaderboard( { rows } ) {
             <EmptyState
                 compact
                 icon={ <UsersIcon size={ 22 } strokeWidth={ 1.75 } /> }
-                title={ __( 'No donors yet', 'dono-fundraising-platform' ) }
-                body={ __( 'The top donor leaderboard fills in as your first completed donations roll in.', 'dono-fundraising-platform' ) }
+                title={ __( 'No donors yet', 'giveflow-fundraising-campaigns' ) }
+                body={ __( 'The top donor leaderboard fills in as your first completed donations roll in.', 'giveflow-fundraising-campaigns' ) }
             />
         );
     }
@@ -242,15 +242,15 @@ function CohortHeatmap( { retention } ) {
             <EmptyState
                 compact
                 icon={ <History size={ 22 } strokeWidth={ 1.75 } /> }
-                title={ __( 'Not enough history yet', 'dono-fundraising-platform' ) }
-                body={ __( 'Cohort retention needs at least one donation in a cohort month before the heatmap can render.', 'dono-fundraising-platform' ) }
+                title={ __( 'Not enough history yet', 'giveflow-fundraising-campaigns' ) }
+                body={ __( 'Cohort retention needs at least one donation in a cohort month before the heatmap can render.', 'giveflow-fundraising-campaigns' ) }
             />
         );
     }
     const cols = Array.from( { length: maxOffset + 1 }, ( _, i ) => i );
 
     const cellStyle = ( pct ) => {
-        if ( pct <= 0 ) return { background: 'var(--dono-bg-soft, #f3f4f6)', color: 'var(--dono-text-muted, #6b7280)' };
+        if ( pct <= 0 ) return { background: 'var(--giveflow-bg-soft, #f3f4f6)', color: 'var(--giveflow-text-muted, #6b7280)' };
         // Linear interpolation from light to accent green.
         const intensity = Math.min( 1, pct / 100 );
         const r = Math.round( 240 + ( 30 - 240 ) * intensity );
@@ -261,14 +261,14 @@ function CohortHeatmap( { retention } ) {
     };
 
     return (
-        <div className="dono-cohort">
-            <table className="dono-cohort__table">
+        <div className="giveflow-cohort">
+            <table className="giveflow-cohort__table">
                 <thead>
                     <tr>
-                        <th>{ __( 'Cohort', 'dono-fundraising-platform' ) }</th>
-                        <th className="dono-num">{ __( 'Size', 'dono-fundraising-platform' ) }</th>
+                        <th>{ __( 'Cohort', 'giveflow-fundraising-campaigns' ) }</th>
+                        <th className="giveflow-num">{ __( 'Size', 'giveflow-fundraising-campaigns' ) }</th>
                         { cols.map( ( i ) => (
-                            <th key={ i } className="dono-num">{ i === 0 ? __( 'M0', 'dono-fundraising-platform' ) : `+${ i }` }</th>
+                            <th key={ i } className="giveflow-num">{ i === 0 ? __( 'M0', 'giveflow-fundraising-campaigns' ) : `+${ i }` }</th>
                         ) ) }
                     </tr>
                 </thead>
@@ -276,13 +276,13 @@ function CohortHeatmap( { retention } ) {
                     { cohorts.map( ( row ) => (
                         <tr key={ row.month }>
                             <td>{ row.month }</td>
-                            <td className="dono-num">{ row.size }</td>
+                            <td className="giveflow-num">{ row.size }</td>
                             { cols.map( ( i ) => {
                                 const cell = row.retention[ i ] || { pct: 0, count: 0 };
                                 return (
                                     <td
                                         key={ i }
-                                        className="dono-cohort__cell"
+                                        className="giveflow-cohort__cell"
                                         style={ cellStyle( cell.pct ) }
                                         title={ `${ cell.count } / ${ row.size } (${ cell.pct }%)` }
                                     >
@@ -300,29 +300,29 @@ function CohortHeatmap( { retention } ) {
 
 function RecurringStrip( { recurring } ) {
     return (
-        <div className="dono-overview__metrics">
+        <div className="giveflow-overview__metrics">
             <MetricCard
-                label={ __( 'Active recurring', 'dono-fundraising-platform' ) }
+                label={ __( 'Active recurring', 'giveflow-fundraising-campaigns' ) }
                 value={ String( recurring.active_count ) }
-                sub={ __( 'plans currently billing', 'dono-fundraising-platform' ) }
+                sub={ __( 'plans currently billing', 'giveflow-fundraising-campaigns' ) }
                 icon={ <IconHeart /> }
             />
             <MetricCard
-                label={ __( 'MRR', 'dono-fundraising-platform' ) }
+                label={ __( 'MRR', 'giveflow-fundraising-campaigns' ) }
                 value={ formatAmount( recurring.mrr_cents ) }
-                sub={ __( 'monthly-equivalent revenue', 'dono-fundraising-platform' ) }
+                sub={ __( 'monthly-equivalent revenue', 'giveflow-fundraising-campaigns' ) }
                 icon={ <IconCoins /> }
             />
             <MetricCard
-                label={ __( 'New this month', 'dono-fundraising-platform' ) }
+                label={ __( 'New this month', 'giveflow-fundraising-campaigns' ) }
                 value={ String( recurring.new_this_month ) }
-                sub={ __( 'plans started', 'dono-fundraising-platform' ) }
+                sub={ __( 'plans started', 'giveflow-fundraising-campaigns' ) }
                 icon={ <IconActivity /> }
             />
             <MetricCard
-                label={ __( 'Churn this month', 'dono-fundraising-platform' ) }
+                label={ __( 'Churn this month', 'giveflow-fundraising-campaigns' ) }
                 value={ `${ recurring.churn_pct }%` }
-                sub={ sprintf( /* translators: %d: count */ __( '%d cancellations', 'dono-fundraising-platform' ), recurring.churned_this_month ) }
+                sub={ sprintf( /* translators: %d: count */ __( '%d cancellations', 'giveflow-fundraising-campaigns' ), recurring.churned_this_month ) }
                 icon={ <IconActivity /> }
             />
         </div>
@@ -341,7 +341,7 @@ function AtRiskTable() {
         let aborted = false;
         setLoading( true );
         apiFetch( {
-            path: `/dono/v1/admin/donors/at-risk?page=${ page }&per_page=${ perPage }`,
+            path: `/giveflow/v1/admin/donors/at-risk?page=${ page }&per_page=${ perPage }`,
             parse: false,
         } )
             .then( async ( res ) => {
@@ -354,7 +354,7 @@ function AtRiskTable() {
             } )
             // On failure keep data null and record the error so we show a
             // problem, not the celebratory "no donors slipping" empty state.
-            .catch( ( e ) => { if ( ! aborted ) setError( e?.message || __( 'Could not load at-risk donors.', 'dono-fundraising-platform' ) ); } )
+            .catch( ( e ) => { if ( ! aborted ) setError( e?.message || __( 'Could not load at-risk donors.', 'giveflow-fundraising-campaigns' ) ); } )
             .finally( () => { if ( ! aborted ) setLoading( false ); } );
         return () => { aborted = true; };
     }, [ page ] );
@@ -362,39 +362,39 @@ function AtRiskTable() {
     const pageCount = Math.max( 1, Math.ceil( total / perPage ) );
 
     return (
-        <div className="dono-at-risk">
+        <div className="giveflow-at-risk">
             { total > 0 && (
-                <div className="dono-at-risk__head">
-                    <span className="dono-at-risk__count">
+                <div className="giveflow-at-risk__head">
+                    <span className="giveflow-at-risk__count">
                         { total === 1
-                            ? __( '1 at-risk donor', 'dono-fundraising-platform' )
-                            : sprintf( /* translators: %s: count */ __( '%s at-risk donors', 'dono-fundraising-platform' ), total.toLocaleString() ) }
+                            ? __( '1 at-risk donor', 'giveflow-fundraising-campaigns' )
+                            : sprintf( /* translators: %s: count */ __( '%s at-risk donors', 'giveflow-fundraising-campaigns' ), total.toLocaleString() ) }
                     </span>
                 </div>
             ) }
-            { loading && ! data && <p className="dono-loading">{ __( 'Loading…', 'dono-fundraising-platform' ) }</p> }
-            { error && ! loading && <p className="dono-error">{ error }</p> }
+            { loading && ! data && <p className="giveflow-loading">{ __( 'Loading…', 'giveflow-fundraising-campaigns' ) }</p> }
+            { error && ! loading && <p className="giveflow-error">{ error }</p> }
             { ! error && data && data.length === 0 && (
                 <EmptyState
                     compact
                     icon={ <UsersIcon size={ 22 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'No donors are slipping', 'dono-fundraising-platform' ) }
-                    body={ __( 'Donors appear here when they have gone quiet for longer than usual, so you can reach them before they lapse.', 'dono-fundraising-platform' ) }
+                    title={ __( 'No donors are slipping', 'giveflow-fundraising-campaigns' ) }
+                    body={ __( 'Donors appear here when they have gone quiet for longer than usual, so you can reach them before they lapse.', 'giveflow-fundraising-campaigns' ) }
                 />
             ) }
             { data && data.length > 0 && (
                 <>
-                    <div className="dono-at-risk__scroll">
+                    <div className="giveflow-at-risk__scroll">
                         <DonorTable rows={ data } showReason />
                     </div>
                     { pageCount > 1 && (
-                        <div className="dono-pagination">
+                        <div className="giveflow-pagination">
                             <button type="button" disabled={ page <= 1 } onClick={ () => setPage( ( p ) => p - 1 ) }>
-                                ← { __( 'Prev', 'dono-fundraising-platform' ) }
+                                ← { __( 'Prev', 'giveflow-fundraising-campaigns' ) }
                             </button>
-                            <span>{ sprintf( /* translators: 1: current page, 2: total pages */ __( 'Page %1$d of %2$d', 'dono-fundraising-platform' ), page, pageCount ) }</span>
+                            <span>{ sprintf( /* translators: 1: current page, 2: total pages */ __( 'Page %1$d of %2$d', 'giveflow-fundraising-campaigns' ), page, pageCount ) }</span>
                             <button type="button" disabled={ page >= pageCount } onClick={ () => setPage( ( p ) => p + 1 ) }>
-                                { __( 'Next', 'dono-fundraising-platform' ) } →
+                                { __( 'Next', 'giveflow-fundraising-campaigns' ) } →
                             </button>
                         </div>
                     ) }
@@ -412,7 +412,7 @@ export default function Insights( { toggleSlot } ) {
     useEffect( () => {
         let aborted = false;
         setLoading( true );
-        apiFetch( { path: '/dono/v1/admin/donors/insights' } )
+        apiFetch( { path: '/giveflow/v1/admin/donors/insights' } )
             .then( ( d ) => { if ( ! aborted ) { setData( d ); setError( null ); } } )
             .catch( ( e ) => { if ( ! aborted ) setError( e?.message || 'Error' ); } )
             .finally( () => { if ( ! aborted ) setLoading( false ); } );
@@ -420,21 +420,21 @@ export default function Insights( { toggleSlot } ) {
     }, [] );
 
     if ( loading && ! data ) {
-        return <p className="dono-loading">{ __( 'Loading insights…', 'dono-fundraising-platform' ) }</p>;
+        return <p className="giveflow-loading">{ __( 'Loading insights…', 'giveflow-fundraising-campaigns' ) }</p>;
     }
     if ( error ) {
-        return <p className="dono-error">{ error }</p>;
+        return <p className="giveflow-error">{ error }</p>;
     }
     if ( ! data ) return null;
 
     return (
-        <div className="dono-donor-insights" data-loading={ loading ? 'true' : undefined }>
+        <div className="giveflow-donor-insights" data-loading={ loading ? 'true' : undefined }>
             { toggleSlot && (
-                <div className="dono-page-head">
-                    <div className="dono-page-head__title-row">
-                        <h1>{ __( 'Donors', 'dono-fundraising-platform' ) }</h1>
+                <div className="giveflow-page-head">
+                    <div className="giveflow-page-head__title-row">
+                        <h1>{ __( 'Donors', 'giveflow-fundraising-campaigns' ) }</h1>
                     </div>
-                    <div className="dono-page-head__right">{ toggleSlot }</div>
+                    <div className="giveflow-page-head__right">{ toggleSlot }</div>
                 </div>
             ) }
             { ( data.test?.test_only_donors || 0 ) > 0 && (
@@ -445,39 +445,39 @@ export default function Insights( { toggleSlot } ) {
                             '%d donor has only test donations, so they are not in this analysis.',
                             '%d donors have only test donations, so they are not in this analysis.',
                             data.test.test_only_donors,
-                            'dono-fundraising-platform'
+                            'giveflow-fundraising-campaigns'
                         ),
                         data.test.test_only_donors
                     ) }
                     { ' ' }
-                    { __( 'Lifetime value, segments and retention are built from money actually taken, so there is no test version of them.', 'dono-fundraising-platform' ) }
+                    { __( 'Lifetime value, segments and retention are built from money actually taken, so there is no test version of them.', 'giveflow-fundraising-campaigns' ) }
                 </Notice>
             ) }
 
             <LifecycleKpis kpi={ data.kpi } />
 
-            <WidgetCard title={ __( 'Recurring revenue', 'dono-fundraising-platform' ) }>
+            <WidgetCard title={ __( 'Recurring revenue', 'giveflow-fundraising-campaigns' ) }>
                 <RecurringStrip recurring={ data.recurring } />
             </WidgetCard>
 
-            <div className="dono-overview__grid">
-                <WidgetCard title={ __( 'Donor segments', 'dono-fundraising-platform' ) }>
+            <div className="giveflow-overview__grid">
+                <WidgetCard title={ __( 'Donor segments', 'giveflow-fundraising-campaigns' ) }>
                     <SegmentBreakdown segments={ data.segments } />
                 </WidgetCard>
-                <WidgetCard title={ __( 'Lifetime value distribution', 'dono-fundraising-platform' ) }>
+                <WidgetCard title={ __( 'Lifetime value distribution', 'giveflow-fundraising-campaigns' ) }>
                     <LtvHistogram buckets={ data.ltv_buckets } />
                 </WidgetCard>
             </div>
 
-            <WidgetCard title={ __( 'Cohort retention', 'dono-fundraising-platform' ) }>
+            <WidgetCard title={ __( 'Cohort retention', 'giveflow-fundraising-campaigns' ) }>
                 <CohortHeatmap retention={ data.retention } />
             </WidgetCard>
 
-            <WidgetCard title={ __( 'Needs attention: at-risk donors', 'dono-fundraising-platform' ) }>
+            <WidgetCard title={ __( 'Needs attention: at-risk donors', 'giveflow-fundraising-campaigns' ) }>
                 <AtRiskTable />
             </WidgetCard>
 
-            <WidgetCard title={ __( 'Top donors by lifetime value', 'dono-fundraising-platform' ) }>
+            <WidgetCard title={ __( 'Top donors by lifetime value', 'giveflow-fundraising-campaigns' ) }>
                 <TopDonorsLeaderboard rows={ data.top_donors } />
             </WidgetCard>
         </div>

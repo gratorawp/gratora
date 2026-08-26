@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Dashboard\DashboardMetricsService;
-use Dono\Donations\Donation;
-use Dono\Donations\DonationRepository;
-use Dono\Donations\Refund;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
-use Dono\Foundation\Time\Clock;
-use Dono\Recurring\RecurringPlanRepository;
+use GiveFlow\Dashboard\DashboardMetricsService;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Donations\Refund;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Foundation\Time\Clock;
+use GiveFlow\Recurring\RecurringPlanRepository;
 
 /**
  * Locks the live "today" ribbon's money math: donations are summed in the org
@@ -28,10 +28,10 @@ final class DashboardTodayMetricsTest extends IntegrationTestCase
         $now = gmdate('Y-m-d H:i:s');
 
         // Base-currency donation: 100.00 base.
-        $this->seedPaid((int) $donor->id, 'DONO-TODAY-EUR', 10000, 'EUR', 10000, '1.00000000', $now);
+        $this->seedPaid((int) $donor->id, 'GIVEFLOW-TODAY-EUR', 10000, 'EUR', 10000, '1.00000000', $now);
 
         // Foreign donation: 100.00 USD recorded as 50.00 base (fx 0.5).
-        $usd = $this->seedPaid((int) $donor->id, 'DONO-TODAY-USD', 10000, 'USD', 5000, '0.50000000', $now);
+        $usd = $this->seedPaid((int) $donor->id, 'GIVEFLOW-TODAY-USD', 10000, 'USD', 5000, '0.50000000', $now);
 
         // 40.00 USD refunded == 20.00 base.
         $r = Refund::make();
@@ -73,7 +73,7 @@ final class DashboardTodayMetricsTest extends IntegrationTestCase
         $now = gmdate('Y-m-d H:i:s');
 
         // 200.00 USD at 0.5107, so 102.14 base, rounded once from the whole.
-        $usd = $this->seedPaid((int) $donor->id, 'DONO-TODAY-SPLIT', 20000, 'USD', 10214, '0.51070000', $now);
+        $usd = $this->seedPaid((int) $donor->id, 'GIVEFLOW-TODAY-SPLIT', 20000, 'USD', 10214, '0.51070000', $now);
 
         // Refunded in two halves. 10000 * 0.5107 = 5107 exactly; each 5000 half
         // is 2553.5, which rounds up twice to 5108.

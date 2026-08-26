@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Cli\CliCommands;
-use Dono\Cli\DemoSeeder;
-use Dono\Donations\DonationIntent;
-use Dono\Donations\DonationService;
-use Dono\Foundation\Plugin;
-use DonoCliHalt;
+use GiveFlow\Cli\CliCommands;
+use GiveFlow\Cli\DemoSeeder;
+use GiveFlow\Donations\DonationIntent;
+use GiveFlow\Donations\DonationService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlowCliHalt;
 
 /**
  * The seeding commands ship in the release zip and run against whatever
@@ -54,19 +54,19 @@ final class CliSeedGuardsTest extends IntegrationTestCase
      */
     public function test_e2e_seed_refuses_on_an_install_that_reports_production(): void
     {
-        $before = get_option('dono_currency_locale');
+        $before = get_option('giveflow_currency_locale');
 
         try {
             $this->commands()->e2e_seed([], ['yes' => true]);
             $this->fail('e2e-seed ran on a production install');
-        } catch (DonoCliHalt $halt) {
+        } catch (GiveFlowCliHalt $halt) {
             $this->assertStringContainsString('production', $halt->getMessage());
         }
 
-        $this->assertSame($before, get_option('dono_currency_locale'), 'the org currency is untouched');
+        $this->assertSame($before, get_option('giveflow_currency_locale'), 'the org currency is untouched');
         $this->assertArrayNotHasKey(
             'test_mode',
-            (array) get_option('dono_gateway_config', []),
+            (array) get_option('giveflow_gateway_config', []),
             'org-wide test mode is not switched on by a refused command'
         );
     }
@@ -74,15 +74,15 @@ final class CliSeedGuardsTest extends IntegrationTestCase
     /** Nothing is written before the refusal, including the onboarding state. */
     public function test_a_refused_e2e_seed_leaves_onboarding_alone(): void
     {
-        update_option('dono_onboarding_status', 'pending', false);
+        update_option('giveflow_onboarding_status', 'pending', false);
 
         try {
             $this->commands()->e2e_seed([], ['yes' => true]);
-        } catch (DonoCliHalt) {
+        } catch (GiveFlowCliHalt) {
             // The refusal is the subject of the test above.
         }
 
-        $this->assertSame('pending', get_option('dono_onboarding_status'));
+        $this->assertSame('pending', get_option('giveflow_onboarding_status'));
     }
 
     /**
@@ -95,7 +95,7 @@ final class CliSeedGuardsTest extends IntegrationTestCase
         try {
             $this->commands()->e2e_seed([], ['force' => true]);
             $this->fail('e2e-seed wrote without asking');
-        } catch (DonoCliHalt $halt) {
+        } catch (GiveFlowCliHalt $halt) {
             $this->assertStringStartsWith('confirm:', $halt->getMessage());
             $this->assertStringContainsString('test mode', $halt->getMessage());
             $this->assertStringContainsString('currency', $halt->getMessage());
@@ -118,7 +118,7 @@ final class CliSeedGuardsTest extends IntegrationTestCase
         try {
             $this->commands()->demo_seed([], ['yes' => true]);
             $this->fail('demo-seed wrote into a real book of record');
-        } catch (DonoCliHalt $halt) {
+        } catch (GiveFlowCliHalt $halt) {
             $this->assertStringContainsString('live donations', $halt->getMessage());
         }
     }
@@ -140,7 +140,7 @@ final class CliSeedGuardsTest extends IntegrationTestCase
         $this->assertSame(0, DemoSeeder::foreignLiveDonations());
     }
 
-    private function liveDonation(bool $isTest = false): \Dono\Donations\Donation
+    private function liveDonation(bool $isTest = false): \GiveFlow\Donations\Donation
     {
         return $this->donations()->createPending(new DonationIntent(
             email: 'offline.giver@example.test',

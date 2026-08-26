@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Dono\Forms\Blocks;
+namespace GiveFlow\Forms\Blocks;
 
-use Dono\Campaigns\CampaignRepository;
-use Dono\Forms\FormRepository;
-use Dono\Foundation\Helpers\Money;
-use Dono\Foundation\Helpers\View;
-use Dono\Vendor\Queryable\DB;
+use GiveFlow\Campaigns\CampaignRepository;
+use GiveFlow\Forms\FormRepository;
+use GiveFlow\Foundation\Helpers\Money;
+use GiveFlow\Foundation\Helpers\View;
+use GiveFlow\Vendor\Queryable\DB;
 
 /**
  * Goal progress block. Display only: shows the form's own goal or the
@@ -28,7 +28,7 @@ final class GoalBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'dono/goal';
+        return 'giveflow/goal';
     }
 
     /** @since 1.0.0 */
@@ -59,7 +59,7 @@ final class GoalBlock implements Block
         $campaignId = (int) ($attrs['campaignId'] ?? 0);
         $campaign   = $campaignId ? $this->campaigns->findById($campaignId) : null;
         if (! $campaign) {
-            return $this->missing(__('Goal will appear once the form is linked to a campaign.', 'dono-fundraising-platform'));
+            return $this->missing(__('Goal will appear once the form is linked to a campaign.', 'giveflow-fundraising-campaigns'));
         }
 
         $type = (string) ($campaign->goal_type ?: 'amount');
@@ -70,7 +70,7 @@ final class GoalBlock implements Block
             ? (int) ($campaign->goal_cents ?? 0)
             : (int) ($campaign->goal_count ?? 0);
         if ($target <= 0) {
-            return $this->missing(__('The campaign has no goal set yet.', 'dono-fundraising-platform'));
+            return $this->missing(__('The campaign has no goal set yet.', 'giveflow-fundraising-campaigns'));
         }
         $current = match ($type) {
             'donations' => (int) ($campaign->donations_count ?? 0),
@@ -95,23 +95,23 @@ final class GoalBlock implements Block
         $formId = (int) ($attrs['formId'] ?? 0);
         $form   = $formId ? $this->forms->findById($formId) : null;
         if (! $form) {
-            return $this->missing(__('Goal will appear once the form is published.', 'dono-fundraising-platform'));
+            return $this->missing(__('Goal will appear once the form is published.', 'giveflow-fundraising-campaigns'));
         }
 
         $settings = is_array($form->settings) ? $form->settings : [];
         $goal     = is_array($settings['goal'] ?? null) ? $settings['goal'] : [];
         $type     = (string) ($goal['type'] ?? 'none');
         if (! in_array($type, ['amount', 'donations', 'donors'], true)) {
-            return $this->missing(__('This form has no goal set. Add one in the form settings.', 'dono-fundraising-platform'));
+            return $this->missing(__('This form has no goal set. Add one in the form settings.', 'giveflow-fundraising-campaigns'));
         }
         $target = $type === 'amount'
             ? (int) ($goal['amount_cents'] ?? 0)
             : (int) ($goal['count'] ?? 0);
         if ($target <= 0) {
-            return $this->missing(__('This form has no goal set. Add one in the form settings.', 'dono-fundraising-platform'));
+            return $this->missing(__('This form has no goal set. Add one in the form settings.', 'giveflow-fundraising-campaigns'));
         }
 
-        $stats = DB::table('dono_form_donation_stats')
+        $stats = DB::table('giveflow_form_donation_stats')
             ->where('form_id', $formId)
             ->get();
         $raisedCents    = is_array($stats) ? (int) ($stats['raised_cents'] ?? 0) : 0;
@@ -177,7 +177,7 @@ final class GoalBlock implements Block
         if (! (is_user_logged_in() && current_user_can('edit_posts'))) {
             return '';
         }
-        return '<div class="dono-block dono-block--goal dono-goal dono-goal--missing">'
+        return '<div class="giveflow-block giveflow-block--goal giveflow-goal giveflow-goal--missing">'
              . esc_html($message)
              . '</div>';
     }

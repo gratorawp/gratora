@@ -3,7 +3,7 @@
 // since the two pages load separate CSS bundles and the picker lives in
 // _shared/components/FormTemplatePicker.jsx.
 
-.dono-form-template-picker {
+.giveflow-form-template-picker {
     .components-modal__content { padding-top: 12px; }
 
     &__intro {
@@ -89,7 +89,7 @@
     }
 }
 
-.dono-template-thumb {
+.giveflow-template-thumb {
     --thumb-accent: #{$accent};
     position: relative;
     aspect-ratio: 4 / 3;

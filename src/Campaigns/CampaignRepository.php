@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Campaigns;
+namespace GiveFlow\Campaigns;
 
-use Dono\Foundation\Auth\Capabilities;
-use Dono\Vendor\Queryable\DB;
+use GiveFlow\Foundation\Auth\Capabilities;
+use GiveFlow\Vendor\Queryable\DB;
 
 /**
  * Query helpers for the Campaign model.
@@ -34,7 +34,7 @@ final class CampaignRepository
         // Drafts/archived render only for users who can actually manage
         // campaigns (not any edit_posts holder like a Contributor); public and
         // under-privileged visitors get nothing.
-        if ($campaign->status !== 'published' && ! Capabilities::userCan('dono_manage_campaigns')) {
+        if ($campaign->status !== 'published' && ! Capabilities::userCan('giveflow_manage_campaigns')) {
             return null;
         }
         return $campaign;
@@ -175,7 +175,7 @@ final class CampaignRepository
 
         // DB::table (raw query builder) returns plain arrays from selectRaw,
         // which is what we need for the SUM/COUNT aggregates here.
-        $base = fn () => DB::table('dono_campaigns');
+        $base = fn () => DB::table('giveflow_campaigns');
 
         $totalCount  = (int) $applyFilters($base())->count();
         $activeCount = (int) $applyFilters($base())->where('status', 'published')->count();

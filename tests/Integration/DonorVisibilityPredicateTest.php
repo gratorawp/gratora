@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
-use Dono\Donors\DonorRepository;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
-use Dono\Vendor\Queryable\DB;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donors\DonorRepository;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Vendor\Queryable\DB;
 
 /**
  * Which donors are test-only, and which may leave the site in a CSV.
@@ -51,7 +51,7 @@ final class DonorVisibilityPredicateTest extends IntegrationTestCase
     /** @return list<int> */
     private function idsMatching(string $predicate): array
     {
-        $rows = DB::table('dono_donors')
+        $rows = DB::table('giveflow_donors')
             ->selectRaw('id')
             ->whereRaw($predicate)
             ->getAll();
@@ -112,7 +112,7 @@ final class DonorVisibilityPredicateTest extends IntegrationTestCase
         // predicate entirely while the export keeps one.
         $this->assertSame([], array_intersect($testIds, $mailIds));
         $this->assertSame(
-            (int) DB::table('dono_donors')->count(),
+            (int) DB::table('giveflow_donors')->count(),
             count($testIds) + count($mailIds)
         );
         $this->assertContains($testOnly, $testIds);
@@ -129,7 +129,7 @@ final class DonorVisibilityPredicateTest extends IntegrationTestCase
         $id = $this->donorId('kpi-order');
         $this->donation($id, false, 'order');
 
-        $kpi = Plugin::instance()->container->get(\Dono\Donors\DonorRepository::class)
+        $kpi = Plugin::instance()->container->get(\GiveFlow\Donors\DonorRepository::class)
             ->lifecycleKpi(gmdate('Y-m-d'));
 
         $withOrder = (int) $kpi['total'];
@@ -137,7 +137,7 @@ final class DonorVisibilityPredicateTest extends IntegrationTestCase
         $hidden = $this->donorId('kpi-test-only');
         $this->donation($hidden, true);
 
-        $after = (int) Plugin::instance()->container->get(\Dono\Donors\DonorRepository::class)
+        $after = (int) Plugin::instance()->container->get(\GiveFlow\Donors\DonorRepository::class)
             ->lifecycleKpi(gmdate('Y-m-d'))['total'];
 
         $this->assertSame($withOrder, $after, 'a test-only donor does not join the KPI');

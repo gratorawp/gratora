@@ -5,10 +5,10 @@ defined('ABSPATH') || exit;
  * @var string $placeholder
  * @var bool   $required
  */
-$labelText = $label !== '' ? $label : __('Email', 'dono-fundraising-platform');
+$labelText = $label !== '' ? $label : __('Email', 'giveflow-fundraising-campaigns');
 ?>
-<label class="dono-block dono-block--email dono-donor__field">
-    <span class="dono-donor__label"><?php echo esc_html($labelText); ?></span>
+<label class="giveflow-block giveflow-block--email giveflow-donor__field">
+    <span class="giveflow-donor__label"><?php echo esc_html($labelText); ?></span>
     <input type="email" name="email" autocomplete="email"
            placeholder="<?php echo esc_attr($placeholder); ?>"
            <?php echo esc_attr($required ? 'required' : ''); ?>>

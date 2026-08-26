@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Exports;
+namespace GiveFlow\Exports;
 
 use DateTimeImmutable;
-use Dono\Donations\DonationRepository;
-use Dono\Foundation\Helpers\Csv;
-use Dono\Foundation\Helpers\Money;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Foundation\Helpers\Csv;
+use GiveFlow\Foundation\Helpers\Money;
 
 /**
  * Month-by-month revenue and donation counts as CSV.
@@ -83,12 +83,12 @@ final class RevenueExporter
         // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- php://temp stream, not a filesystem path; WP_Filesystem has no streaming equivalent.
         fwrite($out, "\xEF\xBB\xBF");
         Csv::writeRow($out, [
-            __('Month', 'dono-fundraising-platform'),
-            __('Donations', 'dono-fundraising-platform'),
+            __('Month', 'giveflow-fundraising-campaigns'),
+            __('Donations', 'giveflow-fundraising-campaigns'),
             /* translators: %s: currency code, e.g. EUR. */
-            sprintf(__('Revenue (%s)', 'dono-fundraising-platform'), $currency),
+            sprintf(__('Revenue (%s)', 'giveflow-fundraising-campaigns'), $currency),
             /* translators: %s: currency code, e.g. EUR. */
-            sprintf(__('Average donation (%s)', 'dono-fundraising-platform'), $currency),
+            sprintf(__('Average donation (%s)', 'giveflow-fundraising-campaigns'), $currency),
         ]);
 
         foreach ($this->series($fromMonth, $toMonth) as $row) {

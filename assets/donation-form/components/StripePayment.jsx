@@ -117,26 +117,26 @@ export default function StripePayment( { config, payment, dispatch } ) {
         : '';
 
     return (
-        <div class="dono-form dono-form--payment">
-            <h3 class="dono-form__payment-title">{ i18n.paymentTitle || 'Complete your donation' }</h3>
+        <div class="giveflow-form giveflow-form--payment">
+            <h3 class="giveflow-form__payment-title">{ i18n.paymentTitle || 'Complete your donation' }</h3>
             { amountLine && (
-                <p class="dono-form__payment-amount">{ amountLine }</p>
+                <p class="giveflow-form__payment-amount">{ amountLine }</p>
             ) }
 
-            <div ref={ mountRef } class="dono-form__payment-element" />
+            <div ref={ mountRef } class="giveflow-form__payment-element" />
 
             { ! ready && ! error && (
-                <p class="dono-form__payment-loading">{ i18n.paymentLoading || 'Loading secure payment…' }</p>
+                <p class="giveflow-form__payment-loading">{ i18n.paymentLoading || 'Loading secure payment…' }</p>
             ) }
 
             { error && (
-                <div class="dono-form__error" role="alert">{ error }</div>
+                <div class="giveflow-form__error" role="alert">{ error }</div>
             ) }
 
-            <div class="dono-form__nav dono-form__nav--align-left">
+            <div class="giveflow-form__nav giveflow-form__nav--align-left">
                 <button
                     type="button"
-                    class="dono-form__button dono-form__button--primary"
+                    class="giveflow-form__button giveflow-form__button--primary"
                     disabled={ ! ready || paying }
                     onClick={ onPay }
                 >
@@ -144,7 +144,7 @@ export default function StripePayment( { config, payment, dispatch } ) {
                 </button>
                 <button
                     type="button"
-                    class="dono-form__button dono-form__button--secondary"
+                    class="giveflow-form__button giveflow-form__button--secondary"
                     disabled={ paying }
                     onClick={ () => dispatch( { type: 'CANCEL_PAYMENT' } ) }
                 >
@@ -158,10 +158,10 @@ export default function StripePayment( { config, payment, dispatch } ) {
 /** Map the form's themed CSS vars onto the Payment Element where they exist. */
 function stripeVars( el ) {
     try {
-        // --dono-accent is set on the .dono-donation-form element and inherits
+        // --giveflow-accent is set on the .giveflow-donation-form element and inherits
         // down to the mount node; documentElement wouldn't see the override.
         const cs = getComputedStyle( el || document.documentElement );
-        const accent = cs.getPropertyValue( '--dono-accent' ).trim();
+        const accent = cs.getPropertyValue( '--giveflow-accent' ).trim();
         return accent ? { colorPrimary: accent } : {};
     } catch {
         return {};
@@ -175,7 +175,7 @@ function stripeVars( el ) {
  */
 function buildReturnUrl( payment ) {
     const url = new URL( window.location.href );
-    url.searchParams.set( 'dono_return', '1' );
-    if ( payment?.reference ) url.searchParams.set( 'dono_ref', payment.reference );
+    url.searchParams.set( 'giveflow_return', '1' );
+    if ( payment?.reference ) url.searchParams.set( 'giveflow_ref', payment.reference );
     return url.toString();
 }

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Unit\Foundation\Commands;
+namespace GiveFlow\Tests\Unit\Foundation\Commands;
 
-use Dono\Foundation\Commands\Command;
-use Dono\Foundation\Commands\CommandRegistry;
+use GiveFlow\Foundation\Commands\Command;
+use GiveFlow\Foundation\Commands\CommandRegistry;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 

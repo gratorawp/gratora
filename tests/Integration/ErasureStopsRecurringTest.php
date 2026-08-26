@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donors\Donor;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
-use Dono\Gateways\GatewayManager;
-use Dono\Recurring\GatewayUnreachable;
-use Dono\Recurring\RecurringPlan;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Gateways\GatewayManager;
+use GiveFlow\Recurring\GatewayUnreachable;
+use GiveFlow\Recurring\RecurringPlan;
 
 /**
  * Erasing a donor must not leave their money moving.

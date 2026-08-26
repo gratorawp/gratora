@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donors\DonorMetricsService;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
-use Dono\Recurring\RecurringPlan;
+use GiveFlow\Donors\DonorMetricsService;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Recurring\RecurringPlan;
 
 /**
  * The banner an admin sees on a donor whose renewal was declined.

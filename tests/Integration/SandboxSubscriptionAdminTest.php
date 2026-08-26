@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Foundation\Plugin;
-use Dono\Foundation\Time\Clock;
-use Dono\Gateways\GatewayManager;
-use Dono\Gateways\Sandbox\SandboxGateway;
-use Dono\Gateways\SubscriptionAware;
-use Dono\Gateways\SubscriptionCreator;
-use Dono\Recurring\RecurringPlan;
-use Dono\Recurring\RecurringPlanRepository;
-use Dono\Recurring\RecurringResumer;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Foundation\Time\Clock;
+use GiveFlow\Gateways\GatewayManager;
+use GiveFlow\Gateways\Sandbox\SandboxGateway;
+use GiveFlow\Gateways\SubscriptionAware;
+use GiveFlow\Gateways\SubscriptionCreator;
+use GiveFlow\Recurring\RecurringPlan;
+use GiveFlow\Recurring\RecurringPlanRepository;
+use GiveFlow\Recurring\RecurringResumer;
 use WP_REST_Request;
 
 /**
@@ -36,7 +36,7 @@ final class SandboxSubscriptionAdminTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        update_option('dono_gateway_config', [
+        update_option('giveflow_gateway_config', [
             'test_mode' => true,
             'sandbox'   => ['enabled' => true],
         ]);
@@ -85,7 +85,7 @@ final class SandboxSubscriptionAdminTest extends IntegrationTestCase
     /** @param array<string,mixed> $body */
     private function act(RecurringPlan $plan, string $action, array $body = []): \WP_REST_Response|\WP_Error
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/admin/recurring/' . (int) $plan->id . '/action');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/recurring/' . (int) $plan->id . '/action');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['action' => $action] + $body));
 
@@ -108,12 +108,12 @@ final class SandboxSubscriptionAdminTest extends IntegrationTestCase
     {
         $plan = $this->plan();
 
-        $hidden = rest_do_request(new WP_REST_Request('GET', '/dono/v1/admin/recurring'));
+        $hidden = rest_do_request(new WP_REST_Request('GET', '/giveflow/v1/admin/recurring'));
         $ids    = array_column((array) $hidden->get_data(), 'id');
         $this->assertNotContains((int) $plan->id, $ids, 'a test plan stays out of the live list');
-        $this->assertGreaterThan(0, (int) $hidden->get_headers()['X-Dono-Test-Hidden'], 'and the screen says so');
+        $this->assertGreaterThan(0, (int) $hidden->get_headers()['X-GiveFlow-Test-Hidden'], 'and the screen says so');
 
-        $req = new WP_REST_Request('GET', '/dono/v1/admin/recurring');
+        $req = new WP_REST_Request('GET', '/giveflow/v1/admin/recurring');
         $req->set_param('include_test', true);
         $shown = (array) rest_do_request($req)->get_data();
 

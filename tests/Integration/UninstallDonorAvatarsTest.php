@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donors\Donor;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
-use Dono\Foundation\Uninstall\DataEraser;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Foundation\Uninstall\DataEraser;
 
 /**
  * A donor's picture is a WordPress attachment on a public uploads URL, and the
- * only thing that says whose it is is a column of dono_donors. Dropping the
+ * only thing that says whose it is is a column of giveflow_donors. Dropping the
  * table destroys that pointer, so a site that ticked "delete all data" is left
  * serving every supporter photograph forever with nothing left to find them by.
  *

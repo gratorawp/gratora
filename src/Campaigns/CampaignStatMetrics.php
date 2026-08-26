@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Campaigns;
+namespace GiveFlow\Campaigns;
 
-use Dono\Donations\DonationRepository;
-use Dono\Foundation\Helpers\Money;
-use Dono\Foundation\Time\Clock;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Foundation\Helpers\Money;
+use GiveFlow\Foundation\Time\Clock;
 
 /**
  * A metric answers null when the campaign cannot support it, so a stat block
@@ -31,15 +31,15 @@ final class CampaignStatMetrics
     public static function labels(): array
     {
         return [
-            'raised'    => __('Amount raised', 'dono-fundraising-platform'),
-            'goal'      => __('Our goal', 'dono-fundraising-platform'),
-            'remaining' => __('Still needed', 'dono-fundraising-platform'),
-            'percent'   => __('Of goal reached', 'dono-fundraising-platform'),
-            'donations' => __('Donations', 'dono-fundraising-platform'),
-            'donors'    => __('Donors', 'dono-fundraising-platform'),
-            'average'   => __('Average donation', 'dono-fundraising-platform'),
-            'top'       => __('Top donation', 'dono-fundraising-platform'),
-            'days_left' => __('Days left', 'dono-fundraising-platform'),
+            'raised'    => __('Amount raised', 'giveflow-fundraising-campaigns'),
+            'goal'      => __('Our goal', 'giveflow-fundraising-campaigns'),
+            'remaining' => __('Still needed', 'giveflow-fundraising-campaigns'),
+            'percent'   => __('Of goal reached', 'giveflow-fundraising-campaigns'),
+            'donations' => __('Donations', 'giveflow-fundraising-campaigns'),
+            'donors'    => __('Donors', 'giveflow-fundraising-campaigns'),
+            'average'   => __('Average donation', 'giveflow-fundraising-campaigns'),
+            'top'       => __('Top donation', 'giveflow-fundraising-campaigns'),
+            'days_left' => __('Days left', 'giveflow-fundraising-campaigns'),
         ];
     }
 

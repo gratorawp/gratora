@@ -1,1 +1,1 @@
-export { default, resolveEffectiveTokens } from '@dono/ui/styling/StylePreview';
+export { default, resolveEffectiveTokens } from '@giveflow/ui/styling/StylePreview';

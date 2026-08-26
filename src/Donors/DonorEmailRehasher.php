@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Donors;
+namespace GiveFlow\Donors;
 
-use Dono\Async\AsyncDispatcher;
-use Dono\Foundation\Crypto\Crypto;
-use Dono\Foundation\Identity\IdentityHasher;
-use Dono\Vendor\Queryable\DB;
+use GiveFlow\Async\AsyncDispatcher;
+use GiveFlow\Foundation\Crypto\Crypto;
+use GiveFlow\Foundation\Identity\IdentityHasher;
+use GiveFlow\Vendor\Queryable\DB;
 
 /**
  * Rehashes all donor email_hash values after a pepper rotation.
@@ -19,7 +19,7 @@ use Dono\Vendor\Queryable\DB;
  */
 final class DonorEmailRehasher
 {
-    public const HOOK  = 'dono.async.rehash_donor_email_hashes';
+    public const HOOK  = 'giveflow.async.rehash_donor_email_hashes';
 
     /**
      * Set when a rehash is owed and cleared when it finishes.
@@ -31,7 +31,7 @@ final class DonorEmailRehasher
      * pepper is generated at plugins_loaded and Action Scheduler's data store
      * only exists from init.
      */
-    public const PENDING_OPTION = 'dono_donor_rehash_pending';
+    public const PENDING_OPTION = 'giveflow_donor_rehash_pending';
 
     /**
      * How far the walk has got.
@@ -42,7 +42,7 @@ final class DonorEmailRehasher
      * tick already in flight and fork a second walk from the top of the table
      * on the next request, and the one after that.
      */
-    private const CURSOR_OPTION = 'dono_donor_rehash_after_id';
+    private const CURSOR_OPTION = 'giveflow_donor_rehash_after_id';
 
     private const BATCH = 200;
 
@@ -100,7 +100,7 @@ final class DonorEmailRehasher
     {
         $afterId = (int) get_option(self::CURSOR_OPTION, 0);
 
-        $rows = DB::table('dono_donors')
+        $rows = DB::table('giveflow_donors')
             ->where('id', $afterId, '>')
             ->where('email_encrypted', '', '!=')
             ->orderBy('id', 'ASC')
@@ -125,7 +125,7 @@ final class DonorEmailRehasher
             if ($plain === null) continue;
 
             $newHash = $this->hasher->emailHash($plain);
-            DB::table('dono_donors')
+            DB::table('giveflow_donors')
                 ->where('id', $id)
                 ->update(['email_hash' => $newHash]);
         }

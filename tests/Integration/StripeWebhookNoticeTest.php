@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Gateways\Stripe\StripeAccount;
-use Dono\Gateways\Stripe\StripeApi;
-use Dono\Gateways\Stripe\StripeWebhookNotice;
-use Dono\Foundation\Plugin;
-use Dono\Recurring\RecurringPlan;
+use GiveFlow\Gateways\Stripe\StripeAccount;
+use GiveFlow\Gateways\Stripe\StripeApi;
+use GiveFlow\Gateways\Stripe\StripeWebhookNotice;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Recurring\RecurringPlan;
 
 /**
  * The missing-webhook-secret warning is about deliveries that will be rejected.
@@ -29,7 +29,7 @@ final class StripeWebhookNoticeTest extends IntegrationTestCase
 
     private function enableStripe(bool $on): void
     {
-        update_option('dono_gateway_config', [
+        update_option('giveflow_gateway_config', [
             'test_mode' => true,
             'stripe'    => ['enabled' => $on, 'webhook_secret_test' => '', 'webhook_secret_live' => ''],
         ]);

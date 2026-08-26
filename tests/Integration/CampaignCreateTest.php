@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Campaigns\Campaign;
-use Dono\Campaigns\CampaignService;
-use Dono\Foundation\Helpers\Money;
-use Dono\Foundation\Plugin;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Campaigns\CampaignService;
+use GiveFlow\Foundation\Helpers\Money;
+use GiveFlow\Foundation\Plugin;
 
 /**
  * Locks the create-drawer-facing behaviour added to CampaignService::create():
  * default_fund_id + image_attachment_id now persist at create time, and
  * currency defaults to the org currency (not a hardcoded EUR) when the form
  * does not send one. Verified against the persisted row, not the return value
- * (dono_queryable_silent_write_failure.md).
+ * (giveflow_queryable_silent_write_failure.md).
  */
 final class CampaignCreateTest extends IntegrationTestCase
 {

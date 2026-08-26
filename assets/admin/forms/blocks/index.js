@@ -39,25 +39,25 @@ import registerHiddenBlock          from './hidden';
 import registerHtmlBlock            from './html';
 import registerPrivacyNoticeBlock   from './privacy-notice';
 
-const DONO_CATEGORIES = [
-    { slug: 'dono-amount',  title: __( 'Donation amount',   'dono-fundraising-platform' ) },
-    { slug: 'dono-donor',   title: __( 'Donor information', 'dono-fundraising-platform' ) },
-    { slug: 'dono-fields',  title: __( 'Custom fields',     'dono-fundraising-platform' ) },
-    { slug: 'dono-content', title: __( 'Content & layout',  'dono-fundraising-platform' ) },
-    { slug: 'dono-extras',  title: __( 'Extras',            'dono-fundraising-platform' ) },
+const GIVEFLOW_CATEGORIES = [
+    { slug: 'giveflow-amount',  title: __( 'Donation amount',   'giveflow-fundraising-campaigns' ) },
+    { slug: 'giveflow-donor',   title: __( 'Donor information', 'giveflow-fundraising-campaigns' ) },
+    { slug: 'giveflow-fields',  title: __( 'Custom fields',     'giveflow-fundraising-campaigns' ) },
+    { slug: 'giveflow-content', title: __( 'Content & layout',  'giveflow-fundraising-campaigns' ) },
+    { slug: 'giveflow-extras',  title: __( 'Extras',            'giveflow-fundraising-campaigns' ) },
 ];
 
 function ensureCategories() {
     try {
         const existing = select( 'core/blocks' ).getCategories();
-        const keep = existing.filter( ( c ) => ! String( c.slug ).startsWith( 'dono-' ) );
-        dispatch( 'core/blocks' ).setCategories( [ ...DONO_CATEGORIES, ...keep ] );
+        const keep = existing.filter( ( c ) => ! String( c.slug ).startsWith( 'giveflow-' ) );
+        dispatch( 'core/blocks' ).setCategories( [ ...GIVEFLOW_CATEGORIES, ...keep ] );
     } catch ( err ) {
         // setCategories not available on this version; harmless.
     }
 }
 
-addAction( 'dono.editor.registerBlocks', 'dono/core-blocks', ( api ) => {
+addAction( 'giveflow.editor.registerBlocks', 'giveflow/core-blocks', ( api ) => {
     ensureCategories();
     registerHeadingBlock( api );
     registerParagraphBlock( api );

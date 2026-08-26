@@ -1,1 +1,1 @@
-export { default } from '@dono/ui/widgets/WidgetGrid';
+export { default } from '@giveflow/ui/widgets/WidgetGrid';

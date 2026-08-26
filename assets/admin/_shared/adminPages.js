@@ -6,8 +6,8 @@
  * means a slug change is one edit rather than a hunt through every screen, and
  * a stale one is caught by AdminPageSlugTest rather than by a 404.
  */
-export const ADMIN_SLUG = 'dono';
+export const ADMIN_SLUG = 'giveflow';
 
-/** The Dono dashboard, the target of every screen's "Dono" breadcrumb. */
+/** The GiveFlow dashboard, the target of every screen's "GiveFlow" breadcrumb. */
 export const dashboardHref = ( pathname ) =>
     `${ pathname }?page=${ encodeURIComponent( ADMIN_SLUG ) }`;

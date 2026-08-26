@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Foundation\Plugin;
-use Dono\Settings\SettingsService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Settings\SettingsService;
 use WP_REST_Request;
 
 /**
@@ -38,7 +38,7 @@ final class CurrencyLocaleSettingRemovedTest extends IntegrationTestCase
     {
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
 
-        $data = (array) rest_do_request(new WP_REST_Request('GET', '/dono/v1/admin/settings/currency-locale'))->get_data();
+        $data = (array) rest_do_request(new WP_REST_Request('GET', '/giveflow/v1/admin/settings/currency-locale'))->get_data();
 
         $this->assertArrayHasKey('default_currency', $data, 'the rest of the group is untouched');
         $this->assertArrayNotHasKey('locale', $data);

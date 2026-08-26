@@ -22,29 +22,29 @@ require __DIR__ . '/../vendor/autoload.php';
 require __DIR__ . '/../vendor/vendor-prefixed/autoload.php';
 
 // In-memory option store for tests
-if (! isset($GLOBALS['_dono_test_options'])) {
-    $GLOBALS['_dono_test_options'] = [];
+if (! isset($GLOBALS['_giveflow_test_options'])) {
+    $GLOBALS['_giveflow_test_options'] = [];
 }
 
 if (! function_exists('get_option')) {
     function get_option(string $name, mixed $default = false): mixed
     {
-        return $GLOBALS['_dono_test_options'][$name] ?? $default;
+        return $GLOBALS['_giveflow_test_options'][$name] ?? $default;
     }
     function add_option(string $name, mixed $value, string $deprecated = '', bool|string $autoload = true): bool
     {
-        if (array_key_exists($name, $GLOBALS['_dono_test_options'])) return false;
-        $GLOBALS['_dono_test_options'][$name] = $value;
+        if (array_key_exists($name, $GLOBALS['_giveflow_test_options'])) return false;
+        $GLOBALS['_giveflow_test_options'][$name] = $value;
         return true;
     }
     function update_option(string $name, mixed $value, bool|string|null $autoload = null): bool
     {
-        $GLOBALS['_dono_test_options'][$name] = $value;
+        $GLOBALS['_giveflow_test_options'][$name] = $value;
         return true;
     }
     function delete_option(string $name): bool
     {
-        unset($GLOBALS['_dono_test_options'][$name]);
+        unset($GLOBALS['_giveflow_test_options'][$name]);
         return true;
     }
 }
@@ -100,41 +100,41 @@ if (! class_exists('WP_REST_Request')) {
 
 // Action Scheduler stubs for AsyncDispatcher unit tests.
 if (! function_exists('as_enqueue_async_action')) {
-    $GLOBALS['_dono_as_calls'] = [];
-    $GLOBALS['_dono_as_has_scheduled'] = false;
+    $GLOBALS['_giveflow_as_calls'] = [];
+    $GLOBALS['_giveflow_as_has_scheduled'] = false;
     function as_enqueue_async_action(string $hook, array $args = [], string $group = ''): int
     {
-        $GLOBALS['_dono_as_calls'][] = ['func' => 'as_enqueue_async_action', 'args' => [$hook, $args, $group]];
+        $GLOBALS['_giveflow_as_calls'][] = ['func' => 'as_enqueue_async_action', 'args' => [$hook, $args, $group]];
         return 1;
     }
     function as_schedule_single_action(int $ts, string $hook, array $args = [], string $group = ''): int
     {
-        $GLOBALS['_dono_as_calls'][] = ['func' => 'as_schedule_single_action', 'args' => [$ts, $hook, $args, $group]];
+        $GLOBALS['_giveflow_as_calls'][] = ['func' => 'as_schedule_single_action', 'args' => [$ts, $hook, $args, $group]];
         return 1;
     }
     function as_has_scheduled_action(string $hook, ?array $args = null, string $group = ''): bool
     {
-        $GLOBALS['_dono_as_calls'][] = ['func' => 'as_has_scheduled_action', 'args' => [$hook, $args, $group]];
-        return $GLOBALS['_dono_as_has_scheduled'];
+        $GLOBALS['_giveflow_as_calls'][] = ['func' => 'as_has_scheduled_action', 'args' => [$hook, $args, $group]];
+        return $GLOBALS['_giveflow_as_has_scheduled'];
     }
     function as_schedule_recurring_action(int $ts, int $interval, string $hook, array $args = [], string $group = ''): int
     {
-        $GLOBALS['_dono_as_calls'][] = ['func' => 'as_schedule_recurring_action', 'args' => [$ts, $interval, $hook, $args, $group]];
+        $GLOBALS['_giveflow_as_calls'][] = ['func' => 'as_schedule_recurring_action', 'args' => [$ts, $interval, $hook, $args, $group]];
         return 1;
     }
 }
 
 // Transient stubs for rate-limiting tests.
 if (! function_exists('get_transient')) {
-    $GLOBALS['_dono_test_transients'] = [];
-    function get_transient(string $key): mixed { return $GLOBALS['_dono_test_transients'][$key] ?? false; }
-    function set_transient(string $key, mixed $value, int $expiration = 0): bool { $GLOBALS['_dono_test_transients'][$key] = $value; return true; }
+    $GLOBALS['_giveflow_test_transients'] = [];
+    function get_transient(string $key): mixed { return $GLOBALS['_giveflow_test_transients'][$key] ?? false; }
+    function set_transient(string $key, mixed $value, int $expiration = 0): bool { $GLOBALS['_giveflow_test_transients'][$key] = $value; return true; }
 }
 
 // Reset option store between tests.
-$GLOBALS['_dono_reset_options'] = function (): void {
-    $GLOBALS['_dono_test_options'] = [];
-    $GLOBALS['_dono_as_calls'] = [];
-    $GLOBALS['_dono_as_has_scheduled'] = false;
-    $GLOBALS['_dono_test_transients'] = [];
+$GLOBALS['_giveflow_reset_options'] = function (): void {
+    $GLOBALS['_giveflow_test_options'] = [];
+    $GLOBALS['_giveflow_as_calls'] = [];
+    $GLOBALS['_giveflow_as_has_scheduled'] = false;
+    $GLOBALS['_giveflow_test_transients'] = [];
 };

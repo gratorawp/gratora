@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
-use Dono\Donations\DonationRepository;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
-use Dono\Gateways\GatewayManager;
-use Dono\Gateways\Stripe\StripeAccount;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Gateways\GatewayManager;
+use GiveFlow\Gateways\Stripe\StripeAccount;
 use WP_REST_Request;
 
 /**
@@ -29,7 +29,7 @@ final class WebhookModeIsolationTest extends IntegrationTestCase
         parent::setUp();
 
         $this->testSecret = 'whsec_test_' . bin2hex(random_bytes(8));
-        update_option('dono_gateway_config', [
+        update_option('giveflow_gateway_config', [
             'stripe' => [
                 'webhook_secret_test' => $this->testSecret,
                 'webhook_secret_live' => 'whsec_live_' . bin2hex(random_bytes(8)),
@@ -44,15 +44,15 @@ final class WebhookModeIsolationTest extends IntegrationTestCase
 
         $manager = $c->get(GatewayManager::class);
         if (! $manager->get('stripe')) {
-            $manager->register(new \Dono\Gateways\Stripe\StripeGateway(
-                $c->get(\Dono\Gateways\Stripe\StripeApi::class),
+            $manager->register(new \GiveFlow\Gateways\Stripe\StripeGateway(
+                $c->get(\GiveFlow\Gateways\Stripe\StripeApi::class),
                 $c->get(DonationRepository::class),
-                $c->get(\Dono\Donations\DonationService::class),
+                $c->get(\GiveFlow\Donations\DonationService::class),
                 $account,
-                $c->get(\Dono\Donors\DonorRepository::class),
+                $c->get(\GiveFlow\Donors\DonorRepository::class),
                 $c->get(DonorService::class),
-                $c->get(\Dono\Foundation\Time\Clock::class),
-                $c->get(\Dono\Recurring\RecurringPlanRepository::class),
+                $c->get(\GiveFlow\Foundation\Time\Clock::class),
+                $c->get(\GiveFlow\Recurring\RecurringPlanRepository::class),
             ));
         }
     }
@@ -89,7 +89,7 @@ final class WebhookModeIsolationTest extends IntegrationTestCase
         $ts      = (string) time();
         $sig     = hash_hmac('sha256', "{$ts}.{$payload}", $this->testSecret);
 
-        $req = new WP_REST_Request('POST', '/dono/v1/webhooks/stripe');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/webhooks/stripe');
         $req->set_header('content-type', 'application/json');
         $req->set_header('stripe_signature', "t={$ts},v1={$sig}");
         $req->set_body($payload);
@@ -117,7 +117,7 @@ final class WebhookModeIsolationTest extends IntegrationTestCase
             'amount'               => 250000,
             'amount_received'      => 250000,
             'currency'             => 'usd',
-            'metadata'             => ['dono_reference' => $donation->reference],
+            'metadata'             => ['giveflow_reference' => $donation->reference],
             'payment_method_types' => ['card'],
             'livemode'             => false,
         ]);
@@ -158,7 +158,7 @@ final class WebhookModeIsolationTest extends IntegrationTestCase
             'amount'               => 2500,
             'amount_received'      => 2500,
             'currency'             => 'usd',
-            'metadata'             => ['dono_reference' => $d->reference],
+            'metadata'             => ['giveflow_reference' => $d->reference],
             'payment_method_types' => ['card'],
             'livemode'             => false,
         ]);

@@ -4,13 +4,13 @@ import { applyFilters } from '@wordpress/hooks';
 import { __, sprintf } from '@wordpress/i18n';
 
 export const OP_OPTIONS = [
-    { value: '=', label: __( 'equals', 'dono-fundraising-platform' ) },
-    { value: '!=', label: __( 'does not equal', 'dono-fundraising-platform' ) },
-    { value: '>', label: __( 'greater than', 'dono-fundraising-platform' ) },
-    { value: '>=', label: __( 'greater than or equal', 'dono-fundraising-platform' ) },
-    { value: '<', label: __( 'less than', 'dono-fundraising-platform' ) },
-    { value: '<=', label: __( 'less than or equal', 'dono-fundraising-platform' ) },
-    { value: 'contains', label: __( 'contains', 'dono-fundraising-platform' ) },
+    { value: '=', label: __( 'equals', 'giveflow-fundraising-campaigns' ) },
+    { value: '!=', label: __( 'does not equal', 'giveflow-fundraising-campaigns' ) },
+    { value: '>', label: __( 'greater than', 'giveflow-fundraising-campaigns' ) },
+    { value: '>=', label: __( 'greater than or equal', 'giveflow-fundraising-campaigns' ) },
+    { value: '<', label: __( 'less than', 'giveflow-fundraising-campaigns' ) },
+    { value: '<=', label: __( 'less than or equal', 'giveflow-fundraising-campaigns' ) },
+    { value: 'contains', label: __( 'contains', 'giveflow-fundraising-campaigns' ) },
 ];
 
 export const DEFAULT_CONDITION = { field: '', op: '=', value: '' };
@@ -18,28 +18,28 @@ export const DEFAULT_CONDITION = { field: '', op: '=', value: '' };
 // Built-in donor inputs whose value the runtime exposes at a fixed key.
 // Offered as a condition source only when that block is in the form.
 const BUILTIN_SOURCES = {
-    'dono/donation-amount':  { value: 'amount_cents', label: __( 'Amount (cents)', 'dono-fundraising-platform' ) },
-    'dono/recurring-toggle': { value: 'frequency',    label: __( 'Frequency', 'dono-fundraising-platform' ) },
-    'dono/anonymous-toggle': { value: 'is_anonymous', label: __( 'Is anonymous', 'dono-fundraising-platform' ) },
-    'dono/cover-fees':       { value: 'cover_fees',   label: __( 'Cover fees', 'dono-fundraising-platform' ) },
+    'giveflow/donation-amount':  { value: 'amount_cents', label: __( 'Amount (cents)', 'giveflow-fundraising-campaigns' ) },
+    'giveflow/recurring-toggle': { value: 'frequency',    label: __( 'Frequency', 'giveflow-fundraising-campaigns' ) },
+    'giveflow/anonymous-toggle': { value: 'is_anonymous', label: __( 'Is anonymous', 'giveflow-fundraising-campaigns' ) },
+    'giveflow/cover-fees':       { value: 'cover_fees',   label: __( 'Cover fees', 'giveflow-fundraising-campaigns' ) },
 };
 
 // Custom-input blocks: the donor runtime stores their value at
 // values.custom[field], so the condition path is `custom.<field>`.
 const CUSTOM_FIELD_BLOCKS = new Set( [
-    'dono/text-input',
-    'dono/number-input',
-    'dono/date',
-    'dono/dropdown',
-    'dono/radio',
-    'dono/checkbox',
-    'dono/multi-select',
-    'dono/hidden',
+    'giveflow/text-input',
+    'giveflow/number-input',
+    'giveflow/date',
+    'giveflow/dropdown',
+    'giveflow/radio',
+    'giveflow/checkbox',
+    'giveflow/multi-select',
+    'giveflow/hidden',
 ] );
 
 // Kept for backwards-compatible imports; the live list is computed per-render
 // in ConditionPanel from the blocks actually in the editor.
-export const FIELD_OPTIONS = [ { value: '', label: __( '(Always show)', 'dono-fundraising-platform' ) } ];
+export const FIELD_OPTIONS = [ { value: '', label: __( '(Always show)', 'giveflow-fundraising-campaigns' ) } ];
 
 function flatten( blocks, out ) {
     for ( const b of blocks || [] ) {
@@ -61,9 +61,9 @@ export function ConditionPanel( { condition, onChange, title } ) {
 
         // A donor field an add-on contributes exposes its value at a fixed
         // key too, so it can be a condition source like any built-in.
-        const sources = applyFilters( 'dono.editor.conditionSources', BUILTIN_SOURCES );
+        const sources = applyFilters( 'giveflow.editor.conditionSources', BUILTIN_SOURCES );
 
-        const opts = [ { value: '', label: __( '(Always show)', 'dono-fundraising-platform' ) } ];
+        const opts = [ { value: '', label: __( '(Always show)', 'giveflow-fundraising-campaigns' ) } ];
         const seen = new Set( [ '' ] );
 
         for ( const b of all ) {
@@ -94,36 +94,36 @@ export function ConditionPanel( { condition, onChange, title } ) {
             opts.push( {
                 value: c.field,
                 /* translators: %s: stored condition field key that is no longer in the form. */
-                label: sprintf( __( '%s (not in form)', 'dono-fundraising-platform' ), c.field ),
+                label: sprintf( __( '%s (not in form)', 'giveflow-fundraising-campaigns' ), c.field ),
             } );
         }
         return opts;
     }, [ c.field ] );
 
     return (
-        <PanelBody title={ title || __( 'Conditional logic', 'dono-fundraising-platform' ) } initialOpen={ false }>
+        <PanelBody title={ title || __( 'Conditional logic', 'giveflow-fundraising-campaigns' ) } initialOpen={ false }>
             <SelectControl
-                label={ __( 'Show this when', 'dono-fundraising-platform' ) }
+                label={ __( 'Show this when', 'giveflow-fundraising-campaigns' ) }
                 value={ c.field }
                 options={ options }
                 onChange={ ( v ) => set( { field: v } ) }
-                help={ __( 'Only fields already added to this form can be used.', 'dono-fundraising-platform' ) }
+                help={ __( 'Only fields already added to this form can be used.', 'giveflow-fundraising-campaigns' ) }
                 __nextHasNoMarginBottom
             />
             { c.field && (
                 <>
                     <SelectControl
-                        label={ __( 'Operator', 'dono-fundraising-platform' ) }
+                        label={ __( 'Operator', 'giveflow-fundraising-campaigns' ) }
                         value={ c.op }
                         options={ OP_OPTIONS }
                         onChange={ ( v ) => set( { op: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Value', 'dono-fundraising-platform' ) }
+                        label={ __( 'Value', 'giveflow-fundraising-campaigns' ) }
                         value={ c.value }
                         onChange={ ( v ) => set( { value: v } ) }
-                        help={ __( 'For amount, use cents (e.g. 5000 = $50).', 'dono-fundraising-platform' ) }
+                        help={ __( 'For amount, use cents (e.g. 5000 = $50).', 'giveflow-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                 </>

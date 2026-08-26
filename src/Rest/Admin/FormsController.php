@@ -2,24 +2,24 @@
 
 declare(strict_types=1);
 
-namespace Dono\Rest\Admin;
-use Dono\Rest\Paging;
-use Dono\Foundation\Auth\Capabilities;
+namespace GiveFlow\Rest\Admin;
+use GiveFlow\Rest\Paging;
+use GiveFlow\Foundation\Auth\Capabilities;
 
-use Dono\Campaigns\Campaign;
-use Dono\Campaigns\CampaignRepository;
-use Dono\Campaigns\Styling\CampaignStyleResolver;
-use Dono\Forms\Form;
-use Dono\Forms\FormRepository;
-use Dono\Forms\FormService;
-use Dono\Forms\FormTemplates;
-use Dono\Forms\Shortcode\DonationFormShortcode;
-use Dono\Foundation\Helpers\Money;
-use Dono\Funds\FundRepository;
-use Dono\Vendor\Queryable\DB;
-use Dono\Gateways\GatewayManager;
-use Dono\Rest\Schemas\FormSchemas;
-use Dono\Settings\SettingsService;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Campaigns\CampaignRepository;
+use GiveFlow\Campaigns\Styling\CampaignStyleResolver;
+use GiveFlow\Forms\Form;
+use GiveFlow\Forms\FormRepository;
+use GiveFlow\Forms\FormService;
+use GiveFlow\Forms\FormTemplates;
+use GiveFlow\Forms\Shortcode\DonationFormShortcode;
+use GiveFlow\Foundation\Helpers\Money;
+use GiveFlow\Funds\FundRepository;
+use GiveFlow\Vendor\Queryable\DB;
+use GiveFlow\Gateways\GatewayManager;
+use GiveFlow\Rest\Schemas\FormSchemas;
+use GiveFlow\Settings\SettingsService;
 use InvalidArgumentException;
 use RuntimeException;
 use WP_Error;
@@ -35,7 +35,7 @@ use WP_REST_Server;
  */
 final class FormsController
 {
-    private const NAMESPACE = 'dono/v1';
+    private const NAMESPACE = 'giveflow/v1';
 
     /** @since 1.0.0 */
     public function __construct(
@@ -44,7 +44,7 @@ final class FormsController
         private CampaignRepository $campaigns,
         private GatewayManager $gateways,
         private CampaignStyleResolver $styles,
-        private \Dono\Forms\FormReadinessService $readiness,
+        private \GiveFlow\Forms\FormReadinessService $readiness,
         private FundRepository $funds,
     ) {
     }
@@ -154,7 +154,7 @@ final class FormsController
     /** @since 1.0.0 */
     public function canAccess(): bool
     {
-        return Capabilities::userCan('dono_manage_forms');
+        return Capabilities::userCan('giveflow_manage_forms');
     }
 
     /** @since 1.0.0 */
@@ -277,7 +277,7 @@ final class FormsController
     {
         $form = $this->forms->findById((int) $request['id']);
         if (! $form) {
-            return new WP_Error('dono_not_found', __('Form not found.', 'dono-fundraising-platform'), ['status' => 404]);
+            return new WP_Error('giveflow_not_found', __('Form not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
         }
 
         // A POST carries the live editor blocks so checks reflect unsaved edits;
@@ -317,7 +317,7 @@ final class FormsController
     {
         $form = $this->forms->findById((int) $request['id']);
         if (! $form) {
-            return new WP_Error('dono_not_found', __('Form not found.', 'dono-fundraising-platform'), ['status' => 404]);
+            return new WP_Error('giveflow_not_found', __('Form not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
         }
         $campaign = $form->campaign_id ? $this->campaigns->findById((int) $form->campaign_id) : null;
         return new WP_REST_Response($this->shapeFormFull($form, $campaign), 200);
@@ -328,12 +328,12 @@ final class FormsController
     {
         $source = $this->forms->findById((int) $request['id']);
         if (! $source) {
-            return new WP_Error('dono_not_found', __('Form not found.', 'dono-fundraising-platform'), ['status' => 404]);
+            return new WP_Error('giveflow_not_found', __('Form not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
         }
         try {
             $copy = $this->formService->duplicate($source);
         } catch (RuntimeException $e) {
-            return new WP_Error('dono_form_duplicate_failed', $e->getMessage(), ['status' => 500]);
+            return new WP_Error('giveflow_form_duplicate_failed', $e->getMessage(), ['status' => 500]);
         }
         $campaign = $copy->campaign_id ? $this->campaigns->findById((int) $copy->campaign_id) : null;
         return new WP_REST_Response($this->shapeFormFull($copy, $campaign), 201);
@@ -346,9 +346,9 @@ final class FormsController
         try {
             $form = $this->formService->create($body);
         } catch (InvalidArgumentException $e) {
-            return new WP_Error('dono_invalid_input', $e->getMessage(), ['status' => 422]);
+            return new WP_Error('giveflow_invalid_input', $e->getMessage(), ['status' => 422]);
         } catch (RuntimeException $e) {
-            return new WP_Error('dono_form_create_failed', $e->getMessage(), ['status' => 500]);
+            return new WP_Error('giveflow_form_create_failed', $e->getMessage(), ['status' => 500]);
         }
 
         $campaign = $form->campaign_id ? $this->campaigns->findById((int) $form->campaign_id) : null;
@@ -360,14 +360,14 @@ final class FormsController
     {
         $form = $this->forms->findById((int) $request['id']);
         if (! $form) {
-            return new WP_Error('dono_not_found', __('Form not found.', 'dono-fundraising-platform'), ['status' => 404]);
+            return new WP_Error('giveflow_not_found', __('Form not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
         }
 
         $body = (array) ($request->get_json_params() ?? []);
         try {
             $form = $this->formService->update($form, $body);
         } catch (InvalidArgumentException $e) {
-            return new WP_Error('dono_invalid_input', $e->getMessage(), ['status' => 422]);
+            return new WP_Error('giveflow_invalid_input', $e->getMessage(), ['status' => 422]);
         }
 
         $campaign = $form->campaign_id ? $this->campaigns->findById((int) $form->campaign_id) : null;
@@ -379,14 +379,14 @@ final class FormsController
     {
         $form = $this->forms->findById((int) $request['id']);
         if (! $form) {
-            return new WP_Error('dono_not_found', __('Form not found.', 'dono-fundraising-platform'), ['status' => 404]);
+            return new WP_Error('giveflow_not_found', __('Form not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
         }
         try {
             $this->formService->delete($form);
         } catch (InvalidArgumentException $e) {
-            return new WP_Error('dono_form_delete_blocked', $e->getMessage(), ['status' => 422]);
+            return new WP_Error('giveflow_form_delete_blocked', $e->getMessage(), ['status' => 422]);
         } catch (RuntimeException $e) {
-            return new WP_Error('dono_form_delete_blocked', $e->getMessage(), ['status' => 422]);
+            return new WP_Error('giveflow_form_delete_blocked', $e->getMessage(), ['status' => 422]);
         }
         return new WP_REST_Response(['deleted' => true, 'id' => $form->id], 200);
     }
@@ -407,7 +407,7 @@ final class FormsController
             return [];
         }
 
-        $rows = DB::table('dono_form_donation_stats')
+        $rows = DB::table('giveflow_form_donation_stats')
             ->whereIn('form_id', array_values(array_unique($formIds)))
             ->getAll();
 

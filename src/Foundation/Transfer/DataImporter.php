@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Dono\Foundation\Transfer;
+namespace GiveFlow\Foundation\Transfer;
 
-use Dono\Analytics\ErrorLog;
-use Dono\Donations\AggregateSyncer;
-use Dono\Foundation\Crypto\Crypto;
-use Dono\Foundation\Identity\IdentityHasher;
-use Dono\Foundation\References\ReferenceGenerator;
-use Dono\Foundation\Time\SystemClock;
-use Dono\Vendor\Queryable\DB;
+use GiveFlow\Analytics\ErrorLog;
+use GiveFlow\Donations\AggregateSyncer;
+use GiveFlow\Foundation\Crypto\Crypto;
+use GiveFlow\Foundation\Identity\IdentityHasher;
+use GiveFlow\Foundation\References\ReferenceGenerator;
+use GiveFlow\Foundation\Time\SystemClock;
+use GiveFlow\Vendor\Queryable\DB;
 use Throwable;
 
 /**
- * Restores a Dono export onto this site.
+ * Restores a GiveFlow export onto this site.
  *
  * Five things make this harder than inserting rows.
  *
@@ -50,17 +50,17 @@ final class DataImporter
      * before the donations that belong to them.
      */
     private const ORDER = [
-        'dono_funds',
-        'dono_campaigns',
-        'dono_forms',
-        'dono_donors',
-        'dono_recurring_plans',
-        'dono_donations',
-        'dono_consents',
-        'dono_donor_notes',
-        'dono_donation_notes',
-        'dono_refunds',
-        'dono_receipts',
+        'giveflow_funds',
+        'giveflow_campaigns',
+        'giveflow_forms',
+        'giveflow_donors',
+        'giveflow_recurring_plans',
+        'giveflow_donations',
+        'giveflow_consents',
+        'giveflow_donor_notes',
+        'giveflow_donation_notes',
+        'giveflow_refunds',
+        'giveflow_receipts',
     ];
 
     /**
@@ -68,23 +68,23 @@ final class DataImporter
      * duplicate everything and a resumed import would double what it had done.
      */
     private const NATURAL_KEY = [
-        'dono_funds'           => ['code'],
-        'dono_campaigns'       => ['slug'],
-        'dono_forms'           => ['slug'],
-        'dono_donors'          => ['email_hash'],
-        'dono_donations'       => ['reference'],
-        'dono_recurring_plans' => ['gateway', 'gateway_subscription_id'],
-        'dono_refunds'         => ['gateway_refund_id'],
-        'dono_receipts'        => ['renderer_id', 'receipt_number'],
+        'giveflow_funds'           => ['code'],
+        'giveflow_campaigns'       => ['slug'],
+        'giveflow_forms'           => ['slug'],
+        'giveflow_donors'          => ['email_hash'],
+        'giveflow_donations'       => ['reference'],
+        'giveflow_recurring_plans' => ['gateway', 'gateway_subscription_id'],
+        'giveflow_refunds'         => ['gateway_refund_id'],
+        'giveflow_receipts'        => ['renderer_id', 'receipt_number'],
         // No unique index backs these three, so the columns below are the only
         // thing standing between a second run and a doubled audit trail. A
         // consent is the lawful basis for having mailed someone and a note is
         // what a fundraiser wrote about them; neither may arrive twice. The
         // trade is second-resolution: two rows alike in every column named
         // here, written within the same second, restore as one.
-        'dono_consents'        => ['donor_id', 'purpose', 'granted', 'occurred_at'],
-        'dono_donor_notes'     => ['donor_id', 'created_at'],
-        'dono_donation_notes'  => ['donation_id', 'created_at'],
+        'giveflow_consents'        => ['donor_id', 'purpose', 'granted', 'occurred_at'],
+        'giveflow_donor_notes'     => ['donor_id', 'created_at'],
+        'giveflow_donation_notes'  => ['donation_id', 'created_at'],
     ];
 
     /**
@@ -103,8 +103,8 @@ final class DataImporter
      * ALSO_UNIQUE_WHEN_EMPTY.
      */
     private const ALSO_UNIQUE = [
-        'dono_receipts' => ['donation_id', 'renderer_id'],
-        'dono_refunds'  => ['donation_id', 'amount_cents', 'occurred_at'],
+        'giveflow_receipts' => ['donation_id', 'renderer_id'],
+        'giveflow_refunds'  => ['donation_id', 'amount_cents', 'occurred_at'],
     ];
 
     /**
@@ -119,7 +119,7 @@ final class DataImporter
      * ever match a row the insert would be refused against anyway.
      */
     private const ALSO_UNIQUE_WHEN_EMPTY = [
-        'dono_refunds' => 'gateway_refund_id',
+        'giveflow_refunds' => 'gateway_refund_id',
     ];
 
     /** Columns holding an id from another exported table, by the table it points at. */
@@ -127,25 +127,25 @@ final class DataImporter
     private const NO_FUND = -1;
 
     private const REFERENCES = [
-        'donor_id'           => 'dono_donors',
-        'household_id'       => 'dono_donors',
-        'campaign_id'        => 'dono_campaigns',
-        'form_id'            => 'dono_forms',
-        'source_form_id'     => 'dono_forms',
-        'default_form_id'    => 'dono_forms',
-        'fund_id'            => 'dono_funds',
-        'default_fund_id'    => 'dono_funds',
-        'parent_fund_id'     => 'dono_funds',
-        'donation_id'        => 'dono_donations',
-        'source_donation_id' => 'dono_donations',
-        'recurring_plan_id'  => 'dono_recurring_plans',
+        'donor_id'           => 'giveflow_donors',
+        'household_id'       => 'giveflow_donors',
+        'campaign_id'        => 'giveflow_campaigns',
+        'form_id'            => 'giveflow_forms',
+        'source_form_id'     => 'giveflow_forms',
+        'default_form_id'    => 'giveflow_forms',
+        'fund_id'            => 'giveflow_funds',
+        'default_fund_id'    => 'giveflow_funds',
+        'parent_fund_id'     => 'giveflow_funds',
+        'donation_id'        => 'giveflow_donations',
+        'source_donation_id' => 'giveflow_donations',
+        'recurring_plan_id'  => 'giveflow_recurring_plans',
     ];
 
     /** Filled on a second pass, once the table they point at has been walked. */
     private const DEFERRED = [
-        'dono_campaigns' => ['default_form_id'],
-        'dono_funds'     => ['parent_fund_id'],
-        'dono_donors'    => ['household_id'],
+        'giveflow_campaigns' => ['default_form_id'],
+        'giveflow_funds'     => ['parent_fund_id'],
+        'giveflow_donors'    => ['household_id'],
     ];
 
     /**
@@ -177,18 +177,18 @@ final class DataImporter
     /**
      * Where a minted reference lands, by the counter scope that mints it.
      *
-     * dono_refunds carries no reference column, so no scope reads from it: the
+     * giveflow_refunds carries no reference column, so no scope reads from it: the
      * refund prefix in the numbering settings is configuration for a sequence
      * nothing issues yet. A renderer numbering its receipts in a scope of its
      * own prints a prefix of its own with them, so its numbers do not answer to
      * the scopes named here and its counter is the add-on's to raise.
      */
     private const REFERENCE_SCOPES = [
-        'donation' => ['dono_donations', 'reference'],
-        'receipt'  => ['dono_receipts', 'receipt_number'],
+        'donation' => ['giveflow_donations', 'reference'],
+        'receipt'  => ['giveflow_receipts', 'receipt_number'],
         // Rehearsal donations number from their own counter, for the same
         // reason receipts do, and a restore has to raise that one too.
-        'test_donation' => ['dono_donations', 'reference'],
+        'test_donation' => ['giveflow_donations', 'reference'],
         // Rehearsal receipts number from a counter of their own so the live
         // sequence stays gap-free, and the export carries them like any other
         // row. Left out, the counter stays at zero after a restore and the next
@@ -196,7 +196,7 @@ final class DataImporter
         // index refuses: the org can no longer test a form at all. Same table as
         // the live scope, which is safe because a row only counts toward a scope
         // whose own format reproduces the number printed on it.
-        'test_receipt' => ['dono_receipts', 'receipt_number'],
+        'test_receipt' => ['giveflow_receipts', 'receipt_number'],
     ];
 
     /** @var array<string, array<int,int>> source id => id here, per table */
@@ -302,7 +302,7 @@ final class DataImporter
 
         // A reference only identifies a donation within one site. The counter
         // behind it starts at one on every install and the default prefix is
-        // the same everywhere, so DONO-2026-00007 exists on most of them and
+        // the same everywhere, so DON-2026-00007 exists on most of them and
         // belongs to a different person on each. hashOfDonorBehind() already
         // refuses to trust one on its own, for exactly this reason, and says so
         // at length; findExisting() matched on it alone.
@@ -319,7 +319,7 @@ final class DataImporter
         // quoted in their email, so that is a decision for the operator rather
         // than a silent repair.
         if ($existingId > 0
-            && $table === 'dono_donations'
+            && $table === 'giveflow_donations'
             && ! self::sameDonation($row, DB::table($table)->where('id', $existingId)->get())
         ) {
             $this->drop($table, 'reference_collision');
@@ -387,11 +387,11 @@ final class DataImporter
             $row[$column] = $mapped;
         }
 
-        if ($table === 'dono_forms' && isset($row['blocks'])) {
+        if ($table === 'giveflow_forms' && isset($row['blocks'])) {
             $row['blocks'] = $this->remapFundIdsInBlocks((string) $row['blocks']);
         }
 
-        if ($table === 'dono_donors') {
+        if ($table === 'giveflow_donors') {
             return $this->prepareDonor($row);
         }
 
@@ -401,7 +401,7 @@ final class DataImporter
     /**
      * Fund ids the editor stored inside the block markup rather than in a column.
      *
-     * REFERENCES rewrites columns and these are not columns: dono/fund-picker
+     * REFERENCES rewrites columns and these are not columns: giveflow/fund-picker
      * keeps its allowlist and its preselection in the block's attributes, so
      * the loop above cannot reach them. Left alone they name whichever funds
      * hold those numbers here, and activation seeds 'general' on every install,
@@ -410,7 +410,7 @@ final class DataImporter
      * against the same wrong list. The form's own default_fund_id is corrected
      * beside it.
      *
-     * ORDER puts dono_funds before dono_forms, so the map is complete by the
+     * ORDER puts giveflow_funds before giveflow_forms, so the map is complete by the
      * time a form is prepared.
      *
      * @since 1.0.0
@@ -432,7 +432,7 @@ final class DataImporter
     private function remapFundPickers(array &$blocks): void
     {
         foreach ($blocks as &$block) {
-            if (($block['blockName'] ?? '') === 'dono/fund-picker') {
+            if (($block['blockName'] ?? '') === 'giveflow/fund-picker') {
                 $attrs = is_array($block['attrs'] ?? null) ? $block['attrs'] : [];
 
                 if (is_array($attrs['fundIds'] ?? null)) {
@@ -443,7 +443,7 @@ final class DataImporter
                 // block's own fallback chain, so neither is an id to rewrite.
                 $default = (string) ($attrs['defaultId'] ?? '');
                 if ($default !== '' && $default !== '__none__') {
-                    $mapped = $this->map['dono_funds'][(int) $default] ?? null;
+                    $mapped = $this->map['giveflow_funds'][(int) $default] ?? null;
                     $attrs['defaultId'] = $mapped === null ? '' : (string) $mapped;
                 }
 
@@ -477,7 +477,7 @@ final class DataImporter
     {
         $mapped = [];
         foreach ($sourceIds as $sourceId) {
-            $here = $this->map['dono_funds'][(int) $sourceId] ?? null;
+            $here = $this->map['giveflow_funds'][(int) $sourceId] ?? null;
             if ($here !== null) $mapped[(int) $here] = true;
         }
 
@@ -501,7 +501,7 @@ final class DataImporter
         $row['email']      = $email;
         $row['email_hash'] = $this->hasher->emailHash($email);
 
-        return $this->reseal('dono_donors', $row);
+        return $this->reseal('giveflow_donors', $row);
     }
 
     /**
@@ -524,14 +524,14 @@ final class DataImporter
         if ($sourceId <= 0) {
             // Every shell would answer to the same identity, which would
             // gather unrelated donors into one row.
-            return $this->drop('dono_donors', 'no_source_id');
+            return $this->drop('giveflow_donors', 'no_source_id');
         }
 
         foreach (['email', 'first_name', 'last_name', 'company', 'address', 'phone', 'tax_id', 'notes'] as $pii) {
             unset($row[$pii]);
         }
 
-        $row = $this->reseal('dono_donors', $row);
+        $row = $this->reseal('giveflow_donors', $row);
         $row['email_hash'] = $this->shellHash($sourceId);
         // The literal empty string is the marker redaction itself writes, and
         // what DonorService reads to mean this row has no address.
@@ -595,7 +595,7 @@ final class DataImporter
             if ($hash !== '') return $hash;
         }
 
-        return hash('sha256', 'dono-restored-shell:' . $this->origin . ':' . $sourceId);
+        return hash('sha256', 'giveflow-restored-shell:' . $this->origin . ':' . $sourceId);
     }
 
     /**
@@ -604,7 +604,7 @@ final class DataImporter
      *
      * A reference only identifies a donation within one site. The counter
      * behind it starts at one on every install and the default prefix is the
-     * same everywhere, so DONO-2026-00001 exists on most of them and belongs to
+     * same everywhere, so DON-2026-00001 exists on most of them and belongs to
      * a different person on each. Matching on the reference alone would resolve
      * a nameless erased donor onto whichever live supporter happens to hold
      * that number here, and hand them the erased person's consents, receipts
@@ -619,13 +619,13 @@ final class DataImporter
         $reference = trim((string) ($anchor['reference'] ?? ''));
         if ($reference === '') return '';
 
-        $donation = DB::table('dono_donations')->where('reference', $reference)->get();
+        $donation = DB::table('giveflow_donations')->where('reference', $reference)->get();
         if (! self::sameDonation($anchor, $donation)) return '';
 
         $donorId = (int) self::field($donation, 'donor_id');
         if ($donorId <= 0) return '';
 
-        return (string) self::field(DB::table('dono_donors')->where('id', $donorId)->get(), 'email_hash');
+        return (string) self::field(DB::table('giveflow_donors')->where('id', $donorId)->get(), 'email_hash');
     }
 
     /**
@@ -665,7 +665,7 @@ final class DataImporter
     private function indexShellDonors(array $tables): void
     {
         $wanted = [];
-        foreach (($tables['dono_donors'] ?? []) as $row) {
+        foreach (($tables['giveflow_donors'] ?? []) as $row) {
             if (! is_array($row) || ! self::hasNoAddress($row)) continue;
 
             $id = (int) ($row['id'] ?? 0);
@@ -674,7 +674,7 @@ final class DataImporter
 
         if ($wanted === []) return;
 
-        foreach (($tables['dono_donations'] ?? []) as $row) {
+        foreach (($tables['giveflow_donations'] ?? []) as $row) {
             if (! is_array($row)) continue;
 
             $donorId   = (int) ($row['donor_id'] ?? 0);
@@ -836,19 +836,19 @@ final class DataImporter
     {
         $syncer = new AggregateSyncer();
 
-        foreach ($this->map['dono_funds'] ?? [] as $id) {
+        foreach ($this->map['giveflow_funds'] ?? [] as $id) {
             $syncer->syncFund((int) $id);
         }
 
-        foreach ($this->map['dono_campaigns'] ?? [] as $id) {
+        foreach ($this->map['giveflow_campaigns'] ?? [] as $id) {
             $syncer->syncCampaign((int) $id);
         }
 
-        foreach ($this->map['dono_donors'] ?? [] as $id) {
+        foreach ($this->map['giveflow_donors'] ?? [] as $id) {
             $syncer->syncDonor((int) $id);
         }
 
-        foreach ($this->map['dono_forms'] ?? [] as $id) {
+        foreach ($this->map['giveflow_forms'] ?? [] as $id) {
             $syncer->syncForm((int) $id);
         }
     }
@@ -858,7 +858,7 @@ final class DataImporter
      *
      * The counters are per install and no export carries them, so a restore
      * onto a fresh site leaves them at zero while the donations that just
-     * landed already hold DONO-2026-00001. next() then mints a reference
+     * landed already hold DON-2026-00001. next() then mints a reference
      * UNIQUE(reference) refuses, and because it runs inside the donation's own
      * transaction the increment rolls back with the failed insert, so every
      * later donor mints the same colliding number and no donation can be taken
@@ -962,7 +962,7 @@ final class DataImporter
 
     /**
      * Tables the file carries that this importer has no contract for, which is
-     * how an add-on's tables arrive: dono.export.tables puts them in the file,
+     * how an add-on's tables arrive: giveflow.export.tables puts them in the file,
      * and restoring one needs a natural key, a reference map and a deferred
      * map it has not declared. Without a natural key a second run would
      * duplicate every row of it, so they are named to the operator rather than

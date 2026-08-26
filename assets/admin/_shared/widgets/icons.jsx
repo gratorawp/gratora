@@ -1,1 +1,1 @@
-export * from '@dono/ui/widgets/icons';
+export * from '@giveflow/ui/widgets/icons';

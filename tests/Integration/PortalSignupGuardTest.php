@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\AntiSpamGuard;
-use Dono\Donors\Donor;
-use Dono\Foundation\Identity\IdentityHasher;
-use Dono\Donors\PendingSignupRepository;
-use Dono\Foundation\Plugin;
+use GiveFlow\Donations\AntiSpamGuard;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Foundation\Identity\IdentityHasher;
+use GiveFlow\Donors\PendingSignupRepository;
+use GiveFlow\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -31,7 +31,7 @@ final class PortalSignupGuardTest extends IntegrationTestCase
     /** @param array<string,mixed> $body */
     private function post(string $route, array $body): \WP_REST_Response|\WP_Error
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/portal/' . $route);
+        $req = new WP_REST_Request('POST', '/giveflow/v1/portal/' . $route);
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($body));
 
@@ -123,7 +123,7 @@ final class PortalSignupGuardTest extends IntegrationTestCase
     public function test_the_refusal_says_nothing_about_the_address(): void
     {
         $known = 'known-' . uniqid() . '@example.test';
-        Plugin::instance()->container->get(\Dono\Donors\DonorService::class)->findOrCreate($known);
+        Plugin::instance()->container->get(\GiveFlow\Donors\DonorService::class)->findOrCreate($known);
         $this->assertTrue($this->donorExists($known));
 
         $a = $this->post('send-link', ['email' => $known]);

@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace Dono\Dashboard;
+namespace GiveFlow\Dashboard;
 
 use DateTimeImmutable;
-use Dono\Campaigns\Campaign;
-use Dono\Donations\ChannelClassifier;
-use Dono\Donations\Donation;
-use Dono\Donations\DonationQueries;
-use Dono\Donations\DonationRepository;
-use Dono\Donations\Refund;
-use Dono\Donors\Donor;
-use Dono\Foundation\Helpers\Money;
-use Dono\Foundation\Time\Clock;
-use Dono\Recurring\RecurringPlan;
-use Dono\Recurring\RecurringPlanRepository;
-use Dono\Vendor\Queryable\DB;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Donations\ChannelClassifier;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationQueries;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Donations\Refund;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Foundation\Helpers\Money;
+use GiveFlow\Foundation\Time\Clock;
+use GiveFlow\Recurring\RecurringPlan;
+use GiveFlow\Recurring\RecurringPlanRepository;
+use GiveFlow\Vendor\Queryable\DB;
 
 /**
  * Aggregates metrics across all campaigns for the platform dashboard.
@@ -203,7 +203,7 @@ final class DashboardMetricsService
 
             $out[] = [
                 'id'             => (int) $d->id,
-                'donor_name'     => $name !== '' ? $name : __('Anonymous', 'dono-fundraising-platform'),
+                'donor_name'     => $name !== '' ? $name : __('Anonymous', 'giveflow-fundraising-campaigns'),
                 'amount_cents'   => (int) $d->amount_cents,
                 'currency'       => (string) $d->currency,
                 'paid_at'        => $d->paid_at,
@@ -331,11 +331,11 @@ final class DashboardMetricsService
                 'tone'  => 'error',
                 'title' => sprintf(
                     /* translators: %d: failed donations count */
-                    _n('%d donation failed in the last 24 hours.', '%d donations failed in the last 24 hours.', $failed, 'dono-fundraising-platform'),
+                    _n('%d donation failed in the last 24 hours.', '%d donations failed in the last 24 hours.', $failed, 'giveflow-fundraising-campaigns'),
                     $failed
                 ),
-                'action_label' => __('Review', 'dono-fundraising-platform'),
-                'action_href'  => admin_url('admin.php?page=dono-donations&status=failed'),
+                'action_label' => __('Review', 'giveflow-fundraising-campaigns'),
+                'action_href'  => admin_url('admin.php?page=giveflow-donations&status=failed'),
                 'count'        => $failed,
             ];
         }
@@ -357,13 +357,13 @@ final class DashboardMetricsService
                 'tone'  => 'error',
                 'title' => sprintf(
                     /* translators: %d: failed test donations count */
-                    _n('%d test donation failed in the last 24 hours.', '%d test donations failed in the last 24 hours.', $failedTest, 'dono-fundraising-platform'),
+                    _n('%d test donation failed in the last 24 hours.', '%d test donations failed in the last 24 hours.', $failedTest, 'giveflow-fundraising-campaigns'),
                     $failedTest
                 ),
-                'action_label' => __('Review', 'dono-fundraising-platform'),
+                'action_label' => __('Review', 'giveflow-fundraising-campaigns'),
                 // The live link hides test rows, so it would land on an empty
                 // screen.
-                'action_href'  => admin_url('admin.php?page=dono-donations&status=failed&include_test=1'),
+                'action_href'  => admin_url('admin.php?page=giveflow-donations&status=failed&include_test=1'),
                 'count'        => $failedTest,
             ];
         }
@@ -386,12 +386,12 @@ final class DashboardMetricsService
                 'tone'  => 'warn',
                 'title' => sprintf(
                     /* translators: 1: campaign title, 2: days remaining */
-                    _n('"%1$s" ends in %2$d day.', '"%1$s" ends in %2$d days.', $daysLeft, 'dono-fundraising-platform'),
+                    _n('"%1$s" ends in %2$d day.', '"%1$s" ends in %2$d days.', $daysLeft, 'giveflow-fundraising-campaigns'),
                     $c->title,
                     $daysLeft
                 ),
-                'action_label' => __('Open', 'dono-fundraising-platform'),
-                'action_href'  => admin_url('admin.php?page=dono-campaigns&view=detail&id=' . $c->id . '&tab=overview'),
+                'action_label' => __('Open', 'giveflow-fundraising-campaigns'),
+                'action_href'  => admin_url('admin.php?page=giveflow-campaigns&view=detail&id=' . $c->id . '&tab=overview'),
             ];
         }
 
@@ -410,11 +410,11 @@ final class DashboardMetricsService
                 'tone'  => 'warn',
                 'title' => sprintf(
                     /* translators: %s: campaign title */
-                    __('"%s" has no default form. The donate button on its page does nothing.', 'dono-fundraising-platform'),
+                    __('"%s" has no default form. The donate button on its page does nothing.', 'giveflow-fundraising-campaigns'),
                     $c->title
                 ),
-                'action_label' => __('Set form', 'dono-fundraising-platform'),
-                'action_href'  => admin_url('admin.php?page=dono-campaigns&view=detail&id=' . $c->id . '&tab=settings'),
+                'action_label' => __('Set form', 'giveflow-fundraising-campaigns'),
+                'action_href'  => admin_url('admin.php?page=giveflow-campaigns&view=detail&id=' . $c->id . '&tab=settings'),
             ];
         }
 
@@ -423,7 +423,7 @@ final class DashboardMetricsService
         // donors, so one donor leaving three notes is one donor.
         // whereRaw emits no AND connector, so it has to open the chain.
         $noteRows = DonationQueries::donationRows(
-            DB::table('dono_donations')->whereRaw("TRIM(COALESCE(note_to_org, '')) <> ''"),
+            DB::table('giveflow_donations')->whereRaw("TRIM(COALESCE(note_to_org, '')) <> ''"),
             $includeTest
         )
             ->whereIn('status', ['paid', 'partial_refund'])
@@ -439,7 +439,7 @@ final class DashboardMetricsService
         $noteDonors = [];
         if ($noteCount > 0 && $donorCount === 1) {
             $one = DonationQueries::donationRows(
-                DB::table('dono_donations')->whereRaw("TRIM(COALESCE(note_to_org, '')) <> ''"),
+                DB::table('giveflow_donations')->whereRaw("TRIM(COALESCE(note_to_org, '')) <> ''"),
                 $includeTest
             )
                 ->whereIn('status', ['paid', 'partial_refund'])
@@ -455,8 +455,8 @@ final class DashboardMetricsService
             // have no single profile, so fall back to the donor list rather than
             // the donations ledger, which is where you read amounts, not messages.
             $href = count($noteDonors) === 1
-                ? admin_url('admin.php?page=dono-donors#donor/' . array_key_first($noteDonors))
-                : admin_url('admin.php?page=dono-donors');
+                ? admin_url('admin.php?page=giveflow-donors#donor/' . array_key_first($noteDonors))
+                : admin_url('admin.php?page=giveflow-donors');
             $items[] = [
                 'key'   => 'donor-notes',
                 'tone'  => 'info',
@@ -466,11 +466,11 @@ final class DashboardMetricsService
                         '%d donor left a note in the last 7 days.',
                         '%d donors left notes in the last 7 days.',
                         $donorCount,
-                        'dono-fundraising-platform'
+                        'giveflow-fundraising-campaigns'
                     ),
                     $donorCount
                 ),
-                'action_label' => __('Read', 'dono-fundraising-platform'),
+                'action_label' => __('Read', 'giveflow-fundraising-campaigns'),
                 'action_href'  => $href,
                 'count'        => $noteCount,
             ];
@@ -482,9 +482,9 @@ final class DashboardMetricsService
             $items[] = [
                 'key'          => 'no-campaigns',
                 'tone'         => 'info',
-                'title'        => __('No published campaigns yet. Start one to begin collecting donations.', 'dono-fundraising-platform'),
-                'action_label' => __('Create campaign', 'dono-fundraising-platform'),
-                'action_href'  => admin_url('admin.php?page=dono-campaigns'),
+                'title'        => __('No published campaigns yet. Start one to begin collecting donations.', 'giveflow-fundraising-campaigns'),
+                'action_label' => __('Create campaign', 'giveflow-fundraising-campaigns'),
+                'action_href'  => admin_url('admin.php?page=giveflow-campaigns'),
             ];
         }
 
@@ -625,7 +625,7 @@ final class DashboardMetricsService
      */
     public function recurring(bool $includeTest = false): array
     {
-        // Single SQL roll-up over dono_recurring_plans: monthly-normalized
+        // Single SQL roll-up over giveflow_recurring_plans: monthly-normalized
         // amounts, bounded memory, currency-correct via the base column.
         $stats = $this->recurringPlans->recurringStats($this->clock->now()->format('Y-m-d'), $includeTest);
         $currency = strtoupper(Money::defaultCurrency());
@@ -682,7 +682,7 @@ final class DashboardMetricsService
         $campaignIds = array_map(static fn ($c) => (int) $c->id, $rows);
         $lastByCampaign = [];
         $lastRows = DonationQueries::donationRows(
-            DB::table('dono_donations')
+            DB::table('giveflow_donations')
                 ->whereIn('status', ['paid', 'partial_refund'])
                 ->whereIn('campaign_id', $campaignIds),
             $includeTest
@@ -701,7 +701,7 @@ final class DashboardMetricsService
         $testTotals = [];
         if ($includeTest) {
             $totalRows = DonationQueries::donationRows(
-                DB::table('dono_donations')
+                DB::table('giveflow_donations')
                     ->whereIn('status', ['paid', 'partial_refund'])
                     ->whereIn('campaign_id', $campaignIds),
                 true
@@ -813,7 +813,7 @@ final class DashboardMetricsService
         // consumers, which all apply the kind filter too, so a live ticket
         // order could start an all-time chart before the first donation.
         $row = DonationQueries::donationRows(
-            DB::table('dono_donations')->whereIn('status', ['paid', 'partial_refund']),
+            DB::table('giveflow_donations')->whereIn('status', ['paid', 'partial_refund']),
             $includeTest
         )
             ->selectRaw('MIN(paid_at) AS first_paid')

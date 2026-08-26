@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Dono\Foundation\Transfer;
+namespace GiveFlow\Foundation\Transfer;
 
 use DateTimeImmutable;
 use DateTimeZone;
-use Dono\Currency\Currency;
-use Dono\Currency\FxRates;
-use Dono\Donations\AggregateSyncer;
-use Dono\Donations\Donation;
-use Dono\Donations\DonationQueries;
-use Dono\Donors\Donor;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Helpers\Money;
-use Dono\Foundation\Identity\IdentityHasher;
+use GiveFlow\Currency\Currency;
+use GiveFlow\Currency\FxRates;
+use GiveFlow\Donations\AggregateSyncer;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationQueries;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Helpers\Money;
+use GiveFlow\Foundation\Identity\IdentityHasher;
 use Exception;
 use Throwable;
 
@@ -153,7 +153,7 @@ final class CsvImporter
                 'donors_matched' => 0, 'skipped' => [], 'dry_run' => $dryRun,
                 'errors' => [sprintf(
                     /* translators: %s: comma-separated field names. */
-                    __('Map a column to %s before importing.', 'dono-fundraising-platform'),
+                    __('Map a column to %s before importing.', 'giveflow-fundraising-campaigns'),
                     implode(', ', array_map(static fn (string $f): string => self::FIELDS[$f] ?? $f, $missing))
                 )],
             ];
@@ -179,7 +179,7 @@ final class CsvImporter
             } catch (Throwable $e) {
                 $errors[] = sprintf(
                     /* translators: 1: row number, 2: error message. */
-                    __('Row %1$d: %2$s', 'dono-fundraising-platform'),
+                    __('Row %1$d: %2$s', 'giveflow-fundraising-campaigns'),
                     $i + 2,
                     $e->getMessage()
                 );

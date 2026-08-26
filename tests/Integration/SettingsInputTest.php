@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Settings\SettingsService;
+use GiveFlow\Settings\SettingsService;
 
 /**
  * update() used to merge whatever arrived straight into the option: no
@@ -29,7 +29,7 @@ final class SettingsInputTest extends IntegrationTestCase
     public function test_a_rejected_key_is_announced_rather_than_dropped_in_silence(): void
     {
         $seen = [];
-        add_action('dono.settings.rejected', static function ($group, $keys) use (&$seen): void {
+        add_action('giveflow.settings.rejected', static function ($group, $keys) use (&$seen): void {
             $seen = array_merge($seen, $keys);
         }, 10, 2);
 
@@ -99,19 +99,19 @@ final class SettingsInputTest extends IntegrationTestCase
         // exactly who would.
         $register = static function (array $groups): array {
             $groups['test_null_default'] = [
-                'option'   => 'dono_test_null_default',
+                'option'   => 'giveflow_test_null_default',
                 'defaults' => ['seen_at' => null],
             ];
             return $groups;
         };
-        add_filter('dono.settings.groups', $register);
+        add_filter('giveflow.settings.groups', $register);
 
         try {
             $after = $this->service()->update('test_null_default', ['seen_at' => 1735689600]);
             $this->assertSame(1735689600, $after['seen_at']);
         } finally {
-            remove_filter('dono.settings.groups', $register);
-            delete_option('dono_test_null_default');
+            remove_filter('giveflow.settings.groups', $register);
+            delete_option('giveflow_test_null_default');
         }
     }
 

@@ -10,7 +10,7 @@ name: Build plugin zip
 # for on most pushes.
 #
 # The artefact is NOT the git checkout. vendor/ and build/ are both gitignored
-# and dono.php requires them at boot, so a zip cut from a checkout installs and
+# and giveflow.php requires them at boot, so a zip cut from a checkout installs and
 # then fatals on activation.
 
 on:
@@ -36,8 +36,8 @@ jobs:
         with:
           node-version: '20'
 
-      # @dono/ui is a public git dependency, but npm normalises a github: spec
-      # to ssh://git@github.com, which a runner has no key for: the install
+      # @giveflow/ui is a public git dependency, but npm locks it as
+      # ssh://git@github.com, which a runner has no key for: the install
       # dies on "Permission denied (publickey)" before anything runs.
       - name: Fetch git dependencies over https
         run: git config --global url."https://github.com/".insteadOf ssh://git@github.com/
@@ -67,12 +67,12 @@ jobs:
         run: bash bin/verify-zip.sh
 
       # The packager names the zip after the Text Domain, so this is
-      # dist/dono-fundraising-platform.zip and not the folder name.
+      # dist/giveflow-fundraising-campaigns.zip and not the folder name.
       - name: Upload the artefact
         uses: actions/upload-artifact@v4
         with:
-          name: dono-plugin-${{ github.sha }}
-          path: dist/dono-fundraising-platform.zip
+          name: giveflow-plugin-${{ github.sha }}
+          path: dist/giveflow-fundraising-campaigns.zip
           # Default is a warning, so a run that uploads nothing still reports
           # success.
           if-no-files-found: error

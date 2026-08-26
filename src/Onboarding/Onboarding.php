@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace Dono\Onboarding;
+namespace GiveFlow\Onboarding;
 
-use Dono\Foundation\Hooks\HookProvider;
+use GiveFlow\Foundation\Hooks\HookProvider;
 
 /**
- * Redirects to the onboarding page while `dono_onboarding_status` is 'pending'.
+ * Redirects to the onboarding page while `giveflow_onboarding_status` is 'pending'.
  *
  * @since 1.0.0
  */
 final class Onboarding extends HookProvider
 {
-    public const OPTION = 'dono_onboarding_status';
+    public const OPTION = 'giveflow_onboarding_status';
 
     /** Set at activation, spent on the first admin page load. */
-    private const GREET = 'dono_onboarding_greet';
+    private const GREET = 'giveflow_onboarding_greet';
 
     /** @since 1.0.0 */
     protected function actions(): array

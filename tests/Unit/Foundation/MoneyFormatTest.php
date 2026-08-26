@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Unit\Foundation;
+namespace GiveFlow\Tests\Unit\Foundation;
 
-use Dono\Foundation\Helpers\Money;
+use GiveFlow\Foundation\Helpers\Money;
 use PHPUnit\Framework\TestCase;
 
 /**

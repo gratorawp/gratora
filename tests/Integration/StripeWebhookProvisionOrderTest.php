@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Foundation\Plugin;
-use Dono\Gateways\Stripe\StripeAccount;
-use Dono\Gateways\Stripe\StripeApi;
-use Dono\Gateways\Stripe\StripeWebhookProvisioner;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Gateways\Stripe\StripeAccount;
+use GiveFlow\Gateways\Stripe\StripeApi;
+use GiveFlow\Gateways\Stripe\StripeWebhookProvisioner;
 use RuntimeException;
 
 /**
@@ -26,9 +26,9 @@ final class StripeWebhookProvisionOrderTest extends IntegrationTestCase
         parent::setUp();
 
         $this->calls = [];
-        $this->url   = rest_url('dono/v1/webhooks/stripe');
+        $this->url   = rest_url('giveflow/v1/webhooks/stripe');
 
-        update_option('dono_gateway_config', ['stripe' => []]);
+        update_option('giveflow_gateway_config', ['stripe' => []]);
 
         $account = Plugin::instance()->container->get(StripeAccount::class);
         $account->saveKeys(false, 'sk_live_connected', 'pk_live_seed');
@@ -135,7 +135,7 @@ final class StripeWebhookProvisionOrderTest extends IntegrationTestCase
 
     private function storedSecret(): string
     {
-        $opt = get_option('dono_gateway_config', []);
+        $opt = get_option('giveflow_gateway_config', []);
 
         return (string) ($opt['stripe']['webhook_secret_live'] ?? '');
     }
@@ -228,9 +228,9 @@ final class StripeWebhookProvisionOrderTest extends IntegrationTestCase
         // Someone pasting a secret into the gateway settings can paste the
         // wrong one. The endpoint is still ours, but the secret on file is not
         // its secret, and re-saving keys is the only recovery there is.
-        $opt = get_option('dono_gateway_config', []);
+        $opt = get_option('giveflow_gateway_config', []);
         $opt['stripe']['webhook_secret_live'] = 'whsec_typo';
-        update_option('dono_gateway_config', $opt);
+        update_option('giveflow_gateway_config', $opt);
 
         $this->mockStripe([$this->endpoint()], true);
 
@@ -242,7 +242,7 @@ final class StripeWebhookProvisionOrderTest extends IntegrationTestCase
 
     public function test_a_matching_endpoint_whose_secret_is_unknown_is_replaced(): void
     {
-        update_option('dono_gateway_config', ['stripe' => []]);
+        update_option('giveflow_gateway_config', ['stripe' => []]);
         $this->mockStripe([$this->endpoint()], true);
 
         $this->provision();

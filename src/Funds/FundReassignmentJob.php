@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Dono\Funds;
+namespace GiveFlow\Funds;
 
-use Dono\Async\AsyncDispatcher;
-use Dono\Campaigns\Campaign;
-use Dono\Donations\AggregateSyncer;
-use Dono\Donations\Donation;
-use Dono\Forms\Form;
-use Dono\Recurring\RecurringPlan;
-use Dono\Foundation\Batch\BatchProcessor;
+use GiveFlow\Async\AsyncDispatcher;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Donations\AggregateSyncer;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Forms\Form;
+use GiveFlow\Recurring\RecurringPlan;
+use GiveFlow\Foundation\Batch\BatchProcessor;
 
 /**
  * Moves donations, campaign + form default-fund pointers, and recurring-plan
@@ -24,9 +24,9 @@ use Dono\Foundation\Batch\BatchProcessor;
  */
 final class FundReassignmentJob
 {
-    public const HOOK = 'dono.async.reassign_fund';
+    public const HOOK = 'giveflow.async.reassign_fund';
 
-    private const OPTION = 'dono_fund_reassignments';
+    private const OPTION = 'giveflow_fund_reassignments';
     private const BATCH  = 500;
 
     /** @since 1.0.0 */
@@ -72,7 +72,7 @@ final class FundReassignmentJob
             // rather than "Reassigning" forever. Donations stay on the deactivated
             // source - never orphaned.
             self::clearPending($fundId);
-            do_action('dono.fund.reassign_failed', $source, $targetId);
+            do_action('giveflow.fund.reassign_failed', $source, $targetId);
             return;
         }
 
@@ -136,8 +136,8 @@ final class FundReassignmentJob
 
         Fund::query()->where('id', $fundId)->delete();
         self::clearPending($fundId);
-        do_action('dono.fund.reassigned', $source, $target);
-        do_action('dono.fund.deleted', $source);
+        do_action('giveflow.fund.reassigned', $source, $target);
+        do_action('giveflow.fund.deleted', $source);
     }
 
     /**

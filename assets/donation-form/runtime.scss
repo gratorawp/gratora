@@ -1,13 +1,13 @@
-// Scoped to `.dono-form` to avoid fighting theme CSS; CSS variables are the
+// Scoped to `.giveflow-form` to avoid fighting theme CSS; CSS variables are the
 // override surface for themes and campaigns.
 
-.dono-donation-form .dono-modal-host {
+.giveflow-donation-form .giveflow-modal-host {
     display: inline-block;
 }
-.dono-donation-form .dono-modal-trigger {
+.giveflow-donation-form .giveflow-modal-trigger {
     cursor: pointer;
 }
-.dono-donation-form .dono-modal {
+.giveflow-donation-form .giveflow-modal {
     position: fixed;
     inset: 0;
     z-index: 99999;
@@ -22,18 +22,18 @@
     }
     &__panel {
         position: relative;
-        background: var(--dono-bg, #fff);
+        background: var(--giveflow-bg, #fff);
         // The modal is always a card, so it stays legible even when the
         // container style is "plain" and the in-page form inherits the theme's
         // text colour.
-        color: var(--dono-text, #111827);
-        border-radius: var(--dono-radius, 12px);
+        color: var(--giveflow-text, #111827);
+        border-radius: var(--giveflow-radius, 12px);
         max-width: 560px;
         width: calc(100% - 32px);
         max-height: calc(100vh - 64px);
         overflow: auto;
         padding: 28px 24px 24px;
-        box-shadow: var(--dono-card-shadow, 0 30px 60px rgba(0, 0, 0, 0.25));
+        box-shadow: var(--giveflow-card-shadow, 0 30px 60px rgba(0, 0, 0, 0.25));
     }
     &__close {
         position: absolute;
@@ -44,84 +44,84 @@
         font-size: 24px;
         line-height: 1;
         cursor: pointer;
-        color: var(--dono-text-muted, #6b7280);
+        color: var(--giveflow-text-muted, #6b7280);
 
-        &:hover { color: var(--dono-text, #111827); }
+        &:hover { color: var(--giveflow-text, #111827); }
     }
 }
 
 // Token defaults sit on the outermost wrapper so the inline
-// `style="--dono-accent: …"` applyThemeTokens() writes wins on the same element
+// `style="--giveflow-accent: …"` applyThemeTokens() writes wins on the same element
 // and cascades down. On a descendant they would shadow the inherited inline
 // values, since a direct declaration beats an inherited custom property
 // whatever the specificity.
-.dono-donation-form {
+.giveflow-donation-form {
     // Reset host-theme defaults that some block themes apply to <form>.
     border: 0;
     padding: 0;
     margin: 0 auto;
 
     // The admin-set max width, overridable at any level by theme CSS.
-    max-width: var(--dono-form-max-width, 720px);
+    max-width: var(--giveflow-form-max-width, 720px);
     width: 100%;
     box-sizing: border-box;
 
-    --dono-accent:         #1e8a4e;
+    --giveflow-accent:         #211d3f;
     // Literal first, accent-derived mix second: the last valid declaration wins
     // and an unsupported color-mix is ignored. A brand preset can still set
-    // --dono-accent-soft explicitly and override both.
-    --dono-accent-soft:    #e7f5ec;
-    --dono-accent-soft:    color-mix(in srgb, var(--dono-accent) 12%, #fff);
-    --dono-text:           #111827;
-    --dono-text-muted:     #6b7280;
-    --dono-border:         #e5e7eb;
-    --dono-bg:             #ffffff;
-    --dono-bg-soft:        #f8fafb;
-    --dono-error-bg:       #fde8e8;
-    --dono-error-fg:       #9b1c1c;
-    --dono-warning-bg:     #fef3c7;
-    --dono-warning-fg:     #92400e;
-    --dono-on-accent:      #ffffff;
-    --dono-required:       #d63384;
-    --dono-typeface:    system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    --dono-type-size:      15px;
-    --dono-heading-weight: 600;
-    --dono-body-weight:    400;
-    --dono-radius:         10px;
-    --dono-radius-sm:      8px;
-    // --dono-button-radius and --dono-switcher-radius are deliberately not
-    // defaulted: unset they fall back to --dono-radius-sm, and setting either
+    // --giveflow-accent-soft explicitly and override both.
+    --giveflow-accent-soft:    #efedf8;
+    --giveflow-accent-soft:    color-mix(in srgb, var(--giveflow-accent) 12%, #fff);
+    --giveflow-text:           #111827;
+    --giveflow-text-muted:     #6b7280;
+    --giveflow-border:         #e5e7eb;
+    --giveflow-bg:             #ffffff;
+    --giveflow-bg-soft:        #f8fafb;
+    --giveflow-error-bg:       #fde8e8;
+    --giveflow-error-fg:       #9b1c1c;
+    --giveflow-warning-bg:     #fef3c7;
+    --giveflow-warning-fg:     #92400e;
+    --giveflow-on-accent:      #ffffff;
+    --giveflow-required:       #d63384;
+    --giveflow-typeface:    system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --giveflow-type-size:      15px;
+    --giveflow-heading-weight: 600;
+    --giveflow-body-weight:    400;
+    --giveflow-radius:         10px;
+    --giveflow-radius-sm:      8px;
+    // --giveflow-button-radius and --giveflow-switcher-radius are deliberately not
+    // defaulted: unset they fall back to --giveflow-radius-sm, and setting either
     // overrides just the donate button or just the currency switcher.
-    --dono-pill-radius:    999px;
-    --dono-preset-hover:   rgba(0, 0, 0, .04);
-    --dono-stroke:   1px;
-    --dono-gap:            20px;
-    --dono-field-gap:      6px;
-    --dono-button-size:  48px;
-    --dono-button-weight:  600;
-    --dono-button-shadow:  0 1px 2px rgba(0, 0, 0, .08);
-    --dono-focus-ring:     #1e8a4e;
-    --dono-card-shadow:    0 12px 32px rgba(15, 23, 42, .06);
+    --giveflow-pill-radius:    999px;
+    --giveflow-preset-hover:   rgba(0, 0, 0, .04);
+    --giveflow-stroke:   1px;
+    --giveflow-gap:            20px;
+    --giveflow-field-gap:      6px;
+    --giveflow-button-size:  48px;
+    --giveflow-button-weight:  600;
+    --giveflow-button-shadow:  0 1px 2px rgba(0, 0, 0, .08);
+    --giveflow-focus-ring:     #211d3f;
+    --giveflow-card-shadow:    0 12px 32px rgba(15, 23, 42, .06);
 
     // Opt-in via the admin "Container" setting. Each piece is a CSS variable
-    // so themes can override, e.g. `.dono-donation-form { --dono-form-padding: 20px 24px; }`.
+    // so themes can override, e.g. `.giveflow-donation-form { --giveflow-form-padding: 20px 24px; }`.
     &--framed {
-        background: var(--dono-form-bg, #fff);
-        // --dono-form-radius is a theme override hook that nothing here sets,
+        background: var(--giveflow-form-bg, #fff);
+        // --giveflow-form-radius is a theme override hook that nothing here sets,
         // so the fallback has to be the campaign's own radius: a literal would
         // put a rounded card around a campaign set to square corners.
-        border-radius: var(--dono-form-radius, var(--dono-radius, 14px));
-        box-shadow: var(--dono-form-shadow, 0 1px 2px rgba(15, 23, 42, .04), 0 12px 32px rgba(15, 23, 42, .06));
-        padding: var(--dono-form-padding, 36px 40px 44px);
+        border-radius: var(--giveflow-form-radius, var(--giveflow-radius, 14px));
+        box-shadow: var(--giveflow-form-shadow, 0 1px 2px rgba(15, 23, 42, .04), 0 12px 32px rgba(15, 23, 42, .06));
+        padding: var(--giveflow-form-padding, 36px 40px 44px);
     }
 }
 
 // Boundary against host-theme element styles spilling in, kept at specificity 0
-// via :where() so every dono component class still wins. It leaves <a>,
+// via :where() so every giveflow component class still wins. It leaves <a>,
 // list-style and colour alone, so admin-authored rich text keeps its link and
 // list affordances. A theme rule more specific than a single class can still
 // win: this is light DOM.
-:where(.dono-form) {
+:where(.giveflow-form) {
     :where(button, input, select, textarea) {
         margin: 0;
         font: inherit;
@@ -140,21 +140,21 @@
 // "Plain" container: background and text colour follow the host page rather
 // than the branded card tokens, so the embed reads correctly on a light or a
 // dark section. The doubled wrapper class keeps this above the base
-// `.dono-donation-form .dono-form` rule whatever the source order.
-.dono-donation-form.dono-donation-form--plain .dono-form {
-    background: var(--dono-form-bg, transparent);
+// `.giveflow-donation-form .giveflow-form` rule whatever the source order.
+.giveflow-donation-form.giveflow-donation-form--plain .giveflow-form {
+    background: var(--giveflow-form-bg, transparent);
     color: inherit;
 }
 
-.dono-donation-form .dono-form {
+.giveflow-donation-form .giveflow-form {
     display: flex;
     flex-direction: column;
-    gap: var(--dono-gap);
-    background: var(--dono-bg);
-    color: var(--dono-text);
-    font-family: var(--dono-typeface);
-    font-size: var(--dono-type-size);
-    font-weight: var(--dono-body-weight);
+    gap: var(--giveflow-gap);
+    background: var(--giveflow-bg);
+    color: var(--giveflow-text);
+    font-family: var(--giveflow-typeface);
+    font-size: var(--giveflow-type-size);
+    font-weight: var(--giveflow-body-weight);
     line-height: 1.5;
     // Cuts the inheritance chain for the typography a host theme pushes in via
     // body or .entry-content that font, color and line-height do not cover.
@@ -168,16 +168,16 @@
     // Steps are the form's only direct children, so the gap above separates
     // groups and nothing separates the fields inside one. Slightly tighter than
     // the form's own gap, so a group still reads as a group.
-    .dono-form__step {
+    .giveflow-form__step {
         display: flex;
         flex-direction: column;
-        gap: var(--dono-gap);
+        gap: var(--giveflow-gap);
     }
 
     &--inline {
         gap: 24px;
 
-        .dono-form__nav {
+        .giveflow-form__nav {
             display: flex;
             padding-top: 8px;
         }
@@ -192,8 +192,8 @@
     &__step-title {
         margin: 0 0 16px;
         font-size: 18px;
-        font-weight: var(--dono-heading-weight, 600);
-        color: var(--dono-text);
+        font-weight: var(--giveflow-heading-weight, 600);
+        color: var(--giveflow-text);
     }
 
     &__nav {
@@ -210,13 +210,13 @@
         &--align-right  { justify-content: flex-end; }
         &--align-full {
             justify-content: stretch;
-            .dono-form__button { width: 100%; }
+            .giveflow-form__button { width: 100%; }
         }
     }
 
     &__step-count {
         font-size: 12px;
-        color: var(--dono-text-muted);
+        color: var(--giveflow-text-muted);
         font-variant-numeric: tabular-nums;
     }
 
@@ -225,42 +225,42 @@
     &__divider {
         margin: 0;
         border: 0;
-        border-top: 1px solid var(--dono-border);
+        border-top: 1px solid var(--giveflow-border);
         width: 100%;
     }
 
     &__button {
         appearance: none;
-        border: var(--dono-button-border, 0);
-        min-height: var(--dono-button-size, 48px);
+        border: var(--giveflow-button-border, 0);
+        min-height: var(--giveflow-button-size, 48px);
         padding: 0 22px;
         font-size: 14px;
-        font-weight: var(--dono-button-weight, 600);
-        // Falls back to the shared --dono-radius-sm so the button matches the
-        // amount tiles; --dono-button-radius overrides the button alone.
-        border-radius: var(--dono-button-radius, var(--dono-radius-sm, 8px));
+        font-weight: var(--giveflow-button-weight, 600);
+        // Falls back to the shared --giveflow-radius-sm so the button matches the
+        // amount tiles; --giveflow-button-radius overrides the button alone.
+        border-radius: var(--giveflow-button-radius, var(--giveflow-radius-sm, 8px));
         cursor: pointer;
         transition: filter .15s, background .15s, box-shadow .15s;
         font-family: inherit;
-        box-shadow: var(--dono-button-shadow, 0 1px 2px rgba(0, 0, 0, .08));
+        box-shadow: var(--giveflow-button-shadow, 0 1px 2px rgba(0, 0, 0, .08));
 
         &:disabled { opacity: .5; cursor: not-allowed; }
 
         &--primary {
-            background: var(--dono-button-bg, var(--dono-accent));
-            color: var(--dono-button-fg, var(--dono-on-accent, #fff));
+            background: var(--giveflow-button-bg, var(--giveflow-accent));
+            color: var(--giveflow-button-fg, var(--giveflow-on-accent, #fff));
 
             &:hover:not(:disabled) {
                 filter: brightness(.92);
-                background: var(--dono-button-hover-bg, var(--dono-button-bg, var(--dono-accent)));
+                background: var(--giveflow-button-hover-bg, var(--giveflow-button-bg, var(--giveflow-accent)));
             }
         }
 
         &--secondary {
-            background: var(--dono-bg-soft);
-            color: var(--dono-text);
+            background: var(--giveflow-bg-soft);
+            color: var(--giveflow-text);
 
-            &:hover:not(:disabled) { background: var(--dono-border); }
+            &:hover:not(:disabled) { background: var(--giveflow-border); }
         }
     }
 
@@ -276,10 +276,10 @@
         position: relative;
         appearance: none;
         border: 0;
-        background: var(--dono-bg-soft, #f8fafb);
-        color: var(--dono-text);
+        background: var(--giveflow-bg-soft, #f8fafb);
+        color: var(--giveflow-text);
         padding: 12px 12px;
-        border-radius: var(--dono-radius-sm);
+        border-radius: var(--giveflow-radius-sm);
         cursor: pointer;
         transition: background .15s, outline-color .15s;
         font-family: inherit;
@@ -291,17 +291,17 @@
         outline: 2px solid transparent;
         outline-offset: -2px;
 
-        &:hover { background: var(--dono-preset-hover, rgba(0, 0, 0, .04)); }
+        &:hover { background: var(--giveflow-preset-hover, rgba(0, 0, 0, .04)); }
 
         &:focus-visible {
-            outline-color: var(--dono-focus-ring, var(--dono-accent));
+            outline-color: var(--giveflow-focus-ring, var(--giveflow-accent));
             outline-offset: 2px;
         }
 
         &.is-selected {
-            outline-color: var(--dono-accent);
-            background: var(--dono-accent-soft);
-            color: var(--dono-accent);
+            outline-color: var(--giveflow-accent);
+            background: var(--giveflow-accent-soft);
+            color: var(--giveflow-accent);
         }
     }
     &__preset-amount {
@@ -312,7 +312,7 @@
     &__preset-impact {
         font-size: 11px;
         font-weight: 500;
-        color: var(--dono-text-muted);
+        color: var(--giveflow-text-muted);
         line-height: 1.3;
     }
 
@@ -326,7 +326,7 @@
             padding: 0 0 6px;
             font-size: 13px;
             font-weight: 500;
-            color: var(--dono-text);
+            color: var(--giveflow-text);
         }
     }
     &__frequency-options {
@@ -343,40 +343,40 @@
         font-weight: 500;
         font-family: inherit;
         cursor: pointer;
-        color: var(--dono-text-muted);
+        color: var(--giveflow-text-muted);
         transition: background .15s, color .15s, border-color .15s;
     }
 
     &__frequency--pills {
-        .dono-form__frequency-options {
+        .giveflow-form__frequency-options {
             padding: 4px;
-            background: var(--dono-bg-soft, #f8fafb);
-            border-radius: var(--dono-radius-sm, 8px);
+            background: var(--giveflow-bg-soft, #f8fafb);
+            border-radius: var(--giveflow-radius-sm, 8px);
         }
-        .dono-form__frequency-option {
-            border-radius: var(--dono-radius-sm, 8px);
+        .giveflow-form__frequency-option {
+            border-radius: var(--giveflow-radius-sm, 8px);
 
-            &:hover { color: var(--dono-text); }
+            &:hover { color: var(--giveflow-text); }
             &.is-selected {
-                background: var(--dono-accent);
-                color: var(--dono-on-accent, #fff);
+                background: var(--giveflow-accent);
+                color: var(--giveflow-on-accent, #fff);
             }
         }
     }
 
     &__frequency--tabs {
-        border-bottom: 1px solid var(--dono-border);
+        border-bottom: 1px solid var(--giveflow-border);
 
-        .dono-form__frequency-options { gap: 0; }
-        .dono-form__frequency-option {
+        .giveflow-form__frequency-options { gap: 0; }
+        .giveflow-form__frequency-option {
             margin-bottom: -1px;
             border-bottom: 2px solid transparent;
             border-radius: 0;
 
-            &:hover { color: var(--dono-text); }
+            &:hover { color: var(--giveflow-text); }
             &.is-selected {
-                color: var(--dono-accent);
-                border-bottom-color: var(--dono-accent);
+                color: var(--giveflow-accent);
+                border-bottom-color: var(--giveflow-accent);
                 font-weight: 600;
             }
         }
@@ -384,7 +384,7 @@
     &__frequency-help {
         margin: 6px 0 0;
         font-size: 12px;
-        color: var(--dono-text-muted);
+        color: var(--giveflow-text-muted);
         line-height: 1.4;
     }
 
@@ -394,26 +394,26 @@
     &__custom-label {
         display: block;
         font-size: 13px;
-        color: var(--dono-text-muted);
+        color: var(--giveflow-text-muted);
         margin-bottom: 6px;
     }
     &__custom-input-wrap {
         display: flex;
         align-items: center;
         gap: 8px;
-        border: var(--dono-stroke, 1px) solid var(--dono-border);
-        border-radius: var(--dono-radius-sm);
+        border: var(--giveflow-stroke, 1px) solid var(--giveflow-border);
+        border-radius: var(--giveflow-radius-sm);
         padding: 0 12px;
-        background: var(--dono-bg);
+        background: var(--giveflow-bg);
 
         &:focus-within {
-            border-color: var(--dono-focus-ring, var(--dono-accent));
-            box-shadow: 0 0 0 3px var(--dono-accent-soft);
+            border-color: var(--giveflow-focus-ring, var(--giveflow-accent));
+            box-shadow: 0 0 0 3px var(--giveflow-accent-soft);
         }
     }
     &__currency {
         font-size: 13px;
-        color: var(--dono-text-muted);
+        color: var(--giveflow-text-muted);
         font-weight: 500;
     }
     &__custom-input {
@@ -424,7 +424,7 @@
         padding: 10px 0;
         font-size: 16px;
         background: transparent;
-        color: var(--dono-text);
+        color: var(--giveflow-text);
         font-variant-numeric: tabular-nums;
         font-family: inherit;
     }
@@ -433,7 +433,7 @@
 // Honeypot field: a bot that crawls the DOM and fills every input populates it,
 // and the server then rejects the submission silently. Hidden with `position:
 // absolute` rather than `display: none` because some bots skip hidden fields.
-.dono-donation-form .dono-form__hp {
+.giveflow-donation-form .giveflow-form__hp {
     position: absolute;
     left: -10000px;
     top: auto;
@@ -443,17 +443,17 @@
     opacity: 0;
     pointer-events: none;
 }
-.dono-donation-form .dono-privacy {
+.giveflow-donation-form .giveflow-privacy {
     margin: 0;
     font-size: 12px;
     line-height: 1.5;
-    color: var(--dono-text-muted);
+    color: var(--giveflow-text-muted);
 
     &--center { text-align: center; }
     &--right  { text-align: right;  }
 
     &__link {
-        color: var(--dono-accent);
+        color: var(--giveflow-accent);
         text-decoration: underline;
 
         &:hover, &:focus-visible {
@@ -462,18 +462,18 @@
     }
 }
 
-.dono-donation-form .dono-amount {
+.giveflow-donation-form .giveflow-amount {
     display: flex;
     align-items: center;
     gap: 8px;
-    border: var(--dono-stroke, 1px) solid var(--dono-border);
-    border-radius: var(--dono-radius-sm);
+    border: var(--giveflow-stroke, 1px) solid var(--giveflow-border);
+    border-radius: var(--giveflow-radius-sm);
     padding: 0 12px;
-    background: var(--dono-bg);
+    background: var(--giveflow-bg);
 
     &:focus-within {
-        border-color: var(--dono-focus-ring, var(--dono-accent));
-        box-shadow: 0 0 0 3px var(--dono-accent-soft);
+        border-color: var(--giveflow-focus-ring, var(--giveflow-accent));
+        box-shadow: 0 0 0 3px var(--giveflow-accent-soft);
     }
 
     &__prefix {
@@ -483,7 +483,7 @@
 
     &__code {
         font-size: 13px;
-        color: var(--dono-text-muted);
+        color: var(--giveflow-text-muted);
         font-weight: 500;
     }
 
@@ -495,14 +495,14 @@
         padding: 10px 0;
         font-size: 16px;
         background: transparent;
-        color: var(--dono-text);
+        color: var(--giveflow-text);
         font-variant-numeric: tabular-nums;
         font-family: inherit;
         min-width: 0;
     }
 }
 
-.dono-donation-form .dono-form {
+.giveflow-donation-form .giveflow-form {
 
     &__donor {
         display: flex;
@@ -524,53 +524,53 @@
     &__field {
         display: flex;
         flex-direction: column;
-        gap: var(--dono-field-gap, 4px);
+        gap: var(--giveflow-field-gap, 4px);
     }
 
     &__label {
         font-size: 13px;
-        color: var(--dono-text-muted);
+        color: var(--giveflow-text-muted);
         font-weight: 500;
     }
 
     &__required {
-        color: var(--dono-required, #d63384);
+        color: var(--giveflow-required, #d63384);
         margin-left: 2px;
     }
 
     &__field input {
         appearance: none;
-        border: var(--dono-stroke, 1px) solid var(--dono-border);
-        border-radius: var(--dono-radius-sm);
+        border: var(--giveflow-stroke, 1px) solid var(--giveflow-border);
+        border-radius: var(--giveflow-radius-sm);
         padding: 10px 12px;
-        font-size: var(--dono-type-size, 15px);
-        background: var(--dono-bg);
-        color: var(--dono-text);
+        font-size: var(--giveflow-type-size, 15px);
+        background: var(--giveflow-bg);
+        color: var(--giveflow-text);
         font-family: inherit;
         line-height: 1.4;
 
         &:focus {
             outline: 0;
-            border-color: var(--dono-focus-ring, var(--dono-accent));
-            box-shadow: 0 0 0 3px var(--dono-accent-soft);
+            border-color: var(--giveflow-focus-ring, var(--giveflow-accent));
+            box-shadow: 0 0 0 3px var(--giveflow-accent-soft);
         }
 
         &[aria-invalid="true"] {
-            border-color: var(--dono-error-fg);
+            border-color: var(--giveflow-error-fg);
         }
     }
 
     &__field-error {
         margin: 4px 0 0;
         font-size: 12px;
-        color: var(--dono-error-fg);
+        color: var(--giveflow-error-fg);
     }
 
     &__summary {
         margin: 0;
         padding: 16px;
-        background: var(--dono-bg-soft);
-        border-radius: var(--dono-radius);
+        background: var(--giveflow-bg-soft);
+        border-radius: var(--giveflow-radius);
         display: flex;
         flex-direction: column;
         gap: 10px;
@@ -581,20 +581,20 @@
         justify-content: space-between;
         gap: 12px;
 
-        dt { color: var(--dono-text-muted); font-size: 13px; margin: 0; }
+        dt { color: var(--giveflow-text-muted); font-size: 13px; margin: 0; }
         dd { margin: 0; font-weight: 500; }
     }
     &__summary-row--total {
         margin-top: 4px;
         padding-top: 12px;
-        border-top: var(--dono-stroke, 1px) solid var(--dono-border);
+        border-top: var(--giveflow-stroke, 1px) solid var(--giveflow-border);
 
-        dt { color: var(--dono-text); font-size: 15px; font-weight: 600; }
+        dt { color: var(--giveflow-text); font-size: 15px; font-weight: 600; }
     }
     &__summary-amount {
         font-size: 22px;
         font-weight: 700;
-        color: var(--dono-accent);
+        color: var(--giveflow-accent);
         font-variant-numeric: tabular-nums;
     }
 
@@ -606,10 +606,10 @@
 
     &__test-banner {
         padding: 10px 14px;
-        border-radius: var(--dono-radius-sm);
-        border: var(--dono-stroke, 1px) solid var(--dono-warning-fg, #92400e);
-        background: var(--dono-warning-bg, #fef3c7);
-        color: var(--dono-warning-fg, #92400e);
+        border-radius: var(--giveflow-radius-sm);
+        border: var(--giveflow-stroke, 1px) solid var(--giveflow-warning-fg, #92400e);
+        background: var(--giveflow-warning-bg, #fef3c7);
+        color: var(--giveflow-warning-fg, #92400e);
         font-size: 13px;
         font-weight: 600;
     }
@@ -618,10 +618,10 @@
     // banner: a condition to act on, not an error the donor caused.
     &__gateways-empty {
         padding: 10px 14px;
-        border-radius: var(--dono-radius-sm);
-        border: var(--dono-stroke, 1px) solid var(--dono-warning-fg, #92400e);
-        background: var(--dono-warning-bg, #fef3c7);
-        color: var(--dono-warning-fg, #92400e);
+        border-radius: var(--giveflow-radius-sm);
+        border: var(--giveflow-stroke, 1px) solid var(--giveflow-warning-fg, #92400e);
+        background: var(--giveflow-warning-bg, #fef3c7);
+        color: var(--giveflow-warning-fg, #92400e);
         font-size: 13px;
         font-weight: 600;
     }
@@ -634,7 +634,7 @@
     &__gateways-legend {
         padding: 0;
         margin: 0 0 8px;
-        color: var(--dono-text-muted);
+        color: var(--giveflow-text-muted);
         font-size: 13px;
     }
     &__gateways-list {
@@ -647,20 +647,20 @@
         align-items: flex-start;
         gap: 10px;
         padding: 12px 14px;
-        border: var(--dono-stroke, 1px) solid var(--dono-border);
+        border: var(--giveflow-stroke, 1px) solid var(--giveflow-border);
         // A control, not a tile: it sits in the same column as the amount
         // buttons and the inputs, which all take the small radius.
-        border-radius: var(--dono-radius-sm);
+        border-radius: var(--giveflow-radius-sm);
         cursor: pointer;
 
         input[type="radio"] {
             margin: 2px 0 0;
-            accent-color: var(--dono-accent);
+            accent-color: var(--giveflow-accent);
             flex-shrink: 0;
         }
         &.is-selected {
-            border-color: var(--dono-accent);
-            box-shadow: inset 0 0 0 1px var(--dono-accent);
+            border-color: var(--giveflow-accent);
+            box-shadow: inset 0 0 0 1px var(--giveflow-accent);
         }
     }
     &__gateway-body {
@@ -670,17 +670,17 @@
     }
     &__gateway-label { font-weight: 600; }
     &__gateway-desc {
-        color: var(--dono-text-muted);
+        color: var(--giveflow-text-muted);
         font-size: 13px;
     }
 
     // Descendants written out rather than nested with &, which expands to the
-    // whole parent compound and would put .dono-donation-form in the selector
+    // whole parent compound and would put .giveflow-donation-form in the selector
     // twice, matching nothing.
     &__gateways--list {
-        .dono-form__gateways-list { gap: 4px; }
+        .giveflow-form__gateways-list { gap: 4px; }
 
-        .dono-form__gateway {
+        .giveflow-form__gateway {
             padding: 6px 0;
             border: 0;
             border-radius: 0;
@@ -697,7 +697,7 @@
         // row it nests: three inputs on a line, about 77px each in a sidebar.
         // A row holding one therefore stops being a row. Spanning only the name
         // would strand its neighbour at half width beside empty space.
-        &:has(> .dono-form__row--two-up) > * {
+        &:has(> .giveflow-form__row--two-up) > * {
             grid-column: 1 / -1;
         }
 
@@ -711,7 +711,7 @@
         align-items: center;
         gap: 10px;
         font-size: 14px;
-        color: var(--dono-text);
+        color: var(--giveflow-text);
         cursor: pointer;
         margin-top: 4px;
 
@@ -721,14 +721,14 @@
         // whatever its state. This restores the native control and pins the
         // size, doubled on the form class to outrank a theme's element rules.
         input[type="checkbox"],
-        .dono-donation-form.dono-donation-form & input[type="checkbox"] {
+        .giveflow-donation-form.giveflow-donation-form & input[type="checkbox"] {
             appearance: auto;
             -webkit-appearance: checkbox;
             width: 16px;
             height: 16px;
             min-width: 16px;
             min-height: 16px;
-            accent-color: var(--dono-accent);
+            accent-color: var(--giveflow-accent);
             margin: 0;
         }
 
@@ -745,17 +745,17 @@
 
     &__check-label {
         font-size: 14px;
-        color: var(--dono-text);
+        color: var(--giveflow-text);
     }
 
     &__check-help {
         font-size: 12px;
-        color: var(--dono-text-muted);
+        color: var(--giveflow-text-muted);
     }
 
     &__field-help {
         font-size: 12px;
-        color: var(--dono-text-muted);
+        color: var(--giveflow-text-muted);
         margin-bottom: 4px;
     }
 
@@ -767,7 +767,7 @@
         legend {
             font-size: 14px;
             font-weight: 500;
-            color: var(--dono-text);
+            color: var(--giveflow-text);
             margin-bottom: 6px;
         }
     }
@@ -783,9 +783,9 @@
     // :focus-visible, no element default. Without this the donor lands on a
     // group that looks like every valid one on the form.
     &__radio-options[aria-invalid="true"] {
-        outline: 2px solid var(--dono-error-fg);
+        outline: 2px solid var(--giveflow-error-fg);
         outline-offset: 4px;
-        border-radius: var(--dono-radius-sm, 8px);
+        border-radius: var(--giveflow-radius-sm, 8px);
     }
 
     &__radio--horizontal &__radio-options {
@@ -799,13 +799,13 @@
         align-items: center;
         gap: 8px;
         font-size: 14px;
-        color: var(--dono-text);
+        color: var(--giveflow-text);
         cursor: pointer;
 
         input[type="radio"] {
             width: 16px;
             height: 16px;
-            accent-color: var(--dono-accent);
+            accent-color: var(--giveflow-accent);
             margin: 0;
         }
     }
@@ -822,7 +822,7 @@
         legend {
             font-size: 14px;
             font-weight: 500;
-            color: var(--dono-text);
+            color: var(--giveflow-text);
             margin-bottom: 6px;
         }
     }
@@ -838,13 +838,13 @@
         align-items: center;
         gap: 8px;
         font-size: 14px;
-        color: var(--dono-text);
+        color: var(--giveflow-text);
         cursor: pointer;
 
         input[type="checkbox"] {
             width: 16px;
             height: 16px;
-            accent-color: var(--dono-accent);
+            accent-color: var(--giveflow-accent);
             margin: 0;
         }
     }
@@ -856,7 +856,7 @@
     &__cover-fees-math {
         font-style: normal;
         margin-left: 6px;
-        color: var(--dono-accent);
+        color: var(--giveflow-accent);
         font-weight: 500;
         font-variant-numeric: tabular-nums;
     }
@@ -873,7 +873,7 @@
             padding: 0;
             font-weight: 500;
             font-size: 13px;
-            color: var(--dono-text-muted);
+            color: var(--giveflow-text-muted);
         }
     }
     &__fund-options {
@@ -888,7 +888,7 @@
         font-weight: 700;
         letter-spacing: .04em;
         text-transform: uppercase;
-        color: var(--dono-text-muted);
+        color: var(--giveflow-text-muted);
     }
     &__fund-option {
         position: relative;
@@ -900,21 +900,21 @@
         flex-direction: column;
         gap: 2px;
         padding: 12px;
-        border: calc(var(--dono-stroke, 1px) * 2) solid var(--dono-border);
-        border-radius: var(--dono-radius-sm);
-        background: var(--dono-bg);
+        border: calc(var(--giveflow-stroke, 1px) * 2) solid var(--giveflow-border);
+        border-radius: var(--giveflow-radius-sm);
+        background: var(--giveflow-bg);
         cursor: pointer;
         transition: border-color .15s, background .15s;
 
-        &:hover { border-color: var(--dono-text-muted); }
+        &:hover { border-color: var(--giveflow-text-muted); }
         // The radio is visually hidden, so surface keyboard focus on the label.
         &:focus-within {
-            border-color: var(--dono-focus-ring, var(--dono-accent));
-            box-shadow: 0 0 0 3px var(--dono-accent-soft);
+            border-color: var(--giveflow-focus-ring, var(--giveflow-accent));
+            box-shadow: 0 0 0 3px var(--giveflow-accent-soft);
         }
         &.is-selected {
-            border-color: var(--dono-accent);
-            background: var(--dono-accent-soft);
+            border-color: var(--giveflow-accent);
+            background: var(--giveflow-accent-soft);
         }
 
         input[type="radio"] {
@@ -926,11 +926,11 @@
     &__fund-option-label {
         font-size: 13px;
         font-weight: 600;
-        color: var(--dono-text);
+        color: var(--giveflow-text);
     }
     &__fund-option-desc {
         font-size: 11px;
-        color: var(--dono-text-muted);
+        color: var(--giveflow-text-muted);
         line-height: 1.3;
     }
 
@@ -944,9 +944,9 @@
 
         legend {
             padding: 0;
-            font-weight: var(--dono-heading-weight, 600);
+            font-weight: var(--giveflow-heading-weight, 600);
             font-size: 14px;
-            color: var(--dono-text);
+            color: var(--giveflow-text);
         }
     }
 
@@ -957,9 +957,9 @@
         // Controls that cannot move anything once paying starts are hidden
         // rather than greyed out, which reads as something having gone wrong.
         // The gateway owns this screen and shows the charge itself.
-        .dono-form__donor,
-        .dono-form__amount,
-        .dono-form__confirm {
+        .giveflow-form__donor,
+        .giveflow-form__amount,
+        .giveflow-form__confirm {
             display: none;
         }
 
@@ -967,15 +967,15 @@
         // buttons is a donor deciding which one takes their money. Scoped back
         // in below the mount, because the gateway draws its Pay and Cancel in a
         // nav of the same name.
-        .dono-form__nav {
+        .giveflow-form__nav {
             display: none;
         }
 
-        .dono-form__payment-mount .dono-form__nav {
+        .giveflow-form__payment-mount .giveflow-form__nav {
             display: flex;
         }
 
-        .dono-form__payment-mount {
+        .giveflow-form__payment-mount {
             pointer-events: auto;
         }
     }
@@ -1028,7 +1028,7 @@
         gap: 10px;
         align-items: flex-start;
         font-size: 14px;
-        color: var(--dono-text);
+        color: var(--giveflow-text);
         cursor: pointer;
 
         input { margin-top: 3px; flex: 0 0 auto; }
@@ -1039,11 +1039,11 @@
         max-height: 180px;
         overflow-y: auto;
         padding: 12px 14px;
-        border: 1px solid var(--dono-border);
-        border-radius: var(--dono-radius, 8px);
+        border: 1px solid var(--giveflow-border);
+        border-radius: var(--giveflow-radius, 8px);
         font-size: 13px;
         line-height: 1.5;
-        color: var(--dono-text-muted);
+        color: var(--giveflow-text-muted);
         white-space: pre-wrap;
     }
     &__terms-link {
@@ -1061,15 +1061,15 @@
 
         legend {
             padding: 0;
-            font-weight: var(--dono-heading-weight, 600);
+            font-weight: var(--giveflow-heading-weight, 600);
             font-size: 14px;
-            color: var(--dono-text);
+            color: var(--giveflow-text);
         }
     }
     &__consent-help {
         margin: 0;
         font-size: 13px;
-        color: var(--dono-text-muted);
+        color: var(--giveflow-text-muted);
         line-height: 1.4;
     }
     &__consent-purposes {
@@ -1082,14 +1082,14 @@
         gap: 10px;
         align-items: flex-start;
         padding: 10px 12px;
-        border: var(--dono-stroke, 1px) solid var(--dono-border);
-        border-radius: var(--dono-radius-sm);
-        background: var(--dono-bg);
+        border: var(--giveflow-stroke, 1px) solid var(--giveflow-border);
+        border-radius: var(--giveflow-radius-sm);
+        background: var(--giveflow-bg);
         cursor: pointer;
 
         input[type="checkbox"] {
             margin-top: 2px;
-            accent-color: var(--dono-accent);
+            accent-color: var(--giveflow-accent);
             flex-shrink: 0;
         }
         input[type="checkbox"]:disabled {
@@ -1107,7 +1107,7 @@
     &__consent-label {
         font-size: 13px;
         font-weight: 500;
-        color: var(--dono-text);
+        color: var(--giveflow-text);
         display: inline-flex;
         align-items: center;
         gap: 6px;
@@ -1115,7 +1115,7 @@
     }
     &__consent-desc {
         font-size: 12px;
-        color: var(--dono-text-muted);
+        color: var(--giveflow-text-muted);
         line-height: 1.4;
     }
     &__consent-required-pill {
@@ -1125,8 +1125,8 @@
         letter-spacing: .04em;
         padding: 1px 6px;
         border-radius: 999px;
-        background: var(--dono-warning-bg, #fef3c7);
-        color: var(--dono-warning-fg, #92400e);
+        background: var(--giveflow-warning-bg, #fef3c7);
+        color: var(--giveflow-warning-fg, #92400e);
     }
 
     &__currency-switcher {
@@ -1135,15 +1135,15 @@
         gap: 10px;
         width: 100%;
         font-size: 13px;
-        color: var(--dono-text-muted);
+        color: var(--giveflow-text-muted);
         margin-bottom: 12px;
 
         select {
             padding: 6px 10px;
-            border: var(--dono-stroke, 1px) solid var(--dono-border);
-            border-radius: var(--dono-switcher-radius, var(--dono-radius-sm, 8px));
+            border: var(--giveflow-stroke, 1px) solid var(--giveflow-border);
+            border-radius: var(--giveflow-switcher-radius, var(--giveflow-radius-sm, 8px));
             font: inherit;
-            background: var(--dono-bg);
+            background: var(--giveflow-bg);
             cursor: pointer;
         }
 
@@ -1157,34 +1157,34 @@
         gap: 6px;
         flex-wrap: wrap;
         padding: 4px;
-        background: var(--dono-bg-soft, #f8fafb);
-        border-radius: var(--dono-switcher-radius, var(--dono-radius-sm, 8px));
+        background: var(--giveflow-bg-soft, #f8fafb);
+        border-radius: var(--giveflow-switcher-radius, var(--giveflow-radius-sm, 8px));
     }
     &__currency-pill {
         appearance: none;
         border: 0;
         background: transparent;
         padding: 6px 14px;
-        border-radius: var(--dono-switcher-radius, var(--dono-radius-sm, 8px));
+        border-radius: var(--giveflow-switcher-radius, var(--giveflow-radius-sm, 8px));
         font: inherit;
         font-size: 13px;
         font-weight: 500;
-        color: var(--dono-text-muted);
+        color: var(--giveflow-text-muted);
         cursor: pointer;
         transition: background .15s, color .15s;
 
-        &:hover { color: var(--dono-text); }
+        &:hover { color: var(--giveflow-text); }
         &.is-selected {
-            background: var(--dono-accent);
-            color: var(--dono-on-accent, #fff);
+            background: var(--giveflow-accent);
+            color: var(--giveflow-on-accent, #fff);
         }
     }
 
     textarea {
         width: 100%;
         padding: 10px 12px;
-        border: var(--dono-stroke, 1px) solid var(--dono-border);
-        border-radius: var(--dono-radius-sm);
+        border: var(--giveflow-stroke, 1px) solid var(--giveflow-border);
+        border-radius: var(--giveflow-radius-sm);
         font: inherit;
         line-height: 1.5;
         resize: vertical;
@@ -1192,8 +1192,8 @@
 
         &:focus {
             outline: none;
-            border-color: var(--dono-focus-ring, var(--dono-accent));
-            box-shadow: 0 0 0 3px var(--dono-accent-soft);
+            border-color: var(--giveflow-focus-ring, var(--giveflow-accent));
+            box-shadow: 0 0 0 3px var(--giveflow-accent-soft);
         }
     }
 
@@ -1205,49 +1205,49 @@
     }
     &__html { display: contents; }
 
-    .dono-goal {
+    .giveflow-goal {
         display: flex;
         flex-direction: column;
         gap: 6px;
     }
-    .dono-goal__amount {
+    .giveflow-goal__amount {
         display: flex;
         justify-content: space-between;
         font-size: 13px;
-        color: var(--dono-text);
+        color: var(--giveflow-text);
 
         strong { font-weight: 600; }
-        span   { color: var(--dono-text-muted); }
+        span   { color: var(--giveflow-text-muted); }
     }
-    .dono-goal__bar {
+    .giveflow-goal__bar {
         height: 8px;
-        background: var(--dono-border);
-        border-radius: var(--dono-radius-sm, 4px);
+        background: var(--giveflow-border);
+        border-radius: var(--giveflow-radius-sm, 4px);
         overflow: hidden;
     }
-    .dono-goal__fill {
+    .giveflow-goal__fill {
         height: 100%;
-        background: var(--dono-accent);
+        background: var(--giveflow-accent);
         transition: width .3s ease;
     }
-    .dono-goal__meta {
+    .giveflow-goal__meta {
         display: flex;
         justify-content: space-between;
         font-size: 12px;
-        color: var(--dono-text-muted);
+        color: var(--giveflow-text-muted);
     }
-    .dono-goal--missing {
+    .giveflow-goal--missing {
         font-size: 12px;
-        color: var(--dono-text-muted);
+        color: var(--giveflow-text-muted);
         padding: 8px 10px;
-        background: var(--dono-bg-soft);
-        border-radius: var(--dono-radius-sm);
+        background: var(--giveflow-bg-soft);
+        border-radius: var(--giveflow-radius-sm);
     }
     &__heading {
         margin: 0;
-        font-weight: var(--dono-heading-weight, 600);
+        font-weight: var(--giveflow-heading-weight, 600);
         line-height: 1.25;
-        color: var(--dono-text);
+        color: var(--giveflow-text);
 
         &--left   { text-align: left; }
         &--center { text-align: center; }
@@ -1256,14 +1256,14 @@
     &__paragraph {
         margin: 0;
         line-height: 1.5;
-        color: var(--dono-text-muted);
+        color: var(--giveflow-text-muted);
         font-size: 14px;
 
         &--left   { text-align: left; }
         &--center { text-align: center; }
         &--right  { text-align: right; }
 
-        a { color: var(--dono-accent); }
+        a { color: var(--giveflow-accent); }
     }
 
     &__progress {
@@ -1276,8 +1276,8 @@
     &__page-title {
         margin: 0 0 8px;
         font-size: 18px;
-        font-weight: var(--dono-heading-weight, 600);
-        color: var(--dono-text);
+        font-weight: var(--giveflow-heading-weight, 600);
+        color: var(--giveflow-text);
         line-height: 1.3;
     }
 
@@ -1302,43 +1302,43 @@
         justify-content: center;
         border-radius: 999px;
         cursor: pointer;
-        color: var(--dono-text-muted);
+        color: var(--giveflow-text-muted);
         font-size: 18px;
         line-height: 1;
         transition: background .12s, color .12s;
 
         &:hover {
-            background: var(--dono-bg-soft);
-            color: var(--dono-text);
+            background: var(--giveflow-bg-soft);
+            color: var(--giveflow-text);
         }
         &[aria-hidden="true"] { pointer-events: none; }
     }
     &__bar-title {
         margin: 0;
         font-size: 15px;
-        font-weight: var(--dono-heading-weight, 600);
+        font-weight: var(--giveflow-heading-weight, 600);
         text-align: center;
-        color: var(--dono-text);
+        color: var(--giveflow-text);
         line-height: 1.3;
     }
     &__bar-spacer { width: 32px; }
 
     &__bar-track {
         height: 4px;
-        background: var(--dono-border, #e5e7eb);
+        background: var(--giveflow-border, #e5e7eb);
         border-radius: 0;
         overflow: hidden;
         margin: 0 0 20px;
     }
     &__bar-fill {
         height: 100%;
-        background: var(--dono-accent);
+        background: var(--giveflow-accent);
         transition: width .25s ease;
     }
     &__body {
         display: flex;
         flex-direction: column;
-        gap: var(--dono-gap, 20px);
+        gap: var(--giveflow-gap, 20px);
     }
     &__nav--end,
     &__nav--align-end,
@@ -1346,38 +1346,38 @@
     &__nav--align-start,
     &__nav--align-left     { justify-content: flex-start; }
     &__nav--align-center   { justify-content: center; }
-    &__nav--align-stretch  { > .dono-form__button { flex: 1; } }
+    &__nav--align-stretch  { > .giveflow-form__button { flex: 1; } }
     &__progress-dot {
         width: 8px;
         height: 8px;
         border-radius: 50%;
-        background: var(--dono-border, #e5e7eb);
+        background: var(--giveflow-border, #e5e7eb);
         transition: background .15s ease, transform .15s ease;
 
-        &.is-done    { background: var(--dono-accent, #1e8a4e); }
+        &.is-done    { background: var(--giveflow-accent, #211d3f); }
         &.is-current {
-            background: var(--dono-accent, #1e8a4e);
+            background: var(--giveflow-accent, #211d3f);
             transform: scale(1.25);
         }
     }
     &__page-title {
         margin: 0 0 12px;
         font-size: 16px;
-        font-weight: var(--dono-heading-weight, 600);
-        color: var(--dono-text);
+        font-weight: var(--giveflow-heading-weight, 600);
+        color: var(--giveflow-text);
     }
 
     // Author styling belongs to WP's block-supports: the wrapper renders the
     // inline style the Style Engine produced, so only structure lives here.
-    .dono-block--section {
-        > .dono-form__decorations { margin-bottom: 0; }
+    .giveflow-block--section {
+        > .giveflow-form__decorations { margin-bottom: 0; }
     }
 
     &__error {
         padding: 10px 14px;
-        background: var(--dono-error-bg);
-        color: var(--dono-error-fg);
-        border-radius: var(--dono-radius-sm);
+        background: var(--giveflow-error-bg);
+        color: var(--giveflow-error-fg);
+        border-radius: var(--giveflow-radius-sm);
         font-size: 13px;
     }
 
@@ -1388,7 +1388,7 @@
         h3 {
             margin: 12px 0 6px;
             font-size: 20px;
-            font-weight: var(--dono-heading-weight, 600);
+            font-weight: var(--giveflow-heading-weight, 600);
         }
     }
     &__success-icon {
@@ -1396,8 +1396,8 @@
         height: 56px;
         margin: 0 auto;
         border-radius: 50%;
-        background: var(--dono-accent);
-        color: var(--dono-on-accent, #fff);
+        background: var(--giveflow-accent);
+        color: var(--giveflow-on-accent, #fff);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -1407,20 +1407,20 @@
     &__reference {
         font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
         font-size: 13px;
-        color: var(--dono-text-muted);
+        color: var(--giveflow-text-muted);
         margin: 0 0 18px;
     }
 
     &__payment-title {
         margin: 0 0 4px;
         font-size: 18px;
-        font-weight: var(--dono-heading-weight, 600);
+        font-weight: var(--giveflow-heading-weight, 600);
     }
     &__payment-amount {
         margin: 0 0 16px;
         font-size: 22px;
         font-weight: 700;
-        color: var(--dono-accent);
+        color: var(--giveflow-accent);
     }
     &__payment-element {
         min-height: 44px;
@@ -1434,14 +1434,14 @@
     }
     &__payment-loading {
         font-size: 13px;
-        color: var(--dono-text-muted);
+        color: var(--giveflow-text-muted);
         margin: 0 0 12px;
     }
 
     &__confirming {
         text-align: center;
         padding: 32px 0;
-        color: var(--dono-text-muted);
+        color: var(--giveflow-text-muted);
         font-size: 14px;
     }
     &__spinner {
@@ -1449,37 +1449,37 @@
         width: 28px;
         height: 28px;
         margin-bottom: 12px;
-        border: 3px solid var(--dono-border);
-        border-top-color: var(--dono-accent);
+        border: 3px solid var(--giveflow-border);
+        border-top-color: var(--giveflow-accent);
         border-radius: 50%;
-        animation: dono-form-spin 0.7s linear infinite;
+        animation: giveflow-form-spin 0.7s linear infinite;
     }
 }
 
-@keyframes dono-form-spin {
+@keyframes giveflow-form-spin {
     to { transform: rotate(360deg); }
 }
 
-.dono-form__country-select {
+.giveflow-form__country-select {
     position: relative;
 
     &-input {
         width: 100%;
         padding: 9px 32px 9px 12px;
-        border: var(--dono-stroke, 1px) solid var(--dono-border);
-        border-radius: var(--dono-radius-sm, 8px);
-        background: var(--dono-bg, #fff);
-        color: var(--dono-text);
+        border: var(--giveflow-stroke, 1px) solid var(--giveflow-border);
+        border-radius: var(--giveflow-radius-sm, 8px);
+        background: var(--giveflow-bg, #fff);
+        color: var(--giveflow-text);
         font: inherit;
         line-height: 1.4;
         cursor: pointer;
 
         &:focus {
-            outline: 2px solid var(--dono-accent);
+            outline: 2px solid var(--giveflow-accent);
             outline-offset: -1px;
         }
 
-        &[aria-invalid="true"] { border-color: var(--dono-error-fg); }
+        &[aria-invalid="true"] { border-color: var(--giveflow-error-fg); }
     }
 
     &-chevron {
@@ -1487,7 +1487,7 @@
         right: 10px;
         top: 50%;
         transform: translateY(-50%);
-        color: var(--dono-text-muted);
+        color: var(--giveflow-text-muted);
         pointer-events: none;
         transition: transform .15s ease;
     }
@@ -1505,9 +1505,9 @@
         margin: 0;
         padding: 4px;
         list-style: none;
-        background: var(--dono-bg, #fff);
-        border: var(--dono-stroke, 1px) solid var(--dono-border);
-        border-radius: var(--dono-radius-sm, 8px);
+        background: var(--giveflow-bg, #fff);
+        border: var(--giveflow-stroke, 1px) solid var(--giveflow-border);
+        border-radius: var(--giveflow-radius-sm, 8px);
         box-shadow: 0 8px 24px rgba(15, 23, 42, .08);
     }
 
@@ -1519,18 +1519,18 @@
         padding: 7px 10px;
         border-radius: 6px;
         cursor: pointer;
-        color: var(--dono-text);
+        color: var(--giveflow-text);
         font-size: 14px;
         line-height: 1.3;
 
         &.is-active,
-        &:hover { background: var(--dono-accent-soft, #e7f5ec); }
+        &:hover { background: var(--giveflow-accent-soft, #efedf8); }
 
         &.is-current { font-weight: 600; }
     }
 
     &-hint {
-        color: var(--dono-text-muted);
+        color: var(--giveflow-text-muted);
         font-size: 12px;
         font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     }

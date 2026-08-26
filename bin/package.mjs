@@ -28,12 +28,12 @@ const root = path.resolve( path.dirname( fileURLToPath( import.meta.url ) ), '..
  * WordPress.org derives the slug from the plugin name and requires the text
  * domain to match it, so the header is the one place that already has to be
  * right. Reading the folder name instead produced a zip that installed to
- * wp-content/plugins/dono while the directory installs to
- * dono-fundraising-platform: a site that took one from each channel would end
+ * wp-content/plugins/giveflow while the directory installs to
+ * giveflow-fundraising-campaigns: a site that took one from each channel would end
  * up running the plugin twice.
  */
 const slug = ( () => {
-    const header = readFileSync( path.join( root, 'dono.php' ), 'utf8' );
+    const header = readFileSync( path.join( root, 'giveflow.php' ), 'utf8' );
     const match  = header.match( /^\s*\*\s*Text Domain:\s*(\S+)\s*$/m );
 
     if ( ! match ) {

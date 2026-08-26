@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Foundation\Plugin;
-use Dono\Gateways\Stripe\StripeAccount;
-use Dono\Recurring\RecurringCanceller;
-use Dono\Recurring\RecurringPlan;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Gateways\Stripe\StripeAccount;
+use GiveFlow\Recurring\RecurringCanceller;
+use GiveFlow\Recurring\RecurringPlan;
 use RuntimeException;
 
 /**
@@ -32,7 +32,7 @@ final class StripeCancelConfirmationTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        update_option('dono_gateway_config', [
+        update_option('giveflow_gateway_config', [
             'test_mode' => true,
             'stripe'    => ['webhook_secret_test' => 'whsec_cancel'],
         ]);
@@ -42,17 +42,17 @@ final class StripeCancelConfirmationTest extends IntegrationTestCase
         $acct->saveKeys(true, 'sk_test_cancel', 'pk_test_seed');
         $acct->refresh(['id' => 'acct_cancel', 'charges_enabled' => true]);
 
-        $manager = $c->get(\Dono\Gateways\GatewayManager::class);
+        $manager = $c->get(\GiveFlow\Gateways\GatewayManager::class);
         if (! $manager->get('stripe')) {
-            $manager->register(new \Dono\Gateways\Stripe\StripeGateway(
-                $c->get(\Dono\Gateways\Stripe\StripeApi::class),
-                $c->get(\Dono\Donations\DonationRepository::class),
-                $c->get(\Dono\Donations\DonationService::class),
-                $c->get(\Dono\Gateways\Stripe\StripeAccount::class),
-                $c->get(\Dono\Donors\DonorRepository::class),
-                $c->get(\Dono\Donors\DonorService::class),
-                $c->get(\Dono\Foundation\Time\Clock::class),
-                $c->get(\Dono\Recurring\RecurringPlanRepository::class),
+            $manager->register(new \GiveFlow\Gateways\Stripe\StripeGateway(
+                $c->get(\GiveFlow\Gateways\Stripe\StripeApi::class),
+                $c->get(\GiveFlow\Donations\DonationRepository::class),
+                $c->get(\GiveFlow\Donations\DonationService::class),
+                $c->get(\GiveFlow\Gateways\Stripe\StripeAccount::class),
+                $c->get(\GiveFlow\Donors\DonorRepository::class),
+                $c->get(\GiveFlow\Donors\DonorService::class),
+                $c->get(\GiveFlow\Foundation\Time\Clock::class),
+                $c->get(\GiveFlow\Recurring\RecurringPlanRepository::class),
             ));
         }
 
@@ -169,7 +169,7 @@ final class StripeCancelConfirmationTest extends IntegrationTestCase
     private function seedPlan(?string $subscriptionId = null): RecurringPlan
     {
         $donor = Plugin::instance()->container
-            ->get(\Dono\Donors\DonorService::class)
+            ->get(\GiveFlow\Donors\DonorService::class)
             ->findOrCreate('cancel-' . uniqid() . '@example.test', [
                 'first_name' => 'Cancel',
                 'last_name'  => 'Donor',

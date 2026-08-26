@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Foundation\Plugin;
-use Dono\Gateways\GatewayManager;
-use Dono\Vendor\Queryable\DB;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Gateways\GatewayManager;
+use GiveFlow\Vendor\Queryable\DB;
 use ReflectionProperty;
 use WP_UnitTestCase;
 use wpdb;
@@ -23,7 +23,7 @@ use wpdb;
  * same `global $wpdb` handle WP_UnitTestCase uses. The first product
  * transaction in a test therefore implicitly commits WP's wrapping
  * transaction and then commits its own writes, so the tearDown ROLLBACK
- * discards nothing: dono_* rows AND WP transients (the AntiSpamGuard rate-limit
+ * discards nothing: giveflow_* rows AND WP transients (the AntiSpamGuard rate-limit
  * counters) leak across the whole suite. Pinning Queryable's nesting depth to
  * 1 for the duration of each test makes every `DB::transaction()` run as a
  * nested call: it takes a SAVEPOINT rather than starting a transaction, so all
@@ -31,7 +31,7 @@ use wpdb;
  * still undoes that block's own writes and can be asserted on.
  *
  * Plugin migrations run once at bootstrap (`tests/integration-bootstrap.php`),
- * so the dono_* tables exist for every test.
+ * so the giveflow_* tables exist for every test.
  */
 abstract class IntegrationTestCase extends WP_UnitTestCase
 {
@@ -55,7 +55,7 @@ abstract class IntegrationTestCase extends WP_UnitTestCase
         // Money::defaultCurrency() at the 'USD' fallback (no base shift) while
         // letting the suite's EUR/GBP donations pass the create-path
         // supported-currency gate. Tests needing a different set override this.
-        update_option('dono_currency_locale', [
+        update_option('giveflow_currency_locale', [
             'default_currency'     => 'USD',
             'supported_currencies' => ['USD', 'EUR', 'GBP'],
         ]);
@@ -63,7 +63,7 @@ abstract class IntegrationTestCase extends WP_UnitTestCase
         // to a base amount and are reportable - mirroring a configured org.
         // Without a rate, base_amount_cents stays NULL and the donation is
         // correctly excluded from base totals (tests assert face value).
-        update_option('dono_fx_rates', [
+        update_option('giveflow_fx_rates', [
             'base'       => 'USD',
             'date'       => gmdate('Y-m-d'),
             'fetched_at' => gmdate('c'),
@@ -91,7 +91,7 @@ abstract class IntegrationTestCase extends WP_UnitTestCase
      */
     protected function makeOfflinePayable(): void
     {
-        update_option('dono_gateway_config', [
+        update_option('giveflow_gateway_config', [
             'offline' => ['instructions' => 'Transfer the amount quoting your reference.'],
         ]);
     }
@@ -134,7 +134,7 @@ abstract class IntegrationTestCase extends WP_UnitTestCase
     }
 
     /**
-     * Dono\Vendor\Queryable\DB keeps a private static nesting counter. Forcing it to 1
+     * GiveFlow\Vendor\Queryable\DB keeps a private static nesting counter. Forcing it to 1
      * before a test (and back to 0 after) makes product `DB::transaction()`
      * calls participate in WP_UnitTestCase's wrapping transaction instead of
      * committing through it. Harness-only; no product code is touched.
@@ -157,7 +157,7 @@ abstract class IntegrationTestCase extends WP_UnitTestCase
         add_filter('rest_pre_dispatch', function ($result, $server, $request) {
             if ($result !== null) return $result;
             if ($request->get_method() !== 'POST') return $result;
-            if ($request->get_route() !== '/dono/v1/donations') return $result;
+            if ($request->get_route() !== '/giveflow/v1/donations') return $result;
 
             $body = json_decode((string) $request->get_body(), true);
             if (is_array($body) && ! isset($body['_ft'])) {
@@ -172,13 +172,13 @@ abstract class IntegrationTestCase extends WP_UnitTestCase
 
     private function validFormToken(int $formId = 0): string
     {
-        return \Dono\Foundation\Plugin::instance()->container
-            ->get(\Dono\Donations\AntiSpamGuard::class)
+        return \GiveFlow\Foundation\Plugin::instance()->container
+            ->get(\GiveFlow\Donations\AntiSpamGuard::class)
             ->mintFormToken($formId);
     }
 
     /**
-     * Drain all pending dono.async.* jobs synchronously. Tests that exercise
+     * Drain all pending giveflow.async.* jobs synchronously. Tests that exercise
      * the async pipeline call this after the action that enqueues work.
      */
     protected function runPendingAsyncJobs(int $maxIterations = 5): void
@@ -194,7 +194,7 @@ abstract class IntegrationTestCase extends WP_UnitTestCase
             // nothing. Any fixture with a realistic name crosses that line.
             $pending = $wpdb->get_results(
                 "SELECT action_id, hook, COALESCE(extended_args, args) AS args FROM {$as}
-                 WHERE hook LIKE 'dono.async.%' AND status = 'pending' ORDER BY action_id"
+                 WHERE hook LIKE 'giveflow.async.%' AND status = 'pending' ORDER BY action_id"
             );
             if (! $pending) return;
             foreach ($pending as $p) {
@@ -244,12 +244,12 @@ abstract class IntegrationTestCase extends WP_UnitTestCase
 
     /**
      * A live portal session for the donor. Returns the session id; the caller
-     * sets $_COOKIE['dono_donor_session'] to it.
+     * sets $_COOKIE['giveflow_donor_session'] to it.
      */
     protected function portalSession(int $donorId, string $csrf = 'tok', ?int $startedAt = null): string
     {
         $sid = bin2hex(random_bytes(32));
-        set_transient('dono_portal_' . hash('sha256', $sid), [
+        set_transient('giveflow_portal_' . hash('sha256', $sid), [
             'donor_id' => $donorId,
             'csrf'     => $csrf,
             'started'  => $startedAt ?? time(),
@@ -285,7 +285,7 @@ abstract class IntegrationTestCase extends WP_UnitTestCase
      */
     protected function stampStatusToken(string $reference, string $token = 'browser-held-token'): string
     {
-        $repo     = \Dono\Foundation\Plugin::instance()->container->get(\Dono\Donations\DonationRepository::class);
+        $repo     = \GiveFlow\Foundation\Plugin::instance()->container->get(\GiveFlow\Donations\DonationRepository::class);
         $donation = $repo->findByReference($reference);
 
         $this->assertNotNull($donation, "no donation for {$reference}");

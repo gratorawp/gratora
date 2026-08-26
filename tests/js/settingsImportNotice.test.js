@@ -58,7 +58,7 @@ async function choose( payload ) {
     const input = document.querySelector( 'input[type="file"]' );
     Object.defineProperty( input, 'files', {
         configurable: true,
-        value: [ { name: 'dono-export.json', text: async () => JSON.stringify( payload ) } ],
+        value: [ { name: 'giveflow-export.json', text: async () => JSON.stringify( payload ) } ],
     } );
 
     input.dispatchEvent( new Event( 'change', { bubbles: true } ) );
@@ -83,7 +83,7 @@ beforeEach( () => {
 test( 'the settings confirm does not promise to clear settings the file omits', async () => {
     mount();
 
-    const confirm = await choose( { settings: { dono_receipt_settings: { header_title: 'Imported' } } } );
+    const confirm = await choose( { settings: { giveflow_receipt_settings: { header_title: 'Imported' } } } );
 
     expect( confirm ).toBeTruthy();
     // SettingsService::update merges the file over what is stored, so a key the
@@ -95,7 +95,7 @@ test( 'the settings confirm does not promise to clear settings the file omits', 
 test( 'a full export is told its settings half is written over the site', async () => {
     mount();
 
-    const confirm = await choose( { tables: {}, settings: { dono_gateway_config: { stripe: {} } } } );
+    const confirm = await choose( { tables: {}, settings: { giveflow_gateway_config: { stripe: {} } } } );
 
     expect( confirm.message ).toContain( 'written over yours' );
 } );
@@ -112,12 +112,12 @@ test( 'a refused import still reports the settings groups that landed', async ()
     mount();
 
     apiFetch.mockImplementation( () => Promise.reject( {
-        code:    'dono_base_currency_locked',
+        code:    'giveflow_base_currency_locked',
         message: 'Part of that file was not restored. The base currency stays EUR.',
-        data:    { status: 409, applied: 1, refused: { dono_currency: 'locked' }, imported: false, records: null },
+        data:    { status: 409, applied: 1, refused: { giveflow_currency: 'locked' }, imported: false, records: null },
     } ) );
 
-    const confirm = await choose( { settings: { dono_currency: {}, dono_receipt_settings: {} } } );
+    const confirm = await choose( { settings: { giveflow_currency: {}, giveflow_receipt_settings: {} } } );
     await confirm.onConfirm();
     await settle();
 
@@ -131,7 +131,7 @@ test( 'a failure carrying nothing that landed reports only the reason', async ()
     mount();
 
     apiFetch.mockImplementation( () => Promise.reject( {
-        code:    'dono_invalid_import',
+        code:    'giveflow_invalid_import',
         message: 'No settings payload found.',
         data:    { status: 422, applied: 0, imported: false, records: null },
     } ) );

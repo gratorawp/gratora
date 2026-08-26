@@ -4,7 +4,7 @@ import { __ } from '@wordpress/i18n';
 import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 import { BlockIcons } from '../_shared/block-icons';
 
-const NAME = 'dono/comment';
+const NAME = 'giveflow/comment';
 
 function Edit( { attributes, setAttributes } ) {
     const {
@@ -16,31 +16,31 @@ function Edit( { attributes, setAttributes } ) {
 
     // Attributes default to '' and the walker injects these when empty; mirror
     // that in the preview so the canvas is never a nameless field.
-    const labelText       = label || __( 'Add a message', 'dono-fundraising-platform' );
-    const placeholderText = placeholder || __( 'Anything you want to share?', 'dono-fundraising-platform' );
+    const labelText       = label || __( 'Add a message', 'giveflow-fundraising-campaigns' );
+    const placeholderText = placeholder || __( 'Anything you want to share?', 'giveflow-fundraising-campaigns' );
 
-    const blockProps = useBlockProps( { className: 'dono-block-preview' } );
+    const blockProps = useBlockProps( { className: 'giveflow-block-preview' } );
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Comment', 'dono-fundraising-platform' ) } initialOpen>
+                <PanelBody title={ __( 'Comment', 'giveflow-fundraising-campaigns' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'dono-fundraising-platform' ) }
+                        label={ __( 'Label', 'giveflow-fundraising-campaigns' ) }
                         value={ label }
-                        placeholder={ __( 'Add a message', 'dono-fundraising-platform' ) }
+                        placeholder={ __( 'Add a message', 'giveflow-fundraising-campaigns' ) }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Placeholder', 'dono-fundraising-platform' ) }
+                        label={ __( 'Placeholder', 'giveflow-fundraising-campaigns' ) }
                         value={ placeholder }
-                        placeholder={ __( 'Anything you want to share?', 'dono-fundraising-platform' ) }
+                        placeholder={ __( 'Anything you want to share?', 'giveflow-fundraising-campaigns' ) }
                         onChange={ ( v ) => setAttributes( { placeholder: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'dono-fundraising-platform' ) }
+                        label={ __( 'Required', 'giveflow-fundraising-campaigns' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
                         __nextHasNoMarginBottom
@@ -52,11 +52,11 @@ function Edit( { attributes, setAttributes } ) {
                 />
             </InspectorControls>
             <div { ...blockProps }>
-                <span className="dono-block-preview__label">
+                <span className="giveflow-block-preview__label">
                     { labelText }
-                    { required && <em className="dono-block-preview__req" aria-hidden="true">*</em> }
+                    { required && <em className="giveflow-block-preview__req" aria-hidden="true">*</em> }
                 </span>
-                <div className="dono-block-preview__textarea">{ placeholderText }</div>
+                <div className="giveflow-block-preview__textarea">{ placeholderText }</div>
             </div>
         </>
     );
@@ -65,9 +65,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Comment', 'dono-fundraising-platform' ),
-        description: __( 'Optional message from the donor to the organization.', 'dono-fundraising-platform' ),
-        category:   'dono-fields',
+        title:      __( 'Comment', 'giveflow-fundraising-campaigns' ),
+        description: __( 'Optional message from the donor to the organization.', 'giveflow-fundraising-campaigns' ),
+        category:   'giveflow-fields',
         icon:       BlockIcons[ 'comment' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },
         attributes: {

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Donors;
+namespace GiveFlow\Donors;
 
-use Dono\Foundation\Crypto\Crypto;
-use Dono\Foundation\Identity\IdentityHasher;
-use Dono\Foundation\Time\Clock;
+use GiveFlow\Foundation\Crypto\Crypto;
+use GiveFlow\Foundation\Identity\IdentityHasher;
+use GiveFlow\Foundation\Time\Clock;
 
 /**
  * Repository for PendingSignup. Encrypts the address at the boundary.

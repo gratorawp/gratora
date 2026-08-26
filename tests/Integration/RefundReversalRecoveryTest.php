@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
-use Dono\Donations\DonationService;
-use Dono\Donations\Refund;
-use Dono\Donors\Donor;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
-use Dono\Receipts\Receipt;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationService;
+use GiveFlow\Donations\Refund;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Receipts\Receipt;
 
 /**
  * Undoing a refund has to undo all of it.
@@ -50,7 +50,7 @@ final class RefundReversalRecoveryTest extends IntegrationTestCase
         $d->updated_at        = $now;
         $d->save();
 
-        do_action('dono.donation.completed', $d);
+        do_action('giveflow.donation.completed', $d);
 
         return $d;
     }
@@ -58,7 +58,7 @@ final class RefundReversalRecoveryTest extends IntegrationTestCase
     public function test_a_reversed_refund_puts_the_receipt_back(): void
     {
         $donation = $this->paidDonation('receipt-back@example.test');
-        do_action('dono.async.issue_receipt', ['donation_id' => (int) $donation->id]);
+        do_action('giveflow.async.issue_receipt', ['donation_id' => (int) $donation->id]);
 
         $receipt = Receipt::query()->where('donation_id', (int) $donation->id)->get();
         $this->assertNotNull($receipt, 'precondition: a receipt was issued');
@@ -80,7 +80,7 @@ final class RefundReversalRecoveryTest extends IntegrationTestCase
     public function test_a_partial_refund_still_standing_leaves_the_receipt_usable(): void
     {
         $donation = $this->paidDonation('still-refunded@example.test');
-        do_action('dono.async.issue_receipt', ['donation_id' => (int) $donation->id]);
+        do_action('giveflow.async.issue_receipt', ['donation_id' => (int) $donation->id]);
         $receipt = Receipt::query()->where('donation_id', (int) $donation->id)->get();
 
         $this->service()->recordExternalRefund($donation, 2000, 're_part_a', null, 'gateway');
@@ -98,7 +98,7 @@ final class RefundReversalRecoveryTest extends IntegrationTestCase
     public function test_reversing_part_of_a_full_refund_puts_the_receipt_back(): void
     {
         $donation = $this->paidDonation('part-reversed@example.test');
-        do_action('dono.async.issue_receipt', ['donation_id' => (int) $donation->id]);
+        do_action('giveflow.async.issue_receipt', ['donation_id' => (int) $donation->id]);
         $receipt = Receipt::query()->where('donation_id', (int) $donation->id)->get();
 
         $this->service()->recordExternalRefund($donation, 3000, 're_whole_a', null, 'gateway');

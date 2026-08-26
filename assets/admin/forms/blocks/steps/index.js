@@ -1,5 +1,5 @@
 /**
- * dono/steps: multi-page wizard container. Children are dono/step blocks, one
+ * giveflow/steps: multi-page wizard container. Children are giveflow/step blocks, one
  * wizard page each; without this block the form is single-page. progressStyle
  * picks the navigation treatment: dots, bar, or none.
  */
@@ -12,30 +12,30 @@ import { __, sprintf } from '@wordpress/i18n';
 import { createBlock } from '@wordpress/blocks';
 import { BlockIcons } from '../_shared/block-icons';
 
-const NAME = 'dono/steps';
-const ALLOWED = [ 'dono/step' ];
+const NAME = 'giveflow/steps';
+const ALLOWED = [ 'giveflow/step' ];
 
 const TEMPLATE = [
-    [ 'dono/step', { title: __( 'Your donation', 'dono-fundraising-platform' ) } ],
-    [ 'dono/step', { title: __( 'Your info', 'dono-fundraising-platform' ) } ],
+    [ 'giveflow/step', { title: __( 'Your donation', 'giveflow-fundraising-campaigns' ) } ],
+    [ 'giveflow/step', { title: __( 'Your info', 'giveflow-fundraising-campaigns' ) } ],
 ];
 
 const PROGRESS_STYLES = [
-    { value: 'dots', label: __( 'Dots',   'dono-fundraising-platform' ) },
-    { value: 'bar',  label: __( 'Bar',    'dono-fundraising-platform' ) },
-    { value: 'none', label: __( 'None',   'dono-fundraising-platform' ) },
+    { value: 'dots', label: __( 'Dots',   'giveflow-fundraising-campaigns' ) },
+    { value: 'bar',  label: __( 'Bar',    'giveflow-fundraising-campaigns' ) },
+    { value: 'none', label: __( 'None',   'giveflow-fundraising-campaigns' ) },
 ];
 
 const PROGRESS_HELP = {
-    dots: __( 'Centered dots beneath the form.', 'dono-fundraising-platform' ),
-    bar:  __( 'Header bar with back arrow + title + progress fill.', 'dono-fundraising-platform' ),
-    none: __( 'No progress indicator.', 'dono-fundraising-platform' ),
+    dots: __( 'Centered dots beneath the form.', 'giveflow-fundraising-campaigns' ),
+    bar:  __( 'Header bar with back arrow + title + progress fill.', 'giveflow-fundraising-campaigns' ),
+    none: __( 'No progress indicator.', 'giveflow-fundraising-campaigns' ),
 };
 
 function Edit( { attributes, setAttributes, clientId } ) {
     const { prevLabel = '', nextLabel = '', progressStyle = 'dots' } = attributes;
     const blockProps = useBlockProps( {
-        className: `dono-block-preview dono-block-preview--steps dono-block-preview--steps-${ progressStyle }`,
+        className: `giveflow-block-preview giveflow-block-preview--steps giveflow-block-preview--steps-${ progressStyle }`,
     } );
 
     const { insertBlock } = useDispatch( 'core/block-editor' );
@@ -45,10 +45,10 @@ function Edit( { attributes, setAttributes, clientId } ) {
     );
 
     const addStep = () => {
-        const next = createBlock( 'dono/step', {
+        const next = createBlock( 'giveflow/step', {
             title: sprintf(
                 /* translators: %d: new step number. */
-                __( 'Step %d', 'dono-fundraising-platform' ),
+                __( 'Step %d', 'giveflow-fundraising-campaigns' ),
                 childCount + 1
             ),
         } );
@@ -58,30 +58,30 @@ function Edit( { attributes, setAttributes, clientId } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Wizard navigation', 'dono-fundraising-platform' ) } initialOpen>
+                <PanelBody title={ __( 'Wizard navigation', 'giveflow-fundraising-campaigns' ) } initialOpen>
                     <Segmented
-                        label={ __( 'Progress style', 'dono-fundraising-platform' ) }
+                        label={ __( 'Progress style', 'giveflow-fundraising-campaigns' ) }
                         value={ progressStyle }
                         onChange={ ( v ) => setAttributes( { progressStyle: v } ) }
                         options={ PROGRESS_STYLES }
                         help={ PROGRESS_HELP[ progressStyle ] }
                     />
                     <TextControl
-                        label={ __( 'Back-button label', 'dono-fundraising-platform' ) }
+                        label={ __( 'Back-button label', 'giveflow-fundraising-campaigns' ) }
                         value={ prevLabel }
                         onChange={ ( v ) => setAttributes( { prevLabel: v } ) }
-                        placeholder={ __( 'Back', 'dono-fundraising-platform' ) }
+                        placeholder={ __( 'Back', 'giveflow-fundraising-campaigns' ) }
                         help={ progressStyle === 'bar'
-                            ? __( 'Used as the aria-label on the back arrow.', 'dono-fundraising-platform' )
+                            ? __( 'Used as the aria-label on the back arrow.', 'giveflow-fundraising-campaigns' )
                             : undefined
                         }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Next-button label', 'dono-fundraising-platform' ) }
+                        label={ __( 'Next-button label', 'giveflow-fundraising-campaigns' ) }
                         value={ nextLabel }
                         onChange={ ( v ) => setAttributes( { nextLabel: v } ) }
-                        placeholder={ __( 'Continue', 'dono-fundraising-platform' ) }
+                        placeholder={ __( 'Continue', 'giveflow-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -93,9 +93,9 @@ function Edit( { attributes, setAttributes, clientId } ) {
                     templateInsertUpdatesSelection={ false }
                     renderAppender={ false }
                 />
-                <div className="dono-block-preview__steps-add">
+                <div className="giveflow-block-preview__steps-add">
                     <Button variant="secondary" onClick={ addStep }>
-                        { __( '+ Add step', 'dono-fundraising-platform' ) }
+                        { __( '+ Add step', 'giveflow-fundraising-campaigns' ) }
                     </Button>
                 </div>
             </div>
@@ -106,9 +106,9 @@ function Edit( { attributes, setAttributes, clientId } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Steps', 'dono-fundraising-platform' ),
-        description: __( 'Split the form into pages a donor clicks through. Add a Step inside to make a new page.', 'dono-fundraising-platform' ),
-        category:    'dono-content',
+        title:       __( 'Steps', 'giveflow-fundraising-campaigns' ),
+        description: __( 'Split the form into pages a donor clicks through. Add a Step inside to make a new page.', 'giveflow-fundraising-campaigns' ),
+        category:    'giveflow-content',
         icon:        BlockIcons[ 'steps' ],
         supports:    { html: false, anchor: false, inserter: true, multiple: false },
         attributes: {

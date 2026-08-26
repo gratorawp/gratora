@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Currency\FxBackfill;
-use Dono\Donations\Donation;
-use Dono\Vendor\Queryable\Model;
-use Dono\Vendor\Queryable\Schema\Table;
+use GiveFlow\Currency\FxBackfill;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Vendor\Queryable\Model;
+use GiveFlow\Vendor\Queryable\Schema\Table;
 use ReflectionProperty;
 
 /**
@@ -35,7 +35,7 @@ final class DonationBaseAmountIndexTest extends IntegrationTestCase
         $table = new Table('utf8mb4', 'utf8mb4_unicode_ci', []);
         $schemas[Donation::class]($table);
 
-        return $table->compile('dono_donations');
+        return $table->compile('giveflow_donations');
     }
 
     public function test_the_column_leads_an_index_a_fresh_install_would_get(): void
@@ -50,7 +50,7 @@ final class DonationBaseAmountIndexTest extends IntegrationTestCase
     /** And that the migration this suite ran actually put it on the table. */
     public function test_the_migrated_table_carries_it(): void
     {
-        $table   = self::$prefix . 'dono_donations';
+        $table   = self::$prefix . 'giveflow_donations';
         $indexed = self::$wpdb->get_col(
             self::$wpdb->prepare(
                 'SHOW INDEX FROM `' . $table . '` WHERE Seq_in_index = 1 AND Column_name = %s',

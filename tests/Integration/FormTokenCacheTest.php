@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\AntiSpamGuard;
-use Dono\Foundation\Config\SystemSetting;
-use Dono\Foundation\Plugin;
+use GiveFlow\Donations\AntiSpamGuard;
+use GiveFlow\Foundation\Config\SystemSetting;
+use GiveFlow\Foundation\Plugin;
 
 /**
  * Full-codebase QA Batch 3: the anti-spam form token is a coarse day bucket so

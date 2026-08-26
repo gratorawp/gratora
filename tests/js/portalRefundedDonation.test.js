@@ -42,7 +42,7 @@ function me( overrides = {} ) {
 function donation( overrides = {} ) {
     return {
         id:                10,
-        reference:         'DONO-2026-00001',
+        reference:         'GIVEFLOW-2026-00001',
         amount_cents:      5000,
         fee_covered_cents: 0,
         refunded_cents:    1000,
@@ -73,7 +73,7 @@ async function until( predicate, what ) {
 
 // The runtime mounts itself on import, so each test needs its own module copy.
 async function boot() {
-    document.body.innerHTML = '<div id="dono-donor-portal"></div>';
+    document.body.innerHTML = '<div id="giveflow-donor-portal"></div>';
 
     jest.isolateModules( () => {
         require( '../../assets/donor-portal/index.jsx' );
@@ -86,7 +86,7 @@ async function boot() {
 }
 
 function text() {
-    return document.getElementById( 'dono-donor-portal' ).textContent;
+    return document.getElementById( 'giveflow-donor-portal' ).textContent;
 }
 
 async function clickButton( label ) {
@@ -109,13 +109,13 @@ async function openRow() {
 beforeEach( () => {
     routes = {};
     window.history.replaceState( {}, '', '/portal/' );
-    window.donoPortal = { rest: '/wp-json/dono/v1/portal/', nonce: '', token: 'portal-token' };
-    window.dono = {
+    window.giveflowPortal = { rest: '/wp-json/giveflow/v1/portal/', nonce: '', token: 'portal-token' };
+    window.giveflow = {
         default_currency: 'USD',
         number_format: { decimalPlaces: 2, decimalSep: '.', thousandSep: ',', symbolPosition: 'before', symbol: '$' },
     };
     global.fetch = jest.fn( ( url ) => {
-        const path  = String( url ).replace( '/wp-json/dono/v1/portal/', '' );
+        const path  = String( url ).replace( '/wp-json/giveflow/v1/portal/', '' );
         const route = routes[ path ];
         if ( typeof route === 'function' ) return route();
 
@@ -137,7 +137,7 @@ test( 'the row says what came back, so it can be read against a net lifetime tot
 test( 'the donation itself states the refund and what the organization kept', async () => {
     routes.me = () => jsonResponse( 200, me() );
     routes.donations = () => jsonResponse( 200, [ donation() ] );
-    routes[ 'donations/DONO-2026-00001' ] = () => jsonResponse( 200, donation() );
+    routes[ 'donations/GIVEFLOW-2026-00001' ] = () => jsonResponse( 200, donation() );
 
     await boot();
     await clickButton( 'Donations' );
@@ -152,7 +152,7 @@ test( 'the donation itself states the refund and what the organization kept', as
 test( 'a donation nobody refunded says nothing about refunds', async () => {
     routes.me = () => jsonResponse( 200, me( { total_donated_cents: 5000 } ) );
     routes.donations = () => jsonResponse( 200, [ donation( { refunded_cents: 0 } ) ] );
-    routes[ 'donations/DONO-2026-00001' ] = () => jsonResponse( 200, donation( { refunded_cents: 0 } ) );
+    routes[ 'donations/GIVEFLOW-2026-00001' ] = () => jsonResponse( 200, donation( { refunded_cents: 0 } ) );
 
     await boot();
     await clickButton( 'Donations' );

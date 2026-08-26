@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
-use Dono\Forms\Form;
-use Dono\Funds\Fund;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Forms\Form;
+use GiveFlow\Funds\Fund;
 use WP_REST_Request;
 
 /**
@@ -32,7 +32,7 @@ use WP_REST_Request;
  */
 final class PublicRestFormTokenLeakTest extends IntegrationTestCase
 {
-    private const BLOCK_RENDERER_ROUTE = '/wp/v2/block-renderer/dono/donation-form';
+    private const BLOCK_RENDERER_ROUTE = '/wp/v2/block-renderer/giveflow/donation-form';
 
     private int $campaignId;
 
@@ -40,7 +40,7 @@ final class PublicRestFormTokenLeakTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        $req = new WP_REST_Request('POST', '/dono/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['title' => 'Leak probe', 'status' => 'published']));
         $this->campaignId = (int) rest_do_request($req)->get_data()['id'];
@@ -60,14 +60,14 @@ final class PublicRestFormTokenLeakTest extends IntegrationTestCase
      */
     private function publishedForm(): void
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/admin/forms');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/forms');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'title'       => 'Leak probe form',
             'campaign_id' => $this->campaignId,
-            'blocks'      => '<!-- wp:dono/donation-amount {"presets":[1000],"currency":"EUR"} /-->'
-                . '<!-- wp:dono/email /-->'
-                . '<!-- wp:dono/submit-button /-->',
+            'blocks'      => '<!-- wp:giveflow/donation-amount {"presets":[1000],"currency":"EUR"} /-->'
+                . '<!-- wp:giveflow/email /-->'
+                . '<!-- wp:giveflow/submit-button /-->',
         ]));
         $created = rest_do_request($req)->get_data();
 
@@ -85,7 +85,7 @@ final class PublicRestFormTokenLeakTest extends IntegrationTestCase
     {
         $GLOBALS['wp']->query_vars['rest_route'] = $route;
 
-        $html = do_blocks('<!-- wp:dono/donation-form {"campaignId":' . $this->campaignId . '} /-->');
+        $html = do_blocks('<!-- wp:giveflow/donation-form {"campaignId":' . $this->campaignId . '} /-->');
 
         unset($GLOBALS['wp']->query_vars['rest_route']);
 
@@ -97,7 +97,7 @@ final class PublicRestFormTokenLeakTest extends IntegrationTestCase
         $html = $this->renderBlockOn(self::BLOCK_RENDERER_ROUTE);
 
         $this->assertStringContainsString(
-            'dono-donation-form__editor-preview',
+            'giveflow-donation-form__editor-preview',
             $html,
             'ServerSideRender asks on this route, and the editor still gets its iframe preview'
         );
@@ -184,7 +184,7 @@ final class PublicRestFormTokenLeakTest extends IntegrationTestCase
      */
     private function donateWithoutForm(array $extra): ?Donation
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/donations');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($extra + [
             'email'        => 'leak-' . uniqid() . '@example.test',

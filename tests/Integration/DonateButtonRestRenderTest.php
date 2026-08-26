@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Campaigns\Blocks\DonateButtonBlock;
-use Dono\Campaigns\Campaign;
-use Dono\Forms\Form;
+use GiveFlow\Campaigns\Blocks\DonateButtonBlock;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Forms\Form;
 use ReflectionMethod;
 use WP_REST_Request;
 
@@ -26,7 +26,7 @@ use WP_REST_Request;
  */
 final class DonateButtonRestRenderTest extends IntegrationTestCase
 {
-    private const BLOCK_RENDERER_ROUTE = '/wp/v2/block-renderer/dono/donate-button';
+    private const BLOCK_RENDERER_ROUTE = '/wp/v2/block-renderer/giveflow/donate-button';
 
     private int $campaignId;
 
@@ -34,7 +34,7 @@ final class DonateButtonRestRenderTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        $req = new WP_REST_Request('POST', '/dono/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['title' => 'Button REST probe', 'status' => 'published']));
         $this->campaignId = (int) rest_do_request($req)->get_data()['id'];
@@ -54,14 +54,14 @@ final class DonateButtonRestRenderTest extends IntegrationTestCase
      */
     private function publishedForm(): void
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/admin/forms');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/forms');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'title'       => 'Button REST probe form',
             'campaign_id' => $this->campaignId,
-            'blocks'      => '<!-- wp:dono/donation-amount {"presets":[1000],"currency":"EUR"} /-->'
-                . '<!-- wp:dono/email /-->'
-                . '<!-- wp:dono/submit-button /-->',
+            'blocks'      => '<!-- wp:giveflow/donation-amount {"presets":[1000],"currency":"EUR"} /-->'
+                . '<!-- wp:giveflow/email /-->'
+                . '<!-- wp:giveflow/submit-button /-->',
         ]));
         $created = rest_do_request($req)->get_data();
 
@@ -79,7 +79,7 @@ final class DonateButtonRestRenderTest extends IntegrationTestCase
     {
         $GLOBALS['wp']->query_vars['rest_route'] = $route;
 
-        $html = do_blocks('<!-- wp:dono/donate-button {"campaignId":' . $this->campaignId . '} /-->');
+        $html = do_blocks('<!-- wp:giveflow/donate-button {"campaignId":' . $this->campaignId . '} /-->');
 
         unset($GLOBALS['wp']->query_vars['rest_route']);
 
@@ -90,9 +90,9 @@ final class DonateButtonRestRenderTest extends IntegrationTestCase
     {
         $html = $this->renderButtonOn(self::BLOCK_RENDERER_ROUTE);
 
-        $this->assertStringContainsString('dono-donate-button', $html, 'the editor still sees its button');
+        $this->assertStringContainsString('giveflow-donate-button', $html, 'the editor still sees its button');
         $this->assertStringNotContainsString(
-            'dono-donate-modal',
+            'giveflow-donate-modal',
             $html,
             'and no form runtime is booted inside the editor frame'
         );
@@ -110,7 +110,7 @@ final class DonateButtonRestRenderTest extends IntegrationTestCase
             wp_set_current_user($userId);
             $html = $this->renderButtonOn($route);
 
-            $this->assertStringContainsString('dono-donate-modal', $html, 'a page read is not the block editor');
+            $this->assertStringContainsString('giveflow-donate-modal', $html, 'a page read is not the block editor');
             $this->assertStringContainsString('data-form-slug=', $html);
         }
     }
@@ -121,7 +121,7 @@ final class DonateButtonRestRenderTest extends IntegrationTestCase
 
         $html = $this->renderButtonOn(self::BLOCK_RENDERER_ROUTE);
 
-        $this->assertStringContainsString('dono-donate-modal', $html, 'the real button and its form render instead');
+        $this->assertStringContainsString('giveflow-donate-modal', $html, 'the real button and its form render instead');
     }
 
     /**
@@ -139,7 +139,7 @@ final class DonateButtonRestRenderTest extends IntegrationTestCase
         $html = $this->renderButtonOn('/wp/v2/pages/' . self::factory()->post->create(['post_type' => 'page']));
 
         $this->assertStringContainsString('This campaign has finished accepting donations.', $html);
-        $this->assertStringNotContainsString('dono-donate-button', $html);
+        $this->assertStringNotContainsString('giveflow-donate-button', $html);
     }
 
     /**
@@ -151,9 +151,9 @@ final class DonateButtonRestRenderTest extends IntegrationTestCase
      */
     public function test_a_page_only_editor_gets_the_preview_core_let_them_ask_for(): void
     {
-        add_role('dono_page_only', 'Dono page only', ['read' => true, 'edit_pages' => true]);
+        add_role('giveflow_page_only', 'GiveFlow page only', ['read' => true, 'edit_pages' => true]);
 
-        $userId = self::factory()->user->create(['role' => 'dono_page_only']);
+        $userId = self::factory()->user->create(['role' => 'giveflow_page_only']);
         $pageId = self::factory()->post->create([
             'post_type'   => 'page',
             'post_status' => 'draft',
@@ -170,11 +170,11 @@ final class DonateButtonRestRenderTest extends IntegrationTestCase
             $html = $this->renderButtonOn(self::BLOCK_RENDERER_ROUTE);
         } finally {
             unset($_GET['post_id']);
-            remove_role('dono_page_only');
+            remove_role('giveflow_page_only');
         }
 
-        $this->assertStringNotContainsString('dono-donate-modal', $html, 'no live form in the editor canvas');
-        $this->assertStringContainsString('dono-donate-button', $html, 'the editor still sees its button');
+        $this->assertStringNotContainsString('giveflow-donate-modal', $html, 'no live form in the editor canvas');
+        $this->assertStringContainsString('giveflow-donate-button', $html, 'the editor still sees its button');
     }
 
     /**

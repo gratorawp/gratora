@@ -28,7 +28,7 @@ const STEP_RENDERERS = {
     donor:  DonorStep,
     // The submit step draws nothing of its own: it carries the button's label
     // and alignment, which FormBody reads directly, and the recap is the
-    // dono/donation-summary block. Mapped rather than omitted so the step does
+    // giveflow/donation-summary block. Mapped rather than omitted so the step does
     // not fall through to the unknown-step message.
     submit: () => null,
 };
@@ -37,7 +37,7 @@ const STEP_RENDERERS = {
 // moved. It carries the reference and its status token and nothing else: a
 // listener that needs the amount reads it back from the status endpoint, which
 // is server-authoritative and returns no donor data.
-export const COMPLETED_EVENT = 'dono:donation:completed';
+export const COMPLETED_EVENT = 'giveflow:donation:completed';
 
 // How long a thank-you redirect waits for listeners that asked to be waited
 // for. Long enough for a same-origin round trip to the status endpoint, short
@@ -51,7 +51,7 @@ export const COMPLETED_HOLD_MS = 2000;
 // all, and its script cannot see the claim: deciding it a second time over
 // there is how the two came to disagree. So the claim is announced, and the
 // modal script follows it rather than reasoning about references itself.
-export const RETURN_CLAIMED_EVENT = 'dono:donation:return-claimed';
+export const RETURN_CLAIMED_EVENT = 'giveflow:donation:return-claimed';
 
 // The token lands in a different place on each payment path: the submit
 // response for auto-confirmed gateways, the payment step for the ones that
@@ -130,7 +130,7 @@ function PortalLink( { email, config } ) {
         return (
             <button
                 type="button"
-                class="dono-form__button dono-form__button--secondary dono-form__portal-link is-sent"
+                class="giveflow-form__button giveflow-form__button--secondary giveflow-form__portal-link is-sent"
                 disabled
             >
                 { config.i18n.portalLinkSent }
@@ -142,7 +142,7 @@ function PortalLink( { email, config } ) {
     // for something nobody sent, so the portal is offered plainly instead.
     if ( failed ) {
         return (
-            <a class="dono-form__button dono-form__button--secondary" href={ portal.url }>
+            <a class="giveflow-form__button giveflow-form__button--secondary" href={ portal.url }>
                 { config.i18n.manageGiving }
             </a>
         );
@@ -166,7 +166,7 @@ function PortalLink( { email, config } ) {
     return (
         <button
             type="button"
-            class="dono-form__button dono-form__button--secondary dono-form__portal-link"
+            class="giveflow-form__button giveflow-form__button--secondary giveflow-form__portal-link"
             disabled={ busy }
             onClick={ send }
         >
@@ -184,23 +184,23 @@ function DonationReceipt( { receipt, config } ) {
     const freq = frequencyLabel( receipt.frequency, i18n );
 
     return (
-        <dl class="dono-form__summary dono-form__summary--receipt">
+        <dl class="giveflow-form__summary giveflow-form__summary--receipt">
             { known && (
-                <div class="dono-form__summary-row">
+                <div class="giveflow-form__summary-row">
                     <dt>{ freq ? i18n.amount : i18n.total }</dt>
-                    <dd class="dono-form__summary-amount">
+                    <dd class="giveflow-form__summary-amount">
                         { formatAmount( receipt.amountCents, receipt.currency ) }
                     </dd>
                 </div>
             ) }
             { freq && (
-                <div class="dono-form__summary-row">
+                <div class="giveflow-form__summary-row">
                     <dt>{ i18n.frequency }</dt>
                     <dd>{ freq }</dd>
                 </div>
             ) }
             { receipt.email && (
-                <div class="dono-form__summary-row">
+                <div class="giveflow-form__summary-row">
                     <dt>{ i18n.email }</dt>
                     <dd>{ receipt.email }</dd>
                 </div>
@@ -227,18 +227,18 @@ function PendingScreen( { state, dispatch, config } ) {
     }, [] );
 
     return (
-        <div class="dono-form__success dono-form__success--pending" role="status">
-            <div class="dono-form__success-icon dono-form__success-icon--pending" aria-hidden="true">⏳</div>
+        <div class="giveflow-form__success giveflow-form__success--pending" role="status">
+            <div class="giveflow-form__success-icon giveflow-form__success-icon--pending" aria-hidden="true">⏳</div>
             <h3>{ config.i18n.pendingTitle }</h3>
-            <p class="dono-form__thank-you">{ config.i18n.pendingMessage }</p>
+            <p class="giveflow-form__thank-you">{ config.i18n.pendingMessage }</p>
             <DonationReceipt receipt={ receipt } config={ config } />
             { state.submission?.reference && (
-                <p class="dono-form__reference">{ state.submission.reference }</p>
+                <p class="giveflow-form__reference">{ state.submission.reference }</p>
             ) }
-            <div class="dono-form__success-actions">
+            <div class="giveflow-form__success-actions">
                 <button
                     type="button"
-                    class="dono-form__button dono-form__button--secondary"
+                    class="giveflow-form__button giveflow-form__button--secondary"
                     onClick={ () => { clearPending(); dispatch( { type: 'RESET' } ); } }
                 >
                     { config.i18n.donateAgain }
@@ -262,18 +262,18 @@ function UnresolvedScreen( { state, dispatch, config } ) {
     const ret       = detectStripeReturn( reference || null );
 
     return (
-        <div class="dono-form__success dono-form__success--pending" role="alert">
-            <div class="dono-form__success-icon dono-form__success-icon--pending" aria-hidden="true">⏳</div>
+        <div class="giveflow-form__success giveflow-form__success--pending" role="alert">
+            <div class="giveflow-form__success-icon giveflow-form__success-icon--pending" aria-hidden="true">⏳</div>
             <h3>{ config.i18n.unresolvedTitle || config.i18n.pendingTitle }</h3>
-            <p class="dono-form__thank-you">{ state.message || config.i18n.returnUnresolved || config.i18n.error }</p>
+            <p class="giveflow-form__thank-you">{ state.message || config.i18n.returnUnresolved || config.i18n.error }</p>
             { reference && (
-                <p class="dono-form__reference">{ reference }</p>
+                <p class="giveflow-form__reference">{ reference }</p>
             ) }
             { ret && config.stripe?.publishableKey && (
-                <div class="dono-form__success-actions">
+                <div class="giveflow-form__success-actions">
                     <button
                         type="button"
-                        class="dono-form__button dono-form__button--primary"
+                        class="giveflow-form__button giveflow-form__button--primary"
                         onClick={ () => resolveReturn( config, ret, dispatch ) }
                     >
                         { config.i18n.checkAgain }
@@ -285,12 +285,12 @@ function UnresolvedScreen( { state, dispatch, config } ) {
 }
 
 // A gateway shipped outside core registers with
-// window.dono.formGateways.register( id, { component, ready } ) before the
+// window.giveflow.formGateways.register( id, { component, ready } ) before the
 // runtime mounts; `ready` gets that gateway's slice of the form config and
 // answers whether it can actually collect a payment.
 function registeredGateway( id ) {
     if ( ! id ) return null;
-    const reg = typeof window !== 'undefined' ? window.dono?.formGateways : null;
+    const reg = typeof window !== 'undefined' ? window.giveflow?.formGateways : null;
     const entry = reg && typeof reg.get === 'function' ? reg.get( id ) : null;
 
     return entry && typeof entry.component === 'function' ? entry : null;
@@ -300,7 +300,7 @@ function registeredGateway( id ) {
 // reads as a dead click. Runs after the error re-render has committed.
 function focusFirstInvalid() {
     requestAnimationFrame( () => {
-        const el = document.querySelector( '.dono-donation-form [aria-invalid="true"]' );
+        const el = document.querySelector( '.giveflow-donation-form [aria-invalid="true"]' );
         if ( el && typeof el.focus === 'function' ) {
             el.focus( { preventScroll: true } );
             el.scrollIntoView( { behavior: 'smooth', block: 'center' } );
@@ -309,7 +309,7 @@ function focusFirstInvalid() {
 }
 
 function readConfig( form ) {
-    const node = form.querySelector( 'script[type="application/json"][data-dono-form-config]' );
+    const node = form.querySelector( 'script[type="application/json"][data-giveflow-form-config]' );
     if ( ! node ) return null;
     try {
         return JSON.parse( node.textContent || '{}' );
@@ -352,14 +352,14 @@ function StepView( { step, state, dispatch, config } ) {
     const type = step?.type;
     if ( type === 'donor' ) {
         return (
-            <div class="dono-form__step" data-step="donor">
+            <div class="giveflow-form__step" data-step="donor">
                 <StepItems items={ step?.items } state={ state } dispatch={ dispatch } config={ config } />
             </div>
         );
     }
     const StepComp = STEP_RENDERERS[ type ];
     return (
-        <div class="dono-form__step" data-step={ type }>
+        <div class="giveflow-form__step" data-step={ type }>
             { StepComp ? (
                 <ErrorBoundary>
                     <StepComp step={ step } state={ state } dispatch={ dispatch } config={ config } />
@@ -643,8 +643,8 @@ function FormBody( { state, dispatch, config } ) {
 
     if ( state.status === 'confirming' ) {
         return (
-            <div class="dono-form__confirming" role="status">
-                <span class="dono-form__spinner" aria-hidden="true" />
+            <div class="giveflow-form__confirming" role="status">
+                <span class="giveflow-form__spinner" aria-hidden="true" />
                 <p>{ config.i18n.confirming || config.i18n.processing }</p>
             </div>
         );
@@ -655,18 +655,18 @@ function FormBody( { state, dispatch, config } ) {
     // not ask them for anything.
     if ( state.status === 'processing' ) {
         return (
-            <div class="dono-form__success dono-form__success--pending" role="status">
-                <div class="dono-form__success-icon dono-form__success-icon--pending" aria-hidden="true">⏳</div>
+            <div class="giveflow-form__success giveflow-form__success--pending" role="status">
+                <div class="giveflow-form__success-icon giveflow-form__success-icon--pending" aria-hidden="true">⏳</div>
                 <h3>{ config.i18n.processingTitle || config.i18n.pendingTitle }</h3>
-                <p class="dono-form__thank-you">{ config.i18n.processingMessage || config.i18n.pendingMessage }</p>
+                <p class="giveflow-form__thank-you">{ config.i18n.processingMessage || config.i18n.pendingMessage }</p>
                 <DonationReceipt receipt={ receiptOf( state ) } config={ config } />
                 { state.submission?.reference && (
-                    <p class="dono-form__reference">{ state.submission.reference }</p>
+                    <p class="giveflow-form__reference">{ state.submission.reference }</p>
                 ) }
-                <div class="dono-form__success-actions">
+                <div class="giveflow-form__success-actions">
                     <button
                         type="button"
-                        class="dono-form__button dono-form__button--secondary"
+                        class="giveflow-form__button giveflow-form__button--secondary"
                         onClick={ () => { clearPending(); dispatch( { type: 'RESET' } ); } }
                     >
                         { config.i18n.donateAgain }
@@ -694,20 +694,20 @@ function FormBody( { state, dispatch, config } ) {
         // listening for the donation runs first.
         const message = config.thanks?.message || '';
         return (
-            <div class="dono-form__success" role="status">
-                <div class="dono-form__success-icon" aria-hidden="true">✓</div>
+            <div class="giveflow-form__success" role="status">
+                <div class="giveflow-form__success-icon" aria-hidden="true">✓</div>
                 <h3>{ config.i18n.thanks }</h3>
                 { message && (
-                    <p class="dono-form__thank-you">{ message }</p>
+                    <p class="giveflow-form__thank-you">{ message }</p>
                 ) }
                 <DonationReceipt receipt={ receiptOf( state ) } config={ config } />
                 { state.submission?.reference && (
-                    <p class="dono-form__reference">{ state.submission.reference }</p>
+                    <p class="giveflow-form__reference">{ state.submission.reference }</p>
                 ) }
-                <div class="dono-form__success-actions">
+                <div class="giveflow-form__success-actions">
                     <button
                         type="button"
-                        class="dono-form__button dono-form__button--secondary"
+                        class="giveflow-form__button giveflow-form__button--secondary"
                         onClick={ () => { clearPending(); dispatch( { type: 'RESET' } ); } }
                     >
                         { config.i18n.donateAgain }
@@ -719,7 +719,7 @@ function FormBody( { state, dispatch, config } ) {
     }
 
     const honeypotInput = (
-        <div class="dono-form__hp" aria-hidden="true">
+        <div class="giveflow-form__hp" aria-hidden="true">
             <label>
                 Leave this field empty
                 <input
@@ -734,7 +734,7 @@ function FormBody( { state, dispatch, config } ) {
         </div>
     );
 
-    // Root content authored before a dono/steps wizard, rendered once above the
+    // Root content authored before a giveflow/steps wizard, rendered once above the
     // form so it does not collapse onto the first page.
     const preamble = ( Array.isArray( config.preamble ) && config.preamble.length ) ? (
         <StepItems items={ config.preamble } state={ state } dispatch={ dispatch } config={ config } />
@@ -764,9 +764,9 @@ function FormBody( { state, dispatch, config } ) {
 // than in each layout, where one could omit it and leave two buttons competing
 // for the same money.
 const formRootClass = ( state, variant ) => [
-    'dono-form',
+    'giveflow-form',
     variant,
-    state.status === 'payment' && 'dono-form--settled',
+    state.status === 'payment' && 'giveflow-form--settled',
 ].filter( Boolean ).join( ' ' );
 
 function SinglePageView( { state, dispatch, config, onSubmit } ) {
@@ -781,20 +781,20 @@ function SinglePageView( { state, dispatch, config, onSubmit } ) {
         config
     );
     return (
-        <div class={ formRootClass( state, 'dono-form--inline' ) }>
+        <div class={ formRootClass( state, 'giveflow-form--inline' ) }>
             { state.steps.map( ( s, i ) => (
                 <StepView key={ i } step={ s } state={ state } dispatch={ dispatch } config={ config } />
             ) ) }
             { state.status === 'error' && state.message && (
-                <div class="dono-form__error" role="alert">{ state.message }</div>
+                <div class="giveflow-form__error" role="alert">{ state.message }</div>
             ) }
             { unexplained && (
-                <div class="dono-form__gateways-empty" role="alert">{ emptyMessage( config, state ) }</div>
+                <div class="giveflow-form__gateways-empty" role="alert">{ emptyMessage( config, state ) }</div>
             ) }
-            <div class={ `dono-form__nav dono-form__nav--align-${ submitStep?.align || 'left' }` }>
+            <div class={ `giveflow-form__nav giveflow-form__nav--align-${ submitStep?.align || 'left' }` }>
                 <button
                     type="button"
-                    class="dono-form__button dono-form__button--primary"
+                    class="giveflow-form__button giveflow-form__button--primary"
                     disabled={ state.status === 'submitting' || noGateway }
                     onClick={ () => { if ( ! noGateway ) onSubmit(); } }
                 >
@@ -826,8 +826,8 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
     const pageMounted = useRef( false );
     useEffect( () => {
         if ( ! pageMounted.current ) { pageMounted.current = true; return; }
-        const root = document.querySelector( '.dono-donation-form' );
-        const h    = root?.querySelector( '.dono-form__page-title, .dono-form__bar-title' );
+        const root = document.querySelector( '.giveflow-donation-form' );
+        const h    = root?.querySelector( '.giveflow-form__page-title, .giveflow-form__bar-title' );
         if ( h ) {
             h.setAttribute( 'tabindex', '-1' );
             h.focus();
@@ -878,7 +878,7 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
     const primary = (
         <button
             type="button"
-            class="dono-form__button dono-form__button--primary"
+            class="giveflow-form__button giveflow-form__button--primary"
             disabled={ state.status === 'submitting' || ( isLast && noGateway ) }
             onClick={ isLast ? submit : onNext }
         >
@@ -889,7 +889,7 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
     );
 
     const error = state.status === 'error' && state.message && (
-        <div class="dono-form__error" role="alert">{ state.message }</div>
+        <div class="giveflow-form__error" role="alert">{ state.message }</div>
     );
 
     // Not a selector: the payment-gateways block owns where that goes and
@@ -897,7 +897,7 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
     // author removed. This is only the reason the button below cannot work, on
     // the pages where the section that would have said it is not on screen.
     const emptyNotice = unexplained && (
-        <div class="dono-form__gateways-empty" role="alert">{ emptyMessage( config, state ) }</div>
+        <div class="giveflow-form__gateways-empty" role="alert">{ emptyMessage( config, state ) }</div>
     );
 
     if ( progressStyle === 'bar' ) {
@@ -905,12 +905,12 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
             ? Math.round( ( ( current + 1 ) / pages.length ) * 100 )
             : 100;
         return (
-            <div class={ formRootClass( state, 'dono-form--paged-bar' ) }>
-                <header class="dono-form__bar-header">
+            <div class={ formRootClass( state, 'giveflow-form--paged-bar' ) }>
+                <header class="giveflow-form__bar-header">
                     { current > 0 ? (
                         <button
                             type="button"
-                            class="dono-form__bar-back"
+                            class="giveflow-form__bar-back"
                             aria-label={ prevLabel }
                             // The primary button is disabled while a submit is
                             // in flight; leaving Back live let a donor walk off
@@ -921,29 +921,29 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
                             <span aria-hidden="true">←</span>
                         </button>
                     ) : (
-                        <span class="dono-form__bar-back" aria-hidden="true" />
+                        <span class="giveflow-form__bar-back" aria-hidden="true" />
                     ) }
                     { showPageTitle && (
-                        <h3 class="dono-form__bar-title">{ pageTitle }</h3>
+                        <h3 class="giveflow-form__bar-title">{ pageTitle }</h3>
                     ) }
-                    <span class="dono-form__bar-spacer" aria-hidden="true" />
+                    <span class="giveflow-form__bar-spacer" aria-hidden="true" />
                 </header>
                 <div
-                    class="dono-form__bar-track"
+                    class="giveflow-form__bar-track"
                     role="progressbar"
                     aria-valuemin="0"
                     aria-valuemax={ pages.length }
                     aria-valuenow={ current + 1 }
                 >
-                    <div class="dono-form__bar-fill" style={ { width: `${ pct }%` } } />
+                    <div class="giveflow-form__bar-fill" style={ { width: `${ pct }%` } } />
                 </div>
-                <div class="dono-form__body">
+                <div class="giveflow-form__body">
                     { pageSteps.map( ( s, i ) => (
                         <StepView key={ i } step={ s } state={ state } dispatch={ dispatch } config={ config } />
                     ) ) }
                     { error }
                     { emptyNotice }
-                    <div class={ `dono-form__nav dono-form__nav--align-${ ( isLast ? submitStep?.align : null ) || 'end' }` }>{ primary }</div>
+                    <div class={ `giveflow-form__nav giveflow-form__nav--align-${ ( isLast ? submitStep?.align : null ) || 'end' }` }>{ primary }</div>
                 </div>
             </div>
         );
@@ -952,18 +952,18 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
     return (
         <div class={ formRootClass( state ) }>
             { showPageTitle && (
-                <h3 class="dono-form__page-title">{ pageTitle }</h3>
+                <h3 class="giveflow-form__page-title">{ pageTitle }</h3>
             ) }
             { pageSteps.map( ( s, i ) => (
                 <StepView key={ i } step={ s } state={ state } dispatch={ dispatch } config={ config } />
             ) ) }
             { error }
             { emptyNotice }
-            <div class={ `dono-form__nav${ isLast && submitStep?.align ? ` dono-form__nav--align-${ submitStep.align }` : '' }` }>
+            <div class={ `giveflow-form__nav${ isLast && submitStep?.align ? ` giveflow-form__nav--align-${ submitStep.align }` : '' }` }>
                 { current > 0 ? (
                     <button
                         type="button"
-                        class="dono-form__button dono-form__button--secondary"
+                        class="giveflow-form__button giveflow-form__button--secondary"
                         disabled={ state.status === 'submitting' }
                         onClick={ onPrev }
                     >
@@ -1036,22 +1036,22 @@ function ModalShell( { children, openLabel, config, initiallyOpen = false } ) {
     }, [ open ] );
 
     return (
-        <div class="dono-modal-host">
+        <div class="giveflow-modal-host">
             <button
                 type="button"
-                class="dono-form__button dono-form__button--primary dono-modal-trigger"
+                class="giveflow-form__button giveflow-form__button--primary giveflow-modal-trigger"
                 onClick={ () => setOpen( true ) }
             >
                 { openLabel }
             </button>
             { open && (
-                <div class="dono-modal" role="dialog" aria-modal="true" aria-label={ config.i18n.formTitle || '' }>
+                <div class="giveflow-modal" role="dialog" aria-modal="true" aria-label={ config.i18n.formTitle || '' }>
                     { /* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events -- decorative overlay; Escape and the close button provide keyboard dismissal */ }
-                    <div class="dono-modal__backdrop" aria-hidden="true" onClick={ () => setOpen( false ) } />
-                    <div class="dono-modal__panel" ref={ panelRef }>
+                    <div class="giveflow-modal__backdrop" aria-hidden="true" onClick={ () => setOpen( false ) } />
+                    <div class="giveflow-modal__panel" ref={ panelRef }>
                         <button
                             type="button"
-                            class="dono-modal__close"
+                            class="giveflow-modal__close"
                             aria-label={ config.i18n.close || 'Close' }
                             onClick={ () => setOpen( false ) }
                         >×</button>
@@ -1140,13 +1140,13 @@ function App( { config, host } ) {
         const ret = claimReturn();
         if ( ! ret || ! config.stripe?.publishableKey ) return false;
 
-        const marked = document.querySelector( '.dono-donation-form[data-dono-returning]' );
+        const marked = document.querySelector( '.giveflow-donation-form[data-giveflow-returning]' );
         if ( marked && marked !== host ) return false;
 
         // The element this instance rendered into, never a lookup by id: a form
         // the shortcode gave no id still shows its donor an outcome, and the
         // modal around it still has to open.
-        host.dataset.donoReturning = '1';
+        host.dataset.giveflowReturning = '1';
         window.dispatchEvent( new CustomEvent( RETURN_CLAIMED_EVENT, { detail: { host } } ) );
 
         return true;
@@ -1183,7 +1183,7 @@ function renderDecorationItem( d, i, values, ctx ) {
         return (
             <Tag
                 key={ i }
-                class={ `dono-form__heading dono-form__heading--${ d.align || 'left' }` }
+                class={ `giveflow-form__heading giveflow-form__heading--${ d.align || 'left' }` }
             >
                 { decodeEntities( d.text ) }
             </Tag>
@@ -1193,7 +1193,7 @@ function renderDecorationItem( d, i, values, ctx ) {
         return (
             <p
                 key={ i }
-                class={ `dono-form__paragraph dono-form__paragraph--${ d.align || 'left' }` }
+                class={ `giveflow-form__paragraph giveflow-form__paragraph--${ d.align || 'left' }` }
                 dangerouslySetInnerHTML={ { __html: d.html || '' } }
             />
         );
@@ -1202,7 +1202,7 @@ function renderDecorationItem( d, i, values, ctx ) {
         return (
             <hr
                 key={ i }
-                class="dono-form__divider"
+                class="giveflow-form__divider"
                 style={ {
                     marginTop:      `${ d.marginTop ?? 16 }px`,
                     marginBottom:   `${ d.marginBottom ?? 16 }px`,
@@ -1216,7 +1216,7 @@ function renderDecorationItem( d, i, values, ctx ) {
         return (
             <div
                 key={ i }
-                class="dono-form__html"
+                class="giveflow-form__html"
                 dangerouslySetInnerHTML={ { __html: d.html || '' } }
             />
         );
@@ -1253,7 +1253,7 @@ function renderDecorationItem( d, i, values, ctx ) {
             const PaymentStep = paymentComponentFor( st.payment );
             return (
                 <ErrorBoundary key={ i }>
-                    <div class="dono-form__payment-mount">
+                    <div class="giveflow-form__payment-mount">
                         <PaymentStep
                             config={ ctx?.config }
                             payment={ st.payment }
@@ -1303,7 +1303,7 @@ function Decorations( { items, values, ctx } ) {
     );
     if ( ! visible.length ) return null;
     return (
-        <div class="dono-form__decorations">
+        <div class="giveflow-form__decorations">
             { visible.map( ( d, i ) => renderDecorationItem( d, i, values, ctx ) ) }
         </div>
     );
@@ -1311,9 +1311,9 @@ function Decorations( { items, values, ctx } ) {
 
 function applyUrlPrefills( config ) {
     const params = new URLSearchParams( window.location.search );
-    const raw    = parseInt( params.get( 'dono_amount' ) || '', 10 );
-    const freq   = params.get( 'dono_frequency' );
-    const asked  = String( params.get( 'dono_currency' ) || '' ).trim().toUpperCase();
+    const raw    = parseInt( params.get( 'giveflow_amount' ) || '', 10 );
+    const freq   = params.get( 'giveflow_frequency' );
+    const asked  = String( params.get( 'giveflow_currency' ) || '' ).trim().toUpperCase();
 
     const formCurrency = String( config.currency || '' ).toUpperCase();
     const offered      = Array.isArray( config.currencies ) ? config.currencies : [];
@@ -1362,11 +1362,11 @@ function applyThemeTokens( form, theme ) {
 }
 
 function mount( form ) {
-    if ( form.dataset.donoMounted === 'true' ) return;
+    if ( form.dataset.giveflowMounted === 'true' ) return;
 
     // Called on every exit path, or the JS-gated cloak can leave the form
     // permanently hidden.
-    const reveal = () => { form.dataset.donoReady = 'true'; };
+    const reveal = () => { form.dataset.giveflowReady = 'true'; };
 
     const config = readConfig( form );
     if ( ! config ) { reveal(); return; }
@@ -1391,7 +1391,7 @@ function mount( form ) {
 
     const snapshot = form.innerHTML;
     form.innerHTML = '';
-    form.dataset.donoMounted = 'true';
+    form.dataset.giveflowMounted = 'true';
 
     // The host element is a real <form>, so a native submit (Enter on a
     // single-field step) would reload the page and wipe in-progress state.
@@ -1404,15 +1404,15 @@ function mount( form ) {
     } catch ( err ) {
         // Restore the static HTML so the form is at least visible.
         // eslint-disable-next-line no-console
-        console.error( '[dono] mount failed', err );
+        console.error( '[giveflow] mount failed', err );
         form.innerHTML = snapshot;
-        delete form.dataset.donoMounted;
+        delete form.dataset.giveflowMounted;
     }
     reveal();
 }
 
 function bootAll() {
-    document.querySelectorAll( '.dono-donation-form' ).forEach( mount );
+    document.querySelectorAll( '.giveflow-donation-form' ).forEach( mount );
 
     const inIframe = window.parent && window.parent !== window;
 
@@ -1425,7 +1425,7 @@ function bootAll() {
         // strict origin check rejects every token push.
         //
         // The guard still matters for the public form, which a hostile page
-        // could frame by URL and push --dono-* vars into, UI-redress on a
+        // could frame by URL and push --giveflow-* vars into, UI-redress on a
         // payment form. That form loads from a real URL and keeps the strict
         // check; only a srcdoc document, whose HTML is entirely ours, trusts
         // its parent.
@@ -1437,15 +1437,15 @@ function bootAll() {
             if ( isSrcdocPreview && event.source !== window.parent ) return;
             const data = event.data;
             if ( ! data || typeof data !== 'object' ) return;
-            if ( data.type !== 'dono:apply-tokens' || ! data.tokens ) return;
-            document.querySelectorAll( '.dono-donation-form' ).forEach( ( form ) => {
-                // Existing --dono-* inline vars go first, so a preset that omits
+            if ( data.type !== 'giveflow:apply-tokens' || ! data.tokens ) return;
+            document.querySelectorAll( '.giveflow-donation-form' ).forEach( ( form ) => {
+                // Existing --giveflow-* inline vars go first, so a preset that omits
                 // a token reverts to the stylesheet default, not a stale value.
                 const st = form.style;
                 const drop = [];
                 for ( let i = 0; i < st.length; i++ ) {
                     const n = st[ i ];
-                    if ( n && n.indexOf( '--dono-' ) === 0 ) drop.push( n );
+                    if ( n && n.indexOf( '--giveflow-' ) === 0 ) drop.push( n );
                 }
                 drop.forEach( ( n ) => st.removeProperty( n ) );
                 applyThemeTokens( form, { tokens: data.tokens } );
@@ -1453,7 +1453,7 @@ function bootAll() {
         } );
 
         try {
-            window.parent.postMessage( { type: 'dono:preview-ready' }, '*' );
+            window.parent.postMessage( { type: 'giveflow:preview-ready' }, '*' );
         } catch ( e ) {
             // Cross-origin parent: postMessage can throw. Safe to ignore.
         }
@@ -1470,9 +1470,9 @@ function bootAll() {
             for ( const rec of records ) {
                 rec.addedNodes.forEach( ( node ) => {
                     if ( node.nodeType !== 1 ) return;
-                    if ( node.matches && node.matches( '.dono-donation-form' ) ) mount( node );
+                    if ( node.matches && node.matches( '.giveflow-donation-form' ) ) mount( node );
                     if ( node.querySelectorAll ) {
-                        node.querySelectorAll( '.dono-donation-form' ).forEach( mount );
+                        node.querySelectorAll( '.giveflow-donation-form' ).forEach( mount );
                     }
                 } );
             }

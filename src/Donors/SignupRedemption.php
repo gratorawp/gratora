@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Donors;
+namespace GiveFlow\Donors;
 
-use Dono\Vendor\Queryable\DB;
+use GiveFlow\Vendor\Queryable\DB;
 
 /**
  * Turns a proven claim into a donor. The emailed link coming back is the only

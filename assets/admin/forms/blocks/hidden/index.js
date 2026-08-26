@@ -1,5 +1,5 @@
 /**
- * dono/hidden: invisible value capture (UTM, referrer, appeal code).
+ * giveflow/hidden: invisible value capture (UTM, referrer, appeal code).
  *
  * Renders nothing to the donor. The editor preview shows a thin badge so
  * authors can spot and edit it. Values are resolved from the URL, referrer,
@@ -12,37 +12,37 @@ import { __ } from '@wordpress/i18n';
 import { BlockIcons } from '../_shared/block-icons';
 import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 
-const NAME = 'dono/hidden';
+const NAME = 'giveflow/hidden';
 
 const SOURCES = [
-    { value: 'fixed',        label: __( 'Fixed value',                    'dono-fundraising-platform' ) },
-    { value: 'query',        label: __( 'URL query string',               'dono-fundraising-platform' ) },
-    { value: 'utm_source',   label: __( 'UTM: Source',                    'dono-fundraising-platform' ) },
-    { value: 'utm_medium',   label: __( 'UTM: Medium',                    'dono-fundraising-platform' ) },
-    { value: 'utm_campaign', label: __( 'UTM: Campaign',                  'dono-fundraising-platform' ) },
-    { value: 'utm_term',     label: __( 'UTM: Term',                      'dono-fundraising-platform' ) },
-    { value: 'utm_content',  label: __( 'UTM: Content',                   'dono-fundraising-platform' ) },
-    { value: 'referrer',     label: __( 'Referrer URL',                   'dono-fundraising-platform' ) },
-    { value: 'landing',      label: __( 'Landing page URL',               'dono-fundraising-platform' ) },
+    { value: 'fixed',        label: __( 'Fixed value',                    'giveflow-fundraising-campaigns' ) },
+    { value: 'query',        label: __( 'URL query string',               'giveflow-fundraising-campaigns' ) },
+    { value: 'utm_source',   label: __( 'UTM: Source',                    'giveflow-fundraising-campaigns' ) },
+    { value: 'utm_medium',   label: __( 'UTM: Medium',                    'giveflow-fundraising-campaigns' ) },
+    { value: 'utm_campaign', label: __( 'UTM: Campaign',                  'giveflow-fundraising-campaigns' ) },
+    { value: 'utm_term',     label: __( 'UTM: Term',                      'giveflow-fundraising-campaigns' ) },
+    { value: 'utm_content',  label: __( 'UTM: Content',                   'giveflow-fundraising-campaigns' ) },
+    { value: 'referrer',     label: __( 'Referrer URL',                   'giveflow-fundraising-campaigns' ) },
+    { value: 'landing',      label: __( 'Landing page URL',               'giveflow-fundraising-campaigns' ) },
 ];
 
 function Edit( { attributes, setAttributes } ) {
     const { field = '', source = 'fixed', queryParam = '', defaultValue = '', condition = DEFAULT_CONDITION } = attributes;
-    const blockProps = useBlockProps( { className: 'dono-block-preview dono-block-preview--hidden' } );
+    const blockProps = useBlockProps( { className: 'giveflow-block-preview giveflow-block-preview--hidden' } );
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Hidden field', 'dono-fundraising-platform' ) } initialOpen>
+                <PanelBody title={ __( 'Hidden field', 'giveflow-fundraising-campaigns' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Field key', 'dono-fundraising-platform' ) }
+                        label={ __( 'Field key', 'giveflow-fundraising-campaigns' ) }
                         value={ field }
                         onChange={ ( v ) => setAttributes( { field: v.replace( /[^a-z0-9_]/gi, '_' ).toLowerCase() } ) }
-                        help={ __( 'Lowercase, underscores. This is the column name in donation reports.', 'dono-fundraising-platform' ) }
+                        help={ __( 'Lowercase, underscores. This is the column name in donation reports.', 'giveflow-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Source', 'dono-fundraising-platform' ) }
+                        label={ __( 'Source', 'giveflow-fundraising-campaigns' ) }
                         value={ source }
                         options={ SOURCES }
                         onChange={ ( v ) => setAttributes( { source: v } ) }
@@ -50,7 +50,7 @@ function Edit( { attributes, setAttributes } ) {
                     />
                     { source === 'query' && (
                         <TextControl
-                            label={ __( 'Query parameter name', 'dono-fundraising-platform' ) }
+                            label={ __( 'Query parameter name', 'giveflow-fundraising-campaigns' ) }
                             value={ queryParam }
                             onChange={ ( v ) => setAttributes( { queryParam: v } ) }
                             placeholder="appeal_code"
@@ -58,10 +58,10 @@ function Edit( { attributes, setAttributes } ) {
                         />
                     ) }
                     <TextControl
-                        label={ __( 'Fallback value', 'dono-fundraising-platform' ) }
+                        label={ __( 'Fallback value', 'giveflow-fundraising-campaigns' ) }
                         value={ defaultValue }
                         onChange={ ( v ) => setAttributes( { defaultValue: v } ) }
-                        help={ __( 'Used when the source above resolves to empty (e.g. donor arrived directly).', 'dono-fundraising-platform' ) }
+                        help={ __( 'Used when the source above resolves to empty (e.g. donor arrived directly).', 'giveflow-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -71,9 +71,9 @@ function Edit( { attributes, setAttributes } ) {
                 />
             </InspectorControls>
             <div { ...blockProps }>
-                <span className="dono-block-preview__hidden-tag">{ __( 'Hidden', 'dono-fundraising-platform' ) }</span>
-                <span className="dono-block-preview__hidden-meta">
-                    { field ? `${ field } ← ${ source }` : __( '(no field key set)', 'dono-fundraising-platform' ) }
+                <span className="giveflow-block-preview__hidden-tag">{ __( 'Hidden', 'giveflow-fundraising-campaigns' ) }</span>
+                <span className="giveflow-block-preview__hidden-meta">
+                    { field ? `${ field } ← ${ source }` : __( '(no field key set)', 'giveflow-fundraising-campaigns' ) }
                 </span>
             </div>
         </>
@@ -83,9 +83,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Hidden field', 'dono-fundraising-platform' ),
-        description: __( 'Invisible value captured with the donation. Use it for UTM tags, referrer URL, or any appeal code.', 'dono-fundraising-platform' ),
-        category:    'dono-fields',
+        title:       __( 'Hidden field', 'giveflow-fundraising-campaigns' ),
+        description: __( 'Invisible value captured with the donation. Use it for UTM tags, referrer URL, or any appeal code.', 'giveflow-fundraising-campaigns' ),
+        category:    'giveflow-fields',
         icon:        BlockIcons[ 'hidden' ],
         supports:    { html: false, anchor: false, inserter: true },
         attributes: {

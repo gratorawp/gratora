@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
-use Dono\Donors\Donor;
-use Dono\Donors\Portal\AnnualStatementBuilder;
-use Dono\Receipts\PdfBuilder;
-use Dono\Receipts\ReceiptIssuer;
-use Dono\Reports\TaxStatementBuilder;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\Portal\AnnualStatementBuilder;
+use GiveFlow\Receipts\PdfBuilder;
+use GiveFlow\Receipts\ReceiptIssuer;
+use GiveFlow\Reports\TaxStatementBuilder;
 
 /**
  * The three seams an add-on issuing jurisdiction-correct documents needs.
@@ -20,7 +20,7 @@ use Dono\Reports\TaxStatementBuilder;
  */
 final class ReceiptSeamsTest extends IntegrationTestCase
 {
-    // -- dono.statement.pdf --------------------------------------------------
+    // -- giveflow.statement.pdf --------------------------------------------------
 
     /**
      * Both builders, because the portal route calls one and the admin route
@@ -33,7 +33,7 @@ final class ReceiptSeamsTest extends IntegrationTestCase
         $donor = $this->makeDonor();
         $seen  = [];
 
-        add_filter('dono.statement.pdf', static function ($pdf, $d, $year, $kind) use (&$seen) {
+        add_filter('giveflow.statement.pdf', static function ($pdf, $d, $year, $kind) use (&$seen) {
             $seen[] = $kind;
             return 'PDF-' . $kind;
         }, 10, 4);
@@ -48,7 +48,7 @@ final class ReceiptSeamsTest extends IntegrationTestCase
         $donor = $this->makeDonor();
         $got   = null;
 
-        add_filter('dono.statement.pdf', static function ($pdf, $d, $year) use (&$got) {
+        add_filter('giveflow.statement.pdf', static function ($pdf, $d, $year) use (&$got) {
             $got = ['donor_id' => (int) $d->id, 'year' => $year];
             return 'PDF';
         }, 10, 4);
@@ -64,11 +64,11 @@ final class ReceiptSeamsTest extends IntegrationTestCase
         $donor = $this->makeDonor();
 
         foreach ([null, '', false, 123, []] as $decline) {
-            add_filter('dono.statement.pdf', static fn () => $decline, 10, 4);
+            add_filter('giveflow.statement.pdf', static fn () => $decline, 10, 4);
             // No donations, so core's own answer is the empty string. The point
             // is that it got as far as core rather than returning the value.
             $this->assertSame('', (new AnnualStatementBuilder(new PdfBuilder()))->build($donor, 2026));
-            remove_all_filters('dono.statement.pdf');
+            remove_all_filters('giveflow.statement.pdf');
         }
     }
 
@@ -80,7 +80,7 @@ final class ReceiptSeamsTest extends IntegrationTestCase
         $this->assertSame('', $this->taxBuilder()->build($donor, 2026));
     }
 
-    // -- dono.receipt.should_issue -------------------------------------------
+    // -- giveflow.receipt.should_issue -------------------------------------------
 
     /**
      * The default is unchanged: a donation is receipted, a ticket order is not.
@@ -96,7 +96,7 @@ final class ReceiptSeamsTest extends IntegrationTestCase
     public function test_an_add_on_can_turn_issuance_on_for_its_own_kind(): void
     {
         add_filter(
-            'dono.receipt.should_issue',
+            'giveflow.receipt.should_issue',
             static fn (bool $should, $donation): bool => $should || (string) $donation->kind === 'order',
             10,
             2
@@ -107,7 +107,7 @@ final class ReceiptSeamsTest extends IntegrationTestCase
 
     public function test_an_add_on_can_also_turn_issuance_off(): void
     {
-        add_filter('dono.receipt.should_issue', static fn (): bool => false, 10, 2);
+        add_filter('giveflow.receipt.should_issue', static fn (): bool => false, 10, 2);
 
         $this->assertFalse($this->wouldIssue($this->makeDonation('donation')));
     }
@@ -117,7 +117,7 @@ final class ReceiptSeamsTest extends IntegrationTestCase
         $donation = $this->makeDonation('order');
         $got      = null;
 
-        add_filter('dono.receipt.should_issue', static function (bool $should, $d) use (&$got): bool {
+        add_filter('giveflow.receipt.should_issue', static function (bool $should, $d) use (&$got): bool {
             $got = (string) $d->reference;
             return $should;
         }, 10, 2);
@@ -149,14 +149,14 @@ final class ReceiptSeamsTest extends IntegrationTestCase
         );
 
         $before = $count();
-        do_action('dono.donation.completed', $donation);
+        do_action('giveflow.donation.completed', $donation);
 
         return $count() > $before;
     }
 
     private function taxBuilder(): TaxStatementBuilder
     {
-        return \Dono\Foundation\Plugin::instance()->container->get(TaxStatementBuilder::class);
+        return \GiveFlow\Foundation\Plugin::instance()->container->get(TaxStatementBuilder::class);
     }
 
     private function makeDonor(): Donor

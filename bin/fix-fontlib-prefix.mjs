@@ -18,11 +18,11 @@ import path from 'node:path';
 const ROOT = path.join(process.cwd(), 'vendor/vendor-prefixed/dompdf/php-font-lib/src/FontLib');
 
 const TARGETS = [
-    { file: 'Font.php', from: '"FontLib\\\\$class"', to: '"Dono\\\\Vendor\\\\FontLib\\\\$class"' },
+    { file: 'Font.php', from: '"FontLib\\\\$class"', to: '"GiveFlow\\\\Vendor\\\\FontLib\\\\$class"' },
     {
         file: 'TrueType/File.php',
         from: '"FontLib\\\\$type\\\\TableDirectoryEntry"',
-        to: '"Dono\\\\Vendor\\\\FontLib\\\\$type\\\\TableDirectoryEntry"',
+        to: '"GiveFlow\\\\Vendor\\\\FontLib\\\\$type\\\\TableDirectoryEntry"',
     },
     {
         // getFontType() reads the segment before the class name by absolute

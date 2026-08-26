@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Donors\Erasure;
+namespace GiveFlow\Donors\Erasure;
 
 /**
  * Everything a handler needs to find this donor, captured before the wipe.

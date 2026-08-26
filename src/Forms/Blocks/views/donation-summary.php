@@ -5,17 +5,17 @@ defined('ABSPATH') || exit;
  * @var bool $showGateway
  */
 ?>
-<div class="dono-block dono-block--summary dono-form__confirm" data-block="dono/donation-summary"
+<div class="giveflow-block giveflow-block--summary giveflow-form__confirm" data-block="giveflow/donation-summary"
      data-show-donor="<?php echo esc_attr($showDonor ? '1' : '0'); ?>"
      data-show-gateway="<?php echo esc_attr($showGateway ? '1' : '0'); ?>">
-    <dl class="dono-form__summary">
-        <div class="dono-form__summary-row">
-            <dt><?php esc_html_e('Amount', 'dono-fundraising-platform'); ?></dt>
-            <dd class="dono-form__summary-amount"></dd>
+    <dl class="giveflow-form__summary">
+        <div class="giveflow-form__summary-row">
+            <dt><?php esc_html_e('Amount', 'giveflow-fundraising-campaigns'); ?></dt>
+            <dd class="giveflow-form__summary-amount"></dd>
         </div>
-        <div class="dono-form__summary-row dono-form__summary-row--total">
-            <dt><?php esc_html_e('Total', 'dono-fundraising-platform'); ?></dt>
-            <dd class="dono-form__summary-amount"></dd>
+        <div class="giveflow-form__summary-row giveflow-form__summary-row--total">
+            <dt><?php esc_html_e('Total', 'giveflow-fundraising-campaigns'); ?></dt>
+            <dd class="giveflow-form__summary-amount"></dd>
         </div>
     </dl>
 </div>

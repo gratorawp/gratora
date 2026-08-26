@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Core\CoreModule;
-use Dono\Foundation\Plugin;
-use Dono\Foundation\Upgrade\SchemaGuard;
-use Dono\Foundation\Upgrade\UpgradeRunner;
+use GiveFlow\Core\CoreModule;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Foundation\Upgrade\SchemaGuard;
+use GiveFlow\Foundation\Upgrade\UpgradeRunner;
 
 /**
  * WordPress calls an activation hook with $network_wide, and the hook pointed
@@ -29,9 +29,9 @@ final class ActivationHookSignatureTest extends IntegrationTestCase
 {
     public function test_the_hook_registered_with_wordpress_is_not_the_fresh_flag_one(): void
     {
-        $plugin = dirname(__DIR__, 2) . '/dono/dono.php';
+        $plugin = dirname(__DIR__, 2) . '/giveflow/giveflow.php';
         if (! is_file($plugin)) {
-            $plugin = dirname(__DIR__, 2) . '/dono.php';
+            $plugin = dirname(__DIR__, 2) . '/giveflow.php';
         }
         $source = (string) file_get_contents($plugin);
 

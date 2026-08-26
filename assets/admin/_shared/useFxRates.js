@@ -1,7 +1,7 @@
 /**
- * Exchange-rate state for the Currency panel, shaped like useDonoSettings so
+ * Exchange-rate state for the Currency panel, shaped like useGiveFlowSettings so
  * Settings.jsx folds it into the single Save bar. Backed by
- * /dono/v1/admin/currency/fx (GET state, PUT auto+manual, POST /fetch).
+ * /giveflow/v1/admin/currency/fx (GET state, PUT auto+manual, POST /fetch).
  */
 
 import { useState, useEffect, useCallback, useMemo } from '@wordpress/element';
@@ -10,7 +10,7 @@ import apiFetch from '@wordpress/api-fetch';
 
 import { notify } from './notify';
 
-const PATH = '/dono/v1/admin/currency/fx';
+const PATH = '/giveflow/v1/admin/currency/fx';
 
 export function useFxRates() {
     const [ server, setServer ]           = useState( null );
@@ -76,7 +76,7 @@ export function useFxRates() {
             // carry that across: they meant one of the two currencies and the
             // form does not know which.
             if ( moved && Object.values( manualEdits ).some( ( v ) => v !== null ) ) {
-                throw new Error( __( 'The base currency changed in this save, so the exchange rates you entered are in the currency you left. Reload the page and set them again.', 'dono-fundraising-platform' ) );
+                throw new Error( __( 'The base currency changed in this save, so the exchange rates you entered are in the currency you left. Reload the page and set them again.', 'giveflow-fundraising-campaigns' ) );
             }
 
             const updated = await apiFetch( {
@@ -106,13 +106,13 @@ export function useFxRates() {
             // A 200 can still report a failed provider fetch in the body; don't
             // claim success when the rates did not actually refresh.
             if ( updated?.fetch_ok === false ) {
-                notify.error( __( 'Could not fetch exchange rates. Please try again.', 'dono-fundraising-platform' ) );
+                notify.error( __( 'Could not fetch exchange rates. Please try again.', 'giveflow-fundraising-campaigns' ) );
             } else {
-                notify.success( __( 'Exchange rates updated.', 'dono-fundraising-platform' ) );
+                notify.success( __( 'Exchange rates updated.', 'giveflow-fundraising-campaigns' ) );
             }
             return updated;
         } catch ( err ) {
-            notify.error( err?.message || __( 'Could not fetch exchange rates. Please try again.', 'dono-fundraising-platform' ) );
+            notify.error( err?.message || __( 'Could not fetch exchange rates. Please try again.', 'giveflow-fundraising-campaigns' ) );
             return null;
         } finally {
             setFetching( false );

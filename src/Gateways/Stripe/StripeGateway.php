@@ -2,34 +2,34 @@
 
 declare(strict_types=1);
 
-namespace Dono\Gateways\Stripe;
+namespace GiveFlow\Gateways\Stripe;
 
-use Dono\Analytics\ErrorLog;
-use Dono\Currency\Currency;
-use Dono\Donations\Donation;
-use Dono\Donations\DonationRepository;
-use Dono\Donations\DonationService;
-use Dono\Donations\Refund;
-use Dono\Donors\DonorRepository;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Time\Clock;
-use Dono\Gateways\GatewayConfirmResult;
-use Dono\Gateways\AccountFingerprint;
-use Dono\Gateways\GatewayIntentResult;
-use Dono\Gateways\PaymentGateway;
-use Dono\Gateways\RefundResult;
-use Dono\Gateways\PaymentRetryUnavailable;
-use Dono\Gateways\SubscriptionAware;
-use Dono\Gateways\SupportsSubscriptionPause;
-use Dono\Gateways\PaymentMethodUpdate;
-use Dono\Gateways\SupportsPaymentMethodUpdate;
-use Dono\Gateways\SupportsPaymentRetry;
-use Dono\Gateways\TestMode;
-use Dono\Gateways\WebhookOutcome;
-use Dono\Gateways\WebhookPaymentGuard;
-use Dono\Recurring\FrequencyMap;
-use Dono\Recurring\RecurringPlan;
-use Dono\Recurring\RecurringPlanRepository;
+use GiveFlow\Analytics\ErrorLog;
+use GiveFlow\Currency\Currency;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Donations\DonationService;
+use GiveFlow\Donations\Refund;
+use GiveFlow\Donors\DonorRepository;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Time\Clock;
+use GiveFlow\Gateways\GatewayConfirmResult;
+use GiveFlow\Gateways\AccountFingerprint;
+use GiveFlow\Gateways\GatewayIntentResult;
+use GiveFlow\Gateways\PaymentGateway;
+use GiveFlow\Gateways\RefundResult;
+use GiveFlow\Gateways\PaymentRetryUnavailable;
+use GiveFlow\Gateways\SubscriptionAware;
+use GiveFlow\Gateways\SupportsSubscriptionPause;
+use GiveFlow\Gateways\PaymentMethodUpdate;
+use GiveFlow\Gateways\SupportsPaymentMethodUpdate;
+use GiveFlow\Gateways\SupportsPaymentRetry;
+use GiveFlow\Gateways\TestMode;
+use GiveFlow\Gateways\WebhookOutcome;
+use GiveFlow\Gateways\WebhookPaymentGuard;
+use GiveFlow\Recurring\FrequencyMap;
+use GiveFlow\Recurring\RecurringPlan;
+use GiveFlow\Recurring\RecurringPlanRepository;
 use RuntimeException;
 use WP_REST_Request;
 use Throwable;
@@ -82,7 +82,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('Stripe', 'dono-fundraising-platform');
+        return __('Stripe', 'giveflow-fundraising-campaigns');
     }
 
     /**
@@ -94,7 +94,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
      */
     public function description(): string
     {
-        return __('Pay securely by card, or another method offered at checkout.', 'dono-fundraising-platform');
+        return __('Pay securely by card, or another method offered at checkout.', 'giveflow-fundraising-campaigns');
     }
 
     /** @since 1.0.0 */
@@ -141,11 +141,11 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             'currency'    => strtolower($donation->currency),
             'description' => 'Donation ' . $donation->reference,
             'metadata'    => [
-                'dono_reference'   => $donation->reference,
-                'dono_donation_id' => (string) $donation->id,
-                'dono_donor_id'    => (string) $donation->donor_id,
-                'dono_form_id'     => (string) ($donation->form_id ?? ''),
-                'dono_campaign_id' => (string) ($donation->campaign_id ?? ''),
+                'giveflow_reference'   => $donation->reference,
+                'giveflow_donation_id' => (string) $donation->id,
+                'giveflow_donor_id'    => (string) $donation->donor_id,
+                'giveflow_form_id'     => (string) ($donation->form_id ?? ''),
+                'giveflow_campaign_id' => (string) ($donation->campaign_id ?? ''),
             ],
             // String 'true': the API client form-encodes, and http_build_query
             // turns PHP true into "1", which Stripe rejects for booleans.
@@ -168,7 +168,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         // Stripe accepted it would otherwise leave a charged intent nothing
         // points at, and the retry would charge again.
         $intent = $this->api->post('/payment_intents', $params, [
-            'Idempotency-Key' => 'dono_pi_' . $donation->id,
+            'Idempotency-Key' => 'giveflow_pi_' . $donation->id,
         ]);
 
         return new GatewayIntentResult(
@@ -307,7 +307,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         // stays pending for good, with no receipt and no campaign total.
         $healable = false;
         if (! $donation) {
-            $reference = (string) ($intent['metadata']['dono_reference'] ?? '');
+            $reference = (string) ($intent['metadata']['giveflow_reference'] ?? '');
             if ($reference !== '') {
                 $donation = $this->donations->findByReference($reference);
                 $healable = $donation !== null
@@ -519,7 +519,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             return $this->refused($eventId, $type, $reason);
         }
 
-        $reason = $intent['last_payment_error']['message'] ?? __('Payment declined.', 'dono-fundraising-platform');
+        $reason = $intent['last_payment_error']['message'] ?? __('Payment declined.', 'giveflow-fundraising-campaigns');
         $this->donationService->markFailed($donation, $reason);
 
         return new WebhookOutcome(
@@ -1057,7 +1057,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         // idempotency key below requires.
         $params = [
             'metadata' => [
-                'dono_donor_id' => (string) $donation->donor_id,
+                'giveflow_donor_id' => (string) $donation->donor_id,
             ],
         ];
         if ($email !== null && $email !== '') $params['email'] = $email;
@@ -1069,7 +1069,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         // ignored the body would fail their next donation outright rather than
         // deduplicating anything.
         $customer = $this->api->post('/customers', $params, [
-            'Idempotency-Key' => 'dono_cus_' . (int) $donation->donor_id
+            'Idempotency-Key' => 'giveflow_cus_' . (int) $donation->donor_id
                 . '_' . substr(hash('sha256', (string) wp_json_encode($params)), 0, 16),
         ]);
         $id       = (string) ($customer['id'] ?? '');
@@ -1136,10 +1136,10 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             'proration_behavior'   => 'none',
             'default_payment_method' => $paymentMethodId,
             'metadata' => [
-                'dono_donor_id'            => (string) $donation->donor_id,
-                'dono_form_id'             => (string) ($donation->form_id ?? ''),
-                'dono_campaign_id'         => (string) ($donation->campaign_id ?? ''),
-                'dono_initial_donation_id' => (string) $donation->id,
+                'giveflow_donor_id'            => (string) $donation->donor_id,
+                'giveflow_form_id'             => (string) ($donation->form_id ?? ''),
+                'giveflow_campaign_id'         => (string) ($donation->campaign_id ?? ''),
+                'giveflow_initial_donation_id' => (string) $donation->id,
             ],
         ];
 
@@ -1147,7 +1147,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             // Deterministic, so a redelivered webhook re-POSTs the same key and
             // Stripe returns the original subscription rather than a second one
             // that would double-charge the donor every renewal.
-            'Idempotency-Key' => 'dono_sub_' . $donation->id,
+            'Idempotency-Key' => 'giveflow_sub_' . $donation->id,
         ]);
 
         $subId = (string) ($sub['id'] ?? '');
@@ -1210,7 +1210,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
      */
     private function resolveDonationProduct(bool $isTest): string
     {
-        $opt    = get_option('dono_gateway_config', []);
+        $opt    = get_option('giveflow_gateway_config', []);
         $stripe = is_array($opt) && is_array($opt['stripe'] ?? null) ? $opt['stripe'] : [];
         $key    = ($isTest ? 'stripe_product_id_test' : 'stripe_product_id_live')
                 . '_' . AccountFingerprint::of($this->account->secretKeyFor($isTest));
@@ -1230,7 +1230,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
 
         $stripe[$key]    = $productId;
         $opt['stripe']   = $stripe;
-        update_option('dono_gateway_config', $opt);
+        update_option('giveflow_gateway_config', $opt);
         return $productId;
     }
 
@@ -1592,21 +1592,21 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     public function refund(Donation $donation, int $amountCents, ?string $reason = null): RefundResult
     {
         if (! $donation->gateway_intent_id) {
-            return RefundResult::failure(__('No gateway intent on donation; cannot refund via Stripe.', 'dono-fundraising-platform'));
+            return RefundResult::failure(__('No gateway intent on donation; cannot refund via Stripe.', 'giveflow-fundraising-campaigns'));
         }
 
         $this->account->useTestMode((bool) $donation->is_test);
 
         if (! $this->api->isConfigured()) {
-            return RefundResult::failure(__('Stripe is not configured.', 'dono-fundraising-platform'));
+            return RefundResult::failure(__('Stripe is not configured.', 'giveflow-fundraising-campaigns'));
         }
 
         $params = [
             'payment_intent' => $donation->gateway_intent_id,
             'amount'         => Currency::toMinorUnits($amountCents, $donation->currency),
             'metadata'       => [
-                'dono_reference'  => $donation->reference,
-                'dono_donation_id' => (string) $donation->id,
+                'giveflow_reference'  => $donation->reference,
+                'giveflow_donation_id' => (string) $donation->id,
             ],
         ];
         if ($reason !== null && $reason !== '') {
@@ -1627,7 +1627,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             // original refund, and the insert then collides on its id.
             $priorRefunds = (int) Refund::query()->where('donation_id', (int) $donation->id)->count();
             $headers = [
-                'Idempotency-Key' => 'dono_refund_' . $donation->id
+                'Idempotency-Key' => 'giveflow_refund_' . $donation->id
                     . '_' . (int) $donation->refunded_cents
                     . '_' . $priorRefunds
                     . '_' . $amountCents,
@@ -1860,7 +1860,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             }
         }
         if ($customerId === '') {
-            throw new RuntimeException(esc_html__('This donation has no Stripe customer to attach a card to.', 'dono-fundraising-platform'));
+            throw new RuntimeException(esc_html__('This donation has no Stripe customer to attach a card to.', 'giveflow-fundraising-campaigns'));
         }
 
         $intent = $this->api->post('/setup_intents', [
@@ -1871,7 +1871,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
 
         $secret = (string) ($intent['client_secret'] ?? '');
         if ($secret === '') {
-            throw new RuntimeException(esc_html__('Stripe did not return a setup secret.', 'dono-fundraising-platform'));
+            throw new RuntimeException(esc_html__('Stripe did not return a setup secret.', 'giveflow-fundraising-campaigns'));
         }
 
         return PaymentMethodUpdate::inline(
@@ -1894,12 +1894,12 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
 
         $token = trim($token);
         if ($token === '') {
-            throw new RuntimeException(esc_html__('No payment method was supplied.', 'dono-fundraising-platform'));
+            throw new RuntimeException(esc_html__('No payment method was supplied.', 'giveflow-fundraising-campaigns'));
         }
 
         $subId = (string) $plan->gateway_subscription_id;
         if ($subId === '') {
-            throw new RuntimeException(esc_html__('This plan has no Stripe subscription.', 'dono-fundraising-platform'));
+            throw new RuntimeException(esc_html__('This plan has no Stripe subscription.', 'giveflow-fundraising-campaigns'));
         }
 
         $sub = $this->api->get('/subscriptions/' . rawurlencode($subId));
@@ -1931,7 +1931,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         $this->account->useTestMode((bool) $plan->is_test);
         $subId = (string) $plan->gateway_subscription_id;
         if ($subId === '') {
-            throw new PaymentRetryUnavailable(esc_html__('This plan never reached Stripe, so there is nothing to collect.', 'dono-fundraising-platform'));
+            throw new PaymentRetryUnavailable(esc_html__('This plan never reached Stripe, so there is nothing to collect.', 'giveflow-fundraising-campaigns'));
         }
 
         $sub = $this->api->get('/subscriptions/' . rawurlencode($subId));
@@ -1941,7 +1941,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             ? (string) ($sub['latest_invoice']['id'] ?? '')
             : (string) ($sub['latest_invoice'] ?? '');
         if ($invoiceId === '') {
-            throw new PaymentRetryUnavailable(esc_html__('Stripe has no invoice outstanding on this subscription.', 'dono-fundraising-platform'));
+            throw new PaymentRetryUnavailable(esc_html__('Stripe has no invoice outstanding on this subscription.', 'giveflow-fundraising-campaigns'));
         }
 
         $invoice = $this->api->get('/invoices/' . rawurlencode($invoiceId));
@@ -1953,8 +1953,8 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         if ($status !== 'open') {
             throw new PaymentRetryUnavailable(esc_html(sprintf(
                 /* translators: %s: the Stripe invoice status, e.g. paid. */
-                __('Nothing to collect: the latest invoice is %s.', 'dono-fundraising-platform'),
-                $status !== '' ? $status : __('unavailable', 'dono-fundraising-platform')
+                __('Nothing to collect: the latest invoice is %s.', 'giveflow-fundraising-campaigns'),
+                $status !== '' ? $status : __('unavailable', 'giveflow-fundraising-campaigns')
             )));
         }
 

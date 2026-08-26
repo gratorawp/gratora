@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Foundation\Helpers;
+namespace GiveFlow\Foundation\Helpers;
 
 /**
  * CSV helpers with formula-injection protection.

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Foundation\Plugin;
-use Dono\Foundation\References\ReferenceGenerator;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Foundation\References\ReferenceGenerator;
 
 /**
  * Changing the numbering settings moves which option holds the counter, and the
@@ -35,7 +35,7 @@ final class ReferenceCounterSeedingTest extends IntegrationTestCase
     private function alreadyIssued(int $count): void
     {
         $year = (int) gmdate('Y');
-        update_option("dono_reference_counter_donation_{$year}", (string) $count, false);
+        update_option("giveflow_reference_counter_donation_{$year}", (string) $count, false);
     }
 
     public function test_turning_yearly_reset_off_does_not_restart_the_numbering(): void

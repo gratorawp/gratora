@@ -1,5 +1,5 @@
 /**
- * dono/divider: a horizontal rule with author-set spacing and line colour.
+ * giveflow/divider: a horizontal rule with author-set spacing and line colour.
  * Mirrors the server render in src/Forms/Blocks/DividerBlock.php.
  */
 
@@ -11,7 +11,7 @@ import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 import Slider from '../../../_shared/components/Slider';
 import ColorInput from '../../../_shared/components/ColorInput';
 
-const NAME = 'dono/divider';
+const NAME = 'giveflow/divider';
 
 function Edit( { attributes, setAttributes } ) {
     const {
@@ -27,9 +27,9 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Divider', 'dono-fundraising-platform' ) } initialOpen>
+                <PanelBody title={ __( 'Divider', 'giveflow-fundraising-campaigns' ) } initialOpen>
                     <Slider
-                        label={ __( 'Space above', 'dono-fundraising-platform' ) }
+                        label={ __( 'Space above', 'giveflow-fundraising-campaigns' ) }
                         value={ marginTop }
                         onChange={ ( v ) => setAttributes( { marginTop: Number( v ) } ) }
                         min={ 0 }
@@ -37,7 +37,7 @@ function Edit( { attributes, setAttributes } ) {
                         unit="px"
                     />
                     <Slider
-                        label={ __( 'Space below', 'dono-fundraising-platform' ) }
+                        label={ __( 'Space below', 'giveflow-fundraising-campaigns' ) }
                         value={ marginBottom }
                         onChange={ ( v ) => setAttributes( { marginBottom: Number( v ) } ) }
                         min={ 0 }
@@ -45,7 +45,7 @@ function Edit( { attributes, setAttributes } ) {
                         unit="px"
                     />
                     <Slider
-                        label={ __( 'Line thickness', 'dono-fundraising-platform' ) }
+                        label={ __( 'Line thickness', 'giveflow-fundraising-campaigns' ) }
                         value={ thickness }
                         onChange={ ( v ) => setAttributes( { thickness: Number( v ) } ) }
                         min={ 1 }
@@ -53,12 +53,12 @@ function Edit( { attributes, setAttributes } ) {
                         unit="px"
                     />
                     <ColorInput
-                        label={ __( 'Line colour', 'dono-fundraising-platform' ) }
+                        label={ __( 'Line colour', 'giveflow-fundraising-campaigns' ) }
                         value={ color }
                         onChange={ ( v ) => setAttributes( { color: v || '' } ) }
                     />
                     <p style={ { fontSize: 12, color: '#6b7280', margin: '8px 0 0' } }>
-                        { __( 'Leave the colour empty to follow the form border colour.', 'dono-fundraising-platform' ) }
+                        { __( 'Leave the colour empty to follow the form border colour.', 'giveflow-fundraising-campaigns' ) }
                     </p>
                 </PanelBody>
                 <ConditionPanel
@@ -71,7 +71,7 @@ function Edit( { attributes, setAttributes } ) {
                     style={ {
                         margin:         `${ marginTop }px 0 ${ marginBottom }px`,
                         border:         0,
-                        borderTop:      `${ thickness }px solid ${ color || 'var(--dono-border, #e5e7eb)' }`,
+                        borderTop:      `${ thickness }px solid ${ color || 'var(--giveflow-border, #e5e7eb)' }`,
                         width:          '100%',
                     } }
                 />
@@ -83,9 +83,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Divider', 'dono-fundraising-platform' ),
-        description: __( 'A horizontal line with adjustable spacing and colour.', 'dono-fundraising-platform' ),
-        category:   'dono-content',
+        title:      __( 'Divider', 'giveflow-fundraising-campaigns' ),
+        description: __( 'A horizontal line with adjustable spacing and colour.', 'giveflow-fundraising-campaigns' ),
+        category:   'giveflow-content',
         icon:       BlockIcons.divider,
         supports: { html: false, anchor: false, inserter: true },
         attributes: {

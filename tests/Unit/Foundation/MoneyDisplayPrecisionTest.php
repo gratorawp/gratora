@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Unit\Foundation;
+namespace GiveFlow\Tests\Unit\Foundation;
 
-use Dono\Foundation\Helpers\Money;
+use GiveFlow\Foundation\Helpers\Money;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -24,7 +24,7 @@ final class MoneyDisplayPrecisionTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $GLOBALS['_dono_test_options']['dono_currency_locale'] = [
+        $GLOBALS['_giveflow_test_options']['giveflow_currency_locale'] = [
             'default_currency' => 'USD',
             'format'           => ['decimal_places' => 0],
         ];
@@ -37,7 +37,7 @@ final class MoneyDisplayPrecisionTest extends TestCase
 
     protected function tearDown(): void
     {
-        ($GLOBALS['_dono_reset_options'])();
+        ($GLOBALS['_giveflow_reset_options'])();
         parent::tearDown();
     }
 

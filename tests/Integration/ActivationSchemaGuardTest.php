@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Core\Activator;
-use Dono\Foundation\Container\Container;
-use Dono\Foundation\Modules\DonoModule;
-use Dono\Foundation\Modules\ModuleManager;
-use Dono\Foundation\Plugin;
-use Dono\Foundation\Upgrade\SchemaGuard;
-use Dono\Vendor\Queryable\Model;
+use GiveFlow\Core\Activator;
+use GiveFlow\Foundation\Container\Container;
+use GiveFlow\Foundation\Modules\GiveFlowModule;
+use GiveFlow\Foundation\Modules\ModuleManager;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Foundation\Upgrade\SchemaGuard;
+use GiveFlow\Vendor\Queryable\Model;
 use ReflectionMethod;
 use ReflectionProperty;
 
@@ -32,7 +32,7 @@ final class ActivationSchemaGuardTest extends IntegrationTestCase
     protected function tearDown(): void
     {
         $this->unregisterProbeModule();
-        update_option(SchemaGuard::OPTION, DONO_DB_VERSION, false);
+        update_option(SchemaGuard::OPTION, GIVEFLOW_DB_VERSION, false);
         // dbDelta can commit past the harness transaction, so anything the
         // activation path writes has to be put back by hand.
         update_option(Activator::OPT_ACTIVATED_AT, gmdate('Y-m-d H:i:s'), false);
@@ -58,7 +58,7 @@ final class ActivationSchemaGuardTest extends IntegrationTestCase
 
         Plugin::onActivation();
 
-        $this->assertSame(DONO_DB_VERSION, get_option(SchemaGuard::OPTION));
+        $this->assertSame(GIVEFLOW_DB_VERSION, get_option(SchemaGuard::OPTION));
     }
 
     public function test_the_missing_table_is_named(): void
@@ -83,7 +83,7 @@ final class ActivationSchemaGuardTest extends IntegrationTestCase
 
     public function test_no_notice_while_the_schema_is_whole(): void
     {
-        update_option(SchemaGuard::OPTION, DONO_DB_VERSION, false);
+        update_option(SchemaGuard::OPTION, GIVEFLOW_DB_VERSION, false);
 
         ob_start();
         SchemaGuard::renderNotice();
@@ -106,7 +106,7 @@ final class ActivationSchemaGuardTest extends IntegrationTestCase
      */
     public function test_an_activation_that_died_after_the_stamp_is_finished_later(): void
     {
-        update_option(SchemaGuard::OPTION, DONO_DB_VERSION, false);
+        update_option(SchemaGuard::OPTION, GIVEFLOW_DB_VERSION, false);
         delete_option(Activator::OPT_ACTIVATED_AT);
 
         $this->finishActivation();
@@ -120,7 +120,7 @@ final class ActivationSchemaGuardTest extends IntegrationTestCase
     /** Costs one option read on a healthy site and does nothing else. */
     public function test_a_finished_activation_is_not_run_again(): void
     {
-        update_option(SchemaGuard::OPTION, DONO_DB_VERSION, false);
+        update_option(SchemaGuard::OPTION, GIVEFLOW_DB_VERSION, false);
         update_option(Activator::OPT_ACTIVATED_AT, '2020-01-01T00:00:00+00:00', false);
 
         $this->finishActivation();
@@ -165,7 +165,7 @@ final class ActivationSchemaGuardTest extends IntegrationTestCase
 
 final class UnmigratedProbe extends Model
 {
-    public const TABLE = 'dono_schema_guard_probe';
+    public const TABLE = 'giveflow_schema_guard_probe';
 
     protected string $table = self::TABLE;
 
@@ -174,7 +174,7 @@ final class UnmigratedProbe extends Model
     }
 }
 
-final class UnmigratedProbeModule implements DonoModule
+final class UnmigratedProbeModule implements GiveFlowModule
 {
     public const ID = 'schema-guard-probe';
 
@@ -205,7 +205,7 @@ final class UnmigratedProbeModule implements DonoModule
 
     public function tier(): string
     {
-        return DonoModule::TIER_PRO;
+        return GiveFlowModule::TIER_PRO;
     }
 
     public function boot(Container $container): void

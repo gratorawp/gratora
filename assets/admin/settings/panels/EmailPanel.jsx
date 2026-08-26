@@ -25,7 +25,7 @@ export default function EmailPanel( { s } ) {
         try {
             const data = testTo.trim() ? { to: testTo.trim() } : {};
             const res  = await apiFetch( {
-                path:   '/dono/v1/admin/email/test-send',
+                path:   '/giveflow/v1/admin/email/test-send',
                 method: 'POST',
                 data,
             } );
@@ -37,16 +37,16 @@ export default function EmailPanel( { s } ) {
                 type: unauthenticated ? 'warning' : 'success',
                 text: sprintf(
                     /* translators: %s: recipient address */
-                    __( 'Test email sent to %s. Check the inbox and the spam folder.', 'dono-fundraising-platform' ),
-                    res?.to || __( 'the recipient', 'dono-fundraising-platform' )
+                    __( 'Test email sent to %s. Check the inbox and the spam folder.', 'giveflow-fundraising-campaigns' ),
+                    res?.to || __( 'the recipient', 'giveflow-fundraising-campaigns' )
                 ) + ( unauthenticated
-                    ? ' ' + __( 'It went out over PHP mail, which does not authenticate your domain. Gmail and Outlook reject unauthenticated mail outright, so this can be accepted here and still never arrive.', 'dono-fundraising-platform' )
+                    ? ' ' + __( 'It went out over PHP mail, which does not authenticate your domain. Gmail and Outlook reject unauthenticated mail outright, so this can be accepted here and still never arrive.', 'giveflow-fundraising-campaigns' )
                     : '' ),
             } );
         } catch ( err ) {
             setTestNotice( {
                 type: 'error',
-                text: err?.message || __( 'Send failed.', 'dono-fundraising-platform' ),
+                text: err?.message || __( 'Send failed.', 'giveflow-fundraising-campaigns' ),
             } );
         } finally {
             setTesting( false );
@@ -54,53 +54,53 @@ export default function EmailPanel( { s } ) {
     };
 
     return (
-        <div className="dono-panel">
+        <div className="giveflow-panel">
             <Card
-                title={ __( 'Sender identity', 'dono-fundraising-platform' ) }
+                title={ __( 'Sender identity', 'giveflow-fundraising-campaigns' ) }
                 edited={ s.isDirty }
             >
                 <FormRow
-                    label={ __( 'From name', 'dono-fundraising-platform' ) }
-                    help={ __( 'Shown as the sender in the donor inbox.', 'dono-fundraising-platform' ) }
+                    label={ __( 'From name', 'giveflow-fundraising-campaigns' ) }
+                    help={ __( 'Shown as the sender in the donor inbox.', 'giveflow-fundraising-campaigns' ) }
                 >
-                    <input type="text" className="dono-input" { ...s.bind( 'from_name' ) } />
+                    <input type="text" className="giveflow-input" { ...s.bind( 'from_name' ) } />
                 </FormRow>
                 <FormRow
-                    label={ __( 'From email', 'dono-fundraising-platform' ) }
-                    help={ __( 'Use an address on a domain you control.', 'dono-fundraising-platform' ) }
+                    label={ __( 'From email', 'giveflow-fundraising-campaigns' ) }
+                    help={ __( 'Use an address on a domain you control.', 'giveflow-fundraising-campaigns' ) }
                 >
-                    <input type="email" className="dono-input" { ...s.bind( 'from_email' ) } />
+                    <input type="email" className="giveflow-input" { ...s.bind( 'from_email' ) } />
                 </FormRow>
                 <FormRow
-                    label={ __( 'Reply-to', 'dono-fundraising-platform' ) }
-                    help={ __( 'Where donor replies arrive. Defaults to From email.', 'dono-fundraising-platform' ) }
+                    label={ __( 'Reply-to', 'giveflow-fundraising-campaigns' ) }
+                    help={ __( 'Where donor replies arrive. Defaults to From email.', 'giveflow-fundraising-campaigns' ) }
                 >
-                    <input type="email" className="dono-input" { ...s.bind( 'reply_to' ) } />
+                    <input type="email" className="giveflow-input" { ...s.bind( 'reply_to' ) } />
                 </FormRow>
                 <ToggleRow
-                    title={ __( 'BCC me on every donation receipt', 'dono-fundraising-platform' ) }
-                    sub={ __( 'Sends a copy to the admin email.', 'dono-fundraising-platform' ) }
+                    title={ __( 'BCC me on every donation receipt', 'giveflow-fundraising-campaigns' ) }
+                    sub={ __( 'Sends a copy to the admin email.', 'giveflow-fundraising-campaigns' ) }
                     checked={ !! s.value( 'bcc_admin', false ) }
                     onChange={ s.setValue( 'bcc_admin' ) }
                 />
             </Card>
 
             <Card
-                title={ __( 'Send a test email', 'dono-fundraising-platform' ) }
-                sub={ __( 'Checks that your site can hand a message to its mail server. Arriving is a separate question: a message accepted here can still be rejected later by the recipient. Uses your current user email if you leave the recipient blank.', 'dono-fundraising-platform' ) }
+                title={ __( 'Send a test email', 'giveflow-fundraising-campaigns' ) }
+                sub={ __( 'Checks that your site can hand a message to its mail server. Arriving is a separate question: a message accepted here can still be rejected later by the recipient. Uses your current user email if you leave the recipient blank.', 'giveflow-fundraising-campaigns' ) }
             >
-                <FormRow label={ __( 'Recipient', 'dono-fundraising-platform' ) }>
+                <FormRow label={ __( 'Recipient', 'giveflow-fundraising-campaigns' ) }>
                     <input
                         type="email"
-                        className="dono-input"
+                        className="giveflow-input"
                         value={ testTo }
                         onChange={ ( e ) => setTestTo( e.target.value ) }
-                        placeholder={ __( 'Leave blank to send to your WP user email', 'dono-fundraising-platform' ) }
+                        placeholder={ __( 'Leave blank to send to your WP user email', 'giveflow-fundraising-campaigns' ) }
                     />
                 </FormRow>
                 <div style={ { display: 'flex', justifyContent: 'flex-end' } }>
                     <Btn variant="secondary" onClick={ sendTest } disabled={ testing } isBusy={ testing }>
-                        { testing ? __( 'Sending…', 'dono-fundraising-platform' ) : __( 'Send test email', 'dono-fundraising-platform' ) }
+                        { testing ? __( 'Sending…', 'giveflow-fundraising-campaigns' ) : __( 'Send test email', 'giveflow-fundraising-campaigns' ) }
                     </Btn>
                 </div>
                 { testNotice && (
@@ -114,45 +114,45 @@ export default function EmailPanel( { s } ) {
                      the first symptom is a donor who never got a receipt for
                      money they gave. Named as a category with a link to the
                      directory, not a recommendation of one vendor. */ }
-                <p className="dono-muted" style={ { marginTop: 12 } }>
-                    { __( 'If test emails arrive but donors report nothing, the cause is almost always authentication rather than Dono. Mailboxes such as Gmail reject mail that is not signed for your domain, and PHP mail on shared hosting is not. An SMTP plugin pointed at an authenticated provider fixes it for every email your site sends.', 'dono-fundraising-platform' ) }
+                <p className="giveflow-muted" style={ { marginTop: 12 } }>
+                    { __( 'If test emails arrive but donors report nothing, the cause is almost always authentication rather than GiveFlow. Mailboxes such as Gmail reject mail that is not signed for your domain, and PHP mail on shared hosting is not. An SMTP plugin pointed at an authenticated provider fixes it for every email your site sends.', 'giveflow-fundraising-campaigns' ) }
                     { ' ' }
                     <a href="https://wordpress.org/plugins/tags/smtp/" target="_blank" rel="noreferrer noopener">
-                        { __( 'SMTP plugins on WordPress.org', 'dono-fundraising-platform' ) }
+                        { __( 'SMTP plugins on WordPress.org', 'giveflow-fundraising-campaigns' ) }
                     </a>
                 </p>
             </Card>
 
             <Card
-                title={ __( 'Donor emails', 'dono-fundraising-platform' ) }
-                sub={ __( 'Sent to donors automatically by Dono', 'dono-fundraising-platform' ) }
-                meta={ __( 'Click a row to edit', 'dono-fundraising-platform' ) }
+                title={ __( 'Donor emails', 'giveflow-fundraising-campaigns' ) }
+                sub={ __( 'Sent to donors automatically by GiveFlow', 'giveflow-fundraising-campaigns' ) }
+                meta={ __( 'Click a row to edit', 'giveflow-fundraising-campaigns' ) }
             >
-                <div className="dono-email-list">
+                <div className="giveflow-email-list">
                     { templates.map( ( t ) => {
                         const enabled = !! s.value( `templates.${ t.id }.enabled`, true );
                         return (
                             <button
                                 key={ t.id }
                                 type="button"
-                                className="dono-email-row"
+                                className="giveflow-email-row"
                                 onClick={ () => setEditing( t ) }
                             >
                                 <span
-                                    className={ `dono-email-row__dot${ enabled ? ' is-on' : '' }` }
+                                    className={ `giveflow-email-row__dot${ enabled ? ' is-on' : '' }` }
                                     aria-hidden="true"
                                 />
-                                <span className="dono-email-row__body">
-                                    <span className="dono-email-row__title">
+                                <span className="giveflow-email-row__body">
+                                    <span className="giveflow-email-row__title">
                                         { t.label }
                                         <span className="screen-reader-text">
-                                            { enabled ? __( '(enabled)', 'dono-fundraising-platform' ) : __( '(disabled)', 'dono-fundraising-platform' ) }
+                                            { enabled ? __( '(enabled)', 'giveflow-fundraising-campaigns' ) : __( '(disabled)', 'giveflow-fundraising-campaigns' ) }
                                         </span>
                                     </span>
-                                    <span className="dono-email-row__desc">{ t.desc }</span>
+                                    <span className="giveflow-email-row__desc">{ t.desc }</span>
                                 </span>
-                                <span className="dono-email-row__recipient">{ t.recipient }</span>
-                                <span className="dono-email-row__edit">{ __( 'Edit', 'dono-fundraising-platform' ) }</span>
+                                <span className="giveflow-email-row__recipient">{ t.recipient }</span>
+                                <span className="giveflow-email-row__edit">{ __( 'Edit', 'giveflow-fundraising-campaigns' ) }</span>
                             </button>
                         );
                     } ) }
@@ -188,7 +188,7 @@ const SAMPLE_VALUES = {
 function expandTags( text ) {
     return ( text || '' ).split( /(\{[a-z_]+\})/ ).map( ( part, i ) =>
         /^\{[a-z_]+\}$/.test( part ) && SAMPLE_VALUES[ part ] === undefined
-            ? <span key={ i } className="dono-email-preview__tag">{ part }</span>
+            ? <span key={ i } className="giveflow-email-preview__tag">{ part }</span>
             : ( SAMPLE_VALUES[ part ] ?? part )
     );
 }
@@ -245,15 +245,15 @@ function TemplateDialog( { t, s, onClose } ) {
             onClose={ onClose }
             foot={ (
                 <>
-                    <Btn onClick={ onClose }>{ __( 'Cancel', 'dono-fundraising-platform' ) }</Btn>
-                    <Btn variant="primary" onClick={ done }>{ __( 'Done', 'dono-fundraising-platform' ) }</Btn>
+                    <Btn onClick={ onClose }>{ __( 'Cancel', 'giveflow-fundraising-campaigns' ) }</Btn>
+                    <Btn variant="primary" onClick={ done }>{ __( 'Done', 'giveflow-fundraising-campaigns' ) }</Btn>
                 </>
             ) }
         >
-            { t.desc && <p className="dono-dialog__help">{ t.desc }</p> }
+            { t.desc && <p className="giveflow-dialog__help">{ t.desc }</p> }
 
             <div
-                className="dono-email-editor-tabs"
+                className="giveflow-email-editor-tabs"
                 role="tablist"
                 tabIndex={ -1 }
                 onKeyDown={ ( e ) => tablistKeyDown( e, [ 'edit', 'preview' ], view, setView ) }
@@ -263,66 +263,66 @@ function TemplateDialog( { t, s, onClose } ) {
                     role="tab"
                     aria-selected={ view === 'edit' }
                     tabIndex={ view === 'edit' ? 0 : -1 }
-                    className={ `dono-email-editor-tab${ view === 'edit' ? ' is-active' : '' }` }
+                    className={ `giveflow-email-editor-tab${ view === 'edit' ? ' is-active' : '' }` }
                     onClick={ () => setView( 'edit' ) }
                 >
-                    { __( 'Edit', 'dono-fundraising-platform' ) }
+                    { __( 'Edit', 'giveflow-fundraising-campaigns' ) }
                 </button>
                 <button
                     type="button"
                     role="tab"
                     aria-selected={ view === 'preview' }
                     tabIndex={ view === 'preview' ? 0 : -1 }
-                    className={ `dono-email-editor-tab${ view === 'preview' ? ' is-active' : '' }` }
+                    className={ `giveflow-email-editor-tab${ view === 'preview' ? ' is-active' : '' }` }
                     onClick={ () => setView( 'preview' ) }
                 >
-                    { __( 'Preview', 'dono-fundraising-platform' ) }
+                    { __( 'Preview', 'giveflow-fundraising-campaigns' ) }
                 </button>
             </div>
 
             { view === 'preview' ? (
-                <div className="dono-email-preview">
-                    <div className="dono-email-preview__head">
+                <div className="giveflow-email-preview">
+                    <div className="giveflow-email-preview__head">
                         <div>
-                            <strong>{ __( 'Subject:', 'dono-fundraising-platform' ) }</strong>{ ' ' }
+                            <strong>{ __( 'Subject:', 'giveflow-fundraising-campaigns' ) }</strong>{ ' ' }
                             { draft.subject.trim()
                                 ? expandTags( draft.subject )
-                                : <em>{ __( '(no subject)', 'dono-fundraising-platform' ) }</em> }
+                                : <em>{ __( '(no subject)', 'giveflow-fundraising-campaigns' ) }</em> }
                         </div>
-                        <div><strong>{ __( 'To:', 'dono-fundraising-platform' ) }</strong> Jane Doe &lt;jane@example.com&gt;</div>
+                        <div><strong>{ __( 'To:', 'giveflow-fundraising-campaigns' ) }</strong> Jane Doe &lt;jane@example.com&gt;</div>
                     </div>
-                    <pre className="dono-email-preview__body">{ expandTags( draft.body ) }</pre>
+                    <pre className="giveflow-email-preview__body">{ expandTags( draft.body ) }</pre>
                 </div>
             ) : (
                 <>
                     <ToggleRow
-                        title={ __( 'Send this email', 'dono-fundraising-platform' ) }
-                        sub={ __( 'Disable to skip this notification entirely.', 'dono-fundraising-platform' ) }
+                        title={ __( 'Send this email', 'giveflow-fundraising-campaigns' ) }
+                        sub={ __( 'Disable to skip this notification entirely.', 'giveflow-fundraising-campaigns' ) }
                         checked={ draft.enabled }
                         onChange={ ( v ) => set( { enabled: v } ) }
                     />
 
-                    <FormRow label={ __( 'Subject', 'dono-fundraising-platform' ) } wide>
+                    <FormRow label={ __( 'Subject', 'giveflow-fundraising-campaigns' ) } wide>
                         <input
                             type="text"
-                            className="dono-input"
+                            className="giveflow-input"
                             value={ draft.subject }
                             onChange={ ( e ) => set( { subject: e.target.value } ) }
                         />
                     </FormRow>
 
                     <FormRow
-                        label={ __( 'Body', 'dono-fundraising-platform' ) }
-                        help={ __( 'Plain text. Merge tags expand at send time.', 'dono-fundraising-platform' ) }
+                        label={ __( 'Body', 'giveflow-fundraising-campaigns' ) }
+                        help={ __( 'Plain text. Merge tags expand at send time.', 'giveflow-fundraising-campaigns' ) }
                         wide
                     >
                         { !! t.tags.length && (
-                            <div className="dono-merge-tags">
+                            <div className="giveflow-merge-tags">
                                 { t.tags.map( ( tag ) => (
                                     <button
                                         key={ tag }
                                         type="button"
-                                        className="dono-merge-tag"
+                                        className="giveflow-merge-tag"
                                         onClick={ () => insertTag( tag ) }
                                     >
                                         { tag }
@@ -332,7 +332,7 @@ function TemplateDialog( { t, s, onClose } ) {
                         ) }
                         <textarea
                             ref={ bodyRef }
-                            className="dono-textarea"
+                            className="giveflow-textarea"
                             rows={ 10 }
                             value={ draft.body }
                             onChange={ ( e ) => set( { body: e.target.value } ) }

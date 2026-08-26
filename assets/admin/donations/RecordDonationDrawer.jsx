@@ -2,7 +2,7 @@ import { useEffect, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { __, sprintf } from '@wordpress/i18n';
 
-import Dialog from '@dono/ui/components/Dialog';
+import Dialog from '@giveflow/ui/components/Dialog';
 import Notice from '../_shared/components/Notice';
 import Field from '../_shared/components/Field';
 import AmountInput from '../_shared/components/AmountInput';
@@ -13,10 +13,10 @@ import Btn from '../_shared/components/Btn';
 
 // The offline gateway's own list. Anything else is rejected server-side.
 const METHODS = [
-    { value: 'cheque',        label: __( 'Check', 'dono-fundraising-platform' ) },
-    { value: 'cash',          label: __( 'Cash', 'dono-fundraising-platform' ) },
-    { value: 'bank_transfer', label: __( 'Bank transfer', 'dono-fundraising-platform' ) },
-    { value: 'other',         label: __( 'Other', 'dono-fundraising-platform' ) },
+    { value: 'cheque',        label: __( 'Check', 'giveflow-fundraising-campaigns' ) },
+    { value: 'cash',          label: __( 'Cash', 'giveflow-fundraising-campaigns' ) },
+    { value: 'bank_transfer', label: __( 'Bank transfer', 'giveflow-fundraising-campaigns' ) },
+    { value: 'other',         label: __( 'Other', 'giveflow-fundraising-campaigns' ) },
 ];
 
 function today() {
@@ -27,7 +27,7 @@ function today() {
 }
 
 export default function RecordDonationDrawer( { onClose, onRecorded } ) {
-    const currency = window.dono?.default_currency || 'USD';
+    const currency = window.giveflow?.default_currency || 'USD';
 
     const [ email, setEmail ]         = useState( '' );
     const [ firstName, setFirstName ] = useState( '' );
@@ -51,13 +51,13 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
 
     useEffect( () => {
         let aborted = false;
-        // Not /admin/campaigns: that needs dono_manage_campaigns, which a role
+        // Not /admin/campaigns: that needs giveflow_manage_campaigns, which a role
         // created just to enter checks will not have, and the picker rendered
         // blank so every donation they recorded went uncategorised.
-        apiFetch( { path: '/dono/v1/admin/donations/fund-options' } )
+        apiFetch( { path: '/giveflow/v1/admin/donations/fund-options' } )
             .then( ( res ) => setFunds( ( Array.isArray( res ) ? res : [] ).map( ( f ) => {
                 /* translators: %s: fund name. */
-                const isDefault = __( '%s (default)', 'dono-fundraising-platform' );
+                const isDefault = __( '%s (default)', 'giveflow-fundraising-campaigns' );
                 return {
                     value: String( f.id ),
                     label: f.is_default ? sprintf( isDefault, f.name ) : f.name,
@@ -67,7 +67,7 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
             // which is what happens when nobody picks a fund anyway.
             .catch( () => setFunds( [] ) );
 
-        apiFetch( { path: '/dono/v1/admin/donations/campaign-options' } )
+        apiFetch( { path: '/giveflow/v1/admin/donations/campaign-options' } )
             .then( ( res ) => {
                 if ( aborted ) return;
                 setCampaigns( ( Array.isArray( res ) ? res : [] ).map( ( c ) => ( {
@@ -75,7 +75,7 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                     label: c.archived
                         ? sprintf(
                             /* translators: %s: campaign title. */
-                            __( '%s (archived)', 'dono-fundraising-platform' ),
+                            __( '%s (archived)', 'giveflow-fundraising-campaigns' ),
                             c.title
                         )
                         : c.title,
@@ -105,7 +105,7 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
         setError( '' );
         try {
             const created = await apiFetch( {
-                path: '/dono/v1/admin/donations',
+                path: '/giveflow/v1/admin/donations',
                 method: 'POST',
                 data: {
                     email: email.trim(),
@@ -124,17 +124,17 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
             } );
             onRecorded( created );
         } catch ( e ) {
-            if ( e?.code === 'dono_duplicate_donation' ) {
+            if ( e?.code === 'giveflow_duplicate_donation' ) {
                 setDuplicate( e?.data?.reference || '?' );
             } else {
-                setError( e?.message || __( 'Could not record this donation.', 'dono-fundraising-platform' ) );
+                setError( e?.message || __( 'Could not record this donation.', 'giveflow-fundraising-campaigns' ) );
             }
             setSaving( false );
         }
     };
 
     const foot = (
-        <div className="dono-rd__foot">
+        <div className="giveflow-rd__foot">
             <Btn
                 variant="primary"
                 onClick={ () => submit( duplicate !== '' ) }
@@ -142,27 +142,27 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                 isBusy={ saving }
             >
                 { saving
-                    ? __( 'Recording…', 'dono-fundraising-platform' )
+                    ? __( 'Recording…', 'giveflow-fundraising-campaigns' )
                     : duplicate !== ''
-                        ? __( 'Record it anyway', 'dono-fundraising-platform' )
-                        : __( 'Record donation', 'dono-fundraising-platform' ) }
+                        ? __( 'Record it anyway', 'giveflow-fundraising-campaigns' )
+                        : __( 'Record donation', 'giveflow-fundraising-campaigns' ) }
             </Btn>
             <Btn variant="ghost" onClick={ onClose } disabled={ saving }>
-                { __( 'Cancel', 'dono-fundraising-platform' ) }
+                { __( 'Cancel', 'giveflow-fundraising-campaigns' ) }
             </Btn>
         </div>
     );
 
     return (
         <Dialog
-            title={ __( 'Record a donation', 'dono-fundraising-platform' ) }
+            title={ __( 'Record a donation', 'giveflow-fundraising-campaigns' ) }
             onClose={ saving ? undefined : onClose }
             foot={ foot }
         >
-            <p className="dono-dialog__help">
-                { __( 'Money that arrived off the site: a check, cash at an event, a bank transfer.', 'dono-fundraising-platform' ) }
+            <p className="giveflow-dialog__help">
+                { __( 'Money that arrived off the site: a check, cash at an event, a bank transfer.', 'giveflow-fundraising-campaigns' ) }
             </p>
-            <div className="dono-rd">
+            <div className="giveflow-rd">
                 { error !== '' && (
                     <Notice status="error" isDismissible={ false }>{ error }</Notice>
                 ) }
@@ -171,15 +171,15 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                     <Notice status="warning" isDismissible={ false }>
                         { sprintf(
                             /* translators: %s: the reference of the donation already on the books. */
-                            __( '%s is already down for this donor, this amount and this date. If they really gave twice, record it anyway. Otherwise change something above.', 'dono-fundraising-platform' ),
+                            __( '%s is already down for this donor, this amount and this date. If they really gave twice, record it anyway. Otherwise change something above.', 'giveflow-fundraising-campaigns' ),
                             duplicate
                         ) }
                     </Notice>
                 ) }
 
-                <Field label={ __( 'Donor email', 'dono-fundraising-platform' ) } help={ __( 'Matches an existing donor, or creates one.', 'dono-fundraising-platform' ) }>
+                <Field label={ __( 'Donor email', 'giveflow-fundraising-campaigns' ) } help={ __( 'Matches an existing donor, or creates one.', 'giveflow-fundraising-campaigns' ) }>
                     <input
-                        className="dono-input"
+                        className="giveflow-input"
                         type="email"
                         value={ email }
                         autoFocus
@@ -187,32 +187,32 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                     />
                 </Field>
 
-                <div className="dono-rd__row">
-                    <Field label={ __( 'First name', 'dono-fundraising-platform' ) }>
-                        <input className="dono-input" type="text" value={ firstName } onChange={ ( e ) => setFirstName( e.target.value ) } />
+                <div className="giveflow-rd__row">
+                    <Field label={ __( 'First name', 'giveflow-fundraising-campaigns' ) }>
+                        <input className="giveflow-input" type="text" value={ firstName } onChange={ ( e ) => setFirstName( e.target.value ) } />
                     </Field>
-                    <Field label={ __( 'Last name', 'dono-fundraising-platform' ) }>
-                        <input className="dono-input" type="text" value={ lastName } onChange={ ( e ) => setLastName( e.target.value ) } />
+                    <Field label={ __( 'Last name', 'giveflow-fundraising-campaigns' ) }>
+                        <input className="giveflow-input" type="text" value={ lastName } onChange={ ( e ) => setLastName( e.target.value ) } />
                     </Field>
                 </div>
 
-                <Field label={ __( 'Amount', 'dono-fundraising-platform' ) }>
+                <Field label={ __( 'Amount', 'giveflow-fundraising-campaigns' ) }>
                     <AmountInput value={ amount } onChange={ edited( setAmount ) } currency={ currency } placeholder="0" />
                 </Field>
 
                 <Field
-                    label={ __( 'Date received', 'dono-fundraising-platform' ) }
-                    help={ __( 'When the money arrived, which is not always today. A check banked last month belongs to last month, and the totals for that month depend on this.', 'dono-fundraising-platform' ) }
+                    label={ __( 'Date received', 'giveflow-fundraising-campaigns' ) }
+                    help={ __( 'When the money arrived, which is not always today. A check banked last month belongs to last month, and the totals for that month depend on this.', 'giveflow-fundraising-campaigns' ) }
                 >
                     <DateField
                         value={ receivedAt }
                         onChange={ ( next ) => edited( setReceived )( next || '' ) }
-                        ariaLabel={ __( 'Date received', 'dono-fundraising-platform' ) }
+                        ariaLabel={ __( 'Date received', 'giveflow-fundraising-campaigns' ) }
                     />
                 </Field>
 
-                <Field label={ __( 'How it arrived', 'dono-fundraising-platform' ) }>
-                    <select className="dono-select" value={ method } onChange={ ( e ) => setMethod( e.target.value ) }>
+                <Field label={ __( 'How it arrived', 'giveflow-fundraising-campaigns' ) }>
+                    <select className="giveflow-select" value={ method } onChange={ ( e ) => setMethod( e.target.value ) }>
                         { METHODS.map( ( m ) => (
                             <option key={ m.value } value={ m.value }>{ m.label }</option>
                         ) ) }
@@ -220,49 +220,49 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                 </Field>
 
                 <Field
-                    label={ __( 'Campaign', 'dono-fundraising-platform' ) }
+                    label={ __( 'Campaign', 'giveflow-fundraising-campaigns' ) }
                     help={ campaignsFailed
-                        ? __( 'Campaigns could not be loaded, so this will be recorded without one. Someone with campaign access can set it afterwards.', 'dono-fundraising-platform' )
-                        : __( 'Optional. Leave empty for a general donation.', 'dono-fundraising-platform' ) }
+                        ? __( 'Campaigns could not be loaded, so this will be recorded without one. Someone with campaign access can set it afterwards.', 'giveflow-fundraising-campaigns' )
+                        : __( 'Optional. Leave empty for a general donation.', 'giveflow-fundraising-campaigns' ) }
                 >
                     <SearchableSelect
                         value={ campaignId }
                         onChange={ setCampaign }
                         options={ campaigns }
                         placeholder={ campaignsFailed
-                            ? __( 'Unavailable', 'dono-fundraising-platform' )
-                            : __( 'No campaign', 'dono-fundraising-platform' ) }
+                            ? __( 'Unavailable', 'giveflow-fundraising-campaigns' )
+                            : __( 'No campaign', 'giveflow-fundraising-campaigns' ) }
                     />
                 </Field>
 
                 { funds.length > 0 && (
                     <Field
-                        label={ __( 'Fund', 'dono-fundraising-platform' ) }
-                        help={ __( 'Optional. Leave empty to use the default fund.', 'dono-fundraising-platform' ) }
+                        label={ __( 'Fund', 'giveflow-fundraising-campaigns' ) }
+                        help={ __( 'Optional. Leave empty to use the default fund.', 'giveflow-fundraising-campaigns' ) }
                     >
                         <SearchableSelect
                             value={ fundId }
                             onChange={ setFund }
                             options={ funds }
-                            placeholder={ __( 'Default fund', 'dono-fundraising-platform' ) }
+                            placeholder={ __( 'Default fund', 'giveflow-fundraising-campaigns' ) }
                         />
                     </Field>
                 ) }
 
-                <Field label={ __( 'Note', 'dono-fundraising-platform' ) } help={ __( 'Only your team sees this.', 'dono-fundraising-platform' ) }>
-                    <textarea className="dono-input" rows={ 2 } value={ note } onChange={ ( e ) => setNote( e.target.value ) } />
+                <Field label={ __( 'Note', 'giveflow-fundraising-campaigns' ) } help={ __( 'Only your team sees this.', 'giveflow-fundraising-campaigns' ) }>
+                    <textarea className="giveflow-input" rows={ 2 } value={ note } onChange={ ( e ) => setNote( e.target.value ) } />
                 </Field>
 
                 { /* eslint-disable-next-line jsx-a11y/label-has-associated-control -- Switch is self-labeled via its label prop */ }
-                <label className="dono-rd__receipt">
-                    <Switch checked={ sendReceipt } onChange={ setReceipt } label={ __( 'Email the donor a receipt', 'dono-fundraising-platform' ) } />
-                    <span className="dono-rd__receipt-txt">
+                <label className="giveflow-rd__receipt">
+                    <Switch checked={ sendReceipt } onChange={ setReceipt } label={ __( 'Email the donor a receipt', 'giveflow-fundraising-campaigns' ) } />
+                    <span className="giveflow-rd__receipt-txt">
                         <strong>{ sendReceipt
-                            ? __( 'Email a receipt', 'dono-fundraising-platform' )
-                            : __( 'Do not email the donor', 'dono-fundraising-platform' ) }</strong>
+                            ? __( 'Email a receipt', 'giveflow-fundraising-campaigns' )
+                            : __( 'Do not email the donor', 'giveflow-fundraising-campaigns' ) }</strong>
                         <span>{ sendReceipt
-                            ? __( 'The donor gets a receipt for this donation.', 'dono-fundraising-platform' )
-                            : __( 'Nothing is sent, not even a receipt.', 'dono-fundraising-platform' ) }</span>
+                            ? __( 'The donor gets a receipt for this donation.', 'giveflow-fundraising-campaigns' )
+                            : __( 'Nothing is sent, not even a receipt.', 'giveflow-fundraising-campaigns' ) }</span>
                     </span>
                 </label>
             </div>

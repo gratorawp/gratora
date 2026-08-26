@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
-use Dono\Foundation\Plugin;
-use Dono\Gateways\GatewayConfirmResult;
-use Dono\Gateways\GatewayIntentResult;
-use Dono\Gateways\GatewayManager;
-use Dono\Gateways\PaymentGateway;
-use Dono\Gateways\RefundResult;
-use Dono\Gateways\SubscriptionAware;
-use Dono\Gateways\WebhookOutcome;
-use Dono\Recurring\RecurringPlan;
-use Dono\Recurring\RecurringResumer;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Gateways\GatewayConfirmResult;
+use GiveFlow\Gateways\GatewayIntentResult;
+use GiveFlow\Gateways\GatewayManager;
+use GiveFlow\Gateways\PaymentGateway;
+use GiveFlow\Gateways\RefundResult;
+use GiveFlow\Gateways\SubscriptionAware;
+use GiveFlow\Gateways\WebhookOutcome;
+use GiveFlow\Recurring\RecurringPlan;
+use GiveFlow\Recurring\RecurringResumer;
 use RuntimeException;
 use WP_REST_Request;
 

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Forms\Blocks;
+namespace GiveFlow\Forms\Blocks;
 
-use Dono\Foundation\Helpers\View;
+use GiveFlow\Foundation\Helpers\View;
 
 /**
  * Radio button group field block.
@@ -16,7 +16,7 @@ final class RadioBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'dono/radio';
+        return 'giveflow/radio';
     }
 
     /** @since 1.0.0 */

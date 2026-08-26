@@ -1,12 +1,12 @@
 // Theme-sensitive surfaces read CSS custom properties so a wrapper carrying
-// `style="--dono-accent: ..."` recolours a block without recompiling.
+// `style="--giveflow-accent: ..."` recolours a block without recompiling.
 
-$accent-fallback:     #1e8a4e;
+$accent-fallback:     #211d3f;
 $accent-soft-fallback: rgba(30, 138, 78, .12);
-// The resolver emits --dono-accent-soft only when a preset or the campaign
+// The resolver emits --giveflow-accent-soft only when a preset or the campaign
 // pairs one with the accent; deriving it otherwise keeps a purple campaign from
 // washing its own pages in green.
-$accent-soft: var(--dono-accent-soft, color-mix(in srgb, var(--dono-accent, #{$accent-fallback}) 12%, #fff));
+$accent-soft: var(--giveflow-accent-soft, color-mix(in srgb, var(--giveflow-accent, #{$accent-fallback}) 12%, #fff));
 $text-fallback:       #1e1e1e;
 $text-muted-fallback: #6b7280;
 $border-fallback:     #e5e7eb;
@@ -16,36 +16,36 @@ $radius-fallback:     12px;
 $radius-sm-fallback:  8px;
 $shadow-fallback:     0 20px 50px rgba(0, 0, 0, .25);
 
-.dono-block {
+.giveflow-block {
     margin: 0 0 24px;
-    color: var(--dono-text, #{$text-fallback});
+    color: var(--giveflow-text, #{$text-fallback});
 
     // Twenty Twenty-Five ships `html :where([style*="border-width"]) {
     // border-style: solid }`, which matches on the substring, and our blocks
-    // emit a --dono-stroke custom property. Declaring a border here keeps the
+    // emit a --giveflow-stroke custom property. Declaring a border here keeps the
     // theme from drawing a 3px currentColor one; blocks that want a border set
     // it themselves.
     border: 0;
 }
 
-.dono-block-notice {
+.giveflow-block-notice {
     padding: 16px 20px;
     border: 1px dashed #f0b400;
     background: #fff8e1;
     color: #6b4d00;
-    border-radius: var(--dono-radius-sm, #{$radius-sm-fallback});
+    border-radius: var(--giveflow-radius-sm, #{$radius-sm-fallback});
     font-size: 13px;
 }
 
-.dono-block-note {
+.giveflow-block-note {
     font-size: 12px;
     margin: 6px 0 12px;
-    color: var(--dono-text, #{$text-fallback});
+    color: var(--giveflow-text, #{$text-fallback});
     line-height: 1.45;
 
     strong { font-weight: 500; }
 
-    &--muted { color: var(--dono-text-muted, #{$text-muted-fallback}); font-style: italic; }
+    &--muted { color: var(--giveflow-text-muted, #{$text-muted-fallback}); font-style: italic; }
 
     &__pill {
         display: inline-block;
@@ -55,8 +55,8 @@ $shadow-fallback:     0 20px 50px rgba(0, 0, 0, .25);
         font-weight: 500;
         text-transform: uppercase;
         letter-spacing: .04em;
-        background: var(--dono-bg-soft, #{$bg-soft-fallback});
-        color: var(--dono-text-muted, #{$text-muted-fallback});
+        background: var(--giveflow-bg-soft, #{$bg-soft-fallback});
+        color: var(--giveflow-text-muted, #{$text-muted-fallback});
         border-radius: 9px;
         vertical-align: middle;
     }
@@ -64,59 +64,59 @@ $shadow-fallback:     0 20px 50px rgba(0, 0, 0, .25);
 
 // Deliberately not a card: one stat per block means several sit side by side,
 // and a border each would draw a grid nobody asked for.
-.dono-block--stat {
-    .dono-stat__label {
+.giveflow-block--stat {
+    .giveflow-stat__label {
         font-size: 12px;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: .06em;
-        color: var(--dono-text-muted, #{$text-muted-fallback});
+        color: var(--giveflow-text-muted, #{$text-muted-fallback});
     }
-    .dono-stat__value {
+    .giveflow-stat__value {
         margin-top: 4px;
         font-size: 30px;
         font-weight: 800;
         letter-spacing: -.02em;
-        color: var(--dono-text, #{$text-fallback});
+        color: var(--giveflow-text, #{$text-fallback});
         line-height: 1.1;
         font-variant-numeric: tabular-nums;
     }
 
-    &.is-sm .dono-stat__value { font-size: 21px; }
-    &.is-lg .dono-stat__value { font-size: 42px; letter-spacing: -.028em; }
+    &.is-sm .giveflow-stat__value { font-size: 21px; }
+    &.is-lg .giveflow-stat__value { font-size: 42px; letter-spacing: -.028em; }
 }
 
 // Editor only: a stat whose figure this campaign cannot answer. Dashed and
 // muted rather than red, because nothing is wrong; the number does not exist
 // yet, and on the page the block simply renders nothing.
-.dono-stat-empty {
+.giveflow-stat-empty {
     padding: 14px 16px;
-    border: 1px dashed var(--dono-border, #{$border-fallback});
-    border-radius: var(--dono-radius-sm, #{$radius-sm-fallback});
-    background: var(--dono-bg-soft, #{$bg-soft-fallback});
+    border: 1px dashed var(--giveflow-border, #{$border-fallback});
+    border-radius: var(--giveflow-radius-sm, #{$radius-sm-fallback});
+    background: var(--giveflow-bg-soft, #{$bg-soft-fallback});
 
     &__label {
         font-size: 12px;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: .06em;
-        color: var(--dono-text-muted, #{$text-muted-fallback});
+        color: var(--giveflow-text-muted, #{$text-muted-fallback});
     }
 
     &__note {
         margin: 6px 0 0;
         font-size: 13px;
         line-height: 1.45;
-        color: var(--dono-text-muted, #{$text-muted-fallback});
+        color: var(--giveflow-text-muted, #{$text-muted-fallback});
     }
 }
 
 // aspect-ratio with object-fit so a portrait upload and a landscape one crop to
 // the same shape rather than shoving the page around.
-.dono-block--image {
+.giveflow-block--image {
     margin: 0;
 
-    .dono-block__image {
+    .giveflow-block__image {
         display: block;
         width: 100%;
         height: 100%;
@@ -125,18 +125,18 @@ $shadow-fallback:     0 20px 50px rgba(0, 0, 0, .25);
 
     &.is-rounded {
         overflow: hidden;
-        border-radius: var(--dono-radius, #{$radius-fallback});
+        border-radius: var(--giveflow-radius, #{$radius-fallback});
     }
 
-    &.is-ratio-16-9 .dono-block__image { aspect-ratio: 16 / 9; }
-    &.is-ratio-3-2  .dono-block__image { aspect-ratio: 3 / 2; }
-    &.is-ratio-4-3  .dono-block__image { aspect-ratio: 4 / 3; }
-    &.is-ratio-1-1  .dono-block__image { aspect-ratio: 1 / 1; }
-    &.is-ratio-auto .dono-block__image { aspect-ratio: auto; height: auto; }
+    &.is-ratio-16-9 .giveflow-block__image { aspect-ratio: 16 / 9; }
+    &.is-ratio-3-2  .giveflow-block__image { aspect-ratio: 3 / 2; }
+    &.is-ratio-4-3  .giveflow-block__image { aspect-ratio: 4 / 3; }
+    &.is-ratio-1-1  .giveflow-block__image { aspect-ratio: 1 / 1; }
+    &.is-ratio-auto .giveflow-block__image { aspect-ratio: auto; height: auto; }
 }
 
-.dono-block--progress {
-    .dono-progress__labels {
+.giveflow-block--progress {
+    .giveflow-progress__labels {
         display: flex;
         align-items: flex-end;
         justify-content: space-between;
@@ -144,45 +144,45 @@ $shadow-fallback:     0 20px 50px rgba(0, 0, 0, .25);
         gap: 8px;
         margin-bottom: 10px;
     }
-    .dono-progress__value {
+    .giveflow-progress__value {
         font-size: 24px;
         font-weight: 700;
-        color: var(--dono-accent, #{$accent-fallback});
+        color: var(--giveflow-accent, #{$accent-fallback});
         font-variant-numeric: tabular-nums;
     }
-    .dono-progress__caption {
+    .giveflow-progress__caption {
         margin-left: 6px;
         font-size: 13px;
-        color: var(--dono-text-muted, #{$text-muted-fallback});
+        color: var(--giveflow-text-muted, #{$text-muted-fallback});
         text-transform: lowercase;
     }
-    .dono-progress__target {
+    .giveflow-progress__target {
         font-size: 13px;
-        color: var(--dono-text-muted, #{$text-muted-fallback});
+        color: var(--giveflow-text-muted, #{$text-muted-fallback});
         font-variant-numeric: tabular-nums;
     }
-    .dono-progress__bar {
+    .giveflow-progress__bar {
         height: 14px;
-        background: var(--dono-bg-soft, #{$bg-soft-fallback});
+        background: var(--giveflow-bg-soft, #{$bg-soft-fallback});
         border-radius: 999px;
         overflow: hidden;
     }
-    .dono-progress__bar-fill {
+    .giveflow-progress__bar-fill {
         height: 100%;
-        background: linear-gradient(90deg, var(--dono-accent, #{$accent-fallback}), color-mix(in srgb, var(--dono-accent, #{$accent-fallback}) 65%, #fff));
+        background: linear-gradient(90deg, var(--giveflow-accent, #{$accent-fallback}), color-mix(in srgb, var(--giveflow-accent, #{$accent-fallback}) 65%, #fff));
         border-radius: 999px;
         transition: width .35s ease;
     }
 }
 
-.dono-block--donate-button {
+.giveflow-block--donate-button {
     &.is-align-left   { text-align: left; }
     &.is-align-center { text-align: center; }
     &.is-align-right  { text-align: right; }
 
-    .dono-donate-button {
+    .giveflow-donate-button {
         display: inline-block;
-        background: var(--dono-accent, #{$accent-fallback});
+        background: var(--giveflow-accent, #{$accent-fallback});
         color: #fff;
         font-size: 15px;
         font-weight: 500;
@@ -195,16 +195,16 @@ $shadow-fallback:     0 20px 50px rgba(0, 0, 0, .25);
 
         &:hover { filter: brightness(.92); }
         &.is-disabled {
-            background: var(--dono-text-muted, #{$text-muted-fallback});
+            background: var(--giveflow-text-muted, #{$text-muted-fallback});
             cursor: not-allowed;
             opacity: .8;
         }
     }
 }
 
-body.dono-modal-open { overflow: hidden; }
+body.giveflow-modal-open { overflow: hidden; }
 
-.dono-donate-modal {
+.giveflow-donate-modal {
     position: fixed;
     inset: 0;
     z-index: 999999;
@@ -212,7 +212,7 @@ body.dono-modal-open { overflow: hidden; }
     &[hidden] { display: none; }
 
     &.is-open {
-        animation: dono-modal-in .15s ease;
+        animation: giveflow-modal-in .15s ease;
     }
 
     &__backdrop {
@@ -226,9 +226,9 @@ body.dono-modal-open { overflow: hidden; }
         max-width: 540px;
         margin: 5vh auto;
         max-height: 90vh;
-        background: var(--dono-bg, #{$bg-fallback});
-        border-radius: var(--dono-radius, #{$radius-fallback});
-        box-shadow: var(--dono-card-shadow, #{$shadow-fallback});
+        background: var(--giveflow-bg, #{$bg-fallback});
+        border-radius: var(--giveflow-radius, #{$radius-fallback});
+        box-shadow: var(--giveflow-card-shadow, #{$shadow-fallback});
         overflow: auto;
         padding: 32px 28px 24px;
     }
@@ -246,39 +246,39 @@ body.dono-modal-open { overflow: hidden; }
         border: 0;
         border-radius: 50%;
         cursor: pointer;
-        color: var(--dono-text-muted, #{$text-muted-fallback});
+        color: var(--giveflow-text-muted, #{$text-muted-fallback});
 
         &:hover {
-            background: var(--dono-bg-soft, #{$bg-soft-fallback});
-            color: var(--dono-text, #{$text-fallback});
+            background: var(--giveflow-bg-soft, #{$bg-soft-fallback});
+            color: var(--giveflow-text, #{$text-fallback});
         }
     }
 }
 
-@keyframes dono-modal-in {
+@keyframes giveflow-modal-in {
     from { opacity: 0; }
     to   { opacity: 1; }
 }
 
-.dono-block__title {
+.giveflow-block__title {
     margin: 0 0 16px;
     font-size: 20px;
     font-weight: 600;
     line-height: 1.25;
-    color: var(--dono-text, #{$text-fallback});
+    color: var(--giveflow-text, #{$text-fallback});
 }
 
-.dono-block__empty {
+.giveflow-block__empty {
     margin: 0;
     padding: 16px 20px;
-    border: 1px dashed var(--dono-border, #{$border-fallback});
-    background: var(--dono-bg-soft, #fafafa);
-    color: var(--dono-text-muted, #{$text-muted-fallback});
-    border-radius: var(--dono-radius-sm, #{$radius-sm-fallback});
+    border: 1px dashed var(--giveflow-border, #{$border-fallback});
+    background: var(--giveflow-bg-soft, #fafafa);
+    color: var(--giveflow-text-muted, #{$text-muted-fallback});
+    border-radius: var(--giveflow-radius-sm, #{$radius-sm-fallback});
     font-size: 13px;
 }
 
-.dono-empty {
+.giveflow-empty {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -286,56 +286,56 @@ body.dono-modal-open { overflow: hidden; }
     gap: 8px;
     padding: 28px 24px;
     border-style: solid;
-    background: var(--dono-bg, #fff);
-    color: var(--dono-text, #{$text-fallback});
+    background: var(--giveflow-bg, #fff);
+    color: var(--giveflow-text, #{$text-fallback});
 }
 
-.dono-empty__icon {
-    color: var(--dono-text-muted, #{$text-muted-fallback});
+.giveflow-empty__icon {
+    color: var(--giveflow-text-muted, #{$text-muted-fallback});
     line-height: 0;
     margin-bottom: 4px;
 }
 
-.dono-empty__title {
+.giveflow-empty__title {
     margin: 0;
     font-size: 17px;
-    font-weight: var(--dono-heading-weight, 600);
-    color: var(--dono-text, #{$text-fallback});
+    font-weight: var(--giveflow-heading-weight, 600);
+    color: var(--giveflow-text, #{$text-fallback});
 }
 
-.dono-empty__sub {
+.giveflow-empty__sub {
     margin: 0;
     font-size: 14px;
-    color: var(--dono-text-muted, #{$text-muted-fallback});
+    color: var(--giveflow-text-muted, #{$text-muted-fallback});
 }
 
 // ServerSideRender suppresses its own <h3> (REST_REQUEST) so the editor's
 // inline RichText title is the one shown; style it to match the frontend.
-.dono-campaign-block-edit {
+.giveflow-campaign-block-edit {
     &__title {
         margin: 0 0 16px;
         font-size: 20px;
         font-weight: 600;
         line-height: 1.25;
-        color: var(--dono-text, #{$text-fallback});
+        color: var(--giveflow-text, #{$text-fallback});
 
         &[data-rich-text-placeholder]::before,
         &:empty::before {
-            color: var(--dono-text-muted, #{$text-muted-fallback});
+            color: var(--giveflow-text-muted, #{$text-muted-fallback});
             opacity: .65;
         }
     }
 }
 
-.dono-block--top-donors {
-    .dono-top-donors__list {
+.giveflow-block--top-donors {
+    .giveflow-top-donors__list {
         list-style: none;
         margin: 0;
         padding: 0;
-        counter-reset: dono-top-donor;
+        counter-reset: giveflow-top-donor;
     }
 
-    .dono-top-donors__row {
+    .giveflow-top-donors__row {
         display: flex;
         // Wrap is the narrow-container fallback only: the row is avatar, name
         // and amount, and they fit on one line at any sane width.
@@ -346,44 +346,44 @@ body.dono-modal-open { overflow: hidden; }
         // are avatar-led lists and a shared left edge is what makes them read
         // as one column.
         padding: 12px 0;
-        border-bottom: 1px solid var(--dono-border, #{$border-fallback});
+        border-bottom: 1px solid var(--giveflow-border, #{$border-fallback});
 
         &:last-child { border-bottom: 0; }
     }
 
-    .dono-top-donors__name {
+    .giveflow-top-donors__name {
         flex: 1 1 auto;
         min-width: 0;
         font-size: 14px;
         font-weight: 500;
-        color: var(--dono-text, #{$text-fallback});
+        color: var(--giveflow-text, #{$text-fallback});
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
 
         &.is-anonymous {
             font-style: italic;
-            color: var(--dono-text-muted, #{$text-muted-fallback});
+            color: var(--giveflow-text-muted, #{$text-muted-fallback});
             font-weight: 400;
         }
     }
 
-    .dono-top-donors__count {
+    .giveflow-top-donors__count {
         flex: 0 0 auto;
         font-size: 12px;
-        color: var(--dono-text-muted, #{$text-muted-fallback});
+        color: var(--giveflow-text-muted, #{$text-muted-fallback});
         font-variant-numeric: tabular-nums;
     }
 
-    .dono-top-donors__amount {
+    .giveflow-top-donors__amount {
         flex: 0 0 auto;
         font-size: 14px;
         font-weight: 600;
-        color: var(--dono-accent, #{$accent-fallback});
+        color: var(--giveflow-accent, #{$accent-fallback});
         font-variant-numeric: tabular-nums;
     }
 
-    .dono-top-donors__podium .dono-avatar {
+    .giveflow-top-donors__podium .giveflow-avatar {
         align-self: center;
         width: 44px;
         height: 44px;
@@ -391,7 +391,7 @@ body.dono-modal-open { overflow: hidden; }
         margin-bottom: 2px;
     }
 
-    .dono-top-donors__podium {
+    .giveflow-top-donors__podium {
         list-style: none;
         margin: 0 0 16px;
         padding: 0;
@@ -401,10 +401,10 @@ body.dono-modal-open { overflow: hidden; }
         gap: 8px;
     }
 
-    .dono-top-donors__podium-tier {
-        background: var(--dono-bg, #{$bg-fallback});
-        border: 1px solid var(--dono-border, #{$border-fallback});
-        border-radius: var(--dono-radius, #{$radius-fallback});
+    .giveflow-top-donors__podium-tier {
+        background: var(--giveflow-bg, #{$bg-fallback});
+        border: 1px solid var(--giveflow-border, #{$border-fallback});
+        border-radius: var(--giveflow-radius, #{$radius-fallback});
         padding: 16px 12px 18px;
         text-align: center;
         display: flex;
@@ -413,10 +413,10 @@ body.dono-modal-open { overflow: hidden; }
 
         &--1 {
             min-height: 160px;
-            border-color: var(--dono-accent, #{$accent-fallback});
+            border-color: var(--giveflow-accent, #{$accent-fallback});
             box-shadow: 0 4px 14px #{$accent-soft};
-            .dono-top-donors__podium-rank {
-                background: var(--dono-accent, #{$accent-fallback});
+            .giveflow-top-donors__podium-rank {
+                background: var(--giveflow-accent, #{$accent-fallback});
                 color: #fff;
             }
         }
@@ -424,7 +424,7 @@ body.dono-modal-open { overflow: hidden; }
         &--3 { min-height: 120px; }
     }
 
-    .dono-top-donors__podium-rank {
+    .giveflow-top-donors__podium-rank {
         align-self: center;
         display: inline-flex;
         align-items: center;
@@ -432,120 +432,120 @@ body.dono-modal-open { overflow: hidden; }
         width: 32px;
         height: 32px;
         border-radius: 50%;
-        background: var(--dono-bg-soft, #{$bg-soft-fallback});
-        color: var(--dono-text, #{$text-fallback});
+        background: var(--giveflow-bg-soft, #{$bg-soft-fallback});
+        color: var(--giveflow-text, #{$text-fallback});
         font-size: 13px;
         font-weight: 700;
         font-variant-numeric: tabular-nums;
         margin-bottom: 4px;
     }
 
-    .dono-top-donors__podium-name {
+    .giveflow-top-donors__podium-name {
         font-size: 14px;
         font-weight: 600;
-        color: var(--dono-text, #{$text-fallback});
+        color: var(--giveflow-text, #{$text-fallback});
         word-break: break-word;
 
         &.is-anonymous {
             font-style: italic;
-            color: var(--dono-text-muted, #{$text-muted-fallback});
+            color: var(--giveflow-text-muted, #{$text-muted-fallback});
             font-weight: 500;
         }
     }
 
-    .dono-top-donors__podium-amount {
+    .giveflow-top-donors__podium-amount {
         font-size: 14px;
         font-weight: 600;
-        color: var(--dono-accent, #{$accent-fallback});
+        color: var(--giveflow-accent, #{$accent-fallback});
         font-variant-numeric: tabular-nums;
     }
 
-    .dono-top-donors__podium-count {
+    .giveflow-top-donors__podium-count {
         font-size: 11px;
-        color: var(--dono-text-muted, #{$text-muted-fallback});
+        color: var(--giveflow-text-muted, #{$text-muted-fallback});
         font-variant-numeric: tabular-nums;
     }
 
     @media (max-width: 480px) {
-        .dono-top-donors__podium {
+        .giveflow-top-donors__podium {
             grid-template-columns: 1fr;
         }
-        .dono-top-donors__podium-tier {
+        .giveflow-top-donors__podium-tier {
             min-height: auto !important;
         }
     }
 }
 
-.dono-block--recent-donations {
-    .dono-recent-donations__list {
+.giveflow-block--recent-donations {
+    .giveflow-recent-donations__list {
         list-style: none;
         margin: 0;
         padding: 0;
     }
 
-    .dono-recent-donations__item {
+    .giveflow-recent-donations__item {
         display: flex;
         align-items: flex-start;
         gap: 12px;
         padding: 12px 0;
-        border-bottom: 1px solid var(--dono-border, #{$border-fallback});
+        border-bottom: 1px solid var(--giveflow-border, #{$border-fallback});
 
         &:last-child { border-bottom: 0; }
     }
 
-    .dono-recent-donations__content {
+    .giveflow-recent-donations__content {
         flex: 1;
         min-width: 0;
     }
 
-    .dono-recent-donations__header {
+    .giveflow-recent-donations__header {
         display: flex;
         align-items: baseline;
         justify-content: space-between;
         gap: 12px;
     }
 
-    .dono-recent-donations__name {
+    .giveflow-recent-donations__name {
         font-size: 14px;
         font-weight: 500;
-        color: var(--dono-text, #{$text-fallback});
+        color: var(--giveflow-text, #{$text-fallback});
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
 
         &.is-anonymous {
             font-style: italic;
-            color: var(--dono-text-muted, #{$text-muted-fallback});
+            color: var(--giveflow-text-muted, #{$text-muted-fallback});
             font-weight: 400;
         }
     }
 
-    .dono-recent-donations__amount {
+    .giveflow-recent-donations__amount {
         flex: 0 0 auto;
         font-size: 14px;
         font-weight: 600;
-        color: var(--dono-accent, #{$accent-fallback});
+        color: var(--giveflow-accent, #{$accent-fallback});
         font-variant-numeric: tabular-nums;
     }
 
-    .dono-recent-donations__meta {
+    .giveflow-recent-donations__meta {
         margin-top: 4px;
         display: flex;
         flex-direction: column;
         gap: 6px;
     }
 
-    .dono-recent-donations__time {
+    .giveflow-recent-donations__time {
         font-size: 12px;
-        color: var(--dono-text-muted, #{$text-muted-fallback});
+        color: var(--giveflow-text-muted, #{$text-muted-fallback});
     }
 
-    .dono-recent-donations__message {
+    .giveflow-recent-donations__message {
         margin: 0;
         padding: 8px 12px;
-        border-left: 3px solid var(--dono-accent, #{$accent-fallback});
-        background: var(--dono-bg-soft, #f9fafb);
-        color: var(--dono-text, #{$text-fallback});
+        border-left: 3px solid var(--giveflow-accent, #{$accent-fallback});
+        background: var(--giveflow-bg-soft, #f9fafb);
+        color: var(--giveflow-text, #{$text-fallback});
         font-style: italic;
         font-size: 13px;
         line-height: 1.5;
@@ -553,8 +553,8 @@ body.dono-modal-open { overflow: hidden; }
     }
 }
 
-.dono-block--supporter-wall {
-    .dono-supporter-wall {
+.giveflow-block--supporter-wall {
+    .giveflow-supporter-wall {
         list-style: none;
         margin: 0;
         padding: 0;
@@ -563,10 +563,10 @@ body.dono-modal-open { overflow: hidden; }
         gap: 12px;
     }
 
-    .dono-supporter-wall__card {
-        background: var(--dono-bg, #{$bg-fallback});
-        border: 1px solid var(--dono-border, #{$border-fallback});
-        border-radius: var(--dono-radius, 10px);
+    .giveflow-supporter-wall__card {
+        background: var(--giveflow-bg, #{$bg-fallback});
+        border: 1px solid var(--giveflow-border, #{$border-fallback});
+        border-radius: var(--giveflow-radius, 10px);
         padding: 14px 16px;
         display: flex;
         flex-direction: column;
@@ -577,34 +577,34 @@ body.dono-modal-open { overflow: hidden; }
         }
     }
 
-    .dono-supporter-wall__top {
+    .giveflow-supporter-wall__top {
         display: flex;
         align-items: center;
         gap: 10px;
 
-        .dono-avatar { width: 32px; height: 32px; font-size: 13px; }
+        .giveflow-avatar { width: 32px; height: 32px; font-size: 13px; }
     }
 
-    .dono-supporter-wall__name {
+    .giveflow-supporter-wall__name {
         font-size: 14px;
         font-weight: 600;
-        color: var(--dono-text, #{$text-fallback});
+        color: var(--giveflow-text, #{$text-fallback});
         word-break: break-word;
     }
 
-    .dono-supporter-wall__amount {
+    .giveflow-supporter-wall__amount {
         font-size: 12px;
         font-weight: 600;
-        color: var(--dono-accent, #{$accent-fallback});
+        color: var(--giveflow-accent, #{$accent-fallback});
         font-variant-numeric: tabular-nums;
     }
 
-    .dono-supporter-wall__message {
+    .giveflow-supporter-wall__message {
         margin: 0;
         padding: 0;
         font-size: 13px;
         line-height: 1.45;
-        color: var(--dono-text-muted, #{$text-muted-fallback});
+        color: var(--giveflow-text-muted, #{$text-muted-fallback});
         font-style: italic;
 
         &::before { content: '\201C'; }
@@ -612,10 +612,10 @@ body.dono-modal-open { overflow: hidden; }
     }
 
     @media (max-width: 480px) {
-        .dono-supporter-wall {
+        .giveflow-supporter-wall {
             grid-template-columns: 1fr;
         }
-        .dono-supporter-wall__card.has-message {
+        .giveflow-supporter-wall__card.has-message {
             grid-column: span 1;
         }
     }
@@ -624,71 +624,71 @@ body.dono-modal-open { overflow: hidden; }
 // Left alignment, "md" size and "auto" columns are the base styles above, so
 // only the non-default cases need rules.
 
-.dono-block--stat.is-align-center { text-align: center; }
-.dono-block--stat.is-align-right  { text-align: right; }
+.giveflow-block--stat.is-align-center { text-align: center; }
+.giveflow-block--stat.is-align-right  { text-align: right; }
 
-.dono-block--progress.is-align-center .dono-progress__labels {
+.giveflow-block--progress.is-align-center .giveflow-progress__labels {
     justify-content: center;
     text-align: center;
 }
 
-.dono-block--donate-button {
-    .dono-donate-button {
+.giveflow-block--donate-button {
+    .giveflow-donate-button {
         &.is-size-sm { padding: 8px 18px;  font-size: 13px; }
         &.is-size-lg { padding: 16px 32px; font-size: 17px; }
     }
 
-    &.is-full-width .dono-donate-button {
+    &.is-full-width .giveflow-donate-button {
         display: block;
         width: 100%;
         text-align: center;
     }
 }
 
-.dono-block--supporter-wall {
-    .dono-supporter-wall {
+.giveflow-block--supporter-wall {
+    .giveflow-supporter-wall {
         &.is-cols-2 { grid-template-columns: repeat(2, 1fr); }
         &.is-cols-3 { grid-template-columns: repeat(3, 1fr); }
         &.is-cols-4 { grid-template-columns: repeat(4, 1fr); }
     }
 
     @media (max-width: 480px) {
-        .dono-supporter-wall.is-cols-2,
-        .dono-supporter-wall.is-cols-3,
-        .dono-supporter-wall.is-cols-4 {
+        .giveflow-supporter-wall.is-cols-2,
+        .giveflow-supporter-wall.is-cols-3,
+        .giveflow-supporter-wall.is-cols-4 {
             grid-template-columns: 1fr;
         }
     }
 }
 
-.dono-block--grid {
+.giveflow-block--grid {
     margin: 28px 0 24px;
 }
-.dono-grid__head {
+.giveflow-grid__head {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
     gap: 16px;
     margin-bottom: 18px;
 }
-.dono-grid__title {
+.giveflow-grid__title {
     margin: 0;
     font-size: 22px;
     font-weight: 800;
     letter-spacing: -.02em;
-    color: var(--dono-text, #{$text-fallback});
+    color: var(--giveflow-text, #{$text-fallback});
 }
-.dono-campaign-grid {
+.giveflow-campaign-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 20px;
 }
-.dono-campaign-card {
+.giveflow-campaign-card {
     display: flex;
     flex-direction: column;
-    background: var(--dono-bg, #{$bg-fallback});
-    border: 1px solid var(--dono-border, #{$border-fallback});
-    border-radius: var(--dono-radius, #{$radius-fallback});
+    background: var(--giveflow-bg, #{$bg-fallback});
+    border: 1px solid var(--giveflow-border, #{$border-fallback});
+    border-radius: var(--giveflow-radius, #{$radius-fallback});
     box-shadow: 0 1px 2px rgba(15, 23, 42, .06);
     overflow: hidden;
     text-decoration: none;
@@ -698,7 +698,7 @@ body.dono-modal-open { overflow: hidden; }
     &:hover {
         transform: translateY(-3px);
         box-shadow: 0 10px 28px rgba(15, 23, 42, .12);
-        border-color: color-mix(in srgb, var(--dono-accent, #{$accent-fallback}) 35%, var(--dono-border, #{$border-fallback}));
+        border-color: color-mix(in srgb, var(--giveflow-accent, #{$accent-fallback}) 35%, var(--giveflow-border, #{$border-fallback}));
     }
     &.is-inert { pointer-events: none; cursor: default; }
 
@@ -712,7 +712,7 @@ body.dono-modal-open { overflow: hidden; }
         &.is-placeholder {
             background:
                 radial-gradient(130% 120% at 12% 0%, rgba(255, 255, 255, .22), transparent 50%),
-                linear-gradient(135deg, var(--dono-accent, #{$accent-fallback}), color-mix(in srgb, var(--dono-accent, #{$accent-fallback}) 55%, #08160f));
+                linear-gradient(135deg, var(--giveflow-accent, #{$accent-fallback}), color-mix(in srgb, var(--giveflow-accent, #{$accent-fallback}) 55%, #08160f));
         }
     }
 
@@ -722,13 +722,13 @@ body.dono-modal-open { overflow: hidden; }
         display: block;
         margin: 0 0 6px;
         font-size: 17px; font-weight: 700; letter-spacing: -.01em; line-height: 1.3;
-        color: var(--dono-text, #{$text-fallback});
+        color: var(--giveflow-text, #{$text-fallback});
     }
 
     &__blurb {
         margin: 0 0 16px;
         font-size: 13.5px; line-height: 1.55;
-        color: var(--dono-text-muted, #{$text-muted-fallback});
+        color: var(--giveflow-text-muted, #{$text-muted-fallback});
         display: -webkit-box;
         -webkit-line-clamp: 2;
         line-clamp: 2;
@@ -741,7 +741,7 @@ body.dono-modal-open { overflow: hidden; }
     &__bar {
         display: block;
         height: 8px;
-        background: var(--dono-bg-soft, #{$bg-soft-fallback});
+        background: var(--giveflow-bg-soft, #{$bg-soft-fallback});
         border-radius: 999px;
         overflow: hidden;
         margin-bottom: 8px;
@@ -749,14 +749,14 @@ body.dono-modal-open { overflow: hidden; }
         > span {
             display: block;
             height: 100%;
-            background: linear-gradient(90deg, var(--dono-accent, #{$accent-fallback}), color-mix(in srgb, var(--dono-accent, #{$accent-fallback}) 70%, #fff));
+            background: linear-gradient(90deg, var(--giveflow-accent, #{$accent-fallback}), color-mix(in srgb, var(--giveflow-accent, #{$accent-fallback}) 70%, #fff));
             border-radius: 999px;
         }
     }
 
     &__meta { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-size: 13px; }
-    &__raised { font-weight: 700; color: var(--dono-text, #{$text-fallback}); }
-    &__goal   { color: var(--dono-text-muted, #{$text-muted-fallback}); }
+    &__raised { font-weight: 700; color: var(--giveflow-text, #{$text-fallback}); }
+    &__goal   { color: var(--giveflow-text-muted, #{$text-muted-fallback}); }
 
     &__foot {
         display: flex;
@@ -765,18 +765,18 @@ body.dono-modal-open { overflow: hidden; }
         gap: 10px;
         margin-top: 16px;
         padding-top: 14px;
-        border-top: 1px solid var(--dono-border, #{$border-fallback});
+        border-top: 1px solid var(--giveflow-border, #{$border-fallback});
     }
     &__pct {
         font-size: 12.5px; font-weight: 700;
-        color: var(--dono-accent, #{$accent-fallback});
+        color: var(--giveflow-accent, #{$accent-fallback});
         background: #{$accent-soft};
         padding: 3px 10px; border-radius: 999px;
     }
     &__link {
         display: inline-flex; align-items: center; gap: 6px;
         font-size: 13.5px; font-weight: 700;
-        color: var(--dono-accent, #{$accent-fallback});
+        color: var(--giveflow-accent, #{$accent-fallback});
 
         svg { display: block; transition: transform .12s; }
     }
@@ -785,25 +785,25 @@ body.dono-modal-open { overflow: hidden; }
 
 // The form centres itself with its own `margin: 0 auto` and max-width, so no
 // alignment handling belongs here.
-.dono-block--donation-form {
+.giveflow-block--donation-form {
     margin: 0 0 24px;
 }
-.dono-donation-form__placeholder {
+.giveflow-donation-form__placeholder {
     display: flex;
     flex-direction: column;
     gap: 4px;
     padding: 28px;
     text-align: center;
-    border: 1px dashed var(--dono-border, #{$border-fallback});
-    border-radius: var(--dono-radius, #{$radius-fallback});
-    background: var(--dono-bg-soft, #{$bg-soft-fallback});
-    color: var(--dono-text-muted, #{$text-muted-fallback});
+    border: 1px dashed var(--giveflow-border, #{$border-fallback});
+    border-radius: var(--giveflow-radius, #{$radius-fallback});
+    background: var(--giveflow-bg-soft, #{$bg-soft-fallback});
+    color: var(--giveflow-text-muted, #{$text-muted-fallback});
 
-    strong { color: var(--dono-text, #{$text-fallback}); font-size: 15px; }
+    strong { color: var(--giveflow-text, #{$text-fallback}); font-size: 15px; }
     span   { font-size: 13px; }
 }
 
-.dono-avatar {
+.giveflow-avatar {
     position: relative;
     overflow: hidden;
     flex: 0 0 auto;
@@ -819,8 +819,8 @@ body.dono-modal-open { overflow: hidden; }
     line-height: 1;
 
     &--anon {
-        background: var(--dono-bg-soft, #{$bg-soft-fallback});
-        color: var(--dono-text-muted, #{$text-muted-fallback});
+        background: var(--giveflow-bg-soft, #{$bg-soft-fallback});
+        color: var(--giveflow-text-muted, #{$text-muted-fallback});
     }
 
     // Sits over the initial, so a donor with no picture on file keeps their
@@ -838,15 +838,15 @@ body.dono-modal-open { overflow: hidden; }
 // One shared rail: campaign blocks align to the same 1080px container as the
 // P2P sections and the start page. Last in the file so the centering wins over
 // the per-block margin shorthands above.
-.dono-block--image,
-.dono-block--stat,
-.dono-block--progress,
-.dono-block--donate-button,
-.dono-block--top-donors,
-.dono-block--recent-donations,
-.dono-block--supporter-wall,
-.dono-block--grid,
-.dono-block--donation-form {
+.giveflow-block--image,
+.giveflow-block--stat,
+.giveflow-block--progress,
+.giveflow-block--donate-button,
+.giveflow-block--top-donors,
+.giveflow-block--recent-donations,
+.giveflow-block--supporter-wall,
+.giveflow-block--grid,
+.giveflow-block--donation-form {
     box-sizing: border-box;
     max-width: 1080px;
     margin-left: auto;
@@ -854,7 +854,7 @@ body.dono-modal-open { overflow: hidden; }
 }
 
 /* The campaign's cover photo, edited from the block that shows it. */
-.dono-block-image-picker {
+.giveflow-block-image-picker {
     margin: 0 0 16px;
 
     &__preview {

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Donors;
+namespace GiveFlow\Donors;
 
 defined('ABSPATH') || exit;
 
-use Dono\Vendor\Queryable\Model;
-use Dono\Vendor\Queryable\Schema\Table;
+use GiveFlow\Vendor\Queryable\Model;
+use GiveFlow\Vendor\Queryable\Schema\Table;
 
 /**
  * Internal fundraiser notes on a donor. Body is encrypted; author is a WP
@@ -17,7 +17,7 @@ use Dono\Vendor\Queryable\Schema\Table;
  */
 final class DonorNote extends Model
 {
-    protected string $table = 'dono_donor_notes';
+    protected string $table = 'giveflow_donor_notes';
     protected string $version = '1.0.0';
 
     public int $id;

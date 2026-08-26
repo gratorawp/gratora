@@ -6,14 +6,14 @@ import { test, expect } from '@playwright/test';
  * open set is still valid. The portal has to keep the donor signed in on that
  * second open rather than showing the sign-in screen.
  *
- * Needs its own fresh single-use link in DONO_E2E_PORTAL_REOPEN_URL (the p2p
- * portal spec consumes DONO_E2E_PORTAL_URL, so the two cannot share one); the
+ * Needs its own fresh single-use link in GIVEFLOW_E2E_PORTAL_REOPEN_URL (the p2p
+ * portal spec consumes GIVEFLOW_E2E_PORTAL_URL, so the two cannot share one); the
  * donor's admin profile shows one.
  */
 test.describe('Donor portal magic link', () => {
     test('re-opening the same link keeps the donor signed in', async ({ page }) => {
-        const link = process.env.DONO_E2E_PORTAL_REOPEN_URL;
-        test.skip(! link, 'set DONO_E2E_PORTAL_REOPEN_URL to a fresh single-use portal link');
+        const link = process.env.GIVEFLOW_E2E_PORTAL_REOPEN_URL;
+        test.skip(! link, 'set GIVEFLOW_E2E_PORTAL_REOPEN_URL to a fresh single-use portal link');
 
         await page.goto(link!);
 

@@ -69,12 +69,12 @@ function config() {
 
 function addForm( cfg ) {
     const form = document.createElement( 'form' );
-    form.className = 'dono-donation-form';
-    form.id = 'dono-form-1';
+    form.className = 'giveflow-donation-form';
+    form.id = 'giveflow-form-1';
 
     const json = document.createElement( 'script' );
     json.type = 'application/json';
-    json.setAttribute( 'data-dono-form-config', '' );
+    json.setAttribute( 'data-giveflow-form-config', '' );
     json.textContent = JSON.stringify( cfg );
     form.appendChild( json );
 
@@ -84,13 +84,13 @@ function addForm( cfg ) {
 }
 
 function returningFrom( reference ) {
-    const search = '?dono_return=1&dono_ref=' + reference
+    const search = '?giveflow_return=1&giveflow_ref=' + reference
         + '&payment_intent_client_secret=pi_probe_secret';
     captureNavigation( search );
-    window.sessionStorage.setItem( 'dono:pending-donation', JSON.stringify( {
+    window.sessionStorage.setItem( 'giveflow:pending-donation', JSON.stringify( {
         reference,
         statusToken: 'tok',
-        formKey:     'dono-form-1',
+        formKey:     'giveflow-form-1',
         amountCents: 1000,
         currency:    'EUR',
     } ) );
@@ -115,18 +115,18 @@ let listener = null;
 // hold the next test's redirect open.
 function listen( handler ) {
     listener = handler;
-    window.addEventListener( 'dono:donation:completed', listener );
+    window.addEventListener( 'giveflow:donation:completed', listener );
 }
 
 beforeEach( () => {
     document.body.innerHTML = '';
     window.sessionStorage.clear();
     mockStatus = 'succeeded';
-    returningFrom( 'DONO-2026-00042' );
+    returningFrom( 'GIVEFLOW-2026-00042' );
 } );
 
 afterEach( () => {
-    if ( listener ) window.removeEventListener( 'dono:donation:completed', listener );
+    if ( listener ) window.removeEventListener( 'giveflow:donation:completed', listener );
     listener = null;
     jest.useRealTimers();
 } );

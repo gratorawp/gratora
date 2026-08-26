@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
-use Dono\Donations\DonationService;
-use Dono\Donors\Donor;
-use Dono\Foundation\Helpers\Money;
-use Dono\Foundation\Helpers\View;
-use Dono\Foundation\Plugin;
-use Dono\Foundation\Upgrade\RestoreReceiptsRetainingMoney;
-use Dono\Receipts\Receipt;
-use Dono\Receipts\ReceiptContext;
-use Dono\Receipts\ReceiptIssuer;
-use Dono\Receipts\ReceiptRenderer;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationService;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Foundation\Helpers\Money;
+use GiveFlow\Foundation\Helpers\View;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Foundation\Upgrade\RestoreReceiptsRetainingMoney;
+use GiveFlow\Receipts\Receipt;
+use GiveFlow\Receipts\ReceiptContext;
+use GiveFlow\Receipts\ReceiptIssuer;
+use GiveFlow\Receipts\ReceiptRenderer;
 use RuntimeException;
 use WP_REST_Request;
 
@@ -48,7 +48,7 @@ final class PartialRefundReceiptLinkTest extends IntegrationTestCase
         $res = $this->requestDownload($receiptId, $token);
 
         $this->assertSame(410, $res->get_status());
-        $this->assertSame('dono_receipt_voided', $res->get_data()['code']);
+        $this->assertSame('giveflow_receipt_voided', $res->get_data()['code']);
         $this->assertStringContainsString('refunded', (string) $res->get_data()['message']);
     }
 
@@ -125,7 +125,7 @@ final class PartialRefundReceiptLinkTest extends IntegrationTestCase
     private function renderReceiptView(int $amountCents, int $refundedCents): string
     {
         $donation = Donation::make();
-        $donation->reference    = 'DONO-VIEW-' . strtoupper(bin2hex(random_bytes(3)));
+        $donation->reference    = 'GIVEFLOW-VIEW-' . strtoupper(bin2hex(random_bytes(3)));
         $donation->donor_id     = 0;
         $donation->amount_cents = $amountCents;
         $donation->net_cents    = $amountCents;
@@ -193,7 +193,7 @@ final class PartialRefundReceiptLinkTest extends IntegrationTestCase
         };
 
         $swap = static fn (): array => [$spy];
-        add_filter('dono.receipt.renderers', $swap, 99);
+        add_filter('giveflow.receipt.renderers', $swap, 99);
         try {
             $this->requestDownload($receiptId, $token);
         } catch (RuntimeException $e) {
@@ -201,7 +201,7 @@ final class PartialRefundReceiptLinkTest extends IntegrationTestCase
                 throw $e;
             }
         } finally {
-            remove_filter('dono.receipt.renderers', $swap, 99);
+            remove_filter('giveflow.receipt.renderers', $swap, 99);
         }
 
         return $spy->seen;
@@ -209,7 +209,7 @@ final class PartialRefundReceiptLinkTest extends IntegrationTestCase
 
     private function requestDownload(int $receiptId, string $token): \WP_REST_Response
     {
-        $req = new WP_REST_Request('GET', "/dono/v1/receipts/{$receiptId}/download");
+        $req = new WP_REST_Request('GET', "/giveflow/v1/receipts/{$receiptId}/download");
         $req->set_query_params(['token' => $token]);
 
         return rest_do_request($req);
@@ -222,7 +222,7 @@ final class PartialRefundReceiptLinkTest extends IntegrationTestCase
     {
         $mails = $this->captureMails();
 
-        $createReq = new WP_REST_Request('POST', '/dono/v1/donations');
+        $createReq = new WP_REST_Request('POST', '/giveflow/v1/donations');
         $createReq->set_header('content-type', 'application/json');
         $createReq->set_body(json_encode([
             'email'        => 'sarah@example.com',
@@ -233,7 +233,7 @@ final class PartialRefundReceiptLinkTest extends IntegrationTestCase
         ]));
         $reference = rest_do_request($createReq)->get_data()['reference'];
 
-        $confirmReq = new WP_REST_Request('POST', "/dono/v1/donations/{$reference}/confirm");
+        $confirmReq = new WP_REST_Request('POST', "/giveflow/v1/donations/{$reference}/confirm");
         $confirmReq->set_header('content-type', 'application/json');
         $confirmReq->set_body('{}');
         rest_do_request($confirmReq);
@@ -242,7 +242,7 @@ final class PartialRefundReceiptLinkTest extends IntegrationTestCase
 
         $link = null;
         foreach ($mails as $mail) {
-            if (preg_match('#/dono/v1/receipts/(\d+)/download\?token=([a-f0-9]+)#', (string) $mail['message'], $m)) {
+            if (preg_match('#/giveflow/v1/receipts/(\d+)/download\?token=([a-f0-9]+)#', (string) $mail['message'], $m)) {
                 $link = $m;
             }
         }
@@ -256,8 +256,8 @@ final class PartialRefundReceiptLinkTest extends IntegrationTestCase
         return Plugin::instance()->container->get(DonationService::class);
     }
 
-    private function donations(): \Dono\Donations\DonationRepository
+    private function donations(): \GiveFlow\Donations\DonationRepository
     {
-        return Plugin::instance()->container->get(\Dono\Donations\DonationRepository::class);
+        return Plugin::instance()->container->get(\GiveFlow\Donations\DonationRepository::class);
     }
 }

@@ -1,40 +1,44 @@
 /**
- * Re-exports @dono/ui's generic formatters so call sites importing '_shared/format'
- * stay stable; the Dono-specific admin routing helpers stay local.
+ * Re-exports @giveflow/ui's generic formatters so call sites importing '_shared/format'
+ * stay stable; the GiveFlow-specific admin routing helpers stay local.
  */
 import { __ } from '@wordpress/i18n';
-import { currencyDecimals } from '@dono/ui/utils/format';
+import { currencyDecimals } from '@giveflow/ui/utils/format';
 
 export {
-    defaultCurrency,
-    numberFormat,
     currencyDecimals,
     groupDigits,
     formatDate,
     timeAgo,
-} from '@dono/ui/utils/format';
-// Amounts come from the local formatter: the org's "decimal places" preference
-// belongs to the base currency and may only drop places an amount does not use,
-// which is the rule Money::format applies to the same figure server-side.
-export { formatAmount, formatAmountCompact } from '../../_shared/money';
+} from '@giveflow/ui/utils/format';
+// Amounts and the org bridge they read come from the local formatter: the org's
+// "decimal places" preference belongs to the base currency and may only drop
+// places an amount does not use, which is the rule Money::format applies to the
+// same figure server-side.
+export {
+    defaultCurrency,
+    numberFormat,
+    formatAmount,
+    formatAmountCompact,
+} from '../../_shared/money';
 export { default as StatusBadge } from './components/StatusBadge';
 
 // Campaign lifecycle labels (drive the status-filter options on the campaigns
 // list + the detail header). The shared StatusBadge owns its own render map;
 // this is just the campaign-scoped label set for filter dropdowns.
 export const STATUS_LABEL = {
-    draft:     __( 'Draft', 'dono-fundraising-platform' ),
-    published: __( 'Active', 'dono-fundraising-platform' ),
-    archived:  __( 'Archived', 'dono-fundraising-platform' ),
+    draft:     __( 'Draft', 'giveflow-fundraising-campaigns' ),
+    published: __( 'Active', 'giveflow-fundraising-campaigns' ),
+    archived:  __( 'Archived', 'giveflow-fundraising-campaigns' ),
 };
 
 export function listHref() {
-    return `${ window.location.pathname }?page=dono-campaigns`;
+    return `${ window.location.pathname }?page=giveflow-campaigns`;
 }
 
 export function detailHref( id, tab = 'overview' ) {
     const p = new URLSearchParams();
-    p.set( 'page', 'dono-campaigns' );
+    p.set( 'page', 'giveflow-campaigns' );
     p.set( 'view', 'detail' );
     p.set( 'id', String( id ) );
     p.set( 'tab', tab );
@@ -43,7 +47,7 @@ export function detailHref( id, tab = 'overview' ) {
 
 export function formEditorHref( formId ) {
     const p = new URLSearchParams();
-    p.set( 'page', 'dono-forms' );
+    p.set( 'page', 'giveflow-forms' );
     p.set( 'form', String( formId ) );
     return `${ window.location.pathname }?${ p.toString() }`;
 }

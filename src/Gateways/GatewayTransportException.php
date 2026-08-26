@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Gateways;
+namespace GiveFlow\Gateways;
 
 use RuntimeException;
 

@@ -4,7 +4,7 @@ import { __ } from '@wordpress/i18n';
 import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 import { BlockIcons } from '../_shared/block-icons';
 
-const NAME = 'dono/donation-summary';
+const NAME = 'giveflow/donation-summary';
 
 function Edit( { attributes, setAttributes } ) {
     const {
@@ -13,28 +13,28 @@ function Edit( { attributes, setAttributes } ) {
         condition   = DEFAULT_CONDITION,
     } = attributes;
 
-    const blockProps = useBlockProps( { className: 'dono-block-preview dono-block-preview--summary' } );
+    const blockProps = useBlockProps( { className: 'giveflow-block-preview giveflow-block-preview--summary' } );
 
     const rows = [
-        [ __( 'Amount', 'dono-fundraising-platform' ), '-' ],
-        ...( showDonor   ? [ [ __( 'Donor', 'dono-fundraising-platform' ), '-' ], [ __( 'Email', 'dono-fundraising-platform' ), '-' ] ] : [] ),
-        ...( showGateway ? [ [ __( 'Payment method', 'dono-fundraising-platform' ), '-' ] ] : [] ),
-        [ __( 'Total', 'dono-fundraising-platform' ), '-' ],
+        [ __( 'Amount', 'giveflow-fundraising-campaigns' ), '-' ],
+        ...( showDonor   ? [ [ __( 'Donor', 'giveflow-fundraising-campaigns' ), '-' ], [ __( 'Email', 'giveflow-fundraising-campaigns' ), '-' ] ] : [] ),
+        ...( showGateway ? [ [ __( 'Payment method', 'giveflow-fundraising-campaigns' ), '-' ] ] : [] ),
+        [ __( 'Total', 'giveflow-fundraising-campaigns' ), '-' ],
     ];
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Summary', 'dono-fundraising-platform' ) } initialOpen>
+                <PanelBody title={ __( 'Summary', 'giveflow-fundraising-campaigns' ) } initialOpen>
                     <ToggleControl
-                        label={ __( 'Show who is giving', 'dono-fundraising-platform' ) }
-                        help={ __( 'Name, email and country, when the form collects them.', 'dono-fundraising-platform' ) }
+                        label={ __( 'Show who is giving', 'giveflow-fundraising-campaigns' ) }
+                        help={ __( 'Name, email and country, when the form collects them.', 'giveflow-fundraising-campaigns' ) }
                         checked={ showDonor }
                         onChange={ ( v ) => setAttributes( { showDonor: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show payment method', 'dono-fundraising-platform' ) }
+                        label={ __( 'Show payment method', 'giveflow-fundraising-campaigns' ) }
                         checked={ showGateway }
                         onChange={ ( v ) => setAttributes( { showGateway: v } ) }
                         __nextHasNoMarginBottom
@@ -47,9 +47,9 @@ function Edit( { attributes, setAttributes } ) {
             </InspectorControls>
 
             <div { ...blockProps }>
-                <dl className="dono-block-preview__summary">
+                <dl className="giveflow-block-preview__summary">
                     { rows.map( ( [ label, value ] ) => (
-                        <div key={ label } className="dono-block-preview__summary-row">
+                        <div key={ label } className="giveflow-block-preview__summary-row">
                             <dt>{ label }</dt>
                             <dd>{ value }</dd>
                         </div>
@@ -63,9 +63,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Donation summary', 'dono-fundraising-platform' ),
-        description: __( 'Reads back what the donor is about to give. Put it wherever the recap belongs.', 'dono-fundraising-platform' ),
-        category:    'dono-extras',
+        title:       __( 'Donation summary', 'giveflow-fundraising-campaigns' ),
+        description: __( 'Reads back what the donor is about to give. Put it wherever the recap belongs.', 'giveflow-fundraising-campaigns' ),
+        category:    'giveflow-extras',
         icon:        BlockIcons[ 'donation-summary' ],
         // One recap per form. Two would disagree the moment a condition hid a
         // field from one of them.

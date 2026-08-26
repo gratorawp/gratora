@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Foundation\License;
+namespace GiveFlow\Foundation\License;
 
-use Dono\Foundation\Modules\DonoModule;
-use Dono\Foundation\Modules\ModuleManager;
+use GiveFlow\Foundation\Modules\GiveFlowModule;
+use GiveFlow\Foundation\Modules\ModuleManager;
 
 /**
  * Entitlement queries over the installed modules. isPro() reflects whether a
@@ -50,17 +50,17 @@ final class LicenseService
 
     /**
      * License status string for display: active | grace | expired | revoked |
-     * inactive. The dono-licensing client (vendored in each Pro add-on) sets
-     * dono.pro.license_status from the server's signed response. When no client
-     * is loaded, the filter passes through the possession-based default so the
-     * admin still reads sensibly.
+     * inactive. The giveflow-licensing client (vendored in each Pro add-on)
+     * sets giveflow.pro.license_status from the server's signed response.
+     * When no client is loaded, the filter passes through the
+     * possession-based default so the admin still reads sensibly.
      *
      * @since 1.0.0
      */
     public function status(): string
     {
         $default = $this->isPro() ? 'active' : 'inactive';
-        $status  = apply_filters('dono.pro.license_status', $default);
+        $status  = apply_filters('giveflow.pro.license_status', $default);
 
         return is_string($status) && $status !== '' ? $status : $default;
     }
@@ -82,7 +82,7 @@ final class LicenseService
     {
         $out = [];
         foreach ($this->addons() as $addon) {
-            $status = (string) apply_filters('dono.pro.product_status', 'unknown', $addon['id']);
+            $status = (string) apply_filters('giveflow.pro.product_status', 'unknown', $addon['id']);
             $out[]  = $addon + [
                 'status'   => $status,
                 'entitled' => in_array($status, self::ENTITLED, true),
@@ -170,7 +170,7 @@ final class LicenseService
 
         $features = [];
         foreach ($this->modules->all() as $id => $module) {
-            if ($module->tier() === DonoModule::TIER_PRO
+            if ($module->tier() === GiveFlowModule::TIER_PRO
                 && $this->modules->status($id) === 'booted'
             ) {
                 $features[] = $id;

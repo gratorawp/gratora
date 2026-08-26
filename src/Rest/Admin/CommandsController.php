@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Rest\Admin;
+namespace GiveFlow\Rest\Admin;
 
-use Dono\Foundation\Commands\CommandContext;
-use Dono\Foundation\Commands\CommandRegistry;
+use GiveFlow\Foundation\Commands\CommandContext;
+use GiveFlow\Foundation\Commands\CommandRegistry;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -20,7 +20,7 @@ use WP_REST_Server;
  */
 final class CommandsController
 {
-    private const NAMESPACE = 'dono/v1';
+    private const NAMESPACE = 'giveflow/v1';
 
     /** @since 1.0.0 */
     public function __construct(private CommandRegistry $registry)

@@ -1,1 +1,1 @@
-export { default, RANGE_OPTIONS } from '@dono/ui/widgets/SectionBar';
+export { default, RANGE_OPTIONS } from '@giveflow/ui/widgets/SectionBar';

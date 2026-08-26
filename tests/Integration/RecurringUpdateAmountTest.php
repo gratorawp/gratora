@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Foundation\Commands\CommandContext;
-use Dono\Foundation\Commands\CommandRegistry;
-use Dono\Foundation\Plugin;
-use Dono\Recurring\RecurringPlan;
+use GiveFlow\Foundation\Commands\CommandContext;
+use GiveFlow\Foundation\Commands\CommandRegistry;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Recurring\RecurringPlan;
 
 /**
  * recurring.update_amount is the donor portal's change_amount through a

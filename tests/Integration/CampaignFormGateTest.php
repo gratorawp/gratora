@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Campaigns\Campaign;
-use Dono\Forms\Form;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Forms\Form;
 use WP_REST_Request;
 use WP_REST_Response;
 
 /**
- * Render gate: `[dono_donation_form slug="..."]` renders no form unless the
+ * Render gate: `[giveflow_donation_form slug="..."]` renders no form unless the
  * form is published and its campaign is open. Regression coverage for the
  * "form must live under an active campaign" rule, which covers both the
  * campaign's status and the schedule the admin set on it.
  *
- * A visitor sees nothing at all. Somebody who can manage Dono sees why, since
+ * A visitor sees nothing at all. Somebody who can manage GiveFlow sees why, since
  * otherwise a page quietly loses its form and only says so on a different
  * screen they would have to think to visit. assertNoForm covers both.
  */
@@ -30,19 +30,19 @@ final class CampaignFormGateTest extends IntegrationTestCase
         parent::setUp();
 
         // Published campaign.
-        $req = new WP_REST_Request('POST', '/dono/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode(['title' => 'Gate campaign', 'status' => 'published']));
         $this->campaignId = (int) rest_do_request($req)->get_data()['id'];
 
         // Form created as draft (default), bumped to published via direct save
         // to bypass the publish-readiness check on minimal test blocks.
-        $req = new WP_REST_Request('POST', '/dono/v1/admin/forms');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/forms');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode([
             'title'       => 'Gate form',
             'campaign_id' => $this->campaignId,
-            'blocks'      => '<!-- wp:dono/donation-amount /-->',
+            'blocks'      => '<!-- wp:giveflow/donation-amount /-->',
         ]));
         $created = rest_do_request($req)->get_data();
         $this->formId   = (int) $created['id'];
@@ -61,8 +61,8 @@ final class CampaignFormGateTest extends IntegrationTestCase
     {
         $this->assertStringNotContainsString('data-form-slug=', $html, 'no form is rendered');
 
-        if (current_user_can('manage_options') || current_user_can('manage_dono')) {
-            $this->assertStringContainsString('dono-donation-form__error', $html, 'and a manager is told why');
+        if (current_user_can('manage_options') || current_user_can('manage_giveflow')) {
+            $this->assertStringContainsString('giveflow-donation-form__error', $html, 'and a manager is told why');
             if ($because !== '') {
                 $this->assertStringContainsString($because, $html);
             }
@@ -74,8 +74,8 @@ final class CampaignFormGateTest extends IntegrationTestCase
 
     public function test_renders_when_both_form_and_campaign_are_published(): void
     {
-        $html = do_shortcode('[dono_donation_form slug="' . $this->formSlug . '"]');
-        $this->assertStringContainsString('dono-donation-form--blocks', $html);
+        $html = do_shortcode('[giveflow_donation_form slug="' . $this->formSlug . '"]');
+        $this->assertStringContainsString('giveflow-donation-form--blocks', $html);
         $this->assertStringContainsString('data-form-slug="' . $this->formSlug . '"', $html);
     }
 
@@ -85,7 +85,7 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $form->status = 'draft';
         $form->save();
 
-        $html = do_shortcode('[dono_donation_form slug="' . $this->formSlug . '"]');
+        $html = do_shortcode('[giveflow_donation_form slug="' . $this->formSlug . '"]');
         $this->assertNoForm($html);
     }
 
@@ -95,7 +95,7 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $form->status = 'archived';
         $form->save();
 
-        $html = do_shortcode('[dono_donation_form slug="' . $this->formSlug . '"]');
+        $html = do_shortcode('[giveflow_donation_form slug="' . $this->formSlug . '"]');
         $this->assertNoForm($html);
     }
 
@@ -105,7 +105,7 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $campaign->status = 'draft';
         $campaign->save();
 
-        $html = do_shortcode('[dono_donation_form slug="' . $this->formSlug . '"]');
+        $html = do_shortcode('[giveflow_donation_form slug="' . $this->formSlug . '"]');
         $this->assertNoForm($html);
     }
 
@@ -115,7 +115,7 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $campaign->status = 'archived';
         $campaign->save();
 
-        $html = do_shortcode('[dono_donation_form slug="' . $this->formSlug . '"]');
+        $html = do_shortcode('[giveflow_donation_form slug="' . $this->formSlug . '"]');
         $this->assertNoForm($html);
     }
 
@@ -132,7 +132,7 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $was = get_current_user_id();
         wp_set_current_user(0);
 
-        $html = do_shortcode('[dono_donation_form slug="' . $this->formSlug . '"]');
+        $html = do_shortcode('[giveflow_donation_form slug="' . $this->formSlug . '"]');
 
         wp_set_current_user($was);
 
@@ -148,7 +148,7 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $was = get_current_user_id();
         wp_set_current_user(self::factory()->user->create(['role' => 'subscriber']));
 
-        $html = do_shortcode('[dono_donation_form slug="' . $this->formSlug . '"]');
+        $html = do_shortcode('[giveflow_donation_form slug="' . $this->formSlug . '"]');
 
         wp_set_current_user($was);
 
@@ -163,7 +163,7 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $campaign->status = 'archived';
         $campaign->save();
 
-        $req = new WP_REST_Request('POST', '/dono/v1/donations');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode([
             'form_id'      => $this->formId,
@@ -175,14 +175,14 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $res = rest_do_request($req);
 
         $this->assertSame(403, $res->get_status());
-        $this->assertSame('dono_campaign_not_available', $res->get_data()['code'] ?? null);
+        $this->assertSame('giveflow_campaign_not_available', $res->get_data()['code'] ?? null);
     }
 
     public function test_a_campaign_past_its_end_date_stops_rendering_the_form(): void
     {
         $this->schedule(null, gmdate('Y-m-d', strtotime('-1 day')));
 
-        $this->assertNoForm(do_shortcode('[dono_donation_form slug="' . $this->formSlug . '"]'));
+        $this->assertNoForm(do_shortcode('[giveflow_donation_form slug="' . $this->formSlug . '"]'));
     }
 
     /**
@@ -196,7 +196,7 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $res = $this->postDonation();
 
         $this->assertSame(403, $res->get_status());
-        $this->assertSame('dono_campaign_not_available', $res->get_data()['code'] ?? null);
+        $this->assertSame('giveflow_campaign_not_available', $res->get_data()['code'] ?? null);
     }
 
     /**
@@ -209,8 +209,8 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $this->schedule(null, gmdate('Y-m-d'));
 
         $this->assertStringContainsString(
-            'dono-donation-form--blocks',
-            do_shortcode('[dono_donation_form slug="' . $this->formSlug . '"]')
+            'giveflow-donation-form--blocks',
+            do_shortcode('[giveflow_donation_form slug="' . $this->formSlug . '"]')
         );
         $this->assertSame(201, $this->postDonation()->get_status());
     }
@@ -219,7 +219,7 @@ final class CampaignFormGateTest extends IntegrationTestCase
     {
         $this->schedule(gmdate('Y-m-d', strtotime('+2 days')), null);
 
-        $this->assertNoForm(do_shortcode('[dono_donation_form slug="' . $this->formSlug . '"]'));
+        $this->assertNoForm(do_shortcode('[giveflow_donation_form slug="' . $this->formSlug . '"]'));
         $this->assertSame(403, $this->postDonation()->get_status());
     }
 
@@ -246,7 +246,7 @@ final class CampaignFormGateTest extends IntegrationTestCase
 
     private function postDonation(): WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/donations');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode([
             'form_id'      => $this->formId,
@@ -265,7 +265,7 @@ final class CampaignFormGateTest extends IntegrationTestCase
         // null form.
         Form::query()->where('id', $this->formId)->delete();
 
-        $req = new WP_REST_Request('POST', '/dono/v1/donations');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode([
             'form_id'      => $this->formId,
@@ -277,14 +277,14 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $res = rest_do_request($req);
 
         $this->assertSame(403, $res->get_status());
-        $this->assertSame('dono_form_not_available', $res->get_data()['code'] ?? null);
+        $this->assertSame('giveflow_form_not_available', $res->get_data()['code'] ?? null);
     }
 
     public function test_publishing_the_page_publishes_the_campaign(): void
     {
-        $service = \Dono\Foundation\Plugin::instance()
+        $service = \GiveFlow\Foundation\Plugin::instance()
             ->container
-            ->get(\Dono\Campaigns\CampaignService::class);
+            ->get(\GiveFlow\Campaigns\CampaignService::class);
 
         // Drop the campaign to draft; syncPage drops its page to draft too.
         $campaign = Campaign::query()->find('id', $this->campaignId);
@@ -295,7 +295,7 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $this->assertGreaterThan(0, $pageId);
         $this->assertSame('draft', (string) $campaign->status);
         $this->assertSame('draft', get_post_status($pageId));
-        $this->assertNoForm(do_shortcode('[dono_donation_form slug="' . $this->formSlug . '"]'));
+        $this->assertNoForm(do_shortcode('[giveflow_donation_form slug="' . $this->formSlug . '"]'));
 
         // Publish the page, as the editor "Publish" button does.
         wp_update_post(['ID' => $pageId, 'post_status' => 'publish']);
@@ -306,15 +306,15 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $this->assertSame('publish', get_post_status($pageId));
 
         // With both published, the gated shortcode now renders.
-        $html = do_shortcode('[dono_donation_form slug="' . $this->formSlug . '"]');
-        $this->assertStringContainsString('dono-donation-form--blocks', $html);
+        $html = do_shortcode('[giveflow_donation_form slug="' . $this->formSlug . '"]');
+        $this->assertStringContainsString('giveflow-donation-form--blocks', $html);
     }
 
     public function test_publishing_campaign_with_draft_default_form_keeps_page_private(): void
     {
-        $service = \Dono\Foundation\Plugin::instance()
+        $service = \GiveFlow\Foundation\Plugin::instance()
             ->container
-            ->get(\Dono\Campaigns\CampaignService::class);
+            ->get(\GiveFlow\Campaigns\CampaignService::class);
 
         // Make the published Gate form the campaign's default form, then draft it.
         $campaign = Campaign::query()->find('id', $this->campaignId);
@@ -347,11 +347,11 @@ final class CampaignFormGateTest extends IntegrationTestCase
 
     public function test_campaign_type_conversion_is_one_way(): void
     {
-        add_filter('dono.campaign.types', static fn (array $t): array => $t + ['squad' => 'Squad']);
+        add_filter('giveflow.campaign.types', static fn (array $t): array => $t + ['squad' => 'Squad']);
 
-        $service = \Dono\Foundation\Plugin::instance()
+        $service = \GiveFlow\Foundation\Plugin::instance()
             ->container
-            ->get(\Dono\Campaigns\CampaignService::class);
+            ->get(\GiveFlow\Campaigns\CampaignService::class);
 
         $campaign = Campaign::query()->find('id', $this->campaignId);
         $this->assertSame('standard', (string) $campaign->campaign_type);
@@ -395,14 +395,14 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $campaign = Campaign::query()->find('id', $this->campaignId);
         $this->assertNotNull($campaign);
 
-        \Dono\Foundation\Plugin::instance()
+        \GiveFlow\Foundation\Plugin::instance()
             ->container
-            ->get(\Dono\Campaigns\CampaignService::class)
+            ->get(\GiveFlow\Campaigns\CampaignService::class)
             ->delete($campaign);
 
         $this->assertNull(Form::query()->find('id', $this->formId), 'form row goes away with the campaign');
 
-        $html = do_shortcode('[dono_donation_form slug="' . $this->formSlug . '"]');
-        $this->assertStringContainsString('dono-donation-form__error', $html, 'no-such-slug surfaces the admin diagnostic');
+        $html = do_shortcode('[giveflow_donation_form slug="' . $this->formSlug . '"]');
+        $this->assertStringContainsString('giveflow-donation-form__error', $html, 'no-such-slug surfaces the admin diagnostic');
     }
 }

@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Foundation\Plugin;
-use Dono\Gateways\GatewayIntentResult;
-use Dono\Gateways\GatewayConfirmResult;
-use Dono\Gateways\GatewayManager;
-use Dono\Gateways\PaymentGateway;
-use Dono\Gateways\PaymentRetryUnavailable;
-use Dono\Gateways\RefundResult;
-use Dono\Gateways\SubscriptionAware;
-use Dono\Gateways\SupportsPaymentRetry;
-use Dono\Recurring\RecurringPlan;
-use Dono\Recurring\RecurringPlanActions;
-use Dono\Recurring\RecurringPlanChange;
-use Dono\Recurring\RecurringPlanRepository;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Gateways\GatewayIntentResult;
+use GiveFlow\Gateways\GatewayConfirmResult;
+use GiveFlow\Gateways\GatewayManager;
+use GiveFlow\Gateways\PaymentGateway;
+use GiveFlow\Gateways\PaymentRetryUnavailable;
+use GiveFlow\Gateways\RefundResult;
+use GiveFlow\Gateways\SubscriptionAware;
+use GiveFlow\Gateways\SupportsPaymentRetry;
+use GiveFlow\Recurring\RecurringPlan;
+use GiveFlow\Recurring\RecurringPlanActions;
+use GiveFlow\Recurring\RecurringPlanChange;
+use GiveFlow\Recurring\RecurringPlanRepository;
 use WP_REST_Request;
 
 /**
@@ -99,7 +99,7 @@ final class RecurringRetryTest extends IntegrationTestCase
         $plan = $this->plan('retryable_rest');
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
 
-        $req = new WP_REST_Request('POST', '/dono/v1/admin/recurring/' . (int) $plan->id . '/action');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/recurring/' . (int) $plan->id . '/action');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['action' => 'retry']));
         $res = rest_do_request($req);
@@ -140,19 +140,19 @@ final class RetryableGateway implements PaymentGateway, SubscriptionAware, Suppo
     public function currencies(): array { return ['USD']; }
     public function canCharge(): bool { return true; }
 
-    public function createIntent(\Dono\Donations\Donation $d): GatewayIntentResult
+    public function createIntent(\GiveFlow\Donations\Donation $d): GatewayIntentResult
     {
         return new GatewayIntentResult(ok: false, error: 'not used');
     }
-    public function confirm(\Dono\Donations\Donation $d, array $payload = []): GatewayConfirmResult
+    public function confirm(\GiveFlow\Donations\Donation $d, array $payload = []): GatewayConfirmResult
     {
         return new GatewayConfirmResult(ok: false, error: 'not used');
     }
-    public function handleWebhook(WP_REST_Request $r): \Dono\Gateways\WebhookOutcome
+    public function handleWebhook(WP_REST_Request $r): \GiveFlow\Gateways\WebhookOutcome
     {
-        return new \Dono\Gateways\WebhookOutcome(signature_ok: false, external_id: '', event_type: '', handled: false);
+        return new \GiveFlow\Gateways\WebhookOutcome(signature_ok: false, external_id: '', event_type: '', handled: false);
     }
-    public function refund(\Dono\Donations\Donation $d, int $cents, ?string $reason = null): RefundResult
+    public function refund(\GiveFlow\Donations\Donation $d, int $cents, ?string $reason = null): RefundResult
     {
         return new RefundResult(ok: false, error: 'not used');
     }
@@ -185,19 +185,19 @@ final class NoRetryGateway implements PaymentGateway, SubscriptionAware
     public function currencies(): array { return ['USD']; }
     public function canCharge(): bool { return true; }
 
-    public function createIntent(\Dono\Donations\Donation $d): GatewayIntentResult
+    public function createIntent(\GiveFlow\Donations\Donation $d): GatewayIntentResult
     {
         return new GatewayIntentResult(ok: false, error: 'not used');
     }
-    public function confirm(\Dono\Donations\Donation $d, array $payload = []): GatewayConfirmResult
+    public function confirm(\GiveFlow\Donations\Donation $d, array $payload = []): GatewayConfirmResult
     {
         return new GatewayConfirmResult(ok: false, error: 'not used');
     }
-    public function handleWebhook(WP_REST_Request $r): \Dono\Gateways\WebhookOutcome
+    public function handleWebhook(WP_REST_Request $r): \GiveFlow\Gateways\WebhookOutcome
     {
-        return new \Dono\Gateways\WebhookOutcome(signature_ok: false, external_id: '', event_type: '', handled: false);
+        return new \GiveFlow\Gateways\WebhookOutcome(signature_ok: false, external_id: '', event_type: '', handled: false);
     }
-    public function refund(\Dono\Donations\Donation $d, int $cents, ?string $reason = null): RefundResult
+    public function refund(\GiveFlow\Donations\Donation $d, int $cents, ?string $reason = null): RefundResult
     {
         return new RefundResult(ok: false, error: 'not used');
     }

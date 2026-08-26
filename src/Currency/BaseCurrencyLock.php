@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Currency;
+namespace GiveFlow\Currency;
 
-use Dono\Donations\Donation;
-use Dono\Donations\DonationQueries;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationQueries;
 
 /**
  * The base currency is the unit every stored base_amount_cents is already

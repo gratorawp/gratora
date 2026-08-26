@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Analytics\ErrorLog;
-use Dono\Analytics\Event;
-use Dono\Donations\Donation;
-use Dono\Donors\Donor;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
-use Dono\Gateways\GatewayConfirmResult;
-use Dono\Gateways\GatewayIntentResult;
-use Dono\Gateways\GatewayManager;
-use Dono\Gateways\PaymentGateway;
-use Dono\Gateways\RefundResult;
-use Dono\Gateways\SubscriptionAware;
-use Dono\Gateways\WebhookOutcome;
-use Dono\Recurring\RecurringPlan;
+use GiveFlow\Analytics\ErrorLog;
+use GiveFlow\Analytics\Event;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Gateways\GatewayConfirmResult;
+use GiveFlow\Gateways\GatewayIntentResult;
+use GiveFlow\Gateways\GatewayManager;
+use GiveFlow\Gateways\PaymentGateway;
+use GiveFlow\Gateways\RefundResult;
+use GiveFlow\Gateways\SubscriptionAware;
+use GiveFlow\Gateways\WebhookOutcome;
+use GiveFlow\Recurring\RecurringPlan;
 use RuntimeException;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -36,7 +36,7 @@ final class ErasureGatewayErrorTest extends IntegrationTestCase
 
     protected function tearDown(): void
     {
-        unset($_COOKIE['dono_donor_session']);
+        unset($_COOKIE['giveflow_donor_session']);
         parent::tearDown();
     }
 
@@ -98,10 +98,10 @@ final class ErasureGatewayErrorTest extends IntegrationTestCase
 
     private function askToBeForgotten(int $donorId): WP_REST_Response
     {
-        $_COOKIE['dono_donor_session'] = $this->portalSession($donorId, 'tok');
+        $_COOKIE['giveflow_donor_session'] = $this->portalSession($donorId, 'tok');
 
-        $req = new WP_REST_Request('POST', '/dono/v1/portal/forget');
-        $req->set_header('X-Dono-Csrf', 'tok');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/portal/forget');
+        $req->set_header('X-GiveFlow-Csrf', 'tok');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['confirm' => 'DELETE']));
 
@@ -125,7 +125,7 @@ final class ErasureGatewayErrorTest extends IntegrationTestCase
         $res = $this->askToBeForgotten((int) $donor->id);
 
         $this->assertSame(409, $res->get_status());
-        $this->assertSame('dono_erasure_blocked', $res->as_error()->get_error_code());
+        $this->assertSame('giveflow_erasure_blocked', $res->as_error()->get_error_code());
     }
 
     public function test_nothing_is_erased_when_the_plan_could_not_be_stopped(): void

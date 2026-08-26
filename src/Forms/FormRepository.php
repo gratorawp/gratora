@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Forms;
+namespace GiveFlow\Forms;
 
 /**
  * Thin repository over the Form model.

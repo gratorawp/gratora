@@ -22,7 +22,7 @@ export default function NotesCard( { donationRef, notes: initial, onChanged } ) 
         setError( null );
         try {
             const note = await apiFetch( {
-                path:   `/dono/v1/admin/donations/${ donationRef }/notes`,
+                path:   `/giveflow/v1/admin/donations/${ donationRef }/notes`,
                 method: 'POST',
                 data:   { body: body.trim() },
             } );
@@ -30,7 +30,7 @@ export default function NotesCard( { donationRef, notes: initial, onChanged } ) 
             setBody( '' );
             onChanged?.();
         } catch ( err ) {
-            setError( err?.message || __( 'Could not save', 'dono-fundraising-platform' ) );
+            setError( err?.message || __( 'Could not save', 'giveflow-fundraising-campaigns' ) );
         } finally {
             setSaving( false );
         }
@@ -38,20 +38,20 @@ export default function NotesCard( { donationRef, notes: initial, onChanged } ) 
 
     const remove = ( noteId ) => {
         setConfirm( {
-            title:        __( 'Delete note', 'dono-fundraising-platform' ),
-            message:      __( 'Delete this note?', 'dono-fundraising-platform' ),
-            confirmLabel: __( 'Delete', 'dono-fundraising-platform' ),
+            title:        __( 'Delete note', 'giveflow-fundraising-campaigns' ),
+            message:      __( 'Delete this note?', 'giveflow-fundraising-campaigns' ),
+            confirmLabel: __( 'Delete', 'giveflow-fundraising-campaigns' ),
             destructive:  true,
             onConfirm: async () => {
                 try {
                     await apiFetch( {
-                        path:   `/dono/v1/admin/donations/notes/${ noteId }`,
+                        path:   `/giveflow/v1/admin/donations/notes/${ noteId }`,
                         method: 'DELETE',
                     } );
                     setNotes( ( ns ) => ns.filter( ( n ) => n.id !== noteId ) );
                     onChanged?.();
                 } catch ( err ) {
-                    setError( err?.message || __( 'Could not delete', 'dono-fundraising-platform' ) );
+                    setError( err?.message || __( 'Could not delete', 'giveflow-fundraising-campaigns' ) );
                 }
             },
         } );
@@ -65,14 +65,14 @@ export default function NotesCard( { donationRef, notes: initial, onChanged } ) 
                         <EmptyState
                             compact
                             icon={ <StickyNote size={ 22 } strokeWidth={ 1.75 } /> }
-                            title={ __( 'No notes yet', 'dono-fundraising-platform' ) }
-                            body={ __( 'Add notes to keep context attached to this donation: refund reasons, follow-ups, special handling.', 'dono-fundraising-platform' ) }
+                            title={ __( 'No notes yet', 'giveflow-fundraising-campaigns' ) }
+                            body={ __( 'Add notes to keep context attached to this donation: refund reasons, follow-ups, special handling.', 'giveflow-fundraising-campaigns' ) }
                         />
                     )
                     : (
                         <div className="dd-notes-list">
                             { notes.map( ( n ) => {
-                                const author = n.author_display_name || ( n.author_user_id ? __( 'Unknown user', 'dono-fundraising-platform' ) : __( 'System', 'dono-fundraising-platform' ) );
+                                const author = n.author_display_name || ( n.author_user_id ? __( 'Unknown user', 'giveflow-fundraising-campaigns' ) : __( 'System', 'giveflow-fundraising-campaigns' ) );
                                 return (
                                     <div key={ n.id } className="dd-note">
                                         <span className="dd-avatar dd-avatar--md">{ initials( author ) }</span>
@@ -89,7 +89,7 @@ export default function NotesCard( { donationRef, notes: initial, onChanged } ) 
                                         <button
                                             type="button"
                                             className="dd-note__delete"
-                                            aria-label={ __( 'Delete note', 'dono-fundraising-platform' ) }
+                                            aria-label={ __( 'Delete note', 'giveflow-fundraising-campaigns' ) }
                                             onClick={ () => remove( n.id ) }
                                         >
                                             <IconTrash width="14" height="14" />
@@ -104,7 +104,7 @@ export default function NotesCard( { donationRef, notes: initial, onChanged } ) 
                     <textarea
                         value={ body }
                         onChange={ ( e ) => setBody( e.target.value ) }
-                        placeholder={ __( 'Write a note about this donation. Notes are visible to admins only.', 'dono-fundraising-platform' ) }
+                        placeholder={ __( 'Write a note about this donation. Notes are visible to admins only.', 'giveflow-fundraising-campaigns' ) }
                         rows={ 3 }
                     />
                     { error && <div className="dd-note-form__error">{ error }</div> }
@@ -114,7 +114,7 @@ export default function NotesCard( { donationRef, notes: initial, onChanged } ) 
                             className="btn btn--primary"
                             disabled={ saving || ! body.trim() }
                         >
-                            { saving ? __( 'Saving…', 'dono-fundraising-platform' ) : __( 'Add note', 'dono-fundraising-platform' ) }
+                            { saving ? __( 'Saving…', 'giveflow-fundraising-campaigns' ) : __( 'Add note', 'giveflow-fundraising-campaigns' ) }
                         </button>
                     </div>
                 </form>

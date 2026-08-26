@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Foundation\Crypto\Crypto;
-use Dono\Gateways\Stripe\StripeApi;
-use Dono\Gateways\Stripe\StripeAccount;
+use GiveFlow\Foundation\Crypto\Crypto;
+use GiveFlow\Gateways\Stripe\StripeApi;
+use GiveFlow\Gateways\Stripe\StripeAccount;
 
 /**
  * StripeApi is "configured" when the org has stored a secret key for the
- * active mode; the webhook secret comes from dono_gateway_config. Both are
+ * active mode; the webhook secret comes from giveflow_gateway_config. Both are
  * DB-backed, so this is an integration test.
  */
 final class StripeApiTest extends IntegrationTestCase
@@ -21,7 +21,7 @@ final class StripeApiTest extends IntegrationTestCase
     {
         parent::setUp();
         $this->secret = 'whsec_test_' . bin2hex(random_bytes(8));
-        update_option('dono_gateway_config', [
+        update_option('giveflow_gateway_config', [
             'stripe' => ['webhook_secret_test' => $this->secret, 'test_mode' => true],
         ]);
     }
@@ -63,7 +63,7 @@ final class StripeApiTest extends IntegrationTestCase
     {
         // Test and live endpoints have distinct secrets; a delivery signed by
         // either must verify (the other mode's deliveries are not rejected).
-        update_option('dono_gateway_config', [
+        update_option('giveflow_gateway_config', [
             'stripe' => [
                 'webhook_secret_test' => 'whsec_mode_test',
                 'webhook_secret_live' => 'whsec_mode_live',
@@ -130,7 +130,7 @@ final class StripeApiTest extends IntegrationTestCase
 
     public function test_no_webhook_secret_configured_rejects_all(): void
     {
-        update_option('dono_gateway_config', ['stripe' => ['test_mode' => true]]);
+        update_option('giveflow_gateway_config', ['stripe' => ['test_mode' => true]]);
 
         $payload = '{}';
         $timestamp = (string) time();

@@ -24,7 +24,7 @@ export default function ImportTab( { setNotice } ) {
         try {
             parsed = JSON.parse( await file.text() );
         } catch ( e ) {
-            setNotice( { type: 'error', text: __( 'That file is not JSON. Use a file the Export tab produced.', 'dono-fundraising-platform' ) } );
+            setNotice( { type: 'error', text: __( 'That file is not JSON. Use a file the Export tab produced.', 'giveflow-fundraising-campaigns' ) } );
             return;
         }
 
@@ -36,22 +36,22 @@ export default function ImportTab( { setNotice } ) {
 
         setConfirm( {
             title: isFullExport
-                ? __( 'Restore records from this file', 'dono-fundraising-platform' )
-                : __( 'Replace settings from this file', 'dono-fundraising-platform' ),
+                ? __( 'Restore records from this file', 'giveflow-fundraising-campaigns' )
+                : __( 'Replace settings from this file', 'giveflow-fundraising-campaigns' ),
             message: isFullExport
                 ? sprintf(
                     /* translators: %s: the chosen file name. */
-                    __( '%s will add its campaigns, funds, forms, donors, donations, recurring plans and receipts to this site. Anything already here is left as it is, so running it twice is safe. Donors erased on this site stay erased.', 'dono-fundraising-platform' ),
+                    __( '%s will add its campaigns, funds, forms, donors, donations, recurring plans and receipts to this site. Anything already here is left as it is, so running it twice is safe. Donors erased on this site stay erased.', 'giveflow-fundraising-campaigns' ),
                     file.name
                 ) + ( hasSettings
-                    ? ' ' + __( 'It carries settings too, and those are written over yours: gateway, email, receipt, numbering and roles.', 'dono-fundraising-platform' )
+                    ? ' ' + __( 'It carries settings too, and those are written over yours: gateway, email, receipt, numbering and roles.', 'giveflow-fundraising-campaigns' )
                     : '' )
                 : sprintf(
                     /* translators: %s: the chosen file name. */
-                    __( '%s will write its gateway, email, receipt, numbering and role settings over yours. A setting the file does not carry keeps the value it has here, except the role mapping, which is replaced whole: a role the file does not name loses its Dono capabilities. Donations, donors and campaigns are untouched. This cannot be undone.', 'dono-fundraising-platform' ),
+                    __( '%s will write its gateway, email, receipt, numbering and role settings over yours. A setting the file does not carry keeps the value it has here, except the role mapping, which is replaced whole: a role the file does not name loses its GiveFlow capabilities. Donations, donors and campaigns are untouched. This cannot be undone.', 'giveflow-fundraising-campaigns' ),
                     file.name
                 ),
-            confirmLabel: isFullExport ? __( 'Restore', 'dono-fundraising-platform' ) : __( 'Replace settings', 'dono-fundraising-platform' ),
+            confirmLabel: isFullExport ? __( 'Restore', 'giveflow-fundraising-campaigns' ) : __( 'Replace settings', 'giveflow-fundraising-campaigns' ),
             destructive:  ! isFullExport,
             onConfirm:    () => doImport( parsed ),
         } );
@@ -71,7 +71,7 @@ export default function ImportTab( { setNotice } ) {
 
             parts.push( sprintf(
                 /* translators: %d: number of records. */
-                _n( '%d record restored', '%d records restored', created, 'dono-fundraising-platform' ),
+                _n( '%d record restored', '%d records restored', created, 'giveflow-fundraising-campaigns' ),
                 created
             ) );
             // Said plainly, because "already here" is the expected answer on
@@ -79,14 +79,14 @@ export default function ImportTab( { setNotice } ) {
             if ( existing ) {
                 parts.push( sprintf(
                     /* translators: %d: number of records. */
-                    _n( '%d was already here', '%d were already here', existing, 'dono-fundraising-platform' ),
+                    _n( '%d was already here', '%d were already here', existing, 'giveflow-fundraising-campaigns' ),
                     existing
                 ) );
             }
             if ( skipped ) {
                 parts.push( sprintf(
                     /* translators: %d: number of records. */
-                    _n( '%d skipped', '%d skipped', skipped, 'dono-fundraising-platform' ),
+                    _n( '%d skipped', '%d skipped', skipped, 'giveflow-fundraising-campaigns' ),
                     skipped
                 ) );
             }
@@ -96,7 +96,7 @@ export default function ImportTab( { setNotice } ) {
         if ( applied > 0 ) {
             parts.push( sprintf(
                 /* translators: %d: number of settings groups. */
-                _n( '%d settings group restored', '%d settings groups restored', applied, 'dono-fundraising-platform' ),
+                _n( '%d settings group restored', '%d settings groups restored', applied, 'giveflow-fundraising-campaigns' ),
                 applied
             ) );
         }
@@ -110,7 +110,7 @@ export default function ImportTab( { setNotice } ) {
         setNotice( null );
         try {
             const res = await apiFetch( {
-                path:   '/dono/v1/admin/tools/import',
+                path:   '/giveflow/v1/admin/tools/import',
                 method: 'POST',
                 data:   parsed,
             } );
@@ -118,11 +118,11 @@ export default function ImportTab( { setNotice } ) {
             const parts = landedParts( res );
 
             setNotice( parts.length
-                ? { type: 'success', text: parts.join( ', ' ) + '. ' + __( 'Reload the page to see it.', 'dono-fundraising-platform' ) }
-                : { type: 'error', text: __( 'Nothing in that file matched a Dono setting or record.', 'dono-fundraising-platform' ) }
+                ? { type: 'success', text: parts.join( ', ' ) + '. ' + __( 'Reload the page to see it.', 'giveflow-fundraising-campaigns' ) }
+                : { type: 'error', text: __( 'Nothing in that file matched a GiveFlow setting or record.', 'giveflow-fundraising-campaigns' ) }
             );
         } catch ( err ) {
-            const reason = err?.message || __( 'Import failed. Check that the file is a Dono settings export.', 'dono-fundraising-platform' );
+            const reason = err?.message || __( 'Import failed. Check that the file is a GiveFlow settings export.', 'giveflow-fundraising-campaigns' );
             const landed = landedParts( err?.data );
 
             setNotice( {
@@ -130,7 +130,7 @@ export default function ImportTab( { setNotice } ) {
                 text: landed.length
                     ? reason + ' ' + sprintf(
                         /* translators: %s: a comma-separated list of what the refused import did restore. */
-                        __( 'What did land: %s. Running the file again is safe.', 'dono-fundraising-platform' ),
+                        __( 'What did land: %s. Running the file again is safe.', 'giveflow-fundraising-campaigns' ),
                         landed.join( ', ' )
                     )
                     : reason,
@@ -142,19 +142,19 @@ export default function ImportTab( { setNotice } ) {
     };
 
     return (
-        <div className="dono-panel">
+        <div className="giveflow-panel">
             <Card
-                title={ __( 'Import settings', 'dono-fundraising-platform' ) }
-                sub={ __( 'Reads a Dono settings export and replaces the settings it carries. Anything it does not carry keeps the value it has here. Donations, donors and campaigns are left alone.', 'dono-fundraising-platform' ) }
+                title={ __( 'Import settings', 'giveflow-fundraising-campaigns' ) }
+                sub={ __( 'Reads a GiveFlow settings export and replaces the settings it carries. Anything it does not carry keeps the value it has here. Donations, donors and campaigns are left alone.', 'giveflow-fundraising-campaigns' ) }
             >
-                <div className="dono-advanced-actions">
+                <div className="giveflow-advanced-actions">
                     <Btn
                         variant="secondary"
                         onClick={ () => fileRef.current?.click() }
                         disabled={ importing }
                         isBusy={ importing }
                     >
-                        { importing ? __( 'Importing…', 'dono-fundraising-platform' ) : __( 'Choose a JSON file', 'dono-fundraising-platform' ) }
+                        { importing ? __( 'Importing…', 'giveflow-fundraising-campaigns' ) : __( 'Choose a JSON file', 'giveflow-fundraising-campaigns' ) }
                     </Btn>
                     <input
                         ref={ fileRef }
@@ -164,8 +164,8 @@ export default function ImportTab( { setNotice } ) {
                         onChange={ ( e ) => askImport( e.target.files?.[ 0 ] ) }
                     />
                 </div>
-                <p className="dono-tools-note">
-                    { __( 'A masked secret in the file leaves the stored key untouched, so importing an export cannot wipe a gateway key it was unable to carry.', 'dono-fundraising-platform' ) }
+                <p className="giveflow-tools-note">
+                    { __( 'A masked secret in the file leaves the stored key untouched, so importing an export cannot wipe a gateway key it was unable to carry.', 'giveflow-fundraising-campaigns' ) }
                 </p>
             </Card>
 

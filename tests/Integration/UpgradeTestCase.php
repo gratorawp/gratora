@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Foundation\Plugin;
+use GiveFlow\Foundation\Plugin;
 
 /**
  * Base for tests that exercise an upgrade rather than a fresh install.
@@ -20,7 +20,7 @@ use Dono\Foundation\Plugin;
  * DDL implicitly commits in MySQL, so a CREATE or ALTER inside WP_UnitTestCase's
  * per-test transaction ends it and the rollback discards nothing. These tests
  * therefore run against their own table prefix and clean up by hand. The real
- * wptests_dono_* tables are never touched, so leaking is impossible rather than
+ * wptests_giveflow_* tables are never touched, so leaking is impossible rather than
  * merely unlikely.
  *
  * Model::migrate() and DB::getPrefix() both read $wpdb->prefix at call time, so
@@ -65,7 +65,7 @@ abstract class UpgradeTestCase extends IntegrationTestCase
     }
 
     /**
-     * Build every dono table at its current shape, under the scratch prefix.
+     * Build every giveflow table at its current shape, under the scratch prefix.
      *
      * This is the "already installed" starting point. A test then degrades it to
      * look like an older release and runs the update.
@@ -77,7 +77,7 @@ abstract class UpgradeTestCase extends IntegrationTestCase
 
     /**
      * The update path a real site takes: not a model method, the whole thing
-     * Plugin::boot() runs behind the DONO_DB_VERSION gate.
+     * Plugin::boot() runs behind the GIVEFLOW_DB_VERSION gate.
      */
     protected function runTheRealUpdate(): void
     {

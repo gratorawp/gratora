@@ -19,7 +19,7 @@ module.exports = {
     // untranspiled ESM build of preact and friends.
     testEnvironmentOptions: { customExportConditions: [ 'node', 'require', 'default' ] },
     testMatch:      [ '<rootDir>/tests/js/**/*.test.js' ],
-    transformIgnorePatterns: [ '/node_modules/(?!(preact|@preact|@wordpress|@dono)/)' ],
+    transformIgnorePatterns: [ '/node_modules/(?!(preact|@preact|@wordpress|@giveflow)/)' ],
     transform: {
         '\\.[jt]sx?$': [ 'babel-jest', { configFile: path.join( __dirname, 'babel.config.js' ) } ],
     },

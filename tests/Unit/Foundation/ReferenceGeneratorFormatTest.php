@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Unit\Foundation;
+namespace GiveFlow\Tests\Unit\Foundation;
 
 use DateTimeImmutable;
-use Dono\Foundation\References\ReferenceGenerator;
-use Dono\Foundation\Time\FrozenClock;
+use GiveFlow\Foundation\References\ReferenceGenerator;
+use GiveFlow\Foundation\Time\FrozenClock;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -20,14 +20,14 @@ final class ReferenceGeneratorFormatTest extends TestCase
 
     protected function setUp(): void
     {
-        ($GLOBALS['_dono_reset_options'])();
+        ($GLOBALS['_giveflow_reset_options'])();
         $this->gen = new ReferenceGenerator(new FrozenClock(new DateTimeImmutable('2026-05-13')));
     }
 
     public function test_default_format(): void
     {
-        $this->assertSame('DONO-2026-00001', $this->gen->format('donation', 2026, 1));
-        $this->assertSame('DONO-2026-00042', $this->gen->format('donation', 2026, 42));
+        $this->assertSame('DON-2026-00001', $this->gen->format('donation', 2026, 1));
+        $this->assertSame('DON-2026-00042', $this->gen->format('donation', 2026, 42));
         $this->assertSame('REC-2026-00007',  $this->gen->format('receipt', 2026, 7));
         $this->assertSame('REF-2026-00099',  $this->gen->format('refund', 2026, 99));
     }
@@ -49,29 +49,29 @@ final class ReferenceGeneratorFormatTest extends TestCase
     public function test_padding_width(): void
     {
         update_option(ReferenceGenerator::OPTION_SETTINGS, ['padding' => 3]);
-        $this->assertSame('DONO-2026-001',   $this->gen->format('donation', 2026, 1));
-        $this->assertSame('DONO-2026-999',   $this->gen->format('donation', 2026, 999));
+        $this->assertSame('DON-2026-001',   $this->gen->format('donation', 2026, 1));
+        $this->assertSame('DON-2026-999',   $this->gen->format('donation', 2026, 999));
         // Counter exceeds padding width - pad doesn't truncate.
-        $this->assertSame('DONO-2026-1000',  $this->gen->format('donation', 2026, 1000));
+        $this->assertSame('DON-2026-1000',  $this->gen->format('donation', 2026, 1000));
     }
 
     public function test_padding_clamps_minimum_to_1(): void
     {
         update_option(ReferenceGenerator::OPTION_SETTINGS, ['padding' => 0]);
-        $this->assertSame('DONO-2026-1', $this->gen->format('donation', 2026, 1));
+        $this->assertSame('DON-2026-1', $this->gen->format('donation', 2026, 1));
     }
 
     public function test_year_can_be_omitted(): void
     {
         update_option(ReferenceGenerator::OPTION_SETTINGS, ['include_year' => false]);
-        $this->assertSame('DONO-00001', $this->gen->format('donation', 2026, 1));
+        $this->assertSame('DON-00001', $this->gen->format('donation', 2026, 1));
         $this->assertSame('REC-00042',  $this->gen->format('receipt',  2026, 42));
     }
 
     public function test_custom_separator(): void
     {
         update_option(ReferenceGenerator::OPTION_SETTINGS, ['separator' => '_']);
-        $this->assertSame('DONO_2026_00001', $this->gen->format('donation', 2026, 1));
+        $this->assertSame('DON_2026_00001', $this->gen->format('donation', 2026, 1));
     }
 
     public function test_route_unsafe_separator_and_prefix_are_coerced(): void
@@ -80,9 +80,9 @@ final class ReferenceGeneratorFormatTest extends TestCase
         // the separator to '-' and strip the prefix down to the safe alphabet.
         update_option(ReferenceGenerator::OPTION_SETTINGS, [
             'separator' => '/',
-            'prefixes'  => ['donation' => 'DO.NO'],
+            'prefixes'  => ['donation' => 'AP.PEAL'],
         ]);
-        $this->assertSame('DONO-2026-00001', $this->gen->format('donation', 2026, 1));
+        $this->assertSame('APPEAL-2026-00001', $this->gen->format('donation', 2026, 1));
     }
 
     public function test_combined_overrides(): void
@@ -100,13 +100,13 @@ final class ReferenceGeneratorFormatTest extends TestCase
     {
         // Only override padding - prefixes & include_year should keep defaults.
         update_option(ReferenceGenerator::OPTION_SETTINGS, ['padding' => 6]);
-        $this->assertSame('DONO-2026-000001', $this->gen->format('donation', 2026, 1));
+        $this->assertSame('DON-2026-000001', $this->gen->format('donation', 2026, 1));
         $this->assertSame('REC-2026-000001',  $this->gen->format('receipt',  2026, 1));
     }
 
     public function test_invalid_settings_falls_back_to_defaults(): void
     {
         update_option(ReferenceGenerator::OPTION_SETTINGS, 'not-an-array');
-        $this->assertSame('DONO-2026-00001', $this->gen->format('donation', 2026, 1));
+        $this->assertSame('DON-2026-00001', $this->gen->format('donation', 2026, 1));
     }
 }

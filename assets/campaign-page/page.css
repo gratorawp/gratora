@@ -1,5 +1,5 @@
 /* Campaign page foundation: the --dp-* token layer, the page measure and bands,
-   the type ramp and the shared primitives. The dono-p2p-* selectors are aliases
+   the type ramp and the shared primitives. The giveflow-p2p-* selectors are aliases
    of the same vocabulary, so one definition serves both plugins.
 
    Nothing below may hardcode a colour, radius, font or shadow. Read a token,
@@ -7,7 +7,7 @@
    exactly as designed and a styled one carries its identity throughout. */
 
 /* Declared on body, not :root: the campaign's values land on body via the
-   dono-campaign-styled class (see Styling\PageStyle) and a property set on body
+   giveflow-campaign-styled class (see Styling\PageStyle) and a property set on body
    is invisible to :root above it. Body also covers anything an organiser drops
    beside our blocks, which sits in no wrapper of ours.
 
@@ -18,15 +18,15 @@
 
 body,
 .editor-styles-wrapper,
-.dono-p2p-layout,
-.dono-p2p-thermo,
-.dono-p2p-grid-section,
-.dono-p2p-fundraiser,
-.dono-p2p-team,
-.dono-p2p-leaderboard,
-.dono-p2p-donors,
-.dono-p2p-sponsors,
-.dono-p2p-welcome,
+.giveflow-p2p-layout,
+.giveflow-p2p-thermo,
+.giveflow-p2p-grid-section,
+.giveflow-p2p-fundraiser,
+.giveflow-p2p-team,
+.giveflow-p2p-leaderboard,
+.giveflow-p2p-donors,
+.giveflow-p2p-sponsors,
+.giveflow-p2p-welcome,
 .dp-layout{
     /* How wide the page reads. Every rule that needs it reads this, so the
        measure moves in one place and the editor canvas follows the front end. */
@@ -34,43 +34,43 @@ body,
 
     /* Block wrappers carry the campaign's resolved style as core's own custom
        properties (see Styling\CampaignStyleVars). */
-    --dp-accent:      var(--dono-accent, #1e8a4e);
+    --dp-accent:      var(--giveflow-accent, #211d3f);
     --dp-accent-dark: color-mix(in srgb, var(--dp-accent) 78%, #000);
-    /* The resolver emits --dono-accent-soft only when a preset or the campaign
+    /* The resolver emits --giveflow-accent-soft only when a preset or the campaign
        pairs one with the accent; deriving it otherwise keeps a purple campaign
        from washing its own pages in the default green. */
-    --dp-accent-soft: var(--dono-accent-soft, color-mix(in srgb, var(--dp-accent) 12%, #fff));
+    --dp-accent-soft: var(--giveflow-accent-soft, color-mix(in srgb, var(--dp-accent) 12%, #fff));
 
-    --dp-text:        var(--dono-text, #141821);
+    --dp-text:        var(--giveflow-text, #141821);
     /* Core has no token between body and muted, so mix the two rather than pick
        a literal that would ignore a campaign's palette. */
     --dp-text-2:      color-mix(in srgb, var(--dp-text) 70%, var(--dp-muted) 30%);
-    --dp-muted:       var(--dono-text-muted, #7a8398);
+    --dp-muted:       var(--giveflow-text-muted, #7a8398);
 
-    /* Boundary weight, inherited from core. Not @dono/ui's hairline-divider
+    /* Boundary weight, inherited from core. Not @giveflow/ui's hairline-divider
        value: at about 3% contrast a card boundary reads as unfinished. */
-    --dp-border:      var(--dono-border, #e8ebf0);
+    --dp-border:      var(--giveflow-border, #e8ebf0);
     /* The lighter within-list rule, derived so it tracks a custom border. */
     --dp-rule:        color-mix(in srgb, var(--dp-border) 55%, var(--dp-card));
-    --dp-card:        var(--dono-bg, #ffffff);
-    --dp-page:        var(--dono-bg-soft, #fafbfc);
+    --dp-card:        var(--giveflow-bg, #ffffff);
+    --dp-page:        var(--giveflow-bg-soft, #fafbfc);
 
-    --dp-radius:      var(--dono-radius, 14px);
-    --dp-radius-sm:   var(--dono-radius-sm, 10px);
-    --dp-font:        var(--dono-typeface, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
-    --dp-shadow:      var(--dono-card-shadow, 0 1px 2px rgba(15, 23, 42, .04), 0 2px 6px rgba(15, 23, 42, .06));
+    --dp-radius:      var(--giveflow-radius, 14px);
+    --dp-radius-sm:   var(--giveflow-radius-sm, 10px);
+    --dp-font:        var(--giveflow-typeface, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+    --dp-shadow:      var(--giveflow-card-shadow, 0 1px 2px rgba(15, 23, 42, .04), 0 2px 6px rgba(15, 23, 42, .06));
 
-    /* Match core's .dono-donate-button so every call to action on a campaign
+    /* Match core's .giveflow-donate-button so every call to action on a campaign
        page reads as the same button, following the campaign's button group
        where it sets one. */
-    --dp-btn-bg:             var(--dono-button-bg, var(--dp-accent));
-    --dp-btn-fg:             var(--dono-button-fg, #fff);
-    --dp-btn-hover-bg:       var(--dono-button-hover-bg, var(--dp-accent-dark));
+    --dp-btn-bg:             var(--giveflow-button-bg, var(--dp-accent));
+    --dp-btn-fg:             var(--giveflow-button-fg, #fff);
+    --dp-btn-hover-bg:       var(--giveflow-button-hover-bg, var(--dp-accent-dark));
     --dp-btn-radius:         var(--dp-radius-sm);
     --dp-btn-padding-block:  12px;
     --dp-btn-padding-inline: 24px;
     --dp-btn-font-size:      15px;
-    --dp-btn-font-weight:    var(--dono-button-weight, 500);
+    --dp-btn-font-weight:    var(--giveflow-button-weight, 500);
 }
 
 /* Core's columns block owns two-column layout: the flex basis comes from the
@@ -78,7 +78,7 @@ body,
    page measure and the sticky rail are ours, and overriding display here would
    break the block in the editor. */
 
-.dono-p2p-layout,
+.giveflow-p2p-layout,
 .dp-layout{
     box-sizing: border-box;
     max-width: var(--dp-measure, 1200px);
@@ -90,20 +90,20 @@ body,
     padding-inline: 24px;
 }
 
-.dono-p2p-layout .dp-band,
-.dono-p2p-layout .dp-rail,
+.giveflow-p2p-layout .dp-band,
+.giveflow-p2p-layout .dp-rail,
 .dp-layout .dp-band,
 .dp-layout .dp-rail{ padding-inline: 0; }
 
 /* Let a column shrink below its content's intrinsic width, so a long
    unbreakable child cannot force horizontal overflow on narrow screens. */
 
-.dono-p2p-layout > .wp-block-column,
+.giveflow-p2p-layout > .wp-block-column,
 .dp-layout > .wp-block-column{
     min-width: 0;
 }
 
-.dono-p2p-layout__side,
+.giveflow-p2p-layout__side,
 .dp-layout__side{
     position: sticky;
     top: 32px;
@@ -128,12 +128,12 @@ body,
 /* Core stacks columns at 781px; drop the sticky with it. */
 @media (max-width: 781px) {
     .dp-layout__side,
-    .dono-p2p-layout__side {
+    .giveflow-p2p-layout__side {
         position: static;
     }
 }
 
-#dono-form {
+#giveflow-form {
     scroll-margin-top: 24px;
 }
 
@@ -148,8 +148,8 @@ body,
     color: var(--dp-text);
     background: var(--dp-card);
     font-family: var(--dp-font);
-    font-size: calc(var(--dono-type-size, 15px) + 1px);
-    font-weight: var(--dono-body-weight, 400);
+    font-size: calc(var(--giveflow-type-size, 15px) + 1px);
+    font-weight: var(--giveflow-body-weight, 400);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
 
@@ -169,7 +169,7 @@ body,
 .dp-page *::before,
 .dp-page *::after { box-sizing: border-box; }
 
-/* Matches .dono-p2p-layout, so a single-column page and a page with a rail
+/* Matches .giveflow-p2p-layout, so a single-column page and a page with a rail
    present at the same width. Inside a layout column the column constrains this
    anyway. */
 
@@ -181,11 +181,11 @@ body,
 
 .dp-top { padding-top: 64px; }
 
-.dp-display { margin: 0; font-size: 44px; line-height: 1.08; font-weight: var(--dono-heading-weight, 650); letter-spacing: -.022em; text-wrap: balance; }
+.dp-display { margin: 0; font-size: 44px; line-height: 1.08; font-weight: var(--giveflow-heading-weight, 650); letter-spacing: -.022em; text-wrap: balance; }
 
-.dp-h2 { margin: 0 0 18px; font-size: 26px; line-height: 1.25; font-weight: var(--dono-heading-weight, 650); letter-spacing: -.015em; }
+.dp-h2 { margin: 0 0 18px; font-size: 26px; line-height: 1.25; font-weight: var(--giveflow-heading-weight, 650); letter-spacing: -.015em; }
 
-.dp-h3 { margin: 0 0 8px; font-size: 17px; line-height: 1.35; font-weight: var(--dono-heading-weight, 650); }
+.dp-h3 { margin: 0 0 8px; font-size: 17px; line-height: 1.35; font-weight: var(--giveflow-heading-weight, 650); }
 
 .dp-lede { margin: 14px 0 0; font-size: 18px; line-height: 1.55; color: var(--dp-text-2); }
 
@@ -356,7 +356,7 @@ body,
 .dp-profile__amount {
     margin: 0;
     font-size: clamp(22px, 2.4vw, 26px);
-    font-weight: var(--dono-heading-weight, 650);
+    font-weight: var(--giveflow-heading-weight, 650);
     letter-spacing: -.015em;
     font-variant-numeric: tabular-nums;
     line-height: 1.15;
@@ -403,7 +403,7 @@ body,
 .dp-profile__stat b {
     display: block;
     font-size: 15px;
-    font-weight: var(--dono-heading-weight, 650);
+    font-weight: var(--giveflow-heading-weight, 650);
     font-variant-numeric: tabular-nums;
     line-height: 1.2;
     color: var(--dp-text);
@@ -428,7 +428,7 @@ body,
 
 .dp-money { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-top: 28px; font-variant-numeric: tabular-nums; }
 
-.dp-raised { font-size: 36px; font-weight: var(--dono-heading-weight, 650); letter-spacing: -.022em; color: var(--dp-accent); }
+.dp-raised { font-size: 36px; font-weight: var(--giveflow-heading-weight, 650); letter-spacing: -.022em; color: var(--dp-accent); }
 
 .dp-goal { font-size: 15px; color: var(--dp-muted); }
 
@@ -442,7 +442,7 @@ body,
 
 .dp-stat + .dp-stat { border-left: 1px solid var(--dp-border); padding-left: 18px; }
 
-.dp-stat b { display: block; font-size: 22px; font-weight: var(--dono-heading-weight, 650); letter-spacing: -.018em; font-variant-numeric: tabular-nums; }
+.dp-stat b { display: block; font-size: 22px; font-weight: var(--giveflow-heading-weight, 650); letter-spacing: -.018em; font-variant-numeric: tabular-nums; }
 
 .dp-stat span { display: block; margin-top: 3px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: var(--dp-muted); }
 
@@ -452,7 +452,7 @@ body,
     display: inline-flex; align-items: center; gap: 8px; padding: 13px 24px;
     border: 0; border-radius: var(--dp-btn-radius);
     background: var(--dp-btn-bg); color: var(--dp-btn-fg);
-    font: inherit; font-size: 15px; font-weight: var(--dono-button-weight, 650); cursor: pointer; text-decoration: none;
+    font: inherit; font-size: 15px; font-weight: var(--giveflow-button-weight, 650); cursor: pointer; text-decoration: none;
 }
 
 .dp-btn:hover { background: var(--dp-btn-hover-bg); color: var(--dp-btn-fg); }
@@ -627,8 +627,8 @@ body,
    (Frame or Plain), honoured by the shortcode this block renders; forcing it
    flat here would override the organiser's choice. */
 
-.dono-p2p-form-band,
-.dono-form-band{
+.giveflow-p2p-form-band,
+.giveflow-form-band{
     max-width: var(--dp-measure, 1200px);
     margin: 0 auto;
     padding: 0 24px 72px;
@@ -636,7 +636,7 @@ body,
 
 /* In a rail the form is already a column of its own, so it needs no inset. */
 
-.dono-p2p-layout__side .dono-p2p-form-band,
-.dono-p2p-layout__side .dono-form-band,
-.dp-layout__side .dono-p2p-form-band,
-.dp-layout__side .dono-form-band{ padding: 0; max-width: none; }
+.giveflow-p2p-layout__side .giveflow-p2p-form-band,
+.giveflow-p2p-layout__side .giveflow-form-band,
+.dp-layout__side .giveflow-p2p-form-band,
+.dp-layout__side .giveflow-form-band{ padding: 0; max-width: none; }

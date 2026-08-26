@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Unit\Forms;
+namespace GiveFlow\Tests\Unit\Forms;
 
-use Dono\Donations\Donation;
-use Dono\Donations\DonationIntent;
-use Dono\Forms\DefaultFormTypeHandler;
-use Dono\Forms\FormTypeHandler;
-use Dono\Forms\FormTypeRegistry;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationIntent;
+use GiveFlow\Forms\DefaultFormTypeHandler;
+use GiveFlow\Forms\FormTypeHandler;
+use GiveFlow\Forms\FormTypeRegistry;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 

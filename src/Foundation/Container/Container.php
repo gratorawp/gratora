@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Foundation\Container;
+namespace GiveFlow\Foundation\Container;
 
 use Closure;
 use RuntimeException;
@@ -59,7 +59,7 @@ final class Container
         }
 
         if (! isset($this->bindings[$id])) {
-            throw new RuntimeException(esc_html("Dono container: no binding registered for {$id}"));
+            throw new RuntimeException(esc_html("GiveFlow container: no binding registered for {$id}"));
         }
 
         $instance = ($this->bindings[$id])($this);

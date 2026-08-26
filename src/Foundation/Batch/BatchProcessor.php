@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Foundation\Batch;
+namespace GiveFlow\Foundation\Batch;
 
 use Closure;
-use Dono\Vendor\Queryable\DB;
+use GiveFlow\Vendor\Queryable\DB;
 
 /**
  * One bounded, resumable tick of a batched data operation. The caller must operate

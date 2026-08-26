@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace Dono\Donors;
+namespace GiveFlow\Donors;
 
-use Dono\Analytics\ErrorLog;
-use Dono\Donations\Donation;
-use Dono\Donors\Erasure\ErasureRegistry;
-use Dono\Donors\Erasure\ErasureRequest;
-use Dono\Recurring\RecurringCanceller;
-use Dono\Recurring\RecurringPlan;
-use Dono\Recurring\RecurringPlanRepository;
-use Dono\Foundation\Crypto\Crypto;
-use Dono\Foundation\Identity\IdentityHasher;
-use Dono\Foundation\Time\Clock;
+use GiveFlow\Analytics\ErrorLog;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donors\Erasure\ErasureRegistry;
+use GiveFlow\Donors\Erasure\ErasureRequest;
+use GiveFlow\Recurring\RecurringCanceller;
+use GiveFlow\Recurring\RecurringPlan;
+use GiveFlow\Recurring\RecurringPlanRepository;
+use GiveFlow\Foundation\Crypto\Crypto;
+use GiveFlow\Foundation\Identity\IdentityHasher;
+use GiveFlow\Foundation\Time\Clock;
 use InvalidArgumentException;
 use Throwable;
-use Dono\Vendor\Queryable\DB;
+use GiveFlow\Vendor\Queryable\DB;
 
 /**
  * Donor writes: creation, profile edits, email changes, deletion and erasure.
@@ -107,7 +107,7 @@ final class DonorService
 
         $donor->save();
 
-        do_action('dono.donor.created', $donor);
+        do_action('giveflow.donor.created', $donor);
 
         return $donor;
     }
@@ -132,7 +132,7 @@ final class DonorService
     public function editProfile(Donor $donor, array $patch): Donor
     {
         if ($donor->redacted_at !== null) {
-            throw new InvalidArgumentException(esc_html__('This donor has been erased and can no longer be edited.', 'dono-fundraising-platform'));
+            throw new InvalidArgumentException(esc_html__('This donor has been erased and can no longer be edited.', 'giveflow-fundraising-campaigns'));
         }
         $changed = false;
         $textFields = ['first_name' => 100, 'last_name' => 100, 'company' => 150, 'locale' => 10];
@@ -183,7 +183,7 @@ final class DonorService
         if ($changed) {
             $donor->updated_at = $this->clock->now()->format('Y-m-d H:i:s');
             $donor->save();
-            do_action('dono.donor.updated', $donor);
+            do_action('giveflow.donor.updated', $donor);
         }
 
         return $donor;
@@ -201,7 +201,7 @@ final class DonorService
     public function refreshProfile(Donor $donor, array $profile): Donor
     {
         if ($donor->redacted_at !== null) {
-            throw new InvalidArgumentException(esc_html__('This donor has been erased and can no longer be edited.', 'dono-fundraising-platform'));
+            throw new InvalidArgumentException(esc_html__('This donor has been erased and can no longer be edited.', 'giveflow-fundraising-campaigns'));
         }
 
         $changed = false;
@@ -236,7 +236,7 @@ final class DonorService
         if ($changed) {
             $donor->updated_at = $this->clock->now()->format('Y-m-d H:i:s');
             $donor->save();
-            do_action('dono.donor.updated', $donor);
+            do_action('giveflow.donor.updated', $donor);
         }
 
         return $donor;
@@ -246,11 +246,11 @@ final class DonorService
     public function changeEmail(Donor $donor, string $newEmail): Donor
     {
         if ($donor->redacted_at !== null) {
-            throw new InvalidArgumentException(esc_html__('This donor has been erased and can no longer be edited.', 'dono-fundraising-platform'));
+            throw new InvalidArgumentException(esc_html__('This donor has been erased and can no longer be edited.', 'giveflow-fundraising-campaigns'));
         }
         $normalized = $this->hasher->normalizeEmail($newEmail);
         if ($normalized === '') {
-            throw new InvalidArgumentException(esc_html__('Email is required.', 'dono-fundraising-platform'));
+            throw new InvalidArgumentException(esc_html__('Email is required.', 'giveflow-fundraising-campaigns'));
         }
 
         $newHash = $this->hasher->emailHash($normalized);
@@ -269,11 +269,11 @@ final class DonorService
         $donor->updated_at      = $this->clock->now()->format('Y-m-d H:i:s');
         $donor->save();
 
-        do_action('dono.donor.email_changed', $donor, [
+        do_action('giveflow.donor.email_changed', $donor, [
             'old_hash' => $oldHash,
             'new_hash' => $newHash,
         ]);
-        do_action('dono.donor.updated', $donor);
+        do_action('giveflow.donor.updated', $donor);
 
         return $donor;
     }
@@ -324,16 +324,16 @@ final class DonorService
             $id = (int) $donor->id;
 
             if (isset($withDonations[$id])) {
-                $out[$id] = __('This donor has donations on record, which have to be kept. Erase them instead.', 'dono-fundraising-platform');
+                $out[$id] = __('This donor has donations on record, which have to be kept. Erase them instead.', 'giveflow-fundraising-campaigns');
                 continue;
             }
 
             if (isset($withPlans[$id])) {
-                $out[$id] = __('This donor has a recurring plan. Cancel it first.', 'dono-fundraising-platform');
+                $out[$id] = __('This donor has a recurring plan. Cancel it first.', 'giveflow-fundraising-campaigns');
                 continue;
             }
 
-            $vetoed  = apply_filters('dono.donor.undeletable_reason', null, $donor);
+            $vetoed  = apply_filters('giveflow.donor.undeletable_reason', null, $donor);
             $out[$id] = is_string($vetoed) && $vetoed !== '' ? $vetoed : null;
         }
 
@@ -379,7 +379,7 @@ final class DonorService
 
             // After the row is gone, so a listener cannot resurrect it by
             // writing something that references a donor which no longer exists.
-            do_action('dono.donor.deleted', $id, $hash);
+            do_action('giveflow.donor.deleted', $id, $hash);
         });
 
         // After the commit: file deletion cannot be rolled back, so a delete
@@ -465,13 +465,13 @@ final class DonorService
             return;
         }
 
-        $canceller = \Dono\Foundation\Plugin::instance()->container->get(RecurringCanceller::class);
+        $canceller = \GiveFlow\Foundation\Plugin::instance()->container->get(RecurringCanceller::class);
 
         $cancelled = [];
 
         foreach ($plans as $plan) {
             try {
-                $canceller->cancel($plan, __('The donor asked for their data to be erased.', 'dono-fundraising-platform'));
+                $canceller->cancel($plan, __('The donor asked for their data to be erased.', 'giveflow-fundraising-campaigns'));
                 $cancelled[] = (int) $plan->id;
             } catch (Throwable $e) {
                 // The erasure stops here, so the caller has to be told which
@@ -652,13 +652,13 @@ final class DonorService
     public function setEncryptedField(Donor $donor, string $field, ?string $value): void
     {
         if ($donor->redacted_at !== null) {
-            throw new InvalidArgumentException(esc_html__('This donor has been erased and can no longer be edited.', 'dono-fundraising-platform'));
+            throw new InvalidArgumentException(esc_html__('This donor has been erased and can no longer be edited.', 'giveflow-fundraising-campaigns'));
         }
         if (! in_array($field, ['phone_encrypted', 'address_encrypted', 'notes_encrypted', 'tax_id_encrypted'], true)) {
             throw new InvalidArgumentException(esc_html("Unsupported encrypted field: {$field}"));
         }
         $encrypted = ($value === null || $value === '') ? null : $this->crypto->encrypt($value);
-        DB::table('dono_donors')
+        DB::table('giveflow_donors')
             ->where('id', $donor->id)
             ->update([$field => $encrypted, 'updated_at' => $this->clock->now()->format('Y-m-d H:i:s')]);
         $donor->$field = $encrypted ?? '';
@@ -678,7 +678,7 @@ final class DonorService
 
         // Ids, not donors: hydrating a model per match just to read its id
         // costs far more time and memory than the id-only query.
-        $rows = DB::table('dono_donors')
+        $rows = DB::table('giveflow_donors')
             ->selectRaw('id')
             ->where(function ($q) use ($term, $hash): void {
                 $q->whereLike('first_name', $term)

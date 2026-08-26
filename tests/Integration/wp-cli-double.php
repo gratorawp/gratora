@@ -15,8 +15,8 @@
 
 declare(strict_types=1);
 
-if (! class_exists('DonoCliHalt')) {
-    class DonoCliHalt extends \RuntimeException
+if (! class_exists('GiveFlowCliHalt')) {
+    class GiveFlowCliHalt extends \RuntimeException
     {
     }
 }
@@ -29,7 +29,7 @@ if (! class_exists('WP_CLI')) {
 
         public static function error(string $message): void
         {
-            throw new DonoCliHalt('error: ' . $message);
+            throw new GiveFlowCliHalt('error: ' . $message);
         }
 
         /** @param array<string,mixed> $assoc */
@@ -39,7 +39,7 @@ if (! class_exists('WP_CLI')) {
                 return;
             }
 
-            throw new DonoCliHalt('confirm: ' . $question);
+            throw new GiveFlowCliHalt('confirm: ' . $question);
         }
 
         public static function log(string $message): void

@@ -1,7 +1,7 @@
 /**
  * Donation detail view.
  *
- * GET /dono/v1/admin/donations/{reference} returns:
+ * GET /giveflow/v1/admin/donations/{reference} returns:
  *   { donation, donor, receipts, refunds, related, notes }
  */
 
@@ -34,11 +34,11 @@ import MetadataCard         from './detail/rail/MetadataCard';
 import './donations.scss';
 
 function listHref() {
-    return addQueryArgs( window.location.pathname, { page: 'dono-donations' } );
+    return addQueryArgs( window.location.pathname, { page: 'giveflow-donations' } );
 }
 
 function donorHref( donorId ) {
-    return addQueryArgs( window.location.pathname, { page: 'dono-donors' } ) + `#donor/${ donorId }`;
+    return addQueryArgs( window.location.pathname, { page: 'giveflow-donors' } ) + `#donor/${ donorId }`;
 }
 
 export default function Detail( { reference } ) {
@@ -61,15 +61,15 @@ export default function Detail( { reference } ) {
 
     const load = useCallback( () => {
         setLoading( true );
-        return apiFetch( { path: `/dono/v1/admin/donations/${ reference }` } )
+        return apiFetch( { path: `/giveflow/v1/admin/donations/${ reference }` } )
             .then( ( d ) => { setPayload( d ); setError( null ); } )
-            .catch( ( e ) => setError( e?.message || __( 'Could not load donation.', 'dono-fundraising-platform' ) ) )
+            .catch( ( e ) => setError( e?.message || __( 'Could not load donation.', 'giveflow-fundraising-campaigns' ) ) )
             .finally( () => setLoading( false ) );
     }, [ reference ] );
 
     useEffect( () => { load(); }, [ load ] );
 
-    if ( loading && ! payload ) return <p className="dd-loading">{ __( 'Loading donation…', 'dono-fundraising-platform' ) }</p>;
+    if ( loading && ! payload ) return <p className="dd-loading">{ __( 'Loading donation…', 'giveflow-fundraising-campaigns' ) }</p>;
     if ( error )                return <Notice status="error">{ error }</Notice>;
     if ( ! payload )            return null;
 
@@ -79,31 +79,31 @@ export default function Detail( { reference } ) {
     const resendReceipt = async () => {
         try {
             await apiFetch( {
-                path:   `/dono/v1/admin/donations/${ donation.reference }/resend-receipt`,
+                path:   `/giveflow/v1/admin/donations/${ donation.reference }/resend-receipt`,
                 method: 'POST',
             } );
-            notify.success( __( 'Receipt re-queued.', 'dono-fundraising-platform' ) );
+            notify.success( __( 'Receipt re-queued.', 'giveflow-fundraising-campaigns' ) );
             load();
         } catch ( err ) {
-            notify.error( err?.message || __( 'Could not resend receipt.', 'dono-fundraising-platform' ) );
+            notify.error( err?.message || __( 'Could not resend receipt.', 'giveflow-fundraising-campaigns' ) );
         }
     };
 
     const markPaid = () => {
         setConfirm( {
-            title:        __( 'Mark donation as paid', 'dono-fundraising-platform' ),
-            message:      __( 'Mark this donation as paid? This issues the receipt and updates donor totals.', 'dono-fundraising-platform' ),
-            confirmLabel: __( 'Mark as paid', 'dono-fundraising-platform' ),
+            title:        __( 'Mark donation as paid', 'giveflow-fundraising-campaigns' ),
+            message:      __( 'Mark this donation as paid? This issues the receipt and updates donor totals.', 'giveflow-fundraising-campaigns' ),
+            confirmLabel: __( 'Mark as paid', 'giveflow-fundraising-campaigns' ),
             onConfirm: async () => {
                 try {
                     await apiFetch( {
-                        path:   `/dono/v1/admin/donations/${ donation.reference }/mark-paid`,
+                        path:   `/giveflow/v1/admin/donations/${ donation.reference }/mark-paid`,
                         method: 'POST',
                     } );
-                    notify.success( __( 'Donation marked as paid.', 'dono-fundraising-platform' ) );
+                    notify.success( __( 'Donation marked as paid.', 'giveflow-fundraising-campaigns' ) );
                     load();
                 } catch ( err ) {
-                    notify.error( err?.message || __( 'Could not mark donation as paid.', 'dono-fundraising-platform' ) );
+                    notify.error( err?.message || __( 'Could not mark donation as paid.', 'giveflow-fundraising-campaigns' ) );
                 }
             },
         } );
@@ -113,20 +113,20 @@ export default function Detail( { reference } ) {
     // held balance would stand for good, so the operator says so by hand.
     const releaseRefund = ( refund ) => {
         setConfirm( {
-            title:        __( 'Release the held amount', 'dono-fundraising-platform' ),
-            message:      __( 'Say this refund never reached the donor? The amount goes back to what can be refunded. Do this only once the gateway shows it did not go through, or the donor could be repaid twice.', 'dono-fundraising-platform' ),
-            confirmLabel: __( 'It never arrived', 'dono-fundraising-platform' ),
+            title:        __( 'Release the held amount', 'giveflow-fundraising-campaigns' ),
+            message:      __( 'Say this refund never reached the donor? The amount goes back to what can be refunded. Do this only once the gateway shows it did not go through, or the donor could be repaid twice.', 'giveflow-fundraising-campaigns' ),
+            confirmLabel: __( 'It never arrived', 'giveflow-fundraising-campaigns' ),
             onConfirm: async () => {
                 try {
                     await apiFetch( {
-                        path:   `/dono/v1/admin/donations/${ donation.reference }/release-refund`,
+                        path:   `/giveflow/v1/admin/donations/${ donation.reference }/release-refund`,
                         method: 'POST',
                         data:   { gateway_refund_id: refund.gateway_refund_id },
                     } );
-                    notify.success( __( 'The held amount is refundable again.', 'dono-fundraising-platform' ) );
+                    notify.success( __( 'The held amount is refundable again.', 'giveflow-fundraising-campaigns' ) );
                     load();
                 } catch ( err ) {
-                    notify.error( err?.message || __( 'Could not release the held amount.', 'dono-fundraising-platform' ) );
+                    notify.error( err?.message || __( 'Could not release the held amount.', 'giveflow-fundraising-campaigns' ) );
                 }
             },
         } );
@@ -134,22 +134,22 @@ export default function Detail( { reference } ) {
 
     const retrySubscription = () => {
         setConfirm( {
-            title:        __( 'Create the recurring plan', 'dono-fundraising-platform' ),
-            message:      __( 'Create the recurring plan at the gateway from this donation? The donor is not charged again today. The schedule restarts from now, so any renewal that fell due since this donation was made is not collected.', 'dono-fundraising-platform' ),
-            confirmLabel: __( 'Create plan', 'dono-fundraising-platform' ),
+            title:        __( 'Create the recurring plan', 'giveflow-fundraising-campaigns' ),
+            message:      __( 'Create the recurring plan at the gateway from this donation? The donor is not charged again today. The schedule restarts from now, so any renewal that fell due since this donation was made is not collected.', 'giveflow-fundraising-campaigns' ),
+            confirmLabel: __( 'Create plan', 'giveflow-fundraising-campaigns' ),
             onConfirm: async () => {
                 setRetryBusy( true );
                 setRetryError( null );
                 try {
                     await apiFetch( {
-                        path:   `/dono/v1/admin/donations/${ donation.reference }/retry-subscription`,
+                        path:   `/giveflow/v1/admin/donations/${ donation.reference }/retry-subscription`,
                         method: 'POST',
                     } );
-                    notify.success( __( 'Recurring plan created.', 'dono-fundraising-platform' ) );
+                    notify.success( __( 'Recurring plan created.', 'giveflow-fundraising-campaigns' ) );
                     await load();
                 } catch ( err ) {
                     // The gateway message is the diagnostic, so it goes through unedited.
-                    const reason = err?.message || __( 'Could not create the recurring plan.', 'dono-fundraising-platform' );
+                    const reason = err?.message || __( 'Could not create the recurring plan.', 'giveflow-fundraising-campaigns' );
                     setRetryError( reason );
                     notify.error( reason );
                 } finally {
@@ -169,15 +169,15 @@ export default function Detail( { reference } ) {
         setFailBusy( true );
         try {
             await apiFetch( {
-                path:   `/dono/v1/admin/donations/${ donation.reference }/mark-failed`,
+                path:   `/giveflow/v1/admin/donations/${ donation.reference }/mark-failed`,
                 method: 'POST',
                 data:   reason ? { reason } : {},
             } );
             setFailOpen( false );
-            notify.success( __( 'Donation marked as failed.', 'dono-fundraising-platform' ) );
+            notify.success( __( 'Donation marked as failed.', 'giveflow-fundraising-campaigns' ) );
             load();
         } catch ( err ) {
-            notify.error( err?.message || __( 'Could not update donation.', 'dono-fundraising-platform' ) );
+            notify.error( err?.message || __( 'Could not update donation.', 'giveflow-fundraising-campaigns' ) );
         } finally {
             setFailBusy( false );
         }
@@ -194,15 +194,15 @@ export default function Detail( { reference } ) {
         notify.success(
                 result?.plan?.stopped
                     ? ( settled
-                        ? __( 'Refund issued, and the recurring schedule is stopped.', 'dono-fundraising-platform' )
-                        : __( 'Refund accepted by the gateway, and the recurring schedule is stopped.', 'dono-fundraising-platform' ) )
+                        ? __( 'Refund issued, and the recurring schedule is stopped.', 'giveflow-fundraising-campaigns' )
+                        : __( 'Refund accepted by the gateway, and the recurring schedule is stopped.', 'giveflow-fundraising-campaigns' ) )
                     : ( settled
-                        ? __( 'Refund issued.', 'dono-fundraising-platform' )
-                        : __( 'Refund accepted by the gateway.', 'dono-fundraising-platform' ) )
+                        ? __( 'Refund issued.', 'giveflow-fundraising-campaigns' )
+                        : __( 'Refund accepted by the gateway.', 'giveflow-fundraising-campaigns' ) )
             );
         if ( ! settled ) {
             notify.info(
-                __( 'It has not settled yet, so the donor does not have the money back and the donation stays paid. This amount is already off the refundable balance.', 'dono-fundraising-platform' ),
+                __( 'It has not settled yet, so the donor does not have the money back and the donation stays paid. This amount is already off the refundable balance.', 'giveflow-fundraising-campaigns' ),
                 { duration: 0 }
             );
         }
@@ -213,10 +213,10 @@ export default function Detail( { reference } ) {
                 result.plan.error
                     ? sprintf(
                         /* translators: %s: why the schedule could not be cancelled */
-                        __( 'The refund went through, but the recurring schedule was not cancelled. Cancel it from the Subscriptions screen. Reason: %s', 'dono-fundraising-platform' ),
+                        __( 'The refund went through, but the recurring schedule was not cancelled. Cancel it from the Subscriptions screen. Reason: %s', 'giveflow-fundraising-campaigns' ),
                         result.plan.error
                     )
-                    : __( 'The refund went through, but the recurring schedule was not cancelled. Cancel it from the Subscriptions screen.', 'dono-fundraising-platform' ),
+                    : __( 'The refund went through, but the recurring schedule was not cancelled. Cancel it from the Subscriptions screen.', 'giveflow-fundraising-campaigns' ),
                 { duration: 0 }
             );
         }
@@ -299,27 +299,27 @@ export default function Detail( { reference } ) {
 
             { failOpen && (
                 <Dialog
-                    title={ __( 'Mark donation as failed', 'dono-fundraising-platform' ) }
+                    title={ __( 'Mark donation as failed', 'giveflow-fundraising-campaigns' ) }
                     onClose={ () => setFailOpen( false ) }
                     foot={
                         <>
                             <Btn variant="secondary" onClick={ () => setFailOpen( false ) } disabled={ failBusy }>
-                                { __( 'Cancel', 'dono-fundraising-platform' ) }
+                                { __( 'Cancel', 'giveflow-fundraising-campaigns' ) }
                             </Btn>
                             <Btn variant="danger" onClick={ submitFailed } isBusy={ failBusy }>
-                                { __( 'Mark as failed', 'dono-fundraising-platform' ) }
+                                { __( 'Mark as failed', 'giveflow-fundraising-campaigns' ) }
                             </Btn>
                         </>
                     }
                 >
                     <p style={ { marginTop: 0 } }>
-                        { __( 'Mark this donation as failed? Optionally add a reason (shown in the donation timeline). It will be excluded from totals.', 'dono-fundraising-platform' ) }
+                        { __( 'Mark this donation as failed? Optionally add a reason (shown in the donation timeline). It will be excluded from totals.', 'giveflow-fundraising-campaigns' ) }
                     </p>
                     <textarea
-                        className="dono-textarea"
+                        className="giveflow-textarea"
                         value={ failReason }
                         onChange={ ( e ) => setFailReason( e.target.value ) }
-                        placeholder={ __( 'Reason (optional)', 'dono-fundraising-platform' ) }
+                        placeholder={ __( 'Reason (optional)', 'giveflow-fundraising-campaigns' ) }
                         rows={ 3 }
                         style={ { width: '100%' } }
                     />

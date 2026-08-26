@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Dono\Donations;
+namespace GiveFlow\Donations;
 
-use Dono\Foundation\Config\SystemSetting;
-use Dono\Foundation\Helpers\Money;
-use Dono\Foundation\Identity\IdentityHasher;
-use Dono\Foundation\Plugin;
-use Dono\Gateways\GatewayManager;
-use Dono\Gateways\SettlesOutOfBand;
-use Dono\Gateways\TestMode;
+use GiveFlow\Foundation\Config\SystemSetting;
+use GiveFlow\Foundation\Helpers\Money;
+use GiveFlow\Foundation\Identity\IdentityHasher;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Gateways\GatewayManager;
+use GiveFlow\Gateways\SettlesOutOfBand;
+use GiveFlow\Gateways\TestMode;
 use WP_Error;
 
 /**
@@ -61,7 +61,7 @@ final class AntiSpamGuard
         if ($this->testMode !== null) {
             return $this->testMode->forForm(null);
         }
-        $cfg = get_option('dono_gateway_config', []);
+        $cfg = get_option('giveflow_gateway_config', []);
         return is_array($cfg) && ! empty($cfg['test_mode']);
     }
 
@@ -119,7 +119,7 @@ final class AntiSpamGuard
     public function checkHoneypot(string $value): ?WP_Error
     {
         if ($value === '') return null;
-        return new WP_Error('dono_invalid_submission', __('Submission rejected.', 'dono-fundraising-platform'), ['status' => 400]);
+        return new WP_Error('giveflow_invalid_submission', __('Submission rejected.', 'giveflow-fundraising-campaigns'), ['status' => 400]);
     }
 
     /** @since 1.0.0 */
@@ -131,7 +131,7 @@ final class AntiSpamGuard
     /** @since 1.0.0 */
     private function check(string $token, string $scope): ?WP_Error
     {
-        $generic = new WP_Error('dono_invalid_submission', __('Please refresh the page and try again.', 'dono-fundraising-platform'), ['status' => 400]);
+        $generic = new WP_Error('giveflow_invalid_submission', __('Please refresh the page and try again.', 'giveflow-fundraising-campaigns'), ['status' => 400]);
 
         $parts = explode('.', $token, 2);
         if (count($parts) !== 2) return $generic;
@@ -165,13 +165,13 @@ final class AntiSpamGuard
         if ($this->inGlobalTestMode()) return null;
 
         $ip = filter_var(wp_unslash($_SERVER['REMOTE_ADDR'] ?? ''), FILTER_VALIDATE_IP) ?: 'unknown';
-        if ($this->hit('dono_donate_ip_' . hash('sha256', $ip), self::IP_WINDOW) <= self::IP_MAX) {
+        if ($this->hit('giveflow_donate_ip_' . hash('sha256', $ip), self::IP_WINDOW) <= self::IP_MAX) {
             return null;
         }
 
         return new WP_Error(
-            'dono_rate_limited',
-            __('Too many attempts. Please try again in a few minutes.', 'dono-fundraising-platform'),
+            'giveflow_rate_limited',
+            __('Too many attempts. Please try again in a few minutes.', 'giveflow-fundraising-campaigns'),
             ['status' => 429]
         );
     }
@@ -183,14 +183,14 @@ final class AntiSpamGuard
         if ($this->inGlobalTestMode()) return null;
 
         $hash = $this->hasher->emailHash($this->hasher->normalizeEmail($email));
-        $key  = 'dono_donate_email_' . substr($hash, 0, 32);
+        $key  = 'giveflow_donate_email_' . substr($hash, 0, 32);
         if ($this->hit($key, self::EMAIL_WINDOW) <= self::EMAIL_MAX) {
             return null;
         }
 
         return new WP_Error(
-            'dono_rate_limited',
-            __('Too many recent attempts for this email. Please try again later.', 'dono-fundraising-platform'),
+            'giveflow_rate_limited',
+            __('Too many recent attempts for this email. Please try again later.', 'giveflow-fundraising-campaigns'),
             ['status' => 429]
         );
     }
@@ -291,7 +291,7 @@ final class AntiSpamGuard
         // Spent last, so a refusal above costs nothing. The bucket is the root's
         // birth, so every member of the tree at any depth and on any branch
         // names one counter that no wall-clock boundary can reset.
-        $key = 'dono_donate_retry_' . substr(hash('sha256', $group), 0, 32);
+        $key = 'giveflow_donate_retry_' . substr(hash('sha256', $group), 0, 32);
         if ($this->hit($key, self::RETRY_TTL * 2, $born) > self::RETRY_MAX) {
             return null;
         }
@@ -307,7 +307,7 @@ final class AntiSpamGuard
      * Whether the gateway a row was created on takes the money out of band.
      *
      * Asked of the registry rather than of a list kept here, so a gateway
-     * registered through `dono.gateways.register` closes the same hole by
+     * registered through `giveflow.gateways.register` closes the same hole by
      * implementing SettlesOutOfBand. A gateway that is no longer registered
      * cannot answer and its rows keep the ordinary relief: it can take no
      * further submission either way, and refusing on silence would spend a
@@ -404,12 +404,12 @@ final class AntiSpamGuard
     /** @since 1.0.0 */
     public function checkMinAmount(int $cents): ?WP_Error
     {
-        $min = (int) apply_filters('dono.spam.min_amount_cents', self::MIN_AMOUNT_CENTS);
+        $min = (int) apply_filters('giveflow.spam.min_amount_cents', self::MIN_AMOUNT_CENTS);
         if ($min > 0 && $cents < $min) {
             return new WP_Error(
-                'dono_amount_too_low',
+                'giveflow_amount_too_low',
                 /* translators: %s: minimum donation amount formatted */
-                sprintf(__('Minimum donation is %s.', 'dono-fundraising-platform'), Money::format($min)),
+                sprintf(__('Minimum donation is %s.', 'giveflow-fundraising-campaigns'), Money::format($min)),
                 ['status' => 400]
             );
         }

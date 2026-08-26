@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Admin\Pages;
+namespace GiveFlow\Admin\Pages;
 
-use Dono\Foundation\Hooks\HookProvider;
-use Dono\Foundation\Plugin;
-use Dono\Donors\ConsentService;
-use Dono\Gateways\GatewayManager;
+use GiveFlow\Foundation\Hooks\HookProvider;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Donors\ConsentService;
+use GiveFlow\Gateways\GatewayManager;
 
 /**
  * Registers and renders the Forms admin page, including full-screen editor mode.
@@ -16,14 +16,14 @@ use Dono\Gateways\GatewayManager;
  */
 final class FormsPage extends HookProvider
 {
-    private const PAGE_ID   = 'dono-forms';
-    private const HANDLE    = 'dono-admin-forms';
+    private const PAGE_ID   = 'giveflow-forms';
+    private const HANDLE    = 'giveflow-admin-forms';
     private const BUILD_DIR = 'build/admin/forms';
 
     /** @since 1.0.0 */
     protected function filters(): array
     {
-        return ['dono.admin.pages' => 'registerPage'];
+        return ['giveflow.admin.pages' => 'registerPage'];
     }
 
     /** @since 1.0.0 */
@@ -57,16 +57,16 @@ final class FormsPage extends HookProvider
         . 'html.wp-toolbar{padding-top:0!important}'
         . 'html,body{height:100%;margin:0;padding:0;background:#fff}'
         . '#wpwrap,#wpcontent,#wpbody,#wpbody-content{margin-left:0!important;padding:0!important;float:none!important;width:100%!important;background:#fff}'
-        . '.wrap,.dono-forms-wrap{margin:0!important;padding:0!important}'
-        . '#dono-admin-forms{height:100vh;overflow:hidden;background:#fff}';
+        . '.wrap,.giveflow-forms-wrap{margin:0!important;padding:0!important}'
+        . '#giveflow-admin-forms{height:100vh;overflow:hidden;background:#fff}';
 
     /** @since 1.0.0 */
     public function registerPage(array $pages): array
     {
         $pages[] = [
             'id'         => self::PAGE_ID,
-            'title'      => __('Forms', 'dono-fundraising-platform'),
-            'capability' => 'dono_access_forms',
+            'title'      => __('Forms', 'giveflow-fundraising-campaigns'),
+            'capability' => 'giveflow_access_forms',
             'position'   => 15,
             'hidden'     => true,
             'render'     => [$this, 'render'],
@@ -80,8 +80,8 @@ final class FormsPage extends HookProvider
         $this->bootBlockEditorContext();
         $this->enqueueAssets();
         ?>
-        <div class="wrap dono-forms-wrap">
-            <div id="dono-admin-forms"></div>
+        <div class="wrap giveflow-forms-wrap">
+            <div id="giveflow-admin-forms"></div>
         </div>
         <?php
     }
@@ -131,16 +131,16 @@ final class FormsPage extends HookProvider
         do_action('enqueue_block_editor_assets');
         add_action('admin_print_footer_scripts', ['_WP_Editors', 'print_default_editor_scripts'], 45);
 
-        $asset = require DONO_DIR . self::BUILD_DIR . '/index.asset.php';
+        $asset = require GIVEFLOW_DIR . self::BUILD_DIR . '/index.asset.php';
         wp_enqueue_script(
             self::HANDLE,
-            DONO_URL . self::BUILD_DIR . '/index.js',
+            GIVEFLOW_URL . self::BUILD_DIR . '/index.js',
             $asset['dependencies'] ?? [],
-            $asset['version']      ?? DONO_VERSION,
+            $asset['version']      ?? GIVEFLOW_VERSION,
             true
         );
 
-        wp_set_script_translations(self::HANDLE, 'dono-fundraising-platform', DONO_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE, 'giveflow-fundraising-campaigns', GIVEFLOW_DIR . 'languages');
 
         // Registered gateways so the payment-gateways block can list them,
         // each carrying whether the org is currently offering it: a gateway
@@ -167,30 +167,30 @@ final class FormsPage extends HookProvider
             Plugin::instance()->container->get(ConsentService::class)->purposes()
         );
 
-        wp_localize_script(self::HANDLE, 'donoFormsEditor', [
+        wp_localize_script(self::HANDLE, 'giveflowFormsEditor', [
             'gateways' => $gateways,
             'consents' => $consents,
-            'consentsSettingsUrl' => admin_url('admin.php?page=dono-settings&tab=consents'),
+            'consentsSettingsUrl' => admin_url('admin.php?page=giveflow-settings&tab=consents'),
         ]);
 
-        do_action('dono.editor.assets', self::HANDLE);
+        do_action('giveflow.editor.assets', self::HANDLE);
 
         wp_enqueue_style(
-            'dono-dataviews-vendor-forms',
-            DONO_URL . self::BUILD_DIR . '/dataviews.css',
+            'giveflow-dataviews-vendor-forms',
+            GIVEFLOW_URL . self::BUILD_DIR . '/dataviews.css',
             ['wp-components'],
-            $asset['version'] ?? DONO_VERSION
+            (string) (@filemtime(GIVEFLOW_DIR . self::BUILD_DIR . '/dataviews.css') ?: GIVEFLOW_VERSION)
         );
 
         wp_enqueue_style(
-            'dono-admin-forms',
-            DONO_URL . 'build/admin/forms.css',
+            'giveflow-admin-forms',
+            GIVEFLOW_URL . 'build/admin/forms.css',
             ['wp-edit-post', 'wp-block-editor', 'wp-components'],
-            $asset['version'] ?? DONO_VERSION
+            (string) (@filemtime(GIVEFLOW_DIR . 'build/admin/forms.css') ?: GIVEFLOW_VERSION)
         );
 
         if (self::isFormEditView()) {
-            wp_add_inline_style('dono-admin-forms', self::FULLSCREEN_CSS);
+            wp_add_inline_style('giveflow-admin-forms', self::FULLSCREEN_CSS);
         }
     }
 }

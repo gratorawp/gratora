@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Campaigns\Campaign;
+use GiveFlow\Campaigns\Campaign;
 use WP_REST_Request;
 
 /**
@@ -32,7 +32,7 @@ final class CampaignBindingPreviewScopeTest extends IntegrationTestCase
     {
         // The route takes the edited post id in the path; campaign_id pins an
         // explicit campaign, which is the parameter that was unchecked.
-        $req = new WP_REST_Request('GET', '/dono/v1/campaign-binding-preview/1');
+        $req = new WP_REST_Request('GET', '/giveflow/v1/campaign-binding-preview/1');
         $req->set_param('id', 1);
         $req->set_param('campaign_id', $campaignId);
 

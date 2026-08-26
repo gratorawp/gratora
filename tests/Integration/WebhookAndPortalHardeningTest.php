@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
-use Dono\Donors\Donor;
-use Dono\Donors\DonorService;
-use Dono\Donors\SignupRedemption;
-use Dono\Foundation\Identity\IdentityHasher;
-use Dono\Foundation\Plugin;
-use Dono\Gateways\WebhookPaymentGuard;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Donors\SignupRedemption;
+use GiveFlow\Foundation\Identity\IdentityHasher;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Gateways\WebhookPaymentGuard;
 use WP_REST_Request;
 
 /**
@@ -30,7 +30,7 @@ final class WebhookAndPortalHardeningTest extends IntegrationTestCase
     private function portalToken(): string
     {
         return Plugin::instance()->container
-            ->get(\Dono\Donations\AntiSpamGuard::class)
+            ->get(\GiveFlow\Donations\AntiSpamGuard::class)
             ->mintPortalToken();
     }
 
@@ -47,7 +47,7 @@ final class WebhookAndPortalHardeningTest extends IntegrationTestCase
     {
         $sent = $this->captureLinkMail();
 
-        $req = new WP_REST_Request('POST', '/dono/v1/portal/register');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/portal/register');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($body + ['token' => $this->portalToken()]));
         rest_do_request($req);
@@ -136,7 +136,7 @@ final class WebhookAndPortalHardeningTest extends IntegrationTestCase
         $email = 'existing-' . uniqid() . '@example.test';
         $sent  = $this->captureLinkMail();
 
-        $req = new WP_REST_Request('POST', '/dono/v1/portal/register');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/portal/register');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'email'      => $email,
@@ -176,24 +176,24 @@ final class WebhookAndPortalHardeningTest extends IntegrationTestCase
         ]);
 
         $canonical = Plugin::instance()->container
-            ->get(\Dono\Donors\DonorMetricsService::class)
+            ->get(\GiveFlow\Donors\DonorMetricsService::class)
             ->exportData((int) $donor->id);
 
         $sid = $this->portalSession((int) $donor->id, 'tok');
-        $_COOKIE['dono_donor_session'] = $sid;
+        $_COOKIE['giveflow_donor_session'] = $sid;
 
         // The bundle is streamed from a rest_pre_serve_request filter, which
         // only fires when the server actually serves. rest_do_request stops
         // short of that, so the filter is invoked here the way the server would.
-        $req = new WP_REST_Request('POST', '/dono/v1/portal/data-export');
-        $req->set_header('X-Dono-Csrf', 'tok');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/portal/data-export');
+        $req->set_header('X-GiveFlow-Csrf', 'tok');
         $res = rest_do_request($req);
 
         ob_start();
         apply_filters('rest_pre_serve_request', false, $res, $req, rest_get_server());
         $body = ob_get_clean();
 
-        unset($_COOKIE['dono_donor_session']);
+        unset($_COOKIE['giveflow_donor_session']);
 
         $bundle = json_decode((string) $body, true);
         $this->assertIsArray($bundle, 'the export streams a JSON body');
@@ -224,7 +224,7 @@ final class WebhookAndPortalHardeningTest extends IntegrationTestCase
         $donor = Plugin::instance()->container->get(DonorService::class)
             ->findOrCreate('approve-' . uniqid() . '@example.test');
 
-        $plan = \Dono\Recurring\RecurringPlan::make();
+        $plan = \GiveFlow\Recurring\RecurringPlan::make();
         $plan->donor_id                = (int) $donor->id;
         $plan->gateway                 = 'needsapproval';
         $plan->gateway_subscription_id = 'I-' . strtoupper(bin2hex(random_bytes(4)));
@@ -238,23 +238,23 @@ final class WebhookAndPortalHardeningTest extends IntegrationTestCase
         $plan->updated_at              = gmdate('Y-m-d H:i:s');
         $plan->save();
 
-        Plugin::instance()->container->get(\Dono\Gateways\GatewayManager::class)
+        Plugin::instance()->container->get(\GiveFlow\Gateways\GatewayManager::class)
             ->register(new NeedsApprovalGateway());
 
         $sid = $this->portalSession((int) $donor->id, 'tok');
-        $_COOKIE['dono_donor_session'] = $sid;
+        $_COOKIE['giveflow_donor_session'] = $sid;
 
-        $req = new WP_REST_Request('POST', '/dono/v1/portal/recurring/' . (int) $plan->id . '/action');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/portal/recurring/' . (int) $plan->id . '/action');
         $req->set_header('content-type', 'application/json');
-        $req->set_header('X-Dono-Csrf', 'tok');
+        $req->set_header('X-GiveFlow-Csrf', 'tok');
         $req->set_body((string) wp_json_encode(['action' => 'change_amount', 'amount_cents' => 5000]));
         $res = rest_do_request($req);
 
-        unset($_COOKIE['dono_donor_session']);
+        unset($_COOKIE['giveflow_donor_session']);
 
         $this->assertSame(409, $res->get_status(), 'the donor is told it is waiting on them');
 
-        $fresh = \Dono\Recurring\RecurringPlan::query()->find('id', (int) $plan->id);
+        $fresh = \GiveFlow\Recurring\RecurringPlan::query()->find('id', (int) $plan->id);
         $this->assertSame(
             2500,
             (int) $fresh->amount_cents,
@@ -314,7 +314,7 @@ final class WebhookAndPortalHardeningTest extends IntegrationTestCase
 }
 
 /** Answers a revise the way PayPal does when the subscriber must approve it. */
-final class NeedsApprovalGateway implements \Dono\Gateways\PaymentGateway, \Dono\Gateways\SubscriptionAware
+final class NeedsApprovalGateway implements \GiveFlow\Gateways\PaymentGateway, \GiveFlow\Gateways\SubscriptionAware
 {
     public function id(): string { return 'needsapproval'; }
     public function label(): string { return 'Needs approval'; }
@@ -325,33 +325,33 @@ final class NeedsApprovalGateway implements \Dono\Gateways\PaymentGateway, \Dono
     public function currencies(): array { return ['USD']; }
     public function canCharge(): bool { return true; }
 
-    public function createIntent(\Dono\Donations\Donation $donation): \Dono\Gateways\GatewayIntentResult
+    public function createIntent(\GiveFlow\Donations\Donation $donation): \GiveFlow\Gateways\GatewayIntentResult
     {
-        return new \Dono\Gateways\GatewayIntentResult(ok: false, error: 'not used');
+        return new \GiveFlow\Gateways\GatewayIntentResult(ok: false, error: 'not used');
     }
 
-    public function confirm(\Dono\Donations\Donation $donation, array $payload = []): \Dono\Gateways\GatewayConfirmResult
+    public function confirm(\GiveFlow\Donations\Donation $donation, array $payload = []): \GiveFlow\Gateways\GatewayConfirmResult
     {
-        return new \Dono\Gateways\GatewayConfirmResult(ok: false, error: 'not used');
+        return new \GiveFlow\Gateways\GatewayConfirmResult(ok: false, error: 'not used');
     }
 
-    public function handleWebhook(WP_REST_Request $request): \Dono\Gateways\WebhookOutcome
+    public function handleWebhook(WP_REST_Request $request): \GiveFlow\Gateways\WebhookOutcome
     {
-        return new \Dono\Gateways\WebhookOutcome(signature_ok: false, external_id: '', event_type: '', handled: false);
+        return new \GiveFlow\Gateways\WebhookOutcome(signature_ok: false, external_id: '', event_type: '', handled: false);
     }
 
-    public function refund(\Dono\Donations\Donation $donation, int $amountCents, ?string $reason = null): \Dono\Gateways\RefundResult
+    public function refund(\GiveFlow\Donations\Donation $donation, int $amountCents, ?string $reason = null): \GiveFlow\Gateways\RefundResult
     {
-        return new \Dono\Gateways\RefundResult(ok: false, error: 'not used');
+        return new \GiveFlow\Gateways\RefundResult(ok: false, error: 'not used');
     }
 
-    public function cancelSubscription(\Dono\Recurring\RecurringPlan $plan, ?string $reason = null): void {}
-    public function pauseSubscription(\Dono\Recurring\RecurringPlan $plan, ?string $resumesAt = null): void {}
-    public function resumeSubscription(\Dono\Recurring\RecurringPlan $plan): void {}
+    public function cancelSubscription(\GiveFlow\Recurring\RecurringPlan $plan, ?string $reason = null): void {}
+    public function pauseSubscription(\GiveFlow\Recurring\RecurringPlan $plan, ?string $resumesAt = null): void {}
+    public function resumeSubscription(\GiveFlow\Recurring\RecurringPlan $plan): void {}
 
-    public function updateSubscriptionAmount(\Dono\Recurring\RecurringPlan $plan, int $amountCents): void
+    public function updateSubscriptionAmount(\GiveFlow\Recurring\RecurringPlan $plan, int $amountCents): void
     {
-        throw new \Dono\Gateways\SubscriptionChangeNeedsApproval(
+        throw new \GiveFlow\Gateways\SubscriptionChangeNeedsApproval(
             'needs approval',
             'https://www.paypal.com/approve/xyz'
         );

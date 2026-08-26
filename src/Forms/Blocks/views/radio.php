@@ -9,17 +9,17 @@ defined('ABSPATH') || exit;
  * @var string                                                          $defaultValue
  */
 ?>
-<fieldset class="dono-block dono-block--radio dono-radio dono-radio--<?php echo esc_attr($layout); ?>">
+<fieldset class="giveflow-block giveflow-block--radio giveflow-radio giveflow-radio--<?php echo esc_attr($layout); ?>">
     <?php if ($label !== ''): ?>
-        <legend class="dono-radio__legend"><?php echo esc_html($label); ?></legend>
+        <legend class="giveflow-radio__legend"><?php echo esc_html($label); ?></legend>
     <?php endif; ?>
-    <div class="dono-radio__options">
+    <div class="giveflow-radio__options">
         <?php foreach ($options as $i => $o):
             $optLabel = (string) $o['label'];
             $optValue = (string) $o['value'];
             $checked  = ($optValue === $defaultValue);
             ?>
-            <label class="dono-radio__option<?php echo esc_attr($checked ? ' is-selected' : ''); ?>">
+            <label class="giveflow-radio__option<?php echo esc_attr($checked ? ' is-selected' : ''); ?>">
                 <input
                     type="radio"
                     name="custom[<?php echo esc_attr($field); ?>]"
@@ -27,7 +27,7 @@ defined('ABSPATH') || exit;
                     <?php echo esc_attr($checked ? 'checked' : ''); ?>
                     <?php echo esc_attr($required ? 'required' : ''); ?>
                 >
-                <span class="dono-radio__option-label"><?php echo esc_html($optLabel !== '' ? $optLabel : $optValue); ?></span>
+                <span class="giveflow-radio__option-label"><?php echo esc_html($optLabel !== '' ? $optLabel : $optValue); ?></span>
             </label>
         <?php endforeach; ?>
     </div>

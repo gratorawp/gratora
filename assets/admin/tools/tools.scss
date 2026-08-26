@@ -1,17 +1,17 @@
 // Tools page styles.
 
-// Page chrome (crumbs, head, tabs, Card, dono-advanced-*) and the ConfirmDialog
+// Page chrome (crumbs, head, tabs, Card, giveflow-advanced-*) and the ConfirmDialog
 // used by the Logs tab.
 @import '../settings/settings.scss';
-@import '@dono/ui/scss/components/month-field';
+@import '@giveflow/ui/scss/components/month-field';
 
-.dono-tools-empty {
+.giveflow-tools-empty {
     margin: 0;
     color: $text-muted;
     font-size: 13.5px;
 }
 
-.dono-tools-note {
+.giveflow-tools-note {
     margin: 10px 0 0;
     color: $text-muted;
     font-size: 12.5px;
@@ -19,14 +19,14 @@
     max-width: 62ch;
 }
 
-.dono-advanced-actions {
+.giveflow-advanced-actions {
     display: flex;
     align-items: flex-end;
     gap: 10px;
     flex-wrap: wrap;
 }
 
-.dono-tools-field {
+.giveflow-tools-field {
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -35,16 +35,16 @@
 
     flex: 0 0 auto;
 
-    // .dono-select and .dono-input are width:100%, which against an auto-width
+    // .giveflow-select and .giveflow-input are width:100%, which against an auto-width
     // label resolves to the whole container.
-    .dono-select,
-    .dono-input {
+    .giveflow-select,
+    .giveflow-input {
         width: auto;
         min-width: 200px;
     }
 }
 
-.dono-exports {
+.giveflow-exports {
     width: 100%;
     border-collapse: collapse;
     background: $bg-card;
@@ -154,7 +154,7 @@
     }
 }
 
-.dono-tools-logbar {
+.giveflow-tools-logbar {
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -164,13 +164,13 @@
 }
 
 // Timestamp beside a queued job on the System info tab.
-.dono-tools-log__when {
+.giveflow-tools-log__when {
     font-size: 12px;
     color: $text-muted;
     white-space: nowrap;
 }
 
-.dono-log {
+.giveflow-log {
     &__source {
         font-size: 11.5px;
         padding: 1px 6px;
@@ -209,10 +209,10 @@
     }
 }
 
-// Column mapping. A table because that is what it is: one Dono field per row,
+// Column mapping. A table because that is what it is: one GiveFlow field per row,
 // the admin's column beside it, and the first value from their file so they can
 // see they picked the right one without opening the spreadsheet.
-.dono-csv-map {
+.giveflow-csv-map {
     width: 100%;
     border-collapse: collapse;
     margin: 16px 0;
@@ -222,7 +222,7 @@
 
     th, td {
         padding: 8px 10px;
-        border-bottom: 1px solid var(--dono-border, #e5e7eb);
+        border-bottom: 1px solid var(--giveflow-border, #e5e7eb);
         text-align: left;
         vertical-align: middle;
     }
@@ -231,7 +231,7 @@
         font-size: 12px;
         text-transform: uppercase;
         letter-spacing: 0.03em;
-        color: var(--dono-text-muted, #6b7280);
+        color: var(--giveflow-text-muted, #6b7280);
     }
 
     tbody th { font-weight: 600; }
@@ -250,11 +250,11 @@
         font-size: 13px;
         text-transform: uppercase;
         letter-spacing: 0.03em;
-        color: var(--dono-text-muted, #6b7280);
+        color: var(--giveflow-text-muted, #6b7280);
     }
 
     &__sample {
-        color: var(--dono-text-muted, #6b7280);
+        color: var(--giveflow-text-muted, #6b7280);
         font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
         font-size: 12px;
         overflow: hidden;
@@ -263,10 +263,10 @@
     }
 }
 
-.dono-csv-preview {
+.giveflow-csv-preview {
     margin-top: 12px;
     padding: 12px 14px;
-    background: var(--dono-bg-soft, #f8fafc);
+    background: var(--giveflow-bg-soft, #f8fafc);
     border-radius: 8px;
 
     p { margin: 0 0 8px; }
@@ -274,7 +274,7 @@
     &__skips, &__errors {
         margin: 0 0 8px;
         padding-left: 18px;
-        color: var(--dono-text-muted, #6b7280);
+        color: var(--giveflow-text-muted, #6b7280);
         font-size: 13px;
     }
 
@@ -284,7 +284,7 @@
 // The log table. Without widths the message, which is the column somebody came
 // to read, is squeezed to a few characters while the timestamp takes a third of
 // the row.
-.dono-log {
+.giveflow-log {
     &__when {
         white-space: nowrap;
     }
@@ -293,7 +293,7 @@
         display: inline-block;
         padding: 2px 6px;
         border-radius: 4px;
-        background: var(--dono-color-surface-2, #f3f4f6);
+        background: var(--giveflow-color-surface-2, #f3f4f6);
         font-size: 12px;
         white-space: nowrap;
     }
@@ -322,7 +322,7 @@
         margin: 8px 0 0;
         padding: 12px;
         border-radius: 6px;
-        background: var(--dono-color-surface-2, #f3f4f6);
+        background: var(--giveflow-color-surface-2, #f3f4f6);
         font-size: 12px;
         overflow-x: auto;
         white-space: pre-wrap;

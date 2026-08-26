@@ -22,8 +22,8 @@ export default function DistributionHistogram( { distribution, currency } ) {
 
     if ( ! distribution || distribution.total_count === 0 ) {
         return (
-            <p className="dono-panel__empty">
-                { __( 'Not enough donations yet to plot a distribution.', 'dono-fundraising-platform' ) }
+            <p className="giveflow-panel__empty">
+                { __( 'Not enough donations yet to plot a distribution.', 'giveflow-fundraising-campaigns' ) }
             </p>
         );
     }
@@ -41,22 +41,22 @@ export default function DistributionHistogram( { distribution, currency } ) {
         .reduce( ( s, b ) => s + b.count, 0 );
 
     return (
-        <div className="dono-histogram">
-            <div className="dono-histogram__caption">
+        <div className="giveflow-histogram">
+            <div className="giveflow-histogram__caption">
                 <span>
                     <strong>
                         { sprintf(
                             /* translators: %s: median donation amount */
-                            __( 'Median: %s', 'dono-fundraising-platform' ),
+                            __( 'Median: %s', 'giveflow-fundraising-campaigns' ),
                             formatAmount( median_cents, currency )
                         ) }
                     </strong>
                 </span>
                 { longTailCount > 0 && (
-                    <span className="dono-histogram__tail">
+                    <span className="giveflow-histogram__tail">
                         { sprintf(
                             /* translators: 1: donation count, 2: amount threshold (e.g. $100) */
-                            _n( '%1$d donation over %2$s', '%1$d donations over %2$s', longTailCount, 'dono-fundraising-platform' ),
+                            _n( '%1$d donation over %2$s', '%1$d donations over %2$s', longTailCount, 'giveflow-fundraising-campaigns' ),
                             longTailCount,
                             formatAmountCompact( 10000, currency )
                         ) }
@@ -98,21 +98,21 @@ export default function DistributionHistogram( { distribution, currency } ) {
                         formatter={ ( value, _name, props ) => [
                             sprintf(
                                 /* translators: 1: donation count, 2: total amount in that bucket */
-                                __( '%1$d × %2$s', 'dono-fundraising-platform' ),
+                                __( '%1$d × %2$s', 'giveflow-fundraising-campaigns' ),
                                 value,
                                 formatAmount( props.payload.amount_cents, currency )
                             ),
-                            __( 'Donations', 'dono-fundraising-platform' ),
+                            __( 'Donations', 'giveflow-fundraising-campaigns' ),
                         ] }
                     />
-                    <Bar dataKey="count" fill="#1e8a4e" radius={ [ 4, 4, 0, 0 ] } isAnimationActive={ false } />
+                    <Bar dataKey="count" fill="#8a7bff" radius={ [ 4, 4, 0, 0 ] } isAnimationActive={ false } />
                     { medianBucketIndex >= 0 && (
                         <ReferenceLine
                             x={ data[ medianBucketIndex ].label }
                             stroke="#6b7280"
                             strokeDasharray="4 4"
                             label={ {
-                                value:     __( 'median', 'dono-fundraising-platform' ),
+                                value:     __( 'median', 'giveflow-fundraising-campaigns' ),
                                 position:  'top',
                                 fill:      '#6b7280',
                                 fontSize:  10,
@@ -122,10 +122,10 @@ export default function DistributionHistogram( { distribution, currency } ) {
                 </BarChart>
             </ResponsiveContainer>
 
-            <p className="dono-histogram__total">
+            <p className="giveflow-histogram__total">
                 { sprintf(
                     /* translators: %d: total donation count */
-                    _n( '%d donation in this period', '%d donations in this period', total_count, 'dono-fundraising-platform' ),
+                    _n( '%d donation in this period', '%d donations in this period', total_count, 'giveflow-fundraising-campaigns' ),
                     total_count
                 ) }
             </p>

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Gateways;
+namespace GiveFlow\Gateways;
 
 /**
  * Optional capability: a gateway that needs the donor's browser to finish the

@@ -1,15 +1,39 @@
 /**
- * Money rendering for the surfaces that run inside a Dono page: the admin
+ * Money rendering for the surfaces that run inside a GiveFlow page: the admin
  * screens and the donor portal. Figure for figure the same as Money::format on
  * the PHP side, because a donor reads one donation in their portal and again on
  * the receipt in their inbox, and the two are the same money.
  */
 
-import {
-    defaultCurrency,
-    groupDigits,
-    numberFormat,
-} from '@dono/ui/utils/format';
+import { groupDigits } from '@giveflow/ui/utils/format';
+
+const DEFAULT_NUMBER_FORMAT = {
+    decimalPlaces:  2,
+    decimalSep:     '.',
+    thousandSep:    ',',
+    symbolPosition: 'before',
+    symbol:         '',
+};
+
+/**
+ * The org bridge these surfaces run against, read at call time so a bundle that
+ * loads before the inline script still picks it up. A surface without it renders
+ * in the neutral default rather than guessing at the org's preferences.
+ *
+ * @since 1.0.0
+ */
+export function defaultCurrency() {
+    const code = typeof window !== 'undefined' ? window.giveflow?.default_currency : '';
+
+    return code ? String( code ).toUpperCase() : 'USD';
+}
+
+/** @since 1.0.0 */
+export function numberFormat() {
+    const fmt = typeof window !== 'undefined' ? window.giveflow?.number_format : null;
+
+    return fmt ? { ...DEFAULT_NUMBER_FORMAT, ...fmt } : DEFAULT_NUMBER_FORMAT;
+}
 
 /**
  * Currencies charged in whole units, and in thousandths.

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Campaigns\Styling;
+namespace GiveFlow\Campaigns\Styling;
 
 /**
  * Each token maps to a CSS custom property injected on the rendered form element.
@@ -29,62 +29,62 @@ final class Tokens
     public static function catalogue(): array
     {
         return [
-            'dono-accent' => [
+            'giveflow-accent' => [
                 'group'   => 'brand',
-                'label'   => __('Accent', 'dono-fundraising-platform'),
-                'default' => '#1e8a4e',
+                'label'   => __('Accent', 'giveflow-fundraising-campaigns'),
+                'default' => '#211d3f',
                 'control' => 'color',
             ],
-            'dono-accent-soft' => [
+            'giveflow-accent-soft' => [
                 'group'   => 'brand',
-                'label'   => __('Accent soft', 'dono-fundraising-platform'),
-                'default' => '#e7f5ec',
+                'label'   => __('Accent soft', 'giveflow-fundraising-campaigns'),
+                'default' => '#efedf8',
                 'control' => 'color',
-                'help'    => __('Translucent variant used for hover and selected tiles.', 'dono-fundraising-platform'),
+                'help'    => __('Translucent variant used for hover and selected tiles.', 'giveflow-fundraising-campaigns'),
             ],
-            'dono-text' => [
+            'giveflow-text' => [
                 'group'   => 'brand',
-                'label'   => __('Body text', 'dono-fundraising-platform'),
+                'label'   => __('Body text', 'giveflow-fundraising-campaigns'),
                 'default' => '#111827',
                 'control' => 'color',
             ],
-            'dono-text-muted' => [
+            'giveflow-text-muted' => [
                 'group'   => 'brand',
-                'label'   => __('Muted text', 'dono-fundraising-platform'),
+                'label'   => __('Muted text', 'giveflow-fundraising-campaigns'),
                 'default' => '#6b7280',
                 'control' => 'color',
-                'help'    => __('Helper text, placeholders, captions.', 'dono-fundraising-platform'),
+                'help'    => __('Helper text, placeholders, captions.', 'giveflow-fundraising-campaigns'),
             ],
 
-            'dono-bg' => [
+            'giveflow-bg' => [
                 'group'   => 'surface',
-                'label'   => __('Background', 'dono-fundraising-platform'),
+                'label'   => __('Background', 'giveflow-fundraising-campaigns'),
                 'default' => '#ffffff',
                 'control' => 'color',
             ],
-            'dono-bg-soft' => [
+            'giveflow-bg-soft' => [
                 'group'   => 'surface',
-                'label'   => __('Soft background', 'dono-fundraising-platform'),
+                'label'   => __('Soft background', 'giveflow-fundraising-campaigns'),
                 'default' => '#f8fafb',
                 'control' => 'color',
-                'help'    => __('Input and tile resting fill.', 'dono-fundraising-platform'),
+                'help'    => __('Input and tile resting fill.', 'giveflow-fundraising-campaigns'),
             ],
-            'dono-border' => [
+            'giveflow-border' => [
                 'group'   => 'surface',
-                'label'   => __('Border', 'dono-fundraising-platform'),
+                'label'   => __('Border', 'giveflow-fundraising-campaigns'),
                 'default' => '#e5e7eb',
                 'control' => 'color',
             ],
 
-            'dono-typeface' => [
+            'giveflow-typeface' => [
                 'group'   => 'typography',
-                'label'   => __('Font family', 'dono-fundraising-platform'),
+                'label'   => __('Font family', 'giveflow-fundraising-campaigns'),
                 'default' => 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
                 'control' => 'font',
             ],
-            'dono-type-size' => [
+            'giveflow-type-size' => [
                 'group'   => 'typography',
-                'label'   => __('Base font size', 'dono-fundraising-platform'),
+                'label'   => __('Base font size', 'giveflow-fundraising-campaigns'),
                 'default' => '15px',
                 'control' => 'select',
                 'options' => [
@@ -93,57 +93,57 @@ final class Tokens
                     '16px' => '16',
                 ],
             ],
-            'dono-heading-weight' => [
+            'giveflow-heading-weight' => [
                 'group'   => 'typography',
-                'label'   => __('Heading weight', 'dono-fundraising-platform'),
+                'label'   => __('Heading weight', 'giveflow-fundraising-campaigns'),
                 'default' => '600',
                 'control' => 'select',
                 'options' => [
-                    '500' => __('Medium', 'dono-fundraising-platform'),
-                    '600' => __('Semibold', 'dono-fundraising-platform'),
-                    '700' => __('Bold', 'dono-fundraising-platform'),
+                    '500' => __('Medium', 'giveflow-fundraising-campaigns'),
+                    '600' => __('Semibold', 'giveflow-fundraising-campaigns'),
+                    '700' => __('Bold', 'giveflow-fundraising-campaigns'),
                 ],
             ],
-            'dono-body-weight' => [
+            'giveflow-body-weight' => [
                 'group'   => 'typography',
-                'label'   => __('Body weight', 'dono-fundraising-platform'),
+                'label'   => __('Body weight', 'giveflow-fundraising-campaigns'),
                 'default' => '400',
                 'control' => 'select',
                 'options' => [
-                    '400' => __('Regular', 'dono-fundraising-platform'),
-                    '500' => __('Medium', 'dono-fundraising-platform'),
+                    '400' => __('Regular', 'giveflow-fundraising-campaigns'),
+                    '500' => __('Medium', 'giveflow-fundraising-campaigns'),
                 ],
             ],
 
-            'dono-radius' => [
+            'giveflow-radius' => [
                 'group'   => 'radius',
-                'label'   => __('Corner radius', 'dono-fundraising-platform'),
+                'label'   => __('Corner radius', 'giveflow-fundraising-campaigns'),
                 'default' => '10px',
                 'control' => 'range',
                 'min'     => 0,
                 'max'     => 24,
                 'step'    => 1,
-                'help'    => __('Cards, panels and other surfaces.', 'dono-fundraising-platform'),
+                'help'    => __('Cards, panels and other surfaces.', 'giveflow-fundraising-campaigns'),
             ],
-            'dono-radius-sm' => [
+            'giveflow-radius-sm' => [
                 'group'   => 'radius',
-                'label'   => __('Small corner radius', 'dono-fundraising-platform'),
+                'label'   => __('Small corner radius', 'giveflow-fundraising-campaigns'),
                 'default' => '8px',
                 'control' => 'range',
                 'min'     => 0,
                 'max'     => 16,
                 'step'    => 1,
-                'help'    => __('Buttons, inputs, chips and other controls.', 'dono-fundraising-platform'),
+                'help'    => __('Buttons, inputs, chips and other controls.', 'giveflow-fundraising-campaigns'),
             ],
-            // Not 'dono-border-width'. Token names ship inside a block's inline
+            // Not 'giveflow-border-width'. Token names ship inside a block's inline
             // style attribute, and themes select on substrings of it:
             // twentytwentyfive's `html :where([style*="border-width"])` matches
             // the custom property and draws a border on every campaign block.
-            // Same for dono-typeface, dono-type-size and dono-button-size: no
+            // Same for giveflow-typeface, giveflow-type-size and giveflow-button-size: no
             // token name may contain a CSS property a [style*=] selector targets.
-            'dono-stroke' => [
+            'giveflow-stroke' => [
                 'group'   => 'radius',
-                'label'   => __('Border width', 'dono-fundraising-platform'),
+                'label'   => __('Border width', 'giveflow-fundraising-campaigns'),
                 'default' => '1px',
                 'control' => 'select',
                 'options' => [
@@ -152,19 +152,19 @@ final class Tokens
                 ],
             ],
 
-            'dono-gap' => [
+            'giveflow-gap' => [
                 'group'   => 'spacing',
-                'label'   => __('Block spacing', 'dono-fundraising-platform'),
+                'label'   => __('Block spacing', 'giveflow-fundraising-campaigns'),
                 'default' => '20px',
                 'control' => 'range',
                 'min'     => 12,
                 'max'     => 32,
                 'step'    => 2,
-                'help'    => __('Vertical rhythm between blocks.', 'dono-fundraising-platform'),
+                'help'    => __('Vertical rhythm between blocks.', 'giveflow-fundraising-campaigns'),
             ],
-            'dono-field-gap' => [
+            'giveflow-field-gap' => [
                 'group'   => 'spacing',
-                'label'   => __('Label gap', 'dono-fundraising-platform'),
+                'label'   => __('Label gap', 'giveflow-fundraising-campaigns'),
                 'default' => '6px',
                 'control' => 'range',
                 'min'     => 4,
@@ -172,86 +172,86 @@ final class Tokens
                 'step'    => 1,
             ],
 
-            'dono-button-size' => [
+            'giveflow-button-size' => [
                 'group'   => 'buttons',
-                'label'   => __('Button height', 'dono-fundraising-platform'),
+                'label'   => __('Button height', 'giveflow-fundraising-campaigns'),
                 'default' => '48px',
                 'control' => 'range',
                 'min'     => 40,
                 'max'     => 60,
                 'step'    => 2,
             ],
-            'dono-button-weight' => [
+            'giveflow-button-weight' => [
                 'group'   => 'buttons',
-                'label'   => __('Button text weight', 'dono-fundraising-platform'),
+                'label'   => __('Button text weight', 'giveflow-fundraising-campaigns'),
                 'default' => '600',
                 'control' => 'select',
                 'options' => [
-                    '500' => __('Medium', 'dono-fundraising-platform'),
-                    '600' => __('Semibold', 'dono-fundraising-platform'),
-                    '700' => __('Bold', 'dono-fundraising-platform'),
+                    '500' => __('Medium', 'giveflow-fundraising-campaigns'),
+                    '600' => __('Semibold', 'giveflow-fundraising-campaigns'),
+                    '700' => __('Bold', 'giveflow-fundraising-campaigns'),
                 ],
             ],
-            'dono-button-shadow' => [
+            'giveflow-button-shadow' => [
                 'group'   => 'buttons',
-                'label'   => __('Button shadow', 'dono-fundraising-platform'),
+                'label'   => __('Button shadow', 'giveflow-fundraising-campaigns'),
                 'default' => '0 1px 2px rgba(0,0,0,.08)',
                 'control' => 'select',
                 'options' => [
-                    'none'                                  => __('None', 'dono-fundraising-platform'),
-                    '0 1px 2px rgba(0,0,0,.08)'             => __('Soft', 'dono-fundraising-platform'),
-                    '0 6px 16px rgba(0,0,0,.12)'            => __('Strong', 'dono-fundraising-platform'),
+                    'none'                                  => __('None', 'giveflow-fundraising-campaigns'),
+                    '0 1px 2px rgba(0,0,0,.08)'             => __('Soft', 'giveflow-fundraising-campaigns'),
+                    '0 6px 16px rgba(0,0,0,.12)'            => __('Strong', 'giveflow-fundraising-campaigns'),
                 ],
             ],
-            'dono-button-bg' => [
+            'giveflow-button-bg' => [
                 'group'   => 'buttons',
-                'label'   => __('Button background', 'dono-fundraising-platform'),
+                'label'   => __('Button background', 'giveflow-fundraising-campaigns'),
                 'default' => '',
                 'control' => 'color',
-                'help'    => __('Leave empty to use the accent color.', 'dono-fundraising-platform'),
+                'help'    => __('Leave empty to use the accent color.', 'giveflow-fundraising-campaigns'),
             ],
-            'dono-button-fg' => [
+            'giveflow-button-fg' => [
                 'group'   => 'buttons',
-                'label'   => __('Button text color', 'dono-fundraising-platform'),
+                'label'   => __('Button text color', 'giveflow-fundraising-campaigns'),
                 'default' => '',
                 'control' => 'color',
-                'help'    => __('Leave empty to use white on filled buttons.', 'dono-fundraising-platform'),
+                'help'    => __('Leave empty to use white on filled buttons.', 'giveflow-fundraising-campaigns'),
             ],
-            'dono-button-border' => [
+            'giveflow-button-border' => [
                 'group'   => 'buttons',
-                'label'   => __('Button border', 'dono-fundraising-platform'),
+                'label'   => __('Button border', 'giveflow-fundraising-campaigns'),
                 'default' => '0',
                 'control' => 'select',
                 'options' => [
-                    '0'                       => __('None (filled)', 'dono-fundraising-platform'),
-                    '1px solid currentColor'  => __('Outline thin', 'dono-fundraising-platform'),
-                    '2px solid currentColor'  => __('Outline thick', 'dono-fundraising-platform'),
+                    '0'                       => __('None (filled)', 'giveflow-fundraising-campaigns'),
+                    '1px solid currentColor'  => __('Outline thin', 'giveflow-fundraising-campaigns'),
+                    '2px solid currentColor'  => __('Outline thick', 'giveflow-fundraising-campaigns'),
                 ],
             ],
-            'dono-button-hover-bg' => [
+            'giveflow-button-hover-bg' => [
                 'group'   => 'buttons',
-                'label'   => __('Button hover background', 'dono-fundraising-platform'),
+                'label'   => __('Button hover background', 'giveflow-fundraising-campaigns'),
                 'default' => '',
                 'control' => 'color',
-                'help'    => __('Leave empty to inherit the button background.', 'dono-fundraising-platform'),
+                'help'    => __('Leave empty to inherit the button background.', 'giveflow-fundraising-campaigns'),
             ],
 
-            'dono-focus-ring' => [
+            'giveflow-focus-ring' => [
                 'group'   => 'elevation',
-                'label'   => __('Focus ring color', 'dono-fundraising-platform'),
-                'default' => '#1e8a4e',
+                'label'   => __('Focus ring color', 'giveflow-fundraising-campaigns'),
+                'default' => '#211d3f',
                 'control' => 'color',
             ],
-            'dono-card-shadow' => [
+            'giveflow-card-shadow' => [
                 'group'   => 'elevation',
-                'label'   => __('Card shadow', 'dono-fundraising-platform'),
+                'label'   => __('Card shadow', 'giveflow-fundraising-campaigns'),
                 'default' => '0 12px 32px rgba(15, 23, 42, .06)',
                 'control' => 'select',
                 'options' => [
-                    'none'                                       => __('None', 'dono-fundraising-platform'),
-                    '0 1px 2px rgba(15, 23, 42, .04)'            => __('Soft', 'dono-fundraising-platform'),
-                    '0 12px 32px rgba(15, 23, 42, .06)'          => __('Floating', 'dono-fundraising-platform'),
-                    '0 30px 60px rgba(0, 0, 0, .25)'             => __('Dramatic', 'dono-fundraising-platform'),
+                    'none'                                       => __('None', 'giveflow-fundraising-campaigns'),
+                    '0 1px 2px rgba(15, 23, 42, .04)'            => __('Soft', 'giveflow-fundraising-campaigns'),
+                    '0 12px 32px rgba(15, 23, 42, .06)'          => __('Floating', 'giveflow-fundraising-campaigns'),
+                    '0 30px 60px rgba(0, 0, 0, .25)'             => __('Dramatic', 'giveflow-fundraising-campaigns'),
                 ],
             ],
         ];
@@ -261,13 +261,13 @@ final class Tokens
     public static function groups(): array
     {
         return [
-            'brand'      => __('Brand colors', 'dono-fundraising-platform'),
-            'surface'    => __('Surface', 'dono-fundraising-platform'),
-            'typography' => __('Typography', 'dono-fundraising-platform'),
-            'radius'     => __('Radius + borders', 'dono-fundraising-platform'),
-            'spacing'    => __('Spacing', 'dono-fundraising-platform'),
-            'buttons'    => __('Buttons', 'dono-fundraising-platform'),
-            'elevation'  => __('Focus + elevation', 'dono-fundraising-platform'),
+            'brand'      => __('Brand colors', 'giveflow-fundraising-campaigns'),
+            'surface'    => __('Surface', 'giveflow-fundraising-campaigns'),
+            'typography' => __('Typography', 'giveflow-fundraising-campaigns'),
+            'radius'     => __('Radius + borders', 'giveflow-fundraising-campaigns'),
+            'spacing'    => __('Spacing', 'giveflow-fundraising-campaigns'),
+            'buttons'    => __('Buttons', 'giveflow-fundraising-campaigns'),
+            'elevation'  => __('Focus + elevation', 'giveflow-fundraising-campaigns'),
         ];
     }
 

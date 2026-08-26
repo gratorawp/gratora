@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\DonationRepository;
-use Dono\Foundation\Plugin;
-use Dono\Forms\Form;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Forms\Form;
 use WP_REST_Request;
 
 /**
@@ -35,7 +35,7 @@ final class OfflineRetryParentTest extends IntegrationTestCase
     /** @param array<string,mixed> $body */
     private function post(array $body): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/donations');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($body));
 
@@ -73,7 +73,7 @@ final class OfflineRetryParentTest extends IntegrationTestCase
     private function flagsOf(string $reference): array
     {
         $raw = self::$wpdb->get_var(self::$wpdb->prepare(
-            'SELECT flags FROM ' . self::$prefix . 'dono_donations WHERE reference = %s',
+            'SELECT flags FROM ' . self::$prefix . 'giveflow_donations WHERE reference = %s',
             $reference
         ));
 
@@ -90,7 +90,7 @@ final class OfflineRetryParentTest extends IntegrationTestCase
     private function setGateway(string $reference, string $gateway): void
     {
         self::$wpdb->query(self::$wpdb->prepare(
-            'UPDATE ' . self::$prefix . 'dono_donations SET gateway = %s WHERE reference = %s',
+            'UPDATE ' . self::$prefix . 'giveflow_donations SET gateway = %s WHERE reference = %s',
             $gateway,
             $reference
         ));
@@ -100,7 +100,7 @@ final class OfflineRetryParentTest extends IntegrationTestCase
     {
         return (int) self::$wpdb->get_var(
             'SELECT option_value FROM ' . self::$wpdb->options . "
-             WHERE option_name LIKE '_transient_dono_donate_email_%'
+             WHERE option_name LIKE '_transient_giveflow_donate_email_%'
              ORDER BY option_id DESC LIMIT 1"
         );
     }
@@ -133,7 +133,7 @@ final class OfflineRetryParentTest extends IntegrationTestCase
         $f->title      = 'Bank transfer form';
         $f->slug       = 'offline-retry-' . uniqid();
         $f->status     = 'published';
-        $f->blocks     = '<!-- wp:dono/donation-amount /--><!-- wp:dono/email /--><!-- wp:dono/submit-button /-->';
+        $f->blocks     = '<!-- wp:giveflow/donation-amount /--><!-- wp:giveflow/email /--><!-- wp:giveflow/submit-button /-->';
         $f->created_at = gmdate('Y-m-d H:i:s');
         $f->updated_at = $f->created_at;
         $f->save();

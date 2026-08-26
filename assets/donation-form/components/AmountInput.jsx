@@ -95,14 +95,14 @@ export default function AmountInput( {
     };
 
     return (
-        <div class={ `dono-amount${ className ? ' ' + className : '' }` }>
-            <span class="dono-amount__prefix" aria-hidden="true">
-                <span class="dono-amount__code">{ currency }</span>
+        <div class={ `giveflow-amount${ className ? ' ' + className : '' }` }>
+            <span class="giveflow-amount__prefix" aria-hidden="true">
+                <span class="giveflow-amount__code">{ currency }</span>
             </span>
             <input
                 type="text"
                 inputmode={ dp > 0 ? 'decimal' : 'numeric' }
-                class="dono-amount__input"
+                class="giveflow-amount__input"
                 value={ text }
                 onInput={ handleInput }
                 onFocus={ () => setFocused( true ) }

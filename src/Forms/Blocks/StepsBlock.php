@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Forms\Blocks;
+namespace GiveFlow\Forms\Blocks;
 
 /**
  * Multi-step wizard container block.
@@ -14,7 +14,7 @@ final class StepsBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'dono/steps';
+        return 'giveflow/steps';
     }
 
     /** @since 1.0.0 */
@@ -37,6 +37,6 @@ final class StepsBlock implements Block
      */
     public function render(array $attrs, string $content): string
     {
-        return sprintf('<div class="dono-block dono-block--steps">%s</div>', $content);
+        return sprintf('<div class="giveflow-block giveflow-block--steps">%s</div>', $content);
     }
 }

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
 use DateTimeImmutable;
 use DateTimeZone;
-use Dono\Campaigns\Campaign;
+use GiveFlow\Campaigns\Campaign;
 
 /**
  * A campaign schedule is the org's calendar, and the gate on the money path has

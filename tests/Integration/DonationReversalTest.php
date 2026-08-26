@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Campaigns\Campaign;
-use Dono\Donations\Donation;
-use Dono\Donations\DonationRepository;
-use Dono\Donations\DonationService;
-use Dono\Donors\Donor;
-use Dono\Analytics\Event;
-use Dono\Foundation\Plugin;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Donations\DonationService;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Analytics\Event;
+use GiveFlow\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -65,7 +65,7 @@ final class DonationReversalTest extends IntegrationTestCase
 
     private function paidDonation(?int $campaignId = null): Donation
     {
-        $request = new WP_REST_Request('POST', '/dono/v1/donations');
+        $request = new WP_REST_Request('POST', '/giveflow/v1/donations');
         $request->set_header('content-type', 'application/json');
         $request->set_body((string) wp_json_encode(array_filter([
             'email'        => 'sarah@example.com',
@@ -133,7 +133,7 @@ final class DonationReversalTest extends IntegrationTestCase
     {
         $donation = $this->paidDonation();
         $seen     = [];
-        add_action('dono.donation.disputed', static function ($d, $kind) use (&$seen): void {
+        add_action('giveflow.donation.disputed', static function ($d, $kind) use (&$seen): void {
             $seen[] = [(int) $d->id, $kind];
         }, 10, 2);
 
@@ -152,7 +152,7 @@ final class DonationReversalTest extends IntegrationTestCase
         $this->service()->markReversed($donation, 'chargeback', 'bank reversed it');
 
         $fired = 0;
-        add_action('dono.donation.disputed', static function () use (&$fired): void { $fired++; }, 10, 2);
+        add_action('giveflow.donation.disputed', static function () use (&$fired): void { $fired++; }, 10, 2);
         $this->service()->markReversed($this->reload((string) $donation->reference), 'chargeback', 'again');
 
         $this->assertSame(0, $fired);
@@ -162,7 +162,7 @@ final class DonationReversalTest extends IntegrationTestCase
     /** A donation that never landed has nothing to take back. */
     public function test_a_pending_donation_is_not_reversed(): void
     {
-        $request = new WP_REST_Request('POST', '/dono/v1/donations');
+        $request = new WP_REST_Request('POST', '/giveflow/v1/donations');
         $request->set_header('content-type', 'application/json');
         $request->set_body((string) wp_json_encode([
             'email'        => 'sarah@example.com',

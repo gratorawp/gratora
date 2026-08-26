@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace Dono\Rest;
+namespace GiveFlow\Rest;
 
-use Dono\Analytics\ErrorLog;
-use Dono\Analytics\Event;
-use Dono\Analytics\EventRecorder;
-use Dono\Gateways\GatewayManager;
-use Dono\Gateways\WebhookOutcome;
+use GiveFlow\Analytics\ErrorLog;
+use GiveFlow\Analytics\Event;
+use GiveFlow\Analytics\EventRecorder;
+use GiveFlow\Gateways\GatewayManager;
+use GiveFlow\Gateways\WebhookOutcome;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 
 /**
- * Incoming-webhook dispatcher: POST /dono/v1/webhooks/{gateway}; handleWebhook()
+ * Incoming-webhook dispatcher: POST /giveflow/v1/webhooks/{gateway}; handleWebhook()
  * verifies the signature. Every delivery is recorded to the log the site owner
  * reads, whether or not anything came of it.
  *
@@ -23,10 +23,10 @@ use WP_REST_Server;
  */
 final class WebhookController
 {
-    private const NAMESPACE = 'dono/v1';
+    private const NAMESPACE = 'giveflow/v1';
 
     /** One recorded refusal per gateway per window. */
-    private const REJECT_NOTICE_KEY = 'dono_webhook_rejected_';
+    private const REJECT_NOTICE_KEY = 'giveflow_webhook_rejected_';
     private const REJECT_NOTICE_TTL = 15 * MINUTE_IN_SECONDS;
 
     /** Log family these rows belong to, one type per gateway beneath it. */
@@ -75,7 +75,7 @@ final class WebhookController
 
         if (! $gateway) {
             /* translators: %s: gateway identifier */
-            return new WP_Error('dono_unknown_gateway', sprintf(__('Unknown gateway: %s', 'dono-fundraising-platform'), $gatewayId), ['status' => 404]);
+            return new WP_Error('giveflow_unknown_gateway', sprintf(__('Unknown gateway: %s', 'giveflow-fundraising-campaigns'), $gatewayId), ['status' => 404]);
         }
 
         try {
@@ -105,21 +105,21 @@ final class WebhookController
                 set_transient(self::REJECT_NOTICE_KEY . $gatewayId, 1, self::REJECT_NOTICE_TTL);
                 ErrorLog::record(
                     'webhook.' . $gatewayId,
-                    $outcome->error ?? __('Signature verification failed. The webhook will keep being rejected until the gateway credentials and webhook id match this site.', 'dono-fundraising-platform'),
+                    $outcome->error ?? __('Signature verification failed. The webhook will keep being rejected until the gateway credentials and webhook id match this site.', 'giveflow-fundraising-campaigns'),
                     ['gateway' => $gatewayId, 'event_type' => $outcome->event_type ?? 'unknown']
                 );
             }
 
             return new WP_Error(
-                'dono_webhook_rejected',
-                $outcome->error ?? __('Webhook rejected.', 'dono-fundraising-platform'),
+                'giveflow_webhook_rejected',
+                $outcome->error ?? __('Webhook rejected.', 'giveflow-fundraising-campaigns'),
                 ['status' => $outcome->http_status]
             );
         }
 
         if ($outcome->error !== null && $outcome->http_status >= 500) {
             return new WP_Error(
-                'dono_webhook_error',
+                'giveflow_webhook_error',
                 $outcome->error,
                 ['status' => $outcome->http_status]
             );

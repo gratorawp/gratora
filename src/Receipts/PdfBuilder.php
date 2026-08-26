@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Dono\Receipts;
+namespace GiveFlow\Receipts;
 
-use Dono\Vendor\Dompdf\Dompdf;
-use Dono\Vendor\Dompdf\Options;
+use GiveFlow\Vendor\Dompdf\Dompdf;
+use GiveFlow\Vendor\Dompdf\Options;
 
 /**
  * Turns an HTML string into PDF bytes.
  *
- * Temp dir is forced to wp-content/uploads/dono/tmp because /tmp is
+ * Temp dir is forced to wp-content/uploads/giveflow/tmp because /tmp is
  * ephemeral on many deployment environments.
  *
  * @since 1.0.0
@@ -40,7 +40,7 @@ final class PdfBuilder
             'Title'   => $options['title']   ?? '',
             'Author'  => $options['author']  ?? '',
             'Subject' => $options['subject'] ?? '',
-            'Creator' => 'Dono',
+            'Creator' => 'GiveFlow',
         ] as $key => $value) {
             if ($value !== '') {
                 $dompdf->add_info($key, (string) $value);
@@ -121,7 +121,7 @@ final class PdfBuilder
     private function ensureTmpDir(): string
     {
         $uploads = wp_upload_dir();
-        $dir = trailingslashit($uploads['basedir']) . 'dono/tmp';
+        $dir = trailingslashit($uploads['basedir']) . 'giveflow/tmp';
 
         if (! is_dir($dir)) {
             wp_mkdir_p($dir);

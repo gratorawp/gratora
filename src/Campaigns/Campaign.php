@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Dono\Campaigns;
+namespace GiveFlow\Campaigns;
 
 defined('ABSPATH') || exit;
 
-use Dono\Campaigns\Styling\CampaignStyleResolver;
-use Dono\Foundation\Time\ScheduleWindow;
-use Dono\Vendor\Queryable\Model;
-use Dono\Vendor\Queryable\Schema\Table;
+use GiveFlow\Campaigns\Styling\CampaignStyleResolver;
+use GiveFlow\Foundation\Time\ScheduleWindow;
+use GiveFlow\Vendor\Queryable\Model;
+use GiveFlow\Vendor\Queryable\Schema\Table;
 
 /**
  * Owns one public-facing WP page (via `page_id`) and zero or more donation forms.
@@ -18,7 +18,7 @@ use Dono\Vendor\Queryable\Schema\Table;
  */
 final class Campaign extends Model
 {
-    protected string $table = 'dono_campaigns';
+    protected string $table = 'giveflow_campaigns';
     protected string $version = '1.0.0';
 
     public int $id;

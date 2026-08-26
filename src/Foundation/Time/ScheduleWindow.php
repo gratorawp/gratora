@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Dono\Foundation\Time;
+namespace GiveFlow\Foundation\Time;
 
 defined('ABSPATH') || exit;
 
 use DateTimeImmutable;
 use DateTimeZone;
-use Dono\Donations\DonationQueries;
+use GiveFlow\Donations\DonationQueries;
 use Exception;
 
 /**

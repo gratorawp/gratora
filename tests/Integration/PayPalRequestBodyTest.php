@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Foundation\Crypto\Crypto;
-use Dono\Gateways\PayPal\PayPalAccount;
-use Dono\Gateways\PayPal\PayPalApi;
+use GiveFlow\Foundation\Crypto\Crypto;
+use GiveFlow\Gateways\PayPal\PayPalAccount;
+use GiveFlow\Gateways\PayPal\PayPalApi;
 
 /**
  * What actually goes on the wire.

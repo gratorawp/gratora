@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Unit\Assets;
+namespace GiveFlow\Tests\Unit\Assets;
 
-use Dono\Settings\SettingsService;
+use GiveFlow\Settings\SettingsService;
 use PHPUnit\Framework\TestCase;
 
 /**

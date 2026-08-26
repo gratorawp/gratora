@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Dono\Campaigns\Blocks;
+namespace GiveFlow\Campaigns\Blocks;
 
-use Dono\Campaigns\Campaign;
-use Dono\Campaigns\CampaignRepository;
-use Dono\Foundation\Helpers\Money;
-use Dono\Foundation\Hooks\HookProvider;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Campaigns\CampaignRepository;
+use GiveFlow\Foundation\Helpers\Money;
+use GiveFlow\Foundation\Hooks\HookProvider;
 
 /**
  * Block Bindings source resolving campaign stats for core blocks (e.g. bind a
- * Heading to dono/campaign:raised). args.campaign_id is optional; it falls back
- * to the page's _dono_campaign_id meta, same as CampaignBlock.
+ * Heading to giveflow/campaign:raised). args.campaign_id is optional; it falls back
+ * to the page's _giveflow_campaign_id meta, same as CampaignBlock.
  *
  * @since 1.0.0
  */
@@ -44,17 +44,17 @@ final class CampaignBindings extends HookProvider
     public static function fields(): array
     {
         return [
-            'title'           => __('Title', 'dono-fundraising-platform'),
-            'description'     => __('Short description', 'dono-fundraising-platform'),
-            'image'           => __('Cover image', 'dono-fundraising-platform'),
-            'image_alt'       => __('Cover image description', 'dono-fundraising-platform'),
-            'url'             => __('Page link', 'dono-fundraising-platform'),
-            'raised'          => __('Raised', 'dono-fundraising-platform'),
-            'goal'            => __('Goal', 'dono-fundraising-platform'),
-            'percent_label'   => __('Percent of goal', 'dono-fundraising-platform'),
-            'donors_count'    => __('Donors', 'dono-fundraising-platform'),
-            'donations_count' => __('Donations', 'dono-fundraising-platform'),
-            'days_left'       => __('Days left', 'dono-fundraising-platform'),
+            'title'           => __('Title', 'giveflow-fundraising-campaigns'),
+            'description'     => __('Short description', 'giveflow-fundraising-campaigns'),
+            'image'           => __('Cover image', 'giveflow-fundraising-campaigns'),
+            'image_alt'       => __('Cover image description', 'giveflow-fundraising-campaigns'),
+            'url'             => __('Page link', 'giveflow-fundraising-campaigns'),
+            'raised'          => __('Raised', 'giveflow-fundraising-campaigns'),
+            'goal'            => __('Goal', 'giveflow-fundraising-campaigns'),
+            'percent_label'   => __('Percent of goal', 'giveflow-fundraising-campaigns'),
+            'donors_count'    => __('Donors', 'giveflow-fundraising-campaigns'),
+            'donations_count' => __('Donations', 'giveflow-fundraising-campaigns'),
+            'days_left'       => __('Days left', 'giveflow-fundraising-campaigns'),
         ];
     }
 
@@ -81,8 +81,8 @@ final class CampaignBindings extends HookProvider
     {
         if (! function_exists('register_block_bindings_source')) return;
 
-        register_block_bindings_source('dono/campaign', [
-            'label'              => __('Dono campaign', 'dono-fundraising-platform'),
+        register_block_bindings_source('giveflow/campaign', [
+            'label'              => __('GiveFlow campaign', 'giveflow-fundraising-campaigns'),
             'get_value_callback' => [$this, 'resolve'],
             'uses_context'       => ['postId'],
         ]);
@@ -113,7 +113,7 @@ final class CampaignBindings extends HookProvider
             return $this->campaigns->findRenderable($explicit);
         }
 
-        // Fallback: the page's bound campaign via _dono_campaign_id post meta.
+        // Fallback: the page's bound campaign via _giveflow_campaign_id post meta.
         $postId = 0;
         if (is_object($block) && property_exists($block, 'context') && is_array($block->context)) {
             $postId = (int) ($block->context['postId'] ?? 0);
@@ -123,7 +123,7 @@ final class CampaignBindings extends HookProvider
         }
         if ($postId === 0) return null;
 
-        $bound = (int) get_post_meta($postId, '_dono_campaign_id', true);
+        $bound = (int) get_post_meta($postId, '_giveflow_campaign_id', true);
         return $bound > 0 ? $this->campaigns->findRenderable($bound) : null;
     }
 

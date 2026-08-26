@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Forms\Blocks;
+namespace GiveFlow\Forms\Blocks;
 
-use Dono\Foundation\Helpers\View;
+use GiveFlow\Foundation\Helpers\View;
 
 /**
- * Acceptance is recorded in dono_consents under the `terms` purpose along with
+ * Acceptance is recorded in giveflow_consents under the `terms` purpose along with
  * the text revision, so what a donor agreed to survives later edits to the
  * wording. The block ships no default wording: terms are the org's to write.
  *
@@ -20,7 +20,7 @@ final class TermsBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'dono/terms';
+        return 'giveflow/terms';
     }
 
     /** @since 1.0.0 */

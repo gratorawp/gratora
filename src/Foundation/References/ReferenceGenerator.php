@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Dono\Foundation\References;
+namespace GiveFlow\Foundation\References;
 
-use Dono\Foundation\Time\Clock;
-use Dono\Vendor\Queryable\DB;
+use GiveFlow\Foundation\Time\Clock;
+use GiveFlow\Vendor\Queryable\DB;
 use RuntimeException;
 
 /**
- * Generates human-readable, monotonically-increasing references like DONO-2026-00001.
+ * Generates human-readable, monotonically-increasing references like DON-2026-00001.
  *
  * Per-scope counter (donation / receipt / refund), atomically incremented via
  * MySQL LAST_INSERT_ID() - gap-free and race-safe. Configurable via the
- * dono_reference_settings option. reset_yearly (default true) starts a fresh
+ * giveflow_reference_settings option. reset_yearly (default true) starts a fresh
  * counter each Jan 1, which requires include_year to tell the two sequences
  * apart; without it, numbering is continuous across years either way.
  *
@@ -21,11 +21,11 @@ use RuntimeException;
  */
 final class ReferenceGenerator
 {
-    public const OPTION_SETTINGS = 'dono_reference_settings';
+    public const OPTION_SETTINGS = 'giveflow_reference_settings';
 
     public const DEFAULT_SETTINGS = [
         'prefixes' => [
-            'donation' => 'DONO',
+            'donation' => 'DON',
             'receipt'  => 'REC',
             'refund'   => 'REF',
         ],
@@ -164,14 +164,14 @@ final class ReferenceGenerator
     public static function assertTokens(array $input): void
     {
         $labels = [
-            'donation' => __('Donation prefix', 'dono-fundraising-platform'),
-            'receipt'  => __('Receipt prefix', 'dono-fundraising-platform'),
-            'refund'   => __('Refund prefix', 'dono-fundraising-platform'),
+            'donation' => __('Donation prefix', 'giveflow-fundraising-campaigns'),
+            'receipt'  => __('Receipt prefix', 'giveflow-fundraising-campaigns'),
+            'refund'   => __('Refund prefix', 'giveflow-fundraising-campaigns'),
         ];
 
         if (array_key_exists('separator', $input) && ! self::isToken((string) $input['separator'])) {
             throw new InvalidReferenceToken(
-                __('Separator', 'dono-fundraising-platform'),
+                __('Separator', 'giveflow-fundraising-campaigns'),
                 (string) $input['separator'],
             );
         }
@@ -240,7 +240,7 @@ final class ReferenceGenerator
      * A year-scoped counter is only sound when the year is in the reference to
      * tell the two sequences apart. reset_yearly without include_year is
      * therefore continuous numbering, the only reading that does not mint
-     * DONO-00001 twice.
+     * DON-00001 twice.
      *
      * @since 1.0.0
      */
@@ -249,8 +249,8 @@ final class ReferenceGenerator
         $s = $this->settings();
 
         return ! empty($s['reset_yearly']) && ! empty($s['include_year'])
-            ? "dono_reference_counter_{$scope}_{$year}"
-            : "dono_reference_counter_{$scope}";
+            ? "giveflow_reference_counter_{$scope}_{$year}"
+            : "giveflow_reference_counter_{$scope}";
     }
 
     /**
@@ -278,7 +278,7 @@ final class ReferenceGenerator
      */
     private function seedFor(string $scope, string $key): int
     {
-        $continuous = "dono_reference_counter_{$scope}";
+        $continuous = "giveflow_reference_counter_{$scope}";
 
         if ($key !== $continuous) {
             return (int) get_option($continuous, 0);
@@ -286,7 +286,7 @@ final class ReferenceGenerator
 
         $result = DB::raw(
             'SELECT option_name, option_value FROM ' . DB::getPrefix() . "options
-             WHERE option_name LIKE 'dono_reference_counter%'"
+             WHERE option_name LIKE 'giveflow_reference_counter%'"
         );
 
         $high = 0;

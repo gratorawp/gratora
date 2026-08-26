@@ -12,11 +12,11 @@ export default function CoverImageCard( { id, url, onChange } ) {
 
     if ( ! url ) {
         return (
-            <div className="dono-cover-card" style={ { gridTemplateColumns: '1fr' } }>
+            <div className="giveflow-cover-card" style={ { gridTemplateColumns: '1fr' } }>
                 <div>
-                    <Btn variant="primary" onClick={ pick }>{ __( 'Select an image', 'dono-fundraising-platform' ) }</Btn>
+                    <Btn variant="primary" onClick={ pick }>{ __( 'Select an image', 'giveflow-fundraising-campaigns' ) }</Btn>
                     <div style={ { marginTop: 8, fontSize: 12, color: '#6b7280' } }>
-                        { __( '1600 × 900 (16:9) recommended.', 'dono-fundraising-platform' ) }
+                        { __( '1600 × 900 (16:9) recommended.', 'giveflow-fundraising-campaigns' ) }
                     </div>
                 </div>
             </div>
@@ -24,15 +24,15 @@ export default function CoverImageCard( { id, url, onChange } ) {
     }
 
     return (
-        <div className="dono-cover-card">
-            <div className="dono-cover-card__thumb" style={ { backgroundImage: `url(${ url })` } } />
-            <div className="dono-cover-card__meta">
+        <div className="giveflow-cover-card">
+            <div className="giveflow-cover-card__thumb" style={ { backgroundImage: `url(${ url })` } } />
+            <div className="giveflow-cover-card__meta">
                 <AttachmentMeta id={ id } url={ url } />
-                <div className="dono-cover-card__actions">
-                    <Btn variant="secondary" size="sm" onClick={ pick }>{ __( 'Replace', 'dono-fundraising-platform' ) }</Btn>
-                    <Btn variant="ghost" size="sm" onClick={ remove }>{ __( 'Remove', 'dono-fundraising-platform' ) }</Btn>
+                <div className="giveflow-cover-card__actions">
+                    <Btn variant="secondary" size="sm" onClick={ pick }>{ __( 'Replace', 'giveflow-fundraising-campaigns' ) }</Btn>
+                    <Btn variant="ghost" size="sm" onClick={ remove }>{ __( 'Remove', 'giveflow-fundraising-campaigns' ) }</Btn>
                 </div>
-                <span className="dono-cover-card__chip">{ __( 'Cropped on cards · 16:9 expected', 'dono-fundraising-platform' ) }</span>
+                <span className="giveflow-cover-card__chip">{ __( 'Cropped on cards · 16:9 expected', 'giveflow-fundraising-campaigns' ) }</span>
             </div>
         </div>
     );
@@ -73,11 +73,11 @@ function AttachmentMeta( { id, url } ) {
 
     return (
         <>
-            <strong>{ meta.filename || __( 'Cover image', 'dono-fundraising-platform' ) }</strong>
+            <strong>{ meta.filename || __( 'Cover image', 'giveflow-fundraising-campaigns' ) }</strong>
             { parts && <>{ parts }<br /></> }
             { meta.uploaded && sprintf(
                 /* translators: %s: relative time, e.g. "12d ago" */
-                __( 'Uploaded %s', 'dono-fundraising-platform' ),
+                __( 'Uploaded %s', 'giveflow-fundraising-campaigns' ),
                 timeAgo( meta.uploaded ),
             ) }
         </>
@@ -93,12 +93,12 @@ function formatBytes( bytes ) {
 
 function openMediaFrame( { onSelect, currentId } ) {
     if ( ! window.wp?.media ) {
-        notify.error( __( 'Media library not loaded.', 'dono-fundraising-platform' ) );
+        notify.error( __( 'Media library not loaded.', 'giveflow-fundraising-campaigns' ) );
         return;
     }
     const frame = window.wp.media( {
-        title:    __( 'Select campaign cover image', 'dono-fundraising-platform' ),
-        button:   { text: __( 'Use this image', 'dono-fundraising-platform' ) },
+        title:    __( 'Select campaign cover image', 'giveflow-fundraising-campaigns' ),
+        button:   { text: __( 'Use this image', 'giveflow-fundraising-campaigns' ) },
         library:  { type: 'image' },
         multiple: false,
     } );

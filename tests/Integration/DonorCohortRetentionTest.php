@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
-use Dono\Donors\DonorRepository;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donors\DonorRepository;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
 
 /**
  * The cohort-retention matrix used to anchor cohorts on the denormalized
@@ -66,7 +66,7 @@ final class DonorCohortRetentionTest extends IntegrationTestCase
     {
         $now = gmdate('Y-m-d H:i:s');
         $d = Donation::make();
-        $d->reference         = 'DONO-CH-' . bin2hex(random_bytes(4));
+        $d->reference         = 'GIVEFLOW-CH-' . bin2hex(random_bytes(4));
         $d->donor_id          = $donorId;
         $d->amount_cents      = $cents;
         $d->net_cents         = $cents;

@@ -17,11 +17,11 @@ const CloneIcon = () => <Icon name="copy"  size={ 14 } />;
 const TrashIcon = () => <Icon name="trash" size={ 14 } />;
 
 export default function BrandPanel( { s } ) {
-    // Seed from window.dono.styling.presets when the option hasn't been saved yet.
+    // Seed from window.giveflow.styling.presets when the option hasn't been saved yet.
     const saved      = Array.isArray( s.value( 'presets' ) ) ? s.value( 'presets' ) : [];
-    const globalList = Array.isArray( window.dono?.styling?.presets ) ? window.dono.styling.presets : [];
+    const globalList = Array.isArray( window.giveflow?.styling?.presets ) ? window.giveflow.styling.presets : [];
     const presets    = saved.length > 0 ? saved : globalList;
-    const defaultId  = String( s.value( 'default_id', '' ) || window.dono?.styling?.default_id || '' );
+    const defaultId  = String( s.value( 'default_id', '' ) || window.giveflow?.styling?.default_id || '' );
 
     const [ confirm, setConfirm ] = useState( null );
     const [ activeId, setActiveId ] = useState( () => {
@@ -36,9 +36,9 @@ export default function BrandPanel( { s } ) {
     // lives in styling.builtins before any user edit was merged in. Falling
     // straight through to the catalogue default, as this used to, reset every
     // preset's colours to the same green.
-    const catalogueDefaults = window.dono?.styling?.defaults || {};
+    const catalogueDefaults = window.giveflow?.styling?.defaults || {};
     const builtinTokens = ( id ) => {
-        const list = Array.isArray( window.dono?.styling?.builtins ) ? window.dono.styling.builtins : [];
+        const list = Array.isArray( window.giveflow?.styling?.builtins ) ? window.giveflow.styling.builtins : [];
         return list.find( ( b ) => b.id === id )?.tokens || {};
     };
     const resetDefaults = active
@@ -68,7 +68,7 @@ export default function BrandPanel( { s } ) {
         const source = presets.find( ( p ) => p.id === id );
         if ( ! source ) return;
         const newId   = generateId( source.name, presets );
-        const newName = `${ source.name } ${ __( '(copy)', 'dono-fundraising-platform' ) }`;
+        const newName = `${ source.name } ${ __( '(copy)', 'giveflow-fundraising-campaigns' ) }`;
         const next    = [ ...presets, {
             id:      newId,
             name:    newName,
@@ -80,10 +80,10 @@ export default function BrandPanel( { s } ) {
     };
 
     const addPreset = () => {
-        const newId = generateId( __( 'Custom', 'dono-fundraising-platform' ), presets );
+        const newId = generateId( __( 'Custom', 'giveflow-fundraising-campaigns' ), presets );
         const next  = [ ...presets, {
             id:      newId,
-            name:    __( 'New preset', 'dono-fundraising-platform' ),
+            name:    __( 'New preset', 'giveflow-fundraising-campaigns' ),
             tokens:  {},
             builtin: false,
         } ];
@@ -95,8 +95,8 @@ export default function BrandPanel( { s } ) {
         const p = presets.find( ( x ) => x.id === id );
         if ( ! p || p.builtin ) return;
         setConfirm( {
-            title:       __( 'Delete preset', 'dono-fundraising-platform' ),
-            message:     __( 'Delete this brand preset? This cannot be undone.', 'dono-fundraising-platform' ),
+            title:       __( 'Delete preset', 'giveflow-fundraising-campaigns' ),
+            message:     __( 'Delete this brand preset? This cannot be undone.', 'giveflow-fundraising-campaigns' ),
             destructive: true,
             onConfirm:   () => {
                 const next = presets.filter( ( x ) => x.id !== id );
@@ -109,42 +109,42 @@ export default function BrandPanel( { s } ) {
     };
 
     return (
-        <div className="dono-panel">
-            <div className="dono-brand-layout">
-                <div className="dono-brand-layout__main">
+        <div className="giveflow-panel">
+            <div className="giveflow-brand-layout">
+                <div className="giveflow-brand-layout__main">
                     <Card
-                        title={ __( 'Brand presets', 'dono-fundraising-platform' ) }
-                        sub={ __( 'Named style presets. Campaigns and forms pick one as their look.', 'dono-fundraising-platform' ) }
+                        title={ __( 'Brand presets', 'giveflow-fundraising-campaigns' ) }
+                        sub={ __( 'Named style presets. Campaigns and forms pick one as their look.', 'giveflow-fundraising-campaigns' ) }
                         edited={ s.isDirty }
                     >
-                        <div className="dono-preset-mgr">
-                            <div className="dono-preset-mgr__list">
+                        <div className="giveflow-preset-mgr">
+                            <div className="giveflow-preset-mgr__list">
                                 { presets.map( ( p ) => {
-                                    const accent = p.tokens?.[ 'dono-accent' ]
-                                        || builtinTokens( p.id )[ 'dono-accent' ]
-                                        || catalogueDefaults[ 'dono-accent' ]
-                                        || '#1e8a4e';
+                                    const accent = p.tokens?.[ 'giveflow-accent' ]
+                                        || builtinTokens( p.id )[ 'giveflow-accent' ]
+                                        || catalogueDefaults[ 'giveflow-accent' ]
+                                        || '#211d3f';
                                     const isActive  = p.id === active?.id;
                                     const isDefault = p.id === defaultId;
                                     return (
                                         <button
                                             key={ p.id }
                                             type="button"
-                                            className={ `dono-preset-mgr__row${ isActive ? ' is-active' : '' }` }
+                                            className={ `giveflow-preset-mgr__row${ isActive ? ' is-active' : '' }` }
                                             onClick={ () => setActiveId( p.id ) }
                                             aria-pressed={ isActive }
                                         >
                                             <span
-                                                className="dono-preset-mgr__swatch"
+                                                className="giveflow-preset-mgr__swatch"
                                                 style={ { background: accent } }
                                                 aria-hidden="true"
                                             />
-                                            <span className="dono-preset-mgr__meta">
-                                                <strong className="dono-preset-mgr__name">{ p.name }</strong>
+                                            <span className="giveflow-preset-mgr__meta">
+                                                <strong className="giveflow-preset-mgr__name">{ p.name }</strong>
                                                 { isDefault && (
-                                                    <span className="dono-preset-mgr__default">
+                                                    <span className="giveflow-preset-mgr__default">
                                                         <Icon name="check" size={ 12 } />
-                                                        { __( 'Default', 'dono-fundraising-platform' ) }
+                                                        { __( 'Default', 'giveflow-fundraising-campaigns' ) }
                                                     </span>
                                                 ) }
                                             </span>
@@ -153,15 +153,15 @@ export default function BrandPanel( { s } ) {
                                 } ) }
                                 <Button
                                     variant="secondary"
-                                    className="dono-preset-mgr__add"
+                                    className="giveflow-preset-mgr__add"
                                     onClick={ addPreset }
                                     icon={ PlusIcon }
                                 >
-                                    { __( 'Add preset', 'dono-fundraising-platform' ) }
+                                    { __( 'Add preset', 'giveflow-fundraising-campaigns' ) }
                                 </Button>
                             </div>
 
-                            <div className="dono-preset-mgr__editor">
+                            <div className="giveflow-preset-mgr__editor">
                                 { active ? (
                                     <PresetEditor
                                         preset={ active }
@@ -177,11 +177,11 @@ export default function BrandPanel( { s } ) {
                                     <EmptyState
                                         compact
                                         icon={ <Palette size={ 22 } strokeWidth={ 1.75 } /> }
-                                        title={ __( 'No presets yet', 'dono-fundraising-platform' ) }
-                                        body={ __( 'Brand presets give every campaign a consistent look. Create one to get started.', 'dono-fundraising-platform' ) }
+                                        title={ __( 'No presets yet', 'giveflow-fundraising-campaigns' ) }
+                                        body={ __( 'Brand presets give every campaign a consistent look. Create one to get started.', 'giveflow-fundraising-campaigns' ) }
                                         action={
                                             <Btn variant="secondary" onClick={ addPreset }>
-                                                { __( 'Add preset', 'dono-fundraising-platform' ) }
+                                                { __( 'Add preset', 'giveflow-fundraising-campaigns' ) }
                                             </Btn>
                                         }
                                     />
@@ -191,8 +191,8 @@ export default function BrandPanel( { s } ) {
                     </Card>
                 </div>
 
-                <aside className="dono-brand-layout__rail">
-                    <Card title={ __( 'Live preview', 'dono-fundraising-platform' ) }>
+                <aside className="giveflow-brand-layout__rail">
+                    <Card title={ __( 'Live preview', 'giveflow-fundraising-campaigns' ) }>
                         { active && (
                             <StylePreview
                                 // Floor the preview with the built-in baseline so a
@@ -202,7 +202,7 @@ export default function BrandPanel( { s } ) {
                                 // StylePresets::all()'s built-in merge.
                                 tokens={ { ...builtinTokens( active.id ), ...( active.tokens || {} ) } }
                                 layer="brand"
-                                styling={ window.dono?.styling || {} }
+                                styling={ window.giveflow?.styling || {} }
                             />
                         ) }
                     </Card>
@@ -215,23 +215,23 @@ export default function BrandPanel( { s } ) {
 
 function PresetEditor( { preset, resetDefaults, isDefault, onRename, onTokens, onMakeDefault, onClone, onDelete } ) {
     return (
-        <div className="dono-preset-editor">
-            <div className="dono-preset-editor__head">
+        <div className="giveflow-preset-editor">
+            <div className="giveflow-preset-editor__head">
                 <input
                     type="text"
-                    className="dono-input dono-preset-editor__name"
+                    className="giveflow-input giveflow-preset-editor__name"
                     value={ preset.name }
                     onChange={ ( e ) => onRename( e.target.value ) }
-                    placeholder={ __( 'Preset name', 'dono-fundraising-platform' ) }
+                    placeholder={ __( 'Preset name', 'giveflow-fundraising-campaigns' ) }
                 />
-                <div className="dono-preset-editor__actions">
+                <div className="giveflow-preset-editor__actions">
                     { ! isDefault && (
                         <Button variant="secondary" size="small" onClick={ onMakeDefault }>
-                            { __( 'Make default', 'dono-fundraising-platform' ) }
+                            { __( 'Make default', 'giveflow-fundraising-campaigns' ) }
                         </Button>
                     ) }
                     <Button variant="tertiary" size="small" icon={ CloneIcon } onClick={ onClone }>
-                        { __( 'Clone', 'dono-fundraising-platform' ) }
+                        { __( 'Clone', 'giveflow-fundraising-campaigns' ) }
                     </Button>
                     { ! preset.builtin && (
                         <Button
@@ -241,22 +241,22 @@ function PresetEditor( { preset, resetDefaults, isDefault, onRename, onTokens, o
                             isDestructive
                             onClick={ onDelete }
                         >
-                            { __( 'Delete', 'dono-fundraising-platform' ) }
+                            { __( 'Delete', 'giveflow-fundraising-campaigns' ) }
                         </Button>
                     ) }
                 </div>
             </div>
 
             { preset.description && (
-                <p className="dono-preset-editor__desc">{ preset.description }</p>
+                <p className="giveflow-preset-editor__desc">{ preset.description }</p>
             ) }
 
             <TokenEditor
                 value={ preset.tokens || {} }
                 onChange={ onTokens }
-                catalogue={ window.dono?.styling?.catalogue || {} }
-                groups={ window.dono?.styling?.groups || {} }
-                defaults={ resetDefaults || window.dono?.styling?.defaults || {} }
+                catalogue={ window.giveflow?.styling?.catalogue || {} }
+                groups={ window.giveflow?.styling?.groups || {} }
+                defaults={ resetDefaults || window.giveflow?.styling?.defaults || {} }
             />
         </div>
     );

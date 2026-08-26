@@ -1,17 +1,17 @@
-// Dono first-run onboarding. Full-page chrome stripped via the
-// `dono-onboarding-fullscreen` body class (added by OnboardingPage).
+// GiveFlow first-run onboarding. Full-page chrome stripped via the
+// `giveflow-onboarding-fullscreen` body class (added by OnboardingPage).
 
-@import '@dono/ui/scss/tokens';
+@import '@giveflow/ui/scss/tokens';
 @import '../_shared/admin-base';
-@import '@dono/ui/scss/components/amount-input';
-@import '@dono/ui/scss/components/searchable-select';
-@import '@dono/ui/scss/components/skeleton';
+@import '@giveflow/ui/scss/components/amount-input';
+@import '@giveflow/ui/scss/components/searchable-select';
+@import '@giveflow/ui/scss/components/skeleton';
 
 // Aliases for legacy local names still used inside this file.
 $shadow-card:   $shadow-md;
 $shadow-lifted: $shadow-lg;
 
-body.dono-onboarding-fullscreen {
+body.giveflow-onboarding-fullscreen {
     background: $bg-page;
     margin-top: 0 !important;
 
@@ -39,8 +39,8 @@ body.dono-onboarding-fullscreen {
     // WP admin's forms.css applies a global box-shadow + grey border to every
     // <input>/<select>/<textarea>. Override at body-class specificity so our
     // onboarding inputs render with our own chrome.
-    .dono-onboarding__input,
-    .dono-searchable__input {
+    .giveflow-onboarding__input,
+    .giveflow-searchable__input {
         border: 1px solid $border-mid;
         background: #fff;
         box-shadow: none;
@@ -58,10 +58,10 @@ body.dono-onboarding-fullscreen {
             outline: 0;
         }
     }
-    select.dono-onboarding__input { padding-right: 32px; }
+    select.giveflow-onboarding__input { padding-right: 32px; }
 }
 
-.dono-onboarding {
+.giveflow-onboarding {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
     color: $text;
     min-height: 100vh;
@@ -100,7 +100,7 @@ body.dono-onboarding-fullscreen {
         font-weight: 600;
         color: $text;
     }
-    // .dono-onboarding__brand-mark is rendered by the shared <DonoMark/>
+    // .giveflow-onboarding__brand-mark is rendered by the shared <GiveFlowMark/>
     // component with inline styles, so no chip rules live here. We only
     // own the wordmark next to it.
     &__brand-name { font-size: 15px; }
@@ -182,7 +182,7 @@ body.dono-onboarding-fullscreen {
 
     // Form inputs. The selectors are scoped tightly so WP admin's global
     // `input[type="text"]` reset (margin, box-shadow, border-color) doesn't
-    // override the onboarding styling; `body.dono-onboarding-fullscreen`
+    // override the onboarding styling; `body.giveflow-onboarding-fullscreen`
     // wins on specificity.
     &__input {
         width: 100%;
@@ -209,7 +209,7 @@ body.dono-onboarding-fullscreen {
             box-shadow: 0 0 0 3px $accent-soft;
         }
     }
-    select.dono-onboarding__input {
+    select.giveflow-onboarding__input {
         appearance: none;
         cursor: pointer;
         background-image:
@@ -301,7 +301,7 @@ body.dono-onboarding-fullscreen {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 1px 3px rgba(20, 105, 58, .35);
+        box-shadow: 0 1px 3px rgba(33, 29, 63, .35);
     }
 
     &__preset-thumb {
@@ -323,9 +323,9 @@ body.dono-onboarding-fullscreen {
     }
 
     &__preset-thumb--classic {
-        background: linear-gradient(180deg, #f3faf5, $accent-soft);
+        background: linear-gradient(180deg, #f5f4fa, $accent-soft);
 
-        .dono-onboarding__preset-btn {
+        .giveflow-onboarding__preset-btn {
             background: $accent;
             color: #fff;
             border-radius: 999px;
@@ -334,7 +334,7 @@ body.dono-onboarding-fullscreen {
     &__preset-thumb--bold {
         background: linear-gradient(180deg, #f5f5f7, #e9e9ee);
 
-        .dono-onboarding__preset-btn {
+        .giveflow-onboarding__preset-btn {
             background: #0F3D5C;
             color: #fff;
             border-radius: 4px;
@@ -348,7 +348,7 @@ body.dono-onboarding-fullscreen {
         background: #fafaf9;
         border: 1px dashed $border-mid;
 
-        .dono-onboarding__preset-btn {
+        .giveflow-onboarding__preset-btn {
             background: transparent;
             color: $text;
             border: 1px solid $text;
@@ -363,7 +363,7 @@ body.dono-onboarding-fullscreen {
             #ebedf0 6px 12px
         );
 
-        .dono-onboarding__preset-btn {
+        .giveflow-onboarding__preset-btn {
             background: $text-soft;
             color: #fff;
             border-radius: 8px;
@@ -421,7 +421,7 @@ body.dono-onboarding-fullscreen {
         border-radius: $radius-lg;
         background: linear-gradient(90deg, $bg-soft 0%, #f3f4f6 40%, $bg-soft 80%);
         background-size: 200% 100%;
-        animation: dono-skeleton-pulse 1.4s ease-in-out infinite;
+        animation: giveflow-skeleton-pulse 1.4s ease-in-out infinite;
     }
 
     // Shown when the preview request fails; the brand choice is still saved.
@@ -736,15 +736,15 @@ body.dono-onboarding-fullscreen {
 
 }
 
-// @dono/ui's admin base restates border-radius on :focus, to win back the shape
-// wp-admin's a:focus steals when .dono-btn renders as an anchor. It restates one
+// @giveflow/ui's admin base restates border-radius on :focus, to win back the shape
+// wp-admin's a:focus steals when .giveflow-btn renders as an anchor. It restates one
 // radius, so a pill flattens to 8px the moment it is clicked. Its selector ties
-// with a plain .dono-onboarding .dono-btn:focus and wins on order, so this needs
+// with a plain .giveflow-onboarding .giveflow-btn:focus and wins on order, so this needs
 // the extra element to outrank it.
-body .dono-onboarding .dono-btn:focus,
-body .dono-onboarding .dono-btn:active { border-radius: 999px; }
+body .giveflow-onboarding .giveflow-btn:focus,
+body .giveflow-onboarding .giveflow-btn:active { border-radius: 999px; }
 
-.dono-onboarding .dono-btn {
+.giveflow-onboarding .giveflow-btn {
     appearance: none;
     border: 1px solid transparent;
     border-radius: 999px;
@@ -784,7 +784,7 @@ body .dono-onboarding .dono-btn:active { border-radius: 999px; }
 }
 
 @media (max-width: 640px) {
-    .dono-onboarding {
+    .giveflow-onboarding {
         padding: 16px 12px 32px;
 
         &__top { margin-bottom: 20px; }
@@ -798,10 +798,10 @@ body .dono-onboarding .dono-btn:active { border-radius: 999px; }
         &__amounts { grid-template-columns: repeat(2, 1fr); }
         &__checklist-item {
             grid-template-columns: 28px 1fr;
-            .dono-btn { grid-column: 1 / -1; width: 100%; justify-content: center; }
+            .giveflow-btn { grid-column: 1 / -1; width: 100%; justify-content: center; }
         }
         &__nav { flex-direction: column-reverse; gap: 8px;
-            .dono-btn { width: 100%; }
+            .giveflow-btn { width: 100%; }
             > span { display: none; }
         }
     }

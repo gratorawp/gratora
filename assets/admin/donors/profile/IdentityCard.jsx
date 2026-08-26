@@ -17,7 +17,7 @@ function CopyButton( { value, label } ) {
         } catch ( _ ) {}
     };
     return (
-        <button type="button" className="dp-id-row__copy" aria-label={ label } onClick={ copy } title={ ok ? __( 'Copied', 'dono-fundraising-platform' ) : label }>
+        <button type="button" className="dp-id-row__copy" aria-label={ label } onClick={ copy } title={ ok ? __( 'Copied', 'giveflow-fundraising-campaigns' ) : label }>
             <IconCopy width="12" height="12" />
         </button>
     );
@@ -32,7 +32,7 @@ function IdentityRow( { icon, value, copyable, sub, valClass = '' } ) {
                 { sub && <span className="dp-id-row__sub">{ sub }</span> }
             </span>
             { copyable
-                ? <CopyButton value={ copyable } label={ __( 'Copy', 'dono-fundraising-platform' ) } />
+                ? <CopyButton value={ copyable } label={ __( 'Copy', 'giveflow-fundraising-campaigns' ) } />
                 : <span /> }
         </div>
     );
@@ -56,30 +56,30 @@ export default function IdentityCard( { donor } ) {
 
     const segment = donor.segment || 'other';
     const statusLabel = isRedacted
-        ? __( 'Redacted', 'dono-fundraising-platform' )
+        ? __( 'Redacted', 'giveflow-fundraising-campaigns' )
         : isAnon
-            ? __( 'Anonymous', 'dono-fundraising-platform' )
+            ? __( 'Anonymous', 'giveflow-fundraising-campaigns' )
             : SEGMENT_LABELS[ segment ] || segment;
     const statusClass = isRedacted ? 'is-redact' : isAnon ? 'is-anon' : '';
 
     const typeLabel = donor.donor_type === 'organization'
-        ? __( 'Organization', 'dono-fundraising-platform' )
+        ? __( 'Organization', 'giveflow-fundraising-campaigns' )
         : donor.donor_type === 'household'
-            ? __( 'Household', 'dono-fundraising-platform' )
-            : __( 'Individual', 'dono-fundraising-platform' );
+            ? __( 'Household', 'giveflow-fundraising-campaigns' )
+            : __( 'Individual', 'giveflow-fundraising-campaigns' );
 
     const issueMagic = async () => {
         setIssuing( true );
         setIssueError( '' );
         try {
             const res = await apiFetch( {
-                path:   `/dono/v1/admin/donors/${ donor.id }/portal-link`,
+                path:   `/giveflow/v1/admin/donors/${ donor.id }/portal-link`,
                 method: 'POST',
             } );
             setMagicLinkUrl( res.magic_link_url || '' );
             setMagicLinkExpires( res.expires_at || '' );
         } catch ( e ) {
-            setIssueError( e?.message || __( 'The link could not be created.', 'dono-fundraising-platform' ) );
+            setIssueError( e?.message || __( 'The link could not be created.', 'giveflow-fundraising-campaigns' ) );
         } finally {
             setIssuing( false );
         }
@@ -133,7 +133,7 @@ export default function IdentityCard( { donor } ) {
                     { isRedacted && (
                         <IdentityRow
                             icon={ <IconMail width="14" height="14" /> }
-                            value={ __( 'Redacted', 'dono-fundraising-platform' ) }
+                            value={ __( 'Redacted', 'giveflow-fundraising-campaigns' ) }
                             valClass="is-redacted"
                         />
                     ) }
@@ -161,8 +161,8 @@ export default function IdentityCard( { donor } ) {
                     { donor.first_donation_at && (
                         <IdentityRow
                             icon={ <IconCalendar width="14" height="14" /> }
-                            value={ sprintf( /* translators: %s: month */ __( 'Donor since %s', 'dono-fundraising-platform' ), formatMonth( donor.first_donation_at ) ) }
-                            sub={ donor.last_donation_at ? sprintf( /* translators: %s: date */ __( 'Last donation %s', 'dono-fundraising-platform' ), formatDate( donor.last_donation_at ) ) : null }
+                            value={ sprintf( /* translators: %s: month */ __( 'Donor since %s', 'giveflow-fundraising-campaigns' ), formatMonth( donor.first_donation_at ) ) }
+                            sub={ donor.last_donation_at ? sprintf( /* translators: %s: date */ __( 'Last donation %s', 'giveflow-fundraising-campaigns' ), formatDate( donor.last_donation_at ) ) : null }
                         />
                     ) }
                 </div>
@@ -175,10 +175,10 @@ export default function IdentityCard( { donor } ) {
                             onClick={ issueMagic }
                             disabled={ issuing }
                         >
-                            { issuing ? __( 'Creating…', 'dono-fundraising-platform' ) : __( 'Create a sign-in link', 'dono-fundraising-platform' ) }
+                            { issuing ? __( 'Creating…', 'giveflow-fundraising-campaigns' ) : __( 'Create a sign-in link', 'giveflow-fundraising-campaigns' ) }
                         </button>
                         <div className="dp-id-magic__help">
-                            { issueError || __( 'Signs whoever opens it in as this donor, once. Create one only when they have asked.', 'dono-fundraising-platform' ) }
+                            { issueError || __( 'Signs whoever opens it in as this donor, once. Create one only when they have asked.', 'giveflow-fundraising-campaigns' ) }
                         </div>
                     </div>
                 ) }
@@ -188,17 +188,17 @@ export default function IdentityCard( { donor } ) {
                         <div className="dp-magic-link" title={ magicLinkUrl }>
                             <span className="dp-magic-link__url">{ magicLinkUrl }</span>
                             <button type="button" className="dp-magic-link__copy" onClick={ copyMagic }>
-                                { copiedMagic ? __( 'Copied', 'dono-fundraising-platform' ) : __( 'Copy', 'dono-fundraising-platform' ) }
+                                { copiedMagic ? __( 'Copied', 'giveflow-fundraising-campaigns' ) : __( 'Copy', 'giveflow-fundraising-campaigns' ) }
                             </button>
                         </div>
                         <div className="dp-id-magic__help">
                             { magicLinkExpires
                                 ? sprintf(
                                     /* translators: %s: date and time the link stops working */
-                                    __( 'Works once, until %s. The donor can revoke it with sign out everywhere.', 'dono-fundraising-platform' ),
+                                    __( 'Works once, until %s. The donor can revoke it with sign out everywhere.', 'giveflow-fundraising-campaigns' ),
                                     formatDateTime( magicLinkExpires )
                                 )
-                                : __( 'Works once. The donor can revoke it with sign out everywhere.', 'dono-fundraising-platform' ) }
+                                : __( 'Works once. The donor can revoke it with sign out everywhere.', 'giveflow-fundraising-campaigns' ) }
                         </div>
                     </div>
                 ) }

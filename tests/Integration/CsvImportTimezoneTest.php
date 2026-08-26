@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
-use Dono\Donations\DonationRepository;
-use Dono\Donors\Donor;
-use Dono\Foundation\Identity\IdentityHasher;
-use Dono\Foundation\Plugin;
-use Dono\Foundation\Transfer\CsvImporter;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Foundation\Identity\IdentityHasher;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Foundation\Transfer\CsvImporter;
 
 /**
  * The date column of someone else's export is the org's calendar, not UTC.
  *
- * Importing the donation history is the normal first day of Dono, and paid_at is
+ * Importing the donation history is the normal first day of GiveFlow, and paid_at is
  * read back through the site timezone everywhere it is shown: the donations list,
  * the revenue report, the receipt and the year-end statement. A cell taken as a
  * UTC instant therefore dates every imported donation a day early anywhere west

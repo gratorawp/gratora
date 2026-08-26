@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Unit\Donors;
+namespace GiveFlow\Tests\Unit\Donors;
 
-use Dono\Donors\AtRiskReason;
+use GiveFlow\Donors\AtRiskReason;
 use PHPUnit\Framework\TestCase;
 
 /**

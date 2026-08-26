@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Dono\Forms;
+namespace GiveFlow\Forms;
 
-use Dono\Campaigns\Campaign;
-use Dono\Currency\Currency;
-use Dono\Currency\FxRates;
-use Dono\Donors\ConsentService;
-use Dono\Forms\Blocks\ConsentBlock;
-use Dono\Forms\Blocks\TermsBlock;
-use Dono\Forms\Blocks\DateBlock;
-use Dono\Forms\Blocks\DonationAmountBlock;
-use Dono\Forms\Blocks\DropdownBlock;
-use Dono\Forms\Blocks\RecurringToggleBlock;
-use Dono\Foundation\Helpers\Money;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Currency\Currency;
+use GiveFlow\Currency\FxRates;
+use GiveFlow\Donors\ConsentService;
+use GiveFlow\Forms\Blocks\ConsentBlock;
+use GiveFlow\Forms\Blocks\TermsBlock;
+use GiveFlow\Forms\Blocks\DateBlock;
+use GiveFlow\Forms\Blocks\DonationAmountBlock;
+use GiveFlow\Forms\Blocks\DropdownBlock;
+use GiveFlow\Forms\Blocks\RecurringToggleBlock;
+use GiveFlow\Foundation\Helpers\Money;
 use WP_Error;
 
 /**
@@ -35,7 +35,7 @@ final class FormSubmissionValidator
     {
         $this->form = $form;
         $blocks = parse_blocks((string) ($form->blocks ?? ''));
-        $this->offersCurrencyChoice = self::treeHasBlock($blocks, 'dono/currency-switcher');
+        $this->offersCurrencyChoice = self::treeHasBlock($blocks, 'giveflow/currency-switcher');
 
         // The rendered amount step falls back to the campaign's presets when the
         // block omits its own (see DonationFormShortcode::buildSteps). The
@@ -59,7 +59,7 @@ final class FormSubmissionValidator
         $freq = (string) ($body['frequency'] ?? 'one_time');
         if ($freq === '') $freq = 'one_time';
         if (! in_array($freq, $offered, true)) {
-            return $this->reject(__('That donation frequency is not available for this form.', 'dono-fundraising-platform'));
+            return $this->reject(__('That donation frequency is not available for this form.', 'giveflow-fundraising-campaigns'));
         }
 
         return null;
@@ -88,7 +88,7 @@ final class FormSubmissionValidator
     private static function findTermsRevision(array $blocks): ?int
     {
         foreach ($blocks as $block) {
-            if (($block['blockName'] ?? '') === 'dono/terms') {
+            if (($block['blockName'] ?? '') === 'giveflow/terms') {
                 $attrs = is_array($block['attrs'] ?? null) ? $block['attrs'] : [];
                 if (TermsBlock::isConfigured($attrs)) {
                     return TermsBlock::revisionOf(
@@ -161,54 +161,54 @@ final class FormSubmissionValidator
         $custom  = is_array($body['custom'] ?? null) ? $body['custom'] : [];
 
         switch ($name) {
-            case 'dono/name':
+            case 'giveflow/name':
                 // requireFirst/requireLast default true (NameBlock); the editor
                 // omits an attr equal to its default, so absent means required.
                 if ((bool) ($attrs['requireFirst'] ?? true) && ! $this->filled($profile['first_name'] ?? null)) {
-                    return $this->requiredError(__('First name', 'dono-fundraising-platform'));
+                    return $this->requiredError(__('First name', 'giveflow-fundraising-campaigns'));
                 }
                 if ((bool) ($attrs['requireLast'] ?? true) && ! $this->filled($profile['last_name'] ?? null)) {
-                    return $this->requiredError(__('Last name', 'dono-fundraising-platform'));
+                    return $this->requiredError(__('Last name', 'giveflow-fundraising-campaigns'));
                 }
                 break;
 
-            case 'dono/terms':
+            case 'giveflow/terms':
                 // The consent record is only worth keeping if agreement was
                 // actually required, and this is the only side the donor cannot edit.
                 if (TermsBlock::isConfigured($attrs)) {
                     $consents = is_array($body['consents'] ?? null) ? $body['consents'] : [];
                     if (empty($consents[TermsBlock::PURPOSE])) {
-                        return $this->reject(__('Please agree to the terms to continue.', 'dono-fundraising-platform'));
+                        return $this->reject(__('Please agree to the terms to continue.', 'giveflow-fundraising-campaigns'));
                     }
                 }
                 break;
 
-            case 'dono/phone':
+            case 'giveflow/phone':
                 if (! empty($attrs['required']) && ! $this->filled($profile['phone'] ?? null)) {
-                    return $this->requiredError($this->label($attrs, __('Phone', 'dono-fundraising-platform')));
+                    return $this->requiredError($this->label($attrs, __('Phone', 'giveflow-fundraising-campaigns')));
                 }
                 break;
 
-            case 'dono/country':
+            case 'giveflow/country':
                 if (! empty($attrs['required']) && ! $this->filled($profile['country'] ?? null)) {
-                    return $this->requiredError($this->label($attrs, __('Country', 'dono-fundraising-platform')));
+                    return $this->requiredError($this->label($attrs, __('Country', 'giveflow-fundraising-campaigns')));
                 }
                 break;
 
-            case 'dono/comment':
+            case 'giveflow/comment':
                 $note = (string) ($body['note_to_org'] ?? '');
                 if (! empty($attrs['required']) && ! $this->filled($note)) {
-                    return $this->requiredError($this->label($attrs, __('Comment', 'dono-fundraising-platform')));
+                    return $this->requiredError($this->label($attrs, __('Comment', 'giveflow-fundraising-campaigns')));
                 }
                 // Cap length server-side: the note can surface publicly, and the
                 // client's maxlength is bypassable by a crafted POST.
                 $noteMax = (int) ($attrs['maxLength'] ?? 5000);
                 if ($noteMax > 0 && mb_strlen($note) > $noteMax) {
-                    return $this->reject(__('Your message is too long.', 'dono-fundraising-platform'));
+                    return $this->reject(__('Your message is too long.', 'giveflow-fundraising-campaigns'));
                 }
                 break;
 
-            case 'dono/donation-amount':
+            case 'giveflow/donation-amount':
                 // A presets-only form (custom amounts disabled) must only accept
                 // a listed preset; a crafted POST can otherwise send any amount.
                 // 'fixed' donation type is a single custom input, so it's exempt.
@@ -229,7 +229,7 @@ final class FormSubmissionValidator
                     if ($bar !== null && $net < $bar) {
                         return $this->reject(sprintf(
                             /* translators: %s: minimum donation amount, formatted. */
-                            __('The smallest donation this form accepts is %s.', 'dono-fundraising-platform'),
+                            __('The smallest donation this form accepts is %s.', 'giveflow-fundraising-campaigns'),
                             Money::format($bar, $paying)
                         ));
                     }
@@ -243,7 +243,7 @@ final class FormSubmissionValidator
                     // through the same filter (variant/visitor context is
                     // render-only and unavailable at submit time).
                     $presets = (array) apply_filters(
-                        'dono.form.amounts',
+                        'giveflow.form.amounts',
                         DonationAmountBlock::normalizePresets($raw),
                         $this->form,
                         null,
@@ -273,12 +273,12 @@ final class FormSubmissionValidator
                         && $submittedCurrency !== $presetCurrency;
 
                     if (! $convertedByDonor && ! in_array($net, $allowedCents, true)) {
-                        return $this->reject(__('Choose one of the listed donation amounts.', 'dono-fundraising-platform'));
+                        return $this->reject(__('Choose one of the listed donation amounts.', 'giveflow-fundraising-campaigns'));
                     }
                 }
                 break;
 
-            case 'dono/fund-picker':
+            case 'giveflow/fund-picker':
                 // When the picker restricts to a set of funds, a chosen fund
                 // must be one of them; a crafted POST can otherwise route to any
                 // fund in the org. A cleared choice (0) falls back to the form's
@@ -286,18 +286,18 @@ final class FormSubmissionValidator
                 $allowedFunds = array_values(array_filter(array_map('intval', (array) ($attrs['fundIds'] ?? []))));
                 $chosenFund   = (int) ($body['fund_id'] ?? 0);
                 if ($allowedFunds !== [] && $chosenFund !== 0 && ! in_array($chosenFund, $allowedFunds, true)) {
-                    return $this->reject(__('That fund is not available for this form.', 'dono-fundraising-platform'));
+                    return $this->reject(__('That fund is not available for this form.', 'giveflow-fundraising-campaigns'));
                 }
                 break;
 
-            case 'dono/address':
+            case 'giveflow/address':
                 $addr = is_array($profile['address'] ?? null) ? $profile['address'] : [];
                 $sub  = [
-                    'line1'   => ['showLine1',   'requireLine1',   true,  __('Address', 'dono-fundraising-platform')],
-                    'city'    => ['showCity',    'requireCity',    true,  __('City', 'dono-fundraising-platform')],
-                    'region'  => ['showRegion',  'requireRegion',  false, __('Region', 'dono-fundraising-platform')],
-                    'postal'  => ['showPostal',  'requirePostal',  true,  __('Postal code', 'dono-fundraising-platform')],
-                    'country' => ['showCountry', 'requireCountry', true,  __('Country', 'dono-fundraising-platform')],
+                    'line1'   => ['showLine1',   'requireLine1',   true,  __('Address', 'giveflow-fundraising-campaigns')],
+                    'city'    => ['showCity',    'requireCity',    true,  __('City', 'giveflow-fundraising-campaigns')],
+                    'region'  => ['showRegion',  'requireRegion',  false, __('Region', 'giveflow-fundraising-campaigns')],
+                    'postal'  => ['showPostal',  'requirePostal',  true,  __('Postal code', 'giveflow-fundraising-campaigns')],
+                    'country' => ['showCountry', 'requireCountry', true,  __('Country', 'giveflow-fundraising-campaigns')],
                 ];
                 foreach ($sub as $key => [$showAttr, $reqAttr, $reqDefault, $sLabel]) {
                     $shown    = (bool) ($attrs[$showAttr] ?? true);
@@ -308,7 +308,7 @@ final class FormSubmissionValidator
                 }
                 break;
 
-            case 'dono/text-input':
+            case 'giveflow/text-input':
                 $key = $this->customKey($attrs);
                 $val = $custom[$key] ?? null;
                 if (! empty($attrs['required']) && ! $this->filled($val)) {
@@ -317,16 +317,16 @@ final class FormSubmissionValidator
                 if ($this->filled($val)) {
                     $max = (int) ($attrs['maxLength'] ?? 0);
                     if ($max > 0 && mb_strlen((string) $val) > $max) {
-                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is too long.', 'dono-fundraising-platform'), $this->label($attrs, $key)));
+                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is too long.', 'giveflow-fundraising-campaigns'), $this->label($attrs, $key)));
                     }
                     $pattern = (string) ($attrs['pattern'] ?? '');
                     if ($pattern !== '' && ! $this->matchesPattern($pattern, (string) $val)) {
-                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is not in the expected format.', 'dono-fundraising-platform'), $this->label($attrs, $key)));
+                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is not in the expected format.', 'giveflow-fundraising-campaigns'), $this->label($attrs, $key)));
                     }
                 }
                 break;
 
-            case 'dono/number-input':
+            case 'giveflow/number-input':
                 $key = $this->customKey($attrs);
                 $val = $custom[$key] ?? null;
                 if (! empty($attrs['required']) && ! $this->filled($val)) {
@@ -334,19 +334,19 @@ final class FormSubmissionValidator
                 }
                 if ($this->filled($val)) {
                     if (! is_numeric($val)) {
-                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s must be a number.', 'dono-fundraising-platform'), $this->label($attrs, $key)));
+                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s must be a number.', 'giveflow-fundraising-campaigns'), $this->label($attrs, $key)));
                     }
                     $n = (float) $val;
                     if (isset($attrs['min']) && is_numeric($attrs['min']) && $n < (float) $attrs['min']) {
-                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is below the minimum.', 'dono-fundraising-platform'), $this->label($attrs, $key)));
+                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is below the minimum.', 'giveflow-fundraising-campaigns'), $this->label($attrs, $key)));
                     }
                     if (isset($attrs['max']) && is_numeric($attrs['max']) && $n > (float) $attrs['max']) {
-                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is above the maximum.', 'dono-fundraising-platform'), $this->label($attrs, $key)));
+                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is above the maximum.', 'giveflow-fundraising-campaigns'), $this->label($attrs, $key)));
                     }
                 }
                 break;
 
-            case 'dono/date':
+            case 'giveflow/date':
                 $key = $this->customKey($attrs);
                 $val = $custom[$key] ?? null;
                 if (! empty($attrs['required']) && ! $this->filled($val)) {
@@ -357,27 +357,27 @@ final class FormSubmissionValidator
                     $min = DateBlock::normalizeDate((string) ($attrs['minDate'] ?? ''));
                     $max = DateBlock::normalizeDate((string) ($attrs['maxDate'] ?? ''));
                     if (($min !== '' && $d < $min) || ($max !== '' && $d > $max)) {
-                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is outside the allowed range.', 'dono-fundraising-platform'), $this->label($attrs, $key)));
+                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is outside the allowed range.', 'giveflow-fundraising-campaigns'), $this->label($attrs, $key)));
                     }
                 }
                 break;
 
-            case 'dono/dropdown':
-            case 'dono/radio':
+            case 'giveflow/dropdown':
+            case 'giveflow/radio':
                 $key = $this->customKey($attrs);
                 if (! empty($attrs['required']) && ! $this->filled($custom[$key] ?? null)) {
                     return $this->requiredError($this->label($attrs, $key));
                 }
                 break;
 
-            case 'dono/checkbox':
+            case 'giveflow/checkbox':
                 $key = $this->customKey($attrs);
                 if (! empty($attrs['required']) && empty($custom[$key])) {
-                    return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('Please check %s.', 'dono-fundraising-platform'), $this->label($attrs, $key)));
+                    return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('Please check %s.', 'giveflow-fundraising-campaigns'), $this->label($attrs, $key)));
                 }
                 break;
 
-            case 'dono/multi-select':
+            case 'giveflow/multi-select':
                 $key   = $this->customKey($attrs);
                 $sel   = is_array($custom[$key] ?? null) ? $custom[$key] : [];
                 $count = count($sel);
@@ -387,34 +387,34 @@ final class FormSubmissionValidator
                 $min = max(0, (int) ($attrs['minSelections'] ?? 0));
                 $max = max(0, (int) ($attrs['maxSelections'] ?? 0));
                 if ($count > 0 && $min > 0 && $count < $min) {
-                    return $this->reject(sprintf(/* translators: %1$d: smallest number of options allowed. %2$s: the label of the form field. */ __('Select at least %1$d for %2$s.', 'dono-fundraising-platform'), $min, $this->label($attrs, $key)));
+                    return $this->reject(sprintf(/* translators: %1$d: smallest number of options allowed. %2$s: the label of the form field. */ __('Select at least %1$d for %2$s.', 'giveflow-fundraising-campaigns'), $min, $this->label($attrs, $key)));
                 }
                 if ($max > 0 && $count > $max) {
-                    return $this->reject(sprintf(/* translators: %1$d: largest number of options allowed. %2$s: the label of the form field. */ __('Select at most %1$d for %2$s.', 'dono-fundraising-platform'), $max, $this->label($attrs, $key)));
+                    return $this->reject(sprintf(/* translators: %1$d: largest number of options allowed. %2$s: the label of the form field. */ __('Select at most %1$d for %2$s.', 'giveflow-fundraising-campaigns'), $max, $this->label($attrs, $key)));
                 }
                 break;
 
-            case 'dono/consent':
+            case 'giveflow/consent':
                 $consents = is_array($body['consents'] ?? null) ? $body['consents'] : [];
                 // Required lives on the org's purpose, not on the block, so a
                 // form cannot make something mandatory the registry does not.
                 // Resolved rather than injected: this validator is constructed
                 // inline at the one call site and takes no dependencies.
-                $registry = \Dono\Foundation\Plugin::instance()->container->get(ConsentService::class);
+                $registry = \GiveFlow\Foundation\Plugin::instance()->container->get(ConsentService::class);
                 foreach (ConsentBlock::purposeKeys($attrs) as $key) {
                     $p = $registry->findPurpose($key);
                     if ($p === null) continue;
                     if (! empty($p['required']) && empty($consents[$key])) {
                         return $this->reject(sprintf(
                             /* translators: %s: consent purpose label */
-                            __('Please agree to: %s', 'dono-fundraising-platform'),
+                            __('Please agree to: %s', 'giveflow-fundraising-campaigns'),
                             (string) ($p['label'] ?? '')
                         ));
                     }
                 }
                 break;
 
-            case 'dono/recurring-toggle':
+            case 'giveflow/recurring-toggle':
                 // Gutenberg omits an attribute equal to its registered default,
                 // so an absent frequencies key means the default set, not none.
                 // Must match the renderer's fallback or offered frequencies are
@@ -518,7 +518,7 @@ final class FormSubmissionValidator
     private static function collectConsentIds(array $blocks, array &$ids): void
     {
         foreach ($blocks as $block) {
-            if (($block['blockName'] ?? '') === 'dono/consent') {
+            if (($block['blockName'] ?? '') === 'giveflow/consent') {
                 $attrs = is_array($block['attrs'] ?? null) ? $block['attrs'] : [];
                 foreach (ConsentBlock::purposeKeys($attrs) as $key) {
                     $ids[$key] = true;
@@ -568,7 +568,7 @@ final class FormSubmissionValidator
     {
         return $this->reject(sprintf(
             /* translators: %s: form field label */
-            __('Please complete the %s field.', 'dono-fundraising-platform'),
+            __('Please complete the %s field.', 'giveflow-fundraising-campaigns'),
             $label
         ));
     }
@@ -576,6 +576,6 @@ final class FormSubmissionValidator
     /** @since 1.0.0 */
     private function reject(string $message): WP_Error
     {
-        return new WP_Error('dono_form_validation', $message, ['status' => 400]);
+        return new WP_Error('giveflow_form_validation', $message, ['status' => 400]);
     }
 }

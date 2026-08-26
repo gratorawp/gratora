@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Foundation\Plugin;
-use Dono\Gateways\Stripe\StripeApi;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Gateways\Stripe\StripeApi;
 
 /**
  * The signing secret that matters is the one for the mode the site charges in.
@@ -30,7 +30,7 @@ final class StripeWebhookSecretModeTest extends IntegrationTestCase
     /** @param array<string,string> $stripe */
     private function config(bool $testMode, array $stripe): void
     {
-        update_option('dono_gateway_config', ['test_mode' => $testMode, 'stripe' => $stripe]);
+        update_option('giveflow_gateway_config', ['test_mode' => $testMode, 'stripe' => $stripe]);
     }
 
     public function test_a_live_site_is_not_satisfied_by_the_test_secret(): void

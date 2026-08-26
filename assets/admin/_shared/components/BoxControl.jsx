@@ -1,1 +1,1 @@
-export { default } from '@dono/ui/components/BoxControl';
+export { default } from '@giveflow/ui/components/BoxControl';

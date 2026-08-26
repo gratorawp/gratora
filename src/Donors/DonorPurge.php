@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Donors;
+namespace GiveFlow\Donors;
 
-use Dono\Async\AsyncDispatcher;
-use Dono\Foundation\Batch\BatchProcessor;
-use Dono\Foundation\Time\Clock;
+use GiveFlow\Async\AsyncDispatcher;
+use GiveFlow\Foundation\Batch\BatchProcessor;
+use GiveFlow\Foundation\Time\Clock;
 
 /**
  * Severs the last handle on an already-redacted donor, `retention_days_after_
@@ -41,7 +41,7 @@ use Dono\Foundation\Time\Clock;
  */
 final class DonorPurge
 {
-    public const HOOK = 'dono.cron.donor_purge';
+    public const HOOK = 'giveflow.cron.donor_purge';
     private const DAILY = 86400;
     private const BATCH = 200;
 
@@ -67,7 +67,7 @@ final class DonorPurge
      */
     public static function severedHash(int $donorId): string
     {
-        return hash('sha256', 'dono-purged:' . $donorId);
+        return hash('sha256', 'giveflow-purged:' . $donorId);
     }
 
     /** @since 1.0.0 */
@@ -144,9 +144,9 @@ final class DonorPurge
     /** @since 1.0.0 */
     private function retentionDays(): int
     {
-        $opt    = get_option('dono_privacy', []);
+        $opt    = get_option('giveflow_privacy', []);
         $stored = is_array($opt) ? (int) ($opt['retention_days_after_redaction'] ?? 90) : 90;
 
-        return max(0, (int) apply_filters('dono.donor.retention_days_after_redaction', $stored));
+        return max(0, (int) apply_filters('giveflow.donor.retention_days_after_redaction', $stored));
     }
 }

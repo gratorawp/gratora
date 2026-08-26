@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Foundation\Identity\IdentityHasher;
-use Dono\Foundation\Plugin;
+use GiveFlow\Foundation\Identity\IdentityHasher;
+use GiveFlow\Foundation\Plugin;
 
 /**
  * The mailbox an address reaches, used to rate-limit outbound mail.

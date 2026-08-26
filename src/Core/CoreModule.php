@@ -2,234 +2,234 @@
 
 declare(strict_types=1);
 
-namespace Dono\Core;
+namespace GiveFlow\Core;
 
-use Dono\Analytics\ErrorLog;
-use Dono\Admin\AdminGlobals;
-use Dono\Admin\AdminMenu;
-use Dono\Admin\Pages\CampaignsPage;
-use Dono\Admin\Pages\DonationsPage;
-use Dono\Admin\Pages\SubscriptionsPage;
-use Dono\Admin\Pages\DonorsPage;
-use Dono\Admin\Pages\FormsPage;
-use Dono\Admin\Pages\FundsPage;
-use Dono\Admin\Pages\ToolsPage;
-use Dono\Admin\DeactivationDialog;
-use Dono\Admin\ManagedPageStates;
-use Dono\Admin\TestModeBadge;
-use Dono\Admin\Pages\SettingsPage;
-use Dono\Analytics\Event;
-use Dono\Analytics\EventRecorder;
-use Dono\Async\AsyncDispatcher;
-use Dono\Campaigns\CampaignPermalinks;
-use Dono\Campaigns\CampaignTypeRegistry;
-use Dono\Campaigns\DefaultCampaignTypeHandler;
-use Dono\Currency\FxBackfill;
-use Dono\Currency\FxRates;
-use Dono\Currency\FxRatesUpdater;
-use Dono\Campaigns\Campaign;
-use Dono\Campaigns\CampaignChrome;
-use Dono\Campaigns\CampaignPageTemplate;
-use Dono\Campaigns\Styling\PageStyle;
-use Dono\Campaigns\CampaignMetricsService;
-use Dono\Campaigns\CampaignStatMetrics;
-use Dono\Campaigns\CampaignRepository;
-use Dono\Campaigns\CampaignService;
-use Dono\Campaigns\SocialMeta;
-use Dono\Dashboard\DashboardMetricsService;
-use Dono\Donations\AggregateSyncer;
-use Dono\Donations\AntiSpamGuard;
-use Dono\Donations\Donation;
-use Dono\Donations\DonationEmails;
-use Dono\Donations\DonationNote;
-use Dono\Donations\DonationNoteRepository;
-use Dono\Donations\DonationRepository;
-use Dono\Donations\DonationService;
-use Dono\Donations\Refund;
-use Dono\Donors\Consent;
-use Dono\Donors\ConsentService;
-use Dono\Donors\Donor;
-use Dono\Donors\DonorAggregateSyncer;
-use Dono\Donors\DonorEmailRehasher;
-use Dono\Donors\DonorMetricsService;
-use Dono\Donors\DonorNote;
-use Dono\Donors\DonorNoteRepository;
-use Dono\Donors\DonorPurge;
-use Dono\Donors\DonorAvatarUploader;
-use Dono\Donors\DonorAvatars;
-use Dono\Donors\DonorRepository;
-use Dono\Donors\DonorService;
-use Dono\Donors\Erasure\AnalyticsEventHandler;
-use Dono\Foundation\Transfer\CsvImporter;
-use Dono\Foundation\Transfer\DataExporter;
-use Dono\Foundation\Transfer\DataImporter;
-use Dono\Foundation\Upgrade\RestoreReceiptsRetainingMoney;
-use Dono\Foundation\Upgrade\UpgradeRunner;
-use Dono\Foundation\Upgrade\UpgradeJob;
-use Dono\Foundation\Upgrade\UpgradeNotice;
-use Dono\Donors\Erasure\CoreDonorDataHandler;
-use Dono\Donors\Erasure\ErasureRegistry;
-use Dono\Donors\MagicLinkService;
-use Dono\Donors\MagicLinkToken;
-use Dono\Donors\PendingSignup;
-use Dono\Donors\PendingSignupRepository;
-use Dono\Donors\SignupRedemption;
-use Dono\Donors\Portal\AnnualStatementBuilder;
-use Dono\Donors\Portal\PortalPage;
-use Dono\Donors\Portal\PortalSession;
-use Dono\Donors\Portal\PortalShortcode;
-use Dono\Campaigns\Blocks\BlockEditorIntegration as CampaignBlockEditorIntegration;
-use Dono\Campaigns\Blocks\CampaignBindingPreviewController;
-use Dono\Campaigns\Blocks\CampaignBindings;
-use Dono\Campaigns\Blocks\CampaignGridBlock;
-use Dono\Campaigns\Blocks\CampaignImageBlock;
-use Dono\Campaigns\Blocks\CampaignProgressBlock;
-use Dono\Campaigns\Blocks\CampaignStatBlock;
-use Dono\Campaigns\Blocks\DonateButtonBlock;
-use Dono\Campaigns\Blocks\DonationFormBlock;
-use Dono\Campaigns\Blocks\RecentDonationsBlock;
-use Dono\Campaigns\Blocks\SupporterWallBlock;
-use Dono\Campaigns\Blocks\TopDonorsBlock;
-use Dono\Forms\Blocks\AddressBlock;
-use Dono\Forms\Blocks\AnonymousToggleBlock;
-use Dono\Forms\Blocks\BlockRegistry;
-use Dono\Forms\Blocks\CommentBlock;
-use Dono\Forms\Blocks\ConsentBlock;
-use Dono\Forms\Blocks\DonationSummaryBlock;
-use Dono\Forms\Blocks\TermsBlock;
-use Dono\Forms\Blocks\CountryBlock;
-use Dono\Forms\Blocks\CoverFeesBlock;
-use Dono\Forms\Blocks\CurrencySwitcherBlock;
-use Dono\Forms\Blocks\DividerBlock;
-use Dono\Forms\Blocks\DonationAmountBlock;
-use Dono\Forms\Blocks\PaymentGatewaysBlock;
-use Dono\Forms\Blocks\EmailBlock;
-use Dono\Forms\Blocks\FundPickerBlock;
-use Dono\Forms\Blocks\GoalBlock;
-use Dono\Forms\Blocks\HeadingBlock;
-use Dono\Forms\Blocks\NameBlock;
-use Dono\Forms\Blocks\ParagraphBlock;
-use Dono\Forms\Blocks\PhoneBlock;
-use Dono\Forms\Blocks\HiddenBlock;
-use Dono\Forms\Blocks\HtmlBlock;
-use Dono\Forms\Blocks\PrivacyNoticeBlock;
-use Dono\Forms\Blocks\RowBlock;
-use Dono\Forms\Blocks\ColumnsBlock;
-use Dono\Forms\Blocks\SectionBlock;
-use Dono\Forms\Blocks\StepBlock;
-use Dono\Forms\Blocks\StepsBlock;
-use Dono\Forms\Blocks\SubmitButtonBlock;
-use Dono\Forms\Blocks\DateBlock;
-use Dono\Forms\Blocks\TextInputBlock;
-use Dono\Forms\Blocks\NumberInputBlock;
-use Dono\Forms\Blocks\RecurringToggleBlock;
-use Dono\Forms\Blocks\DropdownBlock;
-use Dono\Forms\Blocks\RadioBlock;
-use Dono\Forms\Blocks\CheckboxBlock;
-use Dono\Forms\Blocks\MultiSelectBlock;
-use Dono\Forms\DefaultFormTypeHandler;
-use Dono\Forms\Form;
-use Dono\Forms\FormDonationStats;
-use Dono\Forms\FormReadinessService;
-use Dono\Forms\FormRepository;
-use Dono\Forms\FormService;
-use Dono\Forms\FormTypeRegistry;
-use Dono\Foundation\Config\SystemSetting;
-use Dono\Campaigns\Styling\CampaignStyleResolver;
-use Dono\Core\Commands\CoreCommandProvider;
-use Dono\Forms\Shortcode\DonationFormShortcode;
-use Dono\Foundation\Commands\CommandRegistry;
-use Dono\Foundation\Container\Container;
-use Dono\Foundation\Crypto\Crypto;
-use Dono\Foundation\Auth\Capabilities;
-use Dono\Foundation\Identity\IdentityHasher;
-use Dono\Foundation\License\LicenseNotice;
-use Dono\Foundation\License\LicenseService;
-use Dono\Foundation\Modules\DonoModule;
-use Dono\Foundation\Modules\ModuleManager;
-use Dono\Foundation\Plugin;
-use Dono\Foundation\References\ReferenceGenerator;
-use Dono\Foundation\Time\Clock;
-use Dono\Foundation\Time\SystemClock;
-use Dono\Funds\Fund;
-use Dono\Funds\FundReassignmentJob;
-use Dono\Recurring\CampaignCancelRecurringJob;
-use Dono\Funds\FundRepository;
-use Dono\Funds\FundResolver;
-use Dono\Funds\FundService;
-use Dono\Gateways\GatewayManager;
-use Dono\Gateways\GatewayReconciler;
-use Dono\Gateways\Offline\OfflineGateway;
-use Dono\Gateways\Sandbox\SandboxGateway;
-use Dono\Gateways\Sandbox\SandboxRenewer;
-use Dono\Gateways\Stripe\StripeApi;
-use Dono\Gateways\PayPal\PayPalAccount;
-use Dono\Gateways\PayPal\PayPalApi;
-use Dono\Gateways\PayPal\PayPalGateway;
-use Dono\Gateways\PayPal\PayPalPlanRecorder;
-use Dono\Gateways\PayPal\PayPalPlans;
-use Dono\Gateways\Stripe\ApplePayDomain;
-use Dono\Gateways\Stripe\StripeAccount;
-use Dono\Gateways\Stripe\StripeWebhookNotice;
-use Dono\Gateways\Stripe\StripeGateway;
-use Dono\Gateways\TestMode;
-use Dono\Mail\Mailer;
-use Dono\Onboarding\Onboarding;
-use Dono\Onboarding\OnboardingPage;
-use Dono\Exports\DonorExporter;
-use Dono\Exports\RevenueExporter;
-use Dono\Reports\RevenueReportBuilder;
-use Dono\Receipts\PdfBuilder;
-use Dono\Reports\CampaignReportBuilder;
-use Dono\Reports\TaxStatementBuilder;
-use Dono\Receipts\Receipt;
-use Dono\Receipts\ReceiptIssuer;
-use Dono\Receipts\ReceiptRepository;
-use Dono\Receipts\Renderers\GenericReceiptRenderer;
-use Dono\Recurring\RecurringPlan;
-use Dono\Recurring\RecurringCanceller;
-use Dono\Recurring\RecurringPlanActions;
-use Dono\Recurring\RecurringPlanRepository;
-use Dono\Recurring\RecurringResumer;
-use Dono\Rest\Admin\ExportsController;
-use Dono\Rest\Admin\ToolsController;
-use Dono\Rest\Admin\NumberingController;
-use Dono\Rest\Admin\CampaignsController as AdminCampaignsController;
-use Dono\Rest\Admin\CommandsController;
-use Dono\Rest\Admin\DashboardController;
-use Dono\Rest\Admin\FundsController as AdminFundsController;
-use Dono\Rest\Admin\DonationsController as AdminDonationsController;
-use Dono\Rest\Admin\DonorsController as AdminDonorsController;
-use Dono\Rest\Admin\FormsController as AdminFormsController;
-use Dono\Rest\Admin\FxController;
-use Dono\Rest\Admin\OnboardingController;
-use Dono\Rest\Admin\ReadinessController;
-use Dono\Rest\Admin\ReportsController;
-use Dono\Rest\Admin\RecurringController;
-use Dono\Rest\Admin\RolesController;
-use Dono\Rest\Admin\SettingsController;
-use Dono\Rest\Admin\PayPalKeysController;
-use Dono\Rest\Admin\StripeKeysController;
-use Dono\Rest\Admin\UserPrefsController;
-use Dono\Rest\Portal\PortalController as PortalController;
-use Dono\Rest\DonationsController;
-use Dono\Rest\PayPalController;
-use Dono\Rest\ReceiptsController;
-use Dono\Rest\RestProvider;
-use Dono\Rest\WebhookController;
-use Dono\Settings\ReadinessService;
-use Dono\Settings\SettingsService;
-use Dono\Analytics\EventRetention;
-use Dono\Donors\DonorRetention;
-use Dono\Foundation\Maintenance\TransientGc;
-use Dono\Vendor\Queryable\QueryException;
+use GiveFlow\Analytics\ErrorLog;
+use GiveFlow\Admin\AdminGlobals;
+use GiveFlow\Admin\AdminMenu;
+use GiveFlow\Admin\Pages\CampaignsPage;
+use GiveFlow\Admin\Pages\DonationsPage;
+use GiveFlow\Admin\Pages\SubscriptionsPage;
+use GiveFlow\Admin\Pages\DonorsPage;
+use GiveFlow\Admin\Pages\FormsPage;
+use GiveFlow\Admin\Pages\FundsPage;
+use GiveFlow\Admin\Pages\ToolsPage;
+use GiveFlow\Admin\DeactivationDialog;
+use GiveFlow\Admin\ManagedPageStates;
+use GiveFlow\Admin\TestModeBadge;
+use GiveFlow\Admin\Pages\SettingsPage;
+use GiveFlow\Analytics\Event;
+use GiveFlow\Analytics\EventRecorder;
+use GiveFlow\Async\AsyncDispatcher;
+use GiveFlow\Campaigns\CampaignPermalinks;
+use GiveFlow\Campaigns\CampaignTypeRegistry;
+use GiveFlow\Campaigns\DefaultCampaignTypeHandler;
+use GiveFlow\Currency\FxBackfill;
+use GiveFlow\Currency\FxRates;
+use GiveFlow\Currency\FxRatesUpdater;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Campaigns\CampaignChrome;
+use GiveFlow\Campaigns\CampaignPageTemplate;
+use GiveFlow\Campaigns\Styling\PageStyle;
+use GiveFlow\Campaigns\CampaignMetricsService;
+use GiveFlow\Campaigns\CampaignStatMetrics;
+use GiveFlow\Campaigns\CampaignRepository;
+use GiveFlow\Campaigns\CampaignService;
+use GiveFlow\Campaigns\SocialMeta;
+use GiveFlow\Dashboard\DashboardMetricsService;
+use GiveFlow\Donations\AggregateSyncer;
+use GiveFlow\Donations\AntiSpamGuard;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationEmails;
+use GiveFlow\Donations\DonationNote;
+use GiveFlow\Donations\DonationNoteRepository;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Donations\DonationService;
+use GiveFlow\Donations\Refund;
+use GiveFlow\Donors\Consent;
+use GiveFlow\Donors\ConsentService;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\DonorAggregateSyncer;
+use GiveFlow\Donors\DonorEmailRehasher;
+use GiveFlow\Donors\DonorMetricsService;
+use GiveFlow\Donors\DonorNote;
+use GiveFlow\Donors\DonorNoteRepository;
+use GiveFlow\Donors\DonorPurge;
+use GiveFlow\Donors\DonorAvatarUploader;
+use GiveFlow\Donors\DonorAvatars;
+use GiveFlow\Donors\DonorRepository;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Donors\Erasure\AnalyticsEventHandler;
+use GiveFlow\Foundation\Transfer\CsvImporter;
+use GiveFlow\Foundation\Transfer\DataExporter;
+use GiveFlow\Foundation\Transfer\DataImporter;
+use GiveFlow\Foundation\Upgrade\RestoreReceiptsRetainingMoney;
+use GiveFlow\Foundation\Upgrade\UpgradeRunner;
+use GiveFlow\Foundation\Upgrade\UpgradeJob;
+use GiveFlow\Foundation\Upgrade\UpgradeNotice;
+use GiveFlow\Donors\Erasure\CoreDonorDataHandler;
+use GiveFlow\Donors\Erasure\ErasureRegistry;
+use GiveFlow\Donors\MagicLinkService;
+use GiveFlow\Donors\MagicLinkToken;
+use GiveFlow\Donors\PendingSignup;
+use GiveFlow\Donors\PendingSignupRepository;
+use GiveFlow\Donors\SignupRedemption;
+use GiveFlow\Donors\Portal\AnnualStatementBuilder;
+use GiveFlow\Donors\Portal\PortalPage;
+use GiveFlow\Donors\Portal\PortalSession;
+use GiveFlow\Donors\Portal\PortalShortcode;
+use GiveFlow\Campaigns\Blocks\BlockEditorIntegration as CampaignBlockEditorIntegration;
+use GiveFlow\Campaigns\Blocks\CampaignBindingPreviewController;
+use GiveFlow\Campaigns\Blocks\CampaignBindings;
+use GiveFlow\Campaigns\Blocks\CampaignGridBlock;
+use GiveFlow\Campaigns\Blocks\CampaignImageBlock;
+use GiveFlow\Campaigns\Blocks\CampaignProgressBlock;
+use GiveFlow\Campaigns\Blocks\CampaignStatBlock;
+use GiveFlow\Campaigns\Blocks\DonateButtonBlock;
+use GiveFlow\Campaigns\Blocks\DonationFormBlock;
+use GiveFlow\Campaigns\Blocks\RecentDonationsBlock;
+use GiveFlow\Campaigns\Blocks\SupporterWallBlock;
+use GiveFlow\Campaigns\Blocks\TopDonorsBlock;
+use GiveFlow\Forms\Blocks\AddressBlock;
+use GiveFlow\Forms\Blocks\AnonymousToggleBlock;
+use GiveFlow\Forms\Blocks\BlockRegistry;
+use GiveFlow\Forms\Blocks\CommentBlock;
+use GiveFlow\Forms\Blocks\ConsentBlock;
+use GiveFlow\Forms\Blocks\DonationSummaryBlock;
+use GiveFlow\Forms\Blocks\TermsBlock;
+use GiveFlow\Forms\Blocks\CountryBlock;
+use GiveFlow\Forms\Blocks\CoverFeesBlock;
+use GiveFlow\Forms\Blocks\CurrencySwitcherBlock;
+use GiveFlow\Forms\Blocks\DividerBlock;
+use GiveFlow\Forms\Blocks\DonationAmountBlock;
+use GiveFlow\Forms\Blocks\PaymentGatewaysBlock;
+use GiveFlow\Forms\Blocks\EmailBlock;
+use GiveFlow\Forms\Blocks\FundPickerBlock;
+use GiveFlow\Forms\Blocks\GoalBlock;
+use GiveFlow\Forms\Blocks\HeadingBlock;
+use GiveFlow\Forms\Blocks\NameBlock;
+use GiveFlow\Forms\Blocks\ParagraphBlock;
+use GiveFlow\Forms\Blocks\PhoneBlock;
+use GiveFlow\Forms\Blocks\HiddenBlock;
+use GiveFlow\Forms\Blocks\HtmlBlock;
+use GiveFlow\Forms\Blocks\PrivacyNoticeBlock;
+use GiveFlow\Forms\Blocks\RowBlock;
+use GiveFlow\Forms\Blocks\ColumnsBlock;
+use GiveFlow\Forms\Blocks\SectionBlock;
+use GiveFlow\Forms\Blocks\StepBlock;
+use GiveFlow\Forms\Blocks\StepsBlock;
+use GiveFlow\Forms\Blocks\SubmitButtonBlock;
+use GiveFlow\Forms\Blocks\DateBlock;
+use GiveFlow\Forms\Blocks\TextInputBlock;
+use GiveFlow\Forms\Blocks\NumberInputBlock;
+use GiveFlow\Forms\Blocks\RecurringToggleBlock;
+use GiveFlow\Forms\Blocks\DropdownBlock;
+use GiveFlow\Forms\Blocks\RadioBlock;
+use GiveFlow\Forms\Blocks\CheckboxBlock;
+use GiveFlow\Forms\Blocks\MultiSelectBlock;
+use GiveFlow\Forms\DefaultFormTypeHandler;
+use GiveFlow\Forms\Form;
+use GiveFlow\Forms\FormDonationStats;
+use GiveFlow\Forms\FormReadinessService;
+use GiveFlow\Forms\FormRepository;
+use GiveFlow\Forms\FormService;
+use GiveFlow\Forms\FormTypeRegistry;
+use GiveFlow\Foundation\Config\SystemSetting;
+use GiveFlow\Campaigns\Styling\CampaignStyleResolver;
+use GiveFlow\Core\Commands\CoreCommandProvider;
+use GiveFlow\Forms\Shortcode\DonationFormShortcode;
+use GiveFlow\Foundation\Commands\CommandRegistry;
+use GiveFlow\Foundation\Container\Container;
+use GiveFlow\Foundation\Crypto\Crypto;
+use GiveFlow\Foundation\Auth\Capabilities;
+use GiveFlow\Foundation\Identity\IdentityHasher;
+use GiveFlow\Foundation\License\LicenseNotice;
+use GiveFlow\Foundation\License\LicenseService;
+use GiveFlow\Foundation\Modules\GiveFlowModule;
+use GiveFlow\Foundation\Modules\ModuleManager;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Foundation\References\ReferenceGenerator;
+use GiveFlow\Foundation\Time\Clock;
+use GiveFlow\Foundation\Time\SystemClock;
+use GiveFlow\Funds\Fund;
+use GiveFlow\Funds\FundReassignmentJob;
+use GiveFlow\Recurring\CampaignCancelRecurringJob;
+use GiveFlow\Funds\FundRepository;
+use GiveFlow\Funds\FundResolver;
+use GiveFlow\Funds\FundService;
+use GiveFlow\Gateways\GatewayManager;
+use GiveFlow\Gateways\GatewayReconciler;
+use GiveFlow\Gateways\Offline\OfflineGateway;
+use GiveFlow\Gateways\Sandbox\SandboxGateway;
+use GiveFlow\Gateways\Sandbox\SandboxRenewer;
+use GiveFlow\Gateways\Stripe\StripeApi;
+use GiveFlow\Gateways\PayPal\PayPalAccount;
+use GiveFlow\Gateways\PayPal\PayPalApi;
+use GiveFlow\Gateways\PayPal\PayPalGateway;
+use GiveFlow\Gateways\PayPal\PayPalPlanRecorder;
+use GiveFlow\Gateways\PayPal\PayPalPlans;
+use GiveFlow\Gateways\Stripe\ApplePayDomain;
+use GiveFlow\Gateways\Stripe\StripeAccount;
+use GiveFlow\Gateways\Stripe\StripeWebhookNotice;
+use GiveFlow\Gateways\Stripe\StripeGateway;
+use GiveFlow\Gateways\TestMode;
+use GiveFlow\Mail\Mailer;
+use GiveFlow\Onboarding\Onboarding;
+use GiveFlow\Onboarding\OnboardingPage;
+use GiveFlow\Exports\DonorExporter;
+use GiveFlow\Exports\RevenueExporter;
+use GiveFlow\Reports\RevenueReportBuilder;
+use GiveFlow\Receipts\PdfBuilder;
+use GiveFlow\Reports\CampaignReportBuilder;
+use GiveFlow\Reports\TaxStatementBuilder;
+use GiveFlow\Receipts\Receipt;
+use GiveFlow\Receipts\ReceiptIssuer;
+use GiveFlow\Receipts\ReceiptRepository;
+use GiveFlow\Receipts\Renderers\GenericReceiptRenderer;
+use GiveFlow\Recurring\RecurringPlan;
+use GiveFlow\Recurring\RecurringCanceller;
+use GiveFlow\Recurring\RecurringPlanActions;
+use GiveFlow\Recurring\RecurringPlanRepository;
+use GiveFlow\Recurring\RecurringResumer;
+use GiveFlow\Rest\Admin\ExportsController;
+use GiveFlow\Rest\Admin\ToolsController;
+use GiveFlow\Rest\Admin\NumberingController;
+use GiveFlow\Rest\Admin\CampaignsController as AdminCampaignsController;
+use GiveFlow\Rest\Admin\CommandsController;
+use GiveFlow\Rest\Admin\DashboardController;
+use GiveFlow\Rest\Admin\FundsController as AdminFundsController;
+use GiveFlow\Rest\Admin\DonationsController as AdminDonationsController;
+use GiveFlow\Rest\Admin\DonorsController as AdminDonorsController;
+use GiveFlow\Rest\Admin\FormsController as AdminFormsController;
+use GiveFlow\Rest\Admin\FxController;
+use GiveFlow\Rest\Admin\OnboardingController;
+use GiveFlow\Rest\Admin\ReadinessController;
+use GiveFlow\Rest\Admin\ReportsController;
+use GiveFlow\Rest\Admin\RecurringController;
+use GiveFlow\Rest\Admin\RolesController;
+use GiveFlow\Rest\Admin\SettingsController;
+use GiveFlow\Rest\Admin\PayPalKeysController;
+use GiveFlow\Rest\Admin\StripeKeysController;
+use GiveFlow\Rest\Admin\UserPrefsController;
+use GiveFlow\Rest\Portal\PortalController as PortalController;
+use GiveFlow\Rest\DonationsController;
+use GiveFlow\Rest\PayPalController;
+use GiveFlow\Rest\ReceiptsController;
+use GiveFlow\Rest\RestProvider;
+use GiveFlow\Rest\WebhookController;
+use GiveFlow\Settings\ReadinessService;
+use GiveFlow\Settings\SettingsService;
+use GiveFlow\Analytics\EventRetention;
+use GiveFlow\Donors\DonorRetention;
+use GiveFlow\Foundation\Maintenance\TransientGc;
+use GiveFlow\Vendor\Queryable\QueryException;
 
 /**
  * Always-on module: migrations, service bindings, admin/REST/asset wiring.
  *
  * @since 1.0.0
  */
-final class CoreModule implements DonoModule
+final class CoreModule implements GiveFlowModule
 {
     /** @since 1.0.0 */
     public function id(): string
@@ -240,13 +240,13 @@ final class CoreModule implements DonoModule
     /** @since 1.0.0 */
     public function name(): string
     {
-        return __('Dono Core', 'dono-fundraising-platform');
+        return __('GiveFlow Core', 'giveflow-fundraising-campaigns');
     }
 
     /** @since 1.0.0 */
     public function version(): string
     {
-        return DONO_VERSION;
+        return GIVEFLOW_VERSION;
     }
 
     /** @since 1.0.0 */
@@ -288,15 +288,15 @@ final class CoreModule implements DonoModule
     /** @since 1.0.0 */
     public function boot(Container $c): void
     {
-        // Cache-bust every Dono build/ stylesheet by file mtime instead of
-        // DONO_VERSION, so CSS changes show on a normal reload without a plugin
+        // Cache-bust every GiveFlow build/ stylesheet by file mtime instead of
+        // GIVEFLOW_VERSION, so CSS changes show on a normal reload without a plugin
         // version bump (JS already busts via its content-hashed asset.php).
         add_filter('style_loader_src', static function ($src) {
-            if (! is_string($src) || strpos($src, DONO_URL . 'build/') !== 0) {
+            if (! is_string($src) || strpos($src, GIVEFLOW_URL . 'build/') !== 0) {
                 return $src;
             }
             $clean = strtok($src, '?');
-            $file  = DONO_DIR . substr($clean, strlen(DONO_URL));
+            $file  = GIVEFLOW_DIR . substr($clean, strlen(GIVEFLOW_URL));
             return file_exists($file) ? $clean . '?ver=' . filemtime($file) : $src;
         }, 20);
 
@@ -307,7 +307,7 @@ final class CoreModule implements DonoModule
             $c->get(AsyncDispatcher::class)
         ));
 
-        // Both read dono_system_settings the moment they are constructed, and
+        // Both read giveflow_system_settings the moment they are constructed, and
         // boot constructs them. plugins_loaded is far ahead of the wp_loaded
         // migration, so on an install whose tables are absent (a subsite of a
         // network activation, a half-restored database) that read throws and
@@ -363,13 +363,13 @@ final class CoreModule implements DonoModule
 
         // Purge expired magic-link tokens daily to prevent unbounded table growth.
         $async = $c->get(AsyncDispatcher::class);
-        add_action('dono.cron.magic_link_gc', function () use ($c): void {
+        add_action('giveflow.cron.magic_link_gc', function () use ($c): void {
             $c->get(MagicLinkService::class)->purgeExpired();
             // An address nobody proved is not kept past its window. Same job,
             // because a pending row and its link expire together.
             $c->get(PendingSignupRepository::class)->purgeExpired();
         });
-        add_action('init', fn () => $async->scheduleRecurring('dono.cron.magic_link_gc', 86400));
+        add_action('init', fn () => $async->scheduleRecurring('giveflow.cron.magic_link_gc', 86400));
 
         // Daily FX snapshot; last-good value on failure.
         $c->bind(FxRates::class, fn () => new FxRates());
@@ -429,7 +429,7 @@ final class CoreModule implements DonoModule
         (new SocialMeta($c->get(CampaignRepository::class)))->register();
 
         // Keep campaign page visibility in sync with form status.
-        add_action('dono.form.updated', static function ($form) use ($c) {
+        add_action('giveflow.form.updated', static function ($form) use ($c) {
             $c->get(CampaignService::class)->onFormUpdated($form);
         }, 10, 1);
 
@@ -493,7 +493,7 @@ final class CoreModule implements DonoModule
         // Core erases through the same registry add-ons use, so there is one
         // mechanism and one order rather than core's inline copy plus a hook
         // everyone else is expected to remember.
-        add_filter('dono.donor.erasure_handlers', static function (array $handlers) use ($c): array {
+        add_filter('giveflow.donor.erasure_handlers', static function (array $handlers) use ($c): array {
             $handlers[] = new CoreDonorDataHandler();
             $handlers[] = new AnalyticsEventHandler();
             return $handlers;
@@ -626,14 +626,14 @@ final class CoreModule implements DonoModule
         $c->bind( FormTypeRegistry::class, function (): FormTypeRegistry {
             $r = new FormTypeRegistry();
             $r->register(new DefaultFormTypeHandler());
-            do_action('dono.form_types.register', $r);
+            do_action('giveflow.form_types.register', $r);
             return $r;
         });
 
         $c->bind( CampaignTypeRegistry::class, function (): CampaignTypeRegistry {
             $r = new CampaignTypeRegistry();
             $r->register(new DefaultCampaignTypeHandler());
-            do_action('dono.campaign_types.register', $r);
+            do_action('giveflow.campaign_types.register', $r);
             return $r;
         });
 
@@ -735,12 +735,12 @@ final class CoreModule implements DonoModule
         $c->get(GatewayReconciler::class)->register();
 
         // Sandbox gateway only available when org-wide test mode is on.
-        $gwCfg = get_option('dono_gateway_config', []);
+        $gwCfg = get_option('giveflow_gateway_config', []);
         if (is_array($gwCfg) && ! empty($gwCfg['test_mode'])) {
             $gateways->register(new SandboxGateway($c->get(Clock::class), $c->get(RecurringPlanRepository::class)));
         }
 
-        do_action('dono.gateways.register', $gateways, $c);
+        do_action('giveflow.gateways.register', $gateways, $c);
 
         $c->bind( AntiSpamGuard::class, fn (Container $c) => new AntiSpamGuard(
             $c->get(IdentityHasher::class),
@@ -791,7 +791,7 @@ final class CoreModule implements DonoModule
 
         // Add-ons can register additional renderers via the same filter.
         $genericRenderer = $c->get(GenericReceiptRenderer::class);
-        add_filter('dono.receipt.renderers', function (array $renderers) use ($genericRenderer): array {
+        add_filter('giveflow.receipt.renderers', function (array $renderers) use ($genericRenderer): array {
             $renderers[] = $genericRenderer;
             return $renderers;
         });
@@ -917,7 +917,7 @@ final class CoreModule implements DonoModule
         // catalogue in the site locale rather than the reader's, on top of the
         // _doing_it_wrong it logs for the domain on every request.
         //
-        // Priority 4 keeps core ahead of the dono.commands.register broadcast
+        // Priority 4 keeps core ahead of the giveflow.commands.register broadcast
         // Plugin::boot fires at 5, which is where add-on packs land.
         add_action('init', static function () use ($c): void {
             // init can fire more than once, and the registry refuses a name it
@@ -968,7 +968,7 @@ final class CoreModule implements DonoModule
                 $c->get(DataExporter::class),
                 $c->get(DataImporter::class),
                 $c->get(CsvImporter::class),
-                new \Dono\Foundation\Maintenance\TestDataPurger($c->get(DonorService::class)),
+                new \GiveFlow\Foundation\Maintenance\TestDataPurger($c->get(DonorService::class)),
             ),
             new ExportsController(
                 $c->get(DonorExporter::class),
@@ -1065,7 +1065,7 @@ final class CoreModule implements DonoModule
         $blocks->add(new MultiSelectBlock());
 
         add_filter(
-            'dono.settings.groups',
+            'giveflow.settings.groups',
             [$c->get(GatewayManager::class), 'declareSettings']
         );
 
@@ -1113,7 +1113,7 @@ final class CoreModule implements DonoModule
         // handler they attach during their own boot would miss a broadcast
         // fired inside this method and their block would never register.
         add_action('init', static function () use ($blocks): void {
-            do_action('dono.blocks.register_server', $blocks);
+            do_action('giveflow.blocks.register_server', $blocks);
             $blocks->register();
         });
 
@@ -1135,7 +1135,7 @@ final class CoreModule implements DonoModule
         // register outside any is_admin() gate.
         $c->get(ApplePayDomain::class)->register();
 
-        add_action('dono.settings.updated', static function (string $group, array $next): void {
+        add_action('giveflow.settings.updated', static function (string $group, array $next): void {
             if ($group === 'roles') {
                 Capabilities::applyMapping(is_array($next['mapping'] ?? null) ? $next['mapping'] : []);
             }
@@ -1150,14 +1150,14 @@ final class CoreModule implements DonoModule
         }, 10, 2);
 
         // Activation applies Capabilities::currentMapping(), which reads the
-        // raw dono_roles option: until something writes it, no role holds a
-        // single dono_* capability while the Roles screen shows the defaults as
+        // raw giveflow_roles option: until something writes it, no role holds a
+        // single giveflow_* capability while the Roles screen shows the defaults as
         // granted, and an administrator is refused refunds and receipt resends
         // by command dispatch on a screen that offers no way to grant them.
         // Writing the option once puts the two in agreement, through the
         // handler above.
         add_action('admin_init', static function () use ($c): void {
-            if (get_option('dono_roles') !== false) return;
+            if (get_option('giveflow_roles') !== false) return;
             $c->get(SettingsService::class)->update('roles', []);
         });
 
@@ -1189,15 +1189,15 @@ final class CoreModule implements DonoModule
                 if (! current_user_can('manage_options')) return;
                 $lostAt = Crypto::keyLostAt();
                 if ($lostAt === null) return;
-                echo '<div class="notice dono-admin-notice" role="alert" style="'
+                echo '<div class="notice giveflow-admin-notice" role="alert" style="'
                     . 'border:1px solid #e5e7eb;border-left:3px solid #b42318;border-radius:8px;'
                     . 'background:#fff7f7;color:#b42318;padding:11px 14px;'
                     . 'font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Oxygen,Ubuntu,sans-serif;'
                     . 'font-size:13px;line-height:1.45;">'
-                    . '<strong>Dono:</strong> '
+                    . '<strong>GiveFlow:</strong> '
                     . esc_html(sprintf(
                         /* translators: %s: timestamp the key loss was detected */
-                        __('Encryption key missing since %s. Donor PII written before this point cannot be decrypted. Restore dono_system_settings from a backup, or accept that historical PII is gone. New donations are encrypting against a freshly generated key.', 'dono-fundraising-platform'),
+                        __('Encryption key missing since %s. Donor PII written before this point cannot be decrypted. Restore giveflow_system_settings from a backup, or accept that historical PII is gone. New donations are encrypting against a freshly generated key.', 'giveflow-fundraising-campaigns'),
                         $lostAt
                     ))
                     . '</div>';

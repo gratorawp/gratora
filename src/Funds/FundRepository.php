@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Funds;
+namespace GiveFlow\Funds;
 
-use Dono\Vendor\Queryable\DB;
+use GiveFlow\Vendor\Queryable\DB;
 
 /**
  * Fund query helpers.
@@ -245,7 +245,7 @@ final class FundRepository
             return;
         }
 
-        $rows = DB::table('dono_funds')
+        $rows = DB::table('giveflow_funds')
             ->whereIn('parent_fund_id', array_keys($parentIds))
             ->selectRaw('parent_fund_id, SUM(raised_cents) AS r, SUM(donations_count) AS dc')
             ->groupBy('parent_fund_id')

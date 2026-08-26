@@ -1,20 +1,20 @@
-# Dono translations
+# GiveFlow translations
 
 Notes for whoever regenerates the template. Kept out of the distributed zip by
 `.distignore`.
 
 ## Text domain
 
-Every translatable string uses the `dono-fundraising-platform` text domain,
+Every translatable string uses the `giveflow-fundraising-campaigns` text domain,
 which is the plugin slug and has to stay that way: WordPress.org derives the
 slug from the plugin name and refuses a domain that disagrees with it. File
 naming follows from the domain:
 
 ```
-dono-fundraising-platform.pot           - template
-dono-fundraising-platform-de_DE.po/.mo  - German
-dono-fundraising-platform-fr_FR.po/.mo  - French
-dono-fundraising-platform-hr.po/.mo     - Croatian
+giveflow-fundraising-campaigns.pot           - template
+giveflow-fundraising-campaigns-de_DE.po/.mo  - German
+giveflow-fundraising-campaigns-fr_FR.po/.mo  - French
+giveflow-fundraising-campaigns-hr.po/.mo     - Croatian
 ```
 
 ## Regenerating the POT file
@@ -25,7 +25,7 @@ From the plugin root:
 npm run i18n
 ```
 
-That merges the strings from `@dono/ui` and then runs `wp i18n make-pot` over
+That merges the strings from `@giveflow/ui` and then runs `wp i18n make-pot` over
 the plugin. Requires `wp-cli` with the `i18n` command.
 
 ## JavaScript strings

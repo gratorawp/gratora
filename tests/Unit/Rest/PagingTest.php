@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Unit\Rest;
+namespace GiveFlow\Tests\Unit\Rest;
 
-use Dono\Rest\Paging;
+use GiveFlow\Rest\Paging;
 use PHPUnit\Framework\TestCase;
 
 /**

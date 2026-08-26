@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Dono\Gateways;
+namespace GiveFlow\Gateways;
 
-use Dono\Analytics\ErrorLog;
-use Dono\Async\AsyncDispatcher;
-use Dono\Donations\Donation;
-use Dono\Donations\DonationService;
-use Dono\Foundation\Time\Clock;
-use Dono\Gateways\PayPal\PayPalAccount;
-use Dono\Gateways\PayPal\PayPalApi;
-use Dono\Gateways\PayPal\PayPalMoney;
-use Dono\Vendor\Queryable\ModelQueryBuilder;
+use GiveFlow\Analytics\ErrorLog;
+use GiveFlow\Async\AsyncDispatcher;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationService;
+use GiveFlow\Foundation\Time\Clock;
+use GiveFlow\Gateways\PayPal\PayPalAccount;
+use GiveFlow\Gateways\PayPal\PayPalApi;
+use GiveFlow\Gateways\PayPal\PayPalMoney;
+use GiveFlow\Vendor\Queryable\ModelQueryBuilder;
 use Throwable;
 
 /**
@@ -37,7 +37,7 @@ use Throwable;
  */
 final class GatewayReconciler
 {
-    public const HOOK = 'dono.cron.gateway_reconcile';
+    public const HOOK = 'giveflow.cron.gateway_reconcile';
 
     private const GATEWAY = 'paypal';
 
@@ -79,7 +79,7 @@ final class GatewayReconciler
      * holding matches again on the next read, so without a cursor the same
      * first rows fill every run and anything behind them is never reached.
      */
-    private const CURSOR_OPTION = 'dono_gateway_reconcile_cursor';
+    private const CURSOR_OPTION = 'giveflow_gateway_reconcile_cursor';
 
     /** @since 1.0.0 */
     public function __construct(
@@ -410,7 +410,7 @@ final class GatewayReconciler
         // Word for word what the DENIED webhook stores, so a donation resolved
         // here reads identically to one the delivery resolved. markFailed()
         // refuses to walk a paid or refunded row backwards.
-        $this->donations->markFailed($donation, __('PayPal declined the payment.', 'dono-fundraising-platform'));
+        $this->donations->markFailed($donation, __('PayPal declined the payment.', 'giveflow-fundraising-campaigns'));
     }
 
     /**

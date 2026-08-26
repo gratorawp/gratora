@@ -1,5 +1,5 @@
 /**
- * `dono/comment` block - note-to-org textarea.
+ * `giveflow/comment` block - note-to-org textarea.
  * Skips itself when the test form lacks the block.
  */
 

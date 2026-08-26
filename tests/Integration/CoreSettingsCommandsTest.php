@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Analytics\EventRecorder;
-use Dono\Core\Commands\CoreCommandProvider;
-use Dono\Foundation\Commands\CommandContext;
-use Dono\Foundation\Commands\CommandRegistry;
-use Dono\Foundation\Plugin;
-use Dono\Settings\SettingsService;
+use GiveFlow\Analytics\EventRecorder;
+use GiveFlow\Core\Commands\CoreCommandProvider;
+use GiveFlow\Foundation\Commands\CommandContext;
+use GiveFlow\Foundation\Commands\CommandRegistry;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Settings\SettingsService;
 
 /**
  * settings.get / settings.update let the assistant read and write benign org
@@ -30,7 +30,7 @@ final class CoreSettingsCommandsTest extends IntegrationTestCase
     private function adminCtx(): CommandContext
     {
         $admin = self::factory()->user->create(['role' => 'administrator']);
-        get_role('administrator')->add_cap('dono_manage_settings');
+        get_role('administrator')->add_cap('giveflow_manage_settings');
         wp_set_current_user($admin);
         return new CommandContext($admin, 'rest', 'req-' . uniqid());
     }
@@ -57,7 +57,7 @@ final class CoreSettingsCommandsTest extends IntegrationTestCase
         $this->assertFalse($byId['settings.update']['idempotent'], 'settings.update must not be idempotent');
 
         foreach (['settings.get', 'settings.update'] as $id) {
-            $this->assertSame('dono_manage_settings', $byId[$id]['capability'], "{$id} must be gated on dono_manage_settings");
+            $this->assertSame('giveflow_manage_settings', $byId[$id]['capability'], "{$id} must be gated on giveflow_manage_settings");
         }
     }
 
@@ -156,7 +156,7 @@ final class CoreSettingsCommandsTest extends IntegrationTestCase
         // No allowlisted group ships a secret, so inject secret-shaped keys into
         // an allowed group's option to prove the redaction walk (top-level +
         // nested). SettingsService::get merges the stored option over defaults.
-        update_option('dono_org_profile', [
+        update_option('giveflow_org_profile', [
             'name'    => 'Hope Foundation',
             'api_key' => 'sk_live_should_not_leak',
             'nested'  => ['webhook_secret' => 'whsec_should_not_leak', 'city' => 'Berlin'],

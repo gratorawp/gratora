@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Dono\Foundation\Maintenance;
+namespace GiveFlow\Foundation\Maintenance;
 
-use Dono\Donations\Donation;
-use Dono\Donors\Donor;
-use Dono\Donors\DonorService;
-use Dono\Recurring\RecurringPlan;
-use Dono\Vendor\Queryable\DB;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Recurring\RecurringPlan;
+use GiveFlow\Vendor\Queryable\DB;
 
 /**
  * Removes everything a test-mode gateway left behind, so a site can go live on
@@ -68,12 +68,12 @@ final class TestDataPurger
             // Gift Aid claims, tributes). Core cannot know them, and orphaning
             // them would be worse than leaving them, so they are told before
             // the rows they point at disappear.
-            do_action('dono.test_data.purge_donations', $chunk);
+            do_action('giveflow.test_data.purge_donations', $chunk);
 
-            DB::table('dono_receipts')->whereIn('donation_id', $chunk)->delete();
-            DB::table('dono_refunds')->whereIn('donation_id', $chunk)->delete();
-            DB::table('dono_donation_notes')->whereIn('donation_id', $chunk)->delete();
-            DB::table('dono_events')->whereIn('donation_id', $chunk)->delete();
+            DB::table('giveflow_receipts')->whereIn('donation_id', $chunk)->delete();
+            DB::table('giveflow_refunds')->whereIn('donation_id', $chunk)->delete();
+            DB::table('giveflow_donation_notes')->whereIn('donation_id', $chunk)->delete();
+            DB::table('giveflow_events')->whereIn('donation_id', $chunk)->delete();
 
             $removed['donations'] += (int) Donation::query()->whereIn('id', $chunk)->delete()->affectedRows;
         }
@@ -83,9 +83,9 @@ final class TestDataPurger
             'id'
         ));
         foreach (array_chunk($planIds, self::CHUNK) as $chunk) {
-            do_action('dono.test_data.purge_plans', $chunk);
+            do_action('giveflow.test_data.purge_plans', $chunk);
 
-            DB::table('dono_events')->whereIn('recurring_plan_id', $chunk)->delete();
+            DB::table('giveflow_events')->whereIn('recurring_plan_id', $chunk)->delete();
             $removed['recurring_plans'] += (int) RecurringPlan::query()->whereIn('id', $chunk)->delete()->affectedRows;
         }
 

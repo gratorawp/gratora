@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Campaigns\CampaignService;
-use Dono\Donations\Donation;
-use Dono\Foundation\Plugin;
-use Dono\Foundation\Time\Clock;
-use Dono\Gateways\GatewayManager;
-use Dono\Gateways\Sandbox\SandboxGateway;
-use Dono\Recurring\RecurringPlan;
-use Dono\Recurring\RecurringPlanRepository;
+use GiveFlow\Campaigns\CampaignService;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Foundation\Time\Clock;
+use GiveFlow\Gateways\GatewayManager;
+use GiveFlow\Gateways\Sandbox\SandboxGateway;
+use GiveFlow\Recurring\RecurringPlan;
+use GiveFlow\Recurring\RecurringPlanRepository;
 use WP_REST_Request;
 
 /**
@@ -29,7 +29,7 @@ final class SandboxRecurringPlanTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        update_option('dono_gateway_config', [
+        update_option('giveflow_gateway_config', [
             'test_mode' => true,
             'sandbox'   => ['enabled' => true],
         ]);
@@ -105,14 +105,14 @@ final class SandboxRecurringPlanTest extends IntegrationTestCase
      */
     private function donate(array $overrides = []): array
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/donations');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(array_merge([
             'campaign_id'  => $this->seedCampaign(),
             'gateway'      => 'sandbox',
             'amount_cents' => 1500,
             'currency'     => 'EUR',
-            'email'        => 'sandbox-rec-' . uniqid() . '@dono.test',
+            'email'        => 'sandbox-rec-' . uniqid() . '@giveflow.test',
             'profile'      => ['first_name' => 'Sandy', 'last_name' => 'Recurring'],
         ], $overrides)));
 

@@ -1,5 +1,5 @@
 /**
- * dono/step: one page inside a dono/steps wizard. Hidden from the inserter;
+ * giveflow/step: one page inside a giveflow/steps wizard. Hidden from the inserter;
  * authors add steps via the parent's toolbar.
  */
 
@@ -9,11 +9,11 @@ import { useSelect } from '@wordpress/data';
 import { __, sprintf } from '@wordpress/i18n';
 import { BlockIcons } from '../_shared/block-icons';
 
-const NAME = 'dono/step';
+const NAME = 'giveflow/step';
 
 function Edit( { attributes, setAttributes, clientId } ) {
     const { title = '', showTitle = true } = attributes;
-    const blockProps = useBlockProps( { className: 'dono-block-preview dono-block-preview--step' } );
+    const blockProps = useBlockProps( { className: 'giveflow-block-preview giveflow-block-preview--step' } );
 
     const { index, total, childCount } = useSelect( ( select ) => {
         const { getBlockRootClientId, getBlockOrder } = select( 'core/block-editor' );
@@ -29,28 +29,28 @@ function Edit( { attributes, setAttributes, clientId } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Step', 'dono-fundraising-platform' ) } initialOpen>
+                <PanelBody title={ __( 'Step', 'giveflow-fundraising-campaigns' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'dono-fundraising-platform' ) }
+                        label={ __( 'Label', 'giveflow-fundraising-campaigns' ) }
                         value={ title }
                         onChange={ ( v ) => setAttributes( { title: v } ) }
-                        help={ __( 'Shown as the page title and on the progress indicator.', 'dono-fundraising-platform' ) }
+                        help={ __( 'Shown as the page title and on the progress indicator.', 'giveflow-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show label', 'dono-fundraising-platform' ) }
+                        label={ __( 'Show label', 'giveflow-fundraising-campaigns' ) }
                         checked={ showTitle }
                         onChange={ ( v ) => setAttributes( { showTitle: v } ) }
-                        help={ __( 'Off hides the label on the donor form. The progress indicator still uses it for screen-reader names.', 'dono-fundraising-platform' ) }
+                        help={ __( 'Off hides the label on the donor form. The progress indicator still uses it for screen-reader names.', 'giveflow-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
             </InspectorControls>
             <div { ...blockProps }>
-                <div className="dono-block-preview__step-meta">
+                <div className="giveflow-block-preview__step-meta">
                     { sprintf(
                         /* translators: %1$d: current step number. %2$d: total number of steps. */
-                        __( 'Step %1$d of %2$d', 'dono-fundraising-platform' ),
+                        __( 'Step %1$d of %2$d', 'giveflow-fundraising-campaigns' ),
                         index + 1,
                         total
                     ) }
@@ -58,16 +58,16 @@ function Edit( { attributes, setAttributes, clientId } ) {
                 { showTitle && (
                     <RichText
                         tagName="h3"
-                        className="dono-block-preview__step-title"
+                        className="giveflow-block-preview__step-title"
                         value={ title }
                         onChange={ ( v ) => setAttributes( { title: v } ) }
-                        placeholder={ __( 'Untitled step', 'dono-fundraising-platform' ) }
+                        placeholder={ __( 'Untitled step', 'giveflow-fundraising-campaigns' ) }
                         allowedFormats={ [] }
                     />
                 ) }
                 { childCount === 0 && (
                     <Notice status="warning" isDismissible={ false }>
-                        { __( 'This step is empty. Add fields or content, or remove the step, so donors do not land on a blank page.', 'dono-fundraising-platform' ) }
+                        { __( 'This step is empty. Add fields or content, or remove the step, so donors do not land on a blank page.', 'giveflow-fundraising-campaigns' ) }
                     </Notice>
                 ) }
                 <InnerBlocks
@@ -81,11 +81,11 @@ function Edit( { attributes, setAttributes, clientId } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Step', 'dono-fundraising-platform' ),
-        description: __( 'One page inside a Steps wizard.', 'dono-fundraising-platform' ),
-        category:    'dono-content',
+        title:       __( 'Step', 'giveflow-fundraising-campaigns' ),
+        description: __( 'One page inside a Steps wizard.', 'giveflow-fundraising-campaigns' ),
+        category:    'giveflow-content',
         icon:        BlockIcons[ 'step' ],
-        parent:      [ 'dono/steps' ],
+        parent:      [ 'giveflow/steps' ],
         supports:    { html: false, anchor: false, inserter: false },
         attributes: {
             title:     { type: 'string',  default: '' },

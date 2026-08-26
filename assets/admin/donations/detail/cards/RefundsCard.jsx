@@ -13,17 +13,17 @@ export default function RefundsCard( { donation, refunds, onIssue, onRelease } )
                 <div style={ { padding: '0 18px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' } }>
                     <span style={ { display: 'flex', gap: 8, alignItems: 'center' } }>
                         <span className="dd-pill is-info">
-                            { formatAmount( donation.refunded_cents, donation.currency ) } { __( 'refunded', 'dono-fundraising-platform' ) }
+                            { formatAmount( donation.refunded_cents, donation.currency ) } { __( 'refunded', 'giveflow-fundraising-campaigns' ) }
                         </span>
                         { donation.refund_pending_cents > 0 && (
                             <span className="dd-pill is-warn">
-                                { formatAmount( donation.refund_pending_cents, donation.currency ) } { __( 'awaiting settlement', 'dono-fundraising-platform' ) }
+                                { formatAmount( donation.refund_pending_cents, donation.currency ) } { __( 'awaiting settlement', 'giveflow-fundraising-campaigns' ) }
                             </span>
                         ) }
                     </span>
                     { donation.refundable_cents > 0 && (
                         <button type="button" className="btn--link" onClick={ onIssue }>
-                            { __( 'Issue another refund →', 'dono-fundraising-platform' ) }
+                            { __( 'Issue another refund →', 'giveflow-fundraising-campaigns' ) }
                         </button>
                     ) }
                 </div>
@@ -31,11 +31,11 @@ export default function RefundsCard( { donation, refunds, onIssue, onRelease } )
                     <table className="dd-table">
                         <thead>
                             <tr>
-                                <th>{ __( 'When', 'dono-fundraising-platform' ) }</th>
-                                <th style={ { textAlign: 'right' } }>{ __( 'Amount', 'dono-fundraising-platform' ) }</th>
-                                <th>{ __( 'Reason', 'dono-fundraising-platform' ) }</th>
-                                <th>{ __( 'Gateway ID', 'dono-fundraising-platform' ) }</th>
-                                <th>{ __( 'Status', 'dono-fundraising-platform' ) }</th>
+                                <th>{ __( 'When', 'giveflow-fundraising-campaigns' ) }</th>
+                                <th style={ { textAlign: 'right' } }>{ __( 'Amount', 'giveflow-fundraising-campaigns' ) }</th>
+                                <th>{ __( 'Reason', 'giveflow-fundraising-campaigns' ) }</th>
+                                <th>{ __( 'Gateway ID', 'giveflow-fundraising-campaigns' ) }</th>
+                                <th>{ __( 'Status', 'giveflow-fundraising-campaigns' ) }</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -59,7 +59,7 @@ export default function RefundsCard( { donation, refunds, onIssue, onRelease } )
                                                 style={ { marginLeft: 8 } }
                                                 onClick={ () => onRelease( r ) }
                                             >
-                                                { __( 'Never arrived', 'dono-fundraising-platform' ) }
+                                                { __( 'Never arrived', 'giveflow-fundraising-campaigns' ) }
                                             </button>
                                         ) }
                                     </td>

@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Cli\CliCommands;
-use Dono\Cli\DemoSeeder;
-use Dono\Donations\Donation;
-use Dono\Donations\DonationIntent;
-use Dono\Donations\DonationService;
-use Dono\Donors\Donor;
-use Dono\Foundation\Plugin;
-use Dono\Recurring\RecurringPlan;
-use DonoCliHalt;
+use GiveFlow\Cli\CliCommands;
+use GiveFlow\Cli\DemoSeeder;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationIntent;
+use GiveFlow\Donations\DonationService;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Recurring\RecurringPlan;
+use GiveFlowCliHalt;
 
 /**
  * Demo data is written live on purpose, so every screen that hides test rows
@@ -46,12 +46,12 @@ final class DemoSeederPurgeTest extends IntegrationTestCase
 
         return new DemoSeeder(
             $c->get(DonationService::class),
-            $c->get(\Dono\Donors\DonorService::class),
-            $c->get(\Dono\Campaigns\CampaignService::class),
-            $c->get(\Dono\Funds\FundService::class),
-            $c->get(\Dono\Donations\AggregateSyncer::class),
-            $c->get(\Dono\Recurring\RecurringPlanRepository::class),
-            $c->get(\Dono\Foundation\Time\Clock::class),
+            $c->get(\GiveFlow\Donors\DonorService::class),
+            $c->get(\GiveFlow\Campaigns\CampaignService::class),
+            $c->get(\GiveFlow\Funds\FundService::class),
+            $c->get(\GiveFlow\Donations\AggregateSyncer::class),
+            $c->get(\GiveFlow\Recurring\RecurringPlanRepository::class),
+            $c->get(\GiveFlow\Foundation\Time\Clock::class),
         );
     }
 
@@ -208,7 +208,7 @@ final class DemoSeederPurgeTest extends IntegrationTestCase
         try {
             (new CliCommands())->demo_seed([], ['purge' => true]);
             $this->fail('the purge deleted without asking');
-        } catch (DonoCliHalt $halt) {
+        } catch (GiveFlowCliHalt $halt) {
             $this->assertStringStartsWith('confirm:', $halt->getMessage());
             $this->assertStringContainsString('1 demo donations', $halt->getMessage());
         }

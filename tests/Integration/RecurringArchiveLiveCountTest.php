@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Campaigns\Campaign;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
-use Dono\Recurring\CampaignCancelRecurringJob;
-use Dono\Recurring\RecurringPlan;
-use Dono\Recurring\RecurringPlanRepository;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Recurring\CampaignCancelRecurringJob;
+use GiveFlow\Recurring\RecurringPlan;
+use GiveFlow\Recurring\RecurringPlanRepository;
 use WP_REST_Request;
 
 /**
@@ -100,7 +100,7 @@ final class RecurringArchiveLiveCountTest extends IntegrationTestCase
         $this->seedMixedStatuses();
 
         $response = rest_do_request(
-            new WP_REST_Request('GET', "/dono/v1/admin/campaigns/{$this->campaignId}/recurring-summary")
+            new WP_REST_Request('GET', "/giveflow/v1/admin/campaigns/{$this->campaignId}/recurring-summary")
         );
         $data = $response->get_data();
 

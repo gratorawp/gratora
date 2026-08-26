@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Dono\Donors\Portal;
+namespace GiveFlow\Donors\Portal;
 
-use Dono\Donors\DonorRepository;
-use Dono\Donors\MagicLinkService;
-use Dono\Donors\MagicLinkToken;
-use Dono\Donors\PendingSignupRepository;
-use Dono\Donors\SignupRedemption;
+use GiveFlow\Donors\DonorRepository;
+use GiveFlow\Donors\MagicLinkService;
+use GiveFlow\Donors\MagicLinkToken;
+use GiveFlow\Donors\PendingSignupRepository;
+use GiveFlow\Donors\SignupRedemption;
 
 /**
  * Cookie-backed donor session for the portal, opened by a magic link.
@@ -17,7 +17,7 @@ use Dono\Donors\SignupRedemption;
  */
 final class PortalSession
 {
-    private const COOKIE = 'dono_donor_session';
+    private const COOKIE = 'giveflow_donor_session';
 
     /** Purpose of the magic link that opens a session for an existing donor. */
     public const PORTAL_PURPOSE = 'donor_portal';
@@ -159,7 +159,7 @@ final class PortalSession
 
         $index = $this->index($donorId);
         foreach ($index as $hash) {
-            delete_transient('dono_portal_' . $hash);
+            delete_transient('giveflow_portal_' . $hash);
         }
         delete_transient(self::indexKey($donorId));
 
@@ -218,7 +218,7 @@ final class PortalSession
         $index[] = self::hash($sid);
 
         foreach (array_splice($index, 0, max(0, count($index) - self::MAX_PER_DONOR)) as $evicted) {
-            delete_transient('dono_portal_' . $evicted);
+            delete_transient('giveflow_portal_' . $evicted);
         }
 
         set_transient(self::indexKey($donorId), $index, self::MAX_SECONDS);
@@ -268,12 +268,12 @@ final class PortalSession
     /** @since 1.0.0 */
     private static function transientKey(string $sid): string
     {
-        return 'dono_portal_' . self::hash($sid);
+        return 'giveflow_portal_' . self::hash($sid);
     }
 
     /** @since 1.0.0 */
     private static function indexKey(int $donorId): string
     {
-        return 'dono_portal_sids_' . $donorId;
+        return 'giveflow_portal_sids_' . $donorId;
     }
 }

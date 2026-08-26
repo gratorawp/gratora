@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Dono\Recurring;
+namespace GiveFlow\Recurring;
 
 use RuntimeException;
 
 /**
- * Bridge between Dono donation frequencies and Stripe billing intervals.
+ * Bridge between GiveFlow donation frequencies and Stripe billing intervals.
  *
- * Dono frequencies are user-facing labels chosen on the form: one_time, weekly,
+ * GiveFlow frequencies are user-facing labels chosen on the form: one_time, weekly,
  * biweekly, monthly, quarterly, yearly. Stripe Prices take an `interval`
  * (day|week|month|year) plus `interval_count`; this mapper produces the pair.
  *

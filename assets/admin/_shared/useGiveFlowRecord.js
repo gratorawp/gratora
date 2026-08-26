@@ -1,5 +1,5 @@
 /**
- * Convenience wrapper over @wordpress/core-data's useEntityRecord for dono/v1
+ * Convenience wrapper over @wordpress/core-data's useEntityRecord for giveflow/v1
  * entities (campaign, form, ...). Returns the merged record (saved + pending
  * edits) plus bind/bindNumber/setValue helpers for plain inputs.
  */
@@ -7,9 +7,9 @@
 import { useEntityRecord, store as coreDataStore } from '@wordpress/core-data';
 import { useSelect, useDispatch } from '@wordpress/data';
 
-const KIND = 'dono/v1';
+const KIND = 'giveflow/v1';
 
-export function useDonoRecord( name, id ) {
+export function useGiveFlowRecord( name, id ) {
     const {
         record,
         editedRecord,

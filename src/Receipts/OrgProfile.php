@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Receipts;
+namespace GiveFlow\Receipts;
 
 /**
  * The organisation as it appears on anything a donor keeps.
@@ -30,7 +30,7 @@ final class OrgProfile
             'email'         => (string) get_option('admin_email'),
         ];
 
-        $stored = get_option('dono_org_profile', []);
+        $stored = get_option('giveflow_org_profile', []);
         $org    = is_array($stored) ? array_merge($defaults, $stored) : $defaults;
 
         $org['name'] = self::displayName($org);

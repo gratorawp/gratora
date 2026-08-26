@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Analytics\Event;
-use Dono\Donations\Donation;
-use Dono\Donors\DonorMetricsService;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
+use GiveFlow\Analytics\Event;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donors\DonorMetricsService;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
 
 /**
  * A DSAR / right-of-access export must be complete. profile() caps lists for
@@ -26,7 +26,7 @@ final class DsarExportCompletenessTest extends IntegrationTestCase
         $now = gmdate('Y-m-d H:i:s');
         for ($i = 0; $i < 30; $i++) {
             $d = Donation::make();
-            $d->reference    = sprintf('DONO-TEST-%05d', $i);
+            $d->reference    = sprintf('GIVEFLOW-TEST-%05d', $i);
             $d->donor_id     = $donor->id;
             $d->amount_cents = 1000 + $i;
             $d->net_cents    = 1000 + $i;
@@ -64,7 +64,7 @@ final class DsarExportCompletenessTest extends IntegrationTestCase
 
         $now = gmdate('Y-m-d H:i:s');
         $d = Donation::make();
-        $d->reference    = 'DONO-NOTE-TL';
+        $d->reference    = 'GIVEFLOW-NOTE-TL';
         $d->donor_id     = $donor->id;
         $d->amount_cents = 2500;
         $d->net_cents    = 2500;

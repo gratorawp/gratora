@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Currency;
+namespace GiveFlow\Currency;
 
 /**
  * Currency minor-unit exponents and the storage <-> processor charge-amount conversion.

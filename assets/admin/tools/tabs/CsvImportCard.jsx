@@ -15,14 +15,14 @@ import Btn from '../../_shared/components/Btn';
 
 // Why a row did not make it, in the admin's words rather than a code.
 const SKIP_LABELS = {
-    no_email:          __( 'no email address', 'dono-fundraising-platform' ),
-    invalid_email:     __( 'the email address is not one', 'dono-fundraising-platform' ),
-    invalid_amount:    __( 'the amount is missing, zero or unreadable', 'dono-fundraising-platform' ),
-    invalid_date:      __( 'the date is missing or unreadable', 'dono-fundraising-platform' ),
-    duplicate_in_file: __( 'the same row appears earlier in this file', 'dono-fundraising-platform' ),
-    already_imported:  __( 'already imported by an earlier run', 'dono-fundraising-platform' ),
-    donor_erased:      __( 'the donor was erased on this site', 'dono-fundraising-platform' ),
-    error:             __( 'the row could not be read', 'dono-fundraising-platform' ),
+    no_email:          __( 'no email address', 'giveflow-fundraising-campaigns' ),
+    invalid_email:     __( 'the email address is not one', 'giveflow-fundraising-campaigns' ),
+    invalid_amount:    __( 'the amount is missing, zero or unreadable', 'giveflow-fundraising-campaigns' ),
+    invalid_date:      __( 'the date is missing or unreadable', 'giveflow-fundraising-campaigns' ),
+    duplicate_in_file: __( 'the same row appears earlier in this file', 'giveflow-fundraising-campaigns' ),
+    already_imported:  __( 'already imported by an earlier run', 'giveflow-fundraising-campaigns' ),
+    donor_erased:      __( 'the donor was erased on this site', 'giveflow-fundraising-campaigns' ),
+    error:             __( 'the row could not be read', 'giveflow-fundraising-campaigns' ),
 };
 
 // Two groups, because the second one decides what the import does at all.
@@ -56,7 +56,7 @@ export default function CsvImportCard( { setNotice } ) {
         try {
             const text = await file.text();
             const res  = await apiFetch( {
-                path: '/dono/v1/admin/tools/csv-inspect',
+                path: '/giveflow/v1/admin/tools/csv-inspect',
                 method: 'POST',
                 data: { csv: text },
             } );
@@ -66,7 +66,7 @@ export default function CsvImportCard( { setNotice } ) {
             // a control the admin can change.
             setMapping( res.mapping || {} );
         } catch ( err ) {
-            setNotice( { type: 'error', text: err?.message || __( 'That file could not be read as a CSV.', 'dono-fundraising-platform' ) } );
+            setNotice( { type: 'error', text: err?.message || __( 'That file could not be read as a CSV.', 'giveflow-fundraising-campaigns' ) } );
         } finally {
             setBusy( '' );
         }
@@ -77,7 +77,7 @@ export default function CsvImportCard( { setNotice } ) {
         setNotice( null );
         try {
             const res = await apiFetch( {
-                path: '/dono/v1/admin/tools/csv-import',
+                path: '/giveflow/v1/admin/tools/csv-import',
                 method: 'POST',
                 data: { csv, mapping, dry_run: dryRun },
             } );
@@ -93,11 +93,11 @@ export default function CsvImportCard( { setNotice } ) {
 
             setNotice( {
                 type: landed > 0 ? 'success' : 'error',
-                text: landed > 0 ? summarise( res ) : __( 'Nothing was imported. The preview above says why.', 'dono-fundraising-platform' ),
+                text: landed > 0 ? summarise( res ) : __( 'Nothing was imported. The preview above says why.', 'giveflow-fundraising-campaigns' ),
             } );
             if ( landed > 0 ) reset();
         } catch ( err ) {
-            setNotice( { type: 'error', text: err?.message || __( 'The import failed.', 'dono-fundraising-platform' ) } );
+            setNotice( { type: 'error', text: err?.message || __( 'The import failed.', 'giveflow-fundraising-campaigns' ) } );
         } finally {
             setBusy( '' );
         }
@@ -132,39 +132,39 @@ export default function CsvImportCard( { setNotice } ) {
                 <th scope="row">
                     { fields[ field ] || field }
                     { ( field === 'email' || ( field === 'date' && withAmount ) ) && (
-                        <span className="dono-csv-map__req"> *</span>
+                        <span className="giveflow-csv-map__req"> *</span>
                     ) }
                 </th>
                 <td>
-                    <select className="dono-input" value={ chosen } onChange={ setField( field ) }>
-                        <option value="">{ __( 'Not imported', 'dono-fundraising-platform' ) }</option>
+                    <select className="giveflow-input" value={ chosen } onChange={ setField( field ) }>
+                        <option value="">{ __( 'Not imported', 'giveflow-fundraising-campaigns' ) }</option>
                         { headers.map( ( h ) => (
                             <option key={ h } value={ h }>{ h }</option>
                         ) ) }
                     </select>
                 </td>
-                <td className="dono-csv-map__sample">{ sample || '-' }</td>
+                <td className="giveflow-csv-map__sample">{ sample || '-' }</td>
             </tr>
         );
     };
 
     return (
         <Card
-            title={ __( 'Import from a CSV', 'dono-fundraising-platform' ) }
-            sub={ __( 'A file from another platform or a spreadsheet. Donors are matched on their email address, so a donor who is already here gains the donations rather than a second record. A file with no amounts imports the people on their own.', 'dono-fundraising-platform' ) }
+            title={ __( 'Import from a CSV', 'giveflow-fundraising-campaigns' ) }
+            sub={ __( 'A file from another platform or a spreadsheet. Donors are matched on their email address, so a donor who is already here gains the donations rather than a second record. A file with no amounts imports the people on their own.', 'giveflow-fundraising-campaigns' ) }
         >
-            <div className="dono-advanced-actions">
+            <div className="giveflow-advanced-actions">
                 <Btn
                     variant="secondary"
                     onClick={ () => fileRef.current?.click() }
                     disabled={ busy !== '' }
                     isBusy={ busy === 'inspect' }
                 >
-                    { inspected ? __( 'Choose a different file', 'dono-fundraising-platform' ) : __( 'Choose a CSV file', 'dono-fundraising-platform' ) }
+                    { inspected ? __( 'Choose a different file', 'giveflow-fundraising-campaigns' ) : __( 'Choose a CSV file', 'giveflow-fundraising-campaigns' ) }
                 </Btn>
                 { inspected && (
                     <Btn variant="tertiary" onClick={ reset } disabled={ busy !== '' }>
-                        { __( 'Cancel', 'dono-fundraising-platform' ) }
+                        { __( 'Cancel', 'giveflow-fundraising-campaigns' ) }
                     </Btn>
                 ) }
                 <input
@@ -178,45 +178,45 @@ export default function CsvImportCard( { setNotice } ) {
 
             { inspected && (
                 <>
-                    <p className="dono-tools-note">
+                    <p className="giveflow-tools-note">
                         { sprintf(
                             /* translators: 1: number of rows, 2: number of columns. */
-                            _n( '%1$d row, %2$d columns.', '%1$d rows, %2$d columns.', inspected.rows, 'dono-fundraising-platform' ),
+                            _n( '%1$d row, %2$d columns.', '%1$d rows, %2$d columns.', inspected.rows, 'giveflow-fundraising-campaigns' ),
                             inspected.rows,
                             headers.length
                         ) }
                     </p>
 
-                    <h4 className="dono-csv-map__heading">{ __( 'The donor', 'dono-fundraising-platform' ) }</h4>
-                    <table className="dono-csv-map">
+                    <h4 className="giveflow-csv-map__heading">{ __( 'The donor', 'giveflow-fundraising-campaigns' ) }</h4>
+                    <table className="giveflow-csv-map">
                         <thead>
                             <tr>
-                                <th scope="col">{ __( 'Dono field', 'dono-fundraising-platform' ) }</th>
-                                <th scope="col">{ __( 'Column in your file', 'dono-fundraising-platform' ) }</th>
-                                <th scope="col">{ __( 'First value', 'dono-fundraising-platform' ) }</th>
+                                <th scope="col">{ __( 'GiveFlow field', 'giveflow-fundraising-campaigns' ) }</th>
+                                <th scope="col">{ __( 'Column in your file', 'giveflow-fundraising-campaigns' ) }</th>
+                                <th scope="col">{ __( 'First value', 'giveflow-fundraising-campaigns' ) }</th>
                             </tr>
                         </thead>
                         <tbody>{ DONOR_FIELDS.map( rowFor ) }</tbody>
                     </table>
 
-                    <h4 className="dono-csv-map__heading">{ __( 'The donation', 'dono-fundraising-platform' ) }</h4>
-                    <p className="dono-tools-note">
-                        { ! withAmount && __( 'No amount column is mapped, so this file will import donors only. Map Amount to bring their donations in as well.', 'dono-fundraising-platform' ) }
-                        { withAmount && ! needsDate && __( 'Each row will be imported as a donation.', 'dono-fundraising-platform' ) }
-                        { needsDate && __( 'Map the Date column as well. A donation has to say when the money arrived, and every row without a date is skipped.', 'dono-fundraising-platform' ) }
+                    <h4 className="giveflow-csv-map__heading">{ __( 'The donation', 'giveflow-fundraising-campaigns' ) }</h4>
+                    <p className="giveflow-tools-note">
+                        { ! withAmount && __( 'No amount column is mapped, so this file will import donors only. Map Amount to bring their donations in as well.', 'giveflow-fundraising-campaigns' ) }
+                        { withAmount && ! needsDate && __( 'Each row will be imported as a donation.', 'giveflow-fundraising-campaigns' ) }
+                        { needsDate && __( 'Map the Date column as well. A donation has to say when the money arrived, and every row without a date is skipped.', 'giveflow-fundraising-campaigns' ) }
                     </p>
-                    <table className="dono-csv-map">
+                    <table className="giveflow-csv-map">
                         <tbody>{ DONATION_FIELDS.map( rowFor ) }</tbody>
                     </table>
 
-                    <div className="dono-advanced-actions">
+                    <div className="giveflow-advanced-actions">
                         <Btn
                             variant="secondary"
                             onClick={ () => run( true ) }
                             disabled={ ! ready || busy !== '' }
                             isBusy={ busy === 'preview' }
                         >
-                            { __( 'Preview', 'dono-fundraising-platform' ) }
+                            { __( 'Preview', 'giveflow-fundraising-campaigns' ) }
                         </Btn>
                         { preview && hasWork( preview ) && (
                             <Btn
@@ -225,29 +225,29 @@ export default function CsvImportCard( { setNotice } ) {
                                 disabled={ busy !== '' }
                                 isBusy={ busy === 'import' }
                             >
-                                { __( 'Import', 'dono-fundraising-platform' ) }
+                                { __( 'Import', 'giveflow-fundraising-campaigns' ) }
                             </Btn>
                         ) }
                     </div>
 
                     { ! ready && (
-                        <p className="dono-tools-note">
+                        <p className="giveflow-tools-note">
                             { ! mapping.email
-                                ? __( 'Email has to be mapped before this file can be previewed.', 'dono-fundraising-platform' )
-                                : __( 'Date has to be mapped as well, or every row is skipped for want of one.', 'dono-fundraising-platform' ) }
+                                ? __( 'Email has to be mapped before this file can be previewed.', 'giveflow-fundraising-campaigns' )
+                                : __( 'Date has to be mapped as well, or every row is skipped for want of one.', 'giveflow-fundraising-campaigns' ) }
                         </p>
                     ) }
 
                     { preview && (
-                        <div className="dono-csv-preview">
+                        <div className="giveflow-csv-preview">
                             <p><strong>{ summarise( preview ) }</strong></p>
                             { Object.keys( preview.skipped || {} ).length > 0 && (
-                                <ul className="dono-csv-preview__skips">
+                                <ul className="giveflow-csv-preview__skips">
                                     { Object.entries( preview.skipped ).map( ( [ reason, n ] ) => (
                                         <li key={ reason }>
                                             { sprintf(
                                                 /* translators: 1: number of rows, 2: the reason. */
-                                                _n( '%1$d row skipped: %2$s', '%1$d rows skipped: %2$s', n, 'dono-fundraising-platform' ),
+                                                _n( '%1$d row skipped: %2$s', '%1$d rows skipped: %2$s', n, 'giveflow-fundraising-campaigns' ),
                                                 n,
                                                 SKIP_LABELS[ reason ] || reason
                                             ) }
@@ -256,15 +256,15 @@ export default function CsvImportCard( { setNotice } ) {
                                 </ul>
                             ) }
                             { ( preview.errors || [] ).length > 0 && (
-                                <ul className="dono-csv-preview__errors">
+                                <ul className="giveflow-csv-preview__errors">
                                     { preview.errors.map( ( e, i ) => <li key={ i }>{ e }</li> ) }
                                 </ul>
                             ) }
                             { preview.dry_run && (
-                                <p className="dono-tools-note">
+                                <p className="giveflow-tools-note">
                                     { preview.mode === 'donors'
-                                        ? __( 'Nothing has been written yet.', 'dono-fundraising-platform' )
-                                        : __( 'Nothing has been written yet. Imported donations are marked as coming from a CSV and can be told apart from donations this site took.', 'dono-fundraising-platform' ) }
+                                        ? __( 'Nothing has been written yet.', 'giveflow-fundraising-campaigns' )
+                                        : __( 'Nothing has been written yet. Imported donations are marked as coming from a CSV and can be told apart from donations this site took.', 'giveflow-fundraising-campaigns' ) }
                                 </p>
                             ) }
                         </div>
@@ -284,13 +284,13 @@ function summarise( res ) {
     const people = res.dry_run
         ? sprintf(
             /* translators: 1: donors to create, 2: donors already here. */
-            __( '%1$d donors would be created and %2$d matched to donors already here.', 'dono-fundraising-platform' ),
+            __( '%1$d donors would be created and %2$d matched to donors already here.', 'giveflow-fundraising-campaigns' ),
             res.donors_created,
             res.donors_matched
         )
         : sprintf(
             /* translators: 1: donors created, 2: donors already here. */
-            __( 'Created %1$d donors and matched %2$d to donors already here.', 'dono-fundraising-platform' ),
+            __( 'Created %1$d donors and matched %2$d to donors already here.', 'giveflow-fundraising-campaigns' ),
             res.donors_created,
             res.donors_matched
         );
@@ -302,12 +302,12 @@ function summarise( res ) {
     const donations = res.dry_run
         ? sprintf(
             /* translators: %d: number of donations. */
-            _n( '%d donation would be imported.', '%d donations would be imported.', res.donations_imported, 'dono-fundraising-platform' ),
+            _n( '%d donation would be imported.', '%d donations would be imported.', res.donations_imported, 'giveflow-fundraising-campaigns' ),
             res.donations_imported
         )
         : sprintf(
             /* translators: %d: number of donations. */
-            _n( 'Imported %d donation.', 'Imported %d donations.', res.donations_imported, 'dono-fundraising-platform' ),
+            _n( 'Imported %d donation.', 'Imported %d donations.', res.donations_imported, 'giveflow-fundraising-campaigns' ),
             res.donations_imported
         );
 

@@ -11,7 +11,7 @@ export default function RolesPanel( { s } ) {
 
     const load = () => {
         setLoadError( false );
-        apiFetch( { path: '/dono/v1/admin/roles' } )
+        apiFetch( { path: '/giveflow/v1/admin/roles' } )
             .then( setData )
             .catch( () => setLoadError( true ) );
     };
@@ -25,20 +25,20 @@ export default function RolesPanel( { s } ) {
 
     if ( loadError ) {
         return (
-            <div className="dono-panel">
+            <div className="giveflow-panel">
                 <Card>
                     <p style={ { color: '#b42318', margin: '0 0 12px' } }>
-                        { __( 'Could not load roles.', 'dono-fundraising-platform' ) }
+                        { __( 'Could not load roles.', 'giveflow-fundraising-campaigns' ) }
                     </p>
-                    <Btn variant="secondary" onClick={ load }>{ __( 'Retry', 'dono-fundraising-platform' ) }</Btn>
+                    <Btn variant="secondary" onClick={ load }>{ __( 'Retry', 'giveflow-fundraising-campaigns' ) }</Btn>
                 </Card>
             </div>
         );
     }
-    if ( ! data ) return <p>{ __( 'Loading…', 'dono-fundraising-platform' ) }</p>;
+    if ( ! data ) return <p>{ __( 'Loading…', 'giveflow-fundraising-campaigns' ) }</p>;
 
     // Both come from the server: an add-on registers capabilities through the
-    // dono.capabilities filter, so a list kept here could never include them.
+    // giveflow.capabilities filter, so a list kept here could never include them.
     const roles    = data.roles || [];
     const capGroups = data.capabilities || [];
     const allCaps  = capGroups.flatMap( ( g ) => g.caps.map( ( c ) => c.cap ) );
@@ -62,22 +62,22 @@ export default function RolesPanel( { s } ) {
     const setAll = ( slug, on ) => setRoleCaps( slug, on ? allCaps : [] );
 
     return (
-        <div className="dono-panel">
+        <div className="giveflow-panel">
             <Card edited={ s.isDirty }>
-                <div className="dono-roles-table" style={ { '--dono-role-count': roles.length } }>
-                    <div className="dono-roles-table__head">
-                        <div className="dono-roles-table__role-cell">{ __( 'Capability', 'dono-fundraising-platform' ) }</div>
+                <div className="giveflow-roles-table" style={ { '--giveflow-role-count': roles.length } }>
+                    <div className="giveflow-roles-table__head">
+                        <div className="giveflow-roles-table__role-cell">{ __( 'Capability', 'giveflow-fundraising-campaigns' ) }</div>
                         { roles.map( ( r ) => (
-                            <div key={ r.slug } className="dono-roles-table__role">
+                            <div key={ r.slug } className="giveflow-roles-table__role">
                                 <strong>{ r.name }</strong>
-                                <div className="dono-roles-table__role-actions">
+                                <div className="giveflow-roles-table__role-actions">
                                     <Btn
                                         variant="ghost"
                                         size="sm"
                                         onClick={ () => setAll( r.slug, true ) }
                                         disabled={ r.slug === 'administrator' }
                                     >
-                                        { __( 'All', 'dono-fundraising-platform' ) }
+                                        { __( 'All', 'giveflow-fundraising-campaigns' ) }
                                     </Btn>
                                     <Btn
                                         variant="ghost"
@@ -85,7 +85,7 @@ export default function RolesPanel( { s } ) {
                                         onClick={ () => setAll( r.slug, false ) }
                                         disabled={ r.slug === 'administrator' }
                                     >
-                                        { __( 'None', 'dono-fundraising-platform' ) }
+                                        { __( 'None', 'giveflow-fundraising-campaigns' ) }
                                     </Btn>
                                 </div>
                             </div>
@@ -93,16 +93,16 @@ export default function RolesPanel( { s } ) {
                     </div>
 
                     { capGroups.map( ( group ) => (
-                        <div key={ group.label } className="dono-roles-table__group">
-                            <div className="dono-roles-table__group-label">{ group.label }</div>
+                        <div key={ group.label } className="giveflow-roles-table__group">
+                            <div className="giveflow-roles-table__group-label">{ group.label }</div>
                             { group.caps.map( ( { cap, label } ) => (
-                                <div key={ cap } className="dono-roles-table__row">
-                                    <div className="dono-roles-table__cap">{ label }</div>
+                                <div key={ cap } className="giveflow-roles-table__row">
+                                    <div className="giveflow-roles-table__cap">{ label }</div>
                                     { roles.map( ( r ) => {
                                         const has  = ( mapping[ r.slug ] || [] ).includes( cap );
                                         const lock = r.slug === 'administrator';
                                         return (
-                                            <div key={ r.slug } className="dono-roles-table__cell">
+                                            <div key={ r.slug } className="giveflow-roles-table__cell">
                                                 <input
                                                     type="checkbox"
                                                     checked={ has || lock }

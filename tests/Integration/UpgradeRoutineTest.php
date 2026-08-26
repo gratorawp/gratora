@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donors\Consent;
-use Dono\Donors\Donor;
-use Dono\Foundation\Upgrade\UpgradeRoutine;
-use Dono\Async\AsyncDispatcher;
-use Dono\Foundation\Plugin;
-use Dono\Foundation\Upgrade\UpgradeJob;
-use Dono\Foundation\Upgrade\UpgradeRunner;
+use GiveFlow\Donors\Consent;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Foundation\Upgrade\UpgradeRoutine;
+use GiveFlow\Async\AsyncDispatcher;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Foundation\Upgrade\UpgradeJob;
+use GiveFlow\Foundation\Upgrade\UpgradeRunner;
 
 /**
  * The mechanism, and the first routine that uses it.
@@ -26,7 +26,7 @@ final class UpgradeRoutineTest extends IntegrationTestCase
     {
         parent::setUp();
         delete_option(UpgradeRunner::OPTION_DONE);
-        delete_option('dono_upgrade_clear_consent_hashes_after');
+        delete_option('giveflow_upgrade_clear_consent_hashes_after');
         delete_option(UpgradeRunner::OPTION_FAILED);
     }
 
@@ -66,7 +66,7 @@ final class UpgradeRoutineTest extends IntegrationTestCase
 
     public function test_an_outstanding_routine_is_requeued_on_admin_load(): void
     {
-        // A drain was queued only when DONO_DB_VERSION changed, so a release
+        // A drain was queued only when GIVEFLOW_DB_VERSION changed, so a release
         // that adds a routine and no schema change never ran it, and a queue
         // the host cleared never came back.
         $routine = new class implements UpgradeRoutine {

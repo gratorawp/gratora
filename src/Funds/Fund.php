@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Dono\Funds;
+namespace GiveFlow\Funds;
 
 defined('ABSPATH') || exit;
 
-use Dono\Foundation\Time\ScheduleWindow;
-use Dono\Vendor\Queryable\Model;
-use Dono\Vendor\Queryable\Schema\Table;
+use GiveFlow\Foundation\Time\ScheduleWindow;
+use GiveFlow\Vendor\Queryable\Model;
+use GiveFlow\Vendor\Queryable\Schema\Table;
 
 /**
  * Fund / designation model.
@@ -17,7 +17,7 @@ use Dono\Vendor\Queryable\Schema\Table;
  */
 final class Fund extends Model
 {
-    protected string $table = 'dono_funds';
+    protected string $table = 'giveflow_funds';
     protected string $version = '1.0.0';
 
     public int $id;

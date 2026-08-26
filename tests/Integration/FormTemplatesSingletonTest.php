@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Campaigns\CampaignService;
-use Dono\Forms\Form;
-use Dono\Forms\FormTemplates;
-use Dono\Foundation\Plugin;
+use GiveFlow\Campaigns\CampaignService;
+use GiveFlow\Forms\Form;
+use GiveFlow\Forms\FormTemplates;
+use GiveFlow\Foundation\Plugin;
 
 /**
- * Several Dono blocks register `supports.multiple = false` in their editor
+ * Several GiveFlow blocks register `supports.multiple = false` in their editor
  * registration (one amount picker, one submit, one consent block, etc.).
  * The Gutenberg editor silently drops the second instance, which produced a
  * confusing "missing block" symptom in earlier templates. This regression
@@ -21,25 +21,25 @@ final class FormTemplatesSingletonTest extends IntegrationTestCase
 {
     /** Block names whose JS registration sets `supports.multiple = false`. */
     private const SINGLETONS = [
-        'dono/fund-picker',
-        'dono/anonymous-toggle',
-        'dono/privacy-notice',
-        'dono/comment',
-        'dono/cover-fees',
-        'dono/submit-button',
-        'dono/donation-amount',
-        'dono/donation-summary',
-        'dono/payment-gateways',
-        'dono/consent',
-        'dono/currency-switcher',
-        'dono/steps',
-        'dono/phone',
-        'dono/address',
-        'dono/name',
-        'dono/email',
-        'dono/country',
-        'dono/recurring-toggle',
-        'dono/goal',
+        'giveflow/fund-picker',
+        'giveflow/anonymous-toggle',
+        'giveflow/privacy-notice',
+        'giveflow/comment',
+        'giveflow/cover-fees',
+        'giveflow/submit-button',
+        'giveflow/donation-amount',
+        'giveflow/donation-summary',
+        'giveflow/payment-gateways',
+        'giveflow/consent',
+        'giveflow/currency-switcher',
+        'giveflow/steps',
+        'giveflow/phone',
+        'giveflow/address',
+        'giveflow/name',
+        'giveflow/email',
+        'giveflow/country',
+        'giveflow/recurring-toggle',
+        'giveflow/goal',
     ];
 
     public function test_no_template_duplicates_a_single_instance_block(): void
@@ -76,10 +76,10 @@ final class FormTemplatesSingletonTest extends IntegrationTestCase
         $missing = [];
         foreach (FormTemplates::all() as $template) {
             $blocks = (string) ($template['blocks'] ?? '');
-            if (! str_contains($blocks, 'wp:dono/submit-button')) {
+            if (! str_contains($blocks, 'wp:giveflow/submit-button')) {
                 continue;   // Blank ships no markup at all, by design.
             }
-            if (! str_contains($blocks, 'wp:dono/payment-gateways')) {
+            if (! str_contains($blocks, 'wp:giveflow/payment-gateways')) {
                 $missing[] = (string) $template['id'];
             }
         }
@@ -106,9 +106,9 @@ final class FormTemplatesSingletonTest extends IntegrationTestCase
         $form = Form::query()->find('id', (int) $campaign->default_form_id);
 
         $this->assertNotNull($form, 'a campaign is created with a default form');
-        $this->assertStringContainsString('wp:dono/submit-button', (string) $form->blocks);
+        $this->assertStringContainsString('wp:giveflow/submit-button', (string) $form->blocks);
         $this->assertStringContainsString(
-            'wp:dono/payment-gateways',
+            'wp:giveflow/payment-gateways',
             (string) $form->blocks,
             'the starter form must ask how to pay, like every template does'
         );
@@ -124,10 +124,10 @@ final class FormTemplatesSingletonTest extends IntegrationTestCase
     {
         foreach (FormTemplates::all() as $id => $template) {
             $blocks = (string) ($template['blocks'] ?? '');
-            if (! str_contains($blocks, 'dono/submit-button')) continue;
+            if (! str_contains($blocks, 'giveflow/submit-button')) continue;
 
             $this->assertStringContainsString(
-                'dono/donation-summary',
+                'giveflow/donation-summary',
                 $blocks,
                 "template {$id} asks for money without showing the total"
             );

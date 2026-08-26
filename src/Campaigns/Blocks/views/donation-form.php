@@ -8,26 +8,26 @@ defined('ABSPATH') || exit;
  * @var string  $styleVars
  */
 ?>
-<section id="dono-form" <?php
+<section id="giveflow-form" <?php
 // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes what it returns; core's own blocks print it the same way.
 echo get_block_wrapper_attributes(array_filter([
-    'class' => 'dono-block dono-block--donation-form',
+    'class' => 'giveflow-block giveflow-block--donation-form',
     'style' => $styleVars,
 ]));
 // phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
-?> data-block="dono/donation-form">
+?> data-block="giveflow/donation-form">
     <?php if (($mode ?? 'front') === 'empty'): ?>
-        <p class="dono-block__empty"><?php echo esc_html($emptyText);
+        <p class="giveflow-block__empty"><?php echo esc_html($emptyText);
 ?></p>
         <?php if (($notice ?? '') !== ''): ?>
-            <div class="dono-block-notice"><?php echo esc_html($notice);
+            <div class="giveflow-block-notice"><?php echo esc_html($notice);
 ?></div>
         <?php endif; ?>
     <?php elseif (($mode ?? 'front') === 'editor'): ?>
         <?php if (($previewDoc ?? '') !== ''): ?>
             <iframe
-                class="dono-donation-form__editor-preview"
-                title="<?php echo esc_attr($formTitle ?? __('Donation form', 'dono-fundraising-platform'));
+                class="giveflow-donation-form__editor-preview"
+                title="<?php echo esc_attr($formTitle ?? __('Donation form', 'giveflow-fundraising-campaigns'));
 ?>"
                 loading="lazy"
                 style="width:100%;border:0;display:block;min-height:520px"
@@ -35,10 +35,10 @@ echo get_block_wrapper_attributes(array_filter([
 ?>"
             ></iframe>
         <?php else: ?>
-            <div class="dono-donation-form__placeholder">
+            <div class="giveflow-donation-form__placeholder">
                 <strong><?php echo esc_html($formTitle ?? '');
 ?></strong>
-                <span><?php esc_html_e('Donation form - shown to visitors here.', 'dono-fundraising-platform');
+                <span><?php esc_html_e('Donation form - shown to visitors here.', 'giveflow-fundraising-campaigns');
 ?></span>
             </div>
         <?php endif; ?>
@@ -47,7 +47,7 @@ echo get_block_wrapper_attributes(array_filter([
         // Trusted first-party form output (shortcode -> do_blocks + bootstrap
         // script/style/JSON config). Must be echoed raw, never kses'd, or the
         // form renders as visible gibberish and never initializes.
-        echo $formHtml; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_shortcode('[dono_donation_form]') output; DonationFormShortcode::renderBlocks esc_attr()s every attribute and wp_json_encode()s the config with JSON_HEX_TAG.
+        echo $formHtml; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_shortcode('[giveflow_donation_form]') output; DonationFormShortcode::renderBlocks esc_attr()s every attribute and wp_json_encode()s the config with JSON_HEX_TAG.
         ?>
     <?php endif; ?>
 </section>

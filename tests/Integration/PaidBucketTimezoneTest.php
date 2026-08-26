@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
 use DateTimeImmutable;
 use DateTimeZone;
-use Dono\Campaigns\Campaign;
-use Dono\Campaigns\CampaignMetricsService;
-use Dono\Dashboard\DashboardMetricsService;
-use Dono\Donations\Donation;
-use Dono\Donations\DonationRepository;
-use Dono\Donors\DonorRepository;
-use Dono\Foundation\Plugin;
-use Dono\Foundation\Time\FrozenClock;
-use Dono\Recurring\RecurringPlanRepository;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Campaigns\CampaignMetricsService;
+use GiveFlow\Dashboard\DashboardMetricsService;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Donors\DonorRepository;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Foundation\Time\FrozenClock;
+use GiveFlow\Recurring\RecurringPlanRepository;
 
 /**
  * Every bucket a donation can be counted into is the org's, not UTC.
@@ -235,7 +235,7 @@ final class PaidBucketTimezoneTest extends IntegrationTestCase
     private function paid(string $utc, int $cents, int $campaignId): Donation
     {
         $d = Donation::make();
-        $d->reference         = 'DONO-BUCKET-' . uniqid();
+        $d->reference         = 'GIVEFLOW-BUCKET-' . uniqid();
         $d->campaign_id       = $campaignId;
         $d->status            = 'paid';
         $d->gateway           = 'offline';

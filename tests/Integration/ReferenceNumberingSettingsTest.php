@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
 use DateTimeImmutable;
-use Dono\Foundation\References\ReferenceGenerator;
-use Dono\Foundation\Time\Clock;
-use Dono\Foundation\Time\FrozenClock;
-use Dono\Foundation\Plugin;
+use GiveFlow\Foundation\References\ReferenceGenerator;
+use GiveFlow\Foundation\Time\Clock;
+use GiveFlow\Foundation\Time\FrozenClock;
+use GiveFlow\Foundation\Plugin;
 
 /**
  * Changing a numbering setting must never hand back a reference already in use.
@@ -29,7 +29,7 @@ final class ReferenceNumberingSettingsTest extends IntegrationTestCase
         delete_option(ReferenceGenerator::OPTION_SETTINGS);
         foreach (['', '_' . gmdate('Y')] as $suffix) {
             foreach (['donation', 'receipt'] as $scope) {
-                delete_option("dono_reference_counter_{$scope}{$suffix}");
+                delete_option("giveflow_reference_counter_{$scope}{$suffix}");
             }
         }
     }
@@ -92,13 +92,13 @@ final class ReferenceNumberingSettingsTest extends IntegrationTestCase
             array_intersect($issued, $after),
             'January must not hand back last year\'s references'
         );
-        $this->assertSame(['DONO-00001', 'DONO-00002'], $issued);
-        $this->assertSame(['DONO-00003', 'DONO-00004'], $after);
+        $this->assertSame(['DON-00001', 'DON-00002'], $issued);
+        $this->assertSame(['DON-00003', 'DON-00004'], $after);
     }
 
     public function test_a_yearly_reset_without_a_year_numbers_continuously(): void
     {
-        // Restarting each January with no year printed would mint DONO-00001
+        // Restarting each January with no year printed would mint DON-00001
         // twice, so this combination has to mean continuous numbering.
         $this->settings(false, true);
 
@@ -121,11 +121,11 @@ final class ReferenceNumberingSettingsTest extends IntegrationTestCase
         // The counter really is year-scoped here, so January starts a fresh one
         // and the year in the reference keeps the two sequences apart.
         $this->assertNotFalse(
-            get_option('dono_reference_counter_donation_' . gmdate('Y'), false),
+            get_option('giveflow_reference_counter_donation_' . gmdate('Y'), false),
             'the year-scoped counter is the one being used'
         );
         $this->assertFalse(
-            get_option('dono_reference_counter_donation', false),
+            get_option('giveflow_reference_counter_donation', false),
             'and the continuous counter is untouched'
         );
     }
@@ -148,7 +148,7 @@ final class ReferenceNumberingSettingsTest extends IntegrationTestCase
         $next = $this->generator('2026')->next('donation');
 
         $this->assertNotContains($next, $issued);
-        $this->assertSame('DONO-2026-00003', $next);
+        $this->assertSame('DON-2026-00003', $next);
     }
 
     public function test_every_scope_keeps_its_own_high_water_mark(): void

@@ -1,1 +1,1 @@
-export { default, ComparisonBadge } from '@dono/ui/widgets/MetricCard';
+export { default, ComparisonBadge } from '@giveflow/ui/widgets/MetricCard';

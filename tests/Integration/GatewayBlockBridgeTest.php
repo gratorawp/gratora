@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Campaigns\CampaignService;
-use Dono\Forms\FormService;
-use Dono\Foundation\Plugin;
+use GiveFlow\Campaigns\CampaignService;
+use GiveFlow\Forms\FormService;
+use GiveFlow\Foundation\Plugin;
 
 /**
  * The payment-gateways block is the single writer of
@@ -30,7 +30,7 @@ final class GatewayBlockBridgeTest extends IntegrationTestCase
         $form = $this->forms()->create([
             'title'       => 'Gw bridge',
             'campaign_id' => $this->campaignId(),
-            'blocks'      => '<!-- wp:dono/payment-gateways {"allowed":["offline","stripe"]} /-->',
+            'blocks'      => '<!-- wp:giveflow/payment-gateways {"allowed":["offline","stripe"]} /-->',
         ]);
 
         $this->assertSame(['offline', 'stripe'], $form->settings['gateways']['allowed']);
@@ -41,13 +41,13 @@ final class GatewayBlockBridgeTest extends IntegrationTestCase
         $form = $this->forms()->create([
             'title'       => 'Nested gw',
             'campaign_id' => $this->campaignId(),
-            'blocks'      => '<!-- wp:dono/row --><!-- wp:dono/payment-gateways {"allowed":["offline"]} /--><!-- /wp:dono/row -->',
+            'blocks'      => '<!-- wp:giveflow/row --><!-- wp:giveflow/payment-gateways {"allowed":["offline"]} /--><!-- /wp:giveflow/row -->',
         ]);
         $this->assertSame(['offline'], $form->settings['gateways']['allowed']);
 
         // No block: the bridge does not touch the list, so the Settings tab
         // (or a prior value) keeps governing rather than being clobbered.
-        $form = $this->forms()->update($form, ['blocks' => '<!-- wp:dono/name /-->']);
+        $form = $this->forms()->update($form, ['blocks' => '<!-- wp:giveflow/name /-->']);
         $this->assertSame(['offline'], $form->settings['gateways']['allowed']);
     }
 }

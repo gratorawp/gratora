@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Foundation\Modules;
+namespace GiveFlow\Foundation\Modules;
 
 /**
  * Minimal semver constraint matcher (no Composer dependency).

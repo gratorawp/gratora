@@ -1,5 +1,5 @@
 /**
- * Visual regression: the multi-step wizard (DONO_E2E_MULTI_STEP_FORM_PATH).
+ * Visual regression: the multi-step wizard (GIVEFLOW_E2E_MULTI_STEP_FORM_PATH).
  * One golden per seeded step, so the step indicator, per-step layout, and
  * Back/Next button row are all covered:
  *   step 1: donation-amount
@@ -10,14 +10,14 @@
 import { test, expect } from '../../fixtures/donor-form';
 import { settle } from '../../helpers/visual';
 
-const MULTI_STEP_FORM_PATH = process.env.DONO_E2E_MULTI_STEP_FORM_PATH ?? '';
+const MULTI_STEP_FORM_PATH = process.env.GIVEFLOW_E2E_MULTI_STEP_FORM_PATH ?? '';
 
 test.describe('visual: multi-step wizard', () => {
-    test.skip(! MULTI_STEP_FORM_PATH, 'set DONO_E2E_MULTI_STEP_FORM_PATH via `wp dono e2e-seed`');
+    test.skip(! MULTI_STEP_FORM_PATH, 'set GIVEFLOW_E2E_MULTI_STEP_FORM_PATH via `wp giveflow e2e-seed`');
     test.use({ formPath: MULTI_STEP_FORM_PATH });
 
     test('each step renders', async ({ donor }) => {
-        const next = donor.form.locator('.dono-form__button--primary');
+        const next = donor.form.locator('.giveflow-form__button--primary');
 
         await settle(donor.page);
         await expect(donor.form).toHaveScreenshot('wizard-step-1-amount.png');

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Campaigns\Blocks;
+namespace GiveFlow\Campaigns\Blocks;
 
-use Dono\Foundation\Helpers\View;
+use GiveFlow\Foundation\Helpers\View;
 
 /**
  * Renders the campaign fundraising progress bar.
@@ -16,7 +16,7 @@ final class CampaignProgressBlock extends CampaignBlock
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'dono/campaign-progress';
+        return 'giveflow/campaign-progress';
     }
 
     /** @since 1.0.0 */

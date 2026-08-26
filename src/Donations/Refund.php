@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Donations;
+namespace GiveFlow\Donations;
 
 defined('ABSPATH') || exit;
 
-use Dono\Vendor\Queryable\Model;
-use Dono\Vendor\Queryable\Schema\Table;
+use GiveFlow\Vendor\Queryable\Model;
+use GiveFlow\Vendor\Queryable\Schema\Table;
 
 /**
  * One row per refund operation on a donation.
@@ -20,7 +20,7 @@ use Dono\Vendor\Queryable\Schema\Table;
  */
 final class Refund extends Model
 {
-    protected string $table = 'dono_refunds';
+    protected string $table = 'giveflow_refunds';
     protected string $version = '1.0.0';
 
     public int $id;

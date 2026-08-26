@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Gateways;
+namespace GiveFlow\Gateways;
 
 /**
  * Optional capability: a gateway that takes the money out of band, as a bank

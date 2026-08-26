@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Campaigns;
+namespace GiveFlow\Campaigns;
 
-use Dono\Foundation\Hooks\HookProvider;
+use GiveFlow\Foundation\Hooks\HookProvider;
 
 /**
  * Hides the theme header/footer on a campaign's public pages when the campaign
@@ -52,7 +52,7 @@ final class CampaignChrome extends HookProvider
         if ($campaign === null) {
             return $template;
         }
-        $GLOBALS['dono_chrome_flags'] = [
+        $GLOBALS['giveflow_chrome_flags'] = [
             'header' => (bool) $campaign->hide_header,
             'footer' => (bool) $campaign->hide_footer,
         ];
@@ -144,7 +144,7 @@ final class CampaignChrome extends HookProvider
         if ($postId <= 0) {
             return null;
         }
-        $campaignId = (int) get_post_meta($postId, '_dono_campaign_id', true);
+        $campaignId = (int) get_post_meta($postId, '_giveflow_campaign_id', true);
         if ($campaignId <= 0) {
             return null;
         }

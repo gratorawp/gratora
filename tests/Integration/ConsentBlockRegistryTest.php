@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Forms\Blocks\BlockRegistry;
-use Dono\Forms\FormSubmissionValidator;
-use Dono\Foundation\Plugin;
-use Dono\Settings\SettingsService;
+use GiveFlow\Forms\Blocks\BlockRegistry;
+use GiveFlow\Forms\FormSubmissionValidator;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Settings\SettingsService;
 
 /**
  * The consent block names purposes the organization defined; it does not invent
@@ -38,10 +38,10 @@ final class ConsentBlockRegistryTest extends IntegrationTestCase
         ]);
     }
 
-    private function block(): \Dono\Forms\Blocks\Block
+    private function block(): \GiveFlow\Forms\Blocks\Block
     {
         foreach (Plugin::instance()->container->get(BlockRegistry::class)->all() as $b) {
-            if ($b->name() === 'dono/consent') return $b;
+            if ($b->name() === 'giveflow/consent') return $b;
         }
 
         $this->fail('the consent block is not registered');
@@ -49,7 +49,7 @@ final class ConsentBlockRegistryTest extends IntegrationTestCase
 
     protected function tearDown(): void
     {
-        delete_option('dono_consents');
+        delete_option('giveflow_consents');
         parent::tearDown();
     }
 
@@ -115,11 +115,11 @@ final class ConsentBlockRegistryTest extends IntegrationTestCase
     {
         $this->register(true);
 
-        $blocks = '<!-- wp:dono/donation-amount {"presets":[{"cents":2500}]} /-->'
-            . '<!-- wp:dono/consent {"purposeKeys":["newsletter"]} /-->'
-            . '<!-- wp:dono/submit-button /-->';
+        $blocks = '<!-- wp:giveflow/donation-amount {"presets":[{"cents":2500}]} /-->'
+            . '<!-- wp:giveflow/consent {"purposeKeys":["newsletter"]} /-->'
+            . '<!-- wp:giveflow/submit-button /-->';
 
-        $form = \Dono\Forms\Form::make();
+        $form = \GiveFlow\Forms\Form::make();
         $form->blocks = $blocks;
         $form->settings = [];
 
@@ -135,7 +135,7 @@ final class ConsentBlockRegistryTest extends IntegrationTestCase
     public function test_the_validator_reads_the_picked_keys(): void
     {
         $ids = FormSubmissionValidator::consentPurposeIds(
-            '<!-- wp:dono/consent {"purposeKeys":["newsletter","other"]} /-->'
+            '<!-- wp:giveflow/consent {"purposeKeys":["newsletter","other"]} /-->'
         );
 
         $this->assertArrayHasKey('newsletter', $ids);

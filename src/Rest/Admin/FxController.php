@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Dono\Rest\Admin;
-use Dono\Foundation\Auth\Capabilities;
+namespace GiveFlow\Rest\Admin;
+use GiveFlow\Foundation\Auth\Capabilities;
 
-use Dono\Currency\FxBackfill;
-use Dono\Currency\FxRates;
-use Dono\Gateways\GatewayManager;
-use Dono\Currency\FxRatesUpdater;
-use Dono\Foundation\Helpers\Money;
-use Dono\Settings\SettingsService;
+use GiveFlow\Currency\FxBackfill;
+use GiveFlow\Currency\FxRates;
+use GiveFlow\Gateways\GatewayManager;
+use GiveFlow\Currency\FxRatesUpdater;
+use GiveFlow\Foundation\Helpers\Money;
+use GiveFlow\Settings\SettingsService;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -23,7 +23,7 @@ use WP_REST_Server;
  */
 final class FxController
 {
-    private const NAMESPACE = 'dono/v1';
+    private const NAMESPACE = 'giveflow/v1';
 
     /** @since 1.0.0 */
     public function __construct(
@@ -60,7 +60,7 @@ final class FxController
     /** @since 1.0.0 */
     public function canAccess(): bool
     {
-        return Capabilities::userCan('dono_manage_settings');
+        return Capabilities::userCan('giveflow_manage_settings');
     }
 
     /** @since 1.0.0 */
@@ -92,8 +92,8 @@ final class FxController
 
         if (! $this->updater->saveSettings((bool) ($body['auto'] ?? true), $manual, $frame)) {
             return new WP_REST_Response([
-                'code'    => 'dono_fx_frame_moved',
-                'message' => __('The base currency changed while this screen was open, so the rates shown are no longer in the currency they were entered against. Reload the page and set them again.', 'dono-fundraising-platform'),
+                'code'    => 'giveflow_fx_frame_moved',
+                'message' => __('The base currency changed while this screen was open, so the rates shown are no longer in the currency they were entered against. Reload the page and set them again.', 'giveflow-fundraising-campaigns'),
             ], 409);
         }
 

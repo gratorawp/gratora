@@ -12,24 +12,24 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     env:
-      DONO_E2E_URL: http://localhost:8888
+      GIVEFLOW_E2E_URL: http://localhost:8888
     steps:
       - name: Checkout core
         uses: actions/checkout@v4
 
       # The peer-to-peer add-on lives in a separate (private) repo. When it is
-      # configured (repo var DONO_P2P_REPO + token secret DONO_P2P_TOKEN), pull
+      # configured (repo var GIVEFLOW_P2P_REPO + token secret GIVEFLOW_P2P_TOKEN), pull
       # it in as a sibling so the P2P suite runs too; otherwise the run covers
       # core only.
-      - name: Checkout dono-p2p (optional)
+      - name: Checkout giveflow-p2p (optional)
         id: p2p
-        if: vars.DONO_P2P_REPO != ''
+        if: vars.GIVEFLOW_P2P_REPO != ''
         uses: actions/checkout@v4
         with:
-          repository: ${{ vars.DONO_P2P_REPO }}
-          token: ${{ secrets.DONO_P2P_TOKEN }}
-          ref: ${{ vars.DONO_P2P_REF || 'main' }}
-          path: dono-p2p
+          repository: ${{ vars.GIVEFLOW_P2P_REPO }}
+          token: ${{ secrets.GIVEFLOW_P2P_TOKEN }}
+          ref: ${{ vars.GIVEFLOW_P2P_REF || 'main' }}
+          path: giveflow-p2p
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -42,10 +42,10 @@ jobs:
         with:
           node-version: '20'
 
-      # @dono/ui is a public git dependency, but npm normalises a github:
-      # spec to ssh://git@github.com, which a runner has no key for: the
-      # install then dies on "Permission denied (publickey)" before anything
-      # runs. Rewrite it to https, which needs no credentials.
+      # @giveflow/ui is a public git dependency, but npm locks it as
+      # ssh://git@github.com, which a runner has no key for: the install
+      # then dies on "Permission denied (publickey)" before anything runs.
+      # Rewrite it to https, which needs no credentials.
       - name: Fetch git dependencies over https
         run: git config --global url."https://github.com/".insteadOf ssh://git@github.com/
 
@@ -55,9 +55,9 @@ jobs:
           npm ci
           npm run build
 
-      - name: Build dono-p2p
-        if: vars.DONO_P2P_REPO != ''
-        working-directory: dono-p2p
+      - name: Build giveflow-p2p
+        if: vars.GIVEFLOW_P2P_REPO != ''
+        working-directory: giveflow-p2p
         run: |
           composer install --no-interaction --prefer-dist --no-progress
           npm ci
@@ -66,9 +66,9 @@ jobs:
       # wp-env reads .wp-env.override.json on top of the committed core-only
       # .wp-env.json, so adding the add-on here keeps the default config clean.
       - name: Compose wp-env plugins
-        if: vars.DONO_P2P_REPO != ''
+        if: vars.GIVEFLOW_P2P_REPO != ''
         run: |
-          printf '{ "plugins": [ ".", "%s/dono-p2p" ] }\n' "$GITHUB_WORKSPACE" > .wp-env.override.json
+          printf '{ "plugins": [ ".", "%s/giveflow-p2p" ] }\n' "$GITHUB_WORKSPACE" > .wp-env.override.json
           cat .wp-env.override.json
 
       - name: Start wp-env
@@ -76,16 +76,16 @@ jobs:
 
       - name: Seed core fixtures
         run: |
-          OUT="$(npx wp-env run cli wp dono e2e-seed 2>&1)"
+          OUT="$(npx wp-env run cli wp giveflow e2e-seed 2>&1)"
           echo "$OUT"
-          echo "$OUT" | grep -oE 'DONO_E2E_[A-Z_]+="[^"]*"' | sed -E 's/"//g' >> "$GITHUB_ENV"
+          echo "$OUT" | grep -oE 'GIVEFLOW_E2E_[A-Z_]+="[^"]*"' | sed -E 's/"//g' >> "$GITHUB_ENV"
 
       - name: Seed P2P fixtures
-        if: vars.DONO_P2P_REPO != ''
+        if: vars.GIVEFLOW_P2P_REPO != ''
         run: |
-          OUT="$(npx wp-env run cli wp dono-p2p e2e-seed 2>&1)"
+          OUT="$(npx wp-env run cli wp giveflow-p2p e2e-seed 2>&1)"
           echo "$OUT"
-          echo "$OUT" | grep -oE 'DONO_E2E_[A-Z_]+="[^"]*"' | sed -E 's/"//g' >> "$GITHUB_ENV"
+          echo "$OUT" | grep -oE 'GIVEFLOW_E2E_[A-Z_]+="[^"]*"' | sed -E 's/"//g' >> "$GITHUB_ENV"
 
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium

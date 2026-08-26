@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
 use WP_REST_Request;
 
@@ -24,9 +24,9 @@ final class TestEmailDiagnosticTest extends IntegrationTestCase
 
     private function send(): \WP_REST_Response|\WP_Error
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/admin/email/test-send');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/email/test-send');
         $req->set_header('content-type', 'application/json');
-        $req->set_body((string) wp_json_encode(['to' => 'diagnostic@dono.test']));
+        $req->set_body((string) wp_json_encode(['to' => 'diagnostic@giveflow.test']));
 
         return rest_do_request($req);
     }

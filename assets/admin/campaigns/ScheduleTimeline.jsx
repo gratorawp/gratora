@@ -8,7 +8,7 @@ const MONTHS = [
     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
 ];
 
-const PAD = 22; // .dono-schedule__lane horizontal padding
+const PAD = 22; // .giveflow-schedule__lane horizontal padding
 
 // Jan-Dec lane with draggable start/today/end markers synced to date inputs below.
 export default function ScheduleTimeline( { startsAt, endsAt, onChange, startEdited, endEdited } ) {
@@ -91,13 +91,13 @@ export default function ScheduleTimeline( { startsAt, endsAt, onChange, startEdi
     const setEnd   = ( next ) => onChange?.( { ends_at:   next || null } );
 
     return (
-        <div className="dono-schedule">
-            <div className="dono-schedule__lane" ref={ laneRef }>
-                <div className="dono-schedule__track" />
+        <div className="giveflow-schedule">
+            <div className="giveflow-schedule__lane" ref={ laneRef }>
+                <div className="giveflow-schedule__track" />
 
                 { hasWindow && (
                     <div
-                        className="dono-schedule__window"
+                        className="giveflow-schedule__window"
                         style={ {
                             left:  `calc(${ PAD }px + (100% - ${ PAD * 2 }px) * ${ winLeft  / 100 })`,
                             right: `calc(${ PAD }px + (100% - ${ PAD * 2 }px) * ${ ( 100 - winRight ) / 100 })`,
@@ -107,7 +107,7 @@ export default function ScheduleTimeline( { startsAt, endsAt, onChange, startEdi
 
                 { todayPct !== null && (
                     <div
-                        className="dono-schedule__today"
+                        className="giveflow-schedule__today"
                         style={ { left: markerLeft( todayPct ) } }
                     />
                 ) }
@@ -115,18 +115,18 @@ export default function ScheduleTimeline( { startsAt, endsAt, onChange, startEdi
                 { startPct !== null && (
                     <>
                         <div
-                            className="dono-schedule__marker"
+                            className="giveflow-schedule__marker"
                             style={ { left: markerLeft( startPct ), cursor: 'ew-resize' } }
                             onPointerDown={ beginDrag( 'start' ) }
                             role="slider"
-                            aria-label={ __( 'Drag to change start date', 'dono-fundraising-platform' ) }
+                            aria-label={ __( 'Drag to change start date', 'giveflow-fundraising-campaigns' ) }
                             aria-valuenow={ Math.round( startPct ) }
                             aria-valuemin={ 0 }
                             aria-valuemax={ 100 }
                         />
-                        <div className="dono-schedule__label" style={ { left: markerLeft( startPct ) } }>
+                        <div className="giveflow-schedule__label" style={ { left: markerLeft( startPct ) } }>
                             { shortDate( start ) }
-                            <small>{ __( 'Start', 'dono-fundraising-platform' ) }</small>
+                            <small>{ __( 'Start', 'giveflow-fundraising-campaigns' ) }</small>
                         </div>
                     </>
                 ) }
@@ -134,48 +134,48 @@ export default function ScheduleTimeline( { startsAt, endsAt, onChange, startEdi
                 { endPct !== null && (
                     <>
                         <div
-                            className="dono-schedule__marker"
+                            className="giveflow-schedule__marker"
                             style={ { left: markerLeft( endPct ), cursor: 'ew-resize' } }
                             onPointerDown={ beginDrag( 'end' ) }
                             role="slider"
-                            aria-label={ __( 'Drag to change end date', 'dono-fundraising-platform' ) }
+                            aria-label={ __( 'Drag to change end date', 'giveflow-fundraising-campaigns' ) }
                             aria-valuenow={ Math.round( endPct ) }
                             aria-valuemin={ 0 }
                             aria-valuemax={ 100 }
                         />
-                        <div className="dono-schedule__label" style={ { left: markerLeft( endPct ) } }>
+                        <div className="giveflow-schedule__label" style={ { left: markerLeft( endPct ) } }>
                             { shortDate( end ) }
-                            <small>{ __( 'End', 'dono-fundraising-platform' ) }</small>
+                            <small>{ __( 'End', 'giveflow-fundraising-campaigns' ) }</small>
                         </div>
                     </>
                 ) }
             </div>
 
-            <div className="dono-schedule__axis">
+            <div className="giveflow-schedule__axis">
                 { MONTHS.map( ( m ) => <span key={ m }>{ m }</span> ) }
             </div>
 
-            <div className="dono-schedule__dates">
+            <div className="giveflow-schedule__dates">
                 <label>
-                    <span>{ __( 'Starts at', 'dono-fundraising-platform' ) }</span>
+                    <span>{ __( 'Starts at', 'giveflow-fundraising-campaigns' ) }</span>
                     <DateField
                         withTime
                         value={ startsAt || '' }
                         onChange={ setStart }
                         edited={ startEdited }
-                        placeholder={ __( 'No start scheduled', 'dono-fundraising-platform' ) }
-                        ariaLabel={ __( 'Pick a start date and time', 'dono-fundraising-platform' ) }
+                        placeholder={ __( 'No start scheduled', 'giveflow-fundraising-campaigns' ) }
+                        ariaLabel={ __( 'Pick a start date and time', 'giveflow-fundraising-campaigns' ) }
                     />
                 </label>
                 <label>
-                    <span>{ __( 'Ends at', 'dono-fundraising-platform' ) }</span>
+                    <span>{ __( 'Ends at', 'giveflow-fundraising-campaigns' ) }</span>
                     <DateField
                         withTime
                         value={ endsAt || '' }
                         onChange={ setEnd }
                         edited={ endEdited }
-                        placeholder={ __( 'No end scheduled', 'dono-fundraising-platform' ) }
-                        ariaLabel={ __( 'Pick an end date and time', 'dono-fundraising-platform' ) }
+                        placeholder={ __( 'No end scheduled', 'giveflow-fundraising-campaigns' ) }
+                        ariaLabel={ __( 'Pick an end date and time', 'giveflow-fundraising-campaigns' ) }
                     />
                 </label>
             </div>

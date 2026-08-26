@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Recurring;
+namespace GiveFlow\Recurring;
 
 defined('ABSPATH') || exit;
 
-use Dono\Vendor\Queryable\Model;
-use Dono\Vendor\Queryable\Schema\Table;
+use GiveFlow\Vendor\Queryable\Model;
+use GiveFlow\Vendor\Queryable\Schema\Table;
 
 /**
  * Mirror of a gateway-side subscription. One plan to many donation renewals.
@@ -16,7 +16,7 @@ use Dono\Vendor\Queryable\Schema\Table;
  */
 final class RecurringPlan extends Model
 {
-    protected string $table = 'dono_recurring_plans';
+    protected string $table = 'giveflow_recurring_plans';
     protected string $version = '1.0.1';
 
     public int $id;

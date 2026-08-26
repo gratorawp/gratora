@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Funds;
+namespace GiveFlow\Funds;
 
-use Dono\Campaigns\Campaign;
-use Dono\Forms\Form;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Forms\Form;
 
 /**
  * Resolves which fund a donation belongs to.

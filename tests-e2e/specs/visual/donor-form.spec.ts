@@ -1,8 +1,8 @@
 /**
  * Visual regression: the canonical kitchen-sink donor form
- * (DONO_E2E_FORM_PATH, seeded by `wp dono e2e-seed`).
+ * (GIVEFLOW_E2E_FORM_PATH, seeded by `wp giveflow e2e-seed`).
  *
- * Element-scoped to form.dono-donation-form so theme chrome around the
+ * Element-scoped to form.giveflow-donation-form so theme chrome around the
  * shortcode never bleeds into the goldens. States covered: initial render
  * (desktop + mobile), currency switched, and the field-error styling after an
  * invalid submit.

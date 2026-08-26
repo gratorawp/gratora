@@ -33,21 +33,21 @@ function initials( name ) {
 function donorKpis( stats ) {
     return [
         {
-            label: __( 'Total donors', 'dono-fundraising-platform' ),
+            label: __( 'Total donors', 'giveflow-fundraising-campaigns' ),
             value: stats ? stats.total_count.toLocaleString() : '-',
         },
         {
-            label: __( 'With donations', 'dono-fundraising-platform' ),
+            label: __( 'With donations', 'giveflow-fundraising-campaigns' ),
             value: stats ? stats.with_donations.toLocaleString() : '-',
         },
         {
-            label: __( 'Lifetime given', 'dono-fundraising-platform' ),
+            label: __( 'Lifetime given', 'giveflow-fundraising-campaigns' ),
             value: stats && stats.total_donated_cents > 0
                 ? formatAmount( stats.total_donated_cents )
                 : '-',
         },
         {
-            label: __( 'Avg lifetime value', 'dono-fundraising-platform' ),
+            label: __( 'Avg lifetime value', 'giveflow-fundraising-campaigns' ),
             value: stats && stats.avg_ltv_cents > 0
                 ? formatAmount( stats.avg_ltv_cents )
                 : '-',
@@ -81,7 +81,7 @@ export function DonorsApp( { toggleSlot } ) {
         setError( null );
 
         apiFetch( {
-            path: addQueryArgs( '/dono/v1/admin/donors', {
+            path: addQueryArgs( '/giveflow/v1/admin/donors', {
                 page:       view.page,
                 per_page:   view.perPage,
                 orderby:    view.sort?.field === 'total_donated'
@@ -104,12 +104,12 @@ export function DonorsApp( { toggleSlot } ) {
                 if ( aborted ) return;
                 setData( [] );
                 setTotal( 0 );
-                setError( err?.message || __( 'Failed to load donors.', 'dono-fundraising-platform' ) );
+                setError( err?.message || __( 'Failed to load donors.', 'giveflow-fundraising-campaigns' ) );
             } )
             .finally( () => ! aborted && setLoading( false ) );
 
         apiFetch( {
-            path: addQueryArgs( '/dono/v1/admin/donors/stats', {
+            path: addQueryArgs( '/giveflow/v1/admin/donors/stats', {
                 search:     view.search || undefined,
                 country:    filterValue( 'country' )    || undefined,
                 donor_type: filterValue( 'donor_type' ) || undefined,
@@ -128,28 +128,28 @@ export function DonorsApp( { toggleSlot } ) {
     const fields = useMemo( () => [
         {
             id:    'name',
-            label: __( 'Name', 'dono-fundraising-platform' ),
+            label: __( 'Name', 'giveflow-fundraising-campaigns' ),
             render: ( { item } ) => {
-                const name = item.name || __( '(no name)', 'dono-fundraising-platform' );
+                const name = item.name || __( '(no name)', 'giveflow-fundraising-campaigns' );
                 return (
-                    <div className="dono-row">
-                        <span className="dono-row__avatar" aria-hidden="true">
+                    <div className="giveflow-row">
+                        <span className="giveflow-row__avatar" aria-hidden="true">
                             { initials( name ) }
                             { item.avatar_url && (
-                                <img className="dono-row__avatar-photo" src={ item.avatar_url } alt="" loading="lazy" decoding="async" />
+                                <img className="giveflow-row__avatar-photo" src={ item.avatar_url } alt="" loading="lazy" decoding="async" />
                             ) }
                         </span>
-                        <div className="dono-row__body">
-                            <span className="dono-ref-cell">
-                                <a className="dono-row__link dono-row__link--strong" href={ `#donor/${ item.id }` } { ...rowLinkProps }>
+                        <div className="giveflow-row__body">
+                            <span className="giveflow-ref-cell">
+                                <a className="giveflow-row__link giveflow-row__link--strong" href={ `#donor/${ item.id }` } { ...rowLinkProps }>
                                     { name }
                                 </a>
                                 { item.is_test_only && (
-                                    <span className="dono-pill dono-pill--test">{ __( 'Test', 'dono-fundraising-platform' ) }</span>
+                                    <span className="giveflow-pill giveflow-pill--test">{ __( 'Test', 'giveflow-fundraising-campaigns' ) }</span>
                                 ) }
                             </span>
                             { item.donor_type && item.donor_type !== 'individual' && (
-                                <div className="dono-row__sub" style={ { textTransform: 'capitalize' } }>
+                                <div className="giveflow-row__sub" style={ { textTransform: 'capitalize' } }>
                                     { item.donor_type }
                                 </div>
                             ) }
@@ -160,75 +160,75 @@ export function DonorsApp( { toggleSlot } ) {
         },
         {
             id:    'email',
-            label: __( 'Email', 'dono-fundraising-platform' ),
+            label: __( 'Email', 'giveflow-fundraising-campaigns' ),
             render: ( { item } ) => (
                 item.email
-                    ? <span className="dono-mono">{ item.email }</span>
-                    : <span className="dono-row__sub">-</span>
+                    ? <span className="giveflow-mono">{ item.email }</span>
+                    : <span className="giveflow-row__sub">-</span>
             ),
         },
         {
             id:    'country',
-            label: __( 'Country', 'dono-fundraising-platform' ),
+            label: __( 'Country', 'giveflow-fundraising-campaigns' ),
             elements: COUNTRIES.map( ( c ) => ( { value: c.code, label: `${ c.code } - ${ c.name }` } ) ),
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => (
                 item.country
                     ? (
-                        <span className="dono-country">
-                            <span className="dono-country__code">{ item.country }</span>
+                        <span className="giveflow-country">
+                            <span className="giveflow-country__code">{ item.country }</span>
                         </span>
                     )
-                    : <span className="dono-row__sub">-</span>
+                    : <span className="giveflow-row__sub">-</span>
             ),
         },
         {
             id:    'donor_type',
-            label: __( 'Donor type', 'dono-fundraising-platform' ),
+            label: __( 'Donor type', 'giveflow-fundraising-campaigns' ),
             elements: [
-                { value: 'individual',   label: __( 'Individual', 'dono-fundraising-platform' ) },
-                { value: 'organization', label: __( 'Organization', 'dono-fundraising-platform' ) },
-                { value: 'household',    label: __( 'Household', 'dono-fundraising-platform' ) },
+                { value: 'individual',   label: __( 'Individual', 'giveflow-fundraising-campaigns' ) },
+                { value: 'organization', label: __( 'Organization', 'giveflow-fundraising-campaigns' ) },
+                { value: 'household',    label: __( 'Household', 'giveflow-fundraising-campaigns' ) },
             ],
             filterBy: { operators: [ 'is' ] },
             getValue: ( { item } ) => item.donor_type || 'individual',
             render:   ( { item } ) => (
-                <span className="dono-row__sub" style={ { textTransform: 'capitalize' } }>
+                <span className="giveflow-row__sub" style={ { textTransform: 'capitalize' } }>
                     { item.donor_type || 'individual' }
                 </span>
             ),
         },
         {
             id:            'donations_count',
-            label:         __( '#', 'dono-fundraising-platform' ),
+            label:         __( '#', 'giveflow-fundraising-campaigns' ),
             enableSorting: true,
             render: ( { item } ) => (
-                <span className="dono-amount dono-amount--num">{ item.donations_count }</span>
+                <span className="giveflow-amount giveflow-amount--num">{ item.donations_count }</span>
             ),
         },
         {
             id:            'total_donated',
-            label:         __( 'Total', 'dono-fundraising-platform' ),
+            label:         __( 'Total', 'giveflow-fundraising-campaigns' ),
             enableSorting: true,
             render: ( { item } ) => (
-                <span className="dono-amount">
+                <span className="giveflow-amount">
                     { formatAmount( item.total_donated_cents ) }
                 </span>
             ),
         },
         {
             id:            'last_donation_at',
-            label:         __( 'Last donation', 'dono-fundraising-platform' ),
+            label:         __( 'Last donation', 'giveflow-fundraising-campaigns' ),
             enableSorting: true,
             render: ( { item } ) => (
                 item.last_donation_at
                     ? (
-                        <span className="dono-time" title={ formatDate( item.last_donation_at ) }>
-                            <span className="dono-time__rel">{ timeAgo( item.last_donation_at ) }</span>
-                            <span className="dono-time__abs">{ formatDate( item.last_donation_at ) }</span>
+                        <span className="giveflow-time" title={ formatDate( item.last_donation_at ) }>
+                            <span className="giveflow-time__rel">{ timeAgo( item.last_donation_at ) }</span>
+                            <span className="giveflow-time__abs">{ formatDate( item.last_donation_at ) }</span>
                         </span>
                     )
-                    : <span className="dono-row__sub">-</span>
+                    : <span className="giveflow-row__sub">-</span>
             ),
         },
     ], [] );
@@ -244,7 +244,7 @@ export function DonorsApp( { toggleSlot } ) {
     const actions = useMemo( () => [
         {
             id:            'delete',
-            label:         __( 'Delete', 'dono-fundraising-platform' ),
+            label:         __( 'Delete', 'giveflow-fundraising-campaigns' ),
             icon:          () => <DeleteIcon size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             supportsBulk:  true,
@@ -258,29 +258,29 @@ export function DonorsApp( { toggleSlot } ) {
                 if ( ! items.length ) return;
                 const n = items.length;
                 setConfirm( {
-                    title:        _n( 'Delete donor', 'Delete donors', n, 'dono-fundraising-platform' ),
+                    title:        _n( 'Delete donor', 'Delete donors', n, 'giveflow-fundraising-campaigns' ),
                     message: n === 1
-                        ? __( 'Delete this donor? They have no donations, so nothing is kept: the record and anything describing it go for good.', 'dono-fundraising-platform' )
+                        ? __( 'Delete this donor? They have no donations, so nothing is kept: the record and anything describing it go for good.', 'giveflow-fundraising-campaigns' )
                         : sprintf(
                             /* translators: %d: number of donors to delete */
                             _n(
                                 'Delete %d donor? They have no donations, so nothing is kept.',
                                 'Delete %d donors? They have no donations, so nothing is kept.',
                                 n,
-                                'dono-fundraising-platform'
+                                'giveflow-fundraising-campaigns'
                             ),
                             n
                         ),
-                    confirmLabel: __( 'Delete', 'dono-fundraising-platform' ),
+                    confirmLabel: __( 'Delete', 'giveflow-fundraising-campaigns' ),
                     destructive:  true,
                     onConfirm: async () => {
                         try {
                             await Promise.all( items.map( ( i ) => apiFetch( {
-                                path:   `/dono/v1/admin/donors/${ i.id }`,
+                                path:   `/giveflow/v1/admin/donors/${ i.id }`,
                                 method: 'DELETE',
                             } ) ) );
                         } catch ( err ) {
-                            setError( err?.message || __( 'Could not delete one or more donors.', 'dono-fundraising-platform' ) );
+                            setError( err?.message || __( 'Could not delete one or more donors.', 'giveflow-fundraising-campaigns' ) );
                         } finally {
                             load();
                         }
@@ -290,7 +290,7 @@ export function DonorsApp( { toggleSlot } ) {
         },
         {
             id:            'redact',
-            label:         __( 'Redact (anonymize)', 'dono-fundraising-platform' ),
+            label:         __( 'Redact (anonymize)', 'giveflow-fundraising-campaigns' ),
             icon:          () => <RedactIcon size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             supportsBulk:  true,
@@ -299,35 +299,35 @@ export function DonorsApp( { toggleSlot } ) {
                 if ( ! items.length ) return;
                 const n = items.length;
                 const message = n === 1
-                    ? __( 'Redact this donor? Their PII (name, email, address, phone) is wiped from the donor row and any active recurring plan is cancelled at the gateway, but their donations stay attached and counted. This cannot be undone.', 'dono-fundraising-platform' )
+                    ? __( 'Redact this donor? Their PII (name, email, address, phone) is wiped from the donor row and any active recurring plan is cancelled at the gateway, but their donations stay attached and counted. This cannot be undone.', 'giveflow-fundraising-campaigns' )
                     : sprintf(
                         /* translators: %d: number of donors to redact */
                         _n(
                             'Redact %d donor? Their PII is wiped from the donor rows and any active recurring plan is cancelled at the gateway, but donations stay attached and counted. This cannot be undone.',
                             'Redact %d donors? Their PII is wiped from the donor rows and any active recurring plan is cancelled at the gateway, but donations stay attached and counted. This cannot be undone.',
                             n,
-                            'dono-fundraising-platform'
+                            'giveflow-fundraising-campaigns'
                         ),
                         n
                     );
                 setConfirm( {
-                    title:        _n( 'Redact donor', 'Redact donors', n, 'dono-fundraising-platform' ),
+                    title:        _n( 'Redact donor', 'Redact donors', n, 'giveflow-fundraising-campaigns' ),
                     message,
-                    confirmLabel: __( 'Redact', 'dono-fundraising-platform' ),
+                    confirmLabel: __( 'Redact', 'giveflow-fundraising-campaigns' ),
                     destructive:  true,
                     // The callback fills the server's confirmation from each
                     // row, so nothing else stands between one click and erased
                     // PII here.
-                    requireText:  __( 'REDACT', 'dono-fundraising-platform' ),
+                    requireText:  __( 'REDACT', 'giveflow-fundraising-campaigns' ),
                     onConfirm: async () => {
                         try {
                             await Promise.all( items.map( ( i ) => apiFetch( {
-                                path:   `/dono/v1/admin/donors/${ i.id }/redact`,
+                                path:   `/giveflow/v1/admin/donors/${ i.id }/redact`,
                                 method: 'POST',
                                 data:   { confirmation: i.email || `DONOR_${ i.id }` },
                             } ) ) );
                         } catch ( err ) {
-                            setError( err?.message || __( 'Could not redact one or more donors.', 'dono-fundraising-platform' ) );
+                            setError( err?.message || __( 'Could not redact one or more donors.', 'giveflow-fundraising-campaigns' ) );
                         } finally {
                             load();
                         }
@@ -339,18 +339,18 @@ export function DonorsApp( { toggleSlot } ) {
 
     return (
         <div>
-            <div className="dono-crumbs">
-                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'Dono', 'dono-fundraising-platform' ) }</a>
+            <div className="giveflow-crumbs">
+                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'GiveFlow', 'giveflow-fundraising-campaigns' ) }</a>
                 <span className="sep">›</span>
-                <span>{ __( 'Donors', 'dono-fundraising-platform' ) }</span>
+                <span>{ __( 'Donors', 'giveflow-fundraising-campaigns' ) }</span>
             </div>
-            <div className="dono-page-head">
-                <div className="dono-page-head__title-row">
-                    <h1>{ __( 'Donors', 'dono-fundraising-platform' ) }</h1>
+            <div className="giveflow-page-head">
+                <div className="giveflow-page-head__title-row">
+                    <h1>{ __( 'Donors', 'giveflow-fundraising-campaigns' ) }</h1>
                 </div>
-                <div className="dono-page-head__right">
-                    <span className="dono-page-head__meta">
-                        { sprintf( /* translators: %s: number of donors */ _n( '%s donor', '%s donors', total, 'dono-fundraising-platform' ), total.toLocaleString() ) }
+                <div className="giveflow-page-head__right">
+                    <span className="giveflow-page-head__meta">
+                        { sprintf( /* translators: %s: number of donors */ _n( '%s donor', '%s donors', total, 'giveflow-fundraising-campaigns' ), total.toLocaleString() ) }
                     </span>
                     { toggleSlot }
                 </div>
@@ -365,11 +365,11 @@ export function DonorsApp( { toggleSlot } ) {
             { ! loading && ! error && total === 0 && ! view.search && ! view.filters?.length ? (
                 <EmptyState
                     icon={ <UsersIcon size={ 22 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'No donors yet', 'dono-fundraising-platform' ) }
-                    body={ __( 'Anyone who donates is added here. Publish a form to take the first one.', 'dono-fundraising-platform' ) }
+                    title={ __( 'No donors yet', 'giveflow-fundraising-campaigns' ) }
+                    body={ __( 'Anyone who donates is added here. Publish a form to take the first one.', 'giveflow-fundraising-campaigns' ) }
                 />
             ) : (
-                <div className="dono-dataviews">
+                <div className="giveflow-dataviews">
                     <DataViews
                         data={ data }
                         isLoading={ loading }
@@ -416,10 +416,10 @@ function IconInsights() {
 function ViewToggle( { active, onChange } ) {
     return (
         <div
-            className="dono-view-toggle"
+            className="giveflow-view-toggle"
             role="tablist"
             tabIndex={ -1 }
-            aria-label={ __( 'Donor sections', 'dono-fundraising-platform' ) }
+            aria-label={ __( 'Donor sections', 'giveflow-fundraising-campaigns' ) }
             onKeyDown={ ( e ) => tablistKeyDown( e, [ 'list', 'insights' ], active, onChange ) }
         >
             <button
@@ -427,22 +427,22 @@ function ViewToggle( { active, onChange } ) {
                 role="tab"
                 aria-selected={ active === 'list' }
                 tabIndex={ active === 'list' ? 0 : -1 }
-                className={ `dono-cmp-toggle${ active === 'list' ? ' is-active' : '' }` }
+                className={ `giveflow-cmp-toggle${ active === 'list' ? ' is-active' : '' }` }
                 onClick={ () => onChange( 'list' ) }
             >
                 <IconList />
-                { __( 'List', 'dono-fundraising-platform' ) }
+                { __( 'List', 'giveflow-fundraising-campaigns' ) }
             </button>
             <button
                 type="button"
                 role="tab"
                 aria-selected={ active === 'insights' }
                 tabIndex={ active === 'insights' ? 0 : -1 }
-                className={ `dono-cmp-toggle${ active === 'insights' ? ' is-active' : '' }` }
+                className={ `giveflow-cmp-toggle${ active === 'insights' ? ' is-active' : '' }` }
                 onClick={ () => onChange( 'insights' ) }
             >
                 <IconInsights />
-                { __( 'Insights', 'dono-fundraising-platform' ) }
+                { __( 'Insights', 'giveflow-fundraising-campaigns' ) }
             </button>
         </div>
     );
@@ -480,7 +480,7 @@ function DonorsRoot() {
 }
 
 document.addEventListener( 'DOMContentLoaded', () => {
-    const root = document.getElementById( 'dono-admin-donors' );
+    const root = document.getElementById( 'giveflow-admin-donors' );
     if ( ! root ) return;
     createRoot( root ).render( <><DonorsRoot /><Toaster /></> );
 } );

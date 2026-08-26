@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Unit\Gateways;
+namespace GiveFlow\Tests\Unit\Gateways;
 
-use Dono\Gateways\Stripe\StripeAccount;
+use GiveFlow\Gateways\Stripe\StripeAccount;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 

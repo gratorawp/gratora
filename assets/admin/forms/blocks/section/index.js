@@ -1,5 +1,5 @@
 /**
- * dono/section: a styled container for headings and copy.
+ * giveflow/section: a styled container for headings and copy.
  *
  * Storage is plain custom attributes (no WP block-supports, no Style Engine).
  * The editor + the donor-facing runtime + the server walker all read the
@@ -19,17 +19,17 @@ import Slider         from '../../../_shared/components/Slider';
 import BoxControl     from '../../../_shared/components/BoxControl';
 import Segmented      from '../../../_shared/components/Segmented';
 
-const NAME = 'dono/section';
-const ALLOWED = [ 'dono/heading', 'dono/paragraph', 'dono/section' ];
+const NAME = 'giveflow/section';
+const ALLOWED = [ 'giveflow/heading', 'giveflow/paragraph', 'giveflow/section' ];
 
 const BORDER_STYLES = [ 'none', 'solid', 'dashed', 'dotted' ];
 
 const SHADOW_PRESETS = [
-    { value: '',                                                                       label: __( 'None',       'dono-fundraising-platform' ) },
-    { value: '0 1px 2px rgba(15,23,42,.06)',                                           label: __( 'Subtle',     'dono-fundraising-platform' ) },
-    { value: '0 1px 3px rgba(15,23,42,.08), 0 1px 2px rgba(15,23,42,.04)',             label: __( 'Soft',       'dono-fundraising-platform' ) },
-    { value: '0 4px 14px rgba(15,23,42,.10)',                                          label: __( 'Medium',     'dono-fundraising-platform' ) },
-    { value: '0 12px 32px rgba(15,23,42,.14)',                                         label: __( 'Pronounced', 'dono-fundraising-platform' ) },
+    { value: '',                                                                       label: __( 'None',       'giveflow-fundraising-campaigns' ) },
+    { value: '0 1px 2px rgba(15,23,42,.06)',                                           label: __( 'Subtle',     'giveflow-fundraising-campaigns' ) },
+    { value: '0 1px 3px rgba(15,23,42,.08), 0 1px 2px rgba(15,23,42,.04)',             label: __( 'Soft',       'giveflow-fundraising-campaigns' ) },
+    { value: '0 4px 14px rgba(15,23,42,.10)',                                          label: __( 'Medium',     'giveflow-fundraising-campaigns' ) },
+    { value: '0 12px 32px rgba(15,23,42,.14)',                                         label: __( 'Pronounced', 'giveflow-fundraising-campaigns' ) },
 ];
 
 /**
@@ -81,53 +81,53 @@ function Edit( { attributes, setAttributes } ) {
     const [ showCustomShadow, setShowCustomShadow ] = useState( !! shadow && ! isPresetShadow );
 
     const blockProps = useBlockProps( {
-        className: 'dono-block-preview dono-block-preview--section',
+        className: 'giveflow-block-preview giveflow-block-preview--section',
         style:     sectionStyle( attributes ),
     } );
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Section', 'dono-fundraising-platform' ) } initialOpen>
-                    <Field label={ __( 'Background color', 'dono-fundraising-platform' ) }>
+                <PanelBody title={ __( 'Section', 'giveflow-fundraising-campaigns' ) } initialOpen>
+                    <Field label={ __( 'Background color', 'giveflow-fundraising-campaigns' ) }>
                         <ColorInput value={ background } onChange={ ( v ) => setAttributes( { background: v } ) } />
                     </Field>
 
-                    <Field label={ __( 'Text color', 'dono-fundraising-platform' ) }>
+                    <Field label={ __( 'Text color', 'giveflow-fundraising-campaigns' ) }>
                         <ColorInput value={ textColor } onChange={ ( v ) => setAttributes( { textColor: v } ) } />
                     </Field>
 
-                    <Field label={ __( 'Border color', 'dono-fundraising-platform' ) }>
+                    <Field label={ __( 'Border color', 'giveflow-fundraising-campaigns' ) }>
                         <ColorInput value={ border.color } onChange={ ( v ) => setBorder( { color: v } ) } />
                     </Field>
                     <Slider
-                        label={ __( 'Border width', 'dono-fundraising-platform' ) }
+                        label={ __( 'Border width', 'giveflow-fundraising-campaigns' ) }
                         value={ border.width || 0 }
                         onChange={ ( v ) => setBorder( { width: v } ) }
                         min={ 0 } max={ 20 } unit="px"
                     />
                     <Segmented
-                        label={ __( 'Border style', 'dono-fundraising-platform' ) }
+                        label={ __( 'Border style', 'giveflow-fundraising-campaigns' ) }
                         value={ border.style || 'solid' }
                         onChange={ ( v ) => setBorder( { style: v } ) }
                         options={ BORDER_STYLES }
                     />
                     <Slider
-                        label={ __( 'Border radius', 'dono-fundraising-platform' ) }
+                        label={ __( 'Border radius', 'giveflow-fundraising-campaigns' ) }
                         value={ border.radius || 0 }
                         onChange={ ( v ) => setBorder( { radius: v } ) }
                         min={ 0 } max={ 60 } unit="px"
                     />
 
-                    <Field label={ __( 'Shadow', 'dono-fundraising-platform' ) }>
-                        <div className="dono-shadow-grid">
+                    <Field label={ __( 'Shadow', 'giveflow-fundraising-campaigns' ) }>
+                        <div className="giveflow-shadow-grid">
                             { SHADOW_PRESETS.map( ( p ) => {
                                 const isOn = ! showCustomShadow && shadow === p.value;
                                 return (
                                     <button
                                         key={ p.label }
                                         type="button"
-                                        className={ `dono-shadow-grid__tile ${ isOn ? 'is-on' : '' }` }
+                                        className={ `giveflow-shadow-grid__tile ${ isOn ? 'is-on' : '' }` }
                                         title={ p.label }
                                         aria-label={ p.label }
                                         aria-pressed={ isOn }
@@ -137,12 +137,12 @@ function Edit( { attributes, setAttributes } ) {
                                         } }
                                     >
                                         { p.value === '' ? (
-                                            <span className="dono-shadow-grid__tile__none">
-                                                { __( 'None', 'dono-fundraising-platform' ) }
+                                            <span className="giveflow-shadow-grid__tile__none">
+                                                { __( 'None', 'giveflow-fundraising-campaigns' ) }
                                             </span>
                                         ) : (
                                             <span
-                                                className="dono-shadow-grid__tile__sample"
+                                                className="giveflow-shadow-grid__tile__sample"
                                                 style={ { boxShadow: p.value } }
                                             />
                                         ) }
@@ -152,20 +152,20 @@ function Edit( { attributes, setAttributes } ) {
                         </div>
                     </Field>
                     <Field>
-                        <label className="dono-checkbox-row">
+                        <label className="giveflow-checkbox-row">
                             <input
                                 type="checkbox"
                                 checked={ showCustomShadow }
                                 onChange={ ( e ) => setShowCustomShadow( e.target.checked ) }
                             />
-                            <span>{ __( 'Use custom shadow value', 'dono-fundraising-platform' ) }</span>
+                            <span>{ __( 'Use custom shadow value', 'giveflow-fundraising-campaigns' ) }</span>
                         </label>
                     </Field>
                     { showCustomShadow && (
-                        <Field label={ __( 'Custom shadow CSS', 'dono-fundraising-platform' ) } help={ __( 'Any valid box-shadow value.', 'dono-fundraising-platform' ) }>
+                        <Field label={ __( 'Custom shadow CSS', 'giveflow-fundraising-campaigns' ) } help={ __( 'Any valid box-shadow value.', 'giveflow-fundraising-campaigns' ) }>
                             <input
                                 type="text"
-                                className="dono-input"
+                                className="giveflow-input"
                                 value={ shadow }
                                 onChange={ ( e ) => setAttributes( { shadow: e.target.value } ) }
                                 placeholder="0 4px 14px rgba(0,0,0,.1)"
@@ -174,7 +174,7 @@ function Edit( { attributes, setAttributes } ) {
                     ) }
 
                     <BoxControl
-                        title={ __( 'Padding', 'dono-fundraising-platform' ) }
+                        title={ __( 'Padding', 'giveflow-fundraising-campaigns' ) }
                         value={ padding }
                         onChange={ ( next ) => setAttributes( { padding: { ...padding, ...next } } ) }
                         sides="four"
@@ -182,7 +182,7 @@ function Edit( { attributes, setAttributes } ) {
                         linkable
                     />
                     <BoxControl
-                        title={ __( 'Margin', 'dono-fundraising-platform' ) }
+                        title={ __( 'Margin', 'giveflow-fundraising-campaigns' ) }
                         value={ margin }
                         onChange={ ( next ) => setAttributes( { margin: { ...margin, ...next } } ) }
                         sides="four"
@@ -190,7 +190,7 @@ function Edit( { attributes, setAttributes } ) {
                         linkable
                     />
                     <Slider
-                        label={ __( 'Minimum height', 'dono-fundraising-platform' ) }
+                        label={ __( 'Minimum height', 'giveflow-fundraising-campaigns' ) }
                         value={ minHeight || 0 }
                         onChange={ ( v ) => setAttributes( { minHeight: v } ) }
                         min={ 0 } max={ 800 } unit="px"
@@ -214,9 +214,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Section', 'dono-fundraising-platform' ),
-        description: __( 'A styled container for headings and copy. Use it for hero areas, impact statements, or intro blurbs.', 'dono-fundraising-platform' ),
-        category:    'dono-content',
+        title:       __( 'Section', 'giveflow-fundraising-campaigns' ),
+        description: __( 'A styled container for headings and copy. Use it for hero areas, impact statements, or intro blurbs.', 'giveflow-fundraising-campaigns' ),
+        category:    'giveflow-content',
         icon:        BlockIcons[ 'section' ],
         supports:    { html: false, anchor: false, inserter: true },
         attributes: {

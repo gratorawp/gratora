@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Gateways\Stripe;
+namespace GiveFlow\Gateways\Stripe;
 
-use Dono\Recurring\RecurringPlan;
+use GiveFlow\Recurring\RecurringPlan;
 
 /**
  * Tells an admin that Stripe webhooks are being rejected.
@@ -68,7 +68,7 @@ final class StripeWebhookNotice
      */
     private function switchedOn(): bool
     {
-        $cfg = get_option('dono_gateway_config', []);
+        $cfg = get_option('giveflow_gateway_config', []);
         if (! is_array($cfg)) {
             return true;
         }
@@ -83,13 +83,13 @@ final class StripeWebhookNotice
             return;
         }
 
-        echo '<div class="notice dono-admin-notice" role="alert" style="'
+        echo '<div class="notice giveflow-admin-notice" role="alert" style="'
             . 'border:1px solid #e5e7eb;border-left:3px solid #b54708;border-radius:8px;'
             . 'background:#fffaf5;color:#b54708;padding:11px 14px;'
             . 'font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Oxygen,Ubuntu,sans-serif;'
             . 'font-size:13px;line-height:1.45;">'
-            . '<strong>Dono:</strong> '
-            . esc_html__('Stripe is connected but its webhook signing secret is missing. Recurring renewals, payment confirmations, and account updates will not process until you add it under Dono, Settings, Payment gateways.', 'dono-fundraising-platform')
+            . '<strong>GiveFlow:</strong> '
+            . esc_html__('Stripe is connected but its webhook signing secret is missing. Recurring renewals, payment confirmations, and account updates will not process until you add it under GiveFlow, Settings, Payment gateways.', 'giveflow-fundraising-campaigns')
             . '</div>';
     }
 }

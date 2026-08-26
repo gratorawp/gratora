@@ -10,9 +10,9 @@ import { ToggleRow } from '../../_shared/components/Switch';
 import { notify } from '../../_shared/notify';
 
 const SCOPES = [
-    { key: 'donation', label: __( 'Donation', 'dono-fundraising-platform' ) },
-    { key: 'receipt',  label: __( 'Receipt', 'dono-fundraising-platform' ) },
-    { key: 'refund',   label: __( 'Refund', 'dono-fundraising-platform' ) },
+    { key: 'donation', label: __( 'Donation', 'giveflow-fundraising-campaigns' ) },
+    { key: 'receipt',  label: __( 'Receipt', 'giveflow-fundraising-campaigns' ) },
+    { key: 'refund',   label: __( 'Refund', 'giveflow-fundraising-campaigns' ) },
 ];
 
 /**
@@ -59,7 +59,7 @@ export const isRefToken = ( raw ) => /^[A-Za-z0-9_-]+$/.test( String( raw ) );
 export const asRefToken = ( raw, fallback ) =>
     String( raw ?? '' ).replace( /[^A-Za-z0-9_-]/g, '' ) || fallback;
 
-const tokenHelp = __( 'Letters, numbers, hyphens and underscores only.', 'dono-fundraising-platform' );
+const tokenHelp = __( 'Letters, numbers, hyphens and underscores only.', 'giveflow-fundraising-campaigns' );
 
 /** @since 1.0.0 */
 function TokenInput( { value, bind, maxLength, placeholder, style } ) {
@@ -68,7 +68,7 @@ function TokenInput( { value, bind, maxLength, placeholder, style } ) {
         <>
             <input
                 type="text"
-                className={ `dono-input${ invalid ? ' is-invalid' : '' }` }
+                className={ `giveflow-input${ invalid ? ' is-invalid' : '' }` }
                 aria-invalid={ invalid || undefined }
                 maxLength={ maxLength }
                 placeholder={ placeholder }
@@ -76,7 +76,7 @@ function TokenInput( { value, bind, maxLength, placeholder, style } ) {
                 { ...bind }
             />
             { invalid && (
-                <p className="dono-form-row__field-help" style={ { color: '#b42318' } }>{ tokenHelp }</p>
+                <p className="giveflow-form-row__field-help" style={ { color: '#b42318' } }>{ tokenHelp }</p>
             ) }
         </>
     );
@@ -88,7 +88,7 @@ export default function NumberingPanel( { s , active } ) {
     // Live (possibly unsaved) format drives the format-card preview.
     const rawSep    = String( s.value( 'separator', '-' ) );
     const rawPrefix = {
-        donation: String( s.value( 'prefixes.donation', 'DONO' ) ),
+        donation: String( s.value( 'prefixes.donation', 'DON' ) ),
         receipt:  String( s.value( 'prefixes.receipt', 'REC' ) ),
         refund:   String( s.value( 'prefixes.refund', 'REF' ) ),
     };
@@ -115,7 +115,7 @@ export default function NumberingPanel( { s , active } ) {
         includeYear: saved.include_year !== false,
     };
     const savedPrefix = {
-        donation: String( saved.prefixes?.donation ?? 'DONO' ),
+        donation: String( saved.prefixes?.donation ?? 'DON' ),
         receipt:  String( saved.prefixes?.receipt ?? 'REC' ),
         refund:   String( saved.prefixes?.refund ?? 'REF' ),
     };
@@ -130,7 +130,7 @@ export default function NumberingPanel( { s , active } ) {
 
     const loadCounters = () => {
         setLoadError( false );
-        apiFetch( { path: '/dono/v1/admin/numbering/counters' } )
+        apiFetch( { path: '/giveflow/v1/admin/numbering/counters' } )
             .then( ( data ) => {
                 setCounters( data || {} );
                 setDrafts( data || {} );
@@ -151,15 +151,15 @@ export default function NumberingPanel( { s , active } ) {
         setBusy( key );
         try {
             const res = await apiFetch( {
-                path:   '/dono/v1/admin/numbering/counter',
+                path:   '/giveflow/v1/admin/numbering/counter',
                 method: 'POST',
                 data:   { scope: key, next },
             } );
             setCounters( ( prev ) => ( { ...prev, [ key ]: res.next } ) );
             setDrafts( ( prev ) => ( { ...prev, [ key ]: res.next } ) );
-            notify.success( __( 'Next number updated.', 'dono-fundraising-platform' ) );
+            notify.success( __( 'Next number updated.', 'giveflow-fundraising-campaigns' ) );
         } catch ( err ) {
-            notify.error( err?.message || __( 'Could not update the counter.', 'dono-fundraising-platform' ) );
+            notify.error( err?.message || __( 'Could not update the counter.', 'giveflow-fundraising-campaigns' ) );
             setDrafts( ( prev ) => ( { ...prev, [ key ]: counters[ key ] } ) );
         } finally {
             setBusy( '' );
@@ -169,35 +169,35 @@ export default function NumberingPanel( { s , active } ) {
     const confirmSet = ( key, label ) => {
         const next = Number( drafts[ key ] );
         setConfirm( {
-            title:        __( 'Set next number', 'dono-fundraising-platform' ),
+            title:        __( 'Set next number', 'giveflow-fundraising-campaigns' ),
             message:      sprintf(
                 /* translators: 1: reference type, 2: the formatted next reference */
-                __( 'The next %1$s reference will be %2$s. A counter can only move forward, so this cannot be lowered later. Continue?', 'dono-fundraising-platform' ),
+                __( 'The next %1$s reference will be %2$s. A counter can only move forward, so this cannot be lowered later. Continue?', 'giveflow-fundraising-campaigns' ),
                 label.toLowerCase(),
                 buildRef( savedFmt, savedPrefix[ key ], next, year ),
             ),
-            confirmLabel: __( 'Set number', 'dono-fundraising-platform' ),
+            confirmLabel: __( 'Set number', 'giveflow-fundraising-campaigns' ),
             destructive:  false,
             onConfirm:    () => doSet( key ),
         } );
     };
 
     return (
-        <div className="dono-panel">
+        <div className="giveflow-panel">
             <Card
-                title={ __( 'Reference numbering', 'dono-fundraising-platform' ) }
-                sub={ __( 'How donations, receipts, and refunds are numbered. References are gap-free and increment automatically.', 'dono-fundraising-platform' ) }
+                title={ __( 'Reference numbering', 'giveflow-fundraising-campaigns' ) }
+                sub={ __( 'How donations, receipts, and refunds are numbered. References are gap-free and increment automatically.', 'giveflow-fundraising-campaigns' ) }
                 edited={ s.isDirty }
             >
-                <div className="dono-ref-previews">
+                <div className="giveflow-ref-previews">
                     { SCOPES.map( ( p ) => {
                         const { head, seq } = refParts( liveFmt, livePrefix[ p.key ], 1, year );
                         return (
-                            <div key={ p.key } className="dono-ref-preview">
-                                <span className="dono-ref-preview__label">{ p.label }</span>
-                                <span className="dono-ref-preview__value">
+                            <div key={ p.key } className="giveflow-ref-preview">
+                                <span className="giveflow-ref-preview__label">{ p.label }</span>
+                                <span className="giveflow-ref-preview__value">
                                     { head }
-                                    <span className="dono-ref-preview__seq">{ seq }</span>
+                                    <span className="giveflow-ref-preview__seq">{ seq }</span>
                                 </span>
                             </div>
                         );
@@ -205,20 +205,20 @@ export default function NumberingPanel( { s , active } ) {
                 </div>
 
                 <FormRow
-                    label={ __( 'Donation prefix', 'dono-fundraising-platform' ) }
-                    help={ __( 'Leads every donation reference.', 'dono-fundraising-platform' ) }
+                    label={ __( 'Donation prefix', 'giveflow-fundraising-campaigns' ) }
+                    help={ __( 'Leads every donation reference.', 'giveflow-fundraising-campaigns' ) }
                 >
                     <TokenInput
                         value={ rawPrefix.donation }
                         maxLength={ 8 }
-                        placeholder="DONO"
-                        bind={ s.bind( 'prefixes.donation', 'DONO' ) }
+                        placeholder="DON"
+                        bind={ s.bind( 'prefixes.donation', 'DON' ) }
                     />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Receipt prefix', 'dono-fundraising-platform' ) }
-                    help={ __( 'Leads every receipt number.', 'dono-fundraising-platform' ) }
+                    label={ __( 'Receipt prefix', 'giveflow-fundraising-campaigns' ) }
+                    help={ __( 'Leads every receipt number.', 'giveflow-fundraising-campaigns' ) }
                 >
                     <TokenInput
                         value={ rawPrefix.receipt }
@@ -229,8 +229,8 @@ export default function NumberingPanel( { s , active } ) {
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Refund prefix', 'dono-fundraising-platform' ) }
-                    help={ __( 'Leads every refund reference.', 'dono-fundraising-platform' ) }
+                    label={ __( 'Refund prefix', 'giveflow-fundraising-campaigns' ) }
+                    help={ __( 'Leads every refund reference.', 'giveflow-fundraising-campaigns' ) }
                 >
                     <TokenInput
                         value={ rawPrefix.refund }
@@ -241,8 +241,8 @@ export default function NumberingPanel( { s , active } ) {
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Separator', 'dono-fundraising-platform' ) }
-                    help={ __( 'Character between the prefix, year, and number.', 'dono-fundraising-platform' ) }
+                    label={ __( 'Separator', 'giveflow-fundraising-campaigns' ) }
+                    help={ __( 'Character between the prefix, year, and number.', 'giveflow-fundraising-campaigns' ) }
                 >
                     <TokenInput
                         value={ rawSep }
@@ -254,12 +254,12 @@ export default function NumberingPanel( { s , active } ) {
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Minimum digits', 'dono-fundraising-platform' ) }
-                    help={ __( 'Zero-padded width of the running number. 5 gives 00001.', 'dono-fundraising-platform' ) }
+                    label={ __( 'Minimum digits', 'giveflow-fundraising-campaigns' ) }
+                    help={ __( 'Zero-padded width of the running number. 5 gives 00001.', 'giveflow-fundraising-campaigns' ) }
                 >
                     <input
                         type="number"
-                        className="dono-input"
+                        className="giveflow-input"
                         min={ 1 }
                         max={ 12 }
                         style={ { maxWidth: 90 } }
@@ -268,38 +268,38 @@ export default function NumberingPanel( { s , active } ) {
                 </FormRow>
 
                 <ToggleRow
-                    title={ __( 'Include the year', 'dono-fundraising-platform' ) }
-                    sub={ __( 'Adds the current year, e.g. DONO-2026-00001 instead of DONO-00001.', 'dono-fundraising-platform' ) }
+                    title={ __( 'Include the year', 'giveflow-fundraising-campaigns' ) }
+                    sub={ __( 'Adds the current year, e.g. DON-2026-00001 instead of DON-00001.', 'giveflow-fundraising-campaigns' ) }
                     checked={ liveFmt.includeYear }
                     onChange={ s.setValue( 'include_year' ) }
                 />
 
                 <ToggleRow
-                    title={ __( 'Reset numbering each year', 'dono-fundraising-platform' ) }
-                    sub={ __( 'Start again at 1 every January. Turn off for one continuous sequence across years.', 'dono-fundraising-platform' ) }
+                    title={ __( 'Reset numbering each year', 'giveflow-fundraising-campaigns' ) }
+                    sub={ __( 'Start again at 1 every January. Turn off for one continuous sequence across years.', 'giveflow-fundraising-campaigns' ) }
                     checked={ !! s.value( 'reset_yearly', true ) }
                     onChange={ s.setValue( 'reset_yearly' ) }
                 />
             </Card>
 
             <Card
-                title={ __( 'Next numbers', 'dono-fundraising-platform' ) }
-                sub={ __( 'The number each type will use next. Jump a counter forward to continue an existing sequence; it can only increase, never go back.', 'dono-fundraising-platform' ) }
+                title={ __( 'Next numbers', 'giveflow-fundraising-campaigns' ) }
+                sub={ __( 'The number each type will use next. Jump a counter forward to continue an existing sequence; it can only increase, never go back.', 'giveflow-fundraising-campaigns' ) }
             >
                 { s.isDirty && (
                     <p style={ { margin: '0 0 14px', fontSize: 12.5, color: '#b54708' } }>
-                        { __( 'You have unsaved format changes above. Previews here use the saved format, so save first if you want new references to use the updated format.', 'dono-fundraising-platform' ) }
+                        { __( 'You have unsaved format changes above. Previews here use the saved format, so save first if you want new references to use the updated format.', 'giveflow-fundraising-campaigns' ) }
                     </p>
                 ) }
                 { loadError ? (
                     <div style={ { display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' } }>
                         <p style={ { color: '#b42318', margin: 0 } }>
-                            { __( 'Could not load the current counters.', 'dono-fundraising-platform' ) }
+                            { __( 'Could not load the current counters.', 'giveflow-fundraising-campaigns' ) }
                         </p>
-                        <Btn variant="secondary" onClick={ loadCounters }>{ __( 'Retry', 'dono-fundraising-platform' ) }</Btn>
+                        <Btn variant="secondary" onClick={ loadCounters }>{ __( 'Retry', 'giveflow-fundraising-campaigns' ) }</Btn>
                     </div>
                 ) : counters === null ? (
-                    <p style={ { color: '#6b7280' } }>{ __( 'Loading…', 'dono-fundraising-platform' ) }</p>
+                    <p style={ { color: '#6b7280' } }>{ __( 'Loading…', 'giveflow-fundraising-campaigns' ) }</p>
                 ) : (
                     SCOPES.map( ( p ) => {
                         const current = Number( counters[ p.key ] ?? 1 );
@@ -314,14 +314,14 @@ export default function NumberingPanel( { s , active } ) {
                                 label={ p.label }
                                 help={ sprintf(
                                     /* translators: %s: the formatted next reference */
-                                    __( 'Next reference: %s', 'dono-fundraising-platform' ),
+                                    __( 'Next reference: %s', 'giveflow-fundraising-campaigns' ),
                                     buildRef( savedFmt, savedPrefix[ p.key ], Number( draft ) || current, year ),
                                 ) }
                             >
                                 <div style={ { display: 'flex', gap: 8, alignItems: 'center' } }>
                                     <input
                                         type="number"
-                                        className="dono-input"
+                                        className="giveflow-input"
                                         min={ current }
                                         style={ { maxWidth: 120 } }
                                         value={ draft }
@@ -333,7 +333,7 @@ export default function NumberingPanel( { s , active } ) {
                                         disabled={ ! changed || busy === p.key }
                                         isBusy={ busy === p.key }
                                     >
-                                        { __( 'Set', 'dono-fundraising-platform' ) }
+                                        { __( 'Set', 'giveflow-fundraising-campaigns' ) }
                                     </Btn>
                                 </div>
                             </FormRow>

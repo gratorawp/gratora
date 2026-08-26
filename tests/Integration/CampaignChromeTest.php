@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Campaigns\Campaign;
-use Dono\Campaigns\CampaignChrome;
-use Dono\Campaigns\CampaignRepository;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Campaigns\CampaignChrome;
+use GiveFlow\Campaigns\CampaignRepository;
 use WP_REST_Request;
 
 /**
@@ -36,7 +36,7 @@ final class CampaignChromeTest extends IntegrationTestCase
             'post_type'   => 'page',
             'post_status' => 'publish',
             'post_title'  => 'Chrome page',
-            'meta_input'  => ['_dono_campaign_id' => $campaignId],
+            'meta_input'  => ['_giveflow_campaign_id' => $campaignId],
         ]);
     }
 
@@ -44,7 +44,7 @@ final class CampaignChromeTest extends IntegrationTestCase
     {
         $c = $this->makeCampaign(false, false);
 
-        $req = new WP_REST_Request('PUT', '/dono/v1/admin/campaigns/' . $c->id);
+        $req = new WP_REST_Request('PUT', '/giveflow/v1/admin/campaigns/' . $c->id);
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) json_encode(['hide_header' => true, 'hide_footer' => true]));
         $data = rest_do_request($req)->get_data();

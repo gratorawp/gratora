@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Foundation\References\ReferenceGenerator;
-use Dono\Foundation\Time\FrozenClock;
+use GiveFlow\Foundation\References\ReferenceGenerator;
+use GiveFlow\Foundation\Time\FrozenClock;
 
 final class ReferenceGeneratorTest extends IntegrationTestCase
 {
@@ -15,67 +15,67 @@ final class ReferenceGeneratorTest extends IntegrationTestCase
         delete_option(ReferenceGenerator::OPTION_SETTINGS);
         // Wipe any counter rows lingering across tests.
         self::$wpdb->query(
-            "DELETE FROM " . self::$prefix . "options WHERE option_name LIKE 'dono_reference_counter_%'"
+            "DELETE FROM " . self::$prefix . "options WHERE option_name LIKE 'giveflow_reference_counter_%'"
         );
     }
 
     public function test_next_increments_monotonically(): void
     {
         $gen = $this->generatorAt('2026-05-13');
-        $this->assertSame('DONO-2026-00001', $gen->next('donation'));
-        $this->assertSame('DONO-2026-00002', $gen->next('donation'));
-        $this->assertSame('DONO-2026-00003', $gen->next('donation'));
+        $this->assertSame('DON-2026-00001', $gen->next('donation'));
+        $this->assertSame('DON-2026-00002', $gen->next('donation'));
+        $this->assertSame('DON-2026-00003', $gen->next('donation'));
     }
 
     public function test_each_scope_has_its_own_counter(): void
     {
         $gen = $this->generatorAt('2026-05-13');
-        $this->assertSame('DONO-2026-00001', $gen->next('donation'));
+        $this->assertSame('DON-2026-00001', $gen->next('donation'));
         $this->assertSame('REC-2026-00001',  $gen->next('receipt'));
         $this->assertSame('REF-2026-00001',  $gen->next('refund'));
-        $this->assertSame('DONO-2026-00002', $gen->next('donation'));  // donation continues from 1
+        $this->assertSame('DON-2026-00002', $gen->next('donation'));  // donation continues from 1
         $this->assertSame('REC-2026-00002',  $gen->next('receipt'));
     }
 
     public function test_yearly_reset_starts_fresh_each_year(): void
     {
         $gen2026 = $this->generatorAt('2026-06-01');
-        $this->assertSame('DONO-2026-00001', $gen2026->next('donation'));
-        $this->assertSame('DONO-2026-00002', $gen2026->next('donation'));
+        $this->assertSame('DON-2026-00001', $gen2026->next('donation'));
+        $this->assertSame('DON-2026-00002', $gen2026->next('donation'));
 
         $gen2027 = $this->generatorAt('2027-01-01');
-        $this->assertSame('DONO-2027-00001', $gen2027->next('donation'),
+        $this->assertSame('DON-2027-00001', $gen2027->next('donation'),
             'Counter resets at year boundary when reset_yearly = true');
     }
 
     public function test_continuous_numbering_when_reset_yearly_disabled(): void
     {
         update_option(ReferenceGenerator::OPTION_SETTINGS, [
-            'prefixes'     => ['donation' => 'DONO'],
+            'prefixes'     => ['donation' => 'DON'],
             'padding'      => 5,
             'include_year' => true,
             'reset_yearly' => false,
         ]);
 
         $gen2026 = $this->generatorAt('2026-06-01');
-        $this->assertSame('DONO-2026-00001', $gen2026->next('donation'));
-        $this->assertSame('DONO-2026-00002', $gen2026->next('donation'));
+        $this->assertSame('DON-2026-00001', $gen2026->next('donation'));
+        $this->assertSame('DON-2026-00002', $gen2026->next('donation'));
 
         $gen2027 = $this->generatorAt('2027-01-01');
-        $this->assertSame('DONO-2027-00003', $gen2027->next('donation'),
+        $this->assertSame('DON-2027-00003', $gen2027->next('donation'),
             'Counter continues across years when reset_yearly = false');
     }
 
     public function test_next_number_override_jumps_counter_forward(): void
     {
         $gen = $this->generatorAt('2026-05-13');
-        $this->assertSame('DONO-2026-00001', $gen->next('donation'));
-        $this->assertSame('DONO-2026-00002', $gen->next('donation'));
+        $this->assertSame('DON-2026-00001', $gen->next('donation'));
+        $this->assertSame('DON-2026-00002', $gen->next('donation'));
 
         $gen->nextNumber('donation', 5847);
 
-        $this->assertSame('DONO-2026-05847', $gen->next('donation'));
-        $this->assertSame('DONO-2026-05848', $gen->next('donation'));
+        $this->assertSame('DON-2026-05847', $gen->next('donation'));
+        $this->assertSame('DON-2026-05848', $gen->next('donation'));
     }
 
     public function test_next_number_rejects_value_at_or_below_current(): void
@@ -101,7 +101,7 @@ final class ReferenceGeneratorTest extends IntegrationTestCase
         $gen = $this->generatorAt('2026-05-13');
         $this->assertSame(1, $gen->peekNext('donation'));
         $this->assertSame(1, $gen->peekNext('donation'));  // idempotent
-        $this->assertSame('DONO-2026-00001', $gen->next('donation'));  // first call increments
+        $this->assertSame('DON-2026-00001', $gen->next('donation'));  // first call increments
         $this->assertSame(2, $gen->peekNext('donation'));
     }
 

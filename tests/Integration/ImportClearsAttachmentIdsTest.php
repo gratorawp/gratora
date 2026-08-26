@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donors\Donor;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
-use Dono\Foundation\Transfer\DataExporter;
-use Dono\Foundation\Transfer\DataImporter;
-use Dono\Vendor\Queryable\DB;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Foundation\Transfer\DataExporter;
+use GiveFlow\Foundation\Transfer\DataImporter;
+use GiveFlow\Vendor\Queryable\DB;
 
 /**
  * An export carries no media, so a WordPress attachment id in it means nothing
@@ -43,8 +43,8 @@ final class ImportClearsAttachmentIdsTest extends IntegrationTestCase
     private function import(array $export): void
     {
         (new DataImporter(
-            Plugin::instance()->container->get(\Dono\Foundation\Crypto\Crypto::class),
-            Plugin::instance()->container->get(\Dono\Foundation\Identity\IdentityHasher::class),
+            Plugin::instance()->container->get(\GiveFlow\Foundation\Crypto\Crypto::class),
+            Plugin::instance()->container->get(\GiveFlow\Foundation\Identity\IdentityHasher::class),
         ))->import($export);
     }
 
@@ -63,8 +63,8 @@ final class ImportClearsAttachmentIdsTest extends IntegrationTestCase
 
         // Wipe the row so the import creates it rather than matching it.
         $prefix = DB::getPrefix();
-        DB::raw("DELETE FROM {$prefix}dono_donations");
-        DB::raw("DELETE FROM {$prefix}dono_donors");
+        DB::raw("DELETE FROM {$prefix}giveflow_donations");
+        DB::raw("DELETE FROM {$prefix}giveflow_donors");
 
         $this->import($export);
 

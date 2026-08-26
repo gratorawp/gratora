@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
 use ReflectionClass;
-use Dono\Admin\AdminMenu;
+use GiveFlow\Admin\AdminMenu;
 
 /**
  * The admin menu slug is a `page=` query value, not a text domain.
  *
- * They look identical in source: `{ page: 'dono' }` sits on the same line as
- * `__( 'Dono', 'dono' )`, so a sweep that renames the domain takes the slug
- * with it and every "Dono" breadcrumb 404s. That is exactly what happened, and
+ * They look identical in source: `{ page: 'giveflow' }` sits on the same line as
+ * `__( 'GiveFlow', 'giveflow' )`, so a sweep that renames the domain takes the slug
+ * with it and every "GiveFlow" breadcrumb 404s. That is exactly what happened, and
  * nothing caught it because no test ever followed the link.
  */
 final class AdminPageSlugTest extends IntegrationTestCase
@@ -20,7 +20,7 @@ final class AdminPageSlugTest extends IntegrationTestCase
     private function jsSlug(): string
     {
         $js = (string) file_get_contents(
-            DONO_DIR . 'assets/admin/_shared/adminPages.js'
+            GIVEFLOW_DIR . 'assets/admin/_shared/adminPages.js'
         );
 
         $this->assertMatchesRegularExpression(
@@ -53,7 +53,7 @@ final class AdminPageSlugTest extends IntegrationTestCase
         // linking page= to the text domain is linking to nothing.
         $hits = [];
         $dir  = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator(DONO_DIR . 'assets/admin')
+            new \RecursiveDirectoryIterator(GIVEFLOW_DIR . 'assets/admin')
         );
 
         foreach ($dir as $file) {
@@ -61,8 +61,8 @@ final class AdminPageSlugTest extends IntegrationTestCase
                 continue;
             }
             $body = (string) file_get_contents($file->getPathname());
-            if (str_contains($body, "page: 'dono-fundraising-platform'")
-                || str_contains($body, "page=dono-fundraising-platform")) {
+            if (str_contains($body, "page: 'giveflow-fundraising-campaigns'")
+                || str_contains($body, "page=giveflow-fundraising-campaigns")) {
                 $hits[] = $file->getPathname();
             }
         }

@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Dono\Donors\Erasure;
+namespace GiveFlow\Donors\Erasure;
 
-use Dono\Donations\Donation;
-use Dono\Donations\DonationNote;
-use Dono\Donors\Consent;
-use Dono\Donors\DonorNote;
-use Dono\Donors\MagicLinkToken;
-use Dono\Donors\PendingSignup;
-use Dono\Donors\PendingSignupRepository;
-use Dono\Recurring\RecurringPlan;
-use Dono\Donations\Refund;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationNote;
+use GiveFlow\Donors\Consent;
+use GiveFlow\Donors\DonorNote;
+use GiveFlow\Donors\MagicLinkToken;
+use GiveFlow\Donors\PendingSignup;
+use GiveFlow\Donors\PendingSignupRepository;
+use GiveFlow\Recurring\RecurringPlan;
+use GiveFlow\Donations\Refund;
 
 /**
  * Core's own share of an erasure: everything hanging off the donor by foreign
@@ -26,7 +26,7 @@ final class CoreDonorDataHandler implements ErasureHandler
     /** @since 1.0.0 */
     public function key(): string
     {
-        return 'dono.core';
+        return 'giveflow.core';
     }
 
     /** @since 1.0.0 */

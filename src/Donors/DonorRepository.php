@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Donors;
+namespace GiveFlow\Donors;
 
 use DateTimeImmutable;
-use Dono\Donations\DonationQueries;
-use Dono\Vendor\Queryable\DB;
+use GiveFlow\Donations\DonationQueries;
+use GiveFlow\Vendor\Queryable\DB;
 
 /**
  * Donor reads for the admin list, insights and portal.
@@ -73,7 +73,7 @@ final class DonorRepository
     public static function testOnlyDonorPredicate(): string
     {
         $prefix = DB::getPrefix();
-        $any    = "SELECT 1 FROM {$prefix}dono_donations d WHERE d.donor_id = {$prefix}dono_donors.id";
+        $any    = "SELECT 1 FROM {$prefix}giveflow_donations d WHERE d.donor_id = {$prefix}giveflow_donors.id";
 
         return "(EXISTS ({$any}) AND NOT EXISTS ({$any} AND d.is_test = 0))";
     }
@@ -135,8 +135,8 @@ final class DonorRepository
         // donations_count leads because it decides for almost every donor, but
         // it cannot replace the subquery: a live donation the counter does not
         // count, a ticket order, still has to satisfy this.
-        return "({$prefix}dono_donors.donations_count > 0 OR EXISTS (SELECT 1 FROM {$prefix}dono_donations d "
-            . "WHERE d.donor_id = {$prefix}dono_donors.id AND d.is_test = 0))";
+        return "({$prefix}giveflow_donors.donations_count > 0 OR EXISTS (SELECT 1 FROM {$prefix}giveflow_donations d "
+            . "WHERE d.donor_id = {$prefix}giveflow_donors.id AND d.is_test = 0))";
     }
 
     /**
@@ -216,7 +216,7 @@ final class DonorRepository
         // with_donations gates on donations_count, which is live-only by
         // construction, and a test-only donor carries total_donated_cents 0, so
         // the money cards cannot move.
-        $base = fn () => DB::table('dono_donors');
+        $base = fn () => DB::table('giveflow_donors');
 
         $totalCount    = (int) $applyFilters($base())->count();
         $withDonations = (int) $applyFilters($base())->where('donations_count', 0, '>')->count();
@@ -256,7 +256,7 @@ final class DonorRepository
         $atRiskCut = esc_sql($this->daysAgo($today, $atRiskDays));
         $lapsedCut = esc_sql($this->daysAgo($today, $lapsedDays));
 
-        $row = DB::table('dono_donors')
+        $row = DB::table('giveflow_donors')
             ->whereRaw('redacted_at IS NULL AND ' . $this->givingDonorPredicate())
             ->selectRaw("
                 COUNT(*) AS total,
@@ -305,9 +305,9 @@ final class DonorRepository
 
         $where = "redacted_at IS NULL AND last_donation_at < '{$activeCut}' AND last_donation_at >= '{$atRiskCut}'";
 
-        $total = (int) DB::table('dono_donors')->whereRaw($where)->count();
+        $total = (int) DB::table('giveflow_donors')->whereRaw($where)->count();
 
-        $rows = DB::table('dono_donors')
+        $rows = DB::table('giveflow_donors')
             ->whereRaw($where)
             ->selectRaw('id, first_name, last_name, email_encrypted, country, donations_count, total_donated_cents, last_donation_at, first_donation_at')
             ->orderBy('total_donated_cents', 'DESC')
@@ -343,7 +343,7 @@ final class DonorRepository
         // Donors who have given nothing are not part of a lifetime-value
         // ranking. Without this they pad the list to its limit with rows of
         // nobody at 0.00.
-        $rows = DB::table('dono_donors')
+        $rows = DB::table('giveflow_donors')
             // One fragment, not two: whereRaw contributes no AND connector, so
             // a second call runs straight into the first and the SQL will not
             // parse.
@@ -384,7 +384,7 @@ final class DonorRepository
         }
         $bucketExpr = 'CASE ' . implode(' ', $cases) . ' ELSE NULL END';
 
-        $rows = DB::table('dono_donors')
+        $rows = DB::table('giveflow_donors')
             ->whereRaw('redacted_at IS NULL AND total_donated_cents > 0')
             ->selectRaw("{$bucketExpr} AS bucket, COUNT(*) AS donor_count, COALESCE(SUM(total_donated_cents), 0) AS ltv")
             ->groupByRaw($bucketExpr)
@@ -450,7 +450,7 @@ final class DonorRepository
         // and a segment share was a share of a different denominator.
         //
         // One whereRaw: it emits no AND connector, so a second runs into it.
-        $rows = DB::table('dono_donors')
+        $rows = DB::table('giveflow_donors')
             ->whereRaw($this->givingDonorPredicate() . ' AND redacted_at IS NULL')
             ->selectRaw("
                 {$segmentCase} AS segment,
@@ -488,8 +488,8 @@ final class DonorRepository
      */
     public function donorCohortRetention(int $cohortMonths = 12, int $maxOffset = 12): array
     {
-        $donorsT    = DB::getPrefix() . 'dono_donors';
-        $donationsT = DB::getPrefix() . 'dono_donations';
+        $donorsT    = DB::getPrefix() . 'giveflow_donors';
+        $donationsT = DB::getPrefix() . 'giveflow_donations';
         $cutoff     = esc_sql((new DateTimeImmutable("first day of -{$cohortMonths} months"))->format('Y-m-d'));
 
         // Anchor each donor's cohort on their own earliest live donation, over
@@ -559,7 +559,7 @@ final class DonorRepository
     public function monthlyTimelineForDonor(int $donorId): array
     {
         $netExpr = DonationQueries::netBaseExpr();
-        $rows = DonationQueries::live(DB::table('dono_donations')
+        $rows = DonationQueries::live(DB::table('giveflow_donations')
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('donor_id', $donorId))
             ->selectRaw("DATE_FORMAT(paid_at, '%Y-%m') AS month, COALESCE(SUM({$netExpr}), 0) AS amount, COUNT(*) AS cnt")
@@ -582,7 +582,7 @@ final class DonorRepository
     public function attributionMixForDonor(int $donorId): array
     {
         $netExpr = DonationQueries::netBaseExpr();
-        $rows = DonationQueries::live(DB::table('dono_donations')
+        $rows = DonationQueries::live(DB::table('giveflow_donations')
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('donor_id', $donorId))
             ->selectRaw("
@@ -610,7 +610,7 @@ final class DonorRepository
     {
         if ($giverCount === 0) return 0;
         $offset = (int) floor($giverCount / 2);
-        $row = DB::table('dono_donors')
+        $row = DB::table('giveflow_donors')
             ->whereRaw('redacted_at IS NULL')
             ->where('total_donated_cents', 0, '>')
             ->selectRaw('total_donated_cents')

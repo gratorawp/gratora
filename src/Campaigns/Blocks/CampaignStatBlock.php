@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Campaigns\Blocks;
+namespace GiveFlow\Campaigns\Blocks;
 
-use Dono\Campaigns\CampaignRepository;
-use Dono\Campaigns\CampaignStatMetrics;
-use Dono\Foundation\Helpers\View;
+use GiveFlow\Campaigns\CampaignRepository;
+use GiveFlow\Campaigns\CampaignStatMetrics;
+use GiveFlow\Foundation\Helpers\View;
 
 /**
  * One metric per block rather than a group with toggles: a group moves as a
@@ -30,7 +30,7 @@ final class CampaignStatBlock extends CampaignBlock
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'dono/campaign-stat';
+        return 'giveflow/campaign-stat';
     }
 
     /** @since 1.0.0 */

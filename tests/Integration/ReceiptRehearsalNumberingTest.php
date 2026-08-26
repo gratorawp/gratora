@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
-use Dono\Donors\Donor;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Maintenance\TestDataPurger;
-use Dono\Foundation\Plugin;
-use Dono\Foundation\References\ReferenceGenerator;
-use Dono\Foundation\Transfer\DataExporter;
-use Dono\Foundation\Transfer\DataImporter;
-use Dono\Receipts\Receipt;
-use Dono\Vendor\Queryable\DB;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Maintenance\TestDataPurger;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Foundation\References\ReferenceGenerator;
+use GiveFlow\Foundation\Transfer\DataExporter;
+use GiveFlow\Foundation\Transfer\DataImporter;
+use GiveFlow\Receipts\Receipt;
+use GiveFlow\Vendor\Queryable\DB;
 
 /**
  * The receipt sequence an org hands a tax authority has to be gap-free, and the
@@ -97,7 +97,7 @@ final class ReceiptRehearsalNumberingTest extends IntegrationTestCase
         $decoded = json_decode((string) stream_get_contents($out), true);
         fclose($out);
 
-        $this->assertNotEmpty($decoded['tables']['dono_receipts'] ?? [], 'precondition: the file carries the rehearsal receipt');
+        $this->assertNotEmpty($decoded['tables']['giveflow_receipts'] ?? [], 'precondition: the file carries the rehearsal receipt');
 
         return ['tables' => $decoded['tables']];
     }
@@ -105,17 +105,17 @@ final class ReceiptRehearsalNumberingTest extends IntegrationTestCase
     private function wipe(): void
     {
         $prefix = DB::getPrefix();
-        foreach (['dono_receipts', 'dono_donations', 'dono_donors'] as $table) {
+        foreach (['giveflow_receipts', 'giveflow_donations', 'giveflow_donors'] as $table) {
             DB::raw("DELETE FROM {$prefix}{$table}");
         }
-        DB::raw("DELETE FROM {$prefix}options WHERE option_name LIKE 'dono_reference_counter%'");
+        DB::raw("DELETE FROM {$prefix}options WHERE option_name LIKE 'giveflow_reference_counter%'");
         wp_cache_delete('alloptions', 'options');
     }
 
     /** Runs the issuer for a donation and returns the number it minted. */
     private function issue(Donation $donation): string
     {
-        do_action('dono.async.issue_receipt', ['donation_id' => (int) $donation->id]);
+        do_action('giveflow.async.issue_receipt', ['donation_id' => (int) $donation->id]);
 
         $receipt = Receipt::query()->where('donation_id', (int) $donation->id)->get();
         $this->assertInstanceOf(Receipt::class, $receipt, 'the issuer produced no receipt');
@@ -137,7 +137,7 @@ final class ReceiptRehearsalNumberingTest extends IntegrationTestCase
         $donor->save();
 
         $donation = Donation::make();
-        $donation->reference         = 'DONO-R-' . bin2hex(random_bytes(4));
+        $donation->reference         = 'GIVEFLOW-R-' . bin2hex(random_bytes(4));
         $donation->donor_id          = (int) $donor->id;
         $donation->amount_cents      = 2500;
         $donation->currency          = 'USD';

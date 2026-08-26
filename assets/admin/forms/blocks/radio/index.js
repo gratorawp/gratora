@@ -6,7 +6,7 @@ import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 import { OptionsEditor, normalizeOptions, slugify, slugifyField } from '../_shared/OptionsEditor';
 import { BlockIcons } from '../_shared/block-icons';
 
-const NAME = 'dono/radio';
+const NAME = 'giveflow/radio';
 
 const DEFAULT_OPTIONS = [
     { label: 'Option one', value: 'option-one', isDefault: false },
@@ -24,7 +24,7 @@ function Edit( { attributes, setAttributes } ) {
     const options = normalizeOptions( attributes.options, DEFAULT_OPTIONS );
 
     const blockProps = useBlockProps( {
-        className: `dono-block-preview dono-block-preview--radio dono-block-preview--${ layout }`,
+        className: `giveflow-block-preview giveflow-block-preview--radio giveflow-block-preview--${ layout }`,
     } );
 
     const updateOptionLabel = ( i, v ) => {
@@ -43,32 +43,32 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Radio group', 'dono-fundraising-platform' ) } initialOpen>
+                <PanelBody title={ __( 'Radio group', 'giveflow-fundraising-campaigns' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'dono-fundraising-platform' ) }
+                        label={ __( 'Label', 'giveflow-fundraising-campaigns' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label or any option to edit inline.', 'dono-fundraising-platform' ) }
+                        help={ __( 'Click the label or any option to edit inline.', 'giveflow-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Field name', 'dono-fundraising-platform' ) }
+                        label={ __( 'Field name', 'giveflow-fundraising-campaigns' ) }
                         value={ field }
                         onChange={ ( v ) => setAttributes( { field: slugifyField( v ) } ) }
-                        help={ __( 'Key the value is stored under. Auto-derived from label if empty.', 'dono-fundraising-platform' ) }
+                        help={ __( 'Key the value is stored under. Auto-derived from label if empty.', 'giveflow-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <Segmented
-                        label={ __( 'Layout', 'dono-fundraising-platform' ) }
+                        label={ __( 'Layout', 'giveflow-fundraising-campaigns' ) }
                         value={ layout }
                         onChange={ ( v ) => setAttributes( { layout: v } ) }
                         options={ [
-                            { value: 'vertical',   label: __( 'Vertical',   'dono-fundraising-platform' ) },
-                            { value: 'horizontal', label: __( 'Horizontal', 'dono-fundraising-platform' ) },
+                            { value: 'vertical',   label: __( 'Vertical',   'giveflow-fundraising-campaigns' ) },
+                            { value: 'horizontal', label: __( 'Horizontal', 'giveflow-fundraising-campaigns' ) },
                         ] }
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'dono-fundraising-platform' ) }
+                        label={ __( 'Required', 'giveflow-fundraising-campaigns' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
                         __nextHasNoMarginBottom
@@ -87,13 +87,13 @@ function Edit( { attributes, setAttributes } ) {
             <div { ...blockProps }>
                 <RichText
                     tagName="span"
-                    className="dono-block-preview__label"
+                    className="giveflow-block-preview__label"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Question', 'dono-fundraising-platform' ) }
+                    placeholder={ __( 'Question', 'giveflow-fundraising-campaigns' ) }
                     allowedFormats={ [] }
                 />
-                { required && <em className="dono-block-preview__req" aria-hidden="true">*</em> }
+                { required && <em className="giveflow-block-preview__req" aria-hidden="true">*</em> }
                 <div
                     style={ {
                         marginTop: 8,
@@ -118,7 +118,7 @@ function Edit( { attributes, setAttributes } ) {
                                     height:       14,
                                     borderRadius: '50%',
                                     border:       '1px solid #888',
-                                    background:   o.isDefault ? 'radial-gradient(circle, var(--dono-accent, #1e8a4e) 40%, #fff 50%)' : '#fff',
+                                    background:   o.isDefault ? 'radial-gradient(circle, var(--giveflow-accent, #211d3f) 40%, #fff 50%)' : '#fff',
                                     flexShrink:   0,
                                 } }
                             />
@@ -126,7 +126,7 @@ function Edit( { attributes, setAttributes } ) {
                                 tagName="span"
                                 value={ o.label }
                                 onChange={ ( v ) => updateOptionLabel( i, v ) }
-                                placeholder={ __( 'Option label', 'dono-fundraising-platform' ) }
+                                placeholder={ __( 'Option label', 'giveflow-fundraising-campaigns' ) }
                                 allowedFormats={ [] }
                                 style={ { fontSize: 13, color: '#111827' } }
                             />
@@ -141,9 +141,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Radio group', 'dono-fundraising-platform' ),
-        description: __( 'Single-choice radio buttons. Donor picks one option from the list.', 'dono-fundraising-platform' ),
-        category:    'dono-fields',
+        title:       __( 'Radio group', 'giveflow-fundraising-campaigns' ),
+        description: __( 'Single-choice radio buttons. Donor picks one option from the list.', 'giveflow-fundraising-campaigns' ),
+        category:    'giveflow-fields',
         icon:        BlockIcons[ 'radio' ],
         supports: { html: false, anchor: false, inserter: true },
         attributes: {

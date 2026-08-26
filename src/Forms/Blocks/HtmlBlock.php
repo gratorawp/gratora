@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Forms\Blocks;
+namespace GiveFlow\Forms\Blocks;
 
 /**
- * dono/html: inline HTML decoration.
+ * giveflow/html: inline HTML decoration.
  *
  * @since 1.0.0
  */
@@ -14,7 +14,7 @@ final class HtmlBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'dono/html';
+        return 'giveflow/html';
     }
 
     /** @since 1.0.0 */
@@ -30,7 +30,7 @@ final class HtmlBlock implements Block
     {
         $raw = (string) ($attrs['content'] ?? '');
         if ($raw === '') return '';
-        return sprintf('<div class="dono-block dono-block--html">%s</div>', self::sanitize($raw));
+        return sprintf('<div class="giveflow-block giveflow-block--html">%s</div>', self::sanitize($raw));
     }
 
     /**

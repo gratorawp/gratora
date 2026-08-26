@@ -5,7 +5,7 @@ import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 import { slugifyField } from '../_shared/OptionsEditor';
 import { BlockIcons } from '../_shared/block-icons';
 
-const NAME = 'dono/checkbox';
+const NAME = 'giveflow/checkbox';
 
 function Edit( { attributes, setAttributes } ) {
     const {
@@ -17,43 +17,43 @@ function Edit( { attributes, setAttributes } ) {
         condition = DEFAULT_CONDITION,
     } = attributes;
 
-    const blockProps = useBlockProps( { className: 'dono-block-preview dono-block-preview--check' } );
+    const blockProps = useBlockProps( { className: 'giveflow-block-preview giveflow-block-preview--check' } );
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Checkbox', 'dono-fundraising-platform' ) } initialOpen>
+                <PanelBody title={ __( 'Checkbox', 'giveflow-fundraising-campaigns' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'dono-fundraising-platform' ) }
+                        label={ __( 'Label', 'giveflow-fundraising-campaigns' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label or help text to edit inline.', 'dono-fundraising-platform' ) }
+                        help={ __( 'Click the label or help text to edit inline.', 'giveflow-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Help text', 'dono-fundraising-platform' ) }
+                        label={ __( 'Help text', 'giveflow-fundraising-campaigns' ) }
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Field name', 'dono-fundraising-platform' ) }
+                        label={ __( 'Field name', 'giveflow-fundraising-campaigns' ) }
                         value={ field }
                         onChange={ ( v ) => setAttributes( { field: slugifyField( v ) } ) }
-                        help={ __( 'Key the value is stored under. Auto-derived from label if empty.', 'dono-fundraising-platform' ) }
+                        help={ __( 'Key the value is stored under. Auto-derived from label if empty.', 'giveflow-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Default on', 'dono-fundraising-platform' ) }
+                        label={ __( 'Default on', 'giveflow-fundraising-campaigns' ) }
                         checked={ defaultOn }
                         onChange={ ( v ) => setAttributes( { defaultOn: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'dono-fundraising-platform' ) }
+                        label={ __( 'Required', 'giveflow-fundraising-campaigns' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
-                        help={ __( 'Donor must tick this to submit.', 'dono-fundraising-platform' ) }
+                        help={ __( 'Donor must tick this to submit.', 'giveflow-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -69,7 +69,7 @@ function Edit( { attributes, setAttributes } ) {
                         height:       16,
                         borderRadius: 3,
                         border:       '1px solid #888',
-                        background:   defaultOn ? 'var(--dono-accent, #1e8a4e)' : '#fff',
+                        background:   defaultOn ? 'var(--giveflow-accent, #211d3f)' : '#fff',
                         flexShrink:   0,
                         marginTop:    2,
                     } }
@@ -79,16 +79,16 @@ function Edit( { attributes, setAttributes } ) {
                         tagName="span"
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'I agree to…', 'dono-fundraising-platform' ) }
+                        placeholder={ __( 'I agree to…', 'giveflow-fundraising-campaigns' ) }
                         allowedFormats={ [] }
                         style={ { fontSize: 13, color: '#111827' } }
                     />
-                    { required && <em className="dono-block-preview__req" aria-hidden="true">*</em> }
+                    { required && <em className="giveflow-block-preview__req" aria-hidden="true">*</em> }
                     <RichText
                         tagName="span"
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
-                        placeholder={ __( 'Optional help text', 'dono-fundraising-platform' ) }
+                        placeholder={ __( 'Optional help text', 'giveflow-fundraising-campaigns' ) }
                         allowedFormats={ [] }
                         style={ { fontSize: 11, color: '#6b7280', lineHeight: 1.3 } }
                     />
@@ -101,9 +101,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Checkbox', 'dono-fundraising-platform' ),
-        description: __( 'Single yes/no checkbox for agreements, opt-ins, or any boolean.', 'dono-fundraising-platform' ),
-        category:    'dono-fields',
+        title:       __( 'Checkbox', 'giveflow-fundraising-campaigns' ),
+        description: __( 'Single yes/no checkbox for agreements, opt-ins, or any boolean.', 'giveflow-fundraising-campaigns' ),
+        category:    'giveflow-fields',
         icon:        BlockIcons[ 'checkbox' ],
         supports: { html: false, anchor: false, inserter: true },
         attributes: {

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Forms\Blocks;
+namespace GiveFlow\Forms\Blocks;
 
-use Dono\Foundation\Helpers\View;
-use Dono\Funds\FundRepository;
+use GiveFlow\Foundation\Helpers\View;
+use GiveFlow\Funds\FundRepository;
 
 /**
  * Fund picker block.
@@ -20,7 +20,7 @@ final class FundPickerBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'dono/fund-picker';
+        return 'giveflow/fund-picker';
     }
 
     /** @since 1.0.0 */

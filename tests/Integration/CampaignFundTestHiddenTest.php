@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Campaigns\Campaign;
-use Dono\Donations\Donation;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Donations\Donation;
 use WP_REST_Request;
 
 /**
@@ -59,18 +59,18 @@ final class CampaignFundTestHiddenTest extends IntegrationTestCase
     {
         $res = rest_do_request(new WP_REST_Request('GET', $route));
 
-        return (int) ($res->get_headers()['X-Dono-Test-Hidden'] ?? 0);
+        return (int) ($res->get_headers()['X-GiveFlow-Test-Hidden'] ?? 0);
     }
 
     public function test_the_campaigns_list_reports_what_it_is_not_counting(): void
     {
-        $this->assertSame(0, $this->hiddenHeader('/dono/v1/admin/campaigns'));
+        $this->assertSame(0, $this->hiddenHeader('/giveflow/v1/admin/campaigns'));
 
         $this->seedTestDonation();
 
         $this->assertSame(
             1,
-            $this->hiddenHeader('/dono/v1/admin/campaigns'),
+            $this->hiddenHeader('/giveflow/v1/admin/campaigns'),
             'a zero on this screen has to be explainable'
         );
     }
@@ -79,7 +79,7 @@ final class CampaignFundTestHiddenTest extends IntegrationTestCase
     {
         $this->seedTestDonation();
 
-        $this->assertSame(1, $this->hiddenHeader('/dono/v1/admin/funds'));
+        $this->assertSame(1, $this->hiddenHeader('/giveflow/v1/admin/funds'));
     }
 
     public function test_the_rollup_itself_never_moves(): void

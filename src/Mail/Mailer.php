@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Dono\Mail;
+namespace GiveFlow\Mail;
 
-use Dono\Settings\SettingsService;
+use GiveFlow\Settings\SettingsService;
 
 /**
  * Wraps wp_mail with configured From, Reply-To, and BCC, and per-template
- * subject/body from dono_email_settings.
+ * subject/body from giveflow_email_settings.
  *
  * @since 1.0.0
  */

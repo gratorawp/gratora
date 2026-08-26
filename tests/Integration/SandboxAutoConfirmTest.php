@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
-use Dono\Gateways\Sandbox\SandboxGateway;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Gateways\Sandbox\SandboxGateway;
 use WP_REST_Request;
 
 /**
@@ -27,10 +27,10 @@ final class SandboxAutoConfirmTest extends IntegrationTestCase
         // The flag is the contract between the gateway and the controller.
         // If a future change drops it, the symptom is silent (pending donations),
         // so lock it in directly.
-        $clock  = \Dono\Foundation\Plugin::instance()->container->get(\Dono\Foundation\Time\Clock::class);
-        $donation = \Dono\Donations\Donation::make();
+        $clock  = \GiveFlow\Foundation\Plugin::instance()->container->get(\GiveFlow\Foundation\Time\Clock::class);
+        $donation = \GiveFlow\Donations\Donation::make();
         $donation->reference = 'SANDBOX-TEST';
-        $intent = (new SandboxGateway($clock, new \Dono\Recurring\RecurringPlanRepository()))->createIntent($donation);
+        $intent = (new SandboxGateway($clock, new \GiveFlow\Recurring\RecurringPlanRepository()))->createIntent($donation);
         $this->assertTrue(
             $intent->auto_confirm,
             'sandbox createIntent must set auto_confirm=true so the controller fires confirm in the same request'
@@ -40,7 +40,7 @@ final class SandboxAutoConfirmTest extends IntegrationTestCase
     public function test_sandbox_donation_via_rest_lands_as_paid(): void
     {
         // Org-wide test mode must be on for the sandbox gateway to register.
-        update_option('dono_gateway_config', [
+        update_option('giveflow_gateway_config', [
             'test_mode' => true,
             'sandbox'   => ['enabled' => true],
         ]);
@@ -48,23 +48,23 @@ final class SandboxAutoConfirmTest extends IntegrationTestCase
         // Boot ran (and read test_mode) before this option was set, so the
         // sandbox gateway isn't registered yet; register it now so the REST
         // create can resolve gateway=sandbox.
-        $container = \Dono\Foundation\Plugin::instance()->container;
-        $manager   = $container->get(\Dono\Gateways\GatewayManager::class);
+        $container = \GiveFlow\Foundation\Plugin::instance()->container;
+        $manager   = $container->get(\GiveFlow\Gateways\GatewayManager::class);
         if (! $manager->get('sandbox')) {
             $manager->register(new SandboxGateway(
-                $container->get(\Dono\Foundation\Time\Clock::class),
-                $container->get(\Dono\Recurring\RecurringPlanRepository::class)
+                $container->get(\GiveFlow\Foundation\Time\Clock::class),
+                $container->get(\GiveFlow\Recurring\RecurringPlanRepository::class)
             ));
         }
 
         $campaignId = $this->seedCampaign();
 
-        $res = $this->postJson('/dono/v1/donations', [
+        $res = $this->postJson('/giveflow/v1/donations', [
             'campaign_id'  => $campaignId,
             'gateway'      => 'sandbox',
             'amount_cents' => 1500,
             'currency'     => 'EUR',
-            'email'        => 'sandbox-auto-' . uniqid() . '@dono.test',
+            'email'        => 'sandbox-auto-' . uniqid() . '@giveflow.test',
             'profile'      => ['first_name' => 'Sandy', 'last_name' => 'Auto'],
         ]);
         $this->assertSame(201, $res->get_status(), 'donation create returns 201');
@@ -90,7 +90,7 @@ final class SandboxAutoConfirmTest extends IntegrationTestCase
 
     private function seedCampaign(): int
     {
-        $service = \Dono\Foundation\Plugin::instance()->container->get(\Dono\Campaigns\CampaignService::class);
+        $service = \GiveFlow\Foundation\Plugin::instance()->container->get(\GiveFlow\Campaigns\CampaignService::class);
         $campaign = $service->create([
             'title'      => 'Sandbox AutoConfirm Test',
             'goal_type'  => 'amount',

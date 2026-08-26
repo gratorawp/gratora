@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Campaigns\Campaign;
+use GiveFlow\Campaigns\Campaign;
 
 /**
  * A campaign page is an ordinary page, so its blocks answer to the editor's own
@@ -18,14 +18,14 @@ final class CampaignBlocksStyleSupportTest extends IntegrationTestCase
     public function campaignBlockNames(): array
     {
         return [
-            ['dono/campaign-image'],
-            ['dono/campaign-progress'],
-            ['dono/campaign-stat'],
-            ['dono/donate-button'],
-            ['dono/top-donors'],
-            ['dono/recent-donations'],
-            ['dono/supporter-wall'],
-            ['dono/campaign-grid'],
+            ['giveflow/campaign-image'],
+            ['giveflow/campaign-progress'],
+            ['giveflow/campaign-stat'],
+            ['giveflow/donate-button'],
+            ['giveflow/top-donors'],
+            ['giveflow/recent-donations'],
+            ['giveflow/supporter-wall'],
+            ['giveflow/campaign-grid'],
         ];
     }
 
@@ -65,7 +65,7 @@ final class CampaignBlocksStyleSupportTest extends IntegrationTestCase
         $id = (int) $this->campaign()->id;
 
         $html = do_blocks(
-            '<!-- wp:dono/campaign-progress {"campaignId":' . $id
+            '<!-- wp:giveflow/campaign-progress {"campaignId":' . $id
             . ',"style":{"color":{"background":"#ff0000","text":"#0000ff"}}} /-->'
         );
 
@@ -78,7 +78,7 @@ final class CampaignBlocksStyleSupportTest extends IntegrationTestCase
         $id = (int) $this->campaign()->id;
 
         $html = do_blocks(
-            '<!-- wp:dono/campaign-progress {"campaignId":' . $id
+            '<!-- wp:giveflow/campaign-progress {"campaignId":' . $id
             . ',"style":{"spacing":{"padding":{"top":"40px"}}}} /-->'
         );
 
@@ -94,11 +94,11 @@ final class CampaignBlocksStyleSupportTest extends IntegrationTestCase
         $id = (int) $this->campaign()->id;
 
         $html = do_blocks(
-            '<!-- wp:dono/campaign-progress {"campaignId":' . $id
+            '<!-- wp:giveflow/campaign-progress {"campaignId":' . $id
             . ',"style":{"color":{"background":"#ff0000"}}} /-->'
         );
 
-        $this->assertStringContainsString('dono-block--progress', $html);
-        $this->assertStringContainsString('data-block="dono/campaign-progress"', $html);
+        $this->assertStringContainsString('giveflow-block--progress', $html);
+        $this->assertStringContainsString('data-block="giveflow/campaign-progress"', $html);
     }
 }

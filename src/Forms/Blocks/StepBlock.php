@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Forms\Blocks;
+namespace GiveFlow\Forms\Blocks;
 
 /**
- * Single wizard step block, contained by dono/steps.
+ * Single wizard step block, contained by giveflow/steps.
  *
  * @since 1.0.0
  */
@@ -14,7 +14,7 @@ final class StepBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'dono/step';
+        return 'giveflow/step';
     }
 
     /** @since 1.0.0 */
@@ -36,6 +36,6 @@ final class StepBlock implements Block
      */
     public function render(array $attrs, string $content): string
     {
-        return sprintf('<div class="dono-block dono-block--step">%s</div>', $content);
+        return sprintf('<div class="giveflow-block giveflow-block--step">%s</div>', $content);
     }
 }

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Unit\Gateways;
+namespace GiveFlow\Tests\Unit\Gateways;
 
 use DateTimeImmutable;
-use Dono\Donations\Donation;
-use Dono\Foundation\Time\FrozenClock;
-use Dono\Gateways\Offline\OfflineGateway;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Foundation\Time\FrozenClock;
+use GiveFlow\Gateways\Offline\OfflineGateway;
 use PHPUnit\Framework\TestCase;
 use WP_REST_Request;
 
@@ -34,21 +34,21 @@ final class OfflineGatewayTest extends TestCase
 
     public function test_create_intent_derives_id_from_donation_reference(): void
     {
-        $donation = $this->donationFor('DONO-2026-00042');
+        $donation = $this->donationFor('DON-2026-00042');
         $result = $this->gateway->createIntent($donation);
 
-        $this->assertSame('offline_DONO-2026-00042', $result->intent_id);
+        $this->assertSame('offline_DON-2026-00042', $result->intent_id);
         $this->assertNull($result->client_secret);
         $this->assertFalse($result->requires_action);
     }
 
     public function test_confirm_returns_success_with_synthetic_txn_id(): void
     {
-        $donation = $this->donationFor('DONO-2026-00099');
+        $donation = $this->donationFor('DON-2026-00099');
         $result = $this->gateway->confirm($donation);
 
         $this->assertTrue($result->success);
-        $this->assertSame('offline_txn_DONO-2026-00099', $result->gateway_txn_id);
+        $this->assertSame('offline_txn_DON-2026-00099', $result->gateway_txn_id);
         $this->assertSame('offline', $result->payment_method);
     }
 

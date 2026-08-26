@@ -2,26 +2,26 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
-use Dono\Donations\DonationRepository;
-use Dono\Donations\DonationService;
-use Dono\Donations\Refund;
-use Dono\Donors\DonorRepository;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
-use Dono\Foundation\Time\Clock;
-use Dono\Gateways\GatewayConfirmResult;
-use Dono\Gateways\GatewayIntentResult;
-use Dono\Gateways\GatewayManager;
-use Dono\Gateways\PaymentGateway;
-use Dono\Gateways\RefundResult;
-use Dono\Gateways\Stripe\StripeAccount;
-use Dono\Gateways\Stripe\StripeApi;
-use Dono\Gateways\Stripe\StripeGateway;
-use Dono\Gateways\WebhookOutcome;
-use Dono\Recurring\RecurringPlanRepository;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Donations\DonationService;
+use GiveFlow\Donations\Refund;
+use GiveFlow\Donors\DonorRepository;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Foundation\Time\Clock;
+use GiveFlow\Gateways\GatewayConfirmResult;
+use GiveFlow\Gateways\GatewayIntentResult;
+use GiveFlow\Gateways\GatewayManager;
+use GiveFlow\Gateways\PaymentGateway;
+use GiveFlow\Gateways\RefundResult;
+use GiveFlow\Gateways\Stripe\StripeAccount;
+use GiveFlow\Gateways\Stripe\StripeApi;
+use GiveFlow\Gateways\Stripe\StripeGateway;
+use GiveFlow\Gateways\WebhookOutcome;
+use GiveFlow\Recurring\RecurringPlanRepository;
 use WP_REST_Request;
 
 /**
@@ -43,7 +43,7 @@ final class RefundInFlightBalanceTest extends IntegrationTestCase
         parent::setUp();
 
         // Snapshots the registry so tearDown puts it back without the probe.
-        $this->deregisterGateway('dono_no_such_gateway');
+        $this->deregisterGateway('giveflow_no_such_gateway');
 
         $manager = Plugin::instance()->container->get(GatewayManager::class);
         if (! $manager->get('echeckprobe')) {
@@ -185,12 +185,12 @@ final class RefundInFlightBalanceTest extends IntegrationTestCase
 
     private function donationService(): DonationService
     {
-        return \Dono\Foundation\Plugin::instance()->container->get(DonationService::class);
+        return \GiveFlow\Foundation\Plugin::instance()->container->get(DonationService::class);
     }
 
     private function releaseRefund(Donation $donation, string $refundId): \WP_REST_Response
     {
-        $req = new \WP_REST_Request('POST', "/dono/v1/admin/donations/{$donation->reference}/release-refund");
+        $req = new \WP_REST_Request('POST', "/giveflow/v1/admin/donations/{$donation->reference}/release-refund");
         $req->set_body_params(['gateway_refund_id' => $refundId]);
 
         return rest_do_request($req);
@@ -225,7 +225,7 @@ final class RefundInFlightBalanceTest extends IntegrationTestCase
 
     private function refund(Donation $donation, int $cents): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/admin/donations/' . $donation->reference . '/refund');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/donations/' . $donation->reference . '/refund');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['amount_cents' => $cents]));
 
@@ -235,7 +235,7 @@ final class RefundInFlightBalanceTest extends IntegrationTestCase
     /** @return array<string,mixed> */
     private function show(Donation $donation): array
     {
-        $req = new WP_REST_Request('GET', '/dono/v1/admin/donations/' . $donation->reference);
+        $req = new WP_REST_Request('GET', '/giveflow/v1/admin/donations/' . $donation->reference);
 
         return (array) rest_do_request($req)->get_data();
     }
@@ -245,7 +245,7 @@ final class RefundInFlightBalanceTest extends IntegrationTestCase
     private function registerStripe(): void
     {
         $this->stripeSecret = 'whsec_test_' . bin2hex(random_bytes(8));
-        update_option('dono_gateway_config', [
+        update_option('giveflow_gateway_config', [
             'stripe' => ['webhook_secret_live' => $this->stripeSecret, 'test_mode' => true],
         ]);
 
@@ -302,7 +302,7 @@ final class RefundInFlightBalanceTest extends IntegrationTestCase
         $timestamp = (string) time();
         $sig       = hash_hmac('sha256', "{$timestamp}.{$payload}", $this->stripeSecret);
 
-        $req = new WP_REST_Request('POST', '/dono/v1/webhooks/stripe');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/webhooks/stripe');
         $req->set_header('content-type', 'application/json');
         $req->set_header('stripe_signature', "t={$timestamp},v1={$sig}");
         $req->set_body($payload);

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
-use Dono\Donors\DonorService;
-use Dono\Exports\RevenueExporter;
-use Dono\Foundation\Plugin;
-use Dono\Reports\TaxStatementBuilder;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Exports\RevenueExporter;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Reports\TaxStatementBuilder;
 
 /**
  * The revenue series is what a finance team charts, so a month with nothing in
@@ -142,7 +142,7 @@ final class RevenueExportTest extends IntegrationTestCase
     {
         $this->paid('2026-03-10 12:00:00', 10000);
 
-        $req = new \WP_REST_Request('GET', '/dono/v1/admin/exports/options');
+        $req = new \WP_REST_Request('GET', '/giveflow/v1/admin/exports/options');
         $opts = rest_do_request($req)->get_data();
 
         // Offering a fixed span of past years invites an export of months that
@@ -153,7 +153,7 @@ final class RevenueExportTest extends IntegrationTestCase
 
     public function test_a_site_with_no_donations_still_offers_this_month(): void
     {
-        $req = new \WP_REST_Request('GET', '/dono/v1/admin/exports/options');
+        $req = new \WP_REST_Request('GET', '/giveflow/v1/admin/exports/options');
         $opts = rest_do_request($req)->get_data();
 
         $this->assertSame((string) wp_date('Y-m'), $opts['first_month']);

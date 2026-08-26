@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Forms;
+namespace GiveFlow\Forms;
 
 defined('ABSPATH') || exit;
 
-use Dono\Vendor\Queryable\Model;
-use Dono\Vendor\Queryable\Schema\Table;
+use GiveFlow\Vendor\Queryable\Model;
+use GiveFlow\Vendor\Queryable\Schema\Table;
 
 /**
  * Per-form donation aggregates.
@@ -18,7 +18,7 @@ use Dono\Vendor\Queryable\Schema\Table;
  */
 final class FormDonationStats extends Model
 {
-    protected string $table = 'dono_form_donation_stats';
+    protected string $table = 'giveflow_form_donation_stats';
     protected string $version = '1.0.0';
     protected string $primaryKey = 'form_id';
 

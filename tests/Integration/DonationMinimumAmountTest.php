@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Forms\Form;
-use Dono\Forms\FormSubmissionValidator;
+use GiveFlow\Forms\Form;
+use GiveFlow\Forms\FormSubmissionValidator;
 
 /**
  * The readme promised "a minimum you set" and only a developer filter existed.
@@ -23,9 +23,9 @@ final class DonationMinimumAmountTest extends IntegrationTestCase
     {
         // The currency the figure is authored in is stated, not inherited from
         // whatever another test left in Money::defaultCurrency()'s cache.
-        $blocks = '<!-- wp:dono/donation-amount {"allowCustom":true,"currency":"USD","minCents":' . $minCents . '} /-->'
-            . ($withSwitcher ? '<!-- wp:dono/currency-switcher {"currencies":["GBP","JPY"]} /-->' : '')
-            . '<!-- wp:dono/submit-button {"label":"Give"} /-->';
+        $blocks = '<!-- wp:giveflow/donation-amount {"allowCustom":true,"currency":"USD","minCents":' . $minCents . '} /-->'
+            . ($withSwitcher ? '<!-- wp:giveflow/currency-switcher {"currencies":["GBP","JPY"]} /-->' : '')
+            . '<!-- wp:giveflow/submit-button {"label":"Give"} /-->';
 
         $form = Form::make();
         $form->title      = 'Minimum ' . uniqid();
@@ -86,7 +86,7 @@ final class DonationMinimumAmountTest extends IntegrationTestCase
      */
     private function seedRates(): void
     {
-        update_option('dono_fx_rates', [
+        update_option('giveflow_fx_rates', [
             'base'       => 'USD',
             'date'       => gmdate('Y-m-d'),
             'fetched_at' => gmdate('c'),
@@ -94,7 +94,7 @@ final class DonationMinimumAmountTest extends IntegrationTestCase
         ], false);
         // The switcher only offers currencies the org accepts, so a JPY donor
         // is only reachable on an org that has enabled it.
-        update_option('dono_currency_locale', [
+        update_option('giveflow_currency_locale', [
             'default_currency'     => 'USD',
             'supported_currencies' => ['USD', 'EUR', 'GBP', 'JPY'],
         ]);

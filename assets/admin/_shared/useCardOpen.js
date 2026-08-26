@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from '@wordpress/element';
 
-const EVENT = 'dono:accordion:changed';
+const EVENT = 'giveflow:accordion:changed';
 
 function registry() {
-    return ( typeof window !== 'undefined' && window.dono && window.dono.accordion ) || null;
+    return ( typeof window !== 'undefined' && window.giveflow && window.giveflow.accordion ) || null;
 }
 
 function subscribe( onChange ) {

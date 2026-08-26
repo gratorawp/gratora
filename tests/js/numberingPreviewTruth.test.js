@@ -43,7 +43,7 @@ function mount( record ) {
 }
 
 const previews = ( root ) =>
-    [ ...root.querySelectorAll( '.dono-ref-preview__value' ) ].map( ( n ) => n.textContent );
+    [ ...root.querySelectorAll( '.giveflow-ref-preview__value' ) ].map( ( n ) => n.textContent );
 
 beforeEach( () => {
     apiFetch.mockReset();
@@ -53,11 +53,11 @@ beforeEach( () => {
 test( 'a separator the generator would strip is not previewed as one', () => {
     const root = mount( {
         separator: '.', padding: 5, include_year: true,
-        prefixes: { donation: 'DONO', receipt: 'REC', refund: 'REF' },
+        prefixes: { donation: 'DON', receipt: 'REC', refund: 'REF' },
     } );
 
-    expect( previews( root ) ).toContain( 'DONO-2026-00001'.replace( '2026', String( new Date().getFullYear() ) ) );
-    expect( previews( root ).join( ' ' ) ).not.toContain( 'DONO.' );
+    expect( previews( root ) ).toContain( 'DON-2026-00001'.replace( '2026', String( new Date().getFullYear() ) ) );
+    expect( previews( root ).join( ' ' ) ).not.toContain( 'DON.' );
     // A separator of '.' strips to nothing, so both sides agree on the
     // fallback here. The prefix case above is where they used to diverge.
     expect( root.textContent ).toContain( 'Letters, numbers, hyphens and underscores only.' );
@@ -80,10 +80,10 @@ test( 'a prefix the generator would strip is not previewed as one', () => {
 test( 'an empty digit count previews the one digit the generator falls back to', () => {
     const root = mount( {
         separator: '-', padding: '', include_year: false,
-        prefixes: { donation: 'DONO', receipt: 'REC', refund: 'REF' },
+        prefixes: { donation: 'DON', receipt: 'REC', refund: 'REF' },
     } );
 
-    expect( previews( root ) ).toContain( 'DONO-1' );
+    expect( previews( root ) ).toContain( 'DON-1' );
 } );
 
 test( 'a scheme the generator accepts is previewed as written', () => {

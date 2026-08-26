@@ -20,15 +20,15 @@ $icons = [
 ];
 $icon = $icons[$emptyIcon ?? ''] ?? $icons['donation'];
 ?>
-<div class="dono-block__empty dono-empty">
-    <span class="dono-empty__icon" aria-hidden="true">
+<div class="giveflow-block__empty giveflow-empty">
+    <span class="giveflow-empty__icon" aria-hidden="true">
         <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor"
              stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <?php echo $icon; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- fixed markup from the map above ?>
         </svg>
     </span>
-    <p class="dono-empty__title"><?php echo esc_html($emptyText); ?></p>
+    <p class="giveflow-empty__title"><?php echo esc_html($emptyText); ?></p>
     <?php if (($emptySubText ?? '') !== ''): ?>
-        <p class="dono-empty__sub"><?php echo esc_html($emptySubText); ?></p>
+        <p class="giveflow-empty__sub"><?php echo esc_html($emptySubText); ?></p>
     <?php endif; ?>
 </div>

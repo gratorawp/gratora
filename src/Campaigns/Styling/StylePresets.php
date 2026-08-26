@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Campaigns\Styling;
+namespace GiveFlow\Campaigns\Styling;
 
 /**
- * Brand style presets (built-ins + user customs), stored in dono_org_brand as
+ * Brand style presets (built-ins + user customs), stored in giveflow_org_brand as
  * ['presets' => [...], 'default_id' => id]. Built-ins are always present in all();
  * users may edit a built-in's tokens but cannot delete one.
  *
@@ -13,7 +13,7 @@ namespace Dono\Campaigns\Styling;
  */
 final class StylePresets
 {
-    private const OPTION = 'dono_org_brand';
+    private const OPTION = 'giveflow_org_brand';
 
     /**
      * @return array<int, array{
@@ -31,53 +31,53 @@ final class StylePresets
         return [
             [
                 'id'          => 'classic',
-                'name'        => __('Classic', 'dono-fundraising-platform'),
-                'description' => __('Balanced, friendly, accent green. The Dono default.', 'dono-fundraising-platform'),
+                'name'        => __('Classic', 'giveflow-fundraising-campaigns'),
+                'description' => __('Balanced, friendly, accent green. The GiveFlow default.', 'giveflow-fundraising-campaigns'),
                 'tokens'      => [
-                    // Signature Dono pill donate button. Other presets fall
-                    // back to --dono-radius-sm; the Theme preset inherits the
+                    // Signature GiveFlow pill donate button. Other presets fall
+                    // back to --giveflow-radius-sm; the Theme preset inherits the
                     // site's button radius via themePreset().
-                    'dono-button-radius' => '999px',
+                    'giveflow-button-radius' => '999px',
                 ],
                 'builtin'     => true,
             ],
             [
                 'id'          => 'bold',
-                'name'        => __('Bold', 'dono-fundraising-platform'),
-                'description' => __('Deep navy with strong typography and a dramatic shadow.', 'dono-fundraising-platform'),
+                'name'        => __('Bold', 'giveflow-fundraising-campaigns'),
+                'description' => __('Deep navy with strong typography and a dramatic shadow.', 'giveflow-fundraising-campaigns'),
                 'tokens'      => [
-                    'dono-accent'         => '#0F3D5C',
-                    'dono-accent-soft'    => '#dde6ed',
-                    'dono-radius'         => '6px',
-                    'dono-radius-sm'      => '4px',
-                    'dono-button-weight'  => '700',
-                    'dono-button-shadow'  => '0 6px 16px rgba(0,0,0,.12)',
-                    'dono-heading-weight' => '700',
-                    'dono-card-shadow'    => '0 30px 60px rgba(0, 0, 0, .25)',
-                    'dono-focus-ring'     => '#0F3D5C',
+                    'giveflow-accent'         => '#0F3D5C',
+                    'giveflow-accent-soft'    => '#dde6ed',
+                    'giveflow-radius'         => '6px',
+                    'giveflow-radius-sm'      => '4px',
+                    'giveflow-button-weight'  => '700',
+                    'giveflow-button-shadow'  => '0 6px 16px rgba(0,0,0,.12)',
+                    'giveflow-heading-weight' => '700',
+                    'giveflow-card-shadow'    => '0 30px 60px rgba(0, 0, 0, .25)',
+                    'giveflow-focus-ring'     => '#0F3D5C',
                 ],
                 'builtin'     => true,
             ],
             [
                 'id'          => 'quiet',
-                'name'        => __('Quiet', 'dono-fundraising-platform'),
-                'description' => __('Minimal lines and lots of white space. Outlined button, no color, no shadows.', 'dono-fundraising-platform'),
+                'name'        => __('Quiet', 'giveflow-fundraising-campaigns'),
+                'description' => __('Minimal lines and lots of white space. Outlined button, no color, no shadows.', 'giveflow-fundraising-campaigns'),
                 'tokens'      => [
-                    'dono-accent'          => '#111827',
-                    'dono-accent-soft'     => '#f3f4f6',
-                    'dono-radius'          => '0px',
-                    'dono-radius-sm'       => '0px',
-                    'dono-bg-soft'         => '#f9fafb',
-                    'dono-heading-weight'  => '500',
-                    'dono-button-weight'   => '500',
-                    'dono-button-shadow'   => 'none',
-                    'dono-card-shadow'     => 'none',
-                    'dono-focus-ring'      => '#111827',
-                    'dono-gap'             => '28px',
-                    'dono-button-bg'       => 'transparent',
-                    'dono-button-fg'       => '#111827',
-                    'dono-button-border'   => '1px solid currentColor',
-                    'dono-button-hover-bg' => '#f3f4f6',
+                    'giveflow-accent'          => '#111827',
+                    'giveflow-accent-soft'     => '#f3f4f6',
+                    'giveflow-radius'          => '0px',
+                    'giveflow-radius-sm'       => '0px',
+                    'giveflow-bg-soft'         => '#f9fafb',
+                    'giveflow-heading-weight'  => '500',
+                    'giveflow-button-weight'   => '500',
+                    'giveflow-button-shadow'   => 'none',
+                    'giveflow-card-shadow'     => 'none',
+                    'giveflow-focus-ring'      => '#111827',
+                    'giveflow-gap'             => '28px',
+                    'giveflow-button-bg'       => 'transparent',
+                    'giveflow-button-fg'       => '#111827',
+                    'giveflow-button-border'   => '1px solid currentColor',
+                    'giveflow-button-hover-bg' => '#f3f4f6',
                 ],
                 'builtin'     => true,
             ],
@@ -164,26 +164,26 @@ final class StylePresets
             ?? $bySlug['accent-1']
             ?? ($colors[0]['color'] ?? null);
         if (is_string($accent) && $accent !== '') {
-            $tokens['dono-accent']     = $accent;
-            $tokens['dono-focus-ring'] = $accent;
+            $tokens['giveflow-accent']     = $accent;
+            $tokens['giveflow-focus-ring'] = $accent;
         }
-        if (isset($bySlug['background'])) $tokens['dono-bg']   = $bySlug['background'];
-        if (isset($bySlug['foreground'])) $tokens['dono-text'] = $bySlug['foreground'];
+        if (isset($bySlug['background'])) $tokens['giveflow-bg']   = $bySlug['background'];
+        if (isset($bySlug['foreground'])) $tokens['giveflow-text'] = $bySlug['foreground'];
 
         $button = wp_get_global_styles(['elements', 'button']) ?? [];
         if (is_array($button)) {
             $radius = $button['border']['radius'] ?? null;
             if (is_string($radius) && $radius !== '') {
-                $tokens['dono-radius-sm'] = $radius;
+                $tokens['giveflow-radius-sm'] = $radius;
             }
             $weight = $button['typography']['fontWeight'] ?? null;
             if ($weight !== null && $weight !== '') {
-                $tokens['dono-button-weight'] = (string) $weight;
+                $tokens['giveflow-button-weight'] = (string) $weight;
             }
             $btnBg = $button['color']['background'] ?? null;
-            if (is_string($btnBg) && $btnBg !== '' && ! isset($tokens['dono-accent'])) {
-                $tokens['dono-accent']     = $btnBg;
-                $tokens['dono-focus-ring'] = $btnBg;
+            if (is_string($btnBg) && $btnBg !== '' && ! isset($tokens['giveflow-accent'])) {
+                $tokens['giveflow-accent']     = $btnBg;
+                $tokens['giveflow-focus-ring'] = $btnBg;
             }
         }
 
@@ -191,8 +191,8 @@ final class StylePresets
 
         return [
             'id'          => 'theme',
-            'name'        => __('Site theme', 'dono-fundraising-platform'),
-            'description' => __('Picks up accent, background, and button styles from the active WordPress theme (theme.json).', 'dono-fundraising-platform'),
+            'name'        => __('Site theme', 'giveflow-fundraising-campaigns'),
+            'description' => __('Picks up accent, background, and button styles from the active WordPress theme (theme.json).', 'giveflow-fundraising-campaigns'),
             'tokens'      => $tokens,
             'builtin'     => true,
             'source'      => 'theme',

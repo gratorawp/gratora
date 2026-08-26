@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donors\Donor;
-use Dono\Donors\DonorRepository;
-use Dono\Foundation\Plugin;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\DonorRepository;
+use GiveFlow\Foundation\Plugin;
 
 /**
  * A lifetime-value ranking is a list of people who gave. Without a floor it

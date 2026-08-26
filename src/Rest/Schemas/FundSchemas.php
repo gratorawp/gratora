@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Rest\Schemas;
+namespace GiveFlow\Rest\Schemas;
 
 /**
  * JSON-Schema arg specs for the admin funds endpoints. update() reuses

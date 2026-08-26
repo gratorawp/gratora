@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Dono\Gateways\Sandbox;
+namespace GiveFlow\Gateways\Sandbox;
 
-use Dono\Async\AsyncDispatcher;
-use Dono\Donations\DonationService;
-use Dono\Foundation\Batch\BatchProcessor;
-use Dono\Foundation\Time\Clock;
-use Dono\Gateways\TestMode;
-use Dono\Recurring\RecurringPlan;
-use Dono\Recurring\RecurringPlanRepository;
+use GiveFlow\Async\AsyncDispatcher;
+use GiveFlow\Donations\DonationService;
+use GiveFlow\Foundation\Batch\BatchProcessor;
+use GiveFlow\Foundation\Time\Clock;
+use GiveFlow\Gateways\TestMode;
+use GiveFlow\Recurring\RecurringPlan;
+use GiveFlow\Recurring\RecurringPlanRepository;
 use Throwable;
 
 /**
@@ -33,7 +33,7 @@ use Throwable;
  */
 final class SandboxRenewer
 {
-    public const HOOK = 'dono.cron.sandbox_renew';
+    public const HOOK = 'giveflow.cron.sandbox_renew';
 
     /**
      * Where the rehearsal stops. Twelve is enough to watch a plan mature, fail
@@ -72,7 +72,7 @@ final class SandboxRenewer
         // itself then, and a plan whose gateway is gone cannot be cancelled at
         // all: RecurringCanceller has nothing to call and throws.
         if (! $this->testMode->forForm(null)) {
-            $this->expireAll(__('Test mode was switched off.', 'dono-fundraising-platform'));
+            $this->expireAll(__('Test mode was switched off.', 'giveflow-fundraising-campaigns'));
             return;
         }
 
@@ -107,7 +107,7 @@ final class SandboxRenewer
         if ((int) $plan->payments_count >= self::MAX_CYCLES) {
             $this->expire($plan, sprintf(
                 /* translators: %d: how many simulated cycles the plan ran for. */
-                __('Sandbox rehearsal completed after %d cycles.', 'dono-fundraising-platform'),
+                __('Sandbox rehearsal completed after %d cycles.', 'giveflow-fundraising-campaigns'),
                 self::MAX_CYCLES
             ));
             return;
@@ -144,7 +144,7 @@ final class SandboxRenewer
             // stays in the sweep but leaves this batch, which is what stops a
             // failing plan spinning it.
             $this->push($plan, $nextAt, $nowStr);
-            do_action('dono.sandbox.renewal_failed', $plan, $e);
+            do_action('giveflow.sandbox.renewal_failed', $plan, $e);
             return;
         }
 
@@ -183,7 +183,7 @@ final class SandboxRenewer
                 'updated_at'          => $now,
             ]);
 
-        do_action('dono.sandbox.rehearsal_ended', $plan, $reason);
+        do_action('giveflow.sandbox.rehearsal_ended', $plan, $reason);
     }
 
     /** @since 1.0.0 */

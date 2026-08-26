@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
-use Dono\Donations\DonationIntent;
-use Dono\Donations\DonationService;
-use Dono\Foundation\Plugin;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationIntent;
+use GiveFlow\Donations\DonationService;
+use GiveFlow\Foundation\Plugin;
 use RuntimeException;
 
 /**
@@ -29,7 +29,7 @@ final class RecurringFrequencyGuardTest extends IntegrationTestCase
     private function intent(string $gateway, string $frequency): DonationIntent
     {
         return new DonationIntent(
-            email:        'guard-' . uniqid() . '@dono.test',
+            email:        'guard-' . uniqid() . '@giveflow.test',
             amount_cents: 2500,
             currency:     'EUR',
             gateway:      $gateway,
@@ -48,7 +48,7 @@ final class RecurringFrequencyGuardTest extends IntegrationTestCase
     public function test_a_donation_already_collected_elsewhere_is_recorded_on_a_one_time_gateway(): void
     {
         $intent = new DonationIntent(
-            email:             'collected-' . uniqid() . '@dono.test',
+            email:             'collected-' . uniqid() . '@giveflow.test',
             amount_cents:      2500,
             currency:          'EUR',
             gateway:           'offline',
@@ -63,14 +63,14 @@ final class RecurringFrequencyGuardTest extends IntegrationTestCase
     }
 
     /**
-     * The flag is read before dono.donation.intent_creating, the same defence
+     * The flag is read before giveflow.donation.intent_creating, the same defence
      * $retry has. An add-on that could set it would be able to walk a live
      * donor's submission past the guard and promise them a plan nothing will
      * ever collect.
      */
     public function test_a_filter_cannot_declare_a_live_donation_already_collected(): void
     {
-        add_filter('dono.donation.intent_creating', static function (DonationIntent $intent): DonationIntent {
+        add_filter('giveflow.donation.intent_creating', static function (DonationIntent $intent): DonationIntent {
             return new DonationIntent(
                 email:             $intent->email,
                 amount_cents:      $intent->amount_cents,
@@ -87,7 +87,7 @@ final class RecurringFrequencyGuardTest extends IntegrationTestCase
         try {
             $this->donations()->createPending($this->intent('offline', 'monthly'));
         } finally {
-            remove_all_filters('dono.donation.intent_creating');
+            remove_all_filters('giveflow.donation.intent_creating');
         }
     }
 

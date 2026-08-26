@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
-use Dono\Recurring\RecurringPlan;
-use Dono\Recurring\RecurringPlanRepository;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Recurring\RecurringPlan;
+use GiveFlow\Recurring\RecurringPlanRepository;
 use WP_REST_Request;
 
 /**
@@ -26,7 +26,7 @@ final class PortalPlanConcurrentRenewalTest extends IntegrationTestCase
         $sid  = bin2hex(random_bytes(32));
         $csrf = bin2hex(random_bytes(16));
         $sid = $this->portalSession($donorId, $csrf);
-        $_COOKIE['dono_donor_session'] = $sid;
+        $_COOKIE['giveflow_donor_session'] = $sid;
 
         return $csrf;
     }
@@ -56,9 +56,9 @@ final class PortalPlanConcurrentRenewalTest extends IntegrationTestCase
     /** @param array<string,mixed> $body */
     private function act(int $planId, string $csrf, array $body): int
     {
-        $req = new WP_REST_Request('POST', "/dono/v1/portal/recurring/{$planId}/action");
+        $req = new WP_REST_Request('POST', "/giveflow/v1/portal/recurring/{$planId}/action");
         $req->set_header('content-type', 'application/json');
-        $req->set_header('X-Dono-Csrf', $csrf);
+        $req->set_header('X-GiveFlow-Csrf', $csrf);
         $req->set_body((string) wp_json_encode($body));
 
         return rest_do_request($req)->get_status();

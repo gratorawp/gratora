@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Unit\Campaigns;
+namespace GiveFlow\Tests\Unit\Campaigns;
 
-use Dono\Campaigns\CampaignTypeHandler;
-use Dono\Campaigns\CampaignTypeRegistry;
-use Dono\Campaigns\DefaultCampaignTypeHandler;
+use GiveFlow\Campaigns\CampaignTypeHandler;
+use GiveFlow\Campaigns\CampaignTypeRegistry;
+use GiveFlow\Campaigns\DefaultCampaignTypeHandler;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 

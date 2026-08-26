@@ -19,7 +19,7 @@ set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
 # Same source of truth as the packager: the header, not the checkout's name.
-SLUG=$(sed -n 's/^[[:space:]]*\*[[:space:]]*Text Domain:[[:space:]]*\([^[:space:]]*\).*/\1/p' dono.php | head -1)
+SLUG=$(sed -n 's/^[[:space:]]*\*[[:space:]]*Text Domain:[[:space:]]*\([^[:space:]]*\).*/\1/p' giveflow.php | head -1)
 test -n "$SLUG" || { echo "::error::no Text Domain in the plugin header" >&2; exit 1; }
 
 ZIP="dist/$SLUG.zip"
@@ -34,7 +34,7 @@ unzip -q "$ZIP" -d dist
 
 # Without any one of these the plugin fatals on activation, behind a blank
 # admin screen that says nothing about why.
-for f in dono.php vendor/autoload.php vendor/woocommerce/action-scheduler/action-scheduler.php build; do
+for f in giveflow.php vendor/autoload.php vendor/woocommerce/action-scheduler/action-scheduler.php build; do
     test -e "$OUT/$f" || fail "$f missing from the zip; the plugin would fatal on activation"
 done
 
@@ -47,7 +47,7 @@ do
     test ! -e "$OUT/$leak" || fail "$leak is in the zip"
 done
 
-# Resolved the way dono.php resolves them, which is BOTH autoloaders and not
+# Resolved the way giveflow.php resolves them, which is BOTH autoloaders and not
 # just composer's. Strauss works by editing vendor/autoload.php to pull in the
 # prefixed one, and `composer install --no-dev` removes Strauss and regenerates
 # that file without the edit. Requiring only vendor/autoload.php therefore
@@ -57,10 +57,10 @@ OUT="$OUT" php -r '
     require "$out/vendor/autoload.php";
     require "$out/vendor/vendor-prefixed/autoload.php";
     $need = [
-      "Dono\\Vendor\\Queryable\\Model",
-      "Dono\\Vendor\\Dompdf\\Dompdf",
-      "Dono\\Foundation\\Plugin",
-      "Dono\\Receipts\\PdfBuilder",
+      "GiveFlow\\Vendor\\Queryable\\Model",
+      "GiveFlow\\Vendor\\Dompdf\\Dompdf",
+      "GiveFlow\\Foundation\\Plugin",
+      "GiveFlow\\Receipts\\PdfBuilder",
     ];
     foreach ($need as $c) {
       if (! class_exists($c)) { fwrite(STDERR, "::error::$c does not resolve from the packaged tree\n"); exit(1); }
@@ -108,7 +108,7 @@ done
 # Guideline 4: build/ is compiled, and the repository readme.txt names is where a
 # reviewer is sent for the sources. That link is load-bearing rather than prose,
 # so losing it is a build failure and not a copy edit.
-grep -q 'github.com/dono-platform/dono' "$OUT/readme.txt" \
+grep -q 'github.com/givefloworg/giveflow' "$OUT/readme.txt" \
     || fail "readme.txt does not name the repository, so nothing says where build/ came from"
 
 # The other side of the same bargain: the repository answers for these, so

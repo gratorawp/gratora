@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Forms\Form;
-use Dono\Forms\FormSubmissionValidator;
-use Dono\Forms\Shortcode\DonationFormShortcode;
+use GiveFlow\Forms\Form;
+use GiveFlow\Forms\FormSubmissionValidator;
+use GiveFlow\Forms\Shortcode\DonationFormShortcode;
 use ReflectionMethod;
 
 /**
@@ -23,8 +23,8 @@ final class DonationMinimumOrphanedTest extends IntegrationTestCase
         $form->title      = 'Orphaned minimum ' . uniqid();
         $form->slug       = 'orphan-min-' . uniqid();
         $form->status     = 'published';
-        $form->blocks     = '<!-- wp:dono/donation-amount ' . $attrs . ' /-->'
-            . '<!-- wp:dono/submit-button {"label":"Give"} /-->';
+        $form->blocks     = '<!-- wp:giveflow/donation-amount ' . $attrs . ' /-->'
+            . '<!-- wp:giveflow/submit-button {"label":"Give"} /-->';
         $form->created_at = gmdate('Y-m-d H:i:s');
         $form->updated_at = $form->created_at;
         $form->save();

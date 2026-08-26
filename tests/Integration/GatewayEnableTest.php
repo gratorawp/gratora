@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Foundation\Plugin;
-use Dono\Gateways\GatewayManager;
-use Dono\Settings\SettingsService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Gateways\GatewayManager;
+use GiveFlow\Settings\SettingsService;
 use ReflectionProperty;
 
 /**
@@ -31,7 +31,7 @@ final class GatewayEnableTest extends IntegrationTestCase
 
     protected function tearDown(): void
     {
-        delete_option('dono_gateway_config');
+        delete_option('giveflow_gateway_config');
         parent::tearDown();
     }
 
@@ -60,7 +60,7 @@ final class GatewayEnableTest extends IntegrationTestCase
         foreach (array_keys($this->gateways()->all()) as $id) {
             $this->settings()->update('gateways', [$id => ['enabled' => false]]);
 
-            $stored = (array) get_option('dono_gateway_config', []);
+            $stored = (array) get_option('giveflow_gateway_config', []);
             $this->assertFalse(
                 $stored[$id]['enabled'] ?? null,
                 "{$id} did not persist: the gateways group does not declare its key"
@@ -72,7 +72,7 @@ final class GatewayEnableTest extends IntegrationTestCase
     public function test_the_registry_declares_a_flag_for_each_gateway(): void
     {
         $groups = $this->gateways()->declareSettings([
-            'gateways' => ['option' => 'dono_gateway_config', 'defaults' => []],
+            'gateways' => ['option' => 'giveflow_gateway_config', 'defaults' => []],
         ]);
 
         foreach (array_keys($this->gateways()->all()) as $id) {
@@ -88,7 +88,7 @@ final class GatewayEnableTest extends IntegrationTestCase
 
         $groups = $this->gateways()->declareSettings([
             'gateways' => [
-                'option'   => 'dono_gateway_config',
+                'option'   => 'giveflow_gateway_config',
                 'defaults' => [$id => ['some_existing_default' => 'keep-me']],
             ],
         ]);

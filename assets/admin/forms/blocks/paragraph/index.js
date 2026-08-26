@@ -5,12 +5,12 @@ import { BlockIcons } from '../_shared/block-icons';
 import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 import Segmented from '../../../_shared/components/Segmented';
 
-const NAME = 'dono/paragraph';
+const NAME = 'giveflow/paragraph';
 
 const ALIGN_OPTIONS = [
-    { value: 'left',   label: __( 'Left',   'dono-fundraising-platform' ) },
-    { value: 'center', label: __( 'Center', 'dono-fundraising-platform' ) },
-    { value: 'right',  label: __( 'Right',  'dono-fundraising-platform' ) },
+    { value: 'left',   label: __( 'Left',   'giveflow-fundraising-campaigns' ) },
+    { value: 'center', label: __( 'Center', 'giveflow-fundraising-campaigns' ) },
+    { value: 'right',  label: __( 'Right',  'giveflow-fundraising-campaigns' ) },
 ];
 
 function Edit( { attributes, setAttributes } ) {
@@ -25,9 +25,9 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Paragraph', 'dono-fundraising-platform' ) } initialOpen>
+                <PanelBody title={ __( 'Paragraph', 'giveflow-fundraising-campaigns' ) } initialOpen>
                     <Segmented
-                        label={ __( 'Alignment', 'dono-fundraising-platform' ) }
+                        label={ __( 'Alignment', 'giveflow-fundraising-campaigns' ) }
                         value={ align }
                         onChange={ ( v ) => setAttributes( { align: v } ) }
                         options={ ALIGN_OPTIONS }
@@ -43,7 +43,7 @@ function Edit( { attributes, setAttributes } ) {
                     tagName="p"
                     value={ text }
                     onChange={ ( v ) => setAttributes( { text: v } ) }
-                    placeholder={ __( 'Add a short description for donors.', 'dono-fundraising-platform' ) }
+                    placeholder={ __( 'Add a short description for donors.', 'giveflow-fundraising-campaigns' ) }
                     allowedFormats={ [ 'core/bold', 'core/italic', 'core/link' ] }
                     style={ { margin: 0, lineHeight: 1.5 } }
                 />
@@ -55,9 +55,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Paragraph', 'dono-fundraising-platform' ),
-        description: __( 'Short copy shown above the next field step.', 'dono-fundraising-platform' ),
-        category:   'dono-content',
+        title:      __( 'Paragraph', 'giveflow-fundraising-campaigns' ),
+        description: __( 'Short copy shown above the next field step.', 'giveflow-fundraising-campaigns' ),
+        category:   'giveflow-content',
         icon:       BlockIcons[ 'paragraph' ],
         supports: { html: false, anchor: false, inserter: true },
         attributes: {

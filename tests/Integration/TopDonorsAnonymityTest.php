@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -44,7 +44,7 @@ final class TopDonorsAnonymityTest extends IntegrationTestCase
         $this->seedPaidDonation($campaignId, 'carol@example.com', 'Carol', 'Split', 2000, false);
         $this->seedPaidDonation($campaignId, 'carol@example.com', 'Carol', 'Split', 7000, true);
 
-        $repo  = Plugin::instance()->container->get(\Dono\Donations\DonationRepository::class);
+        $repo  = Plugin::instance()->container->get(\GiveFlow\Donations\DonationRepository::class);
         $named = $repo->topPaidDonors(null, null, $campaignId, 10, false);
         $anon  = $repo->anonymousPaidTotal(null, null, $campaignId);
 
@@ -68,7 +68,7 @@ final class TopDonorsAnonymityTest extends IntegrationTestCase
 
         $now = gmdate('Y-m-d H:i:s');
         $d = Donation::make();
-        $d->reference         = 'DONO-ANON-' . substr(md5($email . $cents . (string) $anonymous), 0, 8);
+        $d->reference         = 'GIVEFLOW-ANON-' . substr(md5($email . $cents . (string) $anonymous), 0, 8);
         $d->donor_id          = (int) $donor->id;
         $d->campaign_id       = $campaignId;
         $d->amount_cents      = $cents;
@@ -90,7 +90,7 @@ final class TopDonorsAnonymityTest extends IntegrationTestCase
     /** @param array<string,mixed> $input */
     private function createCampaign(array $input): array
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) json_encode($input + ['status' => 'published']));
         return rest_do_request($req)->get_data();

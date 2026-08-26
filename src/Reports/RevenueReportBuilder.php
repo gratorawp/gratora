@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Reports;
+namespace GiveFlow\Reports;
 
-use Dono\Exports\RevenueExporter;
-use Dono\Foundation\Helpers\Money;
-use Dono\Foundation\Helpers\View;
-use Dono\Receipts\PdfBuilder;
+use GiveFlow\Exports\RevenueExporter;
+use GiveFlow\Foundation\Helpers\Money;
+use GiveFlow\Foundation\Helpers\View;
+use GiveFlow\Receipts\PdfBuilder;
 
 /**
  * Builds a one-page revenue summary for a calendar year: the year's total, a
@@ -51,7 +51,7 @@ final class RevenueReportBuilder
             ];
         }
 
-        $org     = get_option('dono_org_profile', []);
+        $org     = get_option('giveflow_org_profile', []);
         $orgName = trim((string) (is_array($org) ? ($org['name'] ?? '') : '')) ?: (string) get_bloginfo('name');
 
         $html = View::load('Receipts.revenue-report', [
@@ -60,25 +60,25 @@ final class RevenueReportBuilder
             'total'          => Money::format($totalCents, $currency),
             'months'         => $months,
             'stats'          => [
-                ['label' => __('Donations', 'dono-fundraising-platform'),        'value' => number_format_i18n($totalCount)],
-                ['label' => __('Average donation', 'dono-fundraising-platform'), 'value' => Money::format($totalCount > 0 ? intdiv($totalCents, $totalCount) : 0, $currency)],
-                ['label' => __('Best month', 'dono-fundraising-platform'),       'value' => $best !== null && $best['amount_cents'] > 0 ? $this->monthLabel($best['month']) : '-'],
+                ['label' => __('Donations', 'giveflow-fundraising-campaigns'),        'value' => number_format_i18n($totalCount)],
+                ['label' => __('Average donation', 'giveflow-fundraising-campaigns'), 'value' => Money::format($totalCount > 0 ? intdiv($totalCents, $totalCount) : 0, $currency)],
+                ['label' => __('Best month', 'giveflow-fundraising-campaigns'),       'value' => $best !== null && $best['amount_cents'] > 0 ? $this->monthLabel($best['month']) : '-'],
             ],
             'generated_date' => (string) wp_date(get_option('date_format')),
         ]);
 
         return $this->pdf->fromHtml($html, [
             /* translators: %s: four-digit year. */
-            'title'   => sprintf(__('Revenue report %s', 'dono-fundraising-platform'), (string) $year),
+            'title'   => sprintf(__('Revenue report %s', 'giveflow-fundraising-campaigns'), (string) $year),
             'author'  => $orgName,
-            'subject' => __('Revenue and donations report', 'dono-fundraising-platform'),
+            'subject' => __('Revenue and donations report', 'giveflow-fundraising-campaigns'),
         ]);
     }
 
     /** @since 1.0.0 */
     public static function filename(int $year): string
     {
-        return sprintf('dono-revenue-%d.pdf', $year);
+        return sprintf('giveflow-revenue-%d.pdf', $year);
     }
 
     /**

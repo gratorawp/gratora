@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
-use Dono\Reports\TaxStatementBuilder;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Reports\TaxStatementBuilder;
 
 /**
  * summary() is the tax-relevant figure a caller states without opening the PDF,

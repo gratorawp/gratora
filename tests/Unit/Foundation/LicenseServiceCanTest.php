@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Unit\Foundation;
+namespace GiveFlow\Tests\Unit\Foundation;
 
-use Dono\Foundation\Container\Container;
-use Dono\Foundation\License\LicenseService;
-use Dono\Foundation\Modules\DonoModule;
-use Dono\Foundation\Modules\ModuleManager;
+use GiveFlow\Foundation\Container\Container;
+use GiveFlow\Foundation\License\LicenseService;
+use GiveFlow\Foundation\Modules\GiveFlowModule;
+use GiveFlow\Foundation\Modules\ModuleManager;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -32,8 +32,8 @@ final class LicenseServiceCanTest extends TestCase
     public function test_pro_module_grants_pro_and_its_feature(): void
     {
         $svc = new LicenseService($this->managerWith(
-            $this->module('p2p', DonoModule::TIER_PRO),
-            $this->module('crm', DonoModule::TIER_PRO),
+            $this->module('p2p', GiveFlowModule::TIER_PRO),
+            $this->module('crm', GiveFlowModule::TIER_PRO),
         ));
 
         $this->assertTrue($svc->isPro());
@@ -46,7 +46,7 @@ final class LicenseServiceCanTest extends TestCase
     public function test_free_module_does_not_grant_pro(): void
     {
         $svc = new LicenseService($this->managerWith(
-            $this->module('free-module', DonoModule::TIER_FREE),
+            $this->module('free-module', GiveFlowModule::TIER_FREE),
         ));
 
         $this->assertFalse($svc->isPro(), 'free modules must not grant pro');
@@ -58,7 +58,7 @@ final class LicenseServiceCanTest extends TestCase
         $this->assertFalse((new LicenseService())->isPro());
     }
 
-    private function managerWith(DonoModule ...$modules): ModuleManager
+    private function managerWith(GiveFlowModule ...$modules): ModuleManager
     {
         $manager = new ModuleManager(new Container());
         foreach ($modules as $module) {
@@ -69,9 +69,9 @@ final class LicenseServiceCanTest extends TestCase
         return $manager;
     }
 
-    private function module(string $id, string $tier): DonoModule
+    private function module(string $id, string $tier): GiveFlowModule
     {
-        return new class($id, $tier) implements DonoModule {
+        return new class($id, $tier) implements GiveFlowModule {
             public function __construct(private string $id, private string $tier)
             {
             }

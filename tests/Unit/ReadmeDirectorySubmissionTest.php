@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Unit;
+namespace GiveFlow\Tests\Unit;
 
-use Dono\Tests\Unit\Support\DistPayload;
+use GiveFlow\Tests\Unit\Support\DistPayload;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -44,7 +44,7 @@ final class ReadmeDirectorySubmissionTest extends TestCase
     ];
 
     /** Where readme.txt sends a reviewer for the sources behind build/. */
-    private const REPOSITORY = 'https://github.com/dono-platform/dono';
+    private const REPOSITORY = 'https://github.com/givefloworg/giveflow';
 
     private function root(): string
     {
@@ -89,8 +89,12 @@ final class ReadmeDirectorySubmissionTest extends TestCase
             JSON_THROW_ON_ERROR
         );
 
+        // Both spellings npm accepts for a GitHub tag: the bare shorthand and
+        // the full clone url. Matching only one makes this check skip itself.
+        $pattern = '~^(?:github:|git\+https://github\.com/)([^/]+)/([^#]+?)(?:\.git)?#(.+)$~';
+
         foreach ($package['dependencies'] ?? [] as $spec) {
-            if (preg_match('~^github:([^/]+)/([^#]+)#(.+)$~', (string) $spec, $m) === 1) {
+            if (preg_match($pattern, (string) $spec, $m) === 1) {
                 return ['owner' => $m[1], 'repo' => $m[2], 'ref' => $m[3]];
             }
         }
@@ -121,12 +125,12 @@ final class ReadmeDirectorySubmissionTest extends TestCase
      * obligation; the other half is only observable from outside.
      *
      * Opt-in because it needs the network and says nothing without it. Run with
-     * DONO_NETWORK_TESTS=1 before submitting.
+     * GIVEFLOW_NETWORK_TESTS=1 before submitting.
      */
     public function test_the_repository_the_readme_names_is_reachable_to_a_stranger(): void
     {
-        if (getenv('DONO_NETWORK_TESTS') !== '1') {
-            $this->markTestSkipped('set DONO_NETWORK_TESTS=1 to check the repository against the network');
+        if (getenv('GIVEFLOW_NETWORK_TESTS') !== '1') {
+            $this->markTestSkipped('set GIVEFLOW_NETWORK_TESTS=1 to check the repository against the network');
         }
 
         if (! extension_loaded('curl')) {
@@ -149,12 +153,12 @@ final class ReadmeDirectorySubmissionTest extends TestCase
      * reads.
      *
      * Opt-in because it needs the network and says nothing without it. Run with
-     * DONO_NETWORK_TESTS=1 before submitting.
+     * GIVEFLOW_NETWORK_TESTS=1 before submitting.
      */
     public function test_the_tag_the_build_depends_on_is_still_published(): void
     {
-        if (getenv('DONO_NETWORK_TESTS') !== '1') {
-            $this->markTestSkipped('set DONO_NETWORK_TESTS=1 to check the build dependency against the network');
+        if (getenv('GIVEFLOW_NETWORK_TESTS') !== '1') {
+            $this->markTestSkipped('set GIVEFLOW_NETWORK_TESTS=1 to check the build dependency against the network');
         }
 
         if (! extension_loaded('curl')) {
@@ -221,7 +225,7 @@ final class ReadmeDirectorySubmissionTest extends TestCase
     public function test_the_header_agrees_with_the_plugin_file_and_composer(): void
     {
         $headers = $this->headers();
-        $plugin  = (string) file_get_contents($this->root() . '/dono.php');
+        $plugin  = (string) file_get_contents($this->root() . '/giveflow.php');
         $composer = json_decode(
             (string) file_get_contents($this->root() . '/composer.json'),
             true,
@@ -236,7 +240,7 @@ final class ReadmeDirectorySubmissionTest extends TestCase
         }
 
         preg_match('/^\s*\*\s*Version:\s*(\S+)$/m', $plugin, $version);
-        $this->assertNotEmpty($version, 'dono.php has no Version header.');
+        $this->assertNotEmpty($version, 'giveflow.php has no Version header.');
         $this->assertSame(
             $version[1],
             $headers['Stable tag'],
@@ -244,7 +248,7 @@ final class ReadmeDirectorySubmissionTest extends TestCase
         );
 
         preg_match('/^\s*\*\s*Requires PHP:\s*(\S+)$/m', $plugin, $php);
-        $this->assertNotEmpty($php, 'dono.php has no Requires PHP header.');
+        $this->assertNotEmpty($php, 'giveflow.php has no Requires PHP header.');
         $this->assertSame($php[1], $headers['Requires PHP']);
         $this->assertStringContainsString(
             $headers['Requires PHP'],
@@ -253,7 +257,7 @@ final class ReadmeDirectorySubmissionTest extends TestCase
         );
 
         preg_match('/^\s*\*\s*Requires at least:\s*(\S+)$/m', $plugin, $wp);
-        $this->assertNotEmpty($wp, 'dono.php has no Requires at least header.');
+        $this->assertNotEmpty($wp, 'giveflow.php has no Requires at least header.');
         $this->assertSame($wp[1], $headers['Requires at least']);
 
         $this->assertSame($composer['license'] ?? null, $headers['License']);

@@ -2,27 +2,27 @@
 
 declare(strict_types=1);
 
-namespace Dono\Rest\Admin;
+namespace GiveFlow\Rest\Admin;
 
-use Dono\Campaigns\CampaignRepository;
-use Dono\Donations\Donation;
-use Dono\Donors\Donor;
-use Dono\Donors\DonorRepository;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Auth\Capabilities;
-use Dono\Gateways\GatewayManager;
-use Dono\Gateways\GatewayTransportException;
-use Dono\Gateways\PaymentRetryUnavailable;
-use Dono\Gateways\SubscriptionAware;
-use Dono\Gateways\SubscriptionChangeNeedsApproval;
-use Dono\Gateways\Sandbox\SandboxGateway;
-use Dono\Gateways\SupportsPaymentRetry;
-use Dono\Recurring\RecurringPlan;
-use Dono\Recurring\RecurringPlanActions;
-use Dono\Recurring\RecurringPlanChange;
-use Dono\Recurring\RecurringPlanRepository;
-use Dono\Vendor\Queryable\ModelQueryBuilder;
-use Dono\Vendor\Queryable\QueryBuilder;
+use GiveFlow\Campaigns\CampaignRepository;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\DonorRepository;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Auth\Capabilities;
+use GiveFlow\Gateways\GatewayManager;
+use GiveFlow\Gateways\GatewayTransportException;
+use GiveFlow\Gateways\PaymentRetryUnavailable;
+use GiveFlow\Gateways\SubscriptionAware;
+use GiveFlow\Gateways\SubscriptionChangeNeedsApproval;
+use GiveFlow\Gateways\Sandbox\SandboxGateway;
+use GiveFlow\Gateways\SupportsPaymentRetry;
+use GiveFlow\Recurring\RecurringPlan;
+use GiveFlow\Recurring\RecurringPlanActions;
+use GiveFlow\Recurring\RecurringPlanChange;
+use GiveFlow\Recurring\RecurringPlanRepository;
+use GiveFlow\Vendor\Queryable\ModelQueryBuilder;
+use GiveFlow\Vendor\Queryable\QueryBuilder;
 use InvalidArgumentException;
 use RuntimeException;
 use WP_Error;
@@ -40,7 +40,7 @@ use WP_REST_Server;
  */
 final class RecurringController
 {
-    private const NAMESPACE = 'dono/v1';
+    private const NAMESPACE = 'giveflow/v1';
 
     /**
      * flags is LONGTEXT, so a non-JSON value can reach it: MySQL raises on one
@@ -83,7 +83,7 @@ final class RecurringController
     {
         register_rest_route(self::NAMESPACE, '/admin/recurring', [
             'methods'             => WP_REST_Server::READABLE,
-            'permission_callback' => static fn () => Capabilities::userCan('dono_view_donations'),
+            'permission_callback' => static fn () => Capabilities::userCan('giveflow_view_donations'),
             'callback'            => [$this, 'index'],
             'args'                => [
                 'page'         => ['type' => 'integer', 'default' => 1, 'minimum' => 1],
@@ -103,7 +103,7 @@ final class RecurringController
 
         register_rest_route(self::NAMESPACE, '/admin/recurring/stats', [
             'methods'             => WP_REST_Server::READABLE,
-            'permission_callback' => static fn () => Capabilities::userCan('dono_view_donations'),
+            'permission_callback' => static fn () => Capabilities::userCan('giveflow_view_donations'),
             'callback'            => [$this, 'stats'],
             'args'                => [
                 'include_test' => ['type' => 'boolean', 'default' => false],
@@ -112,7 +112,7 @@ final class RecurringController
 
         register_rest_route(self::NAMESPACE, '/admin/recurring/unlinked', [
             'methods'             => WP_REST_Server::READABLE,
-            'permission_callback' => static fn () => Capabilities::userCan('dono_view_donations'),
+            'permission_callback' => static fn () => Capabilities::userCan('giveflow_view_donations'),
             'callback'            => [$this, 'unlinked'],
             'args'                => [
                 'limit' => ['type' => 'integer', 'default' => 10, 'minimum' => 1, 'maximum' => 50],
@@ -121,7 +121,7 @@ final class RecurringController
 
         register_rest_route(self::NAMESPACE, '/admin/recurring/gateway-options', [
             'methods'             => WP_REST_Server::READABLE,
-            'permission_callback' => static fn () => Capabilities::userCan('dono_view_donations'),
+            'permission_callback' => static fn () => Capabilities::userCan('giveflow_view_donations'),
             'callback'            => [$this, 'gatewayOptions'],
         ]);
 
@@ -129,7 +129,7 @@ final class RecurringController
             'methods'             => WP_REST_Server::CREATABLE,
             // The same authority as a refund: both change what the donor is
             // charged, rather than only annotating a record.
-            'permission_callback' => static fn () => Capabilities::userCan('dono_refund_donations'),
+            'permission_callback' => static fn () => Capabilities::userCan('giveflow_refund_donations'),
             'callback'            => [$this, 'act'],
             'args'                => [
                 'action'       => ['type' => 'string', 'required' => true],
@@ -186,7 +186,7 @@ final class RecurringController
         // because then nothing is hidden and the number would be noise.
         if (! $args['include_test']) {
             $response->header(
-                'X-Dono-Test-Hidden',
+                'X-GiveFlow-Test-Hidden',
                 (string) max(0, $this->plans->countAdmin(['include_test' => true] + $args) - $total)
             );
         }
@@ -229,7 +229,7 @@ final class RecurringController
             'window_days' => self::WINDOW_DAYS,
             // Creating the plan is a refund-grade action, so a reader with view
             // access has to hand these on rather than act on them.
-            'can_retry'   => Capabilities::userCan('dono_refund_donations'),
+            'can_retry'   => Capabilities::userCan('giveflow_refund_donations'),
             'items'       => array_map(static fn (Donation $d): array => [
                 'reference'        => (string) $d->reference,
                 'amount_cents'     => (int) $d->amount_cents,
@@ -395,8 +395,8 @@ final class RecurringController
                 // its actions need to see there is nobody left to email.
                 'redacted' => $donor->redacted_at !== null,
                 // Contact details are the donor record, not the plan record, so
-                // they follow dono_view_donors the way the donations list does.
-                'email'    => $donor->redacted_at === null && Capabilities::userCan('dono_view_donors')
+                // they follow giveflow_view_donors the way the donations list does.
+                'email'    => $donor->redacted_at === null && Capabilities::userCan('giveflow_view_donors')
                     ? $this->donorService->decryptEmail($donor)
                     : null,
             ] : null,
@@ -420,7 +420,7 @@ final class RecurringController
     {
         $plan = RecurringPlan::query()->find('id', (int) $request['id']);
         if (! $plan) {
-            return new WP_Error('dono_not_found', __('Recurring plan not found.', 'dono-fundraising-platform'), ['status' => 404]);
+            return new WP_Error('giveflow_not_found', __('Recurring plan not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
         }
 
         $action = (string) $request['action'];
@@ -456,7 +456,7 @@ final class RecurringController
                     break;
 
                 default:
-                    return new WP_Error('dono_invalid_action', __('Unknown action.', 'dono-fundraising-platform'), ['status' => 422]);
+                    return new WP_Error('giveflow_invalid_action', __('Unknown action.', 'giveflow-fundraising-campaigns'), ['status' => 422]);
             }
         } catch (SubscriptionChangeNeedsApproval $e) {
             // Ahead of RuntimeException, which is its parent. Nothing was
@@ -464,8 +464,8 @@ final class RecurringController
             // new amount here would put the plan permanently out of step with
             // what the card is actually charged.
             return new WP_Error(
-                'dono_change_needs_approval',
-                __('The payment provider needs the donor to approve this change before it takes effect. Nothing has changed yet.', 'dono-fundraising-platform'),
+                'giveflow_change_needs_approval',
+                __('The payment provider needs the donor to approve this change before it takes effect. Nothing has changed yet.', 'giveflow-fundraising-campaigns'),
                 ['status' => 409, 'approve_url' => $e->approveUrl]
             );
         } catch (GatewayTransportException $e) {
@@ -474,25 +474,25 @@ final class RecurringController
             // sends an admin to look at the plan, the card and the gateway
             // dashboard, none of which are involved.
             return new WP_Error(
-                'dono_gateway_unreachable',
+                'giveflow_gateway_unreachable',
                 sprintf(
                     /* translators: %s: transport error, e.g. a DNS failure */
-                    __('This site could not reach the payment provider, so nothing has changed: %s. That is a problem with this server rather than with the plan. Try again in a moment.', 'dono-fundraising-platform'),
+                    __('This site could not reach the payment provider, so nothing has changed: %s. That is a problem with this server rather than with the plan. Try again in a moment.', 'giveflow-fundraising-campaigns'),
                     $e->getMessage()
                 ),
                 ['status' => 503]
             );
         } catch (PaymentRetryUnavailable $e) {
-            return new WP_Error('dono_nothing_to_collect', $e->getMessage(), ['status' => 409]);
+            return new WP_Error('giveflow_nothing_to_collect', $e->getMessage(), ['status' => 409]);
         } catch (InvalidArgumentException $e) {
-            return new WP_Error('dono_invalid_input', $e->getMessage(), ['status' => 422]);
+            return new WP_Error('giveflow_invalid_input', $e->getMessage(), ['status' => 422]);
         } catch (RuntimeException $e) {
-            return new WP_Error('dono_plan_terminal', $e->getMessage(), ['status' => 422]);
+            return new WP_Error('giveflow_plan_terminal', $e->getMessage(), ['status' => 422]);
         } catch (\Throwable $e) {
-            \Dono\Analytics\ErrorLog::record('admin.recurring', $e->getMessage());
+            \GiveFlow\Analytics\ErrorLog::record('admin.recurring', $e->getMessage());
             return new WP_Error(
-                'dono_gateway_error',
-                __('The payment provider would not accept that change. Nothing has been altered.', 'dono-fundraising-platform'),
+                'giveflow_gateway_error',
+                __('The payment provider would not accept that change. Nothing has been altered.', 'giveflow-fundraising-campaigns'),
                 ['status' => 502]
             );
         }

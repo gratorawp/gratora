@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace Dono\Gateways\Sandbox;
+namespace GiveFlow\Gateways\Sandbox;
 
-use Dono\Donations\Donation;
-use Dono\Foundation\Time\Clock;
-use Dono\Gateways\GatewayConfirmResult;
-use Dono\Gateways\GatewayIntentResult;
-use Dono\Gateways\PaymentGateway;
-use Dono\Gateways\RefundResult;
-use Dono\Gateways\SubscriptionAware;
-use Dono\Gateways\SubscriptionCreator;
-use Dono\Gateways\WebhookOutcome;
-use Dono\Recurring\FrequencyMap;
-use Dono\Recurring\RecurringPlan;
-use Dono\Recurring\RecurringPlanRepository;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Foundation\Time\Clock;
+use GiveFlow\Gateways\GatewayConfirmResult;
+use GiveFlow\Gateways\GatewayIntentResult;
+use GiveFlow\Gateways\PaymentGateway;
+use GiveFlow\Gateways\RefundResult;
+use GiveFlow\Gateways\SubscriptionAware;
+use GiveFlow\Gateways\SubscriptionCreator;
+use GiveFlow\Gateways\WebhookOutcome;
+use GiveFlow\Recurring\FrequencyMap;
+use GiveFlow\Recurring\RecurringPlan;
+use GiveFlow\Recurring\RecurringPlanRepository;
 use DateTimeImmutable;
 use WP_REST_Request;
 
@@ -63,13 +63,13 @@ final class SandboxGateway implements PaymentGateway, SubscriptionAware, Subscri
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('Test donation', 'dono-fundraising-platform');
+        return __('Test donation', 'giveflow-fundraising-campaigns');
     }
 
     /** @since 1.0.0 */
     public function description(): string
     {
-        return __('Simulated payment for testing. No real money moves and the form is in test mode.', 'dono-fundraising-platform');
+        return __('Simulated payment for testing. No real money moves and the form is in test mode.', 'giveflow-fundraising-campaigns');
     }
 
     /** @since 1.0.0 */

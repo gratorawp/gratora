@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Campaigns;
+namespace GiveFlow\Campaigns;
 
-use Dono\Foundation\Hooks\HookProvider;
+use GiveFlow\Foundation\Hooks\HookProvider;
 use WP_Post;
 
 /**
@@ -21,7 +21,7 @@ use WP_Post;
  */
 final class CampaignPageTemplate extends HookProvider
 {
-    public const SLUG = 'dono-campaign-page';
+    public const SLUG = 'giveflow-campaign-page';
 
     /** @since 1.0.0 */
     protected function actions(): array
@@ -43,9 +43,9 @@ final class CampaignPageTemplate extends HookProvider
         if (! function_exists('register_block_template')) {
             return;
         }
-        register_block_template('dono//' . self::SLUG, [
-            'title'       => __('Campaign page', 'dono-fundraising-platform'),
-            'description' => __('Site header and footer around the campaign page content, without the theme page banner.', 'dono-fundraising-platform'),
+        register_block_template('giveflow//' . self::SLUG, [
+            'title'       => __('Campaign page', 'giveflow-fundraising-campaigns'),
+            'description' => __('Site header and footer around the campaign page content, without the theme page banner.', 'giveflow-fundraising-campaigns'),
             'content'     => '<!-- wp:template-part {"slug":"header","tagName":"header"} /-->'
                 . '<!-- wp:group {"tagName":"main","layout":{"type":"default"}} -->'
                 . '<main class="wp-block-group"><!-- wp:post-content /--></main>'
@@ -66,7 +66,7 @@ final class CampaignPageTemplate extends HookProvider
         if (! $post instanceof WP_Post || $post->post_type !== 'page') {
             return $templates;
         }
-        if ((int) get_post_meta($post->ID, '_dono_campaign_id', true) <= 0) {
+        if ((int) get_post_meta($post->ID, '_giveflow_campaign_id', true) <= 0) {
             return $templates;
         }
         // An explicitly assigned page template is the admin opting out.

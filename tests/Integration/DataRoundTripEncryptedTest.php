@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
-use Dono\Donations\DonationNote;
-use Dono\Donors\Donor;
-use Dono\Donors\DonorNote;
-use Dono\Donors\DonorNoteRepository;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Crypto\Crypto;
-use Dono\Foundation\Identity\IdentityHasher;
-use Dono\Foundation\Plugin;
-use Dono\Foundation\Transfer\DataExporter;
-use Dono\Foundation\Transfer\DataImporter;
-use Dono\Vendor\Queryable\DB;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationNote;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\DonorNote;
+use GiveFlow\Donors\DonorNoteRepository;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Crypto\Crypto;
+use GiveFlow\Foundation\Identity\IdentityHasher;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Foundation\Transfer\DataExporter;
+use GiveFlow\Foundation\Transfer\DataImporter;
+use GiveFlow\Vendor\Queryable\DB;
 
 /**
  * The sealed columns that are not a donor's.
@@ -56,7 +56,7 @@ final class DataRoundTripEncryptedTest extends IntegrationTestCase
     private function wipe(): void
     {
         $prefix = DB::getPrefix();
-        foreach (['dono_donation_notes', 'dono_donor_notes', 'dono_donations', 'dono_donors'] as $table) {
+        foreach (['giveflow_donation_notes', 'giveflow_donor_notes', 'giveflow_donations', 'giveflow_donors'] as $table) {
             DB::raw("DELETE FROM {$prefix}{$table}");
         }
     }
@@ -201,7 +201,7 @@ final class DataRoundTripEncryptedTest extends IntegrationTestCase
         $now    = gmdate('Y-m-d H:i:s');
         $export = [
             'tables' => [
-                'dono_donors' => [[
+                'giveflow_donors' => [[
                     'id'         => 1,
                     'email'      => 'bodyless@example.test',
                     'first_name' => 'Bodyless',
@@ -209,7 +209,7 @@ final class DataRoundTripEncryptedTest extends IntegrationTestCase
                     'created_at' => $now,
                     'updated_at' => $now,
                 ]],
-                'dono_donor_notes' => [[
+                'giveflow_donor_notes' => [[
                     'id'             => 7,
                     'donor_id'       => 1,
                     'author_user_id' => 3,
@@ -221,7 +221,7 @@ final class DataRoundTripEncryptedTest extends IntegrationTestCase
 
         $result = $this->import($export);
 
-        $this->assertSame(1, $result['created']['dono_donor_notes'] ?? 0, 'the note was inserted');
+        $this->assertSame(1, $result['created']['giveflow_donor_notes'] ?? 0, 'the note was inserted');
 
         $donor = Donor::query()->where('first_name', 'Bodyless')->get();
         $this->assertNotNull($donor);

@@ -20,59 +20,59 @@ defined('ABSPATH') || exit;
  * @var string $postalLabel
  * @var string $countryLabel
  */
-$labelText   = $label !== ''        ? $label        : __('Mailing address', 'dono-fundraising-platform');
-$line1Text   = $line1Label !== ''   ? $line1Label   : __('Address line 1', 'dono-fundraising-platform');
-$line2Text   = $line2Label !== ''   ? $line2Label   : __('Apartment, suite, etc.', 'dono-fundraising-platform');
-$cityText    = $cityLabel !== ''    ? $cityLabel    : __('City', 'dono-fundraising-platform');
-$regionText  = $regionLabel !== ''  ? $regionLabel  : __('State / region', 'dono-fundraising-platform');
-$postalText  = $postalLabel !== ''  ? $postalLabel  : __('Postal code', 'dono-fundraising-platform');
-$countryText = $countryLabel !== '' ? $countryLabel : __('Country', 'dono-fundraising-platform');
+$labelText   = $label !== ''        ? $label        : __('Mailing address', 'giveflow-fundraising-campaigns');
+$line1Text   = $line1Label !== ''   ? $line1Label   : __('Address line 1', 'giveflow-fundraising-campaigns');
+$line2Text   = $line2Label !== ''   ? $line2Label   : __('Apartment, suite, etc.', 'giveflow-fundraising-campaigns');
+$cityText    = $cityLabel !== ''    ? $cityLabel    : __('City', 'giveflow-fundraising-campaigns');
+$regionText  = $regionLabel !== ''  ? $regionLabel  : __('State / region', 'giveflow-fundraising-campaigns');
+$postalText  = $postalLabel !== ''  ? $postalLabel  : __('Postal code', 'giveflow-fundraising-campaigns');
+$countryText = $countryLabel !== '' ? $countryLabel : __('Country', 'giveflow-fundraising-campaigns');
 ?>
-<fieldset class="dono-block dono-block--address dono-address">
-    <legend class="dono-address__legend"><?php echo esc_html($labelText); ?></legend>
-    <div class="dono-address__grid">
+<fieldset class="giveflow-block giveflow-block--address giveflow-address">
+    <legend class="giveflow-address__legend"><?php echo esc_html($labelText); ?></legend>
+    <div class="giveflow-address__grid">
         <?php if ($showLine1): ?>
-            <label class="dono-address__field dono-address__field--full">
-                <span class="dono-address__label"><?php echo esc_html($line1Text); ?></span>
+            <label class="giveflow-address__field giveflow-address__field--full">
+                <span class="giveflow-address__label"><?php echo esc_html($line1Text); ?></span>
                 <input type="text" name="profile[address][line1]" autocomplete="address-line1"
                        <?php echo esc_attr($requireLine1 ? 'required' : ''); ?>>
             </label>
         <?php endif; ?>
 
         <?php if ($showLine2): ?>
-            <label class="dono-address__field dono-address__field--full">
-                <span class="dono-address__label"><?php echo esc_html($line2Text); ?></span>
+            <label class="giveflow-address__field giveflow-address__field--full">
+                <span class="giveflow-address__label"><?php echo esc_html($line2Text); ?></span>
                 <input type="text" name="profile[address][line2]" autocomplete="address-line2">
             </label>
         <?php endif; ?>
 
         <?php if ($showCity): ?>
-            <label class="dono-address__field">
-                <span class="dono-address__label"><?php echo esc_html($cityText); ?></span>
+            <label class="giveflow-address__field">
+                <span class="giveflow-address__label"><?php echo esc_html($cityText); ?></span>
                 <input type="text" name="profile[address][city]" autocomplete="address-level2"
                        <?php echo esc_attr($requireCity ? 'required' : ''); ?>>
             </label>
         <?php endif; ?>
 
         <?php if ($showRegion): ?>
-            <label class="dono-address__field">
-                <span class="dono-address__label"><?php echo esc_html($regionText); ?></span>
+            <label class="giveflow-address__field">
+                <span class="giveflow-address__label"><?php echo esc_html($regionText); ?></span>
                 <input type="text" name="profile[address][region]" autocomplete="address-level1"
                        <?php echo esc_attr($requireRegion ? 'required' : ''); ?>>
             </label>
         <?php endif; ?>
 
         <?php if ($showPostal): ?>
-            <label class="dono-address__field">
-                <span class="dono-address__label"><?php echo esc_html($postalText); ?></span>
+            <label class="giveflow-address__field">
+                <span class="giveflow-address__label"><?php echo esc_html($postalText); ?></span>
                 <input type="text" name="profile[address][postal]" autocomplete="postal-code"
                        <?php echo esc_attr($requirePostal ? 'required' : ''); ?>>
             </label>
         <?php endif; ?>
 
         <?php if ($showCountry): ?>
-            <label class="dono-address__field">
-                <span class="dono-address__label"><?php echo esc_html($countryText); ?></span>
+            <label class="giveflow-address__field">
+                <span class="giveflow-address__label"><?php echo esc_html($countryText); ?></span>
                 <input type="text" name="profile[address][country]" autocomplete="country-name"
                        <?php echo esc_attr($requireCountry ? 'required' : ''); ?>>
             </label>

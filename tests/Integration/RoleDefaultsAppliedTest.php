@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Foundation\Auth\Capabilities;
-use Dono\Foundation\Plugin;
-use Dono\Settings\SettingsService;
+use GiveFlow\Foundation\Auth\Capabilities;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Settings\SettingsService;
 
 /**
  * The Roles screen reads the settings defaults while capabilities come from the
- * dono_roles option, so the two have to be made to agree: a screen showing a
+ * giveflow_roles option, so the two have to be made to agree: a screen showing a
  * capability as granted is a promise that the role holds it, and an
  * administrator refused a refund by command dispatch has no way to grant it
  * from the screen (the administrator column is not editable).
@@ -21,7 +21,7 @@ final class RoleDefaultsAppliedTest extends IntegrationTestCase
     {
         parent::setUp();
         // The fresh-install state: no stored mapping, no role holding anything.
-        delete_option('dono_roles');
+        delete_option('giveflow_roles');
         Capabilities::applyMapping([]);
 
         // These fire admin_init for real, so every listener on it runs. Three
@@ -30,7 +30,7 @@ final class RoleDefaultsAppliedTest extends IntegrationTestCase
         // has written a byte, and the privacy-policy helper reports incorrect
         // usage because is_admin() is false here.
         remove_action('admin_init', 'wp_admin_headers');
-        update_option('dono_onboarding_status', 'completed');
+        update_option('giveflow_onboarding_status', 'completed');
         $this->setExpectedIncorrectUsage('wp_add_privacy_policy_content');
     }
 
@@ -47,15 +47,15 @@ final class RoleDefaultsAppliedTest extends IntegrationTestCase
     public function test_the_first_admin_load_grants_the_administrator_what_the_screen_shows(): void
     {
         $this->assertFalse(
-            get_role('administrator')->has_cap('dono_refund_donations'),
+            get_role('administrator')->has_cap('giveflow_refund_donations'),
             'nothing has applied the mapping yet'
         );
 
         do_action('admin_init');
 
         $admin = get_role('administrator');
-        $this->assertTrue($admin->has_cap('dono_refund_donations'));
-        $this->assertTrue($admin->has_cap('dono_resend_receipt'));
+        $this->assertTrue($admin->has_cap('giveflow_refund_donations'));
+        $this->assertTrue($admin->has_cap('giveflow_resend_receipt'));
         $this->assertTrue($admin->has_cap(Capabilities::MANAGE));
     }
 

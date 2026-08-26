@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Gateways;
+namespace GiveFlow\Gateways;
 
-use Dono\Donations\Donation;
-use Dono\Recurring\RecurringPlan;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Recurring\RecurringPlan;
 use RuntimeException;
 
 /**

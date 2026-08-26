@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Dono\Gateways;
+namespace GiveFlow\Gateways;
 
-use Dono\Donations\Donation;
-use Dono\Donations\Refund;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\Refund;
 use WP_REST_Request;
 
 /**
  * Payment gateway abstraction. Concrete gateways register themselves at boot
- * via the `dono.gateways.register` hook.
+ * via the `giveflow.gateways.register` hook.
  *
  * Lifecycle: createIntent, then either handleWebhook (typical) or confirm
  * (synchronous, Offline only); refund and the subscription methods as needed.

@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Async\AsyncDispatcher;
-use Dono\Currency\FxRates;
-use Dono\Currency\FxRatesUpdater;
-use Dono\Donations\DonationRepository;
-use Dono\Donations\Refund;
-use Dono\Foundation\Helpers\Money;
-use Dono\Settings\SettingsService;
+use GiveFlow\Async\AsyncDispatcher;
+use GiveFlow\Currency\FxRates;
+use GiveFlow\Currency\FxRatesUpdater;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Donations\Refund;
+use GiveFlow\Foundation\Helpers\Money;
+use GiveFlow\Settings\SettingsService;
 use WP_Error;
 use WP_REST_Request;
 
@@ -28,7 +28,7 @@ final class CurrencyFxTest extends IntegrationTestCase
 
     private function postDonation(array $body): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/donations');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode($body));
         return rest_do_request($req);
@@ -36,16 +36,16 @@ final class CurrencyFxTest extends IntegrationTestCase
 
     private function confirm(string $reference): void
     {
-        $req = new WP_REST_Request('POST', "/dono/v1/donations/{$reference}/confirm");
+        $req = new WP_REST_Request('POST', "/giveflow/v1/donations/{$reference}/confirm");
         $req->set_header('content-type', 'application/json');
         $req->set_body('{}');
         $res = rest_do_request($req);
         $this->assertSame(200, $res->get_status(), 'confirm: ' . json_encode($res->get_data()));
     }
 
-    private function makeDefaultFund(): \Dono\Funds\Fund
+    private function makeDefaultFund(): \GiveFlow\Funds\Fund
     {
-        $f = \Dono\Funds\Fund::make();
+        $f = \GiveFlow\Funds\Fund::make();
         $f->code       = 'genfx';
         $f->name       = 'General FX';
         $f->is_active  = true;
@@ -92,7 +92,7 @@ final class CurrencyFxTest extends IntegrationTestCase
         ])->get_data()['reference'];
 
         $row = self::$wpdb->get_row(self::$wpdb->prepare(
-            "SELECT base_amount_cents, base_currency, fx_rate FROM " . self::$prefix . "dono_donations WHERE reference = %s",
+            "SELECT base_amount_cents, base_currency, fx_rate FROM " . self::$prefix . "giveflow_donations WHERE reference = %s",
             $ref
         ));
         $this->assertSame($base, $row->base_currency);
@@ -110,7 +110,7 @@ final class CurrencyFxTest extends IntegrationTestCase
         ])->get_data()['reference'];
 
         $row = self::$wpdb->get_row(self::$wpdb->prepare(
-            "SELECT base_amount_cents, base_currency FROM " . self::$prefix . "dono_donations WHERE reference = %s",
+            "SELECT base_amount_cents, base_currency FROM " . self::$prefix . "giveflow_donations WHERE reference = %s",
             $ref
         ));
         $this->assertSame(5000, (int) $row->base_amount_cents);
@@ -129,7 +129,7 @@ final class CurrencyFxTest extends IntegrationTestCase
         $this->assertSame(201, $res->get_status());
 
         $row = self::$wpdb->get_row(self::$wpdb->prepare(
-            "SELECT base_amount_cents, base_currency FROM " . self::$prefix . "dono_donations WHERE reference = %s",
+            "SELECT base_amount_cents, base_currency FROM " . self::$prefix . "giveflow_donations WHERE reference = %s",
             $res->get_data()['reference']
         ));
         $this->assertNull($row->base_amount_cents);
@@ -155,7 +155,7 @@ final class CurrencyFxTest extends IntegrationTestCase
         $this->confirm($r2);
 
         $raised = (int) self::$wpdb->get_var(self::$wpdb->prepare(
-            "SELECT raised_cents FROM " . self::$prefix . "dono_funds WHERE id = %d",
+            "SELECT raised_cents FROM " . self::$prefix . "giveflow_funds WHERE id = %d",
             $fund->id
         ));
         // 5000 base + 4000 other*0.5 (2000 base) = 7000, not the raw 9000.
@@ -303,12 +303,12 @@ final class CurrencyFxTest extends IntegrationTestCase
 
     private function fxGet(): array
     {
-        return rest_do_request(new WP_REST_Request('GET', '/dono/v1/admin/currency/fx'))->get_data();
+        return rest_do_request(new WP_REST_Request('GET', '/giveflow/v1/admin/currency/fx'))->get_data();
     }
 
     private function fxPut(array $body): array
     {
-        $r = new WP_REST_Request('PUT', '/dono/v1/admin/currency/fx');
+        $r = new WP_REST_Request('PUT', '/giveflow/v1/admin/currency/fx');
         $r->set_header('content-type', 'application/json');
         $r->set_body(json_encode($body));
         return rest_do_request($r)->get_data();
@@ -316,6 +316,6 @@ final class CurrencyFxTest extends IntegrationTestCase
 
     private function fxFetch(): array
     {
-        return rest_do_request(new WP_REST_Request('POST', '/dono/v1/admin/currency/fx/fetch'))->get_data();
+        return rest_do_request(new WP_REST_Request('POST', '/giveflow/v1/admin/currency/fx/fetch'))->get_data();
     }
 }

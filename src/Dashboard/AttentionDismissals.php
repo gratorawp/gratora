@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Dashboard;
+namespace GiveFlow\Dashboard;
 
 /**
  * Which attention items this user has waved off, and until when.
@@ -22,7 +22,7 @@ namespace Dono\Dashboard;
  */
 final class AttentionDismissals
 {
-    private const META_KEY = 'dono_attention_dismissed';
+    private const META_KEY = 'giveflow_attention_dismissed';
 
     /** Bounds the meta blob: dismissals are per key, and the keys are few. */
     private const MAX_ENTRIES = 50;

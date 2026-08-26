@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Dono\Donors;
+namespace GiveFlow\Donors;
 
-use Dono\Foundation\Crypto\Crypto;
-use Dono\Settings\SettingsService;
+use GiveFlow\Foundation\Crypto\Crypto;
+use GiveFlow\Settings\SettingsService;
 
 /**
  * Resolves Gravatar URLs for the donor-activity blocks.
  *
  * Off unless the org turns it on. Asking Gravatar for a picture sends a hash of
  * the donor's address to a third party from every visitor's browser, on a page
- * that is public, and Dono encrypts those addresses at rest precisely so they
+ * that is public, and GiveFlow encrypts those addresses at rest precisely so they
  * are not casually exposed. That trade is the org's to make.
  *
  * Resolves to a URL rather than handing an address to the caller: the blocks

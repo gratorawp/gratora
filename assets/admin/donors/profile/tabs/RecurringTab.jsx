@@ -8,11 +8,11 @@ import PlanActionDialog, { actionsFor, dueIn, isTerminal, retryActionFor } from 
 import { formatAmount, formatDateTime, planStatusPill } from '../helpers';
 
 const STATUS_OPTIONS = [
-    { value: 'active',    label: __( 'Active', 'dono-fundraising-platform' ) },
-    { value: 'past_due',  label: __( 'Past due', 'dono-fundraising-platform' ) },
-    { value: 'paused',    label: __( 'Paused', 'dono-fundraising-platform' ) },
-    { value: 'cancelled', label: __( 'Cancelled', 'dono-fundraising-platform' ) },
-    { value: 'expired',   label: __( 'Expired', 'dono-fundraising-platform' ) },
+    { value: 'active',    label: __( 'Active', 'giveflow-fundraising-campaigns' ) },
+    { value: 'past_due',  label: __( 'Past due', 'giveflow-fundraising-campaigns' ) },
+    { value: 'paused',    label: __( 'Paused', 'giveflow-fundraising-campaigns' ) },
+    { value: 'cancelled', label: __( 'Cancelled', 'giveflow-fundraising-campaigns' ) },
+    { value: 'expired',   label: __( 'Expired', 'giveflow-fundraising-campaigns' ) },
 ];
 
 /**
@@ -25,16 +25,16 @@ function intervalLabel( unit, count ) {
     switch ( unit ) {
         case 'day':
             /* translators: %d: number of days between charges. */
-            return sprintf( _n( '%d day', '%d days', n, 'dono-fundraising-platform' ), n );
+            return sprintf( _n( '%d day', '%d days', n, 'giveflow-fundraising-campaigns' ), n );
         case 'week':
             /* translators: %d: number of weeks between charges. */
-            return sprintf( _n( '%d week', '%d weeks', n, 'dono-fundraising-platform' ), n );
+            return sprintf( _n( '%d week', '%d weeks', n, 'giveflow-fundraising-campaigns' ), n );
         case 'month':
             /* translators: %d: number of months */
-            return sprintf( _n( '%d month', '%d months', n, 'dono-fundraising-platform' ), n );
+            return sprintf( _n( '%d month', '%d months', n, 'giveflow-fundraising-campaigns' ), n );
         case 'year':
             /* translators: %d: number of years between charges. */
-            return sprintf( _n( '%d year', '%d years', n, 'dono-fundraising-platform' ), n );
+            return sprintf( _n( '%d year', '%d years', n, 'giveflow-fundraising-campaigns' ), n );
         default:
             return n > 1 ? `${ n } ${ unit }` : String( unit );
     }
@@ -60,43 +60,43 @@ export default function RecurringTab( { recurring, onChange } ) {
     const fields = useMemo( () => [
         {
             id:    'plan',
-            label: __( 'Plan', 'dono-fundraising-platform' ),
+            label: __( 'Plan', 'giveflow-fundraising-campaigns' ),
             enableSorting: true,
             enableGlobalSearch: true,
             getValue: ( { item } ) => [ item.gateway, item.gateway_subscription_id ].filter( Boolean ).join( ' ' ),
             render: ( { item } ) => (
-                <div className="dono-row">
-                    <div className="dono-row__body">
-                        <div className="dono-row__name" style={ { textTransform: 'capitalize' } }>
+                <div className="giveflow-row">
+                    <div className="giveflow-row__body">
+                        <div className="giveflow-row__name" style={ { textTransform: 'capitalize' } }>
                             { item.gateway }
                             { /* Labelled because the card above deliberately
                                  leaves it out of the totals. */ }
                             { item.is_test && (
                                 <span className="dp-pill is-muted" style={ { marginLeft: 6 } }>
-                                    { __( 'Test', 'dono-fundraising-platform' ) }
+                                    { __( 'Test', 'giveflow-fundraising-campaigns' ) }
                                 </span>
                             ) }
                         </div>
-                        <code className="dono-row__sub dono-row__sub--mono">{ item.gateway_subscription_id }</code>
+                        <code className="giveflow-row__sub giveflow-row__sub--mono">{ item.gateway_subscription_id }</code>
                     </div>
                 </div>
             ),
         },
         {
             id:    'amount',
-            label: __( 'Amount / interval', 'dono-fundraising-platform' ),
+            label: __( 'Amount / interval', 'giveflow-fundraising-campaigns' ),
             enableSorting: true,
             getValue: ( { item } ) => item.amount_cents,
             render: ( { item } ) => (
                 <span>
                     { formatAmount( item.amount_cents, item.currency ) }
-                    <span className="dono-row__sub"> / { intervalLabel( item.interval_unit, item.interval_count ) }</span>
+                    <span className="giveflow-row__sub"> / { intervalLabel( item.interval_unit, item.interval_count ) }</span>
                 </span>
             ),
         },
         {
             id:       'status',
-            label:    __( 'Status', 'dono-fundraising-platform' ),
+            label:    __( 'Status', 'giveflow-fundraising-campaigns' ),
             elements: STATUS_OPTIONS,
             filterBy: { operators: [ 'is' ] },
             enableSorting: true,
@@ -107,49 +107,49 @@ export default function RecurringTab( { recurring, onChange } ) {
         },
         {
             id:    'next_payment_at',
-            label: __( 'Next charge', 'dono-fundraising-platform' ),
+            label: __( 'Next charge', 'giveflow-fundraising-campaigns' ),
             enableSorting: true,
             render: ( { item } ) => ( isTerminal( item.status ) || ! item.next_payment_at )
-                ? <span className="dono-row__sub">-</span>
+                ? <span className="giveflow-row__sub">-</span>
                 : (
-                    <div className="dono-row">
-                        <div className="dono-row__body">
-                            <div className="dono-row__name">{ dueIn( item.next_payment_at ) }</div>
-                            <div className="dono-row__sub">{ formatDateTime( item.next_payment_at ) }</div>
+                    <div className="giveflow-row">
+                        <div className="giveflow-row__body">
+                            <div className="giveflow-row__name">{ dueIn( item.next_payment_at ) }</div>
+                            <div className="giveflow-row__sub">{ formatDateTime( item.next_payment_at ) }</div>
                         </div>
                     </div>
                 ),
         },
         {
             id:    'failed',
-            label: __( 'Renewal health', 'dono-fundraising-platform' ),
+            label: __( 'Renewal health', 'giveflow-fundraising-campaigns' ),
             enableSorting: true,
             getValue: ( { item } ) => item.failed_renewals_count || 0,
             render: ( { item } ) => item.failed_renewals_count > 0
                 ? (
-                    <span className="dono-pill is-warn">
+                    <span className="giveflow-pill is-warn">
                         { sprintf(
                             /* translators: %d: consecutive failed renewals. */
-                            _n( '%d failure', '%d failures', item.failed_renewals_count, 'dono-fundraising-platform' ),
+                            _n( '%d failure', '%d failures', item.failed_renewals_count, 'giveflow-fundraising-campaigns' ),
                             item.failed_renewals_count
                         ) }
                     </span>
                 )
-                : <span className="dono-row__sub">{ __( 'OK', 'dono-fundraising-platform' ) }</span>,
+                : <span className="giveflow-row__sub">{ __( 'OK', 'giveflow-fundraising-campaigns' ) }</span>,
         },
         {
             id:    'lifetime',
-            label: __( 'Lifetime', 'dono-fundraising-platform' ),
+            label: __( 'Lifetime', 'giveflow-fundraising-campaigns' ),
             enableSorting: true,
             getValue: ( { item } ) => item.total_paid_cents,
             render: ( { item } ) => (
-                <div className="dono-row">
-                    <div className="dono-row__body">
-                        <div className="dono-row__name">{ formatAmount( item.total_paid_cents, item.currency ) }</div>
-                        <div className="dono-row__sub">
+                <div className="giveflow-row">
+                    <div className="giveflow-row__body">
+                        <div className="giveflow-row__name">{ formatAmount( item.total_paid_cents, item.currency ) }</div>
+                        <div className="giveflow-row__sub">
                             { sprintf(
                                 /* translators: %d: number of donations */
-                                _n( '%d donation', '%d donations', item.payments_count, 'dono-fundraising-platform' ),
+                                _n( '%d donation', '%d donations', item.payments_count, 'giveflow-fundraising-campaigns' ),
                                 item.payments_count
                             ) }
                         </div>
@@ -169,7 +169,7 @@ export default function RecurringTab( { recurring, onChange } ) {
     const actions = useMemo( () => [
         {
             id:    'retry',
-            label: __( 'Retry payment', 'dono-fundraising-platform' ),
+            label: __( 'Retry payment', 'giveflow-fundraising-campaigns' ),
             // Outside the menu on purpose: collecting a failed renewal is the
             // reason this row is being looked at. The icon is not decoration --
             // DataViews draws a primary action as an icon button, and one
@@ -182,31 +182,31 @@ export default function RecurringTab( { recurring, onChange } ) {
         },
         {
             id:         'pause',
-            label:      __( 'Pause', 'dono-fundraising-platform' ),
+            label:      __( 'Pause', 'giveflow-fundraising-campaigns' ),
             isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'pause' ),
             callback:   ( items ) => setDialog( { plan: items[ 0 ], action: 'pause' } ),
         },
         {
             id:         'resume',
-            label:      __( 'Resume', 'dono-fundraising-platform' ),
+            label:      __( 'Resume', 'giveflow-fundraising-campaigns' ),
             isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'resume' ),
             callback:   ( items ) => setDialog( { plan: items[ 0 ], action: 'resume' } ),
         },
         {
             id:         'skip_next',
-            label:      __( 'Skip next', 'dono-fundraising-platform' ),
+            label:      __( 'Skip next', 'giveflow-fundraising-campaigns' ),
             isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'skip_next' ),
             callback:   ( items ) => setDialog( { plan: items[ 0 ], action: 'skip_next' } ),
         },
         {
             id:         'change_amount',
-            label:      __( 'Change amount', 'dono-fundraising-platform' ),
+            label:      __( 'Change amount', 'giveflow-fundraising-campaigns' ),
             isEligible: ( item ) => ! isTerminal( item.status ),
             callback:   ( items ) => setDialog( { plan: items[ 0 ], action: 'change_amount' } ),
         },
         {
             id:            'cancel',
-            label:         __( 'Cancel', 'dono-fundraising-platform' ),
+            label:         __( 'Cancel', 'giveflow-fundraising-campaigns' ),
             isDestructive: true,
             isEligible:    ( item ) => ! isTerminal( item.status ),
             callback:      ( items ) => setDialog( { plan: items[ 0 ], action: 'cancel' } ),
@@ -218,15 +218,15 @@ export default function RecurringTab( { recurring, onChange } ) {
             <div className="dp-card">
                 <EmptyState
                     compact
-                    title={ __( 'No subscriptions on file', 'dono-fundraising-platform' ) }
-                    body={ __( 'Recurring plans appear here once this donor sets one up on a form that offers it.', 'dono-fundraising-platform' ) }
+                    title={ __( 'No subscriptions on file', 'giveflow-fundraising-campaigns' ) }
+                    body={ __( 'Recurring plans appear here once this donor sets one up on a form that offers it.', 'giveflow-fundraising-campaigns' ) }
                 />
             </div>
         );
     }
 
     return (
-        <div className="dono-dataviews dp-recurring-dv">
+        <div className="giveflow-dataviews dp-recurring-dv">
             <DataViews
                 data={ rows }
                 isLoading={ false }
@@ -237,7 +237,7 @@ export default function RecurringTab( { recurring, onChange } ) {
                 paginationInfo={ paginationInfo }
                 defaultLayouts={ { table: {} } }
                 getItemId={ ( item ) => String( item.id ) }
-                searchLabel={ __( 'Search by subscription ID', 'dono-fundraising-platform' ) }
+                searchLabel={ __( 'Search by subscription ID', 'giveflow-fundraising-campaigns' ) }
             />
 
             { dialog && (

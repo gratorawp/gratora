@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Unit\Foundation;
+namespace GiveFlow\Tests\Unit\Foundation;
 
-use Dono\Foundation\Container\Container;
-use Dono\Foundation\Modules\DonoModule;
-use Dono\Foundation\Modules\ModuleManager;
+use GiveFlow\Foundation\Container\Container;
+use GiveFlow\Foundation\Modules\GiveFlowModule;
+use GiveFlow\Foundation\Modules\ModuleManager;
 use PHPUnit\Framework\TestCase;
 
 final class ModuleManagerStatusTest extends TestCase
 {
     protected function setUp(): void
     {
-        if (! defined('DONO_VERSION')) {
-            define('DONO_VERSION', '0.1.0');
+        if (! defined('GIVEFLOW_VERSION')) {
+            define('GIVEFLOW_VERSION', '0.1.0');
         }
     }
 
@@ -37,9 +37,9 @@ final class ModuleManagerStatusTest extends TestCase
     }
 
     /** @param array<string,mixed> $requires */
-    private function module(string $id, array $requires = [], bool $licensed = true): DonoModule
+    private function module(string $id, array $requires = [], bool $licensed = true): GiveFlowModule
     {
-        return new class($id, $requires, $licensed) implements DonoModule {
+        return new class($id, $requires, $licensed) implements GiveFlowModule {
             /** @param array<string,mixed> $requires */
             public function __construct(
                 private string $idValue,
@@ -75,7 +75,7 @@ final class ModuleManagerStatusTest extends TestCase
 
             public function tier(): string
             {
-                return DonoModule::TIER_PRO;
+                return GiveFlowModule::TIER_PRO;
             }
 
             public function boot(Container $container): void

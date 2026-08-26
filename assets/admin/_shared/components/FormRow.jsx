@@ -1,1 +1,1 @@
-export { default } from '@dono/ui/components/FormRow';
+export { default } from '@giveflow/ui/components/FormRow';

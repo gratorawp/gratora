@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Currency\FxRates;
-use Dono\Foundation\Helpers\Money;
-use Dono\Foundation\Plugin;
+use GiveFlow\Currency\FxRates;
+use GiveFlow\Foundation\Helpers\Money;
+use GiveFlow\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -59,11 +59,11 @@ final class UnconvertibleCurrencyTest extends IntegrationTestCase
      */
     public function test_the_fx_status_names_unconvertible_supported_currencies(): void
     {
-        $cur = (array) get_option('dono_currency_locale', []);
+        $cur = (array) get_option('giveflow_currency_locale', []);
         $cur['supported_currencies'] = [Money::defaultCurrency(), 'ZZZ'];
-        update_option('dono_currency_locale', $cur);
+        update_option('giveflow_currency_locale', $cur);
 
-        $data = (array) rest_do_request(new WP_REST_Request('GET', '/dono/v1/admin/currency/fx'))->get_data();
+        $data = (array) rest_do_request(new WP_REST_Request('GET', '/giveflow/v1/admin/currency/fx'))->get_data();
 
         $this->assertArrayHasKey('unconvertible', $data);
         $this->assertContains('ZZZ', $data['unconvertible']);
@@ -72,11 +72,11 @@ final class UnconvertibleCurrencyTest extends IntegrationTestCase
 
     public function test_a_fully_convertible_setup_reports_nothing_missing(): void
     {
-        $cur = (array) get_option('dono_currency_locale', []);
+        $cur = (array) get_option('giveflow_currency_locale', []);
         $cur['supported_currencies'] = [Money::defaultCurrency()];
-        update_option('dono_currency_locale', $cur);
+        update_option('giveflow_currency_locale', $cur);
 
-        $data = (array) rest_do_request(new WP_REST_Request('GET', '/dono/v1/admin/currency/fx'))->get_data();
+        $data = (array) rest_do_request(new WP_REST_Request('GET', '/giveflow/v1/admin/currency/fx'))->get_data();
 
         $this->assertSame([], $data['unconvertible']);
     }

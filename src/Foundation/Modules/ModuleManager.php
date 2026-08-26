@@ -2,23 +2,23 @@
 
 declare(strict_types=1);
 
-namespace Dono\Foundation\Modules;
+namespace GiveFlow\Foundation\Modules;
 
-use Dono\Foundation\Container\Container;
+use GiveFlow\Foundation\Container\Container;
 use RuntimeException;
 
 /**
- * Registry and boot orchestrator for Dono modules.
+ * Registry and boot orchestrator for GiveFlow modules.
  *
  * Boot order respects requires(). A module is skipped when unlicensed,
  * when a required module is absent, or when its requires()['core'] constraint
- * is not satisfied by the running DONO_VERSION.
+ * is not satisfied by the running GIVEFLOW_VERSION.
  *
  * @since 1.0.0
  */
 final class ModuleManager
 {
-    /** @var array<string, DonoModule> */
+    /** @var array<string, GiveFlowModule> */
     private array $modules = [];
 
     /** @var array<string, bool> */
@@ -26,7 +26,7 @@ final class ModuleManager
 
     /**
      * Modules skipped because their `requires()['core']` constraint was not
-     * met: id => [running DONO_VERSION, declared constraint].
+     * met: id => [running GIVEFLOW_VERSION, declared constraint].
      *
      * @var array<string, array{0:string,1:string}>
      */
@@ -38,25 +38,25 @@ final class ModuleManager
     }
 
     /** @since 1.0.0 */
-    public function register(DonoModule $module): void
+    public function register(GiveFlowModule $module): void
     {
         $id = $module->id();
 
         if (isset($this->modules[$id])) {
-            throw new RuntimeException(esc_html("Dono module '{$id}' is already registered."));
+            throw new RuntimeException(esc_html("GiveFlow module '{$id}' is already registered."));
         }
 
         $this->modules[$id] = $module;
     }
 
     /** @since 1.0.0 */
-    public function get(string $id): ?DonoModule
+    public function get(string $id): ?GiveFlowModule
     {
         return $this->modules[$id] ?? null;
     }
 
     /**
-     * @return array<string, DonoModule>
+     * @return array<string, GiveFlowModule>
      * @since 1.0.0
      */
     public function all(): array
@@ -67,7 +67,7 @@ final class ModuleManager
     /**
      * Modules skipped because their requires()['core'] constraint was not met.
      *
-     * @return array<string, array{0:string,1:string}> id => [DONO_VERSION, constraint]
+     * @return array<string, array{0:string,1:string}> id => [GIVEFLOW_VERSION, constraint]
      * @since 1.0.0
      */
     public function incompatible(): array
@@ -130,11 +130,11 @@ final class ModuleManager
 
         $coreConstraint = $module->requires()['core'] ?? null;
         if (is_string($coreConstraint) && $coreConstraint !== ''
-            && ! VersionConstraint::satisfies(DONO_VERSION, $coreConstraint)
+            && ! VersionConstraint::satisfies(GIVEFLOW_VERSION, $coreConstraint)
         ) {
-            $this->incompatible[$id] = [DONO_VERSION, $coreConstraint];
+            $this->incompatible[$id] = [GIVEFLOW_VERSION, $coreConstraint];
             $this->booted[$id] = false;
-            do_action('dono.module.incompatible', $id, DONO_VERSION, $coreConstraint);
+            do_action('giveflow.module.incompatible', $id, GIVEFLOW_VERSION, $coreConstraint);
             return;
         }
 
@@ -159,7 +159,7 @@ final class ModuleManager
     /**
      * Collect all module-owned model classes for migrations.
      *
-     * @return array<class-string<\Dono\Vendor\Queryable\Model>>
+     * @return array<class-string<\GiveFlow\Vendor\Queryable\Model>>
      * @since 1.0.0
      */
     public function allMigrations(): array

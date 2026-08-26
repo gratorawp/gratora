@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Dono\Analytics;
+namespace GiveFlow\Analytics;
 
-use Dono\Foundation\Identity\IdentityHasher;
-use Dono\Foundation\Time\Clock;
-use Dono\Settings\SettingsService;
+use GiveFlow\Foundation\Identity\IdentityHasher;
+use GiveFlow\Foundation\Time\Clock;
+use GiveFlow\Settings\SettingsService;
 
 /**
- * Records analytics events to the dono_events table.
+ * Records analytics events to the giveflow_events table.
  *
  * @since 1.0.0
  */
@@ -44,7 +44,7 @@ final class EventRecorder
     /** @since 1.0.0 */
     private function write(string $type, array $ctx): void
     {
-        $ctx = apply_filters('dono.event.recording', $ctx, $type);
+        $ctx = apply_filters('giveflow.event.recording', $ctx, $type);
 
         $event = Event::make();
         $event->type              = $type;
@@ -73,6 +73,6 @@ final class EventRecorder
 
         $event->save();
 
-        do_action('dono.event.recorded', $event);
+        do_action('giveflow.event.recorded', $event);
     }
 }

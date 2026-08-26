@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
-use Dono\Foundation\Crypto\Crypto;
-use Dono\Gateways\Stripe\StripeAccount;
-use Dono\Recurring\RecurringPlan;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Foundation\Crypto\Crypto;
+use GiveFlow\Gateways\Stripe\StripeAccount;
+use GiveFlow\Recurring\RecurringPlan;
 use WP_REST_Request;
 
 /**
@@ -23,7 +23,7 @@ final class StripeSubscriptionRenewalTest extends IntegrationTestCase
     {
         parent::setUp();
         $this->secret = 'whsec_test_' . bin2hex(random_bytes(8));
-        update_option('dono_gateway_config', [
+        update_option('giveflow_gateway_config', [
             'stripe' => ['webhook_secret_test' => $this->secret, 'test_mode' => true],
         ]);
 
@@ -36,18 +36,18 @@ final class StripeSubscriptionRenewalTest extends IntegrationTestCase
         // CoreModule registers the Stripe gateway only when the connected
         // account is present at boot. Tests connect the account in setUp(), so
         // we re-register it manually here.
-        $c = \Dono\Foundation\Plugin::instance()->container;
-        $manager = $c->get(\Dono\Gateways\GatewayManager::class);
+        $c = \GiveFlow\Foundation\Plugin::instance()->container;
+        $manager = $c->get(\GiveFlow\Gateways\GatewayManager::class);
         if (! $manager->get('stripe')) {
-            $manager->register(new \Dono\Gateways\Stripe\StripeGateway(
-                $c->get(\Dono\Gateways\Stripe\StripeApi::class),
-                $c->get(\Dono\Donations\DonationRepository::class),
-                $c->get(\Dono\Donations\DonationService::class),
-                $c->get(\Dono\Gateways\Stripe\StripeAccount::class),
-                $c->get(\Dono\Donors\DonorRepository::class),
-                $c->get(\Dono\Donors\DonorService::class),
-                $c->get(\Dono\Foundation\Time\Clock::class),
-                $c->get(\Dono\Recurring\RecurringPlanRepository::class),
+            $manager->register(new \GiveFlow\Gateways\Stripe\StripeGateway(
+                $c->get(\GiveFlow\Gateways\Stripe\StripeApi::class),
+                $c->get(\GiveFlow\Donations\DonationRepository::class),
+                $c->get(\GiveFlow\Donations\DonationService::class),
+                $c->get(\GiveFlow\Gateways\Stripe\StripeAccount::class),
+                $c->get(\GiveFlow\Donors\DonorRepository::class),
+                $c->get(\GiveFlow\Donors\DonorService::class),
+                $c->get(\GiveFlow\Foundation\Time\Clock::class),
+                $c->get(\GiveFlow\Recurring\RecurringPlanRepository::class),
             ));
         }
     }
@@ -58,7 +58,7 @@ final class StripeSubscriptionRenewalTest extends IntegrationTestCase
         $mails = $this->captureMails();
 
         $renewedFired = false;
-        add_action('dono.recurring.renewed', function () use (&$renewedFired): void {
+        add_action('giveflow.recurring.renewed', function () use (&$renewedFired): void {
             $renewedFired = true;
         });
 
@@ -74,9 +74,9 @@ final class StripeSubscriptionRenewalTest extends IntegrationTestCase
         $this->assertSame('paid', $renewal->status);
         $this->assertSame(2500, (int) $renewal->amount_cents);
         $this->assertSame('monthly', $renewal->frequency);
-        $this->assertTrue($renewedFired, 'dono.recurring.renewed action fired');
+        $this->assertTrue($renewedFired, 'giveflow.recurring.renewed action fired');
 
-        $fresh = \Dono\Recurring\RecurringPlan::query()->find('id', (int) $plan->id);
+        $fresh = \GiveFlow\Recurring\RecurringPlan::query()->find('id', (int) $plan->id);
         $this->assertSame(2, (int) $fresh->payments_count, 'plan payments_count incremented');
         $this->assertSame(2500 + (int) $plan->amount_cents, (int) $fresh->total_paid_cents);
 
@@ -109,7 +109,7 @@ final class StripeSubscriptionRenewalTest extends IntegrationTestCase
             date_default_timezone_set($original);
         }
 
-        $fresh = \Dono\Recurring\RecurringPlan::query()->find('id', (int) $plan->id);
+        $fresh = \GiveFlow\Recurring\RecurringPlan::query()->find('id', (int) $plan->id);
 
         // period_end in the fixture, read as UTC.
         $this->assertSame(
@@ -154,7 +154,7 @@ final class StripeSubscriptionRenewalTest extends IntegrationTestCase
         // ...and the plan counters reflect exactly ONE renewal on top of the
         // seeded baseline (1 / 2500), not two: a redelivered webhook must not
         // inflate payments_count / total_paid_cents (would be 3 / 7500 if it did).
-        $fresh = \Dono\Recurring\RecurringPlan::query()->where('id', $plan->id)->get();
+        $fresh = \GiveFlow\Recurring\RecurringPlan::query()->where('id', $plan->id)->get();
         $this->assertSame(2, (int) $fresh->payments_count, 'redelivery does not double-count payments_count');
         $this->assertSame(5000, (int) $fresh->total_paid_cents, 'redelivery does not double-count total_paid_cents');
     }
@@ -177,7 +177,7 @@ final class StripeSubscriptionRenewalTest extends IntegrationTestCase
 
         $this->postWebhook('invoice.payment_failed', $invoice);
 
-        $fresh = \Dono\Recurring\RecurringPlan::query()->find('id', (int) $plan->id);
+        $fresh = \GiveFlow\Recurring\RecurringPlan::query()->find('id', (int) $plan->id);
         $this->assertSame(1, (int) $fresh->failed_renewals_count);
         $this->assertSame('active', $fresh->status, 'Single failure does not cancel');
     }
@@ -195,7 +195,7 @@ final class StripeSubscriptionRenewalTest extends IntegrationTestCase
         $invoice = $this->buildInvoice($plan, 2500, 'subscription_cycle');
 
         $notified = [];
-        add_action('dono.recurring.renewal_failed', static function ($p, $ctx) use (&$notified): void {
+        add_action('giveflow.recurring.renewal_failed', static function ($p, $ctx) use (&$notified): void {
             $notified[] = (int) ($ctx['attempt'] ?? 0);
         }, 10, 2);
 
@@ -229,7 +229,7 @@ final class StripeSubscriptionRenewalTest extends IntegrationTestCase
         $plan = $this->seedPlan();
 
         $seen = [];
-        add_action('dono.recurring.renewal_failed', function ($p, $ctx) use (&$seen): void {
+        add_action('giveflow.recurring.renewal_failed', function ($p, $ctx) use (&$seen): void {
             $seen[] = ['plan_id' => (int) $p->id, 'ctx' => $ctx];
         }, 10, 2);
 
@@ -277,7 +277,7 @@ final class StripeSubscriptionRenewalTest extends IntegrationTestCase
         $this->assertNull($this->findMailBySubject($mails, "couldn't be taken"));
         $this->assertSame(
             2,
-            (int) \Dono\Recurring\RecurringPlan::query()->find('id', (int) $plan->id)->failed_renewals_count,
+            (int) \GiveFlow\Recurring\RecurringPlan::query()->find('id', (int) $plan->id)->failed_renewals_count,
             'the second failure is still counted, it just does not re-mail'
         );
     }
@@ -290,7 +290,7 @@ final class StripeSubscriptionRenewalTest extends IntegrationTestCase
 
         $this->assertSame(
             1,
-            (int) \Dono\Analytics\Event::query()->where('type', 'recurring.failed')->count(),
+            (int) \GiveFlow\Analytics\Event::query()->where('type', 'recurring.failed')->count(),
             'the cancellation path records one, so the failure that precedes it must too'
         );
     }
@@ -301,7 +301,7 @@ final class StripeSubscriptionRenewalTest extends IntegrationTestCase
         $mails = $this->captureMails();
 
         $cancelFired = false;
-        add_action('dono.recurring.cancelled', function () use (&$cancelFired): void {
+        add_action('giveflow.recurring.cancelled', function () use (&$cancelFired): void {
             $cancelFired = true;
         });
 
@@ -310,7 +310,7 @@ final class StripeSubscriptionRenewalTest extends IntegrationTestCase
             'cancellation_details' => ['reason' => 'requested_by_customer'],
         ]);
 
-        $fresh = \Dono\Recurring\RecurringPlan::query()->find('id', (int) $plan->id);
+        $fresh = \GiveFlow\Recurring\RecurringPlan::query()->find('id', (int) $plan->id);
         $this->assertSame('cancelled', $fresh->status);
         $this->assertSame('requested_by_customer', $fresh->cancellation_reason);
         $this->assertTrue($cancelFired);
@@ -335,7 +335,7 @@ final class StripeSubscriptionRenewalTest extends IntegrationTestCase
         $renewal = Donation::query()->where('recurring_plan_id', $plan->id)->orderBy('id', 'DESC')->get();
         $this->assertNull($renewal, 'no live money is banked on a test-mode signature');
 
-        $fresh = \Dono\Recurring\RecurringPlan::query()->find('id', (int) $plan->id);
+        $fresh = \GiveFlow\Recurring\RecurringPlan::query()->find('id', (int) $plan->id);
         $this->assertSame($before, (int) $fresh->payments_count, 'and the live plan counters do not move');
     }
 
@@ -350,7 +350,7 @@ final class StripeSubscriptionRenewalTest extends IntegrationTestCase
             'status' => 'canceled',
         ]);
 
-        $fresh = \Dono\Recurring\RecurringPlan::query()->find('id', (int) $plan->id);
+        $fresh = \GiveFlow\Recurring\RecurringPlan::query()->find('id', (int) $plan->id);
         $this->assertSame('active', (string) $fresh->status, 'a test secret cannot stop a live donor\'s giving');
     }
 
@@ -364,7 +364,7 @@ final class StripeSubscriptionRenewalTest extends IntegrationTestCase
 
         $this->postWebhook('invoice.payment_failed', $this->buildInvoice($plan, 2500, 'subscription_cycle'));
 
-        $fresh = \Dono\Recurring\RecurringPlan::query()->find('id', (int) $plan->id);
+        $fresh = \GiveFlow\Recurring\RecurringPlan::query()->find('id', (int) $plan->id);
         $this->assertSame($before, (int) $fresh->failed_renewals_count);
     }
 
@@ -372,8 +372,8 @@ final class StripeSubscriptionRenewalTest extends IntegrationTestCase
     {
         // Use the service so the email is properly hashed + encrypted; the
         // cancellation email template needs decryptEmail to round-trip.
-        $donorService = \Dono\Foundation\Plugin::instance()->container
-            ->get(\Dono\Donors\DonorService::class);
+        $donorService = \GiveFlow\Foundation\Plugin::instance()->container
+            ->get(\GiveFlow\Donors\DonorService::class);
         $donor = $donorService->findOrCreate('renewer@example.com', [
             'first_name' => 'Recurring',
             'last_name'  => 'Renewer',
@@ -492,7 +492,7 @@ final class StripeSubscriptionRenewalTest extends IntegrationTestCase
         $sig       = hash_hmac('sha256', "{$timestamp}.{$payload}", $this->secret);
         $sigHeader = "t={$timestamp},v1={$sig}";
 
-        $req = new WP_REST_Request('POST', '/dono/v1/webhooks/stripe');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/webhooks/stripe');
         $req->set_header('content-type', 'application/json');
         $req->set_header('stripe_signature', $sigHeader);
         $req->set_body($payload);

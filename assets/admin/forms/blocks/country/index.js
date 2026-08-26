@@ -4,7 +4,7 @@ import { __ } from '@wordpress/i18n';
 import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 import { BlockIcons } from '../_shared/block-icons';
 
-const NAME = 'dono/country';
+const NAME = 'giveflow/country';
 
 function Edit( { attributes, setAttributes } ) {
     const {
@@ -13,27 +13,27 @@ function Edit( { attributes, setAttributes } ) {
         required = false,
         condition = DEFAULT_CONDITION,
     } = attributes;
-    const blockProps = useBlockProps( { className: 'dono-block-preview dono-block-preview--field' } );
+    const blockProps = useBlockProps( { className: 'giveflow-block-preview giveflow-block-preview--field' } );
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Country', 'dono-fundraising-platform' ) } initialOpen>
+                <PanelBody title={ __( 'Country', 'giveflow-fundraising-campaigns' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'dono-fundraising-platform' ) }
+                        label={ __( 'Label', 'giveflow-fundraising-campaigns' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'Country', 'dono-fundraising-platform' ) }
+                        placeholder={ __( 'Country', 'giveflow-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Placeholder', 'dono-fundraising-platform' ) }
+                        label={ __( 'Placeholder', 'giveflow-fundraising-campaigns' ) }
                         value={ placeholder }
                         onChange={ ( v ) => setAttributes( { placeholder: v } ) }
-                        placeholder={ __( 'Search country…', 'dono-fundraising-platform' ) }
+                        placeholder={ __( 'Search country…', 'giveflow-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'dono-fundraising-platform' ) }
+                        label={ __( 'Required', 'giveflow-fundraising-campaigns' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
                         __nextHasNoMarginBottom
@@ -45,12 +45,12 @@ function Edit( { attributes, setAttributes } ) {
                 />
             </InspectorControls>
             <div { ...blockProps }>
-                <span className="dono-block-preview__label">
-                    { label || __( 'Country', 'dono-fundraising-platform' ) }
-                    { required && <em className="dono-block-preview__req" aria-hidden="true">*</em> }
+                <span className="giveflow-block-preview__label">
+                    { label || __( 'Country', 'giveflow-fundraising-campaigns' ) }
+                    { required && <em className="giveflow-block-preview__req" aria-hidden="true">*</em> }
                 </span>
-                <div className="dono-block-preview__field">
-                    { placeholder || __( 'Search country…', 'dono-fundraising-platform' ) }
+                <div className="giveflow-block-preview__field">
+                    { placeholder || __( 'Search country…', 'giveflow-fundraising-campaigns' ) }
                 </div>
             </div>
         </>
@@ -60,8 +60,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Country', 'dono-fundraising-platform' ),
-        category:   'dono-donor',
+        title:      __( 'Country', 'giveflow-fundraising-campaigns' ),
+        category:   'giveflow-donor',
         icon:       BlockIcons[ 'country' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },
         attributes: {

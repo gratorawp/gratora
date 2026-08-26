@@ -7,22 +7,22 @@
  * entirely - it has no DOM node, not just `display:none`. Locators assert
  * `count() === 0` for hidden, normal visibility checks for shown.
  *
- * Seeded form (`wp dono e2e-seed`):
+ * Seeded form (`wp giveflow e2e-seed`):
  *   - dropdown `cond_trigger` with values friend / social / event
- *   - `dono/heading` with text CONDITIONAL_HEADING_SOCIAL, shown when
+ *   - `giveflow/heading` with text CONDITIONAL_HEADING_SOCIAL, shown when
  *     `custom.cond_trigger = social` (covers the `=` operator)
- *   - `dono/text-input` REQUIRED, shown when `cond_trigger = friend`
+ *   - `giveflow/text-input` REQUIRED, shown when `cond_trigger = friend`
  *     (covers the hidden-required-must-not-block-submit regression)
- *   - `dono/comment` with label CONDITIONAL_COMMENT_ANY, shown when
+ *   - `giveflow/comment` with label CONDITIONAL_COMMENT_ANY, shown when
  *     `cond_trigger != ''` (covers the `!=` operator)
  */
 
 import { test, expect } from '../fixtures/donor-form';
 
-const CONDITIONAL_FORM_PATH = process.env.DONO_E2E_CONDITIONAL_FORM_PATH ?? '';
+const CONDITIONAL_FORM_PATH = process.env.GIVEFLOW_E2E_CONDITIONAL_FORM_PATH ?? '';
 
 test.describe('conditional logic', () => {
-    test.skip(! CONDITIONAL_FORM_PATH, 'set DONO_E2E_CONDITIONAL_FORM_PATH via `wp dono e2e-seed`');
+    test.skip(! CONDITIONAL_FORM_PATH, 'set GIVEFLOW_E2E_CONDITIONAL_FORM_PATH via `wp giveflow e2e-seed`');
     test.use({ formPath: CONDITIONAL_FORM_PATH });
 
     test('conditionally-shown heading is absent until the trigger matches', async ({ donor }) => {
@@ -50,7 +50,7 @@ test.describe('conditional logic', () => {
 
     test('!= operator: the comment field appears once any choice is made', async ({ donor }) => {
         const conditionalComment = donor.form
-            .locator('.dono-form__field')
+            .locator('.giveflow-form__field')
             .filter({ hasText: 'CONDITIONAL_COMMENT_ANY' });
 
         // Default (empty): `!=''` is false, hidden.
@@ -70,7 +70,7 @@ test.describe('conditional logic', () => {
         // else, the required field is gone from the DOM and submit must reach
         // thank-you.
         const friendField = donor.form
-            .locator('.dono-form__field')
+            .locator('.giveflow-form__field')
             .filter({ hasText: 'How did your friend hear about us?' });
 
         await donor.selectPresetAt(0);
@@ -90,7 +90,7 @@ test.describe('conditional logic', () => {
         // Flip side of the previous test: with the condition met, the required
         // field is in the DOM and validation must catch the empty value.
         const friendField = donor.form
-            .locator('.dono-form__field')
+            .locator('.giveflow-form__field')
             .filter({ hasText: 'How did your friend hear about us?' });
 
         await donor.selectPresetAt(0);
@@ -108,7 +108,7 @@ test.describe('conditional logic', () => {
         // field.
         await expect(donor.successCard()).toHaveCount(0);
         await expect(
-            donor.form.locator('.dono-form__field-error').filter({ hasText: /\S/ }).first()
+            donor.form.locator('.giveflow-form__field-error').filter({ hasText: /\S/ }).first()
         ).toBeVisible({ timeout: 5_000 });
     });
 });

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Unit\Gateways;
+namespace GiveFlow\Tests\Unit\Gateways;
 
-use Dono\Gateways\PayPal\PayPalApiException;
+use GiveFlow\Gateways\PayPal\PayPalApiException;
 use PHPUnit\Framework\TestCase;
 
 /**

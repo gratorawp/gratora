@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Analytics\Event;
-use Dono\Campaigns\Campaign;
-use Dono\Donations\DonationRepository;
-use Dono\Foundation\Plugin;
-use Dono\Gateways\GatewayManager;
-use Dono\Gateways\PayPal\PayPalAccount;
-use Dono\Gateways\PayPal\PayPalApi;
-use Dono\Gateways\PayPal\PayPalGateway;
-use Dono\Gateways\PayPal\PayPalPlans;
-use Dono\Recurring\RecurringPlan;
-use Dono\Recurring\RecurringPlanRepository;
+use GiveFlow\Analytics\Event;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Gateways\GatewayManager;
+use GiveFlow\Gateways\PayPal\PayPalAccount;
+use GiveFlow\Gateways\PayPal\PayPalApi;
+use GiveFlow\Gateways\PayPal\PayPalGateway;
+use GiveFlow\Gateways\PayPal\PayPalPlans;
+use GiveFlow\Recurring\RecurringPlan;
+use GiveFlow\Recurring\RecurringPlanRepository;
 use WP_REST_Request;
 
 /**
@@ -38,13 +38,13 @@ final class PayPalLateActivationTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        update_option('dono_gateway_config', ['test_mode' => true]);
-        update_option('dono_currency_locale', [
+        update_option('giveflow_gateway_config', ['test_mode' => true]);
+        update_option('giveflow_currency_locale', [
             'default_currency'     => 'USD',
             'supported_currencies' => ['USD'],
         ]);
-        delete_option('dono_paypal_product');
-        delete_option('dono_paypal_plans');
+        delete_option('giveflow_paypal_product');
+        delete_option('giveflow_paypal_plans');
 
         $c       = Plugin::instance()->container;
         $account = $c->get(PayPalAccount::class);
@@ -60,11 +60,11 @@ final class PayPalLateActivationTest extends IntegrationTestCase
                 $c->get(PayPalApi::class),
                 $account,
                 $c->get(DonationRepository::class),
-                $c->get(\Dono\Donations\DonationService::class),
+                $c->get(\GiveFlow\Donations\DonationService::class),
                 $c->get(PayPalPlans::class),
                 $c->get(RecurringPlanRepository::class),
-                $c->get(\Dono\Foundation\Time\Clock::class),
-                $c->get(\Dono\Gateways\PayPal\PayPalPlanRecorder::class),
+                $c->get(\GiveFlow\Foundation\Time\Clock::class),
+                $c->get(\GiveFlow\Gateways\PayPal\PayPalPlanRecorder::class),
             ));
         }
     }
@@ -125,7 +125,7 @@ final class PayPalLateActivationTest extends IntegrationTestCase
 
     private function createRecurringDonation(int $amount = 2500): string
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/donations');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'email'        => 'late' . bin2hex(random_bytes(3)) . '@example.test',
@@ -146,7 +146,7 @@ final class PayPalLateActivationTest extends IntegrationTestCase
 
     private function recordSubscription(string $reference, string $subId): void
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/gateways/paypal/subscription');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/gateways/paypal/subscription');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'reference'       => $reference,
@@ -160,7 +160,7 @@ final class PayPalLateActivationTest extends IntegrationTestCase
     /** @param array<string,mixed> $resource */
     private function postWebhook(string $type, array $resource): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/webhooks/paypal');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/webhooks/paypal');
         $req->set_header('content-type', 'application/json');
         foreach ([
             'paypal_transmission_id'   => 'tx-' . bin2hex(random_bytes(3)),
@@ -237,7 +237,7 @@ final class PayPalLateActivationTest extends IntegrationTestCase
         $account = Plugin::instance()->container->get(PayPalAccount::class);
         $account->saveKeys(false, 'AeA1QIZ_live', 'EO422dn3_live');
         $account->saveWebhookId(false, 'WH-LIVE-1');
-        update_option('dono_gateway_config', ['test_mode' => false]);
+        update_option('giveflow_gateway_config', ['test_mode' => false]);
 
         $reference = $this->createRecurringDonation(2500);
         $this->recordSubscription($reference, 'I-SUB-MRR');
@@ -283,7 +283,7 @@ final class PayPalLateActivationTest extends IntegrationTestCase
         $this->recordSubscription($reference, 'I-SUB-TWICE');
 
         $announced = 0;
-        add_action('dono.recurring.cancelled', static function () use (&$announced): void { $announced++; });
+        add_action('giveflow.recurring.cancelled', static function () use (&$announced): void { $announced++; });
 
         $this->postWebhook('BILLING.SUBSCRIPTION.CANCELLED', ['id' => 'I-SUB-TWICE']);
         $this->assertSame(1, $announced, 'the cancellation is announced once');
@@ -366,7 +366,7 @@ final class PayPalLateActivationTest extends IntegrationTestCase
         );
 
         $announced = 0;
-        add_action('dono.recurring.cancelled', static function () use (&$announced): void { $announced++; });
+        add_action('giveflow.recurring.cancelled', static function () use (&$announced): void { $announced++; });
 
         $this->postWebhook('BILLING.SUBSCRIPTION.CANCELLED', ['id' => 'I-SUB-LIVE']);
 
@@ -393,7 +393,7 @@ final class PayPalLateActivationTest extends IntegrationTestCase
         $account = Plugin::instance()->container->get(PayPalAccount::class);
         $account->saveKeys(false, 'AeA1QIZ_live', 'EO422dn3_live');
         $account->saveWebhookId(false, 'WH-LIVE-1');
-        update_option('dono_gateway_config', ['test_mode' => false]);
+        update_option('giveflow_gateway_config', ['test_mode' => false]);
 
         $reference = $this->createRecurringDonation();
         $donation  = Plugin::instance()->container->get(DonationRepository::class)->findByReference($reference);

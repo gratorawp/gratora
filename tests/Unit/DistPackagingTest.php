@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Unit;
+namespace GiveFlow\Tests\Unit;
 
-use Dono\Tests\Unit\Support\DistPayload;
+use GiveFlow\Tests\Unit\Support\DistPayload;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -57,7 +57,7 @@ final class DistPackagingTest extends TestCase
      */
     private function pluginRoot(bool $installedWithDev, array $vendorPackages = []): string
     {
-        $dir = sys_get_temp_dir() . '/dono-packaging-' . bin2hex(random_bytes(6));
+        $dir = sys_get_temp_dir() . '/giveflow-packaging-' . bin2hex(random_bytes(6));
         mkdir($dir . '/bin', 0777, true);
         mkdir($dir . '/vendor/composer', 0777, true);
 
@@ -77,8 +77,8 @@ final class DistPackagingTest extends TestCase
 
         // The packager reads the install directory out of the plugin header.
         file_put_contents(
-            $dir . '/dono.php',
-            "<?php\n/**\n * Plugin Name: Dono\n * Text Domain: dono-fundraising-platform\n */\n"
+            $dir . '/giveflow.php',
+            "<?php\n/**\n * Plugin Name: GiveFlow\n * Text Domain: giveflow-fundraising-campaigns\n */\n"
         );
 
         file_put_contents(

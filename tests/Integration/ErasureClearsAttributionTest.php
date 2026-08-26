@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\ChannelClassifier;
-use Dono\Donations\Donation;
-use Dono\Donors\Donor;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
+use GiveFlow\Donations\ChannelClassifier;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
 
 /**
  * `source_attribution` is filled from the donor's own browser: the page they
@@ -37,7 +37,7 @@ final class ErasureClearsAttributionTest extends IntegrationTestCase
 
         $now = gmdate('Y-m-d H:i:s');
         $d = Donation::make();
-        $d->reference          = 'DONO-ATTR-' . uniqid();
+        $d->reference          = 'GIVEFLOW-ATTR-' . uniqid();
         $d->donor_id           = $this->donorId;
         $d->amount_cents       = 4000;
         $d->base_amount_cents  = 4000;
@@ -90,7 +90,7 @@ final class ErasureClearsAttributionTest extends IntegrationTestCase
         global $wpdb;
         $stored = (string) $wpdb->get_var($wpdb->prepare(
             "SELECT CONCAT(COALESCE(source_attribution,''), COALESCE(failure_reason,'')) "
-            . "FROM {$wpdb->prefix}dono_donations WHERE id = %d",
+            . "FROM {$wpdb->prefix}giveflow_donations WHERE id = %d",
             $this->donationId
         ));
 
@@ -132,7 +132,7 @@ final class ErasureClearsAttributionTest extends IntegrationTestCase
     {
         $now = gmdate('Y-m-d H:i:s');
         $d = Donation::make();
-        $d->reference          = 'DONO-ATTR-CLEAN-' . uniqid();
+        $d->reference          = 'GIVEFLOW-ATTR-CLEAN-' . uniqid();
         $d->donor_id           = $this->donorId;
         $d->amount_cents       = 1500;
         $d->base_amount_cents  = 1500;

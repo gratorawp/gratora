@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Campaigns\CampaignRepository;
-use Dono\Campaigns\Styling\CampaignStyleResolver;
-use Dono\Forms\FormRepository;
-use Dono\Forms\Shortcode\DonationFormShortcode;
-use Dono\Foundation\Plugin;
-use Dono\Gateways\GatewayManager;
+use GiveFlow\Campaigns\CampaignRepository;
+use GiveFlow\Campaigns\Styling\CampaignStyleResolver;
+use GiveFlow\Forms\FormRepository;
+use GiveFlow\Forms\Shortcode\DonationFormShortcode;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Gateways\GatewayManager;
 
 /**
  * The editor preview is an iframe srcdoc, so it has no wp_scripts queue: every
@@ -40,8 +40,8 @@ final class FormPreviewDocumentTest extends IntegrationTestCase
 
     private function document(): string
     {
-        $blocks = '<!-- wp:dono/donation-amount /--><!-- wp:dono/name /-->'
-            . '<!-- wp:dono/email /--><!-- wp:dono/submit-button /-->';
+        $blocks = '<!-- wp:giveflow/donation-amount /--><!-- wp:giveflow/name /-->'
+            . '<!-- wp:giveflow/email /--><!-- wp:giveflow/submit-button /-->';
 
         $shortcode = $this->shortcode();
 

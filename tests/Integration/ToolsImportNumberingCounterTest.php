@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
-use Dono\Donations\DonationIntent;
-use Dono\Donations\DonationService;
-use Dono\Donors\Donor;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
-use Dono\Foundation\References\ReferenceGenerator;
-use Dono\Foundation\Transfer\DataExporter;
-use Dono\Receipts\Receipt;
-use Dono\Settings\SettingsService;
-use Dono\Vendor\Queryable\DB;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationIntent;
+use GiveFlow\Donations\DonationService;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Foundation\References\ReferenceGenerator;
+use GiveFlow\Foundation\Transfer\DataExporter;
+use GiveFlow\Receipts\Receipt;
+use GiveFlow\Settings\SettingsService;
+use GiveFlow\Vendor\Queryable\DB;
 use WP_REST_Request;
 
 /**
@@ -58,17 +58,17 @@ final class ToolsImportNumberingCounterTest extends IntegrationTestCase
     {
         $prefix = DB::getPrefix();
         foreach ([
-            'dono_receipts',
-            'dono_refunds',
-            'dono_consents',
-            'dono_donation_notes',
-            'dono_donor_notes',
-            'dono_donations',
-            'dono_donors',
-            'dono_form_donation_stats',
-            'dono_forms',
-            'dono_campaigns',
-            'dono_funds',
+            'giveflow_receipts',
+            'giveflow_refunds',
+            'giveflow_consents',
+            'giveflow_donation_notes',
+            'giveflow_donor_notes',
+            'giveflow_donations',
+            'giveflow_donors',
+            'giveflow_form_donation_stats',
+            'giveflow_forms',
+            'giveflow_campaigns',
+            'giveflow_funds',
         ] as $table) {
             DB::raw("DELETE FROM {$prefix}{$table}");
         }
@@ -78,7 +78,7 @@ final class ToolsImportNumberingCounterTest extends IntegrationTestCase
     private function forgetCounters(): void
     {
         $prefix = DB::getPrefix();
-        DB::raw("DELETE FROM {$prefix}options WHERE option_name LIKE 'dono_reference_counter%'");
+        DB::raw("DELETE FROM {$prefix}options WHERE option_name LIKE 'giveflow_reference_counter%'");
         wp_cache_delete('alloptions', 'options');
     }
 
@@ -127,7 +127,7 @@ final class ToolsImportNumberingCounterTest extends IntegrationTestCase
     /** @param array<string,mixed> $body */
     private function post(array $body): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/admin/tools/import');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/tools/import');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($body));
 
@@ -170,7 +170,7 @@ final class ToolsImportNumberingCounterTest extends IntegrationTestCase
         $this->wipeRecords();
         $this->forgetCounters();
         $this->numbering(ReferenceGenerator::DEFAULT_SETTINGS);
-        $this->assertSame('DONO', $this->storedPrefix(), 'precondition: the target numbers its references differently');
+        $this->assertSame('DON', $this->storedPrefix(), 'precondition: the target numbers its references differently');
         $this->assertSame(1, $references->peekNext('donation'), 'precondition: a site that has minted nothing');
 
         $res = $this->post($export);
@@ -246,6 +246,6 @@ final class ToolsImportNumberingCounterTest extends IntegrationTestCase
         $this->assertSame(200, $this->post($export)->get_status());
 
         $this->assertSame(6, $references->peekNext('donation'), 'the counter clears the restored reference');
-        $this->assertSame('DONO', $this->storedPrefix(), 'and the numbering is untouched');
+        $this->assertSame('DON', $this->storedPrefix(), 'and the numbering is untouched');
     }
 }

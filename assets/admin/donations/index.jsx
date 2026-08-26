@@ -1,4 +1,4 @@
-// Dono admin: Donations. Two views: list + detail, routed via URLSearchParams.
+// GiveFlow admin: Donations. Two views: list + detail, routed via URLSearchParams.
 
 import { createRoot } from '@wordpress/element';
 
@@ -19,7 +19,7 @@ function App() {
 }
 
 document.addEventListener( 'DOMContentLoaded', () => {
-    const root = document.getElementById( 'dono-admin-donations' );
+    const root = document.getElementById( 'giveflow-admin-donations' );
     if ( ! root ) return;
     createRoot( root ).render( <><App /><Toaster /></> );
 } );

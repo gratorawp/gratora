@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Forms\Blocks;
+namespace GiveFlow\Forms\Blocks;
 
-use Dono\Foundation\Helpers\View;
+use GiveFlow\Foundation\Helpers\View;
 
 /**
  * Toggle for the donor to cover the transaction fee.
@@ -16,7 +16,7 @@ final class CoverFeesBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'dono/cover-fees';
+        return 'giveflow/cover-fees';
     }
 
     /** @since 1.0.0 */
@@ -36,7 +36,7 @@ final class CoverFeesBlock implements Block
         return View::loadRelative(__DIR__, 'views/cover-fees', [
             'percent'   => (float) ($attrs['percent'] ?? 2.9),
             'fixed'     => (int)   ($attrs['fixed']   ?? 30),
-            'label'     => (string) ($attrs['label']  ?? '') ?: __('I\'d like to help cover the transaction fee', 'dono-fundraising-platform'),
+            'label'     => (string) ($attrs['label']  ?? '') ?: __('I\'d like to help cover the transaction fee', 'giveflow-fundraising-campaigns'),
             'defaultOn' => (bool)   ($attrs['defaultOn'] ?? false),
         ]);
     }

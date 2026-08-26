@@ -1,1 +1,1 @@
-export { default } from '@dono/ui/components/Toaster';
+export { default } from '@giveflow/ui/components/Toaster';

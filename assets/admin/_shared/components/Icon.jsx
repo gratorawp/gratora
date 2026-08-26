@@ -1,1 +1,1 @@
-export { default, ICONS } from '@dono/ui/components/Icon';
+export { default, ICONS } from '@giveflow/ui/components/Icon';

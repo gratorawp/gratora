@@ -9,8 +9,8 @@
  * clicks a synthesized anchor, which is not popup-gated.
  */
 
-const PORTAL_REST = 'https://example.test/wp-json/dono/v1/portal/';
-const RECEIPT_URL = 'https://example.test/wp-json/dono/v1/receipts/9/download?token=fresh';
+const PORTAL_REST = 'https://example.test/wp-json/giveflow/v1/portal/';
+const RECEIPT_URL = 'https://example.test/wp-json/giveflow/v1/receipts/9/download?token=fresh';
 
 let routes = {};
 let clickedAnchors = [];
@@ -48,7 +48,7 @@ function me() {
 }
 
 async function boot() {
-    document.body.innerHTML = '<div id="dono-donor-portal"></div>';
+    document.body.innerHTML = '<div id="giveflow-donor-portal"></div>';
 
     jest.isolateModules( () => {
         require( '../../assets/donor-portal/index.jsx' );
@@ -58,7 +58,7 @@ async function boot() {
 }
 
 function text() {
-    return document.getElementById( 'dono-donor-portal' ).textContent;
+    return document.getElementById( 'giveflow-donor-portal' ).textContent;
 }
 
 const tick = () => new Promise( ( r ) => setTimeout( r, 10 ) );
@@ -88,8 +88,8 @@ beforeEach( () => {
     routes = {};
     clickedAnchors = [];
     window.history.replaceState( {}, '', '/portal/' );
-    window.donoPortal = { rest: PORTAL_REST, nonce: '', token: 'portal-token' };
-    window.dono = {
+    window.giveflowPortal = { rest: PORTAL_REST, nonce: '', token: 'portal-token' };
+    window.giveflow = {
         default_currency: 'USD',
         number_format: { decimalPlaces: 2, decimalSep: '.', thousandSep: ',', symbolPosition: 'before', symbol: '$' },
     };
@@ -191,7 +191,7 @@ test( 'the annual statement saves through the same anchor', async () => {
 
     expect( clickedAnchors ).toHaveLength( 1 );
     expect( clickedAnchors[ 0 ].getAttribute( 'download' ) )
-        .toBe( `dono-annual-${ new Date().getFullYear() }.pdf` );
+        .toBe( `giveflow-annual-${ new Date().getFullYear() }.pdf` );
 } );
 
 /**
@@ -201,7 +201,7 @@ test( 'the annual statement saves through the same anchor', async () => {
  */
 test( 'the document is fetched on the origin the portal itself talks to', async () => {
     routes[ 'receipts/9/download-url' ] = () => jsonResponse( 200, {
-        url: 'https://www.example.test/wp-json/dono/v1/receipts/9/download?token=fresh',
+        url: 'https://www.example.test/wp-json/giveflow/v1/receipts/9/download?token=fresh',
     } );
 
     await openReceipts();
@@ -225,7 +225,7 @@ test( 'the reason the server wrote reaches the donor', async () => {
     global.fetch.mockImplementation( ( url ) => {
         const raw = String( url );
         if ( raw.startsWith( RECEIPT_URL ) ) {
-            return jsonResponse( 410, { code: 'dono_renderer_missing', message: written } );
+            return jsonResponse( 410, { code: 'giveflow_renderer_missing', message: written } );
         }
         const route = routes[ raw.replace( PORTAL_REST, '' ) ];
         return typeof route === 'function' ? route() : jsonResponse( 200, {} );
@@ -248,7 +248,7 @@ test( 'a refused document does not sign the donor out', async () => {
     global.fetch.mockImplementation( ( url ) => {
         const raw = String( url );
         if ( raw.startsWith( RECEIPT_URL ) ) {
-            return jsonResponse( 403, { code: 'dono_invalid_token', message: 'Link is invalid or expired.' } );
+            return jsonResponse( 403, { code: 'giveflow_invalid_token', message: 'Link is invalid or expired.' } );
         }
         const route = routes[ raw.replace( PORTAL_REST, '' ) ];
         return typeof route === 'function' ? route() : jsonResponse( 200, {} );
@@ -270,7 +270,7 @@ test( 'a refused document does not sign the donor out', async () => {
 test( 'a receipt that will not download says so on the receipt', async () => {
     const written = 'This receipt was withdrawn because the donation it covers was refunded in full.';
 
-    routes[ 'receipts/9/download-url' ] = () => jsonResponse( 410, { code: 'dono_receipt_voided', message: written } );
+    routes[ 'receipts/9/download-url' ] = () => jsonResponse( 410, { code: 'giveflow_receipt_voided', message: written } );
 
     await openReceipts();
     await clickButton( 'Download' );

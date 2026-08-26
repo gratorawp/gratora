@@ -1,11 +1,11 @@
 {
-    "name": "getdono/dono",
+    "name": "giveflow/giveflow",
     "description": "Donation platform for WordPress",
     "type": "wordpress-plugin",
     "license": "GPL-2.0-or-later",
     "authors": [
         {
-            "name": "Dono"
+            "name": "GiveFlow"
         }
     ],
     "require": {
@@ -25,12 +25,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Dono\\": "src/"
+            "GiveFlow\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Dono\\Tests\\": "tests/"
+            "GiveFlow\\Tests\\": "tests/"
         }
     },
     "scripts": {
@@ -59,9 +59,9 @@
     "extra": {
         "strauss": {
             "target_directory": "vendor/vendor-prefixed",
-            "namespace_prefix": "Dono\\Vendor\\",
-            "classmap_prefix": "Dono_Vendor_",
-            "constant_prefix": "DONO_VENDOR_",
+            "namespace_prefix": "GiveFlow\\Vendor\\",
+            "classmap_prefix": "GiveFlow_Vendor_",
+            "constant_prefix": "GIVEFLOW_VENDOR_",
             "packages": [
                 "dompdf/dompdf",
                 "dompdf/php-font-lib",
@@ -86,7 +86,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/dono-platform/queryable.git"
+            "url": "https://github.com/givefloworg/queryable.git"
         }
     ]
 }

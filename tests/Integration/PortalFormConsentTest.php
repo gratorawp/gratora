@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donors\ConsentService;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
+use GiveFlow\Donors\ConsentService;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -29,12 +29,12 @@ final class PortalFormConsentTest extends IntegrationTestCase
             ->findOrCreate('consent-' . uniqid() . '@example.test');
 
         $sid = $this->portalSession((int) $this->donor->id, self::CSRF);
-        $_COOKIE['dono_donor_session'] = $sid;
+        $_COOKIE['giveflow_donor_session'] = $sid;
     }
 
     protected function tearDown(): void
     {
-        unset($_COOKIE['dono_donor_session']);
+        unset($_COOKIE['giveflow_donor_session']);
         parent::tearDown();
     }
 
@@ -51,7 +51,7 @@ final class PortalFormConsentTest extends IntegrationTestCase
 
     private function listed(): array
     {
-        $res = rest_do_request(new WP_REST_Request('GET', '/dono/v1/portal/consents'));
+        $res = rest_do_request(new WP_REST_Request('GET', '/giveflow/v1/portal/consents'));
 
         return (array) $res->get_data();
     }
@@ -80,9 +80,9 @@ final class PortalFormConsentTest extends IntegrationTestCase
     {
         $this->grantFromForm();
 
-        $req = new WP_REST_Request('POST', '/dono/v1/portal/consents');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/portal/consents');
         $req->set_header('content-type', 'application/json');
-        $req->set_header('X-Dono-Csrf', self::CSRF);
+        $req->set_header('X-GiveFlow-Csrf', self::CSRF);
         $req->set_body((string) wp_json_encode([
             'items' => [[ 'key' => self::FORM_PURPOSE, 'granted' => false ]],
         ]));
@@ -102,9 +102,9 @@ final class PortalFormConsentTest extends IntegrationTestCase
     {
         // Widening withdrawal must not widen granting: a crafted payload
         // cannot mint consent for an arbitrary purpose.
-        $req = new WP_REST_Request('POST', '/dono/v1/portal/consents');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/portal/consents');
         $req->set_header('content-type', 'application/json');
-        $req->set_header('X-Dono-Csrf', self::CSRF);
+        $req->set_header('X-GiveFlow-Csrf', self::CSRF);
         $req->set_body((string) wp_json_encode([
             'items' => [[ 'key' => 'invented_purpose', 'granted' => true ]],
         ]));

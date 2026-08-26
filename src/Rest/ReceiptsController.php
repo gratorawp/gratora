@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace Dono\Rest;
+namespace GiveFlow\Rest;
 
-use Dono\Receipts\OrgProfile;
+use GiveFlow\Receipts\OrgProfile;
 
-use Dono\Campaigns\Campaign;
-use Dono\Donations\Donation;
-use Dono\Donations\DonationRepository;
-use Dono\Donors\Donor;
-use Dono\Donors\DonorRepository;
-use Dono\Donors\DonorService;
-use Dono\Donors\MagicLinkService;
-use Dono\Receipts\ReceiptContext;
-use Dono\Receipts\ReceiptRenderer;
-use Dono\Receipts\ReceiptRepository;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\DonorRepository;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Donors\MagicLinkService;
+use GiveFlow\Receipts\ReceiptContext;
+use GiveFlow\Receipts\ReceiptRenderer;
+use GiveFlow\Receipts\ReceiptRepository;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Server;
@@ -28,7 +28,7 @@ use WP_REST_Server;
  */
 final class ReceiptsController
 {
-    private const NAMESPACE = 'dono/v1';
+    private const NAMESPACE = 'giveflow/v1';
 
     /** @since 1.0.0 */
     public function __construct(
@@ -62,12 +62,12 @@ final class ReceiptsController
 
         $valid = $this->magicLinks->validate($rawToken, 'download_receipt', $receiptId);
         if (! $valid) {
-            return new WP_Error('dono_invalid_token', __('Link is invalid or expired.', 'dono-fundraising-platform'), ['status' => 403]);
+            return new WP_Error('giveflow_invalid_token', __('Link is invalid or expired.', 'giveflow-fundraising-campaigns'), ['status' => 403]);
         }
 
         $receipt = $this->receipts->findById($receiptId);
         if (! $receipt) {
-            return new WP_Error('dono_receipt_not_found', __('Receipt not found.', 'dono-fundraising-platform'), ['status' => 404]);
+            return new WP_Error('giveflow_receipt_not_found', __('Receipt not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
         }
 
         if ($receipt->voided) {
@@ -75,21 +75,21 @@ final class ReceiptsController
             // "not found" reads as a broken one. A voided receipt means the
             // donation was refunded in full, so say that instead.
             return new WP_Error(
-                'dono_receipt_voided',
-                __('This receipt was withdrawn because the donation it covers was refunded in full. If that is not what you expected, please contact the organization.', 'dono-fundraising-platform'),
+                'giveflow_receipt_voided',
+                __('This receipt was withdrawn because the donation it covers was refunded in full. If that is not what you expected, please contact the organization.', 'giveflow-fundraising-campaigns'),
                 ['status' => 410]
             );
         }
 
         // Defense-in-depth: token must belong to the same donor as the receipt.
         if ($valid->donor_id !== $receipt->donor_id) {
-            return new WP_Error('dono_invalid_token', __('Link is invalid.', 'dono-fundraising-platform'), ['status' => 403]);
+            return new WP_Error('giveflow_invalid_token', __('Link is invalid.', 'giveflow-fundraising-campaigns'), ['status' => 403]);
         }
 
         $donation = $this->donations->findById($receipt->donation_id);
         $donor    = $this->donors->findById($receipt->donor_id);
         if (! $donation || ! $donor) {
-            return new WP_Error('dono_receipt_data_missing', __('Receipt data is no longer available.', 'dono-fundraising-platform'), ['status' => 410]);
+            return new WP_Error('giveflow_receipt_data_missing', __('Receipt data is no longer available.', 'giveflow-fundraising-campaigns'), ['status' => 410]);
         }
 
         $ctx = new ReceiptContext(
@@ -103,7 +103,7 @@ final class ReceiptsController
             campaign:      $this->loadCampaign($donation),
         );
         $ctx = $ctx->with('receipt_number', (string) $receipt->receipt_number);
-        $ctx = apply_filters('dono.receipt.context', $ctx);
+        $ctx = apply_filters('giveflow.receipt.context', $ctx);
 
         $renderer = $this->findRendererById($receipt->renderer_id);
         if (! $renderer) {
@@ -116,8 +116,8 @@ final class ReceiptsController
             // it would hand the donor a different, non-compliant document
             // under the same receipt number.
             return new WP_Error(
-                'dono_renderer_missing',
-                __('This receipt was produced by an extension that is no longer active. Please contact the organization.', 'dono-fundraising-platform'),
+                'giveflow_renderer_missing',
+                __('This receipt was produced by an extension that is no longer active. Please contact the organization.', 'giveflow-fundraising-campaigns'),
                 ['status' => 410, 'renderer_id' => (string) $receipt->renderer_id]
             );
         }
@@ -139,7 +139,7 @@ final class ReceiptsController
     /** @since 1.0.0 */
     private function findRendererById(string $id): ?ReceiptRenderer
     {
-        foreach ((array) apply_filters('dono.receipt.renderers', []) as $r) {
+        foreach ((array) apply_filters('giveflow.receipt.renderers', []) as $r) {
             if ($r instanceof ReceiptRenderer && $r->id() === $id) return $r;
         }
         return null;

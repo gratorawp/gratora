@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
-use Dono\Gateways\GatewayManager;
-use Dono\Recurring\GatewayUnreachable;
-use Dono\Recurring\RecurringCanceller;
-use Dono\Recurring\RecurringPlan;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Gateways\GatewayManager;
+use GiveFlow\Recurring\GatewayUnreachable;
+use GiveFlow\Recurring\RecurringCanceller;
+use GiveFlow\Recurring\RecurringPlan;
 
 /**
  * A cancellation that never reached the processor must not report success.

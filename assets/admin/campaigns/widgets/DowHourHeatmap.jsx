@@ -19,8 +19,8 @@ export default function DowHourHeatmap( { data } ) {
 
     if ( ! data || ( data.total ?? 0 ) === 0 ) {
         return (
-            <p className="dono-panel__empty">
-                { __( 'No donation activity yet to plot timing.', 'dono-fundraising-platform' ) }
+            <p className="giveflow-panel__empty">
+                { __( 'No donation activity yet to plot timing.', 'giveflow-fundraising-campaigns' ) }
             </p>
         );
     }
@@ -35,13 +35,13 @@ export default function DowHourHeatmap( { data } ) {
     } );
 
     return (
-        <div className="dono-heatmap">
-            <div className="dono-heatmap__hours">
-                <span className="dono-heatmap__row-label" />
+        <div className="giveflow-heatmap">
+            <div className="giveflow-heatmap__hours">
+                <span className="giveflow-heatmap__row-label" />
                 { Array.from( { length: 24 }, ( _, h ) => (
                     <span
                         key={ h }
-                        className={ `dono-heatmap__hour-tick${ HOUR_LABELS.includes( h ) ? ' is-labelled' : '' }` }
+                        className={ `giveflow-heatmap__hour-tick${ HOUR_LABELS.includes( h ) ? ' is-labelled' : '' }` }
                         aria-hidden="true"
                     >
                         { HOUR_LABELS.includes( h ) ? h : '' }
@@ -50,8 +50,8 @@ export default function DowHourHeatmap( { data } ) {
             </div>
 
             { grid.map( ( row, day ) => (
-                <div key={ day } className="dono-heatmap__row">
-                    <span className="dono-heatmap__row-label">{ DAYS[ day ].short }</span>
+                <div key={ day } className="giveflow-heatmap__row">
+                    <span className="giveflow-heatmap__row-label">{ DAYS[ day ].short }</span>
                     { row.map( ( count, hour ) => {
                         const intensity = max > 0 ? count / max : 0;
                         const isPeak = peak.day === day && peak.hour === hour && count > 0;
@@ -59,7 +59,7 @@ export default function DowHourHeatmap( { data } ) {
                             <button
                                 key={ hour }
                                 type="button"
-                                className={ `dono-heatmap__cell${ isPeak ? ' is-peak' : '' }` }
+                                className={ `giveflow-heatmap__cell${ isPeak ? ' is-peak' : '' }` }
                                 style={ {
                                     background: count > 0
                                         ? `rgba(30, 138, 78, ${ 0.15 + intensity * 0.75 })`
@@ -75,7 +75,7 @@ export default function DowHourHeatmap( { data } ) {
                                         '%1$s at %2$d:00, %3$d donation',
                                         '%1$s at %2$d:00, %3$d donations',
                                         count,
-                                        'dono-fundraising-platform'
+                                        'giveflow-fundraising-campaigns'
                                     ),
                                     DAYS[ day ].long,
                                     hour,
@@ -87,27 +87,27 @@ export default function DowHourHeatmap( { data } ) {
                 </div>
             ) ) }
 
-            <div className="dono-heatmap__legend">
-                <span className="dono-heatmap__legend-label">{ __( 'Fewer', 'dono-fundraising-platform' ) }</span>
+            <div className="giveflow-heatmap__legend">
+                <span className="giveflow-heatmap__legend-label">{ __( 'Fewer', 'giveflow-fundraising-campaigns' ) }</span>
                 { [ 0.15, 0.35, 0.55, 0.75, 0.9 ].map( ( a ) => (
                     <span
                         key={ a }
-                        className="dono-heatmap__legend-cell"
+                        className="giveflow-heatmap__legend-cell"
                         style={ { background: `rgba(30, 138, 78, ${ a })` } }
                     />
                 ) ) }
-                <span className="dono-heatmap__legend-label">{ __( 'More', 'dono-fundraising-platform' ) }</span>
+                <span className="giveflow-heatmap__legend-label">{ __( 'More', 'giveflow-fundraising-campaigns' ) }</span>
             </div>
 
             { hovered && (
-                <div className="dono-heatmap__tip" aria-live="polite">
+                <div className="giveflow-heatmap__tip" aria-live="polite">
                     <strong>
                         { DAYS[ hovered.day ].long } · { hovered.hour.toString().padStart( 2, '0' ) }:00
                     </strong>
                     { ' - ' }
                     { sprintf(
                         /* translators: %d: number of donations */
-                        _n( '%d donation', '%d donations', hovered.count, 'dono-fundraising-platform' ),
+                        _n( '%d donation', '%d donations', hovered.count, 'giveflow-fundraising-campaigns' ),
                         hovered.count
                     ) }
                 </div>

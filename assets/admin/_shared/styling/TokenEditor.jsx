@@ -1,1 +1,1 @@
-export { default } from '@dono/ui/styling/TokenEditor';
+export { default } from '@giveflow/ui/styling/TokenEditor';

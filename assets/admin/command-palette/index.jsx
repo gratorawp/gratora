@@ -1,5 +1,5 @@
 /**
- * Registers Dono commands in the WP global command palette (Cmd/Ctrl+K); enqueued
+ * Registers GiveFlow commands in the WP global command palette (Cmd/Ctrl+K); enqueued
  * on every admin screen so the palette can always reach them.
  */
 import { dispatch } from '@wordpress/data';
@@ -16,7 +16,7 @@ import {
 } from '@wordpress/icons';
 
 const adminUrl = ( page ) =>
-    `${ window.donoCommandPalette?.adminUrl ?? '/wp-admin/' }admin.php?page=${ page }`;
+    `${ window.giveflowCommandPalette?.adminUrl ?? '/wp-admin/' }admin.php?page=${ page }`;
 
 const goTo = ( page ) => ( { close } ) => {
     window.location.href = adminUrl( page );
@@ -25,53 +25,53 @@ const goTo = ( page ) => ( { close } ) => {
 
 const commands = [
     {
-        name:     'dono/dashboard',
-        label:    __( 'Dono: Open dashboard', 'dono-fundraising-platform' ),
+        name:     'giveflow/dashboard',
+        label:    __( 'GiveFlow: Open dashboard', 'giveflow-fundraising-campaigns' ),
         icon:     chartBar,
-        callback: goTo( 'dono' ),
+        callback: goTo( 'giveflow' ),
     },
     {
-        name:     'dono/donations',
-        label:    __( 'Dono: View donations', 'dono-fundraising-platform' ),
+        name:     'giveflow/donations',
+        label:    __( 'GiveFlow: View donations', 'giveflow-fundraising-campaigns' ),
         icon:     currencyDollar,
-        callback: goTo( 'dono-donations' ),
+        callback: goTo( 'giveflow-donations' ),
     },
     {
-        name:     'dono/donors',
-        label:    __( 'Dono: View donors', 'dono-fundraising-platform' ),
+        name:     'giveflow/donors',
+        label:    __( 'GiveFlow: View donors', 'giveflow-fundraising-campaigns' ),
         icon:     people,
-        callback: goTo( 'dono-donors' ),
+        callback: goTo( 'giveflow-donors' ),
     },
     {
-        name:     'dono/campaigns',
-        label:    __( 'Dono: View campaigns', 'dono-fundraising-platform' ),
+        name:     'giveflow/campaigns',
+        label:    __( 'GiveFlow: View campaigns', 'giveflow-fundraising-campaigns' ),
         icon:     megaphone,
-        callback: goTo( 'dono-campaigns' ),
+        callback: goTo( 'giveflow-campaigns' ),
     },
     {
-        name:     'dono/funds',
-        label:    __( 'Dono: View funds', 'dono-fundraising-platform' ),
+        name:     'giveflow/funds',
+        label:    __( 'GiveFlow: View funds', 'giveflow-fundraising-campaigns' ),
         icon:     archive,
-        callback: goTo( 'dono-funds' ),
+        callback: goTo( 'giveflow-funds' ),
     },
     {
-        name:     'dono/settings',
-        label:    __( 'Dono: Open settings', 'dono-fundraising-platform' ),
+        name:     'giveflow/settings',
+        label:    __( 'GiveFlow: Open settings', 'giveflow-fundraising-campaigns' ),
         icon:     cog,
-        callback: goTo( 'dono-settings' ),
+        callback: goTo( 'giveflow-settings' ),
     },
     {
-        name:     'dono/onboarding',
-        label:    __( 'Dono: Open onboarding wizard', 'dono-fundraising-platform' ),
+        name:     'giveflow/onboarding',
+        label:    __( 'GiveFlow: Open onboarding wizard', 'giveflow-fundraising-campaigns' ),
         icon:     plus,
-        callback: goTo( 'dono-onboarding' ),
+        callback: goTo( 'giveflow-onboarding' ),
     },
     {
-        name:     'dono/new-campaign',
-        label:    __( 'Dono: New campaign', 'dono-fundraising-platform' ),
+        name:     'giveflow/new-campaign',
+        label:    __( 'GiveFlow: New campaign', 'giveflow-fundraising-campaigns' ),
         icon:     plus,
         callback: ( { close } ) => {
-            window.location.href = adminUrl( 'dono-campaigns' ) + '&action=new';
+            window.location.href = adminUrl( 'giveflow-campaigns' ) + '&action=new';
             close();
         },
     },

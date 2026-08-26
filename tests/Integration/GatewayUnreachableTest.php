@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Foundation\Plugin;
-use Dono\Gateways\PayPal\PayPalAccount;
-use Dono\Gateways\Stripe\StripeAccount;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Gateways\PayPal\PayPalAccount;
+use GiveFlow\Gateways\Stripe\StripeAccount;
 use WP_REST_Request;
 
 /**
@@ -59,7 +59,7 @@ final class GatewayUnreachableTest extends IntegrationTestCase
     {
         $this->unreachable = true;
 
-        $req = new WP_REST_Request('POST', '/dono/v1/gateways/stripe/keys');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/gateways/stripe/keys');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'mode'            => 'test',
@@ -70,7 +70,7 @@ final class GatewayUnreachableTest extends IntegrationTestCase
 
         // 503, not 400: nothing was wrong with what the admin typed.
         $this->assertSame(503, $res->get_status(), (string) wp_json_encode($res->get_data()));
-        $this->assertSame('dono_stripe_unreachable', $res->as_error()->get_error_code());
+        $this->assertSame('giveflow_stripe_unreachable', $res->as_error()->get_error_code());
         $this->assertStringNotContainsStringIgnoringCase(
             'rejected',
             (string) $res->as_error()->get_error_message()
@@ -81,7 +81,7 @@ final class GatewayUnreachableTest extends IntegrationTestCase
     {
         $this->unreachable = true;
 
-        $req = new WP_REST_Request('POST', '/dono/v1/gateways/paypal/keys');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/gateways/paypal/keys');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'mode'          => 'test',
@@ -91,7 +91,7 @@ final class GatewayUnreachableTest extends IntegrationTestCase
         $res = rest_do_request($req);
 
         $this->assertSame(503, $res->get_status(), (string) wp_json_encode($res->get_data()));
-        $this->assertSame('dono_paypal_unreachable', $res->as_error()->get_error_code());
+        $this->assertSame('giveflow_paypal_unreachable', $res->as_error()->get_error_code());
         $this->assertStringNotContainsStringIgnoringCase(
             'rejected',
             (string) $res->as_error()->get_error_message()
@@ -100,7 +100,7 @@ final class GatewayUnreachableTest extends IntegrationTestCase
 
     public function test_a_reachable_gateway_still_saves_normally(): void
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/gateways/paypal/keys');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/gateways/paypal/keys');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'mode'          => 'test',

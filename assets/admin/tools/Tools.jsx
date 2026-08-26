@@ -10,11 +10,11 @@ import MaintenanceTab from './tabs/MaintenanceTab';
 import SystemInfoTab from './tabs/SystemInfoTab';
 
 const TABS = [
-    { key: 'maintenance', label: __( 'Maintenance', 'dono-fundraising-platform' ) },
-    { key: 'logs',        label: __( 'Logs', 'dono-fundraising-platform' ) },
-    { key: 'system',      label: __( 'System info', 'dono-fundraising-platform' ) },
-    { key: 'export',      label: __( 'Export', 'dono-fundraising-platform' ) },
-    { key: 'import',      label: __( 'Import', 'dono-fundraising-platform' ) },
+    { key: 'maintenance', label: __( 'Maintenance', 'giveflow-fundraising-campaigns' ) },
+    { key: 'logs',        label: __( 'Logs', 'giveflow-fundraising-campaigns' ) },
+    { key: 'system',      label: __( 'System info', 'giveflow-fundraising-campaigns' ) },
+    { key: 'export',      label: __( 'Export', 'giveflow-fundraising-campaigns' ) },
+    { key: 'import',      label: __( 'Import', 'giveflow-fundraising-campaigns' ) },
 ];
 
 const fromHash = () => {
@@ -30,7 +30,7 @@ export default function Tools() {
 
     const loadInfo = useCallback( () => {
         setInfoError( false );
-        apiFetch( { path: '/dono/v1/admin/tools/info' } )
+        apiFetch( { path: '/giveflow/v1/admin/tools/info' } )
             .then( setInfo )
             .catch( () => setInfoError( true ) );
     }, [] );
@@ -51,23 +51,23 @@ export default function Tools() {
     const shared = { info, infoError, loadInfo, notice, setNotice };
 
     return (
-        <div className="dono-settings-page">
-            <div className="dono-crumbs">
-                <a href="admin.php?page=dono">{ __( 'Dono', 'dono-fundraising-platform' ) }</a>
+        <div className="giveflow-settings-page">
+            <div className="giveflow-crumbs">
+                <a href="admin.php?page=giveflow">{ __( 'GiveFlow', 'giveflow-fundraising-campaigns' ) }</a>
                 <span className="sep">›</span>
-                <span>{ __( 'Tools', 'dono-fundraising-platform' ) }</span>
+                <span>{ __( 'Tools', 'giveflow-fundraising-campaigns' ) }</span>
                 <span className="sep">›</span>
                 <span>{ TABS.find( ( t ) => t.key === tab )?.label || '' }</span>
             </div>
 
-            <div className="dono-page-head">
-                <div className="dono-page-head__title-row">
-                    <h1>{ __( 'Tools', 'dono-fundraising-platform' ) }</h1>
+            <div className="giveflow-page-head">
+                <div className="giveflow-page-head__title-row">
+                    <h1>{ __( 'Tools', 'giveflow-fundraising-campaigns' ) }</h1>
                 </div>
             </div>
 
-            <div className="dono-tabs" role="tablist" aria-label={ __( 'Tools sections', 'dono-fundraising-platform' ) }>
-                <div className="dono-tabs__scroll">
+            <div className="giveflow-tabs" role="tablist" aria-label={ __( 'Tools sections', 'giveflow-fundraising-campaigns' ) }>
+                <div className="giveflow-tabs__scroll">
                     { TABS.map( ( t ) => (
                         <a
                             key={ t.key }
@@ -87,12 +87,12 @@ export default function Tools() {
             <Toaster />
 
             { notice && (
-                <div className={ `dono-advanced-notice dono-advanced-notice--${ notice.type }` }>
+                <div className={ `giveflow-advanced-notice giveflow-advanced-notice--${ notice.type }` }>
                     { notice.text }
                 </div>
             ) }
 
-            <div className="dono-settings-page__body">
+            <div className="giveflow-settings-page__body">
                 <div hidden={ tab !== 'maintenance' }><MaintenanceTab { ...shared } active={ tab === 'maintenance' } /></div>
                 <div hidden={ tab !== 'logs' }><LogsTab { ...shared } active={ tab === 'logs' } /></div>
                 <div hidden={ tab !== 'system' }><SystemInfoTab { ...shared } /></div>

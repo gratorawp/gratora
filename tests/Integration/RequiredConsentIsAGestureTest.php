@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donors\Consent;
-use Dono\Forms\Blocks\Block;
-use Dono\Forms\Blocks\BlockRegistry;
-use Dono\Forms\Form;
-use Dono\Foundation\Plugin;
-use Dono\Settings\SettingsService;
+use GiveFlow\Donors\Consent;
+use GiveFlow\Forms\Blocks\Block;
+use GiveFlow\Forms\Blocks\BlockRegistry;
+use GiveFlow\Forms\Form;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Settings\SettingsService;
 use WP_REST_Request;
 
 /**
@@ -27,7 +27,7 @@ final class RequiredConsentIsAGestureTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        $req = new WP_REST_Request('POST', '/dono/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['title' => 'Consent campaign', 'status' => 'published']));
         $this->campaignId = (int) rest_do_request($req)->get_data()['id'];
@@ -35,7 +35,7 @@ final class RequiredConsentIsAGestureTest extends IntegrationTestCase
 
     protected function tearDown(): void
     {
-        delete_option('dono_consents');
+        delete_option('giveflow_consents');
         parent::tearDown();
     }
 
@@ -56,7 +56,7 @@ final class RequiredConsentIsAGestureTest extends IntegrationTestCase
     private function consentBlock(): Block
     {
         foreach (Plugin::instance()->container->get(BlockRegistry::class)->all() as $b) {
-            if ($b->name() === 'dono/consent') return $b;
+            if ($b->name() === 'giveflow/consent') return $b;
         }
 
         $this->fail('the consent block is not registered');
@@ -65,8 +65,8 @@ final class RequiredConsentIsAGestureTest extends IntegrationTestCase
     /** @return array<string,mixed> */
     private function runtimePurpose(): array
     {
-        $html = do_shortcode('[dono_donation_form slug="' . $this->publishedForm() . '"]');
-        preg_match('/data-dono-form-config>(.+?)<\/script>/s', $html, $m);
+        $html = do_shortcode('[giveflow_donation_form slug="' . $this->publishedForm() . '"]');
+        preg_match('/data-giveflow-form-config>(.+?)<\/script>/s', $html, $m);
         $config = json_decode((string) ($m[1] ?? ''), true);
 
         foreach ((array) ($config['steps'] ?? []) as $step) {
@@ -83,15 +83,15 @@ final class RequiredConsentIsAGestureTest extends IntegrationTestCase
 
     private function publishedForm(): string
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/admin/forms');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/forms');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'title'       => 'Consent form',
             'campaign_id' => $this->campaignId,
-            'blocks'      => '<!-- wp:dono/donation-amount {"presets":[{"cents":2500}]} /-->'
-                . '<!-- wp:dono/email /-->'
-                . '<!-- wp:dono/consent {"purposeKeys":["campaign_news"]} /-->'
-                . '<!-- wp:dono/submit-button /-->',
+            'blocks'      => '<!-- wp:giveflow/donation-amount {"presets":[{"cents":2500}]} /-->'
+                . '<!-- wp:giveflow/email /-->'
+                . '<!-- wp:giveflow/consent {"purposeKeys":["campaign_news"]} /-->'
+                . '<!-- wp:giveflow/submit-button /-->',
         ]));
         $created = rest_do_request($req)->get_data();
 
@@ -158,7 +158,7 @@ final class RequiredConsentIsAGestureTest extends IntegrationTestCase
         $purpose = $this->runtimePurpose();
         $form    = Form::query()->find('slug', $this->publishedForm());
 
-        $req = new WP_REST_Request('POST', '/dono/v1/donations');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'form_id'      => (int) $form->id,

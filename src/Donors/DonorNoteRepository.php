@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Donors;
+namespace GiveFlow\Donors;
 
-use Dono\Foundation\Crypto\Crypto;
-use Dono\Foundation\Time\Clock;
-use Dono\Vendor\Queryable\DB;
+use GiveFlow\Foundation\Crypto\Crypto;
+use GiveFlow\Foundation\Time\Clock;
+use GiveFlow\Vendor\Queryable\DB;
 
 /**
  * Repository for DonorNote. Encrypts/decrypts body at the boundary.
@@ -76,7 +76,7 @@ final class DonorNoteRepository
     {
         $note = DonorNote::query()->find('id', $noteId);
         if (! $note) return false;
-        DB::table('dono_donor_notes')->where('id', $noteId)->delete();
+        DB::table('giveflow_donor_notes')->where('id', $noteId)->delete();
         return true;
     }
 

@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Dono\Campaigns\Blocks;
+namespace GiveFlow\Campaigns\Blocks;
 
-use Dono\Campaigns\Campaign;
-use Dono\Campaigns\CampaignRepository;
-use Dono\Campaigns\Styling\CampaignStyleVars;
-use Dono\Campaigns\Styling\PageStyle;
-use Dono\Forms\Blocks\Block;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Campaigns\CampaignRepository;
+use GiveFlow\Campaigns\Styling\CampaignStyleVars;
+use GiveFlow\Campaigns\Styling\PageStyle;
+use GiveFlow\Forms\Blocks\Block;
 
 /**
  * Base for campaign-scoped page blocks. Resolves the campaign via an explicit
- * campaignId attribute or, when 0, falls back to the page's `_dono_campaign_id`
+ * campaignId attribute or, when 0, falls back to the page's `_giveflow_campaign_id`
  * post meta.
  *
  * @since 1.0.0
@@ -97,7 +97,7 @@ abstract class CampaignBlock implements Block
         if ($id === 0) {
             global $post;
             if ($post instanceof \WP_Post) {
-                $id = (int) get_post_meta($post->ID, '_dono_campaign_id', true);
+                $id = (int) get_post_meta($post->ID, '_giveflow_campaign_id', true);
             }
         }
         return $id > 0 ? $this->campaigns->findRenderable($id) : null;
@@ -123,19 +123,19 @@ abstract class CampaignBlock implements Block
         if ($id === 0) {
             global $post;
             if ($post instanceof \WP_Post) {
-                $id = (int) get_post_meta($post->ID, '_dono_campaign_id', true);
+                $id = (int) get_post_meta($post->ID, '_giveflow_campaign_id', true);
             }
         }
 
         $bound = $id > 0 ? $this->campaigns->findById($id) : null;
         $message = $bound === null
-            ? __('This block is not bound to a campaign. Pick one in the block sidebar.', 'dono-fundraising-platform')
+            ? __('This block is not bound to a campaign. Pick one in the block sidebar.', 'giveflow-fundraising-campaigns')
             : sprintf(
                 /* translators: %s: the campaign's status, e.g. "draft". */
-                __('This campaign is %s, so this block is hidden from visitors. Publish the campaign to show it.', 'dono-fundraising-platform'),
+                __('This campaign is %s, so this block is hidden from visitors. Publish the campaign to show it.', 'giveflow-fundraising-campaigns'),
                 (string) $bound->status
             );
 
-        return '<div class="dono-block-notice">' . esc_html($message) . '</div>';
+        return '<div class="giveflow-block-notice">' . esc_html($message) . '</div>';
     }
 }

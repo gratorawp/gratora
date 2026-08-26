@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\DonationRepository;
-use Dono\Donations\DonationService;
-use Dono\Foundation\Plugin;
-use Dono\Foundation\Time\Clock;
-use Dono\Gateways\PayPal\PayPalAccount;
-use Dono\Gateways\PayPal\PayPalApi;
-use Dono\Gateways\PayPal\PayPalGateway;
-use Dono\Gateways\PayPal\PayPalPlanRecorder;
-use Dono\Gateways\PayPal\PayPalPlans;
-use Dono\Recurring\RecurringPlan;
-use Dono\Recurring\RecurringPlanRepository;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Donations\DonationService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Foundation\Time\Clock;
+use GiveFlow\Gateways\PayPal\PayPalAccount;
+use GiveFlow\Gateways\PayPal\PayPalApi;
+use GiveFlow\Gateways\PayPal\PayPalGateway;
+use GiveFlow\Gateways\PayPal\PayPalPlanRecorder;
+use GiveFlow\Gateways\PayPal\PayPalPlans;
+use GiveFlow\Recurring\RecurringPlan;
+use GiveFlow\Recurring\RecurringPlanRepository;
 use RuntimeException;
 
 /**
@@ -60,7 +60,7 @@ final class PayPalAlreadyInThatStateTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        update_option('dono_gateway_config', ['test_mode' => true]);
+        update_option('giveflow_gateway_config', ['test_mode' => true]);
 
         $c       = Plugin::instance()->container;
         $account = $c->get(PayPalAccount::class);

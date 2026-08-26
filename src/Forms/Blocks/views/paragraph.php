@@ -5,6 +5,6 @@ defined('ABSPATH') || exit;
  * @var string $align
  */
 ?>
-<p class="dono-block dono-block--paragraph dono-paragraph dono-paragraph--<?php echo esc_attr((string) $align); ?>">
+<p class="giveflow-block giveflow-block--paragraph giveflow-paragraph giveflow-paragraph--<?php echo esc_attr((string) $align); ?>">
     <?php echo wp_kses_post((string) $text); ?>
 </p>

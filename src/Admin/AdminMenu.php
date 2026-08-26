@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace Dono\Admin;
+namespace GiveFlow\Admin;
 
-use Dono\Foundation\Hooks\HookProvider;
+use GiveFlow\Foundation\Hooks\HookProvider;
 
 /**
- * Registers the Dono top-level admin menu and its dynamic subpages.
+ * Registers the GiveFlow top-level admin menu and its dynamic subpages.
  *
  * @since 1.0.0
  */
 final class AdminMenu extends HookProvider
 {
-    private const CAPABILITY = 'dono_access';
-    private const SLUG       = 'dono';
-    private const HANDLE     = 'dono-admin-dashboard';
+    private const CAPABILITY = 'giveflow_access';
+    private const SLUG       = 'giveflow';
+    private const HANDLE     = 'giveflow-admin-dashboard';
     private const BUILD_DIR  = 'build/admin/dashboard';
 
     /** @since 1.0.0 */
@@ -31,8 +31,8 @@ final class AdminMenu extends HookProvider
     public function registerMenu(): void
     {
         add_menu_page(
-            __('Dono', 'dono-fundraising-platform'),
-            __('Dono', 'dono-fundraising-platform'),
+            __('GiveFlow', 'giveflow-fundraising-campaigns'),
+            __('GiveFlow', 'giveflow-fundraising-campaigns'),
             self::CAPABILITY,
             self::SLUG,
             [$this, 'renderDashboard'],
@@ -40,7 +40,7 @@ final class AdminMenu extends HookProvider
             30
         );
 
-        $pages = apply_filters('dono.admin.pages', []);
+        $pages = apply_filters('giveflow.admin.pages', []);
         usort($pages, fn ($a, $b) => ($a['position'] ?? 50) <=> ($b['position'] ?? 50));
 
         foreach ($pages as $page) {
@@ -59,15 +59,15 @@ final class AdminMenu extends HookProvider
     /** @since 1.0.0 */
     private static function menuIcon(): string
     {
-        $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="black" fill-rule="evenodd">'
-            . '<path d="M5 1 H15 A4 4 0 0 1 19 5 V15 A4 4 0 0 1 15 19 H5 A4 4 0 0 1 1 15 V5 A4 4 0 0 1 5 1 Z'
-            . ' M5 4 H10 A6 6 0 0 1 16 10 A6 6 0 0 1 10 16 H5 Z" />'
+        $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round">'
+            . '<path d="M3.2 6.9 C5.5 4.8 7.7 4.8 10 6.9 S14.5 9 16.8 6.9" />'
+            . '<path d="M3.2 13.9 C5.5 11.8 7.7 11.8 10 13.9 S14.5 16 16.8 13.9" />'
             . '</svg>';
         return 'data:image/svg+xml;base64,' . base64_encode($svg);
     }
 
     /**
-     * Adds Dono actions (go to donations, new campaign, ...) to the WP 7.0
+     * Adds GiveFlow actions (go to donations, new campaign, ...) to the WP 7.0
      * global command palette (Cmd/Ctrl+K). Loads on every admin screen so the
      * commands are available from anywhere.
      *
@@ -77,20 +77,20 @@ final class AdminMenu extends HookProvider
     {
         if (! current_user_can(self::CAPABILITY)) return;
 
-        $assetPath = DONO_DIR . 'build/admin/command-palette/index.asset.php';
+        $assetPath = GIVEFLOW_DIR . 'build/admin/command-palette/index.asset.php';
         if (! file_exists($assetPath)) return;
 
         $asset = require $assetPath;
 
         wp_enqueue_script(
-            'dono-admin-command-palette',
-            DONO_URL . 'build/admin/command-palette/index.js',
+            'giveflow-admin-command-palette',
+            GIVEFLOW_URL . 'build/admin/command-palette/index.js',
             $asset['dependencies'] ?? [],
-            $asset['version']      ?? DONO_VERSION,
+            $asset['version']      ?? GIVEFLOW_VERSION,
             true
         );
-        wp_set_script_translations('dono-admin-command-palette', 'dono-fundraising-platform', DONO_DIR . 'languages');
-        wp_localize_script('dono-admin-command-palette', 'donoCommandPalette', [
+        wp_set_script_translations('giveflow-admin-command-palette', 'giveflow-fundraising-campaigns', GIVEFLOW_DIR . 'languages');
+        wp_localize_script('giveflow-admin-command-palette', 'giveflowCommandPalette', [
             'adminUrl' => admin_url(),
         ]);
     }
@@ -104,7 +104,7 @@ final class AdminMenu extends HookProvider
             <?php // WP moves admin notices to just after this marker. Without it they
                   // land beside the React header instead of above it. ?>
             <hr class="wp-header-end" />
-            <div id="dono-admin-dashboard"></div>
+            <div id="giveflow-admin-dashboard"></div>
         </div>
         <?php
     }
@@ -112,26 +112,26 @@ final class AdminMenu extends HookProvider
     /** @since 1.0.0 */
     private function enqueueAssets(): void
     {
-        $assetPath = DONO_DIR . self::BUILD_DIR . '/index.asset.php';
+        $assetPath = GIVEFLOW_DIR . self::BUILD_DIR . '/index.asset.php';
         if (! file_exists($assetPath)) return;
 
         $asset = require $assetPath;
 
         wp_enqueue_script(
             self::HANDLE,
-            DONO_URL . self::BUILD_DIR . '/index.js',
+            GIVEFLOW_URL . self::BUILD_DIR . '/index.js',
             $asset['dependencies'] ?? [],
-            $asset['version']      ?? DONO_VERSION,
+            $asset['version']      ?? GIVEFLOW_VERSION,
             true
         );
-        wp_set_script_translations(self::HANDLE, 'dono-fundraising-platform', DONO_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE, 'giveflow-fundraising-campaigns', GIVEFLOW_DIR . 'languages');
 
         wp_enqueue_style('wp-components');
         wp_enqueue_style(
             self::HANDLE,
-            DONO_URL . 'build/admin/dashboard.css',
+            GIVEFLOW_URL . 'build/admin/dashboard.css',
             ['wp-components'],
-            $asset['version'] ?? DONO_VERSION
+            (string) (@filemtime(GIVEFLOW_DIR . 'build/admin/dashboard.css') ?: GIVEFLOW_VERSION)
         );
     }
 }

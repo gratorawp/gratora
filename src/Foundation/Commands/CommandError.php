@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Foundation\Commands;
+namespace GiveFlow\Foundation\Commands;
 
 use RuntimeException;
 

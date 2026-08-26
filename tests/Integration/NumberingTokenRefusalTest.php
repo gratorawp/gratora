@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Foundation\Plugin;
-use Dono\Foundation\References\InvalidReferenceToken;
-use Dono\Foundation\References\ReferenceGenerator;
-use Dono\Settings\SettingsService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Foundation\References\InvalidReferenceToken;
+use GiveFlow\Foundation\References\ReferenceGenerator;
+use GiveFlow\Settings\SettingsService;
 use WP_REST_Request;
 
 /**
@@ -27,7 +27,7 @@ final class NumberingTokenRefusalTest extends IntegrationTestCase
     {
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
 
-        $req = new WP_REST_Request('PUT', '/dono/v1/admin/settings/numbering');
+        $req = new WP_REST_Request('PUT', '/giveflow/v1/admin/settings/numbering');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($body));
 
@@ -39,7 +39,7 @@ final class NumberingTokenRefusalTest extends IntegrationTestCase
         $res = $this->put(['separator' => '.']);
 
         $this->assertSame(400, $res->get_status());
-        $this->assertSame('dono_invalid_reference_token', $res->get_data()['code']);
+        $this->assertSame('giveflow_invalid_reference_token', $res->get_data()['code']);
         $this->assertStringContainsString('Separator', (string) $res->get_data()['message']);
         $this->assertSame('-', $this->settings()->get('numbering')['separator'], 'nothing was stored');
     }
@@ -50,7 +50,7 @@ final class NumberingTokenRefusalTest extends IntegrationTestCase
 
         $this->assertSame(400, $res->get_status());
         $this->assertStringContainsString('Donation prefix', (string) $res->get_data()['message']);
-        $this->assertSame('DONO', $this->settings()->get('numbering')['prefixes']['donation']);
+        $this->assertSame('DON', $this->settings()->get('numbering')['prefixes']['donation']);
     }
 
     public function test_an_empty_prefix_is_refused_rather_than_silently_replaced(): void

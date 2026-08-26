@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\DonationRepository;
-use Dono\Donations\Refund;
-use Dono\Foundation\Plugin;
-use Dono\Gateways\GatewayManager;
-use Dono\Gateways\PayPal\PayPalAccount;
-use Dono\Gateways\PayPal\PayPalApi;
-use Dono\Gateways\PayPal\PayPalGateway;
-use Dono\Gateways\PayPal\PayPalPlans;
-use Dono\Gateways\SubscriptionChangeNeedsApproval;
-use Dono\Recurring\RecurringPlan;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Donations\Refund;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Gateways\GatewayManager;
+use GiveFlow\Gateways\PayPal\PayPalAccount;
+use GiveFlow\Gateways\PayPal\PayPalApi;
+use GiveFlow\Gateways\PayPal\PayPalGateway;
+use GiveFlow\Gateways\PayPal\PayPalPlans;
+use GiveFlow\Gateways\SubscriptionChangeNeedsApproval;
+use GiveFlow\Recurring\RecurringPlan;
 use WP_REST_Request;
 
 /**
@@ -38,8 +38,8 @@ final class PayPalGatewayTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        update_option('dono_gateway_config', ['test_mode' => true]);
-        update_option('dono_currency_locale', [
+        update_option('giveflow_gateway_config', ['test_mode' => true]);
+        update_option('giveflow_currency_locale', [
             'default_currency'     => 'USD',
             'supported_currencies' => ['USD', 'JPY'],
         ]);
@@ -60,11 +60,11 @@ final class PayPalGatewayTest extends IntegrationTestCase
                 $c->get(PayPalApi::class),
                 $account,
                 $c->get(DonationRepository::class),
-                $c->get(\Dono\Donations\DonationService::class),
+                $c->get(\GiveFlow\Donations\DonationService::class),
                 $c->get(PayPalPlans::class),
-                $c->get(\Dono\Recurring\RecurringPlanRepository::class),
-                $c->get(\Dono\Foundation\Time\Clock::class),
-                $c->get(\Dono\Gateways\PayPal\PayPalPlanRecorder::class),
+                $c->get(\GiveFlow\Recurring\RecurringPlanRepository::class),
+                $c->get(\GiveFlow\Foundation\Time\Clock::class),
+                $c->get(\GiveFlow\Gateways\PayPal\PayPalPlanRecorder::class),
             ));
         }
     }
@@ -151,7 +151,7 @@ final class PayPalGatewayTest extends IntegrationTestCase
 
     private function createDonation(string $currency = 'USD', int $amount = 2500, string $email = 'pp@example.test'): string
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/donations');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'email'        => $email,
@@ -222,7 +222,7 @@ final class PayPalGatewayTest extends IntegrationTestCase
     {
         $reference = $this->createDonation();
 
-        $req = new WP_REST_Request('POST', '/dono/v1/gateways/paypal/capture');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/gateways/paypal/capture');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'reference'    => $reference,
@@ -246,7 +246,7 @@ final class PayPalGatewayTest extends IntegrationTestCase
     {
         $reference = $this->createDonation();
 
-        $req = new WP_REST_Request('POST', '/dono/v1/gateways/paypal/capture');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/gateways/paypal/capture');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'reference' => $reference,
@@ -263,9 +263,9 @@ final class PayPalGatewayTest extends IntegrationTestCase
 
     public function test_unknown_reference_is_refused(): void
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/gateways/paypal/capture');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/gateways/paypal/capture');
         $req->set_header('content-type', 'application/json');
-        $req->set_body((string) wp_json_encode(['reference' => 'DONO-NOPE', 'status_token' => 'anything']));
+        $req->set_body((string) wp_json_encode(['reference' => 'GIVEFLOW-NOPE', 'status_token' => 'anything']));
         $res = rest_do_request($req);
 
         $this->assertSame(404, $res->get_status());
@@ -275,7 +275,7 @@ final class PayPalGatewayTest extends IntegrationTestCase
     {
         $reference = $this->createDonation('JPY', 100000, 'jpy-refund@example.test');
 
-        $req = new WP_REST_Request('POST', '/dono/v1/gateways/paypal/capture');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/gateways/paypal/capture');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'reference'    => $reference,
@@ -307,7 +307,7 @@ final class PayPalGatewayTest extends IntegrationTestCase
     {
         $reference = $this->createDonation('JPY', 100000, 'jpy-partial@example.test');
 
-        $req = new WP_REST_Request('POST', '/dono/v1/gateways/paypal/capture');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/gateways/paypal/capture');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'reference'    => $reference,
@@ -332,7 +332,7 @@ final class PayPalGatewayTest extends IntegrationTestCase
     /** @param array<string,mixed> $resource */
     private function postWebhook(string $type, array $resource): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/webhooks/paypal');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/webhooks/paypal');
         $req->set_header('content-type', 'application/json');
         foreach ([
             'paypal_transmission_id'   => 'tx-1',
@@ -402,7 +402,7 @@ final class PayPalGatewayTest extends IntegrationTestCase
     {
         $res = $this->postWebhook('PAYMENT.CAPTURE.COMPLETED', [
             'id'        => 'CAPTURE-STRANGER',
-            'custom_id' => 'DONO-NOT-OURS',
+            'custom_id' => 'GIVEFLOW-NOT-OURS',
         ]);
 
         $this->assertSame(200, $res->get_status());
@@ -418,7 +418,7 @@ final class PayPalGatewayTest extends IntegrationTestCase
         $this->pendingCapture = true;
         $reference = $this->createDonation();
 
-        $req = new WP_REST_Request('POST', '/dono/v1/gateways/paypal/capture');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/gateways/paypal/capture');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'reference'    => $reference,
@@ -439,7 +439,7 @@ final class PayPalGatewayTest extends IntegrationTestCase
         $this->pendingCapture = true;
         $reference = $this->createDonation();
 
-        $req = new WP_REST_Request('POST', '/dono/v1/gateways/paypal/capture');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/gateways/paypal/capture');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'reference'    => $reference,

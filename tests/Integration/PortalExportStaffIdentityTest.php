@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donors\DonorMetricsService;
-use Dono\Donors\DonorNoteRepository;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
+use GiveFlow\Donors\DonorMetricsService;
+use GiveFlow\Donors\DonorNoteRepository;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -21,7 +21,7 @@ final class PortalExportStaffIdentityTest extends IntegrationTestCase
 {
     protected function tearDown(): void
     {
-        unset($_COOKIE['dono_donor_session']);
+        unset($_COOKIE['giveflow_donor_session']);
         parent::tearDown();
     }
 
@@ -54,10 +54,10 @@ final class PortalExportStaffIdentityTest extends IntegrationTestCase
      */
     private function download(int $donorId): array
     {
-        $_COOKIE['dono_donor_session'] = $this->portalSession($donorId, 'tok');
+        $_COOKIE['giveflow_donor_session'] = $this->portalSession($donorId, 'tok');
 
-        $req = new WP_REST_Request('POST', '/dono/v1/portal/data-export');
-        $req->set_header('X-Dono-Csrf', 'tok');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/portal/data-export');
+        $req->set_header('X-GiveFlow-Csrf', 'tok');
         $res = rest_do_request($req);
 
         ob_start();

@@ -2,30 +2,30 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Campaigns\Campaign;
-use Dono\Donations\AggregateSyncer;
-use Dono\Donations\Donation;
-use Dono\Donations\DonationIntent;
-use Dono\Donations\DonationService;
-use Dono\Donors\Donor;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Crypto\Crypto;
-use Dono\Foundation\Identity\IdentityHasher;
-use Dono\Foundation\Plugin;
-use Dono\Foundation\References\ReferenceGenerator;
-use Dono\Foundation\Transfer\DataExporter;
-use Dono\Foundation\Transfer\DataImporter;
-use Dono\Funds\Fund;
-use Dono\Receipts\Receipt;
-use Dono\Vendor\Queryable\DB;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Donations\AggregateSyncer;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationIntent;
+use GiveFlow\Donations\DonationService;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Crypto\Crypto;
+use GiveFlow\Foundation\Identity\IdentityHasher;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Foundation\References\ReferenceGenerator;
+use GiveFlow\Foundation\Transfer\DataExporter;
+use GiveFlow\Foundation\Transfer\DataImporter;
+use GiveFlow\Funds\Fund;
+use GiveFlow\Receipts\Receipt;
+use GiveFlow\Vendor\Queryable\DB;
 
 /**
  * What a restore has to rebuild rather than insert.
  *
  * Two kinds of state do not travel in the file. The reference counters are per
- * install, so a restored donation holding DONO-2026-00001 leaves the counter
+ * install, so a restored donation holding GIVEFLOW-2026-00001 leaves the counter
  * behind it and the next donor mints a reference the unique index refuses. And
  * the fund, campaign and donor totals are columns on rows the restore matches
  * rather than writes, so the money that just landed is missing from every
@@ -73,8 +73,8 @@ final class ImporterRestoreDerivedStateTest extends IntegrationTestCase
     private function forgetCounters(): void
     {
         foreach (['donation', 'receipt', 'refund'] as $scope) {
-            delete_option("dono_reference_counter_{$scope}");
-            delete_option("dono_reference_counter_{$scope}_" . $this->year());
+            delete_option("giveflow_reference_counter_{$scope}");
+            delete_option("giveflow_reference_counter_{$scope}_" . $this->year());
         }
     }
 
@@ -82,17 +82,17 @@ final class ImporterRestoreDerivedStateTest extends IntegrationTestCase
     {
         $prefix = DB::getPrefix();
         foreach ([
-            'dono_receipts',
-            'dono_refunds',
-            'dono_consents',
-            'dono_donation_notes',
-            'dono_donor_notes',
-            'dono_donations',
-            'dono_donors',
-            'dono_form_donation_stats',
-            'dono_forms',
-            'dono_campaigns',
-            'dono_funds',
+            'giveflow_receipts',
+            'giveflow_refunds',
+            'giveflow_consents',
+            'giveflow_donation_notes',
+            'giveflow_donor_notes',
+            'giveflow_donations',
+            'giveflow_donors',
+            'giveflow_form_donation_stats',
+            'giveflow_forms',
+            'giveflow_campaigns',
+            'giveflow_funds',
         ] as $table) {
             DB::raw("DELETE FROM {$prefix}{$table}");
         }
@@ -297,7 +297,7 @@ final class ImporterRestoreDerivedStateTest extends IntegrationTestCase
 
         $export = $this->export();
 
-        DB::raw('DELETE FROM ' . DB::getPrefix() . 'dono_donations');
+        DB::raw('DELETE FROM ' . DB::getPrefix() . 'giveflow_donations');
         $this->seedDonation((int) $donor->id, 'RESTORE-SMALL-1', 5000, (int) $fund->id, (int) $campaign->id);
         $syncer->syncFund((int) $fund->id);
         $syncer->syncCampaign((int) $campaign->id);
@@ -307,8 +307,8 @@ final class ImporterRestoreDerivedStateTest extends IntegrationTestCase
 
         $records = $this->import($export);
 
-        $this->assertSame(1, $records['created']['dono_donations'] ?? 0, 'the restored donation landed');
-        $this->assertSame(1, $records['existing']['dono_funds'] ?? 0, 'and the fund was matched, not written');
+        $this->assertSame(1, $records['created']['giveflow_donations'] ?? 0, 'the restored donation landed');
+        $this->assertSame(1, $records['existing']['giveflow_funds'] ?? 0, 'and the fund was matched, not written');
 
         $fundRow = Fund::query()->where('id', (int) $fund->id)->get();
         $this->assertSame(95000, (int) $fundRow->raised_cents, 'the fund holds both donations');

@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
-use Dono\Donors\Consent;
-use Dono\Donors\Donor;
-use Dono\Donors\DonorService;
-use Dono\Donors\MagicLinkToken;
-use Dono\Donors\PendingSignup;
-use Dono\Foundation\Identity\IdentityHasher;
-use Dono\Foundation\Plugin;
-use Dono\Recurring\RecurringPlan;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donors\Consent;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Donors\MagicLinkToken;
+use GiveFlow\Donors\PendingSignup;
+use GiveFlow\Foundation\Identity\IdentityHasher;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Recurring\RecurringPlan;
 use WP_REST_Request;
 
 /**
@@ -55,7 +55,7 @@ final class DonorDeleteTest extends IntegrationTestCase
 
     private function deleteViaRest(int $id): \WP_REST_Response|\WP_Error
     {
-        return rest_do_request(new WP_REST_Request('DELETE', '/dono/v1/admin/donors/' . $id));
+        return rest_do_request(new WP_REST_Request('DELETE', '/giveflow/v1/admin/donors/' . $id));
     }
 
     private function exists(int $id): bool
@@ -125,18 +125,18 @@ final class DonorDeleteTest extends IntegrationTestCase
 
     /**
      * Core cannot see what an add-on hangs off a donor, so the add-on says so.
-     * dono-p2p uses this to keep a donor whose fundraiser page is still public.
+     * giveflow-p2p uses this to keep a donor whose fundraiser page is still public.
      */
     public function test_an_add_on_can_refuse(): void
     {
         $donor = $this->donor('vetoed-' . uniqid() . '@example.test');
 
         $veto = static fn () => 'They still run something of ours.';
-        add_filter('dono.donor.undeletable_reason', $veto, 10, 2);
+        add_filter('giveflow.donor.undeletable_reason', $veto, 10, 2);
 
         $res = $this->deleteViaRest((int) $donor->id);
 
-        remove_filter('dono.donor.undeletable_reason', $veto, 10);
+        remove_filter('giveflow.donor.undeletable_reason', $veto, 10);
 
         $this->assertSame(409, $res->get_status());
         $this->assertTrue($this->exists((int) $donor->id));
@@ -150,11 +150,11 @@ final class DonorDeleteTest extends IntegrationTestCase
         $id    = (int) $donor->id;
         $hash  = Plugin::instance()->container->get(IdentityHasher::class)->emailHash($email);
 
-        Plugin::instance()->container->get(\Dono\Donors\ConsentService::class)
+        Plugin::instance()->container->get(\GiveFlow\Donors\ConsentService::class)
             ->record($id, 'email_updates', true, ['source' => 'admin']);
-        Plugin::instance()->container->get(\Dono\Donors\MagicLinkService::class)
+        Plugin::instance()->container->get(\GiveFlow\Donors\MagicLinkService::class)
             ->issue($id, 'donor_portal');
-        Plugin::instance()->container->get(\Dono\Donors\PendingSignupRepository::class)
+        Plugin::instance()->container->get(\GiveFlow\Donors\PendingSignupRepository::class)
             ->put($email);
 
         $this->deleteViaRest($id);

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Dono\Currency;
+namespace GiveFlow\Currency;
 
-use Dono\Analytics\ErrorLog;
-use Dono\Async\AsyncDispatcher;
-use Dono\Foundation\Helpers\Money;
+use GiveFlow\Analytics\ErrorLog;
+use GiveFlow\Async\AsyncDispatcher;
+use GiveFlow\Foundation\Helpers\Money;
 
 /**
- * Daily refresh of dono_fx_rates from Frankfurter (ECB reference rates).
+ * Daily refresh of giveflow_fx_rates from Frankfurter (ECB reference rates).
  *
  * On any failure the previous snapshot is left intact so conversion never
  * breaks on a bad fetch.
@@ -18,7 +18,7 @@ use Dono\Foundation\Helpers\Money;
  */
 final class FxRatesUpdater
 {
-    public const HOOK = 'dono.cron.fx_rates';
+    public const HOOK = 'giveflow.cron.fx_rates';
     private const DAILY = 86400;
     private const ENDPOINT = 'https://api.frankfurter.app/latest';
 
@@ -32,7 +32,7 @@ final class FxRatesUpdater
     {
         add_action(self::HOOK, [$this, 'run']);
         add_action('init', fn () => $this->async->scheduleRecurring(self::HOOK, self::DAILY));
-        add_action('dono.settings.updated', [$this, 'onSettingsUpdated'], 10, 2);
+        add_action('giveflow.settings.updated', [$this, 'onSettingsUpdated'], 10, 2);
     }
 
     /**
@@ -118,7 +118,7 @@ final class FxRatesUpdater
     {
         $base = strtoupper(Money::defaultCurrency());
 
-        $opt       = get_option('dono_currency_locale', []);
+        $opt       = get_option('giveflow_currency_locale', []);
         $supported = is_array($opt) ? (array) ($opt['supported_currencies'] ?? []) : [];
 
         foreach ($supported as $code) {

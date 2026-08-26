@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Dono\Recurring;
+namespace GiveFlow\Recurring;
 
-use Dono\Analytics\EventRecorder;
-use Dono\Currency\Currency;
-use Dono\Gateways\GatewayManager;
-use Dono\Gateways\SubscriptionAware;
-use Dono\Gateways\SupportsPaymentRetry;
+use GiveFlow\Analytics\EventRecorder;
+use GiveFlow\Currency\Currency;
+use GiveFlow\Gateways\GatewayManager;
+use GiveFlow\Gateways\SubscriptionAware;
+use GiveFlow\Gateways\SupportsPaymentRetry;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -64,7 +64,7 @@ final class RecurringPlanActions
 
         $change->detail += ['resumes_at' => $resumesAt];
         $this->finish($plan, $change, 'recurring.paused');
-        do_action('dono.recurring.plan_paused', $plan, $resumesAt);
+        do_action('giveflow.recurring.plan_paused', $plan, $resumesAt);
     }
 
     /**
@@ -95,7 +95,7 @@ final class RecurringPlanActions
         ]);
 
         $this->finish($plan, $change, 'recurring.resumed');
-        do_action('dono.recurring.plan_resumed', $plan);
+        do_action('giveflow.recurring.plan_resumed', $plan);
     }
 
     /**
@@ -111,7 +111,7 @@ final class RecurringPlanActions
         $this->assertGatewayReachable($plan, 'skip a payment on');
 
         if (! $plan->next_payment_at) {
-            throw new InvalidArgumentException(esc_html__('This donation has no scheduled payment to skip.', 'dono-fundraising-platform'));
+            throw new InvalidArgumentException(esc_html__('This donation has no scheduled payment to skip.', 'giveflow-fundraising-campaigns'));
         }
 
         $unit   = in_array($plan->interval_unit, ['year', 'week'], true) ? $plan->interval_unit : 'month';
@@ -127,13 +127,13 @@ final class RecurringPlanActions
 
         $change->detail = ['next_payment_at' => $nextAt];
         $this->finish($plan, $change, 'recurring.skipped');
-        do_action('dono.recurring.plan_skipped', $plan);
+        do_action('giveflow.recurring.plan_skipped', $plan);
     }
 
     /**
      * Change what the card is charged from the next cycle on.
      *
-     * @throws \Dono\Gateways\SubscriptionChangeNeedsApproval When the processor
+     * @throws \GiveFlow\Gateways\SubscriptionChangeNeedsApproval When the processor
      *         accepted the change but is waiting on the donor to approve it, in
      *         which case nothing local is written: the plan must not claim an
      *         amount the card is not being charged.
@@ -146,16 +146,16 @@ final class RecurringPlanActions
         $this->assertGatewayReachable($plan, 'change the amount of');
 
         if ($amountCents < 50) {
-            throw new InvalidArgumentException(esc_html__('Amount is too low.', 'dono-fundraising-platform'));
+            throw new InvalidArgumentException(esc_html__('Amount is too low.', 'giveflow-fundraising-campaigns'));
         }
         if ($amountCents > 99999999) {
-            throw new InvalidArgumentException(esc_html__('Amount is too high.', 'dono-fundraising-platform'));
+            throw new InvalidArgumentException(esc_html__('Amount is too high.', 'giveflow-fundraising-campaigns'));
         }
         // Storage is major units x 100, so a fractional amount in a zero-decimal
         // currency rounds at the gateway and the row keeps a figure nobody is
         // charging, on every renewal.
         if (Currency::minorUnits((string) $plan->currency) === 0 && $amountCents % 100 !== 0) {
-            throw new InvalidArgumentException(esc_html__('This currency does not support fractional amounts.', 'dono-fundraising-platform'));
+            throw new InvalidArgumentException(esc_html__('This currency does not support fractional amounts.', 'giveflow-fundraising-campaigns'));
         }
 
         $was = (int) $plan->amount_cents;
@@ -176,7 +176,7 @@ final class RecurringPlanActions
 
         $change->detail = ['from_cents' => $was, 'to_cents' => $amountCents, 'currency' => (string) $plan->currency];
         $this->finish($plan, $change, 'recurring.amount_changed');
-        do_action('dono.recurring.plan_amount_changed', $plan);
+        do_action('giveflow.recurring.plan_amount_changed', $plan);
     }
 
     /**
@@ -197,7 +197,7 @@ final class RecurringPlanActions
         if (! $gateway instanceof SupportsPaymentRetry) {
             throw new InvalidArgumentException(esc_html(sprintf(
                 /* translators: %s: the payment gateway name, e.g. PayPal. */
-                __('%s does not allow a renewal to be retried on demand. It retries on its own schedule; ask the donor to update their card from the donor portal.', 'dono-fundraising-platform'),
+                __('%s does not allow a renewal to be retried on demand. It retries on its own schedule; ask the donor to update their card from the donor portal.', 'giveflow-fundraising-campaigns'),
                 ucfirst((string) $plan->gateway)
             )));
         }
@@ -225,7 +225,7 @@ final class RecurringPlanActions
         if ($change->isByAdmin()) {
             $this->record($plan, $change, 'recurring.cancelled_by_admin');
         }
-        do_action('dono.recurring.plan_changed', $plan, $change);
+        do_action('giveflow.recurring.plan_changed', $plan, $change);
     }
 
     // ---------------------------------------------------------------- internals
@@ -234,7 +234,7 @@ final class RecurringPlanActions
     private function assertChangeable(RecurringPlan $plan): void
     {
         if (in_array((string) $plan->status, self::TERMINAL, true)) {
-            throw new RuntimeException(esc_html__('This donation is no longer active.', 'dono-fundraising-platform'));
+            throw new RuntimeException(esc_html__('This donation is no longer active.', 'giveflow-fundraising-campaigns'));
         }
     }
 
@@ -310,7 +310,7 @@ final class RecurringPlanActions
 
         // Carries the actor and the notify flag, which the plain per-action
         // hooks above cannot: those are a published signature.
-        do_action('dono.recurring.plan_changed', $plan, $change);
+        do_action('giveflow.recurring.plan_changed', $plan, $change);
     }
 
     /** @since 1.0.0 */

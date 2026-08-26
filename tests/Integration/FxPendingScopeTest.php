@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Currency\FxBackfill;
-use Dono\Donations\Donation;
-use Dono\Foundation\Helpers\Money;
+use GiveFlow\Currency\FxBackfill;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Foundation\Helpers\Money;
 use WP_REST_Request;
 
 /**
@@ -112,7 +112,7 @@ final class FxPendingScopeTest extends IntegrationTestCase
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
         $this->donation(['status' => 'pending', 'amount_cents' => 777777]);
 
-        $data = (array) rest_do_request(new WP_REST_Request('GET', '/dono/v1/admin/tools/info'))->get_data();
+        $data = (array) rest_do_request(new WP_REST_Request('GET', '/giveflow/v1/admin/tools/info'))->get_data();
 
         $this->assertSame([], $data['unconverted_donations'], 'the card must not alarm over an abandoned checkout');
     }

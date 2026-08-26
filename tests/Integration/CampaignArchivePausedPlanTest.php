@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Campaigns\Campaign;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
-use Dono\Recurring\CampaignCancelRecurringJob;
-use Dono\Recurring\RecurringPlan;
-use Dono\Recurring\RecurringResumer;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Recurring\CampaignCancelRecurringJob;
+use GiveFlow\Recurring\RecurringPlan;
+use GiveFlow\Recurring\RecurringResumer;
 use WP_REST_Request;
 
 /**
@@ -67,7 +67,7 @@ final class CampaignArchivePausedPlanTest extends IntegrationTestCase
 
     private function archiveAndCancel(int $campaignId): int
     {
-        $req = new WP_REST_Request('PUT', "/dono/v1/admin/campaigns/{$campaignId}");
+        $req = new WP_REST_Request('PUT', "/giveflow/v1/admin/campaigns/{$campaignId}");
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['status' => 'archived', 'cancel_recurring' => true]));
         return rest_do_request($req)->get_status();

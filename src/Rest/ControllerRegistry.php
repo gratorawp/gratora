@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Rest;
+namespace GiveFlow\Rest;
 
 /**
  * Registry for add-on REST controllers. Any object with registerRoutes(): void
- * can be contributed via dono.rest.register without modifying RestProvider.
+ * can be contributed via giveflow.rest.register without modifying RestProvider.
  *
  * @since 1.0.0
  */

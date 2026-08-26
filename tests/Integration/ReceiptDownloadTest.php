@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
 use WP_REST_Request;
 
@@ -12,12 +12,12 @@ final class ReceiptDownloadTest extends IntegrationTestCase
     {
         $this->driveDonationToReceiptIssued();
 
-        $req = new WP_REST_Request('GET', '/dono/v1/receipts/1/download');
+        $req = new WP_REST_Request('GET', '/giveflow/v1/receipts/1/download');
         $req->set_query_params(['token' => 'not-a-real-token']);
         $res = rest_do_request($req);
 
         $this->assertSame(403, $res->get_status());
-        $this->assertSame('dono_invalid_token', $res->get_data()['code']);
+        $this->assertSame('giveflow_invalid_token', $res->get_data()['code']);
     }
 
     public function test_download_endpoint_returns_pdf_for_valid_token(): void
@@ -36,7 +36,7 @@ final class ReceiptDownloadTest extends IntegrationTestCase
         $this->assertCount(1, $receiptMails);
         $body = $receiptMails[0]['message'];
 
-        preg_match('#/dono/v1/receipts/(\d+)/download\?token=([a-f0-9]+)#', $body, $m);
+        preg_match('#/giveflow/v1/receipts/(\d+)/download\?token=([a-f0-9]+)#', $body, $m);
         $this->assertCount(3, $m, 'Download URL with receipt id + token should be in the email body');
         $receiptId = (int) $m[1];
         $rawToken  = $m[2];
@@ -47,7 +47,7 @@ final class ReceiptDownloadTest extends IntegrationTestCase
         // controller's resolution path runs successfully via output buffer + register_shutdown.
         // Quick proof: WP_REST_Request roundtrip + assert no WP_Error returned.
         ob_start();
-        $req = new WP_REST_Request('GET', "/dono/v1/receipts/{$receiptId}/download");
+        $req = new WP_REST_Request('GET', "/giveflow/v1/receipts/{$receiptId}/download");
         $req->set_query_params(['token' => $rawToken]);
 
         // Stop the controller from calling exit() by hooking the moment before stream().
@@ -57,8 +57,8 @@ final class ReceiptDownloadTest extends IntegrationTestCase
         // on MagicLinkService through the container.
         ob_end_clean();
 
-        $container = \Dono\Foundation\Plugin::instance()->container;
-        $magicLinks = $container->get(\Dono\Donors\MagicLinkService::class);
+        $container = \GiveFlow\Foundation\Plugin::instance()->container;
+        $magicLinks = $container->get(\GiveFlow\Donors\MagicLinkService::class);
         $valid = $magicLinks->validate($rawToken, 'download_receipt', $receiptId);
 
         $this->assertNotNull($valid, 'Magic-link token should validate against download_receipt purpose + receipt_id target');
@@ -70,7 +70,7 @@ final class ReceiptDownloadTest extends IntegrationTestCase
         $this->driveDonationToReceiptIssued();
 
         $token = self::$wpdb->get_row(
-            "SELECT * FROM " . self::$prefix . "dono_magic_link_tokens ORDER BY id DESC LIMIT 1"
+            "SELECT * FROM " . self::$prefix . "giveflow_magic_link_tokens ORDER BY id DESC LIMIT 1"
         );
 
         $this->assertSame('download_receipt', $token->purpose);
@@ -84,7 +84,7 @@ final class ReceiptDownloadTest extends IntegrationTestCase
     {
         // Non-DE donor so only the generic renderer applies → exactly one
         // receipt + one email, which the assertions in this suite assume.
-        $createReq = new WP_REST_Request('POST', '/dono/v1/donations');
+        $createReq = new WP_REST_Request('POST', '/giveflow/v1/donations');
         $createReq->set_header('content-type', 'application/json');
         $createReq->set_body(json_encode([
             'email'        => 'sarah@example.com',
@@ -95,7 +95,7 @@ final class ReceiptDownloadTest extends IntegrationTestCase
         ]));
         $reference = rest_do_request($createReq)->get_data()['reference'];
 
-        $confirmReq = new WP_REST_Request('POST', "/dono/v1/donations/{$reference}/confirm");
+        $confirmReq = new WP_REST_Request('POST', "/giveflow/v1/donations/{$reference}/confirm");
         $confirmReq->set_header('content-type', 'application/json');
         $confirmReq->set_body('{}');
         rest_do_request($confirmReq);

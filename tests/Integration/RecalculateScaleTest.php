@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donors\Donor;
-use Dono\Foundation\Plugin;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -36,7 +36,7 @@ final class RecalculateScaleTest extends IntegrationTestCase
             $seeded[] = (int) $d->id;
         }
 
-        $req = new WP_REST_Request('POST', '/dono/v1/admin/tools/recalculate');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/tools/recalculate');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['scope' => 'donors']));
 

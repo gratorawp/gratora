@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Campaigns\Campaign;
-use Dono\Forms\Form;
-use Dono\Forms\FormService;
-use Dono\Foundation\Plugin;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Forms\Form;
+use GiveFlow\Forms\FormService;
+use GiveFlow\Foundation\Plugin;
 use InvalidArgumentException;
 
 /** A campaign's default form cannot walk off to another campaign. */

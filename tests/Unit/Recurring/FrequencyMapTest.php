@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Unit\Recurring;
+namespace GiveFlow\Tests\Unit\Recurring;
 
-use Dono\Recurring\FrequencyMap;
+use GiveFlow\Recurring\FrequencyMap;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 

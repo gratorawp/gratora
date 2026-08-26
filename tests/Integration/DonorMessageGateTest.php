@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
-use Dono\Forms\Form;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Forms\Form;
 use WP_REST_Request;
 
 /**
@@ -17,9 +17,9 @@ final class DonorMessageGateTest extends IntegrationTestCase
 {
     private function form(bool $withComment): Form
     {
-        $blocks = '<!-- wp:dono/donation-amount /--><!-- wp:dono/email /-->'
-            . ($withComment ? '<!-- wp:dono/comment /-->' : '')
-            . '<!-- wp:dono/submit-button /-->';
+        $blocks = '<!-- wp:giveflow/donation-amount /--><!-- wp:giveflow/email /-->'
+            . ($withComment ? '<!-- wp:giveflow/comment /-->' : '')
+            . '<!-- wp:giveflow/submit-button /-->';
 
         $f = Form::make();
         $f->title      = 'Gate test';
@@ -34,7 +34,7 @@ final class DonorMessageGateTest extends IntegrationTestCase
 
     private function donate(Form $form, array $extra): ?Donation
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/donations');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($extra + [
             'email'        => 'msg-' . uniqid() . '@example.test',

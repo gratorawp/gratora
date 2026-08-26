@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Admin\Pages;
+namespace GiveFlow\Admin\Pages;
 
-use Dono\Foundation\Hooks\HookProvider;
-use Dono\Admin\ExtensionAssets;
+use GiveFlow\Foundation\Hooks\HookProvider;
+use GiveFlow\Admin\ExtensionAssets;
 
 /**
  * Registers and renders the Donors admin page.
@@ -14,14 +14,14 @@ use Dono\Admin\ExtensionAssets;
  */
 final class DonorsPage extends HookProvider
 {
-    private const PAGE_ID   = 'dono-donors';
-    private const HANDLE    = 'dono-admin-donors';
+    private const PAGE_ID   = 'giveflow-donors';
+    private const HANDLE    = 'giveflow-admin-donors';
     private const BUILD_DIR = 'build/admin/donors';
 
     /** @since 1.0.0 */
     protected function filters(): array
     {
-        return ['dono.admin.pages' => 'registerPage'];
+        return ['giveflow.admin.pages' => 'registerPage'];
     }
 
     /** @since 1.0.0 */
@@ -29,8 +29,8 @@ final class DonorsPage extends HookProvider
     {
         $pages[] = [
             'id'         => self::PAGE_ID,
-            'title'      => __('Donors', 'dono-fundraising-platform'),
-            'capability' => 'dono_access_donors',
+            'title'      => __('Donors', 'giveflow-fundraising-campaigns'),
+            'capability' => 'giveflow_access_donors',
             'position'   => 20,
             'render'     => [$this, 'render'],
         ];
@@ -46,7 +46,7 @@ final class DonorsPage extends HookProvider
             <?php // WP moves admin notices to just after this marker. Without it they
                   // land beside the React header instead of above it. ?>
             <hr class="wp-header-end" />
-            <div id="dono-admin-donors"></div>
+            <div id="giveflow-admin-donors"></div>
         </div>
         <?php
     }
@@ -54,32 +54,32 @@ final class DonorsPage extends HookProvider
     /** @since 1.0.0 */
     private function enqueueAssets(): void
     {
-        $asset = require DONO_DIR . self::BUILD_DIR . '/index.asset.php';
+        $asset = require GIVEFLOW_DIR . self::BUILD_DIR . '/index.asset.php';
 
         ExtensionAssets::enqueue('donor');
 
         wp_enqueue_script(
             self::HANDLE,
-            DONO_URL . self::BUILD_DIR . '/index.js',
+            GIVEFLOW_URL . self::BUILD_DIR . '/index.js',
             array_merge($asset['dependencies'] ?? [], [ExtensionAssets::HANDLE]),
-            $asset['version']      ?? DONO_VERSION,
+            $asset['version']      ?? GIVEFLOW_VERSION,
             true
         );
 
-        wp_set_script_translations(self::HANDLE, 'dono-fundraising-platform', DONO_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE, 'giveflow-fundraising-campaigns', GIVEFLOW_DIR . 'languages');
 
         wp_enqueue_style('wp-components');
         wp_enqueue_style(
-            'dono-dataviews-vendor-donors',
-            DONO_URL . self::BUILD_DIR . '/dataviews.css',
+            'giveflow-dataviews-vendor-donors',
+            GIVEFLOW_URL . self::BUILD_DIR . '/dataviews.css',
             ['wp-components'],
-            $asset['version'] ?? DONO_VERSION
+            (string) (@filemtime(GIVEFLOW_DIR . self::BUILD_DIR . '/dataviews.css') ?: GIVEFLOW_VERSION)
         );
         wp_enqueue_style(
-            'dono-admin-donors',
-            DONO_URL . 'build/admin/donors.css',
+            'giveflow-admin-donors',
+            GIVEFLOW_URL . 'build/admin/donors.css',
             ['wp-components'],
-            $asset['version'] ?? DONO_VERSION
+            (string) (@filemtime(GIVEFLOW_DIR . 'build/admin/donors.css') ?: GIVEFLOW_VERSION)
         );
     }
 }

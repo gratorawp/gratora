@@ -6,8 +6,8 @@ defined('ABSPATH') || exit;
  * @var bool   $required
  */
 ?>
-<label class="dono-block dono-block--comment dono-comment">
-    <span class="dono-comment__label"><?php echo esc_html((string) $label); ?></span>
+<label class="giveflow-block giveflow-block--comment giveflow-comment">
+    <span class="giveflow-comment__label"><?php echo esc_html((string) $label); ?></span>
     <textarea
         name="note_to_org"
         placeholder="<?php echo esc_attr((string) $placeholder); ?>"

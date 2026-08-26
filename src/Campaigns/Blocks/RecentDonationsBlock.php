@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Dono\Campaigns\Blocks;
+namespace GiveFlow\Campaigns\Blocks;
 
-use Dono\Campaigns\CampaignRepository;
-use Dono\Donations\DonationRepository;
-use Dono\Donors\Donor;
-use Dono\Donors\DonorAvatars;
-use Dono\Foundation\Helpers\View;
+use GiveFlow\Campaigns\CampaignRepository;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\DonorAvatars;
+use GiveFlow\Foundation\Helpers\View;
 
 /**
  * Renders the most recent paid donations for a campaign.
@@ -29,7 +29,7 @@ final class RecentDonationsBlock extends CampaignBlock
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'dono/recent-donations';
+        return 'giveflow/recent-donations';
     }
 
     /** @since 1.0.0 */
@@ -90,7 +90,7 @@ final class RecentDonationsBlock extends CampaignBlock
             // too. A suppressed picture beside their name and their words
             // would be no answer at all.
             if ($isAnonymous || $name === '' || $hidden) {
-                $name = __('Anonymous', 'dono-fundraising-platform');
+                $name = __('Anonymous', 'giveflow-fundraising-campaigns');
                 $isAnonymous = true;
             }
 
@@ -98,7 +98,7 @@ final class RecentDonationsBlock extends CampaignBlock
             $paidTs = strtotime((string) $paidAt) ?: $nowTs;
             $timeAgo = sprintf(
                 /* translators: %s: human-readable time difference, e.g. "5 minutes" */
-                __('%s ago', 'dono-fundraising-platform'),
+                __('%s ago', 'giveflow-fundraising-campaigns'),
                 human_time_diff($paidTs, $nowTs)
             );
 
@@ -123,8 +123,8 @@ final class RecentDonationsBlock extends CampaignBlock
 
         return View::loadRelative(__DIR__, 'views/recent-donations', [
             'title'        => (string) ($attrs['title'] ?? ''),
-            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('No donations to show yet.', 'dono-fundraising-platform'),
-            'emptySubText' => __('Donations tend to follow the first one.', 'dono-fundraising-platform'),
+            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('No donations to show yet.', 'giveflow-fundraising-campaigns'),
+            'emptySubText' => __('Donations tend to follow the first one.', 'giveflow-fundraising-campaigns'),
             'emptyIcon'    => 'donation',
             'entries'      => $entries,
             'showAmount'   => (bool) ($attrs['showAmount'] ?? true),

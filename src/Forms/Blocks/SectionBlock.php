@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Forms\Blocks;
+namespace GiveFlow\Forms\Blocks;
 
 /**
  * Styled content container block.
@@ -14,7 +14,7 @@ final class SectionBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'dono/section';
+        return 'giveflow/section';
     }
 
     /** @since 1.0.0 */
@@ -36,7 +36,7 @@ final class SectionBlock implements Block
     {
         $style = self::sectionStyle($attrs);
         return sprintf(
-            '<div class="dono-block dono-block--section"%s>%s</div>',
+            '<div class="giveflow-block giveflow-block--section"%s>%s</div>',
             $style !== '' ? ' style="' . esc_attr($style) . '"' : '',
             $content
         );

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Forms\Blocks;
+namespace GiveFlow\Forms\Blocks;
 
 /**
- * Server-side render contract for a dono block.
+ * Server-side render contract for a giveflow block.
  *
  * @since 1.0.0
  */

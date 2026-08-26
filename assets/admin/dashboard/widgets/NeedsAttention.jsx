@@ -15,63 +15,63 @@ export default function NeedsAttention( { items = [] } ) {
         setHidden( ( h ) => [ ...h, item.key ] );
         try {
             await apiFetch( {
-                path:   '/dono/v1/admin/me/attention/dismiss',
+                path:   '/giveflow/v1/admin/me/attention/dismiss',
                 method: 'POST',
                 data:   { key: item.key, signature: item.signature || 'x' },
             } );
-            notify.success( __( 'Dismissed. It comes back if the situation changes.', 'dono-fundraising-platform' ), {
+            notify.success( __( 'Dismissed. It comes back if the situation changes.', 'giveflow-fundraising-campaigns' ), {
                 // The default 4s is not long enough to read the sentence and
                 // decide, and the row is already gone by then.
                 duration: 10000,
                 action: {
-                    label:   __( 'Undo', 'dono-fundraising-platform' ),
+                    label:   __( 'Undo', 'giveflow-fundraising-campaigns' ),
                     onClick: () => restore( item ),
                 },
             } );
         } catch ( err ) {
             setHidden( ( h ) => h.filter( ( k ) => k !== item.key ) );
-            notify.error( err?.message || __( 'Could not dismiss that.', 'dono-fundraising-platform' ) );
+            notify.error( err?.message || __( 'Could not dismiss that.', 'giveflow-fundraising-campaigns' ) );
         }
     };
 
     const restore = async ( item ) => {
         try {
             await apiFetch( {
-                path:   '/dono/v1/admin/me/attention/restore',
+                path:   '/giveflow/v1/admin/me/attention/restore',
                 method: 'POST',
                 data:   { key: item.key },
             } );
             setHidden( ( h ) => h.filter( ( k ) => k !== item.key ) );
         } catch ( err ) {
-            notify.error( err?.message || __( 'Could not bring that back.', 'dono-fundraising-platform' ) );
+            notify.error( err?.message || __( 'Could not bring that back.', 'giveflow-fundraising-campaigns' ) );
         }
     };
 
     if ( visible.length === 0 ) {
         return (
-            <p className="dono-attention__empty">
-                { __( 'Nothing needs attention right now.', 'dono-fundraising-platform' ) }
+            <p className="giveflow-attention__empty">
+                { __( 'Nothing needs attention right now.', 'giveflow-fundraising-campaigns' ) }
             </p>
         );
     }
 
     return (
-        <ul className="dono-attention">
+        <ul className="giveflow-attention">
             { visible.map( ( item ) => (
-                <li key={ item.key } className={ `dono-attention__item is-${ item.tone }` }>
-                    <span className="dono-attention__dot" aria-hidden="true" />
-                    <span className="dono-attention__title">{ item.title }</span>
+                <li key={ item.key } className={ `giveflow-attention__item is-${ item.tone }` }>
+                    <span className="giveflow-attention__dot" aria-hidden="true" />
+                    <span className="giveflow-attention__title">{ item.title }</span>
                     { item.action_href && (
-                        <a className="dono-attention__action" href={ item.action_href }>
-                            { item.action_label || __( 'Open', 'dono-fundraising-platform' ) } →
+                        <a className="giveflow-attention__action" href={ item.action_href }>
+                            { item.action_label || __( 'Open', 'giveflow-fundraising-campaigns' ) } →
                         </a>
                     ) }
                     <button
                         type="button"
-                        className="dono-attention__dismiss"
+                        className="giveflow-attention__dismiss"
                         onClick={ () => dismiss( item ) }
-                        aria-label={ __( 'Dismiss', 'dono-fundraising-platform' ) }
-                        title={ __( 'Dismiss', 'dono-fundraising-platform' ) }
+                        aria-label={ __( 'Dismiss', 'giveflow-fundraising-campaigns' ) }
+                        title={ __( 'Dismiss', 'giveflow-fundraising-campaigns' ) }
                     >
                         <DismissIcon size={ 14 } strokeWidth={ 2 } />
                     </button>

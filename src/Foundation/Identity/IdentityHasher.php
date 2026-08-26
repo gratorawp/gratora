@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Foundation\Identity;
+namespace GiveFlow\Foundation\Identity;
 
-use Dono\Async\AsyncDispatcher;
-use Dono\Donors\Donor;
-use Dono\Donors\DonorEmailRehasher;
-use Dono\Foundation\Config\SystemSetting;
+use GiveFlow\Async\AsyncDispatcher;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\DonorEmailRehasher;
+use GiveFlow\Foundation\Config\SystemSetting;
 
 /**
  * Hash helpers for indexed lookup of sensitive identifiers. Losing the email

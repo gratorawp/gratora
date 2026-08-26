@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Campaigns\Campaign;
-use Dono\Donations\Donation;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
-use Dono\Recurring\RecurringPlan;
-use Dono\Settings\SettingsService;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Recurring\RecurringPlan;
+use GiveFlow\Settings\SettingsService;
 
 /**
  * The renewal notice goes out while the receipt row is still queued, so it can
@@ -55,7 +55,7 @@ final class RecurringRenewalEmailTest extends IntegrationTestCase
         $plan->save();
 
         $donation = Donation::make();
-        $donation->reference        = 'DONO-RENEW-' . strtoupper(bin2hex(random_bytes(3)));
+        $donation->reference        = 'GIVEFLOW-RENEW-' . strtoupper(bin2hex(random_bytes(3)));
         $donation->donor_id         = (int) $donor->id;
         $donation->campaign_id      = (int) $campaign->id;
         $donation->amount_cents     = 2500;
@@ -69,7 +69,7 @@ final class RecurringRenewalEmailTest extends IntegrationTestCase
         $donation->updated_at       = $now;
         $donation->save();
 
-        do_action('dono.recurring.renewed', $donation, $plan);
+        do_action('giveflow.recurring.renewed', $donation, $plan);
 
         $this->assertCount(1, $sent);
         $body = (string) $sent[0]['body'];

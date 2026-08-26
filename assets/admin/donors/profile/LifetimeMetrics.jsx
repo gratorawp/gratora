@@ -16,7 +16,7 @@ function Sparkline( { values } ) {
     } ).join( ' ' );
     return (
         <svg className="dp-metric__spark" viewBox={ `0 0 ${ w } ${ h }` } preserveAspectRatio="none">
-            <path d={ points } fill="none" stroke="#1e8a4e" strokeWidth="1.5" />
+            <path d={ points } fill="none" stroke="#6f5ce6" strokeWidth="1.5" />
         </svg>
     );
 }
@@ -52,21 +52,21 @@ export default function LifetimeMetrics( { lifetime } ) {
     if ( plan_counts?.past_due > 0 ) {
         dormant.push( sprintf(
             /* translators: %d: number of plans the gateway could not collect. */
-            _n( '%d past due', '%d past due', plan_counts.past_due, 'dono-fundraising-platform' ),
+            _n( '%d past due', '%d past due', plan_counts.past_due, 'giveflow-fundraising-campaigns' ),
             plan_counts.past_due
         ) );
     }
     if ( plan_counts?.paused > 0 ) {
         dormant.push( sprintf(
             /* translators: %d: number of paused plans. */
-            _n( '%d paused', '%d paused', plan_counts.paused, 'dono-fundraising-platform' ),
+            _n( '%d paused', '%d paused', plan_counts.paused, 'giveflow-fundraising-campaigns' ),
             plan_counts.paused
         ) );
     }
 
     const activePart = active_plan_count > 0
-        ? sprintf( /* translators: 1: active plan count, 2: next payment date */ __( '%1$d active · next %2$s', 'dono-fundraising-platform' ), active_plan_count, formatDate( next_payment_at ) )
-        : __( 'No active plans', 'dono-fundraising-platform' );
+        ? sprintf( /* translators: 1: active plan count, 2: next payment date */ __( '%1$d active · next %2$s', 'giveflow-fundraising-campaigns' ), active_plan_count, formatDate( next_payment_at ) )
+        : __( 'No active plans', 'giveflow-fundraising-campaigns' );
 
     const mrrSub = mrr_unconverted > 0
         ? sprintf(
@@ -75,7 +75,7 @@ export default function LifetimeMetrics( { lifetime } ) {
                 '%d plan has no exchange rate and is not counted',
                 '%d plans have no exchange rate and are not counted',
                 mrr_unconverted,
-                'dono-fundraising-platform'
+                'giveflow-fundraising-campaigns'
             ),
             mrr_unconverted
         )
@@ -85,10 +85,10 @@ export default function LifetimeMetrics( { lifetime } ) {
         <div className="dp-metrics">
             <Card
                 icon={ <IconCoin width="16" height="16" /> }
-                label={ __( 'Lifetime given', 'dono-fundraising-platform' ) }
+                label={ __( 'Lifetime given', 'giveflow-fundraising-campaigns' ) }
                 value={ <span className="num">{ formatAmount( total_cents ) }</span> }
                 spark={ sparkline }
-                sub={ count > 0 ? sprintf( /* translators: %s: amount */ __( 'Largest donation %s', 'dono-fundraising-platform' ), formatAmountCompact( largest_cents ) ) : null }
+                sub={ count > 0 ? sprintf( /* translators: %s: amount */ __( 'Largest donation %s', 'giveflow-fundraising-campaigns' ), formatAmountCompact( largest_cents ) ) : null }
             />
             <Card
                 icon={ <IconHeart width="16" height="16" /> }
@@ -97,21 +97,21 @@ export default function LifetimeMetrics( { lifetime } ) {
                 // average beside it, so it counts paid ones only. The tab
                 // counts every row the donor has, pending and failed included.
                 // Sharing one name made a pending donation look like a bug.
-                label={ __( 'Donations received', 'dono-fundraising-platform' ) }
+                label={ __( 'Donations received', 'giveflow-fundraising-campaigns' ) }
                 value={ <span className="num">{ count }</span> }
                 sub={ count > 0
-                    ? sprintf( /* translators: 1: one-time donation count, 2: recurring donation count */ __( '%1$d one-time, %2$d recurring', 'dono-fundraising-platform' ), one_time_count, recurring_count )
-                    : __( 'No donations yet', 'dono-fundraising-platform' ) }
+                    ? sprintf( /* translators: 1: one-time donation count, 2: recurring donation count */ __( '%1$d one-time, %2$d recurring', 'giveflow-fundraising-campaigns' ), one_time_count, recurring_count )
+                    : __( 'No donations yet', 'giveflow-fundraising-campaigns' ) }
             />
             <Card
                 icon={ <IconActivity width="16" height="16" /> }
-                label={ __( 'Avg. donation', 'dono-fundraising-platform' ) }
+                label={ __( 'Avg. donation', 'giveflow-fundraising-campaigns' ) }
                 value={ <span className="num">{ formatAmount( avg_cents ) }</span> }
-                sub={ count > 0 ? __( 'Per donation', 'dono-fundraising-platform' ) : null }
+                sub={ count > 0 ? __( 'Per donation', 'giveflow-fundraising-campaigns' ) : null }
             />
             <Card
                 icon={ <IconRotate width="16" height="16" /> }
-                label={ __( 'Recurring MRR', 'dono-fundraising-platform' ) }
+                label={ __( 'Recurring MRR', 'giveflow-fundraising-campaigns' ) }
                 value={ <span className="num">{ formatAmount( mrr_cents ) }<small> /mo</small></span> }
                 sub={ mrrSub }
             />

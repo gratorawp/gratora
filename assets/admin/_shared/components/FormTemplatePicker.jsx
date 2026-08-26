@@ -13,14 +13,14 @@ import Icon from './Icon';
 
 // Category values are stable grouping keys; translate only for display.
 const CATEGORY_LABELS = {
-    All:       __( 'All', 'dono-fundraising-platform' ),
-    Blank:     __( 'Blank', 'dono-fundraising-platform' ),
-    Starter:   __( 'Starter', 'dono-fundraising-platform' ),
-    Standard:  __( 'Standard', 'dono-fundraising-platform' ),
-    Recurring: __( 'Recurring', 'dono-fundraising-platform' ),
-    Wizard:    __( 'Wizard', 'dono-fundraising-platform' ),
-    Formal:    __( 'Formal', 'dono-fundraising-platform' ),
-    Other:     __( 'Other', 'dono-fundraising-platform' ),
+    All:       __( 'All', 'giveflow-fundraising-campaigns' ),
+    Blank:     __( 'Blank', 'giveflow-fundraising-campaigns' ),
+    Starter:   __( 'Starter', 'giveflow-fundraising-campaigns' ),
+    Standard:  __( 'Standard', 'giveflow-fundraising-campaigns' ),
+    Recurring: __( 'Recurring', 'giveflow-fundraising-campaigns' ),
+    Wizard:    __( 'Wizard', 'giveflow-fundraising-campaigns' ),
+    Formal:    __( 'Formal', 'giveflow-fundraising-campaigns' ),
+    Other:     __( 'Other', 'giveflow-fundraising-campaigns' ),
 };
 
 export default function FormTemplatePicker( { onPick, onClose, creating = false, intro } ) {
@@ -34,7 +34,7 @@ export default function FormTemplatePicker( { onPick, onClose, creating = false,
     const load = () => {
         setLoading( true );
         setFailed( false );
-        apiFetch( { path: '/dono/v1/admin/forms/templates' } )
+        apiFetch( { path: '/giveflow/v1/admin/forms/templates' } )
             .then( ( list ) => setTemplates( Array.isArray( list ) ? list : [] ) )
             .catch( () => {
                 setTemplates( [] );
@@ -60,16 +60,16 @@ export default function FormTemplatePicker( { onPick, onClose, creating = false,
 
     return (
         <Modal
-            title={ __( 'Choose a starter template', 'dono-fundraising-platform' ) }
+            title={ __( 'Choose a starter template', 'giveflow-fundraising-campaigns' ) }
             onRequestClose={ onClose }
-            className="dono-form-template-picker"
+            className="giveflow-form-template-picker"
             size="large"
         >
             { failed ? (
                 <div style={ { padding: 40, textAlign: 'center' } }>
-                    <p>{ __( 'The starter templates could not be loaded.', 'dono-fundraising-platform' ) }</p>
+                    <p>{ __( 'The starter templates could not be loaded.', 'giveflow-fundraising-campaigns' ) }</p>
                     <button type="button" className="btn" onClick={ load }>
-                        { __( 'Try again', 'dono-fundraising-platform' ) }
+                        { __( 'Try again', 'giveflow-fundraising-campaigns' ) }
                     </button>
                 </div>
             ) : loading ? (
@@ -77,35 +77,35 @@ export default function FormTemplatePicker( { onPick, onClose, creating = false,
             ) : (
                 <>
                     { intro && (
-                        <p className="dono-form-template-picker__intro">{ intro }</p>
+                        <p className="giveflow-form-template-picker__intro">{ intro }</p>
                     ) }
-                    <div className="dono-form-template-picker__filters" role="tablist">
+                    <div className="giveflow-form-template-picker__filters" role="tablist">
                         { categories.map( ( c ) => (
                             <button
                                 key={ c }
                                 type="button"
                                 role="tab"
                                 aria-selected={ category === c }
-                                className={ `dono-form-template-picker__filter${ category === c ? ' is-active' : '' }` }
+                                className={ `giveflow-form-template-picker__filter${ category === c ? ' is-active' : '' }` }
                                 onClick={ () => setCategory( c ) }
                             >
                                 { CATEGORY_LABELS[ c ] || c }
                             </button>
                         ) ) }
                     </div>
-                    <div className="dono-form-template-picker__grid">
+                    <div className="giveflow-form-template-picker__grid">
                         { visible.map( ( t ) => (
                             <button
                                 key={ t.id }
                                 type="button"
-                                className="dono-form-template-picker__card"
+                                className="giveflow-form-template-picker__card"
                                 onClick={ () => onPick( t ) }
                                 disabled={ creating }
                             >
                                 <FormTemplateThumb template={ t } />
-                                <div className="dono-form-template-picker__meta">
+                                <div className="giveflow-form-template-picker__meta">
                                     <strong>{ t.name }</strong>
-                                    <span className="dono-form-template-picker__desc">{ t.description }</span>
+                                    <span className="giveflow-form-template-picker__desc">{ t.description }</span>
                                 </div>
                             </button>
                         ) ) }
@@ -120,20 +120,20 @@ function FormTemplateThumb( { template } ) {
     const settings = template.settings || {};
     const layout   = settings.layout  || 'inline';
 
-    const presets   = Array.isArray( window.dono?.styling?.presets ) ? window.dono.styling.presets : [];
-    const defaults  = window.dono?.styling?.defaults || {};
-    const defaultId = String( window.dono?.styling?.default_id || '' );
+    const presets   = Array.isArray( window.giveflow?.styling?.presets ) ? window.giveflow.styling.presets : [];
+    const defaults  = window.giveflow?.styling?.defaults || {};
+    const defaultId = String( window.giveflow?.styling?.default_id || '' );
     const templatePresetId = String( settings.style?.preset_id || '' );
     const chosenPreset = presets.find( ( p ) => p.id === ( templatePresetId || defaultId ) );
     const tokens = { ...defaults, ...( chosenPreset?.tokens || {} ) };
-    const accent = ( settings.theme?.accent ) || tokens[ 'dono-accent' ] || '#1e8a4e';
+    const accent = ( settings.theme?.accent ) || tokens[ 'giveflow-accent' ] || '#211d3f';
     const radius = settings.theme?.radius
         ? `${ settings.theme.radius }px`
-        : ( tokens[ 'dono-radius-md' ] || tokens[ 'dono-radius' ] || '8px' );
+        : ( tokens[ 'giveflow-radius-md' ] || tokens[ 'giveflow-radius' ] || '8px' );
 
     if ( template.id === 'blank' ) {
         return (
-            <div className="dono-template-thumb dono-template-thumb--blank">
+            <div className="giveflow-template-thumb giveflow-template-thumb--blank">
                 <Icon name="plus" size={ 20 } aria-hidden="true" />
             </div>
         );
@@ -141,28 +141,28 @@ function FormTemplateThumb( { template } ) {
 
     // Detect multi-step shape from block markup so the thumb shows a
     // progress strip even though the form's layout field is still 'inline'.
-    const isWizard = /wp:dono\/steps/.test( template.blocks || '' );
+    const isWizard = /wp:giveflow\/steps/.test( template.blocks || '' );
 
     const sheet = (
-        <div className="dono-template-thumb__sheet" style={ { borderRadius: radius } }>
+        <div className="giveflow-template-thumb__sheet" style={ { borderRadius: radius } }>
             { isWizard && (
-                <div className="dono-template-thumb__steps">
+                <div className="giveflow-template-thumb__steps">
                     <span className="is-active" />
                     <span />
                     <span />
                 </div>
             ) }
-            <span className="dono-template-thumb__title" />
-            <span className="dono-template-thumb__sub" />
-            <div className="dono-template-thumb__tiles">
+            <span className="giveflow-template-thumb__title" />
+            <span className="giveflow-template-thumb__sub" />
+            <div className="giveflow-template-thumb__tiles">
                 <span style={ { borderRadius: radius } } />
                 <span className="is-active" style={ { borderRadius: radius } } />
                 <span style={ { borderRadius: radius } } />
                 <span style={ { borderRadius: radius } } />
             </div>
-            <span className="dono-template-thumb__field" style={ { borderRadius: radius } } />
+            <span className="giveflow-template-thumb__field" style={ { borderRadius: radius } } />
             <span
-                className="dono-template-thumb__button"
+                className="giveflow-template-thumb__button"
                 style={ { background: accent, borderRadius: radius } }
             />
         </div>
@@ -170,11 +170,11 @@ function FormTemplateThumb( { template } ) {
 
     return (
         <div
-            className={ `dono-template-thumb dono-template-thumb--${ layout }` }
+            className={ `giveflow-template-thumb giveflow-template-thumb--${ layout }` }
             style={ { '--thumb-accent': accent } }
         >
             { layout === 'modal' ? (
-                <div className="dono-template-thumb__modal-backdrop">
+                <div className="giveflow-template-thumb__modal-backdrop">
                     { sheet }
                 </div>
             ) : sheet }

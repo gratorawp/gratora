@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Campaigns\Campaign;
-use Dono\Donations\AggregateSyncer;
-use Dono\Donations\Donation;
-use Dono\Donations\DonationIntent;
-use Dono\Donations\DonationService;
-use Dono\Donors\Donor;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Donations\AggregateSyncer;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationIntent;
+use GiveFlow\Donations\DonationService;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
 
 /**
  * The donation `kind` discriminator: non-donation money (event ticket orders)
@@ -23,7 +23,7 @@ final class DonationKindTest extends IntegrationTestCase
     {
         $now = gmdate('Y-m-d H:i:s');
         $d = Donation::make();
-        $d->reference         = 'DONO-KD-' . substr(md5($kind . $cents . uniqid()), 0, 8);
+        $d->reference         = 'GIVEFLOW-KD-' . substr(md5($kind . $cents . uniqid()), 0, 8);
         $d->donor_id          = $donorId;
         $d->campaign_id       = $campaignId;
         $d->amount_cents      = $cents;

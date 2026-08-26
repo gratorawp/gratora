@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Foundation\Crypto\Crypto;
-use Dono\Foundation\Plugin;
-use Dono\Gateways\Stripe\StripeAccount;
-use Dono\Gateways\Stripe\StripeWebhookProvisioner;
-use Dono\Recurring\RecurringPlan;
+use GiveFlow\Foundation\Crypto\Crypto;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Gateways\Stripe\StripeAccount;
+use GiveFlow\Gateways\Stripe\StripeWebhookProvisioner;
+use GiveFlow\Recurring\RecurringPlan;
 use ReflectionClass;
 use WP_REST_Request;
 
@@ -30,7 +30,7 @@ final class StripeSubscriptionStateSyncTest extends IntegrationTestCase
         parent::setUp();
 
         $this->secret = 'whsec_test_' . bin2hex(random_bytes(8));
-        update_option('dono_gateway_config', [
+        update_option('giveflow_gateway_config', [
             'stripe' => ['webhook_secret_test' => $this->secret, 'test_mode' => true],
         ]);
 
@@ -40,17 +40,17 @@ final class StripeSubscriptionStateSyncTest extends IntegrationTestCase
         $acct->refresh(['id' => 'acct_test_123', 'charges_enabled' => true]);
 
         $c       = Plugin::instance()->container;
-        $manager = $c->get(\Dono\Gateways\GatewayManager::class);
+        $manager = $c->get(\GiveFlow\Gateways\GatewayManager::class);
         if (! $manager->get('stripe')) {
-            $manager->register(new \Dono\Gateways\Stripe\StripeGateway(
-                $c->get(\Dono\Gateways\Stripe\StripeApi::class),
-                $c->get(\Dono\Donations\DonationRepository::class),
-                $c->get(\Dono\Donations\DonationService::class),
-                $c->get(\Dono\Gateways\Stripe\StripeAccount::class),
-                $c->get(\Dono\Donors\DonorRepository::class),
-                $c->get(\Dono\Donors\DonorService::class),
-                $c->get(\Dono\Foundation\Time\Clock::class),
-                $c->get(\Dono\Recurring\RecurringPlanRepository::class),
+            $manager->register(new \GiveFlow\Gateways\Stripe\StripeGateway(
+                $c->get(\GiveFlow\Gateways\Stripe\StripeApi::class),
+                $c->get(\GiveFlow\Donations\DonationRepository::class),
+                $c->get(\GiveFlow\Donations\DonationService::class),
+                $c->get(\GiveFlow\Gateways\Stripe\StripeAccount::class),
+                $c->get(\GiveFlow\Donors\DonorRepository::class),
+                $c->get(\GiveFlow\Donors\DonorService::class),
+                $c->get(\GiveFlow\Foundation\Time\Clock::class),
+                $c->get(\GiveFlow\Recurring\RecurringPlanRepository::class),
             ));
         }
     }
@@ -204,7 +204,7 @@ final class StripeSubscriptionStateSyncTest extends IntegrationTestCase
     private function seedPlan(): RecurringPlan
     {
         $donor = Plugin::instance()->container
-            ->get(\Dono\Donors\DonorService::class)
+            ->get(\GiveFlow\Donors\DonorService::class)
             ->findOrCreate('state-sync-' . uniqid() . '@example.test', [
                 'first_name' => 'State',
                 'last_name'  => 'Sync',
@@ -253,7 +253,7 @@ final class StripeSubscriptionStateSyncTest extends IntegrationTestCase
         $timestamp = (string) time();
         $sig       = hash_hmac('sha256', "{$timestamp}.{$payload}", $this->secret);
 
-        $req = new WP_REST_Request('POST', '/dono/v1/webhooks/stripe');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/webhooks/stripe');
         $req->set_header('content-type', 'application/json');
         $req->set_header('stripe_signature', "t={$timestamp},v1={$sig}");
         $req->set_body($payload);

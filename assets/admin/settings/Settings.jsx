@@ -8,7 +8,7 @@ import { notify } from '../_shared/notify';
 import { tablistKeyDown } from '../_shared/tablistKeys';
 import { useExtensionTabs, ExtensionTabPanel } from '../_shared/extensionTabs';
 
-import { useDonoSettings } from '../_shared/useDonoSettings';
+import { useGiveFlowSettings } from '../_shared/useGiveFlowSettings';
 import { useFxRates } from '../_shared/useFxRates';
 import SetupPanel from './panels/SetupPanel';
 import OrganizationPanel from './panels/OrganizationPanel';
@@ -30,41 +30,41 @@ import {
 // Ordered by how often an operator opens it, money first. Add-on tabs land
 // after these.
 const TABS = [
-    { key: 'setup',        label: __( 'Setup', 'dono-fundraising-platform' ),                Icon: IconSetup },
-    { key: 'gateways',     label: __( 'Payment gateways', 'dono-fundraising-platform' ),     Icon: IconGateways },
-    { key: 'organization', label: __( 'Organization', 'dono-fundraising-platform' ),         Icon: IconOrganization },
-    { key: 'brand',        label: __( 'Brand', 'dono-fundraising-platform' ),                Icon: IconBrand },
-    { key: 'email',        label: __( 'Emails', 'dono-fundraising-platform' ),               Icon: IconEmail },
-    { key: 'receipts',     label: __( 'Receipts', 'dono-fundraising-platform' ),             Icon: IconReceipt },
-    { key: 'currency',     label: __( 'Currency', 'dono-fundraising-platform' ),             Icon: IconCurrency },
-    { key: 'numbering',    label: __( 'Numbering', 'dono-fundraising-platform' ),            Icon: IconNumbering },
-    { key: 'privacy',      label: __( 'Privacy', 'dono-fundraising-platform' ),              Icon: IconPrivacy },
-    { key: 'roles',        label: __( 'Roles', 'dono-fundraising-platform' ),                Icon: IconRoles, adminOnly: true },
+    { key: 'setup',        label: __( 'Setup', 'giveflow-fundraising-campaigns' ),                Icon: IconSetup },
+    { key: 'gateways',     label: __( 'Payment gateways', 'giveflow-fundraising-campaigns' ),     Icon: IconGateways },
+    { key: 'organization', label: __( 'Organization', 'giveflow-fundraising-campaigns' ),         Icon: IconOrganization },
+    { key: 'brand',        label: __( 'Brand', 'giveflow-fundraising-campaigns' ),                Icon: IconBrand },
+    { key: 'email',        label: __( 'Emails', 'giveflow-fundraising-campaigns' ),               Icon: IconEmail },
+    { key: 'receipts',     label: __( 'Receipts', 'giveflow-fundraising-campaigns' ),             Icon: IconReceipt },
+    { key: 'currency',     label: __( 'Currency', 'giveflow-fundraising-campaigns' ),             Icon: IconCurrency },
+    { key: 'numbering',    label: __( 'Numbering', 'giveflow-fundraising-campaigns' ),            Icon: IconNumbering },
+    { key: 'privacy',      label: __( 'Privacy', 'giveflow-fundraising-campaigns' ),              Icon: IconPrivacy },
+    { key: 'roles',        label: __( 'Roles', 'giveflow-fundraising-campaigns' ),                Icon: IconRoles, adminOnly: true },
 ];
 
 // Always last, whatever add-ons register in between.
 //
-// Roles assigns Dono capabilities, so the REST route requires full admin. A
+// Roles assigns GiveFlow capabilities, so the REST route requires full admin. A
 // settings manager was still offered the tab and only learned their save was
 // refused after editing the grid.
 const visibleTabs = () =>
-    TABS.filter( ( t ) => ! t.adminOnly || !! window.dono?.can?.manage_options );
+    TABS.filter( ( t ) => ! t.adminOnly || !! window.giveflow?.can?.manage_options );
 
 const TAIL_TABS = [];
 
 // Save-job slug -> human label, for failure messages (job slugs are not tab keys).
 const SECTION_LABELS = {
-    'org-profile':     __( 'Organization', 'dono-fundraising-platform' ),
-    'org-brand':       __( 'Brand', 'dono-fundraising-platform' ),
-    'currency-locale': __( 'Currency & locale', 'dono-fundraising-platform' ),
-    'exchange-rates':  __( 'Exchange rates', 'dono-fundraising-platform' ),
-    'gateways':        __( 'Payment gateways', 'dono-fundraising-platform' ),
-    'email':           __( 'Emails', 'dono-fundraising-platform' ),
-    'receipts':        __( 'Receipts', 'dono-fundraising-platform' ),
-    'numbering':       __( 'Numbering', 'dono-fundraising-platform' ),
-    'consents':        __( 'Consents', 'dono-fundraising-platform' ),
-    'privacy':         __( 'Data & privacy', 'dono-fundraising-platform' ),
-    'roles':           __( 'Roles & permissions', 'dono-fundraising-platform' ),
+    'org-profile':     __( 'Organization', 'giveflow-fundraising-campaigns' ),
+    'org-brand':       __( 'Brand', 'giveflow-fundraising-campaigns' ),
+    'currency-locale': __( 'Currency & locale', 'giveflow-fundraising-campaigns' ),
+    'exchange-rates':  __( 'Exchange rates', 'giveflow-fundraising-campaigns' ),
+    'gateways':        __( 'Payment gateways', 'giveflow-fundraising-campaigns' ),
+    'email':           __( 'Emails', 'giveflow-fundraising-campaigns' ),
+    'receipts':        __( 'Receipts', 'giveflow-fundraising-campaigns' ),
+    'numbering':       __( 'Numbering', 'giveflow-fundraising-campaigns' ),
+    'consents':        __( 'Consents', 'giveflow-fundraising-campaigns' ),
+    'privacy':         __( 'Data & privacy', 'giveflow-fundraising-campaigns' ),
+    'roles':           __( 'Roles & permissions', 'giveflow-fundraising-campaigns' ),
 };
 
 function initialTab() {
@@ -78,7 +78,7 @@ function initialTab() {
 /**
  * A panel reads its group through fallbacks, so a group that failed to load
  * draws a complete, ordinary looking form of literal defaults: Anonymize IPs
- * on, prefix DONO, an empty legal name. None of it is this site's settings, and
+ * on, prefix GIVEFLOW, an empty legal name. None of it is this site's settings, and
  * nothing on the screen said so.
  *
  * @since 1.0.0
@@ -89,11 +89,11 @@ export function SettingsGroup( { of, children } ) {
 
     if ( failed ) {
         return (
-            <div className="dono-panel">
+            <div className="giveflow-panel">
                 <Card>
                     <p style={ { color: '#b42318', margin: '0 0 12px' } }>{ failed.loadError }</p>
                     <Btn variant="secondary" onClick={ () => groups.forEach( ( g ) => g.reload?.() ) }>
-                        { __( 'Retry', 'dono-fundraising-platform' ) }
+                        { __( 'Retry', 'giveflow-fundraising-campaigns' ) }
                     </Btn>
                 </Card>
             </div>
@@ -101,7 +101,7 @@ export function SettingsGroup( { of, children } ) {
     }
 
     if ( groups.some( ( g ) => g.isLoading ) ) {
-        return <p>{ __( 'Loading…', 'dono-fundraising-platform' ) }</p>;
+        return <p>{ __( 'Loading…', 'giveflow-fundraising-campaigns' ) }</p>;
     }
 
     return children;
@@ -121,17 +121,17 @@ export default function Settings() {
         ...TAIL_TABS,
     ];
 
-    const org      = useDonoSettings( 'org-profile' );
-    const brand    = useDonoSettings( 'org-brand' );
-    const currency = useDonoSettings( 'currency-locale' );
+    const org      = useGiveFlowSettings( 'org-profile' );
+    const brand    = useGiveFlowSettings( 'org-brand' );
+    const currency = useGiveFlowSettings( 'currency-locale' );
     const fx       = useFxRates();
-    const gateways = useDonoSettings( 'gateways' );
-    const email    = useDonoSettings( 'email' );
-    const receipts = useDonoSettings( 'receipts' );
-    const numbering = useDonoSettings( 'numbering' );
-    const consents = useDonoSettings( 'consents' );
-    const privacy  = useDonoSettings( 'privacy' );
-    const roles    = useDonoSettings( 'roles' );
+    const gateways = useGiveFlowSettings( 'gateways' );
+    const email    = useGiveFlowSettings( 'email' );
+    const receipts = useGiveFlowSettings( 'receipts' );
+    const numbering = useGiveFlowSettings( 'numbering' );
+    const consents = useGiveFlowSettings( 'consents' );
+    const privacy  = useGiveFlowSettings( 'privacy' );
+    const roles    = useGiveFlowSettings( 'roles' );
 
     // Re-run when extTabs changes so this closure never holds a stale list: an
     // add-on tab registers after mount, and a hash-only navigation to it never
@@ -236,7 +236,7 @@ export default function Settings() {
             .filter( Boolean );
 
         if ( failed.length === 0 ) {
-            notify.success( __( 'All changes saved.', 'dono-fundraising-platform' ) );
+            notify.success( __( 'All changes saved.', 'giveflow-fundraising-campaigns' ) );
             return;
         }
 
@@ -247,10 +247,10 @@ export default function Settings() {
         const base = failed.length < jobs.length
             ? sprintf(
                 /* translators: %s: comma-separated section names that failed */
-                __( 'Could not save: %s.', 'dono-fundraising-platform' ),
+                __( 'Could not save: %s.', 'giveflow-fundraising-campaigns' ),
                 labels.join( ', ' ),
             )
-            : __( 'Save failed.', 'dono-fundraising-platform' );
+            : __( 'Save failed.', 'giveflow-fundraising-campaigns' );
         notify.error( reason ? `${ base } ${ reason }` : base );
     };
 
@@ -271,34 +271,34 @@ export default function Settings() {
     const anySaving = org.isSaving || brand.isSaving || currency.isSaving || fx.isSaving || gateways.isSaving || email.isSaving || receipts.isSaving || numbering.isSaving || consents.isSaving || privacy.isSaving || roles.isSaving;
 
     return (
-        <div className="dono-settings-page">
-            <div className="dono-crumbs">
-                <a href="admin.php?page=dono">{ __( 'Dono', 'dono-fundraising-platform' ) }</a>
+        <div className="giveflow-settings-page">
+            <div className="giveflow-crumbs">
+                <a href="admin.php?page=giveflow">{ __( 'GiveFlow', 'giveflow-fundraising-campaigns' ) }</a>
                 <span className="sep">›</span>
-                <span>{ __( 'Settings', 'dono-fundraising-platform' ) }</span>
+                <span>{ __( 'Settings', 'giveflow-fundraising-campaigns' ) }</span>
                 <span className="sep">›</span>
                 <span>{ allTabs.find( ( t ) => t.key === tab )?.label || '' }</span>
             </div>
 
-            <div className="dono-page-head">
-                <div className="dono-page-head__title-row">
-                    <h1>{ __( 'Settings', 'dono-fundraising-platform' ) }</h1>
+            <div className="giveflow-page-head">
+                <div className="giveflow-page-head__title-row">
+                    <h1>{ __( 'Settings', 'giveflow-fundraising-campaigns' ) }</h1>
                 </div>
-                <div className="dono-page-head__right">
-                    <span className="dono-page-head__meta">
-                        { __( 'Changes save when you click Save changes', 'dono-fundraising-platform' ) }
+                <div className="giveflow-page-head__right">
+                    <span className="giveflow-page-head__meta">
+                        { __( 'Changes save when you click Save changes', 'giveflow-fundraising-campaigns' ) }
                     </span>
                 </div>
             </div>
 
             <div
-                className="dono-tabs"
+                className="giveflow-tabs"
                 role="tablist"
                 tabIndex={ -1 }
-                aria-label={ __( 'Settings sections', 'dono-fundraising-platform' ) }
+                aria-label={ __( 'Settings sections', 'giveflow-fundraising-campaigns' ) }
                 onKeyDown={ ( e ) => tablistKeyDown( e, allTabs.map( ( t ) => t.key ), tab, jumpTo ) }
             >
-                <div className="dono-tabs__scroll">
+                <div className="giveflow-tabs__scroll">
                     { allTabs.map( ( t ) => {
                         const active   = tab === t.key;
                         const isDirty  = !! dirtyByTab[ t.key ];
@@ -313,9 +313,9 @@ export default function Settings() {
                                 className={ active ? 'is-active' : '' }
                                 onClick={ ( e ) => { e.preventDefault(); jumpTo( t.key ); } }
                             >
-                                <Icon className="dono-tab__icon" />
+                                <Icon className="giveflow-tab__icon" />
                                 { t.label }
-                                { isDirty && <span className="dono-tab__dot" title={ __( 'Unsaved changes', 'dono-fundraising-platform' ) } /> }
+                                { isDirty && <span className="giveflow-tab__dot" title={ __( 'Unsaved changes', 'giveflow-fundraising-campaigns' ) } /> }
                             </a>
                         );
                     } ) }
@@ -324,7 +324,7 @@ export default function Settings() {
 
             <Toaster />
 
-            <div className="dono-settings-page__body">
+            <div className="giveflow-settings-page__body">
                 <div hidden={ tab !== 'setup' }>
                     <SetupPanel onJumpTo={ jumpTo } active={ tab === 'setup' } />
                 </div>
@@ -368,32 +368,32 @@ export default function Settings() {
             </div>
 
             { dirtySections > 0 && (
-                <div className="dono-save-bar" role="status" aria-live="polite">
-                    <span className="dono-save-bar__dot" aria-hidden="true" />
-                    <span className="dono-save-bar__count">
+                <div className="giveflow-save-bar" role="status" aria-live="polite">
+                    <span className="giveflow-save-bar__dot" aria-hidden="true" />
+                    <span className="giveflow-save-bar__count">
                         { dirtySections === 1
-                            ? __( 'Unsaved changes in 1 section', 'dono-fundraising-platform' )
+                            ? __( 'Unsaved changes in 1 section', 'giveflow-fundraising-campaigns' )
                             : sprintf(
                                 /* translators: %d: number of sections with unsaved changes */
-                                _n( 'Unsaved changes across %d section', 'Unsaved changes across %d sections', dirtySections, 'dono-fundraising-platform' ),
+                                _n( 'Unsaved changes across %d section', 'Unsaved changes across %d sections', dirtySections, 'giveflow-fundraising-campaigns' ),
                                 dirtySections,
                             ) }
                     </span>
                     <button
                         type="button"
-                        className="dono-save-bar__btn dono-save-bar__btn--ghost"
+                        className="giveflow-save-bar__btn giveflow-save-bar__btn--ghost"
                         onClick={ discardAll }
                         disabled={ anySaving }
                     >
-                        { __( 'Discard', 'dono-fundraising-platform' ) }
+                        { __( 'Discard', 'giveflow-fundraising-campaigns' ) }
                     </button>
                     <button
                         type="button"
-                        className="dono-save-bar__btn dono-save-bar__btn--primary"
+                        className="giveflow-save-bar__btn giveflow-save-bar__btn--primary"
                         onClick={ saveAll }
                         disabled={ anySaving }
                     >
-                        { __( 'Save changes', 'dono-fundraising-platform' ) }
+                        { __( 'Save changes', 'giveflow-fundraising-campaigns' ) }
                     </button>
                 </div>
             ) }

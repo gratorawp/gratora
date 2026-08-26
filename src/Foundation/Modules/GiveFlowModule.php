@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Foundation\Modules;
+namespace GiveFlow\Foundation\Modules;
 
-use Dono\Foundation\Container\Container;
+use GiveFlow\Foundation\Container\Container;
 
 /**
  * Implemented by every gateway, integration, add-on, and core.
@@ -12,7 +12,7 @@ use Dono\Foundation\Container\Container;
  *
  * @since 1.0.0
  */
-interface DonoModule
+interface GiveFlowModule
 {
     /** Distribution tier returned by tier(). */
     public const TIER_CORE = 'core';
@@ -20,7 +20,7 @@ interface DonoModule
     public const TIER_PRO  = 'pro';
 
     /**
-     * Globally-unique identifier, e.g. 'core', 'dono-p2p'.
+     * Globally-unique identifier, e.g. 'core', 'giveflow-p2p'.
      *
      * @since 1.0.0
      */
@@ -65,7 +65,7 @@ interface DonoModule
     public function boot(Container $container): void;
 
     /**
-     * @return array<class-string<\Dono\Vendor\Queryable\Model>>
+     * @return array<class-string<\GiveFlow\Vendor\Queryable\Model>>
      * @since 1.0.0
      */
     public function migrations(): array;

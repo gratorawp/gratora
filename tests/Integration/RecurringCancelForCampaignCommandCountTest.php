@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Analytics\EventRecorder;
-use Dono\Campaigns\Campaign;
-use Dono\Core\Commands\CoreCommandProvider;
-use Dono\Foundation\Commands\CommandContext;
-use Dono\Foundation\Commands\CommandRegistry;
-use Dono\Foundation\Plugin;
-use Dono\Recurring\CampaignCancelRecurringJob;
-use Dono\Recurring\RecurringPlan;
-use Dono\Recurring\RecurringPlanRepository;
+use GiveFlow\Analytics\EventRecorder;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Core\Commands\CoreCommandProvider;
+use GiveFlow\Foundation\Commands\CommandContext;
+use GiveFlow\Foundation\Commands\CommandRegistry;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Recurring\CampaignCancelRecurringJob;
+use GiveFlow\Recurring\RecurringPlan;
+use GiveFlow\Recurring\RecurringPlanRepository;
 
 /**
  * recurring.cancel_for_campaign starts the sweep that cancels every live plan,
@@ -34,7 +34,7 @@ final class RecurringCancelForCampaignCommandCountTest extends IntegrationTestCa
     private function ctx(): CommandContext
     {
         $user = self::factory()->user->create(['role' => 'administrator']);
-        get_role('administrator')->add_cap('dono_view_donations');
+        get_role('administrator')->add_cap('giveflow_view_donations');
         wp_set_current_user($user);
 
         return new CommandContext($user, 'rest', 'test-' . uniqid());

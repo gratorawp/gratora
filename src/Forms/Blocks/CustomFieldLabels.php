@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Forms\Blocks;
+namespace GiveFlow\Forms\Blocks;
 
 /**
  * Resolve custom-field slug => human label for a form's blocks.
@@ -43,19 +43,19 @@ final class CustomFieldLabels
 
             $slug = '';
             switch ($name) {
-                case 'dono/text-input':
-                case 'dono/number-input':
-                case 'dono/date':
-                case 'dono/dropdown':
-                case 'dono/radio':
-                case 'dono/checkbox':
-                case 'dono/multi-select':
+                case 'giveflow/text-input':
+                case 'giveflow/number-input':
+                case 'giveflow/date':
+                case 'giveflow/dropdown':
+                case 'giveflow/radio':
+                case 'giveflow/checkbox':
+                case 'giveflow/multi-select':
                     $slug = DropdownBlock::deriveField(
                         (string) ($attrs['field'] ?? ''),
                         (string) ($attrs['label'] ?? '')
                     );
                     break;
-                case 'dono/hidden':
+                case 'giveflow/hidden':
                     $slug = (string) ($attrs['field'] ?? '');
                     break;
             }

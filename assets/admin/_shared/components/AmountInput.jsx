@@ -1,1 +1,1 @@
-export { default } from '@dono/ui/components/AmountInput';
+export { default } from '@giveflow/ui/components/AmountInput';

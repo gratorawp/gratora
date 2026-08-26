@@ -6,9 +6,9 @@ import { __ } from '@wordpress/i18n';
 import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 import { BlockIcons } from '../_shared/block-icons';
 
-const NAME = 'dono/fund-picker';
+const NAME = 'giveflow/fund-picker';
 
-const FUNDS_ADMIN_URL = 'admin.php?page=dono-funds';
+const FUNDS_ADMIN_URL = 'admin.php?page=giveflow-funds';
 
 function FundTiles( { funds, selectedId, allowEmpty, emptyLabel, emptyDescription, emptySelected } ) {
     if ( funds === null ) {
@@ -22,9 +22,9 @@ function FundTiles( { funds, selectedId, allowEmpty, emptyLabel, emptyDescriptio
     if ( funds.length === 0 ) {
         return (
             <Notice status="warning" isDismissible={ false }>
-                { __( 'No active funds yet. Create funds under Donations → Funds; donations will use your organization default until then.', 'dono-fundraising-platform' ) }
+                { __( 'No active funds yet. Create funds under Donations → Funds; donations will use your organization default until then.', 'giveflow-fundraising-campaigns' ) }
                 {' '}
-                <a href={ FUNDS_ADMIN_URL }>{ __( 'Manage funds', 'dono-fundraising-platform' ) }</a>
+                <a href={ FUNDS_ADMIN_URL }>{ __( 'Manage funds', 'giveflow-fundraising-campaigns' ) }</a>
             </Notice>
         );
     }
@@ -42,9 +42,9 @@ function FundTiles( { funds, selectedId, allowEmpty, emptyLabel, emptyDescriptio
                 <div
                     style={ {
                         padding:        '10px 12px',
-                        background:     emptySelected ? 'color-mix(in srgb, var(--dono-accent, #1e8a4e) 6%, transparent)' : '#fafbfc',
-                        border:         `${ emptySelected ? '2px' : '1px' } solid ${ emptySelected ? 'var(--dono-accent, #1e8a4e)' : '#e5e7eb' }`,
-                        borderRadius:   'var(--dono-radius-sm, 8px)',
+                        background:     emptySelected ? 'color-mix(in srgb, var(--giveflow-accent, #211d3f) 6%, transparent)' : '#fafbfc',
+                        border:         `${ emptySelected ? '2px' : '1px' } solid ${ emptySelected ? 'var(--giveflow-accent, #211d3f)' : '#e5e7eb' }`,
+                        borderRadius:   'var(--giveflow-radius-sm, 8px)',
                         display:        'flex',
                         flexDirection:  'column',
                         alignItems:     'center',
@@ -56,7 +56,7 @@ function FundTiles( { funds, selectedId, allowEmpty, emptyLabel, emptyDescriptio
                     } }
                 >
                     <span style={ { fontSize: 13, fontWeight: 600 } }>
-                        { emptyLabel || __( 'No specific fund', 'dono-fundraising-platform' ) }
+                        { emptyLabel || __( 'No specific fund', 'giveflow-fundraising-campaigns' ) }
                     </span>
                     { emptyDescription && (
                         <span style={ { fontSize: 11, lineHeight: 1.3 } }>
@@ -92,9 +92,9 @@ function FundTiles( { funds, selectedId, allowEmpty, emptyLabel, emptyDescriptio
                         style={ {
                             padding:       '10px 12px',
                             marginLeft:    f.depth ? 14 : 0,
-                            background:    isSelected ? 'color-mix(in srgb, var(--dono-accent, #1e8a4e) 6%, transparent)' : '#fafbfc',
-                            border:        `2px solid ${ isSelected ? 'var(--dono-accent, #1e8a4e)' : '#e5e7eb' }`,
-                            borderRadius:  'var(--dono-radius-sm, 8px)',
+                            background:    isSelected ? 'color-mix(in srgb, var(--giveflow-accent, #211d3f) 6%, transparent)' : '#fafbfc',
+                            border:        `2px solid ${ isSelected ? 'var(--giveflow-accent, #211d3f)' : '#e5e7eb' }`,
+                            borderRadius:  'var(--giveflow-radius-sm, 8px)',
                             display:       'flex',
                             flexDirection: 'column',
                             gap:           4,
@@ -105,7 +105,7 @@ function FundTiles( { funds, selectedId, allowEmpty, emptyLabel, emptyDescriptio
                             style={ {
                                 fontSize:   13,
                                 fontWeight: 600,
-                                color:      isSelected ? 'var(--dono-accent, #1e8a4e)' : '#111827',
+                                color:      isSelected ? 'var(--giveflow-accent, #211d3f)' : '#111827',
                             } }
                         >
                             { f.label }
@@ -137,13 +137,13 @@ function Edit( { attributes, setAttributes } ) {
 
     useEffect( () => {
         let cancelled = false;
-        apiFetch( { path: '/dono/v1/admin/forms/funds' } )
+        apiFetch( { path: '/giveflow/v1/admin/forms/funds' } )
             .then( ( res ) => { if ( ! cancelled ) setFunds( Array.isArray( res ) ? res : [] ); } )
             .catch( () => { if ( ! cancelled ) setFunds( [] ); } );
         return () => { cancelled = true; };
     }, [] );
 
-    const blockProps = useBlockProps( { className: 'dono-block-preview dono-block-preview--fund' } );
+    const blockProps = useBlockProps( { className: 'giveflow-block-preview giveflow-block-preview--fund' } );
 
     // When the admin restricts fundIds, only those + their parents flow into
     // the preview tiles. Empty array = "all active funds".
@@ -181,8 +181,8 @@ function Edit( { attributes, setAttributes } ) {
     // Offer only funds this block actually shows; a restricted set must not let
     // the admin preselect a fund the donor can't pick.
     const preselectChoices = [
-        { value: '', label: __( 'Auto (form, campaign, then org default)', 'dono-fundraising-platform' ) },
-        ...( allowEmpty ? [ { value: '__none__', label: __( 'No specific fund', 'dono-fundraising-platform' ) } ] : [] ),
+        { value: '', label: __( 'Auto (form, campaign, then org default)', 'giveflow-fundraising-campaigns' ) },
+        ...( allowEmpty ? [ { value: '__none__', label: __( 'No specific fund', 'giveflow-fundraising-campaigns' ) } ] : [] ),
         ...visible.map( ( f ) => ( {
             value:    f.selectable ? String( f.id ) : `g:${ f.id }`,
             label:    f.depth ? `- ${ f.label }` : f.label,
@@ -193,42 +193,42 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Fund picker', 'dono-fundraising-platform' ) } initialOpen>
+                <PanelBody title={ __( 'Fund picker', 'giveflow-fundraising-campaigns' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'dono-fundraising-platform' ) }
+                        label={ __( 'Label', 'giveflow-fundraising-campaigns' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'Direct my donation to', 'dono-fundraising-platform' ) }
-                        help={ __( 'This picker always shows your active funds. Fund names and descriptions are managed under Donations → Funds.', 'dono-fundraising-platform' ) }
+                        placeholder={ __( 'Direct my donation to', 'giveflow-fundraising-campaigns' ) }
+                        help={ __( 'This picker always shows your active funds. Fund names and descriptions are managed under Donations → Funds.', 'giveflow-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <p style={ { margin: '8px 0 0' } }>
                         <ExternalLink href={ FUNDS_ADMIN_URL }>
-                            { __( 'Manage funds', 'dono-fundraising-platform' ) }
+                            { __( 'Manage funds', 'giveflow-fundraising-campaigns' ) }
                         </ExternalLink>
                     </p>
                     <SelectControl
-                        label={ __( 'Preselected fund', 'dono-fundraising-platform' ) }
+                        label={ __( 'Preselected fund', 'giveflow-fundraising-campaigns' ) }
                         value={ defaultId }
                         options={ preselectChoices }
                         onChange={ ( v ) => setAttributes( { defaultId: v } ) }
-                        help={ __( 'Leave on the first fund to follow the form, campaign, then organization default order.', 'dono-fundraising-platform' ) }
+                        help={ __( 'Leave on the first fund to follow the form, campaign, then organization default order.', 'giveflow-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Allow "no specific fund"', 'dono-fundraising-platform' ) }
+                        label={ __( 'Allow "no specific fund"', 'giveflow-fundraising-campaigns' ) }
                         checked={ allowEmpty }
                         onChange={ ( v ) => setAttributes( { allowEmpty: v } ) }
-                        help={ __( 'Adds a tile letting donors skip choosing a fund.', 'dono-fundraising-platform' ) }
+                        help={ __( 'Adds a tile letting donors skip choosing a fund.', 'giveflow-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     { list.length > 0 && (
                         <div style={ { marginTop: 16 } }>
                             <strong style={ { fontSize: 11, textTransform: 'uppercase', letterSpacing: '.04em', color: '#6b7280' } }>
-                                { __( 'Restrict to funds', 'dono-fundraising-platform' ) }
+                                { __( 'Restrict to funds', 'giveflow-fundraising-campaigns' ) }
                             </strong>
                             <p style={ { margin: '4px 0 8px', fontSize: 12, color: '#6b7280' } }>
-                                { __( 'Pick which funds this block offers. Leave all unchecked to show every active fund.', 'dono-fundraising-platform' ) }
+                                { __( 'Pick which funds this block offers. Leave all unchecked to show every active fund.', 'giveflow-fundraising-campaigns' ) }
                             </p>
                             <div style={ { display: 'flex', flexDirection: 'column', gap: 4 } }>
                                 { list.filter( ( f ) => f.selectable ).map( ( f ) => (
@@ -247,17 +247,17 @@ function Edit( { attributes, setAttributes } ) {
                     { allowEmpty && (
                         <>
                             <TextControl
-                                label={ __( 'No-specific-fund label', 'dono-fundraising-platform' ) }
+                                label={ __( 'No-specific-fund label', 'giveflow-fundraising-campaigns' ) }
                                 value={ emptyLabel }
                                 onChange={ ( v ) => setAttributes( { emptyLabel: v } ) }
-                                placeholder={ __( 'No specific fund', 'dono-fundraising-platform' ) }
+                                placeholder={ __( 'No specific fund', 'giveflow-fundraising-campaigns' ) }
                                 __nextHasNoMarginBottom
                             />
                             <TextControl
-                                label={ __( 'No-specific-fund description', 'dono-fundraising-platform' ) }
+                                label={ __( 'No-specific-fund description', 'giveflow-fundraising-campaigns' ) }
                                 value={ emptyDescription }
                                 onChange={ ( v ) => setAttributes( { emptyDescription: v } ) }
-                                help={ __( 'Optional. Shown under the label on that tile.', 'dono-fundraising-platform' ) }
+                                help={ __( 'Optional. Shown under the label on that tile.', 'giveflow-fundraising-campaigns' ) }
                                 __nextHasNoMarginBottom
                             />
                         </>
@@ -271,10 +271,10 @@ function Edit( { attributes, setAttributes } ) {
             <div { ...blockProps }>
                 <RichText
                     tagName="span"
-                    className="dono-block-preview__label"
+                    className="giveflow-block-preview__label"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Direct my donation to', 'dono-fundraising-platform' ) }
+                    placeholder={ __( 'Direct my donation to', 'giveflow-fundraising-campaigns' ) }
                     allowedFormats={ [] }
                 />
                 <FundTiles
@@ -293,9 +293,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Fund picker', 'dono-fundraising-platform' ),
-        description: __( 'Tile-style picker that lets donors choose which fund or designation their donation goes to.', 'dono-fundraising-platform' ),
-        category:    'dono-extras',
+        title:       __( 'Fund picker', 'giveflow-fundraising-campaigns' ),
+        description: __( 'Tile-style picker that lets donors choose which fund or designation their donation goes to.', 'giveflow-fundraising-campaigns' ),
+        category:    'giveflow-extras',
         icon:        BlockIcons[ 'fund-picker' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },
         attributes: {

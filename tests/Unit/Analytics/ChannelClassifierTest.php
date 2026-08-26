@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Unit\Analytics;
+namespace GiveFlow\Tests\Unit\Analytics;
 
-use Dono\Donations\ChannelClassifier;
+use GiveFlow\Donations\ChannelClassifier;
 use PHPUnit\Framework\TestCase;
 
 final class ChannelClassifierTest extends TestCase

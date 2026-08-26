@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Analytics\Event;
-use Dono\Donations\Donation;
-use Dono\Donations\DonationRepository;
-use Dono\Donations\DonationService;
+use GiveFlow\Analytics\Event;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Donations\DonationService;
 use WP_REST_Request;
 
 /**
@@ -57,7 +57,7 @@ final class DonationStateGuardsTest extends IntegrationTestCase
         $donation = $this->driveDonationToPaid();
         $this->donationService()->refund($donation, $donation->amount_cents);
 
-        $req = new WP_REST_Request('POST', "/dono/v1/donations/{$donation->reference}/confirm");
+        $req = new WP_REST_Request('POST', "/giveflow/v1/donations/{$donation->reference}/confirm");
         $req->set_header('content-type', 'application/json');
         $req->set_body('{}');
         $res = rest_do_request($req);
@@ -71,7 +71,7 @@ final class DonationStateGuardsTest extends IntegrationTestCase
         $donation = $this->driveDonationToPaid();
         $txn = $donation->gateway_txn_id;
 
-        $req = new WP_REST_Request('POST', "/dono/v1/donations/{$donation->reference}/confirm");
+        $req = new WP_REST_Request('POST', "/giveflow/v1/donations/{$donation->reference}/confirm");
         $req->set_header('content-type', 'application/json');
         $req->set_body('{}');
         $res = rest_do_request($req);
@@ -89,7 +89,7 @@ final class DonationStateGuardsTest extends IntegrationTestCase
         $donation = $this->driveDonationToPaid();
         $this->donationService()->refund($donation, $donation->amount_cents);
 
-        $req = new WP_REST_Request('POST', "/dono/v1/admin/donations/{$donation->reference}/mark-failed");
+        $req = new WP_REST_Request('POST', "/giveflow/v1/admin/donations/{$donation->reference}/mark-failed");
         $req->set_header('content-type', 'application/json');
         $req->set_body('{}');
         $res = rest_do_request($req);
@@ -100,8 +100,8 @@ final class DonationStateGuardsTest extends IntegrationTestCase
 
     public function test_repeated_delivery_never_surfaces_as_a_server_error(): void
     {
-        $first  = rest_do_request(new WP_REST_Request('POST', '/dono/v1/webhooks/offline'));
-        $second = rest_do_request(new WP_REST_Request('POST', '/dono/v1/webhooks/offline'));
+        $first  = rest_do_request(new WP_REST_Request('POST', '/giveflow/v1/webhooks/offline'));
+        $second = rest_do_request(new WP_REST_Request('POST', '/giveflow/v1/webhooks/offline'));
 
         $this->assertLessThan(500, $first->get_status());
         $this->assertLessThan(500, $second->get_status(), 'Redelivery must not surface as a server error');
@@ -109,8 +109,8 @@ final class DonationStateGuardsTest extends IntegrationTestCase
 
     public function test_each_attempt_at_a_delivery_is_kept(): void
     {
-        rest_do_request(new WP_REST_Request('POST', '/dono/v1/webhooks/offline'));
-        rest_do_request(new WP_REST_Request('POST', '/dono/v1/webhooks/offline'));
+        rest_do_request(new WP_REST_Request('POST', '/giveflow/v1/webhooks/offline'));
+        rest_do_request(new WP_REST_Request('POST', '/giveflow/v1/webhooks/offline'));
 
         $rows = Event::query()->whereLike('type', 'webhook.offline%')->orderBy('id', 'ASC')->getAll();
 
@@ -127,7 +127,7 @@ final class DonationStateGuardsTest extends IntegrationTestCase
     /** Create an offline donation via the public API and confirm it. */
     private function driveDonationToPaid(): Donation
     {
-        $createReq = new WP_REST_Request('POST', '/dono/v1/donations');
+        $createReq = new WP_REST_Request('POST', '/giveflow/v1/donations');
         $createReq->set_header('content-type', 'application/json');
         $createReq->set_body(json_encode([
             'email'        => 'guard@example.com',
@@ -138,7 +138,7 @@ final class DonationStateGuardsTest extends IntegrationTestCase
         ]));
         $reference = rest_do_request($createReq)->get_data()['reference'];
 
-        $confirmReq = new WP_REST_Request('POST', "/dono/v1/donations/{$reference}/confirm");
+        $confirmReq = new WP_REST_Request('POST', "/giveflow/v1/donations/{$reference}/confirm");
         $confirmReq->set_header('content-type', 'application/json');
         $confirmReq->set_body('{}');
         rest_do_request($confirmReq);
@@ -150,11 +150,11 @@ final class DonationStateGuardsTest extends IntegrationTestCase
 
     private function donationService(): DonationService
     {
-        return \Dono\Foundation\Plugin::instance()->container->get(DonationService::class);
+        return \GiveFlow\Foundation\Plugin::instance()->container->get(DonationService::class);
     }
 
     private function donations(): DonationRepository
     {
-        return \Dono\Foundation\Plugin::instance()->container->get(DonationRepository::class);
+        return \GiveFlow\Foundation\Plugin::instance()->container->get(DonationRepository::class);
     }
 }

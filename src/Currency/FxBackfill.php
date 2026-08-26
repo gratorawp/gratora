@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Currency;
+namespace GiveFlow\Currency;
 
-use Dono\Donations\Donation;
-use Dono\Donations\DonationQueries;
-use Dono\Recurring\RecurringPlan;
-use Dono\Foundation\Helpers\Money;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationQueries;
+use GiveFlow\Recurring\RecurringPlan;
+use GiveFlow\Foundation\Helpers\Money;
 
 /**
  * Convert donations that were recorded before a rate existed for their currency.

@@ -38,9 +38,9 @@ const README_KEEPS = 3;
 
 /** Version from the plugin header, so the changelog cannot name one that was never shipped. */
 function pluginVersion() {
-    const header = readFileSync( path.join( root, 'dono.php' ), 'utf8' );
+    const header = readFileSync( path.join( root, 'giveflow.php' ), 'utf8' );
     const m = /^\s*\*\s*Version:\s*(.+)$/m.exec( header );
-    if ( ! m ) throw new Error( 'No Version header in dono.php' );
+    if ( ! m ) throw new Error( 'No Version header in giveflow.php' );
     return m[ 1 ].trim();
 }
 
@@ -173,7 +173,7 @@ const existing = existsSync( CHANGELOG )
 
 if ( existing.some( ( e ) => e.startsWith( `= ${ version } =` ) ) ) {
     console.error( `changelog.txt already has an entry for ${ version }.` );
-    console.error( 'Bump the Version header in dono.php, or pass --version.' );
+    console.error( 'Bump the Version header in giveflow.php, or pass --version.' );
     process.exit( 1 );
 }
 

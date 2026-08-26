@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
-use Dono\Donations\DonationNote;
-use Dono\Donations\Refund;
-use Dono\Donors\Consent;
-use Dono\Donors\Donor;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
-use Dono\Recurring\RecurringPlan;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationNote;
+use GiveFlow\Donations\Refund;
+use GiveFlow\Donors\Consent;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Recurring\RecurringPlan;
 
 /**
  * Erasure must reach every table that holds the donor, not just the obvious
@@ -43,7 +43,7 @@ final class DonorErasureCompletenessTest extends IntegrationTestCase
         $this->donorId = (int) $d->id;
 
         $x = Donation::make();
-        $x->reference         = 'DONO-ERASE-1';
+        $x->reference         = 'GIVEFLOW-ERASE-1';
         $x->donor_id          = $this->donorId;
         $x->amount_cents      = 5000;
         $x->base_amount_cents = 5000;
@@ -181,10 +181,10 @@ final class DonorErasureCompletenessTest extends IntegrationTestCase
 
         global $wpdb;
         foreach ([
-            "SELECT gateway_metadata FROM {$wpdb->prefix}dono_donations WHERE donor_id = %d",
-            "SELECT body_encrypted FROM {$wpdb->prefix}dono_donation_notes WHERE donation_id = %d",
-            "SELECT CONCAT(COALESCE(reason,''), COALESCE(metadata,'')) FROM {$wpdb->prefix}dono_refunds WHERE donation_id = %d",
-            "SELECT gateway_customer_id FROM {$wpdb->prefix}dono_recurring_plans WHERE donor_id = %d",
+            "SELECT gateway_metadata FROM {$wpdb->prefix}giveflow_donations WHERE donor_id = %d",
+            "SELECT body_encrypted FROM {$wpdb->prefix}giveflow_donation_notes WHERE donation_id = %d",
+            "SELECT CONCAT(COALESCE(reason,''), COALESCE(metadata,'')) FROM {$wpdb->prefix}giveflow_refunds WHERE donation_id = %d",
+            "SELECT gateway_customer_id FROM {$wpdb->prefix}giveflow_recurring_plans WHERE donor_id = %d",
         ] as $i => $sql) {
             $id  = $i === 0 || $i === 3 ? $this->donorId : $this->donationId;
             $val = (string) implode('', (array) $wpdb->get_col($wpdb->prepare($sql, $id)));
@@ -199,7 +199,7 @@ final class DonorErasureCompletenessTest extends IntegrationTestCase
 
         $donation = Donation::query()->find('id', $this->donationId);
         $this->assertSame(5000, (int) $donation->amount_cents);
-        $this->assertSame('DONO-ERASE-1', $donation->reference);
+        $this->assertSame('GIVEFLOW-ERASE-1', $donation->reference);
         $this->assertSame('paid', $donation->status);
     }
 }

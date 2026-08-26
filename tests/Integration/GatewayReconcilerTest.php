@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Analytics\Event;
-use Dono\Donations\Donation;
-use Dono\Donations\DonationRepository;
-use Dono\Donations\DonationService;
-use Dono\Foundation\Plugin;
-use Dono\Foundation\Time\Clock;
-use Dono\Gateways\GatewayManager;
-use Dono\Gateways\GatewayReconciler;
-use Dono\Gateways\PayPal\PayPalAccount;
-use Dono\Gateways\PayPal\PayPalApi;
-use Dono\Gateways\PayPal\PayPalGateway;
-use Dono\Gateways\PayPal\PayPalPlanRecorder;
-use Dono\Gateways\PayPal\PayPalPlans;
-use Dono\Recurring\RecurringPlanRepository;
+use GiveFlow\Analytics\Event;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Donations\DonationService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Foundation\Time\Clock;
+use GiveFlow\Gateways\GatewayManager;
+use GiveFlow\Gateways\GatewayReconciler;
+use GiveFlow\Gateways\PayPal\PayPalAccount;
+use GiveFlow\Gateways\PayPal\PayPalApi;
+use GiveFlow\Gateways\PayPal\PayPalGateway;
+use GiveFlow\Gateways\PayPal\PayPalPlanRecorder;
+use GiveFlow\Gateways\PayPal\PayPalPlans;
+use GiveFlow\Recurring\RecurringPlanRepository;
 use WP_REST_Request;
 
 /**
@@ -41,12 +41,12 @@ final class GatewayReconcilerTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        update_option('dono_gateway_config', ['test_mode' => true]);
-        update_option('dono_currency_locale', [
+        update_option('giveflow_gateway_config', ['test_mode' => true]);
+        update_option('giveflow_currency_locale', [
             'default_currency'     => 'USD',
             'supported_currencies' => ['USD'],
         ]);
-        delete_option('dono_gateway_reconcile_cursor');
+        delete_option('giveflow_gateway_reconcile_cursor');
 
         $account = Plugin::instance()->container->get(PayPalAccount::class);
         $account->forget();
@@ -112,7 +112,7 @@ final class GatewayReconcilerTest extends IntegrationTestCase
     /** @param array<string,mixed> $overrides */
     private function donationAt(string $status, array $overrides = []): Donation
     {
-        $create = new WP_REST_Request('POST', '/dono/v1/donations');
+        $create = new WP_REST_Request('POST', '/giveflow/v1/donations');
         $create->set_header('content-type', 'application/json');
         $create->set_body((string) wp_json_encode([
             'email'        => 'recon@example.test',

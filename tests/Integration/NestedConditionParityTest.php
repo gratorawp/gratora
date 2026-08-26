@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Forms\Form;
-use Dono\Forms\FormSubmissionValidator;
+use GiveFlow\Forms\Form;
+use GiveFlow\Forms\FormSubmissionValidator;
 
 /**
  * The server half of the contract the donation form's payload builder keeps
@@ -18,11 +18,11 @@ use Dono\Forms\FormSubmissionValidator;
 final class NestedConditionParityTest extends IntegrationTestCase
 {
     private const BLOCKS = <<<BLOCKS
-<!-- wp:dono/donation-amount {"presets":[{"cents":2500}]} /-->
-<!-- wp:dono/recurring-toggle {"frequencies":["one-time","monthly"]} /-->
-<!-- wp:dono/dropdown {"label":"Donor type","field":"donor_type","default":"individual","condition":{"field":"frequency","op":"=","value":"monthly"}} /-->
-<!-- wp:dono/text-input {"label":"Organization name","field":"org_name","required":true,"condition":{"field":"custom.donor_type","op":"!=","value":"individual"}} /-->
-<!-- wp:dono/submit-button /-->
+<!-- wp:giveflow/donation-amount {"presets":[{"cents":2500}]} /-->
+<!-- wp:giveflow/recurring-toggle {"frequencies":["one-time","monthly"]} /-->
+<!-- wp:giveflow/dropdown {"label":"Donor type","field":"donor_type","default":"individual","condition":{"field":"frequency","op":"=","value":"monthly"}} /-->
+<!-- wp:giveflow/text-input {"label":"Organization name","field":"org_name","required":true,"condition":{"field":"custom.donor_type","op":"!=","value":"individual"}} /-->
+<!-- wp:giveflow/submit-button /-->
 BLOCKS;
 
     private function form(): Form

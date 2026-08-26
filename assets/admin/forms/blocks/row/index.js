@@ -5,24 +5,24 @@ import { __ } from '@wordpress/i18n';
 import { BlockIcons } from '../_shared/block-icons';
 import Slider from '../../../_shared/components/Slider';
 
-const NAME = 'dono/row';
+const NAME = 'giveflow/row';
 
 // Donor fields only: content blocks (heading/paragraph/currency-switcher) are
 // rendered outside the grid by the runtime, so they must not sit in a row.
 const ALLOWED = [
-    'dono/name',
-    'dono/email',
-    'dono/country',
-    'dono/phone',
-    'dono/comment',
-    'dono/anonymous-toggle',
-    'dono/cover-fees',
+    'giveflow/name',
+    'giveflow/email',
+    'giveflow/country',
+    'giveflow/phone',
+    'giveflow/comment',
+    'giveflow/anonymous-toggle',
+    'giveflow/cover-fees',
 ];
 
 // Resolved at registration, not module scope, so a donor field an add-on
 // contributes can join the list before the editor mounts.
 function allowedBlocks() {
-    return applyFilters( 'dono.editor.rowAllowedBlocks', ALLOWED );
+    return applyFilters( 'giveflow.editor.rowAllowedBlocks', ALLOWED );
 }
 
 const GAP_UNITS = [ 'px', 'em', 'rem', '%' ];
@@ -36,23 +36,23 @@ function Edit( { attributes, setAttributes } ) {
             gap:                 `${ gap }${ gapUnit }`,
             padding:             8,
             border:              '1px dashed #c3c4c7',
-            borderRadius:        'var(--dono-radius-sm, 6px)',
+            borderRadius:        'var(--giveflow-radius-sm, 6px)',
         },
     } );
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Row', 'dono-fundraising-platform' ) } initialOpen>
+                <PanelBody title={ __( 'Row', 'giveflow-fundraising-campaigns' ) } initialOpen>
                     <Slider
-                        label={ __( 'Columns', 'dono-fundraising-platform' ) }
+                        label={ __( 'Columns', 'giveflow-fundraising-campaigns' ) }
                         value={ columns }
                         onChange={ ( v ) => setAttributes( { columns: v } ) }
                         min={ 1 }
                         max={ 4 }
                     />
                     <Slider
-                        label={ __( 'Gap', 'dono-fundraising-platform' ) }
+                        label={ __( 'Gap', 'giveflow-fundraising-campaigns' ) }
                         value={ gap }
                         onChange={ ( v ) => setAttributes( { gap: v } ) }
                         min={ 0 }
@@ -76,9 +76,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Row', 'dono-fundraising-platform' ),
-        description: __( 'Lay out fields side by side in columns.', 'dono-fundraising-platform' ),
-        category:   'dono-content',
+        title:      __( 'Row', 'giveflow-fundraising-campaigns' ),
+        description: __( 'Lay out fields side by side in columns.', 'giveflow-fundraising-campaigns' ),
+        category:   'giveflow-content',
         icon:       BlockIcons[ 'row' ],
         supports: { html: false, anchor: false, inserter: true },
         attributes: {

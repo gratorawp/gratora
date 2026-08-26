@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Campaigns;
+namespace GiveFlow\Campaigns;
 
 use RuntimeException;
 

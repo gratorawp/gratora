@@ -1,7 +1,7 @@
 // Money in minor units; REST dates are MySQL strings in UTC with no zone
 // marker, which a browser reads as local time. parseTimestamp marks them.
 import { __, sprintf } from '@wordpress/i18n';
-import { parseTimestamp } from '@dono/ui/utils/format';
+import { parseTimestamp } from '@giveflow/ui/utils/format';
 
 export { formatAmount, formatAmountCompact, currencyDecimals, amountEntry } from '../../_shared/format';
 
@@ -34,11 +34,11 @@ export function timeAgo( iso ) {
     const d = parseTimestamp( iso );
     if ( Number.isNaN( d.getTime() ) ) return iso;
     const diff = Math.max( 0, ( Date.now() - d.getTime() ) / 1000 );
-    if ( diff < 60 )      return __( 'just now', 'dono-fundraising-platform' );
-    if ( diff < 3600 )    return sprintf( /* translators: %d: number of minutes */ __( '%dm ago', 'dono-fundraising-platform' ),  Math.floor( diff / 60 ) );
-    if ( diff < 86400 )   return sprintf( /* translators: %d: number of hours */ __( '%dh ago', 'dono-fundraising-platform' ),  Math.floor( diff / 3600 ) );
-    if ( diff < 604800 )  return sprintf( /* translators: %d: number of days */ __( '%dd ago', 'dono-fundraising-platform' ),  Math.floor( diff / 86400 ) );
-    if ( diff < 2628000 ) return sprintf( /* translators: %d: number of weeks */ __( '%dw ago', 'dono-fundraising-platform' ),  Math.floor( diff / 604800 ) );
+    if ( diff < 60 )      return __( 'just now', 'giveflow-fundraising-campaigns' );
+    if ( diff < 3600 )    return sprintf( /* translators: %d: number of minutes */ __( '%dm ago', 'giveflow-fundraising-campaigns' ),  Math.floor( diff / 60 ) );
+    if ( diff < 86400 )   return sprintf( /* translators: %d: number of hours */ __( '%dh ago', 'giveflow-fundraising-campaigns' ),  Math.floor( diff / 3600 ) );
+    if ( diff < 604800 )  return sprintf( /* translators: %d: number of days */ __( '%dd ago', 'giveflow-fundraising-campaigns' ),  Math.floor( diff / 86400 ) );
+    if ( diff < 2628000 ) return sprintf( /* translators: %d: number of weeks */ __( '%dw ago', 'giveflow-fundraising-campaigns' ),  Math.floor( diff / 604800 ) );
     return formatDateShort( iso );
 }
 
@@ -50,28 +50,28 @@ export function initials( name ) {
 
 export function donationStatusPill( status ) {
     switch ( status ) {
-        case 'paid':           return { cls: 'is-ok',     label: __( 'Paid',     'dono-fundraising-platform' ) };
-        case 'pending':        return { cls: 'is-warn',   label: __( 'Pending',  'dono-fundraising-platform' ) };
-        case 'failed':         return { cls: 'is-error',  label: __( 'Failed',   'dono-fundraising-platform' ) };
-        case 'refunded':       return { cls: 'is-muted',  label: __( 'Refunded', 'dono-fundraising-platform' ) };
-        case 'partial_refund': return { cls: 'is-warn',   label: __( 'Partial',  'dono-fundraising-platform' ) };
-        case 'disputed':       return { cls: 'is-error',  label: __( 'Disputed', 'dono-fundraising-platform' ) };
-        case 'abandoned':      return { cls: 'is-muted',  label: __( 'Abandoned','dono-fundraising-platform' ) };
+        case 'paid':           return { cls: 'is-ok',     label: __( 'Paid',     'giveflow-fundraising-campaigns' ) };
+        case 'pending':        return { cls: 'is-warn',   label: __( 'Pending',  'giveflow-fundraising-campaigns' ) };
+        case 'failed':         return { cls: 'is-error',  label: __( 'Failed',   'giveflow-fundraising-campaigns' ) };
+        case 'refunded':       return { cls: 'is-muted',  label: __( 'Refunded', 'giveflow-fundraising-campaigns' ) };
+        case 'partial_refund': return { cls: 'is-warn',   label: __( 'Partial',  'giveflow-fundraising-campaigns' ) };
+        case 'disputed':       return { cls: 'is-error',  label: __( 'Disputed', 'giveflow-fundraising-campaigns' ) };
+        case 'abandoned':      return { cls: 'is-muted',  label: __( 'Abandoned','giveflow-fundraising-campaigns' ) };
         default:               return { cls: 'is-muted',  label: status };
     }
 }
 
 export const CHANNEL_LABEL = {
-    direct:        __( 'Direct',         'dono-fundraising-platform' ),
-    email:         __( 'Email',          'dono-fundraising-platform' ),
-    social:        __( 'Social',         'dono-fundraising-platform' ),
-    'paid-social': __( 'Paid social',    'dono-fundraising-platform' ),
-    organic:       __( 'Organic search', 'dono-fundraising-platform' ),
-    cpc:           __( 'Paid search',    'dono-fundraising-platform' ),
-    referral:      __( 'Referral',       'dono-fundraising-platform' ),
-    qr:            __( 'QR code',        'dono-fundraising-platform' ),
-    peer:          __( 'Peer-to-peer',   'dono-fundraising-platform' ),
-    other:         __( 'Other',          'dono-fundraising-platform' ),
+    direct:        __( 'Direct',         'giveflow-fundraising-campaigns' ),
+    email:         __( 'Email',          'giveflow-fundraising-campaigns' ),
+    social:        __( 'Social',         'giveflow-fundraising-campaigns' ),
+    'paid-social': __( 'Paid social',    'giveflow-fundraising-campaigns' ),
+    organic:       __( 'Organic search', 'giveflow-fundraising-campaigns' ),
+    cpc:           __( 'Paid search',    'giveflow-fundraising-campaigns' ),
+    referral:      __( 'Referral',       'giveflow-fundraising-campaigns' ),
+    qr:            __( 'QR code',        'giveflow-fundraising-campaigns' ),
+    peer:          __( 'Peer-to-peer',   'giveflow-fundraising-campaigns' ),
+    other:         __( 'Other',          'giveflow-fundraising-campaigns' ),
 };
 
 /**

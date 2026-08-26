@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Foundation\Plugin;
-use Dono\Recurring\GatewayUnreachable;
-use Dono\Recurring\RecurringPlan;
-use Dono\Recurring\RecurringPlanActions;
-use Dono\Recurring\RecurringPlanChange;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Recurring\GatewayUnreachable;
+use GiveFlow\Recurring\RecurringPlan;
+use GiveFlow\Recurring\RecurringPlanActions;
+use GiveFlow\Recurring\RecurringPlanChange;
 
 /**
  * A plan may not be changed while its processor is absent.

@@ -10,7 +10,7 @@ import { render } from 'preact';
 import apiFetch from '@wordpress/api-fetch';
 
 import { DonorsApp } from '../../assets/admin/donors/index';
-const { settle, waitFor } = require( './support/waitFor' );
+const { waitFor } = require( './support/waitFor' );
 
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
 jest.mock( 'react', () => require( 'preact/compat' ) );
@@ -46,7 +46,7 @@ beforeEach( () => {
         if ( parse === false ) {
             return Promise.resolve( { json: async () => rows, headers: { get: () => '2' } } );
         }
-        if ( path.startsWith( '/dono/v1/admin/donors/stats' ) ) {
+        if ( path.startsWith( '/giveflow/v1/admin/donors/stats' ) ) {
             return Promise.resolve( null );
         }
         return Promise.resolve( {} );

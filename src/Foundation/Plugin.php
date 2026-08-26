@@ -2,26 +2,26 @@
 
 declare(strict_types=1);
 
-namespace Dono\Foundation;
+namespace GiveFlow\Foundation;
 
-use Dono\Analytics\ErrorLog;
-use Dono\Campaigns\CampaignPermalinks;
-use Dono\Core\Activator;
-use Dono\Core\CoreModule;
-use Dono\Donors\DonorRetention;
-use Dono\Foundation\Commands\CommandRegistry;
-use Dono\Donors\Portal\PortalPage;
-use Dono\Foundation\Auth\Capabilities;
-use Dono\Foundation\Container\Container;
-use Dono\Foundation\Modules\ModuleManager;
-use Dono\Foundation\Uninstall\DataEraser;
-use Dono\Async\AsyncDispatcher;
-use Dono\Foundation\Upgrade\SchemaGuard;
-use Dono\Foundation\Upgrade\UpgradeJob;
-use Dono\Foundation\Upgrade\UpgradeRunner;
-use Dono\Foundation\Time\SystemClock;
-use Dono\Funds\FundRepository;
-use Dono\Onboarding\Onboarding;
+use GiveFlow\Analytics\ErrorLog;
+use GiveFlow\Campaigns\CampaignPermalinks;
+use GiveFlow\Core\Activator;
+use GiveFlow\Core\CoreModule;
+use GiveFlow\Donors\DonorRetention;
+use GiveFlow\Foundation\Commands\CommandRegistry;
+use GiveFlow\Donors\Portal\PortalPage;
+use GiveFlow\Foundation\Auth\Capabilities;
+use GiveFlow\Foundation\Container\Container;
+use GiveFlow\Foundation\Modules\ModuleManager;
+use GiveFlow\Foundation\Uninstall\DataEraser;
+use GiveFlow\Async\AsyncDispatcher;
+use GiveFlow\Foundation\Upgrade\SchemaGuard;
+use GiveFlow\Foundation\Upgrade\UpgradeJob;
+use GiveFlow\Foundation\Upgrade\UpgradeRunner;
+use GiveFlow\Foundation\Time\SystemClock;
+use GiveFlow\Funds\FundRepository;
+use GiveFlow\Onboarding\Onboarding;
 
 /**
  * Plugin singleton. Owns the Container and ModuleManager and runs the boot pipeline.
@@ -73,7 +73,7 @@ final class Plugin
         }
 
         // Allow external modules to register on this hook.
-        do_action('dono.modules.register', $self->modules);
+        do_action('giveflow.modules.register', $self->modules);
 
         $self->modules->bootAll();
 
@@ -97,21 +97,21 @@ final class Plugin
             $broadcast = true;
 
             do_action(
-                'dono.commands.register',
+                'giveflow.commands.register',
                 $self->container->get(CommandRegistry::class),
                 $self->container
             );
         }, 5);
 
-        // Virtual `dono_access` cap for admin-menu visibility (super-admins,
-        // the manage_dono umbrella, or any granular dono_* cap holder). REST
+        // Virtual `giveflow_access` cap for admin-menu visibility (super-admins,
+        // the manage_giveflow umbrella, or any granular giveflow_* cap holder). REST
         // endpoints still enforce per-area granular caps.
         add_filter('user_has_cap', [Capabilities::class, 'grantMetaCaps']);
 
         // Activation hooks don't fire on plugin updates, so a release that adds
         // a table or column would never migrate on a normal update, causing
         // "unknown column" errors until a reactivation. Run the schema
-        // migration once per DONO_DB_VERSION bump (cheap on steady state: one
+        // migration once per GIVEFLOW_DB_VERSION bump (cheap on steady state: one
         // option read). Priority 99 so tables exist before the portal heal.
         add_action('wp_loaded', static function (): void {
             // Anything thrown here reaches no handler and takes the front end
@@ -120,7 +120,7 @@ final class Plugin
             try {
                 $fresh = get_option(SchemaGuard::OPTION, null) === null;
 
-                if (get_option(SchemaGuard::OPTION) !== DONO_DB_VERSION) {
+                if (get_option(SchemaGuard::OPTION) !== GIVEFLOW_DB_VERSION) {
                     self::migrateSchema();
 
                     // Nothing below is safe against tables that are not there,
@@ -160,20 +160,20 @@ final class Plugin
             UpgradeJob::reconcile($c->get(AsyncDispatcher::class), $c->get(UpgradeRunner::class));
         });
 
-        // Re-ensure the donor portal page once per DONO_VERSION bump so existing
+        // Re-ensure the donor portal page once per GIVEFLOW_VERSION bump so existing
         // installs that skip a reactivation still get the page (and recover from
         // manual deletion). Cheap on steady state (one option read).
         add_action('wp_loaded', static function (): void {
             (new PortalPage())->maybeHeal();
         }, 100);
 
-        do_action('dono.booted', $self);
+        do_action('giveflow.booted', $self);
     }
 
     /**
      * Register modules and run all model migrations (schema only). Idempotent
      * and safe to call before plugins_loaded - the integration test bootstrap
-     * calls this so the dono_* tables exist before boot() constructs services
+     * calls this so the giveflow_* tables exist before boot() constructs services
      * (e.g. IdentityHasher) that read them.
      *
      * @since 1.0.0
@@ -306,27 +306,27 @@ final class Plugin
             new SystemClock()
         ))->activate();
 
-        // The donor portal page hosts [dono_donor_portal] and is what every
+        // The donor portal page hosts [giveflow_donor_portal] and is what every
         // magic-link email points at - create or adopt it before any donor
         // ever needs the URL.
         (new PortalPage())->ensure();
-        update_option(PortalPage::OPTION_VERSION, DONO_VERSION, false);
+        update_option(PortalPage::OPTION_VERSION, GIVEFLOW_VERSION, false);
 
         // Register campaign rewrite and flush so permalinks resolve immediately.
         (new CampaignPermalinks())->addRule();
         flush_rewrite_rules();
 
-        do_action('dono.activated');
+        do_action('giveflow.activated');
     }
 
     /** @since 1.0.0 */
     public static function onDeactivation(): void
     {
-        // Anything that reads Dono's own tables runs before the wipe, because
+        // Anything that reads GiveFlow's own tables runs before the wipe, because
         // the plugin is still loaded and hooked for the rest of this request.
         flush_rewrite_rules();
 
-        do_action('dono.deactivated');
+        do_action('giveflow.deactivated');
 
         // Taking the answer is what spends it, so an erase that fails partway
         // cannot be re-run by some later deactivation nobody asked about.

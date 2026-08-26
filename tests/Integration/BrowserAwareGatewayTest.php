@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Campaigns\Campaign;
-use Dono\Donations\Donation;
-use Dono\Forms\Form;
-use Dono\Foundation\Plugin;
-use Dono\Gateways\BrowserAware;
-use Dono\Gateways\GatewayConfirmResult;
-use Dono\Gateways\GatewayIntentResult;
-use Dono\Gateways\GatewayManager;
-use Dono\Gateways\PaymentGateway;
-use Dono\Gateways\RefundResult;
-use Dono\Gateways\WebhookOutcome;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Forms\Form;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Gateways\BrowserAware;
+use GiveFlow\Gateways\GatewayConfirmResult;
+use GiveFlow\Gateways\GatewayIntentResult;
+use GiveFlow\Gateways\GatewayManager;
+use GiveFlow\Gateways\PaymentGateway;
+use GiveFlow\Gateways\RefundResult;
+use GiveFlow\Gateways\WebhookOutcome;
 use WP_REST_Request;
 
 /**
@@ -36,7 +36,7 @@ final class BrowserAwareGatewayTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        update_option('dono_gateway_config', ['test_mode' => true]);
+        update_option('giveflow_gateway_config', ['test_mode' => true]);
 
         $manager = Plugin::instance()->container->get(GatewayManager::class);
         if (! $manager->get('fakepay')) {
@@ -49,14 +49,14 @@ final class BrowserAwareGatewayTest extends IntegrationTestCase
     /** @return array<string,mixed> the JSON the runtime reads out of the rendered form */
     private function renderedConfig(): array
     {
-        $html = do_shortcode('[dono_donation_form slug="' . $this->formSlug . '"]');
+        $html = do_shortcode('[giveflow_donation_form slug="' . $this->formSlug . '"]');
 
         $this->assertMatchesRegularExpression(
-            '/data-dono-form-config>(.*?)<\/script>/s',
+            '/data-giveflow-form-config>(.*?)<\/script>/s',
             $html,
             'The form did not render its config script.'
         );
-        preg_match('/data-dono-form-config>(.*?)<\/script>/s', $html, $m);
+        preg_match('/data-giveflow-form-config>(.*?)<\/script>/s', $html, $m);
         $config = json_decode(html_entity_decode($m[1]), true);
 
         return is_array($config) ? $config : [];
@@ -108,7 +108,7 @@ final class BrowserAwareGatewayTest extends IntegrationTestCase
 
     private function submit(): array
     {
-        $request = new WP_REST_Request('POST', '/dono/v1/donations');
+        $request = new WP_REST_Request('POST', '/giveflow/v1/donations');
         $request->set_header('content-type', 'application/json');
         $request->set_body((string) wp_json_encode([
             'form_slug'    => $this->formSlug,
@@ -130,17 +130,17 @@ final class BrowserAwareGatewayTest extends IntegrationTestCase
 
     private function publishedForm(): string
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['title' => 'Browser gateway', 'status' => 'published']));
         $campaignId = (int) rest_do_request($req)->get_data()['id'];
 
-        $req = new WP_REST_Request('POST', '/dono/v1/admin/forms');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/forms');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'title'       => 'Browser gateway form',
             'campaign_id' => $campaignId,
-            'blocks'      => '<!-- wp:dono/donation-amount /-->',
+            'blocks'      => '<!-- wp:giveflow/donation-amount /-->',
         ]));
         $created = (array) rest_do_request($req)->get_data();
 

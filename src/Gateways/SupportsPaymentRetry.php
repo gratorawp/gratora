@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Gateways;
+namespace GiveFlow\Gateways;
 
-use Dono\Recurring\RecurringPlan;
+use GiveFlow\Recurring\RecurringPlan;
 
 /**
  * A gateway that can be told to collect a failed renewal again, now.

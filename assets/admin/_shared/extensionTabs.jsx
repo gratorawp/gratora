@@ -1,16 +1,16 @@
 /**
  * Consumer side of the extension-tab seam. Core React apps call
  * useExtensionTabs(surface) to read add-on-registered tabs from the
- * window.dono.tabs registry (defined by ExtensionAssets), and render each via
+ * window.giveflow.tabs registry (defined by ExtensionAssets), and render each via
  * ExtensionTabPanel, which hands the add-on a DOM node + context to mount into.
  */
 import { useState, useEffect, useRef } from '@wordpress/element';
 
-const EVENT       = 'dono:tabs:changed';
-const PANEL_EVENT = 'dono:panels:changed';
+const EVENT       = 'giveflow:tabs:changed';
+const PANEL_EVENT = 'giveflow:panels:changed';
 
 function readTabs( surface ) {
-    const reg = ( typeof window !== 'undefined' && window.dono && window.dono.tabs ) || null;
+    const reg = ( typeof window !== 'undefined' && window.giveflow && window.giveflow.tabs ) || null;
     return reg && typeof reg.get === 'function' ? reg.get( surface ) : [];
 }
 
@@ -33,7 +33,7 @@ export function useExtensionTabs( surface ) {
 }
 
 function readPanels( surface ) {
-    const reg = ( typeof window !== 'undefined' && window.dono && window.dono.panels ) || null;
+    const reg = ( typeof window !== 'undefined' && window.giveflow && window.giveflow.panels ) || null;
     return reg && typeof reg.get === 'function' ? reg.get( surface ) : [];
 }
 
@@ -77,7 +77,7 @@ export function ExtensionSection( { panel, context, token } ) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ panel && panel.id, token ] );
 
-    return <div ref={ ref } className="dono-ext-panel" />;
+    return <div ref={ ref } className="giveflow-ext-panel" />;
 }
 
 export function ExtensionTabPanel( { tab, context } ) {
@@ -95,5 +95,5 @@ export function ExtensionTabPanel( { tab, context } ) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ tab && tab.id ] );
 
-    return <div ref={ ref } className="dono-ext-tab-panel" />;
+    return <div ref={ ref } className="giveflow-ext-tab-panel" />;
 }

@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\DonationRepository;
-use Dono\Donations\DonationService;
-use Dono\Donors\DonorRepository;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
-use Dono\Foundation\Time\Clock;
-use Dono\Gateways\GatewayManager;
-use Dono\Gateways\Stripe\StripeAccount;
-use Dono\Gateways\Stripe\StripeApi;
-use Dono\Gateways\Stripe\StripeGateway;
-use Dono\Recurring\RecurringPlan;
-use Dono\Recurring\RecurringPlanRepository;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Donations\DonationService;
+use GiveFlow\Donors\DonorRepository;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Foundation\Time\Clock;
+use GiveFlow\Gateways\GatewayManager;
+use GiveFlow\Gateways\Stripe\StripeAccount;
+use GiveFlow\Gateways\Stripe\StripeApi;
+use GiveFlow\Gateways\Stripe\StripeGateway;
+use GiveFlow\Recurring\RecurringPlan;
+use GiveFlow\Recurring\RecurringPlanRepository;
 use WP_REST_Request;
 
 /**
@@ -34,11 +34,11 @@ final class StripeCustomerReuseTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        update_option('dono_gateway_config', [
+        update_option('giveflow_gateway_config', [
             'test_mode' => true,
             'stripe'    => ['webhook_secret_test' => 'whsec_reuse'],
         ]);
-        update_option('dono_currency_locale', [
+        update_option('giveflow_currency_locale', [
             'default_currency'     => 'USD',
             'supported_currencies' => ['USD'],
         ]);
@@ -91,7 +91,7 @@ final class StripeCustomerReuseTest extends IntegrationTestCase
 
     private function donate(string $frequency = 'weekly'): string
     {
-        $create = new WP_REST_Request('POST', '/dono/v1/donations');
+        $create = new WP_REST_Request('POST', '/giveflow/v1/donations');
         $create->set_header('content-type', 'application/json');
         $create->set_body((string) wp_json_encode([
             'email'        => 'reuse@example.test',
@@ -126,8 +126,8 @@ final class StripeCustomerReuseTest extends IntegrationTestCase
         // A Customer outlives the donation that prompted it, so stamping a
         // donation id on it is wrong on its own terms, and it is also what makes
         // the body differ between two donations by the same donor.
-        $this->assertStringNotContainsString('dono_donation_id', $calls[0]['body']);
-        $this->assertStringContainsString('dono_donor_id', $calls[0]['body']);
+        $this->assertStringNotContainsString('giveflow_donation_id', $calls[0]['body']);
+        $this->assertStringContainsString('giveflow_donor_id', $calls[0]['body']);
     }
 
     public function test_a_second_donation_by_the_same_donor_does_not_reuse_a_key_with_a_different_body(): void

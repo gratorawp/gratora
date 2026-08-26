@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Campaigns;
+namespace GiveFlow\Campaigns;
 
-use Dono\Foundation\Hooks\HookProvider;
+use GiveFlow\Foundation\Hooks\HookProvider;
 use WP_Post;
 
 /**
@@ -77,6 +77,6 @@ final class CampaignPermalinks extends HookProvider
     {
         return $postId > 0
             && get_post_type($postId) === 'page'
-            && (int) get_post_meta($postId, '_dono_campaign_id', true) > 0;
+            && (int) get_post_meta($postId, '_giveflow_campaign_id', true) > 0;
     }
 }

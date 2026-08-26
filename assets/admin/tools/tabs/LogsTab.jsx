@@ -32,26 +32,26 @@ function hasContext( row ) {
 
 /**
  * A delivery has four readings, and only two of them are faults. An event type
- * Dono has no handler for is ordinary traffic: gateways send everything they
+ * GiveFlow has no handler for is ordinary traffic: gateways send everything they
  * have, and most of it is none of our business.
  */
 function deliveryOutcome( row ) {
     if ( ! row.verified ) {
-        return { tone: 'red', label: __( 'Not verified', 'dono-fundraising-platform' ) };
+        return { tone: 'red', label: __( 'Not verified', 'giveflow-fundraising-campaigns' ) };
     }
     if ( row.error ) {
-        return { tone: 'red', label: __( 'Handling failed', 'dono-fundraising-platform' ) };
+        return { tone: 'red', label: __( 'Handling failed', 'giveflow-fundraising-campaigns' ) };
     }
     if ( row.processed ) {
-        return { tone: 'green', label: __( 'Processed', 'dono-fundraising-platform' ) };
+        return { tone: 'green', label: __( 'Processed', 'giveflow-fundraising-campaigns' ) };
     }
-    return { tone: 'gray', label: __( 'No action needed', 'dono-fundraising-platform' ) };
+    return { tone: 'gray', label: __( 'No action needed', 'giveflow-fundraising-campaigns' ) };
 }
 
 function Pill( { tone, label } ) {
     return (
-        <span className={ `dono-pill dono-pill--${ tone }` }>
-            <span className="dono-pill__dot" />
+        <span className={ `giveflow-pill giveflow-pill--${ tone }` }>
+            <span className="giveflow-pill__dot" />
             { label }
         </span>
     );
@@ -108,7 +108,7 @@ export default function LogsTab( { active, setNotice } ) {
     const load = useCallback( () => {
         const mine = ++generation.current;
         setLoading( true );
-        apiFetch( { path: addQueryArgs( '/dono/v1/admin/tools/log', apiParams ) } )
+        apiFetch( { path: addQueryArgs( '/giveflow/v1/admin/tools/log', apiParams ) } )
             .then( ( res ) => {
                 if ( mine !== generation.current ) return;
                 setLog( res );
@@ -119,7 +119,7 @@ export default function LogsTab( { active, setNotice } ) {
                 // Deliberately not an empty result: "nothing has happened" and
                 // "we could not find out" are opposite answers, and this screen
                 // is read precisely when someone suspects the second.
-                setError( err?.message || __( 'The log could not be read.', 'dono-fundraising-platform' ) );
+                setError( err?.message || __( 'The log could not be read.', 'giveflow-fundraising-campaigns' ) );
             } )
             .finally( () => {
                 if ( mine === generation.current ) setLoading( false );
@@ -134,7 +134,7 @@ export default function LogsTab( { active, setNotice } ) {
         setClearing( true );
         try {
             const res = await apiFetch( {
-                path:   addQueryArgs( '/dono/v1/admin/tools/log', { source } ),
+                path:   addQueryArgs( '/giveflow/v1/admin/tools/log', { source } ),
                 method: 'DELETE',
             } );
             setView( ( v ) => ( { ...v, page: 1 } ) );
@@ -143,12 +143,12 @@ export default function LogsTab( { active, setNotice } ) {
                 type: 'success',
                 text: sprintf(
                     /* translators: %d: number of log entries deleted. */
-                    _n( '%d entry cleared.', '%d entries cleared.', Number( res?.deleted ) || 0, 'dono-fundraising-platform' ),
+                    _n( '%d entry cleared.', '%d entries cleared.', Number( res?.deleted ) || 0, 'giveflow-fundraising-campaigns' ),
                     Number( res?.deleted ) || 0
                 ),
             } );
         } catch ( err ) {
-            setNotice( { type: 'error', text: err?.message || __( 'Could not clear the log.', 'dono-fundraising-platform' ) } );
+            setNotice( { type: 'error', text: err?.message || __( 'Could not clear the log.', 'giveflow-fundraising-campaigns' ) } );
         } finally {
             setClearing( false );
         }
@@ -160,16 +160,16 @@ export default function LogsTab( { active, setNotice } ) {
     // alone, and the delivery history goes with the failures otherwise.
     const askClear = () => setConfirm( {
         title: source
-            ? __( 'Clear this source', 'dono-fundraising-platform' )
-            : __( 'Clear the log', 'dono-fundraising-platform' ),
+            ? __( 'Clear this source', 'giveflow-fundraising-campaigns' )
+            : __( 'Clear the log', 'giveflow-fundraising-campaigns' ),
         message: source
             ? sprintf(
                 /* translators: %s: the log source being cleared, e.g. webhook.stripe */
-                __( 'Deletes every entry recorded under %s. Nothing else is touched.', 'dono-fundraising-platform' ),
+                __( 'Deletes every entry recorded under %s. Nothing else is touched.', 'giveflow-fundraising-campaigns' ),
                 source
             )
-            : __( 'Deletes every entry: the failures Dono recorded and the history of what your gateways sent. The log fills again as things happen.', 'dono-fundraising-platform' ),
-        confirmLabel: __( 'Clear log', 'dono-fundraising-platform' ),
+            : __( 'Deletes every entry: the failures GiveFlow recorded and the history of what your gateways sent. The log fills again as things happen.', 'giveflow-fundraising-campaigns' ),
+        confirmLabel: __( 'Clear log', 'giveflow-fundraising-campaigns' ),
         destructive:  true,
         onConfirm:    doClear,
     } );
@@ -183,7 +183,7 @@ export default function LogsTab( { active, setNotice } ) {
     const fields = useMemo( () => [
         {
             id:            'occurred_at',
-            label:         __( 'When', 'dono-fundraising-platform' ),
+            label:         __( 'When', 'giveflow-fundraising-campaigns' ),
             enableSorting: true,
             enableHiding:  false,
             getValue:      ( { item } ) => item.occurred_at || '',
@@ -191,34 +191,34 @@ export default function LogsTab( { active, setNotice } ) {
         },
         {
             id:            'source',
-            label:         __( 'Source', 'dono-fundraising-platform' ),
+            label:         __( 'Source', 'giveflow-fundraising-campaigns' ),
             enableSorting: true,
             elements:      sources.map( ( s ) => ( { value: s, label: s } ) ),
             filterBy:      { operators: [ 'is' ] },
             getValue:      ( { item } ) => fullType( item ),
-            render:        ( { item } ) => <code className="dono-log__source">{ fullType( item ) }</code>,
+            render:        ( { item } ) => <code className="giveflow-log__source">{ fullType( item ) }</code>,
         },
         {
             id:            'message',
-            label:         __( 'What it says', 'dono-fundraising-platform' ),
+            label:         __( 'What it says', 'giveflow-fundraising-campaigns' ),
             enableSorting: false,
             getValue:      ( { item } ) => item.message || '',
             render: ( { item } ) => (
-                <div className="dono-log__message">
+                <div className="giveflow-log__message">
                     <div>{ item.message }</div>
                     { item.kind === 'webhook' && item.error && (
-                        <div className="dono-row__sub dono-log__message-sub">{ item.error }</div>
+                        <div className="giveflow-row__sub giveflow-log__message-sub">{ item.error }</div>
                     ) }
                 </div>
             ),
         },
         {
             id:            'outcome',
-            label:         __( 'Outcome', 'dono-fundraising-platform' ),
+            label:         __( 'Outcome', 'giveflow-fundraising-campaigns' ),
             enableSorting: false,
             // The one narrowing worth offering: everything else on this screen
             // is ordinary traffic an org reads by scanning, not by filtering.
-            elements:      [ { value: 'failed', label: __( 'Problems only', 'dono-fundraising-platform' ) } ],
+            elements:      [ { value: 'failed', label: __( 'Problems only', 'giveflow-fundraising-campaigns' ) } ],
             filterBy:      { operators: [ 'is' ] },
             render: ( { item } ) => {
                 if ( item.kind === 'webhook' ) {
@@ -234,7 +234,7 @@ export default function LogsTab( { active, setNotice } ) {
     const actions = useMemo( () => [
         {
             id:         'detail',
-            label:      __( 'View detail', 'dono-fundraising-platform' ),
+            label:      __( 'View detail', 'giveflow-fundraising-campaigns' ),
             isEligible: hasContext,
             callback:   ( [ item ] ) => setDetail( item ),
         },
@@ -251,10 +251,10 @@ export default function LogsTab( { active, setNotice } ) {
     const emptyAndUnfiltered = ! loading && ! error && total === 0 && ! filtered;
 
     return (
-        <div className="dono-panel">
-            <div className="dono-tools-logbar">
+        <div className="giveflow-panel">
+            <div className="giveflow-tools-logbar">
                 <Btn variant="secondary" onClick={ load } disabled={ loading }>
-                    { __( 'Refresh', 'dono-fundraising-platform' ) }
+                    { __( 'Refresh', 'giveflow-fundraising-campaigns' ) }
                 </Btn>
                 <Btn
                     variant="secondary"
@@ -262,21 +262,21 @@ export default function LogsTab( { active, setNotice } ) {
                     disabled={ clearing || total === 0 }
                     isBusy={ clearing }
                 >
-                    { __( 'Clear log', 'dono-fundraising-platform' ) }
+                    { __( 'Clear log', 'giveflow-fundraising-campaigns' ) }
                 </Btn>
             </div>
 
             { error ? (
-                <p className="dono-tools-empty">
-                    { __( 'The log could not be read, so this screen cannot say what has happened. Check that you are still signed in, then try Refresh.', 'dono-fundraising-platform' ) }
+                <p className="giveflow-tools-empty">
+                    { __( 'The log could not be read, so this screen cannot say what has happened. Check that you are still signed in, then try Refresh.', 'giveflow-fundraising-campaigns' ) }
                     { ' ' }
                     <code>{ error }</code>
                 </p>
             ) : emptyAndUnfiltered ? (
-                <p className="dono-tools-empty">{ __( 'Nothing recorded yet.', 'dono-fundraising-platform' ) }</p>
+                <p className="giveflow-tools-empty">{ __( 'Nothing recorded yet.', 'giveflow-fundraising-campaigns' ) }</p>
             ) : (
                 // Carries the shared table styling every other list screen uses.
-                <div className="dono-dataviews">
+                <div className="giveflow-dataviews">
                     <DataViews
                         data={ items }
                         fields={ fields }
@@ -294,21 +294,21 @@ export default function LogsTab( { active, setNotice } ) {
 
             { detail && (
                 <Dialog
-                    title={ __( 'Entry detail', 'dono-fundraising-platform' ) }
+                    title={ __( 'Entry detail', 'giveflow-fundraising-campaigns' ) }
                     size="wide"
                     onClose={ () => setDetail( null ) }
                     foot={ (
                         <Btn variant="secondary" onClick={ () => setDetail( null ) }>
-                            { __( 'Close', 'dono-fundraising-platform' ) }
+                            { __( 'Close', 'giveflow-fundraising-campaigns' ) }
                         </Btn>
                     ) }
                 >
-                    <div className="dono-log__detail-head">
-                        <code className="dono-log__source">{ fullType( detail ) }</code>
-                        <span className="dono-row__sub">{ formatDate( detail.occurred_at ) }</span>
+                    <div className="giveflow-log__detail-head">
+                        <code className="giveflow-log__source">{ fullType( detail ) }</code>
+                        <span className="giveflow-row__sub">{ formatDate( detail.occurred_at ) }</span>
                     </div>
-                    <div className="dono-log__message">{ detail.message }</div>
-                    <pre className="dono-log__context">{ JSON.stringify( detail.context, null, 2 ) }</pre>
+                    <div className="giveflow-log__message">{ detail.message }</div>
+                    <pre className="giveflow-log__context">{ JSON.stringify( detail.context, null, 2 ) }</pre>
                 </Dialog>
             ) }
 

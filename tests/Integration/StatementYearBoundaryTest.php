@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
-use Dono\Donations\DonationQueries;
-use Dono\Donations\DonationRepository;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationQueries;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
 
 /**
  * A year-end statement is a document the donor files with a tax office, so the
@@ -104,9 +104,9 @@ final class StatementYearBoundaryTest extends IntegrationTestCase
         $donorId = $this->donor();
         $this->paidAtUtc($donorId, '2025-06-02 12:00:00', 'order');
 
-        $donor = \Dono\Donors\Donor::query()->where('id', $donorId)->get();
+        $donor = \GiveFlow\Donors\Donor::query()->where('id', $donorId)->get();
         $pdf   = Plugin::instance()->container
-            ->get(\Dono\Donors\Portal\AnnualStatementBuilder::class)
+            ->get(\GiveFlow\Donors\Portal\AnnualStatementBuilder::class)
             ->build($donor, 2025);
 
         $this->assertSame('', $pdf, 'a year with nothing but a ticket purchase is not a statement');

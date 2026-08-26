@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Campaigns\Campaign;
-use Dono\Campaigns\CampaignPageTemplate;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Campaigns\CampaignPageTemplate;
 
 /**
  * Campaign pages resolve to the plugin's minimal block template (chrome +
@@ -30,7 +30,7 @@ final class CampaignPageTemplateTest extends IntegrationTestCase
             'post_type'   => 'page',
             'post_status' => 'publish',
             'post_title'  => 'Template page',
-            'meta_input'  => ['_dono_campaign_id' => (int) $c->id],
+            'meta_input'  => ['_giveflow_campaign_id' => (int) $c->id],
         ]);
     }
 

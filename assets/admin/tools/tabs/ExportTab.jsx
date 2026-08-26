@@ -15,7 +15,7 @@ async function download( path, setNotice, setBusy, fallbackName ) {
         const blob = await res.blob();
 
         if ( blob.size === 0 ) {
-            setNotice( { type: 'error', text: __( 'That export came back empty.', 'dono-fundraising-platform' ) } );
+            setNotice( { type: 'error', text: __( 'That export came back empty.', 'giveflow-fundraising-campaigns' ) } );
             return;
         }
 
@@ -29,7 +29,7 @@ async function download( path, setNotice, setBusy, fallbackName ) {
         a.remove();
         URL.revokeObjectURL( url );
     } catch ( err ) {
-        setNotice( { type: 'error', text: err?.message || __( 'That export could not be generated.', 'dono-fundraising-platform' ) } );
+        setNotice( { type: 'error', text: err?.message || __( 'That export could not be generated.', 'giveflow-fundraising-campaigns' ) } );
     } finally {
         setBusy( false );
     }
@@ -66,7 +66,7 @@ export default function ExportTab( { setNotice } ) {
     const [ columns, setColumns ]         = useState( [] );
 
     useEffect( () => {
-        apiFetch( { path: '/dono/v1/admin/exports/options' } )
+        apiFetch( { path: '/giveflow/v1/admin/exports/options' } )
             .then( ( o ) => {
                 setOpts( o );
                 setPdfYear( o.current_year );
@@ -87,7 +87,7 @@ export default function ExportTab( { setNotice } ) {
                 setOpts( { donor_columns: [], campaigns: [], years: [ new Date().getFullYear() ] } );
                 setNotice( {
                     type: 'error',
-                    text: __( 'The export options could not be loaded, so the choices below are incomplete. Reload the page to try again.', 'dono-fundraising-platform' ),
+                    text: __( 'The export options could not be loaded, so the choices below are incomplete. Reload the page to try again.', 'giveflow-fundraising-campaigns' ),
                 } );
             } );
     }, [] );
@@ -104,7 +104,7 @@ export default function ExportTab( { setNotice } ) {
         if ( donationsTo )   q.set( 'created_to', donationsTo );
         if ( includeTest )   q.set( 'include_test', '1' );
         const s = q.toString();
-        return '/dono/v1/admin/donations/export.csv' + ( s ? `?${ s }` : '' );
+        return '/giveflow/v1/admin/donations/export.csv' + ( s ? `?${ s }` : '' );
     }, [ donationsFrom, donationsTo, includeTest ] );
 
     const donorsPath = useMemo( () => {
@@ -113,10 +113,10 @@ export default function ExportTab( { setNotice } ) {
         if ( donorsTo )   q.set( 'to', donorsTo );
         if ( donorsCampaign ) q.set( 'campaign_id', String( donorsCampaign ) );
         if ( columns.length ) q.set( 'columns', columns.join( ',' ) );
-        return `/dono/v1/admin/exports/donors.csv?${ q.toString() }`;
+        return `/giveflow/v1/admin/exports/donors.csv?${ q.toString() }`;
     }, [ donorsFrom, donorsTo, donorsCampaign, columns ] );
 
-    const statsPath = `/dono/v1/admin/exports/revenue.csv?from=${ statsFrom }&to=${ statsTo }`;
+    const statsPath = `/giveflow/v1/admin/exports/revenue.csv?from=${ statsFrom }&to=${ statsTo }`;
 
     const canDonors  = opts?.can_export_donors !== false;
     const canReports = opts?.can_view_reports !== false;
@@ -125,54 +125,54 @@ export default function ExportTab( { setNotice } ) {
         setBusy( 'settings' );
         setNotice( null );
         try {
-            const data = await apiFetch( { path: '/dono/v1/admin/tools/export' } );
+            const data = await apiFetch( { path: '/giveflow/v1/admin/tools/export' } );
             const blob = new Blob( [ JSON.stringify( data, null, 2 ) ], { type: 'application/json' } );
             const url  = URL.createObjectURL( blob );
             const a    = document.createElement( 'a' );
             a.href     = url;
-            a.download = `dono-settings-${ new Date().toISOString().slice( 0, 10 ) }.json`;
+            a.download = `giveflow-settings-${ new Date().toISOString().slice( 0, 10 ) }.json`;
             document.body.appendChild( a );
             a.click();
             a.remove();
             URL.revokeObjectURL( url );
         } catch ( err ) {
-            setNotice( { type: 'error', text: err?.message || __( 'Export failed.', 'dono-fundraising-platform' ) } );
+            setNotice( { type: 'error', text: err?.message || __( 'Export failed.', 'giveflow-fundraising-campaigns' ) } );
         } finally {
             setBusy( '' );
         }
     };
 
     return (
-        <div className="dono-panel">
-            <table className="dono-exports">
+        <div className="giveflow-panel">
+            <table className="giveflow-exports">
                 <thead>
                     <tr>
-                        <th scope="col">{ __( 'Export type', 'dono-fundraising-platform' ) }</th>
-                        <th scope="col">{ __( 'Options', 'dono-fundraising-platform' ) }</th>
+                        <th scope="col">{ __( 'Export type', 'giveflow-fundraising-campaigns' ) }</th>
+                        <th scope="col">{ __( 'Options', 'giveflow-fundraising-campaigns' ) }</th>
                     </tr>
                 </thead>
                 <tbody>
                     <Row
-                        title={ __( 'Donations', 'dono-fundraising-platform' ) }
-                        description={ __( 'Every donation as a CSV: reference, donor, amount, status, campaign and gateway.', 'dono-fundraising-platform' ) }
+                        title={ __( 'Donations', 'giveflow-fundraising-campaigns' ) }
+                        description={ __( 'Every donation as a CSV: reference, donor, amount, status, campaign and gateway.', 'giveflow-fundraising-campaigns' ) }
                     >
-                        <div className="dono-exports__controls">
-                            <span className="dono-tools-field">
-                                { __( 'From', 'dono-fundraising-platform' ) }
+                        <div className="giveflow-exports__controls">
+                            <span className="giveflow-tools-field">
+                                { __( 'From', 'giveflow-fundraising-campaigns' ) }
                                 <DateField
                                     value={ donationsFrom }
                                     onChange={ ( v ) => setDonationsFrom( v || '' ) }
-                                    ariaLabel={ __( 'Export donations from', 'dono-fundraising-platform' ) }
-                                    placeholder={ __( 'Any', 'dono-fundraising-platform' ) }
+                                    ariaLabel={ __( 'Export donations from', 'giveflow-fundraising-campaigns' ) }
+                                    placeholder={ __( 'Any', 'giveflow-fundraising-campaigns' ) }
                                 />
                             </span>
-                            <span className="dono-tools-field">
-                                { __( 'To', 'dono-fundraising-platform' ) }
+                            <span className="giveflow-tools-field">
+                                { __( 'To', 'giveflow-fundraising-campaigns' ) }
                                 <DateField
                                     value={ donationsTo }
                                     onChange={ ( v ) => setDonationsTo( v || '' ) }
-                                    ariaLabel={ __( 'Export donations to', 'dono-fundraising-platform' ) }
-                                    placeholder={ __( 'Any', 'dono-fundraising-platform' ) }
+                                    ariaLabel={ __( 'Export donations to', 'giveflow-fundraising-campaigns' ) }
+                                    placeholder={ __( 'Any', 'giveflow-fundraising-campaigns' ) }
                                 />
                             </span>
                             <Btn
@@ -181,24 +181,24 @@ export default function ExportTab( { setNotice } ) {
                                 isBusy={ busy === 'donations' }
                                 onClick={ () => download( donationsPath, setNotice, ( b ) => setBusy( b ? 'donations' : '' ), 'donations.csv' ) }
                             >
-                                { __( 'Generate CSV', 'dono-fundraising-platform' ) }
+                                { __( 'Generate CSV', 'giveflow-fundraising-campaigns' ) }
                             </Btn>
                         </div>
-                        <label className="dono-exports__check">
+                        <label className="giveflow-exports__check">
                             <input type="checkbox" checked={ includeTest } onChange={ ( e ) => setIncludeTest( e.target.checked ) } />
-                            { __( 'Include test donations', 'dono-fundraising-platform' ) }
+                            { __( 'Include test donations', 'giveflow-fundraising-campaigns' ) }
                         </label>
                     </Row>
 
                     { canReports && (
                         <Row
-                            title={ __( 'Revenue report (PDF)', 'dono-fundraising-platform' ) }
-                            description={ __( 'A one-page summary of a year: total raised, month by month, and the best month. No donor details, so it can go straight to a board.', 'dono-fundraising-platform' ) }
+                            title={ __( 'Revenue report (PDF)', 'giveflow-fundraising-campaigns' ) }
+                            description={ __( 'A one-page summary of a year: total raised, month by month, and the best month. No donor details, so it can go straight to a board.', 'giveflow-fundraising-campaigns' ) }
                         >
-                            <div className="dono-exports__controls">
-                                <label className="dono-tools-field">
-                                    { __( 'Year', 'dono-fundraising-platform' ) }
-                                    <select className="dono-select" value={ pdfYear } onChange={ ( e ) => setPdfYear( Number( e.target.value ) ) }>
+                            <div className="giveflow-exports__controls">
+                                <label className="giveflow-tools-field">
+                                    { __( 'Year', 'giveflow-fundraising-campaigns' ) }
+                                    <select className="giveflow-select" value={ pdfYear } onChange={ ( e ) => setPdfYear( Number( e.target.value ) ) }>
                                         { years.map( ( y ) => <option key={ y } value={ y }>{ y }</option> ) }
                                     </select>
                                 </label>
@@ -206,9 +206,9 @@ export default function ExportTab( { setNotice } ) {
                                     variant="secondary"
                                     disabled={ busy === 'pdf' }
                                     isBusy={ busy === 'pdf' }
-                                    onClick={ () => download( `/dono/v1/admin/exports/revenue.pdf?year=${ pdfYear }`, setNotice, ( b ) => setBusy( b ? 'pdf' : '' ), 'revenue.pdf' ) }
+                                    onClick={ () => download( `/giveflow/v1/admin/exports/revenue.pdf?year=${ pdfYear }`, setNotice, ( b ) => setBusy( b ? 'pdf' : '' ), 'revenue.pdf' ) }
                                 >
-                                    { __( 'Generate PDF', 'dono-fundraising-platform' ) }
+                                    { __( 'Generate PDF', 'giveflow-fundraising-campaigns' ) }
                                 </Btn>
                             </div>
                         </Row>
@@ -216,28 +216,28 @@ export default function ExportTab( { setNotice } ) {
 
                     { canReports && (
                         <Row
-                            title={ __( 'Revenue by month', 'dono-fundraising-platform' ) }
-                            description={ __( 'Revenue, donation count and average donation for every month in the range. Quiet months are written as zero rows, so the file charts as a continuous series.', 'dono-fundraising-platform' ) }
+                            title={ __( 'Revenue by month', 'giveflow-fundraising-campaigns' ) }
+                            description={ __( 'Revenue, donation count and average donation for every month in the range. Quiet months are written as zero rows, so the file charts as a continuous series.', 'giveflow-fundraising-campaigns' ) }
                         >
-                            <div className="dono-exports__controls">
-                                <span className="dono-tools-field">
-                                    { __( 'From', 'dono-fundraising-platform' ) }
+                            <div className="giveflow-exports__controls">
+                                <span className="giveflow-tools-field">
+                                    { __( 'From', 'giveflow-fundraising-campaigns' ) }
                                     <MonthField
                                         value={ statsFrom }
                                         onChange={ setStatsFrom }
                                         min={ opts?.first_month }
                                         max={ opts?.current_month }
-                                        ariaLabel={ __( 'Revenue from month', 'dono-fundraising-platform' ) }
+                                        ariaLabel={ __( 'Revenue from month', 'giveflow-fundraising-campaigns' ) }
                                     />
                                 </span>
-                                <span className="dono-tools-field">
-                                    { __( 'To', 'dono-fundraising-platform' ) }
+                                <span className="giveflow-tools-field">
+                                    { __( 'To', 'giveflow-fundraising-campaigns' ) }
                                     <MonthField
                                         value={ statsTo }
                                         onChange={ setStatsTo }
                                         min={ opts?.first_month }
                                         max={ opts?.current_month }
-                                        ariaLabel={ __( 'Revenue to month', 'dono-fundraising-platform' ) }
+                                        ariaLabel={ __( 'Revenue to month', 'giveflow-fundraising-campaigns' ) }
                                     />
                                 </span>
                                 <Btn
@@ -246,7 +246,7 @@ export default function ExportTab( { setNotice } ) {
                                     isBusy={ busy === 'stats' }
                                     onClick={ () => download( statsPath, setNotice, ( b ) => setBusy( b ? 'stats' : '' ), 'revenue.csv' ) }
                                 >
-                                    { __( 'Generate CSV', 'dono-fundraising-platform' ) }
+                                    { __( 'Generate CSV', 'giveflow-fundraising-campaigns' ) }
                                 </Btn>
                             </div>
                         </Row>
@@ -254,32 +254,32 @@ export default function ExportTab( { setNotice } ) {
 
                     { canDonors && (
                         <Row
-                            title={ __( 'Donors', 'dono-fundraising-platform' ) }
-                            description={ __( 'The donor list as a CSV, by when each donor record was created. Take only the columns you need: names, emails, phone numbers and addresses are personal data, and this file is not encrypted once it leaves the site.', 'dono-fundraising-platform' ) }
+                            title={ __( 'Donors', 'giveflow-fundraising-campaigns' ) }
+                            description={ __( 'The donor list as a CSV, by when each donor record was created. Take only the columns you need: names, emails, phone numbers and addresses are personal data, and this file is not encrypted once it leaves the site.', 'giveflow-fundraising-campaigns' ) }
                         >
-                            <div className="dono-exports__controls">
-                                <span className="dono-tools-field">
-                                    { __( 'From', 'dono-fundraising-platform' ) }
+                            <div className="giveflow-exports__controls">
+                                <span className="giveflow-tools-field">
+                                    { __( 'From', 'giveflow-fundraising-campaigns' ) }
                                     <DateField
                                         value={ donorsFrom }
                                         onChange={ ( v ) => setDonorsFrom( v || '' ) }
-                                        ariaLabel={ __( 'Export donors from', 'dono-fundraising-platform' ) }
-                                        placeholder={ __( 'Any', 'dono-fundraising-platform' ) }
+                                        ariaLabel={ __( 'Export donors from', 'giveflow-fundraising-campaigns' ) }
+                                        placeholder={ __( 'Any', 'giveflow-fundraising-campaigns' ) }
                                     />
                                 </span>
-                                <span className="dono-tools-field">
-                                    { __( 'To', 'dono-fundraising-platform' ) }
+                                <span className="giveflow-tools-field">
+                                    { __( 'To', 'giveflow-fundraising-campaigns' ) }
                                     <DateField
                                         value={ donorsTo }
                                         onChange={ ( v ) => setDonorsTo( v || '' ) }
-                                        ariaLabel={ __( 'Export donors to', 'dono-fundraising-platform' ) }
-                                        placeholder={ __( 'Any', 'dono-fundraising-platform' ) }
+                                        ariaLabel={ __( 'Export donors to', 'giveflow-fundraising-campaigns' ) }
+                                        placeholder={ __( 'Any', 'giveflow-fundraising-campaigns' ) }
                                     />
                                 </span>
-                                <label className="dono-tools-field">
-                                    { __( 'Campaign', 'dono-fundraising-platform' ) }
-                                    <select className="dono-select" value={ donorsCampaign } onChange={ ( e ) => setDonorsCampaign( Number( e.target.value ) ) }>
-                                        <option value={ 0 }>{ __( 'All campaigns', 'dono-fundraising-platform' ) }</option>
+                                <label className="giveflow-tools-field">
+                                    { __( 'Campaign', 'giveflow-fundraising-campaigns' ) }
+                                    <select className="giveflow-select" value={ donorsCampaign } onChange={ ( e ) => setDonorsCampaign( Number( e.target.value ) ) }>
+                                        <option value={ 0 }>{ __( 'All campaigns', 'giveflow-fundraising-campaigns' ) }</option>
                                         { ( opts?.campaigns || [] ).map( ( c ) => (
                                             <option key={ c.id } value={ c.id }>{ c.title || `#${ c.id }` }</option>
                                         ) ) }
@@ -291,13 +291,13 @@ export default function ExportTab( { setNotice } ) {
                                     isBusy={ busy === 'donors' }
                                     onClick={ () => download( donorsPath, setNotice, ( b ) => setBusy( b ? 'donors' : '' ), 'donors.csv' ) }
                                 >
-                                    { __( 'Generate CSV', 'dono-fundraising-platform' ) }
+                                    { __( 'Generate CSV', 'giveflow-fundraising-campaigns' ) }
                                 </Btn>
                             </div>
 
-                            <div className="dono-exports__columns">
-                                <p className="dono-exports__columns-head">{ __( 'Columns', 'dono-fundraising-platform' ) }</p>
-                                <div className="dono-exports__grid">
+                            <div className="giveflow-exports__columns">
+                                <p className="giveflow-exports__columns-head">{ __( 'Columns', 'giveflow-fundraising-campaigns' ) }</p>
+                                <div className="giveflow-exports__grid">
                                     { ( opts?.donor_columns || [] ).map( ( c ) => (
                                         <label key={ c.key }>
                                             <input
@@ -314,40 +314,40 @@ export default function ExportTab( { setNotice } ) {
                     ) }
 
                     <Row
-                        title={ __( 'Everything', 'dono-fundraising-platform' ) }
-                        description={ __( 'Campaigns, funds, forms, donors, donations, recurring plans and receipts as one JSON file, which the Import tab can restore onto another Dono site.', 'dono-fundraising-platform' ) }
+                        title={ __( 'Everything', 'giveflow-fundraising-campaigns' ) }
+                        description={ __( 'Campaigns, funds, forms, donors, donations, recurring plans and receipts as one JSON file, which the Import tab can restore onto another GiveFlow site.', 'giveflow-fundraising-campaigns' ) }
                     >
-                        <div className="dono-exports__controls">
+                        <div className="giveflow-exports__controls">
                             <Btn
                                 variant="secondary"
                                 disabled={ busy === 'everything' }
                                 isBusy={ busy === 'everything' }
-                                onClick={ () => download( '/dono/v1/admin/tools/export-all', setNotice, ( b ) => setBusy( b ? 'everything' : '' ), 'dono-export.json' ) }
+                                onClick={ () => download( '/giveflow/v1/admin/tools/export-all', setNotice, ( b ) => setBusy( b ? 'everything' : '' ), 'giveflow-export.json' ) }
                             >
-                                { __( 'Export JSON', 'dono-fundraising-platform' ) }
+                                { __( 'Export JSON', 'giveflow-fundraising-campaigns' ) }
                             </Btn>
                         </div>
-                        <p className="dono-tools-note">
-                            { __( 'Donor names, email addresses and postal addresses are readable in this file. They have to be, or it could only ever be restored onto the site it came from. Treat it like the donor database it is.', 'dono-fundraising-platform' ) }
+                        <p className="giveflow-tools-note">
+                            { __( 'Donor names, email addresses and postal addresses are readable in this file. They have to be, or it could only ever be restored onto the site it came from. Treat it like the donor database it is.', 'giveflow-fundraising-campaigns' ) }
                         </p>
                     </Row>
 
                     <Row
-                        title={ __( 'Settings', 'dono-fundraising-platform' ) }
-                        description={ __( 'Every Dono setting as JSON, to lift a configured site onto another install. Donations, donors and campaigns are not included.', 'dono-fundraising-platform' ) }
+                        title={ __( 'Settings', 'giveflow-fundraising-campaigns' ) }
+                        description={ __( 'Every GiveFlow setting as JSON, to lift a configured site onto another install. Donations, donors and campaigns are not included.', 'giveflow-fundraising-campaigns' ) }
                     >
-                        <div className="dono-exports__controls">
+                        <div className="giveflow-exports__controls">
                             <Btn
                                 variant="secondary"
                                 disabled={ busy === 'settings' }
                                 isBusy={ busy === 'settings' }
                                 onClick={ exportSettings }
                             >
-                                { __( 'Export JSON', 'dono-fundraising-platform' ) }
+                                { __( 'Export JSON', 'giveflow-fundraising-campaigns' ) }
                             </Btn>
                         </div>
-                        <p className="dono-tools-note">
-                            { __( 'Secrets are masked. A gateway key never leaves the site in an export, so an imported file cannot restore one.', 'dono-fundraising-platform' ) }
+                        <p className="giveflow-tools-note">
+                            { __( 'Secrets are masked. A gateway key never leaves the site in an export, so an imported file cannot restore one.', 'giveflow-fundraising-campaigns' ) }
                         </p>
                     </Row>
                 </tbody>

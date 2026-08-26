@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Campaigns\Styling;
+namespace GiveFlow\Campaigns\Styling;
 
-use Dono\Campaigns\Campaign;
+use GiveFlow\Campaigns\Campaign;
 
 /**
  * A campaign's style is a map of 26 tokens, not one color. This emits the
@@ -35,7 +35,7 @@ final class CampaignStyleVars
 
         $tokens = (new CampaignStyleResolver())->resolveForCampaign($campaign);
 
-        // resolveForCampaign applies dono.campaign_style.tokens after merging,
+        // resolveForCampaign applies giveflow.campaign_style.tokens after merging,
         // so whatever a filter returned has not been through the allowlist.
         // These values land verbatim in CSS, where a stray ; or } escapes the
         // declaration, so sanitize once more rather than trusting the filter.

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Campaigns\Blocks;
+namespace GiveFlow\Campaigns\Blocks;
 
-use Dono\Campaigns\Campaign;
-use Dono\Campaigns\CampaignRepository;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Campaigns\CampaignRepository;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -14,8 +14,8 @@ use WP_REST_Server;
  * The values a bound block should show while the page is being edited.
  *
  * The block editor resolves bindings on the client and cannot call a PHP
- * source, so without this a block bound to dono/campaign displays the source's
- * label, "Dono campaign", and the organizer composes a page they cannot read.
+ * source, so without this a block bound to giveflow/campaign displays the source's
+ * label, "GiveFlow campaign", and the organizer composes a page they cannot read.
  * This hands the editor the same values the front end will render, computed by
  * the same code, so the preview cannot drift from the page.
  *
@@ -23,7 +23,7 @@ use WP_REST_Server;
  */
 final class CampaignBindingPreviewController
 {
-    private const NS = 'dono/v1';
+    private const NS = 'giveflow/v1';
 
     /** @since 1.0.0 */
     public function __construct(
@@ -100,7 +100,7 @@ final class CampaignBindingPreviewController
         if ($postId <= 0) {
             return null;
         }
-        $bound = (int) get_post_meta($postId, '_dono_campaign_id', true);
+        $bound = (int) get_post_meta($postId, '_giveflow_campaign_id', true);
 
         return $bound > 0 ? $this->campaigns->findRenderable($bound) : null;
     }

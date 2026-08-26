@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Campaigns\Campaign;
+use GiveFlow\Campaigns\Campaign;
 use WP_REST_Request;
 
 /**
@@ -26,7 +26,7 @@ final class CampaignImageFieldTest extends IntegrationTestCase
 
     private function campaign(): Campaign
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['title' => 'Cover image campaign']));
 
@@ -38,7 +38,7 @@ final class CampaignImageFieldTest extends IntegrationTestCase
 
     private function patch(int $id, mixed $value): \WP_REST_Response|\WP_Error
     {
-        $req = new WP_REST_Request('POST', "/dono/v1/admin/campaigns/{$id}");
+        $req = new WP_REST_Request('POST', "/giveflow/v1/admin/campaigns/{$id}");
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['image_attachment_id' => $value]));
 
@@ -60,7 +60,7 @@ final class CampaignImageFieldTest extends IntegrationTestCase
         $this->assertSame(200, $res->get_status(), (string) wp_json_encode($res->get_data()));
 
         $show = (array) rest_do_request(
-            new WP_REST_Request('GET', '/dono/v1/admin/campaigns/' . (int) $campaign->id)
+            new WP_REST_Request('GET', '/giveflow/v1/admin/campaigns/' . (int) $campaign->id)
         )->get_data();
 
         $this->assertSame((int) $attachment, (int) $show['image_attachment_id']);

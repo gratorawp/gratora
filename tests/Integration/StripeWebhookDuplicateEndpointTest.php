@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Foundation\Plugin;
-use Dono\Gateways\Stripe\StripeAccount;
-use Dono\Gateways\Stripe\StripeApi;
-use Dono\Gateways\Stripe\StripeWebhookProvisioner;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Gateways\Stripe\StripeAccount;
+use GiveFlow\Gateways\Stripe\StripeApi;
+use GiveFlow\Gateways\Stripe\StripeWebhookProvisioner;
 use ReflectionClass;
 
 /**
@@ -29,9 +29,9 @@ final class StripeWebhookDuplicateEndpointTest extends IntegrationTestCase
         parent::setUp();
 
         $this->calls = [];
-        $this->url   = rest_url('dono/v1/webhooks/stripe');
+        $this->url   = rest_url('giveflow/v1/webhooks/stripe');
 
-        update_option('dono_gateway_config', ['stripe' => []]);
+        update_option('giveflow_gateway_config', ['stripe' => []]);
 
         $account = Plugin::instance()->container->get(StripeAccount::class);
         $account->saveKeys(false, 'sk_live_connected', 'pk_live_seed');
@@ -151,7 +151,7 @@ final class StripeWebhookDuplicateEndpointTest extends IntegrationTestCase
 
     private function storedSecret(): string
     {
-        $opt = get_option('dono_gateway_config', []);
+        $opt = get_option('giveflow_gateway_config', []);
 
         return (string) ($opt['stripe']['webhook_secret_live'] ?? '');
     }

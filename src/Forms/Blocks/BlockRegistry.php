@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Forms\Blocks;
+namespace GiveFlow\Forms\Blocks;
 
 /**
- * Server-side dono block registry.
+ * Server-side giveflow block registry.
  *
  * @since 1.0.0
  */
@@ -42,7 +42,7 @@ final class BlockRegistry
         foreach ($this->blocks as $name => $block) {
             $attrs = $block->attributes();
             // Every form block supports conditional visibility via the
-            // dono/condition inspector panel. Declare the attribute centrally
+            // giveflow/condition inspector panel. Declare the attribute centrally
             // so individual blocks don't each need to repeat it.
             if (! isset($attrs['condition'])) {
                 $attrs['condition'] = ['type' => 'object', 'default' => null];

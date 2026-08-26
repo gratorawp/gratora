@@ -11,7 +11,7 @@
 import { formatAmount, formatAmountCompact } from '../../assets/_shared/money';
 
 function org( currency, decimalPlaces, symbol ) {
-    window.dono = {
+    window.giveflow = {
         default_currency: currency,
         number_format: {
             decimalPlaces,
@@ -23,7 +23,7 @@ function org( currency, decimalPlaces, symbol ) {
     };
 }
 
-afterEach( () => { delete window.dono; } );
+afterEach( () => { delete window.giveflow; } );
 
 describe( 'an org that asked for no cents', () => {
     beforeEach( () => org( 'USD', 0, '$' ) );

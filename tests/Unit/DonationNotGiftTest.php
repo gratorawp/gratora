@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Unit;
+namespace GiveFlow\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 use RecursiveDirectoryIterator;
@@ -36,7 +36,7 @@ final class DonationNotGiftTest extends TestCase
     ];
 
     /** @var list<string> */
-    private const ROOT_FILES = ['readme.txt', 'dono.php', 'uninstall.php'];
+    private const ROOT_FILES = ['readme.txt', 'giveflow.php', 'uninstall.php'];
 
     private function root(): string
     {

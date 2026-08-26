@@ -1,5 +1,5 @@
 /**
- * Per-group settings hook over /dono/v1/admin/settings/{group}.
+ * Per-group settings hook over /giveflow/v1/admin/settings/{group}.
  *
  * edit()    deep-merges into pending (good for nested keys).
  * replace() atomically overwrites a top-level key, discarding prior merge edits
@@ -10,7 +10,7 @@ import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 
-export function useDonoSettings( group ) {
+export function useGiveFlowSettings( group ) {
     const [ saved, setSaved ]               = useState( null );
     const [ edits, setEdits ]               = useState( {} );
     const [ replacements, setReplacements ] = useState( {} );
@@ -24,12 +24,12 @@ export function useDonoSettings( group ) {
         let aborted = false;
         setSaved( null );
         setError( null );
-        apiFetch( { path: `/dono/v1/admin/settings/${ group }` } )
+        apiFetch( { path: `/giveflow/v1/admin/settings/${ group }` } )
             .then( ( data ) => { if ( ! aborted ) setSaved( data || {} ); } )
             // Surface the failure instead of swallowing it: a swallowed load left
             // isLoading stuck forever, and (worse) saving from the unloaded state
             // PUT a partial record that wiped keys like the whole roles mapping.
-            .catch( () => { if ( ! aborted ) setError( __( 'Could not load these settings.', 'dono-fundraising-platform' ) ); } );
+            .catch( () => { if ( ! aborted ) setError( __( 'Could not load these settings.', 'giveflow-fundraising-campaigns' ) ); } );
         return () => { aborted = true; };
     }, [ group, reloadKey ] );
 
@@ -64,12 +64,12 @@ export function useDonoSettings( group ) {
         // Never PUT from an unloaded record: it would replace the group with a
         // partial object and drop keys that weren't loaded (e.g. roles mapping).
         if ( saved === null ) {
-            throw new Error( __( 'Settings have not loaded yet. Refresh and try again.', 'dono-fundraising-platform' ) );
+            throw new Error( __( 'Settings have not loaded yet. Refresh and try again.', 'giveflow-fundraising-campaigns' ) );
         }
         setSaving( true );
         try {
             const updated = await apiFetch( {
-                path:   `/dono/v1/admin/settings/${ group }`,
+                path:   `/giveflow/v1/admin/settings/${ group }`,
                 method: 'PUT',
                 data:   record,
             } );

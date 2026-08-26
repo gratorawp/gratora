@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
-use Dono\Donations\DonationRepository;
-use Dono\Donations\DonationService;
-use Dono\Foundation\Plugin;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Donations\DonationService;
+use GiveFlow\Foundation\Plugin;
 use RuntimeException;
 use WP_REST_Request;
 
@@ -39,7 +39,7 @@ final class DonationProcessingTest extends IntegrationTestCase
 
     private function driveOfflineDonation(): Donation
     {
-        $request = new WP_REST_Request('POST', '/dono/v1/donations');
+        $request = new WP_REST_Request('POST', '/giveflow/v1/donations');
         $request->set_header('content-type', 'application/json');
         $request->set_body((string) wp_json_encode([
             'email'        => 'sarah@example.com',
@@ -148,7 +148,7 @@ final class DonationProcessingTest extends IntegrationTestCase
         $donation = $this->driveOfflineDonation();
 
         $fired = 0;
-        add_action('dono.donation.processing', static function () use (&$fired): void { $fired++; });
+        add_action('giveflow.donation.processing', static function () use (&$fired): void { $fired++; });
 
         $this->service()->markProcessing($donation, 'bank_debit_submitted');
         $this->service()->markProcessing($this->reload((string) $donation->reference), 'bank_debit_submitted');
@@ -161,7 +161,7 @@ final class DonationProcessingTest extends IntegrationTestCase
         $donation = $this->driveOfflineDonation();
 
         $seen = null;
-        add_action('dono.donation.processing', static function ($d, $reason) use (&$seen): void {
+        add_action('giveflow.donation.processing', static function ($d, $reason) use (&$seen): void {
             $seen = $reason;
         }, 10, 2);
 

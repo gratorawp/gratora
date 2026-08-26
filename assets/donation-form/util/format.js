@@ -3,7 +3,7 @@ import {
     getActiveNumberFormat,
     defaultCurrency,
     groupDigits,
-} from '@dono/ui/utils/format';
+} from '@giveflow/ui/utils/format';
 import { minorUnitsFor } from '../../_shared/money';
 
 // parseAmount is deliberately not re-exported: it reads a typed figure by
@@ -45,7 +45,7 @@ const SYMBOLS = {
 let formCurrency = '';
 
 /**
- * The public form has no window.dono, so bootstrap calls this once before
+ * The public form has no window.giveflow, so bootstrap calls this once before
  * render with the form's config and the currency that config was built for.
  */
 export function setActiveNumberFormat( fmt, currency = '' ) {

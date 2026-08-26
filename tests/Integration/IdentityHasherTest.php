@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Async\AsyncDispatcher;
-use Dono\Foundation\Config\SystemSetting;
-use Dono\Foundation\Identity\IdentityHasher;
+use GiveFlow\Async\AsyncDispatcher;
+use GiveFlow\Foundation\Config\SystemSetting;
+use GiveFlow\Foundation\Identity\IdentityHasher;
 
 /**
  * IdentityHasher takes an AsyncDispatcher and reads its pepper/salt from
- * dono_system_settings, so it needs the real DB. Relocated from the pure-unit
+ * giveflow_system_settings, so it needs the real DB. Relocated from the pure-unit
  * suite for that reason.
  */
 final class IdentityHasherTest extends IntegrationTestCase

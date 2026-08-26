@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Campaigns\Campaign;
-use Dono\Donations\AggregateSyncer;
-use Dono\Donations\Donation;
-use Dono\Donations\DonationRepository;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Donations\AggregateSyncer;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
 
 /**
  * A foreign-currency donation with no FX rate has base_amount_cents NULL (no
@@ -34,9 +34,9 @@ final class UnconvertedCurrencyAggregateTest extends IntegrationTestCase
 
         $now = gmdate('Y-m-d H:i:s');
         // Base-currency donation: 50.00 base.
-        $this->seedPaid((int) $donor->id, (int) $campaign->id, 'DONO-FX-BASE', 5000, 'USD', 5000, '1.00000000', $now);
+        $this->seedPaid((int) $donor->id, (int) $campaign->id, 'GIVEFLOW-FX-BASE', 5000, 'USD', 5000, '1.00000000', $now);
         // Foreign donation we could not convert: base + fx_rate are NULL.
-        $this->seedPaid((int) $donor->id, (int) $campaign->id, 'DONO-FX-NORATE', 9999, 'EUR', null, null, $now);
+        $this->seedPaid((int) $donor->id, (int) $campaign->id, 'GIVEFLOW-FX-NORATE', 9999, 'EUR', null, null, $now);
 
         (new AggregateSyncer())->syncCampaign((int) $campaign->id);
 

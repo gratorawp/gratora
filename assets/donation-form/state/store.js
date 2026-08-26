@@ -80,7 +80,7 @@ export function initialState( config ) {
     };
 }
 
-// Portal give-again links prefill ?dono_frequency= in the stored underscore
+// Portal give-again links prefill ?giveflow_frequency= in the stored underscore
 // vocabulary ('one_time'); form state uses hyphens. The prefill only applies
 // when the form's frequency field actually offers it.
 function initialFrequency( config, freqField ) {

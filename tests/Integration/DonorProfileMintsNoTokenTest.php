@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donors\DonorMetricsService;
-use Dono\Donors\DonorService;
-use Dono\Donors\Portal\PortalSession;
-use Dono\Foundation\Plugin;
-use Dono\Vendor\Queryable\DB;
+use GiveFlow\Donors\DonorMetricsService;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Donors\Portal\PortalSession;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Vendor\Queryable\DB;
 use WP_REST_Request;
 
 /**
@@ -29,7 +29,7 @@ final class DonorProfileMintsNoTokenTest extends IntegrationTestCase
 
     private function tokenCount(int $donorId): int
     {
-        return (int) DB::table('dono_magic_link_tokens')
+        return (int) DB::table('giveflow_magic_link_tokens')
             ->where('donor_id', $donorId)
             ->where('purpose', PortalSession::PORTAL_PURPOSE)
             ->count();
@@ -46,9 +46,9 @@ final class DonorProfileMintsNoTokenTest extends IntegrationTestCase
         $this->admin();
         $id = $this->donorId();
 
-        rest_do_request(new WP_REST_Request('GET', "/dono/v1/admin/donors/{$id}/profile"));
-        rest_do_request(new WP_REST_Request('GET', "/dono/v1/admin/donors/{$id}/profile"));
-        rest_do_request(new WP_REST_Request('GET', "/dono/v1/admin/donors/{$id}/profile"));
+        rest_do_request(new WP_REST_Request('GET', "/giveflow/v1/admin/donors/{$id}/profile"));
+        rest_do_request(new WP_REST_Request('GET', "/giveflow/v1/admin/donors/{$id}/profile"));
+        rest_do_request(new WP_REST_Request('GET', "/giveflow/v1/admin/donors/{$id}/profile"));
 
         $this->assertSame(0, $this->tokenCount($id), 'three reads, no credentials');
     }
@@ -58,7 +58,7 @@ final class DonorProfileMintsNoTokenTest extends IntegrationTestCase
         $this->admin();
         $id = $this->donorId();
 
-        $data = rest_do_request(new WP_REST_Request('GET', "/dono/v1/admin/donors/{$id}/profile"))->get_data();
+        $data = rest_do_request(new WP_REST_Request('GET', "/giveflow/v1/admin/donors/{$id}/profile"))->get_data();
 
         $this->assertNull($data['donor']['magic_link_url'] ?? null);
     }
@@ -68,7 +68,7 @@ final class DonorProfileMintsNoTokenTest extends IntegrationTestCase
         $this->admin();
         $id = $this->donorId();
 
-        $res = rest_do_request(new WP_REST_Request('POST', "/dono/v1/admin/donors/{$id}/portal-link"));
+        $res = rest_do_request(new WP_REST_Request('POST', "/giveflow/v1/admin/donors/{$id}/portal-link"));
 
         $this->assertSame(201, $res->get_status());
         $this->assertStringContainsString('token=', (string) ($res->get_data()['magic_link_url'] ?? ''));
@@ -80,7 +80,7 @@ final class DonorProfileMintsNoTokenTest extends IntegrationTestCase
         wp_set_current_user(self::factory()->user->create(['role' => 'subscriber']));
         $id = $this->donorId();
 
-        $res = rest_do_request(new WP_REST_Request('POST', "/dono/v1/admin/donors/{$id}/portal-link"));
+        $res = rest_do_request(new WP_REST_Request('POST', "/giveflow/v1/admin/donors/{$id}/portal-link"));
 
         $this->assertGreaterThanOrEqual(400, $res->get_status());
         $this->assertSame(0, $this->tokenCount($id));
@@ -95,9 +95,9 @@ final class DonorProfileMintsNoTokenTest extends IntegrationTestCase
         $this->admin();
         $id = $this->donorId();
 
-        rest_do_request(new WP_REST_Request('POST', "/dono/v1/admin/donors/{$id}/portal-link"));
+        rest_do_request(new WP_REST_Request('POST', "/giveflow/v1/admin/donors/{$id}/portal-link"));
 
-        $rows = DB::table('dono_magic_link_tokens')->where('donor_id', $id)->getAll();
+        $rows = DB::table('giveflow_magic_link_tokens')->where('donor_id', $id)->getAll();
 
         $this->assertCount(1, $rows);
         $this->assertSame(PortalSession::PORTAL_PURPOSE, (string) $rows[0]['purpose']);
@@ -112,8 +112,8 @@ final class DonorProfileMintsNoTokenTest extends IntegrationTestCase
         $this->admin();
         $id = $this->donorId();
 
-        $data  = rest_do_request(new WP_REST_Request('POST', "/dono/v1/admin/donors/{$id}/portal-link"))->get_data();
-        $token = DB::table('dono_magic_link_tokens')->where('donor_id', $id)->get();
+        $data  = rest_do_request(new WP_REST_Request('POST', "/giveflow/v1/admin/donors/{$id}/portal-link"))->get_data();
+        $token = DB::table('giveflow_magic_link_tokens')->where('donor_id', $id)->get();
 
         $this->assertNotEmpty($data['expires_at'] ?? null);
         $this->assertLessThanOrEqual(
@@ -138,7 +138,7 @@ final class DonorProfileMintsNoTokenTest extends IntegrationTestCase
         $this->admin();
         $id = $this->donorId();
 
-        rest_do_request(new WP_REST_Request('POST', "/dono/v1/admin/donors/{$id}/portal-link"));
+        rest_do_request(new WP_REST_Request('POST', "/giveflow/v1/admin/donors/{$id}/portal-link"));
         $this->assertSame(1, $this->tokenCount($id));
 
         Plugin::instance()->container->get(PortalSession::class)->destroyAllFor($id);

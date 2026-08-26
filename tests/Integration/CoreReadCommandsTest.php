@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Analytics\EventRecorder;
-use Dono\Campaigns\CampaignService;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Commands\Command;
-use Dono\Foundation\Commands\CommandContext;
-use Dono\Foundation\Commands\CommandRegistry;
-use Dono\Core\Commands\CoreCommandProvider;
-use Dono\Foundation\Plugin;
+use GiveFlow\Analytics\EventRecorder;
+use GiveFlow\Campaigns\CampaignService;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Commands\Command;
+use GiveFlow\Foundation\Commands\CommandContext;
+use GiveFlow\Foundation\Commands\CommandRegistry;
+use GiveFlow\Core\Commands\CoreCommandProvider;
+use GiveFlow\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
  * Read/list commands are the assistant's eyes: paged, cap-gated, non-mutating,
  * and never surfacing raw donor PII in bulk listings (donor identity is its own
- * dono_view_donors-gated command).
+ * giveflow_view_donors-gated command).
  */
 final class CoreReadCommandsTest extends IntegrationTestCase
 {
@@ -38,7 +38,7 @@ final class CoreReadCommandsTest extends IntegrationTestCase
     {
         $admin = self::factory()->user->create(['role' => 'administrator']);
         $role  = get_role('administrator');
-        foreach (['dono_manage_campaigns', 'dono_manage_forms', 'dono_view_donations', 'dono_view_donors', 'dono_view_reports'] as $cap) {
+        foreach (['giveflow_manage_campaigns', 'giveflow_manage_forms', 'giveflow_view_donations', 'giveflow_view_donors', 'giveflow_view_reports'] as $cap) {
             $role->add_cap($cap);
         }
         wp_set_current_user($admin);
@@ -137,11 +137,11 @@ final class CoreReadCommandsTest extends IntegrationTestCase
         wp_set_current_user($admin);
 
         // The everyday area caps come from grantMetaCaps for any manage_options
-        // holder. (That sensitive caps like dono_refund_donations stay explicit
+        // holder. (That sensitive caps like giveflow_refund_donations stay explicit
         // is covered by CommandsRestTest's refund-denied case, which uses a clean
         // non-admin manage_options user - the shared admin role leaks caps here.)
-        $this->assertTrue(user_can($admin, 'dono_manage_campaigns'));
-        $this->assertTrue(user_can($admin, 'dono_view_donations'));
+        $this->assertTrue(user_can($admin, 'giveflow_manage_campaigns'));
+        $this->assertTrue(user_can($admin, 'giveflow_view_donations'));
 
         $ctx = new CommandContext($admin, 'chat', 'req-' . uniqid());
         $res = $this->registry()->dispatch('campaign.list', [], $ctx);
@@ -188,7 +188,7 @@ final class CoreReadCommandsTest extends IntegrationTestCase
 
     private function driveDonationToPaid(): string
     {
-        $createReq = new WP_REST_Request('POST', '/dono/v1/donations');
+        $createReq = new WP_REST_Request('POST', '/giveflow/v1/donations');
         $createReq->set_header('content-type', 'application/json');
         $createReq->set_body(json_encode([
             'email'        => 'read-cmd@example.com',
@@ -199,7 +199,7 @@ final class CoreReadCommandsTest extends IntegrationTestCase
         ]));
         $reference = rest_do_request($createReq)->get_data()['reference'];
 
-        $confirmReq = new WP_REST_Request('POST', "/dono/v1/donations/{$reference}/confirm");
+        $confirmReq = new WP_REST_Request('POST', "/giveflow/v1/donations/{$reference}/confirm");
         $confirmReq->set_header('content-type', 'application/json');
         $confirmReq->set_body('{}');
         rest_do_request($confirmReq);

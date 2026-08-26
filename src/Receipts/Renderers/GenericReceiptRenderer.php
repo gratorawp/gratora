@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Dono\Receipts\Renderers;
+namespace GiveFlow\Receipts\Renderers;
 
-use Dono\Campaigns\Styling\StylePresets;
-use Dono\Donations\Refund;
-use Dono\Foundation\Helpers\Money;
-use Dono\Foundation\Helpers\View;
-use Dono\Receipts\PdfBuilder;
-use Dono\Receipts\ReceiptContext;
-use Dono\Receipts\ReceiptRenderer;
+use GiveFlow\Campaigns\Styling\StylePresets;
+use GiveFlow\Donations\Refund;
+use GiveFlow\Foundation\Helpers\Money;
+use GiveFlow\Foundation\Helpers\View;
+use GiveFlow\Receipts\PdfBuilder;
+use GiveFlow\Receipts\ReceiptContext;
+use GiveFlow\Receipts\ReceiptRenderer;
 
 /**
  * Generic receipt renderer applied to every paid donation.
@@ -36,7 +36,7 @@ final class GenericReceiptRenderer implements ReceiptRenderer
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('Generic Receipt', 'dono-fundraising-platform');
+        return __('Generic Receipt', 'giveflow-fundraising-campaigns');
     }
 
     /** @since 1.0.0 */
@@ -95,9 +95,9 @@ final class GenericReceiptRenderer implements ReceiptRenderer
 
         return $this->pdf->fromHtml($html, [
             /* translators: %s: human-readable donation reference. */
-            'title'  => sprintf(__('Donation receipt %s', 'dono-fundraising-platform'), $ctx->donation->reference),
-            'author' => $ctx->org['name'] ?? 'Dono',
-            'subject' => __('Donation receipt', 'dono-fundraising-platform'),
+            'title'  => sprintf(__('Donation receipt %s', 'giveflow-fundraising-campaigns'), $ctx->donation->reference),
+            'author' => $ctx->org['name'] ?? 'GiveFlow',
+            'subject' => __('Donation receipt', 'giveflow-fundraising-campaigns'),
         ]);
     }
 
@@ -111,16 +111,16 @@ final class GenericReceiptRenderer implements ReceiptRenderer
      */
     private function loadTemplate(): array
     {
-        $stored = get_option('dono_receipt_settings', []);
+        $stored = get_option('giveflow_receipt_settings', []);
         if (! is_array($stored)) $stored = [];
 
         $defaults = [
-            'header_title'       => __('Donation receipt', 'dono-fundraising-platform'),
+            'header_title'       => __('Donation receipt', 'giveflow-fundraising-campaigns'),
             'intro'              => '',
-            'signoff'            => __('Thank you for your support.', 'dono-fundraising-platform'),
+            'signoff'            => __('Thank you for your support.', 'giveflow-fundraising-campaigns'),
             'footer_note'        => __(
                 "This is a non-fiscal acknowledgement of receipt. Whether your donation is tax-deductible depends on your local jurisdiction and the recipient organization's status. Keep this receipt for your records.",
-                'dono-fundraising-platform'
+                'giveflow-fundraising-campaigns'
             ),
             'show_tax_id'        => true,
             'show_donor_address' => false,
@@ -132,7 +132,7 @@ final class GenericReceiptRenderer implements ReceiptRenderer
 
         // Accent color from the org's default brand preset.
         $brandTokens = StylePresets::tokensFor(StylePresets::defaultId());
-        $accent      = (string) ($brandTokens['dono-accent'] ?? '#1e8a4e');
+        $accent      = (string) ($brandTokens['giveflow-accent'] ?? '#211d3f');
 
         return [
             'header_title'       => trim((string) ($stored['header_title'] ?? '')) !== '' ? (string) $stored['header_title'] : $defaults['header_title'],
@@ -142,7 +142,7 @@ final class GenericReceiptRenderer implements ReceiptRenderer
             'show_tax_id'        => array_key_exists('show_tax_id', $stored)        ? (bool) $stored['show_tax_id']        : $defaults['show_tax_id'],
             'show_donor_address' => array_key_exists('show_donor_address', $stored) ? (bool) $stored['show_donor_address'] : $defaults['show_donor_address'],
             'logo_url'           => $logoUrl,
-            'accent_color'       => preg_match('/^#[0-9a-fA-F]{3,8}$/', $accent) ? $accent : '#1e8a4e',
+            'accent_color'       => preg_match('/^#[0-9a-fA-F]{3,8}$/', $accent) ? $accent : '#211d3f',
         ];
     }
 
@@ -156,7 +156,7 @@ final class GenericReceiptRenderer implements ReceiptRenderer
     {
         $donation = $ctx->donation;
         $donorName = trim((string) ($ctx->donor_name ?? ''));
-        if ($donorName === '') $donorName = __('Friend', 'dono-fundraising-platform');
+        if ($donorName === '') $donorName = __('Friend', 'giveflow-fundraising-campaigns');
 
         $replacements = [
             '{donor_name}'        => $donorName,

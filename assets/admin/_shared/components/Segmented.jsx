@@ -1,1 +1,1 @@
-export { default } from '@dono/ui/components/Segmented';
+export { default } from '@giveflow/ui/components/Segmented';

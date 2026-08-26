@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Foundation\Upgrade;
+namespace GiveFlow\Foundation\Upgrade;
 
 /**
  * A one-shot data migration.

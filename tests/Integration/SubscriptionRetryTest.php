@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donations\Donation;
-use Dono\Donations\DonationRepository;
-use Dono\Foundation\Plugin;
-use Dono\Gateways\Stripe\StripeAccount;
-use Dono\Recurring\RecurringPlan;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Gateways\Stripe\StripeAccount;
+use GiveFlow\Recurring\RecurringPlan;
 use WP_REST_Request;
 
 /**
@@ -28,7 +28,7 @@ final class SubscriptionRetryTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        update_option('dono_gateway_config', [
+        update_option('giveflow_gateway_config', [
             'test_mode' => true,
             'stripe'    => ['webhook_secret_test' => 'whsec_retry'],
         ]);
@@ -39,17 +39,17 @@ final class SubscriptionRetryTest extends IntegrationTestCase
         $stripeAcct->saveKeys(false, 'sk_live_retry', 'pk_live_seed');
         $stripeAcct->refresh(['id' => 'acct_retry', 'charges_enabled' => true]);
 
-        $manager = $c->get(\Dono\Gateways\GatewayManager::class);
+        $manager = $c->get(\GiveFlow\Gateways\GatewayManager::class);
         if (! $manager->get('stripe')) {
-            $manager->register(new \Dono\Gateways\Stripe\StripeGateway(
-                $c->get(\Dono\Gateways\Stripe\StripeApi::class),
-                $c->get(\Dono\Donations\DonationRepository::class),
-                $c->get(\Dono\Donations\DonationService::class),
-                $c->get(\Dono\Gateways\Stripe\StripeAccount::class),
-                $c->get(\Dono\Donors\DonorRepository::class),
-                $c->get(\Dono\Donors\DonorService::class),
-                $c->get(\Dono\Foundation\Time\Clock::class),
-                $c->get(\Dono\Recurring\RecurringPlanRepository::class),
+            $manager->register(new \GiveFlow\Gateways\Stripe\StripeGateway(
+                $c->get(\GiveFlow\Gateways\Stripe\StripeApi::class),
+                $c->get(\GiveFlow\Donations\DonationRepository::class),
+                $c->get(\GiveFlow\Donations\DonationService::class),
+                $c->get(\GiveFlow\Gateways\Stripe\StripeAccount::class),
+                $c->get(\GiveFlow\Donors\DonorRepository::class),
+                $c->get(\GiveFlow\Donors\DonorService::class),
+                $c->get(\GiveFlow\Foundation\Time\Clock::class),
+                $c->get(\GiveFlow\Recurring\RecurringPlanRepository::class),
             ));
         }
 
@@ -89,8 +89,8 @@ final class SubscriptionRetryTest extends IntegrationTestCase
         // The log is where someone looks when a recurring donation misbehaved,
         // and a donor left on a schedule nobody collects is the loudest thing
         // it could be asked to report.
-        $logged = \Dono\Analytics\Event::query()
-            ->whereLike('type', \Dono\Analytics\ErrorLog::PREFIX . 'recurring.%')
+        $logged = \GiveFlow\Analytics\Event::query()
+            ->whereLike('type', \GiveFlow\Analytics\ErrorLog::PREFIX . 'recurring.%')
             ->getAll();
 
         $this->assertNotEmpty($logged, 'the failure reaches the log');
@@ -104,7 +104,7 @@ final class SubscriptionRetryTest extends IntegrationTestCase
         $this->failSubscriptionOnce = false;
         $this->stripeCalls          = [];
 
-        $req = new WP_REST_Request('POST', "/dono/v1/admin/donations/{$reference}/retry-subscription");
+        $req = new WP_REST_Request('POST', "/giveflow/v1/admin/donations/{$reference}/retry-subscription");
         $req->set_header('content-type', 'application/json');
         $req->set_body('{}');
         $res = $this->asAdmin(fn () => rest_do_request($req));
@@ -131,18 +131,18 @@ final class SubscriptionRetryTest extends IntegrationTestCase
     {
         $reference = $this->createMonthlyDonation();
 
-        $req = new WP_REST_Request('POST', "/dono/v1/admin/donations/{$reference}/retry-subscription");
+        $req = new WP_REST_Request('POST', "/giveflow/v1/admin/donations/{$reference}/retry-subscription");
         $req->set_body('{}');
         $res = $this->asAdmin(fn () => rest_do_request($req));
 
         $this->assertSame(422, $res->get_status());
         $data = $res->get_data();
-        $this->assertSame('dono_no_retry_needed', $data['code']);
+        $this->assertSame('giveflow_no_retry_needed', $data['code']);
     }
 
     private function createMonthlyDonation(): string
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/donations');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'email'        => 'retry+' . bin2hex(random_bytes(3)) . '@example.com',
@@ -172,7 +172,7 @@ final class SubscriptionRetryTest extends IntegrationTestCase
         $timestamp = (string) time();
         $sig       = hash_hmac('sha256', "{$timestamp}.{$payload}", $secret);
 
-        $req = new WP_REST_Request('POST', '/dono/v1/webhooks/stripe');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/webhooks/stripe');
         $req->set_header('content-type', 'application/json');
         $req->set_header('stripe_signature', "t={$timestamp},v1={$sig}");
         $req->set_body($payload);

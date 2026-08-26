@@ -11,7 +11,7 @@ export default function TodayStrip( { today } ) {
         chips.push( {
             key: 'donations',
             label: sprintf(
-                /* translators: %d: number of donations */ _n( '%d donation', '%d donations', today.donations_count, 'dono-fundraising-platform' ),
+                /* translators: %d: number of donations */ _n( '%d donation', '%d donations', today.donations_count, 'giveflow-fundraising-campaigns' ),
                 today.donations_count
             ),
         } );
@@ -26,7 +26,7 @@ export default function TodayStrip( { today } ) {
         chips.push( {
             key: 'notes',
             label: sprintf(
-                /* translators: %d: number of donations */ _n( '%d note', '%d notes', today.notes_count, 'dono-fundraising-platform' ),
+                /* translators: %d: number of donations */ _n( '%d note', '%d notes', today.notes_count, 'giveflow-fundraising-campaigns' ),
                 today.notes_count
             ),
         } );
@@ -36,7 +36,7 @@ export default function TodayStrip( { today } ) {
         chips.push( {
             key: 'refunds',
             label: sprintf(
-                /* translators: %d: number of donations */ _n( '%d refund', '%d refunds', today.refunds_count, 'dono-fundraising-platform' ),
+                /* translators: %d: number of donations */ _n( '%d refund', '%d refunds', today.refunds_count, 'giveflow-fundraising-campaigns' ),
                 today.refunds_count
             ),
             tone: 'warn',
@@ -45,19 +45,19 @@ export default function TodayStrip( { today } ) {
 
     if ( chips.length === 0 ) {
         return (
-            <p className="dono-today__empty">
-                { __( 'Quiet so far today.', 'dono-fundraising-platform' ) }
+            <p className="giveflow-today__empty">
+                { __( 'Quiet so far today.', 'giveflow-fundraising-campaigns' ) }
             </p>
         );
     }
 
     return (
-        <div className="dono-today">
-            <span className="dono-today__pulse" aria-hidden="true" />
-            <span className="dono-today__label">{ __( 'Last 24 hours', 'dono-fundraising-platform' ) }</span>
-            <ul className="dono-today__chips">
+        <div className="giveflow-today">
+            <span className="giveflow-today__pulse" aria-hidden="true" />
+            <span className="giveflow-today__label">{ __( 'Last 24 hours', 'giveflow-fundraising-campaigns' ) }</span>
+            <ul className="giveflow-today__chips">
                 { chips.map( ( c ) => (
-                    <li key={ c.key } className={ `dono-today__chip${ c.tone ? ' is-' + c.tone : '' }${ c.strong ? ' is-strong' : '' }` }>
+                    <li key={ c.key } className={ `giveflow-today__chip${ c.tone ? ' is-' + c.tone : '' }${ c.strong ? ' is-strong' : '' }` }>
                         { c.label }
                     </li>
                 ) ) }

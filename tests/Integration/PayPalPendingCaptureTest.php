@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Analytics\Event;
-use Dono\Donations\DonationRepository;
-use Dono\Donations\DonationService;
-use Dono\Foundation\Plugin;
-use Dono\Foundation\Time\Clock;
-use Dono\Gateways\GatewayManager;
-use Dono\Gateways\PayPal\PayPalAccount;
-use Dono\Gateways\PayPal\PayPalApi;
-use Dono\Gateways\PayPal\PayPalGateway;
-use Dono\Gateways\PayPal\PayPalPlans;
-use Dono\Recurring\RecurringPlanRepository;
+use GiveFlow\Analytics\Event;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Donations\DonationService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Foundation\Time\Clock;
+use GiveFlow\Gateways\GatewayManager;
+use GiveFlow\Gateways\PayPal\PayPalAccount;
+use GiveFlow\Gateways\PayPal\PayPalApi;
+use GiveFlow\Gateways\PayPal\PayPalGateway;
+use GiveFlow\Gateways\PayPal\PayPalPlans;
+use GiveFlow\Recurring\RecurringPlanRepository;
 use WP_REST_Request;
 
 /**
@@ -33,8 +33,8 @@ final class PayPalPendingCaptureTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        update_option('dono_gateway_config', ['test_mode' => true]);
-        update_option('dono_currency_locale', [
+        update_option('giveflow_gateway_config', ['test_mode' => true]);
+        update_option('giveflow_currency_locale', [
             'default_currency'     => 'USD',
             'supported_currencies' => ['USD'],
         ]);
@@ -87,7 +87,7 @@ final class PayPalPendingCaptureTest extends IntegrationTestCase
                 $c->get(PayPalPlans::class),
                 $c->get(RecurringPlanRepository::class),
                 $c->get(Clock::class),
-                $c->get(\Dono\Gateways\PayPal\PayPalPlanRecorder::class),
+                $c->get(\GiveFlow\Gateways\PayPal\PayPalPlanRecorder::class),
             ));
         }
     }
@@ -105,7 +105,7 @@ final class PayPalPendingCaptureTest extends IntegrationTestCase
 
     private function newDonation(): string
     {
-        $create = new WP_REST_Request('POST', '/dono/v1/donations');
+        $create = new WP_REST_Request('POST', '/giveflow/v1/donations');
         $create->set_header('content-type', 'application/json');
         $create->set_body((string) wp_json_encode([
             'email'        => 'pending@example.test',
@@ -128,7 +128,7 @@ final class PayPalPendingCaptureTest extends IntegrationTestCase
 
     private function capture(string $reference): void
     {
-        $req = new WP_REST_Request('POST', '/dono/v1/gateways/paypal/capture');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/gateways/paypal/capture');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'reference' => $reference,
@@ -164,7 +164,7 @@ final class PayPalPendingCaptureTest extends IntegrationTestCase
         $reference = $this->newDonation();
         $this->capture($reference);
 
-        $res  = rest_do_request(new WP_REST_Request('GET', "/dono/v1/admin/donations/{$reference}"));
+        $res  = rest_do_request(new WP_REST_Request('GET', "/giveflow/v1/admin/donations/{$reference}"));
         $body = (array) $res->get_data();
         $data = (array) ($body['donation'] ?? []);
 
@@ -182,7 +182,7 @@ final class PayPalPendingCaptureTest extends IntegrationTestCase
         $reference = $this->newDonation();
         $this->capture($reference);
 
-        $hook = new WP_REST_Request('POST', '/dono/v1/webhooks/paypal');
+        $hook = new WP_REST_Request('POST', '/giveflow/v1/webhooks/paypal');
         $hook->set_header('content-type', 'application/json');
         $hook->set_header('paypal_transmission_id', 'tx-1');
         $hook->set_header('paypal_transmission_time', '2026-08-11T12:00:00Z');
@@ -246,7 +246,7 @@ final class PayPalPendingCaptureTest extends IntegrationTestCase
 
     private function deliverCompleted(string $eventId, string $reference): void
     {
-        $hook = new WP_REST_Request('POST', '/dono/v1/webhooks/paypal');
+        $hook = new WP_REST_Request('POST', '/giveflow/v1/webhooks/paypal');
         $hook->set_header('content-type', 'application/json');
         $hook->set_header('paypal_transmission_id', 'tx-' . $eventId);
         $hook->set_header('paypal_transmission_time', '2026-08-11T12:00:00Z');
@@ -271,7 +271,7 @@ final class PayPalPendingCaptureTest extends IntegrationTestCase
     {
         $reference = $this->newDonation();
 
-        $hook = new WP_REST_Request('POST', '/dono/v1/webhooks/paypal');
+        $hook = new WP_REST_Request('POST', '/giveflow/v1/webhooks/paypal');
         $hook->set_header('content-type', 'application/json');
         $hook->set_header('paypal_transmission_id', 'tx-2');
         $hook->set_header('paypal_transmission_time', '2026-08-11T12:00:00Z');

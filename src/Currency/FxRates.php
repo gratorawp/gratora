@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Currency;
+namespace GiveFlow\Currency;
 
-use Dono\Foundation\Helpers\Money;
+use GiveFlow\Foundation\Helpers\Money;
 
 /**
- * Read access to the daily FX snapshot stored in the dono_fx_rates option.
+ * Read access to the daily FX snapshot stored in the giveflow_fx_rates option.
  *
  * Option shape: { base, date, fetched_at, rates } - units of CCY per 1 base.
  * Conversion is read-only. FxRatesUpdater owns the writes in product code; the
@@ -17,7 +17,7 @@ use Dono\Foundation\Helpers\Money;
  */
 final class FxRates
 {
-    public const OPTION = 'dono_fx_rates';
+    public const OPTION = 'giveflow_fx_rates';
 
     /**
      * Past this age a snapshot is unfit to be stamped onto money.

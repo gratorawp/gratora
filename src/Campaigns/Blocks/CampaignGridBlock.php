@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Campaigns\Blocks;
+namespace GiveFlow\Campaigns\Blocks;
 
-use Dono\Foundation\Helpers\Money;
-use Dono\Foundation\Helpers\View;
+use GiveFlow\Foundation\Helpers\Money;
+use GiveFlow\Foundation\Helpers\View;
 
 /**
  * Responsive card grid of other published campaigns ("more ways to give" section
@@ -18,7 +18,7 @@ final class CampaignGridBlock extends CampaignBlock
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'dono/campaign-grid';
+        return 'giveflow/campaign-grid';
     }
 
     /** @since 1.0.0 */
@@ -40,7 +40,7 @@ final class CampaignGridBlock extends CampaignBlock
         if ($excludeId === 0) {
             global $post;
             if ($post instanceof \WP_Post) {
-                $excludeId = (int) get_post_meta($post->ID, '_dono_campaign_id', true);
+                $excludeId = (int) get_post_meta($post->ID, '_giveflow_campaign_id', true);
             }
         }
 
@@ -56,15 +56,15 @@ final class CampaignGridBlock extends CampaignBlock
                 'heading'   => '',
                 'cards'     => [],
                 'emptyText' => (string) ($attrs['emptyText'] ?? '')
-                    ?: __('This is the only campaign running right now.', 'dono-fundraising-platform'),
+                    ?: __('This is the only campaign running right now.', 'giveflow-fundraising-campaigns'),
                 // Unlike the donation and donor blocks, nothing a visitor does
                 // makes another campaign appear. So the invitation points at
                 // the one they are already reading, which is the only way to
                 // give that exists today.
-                'emptySubText' => __('Which makes it an easy choice.', 'dono-fundraising-platform'),
+                'emptySubText' => __('Which makes it an easy choice.', 'giveflow-fundraising-campaigns'),
                 'emptyIcon'    => 'campaigns',
                 'notice'    => (is_user_logged_in() && current_user_can('edit_posts'))
-                    ? __('Only this campaign is published, so there is nothing to list. Visitors see the message above; this line is editor-only.', 'dono-fundraising-platform')
+                    ? __('Only this campaign is published, so there is nothing to list. Visitors see the message above; this line is editor-only.', 'giveflow-fundraising-campaigns')
                     : '',
                 'styleVars' => $this->styleVars($current),
             ]);
@@ -86,7 +86,7 @@ final class CampaignGridBlock extends CampaignBlock
                 'raised'    => Money::compact((int) $c->raised_cents, $c->currency),
                 'goalLabel' => $goalCents > 0
                     /* translators: %s: formatted goal amount */
-                    ? sprintf(__('of %s', 'dono-fundraising-platform'), Money::compact($goalCents, $c->currency))
+                    ? sprintf(__('of %s', 'giveflow-fundraising-campaigns'), Money::compact($goalCents, $c->currency))
                     : '',
                 'percent'   => $percent,
                 'accent'    => $c->accentColor(),

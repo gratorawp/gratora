@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Campaigns\Blocks;
+namespace GiveFlow\Campaigns\Blocks;
 
-use Dono\Forms\FormRepository;
-use Dono\Foundation\Helpers\View;
+use GiveFlow\Forms\FormRepository;
+use GiveFlow\Foundation\Helpers\View;
 
 /**
  * Renders the donate button and its inline form modal.
@@ -16,7 +16,7 @@ final class DonateButtonBlock extends CampaignBlock
 {
     /** @since 1.0.0 */
     public function __construct(
-        \Dono\Campaigns\CampaignRepository $campaigns,
+        \GiveFlow\Campaigns\CampaignRepository $campaigns,
         private readonly FormRepository $forms,
     ) {
         parent::__construct($campaigns);
@@ -25,7 +25,7 @@ final class DonateButtonBlock extends CampaignBlock
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'dono/donate-button';
+        return 'giveflow/donate-button';
     }
 
     /** @since 1.0.0 */
@@ -54,8 +54,8 @@ final class DonateButtonBlock extends CampaignBlock
         // as broken), an editor-only notice for anyone who can fix it.
         if (! $form) {
             return (is_user_logged_in() && current_user_can('edit_posts'))
-                ? '<div class="dono-block-notice">'
-                    . esc_html__('This campaign has no published donation form yet.', 'dono-fundraising-platform')
+                ? '<div class="giveflow-block-notice">'
+                    . esc_html__('This campaign has no published donation form yet.', 'giveflow-fundraising-campaigns')
                     . '</div>'
                 : '';
         }
@@ -66,7 +66,7 @@ final class DonateButtonBlock extends CampaignBlock
         $editorPreview = $this->isBlockRendererRequest();
         $formHtml      = '';
         if (! $editorPreview) {
-            $formHtml = do_shortcode('[dono_donation_form slug="' . esc_attr($form->slug) . '"]');
+            $formHtml = do_shortcode('[giveflow_donation_form slug="' . esc_attr($form->slug) . '"]');
         }
 
         // The form gate renders no form while the campaign sits outside its
@@ -74,27 +74,27 @@ final class DonateButtonBlock extends CampaignBlock
         // a button here would open nothing at all.
         //
         // Asked of the markup rather than of emptiness: the gate also returns a
-        // short explanation to anyone who can manage Dono, and a button opening
+        // short explanation to anyone who can manage GiveFlow, and a button opening
         // that is no better than a button opening nothing.
         $hasForm = str_contains($formHtml, 'data-form-slug=');
         if (! $editorPreview && ! $hasForm) {
             $message = $campaign->notAcceptingReason() === 'ended'
-                ? __('This campaign has finished accepting donations.', 'dono-fundraising-platform')
-                : __('Donations are not open for this campaign yet.', 'dono-fundraising-platform');
+                ? __('This campaign has finished accepting donations.', 'giveflow-fundraising-campaigns')
+                : __('Donations are not open for this campaign yet.', 'giveflow-fundraising-campaigns');
 
             $notice = (is_user_logged_in() && current_user_can('edit_posts'))
-                ? '<div class="dono-block-notice">'
-                    . esc_html__('This campaign is not accepting donations, so the donate button is hidden. Publish the campaign and check its schedule.', 'dono-fundraising-platform')
+                ? '<div class="giveflow-block-notice">'
+                    . esc_html__('This campaign is not accepting donations, so the donate button is hidden. Publish the campaign and check its schedule.', 'giveflow-fundraising-campaigns')
                     . '</div>'
                 : '';
 
-            return '<p class="dono-block__empty">' . esc_html($message) . '</p>' . $notice;
+            return '<p class="giveflow-block__empty">' . esc_html($message) . '</p>' . $notice;
         }
 
         return View::loadRelative(__DIR__, 'views/donate-button', [
             // ?: not ??: the attribute exists and is an empty string when the
             // organizer has not renamed it, so ?? would hand the view ''.
-            'label'        => (string) ($attrs['label'] ?? '') ?: __('Donate now', 'dono-fundraising-platform'),
+            'label'        => (string) ($attrs['label'] ?? '') ?: __('Donate now', 'giveflow-fundraising-campaigns'),
             'align'        => (string) ($attrs['align'] ?? 'left'),
             'size'         => in_array($attrs['size'] ?? 'md', ['sm', 'md', 'lg'], true)
                 ? (string) $attrs['size'] : 'md',

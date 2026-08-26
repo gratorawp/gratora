@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Async;
+namespace GiveFlow\Async;
 
 /**
  * Wrapper over Action Scheduler.
@@ -11,7 +11,7 @@ namespace Dono\Async;
  */
 final class AsyncDispatcher
 {
-    public const GROUP = 'dono';
+    public const GROUP = 'giveflow';
 
     /**
      * @param array<string,mixed> $args

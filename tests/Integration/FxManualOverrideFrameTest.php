@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Analytics\ErrorLog;
-use Dono\Analytics\Event;
-use Dono\Async\AsyncDispatcher;
-use Dono\Currency\FxRates;
-use Dono\Currency\FxRatesUpdater;
-use Dono\Foundation\Helpers\Money;
-use Dono\Foundation\Plugin;
-use Dono\Settings\SettingsService;
+use GiveFlow\Analytics\ErrorLog;
+use GiveFlow\Analytics\Event;
+use GiveFlow\Async\AsyncDispatcher;
+use GiveFlow\Currency\FxRates;
+use GiveFlow\Currency\FxRatesUpdater;
+use GiveFlow\Foundation\Helpers\Money;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Settings\SettingsService;
 use WP_REST_Request;
 
 /**
@@ -290,7 +290,7 @@ final class FxManualOverrideFrameTest extends IntegrationTestCase
         $base = strtoupper(Money::defaultCurrency());
         $this->seed('EUR', ['USD' => 1.0843, 'GBP' => 0.8521]);
 
-        $state = (array) rest_do_request(new WP_REST_Request('GET', '/dono/v1/admin/currency/fx'))->get_data();
+        $state = (array) rest_do_request(new WP_REST_Request('GET', '/giveflow/v1/admin/currency/fx'))->get_data();
         $this->assertSame($base, $state['base'], 'the column is labelled with the org base');
         $this->assertSame('EUR', $state['frame'], 'the numbers under it are not always in it');
 
@@ -323,7 +323,7 @@ final class FxManualOverrideFrameTest extends IntegrationTestCase
 
     private function fxPut(array $body): \WP_REST_Response
     {
-        $req = new WP_REST_Request('PUT', '/dono/v1/admin/currency/fx');
+        $req = new WP_REST_Request('PUT', '/giveflow/v1/admin/currency/fx');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode($body));
 

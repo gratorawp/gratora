@@ -14,7 +14,7 @@ function config( checked ) {
         currency: 'USD',
         gateway:  'offline',
         layout:   'inline',
-        rest:     'https://example.test/wp-json/dono/v1/donations',
+        rest:     'https://example.test/wp-json/giveflow/v1/donations',
         gateways: {
             options: [ {
                 id:          'offline',
@@ -54,12 +54,12 @@ function config( checked ) {
 
 function addForm( cfg ) {
     const form = document.createElement( 'form' );
-    form.className = 'dono-donation-form';
-    form.id = 'dono-form-1';
+    form.className = 'giveflow-donation-form';
+    form.id = 'giveflow-form-1';
 
     const json = document.createElement( 'script' );
     json.type = 'application/json';
-    json.setAttribute( 'data-dono-form-config', '' );
+    json.setAttribute( 'data-giveflow-form-config', '' );
     json.textContent = JSON.stringify( cfg );
     form.appendChild( json );
 
@@ -79,12 +79,12 @@ async function boot() {
 const { settle } = require( './support/waitFor' );
 
 async function donate( form ) {
-    form.querySelector( '.dono-form__button--primary' ).click();
+    form.querySelector( '.giveflow-form__button--primary' ).click();
     await settle();
 }
 
 function consentBox( form ) {
-    return form.querySelector( '.dono-form__consent-purpose input[type="checkbox"]' );
+    return form.querySelector( '.giveflow-form__consent-purpose input[type="checkbox"]' );
 }
 
 let sent = [];
@@ -103,7 +103,7 @@ beforeEach( () => {
         return Promise.resolve( {
             ok:   true,
             json: () => Promise.resolve( {
-                reference:    'DONO-2026-00001',
+                reference:    'GIVEFLOW-2026-00001',
                 status_token: 'tok',
                 status:       'pending',
                 gateway:      'offline',
@@ -138,7 +138,7 @@ describe( 'a required consent purpose', () => {
 
         expect( sent ).toHaveLength( 0 );
 
-        const error = form.querySelector( '.dono-form__consent-purpose .dono-form__field-error' );
+        const error = form.querySelector( '.giveflow-form__consent-purpose .giveflow-form__field-error' );
         expect( error ).not.toBeNull();
         expect( consentBox( form ).getAttribute( 'aria-invalid' ) ).toBe( 'true' );
     } );

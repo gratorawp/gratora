@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Recurring;
+namespace GiveFlow\Recurring;
 
 use RuntimeException;
 

@@ -42,31 +42,31 @@ export default function QuickActions() {
         setCreating( true );
         try {
             const c = await apiFetch( {
-                path:   '/dono/v1/admin/campaigns',
+                path:   '/giveflow/v1/admin/campaigns',
                 method: 'POST',
-                data:   { title: __( 'Untitled campaign', 'dono-fundraising-platform' ) },
+                data:   { title: __( 'Untitled campaign', 'giveflow-fundraising-campaigns' ) },
             } );
             window.location.href = detailHref( c.id, 'overview' );
         } catch ( err ) {
             setCreating( false );
-            notify.error( err?.message || __( 'Could not create the campaign. Please try again.', 'dono-fundraising-platform' ) );
+            notify.error( err?.message || __( 'Could not create the campaign. Please try again.', 'giveflow-fundraising-campaigns' ) );
         }
     };
 
     return (
-        <div className="dono-quick-actions">
-            <Button variant="primary" onClick={ onNewCampaign } isBusy={ creating } disabled={ creating } className="dono-quick-actions__primary">
-                { ICON.plus } { __( 'New campaign', 'dono-fundraising-platform' ) }
+        <div className="giveflow-quick-actions">
+            <Button variant="primary" onClick={ onNewCampaign } isBusy={ creating } disabled={ creating } className="giveflow-quick-actions__primary">
+                { ICON.plus } { __( 'New campaign', 'giveflow-fundraising-campaigns' ) }
             </Button>
 
-            <a className="dono-quick-actions__item" href={ adminUrl( { page: 'dono-donations' } ) }>
-                { ICON.donations } { __( 'Donations', 'dono-fundraising-platform' ) }
+            <a className="giveflow-quick-actions__item" href={ adminUrl( { page: 'giveflow-donations' } ) }>
+                { ICON.donations } { __( 'Donations', 'giveflow-fundraising-campaigns' ) }
             </a>
-            <a className="dono-quick-actions__item" href={ adminUrl( { page: 'dono-donors' } ) }>
-                { ICON.donors } { __( 'Donors', 'dono-fundraising-platform' ) }
+            <a className="giveflow-quick-actions__item" href={ adminUrl( { page: 'giveflow-donors' } ) }>
+                { ICON.donors } { __( 'Donors', 'giveflow-fundraising-campaigns' ) }
             </a>
-            <a className="dono-quick-actions__item" href={ adminUrl( { page: 'dono-settings' } ) }>
-                { ICON.settings } { __( 'Settings', 'dono-fundraising-platform' ) }
+            <a className="giveflow-quick-actions__item" href={ adminUrl( { page: 'giveflow-settings' } ) }>
+                { ICON.settings } { __( 'Settings', 'giveflow-fundraising-campaigns' ) }
             </a>
         </div>
     );

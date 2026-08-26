@@ -10,8 +10,8 @@ export default function RecurringForecast( { recurring } ) {
             <EmptyState
                 compact
                 icon={ <RotateCw size={ 22 } strokeWidth={ 1.75 } /> }
-                title={ __( 'No recurring plans yet', 'dono-fundraising-platform' ) }
-                body={ __( 'Enable a recurring frequency on your form to unlock predictable monthly revenue.', 'dono-fundraising-platform' ) }
+                title={ __( 'No recurring plans yet', 'giveflow-fundraising-campaigns' ) }
+                body={ __( 'Enable a recurring frequency on your form to unlock predictable monthly revenue.', 'giveflow-fundraising-campaigns' ) }
             />
         );
     }
@@ -19,23 +19,23 @@ export default function RecurringForecast( { recurring } ) {
     const { active_plans, mrr_cents, projected_30d_cents, new_this_month, currency } = recurring;
 
     return (
-        <div className="dono-recurring">
-            <div className="dono-recurring__main">
-                <div className="dono-recurring__mrr">
+        <div className="giveflow-recurring">
+            <div className="giveflow-recurring__main">
+                <div className="giveflow-recurring__mrr">
                     { formatAmount( mrr_cents, currency ) }
-                    <span className="dono-recurring__suffix">{ __( '/ month', 'dono-fundraising-platform' ) }</span>
+                    <span className="giveflow-recurring__suffix">{ __( '/ month', 'giveflow-fundraising-campaigns' ) }</span>
                 </div>
-                <div className="dono-recurring__sub">
+                <div className="giveflow-recurring__sub">
                     { sprintf(
-                        /* translators: %d: count */ _n( '%d active plan', '%d active plans', active_plans, 'dono-fundraising-platform' ),
+                        /* translators: %d: count */ _n( '%d active plan', '%d active plans', active_plans, 'giveflow-fundraising-campaigns' ),
                         active_plans
                     ) }
                     { new_this_month > 0 && (
                         <>
-                            <span className="dono-recurring__dot" aria-hidden="true">·</span>
-                            <span className="dono-recurring__new">
+                            <span className="giveflow-recurring__dot" aria-hidden="true">·</span>
+                            <span className="giveflow-recurring__new">
                                 { sprintf(
-                                    /* translators: %d: count */ _n( '+%d new this month', '+%d new this month', new_this_month, 'dono-fundraising-platform' ),
+                                    /* translators: %d: count */ _n( '+%d new this month', '+%d new this month', new_this_month, 'giveflow-fundraising-campaigns' ),
                                     new_this_month
                                 ) }
                             </span>
@@ -44,9 +44,9 @@ export default function RecurringForecast( { recurring } ) {
                 </div>
             </div>
 
-            <div className="dono-recurring__forecast">
-                <div className="dono-recurring__forecast-label">{ __( 'Projected next 30 days', 'dono-fundraising-platform' ) }</div>
-                <div className="dono-recurring__forecast-value">
+            <div className="giveflow-recurring__forecast">
+                <div className="giveflow-recurring__forecast-label">{ __( 'Projected next 30 days', 'giveflow-fundraising-campaigns' ) }</div>
+                <div className="giveflow-recurring__forecast-value">
                     { formatAmount( projected_30d_cents, currency ) }
                 </div>
             </div>

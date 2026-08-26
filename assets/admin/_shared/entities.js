@@ -1,5 +1,5 @@
 /**
- * Dono entity registration for @wordpress/core-data. Call once on boot.
+ * GiveFlow entity registration for @wordpress/core-data. Call once on boot.
  */
 
 import { dispatch } from '@wordpress/data';
@@ -7,22 +7,22 @@ import { __ } from '@wordpress/i18n';
 
 let registered = false;
 
-export function registerDonoEntities() {
+export function registerGiveFlowEntities() {
     if ( registered ) return;
     registered = true;
 
     dispatch( 'core' ).addEntities( [
         {
-            kind:    'dono/v1',
+            kind:    'giveflow/v1',
             name:    'campaign',
-            baseURL: '/dono/v1/admin/campaigns',
-            label:   __( 'Campaign', 'dono-fundraising-platform' ),
+            baseURL: '/giveflow/v1/admin/campaigns',
+            label:   __( 'Campaign', 'giveflow-fundraising-campaigns' ),
         },
         {
-            kind:    'dono/v1',
+            kind:    'giveflow/v1',
             name:    'form',
-            baseURL: '/dono/v1/admin/forms',
-            label:   __( 'Donation form', 'dono-fundraising-platform' ),
+            baseURL: '/giveflow/v1/admin/forms',
+            label:   __( 'Donation form', 'giveflow-fundraising-campaigns' ),
         },
     ] );
 }

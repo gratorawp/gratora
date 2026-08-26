@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Rest;
+namespace GiveFlow\Rest;
 
 /**
  * The one place a page number from a request becomes a number we will do

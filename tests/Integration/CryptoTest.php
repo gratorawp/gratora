@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Foundation\Crypto\Crypto;
+use GiveFlow\Foundation\Crypto\Crypto;
 
 /**
- * Crypto reads its key from dono_system_settings, so it needs the real DB.
+ * Crypto reads its key from giveflow_system_settings, so it needs the real DB.
  * Relocated from the pure-unit suite for that reason.
  */
 final class CryptoTest extends IntegrationTestCase

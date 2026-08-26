@@ -3,7 +3,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
 
 import { detailHref } from '../_shared/format';
-import Dialog from '@dono/ui/components/Dialog';
+import Dialog from '@giveflow/ui/components/Dialog';
 import Notice from '../_shared/components/Notice';
 import Field from '../_shared/components/Field';
 import Segmented from '../_shared/components/Segmented';
@@ -16,17 +16,17 @@ import Btn from '../_shared/components/Btn';
 import { DollarSign, HandHeart, Users, Ban, ImagePlus, Plus } from 'lucide-react';
 
 const GOAL_OPTIONS = [
-    { value: 'amount',    label: __( 'Amount', 'dono-fundraising-platform' ),    icon: <DollarSign strokeWidth={ 1.75 } /> },
-    { value: 'donations', label: __( 'Donations', 'dono-fundraising-platform' ), icon: <HandHeart strokeWidth={ 1.75 } /> },
-    { value: 'donors',    label: __( 'Donors', 'dono-fundraising-platform' ),    icon: <Users strokeWidth={ 1.75 } /> },
-    { value: 'none',      label: __( 'No goal', 'dono-fundraising-platform' ),   icon: <Ban strokeWidth={ 1.75 } /> },
+    { value: 'amount',    label: __( 'Amount', 'giveflow-fundraising-campaigns' ),    icon: <DollarSign strokeWidth={ 1.75 } /> },
+    { value: 'donations', label: __( 'Donations', 'giveflow-fundraising-campaigns' ), icon: <HandHeart strokeWidth={ 1.75 } /> },
+    { value: 'donors',    label: __( 'Donors', 'giveflow-fundraising-campaigns' ),    icon: <Users strokeWidth={ 1.75 } /> },
+    { value: 'none',      label: __( 'No goal', 'giveflow-fundraising-campaigns' ),   icon: <Ban strokeWidth={ 1.75 } /> },
 ];
 
 const GOAL_DESC = {
-    amount:    __( 'Track progress toward a fundraising total.', 'dono-fundraising-platform' ),
-    donations: __( 'Track the number of completed donations.', 'dono-fundraising-platform' ),
-    donors:    __( 'Track the number of unique donors who give to this campaign.', 'dono-fundraising-platform' ),
-    none:      __( 'No progress bar or target.', 'dono-fundraising-platform' ),
+    amount:    __( 'Track progress toward a fundraising total.', 'giveflow-fundraising-campaigns' ),
+    donations: __( 'Track the number of completed donations.', 'giveflow-fundraising-campaigns' ),
+    donors:    __( 'Track the number of unique donors who give to this campaign.', 'giveflow-fundraising-campaigns' ),
+    none:      __( 'No progress bar or target.', 'giveflow-fundraising-campaigns' ),
 };
 
 function slugify( s ) {
@@ -37,8 +37,8 @@ function openCoverFrame( onSelect ) {
     const media = window.wp?.media;
     if ( ! media ) return;
     const frame = media( {
-        title:    __( 'Select or upload a cover image', 'dono-fundraising-platform' ),
-        button:   { text: __( 'Use this image', 'dono-fundraising-platform' ) },
+        title:    __( 'Select or upload a cover image', 'giveflow-fundraising-campaigns' ),
+        button:   { text: __( 'Use this image', 'giveflow-fundraising-campaigns' ) },
         multiple: false,
         library:  { type: 'image' },
     } );
@@ -55,8 +55,8 @@ export default function CreateCampaignDrawer( { onClose } ) {
     const [ slugEdited, setSlugEdited ]   = useState( false );
     const [ editingSlug, setEditingSlug ] = useState( false );
 
-    const campaignTypes = window.dono?.campaign_types || {};
-    const typeNotices   = window.dono?.campaign_type_notices || {};
+    const campaignTypes = window.giveflow?.campaign_types || {};
+    const typeNotices   = window.giveflow?.campaign_type_notices || {};
     const [ campaignType, setCampaignType ] = useState( 'standard' );
 
     const [ goalType, setGoalType ] = useState( 'amount' );
@@ -87,7 +87,7 @@ export default function CreateCampaignDrawer( { onClose } ) {
 
     useEffect( () => {
         let aborted = false;
-        apiFetch( { path: '/dono/v1/admin/campaigns/funds' } )
+        apiFetch( { path: '/giveflow/v1/admin/campaigns/funds' } )
             .then( ( rows ) => {
                 if ( aborted || ! Array.isArray( rows ) ) return;
                 setFunds( rows.map( ( f ) => ( { value: f.id, label: f.name, hint: f.code } ) ) );
@@ -103,7 +103,7 @@ export default function CreateCampaignDrawer( { onClose } ) {
         if ( ! slugEdited ) setSlug( slugify( v ) );
     };
 
-    const siteBase = ( window.dono?.wp?.home_url || '' )
+    const siteBase = ( window.giveflow?.wp?.home_url || '' )
         .replace( /^https?:\/\//, '' )
         .replace( /\/+$/, '' );
     const slugBase = `${ siteBase }/campaigns`;
@@ -143,36 +143,36 @@ export default function CreateCampaignDrawer( { onClose } ) {
 
         try {
             const c = await apiFetch( {
-                path:   '/dono/v1/admin/campaigns',
+                path:   '/giveflow/v1/admin/campaigns',
                 method: 'POST',
                 data:   payload,
             } );
             window.location.href = detailHref( c.id, 'overview' );
         } catch ( err ) {
-            setError( err?.message || __( 'Could not create campaign.', 'dono-fundraising-platform' ) );
+            setError( err?.message || __( 'Could not create campaign.', 'giveflow-fundraising-campaigns' ) );
             setSubmitting( false );
         }
     };
 
     const foot = (
-        <div className="dono-cc__foot">
+        <div className="giveflow-cc__foot">
             { /* eslint-disable-next-line jsx-a11y/label-has-associated-control -- Switch is self-labeled via its label prop; the wrapping label makes the whole row a click target */ }
-            <label className="dono-cc__publish">
-                <Switch checked={ publishNow } onChange={ setPublishNow } label={ __( 'Publish now', 'dono-fundraising-platform' ) } />
-                <span className="dono-cc__publish-txt">
-                    <strong>{ publishNow ? __( 'Publish now', 'dono-fundraising-platform' ) : __( 'Create as draft', 'dono-fundraising-platform' ) }</strong>
+            <label className="giveflow-cc__publish">
+                <Switch checked={ publishNow } onChange={ setPublishNow } label={ __( 'Publish now', 'giveflow-fundraising-campaigns' ) } />
+                <span className="giveflow-cc__publish-txt">
+                    <strong>{ publishNow ? __( 'Publish now', 'giveflow-fundraising-campaigns' ) : __( 'Create as draft', 'giveflow-fundraising-campaigns' ) }</strong>
                     <span>{ publishNow
-                        ? __( 'Page goes live on create', 'dono-fundraising-platform' )
-                        : __( 'Toggle to publish now', 'dono-fundraising-platform' ) }</span>
+                        ? __( 'Page goes live on create', 'giveflow-fundraising-campaigns' )
+                        : __( 'Toggle to publish now', 'giveflow-fundraising-campaigns' ) }</span>
                 </span>
             </label>
-            <div className="dono-cc__foot-actions">
+            <div className="giveflow-cc__foot-actions">
                 <Btn variant="ghost" onClick={ onClose } disabled={ submitting }>
-                    { __( 'Cancel', 'dono-fundraising-platform' ) }
+                    { __( 'Cancel', 'giveflow-fundraising-campaigns' ) }
                 </Btn>
                 <Btn variant="primary" onClick={ submit } isBusy={ submitting } disabled={ ! canCreate }>
                     <Plus size={ 14 } strokeWidth={ 1.75 } />
-                    { __( 'Create', 'dono-fundraising-platform' ) }
+                    { __( 'Create', 'giveflow-fundraising-campaigns' ) }
                 </Btn>
             </div>
         </div>
@@ -180,85 +180,85 @@ export default function CreateCampaignDrawer( { onClose } ) {
 
     return (
         <Dialog
-            title={ __( 'New campaign', 'dono-fundraising-platform' ) }
+            title={ __( 'New campaign', 'giveflow-fundraising-campaigns' ) }
             onClose={ submitting ? undefined : onClose }
             foot={ foot }
         >
-            <p className="dono-dialog__help">
-                { __( 'A few quick details, then you are live. You can change everything later.', 'dono-fundraising-platform' ) }
+            <p className="giveflow-dialog__help">
+                { __( 'A few quick details, then you are live. You can change everything later.', 'giveflow-fundraising-campaigns' ) }
             </p>
-            <div className="dono-cc">
+            <div className="giveflow-cc">
             { error && (
-                <div ref={ errorRef } className="dono-cc__error">
+                <div ref={ errorRef } className="giveflow-cc__error">
                     <Notice status="error" isDismissible={ false }>{ error }</Notice>
                 </div>
             ) }
 
-            <Field label={ __( 'Campaign title', 'dono-fundraising-platform' ) }>
+            <Field label={ __( 'Campaign title', 'giveflow-fundraising-campaigns' ) }>
                 <input
-                    className="dono-input"
+                    className="giveflow-input"
                     type="text"
                     value={ title }
                     autoFocus
-                    placeholder={ __( 'Enter campaign title', 'dono-fundraising-platform' ) }
+                    placeholder={ __( 'Enter campaign title', 'giveflow-fundraising-campaigns' ) }
                     onChange={ ( e ) => onTitle( e.target.value ) }
                 />
             </Field>
 
             { Object.keys( campaignTypes ).length > 1 && (
-                <Field label={ __( 'Campaign type', 'dono-fundraising-platform' ) }>
+                <Field label={ __( 'Campaign type', 'giveflow-fundraising-campaigns' ) }>
                     <Segmented
-                        ariaLabel={ __( 'Campaign type', 'dono-fundraising-platform' ) }
+                        ariaLabel={ __( 'Campaign type', 'giveflow-fundraising-campaigns' ) }
                         value={ campaignType }
                         onChange={ setCampaignType }
                         options={ Object.entries( campaignTypes ).map( ( [ value, label ] ) => ( { value, label } ) ) }
                     />
-                    <div className="dono-cc__goal-desc">
+                    <div className="giveflow-cc__goal-desc">
                         { campaignType === 'standard'
-                            ? __( 'Collects donations directly on the campaign page.', 'dono-fundraising-platform' )
+                            ? __( 'Collects donations directly on the campaign page.', 'giveflow-fundraising-campaigns' )
                             : ( typeNotices[ campaignType ] || '' ) }
                     </div>
                 </Field>
             ) }
 
-            <Field label={ __( 'Goal', 'dono-fundraising-platform' ) }>
+            <Field label={ __( 'Goal', 'giveflow-fundraising-campaigns' ) }>
                 <Segmented
-                    ariaLabel={ __( 'Goal type', 'dono-fundraising-platform' ) }
+                    ariaLabel={ __( 'Goal type', 'giveflow-fundraising-campaigns' ) }
                     value={ goalType }
                     onChange={ setGoalType }
                     options={ GOAL_OPTIONS }
                 />
                 { goalType === 'amount' && (
-                    <div className="dono-cc__goal-input">
+                    <div className="giveflow-cc__goal-input">
                         <AmountInput
                             value={ amount }
                             onChange={ setAmount }
-                            currency={ window.dono?.default_currency || 'USD' }
+                            currency={ window.giveflow?.default_currency || 'USD' }
                             placeholder="0"
                         />
                     </div>
                 ) }
                 { ( goalType === 'donations' || goalType === 'donors' ) && (
-                    <div className="dono-cc__goal-input">
+                    <div className="giveflow-cc__goal-input">
                         <input
-                            className="dono-input"
+                            className="giveflow-input"
                             type="number"
                             min="0"
                             value={ count }
-                            placeholder={ __( 'Enter a number', 'dono-fundraising-platform' ) }
+                            placeholder={ __( 'Enter a number', 'giveflow-fundraising-campaigns' ) }
                             onChange={ ( e ) => setCount( e.target.value ) }
                         />
                     </div>
                 ) }
-                <div className="dono-cc__goal-desc">{ GOAL_DESC[ goalType ] }</div>
+                <div className="giveflow-cc__goal-desc">{ GOAL_DESC[ goalType ] }</div>
             </Field>
 
             <Field
-                label={ __( 'Description', 'dono-fundraising-platform' ) }
-                help={ __( 'One or two sentences. Shows on campaign cards and the page hero.', 'dono-fundraising-platform' ) }
+                label={ __( 'Description', 'giveflow-fundraising-campaigns' ) }
+                help={ __( 'One or two sentences. Shows on campaign cards and the page hero.', 'giveflow-fundraising-campaigns' ) }
             >
                 <textarea
-                    className="dono-textarea"
+                    className="giveflow-textarea"
                     rows={ 3 }
                     value={ description }
                     onChange={ ( e ) => setDescription( e.target.value ) }
@@ -266,20 +266,20 @@ export default function CreateCampaignDrawer( { onClose } ) {
             </Field>
 
             <Field
-                label={ __( 'Fund', 'dono-fundraising-platform' ) }
-                help={ __( 'Donations to this campaign are designated to this fund.', 'dono-fundraising-platform' ) }
+                label={ __( 'Fund', 'giveflow-fundraising-campaigns' ) }
+                help={ __( 'Donations to this campaign are designated to this fund.', 'giveflow-fundraising-campaigns' ) }
             >
                 <SearchableSelect
                     value={ fundId }
                     onChange={ setFundId }
                     options={ funds }
-                    placeholder={ __( 'Search funds', 'dono-fundraising-platform' ) }
+                    placeholder={ __( 'Search funds', 'giveflow-fundraising-campaigns' ) }
                 />
             </Field>
 
             <Field
-                label={ __( 'Schedule', 'dono-fundraising-platform' ) }
-                help={ __( 'By default the campaign is always on with no end date.', 'dono-fundraising-platform' ) }
+                label={ __( 'Schedule', 'giveflow-fundraising-campaigns' ) }
+                help={ __( 'By default the campaign is always on with no end date.', 'giveflow-fundraising-campaigns' ) }
             >
                 <ScheduleFields
                     enabled={ scheduleOn }
@@ -291,48 +291,48 @@ export default function CreateCampaignDrawer( { onClose } ) {
                 />
             </Field>
 
-            <Field label={ __( 'Cover image', 'dono-fundraising-platform' ) }>
+            <Field label={ __( 'Cover image', 'giveflow-fundraising-campaigns' ) }>
                 { cover ? (
-                    <div className="dono-cc__cover-sel">
-                        <img className="dono-cc__cover-thumb" src={ cover.url } alt="" />
-                        <span className="dono-cc__cover-name">{ __( 'Cover image selected', 'dono-fundraising-platform' ) }</span>
+                    <div className="giveflow-cc__cover-sel">
+                        <img className="giveflow-cc__cover-thumb" src={ cover.url } alt="" />
+                        <span className="giveflow-cc__cover-name">{ __( 'Cover image selected', 'giveflow-fundraising-campaigns' ) }</span>
                         <Btn variant="ghost" size="sm" onClick={ () => openCoverFrame( setCover ) }>
-                            { __( 'Change', 'dono-fundraising-platform' ) }
+                            { __( 'Change', 'giveflow-fundraising-campaigns' ) }
                         </Btn>
                         <Btn variant="ghost" size="sm" onClick={ () => setCover( null ) }>
-                            { __( 'Remove', 'dono-fundraising-platform' ) }
+                            { __( 'Remove', 'giveflow-fundraising-campaigns' ) }
                         </Btn>
                     </div>
                 ) : (
                     <button
                         type="button"
-                        className="dono-cc__cover-pick"
+                        className="giveflow-cc__cover-pick"
                         onClick={ () => openCoverFrame( setCover ) }
                     >
-                        <span className="dono-cc__cover-icon">
+                        <span className="giveflow-cc__cover-icon">
                             <ImagePlus size={ 18 } strokeWidth={ 1.75 } />
                         </span>
-                        <span className="dono-cc__cover-txt">
-                            <span className="dono-cc__cover-title">{ __( 'Select or upload an image', 'dono-fundraising-platform' ) }</span>
+                        <span className="giveflow-cc__cover-txt">
+                            <span className="giveflow-cc__cover-title">{ __( 'Select or upload an image', 'giveflow-fundraising-campaigns' ) }</span>
                         </span>
                     </button>
                 ) }
             </Field>
 
             <Field
-                label={ __( 'Permalink', 'dono-fundraising-platform' ) }
-                help={ __( 'Auto-generated from the title.', 'dono-fundraising-platform' ) }
+                label={ __( 'Permalink', 'giveflow-fundraising-campaigns' ) }
+                help={ __( 'Auto-generated from the title.', 'giveflow-fundraising-campaigns' ) }
             >
                 { editingSlug ? (
                     <>
-                        <div className="dono-cc__slug-edit">
-                            <span className="dono-cc__slug-prefix">{ slugBase }/</span>
+                        <div className="giveflow-cc__slug-edit">
+                            <span className="giveflow-cc__slug-prefix">{ slugBase }/</span>
                             <input
-                                className="dono-cc__slug-input"
+                                className="giveflow-cc__slug-input"
                                 type="text"
                                 value={ slug }
                                 autoFocus
-                                aria-label={ __( 'Campaign slug', 'dono-fundraising-platform' ) }
+                                aria-label={ __( 'Campaign slug', 'giveflow-fundraising-campaigns' ) }
                                 onChange={ ( e ) => {
                                     setSlug( e.target.value.toLowerCase().replace( /[^a-z0-9-]+/g, '-' ) );
                                     setSlugEdited( true );
@@ -340,22 +340,22 @@ export default function CreateCampaignDrawer( { onClose } ) {
                                 onBlur={ () => setEditingSlug( false ) }
                             />
                         </div>
-                        <div className="dono-cc__slug-help">
-                            { __( 'Lowercase letters, numbers and hyphens. Must be unique across campaigns.', 'dono-fundraising-platform' ) }
+                        <div className="giveflow-cc__slug-help">
+                            { __( 'Lowercase letters, numbers and hyphens. Must be unique across campaigns.', 'giveflow-fundraising-campaigns' ) }
                         </div>
                     </>
                 ) : (
-                    <div className="dono-cc__slug">
-                        <span className="dono-cc__slug-lbl">{ __( 'URL', 'dono-fundraising-platform' ) }</span>
-                        <span className="dono-cc__slug-url">
-                            { slugBase }/<em>{ slug || __( 'campaign', 'dono-fundraising-platform' ) }</em>
+                    <div className="giveflow-cc__slug">
+                        <span className="giveflow-cc__slug-lbl">{ __( 'URL', 'giveflow-fundraising-campaigns' ) }</span>
+                        <span className="giveflow-cc__slug-url">
+                            { slugBase }/<em>{ slug || __( 'campaign', 'giveflow-fundraising-campaigns' ) }</em>
                         </span>
                         <button
                             type="button"
-                            className="dono-cc__slug-btn"
+                            className="giveflow-cc__slug-btn"
                             onClick={ () => setEditingSlug( true ) }
                         >
-                            { __( 'Edit', 'dono-fundraising-platform' ) }
+                            { __( 'Edit', 'giveflow-fundraising-campaigns' ) }
                         </button>
                     </div>
                 ) }

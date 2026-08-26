@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Campaigns\Campaign;
+use GiveFlow\Campaigns\Campaign;
 use WP_REST_Request;
 
 /**
@@ -21,7 +21,7 @@ final class DonateButtonClosedCampaignTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        $req = new WP_REST_Request('POST', '/dono/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode(['title' => 'Button gate campaign', 'status' => 'published']));
         $this->campaignId = (int) rest_do_request($req)->get_data()['id'];
@@ -31,9 +31,9 @@ final class DonateButtonClosedCampaignTest extends IntegrationTestCase
     {
         $html = $this->renderButton();
 
-        $this->assertStringContainsString('dono-donate-button', $html);
-        $this->assertStringContainsString('dono-donate-modal', $html);
-        $this->assertStringNotContainsString('dono-block__empty', $html);
+        $this->assertStringContainsString('giveflow-donate-button', $html);
+        $this->assertStringContainsString('giveflow-donate-modal', $html);
+        $this->assertStringNotContainsString('giveflow-block__empty', $html);
     }
 
     public function test_an_ended_campaign_explains_itself_instead_of_rendering_a_dead_button(): void
@@ -42,7 +42,7 @@ final class DonateButtonClosedCampaignTest extends IntegrationTestCase
 
         $html = $this->renderButton();
 
-        $this->assertStringNotContainsString('dono-donate-button', $html);
+        $this->assertStringNotContainsString('giveflow-donate-button', $html);
         $this->assertStringContainsString('This campaign has finished accepting donations.', $html);
     }
 
@@ -56,7 +56,7 @@ final class DonateButtonClosedCampaignTest extends IntegrationTestCase
 
         $html = $this->renderButton();
 
-        $this->assertStringNotContainsString('dono-donate-button', $html);
+        $this->assertStringNotContainsString('giveflow-donate-button', $html);
         $this->assertStringContainsString('Donations are not open for this campaign yet.', $html);
     }
 
@@ -66,7 +66,7 @@ final class DonateButtonClosedCampaignTest extends IntegrationTestCase
 
         $html = $this->renderButton();
 
-        $this->assertStringContainsString('dono-block-notice', $html);
+        $this->assertStringContainsString('giveflow-block-notice', $html);
         $this->assertStringContainsString('check its schedule', $html);
     }
 
@@ -78,7 +78,7 @@ final class DonateButtonClosedCampaignTest extends IntegrationTestCase
         $html = $this->renderButton();
 
         $this->assertStringContainsString('This campaign has finished accepting donations.', $html);
-        $this->assertStringNotContainsString('dono-block-notice', $html);
+        $this->assertStringNotContainsString('giveflow-block-notice', $html);
     }
 
     private function schedule(?string $startsAt, ?string $endsAt): void
@@ -96,10 +96,10 @@ final class DonateButtonClosedCampaignTest extends IntegrationTestCase
             'post_status'  => 'publish',
             'post_type'    => 'page',
             'post_content' => sprintf(
-                '<!-- wp:dono/donate-button {"campaignId":%d} /-->',
+                '<!-- wp:giveflow/donate-button {"campaignId":%d} /-->',
                 $this->campaignId
             ),
-            'meta_input'   => ['_dono_campaign_id' => $this->campaignId],
+            'meta_input'   => ['_giveflow_campaign_id' => $this->campaignId],
         ]);
 
         global $post;

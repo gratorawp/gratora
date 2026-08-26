@@ -2,13 +2,13 @@
 
 @import '../campaigns/campaigns.scss';
 // ConfirmDialog (Numbering counters, Receipts preview, Stripe disconnect) needs
-// the @dono/ui dialog chrome; the JS import alone ships no CSS.
-@import '@dono/ui/scss/components/dialog';
+// the @giveflow/ui dialog chrome; the JS import alone ships no CSS.
+@import '@giveflow/ui/scss/components/dialog';
 
 // Aliases for legacy local names still referenced inside this file.
 $border: $border-mid;
 
-.dono-settings-page {
+.giveflow-settings-page {
     max-width: 1480px;
     color: $text;
     font-variant-numeric: tabular-nums;
@@ -19,7 +19,7 @@ $border: $border-mid;
     }
 }
 
-.dono-crumbs {
+.giveflow-crumbs {
     font-size: 13px;
     color: $text-muted;
     margin-bottom: 6px;
@@ -30,7 +30,7 @@ $border: $border-mid;
     .sep { margin: 0 6px; color: #cbd0d5; }
 }
 
-.dono-page-head {
+.giveflow-page-head {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -62,7 +62,7 @@ $border: $border-mid;
     }
 }
 
-.dono-status-badge {
+.giveflow-status-badge {
     font-size: 12px;
     font-weight: 500;
     padding: 3px 10px;
@@ -71,7 +71,7 @@ $border: $border-mid;
     color: $accent-dark;
 }
 
-.dono-banner {
+.giveflow-banner {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -121,7 +121,7 @@ $border: $border-mid;
 }
 
 
-.dono-tabs {
+.giveflow-tabs {
     position: relative;
     display: flex;
     align-items: stretch;
@@ -140,7 +140,7 @@ $border: $border-mid;
         row-gap: 2px;
     }
 
-    a, button.dono-tab {
+    a, button.giveflow-tab {
         display: inline-flex;
         align-items: center;
         gap: 6px;
@@ -192,14 +192,14 @@ $border: $border-mid;
     }
 }
 
-.dono-tab__icon {
+.giveflow-tab__icon {
     width: 15px; height: 15px;
     color: currentColor;
     opacity: 0.9;
     flex-shrink: 0;
 }
 
-.dono-tab__dot {
+.giveflow-tab__dot {
     width: 6px; height: 6px;
     border-radius: 50%;
     background: $accent;
@@ -210,18 +210,18 @@ $border: $border-mid;
     &.is-red   { background: $red; }
 }
 
-.dono-settings-page__body {
+.giveflow-settings-page__body {
     min-width: 0;
 }
 
-.dono-panel { animation: donoPanelIn .12s ease-out; }
-.dono-panel[hidden] { display: none; }
-@keyframes donoPanelIn {
+.giveflow-panel { animation: giveflowPanelIn .12s ease-out; }
+.giveflow-panel[hidden] { display: none; }
+@keyframes giveflowPanelIn {
     from { opacity: 0; }
     to   { opacity: 1; }
 }
 
-.dono-section-bar {
+.giveflow-section-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -242,10 +242,10 @@ $border: $border-mid;
     }
 }
 
-.dono-section-block { margin-bottom: 28px; }
+.giveflow-section-block { margin-bottom: 28px; }
 
 
-.dono-pill {
+.giveflow-pill {
     display: inline-flex;
     align-items: center;
     gap: 5px;
@@ -256,7 +256,7 @@ $border: $border-mid;
 
     // This screen keeps its own base rule (roomier padding, no leading dot)
     // and does not import admin-base, so it carries its own copy of the
-    // colour modifiers. Every other screen gets them from @dono/ui.
+    // colour modifiers. Every other screen gets them from @giveflow/ui.
     &--green { background: $accent-soft; color: $accent-dark; }
     &--amber { background: $amber-soft;  color: $amber; }
     &--red   { background: $red-soft;    color: $red; }
@@ -272,7 +272,7 @@ $border: $border-mid;
     }
 }
 
-.dono-edited-pill {
+.giveflow-edited-pill {
     display: inline-flex;
     align-items: center;
     gap: 5px;
@@ -293,10 +293,10 @@ $border: $border-mid;
 
 
 
-.dono-stack-12 { display: flex; flex-direction: column; gap: 12px; }
-.dono-grid-2-eq { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.giveflow-stack-12 { display: flex; flex-direction: column; gap: 12px; }
+.giveflow-grid-2-eq { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-.dono-toggle-row {
+.giveflow-toggle-row {
     display: flex;
     align-items: center;
     gap: 14px;
@@ -322,7 +322,7 @@ $border: $border-mid;
 }
 
 
-.dono-brand-mark {
+.giveflow-brand-mark {
     width: 28px; height: 28px;
     border-radius: 6px;
     display: inline-flex;
@@ -347,7 +347,7 @@ $border: $border-mid;
     &--razorpay      { background: linear-gradient(135deg, #3395ff 0%, #072654 100%); }
 }
 
-.dono-gateway-foot {
+.giveflow-gateway-foot {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr auto;
     gap: 16px;
@@ -375,7 +375,7 @@ $border: $border-mid;
     }
 }
 
-.dono-connect-p {
+.giveflow-connect-p {
     font-size: 13px;
     line-height: 1.6;
     color: $text-muted;
@@ -384,7 +384,7 @@ $border: $border-mid;
     strong { color: $text; }
 }
 
-.dono-connect-checks {
+.giveflow-connect-checks {
     margin: 0 0 18px;
     padding: 0;
     list-style: none;
@@ -405,7 +405,7 @@ $border: $border-mid;
     }
 }
 
-.dono-connect-notice {
+.giveflow-connect-notice {
     display: flex;
     gap: 10px;
     border-radius: 10px;
@@ -423,19 +423,19 @@ $border: $border-mid;
     &--accent { background: $accent-soft; color: $accent-dark; }
 }
 
-.dono-connect-options {
+.giveflow-connect-options {
     margin-top: 18px;
     padding-top: 16px;
     border-top: 1px solid $border-soft;
 }
 
-.dono-stripe-modes {
+.giveflow-stripe-modes {
     display: grid;
     gap: 14px;
     margin-top: 18px;
 }
 
-.dono-stripe-mode {
+.giveflow-stripe-mode {
     padding: 16px;
     background: $bg-soft;
     border-radius: 9px;
@@ -469,7 +469,7 @@ $border: $border-mid;
 }
 
 // Setup screen: one status strip over grouped readiness rows.
-.dono-readiness {
+.giveflow-readiness {
     &__head {
         display: flex;
         align-items: flex-start;
@@ -517,7 +517,7 @@ $border: $border-mid;
     }
 }
 
-.dono-readiness-row {
+.giveflow-readiness-row {
     display: flex;
     align-items: flex-start;
     gap: 10px;
@@ -570,14 +570,14 @@ $border: $border-mid;
     }
 }
 
-.dono-merge-tags {
+.giveflow-merge-tags {
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
     margin-bottom: 8px;
 }
 
-.dono-merge-tag {
+.giveflow-merge-tag {
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: 11px;
     padding: 3px 7px;
@@ -591,7 +591,7 @@ $border: $border-mid;
     &:hover { background: $accent-soft; border-color: $accent; }
 }
 
-.dono-currency-preview {
+.giveflow-currency-preview {
     display: inline-flex;
     align-items: baseline;
     gap: 10px;
@@ -616,12 +616,12 @@ $border: $border-mid;
     }
 }
 
-.dono-cur-chips {
+.giveflow-cur-chips {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
 }
-.dono-cur-chip {
+.giveflow-cur-chip {
     display: inline-flex;
     align-items: center;
     gap: 7px;
@@ -653,18 +653,18 @@ $border: $border-mid;
         color: $accent-dark;
         font-weight: 500;
 
-        .dono-cur-chip__box { background: $accent; border-color: $accent; }
+        .giveflow-cur-chip__box { background: $accent; border-color: $accent; }
     }
     &.is-locked { cursor: default; background: $bg-soft; color: $text-muted; }
 }
 
-.dono-fx-head {
+.giveflow-fx-head {
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-.dono-fx {
+.giveflow-fx {
     width: 100%;
     border-collapse: collapse;
     margin-top: 8px;
@@ -714,7 +714,7 @@ $border: $border-mid;
     &__reset:hover { text-decoration: underline; }
 }
 
-.dono-rate-input {
+.giveflow-rate-input {
     width: 130px;
     padding: 6px 9px;
     text-align: right;
@@ -734,15 +734,15 @@ $border: $border-mid;
     &:disabled { background: $bg-soft; color: $text-muted; }
 }
 
-.dono-muted { color: $text-muted; font-size: 13px; }
+.giveflow-muted { color: $text-muted; font-size: 13px; }
 
-.dono-roles-table {
+.giveflow-roles-table {
     display: grid;
     overflow-x: auto;
 
     &__head {
         display: grid;
-        grid-template-columns: minmax(220px, 1fr) repeat(var(--dono-role-count, 4), minmax(120px, 1fr));
+        grid-template-columns: minmax(220px, 1fr) repeat(var(--giveflow-role-count, 4), minmax(120px, 1fr));
         gap: 0;
         align-items: end;
         padding-bottom: 12px;
@@ -780,7 +780,7 @@ $border: $border-mid;
     }
     &__row {
         display: grid;
-        grid-template-columns: minmax(220px, 1fr) repeat(var(--dono-role-count, 4), minmax(120px, 1fr));
+        grid-template-columns: minmax(220px, 1fr) repeat(var(--giveflow-role-count, 4), minmax(120px, 1fr));
         align-items: center;
         padding: 6px 0;
         border-bottom: 1px solid $bg-soft;
@@ -803,7 +803,7 @@ $border: $border-mid;
     }
 }
 
-.dono-advanced-info {
+.giveflow-advanced-info {
     display: grid;
     grid-template-columns: 200px 1fr;
     gap: 0;
@@ -832,7 +832,7 @@ $border: $border-mid;
         }
     }
 }
-.dono-advanced-cron {
+.giveflow-advanced-cron {
     list-style: none;
     margin: 0;
     padding: 0;
@@ -844,7 +844,7 @@ $border: $border-mid;
     }
     em { color: $text-muted; font-style: normal; font-size: 12px; }
 }
-.dono-advanced-notice {
+.giveflow-advanced-notice {
     padding: 10px 12px;
     border-radius: 8px;
     margin-bottom: 12px;
@@ -854,7 +854,7 @@ $border: $border-mid;
     &--error   { background: $red-soft; color: $red; }
 }
 
-.dono-consents {
+.giveflow-consents {
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -865,7 +865,7 @@ $border: $border-mid;
     }
 }
 
-.dono-consent-card {
+.giveflow-consent-card {
     background: #fff;
     border: 1px solid $border-soft;
     border-radius: 10px;
@@ -947,12 +947,12 @@ $border: $border-mid;
     &__chip-label { user-select: none; }
 }
 
-.dono-email-list {
+.giveflow-email-list {
     display: flex;
     flex-direction: column;
 }
 
-.dono-email-row {
+.giveflow-email-row {
     display: flex;
     align-items: center;
     gap: 14px;
@@ -1036,14 +1036,14 @@ $border: $border-mid;
 // What a reference will look like, on the Numbering tab. The prefix and year
 // are the operator's own and stay quiet; the counter is the only part that
 // moves, and the controls for it sit directly below, so it carries the weight.
-.dono-ref-previews {
+.giveflow-ref-previews {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 10px;
     margin-bottom: 20px;
 }
 
-.dono-ref-preview {
+.giveflow-ref-preview {
     display: flex;
     flex-direction: column;
     gap: 7px;
@@ -1075,7 +1075,7 @@ $border: $border-mid;
     }
 }
 
-.dono-save-bar {
+.giveflow-save-bar {
     position: fixed;
     left: 50%;
     bottom: 22px;
@@ -1090,7 +1090,7 @@ $border: $border-mid;
     border-radius: 999px;
     box-shadow: 0 10px 28px rgba(15, 23, 42, .25), 0 2px 8px rgba(15, 23, 42, .18);
     font-size: 13px;
-    animation: donoSaveBarIn .25s cubic-bezier(.2, .7, 0, 1);
+    animation: giveflowSaveBarIn .25s cubic-bezier(.2, .7, 0, 1);
 
     &__dot {
         width: 8px; height: 8px;
@@ -1137,18 +1137,18 @@ $border: $border-mid;
     }
 }
 
-@keyframes donoSaveBarIn {
+@keyframes giveflowSaveBarIn {
     from { transform: translate(-50%, 8px); opacity: 0; }
     to   { transform: translate(-50%, 0);   opacity: 1; }
 }
 
-.dono-email-editor-tabs {
+.giveflow-email-editor-tabs {
     display: flex;
     gap: 6px;
     margin: 8px 0 16px;
     border-bottom: 1px solid $border-mid;
 }
-.dono-email-editor-tab {
+.giveflow-email-editor-tab {
     appearance: none;
     background: transparent;
     border: 0;
@@ -1164,7 +1164,7 @@ $border: $border-mid;
     &.is-active { color: $accent; border-bottom-color: $accent; }
 }
 
-.dono-email-preview {
+.giveflow-email-preview {
     background: #f9fafb;
     border-radius: 8px;
     padding: 18px 20px;
@@ -1197,13 +1197,13 @@ $border: $border-mid;
     }
 }
 
-// Settings pages contain their own Cards inside `.dono-panel`, so the
+// Settings pages contain their own Cards inside `.giveflow-panel`, so the
 // outer panel chrome inherited from campaigns.scss (white bg, border,
 // shadow, padding) would make those Cards look nested. Strip it for any
-// `.dono-panel` that sits inside the settings page; dashboard/campaign
+// `.giveflow-panel` that sits inside the settings page; dashboard/campaign
 // widget panels still get the card treatment unchanged.
-.dono-settings-page {
-    .dono-panel {
+.giveflow-settings-page {
+    .giveflow-panel {
         background: transparent;
         border: 0;
         box-shadow: none;
@@ -1211,7 +1211,7 @@ $border: $border-mid;
     }
 
     // Re-skin WP components (ToggleControl, primary buttons, focus rings,
-    // etc.) from the default WP admin blue to the Dono accent. WP reads
+    // etc.) from the default WP admin blue to the GiveFlow accent. WP reads
     // `--wp-admin-theme-color` for all of these.
     --wp-admin-theme-color:           #{$accent};
     --wp-admin-theme-color--rgb:      30, 138, 78;
@@ -1225,7 +1225,7 @@ $border: $border-mid;
     *:focus:not(:focus-visible) { outline: none; box-shadow: none; }
 }
 
-.dono-brand-layout {
+.giveflow-brand-layout {
     display: grid;
     grid-template-columns: 1fr 380px;
     gap: 16px;
@@ -1247,7 +1247,7 @@ $border: $border-mid;
     }
 }
 
-.dono-preset-mgr {
+.giveflow-preset-mgr {
     display: grid;
     grid-template-columns: 220px 1fr;
     gap: 16px;
@@ -1329,7 +1329,7 @@ $border: $border-mid;
     }
 }
 
-.dono-preset-editor {
+.giveflow-preset-editor {
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -1371,7 +1371,7 @@ $border: $border-mid;
     }
 }
 
-.dono-advanced-when {
+.giveflow-advanced-when {
     color: $text-muted;
     font-size: 11.5px;
 }

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Donations;
+namespace GiveFlow\Donations;
 
 use DateTimeImmutable;
 use DateTimeZone;
-use Dono\Vendor\Queryable\DB;
+use GiveFlow\Vendor\Queryable\DB;
 
 /**
  * Shared query scopes for donation reads.
@@ -131,7 +131,7 @@ final class DonationQueries
      */
     private static function supersededIds(?int $donorId = null): string
     {
-        $donations = DB::getPrefix() . 'dono_donations';
+        $donations = DB::getPrefix() . 'giveflow_donations';
 
         // Correlating to one donor turns a set the planner builds from every
         // pending row into one bounded by that donor's own attempts, which
@@ -158,7 +158,7 @@ final class DonationQueries
      */
     public static function supersededPredicate(?string $donationIdColumn = null): string
     {
-        $column = $donationIdColumn ?? DB::getPrefix() . 'dono_donations.id';
+        $column = $donationIdColumn ?? DB::getPrefix() . 'giveflow_donations.id';
 
         return "{$column} IN (" . self::supersededIds() . ')';
     }
@@ -166,7 +166,7 @@ final class DonationQueries
     /**
      * The complement, and not simply NOT of the above: `NULL NOT IN (...)`
      * evaluates to NULL rather than true, so an unguarded negation drops every
-     * row whose column is NULL. dono_events.donation_id is nullable and carries
+     * row whose column is NULL. giveflow_events.donation_id is nullable and carries
      * the donor's magic links, consents and portal sign-ins, so the guard is
      * what keeps their timeline from emptying itself.
      *
@@ -174,7 +174,7 @@ final class DonationQueries
      */
     public static function notSupersededPredicate(?string $donationIdColumn = null, ?int $donorId = null): string
     {
-        $column = $donationIdColumn ?? DB::getPrefix() . 'dono_donations.id';
+        $column = $donationIdColumn ?? DB::getPrefix() . 'giveflow_donations.id';
 
         return "({$column} IS NULL OR {$column} NOT IN (" . self::supersededIds($donorId) . '))';
     }
@@ -202,7 +202,7 @@ final class DonationQueries
 
     /**
      * The same rule for a table that points at a donation rather than being
-     * one, dono_events.donation_id among them. Pass the column qualified with
+     * one, giveflow_events.donation_id among them. Pass the column qualified with
      * its table. A row pointing at nothing is left alone.
      *
      * @template T
@@ -249,7 +249,7 @@ final class DonationQueries
      */
     public static function hiddenTestCount(): int
     {
-        return (int) DB::table('dono_donations')
+        return (int) DB::table('giveflow_donations')
             ->where('is_test', 1)
             ->where('kind', 'donation')
             ->whereIn('status', ['paid', 'partial_refund'])
@@ -275,18 +275,18 @@ final class DonationQueries
 
     /**
      * Correlated subquery: total succeeded refunds for the current
-     * dono_donations row, expressed in the org/base currency. Refunds are
+     * giveflow_donations row, expressed in the org/base currency. Refunds are
      * stored in the donation currency, so each is scaled by the donation's
      * fx_rate (base per donation unit; NULL when the donation already is base).
-     * Use only where dono_donations is the main/correlated table.
+     * Use only where giveflow_donations is the main/correlated table.
      *
      * @since 1.0.0
      */
     public static function refundedBaseExpr(): string
     {
         $prefix    = DB::getPrefix();
-        $refunds   = $prefix . 'dono_refunds';
-        $donations = $prefix . 'dono_donations';
+        $refunds   = $prefix . 'giveflow_refunds';
+        $donations = $prefix . 'giveflow_donations';
         // fx_rate is NULL only for a foreign donation we could not convert to
         // base (no rate available); such a row contributes nothing to base
         // totals, so its refunds must net to 0 too - scale by 0, not 1.

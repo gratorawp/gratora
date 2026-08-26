@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Foundation\Auth;
+namespace GiveFlow\Foundation\Auth;
 
 /**
  * All plugin capability constants and role-mapping helpers.
@@ -11,44 +11,44 @@ namespace Dono\Foundation\Auth;
  */
 final class Capabilities
 {
-    /** Umbrella cap: "can reach the Dono admin area at all" (menu + base gate). */
-    public const MANAGE = 'manage_dono';
+    /** Umbrella cap: "can reach the GiveFlow admin area at all" (menu + base gate). */
+    public const MANAGE = 'manage_giveflow';
 
     public const ALL = [
-        'dono_view_donors',
-        'dono_edit_donors',
-        'dono_export_donors',
-        'dono_redact_donors',
-        'dono_view_donations',
-        'dono_edit_donations',
-        'dono_refund_donations',
-        'dono_resend_receipt',
-        'dono_view_reports',
-        'dono_manage_campaigns',
-        'dono_manage_forms',
-        'dono_manage_settings',
+        'giveflow_view_donors',
+        'giveflow_edit_donors',
+        'giveflow_export_donors',
+        'giveflow_redact_donors',
+        'giveflow_view_donations',
+        'giveflow_edit_donations',
+        'giveflow_refund_donations',
+        'giveflow_resend_receipt',
+        'giveflow_view_reports',
+        'giveflow_manage_campaigns',
+        'giveflow_manage_forms',
+        'giveflow_manage_settings',
     ];
 
     public const GROUPS = [
-        'Donors'    => ['dono_view_donors', 'dono_edit_donors', 'dono_export_donors', 'dono_redact_donors'],
-        'Donations' => ['dono_view_donations', 'dono_edit_donations', 'dono_refund_donations', 'dono_resend_receipt'],
-        'Reports'   => ['dono_view_reports'],
-        'Setup'     => ['dono_manage_campaigns', 'dono_manage_forms', 'dono_manage_settings'],
+        'Donors'    => ['giveflow_view_donors', 'giveflow_edit_donors', 'giveflow_export_donors', 'giveflow_redact_donors'],
+        'Donations' => ['giveflow_view_donations', 'giveflow_edit_donations', 'giveflow_refund_donations', 'giveflow_resend_receipt'],
+        'Reports'   => ['giveflow_view_reports'],
+        'Setup'     => ['giveflow_manage_campaigns', 'giveflow_manage_forms', 'giveflow_manage_settings'],
     ];
 
     public const LABELS = [
-        'dono_view_donors'      => 'View donors',
-        'dono_edit_donors'      => 'Edit donor records',
-        'dono_export_donors'    => 'Export donor list (CSV)',
-        'dono_redact_donors'    => 'Redact donors (GDPR)',
-        'dono_view_donations'   => 'View donations',
-        'dono_edit_donations'   => 'Edit donations (notes)',
-        'dono_refund_donations' => 'Change what is charged (refund, mark paid, record by hand, change a recurring plan)',
-        'dono_resend_receipt'   => 'Resend receipts',
-        'dono_view_reports'     => 'View dashboards & reports',
-        'dono_manage_campaigns' => 'Manage campaigns',
-        'dono_manage_forms'     => 'Manage donation forms',
-        'dono_manage_settings'  => 'Manage settings',
+        'giveflow_view_donors'      => 'View donors',
+        'giveflow_edit_donors'      => 'Edit donor records',
+        'giveflow_export_donors'    => 'Export donor list (CSV)',
+        'giveflow_redact_donors'    => 'Redact donors (GDPR)',
+        'giveflow_view_donations'   => 'View donations',
+        'giveflow_edit_donations'   => 'Edit donations (notes)',
+        'giveflow_refund_donations' => 'Change what is charged (refund, mark paid, record by hand, change a recurring plan)',
+        'giveflow_resend_receipt'   => 'Resend receipts',
+        'giveflow_view_reports'     => 'View dashboards & reports',
+        'giveflow_manage_campaigns' => 'Manage campaigns',
+        'giveflow_manage_forms'     => 'Manage donation forms',
+        'giveflow_manage_settings'  => 'Manage settings',
     ];
 
     /**
@@ -59,7 +59,7 @@ final class Capabilities
      */
     private static function maps(): array
     {
-        $maps = apply_filters('dono.capabilities', [
+        $maps = apply_filters('giveflow.capabilities', [
             'all'    => self::ALL,
             'groups' => self::GROUPS,
             'labels' => self::LABELS,
@@ -115,7 +115,7 @@ final class Capabilities
     }
 
     /**
-     * True for anyone who may reach the Dono admin area at all (menu/base gate).
+     * True for anyone who may reach the GiveFlow admin area at all (menu/base gate).
      *
      * @since 1.0.0
      */
@@ -134,18 +134,18 @@ final class Capabilities
 
     /**
      * Virtual menu meta-caps: WP menus take one capability string, so each
-     * dono_access_* grants on manage_options or the area's granular cap. REST still
+     * giveflow_access_* grants on manage_options or the area's granular cap. REST still
      * enforces the granular caps, so menu visibility never widens actual access.
      *
      * @var array<string,string> menu meta-cap => the granular cap it maps to
      */
     public const MENU_AREAS = [
-        'dono_access_reports'   => 'dono_view_reports',
-        'dono_access_campaigns' => 'dono_manage_campaigns',
-        'dono_access_donations' => 'dono_view_donations',
-        'dono_access_donors'    => 'dono_view_donors',
-        'dono_access_forms'     => 'dono_manage_forms',
-        'dono_access_settings'  => 'dono_manage_settings',
+        'giveflow_access_reports'   => 'giveflow_view_reports',
+        'giveflow_access_campaigns' => 'giveflow_manage_campaigns',
+        'giveflow_access_donations' => 'giveflow_view_donations',
+        'giveflow_access_donors'    => 'giveflow_view_donors',
+        'giveflow_access_forms'     => 'giveflow_manage_forms',
+        'giveflow_access_settings'  => 'giveflow_manage_settings',
     ];
 
     /**
@@ -178,7 +178,7 @@ final class Capabilities
         // dispatches with the strict granular check, not the lenient userCan).
         // Add-ons keep sensitive caps off this list, so those stay explicit.
         if ($super) {
-            foreach ((array) apply_filters('dono.capabilities.admin_caps', []) as $cap) {
+            foreach ((array) apply_filters('giveflow.capabilities.admin_caps', []) as $cap) {
                 if (is_string($cap) && $cap !== '') {
                     $allcaps[$cap] = true;
                 }
@@ -186,7 +186,7 @@ final class Capabilities
         }
 
         if ($super || ! empty($allcaps[self::MANAGE]) || $anyArea) {
-            $allcaps['dono_access'] = true;
+            $allcaps['giveflow_access'] = true;
         }
 
         return $allcaps;
@@ -195,7 +195,7 @@ final class Capabilities
     /**
      * Apply a role-to-caps mapping to all registered WP roles. A role that
      * receives at least one granular cap also gets the MANAGE umbrella so it
-     * can see the Dono menu; the administrator always keeps MANAGE. Runs on
+     * can see the GiveFlow menu; the administrator always keeps MANAGE. Runs on
      * activation and whenever the roles mapping is saved.
      *
      * @since 1.0.0
@@ -225,7 +225,7 @@ final class Capabilities
     /** @since 1.0.0 */
     public static function currentMapping(): array
     {
-        $stored = get_option('dono_roles', []);
+        $stored = get_option('giveflow_roles', []);
         $map    = is_array($stored['mapping'] ?? null) ? $stored['mapping'] : [];
         return $map;
     }

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Campaigns\Campaign;
-use Dono\Donations\Donation;
-use Dono\Donations\DonationRepository;
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
 
 /**
  * The donations list has three scopes, not two.
@@ -35,16 +35,16 @@ final class DonationListTestScopeTest extends IntegrationTestCase
 
         $this->campaignId = (int) $campaign->id;
 
-        $this->seed('DONO-TS-LIVE-1', false, 5000);
-        $this->seed('DONO-TS-LIVE-2', false, 3000);
-        $this->seed('DONO-TS-TEST-1', true, 9900);
+        $this->seed('GIVEFLOW-TS-LIVE-1', false, 5000);
+        $this->seed('GIVEFLOW-TS-LIVE-2', false, 3000);
+        $this->seed('GIVEFLOW-TS-TEST-1', true, 9900);
     }
 
     public function test_live_only_by_default(): void
     {
         $refs = $this->references([]);
 
-        $this->assertSame(['DONO-TS-LIVE-1', 'DONO-TS-LIVE-2'], $refs);
+        $this->assertSame(['GIVEFLOW-TS-LIVE-1', 'GIVEFLOW-TS-LIVE-2'], $refs);
     }
 
     public function test_include_test_shows_both_kinds(): void
@@ -52,7 +52,7 @@ final class DonationListTestScopeTest extends IntegrationTestCase
         $refs = $this->references(['include_test' => true]);
 
         $this->assertSame(
-            ['DONO-TS-LIVE-1', 'DONO-TS-LIVE-2', 'DONO-TS-TEST-1'],
+            ['GIVEFLOW-TS-LIVE-1', 'GIVEFLOW-TS-LIVE-2', 'GIVEFLOW-TS-TEST-1'],
             $refs,
             'the whole run, in one list'
         );
@@ -61,13 +61,13 @@ final class DonationListTestScopeTest extends IntegrationTestCase
     public function test_an_explicit_filter_still_wins_over_the_scope(): void
     {
         $this->assertSame(
-            ['DONO-TS-TEST-1'],
+            ['GIVEFLOW-TS-TEST-1'],
             $this->references(['include_test' => true, 'is_test' => true]),
             'Test only means only test, whatever the scope is set to'
         );
 
         $this->assertSame(
-            ['DONO-TS-LIVE-1', 'DONO-TS-LIVE-2'],
+            ['GIVEFLOW-TS-LIVE-1', 'GIVEFLOW-TS-LIVE-2'],
             $this->references(['include_test' => true, 'is_test' => false]),
             'and Live only means only live'
         );

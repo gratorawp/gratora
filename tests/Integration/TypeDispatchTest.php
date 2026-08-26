@@ -2,24 +2,24 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Analytics\EventRecorder;
-use Dono\Currency\FxRates;
-use Dono\Donations\AggregateSyncer;
-use Dono\Donations\Donation;
-use Dono\Donations\DonationIntent;
-use Dono\Donations\DonationRepository;
-use Dono\Donations\DonationService;
-use Dono\Donors\DonorService;
-use Dono\Forms\DefaultFormTypeHandler;
-use Dono\Forms\FormTypeHandler;
-use Dono\Forms\FormTypeRegistry;
-use Dono\Foundation\Plugin;
-use Dono\Foundation\References\ReferenceGenerator;
-use Dono\Foundation\Time\Clock;
-use Dono\Funds\FundResolver;
-use Dono\Gateways\GatewayManager;
+use GiveFlow\Analytics\EventRecorder;
+use GiveFlow\Currency\FxRates;
+use GiveFlow\Donations\AggregateSyncer;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Donations\DonationIntent;
+use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Donations\DonationService;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Forms\DefaultFormTypeHandler;
+use GiveFlow\Forms\FormTypeHandler;
+use GiveFlow\Forms\FormTypeRegistry;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Foundation\References\ReferenceGenerator;
+use GiveFlow\Foundation\Time\Clock;
+use GiveFlow\Funds\FundResolver;
+use GiveFlow\Gateways\GatewayManager;
 
 /**
  * The byte-identical Free path is also regression-covered by the existing
@@ -43,8 +43,8 @@ final class TypeDispatchTest extends IntegrationTestCase
             $c->get(FundResolver::class),
             $c->get(FxRates::class),
             $types,
-            $c->get(\Dono\Foundation\Crypto\Crypto::class),
-            $c->get(\Dono\Gateways\TestMode::class),
+            $c->get(\GiveFlow\Foundation\Crypto\Crypto::class),
+            $c->get(\GiveFlow\Gateways\TestMode::class),
         );
     }
 

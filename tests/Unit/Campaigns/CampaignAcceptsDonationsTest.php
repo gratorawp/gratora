@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Unit\Campaigns;
+namespace GiveFlow\Tests\Unit\Campaigns;
 
-use Dono\Campaigns\Campaign;
+use GiveFlow\Campaigns\Campaign;
 use PHPUnit\Framework\TestCase;
 
 /**

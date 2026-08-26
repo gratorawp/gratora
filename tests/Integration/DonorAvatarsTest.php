@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donors\Donor;
-use Dono\Donors\DonorAvatars;
-use Dono\Foundation\Crypto\Crypto;
-use Dono\Foundation\Plugin;
-use Dono\Settings\SettingsService;
+use GiveFlow\Donors\Donor;
+use GiveFlow\Donors\DonorAvatars;
+use GiveFlow\Foundation\Crypto\Crypto;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Settings\SettingsService;
 
 /**
  * Gravatar sends a hash of the donor's address to a third party from the
@@ -46,7 +46,7 @@ final class DonorAvatarsTest extends IntegrationTestCase
 
     protected function tearDown(): void
     {
-        delete_option('dono_privacy');
+        delete_option('giveflow_privacy');
         parent::tearDown();
     }
 

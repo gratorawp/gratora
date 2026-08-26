@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Gateways\PayPal;
+namespace GiveFlow\Gateways\PayPal;
 
-use Dono\Foundation\Config\SystemSetting;
-use Dono\Foundation\Crypto\Crypto;
+use GiveFlow\Foundation\Config\SystemSetting;
+use GiveFlow\Foundation\Crypto\Crypto;
 
 /**
  * The organization's own PayPal REST app credentials, stored per mode.
@@ -289,7 +289,7 @@ final class PayPalAccount
     /** @since 1.0.0 */
     private function tokenKey(bool $test): string
     {
-        return 'dono_paypal_token_' . ($test ? 'test' : 'live');
+        return 'giveflow_paypal_token_' . ($test ? 'test' : 'live');
     }
 
     /** @since 1.0.0 */

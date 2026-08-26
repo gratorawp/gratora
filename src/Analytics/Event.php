@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Analytics;
+namespace GiveFlow\Analytics;
 
 defined('ABSPATH') || exit;
 
-use Dono\Vendor\Queryable\Model;
-use Dono\Vendor\Queryable\Schema\Table;
+use GiveFlow\Vendor\Queryable\Model;
+use GiveFlow\Vendor\Queryable\Schema\Table;
 
 /**
  * Universal event log that every domain emits to this single table.
@@ -16,7 +16,7 @@ use Dono\Vendor\Queryable\Schema\Table;
  */
 final class Event extends Model
 {
-    protected string $table = 'dono_events';
+    protected string $table = 'giveflow_events';
     protected string $version = '1.0.0';
 
     public int $id;

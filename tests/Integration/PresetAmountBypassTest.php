@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Forms\Form;
-use Dono\Forms\FormSubmissionValidator;
-use Dono\Foundation\Plugin;
+use GiveFlow\Forms\Form;
+use GiveFlow\Forms\FormSubmissionValidator;
+use GiveFlow\Foundation\Plugin;
 
 /**
  * A form with "allow custom amount" off is a fixed-amount form. The server has
@@ -27,8 +27,8 @@ final class PresetAmountBypassTest extends IntegrationTestCase
 
     private function form(bool $withSwitcher): Form
     {
-        $amount = '<!-- wp:dono/donation-amount {"allowCustom":false,"presets":[2500,5000,10000]} /-->';
-        $switch = $withSwitcher ? '<!-- wp:dono/currency-switcher /-->' : '';
+        $amount = '<!-- wp:giveflow/donation-amount {"allowCustom":false,"presets":[2500,5000,10000]} /-->';
+        $switch = $withSwitcher ? '<!-- wp:giveflow/currency-switcher /-->' : '';
 
         $f = Form::make();
         $f->title      = 'Fixed amounts';

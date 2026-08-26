@@ -36,58 +36,58 @@ export default function OrganizationPanel( { s } ) {
     };
 
     return (
-        <div className="dono-panel">
+        <div className="giveflow-panel">
             <Card
-                title={ __( 'Identity', 'dono-fundraising-platform' ) }
-                meta={ __( 'Used by receipts and footer', 'dono-fundraising-platform' ) }
+                title={ __( 'Identity', 'giveflow-fundraising-campaigns' ) }
+                meta={ __( 'Used by receipts and footer', 'giveflow-fundraising-campaigns' ) }
                 edited={ s.isDirty }
             >
                 <FormRow
-                    label={ __( 'Legal name', 'dono-fundraising-platform' ) }
+                    label={ __( 'Legal name', 'giveflow-fundraising-campaigns' ) }
                     required
-                    help={ __( 'The entity that legally receives donations.', 'dono-fundraising-platform' ) }
+                    help={ __( 'The entity that legally receives donations.', 'giveflow-fundraising-campaigns' ) }
                 >
-                    <input type="text" className="dono-input" { ...s.bind( 'legal_name' ) } />
+                    <input type="text" className="giveflow-input" { ...s.bind( 'legal_name' ) } />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Display name', 'dono-fundraising-platform' ) }
-                    help={ __( 'Donor-facing name in subject lines and headers.', 'dono-fundraising-platform' ) }
+                    label={ __( 'Display name', 'giveflow-fundraising-campaigns' ) }
+                    help={ __( 'Donor-facing name in subject lines and headers.', 'giveflow-fundraising-campaigns' ) }
                 >
-                    <input type="text" className="dono-input" { ...s.bind( 'name' ) } />
+                    <input type="text" className="giveflow-input" { ...s.bind( 'name' ) } />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Contact email', 'dono-fundraising-platform' ) }
-                    help={ __( 'Printed on receipts, so donors know where to reply.', 'dono-fundraising-platform' ) }
+                    label={ __( 'Contact email', 'giveflow-fundraising-campaigns' ) }
+                    help={ __( 'Printed on receipts, so donors know where to reply.', 'giveflow-fundraising-campaigns' ) }
                 >
-                    <input type="email" className="dono-input" { ...s.bind( 'email' ) } />
+                    <input type="email" className="giveflow-input" { ...s.bind( 'email' ) } />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Address', 'dono-fundraising-platform' ) }
-                    help={ __( 'Optional. Receipts print it when set; donors claiming tax relief usually need it.', 'dono-fundraising-platform' ) }
+                    label={ __( 'Address', 'giveflow-fundraising-campaigns' ) }
+                    help={ __( 'Optional. Receipts print it when set; donors claiming tax relief usually need it.', 'giveflow-fundraising-campaigns' ) }
                 >
-                    <div className="dono-stack-12">
+                    <div className="giveflow-stack-12">
                         <input
                             type="text"
-                            className="dono-input"
-                            placeholder={ __( 'Street', 'dono-fundraising-platform' ) }
+                            className="giveflow-input"
+                            placeholder={ __( 'Street', 'giveflow-fundraising-campaigns' ) }
                             value={ addressLines[ 0 ] || '' }
                             onChange={ ( e ) => updateAddressLine( 0, e.target.value ) }
                         />
-                        <div className="dono-grid-2-eq">
+                        <div className="giveflow-grid-2-eq">
                             <input
                                 type="text"
-                                className="dono-input"
-                                placeholder={ __( 'Postcode', 'dono-fundraising-platform' ) }
+                                className="giveflow-input"
+                                placeholder={ __( 'Postcode', 'giveflow-fundraising-campaigns' ) }
                                 value={ addressLines[ 1 ] || '' }
                                 onChange={ ( e ) => updateAddressLine( 1, e.target.value ) }
                             />
                             <input
                                 type="text"
-                                className="dono-input"
-                                placeholder={ __( 'City', 'dono-fundraising-platform' ) }
+                                className="giveflow-input"
+                                placeholder={ __( 'City', 'giveflow-fundraising-campaigns' ) }
                                 value={ addressLines[ 2 ] || '' }
                                 onChange={ ( e ) => updateAddressLine( 2, e.target.value ) }
                             />
@@ -96,16 +96,16 @@ export default function OrganizationPanel( { s } ) {
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Country', 'dono-fundraising-platform' ) }
+                    label={ __( 'Country', 'giveflow-fundraising-campaigns' ) }
                     required
-                    help={ __( 'Drives tax-ID format and VAT visibility.', 'dono-fundraising-platform' ) }
+                    help={ __( 'Drives tax-ID format and VAT visibility.', 'giveflow-fundraising-campaigns' ) }
                 >
                     <select
-                        className="dono-select"
+                        className="giveflow-select"
                         value={ country }
                         onChange={ ( e ) => s.setValue( 'country' )( e.target.value ) }
                     >
-                        <option value="">{ __( 'Select a country', 'dono-fundraising-platform' ) }</option>
+                        <option value="">{ __( 'Select a country', 'giveflow-fundraising-campaigns' ) }</option>
                         { COUNTRIES.map( ( c ) => (
                             <option key={ c.code } value={ c.code }>{ c.name }</option>
                         ) ) }
@@ -113,21 +113,21 @@ export default function OrganizationPanel( { s } ) {
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Tax ID / EU VAT', 'dono-fundraising-platform' ) }
-                    help={ __( 'VIES validation is not performed.', 'dono-fundraising-platform' ) }
+                    label={ __( 'Tax ID / EU VAT', 'giveflow-fundraising-campaigns' ) }
+                    help={ __( 'VIES validation is not performed.', 'giveflow-fundraising-campaigns' ) }
                 >
-                    <div className="dono-grid-2-eq">
+                    <div className="giveflow-grid-2-eq">
                         <input
                             type="text"
-                            className="dono-input dono-input--mono"
-                            placeholder={ __( 'Tax number', 'dono-fundraising-platform' ) }
+                            className="giveflow-input giveflow-input--mono"
+                            placeholder={ __( 'Tax number', 'giveflow-fundraising-campaigns' ) }
                             { ...s.bind( 'tax_id' ) }
                         />
                         { showVat && (
                             <input
                                 type="text"
-                                className="dono-input dono-input--mono"
-                                placeholder={ __( 'EU VAT ID', 'dono-fundraising-platform' ) }
+                                className="giveflow-input giveflow-input--mono"
+                                placeholder={ __( 'EU VAT ID', 'giveflow-fundraising-campaigns' ) }
                                 { ...s.bind( 'vat_id' ) }
                             />
                         ) }

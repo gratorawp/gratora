@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Dono\Funds;
+namespace GiveFlow\Funds;
 
-use Dono\Async\AsyncDispatcher;
-use Dono\Campaigns\Campaign;
-use Dono\Donations\Donation;
-use Dono\Forms\Form;
-use Dono\Recurring\RecurringPlan;
-use Dono\Foundation\Time\Clock;
+use GiveFlow\Async\AsyncDispatcher;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Forms\Form;
+use GiveFlow\Recurring\RecurringPlan;
+use GiveFlow\Foundation\Time\Clock;
 use InvalidArgumentException;
-use Dono\Vendor\Queryable\DB;
+use GiveFlow\Vendor\Queryable\DB;
 use RuntimeException;
 
 /**
@@ -40,15 +40,15 @@ final class FundService
 
         $code = $this->normalizeCode((string) ($input['code'] ?? ''));
         if ($code === '') {
-            throw new InvalidArgumentException(esc_html__('A fund code is required.', 'dono-fundraising-platform'));
+            throw new InvalidArgumentException(esc_html__('A fund code is required.', 'giveflow-fundraising-campaigns'));
         }
         if ($this->funds->codeExists($code)) {
-            throw new InvalidArgumentException(esc_html__('Fund code is already in use.', 'dono-fundraising-platform'));
+            throw new InvalidArgumentException(esc_html__('Fund code is already in use.', 'giveflow-fundraising-campaigns'));
         }
 
         $name = trim((string) ($input['name'] ?? ''));
         if ($name === '') {
-            throw new InvalidArgumentException(esc_html__('A fund name is required.', 'dono-fundraising-platform'));
+            throw new InvalidArgumentException(esc_html__('A fund name is required.', 'giveflow-fundraising-campaigns'));
         }
 
         $fund = Fund::make();
@@ -75,7 +75,7 @@ final class FundService
             }
         });
 
-        do_action('dono.fund.created', $fund);
+        do_action('giveflow.fund.created', $fund);
         return $fund;
     }
 
@@ -89,10 +89,10 @@ final class FundService
         if (array_key_exists('code', $input)) {
             $code = $this->normalizeCode((string) $input['code']);
             if ($code === '') {
-                throw new InvalidArgumentException(esc_html__('A fund code is required.', 'dono-fundraising-platform'));
+                throw new InvalidArgumentException(esc_html__('A fund code is required.', 'giveflow-fundraising-campaigns'));
             }
             if ($code !== $fund->code && $this->funds->codeExists($code, (int) $fund->id)) {
-                throw new InvalidArgumentException(esc_html__('Fund code is already in use.', 'dono-fundraising-platform'));
+                throw new InvalidArgumentException(esc_html__('Fund code is already in use.', 'giveflow-fundraising-campaigns'));
             }
             $fund->code = $code;
         }
@@ -115,7 +115,7 @@ final class FundService
         // accepts it directly), so a lexicographic compare is enough.
         if ($fund->starts_at && $fund->ends_at && $fund->starts_at > $fund->ends_at) {
             throw new InvalidArgumentException(
-                esc_html__('Fund "Active from" date must be before "Active until".', 'dono-fundraising-platform')
+                esc_html__('Fund "Active from" date must be before "Active until".', 'giveflow-fundraising-campaigns')
             );
         }
 
@@ -127,7 +127,7 @@ final class FundService
             $next = (bool) $input['is_active'];
             if (! $next && $fund->is_default) {
                 throw new InvalidArgumentException(
-                    esc_html__('The default fund cannot be deactivated. Set another fund as default first.', 'dono-fundraising-platform')
+                    esc_html__('The default fund cannot be deactivated. Set another fund as default first.', 'giveflow-fundraising-campaigns')
                 );
             }
             $fund->is_active = $next;
@@ -152,7 +152,7 @@ final class FundService
             $next = (bool) $input['is_default'];
             if (! $next && $fund->is_default) {
                 throw new InvalidArgumentException(
-                    esc_html__('Set another fund as the default rather than clearing this one.', 'dono-fundraising-platform')
+                    esc_html__('Set another fund as the default rather than clearing this one.', 'giveflow-fundraising-campaigns')
                 );
             }
             $becomesDefault = $next && ! $fund->is_default;
@@ -171,7 +171,7 @@ final class FundService
             }
         });
 
-        do_action('dono.fund.updated', $fund);
+        do_action('giveflow.fund.updated', $fund);
         return $fund;
     }
 
@@ -189,12 +189,12 @@ final class FundService
     {
         if ($fund->is_default) {
             throw new RuntimeException(
-                esc_html__('The default fund cannot be deleted. Set another fund as default first.', 'dono-fundraising-platform')
+                esc_html__('The default fund cannot be deleted. Set another fund as default first.', 'giveflow-fundraising-campaigns')
             );
         }
         if ($this->hasChildren((int) $fund->id)) {
             throw new RuntimeException(
-                esc_html__('Reassign or remove the sub-funds under this fund before deleting it.', 'dono-fundraising-platform')
+                esc_html__('Reassign or remove the sub-funds under this fund before deleting it.', 'giveflow-fundraising-campaigns')
             );
         }
 
@@ -210,12 +210,12 @@ final class FundService
             $target = $this->funds->findById($reassignTo);
             if (! $target || (int) $target->id === (int) $fund->id) {
                 throw new InvalidArgumentException(
-                    esc_html__('Choose a different, existing fund to reassign donations to.', 'dono-fundraising-platform')
+                    esc_html__('Choose a different, existing fund to reassign donations to.', 'giveflow-fundraising-campaigns')
                 );
             }
             if (! $target->is_active) {
                 throw new InvalidArgumentException(
-                    esc_html__('Reassign donations to an active fund.', 'dono-fundraising-platform')
+                    esc_html__('Reassign donations to an active fund.', 'giveflow-fundraising-campaigns')
                 );
             }
 
@@ -228,7 +228,7 @@ final class FundService
             $this->async->enqueue(FundReassignmentJob::HOOK, [
                 'fund_id' => (int) $fund->id,
             ]);
-            do_action('dono.fund.reassign_queued', $fund, $target);
+            do_action('giveflow.fund.reassign_queued', $fund, $target);
 
             return ['action' => 'reassign_queued', 'target_id' => (int) $target->id];
         }
@@ -237,7 +237,7 @@ final class FundService
             $fund->is_active  = false;
             $fund->updated_at = $this->clock->now()->format('Y-m-d H:i:s');
             $fund->save();
-            do_action('dono.fund.deactivated', $fund);
+            do_action('giveflow.fund.deactivated', $fund);
 
             return [
                 'action'    => 'deactivated',
@@ -249,7 +249,7 @@ final class FundService
         }
 
         Fund::query()->where('id', $fund->id)->delete();
-        do_action('dono.fund.deleted', $fund);
+        do_action('giveflow.fund.deleted', $fund);
 
         return ['action' => 'deleted'];
     }
@@ -288,11 +288,11 @@ final class FundService
                 $blocked[(int) $r['ref']] = true;
             }
         };
-        $mark('dono_donations', 'fund_id');
-        $mark('dono_campaigns', 'default_fund_id');
-        $mark('dono_forms', 'default_fund_id');
-        $mark('dono_recurring_plans', 'fund_id');
-        $mark('dono_funds', 'parent_fund_id');
+        $mark('giveflow_donations', 'fund_id');
+        $mark('giveflow_campaigns', 'default_fund_id');
+        $mark('giveflow_forms', 'default_fund_id');
+        $mark('giveflow_recurring_plans', 'fund_id');
+        $mark('giveflow_funds', 'parent_fund_id');
 
         $out = [];
         foreach ($ids as $id) {
@@ -341,20 +341,20 @@ final class FundService
         }
         $parentId = (int) $value;
         if ($selfId !== null && $parentId === $selfId) {
-            throw new InvalidArgumentException(esc_html__('A fund cannot be its own parent.', 'dono-fundraising-platform'));
+            throw new InvalidArgumentException(esc_html__('A fund cannot be its own parent.', 'giveflow-fundraising-campaigns'));
         }
         $parent = $this->funds->findById($parentId);
         if (! $parent) {
-            throw new InvalidArgumentException(esc_html__('Parent fund not found.', 'dono-fundraising-platform'));
+            throw new InvalidArgumentException(esc_html__('Parent fund not found.', 'giveflow-fundraising-campaigns'));
         }
         if ($parent->parent_fund_id !== null) {
             throw new InvalidArgumentException(
-                esc_html__('Funds nest only one level deep. Pick a top-level fund as the parent.', 'dono-fundraising-platform')
+                esc_html__('Funds nest only one level deep. Pick a top-level fund as the parent.', 'giveflow-fundraising-campaigns')
             );
         }
         if ($selfId !== null && $this->hasChildren($selfId)) {
             throw new InvalidArgumentException(
-                esc_html__('This fund has sub-funds, so it cannot also become a sub-fund.', 'dono-fundraising-platform')
+                esc_html__('This fund has sub-funds, so it cannot also become a sub-fund.', 'giveflow-fundraising-campaigns')
             );
         }
         return $parentId;

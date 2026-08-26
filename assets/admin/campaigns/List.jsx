@@ -32,14 +32,14 @@ export function campaignsDeleteMessage( items ) {
     const withPages = items.filter( ( i ) => i.page_id ).length;
 
     const parts = [ n === 1
-        ? __( 'Permanently delete this campaign? Its forms will be deleted too. A campaign that has donations cannot be deleted.', 'dono-fundraising-platform' )
+        ? __( 'Permanently delete this campaign? Its forms will be deleted too. A campaign that has donations cannot be deleted.', 'giveflow-fundraising-campaigns' )
         : sprintf(
             /* translators: %d: number of campaigns to delete */
             _n(
                 'Permanently delete %d campaign? Forms attached to it will be deleted too. Any campaign that has donations cannot be deleted.',
                 'Permanently delete %d campaigns? Forms attached to them will be deleted too. Any campaign that has donations cannot be deleted.',
                 n,
-                'dono-fundraising-platform'
+                'giveflow-fundraising-campaigns'
             ),
             n
         ) ];
@@ -48,7 +48,7 @@ export function campaignsDeleteMessage( items ) {
     // several campaigns selected and one page between them, "the page it
     // created" leaves the admin guessing which campaign "it" is.
     if ( withPages > 0 && n === 1 ) {
-        parts.push( __( 'The WordPress page it created is deleted with it, and it does not go to the trash, so any content you built on that page is gone for good.', 'dono-fundraising-platform' ) );
+        parts.push( __( 'The WordPress page it created is deleted with it, and it does not go to the trash, so any content you built on that page is gone for good.', 'giveflow-fundraising-campaigns' ) );
     } else if ( withPages > 0 ) {
         parts.push( sprintf(
             /* translators: %d: how many of the selected campaigns have a WordPress page */
@@ -56,13 +56,13 @@ export function campaignsDeleteMessage( items ) {
                 '%d of them has a WordPress page, which is deleted with it rather than sent to the trash, so any content you built on it is gone for good.',
                 '%d of them have WordPress pages, which are deleted with them rather than sent to the trash, so any content you built on those pages is gone for good.',
                 withPages,
-                'dono-fundraising-platform'
+                'giveflow-fundraising-campaigns'
             ),
             withPages
         ) );
     }
 
-    parts.push( __( 'This cannot be undone.', 'dono-fundraising-platform' ) );
+    parts.push( __( 'This cannot be undone.', 'giveflow-fundraising-campaigns' ) );
 
     return parts.join( ' ' );
 }
@@ -86,7 +86,7 @@ export default function List() {
     const [ stats, setStats ]     = useState( null );
     const [ confirm, setConfirm ] = useState( null );
     // Opens straight into the create drawer when reached via the command
-    // palette's "New campaign" (admin.php?page=dono-campaigns&action=new).
+    // palette's "New campaign" (admin.php?page=giveflow-campaigns&action=new).
     const [ drawerOpen, setDrawerOpen ] = useState(
         () => new URLSearchParams( window.location.search ).get( 'action' ) === 'new'
     );
@@ -99,7 +99,7 @@ export default function List() {
         setError( null );
 
         apiFetch( {
-            path:  addQueryArgs( '/dono/v1/admin/campaigns', {
+            path:  addQueryArgs( '/giveflow/v1/admin/campaigns', {
                 page:     view.page,
                 per_page: view.perPage,
                 orderby:  view.sort?.field === 'raised' ? 'raised_cents' : ( view.sort?.field || 'updated_at' ),
@@ -114,18 +114,18 @@ export default function List() {
                 const items = await res.json();
                 setData( Array.isArray( items ) ? items : [] );
                 setTotal( parseInt( res.headers.get( 'X-WP-Total' ) || '0', 10 ) );
-                setTestHidden( parseInt( res.headers.get( 'X-Dono-Test-Hidden' ) || '0', 10 ) );
+                setTestHidden( parseInt( res.headers.get( 'X-GiveFlow-Test-Hidden' ) || '0', 10 ) );
             } )
             .catch( ( err ) => {
                 if ( aborted ) return;
-                setError( err?.message || __( 'Failed to load campaigns.', 'dono-fundraising-platform' ) );
+                setError( err?.message || __( 'Failed to load campaigns.', 'giveflow-fundraising-campaigns' ) );
             } )
             .finally( () => ! aborted && setLoading( false ) );
 
         // Filter-aware aggregates for the KPI strip. Same filter shape as the
         // list but no pagination / sort - the totals are over the matched set.
         apiFetch( {
-            path: addQueryArgs( '/dono/v1/admin/campaigns/stats', {
+            path: addQueryArgs( '/giveflow/v1/admin/campaigns/stats', {
                 search: view.search || undefined,
                 status: statusFilter?.value || undefined,
             } ),
@@ -142,38 +142,38 @@ export default function List() {
     const fields = useMemo( () => [
         {
             id:            'title',
-            label:         __( 'Title', 'dono-fundraising-platform' ),
+            label:         __( 'Title', 'giveflow-fundraising-campaigns' ),
             enableSorting: true,
             render: ( { item } ) => (
-                <div className="dono-row__body">
+                <div className="giveflow-row__body">
                     <span style={ { display: 'inline-flex', alignItems: 'center', gap: 8 } }>
                         <a
-                            className="dono-row__link dono-row__link--strong"
+                            className="giveflow-row__link giveflow-row__link--strong"
                             href={ detailHref( item.id ) }
                             { ...rowLinkProps }
                         >
                             { item.title }
                         </a>
                         { item.campaign_type && item.campaign_type !== 'standard' && item.campaign_type_label && (
-                            <span className="dono-pill dono-pill--type">
+                            <span className="giveflow-pill giveflow-pill--type">
                                 { item.campaign_type_label }
                             </span>
                         ) }
                     </span>
-                    <div className="dono-row__sub dono-row__sub--mono">{ item.slug }</div>
+                    <div className="giveflow-row__sub giveflow-row__sub--mono">{ item.slug }</div>
                 </div>
             ),
         },
         {
             id:       'status',
-            label:    __( 'Status', 'dono-fundraising-platform' ),
+            label:    __( 'Status', 'giveflow-fundraising-campaigns' ),
             elements: STATUS_OPTIONS,
             filterBy: { operators: [ 'is' ] },
             render:   ( { item } ) => <StatusBadge status={ item.status } />,
         },
         {
             id:            'raised',
-            label:         __( 'Raised', 'dono-fundraising-platform' ),
+            label:         __( 'Raised', 'giveflow-fundraising-campaigns' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <span style={ { fontVariantNumeric: 'tabular-nums' } }>
@@ -183,7 +183,7 @@ export default function List() {
         },
         {
             id:    'goal',
-            label: __( 'Goal', 'dono-fundraising-platform' ),
+            label: __( 'Goal', 'giveflow-fundraising-campaigns' ),
             // DataViews offers sorting on every field that does not opt out,
             // and the server has no orderby for these, so the indicator moved
             // and the rows came back in the same order.
@@ -192,7 +192,7 @@ export default function List() {
         },
         {
             id:            'donations_count',
-            label:         __( 'Donations', 'dono-fundraising-platform' ),
+            label:         __( 'Donations', 'giveflow-fundraising-campaigns' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <span style={ { fontVariantNumeric: 'tabular-nums', fontSize: '13px' } }>
@@ -202,7 +202,7 @@ export default function List() {
         },
         {
             id:            'donors_count',
-            label:         __( 'Donors', 'dono-fundraising-platform' ),
+            label:         __( 'Donors', 'giveflow-fundraising-campaigns' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <span style={ { fontVariantNumeric: 'tabular-nums', fontSize: '13px' } }>
@@ -212,7 +212,7 @@ export default function List() {
         },
         {
             id:    'forms_count',
-            label: __( 'Forms', 'dono-fundraising-platform' ),
+            label: __( 'Forms', 'giveflow-fundraising-campaigns' ),
             enableSorting: false,
             render: ( { item } ) => (
                 <span style={ { fontVariantNumeric: 'tabular-nums', fontSize: '13px' } }>
@@ -222,12 +222,12 @@ export default function List() {
         },
         {
             id:            'updated_at',
-            label:         __( 'Updated', 'dono-fundraising-platform' ),
+            label:         __( 'Updated', 'giveflow-fundraising-campaigns' ),
             enableSorting: true,
             render: ( { item } ) => (
-                <span className="dono-time" title={ formatDate( item.updated_at ) }>
-                    <span className="dono-time__rel">{ timeAgo( item.updated_at ) }</span>
-                    <span className="dono-time__abs">{ formatDate( item.updated_at ) }</span>
+                <span className="giveflow-time" title={ formatDate( item.updated_at ) }>
+                    <span className="giveflow-time__rel">{ timeAgo( item.updated_at ) }</span>
+                    <span className="giveflow-time__abs">{ formatDate( item.updated_at ) }</span>
                 </span>
             ),
         },
@@ -241,7 +241,7 @@ export default function List() {
     const actions = useMemo( () => [
         {
             id:    'view',
-            label: __( 'View campaign', 'dono-fundraising-platform' ),
+            label: __( 'View campaign', 'giveflow-fundraising-campaigns' ),
             icon:  () => <ViewIcon size={ 16 } strokeWidth={ 1.75 } />,
             // One page per invocation, so no bulk: opening six tabs at once is
             // not what anyone meant by selecting six campaigns.
@@ -257,25 +257,25 @@ export default function List() {
         },
         {
             id:           'duplicate',
-            label:        __( 'Duplicate', 'dono-fundraising-platform' ),
+            label:        __( 'Duplicate', 'giveflow-fundraising-campaigns' ),
             icon:         () => <CopyIcon size={ 16 } strokeWidth={ 1.75 } />,
             supportsBulk: true,
             callback: async ( items ) => {
                 if ( ! items.length ) return;
                 try {
                     await Promise.all( items.map( ( i ) => apiFetch( {
-                        path:   `/dono/v1/admin/campaigns/${ i.id }/duplicate`,
+                        path:   `/giveflow/v1/admin/campaigns/${ i.id }/duplicate`,
                         method: 'POST',
                     } ) ) );
                     load();
                 } catch ( err ) {
-                    setError( err?.message || __( 'Could not duplicate one or more campaigns.', 'dono-fundraising-platform' ) );
+                    setError( err?.message || __( 'Could not duplicate one or more campaigns.', 'giveflow-fundraising-campaigns' ) );
                 }
             },
         },
         {
             id:            'delete',
-            label:         __( 'Delete', 'dono-fundraising-platform' ),
+            label:         __( 'Delete', 'giveflow-fundraising-campaigns' ),
             icon:          () => <TrashIcon size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             supportsBulk:  true,
@@ -289,9 +289,9 @@ export default function List() {
                 const n = items.length;
                 const message = campaignsDeleteMessage( items );
                 setConfirm( {
-                    title:        _n( 'Delete campaign', 'Delete campaigns', n, 'dono-fundraising-platform' ),
+                    title:        _n( 'Delete campaign', 'Delete campaigns', n, 'giveflow-fundraising-campaigns' ),
                     message,
-                    confirmLabel: __( 'Delete', 'dono-fundraising-platform' ),
+                    confirmLabel: __( 'Delete', 'giveflow-fundraising-campaigns' ),
                     destructive:  true,
                     onConfirm: async () => {
                         // allSettled, not all: one refusal used to reject the
@@ -299,7 +299,7 @@ export default function List() {
                         // stayed on screen with a single error above them and no
                         // refetch. Each campaign now reports its own outcome.
                         const results = await Promise.allSettled( items.map( ( i ) => apiFetch( {
-                            path:   `/dono/v1/admin/campaigns/${ i.id }`,
+                            path:   `/giveflow/v1/admin/campaigns/${ i.id }`,
                             method: 'DELETE',
                         } ) ) );
 
@@ -309,14 +309,14 @@ export default function List() {
                         if ( deleted > 0 ) {
                             notify.success( sprintf(
                                 /* translators: %d: number of campaigns deleted */
-                                _n( '%d campaign deleted.', '%d campaigns deleted.', deleted, 'dono-fundraising-platform' ),
+                                _n( '%d campaign deleted.', '%d campaigns deleted.', deleted, 'giveflow-fundraising-campaigns' ),
                                 deleted
                             ) );
                         }
                         if ( refused.length > 0 ) {
                             setError( sprintf(
                                 /* translators: %s: comma separated campaign titles */
-                                __( 'These campaigns were not deleted, because they have donations: %s', 'dono-fundraising-platform' ),
+                                __( 'These campaigns were not deleted, because they have donations: %s', 'giveflow-fundraising-campaigns' ),
                                 refused.map( ( c ) => c.title || `#${ c.id }` ).join( ', ' )
                             ) );
                         }
@@ -330,22 +330,22 @@ export default function List() {
 
     return (
         <div>
-            <div className="dono-crumbs">
-                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'Dono', 'dono-fundraising-platform' ) }</a>
+            <div className="giveflow-crumbs">
+                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'GiveFlow', 'giveflow-fundraising-campaigns' ) }</a>
                 <span className="sep">›</span>
-                <span>{ __( 'Campaigns', 'dono-fundraising-platform' ) }</span>
+                <span>{ __( 'Campaigns', 'giveflow-fundraising-campaigns' ) }</span>
             </div>
-            <div className="dono-page-head">
-                <div className="dono-page-head__title-row">
-                    <h1>{ __( 'Campaigns', 'dono-fundraising-platform' ) }</h1>
+            <div className="giveflow-page-head">
+                <div className="giveflow-page-head__title-row">
+                    <h1>{ __( 'Campaigns', 'giveflow-fundraising-campaigns' ) }</h1>
                 </div>
-                <div className="dono-page-head__right">
-                    <span className="dono-page-head__meta">
-                        { sprintf( /* translators: %s: number of campaigns */ _n( '%s campaign', '%s campaigns', total, 'dono-fundraising-platform' ), total.toLocaleString() ) }
+                <div className="giveflow-page-head__right">
+                    <span className="giveflow-page-head__meta">
+                        { sprintf( /* translators: %s: number of campaigns */ _n( '%s campaign', '%s campaigns', total, 'giveflow-fundraising-campaigns' ), total.toLocaleString() ) }
                     </span>
                     <Btn variant="primary" onClick={ () => setDrawerOpen( true ) }>
                         <Plus size={ 16 } strokeWidth={ 1.75 } />
-                        { __( 'Add new campaign', 'dono-fundraising-platform' ) }
+                        { __( 'Add new campaign', 'giveflow-fundraising-campaigns' ) }
                     </Btn>
                 </div>
             </div>
@@ -367,7 +367,7 @@ export default function List() {
                             '%d test donation is not counted in these figures.',
                             '%d test donations are not counted in these figures.',
                             testHidden,
-                            'dono-fundraising-platform'
+                            'giveflow-fundraising-campaigns'
                         ),
                         testHidden
                     ) }
@@ -378,16 +378,16 @@ export default function List() {
             { ! loading && total === 0 && ! view.search && ! statusFilter ? (
                 <EmptyState
                     icon={ <Target size={ 22 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'No campaigns yet', 'dono-fundraising-platform' ) }
-                    body={ __( 'A campaign groups one or more donation forms around a single fundraising goal. Create one to get started.', 'dono-fundraising-platform' ) }
+                    title={ __( 'No campaigns yet', 'giveflow-fundraising-campaigns' ) }
+                    body={ __( 'A campaign groups one or more donation forms around a single fundraising goal. Create one to get started.', 'giveflow-fundraising-campaigns' ) }
                     action={
                         <Btn variant="primary" onClick={ () => setDrawerOpen( true ) }>
-                            { __( 'Create your first campaign', 'dono-fundraising-platform' ) }
+                            { __( 'Create your first campaign', 'giveflow-fundraising-campaigns' ) }
                         </Btn>
                     }
                 />
             ) : (
-                <div className="dono-dataviews">
+                <div className="giveflow-dataviews">
                     <DataViews
                         data={ data }
                         isLoading={ loading }
@@ -414,24 +414,24 @@ export default function List() {
 function campaignKpis( stats ) {
     return [
         {
-            label: __( 'Total', 'dono-fundraising-platform' ),
+            label: __( 'Total', 'giveflow-fundraising-campaigns' ),
             value: stats ? stats.total_count.toLocaleString() : '-',
         },
         {
-            label: __( 'Active', 'dono-fundraising-platform' ),
+            label: __( 'Active', 'giveflow-fundraising-campaigns' ),
             value: stats ? stats.active_count.toLocaleString() : '-',
         },
         {
-            label: __( 'Raised', 'dono-fundraising-platform' ),
+            label: __( 'Raised', 'giveflow-fundraising-campaigns' ),
             value: stats && stats.raised_cents > 0
                 ? formatAmount( stats.raised_cents, stats.currency || undefined )
                 : '-',
             sub: stats?.currency
-                ? sprintf( /* translators: %s: currency code */ __( 'in %s', 'dono-fundraising-platform' ), stats.currency )
+                ? sprintf( /* translators: %s: currency code */ __( 'in %s', 'giveflow-fundraising-campaigns' ), stats.currency )
                 : null,
         },
         {
-            label: __( 'Donations', 'dono-fundraising-platform' ),
+            label: __( 'Donations', 'giveflow-fundraising-campaigns' ),
             value: stats ? stats.donations_count.toLocaleString() : '-',
         },
     ];

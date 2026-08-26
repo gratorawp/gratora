@@ -43,7 +43,7 @@ function me( overrides = {} ) {
 
 // The runtime mounts itself on import, so each test needs its own module copy.
 async function boot() {
-    document.body.innerHTML = '<div id="dono-donor-portal"></div>';
+    document.body.innerHTML = '<div id="giveflow-donor-portal"></div>';
 
     jest.isolateModules( () => {
         require( '../../assets/donor-portal/index.jsx' );
@@ -54,7 +54,7 @@ async function boot() {
 }
 
 function text() {
-    return document.getElementById( 'dono-donor-portal' ).textContent;
+    return document.getElementById( 'giveflow-donor-portal' ).textContent;
 }
 
 // Awaited, because the form's submit handler closes over the state of the
@@ -89,13 +89,13 @@ function clickButton( label ) {
 beforeEach( () => {
     routes = {};
     window.history.replaceState( {}, '', '/portal/' );
-    window.donoPortal = { rest: '/wp-json/dono/v1/portal/', nonce: '', token: 'portal-token' };
-    window.dono = {
+    window.giveflowPortal = { rest: '/wp-json/giveflow/v1/portal/', nonce: '', token: 'portal-token' };
+    window.giveflow = {
         default_currency: 'USD',
         number_format: { decimalPlaces: 2, decimalSep: '.', thousandSep: ',', symbolPosition: 'before', symbol: '$' },
     };
     global.fetch = jest.fn( ( url ) => {
-        const path = String( url ).replace( '/wp-json/dono/v1/portal/', '' );
+        const path = String( url ).replace( '/wp-json/giveflow/v1/portal/', '' );
         const route = routes[ path ];
         if ( typeof route === 'function' ) return route();
 
@@ -173,7 +173,7 @@ describe( 'signing out everywhere', () => {
         await clickButton( 'Sign out everywhere' );
 
         expect( global.fetch.mock.calls.map( ( c ) => String( c[ 0 ] ) ) )
-            .not.toContain( '/wp-json/dono/v1/portal/logout-everywhere' );
+            .not.toContain( '/wp-json/giveflow/v1/portal/logout-everywhere' );
         expect( text() ).toContain( 'cancels any sign-in link that was never opened' );
     } );
 
@@ -191,7 +191,7 @@ describe( 'signing out everywhere', () => {
             .find( ( c ) => String( c[ 0 ] ).endsWith( '/logout-everywhere' ) );
         expect( posted ).toBeTruthy();
         expect( posted[ 1 ].method ).toBe( 'POST' );
-        expect( posted[ 1 ].headers[ 'X-Dono-Csrf' ] ).toBe( 'csrf-token' );
+        expect( posted[ 1 ].headers[ 'X-GiveFlow-Csrf' ] ).toBe( 'csrf-token' );
     } );
 
     test( 'and backing out of it leaves the ordinary way out', async () => {
@@ -203,6 +203,6 @@ describe( 'signing out everywhere', () => {
 
         expect( text() ).toContain( 'Sign out everywhere' );
         expect( global.fetch.mock.calls.map( ( c ) => String( c[ 0 ] ) ) )
-            .not.toContain( '/wp-json/dono/v1/portal/logout-everywhere' );
+            .not.toContain( '/wp-json/giveflow/v1/portal/logout-everywhere' );
     } );
 } );

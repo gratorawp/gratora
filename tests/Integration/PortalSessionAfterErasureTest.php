@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -17,17 +17,17 @@ final class PortalSessionAfterErasureTest extends IntegrationTestCase
 {
     /** Endpoints that read the session and return the donor's own data. */
     private const AUTHENTICATED = [
-        '/dono/v1/portal/donations',
-        '/dono/v1/portal/recurring',
-        '/dono/v1/portal/receipts',
-        '/dono/v1/portal/preferences',
-        '/dono/v1/portal/me',
-        '/dono/v1/portal/profile',
+        '/giveflow/v1/portal/donations',
+        '/giveflow/v1/portal/recurring',
+        '/giveflow/v1/portal/receipts',
+        '/giveflow/v1/portal/preferences',
+        '/giveflow/v1/portal/me',
+        '/giveflow/v1/portal/profile',
     ];
 
     protected function tearDown(): void
     {
-        unset($_COOKIE['dono_donor_session']);
+        unset($_COOKIE['giveflow_donor_session']);
         parent::tearDown();
     }
 
@@ -49,7 +49,7 @@ final class PortalSessionAfterErasureTest extends IntegrationTestCase
             ->findOrCreate('portal-' . uniqid() . '@example.test', ['first_name' => 'Sam']);
 
         $sid = $this->portalSession((int) $donor->id, bin2hex(random_bytes(8)));
-        $_COOKIE['dono_donor_session'] = $sid;
+        $_COOKIE['giveflow_donor_session'] = $sid;
 
         return $donor;
     }

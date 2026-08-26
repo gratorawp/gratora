@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Foundation\Plugin;
-use Dono\Vendor\Queryable\Model;
-use Dono\Vendor\Queryable\Schema\Table;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Vendor\Queryable\Model;
+use GiveFlow\Vendor\Queryable\Schema\Table;
 use ReflectionProperty;
 
 /**
@@ -14,12 +14,12 @@ use ReflectionProperty;
  *
  * Activation hooks do not fire on a plugin update, so the only thing that
  * migrates an already-installed site is the boot-time gate, and that gate only
- * fires when DONO_DB_VERSION changes. Add a column and forget the bump and the
+ * fires when GIVEFLOW_DB_VERSION changes. Add a column and forget the bump and the
  * table is silently missing it: every query touching that column dies with
  * "unknown column", and it looks fine on any machine that reactivated.
  *
  * That has happened, so the rule is pinned here rather than left to memory.
- * When this fails, you changed a schema: bump DONO_DB_VERSION in dono.php and
+ * When this fails, you changed a schema: bump GIVEFLOW_DB_VERSION in giveflow.php and
  * put the new fingerprint below.
  *
  * The bump is semver, and it tracks the schema rather than the release: patch
@@ -30,13 +30,13 @@ final class SchemaVersionTest extends IntegrationTestCase
 {
     /**
      * sha256 of every registered model's compiled CREATE TABLE, in class order.
-     * Update it in the same commit as the DONO_DB_VERSION bump.
+     * Update it in the same commit as the GIVEFLOW_DB_VERSION bump.
      *
      * Dropping a model is the one schema change that needs no bump: migrate()
      * iterates registered models, and dbDelta never drops a table, so there is
      * nothing for a migration to do and the orphaned table is inert either way.
      */
-    private const FINGERPRINT = 'a1c7db4ae728b87e2187f8c6081ec77174478b223122a209ef6482ef353aadaa';
+    private const FINGERPRINT = 'b400d1622ebb0a70c45fc92e1068349150b8ad2740610287df2263cd0a5473a3';
 
     public function test_the_schema_matches_the_declared_db_version(): void
     {
@@ -45,7 +45,7 @@ final class SchemaVersionTest extends IntegrationTestCase
         $this->assertSame(
             self::FINGERPRINT,
             $actual,
-            "A model's schema changed. Bump DONO_DB_VERSION in dono.php so existing"
+            "A model's schema changed. Bump GIVEFLOW_DB_VERSION in giveflow.php so existing"
             . " installs migrate on update, then set FINGERPRINT to:\n{$actual}"
         );
     }
@@ -60,8 +60,8 @@ final class SchemaVersionTest extends IntegrationTestCase
     {
         $this->assertMatchesRegularExpression(
             '/^\d+\.\d+\.\d+$/',
-            DONO_DB_VERSION,
-            'DONO_DB_VERSION is major.minor.patch'
+            GIVEFLOW_DB_VERSION,
+            'GIVEFLOW_DB_VERSION is major.minor.patch'
         );
     }
 
@@ -70,7 +70,7 @@ final class SchemaVersionTest extends IntegrationTestCase
     {
         Plugin::onActivation();
 
-        $this->assertSame(DONO_DB_VERSION, get_option('dono_db_version'));
+        $this->assertSame(GIVEFLOW_DB_VERSION, get_option('giveflow_db_version'));
     }
 
     private static function fingerprint(): string

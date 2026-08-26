@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Foundation\Uninstall\DataEraser;
+use GiveFlow\Foundation\Uninstall\DataEraser;
 
 /**
- * The answer to "delete all Dono data on deactivation" belongs to the
+ * The answer to "delete all GiveFlow data on deactivation" belongs to the
  * deactivation it was given for.
  *
  * As a plain flag it outlived one. Tick the box, then close the tab or let the

@@ -1,21 +1,21 @@
-.dono-donor-portal {
-    --dp-accent:   var(--dono-accent, #1e8a4e);
-    --dp-text:     var(--dono-text, #111827);
-    --dp-muted:    var(--dono-text-muted, #6b7280);
-    --dp-border:   var(--dono-border, #e5e7eb);
-    // Hairline between rows, lighter than a card boundary. Matches @dono/ui's
+.giveflow-donor-portal {
+    --dp-accent:   var(--giveflow-accent, #211d3f);
+    --dp-text:     var(--giveflow-text, #111827);
+    --dp-muted:    var(--giveflow-text-muted, #6b7280);
+    --dp-border:   var(--giveflow-border, #e5e7eb);
+    // Hairline between rows, lighter than a card boundary. Matches @giveflow/ui's
     // $border-soft.
-    --dp-rule:     var(--dono-border-soft, #eef0f2);
-    --dp-bg:       var(--dono-bg, #fff);
-    --dp-bg-soft:  var(--dono-bg-soft, #f8fafb);
-    --dp-radius:   var(--dono-radius, 10px);
+    --dp-rule:     var(--giveflow-border-soft, #eef0f2);
+    --dp-bg:       var(--giveflow-bg, #fff);
+    --dp-bg-soft:  var(--giveflow-bg-soft, #f8fafb);
+    --dp-radius:   var(--giveflow-radius, 10px);
 
     max-width: 900px;
     margin: 0 auto;
     padding: 32px 20px;
     color: var(--dp-text);
-    font-family: var(--dono-typeface, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
-    font-size: var(--dono-type-size, 15px);
+    font-family: var(--giveflow-typeface, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
+    font-size: var(--giveflow-type-size, 15px);
     line-height: 1.55;
 
     * { box-sizing: border-box; }
@@ -635,7 +635,7 @@
 }
 
 @media (max-width: 600px) {
-    .dono-donor-portal { padding: 16px 12px; }
+    .giveflow-donor-portal { padding: 16px 12px; }
 
     .dp__head {
         flex-direction: column;

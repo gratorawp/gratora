@@ -7,9 +7,9 @@ defined('ABSPATH') || exit;
  * @var bool   $defaultOn
  */
 ?>
-<label class="dono-block dono-block--cover-fees dono-cover-fees"
+<label class="giveflow-block giveflow-block--cover-fees giveflow-cover-fees"
        data-pct="<?php echo esc_attr((string) $percent); ?>"
        data-fixed="<?php echo esc_attr((string) $fixed); ?>">
     <input type="checkbox" name="cover_fees" value="1" <?php echo esc_attr($defaultOn ? 'checked' : ''); ?>>
-    <span class="dono-cover-fees__label"><?php echo esc_html((string) $label); ?></span>
+    <span class="giveflow-cover-fees__label"><?php echo esc_html((string) $label); ?></span>
 </label>

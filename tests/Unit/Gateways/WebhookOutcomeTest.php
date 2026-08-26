@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Unit\Gateways;
+namespace GiveFlow\Tests\Unit\Gateways;
 
-use Dono\Gateways\WebhookOutcome;
+use GiveFlow\Gateways\WebhookOutcome;
 use PHPUnit\Framework\TestCase;
 
 final class WebhookOutcomeTest extends TestCase

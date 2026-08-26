@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Forms\Blocks;
+namespace GiveFlow\Forms\Blocks;
 
-use Dono\Foundation\Helpers\View;
+use GiveFlow\Foundation\Helpers\View;
 
 /**
- * dono/divider: a horizontal rule with author-set spacing and line colour.
+ * giveflow/divider: a horizontal rule with author-set spacing and line colour.
  *
  * @since 1.0.0
  */
@@ -16,7 +16,7 @@ final class DividerBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'dono/divider';
+        return 'giveflow/divider';
     }
 
     /** @since 1.0.0 */
@@ -26,7 +26,7 @@ final class DividerBlock implements Block
             'marginTop'    => ['type' => 'number', 'default' => 16],
             'marginBottom' => ['type' => 'number', 'default' => 16],
             'thickness'    => ['type' => 'number', 'default' => 1],
-            // Empty = inherit the form border token (--dono-border).
+            // Empty = inherit the form border token (--giveflow-border).
             'color'        => ['type' => 'string', 'default' => ''],
         ];
     }

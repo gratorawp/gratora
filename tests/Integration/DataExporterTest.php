@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Donors\DonorService;
-use Dono\Foundation\Plugin;
-use Dono\Foundation\Transfer\DataExporter;
+use GiveFlow\Donors\DonorService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Foundation\Transfer\DataExporter;
 
 /**
  * An export is a file people email to support and commit to repositories, and
@@ -52,7 +52,7 @@ final class DataExporterTest extends IntegrationTestCase
     {
         $this->seedDonor('plaintext@example.test');
 
-        $donors = $this->export()['tables']['dono_donors'] ?? [];
+        $donors = $this->export()['tables']['giveflow_donors'] ?? [];
         $match  = null;
         foreach ($donors as $d) {
             if (($d['email'] ?? '') === 'plaintext@example.test') $match = $d;
@@ -69,13 +69,13 @@ final class DataExporterTest extends IntegrationTestCase
     {
         $this->seedDonor();
 
-        foreach ($this->export()['tables']['dono_donors'] ?? [] as $d) {
+        foreach ($this->export()['tables']['giveflow_donors'] ?? [] as $d) {
             $this->assertArrayNotHasKey('email_hash', $d);
         }
     }
 
     /**
-     * dono_system_settings holds encryption_key_v1, email_pepper_v1,
+     * giveflow_system_settings holds encryption_key_v1, email_pepper_v1,
      * form_signing_secret_v1 and ip_salt_v1. If this ever passes by accident,
      * the export hands over the keys to every encrypted column in the database.
      */
@@ -83,20 +83,20 @@ final class DataExporterTest extends IntegrationTestCase
     {
         $tables = $this->export()['tables'] ?? [];
 
-        $this->assertArrayNotHasKey('dono_system_settings', $tables);
-        $this->assertNotContains('dono_system_settings', DataExporter::tables());
+        $this->assertArrayNotHasKey('giveflow_system_settings', $tables);
+        $this->assertNotContains('giveflow_system_settings', DataExporter::tables());
     }
 
     /** Live credentials: the file would let anyone sign in as any donor. */
     public function test_magic_link_tokens_are_never_exported(): void
     {
-        $this->assertArrayNotHasKey('dono_magic_link_tokens', $this->export()['tables'] ?? []);
+        $this->assertArrayNotHasKey('giveflow_magic_link_tokens', $this->export()['tables'] ?? []);
     }
 
-    /** A delivery records what arrived and what Dono did, never the body. */
+    /** A delivery records what arrived and what GiveFlow did, never the body. */
     public function test_an_exported_delivery_carries_no_gateway_payload(): void
     {
-        $req = new \WP_REST_Request('POST', '/dono/v1/webhooks/offline');
+        $req = new \WP_REST_Request('POST', '/giveflow/v1/webhooks/offline');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['payer' => ['email_address' => 'donor@example.test']]));
         rest_do_request($req);
@@ -106,7 +106,7 @@ final class DataExporterTest extends IntegrationTestCase
 
     public function test_gateway_secrets_are_redacted_in_settings(): void
     {
-        update_option('dono_gateway_config', [
+        update_option('giveflow_gateway_config', [
             'stripe' => ['webhook_secret_live' => 'whsec_this_must_not_travel'],
         ]);
 
@@ -118,21 +118,21 @@ final class DataExporterTest extends IntegrationTestCase
             'the webhook secret is the only authentication on that route'
         );
 
-        delete_option('dono_gateway_config');
+        delete_option('giveflow_gateway_config');
     }
 
     /** An add-on may add its own tables, but not reopen what SKIP closed. */
     public function test_an_add_on_cannot_add_back_a_skipped_table(): void
     {
-        $sneak = static fn (array $t): array => array_merge($t, ['dono_system_settings', 'dono_tributes']);
-        add_filter('dono.export.tables', $sneak);
+        $sneak = static fn (array $t): array => array_merge($t, ['giveflow_system_settings', 'giveflow_tributes']);
+        add_filter('giveflow.export.tables', $sneak);
 
         try {
             $tables = DataExporter::tables();
-            $this->assertContains('dono_tributes', $tables, 'an add-on can contribute its own');
-            $this->assertNotContains('dono_system_settings', $tables, 'but never a skipped one');
+            $this->assertContains('giveflow_tributes', $tables, 'an add-on can contribute its own');
+            $this->assertNotContains('giveflow_system_settings', $tables, 'but never a skipped one');
         } finally {
-            remove_filter('dono.export.tables', $sneak);
+            remove_filter('giveflow.export.tables', $sneak);
         }
     }
 
@@ -141,9 +141,9 @@ final class DataExporterTest extends IntegrationTestCase
     {
         $order = array_flip(DataExporter::tables());
 
-        $this->assertLessThan($order['dono_donations'], $order['dono_donors']);
-        $this->assertLessThan($order['dono_donations'], $order['dono_campaigns']);
-        $this->assertLessThan($order['dono_receipts'], $order['dono_donations']);
+        $this->assertLessThan($order['giveflow_donations'], $order['giveflow_donors']);
+        $this->assertLessThan($order['giveflow_donations'], $order['giveflow_campaigns']);
+        $this->assertLessThan($order['giveflow_receipts'], $order['giveflow_donations']);
     }
 
 }

@@ -1,9 +1,9 @@
-# Copyright (C) 2026 Dono
+# Copyright (C) 2026 GiveFlow
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Dono Fundraising Platform 1.0.0\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/dono-fundraising-platform\n"
+"Project-Id-Version: GiveFlow Fundraising Campaigns 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/giveflow-fundraising-campaigns\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -12,7 +12,7 @@ msgstr ""
 "POT-Creation-Date: 2026-08-19T22:16:16+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
-"X-Domain: dono-fundraising-platform\n"
+"X-Domain: giveflow-fundraising-campaigns\n"
 
 #. translators: %d: number of edited fields in this card
 #: components/Card.js:57
@@ -458,23 +458,23 @@ msgid "Hide widget"
 msgstr ""
 
 #. Plugin Name of the plugin
-#: dono.php
-msgid "Dono Fundraising Platform"
+#: giveflow.php
+msgid "GiveFlow Fundraising Campaigns"
 msgstr ""
 
 #. Plugin URI of the plugin
 #. Author URI of the plugin
-#: dono.php
-msgid "https://getdono.com"
+#: giveflow.php
+msgid "https://giveflow.io"
 msgstr ""
 
 #. Description of the plugin
-#: dono.php
+#: giveflow.php
 msgid "A fundraising platform for WordPress"
 msgstr ""
 
 #. Author of the plugin
-#: dono.php
+#: giveflow.php
 #: src/Admin/AdminMenu.php:34
 #: src/Admin/AdminMenu.php:35
 #: src/Campaigns/Blocks/BlockEditorIntegration.php:66
@@ -487,7 +487,7 @@ msgstr ""
 #: assets/admin/settings/Settings.jsx:237
 #: assets/admin/subscriptions/List.jsx:770
 #: assets/admin/tools/Tools.jsx:56
-msgid "Dono"
+msgid "GiveFlow"
 msgstr ""
 
 #: src/Admin/AdminGlobals.php:46
@@ -498,11 +498,11 @@ msgid "Standard"
 msgstr ""
 
 #: src/Admin/ManagedPageStates.php:38
-msgid "Dono Campaign"
+msgid "GiveFlow Campaign"
 msgstr ""
 
 #: src/Admin/ManagedPageStates.php:43
-msgid "Dono Donor Portal"
+msgid "GiveFlow Donor Portal"
 msgstr ""
 
 #: src/Admin/Pages/CampaignsPage.php:32
@@ -599,14 +599,14 @@ msgid "Tools"
 msgstr ""
 
 #: src/Admin/TestModeBadge.php:54
-msgid "Dono Test Mode Active"
+msgid "GiveFlow Test Mode Active"
 msgstr ""
 
 #. translators: %d: how many published forms are in test mode.
 #: src/Admin/TestModeBadge.php:57
 #, php-format
-msgid "%d Dono Form in Test Mode"
-msgid_plural "%d Dono Forms in Test Mode"
+msgid "%d GiveFlow Form in Test Mode"
+msgid_plural "%d GiveFlow Forms in Test Mode"
 msgstr[0] ""
 msgstr[1] ""
 
@@ -619,15 +619,15 @@ msgid "These forms take no real money. Every other form on the site does."
 msgstr ""
 
 #: src/Admin/views/deactivation-dialog.php:12
-msgid "Deactivate Dono"
+msgid "Deactivate GiveFlow"
 msgstr ""
 
 #: src/Admin/views/deactivation-dialog.php:16
-msgid "Your donations, donors, campaigns and settings stay as they are. Switching Dono back on picks up where you left off."
+msgid "Your donations, donors, campaigns and settings stay as they are. Switching GiveFlow back on picks up where you left off."
 msgstr ""
 
 #: src/Admin/views/deactivation-dialog.php:22
-msgid "Delete all Dono data as well"
+msgid "Delete all GiveFlow data as well"
 msgstr ""
 
 #: src/Admin/views/deactivation-dialog.php:27
@@ -758,7 +758,7 @@ msgstr ""
 
 #: src/Campaigns/Blocks/CampaignBindings.php:85
 #: assets/admin/campaign-blocks/bindings.js:54
-msgid "Dono campaign"
+msgid "GiveFlow campaign"
 msgstr ""
 
 #: src/Campaigns/Blocks/CampaignBlock.php:132
@@ -1064,7 +1064,7 @@ msgid "Classic"
 msgstr ""
 
 #: src/Campaigns/Styling/StylePresets.php:35
-msgid "Balanced, friendly, accent green. The Dono default."
+msgid "Balanced, friendly, accent green. The GiveFlow default."
 msgstr ""
 
 #: src/Campaigns/Styling/StylePresets.php:46
@@ -1349,13 +1349,13 @@ msgid "Link is time-limited to your login session (about %s); regenerate it if i
 msgstr ""
 
 #: src/Core/CoreModule.php:242
-msgid "Dono Core"
+msgid "GiveFlow Core"
 msgstr ""
 
 #. translators: %s: timestamp the key loss was detected
 #: src/Core/CoreModule.php:1198
 #, php-format
-msgid "Encryption key missing since %s. Donor PII written before this point cannot be decrypted. Restore dono_system_settings from a backup, or accept that historical PII is gone. New donations are encrypting against a freshly generated key."
+msgid "Encryption key missing since %s. Donor PII written before this point cannot be decrypted. Restore giveflow_system_settings from a backup, or accept that historical PII is gone. New donations are encrypting against a freshly generated key."
 msgstr ""
 
 #. translators: 1: current base currency, 2: number of donations.
@@ -2663,7 +2663,7 @@ msgid "For a public campaign with a goal and a supporter wall. Carries a progres
 msgstr ""
 
 #: src/Forms/Shortcode/DonationFormShortcode.php:136
-msgid "Specify a form slug: [dono_donation_form slug=\"...\"]."
+msgid "Specify a form slug: [giveflow_donation_form slug=\"...\"]."
 msgstr ""
 
 #. translators: %s: form slug
@@ -2948,7 +2948,7 @@ msgid "The license for %s has lapsed. Renew to keep receiving updates and securi
 msgstr ""
 
 #: src/Foundation/License/LicenseNotice.php:98
-msgid "Dono:"
+msgid "GiveFlow:"
 msgstr ""
 
 #: src/Foundation/License/LicenseNotice.php:101
@@ -2970,15 +2970,15 @@ msgid "Row %1$d: %2$s"
 msgstr ""
 
 #: src/Foundation/Upgrade/SchemaGuard.php:116
-msgid "Dono could not create its database tables."
+msgid "GiveFlow could not create its database tables."
 msgstr ""
 
 #: src/Foundation/Upgrade/SchemaGuard.php:117
-msgid "The plugin cannot run until they exist. This usually means the database user is not allowed to create tables, or the host caps how many a site may have. Ask your host to grant CREATE, then reload this page: Dono retries on every request."
+msgid "The plugin cannot run until they exist. This usually means the database user is not allowed to create tables, or the host caps how many a site may have. Ask your host to grant CREATE, then reload this page: GiveFlow retries on every request."
 msgstr ""
 
 #: src/Foundation/Upgrade/UpgradeNotice.php:68
-msgid "Dono could not finish a data update."
+msgid "GiveFlow could not finish a data update."
 msgstr ""
 
 #: src/Foundation/Upgrade/UpgradeNotice.php:69
@@ -2990,7 +2990,7 @@ msgid "See what failed"
 msgstr ""
 
 #: src/Foundation/Upgrade/UpgradeNotice.php:79
-msgid "Dono is finishing a data update."
+msgid "GiveFlow is finishing a data update."
 msgstr ""
 
 #: src/Foundation/Upgrade/UpgradeNotice.php:81
@@ -3264,7 +3264,7 @@ msgid "unavailable"
 msgstr ""
 
 #: src/Gateways/Stripe/StripeWebhookNotice.php:92
-msgid "Stripe is connected but its webhook signing secret is missing. Recurring renewals, payment confirmations, and account updates will not process until you add it under Dono, Settings, Payment gateways."
+msgid "Stripe is connected but its webhook signing secret is missing. Recurring renewals, payment confirmations, and account updates will not process until you add it under GiveFlow, Settings, Payment gateways."
 msgstr ""
 
 #: src/Onboarding/OnboardingPage.php:34
@@ -4004,11 +4004,11 @@ msgid "Provide a valid recipient email."
 msgstr ""
 
 #: src/Rest/Admin/ToolsController.php:445
-msgid "Dono test email"
+msgid "GiveFlow test email"
 msgstr ""
 
 #: src/Rest/Admin/ToolsController.php:446
-msgid "This is a test email from Dono."
+msgid "This is a test email from GiveFlow."
 msgstr ""
 
 #: src/Rest/Admin/ToolsController.php:447
@@ -4330,7 +4330,7 @@ msgid "Stripe has no webhook signing secret"
 msgstr ""
 
 #: src/Settings/ReadinessService.php:286
-msgid "Without it Dono cannot trust what Stripe reports, so renewals, refunds and cancellations made in Stripe never reach this site."
+msgid "Without it GiveFlow cannot trust what Stripe reports, so renewals, refunds and cancellations made in Stripe never reach this site."
 msgstr ""
 
 #: src/Settings/ReadinessService.php:288
@@ -4738,7 +4738,7 @@ msgid ""
 msgstr ""
 
 #: assets/admin/campaign-blocks/bindings.js:31
-msgid "Dono campaign binding preview"
+msgid "GiveFlow campaign binding preview"
 msgstr ""
 
 #: assets/admin/campaign-blocks/index.jsx:76
@@ -4760,7 +4760,7 @@ msgid "Select a campaign"
 msgstr ""
 
 #: assets/admin/campaign-blocks/index.jsx:133
-msgid "Dono campaign block"
+msgid "GiveFlow campaign block"
 msgstr ""
 
 #: assets/admin/campaign-blocks/index.jsx:134
@@ -6415,35 +6415,35 @@ msgid "Anonymous donor"
 msgstr ""
 
 #: assets/admin/command-palette/index.jsx:29
-msgid "Dono: Open dashboard"
+msgid "GiveFlow: Open dashboard"
 msgstr ""
 
 #: assets/admin/command-palette/index.jsx:35
-msgid "Dono: View donations"
+msgid "GiveFlow: View donations"
 msgstr ""
 
 #: assets/admin/command-palette/index.jsx:41
-msgid "Dono: View donors"
+msgid "GiveFlow: View donors"
 msgstr ""
 
 #: assets/admin/command-palette/index.jsx:47
-msgid "Dono: View campaigns"
+msgid "GiveFlow: View campaigns"
 msgstr ""
 
 #: assets/admin/command-palette/index.jsx:53
-msgid "Dono: View funds"
+msgid "GiveFlow: View funds"
 msgstr ""
 
 #: assets/admin/command-palette/index.jsx:59
-msgid "Dono: Open settings"
+msgid "GiveFlow: Open settings"
 msgstr ""
 
 #: assets/admin/command-palette/index.jsx:65
-msgid "Dono: Open onboarding wizard"
+msgid "GiveFlow: Open onboarding wizard"
 msgstr ""
 
 #: assets/admin/command-palette/index.jsx:71
-msgid "Dono: New campaign"
+msgid "GiveFlow: New campaign"
 msgstr ""
 
 #: assets/admin/dashboard/Dashboard.jsx:100
@@ -10634,7 +10634,7 @@ msgid "Just exploring"
 msgstr ""
 
 #: assets/admin/onboarding/Onboarding.jsx:77
-msgid "Trying Dono out. Starts in test mode, so nothing takes real money until you switch it off."
+msgid "Trying GiveFlow out. Starts in test mode, so nothing takes real money until you switch it off."
 msgstr ""
 
 #: assets/admin/onboarding/Onboarding.jsx:173
@@ -11215,7 +11215,7 @@ msgid "Send test email"
 msgstr ""
 
 #: assets/admin/settings/panels/EmailPanel.jsx:118
-msgid "If test emails arrive but donors report nothing, the cause is almost always authentication rather than Dono. Mailboxes such as Gmail reject mail that is not signed for your domain, and PHP mail on shared hosting is not. An SMTP plugin pointed at an authenticated provider fixes it for every email your site sends."
+msgid "If test emails arrive but donors report nothing, the cause is almost always authentication rather than GiveFlow. Mailboxes such as Gmail reject mail that is not signed for your domain, and PHP mail on shared hosting is not. An SMTP plugin pointed at an authenticated provider fixes it for every email your site sends."
 msgstr ""
 
 #: assets/admin/settings/panels/EmailPanel.jsx:121
@@ -11227,7 +11227,7 @@ msgid "Donor emails"
 msgstr ""
 
 #: assets/admin/settings/panels/EmailPanel.jsx:128
-msgid "Sent to donors automatically by Dono"
+msgid "Sent to donors automatically by GiveFlow"
 msgstr ""
 
 #: assets/admin/settings/panels/EmailPanel.jsx:129
@@ -11410,7 +11410,7 @@ msgid "Include the year"
 msgstr ""
 
 #: assets/admin/settings/panels/NumberingPanel.jsx:225
-msgid "Adds the current year, e.g. DONO-2026-00001 instead of DONO-00001."
+msgid "Adds the current year, e.g. DON-2026-00001 instead of DON-00001."
 msgstr ""
 
 #: assets/admin/settings/panels/NumberingPanel.jsx:231
@@ -11570,7 +11570,7 @@ msgid "Webhook id"
 msgstr ""
 
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:169
-msgid "From the webhook you created in the PayPal dashboard. Dono checks it against this app, and the credentials on file stay as they are."
+msgid "From the webhook you created in the PayPal dashboard. GiveFlow checks it against this app, and the credentials on file stay as they are."
 msgstr ""
 
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:175
@@ -11606,11 +11606,11 @@ msgid "Secret"
 msgstr ""
 
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:212
-msgid "Stored encrypted and never shown again. Dono verifies it with PayPal before saving."
+msgid "Stored encrypted and never shown again. GiveFlow verifies it with PayPal before saving."
 msgstr ""
 
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:218
-msgid "From the webhook you created in the PayPal dashboard. Without it PayPal cannot prove an event came from PayPal, so every notification is rejected and donations PayPal settles after checkout stay unpaid. You can add it after these credentials, but PayPal will not work properly until you do. Dono checks it against your app and only saves an id PayPal confirms."
+msgid "From the webhook you created in the PayPal dashboard. Without it PayPal cannot prove an event came from PayPal, so every notification is rejected and donations PayPal settles after checkout stay unpaid. You can add it after these credentials, but PayPal will not work properly until you do. GiveFlow checks it against your app and only saves an id PayPal confirms."
 msgstr ""
 
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:227
@@ -11668,7 +11668,7 @@ msgid "Not set up"
 msgstr ""
 
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:323
-msgid "Add the credentials from your own PayPal REST app. Donations are paid straight into your PayPal account, and Dono never takes a cut."
+msgid "Add the credentials from your own PayPal REST app. Donations are paid straight into your PayPal account, and GiveFlow never takes a cut."
 msgstr ""
 
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:326
@@ -12115,7 +12115,7 @@ msgid "Secret key"
 msgstr ""
 
 #: assets/admin/settings/panels/StripeKeysCard.jsx:132
-msgid "Stored encrypted and never shown again. Dono verifies it with Stripe before saving."
+msgid "Stored encrypted and never shown again. GiveFlow verifies it with Stripe before saving."
 msgstr ""
 
 #: assets/admin/settings/panels/StripeKeysCard.jsx:173
@@ -12235,7 +12235,7 @@ msgid "Action needed"
 msgstr ""
 
 #: assets/admin/settings/panels/StripeKeysCard.jsx:389
-msgid "Add the API keys from your own Stripe account. Donations are charged directly on your account and pay out to your bank, and Dono never takes a cut."
+msgid "Add the API keys from your own Stripe account. Donations are charged directly on your account and pay out to your bank, and GiveFlow never takes a cut."
 msgstr ""
 
 #: assets/admin/settings/panels/StripeKeysCard.jsx:392
@@ -12267,7 +12267,7 @@ msgid "Donations are charged on your Stripe account and paid out to your bank."
 msgstr ""
 
 #: assets/admin/settings/panels/StripeKeysCard.jsx:442
-msgid "Webhooks tell Dono when a payment succeeds, fails or is refunded. Dono registers this endpoint on your account automatically when you save keys. On a local site Stripe cannot reach it, so add the endpoint yourself and paste its signing secret below."
+msgid "Webhooks tell GiveFlow when a payment succeeds, fails or is refunded. GiveFlow registers this endpoint on your account automatically when you save keys. On a local site Stripe cannot reach it, so add the endpoint yourself and paste its signing secret below."
 msgstr ""
 
 #: assets/admin/settings/panels/StripeKeysCard.jsx:451
@@ -12664,7 +12664,7 @@ msgid "The donor"
 msgstr ""
 
 #: assets/admin/tools/tabs/CsvImportCard.jsx:188
-msgid "Dono field"
+msgid "GiveFlow field"
 msgstr ""
 
 #: assets/admin/tools/tabs/CsvImportCard.jsx:189
@@ -12829,7 +12829,7 @@ msgid "All campaigns"
 msgstr ""
 
 #: assets/admin/tools/tabs/ExportTab.jsx:308
-msgid "Campaigns, funds, forms, donors, donations, recurring plans and receipts as one JSON file, which the Import tab can restore onto another Dono site."
+msgid "Campaigns, funds, forms, donors, donations, recurring plans and receipts as one JSON file, which the Import tab can restore onto another GiveFlow site."
 msgstr ""
 
 #: assets/admin/tools/tabs/ExportTab.jsx:317
@@ -12842,7 +12842,7 @@ msgid "Donor names, email addresses and postal addresses are readable in this fi
 msgstr ""
 
 #: assets/admin/tools/tabs/ExportTab.jsx:327
-msgid "Every Dono setting as JSON, to lift a configured site onto another install. Donations, donors and campaigns are not included."
+msgid "Every GiveFlow setting as JSON, to lift a configured site onto another install. Donations, donors and campaigns are not included."
 msgstr ""
 
 #: assets/admin/tools/tabs/ExportTab.jsx:340
@@ -12874,7 +12874,7 @@ msgstr ""
 #. translators: %s: the chosen file name.
 #: assets/admin/tools/tabs/ImportTab.jsx:51
 #, js-format
-msgid "%s will write its gateway, email, receipt, numbering and role settings over yours. A setting the file does not carry keeps the value it has here, except the role mapping, which is replaced whole: a role the file does not name loses its Dono capabilities. Donations, donors and campaigns are untouched. This cannot be undone."
+msgid "%s will write its gateway, email, receipt, numbering and role settings over yours. A setting the file does not carry keeps the value it has here, except the role mapping, which is replaced whole: a role the file does not name loses its GiveFlow capabilities. Donations, donors and campaigns are untouched. This cannot be undone."
 msgstr ""
 
 #: assets/admin/tools/tabs/ImportTab.jsx:54
@@ -12922,11 +12922,11 @@ msgid "Reload the page to see it."
 msgstr ""
 
 #: assets/admin/tools/tabs/ImportTab.jsx:122
-msgid "Nothing in that file matched a Dono setting or record."
+msgid "Nothing in that file matched a GiveFlow setting or record."
 msgstr ""
 
 #: assets/admin/tools/tabs/ImportTab.jsx:125
-msgid "Import failed. Check that the file is a Dono settings export."
+msgid "Import failed. Check that the file is a GiveFlow settings export."
 msgstr ""
 
 #. translators: %s: a comma-separated list of what the refused import did restore.
@@ -12940,7 +12940,7 @@ msgid "Import settings"
 msgstr ""
 
 #: assets/admin/tools/tabs/ImportTab.jsx:148
-msgid "Reads a Dono settings export and replaces the settings it carries. Anything it does not carry keeps the value it has here. Donations, donors and campaigns are left alone."
+msgid "Reads a GiveFlow settings export and replaces the settings it carries. Anything it does not carry keeps the value it has here. Donations, donors and campaigns are left alone."
 msgstr ""
 
 #: assets/admin/tools/tabs/ImportTab.jsx:157
@@ -12998,7 +12998,7 @@ msgid "Deletes every entry recorded under %s. Nothing else is touched."
 msgstr ""
 
 #: assets/admin/tools/tabs/LogsTab.jsx:171
-msgid "Deletes every entry: the failures Dono recorded and the history of what your gateways sent. The log fills again as things happen."
+msgid "Deletes every entry: the failures GiveFlow recorded and the history of what your gateways sent. The log fills again as things happen."
 msgstr ""
 
 #: assets/admin/tools/tabs/LogsTab.jsx:172
@@ -13200,7 +13200,7 @@ msgid "Open setup wizard"
 msgstr ""
 
 #: assets/admin/tools/tabs/SystemInfoTab.jsx:16
-msgid "Dono version"
+msgid "GiveFlow version"
 msgstr ""
 
 #: assets/admin/tools/tabs/SystemInfoTab.jsx:17
@@ -13245,7 +13245,7 @@ msgid "Scheduled tasks"
 msgstr ""
 
 #: assets/admin/tools/tabs/SystemInfoTab.jsx:69
-msgid "Dono jobs queued with WP-Cron, and when each is due."
+msgid "GiveFlow jobs queued with WP-Cron, and when each is due."
 msgstr ""
 
 #: assets/admin/tools/tabs/SystemInfoTab.jsx:81
@@ -13494,11 +13494,11 @@ msgstr ""
 msgid "The donor has to approve it while signed in to their own account."
 msgstr ""
 
-#: assets/admin/_shared/useDonoSettings.js:32
+#: assets/admin/_shared/useGiveFlowSettings.js:32
 msgid "Could not load these settings. Refresh to try again."
 msgstr ""
 
-#: assets/admin/_shared/useDonoSettings.js:67
+#: assets/admin/_shared/useGiveFlowSettings.js:67
 msgid "Settings have not loaded yet. Refresh and try again."
 msgstr ""
 

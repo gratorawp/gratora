@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dono\Foundation\Commands;
+namespace GiveFlow\Foundation\Commands;
 
-use Dono\Analytics\ErrorLog;
-use Dono\Analytics\EventRecorder;
+use GiveFlow\Analytics\ErrorLog;
+use GiveFlow\Analytics\EventRecorder;
 use RuntimeException;
 
 /**
@@ -293,7 +293,7 @@ final class CommandRegistry
         }
         $bucket = (string) ($command->meta['rate_limit_key'] ?? $command->id);
         $window = (int) floor(time() / 60);
-        $key    = 'dono_cmd_rl_' . md5($bucket . '|' . $ctx->source . '|' . $window);
+        $key    = 'giveflow_cmd_rl_' . md5($bucket . '|' . $ctx->source . '|' . $window);
 
         $count = (int) get_transient($key);
         if ($count >= $limit) {
@@ -304,7 +304,7 @@ final class CommandRegistry
     }
 
     /**
-     * Record to the dono_events firehose. Input is hashed, PII never stored raw.
+     * Record to the giveflow_events firehose. Input is hashed, PII never stored raw.
      *
      * @param array<string,mixed> $input
      * @since 1.0.0

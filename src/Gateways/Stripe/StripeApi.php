@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dono\Gateways\Stripe;
+namespace GiveFlow\Gateways\Stripe;
 
-use Dono\Gateways\GatewayTransportException;
+use GiveFlow\Gateways\GatewayTransportException;
 use RuntimeException;
 
 /**
@@ -86,7 +86,7 @@ final class StripeApi
     /** The org-wide switch, which lives above the per-gateway config. */
     private function orgTestMode(): bool
     {
-        $opt = get_option('dono_gateway_config', []);
+        $opt = get_option('giveflow_gateway_config', []);
 
         return is_array($opt) && ! empty($opt['test_mode']);
     }
@@ -106,7 +106,7 @@ final class StripeApi
     /** @since 1.0.0 */
     private function gatewayConfig(string $key): string
     {
-        $opt = get_option('dono_gateway_config', []);
+        $opt = get_option('giveflow_gateway_config', []);
         if (! is_array($opt)) return '';
         $stripe = is_array($opt['stripe'] ?? null) ? $opt['stripe'] : [];
         return (string) ($stripe[$key] ?? '');

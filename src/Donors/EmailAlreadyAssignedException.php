@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dono\Donors;
+namespace GiveFlow\Donors;
 
 use RuntimeException;
 

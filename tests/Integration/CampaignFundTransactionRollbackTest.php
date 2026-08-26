@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Integration;
+namespace GiveFlow\Tests\Integration;
 
-use Dono\Campaigns\Campaign;
-use Dono\Campaigns\CampaignService;
-use Dono\Foundation\Plugin;
-use Dono\Funds\FundService;
+use GiveFlow\Campaigns\Campaign;
+use GiveFlow\Campaigns\CampaignService;
+use GiveFlow\Foundation\Plugin;
+use GiveFlow\Funds\FundService;
 use RuntimeException;
 
 /**
@@ -89,7 +89,7 @@ final class CampaignFundTransactionRollbackTest extends IntegrationTestCase
         return (int) self::$wpdb->get_var(
             "SELECT COUNT(*) FROM " . self::$prefix . "posts p
              INNER JOIN " . self::$prefix . "postmeta m ON m.post_id = p.ID
-             WHERE p.post_type = 'page' AND m.meta_key = '_dono_campaign_id'"
+             WHERE p.post_type = 'page' AND m.meta_key = '_giveflow_campaign_id'"
         );
     }
 
@@ -99,7 +99,7 @@ final class CampaignFundTransactionRollbackTest extends IntegrationTestCase
     private function defaultFundIds(): array
     {
         $ids = self::$wpdb->get_col(
-            'SELECT id FROM ' . self::$prefix . 'dono_funds WHERE is_default = 1 ORDER BY id'
+            'SELECT id FROM ' . self::$prefix . 'giveflow_funds WHERE is_default = 1 ORDER BY id'
         );
 
         return array_map('intval', (array) $ids);
@@ -113,8 +113,8 @@ final class CampaignFundTransactionRollbackTest extends IntegrationTestCase
     public function test_a_failed_campaign_create_leaves_no_campaign_form_or_page(): void
     {
         $before = [
-            'campaigns' => $this->countRows('dono_campaigns', '1=1'),
-            'forms'     => $this->countRows('dono_forms', '1=1'),
+            'campaigns' => $this->countRows('giveflow_campaigns', '1=1'),
+            'forms'     => $this->countRows('giveflow_forms', '1=1'),
             'pages'     => $this->pagesLinkedToCampaigns(),
         ];
 
@@ -122,7 +122,7 @@ final class CampaignFundTransactionRollbackTest extends IntegrationTestCase
         // by the time it runs every write in the block has already landed.
         $this->whileQueryThrows(
             static fn (string $sql): bool => stripos($sql, 'UPDATE') === 0
-                && stripos($sql, 'dono_campaigns') !== false,
+                && stripos($sql, 'giveflow_campaigns') !== false,
             function (): void {
                 try {
                     $this->campaigns()->create(['title' => 'Rollback Reef']);
@@ -136,8 +136,8 @@ final class CampaignFundTransactionRollbackTest extends IntegrationTestCase
         $this->assertSame(
             $before,
             [
-                'campaigns' => $this->countRows('dono_campaigns', '1=1'),
-                'forms'     => $this->countRows('dono_forms', '1=1'),
+                'campaigns' => $this->countRows('giveflow_campaigns', '1=1'),
+                'forms'     => $this->countRows('giveflow_forms', '1=1'),
                 'pages'     => $this->pagesLinkedToCampaigns(),
             ],
             'the failed create left a campaign row, a default form or an orphan page behind'
@@ -146,7 +146,7 @@ final class CampaignFundTransactionRollbackTest extends IntegrationTestCase
 
     /**
      * createDefaultFormFor() goes through FormService::create(), so
-     * dono.form.created fires inside the campaign's transaction: an add-on
+     * giveflow.form.created fires inside the campaign's transaction: an add-on
      * that refuses there refuses the campaign. Pinned because the seam is not
      * visible from the hook name, and an add-on doing irreversible work in it
      * would be doing it inside a block that can still be taken back.
@@ -154,8 +154,8 @@ final class CampaignFundTransactionRollbackTest extends IntegrationTestCase
     public function test_an_add_on_refusing_the_form_hook_undoes_the_whole_campaign_create(): void
     {
         $before = [
-            'campaigns' => $this->countRows('dono_campaigns', '1=1'),
-            'forms'     => $this->countRows('dono_forms', '1=1'),
+            'campaigns' => $this->countRows('giveflow_campaigns', '1=1'),
+            'forms'     => $this->countRows('giveflow_forms', '1=1'),
             'pages'     => $this->pagesLinkedToCampaigns(),
         ];
 
@@ -163,21 +163,21 @@ final class CampaignFundTransactionRollbackTest extends IntegrationTestCase
             throw new RuntimeException(self::SEAM_FAILURE);
         };
 
-        add_action('dono.form.created', $thrower);
+        add_action('giveflow.form.created', $thrower);
         try {
             $this->campaigns()->create(['title' => 'Rollback Reef']);
             $this->fail('the add-on failure should reach the caller');
         } catch (RuntimeException $e) {
             $this->assertSame(self::SEAM_FAILURE, $e->getMessage());
         } finally {
-            remove_action('dono.form.created', $thrower);
+            remove_action('giveflow.form.created', $thrower);
         }
 
         $this->assertSame(
             $before,
             [
-                'campaigns' => $this->countRows('dono_campaigns', '1=1'),
-                'forms'     => $this->countRows('dono_forms', '1=1'),
+                'campaigns' => $this->countRows('giveflow_campaigns', '1=1'),
+                'forms'     => $this->countRows('giveflow_forms', '1=1'),
                 'pages'     => $this->pagesLinkedToCampaigns(),
             ],
             'the refused create left a campaign row, a form or an orphan page behind'
@@ -194,8 +194,8 @@ final class CampaignFundTransactionRollbackTest extends IntegrationTestCase
         $source = $this->campaigns()->create(['title' => 'Reef Drive']);
 
         $before = [
-            'campaigns' => $this->countRows('dono_campaigns', '1=1'),
-            'forms'     => $this->countRows('dono_forms', '1=1'),
+            'campaigns' => $this->countRows('giveflow_campaigns', '1=1'),
+            'forms'     => $this->countRows('giveflow_forms', '1=1'),
             'pages'     => $this->pagesLinkedToCampaigns(),
         ];
 
@@ -203,7 +203,7 @@ final class CampaignFundTransactionRollbackTest extends IntegrationTestCase
         // write in the block has landed by the time this one is refused.
         $this->whileQueryThrows(
             static fn (string $sql): bool => stripos($sql, 'UPDATE') === 0
-                && stripos($sql, 'dono_campaigns') !== false,
+                && stripos($sql, 'giveflow_campaigns') !== false,
             function () use ($source): void {
                 try {
                     $this->campaigns()->duplicate($source);
@@ -217,8 +217,8 @@ final class CampaignFundTransactionRollbackTest extends IntegrationTestCase
         $this->assertSame(
             $before,
             [
-                'campaigns' => $this->countRows('dono_campaigns', '1=1'),
-                'forms'     => $this->countRows('dono_forms', '1=1'),
+                'campaigns' => $this->countRows('giveflow_campaigns', '1=1'),
+                'forms'     => $this->countRows('giveflow_forms', '1=1'),
                 'pages'     => $this->pagesLinkedToCampaigns(),
             ],
             'the failed duplicate left a copy, a form or an orphan page behind'
@@ -236,8 +236,8 @@ final class CampaignFundTransactionRollbackTest extends IntegrationTestCase
         $this->assertSame(
             ['campaign' => 1, 'form' => 1, 'page' => 1],
             [
-                'campaign' => $this->countRows('dono_campaigns', 'id = ' . (int) $copy->id),
-                'form'     => $this->countRows('dono_forms', 'id = ' . (int) $copy->default_form_id),
+                'campaign' => $this->countRows('giveflow_campaigns', 'id = ' . (int) $copy->id),
+                'form'     => $this->countRows('giveflow_forms', 'id = ' . (int) $copy->default_form_id),
                 'page'     => $this->countRows('posts', 'ID = ' . (int) $copy->page_id),
             ],
             'the duplicate did not land whole'
@@ -252,7 +252,7 @@ final class CampaignFundTransactionRollbackTest extends IntegrationTestCase
      * taking links.
      *
      * The failure is injected on the campaign DELETE rather than on the
-     * dono.form.deleted hook, which fires before either statement runs and so
+     * giveflow.form.deleted hook, which fires before either statement runs and so
      * would leave nothing for a rollback to undo.
      */
     public function test_a_refused_campaign_delete_puts_its_forms_back(): void
@@ -260,11 +260,11 @@ final class CampaignFundTransactionRollbackTest extends IntegrationTestCase
         $campaign = $this->campaigns()->create(['title' => 'Delete Reef', 'status' => 'published']);
         $pageId   = (int) $campaign->page_id;
         $this->assertGreaterThan(0, $pageId);
-        $this->assertSame(1, $this->countRows('dono_forms', 'campaign_id = ' . (int) $campaign->id));
+        $this->assertSame(1, $this->countRows('giveflow_forms', 'campaign_id = ' . (int) $campaign->id));
 
         $this->whileQueryThrows(
             static fn (string $sql): bool => stripos($sql, 'DELETE') !== false
-                && stripos($sql, 'dono_campaigns') !== false,
+                && stripos($sql, 'giveflow_campaigns') !== false,
             function () use ($campaign): void {
                 try {
                     $this->campaigns()->delete($campaign);
@@ -278,8 +278,8 @@ final class CampaignFundTransactionRollbackTest extends IntegrationTestCase
         $this->assertSame(
             ['campaign' => 1, 'forms' => 1, 'page' => 1],
             [
-                'campaign' => $this->countRows('dono_campaigns', 'id = ' . (int) $campaign->id),
-                'forms'    => $this->countRows('dono_forms', 'campaign_id = ' . (int) $campaign->id),
+                'campaign' => $this->countRows('giveflow_campaigns', 'id = ' . (int) $campaign->id),
+                'forms'    => $this->countRows('giveflow_forms', 'campaign_id = ' . (int) $campaign->id),
                 'page'     => $this->countRows('posts', 'ID = ' . $pageId),
             ],
             'the refused delete took the campaign forms with it'
@@ -298,8 +298,8 @@ final class CampaignFundTransactionRollbackTest extends IntegrationTestCase
         $this->assertSame(
             ['campaign' => 0, 'forms' => 0, 'page' => 0],
             [
-                'campaign' => $this->countRows('dono_campaigns', 'id = ' . (int) $campaign->id),
-                'forms'    => $this->countRows('dono_forms', 'id = ' . $formId),
+                'campaign' => $this->countRows('giveflow_campaigns', 'id = ' . (int) $campaign->id),
+                'forms'    => $this->countRows('giveflow_forms', 'id = ' . $formId),
                 'page'     => $this->countRows('posts', 'ID = ' . $pageId),
             ],
             'the delete left part of the campaign behind'
@@ -317,11 +317,11 @@ final class CampaignFundTransactionRollbackTest extends IntegrationTestCase
         $general  = $this->funds()->create(['code' => 'general', 'name' => 'General', 'is_default' => true]);
         $building = $this->funds()->create(['code' => 'building', 'name' => 'Building']);
 
-        // Second UPDATE on dono_funds in the block: the first raised the new
+        // Second UPDATE on giveflow_funds in the block: the first raised the new
         // default, so the old one is still up when this one is refused.
         $this->whileNthQueryThrows(
             static fn (string $sql): bool => stripos($sql, 'UPDATE') === 0
-                && stripos($sql, 'dono_funds') !== false,
+                && stripos($sql, 'giveflow_funds') !== false,
             2,
             function () use ($building): void {
                 try {
@@ -362,7 +362,7 @@ final class CampaignFundTransactionRollbackTest extends IntegrationTestCase
 
         $this->whileQueryThrows(
             static fn (string $sql): bool => stripos($sql, 'UPDATE') === 0
-                && stripos($sql, 'dono_funds') !== false,
+                && stripos($sql, 'giveflow_funds') !== false,
             function (): void {
                 try {
                     $this->funds()->create(['code' => 'building', 'name' => 'Building', 'is_default' => true]);
@@ -375,7 +375,7 @@ final class CampaignFundTransactionRollbackTest extends IntegrationTestCase
 
         $this->assertSame(
             0,
-            $this->countRows('dono_funds', "code = 'building'"),
+            $this->countRows('giveflow_funds', "code = 'building'"),
             'the failed create left its fund row behind'
         );
         $this->assertSame(
@@ -392,13 +392,13 @@ final class CampaignFundTransactionRollbackTest extends IntegrationTestCase
 
         $this->assertSame(
             1,
-            $this->countRows('dono_campaigns', 'id = ' . (int) $campaign->id),
+            $this->countRows('giveflow_campaigns', 'id = ' . (int) $campaign->id),
             'the campaign row was not written'
         );
         $this->assertGreaterThan(0, (int) $campaign->default_form_id);
         $this->assertSame(
             1,
-            $this->countRows('dono_forms', 'id = ' . (int) $campaign->default_form_id),
+            $this->countRows('giveflow_forms', 'id = ' . (int) $campaign->default_form_id),
             'the default form was not written'
         );
         $this->assertGreaterThan(0, (int) $campaign->page_id);

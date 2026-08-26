@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dono\Tests\Unit;
+namespace GiveFlow\Tests\Unit;
 
-use Dono\Donations\Donation;
-use Dono\Gateways\WebhookPaymentGuard;
-use Dono\Recurring\RecurringPlan;
+use GiveFlow\Donations\Donation;
+use GiveFlow\Gateways\WebhookPaymentGuard;
+use GiveFlow\Recurring\RecurringPlan;
 use PHPUnit\Framework\TestCase;
 
 /**
