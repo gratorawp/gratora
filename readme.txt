@@ -143,15 +143,15 @@ Yes. Import a CSV of donors, or donors and donations together, mapping your colu
 == Screenshots ==
 
 1. The dashboard: what came in, where it came from, and what needs attention.
-2. Every donation, filterable by status, campaign, gateway and fund.
+2. Every donation, filterable by status, campaign, gateway and frequency.
 3. A donor record: lifetime giving, their whole history, and their recurring plan.
 4. Donor insights: lifecycle stages, segments, lifetime value and cohort retention.
 5. Campaigns, each with its goal and progress.
-6. A campaign in detail, with its own figures, forms and recent donations.
+6. A campaign in detail, with its own goal, figures and progress.
 7. The block-based form builder. Fields and layout are blocks, so the editor is the one you already know.
 8. Recurring donations, with pause, resume, skip and cancel on each plan.
 9. Funds, so a donor can choose what their donation pays for.
-10. Receipt settings: numbering, the PDF, and when it is sent.
+10. Receipt settings: the template, your logo, and the merge tags it fills in.
 
 == Changelog ==
 
