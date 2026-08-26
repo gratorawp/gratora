@@ -94,7 +94,7 @@ export default function ReceiptsPanel( { s } ) {
         <div className="giveflow-panel">
             <Card
                 title={ __( 'Generic receipt template', 'giveflow-fundraising-campaigns' ) }
-                sub={ __( 'Applies to the GenericReceiptRenderer output, not country-specific renderers.', 'giveflow-fundraising-campaigns' ) }
+                sub={ __( 'The default receipt every donor gets, unless their country has its own format.', 'giveflow-fundraising-campaigns' ) }
                 edited={ s.isDirty }
             >
                 <div style={ { marginBottom: 16, display: 'flex', justifyContent: 'flex-end' } }>
