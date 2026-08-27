@@ -40,6 +40,17 @@ final class AdminMenu extends HookProvider
             30
         );
 
+        // add_menu_page mints a first submenu carrying the parent's title, so the
+        // list opens with "GiveFlow" under "GiveFlow". Naming it here replaces it.
+        add_submenu_page(
+            self::SLUG,
+            __('Dashboard', 'giveflow-fundraising-campaigns'),
+            __('Dashboard', 'giveflow-fundraising-campaigns'),
+            self::CAPABILITY,
+            self::SLUG,
+            [$this, 'renderDashboard']
+        );
+
         $pages = apply_filters('giveflow.admin.pages', []);
         usort($pages, fn ($a, $b) => ($a['position'] ?? 50) <=> ($b['position'] ?? 50));
 
