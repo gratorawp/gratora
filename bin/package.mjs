@@ -256,9 +256,20 @@ const zip = path.join( distDir, `${ slug }.zip` );
 rmSync( zip, { force: true } );
 
 execFileSync( 'zip', [ '-qr', zip, slug ], { cwd: staging } );
+
+/**
+ * The same payload, unpacked. The zip is what a tester installs; svn wants a
+ * directory to rsync into trunk, and unzipping the artifact to get one invites
+ * a deploy that ships whatever was already sitting there.
+ */
+const tree = path.join( distDir, slug );
+rmSync( tree, { recursive: true, force: true } );
+cpSync( payload, tree, { recursive: true } );
+
 rmSync( staging, { recursive: true, force: true } );
 
 const mb = ( statSync( zip ).size / 1024 / 1024 ).toFixed( 2 );
 console.log( `${ slug }.zip  ${ mb } MB  ->  ${ path.relative( process.cwd(), zip ) }` );
+console.log( `${ slug }/      unpacked  ->  ${ path.relative( process.cwd(), tree ) }` );
 console.log( `excluded ${ excluded.length } paths:` );
 for ( const rel of excluded.sort() ) console.log( `  ${ rel }` );

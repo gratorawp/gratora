@@ -23,7 +23,7 @@
 /phpunit*.xml
 /phpunit*.xml.dist
 /.phpunit.cache
-/composer.lock
+composer.lock
 /package-lock.json
 
 /tests-e2e
@@ -73,6 +73,15 @@ tests
 *.cache
 *.dist
 
+# A vendored package carries its own repository furniture, and the rebrand
+# showed why naming the package is the wrong shape: these were listed under a
+# vendor directory that no longer exists, so they silently started shipping
+# again the moment it was renamed. By shape, so the next dependency is covered
+# without anybody remembering to add it.
+.github
+.gitignore
+.php-cs-fixer.php
+
 /vendor/vendor-prefixed/giveflow/queryable/bin
 /vendor/vendor-prefixed/giveflow/queryable/tests
 /vendor/vendor-prefixed/giveflow/queryable/phpunit.xml
@@ -81,12 +90,6 @@ tests
 /vendor/vendor-prefixed/dompdf/php-svg-lib/tests
 /vendor/vendor-prefixed/masterminds/html5/test
 /vendor/vendor-prefixed/sabberworm/php-css-parser/tests
-/vendor/vendor-prefixed/dono/queryable/tests
-/vendor/vendor-prefixed/dono/queryable/composer.lock
-/vendor/vendor-prefixed/dono/queryable/phpunit.xml.dist
-/vendor/vendor-prefixed/dono/queryable/.github
-/vendor/vendor-prefixed/dono/queryable/.gitignore
-/vendor/vendor-prefixed/dono/queryable/bin
 /vendor/vendor-prefixed/masterminds/html5/bin
 
 /.cache
