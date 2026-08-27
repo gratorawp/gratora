@@ -1386,6 +1386,16 @@ final class DonationService
             throw new RuntimeException(esc_html("Donation {$donation->reference} is not refundable (status: {$donation->status})."));
         }
 
+        // A donation can belong to a charge it does not own, and refunding it
+        // has to happen where the money actually moved. Whoever holds that link
+        // refuses here and says where to go instead. Absence of a transaction
+        // id cannot stand in for this: an offline donation has none and is
+        // refundable all the same.
+        $refusal = apply_filters('giveflow.donation.refund_refusal', null, $donation, $amountCents);
+        if (is_string($refusal) && $refusal !== '') {
+            throw new RuntimeException(esc_html($refusal));
+        }
+
         $alreadyRefunded = (int) Refund::query()
             ->where('donation_id', $donation->id)
             ->where('status', 'succeeded')
