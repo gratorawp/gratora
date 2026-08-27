@@ -41,7 +41,7 @@ final class DonationBaseAmountIndexTest extends IntegrationTestCase
     public function test_the_column_leads_an_index_a_fresh_install_would_get(): void
     {
         $this->assertMatchesRegularExpression(
-            '/KEY\s+\S*\s*\(base_amount_cents[,)]/i',
+            '/KEY\s+\S*\s*\(`?base_amount_cents`?[,)]/i',
             self::declaredSchema(),
             'base_amount_cents needs an index it leads, not a trailing column of a composite'
         );

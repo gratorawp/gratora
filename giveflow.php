@@ -28,7 +28,7 @@ require __DIR__ . '/vendor/vendor-prefixed/autoload.php';
 require_once __DIR__ . '/vendor/woocommerce/action-scheduler/action-scheduler.php';
 
 define('GIVEFLOW_VERSION', '1.0.0');
-define('GIVEFLOW_DB_VERSION', '1.0.4');
+define('GIVEFLOW_DB_VERSION', '1.0.5');
 define('GIVEFLOW_FILE', __FILE__);
 define('GIVEFLOW_DIR', plugin_dir_path(__FILE__));
 define('GIVEFLOW_URL', plugin_dir_url(__FILE__));

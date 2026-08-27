@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "70b3159780a773934658b9b25c8a9e08",
+    "content-hash": "94bcebf05fe6f044691a243145977a85",
     "packages": [
         {
             "name": "dompdf/dompdf",
@@ -160,6 +160,47 @@
                 "source": "https://github.com/dompdf/php-svg-lib/tree/1.0.2"
             },
             "time": "2026-01-02T16:01:13+00:00"
+        },
+        {
+            "name": "giveflow/queryable",
+            "version": "v1.0.7",
+            "source": {
+                "type": "git",
+                "url": "git@github-giveflowdev:givefloworg/queryable.git",
+                "reference": "3a50b44075d52fa27bbbaf4bfc2204570c9d5da9"
+            },
+            "require": {
+                "php": ">=8.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.94",
+                "phpunit/phpunit": "^9.0",
+                "yoast/phpunit-polyfills": "^2.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Queryable\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Queryable\\Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "test": [
+                    "vendor/bin/phpunit"
+                ],
+                "test:wp": [
+                    "vendor/bin/phpunit -c phpunit-wp.xml"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "A fluent SQL query builder for WordPress",
+            "time": "2026-08-27T04:34:59+00:00"
         },
         {
             "name": "masterminds/html5",
@@ -1227,57 +1268,6 @@
                 }
             ],
             "time": "2022-12-30T00:23:10+00:00"
-        },
-        {
-            "name": "giveflow/queryable",
-            "version": "v1.0.4",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/givefloworg/queryable.git",
-                "reference": "4985fa790f075dbcfd2471f3202466d5097445f7"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/givefloworg/queryable/zipball/4985fa790f075dbcfd2471f3202466d5097445f7",
-                "reference": "4985fa790f075dbcfd2471f3202466d5097445f7",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=8.0"
-            },
-            "require-dev": {
-                "friendsofphp/php-cs-fixer": "^3.94",
-                "phpunit/phpunit": "^9.0",
-                "yoast/phpunit-polyfills": "^2.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Queryable\\": "src/"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "Queryable\\Tests\\": "tests/"
-                }
-            },
-            "scripts": {
-                "test": [
-                    "vendor/bin/phpunit"
-                ],
-                "test:wp": [
-                    "vendor/bin/phpunit -c phpunit-wp.xml"
-                ]
-            },
-            "license": [
-                "MIT"
-            ],
-            "description": "A fluent SQL query builder for WordPress",
-            "support": {
-                "source": "https://github.com/givefloworg/queryable/tree/v1.0.4",
-                "issues": "https://github.com/givefloworg/queryable/issues"
-            },
-            "time": "2026-08-20T05:53:11+00:00"
         },
         {
             "name": "elazar/flystream",

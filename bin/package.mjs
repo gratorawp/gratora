@@ -184,7 +184,7 @@ if ( vendor.withDev || vendor.present.length > 0 ) {
  * is present whether or not the build produced it.
  */
 const REQUIRED_PREFIXED = [
-    [ 'dono', 'queryable' ],   // every database call
+    [ 'giveflow', 'queryable' ],   // every database call
     [ 'dompdf', 'dompdf' ],    // receipts and annual statements
 ];
 
