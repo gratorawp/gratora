@@ -104,7 +104,7 @@ $bar-radius:    6px;
 
     &__bar {
         width: 100%;
-        background: $accent;
+        background: #8a7bff;
         border-radius: $bar-radius $bar-radius 0 0;
         transition: height .25s ease;
     }

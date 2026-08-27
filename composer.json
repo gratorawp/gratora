@@ -16,7 +16,7 @@
         "woocommerce/action-scheduler": "^4.1"
     },
     "require-dev": {
-        "dono/queryable": "^1.0",
+        "giveflow/queryable": "^1.0",
         "brianhenryie/strauss": "^0.27.2",
         "php-stubs/wordpress-stubs": "^6.9",
         "phpunit/phpunit": "^9.6",
@@ -68,7 +68,7 @@
                 "dompdf/php-svg-lib",
                 "masterminds/html5",
                 "sabberworm/php-css-parser",
-                "dono/queryable"
+                "giveflow/queryable"
             ],
             "update_call_sites": false,
             "delete_vendor_packages": true

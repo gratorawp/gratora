@@ -11,12 +11,12 @@ import { formatAmount, formatAmountCompact, formatDate } from '../_shared/format
 import { IconUsers, IconHeart, IconActivity, IconCoins } from '../_shared/widgets/icons';
 
 const SEGMENT_META = {
-    champions:   { label: __( 'Champions',    'giveflow-fundraising-campaigns' ), color: 'var(--giveflow-seg-champions, #16a34a)',   hint: __( 'Active, frequent, high LTV', 'giveflow-fundraising-campaigns' ) },
-    loyal:       { label: __( 'Loyal',        'giveflow-fundraising-campaigns' ), color: 'var(--giveflow-seg-loyal, #0891b2)',       hint: __( 'Active, 2+ donations',        'giveflow-fundraising-campaigns' ) },
-    new:         { label: __( 'New',          'giveflow-fundraising-campaigns' ), color: 'var(--giveflow-seg-new, #7c3aed)',         hint: __( 'Joined recently',             'giveflow-fundraising-campaigns' ) },
-    at_risk:     { label: __( 'At risk',      'giveflow-fundraising-campaigns' ), color: 'var(--giveflow-seg-at-risk, #f59e0b)',     hint: __( 'Was active, slowing down',    'giveflow-fundraising-campaigns' ) },
-    hibernating: { label: __( 'Hibernating',  'giveflow-fundraising-campaigns' ), color: 'var(--giveflow-seg-hibernating, #a16207)', hint: __( 'Long lapsed, low LTV',        'giveflow-fundraising-campaigns' ) },
-    lost:        { label: __( 'Lost',         'giveflow-fundraising-campaigns' ), color: 'var(--giveflow-seg-lost, #dc2626)',        hint: __( '> 12 months silent',           'giveflow-fundraising-campaigns' ) },
+    champions:   { label: __( 'Champions',    'giveflow-fundraising-campaigns' ), color: 'var(--giveflow-seg-champions, #6f5ce6)',   hint: __( 'Active, frequent, high LTV', 'giveflow-fundraising-campaigns' ) },
+    loyal:       { label: __( 'Loyal',        'giveflow-fundraising-campaigns' ), color: 'var(--giveflow-seg-loyal, #0a9bab)',       hint: __( 'Active, 2+ donations',        'giveflow-fundraising-campaigns' ) },
+    new:         { label: __( 'New',          'giveflow-fundraising-campaigns' ), color: 'var(--giveflow-seg-new, #1f7fb8)',         hint: __( 'Joined recently',             'giveflow-fundraising-campaigns' ) },
+    at_risk:     { label: __( 'At risk',      'giveflow-fundraising-campaigns' ), color: 'var(--giveflow-seg-at-risk, #b08a12)',     hint: __( 'Was active, slowing down',    'giveflow-fundraising-campaigns' ) },
+    hibernating: { label: __( 'Hibernating',  'giveflow-fundraising-campaigns' ), color: 'var(--giveflow-seg-hibernating, #9a3fb0)', hint: __( 'Long lapsed, low LTV',        'giveflow-fundraising-campaigns' ) },
+    lost:        { label: __( 'Lost',         'giveflow-fundraising-campaigns' ), color: 'var(--giveflow-seg-lost, #c25050)',        hint: __( '> 12 months silent',           'giveflow-fundraising-campaigns' ) },
     other:       { label: __( 'Other',        'giveflow-fundraising-campaigns' ), color: 'var(--giveflow-seg-other, #6b7280)',       hint: __( 'Uncategorised',               'giveflow-fundraising-campaigns' ) },
 };
 
@@ -251,12 +251,12 @@ function CohortHeatmap( { retention } ) {
 
     const cellStyle = ( pct ) => {
         if ( pct <= 0 ) return { background: 'var(--giveflow-bg-soft, #f3f4f6)', color: 'var(--giveflow-text-muted, #6b7280)' };
-        // Linear interpolation from light to accent green.
+        // One hue, light to dark, so the cell reads as magnitude.
         const intensity = Math.min( 1, pct / 100 );
-        const r = Math.round( 240 + ( 30 - 240 ) * intensity );
-        const g = Math.round( 244 + ( 138 - 244 ) * intensity );
-        const b = Math.round( 234 + ( 78 - 234 ) * intensity );
-        const fg = intensity > 0.45 ? '#fff' : '#205c2d';
+        const r = Math.round( 245 + ( 111 - 245 ) * intensity );
+        const g = Math.round( 244 + ( 92 - 244 ) * intensity );
+        const b = Math.round( 250 + ( 230 - 250 ) * intensity );
+        const fg = intensity > 0.45 ? '#fff' : '#211d3f';
         return { background: `rgb(${ r },${ g },${ b })`, color: fg };
     };
 
