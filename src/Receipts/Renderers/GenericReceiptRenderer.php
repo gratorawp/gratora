@@ -58,7 +58,22 @@ final class GenericReceiptRenderer implements ReceiptRenderer
     {
         $template       = $this->loadTemplate();
         $amountDisplay  = Money::format($ctx->donation->amount_cents, $ctx->donation->currency);
-        $rendered       = $this->expandMergeTags($template, $ctx, $amountDisplay);
+
+        // When part of the payment bought something, the prose is about the
+        // gift that is left: "your donation of" the whole charge would state
+        // the price of a seat as a contribution. The lines below still show
+        // what was actually paid.
+        $goodsCents = max(0, (int) ($ctx->extras['goods_received_cents'] ?? 0));
+        $rendered   = $this->expandMergeTags(
+            $template,
+            $ctx,
+            $goodsCents > 0
+                ? Money::format(
+                    max(0, (int) $ctx->donation->amount_cents - $goodsCents),
+                    $ctx->donation->currency
+                )
+                : $amountDisplay
+        );
         // Donation has no `refunded_amount_cents` column; the source of truth
         // is the Refund table. Sum successful refunds for this donation so the
         // PDF can show a clear refunded line + the refunded amount.

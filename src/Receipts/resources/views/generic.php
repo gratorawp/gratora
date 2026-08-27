@@ -12,7 +12,7 @@ use GiveFlow\Donors\Donor;
  * @var string   $donor_address   formatted multi-line address, empty when missing
  * @var array    $org             keys: name, address_lines (array), tax_id, vat_id, email
  * @var string   $locale
- * @var array    $extras
+ * @var array    $extras          may carry goods_received_cents + goods_received_label
  * @var string   $amount_display  e.g. "50,00 EUR"
  * @var string   $receipt_number
  * @var array    $receipt_template keys: header_title, intro, signoff, footer_note,
@@ -93,6 +93,15 @@ $netDisplay      = $refundedCents > 0
     )
     : $amount_display;
 $fullyRefunded   = $refundedCents > 0 && $refundedCents >= (int) $donation->amount_cents;
+
+// A payment that bought something has to say so, and say what is left as a
+// gift, because only the remainder is deductible. Whatever sold the thing
+// states its value through the receipt context.
+$money      = static fn (int $c): string => \GiveFlow\Foundation\Helpers\Money::format($c, (string) $donation->currency);
+$goodsCents = max(0, (int) ($extras['goods_received_cents'] ?? 0));
+$goodsLabel = trim((string) ($extras['goods_received_label'] ?? ''));
+$hasGoods   = $goodsCents > 0 && $goodsCents <= (int) $donation->amount_cents;
+$giftCents  = (int) $donation->amount_cents - $goodsCents;
 ?>
 <!doctype html>
 <html lang="<?php echo esc_attr($locale ?: 'en'); ?>">
@@ -224,9 +233,15 @@ $fullyRefunded   = $refundedCents > 0 && $refundedCents >= (int) $donation->amou
         </tr>
     </thead>
     <tbody>
+        <?php if ($hasGoods): ?>
+        <tr>
+            <td><?php echo esc_html($goodsLabel !== '' ? $goodsLabel : __('Goods and services received', 'giveflow-fundraising-campaigns')); ?></td>
+            <td class="amt"><?php echo esc_html($money($goodsCents)); ?></td>
+        </tr>
+        <?php endif; ?>
         <tr>
             <td><?php /* translators: %s: organization name. */ printf(esc_html__('Donation to %s', 'giveflow-fundraising-campaigns'), esc_html($orgName)); ?></td>
-            <td class="amt"><?php echo esc_html($amount_display); ?></td>
+            <td class="amt"><?php echo esc_html($hasGoods ? $money($giftCents) : $amount_display); ?></td>
         </tr>
         <?php if ($refundedDisplay !== ''): ?>
         <tr class="refund-row">
@@ -236,7 +251,16 @@ $fullyRefunded   = $refundedCents > 0 && $refundedCents >= (int) $donation->amou
         <?php endif; ?>
     </tbody>
     <tfoot>
-        <tr><td>&nbsp;</td><td class="amt total"><?php echo esc_html($netDisplay); ?></td></tr>
+        <tr>
+            <td><?php echo $hasGoods ? esc_html__('Total', 'giveflow-fundraising-campaigns') : '&nbsp;'; ?></td>
+            <td class="amt total"><?php echo esc_html($netDisplay); ?></td>
+        </tr>
+        <?php if ($hasGoods): ?>
+        <tr class="deductible-row">
+            <td><?php esc_html_e('Tax-deductible amount', 'giveflow-fundraising-campaigns'); ?></td>
+            <td class="amt"><?php echo esc_html($money(max(0, $giftCents - $refundedCents))); ?></td>
+        </tr>
+        <?php endif; ?>
     </tfoot>
 </table>
 
