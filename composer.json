@@ -17,7 +17,6 @@
         "giveflow/queryable": "^1.0"
     },
     "require-dev": {
-        "giveflow/queryable": "^1.0",
         "brianhenryie/strauss": "^0.27.2",
         "php-stubs/wordpress-stubs": "^6.9",
         "phpunit/phpunit": "^9.6",
