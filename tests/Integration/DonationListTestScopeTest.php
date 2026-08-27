@@ -38,6 +38,12 @@ final class DonationListTestScopeTest extends IntegrationTestCase
         $this->seed('GIVEFLOW-TS-LIVE-1', false, 5000);
         $this->seed('GIVEFLOW-TS-LIVE-2', false, 3000);
         $this->seed('GIVEFLOW-TS-TEST-1', true, 9900);
+
+        // A ticket order rides this table too: a 2000 seat with a 3000 top-up,
+        // banked as the single 5000 charge the gateway took. Every assertion
+        // in this file is written as though it is not here, because to
+        // donation reporting it is not.
+        $this->seed('GIVEFLOW-TS-ORDER-1', false, 5000, 'order');
     }
 
     public function test_live_only_by_default(): void
@@ -131,7 +137,7 @@ final class DonationListTestScopeTest extends IntegrationTestCase
         return $refs;
     }
 
-    private function seed(string $reference, bool $isTest, int $cents): void
+    private function seed(string $reference, bool $isTest, int $cents, string $kind = 'donation'): void
     {
         $donor = Plugin::instance()->container->get(DonorService::class)
             ->findOrCreate('ts-' . uniqid() . '@example.com', ['first_name' => 'Ts', 'last_name' => 'Test']);
@@ -151,9 +157,33 @@ final class DonationListTestScopeTest extends IntegrationTestCase
         $d->gateway           = 'offline';
         $d->status            = 'paid';
         $d->is_test           = $isTest;
+        $d->kind              = $kind;
         $d->paid_at           = $now;
         $d->created_at        = $now;
         $d->updated_at        = $now;
         $d->save();
+    }
+
+    /**
+     * A ticket purchase is goods received, and it is already out of every
+     * rollup, receipt and tax statement. The list, the CSV and the KPI strip
+     * share one filter, so it has to be out of all three or none.
+     */
+    public function test_a_ticket_order_is_not_donation_reporting(): void
+    {
+        $repo = new DonationRepository();
+
+        $this->assertNotContains('GIVEFLOW-TS-ORDER-1', $this->references([]));
+        $this->assertNotContains('GIVEFLOW-TS-ORDER-1', $this->references(['include_test' => true]));
+        $this->assertNotContains('GIVEFLOW-TS-ORDER-1', $this->references(['is_test' => false]));
+
+        // The charge was 5000, so a leak shows up as the raised figure moving.
+        $stats = $repo->aggregateAdmin(['campaign_id' => $this->campaignId]);
+        $this->assertSame(8000, (int) $stats['raised_cents'], 'ticket money is not raised money');
+        $this->assertSame(2, (int) $stats['paid_count']);
+
+        $ids = $repo->listIdsForExport(['campaign_id' => $this->campaignId, 'include_test' => true]);
+        $orderId = (int) Donation::query()->where('reference', 'GIVEFLOW-TS-ORDER-1')->get()->id;
+        $this->assertNotContains($orderId, array_map('intval', $ids), 'and it is not in the CSV either');
     }
 }

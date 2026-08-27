@@ -1028,6 +1028,13 @@ final class DonationRepository
      */
     private function applyAdminFilters($q, array $args)
     {
+        // The kind rule belongs here rather than at each caller: a ticket
+        // order is a purchase riding the same table, and it is already out of
+        // every rollup, receipt and statement. Without this the list, the CSV
+        // and the KPI strip were the one place it still read as a donation,
+        // for the full charge rather than the top-up inside it.
+        $q = $q->where('kind', 'donation');
+
         $term         = trim((string) ($args['search'] ?? ''));
         $donorIds     = array_values(array_unique(array_map('intval', (array) ($args['matching_donor_ids'] ?? []))));
         $scopeDonorId = isset($args['donor_id']) ? (int) $args['donor_id'] : 0;
