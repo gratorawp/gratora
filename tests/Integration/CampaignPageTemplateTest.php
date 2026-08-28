@@ -103,4 +103,48 @@ final class CampaignPageTemplateTest extends IntegrationTestCase
         $this->assertStringContainsString('"type":"constrained"', (string) $template->content);
         $this->assertStringContainsString('"wideSize":"' . CampaignPageTemplate::MEASURE . '"', (string) $template->content);
     }
+
+    /**
+     * The canvas is widened on a campaign page, and nowhere else.
+     *
+     * Scoped twice over: only when the page being edited belongs to a
+     * campaign, and only under .editor-styles-wrapper, so the same stylesheet
+     * reaching the front end can never match.
+     */
+    public function test_the_editor_canvas_is_widened_only_on_a_campaign_page(): void
+    {
+        $integration = new \GiveFlow\Campaigns\Blocks\BlockEditorIntegration();
+
+        $plain = self::factory()->post->create(['post_type' => 'page']);
+        $this->assertSame('', $this->canvasCssFor($integration, $plain), 'an ordinary page had its editor widened');
+
+        $campaign = self::factory()->post->create(['post_type' => 'page']);
+        update_post_meta($campaign, '_giveflow_campaign_id', 123);
+
+        $css = $this->canvasCssFor($integration, $campaign);
+        $this->assertStringContainsString('.editor-styles-wrapper', $css);
+        $this->assertStringContainsString(
+            '--wp--style--global--content-size:' . CampaignPageTemplate::MEASURE,
+            $css,
+            'the canvas is not being given the page measure'
+        );
+    }
+
+    private function canvasCssFor(object $integration, int $postId): string
+    {
+        global $post;
+        $post = get_post($postId);
+        setup_postdata($post);
+
+        wp_dequeue_style('giveflow-campaign-blocks');
+        wp_styles()->registered['giveflow-campaign-blocks']->extra['after'] ?? null;
+        unset(wp_styles()->registered['giveflow-campaign-blocks']);
+
+        set_current_screen('post');
+        $integration->enqueueEditorCanvasStyle();
+
+        $style = wp_styles()->registered['giveflow-campaign-blocks'] ?? null;
+
+        return $style ? implode('', (array) ($style->extra['after'] ?? [])) : '';
+    }
 }

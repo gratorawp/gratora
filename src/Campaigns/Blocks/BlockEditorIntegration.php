@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace GiveFlow\Campaigns\Blocks;
 
+use GiveFlow\Campaigns\CampaignPageTemplate;
+
 /**
  * Registers the campaign block category, editor assets and front-end enqueues.
  *
@@ -152,7 +154,42 @@ final class BlockEditorIntegration
                 (string) (@filemtime($cssPath) ?: GIVEFLOW_VERSION)
             );
             wp_style_add_data(self::HANDLE_FRONTEND, 'rtl', 'replace');
+
+            $this->widenCanvasForCampaignPage();
         }
+    }
+
+    /**
+     * Give the editor canvas the same width the campaign page has.
+     *
+     * The post editor edits post_content, so the block template's own layout
+     * never applies here: the canvas takes its measure from the theme's global
+     * styles, which for most themes is a reading width. Campaign layouts are
+     * built for the page's measure and were being drawn into a column half
+     * that wide, which is not what the visitor gets.
+     *
+     * Written as the layout variables rather than a max-width so the constrained
+     * layout keeps doing the arithmetic, and scoped to .editor-styles-wrapper,
+     * a class that exists only in the editor: this same stylesheet is served to
+     * the front end, where the rule can never match.
+     *
+     * @since 1.0.0
+     */
+    private function widenCanvasForCampaignPage(): void
+    {
+        if (! self::editingCampaignPage()) {
+            return;
+        }
+
+        $measure = CampaignPageTemplate::MEASURE;
+
+        wp_add_inline_style(
+            self::HANDLE_FRONTEND,
+            '.editor-styles-wrapper{'
+            . '--wp--style--global--content-size:' . $measure . ';'
+            . '--wp--style--global--wide-size:' . $measure . ';'
+            . '}'
+        );
     }
 
     /** @since 1.0.0 */
