@@ -60,9 +60,9 @@ final class GenericReceiptRenderer implements ReceiptRenderer
         $amountDisplay  = Money::format($ctx->donation->amount_cents, $ctx->donation->currency);
 
         // When part of the payment bought something, the prose is about the
-        // gift that is left: "your donation of" the whole charge would state
-        // the price of a seat as a contribution. The lines below still show
-        // what was actually paid.
+        // donation that is left: "your donation of" the whole charge would
+        // state the price of a seat as a contribution. The lines below still
+        // show what was actually paid.
         $goodsCents = max(0, (int) ($ctx->extras['goods_received_cents'] ?? 0));
         $rendered   = $this->expandMergeTags(
             $template,

@@ -95,7 +95,7 @@ $netDisplay      = $refundedCents > 0
 $fullyRefunded   = $refundedCents > 0 && $refundedCents >= (int) $donation->amount_cents;
 
 // A payment that bought something has to say so, and say what is left as a
-// gift, because only the remainder is deductible. Whatever sold the thing
+// donation, because only the remainder is deductible. Whatever sold the thing
 // states its value through the receipt context.
 $money      = static fn (int $c): string => \GiveFlow\Foundation\Helpers\Money::format($c, (string) $donation->currency);
 $goodsCents = max(0, (int) ($extras['goods_received_cents'] ?? 0));
