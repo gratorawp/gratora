@@ -62,7 +62,7 @@ export default function FormTemplatePicker( { onPick, onClose, creating = false,
         <Modal
             title={ __( 'Choose a starter template', 'giveflow-fundraising-campaigns' ) }
             onRequestClose={ onClose }
-            className="giveflow-form-template-picker"
+            className="giveflow-template-picker"
             size="large"
         >
             { failed ? (
@@ -77,35 +77,35 @@ export default function FormTemplatePicker( { onPick, onClose, creating = false,
             ) : (
                 <>
                     { intro && (
-                        <p className="giveflow-form-template-picker__intro">{ intro }</p>
+                        <p className="giveflow-template-picker__intro">{ intro }</p>
                     ) }
-                    <div className="giveflow-form-template-picker__filters" role="tablist">
+                    <div className="giveflow-template-picker__filters" role="tablist">
                         { categories.map( ( c ) => (
                             <button
                                 key={ c }
                                 type="button"
                                 role="tab"
                                 aria-selected={ category === c }
-                                className={ `giveflow-form-template-picker__filter${ category === c ? ' is-active' : '' }` }
+                                className={ `giveflow-template-picker__filter${ category === c ? ' is-active' : '' }` }
                                 onClick={ () => setCategory( c ) }
                             >
                                 { CATEGORY_LABELS[ c ] || c }
                             </button>
                         ) ) }
                     </div>
-                    <div className="giveflow-form-template-picker__grid">
+                    <div className="giveflow-template-picker__grid">
                         { visible.map( ( t ) => (
                             <button
                                 key={ t.id }
                                 type="button"
-                                className="giveflow-form-template-picker__card"
+                                className="giveflow-template-picker__card"
                                 onClick={ () => onPick( t ) }
                                 disabled={ creating }
                             >
                                 <FormTemplateThumb template={ t } />
-                                <div className="giveflow-form-template-picker__meta">
+                                <div className="giveflow-template-picker__meta">
                                     <strong>{ t.name }</strong>
-                                    <span className="giveflow-form-template-picker__desc">{ t.description }</span>
+                                    <span className="giveflow-template-picker__desc">{ t.description }</span>
                                 </div>
                             </button>
                         ) ) }

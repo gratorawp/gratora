@@ -1,9 +1,9 @@
-// Shared FormTemplatePicker modal styles. Imported by both campaigns.scss
-// (Add new form picker) and forms/editor.scss (auto-prompt on empty form),
-// since the two pages load separate CSS bundles and the picker lives in
-// _shared/components/FormTemplatePicker.jsx.
+// Shared template-picker modal styles, worn by both the form picker and the
+// campaign page-layout picker so the two read as one feature. Imported by
+// campaigns.scss and forms/editor.scss, since those pages load separate CSS
+// bundles and the components live in _shared/components/.
 
-.giveflow-form-template-picker {
+.giveflow-template-picker {
     .components-modal__content { padding-top: 12px; }
 
     &__intro {
@@ -199,5 +199,79 @@
             height: 36px;
             color: $text-muted;
         }
+    }
+}
+
+// Campaign page-layout thumbs. The form picker draws a miniature form; a
+// campaign page has no single object to miniaturise, so this draws the page's
+// column structure instead. What separates these layouts is where things sit.
+.giveflow-ctp {
+    &__thumb {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 10px;
+        aspect-ratio: 4 / 3;
+        background: $bg-soft;
+        border-radius: 6px;
+    }
+
+    &__cols {
+        display: flex;
+        gap: 6px;
+        flex: 1;
+        min-height: 0;
+
+        &.is-stacked { flex-direction: column; }
+    }
+
+    &__main {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        flex: 1;
+        min-width: 0;
+    }
+
+    // The donation form: the one element that is always the same shape,
+    // so it reads as the anchor the other rows arrange themselves around.
+    &__form {
+        flex: 0 0 34%;
+        border-radius: 4px;
+        background: rgba(0, 0, 0, 0.16);
+    }
+
+    &__wall {
+        flex: 0 0 18%;
+        border-radius: 4px;
+        background: rgba(0, 0, 0, 0.09);
+    }
+
+    &__row {
+        display: block;
+        border-radius: 3px;
+        background: rgba(0, 0, 0, 0.09);
+
+        &--media      { flex: 0 0 34%; }
+        &--media-wide { flex: 0 0 46%; }
+        &--figures    { flex: 0 0 14%; background: rgba(0, 0, 0, 0.14); }
+        &--figures3   { flex: 0 0 18%; background: rgba(0, 0, 0, 0.14); }
+        &--bar        { flex: 0 0 7%;  background: $accent; opacity: .55; }
+        &--text       { flex: 1 1 auto; min-height: 10px; }
+        &--list       { flex: 0 0 22%; }
+    }
+
+    // Sits under the description, so it needs to read as secondary to it.
+    &__best {
+        display: block;
+        margin-top: 4px;
+        font-size: 11.5px;
+        color: $text-muted;
+        opacity: .85;
+    }
+
+    &__state {
+        padding: 40px;
+        text-align: center;
     }
 }

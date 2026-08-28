@@ -23,7 +23,7 @@ final class CampaignTemplates
     public const DEFAULT_ID = 'standard';
 
     /**
-     * @return list<array{id:string,name:string,description:string,best_for:string}>
+     * @return list<array{id:string,name:string,category:string,description:string,best_for:string}>
      *
      * @since 1.0.0
      */
@@ -32,30 +32,35 @@ final class CampaignTemplates
         $templates = [
             [
                 'id'          => self::DEFAULT_ID,
+                'category'    => 'General',
                 'name'        => __('Standard campaign', 'giveflow-fundraising-campaigns'),
                 'description' => __('Image, raised and goal figures, a progress bar, your description, then recent donations and top donors, with the form alongside.', 'giveflow-fundraising-campaigns'),
                 'best_for'    => __('Most campaigns. Start here if none of the others obviously fit.', 'giveflow-fundraising-campaigns'),
             ],
             [
                 'id'          => 'deadline',
+                'category'    => 'Appeals',
                 'name'        => __('Appeal with a deadline', 'giveflow-fundraising-campaigns'),
                 'description' => __('Leads with the goal and how far off it is, puts the form above the fold, and holds the description back until after the ask.', 'giveflow-fundraising-campaigns'),
                 'best_for'    => __('A crisis or a matched appeal, where the reason to give now is the deadline.', 'giveflow-fundraising-campaigns'),
             ],
             [
                 'id'          => 'story',
+                'category'    => 'General',
                 'name'        => __('Story first', 'giveflow-fundraising-campaigns'),
                 'description' => __('A full-width image and the description before any figures at all. The ask comes after the reader knows what they are being asked about.', 'giveflow-fundraising-campaigns'),
                 'best_for'    => __('An appeal that has to explain itself before it asks, and campaigns with a strong photograph.', 'giveflow-fundraising-campaigns'),
             ],
             [
                 'id'          => 'supporters',
+                'category'    => 'Community',
                 'name'        => __('Supporter wall', 'giveflow-fundraising-campaigns'),
                 'description' => __('The people who have already given are the main content, with their messages shown and the wall running the full width beneath the form.', 'giveflow-fundraising-campaigns'),
                 'best_for'    => __('A community appeal where seeing familiar names is the reason somebody gives.', 'giveflow-fundraising-campaigns'),
             ],
             [
                 'id'          => 'minimal',
+                'category'    => 'Bare',
                 'name'        => __('Just the form', 'giveflow-fundraising-campaigns'),
                 'description' => __('Title, description and the donation form. No figures, no donor lists, nothing that needs data to look right.', 'giveflow-fundraising-campaigns'),
                 'best_for'    => __('A page you will design yourself, and a campaign with no goal to show.', 'giveflow-fundraising-campaigns'),

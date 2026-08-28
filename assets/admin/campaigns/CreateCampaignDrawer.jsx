@@ -12,6 +12,7 @@ import SearchableSelect from '../_shared/components/SearchableSelect';
 import ScheduleFields from '../_shared/components/ScheduleFields';
 import { Switch } from '../_shared/components/Switch';
 import Btn from '../_shared/components/Btn';
+import CampaignTemplatePicker from '../_shared/components/CampaignTemplatePicker';
 
 import { DollarSign, HandHeart, Users, Ban, ImagePlus, Plus } from 'lucide-react';
 
@@ -71,6 +72,9 @@ export default function CreateCampaignDrawer( { onClose } ) {
     const [ scheduleOn, setScheduleOn ] = useState( false );
     const [ startsAt, setStartsAt ]     = useState( null );
     const [ endsAt, setEndsAt ]         = useState( null );
+
+    const [ pageTemplate, setPageTemplate ]   = useState( { id: 'standard', name: __( 'Standard campaign', 'giveflow-fundraising-campaigns' ) } );
+    const [ pickingLayout, setPickingLayout ] = useState( false );
 
     const [ cover, setCover ]           = useState( null );
     const [ publishNow, setPublishNow ] = useState( false );
@@ -142,6 +146,8 @@ export default function CreateCampaignDrawer( { onClose } ) {
         }
 
         try {
+            payload.page_template = pageTemplate.id;
+
             const c = await apiFetch( {
                 path:   '/giveflow/v1/admin/campaigns',
                 method: 'POST',
@@ -179,6 +185,7 @@ export default function CreateCampaignDrawer( { onClose } ) {
     );
 
     return (
+        <>
         <Dialog
             title={ __( 'New campaign', 'giveflow-fundraising-campaigns' ) }
             onClose={ submitting ? undefined : onClose }
@@ -220,6 +227,23 @@ export default function CreateCampaignDrawer( { onClose } ) {
                     </div>
                 </Field>
             ) }
+
+            <Field label={ __( 'Page layout', 'giveflow-fundraising-campaigns' ) }>
+                <button
+                    type="button"
+                    className="giveflow-cc__layout"
+                    onClick={ () => setPickingLayout( true ) }
+                    disabled={ submitting }
+                >
+                    <span className="giveflow-cc__layout-name">{ pageTemplate.name }</span>
+                    <span className="giveflow-cc__layout-change">
+                        { __( 'Change', 'giveflow-fundraising-campaigns' ) }
+                    </span>
+                </button>
+                <div className="giveflow-cc__goal-desc">
+                    { __( 'The starting arrangement of the campaign page. Blocks, so you can rearrange it afterwards.', 'giveflow-fundraising-campaigns' ) }
+                </div>
+            </Field>
 
             <Field label={ __( 'Goal', 'giveflow-fundraising-campaigns' ) }>
                 <Segmented
@@ -361,6 +385,15 @@ export default function CreateCampaignDrawer( { onClose } ) {
                 ) }
             </Field>
             </div>
-        </Dialog>
+            </Dialog>
+
+            { pickingLayout && (
+                <CampaignTemplatePicker
+                    value={ pageTemplate.id }
+                    onPick={ ( t ) => { setPageTemplate( t ); setPickingLayout( false ); } }
+                    onClose={ () => setPickingLayout( false ) }
+                />
+            ) }
+        </>
     );
 }

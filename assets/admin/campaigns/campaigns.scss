@@ -2392,7 +2392,36 @@ $card-radius:   $radius-lg;
     }
 }
 
-@import '../_shared/components/form-template-picker';
+@import '../_shared/components/template-picker';
+
+// Trigger for the page-layout picker. Reads as a value with a way to change it
+// rather than as a button, since a layout is always already chosen.
+.giveflow-cc__layout {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding: 9px 12px;
+    background: #fff;
+    border: 1px solid #dcdfe4;
+    border-radius: 6px;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    transition: border-color .12s;
+
+    &:hover:not( :disabled ) { border-color: #b9bec7; }
+    &:disabled { opacity: .6; cursor: default; }
+
+    &-name { font-weight: 500; }
+    &-change {
+        color: $accent;
+        font-size: 12.5px;
+        font-weight: 500;
+    }
+}
+
 
 @import '../_shared/kpi-strip';
 @import '../_shared/dataviews';
