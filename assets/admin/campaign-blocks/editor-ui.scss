@@ -13,6 +13,8 @@
 // and iconographic; this one is ours, and somebody should be able to find it
 // again without hunting along a row of similar glyphs. The mark is the brand's
 // three rules, drawn here rather than pulled from an icon set.
+.giveflow-layout-slot { display: contents; }
+
 .giveflow-layout-btn.components-button {
     display: flex;
     align-items: center;
