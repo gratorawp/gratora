@@ -19,6 +19,8 @@
     "require-dev": {
         "brianhenryie/strauss": "^0.27.2",
         "php-stubs/wordpress-stubs": "^6.9",
+        "php-stubs/wp-cli-stubs": "^2.12",
+        "phpstan/phpstan": "^2.1",
         "phpunit/phpunit": "^9.6",
         "wp-phpunit/wp-phpunit": "^7.0",
         "yoast/phpunit-polyfills": "^2.0"
@@ -35,6 +37,7 @@
     },
     "scripts": {
         "test": [
+            "@analyse",
             "@test:unit",
             "@test:integration"
         ],
@@ -54,7 +57,8 @@
         ],
         "post-update-cmd": [
             "@strauss:auto"
-        ]
+        ],
+        "analyse": "phpstan analyse --memory-limit=3G"
     },
     "extra": {
         "strauss": {

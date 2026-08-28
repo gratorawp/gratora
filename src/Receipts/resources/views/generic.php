@@ -6,8 +6,8 @@ use GiveFlow\Donations\Donation;
 use GiveFlow\Donors\Donor;
 
 /**
- * @var Donation $donation
- * @var Donor    $donor
+ * @var \GiveFlow\Donations\Donation $donation
+ * @var \GiveFlow\Donors\Donor    $donor
  * @var string   $donor_name      name given for this donation (resolved)
  * @var string   $donor_address   formatted multi-line address, empty when missing
  * @var array    $org             keys: name, address_lines (array), tax_id, vat_id, email

@@ -1,0 +1,421 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Property GiveFlow\\Admin\\Pages\\SettingsPage\:\:\$container is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: src/Admin/Pages/SettingsPage.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type GiveFlow\\Forms\\Form\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: src/Campaigns/Blocks/DonateButtonBlock.php
+
+		-
+			message: '#^Property GiveFlow\\Campaigns\\Blocks\\SupporterWallBlock\:\:\$donations is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: src/Campaigns/Blocks/SupporterWallBlock.php
+
+		-
+			message: '#^Variable \$emptyText might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Campaigns/Blocks/views/donation-form.php
+
+		-
+			message: '#^Offset ''avatar_url'' on array\{name\: string, amount_cents\: int, donations_count\: int, is_anonymous\: bool\} on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: src/Campaigns/Blocks/views/top-donors.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between mixed and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: src/Campaigns/CampaignService.php
+
+		-
+			message: '#^Method GiveFlow\\Campaigns\\Styling\\Tokens\:\:catalogue\(\) should return array\<string, array\{group\: string, label\: string, default\: string, control\: string, min\?\: float\|int, max\?\: float\|int, step\?\: float\|int, options\?\: array\<string, string\>, \.\.\.\}\> but returns array\{giveflow\-accent\: array\{group\: ''brand'', label\: string, default\: ''\#211d3f'', control\: ''color''\}, giveflow\-accent\-soft\: array\{group\: ''brand'', label\: string, default\: ''\#efedf8'', control\: ''color'', help\: string\}, giveflow\-text\: array\{group\: ''brand'', label\: string, default\: ''\#111827'', control\: ''color''\}, giveflow\-text\-muted\: array\{group\: ''brand'', label\: string, default\: ''\#6b7280'', control\: ''color'', help\: string\}, giveflow\-bg\: array\{group\: ''surface'', label\: string, default\: ''\#ffffff'', control\: ''color''\}, giveflow\-bg\-soft\: array\{group\: ''surface'', label\: string, default\: ''\#f8fafb'', control\: ''color'', help\: string\}, giveflow\-border\: array\{group\: ''surface'', label\: string, default\: ''\#e5e7eb'', control\: ''color''\}, giveflow\-typeface\: array\{group\: ''typography'', label\: string, default\: ''system\-ui, \-apple…'', control\: ''font''\}, \.\.\.\}\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Campaigns/Styling/Tokens.php
+
+		-
+			message: '#^Anonymous function has an unused use \$c\.$#'
+			identifier: closure.unusedUse
+			count: 1
+			path: src/Core/CoreModule.php
+
+		-
+			message: '#^Method GiveFlow\\Currency\\FxRates\:\:fetchedAt\(\) never returns string so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: src/Currency/FxRates.php
+
+		-
+			message: '#^Offset ''fetched_at'' does not exist on array\{base\: string, date\: string, rates\: array\<string, mixed\>, manual\?\: array\<string, mixed\>, auto\?\: bool\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: src/Currency/FxRates.php
+
+		-
+			message: '#^Comparison operation "\<\=" between int\<min, 90\>\|int\<181, 365\> and 365 is always true\.$#'
+			identifier: smallerOrEqual.alwaysTrue
+			count: 1
+			path: src/Donors/DonorMetricsService.php
+
+		-
+			message: '#^Method GiveFlow\\Donors\\DonorMetricsService\:\:noteForEvent\(\) never returns string so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: src/Donors/DonorMetricsService.php
+
+		-
+			message: '#^Parameter \#2 \$noteMap of method GiveFlow\\Donors\\DonorMetricsService\:\:noteForEvent\(\) expects array\<int, string\>, array\<int, array\<string, string\|null\>\> given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Donors/DonorMetricsService.php
+
+		-
+			message: '#^Offset ''donor_type'' does not exist on array\{page\?\: int, per_page\?\: int, orderby\?\: string, order\?\: string, country\?\: string, matching_ids\?\: array\<int\>, has_search\?\: bool\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: src/Donors/DonorRepository.php
+
+		-
+			message: '#^Anonymous function has an unused use \$donor\.$#'
+			identifier: closure.unusedUse
+			count: 1
+			path: src/Donors/DonorService.php
+
+		-
+			message: '#^Offset ''phone'' does not exist on array\{first_name\?\: string\|null, last_name\?\: string\|null, country\?\: string\|null, locale\?\: string\|null, company\?\: string\|null, donor_type\?\: ''household''\|''individual''\|''organization''\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: src/Donors/DonorService.php
+
+		-
+			message: '#^Right side of && is always true\.$#'
+			identifier: booleanAnd.rightAlwaysTrue
+			count: 1
+			path: src/Donors/DonorService.php
+
+		-
+			message: '#^Property GiveFlow\\Campaigns\\Campaign\:\:\$donations_count \(int\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 1
+			path: src/Forms/Blocks/GoalBlock.php
+
+		-
+			message: '#^Property GiveFlow\\Campaigns\\Campaign\:\:\$donors_count \(int\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 2
+			path: src/Forms/Blocks/GoalBlock.php
+
+		-
+			message: '#^Property GiveFlow\\Campaigns\\Campaign\:\:\$raised_cents \(int\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 1
+			path: src/Forms/Blocks/GoalBlock.php
+
+		-
+			message: '#^Method GiveFlow\\Forms\\Blocks\\NumberInputBlock\:\:attributes\(\) should return array\<string, array\{type\: string, default\?\: mixed\}\> but returns array\{label\: array\{type\: ''string'', default\: ''''\}, placeholder\: array\{type\: ''string'', default\: ''''\}, helpText\: array\{type\: ''string'', default\: ''''\}, required\: array\{type\: ''boolean'', default\: false\}, min\: array\{type\: array\{''number'', ''null''\}, default\: null\}, max\: array\{type\: array\{''number'', ''null''\}, default\: null\}, step\: array\{type\: ''number'', default\: 1\}, field\: array\{type\: ''string'', default\: ''''\}\}\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Forms/Blocks/NumberInputBlock.php
+
+		-
+			message: '#^Offset ''id'' on array\{id\: string, label\: string, description\: string, currencies\: list\<string\>, countries\: list\<string\>, frequencies\: list\<string\>\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: src/Forms/Blocks/PaymentGatewaysBlock.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>default_form_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: src/Forms/FormService.php
+
+		-
+			message: '#^Property GiveFlow\\Forms\\Form\:\:\$blocks \(string\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 1
+			path: src/Forms/FormSubmissionValidator.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between mixed and '''' will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: src/Forms/FormSubmissionValidator.php
+
+		-
+			message: '#^Comparison operation "\>" between 0 and 0 is always false\.$#'
+			identifier: greater.alwaysFalse
+			count: 1
+			path: src/Forms/Shortcode/DonationFormShortcode.php
+
+		-
+			message: '#^Empty array passed to foreach\.$#'
+			identifier: foreach.emptyArray
+			count: 2
+			path: src/Forms/Shortcode/DonationFormShortcode.php
+
+		-
+			message: '#^Method GiveFlow\\Forms\\Shortcode\\DonationFormShortcode\:\:hasPaymentGatewaysBlock\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: src/Forms/Shortcode/DonationFormShortcode.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 1
+			path: src/Forms/Shortcode/DonationFormShortcode.php
+
+		-
+			message: '#^Offset ''page'' on array\{type\: ''amount'', page\: 0, presets\: list\<mixed\>, allowCustom\: bool\}\|array\{type\: ''submit'', page\: 0, label\: mixed, align\?\: ''center''\|''full''\|''left''\|''right''\} in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.offset
+			count: 1
+			path: src/Forms/Shortcode/DonationFormShortcode.php
+
+		-
+			message: '#^Offset ''page'' on array\{type\: ''amount'', page\: 0, presets\: list\<mixed\>, allowCustom\: bool\}\|array\{type\: ''submit'', page\: 0, label\: string, align\: ''center''\|''full''\|''left''\|''right''\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: src/Forms/Shortcode/DonationFormShortcode.php
+
+		-
+			message: '#^Offset ''t'' on \*NEVER\* on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 2
+			path: src/Forms/Shortcode/DonationFormShortcode.php
+
+		-
+			message: '#^Parameter \#1 \$array \(non\-empty\-list\<string\>\) of array_values is already a list, call has no effect\.$#'
+			identifier: arrayValues.list
+			count: 1
+			path: src/Forms/Shortcode/DonationFormShortcode.php
+
+		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 1
+			path: src/Forms/Shortcode/DonationFormShortcode.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between 0 and 1 will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: src/Forms/Shortcode/DonationFormShortcode.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: src/Forms/Shortcode/DonationFormShortcode.php
+
+		-
+			message: '#^Variable \$items in empty\(\) always exists and is always falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: src/Forms/Shortcode/DonationFormShortcode.php
+
+		-
+			message: '#^Variable \$stepDefs in empty\(\) always exists and is always falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: src/Forms/Shortcode/DonationFormShortcode.php
+
+		-
+			message: '#^Template type T of method GiveFlow\\Foundation\\Container\\Container\:\:get\(\) is not referenced in a parameter\.$#'
+			identifier: method.templateTypeNotInParameter
+			count: 1
+			path: src/Foundation/Container/Container.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between non\-empty\-list\<string\|null\> and array\{\} will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: src/Foundation/Transfer/CsvImporter.php
+
+		-
+			message: '#^Method GiveFlow\\Foundation\\Transfer\\DataImporter\:\:drop\(\) never returns array\<string, mixed\> so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: src/Foundation/Transfer/DataImporter.php
+
+		-
+			message: '#^Offset ''default_form_id''\|''household_id''\|''parent_fund_id'' on array\{donor_id\: ''giveflow_donors'', household_id\: ''giveflow_donors'', campaign_id\: ''giveflow_campaigns'', form_id\: ''giveflow_forms'', source_form_id\: ''giveflow_forms'', default_form_id\: ''giveflow_forms'', fund_id\: ''giveflow_funds'', default_fund_id\: ''giveflow_funds'', \.\.\.\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: src/Foundation/Transfer/DataImporter.php
+
+		-
+			message: '#^Ternary operator condition is always true\.$#'
+			identifier: ternary.alwaysTrue
+			count: 1
+			path: src/Foundation/Transfer/DataImporter.php
+
+		-
+			message: '#^Parameter \#2 \$apply of static method GiveFlow\\Foundation\\Batch\\BatchProcessor\:\:step\(\) expects Closure\(array\<mixed\>\)\: void, Closure\(array\)\: GiveFlow\\Vendor\\Queryable\\QueryResult given\.$#'
+			identifier: argument.type
+			count: 4
+			path: src/Funds/FundReassignmentJob.php
+
+		-
+			message: '#^Property GiveFlow\\Donations\\Donation\:\:\$kind \(string\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 1
+			path: src/Receipts/ReceiptIssuer.php
+
+		-
+			message: '#^Property GiveFlow\\Campaigns\\Campaign\:\:\$raised_cents \(int\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 1
+			path: src/Rest/Admin/CampaignsController.php
+
+		-
+			message: '#^Property GiveFlow\\Rest\\Admin\\CampaignsController\:\:\$canceller is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: src/Rest/Admin/CampaignsController.php
+
+		-
+			message: '#^Property GiveFlow\\Rest\\Admin\\CampaignsController\:\:\$funds is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: src/Rest/Admin/CampaignsController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>status" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: src/Rest/Admin/DonationsController.php
+
+		-
+			message: '#^Method GiveFlow\\Rest\\Admin\\DonorsController\:\:index\(\) never returns WP_Error so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: src/Rest/Admin/DonorsController.php
+
+		-
+			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Rest/Admin/FormsController.php
+
+		-
+			message: '#^Property GiveFlow\\Campaigns\\Campaign\:\:\$currency \(string\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 1
+			path: src/Rest/Admin/FormsController.php
+
+		-
+			message: '#^Property GiveFlow\\Campaigns\\Campaign\:\:\$donations_count \(int\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 1
+			path: src/Rest/Admin/FormsController.php
+
+		-
+			message: '#^Property GiveFlow\\Campaigns\\Campaign\:\:\$donors_count \(int\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 1
+			path: src/Rest/Admin/FormsController.php
+
+		-
+			message: '#^Property GiveFlow\\Campaigns\\Campaign\:\:\$goal_type \(string\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 1
+			path: src/Rest/Admin/FormsController.php
+
+		-
+			message: '#^Property GiveFlow\\Campaigns\\Campaign\:\:\$raised_cents \(int\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 1
+			path: src/Rest/Admin/FormsController.php
+
+		-
+			message: '#^Method GiveFlow\\Rest\\Admin\\OnboardingController\:\:finalize\(\) never returns WP_Error so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: src/Rest/Admin/OnboardingController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(GiveFlow\\Vendor\\Queryable\\Model\)\: mixed\)\|null, Closure\(GiveFlow\\Donations\\Donation\)\: array\{reference\: string, amount_cents\: int, currency\: string, frequency\: string, is_test\: bool, failure_recorded\: bool\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Rest/Admin/RecurringController.php
+
+		-
+			message: '#^Dead catch \- GiveFlow\\Foundation\\References\\InvalidReferenceToken is never thrown in the try block\.$#'
+			identifier: catch.neverThrown
+			count: 1
+			path: src/Rest/Admin/SettingsController.php
+
+		-
+			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Rest/Admin/StripeKeysController.php
+
+		-
+			message: '#^If condition is always true\.$#'
+			identifier: if.alwaysTrue
+			count: 1
+			path: src/Rest/DonationsController.php
+
+		-
+			message: '#^Property GiveFlow\\Forms\\Form\:\:\$blocks \(string\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 2
+			path: src/Rest/DonationsController.php
+
+		-
+			message: '#^Property GiveFlow\\Rest\\DonationsController\:\:\$settings is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: src/Rest/DonationsController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>status" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: src/Rest/PayPalController.php
+
+		-
+			message: '#^Property GiveFlow\\Donations\\Donation\:\:\$fee_covered_cents \(int\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 2
+			path: src/Rest/Portal/PortalController.php
+
+		-
+			message: '#^Property GiveFlow\\Donations\\Donation\:\:\$refunded_cents \(int\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 1
+			path: src/Rest/Portal/PortalController.php
+
+		-
+			message: '#^Property GiveFlow\\Donors\\Consent\:\:\$purpose_version \(int\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 1
+			path: src/Rest/Portal/PortalController.php
+
+		-
+			message: '#^Property GiveFlow\\Rest\\Portal\\PortalController\:\:\$donationService is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: src/Rest/Portal/PortalController.php
+
+		-
+			message: '#^Property GiveFlow\\Rest\\Portal\\PortalController\:\:\$receipts is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: src/Rest/Portal/PortalController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>flags" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: src/Rest/Portal/PortalController.php

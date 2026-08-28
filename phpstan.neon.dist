@@ -1,0 +1,36 @@
+includes:
+    # Findings that predate the tool. Frozen, not resolved: the point is that
+    # anything NEW is an error. Shrink it, never regenerate it to make a new
+    # error go away. docs/static-analysis-findings.md lists the ones worth a
+    # proper look.
+    - phpstan-baseline.neon
+
+parameters:
+    level: 5
+    paths:
+        - src
+
+    bootstrapFiles:
+        # Plugin paths and the WordPress time constants the stubs omit.
+        - phpstan/constants.php
+    scanFiles:
+        - vendor/php-stubs/wordpress-stubs/wordpress-stubs.php
+        # The CLI commands are only ever loaded under WP-CLI.
+        - vendor/php-stubs/wp-cli-stubs/wp-cli-stubs.php
+        # cli\progress\Bar, used by the long-running commands.
+        - vendor/php-stubs/wp-cli-stubs/wp-cli-tools-stubs.php
+    scanDirectories:
+        # Libraries Strauss prefixes at build time, Queryable among them.
+        - vendor/vendor-prefixed
+        # Action Scheduler is deliberately never prefixed, so as_* stays global.
+        - vendor/woocommerce/action-scheduler
+
+    treatPhpDocTypesAsCertain: false
+
+    ignoreErrors:
+        # ModelQueryBuilder forwards the whole QueryBuilder surface through
+        # __call, so PHPStan sees none of it. The methods are real; the class is
+        # Strauss-prefixed vendor code and cannot carry @method tags of ours.
+        -
+            identifier: method.notFound
+            message: '#ModelQueryBuilder<#'
